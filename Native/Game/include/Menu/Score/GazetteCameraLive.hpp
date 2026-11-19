@@ -8,7 +8,7 @@
 // Binds the gazette camera and panels (GazetteCamera.hpp) to the frame's
 // primitive buffer and scene ordering table (VS::Render::FrameScratchpad(),
 // vs_main_frameBuf), the frame camera, the score screen's camera settings and
-// backups, the score (Menu_Score_score), the GTE projection's screen offset,
+// backups, the score (Score::score), the GTE projection's screen offset,
 // the compact font and the actor preview, in the shapes the copied score
 // screen, records and encyclopedia call. A palette index outside 0-3, a
 // banner of more than kMaxEnemyBannerLines lines, a null matrix, an ordering

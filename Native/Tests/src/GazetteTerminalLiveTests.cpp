@@ -44,7 +44,7 @@ struct ForeignQueue {
 };
 
 void FillForeignQueue(ForeignQueue& foreign) {
-  const Content_DiscFile file{Menu_Score_kMonBinFile.lba, 2048};
+  const Content_DiscFile file{score::kMonBinFile.lba, 2048};
   for (std::size_t index = 0; index < foreign.slots.size(); ++index) {
     foreign.slots[index] = live::content::AllocateLiveDiscRequest(&file);
     REQUIRE(foreign.slots[index] != nullptr);
@@ -91,7 +91,7 @@ TEST_CASE(
   fixture.BorrowMon();
   fw::InitializeLiveInformationBox();
   const auto refusals = score::LiveGazetteTerminalRefusals();
-  Menu_Score_selectedEnemy = 0;
+  score::selectedEnemy = 0;
   live::Fixture::UnlockAll();
   score::ShowLiveEnemyDescription();
   CHECK(shared::Fixture::InformationText() == live::Fixture::Description(0));
@@ -99,7 +99,7 @@ TEST_CASE(
   score::InitializeLiveEnemyList();
   score::ShowLiveEnemyDescription();
   CHECK(shared::Fixture::InformationText() ==
-        shared::Label(Menu_Score_miscInfo,
+        shared::Label(score::miscInfo,
                       Text_Menu9_miscInfo_Index_enemyNotDefeated));
   CHECK(score::LiveGazetteTerminalRefusals() == refusals);
   CHECK(fixture.GuardsIntact());
@@ -148,13 +148,13 @@ TEST_CASE(
 }
 
 void CheckUnlockedRing() {
-  CHECK(Menu_Score_monBinData[0].unlocked == 1);
-  CHECK(Menu_Score_monBinData[1].unlocked == 1);
-  CHECK(Menu_Score_monBinData[77].unlocked == 1);
-  CHECK(Menu_Score_monBinData[0].prev == 77);
-  CHECK(Menu_Score_monBinData[0].next == 1);
-  CHECK(Menu_Score_monBinData[1].next == 77);
-  CHECK(Menu_Score_monBinData[77].next == 0);
+  CHECK(score::monBinData[0].unlocked == 1);
+  CHECK(score::monBinData[1].unlocked == 1);
+  CHECK(score::monBinData[77].unlocked == 1);
+  CHECK(score::monBinData[0].prev == 77);
+  CHECK(score::monBinData[0].next == 1);
+  CHECK(score::monBinData[1].next == 77);
+  CHECK(score::monBinData[77].next == 0);
 }
 
 TEST_CASE(
@@ -181,9 +181,9 @@ TEST_CASE(
 }
 
 void CheckRenderedEnemyRows() {
-  CHECK(Menu_Score_monBinData[0].selected == 1);
-  CHECK(Menu_Score_monBinData[0].animationState == 8);
-  CHECK(Menu_Score_monBinData[1].selected == 0);
+  CHECK(score::monBinData[0].selected == 1);
+  CHECK(score::monBinData[0].animation_state == 8);
+  CHECK(score::monBinData[1].selected == 0);
   CHECK(shared::Fixture::Row(0).state == fw::RowState::kInactive);
   auto last_name = live::Fixture::EnemyName(7);
   last_name.back() = 0xFF;
@@ -199,8 +199,8 @@ TEST_CASE(
   fixture.BorrowMon();
   live::Fixture::UnlockAll();
   fw::InitializeLiveInformationBox();
-  Battle_unusedMenu9CursorMemory.encyclopaediaPage = 0;
-  Battle_unusedMenu9CursorMemory.encyclopaediaRow = 0;
+  Battle_unusedMenu9CursorMemory.encyclopaedia_page = 0;
+  Battle_unusedMenu9CursorMemory.encyclopaedia_row = 0;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   score::RenderLiveEnemyList(8);
   REQUIRE(fixture.UsedWords() > 240);
@@ -233,9 +233,9 @@ TEST_CASE(
   live::Fixture fixture;
   fixture.BorrowMon();
   live::Fixture::UnlockAll();
-  Menu_Score_selectedEnemy = 0;
-  Menu_Score_rotationColor = 0x808080;
-  Menu_Score_zoomColor = 0x808080;
+  score::selectedEnemy = 0;
+  score::rotationColor = 0x808080;
+  score::zoomColor = 0x808080;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   score::RenderLiveEnemyViewer(8, 3);
   CheckViewerLabels(fixture);
@@ -248,8 +248,8 @@ TEST_CASE("F02834 Live navigation emits its real arrow and directional font",
           "[gazette-terminal][gazette-terminal-live][F02834]") {
   live::Fixture fixture;
   const int direction = GENERATE(0, 1, 2, 3);
-  Menu_Score_enemyNavigationState = 0;
-  Menu_Score_hideUi = 0;
+  score::enemyNavigationState = 0;
+  score::hideUi = 0;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   score::DrawLiveEnemyNavigation(direction);
   const auto packets = fixture.Packets();
@@ -268,13 +268,13 @@ TEST_CASE("F02834 Live navigation emits its real arrow and directional font",
 }
 
 void LoadFirstEnemy(live::PreviewFixture& fixture) {
-  REQUIRE(fixture.TickEnemyPreview(Menu_Score_monBinData[0].zudId, false) == 1);
+  REQUIRE(fixture.TickEnemyPreview(score::monBinData[0].zud_id, false) == 1);
   const auto pending = std::ranges::find(Content_discRequestSlots,
                                          Content_DiscRequestState_Enqueued,
                                          &Content_DiscQueueSlot::state);
   REQUIRE(pending != std::end(Content_discRequestSlots));
   CHECK(live::content::LiveDiscRequestGeneration(pending) != 0);
-  fixture.LoadEnemy(Menu_Score_monBinData[0].zudId);
+  fixture.LoadEnemy(score::monBinData[0].zud_id);
   CHECK(live::content::LiveDiscRequestGeneration(pending) == 0);
 }
 
@@ -310,8 +310,8 @@ TEST_CASE(
   LoadFirstEnemy(fixture);
   CheckLoadedEnemyGeometry();
   CHECK(live::content::LiveActorAssetRefusals() == assets_before);
-  Menu_Score_cameraDistance = 1500;
-  Menu_Score_hideUi = 1;
+  score::cameraDistance = 1500;
+  score::hideUi = 1;
   VS::Render::SetLiveProjectionScreenOffset({127, 93});
   fixture.ResetFrame();
   const auto refusals = score::LiveGazetteTerminalRefusals();
@@ -330,11 +330,11 @@ void CheckOverviewActor() {
 
 void InitializeOverviewForCheck() {
   REQUIRE(score::UpdateLiveGazette() == 0);
-  REQUIRE(Menu_Score_menuState == 2);
+  REQUIRE(score::menuState == 2);
   CheckOverviewActor();
-  CHECK(live::Fixture::RankText() == shared::Label(Menu_Score_rankText, 0));
-  CHECK(Menu_Score_cameraDistance == 336);
-  CHECK(Menu_Score_cameraHeightOffset == 107);
+  CHECK(live::Fixture::RankText() == shared::Label(score::rankText, 0));
+  CHECK(score::cameraDistance == 336);
+  CHECK(score::cameraHeightOffset == 107);
 }
 
 TEST_CASE("F02803 Live prepares the real overview rank and actor preview",
@@ -345,7 +345,7 @@ TEST_CASE("F02803 Live prepares the real overview rank and actor preview",
   fixture.LoadSourceActor();
   REQUIRE(Actors_actorRecords[0] != nullptr);
   REQUIRE(Actors_actorRecords[0]->instance.boneCount > 0);
-  Menu_Score_menuState = 1;
+  score::menuState = 1;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   InitializeOverviewForCheck();
   fixture.ResetFrame();
@@ -359,14 +359,14 @@ TEST_CASE("F02803 Live prepares the real overview rank and actor preview",
 
 void CheckMonEntry(live::PreviewFixture& fixture) {
   fixture.SelectPage(3);
-  REQUIRE(Menu_Score_monBinCdQueueSlot != nullptr);
-  CHECK(Menu_Score_enemyDescriptions == nullptr);
-  CHECK(live::content::LiveDiscRequestGeneration(
-            Menu_Score_monBinCdQueueSlot) != 0);
+  REQUIRE(score::monBinCdQueueSlot != nullptr);
+  CHECK(score::enemyDescriptions == nullptr);
+  CHECK(live::content::LiveDiscRequestGeneration(score::monBinCdQueueSlot) !=
+        0);
   fixture.AdvanceTo(14);
-  CHECK(Menu_Score_monBinCdQueueSlot == nullptr);
-  CHECK(Menu_Score_monBinData[0].zudId == 4);
-  CHECK(Menu_Score_monBinData[0].unlocked == 1);
+  CHECK(score::monBinCdQueueSlot == nullptr);
+  CHECK(score::monBinData[0].zud_id == 4);
+  CHECK(score::monBinData[0].unlocked == 1);
   CHECK(fixture.InformationText() == shared::EncodedText{0xE7});
 }
 
@@ -385,11 +385,11 @@ void SettleFirstEnemyList(live::PreviewFixture& fixture) {
 void OpenControlledViewer(live::PreviewFixture& fixture) {
   live::Fixture::Input(live::kCircle);
   REQUIRE(fixture.TickGazette() == 0);
-  REQUIRE(Menu_Score_menuState == 15);
+  REQUIRE(score::menuState == 15);
   fixture.AdvanceTo(20);
   REQUIRE(Actors_actorRecords[1] != nullptr);
-  CHECK(Menu_Score_selectedEnemy == 0);
-  CHECK(Menu_Score_cameraDistance > 0);
+  CHECK(score::selectedEnemy == 0);
+  CHECK(score::cameraDistance > 0);
   const auto preview_image =
       shared::ReadImage(R"(Native\data\disc\MAP\Z009U16.ZUD)");
   CHECK(Actors_actorRecords[1]->modelId == preview_image.front());
@@ -406,21 +406,21 @@ void CheckViewerSlide(live::PreviewFixture& fixture) {
 }
 
 void RotateAndZoomViewer(live::PreviewFixture& fixture) {
-  const auto yaw = Menu_Score_cameraAngles.vy;
+  const auto yaw = score::cameraAngles.vy;
   live::Fixture::Input(0, 0, 0x2001);
   REQUIRE(fixture.TickGazette() == 0);
-  CHECK(Menu_Score_cameraAngles.vy == yaw + 64);
-  const auto distance = Menu_Score_cameraDistance;
+  CHECK(score::cameraAngles.vy == yaw + 64);
+  const auto distance = score::cameraDistance;
   REQUIRE(distance > 640);
   live::Fixture::Input(0, 0, 0x1002);
   REQUIRE(fixture.TickGazette() == 0);
-  CHECK(Menu_Score_cameraDistance == distance - 64);
+  CHECK(score::cameraDistance == distance - 64);
 }
 
 void HideViewerUi(live::PreviewFixture& fixture) {
   live::Fixture::Input(0x100);
   REQUIRE(fixture.TickGazette() == 0);
-  CHECK(Menu_Score_hideUi == 1);
+  CHECK(score::hideUi == 1);
   CHECK(VS::Menu::Framework::hideMenu == 1);
   const auto hidden_text = fixture.TextRuns();
   CHECK(std::ranges::none_of(hidden_text, [](const auto& run) {
@@ -431,18 +431,18 @@ void HideViewerUi(live::PreviewFixture& fixture) {
 void ShowViewerUi(live::PreviewFixture& fixture) {
   live::Fixture::Input(0x100);
   REQUIRE(fixture.TickGazette() == 0);
-  CHECK(Menu_Score_hideUi == 0);
+  CHECK(score::hideUi == 0);
   CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
 void BeginEnemySwitch(live::PreviewFixture& fixture) {
   live::Fixture::Input(8, 8, 8);
   REQUIRE(fixture.TickGazette() == 0);
-  CHECK(Menu_Score_selectedEnemy == 1);
+  CHECK(score::selectedEnemy == 1);
   CHECK(fixture.InformationText() == live::Fixture::Description(1));
   live::Fixture::Input(0, 0, 0, 8);
   REQUIRE(fixture.TickGazette() == 0);
-  REQUIRE(Menu_Score_menuState == 25);
+  REQUIRE(score::menuState == 25);
   fixture.AdvanceTo(26);
   CHECK(Actors_actorRecords[1] == nullptr);
 }
@@ -453,7 +453,7 @@ void FinishEnemySwitch(live::PreviewFixture& fixture) {
       shared::ReadImage(R"(Native\data\disc\MAP\Z013U15.ZUD)");
   REQUIRE(Actors_actorRecords[1] != nullptr);
   CHECK(Actors_actorRecords[1]->modelId == replacement_image.front());
-  CHECK(Menu_Score_selectedEnemy == 1);
+  CHECK(score::selectedEnemy == 1);
   CHECK(fixture.InformationText() == live::Fixture::Description(1));
   CHECK(live::AssetsIdle());
   CHECK(fixture.Text("NO.   002/078", 160).X() == 8);
@@ -462,19 +462,19 @@ void FinishEnemySwitch(live::PreviewFixture& fixture) {
 void ReturnViewerToList(live::PreviewFixture& fixture) {
   live::Fixture::Input(live::kCross);
   REQUIRE(fixture.TickGazette() == 0);
-  REQUIRE(Menu_Score_menuState == 21);
+  REQUIRE(score::menuState == 21);
   fixture.AdvanceTo(14);
   CHECK(Actors_actorRecords[1] == nullptr);
   CHECK(fixture.InformationText() == live::Fixture::Description(0));
-  REQUIRE(Menu_Score_monBinData != nullptr);
+  REQUIRE(score::monBinData != nullptr);
 }
 
 void ReturnListToOverview(live::PreviewFixture& fixture) {
   live::Fixture::Input(live::kCross);
   REQUIRE(fixture.TickGazette() == 0);
   fixture.AdvanceTo(1);
-  CHECK(Menu_Score_monBinData == nullptr);
-  CHECK(Menu_Score_enemyDescriptions == nullptr);
+  CHECK(score::monBinData == nullptr);
+  CHECK(score::enemyDescriptions == nullptr);
   fixture.SettleOverview();
   CHECK(Menu_textBoxes[0].string != nullptr);
 }
@@ -521,17 +521,16 @@ struct CancellationProbe {
 void ArmMonCancellation(live::PreviewFixture& fixture,
                         CancellationProbe& probe) {
   fixture.SelectPage(3, false);
-  probe.owned_request = Menu_Score_monBinCdQueueSlot;
+  probe.owned_request = score::monBinCdQueueSlot;
   REQUIRE(probe.owned_request != nullptr);
   probe.old_generation =
       live::content::LiveDiscRequestGeneration(probe.owned_request);
   REQUIRE(probe.old_generation != 0);
-  probe.owned_buffer = Menu_Score_monBinData;
+  probe.owned_buffer = score::monBinData;
   probe.owned_bytes = live::Fixture::MonBytes().size();
   REQUIRE(live::content::BeginLiveDiscRead(
-      Menu_Score_kMonBinFile.lba,
-      static_cast<std::uint32_t>(Menu_Score_kMonBinFile.size),
-      probe.owned_buffer));
+      score::kMonBinFile.lba,
+      static_cast<std::uint32_t>(score::kMonBinFile.size), probe.owned_buffer));
   probe.read_generation = live::content::LiveDiscReadGeneration();
   REQUIRE_FALSE(live::content::LiveDiscReadCompleted(probe.read_generation));
   REQUIRE(Content_discDriveState.destination == probe.owned_buffer);
@@ -539,7 +538,7 @@ void ArmMonCancellation(live::PreviewFixture& fixture,
 
 void QueueForeignCancellation(CancellationProbe& probe, bool reuse_request) {
   if (reuse_request) live::content::ReleaseLiveDiscRequest(probe.owned_request);
-  const Content_DiscFile foreign_file{Menu_Score_kMonBinFile.lba, 2048};
+  const Content_DiscFile foreign_file{score::kMonBinFile.lba, 2048};
   probe.foreign = live::content::AllocateLiveDiscRequest(&foreign_file);
   REQUIRE(probe.foreign != nullptr);
   if (reuse_request) CHECK(probe.foreign == probe.owned_request);
@@ -568,10 +567,10 @@ void SnapshotForeignCancellation(CancellationProbe& probe, bool reuse_request) {
 
 void ResetCancelledMon(const CancellationProbe& probe) {
   REQUIRE(score::ResetLiveGazetteTerminalModuleState());
-  CHECK(Menu_Score_monBinData == nullptr);
-  CHECK(Menu_Score_monBinCdQueueSlot == nullptr);
-  CHECK(Menu_Score_enemyDescriptions == nullptr);
-  CHECK(Menu_Score_menuState == 0);
+  CHECK(score::monBinData == nullptr);
+  CHECK(score::monBinCdQueueSlot == nullptr);
+  CHECK(score::enemyDescriptions == nullptr);
+  CHECK(score::menuState == 0);
   CHECK_FALSE(
       live::memory::LivePayloadCapacity(probe.owned_buffer).has_value());
 }
@@ -620,11 +619,11 @@ void ReenterCancelledMon(live::PreviewFixture& fixture) {
   fixture.AdvanceTo(14);
   REQUIRE(fixture.TickGazette() == 0);
   CHECK(fixture.InformationText() == live::Fixture::Description(0));
-  CHECK(Menu_Score_monBinData[0].unlocked == 1);
+  CHECK(score::monBinData[0].unlocked == 1);
   live::Fixture::Input(live::kCross);
   REQUIRE(fixture.TickGazette() == 0);
   fixture.AdvanceTo(1);
-  CHECK(Menu_Score_monBinData == nullptr);
+  CHECK(score::monBinData == nullptr);
 }
 
 TEST_CASE(
@@ -681,8 +680,8 @@ TEST_CASE(
   REQUIRE(fixture.TickGazette() == 0);
   fixture.AdvanceTo(1);
   fixture.SettleOverview();
-  CHECK(live::Fixture::RankText() == shared::Label(Menu_Score_rankText, 0));
-  CHECK(Menu_Score_monBinData == nullptr);
+  CHECK(live::Fixture::RankText() == shared::Label(score::rankText, 0));
+  CHECK(score::monBinData == nullptr);
   CHECK(score::LiveGazetteTerminalRefusals() == refusals);
   CHECK(fixture.GuardsIntact());
 }
@@ -693,16 +692,16 @@ TEST_CASE(
     "[gazette-terminal][gazette-terminal-live][native-refusal]") {
   live::Fixture fixture;
   fixture.BorrowMon();
-  Menu_Score_menuState = 14;
-  Menu_Score_cameraDistance = 777;
-  auto* const borrowed = Menu_Score_monBinData;
+  score::menuState = 14;
+  score::cameraDistance = 777;
+  auto* const borrowed = score::monBinData;
   const auto bytes = live::Fixture::MonBytes();
   const std::vector<std::byte> before(bytes.begin(), bytes.end());
   const auto refusals = score::LiveGazetteTerminalRefusals();
   REQUIRE_FALSE(score::ResetLiveGazetteTerminalModuleState());
-  CHECK(Menu_Score_monBinData == borrowed);
-  CHECK(Menu_Score_menuState == 14);
-  CHECK(Menu_Score_cameraDistance == 777);
+  CHECK(score::monBinData == borrowed);
+  CHECK(score::menuState == 14);
+  CHECK(score::cameraDistance == 777);
   CHECK(live::memory::LivePayloadCapacity(borrowed).has_value());
   CHECK(std::ranges::equal(bytes, before));
   CHECK(score::LiveGazetteTerminalRefusals() == refusals + 1);
@@ -720,8 +719,8 @@ TEST_CASE(
     };
     append(live::ControlOwners());
     append(live::PreviewOwners());
-    append(std::array{live::BytesOf(Menu_Score_menuText),
-                      live::BytesOf(Menu_Score_rankText),
+    append(std::array{live::BytesOf(score::menuText),
+                      live::BytesOf(score::rankText),
                       live::BytesOf(VS::Menu::menuStrings),
                       live::BytesOf(Actors_textureSlotOrigins),
                       live::BytesOf(Actors_textureSlotRowOffsets),
@@ -759,7 +758,7 @@ struct FallbackIdentity {
 };
 
 FallbackIdentity CheckFallbackRecord() {
-  auto* const fallback = Menu_Score_monBinCdQueueSlot;
+  auto* const fallback = score::monBinCdQueueSlot;
   REQUIRE(fallback != nullptr);
   const auto address = reinterpret_cast<std::uintptr_t>(fallback);
   const auto first = reinterpret_cast<std::uintptr_t>(Content_discRequestSlots);
@@ -773,10 +772,10 @@ FallbackIdentity CheckFallbackRecord() {
 
 void CheckFallbackPayload(std::span<const std::byte> mon_image) {
   CHECK(live::content::LiveRefusedDiscRecordsInUse() == 1);
-  REQUIRE(Menu_Score_monBinData != nullptr);
+  REQUIRE(score::monBinData != nullptr);
   CHECK(std::ranges::equal(live::Fixture::MonBytes().first(mon_image.size()),
                            mon_image));
-  CHECK(Menu_Score_enemyDescriptions == nullptr);
+  CHECK(score::enemyDescriptions == nullptr);
 }
 
 void WaitForFallbackConsumption(live::PreviewFixture& fixture,
@@ -790,16 +789,16 @@ void WaitForFallbackConsumption(live::PreviewFixture& fixture,
 void ConsumeFallback(live::PreviewFixture& fixture,
                      const FallbackIdentity& fallback) {
   REQUIRE(fixture.TickGazette(false) == 0);
-  REQUIRE(Menu_Score_menuState == 14);
-  CHECK(Menu_Score_monBinCdQueueSlot == nullptr);
+  REQUIRE(score::menuState == 14);
+  CHECK(score::monBinCdQueueSlot == nullptr);
   CHECK(live::content::LiveRefusedDiscRecordsInUse() == 0);
   CHECK(live::content::LiveDiscRequestGeneration(fallback.request) == 0);
   CHECK(fallback.request->state == Content_DiscRequestState_Free);
 }
 
 void CheckFallbackList(live::PreviewFixture& fixture) {
-  CHECK(Menu_Score_monBinData[0].unlocked == 1);
-  CHECK(Menu_Score_monBinData[0].next == 1);
+  CHECK(score::monBinData[0].unlocked == 1);
+  CHECK(score::monBinData[0].next == 1);
   CHECK(fixture.InformationText() == shared::EncodedText{0xE7});
   REQUIRE(fixture.TickGazette(false) == 0);
   CHECK(fixture.InformationText() == live::Fixture::Description(0));
@@ -809,8 +808,8 @@ void LeaveFallbackList(live::PreviewFixture& fixture) {
   live::Fixture::Input(live::kCross);
   REQUIRE(fixture.TickGazette(false) == 0);
   fixture.AdvanceTo(1, false);
-  CHECK(Menu_Score_monBinData == nullptr);
-  CHECK(Menu_Score_enemyDescriptions == nullptr);
+  CHECK(score::monBinData == nullptr);
+  CHECK(score::enemyDescriptions == nullptr);
 }
 
 TEST_CASE(
@@ -866,8 +865,8 @@ void PrepareGazetteScreen(live::PreviewFixture& fixture, std::uint8_t& phase) {
 }
 
 void CheckScreenProgress() {
-  CHECK(Menu_Score_score == 0);
-  CHECK(Menu_Score_characterRank == 15);
+  CHECK(score::score == 0);
+  CHECK(score::characterRank == 15);
   CHECK(Battle_hudHidden == 1);
   CHECK(Battle_hudSlideOffset == 0x200000);
   CHECK(VS::Field::isFieldRenderingEnabled == 0);
@@ -880,7 +879,7 @@ void DrawActiveGazetteScreen(live::PreviewFixture& fixture,
     live::fw::UpdateLiveScreen();
     REQUIRE(score::UpdateLiveGazetteScreen(&phase) == 0);
   }
-  REQUIRE(Menu_Score_menuState == 2);
+  REQUIRE(score::menuState == 2);
   CHECK(VS::Menu::Framework::backgroundFadeStep > 0);
 }
 

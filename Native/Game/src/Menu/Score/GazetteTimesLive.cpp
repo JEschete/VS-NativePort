@@ -17,7 +17,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -53,10 +53,9 @@ TimeTrialText Label(const u_short (&table)[Size], std::size_t index) {
   return Bytes(table).subspan(table[index] * sizeof(u_short));
 }
 
-TimeTrialText BorrowedText(const char* pointer) {
-  const std::array tables{Bytes(Menu_Score_timeAttacks),
-                          Bytes(Menu_Score_timeAttackDescriptions),
-                          Bytes(Menu_Score_miscInfo)};
+TimeTrialText BorrowedText(const std::uint8_t* pointer) {
+  const std::array tables{Bytes(timeAttacks), Bytes(timeAttackDescriptions),
+                          Bytes(miscInfo)};
   // Integer comparisons avoid comparing pointers to unrelated arrays.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto address = reinterpret_cast<std::uintptr_t>(pointer);
@@ -73,14 +72,13 @@ TimeTrialText BorrowedText(const char* pointer) {
 TimeTrialLabels Labels() {
   TimeTrialLabels labels;
   for (std::size_t index = 0; index < kTimeTrialCount; ++index) {
-    labels.titles[index] = Label(Menu_Score_timeAttacks, index);
-    labels.descriptions[index] =
-        Label(Menu_Score_timeAttackDescriptions, index);
+    labels.titles[index] = Label(timeAttacks, index);
+    labels.descriptions[index] = Label(timeAttackDescriptions, index);
   }
   labels.missing_title =
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneBossRush);
+      Label(miscInfo, Text_Menu9_miscInfo_Index_noneBossRush);
   labels.missing_description =
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneBossRushDesc);
+      Label(miscInfo, Text_Menu9_miscInfo_Index_noneBossRushDesc);
   return labels;
 }
 
@@ -106,32 +104,28 @@ TimeTrialScores Scores() {
 std::array<TimeTrialRow, kTimeTrialCount> Rows() {
   std::array<TimeTrialRow, kTimeTrialCount> rows{};
   for (std::size_t index = 0; index < rows.size(); ++index) {
-    const auto& original = Menu_Score_gazetteRows[index];
-    rows[index] = {
-        .selected = static_cast<std::uint8_t>(original.selected),
-        .enabled_style = static_cast<std::uint8_t>(original.opaque1),
-        .entrance_delay = static_cast<std::uint8_t>(original.animationState),
-        .disabled = static_cast<std::uint8_t>(original.disabled),
-        .x = original.x,
-        .row_number = original.rowIndex,
-        .title = BorrowedText(original.title),
-        .description = BorrowedText(original.description)};
+    const auto& original = gazetteRows[index];
+    rows[index] = {.selected = original.selected,
+                   .enabled_style = original.opaque1,
+                   .entrance_delay = original.animation_state,
+                   .disabled = original.disabled,
+                   .x = original.x,
+                   .row_number = original.row_index,
+                   .title = BorrowedText(original.title),
+                   .description = BorrowedText(original.description)};
   }
   return rows;
 }
 
-char* OriginalPointer(TimeTrialText text) {
+std::uint8_t* OriginalPointer(TimeTrialText text) {
   // These spans borrow writable module arrays; the core never mutates text.
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return reinterpret_cast<char*>(const_cast<std::uint8_t*>(text.data()));
+  return const_cast<std::uint8_t*>(text.data());
 }
 
 void StoreAnimation(const std::array<TimeTrialRow, kTimeTrialCount>& rows) {
   for (std::size_t index = 0; index < rows.size(); ++index) {
-    Menu_Score_gazetteRows[index].selected =
-        static_cast<char>(rows[index].selected);
-    Menu_Score_gazetteRows[index].animationState =
-        static_cast<char>(rows[index].entrance_delay);
+    gazetteRows[index].selected = rows[index].selected;
+    gazetteRows[index].animation_state = rows[index].entrance_delay;
   }
 }
 
@@ -181,8 +175,8 @@ std::size_t FormatLiveFastestClearTime(std::span<char> destination,
   const std::span bytes(reinterpret_cast<std::uint8_t*>(destination.data()),
                         destination.size());
   const std::size_t written = FormatFastestClearTime(
-      bytes, {Menu_Score_clearCount, round_index, completion_minutes},
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear));
+      bytes, {clearCount, round_index, completion_minutes},
+      Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear));
   if (written == 0) Refuse("fastest clear text does not fit or has no end");
   return written;
 }
@@ -196,11 +190,11 @@ void CreateLiveTimeTrialRows() {
     return;
   }
   for (std::size_t index = 0; index < rows.size(); ++index) {
-    auto& original = Menu_Score_gazetteRows[index];
+    auto& original = gazetteRows[index];
     const TimeTrialRow& row = rows[index];
     original.x = row.x;
-    original.disabled = static_cast<char>(row.disabled);
-    original.opaque1 = static_cast<char>(row.enabled_style);
+    original.disabled = row.disabled;
+    original.opaque1 = row.enabled_style;
     original.title = OriginalPointer(row.title);
     original.description = OriginalPointer(row.description);
   }
@@ -222,7 +216,7 @@ void RenderLiveTimeTrialRecords(std::int32_t presentation_step) {
   LiveTimeTrialHost host;
   if (RenderTimeTrialRecords(
           rows, Scores(),
-          static_cast<TimeTrialId>(Battle_unusedMenu9CursorMemory.gazettePage),
+          static_cast<TimeTrialId>(Battle_unusedMenu9CursorMemory.gazette_page),
           presentation_step, live_animation, host)) {
     StoreAnimation(rows);
   }

@@ -278,7 +278,7 @@ class PreviewFixture : public TerminalFixture {
 
   void AdvanceTo(int phase, bool pump_disc = true) {
     for (std::size_t tick = 0; tick < kFrameBudget; ++tick) {
-      if (Menu_Score_menuState == phase) return;
+      if (VS::Menu::Score::menuState == phase) return;
       if (TickGazette(pump_disc) != 0) break;
     }
     throw std::runtime_error("terminal controller did not reach phase " +
@@ -306,7 +306,7 @@ class PreviewFixture : public TerminalFixture {
     }
     Input(kCircle);
     static_cast<void>(TickGazette(pump_disc));
-    if (Menu_Score_menuState != 3) {
+    if (VS::Menu::Score::menuState != 3) {
       throw std::runtime_error("real confirmation did not leave overview");
     }
   }

@@ -3766,10 +3766,10 @@ int func_800F9800(void) {
             (root / r"Native\Game\src\Menu\Score\GazetteTerminalLive.cpp").read_text(encoding="utf-8").split()
         )
         self.assertIn(
-            "if(request!=nullptr){Menu_Score_monBinCdQueueSlot=request;"
+            "if(request!=nullptr){monBinCdQueueSlot=request;"
             "Content::EnqueueLiveDiscRequest(request,data);}"
-            "else{request=Content::CompleteLiveRefusedDiscRequest(&Menu_Score_kMonBinFile,data);"
-            "Menu_Score_monBinCdQueueSlot=request;}",
+            "else{request=Content::CompleteLiveRefusedDiscRequest(&kMonBinFile,data);"
+            "monBinCdQueueSlot=request;}",
             gazette_live,
         )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")

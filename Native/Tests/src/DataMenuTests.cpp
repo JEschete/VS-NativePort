@@ -20,12 +20,12 @@
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
-#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -330,7 +330,7 @@ TEST_CASE("Score encyclopedia viewer retains the complete original ID header",
           "[render][menu][score][viewer]") {
   const int selected = GENERATE(0, 77);
   ScoreViewerFixture fixture;
-  Menu_Score_selectedEnemy = static_cast<int16_t>(selected);
+  VS::Menu::Score::selectedEnemy = static_cast<int16_t>(selected);
   const auto enemy =
       fixture.MonBytes().subspan(static_cast<std::size_t>(selected) *
                                      gazette_terminal_live_tests::kEnemyStride,

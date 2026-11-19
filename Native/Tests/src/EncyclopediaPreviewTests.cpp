@@ -32,7 +32,7 @@
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBox.h"
@@ -625,8 +625,7 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
       Content_legacyWeaponParseCursor, Content_legacySequenceParseData,
       Content_legacyShpDiscOffsets, Content_legacyShpSectorCounts>
       saved_loader;
-  equipment_detail_tests::ValueRestore<int> saved_zud_size{
-      Menu_Score_zudSizes[7]};
+  equipment_detail_tests::ValueRestore<int> saved_zud_size{score::zudSizes[7]};
 
   PreviewLifecycleFixture() {
     std::ranges::fill(Actors_actorRecords, nullptr);
@@ -663,7 +662,7 @@ score::EnemyPreviewState QueueOriginalPreview() {
   const auto image = gazette_times_live_tests::ReadImage(
       R"(Native\data\disc\MAP\Z031U00.ZUD)");
   REQUIRE(image.size() < 0x400000);
-  Menu_Score_zudSizes[7] = static_cast<int>(image.size());
+  score::zudSizes[7] = static_cast<int>(image.size());
   REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
   const auto before = score::LiveEnemyPreviewState();
   std::ranges::copy(image, Pointer<unsigned char>(before.file));

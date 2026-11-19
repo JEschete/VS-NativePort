@@ -2883,7 +2883,7 @@
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Score\Encyclopedia.h">
+    <ClInclude Include="src\Menu\Score\Encyclopedia.hpp">
       <Filter>src\Menu\Score</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Score\EncyclopediaPreview.cpp">
@@ -2928,7 +2928,7 @@
     <ClCompile Include="src\Menu\Score\Records.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Score\Records.h">
+    <ClInclude Include="src\Menu\Score\Records.hpp">
       <Filter>src\Menu\Score</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Score\ScoreRank.cpp">
@@ -2940,7 +2940,7 @@
     <ClCompile Include="src\Menu\Score\ScoreScreen.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Score\ScoreScreen.h">
+    <ClInclude Include="src\Menu\Score\ScoreScreen.hpp">
       <Filter>src\Menu\Score</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Setup\Assembly.cpp">

@@ -18,12 +18,12 @@ namespace shared = gazette_times_live_tests;
 
 inline auto AdditionalOwners() {
   return std::array{
-      shared::BytesOf(Menu_Score_titleText),
-      shared::BytesOf(Menu_Score_titleDescriptions),
-      shared::BytesOf(Menu_Score_statHeaders),
-      shared::BytesOf(Menu_Score_statDescriptions),
-      shared::BytesOf(Menu_Score_mapCompletion),
-      shared::BytesOf(Menu_Score_openedChestCount),
+      shared::BytesOf(VS::Menu::Score::titleText),
+      shared::BytesOf(VS::Menu::Score::titleDescriptions),
+      shared::BytesOf(VS::Menu::Score::statHeaders),
+      shared::BytesOf(VS::Menu::Score::statDescriptions),
+      shared::BytesOf(VS::Menu::Score::mapCompletion),
+      shared::BytesOf(VS::Menu::Score::openedChestCount),
       shared::BytesOf(VS::Menu::Score::LiveScrollableRowAnimation())};
 }
 

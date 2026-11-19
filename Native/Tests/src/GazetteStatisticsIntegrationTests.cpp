@@ -50,9 +50,9 @@ struct Fixture : live::StatisticsFixture {
   std::array<shared::Sprite, 4> PrimeCursor(Page page) {
     VS::State::scoreData.titles = -1;
     VS::State::scoreData.completion_time_minutes = 60;
-    Menu_Score_clearCount = 3;
-    Menu_Score_mapCompletion = 180;
-    Menu_Score_openedChestCount = 26;
+    score::clearCount = 3;
+    score::mapCompletion = 180;
+    score::openedChestCount = 26;
     if (page == Page::kTitles) {
       score::CreateLiveTitleRows();
     } else {
@@ -82,9 +82,9 @@ struct ResidentState {
                              cursor));
     CHECK(VS::State::scoreData.titles == -1);
     CHECK(VS::State::scoreData.completion_time_minutes == 60);
-    CHECK(Menu_Score_clearCount == 3);
-    CHECK(Menu_Score_mapCompletion == 180);
-    CHECK(Menu_Score_openedChestCount == 26);
+    CHECK(score::clearCount == 3);
+    CHECK(score::mapCompletion == 180);
+    CHECK(score::openedChestCount == 26);
     for (std::size_t i = 0; i < rows.rows.size(); ++i) {
       CHECK(Fixture::Row(i).text == rows.rows[i].text);
       CHECK(Fixture::Row(i).x == rows.rows[i].x);
@@ -95,21 +95,21 @@ struct ResidentState {
 void CheckTitleModuleEntries(const Fixture& fixture) {
   VS::State::scoreData.titles = -1;
   ModuleEntry(0x801056B8, &score::CreateLiveTitleRows)();
-  CHECK(Menu_Score_gazetteRows[31].rowIndex == 32);
+  CHECK(score::gazetteRows[31].row_index == 32);
   ModuleEntry(0x8010579C, &score::RenderLiveTitles)(8);
   CHECK(fixture.Cursor().position == 0x00300030);
   CHECK(Fixture::InformationText() ==
-        shared::Label(Menu_Score_titleDescriptions, 0));
+        shared::Label(score::titleDescriptions, 0));
 }
 
 void CheckStatisticModuleEntries(Fixture& fixture) {
   ModuleEntry(0x80106780, &score::CreateLiveStatisticRows)();
-  CHECK(Menu_Score_gazetteRows[22].rowIndex == 23);
+  CHECK(score::gazetteRows[22].row_index == 23);
   fixture.ResetFrame();
   ModuleEntry(0x80106808, &score::RenderLiveStatistics)(8);
   CHECK(fixture.Cursor().position == 0x00300004);
   CHECK(Fixture::InformationText() ==
-        shared::Label(Menu_Score_statDescriptions, 0));
+        shared::Label(score::statDescriptions, 0));
 }
 }  // namespace
 

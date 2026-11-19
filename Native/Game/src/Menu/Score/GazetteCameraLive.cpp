@@ -19,8 +19,8 @@
 #include "Core/Scratch.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
-#include "Menu/Score/Records.h"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/Records.hpp"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
@@ -156,11 +156,11 @@ void StoreCameraVector(VECTOR& vector, const CameraVector& words) {
 // position and angles take its eye and angles, their pads untouched.
 Core::Math::Transform3 BuildAndStoreViewerCamera() {
   const ViewerCamera camera =
-      BuildViewerCamera({.pitch = Menu_Score_cameraAngles.vx,
-                         .yaw = Menu_Score_cameraAngles.vy,
-                         .roll = Menu_Score_cameraAngles.vz,
-                         .distance = Menu_Score_cameraDistance,
-                         .height_offset = Menu_Score_cameraHeightOffset});
+      BuildViewerCamera({.pitch = cameraAngles.vx,
+                         .yaw = cameraAngles.vy,
+                         .roll = cameraAngles.vz,
+                         .distance = cameraDistance,
+                         .height_offset = cameraHeightOffset});
   VS::Render::Camera& frame_camera = VS::Render::FrameScratchpad().camera;
   frame_camera.position.vx = camera.position.x;
   frame_camera.position.vy = camera.position.y;
@@ -217,8 +217,8 @@ void RestoreLiveCamera() {
   VS::Render::Camera& frame_camera = VS::Render::FrameScratchpad().camera;
   CameraPose camera{.position = CameraVectorOf(frame_camera.position),
                     .angles = CameraVectorOf(frame_camera.angles)};
-  RestoreCamera({.position = CameraVectorOf(Menu_Score_cameraPositionBackup),
-                 .angles = CameraVectorOf(Menu_Score_cameraAnglesBackup)},
+  RestoreCamera({.position = CameraVectorOf(cameraPositionBackup),
+                 .angles = CameraVectorOf(cameraAnglesBackup)},
                 camera);
   StoreCameraVector(frame_camera.position, camera.position);
   StoreCameraVector(frame_camera.angles, camera.angles);
@@ -253,8 +253,7 @@ void DrawLiveFooterBackground(int top) { DrawFooter(top); }
 // decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679)
 void RenderLiveOverview(int animation_step) {
   LiveOverviewHost host;
-  RenderOverview(host, animation_step,
-                 static_cast<std::uint32_t>(Menu_Score_score));
+  RenderOverview(host, animation_step, VS::Menu::Score::score);
 }
 
 // decomp: MENU9.PRG _renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2146)

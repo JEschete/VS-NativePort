@@ -29,13 +29,13 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
-#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRows.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteTerminal.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
@@ -89,26 +89,26 @@ inline auto ControlOwners() {
                     BytesOf(VS::Input::settings),
                     BytesOf(VS::State::stateFlags),
                     BytesOf(VS::Audio::nextSfxChannelGroup7E),
-                    BytesOf(Menu_Score_menuState),
-                    BytesOf(Menu_Score_nextState),
-                    BytesOf(Menu_Score_cameraAngles),
-                    BytesOf(Menu_Score_cameraDistance),
-                    BytesOf(Menu_Score_cameraHeightOffset),
-                    BytesOf(Menu_Score_initCameraDistance),
-                    BytesOf(Menu_Score_selectedEnemy),
-                    BytesOf(Menu_Score_enemySkipDelay),
-                    BytesOf(Menu_Score_enemyNavigationState),
-                    BytesOf(Menu_Score_buttonHeld),
-                    BytesOf(Menu_Score_hideUi),
-                    BytesOf(Menu_Score_rotationColor),
-                    BytesOf(Menu_Score_zoomColor),
-                    BytesOf(Menu_Score_monBinData),
-                    BytesOf(Menu_Score_monBinCdQueueSlot),
-                    BytesOf(Menu_Score_enemyDescriptions),
-                    BytesOf(Menu_Score_characterRank),
-                    BytesOf(Menu_Score_score),
-                    BytesOf(Menu_Score_cameraPositionBackup),
-                    BytesOf(Menu_Score_cameraAnglesBackup),
+                    BytesOf(score::menuState),
+                    BytesOf(score::nextState),
+                    BytesOf(score::cameraAngles),
+                    BytesOf(score::cameraDistance),
+                    BytesOf(score::cameraHeightOffset),
+                    BytesOf(score::initCameraDistance),
+                    BytesOf(score::selectedEnemy),
+                    BytesOf(score::enemySkipDelay),
+                    BytesOf(score::enemyNavigationState),
+                    BytesOf(score::buttonHeld),
+                    BytesOf(score::hideUi),
+                    BytesOf(score::rotationColor),
+                    BytesOf(score::zoomColor),
+                    BytesOf(score::monBinData),
+                    BytesOf(score::monBinCdQueueSlot),
+                    BytesOf(score::enemyDescriptions),
+                    BytesOf(score::characterRank),
+                    BytesOf(score::score),
+                    BytesOf(score::cameraPositionBackup),
+                    BytesOf(score::cameraAnglesBackup),
                     BytesOf(VS::Menu::Framework::menuState),
                     BytesOf(VS::Menu::Framework::actionSelection),
                     BytesOf(VS::Menu::Framework::backgroundFadeStep),
@@ -170,8 +170,7 @@ class TerminalFixture
 
  public:
   TerminalFixture() {
-    if (Menu_Score_monBinData != nullptr ||
-        Menu_Score_monBinCdQueueSlot != nullptr ||
+    if (score::monBinData != nullptr || score::monBinCdQueueSlot != nullptr ||
         content::LiveRefusedDiscRecordsInUse() != 0 ||
         !std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
           return slot.state == Content_DiscRequestState_Free;
@@ -179,8 +178,8 @@ class TerminalFixture
       throw std::runtime_error("terminal fixture requires idle disc owners");
     }
     for (const auto owner : ControlOwners()) saved_.Keep(owner);
-    ImportTable(Menu_Score_menuText);
-    ImportTable(Menu_Score_rankText);
+    ImportTable(score::menuText);
+    ImportTable(score::rankText);
     ImportTable(VS::Menu::menuStrings);
     if (!content::DataStore::Open(R"(Native\data)")) {
       throw std::runtime_error("terminal fixture needs extracted data");
@@ -198,7 +197,7 @@ class TerminalFixture
     VS::Menu::Framework::actionSelection = {};
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Menu::Framework::backgroundFadeStep = 0;
-    Menu_Score_characterRank = 0;
+    score::characterRank = 0;
     VS::Input::settings.cursor_memory = 1;
     VS::State::stateFlags.intro_state = 3;
     sound_offsets_.fill(std::numeric_limits<std::uint32_t>::max());
@@ -262,45 +261,44 @@ class TerminalFixture
   }
 
   void BorrowMon() {
-    if (borrowed_mon_ != nullptr || Menu_Score_monBinData != nullptr) {
+    if (borrowed_mon_ != nullptr || score::monBinData != nullptr) {
       throw std::runtime_error("terminal test already has a MON owner");
     }
     borrowed_mon_ = static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(
-        static_cast<std::size_t>(Menu_Score_kMonBinFile.size)));
+        static_cast<std::size_t>(score::kMonBinFile.size)));
     if (borrowed_mon_ == nullptr ||
-        content::ReadLiveDiscFileBlocking(Menu_Score_kMonBinFile.lba,
-                                          Menu_Score_kMonBinFile.size,
+        content::ReadLiveDiscFileBlocking(score::kMonBinFile.lba,
+                                          score::kMonBinFile.size,
                                           borrowed_mon_) != 1) {
       throw std::runtime_error("real MON read did not complete");
     }
-    Menu_Score_monBinData =
-        reinterpret_cast<Menu_Score_EnemyEntry*>(borrowed_mon_);
-    Menu_Score_enemyDescriptions =
+    score::monBinData = reinterpret_cast<score::EnemyEntry*>(borrowed_mon_);
+    score::enemyDescriptions =
         reinterpret_cast<u_short*>(borrowed_mon_ + kDescriptionOffset);
   }
 
   void ReleaseBorrowedMon() {
     if (borrowed_mon_ == nullptr) return;
     const auto capacity = memory::LivePayloadCapacity(borrowed_mon_);
-    const auto bytes = static_cast<std::size_t>(Menu_Score_kMonBinFile.size);
+    const auto bytes = static_cast<std::size_t>(score::kMonBinFile.size);
     if (!capacity || *capacity < bytes ||
         !content::CancelLiveDiscWrites({borrowed_mon_, bytes})) {
       VS::Core::Errorf("tests", "terminal borrowed MON cleanup refused");
       std::abort();
     }
-    Menu_Score_monBinData = nullptr;
-    Menu_Score_enemyDescriptions = nullptr;
+    score::monBinData = nullptr;
+    score::enemyDescriptions = nullptr;
     memory::FreeLiveFromHighEnd(borrowed_mon_);
     borrowed_mon_ = nullptr;
   }
 
   static std::span<std::byte> MonBytes() {
-    const auto capacity = memory::LivePayloadCapacity(Menu_Score_monBinData);
-    const auto bytes = static_cast<std::size_t>(Menu_Score_kMonBinFile.size);
+    const auto capacity = memory::LivePayloadCapacity(score::monBinData);
+    const auto bytes = static_cast<std::size_t>(score::kMonBinFile.size);
     if (!capacity || *capacity < bytes) {
       throw std::runtime_error("terminal MON borrow left its real heap owner");
     }
-    return {reinterpret_cast<std::byte*>(Menu_Score_monBinData), bytes};
+    return {reinterpret_cast<std::byte*>(score::monBinData), bytes};
   }
 
   static shared::EncodedText Description(std::size_t index) {
@@ -325,9 +323,9 @@ class TerminalFixture
     const auto address =
         reinterpret_cast<std::uintptr_t>(Menu_textBoxes[0].string);
     const std::array<std::span<const std::byte>, 2> owners{
-        std::as_bytes(std::span(Menu_Score_rankText)),
-        Menu_Score_monBinData == nullptr ? std::span<const std::byte>{}
-                                         : MonBytes()};
+        std::as_bytes(std::span(score::rankText)),
+        score::monBinData == nullptr ? std::span<const std::byte>{}
+                                     : MonBytes()};
     for (const auto owner : owners) {
       const auto first = reinterpret_cast<std::uintptr_t>(owner.data());
       if (address < first || address - first >= owner.size()) continue;

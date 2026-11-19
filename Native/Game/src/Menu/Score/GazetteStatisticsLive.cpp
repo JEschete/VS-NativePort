@@ -14,7 +14,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatistics.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -47,11 +47,10 @@ GazetteText Label(const u_short (&table)[Size], std::size_t index) {
   return Bytes(table).subspan(table[index] * sizeof(u_short));
 }
 
-GazetteText BorrowedText(const char* pointer) {
-  const std::array tables{
-      Bytes(Menu_Score_titleText), Bytes(Menu_Score_titleDescriptions),
-      Bytes(Menu_Score_statHeaders), Bytes(Menu_Score_statDescriptions),
-      Bytes(Menu_Score_miscInfo)};
+GazetteText BorrowedText(const std::uint8_t* pointer) {
+  const std::array tables{Bytes(titleText), Bytes(titleDescriptions),
+                          Bytes(statHeaders), Bytes(statDescriptions),
+                          Bytes(miscInfo)};
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto address = reinterpret_cast<std::uintptr_t>(pointer);
   for (const auto table : tables) {
@@ -67,37 +66,35 @@ GazetteText BorrowedText(const char* pointer) {
 std::array<GazetteRecordRow, kGazetteTitleCount> Rows() {
   std::array<GazetteRecordRow, kGazetteTitleCount> rows{};
   for (std::size_t index = 0; index < rows.size(); ++index) {
-    const auto& original = Menu_Score_gazetteRows[index];
-    rows[index] = {
-        .selected = static_cast<std::uint8_t>(original.selected),
-        .unlocked = static_cast<std::uint8_t>(original.opaque1),
-        .highlight_step = static_cast<std::uint8_t>(original.animationState),
-        .disabled = static_cast<std::uint8_t>(original.disabled),
-        .x = original.x,
-        .number = original.rowIndex,
-        .title = BorrowedText(original.title),
-        .description = BorrowedText(original.description)};
+    const auto& original = gazetteRows[index];
+    rows[index] = {.selected = original.selected,
+                   .unlocked = original.opaque1,
+                   .highlight_step = original.animation_state,
+                   .disabled = original.disabled,
+                   .x = original.x,
+                   .number = original.row_index,
+                   .title = BorrowedText(original.title),
+                   .description = BorrowedText(original.description)};
   }
   return rows;
 }
 
-char* OriginalPointer(GazetteText text) {
+std::uint8_t* OriginalPointer(GazetteText text) {
   // These spans borrow writable module arrays; the policy never changes text.
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return reinterpret_cast<char*>(const_cast<std::uint8_t*>(text.data()));
+  return const_cast<std::uint8_t*>(text.data());
 }
 
 void StoreRows(std::span<const GazetteRecordRow> rows, bool labels) {
   for (std::size_t index = 0; index < rows.size(); ++index) {
     const auto& row = rows[index];
-    auto& original = Menu_Score_gazetteRows[index];
-    original.selected = static_cast<char>(row.selected);
-    original.animationState = static_cast<char>(row.highlight_step);
+    auto& original = gazetteRows[index];
+    original.selected = row.selected;
+    original.animation_state = row.highlight_step;
     if (labels) {
-      original.opaque1 = static_cast<char>(row.unlocked);
-      original.disabled = static_cast<char>(row.disabled);
+      original.opaque1 = row.unlocked;
+      original.disabled = row.disabled;
       original.x = row.x;
-      original.rowIndex = row.number;
+      original.row_index = row.number;
       original.title = OriginalPointer(row.title);
       original.description = OriginalPointer(row.description);
     }
@@ -107,21 +104,20 @@ void StoreRows(std::span<const GazetteRecordRow> rows, bool labels) {
 GazetteTitleLabels TitleLabels() {
   GazetteTitleLabels labels;
   for (std::size_t index = 0; index < kGazetteTitleCount; ++index) {
-    labels.titles[index] = Label(Menu_Score_titleText, index);
-    labels.descriptions[index] = Label(Menu_Score_titleDescriptions, index);
+    labels.titles[index] = Label(titleText, index);
+    labels.descriptions[index] = Label(titleDescriptions, index);
   }
-  labels.locked_title =
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear);
+  labels.locked_title = Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear);
   labels.locked_description =
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_conditionsNotMet);
+      Label(miscInfo, Text_Menu9_miscInfo_Index_conditionsNotMet);
   return labels;
 }
 
 GazetteStatisticLabels StatisticLabels() {
   GazetteStatisticLabels labels;
   for (std::size_t index = 0; index < kGazetteStatisticCount; ++index) {
-    labels.titles[index] = Label(Menu_Score_statHeaders, index);
-    labels.descriptions[index] = Label(Menu_Score_statDescriptions, index);
+    labels.titles[index] = Label(statHeaders, index);
+    labels.descriptions[index] = Label(statDescriptions, index);
   }
   return labels;
 }
@@ -195,8 +191,8 @@ void RenderLiveTitles(std::int32_t presentation_step) {
   auto rows = Rows();
   LiveRecordHost host;
   if (RenderTitles(rows,
-                   {Battle_unusedMenu9CursorMemory.titlePage,
-                    Battle_unusedMenu9CursorMemory.titleRow},
+                   {Battle_unusedMenu9CursorMemory.title_page,
+                    Battle_unusedMenu9CursorMemory.title_row},
                    presentation_step, title_animation, host)) {
     StoreRows(rows, false);
   }
@@ -225,18 +221,17 @@ void CreateLiveStatisticRows() {
 void RenderLiveStatistics(std::int32_t presentation_step) {
   auto rows = Rows();
   const GazetteStatisticsValues values{
-      .current = {.map_completion = Menu_Score_mapCompletion,
-                  .opened_chest_count = Menu_Score_openedChestCount,
-                  .clear_count = Menu_Score_clearCount,
+      .current = {.map_completion = mapCompletion,
+                  .opened_chest_count = openedChestCount,
+                  .clear_count = clearCount,
                   .rank = {}},
       .best = ReadLiveScoreRecord(),
       .best_clear_round = VS::State::scoreData.clear_count,
-      .no_clear =
-          Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear)};
+      .no_clear = Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear)};
   LiveRecordHost host;
   if (RenderStatistics(rows, values,
-                       {Battle_unusedMenu9CursorMemory.recordTimePage,
-                        Battle_unusedMenu9CursorMemory.recordTimeRow},
+                       {Battle_unusedMenu9CursorMemory.record_time_page,
+                        Battle_unusedMenu9CursorMemory.record_time_row},
                        presentation_step, statistic_animation, host)) {
     StoreRows(std::span(rows).first(kGazetteStatisticCount), false);
   }

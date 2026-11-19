@@ -22,7 +22,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Score/GazetteRows.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/Display.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
@@ -43,7 +43,7 @@ constexpr int kShadowTileCode = 0x60000000;
 constexpr std::size_t kSpriteDrawModeWord = 1;
 constexpr std::size_t kSpriteTextureWord = 4;
 // _menuText's halfwords: the offsets, then the strings.
-constexpr std::size_t kMenuTextHalfwords = std::size(Menu_Score_menuText);
+constexpr std::size_t kMenuTextHalfwords = std::size(menuText);
 // A top menu row's two text entries: the name and no description.
 constexpr std::size_t kTextPerRow = 2;
 // D_800F4EE8.cursorMemories[2] and [3].
@@ -124,10 +124,10 @@ class LiveScrollableRow final : public ScrollableRowHost {
 // its offset is outside the table.
 [[nodiscard]] char* TopMenuChoiceText(std::size_t choice) {
   if (choice >= kMenuTextHalfwords) return nullptr;
-  const std::size_t offset = Menu_Score_menuText[choice];
+  const std::size_t offset = menuText[choice];
   if (offset >= kMenuTextHalfwords) return nullptr;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return reinterpret_cast<char*>(&Menu_Score_menuText[offset]);
+  return reinterpret_cast<char*>(&menuText[offset]);
 }
 
 class LiveGazetteMenu final : public GazetteMenuHost {
@@ -145,7 +145,7 @@ class LiveGazetteMenu final : public GazetteMenuHost {
     text_ = listed_.data();
   }
   std::uint8_t GazetteRow() override {
-    return Battle_unusedMenu9CursorMemory.gazetteRow;
+    return Battle_unusedMenu9CursorMemory.gazette_row;
   }
   void SetTopMenuCursor(TopMenuCursor cursor) override {
     VS::Menu::Framework::menuMemory.cursor_memories[kTopMenuCursorRow] =

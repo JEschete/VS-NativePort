@@ -1,8 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Battle/StatusEffects.h"
+
+#include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.h"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 
 // decomp: D_800E8204 (D_800E8204@BATTLE/BATTLE.PRG)
 int Battle_limbStatusFlags[4]; /* contents: module image (ModuleData.cpp) */
@@ -20,7 +22,7 @@ int Battle_targetingRiskTimer; /* contents: module image (ModuleData.cpp) */
 void* Battle_unusedSceneBuffer;
 
 // decomp: vs_battle_menu9CursorMemory (vs_battle_menu9CursorMemory@BATTLE/BATTLE.PRG)
-Menu_Score_CursorMemory Battle_unusedMenu9CursorMemory;
+VS::Menu::Score::CursorMemory Battle_unusedMenu9CursorMemory;
 
 // decomp: vs_battle_submenuState (vs_battle_submenuState@BATTLE/BATTLE.PRG)
 int Battle_unusedSubmenuState;

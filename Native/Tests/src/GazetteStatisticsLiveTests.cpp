@@ -26,18 +26,20 @@ namespace render = VS::Render;
 using Text = shared::EncodedText;
 
 template <std::size_t Count>
-const char* LabelPointer(const u_short (&table)[Count], std::size_t index) {
+const std::uint8_t* LabelPointer(const u_short (&table)[Count],
+                                 std::size_t index) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return reinterpret_cast<const char*>(table + table[index]);
+  return reinterpret_cast<const std::uint8_t*>(table + table[index]);
 }
 
-auto RowFields(const Menu_Score_Row& row) {
-  return std::tuple(row.selected, row.opaque1, row.animationState, row.disabled,
-                    row.x, row.rowIndex, row.title, row.description);
+auto RowFields(const score::ListRow& row) {
+  return std::tuple(row.selected, row.opaque1, row.animation_state,
+                    row.disabled, row.x, row.row_index, row.title,
+                    row.description);
 }
 
-bool SameRows(std::span<const Menu_Score_Row> left,
-              std::span<const Menu_Score_Row> right) {
+bool SameRows(std::span<const score::ListRow> left,
+              std::span<const score::ListRow> right) {
   return std::ranges::equal(left, right, [](const auto& a, const auto& b) {
     return RowFields(a) == RowFields(b);
   });
@@ -135,9 +137,9 @@ std::vector<shared::Packet> TitleDigits(
 }
 
 void Progress() {
-  Menu_Score_clearCount = 3;
-  Menu_Score_mapCompletion = 180;
-  Menu_Score_openedChestCount = 26;
+  score::clearCount = 3;
+  score::mapCompletion = 180;
+  score::openedChestCount = 26;
   VS::State::scoreData.clear_count = 2;
   VS::State::scoreData.completion_time_minutes = 60;
   VS::State::scoreData.map_completion = 361;
@@ -159,7 +161,7 @@ void CheckTitleGlyphs(const live::StatisticsFixture& fixture) {
   CHECK(row.state == fw::RowState::kInactive);
   CHECK(std::array<int, 4>{row.x, row.y, row.w, row.is_scrollable} ==
         std::array<int, 4>{60, 168, 200, 0});
-  const auto title = shared::Label(Menu_Score_titleText, 31);
+  const auto title = shared::Label(score::titleText, 31);
   REQUIRE(title.size() > 1);
   CHECK(row.text[0] == title[0]);
   const auto glyphs = GlyphRuns(fixture, 168);
@@ -169,8 +171,8 @@ void CheckTitleGlyphs(const live::StatisticsFixture& fixture) {
 
 void CheckTitleInformationOwnership(live::StatisticsFixture& fixture) {
   const auto information = shared::Fixture::InformationText();
-  CHECK(information == shared::Label(Menu_Score_titleDescriptions, 31));
-  Menu_Score_titleDescriptions[Menu_Score_titleDescriptions[31]] = 0xE701;
+  CHECK(information == shared::Label(score::titleDescriptions, 31));
+  score::titleDescriptions[score::titleDescriptions[31]] = 0xE701;
   fixture.ResetFrame();
   score::RenderLiveTitles(8);
   CHECK(shared::Fixture::InformationText() == information);
@@ -203,7 +205,7 @@ void CheckSummaryGlyphs(const live::StatisticsFixture& fixture) {
 void CheckWeaponPage(live::StatisticsFixture& fixture, std::uint8_t page,
                      std::size_t first_weapon) {
   fixture.ResetFrame();
-  Battle_unusedMenu9CursorMemory.recordTimePage = page;
+  Battle_unusedMenu9CursorMemory.record_time_page = page;
   score::RenderLiveStatistics(8);
   for (std::size_t index = 0; index < 6; ++index) {
     CHECK(ValueGlyphs(fixture, 72 + static_cast<int>(index) * 16) ==
@@ -218,23 +220,23 @@ TEST_CASE("F02814 Live title creation borrows original tables and bit 31",
   VS::State::scoreData.titles = -2147483643;
   score::CreateLiveTitleRows();
   for (std::size_t index = 0; index < 32; ++index) {
-    const auto& row = Menu_Score_gazetteRows[index];
+    const auto& row = score::gazetteRows[index];
     const bool unlocked = index == 0 || index == 2 || index == 31;
-    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animationState,
-                             row.disabled, row.x, row.rowIndex} ==
+    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animation_state,
+                             row.disabled, row.x, row.row_index} ==
           std::array<int, 6>{0, unlocked ? 1 : 0, 0, 0, 60,
                              static_cast<int>(index + 1)});
-    CHECK(row.title == (unlocked ? LabelPointer(Menu_Score_titleText, index)
-                                 : LabelPointer(Menu_Score_miscInfo, 0)));
+    CHECK(row.title == (unlocked ? LabelPointer(score::titleText, index)
+                                 : LabelPointer(score::miscInfo, 0)));
     CHECK(row.description ==
-          (unlocked ? LabelPointer(Menu_Score_titleDescriptions, index)
-                    : LabelPointer(Menu_Score_miscInfo, 1)));
+          (unlocked ? LabelPointer(score::titleDescriptions, index)
+                    : LabelPointer(score::miscInfo, 1)));
   }
-  Battle_unusedMenu9CursorMemory.titlePage = 24;
-  Battle_unusedMenu9CursorMemory.titleRow = 7;
+  Battle_unusedMenu9CursorMemory.title_page = 24;
+  Battle_unusedMenu9CursorMemory.title_row = 7;
   score::RenderLiveTitles(8);
   CHECK(shared::Fixture::InformationText() ==
-        shared::Label(Menu_Score_titleDescriptions, 31));
+        shared::Label(score::titleDescriptions, 31));
   CHECK(TitleDigits(fixture).size() == 16);
   CHECK_FALSE(GlyphRuns(fixture, 168).empty());
   CHECK(fixture.GuardsIntact());
@@ -245,13 +247,12 @@ TEST_CASE("F02814 Live malformed chosen label leaves the actual rows intact",
   live::StatisticsFixture fixture;
   VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
-  const auto before = std::to_array(Menu_Score_gazetteRows);
+  const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
-  Menu_Score_titleText[31] =
-      static_cast<u_short>(std::size(Menu_Score_titleText));
+  score::titleText[31] = static_cast<u_short>(std::size(score::titleText));
   score::CreateLiveTitleRows();
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
-  CHECK(SameRows(Menu_Score_gazetteRows, before));
+  CHECK(SameRows(score::gazetteRows, before));
   CHECK(fixture.UsedWords() == 0);
 }
 
@@ -261,13 +262,13 @@ TEST_CASE(
   live::StatisticsFixture fixture;
   VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
-  Battle_unusedMenu9CursorMemory.titlePage = 24;
-  Battle_unusedMenu9CursorMemory.titleRow = 7;
+  Battle_unusedMenu9CursorMemory.title_page = 24;
+  Battle_unusedMenu9CursorMemory.title_row = 7;
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveTitles(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused);
-  CHECK(Menu_Score_gazetteRows[31].selected == 1);
-  CHECK(Menu_Score_gazetteRows[31].animationState == 8);
+  CHECK(score::gazetteRows[31].selected == 1);
+  CHECK(score::gazetteRows[31].animation_state == 8);
   CHECK(fixture.Cursor().position == 0x00A00030);
   CheckTitleGlyphs(fixture);
   const auto digits = TitleDigits(fixture);
@@ -284,15 +285,15 @@ TEST_CASE("F02815 Live refuses an out-of-owner visible title before drawing",
   live::StatisticsFixture fixture;
   VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
-  std::array<char, 2> outside{1, static_cast<char>(0xE7)};
-  Menu_Score_gazetteRows[0].title = outside.data();
-  Battle_unusedMenu9CursorMemory.titlePage = 0;
-  Battle_unusedMenu9CursorMemory.titleRow = 0;
-  const auto before = std::to_array(Menu_Score_gazetteRows);
+  std::array<std::uint8_t, 2> outside{1, 0xE7};
+  score::gazetteRows[0].title = outside.data();
+  Battle_unusedMenu9CursorMemory.title_page = 0;
+  Battle_unusedMenu9CursorMemory.title_row = 0;
+  const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveTitles(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
-  CHECK(SameRows(Menu_Score_gazetteRows, before));
+  CHECK(SameRows(score::gazetteRows, before));
   CHECK(fixture.UsedWords() == 0);
   CHECK(shared::Fixture::InformationText().empty());
 }
@@ -344,24 +345,24 @@ TEST_CASE(
   live::StatisticsFixture fixture;
   VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
-  const auto before = std::to_array(Menu_Score_gazetteRows);
+  const auto before = std::to_array(score::gazetteRows);
   score::CreateLiveStatisticRows();
   for (std::size_t index = 0; index < 23; ++index) {
-    const auto& row = Menu_Score_gazetteRows[index];
-    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animationState,
-                             row.disabled, row.x, row.rowIndex} ==
+    const auto& row = score::gazetteRows[index];
+    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animation_state,
+                             row.disabled, row.x, row.row_index} ==
           std::array<int, 6>{0, 1, 0, 0, 16, static_cast<int>(index + 1)});
-    CHECK(row.title == LabelPointer(Menu_Score_statHeaders, index));
-    CHECK(row.description == LabelPointer(Menu_Score_statDescriptions, index));
+    CHECK(row.title == LabelPointer(score::statHeaders, index));
+    CHECK(row.description == LabelPointer(score::statDescriptions, index));
   }
-  CHECK(SameRows(std::span(Menu_Score_gazetteRows).subspan(23),
+  CHECK(SameRows(std::span(score::gazetteRows).subspan(23),
                  std::span(before).subspan(23)));
   Progress();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 0;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
+  Battle_unusedMenu9CursorMemory.record_time_page = 0;
+  Battle_unusedMenu9CursorMemory.record_time_row = 0;
   score::RenderLiveStatistics(8);
   CHECK(shared::Fixture::InformationText() ==
-        shared::Label(Menu_Score_statDescriptions, 0));
+        shared::Label(score::statDescriptions, 0));
   CHECK(ValueGlyphs(fixture, 56) == Text{3});
   CHECK(fixture.GuardsIntact());
 }
@@ -370,13 +371,13 @@ TEST_CASE("F02824 Live invalid final description is an atomic native refusal",
           "[gazette-statistics][gazette-statistics-live][F02824]") {
   live::StatisticsFixture fixture;
   score::CreateLiveStatisticRows();
-  const auto before = std::to_array(Menu_Score_gazetteRows);
+  const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
-  Menu_Score_statDescriptions[22] =
-      static_cast<u_short>(std::size(Menu_Score_statDescriptions));
+  score::statDescriptions[22] =
+      static_cast<u_short>(std::size(score::statDescriptions));
   score::CreateLiveStatisticRows();
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
-  CHECK(SameRows(Menu_Score_gazetteRows, before));
+  CHECK(SameRows(score::gazetteRows, before));
   CHECK(fixture.UsedWords() == 0);
 }
 
@@ -387,15 +388,15 @@ TEST_CASE(
   Progress();
   score::CreateLiveStatisticRows();
   VS::Render::variableFontGlyphWidths[3] = 12;
-  Battle_unusedMenu9CursorMemory.recordTimePage = 0;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
+  Battle_unusedMenu9CursorMemory.record_time_page = 0;
+  Battle_unusedMenu9CursorMemory.record_time_row = 0;
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveStatistics(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused);
   CheckSummaryGlyphs(fixture);
   CHECK(fixture.Cursor().position == 0x00300004);
-  CHECK(Menu_Score_gazetteRows[0].selected == 1);
-  CHECK(Menu_Score_gazetteRows[0].animationState == 8);
+  CHECK(score::gazetteRows[0].selected == 1);
+  CHECK(score::gazetteRows[0].animation_state == 8);
   CHECK(shared::Fixture::Row(0).state == fw::RowState::kInactive);
   CHECK(fixture.GuardsIntact());
 }
@@ -405,8 +406,8 @@ TEST_CASE("F02825 Live enemy and weapon fields reach genuine rendered glyphs",
   live::StatisticsFixture fixture;
   Progress();
   score::CreateLiveStatisticRows();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 6;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 3;
+  Battle_unusedMenu9CursorMemory.record_time_page = 6;
+  Battle_unusedMenu9CursorMemory.record_time_row = 3;
   score::RenderLiveStatistics(8);
   for (std::size_t index = 0; index < 6; ++index) {
     CHECK(ValueGlyphs(fixture, 72 + static_cast<int>(index) * 16) ==
@@ -414,9 +415,9 @@ TEST_CASE("F02825 Live enemy and weapon fields reach genuine rendered glyphs",
   }
   CHECK(fixture.Cursor().position == 0x00600004);
   CHECK(shared::Fixture::InformationText() ==
-        shared::Label(Menu_Score_statDescriptions, 9));
+        shared::Label(score::statDescriptions, 9));
   CheckWeaponPage(fixture, 12, 1);
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 7;
+  Battle_unusedMenu9CursorMemory.record_time_row = 7;
   CheckWeaponPage(fixture, 15, 4);
   CHECK(ValueGlyphs(fixture, 168) == Text{1, 0, 0, 0});
   CHECK(shared::Fixture::Row(0).is_scrollable == 0);
@@ -427,25 +428,25 @@ TEST_CASE("F02825 Live no-clear text and invalid page retain bounded owners",
           "[gazette-statistics][gazette-statistics-live][F02825]") {
   live::StatisticsFixture fixture;
   Progress();
-  Menu_Score_clearCount = 0;
+  score::clearCount = 0;
   score::CreateLiveStatisticRows();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 0;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 1;
+  Battle_unusedMenu9CursorMemory.record_time_page = 0;
+  Battle_unusedMenu9CursorMemory.record_time_row = 1;
   score::RenderLiveStatistics(8);
-  const auto no_clear = shared::Label(Menu_Score_miscInfo, 0);
+  const auto no_clear = shared::Label(score::miscInfo, 0);
   Text expected;
   for (const auto& glyph : PrintedGlyphs(no_clear, 0)) {
     expected.push_back(glyph.code);
   }
   CHECK(ValueGlyphs(fixture, 72) == expected);
   fixture.ResetFrame();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 16;
-  const auto before = std::to_array(Menu_Score_gazetteRows);
+  Battle_unusedMenu9CursorMemory.record_time_page = 16;
+  const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
   const auto information = shared::Fixture::InformationText();
   score::RenderLiveStatistics(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
-  CHECK(SameRows(Menu_Score_gazetteRows, before));
+  CHECK(SameRows(score::gazetteRows, before));
   CHECK(shared::Fixture::InformationText() == information);
   CHECK(fixture.UsedWords() == 0);
 }
@@ -458,13 +459,13 @@ TEST_CASE("Gazette statistics Live fixture restores all borrowed owners",
     Progress();
     VS::State::scoreData.titles = -1;
     score::CreateLiveTitleRows();
-    Battle_unusedMenu9CursorMemory.titlePage = 1;
-    Battle_unusedMenu9CursorMemory.titleRow = 0;
+    Battle_unusedMenu9CursorMemory.title_page = 1;
+    Battle_unusedMenu9CursorMemory.title_row = 0;
     score::RenderLiveTitles(8);
     score::DrawLiveTitleNumber(0, 0, 99, 1);
     score::CreateLiveStatisticRows();
-    Battle_unusedMenu9CursorMemory.recordTimePage = 1;
-    Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
+    Battle_unusedMenu9CursorMemory.record_time_page = 1;
+    Battle_unusedMenu9CursorMemory.record_time_row = 0;
     score::RenderLiveStatistics(8);
     CHECK(fixture.GuardsIntact());
     CHECK_FALSE(fixture.Packets().empty());

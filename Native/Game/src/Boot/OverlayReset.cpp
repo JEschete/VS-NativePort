@@ -24,7 +24,6 @@
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
-#include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
@@ -77,7 +76,6 @@ void ResetMenu9Statics() {
   if (!VS::Menu::Score::ResetLiveGazetteTerminalModuleState()) {
     std::abort();
   }
-  Menu_Score_Encyclopedia_ResetMenu9Statics();
   VS::Menu::Score::ResetGazetteRowsLive();
   VS::Menu::Score::ResetLiveGazetteStatisticsStatics();
   VS::Menu::Score::ResetLiveTimeTrialStatics();

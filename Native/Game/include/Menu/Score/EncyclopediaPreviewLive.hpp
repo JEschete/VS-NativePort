@@ -5,7 +5,7 @@
 
 // Binds the encyclopedia preview (EncyclopediaPreview.hpp) to the shared
 // model load step (Menu_Inventory_equipmentModelLoadStep), the ZUD file
-// table (Menu_Score_zudLbas, Menu_Score_zudSizes, Menu_Score_paletteFlags),
+// table (zudLbas, zudSizes, paletteFlags),
 // the disc queue, the game heap, the battle asset queue and the actor
 // records, in the shapes the copied score screen calls. The preview's state
 // lives here instead of 592C.c's statics. An id past the file table, a file

@@ -2483,9 +2483,9 @@
     <ClInclude Include="src\Menu\Results\CubePuzzle.hpp" />
     <ClInclude Include="src\Menu\Results\Results.hpp" />
     <ClInclude Include="src\Menu\Results\TimeAttack.hpp" />
-    <ClInclude Include="src\Menu\Score\Encyclopedia.h" />
-    <ClInclude Include="src\Menu\Score\Records.h" />
-    <ClInclude Include="src\Menu\Score\ScoreScreen.h" />
+    <ClInclude Include="src\Menu\Score\Encyclopedia.hpp" />
+    <ClInclude Include="src\Menu\Score\Records.hpp" />
+    <ClInclude Include="src\Menu\Score\ScoreScreen.hpp" />
     <ClInclude Include="src\Menu\Status\ActorStatus.h" />
     <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp" />
     <ClInclude Include="src\Menu\TextBox.h" />

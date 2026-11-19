@@ -15,7 +15,7 @@
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "State/Progress.hpp"
 
 namespace {
@@ -38,7 +38,7 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 void CheckModuleFormatter() {
   std::array<char, 34> storage{};
   storage.fill('Q');
-  Menu_Score_clearCount = 1;
+  score::clearCount = 1;
   const auto format =
       ModuleEntry(0x80106DE0, &score::FormatLiveFastestClearTime);
   const auto output = std::span(storage).subspan(1, 30);
@@ -77,8 +77,8 @@ struct Fixture : live::Fixture {
 void LoadStatisticsLabels() {
   const auto image = live::ReadImage(R"(Native\data\disc\MENU\MENU9.PRG)");
   const auto entries = VS::Content::ModuleDataEntries();
-  const std::array targets{static_cast<void*>(Menu_Score_statHeaders),
-                           static_cast<void*>(Menu_Score_statDescriptions)};
+  const std::array targets{static_cast<void*>(score::statHeaders),
+                           static_cast<void*>(score::statDescriptions)};
   for (const auto target : targets) {
     const auto found = std::ranges::find(entries, target,
                                          &VS::Content::ModuleDataEntry::target);
@@ -91,11 +91,11 @@ void LoadStatisticsLabels() {
 }
 
 void CheckResidentState(const live::ObservableState& before) {
-  CHECK(Battle_unusedMenu9CursorMemory.gazettePage == 0);
-  CHECK(Battle_unusedMenu9CursorMemory.recordTimePage == 5);
-  CHECK(Battle_unusedMenu9CursorMemory.recordTimeRow == 2);
+  CHECK(Battle_unusedMenu9CursorMemory.gazette_page == 0);
+  CHECK(Battle_unusedMenu9CursorMemory.record_time_page == 5);
+  CHECK(Battle_unusedMenu9CursorMemory.record_time_row == 2);
   CHECK(VS::State::scoreData.boss_time_trial_scores[0][0].time == 0x010203);
-  CHECK(Menu_Score_clearCount == 3);
+  CHECK(score::clearCount == 3);
   for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
     CHECK(Fixture::Row(i).text == before.rows[i].text);
     CHECK(Fixture::Row(i).x == before.rows[i].x);
@@ -112,15 +112,15 @@ TEST_CASE("Gazette time module entries use bounded text and real row services",
   CheckModuleFormatter();
   Fixture::SetScore(0, 0, 0x010203);
   ModuleEntry(0x80106F9C, &score::CreateLiveTimeTrialRows)();
-  CHECK(Menu_Score_gazetteRows[0].disabled == 0);
-  CHECK(Menu_Score_gazetteRows[1].disabled == 1);
+  CHECK(score::gazetteRows[0].disabled == 0);
+  CHECK(score::gazetteRows[1].disabled == 1);
   ModuleEntry(0x80107120, &score::RenderLiveTimeTrialRecords)(1);
   fw::UpdateAndDrawLiveRows();
   CHECK(Fixture::Row(0).x < 320);
   CHECK(Fixture::Row(0).target0 == 194);
   ModuleEntry(0x80107090, &score::LeaveLiveTimeTrialMenu)();
   CHECK(Fixture::Row(0).target0 == 320);
-  CHECK(static_cast<std::uint8_t>(Menu_Score_gazetteRows[1].animationState) ==
+  CHECK(static_cast<std::uint8_t>(score::gazetteRows[1].animation_state) ==
         255);
   CHECK(fixture.GuardsIntact());
   CHECK(score::LiveTimeTrialRefusals() == refusals);
@@ -131,11 +131,11 @@ TEST_CASE("Production statistics caller supplies the remaining time text span",
   const game_clear_live_tests::SavedModuleData saved_module;
   Fixture fixture;
   LoadStatisticsLabels();
-  Menu_Score_clearCount = 1;
+  score::clearCount = 1;
   VS::State::scoreData.clear_count = 127;
   VS::State::scoreData.completion_time_minutes = 6000;
-  Battle_unusedMenu9CursorMemory.recordTimePage = 0;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
+  Battle_unusedMenu9CursorMemory.record_time_page = 0;
+  Battle_unusedMenu9CursorMemory.record_time_row = 0;
   score::CreateLiveStatisticRows();
   const auto refusals = score::LiveTimeTrialRefusals();
   score::RenderLiveStatistics(7);
@@ -156,9 +156,9 @@ TEST_CASE("Completed MENU9 resets only the time cursor before fresh rendering",
           "[gazette-times-integration][gazette-times-reload][F02831]") {
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 5;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 2;
-  Menu_Score_clearCount = 3;
+  Battle_unusedMenu9CursorMemory.record_time_page = 5;
+  Battle_unusedMenu9CursorMemory.record_time_row = 2;
+  score::clearCount = 3;
   const auto before = fixture.Observe();
   {
     menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
@@ -187,9 +187,9 @@ TEST_CASE("Actual cold session resets the time cursor without replacing rows",
       saved_ui;
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor();
-  Battle_unusedMenu9CursorMemory.recordTimePage = 5;
-  Battle_unusedMenu9CursorMemory.recordTimeRow = 2;
-  Menu_Score_clearCount = 3;
+  Battle_unusedMenu9CursorMemory.record_time_page = 5;
+  Battle_unusedMenu9CursorMemory.record_time_row = 2;
+  score::clearCount = 3;
   const auto before = fixture.Observe();
   void* const foreign = memory::AllocateLiveFromLowEnd(64);
   REQUIRE(foreign != nullptr);

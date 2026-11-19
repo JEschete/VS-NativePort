@@ -25,20 +25,20 @@ void CheckFastestClearFormat(std::span<char> output,
 
 void CheckCreatedRows(const live::EncodedText& minotaur) {
   for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
-    const auto& row = Menu_Score_gazetteRows[i];
+    const auto& row = score::gazetteRows[i];
     CHECK(row.x == 194);
     CHECK(row.selected == 0);
     CHECK(row.opaque1 == 1);
-    CHECK(static_cast<std::uint8_t>(row.animationState) == i + 1);
+    CHECK(static_cast<std::uint8_t>(row.animation_state) == i + 1);
     CHECK(row.disabled == (i == 0 ? 0 : 1));
-    CHECK(row.rowIndex == static_cast<std::int16_t>(20 + i));
+    CHECK(row.row_index == static_cast<std::int16_t>(20 + i));
     CHECK(live::BorrowedText(row.title) ==
           (i == 0 ? minotaur
-                  : live::Label(Menu_Score_miscInfo,
+                  : live::Label(score::miscInfo,
                                 Text_Menu9_miscInfo_Index_noneBossRush)));
     CHECK(live::BorrowedText(row.description) ==
-          (i == 0 ? live::Label(Menu_Score_timeAttackDescriptions, 0)
-                  : live::Label(Menu_Score_miscInfo,
+          (i == 0 ? live::Label(score::timeAttackDescriptions, 0)
+                  : live::Label(score::miscInfo,
                                 Text_Menu9_miscInfo_Index_noneBossRushDesc)));
   }
 }
@@ -49,7 +49,7 @@ void CheckLeavingRows(
   CHECK(live::Fixture::Row(0).target0 == 320);
   CHECK(live::Fixture::Row(0).text == previous_text);
   for (std::size_t i = 1; i < score::kTimeTrialCount; ++i) {
-    CHECK(static_cast<std::uint8_t>(Menu_Score_gazetteRows[i].animationState) ==
+    CHECK(static_cast<std::uint8_t>(score::gazetteRows[i].animation_state) ==
           255);
     CHECK(live::Fixture::Row(i).state == fw::RowState::kInactive);
   }
@@ -64,7 +64,7 @@ void CheckRenderedRows(const live::ObservableState& state) {
     CHECK(row.delay == 0);
     CHECK(row.selected == (i == 2 ? 1 : 0));
     CHECK(row.disabled == (i == 2 ? 0 : 1));
-    auto expected = live::BorrowedText(Menu_Score_gazetteRows[i].title);
+    auto expected = live::BorrowedText(score::gazetteRows[i].title);
     expected.back() = 0xFF;
     CHECK(std::ranges::equal(std::span(row.text).first(expected.size()),
                              expected));
@@ -126,13 +126,13 @@ TEST_CASE(
   std::array<char, score::kFastestClearTimeBytes + 2> storage{};
   storage.fill('Q');
   const auto output = std::span(storage).subspan(1, storage.size() - 2);
-  Menu_Score_clearCount = 0;
+  score::clearCount = 0;
   const auto missing =
-      live::Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear);
+      live::Label(score::miscInfo, Text_Menu9_miscInfo_Index_noneClear);
   REQUIRE(missing ==
           live::EncodedText{0x8F, 0x8F, 0x17, 0x18, 0x17, 0x0E, 0xE7});
   CheckFastestClearFormat(output, missing);
-  Menu_Score_clearCount = 1;
+  score::clearCount = 1;
   const live::EncodedText completed{0x1B, 1, 2,    8, 0xFA, 12,
                                     9,    9, 0x9E, 5, 9,    0xE7};
   CheckFastestClearFormat(output, completed);
@@ -148,16 +148,16 @@ TEST_CASE("F02829 live create selects genuine MENU9 labels from first place",
   const auto refusals = score::LiveTimeTrialRefusals();
   live::Fixture::SetScore(0, 0, 0x010203, 127, true);
   live::Fixture::SetScore(1, 1, 0x000102);
-  Menu_Score_gazetteRows[8].x = -123;
+  score::gazetteRows[8].x = -123;
   for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
-    Menu_Score_gazetteRows[i].rowIndex = static_cast<std::int16_t>(20 + i);
+    score::gazetteRows[i].row_index = static_cast<std::int16_t>(20 + i);
   }
   score::CreateLiveTimeTrialRows();
-  const auto minotaur = live::Label(Menu_Score_timeAttacks, 0);
+  const auto minotaur = live::Label(score::timeAttacks, 0);
   REQUIRE(minotaur == live::EncodedText{0x16, 0x2C, 0x31, 0x32, 0x37, 0x24,
                                         0x38, 0x35, 0xE7});
   CheckCreatedRows(minotaur);
-  CHECK(Menu_Score_gazetteRows[8].x == -123);
+  CHECK(score::gazetteRows[8].x == -123);
   CHECK(score::LiveTimeTrialRefusals() == refusals);
 }
 
@@ -176,7 +176,7 @@ TEST_CASE("F02830 live leave moves a real row and cancels pending entrances",
   CheckLeavingRows(text);
   fixture.ResetFrame();
   score::RenderLiveTimeTrialRecords(0);
-  CHECK(static_cast<std::uint8_t>(Menu_Score_gazetteRows[1].animationState) ==
+  CHECK(static_cast<std::uint8_t>(score::gazetteRows[1].animation_state) ==
         254);
   for (int tick = 0; tick < 16; ++tick) {
     fixture.ResetFrame();
@@ -195,14 +195,14 @@ TEST_CASE(
   const auto refusals = score::LiveTimeTrialRefusals();
   live::Fixture::SetScore(2, 0, 0xFFFFFF, 127, true);
   live::Fixture::SetScore(2, 1, 0x000102, 0);
-  Battle_unusedMenu9CursorMemory.gazettePage = 2;
+  Battle_unusedMenu9CursorMemory.gazette_page = 2;
   score::CreateLiveTimeTrialRows();
   fixture.SettleEntrance();
   fixture.ResetFrame();
   score::RenderLiveTimeTrialRecords(8);
   const auto state = fixture.Observe();
   CheckRenderedRows(state);
-  CHECK(state.information == live::Label(Menu_Score_timeAttackDescriptions, 2));
+  CHECK(state.information == live::Label(score::timeAttackDescriptions, 2));
   CHECK(Menu_textBoxes[live::kInformationBox].flags.speakerTexture == 32);
   CHECK(Menu_textBoxes[live::kInformationBox].speed != 0);
   CheckRecordGlyphs(fixture);

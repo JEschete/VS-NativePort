@@ -24,7 +24,7 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Menu/TextBox.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -59,9 +59,9 @@ std::span<std::byte> BytesOf(T& value) {
 }
 
 inline auto TableOwners() {
-  return std::array{BytesOf(Menu_Score_timeAttacks),
-                    BytesOf(Menu_Score_timeAttackDescriptions),
-                    BytesOf(Menu_Score_miscInfo),
+  return std::array{BytesOf(score::timeAttacks),
+                    BytesOf(score::timeAttackDescriptions),
+                    BytesOf(score::miscInfo),
                     BytesOf(VS::Render::compactGlyphLeftTrim),
                     BytesOf(VS::Render::compactGlyphWidths),
                     BytesOf(VS::Render::compactGlyphIndices),
@@ -73,8 +73,8 @@ inline auto TableOwners() {
 }
 
 inline auto MutableOwners() {
-  return std::array{BytesOf(Menu_Score_gazetteRows),
-                    BytesOf(Menu_Score_clearCount),
+  return std::array{BytesOf(score::gazetteRows),
+                    BytesOf(score::clearCount),
                     BytesOf(VS::State::scoreData),
                     BytesOf(Battle_unusedMenu9CursorMemory),
                     BytesOf(VS::Menu::Framework::menuItems),
@@ -178,7 +178,7 @@ EncodedText Label(const u_short (&table)[Count], std::size_t index) {
       std::span(bytes, sizeof table).subspan(table[index] * sizeof(u_short)));
 }
 
-inline EncodedText BorrowedText(const char* text) {
+inline EncodedText BorrowedText(const std::uint8_t* text) {
   const auto address = reinterpret_cast<std::uintptr_t>(text);
   const auto tables = TableOwners();
   constexpr std::size_t kGazetteTables = 3;
@@ -273,8 +273,8 @@ class Fixture {
     VS::Menu::Framework::cursorColor = 0;
     VS::Menu::Framework::hideMenu = 0;
     Menu_textBoxes[kInformationBox] = {};
-    Battle_unusedMenu9CursorMemory.gazettePage = 0;
-    std::ranges::fill(Menu_Score_gazetteRows, Menu_Score_Row{});
+    Battle_unusedMenu9CursorMemory.gazette_page = 0;
+    std::ranges::fill(score::gazetteRows, score::ListRow{});
     for (auto& trial : VS::State::scoreData.boss_time_trial_scores) {
       for (auto& record : trial) {
         record = {};
@@ -332,7 +332,7 @@ class Fixture {
       fw::UpdateAndDrawLiveRows();
       bool idle = true;
       for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
-        idle = idle && Menu_Score_gazetteRows[i].animationState == 0 &&
+        idle = idle && score::gazetteRows[i].animation_state == 0 &&
                Row(i).state == fw::RowState::kIdle && Row(i).x == 194;
       }
       if (idle) return;
@@ -453,7 +453,7 @@ class Fixture {
           row.target0,
           row.selected,
           row.unselectable,
-          static_cast<std::uint8_t>(Menu_Score_gazetteRows[i].animationState),
+          static_cast<std::uint8_t>(score::gazetteRows[i].animation_state),
           row.text};
     }
     return state;

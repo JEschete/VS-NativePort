@@ -28,7 +28,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 
 namespace VS::Menu::Score {
@@ -103,10 +103,9 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   [[nodiscard]] EnemyPreviewFile File(int zud_id) const override {
     if (zud_id < 0 || zud_id >= kEnemyPreviewFiles) return {};
     const auto index = static_cast<std::size_t>(zud_id);
-    return {.sector = Menu_Score_zudLbas[index],
-            .bytes = Menu_Score_zudSizes[index],
-            .palette_flag =
-                static_cast<std::uint8_t>(Menu_Score_paletteFlags[index])};
+    return {.sector = zudLbas[index],
+            .bytes = zudSizes[index],
+            .palette_flag = static_cast<std::uint8_t>(paletteFlags[index])};
   }
 
   [[nodiscard]] AssetAddress AllocateRead(

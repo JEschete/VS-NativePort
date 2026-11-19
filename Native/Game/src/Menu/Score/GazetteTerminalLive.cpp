@@ -29,7 +29,7 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
@@ -38,9 +38,9 @@
 #include "Menu/Score/GazetteTerminal.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
@@ -131,8 +131,8 @@ GazetteText Label(const u_short (&table)[Size], std::size_t index) {
 }
 
 std::span<std::byte> EnemyBytes() {
-  const auto capacity = memory::LivePayloadCapacity(Menu_Score_monBinData);
-  const auto file_size = Menu_Score_kMonBinFile.size;
+  const auto capacity = memory::LivePayloadCapacity(monBinData);
+  const auto file_size = kMonBinFile.size;
   if (!capacity.has_value() || file_size <= 0 ||
       *capacity < static_cast<std::size_t>(file_size) ||
       static_cast<std::size_t>(file_size) <
@@ -141,14 +141,14 @@ std::span<std::byte> EnemyBytes() {
   }
   // Imported file bytes, never the native pointer-bearing row layout.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return {reinterpret_cast<std::byte*>(Menu_Score_monBinData),
+  return {reinterpret_cast<std::byte*>(monBinData),
           static_cast<std::size_t>(file_size)};
 }
 
 std::span<const std::byte> Descriptions(std::span<const std::byte> bytes) {
   if (bytes.size() <= kDescriptionOffset) return {};
   const auto table = bytes.subspan(kDescriptionOffset);
-  if (static_cast<const void*>(Menu_Score_enemyDescriptions) !=
+  if (static_cast<const void*>(enemyDescriptions) !=
       static_cast<const void*>(table.data())) {
     return {};
   }
@@ -334,87 +334,83 @@ class LiveEnemyViewerHost final : public EnemyViewerHost {
 };
 
 GazetteState ReadState() {
-  return {
-      .phase = static_cast<GazettePhase>(Menu_Score_menuState),
-      .next_result = Menu_Score_nextState,
-      .animation_step = menu_animation,
-      .camera = {Menu_Score_cameraAngles.vx, Menu_Score_cameraAngles.vy,
-                 Menu_Score_cameraAngles.vz, Menu_Score_cameraDistance,
-                 Menu_Score_cameraHeightOffset},
-      .initial_camera_distance = Menu_Score_initCameraDistance,
-      .selected_enemy = Menu_Score_selectedEnemy,
-      .enemy_skip_delay = Menu_Score_enemySkipDelay,
-      .navigation_step = Menu_Score_enemyNavigationState,
-      .enemy_button_or_slide = Menu_Score_buttonHeld,
-      .hide_ui = Menu_Score_hideUi,
-      .rotation_color = static_cast<std::uint32_t>(Menu_Score_rotationColor),
-      .zoom_color = static_cast<std::uint32_t>(Menu_Score_zoomColor)};
+  return {.phase = static_cast<GazettePhase>(menuState),
+          .next_result = nextState,
+          .animation_step = menu_animation,
+          .camera = {cameraAngles.vx, cameraAngles.vy, cameraAngles.vz,
+                     cameraDistance, cameraHeightOffset},
+          .initial_camera_distance = initCameraDistance,
+          .selected_enemy = selectedEnemy,
+          .enemy_skip_delay = enemySkipDelay,
+          .navigation_step = enemyNavigationState,
+          .enemy_button_or_slide = buttonHeld,
+          .hide_ui = hideUi,
+          .rotation_color = static_cast<std::uint32_t>(rotationColor),
+          .zoom_color = static_cast<std::uint32_t>(zoomColor)};
 }
 
 void WriteState(const GazetteState& state) {
-  Menu_Score_menuState = static_cast<int>(state.phase);
-  Menu_Score_nextState = state.next_result;
+  menuState = static_cast<int>(state.phase);
+  nextState = state.next_result;
   menu_animation = state.animation_step;
-  Menu_Score_cameraAngles.vx = state.camera.pitch;
-  Menu_Score_cameraAngles.vy = state.camera.yaw;
-  Menu_Score_cameraAngles.vz = state.camera.roll;
-  Menu_Score_cameraDistance = state.camera.distance;
-  Menu_Score_cameraHeightOffset = state.camera.height_offset;
-  Menu_Score_initCameraDistance = state.initial_camera_distance;
-  Menu_Score_selectedEnemy = state.selected_enemy;
-  Menu_Score_enemySkipDelay = state.enemy_skip_delay;
-  Menu_Score_enemyNavigationState = state.navigation_step;
-  Menu_Score_buttonHeld = state.enemy_button_or_slide;
-  Menu_Score_hideUi = state.hide_ui;
-  Menu_Score_rotationColor = std::bit_cast<std::int32_t>(state.rotation_color);
-  Menu_Score_zoomColor = std::bit_cast<std::int32_t>(state.zoom_color);
+  cameraAngles.vx = state.camera.pitch;
+  cameraAngles.vy = state.camera.yaw;
+  cameraAngles.vz = state.camera.roll;
+  cameraDistance = state.camera.distance;
+  cameraHeightOffset = state.camera.height_offset;
+  initCameraDistance = state.initial_camera_distance;
+  selectedEnemy = state.selected_enemy;
+  enemySkipDelay = state.enemy_skip_delay;
+  enemyNavigationState = state.navigation_step;
+  buttonHeld = state.enemy_button_or_slide;
+  hideUi = state.hide_ui;
+  rotationColor = std::bit_cast<std::int32_t>(state.rotation_color);
+  zoomColor = std::bit_cast<std::int32_t>(state.zoom_color);
 }
 
 GazetteCursorMemory ReadCursor() {
   const auto& cursor = Battle_unusedMenu9CursorMemory;
-  return {{cursor.titlePage, cursor.titleRow},
-          {cursor.encyclopaediaPage, cursor.encyclopaediaRow},
-          {cursor.recordTimePage, cursor.recordTimeRow},
-          cursor.gazettePage,
-          cursor.gazetteRow};
+  return {{cursor.title_page, cursor.title_row},
+          {cursor.encyclopaedia_page, cursor.encyclopaedia_row},
+          {cursor.record_time_page, cursor.record_time_row},
+          cursor.gazette_page,
+          cursor.gazette_row};
 }
 
 void WriteCursor(const GazetteCursorMemory& cursor) {
   auto& memory = Battle_unusedMenu9CursorMemory;
-  memory.titlePage = cursor.titles.first_row;
-  memory.titleRow = cursor.titles.selected_row;
-  memory.encyclopaediaPage = cursor.enemies.first_row;
-  memory.encyclopaediaRow = cursor.enemies.selected_row;
-  memory.recordTimePage = cursor.statistics.first_row;
-  memory.recordTimeRow = cursor.statistics.selected_row;
-  memory.gazettePage = cursor.time_trial;
-  memory.gazetteRow = cursor.overview_row;
+  memory.title_page = cursor.titles.first_row;
+  memory.title_row = cursor.titles.selected_row;
+  memory.encyclopaedia_page = cursor.enemies.first_row;
+  memory.encyclopaedia_row = cursor.enemies.selected_row;
+  memory.record_time_page = cursor.statistics.first_row;
+  memory.record_time_row = cursor.statistics.selected_row;
+  memory.gazette_page = cursor.time_trial;
+  memory.gazette_row = cursor.overview_row;
 }
 
 bool BeginRead() {
   if (enemy_data.data != nullptr || enemy_data.request != nullptr ||
-      Menu_Score_monBinData != nullptr ||
-      Menu_Score_monBinCdQueueSlot != nullptr) {
+      monBinData != nullptr || monBinCdQueueSlot != nullptr) {
     Refuse("a prior enemy-list owner is still active");
     return false;
   }
-  if (Menu_Score_kMonBinFile.size <= 0) return false;
-  const auto size = static_cast<std::size_t>(Menu_Score_kMonBinFile.size);
+  if (kMonBinFile.size <= 0) return false;
+  const auto size = static_cast<std::size_t>(kMonBinFile.size);
   auto* data = static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(size));
   if (data == nullptr) return false;
   enemy_data.data = data;
   enemy_data.bytes = size;
   // This exported pointer remains a compatibility borrow, not the owner.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  Menu_Score_monBinData = reinterpret_cast<Menu_Score_EnemyEntry*>(data);
-  auto* request = Content::AllocateLiveDiscRequest(&Menu_Score_kMonBinFile);
+  monBinData = reinterpret_cast<EnemyEntry*>(data);
+  auto* request = Content::AllocateLiveDiscRequest(&kMonBinFile);
   if (request != nullptr) {
-    Menu_Score_monBinCdQueueSlot = request;
+    monBinCdQueueSlot = request;
     Content::EnqueueLiveDiscRequest(request, data);
   } else {
-    request =
-        Content::CompleteLiveRefusedDiscRequest(&Menu_Score_kMonBinFile, data);
-    Menu_Score_monBinCdQueueSlot = request;
+    request = Content::CompleteLiveRefusedDiscRequest(&kMonBinFile, data);
+    monBinCdQueueSlot = request;
   }
   enemy_data.request = request;
   enemy_data.generation = Content::LiveDiscRequestGeneration(request);
@@ -431,9 +427,8 @@ GazetteReadStatus ReadStatus() {
   if (enemy_data.request == nullptr || enemy_data.generation == 0 ||
       Content::LiveDiscRequestGeneration(enemy_data.request) !=
           enemy_data.generation ||
-      enemy_data.request != Menu_Score_monBinCdQueueSlot ||
-      static_cast<void*>(enemy_data.data) !=
-          static_cast<void*>(Menu_Score_monBinData) ||
+      enemy_data.request != monBinCdQueueSlot ||
+      static_cast<void*>(enemy_data.data) != static_cast<void*>(monBinData) ||
       EnemyBytes().empty()) {
     return GazetteReadStatus::kRefused;
   }
@@ -454,9 +449,9 @@ bool FinishRead() {
   Content::ReleaseLiveDiscRequest(enemy_data.request);
   enemy_data.request = nullptr;
   enemy_data.generation = 0;
-  Menu_Score_monBinCdQueueSlot = nullptr;
+  monBinCdQueueSlot = nullptr;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  Menu_Score_enemyDescriptions =
+  enemyDescriptions =
       reinterpret_cast<u_short*>(enemy_data.data + kDescriptionOffset);
   return true;
 }
@@ -490,8 +485,8 @@ class LiveGazetteHost final : public GazetteHost {
         std::bit_cast<std::int16_t>(actor->collisionHeight)};
   }
   GazetteText RankText() override {
-    if (Menu_Score_characterRank >= kRiskbreakerRankCount) return {};
-    return Label(Menu_Score_rankText, Menu_Score_characterRank);
+    if (characterRank >= kRiskbreakerRankCount) return {};
+    return Label(rankText, characterRank);
   }
   void InitializeRankBox(const GazetteRankBox& placement) override {
     Publish();
@@ -591,8 +586,8 @@ class LiveGazetteHost final : public GazetteHost {
   }
   std::span<const std::uint8_t> TimeTrialDelays() override {
     for (std::size_t index = 0; index < delays_.size(); ++index) {
-      delays_[index] = static_cast<std::uint8_t>(
-          Menu_Score_gazetteRows[index].animationState);
+      delays_[index] =
+          static_cast<std::uint8_t>(gazetteRows[index].animation_state);
     }
     return delays_;
   }
@@ -632,7 +627,7 @@ class LiveGazetteHost final : public GazetteHost {
   }
   void ShowEnemyDescription(std::int32_t selected) override {
     Publish();
-    if (selected != Menu_Score_selectedEnemy) {
+    if (selected != selectedEnemy) {
       Refuse("enemy description selection was not published");
       return;
     }
@@ -744,9 +739,8 @@ void ShowLiveEnemyDescription() {
     return;
   }
   static_cast<void>(ShowEnemyDescription(
-      enemies, Menu_Score_selectedEnemy,
-      Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_enemyNotDefeated),
-      host));
+      enemies, selectedEnemy,
+      Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNotDefeated), host));
 }
 
 // decomp: _renderEnemyNo (src/MENU/MENU9.PRG/238.c:1878).
@@ -784,10 +778,8 @@ void RenderLiveEnemyList(int step) {
   LiveEnemyListHost host;
   if (RenderEnemyList(
           enemies, ReadCursor().enemies, step, enemy_animation,
-          Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_enemyNameNone),
-          Label(Menu_Score_miscInfo,
-                Text_Menu9_miscInfo_Index_enemyNotDefeated),
-          host)) {
+          Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNameNone),
+          Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNotDefeated), host)) {
     StoreEnemies(enemies, false);
   }
 }
@@ -795,24 +787,24 @@ void RenderLiveEnemyList(int step) {
 // decomp: _renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2069).
 void RenderLiveEnemyViewer(int step, int transition) {
   EnemyRows enemies;
-  if (Menu_Score_hideUi == 0 && !ReadEnemies(enemies)) {
+  if (hideUi == 0 && !ReadEnemies(enemies)) {
     Refuse("viewer UI without a bounded MON.BIN payload");
     return;
   }
   LiveEnemyViewerHost host;
-  static_cast<void>(RenderEnemyViewer(
-      enemies,
-      {Menu_Score_selectedEnemy, step, transition, Menu_Score_hideUi != 0,
-       static_cast<std::uint32_t>(Menu_Score_rotationColor),
-       static_cast<std::uint32_t>(Menu_Score_zoomColor)},
-      host));
+  static_cast<void>(
+      RenderEnemyViewer(enemies,
+                        {selectedEnemy, step, transition, hideUi != 0,
+                         static_cast<std::uint32_t>(rotationColor),
+                         static_cast<std::uint32_t>(zoomColor)},
+                        host));
 }
 
 // decomp: _renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2782).
 void DrawLiveEnemyNavigation(int direction) {
   LiveEnemyNavigationHost host;
-  if (!DrawEnemyNavigation(direction, Menu_Score_enemyNavigationState,
-                           Menu_Score_hideUi != 0, host)) {
+  if (!DrawEnemyNavigation(direction, enemyNavigationState, hideUi != 0,
+                           host)) {
     Refuse("enemy navigation direction or primitive/ordering capacity");
   }
 }
@@ -852,8 +844,8 @@ int UpdateLiveGazetteScreen(std::uint8_t* phase) {
 
 bool ReleaseLiveGazetteEnemyData() {
   if (enemy_data.data == nullptr &&
-      (enemy_data.request != nullptr || Menu_Score_monBinData != nullptr ||
-       Menu_Score_monBinCdQueueSlot != nullptr)) {
+      (enemy_data.request != nullptr || monBinData != nullptr ||
+       monBinCdQueueSlot != nullptr)) {
     Refuse("enemy-list aliases have no terminal storage owner");
     return false;
   }
@@ -874,16 +866,16 @@ bool ReleaseLiveGazetteEnemyData() {
     memory::FreeLiveFromHighEnd(enemy_data.data);
   }
   enemy_data = {};
-  Menu_Score_monBinData = nullptr;
-  Menu_Score_monBinCdQueueSlot = nullptr;
-  Menu_Score_enemyDescriptions = nullptr;
+  monBinData = nullptr;
+  monBinCdQueueSlot = nullptr;
+  enemyDescriptions = nullptr;
   return true;
 }
 
 bool ResetLiveGazetteTerminalModuleState() {
   if (!ReleaseLiveGazetteEnemyData()) return false;
   WriteState({});
-  Menu_Score_cameraAngles.pad = 0;
+  cameraAngles.pad = 0;
   screen_state = {};
   enemy_animation = {};
   return true;

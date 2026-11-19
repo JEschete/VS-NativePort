@@ -13,7 +13,7 @@ struct MenuRow;
 // (VS::Menu::Framework::menuMemory), the cursor memory setting
 // (VS::Input::settings), the gazette's remembered row
 // (Battle_unusedMenu9CursorMemory) and the top menu strings
-// (Menu_Score_menuText), in the shapes the copied score screen calls. The arrow
+// (Score::menuText), in the shapes the copied score screen calls. The arrow
 // animation and the top menu's step live here instead of 238.c's statics. A
 // null row, text or ordering table, a row count outside 0-256, a full primitive
 // buffer and row text without an end are refused and reported on the

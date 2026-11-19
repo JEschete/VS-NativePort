@@ -15,9 +15,9 @@
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreRank.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/Render.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
@@ -57,8 +57,8 @@ bool IsSet(std::uint8_t flag) { return flag != 0; }
 class LiveProgressHost final : public ProgressHost {
  public:
   void ResetScreen() override {
-    Menu_Score_menuState = 0;
-    Menu_Score_hideUi = 0;
+    menuState = 0;
+    hideUi = 0;
   }
   void ClearCursorMemory() override {
     Core::Memory::ZeroLiveAlignedWords(
@@ -67,12 +67,12 @@ class LiveProgressHost final : public ProgressHost {
   }
   void BackupCamera() override {
     auto* scratch = static_cast<VS::Render::FrameScratch*>(Core::ScratchBase());
-    Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraPositionBackup,
+    Core::Memory::CopyLiveAlignedWords(&cameraPositionBackup,
                                        &scratch->camera.position,
-                                       sizeof Menu_Score_cameraPositionBackup);
-    Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraAnglesBackup,
+                                       sizeof cameraPositionBackup);
+    Core::Memory::CopyLiveAlignedWords(&cameraAnglesBackup,
                                        &scratch->camera.angles.vx,
-                                       sizeof Menu_Score_cameraAnglesBackup);
+                                       sizeof cameraAnglesBackup);
   }
 };
 
@@ -139,24 +139,23 @@ TitleConditions ReadLiveTitleConditions() {
 
 // decomp: MENU9.PRG _setTitleFlags (src/MENU/MENU9.PRG/238.c:2662).
 void AwardLiveTitles() {
-  const std::uint32_t titles = AwardTitles(
-      ReadLiveScoreRecord(), Menu_Score_clearCount, ReadLiveTitleConditions());
+  const std::uint32_t titles =
+      AwardTitles(ReadLiveScoreRecord(), clearCount, ReadLiveTitleConditions());
   VS::State::scoreData.titles = static_cast<int>(titles);
 }
 
 // decomp: MENU9.PRG _calculateScore (src/MENU/MENU9.PRG/238.c:2842).
 void CalculateLiveScore() {
-  Menu_Score_score =
-      CalculateScore(ReadLiveScoreRecord(), Menu_Score_clearCount);
+  VS::Menu::Score::score = CalculateScore(ReadLiveScoreRecord(), clearCount);
 }
 
 // decomp: MENU9.PRG _determineCharacterRank (src/MENU/MENU9.PRG/238.c:2633).
 void DetermineLiveRiskbreakerRank() {
   const auto rank = DetermineRiskbreakerRank(
       static_cast<std::uint32_t>(VS::State::scoreData.titles),
-      static_cast<std::uint32_t>(Menu_Score_score));
+      VS::Menu::Score::score);
   if (rank.has_value()) {
-    Menu_Score_characterRank = *rank;
+    characterRank = *rank;
   }
 }
 
@@ -168,15 +167,15 @@ int CalculateLiveProgress() {
 
   VS::State::roomVisitProgress.room_flags[1] =
       static_cast<int>(world.room_flags[1]);
-  Menu_Score_mapCompletion = progress.map_completion;
-  Menu_Score_openedChestCount = progress.opened_chest_count;
-  Menu_Score_clearCount = progress.clear_count;
+  mapCompletion = progress.map_completion;
+  openedChestCount = progress.opened_chest_count;
+  clearCount = progress.clear_count;
   VS::State::scoreData.map_completion = world.record.map_completion;
   VS::State::scoreData.opened_chest_count = world.record.opened_chest_count;
   VS::State::scoreData.titles = static_cast<int>(world.record.titles);
-  Menu_Score_score = progress.score;
+  VS::Menu::Score::score = progress.score;
   if (progress.rank.has_value()) {
-    Menu_Score_characterRank = *progress.rank;
+    characterRank = *progress.rank;
   }
   return 1;
 }

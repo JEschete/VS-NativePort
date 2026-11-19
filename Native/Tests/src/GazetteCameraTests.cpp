@@ -24,8 +24,8 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
-#include "Menu/Score/Records.h"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/Records.hpp"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -504,12 +504,12 @@ struct LiveFrameFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  SVECTOR saved_angles = Menu_Score_cameraAngles;
-  int saved_distance = Menu_Score_cameraDistance;
-  std::int16_t saved_height = Menu_Score_cameraHeightOffset;
-  VECTOR saved_position_backup = Menu_Score_cameraPositionBackup;
-  VECTOR saved_angles_backup = Menu_Score_cameraAnglesBackup;
-  u_long saved_score = Menu_Score_score;
+  SVECTOR saved_angles = score::cameraAngles;
+  int saved_distance = score::cameraDistance;
+  std::int16_t saved_height = score::cameraHeightOffset;
+  VECTOR saved_position_backup = score::cameraPositionBackup;
+  VECTOR saved_angles_backup = score::cameraAnglesBackup;
+  std::uint32_t saved_score = score::score;
   VS::Render::ScreenOffset saved_offset =
       VS::Render::GetLiveProjectionScreenOffset();
   Actors_ActorRecord* saved_preview =
@@ -543,12 +543,12 @@ struct LiveFrameFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_table;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Score_cameraAngles = saved_angles;
-    Menu_Score_cameraDistance = saved_distance;
-    Menu_Score_cameraHeightOffset = saved_height;
-    Menu_Score_cameraPositionBackup = saved_position_backup;
-    Menu_Score_cameraAnglesBackup = saved_angles_backup;
-    Menu_Score_score = saved_score;
+    score::cameraAngles = saved_angles;
+    score::cameraDistance = saved_distance;
+    score::cameraHeightOffset = saved_height;
+    score::cameraPositionBackup = saved_position_backup;
+    score::cameraAnglesBackup = saved_angles_backup;
+    score::score = saved_score;
     VS::Render::SetLiveProjectionScreenOffset(saved_offset);
     Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot] = saved_preview;
   }
@@ -744,9 +744,9 @@ TEST_CASE("Live panels refuse a call the primitive buffer cannot hold",
 
 void SetCameraSettings(std::int16_t pitch, std::int16_t yaw, int distance,
                        std::int16_t height) {
-  Menu_Score_cameraAngles = SVECTOR{pitch, yaw, 33, 0};
-  Menu_Score_cameraDistance = distance;
-  Menu_Score_cameraHeightOffset = height;
+  score::cameraAngles = SVECTOR{pitch, yaw, 33, 0};
+  score::cameraDistance = distance;
+  score::cameraHeightOffset = height;
 }
 
 TEST_CASE("BuildLiveViewerCamera matches the copied body",
@@ -778,8 +778,8 @@ TEST_CASE("BuildLiveViewerCamera refuses a null matrix before any write",
 TEST_CASE("RestoreLiveCamera matches the copied body on every entry",
           "[gazette-camera-live]") {
   LiveFrameFixture fixture;
-  Menu_Score_cameraPositionBackup = VECTOR{-0x100000, 0x2000, 0x7000, 0x55};
-  Menu_Score_cameraAnglesBackup = VECTOR{-12, 3000, 4, 0x66};
+  score::cameraPositionBackup = VECTOR{-0x100000, 0x2000, 0x7000, 0x55};
+  score::cameraAnglesBackup = VECTOR{-12, 3000, 4, 0x66};
   const auto restore_twice = [](auto restore) {
     return [restore] {
       restore();
@@ -793,7 +793,7 @@ TEST_CASE("RestoreLiveCamera matches the copied body on every entry",
   CHECK(fixture.Capture().camera ==
         std::array<std::int64_t, 8>{-0x100000, 0x2000, 0x7000, 0x55, -12, 3000,
                                     4, 0x66});
-  CHECK(Menu_Score_cameraPositionBackup.vx == -0x100000);
+  CHECK(score::cameraPositionBackup.vx == -0x100000);
 }
 
 TEST_CASE("RenderLiveOverview matches the copied body and restores the offset",
@@ -804,7 +804,7 @@ TEST_CASE("RenderLiveOverview matches the copied body and restores the offset",
                                        std::pair{8, 0x3202E8A764875E52ULL},
                                        std::pair{12, 0xCC61E3F789251562ULL});
   SetCameraSettings(-300, 900, 0xA00, 0x40);
-  Menu_Score_score = 0xFFFFFF00;
+  score::score = 0xFFFFFF00;
   const VS::Render::ScreenOffset offset{.x = 160, .y = 112};
   fixture.CheckFrame(copied, [&offset, step] {
     VS::Render::SetLiveProjectionScreenOffset(offset);

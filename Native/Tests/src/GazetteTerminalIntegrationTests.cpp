@@ -44,10 +44,10 @@ struct MonOwner {
   std::uint64_t generation;
 
   void CheckReleased() const {
-    CHECK(Menu_Score_monBinData == nullptr);
-    CHECK(Menu_Score_monBinCdQueueSlot == nullptr);
-    CHECK(Menu_Score_enemyDescriptions == nullptr);
-    CHECK(Menu_Score_menuState == 0);
+    CHECK(score::monBinData == nullptr);
+    CHECK(score::monBinCdQueueSlot == nullptr);
+    CHECK(score::enemyDescriptions == nullptr);
+    CHECK(score::menuState == 0);
     CHECK_FALSE(memory::LivePayloadCapacity(buffer).has_value());
     CHECK(content::LiveDiscRequestGeneration(request) != generation);
   }
@@ -60,8 +60,8 @@ MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
   fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kWaitForEnemies),
                     false);
   const MonOwner owner{
-      Menu_Score_monBinData, Menu_Score_monBinCdQueueSlot,
-      content::LiveDiscRequestGeneration(Menu_Score_monBinCdQueueSlot)};
+      score::monBinData, score::monBinCdQueueSlot,
+      content::LiveDiscRequestGeneration(score::monBinCdQueueSlot)};
   REQUIRE(owner.buffer != nullptr);
   REQUIRE(owner.request != nullptr);
   REQUIRE(owner.generation != 0);
@@ -69,8 +69,8 @@ MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
     fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kEnemies));
   } else {
     REQUIRE(content::BeginLiveDiscRead(
-        Menu_Score_kMonBinFile.lba,
-        static_cast<std::uint32_t>(Menu_Score_kMonBinFile.size), owner.buffer));
+        score::kMonBinFile.lba,
+        static_cast<std::uint32_t>(score::kMonBinFile.size), owner.buffer));
     REQUIRE(Content_discDriveState.destination == owner.buffer);
   }
   return owner;
@@ -86,7 +86,7 @@ struct ForeignOwner {
   ForeignOwner() {
     const auto bytes = live::BytesOf(Battle_unusedMenu9CursorMemory);
     cursor.assign(bytes.begin(), bytes.end());
-    const Content_DiscFile file{Menu_Score_kMonBinFile.lba, 2048};
+    const Content_DiscFile file{score::kMonBinFile.lba, 2048};
     request = content::AllocateLiveDiscRequest(&file);
     generation = content::LiveDiscRequestGeneration(request);
     if (allocation == nullptr || request == nullptr || generation == 0) {
@@ -123,7 +123,7 @@ TEST_CASE("Gazette enemy module entries use real links descriptions and digits",
   std::ranges::fill(VS::State::scoreData.enemy_kill_flags, -1);
   ModuleEntry(0x80105D8C, &score::InitializeLiveEnemyList)();
   fw::InitializeLiveInformationBox();
-  Menu_Score_selectedEnemy = 0;
+  score::selectedEnemy = 0;
   ModuleEntry(0x80104B40, &score::ShowLiveEnemyDescription)();
   CHECK(fixture.InformationText() == live::Fixture::Description(0));
   fixture.ResetFrame();
@@ -159,9 +159,9 @@ TEST_CASE("Gazette terminal module entries initialize real preview and screen",
   live::PreviewFixture fixture;
   fixture.LoadSourceActor();
   CHECK(ModuleEntry(0x8010337C, &score::UpdateLiveGazette)() == 0);
-  CHECK(Menu_Score_menuState == 1);
+  CHECK(score::menuState == 1);
   CHECK(ModuleEntry(0x8010337C, &score::UpdateLiveGazette)() == 0);
-  CHECK(Menu_Score_menuState == 2);
+  CHECK(score::menuState == 2);
   CHECK(Actors_actorRecords[1] != nullptr);
   std::array<std::uint8_t, 2> phase{3, 0xAA};
   CHECK(ModuleEntry(0x80102FF8,
@@ -189,16 +189,16 @@ TEST_CASE(
   VS::Menu::Framework::submenuStates[kGazetteScreen] = 3;
   VS::Menu::Framework::submenuStates[kGazetteScreen - 1] =
       static_cast<char>(0xAA);
-  Menu_Score_score = 12345;
-  Menu_Score_characterRank = 0xFF;
+  score::score = 12345;
+  score::characterRank = 0xFF;
   fw::UpdateLiveMainMenu(kGazetteScreen);
   CHECK(VS::Menu::Framework::submenuStates[kGazetteScreen] == 4);
   CHECK(static_cast<unsigned char>(
             VS::Menu::Framework::submenuStates[kGazetteScreen - 1]) == 0xAA);
   CHECK(VS::Menu::Framework::backgroundFadeStep > 0);
   fw::UpdateLiveMainMenu(kGazetteScreen);
-  CHECK(Menu_Score_score == 0);
-  CHECK(Menu_Score_characterRank == 15);
+  CHECK(score::score == 0);
+  CHECK(score::characterRank == 15);
   CHECK(fixture.GuardsIntact());
 }
 
@@ -212,13 +212,13 @@ TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
   {
     menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
     REQUIRE(other.Complete() == 1);
-    CHECK(Menu_Score_monBinData == owner.buffer);
+    CHECK(score::monBinData == owner.buffer);
   }
   {
     menu_overlay_tests::Load menu(kGazetteScreen,
                                   {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
     REQUIRE(menu.Poll() == 0);
-    CHECK(Menu_Score_monBinData == owner.buffer);
+    CHECK(score::monBinData == owner.buffer);
     REQUIRE(menu.Complete() == 1);
   }
   owner.CheckReleased();

@@ -2664,10 +2664,10 @@ T00309.012,T00309,_creditsElement,12,unk28,1,int,,,,reserved28,Unused member at 
 T00309.013,T00309,_creditsElement,13,unk2C,1,int,,,,reserved2C,Unused member at byte offset 0x2C; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Ending\Credits.h:33;No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:29
 T00310.000,T00310,_gazetteRow,0,selected,0,char,,,,selected,Named in the fork; see cited use,med,source:238.c:1732
 T00310.001,T00310,_gazetteRow,1,unk1,1,char,,,unlockedHighlightEnabled,opaque1,"Used, but its meaning is not established",low,source:238.c:1737
-T00310.002,T00310,_gazetteRow,2,animationState,0,char,,,,animationState,Named in the fork; see cited use,med,source:238.c:926
+T00310.002,T00310,_gazetteRow,2,animationState,0,char,,,,animation_state,Named in the fork; see cited use,med,native:ScoreScreen.hpp ListRow::animation_state (#441);source:238.c:926
 T00310.003,T00310,_gazetteRow,3,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,source:238.c:1734
 T00310.004,T00310,_gazetteRow,4,x,0,short,,,,x,Named in the fork; see cited use,med,source:238.c:1730
-T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,rowIndex,Named in the fork; see cited use,med,source:238.c:1731
+T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,row_index,Named in the fork; see cited use,med,native:ScoreScreen.hpp ListRow::row_index (#441);source:238.c:1731
 T00310.006,T00310,_gazetteRow,6,title,0,char *,,,,title,Named in the fork; see cited use,med,source:238.c:1738
 T00310.007,T00310,_gazetteRow,7,description,0,char *,,,,description,Named in the fork; see cited use,med,source:238.c:1739
 T00311.000,T00311,_hitEntity_t,0,unk0,1,func_8008631C_t2,,,,target,"Target actor and limb with HP, MP and hit chance",high,source:146C.c:4498
@@ -2748,16 +2748,16 @@ T00318.000,T00318,_menuBgTransparencies_t,0,unk0,1,int,,,,reserved0,Not used by 
 T00318.001,T00318,_menuBgTransparencies_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:41;declaration-only;source:494.c:20
 T00318.002,T00318,_menuBgTransparencies_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:42;declaration-only;source:494.c:21
 T00318.003,T00318,_menuBgTransparencies_t,3,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:43;declaration-only;source:494.c:22
-T00319.000,T00319,_monBinData_t,0,zudId,0,short,,,,zudId,Named in the fork; see cited use,med,source:238.c:1352
-T00319.001,T00319,_monBinData_t,1,classId,0,short,,,,classId,Named in the fork; see cited use,med,source:238.c:2137
-T00319.002,T00319,_monBinData_t,2,killFlagsOffset,0,short,,,firstDefeatBit,killFlagsOffset,Named in the fork; see cited use,med,source:238.c:1926
-T00319.003,T00319,_monBinData_t,3,killFlagsCount,0,short,,,defeatBitCount,killFlagsCount,Named in the fork; see cited use,med,source:238.c:1927
+T00319.000,T00319,_monBinData_t,0,zudId,0,short,,,,zud_id,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::zud_id (#441);source:238.c:1352
+T00319.001,T00319,_monBinData_t,1,classId,0,short,,,,class_id,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::class_id (#441);source:238.c:2137
+T00319.002,T00319,_monBinData_t,2,killFlagsOffset,0,short,,,firstDefeatBit,kill_flags_offset,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::kill_flags_offset (#441);source:238.c:1926
+T00319.003,T00319,_monBinData_t,3,killFlagsCount,0,short,,,defeatBitCount,kill_flags_count,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::kill_flags_count (#441);source:238.c:1927
 T00319.004,T00319,_monBinData_t,4,selected,0,short,,,,selected,Named in the fork; see cited use,med,source:238.c:1986
-T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,animationState,Named in the fork; see cited use,med,source:238.c:1999
+T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,animation_state,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::animation_state (#441);source:238.c:1999
 T00319.006,T00319,_monBinData_t,6,unlocked,0,u_char,,,,unlocked,Named in the fork; see cited use,med,source:238.c:1416
 T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,prev,Named in the fork; see cited use,med,source:238.c:1102
 T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,next,Named in the fork; see cited use,med,source:238.c:1253
-T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reservedF,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:33;declaration-only;source:238.c:375
+T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reserved_f,Not used by native code; kept for the original layout,med,native:ScoreScreen.hpp EnemyEntry::reserved_f (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:33;declaration-only;source:238.c:375
 T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,name,Named in the fork; see cited use,med,source:238.c:2036
 T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,kind,Enemy kind,med,source:146C.c:14926;use cited by sanity pass;source:146C.h:662
 T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,index,Enemy table index,med,declaration-only;source:146C.h:663
@@ -3105,23 +3105,23 @@ T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,mpdData,Loaded room file
 T00348.024,T00348,_zoneContext_t,24,mpdEnemyCount,0,u_int,,,,mpdEnemyCount,Number of room enemy placements,med,source:146C.c:14924;use cited by sanity pass;source:146C.h:716
 T00348.025,T00348,_zoneContext_t,25,mpdEnemies,0,_mpdEnemy *,,,,mpdEnemies,Room enemy placements,med,source:146C.c:14925;use cited by sanity pass;source:146C.h:717
 T00348.026,T00348,_zoneContext_t,26,unk68,1,int,,,,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
-T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,characterId,Named in the fork; see cited use,med,source:592C.c:218
-T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,weapon,Named in the fork; see cited use,med,source:592C.c:236
-T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,opaque2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:42;source:592C.c:266
-T00349.003,T00349,_zudData_t,3,weaponMaterial,0,u_char,,,,weaponMaterial,Named in the fork; see cited use,med,source:592C.c:244
-T00349.004,T00349,_zudData_t,4,shield,0,u_char,,,,shield,Named in the fork; see cited use,med,source:592C.c:248
-T00349.005,T00349,_zudData_t,5,shieldMaterial,0,u_char,,,,shieldMaterial,Named in the fork; see cited use,med,source:592C.c:256
-T00349.006,T00349,_zudData_t,6,defaultMaterial,0,u_char,,,,defaultMaterial,Named in the fork; see cited use,med,source:592C.c:222
-T00349.007,T00349,_zudData_t,7,shpOffset,0,u_long,,,,shpOffset,Named in the fork; see cited use,med,source:592C.c:217
-T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:48;declaration-only;source:592C.c:16
-T00349.009,T00349,_zudData_t,9,weaponWepOffset,0,u_long,,,,weaponWepOffset,Named in the fork; see cited use,med,source:592C.c:239
-T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:50;declaration-only;source:592C.c:18
-T00349.011,T00349,_zudData_t,11,shieldWepOffset,0,u_long,,,,shieldWepOffset,Named in the fork; see cited use,med,source:592C.c:251
-T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:52;declaration-only;source:592C.c:20
-T00349.013,T00349,_zudData_t,13,commonSeqOffset,0,u_long,,,,commonSeqOffset,Named in the fork; see cited use,med,source:592C.c:273
-T00349.014,T00349,_zudData_t,14,commonSeqLen,0,int,,,,commonSeqLen,Named in the fork; see cited use,med,source:592C.c:270
-T00349.015,T00349,_zudData_t,15,battleSeqOffset,0,u_long,,,,battleSeqOffset,Named in the fork; see cited use,med,source:592C.c:264
-T00349.016,T00349,_zudData_t,16,battleSeqLen,0,int,,,,battleSeqLen,Named in the fork; see cited use,med,source:592C.c:261
+T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,character_id,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::character_id (#441);source:592C.c:218
+T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,weapon,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon (#441);source:592C.c:236
+T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,battle_sequence_model,Model id sent with the battle sequence's parse request,high,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence_model; 592C.c:269 slot.modelId = zudData->unk2 (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:42;source:592C.c:266
+T00349.003,T00349,_zudData_t,3,weaponMaterial,0,u_char,,,,weapon_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon_material (#441);source:592C.c:244
+T00349.004,T00349,_zudData_t,4,shield,0,u_char,,,,shield,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield (#441);source:592C.c:248
+T00349.005,T00349,_zudData_t,5,shieldMaterial,0,u_char,,,,shield_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield_material (#441);source:592C.c:256
+T00349.006,T00349,_zudData_t,6,defaultMaterial,0,u_char,,,,default_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::default_material (#441);source:592C.c:222
+T00349.007,T00349,_zudData_t,7,shpOffset,0,u_long,,,,shape.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shape.offset (#441);source:592C.c:217
+T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,shape.bytes,Byte length of the SHP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shape.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:48;declaration-only;source:592C.c:16
+T00349.009,T00349,_zudData_t,9,weaponWepOffset,0,u_long,,,,weapon_model.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon_model.offset (#441);source:592C.c:239
+T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,weapon_model.bytes,Byte length of the weapon WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::weapon_model.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:50;declaration-only;source:592C.c:18
+T00349.011,T00349,_zudData_t,11,shieldWepOffset,0,u_long,,,,shield_model.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield_model.offset (#441);source:592C.c:251
+T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,shield_model.bytes,Byte length of the shield WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shield_model.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:52;declaration-only;source:592C.c:20
+T00349.013,T00349,_zudData_t,13,commonSeqOffset,0,u_long,,,,common_sequence.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::common_sequence.offset (#441);source:592C.c:273
+T00349.014,T00349,_zudData_t,14,commonSeqLen,0,int,,,,common_sequence.bytes,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::common_sequence.bytes (#441);source:592C.c:270
+T00349.015,T00349,_zudData_t,15,battleSeqOffset,0,u_long,,,,battle_sequence.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence.offset (#441);source:592C.c:264
+T00349.016,T00349,_zudData_t,16,battleSeqLen,0,int,,,,battle_sequence.bytes,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence.bytes (#441);source:592C.c:261
 T00350.000,T00350,actionCandidateEntry,0,score,0,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:6FC00.c:494
 T00350.001,T00350,actionCandidateEntry,1,row,0,unsigned int,3,,,row,Named in the fork; see cited use,med,source:6FC00.c:526
 T00350.002,T00350,actionCandidateEntry,2,column,0,unsigned int,2,,,column,Named in the fork; see cited use,med,source:6FC00.c:526
@@ -5905,14 +5905,14 @@ T00655.002,T00655,vs_battle_manualDisplayState_t,2,scrollPositions,0,u_short[14]
 T00655.003,T00655,vs_battle_manualDisplayState_t,3,unk20,1,u_short,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Manual.h:12;declaration-only;source:146C.h:652
 T00655.004,T00655,vs_battle_manualDisplayState_t,4,unk22,1,char,,,,reserved22,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Manual.h:13;declaration-only;source:146C.h:653
 T00655.005,T00655,vs_battle_manualDisplayState_t,5,unk23,1,char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Manual.h:14;declaration-only;source:146C.h:654
-T00656.000,T00656,vs_battle_menu9CursorMemory_t,0,titlePage,0,u_char,,,,titlePage,Named in the fork; see cited use,med,source:238.c:667
-T00656.001,T00656,vs_battle_menu9CursorMemory_t,1,titleRow,0,u_char,,,,titleRow,Named in the fork; see cited use,med,source:238.c:666
-T00656.002,T00656,vs_battle_menu9CursorMemory_t,2,encyclopaediaPage,0,u_char,,,,encyclopaediaPage,Named in the fork; see cited use,med,source:238.c:958
-T00656.003,T00656,vs_battle_menu9CursorMemory_t,3,encyclopaediaRow,0,u_char,,,,encyclopaediaRow,Named in the fork; see cited use,med,source:238.c:957
-T00656.004,T00656,vs_battle_menu9CursorMemory_t,4,recordTimePage,0,u_char,,,,recordTimePage,Named in the fork; see cited use,med,source:238.c:772
-T00656.005,T00656,vs_battle_menu9CursorMemory_t,5,recordTimeRow,0,u_char,,,,recordTimeRow,Named in the fork; see cited use,med,source:238.c:771
-T00656.006,T00656,vs_battle_menu9CursorMemory_t,6,gazettePage,0,u_char,,,,gazettePage,Named in the fork; see cited use,med,source:238.c:882
-T00656.007,T00656,vs_battle_menu9CursorMemory_t,7,gazetteRow,0,u_char,,,,gazetteRow,Named in the fork; see cited use,med,source:238.c:622
+T00656.000,T00656,vs_battle_menu9CursorMemory_t,0,titlePage,0,u_char,,,,title_page,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::title_page (#441);source:238.c:667
+T00656.001,T00656,vs_battle_menu9CursorMemory_t,1,titleRow,0,u_char,,,,title_row,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::title_row (#441);source:238.c:666
+T00656.002,T00656,vs_battle_menu9CursorMemory_t,2,encyclopaediaPage,0,u_char,,,,encyclopaedia_page,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::encyclopaedia_page (#441);source:238.c:958
+T00656.003,T00656,vs_battle_menu9CursorMemory_t,3,encyclopaediaRow,0,u_char,,,,encyclopaedia_row,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::encyclopaedia_row (#441);source:238.c:957
+T00656.004,T00656,vs_battle_menu9CursorMemory_t,4,recordTimePage,0,u_char,,,,record_time_page,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::record_time_page (#441);source:238.c:772
+T00656.005,T00656,vs_battle_menu9CursorMemory_t,5,recordTimeRow,0,u_char,,,,record_time_row,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::record_time_row (#441);source:238.c:771
+T00656.006,T00656,vs_battle_menu9CursorMemory_t,6,gazettePage,0,u_char,,,,gazette_page,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::gazette_page (#441);source:238.c:882
+T00656.007,T00656,vs_battle_menu9CursorMemory_t,7,gazetteRow,0,u_char,,,,gazette_row,Named in the fork; see cited use,med,native:ScoreScreen.hpp CursorMemory::gazette_row (#441);source:238.c:622
 T00657.000,T00657,vs_battle_menuItem_t,0,state,0,u_char,,,,state,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::state is a RowState (#441);source:5BF94.c:2669
 T00657.001,T00657,vs_battle_menuItem_t,1,w,0,u_char,,,,w,Named in the fork; see cited use,med,source:5BF94.c:2670
 T00657.002,T00657,vs_battle_menuItem_t,2,backgroundWidth,0,u_char,,,,background_width,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::background_width (#441);source:5BF94.c:2671

@@ -79,14 +79,14 @@ struct Battle_StatusEffectParams {
 static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectParams must keep its PS1 layout");
 
 #include "Menu/Framework/ActorPreview.h"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 
 extern int Battle_limbStatusFlags[4];
 extern int Battle_vitalsTickCounter;
 extern int Battle_regeneratingLimb;
 extern int Battle_targetingRiskTimer;
 extern void* Battle_unusedSceneBuffer;
-extern Menu_Score_CursorMemory Battle_unusedMenu9CursorMemory;
+extern VS::Menu::Score::CursorMemory Battle_unusedMenu9CursorMemory;
 extern int Battle_unusedSubmenuState;
 extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;

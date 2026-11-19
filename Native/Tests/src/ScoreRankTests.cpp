@@ -17,10 +17,10 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
-#include "Menu/Score/Records.h"
+#include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
-#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/Render.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
@@ -107,8 +107,8 @@ class LiveGlobals {
         rooms_(VS::State::roomVisitProgress),
         settings_(VS::Input::settings),
         cursor_(Battle_unusedMenu9CursorMemory),
-        position_(Menu_Score_cameraPositionBackup),
-        angles_(Menu_Score_cameraAnglesBackup) {
+        position_(s::cameraPositionBackup),
+        angles_(s::cameraAnglesBackup) {
     std::memcpy(masks_.data(), Field_countableRoomMask,
                 sizeof Field_countableRoomMask);
     std::memcpy(actions_.data(), Battle_actionDefinitions,
@@ -136,8 +136,8 @@ class LiveGlobals {
     VS::State::roomVisitProgress = rooms_;
     VS::Input::settings = settings_;
     Battle_unusedMenu9CursorMemory = cursor_;
-    Menu_Score_cameraPositionBackup = position_;
-    Menu_Score_cameraAnglesBackup = angles_;
+    s::cameraPositionBackup = position_;
+    s::cameraAnglesBackup = angles_;
     std::memcpy(Field_countableRoomMask, masks_.data(),
                 sizeof Field_countableRoomMask);
     std::memcpy(Battle_actionDefinitions, actions_.data(),
@@ -150,7 +150,7 @@ class LiveGlobals {
   VS::State::StateFlags flags_;
   VS::State::RoomVisitFlags rooms_;
   VS::Input::Settings settings_;
-  Menu_Score_CursorMemory cursor_;
+  s::CursorMemory cursor_;
   VECTOR position_;
   VECTOR angles_;
   std::array<std::byte, sizeof Field_countableRoomMask> masks_{};
@@ -267,11 +267,11 @@ constexpr std::uint32_t kLiveScore = 3'459'218;
 constexpr std::uint32_t kLiveTitles = 0x00171A01;
 
 void CheckProgressStatics() {
-  CHECK(Menu_Score_mapCompletion == 6);
-  CHECK(Menu_Score_openedChestCount == 3);
-  CHECK(Menu_Score_clearCount == 2);
-  CHECK(Menu_Score_menuState == 0);
-  CHECK(Menu_Score_hideUi == 0);
+  CHECK(s::mapCompletion == 6);
+  CHECK(s::openedChestCount == 3);
+  CHECK(s::clearCount == 2);
+  CHECK(s::menuState == 0);
+  CHECK(s::hideUi == 0);
   CHECK(VS::State::roomVisitProgress.room_flags[1] == 0xC00000);
   CHECK(VS::State::scoreData.map_completion == 6);
   CHECK(VS::State::scoreData.opened_chest_count == 10);
@@ -292,8 +292,8 @@ void SetLiveProgressInputs() {
   VS::State::scoreData.completion_time_minutes = 1000;
   VS::State::scoreData.map_completion = 5;
   VS::State::scoreData.opened_chest_count = 10;
-  Menu_Score_menuState = 7;
-  Menu_Score_hideUi = 1;
+  s::menuState = 7;
+  s::hideUi = 1;
 }
 }  // namespace
 
@@ -426,14 +426,14 @@ TEST_CASE("F02833 F02835 F02832 live entries bind the score screen globals",
           "[score-rank-live][F02833][F02835][F02832]") {
   const LiveGlobals globals;
   SetLiveScoreInputs();
-  Menu_Score_clearCount = 1;
-  Menu_Score_characterRank = 0xFF;
+  s::clearCount = 1;
+  s::characterRank = 0xFF;
   VS::Menu::Score::AwardLiveTitles();
   CHECK(static_cast<std::uint32_t>(VS::State::scoreData.titles) == kLiveTitles);
   VS::Menu::Score::CalculateLiveScore();
-  CHECK(Menu_Score_score == kLiveScore);
+  CHECK(s::score == kLiveScore);
   VS::Menu::Score::DetermineLiveRiskbreakerRank();
-  CHECK(Menu_Score_characterRank == 11);
+  CHECK(s::characterRank == 11);
 }
 
 TEST_CASE("F03061 F03060 live entries bind the results screen globals",
@@ -454,17 +454,19 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
   const LiveGlobals globals;
   SetLiveProgressInputs();
   VS::Input::settings.cursor_memory = 0;
-  std::memset(&Battle_unusedMenu9CursorMemory, 0xA5,
-              sizeof Battle_unusedMenu9CursorMemory);
+  constexpr std::uint8_t kStaleCursor = 0xA5;
+  Battle_unusedMenu9CursorMemory = {kStaleCursor, kStaleCursor, kStaleCursor,
+                                    kStaleCursor, kStaleCursor, kStaleCursor,
+                                    kStaleCursor, kStaleCursor};
   auto* scratch =
       static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   scratch->camera.position.vy = 1234;
   scratch->camera.angles.vz = -56;
   CHECK(VS::Menu::Score::CalculateLiveProgress() == 1);
   CheckProgressStatics();
-  CHECK(Battle_unusedMenu9CursorMemory.titlePage == 0);
-  CHECK(Battle_unusedMenu9CursorMemory.gazetteRow == 0);
-  CHECK(Menu_Score_cameraPositionBackup.vy == 1234);
-  CHECK(Menu_Score_cameraAnglesBackup.vz == -56);
-  CHECK(Menu_Score_score == 200000);
+  CHECK(Battle_unusedMenu9CursorMemory.title_page == 0);
+  CHECK(Battle_unusedMenu9CursorMemory.gazette_row == 0);
+  CHECK(s::cameraPositionBackup.vy == 1234);
+  CHECK(s::cameraAnglesBackup.vz == -56);
+  CHECK(s::score == 200000);
 }
