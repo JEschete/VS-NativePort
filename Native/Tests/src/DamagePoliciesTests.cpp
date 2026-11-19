@@ -124,12 +124,12 @@ TEST_CASE("F00394 live uses passed stats without actor table or drawn state",
   Battle_ActorStats target{};
   Battle_actors[40] = nullptr;
   f.action.type = 1;
-  f.stats.weapon.gems[2].gemEffects = 4;
-  target.shield.gems[2].gemEffects = 8;
+  f.stats.weapon.gems[2].gem_effects = 4;
+  target.shield.gems[2].gem_effects = 8;
   CHECK(b::LiveApplyDamageGemMultiplier(&f.action, 100, &f.stats, &target) ==
         100);
-  target.shield.gems[2].gemEffects = 0;
-  target.weapon.gems[0].gemEffects = 8;
+  target.shield.gems[2].gem_effects = 0;
+  target.weapon.gems[0].gem_effects = 8;
   CHECK(b::LiveApplyDamageGemMultiplier(&f.action, 100, &f.stats, &target) ==
         105);
   CheckBinding(0x8007FE5C,

@@ -519,27 +519,25 @@ void PopulateLiveBladeStats(Items_WeaponLoadout* weapon) {
   });
 }
 
-void PopulateLiveGripStats(Items_EquipmentPartStats* grip) {
+void PopulateLiveGripStats(const VS::Items::EquipmentPart* grip) {
   if (grip == nullptr) {
     Warn("missing grip stats for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*grip);
   LiveCall([&](EquipmentDetailsContext& ctx) {
-    const auto effects = VS::Menu::Status::PopulateGripStats(ctx.state, typed);
+    const auto effects = VS::Menu::Status::PopulateGripStats(ctx.state, *grip);
     SetEnabledStatPages(ctx, effects.enabled_pages);
     UpdateDpPpBars(ctx, effects.dp_pp_bars);
   });
 }
 
-void PopulateLiveGemStats(Items_EquipmentPartStats* gem) {
+void PopulateLiveGemStats(const VS::Items::EquipmentPart* gem) {
   if (gem == nullptr) {
     Warn("missing gem stats for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*gem);
   LiveCall([&](EquipmentDetailsContext& ctx) {
-    const auto effects = VS::Menu::Status::PopulateGemStats(ctx.state, typed);
+    const auto effects = VS::Menu::Status::PopulateGemStats(ctx.state, *gem);
     SetEnabledStatPages(ctx, effects.enabled_pages);
     UpdateDpPpBars(ctx, effects.dp_pp_bars);
   });

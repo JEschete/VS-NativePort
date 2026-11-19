@@ -49,12 +49,11 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
-#include "Items/Weapons.h"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
@@ -586,9 +585,9 @@ void Flatten(const T (&values)[Rows][Columns],
 }
 
 [[nodiscard]] SortStats WeaponStats(const Items_WeaponLoadout& weapon) {
-  SortStats stats{.category = Byte(weapon.blade.category),
-                  .material = Byte(weapon.blade.material),
-                  .range = Byte(weapon.range.range),
+  SortStats stats{.category = weapon.blade.category,
+                  .material = weapon.blade.material,
+                  .range = weapon.range.range,
                   .damage_type = weapon.damageType,
                   .current_dp = weapon.currentDp,
                   .max_dp = weapon.maxDp,
@@ -603,7 +602,7 @@ void Flatten(const T (&values)[Rows][Columns],
 }
 
 [[nodiscard]] SortStats ShieldStats(const Items_ShieldLoadout& shield) {
-  SortStats stats{.material = Byte(shield.base.material),
+  SortStats stats{.material = shield.base.material,
                   .current_dp = shield.currentDp,
                   .max_dp = shield.maxDp,
                   .current_pp = shield.currentPp,
@@ -620,15 +619,15 @@ void Flatten(const T (&values)[Rows][Columns],
 }
 
 // The part's classes run on into its affinities, as in the record.
-[[nodiscard]] SortStats EquipmentStats(const Items_EquipmentPartStats& part) {
-  SortStats stats{.category = Byte(part.category),
-                  .material = Byte(part.material),
-                  .range = Byte(part.range.range),
-                  .damage_type = Byte(part.damageType),
-                  .current_dp = part.currentDp,
-                  .max_dp = part.maxDp,
-                  .current_pp = part.currentPp,
-                  .max_pp = part.maxPp,
+[[nodiscard]] SortStats EquipmentStats(const VS::Items::EquipmentPart& part) {
+  SortStats stats{.category = part.category,
+                  .material = part.material,
+                  .range = part.range.range,
+                  .damage_type = part.damage_type,
+                  .current_dp = part.current_dp,
+                  .max_dp = part.max_dp,
+                  .current_pp = part.current_pp,
+                  .max_pp = part.max_pp,
                   .strength = part.strength,
                   .intelligence = part.intelligence,
                   .agility = part.agility};
@@ -1761,7 +1760,8 @@ int LiveMiscSortValue(int stat, Items_InventoryMisc* misc) {
   return MiscSortValue(stat, {.id = misc->id, .count = Byte(misc->count)});
 }
 
-int LiveEquipmentSortValue(int stat, Items_EquipmentPartStats* equipment) {
+int LiveEquipmentSortValue(int stat,
+                           const VS::Items::EquipmentPart* equipment) {
   if (equipment == nullptr) {
     VS::Core::LogWarn("menu.framework", "sort key of absent equipment");
     return 0;

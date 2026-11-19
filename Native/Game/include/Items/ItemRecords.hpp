@@ -151,14 +151,28 @@ template <typename Table>
 
 // A weapon's reach: three ranges and the attack shape packed in the fourth
 // byte (shape in bits 0-2, angle in bits 3-7).
+// decomp: vs_battle_range_t (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:9)
+inline constexpr std::uint8_t kAttackShapeBitsMask = 0x07;
+inline constexpr int kAttackShapeAngleShift = 3;
 struct WeaponRange {
   std::uint8_t range{};
   std::uint8_t second_range{};
   std::uint8_t third_range{};
   std::uint8_t shape_bits{};
+  [[nodiscard]] constexpr std::uint8_t AttackShape() const {
+    return static_cast<std::uint8_t>(shape_bits & kAttackShapeBitsMask);
+  }
   [[nodiscard]] constexpr std::uint8_t AttackShapeAngle() const {
-    constexpr int kAngleShift = 3;
-    return static_cast<std::uint8_t>(shape_bits >> kAngleShift);
+    return static_cast<std::uint8_t>(shape_bits >> kAttackShapeAngleShift);
+  }
+  constexpr void SetAttackShape(std::uint8_t shape) {
+    shape_bits = static_cast<std::uint8_t>(
+        (shape_bits & ~kAttackShapeBitsMask) | (shape & kAttackShapeBitsMask));
+  }
+  // The angle keeps its low five bits, as the five-bit field does.
+  constexpr void SetAttackShapeAngle(std::uint8_t angle) {
+    shape_bits = static_cast<std::uint8_t>((shape_bits & kAttackShapeBitsMask) |
+                                           (angle << kAttackShapeAngleShift));
   }
   friend bool operator==(const WeaponRange&, const WeaponRange&) = default;
 };
@@ -168,7 +182,7 @@ using PartClasses = std::array<std::int8_t, kPartClassSlots>;
 using PartAffinities = std::array<std::int8_t, kPartAffinitySlots>;
 using ItemName = std::array<char, kNameBytes>;
 
-// decomp: vs_battle_equipment (src/BATTLE/BATTLE.PRG/146C.h): one blade,
+// decomp: vs_battle_uiEquipment (src/BATTLE/BATTLE.PRG/146C.h:326): one blade,
 // grip, gem, shield, armour or accessory as a loadout holds it.
 struct EquipmentPart {
   std::uint16_t id{};
@@ -186,7 +200,7 @@ struct EquipmentPart {
   std::uint8_t cost_type{};
   std::uint8_t cost{};
   std::uint8_t material{};
-  std::uint8_t opaque14{};
+  std::uint8_t recovery_delay{};
   std::uint8_t gem_slots{};
   std::uint8_t gem_effects{};
   std::uint8_t index{};
@@ -328,6 +342,7 @@ struct ShieldSpawnLoadout {
   std::int16_t index{};
 };
 
+// decomp: _armorIntermediate (src/BATTLE/BATTLE.PRG/146C.h:826)
 struct ArmorInit {
   EquipmentPart equipment{};
   std::uint8_t material{};
@@ -336,6 +351,7 @@ struct ArmorInit {
   std::uint8_t index{};
 };
 
+// decomp: _accessoryIntermediate (src/BATTLE/BATTLE.PRG/146C.h:834)
 struct AccessoryInit {
   EquipmentPart equipment{};
   std::uint8_t drop_rate{};
@@ -444,6 +460,7 @@ struct InventoryMisc {
 // A gem set in a shield names its owner with kShieldGemFlag over the shield's
 // 1-based slot; loading a shield masks its gem references with
 // kShieldGemSlotMask.
+// decomp: vs_gemTargets (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:166)
 inline constexpr std::uint8_t kShieldGemFlag = 0x80;
 inline constexpr std::uint8_t kShieldGemSlotMask = 0x7F;
 

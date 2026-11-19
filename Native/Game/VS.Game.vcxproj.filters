@@ -2358,7 +2358,7 @@
     <ClCompile Include="src\Items\Categories.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\Categories.h">
+    <ClInclude Include="src\Items\Categories.hpp">
       <Filter>src\Items</Filter>
     </ClInclude>
     <ClCompile Include="src\Items\ContainerGemCounts.cpp">
@@ -2385,9 +2385,6 @@
     <ClCompile Include="src\Items\EquipmentAffinity.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\EquipmentInit.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
     <ClCompile Include="src\Items\EquipmentLive.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
@@ -2427,16 +2424,13 @@
     <ClCompile Include="src\Items\Materials.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\Materials.h">
+    <ClInclude Include="src\Items\Materials.hpp">
       <Filter>src\Items</Filter>
     </ClInclude>
     <ClCompile Include="src\Items\Recovery.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
     <ClInclude Include="src\Items\TreasureChests.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Items\Weapons.h">
       <Filter>src\Items</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\BattleAbilities.cpp">
@@ -3633,9 +3627,6 @@
     <ClInclude Include="include\Battle\Encounter.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
-    <ClInclude Include="include\Battle\Enemy.h">
-      <Filter>include\Battle</Filter>
-    </ClInclude>
     <ClInclude Include="include\Battle\FloatingLabelPlacement.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -4356,9 +4347,6 @@
     <ClInclude Include="include\Items\ContainerTransfersLive.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
-    <ClInclude Include="include\Items\Equipment.h">
-      <Filter>include\Items</Filter>
-    </ClInclude>
     <ClInclude Include="include\Items\EquipmentAffinity.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
@@ -4381,9 +4369,6 @@
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\ItemRecords.hpp">
-      <Filter>include\Items</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Items\KeyItems.h">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Loadout.h">

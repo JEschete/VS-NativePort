@@ -1513,10 +1513,10 @@ Actors_CharacterInit LegacyCharacterInit() {
   init.opaque30 = 1;
   init.opaque31 = static_cast<char>(0xFE);
   init.opaque32 = 3;
-  init.weapon.blade.weaponModelId = -2;
+  init.weapon.blade.weapon_model_id = -2;
   init.weapon.blade.category = 6;
   init.weapon.material = static_cast<char>(0x81);
-  init.shield.base.weaponModelId = 12;
+  init.shield.base.weapon_model_id = 12;
   init.shield.material = 2;
   init.limbs[2].hp = 77;
   init.limbs[2].types[1] = -4;

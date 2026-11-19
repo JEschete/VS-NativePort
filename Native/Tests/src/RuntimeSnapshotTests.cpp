@@ -54,11 +54,11 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Categories.h"
-#include "Items/Equipment.h"
+#include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -157,7 +157,7 @@ struct ContentFixture {
 
   void BuildIndex() {
     for (const auto& slice : VS::Content::ModuleDataEntries()) {
-      if (slice.target != &Items_itemCategoryUpperIds) continue;
+      if (slice.target != &VS::Items::itemCategoryUpperIds) continue;
       categories_offset = slice.offset;
       categories_module = slice.module;
       break;
@@ -257,8 +257,8 @@ struct RuntimeFixture {
       std::to_array(Battle_Ai_actorAiStates);
   decltype(std::to_array(VS::Core::randomShuffleTable)) shuffle =
       std::to_array(VS::Core::randomShuffleTable);
-  decltype(std::to_array(Items_itemCategoryUpperIds)) bounds =
-      std::to_array(Items_itemCategoryUpperIds);
+  decltype(std::to_array(VS::Items::itemCategoryUpperIds)) bounds =
+      std::to_array(VS::Items::itemCategoryUpperIds);
   Battle_Actor* character = Battle_characterState;
   unsigned bios = VS::Core::BiosRand().State();
   unsigned interface_random = VS::Core::interfaceRandomState;
@@ -301,7 +301,7 @@ struct RuntimeFixture {
 
   RuntimeFixture() {
     REQUIRE_FALSE(Save::ResumePending());
-    std::copy(kBounds.begin(), kBounds.end(), Items_itemCategoryUpperIds);
+    std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
     std::fill_n(Battle_actors, actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, models.size(), nullptr);
     std::fill_n(Battle_Ai_actorAiStates, ai.size(), nullptr);
@@ -629,7 +629,7 @@ struct RuntimeFixture {
     std::copy(models.begin(), models.end(), Actors_actorRecords);
     std::copy(ai.begin(), ai.end(), Battle_Ai_actorAiStates);
     std::copy(shuffle.begin(), shuffle.end(), VS::Core::randomShuffleTable);
-    std::copy(bounds.begin(), bounds.end(), Items_itemCategoryUpperIds);
+    std::copy(bounds.begin(), bounds.end(), VS::Items::itemCategoryUpperIds);
     Battle_characterState = character;
     VS::Core::SeedBiosRand(bios);
     VS::Core::interfaceRandomState = interface_random;
@@ -1067,9 +1067,9 @@ TEST_CASE("Runtime content validation works before BATTLE globals initialize",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   const auto state = fixture.Capture();
-  std::fill_n(Items_itemCategoryUpperIds, 8, 0);
+  std::fill_n(VS::Items::itemCategoryUpperIds, 8, 0);
   REQUIRE(Save::ValidateContent(state).has_value());
-  CHECK(std::ranges::all_of(Items_itemCategoryUpperIds,
+  CHECK(std::ranges::all_of(VS::Items::itemCategoryUpperIds,
                             [](auto value) { return value == 0; }));
 }
 

@@ -41,7 +41,7 @@ std::span<std::uint8_t> KnownOrder(std::uint8_t* pointer) {
   Refuse("equipment order is outside known inventory index arrays");
 }
 
-bool OverlapsInventory(const Items_EquipmentPartStats* target) {
+bool OverlapsInventory(const VS::Items::EquipmentPart* target) {
   const auto output = reinterpret_cast<std::uintptr_t>(target);
   const auto source = reinterpret_cast<std::uintptr_t>(&VS::Items::inventory);
   return output <= source ? source - output < sizeof(*target)
@@ -89,7 +89,7 @@ void SortLiveMisc(int stat) {
 }
 
 // decomp: _copyEquipment (MENU/items1.h:994).
-void CopyLiveEquipmentStats(Items_EquipmentPartStats* target, int category,
+void CopyLiveEquipmentStats(VS::Items::EquipmentPart* target, int category,
                             int index) {
   if (!HasEquipmentProjection(category)) return;
   if (target == nullptr) Refuse("missing inventory projection output");
@@ -97,9 +97,9 @@ void CopyLiveEquipmentStats(Items_EquipmentPartStats* target, int category,
     Refuse("equipment output overlaps inventory storage");
   }
   LiveSortingWorld world;
-  auto output = Items::Live::Typed(*target);
+  auto output = *target;
   CopyEquipmentStats(output, category, index, world);
-  Items::Live::Commit(*target, output);
+  *target = output;
 }
 
 // decomp: _sortEquipment (MENU/items1.h:1017).

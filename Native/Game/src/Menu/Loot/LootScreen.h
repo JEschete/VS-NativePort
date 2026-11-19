@@ -1,10 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
-#include "Legacy/Psx.h"
-
-
 #include "Items/Inventory.h"
-#include "Items/Weapons.h"
+#include "Items/ItemRecords.hpp"
+#include "Legacy/Psx.h"
 #include "Menu/Loot/LootInventory.h"
 
 extern char Menu_Loot_previewedLoot;;

@@ -56,10 +56,10 @@
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
-#include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
@@ -683,27 +683,29 @@ struct EnemyLootFixture : LootInventoryFixture {
   }
 };
 
-Items_EquipmentPartStats EquipmentDropPart(u_short id) {
-  Items_EquipmentPartStats part{};
+VS::Items::EquipmentPart EquipmentDropPart(u_short id) {
+  VS::Items::EquipmentPart part{};
   part.id = id;
-  part.subId = 7;
-  part.weaponModelId = 44;
+  part.sub_id = 7;
+  part.weapon_model_id = 44;
   part.category = 2;
   part.strength = 12;
   part.intelligence = -5;
   part.agility = 6;
-  part.currentDp = 1234;
-  part.maxDp = 9876;
-  part.currentPp = 345;
-  part.maxPp = 654;
-  part.damageType = 7;
-  part.costType = 15;
+  part.current_dp = 1234;
+  part.max_dp = 9876;
+  part.current_pp = 345;
+  part.max_pp = 654;
+  part.damage_type = 7;
+  part.cost_type = 15;
   part.cost = 11;
   part.material = 5;
-  part.opaque14 = 0x42;
-  part.gemSlots = 3;
-  part.gemEffects = 5;
-  part.range = {5, 7, 9, 2, 13};
+  part.recovery_delay = 0x42;
+  part.gem_slots = 3;
+  part.gem_effects = 5;
+  part.range = {.range = 5, .second_range = 7, .third_range = 9};
+  part.range.SetAttackShape(2);
+  part.range.SetAttackShapeAngle(13);
   for (int index = 0; index < 4; ++index) {
     part.types[index] = static_cast<signed char>(index * 7 - 21);
   }
@@ -715,10 +717,10 @@ Items_EquipmentPartStats EquipmentDropPart(u_short id) {
 }
 
 template <typename Item>
-void CheckDropIdentity(const Item& item, const Items_EquipmentPartStats& part) {
+void CheckDropIdentity(const Item& item, const VS::Items::EquipmentPart& part) {
   CHECK(item.id == part.id);
   CHECK(static_cast<std::uint8_t>(item.subId) ==
-        static_cast<std::uint8_t>(part.subId));
+        static_cast<std::uint8_t>(part.sub_id));
   CHECK(item.strength == part.strength);
   CHECK(item.intelligence == part.intelligence);
   CHECK(item.agility == part.agility);
@@ -726,20 +728,20 @@ void CheckDropIdentity(const Item& item, const Items_EquipmentPartStats& part) {
 
 template <typename Item>
 void CheckDropDurability(const Item& item,
-                         const Items_EquipmentPartStats& part) {
-  CHECK(item.wepId == part.weaponModelId);
+                         const VS::Items::EquipmentPart& part) {
+  CHECK(item.wepId == part.weapon_model_id);
   CHECK(static_cast<std::uint8_t>(item.category) ==
         static_cast<std::uint8_t>(part.category));
-  CHECK(item.currentDp == part.currentDp);
-  CHECK(item.maxDp == part.maxDp);
-  CHECK(item.currentPp == part.currentPp);
-  CHECK(item.maxPp == part.maxPp);
+  CHECK(item.currentDp == part.current_dp);
+  CHECK(item.maxDp == part.max_dp);
+  CHECK(item.currentPp == part.current_pp);
+  CHECK(item.maxPp == part.max_pp);
   CHECK(item.material == part.material);
 }
 
 template <typename Item>
 void CheckDropAffinities(const Item& item,
-                         const Items_EquipmentPartStats& part) {
+                         const VS::Items::EquipmentPart& part) {
   for (int index = 0; index < 8; ++index) {
     CHECK(item.classes[index] == (index < 6 ? part.classes[index] : 0));
     CHECK(item.affinities[index] == (index < 7 ? part.affinities[index] : 0));
@@ -747,7 +749,7 @@ void CheckDropAffinities(const Item& item,
 }
 
 template <typename Item>
-void CheckDropTypes(const Item& item, const Items_EquipmentPartStats& part) {
+void CheckDropTypes(const Item& item, const VS::Items::EquipmentPart& part) {
   for (int index = 0; index < 4; ++index) {
     CHECK(item.types[index] == part.types[index]);
   }
@@ -760,34 +762,34 @@ void CheckZeroedDrop(const Item& item) {
 }
 
 void CheckBladeDrop(const Items_InventoryBlade& item,
-                    const Items_EquipmentPartStats& part) {
+                    const VS::Items::EquipmentPart& part) {
   CheckDropIdentity(item, part);
   CheckDropDurability(item, part);
   CheckDropAffinities(item, part);
-  CHECK(item.cost == part.cost);
+  CHECK(static_cast<std::uint8_t>(item.cost) == part.cost);
   // Copied C uses unsigned bitfields; compare their wire bits in C++.
-  CHECK((item.damageType & 3) == (part.damageType & 3));
-  CHECK((item.costType & 7) == (part.costType & 7));
-  CHECK(item.opaque12 == part.opaque14);
+  CHECK((item.damageType & 3) == (part.damage_type & 3));
+  CHECK((item.costType & 7) == (part.cost_type & 7));
+  CHECK(item.opaque12 == part.recovery_delay);
   CHECK(std::memcmp(&item.range, &part.range, sizeof(item.range)) == 0);
 }
 
 void CheckGripDrop(const Items_InventoryGrip& item,
-                   const Items_EquipmentPartStats& part) {
+                   const VS::Items::EquipmentPart& part) {
   CheckDropIdentity(item, part);
   CheckDropTypes(item, part);
   CHECK(static_cast<std::uint8_t>(item.category) ==
         static_cast<std::uint8_t>(part.category));
-  CHECK(item.gemSlots == part.gemSlots);
+  CHECK(static_cast<std::uint8_t>(item.gemSlots) == part.gem_slots);
 }
 
 void CheckArmorDrop(const Items_InventoryArmor& item,
-                    const Items_EquipmentPartStats& part) {
+                    const VS::Items::EquipmentPart& part) {
   CheckDropIdentity(item, part);
   CheckDropDurability(item, part);
   CheckDropTypes(item, part);
   CheckDropAffinities(item, part);
-  CHECK(item.gemSlots == part.gemSlots);
+  CHECK(static_cast<std::uint8_t>(item.gemSlots) == part.gem_slots);
 }
 
 template <typename Loadout>
@@ -806,7 +808,7 @@ void CheckDropGems(const Drop& drop, const Loadout& source) {
     } else {
       CheckDropIdentity(gem, part);
       CheckDropAffinities(gem, part);
-      CHECK(gem.gemEffects == part.gemEffects);
+      CHECK(static_cast<std::uint8_t>(gem.gemEffects) == part.gem_effects);
     }
   }
 }
@@ -953,7 +955,7 @@ void CheckClaimedGems(const Item& item, const Loadout& source, int parent) {
       const auto& gem = VS::Items::inventory.gems[slot - 1];
       CheckDropIdentity(gem, part);
       CheckDropAffinities(gem, part);
-      CHECK(gem.gemEffects == part.gemEffects);
+      CHECK(static_cast<std::uint8_t>(gem.gemEffects) == part.gem_effects);
       CHECK(gem.index == slot);
       CHECK(gem.setItemIndex == parent);
     }

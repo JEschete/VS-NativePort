@@ -1,12 +1,11 @@
 #pragma once
-
-struct Items_EquipmentPartStats;
+#include "Items/ItemRecords.hpp"
 
 namespace VS::Menu::container {
 void SortLiveWeapons(int stat);
 void SortLiveShields(int stat);
 void SortLiveMisc(int stat);
-void CopyLiveEquipmentStats(Items_EquipmentPartStats* target, int category,
+void CopyLiveEquipmentStats(VS::Items::EquipmentPart* target, int category,
                             int index);
 void SortLiveEquipment(int category, int stat);
 }  // namespace VS::Menu::container

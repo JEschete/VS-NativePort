@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Items/Categories.h"
+// Storage for the category bound tables (Categories.hpp).
+#include "Items/Categories.hpp"
 
+namespace VS::Items {
 // decomp: _wepIdCategories (_wepIdCategories@BATTLE/BATTLE.PRG)
-char Items_weaponCategoryUpperIds[48]; /* contents: module image (ModuleData.cpp) */
+std::uint8_t weaponCategoryUpperIds[kWeaponCategoryUpperIdBytes];
 
 // decomp: _itemCategorySizes (_itemCategorySizes@BATTLE/BATTLE.PRG)
-u_int Items_itemCategoryUpperIds[8]; /* contents: module image (ModuleData.cpp) */
-
+std::uint32_t itemCategoryUpperIds[kItemIdCategoryCount];
+}  // namespace VS::Items

@@ -21,7 +21,7 @@ namespace {
 namespace status = VS::Menu::Status;
 namespace fw = VS::Menu::Framework;
 namespace data = vs_test::status_components;
-using PartEntry = void (*)(Items_EquipmentPartStats*, char*[], int*);
+using PartEntry = void (*)(VS::Items::EquipmentPart*, char*[], int*);
 constexpr auto kPartAddresses = std::to_array<unsigned>({
     0x80102F64U,
     0x80103080U,
@@ -77,7 +77,7 @@ TEST_CASE("Status part module entries preserve name and row outputs",
   const std::array parts{data::Blade(),
                          VS::Items::EquipmentPart{.id = 101, .category = 4},
                          VS::Items::EquipmentPart{.id = 261}};
-  auto part = std::bit_cast<Items_EquipmentPartStats>(parts[kind]);
+  auto part = parts[kind];
   const std::array<std::size_t, 3> help_indices{16, 95,
                                                 fw::item_text::kGemFeldspar};
   std::array<char, 2> name{};

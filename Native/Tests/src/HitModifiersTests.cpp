@@ -361,7 +361,7 @@ TEST_CASE("Live attack gems use stats owner and ignore absent equipment IDs",
           "[hit-modifiers][F00339][live]") {
   LiveFixture f;
   const auto slot = GENERATE(0, 1, 2);
-  f.stats.at(0).weapon.gems[slot].gemEffects = 1;
+  f.stats.at(0).weapon.gems[slot].gem_effects = 1;
   CHECK(battle::AttackLiveGemHitBonus(&f.action, &f.stats.at(0)) == 20);
   f.actors.at(2).weaponDrawn = 2;
   CHECK(battle::AttackLiveGemHitBonus(nullptr, &f.stats.at(0)) == 0);
@@ -375,8 +375,8 @@ TEST_CASE(
   // A fourth 0x30-stride gem probe would read the low byte of baseAgility.
   f.stats.at(1).shield.baseAgility = 21;
   CHECK(battle::DefenseLiveGemHitBonus(&f.action, &f.stats.at(1), 1) == 0);
-  f.stats.at(1).shield.gems[2].gemEffects = 21;
-  f.stats.at(1).shield.gems[0].gemEffects = 5;
+  f.stats.at(1).shield.gems[2].gem_effects = 21;
+  f.stats.at(1).shield.gems[0].gem_effects = 5;
   CHECK(battle::DefenseLiveGemHitBonus(&f.action, &f.stats.at(1), 1) == 40);
   f.actors.at(2).weaponDrawn = 0;
   CHECK(battle::DefenseLiveGemHitBonus(nullptr, &f.stats.at(1), -1) == 0);
@@ -395,9 +395,9 @@ TEST_CASE("Live previous hit threshold ignores every callback argument",
 TEST_CASE("Live gem chance preserves aliased state and ignores inactive actors",
           "[hit-modifiers][F00343][live]") {
   LiveFixture f;
-  f.stats.at(0).weapon.gems[0].gemEffects = 1;
-  f.stats.at(0).shield.gems[0].gemEffects = 5;
-  f.stats.at(0).shield.gems[1].gemEffects = 11;
+  f.stats.at(0).weapon.gems[0].gem_effects = 1;
+  f.stats.at(0).shield.gems[0].gem_effects = 5;
+  f.stats.at(0).shield.gems[1].gem_effects = 11;
   f.action.hits[0].effectId = 1;
   const auto before = Bytes(f.stats);
   CHECK(battle::LiveGemHitChance(&f.action, &f.source, &f.source, 0, -1) == 80);
@@ -439,8 +439,8 @@ TEST_CASE("Original hit table dispatches all four typed callbacks",
   LiveFixture f;
   RelocateHits(image);
   Battle_previousHitResult = -1;
-  f.stats.at(0).weapon.gems[0].gemEffects = 1;
-  f.stats.at(1).shield.gems[0].gemEffects = 5;
+  f.stats.at(0).weapon.gems[0].gem_effects = 1;
+  f.stats.at(1).shield.gems[0].gem_effects = 5;
   f.stats.at(0).risk = 506;
   f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(128);
   f.target.target.targetLimb = 5;
@@ -464,8 +464,8 @@ TEST_CASE("Original gem helper symbols dispatch short-return bindings",
       symbols, "BATTLE/BATTLE.PRG", 0x8007E6A0);
   REQUIRE(attack == reinterpret_cast<void*>(&battle::AttackLiveGemHitBonus));
   REQUIRE(defense == reinterpret_cast<void*>(&battle::DefenseLiveGemHitBonus));
-  f.stats.at(0).weapon.gems[2].gemEffects = 2;
-  f.stats.at(0).shield.gems[2].gemEffects = 6;
+  f.stats.at(0).weapon.gems[2].gem_effects = 2;
+  f.stats.at(0).shield.gems[2].gem_effects = 6;
   f.action.type = 1;
   CHECK(reinterpret_cast<decltype(&battle::AttackLiveGemHitBonus)>(attack)(
             &f.action, &f.stats.at(0)) == 20);

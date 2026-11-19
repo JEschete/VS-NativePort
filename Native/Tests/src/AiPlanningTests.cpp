@@ -1793,8 +1793,10 @@ TEST_CASE("AI planning snapshots copy only the original simulation stat ranges",
           "[ai][planning]") {
   Battle_ActorStats source;
   Battle_ActorStats destination;
-  std::memset(&source, 0x5A, sizeof(source));
-  std::memset(&destination, 0xA5, sizeof(destination));
+  std::ranges::fill(std::as_writable_bytes(std::span{&source, 1}),
+                    std::byte{0x5A});
+  std::ranges::fill(std::as_writable_bytes(std::span{&destination, 1}),
+                    std::byte{0xA5});
   VS::Battle::Ai::CopyLivePlanningActorStats(&source, &destination);
   const auto bytes = std::as_bytes(std::span{&destination, 1});
   for (std::size_t offset = 0; offset < bytes.size(); ++offset) {

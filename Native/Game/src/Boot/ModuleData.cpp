@@ -112,8 +112,8 @@
 #include "Field/Locations.h"
 #include "Field/MapProgress.h"
 #include "Field/TriggerMarkers.h"
-#include "Items/Categories.h"
-#include "Items/Materials.h"
+#include "Items/Categories.hpp"
+#include "Items/Materials.hpp"
 #include "LegacyFiles.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BreakArts.h"
@@ -182,10 +182,10 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7F9B4, sizeof Battle_categoryIncludesActingActor, &Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor}, // G00021 D_800E81B4
     {"BATTLE/BATTLE.PRG", 0x7F9C4, sizeof Battle_categoryTargetsBodyParts, &Battle_categoryTargetsBodyParts, sizeof Battle_categoryTargetsBodyParts}, // G00022 D_800E81C4
     {"BATTLE/BATTLE.PRG", 0x7F9D4, sizeof Battle_categoryTargetActorMasks, &Battle_categoryTargetActorMasks, sizeof Battle_categoryTargetActorMasks}, // G00023 D_800E81D4
-    {"BATTLE/BATTLE.PRG", 0x7F9E4, sizeof Items_weaponCategoryUpperIds, &Items_weaponCategoryUpperIds, sizeof Items_weaponCategoryUpperIds}, // G00024 _wepIdCategories
+    {"BATTLE/BATTLE.PRG", 0x7F9E4, sizeof VS::Items::weaponCategoryUpperIds, &VS::Items::weaponCategoryUpperIds, sizeof VS::Items::weaponCategoryUpperIds}, // G00024 _wepIdCategories
     {"BATTLE/BATTLE.PRG", 0x7FA00, sizeof Battle_limbInjuryStatusIds, &Battle_limbInjuryStatusIds, sizeof Battle_limbInjuryStatusIds}, // G00025 D_800E8200
     {"BATTLE/BATTLE.PRG", 0x7FA04, sizeof Battle_limbStatusFlags, &Battle_limbStatusFlags, sizeof Battle_limbStatusFlags}, // G00026 D_800E8204
-    {"BATTLE/BATTLE.PRG", 0x7FA14, sizeof Items_itemCategoryUpperIds, &Items_itemCategoryUpperIds, sizeof Items_itemCategoryUpperIds}, // G00027 _itemCategorySizes
+    {"BATTLE/BATTLE.PRG", 0x7FA14, sizeof VS::Items::itemCategoryUpperIds, &VS::Items::itemCategoryUpperIds, sizeof VS::Items::itemCategoryUpperIds}, // G00027 _itemCategorySizes
     {"BATTLE/BATTLE.PRG", 0x7FAF4, sizeof Battle_bladePpDamageBonuses, &Battle_bladePpDamageBonuses, sizeof Battle_bladePpDamageBonuses}, // G00030 D_800E82F4
     {"BATTLE/BATTLE.PRG", 0x7FC90, sizeof Battle_vitalsTickCounter, &Battle_vitalsTickCounter, sizeof Battle_vitalsTickCounter}, // G00033 D_800E8490
     {"BATTLE/BATTLE.PRG", 0x7FC94, sizeof Battle_regeneratingLimb, &Battle_regeneratingLimb, sizeof Battle_regeneratingLimb}, // G00034 D_800E8494
@@ -224,7 +224,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80790, sizeof Actors_textureSlotRowOffsets, &Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets}, // G00070 D_800E8F90
     {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters, &Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters}, // G00071 D_800E8FA8
     {"BATTLE/BATTLE.PRG", 0x807C0, sizeof Actors_forcedModelOverrides, &Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides}, // G00073 D_800E8FC0
-    {"BATTLE/BATTLE.PRG", 0x807C8, sizeof Items_weaponMaterialPaletteIndices, &Items_weaponMaterialPaletteIndices, sizeof Items_weaponMaterialPaletteIndices}, // G00075 _weaponMaterialPaletteMap
+    {"BATTLE/BATTLE.PRG", 0x807C8, sizeof VS::Items::weaponMaterialPaletteIndices, &VS::Items::weaponMaterialPaletteIndices, sizeof VS::Items::weaponMaterialPaletteIndices}, // G00075 _weaponMaterialPaletteMap
     {"BATTLE/BATTLE.PRG", 0x807D0, sizeof Field_kGimmickRollOrientations, &Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations}, // G00076 D_800E8FD0
     {"BATTLE/BATTLE.PRG", 0x80830, sizeof Field_kGimmickOrientationRotations, &Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations}, // G00077 D_800E9030
     {"BATTLE/BATTLE.PRG", 0x80890, sizeof Actors_drawnWeaponAnimationBases, &Actors_drawnWeaponAnimationBases, sizeof Actors_drawnWeaponAnimationBases}, // G00078 D_800E9090

@@ -45,7 +45,7 @@
 #include "Field/Actors.h"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Items/Materials.h"
+#include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
 #include "ModelLoading.h"
@@ -964,7 +964,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   [[nodiscard]] std::span<const std::uint8_t> WeaponMaterialPalettes()
       const override {
-    return Items_weaponMaterialPaletteIndices;
+    return VS::Items::weaponMaterialPaletteIndices;
   }
   int FindActorBoneTag(int actor, int tag) override {
     return VS::Actors::FindLiveActorBoneTag(actor, tag, 0);

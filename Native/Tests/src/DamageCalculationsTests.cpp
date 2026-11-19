@@ -413,7 +413,7 @@ TEST_CASE("Physical guards fallback type and only used PP categories",
 TEST_CASE("Live calculators execute real gems with unsigned shield layout",
           "[damage-calculations][F00409][F00410][F00411][F00421][F00433]") {
   LiveFixture f;
-  f.stats.at(0).weapon.gems[2].gemEffects = 3;
+  f.stats.at(0).weapon.gems[2].gem_effects = 3;
   f.stats.at(0).statuses = 2;
   CHECK(b::LiveCalculatePhysicalHitDamage(&f.action, &f.source, &f.target, 0, 0,
                                           0) == 105);
@@ -422,7 +422,7 @@ TEST_CASE("Live calculators execute real gems with unsigned shield layout",
   CHECK(b::LivePhysicalDamageWithDebuffs(&f.action, &f.source, &f.target, 0,
                                          0) == 52);
   f.action.type = 1;
-  f.stats.at(0).weapon.gems[2].gemEffects = 4;
+  f.stats.at(0).weapon.gems[2].gem_effects = 4;
   CHECK(b::LiveCalculateSpellHitDamage(&f.action, &f.source, &f.target, 0, 0) ==
         105);
   CHECK(b::LiveCalculateSpellHealing(&f.action, &f.source, &f.target, 0, 0) ==

@@ -7,7 +7,7 @@ struct Actors_LimbActionInit;
 struct Actors_LimbInit;
 struct Actors_SpawnSettings;
 
-#include "Items/EquipmentInit.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 
 // decomp: _actions (src/BATTLE/BATTLE.PRG/146C.h:845)
@@ -26,7 +26,7 @@ struct Actors_LimbInit {
     signed char types[4];
     signed char affinities[8];
     Actors_LimbActionInit actions[4];
-    Items_ArmorInit armor;
+    VS::Items::ArmorInit armor;
     char dpSplash[6];
     char reserved5A[2];
 };
@@ -63,7 +63,7 @@ struct Actors_CharacterInit {
     char reserved33;
     Items_WeaponSpawnLoadout weapon;
     Items_ShieldSpawnLoadout shield;
-    Items_AccessoryInit accessory;
+    VS::Items::AccessoryInit accessory;
     Actors_LimbInit limbs[6];
     int zudIndex;
 };

@@ -52,12 +52,11 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
-#include "Items/Categories.h"
-#include "Items/EquipmentInit.h"
+#include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Weapons.h"
 #include "Legacy/Psx.h"
 #include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
@@ -89,7 +88,8 @@ static_assert(std::size(Actors_CharacterInit{}.limbs) == kActorLimbs);
 static_assert(std::size(Battle_ActorStats{}.statusTimers) == kStatusTimers);
 static_assert(std::size(Actors_usesSecondaryBodyModel) >
               std::numeric_limits<std::uint8_t>::max());
-static_assert(std::size(Items_weaponCategoryUpperIds) >= kWeaponCategoryBounds);
+static_assert(std::size(VS::Items::weaponCategoryUpperIds) >=
+              kWeaponCategoryBounds);
 static_assert(std::size(VS::Items::inventory.weapons) == kInventoryWeapons);
 static_assert(std::size(VS::Items::inventory.blades) == kInventoryBlades);
 static_assert(std::size(VS::Items::inventory.shields) == kInventoryShields);
@@ -139,12 +139,11 @@ template <typename T, typename Id>
                                           : nullptr;
 }
 
-[[nodiscard]] WeaponRange RangeOf(const Items_WeaponRange& range) {
-  return {.range = Byte(range.range),
-          .second_range = Byte(range.secondRange),
-          .third_range = Byte(range.thirdRange),
-          .attack_shape_angle = static_cast<std::uint8_t>(
-              Byte(range.attackShapeAngle) & kAttackShapeAngleMask)};
+[[nodiscard]] WeaponRange RangeOf(const VS::Items::WeaponRange& range) {
+  return {.range = range.range,
+          .second_range = range.second_range,
+          .third_range = range.third_range,
+          .attack_shape_angle = range.AttackShapeAngle()};
 }
 
 // A zeroed block from the low end of the game heap, or null.
@@ -300,7 +299,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   WeaponCategoryBounds() const override {
     std::array<std::uint8_t, kWeaponCategoryBounds> bounds{};
     for (std::size_t i = 0; i < bounds.size(); ++i) {
-      bounds.at(i) = Byte(Items_weaponCategoryUpperIds[i]);
+      bounds.at(i) = VS::Items::weaponCategoryUpperIds[i];
     }
     return bounds;
   }
@@ -340,11 +339,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     stats->walkSpeed = static_cast<char>(kDefaultWalkSpeed);
     stats->runSpeed = static_cast<char>(kDefaultRunSpeed);
     stats->weapon.recoveryDelay = static_cast<char>(kDefaultRecoveryDelay);
-    stats->weapon.range.range = static_cast<char>(kDefaultWeaponRange[0]);
-    stats->weapon.range.secondRange = static_cast<char>(kDefaultWeaponRange[1]);
-    stats->weapon.range.thirdRange = static_cast<char>(kDefaultWeaponRange[2]);
+    stats->weapon.range.range = kDefaultWeaponRange[0];
+    stats->weapon.range.second_range = kDefaultWeaponRange[1];
+    stats->weapon.range.third_range = kDefaultWeaponRange[2];
     stats->cancelsHitResults = 0;
-    stats->weapon.range.attackShapeAngle = 0;
+    stats->weapon.range.SetAttackShapeAngle(0);
     stats->actorId = kNoRoomSpawn;
   }
 
@@ -545,10 +544,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     }
     return EquippedModels{.has_blade = stats->weapon.blade.id != 0,
                           .weapon_model = Byte(stats->weapon.wepId),
-                          .blade_material = Byte(stats->weapon.blade.material),
+                          .blade_material = stats->weapon.blade.material,
                           .has_shield = stats->shield.base.id != 0,
                           .shield_model = Byte(stats->shield.wepId),
-                          .shield_material = Byte(stats->shield.base.material)};
+                          .shield_material = stats->shield.base.material};
   }
 
   // --- Animation, display, AI and combat
@@ -962,10 +961,12 @@ CharacterTemplate DecodeCharacterTemplate(const Actors_CharacterInit& init) {
       .template_word = init.opaque2C,
       .mobility_limbs = {Byte(init.opaque30), Byte(init.opaque31)},
       .default_target_limb = Byte(init.opaque32),
-      .blade_model = static_cast<std::uint8_t>(init.weapon.blade.weaponModelId),
-      .blade_category = Byte(init.weapon.blade.category),
+      .blade_model =
+          static_cast<std::uint8_t>(init.weapon.blade.weapon_model_id),
+      .blade_category = init.weapon.blade.category,
       .weapon_material = Byte(init.weapon.material),
-      .shield_model = static_cast<std::uint8_t>(init.shield.base.weaponModelId),
+      .shield_model =
+          static_cast<std::uint8_t>(init.shield.base.weapon_model_id),
       .shield_material = Byte(init.shield.material),
       .zud_index = init.zudIndex,
       .equipment = IdOf<TemplateEquipment>(&init)};

@@ -90,7 +90,7 @@ void SortLiveMisc(int stat) {
 }
 
 // decomp: _sortEquipment (MENU/MENUD.PRG/234.c:1528).
-void CopyLiveEquipmentStats(Items_EquipmentPartStats* target, int category,
+void CopyLiveEquipmentStats(VS::Items::EquipmentPart* target, int category,
                             int index) {
   if (!HasEquipmentProjection(category)) return;
   const auto selected = static_cast<Items::ItemCategory>(category);
@@ -108,9 +108,9 @@ void CopyLiveEquipmentStats(Items_EquipmentPartStats* target, int category,
       Refuse("byte-overlapped equipment projection source and output");
     }
   });
-  auto output = Items::Live::Typed(*target);
+  auto output = *target;
   CopyEquipmentStats(output, category, &record, records);
-  Items::Live::Commit(*target, output);
+  *target = output;
 }
 
 // decomp: _copyEquipmentByStat (MENU/MENUD.PRG/234.c:1549).

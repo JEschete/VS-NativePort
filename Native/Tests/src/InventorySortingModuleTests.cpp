@@ -29,7 +29,7 @@ constexpr unsigned kMenubOffset = 0xD8;
 TEST_CASE("Inventory registry retains all five actual MENU3 signatures",
           "[inventory-sorting-module]") {
   static_assert(std::is_same_v<decltype(&sorting::CopyLiveEquipmentStats),
-                               void (*)(Items_EquipmentPartStats*, int, int)>);
+                               void (*)(VS::Items::EquipmentPart*, int, int)>);
   static_assert(std::is_same_v<decltype(&sorting::SortLiveEquipment),
                                void (*)(int, int)>);
   const auto symbols = VS::Content::ModuleSymbols();

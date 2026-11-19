@@ -130,7 +130,7 @@ ItemsStatus BuildWeaponStatsFromParts(WeaponLoadout& target,
     status = ItemsStatus::kDamageTypeOutOfRange;
   }
   target.risk = source.blade.cost;
-  target.recovery_delay = source.blade.opaque14;
+  target.recovery_delay = source.blade.recovery_delay;
   target.range = source.blade.range;
   target.current_dp = source.blade.current_dp;
   target.max_dp = source.blade.max_dp;
@@ -280,7 +280,7 @@ void ReadInventoryBladeStats(EquipmentPart& target,
   target.cost = source.cost;
   target.damage_type = source.DamageType();
   target.cost_type = source.CostType();
-  target.opaque14 = static_cast<std::uint8_t>(source.opaque12);
+  target.recovery_delay = static_cast<std::uint8_t>(source.opaque12);
   target.range = source.range;
   target.index = source.index;
   ReadClassAffinity(target, source);
@@ -528,7 +528,7 @@ void WriteInventoryBladeStats(InventoryBlade& target,
       (target.type_bits & ~kTypeFields) |
       (source.damage_type & kBladeDamageTypeMask) |
       ((source.cost_type & kBladeCostTypeMask) << kBladeCostTypeShift));
-  target.opaque12 = source.opaque14;
+  target.opaque12 = source.recovery_delay;
   target.range = source.range;
   WriteClassAffinity(target, source);
   target.material = source.material;

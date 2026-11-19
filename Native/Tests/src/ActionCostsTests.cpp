@@ -504,7 +504,7 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
   VS::Items::BuildLiveWeaponStatsFromParts(&fixture.stats.weapon, &natural);
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 0) ==
         0x01000000);
-  natural.blade.costType = 2;
+  natural.blade.cost_type = 2;
   natural.blade.cost = 1;
   VS::Items::BuildLiveWeaponStatsFromParts(&fixture.stats.weapon, &natural);
   Battle_actionState = &fixture.state;

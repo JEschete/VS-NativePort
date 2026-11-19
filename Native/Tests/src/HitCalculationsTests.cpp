@@ -508,7 +508,7 @@ TEST_CASE("Live attributes use existing gear fields and real gem helpers",
   LiveFixture f;
   f.owners.at(0).agility = 180;
   f.owners.at(0).intelligence = 180;
-  f.owners.at(0).weapon.gems[2].gemEffects = 1;
+  f.owners.at(0).weapon.gems[2].gem_effects = 1;
   f.actors.at(0).weaponDrawn = 1;
   f.action.cost = 30;
   CHECK(battle::LiveAgilityHitChance(&f.action, &f.source, &f.target, 0, 0) ==

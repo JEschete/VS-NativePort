@@ -70,7 +70,8 @@ inline constexpr int kSpeedFractionBits = 12;
 
 // The equipped weapon category of an actor without a blade.
 inline constexpr std::uint8_t kUnarmedWeaponCategory = 10;
-// The categories the blade-model bounds cover (Items_weaponCategoryUpperIds).
+// The categories the blade-model bounds cover
+// (VS::Items::weaponCategoryUpperIds).
 inline constexpr std::size_t kWeaponCategoryBounds = 11;
 
 // The texture slots of the equipment and second-body requests.
@@ -353,7 +354,7 @@ struct InitialStats {
   friend bool operator==(const InitialStats&, const InitialStats&) = default;
 };
 
-// The weapon's reach as built (Items_WeaponRange).
+// The weapon's reach as built (VS::Items::WeaponRange).
 struct WeaponRange {
   std::uint8_t range = 0;
   std::uint8_t second_range = 0;
@@ -674,7 +675,7 @@ class ActorSpawnHost {
   // Sets the identity of a new gimmick actor, unlinked and not retained.
   virtual void WriteAuxiliaryIdentity(SpawnedActor actor,
                                       const AuxiliaryIdentity& identity) = 0;
-  // Items_weaponCategoryUpperIds.
+  // VS::Items::weaponCategoryUpperIds.
   [[nodiscard]] virtual std::array<std::uint8_t, kWeaponCategoryBounds>
   WeaponCategoryBounds() const = 0;
 

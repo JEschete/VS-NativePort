@@ -2,14 +2,13 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <cstdint>
 
+#include "Items/ItemRecords.hpp"
+
 struct Battle_ActionDefinition;
 struct Battle_ActorStats;
 struct Battle_HitResult;
-struct Items_AccessoryInit;
 struct Items_AccessorySpawnLoadout;
-struct Items_ArmorInit;
 struct Items_ArmorLoadout;
-struct Items_EquipmentPartStats;
 struct Items_InventoryArmor;
 struct Items_InventoryBlade;
 struct Items_InventoryGem;
@@ -33,17 +32,17 @@ void BuildLiveWeaponStatsFromParts(Items_WeaponLoadout* target,
 void BuildLiveShieldStatsFromParts(Items_ShieldLoadout* target,
                                    const Items_ShieldSpawnLoadout* source);
 void BuildLiveAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target,
-                                     const Items_AccessoryInit* source);
+                                     const VS::Items::AccessoryInit* source);
 void BuildLiveArmorStatsFromPart(Items_ArmorLoadout* target,
-                                 const Items_ArmorInit* source);
+                                 const VS::Items::ArmorInit* source);
 
-void ReadLiveInventoryBladeStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
                                  const Items_InventoryBlade* source);
-void ReadLiveInventoryGripStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryGripStats(VS::Items::EquipmentPart* target,
                                 const Items_InventoryGrip* source);
-void ReadLiveInventoryArmorStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryArmorStats(VS::Items::EquipmentPart* target,
                                  const Items_InventoryArmor* source);
-void ReadLiveInventoryGemStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
                                const Items_InventoryGem* source);
 
 // The part references name slots of Ashley's inventory.
@@ -63,13 +62,13 @@ void EquipLiveAshleyArmor(int body_part, const Items_InventoryArmor* armor);
 void EquipLiveAshleyAccessory(const Items_InventoryArmor* accessory);
 
 void WriteLiveInventoryBladeStats(Items_InventoryBlade* target,
-                                  const Items_EquipmentPartStats* source);
+                                  const VS::Items::EquipmentPart* source);
 void WriteLiveInventoryGripStats(Items_InventoryGrip* target,
-                                 const Items_EquipmentPartStats* source);
+                                 const VS::Items::EquipmentPart* source);
 void WriteLiveInventoryGemStats(Items_InventoryGem* target,
-                                const Items_EquipmentPartStats* source);
+                                const VS::Items::EquipmentPart* source);
 void WriteLiveInventoryArmorStats(Items_InventoryArmor* target,
-                                  const Items_EquipmentPartStats* source);
+                                  const VS::Items::EquipmentPart* source);
 
 // Store a loadout back into `target` and the parts it references in
 // Ashley's inventory.

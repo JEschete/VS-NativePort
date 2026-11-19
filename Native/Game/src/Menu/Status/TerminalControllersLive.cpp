@@ -225,9 +225,9 @@ std::optional<TerminalActor> ActorView(int slot) {
   TerminalActor result{
       .accessory_id = stats->accessory.accessory.id,
       .weapon_gem_slots =
-          static_cast<std::uint8_t>(stats->weapon.grip.gemSlots),
+          static_cast<std::uint8_t>(stats->weapon.grip.gem_slots),
       .shield_gem_slots =
-          static_cast<std::uint8_t>(stats->shield.base.gemSlots),
+          static_cast<std::uint8_t>(stats->shield.base.gem_slots),
       .analyzed = stats->isAnalyzed != 0,
       .statuses =
           static_cast<std::uint32_t>(Battle::LiveStatusIconFlags(stats))};

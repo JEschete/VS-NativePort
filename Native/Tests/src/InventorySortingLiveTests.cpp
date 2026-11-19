@@ -109,13 +109,12 @@ TEST_CASE(
   blade.id = kFullByte;
   blade.strength = kLow;
   blade.material = kWide;
-  Items_EquipmentPartStats target{};
   items::EquipmentPart initial{};
   initial.types.fill(kReserved);
   initial.gem_effects = kFullByte;
-  items::Live::Commit(target, initial);
+  auto target = initial;
   sorting::CopyLiveEquipmentStats(&target, kBlade, items::kBladeSlots - 1);
-  const auto projected = items::Live::Typed(target);
+  const auto& projected = target;
   CHECK(projected.id == kFullByte);
   CHECK(projected.strength == kLow);
   CHECK(projected.material == kFullByte);
@@ -123,7 +122,7 @@ TEST_CASE(
   CHECK(projected.gem_effects == kFullByte);
   blade.id = kLowMaterial;
   sorting::CopyLiveEquipmentStats(&target, kBlade, items::kBladeSlots - 1);
-  CHECK(items::Live::Typed(target).id == kLowMaterial);
+  CHECK(target.id == kLowMaterial);
 }
 
 TEST_CASE("F02589 Live uses real grip armor and gem readers without zeroing",
@@ -133,17 +132,17 @@ TEST_CASE("F02589 Live uses real grip armor and gem readers without zeroing",
   records.grips[0].strength = kLow;
   records.armor[0].strength = kHigh;
   std::span(records.gems).back().strength = kLow;
-  Items_EquipmentPartStats target{};
-  target.currentDp = kWide;
+  VS::Items::EquipmentPart target{};
+  target.current_dp = kWide;
   sorting::CopyLiveEquipmentStats(&target, kGrip, 0);
-  CHECK(items::Live::Typed(target).strength == kLow);
-  CHECK(target.currentDp == kWide);
+  CHECK(target.strength == kLow);
+  CHECK(target.current_dp == kWide);
   sorting::CopyLiveEquipmentStats(&target, kArmor, 0);
-  CHECK(items::Live::Typed(target).strength == kHigh);
+  CHECK(target.strength == kHigh);
   target.category = kHighMaterial;
   sorting::CopyLiveEquipmentStats(&target, kGem, items::kGemSlots - 1);
-  CHECK(items::Live::Typed(target).strength == kLow);
-  CHECK(items::Live::Typed(target).category == kHighMaterial);
+  CHECK(target.strength == kLow);
+  CHECK(target.category == kHighMaterial);
 }
 
 TEST_CASE("F02589 unsupported Live categories are lazy even for a null output",

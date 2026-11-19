@@ -59,8 +59,8 @@ void SetEquipment(Save::Snapshot& state) {
   blade.costType = -1;
   blade.reserved10Bit5 = -3;
   blade.opaque12 = 0xBEEF;
-  blade.range.attackShape = -1;
-  blade.range.attackShapeAngle = -1;
+  blade.range.SetAttackShape(std::numeric_limits<std::uint8_t>::max());
+  blade.range.SetAttackShapeAngle(std::numeric_limits<std::uint8_t>::max());
   blade.classes[7] = -128;
   blade.affinities[7] = 127;
   auto& weapon = state.inventory.weapons[7];
@@ -188,8 +188,7 @@ void CheckInventory(const Save::Snapshot& state) {
   CHECK((static_cast<unsigned>(state.inventory.blades[15].damageType) & 3u) ==
         3);
   CHECK((static_cast<unsigned>(state.inventory.blades[15].costType) & 7u) == 7);
-  CHECK((static_cast<unsigned>(state.inventory.blades[15].range.attackShape) &
-         7u) == 7);
+  CHECK(state.inventory.blades[15].range.AttackShape() == 7);
   CHECK(state.inventory.gems[47].id == 282);
   CHECK(state.inventory.gems[47].setItemIndex == 65535);
   CHECK(state.inventory_order.misc[63] == 63);

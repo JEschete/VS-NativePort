@@ -48,12 +48,12 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Categories.h"
-#include "Items/Equipment.h"
+#include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Materials.h"
+#include "Items/Materials.hpp"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Location.hpp"
@@ -68,14 +68,14 @@ namespace VS::Game::Save {
 namespace {
 using Result = std::expected<void, std::string>;
 using Bytes = std::span<const std::uint8_t>;
-constexpr auto kCategoryCount = std::size(Items_itemCategoryUpperIds);
+constexpr auto kCategoryCount = std::size(VS::Items::itemCategoryUpperIds);
 using CategoryBounds = std::array<unsigned, kCategoryCount>;
 constexpr int kClockRadix = 60;
 constexpr int kMaximumHours = 100;
 constexpr std::uint64_t kTicksPerHour = 60ull * 60 * 60;
 constexpr std::uint64_t kMaximumTicks = 101 * kTicksPerHour - 1;
 constexpr std::size_t kSectionCount = 24;
-constexpr unsigned kShieldParent = Items_GemTarget_Shield;
+constexpr unsigned kShieldParent = VS::Items::kShieldGemFlag;
 constexpr int kLastLocation = 255;
 constexpr int kLastScene = 1023;
 constexpr int kLastAngle = ONE - 1;
@@ -430,7 +430,7 @@ std::expected<CategoryBounds, std::string> ReadCategoryBounds(
   // than depending on whether the BATTLE overlay has been initialized yet.
   const VS::Content::ModuleDataEntry* slice = nullptr;
   for (const auto& entry : VS::Content::ModuleDataEntries()) {
-    if (entry.target == &Items_itemCategoryUpperIds) {
+    if (entry.target == &VS::Items::itemCategoryUpperIds) {
       slice = &entry;
       break;
     }
@@ -453,9 +453,10 @@ std::expected<CategoryBounds, std::string> ReadCategoryBounds(
   if (previous != kItemIdEnd) {
     return std::unexpected("unsupported BATTLE item category table");
   }
-  if (std::ranges::any_of(Items_itemCategoryUpperIds,
+  if (std::ranges::any_of(VS::Items::itemCategoryUpperIds,
                           [](auto value) { return value != 0; }) &&
-      !std::equal(bounds.begin(), bounds.end(), Items_itemCategoryUpperIds)) {
+      !std::equal(bounds.begin(), bounds.end(),
+                  VS::Items::itemCategoryUpperIds)) {
     return std::unexpected("live BATTLE item categories disagree with content");
   }
   return bounds;
@@ -959,8 +960,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
       return std::unexpected(
           "live weapon part identity disagrees with inventory");
     }
-    weapon.blade.currentDp = weapon.currentDp;
-    weapon.blade.currentPp = weapon.currentPp;
+    weapon.blade.current_dp = weapon.currentDp;
+    weapon.blade.current_pp = weapon.currentPp;
     VS::Items::WriteLiveInventoryBladeStats(
         &state.inventory.blades[target.blade - 1], &weapon.blade);
     VS::Items::WriteLiveInventoryGripStats(
@@ -992,8 +993,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
         shield.base.id != target.base.id) {
       return std::unexpected("live shield does not match its inventory slot");
     }
-    shield.base.currentDp = shield.currentDp;
-    shield.base.currentPp = shield.currentPp;
+    shield.base.current_dp = shield.currentDp;
+    shield.base.current_pp = shield.currentPp;
     VS::Items::WriteLiveInventoryArmorStats(&target.base, &shield.base);
     for (std::size_t index = 0; index < kEquipmentGems; ++index) {
       const auto reference = target.gems[index] & 0x7Fu;
@@ -1032,7 +1033,7 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
         state.inventory.armor[armor.index - 1].id != armor.armor.id) {
       return std::unexpected("live armor does not match its inventory limb");
     }
-    armor.armor.currentDp = armor.currentDp;
+    armor.armor.current_dp = armor.currentDp;
     VS::Items::WriteLiveInventoryArmorStats(
         &state.inventory.armor[armor.index - 1], &armor.armor);
   }

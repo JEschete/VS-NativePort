@@ -24,10 +24,8 @@ HitModifierStats ReadStats(const Battle_ActorStats& stats) {
   result.actor_id = stats.actorId;
   result.risk = stats.risk;
   for (std::size_t i = 0; i < result.weapon_gems.size(); ++i) {
-    result.weapon_gems.at(i) =
-        static_cast<std::uint8_t>(stats.weapon.gems[i].gemEffects);
-    result.shield_gems.at(i) =
-        static_cast<std::uint8_t>(stats.shield.gems[i].gemEffects);
+    result.weapon_gems.at(i) = stats.weapon.gems[i].gem_effects;
+    result.shield_gems.at(i) = stats.shield.gems[i].gem_effects;
   }
   for (std::size_t i = 0; i < result.chain_evasion.size(); ++i) {
     result.chain_evasion.at(i) =

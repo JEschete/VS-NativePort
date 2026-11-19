@@ -29,9 +29,7 @@ class LiveSortingKeys : public World {
   }
   std::int32_t EquipmentValue(std::int32_t stat,
                               const Items::EquipmentPart& part) override {
-    Items_EquipmentPartStats legacy{};
-    Items::Live::Commit(legacy, part);
-    return LiveEquipmentSortValue(stat, &legacy);
+    return LiveEquipmentSortValue(stat, &part);
   }
 };
 }  // namespace VS::Menu::Framework

@@ -30,12 +30,10 @@ class LiveComponentDisplay final : public ComponentDisplay {
     Framework::PopulateLiveBladeStats(&legacy);
   }
   void ShowGripStats(const Items::EquipmentPart& grip) override {
-    auto legacy = std::bit_cast<Items_EquipmentPartStats>(grip);
-    Framework::PopulateLiveGripStats(&legacy);
+    Framework::PopulateLiveGripStats(&grip);
   }
   void ShowGemStats(const Items::EquipmentPart& gem) override {
-    auto legacy = std::bit_cast<Items_EquipmentPartStats>(gem);
-    Framework::PopulateLiveGemStats(&legacy);
+    Framework::PopulateLiveGemStats(&gem);
   }
   void HideComponentBars() override {
     Framework::UpdateLiveDpPpBars(Framework::dp_pp_bars::kStatic);
@@ -64,34 +62,33 @@ using PartFormatter = ComponentDescription (*)(Framework::ItemTextHost&,
                                                const Items::EquipmentPart&,
                                                std::span<std::uint8_t>);
 
-void FormatPart(Items_EquipmentPartStats* part, char* menu_text[],
+void FormatPart(VS::Items::EquipmentPart* part, char* menu_text[],
                 PartFormatter format) {
   if (part == nullptr || menu_text == nullptr) {
     Refuse("status component: missing part or description output");
     return;
   }
   Framework::LiveItemRowsHost host;
-  menu_text[1] = Resolve(
-      format(host, Items::Live::Typed(*part), host.StringBuffer()), host);
+  menu_text[1] = Resolve(format(host, *part, host.StringBuffer()), host);
 }
 }  // namespace
 
 // decomp: _initBladeDescription (src/MENU/MENU4.PRG/120.c:228)
-void FormatLiveBladeDescription(Items_EquipmentPartStats* blade,
+void FormatLiveBladeDescription(VS::Items::EquipmentPart* blade,
                                 char* menu_text[], int* row_types) {
   static_cast<void>(row_types);
   FormatPart(blade, menu_text, FormatBladeDescription);
 }
 
 // decomp: _initGripInfo (src/MENU/MENU4.PRG/120.c:254)
-void FormatLiveGripDescription(Items_EquipmentPartStats* grip,
+void FormatLiveGripDescription(VS::Items::EquipmentPart* grip,
                                char* menu_text[], int* row_types) {
   static_cast<void>(row_types);
   FormatPart(grip, menu_text, FormatGripDescription);
 }
 
 // decomp: _initGemInfo (src/MENU/MENU4.PRG/120.c:275)
-void CopyLiveGemDescription(Items_EquipmentPartStats* gem, char* menu_text[],
+void CopyLiveGemDescription(VS::Items::EquipmentPart* gem, char* menu_text[],
                             int* row_types) {
   static_cast<void>(row_types);
   FormatPart(gem, menu_text, CopyGemDescription);

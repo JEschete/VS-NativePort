@@ -44,8 +44,8 @@ void PopulateLiveShieldStats(Items_ShieldLoadout* shield);
 void PopulateLiveArmorStats(Items_ArmorLoadout* armor);
 void PopulateLiveAccessoryStats(Items_AccessorySpawnLoadout* accessory);
 void PopulateLiveBladeStats(Items_WeaponLoadout* weapon);
-void PopulateLiveGripStats(Items_EquipmentPartStats* grip);
-void PopulateLiveGemStats(Items_EquipmentPartStats* gem);
+void PopulateLiveGripStats(const VS::Items::EquipmentPart* grip);
+void PopulateLiveGemStats(const VS::Items::EquipmentPart* gem);
 
 // MAINMENU.PRG reloads restore the module image values of the screen's
 // statics (the DP/PP bars, the cursor and the panels' slides); the shared

@@ -35,7 +35,7 @@ constexpr std::int8_t kNegative = -128;
 TEST_CASE("Container sorting registry uses all five actual MENUD signatures",
           "[container-sorting-module]") {
   static_assert(std::is_same_v<decltype(&sorting::CopyLiveEquipmentStats),
-                               void (*)(Items_EquipmentPartStats*, int, int)>);
+                               void (*)(VS::Items::EquipmentPart*, int, int)>);
   static_assert(std::is_same_v<decltype(&sorting::SortLiveEquipment),
                                void (*)(int, int)>);
   const auto symbols = VS::Content::ModuleSymbols();

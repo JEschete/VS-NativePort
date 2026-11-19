@@ -1,14 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
-#include "Legacy/Psx.h"
-
-
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Weapons.h"
+#include "Legacy/Psx.h"
 
 extern u_int Battle_Ai_kTimedStatusFlags[344];
 extern Battle_ActorStats* Battle_Ai_planningStatsSnapshot;

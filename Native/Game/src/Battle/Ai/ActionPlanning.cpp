@@ -1,12 +1,13 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/Actor.h"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Battle/Ai/ActionPlanning.h"
+
+#include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Weapons.h"
+#include "Legacy/Psx.h"
 
 // decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG)
 u_int Battle_Ai_kTimedStatusFlags[344]; /* contents: module image (ModuleData.cpp) */

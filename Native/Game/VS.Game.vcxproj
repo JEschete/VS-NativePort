@@ -1696,13 +1696,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\Categories.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Items\Categories.cpp" />
     <ClCompile Include="src\Items\ContainerGemCounts.cpp" />
     <ClCompile Include="src\Items\ContainerGemCountsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1732,13 +1726,7 @@
     <ClCompile Include="src\Items\LootLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Items\Materials.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Items\Materials.cpp" />
     <ClCompile Include="src\Items\Recovery.cpp" />
     <ClCompile Include="src\Menu\BattleAbilities.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2501,16 +2489,14 @@
     <ClInclude Include="src\Field\Weather.h" />
     <ClInclude Include="src\Field\Znd.h" />
     <ClInclude Include="src\Field\Zone.h" />
-    <ClInclude Include="src\Items\Categories.h" />
+    <ClInclude Include="src\Items\Categories.hpp" />
     <ClInclude Include="src\Items\ContainerTables.hpp" />
-    <ClInclude Include="src\Items\EquipmentInit.h" />
     <ClInclude Include="src\Items\InventoryLiveState.hpp" />
     <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
     <ClInclude Include="src\Items\Loot.h" />
     <ClInclude Include="src\Items\LootLiveState.hpp" />
-    <ClInclude Include="src\Items\Materials.h" />
+    <ClInclude Include="src\Items\Materials.hpp" />
     <ClInclude Include="src\Items\TreasureChests.h" />
-    <ClInclude Include="src\Items\Weapons.h" />
     <ClInclude Include="src\Menu\BattleAbilities.h" />
     <ClInclude Include="src\Menu\BreakArts.h" />
     <ClInclude Include="src\Menu\Container\ItemView.h" />
@@ -2707,7 +2693,6 @@
     <ClInclude Include="include\Battle\DamageRecoveryEffects.hpp" />
     <ClInclude Include="include\Battle\DamageRecoveryEffectsLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
-    <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Battle\FloatingLabelPlacement.hpp" />
     <ClInclude Include="include\Battle\FloatingLabelPlacementLive.hpp" />
     <ClInclude Include="include\Battle\FloatingLabelProducers.hpp" />
@@ -2948,7 +2933,6 @@
     <ClInclude Include="include\Items\ContainerIndexingLive.hpp" />
     <ClInclude Include="include\Items\ContainerTransfers.hpp" />
     <ClInclude Include="include\Items\ContainerTransfersLive.hpp" />
-    <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\EquipmentAffinity.hpp" />
     <ClInclude Include="include\Items\EquipmentLive.hpp" />
     <ClInclude Include="include\Items\EquipmentStats.hpp" />
@@ -2957,7 +2941,6 @@
     <ClInclude Include="include\Items\Inventory.hpp" />
     <ClInclude Include="include\Items\InventoryLive.hpp" />
     <ClInclude Include="include\Items\ItemRecords.hpp" />
-    <ClInclude Include="include\Items\KeyItems.h" />
     <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Items\Loot.hpp" />
     <ClInclude Include="include\Items\LootLive.hpp" />

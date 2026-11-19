@@ -32,7 +32,7 @@
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Materials.h"
+#include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"

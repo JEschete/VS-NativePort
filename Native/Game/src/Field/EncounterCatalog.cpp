@@ -503,10 +503,10 @@ std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
     constexpr unsigned kDamageTypes = 4, kCostTypes = 8, kMaterials = 8;
     if (result.blade.category != static_cast<int>(weapon) ||
         result.blade.id != source.blade || result.grip.id != source.grip ||
-        result.blade.weaponModelId != source.model ||
+        result.blade.weapon_model_id != source.model ||
         result.grip.category != source.grip_category ||
-        static_cast<unsigned char>(result.blade.damageType) >= kDamageTypes ||
-        static_cast<unsigned char>(result.blade.costType) >= kCostTypes ||
+        result.blade.damage_type >= kDamageTypes ||
+        result.blade.cost_type >= kCostTypes ||
         static_cast<unsigned char>(result.material) >= kMaterials ||
         std::ranges::any_of(result.gems,
                             [](const auto& gem) { return gem.id != 0; })) {

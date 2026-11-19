@@ -16,7 +16,7 @@ struct Items_InventoryShield;
 struct Items_InventoryWeapon;
 struct Items_MiscItemStack;
 
-#include "Items/Weapons.h"
+#include "Items/ItemRecords.hpp"
 
 // decomp: vs_itemCategories (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:155)
 enum Items_ItemCategory {
@@ -80,7 +80,7 @@ struct Items_InventoryBlade {
     char reserved10Bit5 : 3;
     char reserved11;
     u_short opaque12;
-    Items_WeaponRange range;
+    VS::Items::WeaponRange range;
     signed char classes[8];
     signed char affinities[8];
     u_short material;

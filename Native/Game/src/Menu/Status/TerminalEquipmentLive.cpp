@@ -121,8 +121,8 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
     const bool absent =
         equipment == kWeapon
             ? part >= 3 && part - 3 >= static_cast<std::uint8_t>(
-                                           actor->weapon.grip.gemSlots)
-            : part > static_cast<std::uint8_t>(actor->shield.base.gemSlots);
+                                           actor->weapon.grip.gem_slots)
+            : part > static_cast<std::uint8_t>(actor->shield.base.gem_slots);
     auto* row = Invoke([=] {
       Framework::LiveItemRowsHost items;
       return equipment == kWeapon

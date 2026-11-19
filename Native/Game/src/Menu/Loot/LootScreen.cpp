@@ -1,9 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Items/Inventory.h"
-#include "Items/Weapons.h"
-#include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
+
+#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
+#include "Legacy/Psx.h"
+#include "Menu/Loot/LootInventory.h"
 
 // decomp: D_8010A6B7 (D_8010A6B7@src/MENU/MENUB.PRG/260.c)
 char Menu_Loot_previewedLoot;

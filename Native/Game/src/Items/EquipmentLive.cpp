@@ -96,78 +96,70 @@ void BuildLiveShieldStatsFromParts(Items_ShieldLoadout* target,
 
 // decomp: BATTLE.PRG _applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1080)
 void BuildLiveAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target,
-                                     const Items_AccessoryInit* source) {
+                                     const VS::Items::AccessoryInit* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildAccessoryStatsFromPart");
     return;
   }
   auto accessory = Typed(*target);
-  BuildAccessoryStatsFromPart(accessory, Typed(*source));
+  BuildAccessoryStatsFromPart(accessory, *source);
   Commit(*target, accessory);
 }
 
 // decomp: BATTLE.PRG _applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1105)
 void BuildLiveArmorStatsFromPart(Items_ArmorLoadout* target,
-                                 const Items_ArmorInit* source) {
+                                 const VS::Items::ArmorInit* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildArmorStatsFromPart");
     return;
   }
   auto armor = Typed(*target);
-  BuildArmorStatsFromPart(armor, Typed(*source));
+  BuildArmorStatsFromPart(armor, *source);
   Commit(*target, armor);
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1142)
-void ReadLiveInventoryBladeStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
                                  const Items_InventoryBlade* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("ReadInventoryBladeStats");
     return;
   }
-  auto part = Typed(*target);
-  ReadInventoryBladeStats(part, Typed(*source));
-  Commit(*target, part);
+  ReadInventoryBladeStats(*target, Typed(*source));
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGripStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1179)
-void ReadLiveInventoryGripStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryGripStats(VS::Items::EquipmentPart* target,
                                 const Items_InventoryGrip* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("ReadInventoryGripStats");
     return;
   }
-  auto part = Typed(*target);
-  ReadInventoryGripStats(part, Typed(*source));
-  Commit(*target, part);
+  ReadInventoryGripStats(*target, Typed(*source));
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryArmorStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1198)
-void ReadLiveInventoryArmorStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryArmorStats(VS::Items::EquipmentPart* target,
                                  const Items_InventoryArmor* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("ReadInventoryArmorStats");
     return;
   }
-  auto part = Typed(*target);
-  ReadInventoryArmorStats(part, Typed(*source));
-  Commit(*target, part);
+  ReadInventoryArmorStats(*target, Typed(*source));
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGemStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1235)
-void ReadLiveInventoryGemStats(Items_EquipmentPartStats* target,
+void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
                                const Items_InventoryGem* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("ReadInventoryGemStats");
     return;
   }
-  auto part = Typed(*target);
-  ReadInventoryGemStats(part, Typed(*source));
-  Commit(*target, part);
+  ReadInventoryGemStats(*target, Typed(*source));
 }
 
 // decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:1257)
@@ -290,52 +282,52 @@ void EquipLiveAshleyAccessory(const Items_InventoryArmor* accessory) {
 // decomp: BATTLE.PRG vs_battle_copyUiBladeStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1435)
 void WriteLiveInventoryBladeStats(Items_InventoryBlade* target,
-                                  const Items_EquipmentPartStats* source) {
+                                  const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("WriteInventoryBladeStats");
     return;
   }
   auto blade = Typed(*target);
-  WriteInventoryBladeStats(blade, Typed(*source));
+  WriteInventoryBladeStats(blade, *source);
   Commit(*target, blade);
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGripStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1471)
 void WriteLiveInventoryGripStats(Items_InventoryGrip* target,
-                                 const Items_EquipmentPartStats* source) {
+                                 const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("WriteInventoryGripStats");
     return;
   }
   auto grip = Typed(*target);
-  WriteInventoryGripStats(grip, Typed(*source));
+  WriteInventoryGripStats(grip, *source);
   Commit(*target, grip);
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGemStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1489)
 void WriteLiveInventoryGemStats(Items_InventoryGem* target,
-                                const Items_EquipmentPartStats* source) {
+                                const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("WriteInventoryGemStats");
     return;
   }
   auto gem = Typed(*target);
-  WriteInventoryGemStats(gem, Typed(*source));
+  WriteInventoryGemStats(gem, *source);
   Commit(*target, gem);
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiEquipmentStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1509)
 void WriteLiveInventoryArmorStats(Items_InventoryArmor* target,
-                                  const Items_EquipmentPartStats* source) {
+                                  const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("WriteInventoryArmorStats");
     return;
   }
   auto armor = Typed(*target);
-  WriteInventoryArmorStats(armor, Typed(*source));
+  WriteInventoryArmorStats(armor, *source);
   Commit(*target, armor);
 }
 

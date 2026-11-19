@@ -15,7 +15,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Inventory.h"
-#include "Items/Weapons.h"
+#include "Items/ItemRecords.hpp"
 #include "Menu/Container/Storage.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"

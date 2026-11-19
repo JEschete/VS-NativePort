@@ -22,9 +22,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Items/Equipment.h"
 #include "Items/EquipmentAffinity.hpp"
-#include "Items/EquipmentInit.h"
 #include "Items/EquipmentStats.hpp"
 #include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
@@ -37,10 +35,6 @@ namespace VS::Items::Live {
 template <typename Legacy>
 struct TypedRecord;
 
-template <>
-struct TypedRecord<Items_EquipmentPartStats> {
-  using type = EquipmentPart;
-};
 template <>
 struct TypedRecord<Items_WeaponLoadout> {
   using type = WeaponLoadout;
@@ -64,14 +58,6 @@ struct TypedRecord<Items_WeaponSpawnLoadout> {
 template <>
 struct TypedRecord<Items_ShieldSpawnLoadout> {
   using type = ShieldSpawnLoadout;
-};
-template <>
-struct TypedRecord<Items_ArmorInit> {
-  using type = ArmorInit;
-};
-template <>
-struct TypedRecord<Items_AccessoryInit> {
-  using type = AccessoryInit;
 };
 template <>
 struct TypedRecord<Items_InventoryArmor> {
@@ -168,18 +154,6 @@ void Commit(Legacy& legacy, const TypedRecordOf<Legacy>& typed) {
 }
 
 // The fields the typed records name, at the offsets the legacy structs keep.
-static_assert(offsetof(Items_EquipmentPartStats, currentDp) ==
-              offsetof(EquipmentPart, current_dp));
-static_assert(offsetof(Items_EquipmentPartStats, damageType) ==
-              offsetof(EquipmentPart, damage_type));
-static_assert(offsetof(Items_EquipmentPartStats, gemEffects) ==
-              offsetof(EquipmentPart, gem_effects));
-static_assert(offsetof(Items_EquipmentPartStats, range) ==
-              offsetof(EquipmentPart, range));
-static_assert(offsetof(Items_EquipmentPartStats, classes) ==
-              offsetof(EquipmentPart, classes));
-static_assert(offsetof(Items_EquipmentPartStats, affinities) ==
-              offsetof(EquipmentPart, affinities));
 static_assert(offsetof(Items_WeaponLoadout, blade) ==
               offsetof(WeaponLoadout, blade));
 static_assert(offsetof(Items_WeaponLoadout, gems) ==
@@ -232,9 +206,6 @@ static_assert(offsetof(Items_WeaponSpawnLoadout, name) ==
               offsetof(WeaponSpawnLoadout, name));
 static_assert(offsetof(Items_ShieldSpawnLoadout, index) ==
               offsetof(ShieldSpawnLoadout, index));
-static_assert(offsetof(Items_ArmorInit, index) == offsetof(ArmorInit, index));
-static_assert(offsetof(Items_AccessoryInit, index) ==
-              offsetof(AccessoryInit, index));
 static_assert(offsetof(Items_InventoryArmor, types) ==
               offsetof(InventoryArmor, types));
 static_assert(offsetof(Items_InventoryArmor, material) ==

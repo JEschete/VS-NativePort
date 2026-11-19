@@ -6,9 +6,12 @@
 #include <iterator>
 #include <type_traits>
 
+#include "Battle/Action.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
 #include "Battle/DamagePolicies.hpp"
 #include "Battle/Hit.h"
-#include "Items/ItemRecordsLive.hpp"
+#include "Items/ItemRecords.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -56,8 +59,8 @@ std::int16_t LiveApplyDamageGemMultiplier(Battle_ActionDefinition* action,
   Require(action != nullptr && source != nullptr && target != nullptr);
   std::array<Items::EquipmentPart, Items::kWeaponGemCount> weapon{}, shield{};
   for (std::size_t i = 0; i < weapon.size(); ++i) {
-    weapon[i] = Items::Live::Typed(source->weapon.gems[i]);
-    shield[i] = Items::Live::Typed(target->shield.gems[i]);
+    weapon[i] = source->weapon.gems[i];
+    shield[i] = target->shield.gems[i];
   }
   return ApplyDamageGemMultiplier(static_cast<std::uint8_t>(action->type),
                                   damage, weapon, shield);

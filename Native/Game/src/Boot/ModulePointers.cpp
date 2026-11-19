@@ -308,16 +308,15 @@
 #include "Field/Zone.h"
 #include "Input/Controllers.hpp"
 #include "Input/Vibration.hpp"
-#include "Items/Categories.h"
-#include "Items/Equipment.h"
+#include "Items/Categories.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/Inventory.h"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/LootLiveState.hpp"
-#include "Items/Materials.h"
+#include "Items/Materials.hpp"
 #include "Items/TreasureChests.h"
-#include "Items/Weapons.h"
 #include "LegacyFiles.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -388,10 +387,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81C4u, 16u, (void*)&Battle_categoryTargetsBodyParts, sizeof Battle_categoryTargetsBodyParts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81D4u, 16u, (void*)&Battle_categoryTargetActorMasks, sizeof Battle_categoryTargetActorMasks, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E81E4u, 28u, (void*)&Items_weaponCategoryUpperIds, sizeof Items_weaponCategoryUpperIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E81E4u, 28u, (void*)&VS::Items::weaponCategoryUpperIds, sizeof VS::Items::weaponCategoryUpperIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8200u, 4u, (void*)&Battle_limbInjuryStatusIds, sizeof Battle_limbInjuryStatusIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8204u, 16u, (void*)&Battle_limbStatusFlags, sizeof Battle_limbStatusFlags, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8214u, 32u, (void*)&Items_itemCategoryUpperIds, sizeof Items_itemCategoryUpperIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8214u, 32u, (void*)&VS::Items::itemCategoryUpperIds, sizeof VS::Items::itemCategoryUpperIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8234u, 32u, (void*)&Battle_hitFunctions, sizeof Battle_hitFunctions, 4u, sizeof Battle_hitFunctions[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8254u, 160u, (void*)&Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions, 4u, sizeof Battle_attackPrerequisiteFunctions[0]},
     {"BATTLE/BATTLE.PRG", 0x800E82F4u, 24u, (void*)&Battle_bladePpDamageBonuses, sizeof Battle_bladePpDamageBonuses, 1u, 1u},
@@ -429,7 +428,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates, 4u, sizeof Field_gimmickModelTemplates[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC4u, 4u, (void*)&VS::Content::assetQueuePeakUsage, sizeof VS::Content::assetQueuePeakUsage, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E8FC8u, 8u, (void*)&Items_weaponMaterialPaletteIndices, sizeof Items_weaponMaterialPaletteIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8FC8u, 8u, (void*)&VS::Items::weaponMaterialPaletteIndices, sizeof VS::Items::weaponMaterialPaletteIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FD0u, 96u, (void*)&Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9030u, 96u, (void*)&Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9090u, 12u, (void*)&Actors_drawnWeaponAnimationBases, sizeof Actors_drawnWeaponAnimationBases, 1u, 1u},

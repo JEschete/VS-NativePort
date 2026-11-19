@@ -12,7 +12,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Items/Categories.h"
+#include "Items/Categories.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
@@ -27,9 +27,10 @@ Items_Inventory VS::Items::inventory;
 // decomp: vs_main_inventoryIndices (vs_main_inventoryIndices@SLUS_010.40)
 Items_InventoryIndices VS::Items::inventoryIndices;
 
-static_assert(std::extent_v<decltype(Items_itemCategoryUpperIds)> ==
+static_assert(std::extent_v<decltype(VS::Items::itemCategoryUpperIds)> ==
               VS::Items::kItemIdCategoryCount);
-static_assert(sizeof(Items_itemCategoryUpperIds[0]) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Items::itemCategoryUpperIds[0]) ==
+              sizeof(std::uint32_t));
 
 namespace VS::Items {
 namespace {
@@ -68,7 +69,7 @@ const Items_Inventory& OrAshleyInventory(const Items_Inventory* inventory) {
 // (src/BATTLE/BATTLE.PRG/146C.c:9646)
 int CountLiveInventoryItem(int id) {
   const std::span<const std::uint32_t, kItemIdCategoryCount> upper_ids(
-      Items_itemCategoryUpperIds);
+      VS::Items::itemCategoryUpperIds);
   return InventoryItemCount(id, upper_ids, Typed(VS::Items::inventory));
 }
 

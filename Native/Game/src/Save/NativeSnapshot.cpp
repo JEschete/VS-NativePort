@@ -99,18 +99,16 @@ void ApplyWordIds(const IdSet& ids, int (&words)[N]) {
 }
 
 template <class V>
-void Fields(Items_WeaponRange& r, V&& v) {
+void Fields(VS::Items::WeaponRange& r, V&& v) {
   v("range", r.range);
-  v("second_range", r.secondRange);
-  v("third_range", r.thirdRange);
-  Bits shape{static_cast<unsigned>(r.attackShape) & kThreeBitMask,
-             kThreeBitMask};
-  Bits angle{static_cast<unsigned>(r.attackShapeAngle) & kFiveBitMask,
-             kFiveBitMask};
+  v("second_range", r.second_range);
+  v("third_range", r.third_range);
+  Bits shape{r.AttackShape(), kThreeBitMask};
+  Bits angle{r.AttackShapeAngle(), kFiveBitMask};
   v("shape", shape);
   v("angle", angle);
-  r.attackShape = static_cast<char>(shape.value);
-  r.attackShapeAngle = static_cast<char>(angle.value);
+  r.SetAttackShape(static_cast<std::uint8_t>(shape.value));
+  r.SetAttackShapeAngle(static_cast<std::uint8_t>(angle.value));
 }
 
 template <class V>

@@ -1,6 +1,6 @@
 #pragma once
+#include "Items/ItemRecords.hpp"
 
-struct Items_EquipmentPartStats;
 struct Items_WeaponLoadout;
 struct Items_ShieldLoadout;
 struct Items_ArmorLoadout;
@@ -11,11 +11,11 @@ namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
 // These entries own no allocations or statics: neither MENU4 reload nor cold
 // reset needs a new reset hook, and neither may release another module's
 // storage.
-void FormatLiveBladeDescription(Items_EquipmentPartStats* blade,
+void FormatLiveBladeDescription(VS::Items::EquipmentPart* blade,
                                 char* menu_text[], int* row_types);
-void FormatLiveGripDescription(Items_EquipmentPartStats* grip,
+void FormatLiveGripDescription(VS::Items::EquipmentPart* grip,
                                char* menu_text[], int* row_types);
-void CopyLiveGemDescription(Items_EquipmentPartStats* gem, char* menu_text[],
+void CopyLiveGemDescription(VS::Items::EquipmentPart* gem, char* menu_text[],
                             int* row_types);
 char* SelectLiveWeaponComponent(int row, Items_WeaponLoadout* weapon);
 char* SelectLiveShieldComponent(int row, Items_ShieldLoadout* shield);

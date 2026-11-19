@@ -17,7 +17,7 @@
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
-#include "Items/Equipment.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 
 namespace {

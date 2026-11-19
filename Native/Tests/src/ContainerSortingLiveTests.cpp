@@ -121,10 +121,9 @@ TEST_CASE(
   initial.types.fill(kReserved);
   initial.classes.fill(kReserved);
   initial.affinities.fill(kReserved);
-  Items_EquipmentPartStats target{};
-  items::Live::Commit(target, initial);
+  auto target = initial;
   sorting::CopyLiveEquipmentStats(&target, kBlade, kLastBlade);
-  const auto projected = items::Live::Typed(target);
+  const auto& projected = target;
   CHECK(projected.id == kFlaggedGem);
   CHECK(projected.material == kFlaggedGem);
   CHECK(projected.strength == kNegative);
@@ -134,7 +133,7 @@ TEST_CASE(
   Menu_Container_containerData = &fixture.replacement;
   fixture.replacement.items.blades[kLastBlade].id = kLowMaterial;
   sorting::CopyLiveEquipmentStats(&target, kBlade, kLastBlade);
-  CHECK(items::Live::Typed(target).id == kLowMaterial);
+  CHECK(target.id == kLowMaterial);
 }
 
 TEST_CASE(
@@ -146,18 +145,18 @@ TEST_CASE(
   fixture.owner.items.armor[0].strength = kPositive;
   fixture.owner.items.gems[kLastGem].strength = kNegative;
   fixture.owner.items.gems[kLastGem].gemEffects = kRawFlaggedByte;
-  Items_EquipmentPartStats target{};
-  target.currentDp = kWideMaterial;
+  VS::Items::EquipmentPart target{};
+  target.current_dp = kWideMaterial;
   sorting::CopyLiveEquipmentStats(&target, kGrip, 0);
-  CHECK(items::Live::Typed(target).strength == kNegative);
-  CHECK(target.currentDp == kWideMaterial);
+  CHECK(target.strength == kNegative);
+  CHECK(target.current_dp == kWideMaterial);
   sorting::CopyLiveEquipmentStats(&target, kArmor, 0);
-  CHECK(items::Live::Typed(target).strength == kPositive);
+  CHECK(target.strength == kPositive);
   target.category = kHighMaterial;
   sorting::CopyLiveEquipmentStats(&target, kGem, kLastGem);
-  CHECK(items::Live::Typed(target).strength == kNegative);
-  CHECK(items::Live::Typed(target).gem_effects == kFlaggedGem);
-  CHECK(items::Live::Typed(target).category == kHighMaterial);
+  CHECK(target.strength == kNegative);
+  CHECK(target.gem_effects == kFlaggedGem);
+  CHECK(target.category == kHighMaterial);
 }
 
 TEST_CASE(

@@ -30,7 +30,7 @@
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Categories.h"
+#include "Items/Categories.hpp"
 #include "Items/Inventory.h"
 #include "Menu/Files.h"
 #include "Menu/FilesLiveState.hpp"
@@ -144,9 +144,9 @@ struct MenuContentFixture {
       : menu(fixture), root(menu.root / "content") {
     constexpr std::array<unsigned, 8> kBounds{96,  127, 254, 261,
                                               308, 323, 458, 512};
-    std::copy_n(Items_itemCategoryUpperIds, previous_bounds.size(),
+    std::copy_n(VS::Items::itemCategoryUpperIds, previous_bounds.size(),
                 previous_bounds.begin());
-    std::copy(kBounds.begin(), kBounds.end(), Items_itemCategoryUpperIds);
+    std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
     AddMaps();
     AddAreaMap();
     AddBattleBounds(kBounds);
@@ -213,7 +213,7 @@ struct MenuContentFixture {
   void AddBattleBounds(const std::array<unsigned, 8>& bounds) {
     bool found = false;
     for (const auto& slice : VS::Content::ModuleDataEntries()) {
-      if (slice.target != &Items_itemCategoryUpperIds) continue;
+      if (slice.target != &VS::Items::itemCategoryUpperIds) continue;
       std::vector<std::uint8_t> battle;
       Put(battle, slice.offset, bounds);
       Add(slice.module, battle, 10000);
@@ -226,7 +226,7 @@ struct MenuContentFixture {
   ~MenuContentFixture() {
     service.Restore();
     std::copy(previous_bounds.begin(), previous_bounds.end(),
-              Items_itemCategoryUpperIds);
+              VS::Items::itemCategoryUpperIds);
   }
 
   void Add(std::string_view name, std::span<const std::uint8_t> bytes,

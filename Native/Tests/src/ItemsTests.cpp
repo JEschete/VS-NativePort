@@ -17,7 +17,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-#include "Items/Categories.h"
+#include "Items/Categories.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
@@ -204,10 +204,11 @@ struct LiveItemsState {
   Battle_ActorStats stats{};
 
   LiveItemsState() {
-    std::copy(std::begin(Items_itemCategoryUpperIds),
-              std::end(Items_itemCategoryUpperIds), saved_upper_ids.begin());
-    std::fill(std::begin(Items_itemCategoryUpperIds),
-              std::end(Items_itemCategoryUpperIds), 0U);
+    std::copy(std::begin(VS::Items::itemCategoryUpperIds),
+              std::end(VS::Items::itemCategoryUpperIds),
+              saved_upper_ids.begin());
+    std::fill(std::begin(VS::Items::itemCategoryUpperIds),
+              std::end(VS::Items::itemCategoryUpperIds), 0U);
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     VS::Items::miscItemInvoked = 0;
@@ -226,7 +227,7 @@ struct LiveItemsState {
     Field_roomData = saved_room;
     Battle_characterState = saved_character;
     std::copy(saved_upper_ids.begin(), saved_upper_ids.end(),
-              std::begin(Items_itemCategoryUpperIds));
+              std::begin(VS::Items::itemCategoryUpperIds));
   }
 };
 
@@ -252,7 +253,7 @@ items::EquipmentPart MakePart(std::uint16_t id, std::int8_t rating) {
   part.cost_type = 2;
   part.cost = 12;
   part.material = 4;
-  part.opaque14 = 9;
+  part.recovery_delay = 9;
   part.gem_slots = 2;
   part.index = 5;
   part.range = {10, 20, 30, 0x2D};
@@ -682,7 +683,7 @@ TEST_CASE("Inventory blades and grips read into part records",
   expected.cost = 13;
   expected.damage_type = 2;
   expected.cost_type = 1;
-  expected.opaque14 = 0x34;
+  expected.recovery_delay = 0x34;
   expected.range = {1, 2, 3, 0x2C};
   expected.index = 4;
   expected.classes = {1, 2, 3, 4, 5, 6, 0, 44};
@@ -2552,7 +2553,7 @@ constexpr int CategoryId(ItemCategory category) {
 TEST_CASE("Ashley's live inventory counts item ids", "[items-slice][items]") {
   LiveItemsState state;
   std::copy(kUpperIds.begin(), kUpperIds.end(),
-            std::begin(Items_itemCategoryUpperIds));
+            std::begin(VS::Items::itemCategoryUpperIds));
   items::InventoryContents counted{};
   counted.blades[3].id = 7;
   counted.misc[1] = {55, 9, 0};
