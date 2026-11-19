@@ -25,7 +25,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -36,6 +36,12 @@ namespace {
 constexpr int kStatusIconChain = -2;  // original byte offset -8
 constexpr int kLeaderChain = -1;
 constexpr int kPreviewActor = 1;
+// decomp: limbStatuses (src/MENU/MENU4.PRG/120.c:290), the condition labels
+// indexed by LiveLimbCondition (120.c:1213, 1258, 1288). The original's
+// trailing NULL only padded the table.
+constexpr std::array<const char*, kLimbConditionCount> kLimbStatuses{
+    "DYING", "BAD", "AVERAGE", "GOOD", "EXCELLENT",
+};
 LimbPanelState panel_state;
 StatusEffectNavigationState navigation_state;
 std::uint64_t refused_calls = 0;
@@ -73,15 +79,15 @@ void Report(std::string_view call, const LimbControllerResult& result) {
 [[nodiscard]] std::expected<Battle_LimbStats*, LimbControllerError>
 SelectedLimb() {
   const auto slot = std::bit_cast<std::int32_t>(
-      static_cast<std::uint32_t>(Menu_Status_selectedActor) - 1U);
+      static_cast<std::uint32_t>(selectedActor) - 1U);
   Battle_ActorStats* const stats = StatsOf(slot);
   if (stats == nullptr) {
     return std::unexpected(LimbControllerError::kMissingActor);
   }
-  if (Menu_Status_selectedElement >= kStatusLimbSlots) {
+  if (selectedElement >= kStatusLimbSlots) {
     return std::unexpected(LimbControllerError::kInvalidLimb);
   }
-  return &stats->limbs[Menu_Status_selectedElement];
+  return &stats->limbs[selectedElement];
 }
 
 [[nodiscard]] std::span<const std::uint8_t> TextAt(
@@ -191,11 +197,8 @@ class LivePanel final : public LimbPanelHost {
   }
   bool DrawCondition(std::uint8_t condition, std::int32_t position,
                      std::optional<std::uint32_t> color) override {
-    if (condition >= kLimbConditionCount ||
-        Menu_Status_limbStatuses[condition] == nullptr) {
-      return false;
-    }
-    DrawLabel(Menu_Status_limbStatuses[condition], position, color);
+    if (condition >= kLimbConditionCount) return false;
+    DrawLabel(kLimbStatuses[condition], position, color);
     return true;
   }
   bool DrawIndicator(const LimbIndicatorRequest& request) override {
@@ -227,7 +230,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
   void PlayChangeSound() override { Menu::PlayChangeSound(); }
   bool ShowStatusDescription(std::uint8_t effect) override {
     const auto text = IndexedText(
-        Menu_Status_statusStrings,
+        statusStrings,
         static_cast<std::size_t>(Text_Menu4_status_Index_strDown) + effect);
     if (text.empty()) return false;
     Framework::SetLiveInformationMessageText(text);
@@ -240,11 +243,11 @@ class LiveNavigation final : public StatusEffectNavigationHost {
 };
 
 [[nodiscard]] LimbPanelFrame PanelFrame() {
-  return {.selected_actor = Menu_Status_selectedActor,
+  return {.selected_actor = selectedActor,
           .selection_and_dimming =
               VS::Menu::Framework::menuMemory.limb_selection_and_dimming,
-          .fade_screen = Menu_Status_fadeScreen,
-          .background_first = Menu_Status_drawBackgroundFirst,
+          .fade_screen = fadeScreen,
+          .background_first = drawBackgroundFirst,
           .row_offsets = VS::Menu::Framework::rowAnimationSteps};
 }
 [[nodiscard]] std::expected<std::int32_t, LimbControllerError> UpdateLivePanel(
@@ -282,11 +285,11 @@ class LiveSelection final : public SelectedLimbHost {
 };
 
 [[nodiscard]] StatusEffectNavigationFrame NavigationFrame() {
-  return {.selected_element = Menu_Status_selectedElement,
+  return {.selected_element = selectedElement,
           .cursor_color =
               static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
-          .yaw = Menu_Status_xPos,
-          .pitch = Menu_Status_yPos,
+          .yaw = screenXPos,
+          .pitch = screenYPos,
           .pressed = VS::Input::buttonsPressed,
           .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
           .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
@@ -294,10 +297,10 @@ class LiveSelection final : public SelectedLimbHost {
           .stick_y = VS::Input::stickPosBuf.r_stick_y};
 }
 void StoreNavigationFrame(const StatusEffectNavigationFrame& frame) {
-  Menu_Status_selectedElement = frame.selected_element;
+  selectedElement = frame.selected_element;
   VS::Menu::Framework::cursorColor = static_cast<char>(frame.cursor_color);
-  Menu_Status_xPos = frame.yaw;
-  Menu_Status_yPos = frame.pitch;
+  screenXPos = frame.yaw;
+  screenYPos = frame.pitch;
 }
 }  // namespace
 
@@ -374,11 +377,10 @@ void LiveShowSelectedLimbCondition() {
   const SelectedLimbText text{
       .name = IndexedText(Battle_statusStrings, limb->nameIndex),
       .condition = IndexedText(
-          Menu_Status_statusStrings,
+          statusStrings,
           static_cast<std::size_t>(Text_Menu4_status_Index_critical) +
               static_cast<std::size_t>(condition)),
-      .format =
-          TextAt(Menu_Status_statusStrings, Text_Menu4_status_Offset_values)};
+      .format = TextAt(statusStrings, Text_Menu4_status_Offset_values)};
   if (text.name.empty() || text.condition.empty() || text.format.empty()) {
     Refuse("ShowSelectedLimbCondition", LimbControllerError::kInvalidText);
     return;
@@ -389,8 +391,8 @@ void LiveShowSelectedLimbCondition() {
       reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
       Framework::kStringBufferBytes);
   Report("ShowSelectedLimbCondition",
-         ShowSelectedLimbCondition(Menu_Status_selectedElement, text, arguments,
-                                   output, host));
+         ShowSelectedLimbCondition(selectedElement, text, arguments, output,
+                                   host));
 }
 // decomp: _renderSelectedLimbStats (MENU4.PRG 120.c:2246).
 void LivePopulateSelectedLimbDefense() {
@@ -403,7 +405,7 @@ void LivePopulateSelectedLimbDefense() {
   LiveSelection host;
   Report(
       "PopulateSelectedLimbDefense",
-      PopulateSelectedLimbDefense(Menu_Status_selectedElement,
+      PopulateSelectedLimbDefense(selectedElement,
                                   {.affinities = std::span(limb->affinities),
                                    .damage_types = std::span(limb->types)},
                                   VS::Menu::Framework::equipmentStats, host));
@@ -412,7 +414,7 @@ void LivePopulateSelectedLimbDefense() {
 void ResetLiveLimbControllersModuleData() {
   panel_state = {};
   navigation_state = {};
-  Menu_Status_selectedElement = 0;
+  selectedElement = 0;
 }
 const LimbPanelState& LiveLimbPanelControllerState() { return panel_state; }
 const StatusEffectNavigationState& LiveStatusEffectNavigationControllerState() {

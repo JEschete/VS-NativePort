@@ -19,7 +19,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/MagicCosts.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "State/StateFlags.hpp"
@@ -601,7 +601,7 @@ struct TeleportLiveFixture {
   char saved_display_cost = VS::Menu::Framework::displayActionCost;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<char, 48> saved_states{};
-  std::array<u_short, 1599> saved_strings{};
+  std::array<std::uint16_t, magic::kTeleportationStringWords> saved_strings{};
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -612,9 +612,9 @@ struct TeleportLiveFixture {
   TeleportLiveFixture() {
     std::copy_n(VS::State::stateFlags.save_point_states, 48,
                 saved_states.begin());
-    std::copy_n(Menu_Magic_teleportationStrings, 1599, saved_strings.begin());
+    std::ranges::copy(magic::teleportationStrings, saved_strings.begin());
     std::fill_n(VS::State::stateFlags.save_point_states, 48, char{0});
-    std::fill_n(Menu_Magic_teleportationStrings, 1599, u_short{0});
+    std::ranges::fill(magic::teleportationStrings, std::uint16_t{0});
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
@@ -635,7 +635,7 @@ struct TeleportLiveFixture {
     std::copy(saved_states.begin(), saved_states.end(),
               VS::State::stateFlags.save_point_states);
     std::copy(saved_strings.begin(), saved_strings.end(),
-              Menu_Magic_teleportationStrings);
+              magic::teleportationStrings);
     VS::Input::settings = saved_settings;
     VS::Menu::Framework::menuMemory = saved_memory;
     VS::Menu::Framework::menuItems = saved_items;

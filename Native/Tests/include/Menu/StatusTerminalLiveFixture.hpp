@@ -37,7 +37,7 @@
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
@@ -284,8 +284,8 @@ struct Fixture {
       saved_model_workspace{*VS::Render::ModelWorkspace()};
   AssetStateRestore saved_assets;
   AudioRestore saved_audio;
-  ArrayRestore<u_short, std::size(Menu_Status_statusStrings)> saved_status_text{
-      Menu_Status_statusStrings};
+  ArrayRestore<std::uint16_t, std::size(st::statusStrings)> saved_status_text{
+      st::statusStrings};
   ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{
       Battle_statusStrings};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
@@ -452,12 +452,12 @@ struct Fixture {
     std::fill_n(VS::Menu::Framework::itemHelp,
                 equipment_detail_tests::kHelpEntries, u_short{4000});
     VS::Menu::Framework::itemHelp[4000] = 0xE751;
-    std::ranges::fill(Menu_Status_statusStrings, u_short{0xE7E7});
-    std::fill_n(Menu_Status_statusStrings, 61, u_short{400});
-    Menu_Status_statusStrings[400] = 0xE741;
-    Menu_Status_statusStrings[253] = 0x00FF;
-    Menu_Status_statusStrings[254] = 0xFF8F;
-    Menu_Status_statusStrings[255] = 0xE701;
+    std::ranges::fill(st::statusStrings, std::uint16_t{0xE7E7});
+    std::fill_n(st::statusStrings, 61, std::uint16_t{400});
+    st::statusStrings[400] = 0xE741;
+    st::statusStrings[253] = 0x00FF;
+    st::statusStrings[254] = 0xFF8F;
+    st::statusStrings[255] = 0xE701;
     std::ranges::fill(Battle_statusStrings, u_short{0xE7E7});
     Battle_statusStrings[1] = 400;
     Battle_statusStrings[400] = 0xE731;

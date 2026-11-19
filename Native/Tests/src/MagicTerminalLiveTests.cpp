@@ -21,7 +21,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
@@ -81,20 +81,20 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
       saved_restrictions{VS::Menu::Framework::actionRestrictions};
   ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
       saved_actions{Battle_actionDefinitions};
-  ArrayRestore<u_short, std::size(Menu_Magic_magicStrings)> saved_magic{
-      Menu_Magic_magicStrings};
-  ArrayRestore<u_short, std::size(Menu_Magic_teleportationStrings)>
-      saved_teleport{Menu_Magic_teleportationStrings};
+  ArrayRestore<std::uint16_t, std::size(magic::magicStrings)> saved_magic{
+      magic::magicStrings};
+  ArrayRestore<std::uint16_t, std::size(magic::teleportationStrings)>
+      saved_teleport{magic::teleportationStrings};
   ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_titles{
       VS::Menu::menuStrings};
-  ArrayRestore<char, std::size(Menu_Magic_warlockSpellIds)> saved_warlock{
-      Menu_Magic_warlockSpellIds};
-  ArrayRestore<char, std::size(Menu_Magic_shamanSpellIds)> saved_shaman{
-      Menu_Magic_shamanSpellIds};
-  ArrayRestore<char, std::size(Menu_Magic_sorcererSpellIds)> saved_sorcerer{
-      Menu_Magic_sorcererSpellIds};
-  ArrayRestore<char, std::size(Menu_Magic_enchanterSpellIds)> saved_enchanter{
-      Menu_Magic_enchanterSpellIds};
+  ArrayRestore<std::uint8_t, std::size(magic::warlockSpellIds)> saved_warlock{
+      magic::warlockSpellIds};
+  ArrayRestore<std::uint8_t, std::size(magic::shamanSpellIds)> saved_shaman{
+      magic::shamanSpellIds};
+  ArrayRestore<std::uint8_t, std::size(magic::sorcererSpellIds)> saved_sorcerer{
+      magic::sorcererSpellIds};
+  ArrayRestore<std::uint8_t, std::size(magic::enchanterSpellIds)>
+      saved_enchanter{magic::enchanterSpellIds};
   ArrayRestore<std::uint8_t,
                std::size(VS::Menu::Framework::cursorBrightnessAnimation)>
       saved_brightness{VS::Menu::Framework::cursorBrightnessAnimation};
@@ -127,11 +127,11 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     framework::ResetLiveMainMenuStatics();
   }
   void InitializeStrings() {
-    for (auto text : {std::span<u_short>(Menu_Magic_magicStrings),
-                      std::span<u_short>(Menu_Magic_teleportationStrings)}) {
-      std::ranges::fill(text, u_short{0});
+    for (auto text : {std::span<std::uint16_t>(magic::magicStrings),
+                      std::span<std::uint16_t>(magic::teleportationStrings)}) {
+      std::ranges::fill(text, std::uint16_t{0});
       std::fill_n(text.begin(), kStringIndices,
-                  static_cast<u_short>(kTextOffset));
+                  static_cast<std::uint16_t>(kTextOffset));
       text[kTextOffset] = 0xE701;
     }
     std::ranges::fill(VS::Menu::menuStrings, std::uint16_t{0});
@@ -139,12 +139,12 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::menuStrings[64] = 0xE701;
   }
   void InitializeSpells() {
-    const std::array<std::span<char>, 4> schools{
-        Menu_Magic_warlockSpellIds, Menu_Magic_shamanSpellIds,
-        Menu_Magic_sorcererSpellIds, Menu_Magic_enchanterSpellIds};
+    const std::array<std::span<std::uint8_t>, 4> schools{
+        magic::warlockSpellIds, magic::shamanSpellIds, magic::sorcererSpellIds,
+        magic::enchanterSpellIds};
     for (std::size_t school = 0; school < schools.size(); ++school) {
-      std::ranges::fill(schools[school], char{0});
-      schools[school][0] = static_cast<char>(kActions[school]);
+      std::ranges::fill(schools[school], std::uint8_t{0});
+      schools[school][0] = static_cast<std::uint8_t>(kActions[school]);
       auto& action = Battle_actionDefinitions[kActions[school]];
       action.unlocked = 1;
       action.name[0] = 2;

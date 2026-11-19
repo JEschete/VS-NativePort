@@ -11,7 +11,7 @@
 
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/DetailTransitionsLive.hpp"
 #include "Menu/StatusTransitionsWorld.hpp"
 
@@ -23,8 +23,8 @@ using equipment_detail_tests::ArrayRestore;
 using equipment_detail_tests::ValueRestore;
 
 struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
-  ArrayRestore<u_short, std::size(Menu_Status_statusStrings)> saved_status{
-      Menu_Status_statusStrings};
+  ArrayRestore<std::uint16_t, std::size(status::statusStrings)> saved_status{
+      status::statusStrings};
   ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)> saved_hands{
       VS::Menu::Framework::weaponHands};
   vs_test::status_components::World text;
@@ -34,8 +34,8 @@ struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
     std::memcpy(names.data(), text.names.data(), text.names.size());
     std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
     Battle_stringContext = {};
-    std::fill_n(Menu_Status_statusStrings, 48, u_short{74});
-    Menu_Status_statusStrings[74] = 0xE701;
+    std::fill_n(status::statusStrings, 48, u_short{74});
+    status::statusStrings[74] = 0xE701;
   }
 };
 

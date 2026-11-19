@@ -14,7 +14,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BattleAbilitiesTerminal.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -52,28 +52,22 @@ void Refuse(std::string_view reason) {
                     reason);
 }
 
-char LegacyByte(int value) {
-  return std::bit_cast<char>(static_cast<std::uint8_t>(value));
-}
-
 std::span<const std::uint8_t> TextBytes(std::span<const std::uint16_t> words) {
   return {reinterpret_cast<const std::uint8_t*>(words.data()),
           words.size_bytes()};
 }
 
-std::span<char> LearnedActions(AbilityKind kind) {
-  return kind == AbilityKind::kChain
-             ? std::span(Menu_BattleAbilities_unlockedChainAbilities)
-             : std::span(Menu_BattleAbilities_unlockedDefenseAbilities);
+std::span<std::uint8_t> LearnedActions(AbilityKind kind) {
+  return kind == AbilityKind::kChain ? std::span(unlockedChainAbilities)
+                                     : std::span(unlockedDefenseAbilities);
 }
 
 char* MenuText(std::size_t offset) {
-  if (offset >= std::size(Menu_BattleAbilities_battleAbilityStrings)) {
+  if (offset >= std::size(battleAbilityStrings)) {
     Refuse("ability terminal text offset outside its table");
     return nullptr;
   }
-  return reinterpret_cast<char*>(Menu_BattleAbilities_battleAbilityStrings +
-                                 offset);
+  return reinterpret_cast<char*>(battleAbilityStrings + offset);
 }
 
 class LiveAssignmentHost final : public AssignmentHost {
@@ -88,10 +82,10 @@ class LiveAssignmentHost final : public AssignmentHost {
          type != AbilityMenuType::kDefense)) {
       return std::nullopt;
     }
-    return static_cast<std::uint8_t>(LearnedActions(
+    return LearnedActions(
         type == AbilityMenuType::kChain
             ? AbilityKind::kChain
-            : AbilityKind::kDefense)[static_cast<std::size_t>(index)]);
+            : AbilityKind::kDefense)[static_cast<std::size_t>(index)];
   }
   std::span<std::uint8_t> Mappings(AbilityMenuType type) override {
     if (type == AbilityMenuType::kChain) {
@@ -120,12 +114,10 @@ class LiveAssignmentHost final : public AssignmentHost {
     }
   }
   std::span<const std::uint16_t> AbilityText() const override {
-    if (Menu_BattleAbilities_abilityText == nullptr) return {};
-    const auto capacity =
-        Core::Memory::LivePayloadCapacity(Menu_BattleAbilities_abilityText);
+    if (abilityText == nullptr) return {};
+    const auto capacity = Core::Memory::LivePayloadCapacity(abilityText);
     if (!capacity) return {};
-    return {Menu_BattleAbilities_abilityText,
-            *capacity / sizeof(std::uint16_t)};
+    return {abilityText, *capacity / sizeof(std::uint16_t)};
   }
   bool ShowRow(const AssignmentRow& row,
                std::span<const std::uint16_t> name) override {
@@ -188,8 +180,8 @@ class LiveAssignmentHost final : public AssignmentHost {
             .pressed_down = (pressed & kDown) != 0};
   }
   void ReleaseAbilityText() override {
-    Core::Memory::FreeLiveFromHighEnd(Menu_BattleAbilities_abilityText);
-    Menu_BattleAbilities_abilityText = nullptr;
+    Core::Memory::FreeLiveFromHighEnd(abilityText);
+    abilityText = nullptr;
   }
   void RememberCursor(AbilityMenuType type, AbilityCursor cursor) override {
     const auto slot = static_cast<std::size_t>(type) * kPointersPerRow;
@@ -230,7 +222,7 @@ class LiveListHost final : public AbilityListHost {
   }
   void StoreLearnedAction(AbilityKind kind, int index,
                           std::uint8_t action) override {
-    LearnedActions(kind)[static_cast<std::size_t>(index)] = LegacyByte(action);
+    LearnedActions(kind)[static_cast<std::size_t>(index)] = action;
   }
   void CreateRows(AbilityKind kind,
                   std::span<const LearnedAbility> rows) override {
@@ -242,16 +234,14 @@ class LiveListHost final : public AbilityListHost {
     for (std::size_t row = 0; row < rows.size(); ++row) {
       const auto description = static_cast<std::size_t>(description_base) +
                                rows[row].description_slot;
-      const auto offset =
-          Menu_BattleAbilities_battleAbilityStrings[description];
-      if (offset >= std::size(Menu_BattleAbilities_battleAbilityStrings)) {
+      const auto offset = battleAbilityStrings[description];
+      if (offset >= std::size(battleAbilityStrings)) {
         Refuse("learned ability description offset outside its owner");
         return;
       }
       text[row * kPointersPerRow] = reinterpret_cast<std::uint16_t*>(
           Battle_actionDefinitions[rows[row].action].name);
-      text[row * kPointersPerRow + 1] =
-          Menu_BattleAbilities_battleAbilityStrings + offset;
+      text[row * kPointersPerRow + 1] = battleAbilityStrings + offset;
     }
     LiveCreateAbilityRows(static_cast<int>(rows.size()),
                           static_cast<int>(kind == AbilityKind::kChain
@@ -311,8 +301,8 @@ class LiveScreenHost final : public AbilityScreenHost {
     const auto index = row.kind == AbilityKind::kChain
                            ? Text_Menu2_battleAbilities_Index_chainAbilities
                            : Text_Menu2_battleAbilities_Index_defenseAbilities;
-    const auto offset = Menu_BattleAbilities_battleAbilityStrings[index];
-    if (offset >= std::size(Menu_BattleAbilities_battleAbilityStrings)) {
+    const auto offset = battleAbilityStrings[index];
+    if (offset >= std::size(battleAbilityStrings)) {
       Refuse("ability shortcut category text is outside its table");
       return false;
     }
@@ -322,8 +312,7 @@ class LiveScreenHost final : public AbilityScreenHost {
          .y = row.y,
          .w = row.width,
          .background_width = row.background_width},
-        TextBytes(std::span(Menu_BattleAbilities_battleAbilityStrings)
-                      .subspan(offset)));
+        TextBytes(std::span(battleAbilityStrings).subspan(offset)));
     item.selected = 1;
     return true;
   }
@@ -402,18 +391,15 @@ void LiveToggleButtonAssignment(int type, int button, int ability_index) {
 // decomp binding: _abilityMenu (src/MENU/MENU2.PRG/64.c:217).
 int LiveUpdateAssignments() {
   AbilityRowsState rows{
-      .count = static_cast<std::uint8_t>(Menu_BattleAbilities_abilityCount),
-      .menu_state = Menu_BattleAbilities_abilityMenuState,
-      .type = static_cast<AbilityMenuType>(
-          static_cast<std::uint8_t>(Menu_BattleAbilities_selectedAbilityType)),
-      .cursor = {.highlighted = Menu_BattleAbilities_highlightedAbility,
-                 .first = static_cast<std::uint8_t>(
-                     Menu_BattleAbilities_firstAbility)}};
+      .count = menuAbilityCount,
+      .menu_state = abilityMenuState,
+      .type = static_cast<AbilityMenuType>(selectedAbilityType),
+      .cursor = {.highlighted = highlightedAbility, .first = firstAbility}};
   LiveAssignmentHost host;
   const int result = UpdateAssignments(rows, g_assignments, host);
-  Menu_BattleAbilities_abilityMenuState = rows.menu_state;
-  Menu_BattleAbilities_highlightedAbility = rows.cursor.highlighted;
-  Menu_BattleAbilities_firstAbility = LegacyByte(rows.cursor.first);
+  abilityMenuState = rows.menu_state;
+  highlightedAbility = rows.cursor.highlighted;
+  firstAbility = static_cast<std::uint8_t>(rows.cursor.first);
   return result;
 }
 
@@ -454,8 +440,8 @@ void ResetLiveAbilityTerminalModuleState() {
   g_chain = {};
   g_defense = {};
   g_screen_animation = {};
-  std::ranges::fill(LearnedActions(AbilityKind::kChain), char{0});
-  std::ranges::fill(LearnedActions(AbilityKind::kDefense), char{0});
+  std::ranges::fill(LearnedActions(AbilityKind::kChain), std::uint8_t{0});
+  std::ranges::fill(LearnedActions(AbilityKind::kDefense), std::uint8_t{0});
 }
 
 void ResetLiveAbilityTerminalColdState() {

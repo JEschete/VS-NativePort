@@ -13,7 +13,7 @@
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 
 namespace hud_rendering_fixture {
 class LiveShortcut {
@@ -50,12 +50,12 @@ class LiveShortcut {
   LiveShortcut(LiveShortcut&&) = delete;
   LiveShortcut& operator=(LiveShortcut&&) = delete;
 
-  static void SpellClass(std::size_t spell_class, char* first,
+  static void SpellClass(std::size_t spell_class, std::uint8_t* first,
                          std::uint8_t count) {
     auto counts = std::span(Battle_spellClassCounts);
     auto ids = std::span(Battle_spellClassSpellIds);
     counts[spell_class] = count;
-    ids[spell_class] = reinterpret_cast<u_char*>(first);
+    ids[spell_class] = first;
   }
 
  private:
@@ -64,8 +64,8 @@ class LiveShortcut {
   std::array<u_char, 4> counts_{};
   std::array<u_char*, 4> ids_{};
   std::array<char, 16> chain_{}, defense_{};
-  std::array<char, 20> warlock_{}, sorcerer_{};
-  std::array<char, 8> shaman_{}, enchanter_{};
+  std::array<std::uint8_t, 20> warlock_{}, sorcerer_{};
+  std::array<std::uint8_t, 8> shaman_{}, enchanter_{};
   std::array<std::uint8_t, 256> unlocked_{};
 
   void Capture() {
@@ -73,10 +73,10 @@ class LiveShortcut {
     std::ranges::copy(Battle_spellClassSpellIds, ids_.begin());
     std::ranges::copy(Battle_chainAbilityActionIds, chain_.begin());
     std::ranges::copy(Battle_defenseAbilityActionIds, defense_.begin());
-    std::ranges::copy(Menu_Magic_warlockSpellIds, warlock_.begin());
-    std::ranges::copy(Menu_Magic_sorcererSpellIds, sorcerer_.begin());
-    std::ranges::copy(Menu_Magic_shamanSpellIds, shaman_.begin());
-    std::ranges::copy(Menu_Magic_enchanterSpellIds, enchanter_.begin());
+    std::ranges::copy(VS::Menu::Magic::warlockSpellIds, warlock_.begin());
+    std::ranges::copy(VS::Menu::Magic::sorcererSpellIds, sorcerer_.begin());
+    std::ranges::copy(VS::Menu::Magic::shamanSpellIds, shaman_.begin());
+    std::ranges::copy(VS::Menu::Magic::enchanterSpellIds, enchanter_.begin());
     for (std::size_t index = 0; index < unlocked_.size(); ++index) {
       unlocked_.at(index) = static_cast<std::uint8_t>(
           std::span(Battle_actionDefinitions)[index].unlocked);
@@ -87,10 +87,11 @@ class LiveShortcut {
     std::ranges::copy(ids_, std::begin(Battle_spellClassSpellIds));
     std::ranges::copy(chain_, std::begin(Battle_chainAbilityActionIds));
     std::ranges::copy(defense_, std::begin(Battle_defenseAbilityActionIds));
-    std::ranges::copy(warlock_, std::begin(Menu_Magic_warlockSpellIds));
-    std::ranges::copy(sorcerer_, std::begin(Menu_Magic_sorcererSpellIds));
-    std::ranges::copy(shaman_, std::begin(Menu_Magic_shamanSpellIds));
-    std::ranges::copy(enchanter_, std::begin(Menu_Magic_enchanterSpellIds));
+    std::ranges::copy(warlock_, std::begin(VS::Menu::Magic::warlockSpellIds));
+    std::ranges::copy(sorcerer_, std::begin(VS::Menu::Magic::sorcererSpellIds));
+    std::ranges::copy(shaman_, std::begin(VS::Menu::Magic::shamanSpellIds));
+    std::ranges::copy(enchanter_,
+                      std::begin(VS::Menu::Magic::enchanterSpellIds));
     for (std::size_t index = 0; index < unlocked_.size(); ++index) {
       std::span(Battle_actionDefinitions)[index].unlocked = unlocked_.at(index);
     }

@@ -26,8 +26,8 @@ TEST_CASE(
     "F01358 Live accepts an aliased last spell and leaves later rows unused",
     "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
-  auto* last = std::end(Menu_Magic_warlockSpellIds) - 1;
-  *last = static_cast<char>(255);
+  auto* last = std::end(VS::Menu::Magic::warlockSpellIds) - 1;
+  *last = 255;
   f::LiveShortcut::SpellClass(1, last, 2);
   Battle_actionDefinitions[255].unlocked = 1;
   CHECK(b::LiveShortcutIconBrightness(0) == 0x180);

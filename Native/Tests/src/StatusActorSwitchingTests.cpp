@@ -12,7 +12,7 @@
 #include "Battle/Damage.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/ActorSwitching.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 
@@ -335,7 +335,7 @@ struct LiveActorSlot {
   explicit LiveActorSlot(int slot)
       : slot(slot),
         saved(Battle_actors[slot]),
-        saved_selected(Menu_Status_selectedActor) {
+        saved_selected(st::selectedActor) {
     actor->stats = stats.get();
     Battle_actors[slot] = actor.get();
   }
@@ -345,7 +345,7 @@ struct LiveActorSlot {
   LiveActorSlot& operator=(LiveActorSlot&&) = delete;
   ~LiveActorSlot() {
     Battle_actors[slot] = saved;
-    Menu_Status_selectedActor = saved_selected;
+    st::selectedActor = saved_selected;
   }
 
   int slot;
@@ -369,19 +369,19 @@ struct LiveSwitchScene {
   ~LiveSwitchScene() {
     st::ResetLiveActorSwitchPhase();
     VS::Menu::Framework::menuItems = saved_rows;
-    Menu_Status_animationStep = saved_step;
-    Menu_Status_drawBackgroundFirst = saved_first;
-    Menu_Status_fadeScreen = saved_fade;
-    Menu_Status_delayScreenUpdate = saved_delay;
+    st::screenAnimationStep = saved_step;
+    st::drawBackgroundFirst = saved_first;
+    st::fadeScreen = saved_fade;
+    st::delayScreenUpdate = saved_delay;
   }
 
   std::array<VS::Menu::Framework::MenuRow, VS::Menu::Framework::kRowCount>
       rows{};
   VS::Menu::Framework::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
-  int saved_step = Menu_Status_animationStep;
-  int saved_first = Menu_Status_drawBackgroundFirst;
-  int saved_fade = Menu_Status_fadeScreen;
-  char saved_delay = Menu_Status_delayScreenUpdate;
+  int saved_step = st::screenAnimationStep;
+  int saved_first = st::drawBackgroundFirst;
+  int saved_fade = st::fadeScreen;
+  std::uint8_t saved_delay = st::delayScreenUpdate;
 };
 }  // namespace
 
@@ -391,7 +391,7 @@ TEST_CASE("Live limb and row counts read the actor's stats record",
   live.stats->limbs[0].nameIndex = 4;
   live.stats->limbs[1].nameIndex = 9;
   live.stats->accessory.accessory.id = 7;
-  Menu_Status_selectedActor = 4;
+  st::selectedActor = 4;
   CHECK(st::LiveLimbCount(3) == 2);
   CHECK(st::LiveEquipmentRowCount() == 5);
   CHECK(st::LiveLimbCount(-1) == 0);
@@ -403,28 +403,28 @@ TEST_CASE("Live limb and row counts read the actor's stats record",
 
 TEST_CASE("Live vitals transition and switch keep the copied globals",
           "[status-switching-live]") {
-  const char saved_state = Menu_Status_renderBasicStatsState;
-  const char saved_shown = Menu_Status_initializedActor;
-  const char saved_delay = Menu_Status_basicStatsAnimDelay;
-  const int saved_step = Menu_Status_animationStep;
-  const int saved_first = Menu_Status_drawBackgroundFirst;
-  Menu_Status_initializedActor = 2;
+  const std::uint8_t saved_state = st::renderBasicStatsState;
+  const std::uint8_t saved_shown = st::initializedActor;
+  const std::uint8_t saved_delay = st::basicStatsAnimDelay;
+  const int saved_step = st::screenAnimationStep;
+  const int saved_first = st::drawBackgroundFirst;
+  st::initializedActor = 2;
   st::LiveBeginVitalsTransition(0);
-  CHECK(Menu_Status_renderBasicStatsState == vp::kHiding);
-  CHECK(Menu_Status_basicStatsAnimDelay == 4);
-  CHECK(Menu_Status_initializedActor == 0);
+  CHECK(st::renderBasicStatsState == vp::kHiding);
+  CHECK(st::basicStatsAnimDelay == 4);
+  CHECK(st::initializedActor == 0);
 
   st::ResetLiveActorSwitchPhase();
-  Menu_Status_animationStep = 0;
+  st::screenAnimationStep = 0;
   CHECK(st::LiveAnimateActorSwitch(0) == 0);
-  CHECK(Menu_Status_animationStep == 32);
-  CHECK(Menu_Status_drawBackgroundFirst == 1);
+  CHECK(st::screenAnimationStep == 32);
+  CHECK(st::drawBackgroundFirst == 1);
 
-  Menu_Status_renderBasicStatsState = saved_state;
-  Menu_Status_initializedActor = saved_shown;
-  Menu_Status_basicStatsAnimDelay = saved_delay;
-  Menu_Status_animationStep = saved_step;
-  Menu_Status_drawBackgroundFirst = saved_first;
+  st::renderBasicStatsState = saved_state;
+  st::initializedActor = saved_shown;
+  st::basicStatsAnimDelay = saved_delay;
+  st::screenAnimationStep = saved_step;
+  st::drawBackgroundFirst = saved_first;
 }
 
 TEST_CASE("Live actor switch names only an actor with a record",
@@ -437,24 +437,24 @@ TEST_CASE("Live actor switch names only an actor with a record",
 
   row.x = 7;
   CHECK(st::LiveAnimateActorSwitch(0x10) == 0);
-  CHECK(Menu_Status_selectedActor == 0);
+  CHECK(st::selectedActor == 0);
   CHECK(row.x == 7);
   CHECK(st::LiveAnimateActorSwitch(3) == 0);
-  CHECK(Menu_Status_selectedActor == 3);
+  CHECK(st::selectedActor == 3);
   CHECK(row.x == 7);
   CHECK(st::LiveAnimateActorSwitch(2) == 0);
-  CHECK(Menu_Status_selectedActor == 2);
+  CHECK(st::selectedActor == 2);
   CHECK(row.x == 180);
 }
 
 TEST_CASE("Live vitals refuse a selected actor without a record",
           "[status-switching-live]") {
-  const int saved_selected = Menu_Status_selectedActor;
-  const char saved_slide = Menu_Status_basicStatsAnimState;
-  Menu_Status_selectedActor = 0;
-  Menu_Status_basicStatsAnimState = 3;
+  const int saved_selected = st::selectedActor;
+  const std::uint8_t saved_slide = st::basicStatsAnimState;
+  st::selectedActor = 0;
+  st::basicStatsAnimState = 3;
   st::LiveDrawVitals();
-  CHECK(Menu_Status_basicStatsAnimState == 3);
-  Menu_Status_selectedActor = saved_selected;
-  Menu_Status_basicStatsAnimState = saved_slide;
+  CHECK(st::basicStatsAnimState == 3);
+  st::selectedActor = saved_selected;
+  st::basicStatsAnimState = saved_slide;
 }

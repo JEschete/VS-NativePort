@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 
-#include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
@@ -28,7 +28,7 @@
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -42,7 +42,7 @@ void ResetMainMenuStatics() {
 
 // MENU2.PRG.
 void ResetMenu2Statics() {
-  Menu_BattleAbilities_ResetMenu2Statics();
+  VS::Menu::BattleAbilities::ResetMenu2Statics();
   VS::Menu::BattleAbilities::ResetLiveAbilityFoundationState();
   VS::Menu::BattleAbilities::ResetLiveAbilityTerminalModuleState();
 }
@@ -57,7 +57,7 @@ void ResetMenu3Statics() {
 
 // MENU4.PRG.
 void ResetMenu4Statics() {
-  Menu_Status_ActorStatus_ResetMenu4Statics();
+  VS::Menu::Status::ResetMenu4Statics();
   VS::Menu::Status::ResetLiveActorSwitchPhase();
   VS::Menu::Status::ResetLiveLimbControllersModuleData();
   VS::Menu::Status::ResetLiveTerminalControllersModuleData();

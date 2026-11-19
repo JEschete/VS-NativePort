@@ -46,12 +46,12 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Loot/LootScreen.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
@@ -196,10 +196,10 @@ void InspectActionOptions(PlayerObservationState& state) {
   constexpr std::size_t kWarlockRows = 18, kShamanRows = 6;
   constexpr std::size_t kSorcererRows = 18, kEnchanterRows = 8;
   constexpr std::size_t kBattleAbilityRows = 14;
-  append(Menu_Magic_warlockSpellIds, kWarlockRows, "warlock");
-  append(Menu_Magic_shamanSpellIds, kShamanRows, "shaman");
-  append(Menu_Magic_sorcererSpellIds, kSorcererRows, "sorcerer");
-  append(Menu_Magic_enchanterSpellIds, kEnchanterRows, "enchanter");
+  append(VS::Menu::Magic::warlockSpellIds, kWarlockRows, "warlock");
+  append(VS::Menu::Magic::shamanSpellIds, kShamanRows, "shaman");
+  append(VS::Menu::Magic::sorcererSpellIds, kSorcererRows, "sorcerer");
+  append(VS::Menu::Magic::enchanterSpellIds, kEnchanterRows, "enchanter");
   append(Battle_chainAbilityActionIds, kBattleAbilityRows, "chain");
   append(Battle_defenseAbilityActionIds, kBattleAbilityRows, "defense");
 }
@@ -295,11 +295,10 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   result.list_phase =
       static_cast<unsigned char>(VS::Menu::Framework::itemsListRow);
   result.assignment_phase =
-      static_cast<int>(Menu_BattleAbilities_abilityMenuState);
-  result.assignment_type =
-      static_cast<unsigned char>(Menu_BattleAbilities_selectedAbilityType);
-  result.assignment_selected = Menu_BattleAbilities_highlightedAbility +
-                               Menu_BattleAbilities_firstAbility;
+      static_cast<int>(VS::Menu::BattleAbilities::abilityMenuState);
+  result.assignment_type = VS::Menu::BattleAbilities::selectedAbilityType;
+  result.assignment_selected = VS::Menu::BattleAbilities::highlightedAbility +
+                               VS::Menu::BattleAbilities::firstAbility;
   // The rank selector's cursor and row count (menu memories 12 and 13) persist
   // after the selector closes; consumers pair them with a levelled option.
   constexpr int kRankCursorMemory = 12;

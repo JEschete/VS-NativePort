@@ -282,7 +282,7 @@
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
@@ -530,10 +530,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBD3Cu, 40u, (void*)&Battle_limbDisplaySpriteTexCoords, sizeof Battle_limbDisplaySpriteTexCoords, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD64u, 4u, (void*)&Battle_battleModeIndicatorWobble, sizeof Battle_battleModeIndicatorWobble, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD68u, 8u, (void*)&VS::Menu::Framework::abilityGroupActionRanges, sizeof VS::Menu::Framework::abilityGroupActionRanges, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBD70u, 20u, (void*)&Menu_Magic_warlockSpellIds, sizeof Menu_Magic_warlockSpellIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBD84u, 8u, (void*)&Menu_Magic_shamanSpellIds, sizeof Menu_Magic_shamanSpellIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBD8Cu, 20u, (void*)&Menu_Magic_sorcererSpellIds, sizeof Menu_Magic_sorcererSpellIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBDA0u, 8u, (void*)&Menu_Magic_enchanterSpellIds, sizeof Menu_Magic_enchanterSpellIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBD70u, 20u, (void*)&VS::Menu::Magic::warlockSpellIds, sizeof VS::Menu::Magic::warlockSpellIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBD84u, 8u, (void*)&VS::Menu::Magic::shamanSpellIds, sizeof VS::Menu::Magic::shamanSpellIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBD8Cu, 20u, (void*)&VS::Menu::Magic::sorcererSpellIds, sizeof VS::Menu::Magic::sorcererSpellIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBDA0u, 8u, (void*)&VS::Menu::Magic::enchanterSpellIds, sizeof VS::Menu::Magic::enchanterSpellIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBDA8u, 4u, (void*)&Battle_spellClassCounts, sizeof Battle_spellClassCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBDACu, 16u, (void*)&Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds, 4u, sizeof Battle_spellClassSpellIds[0]},
     {"BATTLE/BATTLE.PRG", 0x800EBDBCu, 16u, (void*)&Battle_chainAbilityActionIds, sizeof Battle_chainAbilityActionIds, 1u, 1u},

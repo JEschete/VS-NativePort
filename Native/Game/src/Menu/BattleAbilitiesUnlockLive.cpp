@@ -14,8 +14,8 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilities.hpp"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -50,9 +50,8 @@ char LegacyByte(int value) {
 }
 
 char* MenuText(std::size_t offset) {
-  return offset < std::size(Menu_BattleAbilities_battleAbilityMenuStrings)
-             ? reinterpret_cast<char*>(
-                   Menu_BattleAbilities_battleAbilityMenuStrings + offset)
+  return offset < std::size(battleAbilityMenuStrings)
+             ? reinterpret_cast<char*>(battleAbilityMenuStrings + offset)
              : nullptr;
 }
 
@@ -115,7 +114,7 @@ class LiveBreakArtHost final : public BreakArtUnlockHost {
   }
   void SetBreakArtMessage(int weapon, std::uint8_t action) override {
     Battle_stringContext.strings[0] =
-        MenuText(Menu_BattleAbilities_battleAbilityMenuStrings[weapon]);
+        MenuText(battleAbilityMenuStrings[weapon]);
     Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
     Framework::SetLiveInformationMessage(
         MenuText(Text_Menu2_battleAbilitiesMenu_Offset_breakArtUnlock));
@@ -250,9 +249,7 @@ class LiveRowsHost final : public AbilityRowsHost {
   void Refuse(std::string_view reason) override {
     BattleAbilities::Refuse(reason);
   }
-  bool HasAbilityText() const override {
-    return Menu_BattleAbilities_abilityText != nullptr;
-  }
+  bool HasAbilityText() const override { return abilityText != nullptr; }
   bool CursorMemoryEnabled() const override {
     return VS::Input::settings.cursor_memory != 0;
   }
@@ -263,13 +260,13 @@ class LiveRowsHost final : public AbilityRowsHost {
   }
   std::optional<std::uint8_t> ActionAt(AbilityMenuType type,
                                        int index) const override {
-    if (!InRange(Menu_BattleAbilities_unlockedChainAbilities, index)) {
+    if (!InRange(unlockedChainAbilities, index)) {
       return std::nullopt;
     }
     const auto* actions = type == AbilityMenuType::kChain
-                              ? Menu_BattleAbilities_unlockedChainAbilities
-                              : Menu_BattleAbilities_unlockedDefenseAbilities;
-    return static_cast<std::uint8_t>(actions[index]);
+                              ? unlockedChainAbilities
+                              : unlockedDefenseAbilities;
+    return actions[index];
   }
   void SetRiskCost(std::uint8_t action) override { LiveSetRiskCost(action); }
   std::span<std::uint16_t> AllocateAbilityText(std::size_t words) override {
@@ -280,13 +277,12 @@ class LiveRowsHost final : public AbilityRowsHost {
   }
   void PublishRows(const AbilityRowsState& state,
                    std::span<std::uint16_t> text) override {
-    Menu_BattleAbilities_abilityCount = LegacyByte(state.count);
-    Menu_BattleAbilities_abilityMenuState = state.menu_state;
-    Menu_BattleAbilities_selectedAbilityType =
-        LegacyByte(static_cast<int>(state.type));
-    Menu_BattleAbilities_highlightedAbility = state.cursor.highlighted;
-    Menu_BattleAbilities_firstAbility = LegacyByte(state.cursor.first);
-    Menu_BattleAbilities_abilityText = text.data();
+    menuAbilityCount = static_cast<std::uint8_t>(state.count);
+    abilityMenuState = state.menu_state;
+    selectedAbilityType = static_cast<std::uint8_t>(state.type);
+    highlightedAbility = state.cursor.highlighted;
+    firstAbility = static_cast<std::uint8_t>(state.cursor.first);
+    abilityText = text.data();
   }
 };
 
@@ -294,8 +290,8 @@ bool CopyOwnedWords(const std::uint16_t* source,
                     std::span<std::uint16_t> destination) {
   const std::array<std::span<const std::byte>, 3> owners{
       std::as_bytes(std::span(Battle_actionDefinitions)),
-      std::as_bytes(std::span(Menu_BattleAbilities_battleAbilityStrings)),
-      std::as_bytes(std::span(Menu_BattleAbilities_battleAbilityMenuStrings))};
+      std::as_bytes(std::span(battleAbilityStrings)),
+      std::as_bytes(std::span(battleAbilityMenuStrings))};
   const auto address = reinterpret_cast<std::uintptr_t>(source);
   for (const auto owner : owners) {
     const auto base = reinterpret_cast<std::uintptr_t>(owner.data());
@@ -343,9 +339,8 @@ int LiveUpdateBreakArtUnlock(int initialize) {
   LiveProgress progress;
   if (initialize != 0) {
     const int weapon = progress.EquippedWeaponCategory();
-    if (InRange(Menu_BattleAbilities_battleAbilityMenuStrings, weapon) &&
-        MenuText(Menu_BattleAbilities_battleAbilityMenuStrings[weapon]) ==
-            nullptr) {
+    if (InRange(battleAbilityMenuStrings, weapon) &&
+        MenuText(battleAbilityMenuStrings[weapon]) == nullptr) {
       Refuse("Break Art category text outside menu table");
       return 1;
     }
@@ -357,8 +352,7 @@ int LiveUpdateBreakArtUnlock(int initialize) {
 // decomp binding: _getAbilityDescription (src/MENU/MENU2.PRG/143C.c:81).
 char* LiveUnlockDescription(int ability) {
   const auto text =
-      UnlockDescription(ability, Menu_BattleAbilities_battleAbilityStrings,
-                        Menu_BattleAbilities_battleAbilityMenuStrings,
+      UnlockDescription(ability, battleAbilityStrings, battleAbilityMenuStrings,
                         Text_Menu2_battleAbilitiesMenu_Offset_unknown1);
   if (text.empty()) {
     Refuse("ability description outside text table");
@@ -400,7 +394,7 @@ void LiveSetRiskCost(int action) {
 // decomp binding: _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64).
 int LiveCreateAbilityRows(int count, int type,
                           std::span<std::uint16_t* const> menu_text) {
-  if (Menu_BattleAbilities_abilityText != nullptr) return 0;
+  if (abilityText != nullptr) return 0;
   if (count <= 0 || count > static_cast<int>(kAbilityCapacity) ||
       menu_text.size() < static_cast<std::size_t>(count) * kPointersPerRow ||
       (type != static_cast<int>(AbilityMenuType::kChain) &&
@@ -421,8 +415,8 @@ int LiveCreateAbilityRows(int count, int type,
 
 // Original _initAbilityMenu ABI (src/MENU/MENU2.PRG/64.c:64, 0x80102928).
 int LiveCreateAbilityRowsEntry(int count, int type, std::uint16_t** menu_text) {
-  if (Menu_BattleAbilities_abilityText != nullptr || menu_text == nullptr ||
-      count <= 0 || count > static_cast<int>(kAbilityCapacity)) {
+  if (abilityText != nullptr || menu_text == nullptr || count <= 0 ||
+      count > static_cast<int>(kAbilityCapacity)) {
     return LiveCreateAbilityRows(count, type, {});
   }
   return LiveCreateAbilityRows(

@@ -20,7 +20,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/ActorSwitching.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
@@ -159,37 +159,35 @@ class LiveActorSwitchHost final : public ActorSwitchHost {
 };
 
 [[nodiscard]] VitalsPanelState LoadVitalsState() {
-  return {
-      .phase = static_cast<std::uint8_t>(Menu_Status_renderBasicStatsState),
-      .slide = static_cast<std::uint8_t>(Menu_Status_basicStatsAnimState),
-      .delay = static_cast<std::uint8_t>(Menu_Status_basicStatsAnimDelay),
-      .shown_actor = static_cast<std::uint8_t>(Menu_Status_initializedActor)};
+  return {.phase = renderBasicStatsState,
+          .slide = basicStatsAnimState,
+          .delay = basicStatsAnimDelay,
+          .shown_actor = initializedActor};
 }
 
 void StoreVitalsState(const VitalsPanelState& state) {
-  Menu_Status_renderBasicStatsState = static_cast<char>(state.phase);
-  Menu_Status_basicStatsAnimState = static_cast<char>(state.slide);
-  Menu_Status_basicStatsAnimDelay = static_cast<char>(state.delay);
-  Menu_Status_initializedActor = static_cast<char>(state.shown_actor);
+  renderBasicStatsState = state.phase;
+  basicStatsAnimState = state.slide;
+  basicStatsAnimDelay = state.delay;
+  initializedActor = state.shown_actor;
 }
 
 [[nodiscard]] ActorSwitchState LoadSwitchState() {
   return {.phase = actor_switch_phase_word,
-          .selected_actor = Menu_Status_selectedActor,
-          .animation_step = Menu_Status_animationStep,
-          .draw_background_first = Menu_Status_drawBackgroundFirst,
-          .fade_screen = Menu_Status_fadeScreen,
-          .delay_screen_update =
-              static_cast<std::uint8_t>(Menu_Status_delayScreenUpdate)};
+          .selected_actor = selectedActor,
+          .animation_step = screenAnimationStep,
+          .draw_background_first = drawBackgroundFirst,
+          .fade_screen = fadeScreen,
+          .delay_screen_update = delayScreenUpdate};
 }
 
 void StoreSwitchState(const ActorSwitchState& state) {
   actor_switch_phase_word = state.phase;
-  Menu_Status_selectedActor = state.selected_actor;
-  Menu_Status_animationStep = state.animation_step;
-  Menu_Status_drawBackgroundFirst = state.draw_background_first;
-  Menu_Status_fadeScreen = state.fade_screen;
-  Menu_Status_delayScreenUpdate = static_cast<char>(state.delay_screen_update);
+  selectedActor = state.selected_actor;
+  screenAnimationStep = state.animation_step;
+  drawBackgroundFirst = state.draw_background_first;
+  fadeScreen = state.fade_screen;
+  delayScreenUpdate = state.delay_screen_update;
 }
 
 [[nodiscard]] VitalsLabelLayout LiveLabelLayout() {
@@ -206,8 +204,8 @@ void StoreSwitchState(const ActorSwitchState& state) {
 
 // The selected actor's slot, (_selectedActor - 1).
 [[nodiscard]] std::int32_t SelectedSlot() {
-  return static_cast<std::int32_t>(
-      static_cast<std::uint32_t>(Menu_Status_selectedActor) - 1U);
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(selectedActor) -
+                                   1U);
 }
 }  // namespace
 
@@ -255,12 +253,11 @@ void LiveDrawVitalBar(int color_index, int current, int max, int xy) {
 // decomp: MENU4.PRG _renderBasicStats (120.c:741).
 void LiveDrawVitals() {
   VitalsPanelState state = LoadVitalsState();
-  const VitalsFrame frame{
-      .selected = VitalsOf(SelectedSlot()),
-      .previous = VitalsOf(static_cast<std::int32_t>(
-          static_cast<std::uint32_t>(Menu_Status_previousActor) - 1U)),
-      .hud_slide_offset = Battle_hudSlideOffset,
-      .labels = LiveLabelLayout()};
+  const VitalsFrame frame{.selected = VitalsOf(SelectedSlot()),
+                          .previous = VitalsOf(static_cast<std::int32_t>(
+                              static_cast<std::uint32_t>(previousActor) - 1U)),
+                          .hud_slide_offset = Battle_hudSlideOffset,
+                          .labels = LiveLabelLayout()};
   LiveVitalsHost host(VitalsChain());
   const bool drawn = DrawVitals(state, frame, host);
   StoreVitalsState(state);

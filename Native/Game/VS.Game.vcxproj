@@ -1728,13 +1728,7 @@
     </ClCompile>
     <ClCompile Include="src\Items\Materials.cpp" />
     <ClCompile Include="src\Items\Recovery.cpp" />
-    <ClCompile Include="src\Menu\BattleAbilities.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Menu\BattleAbilitiesLiveState.cpp" />
     <ClCompile Include="src\Menu\BattleAbilitiesTerminal.cpp" />
     <ClCompile Include="src\Menu\BattleAbilitiesTerminalLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2453,7 +2447,7 @@
     <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
     <ClInclude Include="src\Items\LootLiveState.hpp" />
     <ClInclude Include="src\Items\Materials.hpp" />
-    <ClInclude Include="src\Menu\BattleAbilities.h" />
+    <ClInclude Include="src\Menu\BattleAbilitiesLiveState.hpp" />
     <ClInclude Include="src\Menu\Container\ItemView.hpp" />
     <ClInclude Include="src\Menu\Container\Storage.hpp" />
     <ClInclude Include="src\Menu\FilesLiveState.hpp" />
@@ -2472,7 +2466,7 @@
     <ClInclude Include="src\Menu\Inventory\ItemList.hpp" />
     <ClInclude Include="src\Menu\Loot\LootScreen.hpp" />
     <ClInclude Include="src\Menu\Loot\Paging.hpp" />
-    <ClInclude Include="src\Menu\Magic.h" />
+    <ClInclude Include="src\Menu\Magic.hpp" />
     <ClInclude Include="src\Menu\Manual.h" />
     <ClInclude Include="src\Menu\Map.h" />
     <ClInclude Include="src\Menu\OptionsLiveState.hpp" />
@@ -2483,7 +2477,7 @@
     <ClInclude Include="src\Menu\Score\Encyclopedia.hpp" />
     <ClInclude Include="src\Menu\Score\Records.hpp" />
     <ClInclude Include="src\Menu\Score\ScoreScreen.hpp" />
-    <ClInclude Include="src\Menu\Status\ActorStatus.h" />
+    <ClInclude Include="src\Menu\Status\ActorStatus.hpp" />
     <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp" />
     <ClInclude Include="src\Menu\TextBox.h" />
     <ClInclude Include="src\State\Ashley.hpp" />

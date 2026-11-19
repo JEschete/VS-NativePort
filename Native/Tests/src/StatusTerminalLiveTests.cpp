@@ -108,7 +108,7 @@ TEST_CASE("F02675 Live uses real transition rows and diagnoses missing actors",
   fixture.IdleRows();
   REQUIRE(st::LiveUpdateEquipmentDetails(0) == 0);
   CHECK(st::LiveEquipmentDetailControllerState().phase == 1);
-  Menu_Status_selectedActor = std::numeric_limits<std::int32_t>::min();
+  st::selectedActor = std::numeric_limits<std::int32_t>::min();
   CHECK(st::LiveUpdateEquipmentDetails(0) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
 }
@@ -122,10 +122,10 @@ TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
   CHECK(st::LiveEquipmentListControllerState().phase == 1);
   CHECK(static_cast<std::uint8_t>(VS::Input::settings.cursor_memory) == 0xA7);
-  Menu_Status_selectedStatRow = static_cast<char>(250);
+  st::selectedStatRow = 250;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentListControllerState() == st::EquipmentListState{});
-  CHECK(Menu_Status_selectedStatRow == 0);
+  CHECK(st::selectedStatRow == 0);
   REQUIRE(st::LiveUpdateEquipmentList(257) == 0);
   CHECK(VS::Menu::Framework::menuMemory.selected_equipment == 2);
 }
@@ -133,8 +133,8 @@ TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
 TEST_CASE("F02677 and F02678 Live draw into the registered frame storage",
           "[status-terminal][status-terminal-live][F02677][F02678]") {
   Fixture fixture;
-  Menu_Status_fadeScreen = 1;
-  Menu_Status_drawBackgroundFirst = 0;
+  st::fadeScreen = 1;
+  st::drawBackgroundFirst = 0;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   st::LiveDrawModelSlideFade();
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -154,12 +154,12 @@ TEST_CASE(
     "F02679 Live uses real preview dimensions and rejects missing preview",
     "[status-terminal][status-terminal-live][F02679]") {
   Fixture fixture;
-  Menu_Status_delayScreenUpdate = 2;
+  st::delayScreenUpdate = 2;
   Actors_actorRecords[1]->collisionHeight = 32768;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   st::LiveDrawFrame();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
-  CHECK(Menu_Status_delayScreenUpdate == 1);
+  CHECK(st::delayScreenUpdate == 1);
   CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == -67108864);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data() + 37);
@@ -186,11 +186,10 @@ TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
   Core_Gte_RotTransPers(&point, &before, &cue, &flags);
   REQUIRE(before != 0);
   {
-    equipment_detail_tests::ValueRestore<
-        decltype(Menu_Status_delayScreenUpdate)>
-        delay{Menu_Status_delayScreenUpdate};
+    equipment_detail_tests::ValueRestore<decltype(st::delayScreenUpdate)> delay{
+        st::delayScreenUpdate};
     Fixture fixture;
-    Menu_Status_delayScreenUpdate = 2;
+    st::delayScreenUpdate = 2;
     st::LiveDrawFrame();
   }
   Core_Gte_RotTransPers(&point, &after, &cue, &flags);
@@ -278,7 +277,7 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   REQUIRE(st::LiveUpdateEquipmentDetails(2) == 0);
   REQUIRE(st::LiveUpdateLimbPanel(-1) == 0);
   const auto limb = st::LiveLimbPanelControllerState();
-  Menu_Status_selectedElement = 4;
+  st::selectedElement = 4;
   VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
@@ -287,7 +286,7 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   CHECK(st::LiveLimbPanelControllerState().actor_slot == limb.actor_slot);
   CHECK(st::LiveLimbPanelControllerState().animation_steps ==
         limb.animation_steps);
-  CHECK(Menu_Status_selectedElement == 4);
+  CHECK(st::selectedElement == 4);
   CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
 }
 

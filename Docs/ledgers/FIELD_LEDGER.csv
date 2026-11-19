@@ -17,14 +17,14 @@ T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,All,EventMa
 T00004.000,T00004,_memcardMaskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,Masked card operation failed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1483
 T00004.001,T00004,_memcardMaskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,Masked card operation is pending,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1484
 T00004.002,T00004,_memcardMaskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,Masked card operation completed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1485
-T00005.000,T00005,_renderLimbUiState,0,_renderLimbUiNone,0,,,0,,None,LimbUiMode None,med,declaration-only;source:120.c:1138
-T00005.001,T00005,_renderLimbUiState,1,_renderLimbUiInit,0,,,1,,Init,LimbUiMode Init,med,declaration-only;source:120.c:1138
-T00006.000,T00006,abilityState_e,0,abilitiesNone,0,,,0,,None,RemainingAbilities None,med,declaration-only;source:143C.c:209
-T00006.001,T00006,abilityState_e,1,abilitiesChainOnly,0,,,1,,ChainOnly,RemainingAbilities ChainOnly,med,declaration-only;source:143C.c:210
-T00006.002,T00006,abilityState_e,2,abilitiesDefenseOnly,0,,,2,,DefenseOnly,RemainingAbilities DefenseOnly,med,declaration-only;source:143C.c:211
-T00006.003,T00006,abilityState_e,3,abilitiesBoth,0,,,3,,Both,RemainingAbilities Both,med,declaration-only;source:143C.c:212
-T00007.000,T00007,abilityType,0,abilityTypeChain,0,,,24,,Chain,AbilityType Chain,med,declaration-only;source:64.c:55
-T00007.001,T00007,abilityType,1,abilityTypeDefense,0,,,25,,Defense,AbilityType Defense,med,declaration-only;source:64.c:55
+T00005.000,T00005,_renderLimbUiState,0,_renderLimbUiNone,0,,,0,,None,LimbUiMode None,med,native:no named enumerator; LimbPanelState::phase 0 (idle; LimbControllers.cpp stores the literal) (#441);declaration-only;source:MENU/MENU4.PRG/120.c:1141
+T00005.001,T00005,_renderLimbUiState,1,_renderLimbUiInit,0,,,1,,Init,LimbUiMode Init,med,native:no named enumerator; LimbPanelState::phase 1 (entering; LimbControllers.cpp stores and tests the literal) (#441);declaration-only;source:MENU/MENU4.PRG/120.c:1141
+T00006.000,T00006,abilityState_e,0,abilitiesNone,0,,,0,,None,RemainingAbilities None,med,native:no named enumerator; neither bool set in SelectCategories (no chain or defense ability remains) (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:212
+T00006.001,T00006,abilityState_e,1,abilitiesChainOnly,0,,,1,,ChainOnly,RemainingAbilities ChainOnly,med,native:no named enumerator; only the chain bool set in SelectCategories (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:212
+T00006.002,T00006,abilityState_e,2,abilitiesDefenseOnly,0,,,2,,DefenseOnly,RemainingAbilities DefenseOnly,med,native:no named enumerator; only the defense bool set in SelectCategories (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:212
+T00006.003,T00006,abilityState_e,3,abilitiesBoth,0,,,3,,Both,RemainingAbilities Both,med,native:no named enumerator; both bools set in SelectCategories (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:212
+T00007.000,T00007,abilityType,0,abilityTypeChain,0,,,24,,kChain,AbilityType Chain,med,native:BattleAbilities.hpp AbilityMenuType::kChain (#441);declaration-only;source:MENU/MENU2.PRG/64.c:64
+T00007.001,T00007,abilityType,1,abilityTypeDefense,0,,,25,,kDefense,AbilityType Defense,med,native:BattleAbilities.hpp AbilityMenuType::kDefense (#441);declaration-only;source:MENU/MENU2.PRG/64.c:64
 T00008.000,T00008,actionTypes,0,actionTypeSpell,0,,,1,,Spell,ActionType Spell,med,declaration-only;source:main.h:52
 T00008.001,T00008,actionTypes,1,actionTypeAbility,0,,,2,,Ability,ActionType Ability,med,declaration-only;source:main.h:53
 T00008.002,T00008,actionTypes,2,actionTypeBreakArt,0,,,3,,BreakArt,ActionType BreakArt,med,declaration-only;source:main.h:54
@@ -141,11 +141,11 @@ T00022.002,T00022,lootItemState,2,lootStateNoIndent,0,,,2,,NoIndent,LootItemStat
 T00022.003,T00022,lootItemState,3,lootStateIndent1,0,,,3,,Indent1,LootItemState Indent1,med,declaration-only;source:MENU/MENUB.PRG/260.c:19
 T00022.004,T00022,lootItemState,4,lootStateIndent2,0,,,4,,Indent2,LootItemState Indent2,med,declaration-only;source:MENU/MENUB.PRG/260.c:20
 T00022.005,T00022,lootItemState,5,lootStateIndent3,0,,,5,,Indent3,LootItemState Indent3,med,declaration-only;source:MENU/MENUB.PRG/260.c:21
-T00023.000,T00023,magicSubMenu,0,warlock,0,,,0,,Warlock,MagicSubmenu Warlock,med,declaration-only;source:15AC.c:294
-T00023.001,T00023,magicSubMenu,1,shaman,0,,,1,,Shaman,MagicSubmenu Shaman,med,declaration-only;source:15AC.c:294
-T00023.002,T00023,magicSubMenu,2,sorcerer,0,,,2,,Sorcerer,MagicSubmenu Sorcerer,med,declaration-only;source:15AC.c:294
-T00023.003,T00023,magicSubMenu,3,enchanter,0,,,3,,Enchanter,MagicSubmenu Enchanter,med,declaration-only;source:15AC.c:294
-T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,Teleport,MagicSubmenu Teleport,med,declaration-only;source:15AC.c:294
+T00023.000,T00023,magicSubMenu,0,warlock,0,,,0,,kWarlock,MagicSubmenu Warlock,med,native:MagicMenus.hpp School::kWarlock (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
+T00023.001,T00023,magicSubMenu,1,shaman,0,,,1,,kShaman,MagicSubmenu Shaman,med,native:MagicMenus.hpp School::kShaman (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
+T00023.002,T00023,magicSubMenu,2,sorcerer,0,,,2,,kSorcerer,MagicSubmenu Sorcerer,med,native:MagicMenus.hpp School::kSorcerer (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
+T00023.003,T00023,magicSubMenu,3,enchanter,0,,,3,,kEnchanter,MagicSubmenu Enchanter,med,native:MagicMenus.hpp School::kEnchanter (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
+T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,Teleport,MagicSubmenu Teleport,med,"native:no named enumerator; the constant kSchoolCount (MagicMenus.hpp), which MagicTerminal.cpp RunSelection treats as the teleport row (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294"
 T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,MaskedHandlerResult Error,med,declaration-only;source:MENU/MENU7.PRG/260.c:1630
 T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,MaskedHandlerResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1631
 T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,MaskedHandlerResult Complete,med,declaration-only;source:MENU/MENU7.PRG/260.c:1632
@@ -169,10 +169,10 @@ T00028.006,T00028,menuItems,6,menuItemVibrationOff,0,,,5,,VibrationOff,Disable c
 T00028.007,T00028,menuItems,7,menuItemVibrationOn,0,,,6,,VibrationOn,Enable controller vibration,high,source:22C.c:4234
 T00028.008,T00028,menuItems,8,menuItemSoundStereo,0,,,7,,Stereo,Select stereo sound,high,source:22C.c:4234
 T00029.000,T00029,opcodes,0,wait,0,,,1,,Wait,Wait twice the following byte value in frames,high,source:D4.c:1212
-T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,Warlock,ShortcutMagicMenu Warlock,med,declaration-only;source:15AC.c:204
-T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,Shaman,ShortcutMagicMenu Shaman,med,declaration-only;source:15AC.c:204
-T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,Sorcerer,ShortcutMagicMenu Sorcerer,med,declaration-only;source:15AC.c:204
-T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,Enchanter,ShortcutMagicMenu Enchanter,med,declaration-only;source:15AC.c:204
+T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,Warlock,ShortcutMagicMenu Warlock,med,native:no named enumerator; School::kWarlock after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
+T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,Shaman,ShortcutMagicMenu Shaman,med,native:no named enumerator; School::kShaman after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
+T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,Sorcerer,ShortcutMagicMenu Sorcerer,med,native:no named enumerator; School::kSorcerer after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
+T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,Enchanter,ShortcutMagicMenu Enchanter,med,native:no named enumerator; School::kEnchanter after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
 T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,Unavailable,Save slot cannot be used,high,source:22C.c:132
 T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,Available,Save slot is available,high,source:22C.c:132
 T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contains a temporary save,high,source:22C.c:132
@@ -188,14 +188,14 @@ T00034.001,T00034,state,1,handleInput,0,,,1,,kHandleInput,EquipmentSlotMenuState
 T00034.002,T00034,state,2,loadObject,0,,,2,,kLoadObject,EquipmentSlotMenuState LoadObject,med,native:EquipmentMenus.hpp EquipmentSlotStep::kLoadObject (#441);declaration-only;source:16C.c:345
 T00034.003,T00034,state,3,waitMenuReady,0,,,3,,kWaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,native:EquipmentMenus.hpp EquipmentSlotStep::kWaitMenuReady (#441);declaration-only;source:16C.c:345
 T00035.000,T00035,state,0,init,0,,,0,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00036.000,T00036,state,0,init,0,,,0,,Init,SpellListMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00036.001,T00036,state,1,handleInput,0,,,1,,HandleInput,SpellListMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00036.002,T00036,state,2,returnIfready,0,,,2,,ReturnIfready,SpellListMenuState ReturnIfready,med,declaration-only;source:84.c:615
+T00036.000,T00036,state,0,init,0,,,0,,kInit,SpellListMenuState Init,med,native:MagicMenus.hpp SpellMenuStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
+T00036.001,T00036,state,1,handleInput,0,,,1,,kInput,SpellListMenuState HandleInput,med,native:MagicMenus.hpp SpellMenuStep::kInput (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
+T00036.002,T00036,state,2,returnIfready,0,,,2,,kReturn,SpellListMenuState ReturnIfready,med,native:MagicMenus.hpp SpellMenuStep::kReturn (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
 T00037.000,T00037,state,0,init,0,,,0,,Init,ArtSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00037.001,T00037,state,1,waitForSelection,0,,,1,,WaitForSelection,ArtSelectionState WaitForSelection,med,declaration-only;source:30.c:106
 T00037.002,T00037,state,2,returnSelection,0,,,2,,ReturnSelection,ArtSelectionState ReturnSelection,med,declaration-only;source:30.c:106
-T00038.000,T00038,state,0,init,0,,,0,,Init,AbilityListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00038.001,T00038,state,1,abilityMenu,0,,,1,,AbilityMenu,AbilityListState AbilityMenu,med,declaration-only;source:64.c:219
+T00038.000,T00038,state,0,init,0,,,0,,kInit,AbilityListState Init,med,native:BattleAbilitiesTerminal.hpp AbilityListPhase::kInit (#441);declaration-only;source:MENU/MENU2.PRG/64.c:503 and 64.c:564
+T00038.001,T00038,state,1,abilityMenu,0,,,1,,kAssignments,AbilityListState AbilityMenu,med,native:BattleAbilitiesTerminal.hpp AbilityListPhase::kAssignments (#441);declaration-only;source:MENU/MENU2.PRG/64.c:503 and 64.c:564
 T00039.000,T00039,state,0,init,0,,,0,,Init,DiscardMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00039.001,T00039,state,1,discardOneInit,0,,,1,,DiscardOneInit,DiscardMenuState DiscardOneInit,med,declaration-only;source:items1.h:1191
 T00039.002,T00039,state,2,discardMultipleInit,0,,,2,,DiscardMultipleInit,DiscardMenuState DiscardMultipleInit,med,declaration-only;source:items1.h:1192
@@ -291,33 +291,33 @@ T00053.001,T00053,state,1,waitTitle,0,,,1,,kShortcutWaitTitle,MiscItemShortcutSt
 T00053.002,T00053,state,2,initItemRows,0,,,2,,kShortcutPopulate,MiscItemShortcutState InitItemRows,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutPopulate (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00053.003,T00053,state,3,waitForInput,0,,,3,,kShortcutInput,MiscItemShortcutState WaitForInput,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutInput (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00053.004,T00053,state,4,quit,0,,,4,,kShortcutClose,MiscItemShortcutState Quit,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutClose (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00054.000,T00054,state,0,initTeleport,0,,,0,,InitTeleport,TeleportMenuState InitTeleport,med,declaration-only;source:15AC.c:24
-T00054.001,T00054,state,1,handleInput,0,,,1,,HandleInput,TeleportMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00054.002,T00054,state,2,returnIfReady,0,,,2,,ReturnIfReady,TeleportMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
-T00055.000,T00055,state,0,none,0,,,0,,None,MagicMenuState None,med,declaration-only;source:15AC.c:169
-T00055.001,T00055,state,1,handleShortcut,0,,,3,,HandleShortcut,MagicMenuState HandleShortcut,med,declaration-only;source:15AC.c:170
-T00055.002,T00055,state,2,initSubmenu,0,,,4,,InitSubmenu,MagicMenuState InitSubmenu,med,declaration-only;source:15AC.c:171
-T00055.003,T00055,state,3,handleSubmenu,0,,,5,,HandleSubmenu,MagicMenuState HandleSubmenu,med,declaration-only;source:15AC.c:172
-T00055.004,T00055,state,4,initWarlockMenu,0,,,6,,InitWarlockMenu,MagicMenuState InitWarlockMenu,med,declaration-only;source:15AC.c:173
-T00055.005,T00055,state,5,warlockMenu,0,,,7,,WarlockMenu,MagicMenuState WarlockMenu,med,declaration-only;source:15AC.c:174
-T00055.006,T00055,state,6,initShamanMenu,0,,,8,,InitShamanMenu,MagicMenuState InitShamanMenu,med,declaration-only;source:15AC.c:175
-T00055.007,T00055,state,7,shamanMenu,0,,,9,,ShamanMenu,MagicMenuState ShamanMenu,med,declaration-only;source:15AC.c:176
-T00055.008,T00055,state,8,initSorcererMenu,0,,,10,,InitSorcererMenu,MagicMenuState InitSorcererMenu,med,declaration-only;source:15AC.c:177
-T00055.009,T00055,state,9,sorcererMenu,0,,,11,,SorcererMenu,MagicMenuState SorcererMenu,med,declaration-only;source:15AC.c:178
-T00055.010,T00055,state,10,initEnchanterMenu,0,,,12,,InitEnchanterMenu,MagicMenuState InitEnchanterMenu,med,declaration-only;source:15AC.c:179
-T00055.011,T00055,state,11,enchanterMenu,0,,,13,,EnchanterMenu,MagicMenuState EnchanterMenu,med,declaration-only;source:15AC.c:180
-T00055.012,T00055,state,12,teleportMenu,0,,,14,,TeleportMenu,MagicMenuState TeleportMenu,med,declaration-only;source:15AC.c:181
-T00055.013,T00055,state,13,exitToMainMenu,0,,,15,,ExitToMainMenu,MagicMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
-T00055.014,T00055,state,14,executeMagic,0,,,16,,ExecuteMagic,MagicMenuState ExecuteMagic,med,declaration-only;source:15AC.c:183
-T00055.015,T00055,state,15,exit,0,,,17,,Exit,MagicMenuState Exit,med,declaration-only;source:15AC.c:184
-T00056.000,T00056,state,0,init,0,,,0,,Init,WarlockMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00056.001,T00056,state,1,handleInput,0,,,1,,HandleInput,WarlockMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00056.002,T00056,state,2,returnIfReady,0,,,2,,ReturnIfReady,WarlockMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
-T00056.003,T00056,state,3,levelledSpellInit,0,,,3,,LevelledSpellInit,WarlockMenuState LevelledSpellInit,med,declaration-only;source:84.c:166
-T00056.004,T00056,state,4,levelledSpell,0,,,4,,LevelledSpell,WarlockMenuState LevelledSpell,med,declaration-only;source:84.c:166
-T00057.000,T00057,state,0,init,0,,,0,,Init,ShamanMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00057.001,T00057,state,1,handleInput,0,,,1,,HandleInput,ShamanMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00057.002,T00057,state,2,returnIfReady,0,,,2,,ReturnIfReady,ShamanMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00054.000,T00054,state,0,initTeleport,0,,,0,,kInit,TeleportMenuState InitTeleport,med,native:MagicCosts.hpp TeleportStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:25
+T00054.001,T00054,state,1,handleInput,0,,,1,,kHandleInput,TeleportMenuState HandleInput,med,native:MagicCosts.hpp TeleportStep::kHandleInput (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:25
+T00054.002,T00054,state,2,returnIfReady,0,,,2,,kReturnIfReady,TeleportMenuState ReturnIfReady,med,native:MagicCosts.hpp TeleportStep::kReturnIfReady (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:25
+T00055.000,T00055,state,0,none,0,,,0,,kNone,MagicMenuState None,med,native:MagicTerminal.cpp Step::kNone (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.001,T00055,state,1,handleShortcut,0,,,3,,kShortcut,MagicMenuState HandleShortcut,med,native:MagicTerminal.cpp Step::kShortcut (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.002,T00055,state,2,initSubmenu,0,,,4,,kInitSubmenu,MagicMenuState InitSubmenu,med,native:MagicTerminal.cpp Step::kInitSubmenu (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.003,T00055,state,3,handleSubmenu,0,,,5,,kSubmenu,MagicMenuState HandleSubmenu,med,native:MagicTerminal.cpp Step::kSubmenu (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.004,T00055,state,4,initWarlockMenu,0,,,6,,kInitWarlock,MagicMenuState InitWarlockMenu,med,native:MagicTerminal.cpp Step::kInitWarlock (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.005,T00055,state,5,warlockMenu,0,,,7,,kWarlock,MagicMenuState WarlockMenu,med,native:MagicTerminal.cpp Step::kWarlock (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.006,T00055,state,6,initShamanMenu,0,,,8,,kInitShaman,MagicMenuState InitShamanMenu,med,native:MagicTerminal.cpp Step::kInitShaman (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.007,T00055,state,7,shamanMenu,0,,,9,,kShaman,MagicMenuState ShamanMenu,med,native:MagicTerminal.cpp Step::kShaman (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.008,T00055,state,8,initSorcererMenu,0,,,10,,kInitSorcerer,MagicMenuState InitSorcererMenu,med,native:MagicTerminal.cpp Step::kInitSorcerer (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.009,T00055,state,9,sorcererMenu,0,,,11,,kSorcerer,MagicMenuState SorcererMenu,med,native:MagicTerminal.cpp Step::kSorcerer (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.010,T00055,state,10,initEnchanterMenu,0,,,12,,kInitEnchanter,MagicMenuState InitEnchanterMenu,med,native:MagicTerminal.cpp Step::kInitEnchanter (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.011,T00055,state,11,enchanterMenu,0,,,13,,kEnchanter,MagicMenuState EnchanterMenu,med,native:MagicTerminal.cpp Step::kEnchanter (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.012,T00055,state,12,teleportMenu,0,,,14,,kTeleport,MagicMenuState TeleportMenu,med,native:MagicTerminal.cpp Step::kTeleport (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.013,T00055,state,13,exitToMainMenu,0,,,15,,kExitToMain,MagicMenuState ExitToMainMenu,med,native:MagicTerminal.cpp Step::kExitToMain (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.014,T00055,state,14,executeMagic,0,,,16,,kExecute,MagicMenuState ExecuteMagic,med,native:MagicTerminal.cpp Step::kExecute (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00055.015,T00055,state,15,exit,0,,,17,,kExit,MagicMenuState Exit,med,native:MagicTerminal.cpp Step::kExit (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:168
+T00056.000,T00056,state,0,init,0,,,0,,kInit,WarlockMenuState Init,med,native:MagicMenus.hpp SpellMenuStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/84.c:179
+T00056.001,T00056,state,1,handleInput,0,,,1,,kInput,WarlockMenuState HandleInput,med,native:MagicMenus.hpp SpellMenuStep::kInput (#441);declaration-only;source:MENU/MENU0.PRG/84.c:179
+T00056.002,T00056,state,2,returnIfReady,0,,,2,,kReturn,WarlockMenuState ReturnIfReady,med,native:MagicMenus.hpp SpellMenuStep::kReturn (#441);declaration-only;source:MENU/MENU0.PRG/84.c:179
+T00056.003,T00056,state,3,levelledSpellInit,0,,,3,,kInitRanks,WarlockMenuState LevelledSpellInit,med,native:MagicMenus.hpp SpellMenuStep::kInitRanks (#441);declaration-only;source:MENU/MENU0.PRG/84.c:179
+T00056.004,T00056,state,4,levelledSpell,0,,,4,,kRanks,WarlockMenuState LevelledSpell,med,native:MagicMenus.hpp SpellMenuStep::kRanks (#441);declaration-only;source:MENU/MENU0.PRG/84.c:179
+T00057.000,T00057,state,0,init,0,,,0,,kInit,ShamanMenuState Init,med,native:MagicMenus.hpp SpellMenuStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
+T00057.001,T00057,state,1,handleInput,0,,,1,,kInput,ShamanMenuState HandleInput,med,native:MagicMenus.hpp SpellMenuStep::kInput (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
+T00057.002,T00057,state,2,returnIfReady,0,,,2,,kReturn,ShamanMenuState ReturnIfReady,med,native:MagicMenus.hpp SpellMenuStep::kReturn (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
 T00058.000,T00058,state,0,none,0,,,0,,None,BreakArtsMenuState None,med,declaration-only;source:15AC.c:169
 T00058.001,T00058,state,1,init,0,,,3,,Init,BreakArtsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00058.002,T00058,state,2,artsInit,0,,,4,,ArtsInit,BreakArtsMenuState ArtsInit,med,declaration-only;source:30.c:363
@@ -327,31 +327,31 @@ T00058.005,T00058,state,5,weaponCategoryMenu,0,,,7,,WeaponCategoryMenu,BreakArts
 T00058.006,T00058,state,6,exitToMainMenu,0,,,8,,ExitToMainMenu,BreakArtsMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
 T00058.007,T00058,state,7,executeArt,0,,,9,,ExecuteArt,BreakArtsMenuState ExecuteArt,med,declaration-only;source:30.c:368
 T00058.008,T00058,state,8,exit,0,,,10,,Exit,BreakArtsMenuState Exit,med,declaration-only;source:15AC.c:184
-T00059.000,T00059,state,0,init,0,,,0,,Init,AbilityUnlockState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00059.001,T00059,state,1,bothRemaining,0,,,1,,BothRemaining,AbilityUnlockState BothRemaining,med,declaration-only;source:143C.c:129
-T00059.002,T00059,state,2,chainOnly,0,,,2,,ChainOnly,AbilityUnlockState ChainOnly,med,declaration-only;source:143C.c:130
-T00059.003,T00059,state,3,defenseOnly,0,,,3,,DefenseOnly,AbilityUnlockState DefenseOnly,med,declaration-only;source:143C.c:131
-T00059.004,T00059,state,4,unlockChainAbility,0,,,4,,UnlockChainAbility,AbilityUnlockState UnlockChainAbility,med,declaration-only;source:143C.c:132
-T00059.005,T00059,state,5,unlockDefenseAbility,0,,,5,,UnlockDefenseAbility,AbilityUnlockState UnlockDefenseAbility,med,declaration-only;source:143C.c:133
-T00059.006,T00059,state,6,showMessage,0,,,6,,ShowMessage,AbilityUnlockState ShowMessage,med,declaration-only;source:143C.c:134
-T00059.007,T00059,state,7,reinit,0,,,7,,Reinit,AbilityUnlockState Reinit,med,declaration-only;source:143C.c:135
-T00060.000,T00060,state,0,init,0,,,0,,Init,UnlockNotificationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00060.001,T00060,state,1,breakArtInit,0,,,1,,BreakArtInit,UnlockNotificationState BreakArtInit,med,declaration-only;source:143C.c:424
-T00060.002,T00060,state,2,breakArtUnlock,0,,,2,,BreakArtUnlock,UnlockNotificationState BreakArtUnlock,med,declaration-only;source:143C.c:424
-T00060.003,T00060,state,3,abilityInit,0,,,3,,AbilityInit,UnlockNotificationState AbilityInit,med,declaration-only;source:143C.c:424
-T00060.004,T00060,state,4,abilityUnlock,0,,,4,,AbilityUnlock,UnlockNotificationState AbilityUnlock,med,declaration-only;source:143C.c:424
-T00060.005,T00060,state,5,exit,0,,,5,,Exit,UnlockNotificationState Exit,med,declaration-only;source:15AC.c:184
-T00061.000,T00061,state,0,init,0,,,0,,Init,AssignmentState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00061.001,T00061,state,1,waitReady,0,,,16,,WaitReady,AssignmentState WaitReady,med,declaration-only;source:64.c:219
-T00061.002,T00061,state,2,abilityMenu,0,,,17,,AbilityMenu,AssignmentState AbilityMenu,med,declaration-only;source:64.c:219
-T00062.000,T00062,state,0,none,0,,,0,,None,BattleAbilitiesMenuState None,med,declaration-only;source:15AC.c:169
-T00062.001,T00062,state,1,init,0,,,3,,Init,BattleAbilitiesMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00062.002,T00062,state,2,selectTypeInit,0,,,4,,SelectTypeInit,BattleAbilitiesMenuState SelectTypeInit,med,declaration-only;source:64.c:661
-T00062.003,T00062,state,3,selectType,0,,,5,,SelectType,BattleAbilitiesMenuState SelectType,med,declaration-only;source:64.c:662
-T00062.004,T00062,state,4,chain,0,,,6,,Chain,BattleAbilitiesMenuState Chain,med,declaration-only;source:64.c:663
-T00062.005,T00062,state,5,defense,0,,,7,,Defense,BattleAbilitiesMenuState Defense,med,declaration-only;source:64.c:664
-T00062.006,T00062,state,6,exitToMainMenu,0,,,8,,ExitToMainMenu,BattleAbilitiesMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
-T00062.007,T00062,state,7,exitToBattle,0,,,9,,ExitToBattle,BattleAbilitiesMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00059.000,T00059,state,0,init,0,,,0,,kInit,AbilityUnlockState Init,med,native:BattleAbilities.hpp AbilityUnlockPhase::kInit (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.001,T00059,state,1,bothRemaining,0,,,1,,kBothRemaining,AbilityUnlockState BothRemaining,med,native:BattleAbilities.hpp AbilityUnlockPhase::kBothRemaining (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.002,T00059,state,2,chainOnly,0,,,2,,kChainOnly,AbilityUnlockState ChainOnly,med,native:BattleAbilities.hpp AbilityUnlockPhase::kChainOnly (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.003,T00059,state,3,defenseOnly,0,,,3,,kDefenseOnly,AbilityUnlockState DefenseOnly,med,native:BattleAbilities.hpp AbilityUnlockPhase::kDefenseOnly (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.004,T00059,state,4,unlockChainAbility,0,,,4,,kUnlockChain,AbilityUnlockState UnlockChainAbility,med,native:BattleAbilities.hpp AbilityUnlockPhase::kUnlockChain (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.005,T00059,state,5,unlockDefenseAbility,0,,,5,,kUnlockDefense,AbilityUnlockState UnlockDefenseAbility,med,native:BattleAbilities.hpp AbilityUnlockPhase::kUnlockDefense (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.006,T00059,state,6,showMessage,0,,,6,,kShowMessage,AbilityUnlockState ShowMessage,med,native:BattleAbilities.hpp AbilityUnlockPhase::kShowMessage (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00059.007,T00059,state,7,reinit,0,,,7,,kReinit,AbilityUnlockState Reinit,med,native:BattleAbilities.hpp AbilityUnlockPhase::kReinit (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
+T00060.000,T00060,state,0,init,0,,,0,,Init,UnlockNotificationState Init,med,native:no named enumerator; the literal case 0 in BattleAbilitiesUnlock.cpp's step switch (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00060.001,T00060,state,1,breakArtInit,0,,,1,,kCheckBreakArt,UnlockNotificationState BreakArtInit,med,native:BattleAbilitiesUnlock.cpp kCheckBreakArt (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00060.002,T00060,state,2,breakArtUnlock,0,,,2,,kUpdateBreakArt,UnlockNotificationState BreakArtUnlock,med,native:BattleAbilitiesUnlock.cpp kUpdateBreakArt (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00060.003,T00060,state,3,abilityInit,0,,,3,,kCheckAbility,UnlockNotificationState AbilityInit,med,native:BattleAbilitiesUnlock.cpp kCheckAbility (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00060.004,T00060,state,4,abilityUnlock,0,,,4,,kUpdateAbility,UnlockNotificationState AbilityUnlock,med,native:BattleAbilitiesUnlock.cpp kUpdateAbility (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00060.005,T00060,state,5,exit,0,,,5,,kDismiss,UnlockNotificationState Exit,med,native:BattleAbilitiesUnlock.cpp kDismiss (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:428
+T00061.000,T00061,state,0,init,0,,,0,,Init,AssignmentState Init,med,"native:no named enumerator; the first entry phase, below kEntryPhaseLimit in BattleAbilityAssignments.cpp (#441);declaration-only;source:MENU/MENU2.PRG/64.c:228"
+T00061.001,T00061,state,1,waitReady,0,,,16,,kWaitReady,AssignmentState WaitReady,med,native:BattleAbilityAssignments.cpp kWaitReady (#441);declaration-only;source:MENU/MENU2.PRG/64.c:228
+T00061.002,T00061,state,2,abilityMenu,0,,,17,,kAssignments,AssignmentState AbilityMenu,med,native:BattleAbilityAssignments.cpp kAssignments (#441);declaration-only;source:MENU/MENU2.PRG/64.c:228
+T00062.000,T00062,state,0,none,0,,,0,,kNone,BattleAbilitiesMenuState None,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kNone (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.001,T00062,state,1,init,0,,,3,,kInit,BattleAbilitiesMenuState Init,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kInit (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.002,T00062,state,2,selectTypeInit,0,,,4,,kSelectTypeInit,BattleAbilitiesMenuState SelectTypeInit,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kSelectTypeInit (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.003,T00062,state,3,selectType,0,,,5,,kSelectType,BattleAbilitiesMenuState SelectType,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kSelectType (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.004,T00062,state,4,chain,0,,,6,,kChain,BattleAbilitiesMenuState Chain,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kChain (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.005,T00062,state,5,defense,0,,,7,,kDefense,BattleAbilitiesMenuState Defense,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kDefense (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.006,T00062,state,6,exitToMainMenu,0,,,8,,kExitToMainMenu,BattleAbilitiesMenuState ExitToMainMenu,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kExitToMainMenu (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
+T00062.007,T00062,state,7,exitToBattle,0,,,9,,kExitToBattle,BattleAbilitiesMenuState ExitToBattle,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kExitToBattle (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
 T00063.000,T00063,state,0,init,0,,,0,,Init,WeaponDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00063.001,T00063,state,1,initWeapon,0,,,1,,InitWeapon,WeaponDetailsState InitWeapon,med,declaration-only;source:items1.h:100
 T00063.002,T00063,state,2,manageInput,0,,,2,,ManageInput,WeaponDetailsState ManageInput,med,declaration-only;source:items1.h:100
@@ -384,27 +384,27 @@ T00068.003,T00068,state,3,itemsTop,0,,,5,,kScreenInventory,InventoryMenuState It
 T00068.004,T00068,state,4,equip,0,,,6,,kScreenEquipment,InventoryMenuState Equip,med,native:InventoryTerminal.cpp ScreenStep::kScreenEquipment (#441);declaration-only;source:16C.c:1243
 T00068.005,T00068,state,5,quit,0,,,9,,kScreenCloseMenu,InventoryMenuState Quit,med,native:InventoryTerminal.cpp ScreenStep::kScreenCloseMenu (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00068.006,T00068,state,6,quitToBattle,0,,,10,,kScreenCloseBattle,InventoryMenuState QuitToBattle,med,native:InventoryTerminal.cpp ScreenStep::kScreenCloseBattle (#441);declaration-only;source:16C.c:1245
-T00069.000,T00069,state,0,menuLoaded,0,,,0,,MenuLoaded,ActorSwitchState MenuLoaded,med,declaration-only;source:120.c:582
-T00069.001,T00069,state,1,menuLoading,0,,,1,,MenuLoading,ActorSwitchState MenuLoading,med,declaration-only;source:120.c:583
-T00069.002,T00069,state,2,animateForward,0,,,2,,AnimateForward,ActorSwitchState AnimateForward,med,declaration-only;source:120.c:584
-T00069.003,T00069,state,3,menuLoadedReverse,0,,,3,,MenuLoadedReverse,ActorSwitchState MenuLoadedReverse,med,declaration-only;source:120.c:585
-T00069.004,T00069,state,4,menuLoadingReverse,0,,,4,,MenuLoadingReverse,ActorSwitchState MenuLoadingReverse,med,declaration-only;source:120.c:586
-T00069.005,T00069,state,5,animateReverse,0,,,5,,AnimateReverse,ActorSwitchState AnimateReverse,med,declaration-only;source:120.c:587
-T00069.006,T00069,state,6,complete,0,,,6,,Complete,ActorSwitchState Complete,med,declaration-only;source:120.c:588
+T00069.000,T00069,state,0,menuLoaded,0,,,0,,kMenuLoaded,ActorSwitchState MenuLoaded,med,native:ActorSwitching.hpp actor_switch_phase::kMenuLoaded (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.001,T00069,state,1,menuLoading,0,,,1,,kMenuLoading,ActorSwitchState MenuLoading,med,native:ActorSwitching.hpp actor_switch_phase::kMenuLoading (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.002,T00069,state,2,animateForward,0,,,2,,kAnimateForward,ActorSwitchState AnimateForward,med,native:ActorSwitching.hpp actor_switch_phase::kAnimateForward (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.003,T00069,state,3,menuLoadedReverse,0,,,3,,kMenuLoadedReverse,ActorSwitchState MenuLoadedReverse,med,native:ActorSwitching.hpp actor_switch_phase::kMenuLoadedReverse (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.004,T00069,state,4,menuLoadingReverse,0,,,4,,kMenuLoadingReverse,ActorSwitchState MenuLoadingReverse,med,native:ActorSwitching.hpp actor_switch_phase::kMenuLoadingReverse (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.005,T00069,state,5,animateReverse,0,,,5,,kAnimateReverse,ActorSwitchState AnimateReverse,med,native:ActorSwitching.hpp actor_switch_phase::kAnimateReverse (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
+T00069.006,T00069,state,6,complete,0,,,6,,kComplete,ActorSwitchState Complete,med,native:ActorSwitching.hpp actor_switch_phase::kComplete (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
 T00070.000,T00070,state,0,init,0,,,0,,Init,EquipmentListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00070.001,T00070,state,1,animWait,0,,,1,,AnimWait,EquipmentListState AnimWait,med,declaration-only;source:120.c:1879
 T00070.002,T00070,state,2,handleInput,0,,,2,,HandleInput,EquipmentListState HandleInput,med,declaration-only;source:15AC.c:24
 T00070.003,T00070,state,3,waitChangeActor,0,,,3,,WaitChangeActor,EquipmentListState WaitChangeActor,med,declaration-only;source:120.c:1881
 T00070.004,T00070,state,4,waitActorInit,0,,,4,,WaitActorInit,EquipmentListState WaitActorInit,med,declaration-only;source:120.c:1882
 T00070.005,T00070,state,5,equipDetailScreen,0,,,5,,EquipDetailScreen,EquipmentListState EquipDetailScreen,med,declaration-only;source:120.c:1883
-T00071.000,T00071,state,0,none,0,,,0,,None,StatusMenuState None,med,declaration-only;source:15AC.c:169
-T00071.001,T00071,state,1,init,0,,,3,,Init,StatusMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00071.002,T00071,state,2,waitForMenu,0,,,4,,WaitForMenu,StatusMenuState WaitForMenu,med,declaration-only;source:120.c:2275
-T00071.003,T00071,state,3,viewEquipment,0,,,7,,ViewEquipment,StatusMenuState ViewEquipment,med,declaration-only;source:120.c:2276
-T00071.004,T00071,state,4,waitQuitToMenu,0,,,11,,WaitQuitToMenu,StatusMenuState WaitQuitToMenu,med,declaration-only;source:120.c:2277
-T00071.005,T00071,state,5,quitToMenu,0,,,12,,QuitToMenu,StatusMenuState QuitToMenu,med,declaration-only;source:120.c:2278
-T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,WaitQuitToBattle,StatusMenuState WaitQuitToBattle,med,declaration-only;source:120.c:2279
-T00071.007,T00071,state,7,quitToBattle,0,,,14,,QuitToBattle,StatusMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00071.000,T00071,state,0,none,0,,,0,,kNone,StatusMenuState None,med,native:TerminalController.cpp phase::kNone (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.001,T00071,state,1,init,0,,,3,,kInitialize,StatusMenuState Init,med,native:TerminalController.cpp phase::kInitialize (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.002,T00071,state,2,waitForMenu,0,,,4,,kWaitMenu,StatusMenuState WaitForMenu,med,native:TerminalController.cpp phase::kWaitMenu (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.003,T00071,state,3,viewEquipment,0,,,7,,kWaitEquipment,StatusMenuState ViewEquipment,med,native:TerminalController.cpp phase::kWaitEquipment (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.004,T00071,state,4,waitQuitToMenu,0,,,11,,kWaitQuitMenu,StatusMenuState WaitQuitToMenu,med,native:TerminalController.cpp phase::kWaitQuitMenu (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.005,T00071,state,5,quitToMenu,0,,,12,,kQuitMenu,StatusMenuState QuitToMenu,med,native:TerminalController.cpp phase::kQuitMenu (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,kWaitQuitBattle,StatusMenuState WaitQuitToBattle,med,native:TerminalController.cpp phase::kWaitQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
+T00071.007,T00071,state,7,quitToBattle,0,,,14,,kQuitBattle,StatusMenuState QuitToBattle,med,native:TerminalController.cpp phase::kQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00072.000,T00072,state,0,init,0,,,3,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00073.000,T00073,state,0,init,0,,,0,,Init,MapMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00073.001,T00073,state,1,processInput,0,,,1,,ProcessInput,MapMenuState ProcessInput,med,declaration-only;source:4D8.c:527

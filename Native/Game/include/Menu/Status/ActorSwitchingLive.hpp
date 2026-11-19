@@ -6,7 +6,7 @@
 
 // Live binding for the status screen's actor switching and vitals
 // (ActorSwitching.hpp) over the copied MENU4.PRG globals
-// (Menu/Status/ActorStatus.h), Battle_actors and their stats records, the
+// (Menu/Status/ActorStatus.hpp), Battle_actors and their stats records, the
 // HUD's slide offset and label tables, the actor preview, the menu rows and
 // the UI packets. The entries keep the original call shapes (MENU4.PRG
 // 120.c:528-843 and 1114-1142). A slot outside Battle_actors, a missing actor

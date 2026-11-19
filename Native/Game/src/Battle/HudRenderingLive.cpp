@@ -20,7 +20,7 @@
 #include "Battle/HudRendering.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
@@ -175,10 +175,10 @@ bool ActionUnlocked(int action) {
              .unlocked != 0;
 }
 
-std::span<const char> SpellOwner(const u_char* ids) {
-  const std::array<std::span<const char>, 4> owners{
-      Menu_Magic_warlockSpellIds, Menu_Magic_shamanSpellIds,
-      Menu_Magic_sorcererSpellIds, Menu_Magic_enchanterSpellIds};
+std::span<const std::uint8_t> SpellOwner(const std::uint8_t* ids) {
+  const std::array<std::span<const std::uint8_t>, 4> owners{
+      VS::Menu::Magic::warlockSpellIds, VS::Menu::Magic::shamanSpellIds,
+      VS::Menu::Magic::sorcererSpellIds, VS::Menu::Magic::enchanterSpellIds};
   const auto address = reinterpret_cast<std::uintptr_t>(ids);
   for (const auto owner : owners) {
     const auto base = reinterpret_cast<std::uintptr_t>(owner.data());
@@ -201,7 +201,7 @@ void CheckSpellReadiness(int spell_class) {
     if (spell >= owner.size()) {
       Refuse("Used shortcut spell entry is outside its bounded owner");
     }
-    if (ActionUnlocked(static_cast<std::uint8_t>(owner[spell]))) return;
+    if (ActionUnlocked(owner[spell])) return;
   }
 }
 

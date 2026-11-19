@@ -16,7 +16,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/DetailTransitions.hpp"
 
 namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
@@ -42,7 +42,7 @@ class LiveTransitionHost final : public DetailTransitionHost {
                : std::span{&Framework::LiveMenuRow(0), Framework::kRowCount};
   }
   std::span<const std::uint8_t> StatusText() override {
-    const auto bytes = std::as_bytes(std::span(Menu_Status_statusStrings));
+    const auto bytes = std::as_bytes(std::span(statusStrings));
     return {reinterpret_cast<const std::uint8_t*>(bytes.data()), bytes.size()};
   }
   Framework::MenuRow* CreateTitle(const Framework::RowPlacement& placement,

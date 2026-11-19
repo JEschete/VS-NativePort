@@ -117,21 +117,21 @@
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
-#include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ItemView.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Menu/OptionsLiveState.hpp"
 #include "Menu/RenameLiveState.hpp"
 #include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreScreen.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
 #include "Render/FramebufferEffects.hpp"
@@ -673,19 +673,22 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Menu::Framework::abilityGroupActionRanges,
      sizeof VS::Menu::Framework::abilityGroupActionRanges},  // G00200
                                                              // D_800EBD68
-    {"BATTLE/BATTLE.PRG", 0x83570, sizeof Menu_Magic_warlockSpellIds,
-     &Menu_Magic_warlockSpellIds,
-     sizeof Menu_Magic_warlockSpellIds},  // G00201 vs_battle_warlockSpellIds
-    {"BATTLE/BATTLE.PRG", 0x83584, sizeof Menu_Magic_shamanSpellIds,
-     &Menu_Magic_shamanSpellIds,
-     sizeof Menu_Magic_shamanSpellIds},  // G00202 vs_battle_shamanSpellIds
-    {"BATTLE/BATTLE.PRG", 0x8358C, sizeof Menu_Magic_sorcererSpellIds,
-     &Menu_Magic_sorcererSpellIds,
-     sizeof Menu_Magic_sorcererSpellIds},  // G00203 vs_battle_sorcererSpellIds
-    {"BATTLE/BATTLE.PRG", 0x835A0, sizeof Menu_Magic_enchanterSpellIds,
-     &Menu_Magic_enchanterSpellIds,
-     sizeof Menu_Magic_enchanterSpellIds},  // G00204
-                                            // vs_battle_enchanterSpellIds
+    {"BATTLE/BATTLE.PRG", 0x83570, sizeof VS::Menu::Magic::warlockSpellIds,
+     &VS::Menu::Magic::warlockSpellIds,
+     sizeof VS::Menu::Magic::warlockSpellIds},  // G00201
+                                                // vs_battle_warlockSpellIds
+    {"BATTLE/BATTLE.PRG", 0x83584, sizeof VS::Menu::Magic::shamanSpellIds,
+     &VS::Menu::Magic::shamanSpellIds,
+     sizeof VS::Menu::Magic::shamanSpellIds},  // G00202
+                                               // vs_battle_shamanSpellIds
+    {"BATTLE/BATTLE.PRG", 0x8358C, sizeof VS::Menu::Magic::sorcererSpellIds,
+     &VS::Menu::Magic::sorcererSpellIds,
+     sizeof VS::Menu::Magic::sorcererSpellIds},  // G00203
+                                                 // vs_battle_sorcererSpellIds
+    {"BATTLE/BATTLE.PRG", 0x835A0, sizeof VS::Menu::Magic::enchanterSpellIds,
+     &VS::Menu::Magic::enchanterSpellIds,
+     sizeof VS::Menu::Magic::enchanterSpellIds},  // G00204
+                                                  // vs_battle_enchanterSpellIds
     {"BATTLE/BATTLE.PRG", 0x835A8, sizeof Battle_spellClassCounts,
      &Battle_spellClassCounts,
      sizeof Battle_spellClassCounts},  // G00205 _spellClassCounts
@@ -1261,24 +1264,27 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"ENDING/ENDING.PRG", 0x732D8, sizeof VS::Ending::rankScoreThresholds,
      &VS::Ending::rankScoreThresholds,
      sizeof VS::Ending::rankScoreThresholds},  // G00817 rankScores
-    {"MENU/MENU0.PRG", 0x2258, 4924u, &Menu_Magic_magicStrings,
-     sizeof Menu_Magic_magicStrings},  // G00978 _magicStrings
-    {"MENU/MENU0.PRG", 0x3594, 3197u, &Menu_Magic_teleportationStrings,
-     sizeof Menu_Magic_teleportationStrings},  // G00980 _teleportationStrings
+    {"MENU/MENU0.PRG", 0x2258, 4924u, &VS::Menu::Magic::magicStrings,
+     sizeof VS::Menu::Magic::magicStrings},  // G00978 _magicStrings
+    {"MENU/MENU0.PRG", 0x3594, 3197u, &VS::Menu::Magic::teleportationStrings,
+     sizeof VS::Menu::Magic::teleportationStrings},  // G00980
+                                                     // _teleportationStrings
     {"MENU/MENU1.PRG", 0xC78, 4302u, &VS::Menu::break_arts::strings,
      sizeof VS::Menu::break_arts::strings},  // G01004 _strings
     {"MENU/MENU2.PRG", 0x1E90, 2120u,
-     &Menu_BattleAbilities_battleAbilityStrings,
-     sizeof Menu_BattleAbilities_battleAbilityStrings},  // G01025
-                                                         // _battleAbilityStrings
+     &VS::Menu::BattleAbilities::battleAbilityStrings,
+     sizeof VS::Menu::BattleAbilities::
+         battleAbilityStrings},  // G01025
+                                 // _battleAbilityStrings
     {"MENU/MENU2.PRG", 0x26D8, 584u,
-     &Menu_BattleAbilities_battleAbilityMenuStrings,
-     sizeof Menu_BattleAbilities_battleAbilityMenuStrings},  // G01024
-                                                             // _battleAbilityMenuStrings
+     &VS::Menu::BattleAbilities::battleAbilityMenuStrings,
+     sizeof VS::Menu::BattleAbilities::
+         battleAbilityMenuStrings},  // G01024
+                                     // _battleAbilityMenuStrings
     {"MENU/MENU3.PRG", 0x6BB8, 944u, &VS::Menu::Inventory::menuText,
      sizeof VS::Menu::Inventory::menuText},  // G01068 _menuText
-    {"MENU/MENU4.PRG", 0x4C48, 3520u, &Menu_Status_statusStrings,
-     sizeof Menu_Status_statusStrings},  // G01183 _statusStrings
+    {"MENU/MENU4.PRG", 0x4C48, 3520u, &VS::Menu::Status::statusStrings,
+     sizeof VS::Menu::Status::statusStrings},  // G01183 _statusStrings
     {"MENU/MENU5.PRG", 0x5BFC, 564u, &Menu_Map_mapNames,
      sizeof Menu_Map_mapNames},  // G01228 _mapNames
     {"MENU/MENU5.PRG", 0x5E30, 640u, &Menu_Map_connectingMaps,

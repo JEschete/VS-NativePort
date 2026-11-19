@@ -358,7 +358,7 @@ H0356,header,Native/Game/src/Items/LootLiveState.hpp,owned,no,pragma-once,0,0,0,
 H0357,header,Native/Game/src/Items/Materials.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0358,header,Native/Game/src/Items/TreasureChests.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_TreasureChest became VS::Items::TreasureChest in Items/ItemRecords.hpp; TYPE T00332 re-pointed (#441)
 H0359,header,Native/Game/src/Items/Weapons.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_WeaponRange became VS::Items::WeaponRange in Items/ItemRecords.hpp; TYPE T00662 re-pointed (#441)
-H0360,header,Native/Game/src/Menu/BattleAbilities.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
+H0360,header,Native/Game/src/Menu/BattleAbilitiesLiveState.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0361,header,Native/Game/src/Menu/BreakArts.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,retired,"deleted: _strings became VS::Menu::break_arts::strings (std::uint16_t[kMenuStringHalfwords]) in Menu/BreakArtsLive.hpp, defined in BreakArtsLive.cpp; the unread layout byte G01001 and the unused drawArtsListOpt enum T00017 (superseded by kForceCursorMemoryFlag) were dropped (#441)"
 H0362,header,Native/Game/src/Menu/Container/ItemView.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0363,header,Native/Game/src/Menu/Container/Storage.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -384,7 +384,7 @@ H0382,header,Native/Game/src/Menu/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0
 H0383,header,Native/Game/src/Menu/Loot/LootInventory.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: Menu_Loot_LootListItem duplicated LootRow (Menu/Loot/LootRows.hpp) and lootItemState had no uses (#441)
 H0384,header,Native/Game/src/Menu/Loot/LootScreen.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0385,header,Native/Game/src/Menu/Loot/Paging.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0386,header,Native/Game/src/Menu/Magic.h,generated,yes,pragma-once,0,0,0,0,0,0,18,0,0,remaining,
+H0386,header,Native/Game/src/Menu/Magic.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0387,header,Native/Game/src/Menu/Manual.h,generated,yes,pragma-once,0,0,0,0,0,1,22,0,0,remaining,
 H0388,header,Native/Game/src/Menu/Map.h,generated,yes,pragma-once,0,0,0,0,0,0,43,0,0,remaining,
 H0389,header,Native/Game/src/Menu/OptionsLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -395,7 +395,7 @@ H0393,header,Native/Game/src/Menu/Results/TimeAttack.hpp,generated,no,pragma-onc
 H0394,header,Native/Game/src/Menu/Score/Encyclopedia.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0395,header,Native/Game/src/Menu/Score/Records.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0396,header,Native/Game/src/Menu/Score/ScoreScreen.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0397,header,Native/Game/src/Menu/Status/ActorStatus.h,generated,yes,pragma-once,0,0,0,0,0,0,19,0,0,remaining,
+H0397,header,Native/Game/src/Menu/Status/ActorStatus.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0398,header,Native/Game/src/Menu/Status/TerminalControllersLiveInternal.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0399,header,Native/Game/src/Menu/TextBox.h,generated,yes,pragma-once,0,0,0,0,0,0,8,0,0,remaining,
 H0400,header,Native/Game/src/State/Ashley.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -862,7 +862,7 @@ S0425,source,Native/Game/src/Items/EquipmentLive.cpp,owned,no,,0,,,,,,,,,done,
 S0426,source,Native/Game/src/Items/InventoryLive.cpp,owned,no,,0,,,,,,,,,done,
 S0427,source,Native/Game/src/Items/LootLive.cpp,owned,no,,0,,,,,,,,,done,
 S0428,source,Native/Game/src/Items/Materials.cpp,generated,no,,0,,,,,,,,,done,
-S0429,source,Native/Game/src/Menu/BattleAbilities.cpp,generated,yes,,0,,,,,,,,,done,
+S0429,source,Native/Game/src/Menu/BattleAbilitiesLiveState.cpp,generated,no,,0,,,,,,,,,done,
 S0430,source,Native/Game/src/Menu/BattleAbilitiesTerminalLive.cpp,owned,no,,0,,,,,,,,,done,
 S0431,source,Native/Game/src/Menu/BattleAbilitiesUnlockLive.cpp,owned,no,,0,,,,,,,,,done,
 S0432,source,Native/Game/src/Menu/BreakArts.cpp,generated,yes,,0,,,,,,,,,retired,deleted: its _strings definition moved to BreakArtsLive.cpp; the layout byte G01001 had no reader (#441)

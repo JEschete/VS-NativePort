@@ -1,112 +1,63 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 
-// decomp: _ (_@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_layoutPadding1[24];
+#include <cstdint>
 
-// decomp: _animationStep (_animationStep@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_animationStep = 0;
+namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
+namespace {
+// 120.c:515-525 and :571 initialize the screen's statics; selectedElement and
+// selectedStatRow have no initializer and keep their values.
+constexpr std::int32_t kInitialScreenPos = 0;
+constexpr std::int32_t kInitialActor = 0;
+constexpr std::int32_t kInitialFlag = 0;
+constexpr std::int32_t kInitialAnimationStep = 0;
+constexpr std::uint8_t kInitialByte = 0;
+}  // namespace
 
-// decomp: _basicStatsAnimDelay (_basicStatsAnimDelay@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_basicStatsAnimDelay = 0;
+// decomp: statusStrings (src/MENU/MENU4.PRG/120.c:25): filled from the disc
+// (ModuleData.cpp).
+std::uint16_t statusStrings[kStatusStringWords];
 
-// decomp: _basicStatsAnimState (_basicStatsAnimState@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_basicStatsAnimState = 0;
+// decomp: screenXPos (src/MENU/MENU4.PRG/120.c:515)
+std::int32_t screenXPos = kInitialScreenPos;
+// decomp: screenYPos (src/MENU/MENU4.PRG/120.c:516)
+std::int32_t screenYPos = kInitialScreenPos;
+// decomp: previousActor (src/MENU/MENU4.PRG/120.c:517)
+std::int32_t previousActor = kInitialActor;
+// decomp: selectedActor (src/MENU/MENU4.PRG/120.c:518)
+std::int32_t selectedActor = kInitialActor;
+// decomp: drawBackgroundFirst (src/MENU/MENU4.PRG/120.c:519)
+std::int32_t drawBackgroundFirst = kInitialFlag;
+// decomp: fadeScreen (src/MENU/MENU4.PRG/120.c:520)
+std::int32_t fadeScreen = kInitialFlag;
+// decomp: screenAnimationStep (src/MENU/MENU4.PRG/120.c:521)
+std::int32_t screenAnimationStep = kInitialAnimationStep;
+// decomp: renderBasicStatsState (src/MENU/MENU4.PRG/120.c:522)
+std::uint8_t renderBasicStatsState = kInitialByte;
+// decomp: basicStatsAnimState (src/MENU/MENU4.PRG/120.c:523)
+std::uint8_t basicStatsAnimState = kInitialByte;
+// decomp: basicStatsAnimDelay (src/MENU/MENU4.PRG/120.c:524)
+std::uint8_t basicStatsAnimDelay = kInitialByte;
+// decomp: initializedActor (src/MENU/MENU4.PRG/120.c:525)
+std::uint8_t initializedActor = kInitialByte;
+// decomp: delayScreenUpdate (src/MENU/MENU4.PRG/120.c:571)
+std::uint8_t delayScreenUpdate = kInitialByte;
+// decomp: selectedElement (src/MENU/MENU4.PRG/120.c:958)
+std::uint8_t selectedElement;
+// decomp: selectedStatRow (src/MENU/MENU4.PRG/120.c:2264)
+std::uint8_t selectedStatRow;
 
-// decomp: _delayScreenUpdate (_delayScreenUpdate@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_delayScreenUpdate = 0;
-
-// decomp: _drawBackgroundFirst (_drawBackgroundFirst@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_drawBackgroundFirst = 0;
-
-// decomp: _fadeScreen (_fadeScreen@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_fadeScreen = 0;
-
-// decomp: _initializedActor (_initializedActor@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_initializedActor = 0;
-
-// decomp: _limbStatuses (_limbStatuses@src/MENU/MENU4.PRG/120.c)
-char* Menu_Status_limbStatuses[] = { "DYING", "BAD", "AVERAGE", "GOOD", "EXCELLENT", NULL };
-
-// decomp: _previousActor (_previousActor@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_previousActor = 0;
-
-// decomp: _renderBasicStatsState (_renderBasicStatsState@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_renderBasicStatsState = 0;
-
-// decomp: _selectedActor (_selectedActor@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_selectedActor = 0;
-
-// decomp: _selectedElement (_selectedElement@src/MENU/MENU4.PRG/120.c)
-u_char Menu_Status_selectedElement;
-
-// decomp: _selectedStatRow (_selectedStatRow@src/MENU/MENU4.PRG/120.c)
-char Menu_Status_selectedStatRow;
-
-// decomp: _statusStrings (_statusStrings@src/MENU/MENU4.PRG/120.c)
-u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */
-
-// decomp: _xPos (_xPos@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_xPos = 0;
-
-// decomp: _yPos (_yPos@src/MENU/MENU4.PRG/120.c)
-int Menu_Status_yPos = 0;
-
-// MENU4.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Status_ActorStatus_ResetMenu4Statics(void)
-{
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_animationStep, &initial, sizeof Menu_Status_animationStep);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_basicStatsAnimDelay, &initial, sizeof Menu_Status_basicStatsAnimDelay);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_basicStatsAnimState, &initial, sizeof Menu_Status_basicStatsAnimState);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_delayScreenUpdate, &initial, sizeof Menu_Status_delayScreenUpdate);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_drawBackgroundFirst, &initial, sizeof Menu_Status_drawBackgroundFirst);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_fadeScreen, &initial, sizeof Menu_Status_fadeScreen);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_initializedActor, &initial, sizeof Menu_Status_initializedActor);
-    }
-    {
-        static const char* initial[] = { "DYING", "BAD", "AVERAGE", "GOOD", "EXCELLENT", NULL };
-        memcpy((void*)&Menu_Status_limbStatuses, &initial, sizeof Menu_Status_limbStatuses);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_previousActor, &initial, sizeof Menu_Status_previousActor);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_renderBasicStatsState, &initial, sizeof Menu_Status_renderBasicStatsState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_selectedActor, &initial, sizeof Menu_Status_selectedActor);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_xPos, &initial, sizeof Menu_Status_xPos);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Status_yPos, &initial, sizeof Menu_Status_yPos);
-    }
+void ResetMenu4Statics() {
+  screenXPos = kInitialScreenPos;
+  screenYPos = kInitialScreenPos;
+  previousActor = kInitialActor;
+  selectedActor = kInitialActor;
+  drawBackgroundFirst = kInitialFlag;
+  fadeScreen = kInitialFlag;
+  screenAnimationStep = kInitialAnimationStep;
+  renderBasicStatsState = kInitialByte;
+  basicStatsAnimState = kInitialByte;
+  basicStatsAnimDelay = kInitialByte;
+  initializedActor = kInitialByte;
+  delayScreenUpdate = kInitialByte;
 }
-
+}  // namespace VS::Menu::Status

@@ -17,7 +17,7 @@
 #include "Content/DiscLayout.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 
 namespace {
@@ -40,10 +40,10 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 struct LiveLimbFixture {
   ValueRestore<Battle_Actor*> saved_actor{Battle_actors[0]};
   ValueRestore<Battle_Actor*> saved_second_actor{Battle_actors[1]};
-  ValueRestore<int> saved_selected{Menu_Status_selectedActor};
-  ValueRestore<u_char> saved_element{Menu_Status_selectedElement};
-  ValueRestore<int> saved_x{Menu_Status_xPos};
-  ValueRestore<int> saved_y{Menu_Status_yPos};
+  ValueRestore<std::int32_t> saved_selected{status::selectedActor};
+  ValueRestore<std::uint8_t> saved_element{status::selectedElement};
+  ValueRestore<std::int32_t> saved_x{status::screenXPos};
+  ValueRestore<std::int32_t> saved_y{status::screenYPos};
   ValueRestore<char> saved_cursor{VS::Menu::Framework::cursorColor};
   ValueRestore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
@@ -62,8 +62,8 @@ struct LiveLimbFixture {
       VS::Menu::Framework::comparisonAccessoryStats};
   ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_boxes{
       Menu_textBoxes};
-  ArrayRestore<u_short, std::size(Menu_Status_statusStrings)> saved_status_text{
-      Menu_Status_statusStrings};
+  ArrayRestore<std::uint16_t, std::size(status::statusStrings)>
+      saved_status_text{status::statusStrings};
   ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{
       Battle_statusStrings};
   Battle_ActorStats stats{};
@@ -75,7 +75,7 @@ struct LiveLimbFixture {
     actor.stats = &stats;
     Battle_actors[0] = &actor;
     Battle_actors[1] = &actor;
-    Menu_Status_selectedActor = 1;
+    status::selectedActor = 1;
     VS::Menu::Framework::stringBuf = output.data();
     output.fill(static_cast<char>(0xAA));
     stats.statuses =
@@ -89,15 +89,15 @@ struct LiveLimbFixture {
   ~LiveLimbFixture() { status::ResetLiveLimbControllersModuleData(); }
 
   void PrimeReloadState() {
-    Menu_Status_selectedElement = 6;
+    status::selectedElement = 6;
     REQUIRE(status::LiveNavigateStatusEffects(&stats, 1) == 0);
     CHECK(status::LiveStatusEffectNavigationControllerState().selected == 1);
     CHECK(
         status::LiveStatusEffectNavigationControllerState().cursor_animation !=
         0);
-    Menu_Status_selectedActor = 2;
+    status::selectedActor = 2;
     REQUIRE(status::LiveUpdateLimbPanel(-1) == 0);
-    Menu_Status_selectedElement = 11;
+    status::selectedElement = 11;
     VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   }
   static void CheckResetState() {
@@ -113,7 +113,7 @@ struct LiveLimbFixture {
     CHECK(status::LiveLimbPanelControllerState().actor_slot == 0);
     CHECK(status::LiveLimbPanelControllerState().animation_steps ==
           std::array<std::int32_t, 6>{});
-    CHECK(Menu_Status_selectedElement == 0);
+    CHECK(status::selectedElement == 0);
   }
   void CheckBorrowedOwners(char* workspace, std::uint64_t heap_refusals) {
     CHECK(VS::Menu::Framework::stringBuf == workspace);
@@ -121,7 +121,7 @@ struct LiveLimbFixture {
     CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == heap_refusals);
     CHECK(Battle_actors[1] == &actor);
     CHECK(actor.stats == &stats);
-    CHECK(Menu_Status_statusStrings[74] == 0xE741);
+    CHECK(status::statusStrings[74] == 0xE741);
     CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
   }
   static void ResetThroughBoundary(bool cold) {
@@ -143,21 +143,21 @@ struct LiveLimbFixture {
   }
 
   static void BuildText() {
-    std::ranges::fill(Menu_Status_statusStrings, u_short{0});
+    std::ranges::fill(status::statusStrings, u_short{0});
     std::ranges::fill(Battle_statusStrings, u_short{0});
     Battle_statusStrings[1] = 64;
     Battle_statusStrings[64] = 0xE710;
     for (std::size_t index = 0; index < status::kLimbConditionCount; ++index) {
-      Menu_Status_statusStrings[13 + index] = 70;
+      status::statusStrings[13 + index] = 70;
     }
-    Menu_Status_statusStrings[70] = 0xE730;
-    Menu_Status_statusStrings[18] = 72;
-    Menu_Status_statusStrings[19] = 74;
-    Menu_Status_statusStrings[72] = 0xE740;
-    Menu_Status_statusStrings[74] = 0xE741;
-    Menu_Status_statusStrings[253] = 0x00FF;
-    Menu_Status_statusStrings[254] = 0xFF8F;
-    Menu_Status_statusStrings[255] = 0xE701;
+    status::statusStrings[70] = 0xE730;
+    status::statusStrings[18] = 72;
+    status::statusStrings[19] = 74;
+    status::statusStrings[72] = 0xE740;
+    status::statusStrings[74] = 0xE741;
+    status::statusStrings[253] = 0x00FF;
+    status::statusStrings[254] = 0xFF8F;
+    status::statusStrings[255] = 0xE701;
   }
 };
 }  // namespace
@@ -170,7 +170,7 @@ TEST_CASE(
       ModuleEntry(0x80104134, &status::LiveNavigateStatusEffects);
   CHECK(navigate(&fixture.stats, 0) == 0);
   CHECK(status::LiveStatusEffectNavigationControllerState().count == 2);
-  Menu_Status_selectedElement = 11;
+  status::selectedElement = 11;
   VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   status::ResetLiveLimbControllersModuleData();
   const auto& state = status::LiveStatusEffectNavigationControllerState();
@@ -178,16 +178,16 @@ TEST_CASE(
   CHECK_FALSE(state.target_slot.has_value());
   CHECK(std::ranges::all_of(state.active,
                             [](auto effect) { return effect == 0; }));
-  CHECK(Menu_Status_selectedElement == 0);
+  CHECK(status::selectedElement == 0);
   CHECK(VS::Menu::Framework::stringBuf == fixture.output.data());
-  CHECK(Menu_Status_statusStrings[74] == 0xE741);
+  CHECK(status::statusStrings[74] == 0xE741);
   CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
 }
 
 TEST_CASE("F02668 owner hook clears steps and phase before reentry",
           "[status-limbs][status-limbs-live][F02668]") {
   LiveLimbFixture fixture;
-  Menu_Status_selectedActor = 2;
+  status::selectedActor = 2;
   const auto panel = ModuleEntry(0x801045B8, &status::LiveUpdateLimbPanel);
   CHECK(panel(-1) == 0);
   CHECK(status::LiveUpdateLimbPanel(-3) == 1);
@@ -204,7 +204,7 @@ TEST_CASE("F02668 owner hook clears steps and phase before reentry",
 TEST_CASE("F02668 owner hook forgets actor identity without freeing its owner",
           "[status-limbs][status-limbs-live][F02668]") {
   LiveLimbFixture fixture;
-  Menu_Status_selectedActor = 2;
+  status::selectedActor = 2;
   CHECK(status::LiveUpdateLimbPanel(-1) == 0);
   CHECK(status::LiveLimbPanelControllerState().actor_slot == 1);
   status::ResetLiveLimbControllersModuleData();
@@ -229,7 +229,7 @@ TEST_CASE(
     "F02680 Live publishes bounded text and original table pointer relations",
     "[status-limbs][status-limbs-live][F02680]") {
   LiveLimbFixture fixture;
-  Menu_Status_selectedElement = 2;
+  status::selectedElement = 2;
   const auto refused = status::RefusedLiveLimbControllerCount();
   ModuleEntry(0x80106308, &status::LiveShowSelectedLimbCondition)();
   CHECK(status::RefusedLiveLimbControllerCount() == refused);
@@ -241,14 +241,14 @@ TEST_CASE(
   CHECK(Battle_stringContext.strings[0] ==
         reinterpret_cast<char*>(&Battle_statusStrings[64]));
   CHECK(Battle_stringContext.strings[1] ==
-        reinterpret_cast<char*>(&Menu_Status_statusStrings[70]));
+        reinterpret_cast<char*>(&status::statusStrings[70]));
   CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 2);
 }
 
 TEST_CASE("F02681 Live writes the selected limb not the first limb",
           "[status-limbs][status-limbs-live][F02681]") {
   LiveLimbFixture fixture;
-  Menu_Status_selectedElement = 4;
+  status::selectedElement = 4;
   fixture.stats.limbs[4].affinities[0] = -32768;
   fixture.stats.limbs[4].types[3] = -123;
   std::ranges::fill(VS::Menu::Framework::equipmentStats, std::int16_t{444});
@@ -325,7 +325,7 @@ TEST_CASE("Production MENU4 completion and cold entry reset limb state",
   REQUIRE(status::LiveNavigateStatusEffects(&fixture.stats, 0) == 0);
   CHECK(status::LiveStatusEffectNavigationControllerState().count == 2);
   // MENU4 also resets the outer caller's actor choice before fresh entry.
-  Menu_Status_selectedActor = 2;
+  status::selectedActor = 2;
   REQUIRE(status::LiveUpdateLimbPanel(-1) == 0);
   CHECK(status::LiveLimbPanelControllerState().phase == 1);
 }
@@ -338,12 +338,12 @@ TEST_CASE(
   status::LiveDrawLimbConditionIndicator(-1, 0, 0);
   status::LiveDrawLimbLeaderLine(6, 0, 8, 0);
   status::LiveDrawStatusEffectIcons(nullptr, 0);
-  Menu_Status_selectedElement = 6;
+  status::selectedElement = 6;
   status::LivePopulateSelectedLimbDefense();
-  Menu_Status_selectedElement = 0;
+  status::selectedElement = 0;
   Battle_statusStrings[1] = 0xFFFF;
   status::LiveShowSelectedLimbCondition();
-  Menu_Status_selectedActor = 0;
+  status::selectedActor = 0;
   status::LiveShowSelectedLimbCondition();
   CHECK(status::RefusedLiveLimbControllerCount() == refused + 6);
   CHECK(static_cast<std::uint8_t>(fixture.output[0]) == 0xAA);

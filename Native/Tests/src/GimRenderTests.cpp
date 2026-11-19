@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <span>
 
 #include "Actors/Spawning.h"
@@ -24,7 +25,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.h"
@@ -494,13 +495,13 @@ int CheckMenuReloadClosingDelay(void) {
 
 int CheckMenuDiscStringsLoaded(void) {
   const unsigned char* format = reinterpret_cast<const unsigned char*>(
-      &Menu_Status_statusStrings[Text_Menu4_status_Offset_values]);
-  const size_t status_words =
-      sizeof Menu_Status_statusStrings / sizeof Menu_Status_statusStrings[0];
+      &VS::Menu::Status::statusStrings[Text_Menu4_status_Offset_values]);
+  const size_t status_words = sizeof VS::Menu::Status::statusStrings /
+                              sizeof VS::Menu::Status::statusStrings[0];
   const size_t inventory_words = sizeof VS::Menu::Inventory::menuText /
                                  sizeof VS::Menu::Inventory::menuText[0];
   const unsigned int condition =
-      Menu_Status_statusStrings[Text_Menu4_status_Index_critical];
+      VS::Menu::Status::statusStrings[Text_Menu4_status_Index_critical];
   return status_words > Text_Menu4_status_Offset_values && condition > 0 &&
          condition < status_words && VS::Menu::Inventory::menuText[0] > 0 &&
          VS::Menu::Inventory::menuText[0] < inventory_words &&
@@ -533,11 +534,11 @@ int CheckStatusPacketLinks(int background_first) {
   };
   const u_long guard = 0xDEADBEEF;
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  const char saved_background = Menu_Status_drawBackgroundFirst;
+  const std::int32_t saved_background = VS::Menu::Status::drawBackgroundFirst;
   u_long ordering[kOrderingWords];
   u_long storage[kPacketWords];
   PrepareMenuPacketCapture(ordering, storage, guard);
-  Menu_Status_drawBackgroundFirst = background_first;
+  VS::Menu::Status::drawBackgroundFirst = background_first;
   void* const saved_buffer =
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   void* const saved_table =
@@ -560,7 +561,7 @@ int CheckStatusPacketLinks(int background_first) {
                VS::Render::FrameScratchpad().primitive_cursor ==
                    storage + 1 + kWrittenWords &&
                storage[0] == guard && storage[1 + kWrittenWords] == guard;
-  Menu_Status_drawBackgroundFirst = saved_background;
+  VS::Menu::Status::drawBackgroundFirst = saved_background;
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
   VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = saved_table;
   VS::Render::FrameScratchpad() = saved_frame;

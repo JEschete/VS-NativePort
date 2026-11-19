@@ -2427,10 +2427,10 @@
     <ClCompile Include="src\Items\Recovery.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClCompile Include="src\Menu\BattleAbilities.cpp">
+    <ClCompile Include="src\Menu\BattleAbilitiesLiveState.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\BattleAbilities.h">
+    <ClInclude Include="src\Menu\BattleAbilitiesLiveState.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\BattleAbilitiesTerminal.cpp">
@@ -2679,7 +2679,7 @@
     <ClCompile Include="src\Menu\Magic.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Magic.h">
+    <ClInclude Include="src\Menu\Magic.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\MagicCosts.cpp">
@@ -2952,7 +2952,7 @@
     <ClCompile Include="src\Menu\Status\ActorStatus.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Status\ActorStatus.h">
+    <ClInclude Include="src\Menu\Status\ActorStatus.hpp">
       <Filter>src\Menu\Status</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Status\ActorSwitching.cpp">

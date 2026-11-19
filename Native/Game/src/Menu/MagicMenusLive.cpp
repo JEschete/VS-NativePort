@@ -23,7 +23,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenus.hpp"
 #include "Menu/MagicTerminal.hpp"
@@ -81,18 +81,18 @@ class LiveHost final : public MenuHost {
  public:
   void Refuse(std::string_view reason) override { Magic::Refuse(reason); }
   std::span<const std::uint16_t> MagicStrings() override {
-    return Menu_Magic_magicStrings;
+    return magicStrings;
   }
   std::span<const std::uint8_t> SpellIds(School school) override {
     switch (school) {
       case School::kWarlock:
-        return Bytes(Menu_Magic_warlockSpellIds);
+        return warlockSpellIds;
       case School::kShaman:
-        return Bytes(Menu_Magic_shamanSpellIds);
+        return shamanSpellIds;
       case School::kSorcerer:
-        return Bytes(Menu_Magic_sorcererSpellIds);
+        return sorcererSpellIds;
       case School::kEnchanter:
-        return Bytes(Menu_Magic_enchanterSpellIds);
+        return enchanterSpellIds;
     }
     return {};
   }
@@ -317,9 +317,9 @@ class LiveHost final : public MenuHost {
   std::optional<std::span<const std::uint8_t>> Resolve(TextRef text) {
     switch (text.table) {
       case TextTable::kMagic:
-        return TableText(Menu_Magic_magicStrings, text.index);
+        return TableText(magicStrings, text.index);
       case TextTable::kTeleport:
-        return TableText(Menu_Magic_teleportationStrings, text.index);
+        return TableText(teleportationStrings, text.index);
       case TextTable::kActionName:
         if (ValidAction(text.index)) {
           return Terminated(Bytes(Battle_actionDefinitions[text.index].name));

@@ -20,7 +20,7 @@
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/ItemList.hpp"
-#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "Render/Camera.hpp"
@@ -72,22 +72,19 @@ int Report(std::string_view entry, const TerminalResult& result) {
 
 TerminalFrame LoadFrame() {
   return {
-      .selected_actor = Menu_Status_selectedActor,
-      .previous_actor = Menu_Status_previousActor,
-      .animation_step = Menu_Status_animationStep,
-      .yaw = Menu_Status_xPos,
-      .pitch = Menu_Status_yPos,
-      .background_first = Menu_Status_drawBackgroundFirst,
-      .fade = Menu_Status_fadeScreen,
-      .vitals_phase =
-          static_cast<std::uint8_t>(Menu_Status_renderBasicStatsState),
-      .vitals_slide =
-          static_cast<std::uint8_t>(Menu_Status_basicStatsAnimState),
-      .initialized_actor =
-          static_cast<std::uint8_t>(Menu_Status_initializedActor),
-      .model_delay = static_cast<std::uint8_t>(Menu_Status_delayScreenUpdate),
-      .selected_element = Menu_Status_selectedElement,
-      .selected_stat = static_cast<std::uint8_t>(Menu_Status_selectedStatRow),
+      .selected_actor = selectedActor,
+      .previous_actor = previousActor,
+      .animation_step = screenAnimationStep,
+      .yaw = screenXPos,
+      .pitch = screenYPos,
+      .background_first = drawBackgroundFirst,
+      .fade = fadeScreen,
+      .vitals_phase = renderBasicStatsState,
+      .vitals_slide = basicStatsAnimState,
+      .initialized_actor = initializedActor,
+      .model_delay = delayScreenUpdate,
+      .selected_element = selectedElement,
+      .selected_stat = selectedStatRow,
       .cursor_color =
           static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
       .freeze_tabs = VS::Menu::Inventory::freezeTabArrows,
@@ -106,19 +103,19 @@ TerminalFrame LoadFrame() {
       .stick_y = VS::Input::stickPosBuf.r_stick_y};
 }
 void StoreFrame(const TerminalFrame& frame) {
-  Menu_Status_selectedActor = frame.selected_actor;
-  Menu_Status_previousActor = frame.previous_actor;
-  Menu_Status_animationStep = frame.animation_step;
-  Menu_Status_xPos = frame.yaw;
-  Menu_Status_yPos = frame.pitch;
-  Menu_Status_drawBackgroundFirst = frame.background_first;
-  Menu_Status_fadeScreen = frame.fade;
-  Menu_Status_renderBasicStatsState = static_cast<char>(frame.vitals_phase);
-  Menu_Status_basicStatsAnimState = static_cast<char>(frame.vitals_slide);
-  Menu_Status_initializedActor = static_cast<char>(frame.initialized_actor);
-  Menu_Status_delayScreenUpdate = static_cast<char>(frame.model_delay);
-  Menu_Status_selectedElement = frame.selected_element;
-  Menu_Status_selectedStatRow = static_cast<char>(frame.selected_stat);
+  selectedActor = frame.selected_actor;
+  previousActor = frame.previous_actor;
+  screenAnimationStep = frame.animation_step;
+  screenXPos = frame.yaw;
+  screenYPos = frame.pitch;
+  drawBackgroundFirst = frame.background_first;
+  fadeScreen = frame.fade;
+  renderBasicStatsState = frame.vitals_phase;
+  basicStatsAnimState = frame.vitals_slide;
+  initializedActor = frame.initialized_actor;
+  delayScreenUpdate = frame.model_delay;
+  selectedElement = frame.selected_element;
+  selectedStatRow = frame.selected_stat;
   VS::Menu::Framework::cursorColor = static_cast<char>(frame.cursor_color);
   VS::Menu::Inventory::freezeTabArrows = frame.freeze_tabs;
   VS::Menu::Framework::itemStatPage = static_cast<char>(frame.stat_page);
@@ -248,20 +245,20 @@ std::span<const std::uint8_t> Encoded(std::span<const std::uint8_t> bytes) {
 }
 std::span<const std::uint8_t> StatusText(int index, bool indexed) {
   if (index < 0 ||
-      static_cast<std::size_t>(index) >= std::size(Menu_Status_statusStrings)) {
+      static_cast<std::size_t>(index) >= std::size(statusStrings)) {
     return {};
   }
-  const std::size_t offset = indexed ? Menu_Status_statusStrings[index]
-                                     : static_cast<std::size_t>(index);
-  if (offset >= std::size(Menu_Status_statusStrings)) {
+  const std::size_t offset =
+      indexed ? statusStrings[index] : static_cast<std::size_t>(index);
+  if (offset >= std::size(statusStrings)) {
     return {};
   }
-  const auto words = std::span(Menu_Status_statusStrings).subspan(offset);
+  const auto words = std::span(statusStrings).subspan(offset);
   return Encoded({reinterpret_cast<const std::uint8_t*>(words.data()),
                   words.size_bytes()});
 }
 bool DrawFadeChecked() {
-  if (Menu_Status_fadeScreen == 0) {
+  if (fadeScreen == 0) {
     return true;
   }
   auto* chain =
@@ -273,23 +270,20 @@ bool DrawFadeChecked() {
 bool DrawBackgroundChecked() {
   auto* chain = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene,
-      Menu_Status_drawBackgroundFirst != 0 ? -1 : kBackgroundEntry);
+      drawBackgroundFirst != 0 ? -1 : kBackgroundEntry);
   Render::LivePacketQueue queue(chain);
   return chain != nullptr && queue.CanEmit(kBackgroundWords) &&
          DrawBackground(queue, VS::Render::frameBuf != 0);
 }
 bool VitalsChecked() {
-  const auto selected =
-      Core::Math::WrappingSubtract(Menu_Status_selectedActor, 1);
+  const auto selected = Core::Math::WrappingSubtract(selectedActor, 1);
   if (Stats(selected) == nullptr || !RenderSpace()) {
     return false;
   }
-  const auto phase =
-      static_cast<std::uint8_t>(Menu_Status_renderBasicStatsState);
+  const auto phase = renderBasicStatsState;
   if ((phase == vitals_phase::kHiding || phase == vitals_phase::kSwapping) &&
-      static_cast<std::uint8_t>(Menu_Status_basicStatsAnimState) > 1 &&
-      Stats(Core::Math::WrappingSubtract(Menu_Status_previousActor, 1)) ==
-          nullptr) {
+      basicStatsAnimState > 1 &&
+      Stats(Core::Math::WrappingSubtract(previousActor, 1)) == nullptr) {
     return false;
   }
   const auto dropped = Render::DroppedLiveUiPacketCount();
@@ -392,7 +386,7 @@ void ResetLiveTerminalControllersModuleData() {
   terminal_live::detail_state = {};
   terminal_live::list_state = {};
   terminal_live::screen_state = {};
-  Menu_Status_selectedStatRow = 0;
+  selectedStatRow = 0;
 }
 const EquipmentDetailState& LiveEquipmentDetailControllerState() {
   return terminal_live::detail_state;

@@ -41,7 +41,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootScreen.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Platform/App.hpp"
@@ -1062,8 +1062,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   Battle_ActorStats enemy_stats{};
   Actors_ActorRecord player_model{};
   Battle_Ai_ActorAiState enemy_ai{};
-  decltype(std::to_array(Menu_Magic_shamanSpellIds)) saved_shaman =
-      std::to_array(Menu_Magic_shamanSpellIds);
+  decltype(std::to_array(VS::Menu::Magic::shamanSpellIds)) saved_shaman =
+      std::to_array(VS::Menu::Magic::shamanSpellIds);
 
   ReactionInspectionFixture() {
     Field_controlMode = 2;
@@ -1118,7 +1118,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     std::copy(saved_shaman.begin(), saved_shaman.end(),
-              Menu_Magic_shamanSpellIds);
+              VS::Menu::Magic::shamanSpellIds);
   }
 };
 
@@ -1381,9 +1381,8 @@ TEST_CASE("Player reads actual learned spell data without granting an action",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   constexpr unsigned kHeal = 96;
-  std::fill_n(Menu_Magic_shamanSpellIds, std::size(Menu_Magic_shamanSpellIds),
-              0);
-  Menu_Magic_shamanSpellIds[0] = kHeal;
+  std::ranges::fill(VS::Menu::Magic::shamanSpellIds, std::uint8_t{0});
+  VS::Menu::Magic::shamanSpellIds[0] = kHeal;
   auto& heal = Battle_actionDefinitions[kHeal];
   heal = {};
   heal.type = Battle_ActionType_Spell;

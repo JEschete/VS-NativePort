@@ -26,7 +26,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Magic.h"
+#include "Menu/Magic.hpp"
 #include "Menu/MagicCosts.hpp"
 #include "State/StateFlags.hpp"
 
@@ -112,7 +112,7 @@ class LiveHost final : public Host {
     return Battle_characterState->stats->currentMp;
   }
   std::span<const std::uint16_t> TeleportationStrings() override {
-    return Menu_Magic_teleportationStrings;
+    return teleportationStrings;
   }
   std::uint16_t LocationsIndex() const override {
     return Text_Menu0_teleportation_Index_locations;

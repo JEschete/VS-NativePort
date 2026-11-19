@@ -65,7 +65,6 @@
 #include "Items/LootLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"

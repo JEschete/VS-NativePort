@@ -46,7 +46,7 @@ struct ReloadFixture : Fixture {
     saved.rotation_padding = 23;
     saved.translation = {1, 2, 3};
     saved.camera = {{4, 5, 6}, 7, {8, 9, 10}, 11, {12, 13, 14}, 15, 16};
-    Menu_Status_selectedStatRow = 6;
+    st::selectedStatRow = 6;
     VS::Render::projectionDistance = 777;
     VS::Render::FrameScratchpad().camera.position.vx = 1234;
     VS::Render::FrameScratchpad().camera.angles.pad = 77;
@@ -61,7 +61,7 @@ struct ReloadFixture : Fixture {
     CHECK(st::LiveEquipmentDetailControllerState() == detail);
     CHECK(st::LiveEquipmentListControllerState() == list);
     CHECK(st::LiveStatusTerminalControllerState() == screen);
-    CHECK(Menu_Status_selectedStatRow == 6);
+    CHECK(st::selectedStatRow == 6);
   }
 
   static void CheckReset() {
@@ -69,7 +69,7 @@ struct ReloadFixture : Fixture {
           st::EquipmentDetailState{});
     CHECK(st::LiveEquipmentListControllerState() == st::EquipmentListState{});
     CHECK(st::LiveStatusTerminalControllerState() == st::StatusTerminalState{});
-    CHECK(Menu_Status_selectedStatRow == 0);
+    CHECK(st::selectedStatRow == 0);
   }
 
   void CheckBorrowedOwners(bool cold) {
@@ -143,7 +143,7 @@ TEST_CASE(
     "[status-terminal][status-terminal-production][F02677][F02678][F02679]") {
   Fixture fixture;
   const auto refused = st::RefusedLiveTerminalControllerCount();
-  Menu_Status_fadeScreen = 1;
+  st::fadeScreen = 1;
   ModuleEntry(0x80105E94, &st::LiveDrawModelSlideFade)();
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data() + 14);
@@ -151,12 +151,12 @@ TEST_CASE(
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data() + 51);
   fixture.BindFrame();
-  Menu_Status_fadeScreen = 0;
-  Menu_Status_delayScreenUpdate = 2;
+  st::fadeScreen = 0;
+  st::delayScreenUpdate = 2;
   Actors_actorRecords[1]->collisionHeight = 32768;
   ModuleEntry(0x80106150, &st::LiveDrawFrame)();
   CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == -67108864);
-  CHECK(Menu_Status_delayScreenUpdate == 1);
+  CHECK(st::delayScreenUpdate == 1);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data() + 37);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);

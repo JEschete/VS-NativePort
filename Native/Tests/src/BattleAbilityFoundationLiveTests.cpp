@@ -23,8 +23,8 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilities.hpp"
+#include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -65,24 +65,23 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
       VS::Input::settings};
   ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
       saved_actions{Battle_actionDefinitions};
-  ArrayRestore<u_short, std::size(Menu_BattleAbilities_battleAbilityStrings)>
-      saved_ability_text{Menu_BattleAbilities_battleAbilityStrings};
-  ArrayRestore<u_short,
-               std::size(Menu_BattleAbilities_battleAbilityMenuStrings)>
-      saved_menu_text{Menu_BattleAbilities_battleAbilityMenuStrings};
-  ArrayRestore<char, abilities::kAbilityCapacity> saved_chain{
-      Menu_BattleAbilities_unlockedChainAbilities};
-  ArrayRestore<char, abilities::kAbilityCapacity> saved_defense{
-      Menu_BattleAbilities_unlockedDefenseAbilities};
+  ArrayRestore<std::uint16_t, std::size(abilities::battleAbilityStrings)>
+      saved_ability_text{abilities::battleAbilityStrings};
+  ArrayRestore<std::uint16_t, std::size(abilities::battleAbilityMenuStrings)>
+      saved_menu_text{abilities::battleAbilityMenuStrings};
+  ArrayRestore<std::uint8_t, abilities::kAbilityCapacity> saved_chain{
+      abilities::unlockedChainAbilities};
+  ArrayRestore<std::uint8_t, abilities::kAbilityCapacity> saved_defense{
+      abilities::unlockedDefenseAbilities};
   ValueRestore<decltype(VS::Menu::Framework::textHeaders)> saved_headers{
       VS::Menu::Framework::textHeaders};
   ValueRestore<char> saved_cost_display{VS::Menu::Framework::displayActionCost};
-  ValueRestore<u_short*> saved_rows{Menu_BattleAbilities_abilityText};
-  ValueRestore<char> saved_count{Menu_BattleAbilities_abilityCount};
-  ValueRestore<u_int> saved_state{Menu_BattleAbilities_abilityMenuState};
-  ValueRestore<char> saved_type{Menu_BattleAbilities_selectedAbilityType};
-  ValueRestore<int> saved_highlight{Menu_BattleAbilities_highlightedAbility};
-  ValueRestore<char> saved_first{Menu_BattleAbilities_firstAbility};
+  ValueRestore<std::uint16_t*> saved_rows{abilities::abilityText};
+  ValueRestore<std::uint8_t> saved_count{abilities::menuAbilityCount};
+  ValueRestore<std::uint32_t> saved_state{abilities::abilityMenuState};
+  ValueRestore<std::uint8_t> saved_type{abilities::selectedAbilityType};
+  ValueRestore<std::int32_t> saved_highlight{abilities::highlightedAbility};
+  ValueRestore<std::uint8_t> saved_first{abilities::firstAbility};
   ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> types{};
@@ -99,25 +98,24 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::rowTypeBuf = types.data();
-    Menu_BattleAbilities_abilityText = nullptr;
-    Menu_BattleAbilities_unlockedChainAbilities[0] = kAction;
+    abilities::abilityText = nullptr;
+    abilities::unlockedChainAbilities[0] = kAction;
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
-    std::ranges::fill(Menu_BattleAbilities_battleAbilityStrings,
-                      u_short{0xE7E7});
-    std::fill_n(Menu_BattleAbilities_battleAbilityStrings, 34, u_short{64});
-    Menu_BattleAbilities_battleAbilityStrings[64] = 0xE702;
-    std::ranges::fill(Menu_BattleAbilities_battleAbilityMenuStrings,
-                      u_short{0xE7E7});
-    std::fill_n(Menu_BattleAbilities_battleAbilityMenuStrings, 16, u_short{64});
+    std::ranges::fill(abilities::battleAbilityStrings, std::uint16_t{0xE7E7});
+    std::fill_n(abilities::battleAbilityStrings, 34, std::uint16_t{64});
+    abilities::battleAbilityStrings[64] = 0xE702;
+    std::ranges::fill(abilities::battleAbilityMenuStrings,
+                      std::uint16_t{0xE7E7});
+    std::fill_n(abilities::battleAbilityMenuStrings, 16, std::uint16_t{64});
     std::ranges::fill(Battle_actionDefinitions[kAction].name,
                       static_cast<char>(0xE7));
     Battle_actionDefinitions[kAction].name[0] = 1;
     Battle_actionDefinitions[kAction].cost = 255;
   }
   ~LiveFoundationFixture() {
-    if (Menu_BattleAbilities_abilityText != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_BattleAbilities_abilityText);
-      Menu_BattleAbilities_abilityText = nullptr;
+    if (abilities::abilityText != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(abilities::abilityText);
+      abilities::abilityText = nullptr;
     }
     if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
@@ -125,14 +123,14 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     framework::ClearLiveMenuExcept(framework::kNoRow);
     abilities::ResetLiveAbilityFoundationState();
   }
-  std::span<const u_short> RowText() const {
+  std::span<const std::uint16_t> RowText() const {
     const auto capacity =
-        VS::Core::Memory::LivePayloadCapacity(Menu_BattleAbilities_abilityText);
+        VS::Core::Memory::LivePayloadCapacity(abilities::abilityText);
     if (!capacity ||
-        *capacity < abilities::kAbilityRowWords * sizeof(u_short)) {
+        *capacity < abilities::kAbilityRowWords * sizeof(std::uint16_t)) {
       throw std::runtime_error("ability entry did not publish an owned row");
     }
-    return {Menu_BattleAbilities_abilityText, abilities::kAbilityRowWords};
+    return {abilities::abilityText, abilities::kAbilityRowWords};
   }
 };
 
@@ -169,13 +167,14 @@ struct LiveTerminalFixture : LiveFoundationFixture {
                    : abilities::LiveUpdateChainAbilityMenu(0);
   }
   static void CompleteAndCheckReset(menu_overlay_tests::Load& load,
-                                    u_short* owner, char& learned) {
+                                    std::uint16_t* owner,
+                                    std::uint8_t& learned) {
     CHECK(load.Complete() == 1);
     CHECK(load.request->state == Content_DiscRequestState_Free);
     CHECK(learned == 0);
-    CHECK(Menu_BattleAbilities_abilityText == nullptr);
+    CHECK(abilities::abilityText == nullptr);
     CHECK(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
-    if (Menu_BattleAbilities_abilityText == nullptr) {
+    if (abilities::abilityText == nullptr) {
       VS::Core::Memory::FreeLiveFromHighEnd(owner);
     }
   }
@@ -233,8 +232,8 @@ TEST_CASE(
   }
   const auto entry = reinterpret_cast<int (*)(int, int, u_short**)>(address);
   REQUIRE(entry(1, 24, text.data()) == 1);
-  CHECK(Menu_BattleAbilities_abilityCount == 1);
-  CHECK(Menu_BattleAbilities_selectedAbilityType == 24);
+  CHECK(abilities::menuAbilityCount == 1);
+  CHECK(abilities::selectedAbilityType == 24);
   CHECK(fixture.RowText()[0] == 0x10FA);
   CHECK(fixture.RowText()[1] == 0xE701);
   CHECK(fixture.RowText()[17] == 0xE702);
@@ -257,18 +256,18 @@ TEST_CASE("MENU2 reload restarts learned lists without releasing heap owners",
   LiveTerminalFixture fixture;
   const bool defense = GENERATE(false, true);
   REQUIRE(fixture.OpenList(defense) == 0);
-  REQUIRE(Menu_BattleAbilities_abilityCount == 1);
-  auto* owner = Menu_BattleAbilities_abilityText;
+  REQUIRE(abilities::menuAbilityCount == 1);
+  auto* owner = abilities::abilityText;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   VS::Input::settings.mapped_chain_abilities[0] = kAction;
   VS::Boot::ResetMenu2Statics();
-  CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
-  CHECK(Menu_BattleAbilities_unlockedDefenseAbilities[0] == 0);
+  CHECK(abilities::unlockedChainAbilities[0] == 0);
+  CHECK(abilities::unlockedDefenseAbilities[0] == 0);
   CHECK(VS::Input::settings.mapped_chain_abilities[0] == kAction);
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   VS::Core::Memory::FreeLiveFromHighEnd(owner);
   REQUIRE(fixture.OpenList(defense) == 0);
-  CHECK(Menu_BattleAbilities_abilityCount == 1);
+  CHECK(abilities::menuAbilityCount == 1);
 }
 
 TEST_CASE("F02625 actual screen entry creates categories from its caller byte",
@@ -292,7 +291,7 @@ TEST_CASE("Ability terminal cold reset preserves foundation row ownership",
   LiveTerminalFixture fixture;
   const bool actual_session = GENERATE(false, true);
   REQUIRE(fixture.OpenList(false) == 0);
-  auto* owner = Menu_BattleAbilities_abilityText;
+  auto* owner = abilities::abilityText;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   if (actual_session) {
     const auto entry = +[] { return 0; };
@@ -300,9 +299,9 @@ TEST_CASE("Ability terminal cold reset preserves foundation row ownership",
   } else {
     abilities::ResetLiveAbilityTerminalColdState();
   }
-  CHECK(Menu_BattleAbilities_abilityText == owner);
-  CHECK(Menu_BattleAbilities_abilityCount == 1);
-  CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
+  CHECK(abilities::abilityText == owner);
+  CHECK(abilities::menuAbilityCount == 1);
+  CHECK(abilities::unlockedChainAbilities[0] == 0);
   CHECK(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
 }
 
@@ -311,16 +310,16 @@ TEST_CASE("Loaded MENU2 requests dispatch the image reset before menu reentry",
   LiveTerminalFixture fixture;
   menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   const bool defense = GENERATE(false, true);
-  auto& learned = defense ? Menu_BattleAbilities_unlockedDefenseAbilities
-                          : Menu_BattleAbilities_unlockedChainAbilities;
+  auto& learned = defense ? abilities::unlockedDefenseAbilities
+                          : abilities::unlockedChainAbilities;
   const int action = defense ? kDefenseAction : kAction;
   REQUIRE(fixture.OpenList(defense) == 0);
-  auto* owner = Menu_BattleAbilities_abilityText;
+  auto* owner = abilities::abilityText;
   CHECK(load.Poll() == 0);
   CHECK(learned[0] == action);
-  CHECK(Menu_BattleAbilities_abilityText == owner);
+  CHECK(abilities::abilityText == owner);
   fixture.CompleteAndCheckReset(load, owner, learned[0]);
-  learned[0] = static_cast<char>(action);
+  learned[0] = static_cast<std::uint8_t>(action);
   CHECK(load.Poll() == 1);
   CHECK(learned[0] == action);
 }
