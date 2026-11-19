@@ -298,7 +298,8 @@ Settle a row by editing its ledger row directly, then regenerate the queue. Each
 `notes`:
 
 - `native-refs:<class>`: how production native code uses the item (`Native\Tests\` and layout assertions do not
-  count). `none`: never used; `write-only`: only written; `copy-only`: only copied into members that are themselves
+  count; a `= default` body, such as a defaulted comparison, counts only when production code uses it, #470).
+  `none`: never used; `write-only`: only written; `copy-only`: only copied into members that are themselves
   never read; `read`: read. `trace_queue.py --resolve` records the first three at `med` with the meanings it sets;
   a meaning that already says what the item is in the original is kept, with the native finding appended.
 - `source:native:<path>:<line>`: the native line behind that class (the first writer or copier, else the

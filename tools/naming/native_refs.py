@@ -23,6 +23,10 @@ libclang that ships beside its clang-cl, and records:
 A value read inside a larger right-hand side keeps `read` with the assignment target as `peer`, so a member copied
 into a named native mirror through a conversion can be found. Raw byte-offset accesses are not visible here.
 
+A defaulted function (`= default`) has a body only in a translation unit that uses it, so its references are
+recorded if and only if a production unit, one outside Native\\Tests, defines that body (#470). A comparison used
+only by tests records nothing, whatever the unit order or job count.
+
   python tools\\naming\\native_refs.py [--out build\\naming\\native_refs.json] [--jobs N]
 """
 from __future__ import annotations
@@ -79,6 +83,7 @@ def kind(cursor: ci.Cursor) -> str:
 
 
 NATIVE_PREFIX = os.path.normcase(str(NATIVE)) + os.sep
+TESTS = "Native\\Tests\\"
 
 
 @functools.cache
@@ -88,6 +93,24 @@ def relative(name: str) -> str | None:
     if not os.path.normcase(full).startswith(NATIVE_PREFIX):
         return None
     return "Native\\" + full[len(NATIVE_PREFIX):]
+
+
+def production(path: str) -> bool:
+    """A unit outside Native\\Tests; an orphan header unit counts, though it uses nothing."""
+    return not (relative(path) or "").startswith(TESTS)
+
+
+METHODS = {"CXX_METHOD", "CONSTRUCTOR", "DESTRUCTOR", "CONVERSION_FUNCTION"}
+
+
+def defaulted(cursor: ci.Cursor) -> bool:
+    """A function declared `= default`; only comparison operators can be defaulted outside a class."""
+    function_kind = kind(cursor)
+    if function_kind in METHODS:
+        return cursor.is_default_method()
+    if function_kind == "FUNCTION_DECL" and cursor.spelling.startswith("operator"):
+        return [token.spelling for token in cursor.get_tokens()][-2:] == ["=", "default"]
+    return False
 
 
 def qualified(cursor: ci.Cursor | None) -> str:
@@ -159,6 +182,10 @@ class Walker:
         self.loose: dict[str, str] = {}
         self.seen: set[tuple] = set()
         self.included: set[str] = set()
+        # Defaulted functions met so far: USR -> (file, line, column) of the declaration, and those whose
+        # synthesized body a production unit has been walked for.
+        self.defaulted: dict[str, tuple[str, int, int]] = {}
+        self.synthesized: set[str] = set()
         self.lib = ci.conf.lib
 
     def tracked(self, cursor: ci.Cursor | None) -> str | None:
@@ -207,6 +234,11 @@ class Walker:
     def visit(self, cursor: ci.Cursor, function: str, access: str = "read", peer: str | None = None) -> None:
         """`peer` is the copied source for a write, else the assignment target the value flows into."""
         k = kind(cursor)
+        if k in FUNCTIONS and defaulted(cursor):  # its body, if any, is walked by `synthesize`
+            location = cursor.location
+            if location.file is not None:
+                self.defaulted.setdefault(cursor.get_usr(), (location.file.name, location.line, location.column))
+            return
         if k in FUNCTIONS and cursor.is_definition():
             function = qualified(cursor)
         if k in ("STATIC_ASSERT", "CXX_UNARY_EXPR"):
@@ -334,11 +366,32 @@ class Walker:
         path = relative(cursor.location.file.name) if cursor.location.file else "?"
         return f"{path}:{cursor.location.line}"
 
+    def synthesize(self, unit: ci.TranslationUnit, files: dict[str, str]) -> None:
+        """Walk the defaulted bodies this unit defines; `files` maps each normalized file of the unit to its name
+        there."""
+        for usr, (name, line, column) in self.defaulted.items():
+            spelled = files.get(os.path.normcase(os.path.normpath(name)))
+            if usr in self.synthesized or spelled is None:
+                continue
+            location = ci.SourceLocation.from_position(unit, unit.get_file(spelled), line, column)
+            cursor = ci.Cursor.from_location(unit, location)
+            if cursor.get_usr() != usr:
+                continue
+            children = list(cursor.get_children())
+            if not any(kind(child) == "COMPOUND_STMT" for child in children):
+                continue
+            self.synthesized.add(usr)
+            for child in children:
+                self.visit(child, qualified(cursor))
+
     def unit(self, path: str, arguments: list[str], index: ci.Index) -> int:
         unit = index.parse(path, args=arguments)
         errors = sum(1 for diagnostic in unit.diagnostics if diagnostic.severity >= ci.Diagnostic.Error)
+        files = {os.path.normcase(os.path.normpath(path)): path}
         for inclusion in unit.get_includes():
-            included = relative(inclusion.include.name)
+            name = inclusion.include.name
+            files[os.path.normcase(os.path.normpath(name))] = name
+            included = relative(name)
             if included:
                 self.included.add(included)
         for child in unit.cursor.get_children():
@@ -351,6 +404,8 @@ class Walker:
             if os.path.normcase(location.file.name) != os.path.normcase(path):
                 self.seen.add(key)
             self.visit(child, "")
+        if production(path):
+            self.synthesize(unit, files)
         return errors
 
 
