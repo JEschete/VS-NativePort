@@ -101,7 +101,7 @@ class Host {
   [[nodiscard]] virtual int RememberedRow() = 0;
   virtual void DismissInformationBox() = 0;
   virtual void InitializeInformationBox() = 0;
-  virtual void SetCommandLabel(int action) = 0;
+  virtual void SetCommandLabel(Framework::MenuCommand action) = 0;
   virtual void InitInformationTextBox(Framework::InformationHeader header) = 0;
   virtual void SetInformationTextBoxState(int state) = 0;
   [[nodiscard]] virtual Settings LoadSettings() = 0;

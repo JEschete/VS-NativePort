@@ -569,7 +569,7 @@ class LiveTransferWorld final : public TransferWorld {
                                   std::int32_t height) override {
     Framework::DrawLiveButtonPromptBackground(x, y, width, height);
   }
-  void DrawButtonIcon(std::int32_t button, std::int32_t x,
+  void DrawButtonIcon(Framework::ButtonIcon button, std::int32_t x,
                       std::int32_t y) override {
     Framework::DrawLiveButtonIcon(button, x, y, nullptr);
   }

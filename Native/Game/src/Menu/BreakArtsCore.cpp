@@ -19,8 +19,6 @@ constexpr std::int32_t kCategoryIconStep = 0x04000000;
 constexpr std::int32_t kCategoryDisabled = 1;
 constexpr std::int32_t kCategoryEquipped = 4;
 constexpr int kActionNameCount = 256;
-constexpr int kActionMenuCommandNone = 0;
-constexpr int kActionMenuCommandMenu = 2;
 constexpr int kMenuCenterX = 320;
 constexpr int kNoMenuRow = 40;
 constexpr int kHeaderRow = 1;
@@ -411,7 +409,7 @@ std::optional<int> WaitForArtSelection(Context& context) {
     } else {
       host.ClearRowsExcept(kNoMenuRow);
       host.DismissInformationBox();
-      host.SetCommandLabel(kActionMenuCommandNone);
+      host.SetCommandLabel(Framework::MenuCommand::kNone);
     }
     state.step = ArtListStep::kReturnSelection;
   } else {
@@ -568,7 +566,7 @@ std::optional<int> WaitForCategorySelection(Context& context) {
   if (state.selected_row == kMenuSelectionQuit) {
     host.ClearRowsExcept(kNoMenuRow);
     host.DismissInformationBox();
-    host.SetCommandLabel(kActionMenuCommandNone);
+    host.SetCommandLabel(Framework::MenuCommand::kNone);
   } else {
     host.ClearRowsExcept(kHeaderRow);
   }
@@ -625,7 +623,7 @@ void CreateHeader(Host& host) {
                    {TextKind::kBattleMenuIndex, host.BreakArtsHeaderIndex()})) {
     return;
   }
-  host.SetCommandLabel(kActionMenuCommandMenu);
+  host.SetCommandLabel(Framework::MenuCommand::kMenu);
   host.InitializeInformationBox();
 }
 
@@ -707,7 +705,7 @@ void HandleWeaponCategoryMenu(Context& context, std::uint8_t& step) {
 int ExitToMainMenu(Context& context, std::uint8_t& step) {
   Host& host = context.host;
   host.DismissInformationBox();
-  host.SetCommandLabel(kActionMenuCommandNone);
+  host.SetCommandLabel(Framework::MenuCommand::kNone);
   if (host.RowsIdle()) {
     step = static_cast<std::uint8_t>(ScreenStep::kNone);
     return 1;
@@ -730,7 +728,7 @@ int ExecuteArt(Context& context, std::uint8_t& step) {
 int ExitBreakArts(Context& context, std::uint8_t& step) {
   Host& host = context.host;
   host.DismissInformationBox();
-  host.SetCommandLabel(kActionMenuCommandNone);
+  host.SetCommandLabel(Framework::MenuCommand::kNone);
   if (!host.RowsIdle()) {
     return 0;
   }

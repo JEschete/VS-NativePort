@@ -52,7 +52,7 @@ class FakeHost final : public options::Host {
   std::vector<std::pair<int, int>> fly_outs;
   int dismissed = 0;
   int info_boxes = 0;
-  std::vector<int> command_labels;
+  std::vector<framework::MenuCommand> command_labels;
   std::vector<framework::InformationHeader> headers;
   std::vector<int> text_box_states;
   std::vector<options::Settings> stored;
@@ -88,7 +88,7 @@ class FakeHost final : public options::Host {
   int RememberedRow() override { return kRememberedRow; }
   void DismissInformationBox() override { ++dismissed; }
   void InitializeInformationBox() override { ++info_boxes; }
-  void SetCommandLabel(int action) override {
+  void SetCommandLabel(framework::MenuCommand action) override {
     command_labels.push_back(action);
   }
   void InitInformationTextBox(framework::InformationHeader header) override {
@@ -324,7 +324,8 @@ TEST_CASE("Options choice leaves for the battle without applying a setting",
   options::Update(fixture.ctx, fixture.step);
   CHECK(fixture.host.cleared == std::vector<int>{framework::kNoRow});
   CHECK(fixture.host.dismissed == 1);
-  CHECK(fixture.host.command_labels == std::vector<int>{0});
+  CHECK(fixture.host.command_labels ==
+        std::vector{framework::MenuCommand::kNone});
   fixture.host.selected_row = kNoSelection;
   CHECK(options::Update(fixture.ctx, fixture.step) == 0);
   CHECK(fixture.step == StepByte(Step::kExitToBattle));

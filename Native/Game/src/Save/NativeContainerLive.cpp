@@ -106,7 +106,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void ShowContainerHeading() override {
     VS::Save::MemoryCard::StepLiveMenuResources(1);
     VS::Menu::Framework::SetLiveBackgroundFade(1);
-    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    VS::Menu::Framework::SetLiveCommandLabel(Framework::MenuCommand::kMenu);
     VS::Menu::Framework::MenuRow* row = VS::Menu::Framework::SetLiveMenuItem(
         0, kContainerHeadingX, kContainerHeadingY, kContainerHeadingWidth,
         kContainerHeadingBackgroundWidth,
@@ -206,7 +206,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void DismissMenu() override {
-    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+    VS::Menu::Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
     VS::Menu::Framework::DismissLiveInformationBox();
     VS::Menu::Framework::SetLiveBackgroundFade(0);
   }

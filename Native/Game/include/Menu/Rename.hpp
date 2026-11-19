@@ -121,7 +121,7 @@ class Host {
   virtual void DrawCompactText(std::string_view text, std::uint32_t position,
                                std::uint32_t color) = 0;
   // In front of the frame's overlay ordering table.
-  virtual void DrawButtonIcon(int button, int x, int y) = 0;
+  virtual void DrawButtonIcon(Framework::ButtonIcon button, int x, int y) = 0;
   [[nodiscard]] virtual std::uint32_t GradientStopColor(
       std::uint32_t gradient, std::uint32_t color_index, int brightness) = 0;
   [[nodiscard]] virtual int DrawCursor(int step, std::uint32_t position) = 0;

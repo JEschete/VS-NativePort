@@ -541,7 +541,7 @@ class LiveHost : public LiveCardHost {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   void ClearCommandLabel() override {
-    Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+    Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
   }
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();

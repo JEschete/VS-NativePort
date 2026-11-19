@@ -1428,7 +1428,7 @@ void UpdateLiveInformationVisibility(int source_row, int action_menu_state) {
   UpdateInformationVisibility(call.Ctx(), source_row, action_menu_state);
 }
 
-void SetLiveCommandLabel(int action) {
+void SetLiveCommandLabel(MenuCommand action) {
   LiveCall call;
   SetCommandLabel(call.Ctx(), action);
 }
@@ -1468,14 +1468,14 @@ void SetLiveInformationMessageText(std::span<const std::uint8_t> message) {
   SetInformationMessage(call.Ctx(), message);
 }
 
-void DrawLiveButtonIcon(int button_id, int x, int y, u_long* before) {
+void DrawLiveButtonIcon(ButtonIcon button, int x, int y, u_long* before) {
   u_long* const chain =
       before != nullptr
           ? before
           : static_cast<u_long*>(
                 VS::Render::FrameScratchpad().overlay_ordering_table);
   LiveCall call(chain);
-  DrawButtonIcon(call.Ctx(), button_id, x, y, kCallerLayer);
+  DrawButtonIcon(call.Ctx(), button, x, y, kCallerLayer);
 }
 
 int DrawLiveCursor(u_int step, int position) {

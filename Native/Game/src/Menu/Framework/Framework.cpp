@@ -13,6 +13,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Core/Math/ScalarMath.hpp"
@@ -696,10 +697,6 @@ constexpr std::int32_t kContainerSave = 0x400;
 // Menu_textBoxes[7].state.
 constexpr std::uint8_t kInformationBoxShown = 11;
 constexpr std::uint8_t kInformationBoxHidden = 0;
-// _renderMenuCommand's labels (Menu_Framework_MenuCommand).
-constexpr int kLabelNone = 0;
-constexpr int kLabelCommand = 1;
-constexpr int kLabelMenu = 2;
 constexpr int kFadeLimit = 16;
 constexpr int kFadeStep = 2;
 constexpr int kStatusBackgroundOt = -2;
@@ -962,7 +959,7 @@ void OpenMainMenuEntry(Context& ctx, int packed_menu_state, int row) {
       entry == Entry(Submenu::kData) || entry == Entry(Submenu::kScore)) {
     SetBackgroundFade(ctx, 1);
   }
-  SetCommandLabel(ctx, kLabelMenu);
+  SetCommandLabel(ctx, MenuCommand::kMenu);
   ClearMenuExcept(ctx, entry);
   MenuRow& title = MenuItem(ctx, row);
   title.state = RowState::kSlideX;
@@ -1030,7 +1027,7 @@ void OpenMainMenuEntry(Context& ctx, int packed_menu_state, int row) {
 }
 
 void SelectFromMainMenu(Context& ctx) {
-  SetCommandLabel(ctx, kLabelCommand);
+  SetCommandLabel(ctx, MenuCommand::kCommand);
   int state = UpdateMainMenuSelection(ctx, 0);
   if (state == 0) {
     return;
@@ -1039,7 +1036,7 @@ void SelectFromMainMenu(Context& ctx) {
     state |= kOpenedFromMainMenu;
   } else {
     state = kMenuClosing;
-    SetCommandLabel(ctx, kLabelNone);
+    SetCommandLabel(ctx, MenuCommand::kNone);
   }
   ctx.state.control.current_menu = static_cast<std::uint8_t>(state);
 }
@@ -1223,11 +1220,11 @@ void UpdateScreen(Context& ctx) {
 // decomp: MENU5.PRG _setNextAction (src/MENU/MENU5.PRG/4D8.c:90)
 void SetMenuVisible(Context& ctx, int display) {
   if (display != 0) {
-    SetCommandLabel(ctx, kLabelMenu);
+    SetCommandLabel(ctx, MenuCommand::kMenu);
     ctx.state.main_menu.hide_menu = 0;
     return;
   }
-  SetCommandLabel(ctx, kLabelNone);
+  SetCommandLabel(ctx, MenuCommand::kNone);
   ctx.state.main_menu.hide_menu = 1;
 }
 namespace {
@@ -2351,8 +2348,8 @@ void UpdateInformationVisibility(Context& ctx, int source_row,
 
 // decomp: MAINMENU.PRG vs_mainMenu_setMenuCommand
 // (src/MENU/MAINMENU.PRG/58EC.c:405)
-void SetCommandLabel(Context& ctx, int action) {
-  ctx.state.main_menu.menu_action_next = static_cast<std::uint8_t>(action);
+void SetCommandLabel(Context& ctx, MenuCommand action) {
+  ctx.state.main_menu.menu_action_next = std::to_underlying(action);
 }
 
 // decomp: MAINMENU.PRG _renderMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:413)
@@ -2484,8 +2481,9 @@ void DrawActionCostPanel(Context& ctx) {
 
 // decomp: MAINMENU.PRG vs_mainmenu_renderButton
 // (src/MENU/MAINMENU.PRG/58EC.c:487)
-void DrawButtonIcon(Context& ctx, int button_id, int x, int y, Layer layer) {
-  const auto id = static_cast<std::uint32_t>(button_id);
+void DrawButtonIcon(Context& ctx, ButtonIcon button, int x, int y,
+                    Layer layer) {
+  const std::uint32_t id = std::to_underlying(button);
   EmitSprite(ctx, layer,
              {.brightness = kFullBrightness,
               .position = PackXy(x, y),
@@ -2930,8 +2928,8 @@ void DrawRowParts(Context& ctx, MenuRow& row) {
     }
   }
   if (row.button_id != 0) {
-    DrawButtonIcon(ctx, row.button_id - 1, row.x + kButtonIndent,
-                   row.y - kRowIconRaise, kOverlayFront);
+    DrawButtonIcon(ctx, static_cast<ButtonIcon>(row.button_id - 1),
+                   row.x + kButtonIndent, row.y - kRowIconRaise, kOverlayFront);
   }
   if (row.row_icon != 0) {
     DrawRowIcon(ctx,

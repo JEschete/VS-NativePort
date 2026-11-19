@@ -10,6 +10,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Menu/MagicMenus.hpp"
@@ -176,7 +177,9 @@ class World final : public MenuHost {
   void ClearRows(int except) override { Record({7, except}); }
   void DismissInformation() override { Record({8}); }
   void InitializeInformation() override { Record({12}); }
-  void SetCommand(int command) override { Record({9, command}); }
+  void SetCommand(Framework::MenuCommand command) override {
+    Record({9, std::to_underlying(command)});
+  }
   RankCursor ReadRankCursor() override { return cursor; }
   void SetRankCount(std::uint8_t count) override { cursor.count = count; }
   void SetRankSelection(std::uint8_t selected) override {

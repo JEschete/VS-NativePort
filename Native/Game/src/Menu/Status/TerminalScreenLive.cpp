@@ -141,7 +141,8 @@ class ScreenHost final : public HostBase<StatusTerminalHost> {
       constexpr int kTextColor = 0x404040;
       Framework::DrawLiveButtonPromptBackground(kPromptX - offset, kPromptY,
                                                 kPromptWidth, kPromptHeight);
-      Framework::DrawLiveButtonIcon(1, kButtonX - offset, kButtonY, nullptr);
+      Framework::DrawLiveButtonIcon(Framework::ButtonIcon::kSquare,
+                                    kButtonX - offset, kButtonY, nullptr);
       Render::DrawLiveCompactTextColor(
           "STATUS", Render::PackScreenWord(kTextX - offset, kPromptY),
           kTextColor << static_cast<int>(available), nullptr);

@@ -10,6 +10,7 @@
 #include <span>
 
 #include "Items/ItemRecords.hpp"
+#include "Menu/Framework/Prompts.hpp"
 #include "Menu/Loot/LootRows.hpp"
 
 namespace VS::Menu::Framework {
@@ -50,13 +51,6 @@ enum class CapacityLabel : std::uint8_t {
   kEnd,
 };
 
-// Menu_Framework_ButtonId.
-enum class PromptButton : std::uint8_t {
-  kSquare = 1,
-  kCircle = 2,
-  kCross = 3,
-};
-
 // What _displayInventoryCapacities reads of the loot screen.
 struct CapacityPanel {
   std::span<const LootRow> rows;
@@ -92,7 +86,7 @@ class CapacityHost {
                            std::uint32_t color) = 0;
   virtual void DrawButtonBackground(std::int32_t x, std::int32_t y,
                                     std::int32_t w, std::int32_t h) = 0;
-  virtual void DrawButton(PromptButton button, std::int32_t x,
+  virtual void DrawButton(Framework::ButtonIcon button, std::int32_t x,
                           std::int32_t y) = 0;
 };
 

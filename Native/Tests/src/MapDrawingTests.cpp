@@ -609,7 +609,7 @@ class FakeControlsHost final : public map::ControlsHost {
     log.emplace_back("jammed?");
     return jammed;
   }
-  void DrawButton(map::ControlButton button, std::int32_t x,
+  void DrawButton(VS::Menu::Framework::ButtonIcon button, std::int32_t x,
                   std::int32_t y) override {
     log.push_back("button " + std::to_string(static_cast<int>(button)) + " " +
                   std::to_string(x) + " " + std::to_string(y));

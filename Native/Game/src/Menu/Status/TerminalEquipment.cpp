@@ -248,7 +248,7 @@ constexpr std::uint8_t kDetails = 5;
   }
   if ((frame.pressed & kCross) != 0) {
     if (!(host.BeginVitals(frame.selected_actor - 1) && host.ExitDetail() &&
-          host.CommandLabel(2))) {
+          host.CommandLabel(Framework::MenuCommand::kMenu))) {
       return Unavailable();
     }
     return state.selected_row + 1;
@@ -454,7 +454,7 @@ TerminalResult UpdateEquipmentDetails(EquipmentDetailState& state,
     state.selected_row = requested;
     frame.vitals_phase = 0;
     if (!(host.HideHud() && host.HoistRow(state.selected_row) &&
-          host.CommandLabel(0))) {
+          host.CommandLabel(Framework::MenuCommand::kNone))) {
       return Unavailable();
     }
     state.selected_element = kMainElement;

@@ -171,7 +171,7 @@ class LiveHost final : public Host {
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();
   }
-  void SetCommandLabel(int command) override {
+  void SetCommandLabel(Framework::MenuCommand command) override {
     Framework::SetLiveCommandLabel(command);
   }
 

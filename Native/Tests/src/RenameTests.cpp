@@ -71,7 +71,7 @@ class FakeHost final : public rename::Host {
   std::vector<MenuSound> sounds;
   std::vector<int> effects;
   int glyphs = 0;
-  std::vector<int> button_icons;
+  std::vector<framework::ButtonIcon> button_icons;
   std::vector<std::pair<int, std::uint32_t>> cursors;
   std::vector<int> main_cursors;
   std::vector<framework::RowPlacement> placements;
@@ -120,7 +120,8 @@ class FakeHost final : public rename::Host {
   void SetFontStyle(int /*style*/) override {}
   void DrawCompactText(std::string_view /*text*/, std::uint32_t /*position*/,
                        std::uint32_t /*color*/) override {}
-  void DrawButtonIcon(int button, int /*x*/, int /*y*/) override {
+  void DrawButtonIcon(framework::ButtonIcon button, int /*x*/,
+                      int /*y*/) override {
     button_icons.push_back(button);
   }
   std::uint32_t GradientStopColor(std::uint32_t /*gradient*/,

@@ -216,7 +216,7 @@ std::optional<int> Update(std::uint8_t& state, MenuHost& host) {
     case kExit: {
       const bool exit = state == kExit;
       host.DismissInformation();
-      host.SetCommand(0);
+      host.SetCommand(Framework::MenuCommand::kNone);
       if (host.RowsIdle()) {
         if (exit) {
           host.SetCurrentMenu(1);

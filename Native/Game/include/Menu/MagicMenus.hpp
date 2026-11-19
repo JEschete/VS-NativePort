@@ -8,6 +8,7 @@
 #include <span>
 #include <string_view>
 
+#include "Menu/Framework/Prompts.hpp"
 #include "Menu/MagicSpellMenu.hpp"
 #include "Render/GameFont.hpp"
 
@@ -94,7 +95,7 @@ class MenuHost {
   virtual void ClearRows(int except) = 0;
   virtual void DismissInformation() = 0;
   virtual void InitializeInformation() = 0;
-  virtual void SetCommand(int command) = 0;
+  virtual void SetCommand(Framework::MenuCommand command) = 0;
   virtual RankCursor ReadRankCursor() = 0;
   virtual void SetRankCount(std::uint8_t count) = 0;
   virtual void SetRankSelection(std::uint8_t selected) = 0;

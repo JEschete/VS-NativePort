@@ -288,7 +288,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
     DrawLiveButtonPromptBackground(x, y, w, h);
   }
 
-  void DrawButtonIcon(int button, int x, int y, int slot) override {
+  void DrawButtonIcon(ButtonIcon button, int x, int y, int slot) override {
     if (u_long* const chain = Entry(slot)) {
       DrawLiveButtonIcon(button, x, y, chain);
     }

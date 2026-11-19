@@ -41,10 +41,7 @@ namespace VS::Menu::manual {
 namespace {
 static_assert(kHelpFileLoaded == Content_DiscRequestState_Loaded);
 static_assert(kHelpFileFailed == Content_DiscRequestState_Error);
-static_assert(kSquareButtonIcon == Menu_Framework_ButtonId_Square);
-static_assert(kCircleButtonIcon == Menu_Framework_ButtonId_Circle);
 static_assert(kNoMenuItem == Menu_Framework_MenuItemId_None);
-static_assert(kNoMenuCommand == Menu_Framework_MenuCommand_None);
 static_assert(
     std::extent_v<decltype(Field_ManualDisplayState::scrollPositions)> ==
     std::size_t{kTopicCount});
@@ -94,7 +91,7 @@ class LiveScreenHost final : public ScreenHost {
                              std::int32_t brightness) override {
     Framework::SetLiveBackgroundPriority(layer, brightness);
   }
-  void SetMenuCommand(std::int32_t command) override {
+  void SetMenuCommand(Framework::MenuCommand command) override {
     Framework::SetLiveCommandLabel(command);
   }
   [[nodiscard]] std::int32_t BackgroundFadeStep() const override {
@@ -327,8 +324,8 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   void PlaySfx(std::int32_t group, std::int32_t effect) override {
     Audio::LivePlaySfxCentered(group, effect);
   }
-  void DrawButtonIcon(std::int32_t button, std::int32_t x, std::int32_t y,
-                      std::int32_t layer) override {
+  void DrawButtonIcon(Framework::ButtonIcon button, std::int32_t x,
+                      std::int32_t y, std::int32_t layer) override {
     if (u_long* const entry = OrderingEntry(layer); entry != nullptr) {
       Framework::DrawLiveButtonIcon(button, x, y, entry);
     }

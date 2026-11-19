@@ -347,9 +347,9 @@ struct World final : transfer::TransferWorld {
                                   std::int32_t) override {
     Log("prompt", x, y);
   }
-  void DrawButtonIcon(std::int32_t button, std::int32_t x,
+  void DrawButtonIcon(VS::Menu::Framework::ButtonIcon button, std::int32_t x,
                       std::int32_t) override {
-    Log("button", button, x);
+    Log("button", std::to_underlying(button), x);
   }
   void DrawCapacityCount(std::int32_t limit, std::int32_t,
                          std::int32_t count) override {

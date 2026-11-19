@@ -227,7 +227,7 @@ class EquipmentDetailsHost {
   virtual void DrawStatGauge(int color, int fill_width, std::uint32_t xy,
                              int slot) = 0;
   virtual void DrawButtonPromptBackground(int x, int y, int w, int h) = 0;
-  virtual void DrawButtonIcon(int button, int x, int y, int slot) = 0;
+  virtual void DrawButtonIcon(ButtonIcon button, int x, int y, int slot) = 0;
   virtual void SetFontStyle(int palette_offset) = 0;
   // Returns the x after the glyph.
   virtual int DrawGlyph(std::uint8_t glyph, int x, int y, int slot) = 0;

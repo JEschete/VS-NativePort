@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Menu/Framework/Prompts.hpp"
 #include "Render/GameFont.hpp"
 #include "Render/UiPackets.hpp"
 
@@ -623,7 +624,7 @@ void UpdateRowSelection(Context& ctx);
 // The information box, the command label and the action cost panel.
 void UpdateInformationVisibility(Context& ctx, int source_row,
                                  int action_menu_state);
-void SetCommandLabel(Context& ctx, int action);
+void SetCommandLabel(Context& ctx, MenuCommand action);
 void DrawCommandLabel(Context& ctx);
 void DismissInformationBox(Context& ctx);
 void InitializeInformationBox(Context& ctx);
@@ -635,8 +636,7 @@ void SetActionCostText(Context& ctx, int index,
 void DrawActionCostPanel(Context& ctx);
 
 // Icons, cursors and numbers.
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void DrawButtonIcon(Context& ctx, int button_id, int x, int y, Layer layer);
+void DrawButtonIcon(Context& ctx, ButtonIcon button, int x, int y, Layer layer);
 int DrawCursor(Context& ctx, std::uint32_t step, std::uint32_t position);
 std::uint32_t DrawColoredInteger(Context& ctx, const NumberText& number,
                                  Layer layer);

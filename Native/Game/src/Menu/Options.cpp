@@ -49,7 +49,6 @@ constexpr int kLeaveForBattle = -2;
 // The information text box (Menu_textBoxes[7]) shown over a disabled row.
 constexpr int kTextBoxShown = 0xB;
 constexpr int kTextBoxHidden = 0;
-constexpr int kNoCommand = 0;
 constexpr int kVibrationTestPreset = 0;
 
 enum ChoiceStep : std::uint8_t { kCreateRows, kAwaitSelection, kAwaitIdle };
@@ -160,7 +159,7 @@ int UpdateChoice(Context& ctx, Choice choice, int init) {
       if (local.selected_row == kLeaveForBattle) {
         ctx.host.ClearRowsExcept(Framework::kNoRow);
         ctx.host.DismissInformationBox();
-        ctx.host.SetCommandLabel(kNoCommand);
+        ctx.host.SetCommandLabel(Framework::MenuCommand::kNone);
       } else {
         if (choice == Choice::kVibration && local.selected_row == 1) {
           ctx.host.PlayVibrationPreset(kVibrationTestPreset);
@@ -312,7 +311,7 @@ void RunChoice(Context& ctx, std::uint8_t& step) {
 // (src/MENU/MENU8.PRG/88.c:806-822).
 int CloseScreen(Context& ctx, std::uint8_t& step, bool to_battle) {
   ctx.host.DismissInformationBox();
-  ctx.host.SetCommandLabel(kNoCommand);
+  ctx.host.SetCommandLabel(Framework::MenuCommand::kNone);
   if (!ctx.host.RowsIdle()) {
     return 0;
   }

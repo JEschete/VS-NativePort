@@ -163,7 +163,9 @@ class LiveAssignmentHost final : public AssignmentHost {
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   void HideActionCost() override { VS::Menu::Framework::displayActionCost = 0; }
   void DrawButton(AssignmentButton button, int x, int y) override {
-    const std::array<int, kAssignmentButtonCount> icons{2, 0, 1};
+    const std::array<Framework::ButtonIcon, kAssignmentButtonCount> icons{
+        Framework::ButtonIcon::kCircle, Framework::ButtonIcon::kTriangle,
+        Framework::ButtonIcon::kSquare};
     auto* table = static_cast<std::byte*>(
         VS::Render::FrameScratchpad().overlay_ordering_table);
     if (table == nullptr) {
@@ -366,7 +368,9 @@ class LiveScreenHost final : public AbilityScreenHost {
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();
   }
-  void ClearCommand() override { Framework::SetLiveCommandLabel(0); }
+  void ClearCommand() override {
+    Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
+  }
   void ReturnToBattleMenu() override {
     VS::Menu::Framework::menuState.currentMenu = kBattleMenu;
   }

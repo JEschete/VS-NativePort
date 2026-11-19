@@ -538,7 +538,8 @@ void Rotate(TerminalFrame& frame) {
     return Unavailable();
   }
   host.View() = state.saved_view;
-  if (!(host.FieldRendering(true) && host.CommandLabel(0) &&
+  if (!(host.FieldRendering(true) &&
+        host.CommandLabel(Framework::MenuCommand::kNone) &&
         host.ClearRows(static_cast<int>(Framework::kRowCount)) &&
         host.ReleasePreview() &&
         host.BackgroundPriority(-2, kBackgroundBrightness))) {

@@ -23,8 +23,7 @@ inline std::optional<int> RunLiveDetailController(
 }
 
 inline void SetLiveDetailCommand(bool menu) {
-  SetLiveCommandLabel(menu ? Menu_Framework_MenuCommand_Menu
-                           : Menu_Framework_MenuCommand_None);
+  SetLiveCommandLabel(menu ? MenuCommand::kMenu : MenuCommand::kNone);
 }
 
 template <typename World, void (*CheckRows)(), void (*CheckFrame)(bool)>

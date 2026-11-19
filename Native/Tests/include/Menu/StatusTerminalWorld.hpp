@@ -242,8 +242,8 @@ class World final : public status::EquipmentTerminalHost,
     Record(Event::kPages, {command});
     return services;
   }
-  bool CommandLabel(int command) override {
-    Record(Event::kCommand, {command});
+  bool CommandLabel(fw::MenuCommand command) override {
+    Record(Event::kCommand, {std::to_underlying(command)});
     return services;
   }
   bool ClearRows(int row) override {

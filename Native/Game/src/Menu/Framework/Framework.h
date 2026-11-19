@@ -9,34 +9,11 @@ struct Menu_Framework_TextHeader;
 // decomp: vs_mainMenu_actionsMenuActions (src/MENU/MAINMENU.PRG/58EC.h:7)
 enum Menu_Framework_ActionsMenuAction { Menu_Framework_ActionsMenuAction_Discard = 4, Menu_Framework_ActionsMenuAction_Sort = 45 };
 
-// decomp: vs_mainMenu_buttonIDs (src/MENU/MAINMENU.PRG/58EC.h:89)
-enum Menu_Framework_ButtonId {
-    Menu_Framework_ButtonId_Triangle,
-    Menu_Framework_ButtonId_Square,
-    Menu_Framework_ButtonId_Circle,
-    Menu_Framework_ButtonId_Cross,
-    Menu_Framework_ButtonId_L1,
-    Menu_Framework_ButtonId_R1,
-    Menu_Framework_ButtonId_L2,
-    Menu_Framework_ButtonId_R2
-};
-
 // decomp: vs_mainMenu_copyItem_flags (src/MENU/MAINMENU.PRG/2D10.h:200)
 enum Menu_Framework_CopyItemFlag { Menu_Framework_CopyItemFlag_Write = 0x10 };
 
 // decomp: vs_mainMenu_icons (src/MENU/MAINMENU.PRG/58EC.h:134)
 enum Menu_Framework_MainMenuIcon { Menu_Framework_MainMenuIcon_Gem = 22 };
-
-// decomp: vs_mainMenu_menuCommands (src/MENU/MAINMENU.PRG/58EC.h:45)
-enum Menu_Framework_MenuCommand {
-    Menu_Framework_MenuCommand_None,
-    Menu_Framework_MenuCommand_Command,
-    Menu_Framework_MenuCommand_Menu,
-    Menu_Framework_MenuCommand_Num,
-    Menu_Framework_MenuCommand_Warning,
-    Menu_Framework_MenuCommand_Help,
-    Menu_Framework_MenuCommand_Info
-};
 
 // decomp: vs_mainMenu_menuItemIds (src/MENU/MAINMENU.PRG/C48.h:6)
 enum Menu_Framework_MenuItemId { Menu_Framework_MenuItemId_None = 40 };

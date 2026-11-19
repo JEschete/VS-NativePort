@@ -8,6 +8,8 @@
 #include <span>
 #include <string_view>
 
+#include "Menu/Framework/Prompts.hpp"
+
 namespace VS::Menu::break_arts {
 inline constexpr std::size_t kArtCount = 4;
 inline constexpr std::size_t kCategoryCount = 10;
@@ -133,7 +135,7 @@ class Host {
   virtual void ClearRowsExcept(int row) = 0;
   virtual void DismissInformationBox() = 0;
   virtual void InitializeInformationBox() = 0;
-  virtual void SetCommandLabel(int command) = 0;
+  virtual void SetCommandLabel(Framework::MenuCommand command) = 0;
   virtual void SetActionSelection(std::uint16_t action_id) = 0;
   virtual void SetExecuteAbilityType(std::uint8_t type) = 0;
   [[nodiscard]] virtual std::uint8_t CurrentMenu() = 0;

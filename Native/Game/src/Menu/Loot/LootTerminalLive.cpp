@@ -68,7 +68,6 @@ constexpr std::int32_t kStatusTextX = 28;
 constexpr std::int32_t kSoundGroup = 126;
 constexpr std::int32_t kClaimSound = 13;
 constexpr std::int32_t kDisassembleSound = 25;
-constexpr std::int32_t kMenuCommand = 2;
 
 enum class Controller : std::size_t {
   kTransition,
@@ -455,7 +454,10 @@ class LiveTerminalHost final : public LootTerminalHost {
     Call([&] { Framework::SetLiveBackgroundFade(enabled ? 1 : 0); });
   }
   void SetMenuCommand(bool enabled) override {
-    Call([&] { Framework::SetLiveCommandLabel(enabled ? kMenuCommand : 0); });
+    Call([&] {
+      Framework::SetLiveCommandLabel(enabled ? Framework::MenuCommand::kMenu
+                                             : Framework::MenuCommand::kNone);
+    });
   }
   void HideInventoryPanels() override {
     Call([] { Inventory::SetLivePanelVisibility(0); });
@@ -512,7 +514,8 @@ class LiveTerminalHost final : public LootTerminalHost {
       Framework::DrawLiveButtonPromptBackground(
           kStatusBackgroundX - offset, kStatusBackgroundY,
           kStatusBackgroundWidth, kStatusBackgroundHeight);
-      Framework::DrawLiveButtonIcon(1, kStatusButtonX - offset, kStatusButtonY,
+      Framework::DrawLiveButtonIcon(Framework::ButtonIcon::kSquare,
+                                    kStatusButtonX - offset, kStatusButtonY,
                                     nullptr);
       Render::DrawLiveCompactTextColor("STATUS",
                                        static_cast<int>(text_position),

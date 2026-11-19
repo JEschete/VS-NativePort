@@ -6,6 +6,7 @@
 #include <optional>
 #include <string_view>
 
+#include "Menu/Framework/Prompts.hpp"
 #include "Menu/ManualTopics.hpp"
 
 // The manual screen's lifecycle and its help pages (MENUE.PRG
@@ -36,8 +37,6 @@ inline constexpr std::int32_t kClosingBackgroundLayer = -4;
 inline constexpr std::int32_t kBackgroundBrightness = 128;
 // vs_mainMenu_menuItemIds_none: clears every menu row.
 inline constexpr std::int32_t kNoMenuItem = 40;
-// menuActionNone.
-inline constexpr std::int32_t kNoMenuCommand = 0;
 // vs_battle_menuState.currentMenu after leaving for the game (the help pages'
 // kHelpExitToGame).
 inline constexpr std::int32_t kGameMenu = 10;
@@ -71,7 +70,7 @@ class ScreenHost {
   virtual void SetBackgroundPriority(std::int32_t layer,
                                      std::int32_t brightness) = 0;
   // vs_mainMenu_setMenuCommand.
-  virtual void SetMenuCommand(std::int32_t command) = 0;
+  virtual void SetMenuCommand(Framework::MenuCommand command) = 0;
   // vs_mainMenu_backgroundFadeStep.
   [[nodiscard]] virtual std::int32_t BackgroundFadeStep() const = 0;
   // vs_battle_menuState.currentMenu.
@@ -157,9 +156,6 @@ inline constexpr std::int32_t kSfxPageTurn = 4;
 inline constexpr std::int32_t kSfxSelect = 5;
 inline constexpr std::int32_t kSfxLeave = 6;
 
-// vs_mainmenu_renderButton's button ids.
-inline constexpr std::int32_t kSquareButtonIcon = 1;
-inline constexpr std::int32_t kCircleButtonIcon = 2;
 // The ordering table entries the controls and page number are drawn before.
 inline constexpr std::int32_t kControlsLayer = 6;
 inline constexpr std::int32_t kPageNumberLayer = 7;
@@ -325,7 +321,7 @@ class HelpPagesHost {
   // vs_mainmenu_renderButton and vs_battle_renderTextRawColor before
   // ordering table entry `layer`.
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-  virtual void DrawButtonIcon(std::int32_t button, std::int32_t x,
+  virtual void DrawButtonIcon(Framework::ButtonIcon button, std::int32_t x,
                               std::int32_t y, std::int32_t layer) = 0;
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
   virtual void DrawText(std::string_view text, std::int32_t xy,

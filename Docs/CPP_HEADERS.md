@@ -178,7 +178,7 @@ compile settings, is part of #248.
 | `void_params` | 0 | 0 |
 | `gnu_attributes` | 0 | 0 |
 | `macros` | 20 | 10,450 |
-| `global_decls` | 200 | 1,513 |
+| `global_decls` | 200 | 1,511 |
 | `c_wrapped` | 0 | 0 |
 | `baseline` | 2 | 9 |
 

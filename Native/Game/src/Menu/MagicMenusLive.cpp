@@ -176,7 +176,7 @@ class LiveHost final : public MenuHost {
   void InitializeInformation() override {
     Framework::InitializeLiveInformationBox();
   }
-  void SetCommand(int command) override {
+  void SetCommand(Framework::MenuCommand command) override {
     Framework::SetLiveCommandLabel(command);
   }
   RankCursor ReadRankCursor() override {

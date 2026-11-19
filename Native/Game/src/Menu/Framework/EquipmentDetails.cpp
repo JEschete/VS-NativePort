@@ -149,7 +149,6 @@ constexpr int kPromptX = 24;
 constexpr int kPromptY = 48;
 constexpr int kPromptWidth = 135;
 constexpr int kPromptHeight = 12;
-constexpr int kSquareIcon = 1;
 constexpr int kSquareIconX = 16;
 constexpr int kSquareIconY = 46;
 constexpr int kHeaderX = 0x22;
@@ -796,8 +795,8 @@ void DrawStatRow(EquipmentDetailsContext& ctx, Render::PacketQueue& queue,
 void DrawStatPageTabs(EquipmentDetailsContext& ctx, int x_offset) {
   ctx.host.DrawButtonPromptBackground(x_offset + kPromptX, kPromptY,
                                       kPromptWidth, kPromptHeight);
-  ctx.host.DrawButtonIcon(kSquareIcon, x_offset + kSquareIconX, kSquareIconY,
-                          detail_layer::kButtonIcon);
+  ctx.host.DrawButtonIcon(ButtonIcon::kSquare, x_offset + kSquareIconX,
+                          kSquareIconY, detail_layer::kButtonIcon);
   auto tabs = kStatPageTabs;
   for (std::size_t page = 0; page < kStatPageTabStyles.size(); ++page) {
     tabs[kStatPageTabStyles[page]] =

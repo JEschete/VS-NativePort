@@ -475,12 +475,13 @@ void StepSlide(ControlsHost& host, ControlsState& state) {
 // captions the commands state shades.
 void DrawLegend(ControlsHost& host, std::int32_t offset,
                 std::int16_t commands_state) {
-  constexpr std::array<std::pair<ControlButton, LegendPlace>, kCaptionColumns>
-      kButtons{{{ControlButton::kL1, {.x = 8, .y = 15}},
-                {ControlButton::kR1, {.x = 64, .y = 15}},
-                {ControlButton::kL2, {.x = 8, .y = 33}},
-                {ControlButton::kR2, {.x = 8, .y = 52}},
-                {ControlButton::kCircle, {.x = 8, .y = 70}}}};
+  constexpr std::array<std::pair<Framework::ButtonIcon, LegendPlace>,
+                       kCaptionColumns>
+      kButtons{{{Framework::ButtonIcon::kL1, {.x = 8, .y = 15}},
+                {Framework::ButtonIcon::kR1, {.x = 64, .y = 15}},
+                {Framework::ButtonIcon::kL2, {.x = 8, .y = 33}},
+                {Framework::ButtonIcon::kR2, {.x = 8, .y = 52}},
+                {Framework::ButtonIcon::kCircle, {.x = 8, .y = 70}}}};
   constexpr std::array<std::pair<ControlCaption, LegendPlace>, kCaptionColumns>
       kCaptions{{{ControlCaption::kBack, {.x = 28, .y = 18}},
                  {ControlCaption::kNext, {.x = 84, .y = 18}},

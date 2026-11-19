@@ -104,7 +104,7 @@ class LiveHost final : public Host {
                                      static_cast<int>(position),
                                      static_cast<int>(color), nullptr);
   }
-  void DrawButtonIcon(int button, int x, int y) override {
+  void DrawButtonIcon(Framework::ButtonIcon button, int x, int y) override {
     Framework::DrawLiveButtonIcon(button, x, y, nullptr);
   }
   std::uint32_t GradientStopColor(std::uint32_t gradient,

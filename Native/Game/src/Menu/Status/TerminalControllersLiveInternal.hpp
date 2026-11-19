@@ -144,7 +144,7 @@ class HostBase : public Interface {
     Invoke([command] { Framework::UpdateLiveEquipmentStatPages(command); });
     return true;
   }
-  bool CommandLabel(int command) override {
+  bool CommandLabel(Framework::MenuCommand command) override {
     Invoke([command] { Framework::SetLiveCommandLabel(command); });
     return true;
   }

@@ -487,7 +487,7 @@ class LiveScreen final : public MapScreenHost {
                                          kBackgroundBrightness);
   }
   void ClearCommand() override {
-    Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+    Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
   }
   void ClearRows() override {
     Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);

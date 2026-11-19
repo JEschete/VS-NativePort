@@ -65,13 +65,10 @@ constexpr std::uint32_t kLineG2 = 0x50000000;
 constexpr int kLinePacketWords = 7;
 constexpr int kQuadPacketWords = 10;
 
-// The command column: the button icons (Menu_Framework_ButtonId), the Start
+// The command column: the button icons, the Start
 // icon above them and the highlight bars, twelve lines a command that fade
 // over eight frames after the command runs.
 constexpr int kIconX = 16;
-constexpr int kCrossIcon = 3;
-constexpr int kSquareIcon = 1;
-constexpr int kTriangleIcon = 0;
 constexpr std::array<int, 3> kIconRows{50, 66, 82};
 constexpr int kStartIconY = 34;
 constexpr std::uint32_t kIconSize = PackXy(16, 16);
@@ -356,9 +353,9 @@ void LoadName(Context& ctx) {
 
 void DrawCommandIcons(Context& ctx, int x_offset) {
   const int x = kIconX - x_offset;
-  ctx.host.DrawButtonIcon(kCrossIcon, x, kIconRows[0]);
-  ctx.host.DrawButtonIcon(kSquareIcon, x, kIconRows[1]);
-  ctx.host.DrawButtonIcon(kTriangleIcon, x, kIconRows[2]);
+  ctx.host.DrawButtonIcon(Framework::ButtonIcon::kCross, x, kIconRows[0]);
+  ctx.host.DrawButtonIcon(Framework::ButtonIcon::kSquare, x, kIconRows[1]);
+  ctx.host.DrawButtonIcon(Framework::ButtonIcon::kTriangle, x, kIconRows[2]);
   EmitSprite(ctx, PackXy(x, kStartIconY), kStartIconTexture);
 }
 

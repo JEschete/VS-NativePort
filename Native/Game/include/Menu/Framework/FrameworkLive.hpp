@@ -6,6 +6,7 @@
 
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/Prompts.hpp"
 
 // Binds the menu framework (Framework.hpp) to its variables
 // (FrameworkLiveState.hpp), the frame ordering tables, the disc queue, the text
@@ -63,7 +64,7 @@ int LiveActionSelectionResult();
 MenuRow* CreateLiveActionRow(int row, int x);
 void UpdateLiveActionMenu();
 void UpdateLiveInformationVisibility(int source_row, int action_menu_state);
-void SetLiveCommandLabel(int action);
+void SetLiveCommandLabel(MenuCommand action);
 void DrawLiveCommandLabel();
 void SetLiveBackgroundFade(int fade_state);
 void DeactivateLiveRow(int row);
@@ -72,7 +73,7 @@ void InitializeLiveInformationBox();
 void SetLiveInformationMessage(char* message);
 void SetLiveInformationMessageText(std::span<const std::uint8_t> message);
 // A null `before` links into the overlay ordering table.
-void DrawLiveButtonIcon(int button_id, int x, int y, u_long* before);
+void DrawLiveButtonIcon(ButtonIcon button, int x, int y, u_long* before);
 int DrawLiveCursor(u_int step, int position);
 int DrawLiveColoredInteger(int value, int xy, int color, u_long* before);
 int DrawLiveComparedInteger(int value, int xy, int threshold, u_long* before);

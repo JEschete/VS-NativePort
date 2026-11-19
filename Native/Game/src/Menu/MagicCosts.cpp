@@ -31,8 +31,6 @@ constexpr int kFlyOutRow = 4;
 constexpr int kFlyOutOffset = 1;
 constexpr int kNoMenuRow = 40;
 constexpr int kKeepHeaderRow = 0;
-constexpr int kMenuCommandNone = 0;
-constexpr int kMenuCommandMenu = 2;
 constexpr int kMenuSelectionBack = -1;
 constexpr std::int32_t kSelectionPending = 0;
 constexpr std::size_t kFormatBufferSize = 16;
@@ -234,7 +232,7 @@ void HandleTeleportInput(TeleportMenuState& state, Host& host) {
     } else {
       host.ClearRowsExcept(kNoMenuRow);
       host.DismissInformationBox();
-      host.SetCommandLabel(kMenuCommandNone);
+      host.SetCommandLabel(Framework::MenuCommand::kNone);
     }
     state.step = TeleportStep::kReturnIfReady;
     return;
@@ -414,7 +412,7 @@ void CreateHeader(Host& host) {
   MenuItem item = kHeaderItem;
   item.text_offset = strings[index];
   host.SetMenuItem(item);
-  host.SetCommandLabel(kMenuCommandMenu);
+  host.SetCommandLabel(Framework::MenuCommand::kMenu);
   host.InitializeInformationBox();
 }
 }  // namespace VS::Menu::Magic

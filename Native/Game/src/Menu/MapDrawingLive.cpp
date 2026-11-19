@@ -70,16 +70,6 @@ static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
 static_assert(offsetof(Field_MapRoom, dataAddress) == kDataOffset);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(sizeof(Menu_Map_CompassBound) == sizeof(CompassPoint));
-static_assert(static_cast<int>(ControlButton::kL1) ==
-              Menu_Framework_ButtonId_L1);
-static_assert(static_cast<int>(ControlButton::kR1) ==
-              Menu_Framework_ButtonId_R1);
-static_assert(static_cast<int>(ControlButton::kL2) ==
-              Menu_Framework_ButtonId_L2);
-static_assert(static_cast<int>(ControlButton::kR2) ==
-              Menu_Framework_ButtonId_R2);
-static_assert(static_cast<int>(ControlButton::kCircle) ==
-              Menu_Framework_ButtonId_Circle);
 static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
               kMapPalingScenes);
 
@@ -446,10 +436,10 @@ class LiveControlsHost final : public ControlsHost {
     return VS::State::stateFlags.map_paling[Menu_Map_currentScene] != 0;
   }
 
-  void DrawButton(ControlButton button, std::int32_t x,
+  void DrawButton(Framework::ButtonIcon button, std::int32_t x,
                   std::int32_t y) override {
     if (u_long* entry = LegendEntry(); entry != nullptr) {
-      Framework::DrawLiveButtonIcon(static_cast<int>(button), x, y, entry);
+      Framework::DrawLiveButtonIcon(button, x, y, entry);
     }
   }
 

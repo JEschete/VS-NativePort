@@ -114,7 +114,7 @@ class TerminalCommonHost {
   [[nodiscard]] virtual bool BeginVitals(int actor) = 0;
   [[nodiscard]] virtual bool PrimaryStats(int command) = 0;
   [[nodiscard]] virtual bool StatPages(int command) = 0;
-  [[nodiscard]] virtual bool CommandLabel(int command) = 0;
+  [[nodiscard]] virtual bool CommandLabel(Framework::MenuCommand command) = 0;
   [[nodiscard]] virtual bool ClearRows(int except) = 0;
   [[nodiscard]] virtual bool Information(
       std::span<const std::uint8_t> text) = 0;

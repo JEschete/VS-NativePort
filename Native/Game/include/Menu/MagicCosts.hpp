@@ -8,6 +8,8 @@
 #include <span>
 #include <string_view>
 
+#include "Menu/Framework/Prompts.hpp"
+
 // MENU0.PRG MP cost text, teleport cost policy, teleport destination menu and
 // Magic header (src/MENU/MENU0.PRG/84.c, 15AC.c). The typed cores run over a
 // Host; MagicCostsLive.cpp binds them to the game state.
@@ -146,7 +148,7 @@ class Host {
   virtual void SetDisplayActionCost(int enabled) = 0;
   virtual void ClearRowsExcept(int row) = 0;
   virtual void DismissInformationBox() = 0;
-  virtual void SetCommandLabel(int command) = 0;
+  virtual void SetCommandLabel(Framework::MenuCommand command) = 0;
 
   // Header.
   [[nodiscard]] virtual std::span<const std::uint16_t> BattleMenuStrings() = 0;

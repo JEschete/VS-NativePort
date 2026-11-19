@@ -197,9 +197,9 @@ class LiveCapacityHost final : public CapacityHost {
                             std::int32_t h) override {
     Framework::DrawLiveButtonPromptBackground(x, y, w, h);
   }
-  void DrawButton(PromptButton button, std::int32_t x,
+  void DrawButton(Framework::ButtonIcon button, std::int32_t x,
                   std::int32_t y) override {
-    Framework::DrawLiveButtonIcon(static_cast<int>(button), x, y, nullptr);
+    Framework::DrawLiveButtonIcon(button, x, y, nullptr);
   }
 
   explicit LiveCapacityHost(std::span<const LootRow> rows) : rows_(rows) {}

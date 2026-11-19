@@ -305,7 +305,7 @@ class LiveHost final : public Host {
                                      static_cast<int>(color), chain);
   }
   void SetMenuCommandLabel() override {
-    Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    Framework::SetLiveCommandLabel(Framework::MenuCommand::kMenu);
   }
   void SetBackgroundPriority(int ot_offset, int brightness) override {
     Framework::SetLiveBackgroundPriority(ot_offset, brightness);

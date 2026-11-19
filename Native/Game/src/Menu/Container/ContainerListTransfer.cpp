@@ -1200,10 +1200,6 @@ constexpr std::array<Label, 2> kStorageNames{"GADGET BAG", "CONTAINER"};
 constexpr auto kCategoryLabels = std::to_array<std::string_view>(
     {"WEAPON", "BLADE", "GRIP", "SHIELD", "ARMOR", "GEM", "MISC"});
 static_assert(kCategoryLabels.size() == kRecordCategoryCount);
-// vs_mainMenu_buttonIDs positions.
-constexpr std::int32_t kIconTriangle = 0;
-constexpr std::int32_t kIconSquare = 1;
-constexpr std::int32_t kIconCross = 3;
 constexpr std::int32_t kPromptBaseX = 0x10;
 constexpr std::int32_t kPromptTop = 0x26;
 constexpr std::int32_t kPromptBottom = 0x36;
@@ -1235,9 +1231,10 @@ void DrawControlsPrompt(std::int32_t x, TransferWorld& world) {
   world.DrawButtonPromptBackground(x, kPromptBottom, kPromptBottomWidth,
                                    kPromptHeight);
   const auto icon_x = WrappingSubtract(x, kIconLead);
-  world.DrawButtonIcon(kIconSquare, icon_x, kIconTop);
-  world.DrawButtonIcon(kIconTriangle, WrappingAdd(x, kTriangleIconX), kIconTop);
-  world.DrawButtonIcon(kIconCross, icon_x, kIconBottom);
+  world.DrawButtonIcon(Framework::ButtonIcon::kSquare, icon_x, kIconTop);
+  world.DrawButtonIcon(Framework::ButtonIcon::kTriangle,
+                       WrappingAdd(x, kTriangleIconX), kIconTop);
+  world.DrawButtonIcon(Framework::ButtonIcon::kCross, icon_x, kIconBottom);
   const auto text_x = static_cast<std::int32_t>(
       static_cast<std::uint32_t>(WrappingAdd(x, kPromptTextLead)) &
       kHalfwordMask);

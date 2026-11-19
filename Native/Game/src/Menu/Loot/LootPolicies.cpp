@@ -162,17 +162,19 @@ void DrawCommands(std::int32_t edge_x, const CapacityPanel& panel,
   host.DrawColoredLabel(CapacityLabel::kGet, 0,
                         Xy(edge_x + kCommandX, kGetRowY),
                         DimShifted(panel.controls_enabled));
-  host.DrawButton(PromptButton::kCircle, edge_x + kCircleX, kButtonIconY);
+  host.DrawButton(Framework::ButtonIcon::kCircle, edge_x + kCircleX,
+                  kButtonIconY);
   const std::uint32_t all_color = preview.all_rows_state != 0
                                       ? DimShifted(panel.controls_enabled & 1U)
                                       : kCapacityDimColor;
   host.DrawColoredLabel(CapacityLabel::kAll, 0, Xy(edge_x + kAllX, kGetRowY),
                         all_color);
-  host.DrawButton(PromptButton::kSquare, edge_x + kSquareX, kButtonIconY);
+  host.DrawButton(Framework::ButtonIcon::kSquare, edge_x + kSquareX,
+                  kButtonIconY);
   host.DrawColoredLabel(CapacityLabel::kEnd, 0,
                         Xy(edge_x + kCommandX, kEndRowY),
                         DimShifted(panel.controls_enabled));
-  host.DrawButton(PromptButton::kCross, edge_x + kCircleX, kEndIconY);
+  host.DrawButton(Framework::ButtonIcon::kCross, edge_x + kCircleX, kEndIconY);
 }
 
 [[nodiscard]] std::span<const std::uint8_t> WeaponName(

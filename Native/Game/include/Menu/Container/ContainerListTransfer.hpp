@@ -193,7 +193,7 @@ class TransferWorld {
   virtual void DrawButtonPromptBackground(std::int32_t x, std::int32_t y,
                                           std::int32_t width,
                                           std::int32_t height) = 0;
-  virtual void DrawButtonIcon(std::int32_t button, std::int32_t x,
+  virtual void DrawButtonIcon(Framework::ButtonIcon button, std::int32_t x,
                               std::int32_t y) = 0;
   virtual void DrawCapacityCount(std::int32_t limit, std::int32_t xy,
                                  std::int32_t count) = 0;

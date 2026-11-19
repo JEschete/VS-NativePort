@@ -69,7 +69,7 @@ class FakeHost final : public break_arts::Host {
   std::vector<CostText> cost_text;
   std::vector<std::pair<std::string, std::uint32_t>> drawings;
   std::vector<int> cleared_rows;
-  std::vector<int> command_labels;
+  std::vector<VS::Menu::Framework::MenuCommand> command_labels;
   int information_dismissals = 0;
 
   FakeHost() {
@@ -193,7 +193,7 @@ class FakeHost final : public break_arts::Host {
   void ClearRowsExcept(int row) override { cleared_rows.push_back(row); }
   void DismissInformationBox() override { ++information_dismissals; }
   void InitializeInformationBox() override { ++information_initializations; }
-  void SetCommandLabel(int command) override {
+  void SetCommandLabel(VS::Menu::Framework::MenuCommand command) override {
     command_labels.push_back(command);
   }
   void SetActionSelection(std::uint16_t action_id) override {
@@ -364,7 +364,8 @@ TEST_CASE("Break Arts CreateHeader creates the title and information box",
   CHECK(host.menu_items[0].first.y == 18);
   CHECK((host.menu_items[0].second ==
          break_arts::TextRef{break_arts::TextKind::kBattleMenuIndex, 5}));
-  CHECK(host.command_labels == std::vector<int>{2});
+  CHECK(host.command_labels ==
+        std::vector{VS::Menu::Framework::MenuCommand::kMenu});
   CHECK(host.information_initializations == 1);
 }
 

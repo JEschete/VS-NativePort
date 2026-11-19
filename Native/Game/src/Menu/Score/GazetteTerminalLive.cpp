@@ -71,8 +71,6 @@ constexpr int kControlsSlot = 6;
 constexpr int kIdentificationSlot = 7;
 constexpr std::size_t kPreviewActor = 1;
 constexpr int kSoundGroup = 126;
-constexpr int kRotationButton = 6;
-constexpr int kZoomButton = 7;
 constexpr std::size_t kOverviewMemoryRow = 2;
 constexpr std::size_t kOverviewMemoryPage = 3;
 
@@ -317,9 +315,10 @@ class LiveEnemyViewerHost final : public EnemyViewerHost {
       Refuse("viewer button has no frame ordering entry");
       return;
     }
-    Framework::DrawLiveButtonIcon(
-        button == ViewerButton::kRotation ? kRotationButton : kZoomButton, x, y,
-        ordering);
+    Framework::DrawLiveButtonIcon(button == ViewerButton::kRotation
+                                      ? Framework::ButtonIcon::kL2
+                                      : Framework::ButtonIcon::kR2,
+                                  x, y, ordering);
   }
   void DrawText(std::string_view text, std::uint32_t position,
                 std::uint32_t color, ViewerTextLayer layer) override {
@@ -723,7 +722,7 @@ class LiveScreenHost final : public GazetteScreenHost {
   }
   void ClearCommand() override {
     Publish();
-    Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+    Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
   }
   void ClearRows(int except_row) override {
     Publish();

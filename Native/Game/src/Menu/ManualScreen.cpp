@@ -186,11 +186,11 @@ void ScrollLine(HelpPagesHost& host, HelpPagesState& state,
 
 void DrawControls(HelpPagesHost& host, std::int32_t page,
                   std::int32_t last_page) {
-  host.DrawButtonIcon(kSquareButtonIcon, kTurnPageIcon.x, kTurnPageIcon.y,
-                      kControlsLayer);
+  host.DrawButtonIcon(Framework::ButtonIcon::kSquare, kTurnPageIcon.x,
+                      kTurnPageIcon.y, kControlsLayer);
   host.DrawText(kTurnPageText, kTurnPageTextXY, kTextColor, kControlsLayer);
   host.DrawControlsBackground(kTurnPageControls);
-  host.DrawButtonIcon(kCircleButtonIcon, kMenuIcon.x, kMenuIcon.y,
+  host.DrawButtonIcon(Framework::ButtonIcon::kCircle, kMenuIcon.x, kMenuIcon.y,
                       kControlsLayer);
   host.DrawText(kMenuText, kMenuTextXY, kTextColor, kControlsLayer);
   host.DrawControlsBackground(kMenuControls);
@@ -319,7 +319,7 @@ std::int32_t UpdateScreen(ScreenHost& host, std::uint8_t& step,
       host.SetHudHidden(0);
       host.SetHudSlideOffset(0);
       host.SetFieldRenderingEnabled(1);
-      host.SetMenuCommand(kNoMenuCommand);
+      host.SetMenuCommand(Framework::MenuCommand::kNone);
       host.ClearMenuExcept(kNoMenuItem);
       step = kScreenShutDown;
       break;

@@ -91,7 +91,7 @@ class LiveHost final : public Host {
   void InitializeInformationBox() override {
     Framework::InitializeLiveInformationBox();
   }
-  void SetCommandLabel(int action) override {
+  void SetCommandLabel(Framework::MenuCommand action) override {
     Framework::SetLiveCommandLabel(action);
   }
   void InitInformationTextBox(Framework::InformationHeader header) override {

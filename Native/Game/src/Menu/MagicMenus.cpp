@@ -71,7 +71,7 @@ bool Ranked(int action) {
 void CloseSpellMenu(MenuHost& host) {
   host.ClearRows(kNoRow);
   host.DismissInformation();
-  host.SetCommand(0);
+  host.SetCommand(Framework::MenuCommand::kNone);
 }
 
 bool InitializeRows(School school, SpellMenuState& state, MenuHost& host) {

@@ -24,6 +24,7 @@
 namespace {
 namespace items = VS::Items;
 namespace loot = VS::Menu::Loot;
+namespace framework = VS::Menu::Framework;
 namespace live = VS::Menu::Loot::Live;
 using items::ItemCategory;
 using items::ItemsStatus;
@@ -70,7 +71,7 @@ class FakeCapacityHost final : public loot::CapacityHost {
                             std::int32_t w, std::int32_t /*h*/) override {
     backgrounds.push_back(w);
   }
-  void DrawButton(loot::PromptButton button, std::int32_t /*x*/,
+  void DrawButton(framework::ButtonIcon button, std::int32_t /*x*/,
                   std::int32_t /*y*/) override {
     buttons.push_back(button);
   }
@@ -87,7 +88,7 @@ class FakeCapacityHost final : public loot::CapacityHost {
   int contained_calls = 0;
   std::vector<Drawn> drawn;
   std::vector<std::int32_t> backgrounds;
-  std::vector<loot::PromptButton> buttons;
+  std::vector<framework::ButtonIcon> buttons;
 
  private:
   static std::string Name(loot::CapacityLabel label, std::uint8_t category) {
@@ -302,9 +303,9 @@ TEST_CASE("F02856 without a preview lists every category in neutral colors",
   CHECK(*host.Find("7") == Drawn{"7", Xy(282, 96), 0x804020});
   CHECK(host.contained_calls == 0);
   CHECK(host.backgrounds == std::vector<std::int32_t>{112, 64});
-  CHECK(host.buttons == std::vector{loot::PromptButton::kCircle,
-                                    loot::PromptButton::kSquare,
-                                    loot::PromptButton::kCross});
+  CHECK(host.buttons == std::vector{framework::ButtonIcon::kCircle,
+                                    framework::ButtonIcon::kSquare,
+                                    framework::ButtonIcon::kCross});
 }
 
 TEST_CASE("F02856 a previewed row lights the categories it adds to",

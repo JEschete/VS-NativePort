@@ -26,6 +26,7 @@
 
 namespace {
 namespace magic = VS::Menu::Magic;
+namespace framework = VS::Menu::Framework;
 
 constexpr int kRoomOfSavePointFive = 0xCD;
 constexpr int kUnknownRoom = 0x7777;
@@ -70,7 +71,7 @@ class FakeHost final : public magic::Host {
   std::optional<CreatedRows> created;
   std::vector<int> cleared;
   int dismissed = 0;
-  std::vector<int> commands;
+  std::vector<framework::MenuCommand> commands;
   std::optional<magic::MenuItem> menu_item;
   int information_boxes = 0;
 
@@ -126,7 +127,9 @@ class FakeHost final : public magic::Host {
   }
   void ClearRowsExcept(int row) override { cleared.push_back(row); }
   void DismissInformationBox() override { ++dismissed; }
-  void SetCommandLabel(int command) override { commands.push_back(command); }
+  void SetCommandLabel(framework::MenuCommand command) override {
+    commands.push_back(command);
+  }
   std::span<const std::uint16_t> BattleMenuStrings() override {
     return battle_strings;
   }
@@ -489,7 +492,7 @@ TEST_CASE("Magic UpdateTeleportMenu closes the list on a selection",
   CHECK(host.display_action_cost == 0);
   CHECK(host.cleared == std::vector<int>{40});
   CHECK(host.dismissed == 1);
-  CHECK(host.commands == std::vector<int>{0});
+  CHECK(host.commands == std::vector{framework::MenuCommand::kNone});
   CHECK(state.step == magic::TeleportStep::kReturnIfReady);
 }
 
@@ -570,7 +573,7 @@ TEST_CASE("Magic CreateHeader creates the title row and information box",
                               .target_position = 180,
                               .selected = 1,
                           }});
-  CHECK(host.commands == std::vector<int>{2});
+  CHECK(host.commands == std::vector{framework::MenuCommand::kMenu});
   CHECK(host.information_boxes == 1);
   CHECK(host.refusals.empty());
 }

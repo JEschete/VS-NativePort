@@ -99,8 +99,8 @@ class FakeScreenHost final : public manual::ScreenHost {
                              std::int32_t brightness) override {
     events.push_back(std::format("priority:{},{}", layer, brightness));
   }
-  void SetMenuCommand(std::int32_t command) override {
-    events.push_back(std::format("command:{}", command));
+  void SetMenuCommand(fw::MenuCommand command) override {
+    events.push_back(std::format("command:{}", std::to_underlying(command)));
   }
   [[nodiscard]] std::int32_t BackgroundFadeStep() const override {
     return fade_step;
@@ -405,9 +405,10 @@ class FakeHelpHost final : public manual::HelpPagesHost {
   void PlaySfx(std::int32_t group, std::int32_t effect) override {
     events.push_back(std::format("sfx:{},{}", group, effect));
   }
-  void DrawButtonIcon(std::int32_t button, std::int32_t x, std::int32_t y,
+  void DrawButtonIcon(fw::ButtonIcon button, std::int32_t x, std::int32_t y,
                       std::int32_t layer) override {
-    events.push_back(std::format("button:{},{},{},{}", button, x, y, layer));
+    events.push_back(std::format("button:{},{},{},{}",
+                                 std::to_underlying(button), x, y, layer));
   }
   void DrawText(std::string_view text, std::int32_t xy, std::int32_t color,
                 std::int32_t layer) override {

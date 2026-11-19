@@ -1053,8 +1053,8 @@ class FakeDetails final : public fw::EquipmentDetailsHost {
   void DrawButtonPromptBackground(int x, int y, int w, int h) override {
     draws.push_back(Call("Prompt", {x, y, w, h}));
   }
-  void DrawButtonIcon(int button, int x, int y, int slot) override {
-    draws.push_back(Call("Icon", {button, x, y, slot}));
+  void DrawButtonIcon(fw::ButtonIcon button, int x, int y, int slot) override {
+    draws.push_back(Call("Icon", {std::to_underlying(button), x, y, slot}));
   }
   void SetFontStyle(int palette_offset) override {
     styles.push_back(palette_offset);

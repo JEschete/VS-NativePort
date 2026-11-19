@@ -228,7 +228,7 @@ class LiveHost final : public Host {
   void InitializeInformationBox() override {
     Framework::InitializeLiveInformationBox();
   }
-  void SetCommandLabel(int command) override {
+  void SetCommandLabel(Framework::MenuCommand command) override {
     Framework::SetLiveCommandLabel(command);
   }
   void SetActionSelection(std::uint16_t action_id) override {

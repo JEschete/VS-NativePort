@@ -4446,6 +4446,9 @@
     <ClInclude Include="include\Menu\Framework\ItemRowsLive.hpp">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Framework\Prompts.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Framework\SortingKeys.hpp">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>

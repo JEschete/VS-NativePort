@@ -781,7 +781,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Call([] { Framework::SetLiveBackgroundFade(0); });
   }
   void ClearCommand() override {
-    Call([] { Framework::SetLiveCommandLabel(0); });
+    Call([] { Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone); });
   }
   std::int32_t BackgroundFadeStep() override {
     return VS::Menu::Framework::backgroundFadeStep;
@@ -815,7 +815,8 @@ class LiveTerminalHost final : public InventoryTerminalHost,
       Framework::DrawLiveButtonPromptBackground(
           kStatusBackgroundX - offset, kStatusBackgroundY,
           kStatusBackgroundWidth, kStatusBackgroundHeight);
-      Framework::DrawLiveButtonIcon(1, kStatusButtonX - offset, kStatusButtonY,
+      Framework::DrawLiveButtonIcon(Framework::ButtonIcon::kSquare,
+                                    kStatusButtonX - offset, kStatusButtonY,
                                     nullptr);
       Render::DrawLiveCompactTextColor(
           "STATUS",

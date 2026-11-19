@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 
+#include "Menu/Framework/Prompts.hpp"
 #include "Menu/MapMarkers.hpp"
 #include "Menu/MapNavigation.hpp"
 
@@ -280,15 +281,6 @@ class BackdropHost {
                                        std::int32_t y, std::int32_t width,
                                        std::int32_t height);
 
-// The legend's button glyphs (vs_mainmenu_renderButton's ids).
-enum class ControlButton : std::uint8_t {
-  kCircle = 2,
-  kL1 = 4,
-  kR1 = 5,
-  kL2 = 6,
-  kR2 = 7,
-};
-
 enum class ControlCaption : std::uint8_t {
   kBack,
   kNext,
@@ -326,7 +318,7 @@ class ControlsHost {
   virtual void ShiftTextBox(std::int32_t delta) = 0;
   // Whether the scene's map is jammed (map_paling); none refuses the frame.
   [[nodiscard]] virtual std::optional<bool> IsJammed() = 0;
-  virtual void DrawButton(ControlButton button, std::int32_t x,
+  virtual void DrawButton(Framework::ButtonIcon button, std::int32_t x,
                           std::int32_t y) = 0;
   // vs_battle_renderTextRawColor with the packed position.
   virtual void DrawCaption(ControlCaption caption, std::int32_t packed_xy,
