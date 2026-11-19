@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_RendererSlot;
+namespace VS::Effects {
+struct LiveRendererSlot;
+}  // namespace VS::Effects
 
 // Live bindings for the grid, ten-vertex mesh, surface, mirrored surface and
 // rotating surface template instances (Grid.cpp, Mesh10.cpp, Surface.cpp,
@@ -16,140 +18,140 @@ struct Effects_RendererSlot;
 // whose data the package lacks is refused with a diagnostic instead of
 // indexing past it.
 namespace VS::Effects::Templates {
-int UpdateLivePlg049RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg049RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg053Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg053Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg061Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg061Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg065RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg065RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg069Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg069Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg073Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg073RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg073RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg077Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg077Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg077Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg081RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg081RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg082Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg082Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg085Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg085Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg086Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg086Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg086RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg086RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg087Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg087Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg128Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg128Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg128Surface2(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Surface2(LiveRendererSlot* slot, unsigned int command,
                              int packed);
-int UpdateLivePlg128RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg128RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg129Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg129RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg129RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg129Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg137Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg137Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg138Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg138Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg138RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg138RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg139Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg139Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg142Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg142Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg142RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg142RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg146MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg150Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg146MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg150Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg150Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg150Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg152Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg152Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg153Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg153Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg154Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg154Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg156Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg156Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg158Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg158Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg158MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg158RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg158MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg158RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg161Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg161RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg161RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg162RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg162RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg165Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg165Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg165RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg165RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg166MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg166RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg166MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg166RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg167RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg167RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg168Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg168Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg170Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg170Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg170MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg170RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg170MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg170RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg236RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg236RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg242Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg242Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg246RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg246RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg250RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg250RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed);
-int UpdateLivePlg260Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg260Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed);
-int UpdateLivePlg263Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg263Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg272Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg272Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg272Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg272Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed);
-int UpdateLivePlg273MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg291Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg273MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg291Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg297Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg297Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed);
-int UpdateLivePlg297MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
-int UpdateLivePlg300MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed);
+int UpdateLivePlg297MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
+int UpdateLivePlg300MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed);
 }  // namespace VS::Effects::Templates

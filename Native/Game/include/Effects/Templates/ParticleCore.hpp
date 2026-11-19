@@ -57,7 +57,7 @@ inline constexpr std::uint32_t kParticleRestoreModeWord = 0xE1000200;
 inline constexpr std::uint8_t kParticleQuadCode = 0x3E;
 inline constexpr std::uint8_t kParticleLineCode = 0x42;
 
-// Renderer slot commands (Effects_EffectRenderer).
+// Renderer slot commands (EffectRenderer).
 enum class ParticleCommand : std::uint32_t {
   kCreate = 1,
   kTick = 2,

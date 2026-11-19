@@ -30,7 +30,7 @@ namespace effects = VS::Effects;
 namespace rings = VS::Effects::Templates;
 namespace memory = VS::Core::Memory;
 namespace math = VS::Core::Math;
-using LiveRing = int (*)(Effects_RendererSlot*, unsigned int, int);
+using LiveRing = int (*)(VS::Effects::LiveRendererSlot*, unsigned int, int);
 constexpr std::size_t kScratchBytes = 1024;
 constexpr std::size_t kEmitterScratch = 0x1D0;
 
@@ -140,7 +140,7 @@ class LiveEmission {
 
 class RingSlot {
  public:
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   RingSlot() = default;
   RingSlot(const RingSlot&) = delete;
   RingSlot(RingSlot&&) = delete;
@@ -148,15 +148,15 @@ class RingSlot {
   RingSlot& operator=(RingSlot&&) = delete;
   ~RingSlot() { Release(); }
   void Release() {
-    if (slot.rendererState != nullptr) {
-      memory::FreeLiveFromHighEnd(slot.rendererState);
-      slot.rendererState = nullptr;
+    if (slot.renderer_state != nullptr) {
+      memory::FreeLiveFromHighEnd(slot.renderer_state);
+      slot.renderer_state = nullptr;
     }
   }
 };
 
 void CheckLiveBindings(LiveRing ring, LiveEmission& fixture, RingSlot& owner) {
-  auto* state = static_cast<effects::LiveRingState*>(owner.slot.rendererState);
+  auto* state = static_cast<effects::LiveRingState*>(owner.slot.renderer_state);
   SECTION("missing current curve refuses without sampling a zero replacement") {
     fixture.definitions.values[0].position_curve = 1;
     fixture.package.curves[0] = nullptr;
@@ -171,17 +171,17 @@ void CheckLiveBindings(LiveRing ring, LiveEmission& fixture, RingSlot& owner) {
 }
 
 void CheckLiveLifecycle(LiveRing ring, RingSlot& owner) {
-  auto* state = static_cast<effects::LiveRingState*>(owner.slot.rendererState);
+  auto* state = static_cast<effects::LiveRingState*>(owner.slot.renderer_state);
   SECTION("repeated create does not overwrite or leak the existing state") {
     CHECK(ring(&owner.slot, 1, 3) == 0);
-    CHECK(owner.slot.rendererState == state);
+    CHECK(owner.slot.renderer_state == state);
   }
   SECTION("state expires without texture data and cleanup remains with owner") {
     CHECK(ring(&owner.slot, 2, 0) == 1);
     CHECK(ring(&owner.slot, 2, 0) == 0);
     CHECK(state->age == 2);
     CHECK(ring(&owner.slot, 4, 0) == 0);
-    CHECK(owner.slot.rendererState == state);
+    CHECK(owner.slot.renderer_state == state);
   }
 }
 
@@ -190,7 +190,7 @@ void CheckLiveRing(LiveRing ring) {
   RingSlot owner;
   fixture.definitions.values[0].flags = rings::kRingEffectView;
   REQUIRE(ring(&owner.slot, 1, 2) == 1);
-  REQUIRE(owner.slot.rendererState != nullptr);
+  REQUIRE(owner.slot.renderer_state != nullptr);
   SECTION("checked current bindings") {
     CheckLiveBindings(ring, fixture, owner);
   }

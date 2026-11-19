@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Effects_RendererSlot;
+namespace VS::Effects {
+struct LiveRendererSlot;
+}  // namespace VS::Effects
 namespace VS::Render {
 struct TrailPacket;
 }  // namespace VS::Render
@@ -20,8 +22,8 @@ struct BoneTrail;
 // func_800CDCBC (5BF94.c:4898): draws the trail's current segment.
 void LiveDrawTrailSegment(const BoneTrail* trail, int base_weight,
                           int tip_weight);
-// func_800CE174 (5BF94.c:4958): the trail renderer (Effects_EffectRenderer).
-int LiveUpdateBoneTrail(Effects_RendererSlot* slot, unsigned int command,
+// func_800CE174 (5BF94.c:4958): the trail renderer (EffectRenderer).
+int LiveUpdateBoneTrail(LiveRendererSlot* slot, unsigned int command,
                         int parameter);
 // func_800CF7A8 (5BF94.c:5666): begins an endless trail behind `bone`.
 void LiveSpawnBoneTrail(int actor, int bone, int color, int texture);

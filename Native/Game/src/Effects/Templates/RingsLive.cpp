@@ -209,7 +209,7 @@ using RingPaletteEntries = std::array<RingPaletteEntry, kRingPaletteEntries>;
 
 class LiveRingHost final : public RingHost {
  public:
-  explicit LiveRingHost(Effects_RendererSlot& slot) : slot_(slot) {}
+  explicit LiveRingHost(LiveRendererSlot& slot) : slot_(slot) {}
 
   void Create(const RingState& state, RingTextureSource source) override;
 
@@ -284,10 +284,10 @@ class LiveRingHost final : public RingHost {
 
  private:
   [[nodiscard]] LiveRingState* LiveState() const {
-    return static_cast<LiveRingState*>(slot_.rendererState);
+    return static_cast<LiveRingState*>(slot_.renderer_state);
   }
 
-  Effects_RendererSlot& slot_;
+  LiveRendererSlot& slot_;
   const LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
@@ -311,7 +311,7 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
     return;
   }
   *live = LiveRingState{};
-  slot_.rendererState = live;
+  slot_.renderer_state = live;
   StoreState(state);
   const bool segments = source == RingTextureSource::kSegmentsAndPositions;
   const int table =
@@ -514,7 +514,7 @@ void LiveRingHost::EmitParticleEvent(std::uint8_t event, Vec3 position) {
 using RingInstance = bool (*)(RingCommand, std::int32_t,
                               std::span<const RingPaletteEntry>, RingHost&);
 
-int RunRing(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunRing(LiveRendererSlot* slot, unsigned int command, int packed,
             std::span<const RingPaletteEntry> palette, RingInstance instance) {
   if (slot == nullptr) {
     VS::Core::LogError("effects",
@@ -527,7 +527,7 @@ int RunRing(Effects_RendererSlot* slot, unsigned int command, int packed,
 }
 }  // namespace
 
-int RunLiveRing(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunLiveRing(LiveRendererSlot* slot, unsigned int command, int packed,
                 std::span<const RingPaletteEntry> palette,
                 LiveRingInstance instance) {
   return RunRing(slot, command, packed, palette, instance);
@@ -535,464 +535,464 @@ int RunLiveRing(Effects_RendererSlot* slot, unsigned int command, int packed,
 
 // Each entry passes its overlay's palette to the instance in Ring.cpp,
 // ClosedRing.cpp or TiledRing.cpp, which carries the decomp provenance.
-int UpdateLivePlg049Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg049Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg049::ringColorFactors), &Plg049::Ring);
 }
 
-int UpdateLivePlg050Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg050Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg050::ringColorFactors), &Plg050::Ring);
 }
 
-int UpdateLivePlg061Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg061::ringColorFactors), &Plg061::Ring);
 }
 
-int UpdateLivePlg065Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg065Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg065::ringColorFactors), &Plg065::Ring);
 }
 
-int UpdateLivePlg073Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg073::ringColorFactors), &Plg073::Ring);
 }
 
-int UpdateLivePlg081Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg081Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg081::ringColorFactors), &Plg081::Ring);
 }
 
-int UpdateLivePlg129Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg129::ringColorFactors), &Plg129::Ring);
 }
 
-int UpdateLivePlg129Ring2(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Ring2(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg129::ringColorFactors2), &Plg129::Ring2);
 }
 
-int UpdateLivePlg138Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg138Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg138::ringColorFactors), &Plg138::Ring);
 }
 
-int UpdateLivePlg142Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg142Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg142::ringColorFactors), &Plg142::Ring);
 }
 
-int UpdateLivePlg146Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg146Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg146::ringColorFactors), &Plg146::Ring);
 }
 
-int UpdateLivePlg147Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg147Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg147::ringColorFactors), &Plg147::Ring);
 }
 
-int UpdateLivePlg149Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg149Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg149::ringColorFactors), &Plg149::Ring);
 }
 
-int UpdateLivePlg150Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg150Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg150::ringColorFactors), &Plg150::Ring);
 }
 
-int UpdateLivePlg153Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg153Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg153::ringColorFactors), &Plg153::Ring);
 }
 
-int UpdateLivePlg160Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg160Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg160::ringColorFactors), &Plg160::Ring);
 }
 
-int UpdateLivePlg161Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg161::ringColorFactors), &Plg161::Ring);
 }
 
-int UpdateLivePlg161Ring2(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161Ring2(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg161::ringColorFactors2), &Plg161::Ring2);
 }
 
-int UpdateLivePlg162Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg162Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg162::ringColorFactors2), &Plg162::Ring);
 }
 
-int UpdateLivePlg166Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg166Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg166::ringColorFactors), &Plg166::Ring);
 }
 
-int UpdateLivePlg169Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg169Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg169::ringColorFactors), &Plg169::Ring);
 }
 
-int UpdateLivePlg170Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg170::ringColorFactors), &Plg170::Ring);
 }
 
-int UpdateLivePlg198Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg198Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg149::ringColorFactors), &Plg198::Ring);
 }
 
-int UpdateLivePlg236Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg236Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg236::ringColorFactors2), &Plg236::Ring);
 }
 
-int UpdateLivePlg263Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg263Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg263::ringColorFactors), &Plg263::Ring);
 }
 
-int UpdateLivePlg297Ring(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg297Ring(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg297::ringColorFactors), &Plg297::Ring);
 }
 
-int UpdateLivePlg047ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg047ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg047::closedRingColorFactors),
                  &Plg047::ClosedRing);
 }
 
-int UpdateLivePlg051ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg051ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg051::closedRingColorFactors),
                  &Plg051::ClosedRing);
 }
 
-int UpdateLivePlg053ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg053ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg053::closedRingColorFactors),
                  &Plg053::ClosedRing);
 }
 
-int UpdateLivePlg061ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg061::closedRingColorFactors),
                  &Plg061::ClosedRing);
 }
 
-int UpdateLivePlg065ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg065ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg065::closedRingColorFactors),
                  &Plg065::ClosedRing);
 }
 
-int UpdateLivePlg081ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg081ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg081::closedRingColorFactors),
                  &Plg081::ClosedRing);
 }
 
-int UpdateLivePlg082ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg082ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg082::closedRingColorFactors),
                  &Plg082::ClosedRing);
 }
 
-int UpdateLivePlg086ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg086ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg086::closedRingColorFactors),
                  &Plg086::ClosedRing);
 }
 
-int UpdateLivePlg087ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg087::closedRingColorFactors),
                  &Plg087::ClosedRing);
 }
 
-int UpdateLivePlg128ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg128::closedRingColorFactors),
                  &Plg128::ClosedRing);
 }
 
-int UpdateLivePlg134ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg134ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg134::closedRingColorFactors),
                  &Plg134::ClosedRing);
 }
 
-int UpdateLivePlg135ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg135ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg135::closedRingColorFactors),
                  &Plg135::ClosedRing);
 }
 
-int UpdateLivePlg142ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg142ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg142::closedRingColorFactors),
                  &Plg142::ClosedRing);
 }
 
-int UpdateLivePlg143ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg143ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg143::closedRingColorFactors),
                  &Plg143::ClosedRing);
 }
 
-int UpdateLivePlg152ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg152ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg082::closedRingColorFactors),
                  &Plg152::ClosedRing);
 }
 
-int UpdateLivePlg154ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg154ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg154::closedRingColorFactors),
                  &Plg154::ClosedRing);
 }
 
-int UpdateLivePlg158ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg158ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg158::closedRingColorFactors),
                  &Plg158::ClosedRing);
 }
 
-int UpdateLivePlg162ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg162ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg162::closedRingColorFactors),
                  &Plg162::ClosedRing);
 }
 
-int UpdateLivePlg165ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg165ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg086::closedRingColorFactors),
                  &Plg165::ClosedRing);
 }
 
-int UpdateLivePlg166ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg166ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg166::closedRingColorFactors),
                  &Plg166::ClosedRing);
 }
 
-int UpdateLivePlg167ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg167ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg167::closedRingColorFactors),
                  &Plg167::ClosedRing);
 }
 
-int UpdateLivePlg169ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg169ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg169::closedRingColorFactors),
                  &Plg169::ClosedRing);
 }
 
-int UpdateLivePlg170ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg170::closedRingColorFactors),
                  &Plg170::ClosedRing);
 }
 
-int UpdateLivePlg236ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg236ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg236::closedRingColorFactors),
                  &Plg236::ClosedRing);
 }
 
-int UpdateLivePlg250ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg250ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg250::closedRingColorFactors),
                  &Plg250::ClosedRing);
 }
 
-int UpdateLivePlg272ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg272ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg272::closedRingColorFactors),
                  &Plg272::ClosedRing);
 }
 
-int UpdateLivePlg291ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg291ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg291::closedRingColorFactors),
                  &Plg291::ClosedRing);
 }
 
-int UpdateLivePlg297ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg297ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg297::closedRingColorFactors),
                  &Plg297::ClosedRing);
 }
 
-int UpdateLivePlg301ClosedRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg301ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg301::closedRingColorFactors),
                  &Plg301::ClosedRing);
 }
 
-int UpdateLivePlg044TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg044TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg044::tiledRingColorFactors),
                  &Plg044::TiledRing);
 }
 
-int UpdateLivePlg049TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg049TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg049::tiledRingColorFactors),
                  &Plg049::TiledRing);
 }
 
-int UpdateLivePlg069TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg069TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg069::tiledRingColorFactors),
                  &Plg069::TiledRing);
 }
 
-int UpdateLivePlg073TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg073::tiledRingColorFactors),
                  &Plg073::TiledRing);
 }
 
-int UpdateLivePlg085TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg085TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg085::tiledRingColorFactors),
                  &Plg085::TiledRing);
 }
 
-int UpdateLivePlg137TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg137::tiledRingColorFactors),
                  &Plg137::TiledRing);
 }
 
-int UpdateLivePlg138TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg138TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg138::tiledRingColorFactors),
                  &Plg138::TiledRing);
 }
 
-int UpdateLivePlg139TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg139TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg085::tiledRingColorFactors),
                  &Plg139::TiledRing);
 }
 
-int UpdateLivePlg143TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg143TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg143::tiledRingColorFactors),
                  &Plg143::TiledRing);
 }
 
-int UpdateLivePlg146TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg146TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg146::tiledRingColorFactors),
                  &Plg146::TiledRing);
 }
 
-int UpdateLivePlg148TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg148TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg148::tiledRingColorFactors),
                  &Plg148::TiledRing);
 }
 
-int UpdateLivePlg150TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg150TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg150::tiledRingColorFactors),
                  &Plg150::TiledRing);
 }
 
-int UpdateLivePlg160TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg160TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg160::tiledRingColorFactors),
                  &Plg160::TiledRing);
 }
 
-int UpdateLivePlg242TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg242TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg242::tiledRingColorFactors),
                  &Plg242::TiledRing);
 }
 
-int UpdateLivePlg265TiledRing(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg265TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
                  PaletteOf(Effects::Plg265::tiledRingColorFactors),

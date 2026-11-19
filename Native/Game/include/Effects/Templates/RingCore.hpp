@@ -43,7 +43,7 @@ inline constexpr std::uint32_t kRingDrawModeWord = 0xE1000000;
 inline constexpr std::uint32_t kRingRestoreModeWord = 0xE1000200;
 inline constexpr std::uint8_t kRingQuadCode = 0x3E;
 
-// Renderer slot commands (Effects_EffectRenderer).
+// Renderer slot commands (EffectRenderer).
 enum class RingCommand : std::uint32_t {
   kCreate = 1,
   kTick = 2,

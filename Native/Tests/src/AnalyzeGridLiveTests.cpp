@@ -74,8 +74,8 @@ class LiveGrid {
     Core_Gte_SetGeomOffset(160, 120);
   }
   ~LiveGrid() {
-    if (memory::LivePayloadCapacity(slot.rendererState).has_value()) {
-      memory::FreeLiveFromHighEnd(slot.rendererState);
+    if (memory::LivePayloadCapacity(slot.renderer_state).has_value()) {
+      memory::FreeLiveFromHighEnd(slot.renderer_state);
     }
     Effects_package = &package;
     effects::ForgetLivePackageExtents();
@@ -95,12 +95,12 @@ class LiveGrid {
   LiveGrid& operator=(LiveGrid&&) = delete;
 
   effects::AnalyzeGridState& State() {
-    const auto capacity = memory::LivePayloadCapacity(slot.rendererState);
+    const auto capacity = memory::LivePayloadCapacity(slot.renderer_state);
     if (!capacity.has_value() ||
         *capacity < sizeof(effects::AnalyzeGridState)) {
       throw std::logic_error("grid test has no complete state");
     }
-    return *static_cast<effects::AnalyzeGridState*>(slot.rendererState);
+    return *static_cast<effects::AnalyzeGridState*>(slot.renderer_state);
   }
 
   std::array<std::byte, 4096> arena{};
@@ -108,7 +108,7 @@ class LiveGrid {
   Definitions definitions{};
   VS::Effects::LiveEffectPackage package{};
   Effects_EffectInstance instance{};
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   std::array<u_long, kPrimitiveWords> primitives{};
   std::array<u_long, kOrderingWords> ordering{};
 
@@ -124,14 +124,14 @@ class LiveGrid {
   void* saved_ordering_ = VS::Render::legacyOrderingTables[0];
 };
 
-void CheckLiveLifecycle(Effects_EffectRenderer entry) {
+void CheckLiveLifecycle(VS::Effects::EffectRenderer entry) {
   LiveGrid live;
   REQUIRE(entry(&live.slot, 1, 0x0102) == 1);
   CHECK(live.State().u == 37);
-  void* allocation = live.slot.rendererState;
+  void* allocation = live.slot.renderer_state;
   live.State().age = 99;
   REQUIRE(entry(&live.slot, 1, 0x0102) == 1);
-  CHECK(live.slot.rendererState == allocation);
+  CHECK(live.slot.renderer_state == allocation);
   CHECK(live.State().age == 0);
   REQUIRE(entry(&live.slot, 3, 0) == 1);
   CHECK(live.State().lifetime == 1);
@@ -139,26 +139,26 @@ void CheckLiveLifecycle(Effects_EffectRenderer entry) {
   CHECK(live.State().lifetime == 0);
 }
 
-void CheckLiveCleanup(Effects_EffectRenderer entry) {
+void CheckLiveCleanup(VS::Effects::EffectRenderer entry) {
   LiveGrid live;
   REQUIRE(entry(&live.slot, 1, 0) == 1);
-  void* allocation = live.slot.rendererState;
+  void* allocation = live.slot.renderer_state;
   CHECK(entry(&live.slot, 4, 0) == 0);
-  CHECK(live.slot.rendererState == allocation);
+  CHECK(live.slot.renderer_state == allocation);
   CHECK(memory::LivePayloadCapacity(allocation).has_value());
   // EffectInstancesLive::LiveRendererChain::Free owns both allocations.
   memory::FreeLiveFromHighEnd(allocation);
-  live.slot.rendererState = nullptr;
+  live.slot.renderer_state = nullptr;
   CHECK_FALSE(memory::LivePayloadCapacity(allocation).has_value());
   CHECK(entry(&live.slot, 2, 0) == 0);
   CHECK(entry(&live.slot, 3, 0) == 0);
 }
 
-void CheckLiveUnknownCommands(Effects_EffectRenderer entry) {
+void CheckLiveUnknownCommands(VS::Effects::EffectRenderer entry) {
   const unsigned int command = GENERATE(0U, 5U, 0xFFFFFFFFU);
   LiveGrid live;
   CHECK(entry(&live.slot, command, 0) == 1);
-  CHECK(live.slot.rendererState == nullptr);
+  CHECK(live.slot.renderer_state == nullptr);
   REQUIRE(entry(&live.slot, 1, 5) == 1);
   const auto before = live.State();
   CHECK(entry(&live.slot, command, 0) == 1);
@@ -167,7 +167,7 @@ void CheckLiveUnknownCommands(Effects_EffectRenderer entry) {
         live.primitives.data());
 }
 
-void CheckLiveRefusals(Effects_EffectRenderer entry) {
+void CheckLiveRefusals(VS::Effects::EffectRenderer entry) {
   const int failure = GENERATE(0, 1, 2, 3, 4);
   LiveGrid live;
   CHECK(entry(nullptr, 1, 0) == 0);
@@ -190,30 +190,30 @@ void CheckLiveRefusals(Effects_EffectRenderer entry) {
         live.primitives.data());
 }
 
-void CheckLiveCreateRefusals(Effects_EffectRenderer entry) {
+void CheckLiveCreateRefusals(VS::Effects::EffectRenderer entry) {
   LiveGrid live;
   CHECK(entry(&live.slot, 1, 0x0201) == 0);
-  CHECK(live.slot.rendererState == nullptr);
+  CHECK(live.slot.renderer_state == nullptr);
   std::array<std::byte, 32> exhausted_arena{};
   memory::ScopedLiveGameHeap exhausted(exhausted_arena);
   CHECK(entry(&live.slot, 1, 1) == 0);
-  CHECK(live.slot.rendererState == nullptr);
+  CHECK(live.slot.renderer_state == nullptr);
 }
 
-void CheckLiveStateExtent(Effects_EffectRenderer entry) {
+void CheckLiveStateExtent(VS::Effects::EffectRenderer entry) {
   LiveGrid live;
   effects::AnalyzeGridState outside_heap{};
-  live.slot.rendererState = &outside_heap;
+  live.slot.renderer_state = &outside_heap;
   CHECK(entry(&live.slot, 2, 0) == 0);
   CHECK(entry(&live.slot, 3, 0) == 0);
   CHECK(entry(&live.slot, 1, 0) == 0);
-  live.slot.rendererState = memory::AllocateLiveFromHighEnd(1);
-  REQUIRE(live.slot.rendererState != nullptr);
+  live.slot.renderer_state = memory::AllocateLiveFromHighEnd(1);
+  REQUIRE(live.slot.renderer_state != nullptr);
   CHECK(entry(&live.slot, 2, 0) == 0);
   CHECK(entry(&live.slot, 1, 0) == 0);
 }
 
-void CheckLiveDrawCapacity(Effects_EffectRenderer entry) {
+void CheckLiveDrawCapacity(VS::Effects::EffectRenderer entry) {
   const int capacity = GENERATE(0, 1, 2);
   LiveGrid live;
   REQUIRE(entry(&live.slot, 1, 0) == 1);
@@ -363,7 +363,7 @@ TEST_CASE("Analyze plugin dispatch retains overlay lifecycle bindings",
           "[effects-analyze-grid][integration]") {
   struct Binding {
     std::size_t index;
-    Effects_EffectRenderer entry;
+    VS::Effects::EffectRenderer entry;
   };
   constexpr std::array<Binding, 4> kBindings{{
       {0, effects::UpdateLivePlg005AnalyzeGrid},

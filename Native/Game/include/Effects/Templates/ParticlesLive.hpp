@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_RendererSlot;
+namespace VS::Effects {
+struct LiveRendererSlot;
+}  // namespace VS::Effects
 
 // Live bindings for the particle-set dispatch instances (ParticleDispatch.cpp).
 // Each keeps the renderer-slot entry shape the generated renderer tables and
@@ -13,48 +15,48 @@ struct Effects_RendererSlot;
 // current package's recorded extents (PackageExtents.hpp); a set whose data
 // the package lacks is refused with a diagnostic instead of indexing past it.
 namespace VS::Effects::Templates {
-int UpdateLivePlg045ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg045ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg057ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg057ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg065ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg065ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg082ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg082ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg087ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg087ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg114ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg114ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg114ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg114ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed);
-int UpdateLivePlg146ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg146ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg147ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg147ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg152ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg152ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg153ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg153ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg156ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg156ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg168ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg168ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg224ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg224ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg255ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg255ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg263ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg263ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg265ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg265ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg265ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg265ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed);
-int UpdateLivePlg266ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg266ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg266ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg266ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed);
-int UpdateLivePlg300ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg300ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
-int UpdateLivePlg301ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg301ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed);
 }  // namespace VS::Effects::Templates

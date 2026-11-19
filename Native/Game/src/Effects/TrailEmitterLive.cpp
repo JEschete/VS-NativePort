@@ -262,7 +262,7 @@ void GenerateOrigins(const LiveParticleDefinition& definition,
 template <typename Emitter>
 class LiveTrailEmitterHost final : public TrailEmitterHost {
  public:
-  LiveTrailEmitterHost(Effects_RendererSlot& slot,
+  LiveTrailEmitterHost(LiveRendererSlot& slot,
                        const OverlayOf<Emitter>& overlay)
       : slot_(slot), overlay_(overlay) {}
 
@@ -312,12 +312,12 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
   using Layout = EmitterLayout<Emitter>;
 
   [[nodiscard]] Emitter* State() const {
-    return static_cast<Emitter*>(slot_.rendererState);
+    return static_cast<Emitter*>(slot_.renderer_state);
   }
 
   void EmitTickEvents(std::size_t event);
 
-  Effects_RendererSlot& slot_;
+  LiveRendererSlot& slot_;
   const OverlayOf<Emitter>& overlay_;
   LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
@@ -363,7 +363,7 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
   // The original left the trail buffer uninitialized; the "no placement" box
   // mode then offset whatever the heap held.
   std::fill_n(trails, *count, Trail{});
-  slot_.rendererState = state;
+  slot_.renderer_state = state;
   state->effect = plan.definition_index;
   state->lifetime = plan.lifetime;
   state->curve_sample_distance = 0;
@@ -472,7 +472,7 @@ void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
 }
 
 template <typename Emitter>
-int UpdateEmitter(Effects_RendererSlot* slot, unsigned int command, int packed,
+int UpdateEmitter(LiveRendererSlot* slot, unsigned int command, int packed,
                   const OverlayOf<Emitter>& overlay) {
   if (overlay.corner == nullptr || overlay.stages == nullptr) {
     InvalidEmitter(overlay.name, "overlay binding is incomplete");
@@ -502,7 +502,7 @@ void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
 }
 
 // decomp: src/EFFECT/trails5.h:677 VS_TRAIL_DISPATCH_FUNCTION.
-int UpdateLiveTrailEmitter(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLiveTrailEmitter(LiveRendererSlot* slot, unsigned int command,
                            int packed, const LiveTrailOverlay& overlay) {
   return UpdateEmitter<LiveTrailState>(slot, command, packed, overlay);
 }
@@ -517,7 +517,7 @@ void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
 }
 
 // decomp: src/EFFECT/trails9.h:685 VS_TRAIL_DISPATCH_FUNCTION.
-int UpdateLiveTrailNineEmitter(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLiveTrailNineEmitter(LiveRendererSlot* slot, unsigned int command,
                                int packed,
                                const LiveTrailNineOverlay& overlay) {
   return UpdateEmitter<LiveTrailNineState>(slot, command, packed, overlay);
@@ -534,8 +534,8 @@ void GenerateLivePlg074TrailOrigins(const LiveParticleDefinition& definition,
 }
 
 // decomp: PLG074 func_800FCFEC (src/EFFECT/trails5.h:677).
-int UpdateLivePlg074TrailEmitter(Effects_RendererSlot* slot,
-                                 unsigned int command, int packed) {
+int UpdateLivePlg074TrailEmitter(LiveRendererSlot* slot, unsigned int command,
+                                 int packed) {
   return UpdateLiveTrailEmitter(
       slot, command, packed,
       {"PLG074", &VS::Content::plg074TrailEmissionCounter[0], &Plg074Stages()});

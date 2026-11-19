@@ -483,7 +483,7 @@ class LiveParticleForceHost final : public ParticleForceHost {
   }
 };
 
-[[nodiscard]] std::span<const Effects_EffectRenderer> EntryPoints() {
+[[nodiscard]] std::span<const EffectRenderer> EntryPoints() {
   return effectEntryPoints;
 }
 
@@ -743,7 +743,7 @@ void LiveBindEffectPackageBlocks(void* package) {
 }
 
 // decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:590)
-int LiveInvokeAllPluginUpdates(Effects_RendererSlot* /*slot*/,
+int LiveInvokeAllPluginUpdates(LiveRendererSlot* /*slot*/,
                                unsigned int /*command*/, int /*packed*/) {
   LivePluginUpdateHost host;
   return InvokeAllPluginUpdates(host).result;

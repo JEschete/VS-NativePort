@@ -4935,7 +4935,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Effects/PurgeTables.cpp").read_text()
         table = source.split(
-            "Effects_EffectRenderer effectEntryPoints[kEntryPointCount] = {", 1
+            "EffectRenderer effectEntryPoints[kEntryPointCount] = {", 1
         )[1]
         table = table.split("};", 1)[0]
         self.assertNotIn("InvokeAllPluginUpdates", table)

@@ -142,7 +142,7 @@ LiveParticleEmitterScratch& EmitterScratch() {
 
 class LiveAnalyzeGridHost final : public AnalyzeGridHost {
  public:
-  explicit LiveAnalyzeGridHost(Effects_RendererSlot& slot) : slot_(slot) {}
+  explicit LiveAnalyzeGridHost(LiveRendererSlot& slot) : slot_(slot) {}
 
   std::optional<grid::SurfaceDefinition> CreateDefinition(
       AnalyzeGridDefinitionId id) override {
@@ -151,7 +151,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
                                  : std::nullopt;
   }
   bool Create(const AnalyzeGridState& state) override {
-    if (slot_.rendererState != nullptr) {
+    if (slot_.renderer_state != nullptr) {
       AnalyzeGridState* live = LiveState();
       if (live == nullptr) {
         return false;
@@ -164,7 +164,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
       Refuse("state allocation failed");
       return false;
     }
-    slot_.rendererState =
+    slot_.renderer_state =
         std::construct_at(static_cast<AnalyzeGridState*>(storage), state);
     return true;
   }
@@ -235,15 +235,15 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
  private:
   AnalyzeGridState* LiveState() const {
     const auto capacity =
-        Core::Memory::LivePayloadCapacity(slot_.rendererState);
+        Core::Memory::LivePayloadCapacity(slot_.renderer_state);
     if (!capacity.has_value() || *capacity < sizeof(AnalyzeGridState)) {
       Refuse("state is absent or outside a complete heap payload");
       return nullptr;
     }
-    return static_cast<AnalyzeGridState*>(slot_.rendererState);
+    return static_cast<AnalyzeGridState*>(slot_.renderer_state);
   }
 
-  Effects_RendererSlot& slot_;
+  LiveRendererSlot& slot_;
   const LiveParticleDefinition* definition_ = nullptr;
   const Effects_EffectInstance* instance_ = nullptr;
 };
@@ -314,8 +314,8 @@ void LiveAnalyzeGridHost::Draw(const AnalyzeGridQuad& quad) {
 using AnalyzeGridEntry = bool (*)(AnalyzeGridCommand, AnalyzeGridPlan,
                                   AnalyzeGridHost&);
 
-int RunLiveAnalyzeGrid(Effects_RendererSlot* slot, unsigned int command,
-                       int packed, AnalyzeGridEntry entry) {
+int RunLiveAnalyzeGrid(LiveRendererSlot* slot, unsigned int command, int packed,
+                       AnalyzeGridEntry entry) {
   if (slot == nullptr) {
     Refuse("renderer called without a slot");
     return 0;
@@ -334,26 +334,26 @@ int RunLiveAnalyzeGrid(Effects_RendererSlot* slot, unsigned int command,
 }  // namespace
 
 // decomp: vs_effect_analyze (src/EFFECT/PLG005.BIN/18.c:35).
-int UpdateLivePlg005AnalyzeGrid(Effects_RendererSlot* slot,
-                                unsigned int command, int packed) {
+int UpdateLivePlg005AnalyzeGrid(LiveRendererSlot* slot, unsigned int command,
+                                int packed) {
   return RunLiveAnalyzeGrid(slot, command, packed, Plg005::UpdateAnalyzeGrid);
 }
 
 // decomp: func_800F9818 (src/EFFECT/PLG054.BIN/18.c:3).
-int UpdateLivePlg054AnalyzeGrid(Effects_RendererSlot* slot,
-                                unsigned int command, int packed) {
+int UpdateLivePlg054AnalyzeGrid(LiveRendererSlot* slot, unsigned int command,
+                                int packed) {
   return RunLiveAnalyzeGrid(slot, command, packed, Plg054::UpdateAnalyzeGrid);
 }
 
 // decomp: func_800F9818 (src/EFFECT/PLG055.BIN/18.c:3).
-int UpdateLivePlg055AnalyzeGrid(Effects_RendererSlot* slot,
-                                unsigned int command, int packed) {
+int UpdateLivePlg055AnalyzeGrid(LiveRendererSlot* slot, unsigned int command,
+                                int packed) {
   return RunLiveAnalyzeGrid(slot, command, packed, Plg055::UpdateAnalyzeGrid);
 }
 
 // decomp: func_800FE3EC (src/EFFECT/PLG074.BIN/F8.c:23).
-int UpdateLivePlg074AnalyzeGrid(Effects_RendererSlot* slot,
-                                unsigned int command, int packed) {
+int UpdateLivePlg074AnalyzeGrid(LiveRendererSlot* slot, unsigned int command,
+                                int packed) {
   return RunLiveAnalyzeGrid(slot, command, packed, Plg074::UpdateAnalyzeGrid);
 }
 }  // namespace VS::Effects

@@ -9,7 +9,7 @@
 u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800EC324 (D_800EC324@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_scriptRenderers[2]; /* contents: module image, relocated (ModulePointers.cpp) */
+VS::Effects::EffectRenderer Effects_scriptRenderers[2]; /* contents: module image, relocated (ModulePointers.cpp) */
 
 // decomp: D_800EC32C (D_800EC32C@BATTLE/BATTLE.PRG)
 char Effects_actionVariantValues[21824]; /* contents: module image (ModuleData.cpp) */
@@ -90,10 +90,10 @@ VS::Effects::LiveEffectPackage* Effects_savedPackage;
 VS::Effects::LiveEffectPackage* Effects_package;
 
 // decomp: D_800F56A8 (D_800F56A8@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_rendererTableAlias[1];
+VS::Effects::EffectRenderer Effects_rendererTableAlias[1];
 
 // decomp: vs_battle_effectRenderers (vs_battle_effectRenderers@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_effectRenderers[8];
+VS::Effects::EffectRenderer Effects_effectRenderers[8];
 
 // decomp: D_800F56C8 (D_800F56C8@BATTLE/BATTLE.PRG)
 VS::Effects::LiveEffectPackage Effects_actionPackage;

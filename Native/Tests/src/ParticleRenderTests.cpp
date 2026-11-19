@@ -643,24 +643,24 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
   EmissionFixture fixture;
   const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
-  Effects_RendererSlot renderer{};
+  VS::Effects::LiveRendererSlot renderer{};
   fixture.package.texture_table_count = 1;
   fixture.package.animation_count = 1;
   const auto dispatch =
       GENERATE(&VS::Effects::Templates::UpdateLivePlg045ParticleDispatch,
                &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch2);
   REQUIRE(dispatch(&renderer, 1, 30) == 1);
-  REQUIRE(renderer.rendererState != nullptr);
-  const auto capacity = DispatchHeap::Capacity(renderer.rendererState);
+  REQUIRE(renderer.renderer_state != nullptr);
+  const auto capacity = DispatchHeap::Capacity(renderer.renderer_state);
   CHECK(capacity >= sizeof(VS::Effects::LiveParticleQuadSet));
   auto* state =
-      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.renderer_state);
   DispatchHeap::CheckPrefix(*state);
   if (capacity >= sizeof(VS::Effects::LiveParticleQuadSet)) {
     fixture.CheckTexture(*state);
   }
   CHECK(dispatch(&renderer, 4, 0) == 0);
-  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.renderer_state);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -669,7 +669,7 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
   EmissionFixture fixture;
   const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
-  Effects_RendererSlot renderer{};
+  VS::Effects::LiveRendererSlot renderer{};
   const auto dispatch =
       &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch;
   REQUIRE(dispatch(&renderer, 1, 30) == 1);
@@ -677,18 +677,19 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
       offsetof(VS::Effects::LiveParticleQuadSet, texture_animation);
   constexpr auto kUnit = VS::Core::Memory::kHeapUnitBytes;
   const auto rounded = (prefix + kUnit - 1) / kUnit * kUnit;
-  CHECK(DispatchHeap::Capacity(renderer.rendererState) == rounded);
+  CHECK(DispatchHeap::Capacity(renderer.renderer_state) == rounded);
   const auto* state =
-      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.renderer_state);
   DispatchHeap::CheckPrefix(*state);
   CHECK(state->cooldown == 0);
   CHECK(dispatch(&renderer, 4, 0) == 0);
-  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.renderer_state);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 namespace {
-using LiveParticleDispatch = int (*)(Effects_RendererSlot*, unsigned int, int);
+using LiveParticleDispatch = int (*)(VS::Effects::LiveRendererSlot*,
+                                     unsigned int, int);
 
 // A particle-set entry, the GPU words and code of each segment it draws and
 // the overlay global its origin steps.
@@ -753,11 +754,11 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
   const SavedCounter saved{*live.counter};
   *live.counter = 3;
   PrepareLiveCornerSet(fixture);
-  Effects_RendererSlot renderer{};
+  VS::Effects::LiveRendererSlot renderer{};
   REQUIRE(live.dispatch(&renderer, 1, 0) == 1);
   REQUIRE(live.dispatch(&renderer, 2, 0) == 1);
   const auto* state =
-      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.renderer_state);
   REQUIRE(state != nullptr);
   CHECK(state->age == 1);
   CHECK(*live.counter == 4);
@@ -766,7 +767,7 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
         packet + (8 * live.words));
   CheckLiveSegmentPacket(packet, live);
   CHECK(live.dispatch(&renderer, 4, 0) == 0);
-  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.renderer_state);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -1382,9 +1383,9 @@ void CheckPlg074RingInitialState(const State& state) {
 }
 
 template <class State>
-void StopPlg074Ring(Effects_EffectRenderer renderer,
-                    Effects_RendererSlot& slot) {
-  auto* state = static_cast<State*>(slot.rendererState);
+void StopPlg074Ring(VS::Effects::EffectRenderer renderer,
+                    VS::Effects::LiveRendererSlot& slot) {
+  auto* state = static_cast<State*>(slot.renderer_state);
   CHECK(renderer(&slot, 3, 0) == 1);
   CHECK(renderer(&slot, 2, 0) == 0);
   CHECK(state->age == 2);
@@ -1393,15 +1394,15 @@ void StopPlg074Ring(Effects_EffectRenderer renderer,
 }
 
 template <class State>
-void CheckPlg074RingLifecycle(Effects_EffectRenderer renderer,
+void CheckPlg074RingLifecycle(VS::Effects::EffectRenderer renderer,
                               Plg074Fixture& fixture) {
   DispatchHeap heap;
   for (const int lifetime : {2, 0}) {
-    Effects_RendererSlot slot{};
+    VS::Effects::LiveRendererSlot slot{};
     REQUIRE(renderer(&slot, 1, lifetime) == 1);
-    REQUIRE(slot.rendererState != nullptr);
-    REQUIRE(DispatchHeap::Capacity(slot.rendererState) >= sizeof(State));
-    auto* state = static_cast<State*>(slot.rendererState);
+    REQUIRE(slot.renderer_state != nullptr);
+    REQUIRE(DispatchHeap::Capacity(slot.renderer_state) >= sizeof(State));
+    auto* state = static_cast<State*>(slot.renderer_state);
     CheckPlg074RingInitialState(*state);
     REQUIRE(renderer(&slot, 2, 0) == 1);
     CHECK(state->age == 1);
@@ -1470,7 +1471,7 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
   Plg074Fixture fixture;
   fixture.ConfigureRing();
   DispatchHeap heap;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
   const auto* packets = reinterpret_cast<const VS::Render::TiledRingPacket*>(
@@ -1479,7 +1480,7 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
   CheckPlg074TiledRingGeometry(packets);
   CheckPlg074TiledRingPackets(packets);
   fixture.CheckGuards();
-  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.renderer_state);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<VS::Effects::LiveRingState>(entry, fixture);
 }
@@ -1494,7 +1495,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   fixture.ConfigureRing();
   fixture.Definition().transparency_curve = static_cast<u_int>(mode);
   DispatchHeap heap;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
   const auto* packets = reinterpret_cast<const VS::Render::RingPacket*>(
@@ -1505,7 +1506,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   CHECK(packets[0].poly.y0 == 120);
   CHECK(packets[7].poly.x1 == packets[0].poly.x0);
   fixture.CheckGuards();
-  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.renderer_state);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<VS::Effects::LiveRingState>(entry, fixture);
 }
@@ -1663,8 +1664,8 @@ void CheckPlg074EmitterTick(const VS::Effects::LiveTrailState& state, int count,
   CHECK(VS::Effects::Plg073::trailEmissionCounter == 0);
 }
 
-void StopPlg074Emitter(Effects_EffectRenderer entry, Effects_RendererSlot& slot,
-                       bool cancel) {
+void StopPlg074Emitter(VS::Effects::EffectRenderer entry,
+                       VS::Effects::LiveRendererSlot& slot, bool cancel) {
   if (cancel) {
     CHECK(entry(&slot, 4, 0) == 0);
   } else {
@@ -1732,7 +1733,7 @@ TEST_CASE(
 
 TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
           "[effects][plg074][f01994]") {
-  const Effects_EffectRenderer entry =
+  const VS::Effects::EffectRenderer entry =
       &VS::Effects::UpdateLivePlg074TrailEmitter;
   REQUIRE(VS::Effects::effectEntryPoints[89] == entry);
   const std::int16_t count = GENERATE(0, 1, 16, 20);
@@ -1743,9 +1744,10 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
   fixture.Definition().flags = 0x1008;
   std::ranges::fill(fixture.Definition().pair_ranges[4], 12);
   for (int cycle = 0; cycle < 2; ++cycle) {
-    Effects_RendererSlot slot{};
+    VS::Effects::LiveRendererSlot slot{};
     REQUIRE(entry(&slot, 1, 2) == 1);
-    auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
+    auto* state =
+        static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
     REQUIRE(state != nullptr);
     CheckPlg074EmitterInitialization(*state, count);
     REQUIRE(entry(&slot, 2, 0) == 1);
@@ -1801,9 +1803,9 @@ struct CurveBlockStorage {
 std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
                                           u_char curve) {
   fixture.Definition().transparency_curve = curve;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   std::array<u_char, 5> samples = state->transparency;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
@@ -1828,9 +1830,9 @@ TEST_CASE("PLG074 trail emitter refuses definitions the package lacks",
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0x102) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(log.Contains("definition 1 is outside"));
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
   CHECK(VS::Core::Memory::GameHeap().Empty());
@@ -1841,10 +1843,10 @@ TEST_CASE("PLG074 trail emitter refuses negative trail counts",
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   fixture.Definition().interval_range[0] = -1;
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(log.Contains("negative trail count"));
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
@@ -1854,10 +1856,10 @@ TEST_CASE("PLG074 trail emitter stops when its package is replaced",
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   fixture.Definition().interval_range[0] = 2;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   VS::Effects::ForgetLivePackageExtents();
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
@@ -1894,9 +1896,9 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   LogCapture log;
   fixture.Definition().interval_range[0] = 1;
   fixture.Definition().tick_event = 2;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 1);
   CHECK(log.Contains("tick event 1 is outside"));
@@ -1924,10 +1926,10 @@ struct StaleCurveBlock {
 std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
                                                   u_char curve) {
   fixture.Definition().transparency_curve = curve;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
   auto* state =
-      static_cast<VS::Effects::LiveTrailNineState*>(slot.rendererState);
+      static_cast<VS::Effects::LiveTrailNineState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   std::array<u_char, 9> samples = state->transparency;
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 4, 0) == 0);
@@ -1937,11 +1939,11 @@ std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
 
 std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture, u_char curve) {
   fixture.Definition().transparency_curve = curve;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1,
                                                                   0) == 1);
   auto* state =
-      static_cast<VS::Effects::LiveRotatingSurfaceState*>(slot.rendererState);
+      static_cast<VS::Effects::LiveRotatingSurfaceState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   std::array<int, 5> rows{};
   std::ranges::copy(state->factors, rows.begin());
@@ -2000,10 +2002,10 @@ TEST_CASE("Nine-sample emitters aim and spread their trails on the first tick",
   std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
                     definition.pair_ranges[2].begin());
   std::ranges::fill(definition.pair_ranges[4], 12);
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
   auto* state =
-      static_cast<VS::Effects::LiveTrailNineState*>(slot.rendererState);
+      static_cast<VS::Effects::LiveTrailNineState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   REQUIRE(state->trail_count == 3);
   CHECK(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 2, 0) == 1);
@@ -2026,9 +2028,9 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   DispatchHeap heap;
   LogCapture log;
   fixture.Definition().interval_range[0] = 2;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   if (missing_instance) {
     Effects_currentInstance = nullptr;
@@ -2058,9 +2060,9 @@ TEST_CASE("Trail emitters refuse an exhausted heap without a partial state",
       arena{};
   VS::Core::Memory::ScopedLiveGameHeap exhausted(
       std::span(arena).first(state_fits ? kArenaBytes : 32));
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(log.Contains(state_fits ? "heap exhausted for 16 trails"
                                 : "heap exhausted for state"));
   CHECK(VS::Core::Memory::GameHeap().Empty());
@@ -2099,15 +2101,15 @@ TEST_CASE("Live surfaces draw full-intensity rows for curves the package lacks",
 
 TEST_CASE("Live surfaces stop on a missing instance or transform",
           "[effects][plg074][trail-surface-refusals]") {
-  const Effects_EffectRenderer entry =
+  const VS::Effects::EffectRenderer entry =
       &VS::Effects::Templates::UpdateLivePlg073RotatingSurface;
   const bool missing_instance = GENERATE(false, true);
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(entry(&slot, 1, 0) == 1);
-  REQUIRE(slot.rendererState != nullptr);
+  REQUIRE(slot.renderer_state != nullptr);
   if (missing_instance) {
     Effects_currentInstance = nullptr;
   } else {
@@ -2118,7 +2120,7 @@ TEST_CASE("Live surfaces stop on a missing instance or transform",
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
   CHECK(log.Contains(missing_instance ? "no current effect instance"
                                       : "names transform 16 of 16"));
-  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.renderer_state);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -2128,10 +2130,10 @@ TEST_CASE("Live surfaces refuse an exhausted heap",
   LogCapture log;
   std::array<std::byte, 32> arena{};
   VS::Core::Memory::ScopedLiveGameHeap exhausted(arena);
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1, 0) ==
         1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(log.Contains("heap exhausted for state"));
   CHECK(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 2, 0) ==
         0);
@@ -2156,7 +2158,7 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   fixture.ConfigureRing();
   std::ranges::fill(fixture.Definition().vector_ranges[1], 0);
   DispatchHeap heap;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
   const auto* packets =
@@ -2165,7 +2167,7 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 64);
   CheckPlg074SurfacePackets(packets);
   fixture.CheckGuards();
-  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.renderer_state);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<VS::Effects::LiveRotatingSurfaceState>(entry,
                                                                   fixture);
@@ -2182,7 +2184,7 @@ TEST_CASE(
       auto* slot = VS::Effects::LiveAttachEffectRenderer(
           &fixture.instance, VS::Effects::effectEntryPoints[index], 2);
       REQUIRE(slot != nullptr);
-      REQUIRE(slot->rendererState != nullptr);
+      REQUIRE(slot->renderer_state != nullptr);
     }
 
     CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);

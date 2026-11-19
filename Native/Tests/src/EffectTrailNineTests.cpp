@@ -374,9 +374,9 @@ TEST_CASE("Nine-sample live trail entries refuse definitions by overlay",
                std::pair{&trails::UpdateLivePlg232TrailNine, "PLG232"});
   const VS::test_support::ChannelWarnings warnings("effects");
   const EmptyPackageScope package;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(entry(&slot, 1, 0x0102) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(
       Logged(warnings.messages,
              std::string(overlay) + " trail emitter: definition 1 is outside"));

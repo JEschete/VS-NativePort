@@ -9,9 +9,9 @@
 #include "Effects/ActionRequest.hpp"
 
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 namespace VS::Effects {
+struct LiveRendererSlot;
 struct LiveEffectTimeline;
 
 // decomp: D_800F53B8_t3 (src/BATTLE/BATTLE.PRG/battleEffect.h:325): what an
@@ -26,7 +26,7 @@ struct LiveEffectInstanceTargets {
   LiveActionEffectTarget emit_to;
   LiveEffectTimeline* timeline;
   // The instance's renderers, newest first.
-  Effects_RendererSlot* renderer;
+  LiveRendererSlot* renderer;
   std::int16_t effect_id;
   // A secondary instance's SecondaryEffectPhase, as stored.
   std::int16_t phase;

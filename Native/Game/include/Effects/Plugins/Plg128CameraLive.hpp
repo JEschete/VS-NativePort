@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_RendererSlot;
+namespace VS::Effects {
+struct LiveRendererSlot;
+}  // namespace VS::Effects
 
 // Live binding for PLG128's effect camera slot (Plg128Camera.hpp). It keeps
 // the renderer-slot entry shape the EFFPURGE renderer table calls and binds
@@ -13,6 +15,6 @@ struct Effects_RendererSlot;
 // is missing is stopped with a diagnostic instead of indexing past it.
 namespace VS::Effects::Plg128 {
 // decomp: PLG128.BIN func_800FDEC4 (F8.c:146).
-int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
                            int packed);
 }  // namespace VS::Effects::Plg128

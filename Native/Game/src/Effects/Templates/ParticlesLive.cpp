@@ -251,7 +251,7 @@ std::int32_t& CounterOf(ParticleEmissionCounter counter) {
 
 class LiveParticleHost final : public ParticleSetHost {
  public:
-  explicit LiveParticleHost(Effects_RendererSlot& slot) : slot_(slot) {}
+  explicit LiveParticleHost(LiveRendererSlot& slot) : slot_(slot) {}
 
   [[nodiscard]] std::optional<ParticleSetDefinition> Definition(
       std::uint8_t index) override;
@@ -348,7 +348,7 @@ class LiveParticleHost final : public ParticleSetHost {
 
  private:
   [[nodiscard]] LiveParticleQuadSet* LiveState() const {
-    return static_cast<LiveParticleQuadSet*>(slot_.rendererState);
+    return static_cast<LiveParticleQuadSet*>(slot_.renderer_state);
   }
 
   // The control point records the set's buffer holds, at most
@@ -359,7 +359,7 @@ class LiveParticleHost final : public ParticleSetHost {
       std::int32_t depth, std::size_t words);
   void Link(u_long* entry, u_long* packet, std::size_t words);
 
-  Effects_RendererSlot& slot_;
+  LiveRendererSlot& slot_;
   const LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
@@ -397,12 +397,12 @@ void LiveParticleHost::Create(const ParticleSetState& state,
   void* storage = Core::Memory::AllocateLiveFromHighEnd(bytes);
   if (storage == nullptr) {
     VS::Core::LogError("effects", "particle set: heap exhausted for state");
-    slot_.rendererState = nullptr;
+    slot_.renderer_state = nullptr;
     return;
   }
   std::memset(storage, 0, bytes);
   auto* live = static_cast<LiveParticleQuadSet*>(storage);
-  slot_.rendererState = live;
+  slot_.renderer_state = live;
   StoreState(state);
   if (capacity > 0) {
     live->control_points =
@@ -413,7 +413,7 @@ void LiveParticleHost::Create(const ParticleSetState& state,
           "effects", "particle set: heap exhausted for {} ribbons; set refused",
           capacity);
       Core::Memory::FreeLiveFromHighEnd(live);
-      slot_.rendererState = nullptr;
+      slot_.renderer_state = nullptr;
       return;
     }
   }
@@ -685,7 +685,7 @@ void LiveParticleHost::SubmitLine(const ParticleLine& line,
 using ParticleInstance = bool (*)(ParticleCommand, std::int32_t,
                                   ParticleSetHost&);
 
-int RunParticleSet(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunParticleSet(LiveRendererSlot* slot, unsigned int command, int packed,
                    ParticleInstance instance) {
   if (slot == nullptr) {
     VS::Core::LogError("effects",
@@ -699,112 +699,112 @@ int RunParticleSet(Effects_RendererSlot* slot, unsigned int command, int packed,
 
 // Each entry runs the instance in ParticleDispatch.cpp, which carries the
 // decomp provenance.
-int UpdateLivePlg045ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg045ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg045::ParticleDispatch);
 }
 
-int UpdateLivePlg057ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg057ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg057::ParticleDispatch);
 }
 
-int UpdateLivePlg065ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg065ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg065::ParticleDispatch);
 }
 
-int UpdateLivePlg082ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg082ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg082::ParticleDispatch);
 }
 
-int UpdateLivePlg087ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg087ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg087::ParticleDispatch);
 }
 
-int UpdateLivePlg114ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg114ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg114::ParticleDispatch);
 }
 
-int UpdateLivePlg114ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg114ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg114::ParticleDispatch2);
 }
 
-int UpdateLivePlg146ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg146ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg146::ParticleDispatch);
 }
 
-int UpdateLivePlg147ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg147ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg147::ParticleDispatch);
 }
 
-int UpdateLivePlg152ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg152ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg152::ParticleDispatch);
 }
 
-int UpdateLivePlg153ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg153ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg153::ParticleDispatch);
 }
 
-int UpdateLivePlg156ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg156ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg156::ParticleDispatch);
 }
 
-int UpdateLivePlg168ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg168ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg168::ParticleDispatch);
 }
 
-int UpdateLivePlg224ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg224ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg224::ParticleDispatch);
 }
 
-int UpdateLivePlg255ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg255ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg255::ParticleDispatch);
 }
 
-int UpdateLivePlg263ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg263ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg263::ParticleDispatch);
 }
 
-int UpdateLivePlg265ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg265ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg265::ParticleDispatch);
 }
 
-int UpdateLivePlg265ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg265ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg265::ParticleDispatch2);
 }
 
-int UpdateLivePlg266ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg266ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg266::ParticleDispatch);
 }
 
-int UpdateLivePlg266ParticleDispatch2(Effects_RendererSlot* slot,
+int UpdateLivePlg266ParticleDispatch2(LiveRendererSlot* slot,
                                       unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg266::ParticleDispatch2);
 }
 
-int UpdateLivePlg300ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg300ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg300::ParticleDispatch);
 }
 
-int UpdateLivePlg301ParticleDispatch(Effects_RendererSlot* slot,
+int UpdateLivePlg301ParticleDispatch(LiveRendererSlot* slot,
                                      unsigned int command, int packed) {
   return RunParticleSet(slot, command, packed, &Plg301::ParticleDispatch);
 }

@@ -30,7 +30,7 @@ extern std::uint8_t fbcClutRows[kEffectCount];
 // effect's first entry point; the next effect's ends it.
 extern std::uint16_t effectEntryPointIndices[kEffectCount];
 // decomp: effectEntryPoints (src/EFFECT/EFFPURGE.BIN/0.c:459).
-extern Effects_EffectRenderer effectEntryPoints[kEntryPointCount];
+extern EffectRenderer effectEntryPoints[kEntryPointCount];
 // decomp: fbcFiles (src/EFFECT/EFFPURGE.BIN/0.c:160).
 extern EffectFileExtent fbcFiles[kEffectCount];
 // decomp: fbcSlots (src/EFFECT/EFFPURGE.BIN/0.c:141).

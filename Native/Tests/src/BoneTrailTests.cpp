@@ -170,7 +170,7 @@ bool Tick(TestTrailHost& host, int count) {
 
 int other_renderer_calls = 0;
 
-int OtherRenderer(Effects_RendererSlot* /*slot*/, u_int /*command*/,
+int OtherRenderer(fx::LiveRendererSlot* /*slot*/, u_int /*command*/,
                   int /*parameter*/) {
   ++other_renderer_calls;
   return 1;
@@ -180,7 +180,7 @@ int OtherRenderer(Effects_RendererSlot* /*slot*/, u_int /*command*/,
 // 1, instance 1 runs slot 2.
 struct TestChain {
   std::array<Effects_EffectInstance, 2> instances{};
-  std::array<Effects_RendererSlot, 3> slots{};
+  std::array<fx::LiveRendererSlot, 3> slots{};
   std::array<fx::BoneTrail, 3> trails{};
 
   TestChain() {
@@ -191,7 +191,7 @@ struct TestChain {
     for (std::size_t index = 0; index < slots.size(); ++index) {
       trails.at(index).config.life = fx::kEndlessTrailLife;
       slots.at(index).renderer = &fx::LiveUpdateBoneTrail;
-      slots.at(index).rendererState = &trails.at(index);
+      slots.at(index).renderer_state = &trails.at(index);
     }
   }
 };
@@ -199,7 +199,7 @@ struct TestChain {
 class TestChains final : public fx::BoneTrailChains {
  public:
   TestChain chain;
-  std::vector<Effects_RendererSlot*> faded;
+  std::vector<fx::LiveRendererSlot*> faded;
 
   Effects_EffectInstance* FirstInstance() override {
     return &chain.instances[0];
@@ -208,17 +208,17 @@ class TestChains final : public fx::BoneTrailChains {
       Effects_EffectInstance& instance) override {
     return instance.next;
   }
-  Effects_RendererSlot* FirstRenderer(
+  fx::LiveRendererSlot* FirstRenderer(
       Effects_EffectInstance& instance) override {
     return instance.context.renderer;
   }
-  Effects_RendererSlot* NextRenderer(Effects_RendererSlot& slot) override {
+  fx::LiveRendererSlot* NextRenderer(fx::LiveRendererSlot& slot) override {
     return slot.next;
   }
-  bool RunsBoneTrail(Effects_RendererSlot& slot) override {
+  bool RunsBoneTrail(fx::LiveRendererSlot& slot) override {
     return slot.renderer == &fx::LiveUpdateBoneTrail;
   }
-  void Fade(Effects_RendererSlot& slot) override {
+  void Fade(fx::LiveRendererSlot& slot) override {
     faded.push_back(&slot);
     // The fade may unlink the rest of the chain; the walk reads it after.
     slot.next = nullptr;
@@ -633,12 +633,12 @@ TEST_CASE("The live fade commands only the secondary bone trails",
 TEST_CASE("The live renderer refuses a missing slot or trail",
           "[bone-trail][F01418]") {
   CHECK(fx::LiveUpdateBoneTrail(nullptr, 2, 0) == 0);
-  Effects_RendererSlot slot{};
+  fx::LiveRendererSlot slot{};
   slot.renderer = &fx::LiveUpdateBoneTrail;
   CHECK(fx::LiveUpdateBoneTrail(&slot, 2, 0) == 0);
   CHECK(fx::LiveUpdateBoneTrail(&slot, 3, 0) == 0);
   CHECK(fx::LiveUpdateBoneTrail(&slot, 0, 0) == 1);
   CHECK(fx::LiveUpdateBoneTrail(&slot, 4, 0) == 0);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   fx::LiveDrawTrailSegment(nullptr, 1, 1);
 }

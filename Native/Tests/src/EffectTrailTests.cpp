@@ -526,9 +526,9 @@ TEST_CASE("Live trail entries refuse definitions and name their overlay",
       GENERATE(std::pair{&trails::UpdateLivePlg057Trail, "PLG057"},
                std::pair{&trails::UpdateLivePlg291Trail, "PLG291"});
   const LiveTrailScope scope;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(entry(&slot, 1, 0x0102) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(scope.Logged(std::string(overlay) +
                      " trail emitter: definition 1 is outside"));
 }

@@ -102,9 +102,9 @@ void DestroyPrimaryEffectInstance(Effects_EffectInstance& instance,
   static_cast<void>(Unlink(primaries, instance));
   primaries.ReleaseParticles(instance);
   RendererChain& renderers = primaries.Renderers(instance);
-  Effects_RendererSlot* slot = renderers.First();
+  LiveRendererSlot* slot = renderers.First();
   while (slot != nullptr) {
-    Effects_RendererSlot* next = renderers.Next(*slot);
+    LiveRendererSlot* next = renderers.Next(*slot);
     renderers.Run(*slot, RendererCommand::kStop, 0);
     static_cast<void>(DetachEffectRenderer(renderers, *slot));
     slot = next;
@@ -122,10 +122,10 @@ void DestroySecondaryEffectInstance(Effects_EffectInstance& instance,
 }
 
 // decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5636)
-Effects_RendererSlot* AttachEffectRenderer(RendererChain& renderers,
-                                           EffectRenderer renderer,
-                                           std::int32_t parameters) {
-  Effects_RendererSlot* slot = renderers.NewSlot(renderer);
+LiveRendererSlot* AttachEffectRenderer(RendererChain& renderers,
+                                       EffectRenderer renderer,
+                                       std::int32_t parameters) {
+  LiveRendererSlot* slot = renderers.NewSlot(renderer);
   if (slot == nullptr) {
     return nullptr;
   }
@@ -136,8 +136,7 @@ Effects_RendererSlot* AttachEffectRenderer(RendererChain& renderers,
 }
 
 // decomp: BATTLE.PRG func_800CF70C (src/BATTLE/BATTLE.PRG/5BF94.c:5647)
-bool DetachEffectRenderer(RendererChain& renderers,
-                          Effects_RendererSlot& slot) {
+bool DetachEffectRenderer(RendererChain& renderers, LiveRendererSlot& slot) {
   if (!Unlink(renderers, slot)) {
     return false;
   }
@@ -148,9 +147,9 @@ bool DetachEffectRenderer(RendererChain& renderers,
 // decomp: BATTLE.PRG func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
 void UpdateEffectRenderers(Effects_EffectInstance& instance,
                            EffectRendererUpdates& renderers) {
-  Effects_RendererSlot* slot = renderers.FirstRenderer(instance);
+  LiveRendererSlot* slot = renderers.FirstRenderer(instance);
   while (slot != nullptr) {
-    Effects_RendererSlot* next = renderers.NextRenderer(*slot);
+    LiveRendererSlot* next = renderers.NextRenderer(*slot);
     if (!renderers.UpdateRenderer(*slot)) {
       renderers.DetachRenderer(instance, *slot);
     }

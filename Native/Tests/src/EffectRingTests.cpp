@@ -620,9 +620,9 @@ TEST_CASE("Live ring entries refuse definitions the package lacks",
           warnings.emplace_back(record.message);
         }
       });
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(rings::UpdateLivePlg049Ring(&slot, 1, 0x0105) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   VS::Core::SetLogObserver(std::move(previous));
   REQUIRE_FALSE(warnings.empty());
   CHECK(warnings.front().find("definition 1") != std::string::npos);
@@ -631,11 +631,11 @@ TEST_CASE("Live ring entries refuse definitions the package lacks",
 TEST_CASE("Live ring entries answer commands without a ring state",
           "[effects-rings][effects]") {
   const EmptyLivePackage package;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(rings::UpdateLivePlg049Ring(&slot, 3, 0) == 1);
   CHECK(rings::UpdateLivePlg049Ring(&slot, 9, 0) == 1);
   CHECK(rings::UpdateLivePlg053ClosedRing(&slot, 2, 0) == 0);
   CHECK(rings::UpdateLivePlg044TiledRing(&slot, 4, 0) == 0);
   CHECK(rings::UpdateLivePlg049Ring(nullptr, 2, 0) == 0);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
 }

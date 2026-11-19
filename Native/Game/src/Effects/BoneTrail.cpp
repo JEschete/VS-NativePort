@@ -354,7 +354,7 @@ BoneTrailRequest MakeWeaponTrailRequest(std::int32_t actor,
 void FadeBoneTrails(BoneTrailChains& chains) {
   for (Effects_EffectInstance* instance = chains.FirstInstance();
        instance != nullptr; instance = chains.NextInstance(*instance)) {
-    for (Effects_RendererSlot* slot = chains.FirstRenderer(*instance);
+    for (LiveRendererSlot* slot = chains.FirstRenderer(*instance);
          slot != nullptr; slot = chains.NextRenderer(*slot)) {
       if (chains.RunsBoneTrail(*slot)) {
         chains.Fade(*slot);

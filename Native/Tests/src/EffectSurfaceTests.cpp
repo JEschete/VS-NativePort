@@ -838,12 +838,12 @@ TEST_CASE("Live surface entries refuse definitions the package lacks",
           "[effects-surface-templates][effects]") {
   const BlankLivePackage package;
   VS::test_support::ChannelWarnings warnings("effects");
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(surfaces::UpdateLivePlg053Grid(&slot, 1, 0x0105) == 1);
   CHECK(surfaces::UpdateLivePlg061Surface(&slot, 1, 0x0205) == 1);
   CHECK(surfaces::UpdateLivePlg069Mesh10(&slot, 1, 0x0305) == 1);
   CHECK(surfaces::UpdateLivePlg146MirrorSurface(&slot, 1, 0x0405) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   REQUIRE(warnings.messages.size() == 4);
   CHECK(warnings.messages.front().find("grid: definition 1") !=
         std::string::npos);
@@ -853,7 +853,7 @@ TEST_CASE("Live surface entries refuse definitions the package lacks",
 TEST_CASE("Live surface entries answer commands without a state",
           "[effects-surface-templates][effects]") {
   const BlankLivePackage package;
-  Effects_RendererSlot slot{};
+  VS::Effects::LiveRendererSlot slot{};
   CHECK(surfaces::UpdateLivePlg073RotatingSurface(&slot, 3, 0) == 1);
   CHECK(surfaces::UpdateLivePlg073RotatingSurface(&slot, 9, 0) == 1);
   CHECK(surfaces::UpdateLivePlg073RotatingSurface(&slot, 2, 0) == 0);
@@ -861,5 +861,5 @@ TEST_CASE("Live surface entries answer commands without a state",
   CHECK(surfaces::UpdateLivePlg077Mesh10(&slot, 2, 0) == 0);
   CHECK(surfaces::UpdateLivePlg300MirrorSurface(&slot, 3, 0) == 1);
   CHECK(surfaces::UpdateLivePlg061Grid(nullptr, 2, 0) == 0);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
 }

@@ -9,7 +9,6 @@
 
 struct Content_DiscQueueSlot;
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 // The effect runtime's start-up and frame update and the primary effect's
 // action lifecycle (BATTLE.PRG 5BF94.c:5047-5070, 5170-5477). Each frame the
@@ -21,6 +20,7 @@ struct Effects_RendererSlot;
 // binds the hosts below to them, and each host read returns the current
 // record, as the original reread its globals after every call.
 namespace VS::Effects {
+struct LiveRendererSlot;
 // LiveActionEffectTarget.type of an endpoint on an actor's bone.
 inline constexpr std::uint16_t kActorBoneEndpoint = 4;
 

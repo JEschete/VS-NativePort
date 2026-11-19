@@ -3,7 +3,6 @@
 #include "Legacy/Psx.h"
 
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 namespace VS::Effects {
 struct LiveEffectTimeline;
@@ -11,6 +10,7 @@ struct LiveParticle;
 }  // namespace VS::Effects
 
 #include "Effects/ActionRequest.hpp"
+#include "Effects/EffectInstances.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -33,21 +33,10 @@ struct Effects_EffectInstance {
     VS::Effects::LiveEffectInstanceTargets context;
 };
 
-// decomp: effectExec (src/BATTLE/BATTLE.PRG/6E644.h:35)
-using Effects_EffectRenderer = int (*)(Effects_RendererSlot*, u_int, int);
-
-// decomp: func_800D4910_t (src/BATTLE/BATTLE.PRG/6E644.h:37)
-struct Effects_RendererSlot {
-    struct Effects_RendererSlot* next;
-    Effects_EffectRenderer renderer;
-    void* rendererState;
-};
-struct Effects_RendererSlot;
-
 #include "DiscQueue.h"
 
 extern u_char Effects_effectBufferIndex;
-extern Effects_EffectRenderer Effects_scriptRenderers[2];
+extern VS::Effects::EffectRenderer Effects_scriptRenderers[2];
 extern char Effects_actionVariantValues[21824];
 extern int (*Effects_scriptOpcodeHandlers[49])(void*);
 extern u_char Effects_lastReactionSoundVariant;
@@ -73,7 +62,7 @@ extern Effects_EffectInstance* Effects_secondaryInstances;
 extern int Effects_scriptSelector;
 extern VS::Effects::LiveEffectPackage* Effects_savedPackage;
 extern VS::Effects::LiveEffectPackage* Effects_package;
-extern Effects_EffectRenderer Effects_rendererTableAlias[];
-extern Effects_EffectRenderer Effects_effectRenderers[8];
+extern VS::Effects::EffectRenderer Effects_rendererTableAlias[];
+extern VS::Effects::EffectRenderer Effects_effectRenderers[8];
 extern VS::Effects::LiveEffectPackage Effects_actionPackage;
 extern VS::Effects::LiveEffectPackage Effects_secondaryPackage;

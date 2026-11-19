@@ -633,7 +633,7 @@ void StoreRecord(Live& live, const SheetState& state) {
 template <typename Record, typename Live>
 class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
  public:
-  LiveSurfaceHost(Effects_RendererSlot& slot, std::string_view name)
+  LiveSurfaceHost(LiveRendererSlot& slot, std::string_view name)
       : slot_(slot), services_(name) {}
 
   // decomp: grids.h:40-62, meshes10.h:40-51, surfaces.h:56-94,
@@ -647,7 +647,7 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
       return;
     }
     *live = Live{};
-    slot_.rendererState = live;
+    slot_.renderer_state = live;
     StoreState(state);
     if constexpr (AnimatedRecord<Live>) {
       if (animation.has_value()) {
@@ -721,10 +721,10 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
 
  private:
   [[nodiscard]] Live* LiveState() const {
-    return static_cast<Live*>(slot_.rendererState);
+    return static_cast<Live*>(slot_.renderer_state);
   }
 
-  Effects_RendererSlot& slot_;
+  LiveRendererSlot& slot_;
   LiveSurfaceServices services_;
 };
 
@@ -732,8 +732,8 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
 // `inputs` (a profile or a model) go between the packed parameter and the
 // host.
 template <typename Record, typename Live, typename Instance, typename... Args>
-int RunSurfaceEntry(Effects_RendererSlot* slot, unsigned int command,
-                    int packed, std::string_view name, Instance instance,
+int RunSurfaceEntry(LiveRendererSlot* slot, unsigned int command, int packed,
+                    std::string_view name, Instance instance,
                     const Args&... inputs) {
   if (slot == nullptr) {
     VS::Core::LogError("effects", "{}: renderer called without a slot; ignored",
@@ -797,33 +797,33 @@ using RotatingSurfaceInstance = bool (*)(SurfaceCommand, std::int32_t,
 using Mesh10Instance = bool (*)(SurfaceCommand, std::int32_t, Mesh10Model,
                                 Mesh10Host&);
 
-int RunGrid(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunGrid(LiveRendererSlot* slot, unsigned int command, int packed,
             GridInstance instance) {
   return RunSurfaceEntry<GridState, LiveGridState>(slot, command, packed,
                                                    "grid", instance);
 }
 
-int RunSurface(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunSurface(LiveRendererSlot* slot, unsigned int command, int packed,
                const SurfaceProfilePoints& profile, SheetInstance instance) {
   return RunSurfaceEntry<SheetState, LiveSurfaceState>(
       slot, command, packed, "surface", instance, SurfaceProfile(profile));
 }
 
-int RunMirrorSurface(Effects_RendererSlot* slot, unsigned int command,
-                     int packed, const SurfaceProfilePoints& profile,
+int RunMirrorSurface(LiveRendererSlot* slot, unsigned int command, int packed,
+                     const SurfaceProfilePoints& profile,
                      SheetInstance instance) {
   return RunSurfaceEntry<SheetState, LiveMirrorSurfaceState>(
       slot, command, packed, "mirrored surface", instance,
       SurfaceProfile(profile));
 }
 
-int RunRotatingSurface(Effects_RendererSlot* slot, unsigned int command,
-                       int packed, RotatingSurfaceInstance instance) {
+int RunRotatingSurface(LiveRendererSlot* slot, unsigned int command, int packed,
+                       RotatingSurfaceInstance instance) {
   return RunSurfaceEntry<SheetState, LiveRotatingSurfaceState>(
       slot, command, packed, "rotating surface", instance);
 }
 
-int RunMesh10(Effects_RendererSlot* slot, unsigned int command, int packed,
+int RunMesh10(LiveRendererSlot* slot, unsigned int command, int packed,
               const LiveMesh10Model& model, Mesh10Instance instance) {
   return RunSurfaceEntry<Mesh10State, LiveMesh10State>(
       slot, command, packed, "mesh", instance,
@@ -834,34 +834,34 @@ int RunMesh10(Effects_RendererSlot* slot, unsigned int command, int packed,
 // Each entry passes its overlay's profile or model to the instance in
 // Grid.cpp, Mesh10.cpp, Surface.cpp, MirrorSurface.cpp or
 // RotatingSurface.cpp, which carries the decomp provenance.
-int UpdateLivePlg049RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg049RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg049::RotatingSurface);
 }
 
-int UpdateLivePlg053Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg053Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg053::Grid);
 }
 
-int UpdateLivePlg061Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg061::Grid);
 }
 
-int UpdateLivePlg061Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg061Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg061::surfaceVertices),
                     &Plg061::Surface);
 }
 
-int UpdateLivePlg065RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg065RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg065::RotatingSurface);
 }
 
-int UpdateLivePlg069Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg069Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -869,29 +869,29 @@ int UpdateLivePlg069Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg069::Mesh10);
 }
 
-int UpdateLivePlg073Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg073::Grid);
 }
 
-int UpdateLivePlg073RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg073RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg073::RotatingSurface);
 }
 
-int UpdateLivePlg077Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg077::Grid);
 }
 
-int UpdateLivePlg077Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg077::surfaceVertices),
                     &Plg077::Surface);
 }
 
-int UpdateLivePlg077Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg077Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -899,80 +899,80 @@ int UpdateLivePlg077Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg077::Mesh10);
 }
 
-int UpdateLivePlg081RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg081RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg081::RotatingSurface);
 }
 
-int UpdateLivePlg082Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg082Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg082::Grid);
 }
 
-int UpdateLivePlg085Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg085Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg085::Grid);
 }
 
-int UpdateLivePlg086Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg086Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg086::Grid);
 }
 
-int UpdateLivePlg086RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg086RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg086::RotatingSurface);
 }
 
-int UpdateLivePlg087Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg087::Grid);
 }
 
-int UpdateLivePlg087Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg087::surfaceVertices),
                     &Plg087::Surface);
 }
 
-int UpdateLivePlg128Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg128::Grid);
 }
 
-int UpdateLivePlg128Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg128::surfaceVertices),
                     &Plg128::Surface);
 }
 
-int UpdateLivePlg128Surface2(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Surface2(LiveRendererSlot* slot, unsigned int command,
                              int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg128::surfaceVertices2),
                     &Plg128::Surface2);
 }
 
-int UpdateLivePlg128RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg128RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg128::RotatingSurface);
 }
 
-int UpdateLivePlg129Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg129::surfaceVertices),
                     &Plg129::Surface);
 }
 
-int UpdateLivePlg129RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg129RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg129::RotatingSurface);
 }
 
-int UpdateLivePlg129Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg129Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -980,12 +980,12 @@ int UpdateLivePlg129Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg129::Mesh10);
 }
 
-int UpdateLivePlg137Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg137::Grid);
 }
 
-int UpdateLivePlg137Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -993,56 +993,56 @@ int UpdateLivePlg137Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg137::Mesh10);
 }
 
-int UpdateLivePlg138Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg138Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg138::Grid);
 }
 
-int UpdateLivePlg138RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg138RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg138::RotatingSurface);
 }
 
-int UpdateLivePlg139Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg139Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg139::Grid);
 }
 
-int UpdateLivePlg142Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg142Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg142::Grid);
 }
 
-int UpdateLivePlg142RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg142RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg142::RotatingSurface);
 }
 
-int UpdateLivePlg146MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg146MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg146::mirrorSurfaceVertices),
                           &Plg146::MirrorSurface);
 }
 
-int UpdateLivePlg150Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg150Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg150::Grid);
 }
 
-int UpdateLivePlg150Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg150Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg150::surfaceVertices),
                     &Plg150::Surface);
 }
 
-int UpdateLivePlg152Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg152Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg152::Grid);
 }
 
-int UpdateLivePlg153Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg153Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -1050,7 +1050,7 @@ int UpdateLivePlg153Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg153::Mesh10);
 }
 
-int UpdateLivePlg154Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg154Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -1058,122 +1058,122 @@ int UpdateLivePlg154Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg154::Mesh10);
 }
 
-int UpdateLivePlg156Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg156Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg156::Grid);
 }
 
-int UpdateLivePlg158Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg158Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg158::surfaceVertices),
                     &Plg158::Surface);
 }
 
-int UpdateLivePlg158MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg158MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg158::mirrorSurfaceVertices),
                           &Plg158::MirrorSurface);
 }
 
-int UpdateLivePlg158RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg158RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg158::RotatingSurface);
 }
 
-int UpdateLivePlg161Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg161::Grid);
 }
 
-int UpdateLivePlg161RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg161RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg161::RotatingSurface);
 }
 
-int UpdateLivePlg162RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg162RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg162::RotatingSurface);
 }
 
-int UpdateLivePlg165Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg165Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg165::Grid);
 }
 
-int UpdateLivePlg165RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg165RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg165::RotatingSurface);
 }
 
-int UpdateLivePlg166MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg166MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg166::mirrorSurfaceVertices),
                           &Plg166::MirrorSurface);
 }
 
-int UpdateLivePlg166RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg166RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg166::RotatingSurface);
 }
 
-int UpdateLivePlg167RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg167RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg167::RotatingSurface);
 }
 
-int UpdateLivePlg168Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg168Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg168::Grid);
 }
 
-int UpdateLivePlg170Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg170::Grid);
 }
 
-int UpdateLivePlg170Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg170Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg170::surfaceVertices),
                     &Plg170::Surface);
 }
 
-int UpdateLivePlg170MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg170MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg170::mirrorSurfaceVertices),
                           &Plg170::MirrorSurface);
 }
 
-int UpdateLivePlg170RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg170RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg170::RotatingSurface);
 }
 
-int UpdateLivePlg236RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg236RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg236::RotatingSurface);
 }
 
-int UpdateLivePlg242Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg242Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg242::Grid);
 }
 
-int UpdateLivePlg246RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg246RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg246::RotatingSurface);
 }
 
-int UpdateLivePlg250RotatingSurface(Effects_RendererSlot* slot,
+int UpdateLivePlg250RotatingSurface(LiveRendererSlot* slot,
                                     unsigned int command, int packed) {
   return RunRotatingSurface(slot, command, packed, &Plg250::RotatingSurface);
 }
 
-int UpdateLivePlg260Mesh10(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg260Mesh10(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
@@ -1181,51 +1181,51 @@ int UpdateLivePlg260Mesh10(Effects_RendererSlot* slot, unsigned int command,
       &Plg260::Mesh10);
 }
 
-int UpdateLivePlg263Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg263Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg263::surfaceVertices),
                     &Plg263::Surface);
 }
 
-int UpdateLivePlg272Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg272Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg272::Grid);
 }
 
-int UpdateLivePlg272Surface(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg272Surface(LiveRendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
                     ProfileOf(Effects::Plg272::surfaceVertices),
                     &Plg272::Surface);
 }
 
-int UpdateLivePlg273MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg273MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg273::mirrorSurfaceVertices),
                           &Plg273::MirrorSurface);
 }
 
-int UpdateLivePlg291Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg291Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg291::Grid);
 }
 
-int UpdateLivePlg297Grid(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg297Grid(LiveRendererSlot* slot, unsigned int command,
                          int packed) {
   return RunGrid(slot, command, packed, &Plg297::Grid);
 }
 
-int UpdateLivePlg297MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg297MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg297::mirrorSurfaceVertices),
                           &Plg297::MirrorSurface);
 }
 
-int UpdateLivePlg300MirrorSurface(Effects_RendererSlot* slot,
-                                  unsigned int command, int packed) {
+int UpdateLivePlg300MirrorSurface(LiveRendererSlot* slot, unsigned int command,
+                                  int packed) {
   return RunMirrorSurface(slot, command, packed,
                           ProfileOf(Effects::Plg300::mirrorSurfaceVertices),
                           &Plg300::MirrorSurface);

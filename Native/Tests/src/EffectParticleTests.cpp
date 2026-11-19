@@ -1213,9 +1213,9 @@ struct LiveParticleScope {
 TEST_CASE("Live particle entries refuse definitions the package lacks",
           "[effects-particles][effects]") {
   const LiveParticleScope scope;
-  Effects_RendererSlot slot{};
+  fx::LiveRendererSlot slot{};
   CHECK(particles::UpdateLivePlg045ParticleDispatch(&slot, 1, 0x0105) == 1);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
   CHECK(scope.Warned("definition 1 is outside"));
 }
 
@@ -1225,8 +1225,8 @@ TEST_CASE("Live particle entries stop sets their package no longer holds",
   VS::Effects::LiveParticleQuadSet live{};
   live.definition_index = 1;
   live.lifetime = 3;
-  Effects_RendererSlot slot{};
-  slot.rendererState = &live;
+  fx::LiveRendererSlot slot{};
+  slot.renderer_state = &live;
   CHECK(particles::UpdateLivePlg065ParticleDispatch(&slot, 2, 0) == 0);
   CHECK(scope.Warned("no longer holds definition 1"));
   CHECK(particles::UpdateLivePlg065ParticleDispatch(&slot, 3, 0) == 1);
@@ -1240,11 +1240,11 @@ TEST_CASE("Live particle entries stop sets their package no longer holds",
 TEST_CASE("Live particle entries answer commands without a set state",
           "[effects-particles][effects]") {
   const LiveParticleScope scope;
-  Effects_RendererSlot slot{};
+  fx::LiveRendererSlot slot{};
   CHECK(particles::UpdateLivePlg114ParticleDispatch2(&slot, 3, 0) == 1);
   CHECK(particles::UpdateLivePlg265ParticleDispatch(&slot, 9, 0) == 1);
   CHECK(particles::UpdateLivePlg300ParticleDispatch(&slot, 2, 0) == 0);
   CHECK(particles::UpdateLivePlg266ParticleDispatch2(&slot, 4, 0) == 0);
   CHECK(particles::UpdateLivePlg301ParticleDispatch(nullptr, 2, 0) == 0);
-  CHECK(slot.rendererState == nullptr);
+  CHECK(slot.renderer_state == nullptr);
 }

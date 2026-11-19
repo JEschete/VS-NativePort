@@ -54,8 +54,7 @@ using Templates::RingUv;
 constexpr std::size_t kTrailStateBytes = 0xB4;
 static_assert(sizeof(BoneTrail) <= kTrailStateBytes);
 static_assert(std::is_trivially_destructible_v<BoneTrail>);
-static_assert(
-    std::is_same_v<decltype(&LiveUpdateBoneTrail), Effects_EffectRenderer>);
+static_assert(std::is_same_v<decltype(&LiveUpdateBoneTrail), EffectRenderer>);
 constexpr std::uint32_t kOrderingHighMask = ~kRingLinkMask;
 constexpr unsigned kByteBits = 8;
 
@@ -182,10 +181,10 @@ void DrawSegment(const BoneTrail& trail, TrailSegmentWeights weights) {
 
 class LiveBoneTrailHost final : public BoneTrailHost {
  public:
-  explicit LiveBoneTrailHost(Effects_RendererSlot& slot) : slot_(&slot) {}
+  explicit LiveBoneTrailHost(LiveRendererSlot& slot) : slot_(&slot) {}
 
   BoneTrail* Trail() override {
-    return static_cast<BoneTrail*>(slot_->rendererState);
+    return static_cast<BoneTrail*>(slot_->renderer_state);
   }
   BoneTrail* Allocate() override {
     void* const storage =
@@ -195,14 +194,14 @@ class LiveBoneTrailHost final : public BoneTrailHost {
     }
     BoneTrail* const trail =
         std::construct_at(static_cast<BoneTrail*>(storage));
-    slot_->rendererState = trail;
+    slot_->renderer_state = trail;
     return trail;
   }
   void Release() override {
-    if (slot_->rendererState != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(slot_->rendererState);
+    if (slot_->renderer_state != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(slot_->renderer_state);
     }
-    slot_->rendererState = nullptr;
+    slot_->renderer_state = nullptr;
   }
   // decomp: 5BF94.c:4973-4974 (func_800A1AF8; a refused bone leaves the
   // sample as it was).
@@ -226,7 +225,7 @@ class LiveBoneTrailHost final : public BoneTrailHost {
   }
 
  private:
-  Effects_RendererSlot* slot_;
+  LiveRendererSlot* slot_;
 };
 
 class LiveBoneTrailChains final : public BoneTrailChains {
@@ -238,17 +237,16 @@ class LiveBoneTrailChains final : public BoneTrailChains {
       Effects_EffectInstance& instance) override {
     return instance.next;
   }
-  Effects_RendererSlot* FirstRenderer(
-      Effects_EffectInstance& instance) override {
+  LiveRendererSlot* FirstRenderer(Effects_EffectInstance& instance) override {
     return instance.context.renderer;
   }
-  Effects_RendererSlot* NextRenderer(Effects_RendererSlot& slot) override {
+  LiveRendererSlot* NextRenderer(LiveRendererSlot& slot) override {
     return slot.next;
   }
-  bool RunsBoneTrail(Effects_RendererSlot& slot) override {
+  bool RunsBoneTrail(LiveRendererSlot& slot) override {
     return slot.renderer == &LiveUpdateBoneTrail;
   }
-  void Fade(Effects_RendererSlot& slot) override {
+  void Fade(LiveRendererSlot& slot) override {
     static_cast<void>(
         slot.renderer(&slot, std::to_underlying(RendererCommand::kFade), 0));
   }
@@ -281,7 +279,7 @@ void LiveDrawTrailSegment(const BoneTrail* trail, int base_weight,
 }
 
 // decomp: BATTLE.PRG func_800CE174 (src/BATTLE/BATTLE.PRG/5BF94.c:4958).
-int LiveUpdateBoneTrail(Effects_RendererSlot* slot, unsigned int command,
+int LiveUpdateBoneTrail(LiveRendererSlot* slot, unsigned int command,
                         int parameter) {
   if (slot == nullptr) {
     Refuse("renderer command", "no slot");

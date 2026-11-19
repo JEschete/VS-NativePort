@@ -30,7 +30,7 @@ using fx::PrimaryEffectPhase;
 using fx::PrimaryEffectState;
 using fx::SecondaryEffectPhase;
 using Instance = Effects_EffectInstance;
-using Slot = Effects_RendererSlot;
+using Slot = fx::LiveRendererSlot;
 using Log = std::vector<std::string>;
 
 // A chain of instances kept outside the records, as both runtimes walk it.

@@ -70,7 +70,7 @@ std::uint16_t effectEntryPointIndices[kEffectCount] = { 0x000, 0x000, 0x000, 0x0
     0x157, 0x157, 0x157, 0x157, 0x157, 0x157, 0x157, 0x157, 0x157, 0x157 };
 
 // decomp: effectEntryPoints (_effectEntryPoints@src/EFFECT/EFFPURGE.BIN/0.c:459)
-Effects_EffectRenderer effectEntryPoints[kEntryPointCount] = { VS::Effects::UpdateLivePlg005AnalyzeGrid, VS::Effects::Templates::UpdateLivePlg044TiledRing,
+EffectRenderer effectEntryPoints[kEntryPointCount] = { VS::Effects::UpdateLivePlg005AnalyzeGrid, VS::Effects::Templates::UpdateLivePlg044TiledRing,
     VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, VS::Effects::Templates::UpdateLivePlg047ClosedRing, VS::Effects::Templates::UpdateLivePlg044TiledRing, VS::Effects::Templates::UpdateLivePlg049TrailNine,
     VS::Effects::Templates::UpdateLivePlg049Ring, VS::Effects::Templates::UpdateLivePlg049TiledRing, VS::Effects::Templates::UpdateLivePlg049RotatingSurface, VS::Effects::Templates::UpdateLivePlg050Ring, VS::Effects::Templates::UpdateLivePlg050TrailNine, nullptr,
     VS::Effects::Templates::UpdateLivePlg051ClosedRing, VS::Effects::Templates::UpdateLivePlg052RepeatingRing, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::UpdateLivePlg054AnalyzeGrid,

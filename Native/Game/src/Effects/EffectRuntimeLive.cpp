@@ -45,7 +45,7 @@ static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
 namespace VS::Effects {
 namespace {
 using Instance = Effects_EffectInstance;
-using Slot = Effects_RendererSlot;
+using Slot = LiveRendererSlot;
 
 // The particles LiveAcquireParticlePool reserves for a secondary
 // instance.

@@ -642,7 +642,7 @@ void RunLiveTrailNineStage(TrailNineStage stage,
 // instances (TrailTarget.cpp ... TrailRender.cpp, which carry the decomp
 // provenance). PLG057 shares its first cursor with the nine-sample trails, so
 // its five-sample trails use the second.
-int UpdateLivePlg057Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg057Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg057::TrailTarget, &Plg057::TrailControl, &Plg057::TrailInit,
@@ -652,7 +652,7 @@ int UpdateLivePlg057Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG057", &Effects::Plg057::trailEmissionCounter2, &kStages});
 }
 
-int UpdateLivePlg073Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg073::TrailTarget, &Plg073::TrailControl, &Plg073::TrailInit,
@@ -662,7 +662,7 @@ int UpdateLivePlg073Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG073", &Effects::Plg073::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg086Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg086Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg086::TrailTarget, &Plg086::TrailControl, &Plg086::TrailInit,
@@ -672,7 +672,7 @@ int UpdateLivePlg086Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG086", &Effects::Plg086::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg087Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg087::TrailTarget, &Plg087::TrailControl, &Plg087::TrailInit,
@@ -682,7 +682,7 @@ int UpdateLivePlg087Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG087", &Effects::Plg087::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg128Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg128::TrailTarget, &Plg128::TrailControl, &Plg128::TrailInit,
@@ -692,7 +692,7 @@ int UpdateLivePlg128Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG128", &Effects::Plg128::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg134Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg134Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg134::TrailTarget, &Plg134::TrailControl, &Plg134::TrailInit,
@@ -702,7 +702,7 @@ int UpdateLivePlg134Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG134", &Effects::Plg134::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg137Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg137::TrailTarget, &Plg137::TrailControl, &Plg137::TrailInit,
@@ -712,7 +712,7 @@ int UpdateLivePlg137Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG137", &Effects::Plg137::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg141Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg141Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg141::TrailTarget, &Plg141::TrailControl, &Plg141::TrailInit,
@@ -722,7 +722,7 @@ int UpdateLivePlg141Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG141", &Effects::Plg141::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg146Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg146Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg146::TrailTarget, &Plg146::TrailControl, &Plg146::TrailInit,
@@ -732,7 +732,7 @@ int UpdateLivePlg146Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG146", &Effects::Plg146::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg148Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg148Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg148::TrailTarget, &Plg148::TrailControl, &Plg148::TrailInit,
@@ -742,7 +742,7 @@ int UpdateLivePlg148Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG148", &Effects::Plg148::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg242Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg242Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg242::TrailTarget, &Plg242::TrailControl, &Plg242::TrailInit,
@@ -752,7 +752,7 @@ int UpdateLivePlg242Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG242", &Effects::Plg242::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg255Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg255Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg255::TrailTarget, &Plg255::TrailControl, &Plg255::TrailInit,
@@ -762,7 +762,7 @@ int UpdateLivePlg255Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG255", &Effects::Plg255::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg265Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg265Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg265::TrailTarget, &Plg265::TrailControl, &Plg265::TrailInit,
@@ -772,7 +772,7 @@ int UpdateLivePlg265Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG265", &Effects::Plg265::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg266Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg266Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg266::TrailTarget, &Plg266::TrailControl, &Plg266::TrailInit,
@@ -782,7 +782,7 @@ int UpdateLivePlg266Trail(Effects_RendererSlot* slot, unsigned int command,
       {"PLG266", &Effects::Plg266::trailEmissionCounter, &kStages});
 }
 
-int UpdateLivePlg291Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg291Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed) {
   static constexpr TrailStages kStages{
       &Plg291::TrailTarget, &Plg291::TrailControl, &Plg291::TrailInit,
@@ -796,77 +796,77 @@ int UpdateLivePlg291Trail(Effects_RendererSlot* slot, unsigned int command,
 // (trails9.h:685): the emitter lifecycle (TrailEmitter.cpp) with the overlay's
 // own emission cursor (VS_TRAIL_CORNER_STATE; PLG057's first) and the shared
 // nine-sample stages.
-int UpdateLivePlg049TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg049TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG049", &Effects::Plg049::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg050TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg050TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG050", &Effects::Plg050::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg057TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg057TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG057", &Effects::Plg057::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg069TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg069TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG069", &Effects::Plg069::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg135TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg135TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG135", &Effects::Plg135::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg161TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG161", &Effects::Plg161::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg165TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg165TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG165", &Effects::Plg165::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg167TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg167TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG167", &Effects::Plg167::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg168TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg168TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG168", &Effects::Plg168::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg169TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg169TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,
       {"PLG169", &Effects::Plg169::trailEmissionCounter, &NineStages()});
 }
 
-int UpdateLivePlg232TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg232TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return UpdateLiveTrailNineEmitter(
       slot, command, packed,

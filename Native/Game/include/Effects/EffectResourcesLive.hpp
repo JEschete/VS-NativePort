@@ -7,8 +7,6 @@
 
 #include "Effects/EffectResources.hpp"
 
-struct Effects_RendererSlot;
-
 // Live binding for the effect resources (EffectResources.hpp) over the
 // battle's package records (Effects_package, Effects_actionPackage,
 // Effects_secondaryPackage, Effects_savedPackage), the loader state
@@ -25,6 +23,7 @@ struct Effects_RendererSlot;
 // diagnostic. The C-shaped entries keep the original signatures for the
 // copied effect runtime.
 namespace VS::Effects {
+struct LiveRendererSlot;
 // The current package's view of a bound block, or an empty view when the
 // package is unbound, lacks the block or no longer points at it. Texture
 // tables are bound by TextureBindings.hpp and have no view here.
@@ -72,7 +71,7 @@ bool LiveSetEffectRenderer(PluginEntry entry, int index);
 void LiveBindEffectPackageBlocks(void* package);
 // func_800F9800 (EFFPURGE 0.c:590): the renderer shape the entry-point
 // table uses; the arguments are ignored, as in the original.
-int LiveInvokeAllPluginUpdates(Effects_RendererSlot* slot, unsigned int command,
+int LiveInvokeAllPluginUpdates(LiveRendererSlot* slot, unsigned int command,
                                int packed);
 // vs_effpurge_exec (EFFPURGE 0.c:911): the action request's effect.
 void LiveConfigureEffectResources();

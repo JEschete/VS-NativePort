@@ -12,7 +12,6 @@
 #include "Effects/TrailPoint.hpp"
 
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 // Bone trails (BATTLE.PRG 5BF94.c:4898-5000 and 5666-5760; effect 54): a
 // ribbon behind one bone of an actor, usually its weapon. Every tick samples
@@ -24,6 +23,7 @@ struct Effects_RendererSlot;
 // the frame's primitive buffer are reached through hosts (BoneTrailLive.hpp
 // binds them).
 namespace VS::Effects {
+struct LiveRendererSlot;
 inline constexpr std::size_t kTrailHistory = 8;
 inline constexpr std::size_t kTrailCorners = 4;
 // The life of a trail that only a fade or a stop ends, and of a fading one.
@@ -269,14 +269,14 @@ class BoneTrailChains {
   [[nodiscard]] virtual Effects_EffectInstance* FirstInstance() = 0;
   [[nodiscard]] virtual Effects_EffectInstance* NextInstance(
       Effects_EffectInstance& instance) = 0;
-  [[nodiscard]] virtual Effects_RendererSlot* FirstRenderer(
+  [[nodiscard]] virtual LiveRendererSlot* FirstRenderer(
       Effects_EffectInstance& instance) = 0;
-  [[nodiscard]] virtual Effects_RendererSlot* NextRenderer(
-      Effects_RendererSlot& slot) = 0;
+  [[nodiscard]] virtual LiveRendererSlot* NextRenderer(
+      LiveRendererSlot& slot) = 0;
   // Whether the slot runs the bone trail renderer.
-  [[nodiscard]] virtual bool RunsBoneTrail(Effects_RendererSlot& slot) = 0;
+  [[nodiscard]] virtual bool RunsBoneTrail(LiveRendererSlot& slot) = 0;
   // Sends the fade command to the slot's renderer.
-  virtual void Fade(Effects_RendererSlot& slot) = 0;
+  virtual void Fade(LiveRendererSlot& slot) = 0;
 
  protected:
   BoneTrailChains() = default;

@@ -24,7 +24,7 @@ namespace {
 namespace fx = VS::Effects;
 namespace Memory = VS::Core::Memory;
 using Instance = Effects_EffectInstance;
-using Slot = Effects_RendererSlot;
+using Slot = fx::LiveRendererSlot;
 using Log = std::vector<std::string>;
 using Create = Instance* (*)(std::int32_t, fx::EffectInstanceChain&);
 
@@ -177,7 +177,7 @@ std::vector<RendererCall>& RendererCalls() {
 int RecordingRenderer(Slot* slot, unsigned int command, int parameters) {
   RendererCalls().push_back({slot, command, parameters});
   if (command == std::to_underlying(fx::RendererCommand::kStart)) {
-    slot->rendererState = Memory::AllocateLiveFromHighEnd(16);
+    slot->renderer_state = Memory::AllocateLiveFromHighEnd(16);
   }
   return 1;
 }
@@ -187,7 +187,7 @@ int RecordingRenderer(Slot* slot, unsigned int command, int parameters) {
 int FinishingRenderer(Slot* slot, unsigned int command, int parameters) {
   RendererCalls().push_back({slot, command, parameters});
   if (command == std::to_underlying(fx::RendererCommand::kStart)) {
-    slot->rendererState = Memory::AllocateLiveFromHighEnd(16);
+    slot->renderer_state = Memory::AllocateLiveFromHighEnd(16);
   }
   return command == std::to_underlying(fx::RendererCommand::kUpdate) ? 0 : 1;
 }

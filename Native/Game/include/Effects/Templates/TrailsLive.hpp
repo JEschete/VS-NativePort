@@ -5,9 +5,9 @@
 #include "Effects/TrailEmitter.hpp"
 
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 namespace VS::Effects {
+struct LiveRendererSlot;
 struct LiveParticleDefinition;
 struct LiveParticleEmitterScratch;
 }  // namespace VS::Effects
@@ -38,58 +38,58 @@ void RunLiveTrailNineStage(TrailNineStage stage,
                            Effects_EffectInstance& instance,
                            LiveTrailNineState& state);
 
-int UpdateLivePlg057Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg057Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg073Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg073Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg086Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg086Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg087Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg087Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg128Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg128Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg134Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg134Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg137Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg137Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg141Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg141Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg146Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg146Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg148Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg148Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg242Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg242Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg255Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg255Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg265Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg265Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg266Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg266Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
-int UpdateLivePlg291Trail(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg291Trail(LiveRendererSlot* slot, unsigned int command,
                           int packed);
 
 // The trails9.h overlays' renderer-slot entries (trails9.h:685).
-int UpdateLivePlg049TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg049TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg050TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg050TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg057TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg057TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg069TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg069TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg135TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg135TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg161TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg161TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg165TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg165TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg167TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg167TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg168TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg168TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg169TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg169TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
-int UpdateLivePlg232TrailNine(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLivePlg232TrailNine(LiveRendererSlot* slot, unsigned int command,
                               int packed);
 }  // namespace VS::Effects::Templates

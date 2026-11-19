@@ -24,11 +24,10 @@
 namespace VS::Effects {
 namespace {
 using Instance = Effects_EffectInstance;
-using Slot = Effects_RendererSlot;
+using Slot = LiveRendererSlot;
 using Spawn = LiveEffectSpawnRequest;
 static_assert(std::extent_v<decltype(Instance::transforms)> ==
               kEffectInstanceTransforms);
-static_assert(std::is_same_v<Effects_EffectRenderer, EffectRenderer>);
 
 std::uint64_t refused_calls = 0;
 
@@ -130,7 +129,7 @@ class LiveRendererChain final : public RendererChain {
     }
     return std::construct_at(
         static_cast<Slot*>(storage),
-        Slot{.next = nullptr, .renderer = renderer, .rendererState = nullptr});
+        Slot{.next = nullptr, .renderer = renderer, .renderer_state = nullptr});
   }
   void Run(Slot& slot, RendererCommand command,
            std::int32_t parameters) override {
@@ -142,8 +141,8 @@ class LiveRendererChain final : public RendererChain {
         slot.renderer(&slot, std::to_underlying(command), parameters));
   }
   void Free(Slot& slot) override {
-    if (slot.rendererState != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+    if (slot.renderer_state != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(slot.renderer_state);
     }
     Core::Memory::FreeLiveFromHighEnd(&slot);
   }
@@ -276,9 +275,9 @@ void LiveSetSecondaryEffectPhase(int phase, Effects_EffectInstance* instance) {
   SetSecondaryEffectPhase(instance->context.phase, *known);
 }
 
-Effects_RendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
-                                               EffectRenderer renderer,
-                                               int renderer_parameters) {
+LiveRendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
+                                           EffectRenderer renderer,
+                                           int renderer_parameters) {
   if (instance == nullptr || renderer == nullptr) {
     Refuse("attach renderer", "no effect instance or renderer");
     return nullptr;
@@ -288,7 +287,7 @@ Effects_RendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
 }
 
 void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
-                              Effects_RendererSlot* slot) {
+                              LiveRendererSlot* slot) {
   if (instance == nullptr || slot == nullptr) {
     Refuse("detach renderer", "no effect instance or renderer slot");
     return;
@@ -299,7 +298,7 @@ void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
   }
 }
 
-bool LiveUpdateEffectRenderer(Effects_RendererSlot& slot) {
+bool LiveUpdateEffectRenderer(LiveRendererSlot& slot) {
   if (slot.renderer == nullptr) {
     Refuse("renderer update", "the slot has no renderer; detached");
     return false;

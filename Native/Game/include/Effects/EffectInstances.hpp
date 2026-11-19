@@ -6,7 +6,6 @@
 #include <optional>
 
 struct Effects_EffectInstance;
-struct Effects_RendererSlot;
 
 // Effect instance lifecycle (BATTLE.PRG 5BF94.c:5074-5160, 5548, 5593-5665).
 // The primary and the secondary effects each run a chain of instances ordered
@@ -99,8 +98,7 @@ class RecordChain {
   RecordChain& operator=(RecordChain&&) = default;
 };
 
-// The commands an effect renderer takes (Effects_EffectRenderer's second
-// argument).
+// The commands an effect renderer takes (EffectRenderer's second argument).
 enum class RendererCommand : std::uint32_t {
   kStart = 1,   // the slot was attached; the parameters are the attach's
   kUpdate = 2,  // each frame; the renderer returns 0 once it has finished
@@ -108,23 +106,34 @@ enum class RendererCommand : std::uint32_t {
   kStop = 4,    // the slot's instance is being destroyed
 };
 
-// Effects_EffectRenderer: a renderer, given its slot, a command and the
-// command's parameters.
-using EffectRenderer = int (*)(Effects_RendererSlot* slot, unsigned int command,
+struct LiveRendererSlot;
+
+// decomp: effectExec (src/BATTLE/BATTLE.PRG/battleEffect.h:37): a renderer,
+// given its slot, a command and the command's parameters.
+using EffectRenderer = int (*)(LiveRendererSlot* slot, unsigned int command,
                                int parameters);
 
+// decomp: func_800D4910_t (src/BATTLE/BATTLE.PRG/battleEffect.h:39): one of
+// an instance's renderers, in the game heap.
+struct LiveRendererSlot {
+  LiveRendererSlot* next;
+  EffectRenderer renderer;
+  // What the renderer keeps between frames (a bone trail, or a template's
+  // state); null when it keeps nothing. Freed with the slot.
+  void* renderer_state;
+};
+
 // An instance's renderers, newest first (LiveEffectInstanceTargets::renderer).
-class RendererChain : public RecordChain<Effects_RendererSlot> {
+class RendererChain : public RecordChain<LiveRendererSlot> {
  public:
   // A slot running `renderer`, without renderer state; null (refused) when
   // the heap has no room.
-  [[nodiscard]] virtual Effects_RendererSlot* NewSlot(
-      EffectRenderer renderer) = 0;
+  [[nodiscard]] virtual LiveRendererSlot* NewSlot(EffectRenderer renderer) = 0;
   // Sends `command` to the slot's renderer.
-  virtual void Run(Effects_RendererSlot& slot, RendererCommand command,
+  virtual void Run(LiveRendererSlot& slot, RendererCommand command,
                    std::int32_t parameters) = 0;
   // Frees the slot's renderer state, when it has one, then the slot.
-  virtual void Free(Effects_RendererSlot& slot) = 0;
+  virtual void Free(LiveRendererSlot& slot) = 0;
 };
 
 // An effect chain (Effects_primaryInstances or Effects_secondaryInstances),
@@ -174,28 +183,29 @@ void DestroySecondaryEffectInstance(Effects_EffectInstance& instance,
 // func_800CF694 (5BF94.c:5636): attaches a slot running `renderer` as the
 // newest and starts it with `parameters`. Null (refused) when the heap has no
 // room.
-[[nodiscard]] Effects_RendererSlot* AttachEffectRenderer(
-    RendererChain& renderers, EffectRenderer renderer, std::int32_t parameters);
+[[nodiscard]] LiveRendererSlot* AttachEffectRenderer(RendererChain& renderers,
+                                                     EffectRenderer renderer,
+                                                     std::int32_t parameters);
 
 // func_800CF70C (5BF94.c:5647): frees the slot's renderer state, unlinks the
 // slot and frees it. False (refused), leaving the slot, when it is not
 // attached; the original searched past the chain's end.
 [[nodiscard]] bool DetachEffectRenderer(RendererChain& renderers,
-                                        Effects_RendererSlot& slot);
+                                        LiveRendererSlot& slot);
 
 // An instance's renderers, as a frame updates them.
 class EffectRendererUpdates {
  public:
   virtual ~EffectRendererUpdates() = default;
-  [[nodiscard]] virtual Effects_RendererSlot* FirstRenderer(
+  [[nodiscard]] virtual LiveRendererSlot* FirstRenderer(
       Effects_EffectInstance& instance) = 0;
-  [[nodiscard]] virtual Effects_RendererSlot* NextRenderer(
-      Effects_RendererSlot& slot) = 0;
+  [[nodiscard]] virtual LiveRendererSlot* NextRenderer(
+      LiveRendererSlot& slot) = 0;
   // Sends the slot's renderer RendererCommand::kUpdate; false once it has
   // finished.
-  [[nodiscard]] virtual bool UpdateRenderer(Effects_RendererSlot& slot) = 0;
+  [[nodiscard]] virtual bool UpdateRenderer(LiveRendererSlot& slot) = 0;
   virtual void DetachRenderer(Effects_EffectInstance& instance,
-                              Effects_RendererSlot& slot) = 0;
+                              LiveRendererSlot& slot) = 0;
 
  protected:
   EffectRendererUpdates() = default;

@@ -279,7 +279,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 // the fields creation does not write as the heap held them; this clears them.
 // Neither frees the state: the effect runtime's slot release
 // (EffectInstancesLive.cpp) does once a command returns 0.
-int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
+int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   if (slot == nullptr) {
     VS::Core::LogWarn("effects", "plg128 camera: command {} without a slot",
@@ -294,10 +294,10 @@ int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
       VS::Core::LogError("effects", "plg128 camera: heap exhausted for state");
       return 0;
     }
-    slot->rendererState =
+    slot->renderer_state =
         std::construct_at(static_cast<LiveCameraRecord*>(storage));
   } else if (kind == CameraCommand::kTick || kind == CameraCommand::kRelease) {
-    if (slot->rendererState == nullptr) {
+    if (slot->renderer_state == nullptr) {
       VS::Core::LogWarn("effects", "plg128 camera: command {} without a state",
                         command);
       return 0;
@@ -305,7 +305,7 @@ int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
   } else {
     return kind == CameraCommand::kStop ? 0 : 1;
   }
-  auto& live = *static_cast<LiveCameraRecord*>(slot->rendererState);
+  auto& live = *static_cast<LiveCameraRecord*>(slot->renderer_state);
   LiveParticleEmitterScratch& live_scratch = EmitterScratch();
   CameraEffectState state = StateOf(live);
   CameraScratch scratch = ScratchOf(live_scratch);

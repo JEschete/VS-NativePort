@@ -33,7 +33,7 @@ inline constexpr std::size_t kColorChannels = 3;
 // other sheets fill the first five rows.
 inline constexpr auto kSheetPoints = kMirrorSurfaceRows * kSurfaceColumns;
 
-// Renderer slot commands (Effects_EffectRenderer).
+// Renderer slot commands (EffectRenderer).
 enum class SurfaceCommand : std::uint32_t {
   kCreate = 1,
   kTick = 2,
