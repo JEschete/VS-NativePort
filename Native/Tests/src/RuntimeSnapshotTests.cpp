@@ -58,7 +58,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "Save/RuntimeSnapshot.hpp"
@@ -523,20 +522,20 @@ struct RuntimeFixture {
     VS::Items::ReadLiveInventoryGripStats(&runtime_weapon.grip, &grip);
     VS::Items::ReadLiveInventoryGemStats(&runtime_weapon.gems[0],
                                          &items.gems[0]);
-    runtime_weapon.currentDp = 101;
-    runtime_weapon.currentPp = 67;
+    runtime_weapon.current_dp = 101;
+    runtime_weapon.current_pp = 67;
     runtime_weapon.name[3] = static_cast<char>(0xE7);
     player_stats.shield.index = 1;
     VS::Items::ReadLiveInventoryArmorStats(&player_stats.shield.base,
                                            &shield.base);
     VS::Items::ReadLiveInventoryGemStats(&player_stats.shield.gems[0],
                                          &items.gems[1]);
-    player_stats.shield.currentDp = 201;
-    player_stats.shield.currentPp = 37;
+    player_stats.shield.current_dp = 201;
+    player_stats.shield.current_pp = 37;
     auto& runtime_armor = player_stats.limbs[0].armor;
     runtime_armor.index = 1;
     VS::Items::ReadLiveInventoryArmorStats(&runtime_armor.armor, &armor);
-    runtime_armor.currentDp = 321;
+    runtime_armor.current_dp = 321;
     player_stats.accessory.index = 2;
     VS::Items::ReadLiveInventoryArmorStats(&player_stats.accessory.accessory,
                                            &accessory);

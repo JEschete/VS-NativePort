@@ -5,7 +5,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
 // decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG)

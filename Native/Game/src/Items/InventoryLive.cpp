@@ -33,8 +33,6 @@ static_assert(sizeof(VS::Items::itemCategoryUpperIds[0]) ==
 
 namespace VS::Items {
 namespace {
-using Live::Commit;
-using Live::Typed;
 using Live::WarnNullRecord;
 using Live::WarnRefusal;
 
@@ -106,9 +104,8 @@ void UnequipLiveWeapon() {
 void UnequipLiveShield() {
   auto* stats = Live::AshleyStats("UnequipShield");
   if (stats == nullptr) return;
-  auto shield = Typed(stats->shield);
-  Live::LiveEquipStatusHost host(*stats,
-                                 [&] { Commit(stats->shield, shield); });
+  auto shield = stats->shield;
+  Live::LiveEquipStatusHost host(*stats, [&] { stats->shield = shield; });
   auto inventory = VS::Items::inventory;
   const auto status = UnequipShield(shield, inventory, host);
   host.Finish();
@@ -198,21 +195,21 @@ void StoreLiveEquippedStats() {
   auto* stats = Live::AshleyStats("StoreEquippedStats");
   if (stats == nullptr) return;
   EquippedLoadouts loadouts{
-      .weapon = Typed(stats->weapon),
-      .shield = Typed(stats->shield),
+      .weapon = stats->weapon,
+      .shield = stats->shield,
       .limb_armor = {},
-      .accessory = Typed(stats->accessory),
+      .accessory = stats->accessory,
   };
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {
-    loadouts.limb_armor[limb] = Typed(stats->limbs[limb].armor);
+    loadouts.limb_armor[limb] = stats->limbs[limb].armor;
   }
   const auto status = StoreEquippedStats(loadouts, VS::Items::inventory);
-  Commit(stats->weapon, loadouts.weapon);
-  Commit(stats->shield, loadouts.shield);
+  stats->weapon = loadouts.weapon;
+  stats->shield = loadouts.shield;
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {
-    Commit(stats->limbs[limb].armor, loadouts.limb_armor[limb]);
+    stats->limbs[limb].armor = loadouts.limb_armor[limb];
   }
-  Commit(stats->accessory, loadouts.accessory);
+  stats->accessory = loadouts.accessory;
   WarnRefusal("StoreEquippedStats", status);
 }
 }  // namespace VS::Items::Inventory

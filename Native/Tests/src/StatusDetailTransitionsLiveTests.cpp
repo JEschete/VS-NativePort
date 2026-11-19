@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -120,7 +119,7 @@ TEST_CASE("Status weapon module entry formats real parts and empty sockets",
   const int component = GENERATE(1, 2, 3, 4, 5);
   const int init = GENERATE(0, 1);
   const auto typed = data::Weapon();
-  auto weapon = std::bit_cast<Items_WeaponLoadout>(typed);
+  auto weapon = typed;
   ModuleEntry(0x80104C40, &status::SetLiveWeaponComponentRow)(component,
                                                               &weapon, init);
   const auto& row = fw::LiveMenuRow(component + 20);
@@ -128,7 +127,7 @@ TEST_CASE("Status weapon module entry formats real parts and empty sockets",
   CHECK(row.material == (component == 1 ? typed.blade.material : 0));
   CHECK(row.unselectable == (component == 4));
   CHECK(row.x == (init != 0 ? 320 : component < 3 ? 162 : 169));
-  CHECK(VS::Items::Live::Typed(weapon) == typed);
+  CHECK(weapon == typed);
   CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
@@ -138,7 +137,7 @@ TEST_CASE("Status shield module entry masks slide flags and preserves loadouts",
   const int component = GENERATE(1, 2, 3);
   const int init = GENERATE(2, 3);
   const auto typed = data::Shield();
-  auto shield = std::bit_cast<Items_ShieldLoadout>(typed);
+  auto shield = typed;
   ModuleEntry(0x80104DFC, &status::SetLiveShieldGemRow)(component, &shield,
                                                         init);
   const auto& row = fw::LiveMenuRow(component + 20);
@@ -147,7 +146,7 @@ TEST_CASE("Status shield module entry masks slide flags and preserves loadouts",
   CHECK(row.x == ((init & 1) != 0 ? 320 : 169));
   CHECK(row.state ==
         ((init & 1) != 0 ? fw::RowState::kSlideX : fw::RowState::kIdle));
-  CHECK(VS::Items::Live::Typed(shield) == typed);
+  CHECK(shield == typed);
   CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
@@ -177,8 +176,8 @@ TEST_CASE("Status exit module entry drives real rows and optional DP PP hiding",
 TEST_CASE("Status Live transitions refuse absent workspace without text writes",
           "[status-transitions-live]") {
   LiveTransitionFixture fixture;
-  auto weapon = std::bit_cast<Items_WeaponLoadout>(data::Weapon());
-  auto shield = std::bit_cast<Items_ShieldLoadout>(data::Shield());
+  auto weapon = data::Weapon();
+  auto shield = data::Shield();
   fixture.description.fill('Q');
   const auto before = fixture.description;
   VS::Menu::Framework::menuItems = nullptr;

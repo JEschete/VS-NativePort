@@ -26,7 +26,7 @@ bool IsBound(unsigned address, Entry entry) {
 TEST_CASE("F02925 binds actual three-pointer MENUD weapon entry",
           "[container-detail-helpers-module][F02925]") {
   static_assert(std::is_same_v<decltype(&detail::BuildLiveWeaponStats),
-                               void (*)(Items_WeaponLoadout*,
+                               void (*)(VS::Items::WeaponLoadout*,
                                         const VS::Items::InventoryWeapon*,
                                         VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80102A34, &detail::BuildLiveWeaponStats));
@@ -35,7 +35,7 @@ TEST_CASE("F02925 binds actual three-pointer MENUD weapon entry",
 TEST_CASE("F02926 binds actual three-pointer MENUD shield entry",
           "[container-detail-helpers-module][F02926]") {
   static_assert(std::is_same_v<decltype(&detail::BuildLiveShieldStats),
-                               void (*)(Items_ShieldLoadout*,
+                               void (*)(VS::Items::ShieldLoadout*,
                                         const VS::Items::InventoryShield*,
                                         VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80102BB0, &detail::BuildLiveShieldStats));

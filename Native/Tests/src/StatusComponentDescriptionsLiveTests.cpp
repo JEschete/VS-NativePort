@@ -108,18 +108,18 @@ TEST_CASE("Status weapon module entry publishes real blade stats and highlight",
   LiveFixture fixture;
   auto typed = data::Weapon();
   typed.blade.strength = kWeaponStrength;
-  auto weapon = std::bit_cast<Items_WeaponLoadout>(typed);
+  auto weapon = typed;
   auto entry = ModuleEntry(0x8010317C, &status::SelectLiveWeaponComponent);
   CHECK(entry(1, &weapon) == fixture.description.data());
   CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
   CHECK(fixture.rows[kComponentRow].selected == 1);
-  CHECK(VS::Items::Live::Typed(weapon) == typed);
+  CHECK(weapon == typed);
 }
 
 TEST_CASE("Status shield module entry clears an empty socket but not its owner",
           "[status-components-live][F02651]") {
   LiveFixture fixture;
-  Items_ShieldLoadout shield{};
+  VS::Items::ShieldLoadout shield{};
   VS::Menu::Framework::equipmentStats[0] = 37;
   auto entry = ModuleEntry(0x801032C4, &status::SelectLiveShieldComponent);
   CHECK(entry(1, &shield) == fixture.NoGems());
@@ -133,23 +133,23 @@ TEST_CASE("Status armor and accessory module entries use real item text",
   LiveFixture fixture;
   VS::Items::ArmorLoadout typed_armor{};
   typed_armor.armor = {.id = 145, .category = 2, .material = 3};
-  auto armor = std::bit_cast<Items_ArmorLoadout>(typed_armor);
+  auto armor = typed_armor;
   CHECK(ModuleEntry(0x801033A4, &status::LiveArmorDescription)(&armor) ==
         fixture.description.data());
   VS::Items::AccessorySpawnLoadout typed_accessory{};
   typed_accessory.accessory = {.id = 254, .category = 7, .strength = -128};
-  auto accessory = std::bit_cast<Items_AccessorySpawnLoadout>(typed_accessory);
+  auto accessory = typed_accessory;
   const auto buffer = fixture.description;
   CHECK(ModuleEntry(0x801033D4, &status::LiveAccessoryDescription)(
             &accessory) == fixture.HelpEntry(kAccessoryHelp));
   CHECK(fixture.description == buffer);
-  CHECK(VS::Items::Live::Typed(accessory) == typed_accessory);
+  CHECK(accessory == typed_accessory);
 }
 
 TEST_CASE("Empty live accessory refuses without buffer context or row writes",
           "[status-components-live][F02653]") {
   LiveFixture fixture;
-  Items_AccessorySpawnLoadout accessory{};
+  VS::Items::AccessorySpawnLoadout accessory{};
   fixture.description.fill('Q');
   Battle_stringContext.strings[0] = fixture.description.data();
   const auto buffer = fixture.description;
@@ -180,7 +180,7 @@ TEST_CASE("Status selectable module entry reads the current stat page",
 TEST_CASE("MENU4 completion preserves borrowed component text and row owners",
           "[status-components-live][menu-overlay-reload]") {
   LiveFixture fixture;
-  auto weapon = std::bit_cast<Items_WeaponLoadout>(data::Weapon());
+  auto weapon = data::Weapon();
   REQUIRE(status::SelectLiveWeaponComponent(1, &weapon) ==
           fixture.description.data());
   const auto buffer = fixture.description;

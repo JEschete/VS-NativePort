@@ -36,8 +36,8 @@ class LiveCostActor final : public ActionCostActor {
     return {actor_->currentHp,
             actor_->currentMp,
             actor_->risk,
-            actor_->weapon.currentPp,
-            static_cast<std::uint8_t>(actor_->weapon.actionType),
+            actor_->weapon.current_pp,
+            static_cast<std::uint8_t>(actor_->weapon.action_type),
             static_cast<std::uint8_t>(actor_->weapon.risk)};
   }
   void Pay(CostResource resource, std::uint16_t value) override {
@@ -52,7 +52,7 @@ class LiveCostActor final : public ActionCostActor {
         actor_->currentHp = std::bit_cast<std::int16_t>(value);
         break;
       case CostResource::kWeaponPp:
-        actor_->weapon.currentPp = value;
+        actor_->weapon.current_pp = value;
         break;
       case CostResource::kNone:
         break;
@@ -64,7 +64,7 @@ class LiveCostActor final : public ActionCostActor {
   }
   std::uint8_t RecoveryBonus() override { return actor_->recoveryDelayBonus; }
   std::uint8_t WeaponRecoveryDelay() override {
-    return static_cast<std::uint8_t>(actor_->weapon.recoveryDelay);
+    return static_cast<std::uint8_t>(actor_->weapon.recovery_delay);
   }
   std::uint32_t Statuses() override {
     return static_cast<std::uint32_t>(actor_->statuses);

@@ -19,8 +19,8 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Traps.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -50,11 +50,21 @@ void WarnRefusal(const char* rule, const char* reason) {
 }
 
 template <typename Out, typename In, std::size_t N>
-std::array<Out, N> Ratings(const In (&values)[N]) {
+std::array<Out, N> Ratings(std::span<const In, N> values) {
   std::array<Out, N> ratings{};
   std::ranges::transform(values, ratings.begin(),
                          [](In value) { return static_cast<Out>(value); });
   return ratings;
+}
+
+template <typename Out, typename In, std::size_t N>
+std::array<Out, N> Ratings(const In (&values)[N]) {
+  return Ratings<Out>(std::span<const In, N>(values));
+}
+
+template <typename Out, typename In, std::size_t N>
+std::array<Out, N> Ratings(const std::array<In, N>& values) {
+  return Ratings<Out>(std::span<const In, N>(values));
 }
 
 TrapPanelTarget ToPanelTarget(const Battle_ActorStats& stats,
@@ -67,24 +77,24 @@ TrapPanelTarget ToPanelTarget(const Battle_ActorStats& stats,
   target.strength = stats.strength;
   target.limb.types = Ratings<std::int16_t>(limb.types);
   target.limb.affinities = Ratings<std::int16_t>(limb.affinities);
-  target.limb.armor_strength = limb.armor.currentStr;
+  target.limb.armor_strength = limb.armor.attributes.current_strength;
   target.limb.armor_types = Ratings<std::uint16_t>(limb.armor.types);
   target.limb.armor_affinities =
-      Ratings<std::int16_t>(limb.armor.classAffinityCurrent.affinities[0]);
-  target.limb.armor_current_dp = limb.armor.currentDp;
-  target.limb.armor_max_dp = limb.armor.maxDp;
+      Ratings<std::int16_t>(limb.armor.class_affinity.affinities[0]);
+  target.limb.armor_current_dp = limb.armor.current_dp;
+  target.limb.armor_max_dp = limb.armor.max_dp;
   target.shield_raised = shield_raised;
-  target.shield.strength = stats.shield.currentStr;
+  target.shield.strength = stats.shield.attributes.current_strength;
   // decomp: BATTLE.PRG _damageFromTrapPanel 0x80082794 `lbu $v1, 0x2C4($v0)`:
   // the shield's type bytes are unsigned, though the C struct declares char.
   target.shield.types = Ratings<std::uint8_t>(stats.shield.types);
   target.shield.affinities =
-      Ratings<std::int16_t>(stats.shield.classAffinityCurrent.affinities[0]);
-  target.shield.current_dp = stats.shield.currentDp;
-  target.shield.max_dp = stats.shield.maxDp;
-  target.shield.current_pp = stats.shield.currentPp;
-  target.shield.max_pp = stats.shield.maxPp;
-  target.accessory.strength = stats.accessory.currentStr;
+      Ratings<std::int16_t>(stats.shield.class_affinity.affinities[0]);
+  target.shield.current_dp = stats.shield.current_dp;
+  target.shield.max_dp = stats.shield.max_dp;
+  target.shield.current_pp = stats.shield.current_pp;
+  target.shield.max_pp = stats.shield.max_pp;
+  target.accessory.strength = stats.accessory.current_strength;
   target.accessory.types = Ratings<std::uint16_t>(stats.accessory.types);
   target.accessory.affinities =
       Ratings<std::uint16_t>(stats.accessory.affinities);

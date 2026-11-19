@@ -60,7 +60,6 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Loadout.h"
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Items/LootLiveState.hpp"
@@ -308,13 +307,13 @@ struct AbilityEffectFixture : AbilityFixture {
       actor.walkSpeed = actor.baseWalkSpeed = 8;
       actor.runSpeed = actor.baseRunSpeed = 12;
       actor.weapon.blade.id = 1;
-      actor.weapon.currentDp = 100;
-      actor.weapon.maxDp = 1000;
-      actor.weapon.currentPp = 70;
-      actor.weapon.maxPp = 255;
+      actor.weapon.current_dp = 100;
+      actor.weapon.max_dp = 1000;
+      actor.weapon.current_pp = 70;
+      actor.weapon.max_pp = 255;
       actor.shield.base.id = 1;
-      actor.shield.currentPp = 90;
-      actor.shield.maxPp = 255;
+      actor.shield.current_pp = 90;
+      actor.shield.max_pp = 255;
       for (int limb = 0; limb < 6; ++limb) {
         actor.limbs[limb].hp = 50;
         actor.limbs[limb].maxHp = 100;
@@ -814,58 +813,58 @@ void CheckDropGems(const Drop& drop, const Loadout& source) {
   }
 }
 
-void PrepareEquipmentDrop(Items_WeaponLoadout& source) {
+void PrepareEquipmentDrop(VS::Items::WeaponLoadout& source) {
   source.blade = EquipmentDropPart(14);
   source.grip = EquipmentDropPart(96);
   PrepareDropGems(source);
-  source.currentDp = 9;
-  source.currentPp = 8;
+  source.current_dp = 9;
+  source.current_pp = 8;
   for (int index = 0; index < 23; ++index) {
     source.name[index] = static_cast<char>(10 + index);
   }
   source.name[23] = static_cast<char>(0xE7);
 }
 
-void PrepareEquipmentDrop(Items_ShieldLoadout& source) {
+void PrepareEquipmentDrop(VS::Items::ShieldLoadout& source) {
   source.base = EquipmentDropPart(147);
   PrepareDropGems(source);
-  source.currentDp = 9;
-  source.currentPp = 8;
+  source.current_dp = 9;
+  source.current_pp = 8;
 }
 
-void PrepareEquipmentDrop(Items_ArmorLoadout& source) {
+void PrepareEquipmentDrop(VS::Items::ArmorLoadout& source) {
   source.armor = EquipmentDropPart(149);
-  source.currentDp = 9;
+  source.current_dp = 9;
 }
 
-void PrepareEquipmentDrop(Items_AccessorySpawnLoadout& source) {
+void PrepareEquipmentDrop(VS::Items::AccessorySpawnLoadout& source) {
   source.accessory = EquipmentDropPart(237);
 }
 
 void CheckEquipmentDrop(const VS::Items::LootedWeapon& drop,
-                        const Items_WeaponLoadout& source) {
+                        const VS::Items::WeaponLoadout& source) {
   CHECK(drop.header.difficulty_flags == 3);
   CheckBladeDrop(drop.blade, source.blade);
   CheckGripDrop(drop.grip, source.grip);
   CheckDropGems(drop, source);
-  CHECK(std::memcmp(drop.name.data(), source.name, sizeof(drop.name)) == 0);
+  CHECK(drop.name == source.name);
 }
 
 void CheckEquipmentDrop(const VS::Items::LootedShield& drop,
-                        const Items_ShieldLoadout& source) {
+                        const VS::Items::ShieldLoadout& source) {
   CHECK(drop.header.difficulty_flags == 3);
   CheckArmorDrop(drop.shield, source.base);
   CheckDropGems(drop, source);
 }
 
 void CheckEquipmentDrop(const VS::Items::LootedArmor& drop,
-                        const Items_ArmorLoadout& source) {
+                        const VS::Items::ArmorLoadout& source) {
   CHECK(drop.header.difficulty_flags == 3);
   CheckArmorDrop(drop.armor, source.armor);
 }
 
 void CheckEquipmentDrop(const VS::Items::LootedArmor& drop,
-                        const Items_AccessorySpawnLoadout& source) {
+                        const VS::Items::AccessorySpawnLoadout& source) {
   CHECK(drop.header.difficulty_flags == 3);
   CheckArmorDrop(drop.armor, source.accessory);
 }
@@ -876,17 +875,16 @@ template <typename Drop, typename Loadout, auto Roll>
 int RollLegacyDrop(Drop* looted, Loadout* base) {
   VS::Items::Live::LiveItemRandom random;
   auto typed = *looted;
-  const bool dropped = Roll(typed, VS::Items::Live::Typed(*base), random);
+  const bool dropped = Roll(typed, *base, random);
   *looted = typed;
   return dropped ? 1 : 0;
 }
 
 int RollLegacyArmorDrop(VS::Items::LootedArmor* looted,
-                        Items_ArmorLoadout* base) {
+                        VS::Items::ArmorLoadout* base) {
   VS::Items::Live::LiveItemRandom random;
   std::array typed{looted[0], looted[1]};
-  const bool dropped = VS::Items::RollEnemyArmorDrop(
-      typed, VS::Items::Live::Typed(*base), random);
+  const bool dropped = VS::Items::RollEnemyArmorDrop(typed, *base, random);
   looted[0] = typed[0];
   looted[1] = typed[1];
   return dropped ? 1 : 0;
@@ -904,11 +902,10 @@ bool CopyLegacyGuaranteedDrops(
 }
 
 bool RollLegacyItemDrop(VS::Items::BattleLoot& loot,
-                        const Items_MiscItemDrop& source) {
+                        const VS::Items::MiscItemDrop& source) {
   VS::Items::Live::LiveItemRandom random;
   auto typed = loot;
-  const bool dropped = VS::Items::RollEnemyItemDrop(
-      typed, VS::Items::Live::Typed(source), random);
+  const bool dropped = VS::Items::RollEnemyItemDrop(typed, source, random);
   loot = typed;
   return dropped;
 }
@@ -919,7 +916,7 @@ void CheckEquipmentRoll(int roll, int rate, int (*drop)(Drop*, Loadout*)) {
   random.ForceFirstRoll(roll);
   Loadout source{};
   PrepareEquipmentDrop(source);
-  source.dropRate = static_cast<decltype(source.dropRate)>(rate);
+  source.drop_rate = static_cast<decltype(source.drop_rate)>(rate);
   const auto before = source;
   std::array<Drop, 2> result{};
   CHECK(drop(result.data(), &source) == (roll < rate));
@@ -942,7 +939,7 @@ struct EquipmentCapacity {
 template <typename Loadout>
 void EnableEquipmentDrop(Loadout& source) {
   PrepareEquipmentDrop(source);
-  source.dropRate = static_cast<decltype(source.dropRate)>(255);
+  source.drop_rate = static_cast<decltype(source.drop_rate)>(255);
 }
 
 template <typename Item, typename Loadout>
@@ -1090,8 +1087,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     CHECK(weapon.blade == 1);
     CHECK(weapon.grip == 1);
     CHECK(weapon.is_equipped == 0);
-    CHECK(std::memcmp(weapon.name.data(), stats.weapon.name,
-                      sizeof(weapon.name)) == 0);
+    CHECK(weapon.name == stats.weapon.name);
     CheckBladeDrop(inventory.blades[0], stats.weapon.blade);
     CheckGripDrop(inventory.grips[0], stats.weapon.grip);
     CHECK(inventory.blades[0].assembled_weapon_index == 1);
@@ -1855,7 +1851,7 @@ TEST_CASE("All forty Break Arts require surviving their original HP cost",
   auto& actor = fixture.stats[0];
   actor.currentHp = static_cast<decltype(actor.currentHp)>(hp);
   actor.risk = 7;
-  actor.weapon.currentPp = 35;
+  actor.weapon.current_pp = 35;
   const auto expected = static_cast<std::uint32_t>(
       (affordable ? 1 << 24 : 0) + (Battle_ActionType_BreakArt << 16) + cost +
       (affordable ? 0 : 1));
@@ -1867,7 +1863,7 @@ TEST_CASE("All forty Break Arts require surviving their original HP cost",
   CHECK(actor.currentHp == (affordable ? hp - cost : hp));
   CHECK(actor.currentMp == 120);
   CHECK(actor.risk == 7);
-  CHECK(actor.weapon.currentPp == 35);
+  CHECK(actor.weapon.current_pp == 35);
 }
 
 TEST_CASE(
@@ -2130,7 +2126,7 @@ TEST_CASE("Temper damages the target and restores weapon DP",
   fixture.Queue(28, 1, {18, 20, VS::Battle::QueueLiveWeaponDpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 758, 200);
-  CHECK(fixture.stats[0].weapon.currentDp == 304);
+  CHECK(fixture.stats[0].weapon.current_dp == 304);
 }
 
 TEST_CASE("Crimson Pain applies both enemy and self HP damage",
@@ -2150,7 +2146,7 @@ TEST_CASE("Instill damages the target and restores weapon PP",
   fixture.Queue(30, 1, {4, 10, VS::Battle::QueueLiveWeaponPpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 788, 200);
-  CHECK(fixture.stats[0].weapon.currentPp == 173);
+  CHECK(fixture.stats[0].weapon.current_pp == 173);
 }
 
 TEST_CASE("Phantom Pain converts weapon PP to damage and empties it",
@@ -2160,7 +2156,7 @@ TEST_CASE("Phantom Pain converts weapon PP to damage and empties it",
   fixture.Queue(31, 1, {1, 0, VS::Battle::QueueLiveWeaponPpDrain, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 728, 200);
-  CHECK(fixture.stats[0].weapon.currentPp == 0);
+  CHECK(fixture.stats[0].weapon.current_pp == 0);
 }
 
 TEST_CASE("Siphon Soul restores half the incoming spell cost as MP",
@@ -2242,7 +2238,7 @@ TEST_CASE("Phantom Shield converts shield PP to recovery only after damage",
   fixture.Commit();
   const bool applies = incoming_effect == 1 || incoming_effect == 3;
   fixture.CheckResources(applies ? 690 : 600, 100, 800, 200);
-  CHECK(fixture.stats[0].shield.currentPp == (applies ? 0 : 90));
+  CHECK(fixture.stats[0].shield.current_pp == (applies ? 0 : 90));
 }
 
 TEST_CASE("Offensive status abilities queue and apply their original ailments",
@@ -2302,16 +2298,16 @@ TEST_CASE("Restorative abilities respect HP MP and equipment capacity",
     CHECK(fixture.stats[0].currentMp == 300);
   }
   SECTION("Temper") {
-    fixture.stats[0].weapon.currentDp = 995;
+    fixture.stats[0].weapon.current_dp = 995;
     fixture.Queue(28, 1, {18, 20, VS::Battle::QueueLiveWeaponDpRecovery, true});
     fixture.Commit();
-    CHECK(fixture.stats[0].weapon.currentDp == 1000);
+    CHECK(fixture.stats[0].weapon.current_dp == 1000);
   }
   SECTION("Instill") {
-    fixture.stats[0].weapon.currentPp = 250;
+    fixture.stats[0].weapon.current_pp = 250;
     fixture.Queue(30, 1, {4, 10, VS::Battle::QueueLiveWeaponPpRecovery, true});
     fixture.Commit();
-    CHECK(fixture.stats[0].weapon.currentPp == 255);
+    CHECK(fixture.stats[0].weapon.current_pp == 255);
   }
 }
 
@@ -2376,10 +2372,10 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
   const int dp = GENERATE(0, 1, 39, 40, 41, 79, 80, 81, 65535);
   AbilityEffectFixture fixture;
   for (auto& target_limb : fixture.stats[1].limbs) {
-    target_limb.armor.currentDp = 1234;
+    target_limb.armor.current_dp = 1234;
   }
-  auto& armor_dp = fixture.stats[1].limbs[limb].armor.currentDp;
-  auto& shield_dp = fixture.stats[1].shield.currentDp;
+  auto& armor_dp = fixture.stats[1].limbs[limb].armor.current_dp;
+  auto& shield_dp = fixture.stats[1].shield.current_dp;
   armor_dp = shield_dp = static_cast<std::uint16_t>(dp);
   fixture.target.target.targetLimb =
       static_cast<decltype(fixture.target.target.targetLimb)>(limb);
@@ -2393,7 +2389,7 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
   CHECK(shield_dp == std::max(0, dp - 40));
   for (int index = 0; index < 6; ++index) {
     if (index != limb) {
-      CHECK(fixture.stats[1].limbs[index].armor.currentDp == 1234);
+      CHECK(fixture.stats[1].limbs[index].armor.current_dp == 1234);
     }
   }
   fixture.CheckResources(600, 100, 780, 200);
@@ -2483,9 +2479,9 @@ TEST_CASE("Random enemy items use the strict original 255-value threshold",
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
   LootRandomFixture fixture;
   fixture.ForceFirstRoll(roll);
-  Items_MiscItemDrop source{};
+  VS::Items::MiscItemDrop source{};
   source.id = 325;
-  source.dropRate = static_cast<decltype(source.dropRate)>(rate);
+  source.drop_rate = static_cast<decltype(source.drop_rate)>(rate);
   VS::Items::BattleLoot loot{};
   const bool success = roll < rate;
   CHECK(RollLegacyItemDrop(loot, source) == success);
@@ -2497,8 +2493,8 @@ TEST_CASE("Absent random enemy items consume no draw",
           "[combat][loot][drop-rules]") {
   LootRandomFixture fixture;
   VS::Core::Random expected;
-  Items_MiscItemDrop source{};
-  source.dropRate = static_cast<decltype(source.dropRate)>(255);
+  VS::Items::MiscItemDrop source{};
+  source.drop_rate = static_cast<decltype(source.drop_rate)>(255);
   VS::Items::BattleLoot loot{};
   CHECK(!RollLegacyItemDrop(loot, source));
   CheckLootItem(loot.misc[2], 0, 0, 0);
@@ -2520,8 +2516,8 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
   for (int index = 0; index < 3 + armor_count; ++index) expected.Next(255);
   if (candidate) {
     fixture.stats.randomDropItem.id = 325;
-    fixture.stats.randomDropItem.dropRate =
-        static_cast<decltype(fixture.stats.randomDropItem.dropRate)>(
+    fixture.stats.randomDropItem.drop_rate =
+        static_cast<decltype(fixture.stats.randomDropItem.drop_rate)>(
             expected.Next(255) + above_roll);
   }
   const bool success = candidate && above_roll != 0;
@@ -2684,7 +2680,7 @@ TEST_CASE("Weapon drops preserve properties at every original rate boundary",
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
   CheckEquipmentRoll(
       roll, rate,
-      RollLegacyDrop<VS::Items::LootedWeapon, Items_WeaponLoadout,
+      RollLegacyDrop<VS::Items::LootedWeapon, VS::Items::WeaponLoadout,
                      &VS::Items::RollEnemyWeaponDrop>);
 }
 
@@ -2694,7 +2690,7 @@ TEST_CASE("Shield drops preserve properties at every original rate boundary",
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
   CheckEquipmentRoll(
       roll, rate,
-      RollLegacyDrop<VS::Items::LootedShield, Items_ShieldLoadout,
+      RollLegacyDrop<VS::Items::LootedShield, VS::Items::ShieldLoadout,
                      &VS::Items::RollEnemyShieldDrop>);
 }
 
@@ -2711,7 +2707,7 @@ TEST_CASE("Accessory drops preserve properties at every original rate boundary",
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
   CheckEquipmentRoll(
       roll, rate,
-      RollLegacyDrop<VS::Items::LootedArmor, Items_AccessorySpawnLoadout,
+      RollLegacyDrop<VS::Items::LootedArmor, VS::Items::AccessorySpawnLoadout,
                      &VS::Items::RollEnemyAccessoryDrop>);
 }
 
@@ -2730,7 +2726,7 @@ TEST_CASE("Six limb rolls retain only the first two successful armor drops",
       expected.Next(255);
     }
     if ((eligible & (1 << index)) != 0) {
-      source.dropRate = static_cast<char>(255);
+      source.drop_rate = 255;
       if (source.armor.id != 0 && selected.size() < 2) {
         selected.push_back(index);
       }

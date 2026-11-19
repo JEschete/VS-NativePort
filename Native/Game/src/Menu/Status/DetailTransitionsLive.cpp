@@ -110,7 +110,8 @@ void InitializeLiveDetailPanel(int row, int class_affinity) {
 }
 
 // decomp: _setWeaponRow (src/MENU/MENU4.PRG/120.c:1358)
-void SetLiveWeaponComponentRow(int row, Items_WeaponLoadout* weapon, int init) {
+void SetLiveWeaponComponentRow(int row, VS::Items::WeaponLoadout* weapon,
+                               int init) {
   if (weapon == nullptr) {
     Refuse("status transition: missing weapon");
     return;
@@ -119,12 +120,11 @@ void SetLiveWeaponComponentRow(int row, Items_WeaponLoadout* weapon, int init) {
     return;
   }
   Framework::LiveItemRowsHost host;
-  static_cast<void>(SetWeaponComponentRow(
-      host, row, Items::Live::Typed(*weapon), (init & 1) != 0));
+  static_cast<void>(SetWeaponComponentRow(host, row, *weapon, (init & 1) != 0));
 }
 
 // decomp: _setShieldRow (src/MENU/MENU4.PRG/120.c:1418)
-void SetLiveShieldGemRow(int row, Items_ShieldLoadout* shield, int init) {
+void SetLiveShieldGemRow(int row, VS::Items::ShieldLoadout* shield, int init) {
   if (shield == nullptr) {
     Refuse("status transition: missing shield");
     return;
@@ -133,8 +133,7 @@ void SetLiveShieldGemRow(int row, Items_ShieldLoadout* shield, int init) {
     return;
   }
   Framework::LiveItemRowsHost host;
-  static_cast<void>(
-      SetShieldGemRow(host, row, Items::Live::Typed(*shield), (init & 1) != 0));
+  static_cast<void>(SetShieldGemRow(host, row, *shield, (init & 1) != 0));
 }
 
 // decomp: _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463)

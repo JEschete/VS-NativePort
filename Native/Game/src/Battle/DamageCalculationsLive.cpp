@@ -22,14 +22,10 @@ class LiveDamageOwner final : public DamageOwner {
   LiveDamageOwner(Battle_ActorStats& stats, Battle_ActionDefinition* action)
       : stats_(stats), action_(action) {}
   DamageStats Read() override {
-    return {stats_.actorId,
-            static_cast<std::uint8_t>(stats_.enemyClass),
-            stats_.strength,
-            stats_.intelligence,
-            stats_.risk,
-            Items::Live::Typed(stats_.weapon),
-            Items::Live::Typed(stats_.shield),
-            Items::Live::Typed(stats_.accessory)};
+    return {stats_.actorId,  static_cast<std::uint8_t>(stats_.enemyClass),
+            stats_.strength, stats_.intelligence,
+            stats_.risk,     stats_.weapon,
+            stats_.shield,   stats_.accessory};
   }
   std::optional<DamageLimb> Limb(int index) override {
     if (index < 0 ||
@@ -46,7 +42,7 @@ class LiveDamageOwner final : public DamageOwner {
       result.affinities.at(i) = std::bit_cast<std::int16_t>(
           static_cast<std::uint16_t>(limb.affinities[i]));
     }
-    result.armor = Items::Live::Typed(limb.armor);
+    result.armor = limb.armor;
     return result;
   }
   std::uint32_t Statuses() override {

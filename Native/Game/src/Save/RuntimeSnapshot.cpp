@@ -53,7 +53,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Items/Materials.hpp"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -970,8 +969,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
       return std::unexpected(
           "live weapon part identity disagrees with inventory");
     }
-    weapon.blade.current_dp = weapon.currentDp;
-    weapon.blade.current_pp = weapon.currentPp;
+    weapon.blade.current_dp = weapon.current_dp;
+    weapon.blade.current_pp = weapon.current_pp;
     VS::Items::WriteLiveInventoryBladeStats(
         &state.inventory.blades[target.blade - 1], &weapon.blade);
     VS::Items::WriteLiveInventoryGripStats(
@@ -991,7 +990,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
       VS::Items::WriteLiveInventoryGemStats(
           &state.inventory.gems[reference - 1], &weapon.gems[index]);
     }
-    std::copy_n(weapon.name, target.name.size(), target.name.begin());
+    target.name = weapon.name;
   }
   if (stats.shield.index != 0) {
     if (stats.shield.index > std::size(state.inventory.shields)) {
@@ -1003,8 +1002,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
         shield.base.id != target.base.id) {
       return std::unexpected("live shield does not match its inventory slot");
     }
-    shield.base.current_dp = shield.currentDp;
-    shield.base.current_pp = shield.currentPp;
+    shield.base.current_dp = shield.current_dp;
+    shield.base.current_pp = shield.current_pp;
     VS::Items::WriteLiveInventoryArmorStats(&target.base, &shield.base);
     for (std::size_t index = 0; index < kEquipmentGems; ++index) {
       const auto reference = target.gems[index] & 0x7Fu;
@@ -1043,7 +1042,7 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
         state.inventory.armor[armor.index - 1].id != armor.armor.id) {
       return std::unexpected("live armor does not match its inventory limb");
     }
-    armor.armor.current_dp = armor.currentDp;
+    armor.armor.current_dp = armor.current_dp;
     VS::Items::WriteLiveInventoryArmorStats(
         &state.inventory.armor[armor.index - 1], &armor.armor);
   }

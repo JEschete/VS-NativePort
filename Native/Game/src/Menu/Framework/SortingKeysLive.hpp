@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "Items/ItemRecordsLive.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 
 namespace VS::Menu::Framework {
@@ -11,15 +11,11 @@ class LiveSortingKeys : public World {
  public:
   std::int32_t WeaponValue(std::int32_t stat,
                            const Items::WeaponLoadout& weapon) override {
-    Items_WeaponLoadout legacy{};
-    Items::Live::Commit(legacy, weapon);
-    return LiveWeaponSortValue(stat, &legacy);
+    return LiveWeaponSortValue(stat, &weapon);
   }
   std::int32_t ShieldValue(std::int32_t stat,
                            const Items::ShieldLoadout& shield) override {
-    Items_ShieldLoadout legacy{};
-    Items::Live::Commit(legacy, shield);
-    return LiveShieldSortValue(stat, &legacy);
+    return LiveShieldSortValue(stat, &shield);
   }
   std::int32_t MiscValue(std::int32_t stat,
                          const Items::InventoryMisc& item) override {

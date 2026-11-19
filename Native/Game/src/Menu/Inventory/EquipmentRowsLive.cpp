@@ -29,7 +29,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Items/Loadout.h"
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
@@ -195,13 +195,13 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
   }
   void ResetStats() override { Framework::ResetLiveEquipmentStats(); }
   AccessoryPreview LoadAccessory(std::int32_t slot) override {
-    Items_AccessorySpawnLoadout loadout{};
+    VS::Items::AccessorySpawnLoadout loadout{};
     Items::LoadLiveInventoryAccessoryStats(
         &loadout, &armor_[static_cast<std::size_t>(slot)]);
     AccessoryPreview stats;
-    stats.strength = loadout.currentStr;
-    stats.intelligence = loadout.currentInt;
-    stats.agility = loadout.currentAgility;
+    stats.strength = loadout.current_strength;
+    stats.intelligence = loadout.current_intelligence;
+    stats.agility = loadout.current_agility;
     for (std::size_t i = 0; i < stats.types.size(); ++i) {
       stats.types[i] = Unsigned(loadout.types[i]);
     }

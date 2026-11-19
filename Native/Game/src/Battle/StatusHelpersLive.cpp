@@ -102,10 +102,10 @@ void ApplyLiveWeaponElementEnchantment(Battle_ActorStats* pointer,
                                        int amount) {
   auto& stats = StatsOf(pointer);
   if (stats.weapon.blade.id == 0) return;
-  auto weapon = Items::Live::Typed(stats.weapon);
+  auto weapon = stats.weapon;
   Require(ApplyWeaponElementEnchantment(weapon, {increased, decreased, amount}),
           "Weapon enchantment refused its affinity indices");
-  Items::Live::Commit(stats.weapon, weapon);
+  stats.weapon = weapon;
 }
 
 // decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811).
@@ -114,25 +114,25 @@ void ApplyLiveArmorElementEnchantment(Battle_ActorStats* pointer, int increased,
   auto& stats = StatsOf(pointer);
   Items::ShieldLoadout shield{};
   if (stats.shield.base.id != 0) {
-    shield = Items::Live::Typed(stats.shield);
+    shield = stats.shield;
   }
   std::array<Items::ArmorLoadout, Items::kLimbCount> armor{};
   static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> ==
                 Items::kLimbCount);
   for (std::size_t index = 0; index < armor.size(); ++index) {
     if (stats.limbs[index].armor.armor.id != 0) {
-      armor.at(index) = Items::Live::Typed(stats.limbs[index].armor);
+      armor.at(index) = stats.limbs[index].armor;
     }
   }
   Require(ApplyArmorElementEnchantment(shield, armor,
                                        {increased, decreased, amount}),
           "Armor enchantment refused its affinity indices");
   if (stats.shield.base.id != 0) {
-    Items::Live::Commit(stats.shield, shield);
+    stats.shield = shield;
   }
   for (std::size_t index = 0; index < armor.size(); ++index) {
     if (stats.limbs[index].armor.armor.id != 0) {
-      Items::Live::Commit(stats.limbs[index].armor, armor.at(index));
+      stats.limbs[index].armor = armor.at(index);
     }
   }
 }

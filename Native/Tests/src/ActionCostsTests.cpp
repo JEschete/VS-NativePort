@@ -475,7 +475,7 @@ TEST_CASE("Live costs preserve unrelated fields and preview never writes",
           "[action-costs][F00510][F00511]") {
   LiveFixture fixture;
   fixture.stats.currentMp = 30;
-  fixture.stats.weapon.actionType = 1;
+  fixture.stats.weapon.action_type = 1;
   fixture.stats.weapon.risk = 10;
   fixture.stats.maxMp = 33;
   fixture.stats.statuses = 0x8000;
@@ -496,11 +496,11 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
   VS::Items::WeaponLoadout weapon{};
   REQUIRE(VS::Items::LoadInventoryWeaponStats(weapon, nullptr, inventory) ==
           VS::Items::ItemsStatus::kOk);
-  fixture.stats.weapon = std::bit_cast<Items_WeaponLoadout>(weapon);
+  fixture.stats.weapon = weapon;
   Battle_actionState = nullptr;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01000000);
-  Items_WeaponSpawnLoadout natural{};
+  VS::Items::WeaponSpawnLoadout natural{};
   VS::Items::BuildLiveWeaponStatsFromParts(&fixture.stats.weapon, &natural);
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 0) ==
         0x01000000);
@@ -513,7 +513,7 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
   CHECK(fixture.stats.risk == 1);
   REQUIRE(VS::Items::LoadInventoryWeaponStats(weapon, nullptr, inventory) ==
           VS::Items::ItemsStatus::kOk);
-  fixture.stats.weapon = std::bit_cast<Items_WeaponLoadout>(weapon);
+  fixture.stats.weapon = weapon;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01000000);
 }
@@ -522,7 +522,7 @@ TEST_CASE("Live recovery and restrictions preserve their exact interfaces",
   LiveFixture fixture;
   Battle_actionDefinitions[54] = {};
   Battle_actionDefinitions[54].recoveryDelay = 255;
-  fixture.stats.weapon.recoveryDelay = static_cast<char>(255);
+  fixture.stats.weapon.recovery_delay = 255;
   fixture.stats.recoveryDelayBonus = 63;
   fixture.stats.actionRecoveryTimer = 65535;
   auto expected = fixture.stats;
@@ -547,14 +547,14 @@ TEST_CASE("Equipping and unequipping preserves the live resource contract",
   REQUIRE(VS::Items::EquipAshleyWeapon(ashley, &inventory.weapons.at(0),
                                        inventory,
                                        host) == VS::Items::ItemsStatus::kOk);
-  fixture.stats.weapon = std::bit_cast<Items_WeaponLoadout>(ashley.weapon);
+  fixture.stats.weapon = ashley.weapon;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01020001);
   CHECK(fixture.stats.risk == 1);
   REQUIRE(VS::Items::EquipAshleyWeapon(ashley, nullptr, inventory, host) ==
           VS::Items::ItemsStatus::kOk);
   CHECK(ashley.equipped_weapon_category == VS::Items::kUnarmedWeaponCategory);
-  fixture.stats.weapon = std::bit_cast<Items_WeaponLoadout>(ashley.weapon);
+  fixture.stats.weapon = ashley.weapon;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01000000);
   CHECK(fixture.stats.risk == 1);

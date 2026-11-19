@@ -45,12 +45,12 @@ Battle_Actor* BattleActor(std::int32_t actor_id) {
 
 DefenderEquipment ToDefender(const Battle_ActorStats& stats) {
   DefenderEquipment defender{};
-  defender.shield = Typed(stats.shield);
+  defender.shield = stats.shield;
   for (std::size_t i = 0; i < kLimbCount; ++i) {
     auto& limb = defender.limbs[i];
     limb.max_hp = stats.limbs[i].maxHp;
     limb.name_index = stats.limbs[i].nameIndex;
-    limb.armor = Typed(stats.limbs[i].armor);
+    limb.armor = stats.limbs[i].armor;
   }
   if (const auto* actor = BattleActor(stats.actorId); actor != nullptr) {
     defender.weapon_drawn = (actor->weaponDrawn & 1) != 0;
@@ -61,9 +61,9 @@ DefenderEquipment ToDefender(const Battle_ActorStats& stats) {
 
 void CommitDefender(Battle_ActorStats& stats,
                     const DefenderEquipment& defender) {
-  Commit(stats.shield, defender.shield);
+  stats.shield = defender.shield;
   for (std::size_t i = 0; i < kLimbCount; ++i) {
-    Commit(stats.limbs[i].armor, defender.limbs[i].armor);
+    stats.limbs[i].armor = defender.limbs[i].armor;
   }
 }
 
@@ -79,7 +79,7 @@ Battle_ActorStats* AshleyStats(const char* operation) {
 AshleyWeaponState ToAshleyWeapon(const Battle_ActorStats& stats,
                                  const Battle_Actor& actor) {
   return AshleyWeaponState{
-      .weapon = Typed(stats.weapon),
+      .weapon = stats.weapon,
       .reach = static_cast<std::uint8_t>(stats.reach),
       .equipped_weapon_category = actor.equippedWeaponCategory,
       .current_range = static_cast<std::uint8_t>(stats.currentRange),
@@ -94,7 +94,7 @@ AshleyWeaponState ToAshleyWeapon(const Battle_ActorStats& stats,
 
 void CommitAshleyWeapon(Battle_ActorStats& stats, Battle_Actor& actor,
                         const AshleyWeaponState& ashley) {
-  Commit(stats.weapon, ashley.weapon);
+  stats.weapon = ashley.weapon;
   actor.equippedWeaponCategory = ashley.equipped_weapon_category;
   stats.currentRange = ashley.current_range;
   stats.currentRangeY = ashley.current_range_y;

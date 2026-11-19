@@ -76,7 +76,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
@@ -249,8 +248,10 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.weapon_category = actor.equippedWeaponCategory;
   snapshot.weapon_blade = stats.weapon.blade.id;
   snapshot.weapon_grip = stats.weapon.grip.id;
-  snapshot.weapon_model = static_cast<unsigned char>(stats.weapon.wepId);
-  snapshot.shield_model = static_cast<unsigned char>(stats.shield.wepId);
+  snapshot.weapon_model =
+      static_cast<unsigned char>(stats.weapon.weapon_model_id);
+  snapshot.shield_model =
+      static_cast<unsigned char>(stats.shield.weapon_model_id);
   snapshot.actor_flags = VS::Actors::LiveActorStateFlags(slot);
   snapshot.recovery = stats.actionRecoveryTimer;
   Actors_ActorLocationQuery location{};
@@ -634,7 +635,7 @@ void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   }
   // Original BATTLE/146C.c applyWeaponStats/copyUiWeaponStats preserve the
   // stock inventory links; ordinary Ashley spawning loads stats/models later.
-  Items_WeaponLoadout stats{};
+  VS::Items::WeaponLoadout stats{};
   VS::Items::BuildLiveWeaponStatsFromParts(&stats, &*source);
   VS::Items::StoreLiveInventoryWeaponStats(&weapon, &stats);
   // Match MAINMENU/2D10.c's weapon equip restriction (staves are one-handed).

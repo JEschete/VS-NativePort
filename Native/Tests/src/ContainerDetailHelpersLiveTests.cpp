@@ -146,16 +146,15 @@ TEST_CASE("F02925 live stats use actual record conversion and equipment rules",
   fixture.AddContainerWeapon();
   auto& owner = fixture.containers.storage->container.items;
   const auto source = samples::kWeapon;
-  Items_WeaponLoadout target{};
+  VS::Items::WeaponLoadout target{};
   detail::BuildLiveWeaponStats(&target, &owner.weapons.back(), &owner);
-  const auto native = items::Live::Typed(target);
-  CHECK(native.blade.id == 41);
-  CHECK(native.grip.id == 300);
-  CHECK(native.gems[2].id == 511);
-  CHECK(native.attributes.current_strength == 19);
-  CHECK(native.blade.material == 0x34);
-  CHECK(native.index == 0xFE);
-  CHECK(native.name == source.name);
+  CHECK(target.blade.id == 41);
+  CHECK(target.grip.id == 300);
+  CHECK(target.gems[2].id == 511);
+  CHECK(target.attributes.current_strength == 19);
+  CHECK(target.blade.material == 0x34);
+  CHECK(target.index == 0xFE);
+  CHECK(target.name == source.name);
 }
 
 TEST_CASE("F02925 actual item-row host reloads its current container owner",
@@ -189,7 +188,7 @@ TEST_CASE("F02925 zero optional parts do not require a container owner",
   LiveFixture fixture;
   VS::Items::InventoryWeapon source{};
   source.name[std::size(source.name) - 1] = 'z';
-  Items_WeaponLoadout target{};
+  VS::Items::WeaponLoadout target{};
   Menu_Container_containerData = nullptr;
   VS::Menu::Framework::menuItems = nullptr;
   detail::BuildLiveWeaponStats(&target, &source, nullptr);
@@ -204,7 +203,7 @@ TEST_CASE(
   auto& owner = fixture.containers.storage->container.items;
   owner.gems[samples::kFlaggedGemIndex] = samples::kShieldGem;
   owner.shields.back() = samples::kShield;
-  Items_ShieldLoadout target{};
+  VS::Items::ShieldLoadout target{};
   std::span(target.reserved0).back() = samples::kReservedHeaderTail;
   detail::BuildLiveShieldStats(&target, &owner.shields.back(), &owner);
   CHECK(target.index == 255);
@@ -212,7 +211,7 @@ TEST_CASE(
   CHECK(target.gems[0].id == 500);
   CHECK(target.gems[1].id == 0);
   CHECK(target.gems[2].id == 500);
-  CHECK(target.currentStr == -6);
+  CHECK(target.attributes.current_strength == -6);
   CHECK(target.reserved0[5] == 71);
   detail::BuildLiveShieldStats(&target, nullptr, nullptr);
   CHECK(target.base.id == 0);

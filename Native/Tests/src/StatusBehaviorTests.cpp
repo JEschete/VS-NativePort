@@ -293,23 +293,23 @@ TEST_CASE("Equipment down reduces equipped strength and restores baseline",
   auto& stats = fixture.stats;
   stats.weapon.blade.id = stats.shield.base.id = stats.limbs[0].armor.armor.id =
       1;
-  stats.weapon.currentStr = 20;
-  stats.weapon.baseStr = 20;
-  stats.weapon.currentInt = 20;
-  stats.weapon.baseInt = 20;
-  stats.shield.currentStr = 30;
-  stats.shield.baseStr = 30;
-  stats.limbs[0].armor.currentStr = 40;
-  stats.limbs[0].armor.baseStr = 40;
+  stats.weapon.attributes.current_strength = 20;
+  stats.weapon.attributes.base_strength = 20;
+  stats.weapon.attributes.current_intelligence = 20;
+  stats.weapon.attributes.base_intelligence = 20;
+  stats.shield.attributes.current_strength = 30;
+  stats.shield.attributes.base_strength = 30;
+  stats.limbs[0].armor.attributes.current_strength = 40;
+  stats.limbs[0].armor.attributes.base_strength = 40;
   REQUIRE(fixture.Apply(19));
-  CHECK(stats.weapon.currentStr == 11);
-  CHECK(stats.shield.currentStr == 21);
-  CHECK(stats.limbs[0].armor.currentStr == 31);
+  CHECK(stats.weapon.attributes.current_strength == 11);
+  CHECK(stats.shield.attributes.current_strength == 21);
+  CHECK(stats.limbs[0].armor.attributes.current_strength == 31);
   fixture.Tick(15);
   CHECK(stats.statuses == 0);
-  CHECK(stats.weapon.currentStr == 20);
-  CHECK(stats.shield.currentStr == 30);
-  CHECK(stats.limbs[0].armor.currentStr == 40);
+  CHECK(stats.weapon.attributes.current_strength == 20);
+  CHECK(stats.shield.attributes.current_strength == 30);
+  CHECK(stats.limbs[0].armor.attributes.current_strength == 40);
 }
 
 TEST_CASE("Ailment policy respects immunity and the training dummy exclusion",

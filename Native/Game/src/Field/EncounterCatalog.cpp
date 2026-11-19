@@ -460,7 +460,7 @@ bool EncounterStatOverrides::Valid() const {
   return true;
 }
 
-std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
+std::expected<VS::Items::WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
     EncounterWeapon weapon) {
   struct Source {
     int zone, actor, blade, grip, model, grip_category;

@@ -17,7 +17,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Items/Loadout.h"
+#include "Items/ItemRecords.hpp"
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 

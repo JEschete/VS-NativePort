@@ -64,12 +64,12 @@ struct LiveActor final : ResolutionActor {
   bool Cancels() override { return stats.cancelsHitResults != 0; }
   bool HasBlade() override { return stats.weapon.blade.id != 0; }
   std::uint8_t DamageType() override {
-    return static_cast<std::uint8_t>(stats.weapon.damageType);
+    return static_cast<std::uint8_t>(stats.weapon.damage_type);
   }
   std::array<std::int16_t, kActionAffinityCount> Affinities() override {
     std::array<std::int16_t, kActionAffinityCount> values{};
-    std::copy_n(stats.weapon.classAffinityCurrent.affinities[0], values.size(),
-                values.begin());
+    std::copy_n(stats.weapon.class_affinity.affinities[0].begin(),
+                values.size(), values.begin());
     return values;
   }
 };

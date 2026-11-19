@@ -118,12 +118,12 @@ TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
   hit.target.impactKind = 2;
   hit.weaponDpChange = 2;
   hit.weaponDpEffect = 2;
-  stats.weapon.currentDp = 65535;
-  stats.weapon.maxDp = 100;
+  stats.weapon.current_dp = 65535;
+  stats.weapon.max_dp = 100;
   stats.currentHp = -7;
   stats.actionRecoveryTimer = 65535;
   b::ApplyLiveActionSourceEffects(15, nullptr);
-  CHECK(stats.weapon.currentDp == 1);
+  CHECK(stats.weapon.current_dp == 1);
   CHECK(stats.currentHp == -7);
   CHECK(stats.actionRecoveryTimer == 65535);
   CHECK(state->queue[0].primaryTarget.weaponDpEffect == 0);

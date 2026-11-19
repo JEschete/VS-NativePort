@@ -634,6 +634,6 @@ int CheckDefaultLoadoutNames(void) {
       0x2A, 0x32, VS::Core::TextCode::kTerminator};
   return memcmp(Actors_ashleyInitialLoadout.name, actor_name,
                 sizeof actor_name) == 0 &&
-         memcmp(Actors_ashleyInitialLoadout.weapon.name, weapon_name,
+         memcmp(Actors_ashleyInitialLoadout.weapon.name.data(), weapon_name,
                 sizeof weapon_name) == 0;
 }

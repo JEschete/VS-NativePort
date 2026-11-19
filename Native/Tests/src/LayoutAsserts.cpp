@@ -509,10 +509,10 @@ int Tests_ActorConditionSnapshot(void) {
   firstStats.currentMp = 15;
   firstStats.maxMp = 60;
   firstStats.statuses = (1 << 6) | (1 << 12);
-  firstStats.weapon.currentDp = 10;
-  firstStats.weapon.maxDp = 40;
-  firstStats.shield.currentDp = 30;
-  firstStats.shield.maxDp = 60;
+  firstStats.weapon.current_dp = 10;
+  firstStats.weapon.max_dp = 40;
+  firstStats.shield.current_dp = 30;
+  firstStats.shield.max_dp = 60;
   secondStats.maxHp = 120;
   secondStats.statuses = (1 << 0) | (1 << 12);
   secondAi.actionCostEnabled = 1;

@@ -1156,12 +1156,12 @@ struct DamageFixture : RecoveryFixture {
     replacement_stats.actorId = 40;
     input.category = 1;
     stats.currentMp = 71;
-    stats.weapon.currentDp = 100;
-    stats.weapon.currentPp = 10;
-    stats.weapon.maxPp = 500;
-    stats.shield.currentDp = 100;
-    stats.shield.currentPp = 10;
-    stats.shield.maxPp = 500;
+    stats.weapon.current_dp = 100;
+    stats.weapon.current_pp = 10;
+    stats.weapon.max_pp = 500;
+    stats.shield.current_dp = 100;
+    stats.shield.current_pp = 10;
+    stats.shield.max_pp = 500;
     actor.weaponDrawn = 1;
     amount = 30;
   }
@@ -1200,10 +1200,10 @@ TEST_CASE("F00494 caches stats owners but distributes to the current hit actor",
   CHECK(fixture.hit.target.hp == RecoveryHalf(32767 + 30));
   CHECK(fixture.hit.hpEffect == 3);
   CHECK(fixture.hit.inflictStatuses == 0x8010);
-  CHECK(fixture.stats.weapon.currentDp == 70);
-  CHECK(fixture.stats.weapon.currentPp == 13);
-  CHECK(fixture.stats.shield.currentDp == 70);
-  CHECK(fixture.stats.shield.currentPp == 13);
+  CHECK(fixture.stats.weapon.current_dp == 70);
+  CHECK(fixture.stats.weapon.current_pp == 13);
+  CHECK(fixture.stats.shield.current_dp == 70);
+  CHECK(fixture.stats.shield.current_pp == 13);
 }
 TEST_CASE("F00494 preview removes damage status without consuming equipment",
           "[damage-recovery][F00494]") {
@@ -1217,7 +1217,7 @@ TEST_CASE("F00494 preview removes damage status without consuming equipment",
   battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
                                              &fixture.hit, 1, 0);
   CHECK(fixture.hit.inflictStatuses == 0x8010);
-  CHECK(fixture.stats.weapon.currentDp == 100);
+  CHECK(fixture.stats.weapon.current_dp == 100);
   CHECK(fixture.stats.currentHp == 123);
 }
 TEST_CASE("F00494 position damage permits unused null stats owners",
@@ -1265,7 +1265,7 @@ TEST_CASE(
   handler(nullptr, nullptr, &fixture.hit, -99, 0);
   CHECK(Bytes(fixture.hit) == before);
   fixture.stats.weapon.blade.id = 65535;
-  fixture.stats.weapon.currentPp = 65535;
+  fixture.stats.weapon.current_pp = 65535;
   auto expected = fixture.hit;
   expected.weaponPpChange = RecoveryHalf(expected.weaponPpChange - 1);
   expected.weaponPpEffect = 1;
@@ -1289,7 +1289,7 @@ TEST_CASE(
   handler(nullptr, nullptr, &fixture.hit, -99, -1);
   CHECK(Bytes(fixture.hit) == before);
   fixture.stats.shield.base.id = 1;
-  fixture.stats.shield.currentPp = 65535;
+  fixture.stats.shield.current_pp = 65535;
   auto expected = fixture.hit;
   expected.shieldPpChange = RecoveryHalf(expected.shieldPpChange - 1);
   expected.shieldPpEffect = 1;

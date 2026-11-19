@@ -1,14 +1,11 @@
 #pragma once
 #include "Items/ItemRecords.hpp"
 
-struct Items_WeaponLoadout;
-struct Items_ShieldLoadout;
-
 namespace VS::Menu::container {
-void BuildLiveWeaponStats(Items_WeaponLoadout* target,
+void BuildLiveWeaponStats(VS::Items::WeaponLoadout* target,
                           const VS::Items::InventoryWeapon* source,
                           VS::Items::ContainerData* container);
-void BuildLiveShieldStats(Items_ShieldLoadout* target,
+void BuildLiveShieldStats(VS::Items::ShieldLoadout* target,
                           const VS::Items::InventoryShield* source,
                           VS::Items::ContainerData* container);
 void SetLivePanelVisibility(char visibility);

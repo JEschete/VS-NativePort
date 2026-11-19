@@ -42,7 +42,6 @@ VS::Items::LootListNode* VS::Items::lootListHead = nullptr;
 
 namespace VS::Items {
 namespace {
-using Live::Typed;
 using Live::WarnNullRecord;
 using Live::WarnRefusal;
 
@@ -169,14 +168,14 @@ std::optional<EnemyDrops> ToEnemyDrops(const Battle_Actor* enemy) {
   const auto& stats = *enemy->stats;
   EnemyDrops drops{};
   drops.actor_id = enemy->id;
-  drops.weapon = Typed(stats.weapon);
-  drops.shield = Typed(stats.shield);
-  drops.accessory = Typed(stats.accessory);
+  drops.weapon = stats.weapon;
+  drops.shield = stats.shield;
+  drops.accessory = stats.accessory;
   for (std::size_t i = 0; i < kLimbCount; ++i) {
-    drops.limb_armor[i] = Typed(stats.limbs[i].armor);
+    drops.limb_armor[i] = stats.limbs[i].armor;
   }
   drops.guaranteed_items = {stats.dropItem, stats.secondDropItem};
-  drops.random_item = Typed(stats.randomDropItem);
+  drops.random_item = stats.randomDropItem;
   return drops;
 }
 

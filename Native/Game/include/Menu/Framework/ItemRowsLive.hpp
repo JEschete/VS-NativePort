@@ -2,9 +2,6 @@
 #include "Items/ItemRecords.hpp"
 // Hand-maintained (tools/port/owned.csv).
 
-struct Items_ArmorLoadout;
-struct Items_ShieldLoadout;
-struct Items_WeaponLoadout;
 struct Menu_Framework_MenuRow;
 
 // Binds the item rows (ItemRows.hpp) to their texts (ItemRowsLiveState.hpp),
@@ -24,7 +21,7 @@ Menu_Framework_MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index,
                                                      int slide);
 Menu_Framework_MenuRow* CreateLiveShieldGemRow(int row, int shield_index,
                                                int slide);
-void FormatLiveWeaponRow(Items_WeaponLoadout* weapon, char* menu_text[],
+void FormatLiveWeaponRow(VS::Items::WeaponLoadout* weapon, char* menu_text[],
                          int* row_type, void* buffer);
 void FormatLiveInventoryWeaponRow(VS::Items::InventoryWeapon* weapon,
                                   char* menu_text[], int* row_type,
@@ -33,12 +30,12 @@ void FormatLiveBladeRow(VS::Items::InventoryBlade* blade, char* menu_text[],
                         int* row_type, void* buffer);
 void FormatLiveGripRow(VS::Items::InventoryGrip* grip, char* menu_text[],
                        int* row_type, void* buffer);
-void FormatLiveShieldRow(Items_ShieldLoadout* shield, char* menu_text[],
+void FormatLiveShieldRow(VS::Items::ShieldLoadout* shield, char* menu_text[],
                          int* row_type, void* buffer);
 void FormatLiveInventoryShieldRow(VS::Items::InventoryShield* shield,
                                   char* menu_text[], int* row_type,
                                   void* buffer);
-void FormatLiveArmorRow(Items_ArmorLoadout* armor, char* menu_text[],
+void FormatLiveArmorRow(VS::Items::ArmorLoadout* armor, char* menu_text[],
                         int* row_type, void* buffer);
 void FormatLiveInventoryArmorRow(VS::Items::InventoryArmor* armor,
                                  char* menu_text[], int* row_type,

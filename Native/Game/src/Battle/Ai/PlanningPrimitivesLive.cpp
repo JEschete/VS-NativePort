@@ -361,7 +361,7 @@ ActorResources ResourcesOf(const Battle_ActorStats& stats) {
           .max_hp = Half(stats.maxHp),
           .mp = Half(stats.currentMp),
           .max_mp = Half(stats.maxMp),
-          .weapon_pp = Half(stats.weapon.currentPp),
+          .weapon_pp = Half(stats.weapon.current_pp),
           .statuses = static_cast<std::uint32_t>(stats.statuses)};
 }
 

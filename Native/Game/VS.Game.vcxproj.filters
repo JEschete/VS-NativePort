@@ -4362,9 +4362,6 @@
     <ClInclude Include="include\Items\ItemRecords.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
-    <ClInclude Include="include\Items\Loadout.h">
-      <Filter>include\Items</Filter>
-    </ClInclude>
     <ClInclude Include="include\Items\Loot.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>

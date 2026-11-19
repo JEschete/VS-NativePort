@@ -22,7 +22,6 @@
 #include "Battle/Ai/Perception.h"
 #include "Field/TerrainHeight.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 

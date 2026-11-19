@@ -161,10 +161,10 @@ class LiveQueue final : public DamageRecoveryQueue {
     return StatsOf(target_stats_).shield.base.id != 0;
   }
   std::uint16_t WeaponPp() override {
-    return StatsOf(target_stats_).weapon.currentPp;
+    return StatsOf(target_stats_).weapon.current_pp;
   }
   std::uint16_t ShieldPp() override {
-    return StatsOf(target_stats_).shield.currentPp;
+    return StatsOf(target_stats_).shield.current_pp;
   }
   std::uint8_t SelectedPrimaryHpMode() override {
     Require(Battle_actionState != nullptr);

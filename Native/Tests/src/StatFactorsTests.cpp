@@ -398,7 +398,7 @@ TEST_CASE("Live target HP needs no source or selected definition",
 TEST_CASE("Live weapon PP ignores equipment presence action and hit index",
           "[stat-factors][F00416]") {
   LiveFixture fixture;
-  fixture.stats.weapon.currentPp = 65535;
+  fixture.stats.weapon.current_pp = 65535;
   fixture.state->selection.actionId = 65535;
   const auto index = GENERATE(-1, 0, 1, 2);
   CHECK(battle::LiveWeaponPpWithChainOffset(nullptr, &fixture.source, nullptr,
@@ -455,7 +455,7 @@ TEST_CASE("Original SHORT table relocates and dispatches all eight factors",
   fixture.stats.maxHp = 100;
   fixture.stats.currentMp = 301;
   fixture.stats.maxMp = 200;
-  fixture.stats.weapon.currentPp = 65535;
+  fixture.stats.weapon.current_pp = 65535;
   constexpr std::array<int, 19> kExpected{0,  0,  0,    0, -158, -313, -158,
                                           62, -1, -158, 0, -313, 0,    0,
                                           0,  0,  0,    0, -158};
@@ -742,8 +742,8 @@ TEST_CASE("F00431 live shield PP ignores equipment and position flags",
   Battle_actionState = nullptr;
   fixture.source.targetsPosition = GENERATE(0, 1);
   const auto pp = GENERATE(0, 32767, 32768, 65535);
-  fixture.stats.shield.currentPp = static_cast<std::uint16_t>(pp);
-  fixture.stats.weapon.currentPp = 123;
+  fixture.stats.shield.current_pp = static_cast<std::uint16_t>(pp);
+  fixture.stats.weapon.current_pp = 123;
   CHECK(battle::LiveSourceShieldPp(nullptr, &fixture.source, nullptr, -1, -1) ==
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(pp)));
 }
@@ -759,7 +759,7 @@ TEST_CASE("Original SHORT table relocates and dispatches all B8 factors",
   fixture.stats.maxHp = 100;
   fixture.stats.currentMp = 302;
   fixture.stats.maxMp = 200;
-  fixture.stats.shield.currentPp = 65535;
+  fixture.stats.shield.current_pp = 65535;
   const int expected = selector == 16   ? -101
                        : selector == 17 ? -102
                        : selector == 21 ? 790

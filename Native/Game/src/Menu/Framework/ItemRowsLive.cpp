@@ -20,8 +20,8 @@
 #include "DiscQueue.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ItemView.h"
@@ -234,16 +234,6 @@ void FormatRecordRow(RowFormat<Record> format, const Record* record,
   *row_type = static_cast<int>(text.row_type);
 }
 
-// The equipped loadouts are still the legacy records (Loadout.h).
-template <typename Legacy>
-void FormatLegacyRow(RowFormat<Items::Live::TypedRecordOf<Legacy>> format,
-                     const Legacy* record, char* menu_text[], int* row_type,
-                     void* buffer) {
-  const auto typed = Items::Live::TypedOrNone(record);
-  FormatRecordRow(format, Items::Live::OrNull(typed), menu_text, row_type,
-                  buffer, nullptr);
-}
-
 // The ITEMNAME/ITEMHELP/MENU12 block and its read.
 class LiveItemTextLoadHost final : public ItemTextLoadHost {
  public:
@@ -329,7 +319,7 @@ void LiveItemRowsHost::SetStringArgument(std::size_t slot,
 
 std::optional<Items::WeaponLoadout> LiveItemRowsHost::InventoryWeaponLoadout(
     const Items::InventoryWeapon& weapon) {
-  Items_WeaponLoadout loadout{};
+  VS::Items::WeaponLoadout loadout{};
   if (VS::Menu::Framework::weapons == VS::Items::inventory.weapons.data()) {
     Items::LoadLiveInventoryWeaponStats(&loadout, &weapon);
   } else if (VS::Items::ContainerData* container = OpenContainer()) {
@@ -337,12 +327,12 @@ std::optional<Items::WeaponLoadout> LiveItemRowsHost::InventoryWeaponLoadout(
   } else {
     return std::nullopt;
   }
-  return Items::Live::Typed(loadout);
+  return loadout;
 }
 
 std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
     const Items::InventoryShield& shield) {
-  Items_ShieldLoadout loadout{};
+  VS::Items::ShieldLoadout loadout{};
   if (VS::Menu::Framework::shields == VS::Items::inventory.shields.data()) {
     Items::LoadLiveInventoryShieldStats(&loadout, &shield);
   } else if (VS::Items::ContainerData* container = OpenContainer()) {
@@ -350,7 +340,7 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
   } else {
     return std::nullopt;
   }
-  return Items::Live::Typed(loadout);
+  return loadout;
 }
 
 std::optional<Items::InventoryWeapon> LiveItemRowsHost::Weapon(int reference) {
@@ -439,10 +429,10 @@ Menu_Framework_MenuRow* CreateLiveShieldGemRow(int row, int shield_index,
       CreateShieldGemRow(host, row, shield_index, (slide & 1) != 0));
 }
 
-void FormatLiveWeaponRow(Items_WeaponLoadout* weapon, char* menu_text[],
+void FormatLiveWeaponRow(VS::Items::WeaponLoadout* weapon, char* menu_text[],
                          int* row_type, void* buffer) {
-  FormatLegacyRow<Items_WeaponLoadout>(FormatWeaponRow, weapon, menu_text,
-                                       row_type, buffer);
+  FormatRecordRow<VS::Items::WeaponLoadout>(FormatWeaponRow, weapon, menu_text,
+                                            row_type, buffer, nullptr);
 }
 
 void FormatLiveInventoryWeaponRow(VS::Items::InventoryWeapon* weapon,
@@ -465,10 +455,10 @@ void FormatLiveGripRow(VS::Items::InventoryGrip* grip, char* menu_text[],
                                             row_type, buffer, nullptr);
 }
 
-void FormatLiveShieldRow(Items_ShieldLoadout* shield, char* menu_text[],
+void FormatLiveShieldRow(VS::Items::ShieldLoadout* shield, char* menu_text[],
                          int* row_type, void* buffer) {
-  FormatLegacyRow<Items_ShieldLoadout>(FormatShieldRow, shield, menu_text,
-                                       row_type, buffer);
+  FormatRecordRow<VS::Items::ShieldLoadout>(FormatShieldRow, shield, menu_text,
+                                            row_type, buffer, nullptr);
 }
 
 void FormatLiveInventoryShieldRow(VS::Items::InventoryShield* shield,
@@ -478,10 +468,10 @@ void FormatLiveInventoryShieldRow(VS::Items::InventoryShield* shield,
       FormatInventoryShieldRow, shield, menu_text, row_type, buffer, nullptr);
 }
 
-void FormatLiveArmorRow(Items_ArmorLoadout* armor, char* menu_text[],
+void FormatLiveArmorRow(VS::Items::ArmorLoadout* armor, char* menu_text[],
                         int* row_type, void* buffer) {
-  FormatLegacyRow<Items_ArmorLoadout>(FormatArmorRow, armor, menu_text,
-                                      row_type, buffer);
+  FormatRecordRow<VS::Items::ArmorLoadout>(FormatArmorRow, armor, menu_text,
+                                           row_type, buffer, nullptr);
 }
 
 void FormatLiveInventoryArmorRow(VS::Items::InventoryArmor* armor,

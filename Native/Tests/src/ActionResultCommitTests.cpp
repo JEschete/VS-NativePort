@@ -330,8 +330,8 @@ TEST_CASE(
   stats.currentMp = -123;
   stats.actionRecoveryTimer = 65535;
   stats.isAnalyzed = 1;
-  stats.weapon.currentDp = 65535;
-  stats.weapon.maxDp = 100;
+  stats.weapon.current_dp = 65535;
+  stats.weapon.max_dp = 100;
   hit.target.targetActor = 41;
   hit.target.targetLimb = -1;
   hit.weaponDpEffect = 2;
@@ -339,7 +339,7 @@ TEST_CASE(
   hit.removeStatuses = std::bit_cast<int>(0x80000000U);
   apply(&hit);
   Battle_actors[41] = saved;
-  CHECK(stats.weapon.currentDp == 1);
+  CHECK(stats.weapon.current_dp == 1);
   CHECK(stats.currentMp == -123);
   CHECK(stats.actionRecoveryTimer == 65535);
   CHECK(stats.isAnalyzed == 1);

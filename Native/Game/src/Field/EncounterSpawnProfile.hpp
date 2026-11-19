@@ -6,7 +6,7 @@
 
 #include "Battle/Encounter.hpp"
 #include "Field/Mpd.h"
-#include "Items/Loadout.h"
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Game {
@@ -26,7 +26,7 @@ bool UsesEncounterRoomEvents(const EncounterSetup& setup,
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
 
-std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
+std::expected<VS::Items::WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
     EncounterWeapon weapon);
 
 std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(

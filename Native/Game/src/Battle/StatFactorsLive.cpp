@@ -82,11 +82,11 @@ class LiveStatFactorWorld final : public StatFactorWorld {
   }
   std::optional<std::uint16_t> WeaponPp() override {
     const auto* stats = StatsOf(source_);
-    return stats ? std::optional{stats->weapon.currentPp} : std::nullopt;
+    return stats ? std::optional{stats->weapon.current_pp} : std::nullopt;
   }
   std::optional<std::uint16_t> ShieldPp() override {
     const auto* stats = StatsOf(source_);
-    return stats ? std::optional{stats->shield.currentPp} : std::nullopt;
+    return stats ? std::optional{stats->shield.current_pp} : std::nullopt;
   }
   std::optional<std::uint8_t> SelectedActionCost() override {
     if (Battle_actionState == nullptr) return std::nullopt;

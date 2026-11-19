@@ -1,15 +1,11 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// The Items Live bindings' view of the legacy records: which typed record
-// (ItemRecords.hpp) each Items_* struct holds, the layout pins that make the
-// byte copy between them exact, and the battle action, actor and diagnostic
-// helpers the bindings share. Only the *Live.cpp files and the tests include
-// it.
+// What the Items Live bindings share: the battle actor layout pins they read
+// and write by name, and the battle action, actor and diagnostic helpers.
+// Only the *Live.cpp files and the tests include it.
 
-#include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <optional>
 #include <type_traits>
 #include <utility>
 
@@ -25,119 +21,9 @@
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Items::Live {
-template <typename Legacy>
-struct TypedRecord;
-
-template <>
-struct TypedRecord<Items_WeaponLoadout> {
-  using type = WeaponLoadout;
-};
-template <>
-struct TypedRecord<Items_ShieldLoadout> {
-  using type = ShieldLoadout;
-};
-template <>
-struct TypedRecord<Items_ArmorLoadout> {
-  using type = ArmorLoadout;
-};
-template <>
-struct TypedRecord<Items_AccessorySpawnLoadout> {
-  using type = AccessorySpawnLoadout;
-};
-template <>
-struct TypedRecord<Items_WeaponSpawnLoadout> {
-  using type = WeaponSpawnLoadout;
-};
-template <>
-struct TypedRecord<Items_ShieldSpawnLoadout> {
-  using type = ShieldSpawnLoadout;
-};
-template <>
-struct TypedRecord<Items_MiscItemDrop> {
-  using type = MiscItemDrop;
-};
-
-template <typename Legacy>
-using TypedRecordOf = typename TypedRecord<Legacy>::type;
-
-// Every pair has one size and a typed side without padding, so the byte copy
-// both ways is the identity.
-template <typename Legacy>
-consteval bool SameLayout() {
-  return sizeof(Legacy) == sizeof(TypedRecordOf<Legacy>) &&
-         std::has_unique_object_representations_v<TypedRecordOf<Legacy>> &&
-         std::is_trivially_copyable_v<Legacy>;
-}
-
-template <typename Legacy>
-[[nodiscard]] TypedRecordOf<Legacy> Typed(const Legacy& legacy) {
-  static_assert(SameLayout<Legacy>());
-  return std::bit_cast<TypedRecordOf<Legacy>>(legacy);
-}
-
-template <typename Legacy>
-void Commit(Legacy& legacy, const TypedRecordOf<Legacy>& typed) {
-  static_assert(SameLayout<Legacy>());
-  legacy = std::bit_cast<Legacy>(typed);
-}
-
-// The fields the typed records name, at the offsets the legacy structs keep.
-static_assert(offsetof(Items_WeaponLoadout, blade) ==
-              offsetof(WeaponLoadout, blade));
-static_assert(offsetof(Items_WeaponLoadout, gems) ==
-              offsetof(WeaponLoadout, gems));
-static_assert(offsetof(Items_WeaponLoadout, wepId) ==
-              offsetof(WeaponLoadout, weapon_model_id));
-static_assert(offsetof(Items_WeaponLoadout, damageType) ==
-              offsetof(WeaponLoadout, damage_type));
-static_assert(offsetof(Items_WeaponLoadout, currentPp) ==
-              offsetof(WeaponLoadout, current_pp));
-static_assert(offsetof(Items_WeaponLoadout, currentDp) ==
-              offsetof(WeaponLoadout, current_dp));
-static_assert(offsetof(Items_WeaponLoadout, currentStr) ==
-              offsetof(WeaponLoadout, attributes));
-static_assert(offsetof(Items_WeaponLoadout, range) ==
-              offsetof(WeaponLoadout, range));
-static_assert(offsetof(Items_WeaponLoadout, classAffinityCurrent) ==
-              offsetof(WeaponLoadout, class_affinity));
-static_assert(offsetof(Items_WeaponLoadout, affinityModifiers) ==
-              offsetof(WeaponLoadout, affinity_modifiers));
-static_assert(offsetof(Items_WeaponLoadout, classAffinityBaseline) ==
-              offsetof(WeaponLoadout, baseline));
-static_assert(offsetof(Items_ShieldLoadout, base) ==
-              offsetof(ShieldLoadout, base));
-static_assert(offsetof(Items_ShieldLoadout, index) ==
-              offsetof(ShieldLoadout, index));
-static_assert(offsetof(Items_ShieldLoadout, currentPp) ==
-              offsetof(ShieldLoadout, current_pp));
-static_assert(offsetof(Items_ShieldLoadout, currentDp) ==
-              offsetof(ShieldLoadout, current_dp));
-static_assert(offsetof(Items_ShieldLoadout, types) ==
-              offsetof(ShieldLoadout, types));
-static_assert(offsetof(Items_ShieldLoadout, classAffinityBaseline) ==
-              offsetof(ShieldLoadout, baseline));
-static_assert(offsetof(Items_ArmorLoadout, currentDp) ==
-              offsetof(ArmorLoadout, current_dp));
-static_assert(offsetof(Items_ArmorLoadout, classAffinityCurrent) ==
-              offsetof(ArmorLoadout, class_affinity));
-static_assert(offsetof(Items_ArmorLoadout, index) ==
-              offsetof(ArmorLoadout, index));
-static_assert(offsetof(Items_ArmorLoadout, classAffinityBaseline) ==
-              offsetof(ArmorLoadout, baseline));
-static_assert(offsetof(Items_AccessorySpawnLoadout, dropRate) ==
-              offsetof(AccessorySpawnLoadout, drop_rate));
-static_assert(offsetof(Items_AccessorySpawnLoadout, classes) ==
-              offsetof(AccessorySpawnLoadout, classes));
-static_assert(offsetof(Items_WeaponSpawnLoadout, material) ==
-              offsetof(WeaponSpawnLoadout, material));
-static_assert(offsetof(Items_WeaponSpawnLoadout, name) ==
-              offsetof(WeaponSpawnLoadout, name));
-static_assert(offsetof(Items_ShieldSpawnLoadout, index) ==
-              offsetof(ShieldSpawnLoadout, index));
 // The battle actor records the bindings read and write by name.
 inline constexpr std::size_t kActorStatsWeaponOffset = 0x3C;
 static_assert(offsetof(Battle_ActorStats, weapon) == kActorStatsWeaponOffset);
@@ -177,19 +63,6 @@ static_assert(std::extent_v<decltype(Battle_ActionDefinition::hits)> ==
 inline constexpr std::size_t kBattleActorSlots = 42;
 static_assert(std::extent_v<decltype(Battle_actors)> == kBattleActorSlots);
 static_assert(std::extent_v<decltype(Battle_limbArmorDpLoss)> >= kLimbCount);
-
-// The typed copy of a record that may be absent.
-template <typename Legacy>
-[[nodiscard]] std::optional<TypedRecordOf<Legacy>> TypedOrNone(
-    const Legacy* legacy) {
-  if (legacy == nullptr) return std::nullopt;
-  return Typed(*legacy);
-}
-
-template <typename Record>
-[[nodiscard]] const Record* OrNull(const std::optional<Record>& record) {
-  return record.has_value() ? &*record : nullptr;
-}
 
 // Reports a refusal the typed core returned; kOk reports nothing.
 void WarnRefusal(const char* operation, ItemsStatus status);

@@ -38,7 +38,6 @@
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 

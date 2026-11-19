@@ -30,7 +30,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/BreakArts.h"
 #include "Menu/BreakArtsLive.hpp"
@@ -713,15 +712,15 @@ TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
   const int pp = GENERATE(0, 50, 200);
   WorkshopRepairFixture fixture(missing, pp);
   fixture.Equip();
-  REQUIRE(fixture.stats.weapon.currentDp == 10000 - missing);
-  REQUIRE(fixture.stats.shield.currentDp == 10000 - missing);
-  REQUIRE(fixture.stats.limbs[0].armor.currentDp == 10000 - missing);
+  REQUIRE(fixture.stats.weapon.current_dp == 10000 - missing);
+  REQUIRE(fixture.stats.shield.current_dp == 10000 - missing);
+  REQUIRE(fixture.stats.limbs[0].armor.current_dp == 10000 - missing);
   fixture.Prompt(PADRright);
   REQUIRE(fixture.Tick() == 0);
   const std::array<int, 5> actual{
-      fixture.stats.weapon.currentDp, fixture.stats.shield.currentDp,
-      fixture.stats.limbs[0].armor.currentDp, fixture.stats.weapon.currentPp,
-      fixture.stats.shield.currentPp};
+      fixture.stats.weapon.current_dp, fixture.stats.shield.current_dp,
+      fixture.stats.limbs[0].armor.current_dp, fixture.stats.weapon.current_pp,
+      fixture.stats.shield.current_pp};
   const int remaining_pp = std::max(0, pp - missing / 100);
   const std::array<int, 5> expected{10000, 10000, 10000, remaining_pp,
                                     remaining_pp};

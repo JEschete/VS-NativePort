@@ -51,7 +51,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
@@ -572,7 +571,7 @@ template <typename T>
 }
 
 template <typename T, std::size_t Rows, std::size_t Columns>
-void Flatten(const T (&values)[Rows][Columns],
+void Flatten(const std::array<std::array<T, Columns>, Rows>& values,
              std::array<std::int32_t, kSortClassCount>& out) {
   static_assert(Rows * Columns <= kSortClassCount);
   for (std::size_t row = 0; row < Rows; ++row) {
@@ -582,37 +581,37 @@ void Flatten(const T (&values)[Rows][Columns],
   }
 }
 
-[[nodiscard]] SortStats WeaponStats(const Items_WeaponLoadout& weapon) {
+[[nodiscard]] SortStats WeaponStats(const VS::Items::WeaponLoadout& weapon) {
   SortStats stats{.category = weapon.blade.category,
                   .material = weapon.blade.material,
                   .range = weapon.range.range,
-                  .damage_type = weapon.damageType,
-                  .current_dp = weapon.currentDp,
-                  .max_dp = weapon.maxDp,
-                  .current_pp = weapon.currentPp,
-                  .max_pp = weapon.maxPp,
-                  .strength = weapon.currentStr,
-                  .intelligence = weapon.currentInt,
-                  .agility = weapon.currentAgility};
-  Flatten(weapon.classAffinityCurrent.classes, stats.classes);
-  Flatten(weapon.classAffinityCurrent.affinities, stats.affinities);
+                  .damage_type = weapon.damage_type,
+                  .current_dp = weapon.current_dp,
+                  .max_dp = weapon.max_dp,
+                  .current_pp = weapon.current_pp,
+                  .max_pp = weapon.max_pp,
+                  .strength = weapon.attributes.current_strength,
+                  .intelligence = weapon.attributes.current_intelligence,
+                  .agility = weapon.attributes.current_agility};
+  Flatten(weapon.class_affinity.classes, stats.classes);
+  Flatten(weapon.class_affinity.affinities, stats.affinities);
   return stats;
 }
 
-[[nodiscard]] SortStats ShieldStats(const Items_ShieldLoadout& shield) {
+[[nodiscard]] SortStats ShieldStats(const VS::Items::ShieldLoadout& shield) {
   SortStats stats{.material = shield.base.material,
-                  .current_dp = shield.currentDp,
-                  .max_dp = shield.maxDp,
-                  .current_pp = shield.currentPp,
-                  .max_pp = shield.maxPp,
-                  .strength = shield.currentStr,
-                  .intelligence = shield.currentInt,
-                  .agility = shield.currentAgility};
+                  .current_dp = shield.current_dp,
+                  .max_dp = shield.max_dp,
+                  .current_pp = shield.current_pp,
+                  .max_pp = shield.max_pp,
+                  .strength = shield.attributes.current_strength,
+                  .intelligence = shield.attributes.current_intelligence,
+                  .agility = shield.attributes.current_agility};
   for (std::size_t i = 0; i < kSortTypeCount; ++i) {
-    stats.types[i] = Byte(shield.types[i]);
+    stats.types[i] = shield.types[i];
   }
-  Flatten(shield.classAffinityCurrent.classes, stats.classes);
-  Flatten(shield.classAffinityCurrent.affinities, stats.affinities);
+  Flatten(shield.class_affinity.classes, stats.classes);
+  Flatten(shield.class_affinity.affinities, stats.affinities);
   return stats;
 }
 
@@ -1732,7 +1731,7 @@ void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
   UpdateItemDetailsSelection(call.Ctx(), row, details, row_type, page);
 }
 
-int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon) {
+int LiveWeaponSortValue(int stat, const VS::Items::WeaponLoadout* weapon) {
   if (weapon == nullptr) {
     VS::Core::LogWarn("menu.framework", "sort key of an absent weapon");
     return 0;
@@ -1741,7 +1740,7 @@ int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon) {
   return WeaponSortValue(call.Ctx(), stat, WeaponStats(*weapon));
 }
 
-int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield) {
+int LiveShieldSortValue(int stat, const VS::Items::ShieldLoadout* shield) {
   if (shield == nullptr) {
     VS::Core::LogWarn("menu.framework", "sort key of an absent shield");
     return 0;

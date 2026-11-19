@@ -312,17 +312,17 @@ TEST_CASE("F00396 equipment wear consumes only the current first six DP losses",
   Fixture f;
   f.stats.actorId = 40;
   f.actor.weaponDrawn = 1;
-  f.stats.weapon.currentDp = 1000;
-  f.stats.shield.currentDp = 500;
-  for (auto& limb : f.stats.limbs) limb.armor.currentDp = 500;
+  f.stats.weapon.current_dp = 1000;
+  f.stats.shield.current_dp = 500;
+  for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
   f.action.category = 6;
   f.hit.target.targetLimb = 2;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 100);
   VS::Items::ConsumeLiveHitEquipmentDp(&f.action, &f.stats, &f.stats, 100);
-  CHECK(f.stats.weapon.currentDp == 900);
-  CHECK(f.stats.shield.currentDp == 400);
-  CHECK(f.stats.limbs[2].armor.currentDp == 400);
-  CHECK(f.stats.limbs[0].armor.currentDp == 500);
+  CHECK(f.stats.weapon.current_dp == 900);
+  CHECK(f.stats.shield.current_dp == 400);
+  CHECK(f.stats.limbs[2].armor.current_dp == 400);
+  CHECK(f.stats.limbs[0].armor.current_dp == 500);
   CHECK(Battle_limbArmorDpLoss[6] == 206);
 }
 TEST_CASE(
@@ -331,16 +331,16 @@ TEST_CASE(
   Fixture f;
   f.stats.actorId = 40;
   f.actor.weaponDrawn = 1;
-  for (auto& limb : f.stats.limbs) limb.armor.currentDp = 500;
+  for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
   f.action.category = 6;
   f.hit.target.targetLimb = 2;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 100);
   f.stats.limbs[0].maxHp = 100;
   b::LiveDistributeLimbRecovery(nullptr, &f.hit, 25);
   VS::Items::ConsumeLiveHitEquipmentDp(&f.action, &f.stats, &f.stats, 0);
-  CHECK(f.stats.limbs[0].armor.currentDp == 475);
-  CHECK(f.stats.limbs[2].armor.currentDp == 400);
-  CHECK(f.stats.limbs[1].armor.currentDp == 500);
+  CHECK(f.stats.limbs[0].armor.current_dp == 475);
+  CHECK(f.stats.limbs[2].armor.current_dp == 400);
+  CHECK(f.stats.limbs[1].armor.current_dp == 500);
   CHECK(Battle_limbArmorDpLoss[7] == 207);
 }
 

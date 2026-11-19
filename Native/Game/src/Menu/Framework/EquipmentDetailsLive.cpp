@@ -23,7 +23,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -133,7 +132,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
     if (stats == nullptr) {
       return std::nullopt;
     }
-    return Items::Live::Typed(stats->weapon);
+    return stats->weapon;
   }
 
   std::optional<Items::ShieldLoadout> EquippedShield() override {
@@ -141,7 +140,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
     if (stats == nullptr) {
       return std::nullopt;
     }
-    return Items::Live::Typed(stats->shield);
+    return stats->shield;
   }
 
   std::optional<Items::ArmorLoadout> EquippedArmor(int limb) override {
@@ -150,15 +149,14 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
         static_cast<std::size_t>(limb) >= std::size(stats->limbs)) {
       return std::nullopt;
     }
-    return Items::Live::Typed(
-        stats->limbs[static_cast<std::size_t>(limb)].armor);
+    return stats->limbs[static_cast<std::size_t>(limb)].armor;
   }
 
   std::optional<Items::ArmorLoadout> InventoryArmorLoadout(
       const Items::InventoryArmor& armor) override {
-    Items_ArmorLoadout loadout{};
+    VS::Items::ArmorLoadout loadout{};
     Items::LoadLiveInventoryArmorStats(&loadout, &armor);
-    return Items::Live::Typed(loadout);
+    return loadout;
   }
 
   std::optional<ActorComparisonStats> ActorStats(int actor) override {
@@ -172,8 +170,9 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
     }
     const Battle_ActorStats& stats = *record->stats;
     return ActorComparisonStats{
-        .accessory = {stats.accessory.currentStr, stats.accessory.currentInt,
-                      stats.accessory.currentAgility},
+        .accessory = {stats.accessory.current_strength,
+                      stats.accessory.current_intelligence,
+                      stats.accessory.current_agility},
         .base = {stats.strength, stats.intelligence, stats.agility},
         .totals = {stats.totalStrength, stats.totalIntelligence,
                    stats.totalAgility},
@@ -440,42 +439,39 @@ void UpdateLiveDpPpBars(int flags) {
       [flags](EquipmentDetailsContext& ctx) { UpdateDpPpBars(ctx, flags); });
 }
 
-void PopulateLiveWeaponStats(Items_WeaponLoadout* weapon) {
+void PopulateLiveWeaponStats(const VS::Items::WeaponLoadout* weapon) {
   if (weapon == nullptr) {
     Warn("missing weapon loadout for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*weapon);
   const Battle_ActorStats* const ashley = AshleyStats();
   const bool equipped = ashley != nullptr && weapon == &ashley->weapon;
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
-        VS::Menu::Status::PopulateWeaponStats(ctx.state, typed, equipped);
+        VS::Menu::Status::PopulateWeaponStats(ctx.state, *weapon, equipped);
     SetEnabledStatPages(ctx, effects.enabled_pages);
   });
 }
 
-void PopulateLiveShieldStats(Items_ShieldLoadout* shield) {
+void PopulateLiveShieldStats(const VS::Items::ShieldLoadout* shield) {
   if (shield == nullptr) {
     Warn("missing shield loadout for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*shield);
   const Battle_ActorStats* const ashley = AshleyStats();
   const bool equipped = ashley != nullptr && shield == &ashley->shield;
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
-        VS::Menu::Status::PopulateShieldStats(ctx.state, typed, equipped);
+        VS::Menu::Status::PopulateShieldStats(ctx.state, *shield, equipped);
     SetEnabledStatPages(ctx, effects.enabled_pages);
   });
 }
 
-void PopulateLiveArmorStats(Items_ArmorLoadout* armor) {
+void PopulateLiveArmorStats(const VS::Items::ArmorLoadout* armor) {
   if (armor == nullptr) {
     Warn("missing armor loadout for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*armor);
   const Battle_ActorStats* const ashley = AshleyStats();
   bool equipped = false;
   if (ashley != nullptr) {
@@ -485,33 +481,32 @@ void PopulateLiveArmorStats(Items_ArmorLoadout* armor) {
   }
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
-        VS::Menu::Status::PopulateArmorStats(ctx.state, typed, equipped);
+        VS::Menu::Status::PopulateArmorStats(ctx.state, *armor, equipped);
     SetEnabledStatPages(ctx, effects.enabled_pages);
   });
 }
 
-void PopulateLiveAccessoryStats(Items_AccessorySpawnLoadout* accessory) {
+void PopulateLiveAccessoryStats(
+    const VS::Items::AccessorySpawnLoadout* accessory) {
   if (accessory == nullptr) {
     Warn("missing accessory loadout for status details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*accessory);
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
-        VS::Menu::Status::PopulateAccessoryStats(ctx.state, typed);
+        VS::Menu::Status::PopulateAccessoryStats(ctx.state, *accessory);
     SetEnabledStatPages(ctx, effects.enabled_pages);
   });
 }
 
-void PopulateLiveBladeStats(Items_WeaponLoadout* weapon) {
+void PopulateLiveBladeStats(const VS::Items::WeaponLoadout* weapon) {
   if (weapon == nullptr) {
     Warn("missing weapon loadout for blade details");
     return;
   }
-  const auto typed = VS::Items::Live::Typed(*weapon);
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects = VS::Menu::Status::PopulateBladeStats(
-        ctx.state, typed.blade, typed.current_pp, typed.max_pp);
+        ctx.state, weapon->blade, weapon->current_pp, weapon->max_pp);
     SetEnabledStatPages(ctx, effects.enabled_pages);
     UpdateDpPpBars(ctx, effects.dp_pp_bars);
   });

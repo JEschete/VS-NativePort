@@ -2715,13 +2715,13 @@ TEST_CASE("Unequipping Ashley's live shield clears every equipped mark",
   VS::Items::inventory = inventory;
   items::ShieldLoadout shield{};
   shield.base.id = 4;
-  live::Commit(state.stats.shield, shield);
+  state.stats.shield = shield;
   FakeStatusHost host(0);
   CHECK(items::EquipAshleyShield(shield, nullptr, inventory, host) ==
         ItemsStatus::kOk);
   ItemsWarnings warnings;
   inv::UnequipLiveShield();
-  CHECK(live::Typed(state.stats.shield) == shield);
+  CHECK(state.stats.shield == shield);
   const auto unequipped = VS::Items::inventory;
   for (const auto& entry : unequipped.shields) CHECK(entry.is_equipped == 0);
   CHECK(unequipped.weapons == inventory.weapons);
@@ -2735,17 +2735,16 @@ TEST_CASE("Ashley's live armour and accessory follow the equip rules",
   record = MakeInventoryArmor(0x21);
   ItemsWarnings warnings;
   items::EquipLiveAshleyArmor(2, &record);
-  CHECK(live::Typed(state.stats.limbs[2].armor) ==
-        ExpectedInventoryArmor(0x21));
-  CHECK(live::Typed(state.stats.limbs[1].armor) == items::ArmorLoadout{});
+  CHECK(state.stats.limbs[2].armor == ExpectedInventoryArmor(0x21));
+  CHECK(state.stats.limbs[1].armor == items::ArmorLoadout{});
   items::EquipLiveAshleyArmor(6, &record);
   items::EquipLiveAshleyAccessory(&record);
-  CHECK(live::Typed(state.stats.accessory) == ExpectedInventoryAccessory(0x21));
+  CHECK(state.stats.accessory == ExpectedInventoryAccessory(0x21));
 
-  auto rebuilt = live::Typed(state.stats.limbs[2].armor);
+  auto rebuilt = state.stats.limbs[2].armor;
   items::RebuildArmorClassAffinity(rebuilt);
   items::RebuildLiveArmorClassAffinity(&state.stats, 2);
-  CHECK(live::Typed(state.stats.limbs[2].armor) == rebuilt);
+  CHECK(state.stats.limbs[2].armor == rebuilt);
   items::RebuildLiveArmorClassAffinity(&state.stats, 6);
   items::RebuildLiveArmorClassAffinity(&state.stats, -1);
   items::RebuildLiveArmorClassAffinity(nullptr, 0);

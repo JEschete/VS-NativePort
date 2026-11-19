@@ -46,7 +46,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Items/Loadout.h"
+#include "Items/ItemRecords.hpp"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"

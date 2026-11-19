@@ -7,12 +7,6 @@
 struct Battle_ActionDefinition;
 struct Battle_ActorStats;
 struct Battle_HitResult;
-struct Items_AccessorySpawnLoadout;
-struct Items_ArmorLoadout;
-struct Items_ShieldLoadout;
-struct Items_ShieldSpawnLoadout;
-struct Items_WeaponLoadout;
-struct Items_WeaponSpawnLoadout;
 
 // Bindings from the battle actor records, Ashley's battle actor and the
 // inventory (VS::Items::inventory) to the typed equipment statistics,
@@ -21,13 +15,13 @@ struct Items_WeaponSpawnLoadout;
 // Each reports a refusal of the typed rule with a diagnostic; a null record,
 // a missing Ashley or an actor id past the battle actor table changes nothing.
 namespace VS::Items {
-void BuildLiveWeaponStatsFromParts(Items_WeaponLoadout* target,
-                                   const Items_WeaponSpawnLoadout* source);
-void BuildLiveShieldStatsFromParts(Items_ShieldLoadout* target,
-                                   const Items_ShieldSpawnLoadout* source);
-void BuildLiveAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target,
+void BuildLiveWeaponStatsFromParts(VS::Items::WeaponLoadout* target,
+                                   const VS::Items::WeaponSpawnLoadout* source);
+void BuildLiveShieldStatsFromParts(VS::Items::ShieldLoadout* target,
+                                   const VS::Items::ShieldSpawnLoadout* source);
+void BuildLiveAccessoryStatsFromPart(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::AccessoryInit* source);
-void BuildLiveArmorStatsFromPart(Items_ArmorLoadout* target,
+void BuildLiveArmorStatsFromPart(VS::Items::ArmorLoadout* target,
                                  const VS::Items::ArmorInit* source);
 
 void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
@@ -40,13 +34,13 @@ void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
                                const VS::Items::InventoryGem* source);
 
 // The part references name slots of Ashley's inventory.
-void LoadLiveInventoryWeaponStats(Items_WeaponLoadout* target,
+void LoadLiveInventoryWeaponStats(VS::Items::WeaponLoadout* target,
                                   const VS::Items::InventoryWeapon* source);
-void LoadLiveInventoryShieldStats(Items_ShieldLoadout* target,
+void LoadLiveInventoryShieldStats(VS::Items::ShieldLoadout* target,
                                   const VS::Items::InventoryShield* source);
-void LoadLiveInventoryArmorStats(Items_ArmorLoadout* target,
+void LoadLiveInventoryArmorStats(VS::Items::ArmorLoadout* target,
                                  const VS::Items::InventoryArmor* source);
-void LoadLiveInventoryAccessoryStats(Items_AccessorySpawnLoadout* target,
+void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::InventoryArmor* source);
 
 // Equip Ashley (Battle_characterState) from her inventory.
@@ -68,10 +62,10 @@ void WriteLiveInventoryArmorStats(VS::Items::InventoryArmor* target,
 // Store a loadout back into `target` and the parts it references in
 // Ashley's inventory.
 void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
-                                   Items_WeaponLoadout* source);
+                                   VS::Items::WeaponLoadout* source);
 void StoreLiveInventoryAccessoryStats(
     VS::Items::InventoryArmor* target,
-    const Items_AccessorySpawnLoadout* source);
+    const VS::Items::AccessorySpawnLoadout* source);
 
 void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
                                    int limb_index);

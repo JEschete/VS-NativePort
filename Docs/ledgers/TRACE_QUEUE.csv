@@ -442,7 +442,6 @@ T00510,type,3,Effects::TransformControlView,func_800D6508_t,size 0xD0,Views a tr
 T00321,type,3,Field::MpdPolygonGroupHeader,_mpdGeometryHeader,size 0x40,Is the 64-byte header of one MPD polygon group; its contents are not read by decompiled code.,,,OnDisc
 T00337,type,3,Field::MpdSectionE,_mpdRoomSectionE,size 0x14,Heads an MPD section holding one or two integer arrays whose purpose is unidentified.,,,OnDisc
 T00221,type,3,Field::RoomLoadResetBlock,D_800F18C8_t,size 0x18,Holds a block of values cleared when a room finishes loading.,,Field::roomLoadResetBlock=0x800F18C8,State
-T00681,type,3,Items::WeaponReservedBlock,vs_battle_uiWeapon_unk,size 0x30,Declares 24 reserved halfwords of a weapon's statistics; not read.,,,State
 T00585,type,3,Menu::Files::PrimitiveBuffer,primBuf_t,size 0x40,Holds one tagged file menu primitive.,,,Packet
 T00248,type,3,Menu::Framework::PreviewPoseBytes,D_800F4538_unk58_3,size 0x4,Views four bytes of an actor record while the preview pose is reset.,,,State
 T00317,type,3,Menu::Manual::BackgroundChunkWidths,_menuBgChunkWidths_t,size 0xC,Gives the widths of the manual background's scroll-fade chunks.,,,Value

@@ -54,10 +54,10 @@ std::optional<ActorCondition> ReadCondition(const Battle_ActorStats* stats) {
       stats->currentMp,
       stats->maxMp,
       static_cast<std::uint32_t>(stats->statuses),
-      static_cast<std::int16_t>(stats->weapon.currentDp),
-      static_cast<std::int16_t>(stats->weapon.maxDp),
-      static_cast<std::int16_t>(stats->shield.currentDp),
-      static_cast<std::int16_t>(stats->shield.maxDp),
+      static_cast<std::int16_t>(stats->weapon.current_dp),
+      static_cast<std::int16_t>(stats->weapon.max_dp),
+      static_cast<std::int16_t>(stats->shield.current_dp),
+      static_cast<std::int16_t>(stats->shield.max_dp),
   };
 }
 }  // namespace

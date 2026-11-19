@@ -66,7 +66,7 @@ struct ComparisonFixture {
                 sizeof saved_totals);
     stats.strength = stats.intelligence = stats.agility = 100;
     stats.totalStrength = stats.totalIntelligence = stats.totalAgility = 100;
-    stats.accessory.currentInt = 1;
+    stats.accessory.current_intelligence = 1;
     actor.stats = &stats;
     Battle_actors[0] = &actor;
   }

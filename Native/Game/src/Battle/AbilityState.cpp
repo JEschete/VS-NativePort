@@ -6,7 +6,6 @@
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 

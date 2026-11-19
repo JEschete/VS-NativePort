@@ -1185,7 +1185,7 @@ void CheckCachedTargetForecasts(const nlohmann::json& data) {
 TEST_CASE("Player observations retain native weapon geometry and hostility",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
-  fixture.player_stats.weapon.currentPp = 37;
+  fixture.player_stats.weapon.current_pp = 37;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.actors.size() == 2);

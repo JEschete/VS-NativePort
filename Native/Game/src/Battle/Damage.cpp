@@ -10,7 +10,6 @@
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 

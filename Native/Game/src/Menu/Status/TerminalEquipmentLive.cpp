@@ -51,7 +51,8 @@ constexpr std::int32_t kEquipmentListStyle = 0x19142;
                                       : std::span<const std::uint8_t>{};
   }
   if (ref.source == Framework::TextSource::kWeaponName) {
-    return Encoded(ByteView(actor.weapon.name, sizeof(actor.weapon.name)));
+    return Encoded(
+        ByteView(actor.weapon.name.data(), actor.weapon.name.size()));
   }
   return Encoded(host.TextBytes(ref));
 }
@@ -126,10 +127,8 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
     auto* row = Invoke([=] {
       Framework::LiveItemRowsHost items;
       return equipment == kWeapon
-                 ? SetWeaponComponentRow(
-                       items, part, Items::Live::Typed(actor->weapon), slide)
-                 : SetShieldGemRow(items, part,
-                                   Items::Live::Typed(actor->shield), slide);
+                 ? SetWeaponComponentRow(items, part, actor->weapon, slide)
+                 : SetShieldGemRow(items, part, actor->shield, slide);
     });
     return row != nullptr || absent;
   }
@@ -160,10 +159,9 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
     if (!text.name || !text.description) {
       return std::nullopt;
     }
-    auto name =
-        row == kWeapon
-            ? Encoded(ByteView(actor->weapon.name, sizeof(actor->weapon.name)))
-            : Resolve(*text.name, buffer, *actor, items);
+    auto name = row == kWeapon ? Encoded(ByteView(actor->weapon.name.data(),
+                                                  actor->weapon.name.size()))
+                               : Resolve(*text.name, buffer, *actor, items);
     auto description = Resolve(*text.description, buffer, *actor, items);
     if (name.empty() || description.empty()) {
       return std::nullopt;
@@ -309,21 +307,17 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
                                        std::span<std::uint8_t> buffer,
                                        Framework::LiveItemRowsHost& items) {
     if (row == kWeapon) {
-      return Framework::FormatWeaponRow(items, Items::Live::Typed(actor.weapon),
-                                        buffer);
+      return Framework::FormatWeaponRow(items, actor.weapon, buffer);
     }
     if (row == kShield) {
-      return Framework::FormatShieldRow(items, Items::Live::Typed(actor.shield),
-                                        buffer);
+      return Framework::FormatShieldRow(items, actor.shield, buffer);
     }
     if (row - kFirstArmor < LimbRows(actor)) {
       return Framework::FormatArmorRow(
-          items, Items::Live::Typed(actor.limbs[row - kFirstArmor].armor),
-          buffer);
+          items, actor.limbs[row - kFirstArmor].armor, buffer);
     }
     Items::InventoryArmor accessory{};
-    Items::StoreInventoryAccessoryStats(accessory,
-                                        Items::Live::Typed(actor.accessory));
+    Items::StoreInventoryAccessoryStats(accessory, actor.accessory);
     return Framework::FormatInventoryArmorRow(items, accessory, buffer);
   }
 };

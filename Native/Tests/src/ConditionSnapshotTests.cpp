@@ -71,7 +71,7 @@ TEST_CASE("The planner-row binding writes only listed actors' rows",
   stats.currentHp = 7;
   stats.maxHp = 9;
   stats.statuses = 1 << 3;
-  stats.shield.maxDp = 50;
+  stats.shield.max_dp = 50;
   std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   std::memset(rows.data(), 0xA5, sizeof rows);

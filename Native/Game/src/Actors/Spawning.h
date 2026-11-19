@@ -2,7 +2,6 @@
 #pragma once
 #include "Actors/CharacterInit.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
 extern Actors_CharacterInit Actors_ashleyInitialLoadout;

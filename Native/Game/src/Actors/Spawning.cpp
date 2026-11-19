@@ -4,7 +4,6 @@
 
 #include "Actors/CharacterInit.h"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
 // decomp: D_800FAB18 (D_800FAB18@src/BATTLE/INITBTL.PRG/18.c)

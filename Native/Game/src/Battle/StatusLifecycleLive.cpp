@@ -53,15 +53,14 @@ StatusLifecycleState Load(const Battle_ActorStats& stats) {
                          static_cast<std::uint8_t>(stats.mobilityLimb1)},
       .actor_id = stats.actorId,
       .analyzed = stats.isAnalyzed != 0,
-      .weapon = Items::Live::Typed(stats.weapon),
-      .shield = Items::Live::Typed(stats.shield)};
+      .weapon = stats.weapon,
+      .shield = stats.shield};
   for (std::size_t index = 0; index < state.timers.size(); ++index) {
     state.timers.at(index) = stats.statusTimers[index];
   }
   for (std::size_t index = 0; index < state.limbs.size(); ++index) {
     const auto& limb = stats.limbs[index];
-    state.limbs.at(index) = {limb.hp, limb.maxHp, limb.nameIndex,
-                             Items::Live::Typed(limb.armor)};
+    state.limbs.at(index) = {limb.hp, limb.maxHp, limb.nameIndex, limb.armor};
   }
   return state;
 }
@@ -84,8 +83,8 @@ void Store(const StatusLifecycleState& state, Battle_ActorStats& stats) {
   stats.mobilityLimb1 = state.mobility_limbs.at(1);
   stats.actorId = state.actor_id;
   stats.isAnalyzed = state.analyzed;
-  Items::Live::Commit(stats.weapon, state.weapon);
-  Items::Live::Commit(stats.shield, state.shield);
+  stats.weapon = state.weapon;
+  stats.shield = state.shield;
   for (std::size_t index = 0; index < state.timers.size(); ++index) {
     stats.statusTimers[index] = state.timers.at(index);
   }
@@ -94,7 +93,7 @@ void Store(const StatusLifecycleState& state, Battle_ActorStats& stats) {
     stats.limbs[index].hp = limb.hp;
     stats.limbs[index].maxHp = limb.max_hp;
     stats.limbs[index].nameIndex = limb.name_index;
-    Items::Live::Commit(stats.limbs[index].armor, limb.armor);
+    stats.limbs[index].armor = limb.armor;
   }
 }
 

@@ -129,28 +129,26 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
 }  // namespace
 
 // decomp: vs_menuD_initUiWeapon, MENU/MENUD.PRG/234.c:21; 80102A34.
-void BuildLiveWeaponStats(Items_WeaponLoadout* target,
+void BuildLiveWeaponStats(VS::Items::WeaponLoadout* target,
                           const VS::Items::InventoryWeapon* source,
                           VS::Items::ContainerData* container) {
   Items::LiveContainerWorld records(container);
-  auto native =
-      target == nullptr ? Items::WeaponLoadout{} : Items::Live::Typed(*target);
+  auto native = target == nullptr ? Items::WeaponLoadout{} : *target;
   const auto status = BuildWeaponStats(native, source, records);
   if (target == nullptr) Refuse("missing weapon statistics target");
   Items::Live::WarnRefusal("BuildContainerWeaponStats", status);
-  Items::Live::Commit(*target, native);
+  *target = native;
 }
 
 // decomp: vs_menuD_initUiShield, MENU/MENUD.PRG/234.c:57; 80102BB0.
-void BuildLiveShieldStats(Items_ShieldLoadout* target,
+void BuildLiveShieldStats(VS::Items::ShieldLoadout* target,
                           const VS::Items::InventoryShield* source,
                           VS::Items::ContainerData* container) {
   Items::LiveContainerWorld records(container);
-  auto native =
-      target == nullptr ? Items::ShieldLoadout{} : Items::Live::Typed(*target);
+  auto native = target == nullptr ? Items::ShieldLoadout{} : *target;
   BuildShieldStats(native, source, records);
   if (target == nullptr) Refuse("missing shield statistics target");
-  Items::Live::Commit(*target, native);
+  *target = native;
 }
 
 // decomp: func_80103D50, MENU/MENUD.PRG/234.c:659; 80103D50.

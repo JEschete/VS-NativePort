@@ -2938,7 +2938,6 @@
     <ClInclude Include="include\Items\Inventory.hpp" />
     <ClInclude Include="include\Items\InventoryLive.hpp" />
     <ClInclude Include="include\Items\ItemRecords.hpp" />
-    <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Items\Loot.hpp" />
     <ClInclude Include="include\Items\LootLive.hpp" />
     <ClInclude Include="include\Items\Recovery.hpp" />

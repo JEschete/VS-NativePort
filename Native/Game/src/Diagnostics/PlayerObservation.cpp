@@ -93,9 +93,9 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
   snapshot.status_immunities =
       static_cast<std::uint32_t>(stats.statusImmunities);
   InspectActorActions(stats, snapshot);
-  snapshot.base_attack_type = stats.weapon.actionType;
-  snapshot.shield_pp = stats.shield.currentPp;
-  snapshot.weapon_pp = stats.weapon.currentPp;
+  snapshot.base_attack_type = stats.weapon.action_type;
+  snapshot.shield_pp = stats.shield.current_pp;
+  snapshot.weapon_pp = stats.weapon.current_pp;
   // Original 7CD68.c:437 reads this four-byte range shape without modifying it.
   constexpr int kRangeUnit = 32;
   Battle_Ai_ActionRangeShape range{};

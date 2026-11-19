@@ -2734,7 +2734,7 @@ T00314.004,T00314,_limbInit,4,affinities,0,signed char[8],,,,affinities,Limb aff
 T00314.005,T00314,_limbInit,5,actions,0,_actions[4],,,,actions,Actions the limb can perform,high,source:146C.c:6260
 T00314.006,T00314,_limbInit,6,unk20,1,_armorIntermediate,,,,armor,Armor worn on the limb,high,source:146C.c:6253
 T00314.007,T00314,_limbInit,7,dpSplash,0,char[6],,,,dpSplash,Damage-point splash values,high,source:146C.c:6269
-T00314.008,T00314,_limbInit,8,unk5A,1,char[2],,,,reserved5A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:31;declaration-only;source:146C.h:856
+T00314.008,T00314,_limbInit,8,unk5A,1,char[2],,,,reserved5A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:30;declaration-only;source:146C.h:856
 T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,Named in the fork; see cited use,med,source:5BF94.c:5191
 T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Named in the fork; see cited use,med,source:6F014.c:585
 T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,itemCategory,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:265
@@ -5713,9 +5713,9 @@ T00630.021,T00630,vs_battle_actor,21,unk2A,1,u_char,,,bladeModelId,bladeId,Blade
 T00630.022,T00630,vs_battle_actor,22,unk2B,1,u_char,,,shieldModelId,shieldId,Shield model id,med,source:146C.c:6301
 T00630.023,T00630,vs_battle_actor,23,unk2C,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),,,last trigger tile and movement mode,lastTriggerTile,Tile word last checked for floor triggers,med,source:146C.c:5541
 T00630.024,T00630,vs_battle_actor,24,unk30_0,1,u_short,4,,,aiGroup,AI group number other actors link to,med,source:7CD68.c:582
-T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:462;declaration-only;source:146C.h:594
+T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:461;declaration-only;source:146C.h:594
 T00630.026,T00630,vs_battle_actor,26,unk30_9,1,u_int,5,,,aiLinkedGroup,AI group this actor follows or guards,med,source:7CD68.c:582
-T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:464;declaration-only;source:146C.h:596
+T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:463;declaration-only;source:146C.h:596
 T00630.028,T00630,vs_battle_actor,28,unk34,1,int,,,,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:597
 T00630.029,T00630,vs_battle_actor,29,unk38,1,int,,,,templateWord2C,Word 0x2C of the actor template; not read afterwards,low,source:146C.c:6757
 T00630.030,T00630,vs_battle_actor,30,unk3C,1,vs_battle_actor2 *,,,combatStats,stats,Combat statistics,high,source:146C.c:6600
@@ -5767,11 +5767,11 @@ T00631.041,T00631,vs_battle_actor2,41,unk957,1,u_char,,,,actorId,Actor slot inde
 T00631.042,T00631,vs_battle_actor2,42,miscItem,0,vs_battle_uiMisc,,,,dropItem,First item the actor drops,med,source:146C.c:6747
 T00631.043,T00631,vs_battle_actor2,43,unk95C,1,vs_battle_uiMisc,,,,secondDropItem,Second item the actor drops,med,source:146C.c:6749
 T00631.044,T00631,vs_battle_actor2,44,unk960,1,vs_battle_uiMiscRand,,,,randomDropItem,"Third item the actor drops, with a drop rate",med,source:146C.c:1745
-T00632.000,T00632,vs_battle_actor2_flags,0,unk0,1,u_short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:149;declaration-only;source:146C.h:450
-T00632.001,T00632,vs_battle_actor2_flags,1,unk2_0,1,char,1,,,reserved2Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:150;declaration-only;source:146C.h:451
-T00632.002,T00632,vs_battle_actor2_flags,2,unk2_1,1,char,1,,,reserved2Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:151;declaration-only;source:146C.h:452
-T00632.003,T00632,vs_battle_actor2_flags,3,unk2_2,1,char,6,,,reserved2Bit2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:152;declaration-only;source:146C.h:453
-T00632.004,T00632,vs_battle_actor2_flags,4,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:153;declaration-only;source:146C.h:454
+T00632.000,T00632,vs_battle_actor2_flags,0,unk0,1,u_short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:148;declaration-only;source:146C.h:450
+T00632.001,T00632,vs_battle_actor2_flags,1,unk2_0,1,char,1,,,reserved2Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:149;declaration-only;source:146C.h:451
+T00632.002,T00632,vs_battle_actor2_flags,2,unk2_1,1,char,1,,,reserved2Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:150;declaration-only;source:146C.h:452
+T00632.003,T00632,vs_battle_actor2_flags,3,unk2_2,1,char,6,,,reserved2Bit2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:151;declaration-only;source:146C.h:453
+T00632.004,T00632,vs_battle_actor2_flags,4,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Actor.h:152;declaration-only;source:146C.h:454
 T00633.000,T00633,vs_battle_actor4,0,unk0,1,char[1512],,,,storage,Slot storage,low,declaration-only;source:146C.h:439
 T00634.000,T00634,vs_battle_actor_dat,0,unk0,1,vs_battle_actor_dat2,,,,core,Actor and model record,high,source:146C.c:6507
 T00634.001,T00634,vs_battle_actor_dat,1,unkB2C,1,char[6024],,,,reservedB2C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorAllocation.h:28;declaration-only;source:146C.h:619
@@ -5783,9 +5783,9 @@ T00635.003,T00635,vs_battle_actor_dat2,3,unk16C,1,int,,,,reserved16C,Not read by
 T00635.004,T00635,vs_battle_actor_dat2,4,unk170,1,int,,,,reserved170,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorAllocation.h:21;declaration-only;source:146C.h:613
 T00635.005,T00635,vs_battle_actor_dat2,5,unk174,1,int,,,,reserved174,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorAllocation.h:22;declaration-only;source:146C.h:614
 T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,actionId,Action in the slot,high,source:146C.c:6260
-T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:182;source:146C.c:6261
+T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:181;source:146C.c:6261
 T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,effectModelId,Effect model shown when the action is presented,med,source:146C.c:6262
-T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:184;source:146C.c:6263
+T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:183;source:146C.c:6263
 T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,width,Tile columns,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:12
 T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,height,Tile rows,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:13
 T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,reserved08,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Background.h:19;declaration-only;source:2842C.h:14
@@ -5830,7 +5830,7 @@ T00640.016,T00640,vs_battle_charInitData,16,unk2C,1,int,,,,opaque2C,Copied into 
 T00640.017,T00640,vs_battle_charInitData,17,unk30,1,char,,,,opaque30,Copied into the actor state; meaning not established,low,source:146C.c:6215
 T00640.018,T00640,vs_battle_charInitData,18,unk31,1,char,,,,opaque31,Copied into the actor state; meaning not established,low,source:146C.c:6216
 T00640.019,T00640,vs_battle_charInitData,19,unk32,1,char,,,,opaque32,Copied into the actor state; meaning not established,low,source:146C.c:6217
-T00640.020,T00640,vs_battle_charInitData,20,unk33,1,char,,,,reserved33,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:63;declaration-only;source:146C.h:880
+T00640.020,T00640,vs_battle_charInitData,20,unk33,1,char,,,,reserved33,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:62;declaration-only;source:146C.h:880
 T00640.021,T00640,vs_battle_charInitData,21,weapon,0,vs_battle_weaponIntermediate,,,,weapon,Equipped weapon,high,source:146C.c:6220
 T00640.022,T00640,vs_battle_charInitData,22,shield,0,vs_battle_shieldIntermediate,,,,shield,Equipped shield,high,source:146C.c:6226
 T00640.023,T00640,vs_battle_charInitData,23,accessory,0,_accessoryIntermediate,,,,accessory,Equipped accessory,high,source:146C.c:6227
@@ -5980,7 +5980,7 @@ T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,edge_qu
 T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,,base,Shield part stats,med,source:146C.c:6597;use cited by sanity pass;source:146C.h:775
 T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
 T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
-T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:778
+T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:778
 T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
 T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,integers,Named in the fork; see cited use,med,source:4A0A8.c:921
 T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,strings,Named in the fork; see cited use,med,source:5BF94.c:1265
@@ -6023,31 +6023,31 @@ T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,speakerTexture,
 T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,done,Set when the text has finished,med,source:5BF94.c:1747
 T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,opaque3Bit7,Tested first each update; meaning not established; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TextBoxes.h:27;source:5BF94.c:3952
 T00673.000,T00673,vs_battle_uiAccessory,0,accessory,0,vs_battle_uiEquipment,,,,accessory,Accessory part stats,med,source:146C.c:1084;use cited by sanity pass;source:146C.h:414
-T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,currentStr,Strength contribution,med,source:146C.c:1086;use cited by sanity pass;source:146C.h:415
-T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,currentInt,Intelligence contribution,med,source:146C.c:1087;use cited by sanity pass;source:146C.h:416
-T00673.003,T00673,vs_battle_uiAccessory,3,currentAgility,0,short,,,,currentAgility,Agility contribution,med,source:146C.c:1088;use cited by sanity pass;source:146C.h:417
-T00673.004,T00673,vs_battle_uiAccessory,4,dropRate,0,char,,,,dropRate,Drop chance,med,source:146C.c:1654;use cited by sanity pass;source:146C.h:418
+T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,current_strength,Strength contribution,med,source:146C.c:1086;use cited by sanity pass;source:146C.h:415;renamed from currentStr (#441)
+T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,current_intelligence,Intelligence contribution,med,source:146C.c:1087;use cited by sanity pass;source:146C.h:416;renamed from currentInt (#441)
+T00673.003,T00673,vs_battle_uiAccessory,3,currentAgility,0,short,,,,current_agility,Agility contribution,med,source:146C.c:1088;use cited by sanity pass;source:146C.h:417
+T00673.004,T00673,vs_battle_uiAccessory,4,dropRate,0,char,,,,drop_rate,Drop chance,med,source:146C.c:1654;use cited by sanity pass;source:146C.h:418
 T00673.005,T00673,vs_battle_uiAccessory,5,index,0,u_char,,,,index,Inventory index,med,declaration-only;source:146C.h:419
 T00673.006,T00673,vs_battle_uiAccessory,6,types,0,u_short[4],,,,types,Damage-type resistances,med,source:16C.c:325;use cited by sanity pass;source:146C.h:420
 T00673.007,T00673,vs_battle_uiAccessory,7,classes,0,u_short[8],,,,classes,Enemy-class resistances,med,source:146C.c:11374;use cited by sanity pass;source:146C.h:421
 T00673.008,T00673,vs_battle_uiAccessory,8,affinities,0,u_short[8],,,,affinities,Elemental affinities,med,source:16C.c:324;use cited by sanity pass;source:146C.h:422
 T00674.000,T00674,vs_battle_uiArmor,0,armor,0,vs_battle_uiEquipment,,,,armor,Named in the fork; see cited use,med,source:146C.c:1109
-T00674.001,T00674,vs_battle_uiArmor,1,currentDp,0,u_short,,,,currentDp,Named in the fork; see cited use,med,source:146C.c:1112
-T00674.002,T00674,vs_battle_uiArmor,2,maxDp,0,u_short,,,,maxDp,Named in the fork; see cited use,med,source:146C.c:1113
-T00674.003,T00674,vs_battle_uiArmor,3,currentStr,0,short,,,,currentStr,Named in the fork; see cited use,med,source:146C.c:1114
-T00674.004,T00674,vs_battle_uiArmor,4,baseStr,0,u_short,,,,baseStr,Named in the fork; see cited use,med,source:146C.c:1114
-T00674.005,T00674,vs_battle_uiArmor,5,currentInt,0,short,,,,currentInt,Named in the fork; see cited use,med,source:146C.c:1115
-T00674.006,T00674,vs_battle_uiArmor,6,baseInt,0,u_short,,,,baseInt,Named in the fork; see cited use,med,source:146C.c:1115
-T00674.007,T00674,vs_battle_uiArmor,7,currentAgility,0,short,,,,currentAgility,Named in the fork; see cited use,med,source:146C.c:1116
-T00674.008,T00674,vs_battle_uiArmor,8,baseAgility,0,u_short,,,,baseAgility,Named in the fork; see cited use,med,source:146C.c:1116
+T00674.001,T00674,vs_battle_uiArmor,1,currentDp,0,u_short,,,,current_dp,Named in the fork; see cited use,med,source:146C.c:1112
+T00674.002,T00674,vs_battle_uiArmor,2,maxDp,0,u_short,,,,max_dp,Named in the fork; see cited use,med,source:146C.c:1113
+T00674.003,T00674,vs_battle_uiArmor,3,currentStr,0,short,,,,attributes.current_strength,Named in the fork; see cited use,med,source:146C.c:1114;renamed from currentStr (#441)
+T00674.004,T00674,vs_battle_uiArmor,4,baseStr,0,u_short,,,,attributes.base_strength,Named in the fork; see cited use,med,source:146C.c:1114;renamed from baseStr (#441)
+T00674.005,T00674,vs_battle_uiArmor,5,currentInt,0,short,,,,attributes.current_intelligence,Named in the fork; see cited use,med,source:146C.c:1115;renamed from currentInt (#441)
+T00674.006,T00674,vs_battle_uiArmor,6,baseInt,0,u_short,,,,attributes.base_intelligence,Named in the fork; see cited use,med,source:146C.c:1115;renamed from baseInt (#441)
+T00674.007,T00674,vs_battle_uiArmor,7,currentAgility,0,short,,,,attributes.current_agility,Named in the fork; see cited use,med,source:146C.c:1116;renamed from currentAgility (#441)
+T00674.008,T00674,vs_battle_uiArmor,8,baseAgility,0,u_short,,,,attributes.base_agility,Named in the fork; see cited use,med,source:146C.c:1116;renamed from baseAgility (#441)
 T00674.009,T00674,vs_battle_uiArmor,9,types,0,u_short[4],,,,types,Named in the fork; see cited use,med,source:146C.c:1120
-T00674.010,T00674,vs_battle_uiArmor,10,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1125
-T00674.011,T00674,vs_battle_uiArmor,11,unk88,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9596
-T00674.012,T00674,vs_battle_uiArmor,12,dropRate,0,char,,,,dropRate,Named in the fork; see cited use,med,source:146C.c:1138
-T00674.013,T00674,vs_battle_uiArmor,13,unk99,1,char,,,,opaque99,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:74;source:146C.c:1139
+T00674.010,T00674,vs_battle_uiArmor,10,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,class_affinity,Named in the fork; see cited use,med,source:146C.c:1125;renamed from classAffinityCurrent (#441)
+T00674.011,T00674,vs_battle_uiArmor,11,unk88,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinity_modifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9596
+T00674.012,T00674,vs_battle_uiArmor,12,dropRate,0,char,,,,drop_rate,Named in the fork; see cited use,med,source:146C.c:1138
+T00674.013,T00674,vs_battle_uiArmor,13,unk99,1,char,,,,opaque99,Copied from the armor template's byte 0x32 when the armor stats are built; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Items\EquipmentStats.cpp:214;source:upstream:src/BATTLE/BATTLE.PRG/146C.c:793;source:146C.c:1139
 T00674.014,T00674,vs_battle_uiArmor,14,index,0,u_char,,,,index,Named in the fork; see cited use,med,source:146C.c:1117
-T00674.015,T00674,vs_battle_uiArmor,15,unk9B,1,u_char,,,,reserved9B,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:76;declaration-only;source:146C.h:395
-T00674.016,T00674,vs_battle_uiArmor,16,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1127
+T00674.015,T00674,vs_battle_uiArmor,15,unk9B,1,u_char,,,,reserved9b,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:305;declaration-only;source:146C.h:395;renamed from reserved9B (#441)
+T00674.016,T00674,vs_battle_uiArmor,16,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,baseline,Named in the fork; see cited use,med,source:146C.c:1127;renamed from classAffinityBaseline (#441)
 T00675.000,T00675,vs_battle_uiEquipment,0,id,0,u_short,,,,id,Item identifier,med,source:146C.c:1548;use cited by sanity pass;source:146C.h:298
 T00675.001,T00675,vs_battle_uiEquipment,1,subId,0,signed char,,,,sub_id,Variant identifier,med,declaration-only;source:146C.h:299
 T00675.002,T00675,vs_battle_uiEquipment,2,wepId,0,signed char,,,,weapon_model_id,Weapon model identifier,med,source:146C.c:6596;use cited by sanity pass;source:146C.h:300
@@ -6082,63 +6082,63 @@ T00676.007,T00676,vs_battle_uiEquipment_limb,7,affinities,0,short[8],,,,affiniti
 T00676.008,T00676,vs_battle_uiEquipment_limb,8,armor,0,vs_battle_uiArmor,,,,armor,Equipped armor statistics,high,source:146C.c:1421
 T00677.000,T00677,vs_battle_uiMisc,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:427
 T00677.001,T00677,vs_battle_uiMisc,1,count,0,char,,,,count,Item count,med,source:146C.c:6748;use cited by sanity pass;source:146C.h:428
-T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:593;declaration-only;source:146C.h:429
+T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:592;declaration-only;source:146C.h:429
 T00678.000,T00678,vs_battle_uiMiscRand,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:433
-T00678.001,T00678,vs_battle_uiMiscRand,1,dropRate,0,char,,,,dropRate,Drop chance,med,source:146C.c:1710;use cited by sanity pass;source:146C.h:434
-T00678.002,T00678,vs_battle_uiMiscRand,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:86;declaration-only;source:146C.h:435
-T00679.000,T00679,vs_battle_uiShield,0,unk0,1,int[6],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:92;declaration-only;source:146C.h:355
+T00678.001,T00678,vs_battle_uiMiscRand,1,dropRate,0,char,,,,drop_rate,Drop chance,med,source:146C.c:1710;use cited by sanity pass;source:146C.h:434
+T00678.002,T00678,vs_battle_uiMiscRand,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:598;declaration-only;source:146C.h:435
+T00679.000,T00679,vs_battle_uiShield,0,unk0,1,int[6],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:274;declaration-only;source:146C.h:355
 T00679.001,T00679,vs_battle_uiShield,1,base,0,vs_battle_uiEquipment,,,,base,Named in the fork; see cited use,med,source:146C.c:1033
 T00679.002,T00679,vs_battle_uiShield,2,gems,0,vs_battle_uiEquipment[3],,,,gems,Named in the fork; see cited use,med,source:146C.c:1036
-T00679.003,T00679,vs_battle_uiShield,3,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:146C.c:1039
-T00679.004,T00679,vs_battle_uiShield,4,dropRate,0,char,,,,dropRate,Named in the fork; see cited use,med,source:146C.c:1040
+T00679.003,T00679,vs_battle_uiShield,3,wepId,0,char,,,,weapon_model_id,Named in the fork; see cited use,med,source:146C.c:1039;renamed from wepId (#441)
+T00679.004,T00679,vs_battle_uiShield,4,dropRate,0,char,,,,drop_rate,Named in the fork; see cited use,med,source:146C.c:1040
 T00679.005,T00679,vs_battle_uiShield,5,index,0,u_char,,,,index,Named in the fork; see cited use,med,source:146C.c:1041
-T00679.006,T00679,vs_battle_uiShield,6,unkDB,1,char,,,,reservedDB,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:98;declaration-only;source:146C.h:361
-T00679.007,T00679,vs_battle_uiShield,7,currentPp,0,u_short,,,,currentPp,Named in the fork; see cited use,med,source:146C.c:1050
-T00679.008,T00679,vs_battle_uiShield,8,maxPp,0,u_short,,,,maxPp,Named in the fork; see cited use,med,source:146C.c:1051
-T00679.009,T00679,vs_battle_uiShield,9,currentDp,0,u_short,,,,currentDp,Named in the fork; see cited use,med,source:146C.c:1048
-T00679.010,T00679,vs_battle_uiShield,10,maxDp,0,u_short,,,,maxDp,Named in the fork; see cited use,med,source:146C.c:1049
-T00679.011,T00679,vs_battle_uiShield,11,currentStr,0,short,,,,currentStr,Named in the fork; see cited use,med,source:146C.c:1052
-T00679.012,T00679,vs_battle_uiShield,12,baseStr,0,u_short,,,,baseStr,Named in the fork; see cited use,med,source:146C.c:1052
-T00679.013,T00679,vs_battle_uiShield,13,currentInt,0,short,,,,currentInt,Named in the fork; see cited use,med,source:146C.c:1055
-T00679.014,T00679,vs_battle_uiShield,14,baseInt,0,u_short,,,,baseInt,Named in the fork; see cited use,med,source:146C.c:1055
-T00679.015,T00679,vs_battle_uiShield,15,currentAgility,0,short,,,,currentAgility,Named in the fork; see cited use,med,source:146C.c:1058
-T00679.016,T00679,vs_battle_uiShield,16,baseAgility,0,u_short,,,,baseAgility,Named in the fork; see cited use,med,source:146C.c:1058
+T00679.006,T00679,vs_battle_uiShield,6,unkDB,1,char,,,,reserved_db,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:280;declaration-only;source:146C.h:361
+T00679.007,T00679,vs_battle_uiShield,7,currentPp,0,u_short,,,,current_pp,Named in the fork; see cited use,med,source:146C.c:1050
+T00679.008,T00679,vs_battle_uiShield,8,maxPp,0,u_short,,,,max_pp,Named in the fork; see cited use,med,source:146C.c:1051
+T00679.009,T00679,vs_battle_uiShield,9,currentDp,0,u_short,,,,current_dp,Named in the fork; see cited use,med,source:146C.c:1048
+T00679.010,T00679,vs_battle_uiShield,10,maxDp,0,u_short,,,,max_dp,Named in the fork; see cited use,med,source:146C.c:1049
+T00679.011,T00679,vs_battle_uiShield,11,currentStr,0,short,,,,attributes.current_strength,Named in the fork; see cited use,med,source:146C.c:1052;renamed from currentStr (#441)
+T00679.012,T00679,vs_battle_uiShield,12,baseStr,0,u_short,,,,attributes.base_strength,Named in the fork; see cited use,med,source:146C.c:1052;renamed from baseStr (#441)
+T00679.013,T00679,vs_battle_uiShield,13,currentInt,0,short,,,,attributes.current_intelligence,Named in the fork; see cited use,med,source:146C.c:1055;renamed from currentInt (#441)
+T00679.014,T00679,vs_battle_uiShield,14,baseInt,0,u_short,,,,attributes.base_intelligence,Named in the fork; see cited use,med,source:146C.c:1055;renamed from baseInt (#441)
+T00679.015,T00679,vs_battle_uiShield,15,currentAgility,0,short,,,,attributes.current_agility,Named in the fork; see cited use,med,source:146C.c:1058;renamed from currentAgility (#441)
+T00679.016,T00679,vs_battle_uiShield,16,baseAgility,0,u_short,,,,attributes.base_agility,Named in the fork; see cited use,med,source:146C.c:1058;renamed from baseAgility (#441)
 T00679.017,T00679,vs_battle_uiShield,17,types,0,char[4],,,,types,Named in the fork; see cited use,med,source:146C.c:1045
-T00679.018,T00679,vs_battle_uiShield,18,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1064
-T00679.019,T00679,vs_battle_uiShield,19,unk134,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9618
-T00679.020,T00679,vs_battle_uiShield,20,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1063
+T00679.018,T00679,vs_battle_uiShield,18,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,class_affinity,Named in the fork; see cited use,med,source:146C.c:1064;renamed from classAffinityCurrent (#441)
+T00679.019,T00679,vs_battle_uiShield,19,unk134,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinity_modifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9618
+T00679.020,T00679,vs_battle_uiShield,20,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,baseline,Named in the fork; see cited use,med,source:146C.c:1063;renamed from classAffinityBaseline (#441)
 T00680.000,T00680,vs_battle_uiWeapon,0,name,0,char[24],,,,name,Named in the fork; see cited use,med,source:146C.c:1024
 T00680.001,T00680,vs_battle_uiWeapon,1,blade,0,vs_battle_uiEquipment,,,,blade,Named in the fork; see cited use,med,source:146C.c:973
 T00680.002,T00680,vs_battle_uiWeapon,2,grip,0,vs_battle_uiEquipment,,,,grip,Named in the fork; see cited use,med,source:146C.c:974
 T00680.003,T00680,vs_battle_uiWeapon,3,gems,0,vs_battle_uiEquipment[3],,,,gems,Named in the fork; see cited use,med,source:146C.c:977
-T00680.004,T00680,vs_battle_uiWeapon,4,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:146C.c:980
-T00680.005,T00680,vs_battle_uiWeapon,5,damageTypeValue,0,char,,,,damageTypeValue,Named in the fork; see cited use,med,source:146C.c:986
+T00680.004,T00680,vs_battle_uiWeapon,4,wepId,0,char,,,,weapon_model_id,Named in the fork; see cited use,med,source:146C.c:980;renamed from wepId (#441)
+T00680.005,T00680,vs_battle_uiWeapon,5,damageTypeValue,0,char,,,,damage_type_value,Named in the fork; see cited use,med,source:146C.c:986
 T00680.006,T00680,vs_battle_uiWeapon,6,risk,0,char,,,,risk,Named in the fork; see cited use,med,source:146C.c:987
-T00680.007,T00680,vs_battle_uiWeapon,7,unk10B,1,char,,,weapon recovery cost,recoveryDelay,Recovery delay after the weapon's attacks (20 for placeholders),med,source:146C.c:13178
-T00680.008,T00680,vs_battle_uiWeapon,8,dropRate,0,char,,,,dropRate,Named in the fork; see cited use,med,source:146C.c:981
+T00680.007,T00680,vs_battle_uiWeapon,7,unk10B,1,char,,,weapon recovery cost,recovery_delay,Recovery delay after the weapon's attacks (20 for placeholders),med,source:146C.c:13178
+T00680.008,T00680,vs_battle_uiWeapon,8,dropRate,0,char,,,,drop_rate,Named in the fork; see cited use,med,source:146C.c:981
 T00680.009,T00680,vs_battle_uiWeapon,9,index,0,u_char,,,,index,Named in the fork; see cited use,med,source:146C.c:982
-T00680.010,T00680,vs_battle_uiWeapon,10,damageType,0,u_char,,,,damageType,Named in the fork; see cited use,med,source:146C.c:984
-T00680.011,T00680,vs_battle_uiWeapon,11,actionType,0,u_char,,,,actionType,Named in the fork; see cited use,med,source:146C.c:985
-T00680.012,T00680,vs_battle_uiWeapon,12,currentPp,0,u_short,,,,currentPp,Named in the fork; see cited use,med,source:146C.c:993
-T00680.013,T00680,vs_battle_uiWeapon,13,maxPp,0,u_short,,,,maxPp,Named in the fork; see cited use,med,source:146C.c:994
-T00680.014,T00680,vs_battle_uiWeapon,14,currentDp,0,u_short,,,,currentDp,Named in the fork; see cited use,med,source:146C.c:990
-T00680.015,T00680,vs_battle_uiWeapon,15,maxDp,0,u_short,,,,maxDp,Named in the fork; see cited use,med,source:146C.c:991
-T00680.016,T00680,vs_battle_uiWeapon,16,currentStr,0,short,,,,currentStr,Named in the fork; see cited use,med,source:146C.c:995
-T00680.017,T00680,vs_battle_uiWeapon,17,baseStr,0,u_short,,,,baseStr,Named in the fork; see cited use,med,source:146C.c:995
-T00680.018,T00680,vs_battle_uiWeapon,18,currentInt,0,short,,,,currentInt,Named in the fork; see cited use,med,source:146C.c:998
-T00680.019,T00680,vs_battle_uiWeapon,19,baseInt,0,u_short,,,,baseInt,Named in the fork; see cited use,med,source:146C.c:998
-T00680.020,T00680,vs_battle_uiWeapon,20,currentAgility,0,short,,,,currentAgility,Named in the fork; see cited use,med,source:146C.c:1002
-T00680.021,T00680,vs_battle_uiWeapon,21,baseAgility,0,u_short,,,,baseAgility,Named in the fork; see cited use,med,source:146C.c:1002
+T00680.010,T00680,vs_battle_uiWeapon,10,damageType,0,u_char,,,,damage_type,Named in the fork; see cited use,med,source:146C.c:984
+T00680.011,T00680,vs_battle_uiWeapon,11,actionType,0,u_char,,,,action_type,Named in the fork; see cited use,med,source:146C.c:985
+T00680.012,T00680,vs_battle_uiWeapon,12,currentPp,0,u_short,,,,current_pp,Named in the fork; see cited use,med,source:146C.c:993
+T00680.013,T00680,vs_battle_uiWeapon,13,maxPp,0,u_short,,,,max_pp,Named in the fork; see cited use,med,source:146C.c:994
+T00680.014,T00680,vs_battle_uiWeapon,14,currentDp,0,u_short,,,,current_dp,Named in the fork; see cited use,med,source:146C.c:990
+T00680.015,T00680,vs_battle_uiWeapon,15,maxDp,0,u_short,,,,max_dp,Named in the fork; see cited use,med,source:146C.c:991
+T00680.016,T00680,vs_battle_uiWeapon,16,currentStr,0,short,,,,attributes.current_strength,Named in the fork; see cited use,med,source:146C.c:995;renamed from currentStr (#441)
+T00680.017,T00680,vs_battle_uiWeapon,17,baseStr,0,u_short,,,,attributes.base_strength,Named in the fork; see cited use,med,source:146C.c:995;renamed from baseStr (#441)
+T00680.018,T00680,vs_battle_uiWeapon,18,currentInt,0,short,,,,attributes.current_intelligence,Named in the fork; see cited use,med,source:146C.c:998;renamed from currentInt (#441)
+T00680.019,T00680,vs_battle_uiWeapon,19,baseInt,0,u_short,,,,attributes.base_intelligence,Named in the fork; see cited use,med,source:146C.c:998;renamed from baseInt (#441)
+T00680.020,T00680,vs_battle_uiWeapon,20,currentAgility,0,short,,,,attributes.current_agility,Named in the fork; see cited use,med,source:146C.c:1002;renamed from currentAgility (#441)
+T00680.021,T00680,vs_battle_uiWeapon,21,baseAgility,0,u_short,,,,attributes.base_agility,Named in the fork; see cited use,med,source:146C.c:1002;renamed from baseAgility (#441)
 T00680.022,T00680,vs_battle_uiWeapon,22,range,0,vs_battle_range_t,,,,range,Named in the fork; see cited use,med,source:146C.c:989
-T00680.023,T00680,vs_battle_uiWeapon,23,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1008
-T00680.024,T00680,vs_battle_uiWeapon,24,unk168,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9640
-T00680.025,T00680,vs_battle_uiWeapon,25,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1007
+T00680.023,T00680,vs_battle_uiWeapon,23,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,class_affinity,Named in the fork; see cited use,med,source:146C.c:1008;renamed from classAffinityCurrent (#441)
+T00680.024,T00680,vs_battle_uiWeapon,24,unk168,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,affinity_modifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9640
+T00680.025,T00680,vs_battle_uiWeapon,25,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,baseline,Named in the fork; see cited use,med,source:146C.c:1007;renamed from classAffinityBaseline (#441)
 T00681.000,T00681,vs_battle_uiWeapon_unk,0,unk0,1,u_short[24],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:151;declaration-only;source:146C.h:285
 T00682.000,T00682,vs_battle_weaponIntermediate,0,blade,0,vs_battle_uiEquipment,,,,blade,Blade part stats,med,declaration-only;source:146C.h:765
 T00682.001,T00682,vs_battle_weaponIntermediate,1,grip,0,vs_battle_uiEquipment,,,,grip,Grip part stats,med,declaration-only;source:146C.h:766
 T00682.002,T00682,vs_battle_weaponIntermediate,2,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:767
 T00682.003,T00682,vs_battle_weaponIntermediate,3,material,0,char,,,,material,Blade material,med,declaration-only;source:146C.h:768
-T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:769
+T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:769
 T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:770
 T00682.006,T00682,vs_battle_weaponIntermediate,6,name,0,char[24],,,,name,Weapon name in game text encoding,med,declaration-only;source:146C.h:771
 T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,boneCount,Number of bones,med,source:30DB0.c:632;use cited by sanity pass;source:3A1A0.h:403
@@ -6271,9 +6271,9 @@ T00695.008,T00695,vs_main_flags_t,8,unk8,1,char,,,,reserved_8,Not used by native
 T00695.009,T00695,vs_main_flags_t,9,unk9,1,char,,,,reserved_9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:36;declaration-only;source:main.h:250
 T00695.010,T00695,vs_main_flags_t,10,unkA,1,char,,,,reserved_a,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:37;declaration-only;source:main.h:251
 T00695.011,T00695,vs_main_flags_t,11,unkB,1,char,,,,reserved_b,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:38;declaration-only;source:main.h:252
-T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaque_c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:445;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
-T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaque_d,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:446;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
-T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaque_e,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:448;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
+T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaque_c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:443;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
+T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaque_d,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:444;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
+T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaque_e,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:446;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
 T00695.015,T00695,vs_main_flags_t,15,unkF,1,char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:42;declaration-only;source:main.h:256
 T00695.016,T00695,vs_main_flags_t,16,textBoxSelection,0,char,,,,text_box_selection,Named in the fork; see cited use,med,source:4A0A8.c:724
 T00695.017,T00695,vs_main_flags_t,17,unk11,1,char,,,,opaque_11,"Used, but its meaning is not established",low,source:5BF94.c:1590
@@ -6417,7 +6417,7 @@ T00697.011,T00697,vs_main_inventoryBlade,11,cost,0,char,,,,cost,Named in the for
 T00697.012,T00697,vs_main_inventoryBlade,12,damageType,0,char,2,,,damage_type,Named in the fork; see cited use,med,"source:146C.c:1160;native:bits 0-1 of InventoryBlade::type_bits, read through DamageType() and written through SetDamageType()"
 T00697.013,T00697,vs_main_inventoryBlade,13,costType,0,char,3,,,cost_type,Named in the fork; see cited use,med,"source:146C.c:1161;native:bits 2-4 of InventoryBlade::type_bits, read through CostType() and written through SetCostType()"
 T00697.014,T00697,vs_main_inventoryBlade,14,unk10_5,1,char,3,,,reserved_bits,Not read by decompiled code,low,"declaration-only;source:func_8006B57C_t.h:26;native:bits 5-7 of InventoryBlade::type_bits, read through ReservedBits() and written through SetReservedBits()"
-T00697.015,T00697,vs_main_inventoryBlade,15,unk11,1,char,,,,reserved11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:420;declaration-only;source:func_8006B57C_t.h:27
+T00697.015,T00697,vs_main_inventoryBlade,15,unk11,1,char,,,,reserved11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:419;declaration-only;source:func_8006B57C_t.h:27
 T00697.016,T00697,vs_main_inventoryBlade,16,unk12,1,u_short,,,,recovery_delay,"The equipment part's recovery delay, saved with the inventory blade and restored when the weapon is assembled",high,source:upstream:src/BATTLE/BATTLE.PRG/146C.c:815;source:upstream:src/BATTLE/BATTLE.PRG/146C.c:1103;renamed from opaque12 (#441);source:146C.c:1162
 T00697.017,T00697,vs_main_inventoryBlade,17,range,0,vs_battle_range_t,,,,range,Named in the fork; see cited use,med,source:146C.c:1163
 T00697.018,T00697,vs_main_inventoryBlade,18,classes,0,signed char[8],,,,classes,Named in the fork; see cited use,med,source:146C.c:1169
@@ -6427,7 +6427,7 @@ T00697.021,T00697,vs_main_inventoryBlade,21,assembledWeaponIndex,0,char,,,,assem
 T00697.022,T00697,vs_main_inventoryBlade,22,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1164
 T00698.000,T00698,vs_main_inventoryGem,0,id,0,u_short,,,,id,Named in the fork; see cited use,med,source:146C.c:1240
 T00698.001,T00698,vs_main_inventoryGem,1,subId,0,char,,,,sub_id,Named in the fork; see cited use,med,source:146C.c:1241
-T00698.002,T00698,vs_main_inventoryGem,2,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:458;declaration-only;source:func_8006B57C_t.h:53
+T00698.002,T00698,vs_main_inventoryGem,2,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:457;declaration-only;source:func_8006B57C_t.h:53
 T00698.003,T00698,vs_main_inventoryGem,3,gemEffects,0,char,,,,gem_effects,Named in the fork; see cited use,med,source:146C.c:1242
 T00698.004,T00698,vs_main_inventoryGem,4,strength,0,signed char,,,,strength,Named in the fork; see cited use,med,source:146C.c:1243
 T00698.005,T00698,vs_main_inventoryGem,5,intelligence,0,signed char,,,,intelligence,Named in the fork; see cited use,med,source:146C.c:1244
@@ -6458,7 +6458,7 @@ T00701.001,T00701,vs_main_inventoryMisc,1,count,0,char,,,,count,Named in the for
 T00701.002,T00701,vs_main_inventoryMisc,2,index,0,char,,,,index,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:105
 T00702.000,T00702,vs_main_inventoryShield,0,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1303
 T00702.001,T00702,vs_main_inventoryShield,1,isEquipped,0,char,,,,is_equipped,Named in the fork; see cited use,med,source:2D10.c:453;use cited by sanity pass;source:func_8006B57C_t.h:96
-T00702.002,T00702,vs_main_inventoryShield,2,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:501;declaration-only;source:func_8006B57C_t.h:97
+T00702.002,T00702,vs_main_inventoryShield,2,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:500;declaration-only;source:func_8006B57C_t.h:97
 T00702.003,T00702,vs_main_inventoryShield,3,base,0,vs_main_inventoryArmor,,,,base,Named in the fork; see cited use,med,source:146C.c:1305
 T00702.004,T00702,vs_main_inventoryShield,4,gems,0,u_char[4],,,,gems,Named in the fork; see cited use,med,source:146C.c:1310
 T00703.000,T00703,vs_main_inventoryWeapon,0,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1266

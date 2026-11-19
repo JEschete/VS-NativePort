@@ -60,7 +60,7 @@ struct PlanningFixture {
     state.actorId = 1;
     stats.currentHp = stats.maxHp = 100;
     stats.currentMp = stats.maxMp = 100;
-    stats.weapon.currentPp = 100;
+    stats.weapon.current_pp = 100;
     stats.limbs[2].hp = 2;
     stats.limbActions[2][1].actionId = 42;
   }
@@ -1822,13 +1822,13 @@ TEST_CASE("AI action usability applies resource thresholds to every limb slot",
   action.cost = 10;
   fixture.stats.currentHp = 59;
   fixture.stats.currentMp = 9;
-  fixture.stats.weapon.currentPp = 9;
+  fixture.stats.weapon.current_pp = 9;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
                                                      column) ==
         !(type == 1 || type == 3 || type == 4));
   fixture.stats.currentHp = 60;
   fixture.stats.currentMp = 10;
-  fixture.stats.weapon.currentPp = 10;
+  fixture.stats.weapon.current_pp = 10;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
                                                      column));
   CHECK(slot.opaque0Bit7 == 1);
@@ -1981,7 +1981,7 @@ TEST_CASE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   fixture.stats.statuses = 0;
   action.type = 4;
-  fixture.stats.weapon.currentPp = 0xFFFF;
+  fixture.stats.weapon.current_pp = 0xFFFF;
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   action.type = 3;

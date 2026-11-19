@@ -9,8 +9,6 @@
 #include "Menu/Framework/ActionSelection.h"
 
 struct Menu_Framework_MenuRow;
-struct Items_WeaponLoadout;
-struct Items_ShieldLoadout;
 
 // Binds the menu framework (Framework.hpp) to its variables
 // (FrameworkLiveState.hpp), the frame ordering tables, the disc queue, the text
@@ -121,8 +119,8 @@ void RenderLiveAshley(int mode);
 void ContinueLiveItemDetailsTransition(int row);
 void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
                                     int page);
-int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon);
-int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield);
+int LiveWeaponSortValue(int stat, const VS::Items::WeaponLoadout* weapon);
+int LiveShieldSortValue(int stat, const VS::Items::ShieldLoadout* shield);
 int LiveMiscSortValue(int stat, const VS::Items::InventoryMisc* misc);
 int LiveEquipmentSortValue(int stat, const VS::Items::EquipmentPart* equipment);
 void SetLiveMenuVisible(int display);

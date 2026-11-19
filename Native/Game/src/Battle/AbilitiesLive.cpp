@@ -46,7 +46,6 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"

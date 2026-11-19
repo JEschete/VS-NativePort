@@ -8,7 +8,6 @@ struct Actors_LimbInit;
 struct Actors_SpawnSettings;
 
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 
 // decomp: _actions (src/BATTLE/BATTLE.PRG/146C.h:845)
 struct Actors_LimbActionInit {
@@ -61,8 +60,8 @@ struct Actors_CharacterInit {
     char opaque31;
     char opaque32;
     char reserved33;
-    Items_WeaponSpawnLoadout weapon;
-    Items_ShieldSpawnLoadout shield;
+    VS::Items::WeaponSpawnLoadout weapon;
+    VS::Items::ShieldSpawnLoadout shield;
     VS::Items::AccessoryInit accessory;
     Actors_LimbInit limbs[6];
     int zudIndex;

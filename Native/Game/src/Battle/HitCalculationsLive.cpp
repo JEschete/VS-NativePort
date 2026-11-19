@@ -51,18 +51,20 @@ class LiveAttributeAccess final : public HitAttributeAccess {
     result.hp = owner_.currentHp;
     result.max_hp = owner_.maxHp;
     result.agility = {owner_.agility,
-                      owner_.accessory.currentAgility,
-                      owner_.weapon.currentAgility,
-                      owner_.shield.currentAgility,
+                      owner_.accessory.current_agility,
+                      owner_.weapon.attributes.current_agility,
+                      owner_.shield.attributes.current_agility,
                       {}};
     result.intelligence = {owner_.intelligence,
-                           owner_.accessory.currentInt,
-                           owner_.weapon.currentInt,
-                           owner_.shield.currentInt,
+                           owner_.accessory.current_intelligence,
+                           owner_.weapon.attributes.current_intelligence,
+                           owner_.shield.attributes.current_intelligence,
                            {}};
     for (std::size_t i = 0; i < result.defense.size(); ++i) {
-      result.agility.armor.at(i) = owner_.limbs[i].armor.currentAgility;
-      result.intelligence.armor.at(i) = owner_.limbs[i].armor.currentInt;
+      result.agility.armor.at(i) =
+          owner_.limbs[i].armor.attributes.current_agility;
+      result.intelligence.armor.at(i) =
+          owner_.limbs[i].armor.attributes.current_intelligence;
       result.defense.at(i) = owner_.limbs[i].agilityDefenseBonus;
     }
     return result;

@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Items/Loadout.h"
+#include "Items/ItemRecords.hpp"
 
 // Binds the equipment details (EquipmentDetails.hpp) to the variables the
 // copied menus share (EquipmentDetailsLiveState.hpp), the item tables and texts
@@ -39,11 +39,12 @@ void SetLiveDpPp(int current_dp, int max_dp, int current_pp, int max_pp);
 void UpdateLiveDpPpBars(int flags);
 
 // MENU4.PRG 120.c: populate the battle equipment's status detail panels.
-void PopulateLiveWeaponStats(Items_WeaponLoadout* weapon);
-void PopulateLiveShieldStats(Items_ShieldLoadout* shield);
-void PopulateLiveArmorStats(Items_ArmorLoadout* armor);
-void PopulateLiveAccessoryStats(Items_AccessorySpawnLoadout* accessory);
-void PopulateLiveBladeStats(Items_WeaponLoadout* weapon);
+void PopulateLiveWeaponStats(const VS::Items::WeaponLoadout* weapon);
+void PopulateLiveShieldStats(const VS::Items::ShieldLoadout* shield);
+void PopulateLiveArmorStats(const VS::Items::ArmorLoadout* armor);
+void PopulateLiveAccessoryStats(
+    const VS::Items::AccessorySpawnLoadout* accessory);
+void PopulateLiveBladeStats(const VS::Items::WeaponLoadout* weapon);
 void PopulateLiveGripStats(const VS::Items::EquipmentPart* grip);
 void PopulateLiveGemStats(const VS::Items::EquipmentPart* gem);
 

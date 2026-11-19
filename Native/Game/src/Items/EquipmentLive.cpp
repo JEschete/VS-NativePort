@@ -28,9 +28,7 @@
 namespace VS::Items {
 namespace {
 using Live::AshleyStats;
-using Live::Commit;
 using Live::LiveEquipStatusHost;
-using Live::Typed;
 using Live::WarnNullRecord;
 using Live::WarnRefusal;
 
@@ -67,53 +65,55 @@ std::array<std::int16_t, kLimbCount> LimbArmorDpLoss() {
 
 // decomp: BATTLE.PRG vs_battle_applyWeaponStats
 // (src/BATTLE/BATTLE.PRG/146C.c:968)
-void BuildLiveWeaponStatsFromParts(Items_WeaponLoadout* target,
-                                   const Items_WeaponSpawnLoadout* source) {
+void BuildLiveWeaponStatsFromParts(
+    VS::Items::WeaponLoadout* target,
+    const VS::Items::WeaponSpawnLoadout* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildWeaponStatsFromParts");
     return;
   }
-  auto weapon = Typed(*target);
+  auto weapon = *target;
   WarnRefusal("BuildWeaponStatsFromParts",
-              BuildWeaponStatsFromParts(weapon, Typed(*source)));
-  Commit(*target, weapon);
+              BuildWeaponStatsFromParts(weapon, *source));
+  *target = weapon;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShieldStats
 // (src/BATTLE/BATTLE.PRG/146C.c:1028)
-void BuildLiveShieldStatsFromParts(Items_ShieldLoadout* target,
-                                   const Items_ShieldSpawnLoadout* source) {
+void BuildLiveShieldStatsFromParts(
+    VS::Items::ShieldLoadout* target,
+    const VS::Items::ShieldSpawnLoadout* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildShieldStatsFromParts");
     return;
   }
-  auto shield = Typed(*target);
-  BuildShieldStatsFromParts(shield, Typed(*source));
-  Commit(*target, shield);
+  auto shield = *target;
+  BuildShieldStatsFromParts(shield, *source);
+  *target = shield;
 }
 
 // decomp: BATTLE.PRG _applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1080)
-void BuildLiveAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target,
+void BuildLiveAccessoryStatsFromPart(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::AccessoryInit* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildAccessoryStatsFromPart");
     return;
   }
-  auto accessory = Typed(*target);
+  auto accessory = *target;
   BuildAccessoryStatsFromPart(accessory, *source);
-  Commit(*target, accessory);
+  *target = accessory;
 }
 
 // decomp: BATTLE.PRG _applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1105)
-void BuildLiveArmorStatsFromPart(Items_ArmorLoadout* target,
+void BuildLiveArmorStatsFromPart(VS::Items::ArmorLoadout* target,
                                  const VS::Items::ArmorInit* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("BuildArmorStatsFromPart");
     return;
   }
-  auto armor = Typed(*target);
+  auto armor = *target;
   BuildArmorStatsFromPart(armor, *source);
-  Commit(*target, armor);
+  *target = armor;
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats
@@ -161,54 +161,54 @@ void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:1257)
-void LoadLiveInventoryWeaponStats(Items_WeaponLoadout* target,
+void LoadLiveInventoryWeaponStats(VS::Items::WeaponLoadout* target,
                                   const VS::Items::InventoryWeapon* source) {
   if (target == nullptr) {
     WarnNullRecord("LoadInventoryWeaponStats");
     return;
   }
-  auto weapon = Typed(*target);
+  auto weapon = *target;
   WarnRefusal("LoadInventoryWeaponStats",
               LoadInventoryWeaponStats(weapon, source, VS::Items::inventory));
-  Commit(*target, weapon);
+  *target = weapon;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:1295)
-void LoadLiveInventoryShieldStats(Items_ShieldLoadout* target,
+void LoadLiveInventoryShieldStats(VS::Items::ShieldLoadout* target,
                                   const VS::Items::InventoryShield* source) {
   if (target == nullptr) {
     WarnNullRecord("LoadInventoryShieldStats");
     return;
   }
-  auto shield = Typed(*target);
+  auto shield = *target;
   WarnRefusal("LoadInventoryShieldStats",
               LoadInventoryShieldStats(shield, source, VS::Items::inventory));
-  Commit(*target, shield);
+  *target = shield;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:1321)
-void LoadLiveInventoryArmorStats(Items_ArmorLoadout* target,
+void LoadLiveInventoryArmorStats(VS::Items::ArmorLoadout* target,
                                  const VS::Items::InventoryArmor* source) {
   if (target == nullptr) {
     WarnNullRecord("LoadInventoryArmorStats");
     return;
   }
-  auto armor = Typed(*target);
+  auto armor = *target;
   LoadInventoryArmorStats(armor, source);
-  Commit(*target, armor);
+  *target = armor;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyAccessory
 // (src/BATTLE/BATTLE.PRG/146C.c:1338)
-void LoadLiveInventoryAccessoryStats(Items_AccessorySpawnLoadout* target,
+void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::InventoryArmor* source) {
   if (target == nullptr) {
     WarnNullRecord("LoadInventoryAccessoryStats");
     return;
   }
-  auto accessory = Typed(*target);
+  auto accessory = *target;
   LoadInventoryAccessoryStats(accessory, source);
-  Commit(*target, accessory);
+  *target = accessory;
 }
 
 // decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1386)
@@ -229,8 +229,8 @@ void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon) {
 void EquipLiveAshleyShield(const VS::Items::InventoryShield* shield) {
   auto* stats = AshleyStats("EquipAshleyShield");
   if (stats == nullptr) return;
-  auto loadout = Typed(stats->shield);
-  LiveEquipStatusHost host(*stats, [&] { Commit(stats->shield, loadout); });
+  auto loadout = stats->shield;
+  LiveEquipStatusHost host(*stats, [&] { stats->shield = loadout; });
   const auto status =
       EquipAshleyShield(loadout, shield, VS::Items::inventory, host);
   host.Finish();
@@ -244,11 +244,11 @@ void EquipLiveAshleyArmor(int body_part,
   if (stats == nullptr) return;
   std::array<ArmorLoadout, kLimbCount> limb_armor{};
   for (std::size_t i = 0; i < kLimbCount; ++i) {
-    limb_armor[i] = Typed(stats->limbs[i].armor);
+    limb_armor[i] = stats->limbs[i].armor;
   }
   LiveEquipStatusHost host(*stats, [&] {
     for (std::size_t i = 0; i < kLimbCount; ++i) {
-      Commit(stats->limbs[i].armor, limb_armor[i]);
+      stats->limbs[i].armor = limb_armor[i];
     }
   });
   const auto status = EquipAshleyArmor(limb_armor, body_part, armor, host);
@@ -261,8 +261,8 @@ void EquipLiveAshleyArmor(int body_part,
 void EquipLiveAshleyAccessory(const VS::Items::InventoryArmor* accessory) {
   auto* stats = AshleyStats("EquipAshleyAccessory");
   if (stats == nullptr) return;
-  auto loadout = Typed(stats->accessory);
-  LiveEquipStatusHost host(*stats, [&] { Commit(stats->accessory, loadout); });
+  auto loadout = stats->accessory;
+  LiveEquipStatusHost host(*stats, [&] { stats->accessory = loadout; });
   EquipAshleyAccessory(loadout, accessory, host);
   host.Finish();
 }
@@ -316,18 +316,18 @@ void WriteLiveInventoryArmorStats(VS::Items::InventoryArmor* target,
 // `target` is usually a weapon of the inventory itself: the inventory is
 // committed first so the record's new name is not overwritten.
 void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
-                                   Items_WeaponLoadout* source) {
+                                   VS::Items::WeaponLoadout* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("StoreInventoryWeaponStats");
     return;
   }
   auto record = *target;
-  auto weapon = Typed(*source);
+  auto weapon = *source;
   auto inventory = VS::Items::inventory;
   const auto status = StoreInventoryWeaponStats(record, weapon, inventory);
   VS::Items::inventory = inventory;
   *target = record;
-  Commit(*source, weapon);
+  *source = weapon;
   WarnRefusal("StoreInventoryWeaponStats", status);
 }
 
@@ -335,12 +335,12 @@ void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
 // (src/BATTLE/BATTLE.PRG/146C.c:1600)
 void StoreLiveInventoryAccessoryStats(
     VS::Items::InventoryArmor* target,
-    const Items_AccessorySpawnLoadout* source) {
+    const VS::Items::AccessorySpawnLoadout* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("StoreInventoryAccessoryStats");
     return;
   }
-  StoreInventoryAccessoryStats(*target, Typed(*source));
+  StoreInventoryAccessoryStats(*target, *source);
 }
 
 // decomp: BATTLE.PRG _calculateArmorClassAffinity
@@ -356,9 +356,9 @@ void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
     return;
   }
   auto& limb_armor = actor_stats->limbs[limb_index].armor;
-  auto armor = Typed(limb_armor);
+  auto armor = limb_armor;
   RebuildArmorClassAffinity(armor);
-  Commit(limb_armor, armor);
+  limb_armor = armor;
 }
 
 // decomp: BATTLE.PRG _calculateShieldClassAffinity
@@ -368,9 +368,9 @@ void RebuildLiveShieldClassAffinity(Battle_ActorStats* actor_stats) {
     WarnNullRecord("RebuildShieldClassAffinity");
     return;
   }
-  auto shield = Typed(actor_stats->shield);
+  auto shield = actor_stats->shield;
   RebuildShieldClassAffinity(shield);
-  Commit(actor_stats->shield, shield);
+  actor_stats->shield = shield;
 }
 
 // decomp: BATTLE.PRG _calculateWeaponClassAffinity
@@ -380,9 +380,9 @@ void RebuildLiveWeaponClassAffinity(Battle_ActorStats* actor_stats) {
     WarnNullRecord("RebuildWeaponClassAffinity");
     return;
   }
-  auto weapon = Typed(actor_stats->weapon);
+  auto weapon = actor_stats->weapon;
   RebuildWeaponClassAffinity(weapon);
-  Commit(actor_stats->weapon, weapon);
+  actor_stats->weapon = weapon;
 }
 
 // decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
@@ -395,12 +395,12 @@ void ConsumeLiveHitEquipmentDp(const Battle_ActionDefinition* action,
     WarnNullRecord("ConsumeHitEquipmentDp");
     return;
   }
-  auto weapon = Typed(source->weapon);
+  auto weapon = source->weapon;
   auto defender = Live::ToDefender(*target);
   const auto loss = LimbArmorDpLoss();
   const auto status = ConsumeHitEquipmentDp(Live::ToItemAction(*action), weapon,
                                             defender, loss, amount);
-  Commit(source->weapon, weapon);
+  source->weapon = weapon;
   Live::CommitDefender(*target, defender);
   WarnRefusal("ConsumeHitEquipmentDp", status);
 }
@@ -414,11 +414,11 @@ void AccumulateLiveHitEquipmentPp(const Battle_ActionDefinition* action,
     WarnNullRecord("AccumulateHitEquipmentPp");
     return;
   }
-  auto weapon = Typed(source_stats->weapon);
+  auto weapon = source_stats->weapon;
   auto defender = Live::ToDefender(*target_stats);
   const auto status = AccumulateHitEquipmentPp(Live::ToItemAction(*action),
                                                weapon, defender, dp_amount);
-  Commit(source_stats->weapon, weapon);
+  source_stats->weapon = weapon;
   Live::CommitDefender(*target_stats, defender);
   WarnRefusal("AccumulateHitEquipmentPp", status);
 }
@@ -453,14 +453,14 @@ void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
     WarnNullRecord("GrowAttackerWeaponRatings");
     return;
   }
-  auto weapon = Typed(attacker_stats->weapon);
+  auto weapon = attacker_stats->weapon;
   LiveGrowthHost host;
   const auto status = GrowAttackerWeaponRatings(
       Live::ToItemAction(*action), weapon, attacker_stats->actorId == 0,
       HitRatings{.class_id = defender_class_id,
                  .affinity_id = defender_affinity_id},
       host);
-  Commit(attacker_stats->weapon, weapon);
+  attacker_stats->weapon = weapon;
   WarnRefusal("GrowAttackerWeaponRatings", status);
 }
 

@@ -1,6 +1,5 @@
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 
-#include <bit>
 #include <cstdint>
 #include <span>
 #include <string_view>
@@ -26,8 +25,7 @@ void Refuse(std::string_view message) {
 class LiveComponentDisplay final : public ComponentDisplay {
  public:
   void ShowBladeStats(const Items::WeaponLoadout& weapon) override {
-    auto legacy = std::bit_cast<Items_WeaponLoadout>(weapon);
-    Framework::PopulateLiveBladeStats(&legacy);
+    Framework::PopulateLiveBladeStats(&weapon);
   }
   void ShowGripStats(const Items::EquipmentPart& grip) override {
     Framework::PopulateLiveGripStats(&grip);
@@ -95,7 +93,7 @@ void CopyLiveGemDescription(VS::Items::EquipmentPart* gem, char* menu_text[],
 }
 
 // decomp: _drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:293)
-char* SelectLiveWeaponComponent(int row, Items_WeaponLoadout* weapon) {
+char* SelectLiveWeaponComponent(int row, VS::Items::WeaponLoadout* weapon) {
   if (weapon == nullptr) {
     Refuse("status component: missing weapon");
     return nullptr;
@@ -103,12 +101,11 @@ char* SelectLiveWeaponComponent(int row, Items_WeaponLoadout* weapon) {
   Framework::LiveItemRowsHost host;
   LiveComponentDisplay display;
   ComponentContext context{host, host.StringBuffer(), display};
-  return Resolve(
-      SelectWeaponComponent(context, row, Items::Live::Typed(*weapon)), host);
+  return Resolve(SelectWeaponComponent(context, row, *weapon), host);
 }
 
 // decomp: _drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:339)
-char* SelectLiveShieldComponent(int row, Items_ShieldLoadout* shield) {
+char* SelectLiveShieldComponent(int row, VS::Items::ShieldLoadout* shield) {
   if (shield == nullptr) {
     Refuse("status component: missing shield");
     return nullptr;
@@ -116,31 +113,27 @@ char* SelectLiveShieldComponent(int row, Items_ShieldLoadout* shield) {
   Framework::LiveItemRowsHost host;
   LiveComponentDisplay display;
   ComponentContext context{host, host.StringBuffer(), display};
-  return Resolve(
-      SelectShieldComponent(context, row, Items::Live::Typed(*shield)), host);
+  return Resolve(SelectShieldComponent(context, row, *shield), host);
 }
 
 // decomp: _drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:368)
-char* LiveArmorDescription(Items_ArmorLoadout* armor) {
+char* LiveArmorDescription(VS::Items::ArmorLoadout* armor) {
   if (armor == nullptr) {
     Refuse("status component: missing armor");
     return nullptr;
   }
   Framework::LiveItemRowsHost host;
-  return Resolve(
-      ArmorDescription(host, Items::Live::Typed(*armor), host.StringBuffer()),
-      host);
+  return Resolve(ArmorDescription(host, *armor, host.StringBuffer()), host);
 }
 
 // decomp: _drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:383)
-char* LiveAccessoryDescription(Items_AccessorySpawnLoadout* accessory) {
+char* LiveAccessoryDescription(VS::Items::AccessorySpawnLoadout* accessory) {
   if (accessory == nullptr) {
     Refuse("status component: missing accessory");
     return nullptr;
   }
   Framework::LiveItemRowsHost host;
-  return Resolve(AccessoryDescription(host, Items::Live::Typed(*accessory),
-                                      host.StringBuffer()),
+  return Resolve(AccessoryDescription(host, *accessory, host.StringBuffer()),
                  host);
 }
 

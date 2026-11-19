@@ -56,7 +56,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
@@ -338,7 +337,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     stats->gaitClass = static_cast<char>(defaults.gait.gait_class);
     stats->walkSpeed = static_cast<char>(kDefaultWalkSpeed);
     stats->runSpeed = static_cast<char>(kDefaultRunSpeed);
-    stats->weapon.recoveryDelay = static_cast<char>(kDefaultRecoveryDelay);
+    stats->weapon.recovery_delay = kDefaultRecoveryDelay;
     stats->weapon.range.range = kDefaultWeaponRange[0];
     stats->weapon.range.second_range = kDefaultWeaponRange[1];
     stats->weapon.range.third_range = kDefaultWeaponRange[2];
@@ -469,12 +468,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       return;
     }
     stats->dropItem.id = details.drop.id;
-    stats->dropItem.count = static_cast<char>(details.drop.count);
+    stats->dropItem.count = details.drop.count;
     stats->secondDropItem.id = details.second_drop.id;
-    stats->secondDropItem.count = static_cast<char>(details.second_drop.count);
+    stats->secondDropItem.count = details.second_drop.count;
     stats->randomDropItem.id = details.random_drop.id;
-    stats->randomDropItem.dropRate =
-        static_cast<char>(details.random_drop.count);
+    stats->randomDropItem.drop_rate = details.random_drop.count;
   }
 
   void SetTemplateWord(std::size_t slot, std::int32_t word) override {
@@ -543,10 +541,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       return std::nullopt;
     }
     return EquippedModels{.has_blade = stats->weapon.blade.id != 0,
-                          .weapon_model = Byte(stats->weapon.wepId),
+                          .weapon_model = stats->weapon.weapon_model_id,
                           .blade_material = stats->weapon.blade.material,
                           .has_shield = stats->shield.base.id != 0,
-                          .shield_model = Byte(stats->shield.wepId),
+                          .shield_model = stats->shield.weapon_model_id,
                           .shield_material = stats->shield.base.material};
   }
 
@@ -964,10 +962,10 @@ CharacterTemplate DecodeCharacterTemplate(const Actors_CharacterInit& init) {
       .blade_model =
           static_cast<std::uint8_t>(init.weapon.blade.weapon_model_id),
       .blade_category = init.weapon.blade.category,
-      .weapon_material = Byte(init.weapon.material),
+      .weapon_material = init.weapon.material,
       .shield_model =
           static_cast<std::uint8_t>(init.shield.base.weapon_model_id),
-      .shield_material = Byte(init.shield.material),
+      .shield_material = init.shield.material,
       .zud_index = init.zudIndex,
       .equipment = IdOf<TemplateEquipment>(&init)};
   for (std::size_t i = 0; i < kActorNameBytes; ++i) {

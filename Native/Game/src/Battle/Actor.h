@@ -13,7 +13,6 @@ struct Battle_ActorStatsFlags;
 struct Battle_LimbStats;
 
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 
 // decomp: vs_battle_limbStatus (src/BATTLE/BATTLE.PRG/5BF94.h:502)
 enum Battle_LimbConditionLevel {
@@ -88,7 +87,7 @@ struct Battle_LimbStats {
     /* 0x07 */ char chainEvasion;
     /* 0x08 */ short types[4];
     /* 0x10 */ short affinities[8];
-    /* 0x20 */ Items_ArmorLoadout armor;
+    /* 0x20 */ VS::Items::ArmorLoadout armor;
     /* 0xDC */
 };
 static_assert(sizeof(Battle_LimbStats) == 0xDC, "Battle_LimbStats must keep its PS1 layout");
@@ -123,9 +122,9 @@ struct Battle_ActorStats {
     /* 0x03A */ u_int currentRangeZ : 8;
     /* 0x03B */ u_int currentAttackShape : 3;
     /* 0x03B */ u_int currentAttackShapeAngle : 5;
-    /* 0x03C */ Items_WeaponLoadout weapon;
-    /* 0x1D4 */ Items_ShieldLoadout shield;
-    /* 0x338 */ Items_AccessorySpawnLoadout accessory;
+    /* 0x03C */ VS::Items::WeaponLoadout weapon;
+    /* 0x1D4 */ VS::Items::ShieldLoadout shield;
+    /* 0x338 */ VS::Items::AccessorySpawnLoadout accessory;
     /* 0x398 */ Battle_LimbStats limbs[6];
     /* 0x8C0 */ Battle_ActionSlot limbActions[6][4];
     /* 0x920 */ char dpSplash[6][6];
@@ -139,7 +138,7 @@ struct Battle_ActorStats {
     /* 0x957 */ u_char actorId;
     /* 0x958 */ VS::Items::MiscItemStack dropItem;
     /* 0x95C */ VS::Items::MiscItemStack secondDropItem;
-    /* 0x960 */ Items_MiscItemDrop randomDropItem;
+    /* 0x960 */ VS::Items::MiscItemDrop randomDropItem;
     /* 0x964 */
 };
 static_assert(sizeof(Battle_ActorStats) == 0x964, "Battle_ActorStats must keep its PS1 layout");

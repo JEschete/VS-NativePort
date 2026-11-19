@@ -373,7 +373,7 @@ TEST_CASE(
   LiveFixture f;
   f.action.hits[1].effectId = 17;
   // A fourth 0x30-stride gem probe would read the low byte of baseAgility.
-  f.stats.at(1).shield.baseAgility = 21;
+  f.stats.at(1).shield.attributes.base_agility = 21;
   CHECK(battle::DefenseLiveGemHitBonus(&f.action, &f.stats.at(1), 1) == 0);
   f.stats.at(1).shield.gems[2].gem_effects = 21;
   f.stats.at(1).shield.gems[0].gem_effects = 5;

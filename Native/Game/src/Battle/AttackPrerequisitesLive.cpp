@@ -18,7 +18,6 @@
 #include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Loadout.h"
 
 namespace {
 namespace battle = VS::Battle;

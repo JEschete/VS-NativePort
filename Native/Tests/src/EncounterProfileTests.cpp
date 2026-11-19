@@ -29,7 +29,6 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/SetupLive.hpp"
@@ -707,26 +706,30 @@ struct WeaponHeap {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 };
 
-void CheckWeaponStats(const Items_WeaponLoadout& actual,
-                      Items_WeaponSpawnLoadout source) {
-  Items_WeaponLoadout expected{};
+void CheckWeaponStats(const VS::Items::WeaponLoadout& actual,
+                      VS::Items::WeaponSpawnLoadout source) {
+  VS::Items::WeaponLoadout expected{};
   VS::Items::BuildLiveWeaponStatsFromParts(&expected, &source);
-  CHECK(std::tie(actual.wepId, actual.blade.id, actual.grip.id,
-                 actual.blade.material, actual.currentDp, actual.maxDp,
-                 actual.currentPp, actual.maxPp, actual.currentStr,
-                 actual.currentInt, actual.currentAgility, actual.damageType,
-                 actual.damageTypeValue, actual.risk, actual.recoveryDelay) ==
-        std::tie(expected.wepId, expected.blade.id, expected.grip.id,
-                 expected.blade.material, expected.currentDp, expected.maxDp,
-                 expected.currentPp, expected.maxPp, expected.currentStr,
-                 expected.currentInt, expected.currentAgility,
-                 expected.damageType, expected.damageTypeValue, expected.risk,
-                 expected.recoveryDelay));
+  CHECK(std::tie(actual.weapon_model_id, actual.blade.id, actual.grip.id,
+                 actual.blade.material, actual.current_dp, actual.max_dp,
+                 actual.current_pp, actual.max_pp,
+                 actual.attributes.current_strength,
+                 actual.attributes.current_intelligence,
+                 actual.attributes.current_agility, actual.damage_type,
+                 actual.damage_type_value, actual.risk,
+                 actual.recovery_delay) ==
+        std::tie(expected.weapon_model_id, expected.blade.id, expected.grip.id,
+                 expected.blade.material, expected.current_dp, expected.max_dp,
+                 expected.current_pp, expected.max_pp,
+                 expected.attributes.current_strength,
+                 expected.attributes.current_intelligence,
+                 expected.attributes.current_agility, expected.damage_type,
+                 expected.damage_type_value, expected.risk,
+                 expected.recovery_delay));
   CHECK(std::memcmp(&actual.range, &expected.range, sizeof actual.range) == 0);
-  CHECK(std::memcmp(actual.name, expected.name, sizeof actual.name) == 0);
-  CHECK(std::memcmp(&actual.classAffinityBaseline,
-                    &expected.classAffinityBaseline,
-                    sizeof actual.classAffinityBaseline) == 0);
+  CHECK(actual.name == expected.name);
+  CHECK(std::memcmp(&actual.baseline, &expected.baseline,
+                    sizeof actual.baseline) == 0);
 }
 
 VS::Items::InventoryContents CheckWeaponParts(
@@ -801,7 +804,7 @@ TEST_CASE(
           0);
     const auto source = VS::Game::ReadEncounterWeapon(choice);
     REQUIRE(source);
-    Items_WeaponLoadout actual{};
+    VS::Items::WeaponLoadout actual{};
     VS::Items::LoadLiveInventoryWeaponStats(&actual, &*slot);
     CheckWeaponStats(actual, *source);
     VS::Game::InitializeEncounterPlayerWeapon(choice);

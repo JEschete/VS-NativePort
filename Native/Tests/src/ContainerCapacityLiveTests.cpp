@@ -162,12 +162,11 @@ TEST_CASE(
   auto& owner = fixture.containers.storage->container.items;
   LiveFixture::AddWeapon(owner);
   CHECK(items::CountLiveContainerWeaponGems(live::kLastWeapon) == 2);
-  Items_WeaponLoadout loadout{};
+  VS::Items::WeaponLoadout loadout{};
   capacity::BuildLiveWeaponStats(&loadout, &std::span(owner.weapons).back(),
                                  &owner);
   constexpr int kExpectedStrength = 19;
-  CHECK(items::Live::Typed(loadout).attributes.current_strength ==
-        kExpectedStrength);
+  CHECK(loadout.attributes.current_strength == kExpectedStrength);
   auto& next = fixture.containers.replacement->container;
   next.items.weapons[live::kLastWeapon].grip = live::kLastPart + 1;
   Menu_Container_containerData = &next;
@@ -293,12 +292,11 @@ TEST_CASE("F02977 live restores an equipment tree and production loadout stats",
   std::span(storage.itemsToTransfer).back() = kLastWeaponToken;
   constexpr int kLastRow = 63;
   capacity::UndoLivePendingTransfer(kLastRow);
-  Items_WeaponLoadout loadout{};
+  VS::Items::WeaponLoadout loadout{};
   capacity::BuildLiveWeaponStats(&loadout, &storage.container.items.weapons[0],
                                  &storage.container.items);
   constexpr int kExpectedStrength = 19;
-  CHECK(items::Live::Typed(loadout).attributes.current_strength ==
-        kExpectedStrength);
+  CHECK(loadout.attributes.current_strength == kExpectedStrength);
   CHECK(storage.stagedTransfer.weapons[live::kLastWeapon].blade == 0);
   CHECK(storage.stagedTransfer.grips[live::kLastPart].id == 0);
   CHECK(storage.stagedTransfer.gems[live::kLastGem].id == 0);

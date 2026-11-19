@@ -287,7 +287,7 @@ struct LiveTrap {
     stats->maxHp = 300;
     stats->currentHp = 120;
     stats->strength = 40;
-    stats->limbs[1].armor.currentStr = 10;
+    stats->limbs[1].armor.attributes.current_strength = 10;
     actor->stats = stats.get();
     std::memset(static_cast<void*>(Battle_actors), 0, sizeof Battle_actors);
     Battle_actors[0] = actor.get();
