@@ -33,7 +33,6 @@
 #include "Menu/Files.h"
 #include "Menu/Files.hpp"
 #include "Menu/FilesLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -623,7 +622,8 @@ class LiveHost : public LiveCardHost {
     return VS::Save::MemoryCard::LoadLiveIntroSnapshotStep(action);
   }
   void SetCurrentMenu(int menu) override {
-    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.control.current_menu =
+        static_cast<std::uint8_t>(menu);
   }
 
   void BeginGameOverLoad() override {

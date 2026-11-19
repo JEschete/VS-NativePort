@@ -81,7 +81,6 @@
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"

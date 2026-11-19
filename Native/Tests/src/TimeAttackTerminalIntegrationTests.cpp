@@ -227,8 +227,8 @@ TEST_CASE(
       saved;
   VS::Menu::Framework::loadedSubMenu = 15;
   VS::Menu::Framework::openedWithoutMainMenu = 1;
-  VS::Menu::Framework::menuState.currentMenu = 15;
-  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::menuState.control.current_menu = 15;
+  VS::Menu::Framework::menuState.control.loading = 0;
   VS::Menu::Framework::actionRestrictions = 0x200;
   VS::Menu::Framework::submenuStates[15] = 2;
   VS::Menu::Framework::submenuStates[14] = static_cast<char>(0xAA);

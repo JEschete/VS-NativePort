@@ -611,7 +611,7 @@ T00104.004,T00104,vs_mainMenu_buttonIDs,4,buttonIdL1,0,,,4,,L1,ButtonId L1,med,d
 T00104.005,T00104,vs_mainMenu_buttonIDs,5,buttonIdR1,0,,,5,,R1,ButtonId R1,med,declaration-only;source:58EC.h:95
 T00104.006,T00104,vs_mainMenu_buttonIDs,6,buttonIdL2,0,,,6,,L2,ButtonId L2,med,declaration-only;source:58EC.h:96
 T00104.007,T00104,vs_mainMenu_buttonIDs,7,buttonIdR2,0,,,7,,R2,ButtonId R2,med,declaration-only;source:58EC.h:97
-T00105.000,T00105,vs_mainMenu_copyItem_flags,0,copyItemFlagsWrite,0,,,16,,Write,CopyItemFlag Write,med,declaration-only;source:2D10.h:200
+T00105.000,T00105,vs_mainMenu_copyItem_flags,0,copyItemFlagsWrite,0,,,16,,kCopyItemWrite,CopyItemFlag Write,med,native:Items/Inventory.hpp Inventory::kCopyItemWrite (#441);declaration-only;source:2D10.h:200
 T00106.000,T00106,vs_mainMenu_icons,0,mainMenuIconGem,0,,,22,,Gem,MainMenuIcon Gem,med,declaration-only;source:58EC.h:134
 T00107.000,T00107,vs_mainMenu_menuCommands,0,menuActionNone,0,,,0,,None,MenuCommand None,med,declaration-only;source:58EC.h:46
 T00107.001,T00107,vs_mainMenu_menuCommands,1,menuActionCommand,0,,,1,,Command,MenuCommand Command,med,declaration-only;source:58EC.h:47
@@ -620,7 +620,7 @@ T00107.003,T00107,vs_mainMenu_menuCommands,3,menuActionNum,0,,,3,,Num,MenuComman
 T00107.004,T00107,vs_mainMenu_menuCommands,4,menuActionWarning,0,,,4,,Warning,MenuCommand Warning,med,declaration-only;source:58EC.h:50
 T00107.005,T00107,vs_mainMenu_menuCommands,5,menuActionHelp,0,,,5,,Help,MenuCommand Help,med,declaration-only;source:58EC.h:51
 T00107.006,T00107,vs_mainMenu_menuCommands,6,menuActionInfo,0,,,6,,Info,MenuCommand Info,med,declaration-only;source:58EC.h:52
-T00108.000,T00108,vs_mainMenu_menuItemIds,0,vs_mainMenu_menuItemIds_none,0,,,40,,None,MenuItemId None,med,declaration-only;source:C48.h:6
+T00108.000,T00108,vs_mainMenu_menuItemIds,0,vs_mainMenu_menuItemIds_none,0,,,40,,kNoRow,MenuItemId None,med,native:Framework.hpp kNoRow (#441);declaration-only;source:C48.h:6
 T00109.000,T00109,vs_mainMenu_menuSelection,0,menuSelectionConfirm,0,,,0,,Confirm,MenuSelection Confirm,med,declaration-only;source:58EC.h:212
 T00109.001,T00109,vs_mainMenu_menuSelection,1,menuSelectionBack,0,,,65535,,Back,MenuSelection Back,med,declaration-only;source:58EC.h:213
 T00109.002,T00109,vs_mainMenu_menuSelection,2,menuSelectionQuit,0,,,-2,,Quit,MenuSelection Quit,med,declaration-only;source:58EC.h:214
@@ -631,7 +631,7 @@ T00111.000,T00111,vs_mainMenu_renderDpPpBarsTarget,0,renderDpPpBarsTargetNone,0,
 T00111.001,T00111,vs_mainMenu_renderDpPpBarsTarget,1,renderDpPpBarsTargetDp,0,,,1,,Dp,DpPpBarsTarget Dp,med,declaration-only;source:C48.h:99
 T00111.002,T00111,vs_mainMenu_renderDpPpBarsTarget,2,renderDpPpBarsTargetPp,0,,,2,,Pp,DpPpBarsTarget Pp,med,declaration-only;source:C48.h:100
 T00111.003,T00111,vs_mainMenu_renderDpPpBarsTarget,3,renderDpPpBarsTargetBoth,0,,,3,,Both,DpPpBarsTarget Both,med,declaration-only;source:C48.h:101
-T00112.000,T00112,vs_mainMenu_rowTypeFlags,0,rowTypeDisabled,0,,,1,,Disabled,RowTypeFlag Disabled,med,declaration-only;source:58EC.h:179
+T00112.000,T00112,vs_mainMenu_rowTypeFlags,0,rowTypeDisabled,0,,,1,,kRowDisabled,RowTypeFlag Disabled,med,native:Framework.hpp kRowDisabled (#441);declaration-only;source:58EC.h:179
 T00113.000,T00113,vs_mainMenu_statPage,0,statPageClass,0,,,0,,Class,StatPage Class,med,declaration-only;source:58EC.h:338
 T00113.001,T00113,vs_mainMenu_statPage,1,statPageAffinity,0,,,1,,Affinity,StatPage Affinity,med,declaration-only;source:58EC.h:339
 T00113.002,T00113,vs_mainMenu_statPage,2,statPageType,0,,,2,,Type,StatPage Type,med,declaration-only;source:58EC.h:340
@@ -5600,9 +5600,9 @@ T00617.000,T00617,texMapOverlay_t,0,x,0,u_char,,,,x,Overlay X,high,source:40564.
 T00617.001,T00617,texMapOverlay_t,1,y,0,u_char,,,,y,Overlay Y,high,source:40564.c:1477
 T00617.002,T00617,texMapOverlay_t,2,w,0,u_char,,,,width,Overlay width,high,source:40564.c:1457
 T00617.003,T00617,texMapOverlay_t,3,h,0,u_char,,,,height,Overlay height,high,source:40564.c:1458
-T00618.000,T00618,textHeader_t,0,text,0,char[14],,,,text,Named in the fork; see cited use,med,source:58EC.c:690
-T00618.001,T00618,textHeader_t,1,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,source:58EC.c:658
-T00618.002,T00618,textHeader_t,2,x,0,char,,,,x,Named in the fork; see cited use,med,source:58EC.c:659
+T00618.000,T00618,textHeader_t,0,text,0,char[14],,,,text,Named in the fork; see cited use,med,"native:Framework.hpp TextHeader::text is std::array<std::uint8_t, 14> (#441);source:58EC.c:690"
+T00618.001,T00618,textHeader_t,1,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::disabled (#441);source:58EC.c:658
+T00618.002,T00618,textHeader_t,2,x,0,char,,,,x,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::x (#441);source:58EC.c:659
 T00619.000,T00619,textOffset,0,x,0,int,12,,,x,Named in the fork; see cited use,med,source:4A0A8.c:756
 T00619.001,T00619,textOffset,1,y,0,int,12,,,y,Named in the fork; see cited use,med,source:4A0A8.c:757
 T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,alignment,Named in the fork; see cited use,med,source:4A0A8.c:832
@@ -5936,11 +5936,11 @@ T00657.019,T00657,vs_battle_menuItem_t,19,targetPosition0,0,short,,,,target0,Nam
 T00657.020,T00657,vs_battle_menuItem_t,20,targetPosition1,0,short,,,,target1,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::target1 (#441);source:58EC.c:1571
 T00657.021,T00657,vs_battle_menuItem_t,21,text,0,char[32],,,,text,Named in the fork; see cited use,med,"native:Framework.hpp MenuRow::text is std::array<std::uint8_t, 32> of encoded glyphs (#441);source:5BF94.c:2683"
 T00657.022,T00657,vs_battle_menuItem_t,22,subText,0,char *,,,,sub_text,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::sub_text (#441);source:5BF94.c:2822
-T00658.000,T00658,vs_battle_menuState_t,0,currentMenu,0,char,,,,currentMenu,Named in the fork; see cited use,med,source:5BF94.c:2975
-T00658.001,T00658,vs_battle_menuState_t,1,returnState,0,char,,,,returnState,Named in the fork; see cited use,med,source:5BF94.c:3526
-T00658.002,T00658,vs_battle_menuState_t,2,executeAbilityType,0,char,,,,executeAbilityType,Named in the fork; see cited use,med,source:5BF94.c:3528
-T00658.003,T00658,vs_battle_menuState_t,3,loading,0,char,,,,loading,Named in the fork; see cited use,med,source:5BF94.c:2595
-T00658.004,T00658,vs_battle_menuState_t,4,cdQueue,0,vs_main_CdQueueSlot *,,,,cdQueue,Named in the fork; see cited use,med,source:5BF94.c:2605
+T00658.000,T00658,vs_battle_menuState_t,0,currentMenu,0,char,,,,current_menu,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::current_menu (#441);source:5BF94.c:2975
+T00658.001,T00658,vs_battle_menuState_t,1,returnState,0,char,,,,return_state,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::return_state (#441);source:5BF94.c:3526
+T00658.002,T00658,vs_battle_menuState_t,2,executeAbilityType,0,char,,,,execute_ability_type,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::execute_ability_type (#441);source:5BF94.c:3528
+T00658.003,T00658,vs_battle_menuState_t,3,loading,0,char,,,,loading,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::loading (#441);source:5BF94.c:2595
+T00658.004,T00658,vs_battle_menuState_t,4,cdQueue,0,vs_main_CdQueueSlot *,,,,cd_queue,Named in the fork; see cited use,med,native:FrameworkLiveState.hpp LiveMenuControl::cd_queue (#441);source:5BF94.c:2605
 T00659.000,T00659,vs_battle_objectData,0,dataType,0,u_char,,,,assetKind,Kind of asset being requested,high,source:146C.c:6096
 T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,targetSlot,Actor or weapon slot receiving the asset,high,source:30DB0.c:1085
 T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,modelId,Model identifier,high,source:30DB0.c:1095

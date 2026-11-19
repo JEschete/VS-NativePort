@@ -36,7 +36,6 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -355,14 +354,15 @@ class LiveHost final : public Host {
   }
 
   void ReturnFromSetup(int return_state) override {
-    VS::Menu::Framework::menuState.currentMenu =
-        VS::Menu::Framework::menuState.returnState;
-    VS::Menu::Framework::menuState.returnState =
-        static_cast<char>(return_state);
+    VS::Menu::Framework::menuState.control.current_menu =
+        VS::Menu::Framework::menuState.control.return_state;
+    VS::Menu::Framework::menuState.control.return_state =
+        static_cast<std::uint8_t>(return_state);
     VS::Menu::Framework::actionRestrictions &= ~kWorkshopRestriction;
   }
   void OpenMenu(int menu) override {
-    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.control.current_menu =
+        static_cast<std::uint8_t>(menu);
   }
 
   void ResetEquipmentStats() override { Framework::ResetLiveEquipmentStats(); }

@@ -5,6 +5,7 @@
 #include <iterator>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -41,6 +42,11 @@ constexpr int kAction = 24;
 constexpr int kArtAction = 184;
 constexpr int kDefenseAction = 47;
 
+// A text header's bytes up to its NUL, as the cost panel draws them.
+std::string HeaderText(const framework::TextHeader& header) {
+  return {header.text.begin(), std::ranges::find(header.text, std::uint8_t{0})};
+}
+
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
   return VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
@@ -68,7 +74,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
       Menu_BattleAbilities_unlockedChainAbilities};
   ArrayRestore<char, abilities::kAbilityCapacity> saved_defense{
       Menu_BattleAbilities_unlockedDefenseAbilities};
-  ArrayRestore<Menu_Framework_TextHeader, 2> saved_headers{
+  ValueRestore<decltype(VS::Menu::Framework::textHeaders)> saved_headers{
       VS::Menu::Framework::textHeaders};
   ValueRestore<char> saved_cost_display{VS::Menu::Framework::displayActionCost};
   ValueRestore<u_short*> saved_rows{Menu_BattleAbilities_abilityText};
@@ -232,8 +238,8 @@ TEST_CASE(
   CHECK(fixture.RowText()[0] == 0x10FA);
   CHECK(fixture.RowText()[1] == 0xE701);
   CHECK(fixture.RowText()[17] == 0xE702);
-  CHECK(std::string_view(VS::Menu::Framework::textHeaders[0].text) == "#255");
-  CHECK(std::string_view(VS::Menu::Framework::textHeaders[1].text) == "RISK");
+  CHECK(HeaderText(VS::Menu::Framework::textHeaders[0]) == "#255");
+  CHECK(HeaderText(VS::Menu::Framework::textHeaders[1]) == "RISK");
 }
 
 TEST_CASE("Ability terminal retains all six original MENU2 entries",

@@ -57,6 +57,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Items/Inventory.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -66,7 +67,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -498,9 +498,8 @@ struct LootInventoryFixture {
   }
 
   int Copy(bool write) {
-    const int flags =
-        static_cast<int>(VS::Items::ItemCategory::kMisc) |
-        (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
+    const int flags = static_cast<int>(VS::Items::ItemCategory::kMisc) |
+                      (write ? VS::Items::Inventory::kCopyItemWrite : 0);
     return VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory, 0,
                                               &source);
   }
@@ -670,7 +669,7 @@ struct EnemyLootFixture : LootInventoryFixture {
       CHECK(row.state == 1);
       CHECK(row.opaque2 == 0);
       const int flags = static_cast<int>(row.itemCategory) |
-                        static_cast<int>(Menu_Framework_CopyItemFlag_Write);
+                        VS::Items::Inventory::kCopyItemWrite;
       CHECK(VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory,
                                                row.itemIndex, &source) != 0);
     }
@@ -1057,7 +1056,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       const bool fits = index < 2 || armor_count + claimed_armor < 16;
       CheckRow(row, index, fits);
       const int flags = static_cast<int>(row.itemCategory) |
-                        static_cast<int>(Menu_Framework_CopyItemFlag_Write);
+                        VS::Items::Inventory::kCopyItemWrite;
       const int result = VS::Items::Inventory::CopyLiveItem(
           flags, &VS::Items::inventory, row.itemIndex, &source);
       CHECK(result ==
@@ -1310,8 +1309,7 @@ struct EquipmentLootFixture : LootInventoryFixture {
         shield ? static_cast<int>(VS::Items::ItemCategory::kShield)
                : static_cast<int>(VS::Items::ItemCategory::kWeapon);
     const int flags =
-        category |
-        (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
+        category | (write ? VS::Items::Inventory::kCopyItemWrite : 0);
     return VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory, 0,
                                               &source);
   }
@@ -2771,7 +2769,7 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
   EquipmentLootFixture::CheckInventory(VS::Items::inventory, expected);
   CHECK(VS::Items::Inventory::CopyLiveItem(
             static_cast<int>(VS::Items::ItemCategory::kArmor) |
-                static_cast<int>(Menu_Framework_CopyItemFlag_Write),
+                VS::Items::Inventory::kCopyItemWrite,
             &VS::Items::inventory, 0,
             &fixture.source) == (count < 16 ? count + 1 : 0));
   if (count < 16) {

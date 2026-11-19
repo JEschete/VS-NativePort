@@ -6,12 +6,15 @@
 // (Framework.hpp); the menu table, the string buffer, the row types and the
 // item lists stay where the workspace allocation put them.
 
+#include <array>
+
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/MenuMemory.h"
+
+struct Content_DiscQueueSlot;
 
 namespace VS::Menu {
 // decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c)
@@ -24,6 +27,13 @@ extern char saveLocationId;
 }  // namespace VS::Menu
 
 namespace VS::Menu::Framework {
+// decomp: vs_MenuState (BATTLE/BATTLE.PRG battleUi.h:83): the framework's
+// MenuControl and the menu overlay read it waits on.
+struct LiveMenuControl {
+  MenuControl control;
+  Content_DiscQueueSlot* cd_queue = nullptr;
+};
+
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
 // is 0, so the zero-initialised definition stands for it.
 extern signed char loadedSubMenu;
@@ -59,7 +69,7 @@ extern char unlockedBattleAbility;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
 extern char openedWithoutMainMenu;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_MenuControlState menuState;
+extern LiveMenuControl menuState;
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c): the list menu's entries.
 extern u_short* itemsText;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
@@ -75,7 +85,7 @@ extern u_short subMenuRowCount;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
 extern char subMenuRowInfo;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
-extern Menu_Framework_TextHeader textHeaders[2];
+extern std::array<TextHeader, kTextHeaderCount> textHeaders;
 // decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG 58EC.c)
 extern char actionMenuState;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)

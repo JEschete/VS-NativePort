@@ -23,7 +23,6 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.h"
@@ -41,7 +40,7 @@ namespace VS::Menu::manual {
 namespace {
 static_assert(kHelpFileLoaded == Content_DiscRequestState_Loaded);
 static_assert(kHelpFileFailed == Content_DiscRequestState_Error);
-static_assert(kNoMenuItem == Menu_Framework_MenuItemId_None);
+static_assert(kNoMenuItem == Framework::kNoRow);
 static_assert(
     std::extent_v<decltype(Field_ManualDisplayState::scrollPositions)> ==
     std::size_t{kTopicCount});
@@ -98,7 +97,8 @@ class LiveScreenHost final : public ScreenHost {
     return VS::Menu::Framework::backgroundFadeStep;
   }
   void SetCurrentMenu(std::int32_t menu) override {
-    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.control.current_menu =
+        static_cast<std::uint8_t>(menu);
   }
   void RevealMenu() override { VS::Menu::Framework::hideMenu = 0; }
 };

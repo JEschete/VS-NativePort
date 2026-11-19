@@ -250,7 +250,7 @@ struct Fixture {
   ValueRestore<char> saved_lower_ui{Battle_lowerScreenUiState};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
-  ValueRestore<Menu_Framework_MenuControlState> saved_control{
+  ValueRestore<VS::Menu::Framework::LiveMenuControl> saved_control{
       VS::Menu::Framework::menuState};
   ValueRestore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   ValueRestore<char*> saved_strings{VS::Menu::Framework::stringBuf};

@@ -896,7 +896,7 @@ struct LiveManualFixture {
   Content_DiscQueueSlot* saved_assets_request = Menu_Manual_helpAssetsCdQueue;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
-  Menu_Framework_MenuControlState saved_menu_state =
+  VS::Menu::Framework::LiveMenuControl saved_menu_state =
       VS::Menu::Framework::menuState;
   std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(kTableWords);
@@ -1193,7 +1193,7 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
   LiveManualFixture fixture;
   manual::LiveManualScreenState().help_result = manual::kHelpExitToGame;
   VS::Menu::Framework::hideMenu = 1;
-  VS::Menu::Framework::menuState.currentMenu = 0;
+  VS::Menu::Framework::menuState.control.current_menu = 0;
   u_char step = manual::kScreenShutDown;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenExit);
@@ -1203,7 +1203,8 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
   VS::Menu::Framework::backgroundFadeStep = 0;
   CHECK(manual::LiveUpdateScreen(&step) == 1);
   CHECK(step == manual::kScreenClosed);
-  CHECK(VS::Menu::Framework::menuState.currentMenu == manual::kGameMenu);
+  CHECK(VS::Menu::Framework::menuState.control.current_menu ==
+        manual::kGameMenu);
   CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 

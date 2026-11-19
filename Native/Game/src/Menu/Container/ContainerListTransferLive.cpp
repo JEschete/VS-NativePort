@@ -31,7 +31,6 @@
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
@@ -259,10 +258,9 @@ class LiveTransferWorld final : public TransferWorld {
     VS::Menu::Framework::menuMemory.opaque9E = selection;
   }
   void ReturnFromMenu(std::uint8_t return_state) override {
-    VS::Menu::Framework::menuState.currentMenu =
-        VS::Menu::Framework::menuState.returnState;
-    VS::Menu::Framework::menuState.returnState =
-        static_cast<char>(return_state);
+    VS::Menu::Framework::menuState.control.current_menu =
+        VS::Menu::Framework::menuState.control.return_state;
+    VS::Menu::Framework::menuState.control.return_state = return_state;
   }
   std::uint32_t PressedButtons() override {
     return static_cast<std::uint32_t>(VS::Input::buttonsPressed);

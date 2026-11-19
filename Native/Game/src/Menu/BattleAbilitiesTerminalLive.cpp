@@ -17,7 +17,6 @@
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminal.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -363,7 +362,7 @@ class LiveScreenHost final : public AbilityScreenHost {
                : LiveUpdateDefenseAbilityMenu(initialize ? 1 : 0);
   }
   void ClearMenu() override {
-    Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    Framework::ClearLiveMenuExcept(Framework::kNoRow);
   }
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();
@@ -372,7 +371,7 @@ class LiveScreenHost final : public AbilityScreenHost {
     Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
   }
   void ReturnToBattleMenu() override {
-    VS::Menu::Framework::menuState.currentMenu = kBattleMenu;
+    VS::Menu::Framework::menuState.control.current_menu = kBattleMenu;
   }
   std::optional<std::uint8_t> AnimationOffset(
       std::uint8_t step) const override {

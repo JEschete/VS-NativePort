@@ -289,20 +289,19 @@ class LiveHost final : public MenuHost {
     VS::Menu::Framework::actionSelection.execute_ability = action;
   }
   void SetAbilityType(std::uint8_t type) override {
-    VS::Menu::Framework::menuState.executeAbilityType = StorageByte(type);
+    VS::Menu::Framework::menuState.control.execute_ability_type = type;
   }
   void SetSelectionKind(std::int16_t kind) override {
     VS::Menu::Framework::actionSelection.selection_kind = kind;
   }
   std::uint8_t CurrentMenu() override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuState.currentMenu);
+    return VS::Menu::Framework::menuState.control.current_menu;
   }
   void SetCurrentMenu(std::uint8_t menu) override {
-    VS::Menu::Framework::menuState.currentMenu = StorageByte(menu);
+    VS::Menu::Framework::menuState.control.current_menu = menu;
   }
   void SetReturnMenu(std::uint8_t menu) override {
-    VS::Menu::Framework::menuState.returnState = StorageByte(menu);
+    VS::Menu::Framework::menuState.control.return_state = menu;
   }
 
  private:

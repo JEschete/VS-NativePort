@@ -183,8 +183,8 @@ TEST_CASE(
       saved;
   VS::Menu::Framework::loadedSubMenu = kGazetteScreen;
   VS::Menu::Framework::openedWithoutMainMenu = 1;
-  VS::Menu::Framework::menuState.currentMenu = kGazetteScreen;
-  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::menuState.control.current_menu = kGazetteScreen;
+  VS::Menu::Framework::menuState.control.loading = 0;
   VS::Menu::Framework::actionRestrictions = 0;
   VS::Menu::Framework::submenuStates[kGazetteScreen] = 3;
   VS::Menu::Framework::submenuStates[kGazetteScreen - 1] =

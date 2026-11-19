@@ -2462,7 +2462,6 @@
     <ClInclude Include="src\Menu\Framework\DetailDispatchLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp" />
     <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.hpp" />
-    <ClInclude Include="src\Menu\Framework\Framework.h" />
     <ClInclude Include="src\Menu\Framework\FrameworkLiveState.hpp" />
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveHost.hpp" />
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.hpp" />

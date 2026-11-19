@@ -922,7 +922,7 @@ void FinishScreenFade(live::PreviewFixture& fixture, std::uint8_t& phase) {
   CHECK(result == 1);
   CHECK(phase == 0);
   CHECK(VS::Menu::Framework::backgroundFadeStep == 0);
-  CHECK(VS::Menu::Framework::menuState.currentMenu == 9);
+  CHECK(VS::Menu::Framework::menuState.control.current_menu == 9);
   CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 

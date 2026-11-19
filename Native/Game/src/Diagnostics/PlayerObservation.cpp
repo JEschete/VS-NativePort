@@ -47,7 +47,6 @@
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -277,7 +276,7 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
     return result;
   }
   result.available = true;
-  result.loading = VS::Menu::Framework::menuState.loading != 0;
+  result.loading = VS::Menu::Framework::menuState.control.loading != 0;
   result.shortcut =
       static_cast<unsigned char>(VS::Menu::Framework::shortcutInvoked);
   if ((state.menu_state & kMenuIdMask) == kLootPhase) {
@@ -325,7 +324,7 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
       result.rows.push_back(
           {static_cast<int>(index),
            InspectGameText(std::as_bytes(std::span(text[index].name))),
-           (text[index].flags & Menu_Framework_RowTypeFlag_Disabled) != 0,
+           (text[index].flags & VS::Menu::Framework::kRowDisabled) != 0,
            static_cast<int>(index) == result.selected_row});
       constexpr int kInventoryMenu = 4, kItemShortcut = 5, kInputReady = 17;
       if (result.selected_menu == kInventoryMenu &&

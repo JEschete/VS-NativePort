@@ -22,7 +22,6 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Map.h"

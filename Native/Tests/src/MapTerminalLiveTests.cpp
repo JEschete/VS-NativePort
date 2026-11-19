@@ -641,7 +641,7 @@ TEST_CASE(
   CHECK(Battle_hudSlideOffset == 0x200000);
   VS::Render::GamePages().Fill({640, 256, 160, 240}, 255, 0, 0);
   ExitScreen(world, step);
-  CHECK(VS::Menu::Framework::menuState.currentMenu == 6);
+  CHECK(VS::Menu::Framework::menuState.control.current_menu == 6);
   CheckRestoredDisplay();
   CheckRestoredPixels();
   CHECK(memory::GameHeap().Empty());
@@ -970,8 +970,8 @@ TEST_CASE("Production framework dispatch uses the real map state byte",
       saved;
   VS::Menu::Framework::loadedSubMenu = kMapScreen;
   VS::Menu::Framework::openedWithoutMainMenu = 1;
-  VS::Menu::Framework::menuState.currentMenu = kMapScreen;
-  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::menuState.control.current_menu = kMapScreen;
+  VS::Menu::Framework::menuState.control.loading = 0;
   VS::Menu::Framework::actionRestrictions = 0;
   VS::Menu::Framework::submenuStates[kMapScreen] = 3;
   VS::Menu::Framework::submenuStates[kMapScreen - 1] = static_cast<char>(0xAA);

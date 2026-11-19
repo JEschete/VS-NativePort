@@ -172,11 +172,10 @@ void ReadRuntime(TerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Menu_Inventory_statusCommandAnimationStep),
       static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
       Menu_Inventory_ashleyRenderState};
-  const auto& control = VS::Menu::Framework::menuState;
-  runtime.control.current_menu = static_cast<std::uint8_t>(control.currentMenu);
-  runtime.control.return_state = static_cast<std::uint8_t>(control.returnState);
-  runtime.control.execute_ability_type =
-      static_cast<std::uint8_t>(control.executeAbilityType);
+  const auto& control = VS::Menu::Framework::menuState.control;
+  runtime.control.current_menu = control.current_menu;
+  runtime.control.return_state = control.return_state;
+  runtime.control.execute_ability_type = control.execute_ability_type;
   const auto& use = VS::Menu::Framework::actionSelection;
   runtime.use = {use.menu_status, use.selection_kind,
                  VS::Menu::Framework::ExecuteAbilityAction(use),
@@ -207,11 +206,10 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   Menu_Inventory_selectedItemCategoryIconOnTop =
       static_cast<char>(panels.icon_on_top);
   Menu_Inventory_ashleyRenderState = panels.ashley_layout;
-  auto& control = VS::Menu::Framework::menuState;
-  control.currentMenu = static_cast<char>(runtime.control.current_menu);
-  control.returnState = static_cast<char>(runtime.control.return_state);
-  control.executeAbilityType =
-      static_cast<char>(runtime.control.execute_ability_type);
+  auto& control = VS::Menu::Framework::menuState.control;
+  control.current_menu = runtime.control.current_menu;
+  control.return_state = runtime.control.return_state;
+  control.execute_ability_type = runtime.control.execute_ability_type;
   auto& use = VS::Menu::Framework::actionSelection;
   use.menu_status = runtime.use.command;
   use.selection_kind = runtime.use.kind;

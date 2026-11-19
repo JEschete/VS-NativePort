@@ -32,7 +32,6 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"

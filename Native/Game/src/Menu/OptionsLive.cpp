@@ -138,7 +138,7 @@ class LiveHost final : public Host {
     Input::PlayLiveVibrationPreset(preset);
   }
   void ReturnToBattle() override {
-    VS::Menu::Framework::menuState.currentMenu = kBattleMenu;
+    VS::Menu::Framework::menuState.control.current_menu = kBattleMenu;
   }
 
  private:

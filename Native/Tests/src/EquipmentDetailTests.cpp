@@ -24,7 +24,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"

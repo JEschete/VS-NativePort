@@ -675,14 +675,14 @@ class LiveGazetteHost final : public GazetteHost {
 
 GazetteScreenEnvironment ReadScreenEnvironment() {
   return {Battle_hudSlideOffset, VS::Menu::Framework::backgroundFadeStep,
-          static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
+          VS::Menu::Framework::menuState.control.current_menu,
           static_cast<std::uint8_t>(VS::Menu::Framework::hideMenu)};
 }
 
 void WriteScreenEnvironment(const GazetteScreenEnvironment& environment) {
   Battle_hudSlideOffset = environment.hud_slide_offset;
-  VS::Menu::Framework::menuState.currentMenu =
-      static_cast<char>(environment.current_menu);
+  VS::Menu::Framework::menuState.control.current_menu =
+      environment.current_menu;
   VS::Menu::Framework::hideMenu = static_cast<char>(environment.hide_menu);
 }
 

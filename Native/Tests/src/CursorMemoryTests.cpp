@@ -33,7 +33,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -1110,7 +1109,7 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
   for (int row = 0; row < 9; ++row) {
     CAPTURE(disabled, row);
     CHECK(rows[row].flags ==
-          (row == 6 && disabled ? Menu_Framework_RowTypeFlag_Disabled : 0));
+          (row == 6 && disabled ? VS::Menu::Framework::kRowDisabled : 0));
   }
 }
 
@@ -1140,7 +1139,7 @@ TEST_CASE(
       VS::Menu::Framework::itemsText);
   for (int index = 0; index < 4; ++index) {
     CHECK(rows[index].flags ==
-          (equipped ? 0 : Menu_Framework_RowTypeFlag_Disabled));
+          (equipped ? 0 : VS::Menu::Framework::kRowDisabled));
   }
   if (!shortcut) {
     CHECK(rows[4].flags == 2);

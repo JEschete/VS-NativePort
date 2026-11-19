@@ -10,7 +10,6 @@
 
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Status/ActorStatus.h"

@@ -38,7 +38,6 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -848,7 +847,7 @@ struct GameplayInspectionFixture {
     Field_roomData.tileCells = nullptr;
     VS::Menu::Framework::menuItems = nullptr;
     VS::Menu::Framework::itemsText = nullptr;
-    VS::Menu::Framework::menuState.currentMenu =
+    VS::Menu::Framework::menuState.control.current_menu =
         VS::Menu::Framework::kMenuClosed;
     Event_isMenuTransitionActive = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
@@ -1005,7 +1004,7 @@ TEST_CASE(
     "Gameplay roulette inspection reads the original state without changes",
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
-  VS::Menu::Framework::menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.control.current_menu = 15;
   VS::State::stateFlags.menu_f_submenu = 0;
   VS::Menu::Framework::submenuStates[15] = 2;
   VS::Menu::Results::screenState = 1;
@@ -1030,7 +1029,7 @@ TEST_CASE(
     "Roulette inspection excludes loading other submenus and closed menus",
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
-  VS::Menu::Framework::menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.control.current_menu = 15;
   VS::State::stateFlags.menu_f_submenu = 0;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::Boot::EncounterPollStop();
@@ -1038,9 +1037,10 @@ TEST_CASE(
   VS::State::stateFlags.menu_f_submenu = 1;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::State::stateFlags.menu_f_submenu = 0;
-  VS::Menu::Framework::menuState.currentMenu = VS::Menu::Framework::kMenuClosed;
+  VS::Menu::Framework::menuState.control.current_menu =
+      VS::Menu::Framework::kMenuClosed;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
-  VS::Menu::Framework::menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.control.current_menu = 15;
   VS::Boot::ResetGameplayInspection();
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
 }
@@ -1273,7 +1273,7 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
       rows{};
   VS::Menu::Framework::menuItems = rows.data();
   Field_controlMode = kMenuControl;
-  VS::Menu::Framework::menuState.currentMenu = kResultsMenu;
+  VS::Menu::Framework::menuState.control.current_menu = kResultsMenu;
   VS::State::stateFlags.menu_f_submenu = static_cast<char>(200);
   VS::Menu::Framework::menuMemory.cursorMemories[12] = static_cast<char>(200);
   VS::Menu::Framework::menuMemory.cursorMemories[13] = static_cast<char>(201);
@@ -1558,7 +1558,7 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
   ReactionInspectionFixture fixture;
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
-  VS::Menu::Framework::menuState.currentMenu = 3;
+  VS::Menu::Framework::menuState.control.current_menu = 3;
   Battle_actionFlowMode = 14;
   const auto reward =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
@@ -1643,7 +1643,7 @@ TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::itemsText =
       reinterpret_cast<std::uint16_t*>(text.data());
-  VS::Menu::Framework::menuState.currentMenu = 4;
+  VS::Menu::Framework::menuState.control.current_menu = 4;
   VS::Menu::Framework::shortcutInvoked = 5;
   VS::Menu::Framework::itemsListRow = 17;
   VS::Menu::Framework::subMenuRowCount = 1;
@@ -1663,7 +1663,7 @@ TEST_CASE("Loot input readiness is observed without claiming the drop",
   ItemInspectionFixture fixture;
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
-  VS::Menu::Framework::menuState.currentMenu = 12;
+  VS::Menu::Framework::menuState.control.current_menu = 12;
   Battle_actionFlowMode = 12;
   Menu_Loot_controlsEnabled = 1;
   Menu_Loot_lootListCount = 1;
@@ -1681,7 +1681,7 @@ TEST_CASE(
   ItemInspectionFixture fixture;
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
-  VS::Menu::Framework::menuState.currentMenu = 12;
+  VS::Menu::Framework::menuState.control.current_menu = 12;
   Field_controlMode = 3;
   Battle_actionFlowMode = 4;
   Event_isMenuTransitionActive = 1;

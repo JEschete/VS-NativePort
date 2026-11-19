@@ -20,7 +20,6 @@
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -156,13 +155,14 @@ class LiveContainerSave final : public ContainerSaveHost {
                                              VS::Game::Save::ContainerData(),
                                              sizeof storage.storedContainer);
     VS::Save::MemoryCard::ReleaseLiveMenuResources();
-    VS::Menu::Framework::menuState.returnState =
-        VS::Menu::Framework::menuState.currentMenu;
-    VS::Menu::Framework::menuState.currentMenu = kContainerInventoryMenu;
+    VS::Menu::Framework::menuState.control.return_state =
+        VS::Menu::Framework::menuState.control.current_menu;
+    VS::Menu::Framework::menuState.control.current_menu =
+        kContainerInventoryMenu;
   }
 
   ContainerScreenResult ContainerScreenOutcome() override {
-    switch (VS::Menu::Framework::menuState.returnState) {
+    switch (VS::Menu::Framework::menuState.control.return_state) {
       case 0:
         return ContainerScreenResult::kRestore;
       case 1:
@@ -200,7 +200,7 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Field::LiveSetFieldRenderingEnabled(1);
     VS::Battle::SetLiveHudHidden(0);
     Battle_hudSlideOffset = 0;
-    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    VS::Menu::Framework::ClearLiveMenuExcept(VS::Menu::Framework::kNoRow);
     VS::Menu::Framework::SetLiveBackgroundPriority(kContainerRestorePriority,
                                                    kContainerBackgroundAlpha);
   }

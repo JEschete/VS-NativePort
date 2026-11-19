@@ -470,7 +470,7 @@ TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
           "[inventory-terminal-live][inventory-reload][F02636]") {
   TerminalFixture fixture;
   VS::Menu::Framework::itemNames = nullptr;
-  VS::Menu::Framework::menuState.returnState = 1;
+  VS::Menu::Framework::menuState.control.return_state = 1;
   std::uint8_t step = kContainerReturn;
   REQUIRE(inventory::UpdateLiveInventoryScreen(&step) == 0);
   REQUIRE(step == kInventoryCountdown);
@@ -478,7 +478,7 @@ TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 0);
   VS::Boot::ResetMenu3Statics();
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 1);
-  CHECK(VS::Menu::Framework::menuState.currentMenu == kBattleMenu);
+  CHECK(VS::Menu::Framework::menuState.control.current_menu == kBattleMenu);
 }
 
 TEST_CASE("Loot terminal module entries retain their distinct call shapes",

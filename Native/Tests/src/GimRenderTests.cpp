@@ -21,7 +21,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -447,7 +446,7 @@ int CheckMenuWorkspaceReset(void) {
 
 int CheckMenuReloadClosingDelay(void) {
   enum { kRows = 40, kVisits = 3, kClosingTicks = 5 };
-  const Menu_Framework_MenuControlState saved_state =
+  const VS::Menu::Framework::LiveMenuControl saved_state =
       VS::Menu::Framework::menuState;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_int* saved_background = VS::Menu::Framework::menuBackgroundBuffer;
@@ -466,15 +465,15 @@ int CheckMenuReloadClosingDelay(void) {
   VS::Menu::Framework::loadedSubMenu = 0;
   VS::Menu::Framework::shortcutInvoked = 0;
   VS::Menu::Framework::openedWithoutMainMenu = 1;
-  VS::Menu::Framework::menuState.cdQueue = request;
+  VS::Menu::Framework::menuState.cd_queue = request;
 
   for (int visit = 0; visit < kVisits; ++visit) {
     request->state = Content_DiscRequestState_Loaded;
     request->cdFile = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
-    VS::Menu::Framework::menuState.loading = 1;
+    VS::Menu::Framework::menuState.control.loading = 1;
     passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
               request->state == Content_DiscRequestState_Free &&
-              VS::Menu::Framework::menuState.loading == 0;
+              VS::Menu::Framework::menuState.control.loading == 0;
     for (int tick = 1; tick <= kClosingTicks; ++tick) {
       passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1;
       passed &= VS::Menu::Framework::LiveQuitDelay() == (tick == kClosingTicks);
@@ -573,13 +572,12 @@ int CheckMenuPromptPanelLinks(void) {
   const u_long guard = 0xDEADBEEF;
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   const char saved_display = VS::Menu::Framework::displayActionCost;
-  Menu_Framework_TextHeader saved_headers[2];
-  memcpy(saved_headers, VS::Menu::Framework::textHeaders, sizeof saved_headers);
+  const auto saved_headers = VS::Menu::Framework::textHeaders;
   u_long ordering[kOrderingWords];
   u_long storage[kPacketWords];
   PrepareMenuPacketCapture(ordering, storage, guard);
   VS::Menu::Framework::displayActionCost = 1;
-  memset(VS::Menu::Framework::textHeaders, 0, sizeof saved_headers);
+  VS::Menu::Framework::textHeaders = {};
   // The typed HUD packets reserve their words in the current frame's buffer
   // and link only into the current frame's ordering table.
   void* const saved_buffer =
@@ -606,7 +604,7 @@ int CheckMenuPromptPanelLinks(void) {
                nextPrim(ordering + 15) == storage + 15 && end > storage + 1 &&
                end < storage + kPacketWords && storage[0] == guard &&
                *end == guard;
-  memcpy(VS::Menu::Framework::textHeaders, saved_headers, sizeof saved_headers);
+  VS::Menu::Framework::textHeaders = saved_headers;
   VS::Menu::Framework::displayActionCost = saved_display;
   VS::Render::FrameScratchpad() = saved_frame;
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;

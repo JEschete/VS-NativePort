@@ -30,7 +30,6 @@
 #include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/GameFiles.hpp"

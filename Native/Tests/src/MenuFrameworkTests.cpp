@@ -13,7 +13,6 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -240,7 +239,7 @@ fw::SortStats SampleSortStats() {
   return stats;
 }
 
-// vs_battle_menuState_t.currentMenu values, menuStatus done, and the event
+// vs_MenuState.currentMenu values, menuStatus done, and the event
 // menu that runs MENUF.PRG's results screen (BATTLE.PRG 5BF94.c:2966,
 // MAINMENU.PRG C48.c:316).
 constexpr std::uint8_t kChallengeMenu = 15;

@@ -99,8 +99,7 @@ TerminalFrame LoadFrame() {
       .cursor_memory =
           static_cast<std::uint8_t>(VS::Input::settings.cursor_memory),
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
-      .current_menu =
-          static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
+      .current_menu = VS::Menu::Framework::menuState.control.current_menu,
       .pressed = VS::Input::buttonsPressed,
       .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
       .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
@@ -130,8 +129,7 @@ void StoreFrame(const TerminalFrame& frame) {
       static_cast<char>(frame.selected_equipment);
   VS::Input::settings.cursor_memory = static_cast<char>(frame.cursor_memory);
   Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
-  VS::Menu::Framework::menuState.currentMenu =
-      static_cast<char>(frame.current_menu);
+  VS::Menu::Framework::menuState.control.current_menu = frame.current_menu;
 }
 TerminalView LoadView() {
   const MATRIX& view = VS::Render::FrameScratchpad().view_matrix;

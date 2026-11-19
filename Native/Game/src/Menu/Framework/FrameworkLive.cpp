@@ -62,7 +62,6 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
@@ -162,7 +161,7 @@ char VS::Menu::Framework::unlockedBattleAbility = 0;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
 char VS::Menu::Framework::openedWithoutMainMenu = 0;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuControlState VS::Menu::Framework::menuState = {};
+VS::Menu::Framework::LiveMenuControl VS::Menu::Framework::menuState = {};
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c)
 u_short* VS::Menu::Framework::itemsText = nullptr;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
@@ -178,9 +177,9 @@ u_short VS::Menu::Framework::subMenuRowCount = 0;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::subMenuRowInfo = 0;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
-Menu_Framework_TextHeader
-    VS::Menu::Framework::textHeaders[VS::Menu::Framework::kTextHeaderCount] =
-        {};
+std::array<VS::Menu::Framework::TextHeader,
+           VS::Menu::Framework::kTextHeaderCount>
+    VS::Menu::Framework::textHeaders = {};
 // decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::actionMenuState = 0;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
@@ -204,7 +203,6 @@ namespace {
 // The typed records view the live ones in place.
 static_assert(std::is_standard_layout_v<MenuRow>);
 static_assert(std::is_standard_layout_v<ItemText>);
-static_assert(sizeof(TextHeader) == sizeof(Menu_Framework_TextHeader));
 static_assert(sizeof(Menu_Framework_MenuMemory) == kMenuMemoryBytes);
 static_assert(sizeof(Content_battleMainMenuHelpText) ==
               kHelpTextWords * sizeof(std::uint32_t));
@@ -312,10 +310,7 @@ std::array<TrackedItems, 2> g_items{};
 
 void LoadControl() {
   g_state.loaded_sub_menu = loadedSubMenu;
-  g_state.control = {.current_menu = Byte(menuState.currentMenu),
-                     .return_state = Byte(menuState.returnState),
-                     .execute_ability_type = Byte(menuState.executeAbilityType),
-                     .loading = Byte(menuState.loading)};
+  g_state.control = menuState.control;
   g_state.action_selection = actionSelection;
   g_state.shortcut_invoked = Byte(shortcutInvoked);
   g_state.opened_without_main_menu = Byte(openedWithoutMainMenu);
@@ -326,7 +321,7 @@ void LoadControl() {
   g_state.main_menu_cursor_animation = mainMenuCursorAnimation;
   std::memcpy(g_state.submenu_states.data(), submenuStates,
               sizeof(submenuStates));
-  std::memcpy(g_state.text_headers.data(), textHeaders, sizeof(textHeaders));
+  g_state.text_headers = textHeaders;
   g_state.loot_lists = LootListId{reinterpret_cast<std::uintptr_t>(lootLists)};
   g_state.loot_entry = LootEntryId{reinterpret_cast<std::uintptr_t>(lootEntry)};
 }
@@ -356,10 +351,7 @@ void LoadMainMenu() {
 
 void StoreControl() {
   loadedSubMenu = g_state.loaded_sub_menu;
-  menuState.currentMenu = Char(g_state.control.current_menu);
-  menuState.returnState = Char(g_state.control.return_state);
-  menuState.executeAbilityType = Char(g_state.control.execute_ability_type);
-  menuState.loading = Char(g_state.control.loading);
+  menuState.control = g_state.control;
   actionSelection = g_state.action_selection;
   shortcutInvoked = Char(g_state.shortcut_invoked);
   openedWithoutMainMenu = Char(g_state.opened_without_main_menu);
@@ -370,7 +362,7 @@ void StoreControl() {
   mainMenuCursorAnimation = g_state.main_menu_cursor_animation;
   std::memcpy(submenuStates, g_state.submenu_states.data(),
               sizeof(submenuStates));
-  std::memcpy(textHeaders, g_state.text_headers.data(), sizeof(textHeaders));
+  textHeaders = g_state.text_headers;
   lootLists = reinterpret_cast<VS::Items::LootListNode*>(
       static_cast<std::uintptr_t>(g_state.loot_lists));
   lootEntry = reinterpret_cast<VS::Items::BattleLoot*>(
@@ -853,13 +845,13 @@ class LiveHost final : public Host {
   }
 
   void BeginOverlayLoad(int sub_menu, bool main_menu_program) override {
-    Menu_Framework_MenuControlState& control = menuState;
+    Content_DiscQueueSlot*& request = menuState.cd_queue;
     std::uint32_t file_data = MainMenuProgram();
     if (!main_menu_program) {
       if (sub_menu < 0 ||
           static_cast<std::size_t>(sub_menu) >= kMenuFiles.size()) {
         Refuse("menu overlay outside the menu files");
-        control.cdQueue = nullptr;
+        request = nullptr;
         return;
       }
       file_data = kMenuFiles[static_cast<std::size_t>(sub_menu)];
@@ -871,24 +863,23 @@ class LiveHost final : public Host {
     void* const slot =
         VS::Core::kOverlaySlots[sub_menu == 0 ? kMainMenuOverlaySlot
                                               : kSubmenuOverlaySlot];
-    control.cdQueue = VS::Content::AllocateLiveDiscRequest(&file);
-    if (control.cdQueue != nullptr) {
-      VS::Content::EnqueueLiveDiscRequest(control.cdQueue, slot);
+    request = VS::Content::AllocateLiveDiscRequest(&file);
+    if (request != nullptr) {
+      VS::Content::EnqueueLiveDiscRequest(request, slot);
     } else {
-      control.cdQueue =
-          VS::Content::CompleteLiveRefusedDiscRequest(&file, slot);
+      request = VS::Content::CompleteLiveRefusedDiscRequest(&file, slot);
     }
   }
 
   bool IsOverlayLoaded() override {
-    const Content_DiscQueueSlot* const request = menuState.cdQueue;
+    const Content_DiscQueueSlot* const request = menuState.cd_queue;
     return request == nullptr ||
            request->state == Content_DiscRequestState_Loaded;
   }
 
   void FinishOverlayLoad() override {
     std::optional<int> loaded_lba;
-    if (auto* request = menuState.cdQueue) {
+    if (auto* request = menuState.cd_queue) {
       loaded_lba = request->cdFile.lba;
       VS::Content::ReleaseLiveDiscRequest(request);
     }
@@ -909,7 +900,7 @@ class LiveHost final : public Host {
     ResetLoadedSubmenu(*loaded_lba);
   }
 
-  void ForgetOverlayLoad() override { menuState.cdQueue = nullptr; }
+  void ForgetOverlayLoad() override { menuState.cd_queue = nullptr; }
 
   // The other MAINMENU.PRG files' statics; the original dropped both lists'
   // pointers without freeing them.

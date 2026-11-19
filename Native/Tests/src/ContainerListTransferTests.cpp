@@ -16,7 +16,6 @@
 #include "Menu/ContainerListTransferWorld.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 
 namespace {

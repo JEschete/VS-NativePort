@@ -30,7 +30,6 @@
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Map.h"
@@ -490,7 +489,7 @@ class LiveScreen final : public MapScreenHost {
     Framework::SetLiveCommandLabel(Framework::MenuCommand::kNone);
   }
   void ClearRows() override {
-    Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    Framework::ClearLiveMenuExcept(Framework::kNoRow);
   }
   bool RestoreBackground() override {
     const auto bytes = Payload(resources.background);
@@ -514,7 +513,8 @@ class LiveScreen final : public MapScreenHost {
     return true;
   }
   void SetDestination(std::uint8_t menu) override {
-    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.control.current_menu =
+        static_cast<std::uint8_t>(menu);
   }
   void ShowMenu() override { VS::Menu::Framework::hideMenu = 0; }
 };

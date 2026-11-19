@@ -16,7 +16,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilities.hpp"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -199,7 +198,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     return true;
   }
   void ClearMenu() override {
-    Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    Framework::ClearLiveMenuExcept(Framework::kNoRow);
   }
   void FlyOutRowsAndHoistSelection(int row) override {
     Framework::FlyOutLiveRowsAndHoistSelection(row, 0);

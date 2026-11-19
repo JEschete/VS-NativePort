@@ -169,7 +169,7 @@ class LiveHost final : public Host {
     VS::Menu::DismissLiveTextBox(kInformationTextBox);
   }
   void ReturnToMenu() override {
-    VS::Menu::Framework::menuState.currentMenu = kWeaponMenu;
+    VS::Menu::Framework::menuState.control.current_menu = kWeaponMenu;
   }
 
   std::optional<Request> RenameRequest() override {

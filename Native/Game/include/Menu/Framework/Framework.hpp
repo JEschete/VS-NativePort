@@ -51,8 +51,11 @@ inline constexpr std::size_t kInformationMessageCopyBytes = 96;
 inline constexpr std::size_t kBackgroundWords = 0x2D00;
 // The interface texture InitGameInterface uploads (three images).
 inline constexpr std::size_t kInterfaceTextureBytes = 0x12F00;
-// Menu_Framework_MenuItemId_None: no row is kept.
+// vs_mainMenu_menuItemIds_none (MAINMENU.PRG C48.h:6): no row is kept.
 inline constexpr int kNoRow = 40;
+// vs_mainMenu_rowTypeFlags' rowTypeDisabled (MAINMENU.PRG 58EC.h:170): the
+// row's type flag (and ItemText::flags bit) that greys it out.
+inline constexpr std::int32_t kRowDisabled = 1;
 inline constexpr int kActionRowBase = 32;
 
 // Packed screen coordinates and texture words (vs_getXY, vs_getUV, getClut
@@ -146,7 +149,7 @@ struct ItemText {
 static_assert(sizeof(ItemText) == kItemTextRecordBytes,
               "ItemText keeps the record's layout");
 
-// textHeader_t (MAINMENU.PRG 58EC.c:21).
+// TextHeader (MAINMENU.PRG 58EC.c:20).
 struct TextHeader {
   std::array<std::uint8_t, kTextHeaderBytes> text{};
   std::uint8_t disabled = 0;
@@ -187,7 +190,8 @@ constexpr void SetExecuteAbility(ActionSelection& selection,
 // decomp: ashleyRenderMode (src/MENU/_renderAshley.h:11)
 enum class AshleyRenderMode : std::int32_t { kRender, kInit, kRestore };
 
-// vs_battle_menuState_t without its disc request (the host keeps it).
+// vs_MenuState (BATTLE.PRG battleUi.h:83) without its disc request (the host
+// keeps it).
 struct MenuControl {
   std::uint8_t current_menu = 0;
   std::uint8_t return_state = 0;

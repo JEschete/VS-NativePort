@@ -403,17 +403,17 @@ TEST_CASE("Options live binding returns to the battle through the menu state",
   VS::Menu::Framework::MenuRow* const saved_items =
       VS::Menu::Framework::menuItems;
   VS::Menu::Framework::menuItems = nullptr;
-  VS::Menu::Framework::menuState.currentMenu = 0;
+  VS::Menu::Framework::menuState.control.current_menu = 0;
   options::ResetLiveOptionsStatics();
   std::uint8_t step = StepByte(Step::kExitToBattle);
   CHECK(options::UpdateLiveOptions(step) == 1);
   CHECK(step == StepByte(Step::kNone));
-  CHECK(VS::Menu::Framework::menuState.currentMenu == 8);
-  VS::Menu::Framework::menuState.currentMenu = 0;
+  CHECK(VS::Menu::Framework::menuState.control.current_menu == 8);
+  VS::Menu::Framework::menuState.control.current_menu = 0;
   step = StepByte(Step::kExitToMenu);
   CHECK(options::UpdateLiveOptions(step) == 1);
   CHECK(step == StepByte(Step::kNone));
-  CHECK(VS::Menu::Framework::menuState.currentMenu == 0);
+  CHECK(VS::Menu::Framework::menuState.control.current_menu == 0);
   CHECK(options::UpdateLiveOptions(step) == 0);
   VS::Menu::Framework::menuItems = saved_items;
   VS::Menu::Framework::menuState = saved_state;

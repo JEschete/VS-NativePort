@@ -2550,9 +2550,6 @@
     <ClCompile Include="src\Menu\Framework\Framework.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\Framework.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Framework\FrameworkLive.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>

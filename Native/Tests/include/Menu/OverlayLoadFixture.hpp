@@ -41,8 +41,8 @@ struct Load {
     VS::Menu::Framework::shortcutInvoked = 0;
     VS::Menu::Framework::openedWithoutMainMenu = 1;
     VS::Menu::Framework::menuBackgroundBuffer = nullptr;
-    VS::Menu::Framework::menuState.loading = 1;
-    VS::Menu::Framework::menuState.cdQueue = request;
+    VS::Menu::Framework::menuState.control.loading = 1;
+    VS::Menu::Framework::menuState.cd_queue = request;
   }
   ~Load() {
     if (VS::Content::LiveDiscRequestGeneration(request) == generation) {
