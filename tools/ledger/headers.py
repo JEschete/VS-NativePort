@@ -347,7 +347,9 @@ def sync(workspace: HeaderWorkspace) -> None:
         claimed = {row["path"] for row in previous}
         rows = []
         for row in previous:
-            path = renamed(row["path"], scanner, claimed) if row["kind"] == "header" else row["path"]
+            # A retired row records a deletion; a same-named .hpp beside it is a different file, not its rename.
+            follows = row["kind"] == "header" and row["status"] != "retired"
+            path = renamed(row["path"], scanner, claimed) if follows else row["path"]
             claimed.add(path)
             rows.append(measured_row({**row, "path": path}, scanner))
     write_ledger(workspace, rows)

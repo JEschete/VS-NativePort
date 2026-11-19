@@ -251,6 +251,21 @@ class LedgerTests(unittest.TestCase):
         headers.write_tracker(self.workspace, rows)
         self.assertEqual(rules(self.workspace), ["retired-present", "retired-without-reason"])
 
+    def test_a_retired_row_is_not_moved_onto_a_sibling_hpp(self) -> None:
+        rows = list(ledger(self.workspace).values())
+        for row in rows:
+            if row["path"].endswith("Map.h"):
+                row["status"], row["notes"] = "retired", "deleted: records moved"
+        headers.write_ledger(self.workspace, rows)
+        self.fixture.remove("Native/Game/src/Menu/Map.h")
+        self.fixture.files["Native/Game/src/Menu/Map.hpp"] = CPP
+        self.fixture.write()
+        headers.sync(self.workspace)
+        rows = ledger(self.workspace)
+        self.assertEqual(rows["Native/Game/src/Menu/Map.h"]["status"], "retired")
+        self.assertNotIn("Native/Game/src/Menu/Map.hpp", rows)
+        self.assertEqual(rules(self.workspace), [])
+
     def test_an_edited_tracker_block_is_stale(self) -> None:
         text = self.workspace.tracker.read_text(encoding="utf-8")
         self.workspace.tracker.write_text(text.replace("headers done", "headers finished"), encoding="utf-8")
