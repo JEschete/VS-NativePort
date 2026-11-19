@@ -59,7 +59,7 @@
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Trails.hpp"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
 #include "Render/Frame.hpp"
@@ -389,8 +389,8 @@ class LiveTrailHost final : public BasicTrailHost<History> {
 
  private:
   // The instance transform `index`, or null with a diagnostic naming `role`.
-  [[nodiscard]] const Effects_TransformSlot* Transform(std::size_t index,
-                                                       std::string_view role);
+  [[nodiscard]] const LiveTransformSlot* Transform(std::size_t index,
+                                                   std::string_view role);
   [[nodiscard]] bool TextureTableBound(std::size_t table) const;
 
   const Effects_ParticleDefinition& definition_;
@@ -425,7 +425,7 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
 }
 
 template <std::size_t History>
-const Effects_TransformSlot* LiveTrailHost<History>::Transform(
+const LiveTransformSlot* LiveTrailHost<History>::Transform(
     std::size_t index, std::string_view role) {
   if (index < kTransformCount) {
     return &instance_.transforms[index];
@@ -443,7 +443,7 @@ const Effects_TransformSlot* LiveTrailHost<History>::Transform(
 // transform unchecked.
 template <std::size_t History>
 std::optional<Vec3> LiveTrailHost<History>::AttractionTranslation() {
-  const Effects_TransformSlot* transform =
+  const LiveTransformSlot* transform =
       Transform(definition_.attractionTransform, "attraction");
   if (transform == nullptr) {
     return std::nullopt;
@@ -462,7 +462,7 @@ bool LiveTrailHost<History>::BeginProjection(bool effect_view) {
     Render::LoadLiveFrameViewMatrix();
     return true;
   }
-  const Effects_TransformSlot* transform =
+  const LiveTransformSlot* transform =
       Transform(definition_.transformIndex, "view");
   if (transform == nullptr) {
     return false;

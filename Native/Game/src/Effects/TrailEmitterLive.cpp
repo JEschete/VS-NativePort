@@ -34,7 +34,7 @@
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "Effects/Trails.hpp"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {

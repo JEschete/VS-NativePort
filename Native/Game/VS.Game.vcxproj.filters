@@ -1731,12 +1731,12 @@
     <ClCompile Include="src\Effects\Transforms.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Transforms.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\TransformsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClInclude Include="src\Effects\TransformsLiveState.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\WeatherPool.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>

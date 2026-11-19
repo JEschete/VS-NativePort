@@ -19,8 +19,8 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
-#include "Effects/Transforms.h"
 #include "Effects/TransformsLive.hpp"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -306,10 +306,10 @@ namespace {
 std::vector<std::byte> GravityOriginPackage() {
   Effects_PackageBlock9 parameters{};
   parameters.transformCount = 1;
-  Effects_TransformDefinition definition{};
+  VS::Effects::LiveTransformDefinition definition{};
   definition.flags = 7;
-  definition.attachActor = 0x12;
-  for (auto& value : definition.scaleRange) value = 4096;
+  definition.attach_actor = 0x12;
+  definition.scale_range.fill(4096);
   constexpr std::size_t kParametersBlock = 4 + 0x1C;
   constexpr std::size_t kDefinitionsBlock = 4 + sizeof definition;
   static_assert(sizeof parameters <= kParametersBlock - 4);

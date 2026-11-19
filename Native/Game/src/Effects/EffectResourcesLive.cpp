@@ -232,8 +232,8 @@ void PublishBlocks(Effects_EffectPackage& package,
         LegacyPointer<Effects_PackageBlock9>(blocks.parameters);
   }
   if (bound(PackageBlockType::kTransformDefinitions)) {
-    package.block10Data = LegacyPointer<Effects_TransformDefinition>(
-        blocks.transform_definitions);
+    package.block10Data =
+        LegacyPointer<LiveTransformDefinition>(blocks.transform_definitions);
   }
   if (bound(PackageBlockType::kSoundSequences)) {
     package.block11Data = LegacyPointer<u_char>(blocks.sound_sequences);

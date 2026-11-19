@@ -23,42 +23,13 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
 #include "Effects/Transforms.hpp"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
-// func_800D0548_arg1 (5BF94.c:6076) views each Effects_TransformSlot.
-namespace {
-constexpr std::size_t kMotionFlagsAt = 0x06;
-constexpr std::size_t kMotionFrameAt = 0x0E;
-constexpr std::size_t kMotionPositionAt = 0x1C;
-constexpr std::size_t kMotionAttachmentAt = 0x78;
-constexpr std::size_t kMotionFacingAt = 0x98;
-constexpr std::size_t kMotionSavedAt = 0xB8;
-constexpr std::size_t kMotionControlAt = 0xC8;
-}  // namespace
-
-static_assert(sizeof(Effects_TransformMotionView) ==
-              sizeof(Effects_TransformSlot));
-static_assert(offsetof(Effects_TransformMotionView, flags) == kMotionFlagsAt);
-static_assert(offsetof(Effects_TransformMotionView, frame) == kMotionFrameAt);
-static_assert(offsetof(Effects_TransformMotionView, position) ==
-              kMotionPositionAt);
-static_assert(offsetof(Effects_TransformMotionView, actor) ==
-              offsetof(Effects_TransformSlot, actor));
-static_assert(offsetof(Effects_TransformMotionView, world) ==
-              offsetof(Effects_TransformSlot, world));
-static_assert(offsetof(Effects_TransformMotionView, view) ==
-              offsetof(Effects_TransformSlot, view));
-static_assert(offsetof(Effects_TransformMotionView, attachment) ==
-              kMotionAttachmentAt);
-static_assert(offsetof(Effects_TransformMotionView, facing) == kMotionFacingAt);
-static_assert(offsetof(Effects_TransformMotionView, saved) == kMotionSavedAt);
-static_assert(offsetof(Effects_TransformMotionView, control1) ==
-              kMotionControlAt);
-static_assert(sizeof(Effects_TransformDefinition) ==
+static_assert(sizeof(VS::Effects::LiveTransformDefinition) ==
               VS::Effects::kTransformDefinitionBytes);
 static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
               VS::Effects::kEffectTransformSlots);
@@ -93,14 +64,12 @@ void StorePoint(SVECTOR& record, TransformPoint point) {
   record.pad = point.pad;
 }
 
-[[nodiscard]] Effects_TransformMotionView& MotionOf(
-    Effects_EffectInstance& instance, std::size_t index) {
-  return *reinterpret_cast<Effects_TransformMotionView*>(
-      &instance.transforms[index]);
+[[nodiscard]] LiveTransformSlot& MotionOf(Effects_EffectInstance& instance,
+                                          std::size_t index) {
+  return std::span(instance.transforms)[index];
 }
 
-[[nodiscard]] TransformState StateOf(
-    const Effects_TransformMotionView& record) {
+[[nodiscard]] TransformState StateOf(const LiveTransformSlot& record) {
   return {
       .rotation = {record.rotation[0], record.rotation[1], record.rotation[2]},
       .flags = record.flags,
@@ -108,8 +77,8 @@ void StorePoint(SVECTOR& record, TransformPoint point) {
       .position = Math::VectorOf(record.position),
       .actor = record.actor,
       .bone = record.bone,
-      .target_actor = record.targetActor,
-      .target_bone = record.targetBone,
+      .target_actor = record.target_actor,
+      .target_bone = record.target_bone,
       .world = Math::TransformOf(record.world),
       .view = Math::TransformOf(record.view),
       .attachment = Math::TransformOf(record.attachment),
@@ -119,16 +88,15 @@ void StorePoint(SVECTOR& record, TransformPoint point) {
       .control1 = PointOf(record.control1)};
 }
 
-void StoreState(Effects_TransformMotionView& record,
-                const TransformState& state) {
-  std::ranges::copy(state.rotation, std::begin(record.rotation));
+void StoreState(LiveTransformSlot& record, const TransformState& state) {
+  std::ranges::copy(state.rotation, record.rotation.begin());
   record.flags = state.flags;
   record.frame = state.frame;
   Math::StoreVector(record.position, state.position);
   record.actor = state.actor;
   record.bone = state.bone;
-  record.targetActor = state.target_actor;
-  record.targetBone = state.target_bone;
+  record.target_actor = state.target_actor;
+  record.target_bone = state.target_bone;
   Math::StoreTransform(record.world, state.world);
   Math::StoreTransform(record.view, state.view);
   Math::StoreTransform(record.attachment, state.attachment);

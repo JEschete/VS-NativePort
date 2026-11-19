@@ -58,7 +58,7 @@ struct TransformDefinition {
                          const TransformDefinition&) = default;
 };
 
-// The bytes of one block-10 definition (Effects_TransformDefinition).
+// The bytes of one block-10 definition (LiveTransformDefinition).
 inline constexpr std::size_t kTransformDefinitionBytes = 0x38;
 
 // Decodes the whole little-endian definitions at the start of a block-10

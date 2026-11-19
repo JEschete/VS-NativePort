@@ -4,7 +4,7 @@
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
 u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.cpp) */

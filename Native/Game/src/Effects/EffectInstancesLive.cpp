@@ -68,21 +68,20 @@ class LiveStart final : public EffectInstanceStart {
     instance_->particles = nullptr;
   }
   void ClearTransform(std::size_t transform) override {
-    Effects_TransformSlot& slot = std::span(instance_->transforms)[transform];
-    slot.reserved0 = 0;
-    slot.reserved4 = 0;
-    slot.reserved8 = 0;
-    slot.reservedC = 0;
-    slot.reserved10 = 0;
-    slot.reserved14 = 0;
-    slot.reserved18 = 0;
-    slot.reserved28 = 0;
-    slot.reserved2C = 0;
-    slot.reserved30 = 0;
+    // 5BF94.c:4655-4666 clears all but the position's x, y and z.
+    LiveTransformSlot& slot = std::span(instance_->transforms)[transform];
+    slot.rotation = {};
+    slot.flags = 0;
+    slot.reserved_8 = 0;
+    slot.reserved_c = 0;
+    slot.frame = 0;
+    slot.reserved_10 = {};
+    slot.position.pad = 0;
+    slot.reserved_2c = {};
     slot.actor = 0;
     slot.bone = 0;
-    slot.targetActor = 0;
-    slot.targetBone = 0;
+    slot.target_actor = 0;
+    slot.target_bone = 0;
   }
   void TakeEndpoints() override {
     Effects_EffectInstanceTargets& context = instance_->context;

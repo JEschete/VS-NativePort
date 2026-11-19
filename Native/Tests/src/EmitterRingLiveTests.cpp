@@ -21,7 +21,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/TemplateState.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace {

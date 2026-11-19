@@ -21,16 +21,12 @@
 #include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracksLive.hpp"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
-// Effects_TransformMotionView views an Effects_TransformSlot
-// (TransformsLive.cpp checks its fields).
-static_assert(sizeof(Effects_TransformMotionView) ==
-              sizeof(Effects_TransformSlot));
 static_assert(sizeof(Effects_ActionControlKey) ==
               sizeof(VS::Effects::ActionControlKey));
 
@@ -64,16 +60,15 @@ void ReportMissing(std::string_view command, std::string_view missing) {
 
 // The transform's motion record, or null (refused) past the instance's
 // transforms.
-[[nodiscard]] Effects_TransformMotionView* MotionOf(
-    Effects_EffectInstance& instance, std::uint8_t transform_index,
-    std::string_view command) {
+[[nodiscard]] LiveTransformSlot* MotionOf(Effects_EffectInstance& instance,
+                                          std::uint8_t transform_index,
+                                          std::string_view command) {
   const auto slot = TransformSlotOf(transform_index);
   if (!slot) {
     ReportMissing(command, "transform past the instance's slots");
     return nullptr;
   }
-  return reinterpret_cast<Effects_TransformMotionView*>(
-      &instance.transforms[*slot]);
+  return &std::span(instance.transforms)[*slot];
 }
 
 [[nodiscard]] CommandEndpoints EndpointsOf(

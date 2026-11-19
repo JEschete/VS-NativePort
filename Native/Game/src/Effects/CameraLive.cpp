@@ -15,7 +15,7 @@
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Legacy/Psx.h"

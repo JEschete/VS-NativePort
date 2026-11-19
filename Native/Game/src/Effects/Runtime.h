@@ -29,10 +29,9 @@ struct Effects_ShakeTrackKey;
 struct Effects_TimelineTrack;
 struct Effects_TimelineTrackHeader;
 struct Effects_TransformControlView;
-struct Effects_TransformDefinition;
 
 #include "Battle/ActionResolution.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 
 // decomp: D_800F5310 (D_800F5310@BATTLE/BATTLE.PRG): a view into another global
 #define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))
@@ -82,7 +81,7 @@ struct Effects_EffectInstance {
     u_int childCount : 5;
     u_int frame : 16;
     Effects_Particle* particles;
-    Effects_TransformSlot transforms[16];
+    VS::Effects::LiveTransformSlot transforms[16];
     Effects_EffectInstanceTargets context;
 };
 
@@ -143,7 +142,7 @@ struct Effects_EffectPackage {
     int block2Count;
     u_short* block2Data;
     Effects_PackageBlock9* block9Data;
-    Effects_TransformDefinition* block10Data;
+    VS::Effects::LiveTransformDefinition* block10Data;
     Effects_PackageBlock3* block3Data;
     u_char* block11Data;
     void* block12Data;

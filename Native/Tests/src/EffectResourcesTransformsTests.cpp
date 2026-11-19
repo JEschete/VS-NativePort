@@ -2032,17 +2032,17 @@ TEST_CASE("Live effect script vertical offsets move the package's transforms",
   auto package = ScriptPackage(2, 1);
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
   auto instance = std::make_unique<Effects_EffectInstance>();
-  for (auto& slot : instance->transforms) slot.positionY = 9;
+  for (auto& slot : instance->transforms) slot.position.vy = 9;
   instance->context.effectId = 6;
   CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
-  CHECK(instance->transforms[0].positionY == Effects::kLoweredEffectHeight);
-  CHECK(instance->transforms[1].positionY == Effects::kLoweredEffectHeight);
-  CHECK(instance->transforms[2].positionY == 9);
+  CHECK(instance->transforms[0].position.vy == Effects::kLoweredEffectHeight);
+  CHECK(instance->transforms[1].position.vy == Effects::kLoweredEffectHeight);
+  CHECK(instance->transforms[2].position.vy == 9);
 
   instance->context.effectId = 0x38;
   instance->registers[Effects::kActionVariantRegister] = 0x2B;
   CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
-  CHECK(instance->transforms[1].positionY == Effects::kRaisedEffectHeight);
+  CHECK(instance->transforms[1].position.vy == Effects::kRaisedEffectHeight);
 }
 
 TEST_CASE("Live effect script vertical offsets clamp counts past the slots",
@@ -2054,7 +2054,7 @@ TEST_CASE("Live effect script vertical offsets clamp counts past the slots",
   instance->context.effectId = 0x24;
   CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
   CHECK(std::ranges::all_of(instance->transforms, [](const auto& slot) {
-    return slot.positionY == Effects::kLoweredEffectHeight;
+    return slot.position.vy == Effects::kLoweredEffectHeight;
   }));
 }
 

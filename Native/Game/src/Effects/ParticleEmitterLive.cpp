@@ -26,7 +26,7 @@
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {

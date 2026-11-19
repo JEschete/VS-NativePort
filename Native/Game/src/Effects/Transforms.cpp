@@ -84,7 +84,7 @@ enum class Easing : std::uint16_t {
   kCurve = 2,
 };
 
-// Effects_TransformDefinition (5BF94.c:200) field offsets.
+// LiveTransformDefinition (func_800D0B30_t, battleEffect.h:57) offsets.
 constexpr std::size_t kAttachActorAt = 0x02;
 constexpr std::size_t kAttachBoneAt = 0x03;
 constexpr std::size_t kTranslationCurveAt = 0x04;

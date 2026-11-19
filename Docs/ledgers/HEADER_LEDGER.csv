@@ -273,7 +273,7 @@ H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0
 H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
 H0273,header,Native/Game/src/Effects/TimelineTrackKeys.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0274,header,Native/Game/src/Effects/Trails.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0275,header,Native/Game/src/Effects/Transforms.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
+H0275,header,Native/Game/src/Effects/Transforms.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,replaced by Native/Game/src/Effects/TransformsLiveState.hpp (#441)
 H0276,header,Native/Game/src/Ending/ClearResults.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0277,header,Native/Game/src/Ending/Credits.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0278,header,Native/Game/src/Ending/Credits/EmbeddedArt.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

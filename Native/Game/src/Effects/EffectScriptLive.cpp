@@ -27,9 +27,9 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/TimelinePlaybackLive.hpp"
-#include "Effects/Transforms.h"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
 static_assert(std::extent_v<decltype(Effects_scriptOpcodeHandlers)> ==
@@ -579,13 +579,14 @@ int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance) {
   const std::span slots =
       std::span{instance->transforms}.first(PackageTransformCount());
   std::array<std::int32_t, kEffectTransformSlots> heights{};
-  std::ranges::transform(slots, heights.begin(),
-                         &Effects_TransformSlot::positionY);
+  std::ranges::transform(
+      slots, heights.begin(),
+      [](const LiveTransformSlot& slot) { return slot.position.vy; });
   const ScriptStep step = SetActionEffectVerticalOffset(
       std::bit_cast<std::uint16_t>(instance->context.effectId),
       RegistersOf(*instance), std::span{heights}.first(slots.size()));
   for (auto&& [slot, height] : std::views::zip(slots, heights)) {
-    slot.positionY = height;
+    slot.position.vy = height;
   }
   return HandlerResult(step);
 }

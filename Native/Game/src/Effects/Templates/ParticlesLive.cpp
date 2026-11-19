@@ -47,7 +47,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
 #include "Render/Frame.hpp"

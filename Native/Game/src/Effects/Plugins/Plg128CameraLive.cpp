@@ -26,7 +26,7 @@
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg128Camera.hpp"
 #include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 
 namespace VS::Effects::Plg128 {
 namespace {
@@ -210,7 +210,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 
   [[nodiscard]] std::optional<Vec3> TransformTranslation(
       std::uint8_t index) override {
-    const Effects_TransformSlot* slot = Transform(index);
+    const LiveTransformSlot* slot = Transform(index);
     if (slot == nullptr) {
       return std::nullopt;
     }
@@ -219,11 +219,11 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 
   [[nodiscard]] std::optional<std::int16_t> TransformFacing(
       std::uint8_t index) override {
-    const Effects_TransformSlot* slot = Transform(index);
+    const LiveTransformSlot* slot = Transform(index);
     if (slot == nullptr) {
       return std::nullopt;
     }
-    return slot->opaqueBE;
+    return slot->saved.pad;
   }
 
   [[nodiscard]] math::Mat3 LookAt(Vec3 from, Vec3 to) override {
@@ -253,7 +253,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
   }
 
  private:
-  [[nodiscard]] const Effects_TransformSlot* Transform(std::uint8_t index) {
+  [[nodiscard]] const LiveTransformSlot* Transform(std::uint8_t index) {
     if (instance_ == nullptr || index >= kTransformCount) {
       if (ShouldReport(refused_transforms)) {
         VS::Core::LogWarn(

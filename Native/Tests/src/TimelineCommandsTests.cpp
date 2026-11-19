@@ -14,7 +14,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
-#include "Effects/Transforms.h"
+#include "Effects/TransformsLiveState.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -209,10 +209,9 @@ constexpr std::uint16_t Timing(std::uint16_t command, std::uint16_t frame) {
   return static_cast<std::uint16_t>((command << 9) | frame);
 }
 
-Effects_TransformMotionView& MotionOf(Effects_EffectInstance& instance,
-                                      std::size_t slot) {
-  return *reinterpret_cast<Effects_TransformMotionView*>(
-      &instance.transforms[slot]);
+fx::LiveTransformSlot& MotionOf(Effects_EffectInstance& instance,
+                                std::size_t slot) {
+  return std::span(instance.transforms)[slot];
 }
 
 using InstanceBytes = std::array<std::byte, sizeof(Effects_EffectInstance)>;

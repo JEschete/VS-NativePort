@@ -247,15 +247,19 @@ bool SameBytes(const Value& left, const Value& right) {
                             std::as_bytes(std::span(&right, 1)));
 }
 
-bool Cleared(const Effects_TransformSlot& slot, int kept) {
-  const std::array cleared{slot.reserved0,  slot.reserved4,  slot.reserved8,
-                           slot.reservedC,  slot.reserved10, slot.reserved14,
-                           slot.reserved18, slot.reserved28, slot.reserved2C,
-                           slot.reserved30};
+bool Cleared(const fx::LiveTransformSlot& slot, int kept) {
+  const std::array cleared{slot.reserved_8,     slot.reserved_10[0],
+                           slot.reserved_10[1], slot.reserved_10[2],
+                           slot.reserved_2c[0], slot.reserved_2c[1]};
+  const std::array halves{slot.rotation[0], slot.rotation[1], slot.rotation[2],
+                          slot.reserved_c, slot.frame};
   return std::ranges::all_of(cleared, [](int word) { return word == 0; }) &&
-         slot.actor == 0 && slot.bone == 0 && slot.targetActor == 0 &&
-         slot.targetBone == 0 && slot.positionX == kept &&
-         slot.positionY == kept && slot.positionZ == kept;
+         std::ranges::all_of(halves,
+                             [](std::int16_t half) { return half == 0; }) &&
+         slot.flags == 0 && slot.position.pad == 0 && slot.actor == 0 &&
+         slot.bone == 0 && slot.target_actor == 0 && slot.target_bone == 0 &&
+         slot.position.vx == kept && slot.position.vy == kept &&
+         slot.position.vz == kept;
 }
 }  // namespace
 
@@ -415,7 +419,7 @@ TEST_CASE("Live effect instances start from their spawn request",
        started.particles == nullptr));
   CHECK(std::ranges::all_of(
       started.transforms,
-      [](const Effects_TransformSlot& slot) { return Cleared(slot, kKept); }));
+      [](const fx::LiveTransformSlot& slot) { return Cleared(slot, kKept); }));
   const Effects_EffectInstanceTargets& context = started.context;
   CHECK((SameBytes(context.source, endpoints[0]) &&
          SameBytes(context.emitFrom, endpoints[1]) &&
