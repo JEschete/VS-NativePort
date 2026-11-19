@@ -22,14 +22,14 @@
 #include "Field/Map.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
@@ -333,12 +333,12 @@ struct LiveClutFixture {
   Clut saved_vram{};
   RECT area{768, 511, 160, 1};
   LiveClutFixture() {
-    std::ranges::copy(Menu_Results_clutBuf, saved_clut.begin());
+    std::ranges::copy(r::clutBuf, saved_clut.begin());
     StoreImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
   }
   ~LiveClutFixture() {
     LoadImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
-    std::ranges::copy(saved_clut, std::begin(Menu_Results_clutBuf));
+    std::ranges::copy(saved_clut, std::begin(r::clutBuf));
   }
   LiveClutFixture(const LiveClutFixture&) = delete;
   LiveClutFixture& operator=(const LiveClutFixture&) = delete;
@@ -355,11 +355,11 @@ TEST_CASE("F03024 live pulse blends clutBuf and uploads the palette row",
           "[cube-lifecycle-live]") {
   LiveClutFixture fixture;
   Clut expected = PulseClut();
-  std::ranges::copy(expected, std::begin(Menu_Results_clutBuf));
+  std::ranges::copy(expected, std::begin(r::clutBuf));
   RecordClut target;
   r::PulseCubePuzzleClut(expected, 11, target);
   r::LivePulseCubePuzzleClut(11);
-  CHECK(std::ranges::equal(Menu_Results_clutBuf, expected));
+  CHECK(std::ranges::equal(r::clutBuf, expected));
   CHECK(fixture.Vram() == expected);
 }
 
@@ -498,14 +498,14 @@ TEST_CASE("F03046 last step frees IQ.DIS, clears the screen and restarts",
 // Saves and restores the module state the Live initializers and updates use.
 struct LiveScreenFixture {
   int saved_step = Battle_unusedSubmenuState;
-  int saved_timer = Menu_Results_screenTimer;
-  int saved_state = Menu_Results_screenState;
+  int saved_timer = r::screenTimer;
+  int saved_state = r::screenState;
   u_int saved_animation = Menu_Results_elementAnimationState;
   int saved_completion = Menu_Results_onScreenMapCompletion;
   int saved_score = Menu_Results_onScreenScore;
   u_int saved_reel = Menu_Results_buffReelSelection;
-  std::int16_t saved_par = Menu_Results_puzzleParTime;
-  std::int16_t saved_cap = Menu_Results_puzzleRankCap;
+  std::int16_t saved_par = r::puzzleParTime;
+  std::int16_t saved_cap = r::puzzleRankCap;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
   u_int saved_misc = VS::State::scoreData.misc_score;
   LiveClutFixture clut;
@@ -514,14 +514,14 @@ struct LiveScreenFixture {
   ~LiveScreenFixture() {
     r::ResetLiveCubePuzzleLifecycleStatics();
     Battle_unusedSubmenuState = saved_step;
-    Menu_Results_screenTimer = saved_timer;
-    Menu_Results_screenState = saved_state;
+    r::screenTimer = saved_timer;
+    r::screenState = saved_state;
     Menu_Results_elementAnimationState = saved_animation;
     Menu_Results_onScreenMapCompletion = saved_completion;
     Menu_Results_onScreenScore = saved_score;
     Menu_Results_buffReelSelection = saved_reel;
-    Menu_Results_puzzleParTime = saved_par;
-    Menu_Results_puzzleRankCap = saved_cap;
+    r::puzzleParTime = saved_par;
+    r::puzzleRankCap = saved_cap;
     VS::State::stateFlags = saved_flags;
     VS::State::scoreData.misc_score = saved_misc;
   }
@@ -536,16 +536,16 @@ TEST_CASE(
     "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
   Battle_unusedSubmenuState = 1;
-  Menu_Results_puzzleParTime = 12;
-  Menu_Results_puzzleRankCap = 13;
-  Menu_Results_screenTimer = 44;
+  r::puzzleParTime = 12;
+  r::puzzleRankCap = 13;
+  r::screenTimer = 44;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
-  CHECK(Menu_Results_puzzleParTime == 600);
-  CHECK(Menu_Results_puzzleRankCap == 1);
+  CHECK(r::puzzleParTime == 600);
+  CHECK(r::puzzleRankCap == 1);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
   CHECK(Battle_unusedSubmenuState == 0);
-  CHECK(Menu_Results_screenTimer == 0);
+  CHECK(r::screenTimer == 0);
 }
 
 TEST_CASE("F03046 live start without heap room cancels the read",
@@ -657,8 +657,7 @@ struct LiveReadFixture {
 
 // Starts the IQ.DIS read from the first step; returns its queued request.
 [[nodiscard]] Content_DiscQueueSlot* StartLiveIqRead() {
-  const Content_DiscFile& file =
-      Menu_Results_kDisFiles[Menu_Results_DisFile_Iq];
+  const Content_DiscFile& file = r::kDisFiles[Menu_Results_DisFile_Iq];
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   Content_DiscQueueSlot* const request = LiveReadFixture::Pending();
@@ -672,8 +671,7 @@ struct LiveReadFixture {
 // Completes the read with an IQ.DIS whose third record is zone 4 map 12's;
 // returns the asset.
 std::vector<std::byte> CompleteLiveIqRead(Content_DiscQueueSlot& request) {
-  const Content_DiscFile& file =
-      Menu_Results_kDisFiles[Menu_Results_DisFile_Iq];
+  const Content_DiscFile& file = r::kDisFiles[Menu_Results_DisFile_Iq];
   std::vector<std::byte> asset = IqAsset();
   asset.resize(static_cast<std::size_t>(file.size));
   PutRecord(asset, 1,
@@ -689,11 +687,11 @@ std::vector<std::byte> CompleteLiveIqRead(Content_DiscQueueSlot& request) {
 // first two colors cleared, and both images.
 void CheckLiveIqUploads(LiveScreenFixture& screen, const LiveReadFixture& read,
                         std::span<const std::byte> asset) {
-  CHECK(Menu_Results_clutBuf[0] == 0);
-  CHECK(Menu_Results_clutBuf[1] == 0);
-  CHECK(Menu_Results_clutBuf[2] == 0x102);
-  CHECK(Menu_Results_clutBuf[159] == 0x100 + 159);
-  CHECK(std::ranges::equal(screen.clut.Vram(), Menu_Results_clutBuf));
+  CHECK(r::clutBuf[0] == 0);
+  CHECK(r::clutBuf[1] == 0);
+  CHECK(r::clutBuf[2] == 0x102);
+  CHECK(r::clutBuf[159] == 0x100 + 159);
+  CHECK(std::ranges::equal(screen.clut.Vram(), r::clutBuf));
   CHECK(read.ImageRow(r::kCubePuzzleImageX) ==
         AssetRow(asset, kFirstTim.pixels));
   CHECK(read.ImageRow(r::kCubePuzzleImageX + r::kCubePuzzleImageStep) ==
@@ -706,7 +704,7 @@ TEST_CASE("F03046 live start reads IQ.DIS and takes the minimap room's record",
   LiveReadFixture read;
   read.UseRoom(4, 12);
   Battle_unusedSubmenuState = 0;
-  Menu_Results_screenTimer = 7;
+  r::screenTimer = 7;
   Content_DiscQueueSlot* const request = StartLiveIqRead();
   // Still reading.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
@@ -715,10 +713,10 @@ TEST_CASE("F03046 live start reads IQ.DIS and takes the minimap room's record",
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
   CHECK(request->state != Content_DiscRequestState_Loaded);
-  CHECK(Menu_Results_puzzleParTime == 45);
-  CHECK(Menu_Results_puzzleRankCap == 3);
+  CHECK(r::puzzleParTime == 45);
+  CHECK(r::puzzleRankCap == 3);
   CheckLiveIqUploads(screen, read, asset);
-  CHECK(Menu_Results_screenTimer == 7);
+  CHECK(r::screenTimer == 7);
 }
 
 TEST_CASE(
@@ -729,14 +727,14 @@ TEST_CASE(
   LiveReadFixture read;
   read.UseRoom(4, 12);
   Battle_unusedSubmenuState = 0;
-  Menu_Results_screenTimer = 7;
+  r::screenTimer = 7;
   Content_DiscQueueSlot* const request = StartLiveIqRead();
   void* const buffer = request->vram;
   (void)CompleteLiveIqRead(*request);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
   CHECK(Battle_unusedSubmenuState == 0);
-  CHECK(Menu_Results_screenTimer == 0);
+  CHECK(r::screenTimer == 0);
   // The buffer was released: entering again reads into the same block.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   Content_DiscQueueSlot* const again = LiveReadFixture::Pending();
@@ -763,10 +761,10 @@ TEST_CASE(
             {.zone_id = 4, .map_id = 12, .par_seconds = 45, .rank_cap = 3});
   std::ranges::copy(asset, static_cast<std::byte*>(request->vram));
   request->state = Content_DiscRequestState_Loaded;
-  Menu_Results_puzzleParTime = 12;
+  r::puzzleParTime = 12;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Menu_Results_puzzleParTime == 600);
-  CHECK(Menu_Results_puzzleRankCap == 1);
+  CHECK(r::puzzleParTime == 600);
+  CHECK(r::puzzleRankCap == 1);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
 }
 
@@ -925,10 +923,10 @@ TEST_CASE("F03048 live quit without a read leaves the rating",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
   Battle_unusedSubmenuState = 1;
-  Menu_Results_puzzleParTime = 12;
+  r::puzzleParTime = 12;
   CHECK(r::LiveInitializeCubePuzzleQuit() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
-  CHECK(Menu_Results_puzzleParTime == 12);
+  CHECK(r::puzzleParTime == 12);
   CHECK(r::LiveInitializeCubePuzzleQuit() == 1);
   CHECK(Battle_unusedSubmenuState == 0);
 }
@@ -984,10 +982,10 @@ TEST_CASE("F03049 start skips to its end on Circle then finishes",
 TEST_CASE("F03049 live start waits while the screen state is set",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
-  Menu_Results_screenState = 2;
-  Menu_Results_screenTimer = 12;
+  r::screenState = 2;
+  r::screenTimer = 12;
   CHECK(r::LiveUpdateCubePuzzleStart() == 0);
-  CHECK(Menu_Results_screenTimer == 12);
+  CHECK(r::screenTimer == 12);
 }
 
 // ----- F03050 -----
@@ -1097,18 +1095,18 @@ TEST_CASE("F03050 live results pulse clutBuf while the screen state is set",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
   Clut expected = PulseClut();
-  std::ranges::copy(expected, std::begin(Menu_Results_clutBuf));
-  Menu_Results_screenState = 1;
-  Menu_Results_screenTimer = 140;
+  std::ranges::copy(expected, std::begin(r::clutBuf));
+  r::screenState = 1;
+  r::screenTimer = 140;
   Menu_Results_elementAnimationState = 0x400;
   VS::State::scoreData.misc_score = 3;
   CHECK(r::LiveUpdateCubePuzzleResults() == 0);
   RecordClut target;
   r::PulseCubePuzzleClut(expected, 16, target);
-  CHECK(std::ranges::equal(Menu_Results_clutBuf, expected));
+  CHECK(std::ranges::equal(r::clutBuf, expected));
   CHECK(fixture.clut.Vram() == expected);
   CHECK(Menu_Results_elementAnimationState == 0x440);
-  CHECK(Menu_Results_screenTimer == 140);
+  CHECK(r::screenTimer == 140);
   CHECK(VS::State::scoreData.misc_score == 3);
 }
 
@@ -1159,16 +1157,16 @@ TEST_CASE("F03051 live quit pulses clutBuf while the screen state is set",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
   Clut expected = PulseClut();
-  std::ranges::copy(expected, std::begin(Menu_Results_clutBuf));
-  Menu_Results_screenState = 1;
-  Menu_Results_screenTimer = 9;
+  std::ranges::copy(expected, std::begin(r::clutBuf));
+  r::screenState = 1;
+  r::screenTimer = 9;
   Menu_Results_elementAnimationState = 0xFFF;
   CHECK(r::LiveUpdateCubePuzzleQuit() == 0);
   RecordClut target;
   r::PulseCubePuzzleClut(expected, r::CubePuzzlePulseWeight(0xFFF), target);
-  CHECK(std::ranges::equal(Menu_Results_clutBuf, expected));
+  CHECK(std::ranges::equal(r::clutBuf, expected));
   CHECK(Menu_Results_elementAnimationState == 0x3F);
-  CHECK(Menu_Results_screenTimer == 9);
+  CHECK(r::screenTimer == 9);
 }
 
 TEST_CASE("F03050 results clamp over-par ranks for caps outside the table",

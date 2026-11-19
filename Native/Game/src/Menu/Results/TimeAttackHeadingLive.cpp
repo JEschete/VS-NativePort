@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed time-attack heading, countdown and palette pulse
 // (TimeAttackHeading.cpp) to Menu_Results_disMap, the time-attack course and
-// best times, Menu_Results_clutBuf, the live atlas draws and LoadImage.
+// best times, clutBuf, the live atlas draws and LoadImage.
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 
 #include <algorithm>
@@ -13,7 +13,7 @@
 
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -30,7 +30,7 @@ namespace {
 constexpr std::uint32_t kTrialRoundShift = 24;
 constexpr std::uint32_t kTrialDifficultyShift = 31;
 static_assert(sizeof(u_short) == sizeof(std::uint16_t));
-static_assert(std::size(Menu_Results_clutBuf) == kResultsClutWords);
+static_assert(std::size(clutBuf) == kResultsClutWords);
 
 std::uint64_t refusals = 0;
 
@@ -147,6 +147,6 @@ void LiveDrawStartCountdown(int x, int y, int timer) {
 // 0x80104914
 void LivePulseTimeAttackClut(int blend_weight) {
   LiveClutTarget target;
-  PulseTimeAttackClut(std::span(Menu_Results_clutBuf), blend_weight, target);
+  PulseTimeAttackClut(std::span(clutBuf), blend_weight, target);
 }
 }  // namespace VS::Menu::Results

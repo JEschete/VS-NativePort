@@ -12,7 +12,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -27,7 +27,7 @@ struct ResultsTextureFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   VS::Render::TextureRegion saved_ending_region =
       VS::Ending::resultAtlasRegions[12];
-  int saved_time = Menu_Results_timeTrialTime;
+  int saved_time = VS::Menu::Results::timeTrialTime;
   std::vector<u_long> storage = std::vector<u_long>(
       32 * sizeof(POLY_GT4) / sizeof(u_long) + 2, 0xDEADBEEF);
   std::array<u_long, 32> ordering{};
@@ -46,7 +46,7 @@ struct ResultsTextureFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Ending::resultAtlasRegions[12] = saved_ending_region;
-    Menu_Results_timeTrialTime = saved_time;
+    VS::Menu::Results::timeTrialTime = saved_time;
   }
 
   POLY_GT4* Packets() {
@@ -215,7 +215,7 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
   const int fade = GENERATE(1, 64);
   constexpr std::array kTimes{0, 7680, 65536, 73216, 131072};
   ResultsTextureFixture fixture;
-  Menu_Results_timeTrialTime = kTimes[rating];
+  VS::Menu::Results::timeTrialTime = kTimes[rating];
   VS::Menu::Results::LiveDrawTimeAttackRatingWipe(10, 20, fade);
   const auto& region = Menu_Results_disMap[78 + rating];
   const int count = fade == 64 ? 1 : (region.width + 11) / 12;

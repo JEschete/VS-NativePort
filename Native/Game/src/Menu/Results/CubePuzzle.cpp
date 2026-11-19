@@ -1,13 +1,17 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+// The MENUF.PRG results palette and the cube puzzle's rating.
+#include "Menu/Results/CubePuzzle.hpp"
 
+#include <cstdint>
+
+#include "Menu/Results/ResultsPalette.hpp"
+
+namespace VS::Menu::Results {
 // decomp: _clutBuf (_clutBuf@src/MENU/MENUF.PRG/3B8.c)
-u_short Menu_Results_clutBuf[160];
+std::uint16_t clutBuf[kResultsClutWords];
 
 // decomp: _puzzleParTime (_puzzleParTime@src/MENU/MENUF.PRG/3B8.c)
-short Menu_Results_puzzleParTime;
+std::int16_t puzzleParTime;
 
 // decomp: _puzzleRankCap (_puzzleRankCap@src/MENU/MENUF.PRG/3B8.c)
-short Menu_Results_puzzleRankCap;
-
+std::int16_t puzzleRankCap;
+}  // namespace VS::Menu::Results

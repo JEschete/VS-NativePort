@@ -9,7 +9,7 @@
 
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
@@ -475,7 +475,7 @@ TEST_CASE("F03032 live results heading matches the typed draw",
 TEST_CASE("F03033 live rating reads the completed time",
           "[timeattack-rating-live]") {
   LiveTimeAttackFixture frame;
-  Menu_Results_timeTrialTime = Time(1, 10, 0);
+  r::timeTrialTime = Time(1, 10, 0);
   r::LiveDrawTimeAttackRating(200, 130, 30);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -492,7 +492,7 @@ TEST_CASE("F03033 live rating reads the completed time",
 TEST_CASE("F03034 live rating wipe reads the completed time",
           "[timeattack-rating-live]") {
   LiveTimeAttackFixture frame;
-  Menu_Results_timeTrialTime = Time(0, 12, 0);
+  r::timeTrialTime = Time(0, 12, 0);
   r::LiveDrawTimeAttackRatingWipe(100, 140, 6);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -511,7 +511,7 @@ TEST_CASE("F03034 live rating wipe reads the completed time",
 TEST_CASE("F03035 live time reads the completed time",
           "[timeattack-rating-live]") {
   LiveTimeAttackFixture frame;
-  Menu_Results_timeTrialTime = Time(2, 3, 4);
+  r::timeTrialTime = Time(2, 3, 4);
   r::LiveDrawTimeAttackTime(60, 90, 50);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -526,7 +526,7 @@ TEST_CASE("F03035 live time reads the completed time",
 TEST_CASE("F03036 live counting time counts the completed time",
           "[timeattack-rating-live]") {
   LiveTimeAttackFixture frame;
-  Menu_Results_timeTrialTime = Time(1, 30, 60);
+  r::timeTrialTime = Time(1, 30, 60);
   r::LiveDrawCountingTimeAttackTime(60, 90, 40);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -562,7 +562,7 @@ TEST_CASE("F03038 live leaderboard reads the course, scores and new rank",
   const auto scores = CourseScores();
   SetLiveScores(scores);
   VS::State::stateFlags.time_attack_boss = 3;
-  Menu_Results_newTimeSlot = 2;
+  r::newTimeSlot = 2;
   r::LiveDrawLeaderboard(250, 100, 40);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -585,7 +585,7 @@ TEST_CASE("F03039 live leaderboard entry refuses a rank outside the board",
   const auto scores = CourseScores();
   SetLiveScores(scores);
   VS::State::stateFlags.time_attack_boss = 6;
-  Menu_Results_newTimeSlot = 1;
+  r::newTimeSlot = 1;
   r::LiveDrawLeaderboardEntry(250, 100, 1, 25);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());

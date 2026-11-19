@@ -14,7 +14,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
@@ -117,7 +117,7 @@ void LiveDrawTimeAttackResultsHeading(int x, int y, int timer) {
 void LiveDrawTimeAttackRating(int x, int y, int fade_timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackRating(LiveResultsAtlas(), x, y, fade_timer,
-                              Menu_Results_timeTrialTime, host));
+                              timeTrialTime, host));
 }
 
 // decomp: MENUF.PRG _renderTimeAttackRatingWipe
@@ -125,15 +125,15 @@ void LiveDrawTimeAttackRating(int x, int y, int fade_timer) {
 void LiveDrawTimeAttackRatingWipe(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackRatingWipe(LiveResultsAtlas(), x, y, timer,
-                                  Menu_Results_timeTrialTime, host));
+                                  timeTrialTime, host));
 }
 
 // decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743),
 // 0x80105790
 void LiveDrawTimeAttackTime(int x, int y, int fade_timer) {
   LiveResultsHost host;
-  Report(DrawTimeAttackTime(LiveResultsAtlas(), x, y, fade_timer,
-                            Menu_Results_timeTrialTime, host));
+  Report(DrawTimeAttackTime(LiveResultsAtlas(), x, y, fade_timer, timeTrialTime,
+                            host));
 }
 
 // decomp: MENUF.PRG _renderHeaderAndIncrementalTime
@@ -141,7 +141,7 @@ void LiveDrawTimeAttackTime(int x, int y, int fade_timer) {
 void LiveDrawCountingTimeAttackTime(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawCountingTimeAttackTime(LiveResultsAtlas(), x, y, timer,
-                                    Menu_Results_timeTrialTime, host));
+                                    timeTrialTime, host));
 }
 
 // decomp: MENUF.PRG _renderNewRecord (src/MENU/MENUF.PRG/3B8.c:1801),
@@ -157,7 +157,7 @@ void LiveDrawLeaderboard(int x, int y, int timer) {
   LiveResultsHost host;
   const auto scores = LiveCourseScores();
   Report(DrawLeaderboard(LiveResultsAtlas(), x, y, timer, LiveCourse(),
-                         Menu_Results_newTimeSlot, scores, host));
+                         newTimeSlot, scores, host));
 }
 
 // decomp: MENUF.PRG _renderStoredTime (src/MENU/MENUF.PRG/3B8.c:1849),
@@ -166,7 +166,6 @@ void LiveDrawLeaderboardEntry(int x, int y, int slot, int timer) {
   LiveResultsHost host;
   const auto scores = LiveCourseScores();
   Report(DrawLeaderboardEntry(LiveResultsAtlas(), x, y, slot, timer,
-                              LiveCourse(), Menu_Results_newTimeSlot, scores,
-                              host));
+                              LiveCourse(), newTimeSlot, scores, host));
 }
 }  // namespace VS::Menu::Results

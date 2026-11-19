@@ -25,7 +25,7 @@
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
@@ -33,7 +33,7 @@
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
@@ -42,7 +42,7 @@
 namespace VS::Menu::Results {
 namespace {
 static_assert(sizeof(u_short) == sizeof(std::uint16_t));
-static_assert(std::size(Menu_Results_clutBuf) == kResultsClutWords);
+static_assert(std::size(clutBuf) == kResultsClutWords);
 
 // Refusals so far; each warning repeats at each power of two.
 std::uint64_t refusals = 0;
@@ -78,7 +78,7 @@ AssetLoad iq_load;
 AssetLoad esc_load;
 
 [[nodiscard]] std::span<std::uint16_t, kResultsClutWords> LiveClut() {
-  return std::span<std::uint16_t, kResultsClutWords>{Menu_Results_clutBuf};
+  return std::span<std::uint16_t, kResultsClutWords>{clutBuf};
 }
 
 class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
@@ -242,8 +242,8 @@ class LiveCubePuzzleScreen final : public CubePuzzleScreenHost {
 
 [[nodiscard]] CubePuzzleScreen LiveScreen() {
   return {.load_step = Battle_unusedSubmenuState,
-          .timer = Menu_Results_screenTimer,
-          .screen_state = Menu_Results_screenState,
+          .timer = screenTimer,
+          .screen_state = screenState,
           .animation = Menu_Results_elementAnimationState,
           .on_screen_map_completion = Menu_Results_onScreenMapCompletion,
           .on_screen_score = Menu_Results_onScreenScore,
@@ -252,8 +252,8 @@ class LiveCubePuzzleScreen final : public CubePuzzleScreenHost {
 
 void StoreScreen(const CubePuzzleScreen& screen) {
   Battle_unusedSubmenuState = screen.load_step;
-  Menu_Results_screenTimer = screen.timer;
-  Menu_Results_screenState = screen.screen_state;
+  screenTimer = screen.timer;
+  screenState = screen.screen_state;
   Menu_Results_elementAnimationState = screen.animation;
   Menu_Results_onScreenMapCompletion = screen.on_screen_map_completion;
   Menu_Results_onScreenScore = screen.on_screen_score;
@@ -261,13 +261,12 @@ void StoreScreen(const CubePuzzleScreen& screen) {
 }
 
 [[nodiscard]] CubePuzzleRating LiveRating() {
-  return {.par_seconds = Menu_Results_puzzleParTime,
-          .rank_cap = Menu_Results_puzzleRankCap};
+  return {.par_seconds = puzzleParTime, .rank_cap = puzzleRankCap};
 }
 
 void StoreRating(CubePuzzleRating rating) {
-  Menu_Results_puzzleParTime = rating.par_seconds;
-  Menu_Results_puzzleRankCap = rating.rank_cap;
+  puzzleParTime = rating.par_seconds;
+  puzzleRankCap = rating.rank_cap;
 }
 
 // The flags' fields are plain char; the original loads them unsigned.
@@ -304,8 +303,7 @@ void LivePulseCubePuzzleClut(int blend_weight) {
 // decomp: MENUF.PRG _initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2260),
 // 0x80107A8C
 int LiveInitializeCubePuzzleStart() {
-  LiveCubePuzzleLoad host("start", iq_load,
-                          Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]);
+  LiveCubePuzzleLoad host("start", iq_load, kDisFiles[Menu_Results_DisFile_Iq]);
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   const CubePuzzleLoad load =
@@ -319,7 +317,7 @@ int LiveInitializeCubePuzzleStart() {
 // 0x80107D4C
 int LiveInitializeCubePuzzleResults() {
   LiveCubePuzzleLoad host("results", iq_load,
-                          Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]);
+                          kDisFiles[Menu_Results_DisFile_Iq]);
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   CubePuzzleTimer timer{.clock = LiveClock(),
@@ -344,7 +342,7 @@ int LiveInitializeCubePuzzleResults() {
 // 0x80107D98
 int LiveInitializeCubePuzzleQuit() {
   LiveCubePuzzleLoad host("quit", esc_load,
-                          Menu_Results_kDisFiles[Menu_Results_DisFile_Esc]);
+                          kDisFiles[Menu_Results_DisFile_Esc]);
   CubePuzzleScreen screen = LiveScreen();
   const CubePuzzleLoad load =
       InitializeCubePuzzleQuit(screen, LiveClut(), host);

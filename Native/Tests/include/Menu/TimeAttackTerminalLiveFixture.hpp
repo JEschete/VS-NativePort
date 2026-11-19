@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -62,7 +62,7 @@ inline Content_DiscQueueSlot& RequestFor(Asset asset) {
                                              : Menu_Results_DisFile_Attack;
   for (auto& request : Content_discRequestSlots) {
     if (content::LiveDiscRequestGeneration(&request) != 0 &&
-        request.cdFile.lba == Menu_Results_kDisFiles[file].lba) {
+        request.cdFile.lba == results::kDisFiles[file].lba) {
       return request;
     }
   }
@@ -112,9 +112,9 @@ inline void RestoreEffectSettings(
 // deferred Render packets must be quiesced before discarding their heap.
 class TimeAttackFixture : public game_clear_live_tests::Fixture {
  private:
-  game_clear_live_tests::SavedGlobals<
-      Menu_Results_newTimeSlot, Menu_Results_timeTrialTime,
-      Menu_Results_clutBuf, VS::State::tickSpeed>
+  game_clear_live_tests::SavedGlobals<results::newTimeSlot,
+                                      results::timeTrialTime, results::clutBuf,
+                                      VS::State::tickSpeed>
       saved_;
   render::FramebufferEffectSettings saved_effect_ =
       render::LiveFramebufferEffect().settings;

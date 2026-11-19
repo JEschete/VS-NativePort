@@ -13,7 +13,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
 #include "Render/Display.hpp"
@@ -119,8 +119,8 @@ struct LiveTimeAttackFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   u_char saved_course = VS::State::stateFlags.time_attack_boss;
   VS::State::ScoreData saved_scores = VS::State::scoreData;
-  int saved_time = Menu_Results_timeTrialTime;
-  int saved_new_slot = Menu_Results_newTimeSlot;
+  int saved_time = results::timeTrialTime;
+  int saved_new_slot = results::newTimeSlot;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::vector<u_long> ordering =
       std::vector<u_long>(kLiveOrderingWords, kLiveEnd);
@@ -133,8 +133,8 @@ struct LiveTimeAttackFixture {
     VS::Render::frameBuf = saved_framebuffer;
     VS::State::stateFlags.time_attack_boss = saved_course;
     VS::State::scoreData = saved_scores;
-    Menu_Results_timeTrialTime = saved_time;
-    Menu_Results_newTimeSlot = saved_new_slot;
+    results::timeTrialTime = saved_time;
+    results::newTimeSlot = saved_new_slot;
   }
   LiveTimeAttackFixture(const LiveTimeAttackFixture&) = delete;
   LiveTimeAttackFixture& operator=(const LiveTimeAttackFixture&) = delete;

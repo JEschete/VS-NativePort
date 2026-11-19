@@ -84,7 +84,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Render/Display.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -115,8 +115,8 @@ std::optional<EncounterRouletteState> InspectRoulette(int menu) {
   }
   return EncounterRouletteState{
       .entry_phase = VS::Menu::Framework::submenuStates[kResultsMenu],
-      .screen_state = Menu_Results_screenState,
-      .timer = Menu_Results_screenTimer,
+      .screen_state = VS::Menu::Results::screenState,
+      .timer = VS::Menu::Results::screenTimer,
       .animation = Menu_Results_elementAnimationState,
       .reel = Menu_Results_buffReelIndex,
       .selection = Menu_Results_buffReelSelection,

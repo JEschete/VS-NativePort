@@ -36,8 +36,8 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 struct ReloadFixture : game_clear_live_tests::Fixture {
   void Prime() {
     REQUIRE(results::LiveInitializeGameClear() == 0);
-    Menu_Results_screenState = 2;
-    Menu_Results_screenTimer = -1000;
+    results::screenState = 2;
+    results::screenTimer = -1000;
     Menu_Results_buffReelSelection = 248;
     Menu_Results_score = 400;
     Menu_Results_incrementingScore = 7;
@@ -56,8 +56,8 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
     CHECK(status.state_timer == 0);
     CHECK_FALSE(status.request_bound);
     CHECK_FALSE(status.buffer_bound);
-    CHECK(Menu_Results_screenState == 0);
-    CHECK(Menu_Results_screenTimer == 0);
+    CHECK(results::screenState == 0);
+    CHECK(results::screenTimer == 0);
     CHECK(Menu_Results_buffReelSelection == 0);
     CheckScoreReset();
   }
@@ -159,8 +159,8 @@ TEST_CASE("Game-clear module entries use actual controller and score owners",
   REQUIRE(ModuleEntry(0x80102D10, &results::LiveInitializeGameClear)() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   CHECK(results::InspectLiveGameClear().request_bound);
-  Menu_Results_screenState = 2;
-  Menu_Results_screenTimer = -1000;
+  results::screenState = 2;
+  results::screenTimer = -1000;
   CHECK(ModuleEntry(0x8010384C, &results::LiveUpdateGameClear)() == 0);
   CHECK(results::InspectLiveGameClear().state_timer == 1);
   VS::State::scoreData.misc_score = 123;

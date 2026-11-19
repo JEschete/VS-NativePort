@@ -2808,7 +2808,7 @@
     <ClCompile Include="src\Menu\Results\CubePuzzle.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Results\CubePuzzle.h">
+    <ClInclude Include="src\Menu\Results\CubePuzzle.hpp">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Results\CubePuzzleLifecycle.cpp">
@@ -2862,7 +2862,7 @@
     <ClCompile Include="src\Menu\Results\TimeAttack.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Results\TimeAttack.h">
+    <ClInclude Include="src\Menu\Results\TimeAttack.hpp">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Results\TimeAttackHeading.cpp">

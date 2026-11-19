@@ -11,7 +11,7 @@
 
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
@@ -111,7 +111,7 @@ void LiveDrawAverageTimeHeading(int x, int y, int timer) {
 // 0x80108784
 void LiveDrawCubePuzzleParTime(int x, int y, int timer) {
   LiveCubePuzzleTextHost host;
-  Report(DrawCubePuzzleParTime(x, y, timer, Menu_Results_puzzleParTime, host));
+  Report(DrawCubePuzzleParTime(x, y, timer, puzzleParTime, host));
 }
 
 // decomp: MENUF.PRG _renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2712),

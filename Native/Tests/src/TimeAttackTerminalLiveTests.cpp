@@ -17,10 +17,10 @@
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -107,15 +107,15 @@ void CheckRestoredTerminalState(
   CHECK_FALSE(render::HasLiveFramebufferEffectPackets());
   CHECK_FALSE(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(VS::State::tickSpeed == 4);
-  CHECK(Menu_Results_newTimeSlot == 3);
-  CHECK(Menu_Results_timeTrialTime == 0x10203);
-  CHECK(Menu_Results_clutBuf[159] == 0x5A5A);
+  CHECK(r::newTimeSlot == 3);
+  CHECK(r::timeTrialTime == 0x10203);
+  CHECK(r::clutBuf[159] == 0x5A5A);
 }
 
 void AdvanceCountdownToExit(LiveFixture& fixture) {
   fixture.LoadThroughTextures(Asset::kStart);
   REQUIRE(r::LiveInitializeTimeAttackStart() == 1);
-  Menu_Results_screenState = 2;
+  r::screenState = 2;
   REQUIRE(r::LiveUpdateTimeAttackStart() == 0);
   VS::Input::buttonsPressed = 0x20;
   for (int tick = 0; tick < 62; ++tick) {
@@ -123,7 +123,7 @@ void AdvanceCountdownToExit(LiveFixture& fixture) {
     CHECK(r::LiveUpdateTimeAttackStart() == 0);
     CHECK(VS::State::tickSpeed == 4);
   }
-  CHECK(Menu_Results_screenState == 4);
+  CHECK(r::screenState == 4);
 }
 }  // namespace
 
@@ -155,18 +155,17 @@ TEST_CASE(
   LiveFixture fixture;
   Battle_unusedSubmenuState = 2;
   VS::State::scoreData.boss_time_trial_scores[7][2].time = 123456;
-  Menu_Results_screenTimer = 97;
-  Menu_Results_screenState = 2;
-  Menu_Results_newTimeSlot = 3;
-  Menu_Results_timeTrialTime = 0x123456;
-  std::ranges::fill(Menu_Results_clutBuf, 0x1234);
+  r::screenTimer = 97;
+  r::screenState = 2;
+  r::newTimeSlot = 3;
+  r::timeTrialTime = 0x123456;
+  std::ranges::fill(r::clutBuf, 0x1234);
   r::ResetLiveTimeAttackModuleData();
-  CHECK(Menu_Results_newTimeSlot == 0);
-  CHECK(Menu_Results_timeTrialTime == 0);
-  CHECK(std::ranges::all_of(Menu_Results_clutBuf,
-                            [](auto color) { return color == 0; }));
-  CHECK(Menu_Results_screenTimer == 97);
-  CHECK(Menu_Results_screenState == 2);
+  CHECK(r::newTimeSlot == 0);
+  CHECK(r::timeTrialTime == 0);
+  CHECK(std::ranges::all_of(r::clutBuf, [](auto color) { return color == 0; }));
+  CHECK(r::screenTimer == 97);
+  CHECK(r::screenState == 2);
   CHECK(Battle_unusedSubmenuState == 2);
   CHECK(VS::State::scoreData.boss_time_trial_scores[7][2].time == 123456);
 }
@@ -300,8 +299,7 @@ TEST_CASE("F03011 Live parses real TIM storage and retains the copied palette",
   CHECK(Word(bytes, 24) == 0x7F7F7F7F);
   CHECK(Word(bytes, kImageBlock + 4) == 0x01000340);
   CHECK(Word(bytes, kImageBlock + 8) == 0x00FF0040);
-  const std::array sample{Menu_Results_clutBuf[0], Menu_Results_clutBuf[1],
-                          Menu_Results_clutBuf[159]};
+  const std::array sample{r::clutBuf[0], r::clutBuf[1], r::clutBuf[159]};
   CHECK(sample == std::array<std::uint16_t, 3>{0, 0, 0x7F7F});
   CHECK_FALSE(r::InspectLiveTimeAttackLoad(Asset::kResults).owns_request);
 }
@@ -309,15 +307,15 @@ TEST_CASE("F03011 Live parses real TIM storage and retains the copied palette",
 TEST_CASE("F03012 Live parses two TIMs without overwriting the results palette",
           "[time-attack-terminal-live][F03012]") {
   LiveFixture fixture;
-  std::ranges::fill(Menu_Results_clutBuf, 0x1234);
+  std::ranges::fill(r::clutBuf, 0x1234);
   REQUIRE(r::LiveInitializeTimeAttackStart() == 0);
   const auto bytes = InjectLoaded(Asset::kStart);
   CHECK(r::LiveInitializeTimeAttackStart() == 0);
   CHECK(Word(bytes, 20) == 0);
   CHECK(Word(bytes, r::kGameClearTimStride + 20) == 0x7F7F7F7F);
   CHECK(Word(bytes, r::kGameClearTimStride + kImageBlock + 4) == 0x01000380);
-  CHECK(Menu_Results_clutBuf[0] == 0x1234);
-  CHECK(Menu_Results_clutBuf[159] == 0x1234);
+  CHECK(r::clutBuf[0] == 0x1234);
+  CHECK(r::clutBuf[159] == 0x1234);
   CHECK(Battle_unusedSubmenuState == 2);
 }
 
@@ -345,10 +343,10 @@ TEST_CASE("F03011 Live validates the course before freeing or writing records",
   fixture.LoadThroughTextures(Asset::kResults);
   VS::State::stateFlags.time_attack_boss = 8;
   VS::State::scoreData.boss_time_trial_scores[0][0].time = 99;
-  Menu_Results_timeTrialTime = 1234;
+  r::timeTrialTime = 1234;
   CHECK(r::LiveInitializeTimeAttackResults() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
-  CHECK(Menu_Results_timeTrialTime == 1234);
+  CHECK(r::timeTrialTime == 1234);
   CHECK(VS::State::scoreData.boss_time_trial_scores[0][0].time == 99);
   CHECK(r::InspectLiveTimeAttackLoad(Asset::kResults).owns_buffer);
 }
@@ -369,7 +367,7 @@ TEST_CASE(
   row[1] = {.time = 0x1E00, .round = 7, .difficulty = 1};
   row[2] = {.time = 0x2000, .round = 9, .difficulty = 0};
   CHECK(r::LiveInitializeTimeAttackResults() == 1);
-  CHECK(Menu_Results_newTimeSlot == 1);
+  CHECK(r::newTimeSlot == 1);
   CHECK(row[1].round == 126);
   CHECK(row[1].difficulty == 1);
   CHECK(row[2].time == 0x1E00);
@@ -386,13 +384,13 @@ TEST_CASE("F03012 Live explicit initialization preserves unrelated counters",
   Menu_Results_onScreenScore = 55;
   Menu_Results_buffReelSelection = 66;
   Menu_Results_incrementingScore = 77;
-  Menu_Results_timeTrialTime = 88;
+  r::timeTrialTime = 88;
   CHECK(r::LiveInitializeTimeAttackStart() == 1);
   CHECK(Menu_Results_onScreenMapCompletion == 0);
   CHECK(Menu_Results_onScreenScore == 0);
   CHECK(Menu_Results_buffReelSelection == 0);
   CHECK(Menu_Results_incrementingScore == 77);
-  CHECK(Menu_Results_timeTrialTime == 88);
+  CHECK(r::timeTrialTime == 88);
   CHECK(Battle_unusedSubmenuState == 0);
   CheckTextureStorageFreed(Asset::kStart);
 }
@@ -421,14 +419,14 @@ TEST_CASE(
   fixture.LoadThroughTextures(Asset::kResults);
   fixture.CompleteMusicLoad();
   REQUIRE(r::LiveInitializeTimeAttackResults() == 1);
-  Menu_Results_screenState = 3;
-  Menu_Results_screenTimer = 0;
+  r::screenState = 3;
+  r::screenTimer = 0;
   CHECK(r::LiveUpdateTimeAttackResults() == 1);
   CHECK_FALSE(r::InspectLiveTimeAttackLoad(Asset::kResults).owns_pages);
   CHECK(render::LiveTexturePages()[29].state ==
         render::TexturePageState::kRetiring);
   CHECK(r::LiveUpdateTimeAttackResults() == 1);
-  CHECK(Menu_Results_screenState == 3);
+  CHECK(r::screenState == 3);
   CHECK(Menu_Results_elementAnimationState == 128);
 }
 
@@ -437,19 +435,19 @@ TEST_CASE(
     "[time-attack-terminal-live][F03016]") {
   LiveFixture fixture;
   VS::State::stateFlags.time_attack_boss = 255;
-  Menu_Results_screenTimer = 191;
+  r::screenTimer = 191;
   Menu_Results_elementAnimationState = 4095;
   CHECK(r::LiveUpdateTimeAttackResults() == 0);
-  CHECK(Menu_Results_screenTimer == 191);
+  CHECK(r::screenTimer == 191);
   CHECK(Menu_Results_elementAnimationState == 4095);
-  CHECK(Menu_Results_screenState == 0);
+  CHECK(r::screenState == 0);
 }
 
 TEST_CASE(
     "F03017 Live uses real framebuffer state and preserves it on MENUF reload",
     "[time-attack-terminal-live][F03017][reload]") {
   LiveFixture fixture;
-  Menu_Results_screenState = 2;
+  r::screenState = 2;
   CHECK(r::LiveUpdateTimeAttackStart() == 0);
   CHECK(VS::State::tickSpeed == 4);
   CHECK(render::HasLiveFramebufferEffectPackets());
@@ -459,16 +457,16 @@ TEST_CASE(
   CHECK(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(render::IsLiveFramebufferEffectShowing());
   CHECK(VS::State::tickSpeed == 4);
-  CHECK(Menu_Results_screenState == 0);
+  CHECK(r::screenState == 0);
 }
 
 TEST_CASE(
     "F03017 Live GO changes real effect settings and defers packet release",
     "[time-attack-terminal-live][F03017][ownership]") {
   LiveFixture fixture;
-  Menu_Results_screenState = 2;
+  r::screenState = 2;
   REQUIRE(r::LiveUpdateTimeAttackStart() == 0);
-  Menu_Results_screenTimer = 45;
+  r::screenTimer = 45;
   CHECK(r::LiveUpdateTimeAttackStart() == 0);
   CheckEffectSettings({0x107A, 0x107A}, {220, 80, 64}, 1);
   CHECK(r::CleanupLiveTimeAttackOwnedState());
@@ -485,9 +483,9 @@ TEST_CASE(
   LiveFixture fixture;
   std::array<std::byte, 256> tiny{};
   memory::ScopedLiveGameHeap exhausted(tiny);
-  Menu_Results_screenState = 2;
+  r::screenState = 2;
   CHECK(r::LiveUpdateTimeAttackStart() == 0);
-  CHECK(Menu_Results_screenState == 2);
+  CHECK(r::screenState == 2);
   CHECK_FALSE(render::HasLiveFramebufferEffectPackets());
   CHECK(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(r::CleanupLiveTimeAttackOwnedState());
@@ -530,7 +528,7 @@ TEST_CASE(
   fixture.stats.strength = 100;
   Menu_Results_buffReels[0][0] = {.stat = Menu_Results_BuffReelStat_Str,
                                   .amount = 7};
-  Menu_Results_screenState = 3;
+  r::screenState = 3;
   REQUIRE(render::ReserveLiveTexturePageRange(29, 3, 5) == 29);
   for (int tick = 0; tick < 8; ++tick) {
     fixture.BeginFrame();
@@ -626,8 +624,8 @@ TEST_CASE("Time-attack production fixture uses real music and render storage",
             VS::Audio::soundState.music_data[LiveFixture::kMusicIndex])
             .has_value());
   fixture.BeginFrame();
-  Menu_Results_screenState = 1;
-  Menu_Results_screenTimer = 64;
+  r::screenState = 1;
+  r::screenTimer = 64;
   CHECK(r::LiveUpdateTimeAttackResults() == 0);
   CHECK_FALSE(fixture.frame.Empty());
 }
@@ -644,14 +642,14 @@ TEST_CASE("Time-attack production fixture restores its caller resources",
                                                    .uses_previous_frame = 1};
   time_attack_terminal_live_tests::RestoreEffectSettings(settings);
   VS::State::tickSpeed = 4;
-  Menu_Results_newTimeSlot = 3;
-  Menu_Results_timeTrialTime = 0x10203;
-  Menu_Results_clutBuf[159] = 0x5A5A;
+  r::newTimeSlot = 3;
+  r::timeTrialTime = 0x10203;
+  r::clutBuf[159] = 0x5A5A;
   auto* const allocation = AllocateForeignResources();
   const auto refusals = memory::RefusedLiveHeapRequestCount();
   {
     LiveFixture inner;
-    Menu_Results_screenState = 2;
+    r::screenState = 2;
     REQUIRE(r::LiveUpdateTimeAttackStart() == 0);
     REQUIRE(render::HasLiveFramebufferEffectPackets());
   }
@@ -678,7 +676,7 @@ TEST_CASE(
     void* const music =
         VS::Audio::soundState.music_data[LiveFixture::kMusicIndex];
     REQUIRE(memory::LivePayloadCapacity(music).has_value());
-    Menu_Results_screenState = 2;
+    r::screenState = 2;
     REQUIRE(r::LiveUpdateTimeAttackStart() == 0);
     REQUIRE(r::CleanupLiveTimeAttackOwnedState());
     fixture.DrainEffect();

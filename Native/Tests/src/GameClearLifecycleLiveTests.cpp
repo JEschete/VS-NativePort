@@ -19,7 +19,7 @@
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
@@ -76,7 +76,7 @@ void PrimeClosing(LiveFixture& fixture) {
                                    .amount = 7};
   fixture.stats.strength = 100;
   Menu_Results_buffReelSelection = 0xFFFF'FFF8;
-  Menu_Results_screenState = 3;
+  results::screenState = 3;
   REQUIRE(render::ReserveLiveTexturePageRange(29, 3, 5) == 29);
   for (int tick = 0; tick < 8; ++tick) {
     fixture.BeginFrame();
@@ -209,8 +209,8 @@ void CheckFailedLoadOwners(const RankRead& rank) {
 TEST_CASE("Game-clear Live ordinary MENUF reload resets file-backed counters",
           "[game-clear-live][F03015][reload]") {
   LiveFixture fixture;
-  Menu_Results_screenState = 2;
-  Menu_Results_screenTimer = -1000;
+  results::screenState = 2;
+  results::screenTimer = -1000;
   Menu_Results_buffReelSelection = 248;
   Menu_Results_score = 400;
   Menu_Results_incrementingScore = 7;
@@ -218,8 +218,8 @@ TEST_CASE("Game-clear Live ordinary MENUF reload resets file-backed counters",
   CHECK(results::InspectLiveGameClear().state_timer == 1);
   results::ResetLiveGameClearModuleData();
   CHECK(results::InspectLiveGameClear().state_timer == 0);
-  CHECK(Menu_Results_screenState == 0);
-  CHECK(Menu_Results_screenTimer == 0);
+  CHECK(results::screenState == 0);
+  CHECK(results::screenTimer == 0);
   CHECK(Menu_Results_buffReelSelection == 0);
   CHECK(Menu_Results_score == 0);
   CHECK(Menu_Results_incrementingScore == 0);
@@ -495,7 +495,7 @@ TEST_CASE(
   CHECK(results::LiveUpdateGameClear() == 1);
   CHECK(fixture.stats.strength == 114);
   CHECK(results::InspectLiveGameClear().state_timer == 8);
-  CHECK(Menu_Results_screenTimer == 8);
+  CHECK(results::screenTimer == 8);
 }
 
 TEST_CASE("Game-clear Live no-frame and invalid glyph calls preserve owners",

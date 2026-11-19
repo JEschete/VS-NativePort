@@ -44,7 +44,7 @@
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
@@ -159,8 +159,8 @@ class Fixture {
       Battle_characterState, Battle_unusedSubmenuState,
       VS::Input::buttonsPressed, Content_discRequestSlots,
       Content_discRequestCounts, Content_discDriveState,
-      VS::Render::legacyDrawEnvironments, Menu_Results_screenTimer,
-      Menu_Results_screenState, Menu_Results_buffReelIndex,
+      VS::Render::legacyDrawEnvironments, results::screenTimer,
+      results::screenState, Menu_Results_buffReelIndex,
       Menu_Results_buffReelSelection, Menu_Results_elementAnimationState,
       Menu_Results_score, Menu_Results_mapCompletion, Menu_Results_rank,
       Menu_Results_clearCount, Menu_Results_onScreenScore,

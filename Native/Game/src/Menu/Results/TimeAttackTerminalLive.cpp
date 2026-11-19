@@ -19,12 +19,12 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsPalette.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/FramebufferEffects.hpp"
@@ -51,7 +51,7 @@ constexpr std::uint32_t kRoundMask = 127;
 constexpr std::int32_t kCountdownTickSpeed = 4;
 constexpr std::int32_t kNormalTickSpeed = 2;
 constexpr std::int32_t kResultsClosingPhase = 2;
-static_assert(std::size(Menu_Results_clutBuf) == kResultsClutWords);
+static_assert(std::size(clutBuf) == kResultsClutWords);
 static_assert(std::size(VS::State::scoreData.boss_time_trial_scores) ==
               kTimeAttackCourses);
 
@@ -136,11 +136,11 @@ bool RetirePages(LoadOwner& owner, const TexturePageLoan& loan) {
 
 TimeAttackState LoadState() {
   return {.init_phase = Battle_unusedSubmenuState,
-          .timer = Menu_Results_screenTimer,
-          .phase = Menu_Results_screenState,
+          .timer = screenTimer,
+          .phase = screenState,
           .animation = Menu_Results_elementAnimationState,
-          .new_slot = Menu_Results_newTimeSlot,
-          .time = Menu_Results_timeTrialTime,
+          .new_slot = newTimeSlot,
+          .time = timeTrialTime,
           .shown_map = Menu_Results_onScreenMapCompletion,
           .shown_score = Menu_Results_onScreenScore,
           .selection = Menu_Results_buffReelSelection};
@@ -148,11 +148,11 @@ TimeAttackState LoadState() {
 
 void StoreState(const TimeAttackState& state) {
   Battle_unusedSubmenuState = state.init_phase;
-  Menu_Results_screenTimer = state.timer;
-  Menu_Results_screenState = state.phase;
+  screenTimer = state.timer;
+  screenState = state.phase;
   Menu_Results_elementAnimationState = state.animation;
-  Menu_Results_newTimeSlot = state.new_slot;
-  Menu_Results_timeTrialTime = state.time;
+  newTimeSlot = state.new_slot;
+  timeTrialTime = state.time;
   Menu_Results_onScreenMapCompletion = state.shown_map;
   Menu_Results_onScreenScore = state.shown_score;
   Menu_Results_buffReelSelection = state.selection;
@@ -184,7 +184,7 @@ class LiveLoad final : public TimeAttackLoadHost {
     const auto index = asset == TimeAttackAsset::kResults
                            ? Menu_Results_DisFile_Time
                            : Menu_Results_DisFile_Attack;
-    const auto& file = Menu_Results_kDisFiles[index];
+    const auto& file = kDisFiles[index];
     if (file.size <= 0) {
       Refuse("invalid texture file size");
       return false;
@@ -260,8 +260,7 @@ class LiveLoad final : public TimeAttackLoadHost {
       Refuse("result palette exceeds its TIM");
       return false;
     }
-    std::memcpy(Menu_Results_clutBuf, bytes->data() + tim->clut->pixel_offset,
-                kBytes);
+    std::memcpy(clutBuf, bytes->data() + tim->clut->pixel_offset, kBytes);
     return true;
   }
   void ReleaseTextureRequest() override { ReleaseRequest(owner_); }
@@ -619,9 +618,9 @@ void ResetLiveTimeAttackModuleData() {
     owner.request_bound = false;
     owner.buffer_bound = false;
   }
-  Menu_Results_newTimeSlot = 0;
-  Menu_Results_timeTrialTime = 0;
-  std::ranges::fill(Menu_Results_clutBuf, 0);
+  newTimeSlot = 0;
+  timeTrialTime = 0;
+  std::ranges::fill(clutBuf, 0);
 }
 
 bool CleanupLiveTimeAttackOwnedState() {

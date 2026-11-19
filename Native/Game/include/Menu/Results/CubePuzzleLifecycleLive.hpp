@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // The original MENUF.PRG cube-puzzle start, results and quit screen
 // signatures bound to vs_battle_submenuState, the Results screen state,
-// Menu_Results_clutBuf, the par time and rank cap, the puzzle clock, the
+// clutBuf, the par time and rank cap, the puzzle clock, the
 // score, Circle, the disc queue, the heap, LoadImage, the texture pages, the
 // sound effects and the live cube-puzzle draws. A TIM, palette or record table
 // the asset cannot hold, a missing minimap room, a missing request or buffer

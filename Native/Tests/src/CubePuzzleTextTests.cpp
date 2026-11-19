@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/Results.h"
@@ -351,7 +351,7 @@ struct LiveCubeTextFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  std::int16_t saved_par = Menu_Results_puzzleParTime;
+  std::int16_t saved_par = r::puzzleParTime;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::vector<u_long> ordering = std::vector<u_long>(kLiveOrderingWords, 0);
@@ -362,7 +362,7 @@ struct LiveCubeTextFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Results_puzzleParTime = saved_par;
+    r::puzzleParTime = saved_par;
     VS::State::stateFlags = saved_flags;
   }
   LiveCubeTextFixture(const LiveCubeTextFixture&) = delete;
@@ -476,7 +476,7 @@ TEST_CASE("F03056 live average time heading fades the heading in",
 TEST_CASE("F03057 live par time reads the module par time",
           "[cube-text-live]") {
   LiveCubeTextFixture frame;
-  Menu_Results_puzzleParTime = 125;
+  r::puzzleParTime = 125;
   r::LiveDrawCubePuzzleParTime(192, 144, 70);
   const auto live = frame.Used();
   REQUIRE(!live.empty());

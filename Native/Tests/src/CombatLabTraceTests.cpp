@@ -46,7 +46,7 @@
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Platform/App.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
@@ -822,8 +822,8 @@ struct GameplayInspectionFixture {
       VS::State::stateFlags.menu_f_submenu;
   std::array<char, 16> saved_submenus =
       std::to_array(VS::Menu::Framework::submenuStates);
-  int saved_results_state = Menu_Results_screenState;
-  int saved_results_timer = Menu_Results_screenTimer;
+  int saved_results_state = VS::Menu::Results::screenState;
+  int saved_results_timer = VS::Menu::Results::screenTimer;
   u_int saved_results_animation = Menu_Results_elementAnimationState;
   int saved_results_reel = Menu_Results_buffReelIndex;
   u_int saved_results_selection = Menu_Results_buffReelSelection;
@@ -881,8 +881,8 @@ struct GameplayInspectionFixture {
     VS::State::stateFlags.menu_f_submenu = saved_results_kind;
     std::copy(saved_submenus.begin(), saved_submenus.end(),
               VS::Menu::Framework::submenuStates);
-    Menu_Results_screenState = saved_results_state;
-    Menu_Results_screenTimer = saved_results_timer;
+    VS::Menu::Results::screenState = saved_results_state;
+    VS::Menu::Results::screenTimer = saved_results_timer;
     Menu_Results_elementAnimationState = saved_results_animation;
     Menu_Results_buffReelIndex = saved_results_reel;
     Menu_Results_buffReelSelection = saved_results_selection;
@@ -1009,8 +1009,8 @@ TEST_CASE(
   VS::Menu::Framework::menuState.currentMenu = 15;
   VS::State::stateFlags.menu_f_submenu = 0;
   VS::Menu::Framework::submenuStates[15] = 2;
-  Menu_Results_screenState = 1;
-  Menu_Results_screenTimer = 490;
+  VS::Menu::Results::screenState = 1;
+  VS::Menu::Results::screenTimer = 490;
   Menu_Results_elementAnimationState = 35;
   Menu_Results_buffReelIndex = 2;
   Menu_Results_buffReelSelection = 248;
@@ -1023,7 +1023,7 @@ TEST_CASE(
     FAIL("Active game-clear roulette was not captured");
   }
   CHECK(VS::Core::BiosRand().State() == 0xFEEDC0DEu);
-  CHECK(Menu_Results_screenTimer == 490);
+  CHECK(VS::Menu::Results::screenTimer == 490);
   CHECK(Menu_Results_buffReelSelection == 248);
 }
 

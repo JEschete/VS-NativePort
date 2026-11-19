@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -470,23 +470,23 @@ TEST_CASE("F03022 live countdown draws the number and refuses past the atlas",
 TEST_CASE("F03023 live pulse blends clutBuf and uploads it to the palette row",
           "[timeattack-heading-live]") {
   std::array<std::uint16_t, r::kResultsClutWords> saved_clut{};
-  std::ranges::copy(Menu_Results_clutBuf, saved_clut.begin());
+  std::ranges::copy(r::clutBuf, saved_clut.begin());
   RECT area{768, 511, 160, 1};
   std::array<std::uint16_t, r::kResultsClutWords> saved_vram{};
   StoreImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
 
   const auto clut = PulseClut();
-  std::ranges::copy(clut, std::begin(Menu_Results_clutBuf));
-  Menu_Results_clutBuf[32] = 0x001F;
-  Menu_Results_clutBuf[96] = 0x7C00;
+  std::ranges::copy(clut, std::begin(r::clutBuf));
+  r::clutBuf[32] = 0x001F;
+  r::clutBuf[96] = 0x7C00;
   r::LivePulseTimeAttackClut(8);
   // Red 31 * 8 / 16 = 15, blue 31 * 8 / 16 = 15.
-  CHECK(Menu_Results_clutBuf[128] == (15 | (15 << 10)));
+  CHECK(r::clutBuf[128] == (15 | (15 << 10)));
   std::array<std::uint16_t, r::kResultsClutWords> vram{};
   StoreImage(&area, reinterpret_cast<u_long*>(vram.data()));
-  CHECK(std::ranges::equal(vram, Menu_Results_clutBuf));
+  CHECK(std::ranges::equal(vram, r::clutBuf));
 
   LoadImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
-  std::ranges::copy(saved_clut, std::begin(Menu_Results_clutBuf));
+  std::ranges::copy(saved_clut, std::begin(r::clutBuf));
 }
 }  // namespace

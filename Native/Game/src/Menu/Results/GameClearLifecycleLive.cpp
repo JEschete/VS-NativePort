@@ -29,7 +29,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/SpritesLive.hpp"
@@ -138,8 +138,8 @@ bool RetirePageLoan(const TexturePageLoan& loan) {
 
 GameClearState LoadState() {
   return {.init_phase = Battle_unusedSubmenuState,
-          .screen = {.timer = Menu_Results_screenTimer,
-                     .phase = Menu_Results_screenState,
+          .screen = {.timer = screenTimer,
+                     .phase = screenState,
                      .state_timer = state_timer,
                      .reel = {.selection = Menu_Results_buffReelSelection,
                               .speed = Menu_Results_elementAnimationState,
@@ -166,8 +166,8 @@ void StoreReadouts(const GameClearReadouts& readouts) {
 void StoreState(const GameClearState& game) {
   Battle_unusedSubmenuState = game.init_phase;
   const auto& screen = game.screen;
-  Menu_Results_screenTimer = screen.timer;
-  Menu_Results_screenState = screen.phase;
+  screenTimer = screen.timer;
+  screenState = screen.phase;
   state_timer = screen.state_timer;
   Menu_Results_buffReelSelection = screen.reel.selection;
   Menu_Results_elementAnimationState = screen.reel.speed;
@@ -283,7 +283,7 @@ class LiveInit final : public GameClearInitHost {
     return owner.pages;
   }
   bool BeginTextureRead() override {
-    const auto& file = Menu_Results_kDisFiles[Menu_Results_DisFile_Rank];
+    const auto& file = kDisFiles[Menu_Results_DisFile_Rank];
     if (file.size <= 0) {
       Refuse("invalid RANK.DIS size");
       return false;

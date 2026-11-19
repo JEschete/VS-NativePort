@@ -20,7 +20,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttack.hpp"
 #include "Render/TexturePagesLive.hpp"
 
 namespace {
@@ -32,8 +32,8 @@ struct RouletteFixture {
   Battle_ActorStats stats{};
   unsigned saved_random = VS::Core::BiosRand().State();
   decltype(VS::Input::buttonsPressed) saved_input = VS::Input::buttonsPressed;
-  int saved_state = Menu_Results_screenState;
-  int saved_timer = Menu_Results_screenTimer;
+  int saved_state = VS::Menu::Results::screenState;
+  int saved_timer = VS::Menu::Results::screenTimer;
   int saved_reel = Menu_Results_buffReelIndex;
   u_int saved_selection = Menu_Results_buffReelSelection;
   u_int saved_animation = Menu_Results_elementAnimationState;
@@ -70,7 +70,7 @@ struct RouletteFixture {
               std::end(VS::Audio::Mixer::kCommandHandlers), IgnoreAudio);
     VS::Audio::nextSfxChannelGroup7E = 2;
     VS::Input::buttonsPressed = 0;
-    Menu_Results_screenTimer = -4096;
+    VS::Menu::Results::screenTimer = -4096;
   }
 
   ~RouletteFixture() {
@@ -78,8 +78,8 @@ struct RouletteFixture {
     Battle_characterState = saved_actor;
     VS::Core::SeedBiosRand(saved_random);
     VS::Input::buttonsPressed = saved_input;
-    Menu_Results_screenState = saved_state;
-    Menu_Results_screenTimer = saved_timer;
+    VS::Menu::Results::screenState = saved_state;
+    VS::Menu::Results::screenTimer = saved_timer;
     Menu_Results_buffReelIndex = saved_reel;
     Menu_Results_buffReelSelection = saved_selection;
     Menu_Results_elementAnimationState = saved_animation;
@@ -102,13 +102,13 @@ struct RouletteFixture {
   // Original MENUF/3B8.c:755 keeps a private per-state timer. Confirming state2
   // resets it; negative presentation time isolates the real logic from assets.
   void PrimeStateTimer(int ticks) {
-    Menu_Results_screenTimer = -4096;
-    Menu_Results_screenState = 2;
+    VS::Menu::Results::screenTimer = -4096;
+    VS::Menu::Results::screenState = 2;
     VS::Input::buttonsPressed = PADRright;
     REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
     VS::Input::buttonsPressed = 0;
     for (int tick = 1; tick < ticks; ++tick) {
-      Menu_Results_screenState = 2;
+      VS::Menu::Results::screenState = 2;
       REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
     }
   }
@@ -161,7 +161,7 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
   RouletteFixture fixture;
   for (unsigned start = 0; start < 256; ++start) {
     fixture.PrimeStateTimer(48);
-    Menu_Results_screenState = 1;
+    VS::Menu::Results::screenState = 1;
     Menu_Results_elementAnimationState = 48;
     Menu_Results_buffReelSelection = start;
     const auto random = VS::Core::BiosRand().State();
@@ -169,13 +169,13 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
     const unsigned alignment = (8 - ((start + 125) & 15)) & 15;
     const auto expected_calls = 40 + alignment;
     unsigned calls = 0;
-    while (Menu_Results_screenState == 1 && calls < 56) {
+    while (VS::Menu::Results::screenState == 1 && calls < 56) {
       REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
       ++calls;
     }
     INFO("starting byte " << start);
     CHECK(calls == expected_calls);
-    CHECK(Menu_Results_screenState == 2);
+    CHECK(VS::Menu::Results::screenState == 2);
     CHECK(Menu_Results_elementAnimationState == 8);
     CHECK(Menu_Results_buffReelSelection == ((start + 125 + alignment) & 255));
     CHECK((Menu_Results_buffReelSelection & 15) == 8);
@@ -187,15 +187,15 @@ TEST_CASE(
     "Early roulette Circle skips presentation without stopping or rerolling",
     "[menu][roulette][timing]") {
   RouletteFixture fixture;
-  Menu_Results_screenState = 0;
-  Menu_Results_screenTimer = 0;
+  VS::Menu::Results::screenState = 0;
+  VS::Menu::Results::screenTimer = 0;
   Menu_Results_elementAnimationState = 0;
   Menu_Results_buffReelSelection = 248;
   VS::Input::buttonsPressed = PADRright;
   const auto random = VS::Core::BiosRand().State();
   CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
-  CHECK(Menu_Results_screenState == 0);
-  CHECK(Menu_Results_screenTimer == 273);
+  CHECK(VS::Menu::Results::screenState == 0);
+  CHECK(VS::Menu::Results::screenTimer == 273);
   CHECK(Menu_Results_elementAnimationState == 0);
   CHECK(Menu_Results_buffReelSelection == 248);
   CHECK(VS::Core::BiosRand().State() == random);
@@ -250,7 +250,7 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
         FAIL("Original reel contains an unsupported stat");
     }
     fixture.PrimeStateTimer(8);
-    Menu_Results_screenState = 3;
+    VS::Menu::Results::screenState = 3;
     Menu_Results_buffReelIndex = reel;
     Menu_Results_buffReelSelection = slot * 16 + 8;
     INFO("reel " << reel << " slot " << slot << " cap " << near_cap);

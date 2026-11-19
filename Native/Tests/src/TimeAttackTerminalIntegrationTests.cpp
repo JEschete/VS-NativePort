@@ -55,29 +55,29 @@ void CheckReleased(Asset asset) {
 
 void CheckModuleReset(Asset asset) {
   CheckUnbound(asset);
-  CHECK(Menu_Results_screenTimer == 0);
-  CHECK(Menu_Results_screenState == 0);
-  CHECK(Menu_Results_newTimeSlot == 0);
-  CHECK(Menu_Results_timeTrialTime == 0);
-  CHECK(std::ranges::all_of(Menu_Results_clutBuf,
+  CHECK(results::screenTimer == 0);
+  CHECK(results::screenState == 0);
+  CHECK(results::newTimeSlot == 0);
+  CHECK(results::timeTrialTime == 0);
+  CHECK(std::ranges::all_of(results::clutBuf,
                             [](auto value) { return value == 0; }));
 }
 
 struct ReloadFixture : tests::Fixture {
   void Prime(Asset asset) {
     REQUIRE(tests::Initialize(asset) == 0);
-    Menu_Results_screenTimer = 94;
-    Menu_Results_newTimeSlot = 2;
-    Menu_Results_timeTrialTime = 0x123456;
-    Menu_Results_clutBuf[159] = 0x1234;
+    results::screenTimer = 94;
+    results::newTimeSlot = 2;
+    results::timeTrialTime = 0x123456;
+    results::clutBuf[159] = 0x1234;
     VS::State::scoreData.boss_time_trial_scores[7][2].time = 123456;
     stats.strength = 77;
   }
 
   static void CheckUnchanged(Asset asset) {
-    CHECK(Menu_Results_newTimeSlot == 2);
-    CHECK(Menu_Results_timeTrialTime == 0x123456);
-    CHECK(Menu_Results_clutBuf[159] == 0x1234);
+    CHECK(results::newTimeSlot == 2);
+    CHECK(results::timeTrialTime == 0x123456);
+    CHECK(results::clutBuf[159] == 0x1234);
     CHECK(results::InspectLiveTimeAttackLoad(asset).request_bound);
   }
 
@@ -115,7 +115,7 @@ void BeginCountdown(tests::Fixture& fixture) {
   REQUIRE(results::LiveInitializeTimeAttackStart() == 1);
   VS::Input::buttonsPressed = 0x20;
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
-  REQUIRE(Menu_Results_screenState == 2);
+  REQUIRE(results::screenState == 2);
   VS::Input::buttonsPressed = 0;
   fixture.BeginFrame();
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
@@ -187,10 +187,10 @@ TEST_CASE("Time-attack module entries execute real loading and rendering",
         asset == Asset::kResults
             ? ModuleEntry(0x80103D88, &results::LiveUpdateTimeAttackResults)
             : ModuleEntry(0x8010412C, &results::LiveUpdateTimeAttackStart);
-    Menu_Results_screenTimer = 64;
+    results::screenTimer = 64;
     fixture.BeginFrame();
     CHECK(update() == 0);
-    CHECK(Menu_Results_screenTimer == 65);
+    CHECK(results::screenTimer == 65);
     CHECK_FALSE(fixture.frame.Empty());
   }
 }
