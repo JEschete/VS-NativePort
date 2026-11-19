@@ -49,9 +49,9 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::Loot {
 namespace {
@@ -115,7 +115,7 @@ void RequireRows() {
   }
 }
 void RequireFrame() {
-  if (Render_frameScratch.primitiveCursor == nullptr ||
+  if (VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, 0) ==
           nullptr) {
     Refuse("missing loot presentation frame");

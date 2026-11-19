@@ -20,7 +20,8 @@
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 // Ordering-table slots relative to the frame's scene table
-// (Render_frameScratch.orderingTable): the panels, footer and overview text
+// (VS::Render::FrameScratchpad().ordering_table): the panels, footer and
+// overview text
 // (+0x1C), and the viewer's edge fade (+0x20).
 inline constexpr std::int32_t kPanelSlot = 7;
 inline constexpr std::int32_t kEdgeFadeSlot = 8;
@@ -180,7 +181,7 @@ void DrawFooterBackground(std::int32_t top, PanelTarget& target);
 // additive page, in the edge fade slot.
 void DrawViewerEdgeFade(PanelTarget& target);
 
-// Render_Camera's position and angles VECTORs: x, y, z and the pad word.
+// VS::Render::Camera's position and angles VECTORs: x, y, z and the pad word.
 inline constexpr std::size_t kCameraVectorWords = 4;
 using CameraVector = std::array<std::int32_t, kCameraVectorWords>;
 struct CameraPose {

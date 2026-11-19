@@ -28,7 +28,7 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
-#include "Render/FramebufferEffects.h"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -438,7 +438,8 @@ class LiveScreen final : public TimeAttackScreenHost {
     Render::SetLiveFramebufferEffectRotation(angle);
   }
   void SetEffectScale(Render::FramebufferEffectPair scale) override {
-    const Render_FramebufferEffectTranslation value{scale.x, scale.y, 0, 0};
+    const VS::Render::FramebufferEffectTranslation value{scale.x, scale.y, 0,
+                                                         0};
     Render::SetLiveFramebufferEffectScale(&value);
   }
   void SetEffectTint(Render::FramebufferEffectTint tint) override {
@@ -446,7 +447,8 @@ class LiveScreen final : public TimeAttackScreenHost {
     Render::SetLiveFramebufferEffectTint(&value);
   }
   void SetEffectOffset(Render::FramebufferEffectPair offset) override {
-    const Render_FramebufferEffectTranslation value{offset.x, offset.y, 0, 0};
+    const VS::Render::FramebufferEffectTranslation value{offset.x, offset.y, 0,
+                                                         0};
     Render::SetLiveFramebufferEffectOffset(&value);
   }
   void SetEffectBlend(std::int32_t mode) override {
@@ -628,7 +630,7 @@ void ResetLiveTimeAttackModuleData() {
 bool CleanupLiveTimeAttackOwnedState() {
   if (countdown_controls) {
     State::SetLiveTickSpeed(kNormalTickSpeed);
-    const Render_FramebufferEffectTranslation stopped{};
+    const VS::Render::FramebufferEffectTranslation stopped{};
     Render::SetLiveFramebufferEffectScale(&stopped);
     Render::SetLiveFramebufferEffectEnabled(0);
     countdown_controls = false;

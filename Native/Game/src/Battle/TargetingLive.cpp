@@ -77,7 +77,7 @@
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 
@@ -133,7 +133,7 @@ static_assert(sizeof(Battle_TargetSphere) <=
               sizeof(Battle_TargetSphereSetupView));
 // The sphere's highlight tint word is a colour code; its cursor word holds x
 // and y.
-static_assert(sizeof(Render_ColorCode) ==
+static_assert(sizeof(VS::Render::ColorCode) ==
               sizeof(Battle_TargetSphere::reserved34));
 static_assert(sizeof(HalfwordPair) == sizeof(Battle_TargetSphere::reserved38));
 static_assert(sizeof(HalfwordPair) == sizeof(Battle_Actor::commandArg2));
@@ -1012,7 +1012,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
       VS::Actors::SetLiveActorTint(actor, nullptr);
       return;
     }
-    const auto tint = std::bit_cast<Render_ColorCode>(sphere_.reserved34);
+    const auto tint = std::bit_cast<VS::Render::ColorCode>(sphere_.reserved34);
     VS::Actors::SetLiveActorTint(actor, &tint);
   }
   [[nodiscard]] std::optional<int> ActorKind(int actor) const override {

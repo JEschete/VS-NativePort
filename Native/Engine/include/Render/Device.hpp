@@ -16,7 +16,8 @@ struct SDL_GPUTransferBuffer;
 
 namespace VS::Render {
 
-struct ClearColor {
+// The swapchain clear color PresentClear draws (#454).
+struct SwapchainClearColor {
   float r = 0.0f;
   float g = 0.0f;
   float b = 0.0f;
@@ -61,7 +62,7 @@ class Device {
 
   // Acquires the swapchain, clears it and presents. Returns false if the frame
   // was skipped (e.g. minimized window).
-  bool PresentClear(const ClearColor& color);
+  bool PresentClear(const SwapchainClearColor& color);
 
   // Shows an RGBA8 image (0xAABBGGRR) letterboxed at the given display aspect
   // (4:3 for the PS1 TV picture).

@@ -123,17 +123,18 @@ void CheckRealReelFrame(LiveFixture& fixture) {
 }
 
 struct SavedServiceViews {
-  decltype(Render_frameScratch) frame = Render_frameScratch;
+  decltype(VS::Render::FrameScratchpad()) frame = VS::Render::FrameScratchpad();
   decltype(Audio_soundState) audio = Audio_soundState;
   Battle_Actor* actor = Battle_characterState;
   unsigned random = VS::Core::BiosRand().State();
 
   void CheckRestored() const {
     CHECK(VS::Core::BiosRand().State() == random);
-    CHECK(Render_frameScratch.primitiveCursor == frame.primitiveCursor);
-    CHECK(Render_frameScratch.orderingTable == frame.orderingTable);
-    CHECK(Render_frameScratch.overlayOrderingTable ==
-          frame.overlayOrderingTable);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          frame.primitive_cursor);
+    CHECK(VS::Render::FrameScratchpad().ordering_table == frame.ordering_table);
+    CHECK(VS::Render::FrameScratchpad().overlay_ordering_table ==
+          frame.overlay_ordering_table);
     CHECK(Battle_characterState == actor);
     CHECK(Audio_soundState.currentMusicData == audio.currentMusicData);
     CHECK(Audio_soundState.currentMusicSlot == audio.currentMusicSlot);
@@ -499,7 +500,7 @@ TEST_CASE(
 TEST_CASE("Game-clear Live no-frame and invalid glyph calls preserve owners",
           "[game-clear-live][F03043][F03045]") {
   LiveFixture fixture;
-  Render_frameScratch = {};
+  VS::Render::FrameScratchpad() = {};
   results::LiveDrawBonusReelTexture(0, 0, -1);
   Menu_Results_buffReelIndex = -1;
   results::LiveDrawBonusReel(130, 190, 64, 2);

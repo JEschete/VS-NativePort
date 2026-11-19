@@ -12,9 +12,9 @@
 #include "Ending/Credits/EmbeddedArt.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 constexpr auto kOffsets = std::to_array<std::size_t>({
@@ -79,11 +79,11 @@ struct EndingArtFixture {
 };
 
 struct EndingFrameFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   std::array<void*, 2> saved_primitives =
-      std::to_array(Render_legacyPrimitiveBuffers);
+      std::to_array(VS::Render::legacyPrimitiveBuffers);
   std::array<void*, 2> saved_ordering =
-      std::to_array(Render_legacyOrderingTables);
+      std::to_array(VS::Render::legacyOrderingTables);
   std::vector<u_long> packets = std::vector<u_long>(
       5 * sizeof(POLY_FT4) / sizeof(u_long) + 2, 0xDEADBEEF);
   // AllocateRenderBuffers' 0x2088-byte ordering table.
@@ -91,15 +91,15 @@ struct EndingFrameFixture {
 
   EndingFrameFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    std::ranges::fill(Render_legacyPrimitiveBuffers, packets.data());
-    std::ranges::fill(Render_legacyOrderingTables, ordering.data());
-    Render_frameScratch.primitiveCursor = packets.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data();
+    std::ranges::fill(VS::Render::legacyPrimitiveBuffers, packets.data());
+    std::ranges::fill(VS::Render::legacyOrderingTables, ordering.data());
+    VS::Render::FrameScratchpad().primitive_cursor = packets.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
   }
   ~EndingFrameFixture() {
-    Render_frameScratch = saved_frame;
-    std::ranges::copy(saved_primitives, Render_legacyPrimitiveBuffers);
-    std::ranges::copy(saved_ordering, Render_legacyOrderingTables);
+    VS::Render::FrameScratchpad() = saved_frame;
+    std::ranges::copy(saved_primitives, VS::Render::legacyPrimitiveBuffers);
+    std::ranges::copy(saved_ordering, VS::Render::legacyOrderingTables);
   }
 };
 
@@ -177,7 +177,7 @@ TEST_CASE("Clear results retain five strips in the native penultimate bucket",
   VS::Ending::LiveDrawRankBackground(fade);
   CHECK(fixture.packets.front() == 0xDEADBEEF);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
-  CHECK(Render_frameScratch.primitiveCursor == strips + 5);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == strips + 5);
   CHECK(nextPrim(&fixture.ordering[0x7FE]) == strips + 4);
   for (int index = 0; index < 5; ++index) {
     CheckRankStrip(strips[index], index, std::clamp(fade, 0, 64) * 2,
@@ -196,10 +196,10 @@ TEST_CASE(
   const int fade = GENERATE(-1, 0);
   EndingFrameFixture fixture;
   const auto original_ordering = fixture.ordering;
-  const void* original_cursor = Render_frameScratch.primitiveCursor;
+  const void* original_cursor = VS::Render::FrameScratchpad().primitive_cursor;
   VS::Ending::LiveDrawRankBackground(fade);
   CHECK(fixture.packets.front() == 0xDEADBEEF);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
-  CHECK(Render_frameScratch.primitiveCursor == original_cursor);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == original_cursor);
   CHECK(fixture.ordering == original_ordering);
 }

@@ -31,7 +31,7 @@
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Score/ScoreRankLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -260,8 +260,8 @@ void DrawLiveReel(ResultsPoint origin, std::int32_t timer, std::int32_t phase,
                   const BonusReelView& view) {
   const auto atlas = LiveResultsAtlas();
   const auto reels = LiveReels();
-  const auto frame = (static_cast<std::uint32_t>(Render_frameBuf) + 1) & 1;
-  const auto& clip = Render_legacyDrawEnvironments[frame].clip;
+  const auto frame = (static_cast<std::uint32_t>(VS::Render::frameBuf) + 1) & 1;
+  const auto& clip = VS::Render::legacyDrawEnvironments[frame].clip;
   const BonusReelScene scene{
       .atlas = atlas,
       .reels = reels,

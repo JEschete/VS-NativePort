@@ -14,8 +14,8 @@
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/LegacyPackets.h"
+#include "Render/Display.hpp"
+#include "Render/LegacyPackets.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -400,24 +400,24 @@ TEST_CASE("The framebuffer page holds the leftmost corner up to x 320",
 
 TEST_CASE("The live map writes only the packet's page and texels",
           "[bone-trail][F01452]") {
-  const int saved_buffer = Render_frameBuf;
-  Render_TrailPacket packet{};
+  const int saved_buffer = VS::Render::frameBuf;
+  VS::Render::TrailPacket packet{};
   packet.xy0 = static_cast<std::int32_t>(Point(130, 20));
   packet.xy1 = static_cast<std::int32_t>(Point(70, 40));
   packet.xy2 = static_cast<std::int32_t>(Point(200, 250));
   packet.xy3 = static_cast<std::int32_t>(Point(90, -4));
-  packet.clut = 0x1234;
-  packet.reserved2A = 0x5678;
-  Render_frameBuf = 3;
+  packet.palette = 0x1234;
+  packet.reserved2a = 0x5678;
+  VS::Render::frameBuf = 3;
   fx::LiveMapTrailFramebufferTexture(&packet, 2, 2, 0x40);
-  Render_frameBuf = saved_buffer;
-  CHECK(packet.tpage == (1 | 0x40 | 0x100));
+  VS::Render::frameBuf = saved_buffer;
+  CHECK(packet.texture_page == (1 | 0x40 | 0x100));
   CHECK(packet.uv0 == (68 | (22 << 8)));
   CHECK(packet.uv1 == (8 | (42 << 8)));
   CHECK(packet.uv2 == (138 | (252 << 8)));
   CHECK(packet.uv3 == (28 | (1 << 8)));
-  CHECK(packet.clut == 0x1234);
-  CHECK(packet.reserved2A == 0x5678);
+  CHECK(packet.palette == 0x1234);
+  CHECK(packet.reserved2a == 0x5678);
   fx::LiveMapTrailFramebufferTexture(nullptr, 0, 0, 0);
 }
 

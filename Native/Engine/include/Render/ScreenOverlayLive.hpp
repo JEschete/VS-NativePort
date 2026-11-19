@@ -6,7 +6,9 @@
 #include "Legacy/Psx.h"
 #include "Render/ScreenOverlay.hpp"
 
-struct Render_FramebufferEffectTranslation;
+namespace VS::Render {
+struct FramebufferEffectTranslation;
+}  // namespace VS::Render
 
 // Live binding for the screen overlays (ScreenOverlay.cpp): the framebuffer
 // effect's state and its packet block from the high end of the game heap, and
@@ -26,21 +28,21 @@ void DrawLiveFramebufferEffect(void* ordering_table);
 void SetLiveFramebufferEffectEnabled(int enabled);
 void SetLiveFramebufferEffectRotation(int roll_angle);
 void SetLiveFramebufferEffectScale(
-    const Render_FramebufferEffectTranslation* scale);
+    const VS::Render::FramebufferEffectTranslation* scale);
 void SetLiveFramebufferEffectTint(const CVECTOR* tint);
 void SetLiveFramebufferEffectOffset(
-    const Render_FramebufferEffectTranslation* offset);
+    const VS::Render::FramebufferEffectTranslation* offset);
 void SetLiveFramebufferEffectBlendMode(int blend_mode);
 void SetLiveFramebufferEffectDepth(u_int ordering_depth);
 void SetLiveFramebufferPreviousFrame(int use_previous_frame);
 // Writes x, the x scale again as y (the original quirk) and 0.
 void ReadLiveFramebufferEffectScale(
-    Render_FramebufferEffectTranslation* output);
+    VS::Render::FramebufferEffectTranslation* output);
 // Writes r, g and b; cd is left as it was.
 void ReadLiveFramebufferEffectTint(CVECTOR* output);
 // Writes x and y; the two reserved words are left as they were.
 void ReadLiveFramebufferEffectOffset(
-    Render_FramebufferEffectTranslation* output);
+    VS::Render::FramebufferEffectTranslation* output);
 
 // True while the effect is starting or drawing (GameLoop.cpp's frame wait).
 [[nodiscard]] bool IsLiveFramebufferEffectShowing() noexcept;

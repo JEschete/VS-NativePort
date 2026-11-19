@@ -25,13 +25,13 @@
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Trails.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/LegacyPackets.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -113,7 +113,7 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
     return palettes_;
   }
   std::uint32_t DrawBuffer() override {
-    return static_cast<std::uint32_t>(Render_frameBuf) & 1U;
+    return static_cast<std::uint32_t>(VS::Render::frameBuf) & 1U;
   }
   // decomp: 5BF94.c:4931 and 4954 (addPrim at the segment's depth). The
   // original wrote past the primitive buffer when it was full; a quad
@@ -141,7 +141,7 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
     std::ranges::copy(words, packet);
     *entry = (*entry & kOrderingHighMask) |
              (LegacyGpu_Handle(packet) & kRingLinkMask);
-    Render_frameScratch.primitiveCursor = packet + kRingPacketWords;
+    VS::Render::FrameScratchpad().primitive_cursor = packet + kRingPacketWords;
   }
 
  private:
@@ -313,8 +313,8 @@ void LiveClampTrailTexturePoint(int u_offset, int v_offset, int screen,
 }
 
 // decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5738).
-void LiveMapTrailFramebufferTexture(Render_TrailPacket* packet, int u_offset,
-                                    int v_offset, int flags) {
+void LiveMapTrailFramebufferTexture(VS::Render::TrailPacket* packet,
+                                    int u_offset, int v_offset, int flags) {
   if (packet == nullptr) {
     Refuse("framebuffer map", "no packet");
     return;
@@ -323,13 +323,13 @@ void LiveMapTrailFramebufferTexture(Render_TrailPacket* packet, int u_offset,
                             static_cast<std::uint32_t>(packet->xy1),
                             static_cast<std::uint32_t>(packet->xy2),
                             static_cast<std::uint32_t>(packet->xy3)}};
-  MapTrailFramebufferTexture(quad, u_offset, v_offset,
-                             static_cast<std::uint16_t>(flags),
-                             static_cast<std::uint32_t>(Render_frameBuf) & 1U);
+  MapTrailFramebufferTexture(
+      quad, u_offset, v_offset, static_cast<std::uint16_t>(flags),
+      static_cast<std::uint32_t>(VS::Render::frameBuf) & 1U);
   const auto packed = [](RingUv uv) {
     return static_cast<u_short>(uv.u | (uv.v << kByteBits));
   };
-  packet->tpage = quad.tpage;
+  packet->texture_page = quad.tpage;
   packet->uv0 = packed(quad.uvs[0]);
   packet->uv1 = packed(quad.uvs[1]);
   packet->uv2 = packed(quad.uvs[2]);

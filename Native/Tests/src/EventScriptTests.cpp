@@ -54,7 +54,7 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 static int sessionTitleCalls;
@@ -653,7 +653,7 @@ int Tests_RoomLightingSamples(void) {
   Field_roomData.isLoaded = 1;
   Field_roomData.lighting = &lighting;
   Field_roomData.header.lightingLength = sizeof lighting;
-  Render_ColorCode color = {0, 0, 0, 0x5A};
+  VS::Render::ColorCode color = {0, 0, 0, 0x5A};
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   int passed = color.red == 127 && color.green == 63 && color.blue == 63 &&
                color.code == 0x5A;

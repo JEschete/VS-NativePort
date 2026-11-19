@@ -290,7 +290,7 @@ bool Device::PresentImage(const u32* rgba, i32 width, i32 height,
   return true;
 }
 
-bool Device::PresentClear(const ClearColor& color) {
+bool Device::PresentClear(const SwapchainClearColor& color) {
   SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(m_device_);
   if (!cmd) {
     return false;

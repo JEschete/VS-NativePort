@@ -61,12 +61,12 @@
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Camera.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects::Templates {
 namespace {
@@ -380,7 +380,9 @@ class LiveTrailHost final : public BasicTrailHost<History> {
   [[nodiscard]] RingProjection Project(TrailPoint point) override;
   [[nodiscard]] std::optional<RingTexture> AdvanceTexture() override;
   [[nodiscard]] std::array<std::uint8_t, History> Transparency() override;
-  [[nodiscard]] std::int32_t NearClip() override { return Render_nearClip; }
+  [[nodiscard]] std::int32_t NearClip() override {
+    return VS::Render::nearClip;
+  }
   void Submit(const RingQuad& quad, std::int32_t depth) override;
   void ReportSkippedTrail(std::size_t index, TrailFault fault) override;
 
@@ -563,7 +565,7 @@ void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
   std::ranges::copy(packet, words);
   const std::uint32_t handle = LegacyGpu_Handle(words);
   *bucket = (previous & ~kRingLinkMask) | (handle & kRingLinkMask);
-  Render_frameScratch.primitiveCursor = words + packet.size();
+  VS::Render::FrameScratchpad().primitive_cursor = words + packet.size();
 }
 
 template <std::size_t History>

@@ -10,7 +10,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/UiPackets.hpp"
 
 namespace {

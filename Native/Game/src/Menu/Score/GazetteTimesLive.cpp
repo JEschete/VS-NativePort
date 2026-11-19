@@ -20,8 +20,8 @@
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/Records.h"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
 
 namespace VS::Menu::Score {
@@ -154,7 +154,8 @@ class LiveTimeTrialHost final : public TimeTrialHost {
   }
   void DrawText(std::string_view text, int x, int y,
                 std::uint32_t color) override {
-    auto* ordering = static_cast<u_long*>(Render_frameScratch.orderingTable);
+    auto* ordering =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table);
     if (ordering == nullptr) {
       Score::Refuse("time trial text without a scene ordering table");
       return;

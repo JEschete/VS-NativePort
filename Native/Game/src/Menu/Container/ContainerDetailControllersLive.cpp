@@ -27,10 +27,10 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::container {
 namespace {
@@ -196,9 +196,9 @@ std::span<char> BorrowedText(char* text, const TextOwners& owners) {
 }
 
 void RequireFrame(bool overlay) {
-  if (Render_frameScratch.primitiveCursor == nullptr ||
-      (overlay ? Render_frameScratch.overlayOrderingTable
-               : Render_frameScratch.orderingTable) == nullptr) {
+  if (VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
+      (overlay ? VS::Render::FrameScratchpad().overlay_ordering_table
+               : VS::Render::FrameScratchpad().ordering_table) == nullptr) {
     Refuse("missing used container presentation frame");
   }
 }

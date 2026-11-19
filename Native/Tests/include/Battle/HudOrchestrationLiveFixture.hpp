@@ -21,7 +21,7 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "State/SceneTimer.h"
 #include "State/Timers.hpp"
 
@@ -82,9 +82,9 @@ class ProductionTables {
   }
 
  private:
-  SavedArray<Render_compactGlyphLeftTrim> trims_;
-  SavedArray<Render_compactGlyphWidths> widths_;
-  SavedArray<Render_compactGlyphIndices> indices_;
+  SavedArray<VS::Render::compactGlyphLeftTrim> trims_;
+  SavedArray<VS::Render::compactGlyphWidths> widths_;
+  SavedArray<VS::Render::compactGlyphIndices> indices_;
   SavedArray<Menu_Framework_animationIndices> animation_;
   SavedArray<Menu_Framework_rowAnimationSteps> steps_;
   SavedArray<Battle_secondShortcutMarkerPositions> ability_markers_;
@@ -106,7 +106,7 @@ class ProductionTables {
   SavedArray<Battle_hudGaugeLabelTexU> gauge_textures_;
   SavedArray<Battle_statusIconTexOffsets> status_textures_;
   SavedArray<Battle_upperStatusIconFlags> upper_status_;
-  SavedArray<Render_kStatGaugeColors> gauge_colors_;
+  SavedArray<VS::Render::kStatGaugeColors> gauge_colors_;
 
   void LoadFontsAndAnimation(std::span<const unsigned char> image) {
     trims_.Load(image, 0x82F08, 172);

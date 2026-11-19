@@ -24,13 +24,13 @@
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Camera.hpp"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "nlohmann/json.hpp"
 
 namespace VS::Effects {
@@ -92,9 +92,9 @@ void Link(u_long* packet, unsigned length, u_long* ordering) {
 
 void CheckCapacity(unsigned quads) {
   const auto base = reinterpret_cast<std::uintptr_t>(
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
-  const auto cursor =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1]);
+  const auto cursor = reinterpret_cast<std::uintptr_t>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   const auto bytes = (static_cast<std::uint64_t>(quads) * kQuadWords +
                       std::uint64_t{kModeWords} * 2) *
                      sizeof(u_long);
@@ -104,11 +104,12 @@ void CheckCapacity(unsigned quads) {
 }
 
 void Mode(u_long word, u_long* ordering) {
-  auto* packet = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  auto* packet =
+      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
   Link(packet, 1, ordering);
   packet[1] = word;
   packet[2] = 0;
-  Render_frameScratch.primitiveCursor = packet + kModeWords;
+  VS::Render::FrameScratchpad().primitive_cursor = packet + kModeWords;
 }
 
 std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
@@ -130,7 +131,7 @@ bool ProjectNode(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
            Half((node.motion.position.vy >> kFixedShift) +
                 node.textureAnimation.frameOffsetY),
            Half(node.motion.position.vz >> kFixedShift), 0};
-  const MATRIX* matrix = &Render_frameScratch.viewMatrix;
+  const MATRIX* matrix = &VS::Render::FrameScratchpad().view_matrix;
   if ((node.emitFlags & kAttached) != 0) {
     Require(Effects_currentInstance != nullptr &&
                 node.transformIndex <
@@ -173,7 +174,7 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
               {value.m[2][0], value.m[2][1], value.m[2][2]}}},
             {"translation", {value.t[0], value.t[1], value.t[2]}}};
   };
-  const MATRIX* view = &Render_frameScratch.viewMatrix;
+  const MATRIX* view = &VS::Render::FrameScratchpad().view_matrix;
   std::array<std::int64_t, kSpatialDimensions> world{point.vx, point.vy,
                                                      point.vz};
   nlohmann::json transform = nullptr;
@@ -196,7 +197,7 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
     commands.push_back(reinterpret_cast<std::uintptr_t>(
         first_quad + std::size_t{index} * kQuadWords + 1));
   }
-  const Render_ScreenOffset offset =
+  const VS::Render::ScreenOffset offset =
       VS::Render::GetLiveProjectionScreenOffset();
   nlohmann::json record{
       {"kind", "particle"},
@@ -222,8 +223,8 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
       {"world_point", world},
       {"world_transform", std::move(transform)},
       {"view_transform", matrix(*view)},
-      {"camera_transform", matrix(Render_frameScratch.viewMatrix)},
-      {"projection_distance", Render_projectionDistance},
+      {"camera_transform", matrix(VS::Render::FrameScratchpad().view_matrix)},
+      {"projection_distance", VS::Render::projectionDistance},
       {"projection_offset", {offset.x, offset.y}},
       {"screen",
        outcome == "below-ground"
@@ -289,11 +290,11 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   [[nodiscard]] std::int32_t NearClip() const override {
-    return Render_nearClip;
+    return VS::Render::nearClip;
   }
 
   [[nodiscard]] std::int32_t ProjectionDistance() const override {
-    return Render_projectionDistance;
+    return VS::Render::projectionDistance;
   }
 
   [[nodiscard]] std::optional<ParticleTextureFrame> TextureFrame(
@@ -360,14 +361,15 @@ class LiveParticleRenderer final : public ParticleRenderer {
                      std::uint32_t quad_count) override {
     CheckCapacity(quad_count);
     Mode(kEnableTextureWindow, Ordering(bucket));
-    TraceParticle(
-        Node(particle), point_, xy_, depth_, flags_, "draw",
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor),
-        quad_count);
+    TraceParticle(Node(particle), point_, xy_, depth_, flags_, "draw",
+                  static_cast<const u_long*>(
+                      VS::Render::FrameScratchpad().primitive_cursor),
+                  quad_count);
   }
 
   void DrawQuad(int bucket, const ParticleQuad& quad) override {
-    auto* packet = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+    auto* packet =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
     Link(packet, kQuadWords - 1, Ordering(bucket));
     packet[kColor] = quad.color | (quad.semi_transparent ? kSemiTransparentQuad
                                                          : kTexturedQuad);
@@ -383,7 +385,7 @@ class LiveParticleRenderer final : public ParticleRenderer {
         quad.uv[1] | (static_cast<unsigned>(quad.tpage) << kHalfShift);
     packet[kTexture2] = quad.uv[2];
     packet[kTexture3] = quad.uv.back();
-    Render_frameScratch.primitiveCursor = packet + kQuadWords;
+    VS::Render::FrameScratchpad().primitive_cursor = packet + kQuadWords;
   }
 
   void EndParticle(int bucket) override {
@@ -401,7 +403,8 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   static u_long* Ordering(int bucket) {
-    return static_cast<u_long*>(Render_frameScratch.orderingTable) + bucket;
+    return static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+           bucket;
   }
 
   SVECTOR point_{};

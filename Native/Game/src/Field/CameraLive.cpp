@@ -43,9 +43,9 @@
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 
 // decomp: _firstPersonViewEnabled (_firstPersonViewEnabled@BATTLE/BATTLE.PRG)
 int VS::Field::isFirstPersonViewEnabled;
@@ -77,8 +77,8 @@ static_assert(sizeof(Field_SphericalCameraValues) == kSphericalValuesBytes);
 static_assert(sizeof(Field_SphericalCamera) == kSphericalCameraBytes);
 static_assert(offsetof(Field_SphericalCamera, delta) == kSphericalDeltaAt);
 static_assert(offsetof(Field_SphericalCamera, speed) == kSphericalSpeedAt);
-static_assert(sizeof(Render_Camera) == kViewCameraBytes);
-static_assert(offsetof(Render_Camera, farClip) == kViewCameraFarClipAt);
+static_assert(sizeof(VS::Render::Camera) == kViewCameraBytes);
+static_assert(offsetof(VS::Render::Camera, far_clip) == kViewCameraFarClipAt);
 static_assert(sizeof(Field_CameraTransition) == kTransitionBytes);
 static_assert(offsetof(Field_CameraTransition, fromSpherical) ==
               kTransitionFromSphericalAt);
@@ -115,26 +115,26 @@ void RefuseNull(std::string_view entry) {
   }
 }
 
-[[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+[[nodiscard]] VS::Render::FrameScratch& Scratch() {
+  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
 }
 
 [[nodiscard]] Actors::MotionVector MotionOf(const SVECTOR& vector) {
   return {.x = vector.vx, .y = vector.vy, .z = vector.vz, .w = 0};
 }
 
-[[nodiscard]] ViewCamera ViewCameraOf(const Render_Camera& camera) {
+[[nodiscard]] ViewCamera ViewCameraOf(const VS::Render::Camera& camera) {
   return {.position = Math::VectorOf(camera.position),
-          .look_at = Math::VectorOf(camera.lookAt),
+          .look_at = Math::VectorOf(camera.look_at),
           .angles = Math::VectorOf(camera.angles),
-          .far_clip = camera.farClip};
+          .far_clip = camera.far_clip};
 }
 
-void StoreViewCamera(Render_Camera& record, const ViewCamera& camera) {
+void StoreViewCamera(VS::Render::Camera& record, const ViewCamera& camera) {
   Math::StoreVector(record.position, camera.position);
-  Math::StoreVector(record.lookAt, camera.look_at);
+  Math::StoreVector(record.look_at, camera.look_at);
   Math::StoreVector(record.angles, camera.angles);
-  record.farClip = camera.far_clip;
+  record.far_clip = camera.far_clip;
 }
 
 [[nodiscard]] OrbitAngles AnglesOf(const Field_SphericalCameraValues& values) {
@@ -237,13 +237,13 @@ auto RunLive(Rule rule) {
 }  // namespace
 
 FieldCameraState LoadLiveFieldCameraState() {
-  const Render_FrameScratch& scratch = Scratch();
+  const VS::Render::FrameScratch& scratch = Scratch();
   FieldCameraState state{.camera = ViewCameraOf(scratch.camera),
                          .spherical = SphericalOf(sphericalCamera),
                          .transition = std::nullopt,
                          .first_person_view_enabled = isFirstPersonViewEnabled,
                          .geometry_draw_mode = roomGeometryDrawMode,
-                         .view_facing_word = scratch.firstPersonViewFacing};
+                         .view_facing_word = scratch.first_person_view_facing};
   if (cameraTransition != nullptr) {
     state.transition = TransitionOf(*cameraTransition);
   }
@@ -251,7 +251,7 @@ FieldCameraState LoadLiveFieldCameraState() {
 }
 
 void StoreLiveFieldCameraState(const FieldCameraState& state) {
-  Render_FrameScratch& scratch = Scratch();
+  VS::Render::FrameScratch& scratch = Scratch();
   StoreViewCamera(scratch.camera, state.camera);
   StoreSpherical(sphericalCamera, state.spherical);
   if (state.transition && cameraTransition != nullptr) {
@@ -259,7 +259,7 @@ void StoreLiveFieldCameraState(const FieldCameraState& state) {
   }
   isFirstPersonViewEnabled = state.first_person_view_enabled;
   roomGeometryDrawMode = state.geometry_draw_mode;
-  scratch.firstPersonViewFacing = state.view_facing_word;
+  scratch.first_person_view_facing = state.view_facing_word;
 }
 
 template <typename Call>
@@ -423,9 +423,9 @@ std::optional<StickPosition> LiveCameraHost::AnalogRightStick() {
 // scratch keeps the field but not the PS1 offset.
 std::int32_t LiveCameraHost::ProjectToScreen(
     const Actors::MotionVector& point) {
-  Render_FrameScratch& scratch = Scratch();
-  Core_Gte_SetRotMatrix(&scratch.viewMatrix);
-  Core_Gte_SetTransMatrix(&scratch.viewMatrix);
+  VS::Render::FrameScratch& scratch = Scratch();
+  Core_Gte_SetRotMatrix(&scratch.view_matrix);
+  Core_Gte_SetTransMatrix(&scratch.view_matrix);
   SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
   Core_GteWord screen_xy = 0;
   Core_GteWord interpolation = 0;
@@ -435,10 +435,10 @@ std::int32_t LiveCameraHost::ProjectToScreen(
   return static_cast<std::int32_t>(screen_xy);
 }
 
-std::int32_t LiveCameraHost::NearClip() { return Render_nearClip; }
+std::int32_t LiveCameraHost::NearClip() { return VS::Render::nearClip; }
 
 std::int32_t LiveCameraHost::ProjectionDistance() {
-  return Render_projectionDistance;
+  return VS::Render::projectionDistance;
 }
 
 void LiveCameraHost::SetNearClip(std::int32_t near_clip) {
@@ -762,7 +762,7 @@ void LiveInitializeSphericalCamera(VECTOR* out_position, VECTOR* out_look_at,
     RefuseNull("InitializeSphericalCamera");
     return;
   }
-  const bool look_at_is_view_camera = out_look_at == &Scratch().camera.lookAt;
+  const bool look_at_is_view_camera = out_look_at == &Scratch().camera.look_at;
   const CameraPlacement placement =
       RunLive([facing, mode, look_at_is_view_camera](CameraHost& host,
                                                      FieldCameraState& state) {

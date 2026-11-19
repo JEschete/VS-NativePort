@@ -9,10 +9,10 @@
 
 #include "Battle/Hud.h"
 #include "Battle/HudRendering.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace hud_rendering_fixture {
 inline constexpr std::size_t kHudOrderingWords = 0x2088 / sizeof(u_long);
@@ -27,19 +27,20 @@ class LiveFrame {
   std::array<u_long, kHudPrimitiveWords> primitives{};
 
   LiveFrame()
-      : saved_scratch_(Render_frameScratch),
-        saved_frame_(Render_frameBuf),
-        saved_ordering_(Render_legacyOrderingTables[0]),
-        saved_primitives_(Render_legacyPrimitiveBuffers[0]),
+      : saved_scratch_(VS::Render::FrameScratchpad()),
+        saved_frame_(VS::Render::frameBuf),
+        saved_ordering_(VS::Render::legacyOrderingTables[0]),
+        saved_primitives_(VS::Render::legacyPrimitiveBuffers[0]),
         saved_slide_(Battle_hudSlideOffset) {
     CaptureLayout();
     ordering.fill(kEndLink);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = primitives.data();
-    Render_frameScratch.primitiveCursor = primitives.data();
-    Render_frameScratch.orderingTable = ordering.data() + kHudSceneHead;
-    Render_frameScratch.overlayOrderingTable =
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kHudSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kHudOverlayHead;
     Battle_hudSlideOffset = 0;
     SeedLayout();
@@ -47,10 +48,10 @@ class LiveFrame {
   ~LiveFrame() {
     RestoreLayout();
     Battle_hudSlideOffset = saved_slide_;
-    Render_frameScratch = saved_scratch_;
-    Render_frameBuf = saved_frame_;
-    Render_legacyOrderingTables[0] = saved_ordering_;
-    Render_legacyPrimitiveBuffers[0] = saved_primitives_;
+    VS::Render::FrameScratchpad() = saved_scratch_;
+    VS::Render::frameBuf = saved_frame_;
+    VS::Render::legacyOrderingTables[0] = saved_ordering_;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_primitives_;
   }
   LiveFrame(const LiveFrame&) = delete;
   LiveFrame& operator=(const LiveFrame&) = delete;
@@ -58,19 +59,21 @@ class LiveFrame {
   LiveFrame& operator=(LiveFrame&&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+    return static_cast<u_long*>(
+               VS::Render::FrameScratchpad().primitive_cursor) -
            primitives.data();
   }
   void Disconnect() {
-    Render_frameScratch.orderingTable = nullptr;
-    Render_frameScratch.overlayOrderingTable = nullptr;
+    VS::Render::FrameScratchpad().ordering_table = nullptr;
+    VS::Render::FrameScratchpad().overlay_ordering_table = nullptr;
   }
   void FillBuffer() {
-    Render_frameScratch.primitiveCursor = primitives.data() + primitives.size();
+    VS::Render::FrameScratchpad().primitive_cursor =
+        primitives.data() + primitives.size();
   }
 
  private:
-  Render_FrameScratch saved_scratch_;
+  VS::Render::FrameScratch saved_scratch_;
   int saved_frame_;
   void* saved_ordering_;
   void* saved_primitives_;
@@ -85,7 +88,7 @@ class LiveFrame {
     auto labels = std::span(Battle_hudGaugeLabelPositions);
     auto widths = std::span(Battle_hudGaugeLabelWidths);
     auto textures = std::span(Battle_hudGaugeLabelTexU);
-    auto palette = std::span(Render_kStatGaugeColors);
+    auto palette = std::span(VS::Render::kStatGaugeColors);
     for (std::size_t index = 0; index < VS::Battle::kHudGaugeCount; ++index) {
       positions[index] = 0x0012000A;
       labels[index] = 0x000A000A;
@@ -99,7 +102,7 @@ class LiveFrame {
   void CaptureLayout() {
     std::ranges::copy(Battle_hudGaugePositions, positions_.begin());
     std::ranges::copy(Battle_hudGaugeLabelPositions, labels_.begin());
-    std::ranges::copy(Render_kStatGaugeColors, palette_.begin());
+    std::ranges::copy(VS::Render::kStatGaugeColors, palette_.begin());
     std::ranges::copy(Battle_hudGaugeLabelWidths, widths_.begin());
     std::ranges::copy(
         std::span(Battle_hudGaugeLabelTexU).first<VS::Battle::kHudGaugeCount>(),
@@ -109,7 +112,7 @@ class LiveFrame {
   void RestoreLayout() {
     std::ranges::copy(positions_, std::begin(Battle_hudGaugePositions));
     std::ranges::copy(labels_, std::begin(Battle_hudGaugeLabelPositions));
-    std::ranges::copy(palette_, std::begin(Render_kStatGaugeColors));
+    std::ranges::copy(palette_, std::begin(VS::Render::kStatGaugeColors));
     std::ranges::copy(widths_, std::begin(Battle_hudGaugeLabelWidths));
     std::ranges::copy(textures_, std::begin(Battle_hudGaugeLabelTexU));
     std::ranges::copy(icons_, std::begin(Battle_statusIconTexOffsets));

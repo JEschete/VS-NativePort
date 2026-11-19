@@ -22,7 +22,7 @@
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -456,7 +456,8 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
   VS::Input::settings.cursorMemory = 0;
   std::memset(&Battle_unusedMenu9CursorMemory, 0xA5,
               sizeof Battle_unusedMenu9CursorMemory);
-  auto* scratch = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+  auto* scratch =
+      static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   scratch->camera.position.vy = 1234;
   scratch->camera.angles.vz = -56;
   CHECK(VS::Menu::Score::CalculateLiveProgress() == 1);

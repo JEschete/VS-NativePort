@@ -9,7 +9,7 @@
 
 #include "CombatLab/Canvas.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "SystemResources.h"
 
 namespace {
@@ -44,16 +44,16 @@ std::vector<std::uint8_t> FontData() {
 }
 
 struct GlyphScope {
-  unsigned char width = Render_compactGlyphWidths[kGlyphIndex / 2];
-  unsigned char index = Render_compactGlyphIndices[kGlyphIndex];
+  unsigned char width = VS::Render::compactGlyphWidths[kGlyphIndex / 2];
+  unsigned char index = VS::Render::compactGlyphIndices[kGlyphIndex];
 
   GlyphScope() {
-    Render_compactGlyphWidths[kGlyphIndex / 2] = 0x40;
-    Render_compactGlyphIndices[kGlyphIndex] = 0;
+    VS::Render::compactGlyphWidths[kGlyphIndex / 2] = 0x40;
+    VS::Render::compactGlyphIndices[kGlyphIndex] = 0;
   }
   ~GlyphScope() {
-    Render_compactGlyphWidths[kGlyphIndex / 2] = width;
-    Render_compactGlyphIndices[kGlyphIndex] = index;
+    VS::Render::compactGlyphWidths[kGlyphIndex / 2] = width;
+    VS::Render::compactGlyphIndices[kGlyphIndex] = index;
   }
 };
 }  // namespace

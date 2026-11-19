@@ -19,7 +19,7 @@
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"

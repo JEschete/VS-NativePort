@@ -25,7 +25,7 @@
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -347,7 +347,7 @@ class LivePlatformUpdateHost final
         .tick_speed = VS::State::tickSpeed,
         .room_updates_paused = VS::Field::areRoomUpdatesPaused != 0,
         .platform_section_present = Field_roomData.movingPlatforms != nullptr,
-        .frame_buffer_nonzero = Render_frameBuf != 0,
+        .frame_buffer_nonzero = VS::Render::frameBuf != 0,
         .freeze_tint_active = Field_isPlatformFreezeTintActive != 0};
     return true;
   }

@@ -11,7 +11,7 @@
 #include "Battle/Hit.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800E82F4 (D_800E82F4@BATTLE/BATTLE.PRG)
 u_short Battle_bladePpDamageBonuses[12]; /* contents: module image (ModuleData.cpp) */

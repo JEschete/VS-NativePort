@@ -42,12 +42,12 @@
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "ModelLoading.h"
-#include "Render/Camera.h"
-#include "Render/ModelDraw.h"
+#include "Render/Camera.hpp"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/Textures.h"
+#include "Render/Textures.hpp"
 
 namespace status_terminal_live_tests {
 namespace st = VS::Menu::Status;
@@ -144,10 +144,10 @@ struct AssetStateRestore {
   ValueRestore<int> load_phase{VS::Content::lastLoadPhaseSnapshot};
   ValueRestore<int> ticks{VS::Content::assetQueueFrameTicks};
   ValueRestore<int> kind{VS::Content::lastAssetRequestType};
-  ArrayRestore<Render_TextureSlot, VS::Content::kActorTextureSlots>
-      actor_textures{Render_legacyActorTextureSlots};
-  ArrayRestore<Render_TextureSlot, VS::Content::kWeaponTextureSlots>
-      weapon_textures{Render_legacyWeaponTextureSlots};
+  ArrayRestore<VS::Render::TextureSlot, VS::Content::kActorTextureSlots>
+      actor_textures{VS::Render::legacyActorTextureSlots};
+  ArrayRestore<VS::Render::TextureSlot, VS::Content::kWeaponTextureSlots>
+      weapon_textures{VS::Render::legacyWeaponTextureSlots};
   ValueRestore<VS::Render::TexturePageTable> texture_pages{
       VS::Render::LiveTexturePages()};
   ArrayRestore<u_char, std::size(Actors_textureSlotOrigins)> texture_origins{
@@ -231,12 +231,14 @@ struct Fixture {
       st::terminal_live::list_state};
   ValueRestore<st::StatusTerminalState> saved_screen{
       st::terminal_live::screen_state};
-  ValueRestore<Render_FrameScratch> saved_scratch{Render_frameScratch};
-  ValueRestore<int> saved_projection{Render_projectionDistance};
-  ValueRestore<int> saved_framebuffer{Render_frameBuf};
-  ValueRestore<void*> saved_primitives{Render_legacyPrimitiveBuffers[0]};
-  ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
-  ValueRestore<void*> saved_current_ordering{Render_legacyCurrentOrderingTable};
+  ValueRestore<VS::Render::FrameScratch> saved_scratch{
+      VS::Render::FrameScratchpad()};
+  ValueRestore<int> saved_projection{VS::Render::projectionDistance};
+  ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
+  ValueRestore<void*> saved_primitives{VS::Render::legacyPrimitiveBuffers[0]};
+  ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
+  ValueRestore<void*> saved_current_ordering{
+      VS::Render::legacyCurrentOrderingTable};
   ValueRestore<char> saved_owner{VS::Content::overlayWorkspaceOwner};
   ValueRestore<char> saved_hud{Battle_hudHidden};
   ValueRestore<char> saved_lower_ui{Battle_lowerScreenUiState};
@@ -269,7 +271,7 @@ struct Fixture {
   ValueRestore<Actors_SkeletonPose> saved_pose{VS::Actors::skeletonPose};
   ValueRestore<MATRIX> saved_root_matrix{VS::Actors::skeletonRootMatrix};
   ValueRestore<MATRIX> saved_bone_camera{VS::Actors::boneMatrixScratch};
-  ValueRestore<MATRIX> saved_camera_basis{Render_cameraBasisMatrix};
+  ValueRestore<MATRIX> saved_camera_basis{VS::Render::cameraBasisMatrix};
   ValueRestore<Actors_ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
   ValueRestore<char> saved_sequence_index{Actors_lastResolvedSequenceIndex};
@@ -330,9 +332,10 @@ struct Fixture {
   ~Fixture() {
     st::ResetLiveLimbControllersModuleData();
     st::ResetLiveActorSwitchPhase();
-    // The preview draw sets the GTE screen distance. Render_projectionDistance
-    // is not that distance's previous value (0 versus 1000 at start-up), so
-    // reset the GTE; saved_projection and geometry restore their own state.
+    // The preview draw sets the GTE screen distance.
+    // VS::Render::projectionDistance is not that distance's previous value (0
+    // versus 1000 at start-up), so reset the GTE; saved_projection and geometry
+    // restore their own state.
     Core_Gte_Reset();
   }
 
@@ -457,19 +460,19 @@ struct Fixture {
     std::ranges::fill(Menu_Framework_animationIndices, char{10});
   }
   void BindFrame() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = primitives.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyCurrentOrderingTable = ordering.data();
-    Render_frameScratch.orderingTable =
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyCurrentOrderingTable = ordering.data();
+    VS::Render::FrameScratchpad().ordering_table =
         ordering.data() + equipment_detail_tests::kSceneOrderingEntry;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Render_frameScratch.viewMatrix = {};
-    Render_frameScratch.camera = {};
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
+    VS::Render::FrameScratchpad().view_matrix = {};
+    VS::Render::FrameScratchpad().camera = {};
     BeginFrame();
   }
   void BeginFrame() {
-    Render_frameScratch.primitiveCursor = primitives.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   void IdleRows() const {

@@ -123,10 +123,11 @@ struct LiveWorld {
   ArrayRestore<Menu_Map_MapLabel, 8> saved_labels{Menu_Map_mapLabels};
   ArrayRestore<std::int16_t, 2> saved_padding1{Menu_Map_layoutPadding1};
   ArrayRestore<int, 2> saved_padding2{Menu_Map_layoutPadding2};
-  ValueRestore<Render_FrameScratch> saved_frame{Render_frameScratch};
-  ArrayRestore<void*, 2> saved_buffers{Render_legacyPrimitiveBuffers};
-  ArrayRestore<void*, 2> saved_tables{Render_legacyOrderingTables};
-  ValueRestore<int> saved_framebuffer{Render_frameBuf};
+  ValueRestore<VS::Render::FrameScratch> saved_frame{
+      VS::Render::FrameScratchpad()};
+  ArrayRestore<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers};
+  ArrayRestore<void*, 2> saved_tables{VS::Render::legacyOrderingTables};
+  ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   ValueRestore<decltype(Field_roomData)> saved_room{Field_roomData};
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_progress{
       Audio_Seq_unusedStateFlags};
@@ -202,10 +203,10 @@ struct LiveWorld {
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
     Core_Gte_SetGeomOffset(160, 112);
-    Render_frameBuf = 0;
+    VS::Render::frameBuf = 0;
     for (int buffer = 0; buffer < 2; ++buffer) {
-      Render_legacyPrimitiveBuffers[buffer] = primitives.data() + 1;
-      Render_legacyOrderingTables[buffer] = ordering.data();
+      VS::Render::legacyPrimitiveBuffers[buffer] = primitives.data() + 1;
+      VS::Render::legacyOrderingTables[buffer] = ordering.data();
     }
     ResetFrame();
     if (data) {
@@ -239,9 +240,10 @@ struct LiveWorld {
   }
 
   void ResetFrame() {
-    Render_frameScratch.primitiveCursor = primitives.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + kSceneEntry;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kSceneEntry;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
@@ -393,11 +395,13 @@ void CheckResetExports() {
   CheckNoSceneOwners();
 }
 
-void CheckPreservedData(const decltype(std::to_array(Menu_Map_mapNames))& names,
-                        const decltype(Render_frameScratch.camera)& camera) {
+void CheckPreservedData(
+    const decltype(std::to_array(Menu_Map_mapNames))& names,
+    const decltype(VS::Render::FrameScratchpad().camera)& camera) {
   CHECK(std::to_array(Menu_Map_mapNames) == names);
   CHECK(Audio_Seq_unusedStateFlags.mapPaling[5] == 19);
-  CHECK(std::memcmp(&Render_frameScratch.camera, &camera, sizeof(camera)) == 0);
+  CHECK(std::memcmp(&VS::Render::FrameScratchpad().camera, &camera,
+                    sizeof(camera)) == 0);
 }
 
 void CheckReleasedInitialRead(void* buffer, Content_DiscQueueSlot* request,
@@ -432,13 +436,13 @@ std::array<std::int32_t, 3> TransformOrigin() {
 }
 
 void SetFieldView() {
-  Render_frameScratch.viewMatrix = {};
+  VS::Render::FrameScratchpad().view_matrix = {};
   for (int axis = 0; axis < 3; ++axis) {
-    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+    VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
   }
-  Render_frameScratch.viewMatrix.t[0] = 77;
-  Render_frameScratch.viewMatrix.t[1] = 88;
-  Render_frameScratch.viewMatrix.t[2] = 99;
+  VS::Render::FrameScratchpad().view_matrix.t[0] = 77;
+  VS::Render::FrameScratchpad().view_matrix.t[1] = 88;
+  VS::Render::FrameScratchpad().view_matrix.t[2] = 99;
   Core_Gte_SetGeomOffset(171, 93);
 }
 
@@ -517,13 +521,13 @@ void FailSwapAllocation(LiveWorld& world, void* staging) {
 TEST_CASE("F02699 Live packets preserve untouched RGB and native chain heads",
           "[map-terminal][map-terminal-live][F02699]") {
   LiveWorld world;
-  Render_frameBuf = GENERATE(0, 1);
+  VS::Render::frameBuf = GENERATE(0, 1);
   auto& head = world.ordering[kSceneEntry + 2046];
   head = (head & kLinkMask) | 0x5A000000;
   const auto initial = head;
   map::LiveDarkenBackground();
   const auto* packets = world.primitives.data() + 1;
-  CHECK(Render_frameScratch.primitiveCursor == packets + 19);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 19);
   CHECK(packets[0] == (0x02000000 | (initial & kLinkMask)));
   CHECK(std::to_array<std::uint32_t>(
             {packets[4] & kLinkMask, packets[12] & kLinkMask}) ==
@@ -532,8 +536,8 @@ TEST_CASE("F02699 Live packets preserve untouched RGB and native chain heads",
         std::pair{0U, 0U});
   CHECK(
       std::to_array<std::uint32_t>({packets[9] & 0x1FF, packets[17] & 0x1FF}) ==
-      std::array{Render_frameBuf ? 0x105U : 0x100U,
-                 Render_frameBuf ? 0x108U : 0x103U});
+      std::array{VS::Render::frameBuf ? 0x105U : 0x100U,
+                 VS::Render::frameBuf ? 0x108U : 0x103U});
   CHECK((head & 0xFF000000) == 0x5A000000);
   CHECK(nextPrim(&head) == packets + 16);
   CHECK(std::to_array<std::uint32_t>(
@@ -544,11 +548,11 @@ TEST_CASE("F02699 Live packets preserve untouched RGB and native chain heads",
 TEST_CASE("F02702 Live scanlines retain the second strip's prior CLUT",
           "[map-terminal][map-terminal-live][F02702]") {
   LiveWorld world;
-  Render_frameBuf = GENERATE(0, 1);
+  VS::Render::frameBuf = GENERATE(0, 1);
   Menu_Map_menuFramesCounter = -1;
   map::LiveDrawPalingDistortion();
   const auto* packets = world.primitives.data() + 1;
-  CHECK(Render_frameScratch.primitiveCursor == packets + 3827);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 3827);
   CHECK(packets[4] == 0x66808080);
   CHECK(packets[5] == 3);
   CHECK(packets[6] == 0);
@@ -565,15 +569,16 @@ TEST_CASE(
   Menu_Map_cameraAngles = {0, 1024, 17, -19};
   Menu_Map_cameraPos = {51, 52, 53, -1234};
   Menu_Map_cameraDistance = 768;
-  const auto frame_view = Render_frameScratch.viewMatrix;
+  const auto frame_view = VS::Render::FrameScratchpad().view_matrix;
   map::LiveApplyCamera();
   CHECK(map::ReadLiveMapView().camera_position ==
         map::MapAngles{768, 0, 0, -1234});
   for (std::size_t axis = 0; axis < std::size(frame_view.m); ++axis) {
-    CHECK(std::ranges::equal(frame_view.m[axis],
-                             Render_frameScratch.viewMatrix.m[axis]));
+    CHECK(std::ranges::equal(
+        frame_view.m[axis], VS::Render::FrameScratchpad().view_matrix.m[axis]));
   }
-  CHECK(std::ranges::equal(frame_view.t, Render_frameScratch.viewMatrix.t));
+  CHECK(std::ranges::equal(frame_view.t,
+                           VS::Render::FrameScratchpad().view_matrix.t));
   CHECK(TransformOrigin() == std::array{0, 0, 768});
   const auto offset = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(std::pair<int, int>{offset.x, offset.y} == std::pair{160, 112});
@@ -684,7 +689,7 @@ TEST_CASE(
   Menu_Map_mapLabels[0].x = 123;
   Menu_Map_compassBounds[0].x = 456;
   Audio_Seq_unusedStateFlags.mapPaling[5] = 19;
-  const auto field_camera = Render_frameScratch.camera;
+  const auto field_camera = VS::Render::FrameScratchpad().camera;
   REQUIRE(map::ResetMapTerminalModuleData());
   CheckResetExports();
   CheckReleasedInitialRead(buffer, request, generation);
@@ -915,13 +920,16 @@ struct RestoreRoomRuntime {
 void CheckMapFrameEntries(LiveWorld& world) {
   world.LoadScene(1);
   MapModuleEntry(0x801042B0, &map::LiveDrawFrame)();
-  CHECK(Render_frameScratch.primitiveCursor != world.primitives.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor !=
+        world.primitives.data() + 1);
   world.ResetFrame();
   MapModuleEntry(0x8010625C, &map::LiveDarkenBackground)();
-  CHECK(Render_frameScratch.primitiveCursor == world.primitives.data() + 20);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        world.primitives.data() + 20);
   world.ResetFrame();
   MapModuleEntry(0x801066E0, &map::LiveDrawPalingDistortion)();
-  CHECK(Render_frameScratch.primitiveCursor == world.primitives.data() + 3828);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        world.primitives.data() + 3828);
 }
 }  // namespace
 
@@ -994,7 +1002,7 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   Menu_Map_cameraDistance = 512;
   const auto names = std::to_array(Menu_Map_mapNames);
   Audio_Seq_unusedStateFlags.mapPaling[5] = 19;
-  const auto camera = Render_frameScratch.camera;
+  const auto camera = VS::Render::FrameScratchpad().camera;
   const Content_DiscFile file =
       map_reload ? Content_DiscFile{VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE}
                  : Content_DiscFile{VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE};

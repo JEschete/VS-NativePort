@@ -9,7 +9,7 @@
 #include "Battle/Actor.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 extern Battle_Actor* Battle_characterState;
 extern u_short Battle_breakArtPointRequirements[15][4];

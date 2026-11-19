@@ -11,11 +11,11 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/Timers.hpp"
 
@@ -98,11 +98,11 @@ TEST_CASE("Default actor and weapon names retain encoded glyphs and controls",
 
 namespace {
 struct PuzzleTimerFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  decltype(std::to_array(Render_compactGlyphWidths)) saved_widths =
-      std::to_array(Render_compactGlyphWidths);
-  decltype(std::to_array(Render_compactGlyphIndices)) saved_indices =
-      std::to_array(Render_compactGlyphIndices);
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  decltype(std::to_array(VS::Render::compactGlyphWidths)) saved_widths =
+      std::to_array(VS::Render::compactGlyphWidths);
+  decltype(std::to_array(VS::Render::compactGlyphIndices)) saved_indices =
+      std::to_array(VS::Render::compactGlyphIndices);
   decltype(std::to_array(Battle_puzzleTimerText)) saved_text =
       std::to_array(Battle_puzzleTimerText);
   char* saved_pointer = Battle_puzzleTimerTextPointer;
@@ -113,26 +113,27 @@ struct PuzzleTimerFixture {
   char saved_hours = Audio_Seq_unusedStateFlags.puzzleSetMaxTimer;
   State_SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::array<u_long, 256> storage{};
   std::array<u_long, 16> ordering{};
 
   PuzzleTimerFixture() {
     Battle_puzzleTimerTextPointer = nullptr;
-    std::fill_n(Render_compactGlyphWidths + 8, 6, 0x66);
+    std::fill_n(VS::Render::compactGlyphWidths + 8, 6, 0x66);
     for (int glyph = 0; glyph < 11; ++glyph) {
-      Render_compactGlyphIndices[16 + glyph] = static_cast<u_char>(glyph * 2);
+      VS::Render::compactGlyphIndices[16 + glyph] =
+          static_cast<u_char>(glyph * 2);
     }
   }
 
   ~PuzzleTimerFixture() {
-    Render_frameScratch = saved_frame;
+    VS::Render::FrameScratchpad() = saved_frame;
     std::copy(saved_widths.begin(), saved_widths.end(),
-              Render_compactGlyphWidths);
+              VS::Render::compactGlyphWidths);
     std::copy(saved_indices.begin(), saved_indices.end(),
-              Render_compactGlyphIndices);
+              VS::Render::compactGlyphIndices);
     std::copy(saved_text.begin(), saved_text.end(), Battle_puzzleTimerText);
     Battle_puzzleTimerTextPointer = saved_pointer;
     Battle_lowerScreenUiState = saved_visible;
@@ -142,9 +143,9 @@ struct PuzzleTimerFixture {
     Audio_Seq_unusedStateFlags.puzzleSetMaxTimer = saved_hours;
     VS::State::sceneTimer = saved_timer;
     Battle_puzzleTimer = saved_packed_timer;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering_table;
+    VS::Render::frameBuf = saved_framebuffer;
   }
 
   void DrawCounter(const State_SceneTimer& timer, int hundredths) {
@@ -152,11 +153,11 @@ struct PuzzleTimerFixture {
     storage.front() = storage.back() = 0xC0FFEE00;
     ordering.fill(0xFFFFFF);
     // The Live queue reserves its packets inside the frame's buffer.
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + 1;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 1;
     Audio_Seq_unusedStateFlags.puzzleTimerHundredths =
         static_cast<char>(hundredths);
     VS::Battle::DrawLivePuzzleTimer(&timer);
@@ -193,7 +194,8 @@ struct PuzzleTimerFixture {
   void CheckRendering(std::string_view expected) const {
     CHECK(std::string_view(Battle_puzzleTimerText, 8) == expected);
     // The draw mode and eight glyphs; the chain, not the buffer, orders them.
-    CHECK(Render_frameScratch.primitiveCursor == storage.data() + 43);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          storage.data() + 43);
     CHECK(LegacyGpu_WalkList(ordering.data()) == 10);
     const auto* packet = static_cast<const u_long*>(nextPrim(ordering.data()));
     CHECK(packet[1] == 0xE100000C);

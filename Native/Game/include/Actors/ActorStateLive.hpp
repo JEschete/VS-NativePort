@@ -10,7 +10,9 @@ struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Battle_Actor;
 struct Field_ActorPlacement;
-struct Render_ColorCode;
+namespace VS::Render {
+struct ColorCode;
+}  // namespace VS::Render
 struct SVECTOR;
 
 // Binding from the actor table, the battle actors, the slot gimmicks and the
@@ -67,8 +69,8 @@ void BeginLiveActorDeath(int actor_id, void* context, int animate);
 // outside a byte is refused.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetLiveActorCompanion(int actor_id, int companion_slot,
-                           const Render_ColorCode* companion_state,
-                           const Render_ColorCode* companion_color);
+                           const VS::Render::ColorCode* companion_state,
+                           const VS::Render::ColorCode* companion_color);
 // decomp: BATTLE.PRG func_8009FF08 (src/BATTLE/BATTLE.PRG/30DB0.c:3613)
 // A parent of -1 keeps the current one; `unused` is never read.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

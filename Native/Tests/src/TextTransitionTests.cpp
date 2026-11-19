@@ -12,10 +12,10 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/Text/VariableFont.h"
+#include "Render/Render.hpp"
+#include "Render/Text/VariableFont.hpp"
 
 namespace {
 constexpr u_short kBackground = 0x1234;
@@ -26,12 +26,12 @@ struct TextTransitionFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  decltype(std::to_array(Render_variableFontGlyphWidths)) widths =
-      std::to_array(Render_variableFontGlyphWidths);
-  decltype(std::to_array(Render_kGlyphPixelExpansion)) expansion =
-      std::to_array(Render_kGlyphPixelExpansion);
+  decltype(std::to_array(VS::Render::variableFontGlyphWidths)) widths =
+      std::to_array(VS::Render::variableFontGlyphWidths);
+  decltype(std::to_array(VS::Render::kGlyphPixelExpansion)) expansion =
+      std::to_array(VS::Render::kGlyphPixelExpansion);
   VS::Render::FontStyle font_style = VS::Render::LiveFontStyle();
-  int frame_buffer = Render_frameBuf;
+  int frame_buffer = VS::Render::frameBuf;
   decltype(VS::Input::buttonsPressed) buttons = VS::Input::buttonsPressed;
   RECT target{32, 32, kWidth, kHeight};
   RECT atlas{832, 108, 63, 12};
@@ -43,19 +43,19 @@ struct TextTransitionFixture {
   TextTransitionFixture() {
     StoreImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
     StoreImage(&atlas, reinterpret_cast<u_long*>(saved_atlas.data()));
-    std::fill(std::begin(Render_variableFontGlyphWidths),
-              std::end(Render_variableFontGlyphWidths), 6);
-    Render_kGlyphPixelExpansion[1] = 0x7FFF;
-    Render_kGlyphPixelExpansion[2] = 0x001F;
-    Render_kGlyphPixelExpansion[3] = 0x03E0;
-    Render_kGlyphPixelExpansion[4] = 0x7C00;
+    std::fill(std::begin(VS::Render::variableFontGlyphWidths),
+              std::end(VS::Render::variableFontGlyphWidths), 6);
+    VS::Render::kGlyphPixelExpansion[1] = 0x7FFF;
+    VS::Render::kGlyphPixelExpansion[2] = 0x001F;
+    VS::Render::kGlyphPixelExpansion[3] = 0x03E0;
+    VS::Render::kGlyphPixelExpansion[4] = 0x7C00;
     Glyph(0, 1);
     Glyph(10, 2);
     Glyph(11, 3);
     Glyph(12, 4);
     std::vector<u_short> pixels(std::size_t{kWidth} * kHeight, kBackground);
     LoadImage(&target, reinterpret_cast<u_long*>(pixels.data()));
-    Render_frameBuf = 0;
+    VS::Render::frameBuf = 0;
     VS::Input::buttonsPressed = 0;
     box.x = box.xIndent = target.x;
     box.y = box.yIndent = target.y;
@@ -68,11 +68,11 @@ struct TextTransitionFixture {
     LoadImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
     LoadImage(&atlas, reinterpret_cast<u_long*>(saved_atlas.data()));
     std::copy(widths.begin(), widths.end(),
-              std::begin(Render_variableFontGlyphWidths));
+              std::begin(VS::Render::variableFontGlyphWidths));
     std::copy(expansion.begin(), expansion.end(),
-              std::begin(Render_kGlyphPixelExpansion));
+              std::begin(VS::Render::kGlyphPixelExpansion));
     VS::Render::LiveFontStyle() = font_style;
-    Render_frameBuf = frame_buffer;
+    VS::Render::frameBuf = frame_buffer;
     VS::Input::buttonsPressed = buttons;
   }
 

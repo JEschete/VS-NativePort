@@ -24,9 +24,9 @@
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 struct TextureBindingFixture {
@@ -328,10 +328,10 @@ std::vector<std::byte> GravityOriginPackage() {
 
 // An identity rotation with the given translation.
 void SetTranslatedViewMatrix(const std::array<std::int32_t, 3>& translation) {
-  Render_frameScratch.viewMatrix = {};
+  VS::Render::FrameScratchpad().view_matrix = {};
   for (std::size_t axis = 0; axis < translation.size(); ++axis) {
-    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
-    Render_frameScratch.viewMatrix.t[axis] = translation[axis];
+    VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
+    VS::Render::FrameScratchpad().view_matrix.t[axis] = translation[axis];
   }
 }
 }  // namespace
@@ -341,7 +341,7 @@ TEST_CASE(
     "[effects][gravity-placement][placement-red]") {
   TextureBindingFixture fixture;
   const auto saved_request = Effects_actionRequest;
-  const auto saved_view = Render_frameScratch.viewMatrix;
+  const auto saved_view = VS::Render::FrameScratchpad().view_matrix;
   auto package = GravityOriginPackage();
   REQUIRE(VS::Effects::BindLiveEffectPackage(package));
   Effects_EffectInstance instance{};
@@ -356,5 +356,5 @@ TEST_CASE(
   CHECK(instance.transforms[0].view.t[1] == -184);
   CHECK(instance.transforms[0].view.t[2] == 1500);
   Effects_actionRequest = saved_request;
-  Render_frameScratch.viewMatrix = saved_view;
+  VS::Render::FrameScratchpad().view_matrix = saved_view;
 }

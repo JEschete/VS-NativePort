@@ -15,7 +15,7 @@ struct Field_MpdLockTrigger;
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800E8FB4_t (src/BATTLE/BATTLE.PRG/30DB0.c:36)
 struct Field_GimmickTemplate {
@@ -111,7 +111,7 @@ struct Field_GimmickInstance {
     short reserved50;
     short savedRotationY;
     int baseColor;
-    Render_ColorCode tint;
+    VS::Render::ColorCode tint;
     char tileX;
     volatile char tileLayer; // dear god why
     char tileZ;
@@ -203,7 +203,7 @@ struct Field_GimmickInstance {
     u_char fadeRed;
     u_char reserved6F3;
     Actors_CompanionOffset reserved6F4;
-    Render_ColorCode reserved6F8;
+    VS::Render::ColorCode reserved6F8;
     int reserved6FC;
     int reserved700;
     Actors_AnimationPose reserved704;

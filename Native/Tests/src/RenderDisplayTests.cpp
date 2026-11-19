@@ -14,17 +14,17 @@
 #include "Legacy/Psx.h"
 #include "Render/CameraView.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/DisplayControlLive.hpp"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the #276 slice A4 (#279) camera, display and HUD packet
 // policies: values traced from 146C.c, 5BF94.c, 44F14.c and main.c, and every
@@ -84,10 +84,12 @@ TEST_CASE("Live draw-mode commands advance the frame cursor by two words",
           "[render-display]") {
   std::array<u_long, 8> storage{};
   storage.fill(0xDEADBEEF);
-  const Render_FrameScratch saved_frame = Render_frameScratch;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage.data() + 1;
-  Render_frameScratch.primitiveCursor = storage.data() + 1;
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
+      storage.data() + 1;
+  VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   std::array<u_long, 2> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   const u_long old_head = ordering[1];
@@ -95,25 +97,27 @@ TEST_CASE("Live draw-mode commands advance the frame cursor by two words",
   VS::Render::InsertLiveDrawModeCommand(static_cast<int>(0xE1000600u),
                                         &ordering[1]);
 
-  CHECK(Render_frameScratch.primitiveCursor == storage.data() + 3);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == storage.data() + 3);
   CHECK((storage[1] >> 24) == 1);
   CHECK((storage[1] & 0xFFFFFF) == (old_head & 0xFFFFFF));
   CHECK(storage[2] == 0xE1000600);
   CHECK(storage[3] == 0xDEADBEEF);
   CHECK(nextPrim(&ordering[1]) == storage.data() + 1);
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
-  Render_frameScratch = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
+  VS::Render::FrameScratchpad() = saved_frame;
 }
 
 TEST_CASE("Live HUD packets outside the frame buffer are dropped and counted",
           "[render-display]") {
   std::array<u_long, 8> storage{};
   storage.fill(0xDEADBEEF);
-  const Render_FrameScratch saved_frame = Render_frameScratch;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   // The cursor lies before the frame buffer's start.
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage.data() + 4;
-  Render_frameScratch.primitiveCursor = storage.data() + 1;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
+      storage.data() + 4;
+  VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   u_long chain = 0x00FFFFFF;
   const std::uint64_t dropped = VS::Render::DroppedLiveUiPacketCount();
 
@@ -122,11 +126,11 @@ TEST_CASE("Live HUD packets outside the frame buffer are dropped and counted",
 
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 2);
   CHECK(chain == 0x00FFFFFF);
-  CHECK(Render_frameScratch.primitiveCursor == storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == storage.data() + 1);
   CHECK(std::ranges::all_of(storage,
                             [](u_long word) { return word == 0xDEADBEEF; }));
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
-  Render_frameScratch = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
+  VS::Render::FrameScratchpad() = saved_frame;
 }
 
 TEST_CASE("Numeric glyphs use the font's size, row and texture column",
@@ -210,19 +214,20 @@ TEST_CASE("Live numbers default to the chain before the ordering table",
   std::array<u_long, 32> storage{};
   std::array<u_long, 8> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-  const Render_FrameScratch saved_frame = Render_frameScratch;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage.data();
-  Render_frameScratch.primitiveCursor = storage.data();
-  Render_frameScratch.orderingTable = ordering.data() + 4;
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = storage.data();
+  VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+  VS::Render::FrameScratchpad().ordering_table = ordering.data() + 4;
 
   CHECK(VS::Render::DrawLiveIntegerRightAligned(0, 50, 42, nullptr) == 40);
   // Two sprites, each six words, linked in front of ordering[0].
-  CHECK(Render_frameScratch.primitiveCursor == storage.data() + 12);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == storage.data() + 12);
   CHECK(nextPrim(ordering.data()) == storage.data() + 6);
   CHECK(nextPrim(storage.data() + 6) == storage.data());
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
-  Render_frameScratch = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
+  VS::Render::FrameScratchpad() = saved_frame;
 }
 
 using GaugePalette = std::array<std::uint32_t, 4>;
@@ -350,23 +355,23 @@ TEST_CASE("Live overlay splices reach the ordering table's overlay bucket",
   ClearOTagR(ordering.data(), kOrderingWords);
   std::array<u_long, 4> primitive{};
   setlen(primitive.data(), 3);
-  void* const saved_table = Render_legacyCurrentOrderingTable;
+  void* const saved_table = VS::Render::legacyCurrentOrderingTable;
   // The overlay bucket sits at byte 0x2084 of the table.
   constexpr std::size_t kOverlayHead = 0x821;
   u_long* const head = ordering.data() + kOverlayHead;
 
-  Render_legacyCurrentOrderingTable = nullptr;
+  VS::Render::legacyCurrentOrderingTable = nullptr;
   VS::Render::AppendLiveOverlayPrimitive(primitive.data());
   CHECK(nextPrim(head) == head - 1);
 
-  Render_legacyCurrentOrderingTable = ordering.data();
+  VS::Render::legacyCurrentOrderingTable = ordering.data();
   VS::Render::AppendLiveOverlayPrimitive(nullptr);
   CHECK(nextPrim(head) == head - 1);
   VS::Render::AppendLiveOverlayPrimitive(primitive.data());
   CHECK(nextPrim(head) == primitive.data());
   CHECK(nextPrim(primitive.data()) == head - 1);
   CHECK((primitive[0] >> 24) == 3);
-  Render_legacyCurrentOrderingTable = saved_table;
+  VS::Render::legacyCurrentOrderingTable = saved_table;
 }
 
 // --- Image uploads -------------------------------------------------------
@@ -549,17 +554,17 @@ TEST_CASE("Live far clips keep the room texture LOD when asked (#279)",
           "[render-display]") {
   Render::RoomClipState& room = Render::LiveRoomClipState();
   const Render::RoomClipState saved_room = room;
-  const int saved_far = Render_frameScratch.camera.farClip;
+  const int saved_far = VS::Render::FrameScratchpad().camera.far_clip;
 
   VS::Render::SetLiveCameraFarClip(800, 0);
   CHECK(room.lod_depth == 100U);
-  CHECK(Render_frameScratch.camera.farClip == 800);
+  CHECK(VS::Render::FrameScratchpad().camera.far_clip == 800);
   // Effects/Camera.cpp passes its z offset as the preserve flag.
   VS::Render::SetLiveCameraFarClip(1600, -3);
   CHECK(room.lod_depth == 100U);
-  CHECK(Render_frameScratch.camera.farClip == 1600);
+  CHECK(VS::Render::FrameScratchpad().camera.far_clip == 1600);
   room = saved_room;
-  Render_frameScratch.camera.farClip = saved_far;
+  VS::Render::FrameScratchpad().camera.far_clip = saved_far;
 }
 
 // --- Display -------------------------------------------------------------
@@ -646,7 +651,7 @@ TEST_CASE("Display masks forward to the device", "[render-display]") {
 
 void CheckLiveDrawEnvironment(int index) {
   CAPTURE(index);
-  const DRAWENV& draw = Render_legacyDrawEnvironments[index];
+  const DRAWENV& draw = VS::Render::legacyDrawEnvironments[index];
   CHECK(draw.clip.x == (index == 0 ? 0 : 320));
   CHECK(draw.clip.w == 320);
   CHECK(draw.clip.h == 224);
@@ -660,7 +665,7 @@ void CheckLiveDrawEnvironment(int index) {
 
 void CheckLiveDisplayEnvironment(int index) {
   CAPTURE(index);
-  const DISPENV& display = Render_legacyDisplayEnvironments[index];
+  const DISPENV& display = VS::Render::legacyDisplayEnvironments[index];
   CHECK(display.disp.x == (index == 0 ? 320 : 0));
   CHECK(display.disp.h == 224);
   CHECK(display.screen.y == 8);
@@ -672,12 +677,12 @@ TEST_CASE("Live field display configures both environments",
           "[render-display]") {
   std::array<DRAWENV, 2> saved_draw{};
   std::array<DISPENV, 2> saved_display{};
-  std::copy_n(Render_legacyDrawEnvironments, 2, saved_draw.begin());
-  std::copy_n(Render_legacyDisplayEnvironments, 2, saved_display.begin());
-  const auto saved_left = Render_legacyViewportLeft;
-  const auto saved_top = Render_legacyViewportTop;
-  const auto saved_width = Render_viewportWidth;
-  const auto saved_height = Render_viewportHeight;
+  std::copy_n(VS::Render::legacyDrawEnvironments, 2, saved_draw.begin());
+  std::copy_n(VS::Render::legacyDisplayEnvironments, 2, saved_display.begin());
+  const auto saved_left = VS::Render::legacyViewportLeft;
+  const auto saved_top = VS::Render::legacyViewportTop;
+  const auto saved_width = VS::Render::viewportWidth;
+  const auto saved_height = VS::Render::viewportHeight;
 
   VS::Render::ConfigureLiveFieldDisplay(320, 240, 512, 1, 2, 3);
 
@@ -685,17 +690,17 @@ TEST_CASE("Live field display configures both environments",
     CheckLiveDrawEnvironment(index);
     CheckLiveDisplayEnvironment(index);
   }
-  CHECK(Render_viewportWidth == 320);
-  CHECK(Render_viewportHeight == 224);
+  CHECK(VS::Render::viewportWidth == 320);
+  CHECK(VS::Render::viewportHeight == 224);
 
   std::copy(saved_draw.begin(), saved_draw.end(),
-            Render_legacyDrawEnvironments);
+            VS::Render::legacyDrawEnvironments);
   std::copy(saved_display.begin(), saved_display.end(),
-            Render_legacyDisplayEnvironments);
-  Render_legacyViewportLeft = saved_left;
-  Render_legacyViewportTop = saved_top;
-  Render_viewportWidth = saved_width;
-  Render_viewportHeight = saved_height;
+            VS::Render::legacyDisplayEnvironments);
+  VS::Render::legacyViewportLeft = saved_left;
+  VS::Render::legacyViewportTop = saved_top;
+  VS::Render::viewportWidth = saved_width;
+  VS::Render::viewportHeight = saved_height;
   Core_Gte_Reset();
 }
 

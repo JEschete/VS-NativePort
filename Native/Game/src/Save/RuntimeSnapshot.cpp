@@ -53,8 +53,8 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Camera.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Camera.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
@@ -396,8 +396,8 @@ void CaptureCamera(Snapshot& state) {
   target.zoom_mode = source.delta.mode;
   target.zoom_velocity = source.zoomVelocity;
   target.tracking_speed = source.speed;
-  const auto& camera = Render_frameScratch.camera;
-  target.look_at = {camera.lookAt.vx, camera.lookAt.vy, camera.lookAt.vz};
+  const auto& camera = VS::Render::FrameScratchpad().camera;
+  target.look_at = {camera.look_at.vx, camera.look_at.vy, camera.look_at.vz};
   target.view_angles = {camera.angles.vx, camera.angles.vy, camera.angles.vz};
 }
 
@@ -413,12 +413,12 @@ void RestoreCamera(const Snapshot& state) {
   target.initialDistance = state.ashley.cameraDistance;
   target.zoomVelocity = camera.zoom_velocity;
   target.speed = camera.tracking_speed;
-  Render_frameScratch.camera.lookAt =
+  VS::Render::FrameScratchpad().camera.look_at =
       VECTOR{camera.look_at[0], camera.look_at[1], camera.look_at[2], 0};
-  Render_frameScratch.camera.position = OrbitPosition(state);
-  Render_frameScratch.camera.angles.vx = camera.view_angles[0];
-  Render_frameScratch.camera.angles.vy = camera.view_angles[1];
-  Render_frameScratch.camera.angles.vz = camera.view_angles[2];
+  VS::Render::FrameScratchpad().camera.position = OrbitPosition(state);
+  VS::Render::FrameScratchpad().camera.angles.vx = camera.view_angles[0];
+  VS::Render::FrameScratchpad().camera.angles.vy = camera.view_angles[1];
+  VS::Render::FrameScratchpad().camera.angles.vz = camera.view_angles[2];
 }
 
 std::expected<CategoryBounds, std::string> ReadCategoryBounds(
@@ -1249,9 +1249,9 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
   if (VS::Field::cameraTransition != nullptr ||
       VS::Field::isFirstPersonViewEnabled ||
       VS::Field::sphericalCamera.delta.yaw != 0 ||
-      Render_nearClip != kFieldNearClip ||
-      Render_projectionDistance != kFieldProjection ||
-      Render_frameScratch.camera.farClip != ONE) {
+      VS::Render::nearClip != kFieldNearClip ||
+      VS::Render::projectionDistance != kFieldProjection ||
+      VS::Render::FrameScratchpad().camera.far_clip != ONE) {
     return std::unexpected(
         "schema3 requires a settled orbit camera, not a transition/custom "
         "view");
@@ -1467,7 +1467,7 @@ std::expected<Snapshot, std::string> Capture(
   valid = ValidateOrbitCamera(state);
   if (!valid) return std::unexpected(valid.error());
   const auto orbit_position = OrbitPosition(state);
-  const auto& actual = Render_frameScratch.camera.position;
+  const auto& actual = VS::Render::FrameScratchpad().camera.position;
   if (actual.vx != orbit_position.vx || actual.vy != orbit_position.vy ||
       actual.vz != orbit_position.vz) {
     return std::unexpected("current camera position is not the captured orbit");

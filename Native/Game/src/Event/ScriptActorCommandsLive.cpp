@@ -40,7 +40,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace {
@@ -52,7 +52,7 @@ static_assert(std::size(Event_scriptControlledActors) ==
               static_cast<std::size_t>(event::kScriptActorSlots));
 static_assert(std::extent_v<decltype(Event_ActorSelection::actorIds)> ==
               event::kSelectionCapacity);
-static_assert(sizeof(Render_ColorCode) == sizeof(VS::Render::ColorCode));
+static_assert(sizeof(VS::Render::ColorCode) == sizeof(VS::Render::ColorCode));
 
 constexpr char kSkipActive = 2;
 // The tagged bone the dialog anchor projects through.
@@ -94,7 +94,7 @@ Actors_TileTarget ToLiveTile(PackedTile tile) {
   return live;
 }
 
-Render_ColorCode ToLiveColor(const VS::Render::ColorCode& color) {
+VS::Render::ColorCode ToLiveColor(const VS::Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
@@ -284,7 +284,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
       VS::Actors::SetLiveActorTint(actor, nullptr);
       return;
     }
-    const Render_ColorCode live = ToLiveColor(*tint);
+    const VS::Render::ColorCode live = ToLiveColor(*tint);
     VS::Actors::SetLiveActorTint(actor, &live);
   }
   void SetCompanion(int actor,
@@ -294,11 +294,11 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
       return;
     }
     // The companion state travels as a colour code: x, y, z and depth bias.
-    const Render_ColorCode state{static_cast<u_char>(style->offset.x),
-                                 static_cast<u_char>(style->offset.y),
-                                 static_cast<u_char>(style->offset.z),
-                                 style->offset.depth_bias};
-    const Render_ColorCode color = ToLiveColor(style->color);
+    const VS::Render::ColorCode state{static_cast<u_char>(style->offset.x),
+                                      static_cast<u_char>(style->offset.y),
+                                      static_cast<u_char>(style->offset.z),
+                                      style->offset.depth_bias};
+    const VS::Render::ColorCode color = ToLiveColor(style->color);
     VS::Actors::SetLiveActorCompanion(actor, 1, &state, &color);
   }
   void SetRootSpin(int actor, int rate) override {

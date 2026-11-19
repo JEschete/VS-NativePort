@@ -14,7 +14,7 @@
 #include "Field/Zone.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800E856C (D_800E856C@BATTLE/BATTLE.PRG)
 MATRIX Field_triggerMarkerMatrix; /* contents: module image (ModuleData.cpp) */

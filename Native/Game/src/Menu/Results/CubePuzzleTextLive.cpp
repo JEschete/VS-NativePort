@@ -17,7 +17,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "State/StateFlags.h"
 

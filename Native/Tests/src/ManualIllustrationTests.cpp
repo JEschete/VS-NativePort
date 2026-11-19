@@ -13,10 +13,10 @@
 #include "Menu/Manual.h"
 #include "Menu/ManualIllustration.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the manual's illustrations (MENUE.PRG 494.c:481-511, 619-713,
 // 883-960): the help asset uploads, the atlas sprites and diagram lines of a
@@ -494,10 +494,10 @@ TEST_CASE("Diagram line offsets wrap like the original's address arithmetic",
 // --- Live bindings ----------------------------------------------------------
 
 struct LiveFrameFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_scroll = Menu_Manual_scrollPosition;
   int* saved_help_text = Menu_Manual_helpText;
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
@@ -507,11 +507,11 @@ struct LiveFrameFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 
   LiveFrameFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     Menu_Manual_scrollPosition = 0;
   }
@@ -520,10 +520,10 @@ struct LiveFrameFixture {
   LiveFrameFixture(LiveFrameFixture&&) = delete;
   LiveFrameFixture& operator=(LiveFrameFixture&&) = delete;
   ~LiveFrameFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Manual_scrollPosition = saved_scroll;
     Menu_Manual_helpText = saved_help_text;
   }
@@ -548,7 +548,8 @@ TEST_CASE("Live illustrations queue a sprite and texture page per tile",
   Menu_Manual_scrollPosition = 1;
 
   manual::LiveDrawIllustration(data);
-  CHECK(Render_frameScratch.primitiveCursor == frame.storage.data() + 7);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        frame.storage.data() + 7);
   CHECK(nextPrim(&frame.ordering[18]) == frame.storage.data() + 5);
   CHECK(nextPrim(frame.storage.data() + 5) == frame.storage.data());
   CHECK(frame.storage[6] == 0xE100021FU);
@@ -572,7 +573,7 @@ TEST_CASE("Live illustrations outside the game heap are refused",
   // Thirteen tiles do not fit the payload's 16-byte rounding.
   manual::LiveDrawIllustration(frame.Allocate<std::int16_t>(short_record));
   CHECK(manual::LiveIllustrationRefusalCount() == refusals + 3);
-  CHECK(Render_frameScratch.primitiveCursor == frame.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == frame.storage.data());
   CHECK(frame.storage[0] == 0xDEADBEEF);
 }
 
@@ -587,7 +588,8 @@ TEST_CASE("Live diagram lines queue flat lines from the help text",
   REQUIRE(Menu_Manual_helpText != nullptr);
 
   manual::LiveDrawDiagramLines();
-  CHECK(Render_frameScratch.primitiveCursor == frame.storage.data() + 4);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        frame.storage.data() + 4);
   CHECK(nextPrim(&frame.ordering[18]) == frame.storage.data());
   CHECK(frame.storage[1] == 0x40030201U);
   CHECK(frame.storage[2] == ((55U << 16U) | 13U));
@@ -609,7 +611,7 @@ TEST_CASE("Live diagram lines without a heap help text are refused",
       reinterpret_cast<int*>(frame.Allocate<std::int16_t>(text));
   manual::LiveDrawDiagramLines();
   CHECK(manual::LiveIllustrationRefusalCount() == refusals + 3);
-  CHECK(Render_frameScratch.primitiveCursor == frame.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == frame.storage.data());
 }
 
 TEST_CASE("Live uploads copy heap tiles and palettes into VRAM",

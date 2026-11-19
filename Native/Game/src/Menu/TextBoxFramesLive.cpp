@@ -17,12 +17,12 @@
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu {
 namespace {
@@ -54,11 +54,13 @@ class LiveInformationBoxWorld final : public InformationBoxWorld {
                       ? nullptr
                       : Menu_activeTextBoxOrderingTable +
                             index * kBoxOrderingStride + 1),
-        headers_(
-            static_cast<u_long*>(Render_frameScratch.overlayOrderingTable)) {}
+        headers_(static_cast<u_long*>(
+            VS::Render::FrameScratchpad().overlay_ordering_table)) {}
 
   TextBox ReadBox() const override { return ReadLiveTextBox(index_); }
-  bool AlternateFramebuffer() const override { return Render_frameBuf != 0; }
+  bool AlternateFramebuffer() const override {
+    return VS::Render::frameBuf != 0;
+  }
 
   bool DrawHeader(std::size_t kind, std::int32_t x, std::int32_t y) override {
     const Render::SpriteRequest request{

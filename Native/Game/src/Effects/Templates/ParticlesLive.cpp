@@ -31,13 +31,13 @@
 #include "Effects/Templates/ParticleDispatch.hpp"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Render.h"
+#include "Render/Camera.hpp"
+#include "Render/Frame.hpp"
+#include "Render/LegacyPackets.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // The overlays' emission cursors (Effects/Plugins/Plg*.h); PLG152's origin
 // shares PLG082's address.
@@ -92,9 +92,9 @@ constexpr std::size_t kSpeedRange = 2;
 constexpr unsigned kBlendMask = 3;
 
 static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
-static_assert(sizeof(Render_ParticleQuadPacket) ==
+static_assert(sizeof(VS::Render::ParticleQuadPacket) ==
               kParticleQuadWords * sizeof(std::uint32_t));
-static_assert(sizeof(Render_ParticleLinePacket) ==
+static_assert(sizeof(VS::Render::ParticleLinePacket) ==
               kParticleLineWords * sizeof(std::uint32_t));
 static_assert(sizeof(SVECTOR) * kParticleControlPoints ==
               kParticleControlPointBytes);
@@ -479,7 +479,7 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
       .effect_origin = math::VectorOf(Effects_actionRequest.position),
       .world = world,
       .target_translation = target_translation,
-      .near_clip = Render_nearClip};
+      .near_clip = VS::Render::nearClip};
 }
 
 std::span<SVECTOR> LiveParticleHost::ControlPoints() const {
@@ -647,7 +647,7 @@ std::optional<std::pair<u_long*, u_long*>> LiveParticleHost::Reserve(
 void LiveParticleHost::Link(u_long* entry, u_long* packet, std::size_t words) {
   *entry = (*entry & kOrderingHighMask) |
            (LegacyGpu_Handle(packet) & kParticleLinkMask);
-  Render_frameScratch.primitiveCursor = packet + words;
+  VS::Render::FrameScratchpad().primitive_cursor = packet + words;
 }
 
 void LiveParticleHost::SubmitQuad(const ParticleQuad& quad,

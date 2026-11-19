@@ -16,10 +16,10 @@
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 __declspec(noinline) void ReuseReturnedStack() {
@@ -30,38 +30,38 @@ __declspec(noinline) void ReuseReturnedStack() {
 }
 
 struct ManualFrameFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_scroll = Menu_Manual_scrollPosition;
   int saved_arrow = Menu_Manual_pageArrowAnimState;
   std::vector<u_long> storage = std::vector<u_long>(0x8002, 0xDEADBEEF);
   std::array<u_long, 64> ordering{};
 
   ManualFrameFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + 16;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 16;
     Menu_Manual_scrollPosition = 0;
     Menu_Manual_pageArrowAnimState = 0;
   }
 
   ~ManualFrameFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Manual_scrollPosition = saved_scroll;
     Menu_Manual_pageArrowAnimState = saved_arrow;
   }
 
   void CheckPackets(std::size_t bytes, unsigned expected) const {
     const auto* begin = reinterpret_cast<const std::byte*>(storage.data() + 1);
-    CHECK(Render_frameScratch.primitiveCursor == begin + bytes);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == begin + bytes);
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
     const void* packet = &ordering.back();

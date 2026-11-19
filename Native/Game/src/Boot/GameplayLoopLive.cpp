@@ -88,15 +88,15 @@
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Boot {
@@ -196,17 +196,18 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   void PollEncounterStop() override { EncounterPollStop(); }
   void BeginFrame() override {
-    ordering_table_ =
-        static_cast<u_long*>(Render_legacyOrderingTables[Render_frameBuf]);
-    Render_legacyCurrentOrderingTable = ordering_table_;
-    Render_frameScratch.overlayOrderingTable =
+    ordering_table_ = static_cast<u_long*>(
+        VS::Render::legacyOrderingTables[VS::Render::frameBuf]);
+    VS::Render::legacyCurrentOrderingTable = ordering_table_;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering_table_ + kOverlayOrderingTableOffset;
-    Render_frameScratch.orderingTable =
+    VS::Render::FrameScratchpad().ordering_table =
         ordering_table_ + kFieldOrderingTableOffset;
     ClearOTagR(ordering_table_, kOrderingTableLength);
-    Render_frameScratch.primitiveCursor =
-        Render_legacyPrimitiveBuffers[Render_frameBuf];
-    AddPrim(ordering_table_, &Render_legacyMaskBitOffPackets[Render_frameBuf]);
+    VS::Render::FrameScratchpad().primitive_cursor =
+        VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf];
+    AddPrim(ordering_table_,
+            &VS::Render::legacyMaskBitOffPackets[VS::Render::frameBuf]);
   }
   void UpdateMovingPlatforms() override {
     static_cast<void>(VS::Field::UpdateLiveMovingPlatforms());
@@ -350,8 +351,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void BuildCameraView() override {
     VS::Field::LiveUpdateCameraFacingState();
     VS::Render::BuildLiveCameraViewMatrix();
-    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
-    Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
+    Core_Gte_SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    Core_Gte_SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
   }
   void BeginFirstPersonView() override {
     VS::Field::LiveBeginFirstPersonView();
@@ -496,10 +497,11 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Core_Gte_SetGeomOffset(kGeometryOffsetX, kGeometryOffsetY);
   }
   void DrawRoomActors() override {
-    VS::Actors::UpdateAndDrawLiveRoomActors(&Render_frameScratch.viewMatrix);
+    VS::Actors::UpdateAndDrawLiveRoomActors(
+        &VS::Render::FrameScratchpad().view_matrix);
     static_cast<void>(VS::Content::UpdateLiveActorAssetQueue());
-    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
-    Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
+    Core_Gte_SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    Core_Gte_SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
     Battle::LiveUpdateAndDrawFloatingLabels();
   }
   void UpdateEffectRuntime() override {
@@ -524,7 +526,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   }
   void PresentFrame() override {
-    DR_STP* mask_bit = &Render_legacyMaskBitOnPackets[Render_frameBuf];
+    DR_STP* mask_bit =
+        &VS::Render::legacyMaskBitOnPackets[VS::Render::frameBuf];
     SetDrawStp(mask_bit, VS::Render::IsLiveFramebufferEffectShowing() ? 1 : 0);
     AddPrim(ordering_table_ + kMaskBitSlot, mask_bit);
     static_cast<void>(VS::Core::ElapsedFrameCounterTicks());

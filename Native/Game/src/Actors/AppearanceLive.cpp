@@ -23,7 +23,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 
 // decomp: D_800F4438 (D_800F4438@BATTLE/BATTLE.PRG)
@@ -36,7 +36,7 @@ using Core::Math::VectorOf;
 
 static_assert(std::size(Actors_actorRecords) == kActorTableSize);
 static_assert(std::size(weaponModels) % kWeaponsPerActor == 0);
-static_assert(sizeof(Render_ColorCode) == sizeof(Render::ColorCode));
+static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
 
 // The actor CLUT rows start at this row plus the actor's slot.
 constexpr unsigned kActorClutRowBase = 0x16;
@@ -56,11 +56,12 @@ constexpr int kNoActorStatus = static_cast<int>(AppearanceStatus::kNoModel);
   return &weaponModels[slot * kWeaponsPerActor];
 }
 
-[[nodiscard]] Render::ColorCode ToColor(const Render_ColorCode& live) {
+[[nodiscard]] Render::ColorCode ToColor(const VS::Render::ColorCode& live) {
   return {live.red, live.green, live.blue, live.code};
 }
 
-[[nodiscard]] Render_ColorCode ToLiveColor(const Render::ColorCode& color) {
+[[nodiscard]] VS::Render::ColorCode ToLiveColor(
+    const Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
@@ -251,7 +252,8 @@ void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames) {
   StoreLiveShadowBlend(shadow, actor->shadowBlend);
 }
 
-int LiveActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out) {
+int LiveActorFadeParameters(int actor_id,
+                            VS::Render::ColorCode* fade_color_out) {
   constexpr const char* kOperation = "ActorFadeParameters";
   const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
@@ -266,7 +268,7 @@ int LiveActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out) {
 }
 
 int SetLiveActorFadeParameters(int actor_id,
-                               const Render_ColorCode* fade_color) {
+                               const VS::Render::ColorCode* fade_color) {
   constexpr const char* kOperation = "SetActorFadeParameters";
   Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
@@ -280,7 +282,7 @@ int SetLiveActorFadeParameters(int actor_id,
   return static_cast<int>(AppearanceStatus::kOk);
 }
 
-int LiveActorTint(int actor_id, Render_ColorCode* tint_out) {
+int LiveActorTint(int actor_id, VS::Render::ColorCode* tint_out) {
   constexpr const char* kOperation = "ActorTint";
   const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
@@ -292,7 +294,7 @@ int LiveActorTint(int actor_id, Render_ColorCode* tint_out) {
   return static_cast<int>(AppearanceStatus::kOk);
 }
 
-int SetLiveActorTint(int actor_id, const Render_ColorCode* tint) {
+int SetLiveActorTint(int actor_id, const VS::Render::ColorCode* tint) {
   Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorTint");
   if (actor == nullptr) return kNoActorStatus;
   ActorColors colors = LoadColors(*actor);

@@ -23,10 +23,10 @@
 #include "Menu/Score/GazetteRows.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the gazette's scrolling rows, top menu and unused menu
 // wrappers (MENU9.PRG 238.c:54-267, 1430-1471).
@@ -364,10 +364,10 @@ TEST_CASE("PollMenuReady polls once and drops a busy or idle answer",
 
 // The frame's packet buffer and overlay ordering table.
 struct LivePacketsFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   score::ScrollableRowAnimation saved_animation =
       score::LiveScrollableRowAnimation();
   std::vector<u_long> storage =
@@ -375,18 +375,18 @@ struct LivePacketsFixture {
   std::array<u_long, 8> ordering{};
 
   LivePacketsFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.overlayOrderingTable = ordering.data();
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   }
   ~LivePacketsFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::frameBuf = saved_framebuffer;
     score::LiveScrollableRowAnimation() = saved_animation;
   }
   LivePacketsFixture(const LivePacketsFixture&) = delete;
@@ -443,10 +443,11 @@ TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
   row.text[0] = static_cast<char>(kEnd);
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::RenderLiveScrollableRow(nullptr);
-  Render_frameScratch.overlayOrderingTable = nullptr;
+  VS::Render::FrameScratchpad().overlay_ordering_table = nullptr;
   score::RenderLiveScrollableRow(&row);
   CHECK(score::LiveGazetteRowsRefusals() == refused + 2);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 1);
 }
 
 // The menu rows, cursor memory, settings, gazette row and top menu strings,

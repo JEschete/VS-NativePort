@@ -1,4 +1,6 @@
 // Hand-maintained tests for the typed actor movement commands (#247).
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
@@ -89,7 +91,8 @@ TEST_CASE("The actor-table adapter writes only the request fields",
       VS::Actors::ActorRecordMovementRequests();
   Actors_ActorRecord* saved = Actors_actorRecords[3];
   Actors_ActorRecord actor;
-  std::memset(&actor, 0xA5, sizeof actor);
+  std::ranges::fill(std::as_writable_bytes(std::span(&actor, 1)),
+                    std::byte{0xA5});
   Actors_actorRecords[3] = &actor;
   CHECK(requests.StoreMovementRequest(
       3, VS::Actors::MakeTileTargetCommand(0x300, 1024, 0x800)));

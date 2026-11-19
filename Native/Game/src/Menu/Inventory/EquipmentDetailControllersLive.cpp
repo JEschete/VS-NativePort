@@ -25,10 +25,10 @@
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -290,8 +290,8 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
   void DrawGripGemSlotCount(std::uint8_t slots) override {
     g_gem_count_text[kGemDigit] =
         static_cast<char>(static_cast<std::uint8_t>(slots + kDigitZero));
-    if (Render_frameScratch.primitiveCursor == nullptr ||
-        Render_frameScratch.overlayOrderingTable == nullptr) {
+    if (VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
+        VS::Render::FrameScratchpad().overlay_ordering_table == nullptr) {
       Refuse("missing current equipment presentation frame");
     }
     Framework::DrawLiveRowIcon(kGemCountIcon, kGemIconX, kGemIconY);

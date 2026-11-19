@@ -92,13 +92,13 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Save/NativeResume.hpp"
 #include "Save/RuntimeSnapshot.hpp"
@@ -220,8 +220,8 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
   return "unknown refusal";
 }
 
-[[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+[[nodiscard]] VS::Render::FrameScratch& Scratch() {
+  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
 }
 
 [[nodiscard]] RECT ToRect(const Render::ScreenRect& area) {
@@ -748,7 +748,7 @@ class LiveEntrance : public Host {
     Actors_ActorLocationQuery location{};
     static_cast<void>(Actors::LiveActorPlacement(0, &location));
     Actors::RestoreLiveActorIdlePose(0);
-    Actors::BuildLiveActorPoseAtMatrix(0, &Scratch().viewMatrix);
+    Actors::BuildLiveActorPoseAtMatrix(0, &Scratch().view_matrix);
     SetLiveActorCollisionBypass(0, 0);
     Battle::Ai::InitializeLiveRoomNavigation();
   }
@@ -967,9 +967,9 @@ class LiveRoomLoadHost final
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15296-15299)
   void AllocatePrimitiveBuffers() override {
-    Render_legacyPrimitiveBuffers[0] =
+    VS::Render::legacyPrimitiveBuffers[0] =
         Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes);
-    Render_legacyPrimitiveBuffers[1] =
+    VS::Render::legacyPrimitiveBuffers[1] =
         Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes);
     Render::InitializeLiveClutAnimation();
   }
@@ -1111,7 +1111,7 @@ class LiveRoomLoadHost final
     VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonsState = 0;
-    Scratch().camera.farClip = ONE;
+    Scratch().camera.far_clip = ONE;
   }
 
   [[nodiscard]] int ScreenTransitionEffect() const override {
@@ -1155,8 +1155,8 @@ class LiveRoomLoadHost final
                         .pad = 0};
     VECTOR look_at{};
     LiveClampCameraLookAtToZone(&target, &look_at);
-    Render_FrameScratch& scratch = Scratch();
-    scratch.camera.lookAt = look_at;
+    VS::Render::FrameScratch& scratch = Scratch();
+    scratch.camera.look_at = look_at;
     scratch.camera.angles.vy = sphericalCamera.values.yaw;
     LiveSetCameraPositionFromAngles(&sphericalCamera.values);
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
@@ -1164,7 +1164,7 @@ class LiveRoomLoadHost final
     Render::ResetLiveFramebufferEffect();
     Render::CommitLiveClutRows();
     Render::ConfigureLiveFieldDisplay(kFieldFrameWidth, kFieldFrameHeight,
-                                      Render_projectionDistance, 0, 0, 0);
+                                      VS::Render::projectionDistance, 0, 0, 0);
   }
 
   [[nodiscard]] bool NativeResumePending() const override {
@@ -1226,18 +1226,18 @@ class LiveRoomUnloadHost final
 
   // decomp: BATTLE.PRG func_8008A3A0 (146C.c:15495-15501)
   void DrawTransitionFrame() override {
-    const int buffer = Render_frameBuf;
+    const int buffer = VS::Render::frameBuf;
     if (buffer < 0 ||
         static_cast<std::size_t>(buffer) >=
-            std::size(Render_legacyOrderingTables) ||
-        Render_legacyOrderingTables[buffer] == nullptr) {
+            std::size(VS::Render::legacyOrderingTables) ||
+        VS::Render::legacyOrderingTables[buffer] == nullptr) {
       RefuseCall("DrawTransitionFrame", "no ordering table for the frame");
       return;
     }
     u_long* ordering_table =
-        static_cast<u_long*>(Render_legacyOrderingTables[buffer]) +
+        static_cast<u_long*>(VS::Render::legacyOrderingTables[buffer]) +
         kOrderingTableOffsetEntries;
-    Scratch().orderingTable = ordering_table;
+    Scratch().ordering_table = ordering_table;
     ClearOTagR(ordering_table, kOrderingTableEntries);
     Render::DrawLiveScreenTransition(ordering_table);
     static_cast<void>(Render::PresentLiveFieldFrame(
@@ -1277,8 +1277,8 @@ class LiveRoomUnloadHost final
 
   // The original freed both and left them set.
   void FreePrimitiveBuffers() override {
-    FreeLowEnd(Render_legacyPrimitiveBuffers[1]);
-    FreeLowEnd(Render_legacyPrimitiveBuffers[0]);
+    FreeLowEnd(VS::Render::legacyPrimitiveBuffers[1]);
+    FreeLowEnd(VS::Render::legacyPrimitiveBuffers[0]);
   }
 };
 }  // namespace

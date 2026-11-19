@@ -16,10 +16,10 @@
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapTerminalLive.hpp"
 #include "Render/DepthCueLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {
@@ -27,19 +27,20 @@ std::span<const std::byte> SceneBytes(const void* data, size_t size) {
 }
 
 struct MapFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  std::array<void*, 2> saved_buffers{Render_legacyPrimitiveBuffers[0],
-                                     Render_legacyPrimitiveBuffers[1]};
-  std::array<void*, 2> saved_tables{Render_legacyOrderingTables[0],
-                                    Render_legacyOrderingTables[1]};
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  std::array<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers[0],
+                                     VS::Render::legacyPrimitiveBuffers[1]};
+  std::array<void*, 2> saved_tables{VS::Render::legacyOrderingTables[0],
+                                    VS::Render::legacyOrderingTables[1]};
   Field_MapScene* saved_minimap = Field_roomData.minimapScene;
   u_int saved_minimap_length = Field_roomData.header.minimapSceneLength;
-  int saved_framebuffer = Render_frameBuf;
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_room = Menu_Map_currentRoomIndex;
   std::vector<u_long> storage =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
   std::array<u_long, 2084> ordering{};
-  std::array<unsigned char, 1024 - sizeof(Render_FrameScratch)> saved_tail{};
+  std::array<unsigned char, 1024 - sizeof(VS::Render::FrameScratch)>
+      saved_tail{};
 
   explicit MapFixture(int framebuffer = 0) {
     Core_Gte_Reset();
@@ -47,30 +48,30 @@ struct MapFixture {
     Core_Gte_SetGeomOffset(160, 112);
     const VECTOR translation{0, 0, 512, 0};
     Core_Gte_SetTransVector(&translation);
-    Render_frameBuf = framebuffer;
-    Render_legacyPrimitiveBuffers[framebuffer] = storage.data() + 1;
-    Render_legacyOrderingTables[framebuffer] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = framebuffer;
+    VS::Render::legacyPrimitiveBuffers[framebuffer] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[framebuffer] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     std::copy_n(static_cast<unsigned char*>(VS::Core::ScratchBase()) +
-                    sizeof(Render_FrameScratch),
+                    sizeof(VS::Render::FrameScratch),
                 saved_tail.size(), saved_tail.begin());
     Menu_Map_currentRoomIndex = 0;
     VS::Menu::map::ResetMapDrawingLive();
   }
 
   ~MapFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffers[0];
-    Render_legacyPrimitiveBuffers[1] = saved_buffers[1];
-    Render_legacyOrderingTables[0] = saved_tables[0];
-    Render_legacyOrderingTables[1] = saved_tables[1];
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffers[0];
+    VS::Render::legacyPrimitiveBuffers[1] = saved_buffers[1];
+    VS::Render::legacyOrderingTables[0] = saved_tables[0];
+    VS::Render::legacyOrderingTables[1] = saved_tables[1];
     Field_roomData.minimapScene = saved_minimap;
     Field_roomData.header.minimapSceneLength = saved_minimap_length;
     VS::Menu::map::ResetMapDrawingLive();
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Map_currentRoomIndex = saved_room;
     Core_Gte_Reset();
   }
@@ -87,8 +88,8 @@ struct MapFixture {
     const void* packet = &ordering.back();
     const void* last = nullptr;
     const auto begin = reinterpret_cast<uintptr_t>(storage.data() + 1);
-    const auto end =
-        reinterpret_cast<uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto end = reinterpret_cast<uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto table = reinterpret_cast<uintptr_t>(ordering.data());
     for (size_t count = 0; packet != nullptr && count < 4096; ++count) {
       const auto address = reinterpret_cast<uintptr_t>(packet);
@@ -116,7 +117,7 @@ TEST_CASE("Map control backdrops retain native cursor and ordering pointers",
   VS::Menu::map::LiveDrawControlBackdrop(-20, 10, 40, height);
   const size_t bytes =
       static_cast<size_t>(height - 1) * sizeof(LINE_G2) + sizeof(POLY_F4);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         reinterpret_cast<unsigned char*>(fixture.storage.data() + 1) + bytes);
   CHECK(fixture.CompleteChain());
   CHECK(fixture.storage.front() == 0xDEADBEEF);
@@ -172,7 +173,7 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
   CHECK(coordinates == expected);
   CHECK(std::equal(fixture.saved_tail.begin(), fixture.saved_tail.end(),
                    static_cast<const unsigned char*>(VS::Core::ScratchBase()) +
-                       sizeof(Render_FrameScratch)));
+                       sizeof(VS::Render::FrameScratch)));
   CHECK(fixture.CompleteChain());
 }
 
@@ -198,13 +199,13 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
                                                    128, 0,  64,  128};
   VS::Render::SetLiveFogNearDistance(0, 320);
-  auto* baseline =
-      reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
+  auto* baseline = reinterpret_cast<POLY_G3*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   REQUIRE(VS::Menu::map::LiveDrawRoom(1, data, 1, 1) == 1);
   CHECK(TriangleRgb(*baseline) == kExpected);
   VS::Render::SetLiveFogNearDistance(768, 320);
-  auto* fogged =
-      reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
+  auto* fogged = reinterpret_cast<POLY_G3*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   REQUIRE(VS::Menu::map::LiveDrawRoom(1, data, 1, 1) == 1);
   CHECK(TriangleRgb(*fogged) == kExpected);
   CHECK(fixture.CompleteChain());

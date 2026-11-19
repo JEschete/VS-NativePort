@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 
 // decomp: _buffReelIndex (_buffReelIndex@src/MENU/MENUF.PRG/3B8.c)
 int Menu_Results_buffReelIndex;
@@ -35,7 +35,7 @@ Menu_Results_BuffReel Menu_Results_buffReels[][16] = {
 int Menu_Results_clearCount;
 
 // decomp: _disMap (_disMap@src/MENU/MENUF.PRG/3B8.c)
-Render_TextureRegion Menu_Results_disMap[127] = {
+VS::Render::TextureRegion Menu_Results_disMap[127] = {
     { 0, 0, 14, 20, getTPage(0, 0, 832, 256), getClut(768, 511) },
     { 14, 0, 14, 20, getTPage(0, 0, 832, 256), getClut(768, 511) },
     { 28, 0, 14, 20, getTPage(0, 0, 832, 256), getClut(768, 511) },

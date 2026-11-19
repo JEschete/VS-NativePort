@@ -4,7 +4,9 @@
 #include <cstdint>
 
 struct Effects_RendererSlot;
-struct Render_TrailPacket;
+namespace VS::Render {
+struct TrailPacket;
+}  // namespace VS::Render
 
 // Live binding for bone trails (BoneTrail.hpp): the trail state in a
 // renderer slot's game heap block, the actors' bones, the GTE, the module's
@@ -29,8 +31,8 @@ void LiveFadeBoneTrails();
 void LiveClampTrailTexturePoint(int u_offset, int v_offset, int screen,
                                 std::uint16_t* uv);
 // func_800CF988 (5BF94.c:5738): maps the packet onto the frame on display.
-void LiveMapTrailFramebufferTexture(Render_TrailPacket* packet, int u_offset,
-                                    int v_offset, int flags);
+void LiveMapTrailFramebufferTexture(VS::Render::TrailPacket* packet,
+                                    int u_offset, int v_offset, int flags);
 // func_8006C480 (146C.c:1923): begins a weapon trail behind `bone`.
 void LiveStartWeaponTrail(int actor, int bone);
 // func_8006C4A4 (146C.c:1925): fades every weapon trail; the original's

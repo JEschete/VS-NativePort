@@ -24,11 +24,11 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Score/GazetteRows.hpp"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::Score {
 namespace {
@@ -69,7 +69,8 @@ void Refuse(std::string_view what) {
 }
 
 [[nodiscard]] u_long* RowOrderingEntry() {
-  auto* table = static_cast<u_long*>(Render_frameScratch.overlayOrderingTable);
+  auto* table = static_cast<u_long*>(
+      VS::Render::FrameScratchpad().overlay_ordering_table);
   return table == nullptr ? nullptr : table + kRowOrderingEntry;
 }
 
@@ -78,7 +79,7 @@ class LiveScrollableRow final : public ScrollableRowHost {
   LiveScrollableRow(Menu_Framework_MenuRow* row, u_long* before)
       : row_(row), before_(before) {}
 
-  int FrameBufferIndex() override { return Render_frameBuf; }
+  int FrameBufferIndex() override { return VS::Render::frameBuf; }
   void DrawScrollArrow(const ScrollArrowSprite& arrow) override {
     u_long* packet = Render::QueueLiveSpriteWithTexturePage(
         arrow.brightness, static_cast<int>(arrow.position),
@@ -105,7 +106,7 @@ class LiveScrollableRow final : public ScrollableRowHost {
     packet[0] = (*before_ & kLinkMask) | kLineTag;
     std::ranges::copy(line, packet + 1);
     *before_ = LegacyGpu_Handle(packet);
-    Render_frameScratch.primitiveCursor = packet + kLineWords;
+    VS::Render::FrameScratchpad().primitive_cursor = packet + kLineWords;
   }
   void AddShadowTile(std::uint32_t position, std::uint32_t size) override {
     Render::InsertLiveThreeWordPrimitive(before_, kShadowTileCode,

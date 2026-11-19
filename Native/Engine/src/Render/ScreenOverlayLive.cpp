@@ -15,12 +15,12 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/FramebufferEffects.h"
-#include "Render/Render.h"
-#include "Render/ScreenTransition.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/FramebufferEffects.hpp"
+#include "Render/Render.hpp"
+#include "Render/ScreenTransition.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Render {
 namespace {
@@ -62,7 +62,7 @@ void ReportRefusal(const char* what) {
 }
 
 [[nodiscard]] std::size_t CurrentBuffer() {
-  return static_cast<std::size_t>(Render_frameBuf & 1);
+  return static_cast<std::size_t>(frameBuf & 1);
 }
 
 [[nodiscard]] void* OrderingEntry(void* ordering_table, std::size_t entry) {
@@ -201,8 +201,8 @@ class LiveTransitionTarget final : public ScreenTransitionTarget {
 
   void DrawFade(const ScreenTransitionFade& fade) override {
     const std::size_t buffer = CurrentBuffer();
-    POLY_F4& quad = Render_legacyTransitionFadePackets[buffer];
-    DR_MODE& mode = Render_legacyTransitionDrawModes[buffer];
+    POLY_F4& quad = legacyTransitionFadePackets[buffer];
+    DR_MODE& mode = legacyTransitionDrawModes[buffer];
     RECT clip{};
     setXY4(&quad, 0, 0, kScreenWidth, 0, 0, kScreenHeight, kScreenWidth,
            kScreenHeight);
@@ -214,17 +214,16 @@ class LiveTransitionTarget final : public ScreenTransitionTarget {
   }
   void DrawWipe(const ScreenTransitionWipe& wipe) override {
     const std::size_t buffer = CurrentBuffer();
-    Render_LegacyTransitionWipePacket& packet =
-        Render_legacyTransitionWipePackets[buffer];
-    POLY_G4& gradient = Render_legacyTransitionEdgePackets[buffer];
-    DR_MODE& mode = Render_legacyTransitionDrawModes[buffer];
+    LegacyTransitionWipePacket& packet = legacyTransitionWipePackets[buffer];
+    POLY_G4& gradient = legacyTransitionEdgePackets[buffer];
+    DR_MODE& mode = legacyTransitionDrawModes[buffer];
     const auto& [covered_left, edge_left, gradient_left, gradient_right] =
         wipe.columns;
-    SetQuadBetween(packet.coveredQuad, covered_left, edge_left);
-    SetQuadBetween(packet.edgeQuad, edge_left, gradient_left);
+    SetQuadBetween(packet.covered_quad, covered_left, edge_left);
+    SetQuadBetween(packet.edge_quad, edge_left, gradient_left);
     SetQuadBetween(gradient, gradient_left, gradient_right);
-    AddPrim(entry_, &packet.coveredQuad);
-    AddPrim(entry_, &packet.edgeQuad);
+    AddPrim(entry_, &packet.covered_quad);
+    AddPrim(entry_, &packet.edge_quad);
     AddPrim(entry_, &gradient);
     RECT clip{};
     SetDrawMode(&mode, 0, 1, wipe.texture_page, &clip);
@@ -282,12 +281,12 @@ bool AbandonLiveFrameBeforeHeapReset() {
       return false;
     }
   }
-  std::ranges::fill(Render_legacyOrderingTables, nullptr);
-  std::ranges::fill(Render_legacyPrimitiveBuffers, nullptr);
-  Render_legacyCurrentOrderingTable = nullptr;
-  Render_frameScratch.orderingTable = nullptr;
-  Render_frameScratch.overlayOrderingTable = nullptr;
-  Render_frameScratch.primitiveCursor = nullptr;
+  std::ranges::fill(legacyOrderingTables, nullptr);
+  std::ranges::fill(legacyPrimitiveBuffers, nullptr);
+  legacyCurrentOrderingTable = nullptr;
+  FrameScratchpad().ordering_table = nullptr;
+  FrameScratchpad().overlay_ordering_table = nullptr;
+  FrameScratchpad().primitive_cursor = nullptr;
   LiveEffectPackets packets;
   packets.Release();
   ResetFramebufferEffect(live_effect);
@@ -318,8 +317,7 @@ void SetLiveFramebufferEffectRotation(int roll_angle) {
 }
 
 // decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9432).
-void SetLiveFramebufferEffectScale(
-    const Render_FramebufferEffectTranslation* scale) {
+void SetLiveFramebufferEffectScale(const FramebufferEffectTranslation* scale) {
   if (scale == nullptr) {
     ReportRefusal("null framebuffer effect scale");
     return;
@@ -338,7 +336,7 @@ void SetLiveFramebufferEffectTint(const CVECTOR* tint) {
 
 // decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9440).
 void SetLiveFramebufferEffectOffset(
-    const Render_FramebufferEffectTranslation* offset) {
+    const FramebufferEffectTranslation* offset) {
   if (offset == nullptr) {
     ReportRefusal("null framebuffer effect offset");
     return;
@@ -364,8 +362,7 @@ void SetLiveFramebufferPreviousFrame(int use_previous_frame) {
 }
 
 // decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9459).
-void ReadLiveFramebufferEffectScale(
-    Render_FramebufferEffectTranslation* output) {
+void ReadLiveFramebufferEffectScale(FramebufferEffectTranslation* output) {
   if (output == nullptr) {
     ReportRefusal("null framebuffer effect scale output");
     return;
@@ -374,7 +371,7 @@ void ReadLiveFramebufferEffectScale(
       ReadFramebufferEffectScale(live_effect.settings);
   output->x = scale.x;
   output->y = scale.y;
-  output->reserved8 = 0;
+  output->reserved08 = 0;
 }
 
 // decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9466).
@@ -391,8 +388,7 @@ void ReadLiveFramebufferEffectTint(CVECTOR* output) {
 }
 
 // decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9468).
-void ReadLiveFramebufferEffectOffset(
-    Render_FramebufferEffectTranslation* output) {
+void ReadLiveFramebufferEffectOffset(FramebufferEffectTranslation* output) {
   if (output == nullptr) {
     ReportRefusal("null framebuffer effect offset output");
     return;

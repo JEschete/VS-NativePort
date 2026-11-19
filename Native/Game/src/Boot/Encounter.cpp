@@ -87,9 +87,9 @@
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
-#include "Render/Display.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Location.h"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -881,7 +881,7 @@ EncounterState InspectGameplay() {
     state.results_screen =
         static_cast<unsigned char>(Audio_Seq_unusedStateFlags.menuFSubmenu);
   }
-  state.frame_buffer = Render_frameBuf;
+  state.frame_buffer = VS::Render::frameBuf;
   state.transition = VS::Field::screenTransitionStep;
   state.native_buttons = VS::Input::buttonsState;
   state.native_pressed = VS::Input::buttonsPressed;
@@ -1008,7 +1008,7 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
                      {"delta_yaw", camera.delta.yaw},
                      {"delta_pitch", camera.delta.pitch},
                      {"delta_distance", camera.delta.distance}};
-  const auto& view = Render_frameScratch.viewMatrix;
+  const auto& view = VS::Render::FrameScratchpad().view_matrix;
   scene["camera"]["view_rotation"] = {
       {view.m[0][0], view.m[0][1], view.m[0][2]},
       {view.m[1][0], view.m[1][1], view.m[1][2]},

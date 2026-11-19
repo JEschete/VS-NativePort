@@ -33,11 +33,11 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.h"
 
 namespace VS::Menu::map {
@@ -123,7 +123,7 @@ template <typename Primitive>
 template <typename Primitive>
 void Link(u_long* entry, Primitive* packet) {
   AddPrim(entry, packet);
-  Render_frameScratch.primitiveCursor = packet + 1;
+  VS::Render::FrameScratchpad().primitive_cursor = packet + 1;
 }
 
 [[nodiscard]] std::span<const MapLabel> Labels() {
@@ -319,7 +319,8 @@ class LiveVisitedRoomsHost final : public VisitedRoomsHost {
       : scene_(scene) {}
 
   ScreenOffset GetScreenOffset() override {
-    const Render_ScreenOffset offset = Render::GetLiveProjectionScreenOffset();
+    const VS::Render::ScreenOffset offset =
+        Render::GetLiveProjectionScreenOffset();
     return {.x = offset.x, .y = offset.y};
   }
 

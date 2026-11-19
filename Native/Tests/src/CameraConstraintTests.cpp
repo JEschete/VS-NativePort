@@ -16,8 +16,8 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 struct CameraConstraintFixture {
@@ -85,8 +85,8 @@ TEST_CASE("Valid camera cells without authored occlusion retain clearing",
 TEST_CASE("Valid authored view triggers still hide the selected geometry group",
           "[field][camera][camera-constraint]") {
   CameraConstraintFixture fixture;
-  const auto saved_yaw = Render_frameScratch.camera.angles.vy;
-  Render_frameScratch.camera.angles.vy = 0;
+  const auto saved_yaw = VS::Render::FrameScratchpad().camera.angles.vy;
+  VS::Render::FrameScratchpad().camera.angles.vy = 0;
   struct ViewTrigger {
     Field_MpdViewTrigger header;
     std::array<char, 4> group_ids{};
@@ -106,5 +106,5 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) != 0);
   CHECK(fixture.warnings.empty());
-  Render_frameScratch.camera.angles.vy = saved_yaw;
+  VS::Render::FrameScratchpad().camera.angles.vy = saved_yaw;
 }

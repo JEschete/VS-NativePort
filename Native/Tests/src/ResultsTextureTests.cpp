@@ -14,18 +14,18 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 struct ResultsTextureFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
-  Render_TextureRegion saved_ending_region = Ending_resultAtlasRegions[12];
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
+  VS::Render::TextureRegion saved_ending_region = Ending_resultAtlasRegions[12];
   int saved_time = Menu_Results_timeTrialTime;
   std::vector<u_long> storage = std::vector<u_long>(
       32 * sizeof(POLY_GT4) / sizeof(u_long) + 2, 0xDEADBEEF);
@@ -33,17 +33,17 @@ struct ResultsTextureFixture {
 
   ResultsTextureFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + 16;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 16;
     Ending_resultAtlasRegions[12] = {23, 45, 26, 19, 0x15, 0x345};
   }
 
   ~ResultsTextureFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
     Ending_resultAtlasRegions[12] = saved_ending_region;
     Menu_Results_timeTrialTime = saved_time;
   }
@@ -53,7 +53,7 @@ struct ResultsTextureFixture {
   }
 
   void CheckCount(std::size_t count) {
-    CHECK(Render_frameScratch.primitiveCursor == Packets() + count);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == Packets() + count);
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
     if (count != 0) {
@@ -66,24 +66,26 @@ struct ResultsTextureFixture {
 };
 
 void CheckRegionPlacement(const POLY_GT4& packet,
-                          const Render_TextureRegion& region, int x, int y) {
+                          const VS::Render::TextureRegion& region, int x,
+                          int y) {
   // Copied C uses unsigned plain char, unlike the C++ test translation unit.
-  const int width = static_cast<unsigned char>(region.w);
-  const int height = static_cast<unsigned char>(region.h);
+  const int width = static_cast<unsigned char>(region.width);
+  const int height = static_cast<unsigned char>(region.height);
   CHECK(packet.x0 == x);
   CHECK(packet.y0 == y);
   CHECK(packet.x1 == x + width);
   CHECK(packet.y2 == y + height);
 }
 
-void CheckRegion(const POLY_GT4& packet, const Render_TextureRegion& region,
-                 int x, int y, bool fading) {
+void CheckRegion(const POLY_GT4& packet,
+                 const VS::Render::TextureRegion& region, int x, int y,
+                 bool fading) {
   CheckRegionPlacement(packet, region, x, y);
-  CHECK(packet.u0 == static_cast<unsigned char>(region.x));
-  CHECK(packet.v0 == static_cast<unsigned char>(region.y));
-  CHECK(packet.u1 == static_cast<unsigned char>(region.x + region.w));
-  CHECK(packet.v2 == static_cast<unsigned char>(region.y + region.h));
-  CHECK(packet.tpage == (region.tpage | (fading ? 0x20 : 0)));
+  CHECK(packet.u0 == static_cast<unsigned char>(region.u));
+  CHECK(packet.v0 == static_cast<unsigned char>(region.v));
+  CHECK(packet.u1 == static_cast<unsigned char>(region.u + region.width));
+  CHECK(packet.v2 == static_cast<unsigned char>(region.v + region.height));
+  CHECK(packet.tpage == (region.texture_page | (fading ? 0x20 : 0)));
   CHECK(packet.clut == region.clut + (fading ? 1 : 0));
   CHECK(packet.code == 0x3E);
 }
@@ -102,16 +104,17 @@ TEST_CASE("Cube results draw both food-chain pieces and every rank from MENUF",
   const auto& left = Menu_Results_disMap[105];
   const auto& right = Menu_Results_disMap[106];
   const auto& label = Menu_Results_disMap[107 + rank];
-  const int left_width = static_cast<unsigned char>(left.w);
-  const int left_x = 160 - ((left_width + right.w) >> 1);
+  const int left_width = static_cast<unsigned char>(left.width);
+  const int left_x = 160 - ((left_width + right.width) >> 1);
   CheckRegion(packets[0], left, left_x, 80, fade < 10);
   CheckRegion(packets[1], right, left_x + left_width, 80, fade < 10);
   CheckRegion(packets[2], label,
-              160 - (static_cast<unsigned char>(label.w) >> 1), 120, fade < 10);
-  CHECK(label.tpage == getTPage(0, 0, 896, 256));
+              160 - (static_cast<unsigned char>(label.width) >> 1), 120,
+              fade < 10);
+  CHECK(label.texture_page == getTPage(0, 0, 896, 256));
   CHECK(label.clut == getClut(896, 511));
   CHECK(left_width == 170);
-  CHECK(right.w == 116);
+  CHECK(right.width == 116);
 }
 
 TEST_CASE("Hidden cube results emit no textures",
@@ -184,22 +187,22 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
 
 namespace {
 void CheckWipeStripGeometry(const POLY_GT4& packet,
-                            const Render_TextureRegion& region, int offset,
+                            const VS::Render::TextureRegion& region, int offset,
                             int width) {
   CHECK(packet.x0 == 10 + offset);
   CHECK(packet.x1 == 10 + offset + width);
   CHECK(packet.y0 == 20);
-  CHECK(packet.y2 == 20 + region.h);
-  CHECK(packet.u0 == static_cast<unsigned char>(region.x + offset));
-  CHECK(packet.u1 == static_cast<unsigned char>(region.x + offset + width));
+  CHECK(packet.y2 == 20 + region.height);
+  CHECK(packet.u0 == static_cast<unsigned char>(region.u + offset));
+  CHECK(packet.u1 == static_cast<unsigned char>(region.u + offset + width));
 }
 
 void CheckWipeStripFade(const POLY_GT4& packet,
-                        const Render_TextureRegion& region, int offset,
+                        const VS::Render::TextureRegion& region, int offset,
                         int width) {
-  CHECK(packet.v0 == static_cast<unsigned char>(region.y));
+  CHECK(packet.v0 == static_cast<unsigned char>(region.v));
   CHECK(packet.clut == region.clut + 1);
-  CHECK(packet.tpage == (region.tpage | 0x20));
+  CHECK(packet.tpage == (region.texture_page | 0x20));
   CHECK(packet.r0 == 128 * std::clamp(8 - offset, 0, 64) / 64);
   CHECK(packet.r1 == 128 * std::clamp(8 - offset - width, 0, 64) / 64);
 }
@@ -214,7 +217,7 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
   Menu_Results_timeTrialTime = kTimes[rating];
   VS::Menu::Results::LiveDrawTimeAttackRatingWipe(10, 20, fade);
   const auto& region = Menu_Results_disMap[78 + rating];
-  const int count = fade == 64 ? 1 : (region.w + 11) / 12;
+  const int count = fade == 64 ? 1 : (region.width + 11) / 12;
   fixture.CheckCount(count);
   if (fade == 64) {
     CheckRegion(fixture.Packets()[0], region, 10, 20, false);
@@ -224,7 +227,7 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
   for (int index = 0; index < count; ++index) {
     const auto& packet = fixture.Packets()[index];
     const int offset = index * 12;
-    const int width = std::min(12, region.w - offset);
+    const int width = std::min(12, region.width - offset);
     CheckWipeStripGeometry(packet, region, offset, width);
     CheckWipeStripFade(packet, region, offset, width);
   }
@@ -238,8 +241,8 @@ TEST_CASE(
   std::array<CVECTOR, 2> colors{{{128, 96, 64, 0}, {200, 180, 160, 0}}};
   VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, 10, 20, 12, colors,
                                   edge);
-  const auto* ending_begin =
-      static_cast<const POLY_GT4*>(Render_frameScratch.primitiveCursor);
+  const auto* ending_begin = static_cast<const POLY_GT4*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   VS::Render::DrawLiveTextureWipe(Ending_resultAtlasRegions, 10, 20, 12, colors,
                                   edge);
   if (edge == 10) {
@@ -249,7 +252,8 @@ TEST_CASE(
     CheckRegion(ending_begin[0], Ending_resultAtlasRegions[12], 10, 20, false);
   } else {
     fixture.CheckCount(
-        (static_cast<unsigned char>(Menu_Results_disMap[12].w) + 11) / 12 + 3);
+        (static_cast<unsigned char>(Menu_Results_disMap[12].width) + 11) / 12 +
+        3);
     CHECK(ending_begin[0].u0 == 23);
     CHECK(ending_begin[0].v0 == 45);
     CHECK(ending_begin[0].clut == 0x346);

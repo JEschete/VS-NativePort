@@ -17,7 +17,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "Render/RoomLighting.hpp"
 
 namespace {
@@ -157,7 +157,7 @@ TEST_CASE("Room lighting rejects the original signed32 area overflow",
        RoomLightPoint{32767, -32768}},
       {0x00776655, 0x00776655, 0x00776655}};
   LiveLightingFixture fixture(LightingBlock(0x00332211, 1, 0, {triangle}));
-  Render_ColorCode color{0, 0, 0, 0x5A};
+  VS::Render::ColorCode color{0, 0, 0, 0x5A};
   // Original NCLIP MAC0: 65535 * 65535 wraps to signed -131071.
   VS::Field::SampleLiveRoomLighting(-1, 0, &color);
   CHECK(color.red == 0x11);
@@ -286,7 +286,7 @@ TEST_CASE("Live room lighting ignores unloaded rooms and null colours",
   LiveLightingFixture fixture(
       LightingBlock(0x00332211, 1, 0, {PrimaryTriangle()}));
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, nullptr);
-  Render_ColorCode color{0, 0, 0, 0xA5};
+  VS::Render::ColorCode color{0, 0, 0, 0xA5};
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   CHECK((color.red == 127 && color.green == 63 && color.blue == 63 &&
          color.code == 0xA5));
@@ -303,20 +303,20 @@ TEST_CASE("Live room lighting samples a named layer as the original index",
   LiveLightingFixture fixture(
       LightingBlock(0x44332211, 1, 1, {PrimaryTriangle(), ceiling}));
   constexpr std::uint32_t kPacked = (32U << 16) | 32U;
-  Render_ColorCode floor{9, 9, 9, 0x5A};
+  VS::Render::ColorCode floor{9, 9, 9, 0x5A};
   VS::Field::SampleLiveRoomLighting(kPacked, RoomLightLayer::kFloor, &floor);
   CHECK((floor.red == 127 && floor.green == 63 && floor.blue == 63 &&
          floor.code == 0x5A));
-  Render_ColorCode floor_index{9, 9, 9, 0x5A};
+  VS::Render::ColorCode floor_index{9, 9, 9, 0x5A};
   VS::Field::SampleLiveRoomLighting(static_cast<int>(kPacked), 0, &floor_index);
   CHECK(std::memcmp(&floor, &floor_index, sizeof floor) == 0);
 
-  Render_ColorCode ceiling_color{9, 9, 9, 0x5A};
+  VS::Render::ColorCode ceiling_color{9, 9, 9, 0x5A};
   VS::Field::SampleLiveRoomLighting(kPacked, RoomLightLayer::kCeiling,
                                     &ceiling_color);
   CHECK((ceiling_color.red == 64 && ceiling_color.green == 96 &&
          ceiling_color.blue == 128 && ceiling_color.code == 0x5A));
-  Render_ColorCode ceiling_index{9, 9, 9, 0x5A};
+  VS::Render::ColorCode ceiling_index{9, 9, 9, 0x5A};
   VS::Field::SampleLiveRoomLighting(static_cast<int>(kPacked), 1,
                                     &ceiling_index);
   CHECK(std::memcmp(&ceiling_color, &ceiling_index, sizeof ceiling_color) == 0);

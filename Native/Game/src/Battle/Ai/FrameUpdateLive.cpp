@@ -40,7 +40,7 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 namespace {
 VS::Battle::Ai::FrameContext frame_context;

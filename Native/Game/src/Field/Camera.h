@@ -7,7 +7,7 @@ struct Field_CameraTransition;
 struct Field_SphericalCamera;
 struct Field_SphericalCameraValues;
 
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 
 // decomp: _sphericalValues (src/BATTLE/BATTLE.PRG/146C.h:738)
 struct Field_SphericalCameraValues {
@@ -37,7 +37,7 @@ static_assert(sizeof(Field_CameraPositionPair) == 0x20, "Field_CameraPositionPai
 
 // decomp: vs_battle_cameraTransition_t (src/BATTLE/BATTLE.PRG/146C.h:823)
 struct Field_CameraTransition {
-    Render_Camera fromCameraState;
+    VS::Render::Camera fromCameraState;
     Field_SphericalCamera fromSpherical;
     int fromNearClip;
     int fromProjectionDistance;

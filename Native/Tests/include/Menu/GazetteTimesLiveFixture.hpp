@@ -27,14 +27,14 @@
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/TextBox.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace gazette_times_live_tests {
 namespace score = VS::Menu::Score;
@@ -62,10 +62,10 @@ inline auto TableOwners() {
   return std::array{BytesOf(Menu_Score_timeAttacks),
                     BytesOf(Menu_Score_timeAttackDescriptions),
                     BytesOf(Menu_Score_miscInfo),
-                    BytesOf(Render_compactGlyphLeftTrim),
-                    BytesOf(Render_compactGlyphWidths),
-                    BytesOf(Render_compactGlyphIndices),
-                    BytesOf(Render_variableFontGlyphWidths),
+                    BytesOf(VS::Render::compactGlyphLeftTrim),
+                    BytesOf(VS::Render::compactGlyphWidths),
+                    BytesOf(VS::Render::compactGlyphIndices),
+                    BytesOf(VS::Render::variableFontGlyphWidths),
                     BytesOf(Menu_Framework_gradientTopColors),
                     BytesOf(Menu_Framework_gradientBottomColors),
                     BytesOf(Menu_Framework_rowAnimationSteps),
@@ -82,10 +82,10 @@ inline auto MutableOwners() {
                     BytesOf(VS::Menu::Framework::cursorColor),
                     BytesOf(VS::Menu::Framework::hideMenu),
                     BytesOf(Menu_textBoxes),
-                    BytesOf(Render_frameScratch),
-                    BytesOf(Render_legacyPrimitiveBuffers),
-                    BytesOf(Render_legacyOrderingTables),
-                    BytesOf(Render_frameBuf),
+                    BytesOf(VS::Render::FrameScratchpad()),
+                    BytesOf(VS::Render::legacyPrimitiveBuffers),
+                    BytesOf(VS::Render::legacyOrderingTables),
+                    BytesOf(VS::Render::frameBuf),
                     BytesOf(VS::Render::LiveFontStyle())};
 }
 
@@ -220,9 +220,9 @@ struct TextRun {
 inline char CompactCharacter(const Sprite& sprite) {
   constexpr std::size_t kPrintedGlyphs = '[' - ' ';
   for (std::size_t glyph = 0; glyph < kPrintedGlyphs; ++glyph) {
-    const std::uint32_t cell = Render_compactGlyphIndices[glyph];
+    const std::uint32_t cell = VS::Render::compactGlyphIndices[glyph];
     const std::uint32_t width =
-        (Render_compactGlyphWidths[glyph / 2] >> ((glyph % 2) * 4)) & 15;
+        (VS::Render::compactGlyphWidths[glyph / 2] >> ((glyph % 2) * 4)) & 15;
     const std::uint32_t texture =
         (cell & 0xFE) | ((76 + (cell & 1) * 10) << 8) | (0x37F6U << 16);
     if (width != 0 && sprite.texture == texture &&
@@ -296,12 +296,13 @@ class Fixture {
   // an actual module/cold reset without a private production-state getter.
   void ResetFrame() {
     std::ranges::fill(primitives, kCanary);
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = primitives.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = primitives.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + kSceneHead;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + kOverlayHead;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + kSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
+        ordering.data() + kOverlayHead;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
@@ -345,8 +346,8 @@ class Fixture {
 
   [[nodiscard]] std::size_t UsedWords() const {
     const auto start = reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
-    const auto end =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto end = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     if (end < start || end - start > kPrimitiveWords * sizeof(u_long) ||
         (end - start) % sizeof(u_long) != 0) {
       throw std::runtime_error("Gazette Live primitive cursor left its owner");

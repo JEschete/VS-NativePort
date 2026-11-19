@@ -26,11 +26,11 @@
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/Records.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/PlayTime.hpp"
 #include "Title/SaveFiles.h"
@@ -97,10 +97,10 @@ struct EmptySlotsFixture {
 };
 
 struct ClockFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   State_PlayTime saved_time = VS::State::playTime;
   u_int saved_random = VS::Core::interfaceRandomState;
   std::array<u_char, 264> saved_trim{};
@@ -111,45 +111,45 @@ struct ClockFixture {
   std::array<u_long, 32> ordering{};
 
   ClockFixture() {
-    std::copy_n(Render_compactGlyphLeftTrim, saved_trim.size(),
+    std::copy_n(VS::Render::compactGlyphLeftTrim, saved_trim.size(),
                 saved_trim.begin());
-    std::copy_n(Render_compactGlyphWidths, saved_widths.size(),
+    std::copy_n(VS::Render::compactGlyphWidths, saved_widths.size(),
                 saved_widths.begin());
-    std::copy_n(Render_compactGlyphIndices, saved_indices.size(),
+    std::copy_n(VS::Render::compactGlyphIndices, saved_indices.size(),
                 saved_indices.begin());
-    std::fill_n(Render_compactGlyphLeftTrim, saved_trim.size(), 0);
-    std::fill_n(Render_compactGlyphWidths, saved_widths.size(), 0x66);
+    std::fill_n(VS::Render::compactGlyphLeftTrim, saved_trim.size(), 0);
+    std::fill_n(VS::Render::compactGlyphWidths, saved_widths.size(), 0x66);
     for (size_t index = 0; index < saved_indices.size(); ++index) {
-      Render_compactGlyphIndices[index] = static_cast<u_char>(index);
+      VS::Render::compactGlyphIndices[index] = static_cast<u_char>(index);
     }
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     // The live chain lookups only accept the frame's own ordering table.
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
     VS::Core::interfaceRandomState = 0;
     ResetPackets();
   }
 
   ~ClockFixture() {
     std::copy(saved_trim.begin(), saved_trim.end(),
-              Render_compactGlyphLeftTrim);
+              VS::Render::compactGlyphLeftTrim);
     std::copy(saved_widths.begin(), saved_widths.end(),
-              Render_compactGlyphWidths);
+              VS::Render::compactGlyphWidths);
     std::copy(saved_indices.begin(), saved_indices.end(),
-              Render_compactGlyphIndices);
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_frameBuf = saved_framebuffer;
+              VS::Render::compactGlyphIndices);
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::frameBuf = saved_framebuffer;
     VS::State::playTime = saved_time;
     VS::Core::interfaceRandomState = saved_random;
   }
 
   void ResetPackets() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   }
 
   std::string Clock(int y = 200) const {
@@ -215,7 +215,7 @@ TEST_CASE("Game Over fade links packets through native handles",
   VS::Input::buttonsPressed = PADstart;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   VS::Input::buttonsPressed = 0;
-  const auto* fade_packet = Render_frameScratch.primitiveCursor;
+  const auto* fade_packet = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
   CHECK(getaddr(render.ordering.data() + 2) == LegacyGpu_Handle(fade_packet));
@@ -248,15 +248,15 @@ TEST_CASE("Score list numbers retain every original digit and native link",
   const int rows = enemy ? 78 : 32;
   for (int number = 1; number <= rows; ++number) {
     fixture.ResetPackets();
-    const auto* first =
-        static_cast<const POLY_FT4*>(Render_frameScratch.primitiveCursor);
+    const auto* first = static_cast<const POLY_FT4*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const void* initial_next = nextPrim(fixture.ordering.data() + 2);
     if (enemy) {
       VS::Menu::Score::DrawLiveEnemyNumber(100, 50, number, dimmed);
     } else {
       VS::Menu::Score::DrawLiveTitleNumber(100, 50, number, dimmed);
     }
-    CHECK(Render_frameScratch.primitiveCursor == first + digits);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == first + digits);
     CHECK(nextPrim(fixture.ordering.data() + 2) == first + digits - 1);
     const auto text =
         enemy ? std::format("{:03}", number) : std::format("{:02}", number);
@@ -294,8 +294,8 @@ TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
   row.gradientState = GENERATE(0, 8);
   VS::Menu::Score::RenderLiveScrollableRow(&row);
   const auto begin = reinterpret_cast<uintptr_t>(fixture.storage.data() + 1);
-  const auto end =
-      reinterpret_cast<uintptr_t>(Render_frameScratch.primitiveCursor);
+  const auto end = reinterpret_cast<uintptr_t>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   const auto table = reinterpret_cast<uintptr_t>(fixture.ordering.data());
   const void* packet = &fixture.ordering.back();
   size_t visited = 0;
@@ -342,12 +342,12 @@ TEST_CASE("Score encyclopedia viewer retains the complete original ID header",
 TEST_CASE("Score viewer banners use the native main ordering pointer",
           "[render][menu][score][banner]") {
   ClockFixture fixture;
-  const auto* first =
-      static_cast<const LINE_G2*>(Render_frameScratch.primitiveCursor);
+  const auto* first = static_cast<const LINE_G2*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   VS::Menu::Score::DrawLiveEnemyBanner(8, 18, 96, 12, 3);
   const size_t bytes =
       11 * sizeof(LINE_G2) + sizeof(POLY_F4) + 3 * sizeof(u_long);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         reinterpret_cast<const u_char*>(first) + bytes);
   CHECK(nextPrim(fixture.ordering.data() + 25) ==
         reinterpret_cast<const u_char*>(first) + bytes - 3 * sizeof(u_long));

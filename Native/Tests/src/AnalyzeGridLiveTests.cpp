@@ -18,11 +18,11 @@
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Camera.hpp"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 namespace effects = VS::Effects;
@@ -55,17 +55,18 @@ class LiveGrid {
         std::as_bytes(std::span{&definitions, 1}));
     definitions.entries[1].pairRanges[3][0] = 37;
     definitions.entries[1].pairRanges[3][2] = 19;
-    Render_frameBuf = 0;
-    Render_nearClip = 0;
-    Render_legacyPrimitiveBuffers[0] = primitives.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = primitives.data();
-    Render_frameScratch.orderingTable = ordering.data() + kSceneOffset;
-    Render_frameScratch.viewMatrix = MATRIX{};
+    VS::Render::frameBuf = 0;
+    VS::Render::nearClip = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kSceneOffset;
+    VS::Render::FrameScratchpad().view_matrix = MATRIX{};
     for (std::size_t axis = 0; axis < 3; ++axis) {
-      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+      VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
     }
-    Render_frameScratch.viewMatrix.t[2] = 400;
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 400;
     ordering.fill(kInitialLink);
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
@@ -80,12 +81,12 @@ class LiveGrid {
     Effects_package = saved_package_;
     Effects_currentInstance = saved_instance_;
     Effects_actionRequest = saved_request_;
-    Render_frameBuf = saved_frame_buf_;
-    Render_nearClip = saved_near_clip_;
-    Render_frameScratch = saved_frame_;
+    VS::Render::frameBuf = saved_frame_buf_;
+    VS::Render::nearClip = saved_near_clip_;
+    VS::Render::FrameScratchpad() = saved_frame_;
     Emitter() = saved_emitter_;
-    Render_legacyPrimitiveBuffers[0] = saved_primitives_;
-    Render_legacyOrderingTables[0] = saved_ordering_;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_primitives_;
+    VS::Render::legacyOrderingTables[0] = saved_ordering_;
   }
   LiveGrid(const LiveGrid&) = delete;
   LiveGrid& operator=(const LiveGrid&) = delete;
@@ -114,12 +115,12 @@ class LiveGrid {
   Effects_EffectPackage* saved_package_ = Effects_package;
   Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
   Effects_ActionEffectRequest saved_request_ = Effects_actionRequest;
-  int saved_frame_buf_ = Render_frameBuf;
-  int saved_near_clip_ = Render_nearClip;
-  Render_FrameScratch saved_frame_ = Render_frameScratch;
+  int saved_frame_buf_ = VS::Render::frameBuf;
+  int saved_near_clip_ = VS::Render::nearClip;
+  VS::Render::FrameScratch saved_frame_ = VS::Render::FrameScratchpad();
   Effects_ParticleEmitterScratch saved_emitter_ = Emitter();
-  void* saved_primitives_ = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering_ = Render_legacyOrderingTables[0];
+  void* saved_primitives_ = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering_ = VS::Render::legacyOrderingTables[0];
 };
 
 void CheckLiveLifecycle(Effects_EffectRenderer entry) {
@@ -161,7 +162,8 @@ void CheckLiveUnknownCommands(Effects_EffectRenderer entry) {
   const auto before = live.State();
   CHECK(entry(&live.slot, command, 0) == 1);
   CHECK(live.State() == before);
-  CHECK(Render_frameScratch.primitiveCursor == live.primitives.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        live.primitives.data());
 }
 
 void CheckLiveRefusals(Effects_EffectRenderer entry) {
@@ -183,7 +185,8 @@ void CheckLiveRefusals(Effects_EffectRenderer entry) {
   }
   CHECK(entry(&live.slot, 2, 0) == 0);
   CHECK(live.State() == before);
-  CHECK(Render_frameScratch.primitiveCursor == live.primitives.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        live.primitives.data());
 }
 
 void CheckLiveCreateRefusals(Effects_EffectRenderer entry) {
@@ -214,19 +217,19 @@ void CheckLiveDrawCapacity(Effects_EffectRenderer entry) {
   LiveGrid live;
   REQUIRE(entry(&live.slot, 1, 0) == 1);
   if (capacity == 1) {
-    Render_frameScratch.primitiveCursor =
+    VS::Render::FrameScratchpad().primitive_cursor =
         live.primitives.data() + live.primitives.size() - 1;
   } else if (capacity == 2) {
-    Render_legacyOrderingTables[0] = nullptr;
+    VS::Render::legacyOrderingTables[0] = nullptr;
   }
-  void* before = Render_frameScratch.primitiveCursor;
+  void* before = VS::Render::FrameScratchpad().primitive_cursor;
   REQUIRE(entry(&live.slot, 2, 0) == 1);
   CHECK(live.State().age == 1);
   if (capacity != 0) {
-    CHECK(Render_frameScratch.primitiveCursor == before);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
     CHECK(live.ordering[kSceneOffset + 100] == kInitialLink);
   } else {
-    CHECK(Render_frameScratch.primitiveCursor ==
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
           live.primitives.data() + 64 * effects::Templates::kGridPacketWords);
     CHECK((live.ordering[kSceneOffset + 100] & 0xFF000000U) ==
           (kInitialLink & 0xFF000000U));

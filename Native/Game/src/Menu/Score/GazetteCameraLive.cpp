@@ -21,14 +21,14 @@
 #include "Menu/Score/GazetteCamera.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::Score {
 namespace {
@@ -161,7 +161,7 @@ Core::Math::Transform3 BuildAndStoreViewerCamera() {
                          .roll = Menu_Score_cameraAngles.vz,
                          .distance = Menu_Score_cameraDistance,
                          .height_offset = Menu_Score_cameraHeightOffset});
-  Render_Camera& frame_camera = Render_frameScratch.camera;
+  VS::Render::Camera& frame_camera = VS::Render::FrameScratchpad().camera;
   frame_camera.position.vx = camera.position.x;
   frame_camera.position.vy = camera.position.y;
   frame_camera.position.vz = camera.position.z;
@@ -175,12 +175,13 @@ class LiveOverviewHost final : public OverviewHost {
  public:
   void DrawViewerEdgeFade() override { DrawEdgeFade(); }
   ProjectionOffset GetProjectionOffset() override {
-    const Render_ScreenOffset offset = Render::GetLiveProjectionScreenOffset();
+    const VS::Render::ScreenOffset offset =
+        Render::GetLiveProjectionScreenOffset();
     return {.x = offset.x, .y = offset.y};
   }
   void SetProjectionOffset(const ProjectionOffset& offset) override {
     Render::SetLiveProjectionScreenOffset(
-        Render_ScreenOffset{.x = offset.x, .y = offset.y});
+        VS::Render::ScreenOffset{.x = offset.x, .y = offset.y});
   }
   Core::Math::Transform3 BuildViewerCamera() override {
     return BuildAndStoreViewerCamera();
@@ -213,7 +214,7 @@ class LiveOverviewHost final : public OverviewHost {
 
 // decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402)
 void RestoreLiveCamera() {
-  Render_Camera& frame_camera = Render_frameScratch.camera;
+  VS::Render::Camera& frame_camera = VS::Render::FrameScratchpad().camera;
   CameraPose camera{.position = CameraVectorOf(frame_camera.position),
                     .angles = CameraVectorOf(frame_camera.angles)};
   RestoreCamera({.position = CameraVectorOf(Menu_Score_cameraPositionBackup),

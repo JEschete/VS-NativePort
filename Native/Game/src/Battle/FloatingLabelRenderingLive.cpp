@@ -14,11 +14,11 @@
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiTexturedQuads.hpp"
 
@@ -89,8 +89,9 @@ FloatingLabelAtlasRect Atlas(const RECT& rectangle) {
 }
 
 void RequireCurrentFrame() {
-  if (Render_frameBuf < 0 ||
-      static_cast<std::size_t>(Render_frameBuf) >= Render::kFrameBufferCount) {
+  if (VS::Render::frameBuf < 0 ||
+      static_cast<std::size_t>(VS::Render::frameBuf) >=
+          Render::kFrameBufferCount) {
     Refuse("Floating-label frame index is outside the current frame owners");
   }
 }
@@ -173,12 +174,13 @@ class LiveLabelRenderWorld final : public FloatingLabelRenderWorld {
   }
   bool DrawText(std::string_view text, FloatingLabelScreenPoint origin,
                 std::uint32_t color) override {
-    RequireDataOwner(Render_compactGlyphWidths, kCompactCharacterCount / 2);
-    RequireDataOwner(Render_compactGlyphLeftTrim, kCompactTrimBytes);
-    RequireDataOwner(Render_compactGlyphIndices, kCompactCharacterCount);
-    const Render::CompactFontTables font{Render_compactGlyphWidths,
-                                         Render_compactGlyphLeftTrim,
-                                         Render_compactGlyphIndices};
+    RequireDataOwner(VS::Render::compactGlyphWidths,
+                     kCompactCharacterCount / 2);
+    RequireDataOwner(VS::Render::compactGlyphLeftTrim, kCompactTrimBytes);
+    RequireDataOwner(VS::Render::compactGlyphIndices, kCompactCharacterCount);
+    const Render::CompactFontTables font{VS::Render::compactGlyphWidths,
+                                         VS::Render::compactGlyphLeftTrim,
+                                         VS::Render::compactGlyphIndices};
     CheckedLabelQueue queue(kTextLayer);
     const auto position = static_cast<std::int32_t>(
         (static_cast<std::uint32_t>(origin.x) & kHalfMask) |

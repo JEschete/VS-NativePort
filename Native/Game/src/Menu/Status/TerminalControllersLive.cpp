@@ -22,13 +22,13 @@
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/EncodedText.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Settings.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
@@ -134,10 +134,11 @@ void StoreFrame(const TerminalFrame& frame) {
       static_cast<char>(frame.current_menu);
 }
 TerminalView LoadView() {
-  const MATRIX& view = Render_frameScratch.viewMatrix;
+  const MATRIX& view = VS::Render::FrameScratchpad().view_matrix;
   TerminalView result;
-  static_assert(sizeof(TerminalCamera) == sizeof(Render_Camera));
-  result.camera = std::bit_cast<TerminalCamera>(Render_frameScratch.camera);
+  static_assert(sizeof(TerminalCamera) == sizeof(VS::Render::Camera));
+  result.camera =
+      std::bit_cast<TerminalCamera>(VS::Render::FrameScratchpad().camera);
   for (std::size_t row = 0; row < result.rotation.m.size(); ++row) {
     std::ranges::copy(view.m[row], result.rotation.m[row].begin());
   }
@@ -149,7 +150,7 @@ TerminalView LoadView() {
   return result;
 }
 void StoreView(const TerminalView& view) {
-  MATRIX& target = Render_frameScratch.viewMatrix;
+  MATRIX& target = VS::Render::FrameScratchpad().view_matrix;
   for (std::size_t row = 0; row < view.rotation.m.size(); ++row) {
     std::ranges::copy(view.rotation.m[row], target.m[row]);
   }
@@ -159,7 +160,8 @@ void StoreView(const TerminalView& view) {
   target.t[0] = view.translation.x;
   target.t[1] = view.translation.y;
   target.t[2] = view.translation.z;
-  Render_frameScratch.camera = std::bit_cast<Render_Camera>(view.camera);
+  VS::Render::FrameScratchpad().camera =
+      std::bit_cast<VS::Render::Camera>(view.camera);
 }
 bool Workspace() {
   constexpr std::size_t kRowsBytes =
@@ -270,7 +272,7 @@ bool DrawFadeChecked() {
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, -1);
   Render::LivePacketQueue queue(chain);
   return chain != nullptr && queue.CanEmit(kGradientWords) &&
-         DrawModelSlideFade(queue, true, Render_frameBuf != 0);
+         DrawModelSlideFade(queue, true, VS::Render::frameBuf != 0);
 }
 bool DrawBackgroundChecked() {
   auto* chain = Render::LiveFrameOrderingEntry(
@@ -278,7 +280,7 @@ bool DrawBackgroundChecked() {
       Menu_Status_drawBackgroundFirst != 0 ? -1 : kBackgroundEntry);
   Render::LivePacketQueue queue(chain);
   return chain != nullptr && queue.CanEmit(kBackgroundWords) &&
-         DrawBackground(queue, Render_frameBuf != 0);
+         DrawBackground(queue, VS::Render::frameBuf != 0);
 }
 bool VitalsChecked() {
   const auto selected =
@@ -328,8 +330,8 @@ class FrameHost final : public TerminalFrameHost {
       return false;
     }
     Publish();
-    static_cast<void>(
-        Framework::DrawLiveActorPreview(&Render_frameScratch.viewMatrix));
+    static_cast<void>(Framework::DrawLiveActorPreview(
+        &VS::Render::FrameScratchpad().view_matrix));
     Refresh();
     return true;
   }

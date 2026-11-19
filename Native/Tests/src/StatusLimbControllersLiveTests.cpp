@@ -284,20 +284,22 @@ TEST_CASE("Limb module render entries emit into the real frame owners",
   equipment_detail_tests::LiveFixture frame;
   LiveLimbFixture fixture;
   const auto refused = status::RefusedLiveLimbControllerCount();
-  auto* before = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  auto* before =
+      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103E58, &status::LiveDrawLimbConditionIndicator)(0, 0, 0);
-  CHECK(Render_frameScratch.primitiveCursor == before + 7);
-  CHECK(nextPrim(Render_frameScratch.overlayOrderingTable) == before);
-  before = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before + 7);
+  CHECK(nextPrim(VS::Render::FrameScratchpad().overlay_ordering_table) ==
+        before);
+  before = static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103EF8, &status::LiveDrawLimbLeaderLine)(0, 0, 0, 0);
-  CHECK(Render_frameScratch.primitiveCursor == before + 9);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before + 9);
   CHECK(nextPrim(frame.ordering.data() +
                  equipment_detail_tests::kSceneOrderingEntry - 1) == before);
   const auto sprites_before = frame.Sprites().size();
-  before = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  before = static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103FEC, &status::LiveDrawStatusEffectIcons)(&fixture.stats,
                                                               0);
-  CHECK(Render_frameScratch.primitiveCursor > before);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor > before);
   CHECK(frame.Sprites().size() == sprites_before + 2);
   CHECK(status::RefusedLiveLimbControllerCount() == refused);
 }

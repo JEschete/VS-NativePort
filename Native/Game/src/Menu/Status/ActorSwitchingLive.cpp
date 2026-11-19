@@ -22,10 +22,10 @@
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/ActorSwitching.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
@@ -82,7 +82,7 @@ void Refuse(std::string_view call, std::string_view reason) {
 
 [[nodiscard]] u_long* VitalsChain() {
   auto* const table =
-      static_cast<std::uint8_t*>(Render_frameScratch.orderingTable);
+      static_cast<std::uint8_t*>(VS::Render::FrameScratchpad().ordering_table);
   if (table == nullptr) return nullptr;
   return reinterpret_cast<u_long*>(table - kVitalsChainBytes);
 }

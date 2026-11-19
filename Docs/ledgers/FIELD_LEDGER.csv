@@ -580,8 +580,8 @@ T00098.014,T00098,vs_battle_warlockSpellIds_e,14,vs_battle_spell_radialSurge,0,,
 T00098.015,T00098,vs_battle_warlockSpellIds_e,15,vs_battle_spell_meteor,0,,,130,,Meteor,WarlockSpell Meteor,med,declaration-only;source:5BF94.h:22
 T00098.016,T00098,vs_battle_warlockSpellIds_e,16,vs_battle_spell_drainHeart,0,,,94,,DrainHeart,WarlockSpell DrainHeart,med,declaration-only;source:5BF94.h:23
 T00098.017,T00098,vs_battle_warlockSpellIds_e,17,vs_battle_spell_drainMind,0,,,95,,DrainMind,WarlockSpell DrainMind,med,declaration-only;source:5BF94.h:24
-T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,Off,Dithering Off,med,declaration-only;source:gpu.h:15
-T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,On,Dithering On,med,declaration-only;source:gpu.h:15
+T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,kOff,Dithering Off,med,declaration-only;source:gpu.h:15
+T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,kOn,Dithering On,med,declaration-only;source:gpu.h:15
 T00100.000,T00100,vs_fileMenuUiIds_e,0,vs_uiids_colon,0,,,0,,Colon,FileMenuUiId Colon,med,declaration-only;source:MENU/MENU7.PRG/260.c:1207
 T00100.001,T00100,vs_fileMenuUiIds_e,1,vs_uiids_number,0,,,1,,Number,FileMenuUiId Number,med,declaration-only;source:MENU/MENU7.PRG/260.c:1208
 T00100.002,T00100,vs_fileMenuUiIds_e,2,vs_uiids_map,0,,,2,,Map,FileMenuUiId Map,med,declaration-only;source:MENU/MENU7.PRG/260.c:1209
@@ -657,29 +657,29 @@ T00116.003,T00116,vs_main_CdQueueState,3,vs_main_CdQueueStateEnqueued,0,,,3,,Enq
 T00116.004,T00116,vs_main_CdQueueState,4,vs_main_CdQueueStateLoaded,0,,,4,,Loaded,DiscRequestState Loaded,med,declaration-only;source:main.h:31
 T00116.005,T00116,vs_main_CdQueueState,5,vs_main_CdQueueStateError,0,,,6,,Error,DiscRequestState Error,med,declaration-only;source:main.h:32
 T00116.006,T00116,vs_main_CdQueueState,6,vs_main_CdQueueStateDispatched,0,,,7,,Dispatched,DiscRequestState Dispatched,med,declaration-only;source:main.h:33
-T00117.000,T00117,vs_primAddr,0,primAddrNull,0,,,0,,Null,LegacyPrimitiveAddress Null,med,declaration-only;source:gpu.h:17
-T00117.001,T00117,vs_primAddr,1,primAddrEnd,0,,,16777215,,End,LegacyPrimitiveAddress End,med,declaration-only;source:gpu.h:17
-T00118.000,T00118,vs_primType,0,primShadeTex,0,,,1,,ShadeTex,LegacyPrimitiveCode ShadeTex,med,declaration-only;source:gpu.h:20
-T00118.001,T00118,vs_primType,1,primSemiTrans,0,,,2,,SemiTrans,LegacyPrimitiveCode SemiTrans,med,declaration-only;source:gpu.h:21
-T00118.002,T00118,vs_primType,2,primPolyFT3,0,,,36,,PolyFt3,LegacyPrimitiveCode PolyFt3,med,declaration-only;source:gpu.h:22
-T00118.003,T00118,vs_primType,3,primPolyFT4,0,,,44,,PolyFt4,LegacyPrimitiveCode PolyFt4,med,declaration-only;source:gpu.h:23
-T00118.004,T00118,vs_primType,4,primPolyFT4ShadeTex,0,,,45,,PolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,med,declaration-only;source:gpu.h:24
-T00118.005,T00118,vs_primType,5,primPolyG4,0,,,56,,PolyG4,LegacyPrimitiveCode PolyG4,med,declaration-only;source:gpu.h:25
-T00118.006,T00118,vs_primType,6,primPolyG4SemiTrans,0,,,58,,PolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,med,declaration-only;source:gpu.h:26
-T00118.007,T00118,vs_primType,7,primPolyGT4,0,,,60,,PolyGt4,LegacyPrimitiveCode PolyGt4,med,declaration-only;source:gpu.h:27
-T00118.008,T00118,vs_primType,8,primPolyGT4SemiTrans,0,,,62,,PolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,med,declaration-only;source:gpu.h:28
-T00118.009,T00118,vs_primType,9,primLineF2,0,,,64,,LineF2,LegacyPrimitiveCode LineF2,med,declaration-only;source:gpu.h:29
-T00118.010,T00118,vs_primType,10,primLineF2SemiTrans,0,,,66,,LineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,med,declaration-only;source:gpu.h:30
-T00118.011,T00118,vs_primType,11,primLineG2,0,,,80,,LineG2,LegacyPrimitiveCode LineG2,med,declaration-only;source:gpu.h:31
-T00118.012,T00118,vs_primType,12,primLineG2SemiTrans,0,,,82,,LineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,med,declaration-only;source:gpu.h:32
-T00118.013,T00118,vs_primType,13,primTile,0,,,96,,Tile,LegacyPrimitiveCode Tile,med,declaration-only;source:gpu.h:33
-T00118.014,T00118,vs_primType,14,primTileSemiTrans,0,,,98,,TileSemiTrans,LegacyPrimitiveCode TileSemiTrans,med,declaration-only;source:gpu.h:34
-T00118.015,T00118,vs_primType,15,primSprt,0,,,100,,Sprite,LegacyPrimitiveCode Sprite,med,declaration-only;source:gpu.h:35
-T00118.016,T00118,vs_primType,16,primSprtSemtTrans,0,,,102,,SpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,med,declaration-only;source:gpu.h:36
-T00119.000,T00119,vs_semiTransparencyRate,0,semiTransparencyHalf,0,,,0,,Average,BlendMode Average,med,declaration-only;source:gpu.h:9
-T00119.001,T00119,vs_semiTransparencyRate,1,semiTransparencyFull,0,,,1,,Add,BlendMode Add,med,declaration-only;source:gpu.h:10
-T00119.002,T00119,vs_semiTransparencyRate,2,semiTransparencySubtract,0,,,2,,Subtract,BlendMode Subtract,med,declaration-only;source:gpu.h:11
-T00119.003,T00119,vs_semiTransparencyRate,3,semiTransparencyQuarterFront,0,,,3,,AddQuarter,BlendMode AddQuarter,med,declaration-only;source:gpu.h:12
+T00117.000,T00117,vs_primAddr,0,primAddrNull,0,,,0,,kNull,LegacyPrimitiveAddress Null,med,declaration-only;source:gpu.h:17
+T00117.001,T00117,vs_primAddr,1,primAddrEnd,0,,,16777215,,kEnd,LegacyPrimitiveAddress End,med,declaration-only;source:gpu.h:17
+T00118.000,T00118,vs_primType,0,primShadeTex,0,,,1,,kShadeTex,LegacyPrimitiveCode ShadeTex,med,declaration-only;source:gpu.h:20
+T00118.001,T00118,vs_primType,1,primSemiTrans,0,,,2,,kSemiTrans,LegacyPrimitiveCode SemiTrans,med,declaration-only;source:gpu.h:21
+T00118.002,T00118,vs_primType,2,primPolyFT3,0,,,36,,kPolyFt3,LegacyPrimitiveCode PolyFt3,med,declaration-only;source:gpu.h:22
+T00118.003,T00118,vs_primType,3,primPolyFT4,0,,,44,,kPolyFt4,LegacyPrimitiveCode PolyFt4,med,declaration-only;source:gpu.h:23
+T00118.004,T00118,vs_primType,4,primPolyFT4ShadeTex,0,,,45,,kPolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,med,declaration-only;source:gpu.h:24
+T00118.005,T00118,vs_primType,5,primPolyG4,0,,,56,,kPolyG4,LegacyPrimitiveCode PolyG4,med,declaration-only;source:gpu.h:25
+T00118.006,T00118,vs_primType,6,primPolyG4SemiTrans,0,,,58,,kPolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,med,declaration-only;source:gpu.h:26
+T00118.007,T00118,vs_primType,7,primPolyGT4,0,,,60,,kPolyGt4,LegacyPrimitiveCode PolyGt4,med,declaration-only;source:gpu.h:27
+T00118.008,T00118,vs_primType,8,primPolyGT4SemiTrans,0,,,62,,kPolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,med,declaration-only;source:gpu.h:28
+T00118.009,T00118,vs_primType,9,primLineF2,0,,,64,,kLineF2,LegacyPrimitiveCode LineF2,med,declaration-only;source:gpu.h:29
+T00118.010,T00118,vs_primType,10,primLineF2SemiTrans,0,,,66,,kLineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,med,declaration-only;source:gpu.h:30
+T00118.011,T00118,vs_primType,11,primLineG2,0,,,80,,kLineG2,LegacyPrimitiveCode LineG2,med,declaration-only;source:gpu.h:31
+T00118.012,T00118,vs_primType,12,primLineG2SemiTrans,0,,,82,,kLineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,med,declaration-only;source:gpu.h:32
+T00118.013,T00118,vs_primType,13,primTile,0,,,96,,kTile,LegacyPrimitiveCode Tile,med,declaration-only;source:gpu.h:33
+T00118.014,T00118,vs_primType,14,primTileSemiTrans,0,,,98,,kTileSemiTrans,LegacyPrimitiveCode TileSemiTrans,med,declaration-only;source:gpu.h:34
+T00118.015,T00118,vs_primType,15,primSprt,0,,,100,,kSprite,LegacyPrimitiveCode Sprite,med,declaration-only;source:gpu.h:35
+T00118.016,T00118,vs_primType,16,primSprtSemtTrans,0,,,102,,kSpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,med,declaration-only;source:gpu.h:36
+T00119.000,T00119,vs_semiTransparencyRate,0,semiTransparencyHalf,0,,,0,,kAverage,BlendMode Average,med,declaration-only;source:gpu.h:9
+T00119.001,T00119,vs_semiTransparencyRate,1,semiTransparencyFull,0,,,1,,kAdd,BlendMode Add,med,declaration-only;source:gpu.h:10
+T00119.002,T00119,vs_semiTransparencyRate,2,semiTransparencySubtract,0,,,2,,kSubtract,BlendMode Subtract,med,declaration-only;source:gpu.h:11
+T00119.003,T00119,vs_semiTransparencyRate,3,semiTransparencyQuarterFront,0,,,3,,kAddQuarter,BlendMode AddQuarter,med,declaration-only;source:gpu.h:12
 T00120.000,T00120,vs_string_chars,0,vs_char_noChunking,0,,,0,,NoChunking,TextCode NoChunking,med,declaration-only;source:vs_string.h:4
 T00120.001,T00120,vs_string_chars,1,vs_char_zero,0,,,0,,Zero,TextCode Zero,med,declaration-only;source:vs_string.h:5
 T00120.002,T00120,vs_string_chars,2,vs_char_fontTable0,0,,,6,,FontTableZero,TextCode FontTableZero,med,declaration-only;source:vs_string.h:6
@@ -701,9 +701,9 @@ T00120.017,T00120,vs_string_chars,17,vs_char_fontTable,0,,,251,,FontTable,TextCo
 T00120.018,T00120,vs_string_chars,18,vs_char_printHex,0,,,253,,PrintHex,TextCode PrintHex,med,declaration-only;source:vs_string.h:22
 T00120.019,T00120,vs_string_chars,19,vs_char_printDecimal,0,,,254,,PrintDecimal,TextCode PrintDecimal,med,declaration-only;source:vs_string.h:23
 T00120.020,T00120,vs_string_chars,20,vs_char_printString,0,,,255,,PrintString,TextCode PrintString,med,declaration-only;source:vs_string.h:24
-T00121.000,T00121,vs_texMode,0,clut4Bit,0,,,0,,Palette4Bit,TextureFormat Palette4Bit,med,declaration-only;source:gpu.h:6
-T00121.001,T00121,vs_texMode,1,clut8Bit,0,,,1,,Palette8Bit,TextureFormat Palette8Bit,med,declaration-only;source:gpu.h:6
-T00121.002,T00121,vs_texMode,2,direct16Bit,0,,,2,,Direct16Bit,TextureFormat Direct16Bit,med,declaration-only;source:gpu.h:6
+T00121.000,T00121,vs_texMode,0,clut4Bit,0,,,0,,kPalette4Bit,TextureFormat Palette4Bit,med,declaration-only;source:gpu.h:6
+T00121.001,T00121,vs_texMode,1,clut8Bit,0,,,1,,kPalette8Bit,TextureFormat Palette8Bit,med,declaration-only;source:gpu.h:6
+T00121.002,T00121,vs_texMode,2,direct16Bit,0,,,2,,kDirect16Bit,TextureFormat Direct16Bit,med,declaration-only;source:gpu.h:6
 T00122.000,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frames within the current second,med,declaration-only;source:main.h:167
 T00122.001,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Seconds within the current minute,high,source:260.c:767
 T00122.002,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minutes within the current hour,high,source:260.c:765
@@ -1151,17 +1151,17 @@ T00197.003,T00197,ColorInfo,3,a,0,char,,,,maskBit,Semi-transparency bit written 
 T00197.004,T00197,ColorInfo,4,rindex,0,u_char,,,,redStepRow,Target minus current red plus 31; selects the fade step table row,high,source:main.c:10531;source:main.c:11373
 T00197.005,T00197,ColorInfo,5,gindex,0,u_char,,,,greenStepRow,Target minus current green plus 31; selects the fade step table row,high,source:main.c:10532;source:main.c:11374
 T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus current blue plus 31; selects the fade step table row,high,source:main.c:10533;source:main.c:11375
-T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:15;declaration-only;source:30DB0.h:28
-T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texturePage,Texture page of the model being drawn,high,source:49268.c:134
+T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
+T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
 T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:403;declaration-only;source:30DB0.h:31
-T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angleX,Actor X angle staged for the transform,med,source:44F14.c:849
-T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angleY,Actor Y angle staged for the transform,med,source:44F14.c:850
-T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3E,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:21;declaration-only;source:30DB0.h:34
+T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
+T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
+T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
 T00198.007,T00198,D_1F80035C_t,7,position,0,SVECTOR,,,,position,World position of the model,med,source:49268.c:57
-T00198.008,T00198,D_1F80035C_t,8,offset,0,SVECTOR,,,,rootOffset,Root offset of the animated model,high,source:44F14.c:836
-T00198.009,T00198,D_1F80035C_t,9,parent,0,MATRIX *,,,,parentBoneMatrix,Matrix of the parent bone,high,source:49268.c:194
-T00198.010,T00198,D_1F80035C_t,10,unk60,1,int,,,,reserved60,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:25;declaration-only;source:30DB0.h:38
+T00198.008,T00198,D_1F80035C_t,8,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:44F14.c:836
+T00198.009,T00198,D_1F80035C_t,9,parent,0,MATRIX *,,,,parent_bone_matrix,Matrix of the parent bone,high,source:49268.c:194
+T00198.010,T00198,D_1F80035C_t,10,unk60,1,int,,,,reserved60,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:37;declaration-only;source:30DB0.h:38
 T00198.011,T00198,D_1F80035C_t,11,matrix,0,MATRIX,,,,matrix,Working model matrix,high,source:44F14.c:861
 T00198.012,T00198,D_1F80035C_t,12,rotation,0,SVECTOR,,,,rotation,Rotation angles,high,source:30DB0.c:3700
 T00198.013,T00198,D_1F80035C_t,13,scale,0,VECTOR,,,,scale,Scale applied to the working matrix,high,source:44F14.c:871
@@ -1446,8 +1446,8 @@ T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,opaque16,Copied from the acti
 T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,enemyClass,Enemy class of the target,high,source:146C.c:3267
 T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
 T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
-T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved8,Cleared with the effect and never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Engine\src\Render\ScreenOverlayLive.cpp:379;source:146C.c:9273
-T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reservedC,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Event\EventScreenTweensLive.cpp:165;declaration-only;source:146C.h:725
+T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved08,Cleared with the effect and never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Engine\src\Render\ScreenOverlayLive.cpp:379;source:146C.c:9273
+T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reserved0c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Event\EventScreenTweensLive.cpp:165;declaration-only;source:146C.h:725
 T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
 T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
 T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392
@@ -2524,73 +2524,73 @@ T00293.004,T00293,System_dat_h,4,unk10,1,size_t,,,,image3Offset,Fourth rectangle
 T00293.005,T00293,System_dat_h,5,unk14,1,size_t,,,,image4Offset,Fifth rectangle-headed image,high,source:18.c:290
 T00293.006,T00293,System_dat_h,6,unk18,1,size_t,,,,fixedImageOffset,Size-headed image loaded at VRAM 768 240,high,source:18.c:295;source:18.c:296
 T00293.007,T00293,System_dat_h,7,unk1C,1,size_t,,,,interfaceDataOffset,Data passed to Menu::Framework::InitGameInterface,high,source:18.c:300
-T00294.000,T00294,TrailPacket,0,tag,0,u_long,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:59;declaration-only;source:5BF94.c:138
+T00294.000,T00294,TrailPacket,0,tag,0,u_long,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:43;declaration-only;source:5BF94.c:138
 T00294.001,T00294,TrailPacket,1,mode,0,u_long,,,,mode,Named in the fork; see cited use,med,source:5BF94.c:4915
-T00294.002,T00294,TrailPacket,2,r0,0,u_char,,,,r0,Named in the fork; see cited use,med,source:5BF94.c:4923
-T00294.003,T00294,TrailPacket,3,g0,0,u_char,,,,g0,Named in the fork; see cited use,med,source:5BF94.c:4924
+T00294.002,T00294,TrailPacket,2,r0,0,u_char,,,,red0,Named in the fork; see cited use,med,source:5BF94.c:4923
+T00294.003,T00294,TrailPacket,3,g0,0,u_char,,,,green0,Named in the fork; see cited use,med,source:5BF94.c:4924
 T00294.004,T00294,TrailPacket,4,b0,0,u_char,,,,blue0,Blue of the first head vertex,med,source:5BF94.c:4925
 T00294.005,T00294,TrailPacket,5,code,0,u_char,,,,code,Named in the fork; see cited use,med,source:5BF94.c:4914
 T00294.006,T00294,TrailPacket,6,xy0,0,long,,,,xy0,Named in the fork; see cited use,med,source:5BF94.c:4917
 T00294.007,T00294,TrailPacket,7,uv0,0,u_short,,,,uv0,Named in the fork; see cited use,med,source:5BF94.c:4944
-T00294.008,T00294,TrailPacket,8,clut,0,u_short,,,,clut,Named in the fork; see cited use,med,source:5BF94.c:4940
-T00294.009,T00294,TrailPacket,9,r1,0,u_char,,,,r1,Named in the fork; see cited use,med,source:5BF94.c:4923
-T00294.010,T00294,TrailPacket,10,g1,0,u_char,,,,g1,Named in the fork; see cited use,med,source:5BF94.c:4924
+T00294.008,T00294,TrailPacket,8,clut,0,u_short,,,,palette,Named in the fork; see cited use,med,source:5BF94.c:4940
+T00294.009,T00294,TrailPacket,9,r1,0,u_char,,,,red1,Named in the fork; see cited use,med,source:5BF94.c:4923
+T00294.010,T00294,TrailPacket,10,g1,0,u_char,,,,green1,Named in the fork; see cited use,med,source:5BF94.c:4924
 T00294.011,T00294,TrailPacket,11,b1,0,u_char,,,,blue1,Blue of the second head vertex,med,source:5BF94.c:4925
-T00294.012,T00294,TrailPacket,12,pad1,1,u_char,,,,reserved17,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:71;declaration-only;source:5BF94.c:150
+T00294.012,T00294,TrailPacket,12,pad1,1,u_char,,,,reserved17,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:55;declaration-only;source:5BF94.c:150
 T00294.013,T00294,TrailPacket,13,xy1,0,long,,,,xy1,Named in the fork; see cited use,med,source:5BF94.c:4918
 T00294.014,T00294,TrailPacket,14,uv1,0,u_short,,,,uv1,Named in the fork; see cited use,med,source:5BF94.c:4946
-T00294.015,T00294,TrailPacket,15,tpage,0,u_short,,,,tpage,Named in the fork; see cited use,med,source:5BF94.c:4937
-T00294.016,T00294,TrailPacket,16,r2,0,u_char,,,,r2,Named in the fork; see cited use,med,source:5BF94.c:4926
-T00294.017,T00294,TrailPacket,17,g2,0,u_char,,,,g2,Named in the fork; see cited use,med,source:5BF94.c:4927
+T00294.015,T00294,TrailPacket,15,tpage,0,u_short,,,,texture_page,Named in the fork; see cited use,med,source:5BF94.c:4937
+T00294.016,T00294,TrailPacket,16,r2,0,u_char,,,,red2,Named in the fork; see cited use,med,source:5BF94.c:4926
+T00294.017,T00294,TrailPacket,17,g2,0,u_char,,,,green2,Named in the fork; see cited use,med,source:5BF94.c:4927
 T00294.018,T00294,TrailPacket,18,b2,0,u_char,,,,blue2,Blue of the first tail vertex,med,source:5BF94.c:4928
-T00294.019,T00294,TrailPacket,19,pad2,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:78;declaration-only;source:5BF94.c:157
+T00294.019,T00294,TrailPacket,19,pad2,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:62;declaration-only;source:5BF94.c:157
 T00294.020,T00294,TrailPacket,20,xy2,0,long,,,,xy2,Named in the fork; see cited use,med,source:5BF94.c:4919
 T00294.021,T00294,TrailPacket,21,uv2,0,u_short,,,,uv2,Named in the fork; see cited use,med,source:5BF94.c:4945
-T00294.022,T00294,TrailPacket,22,pad3,1,u_short,,,,reserved2A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:81;declaration-only;source:5BF94.c:160
-T00294.023,T00294,TrailPacket,23,r3,0,u_char,,,,r3,Named in the fork; see cited use,med,source:5BF94.c:4926
-T00294.024,T00294,TrailPacket,24,g3,0,u_char,,,,g3,Named in the fork; see cited use,med,source:5BF94.c:4927
+T00294.022,T00294,TrailPacket,22,pad3,1,u_short,,,,reserved2a,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:65;declaration-only;source:5BF94.c:160
+T00294.023,T00294,TrailPacket,23,r3,0,u_char,,,,red3,Named in the fork; see cited use,med,source:5BF94.c:4926
+T00294.024,T00294,TrailPacket,24,g3,0,u_char,,,,green3,Named in the fork; see cited use,med,source:5BF94.c:4927
 T00294.025,T00294,TrailPacket,25,b3,0,u_char,,,,blue3,Blue of the second tail vertex,med,source:5BF94.c:4928
-T00294.026,T00294,TrailPacket,26,pad4,1,u_char,,,,reserved2F,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:85;declaration-only;source:5BF94.c:164
+T00294.026,T00294,TrailPacket,26,pad4,1,u_char,,,,reserved2f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:69;declaration-only;source:5BF94.c:164
 T00294.027,T00294,TrailPacket,27,xy3,0,long,,,,xy3,Named in the fork; see cited use,med,source:5BF94.c:4920
 T00294.028,T00294,TrailPacket,28,uv3,0,u_short,,,,uv3,Named in the fork; see cited use,med,source:5BF94.c:4947
-T00294.029,T00294,TrailPacket,29,pad5,1,u_short,,,,reserved36,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:88;declaration-only;source:5BF94.c:167
-T00294.030,T00294,TrailPacket,30,endMode,0,u_long,,,,endMode,Named in the fork; see cited use,med,source:5BF94.c:4916
-T00295.000,T00295,VS_POLY_FT4,0,r0g0b0code,0,u_long,,,,colorCode,Color and command,med,declaration-only;source:gpu.h:84
+T00294.029,T00294,TrailPacket,29,pad5,1,u_short,,,,reserved36,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:72;declaration-only;source:5BF94.c:167
+T00294.030,T00294,TrailPacket,30,endMode,0,u_long,,,,end_mode,Named in the fork; see cited use,med,source:5BF94.c:4916
+T00295.000,T00295,VS_POLY_FT4,0,r0g0b0code,0,u_long,,,,color_code,Color and command,med,declaration-only;source:gpu.h:84
 T00295.001,T00295,VS_POLY_FT4,1,x0y0,0,u_long,,,,xy0,Vertex 0,med,declaration-only;source:gpu.h:85
-T00295.002,T00295,VS_POLY_FT4,2,u0v0clut,0,u_long,,,,uv0Palette,UV 0 and palette,med,declaration-only;source:gpu.h:86
+T00295.002,T00295,VS_POLY_FT4,2,u0v0clut,0,u_long,,,,uv0_palette,UV 0 and palette,med,declaration-only;source:gpu.h:86
 T00295.003,T00295,VS_POLY_FT4,3,x1y1,0,u_long,,,,xy1,Vertex 1,med,declaration-only;source:gpu.h:87
-T00295.004,T00295,VS_POLY_FT4,4,u1v1tpage,0,u_long,,,,uv1TexturePage,UV 1 and texture page,med,declaration-only;source:gpu.h:88
+T00295.004,T00295,VS_POLY_FT4,4,u1v1tpage,0,u_long,,,,uv1_texture_page,UV 1 and texture page,med,declaration-only;source:gpu.h:88
 T00295.005,T00295,VS_POLY_FT4,5,x2y2,0,u_long,,,,xy2,Vertex 2,med,declaration-only;source:gpu.h:89
 T00295.006,T00295,VS_POLY_FT4,6,u2v2,0,u_long,,,,uv2,UV 2,med,declaration-only;source:gpu.h:90
 T00295.007,T00295,VS_POLY_FT4,7,x3y3,0,u_long,,,,xy3,Vertex 3,med,declaration-only;source:gpu.h:91
 T00295.008,T00295,VS_POLY_FT4,8,u3v3,0,u_long,,,,uv3,UV 3,med,declaration-only;source:gpu.h:92
-T00296.000,T00296,VS_POLY_G4,0,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:73
-T00296.001,T00296,VS_POLY_G4,1,x0y0,0,u_long,,,,positionZero,First vertex position,med,declaration-only;source:gpu.h:74
-T00296.002,T00296,VS_POLY_G4,2,r1g1b1,0,u_long,,,,colorOne,Second vertex color,med,source:MENU/MENU7.PRG/260.c:1317;use cited by sanity pass;source:gpu.h:75
-T00296.003,T00296,VS_POLY_G4,3,x1y1,0,u_long,,,,positionOne,Second vertex position,med,source:MENU/MENU7.PRG/260.c:1318;use cited by sanity pass;source:gpu.h:76
-T00296.004,T00296,VS_POLY_G4,4,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,med,source:MENU/MENU7.PRG/260.c:1319;use cited by sanity pass;source:gpu.h:77
-T00296.005,T00296,VS_POLY_G4,5,x2y2,0,u_long,,,,positionTwo,Third vertex position,med,source:MENU/MENU7.PRG/260.c:1320;use cited by sanity pass;source:gpu.h:78
-T00296.006,T00296,VS_POLY_G4,6,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,med,source:MENU/MENU7.PRG/260.c:1321;use cited by sanity pass;source:gpu.h:79
-T00296.007,T00296,VS_POLY_G4,7,x3y3,0,u_long,,,,positionThree,Fourth vertex position,med,source:MENU/MENU7.PRG/260.c:1322;use cited by sanity pass;source:gpu.h:80
-T00297.000,T00297,VS_POLY_G4_TPAGE,0,tpage,0,u_long,,,,texturePage,Texture page command word,med,source:MENU/MENU7.PRG/260.c:1383;use cited by sanity pass;source:gpu.h:61
-T00297.001,T00297,VS_POLY_G4_TPAGE,1,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,med,source:MENU/MENU7.PRG/260.c:1378;use cited by sanity pass;source:gpu.h:62
-T00297.002,T00297,VS_POLY_G4_TPAGE,2,x0y0,0,u_long,,,,positionZero,First vertex position,med,source:MENU/MENU7.PRG/260.c:1380;use cited by sanity pass;source:gpu.h:63
-T00297.003,T00297,VS_POLY_G4_TPAGE,3,r1g1b1,0,u_long,,,,colorOne,Second vertex color,med,source:58578.c:711;use cited by sanity pass;source:gpu.h:64
-T00297.004,T00297,VS_POLY_G4_TPAGE,4,x1y1,0,u_long,,,,positionOne,Second vertex position,med,source:58578.c:712;use cited by sanity pass;source:gpu.h:65
-T00297.005,T00297,VS_POLY_G4_TPAGE,5,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,med,source:58578.c:713;use cited by sanity pass;source:gpu.h:66
-T00297.006,T00297,VS_POLY_G4_TPAGE,6,x2y2,0,u_long,,,,positionTwo,Third vertex position,med,source:58578.c:714;use cited by sanity pass;source:gpu.h:67
-T00297.007,T00297,VS_POLY_G4_TPAGE,7,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,med,source:58578.c:715;use cited by sanity pass;source:gpu.h:68
-T00297.008,T00297,VS_POLY_G4_TPAGE,8,x3y3,0,u_long,,,,positionThree,Fourth vertex position,med,source:58578.c:716;use cited by sanity pass;source:gpu.h:69
-T00298.000,T00298,VS_SPRT,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render texture handle;source:MENU/MENU7.PRG/260.c:1192;use cited by sanity pass;source:gpu.h:53
-T00298.001,T00298,VS_SPRT,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and sprite command,med,replaced-by:Render sprite color;source:MENU/MENU7.PRG/260.c:1193;use cited by sanity pass;source:gpu.h:54
+T00296.000,T00296,VS_POLY_G4,0,r0g0b0code,0,u_long,,,,color_zero_and_code,First vertex color and command code,med,declaration-only;source:gpu.h:73
+T00296.001,T00296,VS_POLY_G4,1,x0y0,0,u_long,,,,position_zero,First vertex position,med,declaration-only;source:gpu.h:74
+T00296.002,T00296,VS_POLY_G4,2,r1g1b1,0,u_long,,,,color_one,Second vertex color,med,source:MENU/MENU7.PRG/260.c:1317;use cited by sanity pass;source:gpu.h:75
+T00296.003,T00296,VS_POLY_G4,3,x1y1,0,u_long,,,,position_one,Second vertex position,med,source:MENU/MENU7.PRG/260.c:1318;use cited by sanity pass;source:gpu.h:76
+T00296.004,T00296,VS_POLY_G4,4,r2g2b2,0,u_long,,,,color_two,Third vertex color,med,source:MENU/MENU7.PRG/260.c:1319;use cited by sanity pass;source:gpu.h:77
+T00296.005,T00296,VS_POLY_G4,5,x2y2,0,u_long,,,,position_two,Third vertex position,med,source:MENU/MENU7.PRG/260.c:1320;use cited by sanity pass;source:gpu.h:78
+T00296.006,T00296,VS_POLY_G4,6,r3g3b3,0,u_long,,,,color_three,Fourth vertex color,med,source:MENU/MENU7.PRG/260.c:1321;use cited by sanity pass;source:gpu.h:79
+T00296.007,T00296,VS_POLY_G4,7,x3y3,0,u_long,,,,position_three,Fourth vertex position,med,source:MENU/MENU7.PRG/260.c:1322;use cited by sanity pass;source:gpu.h:80
+T00297.000,T00297,VS_POLY_G4_TPAGE,0,tpage,0,u_long,,,,texture_page,Texture page command word,med,source:MENU/MENU7.PRG/260.c:1383;use cited by sanity pass;source:gpu.h:61
+T00297.001,T00297,VS_POLY_G4_TPAGE,1,r0g0b0code,0,u_long,,,,color_zero_and_code,First vertex color and command code,med,source:MENU/MENU7.PRG/260.c:1378;use cited by sanity pass;source:gpu.h:62
+T00297.002,T00297,VS_POLY_G4_TPAGE,2,x0y0,0,u_long,,,,position_zero,First vertex position,med,source:MENU/MENU7.PRG/260.c:1380;use cited by sanity pass;source:gpu.h:63
+T00297.003,T00297,VS_POLY_G4_TPAGE,3,r1g1b1,0,u_long,,,,color_one,Second vertex color,med,source:58578.c:711;use cited by sanity pass;source:gpu.h:64
+T00297.004,T00297,VS_POLY_G4_TPAGE,4,x1y1,0,u_long,,,,position_one,Second vertex position,med,source:58578.c:712;use cited by sanity pass;source:gpu.h:65
+T00297.005,T00297,VS_POLY_G4_TPAGE,5,r2g2b2,0,u_long,,,,color_two,Third vertex color,med,source:58578.c:713;use cited by sanity pass;source:gpu.h:66
+T00297.006,T00297,VS_POLY_G4_TPAGE,6,x2y2,0,u_long,,,,position_two,Third vertex position,med,source:58578.c:714;use cited by sanity pass;source:gpu.h:67
+T00297.007,T00297,VS_POLY_G4_TPAGE,7,r3g3b3,0,u_long,,,,color_three,Fourth vertex color,med,source:58578.c:715;use cited by sanity pass;source:gpu.h:68
+T00297.008,T00297,VS_POLY_G4_TPAGE,8,x3y3,0,u_long,,,,position_three,Fourth vertex position,med,source:58578.c:716;use cited by sanity pass;source:gpu.h:69
+T00298.000,T00298,VS_SPRT,0,tpage,0,u_long,,,,texture_page_command,Packed PS1 texture-page command word,med,replaced-by:Render texture handle;source:MENU/MENU7.PRG/260.c:1192;use cited by sanity pass;source:gpu.h:53
+T00298.001,T00298,VS_SPRT,1,r0g0b0code,0,u_long,,,,color_command,Packed RGB color and sprite command,med,replaced-by:Render sprite color;source:MENU/MENU7.PRG/260.c:1193;use cited by sanity pass;source:gpu.h:54
 T00298.002,T00298,VS_SPRT,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,med,replaced-by:Render sprite position;source:MENU/MENU7.PRG/260.c:1195;use cited by sanity pass;source:gpu.h:55
-T00298.003,T00298,VS_SPRT,3,u0v0clut,0,u_long,,,,uvPalette,Packed texture UV and CLUT selector,med,replaced-by:Render atlas region;source:MENU/MENU7.PRG/260.c:1196;use cited by sanity pass;source:gpu.h:56
+T00298.003,T00298,VS_SPRT,3,u0v0clut,0,u_long,,,,uv_palette,Packed texture UV and CLUT selector,med,replaced-by:Render atlas region;source:MENU/MENU7.PRG/260.c:1196;use cited by sanity pass;source:gpu.h:56
 T00298.004,T00298,VS_SPRT,4,wh,0,u_long,,,,size,Packed width and height in pixels,med,replaced-by:Render sprite size;source:MENU/MENU7.PRG/260.c:1197;use cited by sanity pass;source:gpu.h:57
-T00299.000,T00299,VS_TILE,0,r0g0b0code,0,u_long,,,,colorAndCode,Fill color and command code,med,source:22C.c:3307;use cited by sanity pass;source:gpu.h:47
+T00299.000,T00299,VS_TILE,0,r0g0b0code,0,u_long,,,,color_and_code,Fill color and command code,med,source:22C.c:3307;use cited by sanity pass;source:gpu.h:47
 T00299.001,T00299,VS_TILE,1,x0y0,0,u_long,,,,position,Top-left position,med,source:22C.c:3308;use cited by sanity pass;source:gpu.h:48
 T00299.002,T00299,VS_TILE,2,wh,0,u_long,,,,size,Width and height,med,source:58578.c:707;use cited by sanity pass;source:gpu.h:49
-T00300.000,T00300,VS_TILE_TPAGE,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render draw state;source:MENU/MENU7.PRG/260.c:1308;use cited by sanity pass;source:gpu.h:40
-T00300.001,T00300,VS_TILE_TPAGE,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and tile command,med,replaced-by:Render rectangle color;source:22C.c:4640;use cited by sanity pass;source:gpu.h:41
+T00300.000,T00300,VS_TILE_TPAGE,0,tpage,0,u_long,,,,texture_page_command,Packed PS1 texture-page command word,med,replaced-by:Render draw state;source:MENU/MENU7.PRG/260.c:1308;use cited by sanity pass;source:gpu.h:40
+T00300.001,T00300,VS_TILE_TPAGE,1,r0g0b0code,0,u_long,,,,color_command,Packed RGB color and tile command,med,replaced-by:Render rectangle color;source:22C.c:4640;use cited by sanity pass;source:gpu.h:41
 T00300.002,T00300,VS_TILE_TPAGE,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,med,replaced-by:Render rectangle position;source:22C.c:4641;use cited by sanity pass;source:gpu.h:42
 T00300.003,T00300,VS_TILE_TPAGE,3,wh,0,u_long,,,,size,Packed width and height in pixels,med,replaced-by:Render rectangle size;source:MENU/MENU7.PRG/260.c:1314;use cited by sanity pass;source:gpu.h:43
 T00301.000,T00301,_accessoryIntermediate,0,equip,0,vs_battle_uiEquipment,,,,equipment,Accessory statistics,high,source:146C.c:1084
@@ -3045,11 +3045,11 @@ T00341.002,T00341,_textBoxSelector_t,2,unk9,1,u_char,,,,reserved9,Not used by na
 T00341.003,T00341,_textBoxSelector_t,3,selectedIndex,0,u_char,,,,selectedIndex,Named in the fork; see cited use,med,source:5BF94.c:1596
 T00341.004,T00341,_textBoxSelector_t,4,count,0,u_char,,,,count,Named in the fork; see cited use,med,source:5BF94.c:1569
 T00341.005,T00341,_textBoxSelector_t,5,unkC,1,u_char,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\TextBoxes.h:37;declaration-only;source:5BF94.c:185
-T00342.000,T00342,_texture_t,0,x,0,char,,,,x,Named in the fork; see cited use,med,source:renderTextures.h:17
-T00342.001,T00342,_texture_t,1,y,0,char,,,,y,Named in the fork; see cited use,med,source:renderTextures.h:17
-T00342.002,T00342,_texture_t,2,w,0,char,,,,w,Named in the fork; see cited use,med,source:D4.c:1940
-T00342.003,T00342,_texture_t,3,h,0,char,,,,h,Named in the fork; see cited use,med,source:renderTextures.h:15
-T00342.004,T00342,_texture_t,4,tpage,0,u_short,,,,tpage,Named in the fork; see cited use,med,source:renderTextures.h:41
+T00342.000,T00342,_texture_t,0,x,0,char,,,,u,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.001,T00342,_texture_t,1,y,0,char,,,,v,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.002,T00342,_texture_t,2,w,0,char,,,,width,Named in the fork; see cited use,med,source:D4.c:1940
+T00342.003,T00342,_texture_t,3,h,0,char,,,,height,Named in the fork; see cited use,med,source:renderTextures.h:15
+T00342.004,T00342,_texture_t,4,tpage,0,u_short,,,,texture_page,Named in the fork; see cited use,med,source:renderTextures.h:41
 T00342.005,T00342,_texture_t,5,clut,0,u_short,,,,clut,Named in the fork; see cited use,med,source:renderTextures.h:40
 T00343.000,T00343,_trail,0,splinePoints,0,SVECTOR[4],,,,splinePoints,Named in the fork; see cited use,med,source:trails5.h:73
 T00343.001,T00343,_trail,1,stepCount,0,u_char,,,,stepCount,Named in the fork; see cited use,med,source:trails5.h:395
@@ -3591,12 +3591,12 @@ T00394.011,T00394,actorTimerState,11,direction,0,signed char,,,,direction,Named 
 T00394.012,T00394,actorTimerState,12,pad131,1,char[111],,,,reserved131,Not read through this view,low,declaration-only;source:73700.c:459
 T00394.013,T00394,actorTimerState,13,next,0,struct actorTimerState *,,,,nextEngaged,Next actor in the engagement list,med,source:73700.c:524
 T00394.014,T00394,actorTimerState,14,targetFlags,0,unsigned char,,,,targetFlags,Named in the fork view; see cited use,med,source:73700.c:509
-T00395.000,T00395,actorTransformScratch,0,prefix,0,char[58],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:34;declaration-only;source:44F14.c:68
-T00395.001,T00395,actorTransformScratch,1,angleX,0,u_short,,,,angleX,Actor X angle staged for the transform,high,source:44F14.c:1683
-T00395.002,T00395,actorTransformScratch,2,angleY,0,u_short,,,,angleY,Actor Y angle staged for the transform,high,source:44F14.c:1684
-T00395.003,T00395,actorTransformScratch,3,padding,0,char[22],,,,reserved3E,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:36;declaration-only;source:44F14.c:70
-T00395.004,T00395,actorTransformScratch,4,offset,0,SVECTOR,,,,rootOffset,Root offset of the animated model,high,source:44F14.c:1126
-T00395.005,T00395,actorTransformScratch,5,padding2,0,char[8],,,,reserved5C,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:38;declaration-only;source:44F14.c:72
+T00395.000,T00395,actorTransformScratch,0,prefix,0,char[58],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:46;declaration-only;source:44F14.c:68
+T00395.001,T00395,actorTransformScratch,1,angleX,0,u_short,,,,angle_x,Actor X angle staged for the transform,high,source:44F14.c:1683
+T00395.002,T00395,actorTransformScratch,2,angleY,0,u_short,,,,angle_y,Actor Y angle staged for the transform,high,source:44F14.c:1684
+T00395.003,T00395,actorTransformScratch,3,padding,0,char[22],,,,reserved3e,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:49;declaration-only;source:44F14.c:70
+T00395.004,T00395,actorTransformScratch,4,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:44F14.c:1126
+T00395.005,T00395,actorTransformScratch,5,padding2,0,char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:51;declaration-only;source:44F14.c:72
 T00395.006,T00395,actorTransformScratch,6,matrix,0,MATRIX,,,,matrix,Working model matrix,med,declaration-only;source:44F14.c:73
 T00395.007,T00395,actorTransformScratch,7,rotation,0,SVECTOR,,,,rotation,Rotation angles,high,source:44F14.c:1776
 T00396.000,T00396,actorUpdateActor,0,next,0,struct actorUpdateActor *,,,,next,Named in the fork; see cited use,med,source:6FC00.c:1010
@@ -3704,10 +3704,10 @@ T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,pad00,Leading scratch 
 T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,eyeShake,Summed eye shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:225
 T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,lookAtShake,Summed look-at shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:226
 T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,axisShake,Current oscillator offset by axis,med,scratchpad overlay;source:4A0A8.c:3995;use cited by sanity pass;source:4A0A8.c:227
-T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:46;declaration-only;source:44F14.c:78
-T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:47;declaration-only;source:44F14.c:79
-T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:48;declaration-only;source:44F14.c:80
-T00405.003,T00405,cameraTransformScratch,3,scale,0,VECTOR,,,,reserved8C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:49;declaration-only;source:44F14.c:81
+T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:58;declaration-only;source:44F14.c:78
+T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:59;declaration-only;source:44F14.c:79
+T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:60;declaration-only;source:44F14.c:80
+T00405.003,T00405,cameraTransformScratch,3,scale,0,VECTOR,,,,reserved8c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:61;declaration-only;source:44F14.c:81
 T00406.000,T00406,candidateMovementState,0,pad0,1,char[1],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:611;declaration-only;source:71618.c:481
 T00406.001,T00406,candidateMovementState,1,f1,0,unsigned char,,,,opaque1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:612;source:71618.c:591
 T00406.002,T00406,candidateMovementState,2,pad2,1,char[74],,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:613;declaration-only;source:71618.c:483
@@ -3894,7 +3894,7 @@ T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,h,Named in the fork; see ci
 T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,text,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1480
 T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexedPixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
 T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
-T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:55;declaration-only;source:44F14.c:138
+T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:66;declaration-only;source:44F14.c:138
 T00427.001,T00427,frameScratch,1,depth,0,int,,,,depth,Ordering-table depth offset,high,source:44F14.c:1065
 T00428.000,T00428,func_800172D4_t,0,index,0,int,,,,index,Sound-effect slot index,med,declaration-only;source:25AC.c:51
 T00428.001,T00428,func_800172D4_t,1,unk4,1,int,,,,reserved04,Unidentified word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Sfx.h:11;declaration-only;source:25AC.c:52
@@ -4150,10 +4150,10 @@ T00462.005,T00462,func_800A1108_t,5,unk14,1,int,,,,reserved14,Not used by native
 T00462.006,T00462,func_800A1108_t,6,unk18,1,int,,,,reserved18,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:43;declaration-only;source:146C.c:337
 T00462.007,T00462,func_800A1108_t,7,unk1C,1,int,,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:44;declaration-only;source:146C.c:338
 T00462.008,T00462,func_800A1108_t,8,unk20,1,int,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:45;declaration-only;source:146C.c:339
-T00463.000,T00463,func_800A1DE8_t,0,unk0,1,u_char[76],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:63;declaration-only;source:38C1C.c:11
+T00463.000,T00463,func_800A1DE8_t,0,unk0,1,u_char[76],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:72;declaration-only;source:38C1C.c:11
 T00463.001,T00463,func_800A1DE8_t,1,position,0,SVECTOR,,,,position,Bone position relative to the camera,high,source:38C1C.c:444
-T00463.002,T00463,func_800A1DE8_t,2,offset,0,SVECTOR,,,,rootOffset,Root offset of the animated model,high,source:38C1C.c:424
-T00463.003,T00463,func_800A1DE8_t,3,unk5C,1,u_char[8],,,,reserved5C,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.h:66;declaration-only;source:38C1C.c:14
+T00463.002,T00463,func_800A1DE8_t,2,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:38C1C.c:424
+T00463.003,T00463,func_800A1DE8_t,3,unk5C,1,u_char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:75;declaration-only;source:38C1C.c:14
 T00463.004,T00463,func_800A1DE8_t,4,matrix,0,MATRIX,,,,matrix,Bone matrix being converted,high,source:38C1C.c:414
 T00464.000,T00464,func_800A3054_t,0,unk0,1,short,,,,directionX,X direction; its sign picks the step,high,source:3A1A0.c:263
 T00464.001,T00464,func_800A3054_t,1,unk2,1,short,,,,reserved2,Y component; not read; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Movement.h:28;declaration-only;source:3A1A0.c:11
@@ -4932,10 +4932,10 @@ T00542.018,T00542,gim_t,18,cdQueueSlot,0,vs_main_CdQueueSlot *,,,,discRequest,Di
 T00542.019,T00542,gim_t,19,unk18,1,u_short[240],,,scanline wipe widths,scanlineWipeWidths,Per-scanline wipe edge for the scanline-wipe routine,high,source:5BF94.c:2387;source:5BF94.c:4226
 T00542.020,T00542,gim_t,20,imageTable,0,u_short[254],,,,tileTable,Header words then tile ids from the file,high,source:5BF94.c:2474;source:5BF94.c:4061
 T00542.021,T00542,gim_t,21,unk3F4,1,int,,,,reserved3F4,No access found,low,declaration-only;source:5BF94.c:81
-T00543.000,T00543,imgHeader_t,0,wLo,0,char,,,,widthLow,Low byte of the width,high,source:main.c:8078
-T00543.001,T00543,imgHeader_t,1,wHi,0,char,,,,widthHigh,High byte of the width,high,source:main.c:8078
-T00543.002,T00543,imgHeader_t,2,hLo,0,char,,,,heightLow,Low byte of the height,high,source:main.c:8079
-T00543.003,T00543,imgHeader_t,3,hHi,0,char,,,,heightHigh,High byte of the height,high,source:main.c:8079
+T00543.000,T00543,imgHeader_t,0,wLo,0,char,,,,width_low,Low byte of the width,high,source:main.c:8078
+T00543.001,T00543,imgHeader_t,1,wHi,0,char,,,,width_high,High byte of the width,high,source:main.c:8078
+T00543.002,T00543,imgHeader_t,2,hLo,0,char,,,,height_low,Low byte of the height,high,source:main.c:8079
+T00543.003,T00543,imgHeader_t,3,hHi,0,char,,,,height_high,High byte of the height,high,source:main.c:8079
 T00544.000,T00544,intPair,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:44F14.c:1497
 T00544.001,T00544,intPair,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;declaration-only;source:44F14.c:87
 T00545.000,T00545,labelBoxPrim_t,0,tag,0,u_long,,,,tag,Named in the fork; see cited use,med,source:58578.c:704
@@ -5645,16 +5645,16 @@ T00624.001,T00624,trackingMotionStats,1,current,0,short,,,,currentHp,Current HP 
 T00624.002,T00624,trackingMotionStats,2,maximum,0,short,,,,maxHp,Maximum HP (same offset as Battle::ActorStats.maxHp),high,source:7EE98.c:690
 T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,pageZeroPixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,pageOnePixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
-T00626.000,T00626,unkPrim,0,unk0,1,u_long,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:149;declaration-only;source:EFFECT/PLG005.BIN/18.c:29
-T00626.001,T00626,unkPrim,1,unk4,1,POLY_FT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:150;declaration-only;source:EFFECT/PLG005.BIN/18.c:30
-T00626.002,T00626,unkPrim,2,unk2C,1,int,,,,drawMode,Draw mode command word (0xE1),med,source:EFFECT/PLG005.BIN/18.c:257;use cited by sanity pass;source:EFFECT/PLG005.BIN/18.c:31
-T00626.003,T00626,unkPrim,3,pad,1,int[3],,,,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:152;declaration-only;source:EFFECT/PLG005.BIN/18.c:32
-T00627.000,T00627,unkPrim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:158;declaration-only;source:EFFECT/PLG005.BIN/18.c:29
-T00627.001,T00627,unkPrim,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:159;declaration-only;source:trails5.h:18
-T00627.002,T00627,unkPrim,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:160;declaration-only;source:trails5.h:19
-T00627.003,T00627,unkPrim,3,unk3,1,u_char,,,,wordCount,Packet length in words,med,source:trails5.h:600;use cited by sanity pass;source:trails5.h:20
-T00627.004,T00627,unkPrim,4,unk4,1,POLY_GT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:162;declaration-only;source:EFFECT/PLG005.BIN/18.c:30
-T00627.005,T00627,unkPrim,5,unk38,1,int,,,,drawMode,Draw mode command word (0xE1),med,source:trails5.h:603;use cited by sanity pass;source:trails5.h:22
+T00626.000,T00626,unkPrim,0,unk0,1,u_long,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:128;declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00626.001,T00626,unkPrim,1,unk4,1,POLY_FT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:129;declaration-only;source:EFFECT/PLG005.BIN/18.c:30
+T00626.002,T00626,unkPrim,2,unk2C,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:EFFECT/PLG005.BIN/18.c:257;use cited by sanity pass;source:EFFECT/PLG005.BIN/18.c:31
+T00626.003,T00626,unkPrim,3,pad,1,int[3],,,,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:131;declaration-only;source:EFFECT/PLG005.BIN/18.c:32
+T00627.000,T00627,unkPrim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:136;declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00627.001,T00627,unkPrim,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:137;declaration-only;source:trails5.h:18
+T00627.002,T00627,unkPrim,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:138;declaration-only;source:trails5.h:19
+T00627.003,T00627,unkPrim,3,unk3,1,u_char,,,,word_count,Packet length in words,med,source:trails5.h:600;use cited by sanity pass;source:trails5.h:20
+T00627.004,T00627,unkPrim,4,unk4,1,POLY_GT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:140;declaration-only;source:EFFECT/PLG005.BIN/18.c:30
+T00627.005,T00627,unkPrim,5,unk38,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:trails5.h:603;use cited by sanity pass;source:trails5.h:22
 T00628.000,T00628,vs_actionFlags_t,0,unk0,1,u_short,4,,,reserved0Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Battle\Action.h:125;declaration-only;source:main.h:63
 T00628.001,T00628,vs_actionFlags_t,1,unk4,1,u_short,1,,,opaque0Bit4,"With the actor's settingsModeLow set, scores the action as special with weight 40",low,source:74088.c:642
 T00628.002,T00628,vs_actionFlags_t,2,unk5,1,u_short,1,,,rarelyChosen,The AI rejects the action 115 times in 128,med,source:74088.c:632
@@ -5975,8 +5975,8 @@ T00665.000,T00665,vs_battle_roomVertices,0,vertexCount,0,int,,,,vertexCount,Name
 T00665.001,T00665,vs_battle_roomVertices,1,vertices,0,SVECTOR[0],,,,vertices,Named in the fork; see cited use,med,source:4D8.c:1534
 T00666.000,T00666,vs_battle_scene,0,roomCount,0,int,,,,roomCount,Named in the fork; see cited use,med,source:146C.c:16018
 T00666.001,T00666,vs_battle_scene,1,rooms,0,vs_battle_room[0],,,,rooms,Named in the fork; see cited use,med,source:146C.c:15725
-T00667.000,T00667,vs_battle_screenTransitionWipePoly,0,covered,0,POLY_F4,,,,coveredQuad,Quad over the covered part of the screen,high,source:146C.c:2290
-T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,edgeQuad,Quad drawing the wipe edge,high,source:146C.c:2307
+T00667.000,T00667,vs_battle_screenTransitionWipePoly,0,covered,0,POLY_F4,,,,covered_quad,Quad over the covered part of the screen,high,source:146C.c:2290
+T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,edge_quad,Quad drawing the wipe edge,high,source:146C.c:2307
 T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,,base,Shield part stats,med,source:146C.c:6597;use cited by sanity pass;source:146C.h:775
 T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
 T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
@@ -5984,10 +5984,10 @@ T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,dropRate,Dro
 T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
 T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,integers,Named in the fork; see cited use,med,source:4A0A8.c:921
 T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,strings,Named in the fork; see cited use,med,source:5BF94.c:1265
-T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,texturePage,Texture page word,high,source:30DB0.c:1266
+T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,texture_page,Texture page word,high,source:30DB0.c:1266
 T00670.001,T00670,vs_battle_texInfo_t,1,clut0,0,short,,,,palette,Default palette,high,source:30DB0.c:1338
-T00670.002,T00670,vs_battle_texInfo_t,2,clut1,0,short,,,,alternatePalette,Alternate palette,high,source:30DB0.c:1333
-T00670.003,T00670,vs_battle_texInfo_t,3,refCount,0,u_char,,,,referenceCount,Number of users; zero frees the slot,high,source:30DB0.c:1214
+T00670.002,T00670,vs_battle_texInfo_t,2,clut1,0,short,,,,alternate_palette,Alternate palette,high,source:30DB0.c:1333
+T00670.003,T00670,vs_battle_texInfo_t,3,refCount,0,u_char,,,,reference_count,Number of users; zero frees the slot,high,source:30DB0.c:1214
 T00671.000,T00671,vs_battle_textBox,0,unk0,1,vs_battle_textBox_fields,,,,flags,"Kind, open style, alignment, frame and speaker bits (Battle::TextBoxFlags)",high,source:5BF94.c:4007
 T00671.001,T00671,vs_battle_textBox,1,unk4,1,short,,,,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1543
 T00671.002,T00671,vs_battle_textBox,2,unk6,1,short,,,,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:4577
@@ -6188,12 +6188,12 @@ T00683.043,T00683,vs_battle_wepModels_t,43,unk5DC,1,int,,,,reserved5DC,Not used 
 T00683.044,T00683,vs_battle_wepModels_t,44,unk5E0,1,int,,,,reserved5E0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:66;declaration-only;source:3A1A0.h:447
 T00683.045,T00683,vs_battle_wepModels_t,45,unk5E4,1,int,,,,reserved5E4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:67;declaration-only;source:3A1A0.h:448
 T00684.000,T00684,vs_camera_t,0,position,0,VECTOR,,,,position,Named in the fork; see cited use,med,source:146C.c:3038
-T00684.001,T00684,vs_camera_t,1,lookAt,0,VECTOR,,,,lookAt,Named in the fork; see cited use,med,source:146C.c:2468
+T00684.001,T00684,vs_camera_t,1,lookAt,0,VECTOR,,,,look_at,Named in the fork; see cited use,med,source:146C.c:2468
 T00684.002,T00684,vs_camera_t,2,angles,0,VECTOR,,,,angles,Named in the fork; see cited use,med,source:146C.c:6816
-T00684.003,T00684,vs_camera_t,3,farClip,0,int,,,,farClip,Named in the fork; see cited use,med,source:146C.c:3111
+T00684.003,T00684,vs_camera_t,3,farClip,0,int,,,,far_clip,Named in the fork; see cited use,med,source:146C.c:3111
 T00685.000,T00685,vs_closedRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:closedRings.h:34
 T00685.001,T00685,vs_closedRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:closedRings.h:259;use cited by sanity pass;source:closedRings.h:35
-T00685.002,T00685,vs_closedRingPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:closedRings.h:260;use cited by sanity pass;source:closedRings.h:36
+T00685.002,T00685,vs_closedRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:closedRings.h:260;use cited by sanity pass;source:closedRings.h:36
 T00686.000,T00686,vs_closedRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:closedRings.h:77
 T00686.001,T00686,vs_closedRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:closedRings.h:78
 T00686.002,T00686,vs_closedRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:32;declaration-only;source:closedRings.h:24
@@ -6204,12 +6204,12 @@ T00686.006,T00686,vs_closedRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in
 T00686.007,T00686,vs_closedRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:closedRings.h:83
 T00686.008,T00686,vs_closedRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:closedRings.h:84
 T00686.009,T00686,vs_closedRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:closedRings.h:86
-T00687.000,T00687,vs_closedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:177;declaration-only;source:EFFECT/PLG077.BIN/18.c:32
-T00687.001,T00687,vs_closedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:178;declaration-only;source:EFFECT/PLG077.BIN/18.c:33
+T00687.000,T00687,vs_closedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:153;declaration-only;source:EFFECT/PLG077.BIN/18.c:32
+T00687.001,T00687,vs_closedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:154;declaration-only;source:EFFECT/PLG077.BIN/18.c:33
 T00688.000,T00688,vs_gridPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:grids.h:16
 T00688.001,T00688,vs_gridPrim,1,poly,0,POLY_FT4,,,,poly,Named in the fork; see cited use,med,source:grids.h:240;use cited by sanity pass;source:grids.h:17
-T00688.002,T00688,vs_gridPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:grids.h:241;use cited by sanity pass;source:grids.h:18
-T00688.003,T00688,vs_gridPrim,3,pad,1,int[3],,,layout:upstream,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:188;declaration-only;source:upstream:grids.h:31
+T00688.002,T00688,vs_gridPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:grids.h:241;use cited by sanity pass;source:grids.h:18
+T00688.003,T00688,vs_gridPrim,3,pad,1,int[3],,,layout:upstream,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:162;declaration-only;source:upstream:grids.h:31
 T00689.000,T00689,vs_gridState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:grids.h:62
 T00689.001,T00689,vs_gridState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:grids.h:61
 T00689.002,T00689,vs_gridState,2,u,0,u_char,,,,u,Named in the fork; see cited use,med,source:grids.h:71
@@ -6553,7 +6553,7 @@ T00714.006,T00714,vs_menu_inventoryStorage_t,6,unkC430,1,vs_menu_container,,,wor
 T00714.007,T00714,vs_menu_inventoryStorage_t,7,unk105B0,1,vs_menu_container,,,working-gadget-bag,gadgetBag,Working gadget bag; browsed with the gadget bag item capacities,med,source:234.c:2439;sanity pass 2026-10-17
 T00715.000,T00715,vs_mesh10Prim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:18
 T00715.001,T00715,vs_mesh10Prim,1,poly,0,POLY_GT3,,,,poly,Named in the fork; see cited use,med,source:meshes10.h:213;use cited by sanity pass;source:meshes10.h:19
-T00715.002,T00715,vs_mesh10Prim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:meshes10.h:214;use cited by sanity pass;source:meshes10.h:20
+T00715.002,T00715,vs_mesh10Prim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:meshes10.h:214;use cited by sanity pass;source:meshes10.h:20
 T00716.000,T00716,vs_mesh10State,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:meshes10.h:55
 T00716.001,T00716,vs_mesh10State,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:meshes10.h:54
 T00716.002,T00716,vs_mesh10State,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:54;declaration-only;source:meshes10.h:12
@@ -6564,7 +6564,7 @@ T00717.000,T00717,vs_mesh10UV,0,u,0,u_char,,,,u,Named in the fork; see cited use
 T00717.001,T00717,vs_mesh10UV,1,v,0,u_char,,,,v,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:23
 T00718.000,T00718,vs_mirrorSurfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:mirroredSurfaces.h:19
 T00718.001,T00718,vs_mirrorSurfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:mirroredSurfaces.h:224;use cited by sanity pass;source:mirroredSurfaces.h:20
-T00718.002,T00718,vs_mirrorSurfacePrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:mirroredSurfaces.h:225;use cited by sanity pass;source:mirroredSurfaces.h:21
+T00718.002,T00718,vs_mirrorSurfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:mirroredSurfaces.h:225;use cited by sanity pass;source:mirroredSurfaces.h:21
 T00719.000,T00719,vs_mirrorSurfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:mirroredSurfaces.h:68
 T00719.001,T00719,vs_mirrorSurfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:mirroredSurfaces.h:67
 T00719.002,T00719,vs_mirrorSurfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:63;declaration-only;source:mirroredSurfaces.h:13
@@ -6575,21 +6575,21 @@ T00719.006,T00719,vs_mirrorSurfaceState,6,heightSpeed,0,int,,,,heightSpeed,Named
 T00719.007,T00719,vs_mirrorSurfaceState,7,age,0,int,,,,age,Named in the fork; see cited use,med,source:mirroredSurfaces.h:73
 T00719.008,T00719,vs_mirrorSurfaceState,8,factors,0,int[9],,,,factors,Named in the fork; see cited use,med,source:mirroredSurfaces.h:82
 T00719.009,T00719,vs_mirrorSurfaceState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:mirroredSurfaces.h:95
-T00720.000,T00720,vs_particleLine,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:216;declaration-only;source:particleLineRender.h:6
-T00720.001,T00720,vs_particleLine,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:216;declaration-only;source:particleLineRender.h:6
-T00720.002,T00720,vs_particleLine,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:216;declaration-only;source:particleLineRender.h:6
-T00720.003,T00720,vs_particleLine,3,unk3,1,u_char,,,,wordCount,Packet length in words,med,source:particleLineRender.h:111;use cited by sanity pass;source:particleLineRender.h:6
+T00720.000,T00720,vs_particleLine,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:187;declaration-only;source:particleLineRender.h:6
+T00720.001,T00720,vs_particleLine,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:188;declaration-only;source:particleLineRender.h:6
+T00720.002,T00720,vs_particleLine,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:189;declaration-only;source:particleLineRender.h:6
+T00720.003,T00720,vs_particleLine,3,unk3,1,u_char,,,,word_count,Packet length in words,med,source:particleLineRender.h:111;use cited by sanity pass;source:particleLineRender.h:6
 T00720.004,T00720,vs_particleLine,4,line,0,LINE_F2,,,,line,Named in the fork; see cited use,med,source:particleLineRender.h:112;use cited by sanity pass;source:particleLineRender.h:7
-T00720.005,T00720,vs_particleLine,5,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:particleLineRender.h:114;use cited by sanity pass;source:particleLineRender.h:8
-T00721.000,T00721,vs_particlePrim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:224;declaration-only;source:particleRender.h:7
-T00721.001,T00721,vs_particlePrim,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:225;declaration-only;source:particleRender.h:8
-T00721.002,T00721,vs_particlePrim,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:226;declaration-only;source:particleRender.h:9
-T00721.003,T00721,vs_particlePrim,3,unk3,1,u_char,,,,wordCount,Packet length in words,med,source:particleRender.h:174;use cited by sanity pass;source:particleRender.h:10
-T00721.004,T00721,vs_particlePrim,4,unk4,1,POLY_GT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:228;declaration-only;source:particleRender.h:11
-T00721.005,T00721,vs_particlePrim,5,unk38,1,int,,,,drawMode,Draw mode command word (0xE1),med,source:particleRender.h:177;use cited by sanity pass;source:particleRender.h:12
+T00720.005,T00720,vs_particleLine,5,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:particleLineRender.h:114;use cited by sanity pass;source:particleLineRender.h:8
+T00721.000,T00721,vs_particlePrim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:197;declaration-only;source:particleRender.h:7
+T00721.001,T00721,vs_particlePrim,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:198;declaration-only;source:particleRender.h:8
+T00721.002,T00721,vs_particlePrim,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:199;declaration-only;source:particleRender.h:9
+T00721.003,T00721,vs_particlePrim,3,unk3,1,u_char,,,,word_count,Packet length in words,med,source:particleRender.h:174;use cited by sanity pass;source:particleRender.h:10
+T00721.004,T00721,vs_particlePrim,4,unk4,1,POLY_GT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:201;declaration-only;source:particleRender.h:11
+T00721.005,T00721,vs_particlePrim,5,unk38,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:particleRender.h:177;use cited by sanity pass;source:particleRender.h:12
 T00722.000,T00722,vs_ringPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:rings.h:19
 T00722.001,T00722,vs_ringPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:rings.h:244;use cited by sanity pass;source:rings.h:20
-T00722.002,T00722,vs_ringPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:rings.h:245;use cited by sanity pass;source:rings.h:21
+T00722.002,T00722,vs_ringPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:rings.h:245;use cited by sanity pass;source:rings.h:21
 T00723.000,T00723,vs_ringState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:rings.h:74
 T00723.001,T00723,vs_ringState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:rings.h:73
 T00723.002,T00723,vs_ringState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:72;declaration-only;source:rings.h:14
@@ -6602,7 +6602,7 @@ T00723.008,T00723,vs_ringState,8,age,0,int,,,,age,Named in the fork; see cited u
 T00723.009,T00723,vs_ringState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:rings.h:82
 T00724.000,T00724,vs_rotatingSurfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:rotatingSurfaces.h:20
 T00724.001,T00724,vs_rotatingSurfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:rotatingSurfaces.h:239;use cited by sanity pass;source:rotatingSurfaces.h:21
-T00724.002,T00724,vs_rotatingSurfacePrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:rotatingSurfaces.h:240;use cited by sanity pass;source:rotatingSurfaces.h:22
+T00724.002,T00724,vs_rotatingSurfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:rotatingSurfaces.h:240;use cited by sanity pass;source:rotatingSurfaces.h:22
 T00725.000,T00725,vs_rotatingSurfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:rotatingSurfaces.h:75
 T00725.001,T00725,vs_rotatingSurfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:rotatingSurfaces.h:74
 T00725.002,T00725,vs_rotatingSurfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:80;declaration-only;source:rotatingSurfaces.h:14
@@ -6614,16 +6614,16 @@ T00725.007,T00725,vs_rotatingSurfaceState,7,angle,0,int,,,,angle,Named in the fo
 T00725.008,T00725,vs_rotatingSurfaceState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:rotatingSurfaces.h:81
 T00725.009,T00725,vs_rotatingSurfaceState,9,factors,0,int[5],,,,factors,Named in the fork; see cited use,med,source:rotatingSurfaces.h:90
 T00725.010,T00725,vs_rotatingSurfaceState,10,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:rotatingSurfaces.h:103
-T00726.000,T00726,vs_scratch_t,0,unk0,1,void *,,,,primitiveCursor,Next free primitive in the frame's primitive buffer,high,source:146C.c:7587
-T00726.001,T00726,vs_scratch_t,1,unk4,1,void *,,,,orderingTable,Main ordering table,high,source:146C.c:7585
-T00726.002,T00726,vs_scratch_t,2,unk8,1,void *,,,,overlayOrderingTable,"Ordering table entry for overlay sprites, in front of the main table",high,source:146C.c:7584
-T00726.003,T00726,vs_scratch_t,3,unkC,1,void *,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\Render.h:48;declaration-only;source:scratch.h:16
-T00726.004,T00726,vs_scratch_t,4,firstPersonViewFacing,0,u_int,,,,firstPersonViewFacing,Facing of the first-person view,med,source:146C.c:779
-T00726.005,T00726,vs_scratch_t,5,viewMatrix,0,MATRIX,,,,viewMatrix,View matrix,med,source:146C.c:2503
+T00726.000,T00726,vs_scratch_t,0,unk0,1,void *,,,,primitive_cursor,Next free primitive in the frame's primitive buffer,high,source:146C.c:7587
+T00726.001,T00726,vs_scratch_t,1,unk4,1,void *,,,,ordering_table,Main ordering table,high,source:146C.c:7585
+T00726.002,T00726,vs_scratch_t,2,unk8,1,void *,,,,overlay_ordering_table,"Ordering table entry for overlay sprites, in front of the main table",high,source:146C.c:7584
+T00726.003,T00726,vs_scratch_t,3,unkC,1,void *,,,,reserved0c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\Render.hpp:51;declaration-only;source:scratch.h:16
+T00726.004,T00726,vs_scratch_t,4,firstPersonViewFacing,0,u_int,,,,first_person_view_facing,Facing of the first-person view,med,source:146C.c:779
+T00726.005,T00726,vs_scratch_t,5,viewMatrix,0,MATRIX,,,,view_matrix,View matrix,med,source:146C.c:2503
 T00726.006,T00726,vs_scratch_t,6,camera,0,vs_camera_t,,,,camera,Camera,med,source:146C.c:2468
 T00727.000,T00727,vs_surfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:surfaces.h:19
 T00727.001,T00727,vs_surfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:surfaces.h:204;use cited by sanity pass;source:surfaces.h:20
-T00727.002,T00727,vs_surfacePrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:surfaces.h:205;use cited by sanity pass;source:surfaces.h:21
+T00727.002,T00727,vs_surfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:surfaces.h:205;use cited by sanity pass;source:surfaces.h:21
 T00728.000,T00728,vs_surfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:surfaces.h:68
 T00728.001,T00728,vs_surfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:surfaces.h:67
 T00728.002,T00728,vs_surfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:89;declaration-only;source:surfaces.h:13
@@ -6636,7 +6636,7 @@ T00728.008,T00728,vs_surfaceState,8,factors,0,int[5],,,,factors,Named in the for
 T00728.009,T00728,vs_surfaceState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:surfaces.h:95
 T00729.000,T00729,vs_tiledRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:24
 T00729.001,T00729,vs_tiledRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:tiledRings.h:237;use cited by sanity pass;source:tiledRings.h:25
-T00729.002,T00729,vs_tiledRingPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:tiledRings.h:238;use cited by sanity pass;source:tiledRings.h:26
+T00729.002,T00729,vs_tiledRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:tiledRings.h:238;use cited by sanity pass;source:tiledRings.h:26
 T00730.000,T00730,vs_tiledRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:tiledRings.h:73
 T00730.001,T00730,vs_tiledRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:tiledRings.h:74
 T00730.002,T00730,vs_tiledRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:99;declaration-only;source:tiledRings.h:14
@@ -6658,12 +6658,12 @@ T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,splineSamples,Named 
 T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails9.h:407
 T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,"source:trails9.h:408;source-review:resources\rood-reverseWin\src\EFFECT\trails9Types.h:14;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution splineProgress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
 T00732.008,T00732,vs_trail9,8,unk,1,int,,,,opaque74,"Used, but its meaning is not established",low,source:trails9.h:409
-T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:274;declaration-only;source:trails9.h:17
-T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,tag1,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:275;declaration-only;source:trails9.h:18
-T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,tag2,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:276;declaration-only;source:trails9.h:19
-T00733.003,T00733,vs_trail9Prim,3,unk3,1,u_char,,,,wordCount,Packet length in words,med,source:trails9.h:607
+T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:241;declaration-only;source:trails9.h:17
+T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,tag1,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:242;declaration-only;source:trails9.h:18
+T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,tag2,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:243;declaration-only;source:trails9.h:19
+T00733.003,T00733,vs_trail9Prim,3,unk3,1,u_char,,,,word_count,Packet length in words,med,source:trails9.h:607
 T00733.004,T00733,vs_trail9Prim,4,unk4,1,POLY_GT4,,,,poly,Gouraud textured quad,med,source:trails9.h:543
-T00733.005,T00733,vs_trail9Prim,5,unk38,1,int,,,,drawMode,Draw mode command word (0xE1),med,source:trails9.h:610
+T00733.005,T00733,vs_trail9Prim,5,unk38,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:trails9.h:610
 T00734.000,T00734,vs_trail9State,0,unk0,1,u_char,,,lifetime,lifetime,"Lifetime (low byte of the spawn argument), as in the other template states",med,source:trails9.h:703
 T00734.001,T00734,vs_trail9State,1,unk1,1,u_char,,,effectDefinitionIndex,effect,Particle definition (high byte of the spawn argument),med,source:trails9.h:705
 T00734.002,T00734,vs_trail9State,2,trailcount,0,u_char,,,,trailCount,Number of trails,med,source:trails9.h:71
@@ -6674,7 +6674,7 @@ T00734.006,T00734,vs_trail9State,6,unkC,1,func_800D6CF_t,,,textureAnimation,text
 T00734.007,T00734,vs_trail9State,7,sampledTransparencyCurve,0,u_char[0],,,,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails9.h:555
 T00735.000,T00735,vs_transposedRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
 T00735.001,T00735,vs_transposedRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:240;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:23
-T00735.002,T00735,vs_transposedRingPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:241;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:24
+T00735.002,T00735,vs_transposedRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:241;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:24
 T00736.000,T00736,vs_transposedRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:74
 T00736.001,T00736,vs_transposedRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:75
 T00736.002,T00736,vs_transposedRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:139;declaration-only;source:EFFECT/PLG162.BIN/0.c:12
@@ -6685,8 +6685,8 @@ T00736.006,T00736,vs_transposedRingState,6,heightSpeed,0,int,,,,heightSpeed,Name
 T00736.007,T00736,vs_transposedRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:80
 T00736.008,T00736,vs_transposedRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:81
 T00736.009,T00736,vs_transposedRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:83
-T00737.000,T00737,vs_transposedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:293;declaration-only;source:EFFECT/PLG162.BIN/0.c:27
-T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.h:294;declaration-only;source:EFFECT/PLG162.BIN/0.c:28
+T00737.000,T00737,vs_transposedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:258;declaration-only;source:EFFECT/PLG162.BIN/0.c:27
+T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:259;declaration-only;source:EFFECT/PLG162.BIN/0.c:28
 T00738.000,T00738,vs_trialScore_t,0,time,0,u_int,24,,,time,Named in the fork; see cited use,med,source:D4.c:2294
 T00738.001,T00738,vs_trialScore_t,1,round,0,u_int,7,,,round,Named in the fork; see cited use,med,source:238.c:2600
 T00738.002,T00738,vs_trialScore_t,2,difficulty,0,u_int,1,,,difficulty,Named in the fork; see cited use,med,source:22C.c:4723;use cited by sanity pass;source:main.h:178

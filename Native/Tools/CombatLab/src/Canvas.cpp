@@ -9,7 +9,7 @@
 
 #include "Content/DataStore.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "SystemResources.h"
 
 namespace VS::combat_lab {
@@ -127,10 +127,10 @@ void Canvas::Text(int x, int y, std::string_view text, std::uint32_t color) {
   for (const unsigned char character : text) {
     const int upper = std::toupper(character);
     const int index = upper >= ' ' && upper <= 'Z' ? upper - ' ' : '?' - ' ';
-    const int width =
-        (Render_compactGlyphWidths[index / 2] >> ((index % 2) * kNibbleBits)) &
-        kNibbleMask;
-    const int glyph = Render_compactGlyphIndices[index];
+    const int width = (VS::Render::compactGlyphWidths[index / 2] >>
+                       ((index % 2) * kNibbleBits)) &
+                      kNibbleMask;
+    const int glyph = VS::Render::compactGlyphIndices[index];
     const int u = glyph & kGlyphColumnMask;
     const int v = (glyph & 1) * kGlyphHeight + kGlyphAtlasTop;
     for (int row = 0; row < kGlyphHeight; ++row) {

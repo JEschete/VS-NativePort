@@ -73,7 +73,7 @@ TEST_CASE("Terminal fixture loads production sequence font and queue resources",
   CHECK(std::ranges::all_of(
       Content_legacyActorAssetRequests,
       [](const auto& request) { return request.assetKind == 0; }));
-  CHECK(std::ranges::any_of(Render_compactGlyphWidths,
+  CHECK(std::ranges::any_of(VS::Render::compactGlyphWidths,
                             [](auto width) { return width != 0; }));
 }
 
@@ -139,13 +139,15 @@ TEST_CASE("F02677 and F02678 Live draw into the registered frame storage",
   Menu_Status_drawBackgroundFirst = 0;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   st::LiveDrawModelSlideFade();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 14);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 14);
   CHECK(fixture.primitives[7] == 0x01050060);
   st::LiveDrawBackground();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 51);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 51);
   CHECK(fixture.primitives[44] == 0x010500A0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
-  Render_legacyOrderingTables[0] = nullptr;
+  VS::Render::legacyOrderingTables[0] = nullptr;
   st::LiveDrawBackground();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
 }
@@ -160,8 +162,9 @@ TEST_CASE(
   st::LiveDrawFrame();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
   CHECK(Menu_Status_delayScreenUpdate == 1);
-  CHECK(Render_frameScratch.camera.lookAt.vy == -67108864);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 37);
+  CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == -67108864);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 37);
   {
     equipment_detail_tests::ValueRestore<Actors_ActorRecord*> preview{
         Actors_actorRecords[1]};
@@ -173,10 +176,10 @@ TEST_CASE(
 
 TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
           "[status-terminal][status-terminal-live][fixture-isolation]") {
-  equipment_detail_tests::ValueRestore<decltype(Render_projectionDistance)>
-      projection{Render_projectionDistance};
+  equipment_detail_tests::ValueRestore<decltype(VS::Render::projectionDistance)>
+      projection{VS::Render::projectionDistance};
   Core_Gte_Reset();
-  Render_projectionDistance = 0;
+  VS::Render::projectionDistance = 0;
   SVECTOR point{256, 0, 1024, 0};
   Core_GteWord before{};
   Core_GteWord after{};
@@ -194,7 +197,7 @@ TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
   }
   Core_Gte_RotTransPers(&point, &after, &cue, &flags);
   CHECK(after == before);
-  CHECK(Render_projectionDistance == 0);
+  CHECK(VS::Render::projectionDistance == 0);
 }
 
 TEST_CASE(
@@ -227,7 +230,8 @@ TEST_CASE("Terminal Live rejects expired item text and preview allocations",
   Actors_actorRecords[1] = expired_preview;
   st::LiveDrawFrame();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 2);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data());
   Actors_actorRecords[1] = nullptr;
 }
 
@@ -235,8 +239,8 @@ TEST_CASE(
     "F02682 Live initialization saves state and reload never restores camera",
     "[status-terminal][status-terminal-live][F02682]") {
   Fixture fixture;
-  Render_projectionDistance = 333;
-  Render_frameScratch.camera.angles.pad = 77;
+  VS::Render::projectionDistance = 333;
+  VS::Render::FrameScratchpad().camera.angles.pad = 77;
   *fixture.State() = 3;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   REQUIRE(st::LiveUpdateStatusTerminal(fixture.State()) == 0);
@@ -248,7 +252,7 @@ TEST_CASE(
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveStatusTerminalControllerState() == st::StatusTerminalState{});
   CHECK(st::terminal_live::LoadView() == current);
-  CHECK(Render_projectionDistance == 512);
+  CHECK(VS::Render::projectionDistance == 512);
 }
 
 TEST_CASE("Terminal fixture restores production module bindings",

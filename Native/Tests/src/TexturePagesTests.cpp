@@ -10,16 +10,16 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/TexturePages.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImage.hpp"
 #include "Render/TimImageLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the #276 row 6 texture slice: the lendable texture pages
 // (146C.c:9480-9549), the TIM parse (146C.c:16935, D4.c:2235), the texture
@@ -370,32 +370,32 @@ TEST_CASE("Texture moves match the original DR_MOVE words",
 }
 
 struct LiveFrameFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  void* saved_overlay_table = Render_legacyCurrentOrderingTable;
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  void* saved_overlay_table = VS::Render::legacyCurrentOrderingTable;
+  int saved_framebuffer = VS::Render::frameBuf;
   // The frame's whole 0x20000-byte primitive buffer.
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
 
   LiveFrameFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyCurrentOrderingTable = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyCurrentOrderingTable = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   LiveFrameFixture(const LiveFrameFixture&) = delete;
   LiveFrameFixture& operator=(const LiveFrameFixture&) = delete;
   ~LiveFrameFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_legacyCurrentOrderingTable = saved_overlay_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::legacyCurrentOrderingTable = saved_overlay_table;
+    VS::Render::frameBuf = saved_framebuffer;
   }
 };
 
@@ -407,7 +407,8 @@ TEST_CASE("Live texture moves are spliced last into the overlay bucket",
   u_long* const head = &frame.ordering[0x821];
 
   Render::QueueLiveTextureRectangleMove(&rect, 264, 84);
-  CHECK(Render_frameScratch.primitiveCursor == frame.storage.data() + 6);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        frame.storage.data() + 6);
   CHECK(nextPrim(head) == frame.storage.data());
   CHECK(nextPrim(frame.storage.data()) == head - 1);
   CHECK(frame.storage[2] == 0x80000000);
@@ -421,13 +422,13 @@ TEST_CASE("Live texture moves without room or a source are dropped",
   RECT rect{};
   setRECT(&rect, 16, 20, 8, 2);
   u_long* const near_end = frame.storage.data() + frame.storage.size() - 5;
-  Render_frameScratch.primitiveCursor = near_end;
+  VS::Render::FrameScratchpad().primitive_cursor = near_end;
   const std::uint64_t dropped = Render::DroppedLiveUiPacketCount();
 
   Render::QueueLiveTextureRectangleMove(&rect, 264, 84);
   Render::QueueLiveTextureRectangleMove(nullptr, 264, 84);
   CHECK(Render::DroppedLiveUiPacketCount() == dropped + 2);
-  CHECK(Render_frameScratch.primitiveCursor == near_end);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == near_end);
   CHECK(*near_end == 0xDEADBEEF);
   CHECK(nextPrim(&frame.ordering[0x821]) == &frame.ordering[0x820]);
 }
@@ -463,7 +464,7 @@ TEST_CASE("Live texture pages link into the frame's ordering-table slot",
 
   void* next = Render::AppendLiveTexturePage(0x2E, 3);
   CHECK(next == frame.storage.data() + 2);
-  CHECK(Render_frameScratch.primitiveCursor == next);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == next);
   CHECK(nextPrim(slot) == frame.storage.data());
   CHECK(frame.storage[1] == 0xE100022EU);
   CHECK(Render::AppendLiveTexturePage(0x2E, 0x7FF) == frame.storage.data() + 4);

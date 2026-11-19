@@ -4,10 +4,10 @@
 
 
 #include "DiscQueue.h"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 
 extern int Ending_countableRoomBits[16];
-extern Render_TextureRegion Ending_resultAtlasRegions[69];
+extern VS::Render::TextureRegion Ending_resultAtlasRegions[69];
 extern u_char Ending_rankLabelRegionIds[31][4];
 extern short Ending_rankTitleThresholds[16];
 extern u_int Ending_rankScoreThresholds[36];

@@ -1,11 +1,11 @@
 #include "Render/ModelWorkspace.hpp"
 
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 
 // decomp: BATTLE 44F14.c and 49268.c model workspace; native storage replaces
 // the 0x1F80035C slot.
-static Render_ModelScratchpad model_workspace;
+static VS::Render::ModelScratchpad model_workspace;
 
-Render_ModelScratchpad* VS::Render::ModelWorkspace(void) {
+VS::Render::ModelScratchpad* VS::Render::ModelWorkspace(void) {
   return &model_workspace;
 }

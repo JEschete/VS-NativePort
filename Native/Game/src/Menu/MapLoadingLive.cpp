@@ -31,12 +31,12 @@
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
 
 namespace VS::Menu::map {
@@ -230,7 +230,8 @@ class LiveSceneMap final : public SceneMapHost {
  public:
   bool HasSceneBuffer() override { return Battle_unusedSceneBuffer != nullptr; }
   std::uint16_t CameraYaw() override {
-    return static_cast<std::uint16_t>(Render_frameScratch.camera.angles.vy);
+    return static_cast<std::uint16_t>(
+        VS::Render::FrameScratchpad().camera.angles.vy);
   }
   std::int32_t CurrentSceneId() override { return Field::LiveCurrentSceneId(); }
   void AllocateSceneBuffer(std::int32_t bytes) override {
@@ -291,7 +292,8 @@ class LiveSceneMap final : public SceneMapHost {
     LiveCenterOnRoom(Scene(), room);
   }
   void SetFogNear(std::int32_t near_distance) override {
-    Render::SetLiveFogNearDistance(near_distance, Render_projectionDistance);
+    Render::SetLiveFogNearDistance(near_distance,
+                                   VS::Render::projectionDistance);
   }
   void SetFarColor(std::int32_t red, std::int32_t green,
                    std::int32_t blue) override {

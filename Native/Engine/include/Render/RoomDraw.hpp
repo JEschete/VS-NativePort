@@ -273,7 +273,8 @@ RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
 struct RoomDrawPass {
   // Bit 0 enables subdivision and skips alternate-pass groups.
   std::int32_t mode = 0;
-  // The first-person facing mask (Render_FrameScratch.firstPersonViewFacing).
+  // The first-person facing mask
+  // (VS::Render::FrameScratch.firstPersonViewFacing).
   std::uint32_t view_facing = 0;
 };
 

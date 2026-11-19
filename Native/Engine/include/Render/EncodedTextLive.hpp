@@ -12,7 +12,7 @@
 
 // Live binding for EncodedText.hpp: the arguments are the battle string
 // context (Battle_stringContext) and the widths are the variable-width font's
-// (Render_variableFontGlyphWidths). An array argument is bounded by its
+// (VS::Render::variableFontGlyphWidths). An array argument is bounded by its
 // declared extent; a pointer destination is trusted for the bytes the request
 // writes, and a pointer source or argument string is read up to
 // kTrustedEncodedTextBytes looking for its terminator. A refused request

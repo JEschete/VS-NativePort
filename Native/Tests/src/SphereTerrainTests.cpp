@@ -24,11 +24,11 @@
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 constexpr u_long kGuard = 0xA1B2C3D4;
@@ -36,7 +36,7 @@ constexpr u_long kGuard = 0xA1B2C3D4;
 struct SliceFixture {
   Battle_TargetSphereSetupView storage{};
   Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   u_int saved_control = Field_controlMode;
   u_int saved_action_mode = Battle_actionFlowMode;
   std::array<u_long, 2050> ordering{};
@@ -54,7 +54,7 @@ struct SliceFixture {
   ~SliceFixture() {
     VS::Battle::ResetTargetPages();
     Battle_targetSphere = saved_sphere;
-    Render_frameScratch = saved_frame;
+    VS::Render::FrameScratchpad() = saved_frame;
     Field_controlMode = saved_control;
     Battle_actionFlowMode = saved_action_mode;
     Core_Gte_Reset();
@@ -89,14 +89,15 @@ struct SliceFixture {
     ordering.fill(0xFFFFFF);
     ordering.front() = ordering.back() = kGuard;
     std::fill(packets.begin(), packets.end(), kGuard);
-    Render_frameScratch.orderingTable = ordering.data() + 1;
-    Render_frameScratch.primitiveCursor = packets.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = packets.data() + 1;
     VS::Battle::DrawLiveSphereTerrainIntersection(center, shape, scale);
     REQUIRE(ordering.front() == kGuard);
     REQUIRE(ordering.back() == kGuard);
     REQUIRE(packets.front() == kGuard);
     REQUIRE(packets.back() == kGuard);
-    auto* cursor = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+    auto* cursor =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
     const auto count = cursor - packets.data() - 1;
     REQUIRE(count >= 0);
     REQUIRE(count < 65536);
@@ -142,41 +143,42 @@ struct SliceFixture {
 struct SphereLabelFixture {
   SliceFixture slice;
   std::array<u_char, 92> saved_widths =
-      std::to_array(Render_compactGlyphWidths);
+      std::to_array(VS::Render::compactGlyphWidths);
   std::array<u_char, 60> saved_indices =
-      std::to_array(Render_compactGlyphIndices);
+      std::to_array(VS::Render::compactGlyphIndices);
   std::array<u_char, 264> saved_trim =
-      std::to_array(Render_compactGlyphLeftTrim);
+      std::to_array(VS::Render::compactGlyphLeftTrim);
   std::array<u_long, 2200> ordering{};
-  void* saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  void* saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
 
   SphereLabelFixture() {
     // The typed HUD packets reserve their words in the current frame's
     // primitive buffer.
-    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] =
+    VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
         slice.packets.data() + 1;
-    std::fill_n(Render_compactGlyphWidths, saved_widths.size(), 0x66);
-    std::fill_n(Render_compactGlyphIndices, saved_indices.size(), 0);
-    std::fill_n(Render_compactGlyphLeftTrim, saved_trim.size(), 0);
-    Render_frameScratch = {};
+    std::fill_n(VS::Render::compactGlyphWidths, saved_widths.size(), 0x66);
+    std::fill_n(VS::Render::compactGlyphIndices, saved_indices.size(), 0);
+    std::fill_n(VS::Render::compactGlyphLeftTrim, saved_trim.size(), 0);
+    VS::Render::FrameScratchpad() = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+      VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
     }
-    Render_frameScratch.viewMatrix.t[2] = 2048;
-    Render_frameScratch.orderingTable = ordering.data() + 64;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 32;
-    Render_frameScratch.primitiveCursor = slice.packets.data() + 1;
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 2048;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 64;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 32;
+    VS::Render::FrameScratchpad().primitive_cursor = slice.packets.data() + 1;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
   ~SphereLabelFixture() {
-    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
+    VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
     std::copy(saved_widths.begin(), saved_widths.end(),
-              Render_compactGlyphWidths);
+              VS::Render::compactGlyphWidths);
     std::copy(saved_indices.begin(), saved_indices.end(),
-              Render_compactGlyphIndices);
+              VS::Render::compactGlyphIndices);
     std::copy(saved_trim.begin(), saved_trim.end(),
-              Render_compactGlyphLeftTrim);
+              VS::Render::compactGlyphLeftTrim);
   }
 
   void Labels(int count) {
@@ -376,11 +378,13 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
   volume.scale.extents[1] = 24;
   volume.scale.extents[3] = 32;
   VS::Battle::LiveDrawSphere();
-  auto* cursor = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  auto* cursor =
+      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
   REQUIRE(cursor >= fixture.slice.packets.data() + 1);
   REQUIRE(cursor < fixture.slice.packets.data() + fixture.slice.packets.size());
-  CHECK(Render_frameScratch.orderingTable == fixture.ordering.data() + 64);
-  CHECK(Render_frameScratch.overlayOrderingTable ==
+  CHECK(VS::Render::FrameScratchpad().ordering_table ==
+        fixture.ordering.data() + 64);
+  CHECK(VS::Render::FrameScratchpad().overlay_ordering_table ==
         fixture.ordering.data() + 32);
   CHECK(fixture.slice.packets.front() == kGuard);
   CHECK(fixture.slice.packets.back() == kGuard);
@@ -396,8 +400,8 @@ TEST_CASE("Live sphere position cursor links both pitch quads",
   SVECTOR position = fixture.slice.center;
   VS::Battle::LiveDrawSpherePositionCursor(&position, 0);
   Battle_positionCursorBlinkFrame = saved_blink;
-  const auto* cursor =
-      static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+  const auto* cursor = static_cast<const u_long*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   const u_long* const next_slot = &fixture.ordering[62];
   const u_long* link = &fixture.ordering[63];
   int quads = 0;

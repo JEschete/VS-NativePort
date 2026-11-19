@@ -21,7 +21,7 @@
 #include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Render/DisplayControl.hpp"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"

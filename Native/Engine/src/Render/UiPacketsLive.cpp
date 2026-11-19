@@ -16,11 +16,11 @@
 #include <span>
 
 #include "Core/Diagnostics.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Render {
 namespace {
@@ -87,7 +87,7 @@ class LivePrimitiveChain final : public PrimitiveChain {
   }
 
   [[nodiscard]] std::optional<ChainBucket> OverlayBucket() const override {
-    auto* table = static_cast<u_long*>(Render_legacyCurrentOrderingTable);
+    auto* table = static_cast<u_long*>(legacyCurrentOrderingTable);
     if (table == nullptr) {
       return std::nullopt;
     }
@@ -145,7 +145,7 @@ class LiveOverlayQueue final : public OverlayPacketQueue {
       ReportUnspliced(result);
       return false;
     }
-    Render_frameScratch.primitiveCursor = slot + packet.size();
+    FrameScratchpad().primitive_cursor = slot + packet.size();
     return true;
   }
 };
@@ -165,7 +165,7 @@ class LiveImmediateTarget final : public ImmediatePacketTarget {
 
 u_long* DefaultNumberChain() {
   const auto table =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.orderingTable);
+      reinterpret_cast<std::uintptr_t>(FrameScratchpad().ordering_table);
   if (table < kNumberChainOffset) {
     return nullptr;
   }
@@ -194,17 +194,17 @@ bool LivePacketQueue::Emit(std::span<const std::uint32_t> packet) {
   }
   std::ranges::copy(packet, slot);
   *chain_ = LegacyGpu_Handle(slot);
-  Render_frameScratch.primitiveCursor = slot + packet.size();
+  FrameScratchpad().primitive_cursor = slot + packet.size();
   return true;
 }
 
 u_long* LiveFrameOrderingEntry(LiveOrderingBase base, int slot) {
-  void* const frame_table = Render_legacyOrderingTables[Render_frameBuf & 1];
+  void* const frame_table = legacyOrderingTables[frameBuf & 1];
   const auto table = reinterpret_cast<std::uintptr_t>(frame_table);
   const auto head = reinterpret_cast<std::uintptr_t>(
       base == LiveOrderingBase::kScene
-          ? Render_frameScratch.orderingTable
-          : Render_frameScratch.overlayOrderingTable);
+          ? FrameScratchpad().ordering_table
+          : FrameScratchpad().overlay_ordering_table);
   if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
     return nullptr;
   }
@@ -248,10 +248,10 @@ int DrawLiveIntegerRightAligned(int font, int xy, int value, u_long* before) {
 }
 
 void DrawLiveStatGauge(int color_index, int w, u_long* before, int xy) {
-  std::array<std::uint32_t, std::size(Render_kStatGaugeColors)> palette{};
-  std::ranges::transform(
-      Render_kStatGaugeColors, palette.begin(),
-      [](int color) { return static_cast<std::uint32_t>(color); });
+  std::array<std::uint32_t, std::size(kStatGaugeColors)> palette{};
+  std::ranges::transform(kStatGaugeColors, palette.begin(), [](int color) {
+    return static_cast<std::uint32_t>(color);
+  });
   const auto index = static_cast<std::uint32_t>(color_index);
   if (index >= palette.size()) {
     VS::Core::Errorf("render", "stat gauge colour %d is outside the palette",
@@ -324,11 +324,11 @@ void* AppendLiveTexturePage(int tpage, int ot_slot) {
                        static_cast<unsigned>(tpage), ot_slot,
                        refused_texture_pages);
     }
-    return Render_frameScratch.primitiveCursor;
+    return FrameScratchpad().primitive_cursor;
   }
   LivePacketQueue queue(entry);
   InsertTexturePageCommand(queue, static_cast<std::uint32_t>(tpage));
-  return Render_frameScratch.primitiveCursor;
+  return FrameScratchpad().primitive_cursor;
 }
 
 void DrawLiveImmediateSprite(int xy, int uv_clut, int wh, int tpage) {

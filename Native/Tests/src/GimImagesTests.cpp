@@ -17,15 +17,15 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GimImages.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the #276 row 6 GIM slice: the event scripts' tiled images
 // (BATTLE.PRG 5BF94.c:2347-4449, 4A0A8.c:609-905).
@@ -941,10 +941,10 @@ struct LiveGimFixture {
       std::to_array(Content_discRequestSlots);
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
   Render::ClutRowColors saved_clut = Render::LivePaletteAnimation().colors[3];
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   RECT clut_strip{};
   RECT texture_strip{};
   std::vector<u_short> saved_clut_strip = std::vector<u_short>(64);
@@ -961,12 +961,12 @@ struct LiveGimFixture {
     StoreImage(&clut_strip, reinterpret_cast<u_long*>(saved_clut_strip.data()));
     StoreImage(&texture_strip,
                reinterpret_cast<u_long*>(saved_texture_strip.data()));
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   LiveGimFixture(const LiveGimFixture&) = delete;
@@ -980,10 +980,10 @@ struct LiveGimFixture {
     LoadImage(&clut_strip, reinterpret_cast<u_long*>(saved_clut_strip.data()));
     LoadImage(&texture_strip,
               reinterpret_cast<u_long*>(saved_texture_strip.data()));
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::frameBuf = saved_framebuffer;
   }
 };
 
@@ -1000,7 +1000,7 @@ TEST_CASE("Live GIM requests without an image set do nothing", "[render-gim]") {
   Render::UpdateLiveGimImages();
   Render::ReleaseLiveGimImages();
   CHECK(Render::LiveGimImages() == nullptr);
-  CHECK(Render_frameScratch.primitiveCursor == live.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == live.storage.data());
 
   Render::QueueLiveGimImage(-1, 25);
   Render::QueueLiveGimImage(Render::kGimImageCount, 25);
@@ -1086,7 +1086,7 @@ TEST_CASE("Live GIM images upload once their read is loaded", "[render-gim]") {
   CHECK(Render::LivePaletteAnimation().colors[3][0] == 0x4040);
   Render::UpdateLiveGimImages();
   CHECK(Render::LiveGimImageLoading() == 0);
-  CHECK(Render_frameScratch.primitiveCursor == live.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == live.storage.data());
 }
 
 TEST_CASE("Live GIM images draw into the overlay table", "[render-gim]") {
@@ -1097,7 +1097,8 @@ TEST_CASE("Live GIM images draw into the overlay table", "[render-gim]") {
   Render::UpdateLiveGimImages();
   // The backdrop bands above and below the row (colour 0x4000, full blue),
   // then the five tiles, link in front of the overlay table's entry 6.
-  CHECK(Render_frameScratch.primitiveCursor == live.storage.data() + 38);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        live.storage.data() + 38);
   CHECK(nextPrim(&live.ordering[8]) == live.storage.data() + 32);
   CHECK(nextPrim(live.storage.data()) == &live.ordering[7]);
   CHECK(live.storage[1] == 0x60800000);

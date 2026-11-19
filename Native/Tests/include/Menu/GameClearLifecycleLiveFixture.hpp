@@ -157,7 +157,7 @@ class Fixture {
       State_roomVisitProgress, Battle_characterState, Battle_unusedSubmenuState,
       VS::Input::buttonsPressed, Content_discRequestSlots,
       Content_discRequestCounts, Content_discDriveState,
-      Render_legacyDrawEnvironments, Menu_Results_screenTimer,
+      VS::Render::legacyDrawEnvironments, Menu_Results_screenTimer,
       Menu_Results_screenState, Menu_Results_buffReelIndex,
       Menu_Results_buffReelSelection, Menu_Results_elementAnimationState,
       Menu_Results_score, Menu_Results_mapCompletion, Menu_Results_rank,
@@ -213,10 +213,10 @@ class Fixture {
 
   void BeginFrame() {
     frame.Reset();
-    Render_frameScratch.orderingTable = frame.ordering.data() + 18;
+    VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 18;
     ClearOTagR(frame.ordering.data(), static_cast<int>(frame.ordering.size()));
-    SetDefDrawEnv(&Render_legacyDrawEnvironments[0], 0, 0, 320, 240);
-    SetDefDrawEnv(&Render_legacyDrawEnvironments[1], 320, 0, 320, 240);
+    SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[0], 0, 0, 320, 240);
+    SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[1], 320, 0, 320, 240);
   }
 
   // The actual music loader allocates this request and high-heap destination.

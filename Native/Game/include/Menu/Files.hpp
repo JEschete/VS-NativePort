@@ -324,7 +324,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
                               int first) = 0;
   virtual void RetireTexturePages(std::uint32_t first, std::uint32_t count,
                                   int owner) = 0;
-  // Render_frameBuf.
+  // VS::Render::frameBuf.
   [[nodiscard]] virtual int FrameBuffer() = 0;
   // ClearImage of both 320x240 buffers to black.
   virtual void ClearScreen() = 0;

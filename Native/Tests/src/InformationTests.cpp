@@ -13,18 +13,18 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Settings.h"
 
 namespace {
 struct InformationFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
@@ -45,8 +45,8 @@ struct InformationFixture {
     message[0] = 5;
     message[1] = 0;
     message[2] = 6;
-    Render_legacyPrimitiveBuffers[0] = memory.data() + 8;
-    Render_frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = memory.data() + 8;
+    VS::Render::frameBuf = 0;
     Menu_activeTextBoxOrderingTable = ordering.data();
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::rowTypeBuf = row_types.data();
@@ -58,9 +58,9 @@ struct InformationFixture {
 
   ~InformationFixture() {
     Menu_textBoxes[7] = saved_box;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_activeTextBoxOrderingTable = saved_ordering;
     VS::Render::LiveFontStyle() = saved_style;
     VS::Input::settings.information = saved_setting;
@@ -70,7 +70,7 @@ struct InformationFixture {
   }
 
   void ResetPackets() {
-    Render_frameScratch.primitiveCursor = memory.data() + 8;
+    VS::Render::FrameScratchpad().primitive_cursor = memory.data() + 8;
     ClearOTag(ordering.data(), static_cast<int>(ordering.size()));
   }
 };
@@ -104,7 +104,7 @@ TEST_CASE(
     VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
     CHECK(Menu_textBoxes[7].flags.done);
     CHECK(Menu_textBoxes[7].prevChunksPrinted == 3);
-    CHECK(Render_frameScratch.primitiveCursor ==
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
           fixture.memory.data() + 8 + sizeof(u_long) * 3 * 6);
   }
   fixture.message[0] = static_cast<char>(VS::Core::TextCode::kTerminator);
@@ -113,7 +113,8 @@ TEST_CASE(
   VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
   CHECK(Menu_textBoxes[7].flags.done);
   CHECK(Menu_textBoxes[7].prevChunksPrinted == 0);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.memory.data() + 8);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.memory.data() + 8);
   CHECK(fixture.memory.front() == 0xA5);
   CHECK(fixture.memory.back() == 0xA5);
 }
@@ -133,7 +134,7 @@ TEST_CASE("Information control repair does not accelerate ordinary dialogue",
   VS::Render::DrawLiveProgressiveTextBoxText(&dialogue);
   CHECK_FALSE(dialogue.flags.done);
   CHECK(dialogue.prevChunksPrinted == 1);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.memory.data() + 8 + 6 * sizeof(u_long));
 }
 

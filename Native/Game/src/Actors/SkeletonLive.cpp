@@ -36,7 +36,7 @@
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
 Actors_SkeletonPose VS::Actors::skeletonPose;

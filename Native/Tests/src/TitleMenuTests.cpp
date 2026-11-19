@@ -20,7 +20,7 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/FilesLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "State/Location.h"
 #include "State/StateFlags.h"
@@ -651,8 +651,8 @@ class PresetLiveExit {
 class LiveHostGuard {
  public:
   LiveHostGuard() {
-    std::ranges::copy(Render_legacyDrawEnvironments, draw_.begin());
-    std::ranges::copy(Render_legacyDisplayEnvironments, display_.begin());
+    std::ranges::copy(VS::Render::legacyDrawEnvironments, draw_.begin());
+    std::ranges::copy(VS::Render::legacyDisplayEnvironments, display_.begin());
   }
   LiveHostGuard(const LiveHostGuard&) = delete;
   LiveHostGuard& operator=(const LiveHostGuard&) = delete;
@@ -661,8 +661,9 @@ class LiveHostGuard {
   ~LiveHostGuard() {
     VS::Input::settings = settings_;
     VS::Title::titleScreenVisitCount = visits_;
-    std::ranges::copy(draw_, std::begin(Render_legacyDrawEnvironments));
-    std::ranges::copy(display_, std::begin(Render_legacyDisplayEnvironments));
+    std::ranges::copy(draw_, std::begin(VS::Render::legacyDrawEnvironments));
+    std::ranges::copy(display_,
+                      std::begin(VS::Render::legacyDisplayEnvironments));
   }
 
  private:
@@ -1693,7 +1694,7 @@ TEST_CASE("Title live host draws the game into the second buffer",
           "[title][title-menu]") {
   const LiveHostGuard guard;
   ApplyLiveGameDisplay();
-  const DRAWENV& draw = Render_legacyDrawEnvironments[1];
+  const DRAWENV& draw = VS::Render::legacyDrawEnvironments[1];
   CHECK(draw.clip.x == 640);
   CHECK(draw.clip.w == 640);
   CHECK(draw.clip.h == 224);
@@ -1707,12 +1708,12 @@ TEST_CASE("Title live host shows the game from the other buffer",
           "[title][title-menu]") {
   const LiveHostGuard guard;
   ApplyLiveGameDisplay();
-  const DISPENV& shown = Render_legacyDisplayEnvironments[0];
+  const DISPENV& shown = VS::Render::legacyDisplayEnvironments[0];
   CHECK(shown.disp.x == 640);
   CHECK(shown.screen.y == 8);
   CHECK(shown.screen.w == 256);
   CHECK(shown.screen.h == 224);
-  CHECK(Render_legacyDisplayEnvironments[1].disp.x == 0);
+  CHECK(VS::Render::legacyDisplayEnvironments[1].disp.x == 0);
 }
 
 TEST_CASE("Title live file elements reset to the title's defaults",

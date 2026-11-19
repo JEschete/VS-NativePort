@@ -52,7 +52,7 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/Textures.h"
+#include "Render/Textures.hpp"
 
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
 unsigned char VS::Content::modelParseResetFlag;
@@ -71,8 +71,9 @@ static_assert(std::size(Content_legacyActorAssetRequests) ==
               kActorAssetRequestCount);
 static_assert(std::size(Actors_actorRecords) == kActorRecordSlots);
 static_assert(std::size(VS::Actors::weaponModels) == kWeaponModelSlots);
-static_assert(std::size(Render_legacyActorTextureSlots) == kActorTextureSlots);
-static_assert(std::size(Render_legacyWeaponTextureSlots) ==
+static_assert(std::size(VS::Render::legacyActorTextureSlots) ==
+              kActorTextureSlots);
+static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
 static_assert(std::size(Actors_sharedSequenceData) == kSharedSequenceBanks);
 static_assert(std::size(Actors_sharedSequenceAnimationIds) ==
@@ -115,7 +116,7 @@ static_assert(offsetof(Actors_ModelInstance, reserved5F) + 1 ==
               offsetof(Actors_ModelInstance, currentTileX) +
                   sizeof(std::uint32_t));
 static_assert(sizeof(CVECTOR) == sizeof(std::uint32_t));
-static_assert(sizeof(Render_ColorCode) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Render::ColorCode) == sizeof(std::uint32_t));
 static_assert(offsetof(Actors_ActorRecord, reserved6F3) + 1 ==
               offsetof(Actors_ActorRecord, fadeBlue) + sizeof(std::uint32_t));
 // textureRowOffsets shares four bytes with momentumDistance.
@@ -164,7 +165,7 @@ static_assert(sizeof(Actors_WeaponModel::uploadPalette) ==
 static_assert(std::is_same_v<u_short, std::uint16_t>);
 // The original's 8-byte texture slot entries.
 constexpr std::size_t kTextureSlotBytes = 8;
-static_assert(sizeof(Render_TextureSlot) == kTextureSlotBytes);
+static_assert(sizeof(VS::Render::TextureSlot) == kTextureSlotBytes);
 static_assert(sizeof(RECT) == sizeof(VramRect));
 static_assert(std::is_same_v<decltype(Content_DiscFile::lba), std::int32_t>);
 static_assert(std::is_same_v<decltype(Content_DiscFile::size), std::int32_t>);
@@ -678,14 +679,14 @@ LiveFileStream Stream(AssetFileStream stream) {
   }
 }
 
-Render_TextureSlot* TextureSlotAt(AssetTextureTable table, int index) {
+VS::Render::TextureSlot* TextureSlotAt(AssetTextureTable table, int index) {
   if (table == AssetTextureTable::kActor) {
     return InRange(index, kActorTextureSlots)
-               ? &Render_legacyActorTextureSlots[index]
+               ? &VS::Render::legacyActorTextureSlots[index]
                : nullptr;
   }
   return InRange(index, kWeaponTextureSlots)
-             ? &Render_legacyWeaponTextureSlots[index]
+             ? &VS::Render::legacyWeaponTextureSlots[index]
              : nullptr;
 }
 
@@ -839,27 +840,27 @@ class LiveActorAssetHost final : public ActorAssetHost {
   // VRAM.
   [[nodiscard]] AssetTextureSlot TextureSlot(AssetTextureTable table,
                                              int index) const override {
-    const Render_TextureSlot* slot = TextureSlotAt(table, index);
+    const VS::Render::TextureSlot* slot = TextureSlotAt(table, index);
     if (slot == nullptr) {
       CountRefusal("texture slot read", index);
       return {};
     }
-    return {.texture_page = slot->texturePage,
+    return {.texture_page = slot->texture_page,
             .palette = slot->palette,
-            .alternate_palette = slot->alternatePalette,
-            .references = slot->referenceCount};
+            .alternate_palette = slot->alternate_palette,
+            .references = slot->reference_count};
   }
   void SetTextureSlot(AssetTextureTable table, int index,
                       const AssetTextureSlot& value) override {
-    Render_TextureSlot* slot = TextureSlotAt(table, index);
+    VS::Render::TextureSlot* slot = TextureSlotAt(table, index);
     if (slot == nullptr) {
       CountRefusal("texture slot write", index);
       return;
     }
-    slot->texturePage = value.texture_page;
+    slot->texture_page = value.texture_page;
     slot->palette = value.palette;
-    slot->alternatePalette = value.alternate_palette;
-    slot->referenceCount = value.references;
+    slot->alternate_palette = value.alternate_palette;
+    slot->reference_count = value.references;
   }
   [[nodiscard]] std::span<const std::uint8_t> TextureSlotOrigins()
       const override {

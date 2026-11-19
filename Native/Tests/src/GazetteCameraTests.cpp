@@ -26,12 +26,12 @@
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the gazette's viewer camera, panels and overview (MENU9.PRG
 // 238.c:1402-1408, 1474-1509, 1552-1717, 2146-2174).
@@ -500,49 +500,49 @@ struct LiveFrameFixture {
   static constexpr u_long kFill = 0xDEADBEEF;
   static constexpr u_char kGlyphWidths = 0x66;
 
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   SVECTOR saved_angles = Menu_Score_cameraAngles;
   int saved_distance = Menu_Score_cameraDistance;
   std::int16_t saved_height = Menu_Score_cameraHeightOffset;
   VECTOR saved_position_backup = Menu_Score_cameraPositionBackup;
   VECTOR saved_angles_backup = Menu_Score_cameraAnglesBackup;
   u_long saved_score = Menu_Score_score;
-  Render_ScreenOffset saved_offset =
+  VS::Render::ScreenOffset saved_offset =
       VS::Render::GetLiveProjectionScreenOffset();
   Actors_ActorRecord* saved_preview =
       Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot];
-  decltype(std::to_array(Render_compactGlyphLeftTrim)) saved_trim =
-      std::to_array(Render_compactGlyphLeftTrim);
-  decltype(std::to_array(Render_compactGlyphWidths)) saved_widths =
-      std::to_array(Render_compactGlyphWidths);
-  decltype(std::to_array(Render_compactGlyphIndices)) saved_indices =
-      std::to_array(Render_compactGlyphIndices);
+  decltype(std::to_array(VS::Render::compactGlyphLeftTrim)) saved_trim =
+      std::to_array(VS::Render::compactGlyphLeftTrim);
+  decltype(std::to_array(VS::Render::compactGlyphWidths)) saved_widths =
+      std::to_array(VS::Render::compactGlyphWidths);
+  decltype(std::to_array(VS::Render::compactGlyphIndices)) saved_indices =
+      std::to_array(VS::Render::compactGlyphIndices);
   std::vector<u_long> storage = std::vector<u_long>(kStorageWords, kFill);
   std::vector<u_long> ordering = std::vector<u_long>(kOrderingEntries);
 
   LiveFrameFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
     Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot] = nullptr;
-    std::ranges::fill(Render_compactGlyphLeftTrim, u_char{0});
-    std::ranges::fill(Render_compactGlyphWidths, kGlyphWidths);
+    std::ranges::fill(VS::Render::compactGlyphLeftTrim, u_char{0});
+    std::ranges::fill(VS::Render::compactGlyphWidths, kGlyphWidths);
     for (std::size_t cell = 0; cell < saved_indices.size(); ++cell) {
-      Render_compactGlyphIndices[cell] = static_cast<u_char>(cell);
+      VS::Render::compactGlyphIndices[cell] = static_cast<u_char>(cell);
     }
     Reset();
   }
   ~LiveFrameFixture() {
-    std::ranges::copy(saved_trim, Render_compactGlyphLeftTrim);
-    std::ranges::copy(saved_widths, Render_compactGlyphWidths);
-    std::ranges::copy(saved_indices, Render_compactGlyphIndices);
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_frameBuf = saved_framebuffer;
+    std::ranges::copy(saved_trim, VS::Render::compactGlyphLeftTrim);
+    std::ranges::copy(saved_widths, VS::Render::compactGlyphWidths);
+    std::ranges::copy(saved_indices, VS::Render::compactGlyphIndices);
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Score_cameraAngles = saved_angles;
     Menu_Score_cameraDistance = saved_distance;
     Menu_Score_cameraHeightOffset = saved_height;
@@ -558,9 +558,10 @@ struct LiveFrameFixture {
   void Reset() {
     std::ranges::fill(storage, kFill);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + kSceneEntry;
-    Render_frameScratch.camera = Render_Camera{};
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kSceneEntry;
+    VS::Render::FrameScratchpad().camera = VS::Render::Camera{};
   }
 
   [[nodiscard]] static bool In(const std::vector<u_long>& words,
@@ -622,10 +623,10 @@ struct LiveFrameFixture {
         packet = nextPrim(packet);
       }
     }
-    frame.cursor =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor) -
-        storage.data();
-    const Render_Camera& camera = Render_frameScratch.camera;
+    frame.cursor = static_cast<const u_long*>(
+                       VS::Render::FrameScratchpad().primitive_cursor) -
+                   storage.data();
+    const VS::Render::Camera& camera = VS::Render::FrameScratchpad().camera;
     frame.camera = {camera.position.vx,  camera.position.vy, camera.position.vz,
                     camera.position.pad, camera.angles.vx,   camera.angles.vy,
                     camera.angles.vz,    camera.angles.pad};
@@ -716,12 +717,13 @@ TEST_CASE("Live panels refuse bad colours, tall banners and missing entries",
   score::DrawLiveEnemyBanner(0, 0, 8, 600, 0);
   score::DrawLiveGradientPanel(0, 0, 8, 8, -1);
   // An ordering table outside the frame's: every entry is refused.
-  Render_frameScratch.orderingTable = fixture.storage.data();
+  VS::Render::FrameScratchpad().ordering_table = fixture.storage.data();
   score::DrawLiveGradientPanel(0, 0, 8, 8, 0);
   score::DrawLiveFooterBackground(0);
   score::DrawLiveViewerEdgeFade();
   CHECK(score::LiveGazetteCameraRefusals() == refused + 6);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 1);
   CHECK(std::ranges::all_of(fixture.storage, [](u_long word) {
     return word == LiveFrameFixture::kFill;
   }));
@@ -732,11 +734,11 @@ TEST_CASE("Live panels refuse a call the primitive buffer cannot hold",
   LiveFrameFixture fixture;
   const std::uint64_t refused = score::LiveGazetteCameraRefusals();
   // Leaves room for less than a gradient panel's 18 words.
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       fixture.storage.data() + fixture.storage.size() - 12;
   score::DrawLiveGradientPanel(0, 0, 8, 8, 0);
   CHECK(score::LiveGazetteCameraRefusals() == refused + 1);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + fixture.storage.size() - 12);
 }
 
@@ -781,8 +783,8 @@ TEST_CASE("RestoreLiveCamera matches the copied body on every entry",
   const auto restore_twice = [](auto restore) {
     return [restore] {
       restore();
-      Render_frameScratch.camera.position.vx = 1;
-      Render_frameScratch.camera.angles.pad = 2;
+      VS::Render::FrameScratchpad().camera.position.vx = 1;
+      VS::Render::FrameScratchpad().camera.angles.pad = 2;
       restore();
     };
   };
@@ -803,12 +805,12 @@ TEST_CASE("RenderLiveOverview matches the copied body and restores the offset",
                                        std::pair{12, 0xCC61E3F789251562ULL});
   SetCameraSettings(-300, 900, 0xA00, 0x40);
   Menu_Score_score = 0xFFFFFF00;
-  const Render_ScreenOffset offset{.x = 160, .y = 112};
+  const VS::Render::ScreenOffset offset{.x = 160, .y = 112};
   fixture.CheckFrame(copied, [&offset, step] {
     VS::Render::SetLiveProjectionScreenOffset(offset);
     score::RenderLiveOverview(step);
   });
-  const Render_ScreenOffset restored =
+  const VS::Render::ScreenOffset restored =
       VS::Render::GetLiveProjectionScreenOffset();
   CHECK(restored.x == offset.x);
   CHECK(restored.y == offset.y);

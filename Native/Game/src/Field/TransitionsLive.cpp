@@ -21,7 +21,7 @@
 #include "Field/RoomState.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/ScreenTransition.h"
+#include "Render/ScreenTransition.hpp"
 
 // decomp: vs_battle_screenTransitionStep
 // (vs_battle_screenTransitionStep@BATTLE/BATTLE.PRG)
@@ -147,26 +147,26 @@ int SemiTransparency(bool semi_transparent) { return semi_transparent ? 1 : 0; }
 class LiveTransitionPrimitives final : public TransitionPrimitiveTarget {
  public:
   void InitializeFade(const TransitionPrimitiveStyle& style) override {
-    POLY_F4& fade = Render_legacyTransitionFadePackets[kSetUpBuffer];
+    POLY_F4& fade = VS::Render::legacyTransitionFadePackets[kSetUpBuffer];
     SetPolyF4(&fade);
     SetColor(fade, style.fade_color);
     CoverScreen(fade, style);
     SetSemiTrans(&fade, SemiTransparency(style.fade_semi_transparent));
-    Render_legacyTransitionFadePackets[kCopiedBuffer] = fade;
+    VS::Render::legacyTransitionFadePackets[kCopiedBuffer] = fade;
   }
   void InitializeWipe(const TransitionPrimitiveStyle& style) override {
-    Render_LegacyTransitionWipePacket& wipe =
-        Render_legacyTransitionWipePackets[kSetUpBuffer];
-    SetPolyF4(&wipe.coveredQuad);
-    SetSemiTrans(&wipe.coveredQuad,
+    VS::Render::LegacyTransitionWipePacket& wipe =
+        VS::Render::legacyTransitionWipePackets[kSetUpBuffer];
+    SetPolyF4(&wipe.covered_quad);
+    SetSemiTrans(&wipe.covered_quad,
                  SemiTransparency(style.wipe_semi_transparent));
-    SetColor(wipe.coveredQuad, style.wipe_color);
+    SetColor(wipe.covered_quad, style.wipe_color);
     // The wipe's corners are placed each frame (ScreenOverlayLive.cpp).
-    wipe.edgeQuad = wipe.coveredQuad;
-    Render_legacyTransitionWipePackets[kCopiedBuffer] = wipe;
+    wipe.edge_quad = wipe.covered_quad;
+    VS::Render::legacyTransitionWipePackets[kCopiedBuffer] = wipe;
   }
   void InitializeEdge(const TransitionPrimitiveStyle& style) override {
-    POLY_G4& edge = Render_legacyTransitionEdgePackets[kSetUpBuffer];
+    POLY_G4& edge = VS::Render::legacyTransitionEdgePackets[kSetUpBuffer];
     const TransitionColor& lit = style.edge_lit_color;
     const TransitionColor& dark = style.edge_dark_color;
     SetPolyG4(&edge);
@@ -176,14 +176,14 @@ class LiveTransitionPrimitives final : public TransitionPrimitiveTarget {
     setRGB3(&edge, dark.red, dark.green, dark.blue);
     CoverScreen(edge, style);
     SetSemiTrans(&edge, SemiTransparency(style.edge_semi_transparent));
-    Render_legacyTransitionEdgePackets[kCopiedBuffer] = edge;
+    VS::Render::legacyTransitionEdgePackets[kCopiedBuffer] = edge;
   }
   void InitializeDrawMode(const TransitionPrimitiveStyle& style) override {
-    DR_MODE& mode = Render_legacyTransitionDrawModes[kSetUpBuffer];
+    DR_MODE& mode = VS::Render::legacyTransitionDrawModes[kSetUpBuffer];
     RECT no_texture_window{};
     SetDrawMode(&mode, kDrawToDisplayedArea, style.dithered ? 1 : 0,
                 getTPage(0, style.blend_mode, 0, 0), &no_texture_window);
-    Render_legacyTransitionDrawModes[kCopiedBuffer] = mode;
+    VS::Render::legacyTransitionDrawModes[kCopiedBuffer] = mode;
   }
   void SetTransitionAlpha(std::int32_t alpha) override {
     screenTransitionAlpha = alpha;

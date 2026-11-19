@@ -11,8 +11,8 @@
 #include "Battle/SphereTerrain.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 constexpr int kCoordinateBits = 16;
@@ -49,16 +49,18 @@ class LiveCanvas final : public VS::Battle::SphereTerrainCanvas {
     constexpr std::uint32_t kLinkMask = 0xFFFFFF;
     constexpr int kGreenShift = 8;
     constexpr std::size_t kLinePacketWords = 5;
-    auto* packet = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+    auto* packet =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
     auto* ordering =
-        static_cast<u_long*>(Render_frameScratch.orderingTable) + depth;
+        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+        depth;
     const std::array<u_long, kLinePacketWords> words{
         (*ordering & kLinkMask) | kPacketSize, kAdditiveDrawMode,
         kTranslucentLine | (static_cast<unsigned>(y / 2) << kGreenShift),
         ScreenPosition(begin, y), ScreenPosition(end, y)};
     std::copy(words.begin(), words.end(), packet);
     *ordering = LegacyGpu_Handle(packet);
-    Render_frameScratch.primitiveCursor = packet + words.size();
+    VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
   }
 };
 }  // namespace
@@ -67,8 +69,8 @@ namespace VS::Battle {
 void DrawLiveSphereTerrainIntersection(const SVECTOR& position,
                                        const MATRIX& shape, int scale) {
   if (Battle_targetSphere == nullptr ||
-      Render_frameScratch.primitiveCursor == nullptr ||
-      Render_frameScratch.orderingTable == nullptr) {
+      VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
+      VS::Render::FrameScratchpad().ordering_table == nullptr) {
     constexpr const char* kMessage =
         "sphere terrain drawing requires initialized targeting state";
     VS::Core::LogError("sphere", "{}", kMessage);

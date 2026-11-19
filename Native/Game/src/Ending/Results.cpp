@@ -2,13 +2,13 @@
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
 #include "Ending/Results.h"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 
 // decomp: _countableRooms (_countableRooms@ENDING/ENDING.PRG)
 int Ending_countableRoomBits[16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _disMap (_disMap@ENDING/ENDING.PRG)
-Render_TextureRegion Ending_resultAtlasRegions[69]; /* contents: module image (ModuleData.cpp) */
+VS::Render::TextureRegion Ending_resultAtlasRegions[69]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _riskbreakerRanks (_riskbreakerRanks@ENDING/ENDING.PRG)
 u_char Ending_rankLabelRegionIds[31][4]; /* contents: module image (ModuleData.cpp) */

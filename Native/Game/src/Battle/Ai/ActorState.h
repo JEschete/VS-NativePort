@@ -14,7 +14,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Perception.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 extern unsigned char Battle_Ai_kSettingsBits30Values[1284];
 extern unsigned int Battle_Ai_kPerceptionRangesSquared[320];

@@ -13,12 +13,12 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "Render/UiTexturedQuads.hpp"
 
 namespace {
@@ -375,29 +375,30 @@ constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
 constexpr u_long kLiveEnd = 0xFFFFFF;
 
 struct LiveResultsFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::vector<u_long> ordering =
       std::vector<u_long>(kLiveOrderingWords, kLiveEnd);
 
   LiveResultsFixture() {
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch = {};
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
-    Render_frameScratch.overlayOrderingTable =
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad() = {};
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kLiveSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kLiveOverlayHead;
   }
   ~LiveResultsFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
   }
   LiveResultsFixture(const LiveResultsFixture&) = delete;
   LiveResultsFixture& operator=(const LiveResultsFixture&) = delete;
@@ -405,7 +406,8 @@ struct LiveResultsFixture {
   LiveResultsFixture& operator=(LiveResultsFixture&&) = delete;
 
   [[nodiscard]] std::ptrdiff_t Used() const {
-    return static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+    return static_cast<u_long*>(
+               VS::Render::FrameScratchpad().primitive_cursor) -
            storage.data();
   }
   u_long& QuadEntry() { return ordering[kLiveSceneHead - 7]; }
@@ -415,7 +417,7 @@ TEST_CASE(
     "Live fading texture links the atlas quad seven entries before the scene",
     "[results-drawing-live]") {
   LiveResultsFixture frame;
-  const Render_TextureRegion& entry = Menu_Results_disMap[10];
+  const VS::Render::TextureRegion& entry = Menu_Results_disMap[10];
   r::LiveDrawFadingTexture(30, 40, 10, 2);
   REQUIRE(frame.Used() == 10);
   CHECK(nextPrim(&frame.QuadEntry()) == frame.storage.data());
@@ -423,7 +425,7 @@ TEST_CASE(
   CHECK(frame.storage[1] == 0x2E202020);
   CHECK(frame.storage[2] == (30U | 40U << 16));
   CHECK((frame.storage[3] >> 16) == static_cast<std::uint16_t>(entry.clut + 1));
-  CHECK((frame.storage[5] >> 16) == (entry.tpage | 0x20U));
+  CHECK((frame.storage[5] >> 16) == (entry.texture_page | 0x20U));
 }
 
 TEST_CASE("Live fading texture with a palette links after the previous quad",
@@ -449,13 +451,13 @@ TEST_CASE("Live fading texture refuses an index outside the atlas",
 TEST_CASE("Live results quads refuse a full primitive buffer",
           "[results-drawing-live]") {
   LiveResultsFixture frame;
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       frame.storage.data() + kLivePrimitiveWords - 9;
   r::LiveDrawTime(0, 0, 9, 0, 0);
   r::LiveDrawFadingTexture(0, 0, 1, 9);
   CHECK(frame.Used() == static_cast<std::ptrdiff_t>(kLivePrimitiveWords - 9));
   CHECK(frame.QuadEntry() == kLiveEnd);
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       frame.storage.data() + kLivePrimitiveWords - 10;
   r::LiveDrawFadingTexture(0, 0, 1, 9);
   CHECK(frame.Used() == static_cast<std::ptrdiff_t>(kLivePrimitiveWords));

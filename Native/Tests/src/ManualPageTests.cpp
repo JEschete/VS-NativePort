@@ -16,10 +16,10 @@
 #include "Menu/Manual.h"
 #include "Menu/ManualPage.hpp"
 #include "Menu/ManualPageLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the manual page's frame (MENUE.PRG 494.c:577-616, 716-881,
 // 962-987): content clipping, the page background, the scroll fades, the
@@ -453,12 +453,12 @@ TEST_CASE("Page content refuses illustration lists past the help text",
 class PageGlobalsSnapshot {
  public:
   PageGlobalsSnapshot()
-      : scratch_(Render_frameScratch),
-        back_env_(Render_legacyDrawEnvironments[1]),
-        primitives_(Render_legacyPrimitiveBuffers[0]),
-        ordering_(Render_legacyOrderingTables[0]),
+      : scratch_(VS::Render::FrameScratchpad()),
+        back_env_(VS::Render::legacyDrawEnvironments[1]),
+        primitives_(VS::Render::legacyPrimitiveBuffers[0]),
+        ordering_(VS::Render::legacyOrderingTables[0]),
         help_(Menu_Manual_helpText),
-        frame_index_(Render_frameBuf),
+        frame_index_(VS::Render::frameBuf),
         arrow_state_(Menu_Manual_pageArrowAnimState),
         held_(VS::Input::previousButtons) {}
   PageGlobalsSnapshot(const PageGlobalsSnapshot&) = delete;
@@ -468,16 +468,16 @@ class PageGlobalsSnapshot {
   ~PageGlobalsSnapshot() {
     VS::Input::previousButtons = held_;
     Menu_Manual_pageArrowAnimState = arrow_state_;
-    Render_frameBuf = frame_index_;
+    VS::Render::frameBuf = frame_index_;
     Menu_Manual_helpText = help_;
-    Render_legacyOrderingTables[0] = ordering_;
-    Render_legacyPrimitiveBuffers[0] = primitives_;
-    Render_legacyDrawEnvironments[1] = back_env_;
-    Render_frameScratch = scratch_;
+    VS::Render::legacyOrderingTables[0] = ordering_;
+    VS::Render::legacyPrimitiveBuffers[0] = primitives_;
+    VS::Render::legacyDrawEnvironments[1] = back_env_;
+    VS::Render::FrameScratchpad() = scratch_;
   }
 
  private:
-  Render_FrameScratch scratch_;
+  VS::Render::FrameScratch scratch_;
   DRAWENV back_env_;
   void* primitives_;
   void* ordering_;
@@ -502,11 +502,12 @@ struct PageFrame {
 
   PageFrame() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kFrameSlotBase;
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kFrameSlotBase;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::frameBuf = 0;
     VS::Input::previousButtons = 0;
     Menu_Manual_pageArrowAnimState = 0;
   }
@@ -519,7 +520,8 @@ struct PageFrame {
   }
   [[nodiscard]] std::size_t Used() const {
     return static_cast<std::size_t>(
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor) -
+        static_cast<const u_long*>(
+            VS::Render::FrameScratchpad().primitive_cursor) -
         storage.data());
   }
 };
@@ -600,14 +602,15 @@ TEST_CASE("Live page arrows refuse unknown types and full buffers",
   CHECK(manual::LivePageRefusalCount() == refusals + 1);
 
   // Room for the arrow but not the whole fade: nothing is linked.
-  Render_frameScratch.primitiveCursor = frame.Word(frame.storage.size() - 100);
+  VS::Render::FrameScratchpad().primitive_cursor =
+      frame.Word(frame.storage.size() - 100);
   manual::LiveDrawUpperScrollFade();
   CHECK(manual::LivePageRefusalCount() == refusals + 2);
   CHECK(frame.Used() == frame.storage.size() - 100);
   CHECK(nextPrim(frame.Slot(-7)) == frame.Word(0));
 
-  Render_frameScratch.primitiveCursor = frame.Word(0);
-  Render_frameScratch.orderingTable = frame.ordering.data() + 3;
+  VS::Render::FrameScratchpad().primitive_cursor = frame.Word(0);
+  VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 3;
   manual::LiveDrawPageArrow(Menu_Manual_ArrowType_Up);
   CHECK(manual::LivePageRefusalCount() == refusals + 3);
   CHECK(frame.Used() == 0);
@@ -657,7 +660,7 @@ TEST_CASE("Live page content restores the back buffer clip around the panel",
   REQUIRE(payload != nullptr);
   std::ranges::copy(text, payload);
   Menu_Manual_helpText = reinterpret_cast<int*>(payload);
-  setRECT(&Render_legacyDrawEnvironments[1].clip, 320, 0, 320, 240);
+  setRECT(&VS::Render::legacyDrawEnvironments[1].clip, 320, 0, 320, 240);
 
   manual::LiveDrawPageContent();
   CheckLiveContentAreas(frame);

@@ -13,13 +13,13 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -424,9 +424,9 @@ constexpr std::size_t kLiveSceneHead = 16;
 // A frame whose primitives land in `storage`, and the game-clear statics the
 // Live entries read, restored afterwards.
 struct LiveGameClearFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   u_int saved_score = Menu_Results_score;
   u_int saved_map = Menu_Results_mapCompletion;
   int saved_rank = Menu_Results_rank;
@@ -439,9 +439,9 @@ struct LiveGameClearFixture {
 
   LiveGameClearFixture() { Reset(); }
   ~LiveGameClearFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Results_score = saved_score;
     Menu_Results_mapCompletion = saved_map;
     Menu_Results_rank = saved_rank;
@@ -458,14 +458,15 @@ struct LiveGameClearFixture {
   void Reset() {
     std::ranges::fill(storage, 0);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kLiveSceneHead;
   }
   [[nodiscard]] std::vector<u_long> Used() const {
     const auto used =
-        static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor) -
         storage.data();
     return {storage.begin(), storage.begin() + used};
   }

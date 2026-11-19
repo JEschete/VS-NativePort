@@ -51,7 +51,7 @@
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Save/NativeResume.hpp"

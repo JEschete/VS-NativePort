@@ -14,7 +14,7 @@
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.hpp"
 #include "Render/EncodedText.hpp"
-#include "Render/Text/VariableFont.h"
+#include "Render/Text/VariableFont.hpp"
 
 namespace VS::Render {
 namespace {
@@ -60,8 +60,8 @@ char* encoded_text_live::Finish(std::uint8_t* destination,
 }
 
 std::span<const std::uint8_t> LiveVariableFontGlyphWidths() noexcept {
-  return {reinterpret_cast<const std::uint8_t*>(Render_variableFontGlyphWidths),
-          sizeof Render_variableFontGlyphWidths};
+  return {reinterpret_cast<const std::uint8_t*>(variableFontGlyphWidths),
+          sizeof variableFontGlyphWidths};
 }
 
 int encoded_text_live::MeasureLine(std::span<const std::uint8_t> text) {

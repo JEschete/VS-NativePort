@@ -154,7 +154,7 @@ enum class TrailPalette : std::uint8_t { kAdditive, kDistortion };
 // behind it, offset by `u_offset` and `v_offset`. The texture page is the
 // 15-bit page holding the quad's leftmost corner (at most x 320) in the
 // buffer the frame is not drawing into, with `flags`; `draw_buffer` is the
-// buffer being drawn (Render_frameBuf's low bit).
+// buffer being drawn (VS::Render::frameBuf's low bit).
 void MapTrailFramebufferTexture(Templates::RingQuad& frame_quad,
                                 std::int32_t u_offset, std::int32_t v_offset,
                                 std::uint16_t flags, std::uint32_t draw_buffer);

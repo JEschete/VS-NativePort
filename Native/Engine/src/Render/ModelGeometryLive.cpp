@@ -24,12 +24,12 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/ModelDraw.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 extern unsigned int
     Content_battleShadowVertices[VS::Render::kShadowVertexCount];
@@ -129,10 +129,10 @@ class LiveModelTransformer final : public ModelTransformer {
 // The end of the current frame's primitive buffer, or nothing when the
 // cursor is not inside it.
 [[nodiscard]] std::uintptr_t PrimitiveLimit() {
-  const auto base = reinterpret_cast<std::uintptr_t>(
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
+  const auto base =
+      reinterpret_cast<std::uintptr_t>(legacyPrimitiveBuffers[frameBuf & 1]);
   const auto cursor =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+      reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
   return base != 0 && cursor >= base && cursor - base <= kPrimitiveBufferBytes
              ? base + kPrimitiveBufferBytes
              : 0;
@@ -144,21 +144,21 @@ class LivePacketQueue final : public ModelPacketQueue {
 
   bool Emit(std::span<const std::uint32_t> packet,
             std::uint32_t depth) override {
-    auto* ordering = static_cast<u_long*>(Render_frameScratch.orderingTable);
+    auto* ordering = static_cast<u_long*>(FrameScratchpad().ordering_table);
     if (ordering == nullptr) {
       return true;
     }
     const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+        reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
     if (packet.empty() || cursor > limit_ ||
         packet.size_bytes() > limit_ - cursor) {
       return false;
     }
-    auto* slot = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+    auto* slot = static_cast<u_long*>(FrameScratchpad().primitive_cursor);
     std::ranges::copy(packet, slot);
     setlen(slot, packet.size() - 1);
     AddPrim(ordering + depth, slot);
-    Render_frameScratch.primitiveCursor = slot + packet.size();
+    FrameScratchpad().primitive_cursor = slot + packet.size();
     return true;
   }
 
@@ -183,8 +183,8 @@ class LiveShadowGround final : public ShadowGround {
 };
 
 [[nodiscard]] ModelSurface WorkspaceSurface() {
-  const Render_ModelScratchpad* workspace = ModelWorkspace();
-  return {workspace->palette, workspace->texturePage};
+  const ModelScratchpad* workspace = ModelWorkspace();
+  return {workspace->palette, workspace->texture_page};
 }
 
 [[nodiscard]] std::uint32_t TintOf(const CVECTOR& tint) {
@@ -399,7 +399,7 @@ void DrawLiveActorFlatPolygons(const Actors_ActorRecord& geometry,
 void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                                const SVECTOR& root_offset) {
   const std::uintptr_t limit = PrimitiveLimit();
-  if (limit == 0 || Render_frameScratch.orderingTable == nullptr) {
+  if (limit == 0 || FrameScratchpad().ordering_table == nullptr) {
     VS::Core::Errorf(kChannel,
                      "Actor shadow requires actor, view and packet buffers");
     std::abort();

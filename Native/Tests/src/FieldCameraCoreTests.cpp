@@ -13,8 +13,8 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
@@ -225,10 +225,10 @@ std::uint32_t LeaveFirstPerson(FakeCameraHost& host,
 }
 
 struct LiveCameraFixture {
-  Render_Camera saved_camera = Render_frameScratch.camera;
+  VS::Render::Camera saved_camera = VS::Render::FrameScratchpad().camera;
   Field_SphericalCamera saved_spherical = VS::Field::sphericalCamera;
   ~LiveCameraFixture() {
-    Render_frameScratch.camera = saved_camera;
+    VS::Render::FrameScratchpad().camera = saved_camera;
     VS::Field::sphericalCamera = saved_spherical;
   }
   LiveCameraFixture() = default;

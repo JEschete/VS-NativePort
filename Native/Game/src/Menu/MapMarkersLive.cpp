@@ -17,10 +17,10 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Map.h"
 #include "Menu/MapMarkers.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -93,7 +93,8 @@ class LiveMapMarkerHost final : public MapMarkerHost {
 
   void AddMarkerQuad(const MarkerQuad& quad) override {
     auto* poly = ReservePrimitive<POLY_FT4>();
-    if (poly == nullptr || Render_frameScratch.orderingTable == nullptr) {
+    if (poly == nullptr ||
+        VS::Render::FrameScratchpad().ordering_table == nullptr) {
       Refuse(call_, "no room in the frame primitive buffer");
       return;
     }
@@ -107,32 +108,34 @@ class LiveMapMarkerHost final : public MapMarkerHost {
            texture[2].u, texture[2].v, texture[3].u, texture[3].v);
     poly->tpage = quad.texture_page;
     poly->clut = quad.clut;
-    AddPrim(static_cast<u_char*>(Render_frameScratch.orderingTable) +
+    AddPrim(static_cast<u_char*>(VS::Render::FrameScratchpad().ordering_table) +
                 kMarkerQuadSlotBytes,
             poly);
-    Render_frameScratch.primitiveCursor = poly + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = poly + 1;
   }
 
   void AddLabelLine(const LabelLine& line) override {
     auto* packet = ReservePrimitive<LINE_F2>();
-    if (packet == nullptr || Render_frameScratch.orderingTable == nullptr) {
+    if (packet == nullptr ||
+        VS::Render::FrameScratchpad().ordering_table == nullptr) {
       Refuse(call_, "no room in the frame primitive buffer");
       return;
     }
     setLineF2(packet);
     setXY2(packet, line.from.x, line.from.y, line.to.x, line.to.y);
     setRGB0(packet, kLabelLineShade, kLabelLineShade, kLabelLineShade);
-    AddPrim(static_cast<u_long*>(Render_frameScratch.orderingTable) +
+    AddPrim(static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
                 kLabelLineSlot,
             packet);
-    Render_frameScratch.primitiveCursor = packet + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = packet + 1;
   }
 
   void AddAshleyMarker(const AshleyMarkerSprite& sprite) override {
     u_long* target =
         sprite.list == SpriteList::kCaller
             ? caller_
-            : static_cast<u_long*>(Render_frameScratch.overlayOrderingTable);
+            : static_cast<u_long*>(
+                  VS::Render::FrameScratchpad().overlay_ordering_table);
     u_long* packet = Render::QueueLiveSpriteWithTexturePage(
         sprite.brightness_transparency, sprite.packed_position,
         sprite.packed_size, target);

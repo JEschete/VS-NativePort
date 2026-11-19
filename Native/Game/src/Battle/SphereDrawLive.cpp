@@ -33,9 +33,9 @@
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Menus.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -224,14 +224,14 @@ class LiveTerrainSource final : public SphereTerrainSource {
 };
 
 [[nodiscard]] u_long* OrderingTable() {
-  return static_cast<u_long*>(Render_frameScratch.orderingTable);
+  return static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table);
 }
 
 // Reserves `words` words at the frame cursor and advances it past them.
 [[nodiscard]] u_long* ReserveLinkedPacket(std::size_t words) {
   u_long* packet = VS::Render::ReserveLivePrimitiveWords(words);
   if (packet != nullptr) {
-    Render_frameScratch.primitiveCursor = packet + words;
+    VS::Render::FrameScratchpad().primitive_cursor = packet + words;
   }
   return packet;
 }

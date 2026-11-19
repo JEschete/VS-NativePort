@@ -12,19 +12,19 @@
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 struct MarkerFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
   Actors_ActorRecord* saved_enemy = Actors_actorRecords[2];
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_sides = Battle_actorMarkerSides;
   Actors_ActorRecord player{};
   Actors_ActorRecord enemy{};
@@ -37,16 +37,16 @@ struct MarkerFixture {
     player.instance.position.vx = -256;
     player.instance.position.vz = enemy.instance.position.vz = 512;
     player.targetPointHeight = enemy.targetPointHeight = 64;
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch = {};
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad() = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+      VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
     }
-    Render_frameScratch.viewMatrix.t[2] = 1024;
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data();
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 1024;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
@@ -56,17 +56,17 @@ struct MarkerFixture {
   ~MarkerFixture() {
     Actors_actorRecords[0] = saved_player;
     Actors_actorRecords[2] = saved_enemy;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Battle_actorMarkerSides = saved_sides;
     Core_Gte_Reset();
   }
 
   void CheckChain(int icons) const {
-    const auto* end =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+    const auto* end = static_cast<const u_long*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto* frame = end - 10;
     constexpr unsigned kDepth = 384 - 16;
     REQUIRE(nextPrim(&ordering[kDepth]) == frame);

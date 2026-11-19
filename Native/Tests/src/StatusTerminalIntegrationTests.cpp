@@ -47,9 +47,9 @@ struct ReloadFixture : Fixture {
     saved.translation = {1, 2, 3};
     saved.camera = {{4, 5, 6}, 7, {8, 9, 10}, 11, {12, 13, 14}, 15, 16};
     Menu_Status_selectedStatRow = 6;
-    Render_projectionDistance = 777;
-    Render_frameScratch.camera.position.vx = 1234;
-    Render_frameScratch.camera.angles.pad = 77;
+    VS::Render::projectionDistance = 777;
+    VS::Render::FrameScratchpad().camera.position.vx = 1234;
+    VS::Render::FrameScratchpad().camera.angles.pad = 77;
     VS::Menu::Framework::menuMemory.selectedEquipment = 5;
     Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
     *State() = 7;
@@ -145,17 +145,20 @@ TEST_CASE(
   const auto refused = st::RefusedLiveTerminalControllerCount();
   Menu_Status_fadeScreen = 1;
   ModuleEntry(0x80105E94, &st::LiveDrawModelSlideFade)();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 14);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 14);
   ModuleEntry(0x80105F60, &st::LiveDrawBackground)();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 51);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 51);
   fixture.BindFrame();
   Menu_Status_fadeScreen = 0;
   Menu_Status_delayScreenUpdate = 2;
   Actors_actorRecords[1]->collisionHeight = 32768;
   ModuleEntry(0x80106150, &st::LiveDrawFrame)();
-  CHECK(Render_frameScratch.camera.lookAt.vy == -67108864);
+  CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == -67108864);
   CHECK(Menu_Status_delayScreenUpdate == 1);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.primitives.data() + 37);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.primitives.data() + 37);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
 }
 
@@ -173,7 +176,7 @@ TEST_CASE(
   ReloadFixture::CheckReset();
   fixture.CheckBorrowedOwners(cold);
   CHECK(st::terminal_live::LoadView() == current);
-  CHECK(Render_projectionDistance == 777);
+  CHECK(VS::Render::projectionDistance == 777);
   CHECK(*fixture.State() == 7);
   CHECK(memory::RefusedLiveHeapRequestCount() == refused);
   fixture.Reenter();

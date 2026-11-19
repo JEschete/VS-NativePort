@@ -10,7 +10,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/GameFontLive.hpp"
 
@@ -41,7 +41,7 @@ class ScreenHost final : public HostBase<StatusTerminalHost> {
     return true;
   }
   std::int32_t ProjectionDistance() override {
-    return Render_projectionDistance;
+    return VS::Render::projectionDistance;
   }
   bool SetProjection(std::int32_t distance) override {
     Invoke([distance] { Render::SetLiveCameraProjectionDistance(distance); });

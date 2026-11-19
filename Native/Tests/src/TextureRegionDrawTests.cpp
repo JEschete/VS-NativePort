@@ -8,12 +8,12 @@
 
 #include "Ending/ClearResults.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 using VS::Render::QuadColor;
@@ -149,31 +149,31 @@ TEST_CASE(
 
 namespace {
 struct LiveRegionFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::vector<u_long> storage =
       std::vector<u_long>(4 * sizeof(POLY_GT4) / sizeof(u_long), 0);
   std::array<u_long, 16> ordering{};
-  std::array<Render_TextureRegion, 2> atlas{
+  std::array<VS::Render::TextureRegion, 2> atlas{
       {{1, 2, 3, 4, 0x15, 0x345}, {5, 6, 7, 8, 0x16, 0x346}}};
 
   LiveRegionFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 8;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 8;
   }
 
   ~LiveRegionFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
   }
 
   [[nodiscard]] bool Drew() const {
-    return Render_frameScratch.primitiveCursor != storage.data();
+    return VS::Render::FrameScratchpad().primitive_cursor != storage.data();
   }
 };
 }  // namespace
@@ -202,7 +202,7 @@ TEST_CASE("Live region draws stop at a missing primitive buffer",
           "[render][texture-region]") {
   LiveRegionFixture fixture;
   const std::array<CVECTOR, 2> colors{{{128, 96, 64, 8}, {200, 180, 160, 8}}};
-  Render_legacyPrimitiveBuffers[0] = nullptr;
+  VS::Render::legacyPrimitiveBuffers[0] = nullptr;
   VS::Render::DrawLiveTextureTintFade(fixture.atlas, 0, 0, 0, colors);
   CHECK_FALSE(fixture.Drew());
 }

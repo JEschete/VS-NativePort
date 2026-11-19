@@ -39,15 +39,15 @@
 #include "Legacy/Psx.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
-#include "Render/Camera.h"
-#include "Render/ModelDraw.h"
+#include "Render/Camera.hpp"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
-#include "Render/Palette.h"
-#include "Render/Render.h"
+#include "Render/Palette.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomLighting.hpp"
-#include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Textures.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Actors {
@@ -136,9 +136,9 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
     kFirstFrozenJointTag = 3,
     kLastFrozenJointTag = 6
   };
-  const Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
-  const unsigned yaw = workspace->angleX;
-  const unsigned pitch = workspace->angleY;
+  const VS::Render::ModelScratchpad* workspace = VS::Render::ModelWorkspace();
+  const unsigned yaw = workspace->angle_x;
+  const unsigned pitch = workspace->angle_y;
   if (tag == 1 || tag == 2) {
     rotation->vx = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(rotation->vx) - (yaw >> 1));
@@ -167,11 +167,11 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
            values, sizeof values);
     rotation->vx = static_cast<int16_t>(values[1]);
   } else if (tag >= kFirstCameraFacingTag && tag <= kLastCameraFacingTag) {
-    const Render_Camera* camera = &Render_frameScratch.camera;
+    const VS::Render::Camera* camera = &VS::Render::FrameScratchpad().camera;
     const int delta_x =
-        camera->position.vx / kActorFixedOne - workspace->rootOffset.vx;
+        camera->position.vx / kActorFixedOne - workspace->root_offset.vx;
     const int delta_z =
-        camera->position.vz / kActorFixedOne - workspace->rootOffset.vz;
+        camera->position.vz / kActorFixedOne - workspace->root_offset.vz;
     if (tag == kCameraPitchTag) {
       rotation->vx = static_cast<int16_t>(camera->angles.vx);
     }
@@ -184,7 +184,7 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
       const int distance = VS::Core::Math::SquareRootInteger(
           squared > INT32_MAX ? INT32_MAX : static_cast<int>(squared));
       rotation->vz = static_cast<int16_t>(VS::Core::Math::Arctangent2(
-          camera->position.vy / kActorFixedOne - workspace->rootOffset.vy,
+          camera->position.vy / kActorFixedOne - workspace->root_offset.vy,
           distance));
     }
   }
@@ -223,7 +223,7 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       return 0;
     }
   }
-  const Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
+  const VS::Render::ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   SVECTOR rotation = {
       static_cast<int16_t>((actor->blendPose.boneKeys[0].vx >> 1) +
                            actor->instance.rotationX),
@@ -240,7 +240,7 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
   MATRIX root{};
   VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, root);
   VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, root);
-  TransformBonePosition(camera, &workspace->rootOffset, &root);
+  TransformBonePosition(camera, &workspace->root_offset, &root);
   ScaleActorRoot(*actor, root);
   VECTOR scale{};
   int cumulative[kPoseBoneCount][kSpatialDimensions] = {};
@@ -342,7 +342,7 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
     const unsigned packed =
         static_cast<uint16_t>(root_offset->vx) |
         (static_cast<unsigned>(static_cast<uint16_t>(root_offset->vz)) << 16);
-    Render_ColorCode ground{};
+    VS::Render::ColorCode ground{};
     VS::Field::SampleLiveRoomLighting(
         packed, VS::Render::RoomLightLayer::kFloor, &ground);
     unsigned char* shadow_color =
@@ -386,8 +386,8 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
   }
   bool BindGeometry() override {
     if (geometry_->textureSlot >=
-            sizeof Render_legacyActorTextureSlots /
-                sizeof Render_legacyActorTextureSlots[0] ||
+            sizeof VS::Render::legacyActorTextureSlots /
+                sizeof VS::Render::legacyActorTextureSlots[0] ||
         geometry_->instance.boneCount > actor_.instance.boneCount ||
         !VS::Render::ValidateLiveActorModel(*geometry_)) {
       VS::Core::Debugf("render", "Invalid actor model %u data or texture slot",
@@ -396,8 +396,9 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     }
     workspace_ = VS::Render::ModelWorkspace();
     workspace_->model = geometry_->instance.model;
-    workspace_->texturePage =
-        Render_legacyActorTextureSlots[geometry_->textureSlot].texturePage;
+    workspace_->texture_page =
+        VS::Render::legacyActorTextureSlots[geometry_->textureSlot]
+            .texture_page;
     workspace_->palette = static_cast<uint16_t>(geometry_->clutA);
     workspace_->reserved38 = static_cast<uint16_t>(geometry_->clutB);
     return true;
@@ -409,7 +410,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     actor_.instance.isPreviewModel = culled ? 1 : 0;
   }
   void UpdateColors(ModelDrawRole role) override {
-    UpdateActorModelColors(&actor_, geometry_, role, &workspace_->rootOffset);
+    UpdateActorModelColors(&actor_, geometry_, role, &workspace_->root_offset);
   }
   bool ActorHasUvLayout() const override {
     return actor_.instance.uvLayout != 0;
@@ -456,15 +457,15 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
   }
   void DrawShadow() override {
     VS::Render::DrawLiveActorGroundShadow(
-        actor_, Render_frameScratch.viewMatrix,
-        VS::Render::ModelWorkspace()->rootOffset);
+        actor_, VS::Render::FrameScratchpad().view_matrix,
+        VS::Render::ModelWorkspace()->root_offset);
   }
 
  private:
   Actors_ActorRecord& actor_;
   MATRIX& camera_;
   Actors_ActorRecord* geometry_ = nullptr;
-  Render_ModelScratchpad* workspace_ = nullptr;
+  VS::Render::ModelScratchpad* workspace_ = nullptr;
 };
 
 class LiveBoneProjection final : public BoneProjectionHost {

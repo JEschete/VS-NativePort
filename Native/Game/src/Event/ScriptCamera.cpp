@@ -3,13 +3,13 @@
 
 #include "Legacy/Psx.h"
 #include "Event/ScriptCamera.h"
-#include "Render/FramebufferEffects.h"
+#include "Render/FramebufferEffects.hpp"
 
 // decomp: D_800E9C08 (D_800E9C08@BATTLE/BATTLE.PRG)
 CVECTOR Event_kDefaultScreenTint; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800E9C0C (D_800E9C0C@BATTLE/BATTLE.PRG)
-Render_FramebufferEffectTranslation Event_kDefaultScreenTransform; /* contents: module image (ModuleData.cpp) */
+VS::Render::FramebufferEffectTranslation Event_kDefaultScreenTransform; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800E9C1C (D_800E9C1C@BATTLE/BATTLE.PRG)
 u_char Event_fieldCameraReturnCommands[276]; /* contents: module image (ModuleData.cpp) */

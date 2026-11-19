@@ -370,12 +370,12 @@ TEST_CASE("Live fade color requests bind the actor record",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   Actors_ActorRecord& actor = state.AddActor(3);
-  const Render_ColorCode fade{11, 22, 33, 44};
+  const VS::Render::ColorCode fade{11, 22, 33, 44};
   CHECK(actors::SetLiveActorFadeParameters(3, &fade) == 0);
   CHECK(actor.fadeRed == 11);
   CHECK(actor.fadeGreen == 22);
   CHECK(actor.fadeBlue == 33);
-  Render_ColorCode out{0, 0, 0, 55};
+  VS::Render::ColorCode out{0, 0, 0, 55};
   CHECK(actors::LiveActorFadeParameters(3, &out) == 0);
   CHECK(out.red == 11);
   CHECK(out.blue == 33);
@@ -386,13 +386,13 @@ TEST_CASE("Live tint requests bind the actor's model instance",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   Actors_ActorRecord& actor = state.AddActor(3);
-  const Render_ColorCode tint{1, 2, 3, 4};
+  const VS::Render::ColorCode tint{1, 2, 3, 4};
   CHECK(actors::SetLiveActorTint(3, &tint) == 0);
   CHECK(actor.customTint == 1);
   CHECK(actor.instance.tint.green == 2);
   CHECK(actors::SetLiveActorTint(3, nullptr) == 0);
   CHECK(actor.customTint == 0);
-  Render_ColorCode tint_out{};
+  VS::Render::ColorCode tint_out{};
   CHECK(actors::LiveActorTint(3, &tint_out) == 0);
   CHECK(tint_out.code == 4);
 }
@@ -417,7 +417,7 @@ TEST_CASE("Live appearance requests treat an empty actor slot as no model",
   LiveAppearanceState state;
   VS::test_support::ChannelWarnings warnings{"actors"};
   const int no_model = static_cast<int>(AppearanceStatus::kNoModel);
-  Render_ColorCode color{};
+  VS::Render::ColorCode color{};
 
   // An empty slot is the original's no-model result, without a report.
   CHECK(actors::LiveActorTint(4, &color) == no_model);
@@ -435,7 +435,7 @@ TEST_CASE("Live appearance requests refuse bad ids and null colors",
   state.AddActor(2);
   VS::test_support::ChannelWarnings warnings{"actors"};
   const int no_model = static_cast<int>(AppearanceStatus::kNoModel);
-  Render_ColorCode color{};
+  VS::Render::ColorCode color{};
   CHECK(actors::LiveActorTint(17, &color) == no_model);
   CHECK(actors::SetLiveActorFadeParameters(-1, &color) == no_model);
   CHECK(actors::LiveActorTint(2, nullptr) == no_model);

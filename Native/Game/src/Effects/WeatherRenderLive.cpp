@@ -25,12 +25,12 @@
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/Weather.h"
 #include "Legacy/Psx.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Render.h"
+#include "Render/Frame.hpp"
+#include "Render/LegacyPackets.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Effects {
@@ -146,7 +146,7 @@ class LiveRenderHost final : public WeatherRenderHost {
     tag[0] = (std::uint32_t{packet.size} << kLengthShift) | (link & kLinkMask);
     std::copy_n(packet.words.begin(), packet.size, tag + 1);
     *entry = (link & ~kLinkMask) | (LegacyGpu_Handle(tag) & kLinkMask);
-    Render_frameScratch.primitiveCursor = tag + words;
+    VS::Render::FrameScratchpad().primitive_cursor = tag + words;
   }
 };
 

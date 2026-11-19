@@ -15,13 +15,13 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.h"
 
 namespace {
@@ -348,10 +348,10 @@ constexpr std::size_t kLiveSceneHead = 16;
 // A frame whose primitives land in `storage`, and the par time and puzzle
 // clock the Live entries read, restored afterwards.
 struct LiveCubeTextFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::int16_t saved_par = Menu_Results_puzzleParTime;
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
@@ -359,10 +359,10 @@ struct LiveCubeTextFixture {
 
   LiveCubeTextFixture() { Reset(); }
   ~LiveCubeTextFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Menu_Results_puzzleParTime = saved_par;
     Audio_Seq_unusedStateFlags = saved_flags;
   }
@@ -372,18 +372,19 @@ struct LiveCubeTextFixture {
   LiveCubeTextFixture& operator=(LiveCubeTextFixture&&) = delete;
 
   void Reset() {
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::frameBuf = 0;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     std::ranges::fill(storage, 0);
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
-    Render_frameScratch.primitiveCursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kLiveSceneHead;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
   }
   // The primitive words written since the last reset.
   [[nodiscard]] std::vector<u_long> Used() const {
-    const auto* const cursor =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+    const auto* const cursor = static_cast<const u_long*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     return {storage.data(), cursor};
   }
 };

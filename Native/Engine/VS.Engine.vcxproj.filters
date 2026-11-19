@@ -543,7 +543,7 @@
     <ClCompile Include="src\Render\Camera.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Camera.h">
+    <ClInclude Include="src\Render\Camera.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\CameraView.cpp">
@@ -564,7 +564,7 @@
     <ClCompile Include="src\Render\Display.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Display.h">
+    <ClInclude Include="src\Render\Display.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\DisplayControl.cpp">
@@ -582,10 +582,10 @@
     <ClCompile Include="src\Render\Frame.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Frame.h">
+    <ClInclude Include="src\Render\Frame.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\FramebufferEffects.h">
+    <ClInclude Include="src\Render\FramebufferEffects.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\GameFont.cpp">
@@ -600,19 +600,16 @@
     <ClCompile Include="src\Render\GimImagesLive.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Images.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Render\LegacyPackets.h">
+    <ClInclude Include="src\Render\LegacyPackets.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\Loading.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Loading.h">
+    <ClInclude Include="src\Render\Loading.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\ModelDraw.h">
+    <ClInclude Include="src\Render\ModelDraw.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\ModelGeometry.cpp">
@@ -627,19 +624,16 @@
     <ClCompile Include="src\Render\PageSpace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Palette.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
     <ClCompile Include="src\Render\PaletteAnimation.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\PaletteAnimationLive.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Primitives.h">
+    <ClInclude Include="src\Render\Primitives.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\Render.h">
+    <ClInclude Include="src\Render\Render.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\RoomDraw.cpp">
@@ -666,7 +660,7 @@
     <ClCompile Include="src\Render\ScreenTransition.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\ScreenTransition.h">
+    <ClInclude Include="src\Render\ScreenTransition.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\Sprites.cpp">
@@ -678,13 +672,13 @@
     <ClCompile Include="src\Render\Text\CompactFont.cpp">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Text\CompactFont.h">
+    <ClInclude Include="src\Render\Text\CompactFont.hpp">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\Text\VariableFont.cpp">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Text\VariableFont.h">
+    <ClInclude Include="src\Render\Text\VariableFont.hpp">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\TextBoxText.cpp">
@@ -705,7 +699,7 @@
     <ClCompile Include="src\Render\Textures.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Textures.h">
+    <ClInclude Include="src\Render\Textures.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\TimImage.cpp">
@@ -723,7 +717,7 @@
     <ClCompile Include="src\Render\UiPrimitives.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\UiPrimitives.h">
+    <ClInclude Include="src\Render\UiPrimitives.hpp">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\UiTexturedQuads.cpp">
@@ -1098,6 +1092,9 @@
     <ClInclude Include="include\Render\GimImagesLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\Images.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\ModelGeometry.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
@@ -1108,6 +1105,9 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Palette.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PaletteAnimation.hpp">

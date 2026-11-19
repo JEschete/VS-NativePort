@@ -83,8 +83,8 @@ struct EventScreenTweens {
                          const EventScreenTweens&) = default;
 };
 
-// A framebuffer effect scale or offset (Render_FramebufferEffectTranslation's
-// first two words).
+// A framebuffer effect scale or offset
+// (VS::Render::FramebufferEffectTranslation's first two words).
 struct EventScreenPair {
   std::int32_t x{};
   std::int32_t y{};

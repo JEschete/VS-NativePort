@@ -19,9 +19,9 @@
 #include "Core/Runtime.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace Math = VS::Core::Math;
 using FixedTrig = std::int32_t (*)(std::int32_t) noexcept;
@@ -211,11 +211,11 @@ void ReferenceRoomView(const MATRIX& view, int scale, bool compensated,
 }
 
 struct RestoreRoomCamera {
-  MATRIX view = Render_frameScratch.viewMatrix;
-  int scale = Render_frameScratch.camera.farClip;
+  MATRIX view = VS::Render::FrameScratchpad().view_matrix;
+  int scale = VS::Render::FrameScratchpad().camera.far_clip;
   ~RestoreRoomCamera() {
-    Render_frameScratch.viewMatrix = view;
-    Render_frameScratch.camera.farClip = scale;
+    VS::Render::FrameScratchpad().view_matrix = view;
+    VS::Render::FrameScratchpad().camera.far_clip = scale;
   }
 };
 }  // namespace
@@ -317,9 +317,9 @@ TEST_CASE("Vector square keeps its low-halfword golden",
 TEST_CASE("Room view rotation retains the original staged YXZ precision",
           "[math][room-rotation]") {
   const RestoreRoomCamera restore;
-  Render_frameScratch.viewMatrix = {};
+  VS::Render::FrameScratchpad().view_matrix = {};
   for (int axis = 0; axis < 3; ++axis) {
-    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+    VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
   }
   VECTOR position{}, angles{123, 234, 345, 0};
   MATRIX output{};
@@ -376,18 +376,18 @@ TEST_CASE("Room view producers retain source stages with camera and scale",
           "[math][room-rotation]") {
   const RestoreRoomCamera restore;
   std::uint32_t state = 0x985AC;
-  Render_frameScratch.viewMatrix = MatrixPattern(state);
-  Render_frameScratch.viewMatrix.t[0] = 321;
-  const auto before = MatrixBytes(Render_frameScratch.viewMatrix);
+  VS::Render::FrameScratchpad().view_matrix = MatrixPattern(state);
+  VS::Render::FrameScratchpad().view_matrix.t[0] = 321;
+  const auto before = MatrixBytes(VS::Render::FrameScratchpad().view_matrix);
   const auto scale = GENERATE(2048, 4096, 8192);
   const auto compensated = GENERATE(false, true);
-  Render_frameScratch.camera.farClip = scale;
+  VS::Render::FrameScratchpad().camera.far_clip = scale;
   VECTOR position{0x12348001, -65413, 65539, -1};
   VECTOR angles{0x1234007B, -65302, 65881, -2};
   MATRIX actual{};
   MATRIX expected{};
-  ReferenceRoomView(Render_frameScratch.viewMatrix, scale, compensated,
-                    expected);
+  ReferenceRoomView(VS::Render::FrameScratchpad().view_matrix, scale,
+                    compensated, expected);
   if (compensated) {
     VS::Render::BuildLiveScaleCompensatedRoomView(position, angles, actual);
   } else {
@@ -398,8 +398,8 @@ TEST_CASE("Room view producers retain source stages with camera and scale",
     CAPTURE(axis);
     CHECK(actual.t[axis] == expected.t[axis]);
   }
-  CHECK(MatrixBytes(Render_frameScratch.viewMatrix) == before);
-  CHECK(Render_frameScratch.camera.farClip == scale);
+  CHECK(MatrixBytes(VS::Render::FrameScratchpad().view_matrix) == before);
+  CHECK(VS::Render::FrameScratchpad().camera.far_clip == scale);
   CHECK(position.pad == -1);
   CHECK(angles.pad == -2);
 }

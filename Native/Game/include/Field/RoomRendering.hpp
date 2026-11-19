@@ -34,7 +34,7 @@ void SetFieldRenderingEnabled(RoomRenderState& state, bool enabled);
 // Pauses or resumes the room's animations and effects.
 void SetRoomAnimationsPaused(RoomRenderState& state, bool paused);
 
-// A colour code's channels (Render_ColorCode without the GPU code byte).
+// A colour code's channels (VS::Render::ColorCode without the GPU code byte).
 struct TintColor {
   std::uint8_t red = 0;
   std::uint8_t green = 0;

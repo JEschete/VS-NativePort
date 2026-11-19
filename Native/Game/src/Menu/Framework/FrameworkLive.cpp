@@ -100,19 +100,19 @@
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "Save/NativeContainerLive.hpp"
 #include "State/StateFlags.h"
 
@@ -506,7 +506,7 @@ void ResetLoadedSubmenu(int lba) {
 struct PreviewBackup {
   int projection_distance = 0;
   MATRIX view_matrix{};
-  Render_Camera camera{};
+  VS::Render::Camera camera{};
 };
 PreviewBackup g_preview_backup;
 
@@ -1129,7 +1129,7 @@ class LiveHost final : public Host {
                                          static_cast<int>(color), chain);
   }
 
-  int FrameBufferIndex() override { return Render_frameBuf; }
+  int FrameBufferIndex() override { return VS::Render::frameBuf; }
 
   bool TabArrowsFrozen() override {
     return Menu_Inventory_freezeTabArrows != 0;
@@ -1156,15 +1156,15 @@ class LiveHost final : public Host {
   }
 
   void BeginAshleyPreview() override {
-    Render_Camera& camera = Render_frameScratch.camera;
-    g_preview_backup.projection_distance = Render_projectionDistance;
+    VS::Render::Camera& camera = VS::Render::FrameScratchpad().camera;
+    g_preview_backup.projection_distance = VS::Render::projectionDistance;
     VS::Render::SetLiveCameraProjectionDistance(kPreviewProjectionDistance);
-    g_preview_backup.view_matrix = Render_frameScratch.viewMatrix;
+    g_preview_backup.view_matrix = VS::Render::FrameScratchpad().view_matrix;
     g_preview_backup.camera = camera;
     camera.angles.vx = 0;
     camera.angles.vy = 0;
     camera.angles.vz = 0;
-    camera.farClip = kPreviewFarClip;
+    camera.far_clip = kPreviewFarClip;
     VS::Render::BuildLiveCameraViewMatrix();
   }
 
@@ -1181,26 +1181,26 @@ class LiveHost final : public Host {
   void EndAshleyPreview() override {
     VS::Render::SetLiveCameraProjectionDistance(
         g_preview_backup.projection_distance);
-    Render_frameScratch.viewMatrix = g_preview_backup.view_matrix;
-    Render_frameScratch.camera = g_preview_backup.camera;
+    VS::Render::FrameScratchpad().view_matrix = g_preview_backup.view_matrix;
+    VS::Render::FrameScratchpad().camera = g_preview_backup.camera;
   }
 
   void DrawAshleyPreview(const Core::Math::Vec3& look_at,
                          const Core::Math::Vec3& position) override {
-    Render_Camera& camera = Render_frameScratch.camera;
-    camera.lookAt.vx = look_at.x;
-    camera.lookAt.vy = look_at.y;
-    camera.lookAt.vz = look_at.z;
+    VS::Render::Camera& camera = VS::Render::FrameScratchpad().camera;
+    camera.look_at.vx = look_at.x;
+    camera.look_at.vy = look_at.y;
+    camera.look_at.vz = look_at.z;
     camera.position.vx = position.x;
     camera.position.vy = position.y;
     camera.position.vz = position.z;
     camera.angles.vx = 0;
     camera.angles.vy = 0;
     camera.angles.vz = 0;
-    camera.farClip = kPreviewFarClip;
+    camera.far_clip = kPreviewFarClip;
     VS::Render::BuildLiveCameraViewMatrix();
     const CallOutScope scope;
-    DrawLiveActorPreview(&Render_frameScratch.viewMatrix);
+    DrawLiveActorPreview(&VS::Render::FrameScratchpad().view_matrix);
   }
 
   void UpdateActorAssetQueue() override {
@@ -1505,7 +1505,8 @@ void DrawLiveButtonIcon(int button_id, int x, int y, u_long* before) {
   u_long* const chain =
       before != nullptr
           ? before
-          : static_cast<u_long*>(Render_frameScratch.overlayOrderingTable);
+          : static_cast<u_long*>(
+                VS::Render::FrameScratchpad().overlay_ordering_table);
   LiveCall call(chain);
   DrawButtonIcon(call.Ctx(), button_id, x, y, kCallerLayer);
 }

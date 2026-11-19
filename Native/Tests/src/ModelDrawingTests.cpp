@@ -20,7 +20,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Core/Gte.h"
 #include "Legacy/Psx.h"
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
 
 namespace {
@@ -391,7 +391,7 @@ struct BorrowedGeometryFixture {
       std::to_array(Actors_actorRecords);
   Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
-  Render_ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
+  VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   std::array<unsigned, 32> model_bytes{};
   Actors_ActorRecord actor{};
   Actors_ActorRecord geometry{};
@@ -421,7 +421,7 @@ struct BorrowedGeometryFixture {
     geometry.fadeBlue = 246;
     Actors_actorRecords[kGeometrySlot] = &geometry;
     for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
-    setVector(&VS::Render::ModelWorkspace()->rootOffset, 0, 0, 1024);
+    setVector(&VS::Render::ModelWorkspace()->root_offset, 0, 0, 1024);
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
   }

@@ -164,7 +164,8 @@ class TerminalFixture
        .bank_selectors = sound_banks_,
        .program_data = {}}};
   std::byte* borrowed_mon_ = nullptr;
-  Render_ScreenOffset projection_ = VS::Render::GetLiveProjectionScreenOffset();
+  VS::Render::ScreenOffset projection_ =
+      VS::Render::GetLiveProjectionScreenOffset();
 
  public:
   TerminalFixture() {

@@ -17,8 +17,8 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 std::uint32_t Point(int x, int y) {
@@ -27,7 +27,7 @@ std::uint32_t Point(int x, int y) {
 }
 
 struct WarpFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Effects_ScreenEffectOverlay* saved_overlay = Effects_screenEffectOverlay;
   Effects_ScreenEffectOverlay overlay{};
   std::array<u_long, 2048> ordering{};
@@ -51,8 +51,8 @@ struct WarpFixture {
     }
     overlay.radialWarpArg0 = 2048;
     Effects_screenEffectOverlay = &overlay;
-    Render_frameScratch = {};
-    Render_frameScratch.orderingTable = ordering.data();
+    VS::Render::FrameScratchpad() = {};
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ordering[0] = 0x12FFFFFF;
     triangle[0] = 0x04000000 | LegacyGpu_Handle(ordering.data());
     triangle[1] = 0x20010203;
@@ -65,7 +65,7 @@ struct WarpFixture {
   ~WarpFixture() {
     std::copy(saved_lookup.begin(), saved_lookup.end(),
               VS::Core::Math::kArcTangentTable);
-    Render_frameScratch = saved_frame;
+    VS::Render::FrameScratchpad() = saved_frame;
     Effects_screenEffectOverlay = saved_overlay;
   }
 };
@@ -179,7 +179,7 @@ TEST_CASE("The production screen overlay applies radial warp to scene vertices",
   CHECK(fixture.triangle[0] == tag);
   CHECK(fixture.triangle[1] == 0x20010203);
   CHECK(fixture.ordering[0] == root);
-  CHECK(Render_frameScratch.primitiveCursor == nullptr);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == nullptr);
 }
 
 TEST_CASE(
@@ -288,10 +288,10 @@ TEST_CASE(
       0x01000000 | LegacyGpu_Handle(fixture.triangle.data()), 0xE1000640};
   fixture.ordering[2046] = LegacyGpu_Handle(mode.data());
   const auto expected_mode = mode;
-  std::array<std::byte, sizeof(Render_FrameScratch)> before{}, after{};
-  std::memcpy(before.data(), &Render_frameScratch, before.size());
+  std::array<std::byte, sizeof(VS::Render::FrameScratch)> before{}, after{};
+  std::memcpy(before.data(), &VS::Render::FrameScratchpad(), before.size());
   VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
-  std::memcpy(after.data(), &Render_frameScratch, after.size());
+  std::memcpy(after.data(), &VS::Render::FrameScratchpad(), after.size());
   CHECK(mode == expected_mode);
   CHECK(fixture.triangle[2] == Point(96, 88));
   CHECK(fixture.triangle[3] == Point(224, 88));

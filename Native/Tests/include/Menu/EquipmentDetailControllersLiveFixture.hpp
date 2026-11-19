@@ -34,15 +34,15 @@
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/EncodedText.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace equipment_detail_tests {
 namespace inventory = VS::Menu::Inventory;
@@ -175,19 +175,20 @@ struct LiveFixture {
       Battle_stringContext};
   ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_text_boxes{
       Menu_textBoxes};
-  ValueRestore<Render_FrameScratch> saved_frame{Render_frameScratch};
-  ValueRestore<void*> saved_primitive{Render_legacyPrimitiveBuffers[0]};
-  ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
-  ValueRestore<int> saved_framebuffer{Render_frameBuf};
+  ValueRestore<VS::Render::FrameScratch> saved_frame{
+      VS::Render::FrameScratchpad()};
+  ValueRestore<void*> saved_primitive{VS::Render::legacyPrimitiveBuffers[0]};
+  ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
+  ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   ValueRestore<VS::Render::FontStyle> saved_font{VS::Render::LiveFontStyle()};
-  ArrayRestore<u_char, sizeof Render_compactGlyphLeftTrim> saved_compact_trim{
-      Render_compactGlyphLeftTrim};
-  ArrayRestore<u_char, sizeof Render_compactGlyphWidths> saved_compact_widths{
-      Render_compactGlyphWidths};
-  ArrayRestore<u_char, sizeof Render_compactGlyphIndices> saved_compact_indices{
-      Render_compactGlyphIndices};
-  ArrayRestore<char, sizeof Render_variableFontGlyphWidths>
-      saved_variable_widths{Render_variableFontGlyphWidths};
+  ArrayRestore<u_char, sizeof VS::Render::compactGlyphLeftTrim>
+      saved_compact_trim{VS::Render::compactGlyphLeftTrim};
+  ArrayRestore<u_char, sizeof VS::Render::compactGlyphWidths>
+      saved_compact_widths{VS::Render::compactGlyphWidths};
+  ArrayRestore<u_char, sizeof VS::Render::compactGlyphIndices>
+      saved_compact_indices{VS::Render::compactGlyphIndices};
+  ArrayRestore<std::uint8_t, sizeof VS::Render::variableFontGlyphWidths>
+      saved_variable_widths{VS::Render::variableFontGlyphWidths};
 
   std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
   std::array<char, fw::kStringBufferBytes> description{};
@@ -217,10 +218,10 @@ struct LiveFixture {
     const std::vector<unsigned char> image{
         std::istreambuf_iterator<char>(stream), {}};
     const std::array targets{
-        static_cast<void*>(Render_compactGlyphLeftTrim),
-        static_cast<void*>(Render_compactGlyphWidths),
-        static_cast<void*>(Render_compactGlyphIndices),
-        static_cast<void*>(Render_variableFontGlyphWidths)};
+        static_cast<void*>(VS::Render::compactGlyphLeftTrim),
+        static_cast<void*>(VS::Render::compactGlyphWidths),
+        static_cast<void*>(VS::Render::compactGlyphIndices),
+        static_cast<void*>(VS::Render::variableFontGlyphWidths)};
     const auto entries = VS::Content::ModuleDataEntries();
     for (void* target : targets) {
       const auto entry = std::ranges::find(
@@ -283,12 +284,13 @@ struct LiveFixture {
     VS::Menu::Framework::stringBuf = description.data();
   }
   void ResetFrame() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = primitives.data() + 1;
-    Render_frameScratch.primitiveCursor = primitives.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Render_frameScratch.orderingTable = ordering.data() + kSceneOrderingEntry;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kSceneOrderingEntry;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   void IdleRows() {
@@ -372,8 +374,8 @@ struct LiveFixture {
   bool Owns(const void* packet) const {
     const auto address = reinterpret_cast<std::uintptr_t>(packet);
     const auto first = reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
-    const auto end =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto end = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto table = reinterpret_cast<std::uintptr_t>(ordering.data());
     return (address >= first && address < end) ||
            (address >= table && address < table + sizeof ordering);
@@ -439,8 +441,8 @@ struct LiveFixture {
   static char CompactCharacter(const DrawnSprite& sprite) {
     constexpr std::size_t kGlyphsBeforeSkippedBracket = '[' - ' ';
     for (std::size_t glyph = 0; glyph < kGlyphsBeforeSkippedBracket; ++glyph) {
-      const std::uint32_t cell = Render_compactGlyphIndices[glyph];
-      const std::uint32_t width = (Render_compactGlyphWidths[glyph / 2] >>
+      const std::uint32_t cell = VS::Render::compactGlyphIndices[glyph];
+      const std::uint32_t width = (VS::Render::compactGlyphWidths[glyph / 2] >>
                                    ((glyph % 2) * kNibbleBits)) &
                                   kWidthMask;
       const std::uint32_t texture =

@@ -16,7 +16,7 @@
 #include "Core/Log.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"

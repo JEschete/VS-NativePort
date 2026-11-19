@@ -29,13 +29,13 @@
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -268,7 +268,7 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
   decltype(VS::State::tickSpeed) saved_tick_speed = VS::State::tickSpeed;
   decltype(VS::Field::areRoomUpdatesPaused) saved_room_pause =
       VS::Field::areRoomUpdatesPaused;
-  decltype(Render_frameBuf) saved_frame_buffer = Render_frameBuf;
+  decltype(VS::Render::frameBuf) saved_frame_buffer = VS::Render::frameBuf;
   PlatformMotionLiveFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
@@ -277,7 +277,7 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
     Field_platformFreezeFrames = 0;
     Field_isPlatformFreezeTintActive = 0;
     VS::State::tickSpeed = 2;
-    Render_frameBuf = 0;
+    VS::Render::frameBuf = 0;
     platforms[1].sceneObjectId = 99;
   }
   ~PlatformMotionLiveFixture() {
@@ -285,34 +285,34 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     VS::State::tickSpeed = saved_tick_speed;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;
-    Render_frameBuf = saved_frame_buffer;
+    VS::Render::frameBuf = saved_frame_buffer;
   }
 };
 
 struct PlatformShadowLiveFixture : PlatformPlacementFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  void* saved_overlay = Render_legacyCurrentOrderingTable;
-  int saved_frame_buffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  void* saved_overlay = VS::Render::legacyCurrentOrderingTable;
+  int saved_frame_buffer = VS::Render::frameBuf;
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / sizeof(u_long));
   std::vector<u_long> ordering = std::vector<u_long>(0x2088 / sizeof(u_long));
   GeometryWords geometry{1};
   PlatformShadowLiveFixture() {
     // Project with the GTE's own screen distance, not one a prior test left.
     Core_Gte_Reset();
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyCurrentOrderingTable = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyCurrentOrderingTable = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameScratch.viewMatrix = {};
+    VS::Render::FrameScratchpad().view_matrix = {};
     const SVECTOR angles{512, 0, 0, 0};
-    VS::Core::Math::BuildLiveRotationXyz(&angles,
-                                         &Render_frameScratch.viewMatrix);
-    Render_frameScratch.viewMatrix.t[2] = 512;
+    VS::Core::Math::BuildLiveRotationXyz(
+        &angles, &VS::Render::FrameScratchpad().view_matrix);
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 512;
     platforms[0].isHidden = 0;
     platforms[0].positionX = platforms[0].positionZ = 0;
     platforms[0].positionY = 100 * ONE;
@@ -335,13 +335,13 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
                (x(storage[4]) - x(storage[2]));
   }
   ~PlatformShadowLiveFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_legacyCurrentOrderingTable = saved_overlay;
-    Render_frameBuf = saved_frame_buffer;
-    Core_Gte_SetRotMatrix(&saved_frame.viewMatrix);
-    Core_Gte_SetTransMatrix(&saved_frame.viewMatrix);
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::legacyCurrentOrderingTable = saved_overlay;
+    VS::Render::frameBuf = saved_frame_buffer;
+    Core_Gte_SetRotMatrix(&saved_frame.view_matrix);
+    Core_Gte_SetTransMatrix(&saved_frame.view_matrix);
   }
 };
 
@@ -952,7 +952,8 @@ TEST_CASE("Native platform shadows emit translucent quad then subtractive mode",
   const auto saved = fixture.platforms;
   const auto geometry = fixture.geometry;
   VS::Field::DrawMovingPlatformShadowsEntry();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 8);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 8);
   CHECK((fixture.storage[0] >> 24) == 5);
   CHECK((fixture.storage[1] >> 24) == 0x2A);
   CHECK(fixture.storage[7] == 0xE1000240);
@@ -966,7 +967,8 @@ TEST_CASE("Native platform shadows skip hidden records without packet writes",
   PlatformShadowLiveFixture fixture;
   fixture.platforms[0].isHidden = 1;
   VS::Field::DrawMovingPlatformShadowsEntry();
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data());
 }
 
 TEST_CASE("Native platform shadows project a nondegenerate shaded footprint",
@@ -980,11 +982,11 @@ TEST_CASE("Native platform shadows project a nondegenerate shaded footprint",
 TEST_CASE("Native platform shadows refuse a full primitive buffer",
           "[platform-shadow-live][field]") {
   PlatformShadowLiveFixture fixture;
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       fixture.storage.data() + fixture.storage.size();
   const auto dropped = VS::Render::DroppedLiveUiPacketCount();
   VS::Field::DrawMovingPlatformShadowsEntry();
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + fixture.storage.size());
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 1);
 }
@@ -993,12 +995,12 @@ TEST_CASE("Native platform shadows refuse when their draw mode cannot fit",
           "[platform-shadow-capacity][platform-shadow-live][field]") {
   PlatformShadowLiveFixture fixture;
   auto* cursor = fixture.storage.data() + fixture.storage.size() - 6;
-  Render_frameScratch.primitiveCursor = cursor;
+  VS::Render::FrameScratchpad().primitive_cursor = cursor;
   const auto saved_storage = fixture.storage;
   const auto saved_ordering = fixture.ordering;
   const auto dropped = VS::Render::DroppedLiveUiPacketCount();
   VS::Field::DrawMovingPlatformShadowsEntry();
-  CHECK(Render_frameScratch.primitiveCursor == cursor);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == cursor);
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 1);
   CHECK(std::ranges::equal(fixture.storage, saved_storage));
   CHECK(std::ranges::equal(fixture.ordering, saved_ordering));

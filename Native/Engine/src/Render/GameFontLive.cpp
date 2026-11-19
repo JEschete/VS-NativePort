@@ -21,19 +21,19 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/ScaledFontLive.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
 #include "Render/TextBoxText.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Render {
@@ -137,9 +137,9 @@ std::string_view CompactText(const char* text) {
 }
 
 CompactFontTables LiveCompactFontTables() {
-  return {.widths = Render_compactGlyphWidths,
-          .left_trim = Render_compactGlyphLeftTrim,
-          .indices = Render_compactGlyphIndices};
+  return {.widths = compactGlyphWidths,
+          .left_trim = compactGlyphLeftTrim,
+          .indices = compactGlyphIndices};
 }
 
 [[nodiscard]] bool Covers(const ScreenRect& area, std::size_t pixels) {
@@ -185,7 +185,7 @@ void DrawLiveCompactTextColor(const char* text, int xy, int color,
   LivePacketQueue queue(
       chain != nullptr
           ? chain
-          : static_cast<u_long*>(Render_frameScratch.overlayOrderingTable));
+          : static_cast<u_long*>(FrameScratchpad().overlay_ordering_table));
   DrawCompactText(queue, LiveCompactFontTables(), CompactText(text), xy,
                   static_cast<std::uint32_t>(color));
 }
@@ -268,10 +268,10 @@ void BlendLiveTextBoxIntoFramebuffer(Menu_TextBoxState* box, int glyph_alpha) {
   TextBoxText view = ViewOf(*box);
   const FramebufferTextBlend blend{
       .alpha = glyph_alpha,
-      .framebuffer_x = Render_frameBuf * kFramebufferWidth,
+      .framebuffer_x = frameBuf * kFramebufferWidth,
       .skip_pressed = (VS::Input::buttonsPressed & PADRright) != 0};
   const VariableFontTables font{.glyph_widths = LiveVariableFontGlyphWidths(),
-                                .pixel_expansion = Render_kGlyphPixelExpansion};
+                                .pixel_expansion = kGlyphPixelExpansion};
   LiveVramPixels vram;
   BlendTextBoxIntoFramebuffer(view, blend, font_style, font, vram);
   box->speed = view.speed;

@@ -19,7 +19,7 @@
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Score/ScoreRank.hpp"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 
 namespace VS::Menu::Results {

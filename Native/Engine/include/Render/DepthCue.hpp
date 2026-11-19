@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "Render/Palette.hpp"
+
 // Depth cueing (fog) for the map and field geometry: the near-plane cue the
 // projection writes per vertex, and the colour blend toward the far colour.
 // The policies read no global state; the GTE-backed registers and far colour
@@ -39,15 +41,6 @@ class DepthCueRegisters {
 void SetFogNearDistance(DepthCueRegisters& registers,
                         std::int32_t near_distance,
                         std::int32_t projection_distance);
-
-struct ColorCode {
-  std::uint8_t red = 0;
-  std::uint8_t green = 0;
-  std::uint8_t blue = 0;
-  std::uint8_t code = 0;
-
-  friend bool operator==(const ColorCode&, const ColorCode&) = default;
-};
 
 inline constexpr std::size_t kColorChannels = 3;
 

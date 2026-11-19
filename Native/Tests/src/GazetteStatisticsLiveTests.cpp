@@ -327,7 +327,7 @@ TEST_CASE("F02816 Live refuses absent capacity without changing a real chain",
       render::LiveFrameOrderingEntry(render::LiveOrderingBase::kOverlay, 0);
   REQUIRE(head != nullptr);
   const auto previous = *head;
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       fixture.primitives.data() + shared::kPrimitiveWords - 8;
   const auto words = fixture.UsedWords();
   const auto refused = score::LiveGazetteStatisticsRefusals();
@@ -386,7 +386,7 @@ TEST_CASE(
   live::StatisticsFixture fixture;
   Progress();
   score::CreateLiveStatisticRows();
-  Render_variableFontGlyphWidths[3] = 12;
+  VS::Render::variableFontGlyphWidths[3] = 12;
   Battle_unusedMenu9CursorMemory.recordTimePage = 0;
   Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
   const auto refused = score::LiveGazetteStatisticsRefusals();

@@ -15,7 +15,7 @@
 
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "Render/UiPackets.hpp"
 
 namespace {
@@ -98,8 +98,8 @@ class TrialHost final : public score::TimeTrialHost {
       raster_succeeded =
           render::DrawCompactText(
               queue,
-              {Render_compactGlyphWidths, Render_compactGlyphLeftTrim,
-               Render_compactGlyphIndices},
+              {VS::Render::compactGlyphWidths, VS::Render::compactGlyphLeftTrim,
+               VS::Render::compactGlyphIndices},
               text, std::bit_cast<std::int32_t>(fw::PackXy(x, y)), color) &&
           raster_succeeded;
     }
@@ -147,24 +147,24 @@ struct TrialFixture {
 
 // Pin every global compact-font input independently of earlier module tests.
 struct GlyphTables {
-  decltype(std::to_array(Render_compactGlyphWidths)) widths =
-      std::to_array(Render_compactGlyphWidths);
-  decltype(std::to_array(Render_compactGlyphLeftTrim)) trim =
-      std::to_array(Render_compactGlyphLeftTrim);
-  decltype(std::to_array(Render_compactGlyphIndices)) indices =
-      std::to_array(Render_compactGlyphIndices);
+  decltype(std::to_array(VS::Render::compactGlyphWidths)) widths =
+      std::to_array(VS::Render::compactGlyphWidths);
+  decltype(std::to_array(VS::Render::compactGlyphLeftTrim)) trim =
+      std::to_array(VS::Render::compactGlyphLeftTrim);
+  decltype(std::to_array(VS::Render::compactGlyphIndices)) indices =
+      std::to_array(VS::Render::compactGlyphIndices);
 
   GlyphTables() {
-    std::ranges::fill(Render_compactGlyphWidths, std::uint8_t{0x66});
-    std::ranges::fill(Render_compactGlyphLeftTrim, std::uint8_t{0});
+    std::ranges::fill(VS::Render::compactGlyphWidths, std::uint8_t{0x66});
+    std::ranges::fill(VS::Render::compactGlyphLeftTrim, std::uint8_t{0});
     for (std::size_t index = 0; index < indices.size(); ++index) {
-      Render_compactGlyphIndices[index] = static_cast<std::uint8_t>(index);
+      VS::Render::compactGlyphIndices[index] = static_cast<std::uint8_t>(index);
     }
   }
   ~GlyphTables() {
-    std::ranges::copy(widths, Render_compactGlyphWidths);
-    std::ranges::copy(trim, Render_compactGlyphLeftTrim);
-    std::ranges::copy(indices, Render_compactGlyphIndices);
+    std::ranges::copy(widths, VS::Render::compactGlyphWidths);
+    std::ranges::copy(trim, VS::Render::compactGlyphLeftTrim);
+    std::ranges::copy(indices, VS::Render::compactGlyphIndices);
   }
   GlyphTables(const GlyphTables&) = delete;
   GlyphTables& operator=(const GlyphTables&) = delete;

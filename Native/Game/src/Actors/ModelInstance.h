@@ -6,7 +6,7 @@ struct Actors_ModelEffectSlot;
 struct Actors_ModelInstance;
 struct Actors_ShpModel;
 
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800F4538_unk64 (src/BATTLE/BATTLE.PRG/3A1A0.h:99)
 struct Actors_ModelEffectSlot {
@@ -75,7 +75,7 @@ struct Actors_ModelInstance {
     short reserved50;
     short previousFacing;
     CVECTOR baseColor;
-    Render_ColorCode tint;
+    VS::Render::ColorCode tint;
     u_char currentTileX;
     u_char currentTileLayer;
     u_char currentTileZ;

@@ -23,11 +23,11 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimer.h"
 #include "State/Timers.hpp"
@@ -70,9 +70,9 @@ bool DrawText(std::string_view text, std::int32_t position, int layer) {
       CurrentChain(Render::LiveOrderingBase::kScene, layer));
   const bool drawn =
       Render::DrawCompactText(queue,
-                              {.widths = Render_compactGlyphWidths,
-                               .left_trim = Render_compactGlyphLeftTrim,
-                               .indices = Render_compactGlyphIndices},
+                              {.widths = VS::Render::compactGlyphWidths,
+                               .left_trim = VS::Render::compactGlyphLeftTrim,
+                               .indices = VS::Render::compactGlyphIndices},
                               text, position, Render::kCompactTextGray);
   if (!drawn) Refuse("HUD text has insufficient primitive capacity");
   return true;

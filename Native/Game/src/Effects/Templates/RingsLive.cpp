@@ -44,10 +44,10 @@ constexpr std::size_t kPaletteEntryBytes = 4;
 #include "Effects/Runtime.h"
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Transforms.h"
-#include "Render/Camera.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Camera.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // The overlays' colour palettes at the sizes Effects/Plugins/Plg*.cpp define
 // (their headers declare them without a bound).
@@ -440,7 +440,7 @@ std::optional<RingTickInputs> LiveRingHost::BeginTick(
       .actor_translation = {static_cast<std::int32_t>(world.t[0]),
                             static_cast<std::int32_t>(world.t[1]),
                             static_cast<std::int32_t>(world.t[2])},
-      .near_clip = Render_nearClip};
+      .near_clip = VS::Render::nearClip};
 }
 
 // Curve 0 samples 0 without reading the package, as the original's sampler
@@ -541,7 +541,7 @@ void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
   std::ranges::copy(words, packet);
   *entry =
       (*entry & kOrderingHighMask) | (LegacyGpu_Handle(packet) & kRingLinkMask);
-  Render_frameScratch.primitiveCursor = packet + kRingPacketWords;
+  VS::Render::FrameScratchpad().primitive_cursor = packet + kRingPacketWords;
 }
 
 // decomp: rings.h:283-293 (the tick event through the transform's world

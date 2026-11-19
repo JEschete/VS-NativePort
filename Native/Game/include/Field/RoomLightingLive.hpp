@@ -9,7 +9,9 @@
 
 #include "Render/RoomLighting.hpp"
 
-struct Render_ColorCode;
+namespace VS::Render {
+struct ColorCode;
+}  // namespace VS::Render
 
 namespace VS::Field {
 
@@ -21,11 +23,11 @@ namespace VS::Field {
 // position and writes the colour code; a null colour is ignored.
 void SampleLiveRoomLighting(std::uint32_t packed_position,
                             Render::RoomLightLayer layer,
-                            Render_ColorCode* color);
+                            VS::Render::ColorCode* color);
 
 // The generated callers' shape: layer 0 is the floor and any other the
 // ceiling.
 void SampleLiveRoomLighting(int packed_position, int layer,
-                            Render_ColorCode* color);
+                            VS::Render::ColorCode* color);
 
 }  // namespace VS::Field

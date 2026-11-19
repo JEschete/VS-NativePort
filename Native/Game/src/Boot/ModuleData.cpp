@@ -132,12 +132,12 @@
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
-#include "Render/FramebufferEffects.h"
-#include "Render/Images.h"
-#include "Render/Loading.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/FramebufferEffects.hpp"
+#include "Render/Images.hpp"
+#include "Render/Loading.hpp"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "Title/Credits.h"
 #include "Title/SaveFiles.h"
 #include "Title/TitleScreen.h"
@@ -293,11 +293,11 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x821B6, sizeof Battle_targetStatusLineTemplate, &Battle_targetStatusLineTemplate, sizeof Battle_targetStatusLineTemplate}, // G00145 D_800EA9B6
     {"BATTLE/BATTLE.PRG", 0x82254, sizeof Battle_emptyStatusString, &Battle_emptyStatusString, sizeof Battle_emptyStatusString}, // G00146 D_800EAA54
     {"BATTLE/BATTLE.PRG", 0x823AA, sizeof Battle_targetSelectionStep, &Battle_targetSelectionStep, sizeof Battle_targetSelectionStep}, // G00147 D_800EABAA
-    {"BATTLE/BATTLE.PRG", 0x82F08, sizeof Render_compactGlyphLeftTrim, &Render_compactGlyphLeftTrim, sizeof Render_compactGlyphLeftTrim}, // G00149 D_800EB708
-    {"BATTLE/BATTLE.PRG", 0x82FB4, sizeof Render_compactGlyphWidths, &Render_compactGlyphWidths, sizeof Render_compactGlyphWidths}, // G00150 D_800EB7B4
-    {"BATTLE/BATTLE.PRG", 0x82FD4, sizeof Render_compactGlyphIndices, &Render_compactGlyphIndices, sizeof Render_compactGlyphIndices}, // G00151 D_800EB7D4
-    {"BATTLE/BATTLE.PRG", 0x83010, sizeof Render_variableFontGlyphWidths, &Render_variableFontGlyphWidths, sizeof Render_variableFontGlyphWidths}, // G00152 vs_battle_characterWidths
-    {"BATTLE/BATTLE.PRG", 0x8318C, sizeof Render_kGlyphPixelExpansion, &Render_kGlyphPixelExpansion, sizeof Render_kGlyphPixelExpansion}, // G00153 D_800EB98C
+    {"BATTLE/BATTLE.PRG", 0x82F08, sizeof VS::Render::compactGlyphLeftTrim, &VS::Render::compactGlyphLeftTrim, sizeof VS::Render::compactGlyphLeftTrim}, // G00149 D_800EB708
+    {"BATTLE/BATTLE.PRG", 0x82FB4, sizeof VS::Render::compactGlyphWidths, &VS::Render::compactGlyphWidths, sizeof VS::Render::compactGlyphWidths}, // G00150 D_800EB7B4
+    {"BATTLE/BATTLE.PRG", 0x82FD4, sizeof VS::Render::compactGlyphIndices, &VS::Render::compactGlyphIndices, sizeof VS::Render::compactGlyphIndices}, // G00151 D_800EB7D4
+    {"BATTLE/BATTLE.PRG", 0x83010, sizeof VS::Render::variableFontGlyphWidths, &VS::Render::variableFontGlyphWidths, sizeof VS::Render::variableFontGlyphWidths}, // G00152 vs_battle_characterWidths
+    {"BATTLE/BATTLE.PRG", 0x8318C, sizeof VS::Render::kGlyphPixelExpansion, &VS::Render::kGlyphPixelExpansion, sizeof VS::Render::kGlyphPixelExpansion}, // G00153 D_800EB98C
     {"BATTLE/BATTLE.PRG", 0x831AC, sizeof Battle_reuseSphereVolumes, &Battle_reuseSphereVolumes, sizeof Battle_reuseSphereVolumes}, // G00154 D_800EB9AC
     {"BATTLE/BATTLE.PRG", 0x831AE, sizeof Battle_hudStatusIconsHidden, &Battle_hudStatusIconsHidden, sizeof Battle_hudStatusIconsHidden}, // G00156 D_800EB9AE
     {"BATTLE/BATTLE.PRG", 0x831AF, sizeof Battle_hudHidden, &Battle_hudHidden, sizeof Battle_hudHidden}, // G00157 D_800EB9AF
@@ -312,7 +312,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x833EC, sizeof Battle_hudGaugeLabelPositions, &Battle_hudGaugeLabelPositions, sizeof Battle_hudGaugeLabelPositions}, // G00177 D_800EBBEC
     {"BATTLE/BATTLE.PRG", 0x833FC, sizeof Battle_hudGaugeLabelWidths, &Battle_hudGaugeLabelWidths, sizeof Battle_hudGaugeLabelWidths}, // G00178 D_800EBBFC
     {"BATTLE/BATTLE.PRG", 0x83400, sizeof Battle_hudGaugeLabelTexU, &Battle_hudGaugeLabelTexU, sizeof Battle_hudGaugeLabelTexU}, // G00179 D_800EBC00
-    {"BATTLE/BATTLE.PRG", 0x83404, sizeof Render_kStatGaugeColors, &Render_kStatGaugeColors, sizeof Render_kStatGaugeColors}, // G00180 D_800EBC04
+    {"BATTLE/BATTLE.PRG", 0x83404, sizeof VS::Render::kStatGaugeColors, &VS::Render::kStatGaugeColors, sizeof VS::Render::kStatGaugeColors}, // G00180 D_800EBC04
     {"BATTLE/BATTLE.PRG", 0x83414, sizeof Battle_statusIconTexOffsets, &Battle_statusIconTexOffsets, sizeof Battle_statusIconTexOffsets}, // G00181 vs_battle_statusIconTexOffsets
     {"BATTLE/BATTLE.PRG", 0x83454, sizeof Battle_limbStatusColors, &Battle_limbStatusColors, sizeof Battle_limbStatusColors}, // G00182 D_800EBC54
     {"BATTLE/BATTLE.PRG", 0x83468, sizeof Battle_upperStatusIconFlags, &Battle_upperStatusIconFlags, sizeof Battle_upperStatusIconFlags}, // G00183 D_800EBC68
@@ -579,8 +579,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x1FE9C, sizeof Audio_Seq_kRandomPitchOffsets, &Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets}, // G01837 D_8002F69C
     {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
     {"SLUS_010.40", 0x31214, sizeof VS::Core::Math::kArcTangentTable, &VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable}, // G01903 D_80040A14
-    {"SLUS_010.40", 0x39950, sizeof Render_legacyLoadingImageHeader, &Render_legacyLoadingImageHeader, sizeof Render_legacyLoadingImageHeader}, // G02006 _nowLoading_header
-    {"SLUS_010.40", 0x39954, sizeof Render_loadingScreenPixels, &Render_loadingScreenPixels, sizeof Render_loadingScreenPixels}, // G02005 _nowLoading_data
+    {"SLUS_010.40", 0x39950, sizeof VS::Render::legacyLoadingImageHeader, &VS::Render::legacyLoadingImageHeader, sizeof VS::Render::legacyLoadingImageHeader}, // G02006 _nowLoading_header
+    {"SLUS_010.40", 0x39954, sizeof VS::Render::loadingScreenPixels, &VS::Render::loadingScreenPixels, sizeof VS::Render::loadingScreenPixels}, // G02005 _nowLoading_data
     {"SLUS_010.40", 0x3C1DC, sizeof Battle_actionDefinitions, &Battle_actionDefinitions, sizeof Battle_actionDefinitions}, // G01904 vs_main_actions
     {"SLUS_010.40", 0x3F5DC, sizeof Audio_Seq_unusedMaterialModifiers, &Audio_Seq_unusedMaterialModifiers, sizeof Audio_Seq_unusedMaterialModifiers}, // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams, &Battle_statusEffectParams, sizeof Battle_statusEffectParams}, // G01906 vs_main_statusEffectParams

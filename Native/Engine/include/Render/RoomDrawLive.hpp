@@ -7,7 +7,9 @@
 #include "Render/RoomDraw.hpp"
 
 struct Field_RoomTint;
-struct Render_ScreenOffset;
+namespace VS::Render {
+struct ScreenOffset;
+}  // namespace VS::Render
 
 // Live binding for the MPD room geometry (RoomDraw.cpp): the GTE, the frame
 // camera and the current frame's primitive buffer. Room geometry is read
@@ -39,6 +41,6 @@ RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes);
 // or truncated.
 bool TintLiveRoomGeometryPrimitives(void* start, void* end,
                                     const Field_RoomTint& tint, int flags);
-[[nodiscard]] Render_ScreenOffset GetLiveProjectionScreenOffset();
-void SetLiveProjectionScreenOffset(const Render_ScreenOffset& offset);
+[[nodiscard]] VS::Render::ScreenOffset GetLiveProjectionScreenOffset();
+void SetLiveProjectionScreenOffset(const VS::Render::ScreenOffset& offset);
 }  // namespace VS::Render

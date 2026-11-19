@@ -38,9 +38,9 @@
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DepthCue.hpp"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Menu::Framework {
@@ -83,7 +83,7 @@ T* Pointer(AssetAddress address) {
   return 0;
 }
 
-[[nodiscard]] Render_ColorCode LiveColor(const Render::ColorCode& color) {
+[[nodiscard]] VS::Render::ColorCode LiveColor(const Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
@@ -237,16 +237,16 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   void SetCompanion(int slot, int companion_slot,
                     const Actors::CompanionStyle& style) override {
-    const Render_ColorCode state{static_cast<u_char>(style.offset.x),
-                                 static_cast<u_char>(style.offset.y),
-                                 static_cast<u_char>(style.offset.z),
-                                 style.offset.depth_bias};
-    const Render_ColorCode color = LiveColor(style.color);
+    const VS::Render::ColorCode state{static_cast<u_char>(style.offset.x),
+                                      static_cast<u_char>(style.offset.y),
+                                      static_cast<u_char>(style.offset.z),
+                                      style.offset.depth_bias};
+    const VS::Render::ColorCode color = LiveColor(style.color);
     Actors::SetLiveActorCompanion(slot, companion_slot, &state, &color);
   }
 
   void SetFade(int slot, const Render::ColorCode& fade) override {
-    const Render_ColorCode color = LiveColor(fade);
+    const VS::Render::ColorCode color = LiveColor(fade);
     Actors::SetLiveActorFadeParameters(slot, &color);
   }
 
@@ -351,9 +351,10 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   // The original moved the scene ordering table by bytes, (depth bias * 4 +
   // 0xC0) / 4 entries of four bytes (224.c:218-219).
   void OffsetOrderingTable(int entries) override {
-    if (Render_frameScratch.orderingTable == nullptr) return;
-    Render_frameScratch.orderingTable =
-        static_cast<u_long*>(Render_frameScratch.orderingTable) + entries;
+    if (VS::Render::FrameScratchpad().ordering_table == nullptr) return;
+    VS::Render::FrameScratchpad().ordering_table =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+        entries;
   }
 
   void MoveActor(int slot, const Actors::CompanionOffset& offset,

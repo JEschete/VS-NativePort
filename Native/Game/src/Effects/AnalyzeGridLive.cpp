@@ -24,11 +24,11 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
-#include "Render/Camera.h"
-#include "Render/Render.h"
+#include "Render/Camera.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -201,7 +201,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
         .actor_translation = {static_cast<std::int32_t>(world.t[0]),
                               static_cast<std::int32_t>(world.t[1]),
                               static_cast<std::int32_t>(world.t[2])},
-        .near_clip = Render_nearClip};
+        .near_clip = VS::Render::nearClip};
   }
   std::int32_t SampleCurve(std::uint8_t curve, std::int32_t age) override {
     return curve == 0 ? 0 : LiveSampleEffectCurve(curve, age);
@@ -305,7 +305,7 @@ void LiveAnalyzeGridHost::Draw(const AnalyzeGridQuad& quad) {
   packet[0] |= *entry & grid::kRingLinkMask;
   *entry = (*entry & ~grid::kRingLinkMask) |
            (LegacyGpu_Handle(packet) & grid::kRingLinkMask);
-  Render_frameScratch.primitiveCursor = packet + words.size();
+  VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
 }
 
 using AnalyzeGridEntry = bool (*)(AnalyzeGridCommand, AnalyzeGridPlan,

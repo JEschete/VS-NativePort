@@ -30,7 +30,7 @@
 #include "Menu/MagicTerminal.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/Sounds.hpp"
-#include "Render/Text/CompactFont.h"
+#include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 namespace VS::Menu::Magic {
@@ -227,9 +227,9 @@ class LiveHost final : public MenuHost {
     return RankTarget{
         text_queue_,
         icon_queue_,
-        {.widths = Render_compactGlyphWidths,
-         .left_trim = Render_compactGlyphLeftTrim,
-         .indices = Render_compactGlyphIndices},
+        {.widths = VS::Render::compactGlyphWidths,
+         .left_trim = VS::Render::compactGlyphLeftTrim,
+         .indices = VS::Render::compactGlyphIndices},
         Bytes(Menu_Framework_cursorBrightnessAnimation).first(kBlinkSteps)};
   }
   bool SchoolUnlocked(School school) override {

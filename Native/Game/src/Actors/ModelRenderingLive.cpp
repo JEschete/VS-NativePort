@@ -49,12 +49,12 @@
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
 #include "Render/CameraViewLive.hpp"
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
-#include "Render/Render.h"
-#include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/Textures.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
@@ -78,9 +78,9 @@ constexpr const char* kWeaponDraw = "DrawActorWeaponModel";
 static_assert(std::size(Actors_actorRecords) == kRoomActorSlots);
 static_assert(std::size(weaponModels) == kRoomWeaponSlots);
 static_assert(std::size(Field_gimmickInstances) == kRoomGimmickSlots);
-static_assert(std::size(Render_legacyWeaponTextureSlots) ==
+static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
-static_assert(std::size(Render_legacyActorTextureSlots) >=
+static_assert(std::size(VS::Render::legacyActorTextureSlots) >=
               kInitializedActorTextureSlots);
 static_assert(std::extent_v<decltype(Actors_WeaponModel::boneWorldMatrices)> ==
               kWeaponBoneLimit);
@@ -109,7 +109,7 @@ constexpr std::size_t kGimmickHeightBone = 1;
 static_assert(sizeof(u_long) == sizeof(std::uint32_t),
               "ordering-table entries are 4-byte words");
 
-[[nodiscard]] Render_ModelScratchpad& Workspace() {
+[[nodiscard]] VS::Render::ModelScratchpad& Workspace() {
   return *VS::Render::ModelWorkspace();
 }
 
@@ -258,9 +258,10 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
 
   void OffsetOrderingTable(std::int32_t entries) override {
-    if (Render_frameScratch.orderingTable == nullptr) return;
-    Render_frameScratch.orderingTable =
-        static_cast<u_long*>(Render_frameScratch.orderingTable) + entries;
+    if (VS::Render::FrameScratchpad().ordering_table == nullptr) return;
+    VS::Render::FrameScratchpad().ordering_table =
+        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+        entries;
   }
 
   void UpdateMotionAndLookAt(std::size_t slot,
@@ -323,7 +324,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   void CenterGimmick(std::size_t index) override {
     const Field_GimmickInstance* object = Field_gimmickInstances[index];
     if (object == nullptr) return;
-    StoreVector(Workspace().rootOffset,
+    StoreVector(Workspace().root_offset,
                 GimmickCenter(Vec3{object->positionX, object->positionY,
                                    object->positionZ},
                               GimmickModelHeight(*object)));
@@ -413,7 +414,7 @@ LiveWeaponBones(const Actors_WeaponModel& weapon, std::size_t bone_count) {
 void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
                      std::span<const Transform3> chain,
                      std::span<const WeaponBone> bones) {
-  Render_ModelScratchpad& workspace = Workspace();
+  VS::Render::ModelScratchpad& workspace = Workspace();
   weapon.reserved11 = fade.fade.scale;
   weapon.reserved13 = fade.fade.frames;
   if (fade.hidden) weapon.reserved08Bit4 = 0;
@@ -464,11 +465,11 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
         static_cast<unsigned>(weapon.paletteSlotOffset));
     return;
   }
-  Render_ModelScratchpad& workspace = Workspace();
-  workspace.texturePage = static_cast<u_short>(
-      Render_legacyWeaponTextureSlots[weapon.textureSlot].texturePage);
+  VS::Render::ModelScratchpad& workspace = Workspace();
+  workspace.texture_page = static_cast<u_short>(
+      VS::Render::legacyWeaponTextureSlots[weapon.textureSlot].texture_page);
   workspace.palette = static_cast<u_short>(
-      Render_legacyWeaponTextureSlots[weapon.paletteSlotOffset].palette);
+      VS::Render::legacyWeaponTextureSlots[weapon.paletteSlotOffset].palette);
   CVECTOR color = instance.baseColor;
   if (weapon.reserved08Bit6 != 0) {
     color =
@@ -491,10 +492,10 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
       (Actors_textureSlotOrigins[byte + 1] << kByteBits));
 }
 
-void StoreSlotIds(Render_TextureSlot& slot, const TextureSlotIds& ids) {
-  slot.texturePage = static_cast<std::int16_t>(ids.texture_page);
+void StoreSlotIds(VS::Render::TextureSlot& slot, const TextureSlotIds& ids) {
+  slot.texture_page = static_cast<std::int16_t>(ids.texture_page);
   slot.palette = static_cast<std::int16_t>(ids.palette);
-  slot.referenceCount = 0;
+  slot.reference_count = 0;
 }
 }  // namespace
 
@@ -506,13 +507,13 @@ void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
   }
   std::fill(std::begin(modelRenderContext.modelScale),
             std::end(modelRenderContext.modelScale), kUnitModelScale);
-  Render_ModelScratchpad& workspace = Workspace();
-  StoreVector(workspace.rootOffset,
+  VS::Render::ModelScratchpad& workspace = Workspace();
+  StoreVector(workspace.root_offset,
               ActorRootOffset(VectorOf(actor->blendPose.boneKeys[kRootKey]),
                               InstanceScale(actor->instance), actor->scale));
   TransformLiveActorRootOffset(actor);
-  workspace.angleX = actor->instance.lookYaw;
-  workspace.angleY = actor->instance.lookPitch;
+  workspace.angle_x = actor->instance.lookYaw;
+  workspace.angle_y = actor->instance.lookPitch;
 }
 
 // decomp: BATTLE.PRG func_800AEF94 (src/BATTLE/BATTLE.PRG/44F14.c:923)
@@ -531,14 +532,14 @@ void TransformLiveActorRootOffset(Actors_ActorRecord* actor) {
     WarnActorRefused("TransformActorRootOffset", "no actor record");
     return;
   }
-  Render_ModelScratchpad& workspace = Workspace();
+  VS::Render::ModelScratchpad& workspace = Workspace();
   const Core::Math::Angles3 angles = ActorAngles(actor->instance);
   const RootTransform root =
-      TransformRootOffset(angles, VectorOf(workspace.rootOffset),
+      TransformRootOffset(angles, VectorOf(workspace.root_offset),
                           VectorOf(actor->instance.position));
   StoreVector(workspace.rotation, Vec3{angles.x, angles.y, angles.z});
   StoreTransform(workspace.matrix, root.matrix);
-  StoreVector(workspace.rootOffset, root.root_offset);
+  StoreVector(workspace.root_offset, root.root_offset);
 }
 
 // decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48)
@@ -551,10 +552,10 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
       object->objectInfo.objectId, object->parent, object->mode);
   const std::optional<GimmickPose> pose = LiveGimmickPose(*object, placement);
   if (!pose) return;
-  Render_ModelScratchpad& workspace = Workspace();
+  VS::Render::ModelScratchpad& workspace = Workspace();
   const GimmickTransform placed =
       PlaceGimmick(placement, *pose, TransformOf(*camera),
-                   VectorOf(workspace.rootOffset), VectorOf(roomActorScale));
+                   VectorOf(workspace.root_offset), VectorOf(roomActorScale));
   workspace.model = object->model;
   StoreVector(workspace.position, placed.position);
   if (placed.rotation) {
@@ -571,7 +572,7 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
   if (object->isVisible == 0 || !Render::ProjectLiveGimmickModel(*object)) {
     return;
   }
-  workspace.texturePage = GimmickTexturePage();
+  workspace.texture_page = GimmickTexturePage();
   workspace.palette = GimmickPalette(
       object->slot, object->palettePulse.kind != 0, object->motionState);
   if (GimmickDrawsWithOverrides(object->motionState)) {
@@ -632,9 +633,9 @@ void InitializeLiveActorModelResources() {
   for (std::size_t slot = 0; slot < kInitializedActorTextureSlots; ++slot) {
     const TextureSlotIds ids = ActorTextureSlotIds(
         slot, SlotOriginHalfword(slot, 0), SlotOriginHalfword(slot, 1));
-    Render_TextureSlot& stored = Render_legacyActorTextureSlots[slot];
+    VS::Render::TextureSlot& stored = VS::Render::legacyActorTextureSlots[slot];
     StoreSlotIds(stored, ids);
-    stored.alternatePalette = static_cast<std::int16_t>(ids.alternate_palette);
+    stored.alternate_palette = static_cast<std::int16_t>(ids.alternate_palette);
   }
   std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
             nullptr);
@@ -643,7 +644,7 @@ void InitializeLiveActorModelResources() {
   Actors_sequenceWorkBuffer =
       Core::Memory::AllocateLiveFromLowEnd(Content::kSequenceWorkBufferBytes);
   for (std::size_t slot = 0; slot < kWeaponTextureSlots; ++slot) {
-    StoreSlotIds(Render_legacyWeaponTextureSlots[slot],
+    StoreSlotIds(VS::Render::legacyWeaponTextureSlots[slot],
                  WeaponTextureSlotIds(slot));
   }
   std::fill(std::begin(weaponModels), std::end(weaponModels), nullptr);

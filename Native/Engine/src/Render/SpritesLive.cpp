@@ -12,10 +12,10 @@
 
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Render {
 namespace {
@@ -45,7 +45,7 @@ class LiveSpriteQueue final : public SpriteQueue {
     }
     std::ranges::copy(packet, slot);
     *chain_ = LegacyGpu_Handle(slot);
-    Render_frameScratch.primitiveCursor = slot + kSpritePacketWords;
+    FrameScratchpad().primitive_cursor = slot + kSpritePacketWords;
     packet_ = slot;
   }
 
@@ -72,29 +72,29 @@ class LiveSpriteQueue final : public SpriteQueue {
 class LiveFrameView final : public FrameViewTarget {
  public:
   void LoadViewRotation() override {
-    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
+    Core_Gte_SetRotMatrix(&FrameScratchpad().view_matrix);
   }
   void LoadViewTranslation() override {
-    Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
+    Core_Gte_SetTransMatrix(&FrameScratchpad().view_matrix);
   }
 };
 }  // namespace
 
 u_long* ReserveLivePrimitiveWords(std::size_t words) {
-  const auto base = reinterpret_cast<std::uintptr_t>(
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
+  const auto base =
+      reinterpret_cast<std::uintptr_t>(legacyPrimitiveBuffers[frameBuf & 1]);
   const auto cursor =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+      reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
   if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes ||
       (kPrimitiveBufferBytes - (cursor - base)) / sizeof(u_long) < words) {
     return nullptr;
   }
-  return static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  return static_cast<u_long*>(FrameScratchpad().primitive_cursor);
 }
 
 u_long* QueueLiveDefaultSprite(int wh, int xy) {
   LiveSpriteQueue queue(
-      static_cast<u_long*>(Render_frameScratch.overlayOrderingTable));
+      static_cast<u_long*>(FrameScratchpad().overlay_ordering_table));
   QueueDefaultSprite(queue, wh, xy);
   return queue.Packet();
 }

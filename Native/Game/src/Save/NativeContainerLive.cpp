@@ -27,8 +27,8 @@
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Render.hpp"
 #include "Save/FileMenu.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFiles.h"
@@ -141,7 +141,9 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   int PollFilePicker() override { return VS::Game::Save::SelectContainer(0); }
 
-  void DrawFiles() override { VS::Menu::Files::DrawLiveFrame(Render_frameBuf); }
+  void DrawFiles() override {
+    VS::Menu::Files::DrawLiveFrame(VS::Render::frameBuf);
+  }
 
   void OpenContainerScreen() override {
     Menu_Container_InventoryStorage& storage = Storage();

@@ -14,7 +14,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 namespace VS::Render {
 namespace {
@@ -56,7 +56,7 @@ void Upload(std::uint32_t x, std::uint32_t y, std::size_t width,
             reinterpret_cast<u_long*>(const_cast<std::uint16_t*>(pixels)));
 }
 
-Render_ColorCode CodeOf(const TintCode& tint) {
+ColorCode CodeOf(const TintCode& tint) {
   return {.red = tint[0], .green = tint[1], .blue = tint[2], .code = 0};
 }
 
@@ -78,11 +78,11 @@ class LivePaletteHost final : public PaletteHost {
     VS::Field::LiveSetRoomBackgroundColors(colors.data());
   }
   void SetRoomTint(const TintCode& tint, std::int32_t blend) override {
-    Render_ColorCode code = CodeOf(tint);
+    ColorCode code = CodeOf(tint);
     VS::Field::LiveSetRoomTint(&code, blend);
   }
   void SetActorTint(std::uint32_t actor, const TintCode& tint) override {
-    Render_ColorCode code = CodeOf(tint);
+    ColorCode code = CodeOf(tint);
     (void)VS::Actors::SetLiveActorFadeParameters(static_cast<int>(actor),
                                                  &code);
   }

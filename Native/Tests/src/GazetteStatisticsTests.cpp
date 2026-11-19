@@ -19,7 +19,7 @@
 #include "Menu/Score/GazetteStatistics.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/Text/VariableFont.h"
+#include "Render/Text/VariableFont.hpp"
 #include "Render/UiPackets.hpp"
 
 namespace {
@@ -88,18 +88,23 @@ struct DrawCall {
 
 // Pin the only global font input consumed by these actual renderer checks.
 struct FontGlobals {
-  decltype(std::to_array(Render_variableFontGlyphWidths)) saved =
-      std::to_array(Render_variableFontGlyphWidths);
-  FontGlobals() { std::ranges::fill(Render_variableFontGlyphWidths, char{6}); }
-  ~FontGlobals() { std::ranges::copy(saved, Render_variableFontGlyphWidths); }
+  decltype(std::to_array(VS::Render::variableFontGlyphWidths)) saved =
+      std::to_array(VS::Render::variableFontGlyphWidths);
+  FontGlobals() {
+    std::ranges::fill(VS::Render::variableFontGlyphWidths, char{6});
+  }
+  ~FontGlobals() {
+    std::ranges::copy(saved, VS::Render::variableFontGlyphWidths);
+  }
   FontGlobals(const FontGlobals&) = delete;
   FontGlobals& operator=(const FontGlobals&) = delete;
 };
 
 score::GazetteText FontWidths() {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return {reinterpret_cast<const std::uint8_t*>(Render_variableFontGlyphWidths),
-          sizeof Render_variableFontGlyphWidths};
+  return {reinterpret_cast<const std::uint8_t*>(
+              VS::Render::variableFontGlyphWidths),
+          sizeof VS::Render::variableFontGlyphWidths};
 }
 
 class ScrollRaster final : public score::ScrollableRowHost {
@@ -661,7 +666,7 @@ TEST_CASE("F02815 title output reaches existing scrolling and glyph renderers",
 TEST_CASE("F02825 alignment uses actual pinned font widths and scroll renderer",
           "[gazette-statistics][F02825][renderer]") {
   FontGlobals fonts;
-  Render_variableFontGlyphWidths[3] = 12;
+  VS::Render::variableFontGlyphWidths[3] = 12;
   RecordFixture fixture;
   REQUIRE(score::CreateStatisticRows(fixture.rows, fixture.statistics));
   fixture.host.rasterize = true;

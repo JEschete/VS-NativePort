@@ -30,7 +30,7 @@
 #include "Field/SegmentCollision.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
 
 static_assert(std::is_same_v<
@@ -97,7 +97,7 @@ struct ActionTraceFixture : SegmentFixture {
   static constexpr int kAction = 255;
   Battle_ActionDefinition definition = Battle_actionDefinitions[kAction];
   MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
-  Render_ModelScratchpad workspace = *VS::Render::ModelWorkspace();
+  VS::Render::ModelScratchpad workspace = *VS::Render::ModelWorkspace();
   u_int previous_hit = Battle_previousHitResult;
   u_int prerequisite = Battle_hitPrerequisiteResult;
   u_int last_stat = Battle_lastActionStatValue;

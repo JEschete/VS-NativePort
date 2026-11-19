@@ -57,13 +57,13 @@
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Render.h"
+#include "Render/Camera.hpp"
+#include "Render/Frame.hpp"
+#include "Render/LegacyPackets.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects::Templates {
 namespace {
@@ -104,12 +104,14 @@ using LegacyMesh10Vertices = SVECTOR[kMesh10Vertices];
 using LegacyMesh10Faces = u_char[kMesh10Faces][kFaceBytes];
 
 static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
-static_assert(sizeof(Render_GridPacket) == kGridPacketWords * kWordBytes);
-static_assert(sizeof(Render_Mesh10Packet) == kMesh10PacketWords * kWordBytes);
-static_assert(sizeof(Render_SurfacePacket) == kRingPacketWords * kWordBytes);
-static_assert(sizeof(Render_MirrorSurfacePacket) ==
+static_assert(sizeof(VS::Render::GridPacket) == kGridPacketWords * kWordBytes);
+static_assert(sizeof(VS::Render::Mesh10Packet) ==
+              kMesh10PacketWords * kWordBytes);
+static_assert(sizeof(VS::Render::SurfacePacket) ==
               kRingPacketWords * kWordBytes);
-static_assert(sizeof(Render_RotatingSurfacePacket) ==
+static_assert(sizeof(VS::Render::MirrorSurfacePacket) ==
+              kRingPacketWords * kWordBytes);
+static_assert(sizeof(VS::Render::RotatingSurfacePacket) ==
               kRingPacketWords * kWordBytes);
 static_assert(sizeof(LegacyProfile) == kSurfaceProfilePoints * sizeof(SVECTOR));
 static_assert(std::extent_v<decltype(Effects_SurfaceState::factors)> ==
@@ -325,7 +327,7 @@ std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
       .actor_translation = {static_cast<std::int32_t>(world.t[0]),
                             static_cast<std::int32_t>(world.t[1]),
                             static_cast<std::int32_t>(world.t[2])},
-      .near_clip = Render_nearClip};
+      .near_clip = VS::Render::nearClip};
 }
 
 // Curve 0 samples 0 without reading the package, as the original's sampler
@@ -476,7 +478,7 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
   packet[0] |= *entry & kRingLinkMask;
   *entry =
       (*entry & kOrderingHighMask) | (LegacyGpu_Handle(packet) & kRingLinkMask);
-  Render_frameScratch.primitiveCursor = packet + words.size();
+  VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
 }
 
 // decomp: meshes10.h:236-248 (the tick event through the transform's world

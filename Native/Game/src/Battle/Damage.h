@@ -13,7 +13,7 @@
 #include "Battle/Hit.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 extern u_short Battle_bladePpDamageBonuses[12];
 extern short (*Battle_statCalculators[27])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);

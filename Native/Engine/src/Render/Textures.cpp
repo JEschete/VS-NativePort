@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Render/Textures.h"
+#include "Render/Textures.hpp"
 
 // decomp: D_800F46A8 (D_800F46A8@BATTLE/BATTLE.PRG)
-Render_TextureSlot Render_legacyActorTextureSlots[25];
+VS::Render::TextureSlot VS::Render::legacyActorTextureSlots[VS::Render::kActorTextureSlotCount];
 
 // decomp: vs_battle_wepTextures (vs_battle_wepTextures@BATTLE/BATTLE.PRG)
-Render_TextureSlot Render_legacyWeaponTextureSlots[20];
+VS::Render::TextureSlot VS::Render::legacyWeaponTextureSlots[VS::Render::kWeaponTextureSlotCount];
 

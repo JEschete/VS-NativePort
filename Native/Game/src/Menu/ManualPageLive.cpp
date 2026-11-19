@@ -19,7 +19,7 @@
 #include "Menu/Manual.h"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPage.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPackets.hpp"
@@ -194,11 +194,16 @@ void LiveDrawPageContent() {
     return;
   }
   const Render::ScreenRect clip{
-      .x = Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.x,
-      .y = Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.y,
-      .width = Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.w,
+      .x = VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) & 1]
+               .clip.x,
+      .y = VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) & 1]
+               .clip.y,
+      .width =
+          VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) & 1]
+              .clip.w,
       .height =
-          Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.h};
+          VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) & 1]
+              .clip.h};
   LiveContentTarget target(
       reinterpret_cast<std::int16_t*>(Menu_Manual_helpText));
   if (DrawPageContent(*help_text, clip, target) == PageDrawResult::kRefused) {

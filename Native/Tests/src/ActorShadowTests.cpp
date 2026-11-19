@@ -22,14 +22,14 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/ModelDraw.h"
+#include "Render/Camera.hpp"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
@@ -40,13 +40,13 @@ static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
 
 namespace {
 struct ActorShadowFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  Render_ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Field_RoomRecord saved_room = Field_roomData;
-  int saved_framebuffer = Render_frameBuf;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   u_short saved_platform = Actors_supportingPlatformLayer;
   VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   decltype(Actors_supportingGimmickIndex) saved_gimmick_index =
@@ -72,14 +72,14 @@ struct ActorShadowFixture {
     SetMesh();
     Field_roomData = {};
     Actors_supportingPlatformLayer = 0;
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_frameScratch = {};
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::FrameScratchpad() = {};
     camera.m[0][0] = 4096;
     camera.m[1][2] = -4096;
     camera.m[2][1] = 4096;
     camera.t[2] = 1024;
-    Render_frameScratch.viewMatrix = camera;
+    VS::Render::FrameScratchpad().view_matrix = camera;
     *VS::Render::ModelWorkspace() = {};
     VS::Actors::modelRenderContext = {};
     actor.instance.isVisible = -1;
@@ -118,12 +118,12 @@ struct ActorShadowFixture {
     VS::Field::LiveCollisionProbe() = saved_probe;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
-    Render_frameScratch = saved_frame;
+    VS::Render::FrameScratchpad() = saved_frame;
     *VS::Render::ModelWorkspace() = saved_workspace;
     VS::Actors::modelRenderContext = saved_context;
     VS::Actors::skeletonPose = saved_pose;
-    Render_frameBuf = saved_framebuffer;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     Core_Gte_Reset();
   }
 
@@ -155,12 +155,13 @@ struct ActorShadowFixture {
   void ResetPackets() {
     std::fill(ordering.begin(), ordering.end(), 0x00FFFFFF);
     std::fill(storage.begin(), storage.end(), 0xDEADBEEF);
-    Render_frameScratch.orderingTable = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   }
 
   std::size_t PacketCount() const {
-    return (static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+    return (static_cast<u_long*>(
+                VS::Render::FrameScratchpad().primitive_cursor) -
             (storage.data() + 1)) /
            8;
   }
@@ -171,7 +172,7 @@ struct ActorShadowFixture {
 
   void Draw() {
     VS::Render::DrawLiveActorGroundShadow(
-        actor, camera, VS::Render::ModelWorkspace()->rootOffset);
+        actor, camera, VS::Render::ModelWorkspace()->root_offset);
   }
 
   void SetTerrain(bool along_z, bool steep) {
@@ -202,7 +203,7 @@ struct ActorShadowFixture {
     const std::int16_t coordinate = steep ? 176 : 160;
     actor.instance.position = {coordinate, 0, coordinate, 0};
     actor.shadowRadius = steep ? 32 : 64;
-    VS::Render::ModelWorkspace()->rootOffset = {
+    VS::Render::ModelWorkspace()->root_offset = {
         coordinate, static_cast<std::int16_t>(steep ? 64 : 56), coordinate, 0};
     camera.t[0] = -coordinate;
     camera.t[1] = coordinate;
@@ -260,7 +261,7 @@ void CheckScaleCase(ActorShadowFixture& fixture, const ShadowScaleCase& input) {
   fixture.actor.instance.scaleX = fixture.actor.instance.scaleY = input.model;
   fixture.actor.shadowBlend.radiusExpandRate =
       fixture.actor.shadowBlend.radiusShrinkRate = input.blend;
-  VS::Render::ModelWorkspace()->rootOffset.vy =
+  VS::Render::ModelWorkspace()->root_offset.vy =
       static_cast<std::int16_t>(input.height);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
@@ -389,9 +390,10 @@ TEST_CASE(
 TEST_CASE("Actor shadow buffer exhaustion cannot overwrite adjacent storage",
           "[render][actor-shadow]") {
   ActorShadowFixture fixture;
-  Render_frameScratch.primitiveCursor = fixture.storage.data() + 1 + 32768 - 8;
+  VS::Render::FrameScratchpad().primitive_cursor =
+      fixture.storage.data() + 1 + 32768 - 8;
   fixture.Draw();
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + 1 + 32768);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
   CHECK(fixture.storage.front() == 0xDEADBEEF);

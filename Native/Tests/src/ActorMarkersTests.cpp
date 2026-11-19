@@ -19,10 +19,10 @@
 #include "Core/Gte.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -422,12 +422,12 @@ constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
 constexpr u_long kLiveEnd = 0xFFFFFF;
 
 struct LiveMarkerFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
   Actors_ActorRecord* saved_enemy = Actors_actorRecords[2];
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_sides = Battle_actorMarkerSides;
   decltype(Battle_actorMarkersHidden) saved_hidden = Battle_actorMarkersHidden;
   decltype(Battle_abilityTimingCueFrames) saved_frames =
@@ -449,16 +449,17 @@ struct LiveMarkerFixture {
     player.instance.position.vz = enemy.instance.position.vz = 512;
     player.targetPointHeight = enemy.targetPointHeight = 64;
     ordering.fill(kLiveEnd);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch = {};
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad() = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+      VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
     }
-    Render_frameScratch.viewMatrix.t[2] = 1024;
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 1024;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kLiveSceneHead;
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
     Battle_actorMarkerSides = 0;
@@ -469,10 +470,10 @@ struct LiveMarkerFixture {
     std::ranges::copy(saved_markers, std::begin(Battle_actorMarkers));
     Actors_actorRecords[0] = saved_player;
     Actors_actorRecords[2] = saved_enemy;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Battle_actorMarkerSides = saved_sides;
     Battle_actorMarkersHidden = saved_hidden;
     Battle_abilityTimingCueFrames = saved_frames;
@@ -486,7 +487,8 @@ struct LiveMarkerFixture {
   LiveMarkerFixture& operator=(LiveMarkerFixture&&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<const u_long*>(Render_frameScratch.primitiveCursor) -
+    return static_cast<const u_long*>(
+               VS::Render::FrameScratchpad().primitive_cursor) -
            storage.data();
   }
 };

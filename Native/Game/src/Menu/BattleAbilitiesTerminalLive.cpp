@@ -25,8 +25,8 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
 
 namespace VS::Menu::BattleAbilities {
@@ -165,8 +165,8 @@ class LiveAssignmentHost final : public AssignmentHost {
   void HideActionCost() override { VS::Menu::Framework::displayActionCost = 0; }
   void DrawButton(AssignmentButton button, int x, int y) override {
     const std::array<int, kAssignmentButtonCount> icons{2, 0, 1};
-    auto* table =
-        static_cast<std::byte*>(Render_frameScratch.overlayOrderingTable);
+    auto* table = static_cast<std::byte*>(
+        VS::Render::FrameScratchpad().overlay_ordering_table);
     if (table == nullptr) {
       Refuse("ability button draw has no overlay ordering table");
       return;

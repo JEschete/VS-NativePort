@@ -40,13 +40,13 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
@@ -139,9 +139,9 @@ void SetTexels(Packet& packet,
 // table holds it: PresentFrame draws the table after flipping the frame
 // buffer (D4.c:1480 takes the address before the flip).
 u_long* SceneOrderingEntry(int slot) {
-  const auto head =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.orderingTable);
-  for (void* const frame_table : Render_legacyOrderingTables) {
+  const auto head = reinterpret_cast<std::uintptr_t>(
+      VS::Render::FrameScratchpad().ordering_table);
+  for (void* const frame_table : VS::Render::legacyOrderingTables) {
     const auto table = reinterpret_cast<std::uintptr_t>(frame_table);
     if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
       continue;
@@ -311,8 +311,8 @@ class LiveDisplay : public Host {
 
   void ApplyDisplayLayout(const DisplayLayout& layout) override {
     for (std::size_t buffer = 0; buffer < kFrameBufferCount; ++buffer) {
-      DRAWENV& draw = Render_legacyDrawEnvironments[buffer];
-      DISPENV& display = Render_legacyDisplayEnvironments[buffer];
+      DRAWENV& draw = VS::Render::legacyDrawEnvironments[buffer];
+      DISPENV& display = VS::Render::legacyDisplayEnvironments[buffer];
       const ScreenPoint draw_origin = layout.draw_origins[buffer];
       const ScreenPoint display_origin = layout.display_origins[buffer];
       SetDefDrawEnv(&draw, draw_origin.x, draw_origin.y, layout.width,
@@ -325,15 +325,15 @@ class LiveDisplay : public Host {
       setRGB0(&draw, layout.background.red, layout.background.green,
               layout.background.blue);
     }
-    Render_legacyViewportLeft = 0;
-    Render_legacyViewportTop = 0;
-    Render_viewportWidth = layout.width;
-    Render_viewportHeight = static_cast<u_short>(layout.viewport_height);
+    VS::Render::legacyViewportLeft = 0;
+    VS::Render::legacyViewportTop = 0;
+    VS::Render::viewportWidth = layout.width;
+    VS::Render::viewportHeight = static_cast<u_short>(layout.viewport_height);
   }
 
   void ApplyDrawEnvironment(int buffer,
                             const DrawEnvironment& environment) override {
-    DRAWENV& draw = Render_legacyDrawEnvironments[BufferIndex(buffer)];
+    DRAWENV& draw = VS::Render::legacyDrawEnvironments[BufferIndex(buffer)];
     draw.isbg = environment.clear_background ? 1 : 0;
     draw.dtd = environment.dither ? 1 : 0;
     draw.dfe = environment.draw_on_display ? 1 : 0;
@@ -343,7 +343,7 @@ class LiveDisplay : public Host {
   }
 
   void SetInterlaced(int buffer, bool interlaced) override {
-    Render_legacyDisplayEnvironments[BufferIndex(buffer)].isinter =
+    VS::Render::legacyDisplayEnvironments[BufferIndex(buffer)].isinter =
         interlaced ? 1 : 0;
   }
 
@@ -377,11 +377,13 @@ class LiveDisplay : public Host {
 
   void ShowFrameBuffer(int buffer) override {
     const std::size_t index = BufferIndex(buffer);
-    PutDispEnv(&Render_legacyDisplayEnvironments[index]);
-    PutDrawEnv(&Render_legacyDrawEnvironments[index]);
+    PutDispEnv(&VS::Render::legacyDisplayEnvironments[index]);
+    PutDrawEnv(&VS::Render::legacyDrawEnvironments[index]);
   }
-  [[nodiscard]] int FrameBuffer() const override { return Render_frameBuf; }
-  void SetFrameBuffer(int buffer) override { Render_frameBuf = buffer; }
+  [[nodiscard]] int FrameBuffer() const override {
+    return VS::Render::frameBuf;
+  }
+  void SetFrameBuffer(int buffer) override { VS::Render::frameBuf = buffer; }
 
   void DrawOrderingTable(int ordering_slot) override {
     u_long* entry = SceneOrderingEntry(ordering_slot);
@@ -411,19 +413,20 @@ class LiveDisplay : public Host {
 
   void BeginOrderingTables(const OrderingTableLayout& layout) override {
     const std::size_t buffer = BufferIndex(layout.buffer);
-    auto* base = static_cast<u_long*>(Render_legacyOrderingTables[buffer]);
-    Render_frameScratch.primitiveCursor = Render_legacyPrimitiveBuffers[buffer];
+    auto* base = static_cast<u_long*>(VS::Render::legacyOrderingTables[buffer]);
+    VS::Render::FrameScratchpad().primitive_cursor =
+        VS::Render::legacyPrimitiveBuffers[buffer];
     if (base == nullptr) {
       VS::Core::LogWarn(kChannel, "Frame {} has no ordering table", buffer);
-      Render_frameScratch.overlayOrderingTable = nullptr;
-      Render_frameScratch.orderingTable = nullptr;
+      VS::Render::FrameScratchpad().overlay_ordering_table = nullptr;
+      VS::Render::FrameScratchpad().ordering_table = nullptr;
       return;
     }
     const std::span<u_long> table(base,
                                   static_cast<std::size_t>(layout.entries));
-    Render_frameScratch.overlayOrderingTable =
+    VS::Render::FrameScratchpad().overlay_ordering_table =
         table.subspan(static_cast<std::size_t>(layout.overlay_offset)).data();
-    Render_frameScratch.orderingTable =
+    VS::Render::FrameScratchpad().ordering_table =
         table.subspan(static_cast<std::size_t>(layout.scene_offset)).data();
     ClearOTagR(base, layout.entries);
   }
@@ -440,9 +443,9 @@ class LiveDisplay : public Host {
     }
     const std::size_t index = BufferIndex(buffer);
     if (kind == FrameBufferKind::kPrimitives) {
-      Render_legacyPrimitiveBuffers[index] = allocation;
+      VS::Render::legacyPrimitiveBuffers[index] = allocation;
     } else {
-      Render_legacyOrderingTables[index] = allocation;
+      VS::Render::legacyOrderingTables[index] = allocation;
     }
   }
 
@@ -592,17 +595,7 @@ ResultsTints LoadTints() {
 class LiveResultsTables {
  public:
   LiveResultsTables() : rooms_(CountableRoomBits()) {
-    // Read the atlas bytes as unsigned whatever this unit's plain char is.
-    std::ranges::transform(Ending_resultAtlasRegions, atlas_.begin(),
-                           [](const Render_TextureRegion& region) {
-                             return Render::TextureRegion{
-                                 static_cast<std::uint8_t>(region.x),
-                                 static_cast<std::uint8_t>(region.y),
-                                 static_cast<std::uint8_t>(region.w),
-                                 static_cast<std::uint8_t>(region.h),
-                                 region.tpage,
-                                 region.clut};
-                           });
+    std::ranges::copy(Ending_resultAtlasRegions, atlas_.begin());
     for (std::size_t rank = 0; rank < labels_.size(); ++rank) {
       std::ranges::copy(Ending_rankLabelRegionIds[rank], labels_[rank].begin());
     }

@@ -10,7 +10,7 @@
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
 
 // Transitional libgpu shims (plan §2.2): each call acts on the page space
@@ -122,8 +122,10 @@ int LegacyGpu_WalkList(const void* p) {
           static_cast<const void*>(previous),
           previous != nullptr ? static_cast<unsigned>(previous->len) : 0,
           previous != nullptr ? static_cast<unsigned>(previous->addr) : 0,
-          Render_legacyPrimitiveBuffers[0], Render_legacyPrimitiveBuffers[1],
-          Render_legacyOrderingTables[0], Render_legacyOrderingTables[1]);
+          VS::Render::legacyPrimitiveBuffers[0],
+          VS::Render::legacyPrimitiveBuffers[1],
+          VS::Render::legacyOrderingTables[0],
+          VS::Render::legacyOrderingTables[1]);
       VS::Platform::LogAddress(p);
       if (previous != nullptr) VS::Platform::LogAddress(previous);
       return -1;

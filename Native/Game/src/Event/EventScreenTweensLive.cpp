@@ -17,7 +17,7 @@
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Render/FramebufferEffects.h"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.hpp"
 
@@ -122,7 +122,7 @@ class LiveScreenEffect final : public EventScreenEffectPort {
     Render::SetLiveFramebufferPreviousFrame(use_previous_frame);
   }
   void SetScale(EventScreenPair scale) override {
-    const Render_FramebufferEffectTranslation value = Translation(scale);
+    const VS::Render::FramebufferEffectTranslation value = Translation(scale);
     Render::SetLiveFramebufferEffectScale(&value);
   }
   void SetTint(EventScreenTint tint) override {
@@ -131,14 +131,14 @@ class LiveScreenEffect final : public EventScreenEffectPort {
     Render::SetLiveFramebufferEffectTint(&value);
   }
   void SetOffset(EventScreenPair offset) override {
-    const Render_FramebufferEffectTranslation value = Translation(offset);
+    const VS::Render::FramebufferEffectTranslation value = Translation(offset);
     Render::SetLiveFramebufferEffectOffset(&value);
   }
   void SetBlendMode(std::int32_t blend_mode) override {
     Render::SetLiveFramebufferEffectBlendMode(blend_mode);
   }
   EventScreenPair ReadScale() override {
-    Render_FramebufferEffectTranslation value{};
+    VS::Render::FramebufferEffectTranslation value{};
     Render::ReadLiveFramebufferEffectScale(&value);
     return {.x = value.x, .y = value.y};
   }
@@ -148,7 +148,7 @@ class LiveScreenEffect final : public EventScreenEffectPort {
     return {.red = value.r, .green = value.g, .blue = value.b};
   }
   EventScreenPair ReadOffset() override {
-    Render_FramebufferEffectTranslation value{};
+    VS::Render::FramebufferEffectTranslation value{};
     Render::ReadLiveFramebufferEffectOffset(&value);
     return {.x = value.x, .y = value.y};
   }
@@ -158,8 +158,9 @@ class LiveScreenEffect final : public EventScreenEffectPort {
   }
 
  private:
-  static Render_FramebufferEffectTranslation Translation(EventScreenPair pair) {
-    return {.x = pair.x, .y = pair.y, .reserved8 = 0, .reservedC = 0};
+  static VS::Render::FramebufferEffectTranslation Translation(
+      EventScreenPair pair) {
+    return {.x = pair.x, .y = pair.y, .reserved08 = 0, .reserved0c = 0};
   }
 };
 

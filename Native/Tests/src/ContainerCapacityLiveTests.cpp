@@ -46,7 +46,7 @@ struct LogScope {
 
 std::uint32_t GlyphWidth(char letter) {
   const auto glyph = static_cast<std::size_t>(letter - ' ');
-  return (Render_compactGlyphWidths[glyph / 2] >>
+  return (VS::Render::compactGlyphWidths[glyph / 2] >>
           ((glyph % 2) * equipment::kNibbleBits)) &
          equipment::kWidthMask;
 }
@@ -70,8 +70,8 @@ TEST_CASE("F02971 live emits actual compact packets, colors and palette",
         equipment::kCompactClut);
   CHECK(sprites.front().position == kPosition - 32U - GlyphWidth('3'));
   constexpr std::size_t kDrawModeWords = 2;
-  const auto* cursor =
-      static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+  const auto* cursor = static_cast<const u_long*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   CHECK(cursor - (fixture.primitives.data() + 1) ==
         kGlyphCount * (equipment::kCompactWords + kDrawModeWords));
 }
@@ -144,10 +144,10 @@ TEST_CASE("F02972 isolated callback retains the original workspace and packets",
     if (record.channel == "render" && !replaced) {
       replaced = true;
       VS::Menu::Framework::unusedInventoryStorage = &next;
-      Render_legacyPrimitiveBuffers[0] = fixture.primitives.data() + 1;
+      VS::Render::legacyPrimitiveBuffers[0] = fixture.primitives.data() + 1;
     }
   });
-  Render_legacyPrimitiveBuffers[0] = nullptr;
+  VS::Render::legacyPrimitiveBuffers[0] = nullptr;
   capacity::DrawLiveStorageCapacities();
   CHECK(replaced);
   CHECK(VS::Render::DroppedLiveUiPacketCount() > before);

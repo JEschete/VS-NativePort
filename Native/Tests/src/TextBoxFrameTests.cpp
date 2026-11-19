@@ -16,10 +16,10 @@
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 
@@ -102,21 +102,21 @@ class LiveFrameFixture {
   LiveFrameFixture()
       : saved_box_(Menu_textBoxes[0]),
         saved_table_(Menu_activeTextBoxOrderingTable),
-        saved_frame_(Render_frameScratch),
-        slot_(Render_frameBuf & 1),
-        saved_buffer_(Render_legacyPrimitiveBuffers[slot_]),
+        saved_frame_(VS::Render::FrameScratchpad()),
+        slot_(VS::Render::frameBuf & 1),
+        saved_buffer_(VS::Render::legacyPrimitiveBuffers[slot_]),
         storage_(kPrimitiveWords) {
     std::ranges::copy(Event_textBoxFrameStyles, saved_styles_.begin());
     Menu_activeTextBoxOrderingTable = ordering_.data();
-    Render_legacyPrimitiveBuffers[slot_] = storage_.data();
+    VS::Render::legacyPrimitiveBuffers[slot_] = storage_.data();
   }
 
   ~LiveFrameFixture() {
     Menu_textBoxes[0] = saved_box_;
     std::ranges::copy(saved_styles_, Event_textBoxFrameStyles);
     Menu_activeTextBoxOrderingTable = saved_table_;
-    Render_frameScratch = saved_frame_;
-    Render_legacyPrimitiveBuffers[slot_] = saved_buffer_;
+    VS::Render::FrameScratchpad() = saved_frame_;
+    VS::Render::legacyPrimitiveBuffers[slot_] = saved_buffer_;
   }
 
   std::vector<std::vector<std::uint32_t>> Draw(
@@ -163,16 +163,16 @@ class LiveFrameFixture {
     REQUIRE(capacity_words <= kPrimitiveWords);
     ordering_.fill(0xFFFFFF);
     auto* start = storage_.data() + kPrimitiveWords - capacity_words;
-    Render_frameScratch.primitiveCursor = start;
-    Render_frameScratch.overlayOrderingTable = ordering_.data();
+    VS::Render::FrameScratchpad().primitive_cursor = start;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering_.data();
     return start;
   }
 
   std::vector<std::vector<std::uint32_t>> ReadPackets(
       const std::uint32_t* start) {
     std::vector<std::vector<std::uint32_t>> packets;
-    const auto* end =
-        static_cast<const std::uint32_t*>(Render_frameScratch.primitiveCursor);
+    const auto* end = static_cast<const std::uint32_t*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     REQUIRE(end <= storage_.data() + storage_.size());
     for (const auto* cursor = start; cursor < end;) {
       const auto words = (*cursor >> 24) + 1;
@@ -192,7 +192,7 @@ class LiveFrameFixture {
   Menu_TextBoxState saved_box_;
   std::array<unsigned char*, 16> saved_styles_{};
   decltype(Menu_activeTextBoxOrderingTable) saved_table_;
-  Render_FrameScratch saved_frame_;
+  VS::Render::FrameScratch saved_frame_;
   int slot_;
   void* saved_buffer_;
   std::vector<std::uint32_t> storage_;

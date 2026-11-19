@@ -7,9 +7,9 @@
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 
 namespace {
 constexpr int kGuard = 0x13572468;
@@ -21,12 +21,13 @@ constexpr std::size_t kCornerWords = kTriangleCount * kTriangleWords;
 constexpr std::size_t kPacketWords = kCornerWords + kRingCount * kRingWords;
 
 struct VignetteFixture {
-  Render_FrameScratch* frame =
-      static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
-  Render_FrameScratch saved = *frame;
-  void* const saved_ordering = Render_legacyOrderingTables[Render_frameBuf & 1];
+  VS::Render::FrameScratch* frame =
+      static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  VS::Render::FrameScratch saved = *frame;
+  void* const saved_ordering =
+      VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1];
   void* const saved_primitives =
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   alignas(8) std::array<u_long, 8> ordering{};
   std::array<int, kPacketWords + 2> packets{};
   u_long tail = LEGACY_GPU_LINK_END;
@@ -36,16 +37,19 @@ struct VignetteFixture {
     packets.fill(kGuard);
     ordering[2] = LegacyGpu_Handle(&tail);
     *frame = {};
-    frame->primitiveCursor = packets.data() + 1;
-    frame->overlayOrderingTable = ordering.data() + 2;
-    Render_legacyOrderingTables[Render_frameBuf & 1] = ordering.data();
-    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = packets.data() + 1;
+    frame->primitive_cursor = packets.data() + 1;
+    frame->overlay_ordering_table = ordering.data() + 2;
+    VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] =
+        ordering.data();
+    VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
+        packets.data() + 1;
   }
 
   ~VignetteFixture() {
     *frame = saved;
-    Render_legacyOrderingTables[Render_frameBuf & 1] = saved_ordering;
-    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_primitives;
+    VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = saved_ordering;
+    VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
+        saved_primitives;
   }
 
   int* Triangle(std::size_t index) {
@@ -61,7 +65,7 @@ struct VignetteFixture {
     CHECK(ordering[1] == static_cast<u_long>(kGuard));
     CHECK(packets.front() == kGuard);
     CHECK(packets.back() == kGuard);
-    CHECK(frame->primitiveCursor == packets.data() + 1 + kPacketWords);
+    CHECK(frame->primitive_cursor == packets.data() + 1 + kPacketWords);
   }
 };
 

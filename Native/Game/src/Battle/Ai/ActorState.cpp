@@ -12,7 +12,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Perception.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG)
 unsigned char Battle_Ai_kSettingsBits30Values[1284]; /* contents: module image (ModuleData.cpp) */

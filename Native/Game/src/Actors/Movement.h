@@ -49,7 +49,7 @@ static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTic
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 extern u_char Actors_kJumpHangFrames[3204];
 extern u_char Actors_kJumpHeightAdjustments[3196];

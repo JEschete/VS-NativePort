@@ -133,7 +133,7 @@ void CheckTabGlyphs(std::span<const DrawnSprite> sprites) {
     expected.push_back({samples::kVariableColor, fw::PackXy(x, samples::kTabY),
                         texture, samples::kVariableSize,
                         samples::kVariableDrawMode, false});
-    x += static_cast<std::uint8_t>(Render_variableFontGlyphWidths[glyph]);
+    x += static_cast<std::uint8_t>(VS::Render::variableFontGlyphWidths[glyph]);
   }
   std::reverse(expected.begin(), expected.end());
   CHECK(actual == expected);

@@ -7,7 +7,7 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800E90AC (D_800E90AC@BATTLE/BATTLE.PRG)
 u_char Actors_kJumpHangFrames[3204]; /* contents: module image (ModuleData.cpp) */

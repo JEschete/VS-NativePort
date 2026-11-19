@@ -85,7 +85,7 @@ class StatisticsFixture : public shared::Fixture {
     ReloadAdditionalTables();
     VS::Menu::Score::ResetLiveGazetteStatisticsStatics();
     VS::Menu::Score::LiveScrollableRowAnimation() = {};
-    std::ranges::fill(Render_variableFontGlyphWidths, char{6});
+    std::ranges::fill(VS::Render::variableFontGlyphWidths, char{6});
   }
   ~StatisticsFixture() { VS::Menu::Score::ResetLiveGazetteStatisticsStatics(); }
   StatisticsFixture(const StatisticsFixture&) = delete;

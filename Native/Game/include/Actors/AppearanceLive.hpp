@@ -6,7 +6,9 @@
 
 struct Actors_ActorRecord;
 struct Actors_WeaponModel;
-struct Render_ColorCode;
+namespace VS::Render {
+struct ColorCode;
+}  // namespace VS::Render
 
 // Bindings from the actor records, weapon models and field gimmicks to the
 // typed appearance requests (Appearance.cpp), in the original argument order
@@ -30,11 +32,12 @@ void SetLiveRoomActorScale(const VECTOR* room_scale);
 int EnableLiveModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot);
 int DisableLiveModelPalettePulse(int actor_id, int pulse_slot);
 void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames);
-int LiveActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out);
+int LiveActorFadeParameters(int actor_id,
+                            VS::Render::ColorCode* fade_color_out);
 int SetLiveActorFadeParameters(int actor_id,
-                               const Render_ColorCode* fade_color);
-int LiveActorTint(int actor_id, Render_ColorCode* tint_out);
+                               const VS::Render::ColorCode* fade_color);
+int LiveActorTint(int actor_id, VS::Render::ColorCode* tint_out);
 // A null tint returns the actor to its own color.
-int SetLiveActorTint(int actor_id, const Render_ColorCode* tint);
+int SetLiveActorTint(int actor_id, const VS::Render::ColorCode* tint);
 void StartLiveActorAppearanceTransition(int actor_id, int transition_kind);
 }  // namespace VS::Actors

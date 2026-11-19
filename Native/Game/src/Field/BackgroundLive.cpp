@@ -27,7 +27,7 @@
 #include "Field/Room.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -132,8 +132,8 @@ std::uint64_t refused_sections = 0;
   return std::has_single_bit(++count);
 }
 
-[[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+[[nodiscard]] VS::Render::FrameScratch& Scratch() {
+  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
 }
 
 // The read and buffer ids name only kNone; each carries the address of a
@@ -151,11 +151,11 @@ template <typename T, typename Id>
   return reinterpret_cast<T*>(address);
 }
 
-[[nodiscard]] ViewCamera ViewCameraOf(const Render_Camera& camera) {
+[[nodiscard]] ViewCamera ViewCameraOf(const VS::Render::Camera& camera) {
   return {.position = Math::VectorOf(camera.position),
-          .look_at = Math::VectorOf(camera.lookAt),
+          .look_at = Math::VectorOf(camera.look_at),
           .angles = Math::VectorOf(camera.angles),
-          .far_clip = camera.farClip};
+          .far_clip = camera.far_clip};
 }
 
 [[nodiscard]] Content_DiscFile DiscFileOf(const BackgroundFile& file) {
@@ -205,7 +205,7 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
   }
   std::memcpy(slot, &packet, sizeof(Packet));
   AddPrim(entry, slot);
-  Scratch().primitiveCursor = slot + kWords;
+  Scratch().primitive_cursor = slot + kWords;
 }
 
 template <typename Primitive>
@@ -375,9 +375,9 @@ void LiveBackgroundHost::AddFill(const FillRect& fill) {
 void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
                                      const CameraVector& angles,
                                      bool scale_compensated) {
-  const Render_FrameScratch& scratch = Scratch();
-  Core_Gte_SetRotMatrix(&scratch.viewMatrix);
-  Core_Gte_SetTransMatrix(&scratch.viewMatrix);
+  const VS::Render::FrameScratch& scratch = Scratch();
+  Core_Gte_SetRotMatrix(&scratch.view_matrix);
+  Core_Gte_SetTransMatrix(&scratch.view_matrix);
   VECTOR dome_position{};
   VECTOR dome_angles{};
   Math::StoreVector(dome_position, position);

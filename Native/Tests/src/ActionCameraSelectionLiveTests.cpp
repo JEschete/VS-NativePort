@@ -20,10 +20,10 @@
 #include "Core/Gte.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -41,8 +41,8 @@ struct LiveFixture {
       VS::Field::cameraTransition;
   decltype(VS::Field::zoneContext.bounds) saved_bounds =
       VS::Field::zoneContext.bounds;
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  int saved_projection = Render_projectionDistance;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  int saved_projection = VS::Render::projectionDistance;
   MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   Model model{};
   Actors_ActorRecord actor{};
@@ -71,9 +71,9 @@ struct LiveFixture {
     VS::Actors::boneMatrixScratch.m[0][0] = kOne;
     VS::Actors::boneMatrixScratch.m[1][1] = kOne;
     VS::Actors::boneMatrixScratch.m[2][2] = kOne;
-    Render_frameScratch.viewMatrix = VS::Actors::boneMatrixScratch;
-    Render_frameScratch.viewMatrix.t[2] = 1024;
-    Render_frameScratch.camera = {};
+    VS::Render::FrameScratchpad().view_matrix = VS::Actors::boneMatrixScratch;
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 1024;
+    VS::Render::FrameScratchpad().camera = {};
     VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext.bounds = {-100, -100, 100, 100};
     Battle_actionState = &state;
@@ -88,21 +88,21 @@ struct LiveFixture {
     VS::Field::sphericalCamera = saved_camera;
     VS::Field::cameraTransition = saved_transition;
     VS::Field::zoneContext.bounds = saved_bounds;
-    Render_frameScratch = saved_frame;
+    VS::Render::FrameScratchpad() = saved_frame;
     // An inactive legacy global is not a snapshot of the math projection.
-    Render_projectionDistance = saved_projection;
+    VS::Render::projectionDistance = saved_projection;
     VS::Actors::boneMatrixScratch = saved_bone_camera;
     VS::Render::ForgetLiveModelExtent(&model);
   }
 };
 struct ProjectionReset {
-  int saved_projection = Render_projectionDistance;
+  int saved_projection = VS::Render::projectionDistance;
   ProjectionReset() = default;
   ProjectionReset(const ProjectionReset&) = delete;
   ProjectionReset& operator=(const ProjectionReset&) = delete;
   ~ProjectionReset() {
     Core_Gte_Reset();
-    Render_projectionDistance = saved_projection;
+    VS::Render::projectionDistance = saved_projection;
   }
 };
 using Point = std::array<std::int16_t, 4>;
@@ -232,12 +232,12 @@ TEST_CASE(
   VS::Field::sphericalCamera.values.distance = 1600;
   VS::Render::SetLiveCameraProjectionDistance(704);
   b::LiveUpdateActionCameraZoom();
-  CHECK(Render_projectionDistance == 768);
+  CHECK(VS::Render::projectionDistance == 768);
   CHECK(VS::Field::sphericalCamera.values.distance == 1536);
   CHECK(VS::Field::sphericalCamera.delta.yaw == 1);
   CHECK(VS::Field::sphericalCamera.speed > 0);
-  CHECK((Render_frameScratch.camera.lookAt.vx != 0 ||
-         Render_frameScratch.camera.lookAt.vz != 0));
+  CHECK((VS::Render::FrameScratchpad().camera.look_at.vx != 0 ||
+         VS::Render::FrameScratchpad().camera.look_at.vz != 0));
   CHECK(fixture->state.queueIndex == 3);
 }
 TEST_CASE("Camera fixture leaves unused math projection unchanged",
@@ -245,7 +245,7 @@ TEST_CASE("Camera fixture leaves unused math projection unchanged",
   const ProjectionReset reset;
   Core_Gte_Reset();
   Core_Gte_SetGeomScreen(333);
-  Render_projectionDistance = 0;
+  VS::Render::projectionDistance = 0;
   SVECTOR point{256, 0, 1024, 0};
   Core_GteWord before{}, after{}, cue{}, flags{};
   Core_Gte_RotTransPers(&point, &before, &cue, &flags);
@@ -255,7 +255,7 @@ TEST_CASE("Camera fixture leaves unused math projection unchanged",
   }
   Core_Gte_RotTransPers(&point, &after, &cue, &flags);
   CHECK(after == before);
-  CHECK(Render_projectionDistance == 0);
+  CHECK(VS::Render::projectionDistance == 0);
 }
 TEST_CASE("F00179 through F00186 module entries retain their actual call ABI",
           "[camera-selection][redirect-binding]") {

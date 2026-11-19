@@ -1313,7 +1313,7 @@ std::array<int, 4> Position(const SVECTOR& position) {
 // A live record's companion offset (x, y, z, depth bias) and colour.
 std::array<int, 8> LiveCompanionStyle(const Actors_ActorRecord& record) {
   const Actors_CompanionOffset& offset = record.companionState;
-  const Render_ColorCode& color = record.companionColor;
+  const VS::Render::ColorCode& color = record.companionColor;
   return {offset.offsetX, offset.offsetY, offset.offsetZ, offset.depthBias,
           color.red,      color.green,    color.blue,     color.code};
 }
@@ -1486,8 +1486,8 @@ TEST_CASE("Live battle actors switch their logic and hostility",
 TEST_CASE("A live companion takes its offset and colour", "[actors-state]") {
   const LiveStateFixture fixture;
   const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
-  const Render_ColorCode offset{2, static_cast<u_char>(-2), 2, 16};
-  const Render_ColorCode color{10, 20, 30, 40};
+  const VS::Render::ColorCode offset{2, static_cast<u_char>(-2), 2, 16};
+  const VS::Render::ColorCode color{10, 20, 30, 40};
   constexpr std::array kStyle{2, -2, 2, 16, 10, 20, 30, 40};
   VS::Actors::SetLiveActorCompanion(3, 5, &offset, &color);
   CHECK(record->companionSlot == 5);

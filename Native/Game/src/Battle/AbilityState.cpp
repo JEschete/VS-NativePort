@@ -7,7 +7,7 @@
 #include "Battle/Actor.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: vs_battle_characterState (vs_battle_characterState@BATTLE/BATTLE.PRG)
 Battle_Actor* Battle_characterState;

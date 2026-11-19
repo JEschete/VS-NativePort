@@ -28,7 +28,8 @@ class LivePacketQueue final : public PacketQueue {
 };
 
 // The frame's ordering tables (Boot/GameLoop.cpp): the scene table
-// (Render_frameScratch.orderingTable) and the overlay table in front of it.
+// (VS::Render::FrameScratchpad().ordering_table) and the overlay table in front
+// of it.
 enum class LiveOrderingBase : std::uint8_t { kScene, kOverlay };
 // Entry `slot` from the base's pointer, or null when it lies outside the
 // current frame's table.

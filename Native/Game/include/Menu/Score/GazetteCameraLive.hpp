@@ -6,7 +6,7 @@
 #include "Legacy/Psx.h"
 
 // Binds the gazette camera and panels (GazetteCamera.hpp) to the frame's
-// primitive buffer and scene ordering table (Render_frameScratch,
+// primitive buffer and scene ordering table (VS::Render::FrameScratchpad(),
 // vs_main_frameBuf), the frame camera, the score screen's camera settings and
 // backups, the score (Menu_Score_score), the GTE projection's screen offset,
 // the compact font and the actor preview, in the shapes the copied score

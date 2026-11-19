@@ -27,7 +27,7 @@ struct Battle_TargetVolumeMatrix;
 union Battle_VectorWords;
 
 #include "Effects/Runtime.h"
-#include "Render/LegacyPackets.h"
+#include "Render/LegacyPackets.hpp"
 
 // decomp: effectDefinitionView (src/BATTLE/BATTLE.PRG/5BF94.c:617)
 struct Battle_EffectDefinitionView {
@@ -278,8 +278,8 @@ static_assert(sizeof(Battle_EffectParameterBytes) == 0x8, "Battle_EffectParamete
 struct Battle_TargetLabelPrimitive {
     u_long tag;
     struct {
-        Render_TilePacket tile;
-        Render_PagedGouraudQuadPacket shadePoly;
+        VS::Render::UntaggedTilePacket tile;
+        VS::Render::PagedGouraudQuadPacket shadePoly;
         u_long texturePageCommand;
     } box;
 };

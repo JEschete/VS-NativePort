@@ -17,12 +17,12 @@
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Field/TriggerMarkers.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
@@ -55,15 +55,15 @@ void EditGroup(MarkerDefinition& definition, Edit edit) {
 }
 
 struct TriggerMarkerFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Field_RoomRecord saved_room = Field_roomData;
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   RECT saved_texture = Field_triggerMarkerTextureSource;
   RECT saved_palette = Field_triggerMarkerPaletteSource;
   int saved_tick_speed = VS::State::tickSpeed;
   int saved_mode = VS::Field::roomGeometryDrawMode;
-  int saved_framebuffer = Render_frameBuf;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   u_short saved_animation = Field_roomAnimationTicks;
   u_short saved_marker_ticks = Field_triggerMarkerFrameTicks;
   std::array<unsigned int, 29> saved_definition{};
@@ -110,13 +110,13 @@ struct TriggerMarkerFixture {
     // No image transfers unless a test explicitly supplies a source rectangle.
     Field_triggerMarkerTextureSource = {};
     Field_triggerMarkerPaletteSource = {};
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_frameScratch = {};
-    Render_frameScratch.viewMatrix.m[0][0] = 4096;
-    Render_frameScratch.viewMatrix.m[1][2] = -4096;
-    Render_frameScratch.viewMatrix.m[2][1] = 4096;
-    Render_frameScratch.viewMatrix.t[2] = 1024;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::FrameScratchpad() = {};
+    VS::Render::FrameScratchpad().view_matrix.m[0][0] = 4096;
+    VS::Render::FrameScratchpad().view_matrix.m[1][2] = -4096;
+    VS::Render::FrameScratchpad().view_matrix.m[2][1] = 4096;
+    VS::Render::FrameScratchpad().view_matrix.t[2] = 1024;
     Core_Gte_Reset();
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
@@ -134,9 +134,9 @@ struct TriggerMarkerFixture {
     VS::Field::roomGeometryDrawMode = saved_mode;
     Field_roomAnimationTicks = saved_animation;
     Field_triggerMarkerFrameTicks = saved_marker_ticks;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
     Core_Gte_Reset();
   }
 
@@ -147,8 +147,8 @@ struct TriggerMarkerFixture {
   }
 
   void ResetPackets() {
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
@@ -157,7 +157,7 @@ struct TriggerMarkerFixture {
   }
 
   void CheckPackets(unsigned count) const {
-    CHECK(Render_frameScratch.primitiveCursor == Packet(count));
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == Packet(count));
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
     std::array<unsigned int, 29> current_definition{};
@@ -356,7 +356,7 @@ TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
   VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 128);
   fixture.CheckPackets(1);
   fixture.ResetPackets();
-  Render_frameScratch.viewMatrix.t[0] = 64;
+  VS::Render::FrameScratchpad().view_matrix.t[0] = 64;
   VS::Field::DrawLiveRoomTriggerMarker(128, 128, 0, 7);
   fixture.CheckPackets(1);
   const auto* packet = fixture.Packet();

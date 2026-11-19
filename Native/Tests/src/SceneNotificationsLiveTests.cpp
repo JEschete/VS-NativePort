@@ -223,10 +223,10 @@ TEST_CASE(
   const auto closing = menu::ReadLiveTextBox(kFirstBox);
   CHECK(closing.state < 0);
   CHECK(closing.text == nullptr);
-  auto* cursor = Render_frameScratch.primitiveCursor;
+  auto* cursor = VS::Render::FrameScratchpad().primitive_cursor;
   menu::UpdateLiveTextBoxes();
   CHECK(menu::ReadLiveTextBox(kFirstBox).state < closing.state);
-  CHECK(Render_frameScratch.primitiveCursor != cursor);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor != cursor);
   CHECK(Menu_sceneNotificationTimer == 120);
   CHECK(Menu_sceneNotificationTimed == 1);
 }

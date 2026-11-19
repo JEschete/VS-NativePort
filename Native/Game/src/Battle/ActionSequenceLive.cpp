@@ -32,7 +32,7 @@
 #include "Items/LootLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
 namespace VS::Battle {
@@ -114,7 +114,7 @@ class LiveWorld final : public ActionSequenceWorld {
   std::int32_t CameraMode() override {
     return VS::Field::sphericalCamera.delta.mode;
   }
-  std::int32_t Projection() override { return Render_projectionDistance; }
+  std::int32_t Projection() override { return VS::Render::projectionDistance; }
   void ApplyProjection(std::int32_t projection) override {
     Render::SetLiveCameraProjectionDistance(projection);
   }

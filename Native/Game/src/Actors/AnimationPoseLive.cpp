@@ -41,7 +41,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
 
@@ -584,7 +584,7 @@ void StorePoseState(const AnimationPoseState& state, u_char* bank,
 class LiveMotionLookHost final : public MotionLookHost {
  public:
   LiveMotionLookHost(Actors_ActorRecord& actor,
-                     Render_ModelScratchpad& workspace)
+                     VS::Render::ModelScratchpad& workspace)
       : actor_(actor), workspace_(workspace) {}
 
   [[nodiscard]] ActorMotion LoadMotion() const override {
@@ -601,9 +601,9 @@ class LiveMotionLookHost final : public MotionLookHost {
     return actor_.scale;
   }
   void SetRootOffset(Vec3 offset) override {
-    workspace_.rootOffset.vx = static_cast<std::int16_t>(offset.x);
-    workspace_.rootOffset.vy = static_cast<std::int16_t>(offset.y);
-    workspace_.rootOffset.vz = static_cast<std::int16_t>(offset.z);
+    workspace_.root_offset.vx = static_cast<std::int16_t>(offset.x);
+    workspace_.root_offset.vy = static_cast<std::int16_t>(offset.y);
+    workspace_.root_offset.vz = static_cast<std::int16_t>(offset.z);
   }
   [[nodiscard]] bool PreviewPose() const override {
     return actor_.previewPose != 0;
@@ -653,17 +653,17 @@ class LiveMotionLookHost final : public MotionLookHost {
     return context;
   }
   void SetLookAngles(LookAngles angles) override {
-    workspace_.angleX = static_cast<u_short>(angles.yaw);
-    workspace_.angleY = static_cast<u_short>(angles.pitch);
+    workspace_.angle_x = static_cast<u_short>(angles.yaw);
+    workspace_.angle_y = static_cast<u_short>(angles.pitch);
   }
 
  private:
   Actors_ActorRecord& actor_;
-  Render_ModelScratchpad& workspace_;
+  VS::Render::ModelScratchpad& workspace_;
 };
 
 void UpdateLiveMotion(Actors_ActorRecord& actor, bool skip_tweens) {
-  Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
+  VS::Render::ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   if (workspace == nullptr) {
     VS::Core::Errorf(kChannel, "Motion update has no model workspace");
     return;

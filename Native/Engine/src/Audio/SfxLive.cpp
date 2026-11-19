@@ -22,7 +22,7 @@
 #include "Core/Runtime.hpp"
 #include "Core/Scratch.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 
 namespace VS::Audio {
 namespace {
@@ -199,9 +199,9 @@ class LiveSfxHost final : public SfxHost {
   // scratch keeps the field but not the PS1 offset.
   SfxProjection Project(const SfxPoint& point) override {
     auto* const scratch =
-        static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
-    Core_Gte_SetRotMatrix(&scratch->viewMatrix);
-    Core_Gte_SetTransMatrix(&scratch->viewMatrix);
+        static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+    Core_Gte_SetRotMatrix(&scratch->view_matrix);
+    Core_Gte_SetTransMatrix(&scratch->view_matrix);
     SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
     Core_GteWord screen_xy = 0;
     Core_GteWord interpolation = 0;

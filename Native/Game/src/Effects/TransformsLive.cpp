@@ -26,8 +26,8 @@
 #include "Effects/Transforms.h"
 #include "Effects/Transforms.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // func_800D0548_arg1 (5BF94.c:6076) views each Effects_TransformSlot.
 namespace {
@@ -173,12 +173,14 @@ class LiveTransformHostImpl final : public TransformHost {
   }
 
   TransformCameraView FrameCamera() override {
-    return {.position = Math::VectorOf(Render_frameScratch.camera.position),
-            .look_at = Math::VectorOf(Render_frameScratch.camera.lookAt)};
+    return {.position =
+                Math::VectorOf(VS::Render::FrameScratchpad().camera.position),
+            .look_at =
+                Math::VectorOf(VS::Render::FrameScratchpad().camera.look_at)};
   }
 
   Math::Transform3 ViewMatrix() override {
-    return Math::TransformOf(Render_frameScratch.viewMatrix);
+    return Math::TransformOf(VS::Render::FrameScratchpad().view_matrix);
   }
 
   TransformPoint EffectOrigin() override {

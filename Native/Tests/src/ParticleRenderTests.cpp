@@ -51,13 +51,13 @@
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Trails.h"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
+#include "Render/Camera.hpp"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/LegacyPackets.hpp"
 #include "Render/PageSpace.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "nlohmann/json.hpp"
 
 namespace {
@@ -100,12 +100,12 @@ struct EffectTraceScope {
 };
 
 struct ParticleFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
-  int saved_near = Render_nearClip;
-  int saved_projection = Render_projectionDistance;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
+  int saved_near = VS::Render::nearClip;
+  int saved_projection = VS::Render::projectionDistance;
   Effects_EffectPackage* saved_package = Effects_package;
   Effects_EffectInstance* saved_instance = Effects_currentInstance;
   Effects_Particle* saved_pool = Effects_particlePool;
@@ -151,31 +151,31 @@ struct ParticleFixture {
         std::as_writable_bytes(std::span(script)));
     particle.motion.position.vz = 1024 << 12;
     particle.transparency = 16;
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch = {};
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad() = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+      VS::Render::FrameScratchpad().view_matrix.m[axis][axis] = 4096;
     }
-    instance.transforms[0].view = Render_frameScratch.viewMatrix;
-    instance.transforms[0].world = Render_frameScratch.viewMatrix;
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.orderingTable = ordering.data() + 16;
+    instance.transforms[0].view = VS::Render::FrameScratchpad().view_matrix;
+    instance.transforms[0].world = VS::Render::FrameScratchpad().view_matrix;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 16;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_nearClip = 0;
-    Render_projectionDistance = 256;
+    VS::Render::nearClip = 0;
+    VS::Render::projectionDistance = 256;
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
   }
 
   ~ParticleFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
-    Render_nearClip = saved_near;
-    Render_projectionDistance = saved_projection;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
+    VS::Render::nearClip = saved_near;
+    VS::Render::projectionDistance = saved_projection;
     VS::Effects::ForgetLivePackageExtents();
     VS::Effects::ForgetLiveAnimationTable(script.data());
     Effects_package = saved_package;
@@ -196,7 +196,8 @@ struct ParticleFixture {
   }
 
   void CheckQuad() const {
-    CHECK(Render_frameScratch.primitiveCursor == storage.data() + 17);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          storage.data() + 17);
     const auto* quad = storage.data() + 4;
     CHECK(quad[1] == 0x2C808080);
     CHECK(quad[2] == static_cast<u_long>(156 | (116 << 16)));
@@ -359,7 +360,8 @@ TEST_CASE("Culled particle paths explain absent screen geometry",
   CHECK(record.at("outcome") == "below-ground");
   CHECK(record.at("screen").is_null());
   CHECK(record.at("command_addresses").empty());
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 1);
 }
 
 TEST_CASE("Particle texture reset clears native pointer tails without overflow",
@@ -427,7 +429,8 @@ TEST_CASE("Particle culling preserves texture advancement without emitting",
   fixture.particle.motion.position.vy = 4096;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.particle.textureAnimation.cursor == 4);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 1);
 }
 
 TEST_CASE("Attached particles project through their own native effect matrix",
@@ -461,16 +464,17 @@ TEST_CASE("Particle texture timers advance once per render without resetting",
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.particle.textureAnimation.frameTimer == 6);
   CHECK(fixture.particle.textureAnimation.cursor == 4);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 33);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.storage.data() + 33);
 }
 
 TEST_CASE("Particle rendering fits exactly at the native frame buffer boundary",
           "[effects][particle-render]") {
   ParticleFixture fixture;
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       fixture.storage.data() + 1 + 0x8000 - 16;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + 1 + 0x8000);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
@@ -755,7 +759,8 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
   CHECK(state->age == 1);
   CHECK(*live.counter == 4);
   const u_long* packet = fixture.storage.data() + 1;
-  CHECK(Render_frameScratch.primitiveCursor == packet + (8 * live.words));
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        packet + (8 * live.words));
   CheckLiveSegmentPacket(packet, live);
   CHECK(live.dispatch(&renderer, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
@@ -1133,7 +1138,8 @@ namespace {
 void CheckTrailReferenceQuad(const POLY_GT4& quad, int x, int y, int fade,
                              int samples) {
   CHECK(quad.tag == 0xE1000000);
-  CHECK(quad.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+  CHECK(quad.code ==
+        std::to_underlying(VS::Render::LegacyPrimitiveCode::kPolyGt4SemiTrans));
   const std::array<int, 8> positions{quad.x0, quad.y0, quad.x1, quad.y1,
                                      quad.x2, quad.y2, quad.x3, quad.y3};
   const std::array expected_positions{x, y - 4, x + 8, y - 4,
@@ -1179,7 +1185,7 @@ void CheckTrailReferenceRenderState(
     const ParticleFixture& fixture, const u_long* end) {
   CHECK(animation.cursor == 4);
   CHECK(animation.frameTimer == 8);
-  CHECK(Render_frameScratch.primitiveCursor == end);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == end);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
 }
@@ -1198,8 +1204,8 @@ void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
       const auto& quad = read_quad(packet);
       const auto x = origin_x + static_cast<int>(segment * 8);
       const auto y = 120 + static_cast<int>(actor * 16);
-      CHECK(packet.wordCount == 14);
-      CHECK(static_cast<std::uint32_t>(packet.drawMode) == 0xE1000200u);
+      CHECK(packet.word_count == 14);
+      CHECK(static_cast<std::uint32_t>(packet.draw_mode) == 0xE1000200u);
       const auto fade = count - 1 - segment;
       CheckTrailReferenceQuad(quad, x, y, static_cast<int>(fade),
                               static_cast<int>(kSamples));
@@ -1232,15 +1238,16 @@ void CheckTrailReferenceRendering(State& state,
   definition.transformIndex = 1;
   Effects_ParticleEmitterScratch scratch{};
   scratch.flags = attached ? 0x20000 : 0;
-  Render_frameScratch.viewMatrix.t[0] = -64;
-  fixture.instance.transforms[1].view = Render_frameScratch.viewMatrix;
+  VS::Render::FrameScratchpad().view_matrix.t[0] = -64;
+  fixture.instance.transforms[1].view =
+      VS::Render::FrameScratchpad().view_matrix;
   fixture.instance.transforms[1].view.t[0] = 128;
-  Render_nearClip = clipped ? 256 : 255;
+  VS::Render::nearClip = clipped ? 256 : 255;
   constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
   const auto packets = trails.size() * (count - 1);
   auto* begin = fixture.storage.data() + 1;
   if (at_boundary) begin += 0x8000 - packets * kPacketWords;
-  Render_frameScratch.primitiveCursor = begin;
+  VS::Render::FrameScratchpad().primitive_cursor = begin;
   render(&definition, &scratch, &fixture.instance, &state);
   CheckTrailReferenceRenderState(
       animation, fixture, begin + (clipped ? 0 : packets * kPacketWords));
@@ -1265,7 +1272,8 @@ TEST_CASE("Five-sample trail ribbons retain source geometry and render spaces",
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
   storage.state.trailcount = 2;
-  CheckTrailReferenceRendering<Effects_Trail, Render_EffectGouraudQuadPacket>(
+  CheckTrailReferenceRendering<Effects_Trail,
+                               VS::Render::EffectGouraudQuadPacket>(
       storage.state, storage.state.textureAnimation, storage.transparency,
       RunTrailStage<&VS::Effects::Plg057::TrailRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
@@ -1280,7 +1288,7 @@ TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_Trail9State, sampledTransparencyCurve));
   storage.state.trailCount = 2;
-  CheckTrailReferenceRendering<Effects_Trail9, Render_Trail9Packet>(
+  CheckTrailReferenceRendering<Effects_Trail9, VS::Render::Trail9Packet>(
       storage.state, storage.state.texture, storage.transparency,
       RunTrailNineStage<&VS::Effects::Templates::TrailNineRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
@@ -1359,7 +1367,7 @@ struct Plg074Fixture : EmissionFixture {
   }
 
   void ResetPackets() {
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
@@ -1410,7 +1418,7 @@ void CheckPlg074RingLifecycle(Effects_EffectRenderer renderer,
   }
 }
 
-void CheckPlg074TiledRingPackets(const Render_TiledRingPacket* packets) {
+void CheckPlg074TiledRingPackets(const VS::Render::TiledRingPacket* packets) {
   for (int index = 0; index < 32; ++index) {
     const auto& quad = packets[index].poly;
     CHECK(quad.u0 == 16);
@@ -1421,11 +1429,12 @@ void CheckPlg074TiledRingPackets(const Render_TiledRingPacket* packets) {
     CHECK(quad.r2 == (index < 16 ? 64 : 96));
     CHECK(quad.clut == 0x1234);
     CHECK(quad.tpage == 0x567);
-    CHECK(quad.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+    CHECK(quad.code == std::to_underlying(
+                           VS::Render::LegacyPrimitiveCode::kPolyGt4SemiTrans));
   }
 }
 
-void CheckPlg074TiledRingGeometry(const Render_TiledRingPacket* packets) {
+void CheckPlg074TiledRingGeometry(const VS::Render::TiledRingPacket* packets) {
   CHECK(packets[0].poly.x0 == 192);
   CHECK(packets[0].poly.y0 == 120);
   CHECK(packets[0].poly.y2 == 128);
@@ -1433,7 +1442,8 @@ void CheckPlg074TiledRingGeometry(const Render_TiledRingPacket* packets) {
   CHECK(packets[15].poly.y1 == packets[0].poly.y0);
 }
 
-void CheckPlg074RingArcPackets(const Render_RingPacket* packets, int mode) {
+void CheckPlg074RingArcPackets(const VS::Render::RingPacket* packets,
+                               int mode) {
   for (int index = 0; index < 16; ++index) {
     const auto& quad = packets[index].poly;
     CHECK(quad.u0 == 16 + index % 8);
@@ -1445,13 +1455,14 @@ void CheckPlg074RingArcPackets(const Render_RingPacket* packets, int mode) {
   }
 }
 
-void CheckGravityRingMaterial(const Render_ClosedRingPacket* packets) {
-  CHECK(Render_frameScratch.primitiveCursor == packets + 32);
+void CheckGravityRingMaterial(const VS::Render::ClosedRingPacket* packets) {
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 32);
   CHECK(packets[0].poly.clut == 0x1234);
   CHECK(packets[0].poly.tpage == 0x567);
   CHECK(packets[0].poly.u0 == 16);
   CHECK(packets[0].poly.v0 == 32);
-  CHECK(packets[0].poly.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+  CHECK(packets[0].poly.code ==
+        std::to_underlying(VS::Render::LegacyPrimitiveCode::kPolyGt4SemiTrans));
 }
 }  // namespace
 
@@ -1466,9 +1477,9 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
   Effects_RendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
-  const auto* packets = reinterpret_cast<const Render_TiledRingPacket*>(
+  const auto* packets = reinterpret_cast<const VS::Render::TiledRingPacket*>(
       fixture.storage.data() + 1);
-  CHECK(Render_frameScratch.primitiveCursor == packets + 32);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 32);
   CheckPlg074TiledRingGeometry(packets);
   CheckPlg074TiledRingPackets(packets);
   fixture.CheckGuards();
@@ -1490,9 +1501,9 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   Effects_RendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
-  const auto* packets =
-      reinterpret_cast<const Render_RingPacket*>(fixture.storage.data() + 1);
-  CHECK(Render_frameScratch.primitiveCursor == packets + 16);
+  const auto* packets = reinterpret_cast<const VS::Render::RingPacket*>(
+      fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 16);
   CheckPlg074RingArcPackets(packets, mode);
   CHECK(packets[0].poly.x0 == 192);
   CHECK(packets[0].poly.y0 == 120);
@@ -1616,7 +1627,8 @@ void StopPlg074Emitter(Effects_EffectRenderer entry, Effects_RendererSlot& slot,
   }
 }
 
-void CheckPlg074SurfacePackets(const Render_RotatingSurfacePacket* packets) {
+void CheckPlg074SurfacePackets(
+    const VS::Render::RotatingSurfacePacket* packets) {
   for (std::size_t row = 0; row < 4; ++row) {
     const auto& quad = packets[row * 16].poly;
     CHECK(quad.x0 == 192);
@@ -1671,7 +1683,8 @@ TEST_CASE(
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
   storage.state.trailcount = 2;
-  CheckTrailReferenceRendering<Effects_Trail, Render_EffectGouraudQuadPacket>(
+  CheckTrailReferenceRendering<Effects_Trail,
+                               VS::Render::EffectGouraudQuadPacket>(
       storage.state, storage.state.textureAnimation, storage.transparency,
       entry,
       [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
@@ -1942,11 +1955,11 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   } else {
     fixture.Definition().transformIndex = 16;
   }
-  const void* before = Render_frameScratch.primitiveCursor;
+  const void* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
   CHECK(state->trails == nullptr);
   CHECK(state->opaque3 == 0);
-  CHECK(Render_frameScratch.primitiveCursor == before);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
   CHECK(log.Contains(missing_instance ? "no current effect instance"
                                       : "names transform 16 of 16"));
   VS::Core::Memory::FreeLiveFromHighEnd(state);
@@ -2020,9 +2033,9 @@ TEST_CASE("Live surfaces stop on a missing instance or transform",
   } else {
     fixture.Definition().transformIndex = 16;
   }
-  const void* before = Render_frameScratch.primitiveCursor;
+  const void* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(entry(&slot, 2, 0) == 0);
-  CHECK(Render_frameScratch.primitiveCursor == before);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
   CHECK(log.Contains(missing_instance ? "no current effect instance"
                                       : "names transform 16 of 16"));
   VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
@@ -2066,9 +2079,10 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   Effects_RendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
   REQUIRE(entry(&slot, 2, 0) == 1);
-  const auto* packets = reinterpret_cast<const Render_RotatingSurfacePacket*>(
-      fixture.storage.data() + 1);
-  CHECK(Render_frameScratch.primitiveCursor == packets + 64);
+  const auto* packets =
+      reinterpret_cast<const VS::Render::RotatingSurfacePacket*>(
+          fixture.storage.data() + 1);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 64);
   CheckPlg074SurfacePackets(packets);
   fixture.CheckGuards();
   VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
@@ -2118,7 +2132,7 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
         2);
     REQUIRE(slot != nullptr);
     CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);
-    const auto* packets = reinterpret_cast<const Render_ClosedRingPacket*>(
+    const auto* packets = reinterpret_cast<const VS::Render::ClosedRingPacket*>(
         fixture.storage.data() + 1);
     CheckGravityRingMaterial(packets);
     fixture.ResetPackets();

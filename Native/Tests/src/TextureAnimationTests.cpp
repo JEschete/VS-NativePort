@@ -22,11 +22,11 @@
 #include "Actors/Textures.h"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/UiPackets.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -73,21 +73,21 @@ constexpr TextureAnimationSlot kPlaying = [] {
 
 // The frame's primitive buffer and ordering tables, replaced for one test.
 struct LiveFrame {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_table = Render_legacyOrderingTables[0];
-  void* saved_overlay_table = Render_legacyCurrentOrderingTable;
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
+  void* saved_overlay_table = VS::Render::legacyCurrentOrderingTable;
+  int saved_framebuffer = VS::Render::frameBuf;
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
 
   LiveFrame() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyCurrentOrderingTable = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyCurrentOrderingTable = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   LiveFrame(const LiveFrame&) = delete;
@@ -95,11 +95,11 @@ struct LiveFrame {
   LiveFrame(LiveFrame&&) = delete;
   LiveFrame& operator=(LiveFrame&&) = delete;
   ~LiveFrame() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_table;
-    Render_legacyCurrentOrderingTable = saved_overlay_table;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_table;
+    VS::Render::legacyCurrentOrderingTable = saved_overlay_table;
+    VS::Render::frameBuf = saved_framebuffer;
   }
 
   // The queued moves as their source, destination and size words.
@@ -112,8 +112,8 @@ struct LiveFrame {
   };
 
   [[nodiscard]] std::vector<Move> Moves() const {
-    const auto* cursor =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+    const auto* cursor = static_cast<const u_long*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto words = static_cast<std::size_t>(cursor - storage.data());
     std::vector<Move> moves;
     for (std::size_t packet = 0;

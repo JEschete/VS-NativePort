@@ -154,7 +154,7 @@ enum class AssetFileStream : std::uint8_t {
 
 enum class AssetTextureTable : std::uint8_t { kActor, kWeapon };
 
-// Render_TextureSlot (D_800F46A8 and the weapon table).
+// VS::Render::TextureSlot (D_800F46A8 and the weapon table).
 struct AssetTextureSlot {
   std::int16_t texture_page = 0;
   std::int16_t palette = 0;

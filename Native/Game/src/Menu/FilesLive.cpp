@@ -42,15 +42,15 @@
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/GameFilesLive.hpp"
@@ -382,7 +382,7 @@ class LiveGpuHost : public Host {
                           int owner) override {
     Render::RetireLiveTexturePageRange(first, count, owner);
   }
-  int FrameBuffer() override { return Render_frameBuf; }
+  int FrameBuffer() override { return VS::Render::frameBuf; }
   void ClearScreen() override { ClearBothBuffers(); }
 
  private:

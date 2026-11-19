@@ -201,8 +201,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     const auto first = reinterpret_cast<std::uintptr_t>(pointer);
     const auto primitive =
         reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
-    const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto cursor = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto table = reinterpret_cast<std::uintptr_t>(ordering.data());
     const auto text_table =
         reinterpret_cast<std::uintptr_t>(VS::Menu::textBoxOrderingTables);

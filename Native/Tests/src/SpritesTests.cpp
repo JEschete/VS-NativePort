@@ -7,12 +7,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 using VS::Render::SpritePacket;
@@ -39,21 +39,21 @@ constexpr u_long kGuard = 0xDEADBEEF;
 constexpr u_long kChainHead = 0x00ABCDEF;
 
 struct LiveSpriteFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::vector<u_long> storage = std::vector<u_long>(kBufferWords + 2, kGuard);
   u_long chain = kChainHead;
 
   LiveSpriteFixture() {
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = Base();
-    Render_frameScratch.primitiveCursor = Base();
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = Base();
+    VS::Render::FrameScratchpad().primitive_cursor = Base();
   }
   ~LiveSpriteFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::frameBuf = saved_framebuffer;
   }
   LiveSpriteFixture(const LiveSpriteFixture&) = delete;
   LiveSpriteFixture& operator=(const LiveSpriteFixture&) = delete;
@@ -99,7 +99,7 @@ TEST_CASE("live sprites link into the chain and advance the cursor",
   CHECK(fixture.chain == LegacyGpu_Handle(packet));
   CHECK(packet[0] == (0x05000000 | kChainHead));
   CHECK(packet[2] == 0x64808080);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.Base() + VS::Render::kSpritePacketWords);
   CHECK(fixture.GuardsIntact());
 }
@@ -108,11 +108,12 @@ TEST_CASE("a live sprite that exactly fits the buffer end is queued",
           "[sprites]") {
   LiveSpriteFixture fixture;
   u_long* last = fixture.Base() + kBufferWords - VS::Render::kSpritePacketWords;
-  Render_frameScratch.primitiveCursor = last;
+  VS::Render::FrameScratchpad().primitive_cursor = last;
   u_long* packet = VS::Render::QueueLiveSpriteWithTexturePage(
       0x80, 0, 0x00040004, &fixture.chain);
   CHECK(packet == last);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.Base() + kBufferWords);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.Base() + kBufferWords);
   CHECK(fixture.GuardsIntact());
 }
 
@@ -122,7 +123,7 @@ TEST_CASE("a live sprite past the buffer end gets discard storage",
   const std::uint64_t dropped = VS::Render::DroppedLiveSpriteCount();
   u_long* overflow =
       fixture.Base() + kBufferWords - VS::Render::kSpritePacketWords + 1;
-  Render_frameScratch.primitiveCursor = overflow;
+  VS::Render::FrameScratchpad().primitive_cursor = overflow;
   u_long* packet =
       VS::Render::QueueLiveSprite(0x80, 0, 0x00040004, &fixture.chain);
   REQUIRE(packet != nullptr);
@@ -131,7 +132,7 @@ TEST_CASE("a live sprite past the buffer end gets discard storage",
   packet[1] = 1;
   packet[4] = 1;
   CHECK(fixture.chain == kChainHead);
-  CHECK(Render_frameScratch.primitiveCursor == overflow);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == overflow);
   CHECK(fixture.GuardsIntact());
   CHECK(VS::Render::DroppedLiveSpriteCount() == dropped + 1);
 }
@@ -142,14 +143,14 @@ TEST_CASE("a live sprite with no buffer or chain is not linked", "[sprites]") {
   u_long* null_chain =
       VS::Render::QueueLiveSprite(0x80, 0, 0x00040004, nullptr);
   CHECK(null_chain != nullptr);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.Base());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == fixture.Base());
 
-  Render_legacyPrimitiveBuffers[0] = nullptr;
+  VS::Render::legacyPrimitiveBuffers[0] = nullptr;
   u_long* no_buffer =
       VS::Render::QueueLiveSprite(0x80, 0, 0x00040004, &fixture.chain);
   CHECK(no_buffer != nullptr);
   CHECK(no_buffer != fixture.Base());
   CHECK(fixture.chain == kChainHead);
-  CHECK(Render_frameScratch.primitiveCursor == fixture.Base());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == fixture.Base());
   CHECK(VS::Render::DroppedLiveSpriteCount() == dropped + 2);
 }

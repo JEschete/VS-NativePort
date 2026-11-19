@@ -31,10 +31,10 @@
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Palette.h"
+#include "Render/Display.hpp"
+#include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -78,7 +78,7 @@ constexpr int kFrameBottom = 220;
 constexpr std::uint32_t kFrameDrawModeWord = 0xE1000200U | 0x60U;
 constexpr std::uint8_t kFrameDrawModeLength = 2;
 // Both display buffers' drawing environments; the one drawn next is
-// (Render_frameBuf + 1) & 1.
+// (VS::Render::frameBuf + 1) & 1.
 constexpr int kDisplayBufferMask = 1;
 constexpr std::uint32_t kViewFacingMask = 0xFF;
 
@@ -98,8 +98,8 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
   }
 }
 
-[[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+[[nodiscard]] VS::Render::FrameScratch& Scratch() {
+  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
 }
 
 template <typename Byte>
@@ -145,13 +145,13 @@ void StoreTint(const RoomTintState& tint) {
 }
 
 void LoadViewTransform() {
-  Core_Gte_SetRotMatrix(&Scratch().viewMatrix);
-  Core_Gte_SetTransMatrix(&Scratch().viewMatrix);
+  Core_Gte_SetRotMatrix(&Scratch().view_matrix);
+  Core_Gte_SetTransMatrix(&Scratch().view_matrix);
 }
 
 [[nodiscard]] DRAWENV& DrawnEnvironment() {
-  return Render_legacyDrawEnvironments[(Render_frameBuf + 1) &
-                                       kDisplayBufferMask];
+  return VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) &
+                                            kDisplayBufferMask];
 }
 
 // Writes a packet into the frame's primitive buffer and links it at the
@@ -176,7 +176,7 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
   }
   std::memcpy(slot, &packet, sizeof(Packet));
   AddPrim(entry, slot);
-  Scratch().primitiveCursor = slot + kWords;
+  Scratch().primitive_cursor = slot + kWords;
 }
 
 void LinkDrawArea(RECT area, std::string_view kind) {
@@ -231,9 +231,9 @@ class LiveGeometryHost final : public RoomGeometryHost {
     Render::UpdateLiveRoomGroupTransforms(geometry_, Bytes());
   }
   void DrawGroups() override {
-    Field_roomPrimitiveRangeStart = Scratch().primitiveCursor;
+    Field_roomPrimitiveRangeStart = Scratch().primitive_cursor;
     Render::DrawLiveRoomGeometry(geometry_, Bytes(), roomGeometryDrawMode);
-    Field_roomPrimitiveRangeEnd = Scratch().primitiveCursor;
+    Field_roomPrimitiveRangeEnd = Scratch().primitive_cursor;
   }
   void TintDrawnPrimitives(const Render::RoomTint& tint) override {
     const Field_RoomTint packed{.red = tint.red,
@@ -277,7 +277,7 @@ class LiveSceneHost final : public RoomSceneHost {
     return static_cast<int>(Scratch().camera.angles.vy);
   }
   void SetViewFacing(std::uint8_t mask) override {
-    u_int& facing = Scratch().firstPersonViewFacing;
+    u_int& facing = Scratch().first_person_view_facing;
     facing = (facing & ~kViewFacingMask) | mask;
   }
   void DrawGeometry() override {
@@ -314,7 +314,7 @@ class LiveSceneHost final : public RoomSceneHost {
 // draw throws.
 class ProjectionOffsetScope {
  public:
-  explicit ProjectionOffsetScope(const Render_ScreenOffset& offset)
+  explicit ProjectionOffsetScope(const VS::Render::ScreenOffset& offset)
       : saved_(Render::GetLiveProjectionScreenOffset()) {
     Render::SetLiveProjectionScreenOffset(offset);
   }
@@ -325,7 +325,7 @@ class ProjectionOffsetScope {
   ~ProjectionOffsetScope() { Render::SetLiveProjectionScreenOffset(saved_); }
 
  private:
-  Render_ScreenOffset saved_;
+  VS::Render::ScreenOffset saved_;
 };
 
 void LiveSceneHost::DrawMinimap(const MinimapLayout& layout) {
@@ -335,7 +335,7 @@ void LiveSceneHost::DrawMinimap(const MinimapLayout& layout) {
   LinkDrawArea(DrawnEnvironment().clip, "display draw area");
   {
     const ProjectionOffsetScope scope(
-        Render_ScreenOffset{.x = layout.offset_x, .y = layout.offset_y});
+        VS::Render::ScreenOffset{.x = layout.offset_x, .y = layout.offset_y});
     DrawLiveMinimapScene(Field_roomData.minimapScene,
                          Field_roomData.header.minimapSceneLength);
   }
@@ -430,7 +430,7 @@ void LiveOffsetRoomTextureIds(int offset, int* geometry) {
   static_cast<void>(OffsetRoomTextureIds(RoomGeometry(), offset));
 }
 
-void LiveSetRoomTint(const Render_ColorCode* color, int strength) {
+void LiveSetRoomTint(const VS::Render::ColorCode* color, int strength) {
   if (color == nullptr) {
     RefuseCall("Room tint", "null colour");
     return;

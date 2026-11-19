@@ -31,9 +31,9 @@
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "ModelLoading.h"
-#include "Render/ModelDraw.h"
+#include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
-#include "Render/Textures.h"
+#include "Render/Textures.hpp"
 
 namespace gazette_terminal_live_tests {
 inline content::AssetAddress Address(const void* pointer) {
@@ -61,8 +61,8 @@ inline auto PreviewOwners() {
                     BytesOf(Actors_sequenceWorkBuffer),
                     BytesOf(Actors_forcedModelOverrides),
                     BytesOf(Content_legacyWeaponModelBuffers),
-                    BytesOf(Render_legacyActorTextureSlots),
-                    BytesOf(Render_legacyWeaponTextureSlots),
+                    BytesOf(VS::Render::legacyActorTextureSlots),
+                    BytesOf(VS::Render::legacyWeaponTextureSlots),
                     BytesOf(Actors_sharedSequenceBankTexturePages),
                     BytesOf(Actors_sharedSequenceData),
                     BytesOf(Actors_sharedSequenceAnimationIds),

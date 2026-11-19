@@ -3,7 +3,9 @@
 
 #include "Field/RoomRendering.hpp"
 
-struct Render_ColorCode;
+namespace VS::Render {
+struct ColorCode;
+}  // namespace VS::Render
 
 // Binding from the session's room rendering globals
 // (RoomRenderingLiveState.hpp), the loaded room (Field_roomData), the frame
@@ -33,7 +35,7 @@ void LiveUploadRoomPalettes();
 // Only the loaded room's geometry is rewritten; any other is refused.
 void LiveOffsetRoomTextureIds(int offset, int* geometry);
 // decomp: BATTLE.PRG func_8008B430 (src/BATTLE/BATTLE.PRG/146C.c:15995)
-void LiveSetRoomTint(const Render_ColorCode* color, int strength);
+void LiveSetRoomTint(const VS::Render::ColorCode* color, int strength);
 // decomp: BATTLE.PRG func_8008B4B0 (src/BATTLE/BATTLE.PRG/146C.c:16008)
 void LiveClearRoomTint();
 // decomp: BATTLE.PRG func_8008B4BC (src/BATTLE/BATTLE.PRG/146C.c:16010)

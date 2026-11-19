@@ -21,9 +21,9 @@ const u_long* NextPacket(const u_long* packet) {
 
 int CheckTimerGlyph(const u_long* packet, char character, int x) {
   const auto glyph = static_cast<std::uint8_t>(character - ' ');
-  const auto widths = std::span(Render_compactGlyphWidths);
+  const auto widths = std::span(VS::Render::compactGlyphWidths);
   const auto width = (widths[glyph / 2] >> ((glyph & 1U) * 4)) & 15;
-  const auto cell = std::span(Render_compactGlyphIndices)[glyph];
+  const auto cell = std::span(VS::Render::compactGlyphIndices)[glyph];
   CHECK(packet[1] == 0x64808080);
   CHECK(packet[2] == static_cast<u_long>(x | (200 << 16)));
   CHECK(packet[3] ==
@@ -95,8 +95,8 @@ TEST_CASE("F01361 Live emits both actual sprite rows and reverse digit owners",
   b::DrawLiveShortcutHud();
   CHECK(fixture.frame.UsedWords() == 42);
   CHECK(Battle_shortcutHudRequested == 0);
-  const auto* digit = NextPacket(
-      static_cast<const u_long*>(Render_frameScratch.overlayOrderingTable));
+  const auto* digit = NextPacket(static_cast<const u_long*>(
+      VS::Render::FrameScratchpad().overlay_ordering_table));
   REQUIRE(digit != nullptr);
   CHECK(digit[VS::Render::kSpriteTextureWord] == 0x37FB8000);
   CHECK(digit[VS::Render::kSpriteSizeWord] == 0x100010);

@@ -16,8 +16,8 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
-#include "Render/Display.h"
-#include "Render/Loading.h"
+#include "Render/Display.hpp"
+#include "Render/Loading.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
@@ -28,7 +28,7 @@ namespace {
 constexpr int kSecondPortShift = 16;
 constexpr unsigned kByteBits = 8;
 // The loading picture's 16-bit pixels, stored as words.
-using LoadingPixels = decltype(Render_loadingScreenPixels);
+using LoadingPixels = decltype(VS::Render::loadingScreenPixels);
 constexpr std::size_t kPixelBytes = sizeof(std::uint16_t);
 constexpr std::size_t kLoadingPixelCount = sizeof(LoadingPixels) / kPixelBytes;
 
@@ -38,13 +38,11 @@ RECT ToRect(const ScreenRect& area) {
   return rect;
 }
 
-std::size_t CurrentBuffer() {
-  return static_cast<std::size_t>(Render_frameBuf & 1);
-}
+std::size_t CurrentBuffer() { return static_cast<std::size_t>(frameBuf & 1); }
 
 void PresentEnvironments(std::size_t index) {
-  PutDispEnv(&Render_legacyDisplayEnvironments[index]);
-  PutDrawEnv(&Render_legacyDrawEnvironments[index]);
+  PutDispEnv(&legacyDisplayEnvironments[index]);
+  PutDrawEnv(&legacyDrawEnvironments[index]);
 }
 
 class LiveDisplayDevice final : public DisplayDevice {
@@ -58,7 +56,7 @@ class LiveDisplayDevice final : public DisplayDevice {
   void ApplyFieldLayout(const FieldDisplayLayout& layout) override {
     for (std::size_t index = 0; index < kFrameBufferCount; ++index) {
       const ScreenRect& draw = layout.draw_areas[index];
-      DRAWENV& draw_env = Render_legacyDrawEnvironments[index];
+      DRAWENV& draw_env = legacyDrawEnvironments[index];
       SetDefDrawEnv(&draw_env, draw.x, draw.y, draw.width, draw.height);
       draw_env.dtd = 1;
       draw_env.dfe = 0;
@@ -66,19 +64,19 @@ class LiveDisplayDevice final : public DisplayDevice {
       setRGB0(&draw_env, layout.clear.red, layout.clear.green,
               layout.clear.blue);
       const ScreenRect& shown = layout.display_areas[index];
-      DISPENV& display_env = Render_legacyDisplayEnvironments[index];
+      DISPENV& display_env = legacyDisplayEnvironments[index];
       SetDefDispEnv(&display_env, shown.x, shown.y, shown.width, shown.height);
       display_env.screen = ToRect(layout.screen);
     }
-    Render_legacyViewportLeft = layout.viewport.x;
-    Render_legacyViewportTop = layout.viewport.y;
-    Render_viewportWidth = layout.viewport.width;
-    Render_viewportHeight = static_cast<u_short>(layout.viewport.height);
+    legacyViewportLeft = layout.viewport.x;
+    legacyViewportTop = layout.viewport.y;
+    viewportWidth = layout.viewport.width;
+    viewportHeight = static_cast<u_short>(layout.viewport.height);
     PresentEnvironments(CurrentBuffer());
   }
   void ShowDisplayArea(const ScreenRect& area,
                        const ScreenRect& screen) override {
-    DISPENV& display_env = Render_legacyDisplayEnvironments[0];
+    DISPENV& display_env = legacyDisplayEnvironments[0];
     SetDefDispEnv(&display_env, area.x, area.y, area.width, area.height);
     display_env.screen = ToRect(screen);
     PutDispEnv(&display_env);
@@ -105,8 +103,8 @@ class LiveFieldFrame final : public FieldFrameHost {
   explicit LiveFieldFrame(u_long* ordering_table)
       : ordering_table_(ordering_table) {}
 
-  [[nodiscard]] int FrameBuffer() const override { return Render_frameBuf; }
-  void SelectFrameBuffer(int index) override { Render_frameBuf = index; }
+  [[nodiscard]] int FrameBuffer() const override { return frameBuf; }
+  void SelectFrameBuffer(int index) override { frameBuf = index; }
   void AdvanceRandom() override { VS::Core::NextLiveRandomBounded(0); }
   void SetGeometryOffset(std::int32_t x, std::int32_t y) override {
     Core_Gte_SetGeomOffset(x, y);
@@ -118,9 +116,9 @@ class LiveFieldFrame final : public FieldFrameHost {
     return VS::State::UpdateLivePlayTimeAndLoading(ticks);
   }
   [[nodiscard]] bool FrameStepPaused() const override {
-    return Render_isFrameStepPaused != 0;
+    return isFrameStepPaused != 0;
   }
-  void ToggleFrameStepPause() override { Render_isFrameStepPaused ^= 1; }
+  void ToggleFrameStepPause() override { isFrameStepPaused ^= 1; }
   // The original polled both pads inline (146C.c:5998-6008).
   std::uint32_t PollSecondControllerPressed() override {
     const auto first =
@@ -154,12 +152,11 @@ class LiveFieldFrame final : public FieldFrameHost {
   u_long* ordering_table_;
 };
 
-std::int32_t HeaderSize(char low, char high) {
+std::int32_t HeaderSize(std::uint8_t low, std::uint8_t high) {
   // Read unsigned; the original's signed chars agree for the shipped
   // 126x20 image.
-  return static_cast<std::int32_t>(
-      static_cast<unsigned char>(low) |
-      (static_cast<unsigned>(static_cast<unsigned char>(high)) << kByteBits));
+  return static_cast<std::int32_t>(static_cast<unsigned>(low) |
+                                   (static_cast<unsigned>(high) << kByteBits));
 }
 }  // namespace
 
@@ -204,15 +201,13 @@ void HideLiveDisplay() {
 }
 
 void ShowLiveLoadingScreen() {
-  static_assert(sizeof(Render_loadingScreenPixels) % sizeof(std::uint16_t) ==
-                0);
+  static_assert(sizeof(loadingScreenPixels) % sizeof(std::uint16_t) == 0);
   std::array<std::uint16_t, kLoadingPixelCount> pixels{};
-  std::memcpy(pixels.data(), Render_loadingScreenPixels,
-              sizeof(Render_loadingScreenPixels));
-  const Render_LegacyImageSize& header = Render_legacyLoadingImageHeader;
+  std::memcpy(pixels.data(), loadingScreenPixels, sizeof(loadingScreenPixels));
+  const LegacyImageSize& header = legacyLoadingImageHeader;
   const LoadingImage image{
-      .width = HeaderSize(header.widthLow, header.widthHigh),
-      .height = HeaderSize(header.heightLow, header.heightHigh),
+      .width = HeaderSize(header.width_low, header.width_high),
+      .height = HeaderSize(header.height_low, header.height_high),
       .pixels = pixels,
   };
   LiveDisplayDevice device;

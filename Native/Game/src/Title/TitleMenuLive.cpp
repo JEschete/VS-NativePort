@@ -34,7 +34,7 @@
 #include "Menu/Sounds.hpp"
 #include "Movie/Intro/Playback.hpp"
 #include "Movie/IntroPlayerLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
@@ -299,8 +299,8 @@ class LiveHost final : public Host {
   }
   void ApplyGameDisplay(const GameDisplayLayout& layout) override {
     for (std::size_t buffer = 0; buffer < Render::kFrameBufferCount; ++buffer) {
-      DRAWENV& draw = Render_legacyDrawEnvironments[buffer];
-      DISPENV& display = Render_legacyDisplayEnvironments[buffer];
+      DRAWENV& draw = VS::Render::legacyDrawEnvironments[buffer];
+      DISPENV& display = VS::Render::legacyDisplayEnvironments[buffer];
       const Render::ScreenRect& draw_area = layout.draw_areas.at(buffer);
       const Render::ScreenRect& display_area = layout.display_areas.at(buffer);
       SetDefDrawEnv(&draw, draw_area.x, draw_area.y, draw_area.width,
@@ -314,12 +314,12 @@ class LiveHost final : public Host {
               layout.background.blue);
     }
   }
-  int FrameBuffer() override { return Render_frameBuf; }
-  void SetFrameBuffer(int buffer) override { Render_frameBuf = buffer; }
+  int FrameBuffer() override { return VS::Render::frameBuf; }
+  void SetFrameBuffer(int buffer) override { VS::Render::frameBuf = buffer; }
   void ShowFrameBuffer(int buffer) override {
     const std::size_t index = BufferIndex(buffer);
-    PutDispEnv(&Render_legacyDisplayEnvironments[index]);
-    PutDrawEnv(&Render_legacyDrawEnvironments[index]);
+    PutDispEnv(&VS::Render::legacyDisplayEnvironments[index]);
+    PutDrawEnv(&VS::Render::legacyDrawEnvironments[index]);
   }
   // _renderScreen's caller passed its ordering table; the live title has
   // none (PresentGameFrame has no live caller).

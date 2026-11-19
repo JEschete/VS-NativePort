@@ -15,7 +15,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 
 namespace {
 namespace results = VS::Menu::Results;
@@ -127,14 +127,14 @@ void CheckAbandonedFrame() {
   CHECK_FALSE(render::HasLiveFramebufferEffectPackets());
   CHECK(render::LiveFramebufferEffect().phase ==
         render::FramebufferEffectPhase::kOff);
-  CHECK(Render_legacyCurrentOrderingTable == nullptr);
-  CHECK(Render_frameScratch.orderingTable == nullptr);
-  CHECK(Render_frameScratch.overlayOrderingTable == nullptr);
-  CHECK(Render_frameScratch.primitiveCursor == nullptr);
-  CHECK(std::ranges::all_of(Render_legacyOrderingTables, [](const void* table) {
-    return table == nullptr;
-  }));
-  CHECK(std::ranges::all_of(Render_legacyPrimitiveBuffers,
+  CHECK(VS::Render::legacyCurrentOrderingTable == nullptr);
+  CHECK(VS::Render::FrameScratchpad().ordering_table == nullptr);
+  CHECK(VS::Render::FrameScratchpad().overlay_ordering_table == nullptr);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == nullptr);
+  CHECK(
+      std::ranges::all_of(VS::Render::legacyOrderingTables,
+                          [](const void* table) { return table == nullptr; }));
+  CHECK(std::ranges::all_of(VS::Render::legacyPrimitiveBuffers,
                             [](const void* data) { return data == nullptr; }));
 }
 
@@ -162,15 +162,16 @@ void InitializeThroughModule(Asset asset, tests::Fixture& fixture) {
   }
 }
 
-void CheckFrameBindings(const Render_FrameScratch& before,
+void CheckFrameBindings(const VS::Render::FrameScratch& before,
                         std::span<void* const> tables,
                         std::span<void* const> buffers) {
-  CHECK(Render_frameScratch.orderingTable == before.orderingTable);
-  CHECK(Render_frameScratch.overlayOrderingTable ==
-        before.overlayOrderingTable);
-  CHECK(Render_frameScratch.primitiveCursor == before.primitiveCursor);
-  CHECK(std::ranges::equal(Render_legacyOrderingTables, tables));
-  CHECK(std::ranges::equal(Render_legacyPrimitiveBuffers, buffers));
+  CHECK(VS::Render::FrameScratchpad().ordering_table == before.ordering_table);
+  CHECK(VS::Render::FrameScratchpad().overlay_ordering_table ==
+        before.overlay_ordering_table);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        before.primitive_cursor);
+  CHECK(std::ranges::equal(VS::Render::legacyOrderingTables, tables));
+  CHECK(std::ranges::equal(VS::Render::legacyPrimitiveBuffers, buffers));
 }
 }  // namespace
 
@@ -344,9 +345,9 @@ TEST_CASE("Frame abandonment refuses an unavailable heap without losing owners",
   tests::Fixture fixture;
   BeginCountdown(fixture);
   const auto effect = render::LiveFramebufferEffect();
-  const auto frame = Render_frameScratch;
-  const auto tables = std::to_array(Render_legacyOrderingTables);
-  const auto buffers = std::to_array(Render_legacyPrimitiveBuffers);
+  const auto frame = VS::Render::FrameScratchpad();
+  const auto tables = std::to_array(VS::Render::legacyOrderingTables);
+  const auto buffers = std::to_array(VS::Render::legacyPrimitiveBuffers);
   const auto refusals = render::RefusedLiveScreenOverlayCount();
   {
     const memory::ScopedLiveGameHeap unavailable(std::span<std::byte>{});

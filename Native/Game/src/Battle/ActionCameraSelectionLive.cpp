@@ -20,7 +20,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
 namespace VS::Battle {
@@ -114,9 +114,9 @@ class LiveCamera final : public ActionCameraWorld {
   void SetDistance(std::int32_t distance) override {
     VS::Field::sphericalCamera.values.distance = distance;
   }
-  std::int32_t Projection() override { return Render_projectionDistance; }
+  std::int32_t Projection() override { return VS::Render::projectionDistance; }
   void SetProjection(std::int32_t projection) override {
-    Render_projectionDistance = projection;
+    VS::Render::projectionDistance = projection;
   }
   void ApplyProjection(std::int32_t projection) override {
     Render::SetLiveCameraProjectionDistance(projection);

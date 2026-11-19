@@ -38,11 +38,11 @@
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/ManualTopics.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 // Contracts of the manual screen's lifecycle and help pages (MENUE.PRG
 // 494.c:132-448): the unused menu wrappers, the screen's open, wait, show and
@@ -893,8 +893,8 @@ struct LiveManualFixture {
   u_long* saved_assets = Menu_Manual_helpAssets;
   Content_DiscQueueSlot* saved_text_request = Menu_Manual_helpTextCdQueue;
   Content_DiscQueueSlot* saved_assets_request = Menu_Manual_helpAssetsCdQueue;
-  void* saved_primitives = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
+  void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
   Menu_Framework_MenuControlState saved_menu_state =
       VS::Menu::Framework::menuState;
   std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
@@ -903,7 +903,7 @@ struct LiveManualFixture {
   Menu_TextBoxState saved_information_box =
       *VS::Menu::LiveTextBox(kInformationBox);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Render_FrameScratch saved_frame = Render_frameScratch;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   std::array<Content_DiscQueueSlot, 32> saved_requests =
       std::to_array(Content_discRequestSlots);
   std::array<Menu_Framework_MenuRow, 40> rows{};
@@ -921,10 +921,10 @@ struct LiveManualFixture {
   int saved_load_counter = Menu_Manual_helpPageLoadCounter;
   int saved_topic_step = Menu_Manual_topMenuState;
   int saved_topic_row = Menu_Manual_selectedRow;
-  int saved_frame_index = Render_frameBuf;
+  int saved_frame_index = VS::Render::frameBuf;
   ScreenState saved_screen = manual::LiveManualScreenState();
   State_Settings saved_settings = VS::Input::settings;
-  DRAWENV saved_back_env = Render_legacyDrawEnvironments[1];
+  DRAWENV saved_back_env = VS::Render::legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
   Field_ManualDisplayState saved_display = Field_manualDisplayState;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
@@ -955,11 +955,12 @@ struct LiveManualFixture {
     VS::Render::InitializeLiveTexturePages();
     manual::ResetLiveManualScreenStatics();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kFrameSlotBase;
-    Render_frameScratch.primitiveCursor = storage.data();
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kFrameSlotBase;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
   }
   LiveManualFixture(const LiveManualFixture&) = delete;
   LiveManualFixture& operator=(const LiveManualFixture&) = delete;
@@ -999,11 +1000,11 @@ struct LiveManualFixture {
     *VS::Menu::LiveTextBox(kInformationBox) = saved_information_box;
     VS::Render::LiveTexturePages() = saved_pages;
     manual::LiveManualScreenState() = saved_screen;
-    Render_frameScratch = saved_frame;
-    Render_legacyDrawEnvironments[1] = saved_back_env;
-    Render_legacyPrimitiveBuffers[0] = saved_primitives;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_frame_index;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyDrawEnvironments[1] = saved_back_env;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_primitives;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_frame_index;
   }
 
   // A game heap payload holding `bytes`.
@@ -1349,7 +1350,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages refuses drawing without a frame table",
   LiveManualFixture fixture;
   Menu_Manual_helpText = LiveManualFixture::Payload<int>(HelpText(3));
   Menu_Manual_showMenuState = manual::kHelpShowPage;
-  Render_legacyOrderingTables[0] = nullptr;
+  VS::Render::legacyOrderingTables[0] = nullptr;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
   // Two button icons and five texts.

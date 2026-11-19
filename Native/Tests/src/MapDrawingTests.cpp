@@ -23,12 +23,12 @@
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.h"
 
 namespace map = VS::Menu::map;
@@ -853,15 +853,15 @@ class LiveMap {
                 sizeof(saved_flags_));
     std::memcpy(saved_bounds_.data(), Menu_Map_compassBounds,
                 sizeof(saved_bounds_));
-    std::memcpy(saved_trims_.data(), Render_compactGlyphLeftTrim,
+    std::memcpy(saved_trims_.data(), VS::Render::compactGlyphLeftTrim,
                 sizeof(saved_trims_));
-    std::memcpy(saved_widths_.data(), Render_compactGlyphWidths,
+    std::memcpy(saved_widths_.data(), VS::Render::compactGlyphWidths,
                 sizeof(saved_widths_));
-    std::memcpy(saved_indices_.data(), Render_compactGlyphIndices,
+    std::memcpy(saved_indices_.data(), VS::Render::compactGlyphIndices,
                 sizeof(saved_indices_));
-    std::memset(Render_compactGlyphLeftTrim, 0, sizeof(saved_trims_));
-    std::memset(Render_compactGlyphWidths, 0, sizeof(saved_widths_));
-    std::memset(Render_compactGlyphIndices, 0, sizeof(saved_indices_));
+    std::memset(VS::Render::compactGlyphLeftTrim, 0, sizeof(saved_trims_));
+    std::memset(VS::Render::compactGlyphWidths, 0, sizeof(saved_widths_));
+    std::memset(VS::Render::compactGlyphIndices, 0, sizeof(saved_indices_));
     if (Menu_TextBoxState* box = VS::Menu::LiveTextBox(0); box != nullptr) {
       saved_box_ = *box;
     }
@@ -870,9 +870,9 @@ class LiveMap {
     Core_Gte_SetGeomOffset(160, 112);
     const VECTOR translation{0, 0, 512, 0};
     Core_Gte_SetTransVector(&translation);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = primitives.data();
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
     Reset();
     Menu_Map_currentRoomIndex = 0;
     Menu_Map_isCurrentScene = 0;
@@ -893,11 +893,11 @@ class LiveMap {
                 sizeof(saved_flags_));
     std::memcpy(Menu_Map_compassBounds, saved_bounds_.data(),
                 sizeof(saved_bounds_));
-    std::memcpy(Render_compactGlyphLeftTrim, saved_trims_.data(),
+    std::memcpy(VS::Render::compactGlyphLeftTrim, saved_trims_.data(),
                 sizeof(saved_trims_));
-    std::memcpy(Render_compactGlyphWidths, saved_widths_.data(),
+    std::memcpy(VS::Render::compactGlyphWidths, saved_widths_.data(),
                 sizeof(saved_widths_));
-    std::memcpy(Render_compactGlyphIndices, saved_indices_.data(),
+    std::memcpy(VS::Render::compactGlyphIndices, saved_indices_.data(),
                 sizeof(saved_indices_));
     if (Menu_TextBoxState* box = VS::Menu::LiveTextBox(0); box != nullptr) {
       *box = saved_box_;
@@ -911,14 +911,14 @@ class LiveMap {
   void Reset() {
     std::ranges::fill(primitives, 0);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameScratch.primitiveCursor = primitives.data();
-    Render_frameScratch.orderingTable = ordering.data() + kSceneHead;
-    Render_frameScratch.overlayOrderingTable = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + kSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data();
   }
 
   [[nodiscard]] std::size_t UsedWords() const {
     return static_cast<std::size_t>(
-        static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor) -
         primitives.data());
   }
 
@@ -952,10 +952,10 @@ class LiveMap {
   }
 
  private:
-  Restore<Render_FrameScratch> scratch_{Render_frameScratch};
-  Restore<int> frame_{Render_frameBuf};
-  Restore<void*> ordering_table_{Render_legacyOrderingTables[0]};
-  Restore<void*> primitive_buffer_{Render_legacyPrimitiveBuffers[0]};
+  Restore<VS::Render::FrameScratch> scratch_{VS::Render::FrameScratchpad()};
+  Restore<int> frame_{VS::Render::frameBuf};
+  Restore<void*> ordering_table_{VS::Render::legacyOrderingTables[0]};
+  Restore<void*> primitive_buffer_{VS::Render::legacyPrimitiveBuffers[0]};
   Restore<int> room_{Menu_Map_currentRoomIndex};
   Restore<int> scene_room_{Menu_Map_isCurrentScene};
   Restore<int> frames_{Menu_Map_menuFramesCounter};
@@ -972,9 +972,9 @@ class LiveMap {
   Restore<u_int> minimap_length_{Field_roomData.header.minimapSceneLength};
   State_StateFlags saved_flags_{};
   std::array<Menu_Map_CompassBound, 4> saved_bounds_{};
-  std::array<u_char, sizeof(Render_compactGlyphLeftTrim)> saved_trims_{};
-  std::array<u_char, sizeof(Render_compactGlyphWidths)> saved_widths_{};
-  std::array<u_char, sizeof(Render_compactGlyphIndices)> saved_indices_{};
+  std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
+  std::array<u_char, sizeof(VS::Render::compactGlyphWidths)> saved_widths_{};
+  std::array<u_char, sizeof(VS::Render::compactGlyphIndices)> saved_indices_{};
   Menu_TextBoxState saved_box_{};
 };
 
@@ -1296,11 +1296,12 @@ TEST_CASE("Live visited rooms draw centred and clear the label queue",
   Menu_Map_geomOffsetX = -20;
   Menu_Map_geomOffsetY = 8;
   Menu_Map_mapLabelCount = 5;
-  const Render_ScreenOffset before =
+  const VS::Render::ScreenOffset before =
       VS::Render::GetLiveProjectionScreenOffset();
   map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
   CHECK(Menu_Map_mapLabelCount == 0);
-  const Render_ScreenOffset after = VS::Render::GetLiveProjectionScreenOffset();
+  const VS::Render::ScreenOffset after =
+      VS::Render::GetLiveProjectionScreenOffset();
   CHECK(after.x == before.x);
   CHECK(after.y == before.y);
   if (visited == 0) {

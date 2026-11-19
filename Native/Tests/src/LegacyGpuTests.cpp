@@ -16,13 +16,12 @@
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Render/LibGpu.h"
 #include "Render/Device.hpp"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
-
-extern void* Render_legacyPrimitiveBuffers[2];
-extern int Render_frameBuf;
 
 namespace {
 
@@ -186,17 +185,17 @@ TEST_CASE("Room transforms use native camera layout and camera-facing groups",
     unsigned count = 2;
     std::array<RoomGroupRecord, 2> groups{};
   } geometry;
-  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+  auto* frame = static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
-  frame->viewMatrix = {};
+  frame->view_matrix = {};
   auto first = GroupOf(geometry, 0);
   auto second = GroupOf(geometry, 1);
   for (int axis = 0; axis < 3; ++axis) {
-    frame->viewMatrix.m[axis][axis] = 4096;
-    frame->viewMatrix.t[axis] = 10 * (axis + 1);
+    frame->view_matrix.m[axis][axis] = 4096;
+    frame->view_matrix.t[axis] = 10 * (axis + 1);
     first.bounds[axis][0] = static_cast<std::int16_t>(100 * (axis + 1));
   }
-  frame->camera.farClip = 4096;
+  frame->camera.far_clip = 4096;
   frame->camera.angles.vz = 1024;
   second.flags = 0x400;
   StoreGroup(geometry, 0, first);
@@ -213,9 +212,9 @@ TEST_CASE("Room transforms use native camera layout and camera-facing groups",
   CHECK(second.view.rotation.m[2][2] == 4096);
   CHECK_FALSE(VS::Render::UpdateLiveRoomGroupTransforms(&geometry,
                                                         sizeof geometry - 1));
-  frame->camera.farClip = 8192;
+  frame->camera.far_clip = 8192;
   for (int axis = 0; axis < 3; ++axis) {
-    frame->viewMatrix.m[axis][axis] = 8192;
+    frame->view_matrix.m[axis][axis] = 8192;
   }
   VECTOR position{100, 200, 300, 0}, angles{};
   MATRIX output{};
@@ -270,15 +269,15 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   std::vector<unsigned char> memory(0x20000 + 16, 0xA5);
   auto* buffer = memory.data() + 8;
   std::array<u_long, 2048> ordering{};
-  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+  auto* frame = static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
-  void* savedBuffer = Render_legacyPrimitiveBuffers[0];
-  const int savedFrame = Render_frameBuf;
-  Render_legacyPrimitiveBuffers[0] = buffer;
-  Render_frameBuf = 0;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  const int saved_frame = VS::Render::frameBuf;
+  VS::Render::legacyPrimitiveBuffers[0] = buffer;
+  VS::Render::frameBuf = 0;
   *frame = {};
-  frame->primitiveCursor = buffer;
-  frame->orderingTable = ordering.data();
+  frame->primitive_cursor = buffer;
+  frame->ordering_table = ordering.data();
   Core_Gte_Reset();
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
@@ -290,14 +289,14 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   const auto saved_mode = VS::Field::roomGeometryDrawMode;
   const auto saved_start = Field_roomPrimitiveRangeStart;
   const auto saved_end = Field_roomPrimitiveRangeEnd;
-  const auto saved_field_view = frame->viewMatrix;
+  const auto saved_field_view = frame->view_matrix;
   for (int axis = 0; axis < 3; ++axis) {
-    frame->viewMatrix.m[axis][axis] = 4096;
+    frame->view_matrix.m[axis][axis] = 4096;
   }
-  frame->viewMatrix.t[2] = 1024;
+  frame->view_matrix.t[2] = 1024;
   Field_roomData.header.geometryLength = sizeof geometry;
   VS::Field::roomGeometryDrawMode = 0;
-  Render_ColorCode tint{1, 2, 3, 0};
+  VS::Render::ColorCode tint{1, 2, 3, 0};
   VS::Field::LiveSetRoomTint(&tint, 0);
   StoreGroup(geometry, 0, group);
   VS::Field::LiveDrawRoomGeometry(&geometry);
@@ -312,12 +311,12 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   VS::Field::roomGeometryDrawMode = saved_mode;
   Field_roomPrimitiveRangeStart = saved_start;
   Field_roomPrimitiveRangeEnd = saved_end;
-  frame->viewMatrix = saved_field_view;
+  frame->view_matrix = saved_field_view;
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-  frame->primitiveCursor = buffer;
+  frame->primitive_cursor = buffer;
   draw(0);
   auto* triangle = reinterpret_cast<POLY_GT3*>(buffer);
-  CHECK(frame->primitiveCursor == buffer + sizeof(POLY_GT3));
+  CHECK(frame->primitive_cursor == buffer + sizeof(POLY_GT3));
   CHECK(nextPrim(&ordering[256]) == triangle);
   CHECK(triangle->code == 0x34);
   CHECK(triangle->u0 == 10);
@@ -329,7 +328,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   for (unsigned flags : {0u, 0x800u}) {
     group.flags = flags;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    frame->primitiveCursor = buffer;
+    frame->primitive_cursor = buffer;
     draw(0);
     const std::array<std::int16_t, 6> coordinates{triangle->x0, triangle->y0,
                                                   triangle->x1, triangle->y1,
@@ -346,41 +345,41 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
         0x800u |
         (static_cast<unsigned>(static_cast<std::uint16_t>(bias)) << 16);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    frame->primitiveCursor = buffer;
+    frame->primitive_cursor = buffer;
     draw(0);
     CHECK(triangle->u2 == (bias < 0 ? 50 : 25));
     CHECK(triangle->tpage == (bias < 0 ? 0x15 : 0x14));
   }
   group.flags = 0x800;
-  frame->primitiveCursor = buffer;
+  frame->primitive_cursor = buffer;
   VS::Render::SetRoomTextureLodDepth(room_clip, 128);
   draw(0);
   CHECK(triangle->u2 == 25);
   CHECK(triangle->v2 == 30);
   CHECK(triangle->tpage == 0x14);
-  frame->primitiveCursor = buffer;
+  frame->primitive_cursor = buffer;
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
   group.flags |= 0x6000;
   draw(1);
-  CHECK(frame->primitiveCursor == buffer + 7 * sizeof(POLY_GT3));
+  CHECK(frame->primitive_cursor == buffer + 7 * sizeof(POLY_GT3));
   CHECK(triangle->u1 == 20);
   CHECK(triangle->v1 == 30);
   CHECK(triangle->u2 == 30);
   CHECK(triangle->v2 == 40);
   group.flags &= ~0x6000u;
-  frame->primitiveCursor = buffer;
+  frame->primitive_cursor = buffer;
   geometry.triangles = 0;
   geometry.quads = 1;
   geometry.polygon[15] = 0x3D;
   draw(0);
   auto* quad = reinterpret_cast<POLY_GT4*>(buffer);
-  CHECK(frame->primitiveCursor == buffer + sizeof(POLY_GT4));
+  CHECK(frame->primitive_cursor == buffer + sizeof(POLY_GT4));
   CHECK(quad->u3 == 70);
   CHECK(quad->v3 == 80);
-  frame->primitiveCursor = buffer;
+  frame->primitive_cursor = buffer;
   group.flags |= 0x6000;
   draw(1);
-  CHECK(frame->primitiveCursor ==
+  CHECK(frame->primitive_cursor ==
         buffer + 4 * sizeof(POLY_GT4) + 4 * sizeof(POLY_GT3));
   CHECK(quad->u1 == 20);
   CHECK(quad->v1 == 30);
@@ -388,9 +387,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   CHECK(quad->v2 == 40);
   CHECK(quad->u3 == 40);
   CHECK(quad->v3 == 50);
-  frame->primitiveCursor = buffer + 0x20000 - 4;
+  frame->primitive_cursor = buffer + 0x20000 - 4;
   draw(0);
-  CHECK(frame->primitiveCursor == buffer + 0x20000 - 4);
+  CHECK(frame->primitive_cursor == buffer + 0x20000 - 4);
   CHECK(memory.front() == 0xA5);
   CHECK(memory.back() == 0xA5);
   struct FarDepthCase {
@@ -418,20 +417,20 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
             (static_cast<unsigned>(static_cast<std::uint16_t>(bias)) << 16);
         for (const auto& cutoff : kFarDepths) {
           ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-          frame->primitiveCursor = buffer;
+          frame->primitive_cursor = buffer;
           VS::Render::SetRoomPolygonFarClip(room_clip, cutoff.requested);
           draw(mode);
           const std::size_t bytes =
               256 + bias < cutoff.signed_halfword ? emitted : 0;
-          CHECK(frame->primitiveCursor == buffer + bytes);
+          CHECK(frame->primitive_cursor == buffer + bytes);
         }
       }
       group.flags = 0x800u | (mode ? 0x6000u : 0) | (2047u << 16);
       ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-      frame->primitiveCursor = buffer;
+      frame->primitive_cursor = buffer;
       VS::Render::SetRoomPolygonFarClip(room_clip, 32767);
       draw(mode);
-      CHECK(frame->primitiveCursor == buffer);
+      CHECK(frame->primitive_cursor == buffer);
     }
   }
   VS::Render::SetRoomPolygonFarClip(room_clip, 2047);
@@ -443,9 +442,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     for (int mode : {0, 1}) {
       group.flags = 0x800u | (mode ? 0x6000u : 0);
       ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-      frame->primitiveCursor = buffer;
+      frame->primitive_cursor = buffer;
       draw(mode);
-      CHECK(frame->primitiveCursor == buffer);
+      CHECK(frame->primitive_cursor == buffer);
     }
   }
   group.view.translation.y = 0;
@@ -486,15 +485,15 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
         VS::Render::SetRoomPolygonScreenBounds(
             room_clip, {clip.left, clip.top, clip.right, clip.bottom});
         ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-        frame->primitiveCursor = buffer;
+        frame->primitive_cursor = buffer;
         draw(mode);
         if (clip.expected == ClipResult::kFull) {
-          CHECK(frame->primitiveCursor == buffer + full_bytes);
+          CHECK(frame->primitive_cursor == buffer + full_bytes);
         } else if (clip.expected == ClipResult::kHidden) {
-          CHECK(frame->primitiveCursor == buffer);
+          CHECK(frame->primitive_cursor == buffer);
         } else {
           const auto* cursor =
-              static_cast<unsigned char*>(frame->primitiveCursor);
+              static_cast<unsigned char*>(frame->primitive_cursor);
           CHECK(cursor > buffer);
           CHECK(cursor <= buffer + full_bytes);
         }
@@ -502,9 +501,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
       group.view.translation.y = 480;
       VS::Render::SetRoomPolygonScreenBounds(room_clip, {0, 0, 320, 240});
       ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-      frame->primitiveCursor = buffer;
+      frame->primitive_cursor = buffer;
       draw(mode);
-      CHECK(frame->primitiveCursor != buffer);
+      CHECK(frame->primitive_cursor != buffer);
       group.view.translation.y = 0;
     }
   }
@@ -512,8 +511,8 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   CHECK(memory.front() == 0xA5);
   CHECK(memory.back() == 0xA5);
   room_clip = saved_clip;
-  Render_legacyPrimitiveBuffers[0] = savedBuffer;
-  Render_frameBuf = savedFrame;
+  VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+  VS::Render::frameBuf = saved_frame;
   *frame = saved;
   Core_Gte_Reset();
 }
@@ -538,14 +537,14 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   sky.triangles[0][2] = 2;
   std::vector<unsigned char> buffer(0x20000);
   std::array<u_long, 2048> ordering{};
-  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
+  auto* frame = static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
-  void* savedBuffer = Render_legacyPrimitiveBuffers[0];
-  const int savedIndex = Render_frameBuf;
-  Render_frameBuf = 0;
-  Render_legacyPrimitiveBuffers[0] = buffer.data();
-  frame->primitiveCursor = buffer.data();
-  frame->orderingTable = ordering.data();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  const int saved_index = VS::Render::frameBuf;
+  VS::Render::frameBuf = 0;
+  VS::Render::legacyPrimitiveBuffers[0] = buffer.data();
+  frame->primitive_cursor = buffer.data();
+  frame->ordering_table = ordering.data();
   ClearOTagR(ordering.data(), 2048);
   Core_Gte_Reset();
   static_assert(sizeof sky == VS::Render::kSkyDomeBytes);
@@ -554,7 +553,7 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky - 1) ==
         VS::Render::RoomDrawStatus::kInvalidGeometry);
   auto* triangle = reinterpret_cast<POLY_G3*>(buffer.data());
-  CHECK(frame->primitiveCursor == buffer.data() + sizeof(POLY_G3));
+  CHECK(frame->primitive_cursor == buffer.data() + sizeof(POLY_G3));
   CHECK(nextPrim(&ordering[2047]) == triangle);
   CHECK(triangle->x0 == 140);
   CHECK(triangle->y0 == 100);
@@ -562,8 +561,8 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   CHECK(triangle->g1 == 255);
   CHECK(triangle->b2 == 255);
   *frame = saved;
-  Render_legacyPrimitiveBuffers[0] = savedBuffer;
-  Render_frameBuf = savedIndex;
+  VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+  VS::Render::frameBuf = saved_index;
 }
 
 TEST_CASE("GPU frame byte counts reject invalid and overflowing dimensions",

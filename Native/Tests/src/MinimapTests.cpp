@@ -26,11 +26,11 @@
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Room.h"
 #include "Field/Transitions.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.h"
 
 namespace {
@@ -142,10 +142,10 @@ struct RecordingEntranceDoorHost final : VS::Field::EntranceDoorHost {
 };
 
 struct RenderFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  std::array<void*, 2> saved_buffers{Render_legacyPrimitiveBuffers[0],
-                                     Render_legacyPrimitiveBuffers[1]};
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  std::array<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers[0],
+                                     VS::Render::legacyPrimitiveBuffers[1]};
+  int saved_framebuffer = VS::Render::frameBuf;
   u_short saved_ticks = Field_roomAnimationTicks;
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   std::vector<u_long> packets =
@@ -156,10 +156,10 @@ struct RenderFixture {
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
     Core_Gte_SetGeomOffset(264, 196);
-    Render_frameBuf = framebuffer;
-    Render_legacyPrimitiveBuffers[framebuffer] = packets.data();
-    Render_frameScratch.primitiveCursor = packets.data();
-    Render_frameScratch.orderingTable = ordering.data();
+    VS::Render::frameBuf = framebuffer;
+    VS::Render::legacyPrimitiveBuffers[framebuffer] = packets.data();
+    VS::Render::FrameScratchpad().primitive_cursor = packets.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
     Field_roomAnimationTicks = 0;
     std::memset(&Audio_Seq_unusedStateFlags, 0,
                 sizeof Audio_Seq_unusedStateFlags);
@@ -168,10 +168,10 @@ struct RenderFixture {
   }
 
   ~RenderFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffers[0];
-    Render_legacyPrimitiveBuffers[1] = saved_buffers[1];
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffers[0];
+    VS::Render::legacyPrimitiveBuffers[1] = saved_buffers[1];
+    VS::Render::frameBuf = saved_framebuffer;
     Field_roomAnimationTicks = saved_ticks;
     Audio_Seq_unusedStateFlags = saved_flags;
     Core_Gte_Reset();
@@ -603,7 +603,7 @@ TEST_CASE("Minimap capacity errors do not overwrite packets or ordering links",
   auto bytes = Scene();
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
                                       bytes.size() * sizeof(u_long));
-  Render_frameScratch.primitiveCursor =
+  VS::Render::FrameScratchpad().primitive_cursor =
       fixture.packets.data() + 0x20000 / 4 - 1;
   const auto saved = fixture.ordering;
   CHECK_THROWS_AS(VS::Field::DrawLiveMinimapScene(
@@ -616,10 +616,11 @@ TEST_CASE("Minimap capacity errors do not overwrite packets or ordering links",
 TEST_CASE(
     "Projection offsets restore the original center for independent draws",
     "[render][minimap][projection]") {
-  const Render_ScreenOffset original{160, 112};
-  const Render_ScreenOffset map{264, 196};
+  const VS::Render::ScreenOffset original{160, 112};
+  const VS::Render::ScreenOffset map{264, 196};
   VS::Render::SetLiveProjectionScreenOffset(original);
-  Render_ScreenOffset observed = VS::Render::GetLiveProjectionScreenOffset();
+  VS::Render::ScreenOffset observed =
+      VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == 160);
   CHECK(observed.y == 112);
   VS::Render::SetLiveProjectionScreenOffset(map);
@@ -636,9 +637,9 @@ TEST_CASE(
 TEST_CASE("Projection centers preserve the original high-halfword semantics",
           "[render][minimap][projection]") {
   const int x = GENERATE(-32768, -1, 0, 32767, 65535);
-  const Render_ScreenOffset offset{x, 1 - x};
+  const VS::Render::ScreenOffset offset{x, 1 - x};
   VS::Render::SetLiveProjectionScreenOffset(offset);
-  const Render_ScreenOffset observed =
+  const VS::Render::ScreenOffset observed =
       VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == static_cast<u_short>(offset.x));
   CHECK(observed.y == static_cast<u_short>(offset.y));

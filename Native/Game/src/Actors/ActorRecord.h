@@ -10,7 +10,7 @@ struct Actors_CompanionOffset;
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/TextureAnimation.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 // decomp: D_800F4538_unk58 (src/BATTLE/BATTLE.PRG/3A1A0.h:31)
 struct Actors_CompanionOffset {
@@ -132,7 +132,7 @@ struct Actors_ActorRecord {
     u_char fadeRed;
     u_char reserved6F3;
     Actors_CompanionOffset companionState;
-    Render_ColorCode companionColor;
+    VS::Render::ColorCode companionColor;
     SVECTOR soundPosition;
     Actors_AnimationPose blendPose;
     Actors_AnimationPose pose;

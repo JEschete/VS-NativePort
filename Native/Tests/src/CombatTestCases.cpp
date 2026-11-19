@@ -83,10 +83,10 @@
 #include "Menu/Loot/Paging.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -1115,10 +1115,10 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
       VS::Menu::Framework::itemNames;
   decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   int saved_sound_group = Audio_nextSfxChannelGroup7E;
   decltype(Menu_Loot_lootClaimed) saved_claimed = Menu_Loot_lootClaimed;
   decltype(Menu_Loot_controlsEnabled) saved_controls =
@@ -1150,12 +1150,12 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Input::settings.information = 0;
     Menu_Loot_lootClaimed = 0;
     Menu_Loot_lootLeftEdge = 0;
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     VS::Menu::Loot::UpdateLiveLootSelection(1);
   }
@@ -1170,10 +1170,10 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Menu::Framework::itemNames = saved_names;
     Battle_stringContext = saved_string_context;
     Menu_textBoxes[7] = saved_box;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Audio_nextSfxChannelGroup7E = saved_sound_group;
     Menu_Loot_lootClaimed = saved_claimed;
     Menu_Loot_controlsEnabled = saved_controls;

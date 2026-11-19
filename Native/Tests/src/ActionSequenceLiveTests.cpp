@@ -25,7 +25,7 @@
 #include "Field/CameraLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
 namespace {
@@ -50,7 +50,7 @@ struct LiveFixture {
                                   Effects_startedTrackCount};
   decltype(Effects_actionVariant) saved_variant = Effects_actionVariant;
   int saved_busy = Effects_effectBusyFlags;
-  int saved_projection = Render_projectionDistance;
+  int saved_projection = VS::Render::projectionDistance;
   int saved_distance_alias = Battle_settledCameraDistance;
   unsigned saved_phase = Battle_actionFlowMode;
   Battle_ActionState state{};
@@ -84,7 +84,7 @@ struct LiveFixture {
     Effects_effectBusyFlags = saved_busy;
     Battle_actionFlowMode = saved_phase;
     Battle_settledCameraDistance = saved_distance_alias;
-    Render_projectionDistance = saved_projection;
+    VS::Render::projectionDistance = saved_projection;
   }
 };
 struct ProjectionReset {
@@ -200,7 +200,7 @@ TEST_CASE(
   Battle_settledCameraDistance = 12345;
   VS::Render::SetLiveCameraProjectionDistance(577);
   b::FinishLiveActionSequence();
-  CHECK(Render_projectionDistance == 513);
+  CHECK(VS::Render::projectionDistance == 513);
   CHECK(VS::Field::sphericalCamera.values.distance == -32768);
   CHECK(Battle_settledCameraDistance == 12345);
   CHECK(fixture->state.chainStep == 0);
@@ -215,6 +215,6 @@ TEST_CASE(
   VS::Render::SetLiveCameraProjectionDistance(511);
   b::FinishLiveActionSequence();
   CHECK(Battle_actionState == nullptr);
-  CHECK(Render_projectionDistance == 511);
+  CHECK(VS::Render::projectionDistance == 511);
 }
 }  // namespace

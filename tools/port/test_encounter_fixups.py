@@ -1390,9 +1390,9 @@ int func_800F9800(void) {
         self.assertEqual(core.count("LinkRoomPolygonByDepth("), 2)
         self.assertIn("ResolveRoomPolygonDepth(projected_depth, flags, clip)", core)
         self.assertIn("biased < 0", core)
-        self.assertNotIn("Render_frameScratch", core)
+        self.assertNotIn("FrameScratchpad", core)
         self.assertIn(
-            "AddPrim(static_cast<u_long*>(Render_frameScratch.orderingTable) + depth,",
+            "AddPrim(static_cast<u_long*>(FrameScratchpad().ordering_table) + depth,",
             flat(live),
         )
         relaxed = (

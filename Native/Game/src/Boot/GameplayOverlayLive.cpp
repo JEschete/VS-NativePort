@@ -34,12 +34,12 @@
 #include "Input/ControllerLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Location.h"
@@ -53,22 +53,23 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InitializeOrderingTables(
       const GameplayOverlayDefaults& defaults) override {
-    Render_legacyPrimitiveBuffers[1] = nullptr;
-    Render_legacyPrimitiveBuffers[0] = nullptr;
+    VS::Render::legacyPrimitiveBuffers[1] = nullptr;
+    VS::Render::legacyPrimitiveBuffers[0] = nullptr;
     for (std::size_t i = 0; i < 2; ++i) {
-      Render_legacyOrderingTables[i] = VS::Core::Memory::AllocateLiveFromLowEnd(
-          defaults.ordering_table_bytes);
-      if (Render_legacyOrderingTables[i] == nullptr) {
+      VS::Render::legacyOrderingTables[i] =
+          VS::Core::Memory::AllocateLiveFromLowEnd(
+              defaults.ordering_table_bytes);
+      if (VS::Render::legacyOrderingTables[i] == nullptr) {
         VS::Core::Errorf("boot",
                          "failed to allocate gameplay ordering table %u",
                          static_cast<unsigned>(i));
         std::abort();
       }
     }
-    SetDrawStp(&Render_legacyMaskBitOffPackets[0], 0);
-    SetDrawStp(&Render_legacyMaskBitOffPackets[1], 0);
-    SetDrawStp(&Render_legacyMaskBitOnPackets[0], 1);
-    SetDrawStp(&Render_legacyMaskBitOnPackets[1], 1);
+    SetDrawStp(&VS::Render::legacyMaskBitOffPackets[0], 0);
+    SetDrawStp(&VS::Render::legacyMaskBitOffPackets[1], 0);
+    SetDrawStp(&VS::Render::legacyMaskBitOnPackets[0], 1);
+    SetDrawStp(&VS::Render::legacyMaskBitOnPackets[1], 1);
   }
   void InitializePaletteAnimation() override {
     VS::Render::InitializeLiveClutAnimation();

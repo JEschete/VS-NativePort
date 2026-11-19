@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <span>
 
+#include "Render/Images.hpp"
+
 // Fading, flashing and wiping draws of one texture-atlas region (the results
 // screens' renderTextures.h). The policy turns a region, a screen position and
 // a left/right color pair into semi-transparent textured quads and hands them
@@ -27,16 +29,6 @@ inline constexpr int kRegionWipeFeather = 64;
 // While fading in, the quad uses the next palette and additive blending.
 inline constexpr std::uint16_t kRegionFadePaletteStep = 1;
 inline constexpr std::uint16_t kRegionAdditiveBlend = 0x20;
-
-// One atlas entry: its texel rectangle, texture page and palette.
-struct TextureRegion {
-  std::uint8_t u = 0;
-  std::uint8_t v = 0;
-  std::uint8_t width = 0;
-  std::uint8_t height = 0;
-  std::uint16_t texture_page = 0;
-  std::uint16_t clut = 0;
-};
 
 // A region color and the shared animation step (the left color's step drives
 // every draw).

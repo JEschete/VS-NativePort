@@ -131,7 +131,7 @@ TEST_CASE(
   b::DrawLiveAbilityTimingResult(kX, kY, &label);
   const auto baseline = frame.Traversal(f::kTextBucket);
   frame.ClearDraws();
-  Render_compactGlyphIndices[kCapitalC] = kChangedCell;
+  VS::Render::compactGlyphIndices[kCapitalC] = kChangedCell;
   b::DrawLiveAbilityTimingResult(kX, kY, &label);
   CHECK(frame.Traversal(f::kTextBucket) != baseline);
   tables.Reload();

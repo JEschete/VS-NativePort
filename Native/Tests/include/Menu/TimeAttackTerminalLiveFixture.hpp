@@ -12,7 +12,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
-#include "Render/FramebufferEffects.h"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.hpp"
 
@@ -93,10 +93,10 @@ inline std::span<std::byte> InjectLoaded(Asset asset) {
 
 inline void RestoreEffectSettings(
     const render::FramebufferEffectSettings& settings) {
-  const Render_FramebufferEffectTranslation scale{settings.scale.x,
-                                                  settings.scale.y, 0, 0};
-  const Render_FramebufferEffectTranslation offset{settings.offset.x,
-                                                   settings.offset.y, 0, 0};
+  const VS::Render::FramebufferEffectTranslation scale{settings.scale.x,
+                                                       settings.scale.y, 0, 0};
+  const VS::Render::FramebufferEffectTranslation offset{
+      settings.offset.x, settings.offset.y, 0, 0};
   const CVECTOR tint{settings.tint.red, settings.tint.green, settings.tint.blue,
                      0};
   render::SetLiveFramebufferEffectRotation(settings.roll);
@@ -146,9 +146,11 @@ class TimeAttackFixture : public game_clear_live_tests::Fixture {
   void DrainEffect() {
     render::SetLiveFramebufferEffectEnabled(0);
     BeginFrame();
-    render::DrawLiveFramebufferEffect(Render_frameScratch.orderingTable);
+    render::DrawLiveFramebufferEffect(
+        VS::Render::FrameScratchpad().ordering_table);
     BeginFrame();
-    render::DrawLiveFramebufferEffect(Render_frameScratch.orderingTable);
+    render::DrawLiveFramebufferEffect(
+        VS::Render::FrameScratchpad().ordering_table);
   }
 
   void LoadThroughTextures(Asset asset) {

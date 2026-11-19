@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
+#include <span>
 
 #include "Actors/Spawning.h"
 #include "Battle/TargetingState.h"
@@ -27,17 +29,17 @@
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxFramesLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "Render/Frame.h"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/ScaledFont.hpp"
 #include "Render/ScaledFontLive.hpp"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Settings.h"
 
 static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
@@ -81,15 +83,16 @@ int Tests_EncodedTextFormatting(void) {
 int Tests_CompactTextAndGaugeLinks(void) {
   u_long storage[64] = {0};
   u_long ordering = 0xFFFFFF;
-  const Render_FrameScratch saved = Render_frameScratch;
-  const unsigned char savedWidth = Render_compactGlyphWidths[16];
-  const unsigned char savedIndex = Render_compactGlyphIndices[33];
-  Render_compactGlyphWidths[16] = 0x60;
-  Render_compactGlyphIndices[33] = 0;
+  const VS::Render::FrameScratch saved = VS::Render::FrameScratchpad();
+  const unsigned char saved_width = VS::Render::compactGlyphWidths[16];
+  const unsigned char saved_index = VS::Render::compactGlyphIndices[33];
+  VS::Render::compactGlyphWidths[16] = 0x60;
+  VS::Render::compactGlyphIndices[33] = 0;
   // The Live queue reserves its packets inside the current frame's buffer.
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage;
-  Render_frameScratch.primitiveCursor = storage;
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = storage;
+  VS::Render::FrameScratchpad().primitive_cursor = storage;
   VS::Render::DrawLiveCompactTextColor("A", 0, 0x808080, &ordering);
   // The glyph is stored first; the draw mode stored after it leads the
   // chain, and the glyph ends it.
@@ -98,14 +101,14 @@ int Tests_CompactTextAndGaugeLinks(void) {
                (storage[0] & 0xFFFFFF) == 0xFFFFFF &&
                LegacyGpu_WalkList(&ordering) == 3;
   ordering = 0xFFFFFF;
-  Render_frameScratch.primitiveCursor = storage;
+  VS::Render::FrameScratchpad().primitive_cursor = storage;
   VS::Render::DrawLiveStatGauge(0, 32, &ordering, 0);
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
   passed = passed && nextPrim(&ordering) == storage && (ordering >> 24) == 0 &&
            LegacyGpu_WalkList(&ordering) == 2;
-  Render_compactGlyphWidths[16] = savedWidth;
-  Render_compactGlyphIndices[33] = savedIndex;
-  Render_frameScratch = saved;
+  VS::Render::compactGlyphWidths[16] = saved_width;
+  VS::Render::compactGlyphIndices[33] = saved_index;
+  VS::Render::FrameScratchpad() = saved;
   return passed;
 }
 
@@ -129,29 +132,30 @@ int Tests_ScaledDialogueGlyphs(void) {
   unsigned char* memory = static_cast<unsigned char*>(malloc(0x20010));
   if (memory == nullptr) return 0;
   memset(memory, 0xA5, 0x20010);
-  const Render_FrameScratch savedFrame = Render_frameScratch;
-  void* savedBuffer = Render_legacyPrimitiveBuffers[0];
-  const int savedFrameIndex = Render_frameBuf;
-  u_long* savedOrdering = Menu_activeTextBoxOrderingTable;
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  const int saved_frame_index = VS::Render::frameBuf;
+  u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  const char savedWidth = Render_variableFontGlyphWidths[5];
-  const char savedSpaceWidth = Render_variableFontGlyphWidths[0x8F];
-  const Menu_TextBoxState savedBox = Menu_textBoxes[2];
-  u_char* savedShape = Event_textBoxFrameStyles[0];
+  const char saved_width = VS::Render::variableFontGlyphWidths[5];
+  const char saved_space_width = VS::Render::variableFontGlyphWidths[0x8F];
+  const Menu_TextBoxState saved_box = Menu_textBoxes[2];
+  u_char* saved_shape = Event_textBoxFrameStyles[0];
   u_long ordering[34];
   ClearOTag(ordering, 34);
   Menu_activeTextBoxOrderingTable = ordering;
-  Render_legacyPrimitiveBuffers[0] = memory + 8;
-  Render_frameBuf = 0;
-  Render_frameScratch.primitiveCursor = memory + 8;
+  VS::Render::legacyPrimitiveBuffers[0] = memory + 8;
+  VS::Render::frameBuf = 0;
+  VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   VS::Render::LiveFontStyle() = {
       .table_select = 0, .palette_offset = 0, .color = 0x2C808080};
-  Render_variableFontGlyphWidths[5] = 7;
-  Render_variableFontGlyphWidths[0x8F] = 6;
+  VS::Render::variableFontGlyphWidths[5] = 7;
+  VS::Render::variableFontGlyphWidths[0x8F] = 6;
   // Box 2's glyphs go in front of the last of its four layers.
   VS::Render::LiveScaledGlyphTarget target(&ordering[11]);
   const VS::Render::ScaledFontStyle style{
-      .glyph_widths = std::as_bytes(std::span(Render_variableFontGlyphWidths)),
+      .glyph_widths =
+          std::as_bytes(std::span(VS::Render::variableFontGlyphWidths)),
       .table_select = 0,
       .palette_offset = 0,
       .color = 0x2C808080};
@@ -163,11 +167,11 @@ int Tests_ScaledDialogueGlyphs(void) {
                glyph->v0 == 0 && glyph->u3 == 72 && glyph->v3 == 12 &&
                glyph->clut == 0x37B4 && glyph->tpage == 13 &&
                nextPrim(&ordering[11]) == glyph;
-  void* end = Render_frameScratch.primitiveCursor;
+  void* end = VS::Render::FrameScratchpad().primitive_cursor;
   passed = passed &&
            VS::Render::DrawScaledFontChar(0x8F, next_x, 0, 0, 0, 1 << 16, style,
                                           target) == 23 << 16 &&
-           Render_frameScratch.primitiveCursor == end;
+           VS::Render::FrameScratchpad().primitive_cursor == end;
   // The text box drawers draw only the dialogue text boxes.
   Menu_TextBoxState& box = Menu_textBoxes[2];
   memset(&box, 0, sizeof box);
@@ -180,19 +184,20 @@ int Tests_ScaledDialogueGlyphs(void) {
   box.brightness = 128;
   box.frameX = 10;
   box.frameY = 20;
-  Render_frameScratch.primitiveCursor = memory + 8;
+  VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   VS::Render::DrawLiveScaledTextBoxText(&box, 1 << 16);
-  passed = passed && Render_frameScratch.primitiveCursor == glyph + 3 &&
+  passed = passed &&
+           VS::Render::FrameScratchpad().primitive_cursor == glyph + 3 &&
            glyph[1].x0 == 23 && glyph[2].x0 == 10 && glyph[2].y0 == 33 &&
            memory[0] == 0xA5 && memory[0x2000F] == 0xA5;
-  Render_frameScratch.primitiveCursor = memory + 8;
+  VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   box.speed = 100;
   box.opaque2C = 1;
   VS::Render::DrawLiveProgressiveTextBoxText(&box);
   passed = passed && box.flags.done && box.prevChunksPrinted == 4 &&
-           Render_frameScratch.primitiveCursor ==
+           VS::Render::FrameScratchpad().primitive_cursor ==
                memory + 8 + 3 * 6 * sizeof(u_long);
   unsigned shape[] = {0x01040004, 0x00FF0000, 0xFFFFFF00, 0x03020100};
   memset(&Menu_textBoxes[2], 0, sizeof Menu_textBoxes[2]);
@@ -201,22 +206,22 @@ int Tests_ScaledDialogueGlyphs(void) {
   Menu_textBoxes[2].frameWidth = 64;
   Menu_textBoxes[2].frameHeight = 64;
   Menu_textBoxes[2].brightness = 128;
-  Render_frameScratch.primitiveCursor = memory + 8;
+  VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   passed = DrawTrackedFrameFixture(2, shape, sizeof shape) && passed;
   passed = passed && (ordering[9] >> 24) == 0 && (ordering[10] >> 24) == 0 &&
            nextPrim(&ordering[9]) != nullptr &&
            nextPrim(&ordering[10]) != nullptr &&
            LegacyGpu_WalkList(ordering) > 34;
-  Menu_textBoxes[2] = savedBox;
-  Event_textBoxFrameStyles[0] = savedShape;
-  Render_frameScratch = savedFrame;
-  Render_legacyPrimitiveBuffers[0] = savedBuffer;
-  Render_frameBuf = savedFrameIndex;
-  Menu_activeTextBoxOrderingTable = savedOrdering;
+  Menu_textBoxes[2] = saved_box;
+  Event_textBoxFrameStyles[0] = saved_shape;
+  VS::Render::FrameScratchpad() = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+  VS::Render::frameBuf = saved_frame_index;
+  Menu_activeTextBoxOrderingTable = saved_ordering;
   VS::Render::LiveFontStyle() = saved_style;
-  Render_variableFontGlyphWidths[5] = savedWidth;
-  Render_variableFontGlyphWidths[0x8F] = savedSpaceWidth;
+  VS::Render::variableFontGlyphWidths[5] = saved_width;
+  VS::Render::variableFontGlyphWidths[0x8F] = saved_space_width;
   free(memory);
   return passed;
 }
@@ -237,25 +242,27 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   u_long ordering[kOrderingEntries];
   u_long storage[kPacketWords + 2];
   u_long dialogue[] = {0, 0x60000000, 0, 0x00010001};
-  const Render_FrameScratch saved_frame = Render_frameScratch;
-  const int saved_framebuffer = Render_frameBuf;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[framebuffer & 1];
-  void* const saved_ordering = Render_legacyOrderingTables[framebuffer & 1];
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  const int saved_framebuffer = VS::Render::frameBuf;
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[framebuffer & 1];
+  void* const saved_ordering =
+      VS::Render::legacyOrderingTables[framebuffer & 1];
   Effects_ScreenEffectOverlay* saved_effect = Effects_screenEffectOverlay;
   Effects_ScreenEffectOverlay effect = {0};
   effect.feedbackLayer = feedback_layer;
   Effects_screenEffectOverlay = &effect;
-  Render_frameBuf = framebuffer;
+  VS::Render::frameBuf = framebuffer;
   ClearOTagR(ordering, kOrderingEntries);
   setlen(dialogue, 3);
   AddPrim(ordering + kTextOrderingEntry, dialogue);
   for (int index = 0; index < kPacketWords + 2; ++index) {
     storage[index] = guard;
   }
-  Render_frameScratch.orderingTable = ordering + kSceneOrderingEntry;
-  Render_frameScratch.primitiveCursor = storage + 1;
-  Render_legacyPrimitiveBuffers[framebuffer & 1] = storage + 1;
-  Render_legacyOrderingTables[framebuffer & 1] = ordering;
+  VS::Render::FrameScratchpad().ordering_table = ordering + kSceneOrderingEntry;
+  VS::Render::FrameScratchpad().primitive_cursor = storage + 1;
+  VS::Render::legacyPrimitiveBuffers[framebuffer & 1] = storage + 1;
+  VS::Render::legacyOrderingTables[framebuffer & 1] = ordering;
 
   VS::Effects::ScreenDistortion::DrawLiveFeedbackTiles();
 
@@ -264,13 +271,13 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
       static_cast<size_t>(kFeedbackSpriteCount) * kSpritePacketWords;
   u_long* restore = feedback + kFeedbackPacketWords;
   const int feedback_entry = kSceneOrderingEntry + feedback_layer - 3;
-  int passed =
-      nextPrim(ordering + feedback_entry) == feedback &&
-      nextPrim(feedback) == ordering + feedback_entry - 1 &&
-      nextPrim(ordering + kSceneOrderingEntry) == restore &&
-      nextPrim(restore) == feedback - kSpritePacketWords &&
-      Render_frameScratch.primitiveCursor == storage + 1 + kPacketWords &&
-      storage[0] == guard && storage[kPacketWords + 1] == guard;
+  int passed = nextPrim(ordering + feedback_entry) == feedback &&
+               nextPrim(feedback) == ordering + feedback_entry - 1 &&
+               nextPrim(ordering + kSceneOrderingEntry) == restore &&
+               nextPrim(restore) == feedback - kSpritePacketWords &&
+               VS::Render::FrameScratchpad().primitive_cursor ==
+                   storage + 1 + kPacketWords &&
+               storage[0] == guard && storage[kPacketWords + 1] == guard;
   int saw_dialogue = 0;
   int visited = 0;
   void* packet = ordering + kOrderingEntries - 1;
@@ -282,10 +289,10 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   }
   passed = passed && saw_dialogue && packet == nullptr &&
            visited == expected_packets;
-  Render_frameScratch = saved_frame;
-  Render_legacyPrimitiveBuffers[framebuffer & 1] = saved_buffer;
-  Render_legacyOrderingTables[framebuffer & 1] = saved_ordering;
-  Render_frameBuf = saved_framebuffer;
+  VS::Render::FrameScratchpad() = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[framebuffer & 1] = saved_buffer;
+  VS::Render::legacyOrderingTables[framebuffer & 1] = saved_ordering;
+  VS::Render::frameBuf = saved_framebuffer;
   Effects_screenEffectOverlay = saved_effect;
   return passed;
 }
@@ -300,12 +307,12 @@ int CheckMenuRowNativeLinks(int scrolling) {
     kFrameTableWords = 0x822
   };
   const u_long guard = 0xDEADBEEF;
-  const Render_FrameScratch saved_frame = Render_frameScratch;
-  const int saved_framebuffer = Render_frameBuf;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* const saved_table = Render_legacyOrderingTables[0];
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  const int saved_framebuffer = VS::Render::frameBuf;
+  void* const saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* const saved_table = VS::Render::legacyOrderingTables[0];
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  const char saved_width = Render_variableFontGlyphWidths[5];
+  const char saved_width = VS::Render::variableFontGlyphWidths[5];
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuRow rows[40] = {0};
   // The Live menu links only into the current frame's ordering table, which
@@ -329,13 +336,13 @@ int CheckMenuRowNativeLinks(int scrolling) {
   for (int index = 0; index < kPacketWords; ++index) {
     storage[index] = guard;
   }
-  Render_frameScratch.overlayOrderingTable = overlay + 4;
-  Render_frameScratch.orderingTable = scene + 4;
-  Render_frameScratch.primitiveCursor = storage + 1;
-  Render_frameBuf = 0;
-  Render_legacyPrimitiveBuffers[0] = storage + 1;
-  Render_legacyOrderingTables[0] = frame_table;
-  Render_variableFontGlyphWidths[5] = 7;
+  VS::Render::FrameScratchpad().overlay_ordering_table = overlay + 4;
+  VS::Render::FrameScratchpad().ordering_table = scene + 4;
+  VS::Render::FrameScratchpad().primitive_cursor = storage + 1;
+  VS::Render::frameBuf = 0;
+  VS::Render::legacyPrimitiveBuffers[0] = storage + 1;
+  VS::Render::legacyOrderingTables[0] = frame_table;
+  VS::Render::variableFontGlyphWidths[5] = 7;
   VS::Menu::Framework::menuItems = rows;
 
   if (scrolling) {
@@ -347,12 +354,13 @@ int CheckMenuRowNativeLinks(int scrolling) {
   u_long* glyph = storage + 1;
   u_long* shadow = glyph + 6;
   u_long* gradient = shadow + 4;
-  int passed =
-      nextPrim(overlay + 6) == gradient && nextPrim(gradient) == glyph &&
-      nextPrim(glyph) == overlay + 5 && nextPrim(overlay + 7) == shadow &&
-      Render_frameScratch.primitiveCursor == storage + 1 + kRowPacketWords &&
-      storage[0] == guard && storage[1 + kRowPacketWords] == guard &&
-      memcmp(scene, expected_scene, sizeof expected_scene) == 0;
+  int passed = nextPrim(overlay + 6) == gradient &&
+               nextPrim(gradient) == glyph && nextPrim(glyph) == overlay + 5 &&
+               nextPrim(overlay + 7) == shadow &&
+               VS::Render::FrameScratchpad().primitive_cursor ==
+                   storage + 1 + kRowPacketWords &&
+               storage[0] == guard && storage[1 + kRowPacketWords] == guard &&
+               memcmp(scene, expected_scene, sizeof expected_scene) == 0;
   if (scrolling) {
     int count = 0;
     void* packet = overlay + kOrderingWords - 1;
@@ -362,18 +370,18 @@ int CheckMenuRowNativeLinks(int scrolling) {
       packet = nextPrim(packet);
     }
     passed = count == expected_packets && packet == nullptr &&
-             Render_frameScratch.primitiveCursor ==
+             VS::Render::FrameScratchpad().primitive_cursor ==
                  storage + 1 + kScrollingPacketWords &&
              storage[0] == guard &&
              storage[1 + kScrollingPacketWords] == guard &&
              memcmp(scene, expected_scene, sizeof expected_scene) == 0;
   }
-  Render_frameScratch = saved_frame;
-  Render_frameBuf = saved_framebuffer;
-  Render_legacyPrimitiveBuffers[0] = saved_buffer;
-  Render_legacyOrderingTables[0] = saved_table;
+  VS::Render::FrameScratchpad() = saved_frame;
+  VS::Render::frameBuf = saved_framebuffer;
+  VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+  VS::Render::legacyOrderingTables[0] = saved_table;
   VS::Render::LiveFontStyle() = saved_style;
-  Render_variableFontGlyphWidths[5] = saved_width;
+  VS::Render::variableFontGlyphWidths[5] = saved_width;
   VS::Menu::Framework::menuItems = saved_items;
   return passed;
 }
@@ -502,6 +510,21 @@ int CheckMenuDiscStringsLoaded(void) {
          format[7] == VS::Core::TextCode::kTerminator;
 }
 
+// Points the frame scratchpad at guard-filled packet storage (packets start
+// one word in) and a cleared reverse ordering table, with the scene and
+// overlay tables at the menu's entries.
+static void PrepareMenuPacketCapture(std::span<u_long> ordering,
+                                     std::span<u_long> storage, u_long guard) {
+  constexpr std::size_t kSceneEntry = 18;
+  constexpr std::size_t kOverlayEntry = 2;
+  ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+  std::ranges::fill(storage, guard);
+  VS::Render::FrameScratch& frame = VS::Render::FrameScratchpad();
+  frame.primitive_cursor = storage.data() + 1;
+  frame.ordering_table = ordering.data() + kSceneEntry;
+  frame.overlay_ordering_table = ordering.data() + kOverlayEntry;
+}
+
 int CheckStatusPacketLinks(int background_first) {
   enum {
     kOrderingWords = 0x822,
@@ -510,22 +533,18 @@ int CheckStatusPacketLinks(int background_first) {
     kInsertedPackets = 5
   };
   const u_long guard = 0xDEADBEEF;
-  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   const char saved_background = Menu_Status_drawBackgroundFirst;
   u_long ordering[kOrderingWords];
   u_long storage[kPacketWords];
-  ClearOTagR(ordering, kOrderingWords);
-  for (int index = 0; index < kPacketWords; ++index) {
-    storage[index] = guard;
-  }
-  Render_frameScratch.primitiveCursor = storage + 1;
-  Render_frameScratch.orderingTable = ordering + 18;
-  Render_frameScratch.overlayOrderingTable = ordering + 2;
+  PrepareMenuPacketCapture(ordering, storage, guard);
   Menu_Status_drawBackgroundFirst = background_first;
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  void* const saved_table = Render_legacyOrderingTables[Render_frameBuf & 1];
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
-  Render_legacyOrderingTables[Render_frameBuf & 1] = ordering;
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
+  void* const saved_table =
+      VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1];
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = storage + 1;
+  VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = ordering;
 
   VS::Menu::Status::LiveDrawBackground();
   VS::Menu::Status::LiveDrawLimbConditionIndicator(0, 0, 0);
@@ -538,41 +557,37 @@ int CheckStatusPacketLinks(int background_first) {
     ++count;
     packet = nextPrim(packet);
   }
-  int passed =
-      packet == nullptr && count == expected_packets &&
-      Render_frameScratch.primitiveCursor == storage + 1 + kWrittenWords &&
-      storage[0] == guard && storage[1 + kWrittenWords] == guard;
+  int passed = packet == nullptr && count == expected_packets &&
+               VS::Render::FrameScratchpad().primitive_cursor ==
+                   storage + 1 + kWrittenWords &&
+               storage[0] == guard && storage[1 + kWrittenWords] == guard;
   Menu_Status_drawBackgroundFirst = saved_background;
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
-  Render_legacyOrderingTables[Render_frameBuf & 1] = saved_table;
-  Render_frameScratch = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
+  VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = saved_table;
+  VS::Render::FrameScratchpad() = saved_frame;
   return passed;
 }
 
 int CheckMenuPromptPanelLinks(void) {
   enum { kOrderingWords = 0x822, kPacketWords = 256, kAnimationFrames = 8 };
   const u_long guard = 0xDEADBEEF;
-  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   const char saved_display = VS::Menu::Framework::displayActionCost;
   Menu_Framework_TextHeader saved_headers[2];
   memcpy(saved_headers, VS::Menu::Framework::textHeaders, sizeof saved_headers);
   u_long ordering[kOrderingWords];
   u_long storage[kPacketWords];
-  ClearOTagR(ordering, kOrderingWords);
-  for (int index = 0; index < kPacketWords; ++index) {
-    storage[index] = guard;
-  }
-  Render_frameScratch.primitiveCursor = storage + 1;
-  Render_frameScratch.orderingTable = ordering + 18;
-  Render_frameScratch.overlayOrderingTable = ordering + 2;
+  PrepareMenuPacketCapture(ordering, storage, guard);
   VS::Menu::Framework::displayActionCost = 1;
   memset(VS::Menu::Framework::textHeaders, 0, sizeof saved_headers);
   // The typed HUD packets reserve their words in the current frame's buffer
   // and link only into the current frame's ordering table.
-  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  void* const saved_table = Render_legacyOrderingTables[Render_frameBuf & 1];
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
-  Render_legacyOrderingTables[Render_frameBuf & 1] = ordering;
+  void* const saved_buffer =
+      VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
+  void* const saved_table =
+      VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1];
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = storage + 1;
+  VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = ordering;
 
   VS::Menu::Framework::DrawLiveButtonPromptBackground(20, 160, 80, 3);
   for (int frame = 0; frame < kAnimationFrames; ++frame) {
@@ -585,17 +600,17 @@ int CheckMenuPromptPanelLinks(void) {
     ++count;
     packet = nextPrim(packet);
   }
-  const u_long* end =
-      static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+  const u_long* end = static_cast<const u_long*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   int passed = packet == nullptr && count >= kOrderingWords + 5 &&
                nextPrim(ordering + 15) == storage + 15 && end > storage + 1 &&
                end < storage + kPacketWords && storage[0] == guard &&
                *end == guard;
   memcpy(VS::Menu::Framework::textHeaders, saved_headers, sizeof saved_headers);
   VS::Menu::Framework::displayActionCost = saved_display;
-  Render_frameScratch = saved_frame;
-  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
-  Render_legacyOrderingTables[Render_frameBuf & 1] = saved_table;
+  VS::Render::FrameScratchpad() = saved_frame;
+  VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
+  VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1] = saved_table;
   return passed;
 }
 

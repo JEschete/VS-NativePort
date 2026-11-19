@@ -5,7 +5,7 @@
 struct Menu_Files_FileMenuElement;
 struct Menu_Files_PrimitiveBuffer;
 
-#include "Render/LegacyPackets.h"
+#include "Render/LegacyPackets.hpp"
 
 // decomp: fileMenuElementState_e (src/MENU/MENU7.PRG/260.c:110)
 enum Menu_Files_ElementState {
@@ -57,14 +57,14 @@ static_assert(sizeof(Menu_Files_FileMenuElement) == 0x34, "Menu_Files_FileMenuEl
 struct Menu_Files_PrimitiveBuffer {
     u_long tag;
     union {
-        Render_SpriteTexturePagePacket sprt;
-        Render_TileTexturePagePacket tileTpage;
-        Render_TilePacket tile;
-        Render_PagedGouraudQuadPacket polyG4Tpage;
-        Render_GouraudQuadPacket polyG4;
+        VS::Render::SpriteTexturePagePacket sprt;
+        VS::Render::TileTexturePagePacket tileTpage;
+        VS::Render::UntaggedTilePacket tile;
+        VS::Render::PagedGouraudQuadPacket polyG4Tpage;
+        VS::Render::GouraudQuadPacket polyG4;
         struct {
-            Render_TileTexturePagePacket tileTpage;
-            Render_GouraudQuadPacket polyG4;
+            VS::Render::TileTexturePagePacket tileTpage;
+            VS::Render::GouraudQuadPacket polyG4;
         } tilePoly;
         u_long reserved0[15];
     } prim;

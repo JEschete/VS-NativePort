@@ -7,7 +7,7 @@
 
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "Render/RoomLighting.hpp"
 
 namespace VS::Field {
@@ -22,7 +22,7 @@ std::span<const std::byte> LiveRoomLightingSection() {
 
 void SampleLiveRoomLighting(std::uint32_t packed_position,
                             Render::RoomLightLayer layer,
-                            Render_ColorCode* color) {
+                            VS::Render::ColorCode* color) {
   if (color == nullptr) return;
   const Render::RoomLightColor sample = Render::SampleRoomLighting(
       LiveRoomLightingSection(), Render::UnpackRoomLightPoint(packed_position),
@@ -34,7 +34,7 @@ void SampleLiveRoomLighting(std::uint32_t packed_position,
 }
 
 void SampleLiveRoomLighting(int packed_position, int layer,
-                            Render_ColorCode* color) {
+                            VS::Render::ColorCode* color) {
   SampleLiveRoomLighting(static_cast<std::uint32_t>(packed_position),
                          layer != 0 ? Render::RoomLightLayer::kCeiling
                                     : Render::RoomLightLayer::kFloor,

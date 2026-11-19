@@ -18,13 +18,13 @@
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/Text/CompactFont.hpp"
+#include "Render/Text/VariableFont.hpp"
 #include "Render/UiPackets.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::test_support::floating_label_rendering {
 inline constexpr std::size_t kLabelCapacity = 32;
@@ -100,14 +100,14 @@ class ProductionTables {
                       sizeof(Battle_lockedLabelHalfHeights)},
         ExpectedOwner{Battle_lockedLabelPieces,
                       sizeof(Battle_lockedLabelPieces)},
-        ExpectedOwner{Render_compactGlyphLeftTrim,
-                      sizeof(Render_compactGlyphLeftTrim)},
-        ExpectedOwner{Render_compactGlyphWidths,
-                      sizeof(Render_compactGlyphWidths)},
-        ExpectedOwner{Render_compactGlyphIndices,
-                      sizeof(Render_compactGlyphIndices)},
-        ExpectedOwner{Render_variableFontGlyphWidths,
-                      sizeof(Render_variableFontGlyphWidths)}};
+        ExpectedOwner{VS::Render::compactGlyphLeftTrim,
+                      sizeof(VS::Render::compactGlyphLeftTrim)},
+        ExpectedOwner{VS::Render::compactGlyphWidths,
+                      sizeof(VS::Render::compactGlyphWidths)},
+        ExpectedOwner{VS::Render::compactGlyphIndices,
+                      sizeof(VS::Render::compactGlyphIndices)},
+        ExpectedOwner{VS::Render::variableFontGlyphWidths,
+                      sizeof(VS::Render::variableFontGlyphWidths)}};
     for (const auto& owner : expected) {
       const auto entries = VS::Content::ModuleDataEntries();
       const auto found = std::ranges::find(
@@ -136,21 +136,22 @@ class LiveFrame {
 
   LiveFrame() {
     ordering.fill(kEnd);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = primitives.data();
-    Render_frameScratch.primitiveCursor = primitives.data();
-    Render_frameScratch.orderingTable = ordering.data() + kSceneHead;
-    Render_frameScratch.overlayOrderingTable = ordering.data() + kOverlayHead;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + kSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
+        ordering.data() + kOverlayHead;
     static_assert(sizeof(storage_) == sizeof(*Battle_floatingLabels));
     Battle_floatingLabels = storage_;
     Battle_floatingLabelCount = 1;
   }
   ~LiveFrame() {
-    Render_frameScratch = saved_scratch_;
-    Render_frameBuf = saved_frame_;
-    Render_legacyOrderingTables[0] = saved_ordering_;
-    Render_legacyPrimitiveBuffers[0] = saved_primitives_;
+    VS::Render::FrameScratchpad() = saved_scratch_;
+    VS::Render::frameBuf = saved_frame_;
+    VS::Render::legacyOrderingTables[0] = saved_ordering_;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_primitives_;
     Battle_floatingLabels = saved_labels_;
     Battle_floatingLabelCount = saved_count_;
     Battle_abilityTimingCuePosition = saved_cue_;
@@ -162,12 +163,13 @@ class LiveFrame {
   LiveFrame& operator=(const LiveFrame&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<u_long*>(Render_frameScratch.primitiveCursor) -
+    return static_cast<u_long*>(
+               VS::Render::FrameScratchpad().primitive_cursor) -
            primitives.data();
   }
   void ClearDraws() {
     ordering.fill(kEnd);
-    Render_frameScratch.primitiveCursor = primitives.data();
+    VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
   }
   [[nodiscard]] std::vector<Packet> Traversal(std::size_t bucket) const {
     if (bucket >= ordering.size()) {
@@ -216,10 +218,10 @@ class LiveFrame {
   }
 
  private:
-  Render_FrameScratch saved_scratch_ = Render_frameScratch;
-  int saved_frame_ = Render_frameBuf;
-  void* saved_ordering_ = Render_legacyOrderingTables[0];
-  void* saved_primitives_ = Render_legacyPrimitiveBuffers[0];
+  VS::Render::FrameScratch saved_scratch_ = VS::Render::FrameScratchpad();
+  int saved_frame_ = VS::Render::frameBuf;
+  void* saved_ordering_ = VS::Render::legacyOrderingTables[0];
+  void* saved_primitives_ = VS::Render::legacyPrimitiveBuffers[0];
   decltype(Battle_floatingLabels) saved_labels_ = Battle_floatingLabels;
   std::int16_t saved_count_ = Battle_floatingLabelCount;
   SVECTOR saved_cue_ = Battle_abilityTimingCuePosition;

@@ -15,11 +15,11 @@
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
-#include "Render/Display.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects::ScreenDistortion {
 namespace {
@@ -93,7 +93,7 @@ void DrawLiveFeedbackTiles() {
   Render::LivePacketQueue feedback_entry(Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene,
       FeedbackOrderingSlot(overlay->feedbackLayer)));
-  DrawFeedbackTiles(Render_frameBuf, scene_head, feedback_entry);
+  DrawFeedbackTiles(VS::Render::frameBuf, scene_head, feedback_entry);
 }
 
 void SetLiveRadialWarp(RadialWarpSettings settings) {
@@ -115,7 +115,8 @@ void SetLiveVignetteEnabled(int enabled) {
 int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
                               int* packet_words, u_long* ordering_head) {
   if (packet_words == nullptr ||
-      static_cast<void*>(packet_words) != Render_frameScratch.primitiveCursor) {
+      static_cast<void*>(packet_words) !=
+          VS::Render::FrameScratchpad().primitive_cursor) {
     VS::Core::LogError(
         "effects",
         "vignette corner refused: packets must start at the frame "
@@ -125,7 +126,7 @@ int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
   Render::LivePacketQueue overlay(ordering_head);
   AppendVignetteCorner(static_cast<std::uint32_t>(packed_corner_xy),
                        first_angular_step, overlay);
-  return static_cast<int*>(Render_frameScratch.primitiveCursor);
+  return static_cast<int*>(VS::Render::FrameScratchpad().primitive_cursor);
 }
 
 void DrawLiveVignette() {

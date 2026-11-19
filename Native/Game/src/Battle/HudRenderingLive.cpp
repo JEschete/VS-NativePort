@@ -21,11 +21,11 @@
 #include "Core/Diagnostics.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Magic.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -101,7 +101,7 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
     }
     // Only the selected palette entry is used by DrawStatGauge.
     palette.at(gauge.color_index) = static_cast<std::uint32_t>(
-        std::span(Render_kStatGaugeColors)[gauge.color_index]);
+        std::span(VS::Render::kStatGaugeColors)[gauge.color_index]);
     return Render::DrawStatGauge(queue, palette, gauge);
   }
 

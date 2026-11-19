@@ -27,10 +27,10 @@
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetailDispatch.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -90,9 +90,9 @@ void RequireBoundTable(const Record* bound, Record (&table)[Count]) {
 }
 
 void RequireFrame(bool overlay) {
-  if (Render_frameScratch.primitiveCursor == nullptr ||
-      (overlay ? Render_frameScratch.overlayOrderingTable
-               : Render_frameScratch.orderingTable) == nullptr) {
+  if (VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
+      (overlay ? VS::Render::FrameScratchpad().overlay_ordering_table
+               : VS::Render::FrameScratchpad().ordering_table) == nullptr) {
     Refuse("missing current item detail presentation frame");
   }
 }
@@ -265,12 +265,12 @@ class LiveIconWorld final : public CategoryIconWorld {
     RequireFrame(icon.overlay);
     const auto xy = static_cast<int>(Framework::PackXy(icon.x, icon.y));
     const auto size = static_cast<int>(Framework::PackXy(kIconSize, kIconSize));
-    auto* packet =
-        icon.overlay
-            ? Render::QueueLiveDefaultSprite(size, xy)
-            : Render::QueueLiveSpriteWithTexturePage(
-                  Render::kDefaultSpriteBrightness, xy, size,
-                  static_cast<u_long*>(Render_frameScratch.orderingTable));
+    auto* packet = icon.overlay
+                       ? Render::QueueLiveDefaultSprite(size, xy)
+                       : Render::QueueLiveSpriteWithTexturePage(
+                             Render::kDefaultSpriteBrightness, xy, size,
+                             static_cast<u_long*>(
+                                 VS::Render::FrameScratchpad().ordering_table));
     packet[Render::kSpriteTextureWord] =
         (kFirstIconU + icon.category * kIconSize) | (kIconV << kTextureVShift) |
         (icon.selected_palette ? kSelectedIconPalette : kIdleIconPalette);

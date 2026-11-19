@@ -20,10 +20,10 @@
 #include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Camera.h"
+#include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 // decomp: D_800F54B8 (D_800F54B8@BATTLE/BATTLE.PRG)
 Effects_CameraShakeChannel
@@ -149,9 +149,9 @@ class LiveCameraHost final : public EffectCameraHost {
     return {.position = Math::VectorOf(position),
             .look_at = Math::VectorOf(look_at),
             .roll = VS::Field::LiveCameraRoll(),
-            .near_clip = Render_nearClip,
-            .projection_distance = Render_projectionDistance,
-            .far_clip = Render_frameScratch.camera.farClip};
+            .near_clip = VS::Render::nearClip,
+            .projection_distance = VS::Render::projectionDistance,
+            .far_clip = VS::Render::FrameScratchpad().camera.far_clip};
   }
 
   void ApplyCamera(const AppliedEffectCamera& camera) override {

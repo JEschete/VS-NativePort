@@ -57,14 +57,14 @@
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Platforms.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 
 namespace VS::Actors {
 namespace {
 static_assert(std::size(Actors_actorRecords) == kActorStateSlots);
 static_assert(std::size(Battle_actors) == kBattleActorSlots);
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> == kActorLimbs);
-static_assert(sizeof(Render_ColorCode) == sizeof(Render::ColorCode));
+static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
 
 constexpr int kAllStatuses = 0x7FFFFFFF;
 // The rider a freed moving platform takes.
@@ -77,11 +77,11 @@ u_char Bit(bool value) { return value ? 1 : 0; }
 // A one-bit signed (char) field's value; its only set value is -1.
 char SignedBit(bool value) { return value ? -1 : 0; }
 
-Render::ColorCode ToColor(const Render_ColorCode& live) {
+Render::ColorCode ToColor(const VS::Render::ColorCode& live) {
   return {live.red, live.green, live.blue, live.code};
 }
 
-Render_ColorCode ToLiveColor(const Render::ColorCode& color) {
+VS::Render::ColorCode ToLiveColor(const Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
@@ -719,8 +719,8 @@ void BeginLiveActorDeath(int actor_id, void* /*context*/, int animate) {
 }
 
 void SetLiveActorCompanion(int actor_id, int companion_slot,
-                           const Render_ColorCode* companion_state,
-                           const Render_ColorCode* companion_color) {
+                           const VS::Render::ColorCode* companion_state,
+                           const VS::Render::ColorCode* companion_color) {
   // The record keeps the slot in a byte; the original tested the full value,
   // so a slot of 256 stored "no companion" yet still copied the style.
   if (companion_slot < 0 || companion_slot > UINT8_MAX) {

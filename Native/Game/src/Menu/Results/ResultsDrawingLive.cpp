@@ -16,7 +16,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Images.h"
+#include "Render/Images.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -89,20 +89,9 @@ void Report(ResultsDrawResult result) {
 }
 }  // namespace
 
-// Copied code builds with unsigned plain char (/J); read the atlas bytes as
-// unsigned whatever this translation unit uses.
 std::array<Render::TextureRegion, kResultsAtlasEntries> LiveResultsAtlas() {
   std::array<Render::TextureRegion, kResultsAtlasEntries> atlas{};
-  std::ranges::transform(Menu_Results_disMap, atlas.begin(),
-                         [](const Render_TextureRegion& entry) {
-                           return Render::TextureRegion{
-                               .u = static_cast<std::uint8_t>(entry.x),
-                               .v = static_cast<std::uint8_t>(entry.y),
-                               .width = static_cast<std::uint8_t>(entry.w),
-                               .height = static_cast<std::uint8_t>(entry.h),
-                               .texture_page = entry.tpage,
-                               .clut = entry.clut};
-                         });
+  std::ranges::copy(Menu_Results_disMap, atlas.begin());
   return atlas;
 }
 

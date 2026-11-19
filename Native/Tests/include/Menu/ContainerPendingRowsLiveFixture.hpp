@@ -138,15 +138,16 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
       const auto end = reinterpret_cast<std::uintptr_t>(last);
       return address >= begin && address <= end && bytes <= end - address;
     };
-    return within(primitives.data() + 1, Render_frameScratch.primitiveCursor) ||
+    return within(primitives.data() + 1,
+                  VS::Render::FrameScratchpad().primitive_cursor) ||
            within(ordering.data(), ordering.data() + ordering.size()) ||
            within(VS::Menu::textBoxOrderingTables,
                   VS::Menu::textBoxOrderingTables +
                       std::size(VS::Menu::textBoxOrderingTables));
   }
   std::vector<std::vector<std::uint32_t>> Packets() const {
-    const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto cursor = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto first = reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
     const auto last = reinterpret_cast<std::uintptr_t>(primitives.data() +
                                                        primitives.size() - 1);

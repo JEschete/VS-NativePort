@@ -11,7 +11,7 @@
 // the room renderer through a CameraClipTarget. Nothing here reads the frame
 // scratch, GTE registers or module addresses.
 namespace VS::Render {
-// The camera as the frame scratch records it (Render_Camera).
+// The camera as the frame scratch records it (VS::Render::Camera).
 struct CameraPose {
   Core::Math::Vec3 position;
   Core::Math::Vec3 look_at;

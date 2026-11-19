@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -29,12 +30,12 @@
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/RenameLive.hpp"
 #include "Menu/RenameLiveState.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/Render.h"
-#include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/Textures.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 static_assert(sizeof VS::Menu::Framework::comparisonStatTotals == 8);
@@ -87,10 +88,10 @@ struct ComparisonFixture {
 };
 
 struct EquipmentFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   char saved_page = VS::Menu::Framework::itemStatPage;
   char saved_pages = VS::Menu::Framework::enabledStatPages;
@@ -107,13 +108,13 @@ struct EquipmentFixture {
     VS::Menu::Framework::itemStatPage = static_cast<char>(page);
     VS::Menu::Framework::enabledStatPages = 7;
     VS::Menu::Framework::equipmentSubtype = 0;
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     // The typed UI packets only link into the frame's own ordering table.
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Render_frameScratch.orderingTable = ordering.data() + 18;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
+    VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
@@ -123,18 +124,18 @@ struct EquipmentFixture {
     VS::Menu::Framework::itemStatPage = saved_page;
     VS::Menu::Framework::enabledStatPages = saved_pages;
     VS::Menu::Framework::equipmentSubtype = saved_subtype;
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     VS::Render::LiveFontStyle() = saved_style;
   }
 
   bool Owns(const void* packet) const {
     const auto address = reinterpret_cast<uintptr_t>(packet);
     const auto first_packet = reinterpret_cast<uintptr_t>(storage.data() + 1);
-    const auto last_packet =
-        reinterpret_cast<uintptr_t>(Render_frameScratch.primitiveCursor);
+    const auto last_packet = reinterpret_cast<uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto first_entry = reinterpret_cast<uintptr_t>(ordering.data());
     const auto last_entry = first_entry + sizeof ordering;
     return (address >= first_packet && address < last_packet) ||
@@ -176,15 +177,16 @@ struct RenameFrameFixture {
       VS::Menu::Rename::renderRenameMenuStrings)) saved_strings =
       std::to_array(VS::Menu::Rename::renderRenameMenuStrings);
   VS::Menu::Rename::State saved_state = VS::Menu::Rename::LiveRenameState();
-  void* saved_table = Render_legacyOrderingTables[0];
+  void* saved_table = VS::Render::legacyOrderingTables[0];
   std::array<Menu_Framework_MenuRow, 40> rows{};
 
   RenameFrameFixture() {
     VS::Menu::Framework::menuItems = rows.data();
     // The live chain lookups only accept the frame's own ordering table.
-    Render_legacyOrderingTables[0] = frame.ordering.data();
-    Render_frameScratch.orderingTable = frame.ordering.data() + 24;
-    Render_frameScratch.overlayOrderingTable = frame.ordering.data() + 8;
+    VS::Render::legacyOrderingTables[0] = frame.ordering.data();
+    VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 24;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
+        frame.ordering.data() + 8;
     std::fill_n(VS::Menu::Rename::renderRenameMenuStrings, saved_strings.size(),
                 0xE7E7);
     for (int index = Text_Menu8_rename_Index_ok;
@@ -204,7 +206,7 @@ struct RenameFrameFixture {
 
   ~RenameFrameFixture() {
     VS::Menu::Framework::menuItems = saved_rows;
-    Render_legacyOrderingTables[0] = saved_table;
+    VS::Render::legacyOrderingTables[0] = saved_table;
     std::copy(saved_strings.begin(), saved_strings.end(),
               VS::Menu::Rename::renderRenameMenuStrings);
     VS::Menu::Rename::LiveRenameState() = saved_state;
@@ -227,7 +229,8 @@ struct EquipmentReloadFixture {
   Actors_ActorRecord* saved_preview = Actors_actorRecords[1];
   decltype(std::to_array(VS::Actors::weaponModels)) saved_models =
       std::to_array(VS::Actors::weaponModels);
-  Render_TextureSlot saved_texture = Render_legacyWeaponTextureSlots[0];
+  VS::Render::TextureSlot saved_texture =
+      VS::Render::legacyWeaponTextureSlots[0];
   decltype(Event_playbackPhase) saved_event_phase = Event_playbackPhase;
   char saved_reload = Menu_Inventory_equipmentModelLoadStep;
   int saved_alias = Battle_unusedGlobal2;
@@ -242,7 +245,7 @@ struct EquipmentReloadFixture {
     shield.boneCount = 1;
     VS::Actors::weaponModels[1] = &shield;
     VS::Actors::weaponModels[3] = has_preview ? &preview_shield : nullptr;
-    Render_legacyWeaponTextureSlots[0].referenceCount = 2;
+    VS::Render::legacyWeaponTextureSlots[0].reference_count = 2;
     Event_playbackPhase = 0;
     Menu_Inventory_equipmentModelLoadStep = 0;
     Battle_unusedGlobal2 = unused_alias;
@@ -252,7 +255,7 @@ struct EquipmentReloadFixture {
     Actors_actorRecords[1] = saved_preview;
     std::copy(saved_models.begin(), saved_models.end(),
               VS::Actors::weaponModels);
-    Render_legacyWeaponTextureSlots[0] = saved_texture;
+    VS::Render::legacyWeaponTextureSlots[0] = saved_texture;
     Event_playbackPhase = saved_event_phase;
     Menu_Inventory_equipmentModelLoadStep = saved_reload;
     Battle_unusedGlobal2 = saved_alias;
@@ -379,7 +382,8 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
   CHECK(VS::Actors::weaponModels[1] == (release ? nullptr : &fixture.shield));
   CHECK(VS::Actors::weaponModels[3] ==
         (has_preview ? &fixture.preview_shield : nullptr));
-  CHECK(Render_legacyWeaponTextureSlots[0].referenceCount == (release ? 1 : 2));
+  CHECK(VS::Render::legacyWeaponTextureSlots[0].reference_count ==
+        (release ? 1 : 2));
 }
 
 TEST_CASE("Actor equipment slots contain complete aligned native models",
@@ -396,7 +400,8 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
     Actors_ActorAllocation actor;
     std::array<unsigned char, 64> guard;
   } allocation{};
-  std::memset(&allocation, 0xA5, sizeof allocation);
+  std::ranges::fill(std::as_writable_bytes(std::span(&allocation, 1)),
+                    std::byte{0xA5});
   std::array<unsigned char, sizeof allocation> expected{};
   std::memcpy(expected.data(), &allocation, sizeof allocation);
   Actors_WeaponModel model{};

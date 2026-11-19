@@ -40,11 +40,11 @@
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLive.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GimImagesLive.hpp"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -249,8 +249,8 @@ class LiveScanlineCanvas final : public event::ScanlineCanvas {
     line->x0 = 0;
     line->y0 = line->y1 = static_cast<std::int16_t>(y);
     line->x1 = static_cast<std::int16_t>(width);
-    AddPrim(Render_frameScratch.overlayOrderingTable, line);
-    Render_frameScratch.primitiveCursor = line + 1;
+    AddPrim(VS::Render::FrameScratchpad().overlay_ordering_table, line);
+    VS::Render::FrameScratchpad().primitive_cursor = line + 1;
   }
   void SetSubtractiveBlend() override {
     auto* page = static_cast<DR_TPAGE*>(Reserve(sizeof(DR_TPAGE)));
@@ -259,22 +259,22 @@ class LiveScanlineCanvas final : public event::ScanlineCanvas {
     }
     std::memset(page, 0, sizeof *page);
     SetDrawTPage(page, 1, 1, GetTPage(0, 2, 0, 0));
-    AddPrim(Render_frameScratch.overlayOrderingTable, page);
-    Render_frameScratch.primitiveCursor = page + 1;
+    AddPrim(VS::Render::FrameScratchpad().overlay_ordering_table, page);
+    VS::Render::FrameScratchpad().primitive_cursor = page + 1;
   }
 
  private:
   [[nodiscard]] static void* Reserve(std::size_t bytes) {
     const auto base = reinterpret_cast<std::uintptr_t>(
-        Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
-    const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+        VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1]);
+    const auto cursor = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     if (base == 0 || cursor < base ||
         cursor - base > kPrimitiveBufferBytes - bytes ||
-        Render_frameScratch.overlayOrderingTable == nullptr) {
+        VS::Render::FrameScratchpad().overlay_ordering_table == nullptr) {
       return nullptr;
     }
-    return Render_frameScratch.primitiveCursor;
+    return VS::Render::FrameScratchpad().primitive_cursor;
   }
 };
 
@@ -327,9 +327,9 @@ namespace VS::Event {
 
 void DrawLiveScanlineOverlay() {
   LiveScanlineCanvas canvas;
-  Event_scanlineOverlayFrame =
-      DrawEventScanlineOverlay(Event_scanlineOverlayFrame, Render_viewportWidth,
-                               Render_viewportHeight, canvas);
+  Event_scanlineOverlayFrame = DrawEventScanlineOverlay(
+      Event_scanlineOverlayFrame, VS::Render::viewportWidth,
+      VS::Render::viewportHeight, canvas);
 }
 
 void UpdateLiveImageTweens() {

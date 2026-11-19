@@ -15,10 +15,10 @@
 #include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.h"
 
 namespace VS::Field {
@@ -45,10 +45,10 @@ class Packets {
  public:
   explicit Packets(std::size_t required) {
     const auto base = reinterpret_cast<std::uintptr_t>(
-        Render_legacyPrimitiveBuffers[Render_frameBuf]);
-    const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
-    if (Render_frameScratch.orderingTable == nullptr || base == 0 ||
+        VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf]);
+    const auto cursor = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
+    if (VS::Render::FrameScratchpad().ordering_table == nullptr || base == 0 ||
         cursor < base || cursor - base > kPrimitiveBufferBytes ||
         required > kPrimitiveBufferBytes - (cursor - base)) {
       VS::Core::LogError("minimap", "Primitive buffer cannot hold {} bytes",
@@ -66,15 +66,16 @@ class Packets {
     return packet;
   }
 
-  void Finish() { Render_frameScratch.primitiveCursor = cursor_; }
+  void Finish() { VS::Render::FrameScratchpad().primitive_cursor = cursor_; }
 
  private:
   std::byte* cursor_ = nullptr;
 };
 
 void Link(std::size_t slot, void* packet) {
-  AddPrim(static_cast<u_long*>(Render_frameScratch.orderingTable) + slot,
-          packet);
+  AddPrim(
+      static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) + slot,
+      packet);
 }
 
 void SetPoint(std::int16_t& x, std::int16_t& y, MinimapScreenPoint point) {

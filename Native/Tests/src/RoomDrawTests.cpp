@@ -18,12 +18,12 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 namespace Render = VS::Render;
@@ -552,20 +552,20 @@ SkyDome OneFaceSky() {
 
 // A frame buffer and ordering table the Live binding draws into.
 struct LiveFrame {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  int saved_framebuffer = Render_frameBuf;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  int saved_framebuffer = VS::Render::frameBuf;
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   Render::RoomClipState saved_clip = Render::LiveRoomClipState();
   std::vector<std::uint32_t> memory = std::vector<std::uint32_t>(
       0x20000 / sizeof(std::uint32_t) + 2, 0xA5A5A5A5);
   std::array<u_long, 2048> ordering{};
 
   LiveFrame() {
-    Render_frameScratch = {};
-    Render_frameBuf = 0;
-    Render_legacyPrimitiveBuffers[0] = Buffer();
-    Render_frameScratch.primitiveCursor = Buffer();
-    Render_frameScratch.orderingTable = ordering.data();
+    VS::Render::FrameScratchpad() = {};
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyPrimitiveBuffers[0] = Buffer();
+    VS::Render::FrameScratchpad().primitive_cursor = Buffer();
+    VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     Render::LiveRoomClipState() = {};
     Core_Gte_Reset();
@@ -573,9 +573,9 @@ struct LiveFrame {
     Core_Gte_SetGeomOffset(160, 120);
   }
   ~LiveFrame() {
-    Render_frameScratch = saved_frame;
-    Render_frameBuf = saved_framebuffer;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::frameBuf = saved_framebuffer;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     Render::LiveRoomClipState() = saved_clip;
     Core_Gte_Reset();
   }
@@ -587,7 +587,8 @@ struct LiveFrame {
   std::uint32_t* Buffer() { return memory.data() + 1; }
   [[nodiscard]] std::size_t Used() const {
     return static_cast<std::size_t>(
-        static_cast<const std::byte*>(Render_frameScratch.primitiveCursor) -
+        static_cast<const std::byte*>(
+            VS::Render::FrameScratchpad().primitive_cursor) -
         reinterpret_cast<const std::byte*>(memory.data() + 1));
   }
 };
@@ -1274,15 +1275,16 @@ TEST_CASE("Live room draws refuse geometry overlapping unwritten packets",
   std::memcpy(frame.Buffer(), geometry.data(), geometry.size());
   for (const std::size_t cursor : {std::size_t{0}, words - 1}) {
     CAPTURE(cursor);
-    Render_frameScratch.primitiveCursor = frame.Buffer() + cursor;
+    VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer() + cursor;
     CHECK(Render::DrawLiveRoomGeometry(frame.Buffer(), geometry.size(), 0) ==
           Render::RoomDrawStatus::kInvalidGeometry);
-    CHECK(Render_frameScratch.primitiveCursor == frame.Buffer() + cursor);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          frame.Buffer() + cursor);
   }
-  Render_frameScratch.primitiveCursor = frame.Buffer() + words;
+  VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer() + words;
   CHECK(Render::DrawLiveRoomGeometry(frame.Buffer(), geometry.size(), 0) ==
         Render::RoomDrawStatus::kDrawn);
-  CHECK(Render_frameScratch.primitiveCursor ==
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         frame.Buffer() + words + Render::kRoomTrianglePacketWords +
             Render::kRoomQuadPacketWords);
 }
@@ -1291,11 +1293,11 @@ TEST_CASE("Live room draws queue nothing before the frame is ready",
           "[render][room][live]") {
   LiveFrame frame;
   const auto geometry = Geometry(0);
-  Render_frameScratch.orderingTable = nullptr;
-  auto* before = Render_frameScratch.primitiveCursor;
+  VS::Render::FrameScratchpad().ordering_table = nullptr;
+  auto* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
         Render::RoomDrawStatus::kDrawn);
-  CHECK(Render_frameScratch.primitiveCursor == before);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
 }
 
 TEST_CASE("Live room tint is bounded by the current frame buffer",

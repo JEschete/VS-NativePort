@@ -33,15 +33,15 @@
 #include "Field/EnvironmentLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Render/Display.h"
-#include "Render/Frame.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/SceneTimer.h"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -1202,10 +1202,10 @@ struct CutsceneEndScenario {
 };
 
 struct CutsceneFrameFixture {
-  Render_FrameScratch saved = Render_frameScratch;
-  void* saved_ordering = Render_legacyCurrentOrderingTable;
-  void* saved_primitives = Render_legacyPrimitiveBuffers[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved = VS::Render::FrameScratchpad();
+  void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
+  void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   std::array<u_long, 0x2088 / sizeof(u_long)> ordering{};
   std::array<u_long, 18> storage{};
   std::uint64_t dropped = VS::Render::DroppedLiveUiPacketCount();
@@ -1213,21 +1213,21 @@ struct CutsceneFrameFixture {
   CutsceneFrameFixture() {
     storage.fill(0xDEADBEEF);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Render_frameBuf = 0;
-    Render_legacyCurrentOrderingTable = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
-    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyCurrentOrderingTable = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
   }
   ~CutsceneFrameFixture() {
-    Render_frameScratch = saved;
-    Render_legacyCurrentOrderingTable = saved_ordering;
-    Render_legacyPrimitiveBuffers[0] = saved_primitives;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved;
+    VS::Render::legacyCurrentOrderingTable = saved_ordering;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_primitives;
+    VS::Render::frameBuf = saved_framebuffer;
   }
   void CheckEmission(bool emitted) const {
     CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped);
-    CHECK((Render_frameScratch.primitiveCursor != storage.data() + 1) ==
-          emitted);
+    CHECK((VS::Render::FrameScratchpad().primitive_cursor !=
+           storage.data() + 1) == emitted);
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
   }

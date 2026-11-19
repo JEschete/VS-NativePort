@@ -80,10 +80,10 @@ TEST_CASE("F00724 fully culled graphics require no primitive or OT owner",
   constexpr int kFullyRight = 336;
   f::ProductionTables tables;
   f::LiveFrame frame;
-  Render_frameScratch.primitiveCursor = nullptr;
-  Render_frameScratch.orderingTable = nullptr;
+  VS::Render::FrameScratchpad().primitive_cursor = nullptr;
+  VS::Render::FrameScratchpad().ordering_table = nullptr;
   b::DrawLiveLockedFloatingLabel(kFullyRight, kY, &frame.labels.front());
-  CHECK(Render_frameScratch.primitiveCursor == nullptr);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor == nullptr);
   CHECK(frame.ordering.at(f::kQuadBucket) == f::kEnd);
 }
 

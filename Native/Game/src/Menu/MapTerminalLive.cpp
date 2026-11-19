@@ -40,14 +40,14 @@
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Menu::map {
 namespace {
@@ -93,7 +93,7 @@ struct PendingScene {
 struct ScreenResources {
   void* background = nullptr;
   bool field_hidden = false;
-  Render_ScreenOffset projection_offset{};
+  VS::Render::ScreenOffset projection_offset{};
 };
 
 MapScreenState screen;
@@ -570,7 +570,7 @@ void LiveApplyCamera() {
 // F02699: _darkenBackground, src/MENU/MENU5.PRG/4D8.c:1788.
 void LiveDarkenBackground() {
   LiveFramebuffer host;
-  if (!DarkenBackground(host, Render_frameBuf != 0)) {
+  if (!DarkenBackground(host, VS::Render::frameBuf != 0)) {
     Refuse("DarkenBackground", "packet capacity or ordering table");
   }
 }
@@ -578,7 +578,7 @@ void LiveDarkenBackground() {
 // F02702: _applyPalingScreenEffect, src/MENU/MENU5.PRG/4D8.c:1880.
 void LiveDrawPalingDistortion() {
   LiveFramebuffer host;
-  if (!DrawPalingDistortion(host, Render_frameBuf != 0,
+  if (!DrawPalingDistortion(host, VS::Render::frameBuf != 0,
                             Menu_Map_menuFramesCounter)) {
     Refuse("DrawPalingDistortion", "packet capacity or ordering table");
   }
@@ -604,8 +604,8 @@ int LiveUpdateMapMenu() {
         .left_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.l_stick_y),
         .right_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.r_stick_x),
         .right_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.r_stick_y),
-        .field_yaw =
-            static_cast<std::uint16_t>(Render_frameScratch.camera.angles.vy)};
+        .field_yaw = static_cast<std::uint16_t>(
+            VS::Render::FrameScratchpad().camera.angles.vy)};
     std::array<DiscFileRange, kSceneCount> files{};
     for (std::size_t index = 0; index < files.size(); ++index) {
       files[index] = {Menu_Map_kSceneArmFiles[index].lba,

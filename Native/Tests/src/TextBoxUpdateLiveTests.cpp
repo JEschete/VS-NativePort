@@ -35,9 +35,10 @@ constexpr std::uint32_t kRandomSeed = 0x12345678;
 struct LiveUpdateFixture {
   ArrayRestore<Menu_TextBoxState, menu::kTextBoxCount> saved_boxes{
       Menu_textBoxes};
-  ValueRestore<decltype(Render_frameScratch)> saved_frame{Render_frameScratch};
-  ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
-  ValueRestore<int> saved_framebuffer{Render_frameBuf};
+  ValueRestore<decltype(VS::Render::FrameScratchpad())> saved_frame{
+      VS::Render::FrameScratchpad()};
+  ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
+  ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   text_box_tests::LiveUpdateRestore saved_update;
   std::array<u_long, kFrameEntries> ordering{};
 
@@ -49,9 +50,10 @@ struct LiveUpdateFixture {
         VS::Menu::textBoxOrderingTables + buffer * menu::kTextBoxOrderingTags;
     ClearOTag(Menu_activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_frameScratch.orderingTable = ordering.data() + kSceneEntry;
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kSceneEntry;
     VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
     VS::Core::interfaceRandomState = kRandomSeed;
@@ -96,7 +98,7 @@ TEST_CASE(
   LiveUpdateFixture fixture;
   switch (GENERATE(0, 1, 2, 3)) {
     case 0:
-      Render_frameScratch.orderingTable = nullptr;
+      VS::Render::FrameScratchpad().ordering_table = nullptr;
       break;
     case 1:
       VS::Menu::textBoxBufferIndex = 3;

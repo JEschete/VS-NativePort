@@ -26,7 +26,7 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Render/Palette.h"
+#include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.hpp"
 
@@ -102,7 +102,8 @@ u_char StateBits(int state) {
 }
 
 AppearanceColors ColorsFrom(const ColorBytes& color, u_char fade_level,
-                            u_char fade_target, const Render_ColorCode& tint) {
+                            u_char fade_target,
+                            const VS::Render::ColorCode& tint) {
   AppearanceColors colors;
   std::copy_n(color.begin(), colors.rgb.size(), colors.rgb.begin());
   colors.delay = color[kDelayByte];

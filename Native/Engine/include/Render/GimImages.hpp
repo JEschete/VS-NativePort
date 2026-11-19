@@ -177,7 +177,7 @@ bool ConfigureGimLayer(GimImageSet& set, std::size_t layer,
 [[nodiscard]] bool UpdateGimImageSet(GimImageSet& set, GimHost& host);
 
 // What a routine draws with: the layer's CLUT word (getClut << 16), the
-// image's pages and the frame being drawn (Render_frameBuf).
+// image's pages and the frame being drawn (VS::Render::frameBuf).
 struct GimTexture {
   std::uint32_t clut_word = 0;
   std::uint8_t first_page = 0;

@@ -8,12 +8,12 @@
 #include <span>
 
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 
 namespace {
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
@@ -26,16 +26,16 @@ class LiveRegionTarget final : public VS::Render::RegionQuadTarget {
  public:
   void Draw(const VS::Render::RegionQuad& quad) override {
     const auto base = reinterpret_cast<std::uintptr_t>(
-        Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
-    const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+        VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1]);
+    const auto cursor = reinterpret_cast<std::uintptr_t>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     if (base == 0 || cursor < base ||
         cursor - base > kPrimitiveBufferBytes - sizeof(POLY_GT4) ||
-        Render_frameScratch.orderingTable == nullptr) {
+        VS::Render::FrameScratchpad().ordering_table == nullptr) {
       return;
     }
     auto* primitive =
-        static_cast<POLY_GT4*>(Render_frameScratch.primitiveCursor);
+        static_cast<POLY_GT4*>(VS::Render::FrameScratchpad().primitive_cursor);
     std::memset(primitive, 0, sizeof *primitive);
     setPolyGT4(primitive);
     setXY4(primitive, quad.left, quad.top, quad.right, quad.top, quad.left,
@@ -51,21 +51,22 @@ class LiveRegionTarget final : public VS::Render::RegionQuadTarget {
     setSemiTrans(primitive, 1);
     primitive->clut = quad.clut;
     primitive->tpage = quad.texture_page;
-    AddPrim(static_cast<unsigned char*>(Render_frameScratch.orderingTable) -
+    AddPrim(static_cast<unsigned char*>(
+                VS::Render::FrameScratchpad().ordering_table) -
                 kOrderingOffsetBytes,
             primitive);
-    Render_frameScratch.primitiveCursor = primitive + 1;
+    VS::Render::FrameScratchpad().primitive_cursor = primitive + 1;
   }
 };
 
 // Copied code builds with unsigned plain char (/J); read the atlas bytes as
 // unsigned whatever this translation unit uses.
-VS::Render::TextureRegion Region(const Render_TextureRegion& region) {
-  return {static_cast<std::uint8_t>(region.x),
-          static_cast<std::uint8_t>(region.y),
-          static_cast<std::uint8_t>(region.w),
-          static_cast<std::uint8_t>(region.h),
-          region.tpage,
+VS::Render::TextureRegion Region(const VS::Render::TextureRegion& region) {
+  return {static_cast<std::uint8_t>(region.u),
+          static_cast<std::uint8_t>(region.v),
+          static_cast<std::uint8_t>(region.width),
+          static_cast<std::uint8_t>(region.height),
+          region.texture_page,
           region.clut};
 }
 
@@ -75,7 +76,7 @@ VS::Render::RegionColor Color(const CVECTOR& color) {
 
 // The region and color pair a live draw names, or false when either lies
 // outside its array.
-bool Resolve(std::span<const Render_TextureRegion> atlas, int region_id,
+bool Resolve(std::span<const VS::Render::TextureRegion> atlas, int region_id,
              std::span<const CVECTOR> colors, VS::Render::TextureRegion& region,
              std::array<VS::Render::RegionColor, 2>& pair) {
   if (region_id < 0 || static_cast<std::size_t>(region_id) >= atlas.size() ||
@@ -89,8 +90,8 @@ bool Resolve(std::span<const Render_TextureRegion> atlas, int region_id,
 }  // namespace
 
 namespace VS::Render {
-void DrawLiveTextureTintFade(std::span<const Render_TextureRegion> atlas, int x,
-                             int y, int region_id,
+void DrawLiveTextureTintFade(std::span<const VS::Render::TextureRegion> atlas,
+                             int x, int y, int region_id,
                              std::span<const CVECTOR> colors) {
   TextureRegion region;
   std::array<RegionColor, 2> pair;
@@ -101,7 +102,7 @@ void DrawLiveTextureTintFade(std::span<const Render_TextureRegion> atlas, int x,
   DrawTextureTintFade(region, x, y, pair, target);
 }
 
-void DrawLiveTextureFlashFade(std::span<const Render_TextureRegion> atlas,
+void DrawLiveTextureFlashFade(std::span<const VS::Render::TextureRegion> atlas,
                               int x, int y, int region_id,
                               std::span<const CVECTOR> colors) {
   TextureRegion region;
@@ -113,9 +114,9 @@ void DrawLiveTextureFlashFade(std::span<const Render_TextureRegion> atlas,
   DrawTextureFlashFade(region, x, y, pair, target);
 }
 
-void DrawLiveTextureWipe(std::span<const Render_TextureRegion> atlas, int x,
-                         int y, int region_id, std::span<const CVECTOR> colors,
-                         int wipe_edge_x) {
+void DrawLiveTextureWipe(std::span<const VS::Render::TextureRegion> atlas,
+                         int x, int y, int region_id,
+                         std::span<const CVECTOR> colors, int wipe_edge_x) {
   TextureRegion region;
   std::array<RegionColor, 2> pair;
   if (!Resolve(atlas, region_id, colors, region, pair)) {

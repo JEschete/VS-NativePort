@@ -19,7 +19,7 @@
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Render.h"
+#include "Render/Render.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -66,7 +66,7 @@ class LiveProgressHost final : public ProgressHost {
         static_cast<std::int32_t>(sizeof Battle_unusedMenu9CursorMemory));
   }
   void BackupCamera() override {
-    auto* scratch = static_cast<Render_FrameScratch*>(Core::ScratchBase());
+    auto* scratch = static_cast<VS::Render::FrameScratch*>(Core::ScratchBase());
     Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraPositionBackup,
                                        &scratch->camera.position,
                                        sizeof Menu_Score_cameraPositionBackup);

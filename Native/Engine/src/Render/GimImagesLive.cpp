@@ -21,7 +21,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -307,7 +307,7 @@ void UpdateLiveGimImages() {
       continue;
     }
     LivePacketQueue queue(chain);
-    DrawGimLayer(queue, *live_set, layer, Render_frameBuf);
+    DrawGimLayer(queue, *live_set, layer, frameBuf);
   }
 }
 

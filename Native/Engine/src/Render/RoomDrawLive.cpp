@@ -10,10 +10,10 @@
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Display.hpp"
+#include "Render/Frame.hpp"
+#include "Render/Render.hpp"
+#include "Render/UiPrimitives.hpp"
 
 namespace VS::Render {
 namespace {
@@ -78,8 +78,7 @@ class LiveRoomTransformer final : public RoomTransformer {
 };
 
 [[nodiscard]] std::uintptr_t FrameBufferBase() {
-  return reinterpret_cast<std::uintptr_t>(
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
+  return reinterpret_cast<std::uintptr_t>(legacyPrimitiveBuffers[frameBuf & 1]);
 }
 
 // Packets linked into the frame's ordering table from the primitive cursor,
@@ -89,9 +88,9 @@ class LiveRoomPacketQueue final : public RoomPacketQueue {
   explicit LiveRoomPacketQueue(std::size_t budget) {
     const std::uintptr_t base = FrameBufferBase();
     begin_ =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+        reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
     if (base == 0 || begin_ < base || begin_ - base > kPrimitiveBufferBytes ||
-        Render_frameScratch.orderingTable == nullptr) {
+        FrameScratchpad().ordering_table == nullptr) {
       return;
     }
     limit_ = begin_ + std::min(budget, kPrimitiveBufferBytes - (begin_ - base));
@@ -105,17 +104,17 @@ class LiveRoomPacketQueue final : public RoomPacketQueue {
   bool Emit(std::span<const std::uint32_t> packet,
             std::uint32_t depth) override {
     const auto cursor =
-        reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+        reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
     if (!ready_ || packet.empty() || cursor < begin_ || cursor > limit_ ||
         packet.size_bytes() > limit_ - cursor) {
       return false;
     }
-    auto* slot = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+    auto* slot = static_cast<u_long*>(FrameScratchpad().primitive_cursor);
     std::ranges::copy(packet, slot);
     setlen(slot, packet.size() - 1);
-    AddPrim(static_cast<u_long*>(Render_frameScratch.orderingTable) + depth,
+    AddPrim(static_cast<u_long*>(FrameScratchpad().ordering_table) + depth,
             slot);
-    Render_frameScratch.primitiveCursor = slot + packet.size();
+    FrameScratchpad().primitive_cursor = slot + packet.size();
     return true;
   }
 
@@ -149,14 +148,14 @@ RoomClipState& LiveRoomClipState() {
 }
 
 RoomCamera LiveRoomCamera() {
-  const MATRIX& view = Render_frameScratch.viewMatrix;
+  const MATRIX& view = FrameScratchpad().view_matrix;
   RoomCamera camera;
   camera.view.rotation = Math::MatrixOf(view);
   camera.view.translation = {static_cast<std::int32_t>(view.t[0]),
                              static_cast<std::int32_t>(view.t[1]),
                              static_cast<std::int32_t>(view.t[2])};
-  camera.scale = Render_frameScratch.camera.farClip;
-  camera.roll = static_cast<std::int32_t>(Render_frameScratch.camera.angles.vz);
+  camera.scale = FrameScratchpad().camera.far_clip;
+  camera.roll = static_cast<std::int32_t>(FrameScratchpad().camera.angles.vz);
   return camera;
 }
 
@@ -189,7 +188,7 @@ RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
     return RoomDrawStatus::kInvalidGeometry;
   }
   LiveRoomTransformer transformer;
-  const RoomDrawPass pass{mode, Render_frameScratch.firstPersonViewFacing};
+  const RoomDrawPass pass{mode, FrameScratchpad().first_person_view_facing};
   const RoomDrawStatus status = DrawRoomGeometry(
       BytesOf(geometry, bytes), pass, LiveRoomClipState(), transformer, queue);
   if (status == RoomDrawStatus::kInvalidGeometry) {
@@ -251,13 +250,13 @@ bool TintLiveRoomGeometryPrimitives(void* start, void* end,
   return true;
 }
 
-Render_ScreenOffset GetLiveProjectionScreenOffset() {
+VS::Render::ScreenOffset GetLiveProjectionScreenOffset() {
   const LiveRoomTransformer transformer;
   const RoomScreenOffset offset = GetProjectionScreenOffset(transformer);
   return {offset.x, offset.y};
 }
 
-void SetLiveProjectionScreenOffset(const Render_ScreenOffset& offset) {
+void SetLiveProjectionScreenOffset(const VS::Render::ScreenOffset& offset) {
   LiveRoomTransformer transformer;
   SetProjectionScreenOffset(transformer, {offset.x, offset.y});
 }

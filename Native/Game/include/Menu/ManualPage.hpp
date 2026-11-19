@@ -17,7 +17,7 @@
 // (ManualPageLive.cpp).
 namespace VS::Menu::manual {
 // Ordering-table slots relative to the frame's scene table
-// (Render_frameScratch.orderingTable).
+// (VS::Render::FrameScratchpad().ordering_table).
 inline constexpr std::int32_t kPageContentSlot = 0;
 // The page background and the control hint boxes.
 inline constexpr std::int32_t kPagePanelSlot = 7;

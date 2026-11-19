@@ -17,13 +17,13 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
-#include "Render/Display.h"
+#include "Render/Display.hpp"
 #include "Render/DisplayControl.hpp"
-#include "Render/Frame.h"
-#include "Render/Images.h"
-#include "Render/Render.h"
+#include "Render/Frame.hpp"
+#include "Render/Images.hpp"
+#include "Render/Render.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -114,10 +114,10 @@ inline constexpr u_long kLiveEnd = 0xFFFFFF;
 // A frame whose primitives land in `storage`, and the time-attack state the
 // Live entries read, restored afterwards.
 struct LiveTimeAttackFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
+  VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
+  void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
+  void* saved_ordering = VS::Render::legacyOrderingTables[0];
+  int saved_framebuffer = VS::Render::frameBuf;
   u_char saved_course = Audio_Seq_unusedStateFlags.timeAttackBoss;
   State_ScoreData saved_scores = Audio_Seq_unusedScoredata;
   int saved_time = Menu_Results_timeTrialTime;
@@ -128,10 +128,10 @@ struct LiveTimeAttackFixture {
 
   LiveTimeAttackFixture() { Reset(); }
   ~LiveTimeAttackFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
+    VS::Render::FrameScratchpad() = saved_frame;
+    VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
+    VS::Render::legacyOrderingTables[0] = saved_ordering;
+    VS::Render::frameBuf = saved_framebuffer;
     Audio_Seq_unusedStateFlags.timeAttackBoss = saved_course;
     Audio_Seq_unusedScoredata = saved_scores;
     Menu_Results_timeTrialTime = saved_time;
@@ -145,26 +145,27 @@ struct LiveTimeAttackFixture {
   void Reset() {
     std::ranges::fill(storage, 0);
     std::ranges::fill(ordering, kLiveEnd);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch = {};
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
-    Render_frameScratch.overlayOrderingTable =
+    VS::Render::frameBuf = 0;
+    VS::Render::legacyOrderingTables[0] = ordering.data();
+    VS::Render::legacyPrimitiveBuffers[0] = storage.data();
+    VS::Render::FrameScratchpad() = {};
+    VS::Render::FrameScratchpad().primitive_cursor = storage.data();
+    VS::Render::FrameScratchpad().ordering_table =
+        ordering.data() + kLiveSceneHead;
+    VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kLiveOverlayHead;
   }
   // The primitives written so far followed by the whole ordering table, so a
   // replay must also link them into the same entries.
   [[nodiscard]] std::vector<u_long> Frame() const {
-    const auto* const cursor =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+    const auto* const cursor = static_cast<const u_long*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     std::vector<u_long> words(storage.data(), cursor);
     words.insert(words.end(), ordering.begin(), ordering.end());
     return words;
   }
   [[nodiscard]] bool Empty() const {
-    return Render_frameScratch.primitiveCursor == storage.data();
+    return VS::Render::FrameScratchpad().primitive_cursor == storage.data();
   }
 };
 

@@ -656,7 +656,8 @@ TEST_CASE("Time-attack production fixture restores its caller resources",
   }
   CheckRestoredTerminalState(settings);
   CHECK(Battle_characterState == &outer.actor);
-  CHECK(Render_frameScratch.primitiveCursor == outer.frame.storage.data());
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        outer.frame.storage.data());
   CHECK(memory::LivePayloadCapacity(allocation).has_value());
   CHECK(render::LiveTexturePages()[25] ==
         render::TexturePage{render::TexturePageState::kOwned, 9});

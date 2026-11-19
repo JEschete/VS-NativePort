@@ -17,11 +17,11 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/FramebufferEffects.h"
+#include "Render/Display.hpp"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlay.hpp"
 #include "Render/ScreenOverlayLive.hpp"
-#include "Render/ScreenTransition.h"
+#include "Render/ScreenTransition.hpp"
 
 namespace {
 namespace Render = VS::Render;
@@ -129,7 +129,7 @@ class LiveOverlayGuard {
     VS::Field::screenTransitionEffect = effect_;
     VS::Field::screenTransitionWipeAngle = angle_;
     VS::Field::screenTransitionSpeed = speed_;
-    Render_frameBuf = frame_buffer_;
+    VS::Render::frameBuf = frame_buffer_;
     Core_Gte_Reset();
   }
 
@@ -139,7 +139,7 @@ class LiveOverlayGuard {
   int effect_ = VS::Field::screenTransitionEffect;
   int angle_ = VS::Field::screenTransitionWipeAngle;
   int speed_ = VS::Field::screenTransitionSpeed;
-  int frame_buffer_ = Render_frameBuf;
+  int frame_buffer_ = VS::Render::frameBuf;
 };
 
 // The packets linked at `entry`, in the order the GPU runs them.
@@ -698,9 +698,9 @@ TEST_CASE("Live framebuffer effect links flat strips and frees its block",
           arena{};
   const VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   const LiveOverlayGuard guard;
-  Render_frameBuf = 1;
+  VS::Render::frameBuf = 1;
   const CVECTOR tint{10, 20, 30, 0};
-  Render_FramebufferEffectTranslation offset{8, -4, 0, 0};
+  VS::Render::FramebufferEffectTranslation offset{8, -4, 0, 0};
   Render::SetLiveFramebufferEffectTint(&tint);
   Render::SetLiveFramebufferEffectOffset(&offset);
   Render::SetLiveFramebufferEffectBlendMode(1);
@@ -727,8 +727,8 @@ TEST_CASE("Live framebuffer effect places scaled strips through the GTE",
           arena{};
   const VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   const LiveOverlayGuard guard;
-  Render_frameBuf = 0;
-  Render_FramebufferEffectTranslation scale{0x2000, 0x2000, 0, 0};
+  VS::Render::frameBuf = 0;
+  VS::Render::FramebufferEffectTranslation scale{0x2000, 0x2000, 0, 0};
   Render::SetLiveFramebufferEffectScale(&scale);
   Render::SetLiveFramebufferEffectDepth(1);
   Render::SetLiveFramebufferEffectEnabled(1);
@@ -803,14 +803,14 @@ TEST_CASE("Live screen transition steps without an ordering table",
 TEST_CASE("Live framebuffer effect scale reader writes only its fields",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
-  Render_FramebufferEffectTranslation scale{0x2000, 0x800, 5, 6};
+  VS::Render::FramebufferEffectTranslation scale{0x2000, 0x800, 5, 6};
   Render::SetLiveFramebufferEffectScale(&scale);
-  Render_FramebufferEffectTranslation read{1, 2, 3, 4};
+  VS::Render::FramebufferEffectTranslation read{1, 2, 3, 4};
   Render::ReadLiveFramebufferEffectScale(&read);
   CHECK(read.x == 0x2000);
   CHECK(read.y == 0x2000);
-  CHECK(read.reserved8 == 0);
-  CHECK(read.reservedC == 4);
+  CHECK(read.reserved08 == 0);
+  CHECK(read.reserved0c == 4);
 }
 
 TEST_CASE("Live framebuffer effect tint reader keeps the code byte",
@@ -829,14 +829,14 @@ TEST_CASE("Live framebuffer effect tint reader keeps the code byte",
 TEST_CASE("Live framebuffer effect offset reader writes only x and y",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
-  Render_FramebufferEffectTranslation offset{-9, 11, 12, 13};
+  VS::Render::FramebufferEffectTranslation offset{-9, 11, 12, 13};
   Render::SetLiveFramebufferEffectOffset(&offset);
-  Render_FramebufferEffectTranslation offset_read{1, 2, 3, 4};
+  VS::Render::FramebufferEffectTranslation offset_read{1, 2, 3, 4};
   Render::ReadLiveFramebufferEffectOffset(&offset_read);
   CHECK(offset_read.x == -9);
   CHECK(offset_read.y == 11);
-  CHECK(offset_read.reserved8 == 3);
-  CHECK(offset_read.reservedC == 4);
+  CHECK(offset_read.reserved08 == 3);
+  CHECK(offset_read.reserved0c == 4);
 }
 
 TEST_CASE("Live framebuffer effect setters update the settings",
@@ -858,7 +858,7 @@ TEST_CASE("Live framebuffer effect setters update the settings",
 TEST_CASE("Live screen transition fades the frame being built",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
-  Render_frameBuf = 1;
+  VS::Render::frameBuf = 1;
   VS::Field::screenTransitionAlpha = 100;
   VS::Field::screenTransitionStep = 1;
   VS::Field::screenTransitionEffect = 0;
@@ -870,10 +870,10 @@ TEST_CASE("Live screen transition fades the frame being built",
   CHECK(VS::Field::screenTransitionStep == 1);
   const auto chain = Chain(&ordering[1], &ordering[0]);
   REQUIRE(chain.size() == 2);
-  CHECK(chain[0] == &Render_legacyTransitionDrawModes[1]);
+  CHECK(chain[0] == &VS::Render::legacyTransitionDrawModes[1]);
   CheckDrawMode(chain[0], 0x40);
-  REQUIRE(chain[1] == &Render_legacyTransitionFadePackets[1]);
-  const POLY_F4& quad = Render_legacyTransitionFadePackets[1];
+  REQUIRE(chain[1] == &VS::Render::legacyTransitionFadePackets[1]);
+  const POLY_F4& quad = VS::Render::legacyTransitionFadePackets[1];
   CHECK((getcode(&quad) & 2) == 2);
   CHECK(RgbOf(quad) == std::array<int, 3>{100, 100, 100});
   CheckQuad(quad, {ScreenVertex{0, 0}, ScreenVertex{320, 0},
@@ -883,7 +883,7 @@ TEST_CASE("Live screen transition fades the frame being built",
 TEST_CASE("Live screen transition wipes across the centred band",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
-  Render_frameBuf = 0;
+  VS::Render::frameBuf = 0;
   VS::Field::screenTransitionAlpha = 255;
   VS::Field::screenTransitionStep = 1;
   VS::Field::screenTransitionEffect = 2;
@@ -896,11 +896,11 @@ TEST_CASE("Live screen transition wipes across the centred band",
   CHECK(VS::Field::screenTransitionStep == 1);
   const auto chain = Chain(&ordering[1], &ordering[0]);
   REQUIRE(chain.size() == 4);
-  CHECK(chain[0] == &Render_legacyTransitionDrawModes[0]);
+  CHECK(chain[0] == &VS::Render::legacyTransitionDrawModes[0]);
   CheckDrawMode(chain[0], 0x40);
-  CHECK(chain[1] == &Render_legacyTransitionEdgePackets[0]);
-  CHECK(chain[2] == &Render_legacyTransitionWipePackets[0].edgeQuad);
-  CHECK(chain[3] == &Render_legacyTransitionWipePackets[0].coveredQuad);
+  CHECK(chain[1] == &VS::Render::legacyTransitionEdgePackets[0]);
+  CHECK(chain[2] == &VS::Render::legacyTransitionWipePackets[0].edge_quad);
+  CHECK(chain[3] == &VS::Render::legacyTransitionWipePackets[0].covered_quad);
   const auto column = [](std::int16_t x) {
     return std::array<ScreenVertex, 2>{ScreenVertex{x, -80},
                                        ScreenVertex{x, 320}};
@@ -911,11 +911,11 @@ TEST_CASE("Live screen transition wipes across the centred band",
     return std::array<ScreenVertex, 4>{left_column[0], right_column[0],
                                        left_column[1], right_column[1]};
   };
-  CheckQuad(Render_legacyTransitionWipePackets[0].coveredQuad,
+  CheckQuad(VS::Render::legacyTransitionWipePackets[0].covered_quad,
             quad_between(-200, 80));
-  CheckQuad(Render_legacyTransitionWipePackets[0].edgeQuad,
+  CheckQuad(VS::Render::legacyTransitionWipePackets[0].edge_quad,
             quad_between(80, 360));
-  CheckQuad(Render_legacyTransitionEdgePackets[0], quad_between(360, 520));
+  CheckQuad(VS::Render::legacyTransitionEdgePackets[0], quad_between(360, 520));
 }
 
 TEST_CASE("Screen overlay functions no longer resolve by module address",

@@ -60,8 +60,8 @@
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/Loadout.h"
-#include "Render/Camera.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Camera.hpp"
+#include "Render/UiPrimitives.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
@@ -241,8 +241,8 @@ struct RuntimeFixture {
   decltype(VS::Field::zoneContext) zone = VS::Field::zoneContext;
   decltype(Field_roomData) room = Field_roomData;
   decltype(VS::Field::sphericalCamera) camera = VS::Field::sphericalCamera;
-  decltype(Render_frameScratch.camera) rendered_camera =
-      Render_frameScratch.camera;
+  decltype(VS::Render::FrameScratchpad().camera) rendered_camera =
+      VS::Render::FrameScratchpad().camera;
   decltype(std::to_array(State_recentRoomEnemyStates)) caches =
       std::to_array(State_recentRoomEnemyStates);
   decltype(std::to_array(State_learnedActionFlags)) learned =
@@ -267,8 +267,8 @@ struct RuntimeFixture {
   int current_cache = State_currentRoomStateSlot;
   int gameplay = Boot_isGameplayActive;
   int clear_pending = Boot_isClearSavePending;
-  int near_clip = Render_nearClip;
-  int projection = Render_projectionDistance;
+  int near_clip = VS::Render::nearClip;
+  int projection = VS::Render::projectionDistance;
   int first_person = VS::Field::isFirstPersonViewEnabled;
   unsigned control_mode = Field_controlMode;
   int interaction_paused = VS::Field::isInteractionPaused;
@@ -394,12 +394,12 @@ struct RuntimeFixture {
     VS::Field::sphericalCamera.delta.pitch = 2050;
     VS::Field::sphericalCamera.initialDistance = 1536;
     VS::Field::sphericalCamera.delta.mode = 1;
-    Render_nearClip = 64;
-    Render_projectionDistance = 512;
-    Render_frameScratch.camera = {};
-    Render_frameScratch.camera.farClip = ONE;
-    Render_frameScratch.camera.lookAt = {100000, -200000, 300000, 0};
-    Render_frameScratch.camera.angles = {-384, 1027, 0, 0};
+    VS::Render::nearClip = 64;
+    VS::Render::projectionDistance = 512;
+    VS::Render::FrameScratchpad().camera = {};
+    VS::Render::FrameScratchpad().camera.far_clip = ONE;
+    VS::Render::FrameScratchpad().camera.look_at = {100000, -200000, 300000, 0};
+    VS::Render::FrameScratchpad().camera.angles = {-384, 1027, 0, 0};
     UpdateOrbitPosition();
   }
 
@@ -614,7 +614,7 @@ struct RuntimeFixture {
     VS::Field::zoneContext = zone;
     Field_roomData = room;
     VS::Field::sphericalCamera = camera;
-    Render_frameScratch.camera = rendered_camera;
+    VS::Render::FrameScratchpad().camera = rendered_camera;
     std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
@@ -631,8 +631,8 @@ struct RuntimeFixture {
     VS::Battle::Ai::LiveFrameContext().randomState = frame_random;
     State_currentRoomStateSlot = current_cache;
     Boot_isGameplayActive = gameplay;
-    Render_nearClip = near_clip;
-    Render_projectionDistance = projection;
+    VS::Render::nearClip = near_clip;
+    VS::Render::projectionDistance = projection;
     VS::Field::isFirstPersonViewEnabled = first_person;
     Field_controlMode = control_mode;
     VS::Field::isInteractionPaused = interaction_paused;
@@ -674,15 +674,15 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::State::playTime);
   Append(bytes, VS::State::sceneTimer);
   Append(bytes, VS::Field::sphericalCamera);
-  Append(bytes, Render_frameScratch.camera);
+  Append(bytes, VS::Render::FrameScratchpad().camera);
   Append(bytes, VS::Field::zoneContext);
   Append(bytes, Field_roomData);
   Append(bytes, VS::Field::isFirstPersonViewEnabled);
   Append(bytes, Field_controlMode);
   Append(bytes, VS::Field::isInteractionPaused);
   Append(bytes, VS::Field::cameraTransition != nullptr);
-  Append(bytes, Render_nearClip);
-  Append(bytes, Render_projectionDistance);
+  Append(bytes, VS::Render::nearClip);
+  Append(bytes, VS::Render::projectionDistance);
   Append(bytes, fixture.player_stats);
   Append(bytes, fixture.player_model);
   Append(bytes, fixture.enemy_stats);
@@ -941,11 +941,11 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 10) VS::Field::sphericalCamera.values.pitch = -768;
   if (defect == 22) VS::Field::sphericalCamera.delta.mode = 2;
   if (defect == 23) VS::Field::sphericalCamera.delta.yaw = 1;
-  if (defect == 24) ++Render_frameScratch.camera.position.vx;
-  if (defect == 25) Render_frameScratch.camera.angles.vz = 1;
-  if (defect == 26) Render_nearClip = 128;
+  if (defect == 24) ++VS::Render::FrameScratchpad().camera.position.vx;
+  if (defect == 25) VS::Render::FrameScratchpad().camera.angles.vz = 1;
+  if (defect == 26) VS::Render::nearClip = 128;
   if (defect == 27) VS::Field::sphericalCamera.values.pitch = 1024;
-  if (defect == 28) Render_projectionDistance = 256;
+  if (defect == 28) VS::Render::projectionDistance = 256;
   if (defect == 29) VS::Field::sphericalCamera.delta.distance = 65;
   if (defect == 30) VS::Field::cameraTransition = &fixture.camera_transition;
 }
@@ -1383,7 +1383,7 @@ void CheckRestoredClockCamera() {
   CHECK(VS::State::sceneTimer.frames == 29);
   CHECK(VS::State::sceneTimer.seconds == 17);
   CHECK(VS::Field::sphericalCamera.values.yaw == 1027);
-  CHECK(Render_frameScratch.camera.angles.vy == 1027);
+  CHECK(VS::Render::FrameScratchpad().camera.angles.vy == 1027);
   CHECK(VS::Field::sphericalCamera.initialDistance == 1536);
 }
 
@@ -1439,8 +1439,8 @@ void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
   VS::Field::sphericalCamera.initialDistance = 2304;
   VS::Field::sphericalCamera.zoomVelocity = 48;
   VS::Field::sphericalCamera.speed = 24;
-  Render_frameScratch.camera.lookAt = {111111, -333333, 222222, 0};
-  Render_frameScratch.camera.angles = {-764, 1027, 0, 0};
+  VS::Render::FrameScratchpad().camera.look_at = {111111, -333333, 222222, 0};
+  VS::Render::FrameScratchpad().camera.angles = {-764, 1027, 0, 0};
   fixture.UpdateOrbitPosition();
 }
 
@@ -1461,17 +1461,20 @@ void CheckStaticLayer(const RuntimeFixture& fixture,
 }
 
 void CheckOrbitRestored(const Field_SphericalCamera& expected,
-                        const Render_Camera& rendered) {
+                        const VS::Render::Camera& rendered) {
   CHECK(std::memcmp(&VS::Field::sphericalCamera, &expected, sizeof(expected)) ==
         0);
-  CHECK(Render_frameScratch.camera.position.vx == rendered.position.vx);
-  CHECK(Render_frameScratch.camera.position.vy == rendered.position.vy);
-  CHECK(Render_frameScratch.camera.position.vz == rendered.position.vz);
-  CHECK(Render_frameScratch.camera.lookAt.vx == rendered.lookAt.vx);
-  CHECK(Render_frameScratch.camera.lookAt.vy == rendered.lookAt.vy);
-  CHECK(Render_frameScratch.camera.lookAt.vz == rendered.lookAt.vz);
-  CHECK(Render_frameScratch.camera.angles.vx == rendered.angles.vx);
-  CHECK(Render_frameScratch.camera.angles.vy == rendered.angles.vy);
+  CHECK(VS::Render::FrameScratchpad().camera.position.vx ==
+        rendered.position.vx);
+  CHECK(VS::Render::FrameScratchpad().camera.position.vy ==
+        rendered.position.vy);
+  CHECK(VS::Render::FrameScratchpad().camera.position.vz ==
+        rendered.position.vz);
+  CHECK(VS::Render::FrameScratchpad().camera.look_at.vx == rendered.look_at.vx);
+  CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == rendered.look_at.vy);
+  CHECK(VS::Render::FrameScratchpad().camera.look_at.vz == rendered.look_at.vz);
+  CHECK(VS::Render::FrameScratchpad().camera.angles.vx == rendered.angles.vx);
+  CHECK(VS::Render::FrameScratchpad().camera.angles.vy == rendered.angles.vy);
 }
 
 void CheckCanceledStaticResume(const RuntimeFixture& fixture,
@@ -1491,7 +1494,7 @@ TEST_CASE("Schema3 resumes both static floors and a settled nondefault orbit",
   ConfigureStaticOrbit(fixture, GENERATE(0u, 1u));
   const auto before = LiveFingerprint(fixture);
   const auto camera = VS::Field::sphericalCamera;
-  const auto rendered = Render_frameScratch.camera;
+  const auto rendered = VS::Render::FrameScratchpad().camera;
   const auto state = fixture.Capture();
   CHECK(LiveFingerprint(fixture) == before);
   const auto encoded = Save::Encode({1, 0, state});
@@ -1506,7 +1509,7 @@ TEST_CASE("Schema3 resumes both static floors and a settled nondefault orbit",
     fixture.player_model.instance.previousTileLayer = 0;
     fixture.player_model.savedPlacement = 0;
     VS::Field::sphericalCamera = {};
-    Render_frameScratch.camera.lookAt = {};
+    VS::Render::FrameScratchpad().camera.look_at = {};
     REQUIRE(Save::FinishResume().has_value());
     CheckStaticLayer(fixture, state);
     CheckOrbitRestored(camera, rendered);

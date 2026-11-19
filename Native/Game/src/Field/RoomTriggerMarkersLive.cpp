@@ -17,7 +17,7 @@
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Field/TriggerMarkers.h"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.h"
+#include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
 namespace {

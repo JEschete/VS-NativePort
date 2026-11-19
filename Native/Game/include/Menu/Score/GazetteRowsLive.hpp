@@ -6,8 +6,8 @@
 struct Menu_Framework_MenuRow;
 
 // Binds the gazette rows (GazetteRows.hpp) to the frame's primitive buffer
-// and overlay ordering table (Render_frameScratch), vs_main_frameBuf
-// (Render_frameBuf), the menu framework's rows and cursor memory
+// and overlay ordering table (VS::Render::FrameScratchpad()), vs_main_frameBuf
+// (VS::Render::frameBuf), the menu framework's rows and cursor memory
 // (VS::Menu::Framework::menuMemory), the cursor memory setting
 // (VS::Input::settings), the gazette's remembered row
 // (Battle_unusedMenu9CursorMemory) and the top menu strings
