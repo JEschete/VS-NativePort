@@ -14,7 +14,8 @@ unit, cached in build\\naming\\native_refs.json. The `note` column gives the nat
 `--resolve` settles the low-confidence fields and globals that production native code never reads (no use, only
 writes, or only copies into members that are themselves never read): it records that meaning at `med` with a
 `native-refs:` note and a `source:native:` citation (Docs\\NAMING_CONVENTIONS.md §10.1). Rows that native code
-reads stay in the queue for tracing. See #347 and #445.
+reads stay in the queue for tracing. See #347 and #445. Every run recomputes those citations' lines from the index
+and lists, for review, recorded findings whose native use has since changed (#457).
 """
 from __future__ import annotations
 
@@ -36,6 +37,7 @@ TESTS = "Native\\Tests\\"
 PRIORITY = {"opaque": 1, "low-named": 2, "global": 2, "type": 3, "reserved": 4}
 COLUMNS = ["id", "kind", "priority", "name", "original", "offset", "current_meaning", "touched_by", "watch", "note"]
 ANCHOR = re.compile(r"unk([0-9A-Fa-f]+)(?:_(\d+))?")
+CITATION = re.compile(r"native-refs:(?P<use>[\w-]+);source:native:[^;]+:\d+")
 UNREAD = ("none", "write-only", "copy-only")
 MEANING = {
     "none": "Not used by native code; kept for the original layout",
@@ -305,6 +307,42 @@ def resolve(native: Native, fields: list[dict], types: list[dict], data: list[di
     return counts
 
 
+def refresh(native: Native, fields: list[dict], types: list[dict], data: list[dict]) -> tuple[collections.Counter,
+                                                                                               list[str]]:
+    """Recompute the `source:native:` line of every recorded native finding from the current index: edits to the
+    cited file move it (#457). A row whose native declaration is gone or whose use class changed keeps its note and
+    is returned for review instead, since its recorded meaning may no longer hold. Retired types and globals keep
+    the evidence they were retired with."""
+    type_by_id = {row["id"]: row for row in types}
+    by_type = collections.defaultdict(list)
+    for row in fields:
+        by_type[row["type_id"]].append(row)
+    counts: collections.Counter = collections.Counter()
+    review: list[str] = []
+
+    def update(row: dict, usr: str | None) -> None:
+        match = CITATION.match(row["notes"])
+        use = native.classify(usr)
+        if use != match["use"]:
+            counts["review"] += 1
+            review.append(f"{row['id']}: recorded {match['use']}, native {use}")
+            return
+        citation = native.evidence(usr, use)
+        if citation != match[0]:
+            row["notes"] = citation + row["notes"][match.end():]
+            counts["refreshed"] += 1
+
+    for row in fields:
+        type_row = type_by_id.get(row["type_id"])
+        if CITATION.match(row["notes"]) and type_row and type_row["copied"] != "retired":
+            names = {member["final_name"] for member in by_type[row["type_id"]]}
+            update(row, native.member(native.record(type_row, names), row))
+    for row in data:
+        if CITATION.match(row["notes"]) and row["copied"] != "retired":
+            update(row, native.variable(row))
+    return counts, review
+
+
 def queue(native: Native, labels: Labels, fields: list[dict], types: list[dict], data: list[dict]) -> list[list]:
     type_by_id = {row["id"]: row for row in types}
     by_type = collections.defaultdict(list)
@@ -362,9 +400,14 @@ def main() -> int:
     _catalog_columns, catalog = read("FUNCTION_CATALOG.csv")
     if args.resolve:
         counts = resolve(native, fields, types, data)
+        print("resolved:", dict(sorted(counts.items())))
+    refreshed, review = refresh(native, fields, types, data)
+    if args.resolve or refreshed["refreshed"]:
         write("FIELD_LEDGER.csv", field_columns, fields)
         write("DATA_LEDGER.csv", data_columns, data)
-        print("resolved:", dict(sorted(counts.items())))
+    print(f"native citations: {refreshed['refreshed']} refreshed, {len(review)} to review")
+    for line in review:
+        print(f"  review {line}")
     if not UPSTREAM.is_dir():
         print(f"warning: {UPSTREAM} is missing; functions without a func_ address are listed without one")
     rows = queue(native, Labels(catalog), fields, types, data)

@@ -1,4 +1,4 @@
-"""Tests for the native-evidence classification and resolution in trace_queue.py (#445)."""
+"""Tests for the native-evidence classification, resolution and citation refresh in trace_queue.py (#445, #457)."""
 from __future__ import annotations
 
 import sys
@@ -96,6 +96,39 @@ class ResolveTests(unittest.TestCase):
         counts = trace_queue.resolve(trace_queue.Native(index()), fields, [dict(TYPE, copied="retired")], data)
         self.assertEqual(dict(counts), {})
         self.assertEqual(fields[0]["confidence"], "low")
+
+
+class RefreshTests(unittest.TestCase):
+    def test_citations_follow_the_index_and_changed_classes_are_reported(self):
+        fields = [
+            member_row("unused", "Not used", f"native-refs:none;source:native:{HEADER}:99;source:rec.c:1"),
+            member_row("written", "Written", f"native-refs:write-only;source:native:{SOURCE}:11"),
+            member_row("read", "Not used", f"native-refs:none;source:native:{HEADER}:1"),
+            member_row("gone", "Not used", f"native-refs:none;source:native:{HEADER}:3"),
+        ]
+        data = [{"id": "G00001", "name": "D_80010000", "final_name": "Rec_global", "copied": "x",
+                 "notes": f"native-refs:write-only;source:native:{SOURCE}:2"}]
+        counts, review = trace_queue.refresh(trace_queue.Native(index()), fields, [TYPE], data)
+        self.assertEqual(dict(counts), {"refreshed": 2, "review": 2})
+        self.assertEqual([row["notes"] for row in fields], [
+            f"native-refs:none;source:native:{HEADER}:7;source:rec.c:1",
+            f"native-refs:write-only;source:native:{SOURCE}:11",
+            f"native-refs:none;source:native:{HEADER}:1",
+            f"native-refs:none;source:native:{HEADER}:3",
+        ])
+        self.assertEqual(data[0]["notes"], f"native-refs:write-only;source:native:{SOURCE}:16")
+        self.assertEqual(review, ["T00001.read: recorded none, native read",
+                                  "T00001.gone: recorded none, native missing"])
+
+    def test_retired_rows_keep_their_evidence(self):
+        stale = f"native-refs:none;source:native:{HEADER}:99"
+        fields = [member_row("unused", "Not used", stale)]
+        data = [{"id": "G00001", "name": "D_80010000", "final_name": "Rec_global", "copied": "retired",
+                 "notes": stale}]
+        counts, review = trace_queue.refresh(trace_queue.Native(index()), fields, [dict(TYPE, copied="retired")],
+                                             data)
+        self.assertEqual((dict(counts), review), ({}, []))
+        self.assertEqual((fields[0]["notes"], data[0]["notes"]), (stale, stale))
 
 
 if __name__ == "__main__":
