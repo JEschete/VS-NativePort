@@ -18,7 +18,7 @@
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRows.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/Paging.hpp"
 
 namespace {
@@ -243,16 +243,16 @@ loot::OrganizeMenu OpenOrganize(FakePromptHost& host, const loot::LootRow& row,
 struct LivePoliciesFixture {
   VS::Items::InventoryContents staged{};
   VS::Items::InventoryContents backup{};
-  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
+  std::array<loot::LootRow, VS::Menu::Loot::kRowCapacity> rows{};
   std::array<VS::Menu::Framework::MenuRow, 40> menu_rows{};
   VS::Menu::Framework::MenuRow* previous_menu_rows{
       VS::Menu::Framework::menuItems};
-  VS::Items::InventoryContents* previous_inventory{Menu_Loot_inventory};
-  VS::Items::InventoryContents* previous_backup{Menu_Loot_inventoryBackup};
-  Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
+  VS::Items::InventoryContents* previous_inventory{loot::stagedInventory};
+  VS::Items::InventoryContents* previous_backup{loot::inventoryBackup};
+  loot::LootRow* previous_rows{loot::lootList};
   VS::Items::BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
   VS::Items::InventoryContents previous_ashley{VS::Items::inventory};
-  char previous_claimed{Menu_Loot_lootClaimed};
+  std::uint8_t previous_claimed{loot::lootClaimed};
 
   LivePoliciesFixture() {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
@@ -260,12 +260,12 @@ struct LivePoliciesFixture {
         VS::tests::inventory_terminal::LootText());
     live::ResetPolicyStatics();
     VS::Menu::Framework::menuItems = menu_rows.data();
-    Menu_Loot_inventory = &staged;
-    Menu_Loot_inventoryBackup = &backup;
-    Menu_Loot_lootList = rows.data();
-    Menu_Loot_lootListCount = 0;
-    Menu_Loot_lootListOffset = 0;
-    Menu_Loot_lootClaimed = 0;
+    loot::stagedInventory = &staged;
+    loot::inventoryBackup = &backup;
+    loot::lootList = rows.data();
+    loot::lootListCount = 0;
+    loot::lootListOffset = 0;
+    loot::lootClaimed = 0;
     VS::Menu::Framework::lootEntry = nullptr;
   }
 
@@ -273,13 +273,13 @@ struct LivePoliciesFixture {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
     live::ResetPolicyStatics();
     VS::Menu::Framework::menuItems = previous_menu_rows;
-    Menu_Loot_inventory = previous_inventory;
-    Menu_Loot_inventoryBackup = previous_backup;
-    Menu_Loot_lootList = previous_rows;
-    Menu_Loot_lootListCount = 0;
+    loot::stagedInventory = previous_inventory;
+    loot::inventoryBackup = previous_backup;
+    loot::lootList = previous_rows;
+    loot::lootListCount = 0;
     VS::Menu::Framework::lootEntry = previous_entry;
     VS::Items::inventory = previous_ashley;
-    Menu_Loot_lootClaimed = previous_claimed;
+    loot::lootClaimed = previous_claimed;
   }
 
   LivePoliciesFixture(const LivePoliciesFixture&) = delete;
@@ -646,10 +646,10 @@ TEST_CASE("Live leave confirmation returns the empty and single-entry results",
   CHECK(live::UpdateLeaveConfirmation(0) == 1);
   VS::Items::BattleLoot chest{};
   VS::Menu::Framework::lootEntry = &chest;
-  Menu_Loot_lootListCount = 1;
+  loot::lootListCount = 1;
   CHECK(live::UpdateLeaveConfirmation(1) == 0);
   CHECK(live::UpdateLeaveConfirmation(0) == 2);
-  Menu_Loot_lootClaimed = 1;
+  loot::lootClaimed = 1;
   CHECK(live::UpdateLeaveConfirmation(1) == 0);
 }
 
@@ -661,12 +661,12 @@ TEST_CASE("Live loot policies refuse missing lists and rows",
   live::ShowLootDescription(-1);
   live::ShowLootDescription(static_cast<int>(VS::Menu::Loot::kRowCapacity));
   CHECK(VS::Items::inventory.misc[0].id == 0);
-  Menu_Loot_lootList = nullptr;
+  loot::lootList = nullptr;
   live::RenderBagCapacities(0);
   live::RenderLootRows(0);
   live::ShowLootDescription(0);
-  Menu_Loot_inventory = nullptr;
-  Menu_Loot_LootListItem row{};
+  loot::stagedInventory = nullptr;
+  loot::LootRow row{};
   CHECK(live::UpdateOrganizationMenu(&row) == 0);
   CHECK(fixture.backup.misc[0].id == 0);
 }

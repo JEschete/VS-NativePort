@@ -73,9 +73,8 @@
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
-#include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootRowsLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/Loot/Paging.hpp"
@@ -595,14 +594,14 @@ struct EnemyLootFixture : LootInventoryFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Items::LootListNode* saved_head = VS::Items::lootListHead;
   Battle_Actor* saved_actor = Battle_actors[1];
-  VS::Items::InventoryContents* saved_staging = Menu_Loot_inventory;
+  VS::Items::InventoryContents* saved_staging = VS::Menu::Loot::stagedInventory;
   VS::Items::BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
-  Menu_Loot_LootListItem* saved_rows = Menu_Loot_lootList;
-  u_char saved_count = Menu_Loot_lootListCount;
-  u_char saved_offset = Menu_Loot_lootListOffset;
-  char saved_selection = Menu_Loot_selectedLoot;
+  VS::Menu::Loot::LootRow* saved_rows = VS::Menu::Loot::lootList;
+  std::uint8_t saved_count = VS::Menu::Loot::lootListCount;
+  std::uint8_t saved_offset = VS::Menu::Loot::lootListOffset;
+  std::uint8_t saved_selection = VS::Menu::Loot::selectedLoot;
   std::uint8_t saved_difficulty = VS::State::stateFlags.difficulty;
-  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
+  std::array<VS::Menu::Loot::LootRow, VS::Menu::Loot::kRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
 
@@ -614,12 +613,12 @@ struct EnemyLootFixture : LootInventoryFixture {
     Battle_actors[1] = &enemy;
     VS::Items::inventory = {};
     source = {};
-    Menu_Loot_inventory = &source;
+    VS::Menu::Loot::stagedInventory = &source;
     VS::Menu::Framework::lootEntry = nullptr;
-    Menu_Loot_lootList = rows.data();
-    Menu_Loot_lootListCount = 0;
-    Menu_Loot_lootListOffset = 0;
-    Menu_Loot_selectedLoot = 0;
+    VS::Menu::Loot::lootList = rows.data();
+    VS::Menu::Loot::lootListCount = 0;
+    VS::Menu::Loot::lootListOffset = 0;
+    VS::Menu::Loot::selectedLoot = 0;
     VS::State::stateFlags.difficulty = 0;
   }
 
@@ -627,12 +626,12 @@ struct EnemyLootFixture : LootInventoryFixture {
     VS::Items::ClearLiveRoomLootList();
     VS::Items::lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
-    Menu_Loot_inventory = saved_staging;
+    VS::Menu::Loot::stagedInventory = saved_staging;
     VS::Menu::Framework::lootEntry = saved_entry;
-    Menu_Loot_lootList = saved_rows;
-    Menu_Loot_lootListCount = saved_count;
-    Menu_Loot_lootListOffset = saved_offset;
-    Menu_Loot_selectedLoot = saved_selection;
+    VS::Menu::Loot::lootList = saved_rows;
+    VS::Menu::Loot::lootListCount = saved_count;
+    VS::Menu::Loot::lootListOffset = saved_offset;
+    VS::Menu::Loot::selectedLoot = saved_selection;
     VS::State::stateFlags.difficulty = saved_difficulty;
   }
 
@@ -661,17 +660,16 @@ struct EnemyLootFixture : LootInventoryFixture {
   }
 
   void DeliverRows(int count) {
-    REQUIRE(Menu_Loot_lootListCount == count);
+    REQUIRE(VS::Menu::Loot::lootListCount == count);
     for (int index = 0; index < count; ++index) {
       const auto& row = rows[index];
-      CHECK(row.itemCategory ==
-            static_cast<int>(VS::Items::ItemCategory::kMisc));
+      CHECK(row.category == static_cast<int>(VS::Items::ItemCategory::kMisc));
       CHECK(row.state == 1);
-      CHECK(row.opaque2 == 0);
-      const int flags = static_cast<int>(row.itemCategory) |
-                        VS::Items::Inventory::kCopyItemWrite;
+      CHECK(row.slide_step == 0);
+      const int flags =
+          static_cast<int>(row.category) | VS::Items::Inventory::kCopyItemWrite;
       CHECK(VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory,
-                                               row.itemIndex, &source) != 0);
+                                               row.item_index, &source) != 0);
     }
   }
 
@@ -961,27 +959,27 @@ void CheckClaimedGems(const Item& item, const Loadout& source, int parent) {
 
 struct EquipmentStagingFixture : EnemyLootFixture {
   void CollectArmorPage(std::vector<int>& seen, bool claim) {
-    for (int index = 0; index < Menu_Loot_lootListCount; ++index) {
+    for (int index = 0; index < VS::Menu::Loot::lootListCount; ++index) {
       const auto& row = rows[index];
-      REQUIRE(row.itemCategory ==
+      REQUIRE(row.category ==
               static_cast<int>(VS::Items::ItemCategory::kArmor));
-      if (row.itemIndex < 0 || row.itemIndex >= 16) {
+      if (row.item_index < 0 || row.item_index >= 16) {
         FAIL("Staged armor row points outside the original capacity");
         return;
       }
-      seen.push_back(source.armor[row.itemIndex].id);
+      seen.push_back(source.armor[row.item_index].id);
       if (claim) {
         CHECK(row.state == 1);
         CHECK(VS::Items::Inventory::CopyLiveItem(0x14, &VS::Items::inventory,
-                                                 row.itemIndex, &source) != 0);
+                                                 row.item_index, &source) != 0);
       }
     }
   }
 
   void AdvanceArmorPage(bool first_claimed) {
-    Menu_Loot_lootListCount = 0;
+    VS::Menu::Loot::lootListCount = 0;
     REQUIRE(VS::Menu::Loot::Live::AdvanceStagedInventory() == 1);
-    REQUIRE(Menu_Loot_lootListCount == 8);
+    REQUIRE(VS::Menu::Loot::lootListCount == 8);
     for (int index = 0; index < 8; ++index) {
       CHECK(rows[index].state == !first_claimed);
     }
@@ -993,7 +991,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     std::sort(seen.begin(), seen.end());
     REQUIRE(seen.size() == 24);
     for (int index = 0; index < 24; ++index) CHECK(seen[index] == 149 + index);
-    Menu_Loot_lootListCount = 0;
+    VS::Menu::Loot::lootListCount = 0;
     CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
     VS::Core::Random expected;
     for (int index = 0; index < 40; ++index) expected.Next(255);
@@ -1034,7 +1032,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   }
 
-  static void CheckRow(const Menu_Loot_LootListItem& row, int index,
+  static void CheckRow(const VS::Menu::Loot::LootRow& row, int index,
                        bool fits) {
     const std::array categories{
         static_cast<int>(VS::Items::ItemCategory::kWeapon),
@@ -1042,9 +1040,9 @@ struct EquipmentStagingFixture : EnemyLootFixture {
         static_cast<int>(VS::Items::ItemCategory::kArmor),
         static_cast<int>(VS::Items::ItemCategory::kArmor),
         static_cast<int>(VS::Items::ItemCategory::kArmor)};
-    CHECK(row.itemCategory == categories[index]);
-    CHECK(row.itemIndex == (index < 2 ? 0 : index - 2));
-    CHECK(row.opaque2 == 0);
+    CHECK(row.category == categories[index]);
+    CHECK(row.item_index == (index < 2 ? 0 : index - 2));
+    CHECK(row.slide_step == 0);
     CHECK(row.state == fits);
   }
 
@@ -1055,10 +1053,10 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       const auto& row = rows[index];
       const bool fits = index < 2 || armor_count + claimed_armor < 16;
       CheckRow(row, index, fits);
-      const int flags = static_cast<int>(row.itemCategory) |
-                        VS::Items::Inventory::kCopyItemWrite;
+      const int flags =
+          static_cast<int>(row.category) | VS::Items::Inventory::kCopyItemWrite;
       const int result = VS::Items::Inventory::CopyLiveItem(
-          flags, &VS::Items::inventory, row.itemIndex, &source);
+          flags, &VS::Items::inventory, row.item_index, &source);
       CHECK(result ==
             (fits ? (index < 2 ? 1 : armor_count + claimed_armor + 1) : 0));
       if (index >= 2 && fits) ++claimed_armor;
@@ -1121,12 +1119,15 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_sound_group = VS::Audio::nextSfxChannelGroup7E;
-  decltype(Menu_Loot_lootClaimed) saved_claimed = Menu_Loot_lootClaimed;
-  decltype(Menu_Loot_controlsEnabled) saved_controls =
-      Menu_Loot_controlsEnabled;
-  decltype(Menu_Loot_showLoot) saved_show = Menu_Loot_showLoot;
-  decltype(Menu_Loot_previewedLoot) saved_preview = Menu_Loot_previewedLoot;
-  decltype(Menu_Loot_lootLeftEdge) saved_edge = Menu_Loot_lootLeftEdge;
+  decltype(VS::Menu::Loot::lootClaimed) saved_claimed =
+      VS::Menu::Loot::lootClaimed;
+  decltype(VS::Menu::Loot::controlsEnabled) saved_controls =
+      VS::Menu::Loot::controlsEnabled;
+  decltype(VS::Menu::Loot::showLoot) saved_show = VS::Menu::Loot::showLoot;
+  decltype(VS::Menu::Loot::previewedLoot) saved_preview =
+      VS::Menu::Loot::previewedLoot;
+  decltype(VS::Menu::Loot::lootLeftEdge) saved_edge =
+      VS::Menu::Loot::lootLeftEdge;
   std::array<VS::Menu::Framework::MenuRow, 40> menu_rows{};
   char item_names[512][24]{};
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4 + 2);
@@ -1149,8 +1150,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
     sfx_offsets.fill(UINT32_MAX);
     VS::Input::settings.information = 0;
-    Menu_Loot_lootClaimed = 0;
-    Menu_Loot_lootLeftEdge = 0;
+    VS::Menu::Loot::lootClaimed = 0;
+    VS::Menu::Loot::lootLeftEdge = 0;
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::legacyOrderingTables[0] = ordering.data();
@@ -1176,11 +1177,11 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Audio::nextSfxChannelGroup7E = saved_sound_group;
-    Menu_Loot_lootClaimed = saved_claimed;
-    Menu_Loot_controlsEnabled = saved_controls;
-    Menu_Loot_showLoot = saved_show;
-    Menu_Loot_previewedLoot = saved_preview;
-    Menu_Loot_lootLeftEdge = saved_edge;
+    VS::Menu::Loot::lootClaimed = saved_claimed;
+    VS::Menu::Loot::controlsEnabled = saved_controls;
+    VS::Menu::Loot::showLoot = saved_show;
+    VS::Menu::Loot::previewedLoot = saved_preview;
+    VS::Menu::Loot::lootLeftEdge = saved_edge;
   }
 
   static int Tick(int buttons = 0) {
@@ -1192,18 +1193,18 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   static void Step(int buttons = 0) { CHECK(Tick(buttons) == 0); }
 
   static void CheckClaims(int claimed, int bag_count) {
-    CHECK(Menu_Loot_lootClaimed == claimed);
+    CHECK(VS::Menu::Loot::lootClaimed == claimed);
     CHECK(VS::Items::Inventory::CountLiveItems(
               static_cast<int>(VS::Items::ItemCategory::kArmor), nullptr) ==
           bag_count);
   }
 
   static void CheckNextArmorPage() {
-    CHECK(Menu_Loot_lootListCount == 8);
-    CHECK(Menu_Loot_selectedLoot == 0);
-    CHECK(Menu_Loot_lootListOffset == 0);
-    CHECK(Menu_Loot_controlsEnabled == 0);
-    CHECK(Menu_Loot_showLoot == 1);
+    CHECK(VS::Menu::Loot::lootListCount == 8);
+    CHECK(VS::Menu::Loot::selectedLoot == 0);
+    CHECK(VS::Menu::Loot::lootListOffset == 0);
+    CHECK(VS::Menu::Loot::controlsEnabled == 0);
+    CHECK(VS::Menu::Loot::showLoot == 1);
   }
 
   void OpenLeaveConfirmation() {
@@ -2795,7 +2796,7 @@ TEST_CASE(
   }
   fixture.Stage(flags);
   const bool allowed = (flags & (difficulty + 1)) != 0;
-  REQUIRE(Menu_Loot_lootListCount == (allowed ? 5 : 0));
+  REQUIRE(VS::Menu::Loot::lootListCount == (allowed ? 5 : 0));
   if (allowed) {
     fixture.Claim(armor_count);
     fixture.CheckWeaponParts();
@@ -2901,7 +2902,7 @@ TEST_CASE(
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
-  REQUIRE(Menu_Loot_lootListCount == 16);
+  REQUIRE(VS::Menu::Loot::lootListCount == 16);
   std::vector<int> seen;
   fixture.CollectArmorPage(seen, claim_first);
   fixture.AdvanceArmorPage(claim_first);
@@ -2914,14 +2915,14 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
-  REQUIRE(Menu_Loot_lootListCount == 16);
+  REQUIRE(VS::Menu::Loot::lootListCount == 16);
   const auto first = VS::Items::lootListHead->loot;
   VS::Menu::Loot::Live::ResetPaging();
   CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &first, sizeof(first)) ==
         0);
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
-  REQUIRE(Menu_Loot_lootListCount == 16);
+  REQUIRE(VS::Menu::Loot::lootListCount == 16);
   fixture.CheckCleared();
   CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
 
@@ -2943,7 +2944,7 @@ TEST_CASE("Single chest loot remains intact when staging is abandoned",
   VS::Menu::Framework::lootEntry = &chest;
   const auto before = chest;
   VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
-  REQUIRE(Menu_Loot_lootListCount == 2);
+  REQUIRE(VS::Menu::Loot::lootListCount == 2);
   CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   VS::Menu::Loot::Live::ResetPaging();
   CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
@@ -2961,7 +2962,7 @@ TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
   const auto queued = VS::Items::lootListHead->loot;
   fixture.OpenLeaveConfirmation();
   fixture.Step(PADRdown);
-  CHECK(Menu_Loot_lootListCount == 16);
+  CHECK(VS::Menu::Loot::lootListCount == 16);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==
         0);
@@ -2979,11 +2980,11 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
   fixture.QueueArmorBatch();
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   fixture.Step(PADRleft);
-  CHECK(Menu_Loot_lootListCount == 16);
-  for (int tick = 0; tick < 10 && Menu_Loot_lootListCount != 8; ++tick) {
+  CHECK(VS::Menu::Loot::lootListCount == 16);
+  for (int tick = 0; tick < 10 && VS::Menu::Loot::lootListCount != 8; ++tick) {
     fixture.Step();
   }
-  REQUIRE(Menu_Loot_lootListCount == 8);
+  REQUIRE(VS::Menu::Loot::lootListCount == 8);
   fixture.CheckClaims(16, 16);
   VS::Items::inventory = {};
   VS::Menu::Loot::Live::RefreshClaimableRows();
@@ -3002,15 +3003,15 @@ TEST_CASE("Loot menu cannot abandon a key while another page is pending",
   fixture.QueueArmorBatch();
   VS::Items::lootListHead->loot.misc[0] = {467, 3, 1};
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
-  REQUIRE(Menu_Loot_lootListCount == 17);
+  REQUIRE(VS::Menu::Loot::lootListCount == 17);
   const auto before = fixture.source;
   const auto queued = VS::Items::lootListHead->loot;
   CHECK(fixture.Tick(PADRdown) == 0);
   CHECK(fixture.Tick() == 0);
   CHECK(fixture.Tick(PADRdown) == 0);
-  CHECK(Menu_Loot_lootListCount == 17);
+  CHECK(VS::Menu::Loot::lootListCount == 17);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==
         0);
-  CHECK(Menu_Loot_lootClaimed == 0);
+  CHECK(VS::Menu::Loot::lootClaimed == 0);
 }

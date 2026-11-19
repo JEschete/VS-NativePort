@@ -2456,9 +2456,7 @@
     <ClInclude Include="src\Menu\BattleAbilities.h" />
     <ClInclude Include="src\Menu\Container\ItemView.h" />
     <ClInclude Include="src\Menu\Container\Storage.h" />
-    <ClInclude Include="src\Menu\Files.h" />
     <ClInclude Include="src\Menu\FilesLiveState.hpp" />
-    <ClInclude Include="src\Menu\Framework\ActorPreview.h" />
     <ClInclude Include="src\Menu\Framework\DetailDispatchLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp" />
     <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.hpp" />
@@ -2472,8 +2470,7 @@
     <ClInclude Include="src\Menu\Inventory\Inventory.h" />
     <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemList.hpp" />
-    <ClInclude Include="src\Menu\Loot\LootInventory.h" />
-    <ClInclude Include="src\Menu\Loot\LootScreen.h" />
+    <ClInclude Include="src\Menu\Loot\LootScreen.hpp" />
     <ClInclude Include="src\Menu\Loot\Paging.hpp" />
     <ClInclude Include="src\Menu\Magic.h" />
     <ClInclude Include="src\Menu\Manual.h" />

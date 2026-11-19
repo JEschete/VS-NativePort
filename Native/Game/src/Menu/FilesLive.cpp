@@ -30,7 +30,6 @@
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Files.h"
 #include "Menu/Files.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -106,10 +105,9 @@ static_assert(kWrittenSummaryOffset + sizeof(Save_CardFileInfoRecord) <=
               kSaveImageBytes);
 static_assert(offsetof(Save_CardFileInfoRecord, summary) ==
               sizeof(Save_CardFileInfoRecord::key));
-// The packets the screens build fill the original's 16-word primBuf_t.
-constexpr std::size_t kPacketBytes = sizeof(Menu_Files_PrimitiveBuffer);
-constexpr std::size_t kPacketWordBytes = sizeof(std::uint32_t);
-constexpr std::size_t kImmediatePacketWords = kPacketBytes / kPacketWordBytes;
+// The packets the screens build fill the original's primBuf_t
+// (MENU7.PRG 260.c:150): a tag word and a 15-word packet union.
+constexpr std::size_t kImmediatePacketWords = 16;
 // The compact text links 0x14 bytes before the scene ordering table
 // (((u_char*)orderingTable) - 0x14).
 constexpr int kCompactTextSlot = -5;
@@ -662,10 +660,10 @@ class LiveHost : public LiveCardHost {
   }
 };
 
-// The same screens over TITLE.PRG's copies (22C.c) of the message, cursor,
-// unsaved-data and progress variables, its card check and its file overlay;
-// the summaries, the card driver and the 0x7E sound group are shared.
-class TitleFilesLiveHost final : public LiveHost {
+// TITLE.PRG's MCMAN.BIN message table, message pointer and card check (22C.c)
+// for either title host.
+template <typename Base>
+class TitleCardMessages : public Base {
  public:
   std::span<const std::uint16_t> TextTable() override {
     return TableSpan(VS::Title::saveMenuText);
@@ -677,6 +675,13 @@ class TitleFilesLiveHost final : public LiveHost {
   int AdvanceCardReadiness(int port) override {
     return VS::Save::MemoryCard::AdvanceLiveTitleCardReadiness(port);
   }
+};
+
+// The same screens over TITLE.PRG's copies (22C.c) of the message, cursor,
+// unsaved-data and progress variables, its card check and its file overlay;
+// the summaries, the card driver and the 0x7E sound group are shared.
+class TitleFilesLiveHost final : public TitleCardMessages<LiveHost> {
+ public:
   bool CardMessageIs(std::uint16_t offset) override {
     return VS::Title::saveMenuText != nullptr && offset < kTextTableHalfwords &&
            VS::Title::memoryCardMessage ==
@@ -757,22 +762,12 @@ auto WithLiveTitleContext(Function&& function) {
 }
 
 // TITLE.PRG's save search, display and clear-save reminder.
-class TitleLiveHost final : public TitleHost {
+class TitleLiveHost final : public TitleCardMessages<TitleHost> {
  public:
   void Submit(std::span<const std::uint32_t> packet) override {
     SubmitLive(packet);
   }
   void Refuse(std::string_view what) override { Warn(what); }
-  std::span<const std::uint16_t> TextTable() override {
-    return TableSpan(VS::Title::saveMenuText);
-  }
-  void SetCardMessage(std::optional<std::uint16_t> offset) override {
-    VS::Title::memoryCardMessage =
-        TableMessage(VS::Title::saveMenuText, offset, *this);
-  }
-  int AdvanceCardReadiness(int port) override {
-    return VS::Save::MemoryCard::AdvanceLiveTitleCardReadiness(port);
-  }
   int ScanSaveDirectory(int port) override {
     return VS::Save::MemoryCard::ScanLiveSaveDirectory(port);
   }

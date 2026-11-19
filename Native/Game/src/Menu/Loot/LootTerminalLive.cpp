@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -40,7 +39,7 @@
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "Menu/Sounds.hpp"
@@ -88,8 +87,8 @@ struct Controllers {
 struct WorkspaceViews {
   VS::Items::InventoryContents inventory{};
   VS::Items::InventoryContents inventory_backup{};
-  std::array<Menu_Loot_LootListItem, kLootRowCapacity> rows{};
-  std::array<Menu_Loot_LootListItem, kLootRowCapacity> working_rows{};
+  std::array<LootRow, kLootRowCapacity> rows{};
+  std::array<LootRow, kLootRowCapacity> working_rows{};
 };
 Controllers g_controllers;
 std::unique_ptr<WorkspaceViews> g_workspace;
@@ -120,8 +119,7 @@ void RequireFrame() {
   }
 }
 void ReadRuntime(LootTerminalRuntime& runtime) {
-  runtime.cursor = {Menu_Loot_lootListCount, Menu_Loot_lootListOffset,
-                    static_cast<std::uint8_t>(Menu_Loot_selectedLoot)};
+  runtime.cursor = {lootListCount, lootListOffset, selectedLoot};
   runtime.inventory_ui = {
       static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled),
       static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsEnabled),
@@ -133,14 +131,13 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
       Menu_Inventory_ashleyRenderState};
   runtime.inventory_category =
       VS::Menu::Framework::menuMemory.inventory_cursors.category;
-  runtime.show_inventory = static_cast<std::uint8_t>(Menu_Loot_showInventory);
-  runtime.inventory_step = Menu_Loot_inventoryCapacityFlyinTimer;
-  runtime.show_loot = static_cast<std::uint8_t>(Menu_Loot_showLoot);
-  runtime.loot_step = Menu_Loot_lootLeftEdge;
-  runtime.controls_enabled =
-      static_cast<std::uint8_t>(Menu_Loot_controlsEnabled);
-  runtime.previewed = static_cast<std::uint8_t>(Menu_Loot_previewedLoot);
-  runtime.claimed = static_cast<std::uint8_t>(Menu_Loot_lootClaimed);
+  runtime.show_inventory = showInventory;
+  runtime.inventory_step = inventoryCapacityFlyinTimer;
+  runtime.show_loot = showLoot;
+  runtime.loot_step = lootLeftEdge;
+  runtime.controls_enabled = controlsEnabled;
+  runtime.previewed = previewedLoot;
+  runtime.claimed = lootClaimed;
   runtime.information_shown =
       static_cast<std::uint8_t>(VS::Input::settings.information);
   runtime.hud_hidden = static_cast<std::uint8_t>(Battle_hudHidden);
@@ -148,9 +145,9 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
   runtime.result_kind = VS::Menu::Framework::actionSelection.selection_kind;
 }
 void WriteRuntime(const LootTerminalRuntime& runtime) {
-  Menu_Loot_lootListCount = runtime.cursor.count;
-  Menu_Loot_lootListOffset = runtime.cursor.offset;
-  Menu_Loot_selectedLoot = static_cast<char>(runtime.cursor.selected);
+  lootListCount = runtime.cursor.count;
+  lootListOffset = runtime.cursor.offset;
+  selectedLoot = runtime.cursor.selected;
   const auto& ui = runtime.inventory_ui;
   Menu_Inventory_secondaryTitleEnabled = static_cast<char>(ui.secondary_title);
   Menu_Inventory_itemCategoryIconsEnabled =
@@ -166,13 +163,13 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Inventory_ashleyRenderState = ui.ashley_layout;
   VS::Menu::Framework::menuMemory.inventory_cursors.category =
       runtime.inventory_category;
-  Menu_Loot_showInventory = static_cast<char>(runtime.show_inventory);
-  Menu_Loot_inventoryCapacityFlyinTimer = runtime.inventory_step;
-  Menu_Loot_showLoot = static_cast<char>(runtime.show_loot);
-  Menu_Loot_lootLeftEdge = runtime.loot_step;
-  Menu_Loot_controlsEnabled = static_cast<char>(runtime.controls_enabled);
-  Menu_Loot_previewedLoot = static_cast<char>(runtime.previewed);
-  Menu_Loot_lootClaimed = static_cast<char>(runtime.claimed);
+  showInventory = runtime.show_inventory;
+  inventoryCapacityFlyinTimer = runtime.inventory_step;
+  showLoot = runtime.show_loot;
+  lootLeftEdge = runtime.loot_step;
+  controlsEnabled = runtime.controls_enabled;
+  previewedLoot = runtime.previewed;
+  lootClaimed = runtime.claimed;
   VS::Input::settings.information =
       static_cast<char>(runtime.information_shown);
   Battle_hudHidden = static_cast<char>(runtime.hud_hidden);
@@ -187,17 +184,17 @@ void InvalidateWorkspace() {
       }
     }
   }
-  Menu_Loot_inventory = nullptr;
-  Menu_Loot_inventoryBackup = nullptr;
-  Menu_Loot_lootList = nullptr;
-  Menu_Loot_lootListWorkingCopy = nullptr;
+  stagedInventory = nullptr;
+  inventoryBackup = nullptr;
+  lootList = nullptr;
+  lootListWorkingCopy = nullptr;
   g_workspace.reset();
 }
 void RequireOwnedWorkspace() {
-  if (!g_workspace || Menu_Loot_inventory != &g_workspace->inventory ||
-      Menu_Loot_inventoryBackup != &g_workspace->inventory_backup ||
-      Menu_Loot_lootList != g_workspace->rows.data() ||
-      Menu_Loot_lootListWorkingCopy != g_workspace->working_rows.data()) {
+  if (!g_workspace || stagedInventory != &g_workspace->inventory ||
+      inventoryBackup != &g_workspace->inventory_backup ||
+      lootList != g_workspace->rows.data() ||
+      lootListWorkingCopy != g_workspace->working_rows.data()) {
     Refuse("loot workspace cannot be released by a different owner");
   }
 }
@@ -247,7 +244,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     return workspace_;
   }
   void RequireBackups(bool inventory) override {
-    if (Menu_Loot_lootListWorkingCopy == nullptr) {
+    if (lootListWorkingCopy == nullptr) {
       Refuse("missing loot row backup");
     }
     if (!rows_backup_loaded_) {
@@ -255,11 +252,11 @@ class LiveTerminalHost final : public LootTerminalHost {
       rows_backup_loaded_ = true;
     }
     if (inventory) {
-      if (Menu_Loot_inventoryBackup == nullptr) {
+      if (inventoryBackup == nullptr) {
         Refuse("missing staged inventory backup");
       }
       if (!inventory_backup_loaded_) {
-        workspace_.inventory_backup = *Menu_Loot_inventoryBackup;
+        workspace_.inventory_backup = *inventoryBackup;
         inventory_backup_loaded_ = true;
       }
     }
@@ -267,32 +264,29 @@ class LiveTerminalHost final : public LootTerminalHost {
   void Publish() {
     WriteRuntime(runtime_);
     if (primary_loaded_) {
-      if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
+      if (stagedInventory == nullptr || lootList == nullptr) {
         Refuse("staged workspace was invalidated during a loot call");
       }
-      *Menu_Loot_inventory = workspace_.inventory;
-      const auto rows = std::span(Menu_Loot_lootList, kLootRowCapacity);
+      *stagedInventory = workspace_.inventory;
+      const auto rows = std::span(lootList, kLootRowCapacity);
       for (std::size_t index = 0; index < rows.size(); ++index) {
-        rows[index] =
-            std::bit_cast<Menu_Loot_LootListItem>(workspace_.rows[index]);
+        rows[index] = workspace_.rows[index];
       }
     }
     if (rows_backup_loaded_) {
-      if (Menu_Loot_lootListWorkingCopy == nullptr) {
+      if (lootListWorkingCopy == nullptr) {
         Refuse("row backup was invalidated");
       }
-      const auto rows =
-          std::span(Menu_Loot_lootListWorkingCopy, kLootRowCapacity);
+      const auto rows = std::span(lootListWorkingCopy, kLootRowCapacity);
       for (std::size_t index = 0; index < rows.size(); ++index) {
-        rows[index] = std::bit_cast<Menu_Loot_LootListItem>(
-            workspace_.working_rows[index]);
+        rows[index] = workspace_.working_rows[index];
       }
     }
     if (inventory_backup_loaded_) {
-      if (Menu_Loot_inventoryBackup == nullptr) {
+      if (inventoryBackup == nullptr) {
         Refuse("inventory backup was invalidated");
       }
-      *Menu_Loot_inventoryBackup = workspace_.inventory_backup;
+      *inventoryBackup = workspace_.inventory_backup;
     }
   }
   template <typename Function, typename... Arguments>
@@ -377,7 +371,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     }
     Publish();
     Battle_stringContext.strings[0] =
-        Menu_Loot_inventory->weapons[slot].name.data();
+        stagedInventory->weapons[slot].name.data();
   }
   void SetItemName(std::uint16_t id) override {
     constexpr auto kItemNameCount =
@@ -528,7 +522,7 @@ class LiveTerminalHost final : public LootTerminalHost {
   }
   void ShowDescription(std::size_t row) override {
     static_cast<void>(Workspace());
-    if (Menu_Loot_inventoryBackup == nullptr) {
+    if (inventoryBackup == nullptr) {
       Refuse("missing description inventory backup");
     }
     if (row >= runtime_.cursor.count) {
@@ -542,7 +536,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       constexpr int kWriteItem = 16;
       return Items::Inventory::CopyLiveItem(
                  row.category | kWriteItem, &VS::Items::inventory,
-                 row.item_index, Menu_Loot_inventory) != 0;
+                 row.item_index, stagedInventory) != 0;
     });
   }
   void RecordKey(std::uint16_t id) override {
@@ -559,7 +553,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       Refuse("organization row outside loot");
     }
     return Call([&] {
-      auto* entry = row ? &Menu_Loot_lootList[*row] : nullptr;
+      auto* entry = row ? &lootList[*row] : nullptr;
       return Live::UpdateOrganizationMenu(entry);
     });
   }
@@ -591,16 +585,16 @@ class LiveTerminalHost final : public LootTerminalHost {
   }
   void AcquireWorkspace() override {
     Publish();
-    if (g_workspace || Menu_Loot_inventory != nullptr ||
-        Menu_Loot_inventoryBackup != nullptr || Menu_Loot_lootList != nullptr ||
-        Menu_Loot_lootListWorkingCopy != nullptr) {
+    if (g_workspace || stagedInventory != nullptr ||
+        inventoryBackup != nullptr || lootList != nullptr ||
+        lootListWorkingCopy != nullptr) {
       Refuse("loot workspace already acquired or borrowed by another owner");
     }
     g_workspace = std::make_unique<WorkspaceViews>();
-    Menu_Loot_inventory = &g_workspace->inventory;
-    Menu_Loot_inventoryBackup = &g_workspace->inventory_backup;
-    Menu_Loot_lootList = g_workspace->rows.data();
-    Menu_Loot_lootListWorkingCopy = g_workspace->working_rows.data();
+    stagedInventory = &g_workspace->inventory;
+    inventoryBackup = &g_workspace->inventory_backup;
+    lootList = g_workspace->rows.data();
+    lootListWorkingCopy = g_workspace->working_rows.data();
     ForgetWorkspace();
     ReadRuntime(runtime_);
   }
@@ -652,23 +646,22 @@ class LiveTerminalHost final : public LootTerminalHost {
 
  private:
   void ReadPrimary() {
-    if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
+    if (stagedInventory == nullptr || lootList == nullptr) {
       Refuse("missing staged inventory or loot rows");
     }
-    workspace_.inventory = *Menu_Loot_inventory;
-    const auto rows = std::span(Menu_Loot_lootList, kLootRowCapacity);
+    workspace_.inventory = *stagedInventory;
+    const auto rows = std::span(lootList, kLootRowCapacity);
     for (std::size_t index = 0; index < rows.size(); ++index) {
-      workspace_.rows[index] = std::bit_cast<LootRow>(rows[index]);
+      workspace_.rows[index] = rows[index];
     }
   }
   void ReadRowBackup() {
-    if (Menu_Loot_lootListWorkingCopy == nullptr) {
+    if (lootListWorkingCopy == nullptr) {
       Refuse("missing loot row backup");
     }
-    const auto rows =
-        std::span(Menu_Loot_lootListWorkingCopy, kLootRowCapacity);
+    const auto rows = std::span(lootListWorkingCopy, kLootRowCapacity);
     for (std::size_t index = 0; index < rows.size(); ++index) {
-      workspace_.working_rows[index] = std::bit_cast<LootRow>(rows[index]);
+      workspace_.working_rows[index] = rows[index];
     }
   }
   void Refresh() {
@@ -676,10 +669,10 @@ class LiveTerminalHost final : public LootTerminalHost {
     if (primary_loaded_) ReadPrimary();
     if (rows_backup_loaded_) ReadRowBackup();
     if (inventory_backup_loaded_) {
-      if (Menu_Loot_inventoryBackup == nullptr) {
+      if (inventoryBackup == nullptr) {
         Refuse("inventory backup was invalidated");
       }
-      workspace_.inventory_backup = *Menu_Loot_inventoryBackup;
+      workspace_.inventory_backup = *inventoryBackup;
     }
   }
   void ForgetWorkspace() {
@@ -762,16 +755,16 @@ void ResetLootTerminalSession() {
   VS::Menu::Loot::Live::ResetPaging();
   InvalidateWorkspace();
   g_controllers = {};
-  Menu_Loot_lootListCount = 0;
-  Menu_Loot_lootListOffset = 0;
-  Menu_Loot_selectedLoot = 0;
-  Menu_Loot_previewedLoot = 0;
-  Menu_Loot_lootClaimed = 0;
-  Menu_Loot_controlsEnabled = 0;
-  Menu_Loot_showInventory = 0;
-  Menu_Loot_showLoot = 0;
-  Menu_Loot_inventoryCapacityFlyinTimer = 0;
-  Menu_Loot_lootLeftEdge = 0;
+  lootListCount = 0;
+  lootListOffset = 0;
+  selectedLoot = 0;
+  previewedLoot = 0;
+  lootClaimed = 0;
+  controlsEnabled = 0;
+  showInventory = 0;
+  showLoot = 0;
+  inventoryCapacityFlyinTimer = 0;
+  lootLeftEdge = 0;
 }
 std::uint64_t LootTerminalLiveRefusalCount() noexcept { return g_refusals; }
 }  // namespace VS::Menu::Loot

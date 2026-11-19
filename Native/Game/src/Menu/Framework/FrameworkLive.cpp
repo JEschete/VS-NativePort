@@ -69,7 +69,6 @@
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
-#include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"

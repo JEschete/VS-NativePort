@@ -16,7 +16,7 @@
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/Map.h"
@@ -84,7 +84,7 @@ void ResetMenu9Statics() {
 // MENUB.PRG.
 void ResetMenubStatics() {
   Menu_Inventory_ResetMenubStatics();
-  Menu_Loot_LootScreen_ResetMenubStatics();
+  VS::Menu::Loot::ResetMenubStatics();
   VS::Menu::Loot::Live::ResetPolicyStatics();
   VS::Menu::Loot::ResetLootTerminalModuleData();
   VS::Menu::Inventory::ResetLootInventoryTerminalModuleData();

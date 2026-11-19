@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootStaging.hpp"
 
 namespace VS::Menu::Loot::Live {
@@ -14,13 +14,13 @@ namespace item_live = VS::Items::Live;
 template <typename LegacySource, typename Convert, typename Stage>
 int Apply(LegacySource* source, const char* operation, Convert&& convert,
           Stage&& stage) {
-  if (source == nullptr || Menu_Loot_inventory == nullptr) {
+  if (source == nullptr || stagedInventory == nullptr) {
     item_live::WarnNullRecord(operation);
     return 0;
   }
-  auto inventory = *Menu_Loot_inventory;
+  auto inventory = *stagedInventory;
   const auto result = stage(convert(*source), inventory);
-  *Menu_Loot_inventory = inventory;
+  *stagedInventory = inventory;
   return result;
 }
 }  // namespace

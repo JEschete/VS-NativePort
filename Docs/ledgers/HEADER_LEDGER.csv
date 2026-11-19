@@ -362,9 +362,9 @@ H0360,header,Native/Game/src/Menu/BattleAbilities.h,generated,yes,pragma-once,0,
 H0361,header,Native/Game/src/Menu/BreakArts.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,retired,"deleted: _strings became VS::Menu::break_arts::strings (std::uint16_t[kMenuStringHalfwords]) in Menu/BreakArtsLive.hpp, defined in BreakArtsLive.cpp; the unread layout byte G01001 and the unused drawArtsListOpt enum T00017 (superseded by kForceCursorMemoryFlag) were dropped (#441)"
 H0362,header,Native/Game/src/Menu/Container/ItemView.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
 H0363,header,Native/Game/src/Menu/Container/Storage.h,generated,yes,pragma-once,0,0,0,0,0,0,5,0,0,remaining,
-H0364,header,Native/Game/src/Menu/Files.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
+H0364,header,Native/Game/src/Menu/Files.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,deleted: its enums duplicated Files.hpp ElementState
 H0365,header,Native/Game/src/Menu/FilesLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0366,header,Native/Game/src/Menu/Framework/ActorPreview.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0366,header,Native/Game/src/Menu/Framework/ActorPreview.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: PreviewPoseState was a partial view of Actors_WeaponModel
 H0367,header,Native/Game/src/Menu/Framework/AshleyPreview.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Menu_Framework_AshleyRenderMode became the VS::Menu::Framework::AshleyRenderMode enum class in Menu/Framework/Framework.hpp, threaded through RenderAshley, RenderLiveAshley and the Inventory and Loot terminal hosts; TYPE T00012 re-pointed (#441)"
 H0368,header,Native/Game/src/Menu/Framework/DetailDispatchLiveSupport.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0369,header,Native/Game/src/Menu/Framework/DetailInputLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -381,8 +381,8 @@ H0379,header,Native/Game/src/Menu/Inventory/Inventory.h,generated,yes,pragma-onc
 H0380,header,Native/Game/src/Menu/Inventory/ItemDetailLiveSupport.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0381,header,Native/Game/src/Menu/Inventory/ItemList.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0382,header,Native/Game/src/Menu/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: the __unused_vertices__ table G00000 has no reader in the original or native code (#441)
-H0383,header,Native/Game/src/Menu/Loot/LootInventory.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
-H0384,header,Native/Game/src/Menu/Loot/LootScreen.h,generated,yes,pragma-once,0,0,0,0,0,0,17,0,0,remaining,
+H0383,header,Native/Game/src/Menu/Loot/LootInventory.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: Menu_Loot_LootListItem duplicated LootRow (Menu/Loot/LootRows.hpp) and lootItemState had no uses (#441)
+H0384,header,Native/Game/src/Menu/Loot/LootScreen.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0385,header,Native/Game/src/Menu/Loot/Paging.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0386,header,Native/Game/src/Menu/Magic.h,generated,yes,pragma-once,0,0,0,0,0,0,18,0,0,remaining,
 H0387,header,Native/Game/src/Menu/Manual.h,generated,yes,pragma-once,0,0,0,0,0,1,22,0,0,remaining,

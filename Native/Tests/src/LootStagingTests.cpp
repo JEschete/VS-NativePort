@@ -6,7 +6,7 @@
 
 #include "Content/ModuleData.hpp"
 #include "Items/Inventory.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootStaging.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 
@@ -18,10 +18,10 @@ namespace inventory = VS::Items::Inventory;
 
 struct LiveStageFixture {
   VS::Items::InventoryContents staged{};
-  VS::Items::InventoryContents* previous{Menu_Loot_inventory};
+  VS::Items::InventoryContents* previous{VS::Menu::Loot::stagedInventory};
 
-  LiveStageFixture() { Menu_Loot_inventory = &staged; }
-  ~LiveStageFixture() { Menu_Loot_inventory = previous; }
+  LiveStageFixture() { VS::Menu::Loot::stagedInventory = &staged; }
+  ~LiveStageFixture() { VS::Menu::Loot::stagedInventory = previous; }
 };
 
 items::LootedWeapon MakeWeapon() {

@@ -128,11 +128,11 @@ T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,EaseOut,Quarter-sine ease-ou
 T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289
 T00018.003,T00018,easeMode,3,easeModeEaseIn,0,,,3,,EaseIn,Shifted quarter-sine ease-in interpolation,high,source:D4.c:1289
 T00019.000,T00019,enemyClasses,0,enemyClassUndead,0,,,2,,Undead,EnemyClass Undead,med,declaration-only;source:main.h:60
-T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,Inactive,ElementState Inactive,med,declaration-only;source:MENU/MENU7.PRG/260.c:111
-T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,Static,ElementState Static,med,declaration-only;source:MENU/MENU7.PRG/260.c:112
-T00020.002,T00020,fileMenuElementState_e,2,fileMenuElementStateAnimateX,0,,,2,,AnimateX,ElementState AnimateX,med,declaration-only;source:MENU/MENU7.PRG/260.c:113
-T00020.003,T00020,fileMenuElementState_e,3,fileMenuElementStateAnimateY,0,,,3,,AnimateY,ElementState AnimateY,med,declaration-only;source:MENU/MENU7.PRG/260.c:114
-T00020.004,T00020,fileMenuElementState_e,4,fileMenuElementStateAnimateNegX,0,,,4,,AnimateNegX,ElementState AnimateNegX,med,declaration-only;source:MENU/MENU7.PRG/260.c:115
+T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,kInactive,ElementState Inactive,med,native:Files.hpp ElementState::kInactive (#441);declaration-only;source:MENU/MENU7.PRG/260.c:111
+T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,kStatic,ElementState Static,med,native:Files.hpp ElementState::kStatic (#441);declaration-only;source:MENU/MENU7.PRG/260.c:112
+T00020.002,T00020,fileMenuElementState_e,2,fileMenuElementStateAnimateX,0,,,2,,kAnimateX,ElementState AnimateX,med,native:Files.hpp ElementState::kAnimateX (#441);declaration-only;source:MENU/MENU7.PRG/260.c:113
+T00020.003,T00020,fileMenuElementState_e,3,fileMenuElementStateAnimateY,0,,,3,,kAnimateY,ElementState AnimateY,med,native:Files.hpp ElementState::kAnimateY (#441);declaration-only;source:MENU/MENU7.PRG/260.c:114
+T00020.004,T00020,fileMenuElementState_e,4,fileMenuElementStateAnimateNegX,0,,,4,,kAnimateNegX,ElementState AnimateNegX,med,native:Files.hpp ElementState::kAnimateNegX (#441);declaration-only;source:MENU/MENU7.PRG/260.c:115
 T00021.000,T00021,itemIdentifiers,0,bronzeKey,0,,,458,,BronzeKey,KeyItemId BronzeKey,med,declaration-only;source:main.h:238
 T00021.001,T00021,itemIdentifiers,1,chamomileSigil,0,,,466,,ChamomileSigil,KeyItemId ChamomileSigil,med,declaration-only;source:main.h:238
 T00022.000,T00022,lootItemState,0,lootStateNone,0,,,0,,None,LootItemState None,med,declaration-only;source:MENU/MENUB.PRG/260.c:16
@@ -177,8 +177,8 @@ T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,Unavailable,Save slo
 T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,Available,Save slot is available,high,source:22C.c:132
 T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contains a temporary save,high,source:22C.c:132
 T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,InUse,Slot contains an occupied save,high,source:22C.c:132
-T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,HP,StatType HP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
-T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,MP,StatType MP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,kHp,StatType HP,med,native:Files.hpp Stat::kHp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,kMp,StatType MP,med,native:Files.hpp Stat::kMp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
 T00033.000,T00033,state,0,init,0,,,0,,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00033.001,T00033,state,1,wait,0,,,1,,Wait,EquipmentDetailsState Wait,med,declaration-only;source:items1.h:197
 T00033.002,T00033,state,2,manageInput,0,,,2,,ManageInput,EquipmentDetailsState ManageInput,med,declaration-only;source:items1.h:100
@@ -220,33 +220,33 @@ T00042.004,T00042,state,4,fileVerified,0,,,4,,FileVerified,SaveWriteState FileVe
 T00043.000,T00043,state,0,none,0,,,0,,None,ResourceInitState None,med,declaration-only;source:15AC.c:169
 T00043.001,T00043,state,1,queueReady,0,,,1,,QueueReady,ResourceInitState QueueReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:1084
 T00043.002,T00043,state,2,enqueued,0,,,2,,Enqueued,ResourceInitState Enqueued,med,declaration-only;source:MENU/MENU7.PRG/260.c:1085
-T00044.000,T00044,state,0,initYes,0,,,0,,InitYes,ConfirmationState InitYes,med,declaration-only;source:MENU/MENU7.PRG/260.c:2095
-T00044.001,T00044,state,1,initNo,0,,,1,,InitNo,ConfirmationState InitNo,med,declaration-only;source:MENU/MENU7.PRG/260.c:2096
-T00044.002,T00044,state,2,waitForAnimation,0,,,2,,WaitForAnimation,ConfirmationState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
-T00044.003,T00044,state,3,handleInput,0,,,3,,HandleInput,ConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
-T00045.000,T00045,state,0,promptConfirm,0,,,0,,PromptConfirm,FormatPromptState PromptConfirm,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00045.001,T00045,state,1,initEvents,0,,,1,,InitEvents,FormatPromptState InitEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00045.002,T00045,state,2,handleEvents,0,,,2,,HandleEvents,FormatPromptState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00045.003,T00045,state,3,format,0,,,3,,Format,FormatPromptState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00046.000,T00046,state,0,init,0,,,0,,Init,SaveFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00046.001,T00046,state,1,handleInput,0,,,1,,HandleInput,SaveFilesState HandleInput,med,declaration-only;source:15AC.c:24
-T00046.002,T00046,state,2,slotSelected,0,,,2,,SlotSelected,SaveFilesState SlotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:2282
-T00046.003,T00046,state,3,overwritePrompt,0,,,3,,OverwritePrompt,SaveFilesState OverwritePrompt,med,declaration-only;source:MENU/MENU7.PRG/260.c:2283
-T00046.004,T00046,state,4,initOverwrite,0,,,4,,InitOverwrite,SaveFilesState InitOverwrite,med,declaration-only;source:MENU/MENU7.PRG/260.c:2284
-T00046.005,T00046,state,5,save,0,,,5,,Save,SaveFilesState Save,med,declaration-only;source:MENU/MENU7.PRG/260.c:2285
-T00046.006,T00046,state,6,validate,0,,,6,,Validate,SaveFilesState Validate,med,declaration-only;source:MENU/MENU7.PRG/260.c:2286
-T00046.007,T00046,state,7,leaveWithTimer,0,,,7,,LeaveWithTimer,SaveFilesState LeaveWithTimer,med,declaration-only;source:MENU/MENU7.PRG/260.c:2287
-T00046.008,T00046,state,8,leave,0,,,8,,Leave,SaveFilesState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
-T00046.009,T00046,state,9,format,0,,,9,,Format,SaveFilesState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00046.010,T00046,state,10,leaveError,0,,,10,,LeaveError,SaveFilesState LeaveError,med,declaration-only;source:MENU/MENU7.PRG/260.c:2290
-T00047.000,T00047,state,0,init,0,,,0,,Init,SaveCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00047.001,T00047,state,1,waitForUnselectedAnimation,0,,,1,,WaitForUnselectedAnimation,SaveCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
-T00047.002,T00047,state,2,waitForAnimation,0,,,2,,WaitForAnimation,SaveCardState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
-T00047.003,T00047,state,3,handleEvents,0,,,3,,HandleEvents,SaveCardState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
-T00047.004,T00047,state,4,animateLeave,0,,,4,,AnimateLeave,SaveCardState AnimateLeave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2544
-T00047.005,T00047,state,5,leave,0,,,5,,Leave,SaveCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
-T00047.006,T00047,state,6,initSaveMenu,0,,,6,,InitSaveMenu,SaveCardState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
-T00047.007,T00047,state,7,showSaveMenu,0,,,7,,ShowSaveMenu,SaveCardState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00044.000,T00044,state,0,initYes,0,,,0,,kConfirmationYes,ConfirmationState InitYes,med,native:Files.cpp ConfirmationStep::kConfirmationYes (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2095
+T00044.001,T00044,state,1,initNo,0,,,1,,kConfirmationNo,ConfirmationState InitNo,med,native:Files.cpp ConfirmationStep::kConfirmationNo (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2096
+T00044.002,T00044,state,2,waitForAnimation,0,,,2,,kConfirmationWait,ConfirmationState WaitForAnimation,med,native:Files.cpp ConfirmationStep::kConfirmationWait (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00044.003,T00044,state,3,handleInput,0,,,3,,kConfirmationInput,ConfirmationState HandleInput,med,native:Files.cpp ConfirmationStep::kConfirmationInput (#441);declaration-only;source:15AC.c:24
+T00045.000,T00045,state,0,promptConfirm,0,,,0,,kFormatConfirm,FormatPromptState PromptConfirm,med,native:Files.cpp FormatStep::kFormatConfirm (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.001,T00045,state,1,initEvents,0,,,1,,kFormatStartEvents,FormatPromptState InitEvents,med,native:Files.cpp FormatStep::kFormatStartEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.002,T00045,state,2,handleEvents,0,,,2,,kFormatEvents,FormatPromptState HandleEvents,med,native:Files.cpp FormatStep::kFormatEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.003,T00045,state,3,format,0,,,3,,kFormatCard,FormatPromptState Format,med,native:Files.cpp FormatStep::kFormatCard (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.000,T00046,state,0,init,0,,,0,,kSaveInit,SaveFilesState Init,med,native:Files.cpp SaveFilesStep::kSaveInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00046.001,T00046,state,1,handleInput,0,,,1,,kSaveInput,SaveFilesState HandleInput,med,native:Files.cpp SaveFilesStep::kSaveInput (#441);declaration-only;source:15AC.c:24
+T00046.002,T00046,state,2,slotSelected,0,,,2,,kSaveSlotChosen,SaveFilesState SlotSelected,med,native:Files.cpp SaveFilesStep::kSaveSlotChosen (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2282
+T00046.003,T00046,state,3,overwritePrompt,0,,,3,,kSaveOverwritePrompt,SaveFilesState OverwritePrompt,med,native:Files.cpp SaveFilesStep::kSaveOverwritePrompt (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2283
+T00046.004,T00046,state,4,initOverwrite,0,,,4,,kSaveOverwriteCheck,SaveFilesState InitOverwrite,med,native:Files.cpp SaveFilesStep::kSaveOverwriteCheck (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2284
+T00046.005,T00046,state,5,save,0,,,5,,kSaveWrite,SaveFilesState Save,med,native:Files.cpp SaveFilesStep::kSaveWrite (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2285
+T00046.006,T00046,state,6,validate,0,,,6,,kSaveValidate,SaveFilesState Validate,med,native:Files.cpp SaveFilesStep::kSaveValidate (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2286
+T00046.007,T00046,state,7,leaveWithTimer,0,,,7,,kSaveLeaveWithTimer,SaveFilesState LeaveWithTimer,med,native:Files.cpp SaveFilesStep::kSaveLeaveWithTimer (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2287
+T00046.008,T00046,state,8,leave,0,,,8,,kSaveLeave,SaveFilesState Leave,med,native:Files.cpp SaveFilesStep::kSaveLeave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00046.009,T00046,state,9,format,0,,,9,,kSaveFormat,SaveFilesState Format,med,native:Files.cpp SaveFilesStep::kSaveFormat (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.010,T00046,state,10,leaveError,0,,,10,,kSaveLeaveError,SaveFilesState LeaveError,med,native:Files.cpp SaveFilesStep::kSaveLeaveError (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2290
+T00047.000,T00047,state,0,init,0,,,0,,kCardSlideOut,SaveCardState Init,med,native:Files.cpp CardStep::kCardSlideOut (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00047.001,T00047,state,1,waitForUnselectedAnimation,0,,,1,,kCardSlideUp,SaveCardState WaitForUnselectedAnimation,med,native:Files.cpp CardStep::kCardSlideUp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00047.002,T00047,state,2,waitForAnimation,0,,,2,,kCardStartEvents,SaveCardState WaitForAnimation,med,native:Files.cpp CardStep::kCardStartEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00047.003,T00047,state,3,handleEvents,0,,,3,,kCardPollEvents,SaveCardState HandleEvents,med,native:Files.cpp CardStep::kCardPollEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00047.004,T00047,state,4,animateLeave,0,,,4,,kCardLeave,SaveCardState AnimateLeave,med,native:Files.cpp CardStep::kCardLeave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2544
+T00047.005,T00047,state,5,leave,0,,,5,,kCardReturn,SaveCardState Leave,med,native:Files.cpp CardStep::kCardReturn (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00047.006,T00047,state,6,initSaveMenu,0,,,6,,kCardScan,SaveCardState InitSaveMenu,med,native:Files.cpp CardStep::kCardScan (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00047.007,T00047,state,7,showSaveMenu,0,,,7,,kCardList,SaveCardState ShowSaveMenu,med,native:Files.cpp CardStep::kCardList (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2547
 T00048.000,T00048,state,0,init,0,,,0,,Init,SaveMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00048.001,T00048,state,1,saveExists,0,,,1,,SaveExists,SaveMenuState SaveExists,med,declaration-only;source:MENU/MENU7.PRG/260.c:2677
 T00048.002,T00048,state,2,loadSave,0,,,2,,LoadSave,SaveMenuState LoadSave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2678
@@ -259,20 +259,20 @@ T00048.008,T00048,state,8,returnNoSave,0,,,8,,ReturnNoSave,SaveMenuState ReturnN
 T00048.009,T00048,state,9,containerWarn,0,,,9,,ContainerWarn,SaveMenuState ContainerWarn,med,declaration-only;source:MENU/MENU7.PRG/260.c:2685
 T00048.010,T00048,state,10,eraseContainerData,0,,,10,,EraseContainerData,SaveMenuState EraseContainerData,med,declaration-only;source:MENU/MENU7.PRG/260.c:2686
 T00048.011,T00048,state,11,discardChanges,0,,,11,,DiscardChanges,SaveMenuState DiscardChanges,med,declaration-only;source:MENU/MENU7.PRG/260.c:2687
-T00049.000,T00049,state,0,init,0,,,0,,Init,LoadFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00049.001,T00049,state,1,handleInput,0,,,1,,HandleInput,LoadFilesState HandleInput,med,declaration-only;source:15AC.c:24
-T00049.002,T00049,state,2,startLoad,0,,,2,,StartLoad,LoadFilesState StartLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2883
-T00049.003,T00049,state,3,applyLoad,0,,,3,,ApplyLoad,LoadFilesState ApplyLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2884
-T00049.004,T00049,state,4,loaded,0,,,4,,Loaded,LoadFilesState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
-T00049.005,T00049,state,5,exiting,0,,,5,,Exiting,LoadFilesState Exiting,med,declaration-only;source:MENU/MENU7.PRG/260.c:2886
-T00050.000,T00050,state,0,init,0,,,0,,Init,LoadCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00050.001,T00050,state,1,waitForUnselectedAnimation,0,,,1,,WaitForUnselectedAnimation,LoadCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
-T00050.002,T00050,state,2,pollEventsInit,0,,,2,,PollEventsInit,LoadCardState PollEventsInit,med,declaration-only;source:MENU/MENU7.PRG/260.c:3068
-T00050.003,T00050,state,3,pollEvents,0,,,3,,PollEvents,LoadCardState PollEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:3069
-T00050.004,T00050,state,4,leave,0,,,4,,Leave,LoadCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
-T00050.005,T00050,state,5,returnNotSelected,0,,,5,,ReturnNotSelected,LoadCardState ReturnNotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3071
-T00050.006,T00050,state,6,pollSuccess,0,,,6,,PollSuccess,LoadCardState PollSuccess,med,declaration-only;source:MENU/MENU7.PRG/260.c:3072
-T00050.007,T00050,state,7,selectFile,0,,,7,,SelectFile,LoadCardState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00049.000,T00049,state,0,init,0,,,0,,kLoadInit,LoadFilesState Init,med,native:Files.cpp LoadFilesStep::kLoadInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00049.001,T00049,state,1,handleInput,0,,,1,,kLoadInput,LoadFilesState HandleInput,med,native:Files.cpp LoadFilesStep::kLoadInput (#441);declaration-only;source:15AC.c:24
+T00049.002,T00049,state,2,startLoad,0,,,2,,kLoadStart,LoadFilesState StartLoad,med,native:Files.cpp LoadFilesStep::kLoadStart (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2883
+T00049.003,T00049,state,3,applyLoad,0,,,3,,kLoadApply,LoadFilesState ApplyLoad,med,native:Files.cpp LoadFilesStep::kLoadApply (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2884
+T00049.004,T00049,state,4,loaded,0,,,4,,kLoadLoaded,LoadFilesState Loaded,med,native:Files.cpp LoadFilesStep::kLoadLoaded (#441);declaration-only;source:MENU/MENU7.PRG/260.c:571
+T00049.005,T00049,state,5,exiting,0,,,5,,kLoadExiting,LoadFilesState Exiting,med,native:Files.cpp LoadFilesStep::kLoadExiting (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2886
+T00050.000,T00050,state,0,init,0,,,0,,kCardSlideOut,LoadCardState Init,med,native:Files.cpp CardStep::kCardSlideOut (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00050.001,T00050,state,1,waitForUnselectedAnimation,0,,,1,,kCardSlideUp,LoadCardState WaitForUnselectedAnimation,med,native:Files.cpp CardStep::kCardSlideUp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00050.002,T00050,state,2,pollEventsInit,0,,,2,,kCardStartEvents,LoadCardState PollEventsInit,med,native:Files.cpp CardStep::kCardStartEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3068
+T00050.003,T00050,state,3,pollEvents,0,,,3,,kCardPollEvents,LoadCardState PollEvents,med,native:Files.cpp CardStep::kCardPollEvents (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3069
+T00050.004,T00050,state,4,leave,0,,,4,,kCardLeave,LoadCardState Leave,med,native:Files.cpp CardStep::kCardLeave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00050.005,T00050,state,5,returnNotSelected,0,,,5,,kCardReturn,LoadCardState ReturnNotSelected,med,native:Files.cpp CardStep::kCardReturn (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3071
+T00050.006,T00050,state,6,pollSuccess,0,,,6,,kCardScan,LoadCardState PollSuccess,med,native:Files.cpp CardStep::kCardScan (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3072
+T00050.007,T00050,state,7,selectFile,0,,,7,,kCardList,LoadCardState SelectFile,med,native:Files.cpp CardStep::kCardList (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3073
 T00051.000,T00051,state,0,init,0,,,0,,Init,LoadMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00051.001,T00051,state,1,displaySlot1,0,,,1,,DisplaySlot1,LoadMenuState DisplaySlot1,med,declaration-only;source:MENU/MENU7.PRG/260.c:3191
 T00051.002,T00051,state,2,displaySlot2,0,,,2,,DisplaySlot2,LoadMenuState DisplaySlot2,med,declaration-only;source:MENU/MENU7.PRG/260.c:3192
@@ -414,25 +414,25 @@ T00073.004,T00073,state,4,initNewMap,0,,,4,,InitNewMap,MapMenuState InitNewMap,m
 T00073.005,T00073,state,5,waitForMapAnimation,0,,,5,,WaitForMapAnimation,MapMenuState WaitForMapAnimation,med,declaration-only;source:4D8.c:531
 T00074.000,T00074,state,0,init,0,,,0,,Init,AreaSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00074.001,T00074,state,1,getSelection,0,,,1,,GetSelection,AreaSelectionState GetSelection,med,declaration-only;source:4D8.c:981
-T00075.000,T00075,state,0,init,0,,,0,,Init,GameOverState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00075.001,T00075,state,1,loadAssets,0,,,1,,LoadAssets,GameOverState LoadAssets,med,declaration-only;source:MENU/MENU7.PRG/260.c:3607
-T00075.002,T00075,state,2,displayGameOver,0,,,2,,DisplayGameOver,GameOverState DisplayGameOver,med,declaration-only;source:MENU/MENU7.PRG/260.c:3608
-T00075.003,T00075,state,3,initFileMenu,0,,,3,,InitFileMenu,GameOverState InitFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3609
-T00075.004,T00075,state,4,displayFileMenu,0,,,4,,DisplayFileMenu,GameOverState DisplayFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3610
-T00075.005,T00075,state,5,selectFile,0,,,5,,SelectFile,GameOverState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
-T00075.006,T00075,state,6,restartIntro,0,,,6,,RestartIntro,GameOverState RestartIntro,med,declaration-only;source:MENU/MENU7.PRG/260.c:3612
-T00075.007,T00075,state,7,returnToTitle,0,,,7,,ReturnToTitle,GameOverState ReturnToTitle,med,declaration-only;source:MENU/MENU7.PRG/260.c:3613
-T00076.000,T00076,state,0,init,0,,,0,,Init,ContainerConfirmationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00076.001,T00076,state,1,animWait,0,,,1,,AnimWait,ContainerConfirmationState AnimWait,med,declaration-only;source:120.c:1879
-T00076.002,T00076,state,2,handleInput,0,,,2,,HandleInput,ContainerConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
-T00076.003,T00076,state,3,returnSelection,0,,,3,,ReturnSelection,ContainerConfirmationState ReturnSelection,med,declaration-only;source:30.c:106
-T00077.000,T00077,state,0,none,0,,,0,,None,DataMenuState None,med,declaration-only;source:15AC.c:169
-T00077.001,T00077,state,1,init,0,,,3,,Init,DataMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00077.002,T00077,state,2,loadWait,0,,,4,,LoadWait,DataMenuState LoadWait,med,declaration-only;source:MENU/MENU7.PRG/260.c:4192
-T00077.003,T00077,state,3,initSaveMenu,0,,,7,,InitSaveMenu,DataMenuState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
-T00077.004,T00077,state,4,showSaveMenu,0,,,8,,ShowSaveMenu,DataMenuState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
-T00077.005,T00077,state,5,initLoadMenu,0,,,9,,InitLoadMenu,DataMenuState InitLoadMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:4195
-T00077.006,T00077,state,6,handleInput,0,,,10,,HandleInput,DataMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00075.000,T00075,state,0,init,0,,,0,,kGameOverInit,GameOverState Init,med,native:Files.cpp GameOverStep::kGameOverInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00075.001,T00075,state,1,loadAssets,0,,,1,,kGameOverLoadAssets,GameOverState LoadAssets,med,native:Files.cpp GameOverStep::kGameOverLoadAssets (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3607
+T00075.002,T00075,state,2,displayGameOver,0,,,2,,kGameOverChoices,GameOverState DisplayGameOver,med,native:Files.cpp GameOverStep::kGameOverChoices (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3608
+T00075.003,T00075,state,3,initFileMenu,0,,,3,,kGameOverOpenFiles,GameOverState InitFileMenu,med,native:Files.cpp GameOverStep::kGameOverOpenFiles (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3609
+T00075.004,T00075,state,4,displayFileMenu,0,,,4,,kGameOverFilesWait,GameOverState DisplayFileMenu,med,native:Files.cpp GameOverStep::kGameOverFilesWait (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3610
+T00075.005,T00075,state,5,selectFile,0,,,5,,kGameOverSelectFile,GameOverState SelectFile,med,native:Files.cpp GameOverStep::kGameOverSelectFile (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00075.006,T00075,state,6,restartIntro,0,,,6,,kGameOverRestartIntro,GameOverState RestartIntro,med,native:Files.cpp GameOverStep::kGameOverRestartIntro (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3612
+T00075.007,T00075,state,7,returnToTitle,0,,,7,,kGameOverToTitle,GameOverState ReturnToTitle,med,native:Files.cpp GameOverStep::kGameOverToTitle (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3613
+T00076.000,T00076,state,0,init,0,,,0,,kContainerNo,ContainerConfirmationState Init,med,native:Files.cpp ContainerStep::kContainerNo (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00076.001,T00076,state,1,animWait,0,,,1,,kContainerWait,ContainerConfirmationState AnimWait,med,native:Files.cpp ContainerStep::kContainerWait (#441);declaration-only;source:120.c:1879
+T00076.002,T00076,state,2,handleInput,0,,,2,,kContainerInput,ContainerConfirmationState HandleInput,med,native:Files.cpp ContainerStep::kContainerInput (#441);declaration-only;source:15AC.c:24
+T00076.003,T00076,state,3,returnSelection,0,,,3,,kContainerReturn,ContainerConfirmationState ReturnSelection,med,native:Files.cpp ContainerStep::kContainerReturn (#441);declaration-only;source:30.c:106
+T00077.000,T00077,state,0,none,0,,,0,,kDataClosed,DataMenuState None,med,native:Files.cpp DataMenuStep::kDataClosed (#441);declaration-only;source:15AC.c:169
+T00077.001,T00077,state,1,init,0,,,3,,kDataOpen,DataMenuState Init,med,native:Files.cpp DataMenuStep::kDataOpen (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00077.002,T00077,state,2,loadWait,0,,,4,,kDataLoadWait,DataMenuState LoadWait,med,native:Files.cpp DataMenuStep::kDataLoadWait (#441);declaration-only;source:MENU/MENU7.PRG/260.c:4192
+T00077.003,T00077,state,3,initSaveMenu,0,,,7,,kDataSaveOpen,DataMenuState InitSaveMenu,med,native:Files.cpp DataMenuStep::kDataSaveOpen (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00077.004,T00077,state,4,showSaveMenu,0,,,8,,kDataSave,DataMenuState ShowSaveMenu,med,native:Files.cpp DataMenuStep::kDataSave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00077.005,T00077,state,5,initLoadMenu,0,,,9,,kDataLoadOpen,DataMenuState InitLoadMenu,med,native:Files.cpp DataMenuStep::kDataLoadOpen (#441);declaration-only;source:MENU/MENU7.PRG/260.c:4195
+T00077.006,T00077,state,6,handleInput,0,,,10,,kDataLoad,DataMenuState HandleInput,med,native:Files.cpp DataMenuStep::kDataLoad (#441);declaration-only;source:15AC.c:24
 T00078.000,T00078,state,0,init,0,,,0,,Init,NameEditorState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00078.001,T00078,state,1,state1,0,,,1,,State1,NameEditorState State1,med,declaration-only;source:21A0.c:467
 T00078.002,T00078,state,2,state2,0,,,2,,State2,NameEditorState State2,med,declaration-only;source:21A0.c:468
@@ -461,24 +461,24 @@ T00080.002,T00080,state,2,waitMenuReady,0,,,5,,WaitMenuReady,ScoreOverlayState W
 T00081.000,T00081,state,0,init,0,,,0,,Init,ScoreMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00081.001,T00081,state,1,initData,0,,,1,,InitData,ScoreMenuState InitData,med,declaration-only;source:238.c:277
 T00081.002,T00081,state,2,topMenu,0,,,2,,TopMenu,ScoreMenuState TopMenu,med,declaration-only;source:16C.c:1056
-T00082.000,T00082,state,0,init,0,,,0,,Init,DisassemblyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00082.001,T00082,state,1,initOptionYes,0,,,1,,InitOptionYes,DisassemblyState InitOptionYes,med,declaration-only;source:MENU/MENUB.PRG/260.c:236
-T00082.002,T00082,state,2,initOptionNo,0,,,2,,InitOptionNo,DisassemblyState InitOptionNo,med,declaration-only;source:MENU/MENUB.PRG/260.c:237
-T00082.003,T00082,state,3,waitInit,0,,,3,,WaitInit,DisassemblyState WaitInit,med,declaration-only;source:items2.h:206
-T00082.004,T00082,state,4,processCommand,0,,,4,,ProcessCommand,DisassemblyState ProcessCommand,med,declaration-only;source:MENU/MENUB.PRG/260.c:239
-T00082.005,T00082,state,5,disassemble,0,,,5,,Disassemble,DisassemblyState Disassemble,med,declaration-only;source:MENU/MENUB.PRG/260.c:240
-T00082.006,T00082,state,6,finalize,0,,,6,,Finalize,DisassemblyState Finalize,med,declaration-only;source:MENU/MENUB.PRG/260.c:241
-T00082.007,T00082,state,7,leave,0,,,7,,Leave,DisassemblyState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
-T00083.000,T00083,state,0,init,0,,,0,,Init,LootSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00083.001,T00083,state,1,processInput,0,,,1,,ProcessInput,LootSelectionState ProcessInput,med,declaration-only;source:4D8.c:527
-T00083.002,T00083,state,2,discard,0,,,2,,Discard,LootSelectionState Discard,med,declaration-only;source:items2.h:211
-T00083.003,T00083,state,3,organize,0,,,3,,Organize,LootSelectionState Organize,med,declaration-only;source:MENU/MENUB.PRG/260.c:1628
-T00083.004,T00083,state,4,topMenu,0,,,4,,TopMenu,LootSelectionState TopMenu,med,declaration-only;source:16C.c:1056
-T00083.005,T00083,state,5,dissasemble,0,,,5,,Dissasemble,LootSelectionState Dissasemble,med,declaration-only;source:MENU/MENUB.PRG/260.c:1630
-T00083.006,T00083,state,6,consolidateItems,0,,,6,,ConsolidateItems,LootSelectionState ConsolidateItems,med,declaration-only;source:MENU/MENUB.PRG/260.c:1631
-T00083.007,T00083,state,7,waitForInput,0,,,7,,WaitForInput,LootSelectionState WaitForInput,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00083.008,T00083,state,8,waitForTopMenu,0,,,8,,WaitForTopMenu,LootSelectionState WaitForTopMenu,med,declaration-only;source:MENU/MENUB.PRG/260.c:1633
-T00083.009,T00083,state,9,updateLoot,0,,,9,,UpdateLoot,LootSelectionState UpdateLoot,med,declaration-only;source:MENU/MENUB.PRG/260.c:1634
+T00082.000,T00082,state,0,init,0,,,0,,kPreview,DisassemblyState Init,med,native:LootTerminal.cpp PromptStep::kPreview (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00082.001,T00082,state,1,initOptionYes,0,,,1,,kShowYes,DisassemblyState InitOptionYes,med,native:LootTerminal.cpp PromptStep::kShowYes (#441);declaration-only;source:MENU/MENUB.PRG/260.c:236
+T00082.002,T00082,state,2,initOptionNo,0,,,2,,kShowNo,DisassemblyState InitOptionNo,med,native:LootTerminal.cpp PromptStep::kShowNo (#441);declaration-only;source:MENU/MENUB.PRG/260.c:237
+T00082.003,T00082,state,3,waitInit,0,,,3,,kWaitRows,DisassemblyState WaitInit,med,native:LootTerminal.cpp PromptStep::kWaitRows (#441);declaration-only;source:items2.h:206
+T00082.004,T00082,state,4,processCommand,0,,,4,,kChoose,DisassemblyState ProcessCommand,med,native:LootTerminal.cpp PromptStep::kChoose (#441);declaration-only;source:MENU/MENUB.PRG/260.c:239
+T00082.005,T00082,state,5,disassemble,0,,,5,,kApply,DisassemblyState Disassemble,med,native:LootTerminal.cpp PromptStep::kApply (#441);declaration-only;source:MENU/MENUB.PRG/260.c:240
+T00082.006,T00082,state,6,finalize,0,,,6,,kRestore,DisassemblyState Finalize,med,native:LootTerminal.cpp PromptStep::kRestore (#441);declaration-only;source:MENU/MENUB.PRG/260.c:241
+T00082.007,T00082,state,7,leave,0,,,7,,kWaitExit,DisassemblyState Leave,med,native:LootTerminal.cpp PromptStep::kWaitExit (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00083.000,T00083,state,0,init,0,,,0,,kInitialize,LootSelectionState Init,med,native:LootTerminal.cpp SelectionStep::kInitialize (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00083.001,T00083,state,1,processInput,0,,,1,,kInput,LootSelectionState ProcessInput,med,native:LootTerminal.cpp SelectionStep::kInput (#441);declaration-only;source:4D8.c:527
+T00083.002,T00083,state,2,discard,0,,,2,,kLeave,LootSelectionState Discard,med,native:LootTerminal.cpp SelectionStep::kLeave (#441);declaration-only;source:items2.h:211
+T00083.003,T00083,state,3,organize,0,,,3,,kOrganize,LootSelectionState Organize,med,native:LootTerminal.cpp SelectionStep::kOrganize (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1628
+T00083.004,T00083,state,4,topMenu,0,,,4,,kInventory,LootSelectionState TopMenu,med,native:LootTerminal.cpp SelectionStep::kInventory (#441);declaration-only;source:16C.c:1056
+T00083.005,T00083,state,5,dissasemble,0,,,5,,kDisassemble,LootSelectionState Dissasemble,med,native:LootTerminal.cpp SelectionStep::kDisassemble (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1630
+T00083.006,T00083,state,6,consolidateItems,0,,,6,,kConsolidate,LootSelectionState ConsolidateItems,med,native:LootTerminal.cpp SelectionStep::kConsolidate (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1631
+T00083.007,T00083,state,7,waitForInput,0,,,7,,kWaitInput,LootSelectionState WaitForInput,med,native:LootTerminal.cpp SelectionStep::kWaitInput (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00083.008,T00083,state,8,waitForTopMenu,0,,,8,,kWaitPanels,LootSelectionState WaitForTopMenu,med,native:LootTerminal.cpp SelectionStep::kWaitPanels (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1633
+T00083.009,T00083,state,9,updateLoot,0,,,9,,kRemoveClaimed,LootSelectionState UpdateLoot,med,native:LootTerminal.cpp SelectionStep::kRemoveClaimed (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1634
 T00084.000,T00084,state,0,init,0,,,0,,Init,SortMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00084.001,T00084,state,1,display,0,,,1,,Display,SortMenuState Display,med,declaration-only;source:234.c:1621
 T00085.000,T00085,state,0,none,0,,,0,,None,ManualOverlayState None,med,declaration-only;source:15AC.c:169
@@ -582,16 +582,16 @@ T00098.016,T00098,vs_battle_warlockSpellIds_e,16,vs_battle_spell_drainHeart,0,,,
 T00098.017,T00098,vs_battle_warlockSpellIds_e,17,vs_battle_spell_drainMind,0,,,95,,DrainMind,WarlockSpell DrainMind,med,declaration-only;source:5BF94.h:24
 T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,kOff,Dithering Off,med,declaration-only;source:gpu.h:15
 T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,kOn,Dithering On,med,declaration-only;source:gpu.h:15
-T00100.000,T00100,vs_fileMenuUiIds_e,0,vs_uiids_colon,0,,,0,,Colon,FileMenuUiId Colon,med,declaration-only;source:MENU/MENU7.PRG/260.c:1207
-T00100.001,T00100,vs_fileMenuUiIds_e,1,vs_uiids_number,0,,,1,,Number,FileMenuUiId Number,med,declaration-only;source:MENU/MENU7.PRG/260.c:1208
-T00100.002,T00100,vs_fileMenuUiIds_e,2,vs_uiids_map,0,,,2,,Map,FileMenuUiId Map,med,declaration-only;source:MENU/MENU7.PRG/260.c:1209
-T00100.003,T00100,vs_fileMenuUiIds_e,3,vs_uiids_save,0,,,3,,Save,FileMenuUiId Save,med,declaration-only;source:MENU/MENU7.PRG/260.c:1210
-T00100.004,T00100,vs_fileMenuUiIds_e,4,vs_uiids_clear,0,,,4,,Clear,FileMenuUiId Clear,med,declaration-only;source:MENU/MENU7.PRG/260.c:1211
-T00100.005,T00100,vs_fileMenuUiIds_e,5,vs_uiids_time,0,,,5,,Time,FileMenuUiId Time,med,declaration-only;source:MENU/MENU7.PRG/260.c:1212
-T00100.006,T00100,vs_fileMenuUiIds_e,6,vs_uiids_percent,0,,,6,,Percent,FileMenuUiId Percent,med,declaration-only;source:MENU/MENU7.PRG/260.c:1213
-T00100.007,T00100,vs_fileMenuUiIds_e,7,vs_uiids_hp,0,,,7,,Hp,FileMenuUiId Hp,med,declaration-only;source:MENU/MENU7.PRG/260.c:1214
-T00100.008,T00100,vs_fileMenuUiIds_e,8,vs_uiids_mp,0,,,8,,Mp,FileMenuUiId Mp,med,declaration-only;source:MENU/MENU7.PRG/260.c:1215
-T00100.009,T00100,vs_fileMenuUiIds_e,9,vs_uiids_dot,0,,,9,,Dot,FileMenuUiId Dot,med,declaration-only;source:MENU/MENU7.PRG/260.c:1216
+T00100.000,T00100,vs_fileMenuUiIds_e,0,vs_uiids_colon,0,,,0,,kColon,FileMenuUiId Colon,med,native:Files.hpp Label::kColon (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1207
+T00100.001,T00100,vs_fileMenuUiIds_e,1,vs_uiids_number,0,,,1,,kNumber,FileMenuUiId Number,med,native:Files.hpp Label::kNumber (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1208
+T00100.002,T00100,vs_fileMenuUiIds_e,2,vs_uiids_map,0,,,2,,kMap,FileMenuUiId Map,med,native:Files.hpp Label::kMap (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1209
+T00100.003,T00100,vs_fileMenuUiIds_e,3,vs_uiids_save,0,,,3,,kSave,FileMenuUiId Save,med,native:Files.hpp Label::kSave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1210
+T00100.004,T00100,vs_fileMenuUiIds_e,4,vs_uiids_clear,0,,,4,,kClear,FileMenuUiId Clear,med,native:Files.hpp Label::kClear (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1211
+T00100.005,T00100,vs_fileMenuUiIds_e,5,vs_uiids_time,0,,,5,,kTime,FileMenuUiId Time,med,native:Files.hpp Label::kTime (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1212
+T00100.006,T00100,vs_fileMenuUiIds_e,6,vs_uiids_percent,0,,,6,,kPercent,FileMenuUiId Percent,med,native:Files.hpp Label::kPercent (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1213
+T00100.007,T00100,vs_fileMenuUiIds_e,7,vs_uiids_hp,0,,,7,,kHp,FileMenuUiId Hp,med,native:Files.hpp Label::kHp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1214
+T00100.008,T00100,vs_fileMenuUiIds_e,8,vs_uiids_mp,0,,,8,,kMp,FileMenuUiId Mp,med,native:Files.hpp Label::kMp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1215
+T00100.009,T00100,vs_fileMenuUiIds_e,9,vs_uiids_dot,0,,,9,,kDot,FileMenuUiId Dot,med,native:Files.hpp Label::kDot (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1216
 T00101.000,T00101,vs_gemTargets,0,gemTargetShield,0,,,128,,Shield,GemTarget Shield,med,declaration-only;source:func_8006B57C_t.h:166
 T00102.000,T00102,vs_itemCategories,0,itemCategoryWeapon,0,,,0,,kWeapon,ItemCategory Weapon,med,declaration-only;source:func_8006B57C_t.h:156
 T00102.001,T00102,vs_itemCategories,1,itemCategoryBlade,0,,,1,,kBlade,ItemCategory Blade,med,declaration-only;source:func_8006B57C_t.h:157
@@ -2737,10 +2737,10 @@ T00314.007,T00314,_limbInit,7,dpSplash,0,char[6],,,,dpSplash,Damage-point splash
 T00314.008,T00314,_limbInit,8,unk5A,1,char[2],,,,reserved5A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:30;declaration-only;source:146C.h:856
 T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,Named in the fork; see cited use,med,source:5BF94.c:5191
 T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Named in the fork; see cited use,med,source:6F014.c:585
-T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,itemCategory,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:265
-T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,itemIndex,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:274
-T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,opaque2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Loot\LootInventory.h:21;source:MENU/MENUB.PRG/260.c:545
-T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,state,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:286
+T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,category,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::category (#441);source:MENU/MENUB.PRG/260.c:265
+T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,item_index,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::item_index (#441);source:MENU/MENUB.PRG/260.c:274
+T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,slide_step,Not used by native code; kept for the original layout,med,native:LootRows.hpp LootRow::slide_step (#441);native-refs:none;source:native:Native\Game\src\Menu\Loot\LootInventory.h:21;source:MENU/MENUB.PRG/260.c:545
+T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,state,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::state (#441);source:MENU/MENUB.PRG/260.c:286
 T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:32;declaration-only;source:494.c:26
 T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:33;declaration-only;source:494.c:27
 T00317.002,T00317,_menuBgChunkWidths_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:34;declaration-only;source:494.c:28

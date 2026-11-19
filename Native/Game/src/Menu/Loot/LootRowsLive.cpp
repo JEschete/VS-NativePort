@@ -1,10 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the loot screen's rows (LootRows.hpp): the working
-// inventory (Menu_Loot_inventory), its rows and cursor, the pending loot
+// inventory (stagedInventory), its rows and cursor, the pending loot
 // records and Ashley's inventory for the room checks.
 #include "Menu/Loot/LootRowsLive.hpp"
 
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -18,15 +17,13 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootRows.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 
 static_assert(static_cast<std::size_t>(VS::Menu::Loot::kRowCapacity) ==
               VS::Menu::Loot::kLootRowCapacity);
-static_assert(sizeof(Menu_Loot_LootListItem) ==
-              sizeof(VS::Menu::Loot::LootRow));
 
 namespace VS::Menu::Loot::Live {
 namespace {
@@ -72,28 +69,27 @@ class AshleyClaimCheck final : public ClaimCheck {
   items::InventoryIndices indices_;
 };
 
-std::span<Menu_Loot_LootListItem, kLootRowCapacity> LiveRows() {
-  return std::span<Menu_Loot_LootListItem, kLootRowCapacity>(Menu_Loot_lootList,
-                                                             kLootRowCapacity);
+std::span<LootRow, kLootRowCapacity> LiveRows() {
+  return std::span<LootRow, kLootRowCapacity>(lootList, kLootRowCapacity);
 }
 
 // The screen allocates VS::Menu::Loot::kRowCapacity rows with the working
 // inventory.
 std::optional<LootStaging> Load(const char* operation) {
-  if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
+  if (stagedInventory == nullptr || lootList == nullptr) {
     item_live::WarnNullRecord(operation);
     return std::nullopt;
   }
   std::optional<LootStaging> staging(std::in_place);
-  staging->inventory = *Menu_Loot_inventory;
+  staging->inventory = *stagedInventory;
   const auto rows = LiveRows();
   for (std::size_t i = 0; i < rows.size(); ++i) {
-    staging->rows[i] = std::bit_cast<LootRow>(rows[i]);
+    staging->rows[i] = rows[i];
   }
   staging->cursor = {
-      .count = Menu_Loot_lootListCount,
-      .offset = Menu_Loot_lootListOffset,
-      .selected = static_cast<std::uint8_t>(Menu_Loot_selectedLoot),
+      .count = lootListCount,
+      .offset = lootListOffset,
+      .selected = selectedLoot,
   };
   staging->batch = PagingState().batch;
   staging->difficulty =
@@ -102,14 +98,14 @@ std::optional<LootStaging> Load(const char* operation) {
 }
 
 void Store(const LootStaging& staging) {
-  *Menu_Loot_inventory = staging.inventory;
+  *stagedInventory = staging.inventory;
   const auto rows = LiveRows();
   for (std::size_t i = 0; i < rows.size(); ++i) {
-    rows[i] = std::bit_cast<Menu_Loot_LootListItem>(staging.rows[i]);
+    rows[i] = staging.rows[i];
   }
-  Menu_Loot_lootListCount = staging.cursor.count;
-  Menu_Loot_lootListOffset = staging.cursor.offset;
-  Menu_Loot_selectedLoot = static_cast<char>(staging.cursor.selected);
+  lootListCount = staging.cursor.count;
+  lootListOffset = staging.cursor.offset;
+  selectedLoot = staging.cursor.selected;
   PagingState().batch = staging.batch;
 }
 
@@ -158,9 +154,9 @@ void AppendLootRow(int category, int slot) {
   Store(*staging);
 }
 
-int CountContainedCategory(int counted_category, Menu_Loot_LootListItem* row) {
+int CountContainedCategory(int counted_category, LootRow* row) {
   constexpr const char* kOperation = "Menu::Loot::CountContainedCategory";
-  if (row == nullptr || Menu_Loot_inventory == nullptr) {
+  if (row == nullptr || stagedInventory == nullptr) {
     item_live::WarnNullRecord(kOperation);
     return 0;
   }
@@ -170,8 +166,8 @@ int CountContainedCategory(int counted_category, Menu_Loot_LootListItem* row) {
     return 0;
   }
   const auto count = VS::Menu::Loot::CountContainedCategory(
-      static_cast<items::ItemCategory>(counted_category),
-      std::bit_cast<LootRow>(*row), *Menu_Loot_inventory);
+      static_cast<items::ItemCategory>(counted_category), *row,
+      *stagedInventory);
   item_live::WarnRefusal(kOperation, count.status);
   return count.count;
 }

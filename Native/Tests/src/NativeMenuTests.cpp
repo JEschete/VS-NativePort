@@ -32,7 +32,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Menu/Files.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/NativeContainerLive.hpp"
@@ -458,7 +457,7 @@ TEST_CASE("Native file screens have three cards without generic row panels",
   CHECK_FALSE(Screen().save);
   for (int i = 0; i < 10; ++i) {
     CHECK(VS::Title::fileMenuElements[i].state ==
-          Menu_Files_ElementState_Inactive);
+          static_cast<std::uint8_t>(VS::Menu::Files::ElementState::kInactive));
   }
   for (const auto& file : Screen().files) {
     CHECK(file.status == Save::FileStatus::kEmpty);

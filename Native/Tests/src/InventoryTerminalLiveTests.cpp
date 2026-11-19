@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -37,7 +36,7 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
@@ -234,33 +233,31 @@ struct LootFixture : TextLoadingFixture {
                                                  loot::LootRow{6, 0, 0, 0},
                                                  loot::LootRow{6, 1, 0, 0}};
   ValueRestore<VS::Items::InventoryContents*> saved_loot_inventory{
-      Menu_Loot_inventory};
+      loot::stagedInventory};
   ValueRestore<VS::Items::InventoryContents*> saved_backup{
-      Menu_Loot_inventoryBackup};
-  ValueRestore<Menu_Loot_LootListItem*> saved_loot_rows{Menu_Loot_lootList};
-  ValueRestore<Menu_Loot_LootListItem*> saved_working{
-      Menu_Loot_lootListWorkingCopy};
+      loot::inventoryBackup};
+  ValueRestore<loot::LootRow*> saved_loot_rows{loot::lootList};
+  ValueRestore<loot::LootRow*> saved_working{loot::lootListWorkingCopy};
   ValueRestore<decltype(VS::Menu::Framework::lootLists)> saved_room_loot{
       VS::Menu::Framework::lootLists};
   ValueRestore<decltype(VS::Menu::Framework::lootEntry)> saved_chest{
       VS::Menu::Framework::lootEntry};
   std::remove_pointer_t<decltype(VS::Menu::Framework::lootEntry)> chest{};
-  ValueRestore<u_char> saved_count{Menu_Loot_lootListCount};
-  ValueRestore<u_char> saved_offset{Menu_Loot_lootListOffset};
-  ValueRestore<char> saved_selected{Menu_Loot_selectedLoot};
-  ValueRestore<char> saved_previewed{Menu_Loot_previewedLoot};
-  ValueRestore<char> saved_claimed{Menu_Loot_lootClaimed};
-  ValueRestore<char> saved_controls{Menu_Loot_controlsEnabled};
-  ValueRestore<char> saved_show_inventory{Menu_Loot_showInventory};
-  ValueRestore<char> saved_show_loot{Menu_Loot_showLoot};
-  ValueRestore<u_char> saved_inventory_step{
-      Menu_Loot_inventoryCapacityFlyinTimer};
-  ValueRestore<u_char> saved_loot_step{Menu_Loot_lootLeftEdge};
+  ValueRestore<std::uint8_t> saved_count{loot::lootListCount};
+  ValueRestore<std::uint8_t> saved_offset{loot::lootListOffset};
+  ValueRestore<std::uint8_t> saved_selected{loot::selectedLoot};
+  ValueRestore<std::uint8_t> saved_previewed{loot::previewedLoot};
+  ValueRestore<std::uint8_t> saved_claimed{loot::lootClaimed};
+  ValueRestore<std::uint8_t> saved_controls{loot::controlsEnabled};
+  ValueRestore<std::uint8_t> saved_show_inventory{loot::showInventory};
+  ValueRestore<std::uint8_t> saved_show_loot{loot::showLoot};
+  ValueRestore<std::uint8_t> saved_inventory_step{
+      loot::inventoryCapacityFlyinTimer};
+  ValueRestore<std::uint8_t> saved_loot_step{loot::lootLeftEdge};
 
   LootFixture() {
-    if (Menu_Loot_inventory != nullptr ||
-        Menu_Loot_inventoryBackup != nullptr || Menu_Loot_lootList != nullptr ||
-        Menu_Loot_lootListWorkingCopy != nullptr) {
+    if (loot::stagedInventory != nullptr || loot::inventoryBackup != nullptr ||
+        loot::lootList != nullptr || loot::lootListWorkingCopy != nullptr) {
       throw std::runtime_error("loot integration requires an unused workspace");
     }
     loot::ResetLootTerminalSession();
@@ -280,37 +277,35 @@ struct LootFixture : TextLoadingFixture {
   void OpenAndLoad() {
     REQUIRE(Open() == 0);
     REQUIRE(CompleteTextRead());
-    REQUIRE(Menu_Loot_inventory != nullptr);
-    REQUIRE(Menu_Loot_inventoryBackup != nullptr);
-    REQUIRE(Menu_Loot_lootList != nullptr);
-    REQUIRE(Menu_Loot_lootListWorkingCopy != nullptr);
+    REQUIRE(loot::stagedInventory != nullptr);
+    REQUIRE(loot::inventoryBackup != nullptr);
+    REQUIRE(loot::lootList != nullptr);
+    REQUIRE(loot::lootListWorkingCopy != nullptr);
   }
   void BeginInventoryTransition() {
     REQUIRE(loot::UpdateLiveInventoryTransition(1) == 0);
     REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
   }
   static void CheckReleased() {
-    CHECK(Menu_Loot_inventory == nullptr);
-    CHECK(Menu_Loot_inventoryBackup == nullptr);
-    CHECK(Menu_Loot_lootList == nullptr);
-    CHECK(Menu_Loot_lootListWorkingCopy == nullptr);
+    CHECK(loot::stagedInventory == nullptr);
+    CHECK(loot::inventoryBackup == nullptr);
+    CHECK(loot::lootList == nullptr);
+    CHECK(loot::lootListWorkingCopy == nullptr);
     CHECK(Battle_stringContext.strings[0] == nullptr);
   }
   static void SeedConsolidation() {
-    auto& staged = *Menu_Loot_inventory;
+    auto& staged = *loot::stagedInventory;
     staged.misc[0] = {323, 2, 1};
     staged.misc[1] = {323, 3, 1};
     staged.blades[0].id = 17;
     VS::Items::inventory.misc[0] = {323, 80, 1};
-    Menu_Loot_lootListCount = static_cast<u_char>(kConsolidationRows.size());
+    loot::lootListCount = static_cast<std::uint8_t>(kConsolidationRows.size());
     for (std::size_t index = 0; index < kConsolidationRows.size(); ++index) {
-      Menu_Loot_lootList[index] =
-          std::bit_cast<Menu_Loot_LootListItem>(kConsolidationRows[index]);
+      loot::lootList[index] = kConsolidationRows[index];
     }
-    Menu_Loot_lootList[loot::kLootRowCapacity - 1] =
-        std::bit_cast<Menu_Loot_LootListItem>(kTail);
+    loot::lootList[loot::kLootRowCapacity - 1] = kTail;
     REQUIRE(loot::UpdateLiveStackConsolidation(2) == 0);
-    Menu_Loot_lootLeftEdge = 6;
+    loot::lootLeftEdge = 6;
   }
   void OpenConsolidationPrompt() {
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
@@ -322,16 +317,14 @@ struct LootFixture : TextLoadingFixture {
     VS::Input::buttonsPressed = confirm ? kConfirm : kCancel;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
     VS::Input::buttonsPressed = 0;
-    Menu_Loot_lootLeftEdge = 6;
+    loot::lootLeftEdge = 6;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   }
   static void CheckRestoredRows() {
     for (std::size_t index = 0; index < kConsolidationRows.size(); ++index) {
-      CHECK(std::bit_cast<loot::LootRow>(Menu_Loot_lootList[index]) ==
-            kConsolidationRows[index]);
+      CHECK(loot::lootList[index] == kConsolidationRows[index]);
     }
-    CHECK(std::bit_cast<loot::LootRow>(
-              Menu_Loot_lootList[loot::kLootRowCapacity - 1]) == kTail);
+    CHECK(loot::lootList[loot::kLootRowCapacity - 1] == kTail);
   }
 };
 }  // namespace
@@ -495,7 +488,7 @@ TEST_CASE(
     "[loot-terminal-live][inventory-reload][F02843][menu-overlay-reload]") {
   LootFixture fixture;
   fixture.OpenAndLoad();
-  auto* const owned = Menu_Loot_inventory;
+  auto* const owned = loot::stagedInventory;
   fixture.BeginInventoryTransition();
   {
     menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
@@ -508,7 +501,7 @@ TEST_CASE(
   REQUIRE(fixture.SettleRows());
   menu_overlay_tests::Load load(12, {VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE});
   CHECK(load.Complete() == 1);
-  CHECK(Menu_Loot_inventory == owned);
+  CHECK(loot::stagedInventory == owned);
   REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
   CHECK(framework::LiveMenuRow(kLootTitleRow).state ==
         framework::RowState::kSlideX);
@@ -525,7 +518,7 @@ TEST_CASE(
   for (int visit = 0; visit < 2; ++visit) {
     fixture.OpenAndLoad();
     Battle_stringContext.strings[0] =
-        Menu_Loot_inventory->weapons[0].name.data();
+        loot::stagedInventory->weapons[0].name.data();
     if (cold) {
       const auto entry = +[] { return 0; };
       CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
@@ -547,10 +540,10 @@ TEST_CASE(
   LootFixture fixture;
   fixture.OpenAndLoad();
   fixture.SeedConsolidation();
-  auto& staged = *Menu_Loot_inventory;
+  auto& staged = *loot::stagedInventory;
   const auto before = staged;
   REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
-  CHECK(Menu_Loot_lootListCount == 1);
+  CHECK(loot::lootListCount == 1);
   CHECK(staged.misc[0].count == 5);
   fixture.OpenConsolidationPrompt();
   fixture.AnswerConsolidation(confirm);

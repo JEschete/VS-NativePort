@@ -6,7 +6,6 @@
 #include "Menu/Loot/LootPoliciesLive.hpp"
 
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -36,7 +35,7 @@
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -83,16 +82,15 @@ void Refuse(std::string_view reason) {
   }
 }
 
-[[nodiscard]] std::span<Menu_Loot_LootListItem, kLootRowCapacity> LiveRows() {
-  return std::span<Menu_Loot_LootListItem, kLootRowCapacity>(Menu_Loot_lootList,
-                                                             kLootRowCapacity);
+[[nodiscard]] std::span<LootRow, kLootRowCapacity> LiveRows() {
+  return std::span<LootRow, kLootRowCapacity>(lootList, kLootRowCapacity);
 }
 
 [[nodiscard]] std::vector<LootRow> LoadRows() {
   std::vector<LootRow> rows(kLootRowCapacity);
   const auto live = LiveRows();
   for (std::size_t i = 0; i < live.size(); ++i) {
-    rows[i] = std::bit_cast<LootRow>(live[i]);
+    rows[i] = live[i];
   }
   return rows;
 }
@@ -100,14 +98,14 @@ void Refuse(std::string_view reason) {
 void StoreRows(std::span<const LootRow> rows) {
   const auto live = LiveRows();
   for (std::size_t i = 0; i < live.size(); ++i) {
-    live[i] = std::bit_cast<Menu_Loot_LootListItem>(rows[i]);
+    live[i] = rows[i];
   }
 }
 
 [[nodiscard]] LootCursor LiveCursor() {
-  return {.count = Menu_Loot_lootListCount,
-          .offset = Menu_Loot_lootListOffset,
-          .selected = static_cast<std::uint8_t>(Menu_Loot_selectedLoot)};
+  return {.count = lootListCount,
+          .offset = lootListOffset,
+          .selected = selectedLoot};
 }
 
 [[nodiscard]] std::span<const std::uint8_t> ItemNameText(std::uint16_t id) {
@@ -213,7 +211,7 @@ class LiveCapacityHost final : public CapacityHost {
       case CapacityLabel::kSlash:
         return "/";
       case CapacityLabel::kCategory:
-        return Menu_Loot_itemCategoryHeaders[category];
+        return kItemCategoryHeaders[category];
       case CapacityLabel::kGet:
         return "GET";
       case CapacityLabel::kAll:
@@ -225,7 +223,7 @@ class LiveCapacityHost final : public CapacityHost {
   }
 
   // The live row the typed copy came from (CountContainedCategory reads it).
-  [[nodiscard]] Menu_Loot_LootListItem* LiveRow(const LootRow& row) const {
+  [[nodiscard]] LootRow* LiveRow(const LootRow& row) const {
     const auto index = static_cast<std::size_t>(&row - rows_.data());
     return &LiveRows()[index];
   }
@@ -248,13 +246,11 @@ class LiveLootRowsHost final : public LootRowsHost {
 class LiveDescriptionHost final : public DescriptionHost {
  public:
   void BackupInventory() override {
-    Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_inventoryBackup,
-                                         &VS::Items::inventory,
-                                         sizeof *Menu_Loot_inventoryBackup);
+    Core::Memory::CopyLiveHalfwordBlocks(inventoryBackup, &VS::Items::inventory,
+                                         sizeof *inventoryBackup);
   }
   void LoadStagedInventory() override {
-    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
-                                         Menu_Loot_inventory,
+    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory, stagedInventory,
                                          sizeof VS::Items::inventory);
   }
   std::span<const std::uint8_t> FormatDescription(items::ItemCategory category,
@@ -302,8 +298,7 @@ class LiveDescriptionHost final : public DescriptionHost {
     Framework::SetLiveInformationMessageText(message);
   }
   void RestoreInventory() override {
-    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
-                                         Menu_Loot_inventoryBackup,
+    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory, inventoryBackup,
                                          sizeof VS::Items::inventory);
   }
 
@@ -365,7 +360,7 @@ class LivePromptHost final : public PromptHost {
 }
 
 [[nodiscard]] bool HaveLootList(const char* operation) {
-  if (Menu_Loot_lootList == nullptr || Menu_Loot_inventory == nullptr) {
+  if (lootList == nullptr || stagedInventory == nullptr) {
     item_live::WarnNullRecord(operation);
     return false;
   }
@@ -374,7 +369,7 @@ class LivePromptHost final : public PromptHost {
 }  // namespace
 
 void RenderBagCapacities(int edge_x) {
-  if (Menu_Loot_lootList == nullptr) {
+  if (lootList == nullptr) {
     item_live::WarnNullRecord("RenderBagCapacities");
     return;
   }
@@ -382,8 +377,8 @@ void RenderBagCapacities(int edge_x) {
   const CapacityPanel panel{
       .rows = rows,
       .cursor = LiveCursor(),
-      .previewed = static_cast<std::uint8_t>(Menu_Loot_previewedLoot),
-      .controls_enabled = static_cast<std::uint8_t>(Menu_Loot_controlsEnabled),
+      .previewed = previewedLoot,
+      .controls_enabled = controlsEnabled,
       .capacities = std::span(VS::Items::kCategoryCapacities)};
   LiveCapacityHost host(rows);
   if (!VS::Menu::Loot::RenderBagCapacities(edge_x, panel, host)) {
@@ -396,19 +391,18 @@ void RenderLootRows(int x) {
   auto rows = LoadRows();
   LootRowsView view{.rows = rows,
                     .cursor = LiveCursor(),
-                    .gradient_state_index = static_cast<std::uint8_t>(
-                        Menu_Loot_gradientStateIndex)};
-  const auto inventory = *Menu_Loot_inventory;
+                    .gradient_state_index = gradientStateIndex};
+  const auto inventory = *stagedInventory;
   LiveLootRowsHost host;
   item_live::WarnRefusal("RenderLootRows", VS::Menu::Loot::RenderLootRows(
                                                x, view, inventory, host));
   StoreRows(rows);
-  Menu_Loot_gradientStateIndex = static_cast<char>(view.gradient_state_index);
+  gradientStateIndex = view.gradient_state_index;
 }
 
 void ShowLootDescription(int loot_index) {
   if (!HaveLootList("ShowLootDescription")) return;
-  if (Menu_Loot_inventoryBackup == nullptr) {
+  if (inventoryBackup == nullptr) {
     item_live::WarnNullRecord("ShowLootDescription");
     return;
   }
@@ -417,8 +411,7 @@ void ShowLootDescription(int loot_index) {
     Refuse("a described loot row outside the loot list");
     return;
   }
-  const auto row =
-      std::bit_cast<LootRow>(LiveRows()[static_cast<std::size_t>(loot_index)]);
+  const auto row = LiveRows()[static_cast<std::size_t>(loot_index)];
   LiveDescriptionHost host;
   item_live::WarnRefusal("ShowLootDescription",
                          VS::Menu::Loot::ShowLootDescription(row, host));
@@ -426,17 +419,17 @@ void ShowLootDescription(int loot_index) {
 
 int UpdateLeaveConfirmation(int init) {
   auto& prompt = Statics().leave;
-  const bool claimed = Menu_Loot_lootClaimed != 0;
+  const bool claimed = lootClaimed != 0;
   if (init != 0) {
     if (!HaveLootList("UpdateLeaveConfirmation")) return 0;
     const auto rows = LoadRows();
     const LeaveContext context{.rows = rows,
-                               .count = Menu_Loot_lootListCount,
+                               .count = lootListCount,
                                .claimed = claimed,
                                .single_entry = Framework::lootEntry != nullptr};
     item_live::WarnRefusal(
         "UpdateLeaveConfirmation",
-        InitLeaveConfirmation(prompt, context, *Menu_Loot_inventory));
+        InitLeaveConfirmation(prompt, context, *stagedInventory));
     return 0;
   }
   LivePromptHost host;
@@ -449,17 +442,17 @@ int UpdateLeaveConfirmation(int init) {
   return *result;
 }
 
-int UpdateOrganizationMenu(Menu_Loot_LootListItem* loot) {
+int UpdateOrganizationMenu(LootRow* loot) {
   auto& menu = Statics().organize;
   LivePromptHost host;
   if (loot != nullptr) {
-    if (Menu_Loot_inventory == nullptr) {
+    if (stagedInventory == nullptr) {
       item_live::WarnNullRecord("UpdateOrganizationMenu");
       return 0;
     }
-    item_live::WarnRefusal("UpdateOrganizationMenu",
-                           InitOrganizeMenu(menu, std::bit_cast<LootRow>(*loot),
-                                            *Menu_Loot_inventory, host));
+    item_live::WarnRefusal(
+        "UpdateOrganizationMenu",
+        InitOrganizeMenu(menu, *loot, *stagedInventory, host));
     return 0;
   }
   const auto result = UpdateOrganizeMenu(menu, LiveInput(), host);

@@ -17,7 +17,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
@@ -116,9 +116,9 @@ bool IsBound(unsigned address, Entry entry) {
 
 struct LiveRowsFixture {
   VS::Items::InventoryContents staged{};
-  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
-  VS::Items::InventoryContents* previous_inventory{Menu_Loot_inventory};
-  Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
+  std::array<loot::LootRow, VS::Menu::Loot::kRowCapacity> rows{};
+  VS::Items::InventoryContents* previous_inventory{loot::stagedInventory};
+  loot::LootRow* previous_rows{loot::lootList};
   VS::Items::InventoryContents previous_ashley{VS::Items::inventory};
   VS::Items::InventoryIndices previous_indices{VS::Items::inventoryIndices};
   VS::Items::BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
@@ -126,11 +126,11 @@ struct LiveRowsFixture {
 
   LiveRowsFixture() {
     VS::Menu::Loot::Live::ResetPaging();
-    Menu_Loot_inventory = &staged;
-    Menu_Loot_lootList = rows.data();
-    Menu_Loot_lootListCount = 0;
-    Menu_Loot_lootListOffset = 0;
-    Menu_Loot_selectedLoot = 0;
+    loot::stagedInventory = &staged;
+    loot::lootList = rows.data();
+    loot::lootListCount = 0;
+    loot::lootListOffset = 0;
+    loot::selectedLoot = 0;
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     VS::State::stateFlags.difficulty = 0;
@@ -138,9 +138,9 @@ struct LiveRowsFixture {
 
   ~LiveRowsFixture() {
     VS::Menu::Loot::Live::ResetPaging();
-    Menu_Loot_inventory = previous_inventory;
-    Menu_Loot_lootList = previous_rows;
-    Menu_Loot_lootListCount = 0;
+    loot::stagedInventory = previous_inventory;
+    loot::lootList = previous_rows;
+    loot::lootListCount = 0;
     VS::Items::inventory = previous_ashley;
     VS::Items::inventoryIndices = previous_indices;
     VS::Menu::Framework::lootEntry = previous_entry;
@@ -427,11 +427,11 @@ TEST_CASE("Live loot rows use the screen's rows, cursor and difficulty",
   CHECK(live::IsDropAllowed(1) == 0);
 
   live::AppendLootRow(static_cast<int>(ItemCategory::kArmor), 3);
-  CHECK(Menu_Loot_lootListCount == 1);
-  CHECK(fixture.rows[0].itemCategory == static_cast<int>(ItemCategory::kArmor));
-  CHECK(fixture.rows[0].itemIndex == 2);
+  CHECK(loot::lootListCount == 1);
+  CHECK(fixture.rows[0].category == static_cast<int>(ItemCategory::kArmor));
+  CHECK(fixture.rows[0].item_index == 2);
   live::AppendLootRow(static_cast<int>(ItemCategory::kManage), 1);
-  CHECK(Menu_Loot_lootListCount == 1);
+  CHECK(loot::lootListCount == 1);
 
   CHECK(live::CountContainedCategory(static_cast<int>(ItemCategory::kArmor),
                                      &fixture.rows[0]) == 1);
@@ -450,7 +450,7 @@ TEST_CASE("Live chest staging pages the single loot entry",
   chest = typed;
   VS::Menu::Framework::lootEntry = &chest;
   live::BuildStagedInventory(nullptr);
-  REQUIRE(Menu_Loot_lootListCount == 2);
+  REQUIRE(loot::lootListCount == 2);
   CHECK(fixture.rows[0].state == 1);
   CHECK(fixture.rows[1].state == 1);
   CHECK(fixture.staged.misc[0].id == 323);

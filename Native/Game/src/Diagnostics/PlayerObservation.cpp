@@ -50,7 +50,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Magic.h"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
@@ -280,8 +280,8 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   result.shortcut =
       static_cast<unsigned char>(VS::Menu::Framework::shortcutInvoked);
   if ((state.menu_state & kMenuIdMask) == kLootPhase) {
-    result.loot_input_ready = Menu_Loot_controlsEnabled != 0;
-    result.loot_count = Menu_Loot_lootListCount;
+    result.loot_input_ready = VS::Menu::Loot::controlsEnabled != 0;
+    result.loot_count = VS::Menu::Loot::lootListCount;
   }
   result.selected_menu = static_cast<int>(state.menu_state & kMenuIdMask);
   result.submenu_phase = static_cast<unsigned char>(

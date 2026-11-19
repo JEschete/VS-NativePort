@@ -41,7 +41,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -1573,9 +1573,10 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
 
 namespace {
 struct ItemInspectionFixture : ReactionInspectionFixture {
-  decltype(Menu_Loot_controlsEnabled) saved_loot_controls =
-      Menu_Loot_controlsEnabled;
-  decltype(Menu_Loot_lootListCount) saved_loot_count = Menu_Loot_lootListCount;
+  decltype(VS::Menu::Loot::controlsEnabled) saved_loot_controls =
+      VS::Menu::Loot::controlsEnabled;
+  decltype(VS::Menu::Loot::lootListCount) saved_loot_count =
+      VS::Menu::Loot::lootListCount;
   decltype(VS::Items::inventory.misc) saved_items = VS::Items::inventory.misc;
   decltype(VS::Items::inventoryIndices.misc) saved_indices =
       VS::Items::inventoryIndices.misc;
@@ -1604,8 +1605,8 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
     VS::Menu::Framework::itemsListRow = saved_list;
     VS::Menu::Framework::subMenuRowCount = saved_rows;
-    Menu_Loot_controlsEnabled = saved_loot_controls;
-    Menu_Loot_lootListCount = saved_loot_count;
+    VS::Menu::Loot::controlsEnabled = saved_loot_controls;
+    VS::Menu::Loot::lootListCount = saved_loot_count;
   }
 };
 
@@ -1665,8 +1666,8 @@ TEST_CASE("Loot input readiness is observed without claiming the drop",
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.control.current_menu = 12;
   Battle_actionFlowMode = 12;
-  Menu_Loot_controlsEnabled = 1;
-  Menu_Loot_lootListCount = 1;
+  VS::Menu::Loot::controlsEnabled = 1;
+  VS::Menu::Loot::lootListCount = 1;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(state.menu.available);
@@ -1685,8 +1686,8 @@ TEST_CASE(
   Field_controlMode = 3;
   Battle_actionFlowMode = 4;
   Event_isMenuTransitionActive = 1;
-  Menu_Loot_controlsEnabled = 1;
-  Menu_Loot_lootListCount = 2;
+  VS::Menu::Loot::controlsEnabled = 1;
+  VS::Menu::Loot::lootListCount = 2;
   const auto base = VS::Game::InspectGameplay();
   TraceScope scope;
   const auto data = FlushedFrame(scope, base, true).at("data");
@@ -1695,5 +1696,5 @@ TEST_CASE(
   CHECK(data.at("menu").at("loot_input_ready") == true);
   CHECK(Field_controlMode == 3);
   CHECK(Battle_actionFlowMode == 4);
-  CHECK(Menu_Loot_lootListCount == 2);
+  CHECK(VS::Menu::Loot::lootListCount == 2);
 }

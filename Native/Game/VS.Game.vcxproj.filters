@@ -2511,9 +2511,6 @@
     <ClCompile Include="src\Menu\Files.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Files.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\FilesLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -2523,9 +2520,6 @@
     <ClCompile Include="src\Menu\Framework\ActorPreview.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\ActorPreview.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Framework\ActorPreviewLive.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
@@ -2649,9 +2643,6 @@
     <ClCompile Include="src\Menu\Inventory\ItemListRowsLive.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Loot\LootInventory.h">
-      <Filter>src\Menu\Loot</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Loot\LootPolicies.cpp">
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
@@ -2667,7 +2658,7 @@
     <ClCompile Include="src\Menu\Loot\LootScreen.cpp">
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Loot\LootScreen.h">
+    <ClInclude Include="src\Menu\Loot\LootScreen.hpp">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Loot\LootStaging.cpp">

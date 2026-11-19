@@ -22,7 +22,6 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
-#include "Menu/Files.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Render/UiPackets.hpp"
@@ -33,6 +32,8 @@
 namespace VS::Game::Save {
 namespace {
 using Bytes = std::span<const std::uint8_t>;
+using FileLabel = VS::Menu::Files::Label;
+using FileStat = VS::Menu::Files::Stat;
 constexpr std::size_t kMaximumContentBytes = 4ull * 1024 * 1024;
 constexpr std::size_t kRoomSectionCount = 24;
 constexpr std::size_t kFloorTriggerSection = 8;
@@ -291,20 +292,17 @@ class Frontend {
                                         asset.page);
   }
 
-  void Label(Point position, Menu_Files_FileMenuUiId label) const {
+  void Label(Point position, FileLabel label) const {
     const int xy = VS::Render::PackScreenWord(position.x, position.y);
-    VS::Menu::Files::DrawLiveSummaryLabel(
-        xy, static_cast<VS::Menu::Files::Label>(label));
+    VS::Menu::Files::DrawLiveSummaryLabel(xy, label);
   }
 
-  void HpMp(Point position, Menu_Files_StatType stat, int current,
-            int maximum) const {
+  void HpMp(Point position, FileStat stat, int current, int maximum) const {
     const unsigned limit =
         std::clamp(maximum, 0, static_cast<int>(kMaximumStat));
     const unsigned value = std::clamp(current, 0, static_cast<int>(limit));
     const int xy = VS::Render::PackScreenWord(position.x, position.y);
-    VS::Menu::Files::DrawLiveHpMpSummary(
-        xy, static_cast<VS::Menu::Files::Stat>(stat), value, limit);
+    VS::Menu::Files::DrawLiveHpMpSummary(xy, stat, value, limit);
   }
 
   void Panel(Point position, Extent size, bool selected,
@@ -454,21 +452,21 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
       VS::Render::PackUvClutWord(240, 16, 912, 223),
       VS::Render::PackScreenWord(16, 16), getTPage(0, 0, 768, 0)};
   const unsigned percent = MapPercent(state.visits);
-  frontend.Label(AtRow(kMap, top), Menu_Files_FileMenuUiId_Map);
-  frontend.Label(AtRow(kMapColon, top), Menu_Files_FileMenuUiId_Colon);
+  frontend.Label(AtRow(kMap, top), FileLabel::kMap);
+  frontend.Label(AtRow(kMapColon, top), FileLabel::kColon);
   Integer(AtRow(kMapDigits, top), percent,
           percent == kPercentScale ? kPercentScale : kDecimalRadix);
   frontend.Label(
       AtRow(percent == kPercentScale ? kHundredPercent : kPercent, top),
-      Menu_Files_FileMenuUiId_Percent);
-  frontend.Label(AtRow(kSave, top), Menu_Files_FileMenuUiId_Save);
-  frontend.Label(AtRow(kSaveColon, top), Menu_Files_FileMenuUiId_Colon);
+      FileLabel::kPercent);
+  frontend.Label(AtRow(kSave, top), FileLabel::kSave);
+  frontend.Label(AtRow(kSaveColon, top), FileLabel::kColon);
   Integer(AtRow(kSaveDigits, top),
           std::min<unsigned>(state.settings.cumulative_save_count,
                              kMaximumSaveCount),
           kFourDigitDivisor);
-  frontend.Label(AtRow(kClear, top), Menu_Files_FileMenuUiId_Clear);
-  frontend.Label(AtRow(kClearColon, top), Menu_Files_FileMenuUiId_Colon);
+  frontend.Label(AtRow(kClear, top), FileLabel::kClear);
+  frontend.Label(AtRow(kClearColon, top), FileLabel::kColon);
   // TITLE 22C.c:700 uses the current clear count, not the fastest-run record.
   const unsigned clears = state.script_flags[0];
   Integer(AtRow(kClearDigits, top), std::min(clears, kMaximumClearCount),
@@ -476,22 +474,22 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
   if (clears != 0) {
     frontend.Sprite(AtRow(kClearIcon, top), kClearSprite);
   }
-  frontend.HpMp(AtRow(kHp, top), Menu_Files_StatType_HP,
-                state.ashley.current_hp, state.ashley.max_hp);
-  frontend.HpMp(AtRow(kMp, top), Menu_Files_StatType_MP,
-                state.ashley.current_mp, state.ashley.max_mp);
+  frontend.HpMp(AtRow(kHp, top), FileStat::kHp, state.ashley.current_hp,
+                state.ashley.max_hp);
+  frontend.HpMp(AtRow(kMp, top), FileStat::kMp, state.ashley.current_mp,
+                state.ashley.max_mp);
   const auto seconds =
       std::min(state.play_ticks / kClockRadix, kMaximumSeconds);
   const unsigned hours =
       static_cast<unsigned>(seconds / (kClockRadix * kClockRadix));
-  frontend.Label(AtRow(kTime, top), Menu_Files_FileMenuUiId_Time);
+  frontend.Label(AtRow(kTime, top), FileLabel::kTime);
   Integer(AtRow(hours == kPercentScale ? kHundredHours : kHours, top), hours,
           hours == kPercentScale ? kPercentScale : kDecimalRadix);
-  frontend.Label(AtRow(kHourColon, top), Menu_Files_FileMenuUiId_Colon);
+  frontend.Label(AtRow(kHourColon, top), FileLabel::kColon);
   Integer(AtRow(kMinutes, top),
           static_cast<unsigned>(seconds / kClockRadix % kClockRadix),
           kDecimalRadix);
-  frontend.Label(AtRow(kMinuteColon, top), Menu_Files_FileMenuUiId_Colon);
+  frontend.Label(AtRow(kMinuteColon, top), FileLabel::kColon);
   Integer(AtRow(kSeconds, top), static_cast<unsigned>(seconds % kClockRadix),
           kDecimalRadix);
 }
@@ -537,7 +535,7 @@ void Card(const Frontend& frontend, const NativeFileScreen& screen,
   const unsigned number =
       static_cast<unsigned>(std::clamp(file.slot, 0, kLastSlot)) + 1;
   frontend.Label({number == kPercentScale ? kHundredNumberX : kNumberX, y},
-                 Menu_Files_FileMenuUiId_Number);
+                 FileLabel::kNumber);
   Integer({number == kPercentScale ? kHundredDigitsX : kNumberDigitsX, y},
           number, number == kPercentScale ? kPercentScale : kDecimalRadix);
   if (selected) {
