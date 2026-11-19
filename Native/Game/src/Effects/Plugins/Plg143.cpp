@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg143.h"
+// PLG143.BIN's module data (src/EFFECT/PLG143.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg143.hpp"
 
-// decomp: D_800FB664 (D_800FB664@EFFECT/PLG143.BIN)
-CVECTOR Effects_Plg143_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FB684 (D_800FB684@EFFECT/PLG143.BIN)
-CVECTOR Effects_Plg143_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg143 {
+// decomp: D_800FB664 (PLG143.BIN/0.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+// decomp: D_800FB684 (PLG143.BIN/0.c:7; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg143

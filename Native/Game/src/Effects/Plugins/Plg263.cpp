@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg263.h"
+// PLG263.BIN's module data (src/EFFECT/PLG263.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg263.hpp"
 
-// decomp: D_800FDCB0 (D_800FDCB0@EFFECT/PLG263.BIN)
-SVECTOR Effects_Plg263_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FDF30 (D_800FDF30@EFFECT/PLG263.BIN)
-u_char Effects_Plg263_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FDF50 (D_800FDF50@EFFECT/PLG263.BIN)
-u_char Effects_Plg263_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FDF70 (D_800FDF70@EFFECT/PLG263.BIN)
-int Effects_Plg263_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg263 {
+// decomp: D_800FDCB0 (PLG263.BIN/110.c:5; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_800FDF30 (PLG263.BIN/110.c:7; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FDF50 (PLG263.BIN/110.c:10; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors2;
+// decomp: D_800FDF70 (PLG263.BIN/110.c:12; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+}  // namespace VS::Effects::Plg263

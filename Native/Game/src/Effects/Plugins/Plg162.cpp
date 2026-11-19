@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg162.h"
+// PLG162.BIN's module data (src/EFFECT/PLG162.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg162.hpp"
 
-// decomp: D_800FD18C (D_800FD18C@EFFECT/PLG162.BIN)
-u_char Effects_Plg162_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD1AC (D_800FD1AC@EFFECT/PLG162.BIN)
-u_char Effects_Plg162_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD1CC (D_800FD1CC@EFFECT/PLG162.BIN)
-CVECTOR Effects_Plg162_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg162 {
+// decomp: D_800FD18C (PLG162.BIN/0.c:6; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FD1AC (PLG162.BIN/0.c:10; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors2;
+// decomp: D_800FD1CC (PLG162.BIN/0.c:13; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg162

@@ -37,25 +37,54 @@
 #include "Core/Log.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/Package.h"
-#include "Effects/Plugins/Plg044.h"
-#include "Effects/Plugins/Plg049.h"
-#include "Effects/Plugins/Plg069.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg077.h"
-#include "Effects/Plugins/Plg085.h"
-#include "Effects/Plugins/Plg129.h"
-#include "Effects/Plugins/Plg137.h"
-#include "Effects/Plugins/Plg138.h"
-#include "Effects/Plugins/Plg143.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg148.h"
-#include "Effects/Plugins/Plg150.h"
-#include "Effects/Plugins/Plg153.h"
-#include "Effects/Plugins/Plg154.h"
-#include "Effects/Plugins/Plg160.h"
-#include "Effects/Plugins/Plg242.h"
-#include "Effects/Plugins/Plg260.h"
-#include "Effects/Plugins/Plg265.h"
+#include "Effects/Plugins/Plg044.hpp"
+#include "Effects/Plugins/Plg049.hpp"
+#include "Effects/Plugins/Plg050.hpp"
+#include "Effects/Plugins/Plg053.hpp"
+#include "Effects/Plugins/Plg061.hpp"
+#include "Effects/Plugins/Plg065.hpp"
+#include "Effects/Plugins/Plg069.hpp"
+#include "Effects/Plugins/Plg073.hpp"
+#include "Effects/Plugins/Plg077.hpp"
+#include "Effects/Plugins/Plg081.hpp"
+#include "Effects/Plugins/Plg082.hpp"
+#include "Effects/Plugins/Plg085.hpp"
+#include "Effects/Plugins/Plg086.hpp"
+#include "Effects/Plugins/Plg087.hpp"
+#include "Effects/Plugins/Plg128.hpp"
+#include "Effects/Plugins/Plg129.hpp"
+#include "Effects/Plugins/Plg134.hpp"
+#include "Effects/Plugins/Plg135.hpp"
+#include "Effects/Plugins/Plg137.hpp"
+#include "Effects/Plugins/Plg138.hpp"
+#include "Effects/Plugins/Plg142.hpp"
+#include "Effects/Plugins/Plg143.hpp"
+#include "Effects/Plugins/Plg146.hpp"
+#include "Effects/Plugins/Plg147.hpp"
+#include "Effects/Plugins/Plg148.hpp"
+#include "Effects/Plugins/Plg149.hpp"
+#include "Effects/Plugins/Plg150.hpp"
+#include "Effects/Plugins/Plg153.hpp"
+#include "Effects/Plugins/Plg154.hpp"
+#include "Effects/Plugins/Plg158.hpp"
+#include "Effects/Plugins/Plg160.hpp"
+#include "Effects/Plugins/Plg161.hpp"
+#include "Effects/Plugins/Plg162.hpp"
+#include "Effects/Plugins/Plg166.hpp"
+#include "Effects/Plugins/Plg167.hpp"
+#include "Effects/Plugins/Plg169.hpp"
+#include "Effects/Plugins/Plg170.hpp"
+#include "Effects/Plugins/Plg236.hpp"
+#include "Effects/Plugins/Plg242.hpp"
+#include "Effects/Plugins/Plg250.hpp"
+#include "Effects/Plugins/Plg260.hpp"
+#include "Effects/Plugins/Plg263.hpp"
+#include "Effects/Plugins/Plg265.hpp"
+#include "Effects/Plugins/Plg272.hpp"
+#include "Effects/Plugins/Plg291.hpp"
+#include "Effects/Plugins/Plg297.hpp"
+#include "Effects/Plugins/Plg300.hpp"
+#include "Effects/Plugins/Plg301.hpp"
 #include "Effects/PurgeTables.h"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Transforms.hpp"
@@ -66,65 +95,6 @@
 #include "Movie/MoviePlayer.hpp"
 #include "PFile.h"
 #include "Render/PageSpace.hpp"
-
-// The ring palettes at their eight transparency entries (#289); the plugin
-// headers declare them without a bound.
-extern u_char Effects_Plg049_ringColorFactors[8][4];
-extern u_char Effects_Plg050_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg053_closedRingColorFactors[8];
-extern u_char Effects_Plg061_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg061_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg065_closedRingColorFactors[8];
-extern u_char Effects_Plg065_ringColorFactors[8][4];
-extern u_char Effects_Plg077_ringColorFactors[8][4];
-extern u_char Effects_Plg077_ringColorFactors2[8][4];
-extern u_char Effects_Plg081_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg081_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg082_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg086_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg087_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg128_closedRingColorFactors[8];
-extern u_char Effects_Plg129_ringColorFactors[8][4];
-extern u_char Effects_Plg129_ringColorFactors2[8][4];
-extern CVECTOR Effects_Plg134_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg135_closedRingColorFactors[8];
-extern u_char Effects_Plg138_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg142_closedRingColorFactors[8];
-extern u_char Effects_Plg142_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg143_closedRingColorFactors[8];
-extern u_char Effects_Plg146_ringColorFactors[8][4];
-extern u_char Effects_Plg147_ringColorFactors[8][4];
-extern u_char Effects_Plg149_ringColorFactors[8][4];
-extern u_char Effects_Plg150_ringColorFactors[8][4];
-extern u_char Effects_Plg153_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg154_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg158_closedRingColorFactors[8];
-extern u_char Effects_Plg160_ringColorFactors[8][4];
-extern u_char Effects_Plg161_ringColorFactors[8][4];
-extern u_char Effects_Plg161_ringColorFactors2[8][4];
-extern u_char Effects_Plg162_ringColorFactors[8][4];
-extern u_char Effects_Plg162_ringColorFactors2[8][4];
-extern CVECTOR Effects_Plg162_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg166_closedRingColorFactors[8];
-extern u_char Effects_Plg166_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg167_closedRingColorFactors[8];
-extern u_char Effects_Plg169_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg169_closedRingColorFactors[8];
-extern u_char Effects_Plg170_ringColorFactors[8][4];
-extern CVECTOR Effects_Plg170_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg236_closedRingColorFactors[8];
-extern u_char Effects_Plg236_ringColorFactors[8][4];
-extern u_char Effects_Plg236_ringColorFactors2[8][4];
-extern CVECTOR Effects_Plg250_closedRingColorFactors[8];
-extern u_char Effects_Plg263_ringColorFactors[8][4];
-extern u_char Effects_Plg263_ringColorFactors2[8][4];
-extern CVECTOR Effects_Plg272_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg291_closedRingColorFactors[8];
-extern CVECTOR Effects_Plg297_closedRingColorFactors[8];
-extern u_char Effects_Plg297_ringColorFactors[8][4];
-extern u_char Effects_Plg300_ringColorFactors[8][4];
-extern u_char Effects_Plg300_ringColorFactors2[8][4];
-extern CVECTOR Effects_Plg301_closedRingColorFactors[8];
 
 using VS::u16;
 using VS::u32;
@@ -143,96 +113,141 @@ extern unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
 constexpr auto kMesh10Data = std::to_array<VS::Content::ModuleDataEntry>({
-    {"EFFECT/PLG069.BIN", 0x3C24, 80, Effects_Plg069_mesh10Vertices, 80},
-    {"EFFECT/PLG069.BIN", 0x3C74, 96, Effects_Plg069_mesh10Faces, 96},
-    {"EFFECT/PLG077.BIN", 0x4108, 80, Effects_Plg077_mesh10Vertices, 80},
-    {"EFFECT/PLG077.BIN", 0x4158, 96, Effects_Plg077_mesh10Faces, 96},
-    {"EFFECT/PLG129.BIN", 0x3DE8, 80, Effects_Plg129_mesh10Vertices, 80},
-    {"EFFECT/PLG129.BIN", 0x3E38, 96, Effects_Plg129_mesh10Faces, 96},
-    {"EFFECT/PLG137.BIN", 0x478C, 80, Effects_Plg137_mesh10Vertices, 80},
-    {"EFFECT/PLG137.BIN", 0x47DC, 96, Effects_Plg137_mesh10Faces, 96},
-    {"EFFECT/PLG153.BIN", 0x3504, 80, Effects_Plg153_mesh10Vertices, 80},
-    {"EFFECT/PLG153.BIN", 0x3554, 96, Effects_Plg153_mesh10Faces, 96},
-    {"EFFECT/PLG154.BIN", 0x1A9C, 80, Effects_Plg154_mesh10Vertices, 80},
-    {"EFFECT/PLG154.BIN", 0x1AEC, 96, Effects_Plg154_mesh10Faces, 96},
-    {"EFFECT/PLG260.BIN", 0xB2C, 80, Effects_Plg260_mesh10Vertices, 80},
-    {"EFFECT/PLG260.BIN", 0xB7C, 96, Effects_Plg260_mesh10Faces, 96},
+    {"EFFECT/PLG069.BIN", 0x3C24, 80, VS::Effects::Plg069::mesh10Vertices, 80},
+    {"EFFECT/PLG069.BIN", 0x3C74, 96, VS::Effects::Plg069::mesh10Faces, 96},
+    {"EFFECT/PLG077.BIN", 0x4108, 80, VS::Effects::Plg077::mesh10Vertices, 80},
+    {"EFFECT/PLG077.BIN", 0x4158, 96, VS::Effects::Plg077::mesh10Faces, 96},
+    {"EFFECT/PLG129.BIN", 0x3DE8, 80, VS::Effects::Plg129::mesh10Vertices, 80},
+    {"EFFECT/PLG129.BIN", 0x3E38, 96, VS::Effects::Plg129::mesh10Faces, 96},
+    {"EFFECT/PLG137.BIN", 0x478C, 80, VS::Effects::Plg137::mesh10Vertices, 80},
+    {"EFFECT/PLG137.BIN", 0x47DC, 96, VS::Effects::Plg137::mesh10Faces, 96},
+    {"EFFECT/PLG153.BIN", 0x3504, 80, VS::Effects::Plg153::mesh10Vertices, 80},
+    {"EFFECT/PLG153.BIN", 0x3554, 96, VS::Effects::Plg153::mesh10Faces, 96},
+    {"EFFECT/PLG154.BIN", 0x1A9C, 80, VS::Effects::Plg154::mesh10Vertices, 80},
+    {"EFFECT/PLG154.BIN", 0x1AEC, 96, VS::Effects::Plg154::mesh10Faces, 96},
+    {"EFFECT/PLG260.BIN", 0xB2C, 80, VS::Effects::Plg260::mesh10Vertices, 80},
+    {"EFFECT/PLG260.BIN", 0xB7C, 96, VS::Effects::Plg260::mesh10Faces, 96},
 });
 
 constexpr auto kTiledRingData = std::to_array<VS::Content::ModuleDataEntry>({
-    {"EFFECT/PLG049.BIN", 19448, 32, Effects_Plg049_tiledRingColorFactors, 32},
-    {"EFFECT/PLG069.BIN", 15576, 32, Effects_Plg069_tiledRingColorFactors, 32},
-    {"EFFECT/PLG073.BIN", 22332, 32, Effects_Plg073_tiledRingColorFactors, 32},
-    {"EFFECT/PLG085.BIN", 6752, 32, Effects_Plg085_tiledRingColorFactors, 32},
-    {"EFFECT/PLG137.BIN", 18496, 32, Effects_Plg137_tiledRingColorFactors, 32},
-    {"EFFECT/PLG138.BIN", 13660, 32, Effects_Plg138_tiledRingColorFactors, 32},
-    {"EFFECT/PLG143.BIN", 7780, 32, Effects_Plg143_tiledRingColorFactors, 32},
-    {"EFFECT/PLG146.BIN", 24700, 32, Effects_Plg146_tiledRingColorFactors, 32},
-    {"EFFECT/PLG148.BIN", 12540, 32, Effects_Plg148_tiledRingColorFactors, 32},
-    {"EFFECT/PLG150.BIN", 12828, 32, Effects_Plg150_tiledRingColorFactors, 32},
-    {"EFFECT/PLG160.BIN", 6940, 32, Effects_Plg160_tiledRingColorFactors, 32},
-    {"EFFECT/PLG242.BIN", 15456, 32, Effects_Plg242_tiledRingColorFactors, 32},
-    {"EFFECT/PLG265.BIN", 26008, 32, Effects_Plg265_tiledRingColorFactors, 32},
+    {"EFFECT/PLG049.BIN", 19448, 32, VS::Effects::Plg049::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG069.BIN", 15576, 32, VS::Effects::Plg069::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG073.BIN", 22332, 32, VS::Effects::Plg073::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG085.BIN", 6752, 32, VS::Effects::Plg085::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG137.BIN", 18496, 32, VS::Effects::Plg137::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG138.BIN", 13660, 32, VS::Effects::Plg138::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG143.BIN", 7780, 32, VS::Effects::Plg143::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG146.BIN", 24700, 32, VS::Effects::Plg146::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG148.BIN", 12540, 32, VS::Effects::Plg148::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG150.BIN", 12828, 32, VS::Effects::Plg150::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG160.BIN", 6940, 32, VS::Effects::Plg160::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG242.BIN", 15456, 32, VS::Effects::Plg242::tiledRingColorFactors,
+     32},
+    {"EFFECT/PLG265.BIN", 26008, 32, VS::Effects::Plg265::tiledRingColorFactors,
+     32},
 });
 
 // Ring and closed ring palettes (#289): eight four-byte entries each.
 constexpr auto kRingPaletteData = std::to_array<VS::Content::ModuleDataEntry>({
-    {"EFFECT/PLG049.BIN", 19416, 32, Effects_Plg049_ringColorFactors, 32},
-    {"EFFECT/PLG050.BIN", 11812, 32, Effects_Plg050_ringColorFactors, 32},
-    {"EFFECT/PLG053.BIN", 6868, 32, Effects_Plg053_closedRingColorFactors, 32},
-    {"EFFECT/PLG061.BIN", 13584, 32, Effects_Plg061_ringColorFactors, 32},
-    {"EFFECT/PLG061.BIN", 13616, 32, Effects_Plg061_closedRingColorFactors, 32},
-    {"EFFECT/PLG065.BIN", 16692, 32, Effects_Plg065_closedRingColorFactors, 32},
-    {"EFFECT/PLG065.BIN", 16724, 32, Effects_Plg065_ringColorFactors, 32},
-    {"EFFECT/PLG077.BIN", 16824, 32, Effects_Plg077_ringColorFactors, 32},
-    {"EFFECT/PLG077.BIN", 17496, 32, Effects_Plg077_ringColorFactors2, 32},
-    {"EFFECT/PLG081.BIN", 10828, 32, Effects_Plg081_ringColorFactors, 32},
-    {"EFFECT/PLG081.BIN", 10860, 32, Effects_Plg081_closedRingColorFactors, 32},
-    {"EFFECT/PLG082.BIN", 14476, 32, Effects_Plg082_closedRingColorFactors, 32},
-    {"EFFECT/PLG086.BIN", 19344, 32, Effects_Plg086_closedRingColorFactors, 32},
-    {"EFFECT/PLG087.BIN", 25052, 32, Effects_Plg087_closedRingColorFactors, 32},
-    {"EFFECT/PLG128.BIN", 28528, 32, Effects_Plg128_closedRingColorFactors, 32},
-    {"EFFECT/PLG129.BIN", 15784, 32, Effects_Plg129_ringColorFactors, 32},
-    {"EFFECT/PLG129.BIN", 16664, 32, Effects_Plg129_ringColorFactors2, 32},
-    {"EFFECT/PLG134.BIN", 12656, 32, Effects_Plg134_closedRingColorFactors, 32},
-    {"EFFECT/PLG135.BIN", 12652, 32, Effects_Plg135_closedRingColorFactors, 32},
-    {"EFFECT/PLG138.BIN", 13628, 32, Effects_Plg138_ringColorFactors, 32},
-    {"EFFECT/PLG142.BIN", 13752, 32, Effects_Plg142_closedRingColorFactors, 32},
-    {"EFFECT/PLG142.BIN", 13784, 32, Effects_Plg142_ringColorFactors, 32},
-    {"EFFECT/PLG143.BIN", 7812, 32, Effects_Plg143_closedRingColorFactors, 32},
-    {"EFFECT/PLG146.BIN", 25376, 32, Effects_Plg146_ringColorFactors, 32},
-    {"EFFECT/PLG147.BIN", 8976, 32, Effects_Plg147_ringColorFactors, 32},
-    {"EFFECT/PLG149.BIN", 3108, 32, Effects_Plg149_ringColorFactors, 32},
-    {"EFFECT/PLG150.BIN", 13500, 32, Effects_Plg150_ringColorFactors, 32},
-    {"EFFECT/PLG153.BIN", 13748, 32, Effects_Plg153_ringColorFactors, 32},
-    {"EFFECT/PLG154.BIN", 6988, 32, Effects_Plg154_closedRingColorFactors, 32},
-    {"EFFECT/PLG158.BIN", 15160, 32, Effects_Plg158_closedRingColorFactors, 32},
-    {"EFFECT/PLG160.BIN", 6972, 32, Effects_Plg160_ringColorFactors, 32},
-    {"EFFECT/PLG161.BIN", 21608, 32, Effects_Plg161_ringColorFactors, 32},
-    {"EFFECT/PLG161.BIN", 21644, 32, Effects_Plg161_ringColorFactors2, 32},
-    {"EFFECT/PLG162.BIN", 14732, 32, Effects_Plg162_ringColorFactors, 32},
-    {"EFFECT/PLG162.BIN", 14764, 32, Effects_Plg162_ringColorFactors2, 32},
-    {"EFFECT/PLG162.BIN", 14796, 32, Effects_Plg162_closedRingColorFactors, 32},
-    {"EFFECT/PLG166.BIN", 14656, 32, Effects_Plg166_closedRingColorFactors, 32},
-    {"EFFECT/PLG166.BIN", 14688, 32, Effects_Plg166_ringColorFactors, 32},
-    {"EFFECT/PLG167.BIN", 16420, 32, Effects_Plg167_closedRingColorFactors, 32},
-    {"EFFECT/PLG169.BIN", 15764, 32, Effects_Plg169_ringColorFactors, 32},
-    {"EFFECT/PLG169.BIN", 15796, 32, Effects_Plg169_closedRingColorFactors, 32},
-    {"EFFECT/PLG170.BIN", 20548, 32, Effects_Plg170_ringColorFactors, 32},
-    {"EFFECT/PLG170.BIN", 21220, 32, Effects_Plg170_closedRingColorFactors, 32},
-    {"EFFECT/PLG236.BIN", 14736, 32, Effects_Plg236_closedRingColorFactors, 32},
-    {"EFFECT/PLG236.BIN", 14768, 32, Effects_Plg236_ringColorFactors, 32},
-    {"EFFECT/PLG236.BIN", 14800, 32, Effects_Plg236_ringColorFactors2, 32},
-    {"EFFECT/PLG250.BIN", 7720, 32, Effects_Plg250_closedRingColorFactors, 32},
-    {"EFFECT/PLG263.BIN", 18224, 32, Effects_Plg263_ringColorFactors, 32},
-    {"EFFECT/PLG263.BIN", 18256, 32, Effects_Plg263_ringColorFactors2, 32},
-    {"EFFECT/PLG272.BIN", 9840, 32, Effects_Plg272_closedRingColorFactors, 32},
-    {"EFFECT/PLG291.BIN", 15580, 32, Effects_Plg291_closedRingColorFactors, 32},
-    {"EFFECT/PLG297.BIN", 13808, 32, Effects_Plg297_closedRingColorFactors, 32},
-    {"EFFECT/PLG297.BIN", 13840, 32, Effects_Plg297_ringColorFactors, 32},
-    {"EFFECT/PLG300.BIN", 19280, 32, Effects_Plg300_ringColorFactors, 32},
-    {"EFFECT/PLG300.BIN", 19312, 32, Effects_Plg300_ringColorFactors2, 32},
-    {"EFFECT/PLG301.BIN", 11560, 32, Effects_Plg301_closedRingColorFactors, 32},
+    {"EFFECT/PLG049.BIN", 19416, 32, VS::Effects::Plg049::ringColorFactors, 32},
+    {"EFFECT/PLG050.BIN", 11812, 32, VS::Effects::Plg050::ringColorFactors, 32},
+    {"EFFECT/PLG053.BIN", 6868, 32, VS::Effects::Plg053::closedRingColorFactors,
+     32},
+    {"EFFECT/PLG061.BIN", 13584, 32, VS::Effects::Plg061::ringColorFactors, 32},
+    {"EFFECT/PLG061.BIN", 13616, 32,
+     VS::Effects::Plg061::closedRingColorFactors, 32},
+    {"EFFECT/PLG065.BIN", 16692, 32,
+     VS::Effects::Plg065::closedRingColorFactors, 32},
+    {"EFFECT/PLG065.BIN", 16724, 32, VS::Effects::Plg065::ringColorFactors, 32},
+    {"EFFECT/PLG077.BIN", 16824, 32, VS::Effects::Plg077::ringColorFactors, 32},
+    {"EFFECT/PLG077.BIN", 17496, 32, VS::Effects::Plg077::ringColorFactors2,
+     32},
+    {"EFFECT/PLG081.BIN", 10828, 32, VS::Effects::Plg081::ringColorFactors, 32},
+    {"EFFECT/PLG081.BIN", 10860, 32,
+     VS::Effects::Plg081::closedRingColorFactors, 32},
+    {"EFFECT/PLG082.BIN", 14476, 32,
+     VS::Effects::Plg082::closedRingColorFactors, 32},
+    {"EFFECT/PLG086.BIN", 19344, 32,
+     VS::Effects::Plg086::closedRingColorFactors, 32},
+    {"EFFECT/PLG087.BIN", 25052, 32,
+     VS::Effects::Plg087::closedRingColorFactors, 32},
+    {"EFFECT/PLG128.BIN", 28528, 32,
+     VS::Effects::Plg128::closedRingColorFactors, 32},
+    {"EFFECT/PLG129.BIN", 15784, 32, VS::Effects::Plg129::ringColorFactors, 32},
+    {"EFFECT/PLG129.BIN", 16664, 32, VS::Effects::Plg129::ringColorFactors2,
+     32},
+    {"EFFECT/PLG134.BIN", 12656, 32,
+     VS::Effects::Plg134::closedRingColorFactors, 32},
+    {"EFFECT/PLG135.BIN", 12652, 32,
+     VS::Effects::Plg135::closedRingColorFactors, 32},
+    {"EFFECT/PLG138.BIN", 13628, 32, VS::Effects::Plg138::ringColorFactors, 32},
+    {"EFFECT/PLG142.BIN", 13752, 32,
+     VS::Effects::Plg142::closedRingColorFactors, 32},
+    {"EFFECT/PLG142.BIN", 13784, 32, VS::Effects::Plg142::ringColorFactors, 32},
+    {"EFFECT/PLG143.BIN", 7812, 32, VS::Effects::Plg143::closedRingColorFactors,
+     32},
+    {"EFFECT/PLG146.BIN", 25376, 32, VS::Effects::Plg146::ringColorFactors, 32},
+    {"EFFECT/PLG147.BIN", 8976, 32, VS::Effects::Plg147::ringColorFactors, 32},
+    {"EFFECT/PLG149.BIN", 3108, 32, VS::Effects::Plg149::ringColorFactors, 32},
+    {"EFFECT/PLG150.BIN", 13500, 32, VS::Effects::Plg150::ringColorFactors, 32},
+    {"EFFECT/PLG153.BIN", 13748, 32, VS::Effects::Plg153::ringColorFactors, 32},
+    {"EFFECT/PLG154.BIN", 6988, 32, VS::Effects::Plg154::closedRingColorFactors,
+     32},
+    {"EFFECT/PLG158.BIN", 15160, 32,
+     VS::Effects::Plg158::closedRingColorFactors, 32},
+    {"EFFECT/PLG160.BIN", 6972, 32, VS::Effects::Plg160::ringColorFactors, 32},
+    {"EFFECT/PLG161.BIN", 21608, 32, VS::Effects::Plg161::ringColorFactors, 32},
+    {"EFFECT/PLG161.BIN", 21644, 32, VS::Effects::Plg161::ringColorFactors2,
+     32},
+    {"EFFECT/PLG162.BIN", 14732, 32, VS::Effects::Plg162::ringColorFactors, 32},
+    {"EFFECT/PLG162.BIN", 14764, 32, VS::Effects::Plg162::ringColorFactors2,
+     32},
+    {"EFFECT/PLG162.BIN", 14796, 32,
+     VS::Effects::Plg162::closedRingColorFactors, 32},
+    {"EFFECT/PLG166.BIN", 14656, 32,
+     VS::Effects::Plg166::closedRingColorFactors, 32},
+    {"EFFECT/PLG166.BIN", 14688, 32, VS::Effects::Plg166::ringColorFactors, 32},
+    {"EFFECT/PLG167.BIN", 16420, 32,
+     VS::Effects::Plg167::closedRingColorFactors, 32},
+    {"EFFECT/PLG169.BIN", 15764, 32, VS::Effects::Plg169::ringColorFactors, 32},
+    {"EFFECT/PLG169.BIN", 15796, 32,
+     VS::Effects::Plg169::closedRingColorFactors, 32},
+    {"EFFECT/PLG170.BIN", 20548, 32, VS::Effects::Plg170::ringColorFactors, 32},
+    {"EFFECT/PLG170.BIN", 21220, 32,
+     VS::Effects::Plg170::closedRingColorFactors, 32},
+    {"EFFECT/PLG236.BIN", 14736, 32,
+     VS::Effects::Plg236::closedRingColorFactors, 32},
+    {"EFFECT/PLG236.BIN", 14768, 32, VS::Effects::Plg236::ringColorFactors, 32},
+    {"EFFECT/PLG236.BIN", 14800, 32, VS::Effects::Plg236::ringColorFactors2,
+     32},
+    {"EFFECT/PLG250.BIN", 7720, 32, VS::Effects::Plg250::closedRingColorFactors,
+     32},
+    {"EFFECT/PLG263.BIN", 18224, 32, VS::Effects::Plg263::ringColorFactors, 32},
+    {"EFFECT/PLG263.BIN", 18256, 32, VS::Effects::Plg263::ringColorFactors2,
+     32},
+    {"EFFECT/PLG272.BIN", 9840, 32, VS::Effects::Plg272::closedRingColorFactors,
+     32},
+    {"EFFECT/PLG291.BIN", 15580, 32,
+     VS::Effects::Plg291::closedRingColorFactors, 32},
+    {"EFFECT/PLG297.BIN", 13808, 32,
+     VS::Effects::Plg297::closedRingColorFactors, 32},
+    {"EFFECT/PLG297.BIN", 13840, 32, VS::Effects::Plg297::ringColorFactors, 32},
+    {"EFFECT/PLG300.BIN", 19280, 32, VS::Effects::Plg300::ringColorFactors, 32},
+    {"EFFECT/PLG300.BIN", 19312, 32, VS::Effects::Plg300::ringColorFactors2,
+     32},
+    {"EFFECT/PLG301.BIN", 11560, 32,
+     VS::Effects::Plg301::closedRingColorFactors, 32},
 });
 
 void CheckTemplateReloads();
@@ -905,10 +920,12 @@ void CheckLoadedTiledRingData(const Content::DataStore& store) {
     CheckTemplateSourceBytes(store, expected);
   }
   const VS::Content::ModuleDataEntry initialized{
-      "EFFECT/PLG044.BIN", 3832, 32, Effects_Plg044_tiledRingColorFactors, 32};
+      "EFFECT/PLG044.BIN", 3832, 32, VS::Effects::Plg044::tiledRingColorFactors,
+      32};
   CheckTemplateSourceBytes(store, initialized);
   const VS::Content::ModuleDataEntry shared{
-      "EFFECT/PLG139.BIN", 6752, 32, Effects_Plg085_tiledRingColorFactors, 32};
+      "EFFECT/PLG139.BIN", 6752, 32, VS::Effects::Plg085::tiledRingColorFactors,
+      32};
   CheckTemplateSourceBytes(store, shared);
 }
 
@@ -1180,14 +1197,14 @@ void CheckPlg074CursorReload(std::span<const u8> image) {
   CHECK(cursor->offset == 0x577C);
   CHECK(cursor->size == 4);
   CHECK(cursor->capacity == sizeof(int));
-  const auto saved_first = Effects_Plg073_trailEmissionCounter;
+  const auto saved_first = VS::Effects::Plg073::trailEmissionCounter;
   const auto saved_second = VS::Content::plg074TrailEmissionCounter[0];
-  Effects_Plg073_trailEmissionCounter = 5;
+  VS::Effects::Plg073::trailEmissionCounter = 5;
   VS::Content::plg074TrailEmissionCounter[0] = 7;
   CHECK(Content::CopyModuleDataEntry(*cursor, image));
   CHECK(VS::Content::plg074TrailEmissionCounter[0] == 0);
-  CHECK(Effects_Plg073_trailEmissionCounter == 5);
-  Effects_Plg073_trailEmissionCounter = saved_first;
+  CHECK(VS::Effects::Plg073::trailEmissionCounter == 5);
+  VS::Effects::Plg073::trailEmissionCounter = saved_first;
   VS::Content::plg074TrailEmissionCounter[0] = saved_second;
 }
 }  // namespace
@@ -1213,7 +1230,8 @@ TEST_CASE(
 TEST_CASE("PLG073 and PLG074 import all eight ring-arc color rows",
           "[content][module][plg074][ring-arc][disc]") {
   const VS::Content::ModuleDataEntry expected{
-      "EFFECT/PLG073.BIN", 0x575C, 32, Effects_Plg073_ringColorFactors, 32};
+      "EFFECT/PLG073.BIN", 0x575C, 32, VS::Effects::Plg073::ringColorFactors,
+      32};
   CheckTemplateBinding(expected);
   LoadOriginalLfoModules();
   CheckTemplateSourceBytes(*Content::DataStore::Get(), expected);

@@ -32,6 +32,7 @@ inline constexpr std::uint32_t kRingAnchorMask = 7;
 inline constexpr std::uint32_t kRingEffectView = 0x20000;
 // The definition's transparency field selects one of eight palette entries.
 inline constexpr std::uint8_t kRingPaletteMask = 7;
+inline constexpr std::size_t kRingPaletteEntries = kRingPaletteMask + 1;
 // Quads at or beyond this depth are not drawn.
 inline constexpr std::int32_t kRingFarDepth = 0x800;
 // GPU words of every ring quad: an E1 draw-mode word, a semi-transparent

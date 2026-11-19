@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg085.h"
+// PLG085.BIN's module data (src/EFFECT/PLG085.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg085.hpp"
 
-// decomp: D_800FB260 (D_800FB260@src/EFFECT/tiledRings.h)
-CVECTOR Effects_Plg085_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg085 {
+// decomp: D_800FB260 (PLG085.BIN/18.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+}  // namespace VS::Effects::Plg085

@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg161.h"
+// PLG161.BIN's module data (src/EFFECT/PLG161.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg161.hpp"
 
-// decomp: D_800FEC68 (D_800FEC68@EFFECT/PLG161.BIN)
-u_char Effects_Plg161_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FEC88 (D_800FEC88@EFFECT/PLG161.BIN)
-int Effects_Plg161_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FEC8C (D_800FEC8C@EFFECT/PLG161.BIN)
-u_char Effects_Plg161_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg161 {
+// decomp: D_800FEC68 (PLG161.BIN/F8.c:8; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FEC88 (PLG161.BIN/F8.c:10; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FEC8C (PLG161.BIN/F8.c:14; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors2;
+}  // namespace VS::Effects::Plg161

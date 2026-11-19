@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg297.h"
+// PLG297.BIN's module data (src/EFFECT/PLG297.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg297.hpp"
 
-// decomp: D_800FCB70 (D_800FCB70@EFFECT/PLG297.BIN)
-SVECTOR Effects_Plg297_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCDF0 (D_800FCDF0@EFFECT/PLG297.BIN)
-CVECTOR Effects_Plg297_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCE10 (D_800FCE10@EFFECT/PLG297.BIN)
-u_char Effects_Plg297_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg297 {
+// decomp: D_800FCB70 (PLG297.BIN/18.c:5; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile mirrorSurfaceVertices;
+// decomp: D_800FCDF0 (PLG297.BIN/18.c:8; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+// decomp: D_800FCE10 (PLG297.BIN/18.c:13; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+}  // namespace VS::Effects::Plg297

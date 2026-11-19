@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg169.h"
+// PLG169.BIN's module data (src/EFFECT/PLG169.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg169.hpp"
 
-// decomp: D_800FD590 (D_800FD590@EFFECT/PLG169.BIN)
-int Effects_Plg169_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD594 (D_800FD594@EFFECT/PLG169.BIN)
-u_char Effects_Plg169_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD5B4 (D_800FD5B4@EFFECT/PLG169.BIN)
-CVECTOR Effects_Plg169_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg169 {
+// decomp: D_800FD590 (PLG169.BIN/E0.c:5; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FD594 (PLG169.BIN/E0.c:7; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FD5B4 (PLG169.BIN/E0.c:9; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg169

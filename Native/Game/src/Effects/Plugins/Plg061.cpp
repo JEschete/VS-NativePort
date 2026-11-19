@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg061.h"
+// PLG061.BIN's module data (src/EFFECT/PLG061.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg061.hpp"
 
-// decomp: D_800FCA90 (D_800FCA90@EFFECT/PLG061.BIN)
-SVECTOR Effects_Plg061_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCD10 (D_800FCD10@EFFECT/PLG061.BIN)
-u_char Effects_Plg061_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCD30 (D_800FCD30@EFFECT/PLG061.BIN)
-CVECTOR Effects_Plg061_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg061 {
+// decomp: D_800FCA90 (PLG061.BIN/18.c:5; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_800FCD10 (PLG061.BIN/18.c:9; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FCD30 (PLG061.BIN/18.c:11; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg061

@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg300.h"
+// PLG300.BIN's module data (src/EFFECT/PLG300.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg300.hpp"
 
-// decomp: D_800FE0CC (D_800FE0CC@EFFECT/PLG300.BIN)
-SVECTOR Effects_Plg300_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE34C (D_800FE34C@EFFECT/PLG300.BIN)
-int Effects_Plg300_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE350 (D_800FE350@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE370 (D_800FE370@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg300 {
+// decomp: D_800FE0CC (PLG300.BIN/110.c:5; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile mirrorSurfaceVertices;
+// decomp: D_800FE34C (PLG300.BIN/110.c:7; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+// decomp: D_800FE350 (PLG300.BIN/110.c:12; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FE370 (PLG300.BIN/110.c:17; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors2;
+}  // namespace VS::Effects::Plg300

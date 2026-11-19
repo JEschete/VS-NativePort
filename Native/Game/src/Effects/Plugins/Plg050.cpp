@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg050.h"
+// PLG050.BIN's module data (src/EFFECT/PLG050.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg050.hpp"
 
-// decomp: D_800FC624 (D_800FC624@EFFECT/PLG050.BIN)
-u_char Effects_Plg050_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FC644 (D_800FC644@EFFECT/PLG050.BIN)
-int Effects_Plg050_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg050 {
+// decomp: D_800FC624 (PLG050.BIN/E0.c:5; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FC644 (PLG050.BIN/E0.c:7; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+}  // namespace VS::Effects::Plg050

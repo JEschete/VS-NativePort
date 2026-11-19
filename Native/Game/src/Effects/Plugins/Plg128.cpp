@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg128.h"
+// PLG128.BIN's module data (src/EFFECT/PLG128.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg128.hpp"
 
-// decomp: D_801004F0 (D_801004F0@EFFECT/PLG128.BIN)
-SVECTOR Effects_Plg128_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_80100770 (D_80100770@EFFECT/PLG128.BIN)
-CVECTOR Effects_Plg128_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_80100790 (D_80100790@EFFECT/PLG128.BIN)
-SVECTOR Effects_Plg128_surfaceVertices2[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_80100A10 (D_80100A10@EFFECT/PLG128.BIN)
-int Effects_Plg128_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg128 {
+// decomp: D_801004F0 (PLG128.BIN/F8.c:24; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_80100770 (PLG128.BIN/F8.c:27; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+// decomp: D_80100790 (PLG128.BIN/F8.c:34; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices2;
+// decomp: D_80100A10 (PLG128.BIN/F8.c:227; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+}  // namespace VS::Effects::Plg128

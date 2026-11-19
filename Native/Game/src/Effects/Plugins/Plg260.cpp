@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg260.h"
+// PLG260.BIN's module data (src/EFFECT/PLG260.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg260.hpp"
 
-// decomp: D_800FA32C (D_800FA32C@EFFECT/PLG260.BIN)
-SVECTOR Effects_Plg260_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FA37C (D_800FA37C@EFFECT/PLG260.BIN)
-u_char Effects_Plg260_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg260 {
+// decomp: D_800FA32C (PLG260.BIN/0.c:5; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FA37C (PLG260.BIN/0.c:5; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+}  // namespace VS::Effects::Plg260

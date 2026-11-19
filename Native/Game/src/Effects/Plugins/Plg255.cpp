@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg255.h"
+// PLG255.BIN's module data (src/EFFECT/PLG255.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg255.hpp"
 
-// decomp: D_800FD0EC (D_800FD0EC@EFFECT/PLG255.BIN)
-int Effects_Plg255_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD0F0 (D_800FD0F0@EFFECT/PLG255.BIN)
-int Effects_Plg255_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg255 {
+// decomp: D_800FD0EC (PLG255.BIN/1D8.c:5; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FD0F0 (PLG255.BIN/1D8.c:8; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+}  // namespace VS::Effects::Plg255

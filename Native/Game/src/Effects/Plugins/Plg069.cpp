@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg069.h"
+// PLG069.BIN's module data (src/EFFECT/PLG069.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg069.hpp"
 
-// decomp: D_800FD424 (D_800FD424@EFFECT/PLG069.BIN)
-SVECTOR Effects_Plg069_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD474 (D_800FD474@EFFECT/PLG069.BIN)
-u_char Effects_Plg069_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD4D4 (D_800FD4D4@EFFECT/PLG069.BIN)
-int Effects_Plg069_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD4D8 (D_800FD4D8@EFFECT/PLG069.BIN)
-CVECTOR Effects_Plg069_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg069 {
+// decomp: D_800FD424 (PLG069.BIN/E0.c:5; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FD474 (PLG069.BIN/E0.c:5; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+// decomp: D_800FD4D4 (PLG069.BIN/E0.c:7; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FD4D8 (PLG069.BIN/E0.c:9; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+}  // namespace VS::Effects::Plg069

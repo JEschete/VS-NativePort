@@ -26,6 +26,24 @@
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.h"
+#include "Effects/Plugins/Plg045.hpp"
+#include "Effects/Plugins/Plg057.hpp"
+#include "Effects/Plugins/Plg065.hpp"
+#include "Effects/Plugins/Plg082.hpp"
+#include "Effects/Plugins/Plg087.hpp"
+#include "Effects/Plugins/Plg114.hpp"
+#include "Effects/Plugins/Plg146.hpp"
+#include "Effects/Plugins/Plg147.hpp"
+#include "Effects/Plugins/Plg153.hpp"
+#include "Effects/Plugins/Plg156.hpp"
+#include "Effects/Plugins/Plg168.hpp"
+#include "Effects/Plugins/Plg224.hpp"
+#include "Effects/Plugins/Plg255.hpp"
+#include "Effects/Plugins/Plg263.hpp"
+#include "Effects/Plugins/Plg265.hpp"
+#include "Effects/Plugins/Plg266.hpp"
+#include "Effects/Plugins/Plg300.hpp"
+#include "Effects/Plugins/Plg301.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
@@ -38,30 +56,6 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
-
-// The overlays' emission cursors (Effects/Plugins/Plg*.h); PLG152's origin
-// shares PLG082's address.
-extern int Effects_Plg045_particleEmissionCounter;
-extern int Effects_Plg057_particleEmissionCounter;
-extern int Effects_Plg065_particleEmissionCounter;
-extern int Effects_Plg082_particleEmissionCounter;
-extern int Effects_Plg087_particleEmissionCounter;
-extern int Effects_Plg114_particleEmissionCounter;
-extern int Effects_Plg114_particleEmissionCounter2;
-extern int Effects_Plg146_particleEmissionCounter;
-extern int Effects_Plg147_particleEmissionCounter;
-extern int Effects_Plg153_particleEmissionCounter;
-extern int Effects_Plg156_particleEmissionCounter;
-extern int Effects_Plg168_particleEmissionCounter;
-extern int Effects_Plg224_particleEmissionCounter;
-extern int Effects_Plg255_particleEmissionCounter;
-extern int Effects_Plg263_particleEmissionCounter;
-extern int Effects_Plg265_particleEmissionCounter;
-extern int Effects_Plg265_particleEmissionCounter2;
-extern int Effects_Plg266_particleEmissionCounter;
-extern int Effects_Plg266_particleEmissionCounter2;
-extern int Effects_Plg300_particleEmissionCounter;
-extern int Effects_Plg301_particleEmissionCounter;
 
 namespace VS::Effects::Templates {
 namespace {
@@ -202,53 +196,54 @@ void StorePair(std::span<int, 2> pair, math::Vec2 value) {
 }
 
 // The overlay global an origin instance keeps its emission cursor in.
-int& CounterOf(ParticleEmissionCounter counter) {
+std::int32_t& CounterOf(ParticleEmissionCounter counter) {
   using enum ParticleEmissionCounter;
   switch (counter) {
     case kPlg045:
-      return Effects_Plg045_particleEmissionCounter;
+      return Effects::Plg045::particleEmissionCounter;
     case kPlg057:
-      return Effects_Plg057_particleEmissionCounter;
+      return Effects::Plg057::particleEmissionCounter;
     case kPlg065:
-      return Effects_Plg065_particleEmissionCounter;
+      return Effects::Plg065::particleEmissionCounter;
+    // PLG152's origin shares PLG082's address.
     case kPlg082:
     case kPlg152:
-      return Effects_Plg082_particleEmissionCounter;
+      return Effects::Plg082::particleEmissionCounter;
     case kPlg087:
-      return Effects_Plg087_particleEmissionCounter;
+      return Effects::Plg087::particleEmissionCounter;
     case kPlg114:
-      return Effects_Plg114_particleEmissionCounter;
+      return Effects::Plg114::particleEmissionCounter;
     case kPlg114Second:
-      return Effects_Plg114_particleEmissionCounter2;
+      return Effects::Plg114::particleEmissionCounter2;
     case kPlg146:
-      return Effects_Plg146_particleEmissionCounter;
+      return Effects::Plg146::particleEmissionCounter;
     case kPlg147:
-      return Effects_Plg147_particleEmissionCounter;
+      return Effects::Plg147::particleEmissionCounter;
     case kPlg153:
-      return Effects_Plg153_particleEmissionCounter;
+      return Effects::Plg153::particleEmissionCounter;
     case kPlg156:
-      return Effects_Plg156_particleEmissionCounter;
+      return Effects::Plg156::particleEmissionCounter;
     case kPlg168:
-      return Effects_Plg168_particleEmissionCounter;
+      return Effects::Plg168::particleEmissionCounter;
     case kPlg224:
-      return Effects_Plg224_particleEmissionCounter;
+      return Effects::Plg224::particleEmissionCounter;
     case kPlg255:
-      return Effects_Plg255_particleEmissionCounter;
+      return Effects::Plg255::particleEmissionCounter;
     case kPlg263:
-      return Effects_Plg263_particleEmissionCounter;
+      return Effects::Plg263::particleEmissionCounter;
     case kPlg265:
-      return Effects_Plg265_particleEmissionCounter;
+      return Effects::Plg265::particleEmissionCounter;
     case kPlg265Second:
-      return Effects_Plg265_particleEmissionCounter2;
+      return Effects::Plg265::particleEmissionCounter2;
     case kPlg266:
-      return Effects_Plg266_particleEmissionCounter;
+      return Effects::Plg266::particleEmissionCounter;
     case kPlg266Second:
-      return Effects_Plg266_particleEmissionCounter2;
+      return Effects::Plg266::particleEmissionCounter2;
     case kPlg300:
-      return Effects_Plg300_particleEmissionCounter;
+      return Effects::Plg300::particleEmissionCounter;
     case kPlg301:
     default:
-      return Effects_Plg301_particleEmissionCounter;
+      return Effects::Plg301::particleEmissionCounter;
   }
 }
 

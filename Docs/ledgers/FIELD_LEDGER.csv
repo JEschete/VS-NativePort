@@ -2501,21 +2501,21 @@ T00291.004,T00291,MovieData_t,4,frameBufs,0,RECT[2],,,,frameRects,Destination re
 T00291.005,T00291,MovieData_t,5,frameBufIndex,0,u_int,,,,frameRectIndex,Frame buffer rectangle being filled,high,source:22C.c:3552
 T00291.006,T00291,MovieData_t,6,renderTarget,0,RECT,,,,sliceRect,Rectangle of the slice currently uploaded,med,source:22C.c:3436;source:22C.c:3538
 T00291.007,T00291,MovieData_t,7,frameComplete,0,int,,,,frameComplete,Set when the current frame has been fully uploaded,high,source:22C.c:3444;source:22C.c:3546
-T00292.000,T00292,PLG005_data_t,0,unk0,1,u_char,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:9;source:EFFECT/PLG005.BIN/18.c:71
-T00292.001,T00292,PLG005_data_t,1,unk1,1,u_char,,,,opaque1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:10;source:EFFECT/PLG005.BIN/18.c:70
-T00292.002,T00292,PLG005_data_t,2,uBase,0,u_char,,,,uBase,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:82
-T00292.003,T00292,PLG005_data_t,3,vBase,0,u_char,,,,vBase,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:83
-T00292.004,T00292,PLG005_data_t,4,uScroll,0,u_char,,,,uScroll,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:85
-T00292.005,T00292,PLG005_data_t,5,vScroll,0,u_char,,,,vScroll,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:84
-T00292.006,T00292,PLG005_data_t,6,tpage,0,short,,,,tpage,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:80
-T00292.007,T00292,PLG005_data_t,7,clut,0,short,,,,clut,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:81
-T00292.008,T00292,PLG005_data_t,8,unkA,1,short,,,xSpacing,opaqueA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:17;source:EFFECT/PLG005.BIN/18.c:74
-T00292.009,T00292,PLG005_data_t,9,unkC,1,short,,,xSpacingSpeed,opaqueC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:18;source:EFFECT/PLG005.BIN/18.c:73
-T00292.010,T00292,PLG005_data_t,10,unkE,1,short,,,zSpacing,opaqueE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:19;source:EFFECT/PLG005.BIN/18.c:76
-T00292.011,T00292,PLG005_data_t,11,unk10,1,short,,,zSpacingSpeed,opaque10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:20;source:EFFECT/PLG005.BIN/18.c:75
-T00292.012,T00292,PLG005_data_t,12,unk12,1,short,,,xWavePhase,opaque12,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:21;source:EFFECT/PLG005.BIN/18.c:78
-T00292.013,T00292,PLG005_data_t,13,unk14,1,short,,,zWavePhase,opaque14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg005.h:22;source:EFFECT/PLG005.BIN/18.c:77
-T00292.014,T00292,PLG005_data_t,14,curveSampleDistance,0,int,,,,curveSampleDistance,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:72
+T00292.000,T00292,PLG005_data_t,0,unk0,1,u_char,,,,lifetime,Lifetime the create command sets,med,native:Effects/Templates/Grid.hpp GridState::lifetime (#441);source:EFFECT/grids.h:17
+T00292.001,T00292,PLG005_data_t,1,unk1,1,u_char,,,,definition_index,Index of the grid's definition in the current package,med,native:Effects/Templates/Grid.hpp GridState::definition_index (#441);source:EFFECT/grids.h:18
+T00292.002,T00292,PLG005_data_t,2,uBase,0,u_char,,,,u,Texture U origin from the definition's grid_u,med,native:Effects/Templates/Grid.hpp GridState::u (#441);source:EFFECT/grids.h:19
+T00292.003,T00292,PLG005_data_t,3,vBase,0,u_char,,,,v,Texture V origin from the definition's grid_v,med,native:Effects/Templates/Grid.hpp GridState::v (#441);source:EFFECT/grids.h:20
+T00292.004,T00292,PLG005_data_t,4,uScroll,0,u_char,,,,u_scroll,U texture scroll accumulator,med,native:Effects/Templates/Grid.hpp GridState::u_scroll (#441);source:EFFECT/grids.h:21
+T00292.005,T00292,PLG005_data_t,5,vScroll,0,u_char,,,,v_scroll,V texture scroll accumulator,med,native:Effects/Templates/Grid.hpp GridState::v_scroll (#441);source:EFFECT/grids.h:22
+T00292.006,T00292,PLG005_data_t,6,tpage,0,short,,,,tpage,Texture page word,med,native:Effects/Templates/Grid.hpp GridState::tpage (#441);source:EFFECT/grids.h:23
+T00292.007,T00292,PLG005_data_t,7,clut,0,short,,,,clut,CLUT word,med,native:Effects/Templates/Grid.hpp GridState::clut (#441);source:EFFECT/grids.h:24
+T00292.008,T00292,PLG005_data_t,8,unkA,1,short,,,xSpacing,x_spacing,X line spacing; adds the minimum force and x_speed each tick,med,native:Effects/Templates/Grid.hpp GridState::x_spacing (#441);source:EFFECT/grids.h:25
+T00292.009,T00292,PLG005_data_t,9,unkC,1,short,,,xSpacingSpeed,x_speed,X spacing velocity; adds the minimum acceleration each tick,med,native:Effects/Templates/Grid.hpp GridState::x_speed (#441);source:EFFECT/grids.h:26
+T00292.010,T00292,PLG005_data_t,10,unkE,1,short,,,zSpacing,z_spacing,Z line spacing; adds the minimum force and z_speed each tick,med,native:Effects/Templates/Grid.hpp GridState::z_spacing (#441);source:EFFECT/grids.h:27
+T00292.011,T00292,PLG005_data_t,11,unk10,1,short,,,zSpacingSpeed,z_speed,Z spacing velocity; adds the minimum acceleration each tick,med,native:Effects/Templates/Grid.hpp GridState::z_speed (#441);source:EFFECT/grids.h:28
+T00292.012,T00292,PLG005_data_t,12,unk12,1,short,,,xWavePhase,x_phase,X sway phase; advances by the jitter each tick,med,native:Effects/Templates/Grid.hpp GridState::x_phase (#441);source:EFFECT/grids.h:29
+T00292.013,T00292,PLG005_data_t,13,unk14,1,short,,,zWavePhase,z_phase,Z sway phase; advances by the jitter each tick,med,native:Effects/Templates/Grid.hpp GridState::z_phase (#441);source:EFFECT/grids.h:30
+T00292.014,T00292,PLG005_data_t,14,curveSampleDistance,0,int,,,,age,Age the update and texture scroll read,med,native:Effects/Templates/Grid.hpp GridState::age (#441);source:EFFECT/grids.h:31
 T00293.000,T00293,System_dat_h,0,unk0,1,size_t,,,,image0Offset,First rectangle-headed image,high,source:18.c:267
 T00293.001,T00293,System_dat_h,1,unk4,1,size_t,,,,image1Offset,Second rectangle-headed image,high,source:18.c:272
 T00293.002,T00293,System_dat_h,2,unk8,1,size_t,,,,paletteOffset,Palette block loaded with vs_main_loadClut,high,source:18.c:277
@@ -4893,17 +4893,17 @@ T00539.003,T00539,func_800FB4C0_t,3,unk60,1,u_int,8,,,transparency,Transparency 
 T00539.004,T00539,func_800FB4C0_t,4,unk60_8,1,u_int,4,,,variant,Variant passed to emitted events,low,source:5BF94.c:6973
 T00539.005,T00539,func_800FB4C0_t,5,unk60_12,1,u_int,20,,,reserved61Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:256;declaration-only;source:5BF94.h:498
 T00539.006,T00539,func_800FB4C0_t,6,unk64,1,u_char[20],,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:257;declaration-only;source:5BF94.h:499
-T00540.000,T00540,func_800FD9A4_t,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:158;use cited by sanity pass;source:EFFECT/PLG128.BIN/F8.c:14
-T00540.001,T00540,func_800FD9A4_t,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:157;use cited by sanity pass;source:EFFECT/PLG128.BIN/F8.c:14
-T00540.002,T00540,func_800FD9A4_t,2,mode,0,short,,,,mode,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:159;use cited by sanity pass;source:EFFECT/PLG128.BIN/F8.c:15
-T00540.003,T00540,func_800FD9A4_t,3,age,0,int,,,,age,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:160;use cited by sanity pass;source:EFFECT/PLG128.BIN/F8.c:16
-T00540.004,T00540,func_800FD9A4_t,4,startCamera,0,D_800F54D8_t,,,,startCamera,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:161;use cited by sanity pass;source:EFFECT/PLG128.BIN/F8.c:17
-T00540.005,T00540,func_800FD9A4_t,5,endCamera,0,D_800F54D8_t,,,,endCamera,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:138
-T00540.006,T00540,func_800FD9A4_t,6,unk88,1,VECTOR,,,cameraPosition,lookAt,Point looked at,med,source:EFFECT/PLG128.BIN/F8.c:68
-T00540.007,T00540,func_800FD9A4_t,7,unk98,1,VECTOR,,,cameraLookAt,eye,Camera position,med,source:EFFECT/PLG128.BIN/F8.c:68
-T00540.008,T00540,func_800FD9A4_t,8,unkA8,1,MATRIX,,,cameraOffsetTransform,view,Look-at matrix,med,source:EFFECT/PLG128.BIN/F8.c:68
-T00540.009,T00540,func_800FD9A4_t,9,nearClip,0,int,,,,nearClip,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:22
-T00540.010,T00540,func_800FD9A4_t,10,padCC,1,int,,,,reservedCC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Plugins\Plg128.h:20;declaration-only;source:EFFECT/PLG128.BIN/F8.c:23
+T00540.000,T00540,func_800FD9A4_t,0,lifetime,0,u_char,,,,lifetime,Ticks left; each tick decrements it and the slot ends at zero,med,native:Plg128CameraLive.cpp LiveCameraRecord::lifetime (#441);source:EFFECT/PLG128.BIN/F8.c:11
+T00540.001,T00540,func_800FD9A4_t,1,effect,0,u_char,,,,definition,Index of the camera definition in the current package (the create word's high byte),med,native:Plg128CameraLive.cpp LiveCameraRecord::definition (#441);source:EFFECT/PLG128.BIN/F8.c:11
+T00540.002,T00540,func_800FD9A4_t,2,mode,0,short,,,,mode,Camera mode selecting endpoint or actor-facing placement,med,native:Plg128CameraLive.cpp LiveCameraRecord::mode (#441);source:EFFECT/PLG128.BIN/F8.c:12
+T00540.003,T00540,func_800FD9A4_t,3,age,0,int,,,,age,Ticks since creation,med,native:Plg128CameraLive.cpp LiveCameraRecord::age (#441);source:EFFECT/PLG128.BIN/F8.c:13
+T00540.004,T00540,func_800FD9A4_t,4,startCamera,0,D_800F54D8_t,,,,start_camera,Camera pose the move starts from,med,native:Plg128CameraLive.cpp LiveCameraRecord::start_camera (#441);source:EFFECT/PLG128.BIN/F8.c:14
+T00540.005,T00540,func_800FD9A4_t,5,endCamera,0,D_800F54D8_t,,,,end_camera,"Camera pose the tick writes the position, target and near clip to",med,native:Plg128CameraLive.cpp LiveCameraRecord::end_camera (#441);source:EFFECT/PLG128.BIN/F8.c:15
+T00540.006,T00540,func_800FD9A4_t,6,unk88,1,VECTOR,,,cameraPosition,position,Camera position; the end pose's position,med,native:Plg128CameraLive.cpp LiveCameraRecord::position (#441);source:EFFECT/PLG128.BIN/F8.c:16
+T00540.007,T00540,func_800FD9A4_t,7,unk98,1,VECTOR,,,cameraLookAt,target,Point looked at; the end pose's look-at,med,native:Plg128CameraLive.cpp LiveCameraRecord::target (#441);source:EFFECT/PLG128.BIN/F8.c:17
+T00540.008,T00540,func_800FD9A4_t,8,unkA8,1,MATRIX,,,cameraOffsetTransform,view,Look-at transform built from the target and position,med,native:Plg128CameraLive.cpp LiveCameraRecord::view (#441);source:EFFECT/PLG128.BIN/F8.c:18
+T00540.009,T00540,func_800FD9A4_t,9,nearClip,0,int,,,,near_clip,Near clip interpolated each tick and copied to the end pose,med,native:Plg128CameraLive.cpp LiveCameraRecord::near_clip (#441);declaration-only;source:EFFECT/PLG128.BIN/F8.c:19
+T00540.010,T00540,func_800FD9A4_t,10,padCC,1,int,,,,reserved_cc,Not used by native code; kept for the original layout,med,native:Plg128CameraLive.cpp LiveCameraRecord::reserved_cc (#441);declaration-only;source:EFFECT/PLG128.BIN/F8.c:20
 T00541.000,T00541,func_80103080_t,0,unk0,1,u_short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:268;declaration-only;source:146C.h:289
 T00541.001,T00541,func_80103080_t,1,unk2,1,u_short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:269;declaration-only;source:146C.h:290
 T00541.002,T00541,func_80103080_t,2,unk4,1,char,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:270;declaration-only;source:146C.h:291

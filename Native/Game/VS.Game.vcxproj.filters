@@ -1173,127 +1173,124 @@
     <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg005.h">
-      <Filter>src\Effects\Plugins</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg044.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg044.h">
+    <ClInclude Include="src\Effects\Plugins\Plg044.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg045.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg045.h">
+    <ClInclude Include="src\Effects\Plugins\Plg045.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg047.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg047.h">
+    <ClInclude Include="src\Effects\Plugins\Plg047.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg049.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg049.h">
+    <ClInclude Include="src\Effects\Plugins\Plg049.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg050.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg050.h">
+    <ClInclude Include="src\Effects\Plugins\Plg050.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg051.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg051.h">
+    <ClInclude Include="src\Effects\Plugins\Plg051.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg053.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg053.h">
+    <ClInclude Include="src\Effects\Plugins\Plg053.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg057.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg057.h">
+    <ClInclude Include="src\Effects\Plugins\Plg057.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg061.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg061.h">
+    <ClInclude Include="src\Effects\Plugins\Plg061.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg065.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg065.h">
+    <ClInclude Include="src\Effects\Plugins\Plg065.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg069.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg069.h">
+    <ClInclude Include="src\Effects\Plugins\Plg069.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg073.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg073.h">
+    <ClInclude Include="src\Effects\Plugins\Plg073.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg077.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg077.h">
+    <ClInclude Include="src\Effects\Plugins\Plg077.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg081.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg081.h">
+    <ClInclude Include="src\Effects\Plugins\Plg081.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg082.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg082.h">
+    <ClInclude Include="src\Effects\Plugins\Plg082.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg085.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg085.h">
+    <ClInclude Include="src\Effects\Plugins\Plg085.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg086.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg086.h">
+    <ClInclude Include="src\Effects\Plugins\Plg086.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg087.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg087.h">
+    <ClInclude Include="src\Effects\Plugins\Plg087.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg114.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg114.h">
+    <ClInclude Include="src\Effects\Plugins\Plg114.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg128.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg128.h">
+    <ClInclude Include="src\Effects\Plugins\Plg128.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg128Camera.cpp">
@@ -1305,253 +1302,256 @@
     <ClCompile Include="src\Effects\Plugins\Plg129.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg129.h">
+    <ClInclude Include="src\Effects\Plugins\Plg129.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg134.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg134.h">
+    <ClInclude Include="src\Effects\Plugins\Plg134.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg135.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg135.h">
+    <ClInclude Include="src\Effects\Plugins\Plg135.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg137.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg137.h">
+    <ClInclude Include="src\Effects\Plugins\Plg137.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg138.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg138.h">
+    <ClInclude Include="src\Effects\Plugins\Plg138.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg141.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg141.h">
+    <ClInclude Include="src\Effects\Plugins\Plg141.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg142.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg142.h">
+    <ClInclude Include="src\Effects\Plugins\Plg142.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg143.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg143.h">
+    <ClInclude Include="src\Effects\Plugins\Plg143.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg146.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg146.h">
+    <ClInclude Include="src\Effects\Plugins\Plg146.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg147.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg147.h">
+    <ClInclude Include="src\Effects\Plugins\Plg147.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg148.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg148.h">
+    <ClInclude Include="src\Effects\Plugins\Plg148.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg149.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg149.h">
+    <ClInclude Include="src\Effects\Plugins\Plg149.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg150.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg150.h">
+    <ClInclude Include="src\Effects\Plugins\Plg150.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg153.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg153.h">
+    <ClInclude Include="src\Effects\Plugins\Plg153.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg154.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg154.h">
+    <ClInclude Include="src\Effects\Plugins\Plg154.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg156.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg156.h">
+    <ClInclude Include="src\Effects\Plugins\Plg156.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg158.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg158.h">
+    <ClInclude Include="src\Effects\Plugins\Plg158.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg160.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg160.h">
+    <ClInclude Include="src\Effects\Plugins\Plg160.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg161.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg161.h">
+    <ClInclude Include="src\Effects\Plugins\Plg161.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg162.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg162.h">
+    <ClInclude Include="src\Effects\Plugins\Plg162.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg165.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg165.h">
+    <ClInclude Include="src\Effects\Plugins\Plg165.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg166.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg166.h">
+    <ClInclude Include="src\Effects\Plugins\Plg166.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg167.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg167.h">
+    <ClInclude Include="src\Effects\Plugins\Plg167.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg168.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg168.h">
+    <ClInclude Include="src\Effects\Plugins\Plg168.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg169.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg169.h">
+    <ClInclude Include="src\Effects\Plugins\Plg169.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg170.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg170.h">
+    <ClInclude Include="src\Effects\Plugins\Plg170.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg224.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg224.h">
+    <ClInclude Include="src\Effects\Plugins\Plg224.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg232.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg232.h">
+    <ClInclude Include="src\Effects\Plugins\Plg232.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg236.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg236.h">
+    <ClInclude Include="src\Effects\Plugins\Plg236.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg242.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg242.h">
+    <ClInclude Include="src\Effects\Plugins\Plg242.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg250.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg250.h">
+    <ClInclude Include="src\Effects\Plugins\Plg250.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg255.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg255.h">
+    <ClInclude Include="src\Effects\Plugins\Plg255.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg260.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg260.h">
+    <ClInclude Include="src\Effects\Plugins\Plg260.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg263.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg263.h">
+    <ClInclude Include="src\Effects\Plugins\Plg263.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg265.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg265.h">
+    <ClInclude Include="src\Effects\Plugins\Plg265.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg266.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg266.h">
+    <ClInclude Include="src\Effects\Plugins\Plg266.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg272.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg272.h">
+    <ClInclude Include="src\Effects\Plugins\Plg272.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg273.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg273.h">
+    <ClInclude Include="src\Effects\Plugins\Plg273.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg291.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg291.h">
+    <ClInclude Include="src\Effects\Plugins\Plg291.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg297.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg297.h">
+    <ClInclude Include="src\Effects\Plugins\Plg297.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg300.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg300.h">
+    <ClInclude Include="src\Effects\Plugins\Plg300.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg301.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg301.h">
+    <ClInclude Include="src\Effects\Plugins\Plg301.hpp">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Plugins\PluginData.hpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\PrimaryEffect.cpp">

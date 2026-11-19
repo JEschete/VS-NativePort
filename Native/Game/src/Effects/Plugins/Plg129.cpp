@@ -1,19 +1,16 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg129.h"
+// PLG129.BIN's module data (src/EFFECT/PLG129.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg129.hpp"
 
-// decomp: D_800FD5A8 (D_800FD5A8@EFFECT/PLG129.BIN)
-u_char Effects_Plg129_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD5E8 (D_800FD5E8@EFFECT/PLG129.BIN)
-SVECTOR Effects_Plg129_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD638 (D_800FD638@EFFECT/PLG129.BIN)
-u_char Effects_Plg129_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD698 (D_800FD698@EFFECT/PLG129.BIN)
-SVECTOR Effects_Plg129_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD918 (D_800FD918@EFFECT/PLG129.BIN)
-u_char Effects_Plg129_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg129 {
+// decomp: D_800FD5A8 (PLG129.BIN/0.c:6; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FD5E8 (PLG129.BIN/0.c:8; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FD638 (PLG129.BIN/0.c:8; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+// decomp: D_800FD698 (PLG129.BIN/0.c:11; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_800FD918 (PLG129.BIN/0.c:13; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors2;
+}  // namespace VS::Effects::Plg129

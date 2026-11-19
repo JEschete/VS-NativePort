@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg232.h"
+// PLG232.BIN's module data (src/EFFECT/PLG232.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg232.hpp"
 
-// decomp: D_800FBA00 (D_800FBA00@EFFECT/PLG232.BIN)
-int Effects_Plg232_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg232 {
+// decomp: D_800FBA00 (PLG232.BIN/E0.c:5; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+}  // namespace VS::Effects::Plg232

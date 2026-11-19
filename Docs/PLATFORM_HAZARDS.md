@@ -177,8 +177,8 @@ then write it down explicitly:
 - **Out of bounds:** where a read deliberately reached a neighbor, name that neighbor. Use `std::array` or `std::span`
   everywhere else, with bounds checks in Debug.
 - **Unsized module arrays:** these are the most urgent of this group. The copy tool gives them one row and loads no bytes,
-  so effects read zeros or run past the end. For example, `Effects_Plg049_ringColorFactors` is defined as `[1][4]` while
-  `Plg052` reads a sibling table up to 0x1C bytes in. Decode them from the user's disc into a sized `std::span`.
+  so effects read zeros or run past the end. For example, `Effects_Plg049_ringColorFactors` was once defined as `[1][4]` while
+  `Plg052` read a sibling table up to 0x1C bytes in (#289). Decode them from the user's disc into a sized `std::span`.
 
 ### Pointer width: `POINTER-INT`, `BYTE-OFFSET`, `LITERAL-SIZE`, `PS1-ADDRESS`, `UNPROTOTYPED-CALL`
 

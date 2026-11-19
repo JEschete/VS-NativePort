@@ -35,65 +35,65 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
-#include "Effects/Plugins/Plg045.h"
-#include "Effects/Plugins/Plg049.h"
-#include "Effects/Plugins/Plg050.h"
-#include "Effects/Plugins/Plg053.h"
-#include "Effects/Plugins/Plg057.h"
-#include "Effects/Plugins/Plg061.h"
-#include "Effects/Plugins/Plg065.h"
-#include "Effects/Plugins/Plg069.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg077.h"
-#include "Effects/Plugins/Plg081.h"
-#include "Effects/Plugins/Plg082.h"
-#include "Effects/Plugins/Plg085.h"
-#include "Effects/Plugins/Plg086.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg114.h"
-#include "Effects/Plugins/Plg128.h"
-#include "Effects/Plugins/Plg129.h"
-#include "Effects/Plugins/Plg134.h"
-#include "Effects/Plugins/Plg135.h"
-#include "Effects/Plugins/Plg137.h"
-#include "Effects/Plugins/Plg138.h"
-#include "Effects/Plugins/Plg141.h"
-#include "Effects/Plugins/Plg142.h"
-#include "Effects/Plugins/Plg143.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg147.h"
-#include "Effects/Plugins/Plg148.h"
-#include "Effects/Plugins/Plg149.h"
-#include "Effects/Plugins/Plg150.h"
-#include "Effects/Plugins/Plg153.h"
-#include "Effects/Plugins/Plg154.h"
-#include "Effects/Plugins/Plg156.h"
-#include "Effects/Plugins/Plg158.h"
-#include "Effects/Plugins/Plg160.h"
-#include "Effects/Plugins/Plg161.h"
-#include "Effects/Plugins/Plg162.h"
-#include "Effects/Plugins/Plg165.h"
-#include "Effects/Plugins/Plg166.h"
-#include "Effects/Plugins/Plg167.h"
-#include "Effects/Plugins/Plg168.h"
-#include "Effects/Plugins/Plg169.h"
-#include "Effects/Plugins/Plg170.h"
-#include "Effects/Plugins/Plg224.h"
-#include "Effects/Plugins/Plg232.h"
-#include "Effects/Plugins/Plg236.h"
-#include "Effects/Plugins/Plg242.h"
-#include "Effects/Plugins/Plg250.h"
-#include "Effects/Plugins/Plg255.h"
-#include "Effects/Plugins/Plg260.h"
-#include "Effects/Plugins/Plg263.h"
-#include "Effects/Plugins/Plg265.h"
-#include "Effects/Plugins/Plg266.h"
-#include "Effects/Plugins/Plg272.h"
-#include "Effects/Plugins/Plg273.h"
-#include "Effects/Plugins/Plg291.h"
-#include "Effects/Plugins/Plg297.h"
-#include "Effects/Plugins/Plg300.h"
-#include "Effects/Plugins/Plg301.h"
+#include "Effects/Plugins/Plg045.hpp"
+#include "Effects/Plugins/Plg049.hpp"
+#include "Effects/Plugins/Plg050.hpp"
+#include "Effects/Plugins/Plg053.hpp"
+#include "Effects/Plugins/Plg057.hpp"
+#include "Effects/Plugins/Plg061.hpp"
+#include "Effects/Plugins/Plg065.hpp"
+#include "Effects/Plugins/Plg069.hpp"
+#include "Effects/Plugins/Plg073.hpp"
+#include "Effects/Plugins/Plg077.hpp"
+#include "Effects/Plugins/Plg081.hpp"
+#include "Effects/Plugins/Plg082.hpp"
+#include "Effects/Plugins/Plg085.hpp"
+#include "Effects/Plugins/Plg086.hpp"
+#include "Effects/Plugins/Plg087.hpp"
+#include "Effects/Plugins/Plg114.hpp"
+#include "Effects/Plugins/Plg128.hpp"
+#include "Effects/Plugins/Plg129.hpp"
+#include "Effects/Plugins/Plg134.hpp"
+#include "Effects/Plugins/Plg135.hpp"
+#include "Effects/Plugins/Plg137.hpp"
+#include "Effects/Plugins/Plg138.hpp"
+#include "Effects/Plugins/Plg141.hpp"
+#include "Effects/Plugins/Plg142.hpp"
+#include "Effects/Plugins/Plg143.hpp"
+#include "Effects/Plugins/Plg146.hpp"
+#include "Effects/Plugins/Plg147.hpp"
+#include "Effects/Plugins/Plg148.hpp"
+#include "Effects/Plugins/Plg149.hpp"
+#include "Effects/Plugins/Plg150.hpp"
+#include "Effects/Plugins/Plg153.hpp"
+#include "Effects/Plugins/Plg154.hpp"
+#include "Effects/Plugins/Plg156.hpp"
+#include "Effects/Plugins/Plg158.hpp"
+#include "Effects/Plugins/Plg160.hpp"
+#include "Effects/Plugins/Plg161.hpp"
+#include "Effects/Plugins/Plg162.hpp"
+#include "Effects/Plugins/Plg165.hpp"
+#include "Effects/Plugins/Plg166.hpp"
+#include "Effects/Plugins/Plg167.hpp"
+#include "Effects/Plugins/Plg168.hpp"
+#include "Effects/Plugins/Plg169.hpp"
+#include "Effects/Plugins/Plg170.hpp"
+#include "Effects/Plugins/Plg224.hpp"
+#include "Effects/Plugins/Plg232.hpp"
+#include "Effects/Plugins/Plg236.hpp"
+#include "Effects/Plugins/Plg242.hpp"
+#include "Effects/Plugins/Plg250.hpp"
+#include "Effects/Plugins/Plg255.hpp"
+#include "Effects/Plugins/Plg260.hpp"
+#include "Effects/Plugins/Plg263.hpp"
+#include "Effects/Plugins/Plg265.hpp"
+#include "Effects/Plugins/Plg266.hpp"
+#include "Effects/Plugins/Plg272.hpp"
+#include "Effects/Plugins/Plg273.hpp"
+#include "Effects/Plugins/Plg291.hpp"
+#include "Effects/Plugins/Plg297.hpp"
+#include "Effects/Plugins/Plg300.hpp"
+#include "Effects/Plugins/Plg301.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Trails.h"
 #include "Ending/ClearResults.hpp"
@@ -770,456 +770,548 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x88FDC, sizeof Battle_Ai_radialRetreatPath,
      &Battle_Ai_radialRetreatPath,
      sizeof Battle_Ai_radialRetreatPath},  // G00237 D_800F17DC
-    {"EFFECT/PLG045.BIN", 0x1DB4, sizeof Effects_Plg045_particleEmissionCounter,
-     &Effects_Plg045_particleEmissionCounter,
-     sizeof Effects_Plg045_particleEmissionCounter},  // G00634 D_800FB5B4
-    {"EFFECT/PLG049.BIN", 0x4BD4, sizeof Effects_Plg049_trailEmissionCounter,
-     &Effects_Plg049_trailEmissionCounter,
-     sizeof Effects_Plg049_trailEmissionCounter},  // G00637 D_800FE3D4
-    {"EFFECT/PLG049.BIN", 0x4BD8, sizeof Effects_Plg049_ringColorFactors,
-     &Effects_Plg049_ringColorFactors,
-     sizeof Effects_Plg049_ringColorFactors},  // G00638 D_800FE3D8
-    {"EFFECT/PLG049.BIN", 0x4BF8, sizeof Effects_Plg049_tiledRingColorFactors,
-     &Effects_Plg049_tiledRingColorFactors,
-     sizeof Effects_Plg049_tiledRingColorFactors},  // G00639 D_800FE3F8
-    {"EFFECT/PLG050.BIN", 0x2E24, sizeof Effects_Plg050_ringColorFactors,
-     &Effects_Plg050_ringColorFactors,
-     sizeof Effects_Plg050_ringColorFactors},  // G00640 D_800FC624
-    {"EFFECT/PLG050.BIN", 0x2E44, sizeof Effects_Plg050_trailEmissionCounter,
-     &Effects_Plg050_trailEmissionCounter,
-     sizeof Effects_Plg050_trailEmissionCounter},  // G00641 D_800FC644
-    {"EFFECT/PLG053.BIN", 0x1AD4, sizeof Effects_Plg053_closedRingColorFactors,
-     &Effects_Plg053_closedRingColorFactors,
-     sizeof Effects_Plg053_closedRingColorFactors},  // G00644 D_800FB2D4
-    {"EFFECT/PLG057.BIN", 0x61B4, sizeof Effects_Plg057_particleEmissionCounter,
-     &Effects_Plg057_particleEmissionCounter,
-     sizeof Effects_Plg057_particleEmissionCounter},  // G00645 D_800FF9B4
-    {"EFFECT/PLG057.BIN", 0x61B8, sizeof Effects_Plg057_trailEmissionCounter,
-     &Effects_Plg057_trailEmissionCounter,
-     sizeof Effects_Plg057_trailEmissionCounter},  // G00646 D_800FF9B8
-    {"EFFECT/PLG057.BIN", 0x61BC, sizeof Effects_Plg057_trailEmissionCounter2,
-     &Effects_Plg057_trailEmissionCounter2,
-     sizeof Effects_Plg057_trailEmissionCounter2},  // G00647 D_800FF9BC
-    {"EFFECT/PLG061.BIN", 0x3290, sizeof Effects_Plg061_surfaceVertices,
-     &Effects_Plg061_surfaceVertices,
-     sizeof Effects_Plg061_surfaceVertices},  // G00648 D_800FCA90
-    {"EFFECT/PLG061.BIN", 0x3510, sizeof Effects_Plg061_ringColorFactors,
-     &Effects_Plg061_ringColorFactors,
-     sizeof Effects_Plg061_ringColorFactors},  // G00649 D_800FCD10
-    {"EFFECT/PLG061.BIN", 0x3530, sizeof Effects_Plg061_closedRingColorFactors,
-     &Effects_Plg061_closedRingColorFactors,
-     sizeof Effects_Plg061_closedRingColorFactors},  // G00650 D_800FCD30
-    {"EFFECT/PLG065.BIN", 0x4134, sizeof Effects_Plg065_closedRingColorFactors,
-     &Effects_Plg065_closedRingColorFactors,
-     sizeof Effects_Plg065_closedRingColorFactors},  // G00651 D_800FD934
-    {"EFFECT/PLG065.BIN", 0x4154, sizeof Effects_Plg065_ringColorFactors,
-     &Effects_Plg065_ringColorFactors,
-     sizeof Effects_Plg065_ringColorFactors},  // G00652 D_800FD954
-    {"EFFECT/PLG065.BIN", 0x4174, sizeof Effects_Plg065_particleEmissionCounter,
-     &Effects_Plg065_particleEmissionCounter,
-     sizeof Effects_Plg065_particleEmissionCounter},  // G00653 D_800FD974
-    {"EFFECT/PLG069.BIN", 0x3C24, sizeof Effects_Plg069_mesh10Vertices,
-     &Effects_Plg069_mesh10Vertices,
-     sizeof Effects_Plg069_mesh10Vertices},  // G00654 D_800FD424
-    {"EFFECT/PLG069.BIN", 0x3C74, sizeof Effects_Plg069_mesh10Faces,
-     &Effects_Plg069_mesh10Faces,
-     sizeof Effects_Plg069_mesh10Faces},  // G00655 D_800FD474
-    {"EFFECT/PLG069.BIN", 0x3CD4, sizeof Effects_Plg069_trailEmissionCounter,
-     &Effects_Plg069_trailEmissionCounter,
-     sizeof Effects_Plg069_trailEmissionCounter},  // G00656 D_800FD4D4
-    {"EFFECT/PLG069.BIN", 0x3CD8, sizeof Effects_Plg069_tiledRingColorFactors,
-     &Effects_Plg069_tiledRingColorFactors,
-     sizeof Effects_Plg069_tiledRingColorFactors},  // G00657 D_800FD4D8
-    {"EFFECT/PLG073.BIN", 0x573C, sizeof Effects_Plg073_tiledRingColorFactors,
-     &Effects_Plg073_tiledRingColorFactors,
-     sizeof Effects_Plg073_tiledRingColorFactors},  // G00658 D_800FEF3C
-    {"EFFECT/PLG073.BIN", 0x575C, sizeof Effects_Plg073_ringColorFactors,
-     &Effects_Plg073_ringColorFactors,
-     sizeof Effects_Plg073_ringColorFactors},  // G00659 D_800FEF5C
-    {"EFFECT/PLG073.BIN", 0x577C, sizeof Effects_Plg073_trailEmissionCounter,
-     &Effects_Plg073_trailEmissionCounter,
-     sizeof Effects_Plg073_trailEmissionCounter},  // G00660 D_800FEF7C
-    {"EFFECT/PLG077.BIN", 0x4108, sizeof Effects_Plg077_mesh10Vertices,
-     &Effects_Plg077_mesh10Vertices,
-     sizeof Effects_Plg077_mesh10Vertices},  // G00661 D_800FD908
-    {"EFFECT/PLG077.BIN", 0x4158, sizeof Effects_Plg077_mesh10Faces,
-     &Effects_Plg077_mesh10Faces,
-     sizeof Effects_Plg077_mesh10Faces},  // G00662 D_800FD958
-    {"EFFECT/PLG077.BIN", 0x41B8, sizeof Effects_Plg077_ringColorFactors,
-     &Effects_Plg077_ringColorFactors,
-     sizeof Effects_Plg077_ringColorFactors},  // G00663 D_800FD9B8
-    {"EFFECT/PLG077.BIN", 0x41D8, sizeof Effects_Plg077_surfaceVertices,
-     &Effects_Plg077_surfaceVertices,
-     sizeof Effects_Plg077_surfaceVertices},  // G00664 D_800FD9D8
-    {"EFFECT/PLG077.BIN", 0x4458, sizeof Effects_Plg077_ringColorFactors2,
-     &Effects_Plg077_ringColorFactors2,
-     sizeof Effects_Plg077_ringColorFactors2},  // G00665 D_800FDC58
-    {"EFFECT/PLG081.BIN", 0x2A4C, sizeof Effects_Plg081_ringColorFactors,
-     &Effects_Plg081_ringColorFactors,
-     sizeof Effects_Plg081_ringColorFactors},  // G00666 D_800FC24C
-    {"EFFECT/PLG081.BIN", 0x2A6C, sizeof Effects_Plg081_closedRingColorFactors,
-     &Effects_Plg081_closedRingColorFactors,
-     sizeof Effects_Plg081_closedRingColorFactors},  // G00667 D_800FC26C
-    {"EFFECT/PLG082.BIN", 0x3888, sizeof Effects_Plg082_particleEmissionCounter,
-     &Effects_Plg082_particleEmissionCounter,
-     sizeof Effects_Plg082_particleEmissionCounter},  // G00668 D_800FD088
-    {"EFFECT/PLG082.BIN", 0x388C, sizeof Effects_Plg082_closedRingColorFactors,
-     &Effects_Plg082_closedRingColorFactors,
-     sizeof Effects_Plg082_closedRingColorFactors},  // G00669 D_800FD08C
-    {"EFFECT/PLG085.BIN", 0x1A60, sizeof Effects_Plg085_tiledRingColorFactors,
-     &Effects_Plg085_tiledRingColorFactors,
-     sizeof Effects_Plg085_tiledRingColorFactors},  // G00670 D_800FB260
-    {"EFFECT/PLG086.BIN", 0x4B90, sizeof Effects_Plg086_closedRingColorFactors,
-     &Effects_Plg086_closedRingColorFactors,
-     sizeof Effects_Plg086_closedRingColorFactors},  // G00671 D_800FE390
-    {"EFFECT/PLG086.BIN", 0x4BB0, sizeof Effects_Plg086_trailEmissionCounter,
-     &Effects_Plg086_trailEmissionCounter,
-     sizeof Effects_Plg086_trailEmissionCounter},  // G00672 D_800FE3B0
-    {"EFFECT/PLG087.BIN", 0x5F5C, sizeof Effects_Plg087_surfaceVertices,
-     &Effects_Plg087_surfaceVertices,
-     sizeof Effects_Plg087_surfaceVertices},  // G00673 D_800FF75C
-    {"EFFECT/PLG087.BIN", 0x61DC, sizeof Effects_Plg087_closedRingColorFactors,
-     &Effects_Plg087_closedRingColorFactors,
-     sizeof Effects_Plg087_closedRingColorFactors},  // G00674 D_800FF9DC
-    {"EFFECT/PLG087.BIN", 0x61FC, sizeof Effects_Plg087_trailEmissionCounter,
-     &Effects_Plg087_trailEmissionCounter,
-     sizeof Effects_Plg087_trailEmissionCounter},  // G00675 D_800FF9FC
-    {"EFFECT/PLG087.BIN", 0x6200, sizeof Effects_Plg087_particleEmissionCounter,
-     &Effects_Plg087_particleEmissionCounter,
-     sizeof Effects_Plg087_particleEmissionCounter},  // G00676 D_800FFA00
-    {"EFFECT/PLG114.BIN", 0x34A0, sizeof Effects_Plg114_particleEmissionCounter,
-     &Effects_Plg114_particleEmissionCounter,
-     sizeof Effects_Plg114_particleEmissionCounter},  // G00677 D_800FCCA0
+    {"EFFECT/PLG045.BIN", 0x1DB4,
+     sizeof VS::Effects::Plg045::particleEmissionCounter,
+     &VS::Effects::Plg045::particleEmissionCounter,
+     sizeof VS::Effects::Plg045::particleEmissionCounter},  // G00634 D_800FB5B4
+    {"EFFECT/PLG049.BIN", 0x4BD4,
+     sizeof VS::Effects::Plg049::trailEmissionCounter,
+     &VS::Effects::Plg049::trailEmissionCounter,
+     sizeof VS::Effects::Plg049::trailEmissionCounter},  // G00637 D_800FE3D4
+    {"EFFECT/PLG049.BIN", 0x4BD8, sizeof VS::Effects::Plg049::ringColorFactors,
+     &VS::Effects::Plg049::ringColorFactors,
+     sizeof VS::Effects::Plg049::ringColorFactors},  // G00638 D_800FE3D8
+    {"EFFECT/PLG049.BIN", 0x4BF8,
+     sizeof VS::Effects::Plg049::tiledRingColorFactors,
+     &VS::Effects::Plg049::tiledRingColorFactors,
+     sizeof VS::Effects::Plg049::tiledRingColorFactors},  // G00639 D_800FE3F8
+    {"EFFECT/PLG050.BIN", 0x2E24, sizeof VS::Effects::Plg050::ringColorFactors,
+     &VS::Effects::Plg050::ringColorFactors,
+     sizeof VS::Effects::Plg050::ringColorFactors},  // G00640 D_800FC624
+    {"EFFECT/PLG050.BIN", 0x2E44,
+     sizeof VS::Effects::Plg050::trailEmissionCounter,
+     &VS::Effects::Plg050::trailEmissionCounter,
+     sizeof VS::Effects::Plg050::trailEmissionCounter},  // G00641 D_800FC644
+    {"EFFECT/PLG053.BIN", 0x1AD4,
+     sizeof VS::Effects::Plg053::closedRingColorFactors,
+     &VS::Effects::Plg053::closedRingColorFactors,
+     sizeof VS::Effects::Plg053::closedRingColorFactors},  // G00644 D_800FB2D4
+    {"EFFECT/PLG057.BIN", 0x61B4,
+     sizeof VS::Effects::Plg057::particleEmissionCounter,
+     &VS::Effects::Plg057::particleEmissionCounter,
+     sizeof VS::Effects::Plg057::particleEmissionCounter},  // G00645 D_800FF9B4
+    {"EFFECT/PLG057.BIN", 0x61B8,
+     sizeof VS::Effects::Plg057::trailEmissionCounter,
+     &VS::Effects::Plg057::trailEmissionCounter,
+     sizeof VS::Effects::Plg057::trailEmissionCounter},  // G00646 D_800FF9B8
+    {"EFFECT/PLG057.BIN", 0x61BC,
+     sizeof VS::Effects::Plg057::trailEmissionCounter2,
+     &VS::Effects::Plg057::trailEmissionCounter2,
+     sizeof VS::Effects::Plg057::trailEmissionCounter2},  // G00647 D_800FF9BC
+    {"EFFECT/PLG061.BIN", 0x3290, sizeof VS::Effects::Plg061::surfaceVertices,
+     &VS::Effects::Plg061::surfaceVertices,
+     sizeof VS::Effects::Plg061::surfaceVertices},  // G00648 D_800FCA90
+    {"EFFECT/PLG061.BIN", 0x3510, sizeof VS::Effects::Plg061::ringColorFactors,
+     &VS::Effects::Plg061::ringColorFactors,
+     sizeof VS::Effects::Plg061::ringColorFactors},  // G00649 D_800FCD10
+    {"EFFECT/PLG061.BIN", 0x3530,
+     sizeof VS::Effects::Plg061::closedRingColorFactors,
+     &VS::Effects::Plg061::closedRingColorFactors,
+     sizeof VS::Effects::Plg061::closedRingColorFactors},  // G00650 D_800FCD30
+    {"EFFECT/PLG065.BIN", 0x4134,
+     sizeof VS::Effects::Plg065::closedRingColorFactors,
+     &VS::Effects::Plg065::closedRingColorFactors,
+     sizeof VS::Effects::Plg065::closedRingColorFactors},  // G00651 D_800FD934
+    {"EFFECT/PLG065.BIN", 0x4154, sizeof VS::Effects::Plg065::ringColorFactors,
+     &VS::Effects::Plg065::ringColorFactors,
+     sizeof VS::Effects::Plg065::ringColorFactors},  // G00652 D_800FD954
+    {"EFFECT/PLG065.BIN", 0x4174,
+     sizeof VS::Effects::Plg065::particleEmissionCounter,
+     &VS::Effects::Plg065::particleEmissionCounter,
+     sizeof VS::Effects::Plg065::particleEmissionCounter},  // G00653 D_800FD974
+    {"EFFECT/PLG069.BIN", 0x3C24, sizeof VS::Effects::Plg069::mesh10Vertices,
+     &VS::Effects::Plg069::mesh10Vertices,
+     sizeof VS::Effects::Plg069::mesh10Vertices},  // G00654 D_800FD424
+    {"EFFECT/PLG069.BIN", 0x3C74, sizeof VS::Effects::Plg069::mesh10Faces,
+     &VS::Effects::Plg069::mesh10Faces,
+     sizeof VS::Effects::Plg069::mesh10Faces},  // G00655 D_800FD474
+    {"EFFECT/PLG069.BIN", 0x3CD4,
+     sizeof VS::Effects::Plg069::trailEmissionCounter,
+     &VS::Effects::Plg069::trailEmissionCounter,
+     sizeof VS::Effects::Plg069::trailEmissionCounter},  // G00656 D_800FD4D4
+    {"EFFECT/PLG069.BIN", 0x3CD8,
+     sizeof VS::Effects::Plg069::tiledRingColorFactors,
+     &VS::Effects::Plg069::tiledRingColorFactors,
+     sizeof VS::Effects::Plg069::tiledRingColorFactors},  // G00657 D_800FD4D8
+    {"EFFECT/PLG073.BIN", 0x573C,
+     sizeof VS::Effects::Plg073::tiledRingColorFactors,
+     &VS::Effects::Plg073::tiledRingColorFactors,
+     sizeof VS::Effects::Plg073::tiledRingColorFactors},  // G00658 D_800FEF3C
+    {"EFFECT/PLG073.BIN", 0x575C, sizeof VS::Effects::Plg073::ringColorFactors,
+     &VS::Effects::Plg073::ringColorFactors,
+     sizeof VS::Effects::Plg073::ringColorFactors},  // G00659 D_800FEF5C
+    {"EFFECT/PLG073.BIN", 0x577C,
+     sizeof VS::Effects::Plg073::trailEmissionCounter,
+     &VS::Effects::Plg073::trailEmissionCounter,
+     sizeof VS::Effects::Plg073::trailEmissionCounter},  // G00660 D_800FEF7C
+    {"EFFECT/PLG077.BIN", 0x4108, sizeof VS::Effects::Plg077::mesh10Vertices,
+     &VS::Effects::Plg077::mesh10Vertices,
+     sizeof VS::Effects::Plg077::mesh10Vertices},  // G00661 D_800FD908
+    {"EFFECT/PLG077.BIN", 0x4158, sizeof VS::Effects::Plg077::mesh10Faces,
+     &VS::Effects::Plg077::mesh10Faces,
+     sizeof VS::Effects::Plg077::mesh10Faces},  // G00662 D_800FD958
+    {"EFFECT/PLG077.BIN", 0x41B8, sizeof VS::Effects::Plg077::ringColorFactors,
+     &VS::Effects::Plg077::ringColorFactors,
+     sizeof VS::Effects::Plg077::ringColorFactors},  // G00663 D_800FD9B8
+    {"EFFECT/PLG077.BIN", 0x41D8, sizeof VS::Effects::Plg077::surfaceVertices,
+     &VS::Effects::Plg077::surfaceVertices,
+     sizeof VS::Effects::Plg077::surfaceVertices},  // G00664 D_800FD9D8
+    {"EFFECT/PLG077.BIN", 0x4458, sizeof VS::Effects::Plg077::ringColorFactors2,
+     &VS::Effects::Plg077::ringColorFactors2,
+     sizeof VS::Effects::Plg077::ringColorFactors2},  // G00665 D_800FDC58
+    {"EFFECT/PLG081.BIN", 0x2A4C, sizeof VS::Effects::Plg081::ringColorFactors,
+     &VS::Effects::Plg081::ringColorFactors,
+     sizeof VS::Effects::Plg081::ringColorFactors},  // G00666 D_800FC24C
+    {"EFFECT/PLG081.BIN", 0x2A6C,
+     sizeof VS::Effects::Plg081::closedRingColorFactors,
+     &VS::Effects::Plg081::closedRingColorFactors,
+     sizeof VS::Effects::Plg081::closedRingColorFactors},  // G00667 D_800FC26C
+    {"EFFECT/PLG082.BIN", 0x3888,
+     sizeof VS::Effects::Plg082::particleEmissionCounter,
+     &VS::Effects::Plg082::particleEmissionCounter,
+     sizeof VS::Effects::Plg082::particleEmissionCounter},  // G00668 D_800FD088
+    {"EFFECT/PLG082.BIN", 0x388C,
+     sizeof VS::Effects::Plg082::closedRingColorFactors,
+     &VS::Effects::Plg082::closedRingColorFactors,
+     sizeof VS::Effects::Plg082::closedRingColorFactors},  // G00669 D_800FD08C
+    {"EFFECT/PLG085.BIN", 0x1A60,
+     sizeof VS::Effects::Plg085::tiledRingColorFactors,
+     &VS::Effects::Plg085::tiledRingColorFactors,
+     sizeof VS::Effects::Plg085::tiledRingColorFactors},  // G00670 D_800FB260
+    {"EFFECT/PLG086.BIN", 0x4B90,
+     sizeof VS::Effects::Plg086::closedRingColorFactors,
+     &VS::Effects::Plg086::closedRingColorFactors,
+     sizeof VS::Effects::Plg086::closedRingColorFactors},  // G00671 D_800FE390
+    {"EFFECT/PLG086.BIN", 0x4BB0,
+     sizeof VS::Effects::Plg086::trailEmissionCounter,
+     &VS::Effects::Plg086::trailEmissionCounter,
+     sizeof VS::Effects::Plg086::trailEmissionCounter},  // G00672 D_800FE3B0
+    {"EFFECT/PLG087.BIN", 0x5F5C, sizeof VS::Effects::Plg087::surfaceVertices,
+     &VS::Effects::Plg087::surfaceVertices,
+     sizeof VS::Effects::Plg087::surfaceVertices},  // G00673 D_800FF75C
+    {"EFFECT/PLG087.BIN", 0x61DC,
+     sizeof VS::Effects::Plg087::closedRingColorFactors,
+     &VS::Effects::Plg087::closedRingColorFactors,
+     sizeof VS::Effects::Plg087::closedRingColorFactors},  // G00674 D_800FF9DC
+    {"EFFECT/PLG087.BIN", 0x61FC,
+     sizeof VS::Effects::Plg087::trailEmissionCounter,
+     &VS::Effects::Plg087::trailEmissionCounter,
+     sizeof VS::Effects::Plg087::trailEmissionCounter},  // G00675 D_800FF9FC
+    {"EFFECT/PLG087.BIN", 0x6200,
+     sizeof VS::Effects::Plg087::particleEmissionCounter,
+     &VS::Effects::Plg087::particleEmissionCounter,
+     sizeof VS::Effects::Plg087::particleEmissionCounter},  // G00676 D_800FFA00
+    {"EFFECT/PLG114.BIN", 0x34A0,
+     sizeof VS::Effects::Plg114::particleEmissionCounter,
+     &VS::Effects::Plg114::particleEmissionCounter,
+     sizeof VS::Effects::Plg114::particleEmissionCounter},  // G00677 D_800FCCA0
     {"EFFECT/PLG114.BIN", 0x34A4,
-     sizeof Effects_Plg114_particleEmissionCounter2,
-     &Effects_Plg114_particleEmissionCounter2,
-     sizeof Effects_Plg114_particleEmissionCounter2},  // G00678 D_800FCCA4
-    {"EFFECT/PLG128.BIN", 0x6CF0, sizeof Effects_Plg128_surfaceVertices,
-     &Effects_Plg128_surfaceVertices,
-     sizeof Effects_Plg128_surfaceVertices},  // G00679 D_801004F0
-    {"EFFECT/PLG128.BIN", 0x6F70, sizeof Effects_Plg128_closedRingColorFactors,
-     &Effects_Plg128_closedRingColorFactors,
-     sizeof Effects_Plg128_closedRingColorFactors},  // G00680 D_80100770
-    {"EFFECT/PLG128.BIN", 0x6F90, sizeof Effects_Plg128_surfaceVertices2,
-     &Effects_Plg128_surfaceVertices2,
-     sizeof Effects_Plg128_surfaceVertices2},  // G00681 D_80100790
-    {"EFFECT/PLG128.BIN", 0x7210, sizeof Effects_Plg128_trailEmissionCounter,
-     &Effects_Plg128_trailEmissionCounter,
-     sizeof Effects_Plg128_trailEmissionCounter},  // G00682 D_80100A10
-    {"EFFECT/PLG129.BIN", 0x3DA8, sizeof Effects_Plg129_ringColorFactors,
-     &Effects_Plg129_ringColorFactors,
-     sizeof Effects_Plg129_ringColorFactors},  // G00683 D_800FD5A8
-    {"EFFECT/PLG129.BIN", 0x3DE8, sizeof Effects_Plg129_mesh10Vertices,
-     &Effects_Plg129_mesh10Vertices,
-     sizeof Effects_Plg129_mesh10Vertices},  // G00684 D_800FD5E8
-    {"EFFECT/PLG129.BIN", 0x3E38, sizeof Effects_Plg129_mesh10Faces,
-     &Effects_Plg129_mesh10Faces,
-     sizeof Effects_Plg129_mesh10Faces},  // G00685 D_800FD638
-    {"EFFECT/PLG129.BIN", 0x3E98, sizeof Effects_Plg129_surfaceVertices,
-     &Effects_Plg129_surfaceVertices,
-     sizeof Effects_Plg129_surfaceVertices},  // G00686 D_800FD698
-    {"EFFECT/PLG129.BIN", 0x4118, sizeof Effects_Plg129_ringColorFactors2,
-     &Effects_Plg129_ringColorFactors2,
-     sizeof Effects_Plg129_ringColorFactors2},  // G00687 D_800FD918
-    {"EFFECT/PLG134.BIN", 0x316C, sizeof Effects_Plg134_trailEmissionCounter,
-     &Effects_Plg134_trailEmissionCounter,
-     sizeof Effects_Plg134_trailEmissionCounter},  // G00688 D_800FC96C
-    {"EFFECT/PLG134.BIN", 0x3170, sizeof Effects_Plg134_closedRingColorFactors,
-     &Effects_Plg134_closedRingColorFactors,
-     sizeof Effects_Plg134_closedRingColorFactors},  // G00689 D_800FC970
-    {"EFFECT/PLG135.BIN", 0x316C, sizeof Effects_Plg135_closedRingColorFactors,
-     &Effects_Plg135_closedRingColorFactors,
-     sizeof Effects_Plg135_closedRingColorFactors},  // G00690 D_800FC96C
-    {"EFFECT/PLG135.BIN", 0x318C, sizeof Effects_Plg135_trailEmissionCounter,
-     &Effects_Plg135_trailEmissionCounter,
-     sizeof Effects_Plg135_trailEmissionCounter},  // G00691 D_800FC98C
-    {"EFFECT/PLG137.BIN", 0x478C, sizeof Effects_Plg137_mesh10Vertices,
-     &Effects_Plg137_mesh10Vertices,
-     sizeof Effects_Plg137_mesh10Vertices},  // G00692 D_800FDF8C
-    {"EFFECT/PLG137.BIN", 0x47DC, sizeof Effects_Plg137_mesh10Faces,
-     &Effects_Plg137_mesh10Faces,
-     sizeof Effects_Plg137_mesh10Faces},  // G00693 D_800FDFDC
-    {"EFFECT/PLG137.BIN", 0x483C, sizeof Effects_Plg137_trailEmissionCounter,
-     &Effects_Plg137_trailEmissionCounter,
-     sizeof Effects_Plg137_trailEmissionCounter},  // G00694 D_800FE03C
-    {"EFFECT/PLG137.BIN", 0x4840, sizeof Effects_Plg137_tiledRingColorFactors,
-     &Effects_Plg137_tiledRingColorFactors,
-     sizeof Effects_Plg137_tiledRingColorFactors},  // G00695 D_800FE040
-    {"EFFECT/PLG138.BIN", 0x353C, sizeof Effects_Plg138_ringColorFactors,
-     &Effects_Plg138_ringColorFactors,
-     sizeof Effects_Plg138_ringColorFactors},  // G00696 D_800FCD3C
-    {"EFFECT/PLG138.BIN", 0x355C, sizeof Effects_Plg138_tiledRingColorFactors,
-     &Effects_Plg138_tiledRingColorFactors,
-     sizeof Effects_Plg138_tiledRingColorFactors},  // G00697 D_800FCD5C
-    {"EFFECT/PLG141.BIN", 0x2200, sizeof Effects_Plg141_trailEmissionCounter,
-     &Effects_Plg141_trailEmissionCounter,
-     sizeof Effects_Plg141_trailEmissionCounter},  // G00698 D_800FBA00
-    {"EFFECT/PLG142.BIN", 0x35B8, sizeof Effects_Plg142_closedRingColorFactors,
-     &Effects_Plg142_closedRingColorFactors,
-     sizeof Effects_Plg142_closedRingColorFactors},  // G00699 D_800FCDB8
-    {"EFFECT/PLG142.BIN", 0x35D8, sizeof Effects_Plg142_ringColorFactors,
-     &Effects_Plg142_ringColorFactors,
-     sizeof Effects_Plg142_ringColorFactors},  // G00700 D_800FCDD8
-    {"EFFECT/PLG143.BIN", 0x1E64, sizeof Effects_Plg143_tiledRingColorFactors,
-     &Effects_Plg143_tiledRingColorFactors,
-     sizeof Effects_Plg143_tiledRingColorFactors},  // G00701 D_800FB664
-    {"EFFECT/PLG143.BIN", 0x1E84, sizeof Effects_Plg143_closedRingColorFactors,
-     &Effects_Plg143_closedRingColorFactors,
-     sizeof Effects_Plg143_closedRingColorFactors},  // G00702 D_800FB684
-    {"EFFECT/PLG146.BIN", 0x607C, sizeof Effects_Plg146_tiledRingColorFactors,
-     &Effects_Plg146_tiledRingColorFactors,
-     sizeof Effects_Plg146_tiledRingColorFactors},  // G00703 D_800FF87C
-    {"EFFECT/PLG146.BIN", 0x609C, sizeof Effects_Plg146_mirrorSurfaceVertices,
-     &Effects_Plg146_mirrorSurfaceVertices,
-     sizeof Effects_Plg146_mirrorSurfaceVertices},  // G00704 D_800FF89C
-    {"EFFECT/PLG146.BIN", 0x631C, sizeof Effects_Plg146_particleEmissionCounter,
-     &Effects_Plg146_particleEmissionCounter,
-     sizeof Effects_Plg146_particleEmissionCounter},  // G00705 D_800FFB1C
-    {"EFFECT/PLG146.BIN", 0x6320, sizeof Effects_Plg146_ringColorFactors,
-     &Effects_Plg146_ringColorFactors,
-     sizeof Effects_Plg146_ringColorFactors},  // G00706 D_800FFB20
-    {"EFFECT/PLG146.BIN", 0x6340, sizeof Effects_Plg146_trailEmissionCounter,
-     &Effects_Plg146_trailEmissionCounter,
-     sizeof Effects_Plg146_trailEmissionCounter},  // G00707 D_800FFB40
-    {"EFFECT/PLG147.BIN", 0x2310, sizeof Effects_Plg147_ringColorFactors,
-     &Effects_Plg147_ringColorFactors,
-     sizeof Effects_Plg147_ringColorFactors},  // G00708 D_800FBB10
-    {"EFFECT/PLG147.BIN", 0x2330, sizeof Effects_Plg147_particleEmissionCounter,
-     &Effects_Plg147_particleEmissionCounter,
-     sizeof Effects_Plg147_particleEmissionCounter},  // G00709 D_800FBB30
-    {"EFFECT/PLG148.BIN", 0x30F8, sizeof Effects_Plg148_trailEmissionCounter,
-     &Effects_Plg148_trailEmissionCounter,
-     sizeof Effects_Plg148_trailEmissionCounter},  // G00710 D_800FC8F8
-    {"EFFECT/PLG148.BIN", 0x30FC, sizeof Effects_Plg148_tiledRingColorFactors,
-     &Effects_Plg148_tiledRingColorFactors,
-     sizeof Effects_Plg148_tiledRingColorFactors},  // G00711 D_800FC8FC
-    {"EFFECT/PLG149.BIN", 0xC24, sizeof Effects_Plg149_ringColorFactors,
-     &Effects_Plg149_ringColorFactors,
-     sizeof Effects_Plg149_ringColorFactors},  // G00712 D_800FA424
-    {"EFFECT/PLG150.BIN", 0x321C, sizeof Effects_Plg150_tiledRingColorFactors,
-     &Effects_Plg150_tiledRingColorFactors,
-     sizeof Effects_Plg150_tiledRingColorFactors},  // G00713 D_800FCA1C
-    {"EFFECT/PLG150.BIN", 0x323C, sizeof Effects_Plg150_surfaceVertices,
-     &Effects_Plg150_surfaceVertices,
-     sizeof Effects_Plg150_surfaceVertices},  // G00714 D_800FCA3C
-    {"EFFECT/PLG150.BIN", 0x34BC, sizeof Effects_Plg150_ringColorFactors,
-     &Effects_Plg150_ringColorFactors,
-     sizeof Effects_Plg150_ringColorFactors},  // G00715 D_800FCCBC
-    {"EFFECT/PLG153.BIN", 0x3504, sizeof Effects_Plg153_mesh10Vertices,
-     &Effects_Plg153_mesh10Vertices,
-     sizeof Effects_Plg153_mesh10Vertices},  // G00716 D_800FCD04
-    {"EFFECT/PLG153.BIN", 0x3554, sizeof Effects_Plg153_mesh10Faces,
-     &Effects_Plg153_mesh10Faces,
-     sizeof Effects_Plg153_mesh10Faces},  // G00717 D_800FCD54
-    {"EFFECT/PLG153.BIN", 0x35B4, sizeof Effects_Plg153_ringColorFactors,
-     &Effects_Plg153_ringColorFactors,
-     sizeof Effects_Plg153_ringColorFactors},  // G00718 D_800FCDB4
-    {"EFFECT/PLG153.BIN", 0x35D4, sizeof Effects_Plg153_particleEmissionCounter,
-     &Effects_Plg153_particleEmissionCounter,
-     sizeof Effects_Plg153_particleEmissionCounter},  // G00719 D_800FCDD4
-    {"EFFECT/PLG154.BIN", 0x1A9C, sizeof Effects_Plg154_mesh10Vertices,
-     &Effects_Plg154_mesh10Vertices,
-     sizeof Effects_Plg154_mesh10Vertices},  // G00720 D_800FB29C
-    {"EFFECT/PLG154.BIN", 0x1AEC, sizeof Effects_Plg154_mesh10Faces,
-     &Effects_Plg154_mesh10Faces,
-     sizeof Effects_Plg154_mesh10Faces},  // G00721 D_800FB2EC
-    {"EFFECT/PLG154.BIN", 0x1B4C, sizeof Effects_Plg154_closedRingColorFactors,
-     &Effects_Plg154_closedRingColorFactors,
-     sizeof Effects_Plg154_closedRingColorFactors},  // G00722 D_800FB34C
-    {"EFFECT/PLG156.BIN", 0x291C, sizeof Effects_Plg156_particleEmissionCounter,
-     &Effects_Plg156_particleEmissionCounter,
-     sizeof Effects_Plg156_particleEmissionCounter},  // G00723 D_800FC11C
-    {"EFFECT/PLG158.BIN", 0x3638, sizeof Effects_Plg158_surfaceVertices,
-     &Effects_Plg158_surfaceVertices,
-     sizeof Effects_Plg158_surfaceVertices},  // G00724 D_800FCE38
-    {"EFFECT/PLG158.BIN", 0x38B8, sizeof Effects_Plg158_mirrorSurfaceVertices,
-     &Effects_Plg158_mirrorSurfaceVertices,
-     sizeof Effects_Plg158_mirrorSurfaceVertices},  // G00725 D_800FD0B8
-    {"EFFECT/PLG158.BIN", 0x3B38, sizeof Effects_Plg158_closedRingColorFactors,
-     &Effects_Plg158_closedRingColorFactors,
-     sizeof Effects_Plg158_closedRingColorFactors},  // G00726 D_800FD338
-    {"EFFECT/PLG160.BIN", 0x1B1C, sizeof Effects_Plg160_tiledRingColorFactors,
-     &Effects_Plg160_tiledRingColorFactors,
-     sizeof Effects_Plg160_tiledRingColorFactors},  // G00727 D_800FB31C
-    {"EFFECT/PLG160.BIN", 0x1B3C, sizeof Effects_Plg160_ringColorFactors,
-     &Effects_Plg160_ringColorFactors,
-     sizeof Effects_Plg160_ringColorFactors},  // G00728 D_800FB33C
-    {"EFFECT/PLG161.BIN", 0x5468, sizeof Effects_Plg161_ringColorFactors,
-     &Effects_Plg161_ringColorFactors,
-     sizeof Effects_Plg161_ringColorFactors},  // G00729 D_800FEC68
-    {"EFFECT/PLG161.BIN", 0x5488, sizeof Effects_Plg161_trailEmissionCounter,
-     &Effects_Plg161_trailEmissionCounter,
-     sizeof Effects_Plg161_trailEmissionCounter},  // G00730 D_800FEC88
-    {"EFFECT/PLG161.BIN", 0x548C, sizeof Effects_Plg161_ringColorFactors2,
-     &Effects_Plg161_ringColorFactors2,
-     sizeof Effects_Plg161_ringColorFactors2},  // G00731 D_800FEC8C
-    {"EFFECT/PLG162.BIN", 0x398C, sizeof Effects_Plg162_ringColorFactors,
-     &Effects_Plg162_ringColorFactors,
-     sizeof Effects_Plg162_ringColorFactors},  // G00732 D_800FD18C
-    {"EFFECT/PLG162.BIN", 0x39AC, sizeof Effects_Plg162_ringColorFactors2,
-     &Effects_Plg162_ringColorFactors2,
-     sizeof Effects_Plg162_ringColorFactors2},  // G00733 D_800FD1AC
-    {"EFFECT/PLG162.BIN", 0x39CC, sizeof Effects_Plg162_closedRingColorFactors,
-     &Effects_Plg162_closedRingColorFactors,
-     sizeof Effects_Plg162_closedRingColorFactors},  // G00734 D_800FD1CC
-    {"EFFECT/PLG165.BIN", 0x4B8C, sizeof Effects_Plg165_trailEmissionCounter,
-     &Effects_Plg165_trailEmissionCounter,
-     sizeof Effects_Plg165_trailEmissionCounter},  // G00735 D_800FE38C
-    {"EFFECT/PLG166.BIN", 0x36C0, sizeof Effects_Plg166_mirrorSurfaceVertices,
-     &Effects_Plg166_mirrorSurfaceVertices,
-     sizeof Effects_Plg166_mirrorSurfaceVertices},  // G00736 D_800FCEC0
-    {"EFFECT/PLG166.BIN", 0x3940, sizeof Effects_Plg166_closedRingColorFactors,
-     &Effects_Plg166_closedRingColorFactors,
-     sizeof Effects_Plg166_closedRingColorFactors},  // G00737 D_800FD140
-    {"EFFECT/PLG166.BIN", 0x3960, sizeof Effects_Plg166_ringColorFactors,
-     &Effects_Plg166_ringColorFactors,
-     sizeof Effects_Plg166_ringColorFactors},  // G00738 D_800FD160
-    {"EFFECT/PLG167.BIN", 0x4024, sizeof Effects_Plg167_closedRingColorFactors,
-     &Effects_Plg167_closedRingColorFactors,
-     sizeof Effects_Plg167_closedRingColorFactors},  // G00739 D_800FD824
-    {"EFFECT/PLG167.BIN", 0x4044, sizeof Effects_Plg167_trailEmissionCounter,
-     &Effects_Plg167_trailEmissionCounter,
-     sizeof Effects_Plg167_trailEmissionCounter},  // G00740 D_800FD844
-    {"EFFECT/PLG168.BIN", 0x4454, sizeof Effects_Plg168_trailEmissionCounter,
-     &Effects_Plg168_trailEmissionCounter,
-     sizeof Effects_Plg168_trailEmissionCounter},  // G00741 D_800FDC54
-    {"EFFECT/PLG168.BIN", 0x4458, sizeof Effects_Plg168_particleEmissionCounter,
-     &Effects_Plg168_particleEmissionCounter,
-     sizeof Effects_Plg168_particleEmissionCounter},  // G00742 D_800FDC58
-    {"EFFECT/PLG169.BIN", 0x3D90, sizeof Effects_Plg169_trailEmissionCounter,
-     &Effects_Plg169_trailEmissionCounter,
-     sizeof Effects_Plg169_trailEmissionCounter},  // G00743 D_800FD590
-    {"EFFECT/PLG169.BIN", 0x3D94, sizeof Effects_Plg169_ringColorFactors,
-     &Effects_Plg169_ringColorFactors,
-     sizeof Effects_Plg169_ringColorFactors},  // G00744 D_800FD594
-    {"EFFECT/PLG169.BIN", 0x3DB4, sizeof Effects_Plg169_closedRingColorFactors,
-     &Effects_Plg169_closedRingColorFactors,
-     sizeof Effects_Plg169_closedRingColorFactors},  // G00745 D_800FD5B4
-    {"EFFECT/PLG170.BIN", 0x4DC4, sizeof Effects_Plg170_mirrorSurfaceVertices,
-     &Effects_Plg170_mirrorSurfaceVertices,
-     sizeof Effects_Plg170_mirrorSurfaceVertices},  // G00746 D_800FE5C4
-    {"EFFECT/PLG170.BIN", 0x5044, sizeof Effects_Plg170_ringColorFactors,
-     &Effects_Plg170_ringColorFactors,
-     sizeof Effects_Plg170_ringColorFactors},  // G00747 D_800FE844
-    {"EFFECT/PLG170.BIN", 0x5064, sizeof Effects_Plg170_surfaceVertices,
-     &Effects_Plg170_surfaceVertices,
-     sizeof Effects_Plg170_surfaceVertices},  // G00748 D_800FE864
-    {"EFFECT/PLG170.BIN", 0x52E4, sizeof Effects_Plg170_closedRingColorFactors,
-     &Effects_Plg170_closedRingColorFactors,
-     sizeof Effects_Plg170_closedRingColorFactors},  // G00749 D_800FEAE4
-    {"EFFECT/PLG224.BIN", 0x16EC, sizeof Effects_Plg224_particleEmissionCounter,
-     &Effects_Plg224_particleEmissionCounter,
-     sizeof Effects_Plg224_particleEmissionCounter},  // G00750 D_800FAEEC
-    {"EFFECT/PLG232.BIN", 0x2200, sizeof Effects_Plg232_trailEmissionCounter,
-     &Effects_Plg232_trailEmissionCounter,
-     sizeof Effects_Plg232_trailEmissionCounter},  // G00751 D_800FBA00
-    {"EFFECT/PLG236.BIN", 0x3990, sizeof Effects_Plg236_closedRingColorFactors,
-     &Effects_Plg236_closedRingColorFactors,
-     sizeof Effects_Plg236_closedRingColorFactors},  // G00752 D_800FD190
-    {"EFFECT/PLG236.BIN", 0x39B0, sizeof Effects_Plg236_ringColorFactors,
-     &Effects_Plg236_ringColorFactors,
-     sizeof Effects_Plg236_ringColorFactors},  // G00753 D_800FD1B0
-    {"EFFECT/PLG236.BIN", 0x39D0, sizeof Effects_Plg236_ringColorFactors2,
-     &Effects_Plg236_ringColorFactors2,
-     sizeof Effects_Plg236_ringColorFactors2},  // G00754 D_800FD1D0
-    {"EFFECT/PLG242.BIN", 0x3C60, sizeof Effects_Plg242_tiledRingColorFactors,
-     &Effects_Plg242_tiledRingColorFactors,
-     sizeof Effects_Plg242_tiledRingColorFactors},  // G00755 D_800FD460
-    {"EFFECT/PLG242.BIN", 0x3C80, sizeof Effects_Plg242_trailEmissionCounter,
-     &Effects_Plg242_trailEmissionCounter,
-     sizeof Effects_Plg242_trailEmissionCounter},  // G00756 D_800FD480
-    {"EFFECT/PLG250.BIN", 0x1E28, sizeof Effects_Plg250_closedRingColorFactors,
-     &Effects_Plg250_closedRingColorFactors,
-     sizeof Effects_Plg250_closedRingColorFactors},  // G00757 D_800FB628
-    {"EFFECT/PLG255.BIN", 0x38EC, sizeof Effects_Plg255_trailEmissionCounter,
-     &Effects_Plg255_trailEmissionCounter,
-     sizeof Effects_Plg255_trailEmissionCounter},  // G00758 D_800FD0EC
-    {"EFFECT/PLG255.BIN", 0x38F0, sizeof Effects_Plg255_particleEmissionCounter,
-     &Effects_Plg255_particleEmissionCounter,
-     sizeof Effects_Plg255_particleEmissionCounter},  // G00759 D_800FD0F0
-    {"EFFECT/PLG260.BIN", 0xB2C, sizeof Effects_Plg260_mesh10Vertices,
-     &Effects_Plg260_mesh10Vertices,
-     sizeof Effects_Plg260_mesh10Vertices},  // G00760 D_800FA32C
-    {"EFFECT/PLG260.BIN", 0xB7C, sizeof Effects_Plg260_mesh10Faces,
-     &Effects_Plg260_mesh10Faces,
-     sizeof Effects_Plg260_mesh10Faces},  // G00761 D_800FA37C
-    {"EFFECT/PLG263.BIN", 0x44B0, sizeof Effects_Plg263_surfaceVertices,
-     &Effects_Plg263_surfaceVertices,
-     sizeof Effects_Plg263_surfaceVertices},  // G00762 D_800FDCB0
-    {"EFFECT/PLG263.BIN", 0x4730, sizeof Effects_Plg263_ringColorFactors,
-     &Effects_Plg263_ringColorFactors,
-     sizeof Effects_Plg263_ringColorFactors},  // G00763 D_800FDF30
-    {"EFFECT/PLG263.BIN", 0x4750, sizeof Effects_Plg263_ringColorFactors2,
-     &Effects_Plg263_ringColorFactors2,
-     sizeof Effects_Plg263_ringColorFactors2},  // G00764 D_800FDF50
-    {"EFFECT/PLG263.BIN", 0x4770, sizeof Effects_Plg263_particleEmissionCounter,
-     &Effects_Plg263_particleEmissionCounter,
-     sizeof Effects_Plg263_particleEmissionCounter},  // G00765 D_800FDF70
-    {"EFFECT/PLG265.BIN", 0x6598, sizeof Effects_Plg265_tiledRingColorFactors,
-     &Effects_Plg265_tiledRingColorFactors,
-     sizeof Effects_Plg265_tiledRingColorFactors},  // G00766 D_800FFD98
-    {"EFFECT/PLG265.BIN", 0x65B8, sizeof Effects_Plg265_particleEmissionCounter,
-     &Effects_Plg265_particleEmissionCounter,
-     sizeof Effects_Plg265_particleEmissionCounter},  // G00767 D_800FFDB8
-    {"EFFECT/PLG265.BIN", 0x65BC, sizeof Effects_Plg265_trailEmissionCounter,
-     &Effects_Plg265_trailEmissionCounter,
-     sizeof Effects_Plg265_trailEmissionCounter},  // G00768 D_800FFDBC
+     sizeof VS::Effects::Plg114::particleEmissionCounter2,
+     &VS::Effects::Plg114::particleEmissionCounter2,
+     sizeof VS::Effects::Plg114::particleEmissionCounter2},  // G00678
+                                                             // D_800FCCA4
+    {"EFFECT/PLG128.BIN", 0x6CF0, sizeof VS::Effects::Plg128::surfaceVertices,
+     &VS::Effects::Plg128::surfaceVertices,
+     sizeof VS::Effects::Plg128::surfaceVertices},  // G00679 D_801004F0
+    {"EFFECT/PLG128.BIN", 0x6F70,
+     sizeof VS::Effects::Plg128::closedRingColorFactors,
+     &VS::Effects::Plg128::closedRingColorFactors,
+     sizeof VS::Effects::Plg128::closedRingColorFactors},  // G00680 D_80100770
+    {"EFFECT/PLG128.BIN", 0x6F90, sizeof VS::Effects::Plg128::surfaceVertices2,
+     &VS::Effects::Plg128::surfaceVertices2,
+     sizeof VS::Effects::Plg128::surfaceVertices2},  // G00681 D_80100790
+    {"EFFECT/PLG128.BIN", 0x7210,
+     sizeof VS::Effects::Plg128::trailEmissionCounter,
+     &VS::Effects::Plg128::trailEmissionCounter,
+     sizeof VS::Effects::Plg128::trailEmissionCounter},  // G00682 D_80100A10
+    {"EFFECT/PLG129.BIN", 0x3DA8, sizeof VS::Effects::Plg129::ringColorFactors,
+     &VS::Effects::Plg129::ringColorFactors,
+     sizeof VS::Effects::Plg129::ringColorFactors},  // G00683 D_800FD5A8
+    {"EFFECT/PLG129.BIN", 0x3DE8, sizeof VS::Effects::Plg129::mesh10Vertices,
+     &VS::Effects::Plg129::mesh10Vertices,
+     sizeof VS::Effects::Plg129::mesh10Vertices},  // G00684 D_800FD5E8
+    {"EFFECT/PLG129.BIN", 0x3E38, sizeof VS::Effects::Plg129::mesh10Faces,
+     &VS::Effects::Plg129::mesh10Faces,
+     sizeof VS::Effects::Plg129::mesh10Faces},  // G00685 D_800FD638
+    {"EFFECT/PLG129.BIN", 0x3E98, sizeof VS::Effects::Plg129::surfaceVertices,
+     &VS::Effects::Plg129::surfaceVertices,
+     sizeof VS::Effects::Plg129::surfaceVertices},  // G00686 D_800FD698
+    {"EFFECT/PLG129.BIN", 0x4118, sizeof VS::Effects::Plg129::ringColorFactors2,
+     &VS::Effects::Plg129::ringColorFactors2,
+     sizeof VS::Effects::Plg129::ringColorFactors2},  // G00687 D_800FD918
+    {"EFFECT/PLG134.BIN", 0x316C,
+     sizeof VS::Effects::Plg134::trailEmissionCounter,
+     &VS::Effects::Plg134::trailEmissionCounter,
+     sizeof VS::Effects::Plg134::trailEmissionCounter},  // G00688 D_800FC96C
+    {"EFFECT/PLG134.BIN", 0x3170,
+     sizeof VS::Effects::Plg134::closedRingColorFactors,
+     &VS::Effects::Plg134::closedRingColorFactors,
+     sizeof VS::Effects::Plg134::closedRingColorFactors},  // G00689 D_800FC970
+    {"EFFECT/PLG135.BIN", 0x316C,
+     sizeof VS::Effects::Plg135::closedRingColorFactors,
+     &VS::Effects::Plg135::closedRingColorFactors,
+     sizeof VS::Effects::Plg135::closedRingColorFactors},  // G00690 D_800FC96C
+    {"EFFECT/PLG135.BIN", 0x318C,
+     sizeof VS::Effects::Plg135::trailEmissionCounter,
+     &VS::Effects::Plg135::trailEmissionCounter,
+     sizeof VS::Effects::Plg135::trailEmissionCounter},  // G00691 D_800FC98C
+    {"EFFECT/PLG137.BIN", 0x478C, sizeof VS::Effects::Plg137::mesh10Vertices,
+     &VS::Effects::Plg137::mesh10Vertices,
+     sizeof VS::Effects::Plg137::mesh10Vertices},  // G00692 D_800FDF8C
+    {"EFFECT/PLG137.BIN", 0x47DC, sizeof VS::Effects::Plg137::mesh10Faces,
+     &VS::Effects::Plg137::mesh10Faces,
+     sizeof VS::Effects::Plg137::mesh10Faces},  // G00693 D_800FDFDC
+    {"EFFECT/PLG137.BIN", 0x483C,
+     sizeof VS::Effects::Plg137::trailEmissionCounter,
+     &VS::Effects::Plg137::trailEmissionCounter,
+     sizeof VS::Effects::Plg137::trailEmissionCounter},  // G00694 D_800FE03C
+    {"EFFECT/PLG137.BIN", 0x4840,
+     sizeof VS::Effects::Plg137::tiledRingColorFactors,
+     &VS::Effects::Plg137::tiledRingColorFactors,
+     sizeof VS::Effects::Plg137::tiledRingColorFactors},  // G00695 D_800FE040
+    {"EFFECT/PLG138.BIN", 0x353C, sizeof VS::Effects::Plg138::ringColorFactors,
+     &VS::Effects::Plg138::ringColorFactors,
+     sizeof VS::Effects::Plg138::ringColorFactors},  // G00696 D_800FCD3C
+    {"EFFECT/PLG138.BIN", 0x355C,
+     sizeof VS::Effects::Plg138::tiledRingColorFactors,
+     &VS::Effects::Plg138::tiledRingColorFactors,
+     sizeof VS::Effects::Plg138::tiledRingColorFactors},  // G00697 D_800FCD5C
+    {"EFFECT/PLG141.BIN", 0x2200,
+     sizeof VS::Effects::Plg141::trailEmissionCounter,
+     &VS::Effects::Plg141::trailEmissionCounter,
+     sizeof VS::Effects::Plg141::trailEmissionCounter},  // G00698 D_800FBA00
+    {"EFFECT/PLG142.BIN", 0x35B8,
+     sizeof VS::Effects::Plg142::closedRingColorFactors,
+     &VS::Effects::Plg142::closedRingColorFactors,
+     sizeof VS::Effects::Plg142::closedRingColorFactors},  // G00699 D_800FCDB8
+    {"EFFECT/PLG142.BIN", 0x35D8, sizeof VS::Effects::Plg142::ringColorFactors,
+     &VS::Effects::Plg142::ringColorFactors,
+     sizeof VS::Effects::Plg142::ringColorFactors},  // G00700 D_800FCDD8
+    {"EFFECT/PLG143.BIN", 0x1E64,
+     sizeof VS::Effects::Plg143::tiledRingColorFactors,
+     &VS::Effects::Plg143::tiledRingColorFactors,
+     sizeof VS::Effects::Plg143::tiledRingColorFactors},  // G00701 D_800FB664
+    {"EFFECT/PLG143.BIN", 0x1E84,
+     sizeof VS::Effects::Plg143::closedRingColorFactors,
+     &VS::Effects::Plg143::closedRingColorFactors,
+     sizeof VS::Effects::Plg143::closedRingColorFactors},  // G00702 D_800FB684
+    {"EFFECT/PLG146.BIN", 0x607C,
+     sizeof VS::Effects::Plg146::tiledRingColorFactors,
+     &VS::Effects::Plg146::tiledRingColorFactors,
+     sizeof VS::Effects::Plg146::tiledRingColorFactors},  // G00703 D_800FF87C
+    {"EFFECT/PLG146.BIN", 0x609C,
+     sizeof VS::Effects::Plg146::mirrorSurfaceVertices,
+     &VS::Effects::Plg146::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg146::mirrorSurfaceVertices},  // G00704 D_800FF89C
+    {"EFFECT/PLG146.BIN", 0x631C,
+     sizeof VS::Effects::Plg146::particleEmissionCounter,
+     &VS::Effects::Plg146::particleEmissionCounter,
+     sizeof VS::Effects::Plg146::particleEmissionCounter},  // G00705 D_800FFB1C
+    {"EFFECT/PLG146.BIN", 0x6320, sizeof VS::Effects::Plg146::ringColorFactors,
+     &VS::Effects::Plg146::ringColorFactors,
+     sizeof VS::Effects::Plg146::ringColorFactors},  // G00706 D_800FFB20
+    {"EFFECT/PLG146.BIN", 0x6340,
+     sizeof VS::Effects::Plg146::trailEmissionCounter,
+     &VS::Effects::Plg146::trailEmissionCounter,
+     sizeof VS::Effects::Plg146::trailEmissionCounter},  // G00707 D_800FFB40
+    {"EFFECT/PLG147.BIN", 0x2310, sizeof VS::Effects::Plg147::ringColorFactors,
+     &VS::Effects::Plg147::ringColorFactors,
+     sizeof VS::Effects::Plg147::ringColorFactors},  // G00708 D_800FBB10
+    {"EFFECT/PLG147.BIN", 0x2330,
+     sizeof VS::Effects::Plg147::particleEmissionCounter,
+     &VS::Effects::Plg147::particleEmissionCounter,
+     sizeof VS::Effects::Plg147::particleEmissionCounter},  // G00709 D_800FBB30
+    {"EFFECT/PLG148.BIN", 0x30F8,
+     sizeof VS::Effects::Plg148::trailEmissionCounter,
+     &VS::Effects::Plg148::trailEmissionCounter,
+     sizeof VS::Effects::Plg148::trailEmissionCounter},  // G00710 D_800FC8F8
+    {"EFFECT/PLG148.BIN", 0x30FC,
+     sizeof VS::Effects::Plg148::tiledRingColorFactors,
+     &VS::Effects::Plg148::tiledRingColorFactors,
+     sizeof VS::Effects::Plg148::tiledRingColorFactors},  // G00711 D_800FC8FC
+    {"EFFECT/PLG149.BIN", 0xC24, sizeof VS::Effects::Plg149::ringColorFactors,
+     &VS::Effects::Plg149::ringColorFactors,
+     sizeof VS::Effects::Plg149::ringColorFactors},  // G00712 D_800FA424
+    {"EFFECT/PLG150.BIN", 0x321C,
+     sizeof VS::Effects::Plg150::tiledRingColorFactors,
+     &VS::Effects::Plg150::tiledRingColorFactors,
+     sizeof VS::Effects::Plg150::tiledRingColorFactors},  // G00713 D_800FCA1C
+    {"EFFECT/PLG150.BIN", 0x323C, sizeof VS::Effects::Plg150::surfaceVertices,
+     &VS::Effects::Plg150::surfaceVertices,
+     sizeof VS::Effects::Plg150::surfaceVertices},  // G00714 D_800FCA3C
+    {"EFFECT/PLG150.BIN", 0x34BC, sizeof VS::Effects::Plg150::ringColorFactors,
+     &VS::Effects::Plg150::ringColorFactors,
+     sizeof VS::Effects::Plg150::ringColorFactors},  // G00715 D_800FCCBC
+    {"EFFECT/PLG153.BIN", 0x3504, sizeof VS::Effects::Plg153::mesh10Vertices,
+     &VS::Effects::Plg153::mesh10Vertices,
+     sizeof VS::Effects::Plg153::mesh10Vertices},  // G00716 D_800FCD04
+    {"EFFECT/PLG153.BIN", 0x3554, sizeof VS::Effects::Plg153::mesh10Faces,
+     &VS::Effects::Plg153::mesh10Faces,
+     sizeof VS::Effects::Plg153::mesh10Faces},  // G00717 D_800FCD54
+    {"EFFECT/PLG153.BIN", 0x35B4, sizeof VS::Effects::Plg153::ringColorFactors,
+     &VS::Effects::Plg153::ringColorFactors,
+     sizeof VS::Effects::Plg153::ringColorFactors},  // G00718 D_800FCDB4
+    {"EFFECT/PLG153.BIN", 0x35D4,
+     sizeof VS::Effects::Plg153::particleEmissionCounter,
+     &VS::Effects::Plg153::particleEmissionCounter,
+     sizeof VS::Effects::Plg153::particleEmissionCounter},  // G00719 D_800FCDD4
+    {"EFFECT/PLG154.BIN", 0x1A9C, sizeof VS::Effects::Plg154::mesh10Vertices,
+     &VS::Effects::Plg154::mesh10Vertices,
+     sizeof VS::Effects::Plg154::mesh10Vertices},  // G00720 D_800FB29C
+    {"EFFECT/PLG154.BIN", 0x1AEC, sizeof VS::Effects::Plg154::mesh10Faces,
+     &VS::Effects::Plg154::mesh10Faces,
+     sizeof VS::Effects::Plg154::mesh10Faces},  // G00721 D_800FB2EC
+    {"EFFECT/PLG154.BIN", 0x1B4C,
+     sizeof VS::Effects::Plg154::closedRingColorFactors,
+     &VS::Effects::Plg154::closedRingColorFactors,
+     sizeof VS::Effects::Plg154::closedRingColorFactors},  // G00722 D_800FB34C
+    {"EFFECT/PLG156.BIN", 0x291C,
+     sizeof VS::Effects::Plg156::particleEmissionCounter,
+     &VS::Effects::Plg156::particleEmissionCounter,
+     sizeof VS::Effects::Plg156::particleEmissionCounter},  // G00723 D_800FC11C
+    {"EFFECT/PLG158.BIN", 0x3638, sizeof VS::Effects::Plg158::surfaceVertices,
+     &VS::Effects::Plg158::surfaceVertices,
+     sizeof VS::Effects::Plg158::surfaceVertices},  // G00724 D_800FCE38
+    {"EFFECT/PLG158.BIN", 0x38B8,
+     sizeof VS::Effects::Plg158::mirrorSurfaceVertices,
+     &VS::Effects::Plg158::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg158::mirrorSurfaceVertices},  // G00725 D_800FD0B8
+    {"EFFECT/PLG158.BIN", 0x3B38,
+     sizeof VS::Effects::Plg158::closedRingColorFactors,
+     &VS::Effects::Plg158::closedRingColorFactors,
+     sizeof VS::Effects::Plg158::closedRingColorFactors},  // G00726 D_800FD338
+    {"EFFECT/PLG160.BIN", 0x1B1C,
+     sizeof VS::Effects::Plg160::tiledRingColorFactors,
+     &VS::Effects::Plg160::tiledRingColorFactors,
+     sizeof VS::Effects::Plg160::tiledRingColorFactors},  // G00727 D_800FB31C
+    {"EFFECT/PLG160.BIN", 0x1B3C, sizeof VS::Effects::Plg160::ringColorFactors,
+     &VS::Effects::Plg160::ringColorFactors,
+     sizeof VS::Effects::Plg160::ringColorFactors},  // G00728 D_800FB33C
+    {"EFFECT/PLG161.BIN", 0x5468, sizeof VS::Effects::Plg161::ringColorFactors,
+     &VS::Effects::Plg161::ringColorFactors,
+     sizeof VS::Effects::Plg161::ringColorFactors},  // G00729 D_800FEC68
+    {"EFFECT/PLG161.BIN", 0x5488,
+     sizeof VS::Effects::Plg161::trailEmissionCounter,
+     &VS::Effects::Plg161::trailEmissionCounter,
+     sizeof VS::Effects::Plg161::trailEmissionCounter},  // G00730 D_800FEC88
+    {"EFFECT/PLG161.BIN", 0x548C, sizeof VS::Effects::Plg161::ringColorFactors2,
+     &VS::Effects::Plg161::ringColorFactors2,
+     sizeof VS::Effects::Plg161::ringColorFactors2},  // G00731 D_800FEC8C
+    {"EFFECT/PLG162.BIN", 0x398C, sizeof VS::Effects::Plg162::ringColorFactors,
+     &VS::Effects::Plg162::ringColorFactors,
+     sizeof VS::Effects::Plg162::ringColorFactors},  // G00732 D_800FD18C
+    {"EFFECT/PLG162.BIN", 0x39AC, sizeof VS::Effects::Plg162::ringColorFactors2,
+     &VS::Effects::Plg162::ringColorFactors2,
+     sizeof VS::Effects::Plg162::ringColorFactors2},  // G00733 D_800FD1AC
+    {"EFFECT/PLG162.BIN", 0x39CC,
+     sizeof VS::Effects::Plg162::closedRingColorFactors,
+     &VS::Effects::Plg162::closedRingColorFactors,
+     sizeof VS::Effects::Plg162::closedRingColorFactors},  // G00734 D_800FD1CC
+    {"EFFECT/PLG165.BIN", 0x4B8C,
+     sizeof VS::Effects::Plg165::trailEmissionCounter,
+     &VS::Effects::Plg165::trailEmissionCounter,
+     sizeof VS::Effects::Plg165::trailEmissionCounter},  // G00735 D_800FE38C
+    {"EFFECT/PLG166.BIN", 0x36C0,
+     sizeof VS::Effects::Plg166::mirrorSurfaceVertices,
+     &VS::Effects::Plg166::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg166::mirrorSurfaceVertices},  // G00736 D_800FCEC0
+    {"EFFECT/PLG166.BIN", 0x3940,
+     sizeof VS::Effects::Plg166::closedRingColorFactors,
+     &VS::Effects::Plg166::closedRingColorFactors,
+     sizeof VS::Effects::Plg166::closedRingColorFactors},  // G00737 D_800FD140
+    {"EFFECT/PLG166.BIN", 0x3960, sizeof VS::Effects::Plg166::ringColorFactors,
+     &VS::Effects::Plg166::ringColorFactors,
+     sizeof VS::Effects::Plg166::ringColorFactors},  // G00738 D_800FD160
+    {"EFFECT/PLG167.BIN", 0x4024,
+     sizeof VS::Effects::Plg167::closedRingColorFactors,
+     &VS::Effects::Plg167::closedRingColorFactors,
+     sizeof VS::Effects::Plg167::closedRingColorFactors},  // G00739 D_800FD824
+    {"EFFECT/PLG167.BIN", 0x4044,
+     sizeof VS::Effects::Plg167::trailEmissionCounter,
+     &VS::Effects::Plg167::trailEmissionCounter,
+     sizeof VS::Effects::Plg167::trailEmissionCounter},  // G00740 D_800FD844
+    {"EFFECT/PLG168.BIN", 0x4454,
+     sizeof VS::Effects::Plg168::trailEmissionCounter,
+     &VS::Effects::Plg168::trailEmissionCounter,
+     sizeof VS::Effects::Plg168::trailEmissionCounter},  // G00741 D_800FDC54
+    {"EFFECT/PLG168.BIN", 0x4458,
+     sizeof VS::Effects::Plg168::particleEmissionCounter,
+     &VS::Effects::Plg168::particleEmissionCounter,
+     sizeof VS::Effects::Plg168::particleEmissionCounter},  // G00742 D_800FDC58
+    {"EFFECT/PLG169.BIN", 0x3D90,
+     sizeof VS::Effects::Plg169::trailEmissionCounter,
+     &VS::Effects::Plg169::trailEmissionCounter,
+     sizeof VS::Effects::Plg169::trailEmissionCounter},  // G00743 D_800FD590
+    {"EFFECT/PLG169.BIN", 0x3D94, sizeof VS::Effects::Plg169::ringColorFactors,
+     &VS::Effects::Plg169::ringColorFactors,
+     sizeof VS::Effects::Plg169::ringColorFactors},  // G00744 D_800FD594
+    {"EFFECT/PLG169.BIN", 0x3DB4,
+     sizeof VS::Effects::Plg169::closedRingColorFactors,
+     &VS::Effects::Plg169::closedRingColorFactors,
+     sizeof VS::Effects::Plg169::closedRingColorFactors},  // G00745 D_800FD5B4
+    {"EFFECT/PLG170.BIN", 0x4DC4,
+     sizeof VS::Effects::Plg170::mirrorSurfaceVertices,
+     &VS::Effects::Plg170::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg170::mirrorSurfaceVertices},  // G00746 D_800FE5C4
+    {"EFFECT/PLG170.BIN", 0x5044, sizeof VS::Effects::Plg170::ringColorFactors,
+     &VS::Effects::Plg170::ringColorFactors,
+     sizeof VS::Effects::Plg170::ringColorFactors},  // G00747 D_800FE844
+    {"EFFECT/PLG170.BIN", 0x5064, sizeof VS::Effects::Plg170::surfaceVertices,
+     &VS::Effects::Plg170::surfaceVertices,
+     sizeof VS::Effects::Plg170::surfaceVertices},  // G00748 D_800FE864
+    {"EFFECT/PLG170.BIN", 0x52E4,
+     sizeof VS::Effects::Plg170::closedRingColorFactors,
+     &VS::Effects::Plg170::closedRingColorFactors,
+     sizeof VS::Effects::Plg170::closedRingColorFactors},  // G00749 D_800FEAE4
+    {"EFFECT/PLG224.BIN", 0x16EC,
+     sizeof VS::Effects::Plg224::particleEmissionCounter,
+     &VS::Effects::Plg224::particleEmissionCounter,
+     sizeof VS::Effects::Plg224::particleEmissionCounter},  // G00750 D_800FAEEC
+    {"EFFECT/PLG232.BIN", 0x2200,
+     sizeof VS::Effects::Plg232::trailEmissionCounter,
+     &VS::Effects::Plg232::trailEmissionCounter,
+     sizeof VS::Effects::Plg232::trailEmissionCounter},  // G00751 D_800FBA00
+    {"EFFECT/PLG236.BIN", 0x3990,
+     sizeof VS::Effects::Plg236::closedRingColorFactors,
+     &VS::Effects::Plg236::closedRingColorFactors,
+     sizeof VS::Effects::Plg236::closedRingColorFactors},  // G00752 D_800FD190
+    {"EFFECT/PLG236.BIN", 0x39B0, sizeof VS::Effects::Plg236::ringColorFactors,
+     &VS::Effects::Plg236::ringColorFactors,
+     sizeof VS::Effects::Plg236::ringColorFactors},  // G00753 D_800FD1B0
+    {"EFFECT/PLG236.BIN", 0x39D0, sizeof VS::Effects::Plg236::ringColorFactors2,
+     &VS::Effects::Plg236::ringColorFactors2,
+     sizeof VS::Effects::Plg236::ringColorFactors2},  // G00754 D_800FD1D0
+    {"EFFECT/PLG242.BIN", 0x3C60,
+     sizeof VS::Effects::Plg242::tiledRingColorFactors,
+     &VS::Effects::Plg242::tiledRingColorFactors,
+     sizeof VS::Effects::Plg242::tiledRingColorFactors},  // G00755 D_800FD460
+    {"EFFECT/PLG242.BIN", 0x3C80,
+     sizeof VS::Effects::Plg242::trailEmissionCounter,
+     &VS::Effects::Plg242::trailEmissionCounter,
+     sizeof VS::Effects::Plg242::trailEmissionCounter},  // G00756 D_800FD480
+    {"EFFECT/PLG250.BIN", 0x1E28,
+     sizeof VS::Effects::Plg250::closedRingColorFactors,
+     &VS::Effects::Plg250::closedRingColorFactors,
+     sizeof VS::Effects::Plg250::closedRingColorFactors},  // G00757 D_800FB628
+    {"EFFECT/PLG255.BIN", 0x38EC,
+     sizeof VS::Effects::Plg255::trailEmissionCounter,
+     &VS::Effects::Plg255::trailEmissionCounter,
+     sizeof VS::Effects::Plg255::trailEmissionCounter},  // G00758 D_800FD0EC
+    {"EFFECT/PLG255.BIN", 0x38F0,
+     sizeof VS::Effects::Plg255::particleEmissionCounter,
+     &VS::Effects::Plg255::particleEmissionCounter,
+     sizeof VS::Effects::Plg255::particleEmissionCounter},  // G00759 D_800FD0F0
+    {"EFFECT/PLG260.BIN", 0xB2C, sizeof VS::Effects::Plg260::mesh10Vertices,
+     &VS::Effects::Plg260::mesh10Vertices,
+     sizeof VS::Effects::Plg260::mesh10Vertices},  // G00760 D_800FA32C
+    {"EFFECT/PLG260.BIN", 0xB7C, sizeof VS::Effects::Plg260::mesh10Faces,
+     &VS::Effects::Plg260::mesh10Faces,
+     sizeof VS::Effects::Plg260::mesh10Faces},  // G00761 D_800FA37C
+    {"EFFECT/PLG263.BIN", 0x44B0, sizeof VS::Effects::Plg263::surfaceVertices,
+     &VS::Effects::Plg263::surfaceVertices,
+     sizeof VS::Effects::Plg263::surfaceVertices},  // G00762 D_800FDCB0
+    {"EFFECT/PLG263.BIN", 0x4730, sizeof VS::Effects::Plg263::ringColorFactors,
+     &VS::Effects::Plg263::ringColorFactors,
+     sizeof VS::Effects::Plg263::ringColorFactors},  // G00763 D_800FDF30
+    {"EFFECT/PLG263.BIN", 0x4750, sizeof VS::Effects::Plg263::ringColorFactors2,
+     &VS::Effects::Plg263::ringColorFactors2,
+     sizeof VS::Effects::Plg263::ringColorFactors2},  // G00764 D_800FDF50
+    {"EFFECT/PLG263.BIN", 0x4770,
+     sizeof VS::Effects::Plg263::particleEmissionCounter,
+     &VS::Effects::Plg263::particleEmissionCounter,
+     sizeof VS::Effects::Plg263::particleEmissionCounter},  // G00765 D_800FDF70
+    {"EFFECT/PLG265.BIN", 0x6598,
+     sizeof VS::Effects::Plg265::tiledRingColorFactors,
+     &VS::Effects::Plg265::tiledRingColorFactors,
+     sizeof VS::Effects::Plg265::tiledRingColorFactors},  // G00766 D_800FFD98
+    {"EFFECT/PLG265.BIN", 0x65B8,
+     sizeof VS::Effects::Plg265::particleEmissionCounter,
+     &VS::Effects::Plg265::particleEmissionCounter,
+     sizeof VS::Effects::Plg265::particleEmissionCounter},  // G00767 D_800FFDB8
+    {"EFFECT/PLG265.BIN", 0x65BC,
+     sizeof VS::Effects::Plg265::trailEmissionCounter,
+     &VS::Effects::Plg265::trailEmissionCounter,
+     sizeof VS::Effects::Plg265::trailEmissionCounter},  // G00768 D_800FFDBC
     {"EFFECT/PLG265.BIN", 0x65C0,
-     sizeof Effects_Plg265_particleEmissionCounter2,
-     &Effects_Plg265_particleEmissionCounter2,
-     sizeof Effects_Plg265_particleEmissionCounter2},  // G00769 D_800FFDC0
-    {"EFFECT/PLG266.BIN", 0x56A0, sizeof Effects_Plg266_particleEmissionCounter,
-     &Effects_Plg266_particleEmissionCounter,
-     sizeof Effects_Plg266_particleEmissionCounter},  // G00770 D_800FEEA0
+     sizeof VS::Effects::Plg265::particleEmissionCounter2,
+     &VS::Effects::Plg265::particleEmissionCounter2,
+     sizeof VS::Effects::Plg265::particleEmissionCounter2},  // G00769
+                                                             // D_800FFDC0
+    {"EFFECT/PLG266.BIN", 0x56A0,
+     sizeof VS::Effects::Plg266::particleEmissionCounter,
+     &VS::Effects::Plg266::particleEmissionCounter,
+     sizeof VS::Effects::Plg266::particleEmissionCounter},  // G00770 D_800FEEA0
     {"EFFECT/PLG266.BIN", 0x56A4,
-     sizeof Effects_Plg266_particleEmissionCounter2,
-     &Effects_Plg266_particleEmissionCounter2,
-     sizeof Effects_Plg266_particleEmissionCounter2},  // G00771 D_800FEEA4
-    {"EFFECT/PLG266.BIN", 0x56A8, sizeof Effects_Plg266_trailEmissionCounter,
-     &Effects_Plg266_trailEmissionCounter,
-     sizeof Effects_Plg266_trailEmissionCounter},  // G00772 D_800FEEA8
-    {"EFFECT/PLG272.BIN", 0x2670, sizeof Effects_Plg272_closedRingColorFactors,
-     &Effects_Plg272_closedRingColorFactors,
-     sizeof Effects_Plg272_closedRingColorFactors},  // G00773 D_800FBE70
-    {"EFFECT/PLG272.BIN", 0x2690, sizeof Effects_Plg272_surfaceVertices,
-     &Effects_Plg272_surfaceVertices,
-     sizeof Effects_Plg272_surfaceVertices},  // G00774 D_800FBE90
-    {"EFFECT/PLG273.BIN", 0xC74, sizeof Effects_Plg273_mirrorSurfaceVertices,
-     &Effects_Plg273_mirrorSurfaceVertices,
-     sizeof Effects_Plg273_mirrorSurfaceVertices},  // G00775 D_800FA474
-    {"EFFECT/PLG291.BIN", 0x3CD8, sizeof Effects_Plg291_trailEmissionCounter,
-     &Effects_Plg291_trailEmissionCounter,
-     sizeof Effects_Plg291_trailEmissionCounter},  // G00776 D_800FD4D8
-    {"EFFECT/PLG291.BIN", 0x3CDC, sizeof Effects_Plg291_closedRingColorFactors,
-     &Effects_Plg291_closedRingColorFactors,
-     sizeof Effects_Plg291_closedRingColorFactors},  // G00777 D_800FD4DC
-    {"EFFECT/PLG297.BIN", 0x3370, sizeof Effects_Plg297_mirrorSurfaceVertices,
-     &Effects_Plg297_mirrorSurfaceVertices,
-     sizeof Effects_Plg297_mirrorSurfaceVertices},  // G00778 D_800FCB70
-    {"EFFECT/PLG297.BIN", 0x35F0, sizeof Effects_Plg297_closedRingColorFactors,
-     &Effects_Plg297_closedRingColorFactors,
-     sizeof Effects_Plg297_closedRingColorFactors},  // G00779 D_800FCDF0
-    {"EFFECT/PLG297.BIN", 0x3610, sizeof Effects_Plg297_ringColorFactors,
-     &Effects_Plg297_ringColorFactors,
-     sizeof Effects_Plg297_ringColorFactors},  // G00780 D_800FCE10
-    {"EFFECT/PLG300.BIN", 0x48CC, sizeof Effects_Plg300_mirrorSurfaceVertices,
-     &Effects_Plg300_mirrorSurfaceVertices,
-     sizeof Effects_Plg300_mirrorSurfaceVertices},  // G00781 D_800FE0CC
-    {"EFFECT/PLG300.BIN", 0x4B4C, sizeof Effects_Plg300_particleEmissionCounter,
-     &Effects_Plg300_particleEmissionCounter,
-     sizeof Effects_Plg300_particleEmissionCounter},  // G00782 D_800FE34C
-    {"EFFECT/PLG300.BIN", 0x4B50, sizeof Effects_Plg300_ringColorFactors,
-     &Effects_Plg300_ringColorFactors,
-     sizeof Effects_Plg300_ringColorFactors},  // G00783 D_800FE350
-    {"EFFECT/PLG300.BIN", 0x4B70, sizeof Effects_Plg300_ringColorFactors2,
-     &Effects_Plg300_ringColorFactors2,
-     sizeof Effects_Plg300_ringColorFactors2},  // G00784 D_800FE370
-    {"EFFECT/PLG301.BIN", 0x2D24, sizeof Effects_Plg301_particleEmissionCounter,
-     &Effects_Plg301_particleEmissionCounter,
-     sizeof Effects_Plg301_particleEmissionCounter},  // G00785 D_800FC524
-    {"EFFECT/PLG301.BIN", 0x2D28, sizeof Effects_Plg301_closedRingColorFactors,
-     &Effects_Plg301_closedRingColorFactors,
-     sizeof Effects_Plg301_closedRingColorFactors},  // G00786 D_800FC528
+     sizeof VS::Effects::Plg266::particleEmissionCounter2,
+     &VS::Effects::Plg266::particleEmissionCounter2,
+     sizeof VS::Effects::Plg266::particleEmissionCounter2},  // G00771
+                                                             // D_800FEEA4
+    {"EFFECT/PLG266.BIN", 0x56A8,
+     sizeof VS::Effects::Plg266::trailEmissionCounter,
+     &VS::Effects::Plg266::trailEmissionCounter,
+     sizeof VS::Effects::Plg266::trailEmissionCounter},  // G00772 D_800FEEA8
+    {"EFFECT/PLG272.BIN", 0x2670,
+     sizeof VS::Effects::Plg272::closedRingColorFactors,
+     &VS::Effects::Plg272::closedRingColorFactors,
+     sizeof VS::Effects::Plg272::closedRingColorFactors},  // G00773 D_800FBE70
+    {"EFFECT/PLG272.BIN", 0x2690, sizeof VS::Effects::Plg272::surfaceVertices,
+     &VS::Effects::Plg272::surfaceVertices,
+     sizeof VS::Effects::Plg272::surfaceVertices},  // G00774 D_800FBE90
+    {"EFFECT/PLG273.BIN", 0xC74,
+     sizeof VS::Effects::Plg273::mirrorSurfaceVertices,
+     &VS::Effects::Plg273::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg273::mirrorSurfaceVertices},  // G00775 D_800FA474
+    {"EFFECT/PLG291.BIN", 0x3CD8,
+     sizeof VS::Effects::Plg291::trailEmissionCounter,
+     &VS::Effects::Plg291::trailEmissionCounter,
+     sizeof VS::Effects::Plg291::trailEmissionCounter},  // G00776 D_800FD4D8
+    {"EFFECT/PLG291.BIN", 0x3CDC,
+     sizeof VS::Effects::Plg291::closedRingColorFactors,
+     &VS::Effects::Plg291::closedRingColorFactors,
+     sizeof VS::Effects::Plg291::closedRingColorFactors},  // G00777 D_800FD4DC
+    {"EFFECT/PLG297.BIN", 0x3370,
+     sizeof VS::Effects::Plg297::mirrorSurfaceVertices,
+     &VS::Effects::Plg297::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg297::mirrorSurfaceVertices},  // G00778 D_800FCB70
+    {"EFFECT/PLG297.BIN", 0x35F0,
+     sizeof VS::Effects::Plg297::closedRingColorFactors,
+     &VS::Effects::Plg297::closedRingColorFactors,
+     sizeof VS::Effects::Plg297::closedRingColorFactors},  // G00779 D_800FCDF0
+    {"EFFECT/PLG297.BIN", 0x3610, sizeof VS::Effects::Plg297::ringColorFactors,
+     &VS::Effects::Plg297::ringColorFactors,
+     sizeof VS::Effects::Plg297::ringColorFactors},  // G00780 D_800FCE10
+    {"EFFECT/PLG300.BIN", 0x48CC,
+     sizeof VS::Effects::Plg300::mirrorSurfaceVertices,
+     &VS::Effects::Plg300::mirrorSurfaceVertices,
+     sizeof VS::Effects::Plg300::mirrorSurfaceVertices},  // G00781 D_800FE0CC
+    {"EFFECT/PLG300.BIN", 0x4B4C,
+     sizeof VS::Effects::Plg300::particleEmissionCounter,
+     &VS::Effects::Plg300::particleEmissionCounter,
+     sizeof VS::Effects::Plg300::particleEmissionCounter},  // G00782 D_800FE34C
+    {"EFFECT/PLG300.BIN", 0x4B50, sizeof VS::Effects::Plg300::ringColorFactors,
+     &VS::Effects::Plg300::ringColorFactors,
+     sizeof VS::Effects::Plg300::ringColorFactors},  // G00783 D_800FE350
+    {"EFFECT/PLG300.BIN", 0x4B70, sizeof VS::Effects::Plg300::ringColorFactors2,
+     &VS::Effects::Plg300::ringColorFactors2,
+     sizeof VS::Effects::Plg300::ringColorFactors2},  // G00784 D_800FE370
+    {"EFFECT/PLG301.BIN", 0x2D24,
+     sizeof VS::Effects::Plg301::particleEmissionCounter,
+     &VS::Effects::Plg301::particleEmissionCounter,
+     sizeof VS::Effects::Plg301::particleEmissionCounter},  // G00785 D_800FC524
+    {"EFFECT/PLG301.BIN", 0x2D28,
+     sizeof VS::Effects::Plg301::closedRingColorFactors,
+     &VS::Effects::Plg301::closedRingColorFactors,
+     sizeof VS::Effects::Plg301::closedRingColorFactors},  // G00786 D_800FC528
     {"ENDING/ENDING.PRG", 0x5BFC, sizeof VS::Ending::Credits::scriptBytes,
      &VS::Ending::Credits::scriptBytes,
      sizeof VS::Ending::Credits::scriptBytes},  // G00787 D_8006E3FC

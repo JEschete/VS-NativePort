@@ -30,11 +30,11 @@
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.h"
-#include "Effects/Plugins/Plg045.h"
-#include "Effects/Plugins/Plg053.h"
-#include "Effects/Plugins/Plg065.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg082.h"
+#include "Effects/Plugins/Plg045.hpp"
+#include "Effects/Plugins/Plg053.hpp"
+#include "Effects/Plugins/Plg065.hpp"
+#include "Effects/Plugins/Plg073.hpp"
+#include "Effects/Plugins/Plg082.hpp"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticlesLive.hpp"
@@ -737,13 +737,13 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
   const auto live = GENERATE(
       LiveParticleCase{
           &VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, 15, 0x3E,
-          &Effects_Plg045_particleEmissionCounter},
+          &VS::Effects::Plg045::particleEmissionCounter},
       LiveParticleCase{
           &VS::Effects::Templates::UpdateLivePlg065ParticleDispatch, 6, 0x42,
-          &Effects_Plg065_particleEmissionCounter},
+          &VS::Effects::Plg065::particleEmissionCounter},
       LiveParticleCase{
           &VS::Effects::Templates::UpdateLivePlg152ParticleDispatch, 15, 0x3E,
-          &Effects_Plg082_particleEmissionCounter});
+          &VS::Effects::Plg082::particleEmissionCounter});
   EmissionFixture fixture;
   const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
@@ -1305,7 +1305,7 @@ Function Plg074Entry(unsigned address, Function expected) {
 
 struct Plg074Fixture : EmissionFixture {
   int saved_sample = Effects_curveSamples[0];
-  int saved_corner = Effects_Plg073_trailEmissionCounter;
+  int saved_corner = VS::Effects::Plg073::trailEmissionCounter;
   int saved_plg074_corner = VS::Content::plg074TrailEmissionCounter[0];
   Effects_ActionEffectRequest saved_request = Effects_actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
@@ -1318,17 +1318,17 @@ struct Plg074Fixture : EmissionFixture {
     package.block1TableCount = 1;
     package.block2Count = 1;
     Effects_curveSamples[0] = 0;
-    Effects_Plg073_trailEmissionCounter = 0;
+    VS::Effects::Plg073::trailEmissionCounter = 0;
     VS::Content::plg074TrailEmissionCounter[0] = 0;
     Effects_actionRequest.position = {400, -500, 600, 0};
-    std::ranges::copy(Effects_Plg073_tiledRingColorFactors,
+    std::ranges::copy(VS::Effects::Plg073::tiledRingColorFactors,
                       saved_colors.begin());
-    std::memcpy(saved_arc_colors.data(), Effects_Plg073_ringColorFactors,
+    std::memcpy(saved_arc_colors.data(), VS::Effects::Plg073::ringColorFactors,
                 sizeof saved_arc_colors);
-    Effects_Plg073_tiledRingColorFactors[0] = {32, 64, 96, 0};
+    VS::Effects::Plg073::tiledRingColorFactors[0] = {32, 64, 96, 0};
     for (int mode = 0; mode < 8; ++mode) {
       for (int row = 0; row < 3; ++row) {
-        Effects_Plg073_ringColorFactors[mode][row] =
+        VS::Effects::Plg073::ringColorFactors[mode][row] =
             static_cast<u_char>(32 * (row + 1) + mode);
       }
     }
@@ -1345,11 +1345,11 @@ struct Plg074Fixture : EmissionFixture {
   ~Plg074Fixture() {
     VS::Effects::ForgetLivePackageExtents();
     Effects_curveSamples[0] = saved_sample;
-    Effects_Plg073_trailEmissionCounter = saved_corner;
+    VS::Effects::Plg073::trailEmissionCounter = saved_corner;
     VS::Content::plg074TrailEmissionCounter[0] = saved_plg074_corner;
     Effects_actionRequest = saved_request;
-    std::ranges::copy(saved_colors, Effects_Plg073_tiledRingColorFactors);
-    std::memcpy(Effects_Plg073_ringColorFactors, saved_arc_colors.data(),
+    std::ranges::copy(saved_colors, VS::Effects::Plg073::tiledRingColorFactors);
+    std::memcpy(VS::Effects::Plg073::ringColorFactors, saved_arc_colors.data(),
                 sizeof saved_arc_colors);
   }
 
@@ -1523,7 +1523,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
   std::ranges::copy(std::array<std::int16_t, 6>{10, 10, 20, 20, 30, 30},
                     definition.extentRange);
   fixture.scratch.flags = 0x1008 | anchor;
-  Effects_Plg073_trailEmissionCounter = 5;
+  VS::Effects::Plg073::trailEmissionCounter = 5;
   const std::array offsets{std::array{0, 0, 0}, std::array{100, -200, 300},
                            std::array{700, -800, 900}};
   for (int cycle = 0; cycle < 2; ++cycle) {
@@ -1537,7 +1537,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
       CHECK(point.vz == offsets[anchor][2] + (corner & 4 ? 30 : -30));
     }
     CHECK(VS::Content::plg074TrailEmissionCounter[0] == 0);
-    CHECK(Effects_Plg073_trailEmissionCounter == 5);
+    CHECK(VS::Effects::Plg073::trailEmissionCounter == 5);
     CHECK(fixture.trails[8].splinePoints[0].vx == 0);
   }
 }
@@ -1614,7 +1614,7 @@ void CheckPlg074EmitterTick(const Effects_TrailQuadSet& state, int count,
   CHECK(state.curveSampleDistance == 1);
   CHECK(VS::Content::plg074TrailEmissionCounter[0] ==
         ((cycle + 1) * std::min(count, 16)) % 8);
-  CHECK(Effects_Plg073_trailEmissionCounter == 0);
+  CHECK(VS::Effects::Plg073::trailEmissionCounter == 0);
 }
 
 void StopPlg074Emitter(Effects_EffectRenderer entry, Effects_RendererSlot& slot,
@@ -2123,8 +2123,8 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
   fixture.package.textureInfoTable[1] = &fixture.info;
   fixture.Definition().ringSegments = 1;
   fixture.Definition().ringPositions = 0;
-  const auto saved_color = Effects_Plg053_closedRingColorFactors[0];
-  Effects_Plg053_closedRingColorFactors[0] = {32, 64, 96, 0};
+  const auto saved_color = VS::Effects::Plg053::closedRingColorFactors[0];
+  VS::Effects::Plg053::closedRingColorFactors[0] = {32, 64, 96, 0};
   DispatchHeap heap;
   for (int cycle = 0; cycle < 3; ++cycle) {
     auto* slot = VS::Effects::LiveAttachEffectRenderer(
@@ -2141,5 +2141,5 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
     CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.ResetPackets();
   }
-  Effects_Plg053_closedRingColorFactors[0] = saved_color;
+  VS::Effects::Plg053::closedRingColorFactors[0] = saved_color;
 }

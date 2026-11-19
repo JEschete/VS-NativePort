@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg301.h"
+// PLG301.BIN's module data (src/EFFECT/PLG301.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg301.hpp"
 
-// decomp: D_800FC524 (D_800FC524@EFFECT/PLG301.BIN)
-int Effects_Plg301_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FC528 (D_800FC528@EFFECT/PLG301.BIN)
-CVECTOR Effects_Plg301_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg301 {
+// decomp: D_800FC524 (PLG301.BIN/110.c:5; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+// decomp: D_800FC528 (PLG301.BIN/110.c:10; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg301

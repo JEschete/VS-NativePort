@@ -26,26 +26,27 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.h"
-#include "Effects/Plugins/Plg061.h"
-#include "Effects/Plugins/Plg069.h"
-#include "Effects/Plugins/Plg077.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg128.h"
-#include "Effects/Plugins/Plg129.h"
-#include "Effects/Plugins/Plg137.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg150.h"
-#include "Effects/Plugins/Plg153.h"
-#include "Effects/Plugins/Plg154.h"
-#include "Effects/Plugins/Plg158.h"
-#include "Effects/Plugins/Plg166.h"
-#include "Effects/Plugins/Plg170.h"
-#include "Effects/Plugins/Plg260.h"
-#include "Effects/Plugins/Plg263.h"
-#include "Effects/Plugins/Plg272.h"
-#include "Effects/Plugins/Plg273.h"
-#include "Effects/Plugins/Plg297.h"
-#include "Effects/Plugins/Plg300.h"
+#include "Effects/Plugins/Plg061.hpp"
+#include "Effects/Plugins/Plg069.hpp"
+#include "Effects/Plugins/Plg077.hpp"
+#include "Effects/Plugins/Plg087.hpp"
+#include "Effects/Plugins/Plg128.hpp"
+#include "Effects/Plugins/Plg129.hpp"
+#include "Effects/Plugins/Plg137.hpp"
+#include "Effects/Plugins/Plg146.hpp"
+#include "Effects/Plugins/Plg150.hpp"
+#include "Effects/Plugins/Plg153.hpp"
+#include "Effects/Plugins/Plg154.hpp"
+#include "Effects/Plugins/Plg158.hpp"
+#include "Effects/Plugins/Plg166.hpp"
+#include "Effects/Plugins/Plg170.hpp"
+#include "Effects/Plugins/Plg260.hpp"
+#include "Effects/Plugins/Plg263.hpp"
+#include "Effects/Plugins/Plg272.hpp"
+#include "Effects/Plugins/Plg273.hpp"
+#include "Effects/Plugins/Plg297.hpp"
+#include "Effects/Plugins/Plg300.hpp"
+#include "Effects/Plugins/PluginData.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/Grid.hpp"
 #include "Effects/Templates/Mesh10.hpp"
@@ -96,12 +97,6 @@ constexpr std::size_t kFirstStart = 0;
 constexpr std::size_t kSecondStart = 2;
 // The second colour's curve ids: the minimum force range's start halfwords.
 constexpr std::size_t kSecondColorBlue = 4;
-// A face's three vertex indices, then its three texture offsets.
-constexpr std::size_t kFaceBytes = kMesh10Corners * 2;
-
-using LegacyProfile = SVECTOR[kSurfaceRows][kSurfaceColumns];
-using LegacyMesh10Vertices = SVECTOR[kMesh10Vertices];
-using LegacyMesh10Faces = u_char[kMesh10Faces][kFaceBytes];
 
 static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
 static_assert(sizeof(VS::Render::GridPacket) == kGridPacketWords * kWordBytes);
@@ -113,7 +108,8 @@ static_assert(sizeof(VS::Render::MirrorSurfacePacket) ==
               kRingPacketWords * kWordBytes);
 static_assert(sizeof(VS::Render::RotatingSurfacePacket) ==
               kRingPacketWords * kWordBytes);
-static_assert(sizeof(LegacyProfile) == kSurfaceProfilePoints * sizeof(SVECTOR));
+static_assert(sizeof(plugins::SurfaceProfile) ==
+              kSurfaceProfilePoints * sizeof(SVECTOR));
 static_assert(std::extent_v<decltype(Effects_SurfaceState::factors)> ==
               kSurfaceRows);
 static_assert(std::extent_v<decltype(Effects_RotatingSurfaceState::factors)> ==
@@ -758,7 +754,8 @@ int RunSurfaceEntry(Effects_RendererSlot* slot, unsigned int command,
 using SurfaceProfilePoints = std::array<RingPoint, kSurfaceProfilePoints>;
 
 // An overlay's profile table as points, row by row.
-[[nodiscard]] SurfaceProfilePoints ProfileOf(const LegacyProfile& rows) {
+[[nodiscard]] SurfaceProfilePoints ProfileOf(
+    const plugins::SurfaceProfile& rows) {
   SurfaceProfilePoints profile{};
   std::size_t next = 0;
   for (const auto& row : rows) {
@@ -776,8 +773,9 @@ struct LiveMesh10Model {
   std::array<Mesh10Face, kMesh10Faces> faces{};
 };
 
-[[nodiscard]] LiveMesh10Model ModelOf(const LegacyMesh10Vertices& vertices,
-                                      const LegacyMesh10Faces& faces) {
+[[nodiscard]] LiveMesh10Model ModelOf(
+    const plugins::Mesh10VertexTable& vertices,
+    const plugins::Mesh10FaceTable& faces) {
   LiveMesh10Model model{};
   std::size_t next = 0;
   for (const SVECTOR& vertex : vertices) {
@@ -787,7 +785,7 @@ struct LiveMesh10Model {
   }
   next = 0;
   for (const auto& face : faces) {
-    const std::span<const u_char, kFaceBytes> bytes = face;
+    const std::span<const std::uint8_t, plugins::kMesh10FaceBytes> bytes = face;
     model.faces.at(next++) = {
         .vertices = {bytes[0], bytes[1], bytes[2]},
         .uvs = {bytes[kMesh10Corners], bytes[kMesh10Corners + 1],
@@ -859,7 +857,7 @@ int UpdateLivePlg061Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg061Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg061_surfaceVertices),
+                    ProfileOf(Effects::Plg061::surfaceVertices),
                     &Plg061::Surface);
 }
 
@@ -872,7 +870,7 @@ int UpdateLivePlg069Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg069_mesh10Vertices, Effects_Plg069_mesh10Faces),
+      ModelOf(Effects::Plg069::mesh10Vertices, Effects::Plg069::mesh10Faces),
       &Plg069::Mesh10);
 }
 
@@ -894,7 +892,7 @@ int UpdateLivePlg077Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg077Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg077_surfaceVertices),
+                    ProfileOf(Effects::Plg077::surfaceVertices),
                     &Plg077::Surface);
 }
 
@@ -902,7 +900,7 @@ int UpdateLivePlg077Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg077_mesh10Vertices, Effects_Plg077_mesh10Faces),
+      ModelOf(Effects::Plg077::mesh10Vertices, Effects::Plg077::mesh10Faces),
       &Plg077::Mesh10);
 }
 
@@ -939,7 +937,7 @@ int UpdateLivePlg087Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg087Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg087_surfaceVertices),
+                    ProfileOf(Effects::Plg087::surfaceVertices),
                     &Plg087::Surface);
 }
 
@@ -951,14 +949,14 @@ int UpdateLivePlg128Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg128Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg128_surfaceVertices),
+                    ProfileOf(Effects::Plg128::surfaceVertices),
                     &Plg128::Surface);
 }
 
 int UpdateLivePlg128Surface2(Effects_RendererSlot* slot, unsigned int command,
                              int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg128_surfaceVertices2),
+                    ProfileOf(Effects::Plg128::surfaceVertices2),
                     &Plg128::Surface2);
 }
 
@@ -970,7 +968,7 @@ int UpdateLivePlg128RotatingSurface(Effects_RendererSlot* slot,
 int UpdateLivePlg129Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg129_surfaceVertices),
+                    ProfileOf(Effects::Plg129::surfaceVertices),
                     &Plg129::Surface);
 }
 
@@ -983,7 +981,7 @@ int UpdateLivePlg129Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg129_mesh10Vertices, Effects_Plg129_mesh10Faces),
+      ModelOf(Effects::Plg129::mesh10Vertices, Effects::Plg129::mesh10Faces),
       &Plg129::Mesh10);
 }
 
@@ -996,7 +994,7 @@ int UpdateLivePlg137Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg137_mesh10Vertices, Effects_Plg137_mesh10Faces),
+      ModelOf(Effects::Plg137::mesh10Vertices, Effects::Plg137::mesh10Faces),
       &Plg137::Mesh10);
 }
 
@@ -1028,7 +1026,7 @@ int UpdateLivePlg142RotatingSurface(Effects_RendererSlot* slot,
 int UpdateLivePlg146MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg146_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg146::mirrorSurfaceVertices),
                           &Plg146::MirrorSurface);
 }
 
@@ -1040,7 +1038,7 @@ int UpdateLivePlg150Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg150Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg150_surfaceVertices),
+                    ProfileOf(Effects::Plg150::surfaceVertices),
                     &Plg150::Surface);
 }
 
@@ -1053,7 +1051,7 @@ int UpdateLivePlg153Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg153_mesh10Vertices, Effects_Plg153_mesh10Faces),
+      ModelOf(Effects::Plg153::mesh10Vertices, Effects::Plg153::mesh10Faces),
       &Plg153::Mesh10);
 }
 
@@ -1061,7 +1059,7 @@ int UpdateLivePlg154Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg154_mesh10Vertices, Effects_Plg154_mesh10Faces),
+      ModelOf(Effects::Plg154::mesh10Vertices, Effects::Plg154::mesh10Faces),
       &Plg154::Mesh10);
 }
 
@@ -1073,14 +1071,14 @@ int UpdateLivePlg156Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg158Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg158_surfaceVertices),
+                    ProfileOf(Effects::Plg158::surfaceVertices),
                     &Plg158::Surface);
 }
 
 int UpdateLivePlg158MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg158_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg158::mirrorSurfaceVertices),
                           &Plg158::MirrorSurface);
 }
 
@@ -1117,7 +1115,7 @@ int UpdateLivePlg165RotatingSurface(Effects_RendererSlot* slot,
 int UpdateLivePlg166MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg166_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg166::mirrorSurfaceVertices),
                           &Plg166::MirrorSurface);
 }
 
@@ -1144,14 +1142,14 @@ int UpdateLivePlg170Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg170Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg170_surfaceVertices),
+                    ProfileOf(Effects::Plg170::surfaceVertices),
                     &Plg170::Surface);
 }
 
 int UpdateLivePlg170MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg170_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg170::mirrorSurfaceVertices),
                           &Plg170::MirrorSurface);
 }
 
@@ -1184,14 +1182,14 @@ int UpdateLivePlg260Mesh10(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   return RunMesh10(
       slot, command, packed,
-      ModelOf(Effects_Plg260_mesh10Vertices, Effects_Plg260_mesh10Faces),
+      ModelOf(Effects::Plg260::mesh10Vertices, Effects::Plg260::mesh10Faces),
       &Plg260::Mesh10);
 }
 
 int UpdateLivePlg263Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg263_surfaceVertices),
+                    ProfileOf(Effects::Plg263::surfaceVertices),
                     &Plg263::Surface);
 }
 
@@ -1203,14 +1201,14 @@ int UpdateLivePlg272Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg272Surface(Effects_RendererSlot* slot, unsigned int command,
                             int packed) {
   return RunSurface(slot, command, packed,
-                    ProfileOf(Effects_Plg272_surfaceVertices),
+                    ProfileOf(Effects::Plg272::surfaceVertices),
                     &Plg272::Surface);
 }
 
 int UpdateLivePlg273MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg273_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg273::mirrorSurfaceVertices),
                           &Plg273::MirrorSurface);
 }
 
@@ -1227,14 +1225,14 @@ int UpdateLivePlg297Grid(Effects_RendererSlot* slot, unsigned int command,
 int UpdateLivePlg297MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg297_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg297::mirrorSurfaceVertices),
                           &Plg297::MirrorSurface);
 }
 
 int UpdateLivePlg300MirrorSurface(Effects_RendererSlot* slot,
                                   unsigned int command, int packed) {
   return RunMirrorSurface(slot, command, packed,
-                          ProfileOf(Effects_Plg300_mirrorSurfaceVertices),
+                          ProfileOf(Effects::Plg300::mirrorSurfaceVertices),
                           &Plg300::MirrorSurface);
 }
 }  // namespace VS::Effects::Templates

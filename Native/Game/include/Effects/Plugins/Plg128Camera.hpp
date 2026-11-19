@@ -26,9 +26,9 @@ enum class CameraCommand : std::uint32_t {
   kStop = 4,
 };
 
-// func_800FD9A4_t (F8.c:13): the slot's state. The generated record names
-// `position` lookAt (0x88) and `target` eye (0x98); func_800FDE78 stores the
-// first as the end pose's position and the second as its look-at.
+// func_800FD9A4_t (src/EFFECT/PLG128.BIN/F8.c:10): the slot's state. Upstream
+// names `position` unk88 and `target` unk98; func_800FDE78 stores the first as
+// the end pose's position and the second as its look-at.
 struct CameraEffectState {
   std::uint8_t lifetime{};
   std::uint8_t definition{};

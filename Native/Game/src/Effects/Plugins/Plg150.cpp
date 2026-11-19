@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg150.h"
+// PLG150.BIN's module data (src/EFFECT/PLG150.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg150.hpp"
 
-// decomp: D_800FCA1C (D_800FCA1C@EFFECT/PLG150.BIN)
-CVECTOR Effects_Plg150_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCA3C (D_800FCA3C@EFFECT/PLG150.BIN)
-SVECTOR Effects_Plg150_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCCBC (D_800FCCBC@EFFECT/PLG150.BIN)
-u_char Effects_Plg150_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg150 {
+// decomp: D_800FCA1C (PLG150.BIN/18.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+// decomp: D_800FCA3C (PLG150.BIN/18.c:9; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_800FCCBC (PLG150.BIN/18.c:12; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+}  // namespace VS::Effects::Plg150

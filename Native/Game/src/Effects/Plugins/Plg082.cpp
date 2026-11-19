@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg082.h"
+// PLG082.BIN's module data (src/EFFECT/PLG082.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg082.hpp"
 
-// decomp: D_800FD088 (D_800FD088@src/EFFECT/particleSetup.h)
-int Effects_Plg082_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD08C (D_800FD08C@src/EFFECT/closedRings.h)
-CVECTOR Effects_Plg082_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg082 {
+// decomp: D_800FD088 (PLG082.BIN/128.c:5; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+// decomp: D_800FD08C (PLG082.BIN/128.c:11; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg082

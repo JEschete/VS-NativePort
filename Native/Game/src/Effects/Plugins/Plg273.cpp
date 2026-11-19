@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg273.h"
+// PLG273.BIN's module data (src/EFFECT/PLG273.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg273.hpp"
 
-// decomp: D_800FA474 (D_800FA474@EFFECT/PLG273.BIN)
-SVECTOR Effects_Plg273_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg273 {
+// decomp: D_800FA474 (PLG273.BIN/0.c:7; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile mirrorSurfaceVertices;
+}  // namespace VS::Effects::Plg273

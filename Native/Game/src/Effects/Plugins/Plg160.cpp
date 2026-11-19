@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg160.h"
+// PLG160.BIN's module data (src/EFFECT/PLG160.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg160.hpp"
 
-// decomp: D_800FB31C (D_800FB31C@EFFECT/PLG160.BIN)
-CVECTOR Effects_Plg160_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FB33C (D_800FB33C@EFFECT/PLG160.BIN)
-u_char Effects_Plg160_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg160 {
+// decomp: D_800FB31C (PLG160.BIN/0.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+// decomp: D_800FB33C (PLG160.BIN/0.c:7; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+}  // namespace VS::Effects::Plg160

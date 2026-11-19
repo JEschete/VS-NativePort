@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg073.h"
+// PLG073.BIN's module data (src/EFFECT/PLG073.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg073.hpp"
 
-// decomp: D_800FEF3C (D_800FEF3C@EFFECT/PLG073.BIN)
-CVECTOR Effects_Plg073_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FEF5C (D_800FEF5C@EFFECT/PLG073.BIN)
-u_char Effects_Plg073_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FEF7C (D_800FEF7C@EFFECT/PLG073.BIN)
-int Effects_Plg073_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg073 {
+// decomp: D_800FEF3C (PLG073.BIN/F8.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+// decomp: D_800FEF5C (PLG073.BIN/F8.c:7; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FEF7C (PLG073.BIN/F8.c:9; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+}  // namespace VS::Effects::Plg073

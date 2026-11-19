@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg137.h"
+// PLG137.BIN's module data (src/EFFECT/PLG137.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg137.hpp"
 
-// decomp: D_800FDF8C (D_800FDF8C@EFFECT/PLG137.BIN)
-SVECTOR Effects_Plg137_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FDFDC (D_800FDFDC@EFFECT/PLG137.BIN)
-u_char Effects_Plg137_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE03C (D_800FE03C@EFFECT/PLG137.BIN)
-int Effects_Plg137_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE040 (D_800FE040@EFFECT/PLG137.BIN)
-CVECTOR Effects_Plg137_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg137 {
+// decomp: D_800FDF8C (PLG137.BIN/F8.c:5; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FDFDC (PLG137.BIN/F8.c:5; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+// decomp: D_800FE03C (PLG137.BIN/F8.c:7; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FE040 (PLG137.BIN/F8.c:11; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+}  // namespace VS::Effects::Plg137

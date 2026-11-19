@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg053.h"
+// PLG053.BIN's module data (src/EFFECT/PLG053.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg053.hpp"
 
-// decomp: D_800FB2D4 (D_800FB2D4@EFFECT/PLG053.BIN)
-CVECTOR Effects_Plg053_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg053 {
+// decomp: D_800FB2D4 (PLG053.BIN/18.c:7; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg053

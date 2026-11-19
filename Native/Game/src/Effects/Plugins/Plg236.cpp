@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg236.h"
+// PLG236.BIN's module data (src/EFFECT/PLG236.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg236.hpp"
 
-// decomp: D_800FD190 (D_800FD190@EFFECT/PLG236.BIN)
-CVECTOR Effects_Plg236_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD1B0 (D_800FD1B0@EFFECT/PLG236.BIN)
-u_char Effects_Plg236_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD1D0 (D_800FD1D0@EFFECT/PLG236.BIN)
-u_char Effects_Plg236_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg236 {
+// decomp: D_800FD190 (PLG236.BIN/0.c:6; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+// decomp: D_800FD1B0 (PLG236.BIN/0.c:12; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FD1D0 (PLG236.BIN/0.c:15; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors2;
+}  // namespace VS::Effects::Plg236

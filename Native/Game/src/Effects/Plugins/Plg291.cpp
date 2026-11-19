@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg291.h"
+// PLG291.BIN's module data (src/EFFECT/PLG291.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg291.hpp"
 
-// decomp: D_800FD4D8 (D_800FD4D8@EFFECT/PLG291.BIN)
-int Effects_Plg291_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD4DC (D_800FD4DC@EFFECT/PLG291.BIN)
-CVECTOR Effects_Plg291_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg291 {
+// decomp: D_800FD4D8 (PLG291.BIN/F8.c:5; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FD4DC (PLG291.BIN/F8.c:10; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg291

@@ -1,19 +1,16 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg077.h"
+// PLG077.BIN's module data (src/EFFECT/PLG077.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg077.hpp"
 
-// decomp: D_800FD908 (D_800FD908@EFFECT/PLG077.BIN)
-SVECTOR Effects_Plg077_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD958 (D_800FD958@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD9B8 (D_800FD9B8@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD9D8 (D_800FD9D8@EFFECT/PLG077.BIN)
-SVECTOR Effects_Plg077_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FDC58 (D_800FDC58@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg077 {
+// decomp: D_800FD908 (PLG077.BIN/18.c:5; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FD958 (PLG077.BIN/18.c:5; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+// decomp: D_800FD9B8 (PLG077.BIN/18.c:8; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FD9D8 (PLG077.BIN/18.c:13; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile surfaceVertices;
+// decomp: D_800FDC58 (PLG077.BIN/18.c:15; closedRings.h:58)
+plugins::RingPaletteBytes ringColorFactors2;
+}  // namespace VS::Effects::Plg077

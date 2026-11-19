@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg224.h"
+// PLG224.BIN's module data (src/EFFECT/PLG224.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg224.hpp"
 
-// decomp: D_800FAEEC (D_800FAEEC@EFFECT/PLG224.BIN)
-int Effects_Plg224_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg224 {
+// decomp: D_800FAEEC (PLG224.BIN/F8.c:6; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+}  // namespace VS::Effects::Plg224

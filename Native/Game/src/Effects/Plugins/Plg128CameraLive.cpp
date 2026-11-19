@@ -24,7 +24,6 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.h"
-#include "Effects/Plugins/Plg128.h"
 #include "Effects/Plugins/Plg128Camera.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
@@ -34,11 +33,28 @@ namespace {
 namespace math = Core::Math;
 using math::Position3;
 using math::Vec3;
-using State = Effects_Plg128_CameraEffectState;
 
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 // func_800FDEC4 allocates the state with vs_main_allocHeapR(0xD0).
 constexpr std::size_t kStateBytes = 0xD0;
+
+// decomp: func_800FD9A4_t (src/EFFECT/PLG128.BIN/F8.c:10): the slot's state
+// in the heap between commands, in its PS1 layout.
+struct LiveCameraRecord {
+  std::uint8_t lifetime{};
+  std::uint8_t definition{};
+  std::int16_t mode{};
+  std::int32_t age{};
+  Effects_EffectCamera start_camera{};
+  Effects_EffectCamera end_camera{};
+  VECTOR position{};
+  VECTOR target{};
+  MATRIX view{};
+  std::int32_t near_clip{};
+  std::int32_t reserved_cc{};
+};
+static_assert(sizeof(LiveCameraRecord) == kStateBytes);
+
 using TransformSlots = decltype(Effects_EffectInstance::transforms);
 constexpr std::size_t kTransformCount = std::extent_v<TransformSlots>;
 // vectorRanges[] and pairRanges[] rows the camera reads.
@@ -46,8 +62,6 @@ constexpr std::size_t kDirectionRange = 0;
 constexpr std::size_t kAttractionOffsetRange = 6;
 constexpr std::size_t kAttractionJitterRange = 7;
 constexpr std::size_t kSpeedRange = 2;
-
-static_assert(sizeof(State) == kStateBytes);
 
 std::uint64_t refused_definitions = 0;
 std::uint64_t refused_transforms = 0;
@@ -74,30 +88,30 @@ void StoreShort(SVECTOR& record, Position3 value) {
   record.vz = value.z;
 }
 
-[[nodiscard]] CameraEffectState StateOf(const State& live) {
+[[nodiscard]] CameraEffectState StateOf(const LiveCameraRecord& live) {
   return {.lifetime = live.lifetime,
-          .definition = live.effect,
+          .definition = live.definition,
           .mode = live.mode,
           .age = live.age,
-          .start_camera = LoadLiveEffectCameraPose(live.startCamera),
-          .end_camera = LoadLiveEffectCameraPose(live.endCamera),
-          .position = math::VectorOf(live.lookAt),
-          .target = math::VectorOf(live.eye),
+          .start_camera = LoadLiveEffectCameraPose(live.start_camera),
+          .end_camera = LoadLiveEffectCameraPose(live.end_camera),
+          .position = math::VectorOf(live.position),
+          .target = math::VectorOf(live.target),
           .view = math::TransformOf(live.view),
-          .near_clip = live.nearClip};
+          .near_clip = live.near_clip};
 }
 
-void StoreState(State& live, const CameraEffectState& state) {
+void StoreState(LiveCameraRecord& live, const CameraEffectState& state) {
   live.lifetime = state.lifetime;
-  live.effect = state.definition;
+  live.definition = state.definition;
   live.mode = state.mode;
   live.age = state.age;
-  StoreLiveEffectCameraPose(live.startCamera, state.start_camera);
-  StoreLiveEffectCameraPose(live.endCamera, state.end_camera);
-  math::StoreVector(live.lookAt, state.position);
-  math::StoreVector(live.eye, state.target);
+  StoreLiveEffectCameraPose(live.start_camera, state.start_camera);
+  StoreLiveEffectCameraPose(live.end_camera, state.end_camera);
+  math::StoreVector(live.position, state.position);
+  math::StoreVector(live.target, state.target);
   math::StoreTransform(live.view, state.view);
-  live.nearClip = state.near_clip;
+  live.near_clip = state.near_clip;
 }
 
 [[nodiscard]] CameraScratch ScratchOf(
@@ -271,12 +285,14 @@ int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
   }
   const auto kind = static_cast<CameraCommand>(command);
   if (kind == CameraCommand::kCreate) {
-    void* storage = Core::Memory::AllocateLiveFromHighEnd(sizeof(State));
+    void* storage =
+        Core::Memory::AllocateLiveFromHighEnd(sizeof(LiveCameraRecord));
     if (storage == nullptr) {
       VS::Core::LogError("effects", "plg128 camera: heap exhausted for state");
       return 0;
     }
-    slot->rendererState = std::construct_at(static_cast<State*>(storage));
+    slot->rendererState =
+        std::construct_at(static_cast<LiveCameraRecord*>(storage));
   } else if (kind == CameraCommand::kTick || kind == CameraCommand::kRelease) {
     if (slot->rendererState == nullptr) {
       VS::Core::LogWarn("effects", "plg128 camera: command {} without a state",
@@ -286,7 +302,7 @@ int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
   } else {
     return kind == CameraCommand::kStop ? 0 : 1;
   }
-  auto& live = *static_cast<State*>(slot->rendererState);
+  auto& live = *static_cast<LiveCameraRecord*>(slot->rendererState);
   Effects_ParticleEmitterScratch& live_scratch = EmitterScratch();
   CameraEffectState state = StateOf(live);
   CameraScratch scratch = ScratchOf(live_scratch);

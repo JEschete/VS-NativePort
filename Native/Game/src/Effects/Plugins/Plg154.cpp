@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg154.h"
+// PLG154.BIN's module data (src/EFFECT/PLG154.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg154.hpp"
 
-// decomp: D_800FB29C (D_800FB29C@EFFECT/PLG154.BIN)
-SVECTOR Effects_Plg154_mesh10Vertices[10]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FB2EC (D_800FB2EC@EFFECT/PLG154.BIN)
-u_char Effects_Plg154_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FB34C (D_800FB34C@EFFECT/PLG154.BIN)
-CVECTOR Effects_Plg154_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg154 {
+// decomp: D_800FB29C (PLG154.BIN/0.c:8; meshes10.h:38)
+plugins::Mesh10VertexTable mesh10Vertices;
+// decomp: D_800FB2EC (PLG154.BIN/0.c:8; meshes10.h:45)
+plugins::Mesh10FaceTable mesh10Faces;
+// decomp: D_800FB34C (PLG154.BIN/0.c:12; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg154

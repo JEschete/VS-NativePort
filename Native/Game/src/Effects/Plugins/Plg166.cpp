@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg166.h"
+// PLG166.BIN's module data (src/EFFECT/PLG166.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg166.hpp"
 
-// decomp: D_800FCEC0 (D_800FCEC0@EFFECT/PLG166.BIN)
-SVECTOR Effects_Plg166_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD140 (D_800FD140@EFFECT/PLG166.BIN)
-CVECTOR Effects_Plg166_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FD160 (D_800FD160@EFFECT/PLG166.BIN)
-u_char Effects_Plg166_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg166 {
+// decomp: D_800FCEC0 (PLG166.BIN/0.c:7; sphericalSurfaceVertices.h:21)
+plugins::SurfaceProfile mirrorSurfaceVertices;
+// decomp: D_800FD140 (PLG166.BIN/0.c:10; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+// decomp: D_800FD160 (PLG166.BIN/0.c:13; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+}  // namespace VS::Effects::Plg166

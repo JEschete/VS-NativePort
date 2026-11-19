@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg049.h"
+// PLG049.BIN's module data (src/EFFECT/PLG049.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg049.hpp"
 
-// decomp: D_800FE3D4 (D_800FE3D4@EFFECT/PLG049.BIN)
-int Effects_Plg049_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE3D8 (D_800FE3D8@EFFECT/PLG049.BIN)
-u_char Effects_Plg049_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FE3F8 (D_800FE3F8@EFFECT/PLG049.BIN)
-CVECTOR Effects_Plg049_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg049 {
+// decomp: D_800FE3D4 (PLG049.BIN/E0.c:8; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FE3D8 (PLG049.BIN/E0.c:13; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FE3F8 (PLG049.BIN/E0.c:18; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+}  // namespace VS::Effects::Plg049

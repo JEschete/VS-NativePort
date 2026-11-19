@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg138.h"
+// PLG138.BIN's module data (src/EFFECT/PLG138.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg138.hpp"
 
-// decomp: D_800FCD3C (D_800FCD3C@EFFECT/PLG138.BIN)
-u_char Effects_Plg138_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FCD5C (D_800FCD5C@EFFECT/PLG138.BIN)
-CVECTOR Effects_Plg138_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg138 {
+// decomp: D_800FCD3C (PLG138.BIN/18.c:7; rings.h:20)
+plugins::RingPaletteBytes ringColorFactors;
+// decomp: D_800FCD5C (PLG138.BIN/18.c:11; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+}  // namespace VS::Effects::Plg138

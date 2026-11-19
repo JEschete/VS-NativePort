@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg134.h"
+// PLG134.BIN's module data (src/EFFECT/PLG134.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg134.hpp"
 
-// decomp: D_800FC96C (D_800FC96C@EFFECT/PLG134.BIN)
-int Effects_Plg134_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FC970 (D_800FC970@EFFECT/PLG134.BIN)
-CVECTOR Effects_Plg134_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg134 {
+// decomp: D_800FC96C (PLG134.BIN/E0.c:5; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FC970 (PLG134.BIN/E0.c:7; closedRings.h:58)
+plugins::RingPalette closedRingColorFactors;
+}  // namespace VS::Effects::Plg134

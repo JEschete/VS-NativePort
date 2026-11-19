@@ -1,16 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Effects/Plugins/Plg265.h"
+// PLG265.BIN's module data (src/EFFECT/PLG265.BIN).
+// ModuleData.cpp fills these tables from the module image.
+#include "Effects/Plugins/Plg265.hpp"
 
-// decomp: D_800FFD98 (D_800FFD98@EFFECT/PLG265.BIN)
-CVECTOR Effects_Plg265_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FFDB8 (D_800FFDB8@EFFECT/PLG265.BIN)
-int Effects_Plg265_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FFDBC (D_800FFDBC@EFFECT/PLG265.BIN)
-int Effects_Plg265_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800FFDC0 (D_800FFDC0@EFFECT/PLG265.BIN)
-int Effects_Plg265_particleEmissionCounter2; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Effects::Plg265 {
+// decomp: D_800FFD98 (PLG265.BIN/2E8.c:5; closedRings.h:58)
+plugins::RingPalette tiledRingColorFactors;
+// decomp: D_800FFDB8 (PLG265.BIN/2E8.c:8; particleSetup.h:35)
+std::int32_t particleEmissionCounter;
+// decomp: D_800FFDBC (PLG265.BIN/2E8.c:13; trailEffect.h:70)
+std::int32_t trailEmissionCounter;
+// decomp: D_800FFDC0 (PLG265.BIN/2E8.c:15; particleSetup.h:35)
+std::int32_t particleEmissionCounter2;
+}  // namespace VS::Effects::Plg265
