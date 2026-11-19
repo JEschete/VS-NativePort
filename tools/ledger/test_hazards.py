@@ -296,6 +296,13 @@ class ModuleDataTests(unittest.TestCase):
                  if item.hazard_class == "UNSIZED-ARRAY"]
         self.assertEqual(found, ["VS::Content::trailCounter"])
 
+    def test_a_placeholder_row_with_a_qualified_element_type_is_found(self) -> None:
+        # Qualifying the element type, as the C++ header rewrite does, leaves the placeholder in place.
+        for body in ("VS::Effects::EffectRenderer Effects_rows[1];\n", "std::uint8_t Effects_rows[1][4];\n"):
+            with self.subTest(body=body):
+                found = [item.detail for item in scan_all(body) if item.hazard_class == "UNSIZED-ARRAY"]
+                self.assertEqual(found, ["Effects_rows"])
+
     def test_a_real_one_element_initialized_array_is_clean(self) -> None:
         self.assertEqual(classes("int Effects_rows[1] = {4};\n"), set())
 

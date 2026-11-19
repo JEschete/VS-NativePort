@@ -205,7 +205,7 @@ LITERAL_SIZE = re.compile(r"\b\w*(?:memset|memcpy|memmove|[Mm]emcpy|[Mm]emset|[A
 BYTE_OFFSET = re.compile(r"\(\s*(?:u_char|char|unsigned char|uint8_t|std::uint8_t)\s*\*\s*\)\s*&?\s*[\w\->.\[\]]+\s*\)?\s*\+|\(\s*(?:std::)?uintptr_t\s*\)\s*&")
 PS1_ADDRESS = re.compile(r"\b0[xX](?:80(?:0[1-9A-Fa-f]|1[0-9A-Fa-f])[0-9A-Fa-f]{4}|1[fF]80[0-9A-Fa-f]{4})\b")
 UNPROTOTYPED = re.compile(r"\(\s*\*\s*(?P<name>\w+)\s*\)\s*\(\s*\.\.\.\s*\)")
-UNSIZED = re.compile(r"^(?!\s*(?:extern|static_assert|return)\b)[A-Za-z_][\w *]*?\b(?P<name>(?:\w+::)*\w+)(?:\[\]\[\w+\][^;\n]*|\[1\](?:\[\w+\])*\s*);", re.M)
+UNSIZED = re.compile(r"^(?!\s*(?:extern|static_assert|return)\b)[A-Za-z_][\w *:]*?\b(?P<name>(?:\w+::)*\w+)(?:\[\]\[\w+\][^;\n]*|\[1\](?:\[\w+\])*\s*);", re.M)
 NOT_A_DIVISION = re.compile(r"\b(?:float|double|path|filesystem)\b|\bfs::")
 # `!actor->locked` tests a field: it says nothing about whether `actor` itself is empty.
 NOT_A_MEMBER = r"(?![\w\[]|\s*->|\s*\.)"
