@@ -49,7 +49,8 @@ Every header now uses `#pragma once`, and `RETIRED_CRITERIA` holds `guard` to it
   declarations visible changes no expansion. It exposed one include cycle, `Effects/Runtime.h` ->
   `Battle/ActionResolution.h` -> `Battle/BattleTypes.h` -> `Effects/Runtime.h`. `ActionResolution.h` included
   `Action.h`, `BattleTypes.h` and `Hit.h` only for two pointer parameters, so it now forward-declares
-  `Battle_ActionDefinition` and `Battle_HitResult` instead.
+  `Battle_ActionDefinition` and `Battle_HitResult` instead. Those are now `VS::Battle::ActionDefinition` and
+  `VS::Battle::HitResult`, forward-declared in `Battle/ActionResolution.hpp`.
 
 ## Owner decisions (2026-11-18)
 

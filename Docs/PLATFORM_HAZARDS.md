@@ -133,8 +133,8 @@ These flags keep a check that the source already has. They do not add one, so `G
 
 ```cpp
 // Today (the #251 shape): nothing says this slot can be empty.
-Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
-if (actor->instance.weaponDrawn) { ... }
+VS::Actors::ActorRecord* actor = VS::Actors::actorRecords[actor_slot];
+if (actor->instance.weapon_drawn) { ... }
 
 // Modern: a typed ID, and a lookup whose result cannot be used without handling the empty case.
 enum class ActorId : std::uint32_t {};
@@ -233,8 +233,8 @@ Suggested order, with each step leaving the game playing the same:
    definitions from instances and owns this work.
 5. Make the menus scroll over any length, and only then raise a limit.
 
-The ledger also lists fixed tables outside inventory that later features may reach, such as `Battle_actors[42]` and
-`Actors_actorRecords[17]`.
+The ledger also lists fixed tables outside inventory that later features may reach, such as `VS::Battle::actors`
+(`kBattleActorSlotCount`, 42) and `VS::Actors::actorRecords` (`kActorTableSlots`, 17).
 
 ## Limits
 
