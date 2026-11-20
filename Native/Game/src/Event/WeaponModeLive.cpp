@@ -17,7 +17,7 @@
 #include "Battle/Damage.h"
 #include "Event/Actors.hpp"
 #include "Event/ScriptActors.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/WeaponMode.hpp"
 #include "Event/WeaponModeOpcode.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -43,10 +43,10 @@ void Require(bool valid, const char* message) {
 class LiveWeaponModeHost final : public event::WeaponModeHost {
  public:
   [[nodiscard]] bool TransitionPending() const override {
-    return Event_weaponTransitionPending != 0;
+    return event::weaponTransitionPending != 0;
   }
   void SetTransitionPending(bool pending) override {
-    Event_weaponTransitionPending = pending ? 1 : 0;
+    event::weaponTransitionPending = pending ? 1 : 0;
   }
   [[nodiscard]] bool SkipActive() const override {
     return event::skipState == kSkipActive;
@@ -89,10 +89,12 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
 
 // decomp: func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158): the opcode reads
 // its mode at byte 1 and its transition variant at byte 2.
-intptr_t VS::Event::ScriptSetAshleyBattleModeOpcode(u_char* command, int16_t) {
+std::intptr_t VS::Event::ScriptSetAshleyBattleModeOpcode(std::uint8_t* command,
+                                                         std::int16_t) {
   Require(command != nullptr, "Script weapon-mode command is missing");
   LiveWeaponModeHost host;
   const event::WeaponModeCommand decoded{.mode = command[1],
                                          .transition = command[2]};
-  return static_cast<intptr_t>(event::ScriptSetAshleyBattleMode(decoded, host));
+  return static_cast<std::intptr_t>(
+      event::ScriptSetAshleyBattleMode(decoded, host));
 }

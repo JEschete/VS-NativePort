@@ -1962,15 +1962,15 @@
     <ClCompile Include="src\Event\ScriptSplashCommands.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClCompile Include="src\Event\ScriptVm.cpp">
-      <Filter>src\Event</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Event\ScriptVm.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
     <ClCompile Include="src\Event\ScriptVmLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
+    <ClCompile Include="src\Event\ScriptVmLiveState.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptVmLiveState.hpp">
+      <Filter>src\Event</Filter>
+    </ClInclude>
     <ClInclude Include="src\Event\Splash.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>

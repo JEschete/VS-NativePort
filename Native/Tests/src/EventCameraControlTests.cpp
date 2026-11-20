@@ -17,7 +17,7 @@
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -136,7 +136,7 @@ struct LiveControlWorkspace {
   VS::Event::CameraState camera{};
   VS::Event::CameraState* saved_camera = event::cameraWorkspace;
   std::uint8_t saved_skip = event::skipNextFieldCameraRestore;
-  std::int16_t saved_scripted = Event_isFieldCameraRestoreScripted;
+  std::int16_t saved_scripted = event::isFieldCameraRestoreScripted;
 
   LiveControlWorkspace() { event::cameraWorkspace = &camera; }
   LiveControlWorkspace(const LiveControlWorkspace&) = delete;
@@ -146,7 +146,7 @@ struct LiveControlWorkspace {
   ~LiveControlWorkspace() {
     event::cameraWorkspace = saved_camera;
     event::skipNextFieldCameraRestore = saved_skip;
-    Event_isFieldCameraRestoreScripted = saved_scripted;
+    event::isFieldCameraRestoreScripted = saved_scripted;
   }
 };
 
@@ -363,13 +363,13 @@ TEST_CASE("Field camera restore opcode marks the restore scripted if skipped",
   LiveControlWorkspace workspace;
   event::cameraWorkspace = nullptr;
   event::skipNextFieldCameraRestore = 1;
-  Event_isFieldCameraRestoreScripted = 0;
+  event::isFieldCameraRestoreScripted = 0;
   std::array<std::uint8_t, 3> instruction{0xE9, 0x02, 0x01};
 
   CHECK(VS::Event::CommandRestoreFieldCameraOpcode(instruction.data(), 0) == 0);
 
   CHECK(event::skipNextFieldCameraRestore == 0);
-  CHECK(Event_isFieldCameraRestoreScripted == 1);
+  CHECK(event::isFieldCameraRestoreScripted == 1);
 }
 
 // F01220 func_800BC1CC

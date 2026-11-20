@@ -20,7 +20,7 @@
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -248,9 +248,8 @@ void ApplyEventCameraStateEntry() {
   if (camera == nullptr) return;
   LiveCameraOutput output;
   EventCameraFrame frame = LoadFrame(*camera);
-  ApplyEventCameraState(
-      frame, skipNextFieldCameraRestore != 0,
-      static_cast<std::uint8_t>(Event_isScriptBackdropEnabled), output);
+  ApplyEventCameraState(frame, skipNextFieldCameraRestore != 0,
+                        isScriptBackdropEnabled, output);
   StoreFrame(*camera, frame);
 }
 

@@ -42,7 +42,6 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/Gimmicks.h"

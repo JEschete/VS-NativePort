@@ -32,8 +32,8 @@
 #include "Event/ScriptEffects.hpp"
 #include "Event/ScriptField.hpp"
 #include "Event/ScriptScreen.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/Splash.hpp"
 #include "Event/Weather.hpp"
 #include "Field/EnvironmentLive.hpp"
@@ -54,8 +54,6 @@ static_assert(std::size(Actors_actorRecords) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
 static_assert(std::size(Field_gimmickInstances) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
-static_assert(std::size(Event_vibrationPatterns) >=
-              static_cast<std::size_t>(event::kVibrationPatternCount));
 static_assert(event::kSplashTweenExtent >= event::kImageTweenCount);
 // The original advanced the cursor past a texture page packet to the first
 // line's x0, a packet's length further.
@@ -65,7 +63,6 @@ constexpr char kSkipActive = 2;
 // Vibration patterns open with an 8-byte header; the controller plays all
 // motors and the script owns the request.
 constexpr std::size_t kVibrationHeaderBytes = 8;
-constexpr std::uint32_t kVibrationPatternBytes = 0x80;
 constexpr std::uint32_t kAllMotors = 0xFF;
 constexpr int kScriptVibrationOwner = 2;
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
@@ -152,44 +149,26 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
 
   [[nodiscard]] bool VibrationPatternLoaded(int pattern) const override {
     const auto lease = event::LeaseLiveVibrationPattern(pattern);
-    if (lease) {
-      const auto bytes = lease->Bytes();
-      return bytes && bytes->size() > kVibrationHeaderBytes;
-    }
-    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
-      return false;
-    }
-    return Event_vibrationPatterns[pattern] != nullptr;
+    if (!lease) return false;
+    const auto bytes = lease->Bytes();
+    return bytes && bytes->size() > kVibrationHeaderBytes;
   }
-  // Buffered requests own separate copies, not the original shared scratch.
-  void StartVibrationPattern(int pattern, bool buffered) override {
+  // Every request owns a bounded copy of the pattern, buffered or not, so no
+  // request reads the original shared scratch.
+  void StartVibrationPattern(int pattern, bool /*buffered*/) override {
     const auto lease = event::LeaseLiveVibrationPattern(pattern);
-    if (lease) {
-      const auto bytes = lease->Bytes();
-      if (!bytes || bytes->size() <= kVibrationHeaderBytes) {
-        Refuse(event::ScriptEffectRefusal::kVibrationPattern, pattern);
-        return;
-      }
-      static_cast<void>(VS::Input::StartLiveOwnedVibrationPattern(
-          std::as_bytes(*bytes).subspan(kVibrationHeaderBytes), kAllMotors,
-          kScriptVibrationOwner));
-      return;
-    }
-    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
+    if (!lease) {
       Refuse(event::ScriptEffectRefusal::kVibrationPattern, pattern);
       return;
     }
-    const char* source = Event_vibrationPatterns[pattern];
-    if (buffered) {
-      const std::span bytes(reinterpret_cast<const std::byte*>(source),
-                            kVibrationPatternBytes);
-      static_cast<void>(VS::Input::StartLiveOwnedVibrationPattern(
-          bytes.subspan(kVibrationHeaderBytes), kAllMotors,
-          kScriptVibrationOwner));
+    const auto bytes = lease->Bytes();
+    if (!bytes || bytes->size() <= kVibrationHeaderBytes) {
+      Refuse(event::ScriptEffectRefusal::kVibrationPattern, pattern);
       return;
     }
-    static_cast<void>(VS::Input::StartLiveVibrationPattern(
-        source + kVibrationHeaderBytes, kAllMotors, kScriptVibrationOwner));
+    static_cast<void>(VS::Input::StartLiveOwnedVibrationPattern(
+        std::as_bytes(*bytes).subspan(kVibrationHeaderBytes), kAllMotors,
+        kScriptVibrationOwner));
   }
   void StopVibration() override {
     static_cast<void>(
@@ -217,7 +196,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     VS::Effects::ScreenDistortion::SetLiveFeedbackLayer(layer);
   }
   void SetScanlineOverlay(std::uint8_t enabled) override {
-    Event_isScanlineOverlayEnabled = static_cast<char>(enabled);
+    event::isScanlineOverlayEnabled = enabled;
   }
 };
 

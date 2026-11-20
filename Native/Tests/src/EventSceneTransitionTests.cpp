@@ -14,7 +14,7 @@
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptStep.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/DoorRecord.hpp"
 #include "State/RoomMemory.hpp"
 
@@ -393,16 +393,16 @@ TEST_CASE(
     "ScriptRunMenuTransition opcode clears the live active flag when "
     "the rewards end",
     "[event][scene-transition]") {
-  const char saved_active = Event_isMenuTransitionActive;
+  const std::uint8_t saved_active = event::isMenuTransitionActive;
   const auto saved_phase = Battle_actionFlowMode;
   // No reward phase runs, so the sequence has ended.
   Battle_actionFlowMode = 0;
-  Event_isMenuTransitionActive = 5;
+  event::isMenuTransitionActive = 5;
   std::array<std::uint8_t, event::kRunMenuTransitionLength> bytes =
       MenuCommand(event::kTimeAttackStartMode);
   CHECK(VS::Event::ScriptRunMenuTransitionOpcode(bytes.data(), 0) == 4);
-  CHECK(Event_isMenuTransitionActive == 0);
-  Event_isMenuTransitionActive = saved_active;
+  CHECK(event::isMenuTransitionActive == 0);
+  event::isMenuTransitionActive = saved_active;
   Battle_actionFlowMode = saved_phase;
 }
 
@@ -514,14 +514,14 @@ TEST_CASE("ScriptChangeRoom refuses a short instruction",
 
 TEST_CASE("ScriptChangeRoom opcode maps the live room change state",
           "[event][scene-transition]") {
-  const std::int16_t saved = Event_roomChangeState;
+  const std::int16_t saved = event::roomChangeState;
   std::array<std::uint8_t, event::kChangeRoomLength> bytes{0x68, 3, 4,    5, 1,
                                                            6,    2, 0x04, 0, 0};
-  Event_roomChangeState = event::kRoomChangeKeepsEvent;
+  event::roomChangeState = event::kRoomChangeKeepsEvent;
   CHECK(VS::Event::ScriptChangeRoomOpcode(bytes.data(), 0) == 1);
-  CHECK(Event_roomChangeState == event::kRoomChangeKeepsEvent);
-  Event_roomChangeState = event::kRoomChangeArrived;
+  CHECK(event::roomChangeState == event::kRoomChangeKeepsEvent);
+  event::roomChangeState = event::kRoomChangeArrived;
   CHECK(VS::Event::ScriptChangeRoomOpcode(bytes.data(), 0) == 0);
-  CHECK(Event_roomChangeState == event::kRoomChangeIdle);
-  Event_roomChangeState = saved;
+  CHECK(event::roomChangeState == event::kRoomChangeIdle);
+  event::roomChangeState = saved;
 }

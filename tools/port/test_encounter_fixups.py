@@ -24,6 +24,18 @@ def flat(source: str) -> str:
     return " ".join(source.split())
 
 
+def skip_opcode_handlers() -> list[str]:
+    """The VS::Event skip table's 256 handlers, in opcode order."""
+    root = Path(__file__).resolve().parents[2]
+    source = (root / r"Native\Game\src\Event\ScriptVmLiveState.cpp").read_text(encoding="utf-8")
+    start = source.index("ScriptOpcodeHandler skipOpcodeHandlers[kScriptOpcodeCount] = {")
+    assert source.rfind("namespace VS::Event {", 0, start) != -1
+    body = source[source.index("{", start) + 1:source.index("};", start)]
+    entries = re.findall(r"^\s*(\w+),", body, re.MULTILINE)
+    assert len(entries) == 256, len(entries)
+    return entries
+
+
 @contextlib.contextmanager
 def unpromoted_opcode_handlers(*identifiers: str):
     """Fixture handlers stay unpromoted however many real handlers later gain an opcode binding."""
@@ -1983,10 +1995,10 @@ int func_800F9800(void) {
             copy_fixups.MODULE_BINDING_ENTRIES,
         )
         root = Path(__file__).resolve().parents[2]
-        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
+        vm = (root / r"Native\Game\src\Event\ScriptVmLiveState.cpp").read_text(encoding="utf-8")
         self.assertIn('#include "Event/WeaponModeOpcode.hpp"', vm)
-        self.assertIn("VS::Event::ScriptSetAshleyBattleModeOpcode,", vm)
-        self.assertNotRegex(vm, r"VS::Event::ScriptSetAshleyBattleMode\b")
+        self.assertIn("ScriptSetAshleyBattleModeOpcode", skip_opcode_handlers())
+        self.assertNotRegex(vm, r"\bScriptSetAshleyBattleMode\b")
         pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertIn(
             '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&VS::Event::ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u}',
@@ -2009,8 +2021,9 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn(
-            "Event_weaponTransitionPending = static_cast<char>(value);", source
+            "weaponTransitionPending = static_cast<std::uint8_t>(value);", source
         )
+        self.assertNotIn("Event_weaponTransitionPending", source)
         self.assertNotIn("Event_reservedResetByte", source)
         self.assertNotIn("Event_reservedResetByte", vm)
         control = (root / r"Native\Game\src\Event\ScriptControl.cpp").read_text(
@@ -3130,9 +3143,9 @@ int func_800F9800(void) {
                      "RestoreEventFieldCamera", "SetEventCameraFollowing", "StopEventCameraMotion",
                      "StartEventCameraOrbitReturn"):
             self.assertNotRegex(generated, rf"\bEvent_{name}\(")
-        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
+        skip = skip_opcode_handlers()
         for name in ("CommandStopCameraMotion", "CommandSetCameraFollowing", "CommandRestoreFieldCamera"):
-            self.assertIn(f"VS::Event::{name}Opcode", vm)
+            self.assertIn(f"{name}Opcode", skip)
 
     def test_camera_lens_and_shake_are_owned_by_the_typed_lens(self):
         # #276 row 35 A35-05: the typed lens (EventCameraLens.cpp) replaces the lens/shake opcode and the
@@ -3146,8 +3159,7 @@ int func_800F9800(void) {
         frame = (root / r"Native\Game\src\Event\EventCameraFrameLive.cpp").read_text(encoding="utf-8")
         self.assertIn("UpdateEventLensTweenEntry(&camera.far_clip);", frame)
         self.assertIn("UpdateEventCameraShakeEntry();", frame)
-        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
-        self.assertEqual(vm.count("VS::Event::CommandCameraLensOrShakeOpcode"), 5)
+        self.assertEqual(skip_opcode_handlers().count("CommandCameraLensOrShakeOpcode"), 5)
 
     def test_script_actor_tile_store_reads_a_typed_placement(self):
         # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.

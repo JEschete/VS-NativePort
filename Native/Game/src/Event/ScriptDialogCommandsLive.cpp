@@ -19,8 +19,8 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogOpcodes.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBox.hpp"
@@ -33,7 +33,7 @@ namespace event = VS::Event;
 
 static_assert(std::size(VS::Menu::textBoxes) ==
               static_cast<std::size_t>(event::kTextBoxCount));
-static_assert(std::size(Event_isTextBoxAwaitingClose) >=
+static_assert(std::size(event::isTextBoxAwaitingClose) >=
               static_cast<std::size_t>(event::kTextBoxCount));
 static_assert(std::size(Battle_stringContext.integers) ==
               static_cast<std::size_t>(event::kDialogIntegerCount));
@@ -190,40 +190,32 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
   }
 
   [[nodiscard]] bool AwaitingClose(int box) const override {
-    return Event_isTextBoxAwaitingClose[box] != 0;
+    return event::isTextBoxAwaitingClose[box] != 0;
   }
   void SetAwaitingClose(int box, bool awaiting) override {
-    Event_isTextBoxAwaitingClose[box] = awaiting ? 1 : 0;
+    event::isTextBoxAwaitingClose[box] = awaiting ? 1 : 0;
   }
   // The script's dialog strings open with a table of half-word offsets, from
   // the start of the strings, of each string.
   void ShowDialogString(int box, int string_id) override {
     const auto lease = event::LeaseLiveDialogStrings();
-    if (lease) {
-      const auto bytes = lease->Bytes();
-      if (!bytes) {
-        RefuseNativeDialog(box, string_id);
-        return;
-      }
-      const auto text = event::ResolveDialogString(*bytes, string_id);
-      if (!text || !RetainDialogOwner(*lease)) {
-        RefuseNativeDialog(box, string_id);
-        return;
-      }
-      static_cast<void>(VS::Menu::SetLiveTextBoxText(
-          box, const_cast<char*>(reinterpret_cast<const char*>(text->data()))));
-      PruneDialogOwners();
-      return;
-    }
-    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
+    if (!lease) {
       RefuseNativeDialog(box, string_id);
       return;
     }
-    Require(Event_dialogStrings != nullptr,
-            "Script dialog strings are missing");
-    const std::uint16_t offset = Event_dialogStrings[string_id];
+    const auto bytes = lease->Bytes();
+    if (!bytes) {
+      RefuseNativeDialog(box, string_id);
+      return;
+    }
+    const auto text = event::ResolveDialogString(*bytes, string_id);
+    if (!text || !RetainDialogOwner(*lease)) {
+      RefuseNativeDialog(box, string_id);
+      return;
+    }
     static_cast<void>(VS::Menu::SetLiveTextBoxText(
-        box, reinterpret_cast<char*>(&Event_dialogStrings[offset])));
+        box, const_cast<char*>(reinterpret_cast<const char*>(text->data()))));
+    PruneDialogOwners();
   }
   [[nodiscard]] int PollTextBox(int box) override {
     return VS::Menu::SetLiveTextBoxText(box, nullptr);
@@ -237,10 +229,10 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     return result;
   }
   [[nodiscard]] bool SelectionActive() const override {
-    return Event_isTextSelectionActive != 0;
+    return event::isTextSelectionActive != 0;
   }
   void SetSelectionActive(bool active) override {
-    Event_isTextSelectionActive = active ? 1 : 0;
+    event::isTextSelectionActive = active ? 1 : 0;
   }
   [[nodiscard]] int SelectTextBoxChoice(std::uint8_t box_mask) override {
     return VS::Menu::SelectLiveTextBoxChoice(box_mask);

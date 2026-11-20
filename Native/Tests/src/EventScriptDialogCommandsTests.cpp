@@ -17,7 +17,6 @@
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptDialogOpcodes.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/TextBox.hpp"
@@ -45,14 +44,11 @@ struct LiveDialogFixture {
   VS::Menu::TextBoxSelectorState selector = VS::Menu::textBoxSelector;
   decltype(VS::State::stateFlags) audio_flags = VS::State::stateFlags;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
-  std::uint16_t* strings = Event_dialogStrings;
-  std::array<std::uint16_t, 3> legacy{1, 0xE701, 0};
 
   LiveDialogFixture() {
     std::ranges::copy(VS::Menu::textBoxes, boxes.begin());
     event::ReleaseLiveScriptDialogText();
     event::ResetLiveScriptRuntime();
-    Event_dialogStrings = legacy.data();
     VS::Menu::textBoxSelector = {};
     VS::Input::buttonsPressed = {};
     VS::State::stateFlags.opaque_11 = 1;
@@ -69,7 +65,6 @@ struct LiveDialogFixture {
     VS::Menu::textBoxSelector = selector;
     VS::State::stateFlags = audio_flags;
     VS::Input::buttonsPressed = pressed;
-    Event_dialogStrings = strings;
   }
 };
 

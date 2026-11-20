@@ -33,7 +33,7 @@
 #include "Battle/TargetingState.h"
 #include "Core/Text/TextCode.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
@@ -269,8 +269,8 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   constexpr unsigned kChestControl = 9, kChestContentsPhase = 3;
   constexpr unsigned kSubmenuStateMask = 0xF;
   constexpr int kMainMenuEntries = 10;
-  result.event_owned =
-      state.control_mode == kEventControl && Event_isMenuTransitionActive != 0;
+  result.event_owned = state.control_mode == kEventControl &&
+                       VS::Event::isMenuTransitionActive != 0;
   if ((state.control_mode != kMenuControl && !result.event_owned &&
        !(state.control_mode == kCombatControl &&
          (state.action_phase == kAbilityUnlockPhase ||

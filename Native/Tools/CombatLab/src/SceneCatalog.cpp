@@ -19,7 +19,7 @@
 #include "CombatLab/DoorTests.hpp"
 #include "Content/DataStore.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::combat_lab {
@@ -64,8 +64,8 @@ SceneOpcodes ProductionOpcodes() {
   SceneOpcodes result;
   for (std::size_t index = 0; index < result.size(); ++index) {
     auto& opcode = result[index];
-    opcode.size = Event_kOpcodeSizes[index];
-    const auto handler = Event_kOpcodeHandlers[index];
+    opcode.size = VS::Event::opcodeSizes[index];
+    const auto handler = VS::Event::opcodeHandlers[index];
     if (handler == VS::Event::ScriptReportInvalidOpcodeOpcode ||
         handler == nullptr) {
       opcode.size = 0;

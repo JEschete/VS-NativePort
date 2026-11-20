@@ -26,8 +26,8 @@
 #include "Event/ScriptAudio.hpp"
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptEffects.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -41,36 +41,33 @@ struct EventSessionFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, kArenaBytes> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  decltype(Event_playbackPhase) saved_phase = Event_playbackPhase;
-  decltype(Event_isStartConfirmed) saved_start = Event_isStartConfirmed;
-  decltype(Event_isMainThreadFinished) saved_finished =
-      Event_isMainThreadFinished;
-  decltype(Event_roomChangeState) saved_room = Event_roomChangeState;
+  decltype(VS::Event::playbackPhase) saved_phase = VS::Event::playbackPhase;
+  decltype(VS::Event::isStartConfirmed) saved_start =
+      VS::Event::isStartConfirmed;
+  decltype(VS::Event::isMainThreadFinished) saved_finished =
+      VS::Event::isMainThreadFinished;
+  decltype(VS::Event::roomChangeState) saved_room = VS::Event::roomChangeState;
   decltype(VS::Event::isAmbientSoundSuspended) saved_ambient =
       VS::Event::isAmbientSoundSuspended;
-  decltype(Event_scriptBuffer) saved_script = Event_scriptBuffer;
-  decltype(std::to_array(Event_threadCursors)) saved_threads =
-      std::to_array(Event_threadCursors);
-  decltype(std::to_array(Event_threadWaitFrames)) saved_waits =
-      std::to_array(Event_threadWaitFrames);
-  decltype(std::to_array(Event_kOpcodeHandlers)) saved_handlers =
-      std::to_array(Event_kOpcodeHandlers);
-  decltype(std::to_array(Event_kOpcodeSizes)) saved_sizes =
-      std::to_array(Event_kOpcodeSizes);
+  decltype(std::to_array(VS::Event::threadWaitFrames)) saved_waits =
+      std::to_array(VS::Event::threadWaitFrames);
+  decltype(std::to_array(VS::Event::opcodeHandlers)) saved_handlers =
+      std::to_array(VS::Event::opcodeHandlers);
+  decltype(std::to_array(VS::Event::opcodeSizes)) saved_sizes =
+      std::to_array(VS::Event::opcodeSizes);
   char saved_skip = VS::Event::skipState;
 
   ~EventSessionFixture() {
-    Event_playbackPhase = saved_phase;
-    Event_isStartConfirmed = saved_start;
-    Event_isMainThreadFinished = saved_finished;
-    Event_roomChangeState = saved_room;
+    VS::Event::playbackPhase = saved_phase;
+    VS::Event::isStartConfirmed = saved_start;
+    VS::Event::isMainThreadFinished = saved_finished;
+    VS::Event::roomChangeState = saved_room;
     VS::Event::isAmbientSoundSuspended = saved_ambient;
-    Event_scriptBuffer = saved_script;
-    std::copy(saved_threads.begin(), saved_threads.end(), Event_threadCursors);
-    std::copy(saved_waits.begin(), saved_waits.end(), Event_threadWaitFrames);
+    std::copy(saved_waits.begin(), saved_waits.end(),
+              VS::Event::threadWaitFrames);
     std::copy(saved_handlers.begin(), saved_handlers.end(),
-              Event_kOpcodeHandlers);
-    std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
+              VS::Event::opcodeHandlers);
+    std::copy(saved_sizes.begin(), saved_sizes.end(), VS::Event::opcodeSizes);
     VS::Event::skipState = saved_skip;
   }
 };
@@ -143,8 +140,8 @@ struct UiSessionFixture {
       std::to_array(VS::Menu::textBoxes);
   VS::Menu::TextBoxSelectorState saved_selector = VS::Menu::textBoxSelector;
   VS::Menu::StringContext saved_context = Battle_stringContext;
-  std::array<char, 80> saved_waits =
-      std::to_array(Event_isTextBoxAwaitingClose);
+  decltype(std::to_array(VS::Event::isTextBoxAwaitingClose)) saved_waits =
+      std::to_array(VS::Event::isTextBoxAwaitingClose);
   int* saved_notification = VS::Menu::sceneNotificationBuffer;
   std::uint8_t saved_timer = VS::Menu::sceneNotificationTimer;
   std::uint8_t saved_timed = VS::Menu::sceneNotificationTimed;
@@ -157,7 +154,7 @@ struct UiSessionFixture {
     VS::Menu::textBoxSelector = saved_selector;
     Battle_stringContext = saved_context;
     std::copy(saved_waits.begin(), saved_waits.end(),
-              Event_isTextBoxAwaitingClose);
+              VS::Event::isTextBoxAwaitingClose);
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Menu::sceneNotificationTimer = saved_timer;
     VS::Menu::sceneNotificationTimed = saved_timed;
@@ -179,7 +176,7 @@ void BorrowSessionUiText() {
   VS::Menu::textBoxSelector.count = 2;
   VS::Menu::textBoxSelector.selected_index = 1;
   std::fill_n(Battle_stringContext.strings, 10, std::begin(text));
-  std::fill_n(Event_isTextBoxAwaitingClose, 80, 1);
+  std::ranges::fill(VS::Event::isTextBoxAwaitingClose, 1);
   VS::Menu::sceneNotificationBuffer = notification;
   VS::Menu::sceneNotificationTimer = 17;
   VS::Menu::sceneNotificationTimed = 1;
@@ -198,9 +195,9 @@ bool SessionUiIsClear() {
          std::all_of(std::begin(Battle_stringContext.strings),
                      std::end(Battle_stringContext.strings),
                      [](const auto* text) { return text == nullptr; }) &&
-         std::all_of(std::begin(Event_isTextBoxAwaitingClose),
-                     std::end(Event_isTextBoxAwaitingClose),
-                     [](char wait) { return wait == 0; }) &&
+         std::all_of(std::begin(VS::Event::isTextBoxAwaitingClose),
+                     std::end(VS::Event::isTextBoxAwaitingClose),
+                     [](std::uint8_t wait) { return wait == 0; }) &&
          VS::Menu::sceneNotificationBuffer == nullptr &&
          VS::Menu::sceneNotificationTimer == 0 &&
          VS::Menu::sceneNotificationTimed == 0;
@@ -313,26 +310,26 @@ TEST_CASE("Gameplay initialization cannot resume a previous Game Over event",
   const auto old_script =
       VS::test_support::MountLiveEventScript(std::vector<std::uint8_t>(16));
   auto& host = VS::Event::LiveScriptVm();
-  Event_playbackPhase = 4;
-  Event_isStartConfirmed = 1;
-  Event_isMainThreadFinished = 1;
-  Event_roomChangeState = 3;
+  VS::Event::playbackPhase = 4;
+  VS::Event::isStartConfirmed = 1;
+  VS::Event::isMainThreadFinished = 1;
+  VS::Event::roomChangeState = 3;
   for (int thread = 0; thread < VS::Event::kScriptThreadCount; ++thread) {
     host.SetThreadCursor(thread, old_script);
   }
-  std::fill(std::begin(Event_threadWaitFrames),
-            std::end(Event_threadWaitFrames), 30);
+  std::fill(std::begin(VS::Event::threadWaitFrames),
+            std::end(VS::Event::threadWaitFrames), 30);
 
   REQUIRE(VS::Event::InitializeLiveScriptOpcodeTable());
 
-  REQUIRE(Event_playbackPhase == 0);
-  CHECK(Event_isStartConfirmed == 0);
-  CHECK(Event_isMainThreadFinished == 0);
+  REQUIRE(VS::Event::playbackPhase == 0);
+  CHECK(VS::Event::isStartConfirmed == 0);
+  CHECK(VS::Event::isMainThreadFinished == 0);
   for (int thread = 0; thread < VS::Event::kScriptThreadCount; ++thread) {
     CHECK_FALSE(host.ThreadCursor(thread).Present());
   }
-  CHECK(std::all_of(std::begin(Event_threadWaitFrames),
-                    std::end(Event_threadWaitFrames),
+  CHECK(std::all_of(std::begin(VS::Event::threadWaitFrames),
+                    std::end(VS::Event::threadWaitFrames),
                     [](auto wait) { return wait == 0; }));
   CHECK(VS::Event::UpdateLiveEventPlayback() == 0);
 }
@@ -370,8 +367,8 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
   script_title_entries = 0;
   script_fallthrough = 0;
   VS::Event::skipState = 0;
-  Event_kOpcodeHandlers[0xFE] = SessionTransferOpcode;
-  Event_kOpcodeSizes[0xFE] = 1;
+  VS::Event::opcodeHandlers[0xFE] = SessionTransferOpcode;
+  VS::Event::opcodeSizes[0xFE] = 1;
   CHECK(VS::Boot::RunLiveSessionLoop(EnterScriptTitle, EnterScriptTitle) == 41);
   CHECK(script_title_entries == 2);
   CHECK(script_fallthrough == 0);

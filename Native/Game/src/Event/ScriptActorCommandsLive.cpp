@@ -32,8 +32,8 @@
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
 #include "Event/ScriptActors.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/Actors.h"
 #include "Field/Doors.h"
 #include "Field/MinimapSceneLive.hpp"
@@ -353,10 +353,10 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     VS::Field::MarkEntranceDoorOnSceneMapEntry(door);
   }
   [[nodiscard]] bool MenuTransitionActive() const override {
-    return Event_isMenuTransitionActive != 0;
+    return event::isMenuTransitionActive != 0;
   }
   void SetMenuTransitionActive(bool active) override {
-    Event_isMenuTransitionActive = active ? 1 : 0;
+    event::isMenuTransitionActive = active ? 1 : 0;
   }
   void PresentScriptedLoot(event::ScriptLoot loot) override {
     VS::Items::PresentLiveScriptedLoot(loot.first_item, loot.first_count,

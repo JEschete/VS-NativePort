@@ -20,7 +20,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Field/CameraLive.hpp"

@@ -14,8 +14,8 @@
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Core/RandomLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/Triggers.hpp"
 #include "State/GameClock.hpp"
 #include "State/GameClockLive.hpp"
@@ -99,10 +99,10 @@ struct LiveTimerState {
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = VS::Core::BiosRand().State();
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
-  char saved_phase = Event_playbackPhase;
+  std::uint8_t saved_phase = VS::Event::playbackPhase;
   char saved_direct = VS::Event::isDirectEventRequest;
-  std::int16_t saved_event = Event_eventId;
-  std::uint16_t saved_source = Event_eventSource;
+  std::int16_t saved_event = VS::Event::eventId;
+  std::uint16_t saved_source = VS::Event::eventSource;
 
   LiveTimerState() = default;
   LiveTimerState(const LiveTimerState&) = delete;
@@ -116,10 +116,10 @@ struct LiveTimerState {
     Battle_lowerScreenUiState = saved_hud;
     VS::Core::SeedBiosRand(saved_random);
     VS::Event::PublishLiveRoomScriptSections(saved_room);
-    Event_playbackPhase = saved_phase;
+    VS::Event::playbackPhase = saved_phase;
     VS::Event::isDirectEventRequest = saved_direct;
-    Event_eventId = saved_event;
-    Event_eventSource = saved_source;
+    VS::Event::eventId = saved_event;
+    VS::Event::eventSource = saved_source;
   }
 };
 
@@ -147,9 +147,9 @@ struct LiveTimerExpiry {
                       bytes.size()}});
     REQUIRE(room);
     VS::Event::PublishLiveRoomScriptSections(*room);
-    Event_playbackPhase = 0;
+    VS::Event::playbackPhase = 0;
     VS::Event::isDirectEventRequest = 0;
-    Event_eventId = 0;
+    VS::Event::eventId = 0;
   }
 
   void Start(int packed_time) {
@@ -644,13 +644,13 @@ TEST_CASE("An ended live countdown evaluates the room expiry triggers",
   test.Start(4);
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
   CHECK(VS::State::sceneTimer.time.frames == 2);
-  CHECK(Event_playbackPhase == 0);
+  CHECK(VS::Event::playbackPhase == 0);
 
   CHECK(VS::State::UpdateLiveSceneTimer() == 1);
   CHECK(VS::State::sceneTimer.time.frames == 0);
   CHECK(VS::State::sceneTimer.mode == kCountDown);
-  CHECK(Event_eventId == LiveTimerExpiry::kExpiryEvent);
-  CHECK(Event_playbackPhase == 1);
+  CHECK(VS::Event::eventId == LiveTimerExpiry::kExpiryEvent);
+  CHECK(VS::Event::playbackPhase == 1);
 }
 
 TEST_CASE("A busy event player does not consume timer expiry", "[state-boot]") {
@@ -660,7 +660,7 @@ TEST_CASE("A busy event player does not consume timer expiry", "[state-boot]") {
   REQUIRE(VS::State::UpdateLiveSceneTimer() == 1);
   VS::Event::isDirectEventRequest = 1;
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
-  CHECK(Event_eventId == LiveTimerExpiry::kExpiryEvent);
+  CHECK(VS::Event::eventId == LiveTimerExpiry::kExpiryEvent);
 }
 
 TEST_CASE("The packed play time word keeps frames in the low byte",

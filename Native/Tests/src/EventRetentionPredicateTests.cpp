@@ -9,8 +9,8 @@
 #include "Battle/Damage.h"
 #include "Battle/Encounter.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/Triggers.hpp"
 #include "Legacy/Psx.h"
 
@@ -25,9 +25,9 @@ constexpr unsigned kTriggerOffset = 32;
 struct RetentionPredicateFixture {
   Battle_Actor* saved_actor = Battle_actors[kActorSlot];
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
-  decltype(Event_playbackPhase) saved_phase = Event_playbackPhase;
-  decltype(Event_eventId) saved_id = Event_eventId;
-  decltype(Event_eventSource) saved_source = Event_eventSource;
+  decltype(VS::Event::playbackPhase) saved_phase = VS::Event::playbackPhase;
+  decltype(VS::Event::eventId) saved_id = VS::Event::eventId;
+  decltype(VS::Event::eventSource) saved_source = VS::Event::eventSource;
   decltype(VS::Event::isDirectEventRequest) saved_direct =
       VS::Event::isDirectEventRequest;
   std::array<u_char, 64> triggers{};
@@ -54,9 +54,9 @@ struct RetentionPredicateFixture {
         VS::Event::RoomEventSections::Copy({.triggers = triggers});
     REQUIRE(room);
     VS::Event::PublishLiveRoomScriptSections(*room);
-    Event_playbackPhase = 0;
-    Event_eventId = 0;
-    Event_eventSource = 0;
+    VS::Event::playbackPhase = 0;
+    VS::Event::eventId = 0;
+    VS::Event::eventSource = 0;
     VS::Event::isDirectEventRequest = 0;
     Battle_actors[kActorSlot] = nullptr;
     actor.stats = &stats;
@@ -66,9 +66,9 @@ struct RetentionPredicateFixture {
   ~RetentionPredicateFixture() {
     VS::Event::PublishLiveRoomScriptSections(saved_room);
     Battle_actors[kActorSlot] = saved_actor;
-    Event_playbackPhase = saved_phase;
-    Event_eventId = saved_id;
-    Event_eventSource = saved_source;
+    VS::Event::playbackPhase = saved_phase;
+    VS::Event::eventId = saved_id;
+    VS::Event::eventSource = saved_source;
     VS::Event::isDirectEventRequest = saved_direct;
   }
 };
@@ -79,7 +79,7 @@ TEST_CASE("Absent actor cannot satisfy a retained-actor room trigger",
   RetentionPredicateFixture fixture;
   CHECK(VS::Actors::IsLiveActorRetainedAfterDefeat(kActorSlot) == 0);
   CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
-  CHECK(Event_playbackPhase == 0);
+  CHECK(VS::Event::playbackPhase == 0);
 }
 
 TEST_CASE("Room death predicates reject absent and nonretained actors",
@@ -92,7 +92,7 @@ TEST_CASE("Room death predicates reject absent and nonretained actors",
     Battle_actors[kActorSlot] = &fixture.actor;
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   }
-  CHECK(Event_playbackPhase == 0);
+  CHECK(VS::Event::playbackPhase == 0);
 }
 
 TEST_CASE("Room death predicates distinguish retained dead and living actors",
@@ -102,15 +102,15 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
   Battle_actors[kActorSlot] = &fixture.actor;
   SECTION("Retained dead actor activates the original local event") {
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 1);
-    CHECK(Event_playbackPhase == 1);
-    CHECK(Event_eventSource == 2);
-    CHECK(Event_eventId == 0);
+    CHECK(VS::Event::playbackPhase == 1);
+    CHECK(VS::Event::eventSource == 2);
+    CHECK(VS::Event::eventId == 0);
   }
   SECTION("A living one-percent actor is not dead") {
     fixture.stats.currentHp = 1;
     fixture.stats.maxHp = 1000;
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
-    CHECK(Event_playbackPhase == 0);
+    CHECK(VS::Event::playbackPhase == 0);
   }
 }
 
@@ -118,14 +118,14 @@ TEST_CASE("Room-entry scenes keep the event id; Lab entry restores boot value",
           "[events][retention-predicate][lab-reentry]") {
   RetentionPredicateFixture fixture;
   const auto saved_entry = VS::Event::hasRoomEntryScript;
-  Event_eventId = 8;
+  VS::Event::eventId = 8;
   VS::Event::hasRoomEntryScript = 1;
   CHECK(VS::Event::EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1);
-  CHECK(Event_eventSource == 1);
-  CHECK(Event_eventId == 8);
+  CHECK(VS::Event::eventSource == 1);
+  CHECK(VS::Event::eventId == 8);
   VS::Game::RestoreBootEventSelector();
-  CHECK(Event_eventId == 0);
-  CHECK(Event_eventSource == 1);
-  CHECK(Event_playbackPhase == 1);
+  CHECK(VS::Event::eventId == 0);
+  CHECK(VS::Event::eventSource == 1);
+  CHECK(VS::Event::playbackPhase == 1);
   VS::Event::hasRoomEntryScript = saved_entry;
 }

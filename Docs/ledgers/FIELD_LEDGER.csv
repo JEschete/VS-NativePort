@@ -1154,7 +1154,7 @@ T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus curren
 T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
-T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:402;declaration-only;source:30DB0.h:31
+T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:401;declaration-only;source:30DB0.h:31
 T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
 T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
 T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
@@ -3092,13 +3092,13 @@ T00348.010,T00348,_zoneContext_t,10,musicId,0,int,,,,musicId,Zone music,med,sour
 T00348.011,T00348,_zoneContext_t,11,musicSlot,0,int,,,,musicSlot,Music slot,med,source:146C.c:14873;use cited by sanity pass;source:146C.h:703
 T00348.012,T00348,_zoneContext_t,12,unk30,1,int,,,,isMusicFadeEnabled,Fade music when the next zone uses another track,med,source:146C.c:14818;source:146C.c:14882
 T00348.013,T00348,_zoneContext_t,13,mapId,0,int,,,,mapId,Loaded room identifier,med,source:146C.c:8914;use cited by sanity pass;source:146C.h:705
-T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone load; no reader identified; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Boot\GameplayOverlayLive.cpp:119;source:146C.c:14883
+T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone load; no reader identified; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Boot\GameplayOverlayLive.cpp:118;source:146C.c:14883
 T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,tileColumns,Collision map columns,high,source:146C.c:15331
 T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,tileRows,Collision map rows,high,source:146C.c:15332
 T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,bounds,Map tile bounds,med,source:146C.c:2435;use cited by sanity pass;source:146C.h:709
-T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1043;declaration-only;source:146C.h:710
+T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1042;declaration-only;source:146C.h:710
 T00348.019,T00348,_zoneContext_t,19,unk4C,1,int,,,,reserved4C,Unreferenced word,low,declaration-only;source:146C.h:711
-T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1046;declaration-only;source:146C.h:712
+T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1045;declaration-only;source:146C.h:712
 T00348.021,T00348,_zoneContext_t,21,unk54,1,int,,,,reserved54,Unreferenced word,low,declaration-only;source:146C.h:713
 T00348.022,T00348,_zoneContext_t,22,mpdCdFile,0,vs_main_CdQueueSlot *,,,,mpdDiscRequest,Disc request loading the room file,med,source:146C.c:15261;use cited by sanity pass;source:146C.h:714
 T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,mpdData,Loaded room file data,med,source:146C.c:15265;use cited by sanity pass;source:146C.h:715

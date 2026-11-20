@@ -13,7 +13,7 @@
 #include "Battle/ActionFlow.h"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/Interactions.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -24,28 +24,28 @@ struct NativeCutsceneScope {
   decltype(Battle_characterState) player = Battle_characterState;
   decltype(Field_controlMode) control = Field_controlMode;
   decltype(Battle_actionFlowMode) action = Battle_actionFlowMode;
-  decltype(Event_eventSource) source = Event_eventSource;
-  decltype(Event_eventId) event_id = Event_eventId;
-  decltype(Event_playbackPhase) phase = Event_playbackPhase;
-  decltype(Event_isStartConfirmed) confirmed = Event_isStartConfirmed;
+  decltype(event::eventSource) source = event::eventSource;
+  decltype(event::eventId) event_id = event::eventId;
+  decltype(event::playbackPhase) phase = event::playbackPhase;
+  decltype(event::isStartConfirmed) confirmed = event::isStartConfirmed;
 
   NativeCutsceneScope() {
     Battle_characterState = nullptr;
     Field_controlMode = 2;
     Battle_actionFlowMode = 7;
-    Event_eventSource = 0;
-    Event_eventId = 0;
-    Event_playbackPhase = 1;
-    Event_isStartConfirmed = 0;
+    event::eventSource = 0;
+    event::eventId = 0;
+    event::playbackPhase = 1;
+    event::isStartConfirmed = 0;
   }
   ~NativeCutsceneScope() {
     Battle_characterState = player;
     Field_controlMode = control;
     Battle_actionFlowMode = action;
-    Event_eventSource = source;
-    Event_eventId = event_id;
-    Event_playbackPhase = phase;
-    Event_isStartConfirmed = confirmed;
+    event::eventSource = source;
+    event::eventId = event_id;
+    event::playbackPhase = phase;
+    event::isStartConfirmed = confirmed;
   }
 };
 
@@ -424,27 +424,27 @@ TEST_CASE("Live cutscene preparation refuses an absent player and logs once",
         std::vector<std::string>{"Preparation refused: missing player"});
   CHECK(Field_controlMode == 2);
   CHECK(Battle_actionFlowMode == 7);
-  CHECK(Event_isStartConfirmed == 0);
+  CHECK(event::isStartConfirmed == 0);
 }
 
 TEST_CASE("Live cutscene waits for signed high-bit selectors without starting",
           "[cutscene-lifecycle]") {
   const NativeCutsceneScope state;
   const VS::test_support::ChannelWarnings warnings("cutscene");
-  Event_eventId = GENERATE(-32768, -1, 1);
+  event::eventId = GENERATE(-32768, -1, 1);
   REQUIRE(event::BeginLiveQueuedCutscene());
   CHECK(Field_controlMode == 3);
   CHECK(Battle_actionFlowMode == 1);
-  CHECK(Event_isStartConfirmed == 0);
+  CHECK(event::isStartConfirmed == 0);
   CHECK(warnings.messages.empty());
 }
 
 TEST_CASE("Live cutscene selector includes a nonzero source with event zero",
           "[cutscene-lifecycle]") {
   const NativeCutsceneScope state;
-  Event_eventSource = GENERATE(1, 2);
+  event::eventSource = GENERATE(1, 2);
   REQUIRE(event::BeginLiveQueuedCutscene());
   CHECK(Field_controlMode == 3);
   CHECK(Battle_actionFlowMode == 1);
-  CHECK(Event_isStartConfirmed == 0);
+  CHECK(event::isStartConfirmed == 0);
 }

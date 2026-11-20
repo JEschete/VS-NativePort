@@ -16,7 +16,6 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "TestSupport/ScriptSources.hpp"
@@ -185,34 +184,24 @@ class LinearTweenHost final : public event::ImageTweenHost {
   }
 };
 
-struct LiveVibrationFixture {
-  char* saved_pattern = Event_vibrationPatterns[0];
+struct NativeVibrationFixture {
   char saved_skip = event::skipState;
   VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
-  // A readable tail keeps an unterminated pattern's scan deterministic
-  // without a bad access.
-  alignas(std::uint32_t) std::array<std::uint8_t, 4104> source{};
 
-  LiveVibrationFixture() {
-    Event_vibrationPatterns[0] = reinterpret_cast<char*>(source.data());
+  NativeVibrationFixture() {
     event::skipState = 0;
     VS::Input::LiveVibrationState() = {};
+    event::ResetLiveScriptRuntime();
   }
-  LiveVibrationFixture(const LiveVibrationFixture&) = delete;
-  LiveVibrationFixture& operator=(const LiveVibrationFixture&) = delete;
-  LiveVibrationFixture(LiveVibrationFixture&&) = delete;
-  LiveVibrationFixture& operator=(LiveVibrationFixture&&) = delete;
-  ~LiveVibrationFixture() {
-    Event_vibrationPatterns[0] = saved_pattern;
+  NativeVibrationFixture(const NativeVibrationFixture&) = delete;
+  NativeVibrationFixture& operator=(const NativeVibrationFixture&) = delete;
+  NativeVibrationFixture(NativeVibrationFixture&&) = delete;
+  NativeVibrationFixture& operator=(NativeVibrationFixture&&) = delete;
+  ~NativeVibrationFixture() {
+    event::ResetLiveScriptRuntime();
     event::skipState = saved_skip;
     VS::Input::LiveVibrationState() = saved_vibration;
   }
-};
-
-struct NativeVibrationFixture {
-  LiveVibrationFixture live;
-  NativeVibrationFixture() { event::ResetLiveScriptRuntime(); }
-  ~NativeVibrationFixture() { event::ResetLiveScriptRuntime(); }
 };
 
 void BindNativeVibration(Bytes bytes,
@@ -233,9 +222,6 @@ TEST_CASE("Native script vibration owns both buffered and unbuffered playback",
           "[event-script-effects][input-controller][event-vm-live]") {
   for (const std::uint8_t selector : {0, 8}) {
     NativeVibrationFixture fixture;
-    fixture.live.source[8] = 3;
-    fixture.live.source[9] = 1;
-    fixture.live.source[10] = 0x70;
     std::weak_ptr<const Bytes> lifetime;
     BindNativeVibration(NativeVibrationBytes(), &lifetime);
     std::array<std::uint8_t, 2> command{0xA7, selector};
@@ -255,9 +241,6 @@ TEST_CASE(
     "Native script vibration rejects short headers without replacing a slot",
     "[event-script-effects][input-controller][event-vm-live]") {
   NativeVibrationFixture fixture;
-  fixture.live.source[8] = 3;
-  fixture.live.source[9] = 1;
-  fixture.live.source[10] = 0x70;
   BindNativeVibration(NativeVibrationBytes());
   std::array<std::uint8_t, 2> command{0xA7, 0x08};
   REQUIRE(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
@@ -312,9 +295,9 @@ TEST_CASE("Malformed native vibration preserves an already playing pattern",
 }
 
 TEST_CASE("Live buffered script vibration cannot scan beyond its copy",
-          "[event-script-effects][input-controller]") {
-  LiveVibrationFixture fixture;
-  fixture.source.fill(1);
+          "[event-script-effects][input-controller][event-vm-live]") {
+  NativeVibrationFixture fixture;
+  BindNativeVibration(Bytes(0x80, 1));
   std::array<std::uint8_t, 2> command{0xA7, 0x08};
   const auto refusals = VS::Input::RefusedLiveControllerRequestCount();
   CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
@@ -322,75 +305,21 @@ TEST_CASE("Live buffered script vibration cannot scan beyond its copy",
   CHECK(VS::Input::RefusedLiveControllerRequestCount() == refusals + 1);
 }
 
-TEST_CASE("Live buffered script vibration accepts a final complete step",
-          "[event-script-effects][input-controller]") {
-  LiveVibrationFixture fixture;
-  fixture.source.fill(1);
-  fixture.source[8] = 4;
-  fixture.source[9] = 0;
-  fixture.source[10] = 0;
-  fixture.source[126] = 0;
-  fixture.source[127] = 0;
-  std::array<std::uint8_t, 2> command{0xA7, 0x08};
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  const auto& slot = VS::Input::LiveVibrationState().slots[0];
-  CHECK(slot.active);
-  CHECK(slot.pattern.Bytes().size() == 120);
-  CHECK(slot.pattern.Bytes().data() !=
-        reinterpret_cast<const std::byte*>(fixture.source.data() + 8));
-  CHECK(std::ranges::equal(
-      slot.pattern.Bytes(),
-      std::as_bytes(std::span(fixture.source).subspan(8, 120))));
-}
-
-TEST_CASE("Live unbuffered script vibration still borrows its original source",
-          "[event-script-effects][input-controller]") {
-  LiveVibrationFixture fixture;
-  fixture.source[8] = 3;
-  std::array<std::uint8_t, 2> command{0xA7, 0x00};
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  const auto& slot = VS::Input::LiveVibrationState().slots[0];
-  CHECK(slot.active);
-  CHECK(slot.pattern.Bytes().size() == 5);
-  CHECK(slot.pattern.Bytes().data() ==
-        reinterpret_cast<const std::byte*>(fixture.source.data() + 8));
-}
-
 TEST_CASE("Live buffered vibration patterns do not overwrite each other",
-          "[event-script-effects][input-controller]") {
-  LiveVibrationFixture fixture;
-  fixture.source[8] = 3;
-  fixture.source[9] = 1;
-  fixture.source[10] = 0x20;
+          "[event-script-effects][input-controller][event-vm-live]") {
+  NativeVibrationFixture fixture;
   std::array<std::uint8_t, 2> command{0xA7, 0x08};
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  fixture.source[10] = 0x60;
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  fixture.source[10] = 0x70;
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  for (const std::uint8_t strength : {0x20, 0x60, 0x70}) {
+    Bytes bytes = NativeVibrationBytes();
+    bytes[10] = strength;
+    BindNativeVibration(std::move(bytes));
+    CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  }
   const auto& slots = VS::Input::LiveVibrationState().slots;
   CHECK(slots[0].pattern.Bytes().data() != slots[1].pattern.Bytes().data());
-  fixture.source.fill(0x7F);
+  event::ResetLiveScriptRuntime();
   CHECK(slots[0].pattern.Bytes()[2] == std::byte{0x20});
   CHECK(slots[1].pattern.Bytes()[2] == std::byte{0x60});
-}
-
-TEST_CASE("Malformed buffered vibration preserves a playing pattern",
-          "[event-script-effects][input-controller]") {
-  LiveVibrationFixture fixture;
-  fixture.source[8] = 3;
-  fixture.source[9] = 1;
-  fixture.source[10] = 0x20;
-  std::array<std::uint8_t, 2> command{0xA7, 0x08};
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  fixture.source.fill(1);
-  const auto refusals = VS::Input::RefusedLiveControllerRequestCount();
-  CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
-  const auto& slots = VS::Input::LiveVibrationState().slots;
-  CHECK(slots[0].active);
-  CHECK(slots[0].pattern.Bytes()[2] == std::byte{0x20});
-  CHECK_FALSE(slots[1].active);
-  CHECK(VS::Input::RefusedLiveControllerRequestCount() == refusals + 1);
 }
 
 TEST_CASE("Event script effect commands refuse short instructions",

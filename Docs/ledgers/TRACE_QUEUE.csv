@@ -321,7 +321,6 @@ T00732.008,low-named,2,Effects::LiveTrail9.first_step,unk,,"Initial speed step (
 T00489.020,low-named,2,Effects::LiveTransformSlot.saved.pad,unkBE,,Facing angle of the attached actor; PLG128 and the 0x4000 attachment mode turn through it,,,native:missing
 G00557,global,2,Effects::scriptSelector,D_800F5610,,Keeps the selector byte read by the effect script; not otherwise read.,VS::Effects::LiveSetEffectScriptSelector,Effects::scriptSelector=0x800F5610,state;native:read
 G00537,global,2,Effects::unusedPrimaryWord,D_800F53B4,,Cleared with the primary effect state; not otherwise used.,VS::Effects::LiveResetEffectInstances,Effects::unusedPrimaryWord=0x800F53B4,state;native:read
-G00125,global,2,Event::kSpecialOperationTenArguments,D_800E9C00,,Provides values passed by special operation ten.,VS::Event::(anonymous)::LiveVmHost::CameraPitchPresets,Event::kSpecialOperationTenArguments=0x800E9C00,constexpr;native:read
 T00255.028,low-named,2,Field::GimmickInstance.delay,unk11,0x11,Frames before the motion starts (offset of Field::GimmickPhysicsView.delay),(anonymous)::LoadState (anonymous)::LiveDynamicsHost::Store,*Field::gimmickInstances+0x11,native:read
 T00255.148,low-named,2,Field::GimmickInstance.fadeGreen,unk6F1,0x6F1,Fade color green; transition target,VS::Actors::UpdateLiveGimmickAppearanceTransition,*Field::gimmickInstances+0x6F1,native:read
 T00255.149,low-named,2,Field::GimmickInstance.fadeRed,unk6F2,0x6F2,Fade color red; transition step,VS::Actors::UpdateLiveGimmickAppearanceTransition,*Field::gimmickInstances+0x6F2,native:read

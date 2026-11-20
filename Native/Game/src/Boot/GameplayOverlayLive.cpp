@@ -20,7 +20,6 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"

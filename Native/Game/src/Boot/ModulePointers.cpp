@@ -193,7 +193,7 @@
 #include "Event/ScriptEffects.hpp"
 #include "Event/ScriptField.hpp"
 #include "Event/ScriptScreen.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Event/WeaponModeOpcode.hpp"
@@ -453,13 +453,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E9B4Cu, 12u, (void*)&VS::Event::weaponDrawStates, sizeof VS::Event::weaponDrawStates, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B58u, 4u, (void*)&VS::Event::animationBankBases, sizeof VS::Event::animationBankBases, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B5Cu, 132u, (void*)&VS::Event::specialSubroutineScript, sizeof VS::Event::specialSubroutineScript, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9BE0u, 8u, (void*)&Event_skipPaletteResetCommand, sizeof Event_skipPaletteResetCommand, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9BE8u, 4u, (void*)&Event_kSkipSoundRestoreMarker, sizeof Event_kSkipSoundRestoreMarker, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9BF4u, 4u, (void*)&Event_kSceneTimerModes, sizeof Event_kSceneTimerModes, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9BF8u, 8u, (void*)&Event_kSceneTimerResetScopes, sizeof Event_kSceneTimerResetScopes, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C00u, 8u, (void*)&Event_kSpecialOperationTenArguments, sizeof Event_kSpecialOperationTenArguments, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C30u, 256u, (void*)&Event_kOpcodeSizes, sizeof Event_kOpcodeSizes, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9D30u, 1024u, (void*)&Event_kOpcodeHandlers, sizeof Event_kOpcodeHandlers, 4u, sizeof Event_kOpcodeHandlers[0]},
+    {"BATTLE/BATTLE.PRG", 0x800E9C30u, 256u, (void*)&VS::Event::opcodeSizes, sizeof VS::Event::opcodeSizes, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9D30u, 1024u, (void*)&VS::Event::opcodeHandlers, sizeof VS::Event::opcodeHandlers, 4u, sizeof VS::Event::opcodeHandlers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EA234u, 144u, (void*)&Battle_sphereArcBases, sizeof Battle_sphereArcBases, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EA2C4u, 372u, (void*)&Battle_sphereMirroredVertices, sizeof Battle_sphereMirroredVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EA438u, 52u, (void*)&Battle_sphereShapeCommandStarts, sizeof Battle_sphereShapeCommandStarts, 1u, 1u},
@@ -689,36 +684,29 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4B08u, 8u, (void*)&Field_collisionProbePosition, sizeof Field_collisionProbePosition, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B18u, 4u, (void*)&Actors_isActorUpdateComplete, sizeof Actors_isActorUpdateComplete, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B20u, 4u, (void*)&VS::Event::scanlineOverlayFrame, sizeof VS::Event::scanlineOverlayFrame, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4B28u, 8u, (void*)&Event_customEasingCurves, sizeof Event_customEasingCurves, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B30u, 64u, (void*)&VS::Event::splashTweens, sizeof VS::Event::splashTweens, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B70u, 17u, (void*)&VS::Event::scriptControlledActors, sizeof VS::Event::scriptControlledActors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B88u, 22u, (void*)&VS::Event::weatherTween, sizeof VS::Event::weatherTween, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4BA0u, 4u, (void*)&VS::Event::skipNextFieldCameraRestore, sizeof VS::Event::skipNextFieldCameraRestore, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4BA4u, 4u, (void*)&VS::Event::cameraWorkspace, sizeof VS::Event::cameraWorkspace, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4BA8u, 4u, (void*)&VS::Event::isDirectEventRequest, sizeof VS::Event::isDirectEventRequest, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BB0u, 4u, (void*)&Event_dialogStrings, sizeof Event_dialogStrings, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BB4u, 4u, (void*)&Event_cachedFlagValue, sizeof Event_cachedFlagValue, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BB8u, 4u, (void*)&Event_isStartConfirmed, sizeof Event_isStartConfirmed, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BC0u, 32u, (void*)&Event_vibrationPatterns, sizeof Event_vibrationPatterns, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BE0u, 4u, (void*)&Event_eventSource, sizeof Event_eventSource, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BE4u, 4u, (void*)&Event_isScanlineOverlayEnabled, sizeof Event_isScanlineOverlayEnabled, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BF8u, 4u, (void*)&Event_isMenuTransitionActive, sizeof Event_isMenuTransitionActive, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C00u, 8u, (void*)&Event_isTextBoxAwaitingClose, sizeof Event_isTextBoxAwaitingClose, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BB4u, 4u, (void*)&VS::Event::cachedFlagValue, sizeof VS::Event::cachedFlagValue, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BB8u, 4u, (void*)&VS::Event::isStartConfirmed, sizeof VS::Event::isStartConfirmed, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BE0u, 4u, (void*)&VS::Event::eventSource, sizeof VS::Event::eventSource, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BE4u, 4u, (void*)&VS::Event::isScanlineOverlayEnabled, sizeof VS::Event::isScanlineOverlayEnabled, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BF8u, 4u, (void*)&VS::Event::isMenuTransitionActive, sizeof VS::Event::isMenuTransitionActive, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C00u, 8u, (void*)&VS::Event::isTextBoxAwaitingClose, sizeof VS::Event::isTextBoxAwaitingClose, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C08u, 4u, (void*)&VS::Event::isAmbientSoundSuspended, sizeof VS::Event::isAmbientSoundSuspended, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C10u, 16u, (void*)&Event_loopCounters, sizeof Event_loopCounters, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C20u, 4u, (void*)&Event_stopsMusicOnSkip, sizeof Event_stopsMusicOnSkip, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C24u, 4u, (void*)&Event_chainedEventBuffer, sizeof Event_chainedEventBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C10u, 16u, (void*)&VS::Event::loopCounters, sizeof VS::Event::loopCounters, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C20u, 4u, (void*)&VS::Event::stopsMusicOnSkip, sizeof VS::Event::stopsMusicOnSkip, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C2Cu, 4u, (void*)&VS::Event::skipState, sizeof VS::Event::skipState, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C30u, 4u, (void*)&Event_scriptBuffer, sizeof Event_scriptBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C34u, 4u, (void*)&Event_playbackPhase, sizeof Event_playbackPhase, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C38u, 16u, (void*)&Event_threadCursors, sizeof Event_threadCursors, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C34u, 4u, (void*)&VS::Event::playbackPhase, sizeof VS::Event::playbackPhase, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C4Cu, 4u, (void*)&VS::Event::suspendedAmbientSoundId, sizeof VS::Event::suspendedAmbientSoundId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C50u, 4u, (void*)&VS::Event::hasRoomEntryScript, sizeof VS::Event::hasRoomEntryScript, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C54u, 4u, (void*)&Event_isChainedEventLoaded, sizeof Event_isChainedEventLoaded, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C58u, 8u, (void*)&Event_threadWaitFrames, sizeof Event_threadWaitFrames, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C60u, 4u, (void*)&Event_isTextSelectionActive, sizeof Event_isTextSelectionActive, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C64u, 4u, (void*)&Event_subroutineReturnCursor, sizeof Event_subroutineReturnCursor, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4C68u, 4u, (void*)&Event_isSkipForced, sizeof Event_isSkipForced, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C54u, 4u, (void*)&VS::Event::isChainedEventLoaded, sizeof VS::Event::isChainedEventLoaded, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C58u, 8u, (void*)&VS::Event::threadWaitFrames, sizeof VS::Event::threadWaitFrames, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C60u, 4u, (void*)&VS::Event::isTextSelectionActive, sizeof VS::Event::isTextSelectionActive, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4C68u, 4u, (void*)&VS::Event::isSkipForced, sizeof VS::Event::isSkipForced, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C70u, 16u, (void*)&Battle_targetColumnEntries, sizeof Battle_targetColumnEntries, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C90u, 8u, (void*)&Battle_secondColumnGroups, sizeof Battle_secondColumnGroups, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4C98u, 8u, (void*)&Battle_firstColumnGroups, sizeof Battle_firstColumnGroups, 1u, 1u},
@@ -2413,9 +2401,9 @@ const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
     {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)Battle_actionEffectMediators, sizeof Battle_actionEffectMediators / sizeof Battle_actionEffectMediators[0], NULL}, // G00032 _actionEffectMediators
     {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates / sizeof Field_gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4
-    {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)Event_kOpcodeHandlers, sizeof Event_kOpcodeHandlers / sizeof Event_kOpcodeHandlers[0], NULL}, // G00133 _opcodeFunctionTable
+    {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)VS::Event::opcodeHandlers, sizeof VS::Event::opcodeHandlers / sizeof VS::Event::opcodeHandlers[0], NULL}, // G00133 _opcodeFunctionTable
     {"BATTLE/BATTLE.PRG", 0x81E20, 20u, (void**)Battle_limbNames, sizeof Battle_limbNames / sizeof Battle_limbNames[0], NULL}, // G00138 vs_battle_limbNames
-    {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)Event_textBoxFrameStyles, sizeof Event_textBoxFrameStyles / sizeof Event_textBoxFrameStyles[0], NULL}, // G00148 D_800EB588
+    {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)VS::Event::textBoxFrameStyles, sizeof VS::Event::textBoxFrameStyles / sizeof VS::Event::textBoxFrameStyles[0], NULL}, // G00148 D_800EB588
     {"BATTLE/BATTLE.PRG", 0x835AC, 4u, (void**)Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds / sizeof Battle_spellClassSpellIds[0], NULL}, // G00206 _spellIds
     {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)VS::Effects::scriptRenderers, sizeof VS::Effects::scriptRenderers / sizeof VS::Effects::scriptRenderers[0], NULL}, // G00222 D_800EC324
     {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)VS::Effects::scriptOpcodeHandlers, sizeof VS::Effects::scriptOpcodeHandlers / sizeof VS::Effects::scriptOpcodeHandlers[0], NULL}, // G00227 D_800EC3F4

@@ -30,7 +30,6 @@
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.hpp"

@@ -29,8 +29,8 @@
 #include "DiscQueue.h"
 #include "Ending/EndingLive.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
@@ -118,8 +118,8 @@ class LiveSessionHost final : public SessionHost {
     std::memset(&VS::Menu::textBoxSelector, 0,
                 sizeof VS::Menu::textBoxSelector);
     std::memset(&Battle_stringContext, 0, sizeof Battle_stringContext);
-    std::memset(Event_isTextBoxAwaitingClose, 0,
-                sizeof Event_isTextBoxAwaitingClose);
+    std::memset(VS::Event::isTextBoxAwaitingClose, 0,
+                sizeof VS::Event::isTextBoxAwaitingClose);
     VS::Menu::sceneNotificationBuffer = nullptr;
     VS::Menu::sceneNotificationTimer = 0;
     VS::Menu::sceneNotificationTimed = 0;

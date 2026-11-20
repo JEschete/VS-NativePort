@@ -300,11 +300,11 @@ H0298,header,Native/Game/src/Event/ScriptEffectOpcodes.hpp,owned,no,pragma-once,
 H0299,header,Native/Game/src/Event/ScriptEffects.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0300,header,Native/Game/src/Event/ScriptField.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0301,header,Native/Game/src/Event/ScriptScreen.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0302,header,Native/Game/src/Event/ScriptVm.h,generated,yes,pragma-once,0,0,0,0,0,0,35,0,0,remaining,
+H0302,header,Native/Game/src/Event/ScriptVmLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,"renamed from Event/ScriptVm.h, beside the unrelated Event/ScriptVm.hpp: its 23 remaining globals are declared in VS::Event; the 12 legacy constant and state copies were retired against the live VM host (#441)"
 H0303,header,Native/Game/src/Event/Sound.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Event_sfxSourceIds (G00115) was unread; VS::Event::kScriptSfxChannelGroups (Event/ScriptAudioCommands.hpp) holds the same values (#441)
 H0304,header,Native/Game/src/Event/Splash.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0305,header,Native/Game/src/Event/Triggers.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0306,header,Native/Game/src/Event/WeaponModeOpcode.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0306,header,Native/Game/src/Event/WeaponModeOpcode.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,dropped Legacy/Psx.h; the opcode's command parameter is std::uint8_t* (#441)
 H0307,header,Native/Game/src/Event/Weather.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0308,header,Native/Game/src/Field/Actors.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0309,header,Native/Game/src/Field/Background.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
@@ -806,7 +806,7 @@ S0369,source,Native/Game/src/Event/ScriptEffectCommandsLive.cpp,owned,no,,0,,,,,
 S0370,source,Native/Game/src/Event/ScriptEffects.cpp,generated,no,,0,,,,,,,,,done,
 S0371,source,Native/Game/src/Event/ScriptField.cpp,generated,no,,0,,,,,,,,,done,
 S0372,source,Native/Game/src/Event/ScriptScreen.cpp,generated,no,,0,,,,,,,,,done,
-S0373,source,Native/Game/src/Event/ScriptVm.cpp,generated,yes,,0,,,,,,,,,done,
+S0373,source,Native/Game/src/Event/ScriptVmLiveState.cpp,owned,no,,0,,,,,,,,,done,renamed from Event/ScriptVm.cpp; defines the VS::Event script VM state (#441)
 S0374,source,Native/Game/src/Event/ScriptVmLive.cpp,owned,no,,0,,,,,,,,,done,
 S0375,source,Native/Game/src/Event/Sound.cpp,generated,yes,,0,,,,,,,,,retired,deleted: Event_sfxSourceIds (G00115) was unread; VS::Event::kScriptSfxChannelGroups (Event/ScriptAudioCommands.hpp) holds the same values (#441)
 S0376,source,Native/Game/src/Event/Triggers.cpp,generated,no,,0,,,,,,,,,done,

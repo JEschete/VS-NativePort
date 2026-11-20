@@ -29,7 +29,7 @@
 #include "Core/RandomLive.hpp"
 #include "Diagnostics/PlayerObservation.hpp"
 #include "Diagnostics/SceneTrace.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
@@ -813,8 +813,8 @@ struct GameplayInspectionFixture {
       VS::Menu::Framework::itemsText;
   decltype(VS::Menu::Framework::menuState) saved_menu =
       VS::Menu::Framework::menuState;
-  decltype(Event_isMenuTransitionActive) saved_event_menu =
-      Event_isMenuTransitionActive;
+  decltype(VS::Event::isMenuTransitionActive) saved_event_menu =
+      VS::Event::isMenuTransitionActive;
   decltype(VS::State::stateFlags.menu_f_submenu) saved_results_kind =
       VS::State::stateFlags.menu_f_submenu;
   std::array<char, 16> saved_submenus =
@@ -829,8 +829,8 @@ struct GameplayInspectionFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Event_isTextBoxAwaitingClose)) saved_waits =
-      std::to_array(Event_isTextBoxAwaitingClose);
+  decltype(std::to_array(VS::Event::isTextBoxAwaitingClose)) saved_waits =
+      std::to_array(VS::Event::isTextBoxAwaitingClose);
   Actors_ActorRecord model{};
 
   GameplayInspectionFixture() {
@@ -848,16 +848,17 @@ struct GameplayInspectionFixture {
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuState.control.current_menu =
         VS::Menu::Framework::kMenuClosed;
-    Event_isMenuTransitionActive = 0;
+    VS::Event::isMenuTransitionActive = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     model.modelId = 58;
     model.pose.frame = 7;
     model.animationLength = 91;
     Actors_actorRecords[2] = &model;
-    std::fill_n(Event_isTextBoxAwaitingClose, saved_waits.size(), 1);
+    std::fill_n(VS::Event::isTextBoxAwaitingClose, saved_waits.size(), 1);
     for (std::size_t box = 0; box < 8; ++box) {
-      Event_isTextBoxAwaitingClose[box] = static_cast<char>(box % 2);
+      VS::Event::isTextBoxAwaitingClose[box] =
+          static_cast<std::uint8_t>(box % 2);
     }
   }
 
@@ -874,7 +875,7 @@ struct GameplayInspectionFixture {
     VS::Menu::Framework::menuItems = saved_menu_items;
     VS::Menu::Framework::itemsText = saved_text;
     VS::Menu::Framework::menuState = saved_menu;
-    Event_isMenuTransitionActive = saved_event_menu;
+    VS::Event::isMenuTransitionActive = saved_event_menu;
     VS::State::stateFlags.menu_f_submenu = saved_results_kind;
     std::copy(saved_submenus.begin(), saved_submenus.end(),
               VS::Menu::Framework::submenuStates);
@@ -887,7 +888,7 @@ struct GameplayInspectionFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_waits.begin(), saved_waits.end(),
-              Event_isTextBoxAwaitingClose);
+              VS::Event::isTextBoxAwaitingClose);
   }
 };
 
@@ -1696,7 +1697,7 @@ TEST_CASE(
   VS::Menu::Framework::menuState.control.current_menu = 12;
   Field_controlMode = 3;
   Battle_actionFlowMode = 4;
-  Event_isMenuTransitionActive = 1;
+  VS::Event::isMenuTransitionActive = 1;
   VS::Menu::Loot::controlsEnabled = 1;
   VS::Menu::Loot::lootListCount = 2;
   const auto base = VS::Game::InspectGameplay();

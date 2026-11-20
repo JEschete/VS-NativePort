@@ -102,7 +102,7 @@
 #include "Event/Actors.hpp"
 #include "Event/Script.hpp"
 #include "Event/ScriptCamera.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -460,23 +460,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x8135C, sizeof VS::Event::specialSubroutineScript,
      &VS::Event::specialSubroutineScript,
      sizeof VS::Event::specialSubroutineScript},  // G00118 D_800E9B5C
-    {"BATTLE/BATTLE.PRG", 0x813E0, sizeof Event_skipPaletteResetCommand,
-     &Event_skipPaletteResetCommand,
-     sizeof Event_skipPaletteResetCommand},  // G00119 D_800E9BE0
-    {"BATTLE/BATTLE.PRG", 0x813E8, sizeof Event_kSkipSoundRestoreMarker,
-     &Event_kSkipSoundRestoreMarker,
-     sizeof Event_kSkipSoundRestoreMarker},  // G00120 D_800E9BE8
-    {"BATTLE/BATTLE.PRG", 0x813F4, sizeof Event_kSceneTimerModes,
-     &Event_kSceneTimerModes,
-     sizeof Event_kSceneTimerModes},  // G00123 D_800E9BF4
-    {"BATTLE/BATTLE.PRG", 0x813F8, sizeof Event_kSceneTimerResetScopes,
-     &Event_kSceneTimerResetScopes,
-     sizeof Event_kSceneTimerResetScopes},  // G00124 D_800E9BF8
-    {"BATTLE/BATTLE.PRG", 0x81400, sizeof Event_kSpecialOperationTenArguments,
-     &Event_kSpecialOperationTenArguments,
-     sizeof Event_kSpecialOperationTenArguments},  // G00125 D_800E9C00
-    {"BATTLE/BATTLE.PRG", 0x81430, sizeof Event_kOpcodeSizes,
-     &Event_kOpcodeSizes, sizeof Event_kOpcodeSizes},  // G00132 D_800E9C30
+    {"BATTLE/BATTLE.PRG", 0x81430, sizeof VS::Event::opcodeSizes,
+     &VS::Event::opcodeSizes, sizeof VS::Event::opcodeSizes},  // G00132 D_800E9C30
     {"BATTLE/BATTLE.PRG", 0x81A34, sizeof Battle_sphereArcBases,
      &Battle_sphereArcBases,
      sizeof Battle_sphereArcBases},  // G00134 D_800EA234

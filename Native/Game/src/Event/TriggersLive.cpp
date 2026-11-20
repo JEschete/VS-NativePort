@@ -9,7 +9,6 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Field/CollisionMapLive.hpp"

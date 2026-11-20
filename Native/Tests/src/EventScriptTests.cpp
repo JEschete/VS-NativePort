@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <iterator>
 #include <span>
 
 #include "Audio/Control/SoundControl.hpp"
@@ -44,7 +45,7 @@
 #include "Event/Script.hpp"
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -805,50 +806,51 @@ int Tests_NativeSessionTransitions(void) {
 // 573B8.c:67 mixes control codes with addresses; every dispatch boundary must
 // retain native pointer width.
 using TestOpcodeHandler = intptr_t (*)(u_char*, int16_t);
-static_assert(_Generic(Event_kOpcodeHandlers[0],
+static_assert(_Generic(VS::Event::opcodeHandlers[0],
                   TestOpcodeHandler: 1,
                   default: 0),
               "normal opcode ABI");
-static_assert(_Generic(Event_kSkipOpcodeHandlers[0],
+static_assert(_Generic(VS::Event::skipOpcodeHandlers[0],
                   TestOpcodeHandler: 1,
                   default: 0),
               "skip opcode ABI");
-static_assert(sizeof(Event_kSkipOpcodeHandlers) ==
+static_assert(sizeof(VS::Event::skipOpcodeHandlers) ==
                   256 * sizeof(TestOpcodeHandler),
               "complete skip table");
 
 int Tests_EventScriptNativeBranches(int skip) {
   const VS::test_support::LiveScriptRuntimeScope runtime;
-  TestOpcodeHandler savedNormal[4];
+  std::array<TestOpcodeHandler, 4> saved_normal{};
   std::array<TestOpcodeHandler, 4> saved_skip_handlers{};
   std::array<u_char, 4> saved_sizes{};
   constexpr std::array<u_char, 4> kOpcodeSizes{3, 1, 1, 1};
   TestOpcodeHandler skipCopy[256];
-  uintptr_t savedReturn = Event_subroutineReturnCursor;
   char saved_skip = VS::Event::skipState;
   const auto script =
       VS::test_support::MountLiveEventScript({0, 4, 0, 0, 1, 0, 0, 0, 2, 3});
   auto& host = VS::Event::LiveScriptVm();
   int passed;
-  memcpy(savedNormal, Event_kOpcodeHandlers, sizeof savedNormal);
-  std::copy_n(Event_kSkipOpcodeHandlers, saved_skip_handlers.size(),
+  std::copy_n(VS::Event::opcodeHandlers, saved_normal.size(),
+              saved_normal.begin());
+  std::copy_n(VS::Event::skipOpcodeHandlers, saved_skip_handlers.size(),
               saved_skip_handlers.begin());
-  std::copy_n(Event_kOpcodeSizes, saved_sizes.size(), saved_sizes.begin());
-  VS::Core::Memory::CopyLiveAlignedWords(skipCopy, Event_kSkipOpcodeHandlers,
-                                         sizeof skipCopy);
-  passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
-  Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
+  std::copy_n(VS::Event::opcodeSizes, saved_sizes.size(), saved_sizes.begin());
+  VS::Core::Memory::CopyLiveAlignedWords(
+      skipCopy, VS::Event::skipOpcodeHandlers, sizeof skipCopy);
+  passed = std::equal(std::begin(skipCopy), std::end(skipCopy),
+                      VS::Event::skipOpcodeHandlers);
+  VS::Event::skipOpcodeHandlers[0] = VS::Event::opcodeHandlers[0] =
       VS::Event::ScriptJumpForwardOpcode;
-  Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
+  VS::Event::skipOpcodeHandlers[1] = VS::Event::opcodeHandlers[1] =
       VS::Event::ScriptReturnToSavedAddressOpcode;
-  Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
+  VS::Event::skipOpcodeHandlers[2] = VS::Event::opcodeHandlers[2] =
       VS::Event::ScriptYieldFrameOpcode;
-  Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
+  VS::Event::skipOpcodeHandlers[3] = VS::Event::opcodeHandlers[3] =
       VS::Event::CommandStopScriptContextOpcode;
   VS::Event::skipState = skip ? 2 : 0;
   host.SetSubroutineReturn({script.region, 8, script.generation});
   host.SetThreadCursor(1, script);
-  std::copy(kOpcodeSizes.begin(), kOpcodeSizes.end(), Event_kOpcodeSizes);
+  std::copy(kOpcodeSizes.begin(), kOpcodeSizes.end(), VS::Event::opcodeSizes);
   // Forward jump, saved-address return, advance-and-yield, then thread
   // termination.
   passed &= !VS::Event::ExecuteLiveScriptThread(1) &&
@@ -856,33 +858,33 @@ int Tests_EventScriptNativeBranches(int skip) {
                 VS::Event::ScriptLocation{script.region, 9, script.generation};
   passed &=
       !VS::Event::ExecuteLiveScriptThread(1) && !host.ThreadCursor(1).Present();
-  memcpy(Event_kOpcodeHandlers, savedNormal, sizeof savedNormal);
+  std::copy(saved_normal.begin(), saved_normal.end(),
+            VS::Event::opcodeHandlers);
   std::copy(saved_skip_handlers.begin(), saved_skip_handlers.end(),
-            Event_kSkipOpcodeHandlers);
-  std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
-  Event_subroutineReturnCursor = savedReturn;
+            VS::Event::skipOpcodeHandlers);
+  std::copy(saved_sizes.begin(), saved_sizes.end(), VS::Event::opcodeSizes);
   VS::Event::skipState = saved_skip;
   return passed;
 }
 
 int Tests_EventScriptBranchHandlers(void) {
   const VS::test_support::LiveScriptRuntimeScope runtime;
-  char savedFlag = Event_cachedFlagValue;
+  std::int8_t saved_flag = VS::Event::cachedFlagValue;
   const char saved_skip = VS::Event::skipState;
   std::array<TestOpcodeHandler, 2> saved_handlers{};
   std::array<u_char, 2> saved_sizes{};
-  std::copy_n(Event_kOpcodeHandlers + 0xE0, saved_handlers.size(),
+  std::copy_n(VS::Event::opcodeHandlers + 0xE0, saved_handlers.size(),
               saved_handlers.begin());
-  std::copy_n(Event_kOpcodeSizes + 0xE0, saved_sizes.size(),
+  std::copy_n(VS::Event::opcodeSizes + 0xE0, saved_sizes.size(),
               saved_sizes.begin());
   u_char conditional[] = {0, 7, 4, 0, 0};
   u_char backward[] = {0, 0, 0, 0, 0, 0xFF, 4, 0};
   int passed;
   auto& host = VS::Event::LiveScriptVm();
-  Event_cachedFlagValue = 7;
+  VS::Event::cachedFlagValue = 7;
   passed = VS::Event::ScriptBranchOnCachedFlag({conditional, {}, 1}, host) ==
            VS::Event::ScriptFlow::JumpBy(4);
-  Event_cachedFlagValue = 6;
+  VS::Event::cachedFlagValue = 6;
   passed &=
       VS::Event::ScriptBranchOnCachedFlag({conditional, {}, 1}, host).kind ==
       VS::Event::ScriptFlowKind::kAdvance;
@@ -892,10 +894,10 @@ int Tests_EventScriptBranchHandlers(void) {
   const auto context =
       VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
   VS::Event::skipState = 0;
-  Event_kOpcodeHandlers[0xE0] = VS::Event::CommandStartScriptContextOpcode;
-  Event_kOpcodeHandlers[0xE1] = VS::Event::CommandWaitScriptContextOpcode;
-  Event_kOpcodeSizes[0xE0] = 4;
-  Event_kOpcodeSizes[0xE1] = 2;
+  VS::Event::opcodeHandlers[0xE0] = VS::Event::CommandStartScriptContextOpcode;
+  VS::Event::opcodeHandlers[0xE1] = VS::Event::CommandWaitScriptContextOpcode;
+  VS::Event::opcodeSizes[0xE0] = 4;
+  VS::Event::opcodeSizes[0xE1] = 2;
   host.SetThreadCursor(1, context);
   passed &= !VS::Event::ExecuteLiveScriptThread(1) &&
             host.ThreadCursor(1) == VS::Event::ScriptLocation{
@@ -903,9 +905,10 @@ int Tests_EventScriptBranchHandlers(void) {
   passed &= host.ThreadCursor(2) ==
             VS::Event::ScriptLocation{context.region, 4, context.generation};
   std::copy(saved_handlers.begin(), saved_handlers.end(),
-            Event_kOpcodeHandlers + 0xE0);
-  std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes + 0xE0);
+            VS::Event::opcodeHandlers + 0xE0);
+  std::copy(saved_sizes.begin(), saved_sizes.end(),
+            VS::Event::opcodeSizes + 0xE0);
   VS::Event::skipState = saved_skip;
-  Event_cachedFlagValue = savedFlag;
+  VS::Event::cachedFlagValue = saved_flag;
   return passed;
 }

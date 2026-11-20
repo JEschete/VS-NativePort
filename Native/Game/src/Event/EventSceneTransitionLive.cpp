@@ -15,7 +15,7 @@
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptStep.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/DoorRecord.hpp"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Mpd.h"
@@ -148,11 +148,11 @@ std::intptr_t VS::Event::ScriptRunMenuTransitionOpcode(
   namespace event = VS::Event;
   const event::ScriptCommand command = event::RequiredCommand(
       instruction, event::kRunMenuTransitionLength, "ScriptRunMenuTransition");
-  const bool was_active = Event_isMenuTransitionActive != 0;
+  const bool was_active = VS::Event::isMenuTransitionActive != 0;
   bool active = was_active;
   const event::ScriptStep step = event::ScriptRunMenuTransition(
       command, active, event::LiveSceneTransitionHost());
-  if (active != was_active) Event_isMenuTransitionActive = active ? 1 : 0;
+  if (active != was_active) VS::Event::isMenuTransitionActive = active ? 1 : 0;
   return static_cast<std::intptr_t>(step);
 }
 
@@ -163,9 +163,9 @@ std::intptr_t VS::Event::ScriptChangeRoomOpcode(std::uint8_t* instruction,
   namespace event = VS::Event;
   const event::ScriptCommand command = event::RequiredCommand(
       instruction, event::kChangeRoomLength, "ScriptChangeRoom");
-  std::int16_t state = Event_roomChangeState;
+  std::int16_t state = VS::Event::roomChangeState;
   const event::ScriptStep step =
       event::ScriptChangeRoom(command, state, event::LiveSceneTransitionHost());
-  Event_roomChangeState = state;
+  VS::Event::roomChangeState = state;
   return static_cast<std::intptr_t>(step);
 }

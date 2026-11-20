@@ -21,7 +21,7 @@
 #include "Content/StringTables.h"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Text/TextCode.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -230,7 +230,8 @@ struct EquipmentReloadFixture {
       std::to_array(VS::Actors::weaponModels);
   VS::Render::TextureSlot saved_texture =
       VS::Render::legacyWeaponTextureSlots[0];
-  decltype(Event_playbackPhase) saved_event_phase = Event_playbackPhase;
+  decltype(VS::Event::playbackPhase) saved_event_phase =
+      VS::Event::playbackPhase;
   std::uint8_t saved_reload = VS::Content::objectDataLoadStep;
   int saved_alias = Battle_unusedGlobal2;
   Actors_ActorRecord preview{};
@@ -245,7 +246,7 @@ struct EquipmentReloadFixture {
     VS::Actors::weaponModels[1] = &shield;
     VS::Actors::weaponModels[3] = has_preview ? &preview_shield : nullptr;
     VS::Render::legacyWeaponTextureSlots[0].reference_count = 2;
-    Event_playbackPhase = 0;
+    VS::Event::playbackPhase = 0;
     VS::Content::objectDataLoadStep = 0;
     Battle_unusedGlobal2 = unused_alias;
   }
@@ -255,7 +256,7 @@ struct EquipmentReloadFixture {
     std::copy(saved_models.begin(), saved_models.end(),
               VS::Actors::weaponModels);
     VS::Render::legacyWeaponTextureSlots[0] = saved_texture;
-    Event_playbackPhase = saved_event_phase;
+    VS::Event::playbackPhase = saved_event_phase;
     VS::Content::objectDataLoadStep = saved_reload;
     Battle_unusedGlobal2 = saved_alias;
   }

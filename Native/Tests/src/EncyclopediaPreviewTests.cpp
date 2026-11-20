@@ -25,7 +25,7 @@
 #include "Content/DiscLayout.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
@@ -849,7 +849,7 @@ TEST_CASE("Actual cold session drains the pending enemy preview owner",
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
       VS::Menu::textBoxSelector, Battle_stringContext,
-      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   LivePreviewFixture fixture;

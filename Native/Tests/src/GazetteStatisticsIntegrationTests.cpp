@@ -11,7 +11,7 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
@@ -159,7 +159,7 @@ TEST_CASE("Cold session restores both statistics cursors with foreign owners",
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
       VS::Menu::textBoxSelector, Battle_stringContext,
-      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   Fixture fixture;

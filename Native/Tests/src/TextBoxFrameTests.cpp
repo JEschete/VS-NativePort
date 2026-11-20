@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
@@ -106,14 +106,14 @@ class LiveFrameFixture {
         slot_(VS::Render::frameBuf & 1),
         saved_buffer_(VS::Render::legacyPrimitiveBuffers[slot_]),
         storage_(kPrimitiveWords) {
-    std::ranges::copy(Event_textBoxFrameStyles, saved_styles_.begin());
+    std::ranges::copy(VS::Event::textBoxFrameStyles, saved_styles_.begin());
     VS::Menu::activeTextBoxOrderingTable = ordering_.data();
     VS::Render::legacyPrimitiveBuffers[slot_] = storage_.data();
   }
 
   ~LiveFrameFixture() {
     VS::Menu::textBoxes[0] = saved_box_;
-    std::ranges::copy(saved_styles_, Event_textBoxFrameStyles);
+    std::ranges::copy(saved_styles_, VS::Event::textBoxFrameStyles);
     VS::Menu::activeTextBoxOrderingTable = saved_table_;
     VS::Render::FrameScratchpad() = saved_frame_;
     VS::Render::legacyPrimitiveBuffers[slot_] = saved_buffer_;
@@ -143,7 +143,7 @@ class LiveFrameFixture {
     box.frame_width = static_cast<std::int16_t>(request.width);
     box.frame_height = static_cast<std::int16_t>(request.height);
     box.brightness = request.brightness;
-    Event_textBoxFrameStyles[style] = const_cast<std::uint8_t*>(source);
+    VS::Event::textBoxFrameStyles[style] = const_cast<std::uint8_t*>(source);
     const auto* start = BeginDraw(capacity_words);
     VS::Menu::DrawLiveTextBoxFrame(0);
     return ReadPackets(start);

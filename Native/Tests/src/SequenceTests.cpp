@@ -46,7 +46,6 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
 #include "Event/ScriptEffects.hpp"
-#include "Event/ScriptVm.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"

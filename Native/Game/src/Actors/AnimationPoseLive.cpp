@@ -36,7 +36,6 @@
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"

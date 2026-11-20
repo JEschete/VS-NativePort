@@ -50,7 +50,7 @@
 #include "Event/ScriptScreen.hpp"
 #include "Event/ScriptScreenCommands.hpp"
 #include "Event/ScriptSplashCommands.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -80,13 +80,35 @@ namespace {
 
 using Buffer = std::vector<std::uint8_t>;
 using MutableBuffer = std::shared_ptr<Buffer>;
-using OpcodeHandler = std::intptr_t (*)(std::uint8_t*, std::int16_t);
-constexpr std::size_t kSceneTimerModeCount = 2;
-constexpr std::size_t kSceneTimerScopeCount = 4;
-constexpr std::size_t kCameraPitchPresetCount = 4;
+
+// The palette reset instruction (opcode 0x70) a skip's end patches with each
+// palette before running it.
+// decomp: skipResetPaletteOp (D_800E9BE0, BATTLE.PRG file offset 0x813E0;
+// src/BATTLE/BATTLE.PRG/4DEA8.c:306, used at :418)
+constexpr std::array<std::uint8_t, 8> kSkipPaletteResetCommand = {
+    0x70, 0x08, 0x01, 0x20, 0, 0, 0, 0,
+};
+// A skip handler holding this instruction ends without the sound reset.
+// decomp: skipTailMarkerOp (D_800E9BE8, file offset 0x813E8; 4DEA8.c:307,
+// compared at :427)
+constexpr std::array<std::uint8_t, 4> kSkipSoundRestoreMarker = {
+    0x50,
+    0x72,
+    0xA8,
+    0x01,
+};
+// The timer modes (counting up, counting down) and the reset scopes the
+// timer opcode 0x5A selects.
+// decomp: battleTimerModes (D_800E9BF4, file offset 0x813F4) and
+// battleTimerLifetimes (D_800E9BF8, 0x813F8; 4DEA8.c:310-311, used at :2390)
+constexpr std::array<std::int16_t, 2> kSceneTimerModes{1, 2};
+constexpr std::array<std::int16_t, 4> kSceneTimerResetScopes{0, 1, 2, 3};
+// The camera pitches special operation 10 selects.
+// decomp: D_800E9C00 (file offset 0x81400; 4DEA8.c:313, used at :3352)
+constexpr std::array<std::int16_t, 4> kCameraPitchPresets{0, -128, -768, 0x66};
 
 struct ControlBinding {
-  OpcodeHandler slot;
+  ScriptOpcodeHandler slot;
   ScriptControlOpcode typed;
 };
 
@@ -183,7 +205,7 @@ constexpr std::array kControlBindings{
                    ScriptControlRoomAnimation},
 };
 
-ScriptControlOpcode NativeControl(OpcodeHandler handler) {
+ScriptControlOpcode NativeControl(ScriptOpcodeHandler handler) {
   for (const auto& binding : kControlBindings) {
     if (binding.slot == handler) {
       return binding.typed;
@@ -228,7 +250,7 @@ class LiveVmHost final : public ScriptVmHost {
     VS::Core::Warnf("event", "Undefined special operation: %d", operation);
   }
   void NoteCutsceneSkip(int thread) override {
-    VS::Core::Debugf("event", "Skip event=%d thread=%d", Event_eventId, thread);
+    VS::Core::Debugf("event", "Skip event=%d thread=%d", eventId, thread);
   }
   std::span<const std::uint8_t> Region(ScriptRegion region) const override {
     const auto bytes = sources.Borrow(region);
@@ -251,90 +273,77 @@ class LiveVmHost final : public ScriptVmHost {
     return source->Generation();
   }
   std::span<const std::uint8_t> OpcodeSizes() const override {
-    return Event_kOpcodeSizes;
+    return opcodeSizes;
   }
   ScriptFlow RunOpcode(ScriptLocation location, int thread) override;
   std::span<const std::uint8_t> PaletteResetCommand() const override {
-    constexpr std::size_t kCommandBytes = 8;
-    return {
-        reinterpret_cast<const std::uint8_t*>(Event_skipPaletteResetCommand),
-        kCommandBytes};
+    return kSkipPaletteResetCommand;
   }
   std::span<const std::uint8_t> SoundRestoreMarker() const override {
-    constexpr std::size_t kMarkerBytes = 4;
-    return {
-        reinterpret_cast<const std::uint8_t*>(Event_kSkipSoundRestoreMarker),
-        kMarkerBytes};
+    return kSkipSoundRestoreMarker;
   }
   std::span<const std::int16_t> SceneTimerModes() const override {
-    return std::span{Event_kSceneTimerModes}.first<kSceneTimerModeCount>();
+    return kSceneTimerModes;
   }
   std::span<const std::int16_t> SceneTimerScopes() const override {
-    return std::span{Event_kSceneTimerResetScopes}
-        .first<kSceneTimerScopeCount>();
+    return kSceneTimerResetScopes;
   }
   std::span<const std::int16_t> CameraPitchPresets() const override {
-    return std::span{Event_kSpecialOperationTenArguments}
-        .first<kCameraPitchPresetCount>();
+    return kCameraPitchPresets;
   }
   PlaybackPhase Phase() const override {
-    return static_cast<PlaybackPhase>(Event_playbackPhase);
+    return static_cast<PlaybackPhase>(playbackPhase);
   }
   void SetPhase(PlaybackPhase phase) override {
-    Event_playbackPhase = static_cast<char>(phase);
+    playbackPhase = static_cast<std::uint8_t>(phase);
   }
-  bool StartConfirmed() const override { return Event_isStartConfirmed != 0; }
+  bool StartConfirmed() const override { return isStartConfirmed != 0; }
   void SetStartConfirmed(bool value) override {
-    Event_isStartConfirmed = static_cast<char>(value);
+    isStartConfirmed = static_cast<std::uint8_t>(value);
   }
   EventSource Source() const override {
-    return static_cast<EventSource>(Event_eventSource);
+    return static_cast<EventSource>(eventSource);
   }
   void SetSource(EventSource source) override {
-    Event_eventSource = static_cast<std::uint16_t>(source);
+    eventSource = static_cast<std::uint16_t>(source);
   }
-  std::int16_t EventId() const override { return Event_eventId; }
-  void SetEventId(std::int16_t id) override { Event_eventId = id; }
-  bool MainThreadFinished() const override {
-    return Event_isMainThreadFinished != 0;
-  }
+  std::int16_t EventId() const override { return eventId; }
+  void SetEventId(std::int16_t id) override { eventId = id; }
+  bool MainThreadFinished() const override { return isMainThreadFinished != 0; }
   void SetMainThreadFinished(bool value) override {
-    Event_isMainThreadFinished = value;
+    isMainThreadFinished = value;
   }
-  bool ChainedEventLoaded() const override {
-    return Event_isChainedEventLoaded != 0;
-  }
+  bool ChainedEventLoaded() const override { return isChainedEventLoaded != 0; }
   void SetChainedEventLoaded(bool value) override {
-    Event_isChainedEventLoaded = value;
+    isChainedEventLoaded = value;
   }
-  std::int16_t RoomChangeState() const override {
-    return Event_roomChangeState;
-  }
+  std::int16_t RoomChangeState() const override { return roomChangeState; }
   void SetRoomChangeState(std::int16_t state) override {
-    Event_roomChangeState = state;
+    roomChangeState = state;
   }
   bool FieldCameraRestoreScripted() const override {
-    return Event_isFieldCameraRestoreScripted != 0;
+    return isFieldCameraRestoreScripted != 0;
   }
   void SetFieldCameraRestoreScripted(bool value) override {
-    Event_isFieldCameraRestoreScripted = value;
+    isFieldCameraRestoreScripted = value;
   }
   bool ScanlineOverlayEnabled() const override {
-    return Event_isScanlineOverlayEnabled != 0;
+    return isScanlineOverlayEnabled != 0;
   }
   void SetScanlineOverlayEnabled(bool value) override {
-    Event_isScanlineOverlayEnabled = static_cast<char>(value);
+    isScanlineOverlayEnabled = static_cast<std::uint8_t>(value);
   }
   // The original stores the spread sign bit of opcode 0x61's operand: 0xFF
   // while a scripted texture LOD depth is kept.
   void SetScriptBackdropEnabled(bool value) override {
-    Event_isScriptBackdropEnabled = value ? static_cast<char>(-1) : 0;
+    constexpr std::uint8_t kLodDepthKept = 0xFF;
+    isScriptBackdropEnabled = value ? kLodDepthKept : std::uint8_t{0};
   }
   bool MenuTransitionActive() const override {
-    return Event_isMenuTransitionActive != 0;
+    return isMenuTransitionActive != 0;
   }
   void SetMenuTransitionActive(bool value) override {
-    Event_isMenuTransitionActive = static_cast<char>(value);
+    isMenuTransitionActive = static_cast<std::uint8_t>(value);
   }
   void SetAmbientSoundSuspended(bool value) override {
     isAmbientSoundSuspended = static_cast<char>(value);
@@ -346,38 +355,36 @@ class LiveVmHost final : public ScriptVmHost {
     cursors.at(static_cast<std::size_t>(thread)) = cursor;
   }
   std::int16_t WaitFrames(int thread) const override {
-    return Event_threadWaitFrames[thread];
+    return threadWaitFrames[thread];
   }
   void SetWaitFrames(int thread, std::int16_t frames_left) override {
-    Event_threadWaitFrames[thread] = frames_left;
+    threadWaitFrames[thread] = frames_left;
   }
   ScriptLocation SubroutineReturn() const override { return return_to; }
   void SetSubroutineReturn(ScriptLocation location) override {
     return_to = location;
   }
   std::uint8_t LoopCounter(int counter) const override {
-    return static_cast<std::uint8_t>(Event_loopCounters[counter]);
+    return loopCounters[counter];
   }
   void SetLoopCounter(int counter, std::uint8_t value) override {
-    Event_loopCounters[counter] = static_cast<char>(value);
+    loopCounters[counter] = value;
   }
-  std::int8_t CachedFlag() const override { return Event_cachedFlagValue; }
-  void SetCachedFlag(std::int8_t value) override {
-    Event_cachedFlagValue = value;
-  }
+  std::int8_t CachedFlag() const override { return cachedFlagValue; }
+  void SetCachedFlag(std::int8_t value) override { cachedFlagValue = value; }
   CutsceneSkip SkipState() const override {
     return static_cast<CutsceneSkip>(skipState);
   }
   void SetSkipState(CutsceneSkip state) override {
     skipState = static_cast<char>(state);
   }
-  bool SkipForced() const override { return Event_isSkipForced != 0; }
+  bool SkipForced() const override { return isSkipForced != 0; }
   void SetSkipForced(bool value) override {
-    Event_isSkipForced = static_cast<char>(value);
+    isSkipForced = static_cast<std::uint8_t>(value);
   }
-  bool StopsMusicOnSkip() const override { return Event_stopsMusicOnSkip != 0; }
+  bool StopsMusicOnSkip() const override { return stopsMusicOnSkip != 0; }
   void SetStopsMusicOnSkip(bool value) override {
-    Event_stopsMusicOnSkip = static_cast<char>(value);
+    stopsMusicOnSkip = static_cast<std::uint8_t>(value);
   }
   void SetDialogStrings(ScriptLocation location) override {
     BindData(strings, location);
@@ -395,13 +402,13 @@ class LiveVmHost final : public ScriptVmHost {
     curves.at(static_cast<std::size_t>(curve)) = value;
   }
   void SetTextBoxAwaitingClose(int box, bool value) override {
-    Event_isTextBoxAwaitingClose[box] = static_cast<char>(value);
+    isTextBoxAwaitingClose[box] = static_cast<std::uint8_t>(value);
   }
   void SetWeaponTransitionPending(bool value) override {
-    Event_weaponTransitionPending = static_cast<char>(value);
+    weaponTransitionPending = static_cast<std::uint8_t>(value);
   }
   void SetTextSelectionActive(bool value) override {
-    Event_isTextSelectionActive = static_cast<char>(value);
+    isTextSelectionActive = static_cast<std::uint8_t>(value);
   }
   void SetEffectWaitPending(bool value) override {
     isEffectWaitPending = value;
@@ -1018,9 +1025,9 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
     return ScriptFlow::Of(ScriptFlowKind::kStop);
   }
   const auto command = bytes.subspan(location.offset);
-  const OpcodeHandler handler = SkipState() == CutsceneSkip::kSkipping
-                                    ? Event_kSkipOpcodeHandlers[command.front()]
-                                    : Event_kOpcodeHandlers[command.front()];
+  const ScriptOpcodeHandler handler = SkipState() == CutsceneSkip::kSkipping
+                                          ? skipOpcodeHandlers[command.front()]
+                                          : opcodeHandlers[command.front()];
   if (handler == nullptr) {
     NoteInvalidOpcode({command, location, thread});
     return ScriptFlow::Of(ScriptFlowKind::kStop);

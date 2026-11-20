@@ -15,7 +15,6 @@
 #include "Event/ScriptAudio.hpp"
 #include "Event/ScriptAudioCommands.hpp"
 #include "Event/ScriptAudioOpcodes.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"

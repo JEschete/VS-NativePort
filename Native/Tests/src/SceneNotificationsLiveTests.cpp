@@ -17,7 +17,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
@@ -301,7 +301,7 @@ TEST_CASE(
     "[F01381]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<menu::textBoxSelector,
-                                            Event_isTextBoxAwaitingClose>
+                                            VS::Event::isTextBoxAwaitingClose>
       saved_ui;
   NotificationFixture fixture;
   const int timed = GENERATE(0, 1);

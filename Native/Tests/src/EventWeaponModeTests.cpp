@@ -24,7 +24,7 @@
 #include "Event/Script.hpp"
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/WeaponModeOpcode.hpp"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -47,16 +47,16 @@ struct WeaponModeFixture {
                                                    VS::Actors::weaponModels[1]};
   decltype(std::to_array(VS::Event::weaponDrawStates)) saved_modes =
       std::to_array(VS::Event::weaponDrawStates);
-  decltype(std::to_array(Event_kOpcodeHandlers)) saved_handlers =
-      std::to_array(Event_kOpcodeHandlers);
-  decltype(std::to_array(Event_kSkipOpcodeHandlers)) saved_native_skip =
-      std::to_array(Event_kSkipOpcodeHandlers);
-  decltype(std::to_array(Event_kOpcodeSizes)) saved_sizes =
-      std::to_array(Event_kOpcodeSizes);
-  char& pending = Event_weaponTransitionPending;
-  char saved_pending = pending;
+  decltype(std::to_array(VS::Event::opcodeHandlers)) saved_handlers =
+      std::to_array(VS::Event::opcodeHandlers);
+  decltype(std::to_array(VS::Event::skipOpcodeHandlers)) saved_native_skip =
+      std::to_array(VS::Event::skipOpcodeHandlers);
+  decltype(std::to_array(VS::Event::opcodeSizes)) saved_sizes =
+      std::to_array(VS::Event::opcodeSizes);
+  std::uint8_t& pending = VS::Event::weaponTransitionPending;
+  std::uint8_t saved_pending = pending;
   char saved_skip = VS::Event::skipState;
-  char saved_phase = Event_playbackPhase;
+  std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::uint8_t saved_gate = VS::State::LiveScriptFlag(0xAC);
   char saved_sequence = Actors_lastResolvedSequenceIndex;
   decltype(Battle_hudBattleMode) saved_hud = Battle_hudBattleMode;
@@ -77,7 +77,7 @@ struct WeaponModeFixture {
     VS::Event::weaponDrawStates[1] = 1;
     VS::State::SetLiveScriptFlag(0xAC, 1);
     VS::Event::skipState = 0;
-    Event_playbackPhase = 4;
+    VS::Event::playbackPhase = 4;
     pending = 0;
     record.commonSequence = MakeBank(common);
     record.battleSequence = MakeBank(battle);
@@ -102,13 +102,13 @@ struct WeaponModeFixture {
     std::copy(saved_modes.begin(), saved_modes.end(),
               VS::Event::weaponDrawStates);
     std::copy(saved_handlers.begin(), saved_handlers.end(),
-              Event_kOpcodeHandlers);
+              VS::Event::opcodeHandlers);
     std::copy(saved_native_skip.begin(), saved_native_skip.end(),
-              Event_kSkipOpcodeHandlers);
-    std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
+              VS::Event::skipOpcodeHandlers);
+    std::copy(saved_sizes.begin(), saved_sizes.end(), VS::Event::opcodeSizes);
     pending = saved_pending;
     VS::Event::skipState = saved_skip;
-    Event_playbackPhase = saved_phase;
+    VS::Event::playbackPhase = saved_phase;
     VS::State::SetLiveScriptFlag(0xAC, saved_gate);
     Actors_lastResolvedSequenceIndex = saved_sequence;
     Battle_hudBattleMode = saved_hud;
@@ -221,10 +221,11 @@ struct WeaponModeFixture {
   }
 
   static u_char Opcode(Handler handler) {
-    auto* found = std::find(std::begin(Event_kSkipOpcodeHandlers),
-                            std::end(Event_kSkipOpcodeHandlers), handler);
-    REQUIRE(found != std::end(Event_kSkipOpcodeHandlers));
-    return static_cast<u_char>(found - std::begin(Event_kSkipOpcodeHandlers));
+    auto* found = std::find(std::begin(VS::Event::skipOpcodeHandlers),
+                            std::end(VS::Event::skipOpcodeHandlers), handler);
+    REQUIRE(found != std::end(VS::Event::skipOpcodeHandlers));
+    return static_cast<u_char>(found -
+                               std::begin(VS::Event::skipOpcodeHandlers));
   }
 };
 }  // namespace
@@ -263,7 +264,7 @@ TEST_CASE("Script weapon mode waits for real skeletal animation completion",
   CAPTURE(mode, variant, phase);
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
-  Event_playbackPhase = static_cast<char>(phase);
+  VS::Event::playbackPhase = static_cast<std::uint8_t>(phase);
   std::array<u_char, 3> command{0, static_cast<u_char>(mode),
                                 static_cast<u_char>(variant)};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
@@ -280,7 +281,7 @@ TEST_CASE("Script weapon mode also waits for the original queued idle",
   const int mode = GENERATE(0, 1);
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
-  Event_playbackPhase = 0;
+  VS::Event::playbackPhase = 0;
   std::array<u_char, 3> command{0, static_cast<u_char>(mode), 2};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.record.queuedAnimation == 1);
@@ -317,18 +318,18 @@ TEST_CASE("Production event dispatch holds then advances the weapon opcode",
   WeaponModeFixture fixture;
   const VS::test_support::LiveScriptRuntimeScope runtime;
   fixture.Prepare(mode);
-  Event_playbackPhase = 4;
+  VS::Event::playbackPhase = 4;
   VS::Event::skipState = static_cast<char>(skip);
   const auto weapon =
       WeaponModeFixture::Opcode(VS::Event::ScriptSetAshleyBattleModeOpcode);
   const auto stop =
       WeaponModeFixture::Opcode(VS::Event::CommandStopScriptContextOpcode);
-  Event_kSkipOpcodeHandlers[weapon] = Event_kOpcodeHandlers[weapon] =
+  VS::Event::skipOpcodeHandlers[weapon] = VS::Event::opcodeHandlers[weapon] =
       WeaponModeFixture::ResolveHandler();
-  Event_kSkipOpcodeHandlers[stop] = Event_kOpcodeHandlers[stop] =
+  VS::Event::skipOpcodeHandlers[stop] = VS::Event::opcodeHandlers[stop] =
       VS::Event::CommandStopScriptContextOpcode;
-  Event_kOpcodeSizes[weapon] = 3;
-  Event_kOpcodeSizes[stop] = 1;
+  VS::Event::opcodeSizes[weapon] = 3;
+  VS::Event::opcodeSizes[stop] = 1;
   const auto script = VS::test_support::MountLiveEventScript(
       {weapon, static_cast<u_char>(mode), 1, stop});
   auto& host = VS::Event::LiveScriptVm();

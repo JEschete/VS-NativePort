@@ -27,7 +27,7 @@
 #include "Core/Gte.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Doors.h"
@@ -1020,7 +1020,7 @@ TEST_CASE("Cold session drains the map before disc and UI invalidation",
           "[F04149][F04151]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<VS::Menu::textBoxSelector,
-                                            Event_isTextBoxAwaitingClose>
+                                            VS::Event::isTextBoxAwaitingClose>
       saved_ui;
   LiveWorld world(true);
   const auto owner = InitialRead::Begin();
@@ -1173,7 +1173,7 @@ TEST_CASE("Original map caption survives module reset but not a cold session",
           "[map-terminal-integration][map-terminal-caption][F02689]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<VS::Menu::textBoxSelector,
-                                            Event_isTextBoxAwaitingClose>
+                                            VS::Event::isTextBoxAwaitingClose>
       saved_ui;
   LiveWorld world(true);
   world.LoadScene(1);

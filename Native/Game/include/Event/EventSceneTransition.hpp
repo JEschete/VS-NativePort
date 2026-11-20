@@ -49,7 +49,7 @@ inline constexpr int kScriptGameMenuMode = 2;
 // The menu status (ActionSelection menuStatus) of a closed game menu.
 inline constexpr std::int16_t kGameMenuClosed = 2;
 
-// Event_roomChangeState (D_800F4BE2), shared with LoadRoomEventSections.
+// roomChangeState (D_800F4BE2), shared with LoadRoomEventSections.
 inline constexpr std::int16_t kRoomChangeIdle = 0;
 inline constexpr std::int16_t kRoomChangeKeepsEvent = 1;
 inline constexpr std::int16_t kRoomChangeArrived = 2;
@@ -124,7 +124,7 @@ ScriptStep ScriptSetHudVisible(ScriptCommand command,
 // decomp: BATTLE.PRG func_800B92F4 (F01105, 4A0A8.c:1819)
 // Opcode 0x59: the first run opens the Results reward sequence (modes 10-14),
 // the post-action rewards (15) or game menu `mode` (any other), sets
-// `menu_transition_active` (Event_isMenuTransitionActive, D_800F4BF8) and
+// `menu_transition_active` (isMenuTransitionActive, D_800F4BF8) and
 // holds. Later runs hold until the sequence or menu ends, then clear the flag
 // and advance and yield. Modes 10-12 and 14 also reset the Results screen
 // flag to the game clear when their sequence ends; the time attack start (13)

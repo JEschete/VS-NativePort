@@ -32,7 +32,6 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"

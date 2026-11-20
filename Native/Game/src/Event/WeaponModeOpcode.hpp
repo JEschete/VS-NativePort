@@ -6,11 +6,9 @@
 // typed core to the live event, battle and model state.
 #include <cstdint>
 
-#include "Legacy/Psx.h"
-
 namespace VS::Event {
 
-std::intptr_t ScriptSetAshleyBattleModeOpcode(u_char* command,
+std::intptr_t ScriptSetAshleyBattleModeOpcode(std::uint8_t* command,
                                               std::int16_t thread_id);
 
 }  // namespace VS::Event

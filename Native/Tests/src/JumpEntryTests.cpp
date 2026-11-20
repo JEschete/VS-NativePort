@@ -20,7 +20,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Log.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -93,7 +93,7 @@ struct JumpFixture {
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
   char saved_sequence = Actors_lastResolvedSequenceIndex;
-  char saved_phase = Event_playbackPhase;
+  std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::array<u_char, 6> saved_hang{};
   std::array<u_char, 6> saved_height{};
   Actors_ActorRecord actor{};
@@ -114,7 +114,7 @@ struct JumpFixture {
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
     Field_roomData.collisionMap = &collision.header;
     Field_roomData.header.collisionMapLength = sizeof(collision);
-    Event_playbackPhase = 0;
+    VS::Event::playbackPhase = 0;
     actor.instance.position = {960, 128, 1216, 0x1234};
     actor.instance.rootMotion = {5, -6, 7, 0x5678};
     actor.instance.facing = 0xF00;
@@ -142,7 +142,7 @@ struct JumpFixture {
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
     Actors_lastResolvedSequenceIndex = saved_sequence;
-    Event_playbackPhase = saved_phase;
+    VS::Event::playbackPhase = saved_phase;
     std::copy(saved_hang.begin(), saved_hang.end(), Actors_kJumpHangFrames);
     std::copy(saved_height.begin(), saved_height.end(),
               Actors_kJumpHeightAdjustments);

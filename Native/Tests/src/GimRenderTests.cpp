@@ -18,7 +18,7 @@
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Legacy/Psx.h"
@@ -122,7 +122,7 @@ static bool DrawTrackedFrameFixture(int index, const void* shape,
     return false;
   }
   memcpy(source, shape, shape_bytes);
-  Event_textBoxFrameStyles[0] = static_cast<u_char*>(source);
+  VS::Event::textBoxFrameStyles[0] = static_cast<u_char*>(source);
   VS::Menu::DrawLiveTextBoxFrame(index);
   VS::Core::Memory::FreeLiveFromHighEnd(source);
   return true;
@@ -140,7 +140,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   const char saved_width = VS::Render::variableFontGlyphWidths[5];
   const char saved_space_width = VS::Render::variableFontGlyphWidths[0x8F];
   const VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[2];
-  u_char* saved_shape = Event_textBoxFrameStyles[0];
+  u_char* saved_shape = VS::Event::textBoxFrameStyles[0];
   u_long ordering[34];
   ClearOTag(ordering, 34);
   VS::Menu::activeTextBoxOrderingTable = ordering;
@@ -214,7 +214,7 @@ int Tests_ScaledDialogueGlyphs(void) {
            nextPrim(&ordering[10]) != nullptr &&
            LegacyGpu_WalkList(ordering) > 34;
   VS::Menu::textBoxes[2] = saved_box;
-  Event_textBoxFrameStyles[0] = saved_shape;
+  VS::Event::textBoxFrameStyles[0] = saved_shape;
   VS::Render::FrameScratchpad() = saved_frame;
   VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
   VS::Render::frameBuf = saved_frame_index;

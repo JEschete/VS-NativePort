@@ -11,8 +11,8 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFrames.hpp"
@@ -153,7 +153,7 @@ void DrawFrame(int index) {
       bytes = *view;
     }
   } else if (lease.error() == VS::Event::ScriptSourceError::kMissingOwner) {
-    const void* pointer = Event_textBoxFrameStyles[box.flags.frame_shape];
+    const void* pointer = VS::Event::textBoxFrameStyles[box.flags.frame_shape];
     if (pointer == nullptr) {
       return;
     }

@@ -14,7 +14,7 @@
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Field/CameraLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -153,6 +153,6 @@ std::intptr_t VS::Event::CommandRestoreFieldCameraOpcode(
     event::RestoreEventFieldCameraEntry(request->facing,
                                         request->distance_mode);
   }
-  Event_isFieldCameraRestoreScripted = 1;
+  VS::Event::isFieldCameraRestoreScripted = 1;
   return 0;
 }

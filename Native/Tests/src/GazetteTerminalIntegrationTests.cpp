@@ -11,7 +11,7 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Event/ScriptVm.h"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/GazetteTerminalPreviewFixture.hpp"
@@ -234,7 +234,7 @@ TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
       VS::Menu::textBoxSelector, Battle_stringContext,
-      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;
@@ -283,7 +283,7 @@ TEST_CASE("Actual Gazette boundaries drain pending ZUD before its MON owner",
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
       VS::Menu::textBoxSelector, Battle_stringContext,
-      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;
@@ -320,7 +320,7 @@ TEST_CASE(
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
       VS::Menu::textBoxSelector, Battle_stringContext,
-      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;

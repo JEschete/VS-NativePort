@@ -57,7 +57,6 @@
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/RoomTriggers.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"

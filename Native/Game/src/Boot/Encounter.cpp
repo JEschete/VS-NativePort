@@ -55,8 +55,8 @@
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.hpp"
-#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/ScriptVmLiveState.hpp"
 #include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -539,7 +539,7 @@ void RestoreBootEventSelector() {
   // id, so a fresh boot leaves its BSS zero. Restore that per Lab script
   // instead of carrying the previous script's last event id into the next
   // scene label.
-  Event_eventId = 0;
+  VS::Event::eventId = 0;
 }
 
 void InitializeEncounterPlayerProfile(EncounterProfile profile) {
@@ -913,7 +913,7 @@ nlohmann::json InspectThreads() {
       Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
   const auto base =
       script ? reinterpret_cast<std::uintptr_t>(script->Bytes().data()) : 0;
-  for (std::size_t index = 0; index < std::size(Event_threadWaitFrames);
+  for (std::size_t index = 0; index < std::size(VS::Event::threadWaitFrames);
        ++index) {
     const auto cursor =
         Event::LiveScriptVm().ThreadCursor(static_cast<int>(index));
@@ -927,8 +927,8 @@ nlohmann::json InspectThreads() {
     }
     nlohmann::json thread{{"thread", index}, {"pc", pc}};
     if (base != 0 && pc >= base) thread["script_base_delta"] = pc - base;
-    thread["wait_frames"] = Event_threadWaitFrames[index];
-    thread["dialogue_wait"] = Event_isTextBoxAwaitingClose[index];
+    thread["wait_frames"] = VS::Event::threadWaitFrames[index];
+    thread["dialogue_wait"] = VS::Event::isTextBoxAwaitingClose[index];
     threads.push_back(std::move(thread));
   }
   return threads;
@@ -984,25 +984,23 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
       Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
   scene["id"] = VS::Field::zoneContext.currentSceneId;
   scene["event"] = {
-      {"id", Event_eventId},
-      {"source", Event_eventSource},
-      {"phase", Event_playbackPhase},
+      {"id", VS::Event::eventId},
+      {"source", VS::Event::eventSource},
+      {"phase", VS::Event::playbackPhase},
       {"script_buffer",
        script ? reinterpret_cast<std::uintptr_t>(script->Bytes().data()) : 0},
       {"skip_state", VS::Event::skipState},
-      {"forced_skip", Event_isSkipForced != 0},
-      {"main_thread_finished", Event_isMainThreadFinished != 0},
+      {"forced_skip", VS::Event::isSkipForced != 0},
+      {"main_thread_finished", VS::Event::isMainThreadFinished != 0},
       {"threads", InspectThreads()}};
   auto waits = nlohmann::json::array();
-  // The legacy declaration spans 80 bytes; the event VM owns eight boxes.
-  constexpr std::size_t kScriptTextBoxes = 8;
-  for (std::size_t box = 0; box < kScriptTextBoxes; ++box) {
-    waits.push_back(Event_isTextBoxAwaitingClose[box] != 0);
+  for (const std::uint8_t wait : VS::Event::isTextBoxAwaitingClose) {
+    waits.push_back(wait != 0);
   }
   scene["event"]["dialogue_waits"] = std::move(waits);
   // func_800B7398 (event opcode 0x1C) holds the script until a face button
   // confirms the highlighted text-box choice.
-  scene["event"]["choice_active"] = Event_isTextSelectionActive != 0;
+  scene["event"]["choice_active"] = VS::Event::isTextSelectionActive != 0;
   scene["camera"] = {{"yaw", camera.values.yaw},
                      {"pitch", camera.values.pitch},
                      {"distance", camera.values.distance},
@@ -1033,7 +1031,8 @@ EncounterDoorRequest CheckDoorRequest(int index) {
             "original-room session required"};
   }
   if (!gameplay_inspection_ready || !room_prepared || Field_controlMode != 1 ||
-      Event_playbackPhase != 0 || VS::Field::LiveScreenTransitionPhase() != 0 ||
+      VS::Event::playbackPhase != 0 ||
+      VS::Field::LiveScreenTransitionPhase() != 0 ||
       Actors_actorRecords[0] == nullptr) {
     return {EncounterDoorRequestStatus::kBusy,
             "source event/transition still active"};
@@ -1160,7 +1159,7 @@ void VS::Boot::EncounterPollStop() {
       // External and room-local components start at the first free-control
       // frame in the configured room, after any production entry events.
       const bool configured_room_ready =
-          Event_playbackPhase == 0 && Field_controlMode == 1 &&
+          VS::Event::playbackPhase == 0 && Field_controlMode == 1 &&
           VS::Field::zoneContext.zndId == VS::Game::configuration.zone &&
           VS::Field::zoneContext.mapId == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&
@@ -1201,9 +1200,9 @@ void VS::Boot::EncounterPollStop() {
         }
         // Same queue state as a satisfied local room trigger (0x8000 event id)
         // in func_800BEC58 (4A0A8.c:4302); the trigger conditions are skipped.
-        Event_eventId = static_cast<int16_t>(selector);
-        Event_eventSource = 2;
-        Event_playbackPhase = 1;
+        VS::Event::eventId = static_cast<int16_t>(selector);
+        VS::Event::eventSource = 2;
+        VS::Event::playbackPhase = 1;
         VS::Event::isDirectEventRequest = 0;
         VS::Game::room_local_event_started = true;
         VS::Core::LogInfo("encounter.event",
