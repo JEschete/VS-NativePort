@@ -172,7 +172,7 @@ class LiveSavedRelationActors final : public SavedRelationActors {
                              const SavedAshleyRelation& saved) override {
     VS::Battle::Ai::RelationWord& relation = TableState(actor).relations[0];
     relation.active = 0;
-    relation.reserved0_bit1 &= kPreservedRelationFlag;
+    relation.perception_flags &= kPreservedRelationFlag;
     relation.previous_classification = saved.previous_classification;
     relation.classification = saved.classification;
     relation.classification_timer = saved.classification_timer;

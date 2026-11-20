@@ -81,11 +81,11 @@ TEST_CASE("The planner-row binding writes only listed actors' rows",
   VS::Battle::Ai::CaptureBattleActorConditions(rows);
   VS::Battle::actors[0] = saved;
   const VS::Battle::Ai::ActionTiming& row = rows.back();
-  CHECK(row.opaque0_bit0 == 15u);
+  CHECK(row.actor_id == 15u);
   CHECK(row.reserved0_bit4 == 0u);
-  CHECK(row.opaque4 == 7);
-  CHECK(row.opaque6 == 9);
-  CHECK(row.opaque_c == 8u);
-  CHECK(row.opaque16 == 50);
-  CHECK(rows[0].opaque_c == 0xA5A5A5A5u);
+  CHECK(row.hp == 7);
+  CHECK(row.max_hp == 9);
+  CHECK(row.statuses == 8u);
+  CHECK(row.shield_max_dp == 50);
+  CHECK(rows[0].statuses == 0xA5A5A5A5u);
 }

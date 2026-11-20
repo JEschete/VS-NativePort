@@ -115,7 +115,7 @@ static_assert(offsetof(VS::Battle::Ai::EscortView, relations) ==
               offsetof(VS::Battle::Ai::ActorAiState, relations));
 static_assert(offsetof(VS::Battle::Ai::SettingsView, decision_callback) ==
               offsetof(VS::Battle::Ai::ActorAiState, native_pointer68));
-static_assert(offsetof(VS::Battle::Ai::SettingsView, opaque_2d) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsView, action_movement_mask) ==
               offsetof(VS::Battle::Ai::ActorAiState, reserved_2d));
 static_assert(sizeof(VS::Battle::Ai::GuardTileWord) == sizeof(std::uint32_t));
 
@@ -319,14 +319,14 @@ class LiveMovementHost final : public MovementHost {
     return Settings().decision_callback == UpdateLivePatrolCombatBehavior;
   }
   [[nodiscard]] std::uint8_t ActionMovementMask() const override {
-    return Settings().opaque_2d;
+    return Settings().action_movement_mask;
   }
   [[nodiscard]] std::optional<std::uint32_t> BestCandidateFlags()
       const override {
     const VS::Battle::Ai::ActionCandidateRecord* best =
         state_.candidate_order[0];
     if (best == nullptr) return std::nullopt;
-    return std::bit_cast<std::uint32_t>(best->opaque10);
+    return std::bit_cast<std::uint32_t>(best->options);
   }
 
   int UpdateTargetApproach(MovementState& state, int option) override {

@@ -31,7 +31,7 @@ static_assert(offsetof(VS::Battle::Ai::PatrolView, tile) ==
               offsetof(AiState, tile));
 static_assert(offsetof(VS::Battle::Ai::PatrolView, index) ==
               offsetof(AiState, patrol_index));
-static_assert(offsetof(VS::Battle::Ai::PatrolView, opaque104) ==
+static_assert(offsetof(VS::Battle::Ai::PatrolView, cooldown) ==
               offsetof(AiState, patrol_cooldown));
 static_assert(offsetof(VS::Battle::Ai::PatrolView, destination) ==
               offsetof(AiState, destination));
@@ -84,7 +84,7 @@ void UpdateLiveWaypointPatrol(VS::Battle::Ai::PatrolView* state) {
                       .row = state->row,
                       .rate = state->rate,
                       .direction = state->direction,
-                      .cooldown = state->opaque104};
+                      .cooldown = state->cooldown};
   LivePatrolRandom random;
   const auto target =
       Required(UpdateWaypointPatrol(
@@ -97,7 +97,7 @@ void UpdateLiveWaypointPatrol(VS::Battle::Ai::PatrolView* state) {
   state->row = cursor.row;
   state->rate = cursor.rate;
   state->direction = cursor.direction;
-  state->opaque104 = cursor.cooldown;
+  state->cooldown = cursor.cooldown;
   state->destination.tile.tile_x = target.x;
   state->destination.tile.tile_z = target.z;
   DispatchLiveAiLocomotionMode(state, 0, 0);

@@ -599,7 +599,7 @@ struct LiveCreationFixture {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
-  void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
+  void* saved_has_waypoints = VS::Battle::Ai::roomAuxiliaryData;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   int saved_attribute = VS::Battle::Ai::attributeActorMask;
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -620,7 +620,7 @@ struct LiveCreationFixture {
               std::end(VS::Actors::actorRecords), nullptr);
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::tileFlagMap = flags;
-    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::roomAuxiliaryData = nullptr;
     VS::Battle::Ai::attributeActorMask = 0;
     model.bones[1].auxiliary_tag = 2;
     VS::Render::RecordLiveModelExtent(&model, sizeof model);
@@ -636,7 +636,7 @@ struct LiveCreationFixture {
     std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::tileFlagMap = saved_flags;
-    VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
+    VS::Battle::Ai::roomAuxiliaryData = saved_has_waypoints;
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Battle::Ai::attributeActorMask = saved_attribute;
   }

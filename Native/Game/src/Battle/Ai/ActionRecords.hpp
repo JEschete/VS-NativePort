@@ -12,7 +12,7 @@ struct ActionRangeView2;
 
 // decomp: actionCandidateEntry (src/BATTLE/BATTLE.PRG/6FC00.c:500)
 struct CandidateEntryView {
-  std::int32_t reserved0;
+  std::int32_t score;
   std::uint32_t row : 3;
   std::uint32_t column : 2;
   std::uint32_t action : 8;
@@ -39,17 +39,17 @@ static_assert(sizeof(CandidateEntryView) == kCandidateEntryViewBytes,
 
 // decomp: func_800DC888_t (src/BATTLE/BATTLE.PRG/6F014.c:253)
 struct ActionTiming {
-  std::uint32_t opaque0_bit0 : 4;
+  std::uint32_t actor_id : 4;
   std::uint32_t reserved0_bit4 : 28;
-  std::int16_t opaque4;
-  std::int16_t opaque6;
-  std::int16_t opaque8;
-  std::int16_t opaque_a;
-  std::uint32_t opaque_c;
-  std::int16_t opaque10;
-  std::int16_t opaque12;
-  std::int16_t opaque14;
-  std::int16_t opaque16;
+  std::int16_t hp;
+  std::int16_t max_hp;
+  std::int16_t mp;
+  std::int16_t max_mp;
+  std::uint32_t statuses;
+  std::int16_t weapon_dp;
+  std::int16_t weapon_max_dp;
+  std::int16_t shield_dp;
+  std::int16_t shield_max_dp;
 };
 inline constexpr std::size_t kActionTimingBytes = 0x18;
 static_assert(sizeof(ActionTiming) == kActionTimingBytes,
@@ -102,7 +102,7 @@ static_assert(sizeof(ReactionRecord) == kReactionRecordBytes,
 
 // decomp: func_800E5568_t (src/BATTLE/BATTLE.PRG/6F014.c:27)
 struct ActionRangeShape {
-  std::uint8_t reserved0;
+  std::uint8_t range_x;
   std::uint8_t range_y;
   std::uint8_t range_z;
   std::uint8_t shape : 3;
@@ -119,7 +119,7 @@ struct ActionRangeView {
   std::array<std::uint8_t, kActionRangeViewReserved00Bytes> reserved0_0;
   void* native_pointer54;  // PS1 pointer slot 0x54
   void* native_pointer58;  // PS1 pointer slot 0x58
-  ActionRangeView2* opaque_5c;
+  ActionRangeView2* stats;
 };
 
 inline constexpr std::size_t kActionRangeView2Reserved0Bytes = 0x38;
@@ -127,7 +127,7 @@ inline constexpr std::size_t kActionRangeView2Reserved0Bytes = 0x38;
 // decomp: func_800E5698_t2 (src/BATTLE/BATTLE.PRG/6F014.c:32)
 struct ActionRangeView2 {
   std::array<std::uint8_t, kActionRangeView2Reserved0Bytes> reserved0;
-  ActionRangeShape opaque38;
+  ActionRangeShape weapon_range;
 };
 inline constexpr std::size_t kActionRangeView2Bytes = 0x3C;
 static_assert(sizeof(ActionRangeView2) == kActionRangeView2Bytes,

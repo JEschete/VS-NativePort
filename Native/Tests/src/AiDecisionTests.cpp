@@ -34,7 +34,7 @@ struct DecisionFixture {
   decltype(VS::Battle::Ai::fallbackCandidates) saved_fallback =
       VS::Battle::Ai::fallbackCandidates;
   int saved_count = VS::Battle::Ai::fallbackCandidateCount;
-  int saved_mask = VS::Battle::Ai::unusedPlanCounter;
+  int saved_mask = VS::Battle::Ai::fallbackSlotMask;
   ActionDefinition saved_action = VS::Battle::actionDefinitions[42];
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   std::array<VS::Actors::ActorRecord*, 17> saved_records =
@@ -68,7 +68,7 @@ struct DecisionFixture {
     }
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::fallbackCandidates = fallback.data();
-    VS::Battle::Ai::fallbackCandidateCount = VS::Battle::Ai::unusedPlanCounter =
+    VS::Battle::Ai::fallbackCandidateCount = VS::Battle::Ai::fallbackSlotMask =
         0;
     state.actor_id = 2;
     state.distances_squared[3] = 25;
@@ -86,7 +86,7 @@ struct DecisionFixture {
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::fallbackCandidates = saved_fallback;
     VS::Battle::Ai::fallbackCandidateCount = saved_count;
-    VS::Battle::Ai::unusedPlanCounter = saved_mask;
+    VS::Battle::Ai::fallbackSlotMask = saved_mask;
     VS::Battle::actionDefinitions[42] = saved_action;
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
@@ -111,7 +111,7 @@ TEST_CASE(
   fixture.state.uses_room_action_delay = static_cast<std::uint8_t>(busy);
   fixture.state.min_action_delay = static_cast<std::uint8_t>(timer);
   std::memcpy(fixture.state.reserved90.data(), &gate, sizeof(gate));
-  fixture.candidate.opaque10.opaque0_bit4 = target_flag;
+  fixture.candidate.options.opaque0_bit4 = target_flag;
   VS::Field::gimmickInstances[3] =
       has_gimmick != 0 ? &fixture.gimmick : nullptr;
   const bool required = busy != 0 || (target_flag != 0 && has_gimmick == 0);
@@ -206,11 +206,11 @@ TEST_CASE(
                         sizeof(fixture.candidate)) == 0);
     }
   }
-  CHECK(VS::Battle::Ai::unusedPlanCounter == 0xFFFFFF);
+  CHECK(VS::Battle::Ai::fallbackSlotMask == 0xFFFFFF);
   fixture.candidate.row = fixture.candidate.column = 0;
   fixture.candidate.opaque0 = 999;
   VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
-  CHECK(fixture.fallback[0].reserved0 == 0);
+  CHECK(fixture.fallback[0].score == 0);
 }
 
 TEST_CASE("AI fallback caching ignores actions without the cache flag",
@@ -219,7 +219,7 @@ TEST_CASE("AI fallback caching ignores actions without the cache flag",
   ActionDefinition action{};
   VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
   CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
-  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackSlotMask == 0);
 }
 
 TEST_CASE(
@@ -229,7 +229,7 @@ TEST_CASE(
   VS::Battle::Ai::ActionPlanView plan{};
   plan.candidate_count = 4;
   for (unsigned index = 0; index < 4; ++index) {
-    plan.candidates[index].reserved0 = 100 - static_cast<int>(index) * 10;
+    plan.candidates[index].score = 100 - static_cast<int>(index) * 10;
     plan.candidates[index].action = index == 0 ? 0 : 42;
     plan.candidates[index].weight = weight;
     plan.candidate_order[index] = &plan.candidates[index];
@@ -281,8 +281,8 @@ TEST_CASE(
       break;
     case 6:
     case 7:
-      fixture.candidate.opaque10.opaque0_bit1 = 1;
-      fixture.candidate.opaque10.opaque0_bit6 = condition == 6 ? 6 : 5;
+      fixture.candidate.options.opaque0_bit1 = 1;
+      fixture.candidate.options.opaque0_bit6 = condition == 6 ? 6 : 5;
       break;
     default:
       break;
@@ -302,8 +302,8 @@ TEST_CASE("AI execution applies visibility and obstruction option alternatives",
   fixture.state.relations[3] = std::bit_cast<VS::Battle::Ai::RelationWord>(
       uint32_t{0x800000C0} | (static_cast<uint32_t>(visible) << 2));
   fixture.state.relations[3].blocked = blocked;
-  fixture.candidate.opaque10.opaque0_bit2 = override_visibility;
-  fixture.candidate.opaque10.opaque0_bit3 = override_obstruction;
+  fixture.candidate.options.opaque0_bit2 = override_visibility;
+  fixture.candidate.options.opaque0_bit3 = override_obstruction;
   CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
                                                       &fixture.candidate) ==
         ((visible != 0 || override_visibility != 0) &&
@@ -377,7 +377,7 @@ TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
 TEST_CASE(
     "AI weapon range reads the canonical actor stats instead of its model",
     "[ai][decisions]") {
-  REQUIRE(offsetof(VS::Battle::Ai::ActionRangeView, opaque_5c) ==
+  REQUIRE(offsetof(VS::Battle::Ai::ActionRangeView, stats) ==
           offsetof(VS::Battle::Ai::ActorAiState, stats));
   DecisionFixture fixture;
   fixture.state.stats = &fixture.stats[1];

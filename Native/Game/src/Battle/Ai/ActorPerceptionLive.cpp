@@ -374,8 +374,8 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
     const VS::Battle::Ai::PositionLinkView* link = view_.position_source;
     if (link == nullptr) return std::nullopt;
     return LinkedPoint{
-        .position = UnpackPosition(link->position, link->opaque4),
-        .pad = static_cast<std::int16_t>(link->opaque4 >> kHalfShift)};
+        .position = UnpackPosition(link->position, link->z_and_pad),
+        .pad = static_cast<std::int16_t>(link->z_and_pad >> kHalfShift)};
   }
   [[nodiscard]] std::optional<PerceivedHp> Hp() const override {
     const VS::Battle::Actor* actor = view_.actor;

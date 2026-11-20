@@ -130,8 +130,8 @@ void CheckRetiredAiOwnership(const CleanupFixture& fixture,
 // actors' states let the link resolution run.
 VS::Battle::Ai::ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
                                                    int sub_type) {
-  void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
-  VS::Battle::Ai::roomHasWaypoints = nullptr;
+  void* saved_has_waypoints = VS::Battle::Ai::roomAuxiliaryData;
+  VS::Battle::Ai::roomAuxiliaryData = nullptr;
   auto* state = fixture.AllocateState(0);
   fixture.AllocateState(1);
   fixture.AllocateState(2);
@@ -140,7 +140,7 @@ VS::Battle::Ai::ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
   VS::Battle::Ai::SettingsWord settings{};
   VS::Battle::Ai::ApplyLiveActorAiSettings(
       reinterpret_cast<VS::Battle::Ai::SettingsView*>(state), &settings);
-  VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
+  VS::Battle::Ai::roomAuxiliaryData = saved_has_waypoints;
   return state;
 }
 

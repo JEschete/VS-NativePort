@@ -190,9 +190,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x13BC, sizeof VS::Battle::Ai::kTimedStatusFlags,
      &VS::Battle::Ai::kTimedStatusFlags,
      sizeof VS::Battle::Ai::kTimedStatusFlags},  // G00013 D_80069BBC
-    {"BATTLE/BATTLE.PRG", 0x1418, sizeof VS::Battle::Ai::kSettingsBits30Values,
-     &VS::Battle::Ai::kSettingsBits30Values,
-     sizeof VS::Battle::Ai::kSettingsBits30Values},  // G00014 D_80069C18
+    {"BATTLE/BATTLE.PRG", 0x1418, sizeof VS::Battle::Ai::kTerrainRejectMasks,
+     &VS::Battle::Ai::kTerrainRejectMasks,
+     sizeof VS::Battle::Ai::kTerrainRejectMasks},  // G00014 D_80069C18
     {"BATTLE/BATTLE.PRG", 0x141C,
      sizeof VS::Battle::Ai::kPerceptionRangesSquared,
      &VS::Battle::Ai::kPerceptionRangesSquared,
@@ -764,9 +764,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x88FB8, sizeof VS::Battle::Ai::viewAngles,
      &VS::Battle::Ai::viewAngles,
      sizeof VS::Battle::Ai::viewAngles},  // G00234 D_800F17B8
-    {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof VS::Battle::Ai::settingsBits8Values,
-     &VS::Battle::Ai::settingsBits8Values,
-     sizeof VS::Battle::Ai::settingsBits8Values},  // G00235 D_800F17C8
+    {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof VS::Battle::Ai::stepHeights,
+     &VS::Battle::Ai::stepHeights,
+     sizeof VS::Battle::Ai::stepHeights},  // G00235 D_800F17C8
     {"BATTLE/BATTLE.PRG", 0x88FD8, sizeof VS::Battle::Ai::facingDelayScales,
      &VS::Battle::Ai::facingDelayScales,
      sizeof VS::Battle::Ai::facingDelayScales},  // G00236 D_800F17D8

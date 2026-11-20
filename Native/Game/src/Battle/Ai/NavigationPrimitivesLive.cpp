@@ -428,9 +428,9 @@ void BuildLiveAiTerrainHeightsWithWorkspace() {
 
 void UpdateLiveRouteGateAvailability() {
   const auto active = LiveVisiblePlatformMask();
-  if (VS::Battle::Ai::roomHasWaypoints == nullptr) return;
+  if (VS::Battle::Ai::roomAuxiliaryData == nullptr) return;
   auto* auxiliary =
-      static_cast<std::uint8_t*>(VS::Battle::Ai::roomHasWaypoints);
+      static_cast<std::uint8_t*>(VS::Battle::Ai::roomAuxiliaryData);
   Require(
       auxiliary == VS::Field::roomData.section6 &&
           VS::Field::roomData.header.section6_length >= kRouteAuxiliaryBytes &&

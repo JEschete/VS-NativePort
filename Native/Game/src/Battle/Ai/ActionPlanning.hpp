@@ -28,7 +28,7 @@ extern CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:530)
 extern std::int32_t fallbackCandidateCount;
 // decomp: D_800F58F4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:531)
-extern std::int32_t unusedPlanCounter;
+extern std::int32_t fallbackSlotMask;
 // decomp: D_800F58F8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:532)
 extern CandidateEntryView* fallbackCandidates;
 // decomp: D_800F5900 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:533)

@@ -33,7 +33,7 @@ namespace {
 // The actor-state creation view reads the saved pair from the actor's group
 // word, so its second word is the room spawn's saved settings flags.
 static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings) +
-                  offsetof(VS::Battle::Ai::SavedSettingsPair, opaque4) ==
+                  offsetof(VS::Battle::Ai::SavedSettingsPair, saved_flags) ==
               offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags));
 static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags) ==
               offsetof(VS::Battle::Actor, reserved34));
@@ -43,10 +43,10 @@ static_assert(offsetof(VS::Battle::Ai::AiActorView, ai_settings) ==
 // (the AI group bit-fields) and its spawn flags word.
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, kind) ==
               offsetof(VS::Battle::Actor, sub_type));
-static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque30) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsActorView, spawn_group) ==
               offsetof(VS::Battle::Actor, last_trigger_tile) +
                   sizeof(VS::Battle::Actor::last_trigger_tile));
-static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque34) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsActorView, spawn_flags) ==
               offsetof(VS::Battle::Actor, reserved34));
 
 // The settings view aliases the AI state it initialises, so the fields it
@@ -111,16 +111,14 @@ constexpr std::size_t kWaypointsEnd = kWaypointsOffset + sizeof(RoomWaypoints);
 static_assert(std::size(VS::Battle::Ai::kPerceptionRangesSquared) >=
               kPerceptionRangeCount);
 static_assert(std::size(VS::Battle::Ai::viewAngles) >= kSettingsChoiceCount);
-static_assert(std::size(VS::Battle::Ai::settingsBits8Values) >=
-              kSettingsChoiceCount);
+static_assert(std::size(VS::Battle::Ai::stepHeights) >= kSettingsChoiceCount);
 static_assert(std::size(VS::Battle::Ai::facingDelayScales) >=
               kSettingsChoiceCount);
 static_assert(std::size(VS::Battle::Ai::kWanderTimingPresets) >=
               kWanderPresetCount);
-static_assert(std::size(VS::Battle::Ai::kSettingsBits30Values) >=
+static_assert(std::size(VS::Battle::Ai::kTerrainRejectMasks) >=
               kSettingsChoiceCount);
-static_assert(std::size(VS::Battle::Ai::kFlags34Bit14Values) >=
-              kPatrolRateCount);
+static_assert(std::size(VS::Battle::Ai::kPatrolRates) >= kPatrolRateCount);
 
 ActorAiSettingsTables LiveSettingsTables() {
   ActorAiSettingsTables tables;
@@ -129,11 +127,11 @@ ActorAiSettingsTables LiveSettingsTables() {
               tables.perception_ranges_squared.begin());
   for (std::size_t index = 0; index < kSettingsChoiceCount; ++index) {
     tables.view_angles[index] = VS::Battle::Ai::viewAngles[index][0];
-    tables.step_heights[index] = VS::Battle::Ai::settingsBits8Values[index][0];
+    tables.step_heights[index] = VS::Battle::Ai::stepHeights[index][0];
     tables.facing_delay_scales[index] =
         VS::Battle::Ai::facingDelayScales[index];
     tables.terrain_reject_masks[index] =
-        VS::Battle::Ai::kSettingsBits30Values[index];
+        VS::Battle::Ai::kTerrainRejectMasks[index];
   }
   for (std::size_t index = 0; index < kWanderPresetCount; ++index) {
     const VS::Battle::Ai::WanderTiming& preset =
@@ -141,15 +139,15 @@ ActorAiSettingsTables LiveSettingsTables() {
     tables.wander_presets[index] =
         WanderPreset{preset.move_period, preset.rest_period, preset.rate};
   }
-  std::copy_n(std::begin(VS::Battle::Ai::kFlags34Bit14Values),
+  std::copy_n(std::begin(VS::Battle::Ai::kPatrolRates),
               tables.patrol_rates.size(), tables.patrol_rates.begin());
   return tables;
 }
 
 std::optional<RoomWaypoints> LiveRoomWaypoints() {
-  if (VS::Battle::Ai::roomHasWaypoints == nullptr) return std::nullopt;
+  if (VS::Battle::Ai::roomAuxiliaryData == nullptr) return std::nullopt;
   const auto* auxiliary =
-      static_cast<const unsigned char*>(VS::Battle::Ai::roomHasWaypoints);
+      static_cast<const unsigned char*>(VS::Battle::Ai::roomAuxiliaryData);
   Require(
       auxiliary == VS::Field::roomData.section6 &&
           VS::Field::roomData.header.section6_length >= kWaypointsEnd &&
@@ -168,8 +166,9 @@ void ApplyLiveSavedAiSettingsFlags(
     const VS::Battle::Ai::SavedSettingsPair* saved_settings) {
   Require(settings_word != nullptr && saved_settings != nullptr,
           "AI saved settings require a settings word and a saved pair");
-  *settings_word = std::bit_cast<int>(ApplySavedAiSettingsFlags(
-      std::bit_cast<std::uint32_t>(*settings_word), saved_settings->opaque4));
+  *settings_word = std::bit_cast<int>(
+      ApplySavedAiSettingsFlags(std::bit_cast<std::uint32_t>(*settings_word),
+                                saved_settings->saved_flags));
 }
 
 void ApplyLiveActorAiSettings(VS::Battle::Ai::SettingsView* state,
@@ -179,8 +178,8 @@ void ApplyLiveActorAiSettings(VS::Battle::Ai::SettingsView* state,
   const VS::Battle::Ai::SettingsActorView& actor = *state->actor;
   ActorAiSettingsSource source;
   source.settings = settings->word;
-  source.spawn_group = actor.opaque30.word;
-  source.spawn_flags = actor.opaque34.word;
+  source.spawn_group = actor.spawn_group.word;
+  source.spawn_flags = actor.spawn_flags.word;
   source.sub_type = actor.kind;
   source.collision_radius = state->collision_radius;
   source.movement_flags = state->movement_flags;
@@ -195,7 +194,7 @@ void ApplyLiveActorAiSettings(VS::Battle::Ai::SettingsView* state,
   state->settings_bit15 = decoded.settings_bit15 ? 1 : 0;
   state->settings_bit14 = decoded.area_lock ? 1 : 0;
   state->settings_bit13 = decoded.settings_bit13 ? 1 : 0;
-  state->opaque_2d = decoded.action_movement_mask;
+  state->action_movement_mask = decoded.action_movement_mask;
   state->opaque_b2 = decoded.tile_step_limit;
   state->opaque_b0 = decoded.step_height;
   state->facing_delay = decoded.facing_delay;

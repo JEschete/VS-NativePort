@@ -2600,7 +2600,7 @@ int func_800F9800(void) {
             self.assertNotIn("Battle_Ai_ApplyActorAiSettings", (ai / name).read_text(encoding="utf-8"))
         # The decode reads the module tables, so the copy still emits them.
         for table in ("kPerceptionRangesSquared;", "viewAngles;", "decisionCallbacks;",
-                      "kWanderTimingPresets;", "kFlags34Bit14Values ="):
+                      "kWanderTimingPresets;", "kPatrolRates ="):
             self.assertIn(table, tables)
         pointers = module_pointers_text(copy_to_native.REPO)
         self.assertEqual(pointers.count("0x800E5A9Cu"), 1)

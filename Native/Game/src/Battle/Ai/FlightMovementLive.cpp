@@ -61,9 +61,8 @@ FlightMover Load(const AiState& state) {
           .x = state.position.vx,
           .y = state.position.vy,
           .z = state.position.vz,
-          .flies = model != nullptr
-                       ? std::optional<bool>(model->opaque_a_bit5 != 0)
-                       : std::nullopt,
+          .flies = model != nullptr ? std::optional<bool>(model->flies != 0)
+                                    : std::nullopt,
           .actor_id = state.actor_id,
           .radius = state.radius,
           .max_range = state.max_range,

@@ -107,7 +107,7 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
         candidate->column,
         candidate->target_id,
         candidate->target_limb,
-        static_cast<int>(candidate->opaque_c_bit7),
+        static_cast<int>(candidate->height_offset),
         state_.action_slots[candidate->row][candidate->column].kind};
   }
 

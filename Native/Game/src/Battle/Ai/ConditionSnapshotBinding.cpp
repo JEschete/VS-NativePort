@@ -30,16 +30,16 @@ class PlannerConditionRows final : public ActorConditionTable {
     VS::Battle::Ai::ActionTiming& row =
         rows_[static_cast<std::size_t>(actor_id)];
     row = VS::Battle::Ai::ActionTiming{};
-    row.opaque0_bit0 = static_cast<unsigned>(actor_id);
-    row.opaque4 = condition.hp;
-    row.opaque6 = condition.max_hp;
-    row.opaque8 = condition.mp;
-    row.opaque_a = condition.max_mp;
-    row.opaque_c = condition.statuses;
-    row.opaque10 = condition.weapon_dp;
-    row.opaque12 = condition.weapon_max_dp;
-    row.opaque14 = condition.shield_dp;
-    row.opaque16 = condition.shield_max_dp;
+    row.actor_id = static_cast<unsigned>(actor_id);
+    row.hp = condition.hp;
+    row.max_hp = condition.max_hp;
+    row.mp = condition.mp;
+    row.max_mp = condition.max_mp;
+    row.statuses = condition.statuses;
+    row.weapon_dp = condition.weapon_dp;
+    row.weapon_max_dp = condition.weapon_max_dp;
+    row.shield_dp = condition.shield_dp;
+    row.shield_max_dp = condition.shield_max_dp;
     return true;
   }
 

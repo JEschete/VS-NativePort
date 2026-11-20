@@ -39,7 +39,7 @@ RadialMover Load(const AiState& state) {
           .saved_destination = state.saved_destination.word,
           .x = state.position.vx,
           .z = state.position.vz,
-          .flies = model != nullptr && model->opaque_a_bit5 != 0,
+          .flies = model != nullptr && model->flies != 0,
           .model_look_yaw =
               model_record != nullptr
                   ? std::bit_cast<std::int16_t>(model_record->instance.look_yaw)

@@ -3849,10 +3849,10 @@ TEST_CASE("Live action range borrows the attacker's weapon range",
   action.shape = 1;
   const BattleLog log;
   VS::Battle::Ai::ActionRangeView2 weapon{};
-  weapon.opaque38.range_z = 4;
-  weapon.opaque38.shape = 1;
+  weapon.weapon_range.range_z = 4;
+  weapon.weapon_range.shape = 1;
   VS::Battle::Ai::ActionRangeView view{};
-  view.opaque_5c = &weapon;
+  view.stats = &weapon;
   CHECK(battle::LiveCalculateActionRangeSquared(&view, 250) == 96 * 96);
   action.ai_flags.radial_area = 1;
   action.area_range_y = 3;
@@ -3889,9 +3889,9 @@ TEST_CASE("Live range shape extent refuses without a shape",
   CHECK(VS::Battle::LiveCalculateRangeShapeExtent(nullptr) == 0);
   CHECK(log.Saw("range extent refused: no range shape"));
   VS::Battle::Ai::ActionRangeView2 weapon{};
-  weapon.opaque38.range_z = 4;
-  weapon.opaque38.shape = 1;
-  CHECK(VS::Battle::LiveCalculateRangeShapeExtent(&weapon.opaque38) == 128);
+  weapon.weapon_range.range_z = 4;
+  weapon.weapon_range.shape = 1;
+  CHECK(VS::Battle::LiveCalculateRangeShapeExtent(&weapon.weapon_range) == 128);
 }
 
 TEST_CASE("Battle targeting bindings retire the module entries they replace",

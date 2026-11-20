@@ -37,8 +37,8 @@ struct SessionBindingSnapshot {
   decltype(VS::Battle::Ai::tileFlagMap) flags = VS::Battle::Ai::tileFlagMap;
   decltype(VS::Battle::Ai::specialTerrainHeights) heights =
       VS::Battle::Ai::specialTerrainHeights;
-  decltype(VS::Battle::Ai::roomHasWaypoints) auxiliary =
-      VS::Battle::Ai::roomHasWaypoints;
+  decltype(VS::Battle::Ai::roomAuxiliaryData) auxiliary =
+      VS::Battle::Ai::roomAuxiliaryData;
   decltype(VS::Battle::Ai::patrolRoutes) patrol = VS::Battle::Ai::patrolRoutes;
   decltype(VS::Battle::Ai::roomWaypoints) waypoints =
       VS::Battle::Ai::roomWaypoints;
@@ -57,7 +57,7 @@ struct SessionBindingSnapshot {
   int mask = VS::Battle::Ai::attributeActorMask;
   int target = VS::Battle::Ai::secondPerceptionTarget;
   int count = VS::Battle::Ai::fallbackCandidateCount;
-  int plan_counter = VS::Battle::Ai::unusedPlanCounter;
+  int plan_counter = VS::Battle::Ai::fallbackSlotMask;
   int engaged = VS::Battle::Ai::candidateEngagedThisUpdate;
 
   ~SessionBindingSnapshot() {
@@ -71,7 +71,7 @@ struct SessionBindingSnapshot {
     VS::Battle::Ai::roomAiState = room;
     VS::Battle::Ai::tileFlagMap = flags;
     VS::Battle::Ai::specialTerrainHeights = heights;
-    VS::Battle::Ai::roomHasWaypoints = auxiliary;
+    VS::Battle::Ai::roomAuxiliaryData = auxiliary;
     VS::Battle::Ai::patrolRoutes = patrol;
     VS::Battle::Ai::roomWaypoints = waypoints;
     VS::Battle::Ai::routeGates = gates;
@@ -84,7 +84,7 @@ struct SessionBindingSnapshot {
     VS::Battle::Ai::attributeActorMask = mask;
     VS::Battle::Ai::secondPerceptionTarget = target;
     VS::Battle::Ai::fallbackCandidateCount = count;
-    VS::Battle::Ai::unusedPlanCounter = plan_counter;
+    VS::Battle::Ai::fallbackSlotMask = plan_counter;
     VS::Battle::Ai::candidateEngagedThisUpdate = engaged;
   }
 };
@@ -96,8 +96,8 @@ void SeedInvalidatedRoomBindings() {
       InvalidatedBinding<decltype(VS::Battle::Ai::tileFlagMap)>();
   VS::Battle::Ai::specialTerrainHeights =
       InvalidatedBinding<decltype(VS::Battle::Ai::specialTerrainHeights)>();
-  VS::Battle::Ai::roomHasWaypoints =
-      InvalidatedBinding<decltype(VS::Battle::Ai::roomHasWaypoints)>();
+  VS::Battle::Ai::roomAuxiliaryData =
+      InvalidatedBinding<decltype(VS::Battle::Ai::roomAuxiliaryData)>();
   VS::Battle::Ai::patrolRoutes =
       InvalidatedBinding<decltype(VS::Battle::Ai::patrolRoutes)>();
   VS::Battle::Ai::roomWaypoints =
@@ -136,7 +136,7 @@ void CheckInvalidatedRoomBindings() {
   CHECK(VS::Battle::Ai::roomAiState == nullptr);
   CHECK(VS::Battle::Ai::tileFlagMap == nullptr);
   CHECK(VS::Battle::Ai::specialTerrainHeights == nullptr);
-  CHECK(VS::Battle::Ai::roomHasWaypoints == nullptr);
+  CHECK(VS::Battle::Ai::roomAuxiliaryData == nullptr);
   CHECK(VS::Battle::Ai::patrolRoutes == nullptr);
   CHECK(VS::Battle::Ai::roomWaypoints == nullptr);
   CHECK(VS::Battle::Ai::routeGates == nullptr);
@@ -161,7 +161,7 @@ void CheckInvalidatedMembership() {
   CHECK(VS::Battle::Ai::attributeActorMask == 0);
   CHECK(VS::Battle::Ai::secondPerceptionTarget == 0);
   CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
-  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackSlotMask == 0);
   CHECK(VS::Battle::Ai::candidateEngagedThisUpdate == 0);
 }
 
@@ -212,7 +212,7 @@ TEST_CASE("AI session invalidation never touches reclaimed allocation storage",
   VS::Battle::Ai::attributeActorMask = 0x1D;
   VS::Battle::Ai::secondPerceptionTarget = 4;
   VS::Battle::Ai::fallbackCandidateCount = 3;
-  VS::Battle::Ai::unusedPlanCounter = 7;
+  VS::Battle::Ai::fallbackSlotMask = 7;
   VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   VS::Battle::Ai::InvalidateSessionBindings();
   CheckInvalidatedRoomBindings();

@@ -62,15 +62,15 @@ static_assert(offsetof(View, destination) == offsetof(AiState, destination));
 FrameContext& Frame() { return LiveFrameContext(); }
 
 WanderActor Load(const View& view) {
-  return {.is_stuck = view.is_stuck,
+  return {
+      .is_stuck = view.is_stuck,
           .height_filter = view.opaque3,
           .stayed_on_tile = view.stayed_on_tile,
           .tile = view.tile.word,
           .saved_destination = view.saved_destination.word,
           .x = view.x,
           .z = view.z,
-          .flies =
-              view.model != nullptr && (view.model->opaque8 & kModelFlies) != 0,
+      .flies = view.model != nullptr && (view.model->flags & kModelFlies) != 0,
           .move_distance = view.move_distance,
           .phase = view.wander_phase,
           .timer = view.wander_timer,

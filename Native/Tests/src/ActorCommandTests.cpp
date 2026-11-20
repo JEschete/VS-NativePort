@@ -84,7 +84,7 @@ struct CommandFixture {
     candidate.column = 1;
     candidate.target_id = 3;
     candidate.target_limb = 4;
-    candidate.opaque_c_bit7 = 13;
+    candidate.height_offset = 13;
     state.action_slots[2][1].kind = 1;
     target.instance.position = {100, 200, 300, 0};
     auto* frame = &VS::Battle::Ai::LiveFrameContext();
@@ -233,8 +233,8 @@ struct RoomCommandFixture : CommandFixture {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
       VS::Battle::Ai::specialTerrainHeights;
-  decltype(VS::Battle::Ai::roomHasWaypoints) saved_auxiliary =
-      VS::Battle::Ai::roomHasWaypoints;
+  decltype(VS::Battle::Ai::roomAuxiliaryData) saved_auxiliary =
+      VS::Battle::Ai::roomAuxiliaryData;
   decltype(VS::Battle::Ai::patrolRoutes) saved_routes =
       VS::Battle::Ai::patrolRoutes;
   decltype(VS::Battle::Ai::roomWaypoints) saved_waypoints =
@@ -257,7 +257,7 @@ struct RoomCommandFixture : CommandFixture {
     VS::Battle::Ai::roomAiState = nullptr;
     VS::Battle::Ai::tileFlagMap = nullptr;
     VS::Battle::Ai::specialTerrainHeights = nullptr;
-    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::roomAuxiliaryData = nullptr;
     VS::Battle::Ai::patrolRoutes = nullptr;
     VS::Battle::Ai::roomWaypoints = nullptr;
     VS::Battle::Ai::routeGates = nullptr;
@@ -276,7 +276,7 @@ struct RoomCommandFixture : CommandFixture {
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
-    VS::Battle::Ai::roomHasWaypoints = saved_auxiliary;
+    VS::Battle::Ai::roomAuxiliaryData = saved_auxiliary;
     VS::Battle::Ai::patrolRoutes = saved_routes;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
     VS::Battle::Ai::routeGates = saved_gates;

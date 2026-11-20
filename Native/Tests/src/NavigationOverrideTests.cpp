@@ -107,7 +107,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
       VS::Battle::Ai::specialTerrainHeights;
-  void* saved_auxiliary = VS::Battle::Ai::roomHasWaypoints;
+  void* saved_auxiliary = VS::Battle::Ai::roomAuxiliaryData;
   int saved_movement_random = VS::Battle::Ai::savedMovementRandomState;
   std::array<VS::Battle::Ai::DirectionDelta, 8> saved_directions =
       VS::Battle::Ai::directionDeltas;
@@ -151,7 +151,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::StoreEngagedMask(room, 0);
     room.engaged_count = 0;
-    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::roomAuxiliaryData = nullptr;
     VS::Battle::Ai::specialTerrainHeights = heights;
     VS::Battle::Ai::savedMovementRandomState = 0x1234;
     room.max_tile_x = room.min_tile_x = 31;
@@ -172,7 +172,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     std::ranges::copy(saved_directions,
                       VS::Battle::Ai::directionDeltas.begin());
     VS::Battle::Ai::roomAiState = saved_room;
-    VS::Battle::Ai::roomHasWaypoints = saved_auxiliary;
+    VS::Battle::Ai::roomAuxiliaryData = saved_auxiliary;
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
     VS::Battle::Ai::savedMovementRandomState = saved_movement_random;
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
@@ -262,7 +262,7 @@ struct GimmickOccupancyFixture : NavigationOverrideFixture {
 };
 
 struct RouteAvailabilityFixture {
-  void* saved_auxiliary = VS::Battle::Ai::roomHasWaypoints;
+  void* saved_auxiliary = VS::Battle::Ai::roomAuxiliaryData;
   VS::Battle::Ai::RouteGateEndRecord* saved_gates = VS::Battle::Ai::routeGates;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   std::array<std::uint8_t, 13> saved_bounce{};
@@ -280,7 +280,7 @@ struct RouteAvailabilityFixture {
     VS::Field::roomData.header.section6_length = auxiliary.size();
     VS::Field::roomData.moving_platforms = platforms.data();
     VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
-    VS::Battle::Ai::roomHasWaypoints = auxiliary.data();
+    VS::Battle::Ai::roomAuxiliaryData = auxiliary.data();
     VS::Battle::Ai::routeGates =
         reinterpret_cast<VS::Battle::Ai::RouteGateEndRecord*>(auxiliary.data() +
                                                               0x454);
@@ -290,7 +290,7 @@ struct RouteAvailabilityFixture {
   ~RouteAvailabilityFixture() {
     std::ranges::copy(saved_bounce, VS::Field::platformBounceFrames.begin());
     VS::Field::roomData = saved_room;
-    VS::Battle::Ai::roomHasWaypoints = saved_auxiliary;
+    VS::Battle::Ai::roomAuxiliaryData = saved_auxiliary;
     VS::Battle::Ai::routeGates = saved_gates;
   }
 
@@ -724,7 +724,7 @@ TEST_CASE("Route availability respects absent room auxiliary data",
           "[ai][route-availability]") {
   RouteAvailabilityFixture fixture;
   fixture.SetWord(1, 0x400);
-  VS::Battle::Ai::roomHasWaypoints = nullptr;
+  VS::Battle::Ai::roomAuxiliaryData = nullptr;
   VS::Battle::Ai::routeGates = nullptr;
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == 0x400);

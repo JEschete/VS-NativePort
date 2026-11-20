@@ -173,7 +173,7 @@ SAME_FIELD(VS::Battle::Ai::AiActorView, ai_control_flags, VS::Battle::Actor,
            kind);
 SAME_FIELD(VS::Battle::Ai::AiActorView, stats, VS::Battle::Actor, stats);
 SAME_FIELD(VS::Battle::Ai::AiActorView, model, VS::Battle::Actor, model);
-SAME_FIELD(VS::Battle::Ai::SettingsActorView, opaque34, VS::Battle::Actor,
+SAME_FIELD(VS::Battle::Ai::SettingsActorView, spawn_flags, VS::Battle::Actor,
            reserved34);
 SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, VS::Actors::ActorRecord,
            collision_radius);
@@ -208,7 +208,8 @@ static_assert(sizeof(VS::Battle::Ai::AiCreationView) <=
               "creation view exceeds storage");
 static_assert(std::tuple_size_v<decltype(VS::Battle::Ai::actorAiStates)> == 16,
               "AI table extent");
-static_assert(std::is_same_v<decltype(VS::Battle::Ai::roomHasWaypoints), void*>,
+static_assert(
+    std::is_same_v<decltype(VS::Battle::Ai::roomAuxiliaryData), void*>,
               "room auxiliary-data pointer width");
 static_assert(sizeof(VS::Battle::Ai::ActorAiState) % 4 == 0,
               "AI clear requires whole words");
@@ -404,7 +405,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   std::uint16_t (*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
-  void* saved_data = VS::Battle::Ai::roomHasWaypoints;
+  void* saved_data = VS::Battle::Ai::roomAuxiliaryData;
   const unsigned saved_aux_length = VS::Field::roomData.header.section6_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
   std::uint8_t saved_scratch[132];
@@ -426,7 +427,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::roomAiState = &room;
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::specialTerrainHeights = heights;
-  VS::Battle::Ai::roomHasWaypoints = auxiliary;
+  VS::Battle::Ai::roomAuxiliaryData = auxiliary;
   VS::Field::roomData.header.section6_length = sizeof auxiliary;
   VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   const int returned = VS::Battle::Ai::CacheLiveActorAiWorkingState();
@@ -449,7 +450,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::roomAiState = saved_room;
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::specialTerrainHeights = saved_heights;
-  VS::Battle::Ai::roomHasWaypoints = saved_data;
+  VS::Battle::Ai::roomAuxiliaryData = saved_data;
   VS::Field::roomData.header.section6_length = saved_aux_length;
   VS::Battle::Ai::savedMovementRandomState = saved_random;
   memcpy(scratch, saved_scratch, sizeof saved_scratch);
@@ -528,15 +529,15 @@ int Tests_ActorConditionSnapshot(void) {
   VS::Battle::Ai::actorAiStates[5] = &second_ai;
   VS::Battle::Ai::CaptureBattleActorConditions(output.rows);
   const int passed =
-      output.rows[2].opaque0_bit0 == 2 && output.rows[5].opaque0_bit0 == 5 &&
-      output.rows[2].opaque4 == 20 && output.rows[2].opaque6 == 100 &&
-      output.rows[2].opaque8 == 15 && output.rows[2].opaque_a == 60 &&
-      output.rows[2].opaque10 == 10 && output.rows[2].opaque12 == 40 &&
-      output.rows[2].opaque14 == 30 && output.rows[2].opaque16 == 60 &&
+      output.rows[2].actor_id == 2 && output.rows[5].actor_id == 5 &&
+      output.rows[2].hp == 20 && output.rows[2].max_hp == 100 &&
+      output.rows[2].mp == 15 && output.rows[2].max_mp == 60 &&
+      output.rows[2].weapon_dp == 10 && output.rows[2].weapon_max_dp == 40 &&
+      output.rows[2].shield_dp == 30 && output.rows[2].shield_max_dp == 60 &&
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[2]) == -34 &&
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[5]) == -314 &&
       output.before == 0xA5A5A5A5u && output.after == 0xA5A5A5A5u &&
-      output.rows[1].opaque_c == 0xA5A5A5A5u;
+      output.rows[1].statuses == 0xA5A5A5A5u;
   VS::Battle::actors[0] = saved_head;
   VS::Battle::Ai::actorAiStates[2] = saved_first;
   VS::Battle::Ai::actorAiStates[5] = saved_second;

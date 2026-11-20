@@ -71,7 +71,7 @@ class LiveDecisionActor final : public DecisionActor {
     return PursuitCandidate{.target = static_cast<int>(candidate->target_id),
                             .distance_squared = static_cast<std::uint32_t>(
                                 candidate->distance_squared),
-                            .extended_reach = state_.model->opaque_a_bit5 != 0};
+                            .extended_reach = state_.model->flies != 0};
   }
   int ApproachActor(int target, int distance) override {
     return ApproachLiveActor(&state_, target, distance, 0);

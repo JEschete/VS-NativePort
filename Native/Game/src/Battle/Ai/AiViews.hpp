@@ -560,7 +560,7 @@ struct SettingsView {
   std::uint8_t has_tagged_bone3;
   std::uint8_t settings_mode_low;
   std::uint8_t settings_bits21;
-  std::uint8_t opaque_2d;
+  std::uint8_t action_movement_mask;
   std::uint8_t reserved_2e;
   std::uint8_t settings_bits28;
   std::uint8_t settings_bit25;
@@ -1056,7 +1056,7 @@ struct PatrolView {
   std::uint8_t row;
   std::uint8_t rate;
   std::uint8_t direction;
-  std::uint8_t opaque104;
+  std::uint8_t cooldown;
   std::array<std::uint8_t, kPatrolViewReserved105Bytes> reserved105;
   TilePosition destination;
 };
@@ -1594,7 +1594,7 @@ struct SettingsActorView {
   std::array<std::uint8_t, kSettingsActorViewReserved04Bytes> reserved0_4;
   std::uint16_t kind;
   std::array<std::uint8_t, kSettingsActorViewReserved1cBytes> reserved_1c;
-  SettingsWord opaque30;
+  SettingsWord spawn_group;
   union {
     std::uint32_t word;
     struct {
@@ -1602,13 +1602,13 @@ struct SettingsActorView {
       std::uint32_t mode : 2;
       std::uint32_t upper_bits : 18;
     } bits;
-  } opaque34;
+  } spawn_flags;
 };
 
 // decomp: actorUpdatePoint (src/BATTLE/BATTLE.PRG/6FC00.c:873)
 struct PositionLinkView {
   std::uint32_t position;
-  std::uint32_t opaque4;
+  std::uint32_t z_and_pad;  // position z (low half), SVECTOR pad (high half)
 };
 inline constexpr std::size_t kPositionLinkViewBytes = 0x8;
 static_assert(sizeof(PositionLinkView) == kPositionLinkViewBytes,
@@ -1628,7 +1628,7 @@ static_assert(sizeof(EscortEntryView) == kEscortEntryViewBytes,
 // decomp: func_800E5A74_t (src/BATTLE/BATTLE.PRG/6F014.c:19)
 struct SavedSettingsPair {
   std::int32_t reserved0;
-  std::uint16_t opaque4;
+  std::uint16_t saved_flags;
 };
 inline constexpr std::size_t kSavedSettingsPairBytes = 0x8;
 static_assert(sizeof(SavedSettingsPair) == kSavedSettingsPairBytes,
@@ -1708,7 +1708,7 @@ inline constexpr std::size_t kWanderRecordViewReserved0Bytes = 8;
 // decomp: wanderObject (src/BATTLE/BATTLE.PRG/771A8.c:1590)
 struct WanderRecordView {
   std::array<std::uint8_t, kWanderRecordViewReserved0Bytes> reserved0;
-  std::uint32_t opaque8;
+  std::uint32_t flags;
 };
 
 inline constexpr std::size_t kGuardTileWordByteCount = 4;

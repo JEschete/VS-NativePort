@@ -277,7 +277,7 @@ VS::Battle::TargetSphereSpec SphereSpec(const TargetingVolume& volume) {
 }
 
 battle::RangeShape RangeOf(const VS::Battle::Ai::ActionRangeShape& shape) {
-  return {static_cast<std::uint8_t>(shape.reserved0),
+  return {static_cast<std::uint8_t>(shape.range_x),
           static_cast<std::uint8_t>(shape.range_y),
           static_cast<std::uint8_t>(shape.range_z), shape.shape, shape.angle};
 }
@@ -1291,8 +1291,8 @@ int LiveCalculateActionRangeSquared(
     VS::Battle::Ai::ActionRangeView* actor_range_view, int action_id) {
   return ActionRangeSquared(
       action_id,
-      actor_range_view != nullptr && actor_range_view->opaque_5c
-          ? std::optional(RangeOf(actor_range_view->opaque_5c->opaque38))
+      actor_range_view != nullptr && actor_range_view->stats
+          ? std::optional(RangeOf(actor_range_view->stats->weapon_range))
           : std::nullopt);
 }
 

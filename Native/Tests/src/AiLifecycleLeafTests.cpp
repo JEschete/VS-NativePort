@@ -719,7 +719,7 @@ namespace {
 struct ActorSettingsFixture {
   AiLifecycleFixture table;
   VS::Battle::Actor* saved_head = VS::Battle::actors[0];
-  void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
+  void* saved_has_waypoints = VS::Battle::Ai::roomAuxiliaryData;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
   void* saved_section6 = VS::Field::roomData.section6;
   std::uint32_t saved_section6_length =
@@ -743,14 +743,14 @@ struct ActorSettingsFixture {
     states[1].linked_actor = 16;
     states[2].linked_actor = 16;
     VS::Battle::actors[0] = actors.data();
-    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::roomAuxiliaryData = nullptr;
     VS::Field::roomData.section6 = auxiliary.data();
     VS::Field::roomData.header.section6_length = auxiliary.size();
   }
 
   ~ActorSettingsFixture() {
     VS::Battle::actors[0] = saved_head;
-    VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
+    VS::Battle::Ai::roomAuxiliaryData = saved_has_waypoints;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
     VS::Field::roomData.section6 = saved_section6;
     VS::Field::roomData.header.section6_length = saved_section6_length;
@@ -760,7 +760,7 @@ struct ActorSettingsFixture {
   void UseRoomWaypoint(std::uint16_t waypoint) {
     std::memcpy(auxiliary.data() + 0x440 + (5 * sizeof(waypoint)), &waypoint,
                 sizeof(waypoint));
-    VS::Battle::Ai::roomHasWaypoints = auxiliary.data();
+    VS::Battle::Ai::roomAuxiliaryData = auxiliary.data();
     VS::Battle::Ai::roomWaypoints =
         reinterpret_cast<std::uint16_t*>(auxiliary.data() + 0x440);
   }
@@ -810,9 +810,9 @@ void ExpectLiveSettings(VS::Battle::Ai::ActorAiState& expected, int waypoints,
   want.settings_bit15 = 0;
   want.settings_bit14 = 1;
   want.settings_bit13 = 0;
-  want.opaque_2d = waypoints == 2 ? 1 : 0;
+  want.action_movement_mask = waypoints == 2 ? 1 : 0;
   want.opaque_b2 = 3;
-  want.opaque_b0 = VS::Battle::Ai::settingsBits8Values[3][0];
+  want.opaque_b0 = VS::Battle::Ai::stepHeights[3][0];
   want.facing_delay = static_cast<std::uint16_t>(
       (32 * VS::Battle::Ai::facingDelayScales[2]) >> 4);
   want.settings_constant23 = 1;
@@ -828,12 +828,12 @@ void ExpectLiveSettings(VS::Battle::Ai::ActorAiState& expected, int waypoints,
   want.settings_bit27 = 1;
   want.settings_bit25 = 1;
   if ((movement_flags & 0xC0) == 0) {
-    want.settings_bits30_value = VS::Battle::Ai::kSettingsBits30Values[3];
+    want.settings_bits30_value = VS::Battle::Ai::kTerrainRejectMasks[3];
   }
   want.settings_byte0_bit7 = 1;
   want.allow_fallback_action = 1;
   want.settings_mode_low = 1;
-  want.opaque102 = VS::Battle::Ai::kFlags34Bit14Values[1];
+  want.opaque102 = VS::Battle::Ai::kPatrolRates[1];
   want.opaque101 = 2;
   want.opaque_c8 = 0x2A;
   want.opaque_cc = 0x15;
@@ -869,7 +869,7 @@ TEST_CASE("AI settings apply every decoded field through the live view",
   CHECK(state.linked_actor == 16);
   CHECK(view.decision_callback == want.decision_callback);
   CHECK(view.settings_bits30_value == want.settings_bits30_value);
-  CHECK(view.opaque_2d == want.opaque_2d);
+  CHECK(view.action_movement_mask == want.action_movement_mask);
   CHECK(StateBytes(state) == StateBytes(expected));
   CHECK(fixture.states[1].linked_actor == 5);
   CHECK(fixture.states[2].linked_actor == 2);

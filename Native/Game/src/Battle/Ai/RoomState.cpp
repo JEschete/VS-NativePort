@@ -72,7 +72,7 @@ void ClearRoomAiBindings() {
   VS::Battle::Ai::roomAiState = nullptr;
   VS::Battle::Ai::tileFlagMap = nullptr;
   VS::Battle::Ai::specialTerrainHeights = nullptr;
-  VS::Battle::Ai::roomHasWaypoints = nullptr;
+  VS::Battle::Ai::roomAuxiliaryData = nullptr;
   VS::Battle::Ai::patrolRoutes = nullptr;
   VS::Battle::Ai::roomWaypoints = nullptr;
   VS::Battle::Ai::routeGates = nullptr;
@@ -159,7 +159,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     VS::Battle::Ai::tileFlagMap = storage->flags;
     VS::Battle::Ai::specialTerrainHeights = storage->heights;
     auto* auxiliary = static_cast<unsigned char*>(VS::Field::roomData.section6);
-    VS::Battle::Ai::roomHasWaypoints = auxiliary;
+    VS::Battle::Ai::roomAuxiliaryData = auxiliary;
     VS::Battle::Ai::patrolRoutes =
         auxiliary != nullptr
             ? reinterpret_cast<uint16_t (*)[kPatrolRouteLength]>(
@@ -256,7 +256,7 @@ void VS::Battle::Ai::InvalidateSessionBindings(void) {
   VS::Battle::Ai::candidateExclusions = nullptr;
   VS::Battle::Ai::fallbackCandidates = nullptr;
   VS::Battle::Ai::fallbackCandidateCount = 0;
-  VS::Battle::Ai::unusedPlanCounter = 0;
+  VS::Battle::Ai::fallbackSlotMask = 0;
   VS::Battle::Ai::candidateEngagedThisUpdate = 0;
   VS::Core::Debugf("ai.lifecycle",
                    "invalidated AI bindings after game-arena reset");

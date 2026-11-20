@@ -50,7 +50,7 @@ TEST_CASE("Movement aliases preserve native pointer and patrol view layout",
   CHECK(offsetof(VS::Battle::Ai::ActorAiState, patrol_row) ==
         offsetof(VS::Battle::Ai::PatrolView, row));
   CHECK(offsetof(VS::Battle::Ai::ActorAiState, patrol_cooldown) ==
-        offsetof(VS::Battle::Ai::PatrolView, opaque104));
+        offsetof(VS::Battle::Ai::PatrolView, cooldown));
   CHECK(offsetof(VS::Battle::Ai::ActorAiState, movement_mode_counters) ==
         offsetof(VS::Battle::Ai::ActorAiState, reserved474));
 }

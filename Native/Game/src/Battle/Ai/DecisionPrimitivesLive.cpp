@@ -177,10 +177,10 @@ std::uint16_t ActionAiFlags(unsigned action) {
 class LiveFallbackCache final : public FallbackCandidateCache {
  public:
   [[nodiscard]] std::uint32_t SlotMask() const override {
-    return std::bit_cast<std::uint32_t>(VS::Battle::Ai::unusedPlanCounter);
+    return std::bit_cast<std::uint32_t>(VS::Battle::Ai::fallbackSlotMask);
   }
   void SetSlotMask(std::uint32_t mask) override {
-    VS::Battle::Ai::unusedPlanCounter = std::bit_cast<int>(mask);
+    VS::Battle::Ai::fallbackSlotMask = std::bit_cast<int>(mask);
   }
   [[nodiscard]] int Count() const override {
     return VS::Battle::Ai::fallbackCandidateCount;

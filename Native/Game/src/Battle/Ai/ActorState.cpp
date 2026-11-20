@@ -4,7 +4,7 @@
 namespace VS::Battle::Ai {
 // decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG); contents: module image
 // (ModuleData.cpp)
-Bits30ValueTable kSettingsBits30Values;
+TerrainMaskTable kTerrainRejectMasks;
 // decomp: D_80069C1C (D_80069C1C@BATTLE/BATTLE.PRG); contents: module image
 // (ModuleData.cpp)
 RangeTable kPerceptionRangesSquared;
@@ -19,7 +19,7 @@ std::array<DecisionCallback, kDecisionCallbackCount> decisionCallbacks;
 std::array<WordPair, kViewAngleCount> viewAngles;
 // decomp: D_800F17C8 (D_800F17C8@BATTLE/BATTLE.PRG); contents: module image
 // (ModuleData.cpp)
-std::array<WordPair, kSettingsBits8ValueCount> settingsBits8Values;
+std::array<WordPair, kStepHeightCount> stepHeights;
 // decomp: D_800F17D8 (D_800F17D8@BATTLE/BATTLE.PRG); contents: module image
 // (ModuleData.cpp)
 std::array<std::uint8_t, kFacingDelayScaleCount> facingDelayScales;
@@ -28,9 +28,9 @@ std::array<VS::Battle::Ai::ActorAiState*, kActorAiStateSlots> actorAiStates;
 // decomp: D_800F58BC (D_800F58BC@BATTLE/BATTLE.PRG)
 VS::Battle::Ai::RoomAiState* roomAiState;
 // decomp: D_800F58C0 (D_800F58C0@BATTLE/BATTLE.PRG)
-void* roomHasWaypoints;
+void* roomAuxiliaryData;
 // decomp: D_800F590C (D_800F590C@BATTLE/BATTLE.PRG)
 std::int32_t attributeActorMask;
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
-const std::array<std::uint8_t, 4> kFlags34Bit14Values = {9, 7, 0, 0};
+const std::array<std::uint8_t, 4> kPatrolRates = {9, 7, 0, 0};
 }  // namespace VS::Battle::Ai

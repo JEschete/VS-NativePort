@@ -119,7 +119,7 @@ int CacheLiveActorAiWorkingState() {
   frameContext.room = VS::Battle::Ai::roomAiState;
   frameContext.heightMap = VS::Battle::Ai::specialTerrainHeights;
   frameContext.tileFlags = VS::Battle::Ai::tileFlagMap;
-  frameContext.roomData = VS::Battle::Ai::roomHasWaypoints;
+  frameContext.roomData = VS::Battle::Ai::roomAuxiliaryData;
   WorkingStateSource source;
   source.has_room_data = frameContext.roomData != nullptr;
   source.auxiliary_bytes = VS::Field::roomData.header.section6_length;

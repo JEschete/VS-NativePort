@@ -87,10 +87,10 @@ struct ActionCandidateRecord {
   std::int32_t distance_squared;
   std::uint32_t target_id : 4;
   std::uint32_t target_limb : 3;
-  std::uint32_t opaque_c_bit7 : 12;
+  std::uint32_t height_offset : 12;
   std::uint32_t weight : 8;
   std::uint32_t reserved_f_bit3 : 5;
-  CandidateFlags opaque10;
+  CandidateFlags options;
 };
 inline constexpr std::size_t kActionCandidateRecordBytes = 0x14;
 static_assert(sizeof(ActionCandidateRecord) == kActionCandidateRecordBytes,
@@ -99,12 +99,12 @@ static_assert(sizeof(ActionCandidateRecord) == kActionCandidateRecordBytes,
 // decomp: func_800DD604_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:106)
 struct ActionSlotMetadataRecord {
   /* 0x00 */ std::uint32_t reserved0_bit0 : 1;
-  /* 0x00 */ std::uint32_t opaque0_bit1 : 1;
-  /* 0x00 */ std::uint32_t opaque0_bit2 : 1;
+  /* 0x00 */ std::uint32_t excludes_self : 1;
+  /* 0x00 */ std::uint32_t ignores_obstruction : 1;
   /* 0x00 */ std::uint32_t kind : 2;
   /* 0x00 */ std::uint32_t long_range : 1;
   /* 0x00 */ std::uint32_t special : 1;
-  /* 0x00 */ std::uint32_t opaque0_bit7 : 1;
+  /* 0x00 */ std::uint32_t usable : 1;
   /* 0x01 */ std::uint32_t radius : 16;
   /* 0x03 */ std::uint32_t reserved3_bit0 : 8;
   /* 0x04 */ std::uint32_t range_squared;
@@ -464,7 +464,7 @@ struct EngagementData {
   std::uint16_t opaque_e;
   VS::Core::Gte::SVECTOR opaque10;
   std::array<std::uint8_t, kEngagementDataReserved18Bytes> reserved18;
-  VS::Battle::ActorStats* opaque_3c;
+  VS::Battle::ActorStats* stats;
 };
 
 // decomp: func_800E1238_t (src/BATTLE/BATTLE.PRG/6F014.c:139)
@@ -472,7 +472,7 @@ struct ModelStatePrefix {
   std::int32_t reserved0;
   std::int32_t reserved4;
   std::uint32_t reserved8_bit0 : 21;
-  std::uint32_t opaque_a_bit5 : 1;
+  std::uint32_t flies : 1;
   std::uint32_t reserved_a_bit6 : 10;
 };
 inline constexpr std::size_t kModelStatePrefixBytes = 0xC;

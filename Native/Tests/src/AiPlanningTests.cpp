@@ -55,7 +55,7 @@ struct PlanningFixture {
     VS::Battle::Ai::actorAiStates[1] = &state;
     VS::Battle::Ai::actorAiStates[3] = &peer;
     VS::Battle::actionDefinitions[42] = {};
-    actor.opaque_3c = &stats;
+    actor.stats = &stats;
     state.actor = &actor;
     state.stats = &stats;
     state.actor_id = 1;
@@ -166,17 +166,17 @@ struct SimulationResultsFixture : PlanningFixture {
     VS::Battle::Ai::planningWorkspace = workspace;
     workspace->action_id = 42;
     for (std::size_t index = 0; index < rows.size(); ++index) {
-      rows[index].opaque0_bit0 = static_cast<unsigned>(index);
+      rows[index].actor_id = static_cast<unsigned>(index);
       rows[index].reserved0_bit4 = 0xABCDE;
-      rows[index].opaque4 = 50;
-      rows[index].opaque6 = 100;
-      rows[index].opaque8 = 40;
-      rows[index].opaque_a = 100;
-      rows[index].opaque10 = 30;
-      rows[index].opaque12 = 100;
-      rows[index].opaque14 = 20;
-      rows[index].opaque16 = 100;
-      rows[index].opaque_c = 0x80000000;
+      rows[index].hp = 50;
+      rows[index].max_hp = 100;
+      rows[index].mp = 40;
+      rows[index].max_mp = 100;
+      rows[index].weapon_dp = 30;
+      rows[index].weapon_max_dp = 100;
+      rows[index].shield_dp = 20;
+      rows[index].shield_max_dp = 100;
+      rows[index].statuses = 0x80000000;
     }
   }
   ~SimulationResultsFixture() {
@@ -216,7 +216,7 @@ struct EnumerationFixture : ReadinessFixture {
   decltype(VS::Battle::Ai::fallbackCandidates) saved_fallback =
       VS::Battle::Ai::fallbackCandidates;
   int saved_count = VS::Battle::Ai::fallbackCandidateCount;
-  int saved_mask = VS::Battle::Ai::unusedPlanCounter;
+  int saved_mask = VS::Battle::Ai::fallbackSlotMask;
   unsigned saved_random = VS::Core::BiosRand().State();
   std::array<VS::Battle::Ai::CandidateEntryView, 24> fallback{};
   VS::Battle::Actor battle_actor{};
@@ -225,7 +225,7 @@ struct EnumerationFixture : ReadinessFixture {
   EnumerationFixture() {
     VS::Battle::Ai::fallbackCandidates = fallback.data();
     VS::Battle::Ai::fallbackCandidateCount = 0;
-    VS::Battle::Ai::unusedPlanCounter = 0;
+    VS::Battle::Ai::fallbackSlotMask = 0;
     VS::Core::SeedBiosRand(1);
     state.candidate_count = 0;
     state.settings_mode_low = 1;
@@ -234,14 +234,14 @@ struct EnumerationFixture : ReadinessFixture {
     target_stats = stats;
     target_stats.limb_actions[2][1].action_id = 0;
     target_stats.limbs[2].max_hp = -7;
-    actor.opaque_3c = &target_stats;
+    actor.stats = &target_stats;
     battle_actor.id = 1;
     battle_actor.stats = &target_stats;
     VS::Battle::actors[0] = VS::Battle::actors[1] = &battle_actor;
     VS::Battle::actionDefinitions[42].ai_flags =
         std::bit_cast<VS::Battle::ActionAiFlags>(std::uint16_t{0x150});
     auto& slot = state.action_slots[2][1];
-    slot.opaque0_bit7 = 1;
+    slot.usable = 1;
     slot.kind = 1;
     slot.radius = 0x1234;
     slot.range_squared = 0xFFFFFFFFu;
@@ -249,7 +249,7 @@ struct EnumerationFixture : ReadinessFixture {
   ~EnumerationFixture() {
     VS::Battle::Ai::fallbackCandidates = saved_fallback;
     VS::Battle::Ai::fallbackCandidateCount = saved_count;
-    VS::Battle::Ai::unusedPlanCounter = saved_mask;
+    VS::Battle::Ai::fallbackSlotMask = saved_mask;
     VS::Core::SeedBiosRand(saved_random);
   }
 };
@@ -270,7 +270,7 @@ struct ActorPlanFixture : EnumerationFixture {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
     VS::Battle::Ai::planningPassCandidates = pass_candidates;
     VS::Battle::Ai::arenaOrbit = nullptr;
-    state.action_slots[2][1].opaque0_bit7 = 0;
+    state.action_slots[2][1].usable = 0;
     std::memset(exclusions, 1, sizeof(exclusions));
   }
   ~ActorPlanFixture() {
@@ -467,15 +467,15 @@ TEST_CASE(
   expected.action = 42;
   expected.distance_squared = 24;
   expected.weight = 128;
-  expected.opaque10.opaque0_bit0 = 0;
-  expected.opaque10.opaque0_bit1 = 0;
-  expected.opaque10.opaque0_bit2 = ignores_sight ? 1u : 0u;
-  expected.opaque10.opaque0_bit3 = 0;
+  expected.options.opaque0_bit0 = 0;
+  expected.options.opaque0_bit1 = 0;
+  expected.options.opaque0_bit2 = ignores_sight ? 1u : 0u;
+  expected.options.opaque0_bit3 = 0;
   VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
   CHECK(std::memcmp(&fixture.state.current_choice, &expected,
                     sizeof(expected)) == 0);
   for (const auto& row : fixture.state.action_slots) {
-    for (const auto& slot : row) CHECK(slot.opaque0_bit7 == 1);
+    for (const auto& slot : row) CHECK(slot.usable == 1);
   }
 }
 
@@ -488,7 +488,7 @@ TEST_CASE(
       std::bit_cast<VS::Battle::Ai::ActionCandidateRecord>(
           Words{0xDEADBEEF, 0xFFFFFFFF, 0xABCDEF01, 0xFFFFFFFF, 0xFFFFFFFF});
   for (auto& row : fixture.state.action_slots) {
-    for (auto& slot : row) slot.opaque0_bit7 = 1;
+    for (auto& slot : row) slot.usable = 1;
   }
   for (auto& row : fixture.stats.limb_actions) {
     for (auto& slot : row) slot.action_id = 42;
@@ -500,7 +500,7 @@ TEST_CASE(
                     sizeof(expected)) == 0);
   for (int row = 0; row < 6; ++row) {
     for (int column = 0; column < 4; ++column) {
-      CHECK(fixture.state.action_slots[row][column].opaque0_bit7 ==
+      CHECK(fixture.state.action_slots[row][column].usable ==
             static_cast<unsigned>(row == 2));
     }
   }
@@ -521,9 +521,9 @@ TEST_CASE(
   CHECK(fixture.state.current_choice.column == 1);
   CHECK(fixture.state.current_choice.distance_squared == 9);
   CHECK(fixture.state.current_choice.weight == 128);
-  CHECK(fixture.state.current_choice.opaque10.opaque0_bit2 ==
+  CHECK(fixture.state.current_choice.options.opaque0_bit2 ==
         VS::Battle::actionDefinitions[0].ai_flags.opaque1_bit4);
-  CHECK(fixture.state.action_slots[2][1].opaque0_bit7 == 1);
+  CHECK(fixture.state.action_slots[2][1].usable == 1);
 }
 
 TEST_CASE(
@@ -540,7 +540,7 @@ TEST_CASE(
   VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
   CHECK(fixture.state.current_choice.action == 0);
   CHECK(fixture.state.current_choice.distance_squared == 9);
-  CHECK(fixture.state.action_slots[2][1].opaque0_bit7 == 0);
+  CHECK(fixture.state.action_slots[2][1].usable == 0);
 }
 
 TEST_CASE("Native planning simulation updates only the original stat fields",
@@ -565,7 +565,7 @@ TEST_CASE("Native planning simulation updates only the original stat fields",
   CHECK(fixture.state.low_mp == 0);
   CHECK(fixture.state.low_hp == 0);
   for (const auto& row : fixture.state.action_slots) {
-    for (const auto& slot : row) CHECK(slot.opaque0_bit7 == 1);
+    for (const auto& slot : row) CHECK(slot.usable == 1);
   }
 }
 
@@ -579,14 +579,14 @@ TEST_CASE(
   fixture.state.stats = nullptr;
   for (auto& limb : fixture.stats.limbs) limb.hp = 0;
   for (auto& row : fixture.state.action_slots) {
-    for (auto& slot : row) slot.opaque0_bit7 = 1;
+    for (auto& slot : row) slot.usable = 1;
   }
   VS::Battle::Ai::AdvanceLivePlanningSimulation(480);
   CHECK(simulated.current_hp == 1);
   CHECK(fixture.stats.current_hp == 100);
   CHECK(fixture.state.low_hp == 0);
   for (const auto& row : fixture.state.action_slots) {
-    for (const auto& slot : row) CHECK(slot.opaque0_bit7 == 0);
+    for (const auto& slot : row) CHECK(slot.usable == 0);
   }
 }
 
@@ -607,7 +607,7 @@ TEST_CASE("Native planning simulation refreshes each actor by its own slot",
   VS::Battle::Ai::EngagementData second_actor{};
   second.id = 3;
   second.stats = &second_stats;
-  second_actor.opaque_3c = &second_stats;
+  second_actor.stats = &second_stats;
   fixture.peer.actor = &second_actor;
   fixture.battle_actor.next = &second;
   fixture.stats.current_hp = 0;
@@ -620,8 +620,8 @@ TEST_CASE("Native planning simulation refreshes each actor by its own slot",
   CHECK(fixture.peer.low_hp == 0);
   for (int row = 0; row < 6; ++row) {
     for (int column = 0; column < 4; ++column) {
-      CHECK(fixture.state.action_slots[row][column].opaque0_bit7 == 0);
-      CHECK(fixture.peer.action_slots[row][column].opaque0_bit7 == 1);
+      CHECK(fixture.state.action_slots[row][column].usable == 0);
+      CHECK(fixture.peer.action_slots[row][column].usable == 1);
     }
   }
 }
@@ -892,7 +892,7 @@ TEST_CASE(
   CHECK(selected.threshold == 0xFFFF);
   CHECK(selected.weight == 40);
   CHECK(selected.target_limb == (kind == 2 ? 2 : 0));
-  CHECK(selected.opaque_c_bit7 == (kind == 3 ? 225 : 0));
+  CHECK(selected.height_offset == (kind == 3 ? 225 : 0));
 }
 
 TEST_CASE("Native enumeration caches and ranks without its old scratch records",
@@ -910,7 +910,7 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
   const auto& selected = fixture.state.candidates[0];
   CHECK(fixture.state.candidate_order[0] == &selected);
   CHECK(fixture.exclusions[1][42] == 1);
-  CHECK(VS::Battle::Ai::unusedPlanCounter == (1 << 9));
+  CHECK(VS::Battle::Ai::fallbackSlotMask == (1 << 9));
   CHECK(std::memcmp(&fixture.fallback[0], &selected, sizeof(selected)) == 0);
   CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
 }
@@ -932,7 +932,7 @@ TEST_CASE(
     "Native enumeration leaves disabled slots and existing lists untouched",
     "[ai][planning][candidate-enumeration-live]") {
   EnumerationFixture fixture;
-  fixture.state.action_slots[2][1].opaque0_bit7 = 0;
+  fixture.state.action_slots[2][1].usable = 0;
   fixture.state.candidate_count = 3;
   VS::Battle::Ai::fallbackCandidateCount = 7;
   VS::Battle::Ai::candidateExclusions = nullptr;
@@ -943,7 +943,7 @@ TEST_CASE(
       VS::Battle::Ai::EnumerateLiveActionCandidates(&fixture.state, 70000));
   CHECK(std::bit_cast<StateBytes>(fixture.state) == before);
   CHECK(VS::Battle::Ai::fallbackCandidateCount == 7);
-  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackSlotMask == 0);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
 
@@ -1065,11 +1065,11 @@ TEST_CASE(
   fixture.state.actor_id = 0;
   fixture.state.candidate_count = 5;
   VS::Battle::Ai::fallbackCandidateCount = 7;
-  VS::Battle::Ai::unusedPlanCounter = -1;
+  VS::Battle::Ai::fallbackSlotMask = -1;
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
   CHECK(fixture.state.candidate_count == 0);
   CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
-  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackSlotMask == 0);
   CHECK(fixture.exclusions[1][0] == 0);
   CHECK(fixture.exclusions[1][42] == 0);
   CHECK(fixture.exclusions[1][43] == 1);
@@ -1165,8 +1165,8 @@ TEST_CASE(
   fixture.workspace->targets[1].opaque4 = 10;
   fixture.workspace->targets[1].opaque18 = 2;
   auto expected = fixture.rows;
-  expected[0].opaque4 = 27;
-  expected[0].opaque_c = 0x80000000;
+  expected[0].hp = 27;
+  expected[0].statuses = 0x80000000;
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   CHECK((std::bit_cast<RowBytes>(fixture.rows) ==
@@ -1197,14 +1197,14 @@ TEST_CASE("Native simulated results decode all signed resource operations",
     target.opaque_1e_bit2 = 2;
     target.opaque_3c = INT16_MIN;
     auto expected = fixture.rows;
-    expected[0].opaque4 = type == 3 ? 52 : 57;
-    expected[0].opaque8 = type == 1 ? 44 : 49;
-    expected[0].opaque10 = type == 6 ? 34 : 39;
-    expected[0].opaque14 = 28;
-    expected[0].opaque_c = 0x80000004;
-    expected[1].opaque8 = 0;
-    expected[1].opaque10 = 35;
-    expected[1].opaque14 = 100;
+    expected[0].hp = type == 3 ? 52 : 57;
+    expected[0].mp = type == 1 ? 44 : 49;
+    expected[0].weapon_dp = type == 6 ? 34 : 39;
+    expected[0].shield_dp = 28;
+    expected[0].statuses = 0x80000004;
+    expected[1].mp = 0;
+    expected[1].weapon_dp = 35;
+    expected[1].shield_dp = 100;
     using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
     REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
     CHECK((std::bit_cast<RowBytes>(fixture.rows) ==
@@ -1280,17 +1280,17 @@ TEST_CASE("Native condition status score reads the row's own AI state",
       rows{};
   // Row 7 belongs to the fixture's peer in slot 3, so slot 1 is not consulted.
   VS::Battle::Ai::ActionTiming& row = rows[7];
-  row.opaque0_bit0 = 3;
-  row.opaque4 = 100;
-  row.opaque6 = 100;
-  row.opaque_c = (1u << 6) | (1u << 12);
+  row.actor_id = 3;
+  row.hp = 100;
+  row.max_hp = 100;
+  row.statuses = (1u << 6) | (1u << 12);
   fixture.state.action_cost_enabled = 1;
   fixture.peer.action_cost_enabled = 0;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50);
   fixture.peer.action_cost_enabled = 1;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50 - 51);
   fixture.peer.action_cost_enabled = 2;
-  row.opaque4 = 0;
+  row.hp = 0;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) ==
         50 - 51 - 128 - 84);
 }
@@ -1302,15 +1302,15 @@ TEST_CASE("Native condition ratios read each term from the requested row",
       rows{};
   for (std::size_t index = 0; index < rows.size(); ++index) {
     auto& row = rows[index];
-    row.opaque0_bit0 = static_cast<std::uint32_t>(rows.size() - 1 - index);
-    row.opaque4 = static_cast<std::int16_t>(2 * index);
-    row.opaque6 = 128;
-    row.opaque8 = static_cast<std::int16_t>(3 * index);
-    row.opaque_a = 128;
-    row.opaque10 = static_cast<std::int16_t>(5 * index);
-    row.opaque12 = 128;
-    row.opaque14 = static_cast<std::int16_t>(7 * index);
-    row.opaque16 = 128;
+    row.actor_id = static_cast<std::uint32_t>(rows.size() - 1 - index);
+    row.hp = static_cast<std::int16_t>(2 * index);
+    row.max_hp = 128;
+    row.mp = static_cast<std::int16_t>(3 * index);
+    row.max_mp = 128;
+    row.weapon_dp = static_cast<std::int16_t>(5 * index);
+    row.weapon_max_dp = 128;
+    row.shield_dp = static_cast<std::int16_t>(7 * index);
+    row.shield_max_dp = 128;
   }
   for (int id = 0; id < VS::Battle::Ai::kBattleActorSlotCount; ++id) {
     CHECK(VS::Battle::Ai::LiveActorHpRatio(rows.data(), id) == 2 * id);
@@ -1326,14 +1326,14 @@ TEST_CASE("Native condition ratios return unnarrowed signed quotients",
              VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   VS::Battle::Ai::ActionTiming& row = rows[9];
-  row.opaque4 = INT16_MIN;
-  row.opaque6 = 1;
-  row.opaque8 = -1;
-  row.opaque_a = 3;
-  row.opaque10 = INT16_MAX;
-  row.opaque12 = 1;
-  row.opaque14 = INT16_MAX;
-  row.opaque16 = 1;
+  row.hp = INT16_MIN;
+  row.max_hp = 1;
+  row.mp = -1;
+  row.max_mp = 3;
+  row.weapon_dp = INT16_MAX;
+  row.weapon_max_dp = 1;
+  row.shield_dp = INT16_MAX;
+  row.shield_max_dp = 1;
   CHECK(VS::Battle::Ai::LiveActorHpRatio(rows.data(), 9) == -4194304);
   CHECK(VS::Battle::Ai::LiveActorMpRatio(rows.data(), 9) == -42);
   CHECK(VS::Battle::Ai::LiveActorEquipmentDpRatio(rows.data(), 9) ==
@@ -1393,9 +1393,9 @@ TEST_CASE("Native candidate readiness refreshes actual action slot usability",
   CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
         false);
   CHECK(fixture.state.candidates[0].weight == 17);
-  CHECK(fixture.state.action_slots[2][1].opaque0_bit7 == 1);
+  CHECK(fixture.state.action_slots[2][1].usable == 1);
   CHECK(fixture.state.action_status == 0);
-  fixture.actor.opaque_3c = nullptr;
+  fixture.actor.stats = nullptr;
   fixture.state.action_status = 9;
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
@@ -1611,7 +1611,7 @@ TEST_CASE("AI action metadata writes the typed slot fields and keeps the rest",
   VS::Battle::Ai::ActorAiState expected = fixture.state;
   for (auto& row : expected.action_slots) {
     for (auto& slot : row) {
-      slot.opaque0_bit1 = 1;
+      slot.excludes_self = 1;
       slot.kind = 2;
       slot.long_range = 0;
       slot.special = type == 0 ? 1u : 0u;
@@ -1624,8 +1624,8 @@ TEST_CASE("AI action metadata writes the typed slot fields and keeps the rest",
   CHECK(fixture.state.action_cost_enabled == (type == 1 ? 30 : 10));
   const auto& slot = fixture.state.action_slots[3][2];
   CHECK(slot.reserved0_bit0 == (fill & 1u));
-  CHECK(slot.opaque0_bit2 == ((fill >> 2) & 1u));
-  CHECK(slot.opaque0_bit7 == ((fill >> 7) & 1u));
+  CHECK(slot.ignores_obstruction == ((fill >> 2) & 1u));
+  CHECK(slot.usable == ((fill >> 7) & 1u));
   CHECK(slot.reserved3_bit0 == static_cast<unsigned>(fill));
 }
 
@@ -1730,7 +1730,7 @@ TEST_CASE(
   const std::array<int, 6> expected{4, 3, 2, 0, 5, 1};
   plan.candidate_count = static_cast<int>(scores.size());
   for (std::size_t index = 0; index < scores.size(); ++index) {
-    plan.candidates[index].reserved0 = scores[index];
+    plan.candidates[index].score = scores[index];
     plan.candidate_order[index] = &plan.candidates[index];
   }
   VS::Battle::Ai::SortLiveActionCandidates(&plan);
@@ -1863,7 +1863,7 @@ TEST_CASE("AI action usability applies resource thresholds to every limb slot",
   fixture.stats.weapon.current_pp = 10;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
                                                      column));
-  CHECK(slot.opaque0_bit7 == 1);
+  CHECK(slot.usable == 1);
   CHECK(std::bit_cast<std::array<uint32_t, 2>>(slot) ==
         std::array<uint32_t, 2>{0xA5CAFE93, 0xDEADBEAF});
 }
@@ -1880,7 +1880,7 @@ TEST_CASE("AI action usability applies status and damaged-limb restrictions",
   fixture.stats.limbs[2].hp = 1;
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
-  CHECK(fixture.state.action_slots[2][1].opaque0_bit7 == 0);
+  CHECK(fixture.state.action_slots[2][1].usable == 0);
 }
 
 TEST_CASE(
@@ -1919,14 +1919,14 @@ TEST_CASE(
   fixture.state.relations[3].classification = 2;
   CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
                                                    3));
-  candidate.opaque10.opaque0_bit4 = 1;
+  candidate.options.opaque0_bit4 = 1;
   CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
                                                          &candidate, 3));
   fixture.state.relations[3].classification = 3;
   CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
                                                    3));
-  candidate.opaque10.opaque0_bit4 = 0;
-  candidate.opaque10.opaque0_bit5 = 1;
+  candidate.options.opaque0_bit4 = 0;
+  candidate.options.opaque0_bit5 = 1;
   CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
                                                          &candidate, 3));
   fixture.state.relations[3].classification = 2;
@@ -1976,19 +1976,19 @@ TEST_CASE("AI sorting covers empty/full lists and signed extremes without RNG",
   const auto random_index = VS::Core::randomShuffleIndex;
   const auto interface_random = VS::Core::interfaceRandomState;
   for (int index = 0; index < count; ++index) {
-    plan.candidates[index].reserved0 =
+    plan.candidates[index].score =
         pattern == 0 ? index : (pattern == 1 ? -index : 0);
     plan.candidate_order[index] = &plan.candidates[index];
   }
   if (count > 1 && pattern != 2) {
-    plan.candidates[0].reserved0 = std::numeric_limits<int>::min();
-    plan.candidates[count - 1].reserved0 = std::numeric_limits<int>::max();
+    plan.candidates[0].score = std::numeric_limits<int>::min();
+    plan.candidates[count - 1].score = std::numeric_limits<int>::max();
   }
   const auto records = plan.candidates;
   VS::Battle::Ai::SortLiveActionCandidates(&plan);
   for (int index = 1; index < count; ++index) {
-    CHECK(plan.candidate_order[index - 1]->reserved0 >=
-          plan.candidate_order[index]->reserved0);
+    CHECK(plan.candidate_order[index - 1]->score >=
+          plan.candidate_order[index]->score);
   }
   CHECK(std::memcmp(records.data(), plan.candidates.data(),
                     sizeof(plan.candidates)) == 0);

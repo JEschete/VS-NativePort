@@ -11,7 +11,9 @@ namespace VS::Battle::Ai {
 // decomp: func_800DA1D4_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:119)
 struct RelationWord {
   /* 0x00 */ std::uint32_t active : 1;
-  /* 0x00 */ std::uint32_t reserved0_bit1 : 4;
+  // Was active, clear at point height, in view, and a bit kept on Ashley's
+  // restore.
+  /* 0x00 */ std::uint32_t perception_flags : 4;
   /* 0x00 */ std::uint32_t visible : 1;
   /* 0x00 */ std::uint32_t classification : 2;
   /* 0x01 */ std::uint32_t counter : 7;

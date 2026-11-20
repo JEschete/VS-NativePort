@@ -12,7 +12,7 @@ VS::Battle::Ai::CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (D_800F58F0@BATTLE/BATTLE.PRG)
 std::int32_t fallbackCandidateCount;
 // decomp: D_800F58F4 (D_800F58F4@BATTLE/BATTLE.PRG)
-std::int32_t unusedPlanCounter;
+std::int32_t fallbackSlotMask;
 // decomp: D_800F58F8 (D_800F58F8@BATTLE/BATTLE.PRG)
 VS::Battle::Ai::CandidateEntryView* fallbackCandidates;
 // decomp: D_800F5900 (D_800F5900@BATTLE/BATTLE.PRG)
