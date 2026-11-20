@@ -258,14 +258,14 @@ struct ReactionView {
     std::uint8_t temporary_ashley_alliance;
   };
   std::array<std::uint8_t, kReactionViewReserved14Bytes> reserved14;
-  std::uint8_t settings_bit26;
-  std::uint8_t settings_byte3_bit0;
+  std::uint8_t hostile_on_grievance;
+  std::uint8_t shares_ally_hostility;
   std::array<std::uint8_t, kReactionViewReserved22Bytes> reserved22;
-  std::uint8_t settings_bit27;
+  std::uint8_t can_ally_with_ashley;
   std::array<std::uint8_t, kReactionViewReserved28Bytes> reserved28;
-  std::uint8_t settings_bits21;
+  std::uint8_t relation_category;
   std::array<std::uint8_t, kReactionViewReserved2dBytes> reserved_2d;
-  std::uint8_t settings_bit25;
+  std::uint8_t hostile_on_harm;
   std::array<std::uint8_t, kReactionViewReserved3131Bytes> reserved31_31;
   void* native_pointer54;   // PS1 pointer slot 0x54
   void* native_pointer58;   // PS1 pointer slot 0x58
@@ -492,9 +492,9 @@ inline constexpr std::size_t kPerceptionViewDistancesSquaredCount = 16;
 // decomp: actorRelationState (src/BATTLE/BATTLE.PRG/6FC00.c:638)
 struct PerceptionView {
   std::array<std::uint8_t, kPerceptionViewReserved0Bytes> reserved0;
-  std::uint8_t settings_bit23;
+  std::uint8_t decays_hostility;
   std::array<std::uint8_t, 2> reserved23;
-  std::uint8_t settings_bit15;
+  std::uint8_t ignores_body_line;
   std::array<std::uint8_t, kPerceptionViewReserved26Bytes> reserved26;
   TilePosition tile;
   std::array<std::uint8_t, kPerceptionViewReserved38Bytes> reserved38;
@@ -640,26 +640,26 @@ struct PerceptionUpdateView {
   std::array<std::uint8_t, kPerceptionUpdateViewReservedFBytes> reserved_f;
   std::uint8_t opaque14;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved15Bytes> reserved15;
-  std::uint8_t opaque18;
+  std::uint8_t alerted;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved19Bytes> reserved19;
-  std::uint8_t opaque_1c;
+  std::uint8_t holds_stall_tile;
   std::uint8_t opaque_1d;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved1eBytes> reserved_1e;
-  std::uint8_t settings_bits28;
+  std::uint8_t alert_rule;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved30Bytes> reserved30;
   std::uint32_t tile;
   union {
     std::int32_t word;
     std::array<std::uint8_t, kPerceptionUpdateViewBytes> bytes;
   } previous_tile;
-  std::uint32_t opaque_3c;
-  std::uint16_t opaque40;
+  std::uint32_t remembered_target_tile;
+  std::uint16_t target_memory_frames;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved42Bytes> reserved42;
-  std::uint8_t opaque45;
-  std::uint16_t opaque46;
+  std::uint8_t detour_step_frames;
+  std::uint16_t stall_frames;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved48Bytes> reserved48;
-  std::int32_t opaque_4c;
-  std::int32_t opaque50;
+  std::int32_t position_xy;
+  std::int32_t position_z_pad;
   VS::Battle::Actor* actor;
   PerceivedObjectView* model;
   PositionLinkView* stats;
@@ -684,10 +684,10 @@ struct PerceptionUpdateView {
   std::uint8_t detour_step;
   std::uint8_t opaque_fb;
   std::array<std::uint8_t, kPerceptionUpdateViewReservedFcBytes> reserved_fc;
-  std::uint16_t opaque114;
+  std::uint16_t flee_timer;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved116Bytes> reserved116;
   std::uint32_t opaque120;
-  std::uint8_t opaque124;
+  std::uint8_t observed_command;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved125Bytes> reserved125;
   std::uint8_t awareness_frames_remaining;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved12bBytes> reserved_12b;
@@ -695,14 +695,14 @@ struct PerceptionUpdateView {
   std::array<std::uint8_t, kPerceptionUpdateViewReserved132Bytes> reserved132;
   std::uint16_t awareness_marker;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved13aBytes> reserved_13a;
-  std::uint16_t opaque156;
+  std::uint16_t movement_wait;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved158Bytes> reserved158;
-  void* opaque_18c;
+  void* scripted_route;
   std::uint32_t reserved190 : 5;
-  std::uint32_t opaque190 : 7;
+  std::uint32_t detour_steps_left : 7;
   std::uint32_t reserved191 : 20;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved194Bytes> reserved194;
-  std::uint8_t opaque_19a;
+  std::uint8_t recovery_frames;
   std::array<std::uint8_t, kPerceptionUpdateViewReserved19b19bBytes>
       reserved_19b_19b;
   void* native_pointer_1a0;  // PS1 pointer slot 0x1A0
@@ -1274,20 +1274,20 @@ inline constexpr std::size_t kTargetApproachViewDistancesSquaredCount = 16;
 
 // decomp: targetMovementState (src/BATTLE/BATTLE.PRG/771A8.c:1967)
 struct TargetApproachView {
-  std::uint8_t opaque0;
-  std::uint8_t opaque1;
+  std::uint8_t close_approach;
+  std::uint8_t gait;
   std::array<std::uint8_t, 1> reserved2;
-  std::uint8_t opaque3;
-  std::uint8_t opaque4;
+  std::uint8_t height_filter;
+  std::uint8_t near_target_detour;
   std::array<std::uint8_t, kTargetApproachViewReserved5Bytes> reserved5;
-  std::uint8_t opaque9;
+  std::uint8_t toward_point;
   std::array<std::uint8_t, 2> reserved_a;
-  std::uint8_t opaque_c;
-  std::uint8_t opaque_d;
+  std::uint8_t facing_locked;
+  std::uint8_t approach_directly;
   std::array<std::uint8_t, kTargetApproachViewReservedEBytes> reserved_e;
-  std::uint8_t settings_bit13;
+  std::uint8_t chases_lost_target;
   std::array<std::uint8_t, kTargetApproachViewReserved25Bytes> reserved25;
-  std::uint8_t settings_byte0_bit7;
+  std::uint8_t approaches_target_point;
   TilePosition tile;
   std::array<std::uint8_t, kTargetApproachViewReserved38Bytes> reserved38;
   ApproachTileWord saved_destination;
@@ -1306,11 +1306,11 @@ struct TargetApproachView {
   std::array<std::uint8_t, kTargetApproachViewReserved89Bytes> reserved89;
   std::int32_t range;
   std::int32_t previous_range;
-  std::uint8_t opaque_e4;
+  std::uint8_t chasing_lost_target;
   std::uint8_t target_id;
   std::uint8_t timeout;
-  std::uint8_t opaque_e7;
-  std::uint8_t opaque_e8;
+  std::uint8_t recover_in_range;
+  std::uint8_t walked_close;
   std::uint8_t range_mode;
   std::uint8_t previous_option;
   std::uint8_t previous_target_id;
@@ -1320,7 +1320,7 @@ struct TargetApproachView {
   std::array<std::uint8_t, 1> reserved_f5;
   std::uint8_t target_tile_z;
   std::array<std::uint8_t, 1> reserved_f7;
-  std::uint16_t opaque_f8;
+  std::uint16_t retarget_timer;
   std::array<std::uint8_t, kTargetApproachViewReservedFaBytes> reserved_fa;
   std::int16_t target_x;
   std::int16_t target_z;
@@ -1436,7 +1436,7 @@ struct WanderView {
   std::uint8_t is_stuck;
   std::uint8_t opaque3;
   std::array<std::uint8_t, kWanderViewReserved4Bytes> reserved4;
-  std::uint8_t opaque8;
+  std::uint8_t stayed_on_tile;
   std::array<std::uint8_t, kWanderViewReserved9Bytes> reserved9;
   TilePosition tile;
   std::array<std::uint8_t, kWanderViewReserved38Bytes> reserved38;

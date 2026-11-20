@@ -135,7 +135,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
     settings_.saved_decision_callback = nullptr;
   }
   [[nodiscard]] bool RecoveryDisabled() const override {
-    return reaction_.settings_bit25 != 0;
+    return reaction_.hostile_on_harm != 0;
   }
   void SetTemporaryAwareness(int marker, int frames) override {
     SetLiveTemporaryAwarenessIndicator(&state_, marker, frames);
@@ -241,11 +241,11 @@ void RequireSlot(int actor) {
 
 ReactionSettings ReadSettings(const VS::Battle::Ai::ReactionView& view) {
   return {.allied_with_ashley = view.temporary_ashley_alliance != 0,
-          .settings_bit25 = view.settings_bit25 != 0,
-          .settings_bit26 = view.settings_bit26 != 0,
-          .settings_bit27 = view.settings_bit27 != 0,
-          .shares_ally_hostility = view.settings_byte3_bit0 != 0,
-          .category = view.settings_bits21};
+          .settings_bit25 = view.hostile_on_harm != 0,
+          .settings_bit26 = view.hostile_on_grievance != 0,
+          .settings_bit27 = view.can_ally_with_ashley != 0,
+          .shares_ally_hostility = view.shares_ally_hostility != 0,
+          .category = view.relation_category};
 }
 
 VS::Battle::Ai::ReactionView* PeerView(int actor) {

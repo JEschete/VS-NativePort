@@ -89,12 +89,12 @@ static_assert(sizeof(EngagementActor) == kEngagementActorBytes,
 
 // decomp: func_800DEEA4_t (src/BATTLE/BATTLE.PRG/6F014.c:287)
 struct ReactionRecord {
-  std::uint16_t opaque0;
+  std::uint16_t action_id;
   std::array<std::uint8_t, 2> reserved2;
-  EngagementActor opaque4;
+  EngagementActor primary_target;
   std::array<std::uint8_t, 2> reserved48;
-  std::uint16_t opaque_4a;
-  EngagementActor opaque_4c[0];
+  std::uint16_t target_count;
+  EngagementActor targets[0];
 };
 inline constexpr std::size_t kReactionRecordBytes = 0x4C;
 static_assert(sizeof(ReactionRecord) == kReactionRecordBytes,

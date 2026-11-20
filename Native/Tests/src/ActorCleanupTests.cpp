@@ -198,11 +198,12 @@ TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
 
 TEST_CASE("AI navigation override views retain a full native pointer",
           "[ai][cleanup][layout]") {
-  REQUIRE(sizeof(decltype(VS::Battle::Ai::PerceptionUpdateView::opaque_18c)) ==
-          sizeof(void*));
+  REQUIRE(
+      sizeof(decltype(VS::Battle::Ai::PerceptionUpdateView::scripted_route)) ==
+      sizeof(void*));
   CHECK(std::is_pointer_v<
-        decltype(VS::Battle::Ai::PerceptionUpdateView::opaque_18c)>);
-  CHECK(offsetof(VS::Battle::Ai::PerceptionUpdateView, opaque_18c) ==
+        decltype(VS::Battle::Ai::PerceptionUpdateView::scripted_route)>);
+  CHECK(offsetof(VS::Battle::Ai::PerceptionUpdateView, scripted_route) ==
         offsetof(VS::Battle::Ai::ActorAiState, native_pointer_18c));
 }
 

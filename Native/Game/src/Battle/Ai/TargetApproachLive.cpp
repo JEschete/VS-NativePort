@@ -41,15 +41,18 @@ static_assert(sizeof(VS::Battle::Ai::ApproachRelationBits) ==
               sizeof(std::uint32_t));
 
 // The approach view names the actor state's unnamed bytes; both alias it.
-static_assert(offsetof(Approach, opaque0) == offsetof(AiState, reserved0));
-static_assert(offsetof(Approach, opaque1) == offsetof(AiState, opaque1));
-static_assert(offsetof(Approach, opaque3) == offsetof(AiState, opaque3));
-static_assert(offsetof(Approach, opaque4) == offsetof(AiState, opaque4));
-static_assert(offsetof(Approach, opaque9) == offsetof(AiState, opaque9));
-static_assert(offsetof(Approach, opaque_d) == offsetof(AiState, opaque_d));
-static_assert(offsetof(Approach, settings_bit13) ==
+static_assert(offsetof(Approach, close_approach) ==
+              offsetof(AiState, reserved0));
+static_assert(offsetof(Approach, gait) == offsetof(AiState, opaque1));
+static_assert(offsetof(Approach, height_filter) == offsetof(AiState, opaque3));
+static_assert(offsetof(Approach, near_target_detour) ==
+              offsetof(AiState, opaque4));
+static_assert(offsetof(Approach, toward_point) == offsetof(AiState, opaque9));
+static_assert(offsetof(Approach, approach_directly) ==
+              offsetof(AiState, opaque_d));
+static_assert(offsetof(Approach, chases_lost_target) ==
               offsetof(AiState, reserved24));
-static_assert(offsetof(Approach, settings_byte0_bit7) ==
+static_assert(offsetof(Approach, approaches_target_point) ==
               offsetof(AiState, reserved33));
 static_assert(offsetof(Approach, tile) == offsetof(AiState, tile));
 static_assert(offsetof(Approach, saved_destination) ==
@@ -58,8 +61,9 @@ static_assert(offsetof(Approach, x) == offsetof(AiState, position));
 static_assert(offsetof(Approach, actor) == offsetof(AiState, actor));
 static_assert(offsetof(Approach, model) == offsetof(AiState, model));
 static_assert(offsetof(Approach, actor_id) == offsetof(AiState, actor_id));
-static_assert(offsetof(Approach, opaque_e7) == offsetof(AiState, opaque_e7));
-static_assert(offsetof(Approach, opaque_e8) == offsetof(AiState, opaque_e8));
+static_assert(offsetof(Approach, recover_in_range) ==
+              offsetof(AiState, opaque_e7));
+static_assert(offsetof(Approach, walked_close) == offsetof(AiState, opaque_e8));
 static_assert(offsetof(Approach, range_mode) == offsetof(AiState, opaque_e9));
 static_assert(offsetof(Approach, target_x) == offsetof(AiState, target_x));
 static_assert(offsetof(Approach, movement_target) ==
@@ -106,15 +110,15 @@ TargetApproacher Load(const AiState& state) {
       model != nullptr ? reinterpret_cast<const VS::Actors::ActorRecord*>(model)
                        : nullptr;
   TargetApproacher approacher{
-      .close_approach = view.opaque0,
-      .gait = view.opaque1,
-      .height_filter = view.opaque3,
-      .near_target_detour = view.opaque4,
-      .toward_point = view.opaque9,
-      .facing_locked = view.opaque_c,
-      .approach_directly = view.opaque_d,
-      .chases_lost_target = view.settings_bit13,
-      .approaches_target_point = view.settings_byte0_bit7,
+      .close_approach = view.close_approach,
+      .gait = view.gait,
+      .height_filter = view.height_filter,
+      .near_target_detour = view.near_target_detour,
+      .toward_point = view.toward_point,
+      .facing_locked = view.facing_locked,
+      .approach_directly = view.approach_directly,
+      .chases_lost_target = view.chases_lost_target,
+      .approaches_target_point = view.approaches_target_point,
       .tile = view.tile.word,
       .saved_destination = view.saved_destination.word,
       .x = view.x,
@@ -130,18 +134,18 @@ TargetApproacher Load(const AiState& state) {
       .facing_delay = state.facing_delay,
       .range = view.range,
       .previous_range = view.previous_range,
-      .chasing_lost_target = view.opaque_e4,
+      .chasing_lost_target = view.chasing_lost_target,
       .target_id = view.target_id,
       .chase_timeout = view.timeout,
-      .recover_in_range = view.opaque_e7,
-      .walked_close = view.opaque_e8,
+      .recover_in_range = view.recover_in_range,
+      .walked_close = view.walked_close,
       .range_mode = view.range_mode,
       .previous_option = view.previous_option,
       .previous_target_id = view.previous_target_id,
       .chase_destination = view.cached_destination.word,
       .target_half_tile_x = view.target_tile_x,
       .target_half_tile_z = view.target_tile_z,
-      .retarget_timer = view.opaque_f8,
+      .retarget_timer = view.retarget_timer,
       .previous_facing_tile = state.previous_facing_tile.word,
       .facing_pending = state.facing_pending,
       .turn_timer = state.opaque_13a,
@@ -166,13 +170,13 @@ TargetApproacher Load(const AiState& state) {
 // written back.
 void Store(const TargetApproacher& approacher, AiState& state) {
   Approach& view = ApproachOf(state);
-  view.opaque0 = approacher.close_approach;
-  view.opaque1 = approacher.gait;
-  view.opaque3 = approacher.height_filter;
-  view.opaque4 = approacher.near_target_detour;
-  view.opaque9 = approacher.toward_point;
-  view.opaque_c = approacher.facing_locked;
-  view.opaque_d = approacher.approach_directly;
+  view.close_approach = approacher.close_approach;
+  view.gait = approacher.gait;
+  view.height_filter = approacher.height_filter;
+  view.near_target_detour = approacher.near_target_detour;
+  view.toward_point = approacher.toward_point;
+  view.facing_locked = approacher.facing_locked;
+  view.approach_directly = approacher.approach_directly;
   view.tile.word = approacher.tile;
   view.saved_destination.word = approacher.saved_destination;
   view.x = approacher.x;
@@ -180,18 +184,18 @@ void Store(const TargetApproacher& approacher, AiState& state) {
   state.facing_delay = approacher.facing_delay;
   view.range = approacher.range;
   view.previous_range = approacher.previous_range;
-  view.opaque_e4 = approacher.chasing_lost_target;
+  view.chasing_lost_target = approacher.chasing_lost_target;
   view.target_id = approacher.target_id;
   view.timeout = approacher.chase_timeout;
-  view.opaque_e7 = approacher.recover_in_range;
-  view.opaque_e8 = approacher.walked_close;
+  view.recover_in_range = approacher.recover_in_range;
+  view.walked_close = approacher.walked_close;
   view.range_mode = approacher.range_mode;
   view.previous_option = approacher.previous_option;
   view.previous_target_id = approacher.previous_target_id;
   view.cached_destination.word = approacher.chase_destination;
   view.target_tile_x = approacher.target_half_tile_x;
   view.target_tile_z = approacher.target_half_tile_z;
-  view.opaque_f8 = approacher.retarget_timer;
+  view.retarget_timer = approacher.retarget_timer;
   state.previous_facing_tile.word = approacher.previous_facing_tile;
   state.facing_pending = approacher.facing_pending;
   state.opaque_13a = approacher.turn_timer;

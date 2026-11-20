@@ -85,17 +85,20 @@ static_assert(offsetof(VS::Battle::Ai::TargetApproachView, target_id) >=
                       sizeof(VS::Battle::Ai::ActorAiState{}.reserved_d9));
 // The pursuit flags the detour clears: 0xE4 lies in the reserved bytes, 0xE7
 // and 0xE8 are named in both layouts.
-static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e4) >=
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView,
+                       chasing_lost_target) >=
                   offsetof(VS::Battle::Ai::ActorAiState, reserved_d9) &&
-              offsetof(VS::Battle::Ai::TargetApproachView, opaque_e4) <
+              offsetof(VS::Battle::Ai::TargetApproachView,
+                       chasing_lost_target) <
                   offsetof(VS::Battle::Ai::ActorAiState, reserved_d9) +
                       sizeof(VS::Battle::Ai::ActorAiState{}.reserved_d9));
-static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e7) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, recover_in_range) ==
               offsetof(VS::Battle::Ai::ActorAiState, opaque_e7));
-static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e8) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, walked_close) ==
               offsetof(VS::Battle::Ai::ActorAiState, opaque_e8));
 static_assert(offsetof(VS::Battle::Ai::MovementPathView, opaque_e4) ==
-              offsetof(VS::Battle::Ai::TargetApproachView, opaque_e4));
+              offsetof(VS::Battle::Ai::TargetApproachView,
+                       chasing_lost_target));
 static_assert(offsetof(VS::Battle::Ai::MovementPathView, wait_timer) ==
               offsetof(VS::Battle::Ai::ActorAiState, opaque_19a));
 static_assert(offsetof(VS::Battle::Ai::MovementPathView, opaque199) ==
@@ -158,7 +161,7 @@ void LoadPlacement(const VS::Battle::Ai::ActorAiState& state,
       *reinterpret_cast<const VS::Battle::Ai::TargetApproachView*>(&state);
   nav.approach_target_id = approach.target_id;
   nav.approach_range = approach.range;
-  nav.pursuit_e4 = approach.opaque_e4;
+  nav.pursuit_e4 = approach.chasing_lost_target;
   nav.pursuit_e7 = state.opaque_e7;
   nav.pursuit_e8 = state.opaque_e8;
 }
@@ -237,8 +240,8 @@ void StorePlacement(const GroundNavigator& nav,
   state.body_height = nav.body_height;
   state.fine_x = nav.fine_x;
   state.fine_z = nav.fine_z;
-  reinterpret_cast<VS::Battle::Ai::TargetApproachView&>(state).opaque_e4 =
-      nav.pursuit_e4;
+  reinterpret_cast<VS::Battle::Ai::TargetApproachView&>(state)
+      .chasing_lost_target = nav.pursuit_e4;
   state.opaque_e7 = nav.pursuit_e7;
   state.opaque_e8 = nav.pursuit_e8;
 }

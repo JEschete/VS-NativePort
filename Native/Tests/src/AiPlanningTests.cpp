@@ -164,7 +164,7 @@ struct SimulationResultsFixture : PlanningFixture {
     std::memset(request, 0, sizeof(*request));
     workspace = reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(request);
     VS::Battle::Ai::planningWorkspace = workspace;
-    workspace->opaque0 = 42;
+    workspace->action_id = 42;
     for (std::size_t index = 0; index < rows.size(); ++index) {
       rows[index].opaque0_bit0 = static_cast<unsigned>(index);
       rows[index].reserved0_bit4 = 0xABCDE;
@@ -728,17 +728,17 @@ TEST_CASE(
   candidate.action = 42;
   candidate.threshold = 54321;
   candidate.opaque0 = -123456;
-  fixture.workspace->opaque_4a = 4;
-  fixture.workspace->opaque_4c[0].opaque0 = 3;
-  fixture.workspace->opaque_4c[0].opaque40 = 1;
-  fixture.workspace->opaque_4c[0].opaque2 = 128;
-  fixture.workspace->opaque_4c[1].opaque0 = 2;
-  fixture.workspace->opaque_4c[1].opaque2 = 128;
-  fixture.workspace->opaque_4c[2].opaque0 = 3;
-  fixture.workspace->opaque_4c[3].opaque0 = 3;
-  fixture.workspace->opaque_4c[3].opaque2 = 99;
+  fixture.workspace->target_count = 4;
+  fixture.workspace->targets[0].opaque0 = 3;
+  fixture.workspace->targets[0].opaque40 = 1;
+  fixture.workspace->targets[0].opaque2 = 128;
+  fixture.workspace->targets[1].opaque0 = 2;
+  fixture.workspace->targets[1].opaque2 = 128;
+  fixture.workspace->targets[2].opaque0 = 3;
+  fixture.workspace->targets[3].opaque0 = 3;
+  fixture.workspace->targets[3].opaque2 = 99;
   for (unsigned threshold = 0; threshold < 256; ++threshold) {
-    fixture.workspace->opaque_4c[2].opaque2 =
+    fixture.workspace->targets[2].opaque2 =
         static_cast<unsigned char>(threshold);
     auto expected = candidate;
     expected.weight = (threshold + threshold / 4 + threshold / 32) & 255;
@@ -746,7 +746,7 @@ TEST_CASE(
     CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
           std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
   }
-  fixture.workspace->opaque_4a = 0;
+  fixture.workspace->target_count = 0;
   VS::Battle::Ai::UpdateCandidateHitWeightEntry(&candidate);
   CHECK(candidate.weight == 0);
 }
@@ -760,14 +760,14 @@ TEST_CASE(
   const auto before =
       std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate);
   CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(nullptr));
-  fixture.workspace->opaque_4a = 256;
+  fixture.workspace->target_count = 256;
   CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
   auto* short_workspace = static_cast<VS::Battle::Ai::ReactionRecord*>(
       VS::Core::Memory::AllocateLiveFromLowEnd(
           sizeof(VS::Battle::Ai::ReactionRecord)));
   REQUIRE(short_workspace != nullptr);
   std::memset(short_workspace, 0, sizeof(*short_workspace));
-  short_workspace->opaque_4a = 1;
+  short_workspace->target_count = 1;
   VS::Battle::Ai::planningWorkspace = short_workspace;
   CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
   VS::Battle::Ai::planningWorkspace = nullptr;
@@ -1153,17 +1153,17 @@ TEST_CASE(
   SimulationResultsFixture fixture;
   VS::Battle::actionDefinitions[42].type = 3;
   VS::Battle::actionDefinitions[42].cost = 55;
-  fixture.workspace->opaque4.opaque4 = 7;
-  fixture.workspace->opaque4.opaque_1c_bit0 = 2;
-  fixture.workspace->opaque4.opaque14 = 3;
-  fixture.workspace->opaque4.opaque18 = 1;
-  fixture.workspace->opaque_4a = 2;
-  fixture.workspace->opaque_4c[0].opaque0 = 0;
-  fixture.workspace->opaque_4c[0].opaque4 = 30;
-  fixture.workspace->opaque_4c[0].opaque_1c_bit0 = 2;
-  fixture.workspace->opaque_4c[1].opaque0 = 0;
-  fixture.workspace->opaque_4c[1].opaque4 = 10;
-  fixture.workspace->opaque_4c[1].opaque18 = 2;
+  fixture.workspace->primary_target.opaque4 = 7;
+  fixture.workspace->primary_target.opaque_1c_bit0 = 2;
+  fixture.workspace->primary_target.opaque14 = 3;
+  fixture.workspace->primary_target.opaque18 = 1;
+  fixture.workspace->target_count = 2;
+  fixture.workspace->targets[0].opaque0 = 0;
+  fixture.workspace->targets[0].opaque4 = 30;
+  fixture.workspace->targets[0].opaque_1c_bit0 = 2;
+  fixture.workspace->targets[1].opaque0 = 0;
+  fixture.workspace->targets[1].opaque4 = 10;
+  fixture.workspace->targets[1].opaque18 = 2;
   auto expected = fixture.rows;
   expected[0].opaque4 = 27;
   expected[0].opaque_c = 0x80000000;
@@ -1179,7 +1179,7 @@ TEST_CASE("Native simulated results decode all signed resource operations",
     SimulationResultsFixture fixture;
     VS::Battle::actionDefinitions[42].type = type;
     VS::Battle::actionDefinitions[42].cost = 5;
-    auto& performer = fixture.workspace->opaque4;
+    auto& performer = fixture.workspace->primary_target;
     performer.opaque4 = 7;
     performer.opaque_1c_bit0 = 2;
     performer.opaque6 = -9;
@@ -1189,8 +1189,8 @@ TEST_CASE("Native simulated results decode all signed resource operations",
     performer.opaque_1e_bit6 = 3;
     performer.opaque14 = 5;
     performer.opaque18 = 1;
-    fixture.workspace->opaque_4a = 1;
-    auto& target = fixture.workspace->opaque_4c[0];
+    fixture.workspace->target_count = 1;
+    auto& target = fixture.workspace->targets[0];
     target.opaque0 = 1;
     target.opaque6 = INT16_MAX;
     target.opaque38 = 5;
@@ -1215,8 +1215,8 @@ TEST_CASE("Native simulated results decode all signed resource operations",
 TEST_CASE("Native simulated results accept the complete native target capacity",
           "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;
-  fixture.workspace->opaque4.opaque40 = 1;
-  fixture.workspace->opaque_4a =
+  fixture.workspace->primary_target.opaque40 = 1;
+  fixture.workspace->target_count =
       static_cast<std::uint16_t>(std::size(fixture.request->targets));
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
@@ -1228,12 +1228,12 @@ TEST_CASE(
     "Native simulated results ignore inactive records before action lookup",
     "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;
-  fixture.workspace->opaque0 = UINT16_MAX;
-  fixture.workspace->opaque4.opaque40 = -1;
-  fixture.workspace->opaque4.opaque0 = 255;
-  fixture.workspace->opaque_4a = 1;
-  fixture.workspace->opaque_4c[0].opaque40 = 1;
-  fixture.workspace->opaque_4c[0].opaque0 = 255;
+  fixture.workspace->action_id = UINT16_MAX;
+  fixture.workspace->primary_target.opaque40 = -1;
+  fixture.workspace->primary_target.opaque0 = 255;
+  fixture.workspace->target_count = 1;
+  fixture.workspace->targets[0].opaque40 = 1;
+  fixture.workspace->targets[0].opaque0 = 255;
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
   VS::Battle::Ai::ApplySimulatedActionResultsEntry(fixture.rows.data());
@@ -1254,17 +1254,17 @@ TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
   SimulationResultsFixture fixture;
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
-  fixture.workspace->opaque_4a = 256;
+  fixture.workspace->target_count = 256;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
-  fixture.workspace->opaque_4a = 0;
-  fixture.workspace->opaque4.opaque0 = 16;
+  fixture.workspace->target_count = 0;
+  fixture.workspace->primary_target.opaque0 = 16;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   auto* short_workspace = static_cast<VS::Battle::Ai::ReactionRecord*>(
       VS::Core::Memory::AllocateLiveFromLowEnd(
           sizeof(VS::Battle::Ai::ReactionRecord)));
   REQUIRE(short_workspace != nullptr);
   std::memset(short_workspace, 0, sizeof(*short_workspace));
-  short_workspace->opaque_4a = 1;
+  short_workspace->target_count = 1;
   VS::Battle::Ai::planningWorkspace = short_workspace;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   VS::Battle::Ai::planningWorkspace = nullptr;

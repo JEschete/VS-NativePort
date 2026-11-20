@@ -101,16 +101,16 @@ TEST_CASE("Pursuit behavior clears six approach bytes but not adjacent options",
   MovementFixture fixture;
   auto& approach =
       *reinterpret_cast<VS::Battle::Ai::TargetApproachView*>(&fixture.state);
-  approach.opaque_e4 = approach.target_id = approach.timeout = 9;
-  approach.opaque_e7 = approach.opaque_e8 = approach.range_mode = 8;
+  approach.chasing_lost_target = approach.target_id = approach.timeout = 9;
+  approach.recover_in_range = approach.walked_close = approach.range_mode = 8;
   approach.previous_option = 7;
   approach.previous_target_id = 6;
   CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 1) == 3);
-  CHECK(approach.opaque_e4 == 0);
+  CHECK(approach.chasing_lost_target == 0);
   CHECK(approach.target_id == 0);
   CHECK(approach.timeout == 0);
-  CHECK(approach.opaque_e7 == 0);
-  CHECK(approach.opaque_e8 == 0);
+  CHECK(approach.recover_in_range == 0);
+  CHECK(approach.walked_close == 0);
   CHECK(approach.range_mode == 0);
   CHECK(approach.previous_option == 7);
   CHECK(approach.previous_target_id == 6);

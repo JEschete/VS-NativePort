@@ -80,7 +80,7 @@ constexpr int kRestoreOperation = 2;
 constexpr int kAimedSimulationMode = 3;
 constexpr std::size_t kPoisonStatusIndex = 14;
 constexpr std::size_t kRegenerationStatusIndex = 17;
-constexpr auto kTargetOffset = offsetof(ReactionRecord, opaque_4c);
+constexpr auto kTargetOffset = offsetof(ReactionRecord, targets);
 PlanningStatsSnapshot liveStatsSnapshot;
 static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
               kTargetPreviewCapacity);
@@ -89,9 +89,9 @@ static_assert(sizeof(VS::Battle::Ai::EngagementActor) ==
               sizeof(VS::Battle::HitResult));
 // func_800DEB10 reads the completed request through func_800DEEA4_t and the
 // performer's command argument as two halves (lhu +0x0C, lhu +0x0E).
-static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque4) ==
+static_assert(offsetof(VS::Battle::Ai::ReactionRecord, primary_target) ==
               offsetof(ActionRequestRecord, primary_target));
-static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque_4a) ==
+static_assert(offsetof(VS::Battle::Ai::ReactionRecord, target_count) ==
               offsetof(ActionRequestRecord, target_count));
 static_assert(offsetof(VS::Battle::Ai::EngagementActor, opaque40) ==
               offsetof(VS::Battle::HitResult, targets_position));
@@ -172,7 +172,7 @@ std::optional<SimulationSnapshot> ReadSimulationSnapshot() {
   SimulationSnapshot result;
   result.source = workspace;
   std::memcpy(&result.header, workspace, sizeof(result.header));
-  const auto count = static_cast<std::size_t>(result.header.opaque_4a);
+  const auto count = static_cast<std::size_t>(result.header.target_count);
   result.bytes =
       kTargetOffset + count * sizeof(VS::Battle::Ai::EngagementActor);
   if (count > kTargetPreviewCapacity ||
@@ -1182,11 +1182,11 @@ bool ApplyLiveSimulatedActionResults(
     return false;
   }
   ActionCost cost{};
-  if (header.opaque4.opaque40 == 0) {
-    if (header.opaque0 >= std::size(VS::Battle::actionDefinitions)) {
+  if (header.primary_target.opaque40 == 0) {
+    if (header.action_id >= std::size(VS::Battle::actionDefinitions)) {
       return false;
     }
-    const auto& action = VS::Battle::actionDefinitions[header.opaque0];
+    const auto& action = VS::Battle::actionDefinitions[header.action_id];
     cost = {.type = action.type, .cost = action.cost};
   }
   std::array<ActorCondition, kBattleActorSlotCount> conditions{};
@@ -1194,7 +1194,7 @@ bool ApplyLiveSimulatedActionResults(
     conditions[index] = SimulationConditionOf(rows[index]);
   }
   if (!ApplySimulatedActionResults(conditions, cost,
-                                   SimulationEffectOf(header.opaque4),
+                                   SimulationEffectOf(header.primary_target),
                                    snapshot->targets) ||
       snapshot->source != VS::Battle::Ai::planningWorkspace) {
     return false;

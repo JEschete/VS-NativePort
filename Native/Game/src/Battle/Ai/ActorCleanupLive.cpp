@@ -62,7 +62,7 @@ static_assert(offsetof(VS::Battle::Ai::RoomAiState, reserved_e_prefix) ==
 static_assert(offsetof(VS::Battle::Ai::RoomAiState, engaged_count) ==
               kRoomEngagedCountOffset);
 // The views callers hold alias the actor AI state.
-static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView, opaque18) ==
+static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView, alerted) ==
               offsetof(VS::Battle::Ai::ActorAiState, opaque18));
 static_assert(offsetof(VS::Battle::Ai::ReactionView, relations) ==
               offsetof(VS::Battle::Ai::ActorAiState, relations));

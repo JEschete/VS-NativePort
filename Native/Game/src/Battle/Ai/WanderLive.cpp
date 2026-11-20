@@ -32,7 +32,7 @@ constexpr std::uint32_t kModelFlies = 0x200000;
 // The wander view aliases the actor AI state it is handed.
 static_assert(offsetof(View, is_stuck) == offsetof(AiState, is_stuck));
 static_assert(offsetof(View, opaque3) == offsetof(AiState, opaque3));
-static_assert(offsetof(View, opaque8) == offsetof(AiState, opaque8));
+static_assert(offsetof(View, stayed_on_tile) == offsetof(AiState, opaque8));
 static_assert(offsetof(View, tile) == offsetof(AiState, tile));
 static_assert(offsetof(View, saved_destination) ==
               offsetof(AiState, saved_destination));
@@ -64,7 +64,7 @@ FrameContext& Frame() { return LiveFrameContext(); }
 WanderActor Load(const View& view) {
   return {.is_stuck = view.is_stuck,
           .height_filter = view.opaque3,
-          .stayed_on_tile = view.opaque8,
+          .stayed_on_tile = view.stayed_on_tile,
           .tile = view.tile.word,
           .saved_destination = view.saved_destination.word,
           .x = view.x,
@@ -90,7 +90,7 @@ WanderActor Load(const View& view) {
 void Store(const WanderActor& actor, View& view) {
   view.is_stuck = actor.is_stuck;
   view.opaque3 = actor.height_filter;
-  view.opaque8 = actor.stayed_on_tile;
+  view.stayed_on_tile = actor.stayed_on_tile;
   view.tile.word = actor.tile;
   view.saved_destination.word = actor.saved_destination;
   view.x = actor.x;

@@ -67,16 +67,17 @@ static_assert(offsetof(ObserverView, distances_squared) ==
               offsetof(AiState, distances_squared));
 static_assert(offsetof(UpdateView, opaque8) == offsetof(AiState, opaque8));
 static_assert(offsetof(UpdateView, opaque_e) == offsetof(AiState, opaque_e));
-static_assert(offsetof(UpdateView, opaque18) == offsetof(AiState, opaque18));
-static_assert(offsetof(UpdateView, opaque_1c) == offsetof(AiState, opaque_1c));
+static_assert(offsetof(UpdateView, alerted) == offsetof(AiState, opaque18));
+static_assert(offsetof(UpdateView, holds_stall_tile) ==
+              offsetof(AiState, opaque_1c));
 static_assert(offsetof(UpdateView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(UpdateView, previous_tile) ==
               offsetof(AiState, previous_tile));
-static_assert(offsetof(UpdateView, opaque_3c) ==
+static_assert(offsetof(UpdateView, remembered_target_tile) ==
               offsetof(AiState, remembered_target_tile));
-static_assert(offsetof(UpdateView, opaque40) ==
+static_assert(offsetof(UpdateView, target_memory_frames) ==
               offsetof(AiState, target_memory_frames));
-static_assert(offsetof(UpdateView, opaque_4c) == offsetof(AiState, position));
+static_assert(offsetof(UpdateView, position_xy) == offsetof(AiState, position));
 static_assert(offsetof(UpdateView, actor) == offsetof(AiState, actor));
 static_assert(offsetof(UpdateView, model) == offsetof(AiState, model));
 static_assert(offsetof(UpdateView, status_flags) ==
@@ -90,7 +91,7 @@ static_assert(offsetof(UpdateView, action_status) ==
               offsetof(AiState, action_status));
 static_assert(offsetof(UpdateView, awareness_marker) ==
               offsetof(AiState, awareness_marker));
-static_assert(offsetof(UpdateView, opaque_19a) ==
+static_assert(offsetof(UpdateView, recovery_frames) ==
               offsetof(AiState, opaque_19a));
 static_assert(offsetof(UpdateView, relations) == offsetof(AiState, relations));
 
@@ -130,8 +131,8 @@ PerceptionShape ShapeOf(const AiState& state) {
 
 PerceivingObserver LoadObserver(const ObserverView& view) {
   PerceivingObserver observer;
-  observer.decays_hostility = view.settings_bit23 != 0;
-  observer.ignores_body_line = view.settings_bit15 != 0;
+  observer.decays_hostility = view.decays_hostility != 0;
+  observer.ignores_body_line = view.ignores_body_line != 0;
   observer.tile = view.tile.word;
   observer.position = Core::Math::PositionOf(view.position);
   observer.point_height = view.point_height;
@@ -256,18 +257,18 @@ PerceivingActor Load(const VS::Battle::Actor& battle, const UpdateView& view) {
   actor.stayed_on_tile = view.opaque8;
   actor.alert = view.opaque_e;
   actor.perception_skipped = view.opaque14;
-  actor.alerted = view.opaque18;
-  actor.holds_stall_tile = view.opaque_1c;
+  actor.alerted = view.alerted;
+  actor.holds_stall_tile = view.holds_stall_tile;
   actor.partial_perception = view.opaque_1d;
-  actor.alert_rule = view.settings_bits28;
+  actor.alert_rule = view.alert_rule;
   actor.tile = view.tile;
   actor.previous_tile = view.previous_tile.word;
-  actor.remembered_target_tile = view.opaque_3c;
-  actor.target_memory_frames = view.opaque40;
-  actor.detour_step_frames = view.opaque45;
-  actor.stall_frames = view.opaque46;
-  const auto xy = static_cast<std::uint32_t>(view.opaque_4c);
-  const auto z = static_cast<std::uint32_t>(view.opaque50);
+  actor.remembered_target_tile = view.remembered_target_tile;
+  actor.target_memory_frames = view.target_memory_frames;
+  actor.detour_step_frames = view.detour_step_frames;
+  actor.stall_frames = view.stall_frames;
+  const auto xy = static_cast<std::uint32_t>(view.position_xy);
+  const auto z = static_cast<std::uint32_t>(view.position_z_pad);
   actor.position = UnpackPosition(xy, z);
   actor.position_pad = static_cast<std::int16_t>(z >> kHalfShift);
   for (std::size_t word = 0; word < actor.history.x_words.size(); ++word) {
@@ -281,16 +282,16 @@ PerceivingActor Load(const VS::Battle::Actor& battle, const UpdateView& view) {
   actor.action_delay = view.status_flags;
   actor.detour_step = view.detour_step;
   actor.detour_target = view.opaque_fb;
-  actor.flee_timer = view.opaque114;
+  actor.flee_timer = view.flee_timer;
   actor.fine_tile = view.opaque120;
-  actor.observed_command = view.opaque124;
+  actor.observed_command = view.observed_command;
   actor.awareness_frames_remaining = view.awareness_frames_remaining;
   actor.action_status = view.action_status;
   actor.awareness_marker = view.awareness_marker;
-  actor.movement_wait = view.opaque156;
-  actor.has_navigation_override = view.opaque_18c != nullptr;
-  actor.navigation_counter = static_cast<std::uint8_t>(view.opaque190);
-  actor.recovery_frames = view.opaque_19a;
+  actor.movement_wait = view.movement_wait;
+  actor.has_navigation_override = view.scripted_route != nullptr;
+  actor.navigation_counter = static_cast<std::uint8_t>(view.detour_steps_left);
+  actor.recovery_frames = view.recovery_frames;
   for (int slot = 0; slot < kPerceptionSlots; ++slot) {
     actor.relations.at(slot) = DecodePerceivedRelation(view.relations[slot]);
   }
@@ -314,17 +315,17 @@ void Store(const PerceivingActor& actor, VS::Battle::Actor& battle,
   view.opaque8 = actor.stayed_on_tile;
   view.opaque_e = actor.alert;
   view.opaque14 = actor.perception_skipped;
-  view.opaque18 = actor.alerted;
-  view.opaque_1c = actor.holds_stall_tile;
+  view.alerted = actor.alerted;
+  view.holds_stall_tile = actor.holds_stall_tile;
   view.opaque_1d = actor.partial_perception;
   view.tile = actor.tile;
   view.previous_tile.word = actor.previous_tile;
-  view.opaque40 = actor.target_memory_frames;
-  view.opaque45 = actor.detour_step_frames;
-  view.opaque46 = actor.stall_frames;
-  view.opaque_4c =
+  view.target_memory_frames = actor.target_memory_frames;
+  view.detour_step_frames = actor.detour_step_frames;
+  view.stall_frames = actor.stall_frames;
+  view.position_xy =
       static_cast<int>(PackHalves(actor.position.x, actor.position.y));
-  view.opaque50 =
+  view.position_z_pad =
       static_cast<int>(PackHalves(actor.position.z, actor.position_pad));
   for (std::size_t word = 0; word < actor.history.x_words.size(); ++word) {
     view.history_x.words[word] =
@@ -338,10 +339,10 @@ void Store(const PerceivingActor& actor, VS::Battle::Actor& battle,
   view.detour_step = actor.detour_step;
   view.opaque_fb = actor.detour_target;
   view.opaque120 = actor.fine_tile;
-  view.opaque124 = actor.observed_command;
-  view.opaque156 = actor.movement_wait;
-  view.opaque190 = actor.navigation_counter;
-  view.opaque_19a = actor.recovery_frames;
+  view.observed_command = actor.observed_command;
+  view.movement_wait = actor.movement_wait;
+  view.detour_steps_left = actor.navigation_counter;
+  view.recovery_frames = actor.recovery_frames;
 }
 
 // One listed actor's model, links and HP, the frame budget, the battle

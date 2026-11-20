@@ -72,9 +72,10 @@ static_assert(offsetof(VS::Battle::Ai::TargetApproachView, actor_id) ==
               offsetof(VS::Battle::Ai::ActorAiState, actor_id));
 static_assert(offsetof(VS::Battle::Ai::TargetApproachView, range) ==
               ApproachOffset(kApproachRangeOffset));
-static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e4) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView,
+                       chasing_lost_target) ==
               ApproachOffset(kPursuitProgressOffset));
-static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e7) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, recover_in_range) ==
               offsetof(VS::Battle::Ai::ActorAiState, opaque_e7));
 static_assert(offsetof(VS::Battle::Ai::TargetApproachView,
                        previous_target_id) ==
@@ -171,11 +172,11 @@ MovementState LoadMovementState(const VS::Battle::Ai::ActorAiState& source) {
             std::end(source.movement_mode_counters),
             state.mode_counters.begin());
   state.navigation_flags = source.navigation_flags;
-  state.pursuit = {.opaque_e4 = approach.opaque_e4,
+  state.pursuit = {.opaque_e4 = approach.chasing_lost_target,
                    .target_id = approach.target_id,
                    .timeout = approach.timeout,
-                   .opaque_e7 = approach.opaque_e7,
-                   .opaque_e8 = approach.opaque_e8,
+                   .opaque_e7 = approach.recover_in_range,
+                   .opaque_e8 = approach.walked_close,
                    .range_mode = approach.range_mode,
                    .previous_option = approach.previous_option,
                    .previous_target_id = approach.previous_target_id};
@@ -217,11 +218,11 @@ void StoreMovementState(const MovementState& state,
   std::copy(state.mode_counters.begin(), state.mode_counters.end(),
             std::begin(target.movement_mode_counters));
   target.navigation_flags = state.navigation_flags;
-  approach.opaque_e4 = state.pursuit.opaque_e4;
+  approach.chasing_lost_target = state.pursuit.opaque_e4;
   approach.target_id = state.pursuit.target_id;
   approach.timeout = state.pursuit.timeout;
-  approach.opaque_e7 = state.pursuit.opaque_e7;
-  approach.opaque_e8 = state.pursuit.opaque_e8;
+  approach.recover_in_range = state.pursuit.opaque_e7;
+  approach.walked_close = state.pursuit.opaque_e8;
   approach.range_mode = state.pursuit.range_mode;
   approach.previous_option = state.pursuit.previous_option;
   approach.previous_target_id = state.pursuit.previous_target_id;
