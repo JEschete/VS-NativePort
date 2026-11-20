@@ -422,7 +422,7 @@ struct LiveControlFixture {
   VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
   VS::Audio::VoiceScheduler saved_scheduler = VS::Audio::Mixer::voiceScheduler;
   VS::Audio::DriverFlags saved_latches = VS::Audio::Driver::controlLatches;
-  u_int saved_loops = VS::Audio::Seq::musicLoopsRemaining;
+  std::uint32_t saved_loops = VS::Audio::Seq::musicLoopsRemaining;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Audio::MusicConfig config{};

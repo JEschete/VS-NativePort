@@ -306,12 +306,10 @@ class LiveAssetFixture {
         static_cast<char>(Content_DiscDriveState_Idle);
     setRECT(&image_, kImageX, kImageY, kImageWidth, kImageHeight);
     StoreImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
-    DrawSync(0);
   }
   ~LiveAssetFixture() {
     VS::Render::LiveTexturePages() = saved_pages_;
     LoadImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
-    DrawSync(0);
     VS::Menu::Files::textTable = saved_menu_text_;
     VS::Title::saveMenuText = saved_title_text_;
     VS::Title::saveFileSummaries = saved_summaries_;
@@ -338,7 +336,7 @@ class LiveAssetFixture {
   u_short* saved_menu_text_ = VS::Menu::Files::textTable;
   u_short* saved_title_text_ = VS::Title::saveMenuText;
   VS::Save::CardFileInfoRecord* saved_summaries_ = VS::Title::saveFileSummaries;
-  DIRENTRY* saved_directory_ = VS::Title::cardDirectoryEntryBuffer;
+  VS::Legacy::DIRENTRY* saved_directory_ = VS::Title::cardDirectoryEntryBuffer;
   RECT image_{};
   std::vector<std::uint16_t> saved_vram_ =
       std::vector<std::uint16_t>(std::size_t{kImagePixels});
@@ -393,7 +391,7 @@ struct AssetViews {
   u_short* menu_text = VS::Menu::Files::textTable;
   u_short* title_text = VS::Title::saveMenuText;
   VS::Save::CardFileInfoRecord* summaries = VS::Title::saveFileSummaries;
-  DIRENTRY* directory = VS::Title::cardDirectoryEntryBuffer;
+  VS::Legacy::DIRENTRY* directory = VS::Title::cardDirectoryEntryBuffer;
 
   bool operator==(const AssetViews&) const = default;
 };

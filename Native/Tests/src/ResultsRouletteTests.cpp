@@ -105,7 +105,7 @@ struct RouletteFixture {
   void PrimeStateTimer(int ticks) {
     VS::Menu::Results::screenTimer = -4096;
     VS::Menu::Results::screenState = 2;
-    VS::Input::buttonsPressed = PADRright;
+    VS::Input::buttonsPressed = VS::Legacy::kPadRright;
     REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
     VS::Input::buttonsPressed = 0;
     for (int tick = 1; tick < ticks; ++tick) {
@@ -197,7 +197,7 @@ TEST_CASE(
   VS::Menu::Results::screenTimer = 0;
   VS::Menu::Results::elementAnimationState = 0;
   VS::Menu::Results::buffReelSelection = 248;
-  VS::Input::buttonsPressed = PADRright;
+  VS::Input::buttonsPressed = VS::Legacy::kPadRright;
   const auto random = VS::Core::BiosRand().State();
   CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
   CHECK(VS::Menu::Results::screenState == 0);

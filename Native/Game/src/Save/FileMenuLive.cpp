@@ -42,6 +42,11 @@
 #include "State/StateFlags.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::kPadLdown;
+using VS::Legacy::kPadLup;
+using VS::Legacy::kPadRdown;
+using VS::Legacy::kPadRright;
+
 namespace VS::Game::Save {
 namespace {
 namespace file_menu = VS::Menu::Files;
@@ -544,10 +549,10 @@ using PickerEntry = file_menu::FileMenuResult (*)(
 int RunPicker(PickerEntry entry, int init) {
   const auto pressed = VS::Input::buttonsPressed;
   const file_menu::FileMenuInput input{
-      .accept = (pressed & PADRright) != 0,
-      .cancel = (pressed & PADRdown) != 0,
-      .up = (VS::Input::buttonRepeat & PADLup) != 0,
-      .down = (VS::Input::buttonRepeat & PADLdown) != 0};
+      .accept = (pressed & kPadRright) != 0,
+      .cancel = (pressed & kPadRdown) != 0,
+      .up = (VS::Input::buttonRepeat & kPadLup) != 0,
+      .down = (VS::Input::buttonRepeat & kPadLdown) != 0};
   LiveFileMenuHost host;
   return static_cast<int>(entry(picker.session, host, init, input));
 }

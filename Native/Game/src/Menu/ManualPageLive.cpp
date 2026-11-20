@@ -140,8 +140,9 @@ void DrawChecked(std::string_view refused, Draw draw) {
 }
 
 PageArrowState ArrowState() {
-  return {.animation_state = pageArrowAnimState,
-          .square_held = (VS::Input::previousButtons & PADRleft) != 0};
+  return {
+      .animation_state = pageArrowAnimState,
+      .square_held = (VS::Input::previousButtons & VS::Legacy::kPadRleft) != 0};
 }
 
 // The help text from its first halfword to the end of its heap payload.

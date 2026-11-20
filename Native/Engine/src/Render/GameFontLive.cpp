@@ -261,7 +261,8 @@ void BlendLiveTextBoxIntoFramebuffer(VS::Menu::TextBoxState* box,
   const FramebufferTextBlend blend{
       .alpha = glyph_alpha,
       .framebuffer_x = frameBuf * kFramebufferWidth,
-      .skip_pressed = (VS::Input::buttonsPressed & PADRright) != 0};
+      .skip_pressed =
+          (VS::Input::buttonsPressed & VS::Legacy::kPadRright) != 0};
   const VariableFontTables font{.glyph_widths = LiveVariableFontGlyphWidths(),
                                 .pixel_expansion = kGlyphPixelExpansion};
   LiveVramPixels vram;

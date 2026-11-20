@@ -177,7 +177,7 @@ class LiveBankLoads final : public BankLoadHost {
 
   void WriteSampleMemory(std::uint32_t address,
                          std::span<const std::byte> bytes) override {
-    SpuSetTransferStartAddr(address);
+    VS::Legacy::SpuSetTransferStartAddr(address);
     // The SPU write only reads the bytes.
     Driver::LiveWriteSampleMemory(
         const_cast<char*>(reinterpret_cast<const char*>(bytes.data())),

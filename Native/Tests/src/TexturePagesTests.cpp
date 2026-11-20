@@ -591,19 +591,15 @@ TEST_CASE("Live image reads return what the upload wrote",
   setRECT(&area, 1000, 500, 4, 2);
   std::array<std::uint16_t, 8> saved{};
   StoreImage(&area, reinterpret_cast<u_long*>(saved.data()));
-  DrawSync(0);
   const std::array<std::uint16_t, 8> pixels{9, 8, 7, 6, 5, 4, 3, 2};
   const int position = 1000 | (500 << 16);
   const int size = 4 | (2 << 16);
 
   Render::UploadLiveImageRectangle(position, pixels.data(), size);
-  DrawSync(0);
   std::array<std::uint16_t, 8> read{};
   Render::ReadLiveImageRectangle(position, read.data(), size);
   Render::ReadLiveImageRectangle(position, nullptr, size);
-  DrawSync(0);
   CHECK(read == pixels);
   LoadImage(&area, reinterpret_cast<u_long*>(saved.data()));
-  DrawSync(0);
 }
 }  // namespace

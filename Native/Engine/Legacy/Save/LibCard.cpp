@@ -1,101 +1,107 @@
-#include "Legacy/Save/LibCard.h"
+#include "Legacy/Save/LibCard.hpp"
+
+#include <cstdint>
 
 #include "Core/Unported.hpp"
 
 // Transitional shims (plan §2.2). Each calls RecordUnported until it
 // translates into the modern system.
 
-long LegacyApi_open(char* path, unsigned long mode) {
+namespace VS::Legacy {
+
+std::int32_t LibApi::open(char* path, std::uint32_t mode) {
   (void)path;
   (void)mode;
-  VS::Core::RecordUnported("libcard:LegacyApi_open");
+  VS::Core::RecordUnported("libapi:open");
   return {};
 }
 
-long LegacyApi_close(long fd) {
+std::int32_t LibApi::close(std::int32_t fd) {
   (void)fd;
-  VS::Core::RecordUnported("libcard:LegacyApi_close");
+  VS::Core::RecordUnported("libapi:close");
   return {};
 }
 
-long LegacyApi_read(long fd, void* buf, long n) {
-  (void)fd;
-  (void)buf;
-  (void)n;
-  VS::Core::RecordUnported("libcard:LegacyApi_read");
-  return {};
-}
-
-long LegacyApi_write(long fd, void* buf, long n) {
+std::int32_t LibApi::read(std::int32_t fd, void* buf, std::int32_t n) {
   (void)fd;
   (void)buf;
   (void)n;
-  VS::Core::RecordUnported("libcard:LegacyApi_write");
+  VS::Core::RecordUnported("libapi:read");
   return {};
 }
 
-long LegacyApi_erase(char* path) {
+std::int32_t LibApi::write(std::int32_t fd, void* buf, std::int32_t n) {
+  (void)fd;
+  (void)buf;
+  (void)n;
+  VS::Core::RecordUnported("libapi:write");
+  return {};
+}
+
+std::int32_t LibApi::erase(char* path) {
   (void)path;
-  VS::Core::RecordUnported("libcard:LegacyApi_erase");
+  VS::Core::RecordUnported("libapi:erase");
   return {};
 }
 
-long LegacyApi_rename(char* from, char* to) {
+std::int32_t LibApi::rename(char* from, char* to) {
   (void)from;
   (void)to;
-  VS::Core::RecordUnported("libcard:LegacyApi_rename");
+  VS::Core::RecordUnported("libapi:rename");
   return {};
 }
 
-long LegacyApi_cd(char* path) {
+std::int32_t LibApi::cd(char* path) {
   (void)path;
-  VS::Core::RecordUnported("libcard:LegacyApi_cd");
+  VS::Core::RecordUnported("libapi:cd");
   return {};
 }
 
-struct DIRENTRY* LegacyApi_firstfile(char* pattern, struct DIRENTRY* dir) {
+DIRENTRY* LibApi::firstfile(char* pattern, DIRENTRY* dir) {
   (void)pattern;
   (void)dir;
-  VS::Core::RecordUnported("libcard:LegacyApi_firstfile");
+  VS::Core::RecordUnported("libapi:firstfile");
   return {};
 }
 
-struct DIRENTRY* LegacyApi_nextfile(struct DIRENTRY* dir) {
+DIRENTRY* LibApi::nextfile(DIRENTRY* dir) {
   (void)dir;
-  VS::Core::RecordUnported("libcard:LegacyApi_nextfile");
+  VS::Core::RecordUnported("libapi:nextfile");
   return {};
 }
 
-void InitCARD(long val) {
+void InitCARD(std::int32_t val) {
   (void)val;
   VS::Core::RecordUnported("libcard:InitCARD");
 }
 
-long StartCARD(void) {
+std::int32_t StartCARD() {
   VS::Core::RecordUnported("libcard:StartCARD");
   return {};
 }
 
-long _card_info(long chan) {
+std::int32_t _card_info(std::int32_t chan) {
   (void)chan;
   VS::Core::RecordUnported("libcard:_card_info");
   return {};
 }
 
-long _card_clear(long chan) {
+std::int32_t _card_clear(std::int32_t chan) {
   (void)chan;
   VS::Core::RecordUnported("libcard:_card_clear");
   return {};
 }
 
-long _card_load(long chan) {
+std::int32_t _card_load(std::int32_t chan) {
   (void)chan;
   VS::Core::RecordUnported("libcard:_card_load");
   return {};
 }
 
-long _card_format(long chan) {
+std::int32_t _card_format(std::int32_t chan) {
   (void)chan;
   VS::Core::RecordUnported("libcard:_card_format");
   return {};
 }
+
+}  // namespace VS::Legacy

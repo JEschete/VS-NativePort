@@ -19,10 +19,27 @@
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Legacy::CloseEvent;
+using VS::Legacy::DisableEvent;
+using VS::Legacy::EnableEvent;
+using VS::Legacy::kEventModeInterrupt;
+using VS::Legacy::kEventSpecInterrupt;
+using VS::Legacy::kRootCounter2;
+using VS::Legacy::kRootCounterInterruptMode;
+using VS::Legacy::kSpuRegisterBytes;
+using VS::Legacy::OpenEvent;
+using VS::Legacy::SetRCnt;
+using VS::Legacy::SpuRead;
+using VS::Legacy::SpuRegisters;
+using VS::Legacy::SpuSetTransferCallback;
+using VS::Legacy::SpuWrite;
+using VS::Legacy::StartRCnt;
+using VS::Legacy::StopRCnt;
+
 namespace VS::Audio::Driver {
 namespace {
 constexpr std::size_t kRegistersPerVoice = 8;
-static_assert(LEGACY_SPU_REGISTER_BYTES >=
+static_assert(kSpuRegisterBytes >=
               kVoiceCount * kRegistersPerVoice * sizeof(std::uint16_t));
 static_assert(sizeof(VS::Audio::Driver::legacySpuEvent) ==
               sizeof(std::int32_t));
@@ -30,7 +47,7 @@ static_assert(sizeof(VS::Audio::Cutscene::legacySpuTransferBusy) ==
               sizeof(std::int32_t));
 
 std::uint16_t& Register(std::uint32_t voice, VoiceRegister reg) {
-  auto* const registers = static_cast<std::uint16_t*>(LegacySpu_Registers());
+  auto* const registers = static_cast<std::uint16_t*>(SpuRegisters());
   return registers[(voice * kRegistersPerVoice) +
                    static_cast<std::size_t>(reg)];
 }
@@ -104,16 +121,17 @@ class LiveSoundDriver final : public SoundDriverHost {
   void ResetPlayback() override { ResetLivePlaybackState(); }
 
   bool SetTickTimer(std::uint16_t target) override {
-    return Accepted(SetRCnt(RCntCNT2, target, RCntMdINTR));
+    return Accepted(SetRCnt(kRootCounter2, target, kRootCounterInterruptMode));
   }
 
-  bool StartTickTimer() override { return Accepted(StartRCnt(RCntCNT2)); }
+  bool StartTickTimer() override { return Accepted(StartRCnt(kRootCounter2)); }
 
-  bool StopTickTimer() override { return Accepted(StopRCnt(RCntCNT2)); }
+  bool StopTickTimer() override { return Accepted(StopRCnt(kRootCounter2)); }
 
   std::int32_t OpenTickEvent() override {
     return static_cast<std::int32_t>(
-        OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, &Seq::LiveTickPlayback));
+        OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt,
+                  &Seq::LiveTickPlayback));
   }
 
   std::int32_t TickEvent() override {

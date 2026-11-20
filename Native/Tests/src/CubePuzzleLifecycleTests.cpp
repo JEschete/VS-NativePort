@@ -603,11 +603,9 @@ struct LiveReadFixture {
     Content_discDriveState.state =
         static_cast<char>(Content_DiscDriveState_Idle);
     StoreImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
-    DrawSync(0);
   }
   ~LiveReadFixture() {
     LoadImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
-    DrawSync(0);
     Field_roomData.minimapScene = saved_scene;
     Field_roomData.header.minimapSceneLength = saved_scene_length;
     std::ranges::copy(saved_slots, std::begin(Content_discRequestSlots));
@@ -641,7 +639,6 @@ struct LiveReadFixture {
     RECT row{x, r::kCubePuzzleImageY, 64, 1};
     std::vector<std::uint16_t> pixels(64);
     StoreImage(&row, reinterpret_cast<u_long*>(pixels.data()));
-    DrawSync(0);
     return pixels;
   }
 };

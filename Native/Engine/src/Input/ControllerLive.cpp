@@ -21,8 +21,14 @@
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Vibration.hpp"
-#include "Legacy/Input/LibPad.h"
+#include "Legacy/Input/LibPad.hpp"
 #include "State/Timers.hpp"
+
+using VS::Legacy::PadGetState;
+using VS::Legacy::PadInfoMode;
+using VS::Legacy::PadSetAct;
+using VS::Legacy::PadSetActAlign;
+using VS::Legacy::PadSetMainMode;
 
 // decomp: SLUS_010.40 _portInfo, vs_main_buttonsReleased,
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,

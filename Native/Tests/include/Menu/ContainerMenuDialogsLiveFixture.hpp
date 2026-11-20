@@ -19,7 +19,7 @@
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Input/LibPad.h"
+#include "Legacy/Input/LibPad.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -92,14 +92,14 @@ struct DialogLiveFixture : equipment::LiveFixture {
     VS::Menu::textBoxBufferIndex = 0;
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(VS::Menu::activeTextBoxOrderingTable, kTextOrderingTags);
-    PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                  VS::Input::legacyPadResponseBytes[1].data());
+    VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                              VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);
   }
   ~DialogLiveFixture() {
     framework::ResetLiveMainMenuStatics();
     dialogs::ResetLiveContainerDialogSession();
-    PadInitDirect(nullptr, nullptr);
+    VS::Legacy::PadInitDirect(nullptr, nullptr);
   }
   static std::vector<unsigned char> ReadData(const char* path) {
     std::ifstream stream(path, std::ios::binary);

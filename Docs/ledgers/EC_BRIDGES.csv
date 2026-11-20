@@ -3,7 +3,7 @@ EC-01,Native/Engine/Legacy/Render/LibGpu.h,header
 EC-01,Native/Engine/Legacy/Render/LibGpu.cpp,source
 EC-01,Native/Engine/include/Render/PageSpace.hpp,header
 EC-01,Native/Engine/src/Render/PageSpace.cpp,source
-EC-02,Native/Engine/Legacy/Audio/LibSpu.h,header
+EC-02,Native/Engine/Legacy/Audio/LibSpu.hpp,header
 EC-02,Native/Engine/Legacy/Audio/LibSpu.cpp,source
 EC-02,Native/Engine/src/Audio/Driver/SoundDriver.hpp,header
 EC-03,Native/Engine/include/Core/Gte.h,header
@@ -21,9 +21,9 @@ EC-05,Native/Engine/include/Core/Arena.hpp,header
 EC-05,Native/Engine/src/Core/Arena.cpp,source
 EC-05,Native/Engine/src/Core/Overlays.cpp,source
 EC-05,Native/Game/src/Boot/OverlayReset.cpp,source
-EC-06,Native/Engine/Legacy/Core/LibEtc.h,header
+EC-06,Native/Engine/Legacy/Core/LibEtc.hpp,header
 EC-06,Native/Engine/Legacy/Core/LibEtc.cpp,source
-EC-07,Native/Engine/Legacy/Input/LibPad.h,header
+EC-07,Native/Engine/Legacy/Input/LibPad.hpp,header
 EC-07,Native/Engine/Legacy/Input/LibPad.cpp,source
-EC-09,Native/Engine/Legacy/Save/LibCard.h,header
+EC-09,Native/Engine/Legacy/Save/LibCard.hpp,header
 EC-09,Native/Engine/Legacy/Save/LibCard.cpp,source

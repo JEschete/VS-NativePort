@@ -318,7 +318,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
                                   text_.data(), row_types.data());
   }
   bool SquarePressed() override {
-    return (VS::Input::buttonsPressed & PADRleft) != 0;
+    return (VS::Input::buttonsPressed & VS::Legacy::kPadRleft) != 0;
   }
   void PlayInvalidSound() override { Menu::PlayInvalidSound(); }
   std::int32_t SelectedRow() override { return Framework::LiveSelectedRow(); }

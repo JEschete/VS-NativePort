@@ -44,10 +44,11 @@
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::DIRENTRY;
+
 namespace VS::Save::MemoryCard {
 namespace {
 constexpr const char* kDiagnosticChannel = "save.card";
-constexpr std::int32_t kTestEventFired = 1;
 constexpr std::int32_t kCardCallFailed = -1;
 // Four events for each of the software and hardware groups.
 constexpr std::size_t kEventsPerGroup = 4;
@@ -242,28 +243,26 @@ std::array<DIRENTRY, kDirectoryCapacity> live_directory_entries{};
 
 class LiveCardHost final : public CardHost {
  public:
-  bool TestEvent(CardEventGroup group, CardEvent event) override {
-    const auto index =
-        static_cast<std::size_t>(group) + static_cast<std::size_t>(event);
-    if (index >= std::size(VS::Title::cardEventDescriptors)) {
-      return false;
-    }
-    return ::TestEvent(VS::Title::cardEventDescriptors[index]) ==
-           kTestEventFired;
+  // decomp: _testMemcardEvents (src/TITLE/TITLE.PRG/22C.c:61,
+  // src/MENU/MENU7.PRG/260.c:172) polls the kernel's card events with
+  // TestEvent. No kernel event is ever delivered natively, so TestEvent's
+  // result is the constant 0 (not fired) for every descriptor.
+  bool TestEvent(CardEventGroup /*group*/, CardEvent /*event*/) override {
+    return false;
   }
   bool StartCardInfo(std::int32_t channel) override {
-    return _card_info(channel) != 0;
+    return VS::Legacy::_card_info(channel) != 0;
   }
   bool StartCardClear(std::int32_t channel) override {
-    return _card_clear(channel) != 0;
+    return VS::Legacy::_card_clear(channel) != 0;
   }
   bool StartCardLoad(std::int32_t channel) override {
-    return _card_load(channel) != 0;
+    return VS::Legacy::_card_load(channel) != 0;
   }
   std::optional<std::int32_t> Open(const CardFilename& path,
                                    std::uint32_t flags) override {
     CardFilename name = path;
-    const auto file = LegacyApi_open(name.data(), flags);
+    const auto file = VS::Legacy::LibApi::open(name.data(), flags);
     if (file == kCardCallFailed) {
       return std::nullopt;
     }
@@ -271,8 +270,8 @@ class LiveCardHost final : public CardHost {
   }
   std::optional<std::int32_t> Read(std::int32_t file,
                                    std::span<std::byte> bytes) override {
-    const auto count = LegacyApi_read(file, bytes.data(),
-                                      static_cast<std::int32_t>(bytes.size()));
+    const auto count = VS::Legacy::LibApi::read(
+        file, bytes.data(), static_cast<std::int32_t>(bytes.size()));
     if (count == kCardCallFailed) {
       return std::nullopt;
     }
@@ -280,32 +279,32 @@ class LiveCardHost final : public CardHost {
   }
   bool Write(std::int32_t file, std::span<const std::byte> bytes) override {
     // write() only reads the buffer; its libapi signature is not const.
-    return LegacyApi_write(file, const_cast<std::byte*>(bytes.data()),
-                           static_cast<std::int32_t>(bytes.size())) !=
+    return VS::Legacy::LibApi::write(file, const_cast<std::byte*>(bytes.data()),
+                                     static_cast<std::int32_t>(bytes.size())) !=
            kCardCallFailed;
   }
-  void Close(std::int32_t file) override { LegacyApi_close(file); }
+  void Close(std::int32_t file) override { VS::Legacy::LibApi::close(file); }
   bool Erase(const CardFilename& path) override {
     CardFilename name = path;
-    return LegacyApi_erase(name.data()) != 0;
+    return VS::Legacy::LibApi::erase(name.data()) != 0;
   }
   bool Rename(const CardFilename& from, const CardFilename& to) override {
     CardFilename from_name = from;
     CardFilename to_name = to;
-    return LegacyApi_rename(from_name.data(), to_name.data()) != 0;
+    return VS::Legacy::LibApi::rename(from_name.data(), to_name.data()) != 0;
   }
   std::optional<CardDirectoryEntry> FirstFile(
       const CardFilename& pattern) override {
     CardFilename name = pattern;
-    return Publish(
-        0, LegacyApi_firstfile(name.data(), &live_directory_entries.front()));
+    return Publish(0, VS::Legacy::LibApi::firstfile(
+                          name.data(), &live_directory_entries.front()));
   }
   std::optional<CardDirectoryEntry> NextFile(std::size_t index) override {
     if (index >= kDirectoryCapacity) {
       return std::nullopt;
     }
-    return Publish(index,
-                   LegacyApi_nextfile(&live_directory_entries.at(index)));
+    return Publish(
+        index, VS::Legacy::LibApi::nextfile(&live_directory_entries.at(index)));
   }
 
  private:

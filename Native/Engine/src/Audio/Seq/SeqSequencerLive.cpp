@@ -387,7 +387,8 @@ LiveMusicGroup MusicGroupOf(ChannelGroup group) {
 class LivePlaybackHost final : public PlaybackHost {
  public:
   std::int32_t ReadTimer() override {
-    return static_cast<std::int32_t>(GetRCnt(RCntCNT2));
+    return static_cast<std::int32_t>(
+        VS::Legacy::GetRCnt(VS::Legacy::kRootCounter2));
   }
 
   void ReleasePendingVoices(PlaybackState& state) override {

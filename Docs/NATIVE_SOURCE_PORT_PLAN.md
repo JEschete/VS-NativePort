@@ -431,7 +431,7 @@ PS1 layout under the x64 MSVC rules.
   PS1 type layouts, packet macros and prototypes for the 287 SDK names in use. R: libgte and the GTE inline macros
   become `Core/Gte.h` (fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
   (now `Core/RandomLive.hpp`), `getScratchAddr` and scratch literals `Core/Scratch.hpp`, CRT-clashing libapi file calls
-  `LegacyApi_*`. D: whole-statement calls are deleted (expression uses keep no-ops in `Legacy/Removed.h`).
+  `VS::Legacy::LibApi::*`. D: whole-statement calls are deleted (the last expression uses were folded or deleted and `Legacy/Removed.h` is retired, #441).
   T: shims record `VS::Core::RecordUnported` until they translate into their system.
 - **Effect templates:** one body per template (`Effects\Templates\<Name>.inl`); each plugin instance is a block in
   `<Name>.c` that defines that plugin's bindings, includes the body and undefines them. EFFPURGE's address-only

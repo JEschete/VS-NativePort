@@ -30,7 +30,7 @@ struct CardUiResources {
   char reserved_fe0[kCardReservedTailBytes];
   std::uint16_t text_table[kCardTextTableHalfwords];
   CardFileInfoRecord file_headers[MemoryCard::kSlotCount];
-  DIRENTRY directory_entry;
+  VS::Legacy::DIRENTRY directory_entry;
 };
 
 }  // namespace VS::Save

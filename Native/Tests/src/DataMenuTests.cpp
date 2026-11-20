@@ -35,6 +35,11 @@
 #include "State/PlayTime.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::kPadLdown;
+using VS::Legacy::kPadRdown;
+using VS::Legacy::kPadRright;
+using VS::Legacy::kPadStart;
+
 namespace {
 namespace files = VS::Menu::Files;
 
@@ -86,11 +91,11 @@ struct EmptySlotsFixture {
   void CheckEmptySlotInput() const {
     files::Context context = LiveFiles();
     for (size_t index = 0; index < summaries.size(); ++index) {
-      VS::Input::buttonsPressed = PADRright;
+      VS::Input::buttonsPressed = kPadRright;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       CHECK(VS::Menu::Files::selectCursorXy != 0);
       VS::Input::buttonsPressed = 0;
-      VS::Input::buttonRepeat = PADLdown;
+      VS::Input::buttonRepeat = kPadLdown;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       VS::Input::buttonRepeat = 0;
     }
@@ -216,7 +221,7 @@ TEST_CASE("Game Over fade links packets through native handles",
     CHECK(files::UpdateGameOverChoices(context, false) == 0);
   }
 
-  VS::Input::buttonsPressed = PADstart;
+  VS::Input::buttonsPressed = kPadStart;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   VS::Input::buttonsPressed = 0;
   const auto* fade_packet = VS::Render::FrameScratchpad().primitive_cursor;
@@ -238,7 +243,7 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
     CHECK(files::LiveFilesState().elements[index + 5].slot_unavailable != 0);
   }
   fixture.CheckEmptySlotInput();
-  VS::Input::buttonsPressed = PADRdown;
+  VS::Input::buttonsPressed = kPadRdown;
   CHECK(files::UpdateLoadFiles(context, 0) == -1);
   CHECK(VS::Menu::Files::selectCursorXy == 0);
 }

@@ -151,7 +151,7 @@ class LiveDiscDriveHost final : public DiscDriveHost {
     Content_legacyDiscReadBuffer = nullptr;
   }
   void WaitFrames(std::uint32_t frames) override {
-    VSync(static_cast<int>(frames));
+    VS::Legacy::VSync(static_cast<int>(frames));
   }
 
  private:

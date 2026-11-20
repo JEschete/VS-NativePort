@@ -42,6 +42,13 @@
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 
+using VS::Legacy::kPadLdown;
+using VS::Legacy::kPadLleft;
+using VS::Legacy::kPadLright;
+using VS::Legacy::kPadLup;
+using VS::Legacy::kPadR2;
+using VS::Legacy::kPadRleft;
+
 // decomp: D_800F1A50 (D_800F1A50@BATTLE/BATTLE.PRG)
 int VS::Actors::ashleyMoveInput[VS::Actors::kAshleyMoveInputWords];
 
@@ -293,12 +300,12 @@ class LiveAshleyHost final : public AshleyMovementHost {
     };
     AshleyControls controls{
         .stick = std::nullopt,
-        .held = {.up = has(PADLup),
-                 .down = has(PADLdown),
-                 .left = has(PADLleft),
-                 .right = has(PADLright)},
-        .walk_held = has(PADR2),
-        .jump_pressed = (VS::Input::buttonsPressed & PADRleft) != 0};
+        .held = {.up = has(kPadLup),
+                 .down = has(kPadLdown),
+                 .left = has(kPadLleft),
+                 .right = has(kPadLright)},
+        .walk_held = has(kPadR2),
+        .jump_pressed = (VS::Input::buttonsPressed & kPadRleft) != 0};
     if (port.controller_type == kAnalogController) {
       controls.stick =
           AshleyStick{.x = port.right_stick_x, .y = port.right_stick_y};

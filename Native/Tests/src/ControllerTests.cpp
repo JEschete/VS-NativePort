@@ -207,7 +207,7 @@ struct LiveControllerGlobals {
   LiveControllerGlobals() = default;
 
   ~LiveControllerGlobals() {
-    PadInitDirect(nullptr, nullptr);
+    VS::Legacy::PadInitDirect(nullptr, nullptr);
     std::ranges::copy(ports, std::begin(VS::Input::controllerPorts));
     VS::Input::legacyPadResponseBytes = packets;
     std::ranges::copy(held_frames, std::begin(VS::Input::buttonHeldFrames));
@@ -230,8 +230,8 @@ void PrepareLiveControllers() {
   VS::Boot::isSoftResetEnabled = 0;
   VS::Input::previousButtons = 0;
   std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
-  PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                VS::Input::legacyPadResponseBytes[1].data());
+  VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                            VS::Input::legacyPadResponseBytes[1].data());
 }
 
 // Feeds an analog first pad with its left stick at (200, 100) and no second.

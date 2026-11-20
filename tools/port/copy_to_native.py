@@ -104,9 +104,15 @@ TOKEN_RENAMES = {
     "getScratchAddr": "Core_ScratchAddr",
 }
 TOKEN_RX = re.compile(r"\b(" + "|".join(sorted(TOKEN_RENAMES, key=len, reverse=True)) + r")\b")
-# Strategy D: calls deleted when they are a whole statement (Legacy/Removed.h keeps the rest compiling).
-REMOVED = set(re.findall(r"static inline [\w\s\*]+?\b(\w+)\(",
-                         (NATIVE / "Engine" / "Legacy" / "Removed.h").read_text(encoding="utf-8")))
+# Strategy D: calls deleted when they are a whole statement. These are the no-ops the retired Legacy/Removed.h
+# declared (deleted in #441, once no expression use remained).
+REMOVED = {
+    "CdMix", "DecDCTReset", "DrawSync", "DrawSyncCallback", "DsEndReadySystem", "DsFlush", "DsMix", "DsReadyCallback",
+    "DsStartReadySystem", "DsSystemStatus", "EnterCriticalSection", "ExitCriticalSection", "FntFlush", "FntLoad",
+    "FntOpen", "InitGeom", "ResetCallback", "ResetGraph", "SetDumpFnt", "SetGraphDebug", "SpuInitMalloc", "SpuQuit",
+    "SpuSetIRQ", "SpuSetIRQAddr", "SpuSetIRQCallback", "SpuSetTransferMode", "StCdInterrupt", "SystemError",
+    "TestEvent", "UnDeliverEvent", "_bu_init"
+}
 # The game's scratch block (vs_scratch) is the start of the PS1 scratch memory, which getScratchAddr(n) also reaches.
 SCRATCH_GLOBAL = "G00011"
 

@@ -688,15 +688,14 @@
     <ClInclude Include="include\Save\MemoryCard\GameFiles.hpp" />
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="include\Save\Snapshot.hpp" />
-    <ClInclude Include="Legacy\Audio\LibSpu.h" />
-    <ClInclude Include="Legacy\Core\LibEtc.h" />
+    <ClInclude Include="Legacy\Audio\LibSpu.hpp" />
+    <ClInclude Include="Legacy\Core\LibEtc.hpp" />
     <ClInclude Include="Legacy\Core\PsxTypes.h" />
-    <ClInclude Include="Legacy\Input\LibPad.h" />
+    <ClInclude Include="Legacy\Input\LibPad.hpp" />
     <ClInclude Include="Legacy\OnDisc.h" />
     <ClInclude Include="Legacy\Psx.h" />
-    <ClInclude Include="Legacy\Removed.h" />
     <ClInclude Include="Legacy\Render\LibGpu.h" />
-    <ClInclude Include="Legacy\Save\LibCard.h" />
+    <ClInclude Include="Legacy\Save\LibCard.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.targets" Condition="Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.targets')" />

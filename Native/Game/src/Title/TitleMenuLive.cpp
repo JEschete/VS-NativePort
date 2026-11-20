@@ -56,6 +56,8 @@
 #include "Title/TitleMenuLiveState.hpp"
 #include "Title/TitleScreen.hpp"
 
+using VS::Legacy::VSync;
+
 namespace mcman_text = VS::Content::text::mcman_bin;
 
 // decomp: vs_main_titleScreenCount (vs_main_titleScreenCount@SLUS_010.40)

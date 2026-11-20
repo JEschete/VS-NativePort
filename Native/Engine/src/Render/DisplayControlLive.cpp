@@ -85,7 +85,9 @@ class LiveDisplayDevice final : public DisplayDevice {
     RECT rect = ToRect(area);
     ClearImage2(&rect, 0, 0, 0);
   }
-  void WaitVerticalBlanks(std::int32_t count) override { VSync(count); }
+  void WaitVerticalBlanks(std::int32_t count) override {
+    VS::Legacy::VSync(count);
+  }
   void UploadImage(const ScreenRect& area,
                    std::span<const std::uint16_t> pixels) override {
     RECT rect = ToRect(area);

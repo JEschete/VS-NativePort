@@ -20,6 +20,10 @@
 #include "Input/Vibration.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Legacy::PadInitDirect;
+using VS::Legacy::PadSetAct;
+using VS::Legacy::PadSetActAlign;
+
 namespace {
 struct Command {
   Uint16 low;

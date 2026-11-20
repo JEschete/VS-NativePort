@@ -89,6 +89,12 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
+using VS::Legacy::kPadLup;
+using VS::Legacy::kPadRdown;
+using VS::Legacy::kPadRleft;
+using VS::Legacy::kPadRright;
+using VS::Legacy::kPadRup;
+
 int Tests_CombatTargetResults(void);
 
 namespace {
@@ -173,7 +179,7 @@ struct AbilityFixture {
       VS::Input::settings.mapped_defense_abilities[index] =
           static_cast<char>(40 + index);
     }
-    VS::Input::buttonsPressed = PADRright;
+    VS::Input::buttonsPressed = kPadRright;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
     VS::State::tickSpeed = 2;
@@ -1207,7 +1213,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   void OpenLeaveConfirmation() {
-    Step(PADRdown);
+    Step(kPadRdown);
     Step();
     Step();
     SettleRows();
@@ -1999,7 +2005,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     CAPTURE(defense, action_id, difficulty, depth, slot, margin, delta);
     AbilityFixture fixture;
     fixture.Prepare(defense, action_id, depth);
-    constexpr std::array kButtons{PADRright, PADRup, PADRleft};
+    constexpr std::array kButtons{kPadRright, kPadRup, kPadRleft};
     VS::Input::buttonsPressed = kButtons[slot - 1];
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
@@ -2068,10 +2074,10 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
 TEST_CASE("Simultaneous ability buttons keep the original input priority",
           "[combat][abilities][timing]") {
   const auto [buttons, slot] =
-      GENERATE(std::make_pair(PADRright | PADRup, 2),
-               std::make_pair(PADRright | PADRleft, 3),
-               std::make_pair(PADRup | PADRleft, 3),
-               std::make_pair(PADRright | PADRup | PADRleft, 3));
+      GENERATE(std::make_pair(kPadRright | kPadRup, 2),
+               std::make_pair(kPadRright | kPadRleft, 3),
+               std::make_pair(kPadRup | kPadRleft, 3),
+               std::make_pair(kPadRright | kPadRup | kPadRleft, 3));
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
   VS::Input::buttonsPressed = buttons;
@@ -2962,7 +2968,7 @@ TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
   const auto before = fixture.source;
   const auto queued = VS::Items::lootListHead->loot;
   fixture.OpenLeaveConfirmation();
-  fixture.Step(PADRdown);
+  fixture.Step(kPadRdown);
   CHECK(VS::Menu::Loot::lootListCount == 16);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==
@@ -2970,8 +2976,8 @@ TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
   fixture.SettleRows();
   fixture.Step();
   fixture.OpenLeaveConfirmation();
-  fixture.Step(PADLup);
-  fixture.Step(PADRright);
+  fixture.Step(kPadLup);
+  fixture.Step(kPadRright);
   fixture.CheckNextArmorPage();
 }
 
@@ -2980,7 +2986,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
-  fixture.Step(PADRleft);
+  fixture.Step(kPadRleft);
   CHECK(VS::Menu::Loot::lootListCount == 16);
   for (int tick = 0; tick < 10 && VS::Menu::Loot::lootListCount != 8; ++tick) {
     fixture.Step();
@@ -2989,7 +2995,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
   fixture.CheckClaims(16, 16);
   VS::Items::inventory = {};
   VS::Menu::Loot::Live::RefreshClaimableRows();
-  fixture.Step(PADRleft);
+  fixture.Step(kPadRleft);
   int result = 0;
   for (int tick = 0; tick < 10 && result == 0; ++tick) {
     result = fixture.Tick();
@@ -3007,9 +3013,9 @@ TEST_CASE("Loot menu cannot abandon a key while another page is pending",
   REQUIRE(VS::Menu::Loot::lootListCount == 17);
   const auto before = fixture.source;
   const auto queued = VS::Items::lootListHead->loot;
-  CHECK(fixture.Tick(PADRdown) == 0);
+  CHECK(fixture.Tick(kPadRdown) == 0);
   CHECK(fixture.Tick() == 0);
-  CHECK(fixture.Tick(PADRdown) == 0);
+  CHECK(fixture.Tick(kPadRdown) == 0);
   CHECK(VS::Menu::Loot::lootListCount == 17);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==

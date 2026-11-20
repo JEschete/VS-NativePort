@@ -5,14 +5,14 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Audio/LibSpu.h"
+#include "Legacy/Audio/LibSpu.hpp"
 
 namespace VS::Audio {
 // decomp: SPU_MALLOC_NUM_BLOCKS (src/include/sound.h:545)
 inline constexpr std::size_t kLegacySpuAllocationBlocks = 4;
 // libspu keeps one record per block plus a terminating record.
 inline constexpr std::size_t kLegacySpuAllocationTableBytes(
-    (kLegacySpuAllocationBlocks + 1) * SPU_MALLOC_RECSIZ);
+    (kLegacySpuAllocationBlocks + 1) * VS::Legacy::kSpuMallocRecordSize);
 inline constexpr std::size_t kLegacyUnreferencedTableWords = 795;
 
 // decomp: D_80094FAC (D_80094FAC@BATTLE/BATTLE.PRG)

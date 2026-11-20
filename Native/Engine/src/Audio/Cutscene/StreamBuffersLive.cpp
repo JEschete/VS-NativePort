@@ -26,6 +26,10 @@
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Legacy::SpuSetTransferCallback;
+using VS::Legacy::SpuSetTransferStartAddr;
+using VS::Legacy::SpuWrite;
+
 namespace VS::Audio::Cutscene {
 namespace {
 static_assert(std::size(VS::Audio::Mixer::kPanGains) == kPanGainCount);

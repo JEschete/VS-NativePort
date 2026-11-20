@@ -1,4 +1,4 @@
-#include "Legacy/Core/LibEtc.h"
+#include "Legacy/Core/LibEtc.hpp"
 
 #include <chrono>
 #include <cstdint>
@@ -12,19 +12,20 @@
 // natively the game fiber hands control back to the host loop, which presents,
 // samples input and resumes it on the next logical tick.
 
+namespace VS::Legacy {
 namespace {
 
 using Clock = std::chrono::steady_clock;
 
-int g_ticks = 0;
-void (*g_vblankCallback)(void) = nullptr;
+std::int32_t g_ticks = 0;
+void (*g_vblankCallback)() = nullptr;
 Clock::time_point g_rcnt2Start = Clock::now();
-unsigned g_rcnt2Target = 0;
+std::uint32_t g_rcnt2Target = 0;
 std::uint64_t g_rcnt2Clocks = 0;
 std::uint64_t g_rcnt2_field_remainder = 0;
 bool g_rcnt2Running = false;
 bool g_rcnt2Enabled = false;
-long (*g_rcnt2Callback)(void) = nullptr;
+EventHandler g_rcnt2Callback = nullptr;
 
 // root counter 2 counts the system clock / 8 (33.8688 MHz / 8)
 constexpr double Rcnt2Hz = 33868800.0 / 8.0;
@@ -40,7 +41,7 @@ void WaitOneFrame() {
     const auto elapsed =
         g_rcnt2_field_remainder / VS::Core::FrameClock::kTickRateNumerator;
     g_rcnt2_field_remainder %= VS::Core::FrameClock::kTickRateNumerator;
-    Legacy_AdvanceCounter2(static_cast<unsigned>(elapsed));
+    AdvanceRootCounter2(static_cast<std::uint32_t>(elapsed));
   }
   if (g_vblankCallback != nullptr) {
     g_vblankCallback();
@@ -49,7 +50,7 @@ void WaitOneFrame() {
 
 }  // namespace
 
-int VSync(int mode) {
+std::int32_t VSync(std::int32_t mode) {
   if (mode < 0) {
     return g_ticks;  // vertical blanks since boot
   }
@@ -58,26 +59,27 @@ int VSync(int mode) {
     // natively, so report a full NTSC field
     return 263;
   }
-  const int frames = mode == 0 ? 1 : mode;
-  for (int i = 0; i < frames; ++i) {
+  const std::int32_t frames = mode == 0 ? 1 : mode;
+  for (std::int32_t i = 0; i < frames; ++i) {
     WaitOneFrame();
   }
   return 0;
 }
 
-int VSyncCallback(void (*f)(void)) {
+std::int32_t VSyncCallback(void (*f)()) {
   g_vblankCallback = f;
   return 0;
 }
 
-long SetVideoMode(long mode) {
+std::int32_t SetVideoMode(std::int32_t mode) {
   (void)mode;  // NTSC only
-  return MODE_NTSC;
+  return kModeNtsc;
 }
 
-long SetRCnt(unsigned long spec, unsigned short target, long mode) {
+std::int32_t SetRCnt(std::uint32_t spec, std::uint16_t target,
+                     std::int32_t mode) {
   (void)mode;
-  if (spec == RCntCNT2) {
+  if (spec == kRootCounter2) {
     g_rcnt2Target = target == 0 ? 65536u : target;
     g_rcnt2Clocks = 0;
     g_rcnt2_field_remainder = 0;
@@ -85,34 +87,34 @@ long SetRCnt(unsigned long spec, unsigned short target, long mode) {
   return 1;
 }
 
-long GetRCnt(unsigned long spec) {
-  if (spec != RCntCNT2) {
+std::int32_t GetRCnt(std::uint32_t spec) {
+  if (spec != kRootCounter2) {
     VS::Core::RecordUnported("libetc:GetRCnt (counter other than 2)");
     return 0;
   }
   const double seconds =
       std::chrono::duration<double>(Clock::now() - g_rcnt2Start).count();
-  return static_cast<long>(static_cast<unsigned long long>(seconds * Rcnt2Hz) &
-                           0xFFFF);
+  return static_cast<std::int32_t>(
+      static_cast<std::uint64_t>(seconds * Rcnt2Hz) & 0xFFFF);
 }
 
-long StartRCnt(unsigned long spec) {
-  if (spec == RCntCNT2) {
+std::int32_t StartRCnt(std::uint32_t spec) {
+  if (spec == kRootCounter2) {
     g_rcnt2Start = Clock::now();
     g_rcnt2Running = true;
   }
   return 1;
 }
 
-long StopRCnt(unsigned long spec) {
-  if (spec == RCntCNT2) g_rcnt2Running = false;
+std::int32_t StopRCnt(std::uint32_t spec) {
+  if (spec == kRootCounter2) g_rcnt2Running = false;
   return 1;
 }
 
-long OpenEvent(unsigned long desc, long spec, long mode,
-               long (*callback)(void)) {
-  if (desc != RCntCNT2 || spec != EvSpINT || mode != EvMdINTR ||
-      callback == nullptr) {
+std::int32_t OpenEvent(std::uint32_t desc, std::int32_t spec, std::int32_t mode,
+                       EventHandler callback) {
+  if (desc != kRootCounter2 || spec != kEventSpecInterrupt ||
+      mode != kEventModeInterrupt || callback == nullptr) {
     return 0;
   }
   if (g_rcnt2Callback != nullptr) return -1;
@@ -121,7 +123,7 @@ long OpenEvent(unsigned long desc, long spec, long mode,
   return 1;
 }
 
-long CloseEvent(long event) {
+std::int32_t CloseEvent(std::int32_t event) {
   if (event == 1) {
     g_rcnt2Callback = nullptr;
     g_rcnt2Enabled = false;
@@ -129,22 +131,24 @@ long CloseEvent(long event) {
   return 1;
 }
 
-long EnableEvent(long event) {
+std::int32_t EnableEvent(std::int32_t event) {
   if (event == 1 && g_rcnt2Callback != nullptr) g_rcnt2Enabled = true;
   return 1;
 }
 
-long DisableEvent(long event) {
+std::int32_t DisableEvent(std::int32_t event) {
   if (event == 1) g_rcnt2Enabled = false;
   return 1;
 }
 
-void Legacy_AdvanceCounter2(unsigned elapsedClocks) {
+void AdvanceRootCounter2(std::uint32_t elapsed_clocks) {
   if (!g_rcnt2Running || g_rcnt2Target == 0) return;
-  g_rcnt2Clocks += elapsedClocks;
+  g_rcnt2Clocks += elapsed_clocks;
   while (g_rcnt2Clocks >= g_rcnt2Target) {
     g_rcnt2Clocks -= g_rcnt2Target;
     if (g_rcnt2Enabled && g_rcnt2Callback != nullptr) g_rcnt2Callback();
     if (!g_rcnt2Running || g_rcnt2Target == 0) return;
   }
 }
+
+}  // namespace VS::Legacy

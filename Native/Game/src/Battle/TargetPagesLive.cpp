@@ -23,6 +23,9 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPackets.hpp"
 
+using VS::Legacy::kPadL1;
+using VS::Legacy::kPadR1;
+
 namespace {
 constexpr auto kSlots = std::extent_v<decltype(Battle_ActionState::previews)>;
 using ResultBuffer = decltype(Battle_ActionRequest::targets);
@@ -137,10 +140,10 @@ int VS::Battle::AdvanceTargetPage(int direction) {
 }
 
 int VS::Battle::HandleTargetPageButtons(void) {
-  const auto pressed = VS::Input::buttonsPressed & (PADL1 | PADR1);
+  const auto pressed = VS::Input::buttonsPressed & (kPadL1 | kPadR1);
   int changed = 0;
-  if (pressed == PADL1) changed = VS::Battle::AdvanceTargetPage(-1);
-  if (pressed == PADR1) changed = VS::Battle::AdvanceTargetPage(1);
+  if (pressed == kPadL1) changed = VS::Battle::AdvanceTargetPage(-1);
+  if (pressed == kPadR1) changed = VS::Battle::AdvanceTargetPage(1);
   if (changed) VS::Menu::PlayChangeSound();
   return changed;
 }

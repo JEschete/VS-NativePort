@@ -7,7 +7,7 @@
 
 #include "Audio/Mixer/MixControl.hpp"
 #include "Audio/VoiceMixer.hpp"
-#include "Legacy/Audio/LibSpu.h"
+#include "Legacy/Audio/LibSpu.hpp"
 
 namespace VS::Audio {
 struct MusicConfig;
@@ -29,7 +29,7 @@ struct VoiceParams {
   /* 0x12 */ std::uint16_t adsr_lower;
   /* 0x14 */ std::uint16_t adsr_upper;
   /* 0x16 */ std::uint16_t volume_scale;
-  /* 0x18 */ SpuVolume volume;
+  /* 0x18 */ VS::Legacy::SpuVolume volume;
 };
 
 // decomp: FSoundVoiceSchedulerState (src/include/sound.h:274)

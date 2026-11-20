@@ -442,10 +442,12 @@ class LiveDisplay : public Host {
     }
   }
 
-  [[nodiscard]] int VerticalBlankCounter() override { return VSync(1); }
+  [[nodiscard]] int VerticalBlankCounter() override {
+    return VS::Legacy::VSync(1);
+  }
   void WaitForVerticalBlank() override {
     PublishState();
-    VSync(0);
+    VS::Legacy::VSync(0);
   }
 };
 

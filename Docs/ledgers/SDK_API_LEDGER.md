@@ -38,6 +38,14 @@ The 2026-11-18 LibDs trim removes the remaining unused command/ring helpers
 and `DsGetSector` remain compatibility stubs; `DslLOC`, `DslFILTER` and
 `CdlATV` remain consumed layouts. This does not retire EC-04 or change loading.
 
+The 2026-11-20 SDK header conversion (#441) moves libpad, libspu, libcard/libapi and libetc into
+`namespace VS::Legacy` (`.hpp`), with typed `constexpr` constants in place of the macros. Unused constants
+(`PADj`, `PADL2`, `PadStateFindPad`, `PadStateFindCTP1`, `SPU_TRANSFER_BY_DMA`, `SPU_REV_MODE_CLEAR_WA`,
+`HwCARD`, `SwCARD`, `EvSpIOE`, `EvSpTIMOUT`, `EvSpNEW`, `EvSpERROR`, `EvMdNOINTR`) are deleted, and
+`Legacy/Removed.h` is retired: its last expression uses were the `DrawSync` calls (deleted) and
+`TestEvent`, whose constant 0 is folded into `LiveCardHost::TestEvent`. Those rows are marked `[x]`.
+This does not retire EC-02, EC-06, EC-07 or EC-09.
+
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
 Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
@@ -49,7 +57,7 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [ ] | T | `setVector` | macro | 131 | 17 | BATTLE.PRG (109), EFFECT (18), MENU (3), MENU9.PRG (1) |
 | [ ] | T | `AddPrim` | function | 123 | 9 | BATTLE.PRG (45), MENU5.PRG (25), ENDING.PRG (16), MENUE.PRG (12), MENU9.PRG (11), MENUF.PRG (10), renderTextures.h (4) |
 | [ ] | T | `setRGB0` | macro | 97 | 10 | BATTLE.PRG (35), MENU5.PRG (15), MENU9.PRG (12), MENUF.PRG (9), renderTextures.h (9), MENUE.PRG (8), INITBTL.PRG (4), ENDING.PRG (3), TITLE.PRG (2) |
-| [ ] | D | `DrawSync` | function | 75 | 7 | TITLE.PRG (32), MENU7.PRG (14), SLUS_010.40 (12), INITBTL.PRG (8), BATTLE.PRG (6), ENDING.PRG (3) |
+| [x] | D | `DrawSync` | function | 75 | 7 | TITLE.PRG (32), MENU7.PRG (14), SLUS_010.40 (12), INITBTL.PRG (8), BATTLE.PRG (6), ENDING.PRG (3) |
 | [ ] | T | `setClut` | macro | 53 | 7 | BATTLE.PRG (14), ENDING.PRG (13), MENU5.PRG (12), MENUF.PRG (6), MENU9.PRG (4), MENUE.PRG (4) |
 | [ ] | T | `setSemiTrans` | macro | 53 | 9 | BATTLE.PRG (15), MENU5.PRG (12), ENDING.PRG (8), MENUF.PRG (7), MENUE.PRG (4), renderTextures.h (4), MENU9.PRG (3) |
 | [ ] | T | `setRECT` | macro | 52 | 11 | TITLE.PRG (21), BATTLE.PRG (11), SLUS_010.40 (8), INITBTL.PRG (6), ENDING.PRG (2), MENU7.PRG (2), MENUF.PRG (2) |
@@ -87,7 +95,7 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [x] | T | `SetDrawStp` | function | 7 | 3 | INITBTL.PRG (4), BATTLE.PRG (2), MENU5.PRG (1) |
 | [ ] | T | `setPolyG4` | macro | 7 | 4 | MENU9.PRG (4), BATTLE.PRG (1), MENU5.PRG (1), MENUE.PRG (1) |
 | [ ] | T | `MoveImage` | function | 6 | 2 | BATTLE.PRG (6) |
-| [ ] | D | `ResetGraph` | function | 6 | 1 | SLUS_010.40 (6) |
+| [x] | D | `ResetGraph` | function | 6 | 1 | SLUS_010.40 (6) |
 | [ ] | T | `SetDrawArea` | function | 6 | 3 | BATTLE.PRG (2), MENUE.PRG (2), MENUF.PRG (2) |
 | [ ] | T | `setPolyF4` | macro | 6 | 4 | MENU9.PRG (3), BATTLE.PRG (1), MENU5.PRG (1), MENUE.PRG (1) |
 | [ ] | T | `setSprt` | macro | 6 | 3 | MENU5.PRG (4), ENDING.PRG (1), MENUE.PRG (1) |
@@ -103,12 +111,12 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [ ] | T | `addPrim` | macro | 3 | 2 | BATTLE.PRG (2), ENDING.PRG (1) |
 | [ ] | T | `setcode` | macro | 3 | 2 | MENU9.PRG (2), BATTLE.PRG (1) |
 | [ ] | T | `ClearOTag` | function | 2 | 1 | BATTLE.PRG (2) |
-| [ ] | D | `FntLoad` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `FntOpen` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
+| [x] | D | `FntLoad` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
+| [x] | D | `FntOpen` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
 | [ ] | T | `LoadImage2` | function | 2 | 1 | MENUE.PRG (2) |
 | [ ] | T | `SetDrawTPage` | function | 2 | 2 | BATTLE.PRG (1), ENDING.PRG (1) |
-| [ ] | D | `SetDumpFnt` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `SetGraphDebug` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `SetDumpFnt` | function | 2 | 2 | ENDING.PRG (1), TITLE.PRG (1) |
+| [x] | D | `SetGraphDebug` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `SetPolyF4` | function | 2 | 1 | INITBTL.PRG (2) |
 | [ ] | T | `getaddr` | macro | 2 | 1 | ENDING.PRG (2) |
 | [ ] | T | `getcode` | macro | 2 | 1 | MENU9.PRG (2) |
@@ -116,8 +124,8 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [ ] | T | `setlen` | macro | 2 | 2 | BATTLE.PRG (2) |
 | [ ] | T | `AddPrims` | function | 1 | 1 | BATTLE.PRG (1) |
 | [ ] | T | `ClearImage2` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `DrawSyncCallback` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `FntFlush` | function | 1 | 1 | BATTLE.PRG (1) |
+| [x] | D | `DrawSyncCallback` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `FntFlush` | function | 1 | 1 | BATTLE.PRG (1) |
 | [ ] | T | `SetLineF2` | function | 1 | 1 | BATTLE.PRG (1) |
 | [ ] | T | `setLineG4` | macro | 1 | 1 | BATTLE.PRG (1) |
 | [ ] | T | `setPolyG3` | macro | 1 | 1 | MENU5.PRG (1) |
@@ -163,7 +171,7 @@ Target: VS.Core Math: Vec3/Mat3 fixed-point, Transform/Project, Camera; GTE ops 
 | [ ] | R | `RotTransPers4` | function | 2 | 2 | BATTLE.PRG (1), ENDING.PRG (1) |
 | [ ] | R | `SetFarColor` | function | 2 | 1 | MENU5.PRG (2) |
 | [ ] | R | `VectorNormalSS` | function | 2 | 1 | BATTLE.PRG (2) |
-| [ ] | D | `InitGeom` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `InitGeom` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `MulMatrix` | function | 1 | 1 | BATTLE.PRG (1) |
 | [ ] | R | `SetFogNear` | function | 1 | 1 | MENU5.PRG (1) |
 | [ ] | R | `gte_ldsxy3` | function | 1 | 1 | BATTLE.PRG (1) |
@@ -187,7 +195,7 @@ Target: VS.Input: ActionState snapshot per frame, rumble
 | [ ] | R | `PADLleft` | constant | 23 | 12 | MENU (6), MENU4.PRG (5), BATTLE.PRG (4), MENU5.PRG (2), MAINMENU.PRG (1), MENU0.PRG (1), MENU9.PRG (1), MENUD.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
 | [ ] | R | `PADLright` | constant | 23 | 12 | MENU (6), MENU4.PRG (5), BATTLE.PRG (4), MENU5.PRG (2), MAINMENU.PRG (1), MENU0.PRG (1), MENU9.PRG (1), MENUD.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
 | [ ] | R | `PADRleft` | constant | 21 | 10 | BATTLE.PRG (9), MENU (3), MENU4.PRG (2), MENUE.PRG (2), MAINMENU.PRG (1), MENU2.PRG (1), MENU3.PRG (1), MENU8.PRG (1), MENUB.PRG (1) |
-| [ ] | R | `PADL2` | constant | 5 | 5 | BATTLE.PRG (1), MENU4.PRG (1), MENU5.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
+| [x] | R | `PADL2` | constant | 5 | 5 | BATTLE.PRG (1), MENU4.PRG (1), MENU5.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
 | [ ] | R | `PADR2` | constant | 5 | 5 | BATTLE.PRG (2), MENU5.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
 | [ ] | R | `PadInfoMode` | function | 5 | 1 | SLUS_010.40 (5) |
 | [ ] | R | `InfoModeCurExID` | constant | 2 | 1 | SLUS_010.40 (2) |
@@ -199,8 +207,8 @@ Target: VS.Input: ActionState snapshot per frame, rumble
 | [ ] | R | `PadGetState` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `PadInitDirect` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `PadStartCom` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadStateFindCTP1` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadStateFindPad` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadStateFindCTP1` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadStateFindPad` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `PadStateStable` | constant | 1 | 1 | SLUS_010.40 (1) |
 
 ## crt â†’ Core (7 symbols, 264 uses)
@@ -227,8 +235,8 @@ Target: VS.Platform: FrameClock (VSync), video mode, callbacks
 | [ ] | R | `VSync` | function | 38 | 4 | TITLE.PRG (27), SLUS_010.40 (6), ENDING.PRG (3), BATTLE.PRG (2) |
 | [ ] | R | `PADstart` | constant | 19 | 10 | MENUC.PRG (5), BATTLE.PRG (4), TITLE.PRG (4), ENDING.PRG (1), MENU5.PRG (1), MENU7.PRG (1), MENU8.PRG (1), MENUE.PRG (1), SLUS_010.40 (1) |
 | [ ] | R | `PADselect` | constant | 8 | 6 | TITLE.PRG (3), BATTLE.PRG (1), MENU5.PRG (1), MENU7.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
-| [ ] | R | `PADj` | constant | 7 | 2 | SLUS_010.40 (4), BATTLE.PRG (3) |
-| [ ] | D | `ResetCallback` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `PADj` | constant | 7 | 2 | SLUS_010.40 (4), BATTLE.PRG (3) |
+| [x] | D | `ResetCallback` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | D | `MODE_NTSC` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `SetVideoMode` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `VSyncCallback` | function | 1 | 1 | SLUS_010.40 (1) |
@@ -239,13 +247,13 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | D | `DsReadyCallback` | function | 8 | 1 | SLUS_010.40 (8) |
+| [x] | D | `DsReadyCallback` | function | 8 | 1 | SLUS_010.40 (8) |
 | [x] | T | `DsControlB` | function | 6 | 2 | SLUS_010.40 (5), TITLE.PRG (1) |
 | [x] | T | `DsPacket` | function | 6 | 1 | SLUS_010.40 (6) |
 | [x] | T | `DslModeSpeed` | constant | 6 | 2 | SLUS_010.40 (4), TITLE.PRG (2) |
 | [x] | T | `DsControl` | function | 4 | 2 | SLUS_010.40 (2), TITLE.PRG (2) |
 | [x] | T | `DsIntToPos` | function | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
-| [ ] | D | `DsSystemStatus` | function | 4 | 1 | SLUS_010.40 (4) |
+| [x] | D | `DsSystemStatus` | function | 4 | 1 | SLUS_010.40 (4) |
 | [x] | T | `DslDiskError` | constant | 4 | 1 | SLUS_010.40 (4) |
 | [x] | T | `DslModeSize1` | constant | 4 | 1 | SLUS_010.40 (4) |
 | [x] | T | `DslPause` | constant | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
@@ -256,10 +264,10 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 | [x] | T | `DslModeSF` | constant | 3 | 1 | SLUS_010.40 (3) |
 | [x] | T | `DslNoIntr` | constant | 3 | 1 | SLUS_010.40 (3) |
 | [x] | T | `DsCommand` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `DsEndReadySystem` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `DsFlush` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `DsEndReadySystem` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `DsFlush` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DsGetSector` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `DsMix` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `DsMix` | function | 2 | 1 | SLUS_010.40 (2) |
 | [x] | T | `DslDataReady` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [x] | T | `DslNoResult` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [x] | T | `DslReadN` | constant | 2 | 1 | SLUS_010.40 (2) |
@@ -268,7 +276,7 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 | [x] | T | `DslSetfilter` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DsInit` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | T | `DsRead2` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | D | `DsStartReadySystem` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `DsStartReadySystem` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | T | `DslModeDA` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [x] | T | `DslModeStream2` | constant | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `DslSetloc` | constant | 1 | 1 | TITLE.PRG (1) |
@@ -279,12 +287,12 @@ Target: VS.Audio: Voice/SampleBank/Mixer/Reverb API (no SPU registers or SPU RAM
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | D | `SpuSetIRQCallback` | function | 8 | 1 | SLUS_010.40 (8) |
+| [x] | D | `SpuSetIRQCallback` | function | 8 | 1 | SLUS_010.40 (8) |
 | [ ] | D | `SpuSetTransferCallback` | function | 7 | 1 | SLUS_010.40 (7) |
-| [ ] | D | `SpuSetIRQ` | function | 6 | 1 | SLUS_010.40 (6) |
+| [x] | D | `SpuSetIRQ` | function | 6 | 1 | SLUS_010.40 (6) |
 | [ ] | D | `SpuSetTransferStartAddr` | function | 6 | 1 | SLUS_010.40 (6) |
 | [ ] | T | `SpuWrite` | function | 4 | 1 | SLUS_010.40 (4) |
-| [ ] | D | `SpuQuit` | function | 3 | 2 | SLUS_010.40 (3) |
+| [x] | D | `SpuQuit` | function | 3 | 2 | SLUS_010.40 (3) |
 | [ ] | T | `SPU_OFF` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `SPU_VOICE_ADSR_AMODE` | constant | 2 | 1 | include (2) |
 | [ ] | T | `SPU_VOICE_ADSR_AR` | constant | 2 | 1 | include (2) |
@@ -295,14 +303,14 @@ Target: VS.Audio: Voice/SampleBank/Mixer/Reverb API (no SPU registers or SPU RAM
 | [ ] | T | `SPU_VOICE_ADSR_SMODE` | constant | 2 | 1 | include (2) |
 | [ ] | T | `SPU_VOICE_ADSR_SR` | constant | 2 | 1 | include (2) |
 | [ ] | T | `SpuSetCommonMasterVolume` | function | 2 | 1 | TITLE.PRG (2) |
-| [ ] | D | `SpuSetIRQAddr` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `SpuSetIRQAddr` | function | 2 | 1 | SLUS_010.40 (2) |
 | [M] | T | `SpuSetNoiseClock` | function | 2 | 1 | SLUS_010.40 (2) |
 | [M] | T | `SpuSetReverb` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `SpuSetTransferMode` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `SpuSetTransferMode` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `SPU_MALLOC_RECSIZ` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_ON` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `SPU_REV_MODE_CLEAR_WA` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `SPU_TRANSFER_BY_DMA` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | T | `SPU_REV_MODE_CLEAR_WA` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | T | `SPU_TRANSFER_BY_DMA` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SPU_VOICE_LSAX` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_VOICE_PITCH` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_VOICE_VOLL` | constant | 1 | 1 | include (1) |
@@ -310,7 +318,7 @@ Target: VS.Audio: Voice/SampleBank/Mixer/Reverb API (no SPU registers or SPU RAM
 | [ ] | T | `SPU_VOICE_WDSA` | constant | 1 | 1 | include (1) |
 | [M] | T | `SpuGetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SpuGetVoiceEnvelope` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `SpuInitMalloc` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `SpuInitMalloc` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SpuRead` | function | 1 | 1 | SLUS_010.40 (1) |
 | [M] | T | `SpuSetReverbModeDepth` | function | 1 | 1 | SLUS_010.40 (1) |
 | [M] | T | `SpuSetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
@@ -326,9 +334,9 @@ Target: VS.Platform: Frame clock, callbacks -> events, file API removed
 | [ ] | T | `open` | function | 8 | 2 | MENU7.PRG (4), TITLE.PRG (4) |
 | [ ] | D | `DisableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | D | `EnableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EnterCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
-| [ ] | D | `ExitCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
-| [ ] | D | `TestEvent` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
+| [x] | D | `EnterCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
+| [x] | D | `ExitCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
+| [x] | D | `TestEvent` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `erase` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `read` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `rename` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
@@ -343,9 +351,9 @@ Target: VS.Platform: Frame clock, callbacks -> events, file API removed
 | [ ] | R | `SetRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `StartRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | R | `StopRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `SystemError` | function | 1 | 1 | ENDING.PRG (1) |
-| [ ] | D | `UnDeliverEvent` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `_bu_init` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `SystemError` | function | 1 | 1 | ENDING.PRG (1) |
+| [x] | D | `UnDeliverEvent` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `_bu_init` | function | 1 | 1 | SLUS_010.40 (1) |
 
 ## libc â†’ Core (2 symbols, 33 uses)
 
@@ -363,14 +371,14 @@ Target: VS.Platform (removed: kernel events/critical sections)
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
 | [ ] | R | `RCntCNT2` | constant | 7 | 1 | SLUS_010.40 (7) |
-| [ ] | D | `EvMdNOINTR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EvSpERROR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EvMdNOINTR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EvSpERROR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | D | `EvSpINT` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `EvSpIOE` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EvSpNEW` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EvSpTIMOUT` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `HwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `SwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EvSpIOE` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EvSpNEW` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EvSpTIMOUT` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `HwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `SwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | D | `EvMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | D | `RCntMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
 
@@ -382,11 +390,11 @@ Target: VS.Movie: StrDecoder (MDEC/VLC/IDCT) -> RGBA frames + XA stream
 |---|---|---|---|---:|---:|---|
 | [x] | T | `DecDCTout` | function | 2 | 1 | TITLE.PRG (2) |
 | [x] | T | `DecDCToutCallback` | function | 2 | 1 | TITLE.PRG (2) |
-| [ ] | D | `DecDCTReset` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | D | `DecDCTReset` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `DecDCTin` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `DecDCTvlc2` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `DecDCTvlcBuild` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | D | `StCdInterrupt` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | D | `StCdInterrupt` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StFreeRing` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StGetBackloc` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StGetNext` | function | 1 | 1 | TITLE.PRG (1) |
@@ -428,4 +436,4 @@ Target: VS.Content: VirtualDisc (LBA->file) + AsyncReadQueue
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | D | `CdMix` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `CdMix` | function | 1 | 1 | SLUS_010.40 (1) |

@@ -1,5 +1,6 @@
-#include "Legacy/Audio/LibSpu.h"
+#include "Legacy/Audio/LibSpu.hpp"
 
+#include <cstdint>
 #include <cstring>
 
 #include "Core/Unported.hpp"
@@ -9,11 +10,12 @@
 // the DMA interrupt did; the rest call RecordUnported until the audio
 // backend.
 
+namespace VS::Legacy {
 namespace {
 
-alignas(16) unsigned char g_registers[LEGACY_SPU_REGISTER_BYTES];
-unsigned char g_ram[LEGACY_SPU_RAM_BYTES];
-unsigned long g_transferAddr = 0;
+alignas(16) std::uint8_t g_registers[kSpuRegisterBytes];
+std::uint8_t g_ram[kSpuRamBytes];
+std::uint32_t g_transferAddr = 0;
 SpuTransferCallbackProc g_transferDone = nullptr;
 
 void CompleteTransfer() {
@@ -25,9 +27,7 @@ void CompleteTransfer() {
 
 }  // namespace
 
-void* LegacySpu_Registers(void) { return g_registers; }
-
-unsigned char* LegacySpu_Ram(void) { return g_ram; }
+void* SpuRegisters() { return g_registers; }
 
 SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func) {
   SpuTransferCallbackProc previous = g_transferDone;
@@ -35,77 +35,79 @@ SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func) {
   return previous;
 }
 
-unsigned long SpuSetTransferStartAddr(unsigned long addr) {
+std::uint32_t SpuSetTransferStartAddr(std::uint32_t addr) {
   // SPU addresses are in 8-byte units of the 512 KiB memory; the first 0x1010
   // bytes are reserved
-  if (addr < 0x1010 || addr >= LEGACY_SPU_RAM_BYTES) {
+  if (addr < 0x1010 || addr >= kSpuRamBytes) {
     return 0;
   }
-  g_transferAddr = addr & ~7ul;
+  g_transferAddr = addr & ~7u;
   return g_transferAddr;
 }
 
-unsigned long SpuWrite(unsigned char* addr, unsigned long size) {
-  const unsigned long n = size <= LEGACY_SPU_RAM_BYTES - g_transferAddr
+std::uint32_t SpuWrite(std::uint8_t* addr, std::uint32_t size) {
+  const std::uint32_t n = size <= kSpuRamBytes - g_transferAddr
                               ? size
-                              : LEGACY_SPU_RAM_BYTES - g_transferAddr;
+                              : kSpuRamBytes - g_transferAddr;
   std::memcpy(g_ram + g_transferAddr, addr, n);
   CompleteTransfer();
   return n;
 }
 
-unsigned long SpuRead(unsigned char* addr, unsigned long size) {
-  const unsigned long n = size <= LEGACY_SPU_RAM_BYTES - g_transferAddr
+std::uint32_t SpuRead(std::uint8_t* addr, std::uint32_t size) {
+  const std::uint32_t n = size <= kSpuRamBytes - g_transferAddr
                               ? size
-                              : LEGACY_SPU_RAM_BYTES - g_transferAddr;
+                              : kSpuRamBytes - g_transferAddr;
   std::memcpy(addr, g_ram + g_transferAddr, n);
   CompleteTransfer();
   return n;
 }
 
-void SpuStart(void) {}
+void SpuStart() {}
 
-long SpuSetNoiseClock(long nClock) {
-  (void)nClock;
+std::int32_t SpuSetNoiseClock(std::int32_t n_clock) {
+  (void)n_clock;
   VS::Core::RecordUnported("libspu:SpuSetNoiseClock");
   return {};
 }
 
-long SpuSetReverb(long onOff) {
-  (void)onOff;
+std::int32_t SpuSetReverb(std::int32_t on_off) {
+  (void)on_off;
   VS::Core::RecordUnported("libspu:SpuSetReverb");
   return {};
 }
 
-void SpuGetVoiceEnvelope(int voice, short* envx) {
+void SpuGetVoiceEnvelope(std::int32_t voice, std::int16_t* envx) {
   (void)voice;
   (void)envx;
   VS::Core::RecordUnported("libspu:SpuGetVoiceEnvelope");
 }
 
-void SpuSetCommonMasterVolume(short left, short right) {
+void SpuSetCommonMasterVolume(std::int16_t left, std::int16_t right) {
   (void)left;
   (void)right;
   VS::Core::RecordUnported("libspu:SpuSetCommonMasterVolume");
 }
 
-long SpuSetReverbModeType(long mode) {
+std::int32_t SpuSetReverbModeType(std::int32_t mode) {
   (void)mode;
   VS::Core::RecordUnported("libspu:SpuSetReverbModeType");
   return {};
 }
 
-void SpuSetReverbModeDepth(short left, short right) {
+void SpuSetReverbModeDepth(std::int16_t left, std::int16_t right) {
   (void)left;
   (void)right;
   VS::Core::RecordUnported("libspu:SpuSetReverbModeDepth");
 }
 
-void SpuGetReverbModeType(long* mode) {
+void SpuGetReverbModeType(std::int32_t* mode) {
   (void)mode;
   VS::Core::RecordUnported("libspu:SpuGetReverbModeType");
 }
 
-void SsUtReverbOn(void) { VS::Core::RecordUnported("libspu:SsUtReverbOn"); }
+void SsUtReverbOn() { VS::Core::RecordUnported("libspu:SsUtReverbOn"); }
 
-void SsUtReverbOff(void) { VS::Core::RecordUnported("libspu:SsUtReverbOff"); }
+void SsUtReverbOff() { VS::Core::RecordUnported("libspu:SsUtReverbOff"); }
+
+}  // namespace VS::Legacy

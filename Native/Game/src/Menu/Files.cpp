@@ -858,7 +858,6 @@ void DrawFrameFooter(Context& ctx) {
                       .uv_clut = kCautionUvClut,
                       .size = kCautionSize,
                       .page = kInterfacePage});
-  host.DrawSync();
   std::array<std::uint32_t, kTilePacketWords> box{
       0, kTileCode, kMessageBoxPosition, kMessageBoxSize};
   Submit(host, box);

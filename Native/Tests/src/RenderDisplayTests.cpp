@@ -406,20 +406,16 @@ TEST_CASE("Live image uploads write the packed VRAM rectangle",
   setRECT(&area, 1000, 500, 4, 2);
   std::array<std::uint16_t, 8> saved{};
   StoreImage(&area, reinterpret_cast<u_long*>(saved.data()));
-  DrawSync(0);
   const std::array<std::uint16_t, 8> pixels{1, 2, 3, 4, 5, 6, 7, 8};
 
   VS::Render::UploadLiveImageRectangle(1000 | (500 << 16), pixels.data(),
                                        4 | (2 << 16));
   VS::Render::UploadLiveImageRectangle(1000 | (500 << 16), nullptr,
                                        4 | (2 << 16));
-  DrawSync(0);
   std::array<std::uint16_t, 8> stored{};
   StoreImage(&area, reinterpret_cast<u_long*>(stored.data()));
-  DrawSync(0);
   CHECK(stored == pixels);
   LoadImage(&area, reinterpret_cast<u_long*>(saved.data()));
-  DrawSync(0);
 }
 
 // --- Camera --------------------------------------------------------------

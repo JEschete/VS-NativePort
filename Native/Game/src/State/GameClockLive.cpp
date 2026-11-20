@@ -15,7 +15,7 @@ VS::State::PlayTime VS::State::playTime;
 
 namespace VS::State {
 int UpdateLivePlayTimeAndLoading(int vsync) {
-  const int result = VSync(vsync);
+  const int result = VS::Legacy::VSync(vsync);
   if (vsync != 1) VS::Core::IdleInstruction();
   VS::Content::UpdateLiveDiscQueue();
   AdvancePlayTime(playTime, tickSpeed);

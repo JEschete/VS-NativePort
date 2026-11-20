@@ -10,6 +10,10 @@
 #include "Movie/IntroPlayerLive.hpp"
 #include "Movie/MoviePlayer.hpp"
 
+using VS::Legacy::kPadRright;
+using VS::Legacy::kPadStart;
+using VS::Legacy::VSync;
+
 namespace VS::Movie::Intro {
 namespace {
 
@@ -33,7 +37,7 @@ class LiveHost final : public Host {
   void WaitForVerticalBlank() override { VSync(0); }
   void UpdateControllers() override { VS::Input::UpdateLiveControllers(); }
   [[nodiscard]] bool SkipRequested() const override {
-    return (VS::Input::buttonsPressed & (PADRright | PADstart)) != 0;
+    return (VS::Input::buttonsPressed & (kPadRright | kPadStart)) != 0;
   }
 
   void ClearPicturePages() override {

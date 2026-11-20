@@ -27,8 +27,22 @@
 #include "Core/RuntimeLive.hpp"
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
-#include "Legacy/Core/LibEtc.h"
+#include "Legacy/Core/LibEtc.hpp"
 #include "Legacy/Psx.h"
+
+using VS::Legacy::AdvanceRootCounter2;
+using VS::Legacy::CloseEvent;
+using VS::Legacy::DisableEvent;
+using VS::Legacy::EnableEvent;
+using VS::Legacy::kEventModeInterrupt;
+using VS::Legacy::kEventSpecInterrupt;
+using VS::Legacy::kRootCounter2;
+using VS::Legacy::kRootCounterInterruptMode;
+using VS::Legacy::OpenEvent;
+using VS::Legacy::SetRCnt;
+using VS::Legacy::StartRCnt;
+using VS::Legacy::StopRCnt;
+using VS::Legacy::VSync;
 
 using VS::i32;
 namespace Core = VS::Core;
@@ -220,16 +234,17 @@ TEST_CASE(
     "[core][clock][audio]") {
   static int calls = 0;
   calls = 0;
-  REQUIRE(SetRCnt(RCntCNT2, 0x44E8, RCntMdINTR) == 1);
-  REQUIRE(StartRCnt(RCntCNT2) == 1);
-  const auto event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, [] {
-    ++calls;
-    return 0L;
-  });
+  REQUIRE(SetRCnt(kRootCounter2, 0x44E8, kRootCounterInterruptMode) == 1);
+  REQUIRE(StartRCnt(kRootCounter2) == 1);
+  const auto event =
+      OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt, [] {
+        ++calls;
+        return 0L;
+      });
   REQUIRE(event == 1);
   std::vector<int> observed;
   const auto advance = [&observed](int cycles) {
-    Legacy_AdvanceCounter2(cycles);
+    AdvanceRootCounter2(cycles);
     observed.push_back(calls);
   };
   advance(70560);
@@ -239,12 +254,12 @@ TEST_CASE(
   advance(70560);
   EnableEvent(event);
   advance(35280);
-  StopRCnt(RCntCNT2);
+  StopRCnt(kRootCounter2);
   advance(70560);
-  StartRCnt(RCntCNT2);
+  StartRCnt(kRootCounter2);
   CloseEvent(event);
   advance(70560);
-  StopRCnt(RCntCNT2);
+  StopRCnt(kRootCounter2);
   // Disabled, stopped and closed events stop the 240 Hz callbacks.
   CHECK(observed == std::vector<int>{0, 4, 4, 6, 6, 6});
 }
@@ -253,12 +268,13 @@ TEST_CASE("VSync keeps the sound counter at 240 Hz across NTSC fields",
           "[core][clock][audio][audio-clock]") {
   static int calls = 0;
   calls = 0;
-  REQUIRE(SetRCnt(RCntCNT2, 17640, RCntMdINTR) == 1);
-  REQUIRE(StartRCnt(RCntCNT2) == 1);
-  const auto event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, [] {
-    ++calls;
-    return 0L;
-  });
+  REQUIRE(SetRCnt(kRootCounter2, 17640, kRootCounterInterruptMode) == 1);
+  REQUIRE(StartRCnt(kRootCounter2) == 1);
+  const auto event =
+      OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt, [] {
+        ++calls;
+        return 0L;
+      });
   REQUIRE(event == 1);
   EnableEvent(event);
   const std::array<std::array<int, 2>, 3> intervals{
@@ -267,17 +283,17 @@ TEST_CASE("VSync keeps the sound counter at 240 Hz across NTSC fields",
     VSync(fields);
     CHECK(calls == expected);
   }
-  StopRCnt(RCntCNT2);
+  StopRCnt(kRootCounter2);
   VSync(1000);
   CHECK(calls == 240240);
-  StartRCnt(RCntCNT2);
+  StartRCnt(kRootCounter2);
   VSync(250);
   CHECK(calls == 241241);
-  SetRCnt(RCntCNT2, 17640, RCntMdINTR);
+  SetRCnt(kRootCounter2, 17640, kRootCounterInterruptMode);
   VSync(250);
   CHECK(calls == 242242);
   CloseEvent(event);
-  StopRCnt(RCntCNT2);
+  StopRCnt(kRootCounter2);
 }
 
 TEST_CASE("Fixed multiply preserves the original signed product bits",

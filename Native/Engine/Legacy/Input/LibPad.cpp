@@ -1,9 +1,10 @@
-#include "Legacy/Input/LibPad.h"
+#include "Legacy/Input/LibPad.hpp"
+
+#include <cstdint>
 
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/LegacyPad.hpp"
-#include "Legacy/Psx.h"
 
 // libpad shim (plan §6.5). The game registered two receive buffers with
 // PadInitDirect and decodes them itself; this writes them in the original
@@ -11,28 +12,27 @@
 // type<<4 | halfwords, [2..3] active-low buttons, [4..7] right X, right Y, left
 // X, left Y for an analog pad.
 
+namespace VS::Legacy {
 namespace {
 
 struct Port {
-  unsigned char* buffer = nullptr;
+  std::uint8_t* buffer = nullptr;
   bool connected = false;
   bool analog = false;
-  unsigned char* actuators = nullptr;
-  int actuator_count = 0;
+  std::uint8_t* actuators = nullptr;
+  std::int32_t actuator_count = 0;
   bool aligned = false;
 };
 
 Port g_ports[2];
 
-Port* PortFor(int port) {
+Port* PortFor(std::int32_t port) {
   // libpad port ids: 0x00 = port 1, 0x10 = port 2
-  const int index = port >> 4;
+  const std::int32_t index = port >> 4;
   return index >= 0 && index < 2 ? &g_ports[index] : nullptr;
 }
 
 }  // namespace
-
-namespace VS::Legacy {
 
 ActuatorState ReadActuators(int port) {
   if (port < 0 || port > 1) {
@@ -69,17 +69,15 @@ void FeedPad(int port, const Input::PadState& state, bool connected) {
   const u32 held = state.held & 0xFFFF;
   p.buffer[0] = 0;
   p.buffer[1] = p.analog ? 0x73 : 0x41;
-  p.buffer[2] = static_cast<unsigned char>(~(held >> 8));
-  p.buffer[3] = static_cast<unsigned char>(~held);
+  p.buffer[2] = static_cast<std::uint8_t>(~(held >> 8));
+  p.buffer[3] = static_cast<std::uint8_t>(~held);
   p.buffer[4] = state.sticks.rx;
   p.buffer[5] = state.sticks.ry;
   p.buffer[6] = state.sticks.lx;
   p.buffer[7] = state.sticks.ly;
 }
 
-}  // namespace VS::Legacy
-
-void PadInitDirect(unsigned char* port1, unsigned char* port2) {
+void PadInitDirect(std::uint8_t* port1, std::uint8_t* port2) {
   g_ports[0] = Port{};
   g_ports[1] = Port{};
   g_ports[0].buffer = port1;
@@ -91,32 +89,34 @@ void PadInitDirect(unsigned char* port1, unsigned char* port2) {
   }
 }
 
-void PadStartCom(void) {}
+void PadStartCom() {}
 
-int PadGetState(int port) {
+std::int32_t PadGetState(std::int32_t port) {
   const Port* p = PortFor(port);
-  return p != nullptr && p->connected ? PadStateStable : 0;
+  return p != nullptr && p->connected ? kPadStateStable : 0;
 }
 
-int PadInfoMode(int port, int term, int offs) {
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the SDK signature.
+std::int32_t PadInfoMode(std::int32_t port, std::int32_t term,
+                         std::int32_t offs) {
   (void)offs;
   const Port* p = PortFor(port);
   if (p == nullptr || !p->connected) {
     return 0;
   }
   switch (term) {
-    case InfoModeCurID:
+    case kInfoModeCurId:
       return p->analog ? 7 : 4;  // 7 = analog (DualShock), 4 = digital
-    case InfoModeCurExID:
+    case kInfoModeCurExId:
       return 7;  // a DualShock: can switch modes and has actuators
-    case InfoModeCurExOffs:
+    case kInfoModeCurExOffs:
       return p->analog ? 1 : 0;  // mode table index currently selected
     default:
       return 0;
   }
 }
 
-int PadSetActAlign(int port, unsigned char* table) {
+std::int32_t PadSetActAlign(std::int32_t port, std::uint8_t* table) {
   Port* p = PortFor(port);
   if (p == nullptr || table == nullptr) {
     VS::Core::LogWarn("input", "invalid actuator alignment for port {}", port);
@@ -131,14 +131,16 @@ int PadSetActAlign(int port, unsigned char* table) {
   return 1;
 }
 
-int PadSetMainMode(int port, int offs, int lock) {
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the SDK signature.
+std::int32_t PadSetMainMode(std::int32_t port, std::int32_t offs,
+                            std::int32_t lock) {
   (void)port;
   (void)offs;
   (void)lock;
   return 1;
 }
 
-void PadSetAct(int port, unsigned char* table, int len) {
+void PadSetAct(std::int32_t port, std::uint8_t* table, std::int32_t len) {
   Port* p = PortFor(port);
   if (p == nullptr) {
     VS::Core::LogWarn("input", "invalid actuator registration port {}", port);
@@ -154,3 +156,5 @@ void PadSetAct(int port, unsigned char* table, int len) {
   p->actuators = len == 0 ? nullptr : table;
   p->actuator_count = len;
 }
+
+}  // namespace VS::Legacy

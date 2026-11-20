@@ -456,7 +456,7 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void ClearHeldButtons() override { VS::Input::buttonsPressed = 0; }
   bool StartPressed() const override {
-    return (VS::Input::buttonsPressed & PADstart) != 0;
+    return (VS::Input::buttonsPressed & VS::Legacy::kPadStart) != 0;
   }
   std::uint8_t PressedButtonsLowByte() const override {
     return VS::Input::LowButtonByte(VS::Input::buttonsPressed);

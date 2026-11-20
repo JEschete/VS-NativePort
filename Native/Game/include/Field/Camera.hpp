@@ -16,7 +16,7 @@
 namespace VS::Field {
 using CameraVector = Core::Math::Vec3;
 
-// Controller word bits (Legacy/Input/LibPad.h).
+// Controller word bits (Legacy/Input/LibPad.hpp).
 inline constexpr std::uint32_t kPadL1 = 1U << 2;
 inline constexpr std::uint32_t kPadR1 = 1U << 3;
 inline constexpr std::uint32_t kPadCross = 1U << 6;

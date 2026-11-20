@@ -61,6 +61,15 @@
 #include "State/PlayTime.hpp"
 #include "Title/TitleMenuLive.hpp"
 
+using VS::Legacy::InitCARD;
+using VS::Legacy::kModeNtsc;
+using VS::Legacy::PadInitDirect;
+using VS::Legacy::PadStartCom;
+using VS::Legacy::SetVideoMode;
+using VS::Legacy::StartCARD;
+using VS::Legacy::VSync;
+using VS::Legacy::VSyncCallback;
+
 namespace VS::Boot {
 namespace {
 // The boundary is the one place a transition lands; the frames it abandons
@@ -251,7 +260,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void JumpToTitle() override { JumpToLiveTitle(); }
   void JumpToGameLoop() override { JumpToLiveGameLoop(); }
 
-  void SelectNtscVideoMode() override { SetVideoMode(MODE_NTSC); }
+  void SelectNtscVideoMode() override { SetVideoMode(kModeNtsc); }
   void InitializeMemoryCard() override { InitCARD(0); }
   void StartMemoryCard() override { StartCARD(); }
   void InitializeControllers() override {

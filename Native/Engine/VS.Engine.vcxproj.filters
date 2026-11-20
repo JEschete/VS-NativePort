@@ -1179,13 +1179,13 @@
     <ClCompile Include="Legacy\Audio\LibSpu.cpp">
       <Filter>Legacy\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\Audio\LibSpu.h">
+    <ClInclude Include="Legacy\Audio\LibSpu.hpp">
       <Filter>Legacy\Audio</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\Core\LibEtc.cpp">
       <Filter>Legacy\Core</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\Core\LibEtc.h">
+    <ClInclude Include="Legacy\Core\LibEtc.hpp">
       <Filter>Legacy\Core</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\Core\PsxTypes.h">
@@ -1194,16 +1194,13 @@
     <ClCompile Include="Legacy\Input\LibPad.cpp">
       <Filter>Legacy\Input</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\Input\LibPad.h">
+    <ClInclude Include="Legacy\Input\LibPad.hpp">
       <Filter>Legacy\Input</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\OnDisc.h">
       <Filter>Legacy</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\Psx.h">
-      <Filter>Legacy</Filter>
-    </ClInclude>
-    <ClInclude Include="Legacy\Removed.h">
       <Filter>Legacy</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\Render\LibGpu.cpp">
@@ -1215,7 +1212,7 @@
     <ClCompile Include="Legacy\Save\LibCard.cpp">
       <Filter>Legacy\Save</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\Save\LibCard.h">
+    <ClInclude Include="Legacy\Save\LibCard.hpp">
       <Filter>Legacy\Save</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,7 +13,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
-#include "Legacy/Input/LibPad.h"
+#include "Legacy/Input/LibPad.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -78,13 +78,13 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     VS::Menu::textBoxBufferIndex = 0;
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(VS::Menu::activeTextBoxOrderingTable, kTextOrderingEntries);
-    PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                  VS::Input::legacyPadResponseBytes[1].data());
+    VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                              VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);
   }
   ~PendingRowsLiveFixture() {
     framework::ResetLiveMainMenuStatics();
-    PadInitDirect(nullptr, nullptr);
+    VS::Legacy::PadInitDirect(nullptr, nullptr);
   }
   static void CopyText(const char* path, std::span<std::byte> target,
                        std::size_t expected_bytes) {

@@ -240,7 +240,9 @@ TEST_CASE(
   FogFixture fixture;
   constexpr std::array<Core_GteWord, 5> kNear{100000, 6710886, 7000000,
                                               10000000, INT32_MAX};
-  for (Core_GteWord near_distance : kNear) CheckCue(near_distance, 512, 32767);
+  for (Core_GteWord near_distance : kNear) {
+    CheckCue(near_distance, 512, 32767);
+  }
 }
 
 TEST_CASE("Typed depth cue preserves every in-range factor and color code",

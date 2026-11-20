@@ -292,7 +292,6 @@ class LiveGpuHost : public Host {
     RECT rect = RectAt(position, size);
     ::StoreImage(&rect, reinterpret_cast<u_long*>(pixels.data()));
   }
-  void DrawSync() override { ::DrawSync(0); }
   void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(false); }
   void DrawCompactText(std::string_view text, std::uint32_t position) override {
     u_long* const chain = Render::LiveFrameOrderingEntry(
@@ -452,7 +451,9 @@ class LiveCardHost : public LiveGpuHost {
   int CreateSaveFile(int port, int file) override {
     return VS::Save::MemoryCard::CreateLiveSaveFile(port, file);
   }
-  int FormatCard(int channel) override { return _card_format(channel); }
+  int FormatCard(int channel) override {
+    return VS::Legacy::_card_format(channel);
+  }
   int WriteSaveStep(int request) override {
     return VS::Save::MemoryCard::WriteLiveSaveStep(request);
   }

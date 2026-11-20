@@ -280,7 +280,7 @@ void StoreRating(CubePuzzleRating rating) {
 }
 
 [[nodiscard]] bool LiveConfirmPressed() {
-  return (VS::Input::buttonsPressed & PADRright) != 0;
+  return (VS::Input::buttonsPressed & VS::Legacy::kPadRright) != 0;
 }
 
 [[nodiscard]] int Finished(CubePuzzleLoad load) {

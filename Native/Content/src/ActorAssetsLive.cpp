@@ -839,7 +839,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     StoreRequestFields(request, head);
     return result;
   }
-  std::int32_t FrameCounter() override { return VSync(1); }
+  std::int32_t FrameCounter() override { return VS::Legacy::VSync(1); }
   [[nodiscard]] std::uint8_t ModelLoadPhase() const override {
     return legacyModelLoadPhase;
   }

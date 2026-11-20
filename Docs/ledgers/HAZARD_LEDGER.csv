@@ -77,7 +77,7 @@ a9d5134e7b49,CAPACITY,medium,pattern,,Battle_actors,Native/Game/src/Battle/Damag
 485a0b0474c6,CAPACITY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.h,92,Battle_unusedGlobal1[1],56,24,open,
 91d5b0a224b0,CAPACITY,medium,pattern,,Field_gimmickInstances,Native/Game/src/Field/Gimmicks.h,311,Field_gimmickInstances[16],45,3,open,
 7515fc1e8e03,CAPACITY,medium,pattern,,InventoryStorage,Native/Game/src/Menu/Container/Storage.hpp,26,InventoryStorage.items_to_transfer[kPendingTransferSlots],60,34,open,
-7509963b0c42,CAPACITY,medium,pattern,,cardDirectoryEntries,Native/Game/src/Title/SaveCard.hpp,22,cardDirectoryEntries[kCardDirectoryCapacity],62,39,open,
+7509963b0c42,CAPACITY,medium,pattern,,cardDirectoryEntries,Native/Game/src/Title/SaveCard.hpp,24,cardDirectoryEntries[kCardDirectoryCapacity],62,39,open,
 f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1366,static_cast,47,6,open,
 287776e0f26f,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,729,Columns,47,6,open,
 53e00571f86b,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,729,Columns,47,6,open,
@@ -140,7 +140,7 @@ ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/
 dccc46474def,DIV-ZERO,medium,pattern,,GaugeFill,Native/Game/src/Battle/HudRendering.cpp,57,gauge.maximum,56,24,open,
 630402b960c0,DIV-ZERO,medium,pattern,F01294,IsPointInTargetPrism,Native/Game/src/Battle/SphereContainment.cpp,188,corners.size(),56,24,open,
 58adfaccd6e6,DIV-ZERO,medium,pattern,,Slope,Native/Game/src/Battle/SphereTerrain.cpp,74,height,56,24,open,
-7b99a6c8629a,DIV-ZERO,medium,pattern,,AdvanceTargetPage,Native/Game/src/Battle/TargetPagesLive.cpp,125,book.pages.size(),56,24,open,
+7b99a6c8629a,DIV-ZERO,medium,pattern,,AdvanceTargetPage,Native/Game/src/Battle/TargetPagesLive.cpp,128,book.pages.size(),56,24,open,
 e5934119e4ad,DIV-ZERO,medium,pattern,,MoveSphereCursorAcross,Native/Game/src/Battle/Targeting.cpp,1092,length,56,24,open,
 f1001b5e0eea,DIV-ZERO,medium,pattern,,MoveSphereCursorAcross,Native/Game/src/Battle/Targeting.cpp,1092,length,56,24,open,
 0dbef81e71ab,DIV-ZERO,medium,pattern,,InspectNavigation,Native/Game/src/Diagnostics/PlayerObservation.cpp,617,result.spacing,none,,open,
@@ -177,8 +177,8 @@ d8458bba03bf,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/Plat
 254d310e4e9a,DIV-ZERO,medium,pattern,,QuarterPercent,Native/Game/src/Field/Traps.cpp,38,denominator,45,3,guarded,"all three callers (ApplyLimbDefense, ApplyShieldDefense) call QuarterPercent only after checking that the max DP or PP denominator is nonzero"
 e90dfbe21c21,DIV-ZERO,low,pattern,,PanelDefense,Native/Game/src/Field/Traps.cpp,100,((risk / 2) + kRiskDefenseBase),45,3,false-positive,"risk is an unsigned 16-bit value, so the divisor (risk / 2) + kRiskDefenseBase is at least 100"
 d621538737a1,DIV-ZERO,medium,pattern,F02624,DrawNextUnlockPoints,Native/Game/src/Menu/BreakArtsCore.cpp,275,static_cast,60,34,open,
-39dbe2e87246,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2209,divisor,60,34,open,
-ee5c5f5527d7,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2214,divisor,60,34,open,
+39dbe2e87246,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2208,divisor,60,34,open,
+ee5c5f5527d7,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2213,divisor,60,34,open,
 30c226fb9e82,DIV-ZERO,medium,pattern,,CopyPartClassAffinity,Native/Game/src/Menu/Framework/EquipmentDetails.cpp,243,classes.size(),60,34,open,
 1c0ae2734a0a,DIV-ZERO,medium,pattern,,CopyPartClassAffinity,Native/Game/src/Menu/Framework/EquipmentDetails.cpp,245,affinities.size(),60,34,open,
 5788a30781b9,DIV-ZERO,medium,pattern,F02564,UpdateDpPpBars,Native/Game/src/Menu/Framework/EquipmentDetails.cpp,1429,divisor,60,34,open,

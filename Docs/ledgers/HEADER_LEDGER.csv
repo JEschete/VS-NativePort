@@ -12,15 +12,15 @@ H0010,header,Native/Content/src/ModelLoading.h,generated,yes,pragma-once,0,0,0,0
 H0011,header,Native/Content/src/OverlayWorkspaceLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Content/include/Content/OverlayWorkspaceLive.hpp (#441)
 H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted; its records are replaced by the Content/PFile.hpp byte readers (#441)
 H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,Content_SystemDatHeader became VS::Content::SystemDatHeader in Native/Content/include/Content/SystemResources.hpp (#441)
-H0014,header,Native/Engine/Legacy/Audio/LibSpu.h,legacy,no,pragma-once,0,0,0,0,0,7,18,0,0,remaining,
-H0015,header,Native/Engine/Legacy/Core/LibEtc.h,legacy,no,pragma-once,0,0,0,0,0,15,12,0,0,remaining,
+H0014,header,Native/Engine/Legacy/Audio/LibSpu.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0015,header,Native/Engine/Legacy/Core/LibEtc.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0016,header,Native/Engine/Legacy/Core/PsxTypes.h,legacy,no,pragma-once,0,0,0,0,0,2,7,0,0,remaining,
-H0017,header,Native/Engine/Legacy/Input/LibPad.h,legacy,no,pragma-once,0,0,0,0,0,28,7,0,0,remaining,
+H0017,header,Native/Engine/Legacy/Input/LibPad.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0018,header,Native/Engine/Legacy/OnDisc.h,legacy,no,pragma-once,0,0,0,0,0,2,0,0,0,remaining,
 H0019,header,Native/Engine/Legacy/Psx.h,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,remaining,
-H0020,header,Native/Engine/Legacy/Removed.h,legacy,no,pragma-once,0,0,0,0,0,0,32,0,5,remaining,
+H0020,header,Native/Engine/Legacy/Removed.h,legacy,no,pragma-once,0,0,0,0,0,0,32,0,5,retired,deleted: no stand-in kept a call site; the DrawSync calls were deleted (Menu Files host seam and test fixtures) and LiveCardHost::TestEvent folds TestEvent's constant 0 into false (#441)
 H0021,header,Native/Engine/Legacy/Render/LibGpu.h,legacy,no,pragma-once,0,0,0,0,0,48,61,0,0,remaining,
-H0022,header,Native/Engine/Legacy/Save/LibCard.h,legacy,no,pragma-once,0,0,0,0,0,5,16,0,4,remaining,
+H0022,header,Native/Engine/Legacy/Save/LibCard.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0023,header,Native/Engine/include/Audio/LfoWaveforms.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0024,header,Native/Engine/include/Audio/MusicState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0025,header,Native/Engine/include/Audio/SequencerOutput.h,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,retired,merged into Native/Engine/include/Audio/VoiceOutputLive.hpp (#441)

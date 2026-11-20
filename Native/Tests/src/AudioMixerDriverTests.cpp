@@ -2695,9 +2695,9 @@ TEST_CASE("Default commands copy every argument to the parameters",
 TEST_CASE("Live SPU voice writes reach the legacy registers and refuse others",
           "[audio-mixer-driver][audio]") {
   constexpr std::size_t kHalves =
-      LEGACY_SPU_REGISTER_BYTES / sizeof(std::uint16_t);
-  const std::span registers(static_cast<std::uint16_t*>(LegacySpu_Registers()),
-                            kHalves);
+      VS::Legacy::kSpuRegisterBytes / sizeof(std::uint16_t);
+  const std::span registers(
+      static_cast<std::uint16_t*>(VS::Legacy::SpuRegisters()), kHalves);
   const std::vector<std::uint16_t> saved(registers.begin(), registers.end());
   const std::uint64_t refused = Seq::LiveRefusalCount();
   // Addresses are stored in 8-byte units.

@@ -32,6 +32,11 @@
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Legacy::DisableEvent;
+using VS::Legacy::EnableEvent;
+using VS::Legacy::kSpuOff;
+using VS::Legacy::kSpuOn;
+
 namespace VS::Audio::Mixer {
 namespace {
 static_assert(std::size(VS::Audio::Seq::musicChannels) ==
@@ -321,7 +326,7 @@ void SlideMusicPitch(const char* operation, VS::Audio::CommandParams* params,
 
 std::int32_t LiveReverbMode() { return VS::Audio::Driver::OutputReverbMode(); }
 void EnableLiveReverb(bool enabled) {
-  VS::Audio::Driver::EnableOutputReverb(enabled ? SPU_ON : SPU_OFF);
+  VS::Audio::Driver::EnableOutputReverb(enabled ? kSpuOn : kSpuOff);
 }
 void SetLiveReverbMode(std::int32_t mode) {
   VS::Audio::Driver::SetOutputReverbMode(mode);

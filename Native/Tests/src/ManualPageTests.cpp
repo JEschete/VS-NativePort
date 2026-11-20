@@ -579,7 +579,7 @@ TEST_CASE(
     "Live scroll fades link the arrow rows tiles and page into the fade slot",
     "[manual-page-live]") {
   PageFrame frame;
-  VS::Input::previousButtons = PADRleft;
+  VS::Input::previousButtons = VS::Legacy::kPadRleft;
   manual::pageArrowAnimState = 4;
   manual::LiveDrawUpperScrollFade();
   CheckLiveUpperFade(frame);

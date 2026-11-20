@@ -302,7 +302,6 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   virtual void StoreImage(std::int32_t position,
                           std::span<std::uint16_t> pixels,
                           std::int32_t size) = 0;
-  virtual void DrawSync() = 0;
   // The native file overlay over the frame (Save_NativeDrawFileOverlay).
   virtual void DrawFileOverlay() = 0;
   // In front of the frame's scene ordering table.

@@ -115,7 +115,6 @@ class FakeHost final : public FakeCard<files::Host> {
                  std::int32_t) override {}
   void StoreImage(std::int32_t, std::span<std::uint16_t>,
                   std::int32_t) override {}
-  void DrawSync() override {}
   void DrawFileOverlay() override {}
   void DrawCompactText(std::string_view, std::uint32_t) override {}
   std::uint32_t InterfaceRandomBits() override { return 0; }
