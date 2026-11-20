@@ -99,6 +99,9 @@ ROADMAP = {
     "Native\\Game\\src\\Title": ("62", "39"),
 }
 ALIAS = re.compile(r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)[ \t]+([A-Za-z_]\w*)[ \t]*$", re.M)
+# Every `Scope::name` pair, overlapping, so `VS::Legacy::LibApi::read` yields `LibApi::read`.
+SCOPED_NAME = re.compile(r"\b(?=([A-Za-z_]\w*)\s*::\s*([A-Za-z_]\w*))")
+LEGACY_NAMESPACE = "VS::Legacy::"
 # Public headers mirror their module's src tree, so a header moved to include\ keeps its system's roadmap issue.
 INCLUDE_ROOTS = {
     "Native\\Game\\include\\": "Native\\Game\\src\\",
@@ -130,6 +133,14 @@ def roadmap_for(path: str) -> tuple[str, str]:
 
 def leaf(symbol: str) -> str:
     return symbol.rsplit("::", 1)[-1]
+
+
+def legacy_call_name(qualified: str) -> str | None:
+    """How other files call a shim: bare for a VS::Legacy or global one, `Scope::name` for a scoped one (#480)."""
+    if "(anonymous)" in qualified:
+        return None
+    name = qualified.removeprefix(LEGACY_NAMESPACE)
+    return "::".join(name.rsplit("::", 2)[-2:])
 
 
 def coverage_name(name: str) -> str:
@@ -189,7 +200,8 @@ class Measure:
                 else:
                     self.aliases[name] = target
             if "/Legacy/" in path:
-                self.legacy |= {leaf(item.qualified) for item in self.sources.definitions(path)}
+                self.legacy |= {name for item in self.sources.definitions(path)
+                                if (name := legacy_call_name(item.qualified))}
 
     def definitions(self, path: str) -> dict[str, gates.Definition]:
         if path not in self.by_file:
@@ -241,7 +253,9 @@ class Measure:
     def blockers(self, definition: gates.Definition | None) -> dict[str, str]:
         if not definition:
             return {"legacy_calls": "", "legacy_signature": ""}
-        calls = sorted(self.legacy & set(gates.IDENTIFIER.findall(definition.body)))
+        names = set(gates.IDENTIFIER.findall(definition.body))
+        names |= {f"{scope}::{name}" for scope, name in SCOPED_NAME.findall(definition.body)}
+        calls = sorted(self.legacy & names)
         return {
             "legacy_calls": ";".join(calls),
             "legacy_signature": "x" if gates.LEGACY_SIGNATURE_TYPES.search(definition.signature) else "",

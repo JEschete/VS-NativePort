@@ -181,6 +181,18 @@ class ModernizationTests(unittest.TestCase):
         self.assertEqual(plan["source_flags"], "scratchpad")
         self.assertEqual(self.rows()["F00004"]["legacy_signature"], "")
 
+    def test_a_scoped_shim_counts_only_when_called_through_its_scope(self) -> None:
+        # #480: `LibApi::read` and anonymous helpers in a Legacy file are not bare `read` or `Links` calls.
+        self.fixture.files["Native/Engine/Legacy/LibCard.cpp"] = (
+            "namespace VS::Legacy {\nstd::int32_t LibApi::read(std::int32_t fd) { return fd; }\n"
+            "namespace { void Links() {} }\n}\n")
+        self.fixture.files[AUDIO] = ("void Audio_Mix(int value) { stream.read(value); Links(); }\n"
+                                     "int Target(int value) { return VS::Legacy::LibApi::read(value); }\n")
+        self.fixture.write()
+        modernization.sync(self.workspace)
+        self.assertEqual(self.rows()["F00004"]["legacy_calls"], "")
+        self.assertEqual(self.rows()["F00005"]["legacy_calls"], "LibApi::read")
+
     def test_compile_mode_comes_from_the_project(self) -> None:
         modernization.sync(self.workspace)
         self.assertEqual(self.rows()["F00004"]["compile"], "relaxed")
