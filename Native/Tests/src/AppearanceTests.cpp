@@ -337,12 +337,12 @@ TEST_CASE("Live palette fade and shadow blend bind the actor record",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   VS::Actors::ActorRecord& actor = state.AddActor(3);
-  actor.palette_fade_state[0] = 50;
+  actor.sway_angles[0] = 50;
   actors::SetLiveActorPaletteFade(3, 3);
-  CHECK(actor.palette_fade_active == 1);
-  CHECK(actor.palette_fade_reverse == 0);
-  CHECK(actor.palette_fade_state[0] == 0);
-  CHECK(actor.palette_fade_state[1] == 6);
+  CHECK(actor.is_swaying == 1);
+  CHECK(actor.sway_returning == 0);
+  CHECK(actor.sway_angles[0] == 0);
+  CHECK(actor.sway_angles[1] == 6);
 
   actor.shadow_radius_expand_rate = 70;
   actor.shadow_radius_shrink_rate = 80;

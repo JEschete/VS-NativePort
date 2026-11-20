@@ -555,7 +555,7 @@ TerrainMotionPass::TerrainMotionPass(ActorCollisionHost& host,
   samples_.search_floor = kSearchFloor;
   if (actor_.weapon_drawn) {
     samples_.search_ceiling = kArmedSearchCeiling;
-  } else if (actor_.action_pose_active) {
+  } else if (actor_.is_carrying) {
     samples_.search_floor = kPosedSearchFloor;
     samples_.search_ceiling = kArmedSearchCeiling;
   } else {
@@ -1221,7 +1221,7 @@ bool CanActorSeparateFromOverlaps(ActorCollisionHost& host,
   if (actor.ignored_by_collision) return true;
   const std::int32_t radius = actor.occupancy_radius;
   std::int32_t min_y = actor.position.y - actor.occupancy_height;
-  if (actor.action_pose_active) min_y -= kPosedOccupancyReach;
+  if (actor.is_carrying) min_y -= kPosedOccupancyReach;
   const std::int32_t min_x = actor.position.x - radius;
   const std::int32_t max_x = actor.position.x + radius;
   const std::int32_t min_z = actor.position.z - radius;

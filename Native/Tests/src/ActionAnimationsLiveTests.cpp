@@ -66,7 +66,7 @@ struct LiveFixture {
     actor.sequence_model_id = 1;
     // LiveAnimationBankLimits reads these legacy bytes as
     // common/battle/special.
-    actor.sequence_flags = 100;
+    actor.common_entry_count = 100;
     actor.common_animation_count = 102;
     actor.battle_animation_count = 64;
     actor.collision_radius = 127;
@@ -311,8 +311,8 @@ TEST_CASE("F00834 actual special playback precedes real FE queue fields",
   b::PlayLiveBreakArtAnimation(kSlot, nullptr, 1);
   CHECK(fixture->actor.animation_id == 0xFF);
   CHECK(fixture->actor.queued_animation == 0xFE);
-  CHECK(fixture->actor.queued_parameter_a == 8);
-  CHECK(fixture->actor.queued_parameter_b == 0);
+  CHECK(fixture->actor.queued_blend_frames == 8);
+  CHECK(fixture->actor.queued_start_frame == 0);
   CHECK(fixture->actor.head_tracking.pad == 71);
   CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }

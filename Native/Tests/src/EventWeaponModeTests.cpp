@@ -81,7 +81,7 @@ struct WeaponModeFixture {
     record.common_sequence = MakeBank(common);
     record.battle_sequence = MakeBank(battle);
     record.owned_sequence = record.common_sequence;
-    record.sequence_flags = 128;
+    record.common_entry_count = 128;
     record.common_animation_count = 128;
     record.frames_per_step = 1;
     record.instance.attach_parent = 0xFF;

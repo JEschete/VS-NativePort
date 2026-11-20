@@ -849,7 +849,7 @@ void SettleRoomEnemy(ActorSpawnHost& host, std::size_t slot, SpawnedActor actor,
                                 .second_drop = spawn.second_drop,
                                 .random_drop = spawn.random_drop,
                                 .settings = DecodeSpawnSettings(spawn.settings),
-                                .template_word = character.template_word});
+                                .ai_settings = character.ai_settings});
 
   int ai_state = 0;
   if (remembered) {

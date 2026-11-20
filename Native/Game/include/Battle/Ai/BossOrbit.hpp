@@ -46,7 +46,7 @@ struct OrbitingBoss {
   std::int16_t x = 0;  // 0x4C
   std::int16_t y = 0;  // 0x4E
   std::int16_t z = 0;  // 0x50
-  // The model's flag at +0x5B0 bit 4 (an actor record's preview_pose bit),
+  // The model's flag at +0x5B0 bit 4 (an actor record's root_key_pinned bit),
   // which the retreat sets while near its start; nothing without a model.
   std::optional<bool> model_flag;
   // Nothing without stats.

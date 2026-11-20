@@ -5773,7 +5773,7 @@ struct RecordingGimmickStartHost : VS::Field::GimmickInteractionStartHost {
     return Record(7);
   }
   bool SetWeaponPose(std::int32_t) override {
-    ActorState().motion.weapon_pose_active = true;
+    ActorState().motion.action_locked = true;
     return Record(8);
   }
   bool ReserveTile(const VS::Field::GimmickTileQuery& tile) override {
@@ -6613,10 +6613,10 @@ TEST_CASE(
   RecordingGimmickStartHost host;
   CHECK_FALSE(VS::Field::BeginGimmickInteraction(-1, host));
   CHECK_FALSE(VS::Field::BeginGimmickInteraction(17, host));
-  host.ActorState().motion.weapon_pose_active = true;
+  host.ActorState().motion.action_locked = true;
   CHECK_FALSE(VS::Field::BeginGimmickInteraction(0, host));
   CHECK(host.calls.empty());
-  host.ActorState().motion.weapon_pose_active = false;
+  host.ActorState().motion.action_locked = false;
   host.selected.reset();
   CHECK_FALSE(VS::Field::BeginGimmickInteraction(0, host));
   CHECK(host.calls == std::vector<int>{0});
@@ -6670,7 +6670,7 @@ TEST_CASE(
       CHECK(host.calls == std::vector<int>{0, 1, 2, 3, 7, 6, 8, 9, 10, 11});
     } else {
       CHECK(host.calls == std::vector<int>{0, 1, 2, 3, 10, 11});
-      CHECK_FALSE(host.ActorState().motion.weapon_pose_active);
+      CHECK_FALSE(host.ActorState().motion.action_locked);
     }
   }
 }
@@ -6680,7 +6680,7 @@ TEST_CASE(
     "[gimmick-interaction-start-core][field]") {
   RecordingGimmickStartHost host;
   host.ObjectState().query.object_id = 4;
-  host.ActorState().motion.action_pose_active = true;
+  host.ActorState().motion.is_carrying = true;
   REQUIRE(VS::Field::BeginGimmickInteraction(0, host));
   CHECK(host.animation == 0x4C);
   CHECK(host.sound_first == 0x2E);
@@ -6780,7 +6780,7 @@ TEST_CASE(
     "ceilings",
     "[gimmick-interaction-core][field]") {
   RecordingGimmickInteractionHost host;
-  host.ActorState().motion.action_pose_active = true;
+  host.ActorState().motion.is_carrying = true;
   host.occupied = true;
   CHECK(VS::Field::FindInteractableGimmickAhead(0, host) == 3);
   CHECK(host.calls == std::vector<int>{0, 1, 2, 4, 5, 5});
@@ -6850,7 +6850,7 @@ TEST_CASE(
   host.ObjectState().interaction = 0;
   host.ObjectState().movement_mode = -1;
   CHECK_FALSE(VS::Field::FindInteractableGimmickAhead(0, host));
-  host.ActorState().motion.action_pose_active = true;
+  host.ActorState().motion.is_carrying = true;
   host.ActorState().attach_bone = 255;
   CHECK_FALSE(VS::Field::FindInteractableGimmickAhead(0, host));
   host.ActorState().attach_bone = 3;
@@ -7372,7 +7372,7 @@ void CheckNativeRollRefusal(const GimmickStartLiveFixture& fixture) {
   CHECK(VS::Field::interactingGimmickId == 1);
   CHECK(fixture.instances[0].slide_x == 0);
   CHECK(fixture.instances[0].slide_z == 0);
-  CHECK(fixture.actor.weapon_pose_active == 0);
+  CHECK(fixture.actor.action_locked == 0);
   CHECK(fixture.flags[0][0] == 0x400);
 }
 
@@ -7390,7 +7390,7 @@ void CheckNativeCommandDrop(const GimmickCommandLiveFixture& fixture) {
   CHECK(fixture.instances[0].mode == 252);
   CHECK(fixture.instances[0].velocity_y == 24);
   CHECK(fixture.instances[0].parent == 255);
-  CHECK(fixture.actor.action_pose_active == 0);
+  CHECK(fixture.actor.is_carrying == 0);
 }
 }  // namespace
 
@@ -7535,14 +7535,14 @@ TEST_CASE(
   CHECK(fixture.heights[1][0] == 0);
   CheckNativeCommandAttachment(fixture);
   CHECK(fixture.actor.instance.attach_bone == 1);
-  CHECK(fixture.actor.action_pose_active == 1);
+  CHECK(fixture.actor.is_carrying == 1);
 }
 
 TEST_CASE("Native gimmick command drop uses actual tagged parent bone heights",
           "[gimmick-interaction-command-live][field]") {
   GimmickCommandLiveFixture fixture;
   fixture.instances[0].parent = 0;
-  fixture.actor.action_pose_active = 1;
+  fixture.actor.is_carrying = 1;
   SVECTOR first{};
   SVECTOR second{};
   REQUIRE(VS::Actors::LiveActorTaggedBonePosition(0, 0xF0, &first, 1) == 0);
@@ -7560,7 +7560,7 @@ TEST_CASE("Native gimmick command refuses missing data without fatal helpers",
   VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(&fixture.actor, 0));
   CHECK(fixture.heights[1][0] == 0x800);
-  CHECK(fixture.actor.action_pose_active == 0);
+  CHECK(fixture.actor.is_carrying == 0);
   VS::Field::gimmickInstances[1] = nullptr;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(nullptr, 2));
 }
@@ -7595,7 +7595,7 @@ TEST_CASE(
   REQUIRE(VS::Field::BeginGimmickInteractionEntry(0) == 0);
   CHECK(VS::Field::interactingGimmickId == 1);
   CheckNativeInitiationSlide(fixture);
-  CHECK(fixture.actor.weapon_pose_active == 1);
+  CHECK(fixture.actor.action_locked == 1);
   CHECK(fixture.actor.instance.reserved5f == 255);
   CHECK(fixture.actor.instance.turn_frames == 4);
 }
@@ -7608,10 +7608,10 @@ TEST_CASE(
   CHECK(VS::Field::BeginGimmickInteractionEntry(-1) == -1);
   CHECK(VS::Field::BeginGimmickInteractionEntry(17) == -1);
   CHECK(VS::Field::BeginGimmickInteractionEntry(2) == -1);
-  fixture.actor.weapon_pose_active = 1;
+  fixture.actor.action_locked = 1;
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(VS::Field::interactingGimmickId == -1);
-  fixture.actor.weapon_pose_active = 0;
+  fixture.actor.action_locked = 0;
   VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(fixture.actor.instance.turn_frames == 0);
@@ -7672,7 +7672,7 @@ TEST_CASE(
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(VS::Field::gimmickInteractionDirection == 77);
   fixture.actor.route_phase = 0;
-  fixture.actor.action_pose_active = 1;
+  fixture.actor.is_carrying = 1;
   fixture.actor.instance.attach_bone = 255;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(VS::Field::gimmickInteractionDirection == 0);

@@ -795,7 +795,7 @@ nlohmann::json EncodeRoomTiles() {
 nlohmann::json EncodePlayerGimmicks() {
   auto gimmicks = nlohmann::json::array();
   const auto* ashley = VS::Actors::actorRecords[0];
-  const int carried = ashley != nullptr && ashley->action_pose_active
+  const int carried = ashley != nullptr && ashley->is_carrying
                           ? ashley->instance.attach_bone
                           : -1;
   for (int slot = 0;

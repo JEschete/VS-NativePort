@@ -143,7 +143,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
                            .pan = record->sound_effect.level,
                            .volume = record->sound_effect.flags},
         .motion = {.action_animation_state = instance.action_animation_state,
-                   .preview_model = instance.is_preview_model != 0,
+                   .is_culled = instance.is_culled != 0,
                    .sound_enabled = instance.sound_enabled != 0,
                    .movement_mode = instance.movement_mode,
                    .locomotion_state = instance.locomotion_state,

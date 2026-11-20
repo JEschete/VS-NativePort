@@ -199,7 +199,7 @@ class LiveActorAppearance final : public ActorAppearance {
   // The carried gimmick drops at the actor's position between its carry
   // bones, facing with the actor.
   void ReleaseCarriedGimmick() override {
-    if (!actor_.action_pose_active) {
+    if (!actor_.is_carrying) {
       return;
     }
     VS::Field::GimmickInstance* object =
@@ -220,7 +220,7 @@ class LiveActorAppearance final : public ActorAppearance {
         (object->rotation_y +
          static_cast<std::uint16_t>(actor_.instance.facing)) &
         kFacingMask);
-    actor_.action_pose_active = 0;
+    actor_.is_carrying = 0;
     VS::Actors::pushedGimmickIndex = actor_.support_gimmick;
   }
 
@@ -254,11 +254,10 @@ class LiveActorAppearance final : public ActorAppearance {
 
  private:
   [[nodiscard]] std::size_t Count() const {
-    return actor_.texture_header_bit ? kActorPaletteColors
-                                     : kSmallPaletteColors;
+    return actor_.is_8bit_texture ? kActorPaletteColors : kSmallPaletteColors;
   }
   [[nodiscard]] std::size_t Skip() const {
-    return actor_.texture_header_bit ? 1 : 0;
+    return actor_.is_8bit_texture ? 1 : 0;
   }
 
   VS::Actors::ActorRecord& actor_;
@@ -288,7 +287,7 @@ class LiveGimmickAppearance final : public AppearanceSubject {
 // func_800AB788 (BATTLE.PRG 40564.c:1651) for an actor's selected palette.
 void UpdateLiveActorPalettePulse(VS::Actors::ActorRecord& actor) {
   const std::size_t count =
-      actor.texture_header_bit ? kActorPaletteColors : kSmallPaletteColors;
+      actor.is_8bit_texture ? kActorPaletteColors : kSmallPaletteColors;
   PalettePulse pulse{actor.instance.palette_pulse.level,
                      actor.instance.palette_pulse.flags};
   const std::span<std::uint16_t> destination =

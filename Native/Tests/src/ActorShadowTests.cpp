@@ -288,8 +288,7 @@ TEST_CASE("Actor drawing submits the original gated ground-shadow pass",
   }
   VS::Actors::DrawLiveActorModel(fixture.actor, fixture.camera, 0);
   CHECK(fixture.PacketCount() == 24);
-  CHECK(static_cast<bool>(fixture.actor.instance.is_preview_model) !=
-        body_visible);
+  CHECK(static_cast<bool>(fixture.actor.instance.is_culled) != body_visible);
   CHECK(fixture.actor.sound_position.vx == 160);
   CHECK(fixture.actor.sound_position.vy == 120);
   CHECK(fixture.actor.sound_position.vz == 1024);

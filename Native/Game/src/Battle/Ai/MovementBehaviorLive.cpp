@@ -290,8 +290,8 @@ class LiveMovementHost final : public MovementHost {
         .x = model.position.vx,
         .z = model.position.vz,
         .planned_x = std::bit_cast<std::int16_t>(
-            static_cast<std::uint16_t>(model.support_offset)),
-        .planned_z = model.reserved50,
+            static_cast<std::uint16_t>(model.grounded_xy)),
+        .planned_z = model.grounded_z,
         .current_tile =
             PackBytes(model.current_tile_x, model.current_tile_layer,
                       model.current_tile_z, model.reserved5f),

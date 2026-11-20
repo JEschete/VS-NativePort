@@ -62,8 +62,8 @@ struct PursuitFixture {
     model.reserved63 = 0x33;
     model.position.vx = 1234;
     model.position.vz = -129;
-    model.support_offset = 0x1234FFBF;
-    model.reserved50 = 193;
+    model.grounded_xy = 0x1234FFBF;
+    model.grounded_z = 193;
     Approach().target_id = 1;
   }
 

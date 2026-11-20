@@ -21,7 +21,7 @@ struct AnimationPose {
   /* 0x00 */ VS::Core::Gte::SVECTOR bone_keys[kPoseBones];
   /* 0x150 */ VS::Core::Gte::SVECTOR scale_keys[kPoseBones];
   /* 0x2A0 */ VS::Core::Gte::SVECTOR rotation_deltas[kPoseBones];
-  /* 0x3F0 */ VS::Core::Gte::SVECTOR track_states[kPoseBones];
+  /* 0x3F0 */ VS::Core::Gte::SVECTOR scale_deltas[kPoseBones];
   /* 0x540 */ std::int16_t frame;
   /* 0x542 */ std::uint16_t next_event_frame;
   /* 0x544 */ std::uint8_t* event_script;

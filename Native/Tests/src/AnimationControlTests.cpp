@@ -288,7 +288,7 @@ AnimationActor& PosedFromBank(FakeAnimationHost& host, int id) {
   AnimationActor& actor = host.Add(id);
   actor.shared_sequences.at(kBank - 1) = kBankSequence;
   actor.animation_header = kBankSequence;
-  actor.pose_override_active = true;
+  actor.vertices_displaced = true;
   actor.animation_set = kRow;
   actor.pose = {.script = kScript, .next_event_frame = kEventFrame};
   actor.blend_pose = actor.pose;
@@ -325,7 +325,7 @@ TEST_CASE("Shared bank retirement checks every posed actor before changing one",
   AnimationActor& elsewhere = host.Add(kOther);
   elsewhere.shared_sequences.at(kBank - 1) = kBankSequence;
   elsewhere.animation_header = kOtherSequence;
-  elsewhere.pose_override_active = true;
+  elsewhere.vertices_displaced = true;
   host.cannot_unwind.insert(kActor);
   const AnimationActor first_before = first;
   const AnimationActor second_before = second;
@@ -338,7 +338,7 @@ TEST_CASE("Shared bank retirement checks every posed actor before changing one",
 
 // A posed actor whose shared bank was retired loses its pose and override.
 void CheckRetired(const AnimationActor& actor) {
-  CHECK_FALSE(actor.pose_override_active);
+  CHECK_FALSE(actor.vertices_displaced);
   CHECK(actor.animation_header == SequenceHandle::kNone);
   CHECK(actor.animation_set == kNoSet);
   CHECK(actor.pose == kClearedCursor);
@@ -351,7 +351,7 @@ TEST_CASE("Shared bank retirement unwinds and clears every posed actor",
   host.release_status = kReleaseStatus;
   const AnimationActor& bound = PosedFromBank(host, kActor);
   AnimationActor& plain = PosedFromBank(host, kOther);
-  plain.pose_override_active = false;
+  plain.vertices_displaced = false;
   AnimationActor& elsewhere = host.Add(kAshley);
   elsewhere.animation_header = kOtherSequence;
   elsewhere.animation_set = kRow;
@@ -428,7 +428,7 @@ TEST_CASE("Weapon draws play the draw animation and queue the idle",
   CHECK(actor.weapon_drawn);
   CHECK(actor.animation_id == kDrawn + kDrawMode * 2 + kDrawStep);
   CHECK(actor.blend_frames == kDrawBlend);
-  CHECK(actor.motion.weapon_pose_active);
+  CHECK(actor.motion.action_locked);
   CHECK(actor.queued_animation == kIdle);
   CHECK(actor.queued_blend_frames == kDrawBlend);
 }
@@ -533,7 +533,7 @@ TEST_CASE("Animation starts substitute the actor's stance animation",
     actor.motion.movement_mode = stance.airborne ? kAirborneMode : 0;
     actor.motion.is_jumping = stance.jumping;
     actor.weapon_drawn = stance.drawn;
-    actor.motion.action_pose_active = stance.action_pose;
+    actor.motion.is_carrying = stance.action_pose;
     CHECK(actors::PlayActorAnimation(host, kActor, stance.requested, kBlend) ==
           0);
     CHECK(actor.animation_id == stance.played);
@@ -541,7 +541,7 @@ TEST_CASE("Animation starts substitute the actor's stance animation",
 
   FakeAnimationHost host;
   AnimationActor& actor = host.Add(kActor);
-  actor.motion.action_pose_active = true;
+  actor.motion.is_carrying = true;
   actor.animation_id = kStanceWalk;
   CHECK(actors::PlayActorAnimation(host, kActor, kWalk, kBlend) == 0);
   CHECK(host.Count("find") == 0);
@@ -603,15 +603,15 @@ TEST_CASE("Animation starts refuse while a pose override cannot restart",
           "[actors][actors-animation-control]") {
   FakeAnimationHost host;
   AnimationActor& actor = host.Add(kActor);
-  actor.pose_override_active = true;
+  actor.vertices_displaced = true;
   host.restart_status = -1;
   CHECK(actors::PlayActorAnimation(host, kActor, kWalk, kBlend) == -1);
-  CHECK(actor.pose_override_active);
+  CHECK(actor.vertices_displaced);
   CHECK(host.calls == Calls{"restart events 3"});
 
   host.restart_status = 0;
   CHECK(actors::PlayActorAnimation(host, kActor, kWalk, kBlend) == 0);
-  CHECK_FALSE(actor.pose_override_active);
+  CHECK_FALSE(actor.vertices_displaced);
   CHECK(actor.animation_id == kWalk);
 }
 
@@ -732,7 +732,7 @@ TEST_CASE("Action poses pick the brace, guard, ready and stance poses",
   CHECK(actor.animation_id == kGuardPose);
   actors::PlayActorActionPose(host, kActor, nullptr, kReadyKind);
   CHECK(actor.animation_id == kReadyPose);
-  actor.motion.action_pose_active = true;
+  actor.motion.is_carrying = true;
   actors::PlayActorActionPose(host, kActor, nullptr, kReadyKind);
   CHECK(actor.animation_id == kStance);
 }
@@ -1187,7 +1187,7 @@ TEST_CASE("Locomotion holds the action stance while walking or standing",
           "[actors][actors-animation-control]") {
   FakeAnimationHost host;
   AnimationActor& actor = host.Add(kActor);
-  actor.motion.action_pose_active = true;
+  actor.motion.is_carrying = true;
   actors::UpdateActorLocomotionAnimation(host, actor, kWalkingSpeed);
   CHECK(actor.animation_id == kStanceWalk);
   CHECK(actor.blend_frames == kStanceWalkBlend);
@@ -1293,13 +1293,13 @@ TEST_CASE("Locomotion stops a walk and settles a busy pose to idle",
   CHECK(actor.queued_animation == kIdle);
   CHECK(actor.queued_blend_frames == kStopBlend);
   actor.animation_id = kBusy;
-  actor.locomotion_counter = kCounterLimit;
+  actor.idle_ticks = kCounterLimit;
   actors::UpdateActorLocomotionAnimation(host, actor, 0);
   CHECK(actor.animation_id == kIdle);
-  CHECK(actor.locomotion_counter == kTickSpeed / 2);
-  actor.locomotion_counter = kCounterLimit;
+  CHECK(actor.idle_ticks == kTickSpeed / 2);
+  actor.idle_ticks = kCounterLimit;
   actors::UpdateActorLocomotionAnimation(host, actor, 0);
-  CHECK(actor.locomotion_counter == kCounterLimit);
+  CHECK(actor.idle_ticks == kCounterLimit);
 }
 
 constexpr std::uint8_t kModelBones = 4;

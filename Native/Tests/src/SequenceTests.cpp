@@ -109,7 +109,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   actor.instance.slot = kActorId;
   actor.animation_locked = 1;
   actor.sequence_model_id = 1;
-  actor.sequence_flags = 100;
+  actor.common_entry_count = 100;
   actor.common_animation_count = 128;
   actor.battle_animation_count = 64;
   actor.common_sequence = bank;
@@ -185,11 +185,11 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
   fixture->actor.instance.model = model;
   fixture->actor.model_data_size = sizeof fixture->model;
   fixture->actor.instance.slot = 3;
-  fixture->actor.pose_override_active = 1;
+  fixture->actor.vertices_displaced = 1;
   fixture->actor.animation_id = animation;
   fixture->actor.animation_length = 16;
   fixture->actor.animation_header = reinterpret_cast<intptr_t>(bank);
-  fixture->actor.sequence_flags = 64;
+  fixture->actor.common_entry_count = 64;
   fixture->actor.common_sequence = bank;
   fixture->actor.shared_sequences[2] = bank;
   fixture->actor.pose.event_script =
@@ -246,7 +246,7 @@ static void EndMorphBindings(const MorphBindingScope* scope) {
 static int MorphIsRetired(const MorphAnimationFixture* fixture) {
   const SVECTOR* vertex = FirstModelVertex(fixture->actor.instance.model);
   return vertex->vx == 10 && vertex->vy == 22 && vertex->vz == 33 &&
-         vertex->pad == 44 && !fixture->actor.pose_override_active &&
+         vertex->pad == 44 && !fixture->actor.vertices_displaced &&
          fixture->actor.animation_header == 0 &&
          fixture->actor.shared_sequences[2] == nullptr &&
          fixture->actor.pose.event_script == nullptr &&
@@ -309,13 +309,13 @@ int TestSharedSequenceRetirementControl(int scenario) {
   int passed;
   if (scenario >= 3 && scenario <= 5) {
     passed = status == (scenario == 4 ? 1 : -1) && vertex->vx == 11 &&
-             first.actor.pose_override_active &&
+             first.actor.vertices_displaced &&
              first.actor.animation_header == expected_header &&
              first.actor.shared_sequences[2] != nullptr &&
              first.actor.pose.event_script != nullptr;
   } else if (scenario == 1) {
     passed = status == 0 && vertex->vx == 11 &&
-             first.actor.pose_override_active &&
+             first.actor.vertices_displaced &&
              first.actor.animation_header == expected_header &&
              first.actor.pose.event_script == second.actor.pose.event_script &&
              first.actor.shared_sequences[2] == nullptr;
@@ -355,7 +355,7 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
     (reinterpret_cast<std::uint8_t*>(bank))[bank->animation_map + 1] = 0xFF;
   }
   if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
-  if (scenario == 4) fixture->actor.pose_override_active = 0;
+  if (scenario == 4) fixture->actor.vertices_displaced = 0;
 }
 
 static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
@@ -380,7 +380,7 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
     }
   } else {
     passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
-              fixture.actor.pose_override_active == (scenario != 4) &&
+              fixture.actor.vertices_displaced == (scenario != 4) &&
               fixture.actor.blend_pose.next_event_frame == unchanged_frame &&
               fixture.actor.blend_pose.event_script == expected_script &&
               fixture.actor.pose.frame == 9;
@@ -711,7 +711,7 @@ int Tests_FacialTextureBankHandoff(void) {
                VS::Content::legacyActorAssetRequests[0].asset_kind == 9 &&
                VS::Actors::sharedSequenceBankTexturePages[0] == 26;
   VS::Actors::ActorRecord actor = {};
-  actor.texture_header_bit = 1;
+  actor.is_8bit_texture = 1;
   actor.texture_overlays[6] = VS::Actors::TextureOverlayRect{16, 20, 8, 2};
   actor.texture_animation_frames[1] =
       VS::Actors::TextureAnimationFrame{7, 8, 0, 2};
@@ -836,7 +836,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   const int16_t origin[2] = {4, 0};
   memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
   VS::Actors::textureSlotRowOffsets[0] = 1;
-  actor.texture_header_bit = wide;
+  actor.is_8bit_texture = wide;
   actor.texture_slot = 0;
   actor.texture_row_offsets[0] = 7;
   const VS::Actors::TextureOverlayRect rectangle = {16, 20, 32, 12};
@@ -1014,7 +1014,7 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
       passed &= actor.instance.position.vx == 100 &&
                 actor.instance.position.vy == 200 &&
                 actor.instance.position.vz == 300 &&
-                actor.instance.current_animation > 0;
+                actor.instance.move_frames > 0;
     }
   }
   VS::Actors::actorRecords[kSlot] = saved_actor;

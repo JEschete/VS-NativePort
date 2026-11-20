@@ -478,7 +478,7 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
   AppearanceFixture fixture;
   auto& actor = fixture.actor;
   actor.instance.action_animation_state = state;
-  actor.texture_header_bit = full_palette ? 1 : 0;
+  actor.is_8bit_texture = full_palette ? 1 : 0;
   actor.fade_green = 10;
   std::fill_n(actor.base_palette, 160, 0x1234);
   std::fill_n(actor.base_palette + 160, 160, 0x7FFF);
@@ -591,7 +591,7 @@ TEST_CASE(
   AppearanceFixture fixture;
   auto& actor = fixture.actor;
   actor.instance.slot = 2;
-  actor.texture_header_bit = full ? 1 : 0;
+  actor.is_8bit_texture = full ? 1 : 0;
   actor.instance.palette_pulse.kind = 128;
   actor.instance.palette_pulse.level = 0;
   actor.instance.palette_pulse.flags = 0;

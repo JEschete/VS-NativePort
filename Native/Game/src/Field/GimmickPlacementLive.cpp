@@ -446,7 +446,7 @@ class LiveGimmickInteractionStartHost final
   }
   bool SetWeaponPose(std::int32_t actor_slot) override {
     if (!ValidActor(actor_slot)) return false;
-    actor_->weapon_pose_active = 1;
+    actor_->action_locked = 1;
     return true;
   }
   bool ReserveTile(const VS::Field::GimmickTileQuery& tile) override {
@@ -599,7 +599,7 @@ class LiveGimmickInteractionCommandHost final
       actor_->instance.attach_bone =
           static_cast<std::uint8_t>(VS::Field::interactingGimmickId);
     }
-    actor_->action_pose_active = carrying;
+    actor_->is_carrying = carrying;
     return true;
   }
   bool StoreSlide(std::int16_t x, std::int16_t z) override {

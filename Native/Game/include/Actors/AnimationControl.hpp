@@ -68,11 +68,11 @@ struct AnimationActor {
   std::uint8_t travel_animation = 0;
   bool animation_locked = false;
   bool animation_event_flag = false;
-  bool pose_override_active = false;
+  bool vertices_displaced = false;
   bool fast_animation = false;
   bool advance_requested = false;
-  std::uint8_t locomotion_animation_state = 0;  // 1 bit
-  std::uint8_t locomotion_counter = 0;
+  std::uint8_t stride_parity = 0;  // 1 bit
+  std::uint8_t idle_ticks = 0;
   std::uint8_t blend_frame = 0;
   std::uint8_t blend_frames = 0;
   std::uint16_t collision_radius = 0;  // read

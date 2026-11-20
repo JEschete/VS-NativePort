@@ -187,7 +187,7 @@ std::optional<int> StanceAnimation(const AnimationActor& actor, int animation) {
     }
   }
   if (actor.weapon_drawn) return animation + kDrawnAnimationOffset;
-  if (!motion.action_pose_active) return animation;
+  if (!motion.is_carrying) return animation;
   if (animation == kIdleAnimation) return kStanceAnimation;
   if (animation == kWalkAnimation) animation = kStanceWalkAnimation;
   if (animation == kStanceWalkAnimation &&
@@ -245,7 +245,7 @@ void SettleBasePose(AnimationControlHost& host, AnimationActor& actor,
   }
   if (base_animation == kKneelAnimation) return;
   if (motion.slot == kAshleySlot) ReleaseReactionTile(host, actor);
-  if (motion.action_pose_active) {
+  if (motion.is_carrying) {
     PlayActorAnimation(host, motion.slot, kStanceAnimation, kStanceBlend);
   } else {
     PlayActorAnimation(host, actor_id, animation, kBasePoseBlend);
@@ -255,8 +255,8 @@ void SettleBasePose(AnimationControlHost& host, AnimationActor& actor,
 
 void PlayStride(AnimationControlHost& host, AnimationActor& actor,
                 int first_stride, int blend_frames) {
-  const int stride = actor.locomotion_animation_state;
-  actor.locomotion_animation_state = LowBit(stride + 1);
+  const int stride = actor.stride_parity;
+  actor.stride_parity = LowBit(stride + 1);
   PlayActorAnimation(host, actor.motion.slot, first_stride + stride,
                      blend_frames);
 }
@@ -342,12 +342,12 @@ void UpdateIdleAnimation(AnimationControlHost& host, AnimationActor& actor,
   if (animation != kIdleAnimation &&
       actor.motion.request_mode != kTurnRequest) {
     PlayActorAnimation(host, slot, kIdleAnimation, kStopBlend);
-    actor.locomotion_counter = 0;
+    actor.idle_ticks = 0;
   }
-  actor.locomotion_counter = static_cast<std::uint8_t>(
-      actor.locomotion_counter + host.TickSpeed() / 2);
-  if (actor.locomotion_counter >= kLocomotionCounterLimit) {
-    actor.locomotion_counter = kLocomotionCounterLimit;
+  actor.idle_ticks =
+      static_cast<std::uint8_t>(actor.idle_ticks + host.TickSpeed() / 2);
+  if (actor.idle_ticks >= kLocomotionCounterLimit) {
+    actor.idle_ticks = kLocomotionCounterLimit;
   }
 }
 
@@ -414,7 +414,7 @@ int UnloadSharedSequence(AnimationControlHost& host, int bank) {
   for (int slot = 0; slot < kActorSlots; ++slot) {
     AnimationActor* actor = host.Actor(slot);
     if (actor == nullptr || !posed_from_bank(*actor) ||
-        !actor->pose_override_active) {
+        !actor->vertices_displaced) {
       continue;
     }
     if (!host.CanUnwindBoundAnimation(*actor)) {
@@ -427,11 +427,10 @@ int UnloadSharedSequence(AnimationControlHost& host, int bank) {
   for (int slot = 0; slot < kActorSlots; ++slot) {
     AnimationActor* actor = host.Actor(slot);
     if (actor == nullptr || !posed_from_bank(*actor)) continue;
-    if (actor->pose_override_active &&
-        host.RestartAnimationEvents(*actor) < 0) {
+    if (actor->vertices_displaced && host.RestartAnimationEvents(*actor) < 0) {
       return -1;
     }
-    actor->pose_override_active = false;
+    actor->vertices_displaced = false;
     actor->animation_header = SequenceHandle::kNone;
     actor->animation_set = kNoAnimationSet;
     actor->pose = {.script = EventScriptHandle::kNone,
@@ -566,14 +565,14 @@ void SetActorWeaponDrawn(AnimationControlHost& host, int actor_id,
     PlayActorAnimation(host, actor_id,
                        transition_mode * 2 + kSheatheAnimationStep,
                        blend_frames);
-    actor->motion.weapon_pose_active = true;
+    actor->motion.action_locked = true;
     actor->weapon_drawn = false;
   } else {
     if (actor->model_id == 0) host.PlaySoundPair(*actor, sound_base, 0);
     actor->weapon_drawn = LowBit(weapon_drawn) != 0;
     PlayActorAnimation(host, actor_id, transition_mode * 2 + kDrawAnimationStep,
                        blend_frames);
-    actor->motion.weapon_pose_active = true;
+    actor->motion.action_locked = true;
   }
   QueueActorAnimation(host, actor_id, kIdleAnimation, kDrawBlend, 0);
 }
@@ -605,8 +604,7 @@ void PlayActorActionPose(AnimationControlHost& host, int actor_id,
   if (actor == nullptr) return;
   ActorMotion& motion = actor->motion;
   if (pose_kind == kReadyPose) {
-    animation =
-        motion.action_pose_active ? kIdleAnimation : kReadyPoseAnimation;
+    animation = motion.is_carrying ? kIdleAnimation : kReadyPoseAnimation;
     if (motion.movement_mode == kAirborneMovement ||
         motion.locomotion_state == kHanging) {
       return;
@@ -615,7 +613,7 @@ void PlayActorActionPose(AnimationControlHost& host, int actor_id,
   motion.facing_delta = Wrap16(ActorFacingDeltaToPoint(motion, facing_target));
   motion.turn_frames = kActionTurnFrames;
   motion.run_frames = 0;
-  motion.weapon_pose_active = true;
+  motion.action_locked = true;
   PlayActorAnimation(host, actor_id, animation, kActionPoseBlend);
   actor->queued_animation = 0;
 }
@@ -822,11 +820,11 @@ int PlayActorAnimation(AnimationControlHost& host, int actor_id, int animation,
   AnimationActor* actor = host.Actor(actor_id);
   if (actor == nullptr) return -1;
   if (actor->animation_locked) return 0;
-  if (actor->pose_override_active && host.RestartAnimationEvents(*actor) < 0) {
+  if (actor->vertices_displaced && host.RestartAnimationEvents(*actor) < 0) {
     return -1;
   }
   actor->animation_event_flag = false;
-  actor->pose_override_active = false;
+  actor->vertices_displaced = false;
   ActorMotion& motion = actor->motion;
   if (animation != kRunTurnAnimation && animation != kRunStraightAnimation) {
     motion.is_running = false;
@@ -842,7 +840,7 @@ int PlayActorAnimation(AnimationControlHost& host, int actor_id, int animation,
     animation = *stance;
   }
 
-  motion.weapon_pose_active = false;
+  motion.action_locked = false;
   const bool sheathed = !actor->weapon_drawn;
   if (sheathed &&
       (animation == kClimbAnimation || animation == kClimbTurnAnimation)) {
@@ -953,7 +951,7 @@ void UpdateActorLocomotionAnimation(AnimationControlHost& host,
   if (animation >= kDrawnAnimationOffset) animation -= kDrawnAnimationOffset;
   const ActorMotion& motion = actor.motion;
   const int quadrant = RequestQuadrant(motion);
-  if (motion.action_pose_active) {
+  if (motion.is_carrying) {
     if (animation == kStanceHoldAnimation) return;
     PlayActorAnimation(host, motion.slot,
                        speed > 0 ? kStanceWalkAnimation : kStanceAnimation,

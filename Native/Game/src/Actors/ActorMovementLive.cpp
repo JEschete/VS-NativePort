@@ -443,17 +443,17 @@ MovementActor LoadLiveMovementActor(const VS::Actors::ActorRecord& live) {
                          .z = instance.previous_tile_z,
                          .spare = instance.reserved63};
   // Original 0x4C/0x50 history packs X/Y then Z.
-  const auto grounded = std::bit_cast<GroundedPair>(instance.support_offset);
-  actor.grounded_position = {grounded[0], grounded[1], instance.reserved50};
+  const auto grounded = std::bit_cast<GroundedPair>(instance.grounded_xy);
+  actor.grounded_position = {grounded[0], grounded[1], instance.grounded_z};
   actor.previous_facing = instance.previous_facing;
   actor.saved_placement = std::bit_cast<PackedTile>(live.saved_placement);
   actor.wall_contact = live.wall_contact != 0;
   actor.landing_pending = live.landing_pending != 0;
   actor.jump_started = live.jump_started != 0;
   actor.support_gimmick = live.support_gimmick;
-  actor.tick_remainder = live.jump_landing;
+  actor.tick_remainder = live.tick_remainder;
   actor.animation_id = live.animation_id;
-  actor.collision_state = live.collision_state;
+  actor.speed_quarters = live.speed_quarters;
   actor.blend_frame = static_cast<std::int8_t>(live.blend_frame);
   actor.collision_radius = live.collision_radius;
   actor.collision_height = live.collision_height;
@@ -466,11 +466,11 @@ MovementActor LoadLiveMovementActor(const VS::Actors::ActorRecord& live) {
   actor.pose_reached_end = live.pose.reached_end != 0;
   actor.platform_anchor = LiveMotionVector(live.platform_anchor);
   actor.companion_slot = live.companion_slot;
-  actor.ledge_attempts = live.opaque17ff;
+  actor.ledge_attempts = live.ledge_attempts;
   actor.move_facing = live.move_facing;
   actor.jump_frames = live.jump_frames;
   actor.momentum_direction = live.momentum_direction;
-  actor.run_turns = live.run_turns;
+  actor.slow_ticks = live.slow_ticks;
   actor.request_step = LiveMotionVector(live.turn_state.step);
   actor.pending_target_x = live.pending_target_x;
   actor.pending_target_z = live.pending_target_z;
@@ -492,16 +492,16 @@ void StoreLiveMovementActor(const MovementActor& actor,
   instance.previous_tile_layer = actor.previous_tile.layer;
   instance.previous_tile_z = actor.previous_tile.z;
   instance.reserved63 = actor.previous_tile.spare;
-  instance.support_offset = std::bit_cast<std::int32_t>(
+  instance.grounded_xy = std::bit_cast<std::int32_t>(
       GroundedPair{actor.grounded_position[0], actor.grounded_position[1]});
-  instance.reserved50 = actor.grounded_position[2];
+  instance.grounded_z = actor.grounded_position[2];
   instance.previous_facing = actor.previous_facing;
   live.saved_placement = std::bit_cast<std::int32_t>(actor.saved_placement);
   live.landing_pending = actor.landing_pending ? 1 : 0;
   live.jump_started = actor.jump_started ? 1 : 0;
   live.support_gimmick = actor.support_gimmick & kFourBits;
-  live.jump_landing = actor.tick_remainder;
-  live.collision_state = actor.collision_state;
+  live.tick_remainder = actor.tick_remainder;
+  live.speed_quarters = actor.speed_quarters;
   live.queued_animation = actor.queued_animation;
   live.animation_set = actor.animation_set;
   live.contact_kind = actor.contact_kind;
@@ -509,11 +509,11 @@ void StoreLiveMovementActor(const MovementActor& actor,
   live.platform_offset_x = actor.platform_offset_x;
   live.platform_offset_z = actor.platform_offset_z;
   live.platform_anchor = LiveSvector(actor.platform_anchor);
-  live.opaque17ff = actor.ledge_attempts;
+  live.ledge_attempts = actor.ledge_attempts;
   live.move_facing = actor.move_facing;
   live.jump_frames = actor.jump_frames;
   live.momentum_direction = actor.momentum_direction;
-  live.run_turns = actor.run_turns;
+  live.slow_ticks = actor.slow_ticks;
   live.pending_target_x = actor.pending_target_x;
   live.pending_target_z = actor.pending_target_z;
   live.previous_target_x = actor.previous_target_x;

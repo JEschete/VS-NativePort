@@ -103,10 +103,10 @@ struct ActorStateRecord {
   bool animation_event = false;         // read
   std::uint8_t support_gimmick = 0;     // 4 bits, read
   bool bypass_actor_collision = false;  // read
-  bool palette_fade_active = false;
-  bool palette_fade_reverse = false;
+  bool is_swaying = false;
+  bool sway_returning = false;
   std::uint8_t animation_id = 0;  // read
-  std::int16_t collision_state = 0;
+  std::int16_t speed_quarters = 0;
   std::uint16_t collision_height = 0;  // read
   std::uint8_t queued_animation = 0;
   std::uint8_t contact_kind = 0;
@@ -120,9 +120,9 @@ struct ActorStateRecord {
   std::int8_t head_track_target = 0;
   std::uint8_t companion_slot = 0;
   // An unnamed record byte the motion reset clears (0x17FF).
-  std::uint8_t reserved_17ff = 0;
+  std::uint8_t ledge_attempts = 0;
   // The first palette fade state byte.
-  std::uint8_t palette_fade_state = 0;
+  std::uint8_t sway_angles = 0;
   std::array<std::uint8_t, 2> texture_timelines{};  // 4 bits each
   MovementRequestExtras request_extras;
   // An unnamed record byte the motion reset clears (0x1860).

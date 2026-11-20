@@ -54,8 +54,8 @@ struct WeaponModel {
   std::uint8_t model_id;
   std::uint8_t texture_slot;
   std::uint8_t palette_slot_offset;
-  // The palette blend's current level, target and remaining frames
-  // (WeaponAppearance::blend_level, blend_target and blend_frames).
+  // Draw scale (64 is full size), tween target and tween frames left
+  // (WeaponAppearance::blend_*; func_800B217C, BATTLE.PRG/49268.c:139-158).
   std::uint8_t blend_level;
   std::uint8_t blend_target;
   std::uint8_t blend_frames;

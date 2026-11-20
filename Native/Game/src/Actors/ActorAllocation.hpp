@@ -32,7 +32,7 @@ struct ActorCore {
   ActorAndStats actor;
   VS::Actors::ModelInstance model;
   std::array<VS::Core::Gte::MATRIX, layout::kActorCoreMatrices> reserved_6c;
-  // The model's object word (0x16C), which actor creation sets.
+  // The model's object header word (0x16C); bits 0-2 hold its object kind.
   std::int32_t object_word;
   std::int32_t reserved_170;
   std::int32_t reserved_174;

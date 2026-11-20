@@ -575,14 +575,14 @@ void StoreInstance(const ActorAssetRecord& in, VS::Actors::ModelInstance& out) {
 
 void LoadActorFields(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
   out.holds_texture_slots = in.holds_texture_slots != 0;
-  out.texture_header_bit = in.texture_header_bit != 0;
+  out.is_8bit_texture = in.is_8bit_texture != 0;
   out.advance_requested = in.advance_requested != 0;
   out.custom_tint = in.custom_tint != 0;
   out.ignored_by_collision = in.ignored_by_collision != 0;
   out.sequence_model_id = in.sequence_model_id;
   out.frames_per_step = in.frames_per_step;
-  out.locomotion_counter = in.locomotion_counter;
-  out.sequence_flags = in.sequence_flags;
+  out.idle_ticks = in.idle_ticks;
+  out.common_entry_count = in.common_entry_count;
   out.common_animation_count = in.common_animation_count;
   out.battle_animation_count = in.battle_animation_count;
   out.texture_slot = in.texture_slot;
@@ -598,7 +598,7 @@ void LoadActorFields(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
   }
   out.occupancy_radius = in.occupancy_radius;
   out.occupancy_height = in.occupancy_height;
-  out.opaque648 = static_cast<std::uint16_t>(in.opaque648);
+  out.reserved648 = in.reserved648;
   out.opaque6dc = in.opaque6dc;
   out.model_id = in.model_id;
   out.clut_a = in.clut_a;
@@ -619,14 +619,14 @@ void LoadActorFields(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
 void StoreActorFields(const ActorAssetRecord& in,
                       VS::Actors::ActorRecord& out) {
   out.holds_texture_slots = in.holds_texture_slots ? 1 : 0;
-  out.texture_header_bit = in.texture_header_bit ? 1 : 0;
+  out.is_8bit_texture = in.is_8bit_texture ? 1 : 0;
   out.advance_requested = in.advance_requested ? 1 : 0;
   out.custom_tint = in.custom_tint ? 1 : 0;
   out.ignored_by_collision = in.ignored_by_collision ? 1 : 0;
   out.sequence_model_id = in.sequence_model_id;
   out.frames_per_step = in.frames_per_step;
-  out.locomotion_counter = in.locomotion_counter;
-  out.sequence_flags = in.sequence_flags;
+  out.idle_ticks = in.idle_ticks;
+  out.common_entry_count = in.common_entry_count;
   out.common_animation_count = in.common_animation_count;
   out.battle_animation_count = in.battle_animation_count;
   out.texture_slot = in.texture_slot;
@@ -642,7 +642,7 @@ void StoreActorFields(const ActorAssetRecord& in,
   }
   out.occupancy_radius = in.occupancy_radius;
   out.occupancy_height = in.occupancy_height;
-  out.opaque648 = in.opaque648;
+  out.reserved648 = in.reserved648;
   out.opaque6dc = in.opaque6dc;
   out.model_id = in.model_id;
   out.clut_a = in.clut_a;

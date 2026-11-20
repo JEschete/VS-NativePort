@@ -48,7 +48,7 @@ struct CollisionActor {
   std::uint8_t tile_x = 0;
   std::uint8_t tile_layer = 0;
   std::uint8_t tile_z = 0;
-  bool action_pose_active = false;
+  bool is_carrying = false;
   bool bypass_actor_collision = false;
   bool bypass_terrain_collision = false;
   bool ignored_by_collision = false;

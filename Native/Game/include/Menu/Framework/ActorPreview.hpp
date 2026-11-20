@@ -46,7 +46,7 @@ enum class PreviewAllocation : std::uint8_t {
 enum class PreviewDrawResult : std::int8_t {
   kDrawn = 0,
   kNotDrawn = -1,
-  // The model was culled (instance.is_preview_model): no weapons drawn.
+  // The model was culled (instance.is_culled): no weapons drawn.
   kCulled = -2,
 };
 

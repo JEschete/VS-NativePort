@@ -23,7 +23,7 @@ std::int32_t ScreenXy(const SfxPoint& position) {
 }
 
 bool PositionStale(const ActorSoundMotion& motion) {
-  return motion.action_animation_state != 0 || motion.preview_model ||
+  return motion.action_animation_state != 0 || motion.is_culled ||
          !motion.sound_enabled || motion.movement_mode != 0 ||
          motion.locomotion_state != 0 || motion.motion_locked;
 }

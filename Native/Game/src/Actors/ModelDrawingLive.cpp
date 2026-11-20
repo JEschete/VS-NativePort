@@ -235,10 +235,10 @@ static int BuildActorModelPose(VS::Actors::ActorRecord* actor, MATRIX* camera) {
       static_cast<int16_t>((actor->blend_pose.bone_keys[0].vz >> 1) +
                            actor->instance.rotation_z),
       0};
-  if (actor->palette_fade_active) {
+  if (actor->is_swaying) {
     rotation.vy = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(rotation.vy) +
-        static_cast<uint32_t>(actor->palette_fade_state[0] >> 1));
+        static_cast<uint32_t>(actor->sway_angles[0] >> 1));
   }
   MATRIX root{};
   VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, root);
@@ -314,7 +314,7 @@ static void UpdateActorModelColors(VS::Actors::ActorRecord* actor,
   // its own state (0x800B36C8, 0x800B385C).
   if (!actor->instance.uv_layout && role != ModelDrawRole::kCompanionOverlay) {
     if (!actor->custom_tint) {
-      if (actor->preview_flag) {
+      if (actor->floor_lit) {
         const unsigned packed =
             static_cast<uint16_t>(actor->instance.position.vx) |
             (static_cast<unsigned>(
@@ -411,7 +411,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     return VS::Render::ProjectLiveActorModel(*geometry_, actor_.bone_matrices);
   }
   void SetCulled(bool culled) override {
-    actor_.instance.is_preview_model = culled ? 1 : 0;
+    actor_.instance.is_culled = culled ? 1 : 0;
   }
   void UpdateColors(ModelDrawRole role) override {
     UpdateActorModelColors(&actor_, geometry_, role, &workspace_->root_offset);

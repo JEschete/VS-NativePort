@@ -35,7 +35,7 @@ static_assert(
     std::extent_v<decltype(VS::Actors::AnimationPose::rotation_deltas)> ==
     kPoseKeyCount);
 static_assert(
-    std::extent_v<decltype(VS::Actors::AnimationPose::track_states)> ==
+    std::extent_v<decltype(VS::Actors::AnimationPose::scale_deltas)> ==
     kPoseKeyCount);
 
 constexpr const char* kChannel = "actors.sequence";
@@ -188,8 +188,8 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
       return false;
     }
     PlayLiveActorAnimationAtFrame(actor_.instance.slot, actor_.queued_animation,
-                                  actor_.queued_parameter_a,
-                                  actor_.queued_parameter_b);
+                                  actor_.queued_blend_frames,
+                                  actor_.queued_start_frame);
     actor_.queued_animation = 0;
     return true;
   }
@@ -329,7 +329,7 @@ SkeletalPose LoadLiveSkeletalPose(const VS::Actors::AnimationPose& pose) {
   SkeletalPose typed;
   typed.keys = LoadLivePoseKeys(pose);
   LoadKeys(pose.rotation_deltas, typed.rotation_deltas);
-  LoadKeys(pose.track_states, typed.scale_deltas);
+  LoadKeys(pose.scale_deltas, typed.scale_deltas);
   return typed;
 }
 
@@ -337,7 +337,7 @@ void StoreLiveSkeletalPose(const SkeletalPose& typed,
                            VS::Actors::AnimationPose& pose) {
   StoreLivePoseKeys(typed.keys, pose);
   StoreKeys(typed.rotation_deltas, pose.rotation_deltas);
-  StoreKeys(typed.scale_deltas, pose.track_states);
+  StoreKeys(typed.scale_deltas, pose.scale_deltas);
 }
 
 ShadowBlend LoadLiveShadowBlend(const ShadowBlendRecord& live) {

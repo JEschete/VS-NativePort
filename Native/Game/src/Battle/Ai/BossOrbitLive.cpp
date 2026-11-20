@@ -74,7 +74,7 @@ OrbitingBoss Load(const AiState& state) {
   boss.y = state.position.vy;
   boss.z = state.position.vz;
   if (const VS::Actors::ActorRecord* record = RecordOf(state)) {
-    boss.model_flag = record->preview_pose != 0;
+    boss.model_flag = record->root_key_pinned != 0;
   }
   if (const VS::Battle::ActorStats* stats = state.stats) {
     boss.stats = BossStats{.current_hp = stats->current_hp,
@@ -92,7 +92,7 @@ OrbitingBoss Load(const AiState& state) {
 void Store(const OrbitingBoss& boss, AiState& state) {
   if (VS::Actors::ActorRecord* record = RecordOf(state);
       record != nullptr && boss.model_flag) {
-    record->preview_pose = *boss.model_flag ? 1 : 0;
+    record->root_key_pinned = *boss.model_flag ? 1 : 0;
   }
   state.movement_target = boss.movement_target;
   state.move_x = boss.move_x;

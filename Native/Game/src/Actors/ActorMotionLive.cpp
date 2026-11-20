@@ -172,7 +172,7 @@ class LiveActorRoute final : public ActorRouteHost {
     actor_.route_phase = static_cast<std::uint8_t>(phase);
   }
   int TurnFrames() override { return actor_.instance.turn_frames; }
-  int MoveFrames() override { return actor_.instance.current_animation; }
+  int MoveFrames() override { return actor_.instance.move_frames; }
   bool MotionLocked() override { return actor_.instance.motion_locked != 0; }
   int TravelAnimation() override { return actor_.travel_animation; }
   void PlayAnimation(int animation) override {
@@ -224,7 +224,7 @@ ActorMotion LoadLiveActorMotion(const VS::Actors::ActorRecord& live) {
   motion.slot = instance.slot;
   motion.jump_countdown = instance.jump_countdown;
   motion.turn_frames = instance.turn_frames;
-  motion.move_frames = instance.current_animation;
+  motion.move_frames = instance.move_frames;
   motion.position = LiveMotionVector(instance.position);
   motion.rotation_x = instance.rotation_x;
   motion.facing = instance.facing;
@@ -241,9 +241,9 @@ ActorMotion LoadLiveActorMotion(const VS::Actors::ActorRecord& live) {
                          .z = instance.current_tile_z};
   motion.route_phase = live.route_phase;
   motion.route_uses_duration = live.route_uses_duration != 0;
-  motion.action_pose_active = live.action_pose_active != 0;
+  motion.is_carrying = live.is_carrying != 0;
   motion.is_running = live.is_running != 0;
-  motion.weapon_pose_active = live.weapon_pose_active != 0;
+  motion.action_locked = live.action_locked != 0;
   motion.jump_profile = live.jump_profile;
   motion.run_speed = live.run_speed;
   motion.walk_speed = live.walk_speed;
@@ -279,7 +279,7 @@ void StoreLiveActorMotion(const ActorMotion& motion,
   instance.slot = motion.slot;
   instance.jump_countdown = motion.jump_countdown;
   instance.turn_frames = motion.turn_frames;
-  instance.current_animation = motion.move_frames;
+  instance.move_frames = motion.move_frames;
   instance.position = LiveSvector(motion.position);
   instance.rotation_x = motion.rotation_x;
   instance.facing = motion.facing;
@@ -297,9 +297,9 @@ void StoreLiveActorMotion(const ActorMotion& motion,
   instance.current_tile_z = motion.current_tile.z;
   live.route_phase = motion.route_phase;
   live.route_uses_duration = motion.route_uses_duration ? 1 : 0;
-  live.action_pose_active = motion.action_pose_active ? 1 : 0;
+  live.is_carrying = motion.is_carrying ? 1 : 0;
   live.is_running = motion.is_running ? 1 : 0;
-  live.weapon_pose_active = motion.weapon_pose_active ? 1 : 0;
+  live.action_locked = motion.action_locked ? 1 : 0;
   live.jump_profile = motion.jump_profile;
   live.run_speed = motion.run_speed;
   live.walk_speed = motion.walk_speed;

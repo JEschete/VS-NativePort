@@ -440,7 +440,7 @@ actors::CharacterTemplate EnemyTemplate() {
   character.shield_model = 6;
   character.shield_material = 1;
   character.zud_index = 2;
-  character.template_word = 0x1234;
+  character.ai_settings = 0x1234;
   return character;
 }
 
@@ -1008,7 +1008,7 @@ TEST_CASE("A room enemy settles from its template and spawn record",
             .second_drop = spawn.second_drop,
             .random_drop = spawn.random_drop,
             .settings = actors::DecodeSpawnSettings(spawn.settings),
-            .template_word = 0x1234});
+            .ai_settings = 0x1234});
   const actors::TemplateIdentity& identity = Required(host.identity);
   CHECK_FALSE(identity.retain_after_defeat);
   CHECK(identity.blade_id == 5);
@@ -1508,7 +1508,7 @@ VS::Actors::CharacterInit LegacyCharacterInit() {
   init.gait_class = 7;
   init.run_speed = 0xA0;
   init.status_immunities = -1;
-  init.template_word = 0x01020304;
+  init.ai_settings = 0x01020304;
   init.mobility_limbs = {1, 0xFE};
   init.default_target_limb = 3;
   init.weapon.blade.weapon_model_id = -2;
@@ -1543,7 +1543,7 @@ void CheckDecodedTraitsAndWeapon(const actors::CharacterTemplate& decoded) {
   CHECK(decoded.gait_class == 7);
   CHECK(decoded.run_speed == 0xA0);
   CHECK(decoded.status_immunities == -1);
-  CHECK(decoded.template_word == 0x01020304);
+  CHECK(decoded.ai_settings == 0x01020304);
   CHECK(decoded.mobility_limbs == std::array<std::uint8_t, 2>{1, 0xFE});
   CHECK(decoded.default_target_limb == 3);
   CHECK(decoded.blade_model == 0xFE);

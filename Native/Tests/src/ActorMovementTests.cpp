@@ -89,7 +89,7 @@ class FakeMovementHost final : public actors::MovementHost {
     slot->motion.slot = static_cast<std::uint8_t>(id);
     slot->motion.walk_speed = kWalkSpeed;
     slot->motion.run_speed = kRunSpeed;
-    slot->collision_state = kFullCollision;
+    slot->speed_quarters = kFullCollision;
     return *slot;
   }
 
@@ -532,7 +532,7 @@ namespace {
   actor.support_gimmick = 12;
   actor.tick_remainder = 13;
   actor.animation_id = 14;
-  actor.collision_state = -15;
+  actor.speed_quarters = -15;
   actor.blend_frame = -16;
   actor.collision_radius = 17;
   actor.collision_height = 18;
@@ -549,7 +549,7 @@ namespace {
   actor.move_facing = 0x456;
   actor.jump_frames = -29;
   actor.momentum_direction = 0x789;
-  actor.run_turns = 30;
+  actor.slow_ticks = 30;
   actor.request_step = {.x = 31, .y = 32, .z = -33, .w = 34};
   actor.pending_target_x = 35;
   actor.pending_target_z = 36;
@@ -592,8 +592,8 @@ TEST_CASE("Live actor movement stores and loads every record field",
   CHECK(actors::LoadLiveMovementActor(*record) == sample);
   CHECK(record->instance.support_layer == 3);
   CHECK(record->support_gimmick == 12);
-  CHECK(record->opaque17ff == 6);
-  CHECK(record->instance.reserved50 == -7);
+  CHECK(record->ledge_attempts == 6);
+  CHECK(record->instance.grounded_z == -7);
 
   // The rules never store the fields they only read.
   auto other = std::make_unique<VS::Actors::ActorRecord>();

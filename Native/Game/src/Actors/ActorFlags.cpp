@@ -72,7 +72,7 @@ std::uint32_t RecordFlags(const ActorStateRecord& record) {
   if (record.animation_locked) flags |= StateFlag::kAnimationLocked;
   flags |= static_cast<std::uint32_t>(record.support_layer)
            << StateFlag::kSupportLayerShift;
-  if (record.motion.action_pose_active ||
+  if (record.motion.is_carrying ||
       static_cast<unsigned>(record.animation_id - kFirstActionAnimation) <
           kActionAnimationCount) {
     flags |= StateFlag::kActionPose;

@@ -60,9 +60,9 @@ struct ActorMotion {
   // Actor record.
   std::uint8_t route_phase = 0;  // 2 bits
   bool route_uses_duration = false;
-  bool action_pose_active = false;
+  bool is_carrying = false;
   bool is_running = false;
-  bool weapon_pose_active = false;
+  bool action_locked = false;
   std::uint8_t jump_profile = 0;  // 2 bits
   std::uint8_t run_speed = 0;
   std::uint8_t walk_speed = 0;

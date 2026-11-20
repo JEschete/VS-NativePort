@@ -56,7 +56,7 @@ struct MovementActor {
   std::uint8_t support_gimmick = 0;  // 4 bits
   std::uint8_t tick_remainder = 0;   // the airborne half-tick carry
   std::uint8_t animation_id = 0;     // read
-  std::int16_t collision_state = 0;
+  std::int16_t speed_quarters = 0;
   std::int8_t blend_frame = 0;         // read
   std::uint16_t collision_radius = 0;  // read
   std::uint16_t collision_height = 0;  // read
@@ -75,7 +75,7 @@ struct MovementActor {
   std::uint16_t move_facing = 0;
   std::int16_t jump_frames = 0;
   std::int16_t momentum_direction = 0;
-  std::uint8_t run_turns = 0;
+  std::uint8_t slow_ticks = 0;
   MotionVector request_step{};  // read
   std::uint16_t pending_target_x = 0;
   std::uint16_t pending_target_z = 0;

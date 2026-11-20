@@ -106,7 +106,7 @@ T* Pointer(AssetAddress address) {
           .bone_count = instance.bone_count,
           .skipped = instance.is_skipped != 0,
           .frozen = instance.is_frozen != 0,
-          .culled = instance.is_preview_model != 0,
+          .culled = instance.is_culled != 0,
           .weapon_drawn = instance.weapon_drawn != 0};
 }
 
@@ -182,7 +182,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
       preview->battle_sequence = source->battle_sequence;
     }
     preview->sequence_model_id = source->sequence_model_id;
-    preview->sequence_flags = source->sequence_flags;
+    preview->common_entry_count = source->common_entry_count;
     preview->common_animation_count = source->common_animation_count;
   }
 
@@ -211,7 +211,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     record->instance.position.vx = 0;
     record->instance.position.vy = 0;
     record->instance.position.vz = 0;
-    record->preview_pose = 0;
+    record->root_key_pinned = 0;
     record->instance.is_skipped = 0;
     record->instance.sound_enabled = 0;
   }
@@ -224,7 +224,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   void ClearPreviewFlag(int slot) override {
     if (VS::Actors::ActorRecord* record = Record(slot)) {
-      record->preview_flag = 0;
+      record->floor_lit = 0;
     }
   }
 
@@ -264,7 +264,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
     record->animation_id = static_cast<std::uint8_t>(animation);
-    record->weapon_pose_active = 0;
+    record->action_locked = 0;
     std::uint16_t* length = nullptr;
     record->animation_header =
         Actors::FindLiveActorAnimationHeader(record, animation, &length);

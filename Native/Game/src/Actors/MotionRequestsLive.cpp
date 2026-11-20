@@ -205,9 +205,9 @@ void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor) {
   instance.previous_tile_z = history.previous_tile.z;
   instance.reserved63 = history.previous_tile.spare;
   // Original 0x4C/0x50 history packs X/Y then Z; 0x52 stores facing.
-  instance.support_offset = std::bit_cast<std::int32_t>(
+  instance.grounded_xy = std::bit_cast<std::int32_t>(
       std::array{history.position[0], history.position[1]});
-  instance.reserved50 = history.position[2];
+  instance.grounded_z = history.position[2];
   if (history.saved_placement) {
     actor->saved_placement =
         std::bit_cast<std::int32_t>(*history.saved_placement);

@@ -730,7 +730,7 @@ int StartSequenceLoad(FakeAssetHost& host, ActorAssetRequest& request) {
 // Actors 2-4 hold model 9; actor 2's common sequence has flags 5.
 AssetAddress AddCommonSequencePeers(FakeAssetHost& host) {
   ActorAssetRecord peer = ActorWithModel(9);
-  peer.sequence_flags = 5;
+  peer.common_entry_count = 5;
   peer.common_sequence = host.AddBlock(8);
   host.actors[2] = peer;
   host.actors[3] = ActorWithModel(9);
@@ -1542,7 +1542,7 @@ TEST_CASE("Common sequences share a peer's sequence",
   CHECK(Content::ParseActorSequence(host, state, shared) == kAssetDone);
   const ActorAssetRecord& actor = Required(host.actors[3]);
   CHECK(actor.common_sequence == peer_sequence);
-  CHECK(actor.sequence_flags == 5);
+  CHECK(actor.common_entry_count == 5);
 }
 
 TEST_CASE("Common sequences copy an actor's own sequence file",
@@ -1560,7 +1560,7 @@ TEST_CASE("Common sequences copy an actor's own sequence file",
   REQUIRE(host.low_blocks.size() == 1);
   const ActorAssetRecord& actor = Required(host.actors[4]);
   CHECK(actor.common_sequence == host.low_blocks[0]);
-  CHECK(actor.sequence_flags == 7);
+  CHECK(actor.common_entry_count == 7);
   CHECK(host.Block(host.low_blocks[0])[7] == std::byte{0xC7});
   REQUIRE(host.sequence_banks.size() == 1);
   CHECK(host.sequence_banks[0].bytes == 8);

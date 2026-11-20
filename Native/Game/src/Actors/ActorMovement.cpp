@@ -729,7 +729,7 @@ Flow IdleStep(MoveContext& ctx) {
   }
   if (motion.momentum_distance >= motion.run_speed) {
     if (motion.run_frames >= kRunStartFrames &&
-        actor.run_turns < kRunStartTurns) {
+        actor.slow_ticks < kRunStartTurns) {
       motion.run_frames = 0;
       motion.is_running = true;
       if (ctx.input.pad == 0) {
@@ -775,9 +775,9 @@ void RunStep(MoveContext& ctx) {
   if (ctx.distance >= motion.run_speed << kFixedShift) {
     actor.momentum_direction = Narrow16(ctx.direction);
     motion.run_frames = AddTicks(motion.run_frames, half_ticks);
-    actor.run_turns = 0;
+    actor.slow_ticks = 0;
   } else {
-    actor.run_turns = AddTicks(actor.run_turns, half_ticks);
+    actor.slow_ticks = AddTicks(actor.slow_ticks, half_ticks);
   }
   ctx.facing = MoveFacing(ctx);
   if (ctx.distance != 0 && motion.locomotion_state == kLocomotionFree) {
@@ -795,9 +795,9 @@ Flow ChooseStep(MoveContext& ctx) {
 Flow ScaleStep(MoveContext& ctx) {
   const MovementActor& actor = ctx.actor;
   int speed = ctx.distance;
-  if (actor.collision_state != kFullCollision) {
+  if (actor.speed_quarters != kFullCollision) {
     speed =
-        WrappingMultiply(ctx.distance, actor.collision_state) / kFullCollision;
+        WrappingMultiply(ctx.distance, actor.speed_quarters) / kFullCollision;
     if (ctx.input.pad == 0 && speed > kStickSpeedCap) {
       speed = kStickSpeedLimit;
     }
@@ -961,7 +961,7 @@ Flow ResolveStep(MoveContext& ctx) {
   }
   if (ctx.input.pad == 0) ClassifyClimb(ctx);
   if (PushesSameWallPoint(ctx)) return Flow::kDone;
-  actor.collision_state = kFullCollision;
+  actor.speed_quarters = kFullCollision;
   if (motion.movement_mode != kModeNone) return ApplyJumpModeResult(ctx);
   return Flow::kContinue;
 }
@@ -1117,7 +1117,7 @@ Flow ApplyClimb(MoveContext& ctx) {
   MovementActor& actor = ctx.actor;
   ActorMotion& motion = actor.motion;
   if (SlidesOnProbedCell(ctx.host) && ctx.result == kStepClimb) {
-    actor.collision_state = kSlidingCollision;
+    actor.speed_quarters = kSlidingCollision;
     SetActorTranslation(motion, ctx.motion, 0);
     return Flow::kDone;
   }
@@ -1125,8 +1125,7 @@ Flow ApplyClimb(MoveContext& ctx) {
     actor.ledge_attempts = 0;
     return Blocked(ctx);
   }
-  if (ctx.result >= kLowClimb &&
-      (actor.weapon_drawn || motion.action_pose_active)) {
+  if (ctx.result >= kLowClimb && (actor.weapon_drawn || motion.is_carrying)) {
     return Blocked(ctx);
   }
   if (motion.movement_mode == kModeNone && ctx.input.pad == 0 &&
@@ -1201,7 +1200,7 @@ Flow ApplyStepDown(MoveContext& ctx) {
   if (ctx.motion.y >= kFallReach) return BeginFall(ctx);
   actor.ledge_attempts = 0;
   if (!SlidesOnProbedCell(ctx.host)) {
-    actor.collision_state = kSteppingDownCollision;
+    actor.speed_quarters = kSteppingDownCollision;
   }
   return Flow::kLand;
 }
@@ -1212,7 +1211,7 @@ Flow ApplyLevelStep(MoveContext& ctx) {
   actor.ledge_height = 0;
   actor.motion.locomotion_state = kLocomotionFree;
   actor.motion.movement_pending = false;
-  if (ctx.motion.y < kSmallDrop) actor.collision_state = kSlidingCollision;
+  if (ctx.motion.y < kSmallDrop) actor.speed_quarters = kSlidingCollision;
   actor.ledge_attempts = 0;
   return Flow::kLand;
 }
@@ -1243,7 +1242,7 @@ Flow PlanStep(MoveContext& ctx) {
 [[nodiscard]] bool RefusesMove(const MovementActor& actor) {
   const ActorMotion& motion = actor.motion;
   return motion.route_phase != 0 || actor.reaction_state != 0 ||
-         motion.weapon_pose_active ||
+         motion.action_locked ||
          static_cast<std::int8_t>(motion.jump_countdown) > 0;
 }
 }  // namespace

@@ -3347,13 +3347,13 @@ int func_800F9800(void) {
         live = (root / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(encoding="utf-8")
         start = live.index("void InitializeLiveActorAnimationPose(")
         init = live[start:live.index("\n}\n", start)]
-        self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->pose_override_active = 0;"))
+        self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->vertices_displaced = 0;"))
         self.assertIn("VS::Core::Errorf", live)
         # #276 slice 20b: PlayActorAnimation (F00856) is owned and keeps the override when the unwind fails.
         core = (root / r"Native\Game\src\Actors\AnimationControl.cpp").read_text(encoding="utf-8")
         self.assertIn(
-            "if (actor->pose_override_active && host.RestartAnimationEvents(*actor) < 0) {\n    return -1;\n  }\n"
-            "  actor->animation_event_flag = false;\n  actor->pose_override_active = false;",
+            "if (actor->vertices_displaced && host.RestartAnimationEvents(*actor) < 0) {\n    return -1;\n  }\n"
+            "  actor->animation_event_flag = false;\n  actor->vertices_displaced = false;",
             core,
         )
 

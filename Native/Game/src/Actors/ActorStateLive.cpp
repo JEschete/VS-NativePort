@@ -151,8 +151,8 @@ void LoadRecordFlags(const VS::Actors::ActorRecord& live,
   record.animation_event = live.animation_event_flag != 0;
   record.support_gimmick = live.support_gimmick;
   record.bypass_actor_collision = live.bypass_actor_collision != 0;
-  record.palette_fade_active = live.palette_fade_active != 0;
-  record.palette_fade_reverse = live.palette_fade_reverse != 0;
+  record.is_swaying = live.is_swaying != 0;
+  record.sway_returning = live.sway_returning != 0;
   record.holding_last_frame = live.pose.holding_last_frame != 0;
   record.pose_reached_end = live.pose.reached_end != 0;
   record.texture_timelines = {live.texture_animation_slots[0].timeline,
@@ -163,8 +163,8 @@ void StoreRecordFlags(const ActorStateRecord& record,
                       VS::Actors::ActorRecord& live) {
   live.attached_child_count = record.attached_child_count;
   live.animation_locked = Bit(record.animation_locked);
-  live.palette_fade_active = Bit(record.palette_fade_active);
-  live.palette_fade_reverse = Bit(record.palette_fade_reverse);
+  live.is_swaying = Bit(record.is_swaying);
+  live.sway_returning = Bit(record.sway_returning);
   live.texture_animation_slots[0].timeline = record.texture_timelines[0];
   live.texture_animation_slots[1].timeline = record.texture_timelines[1];
 }
@@ -172,7 +172,7 @@ void StoreRecordFlags(const ActorStateRecord& record,
 void LoadRecordFields(const VS::Actors::ActorRecord& live,
                       ActorStateRecord& record) {
   record.animation_id = live.animation_id;
-  record.collision_state = live.collision_state;
+  record.speed_quarters = live.speed_quarters;
   record.collision_height = live.collision_height;
   record.queued_animation = live.queued_animation;
   record.contact_kind = live.contact_kind;
@@ -183,8 +183,8 @@ void LoadRecordFields(const VS::Actors::ActorRecord& live,
   record.platform_anchor = LiveMotionVector(live.platform_anchor);
   record.head_track_target = live.head_track_target;
   record.companion_slot = live.companion_slot;
-  record.reserved_17ff = live.opaque17ff;
-  record.palette_fade_state = live.palette_fade_state[0];
+  record.ledge_attempts = live.ledge_attempts;
+  record.sway_angles = live.sway_angles[0];
   const VS::Actors::MovementRequest& request = live.turn_state;
   record.request_extras = {
       .reserved = {request.reserved1, request.reserved2, request.reserved3},
@@ -206,7 +206,7 @@ void LoadRecordFields(const VS::Actors::ActorRecord& live,
 
 void StoreRecordFields(const ActorStateRecord& record,
                        VS::Actors::ActorRecord& live) {
-  live.collision_state = record.collision_state;
+  live.speed_quarters = record.speed_quarters;
   live.queued_animation = record.queued_animation;
   live.contact_kind = record.contact_kind;
   live.ledge_height = record.ledge_height;
@@ -216,8 +216,8 @@ void StoreRecordFields(const ActorStateRecord& record,
   live.platform_anchor = LiveSvector(record.platform_anchor);
   live.head_track_target = record.head_track_target;
   live.companion_slot = record.companion_slot;
-  live.opaque17ff = record.reserved_17ff;
-  live.palette_fade_state[0] = record.palette_fade_state;
+  live.ledge_attempts = record.ledge_attempts;
+  live.sway_angles[0] = record.sway_angles;
   VS::Actors::MovementRequest& request = live.turn_state;
   request.reserved1 = record.request_extras.reserved[0];
   request.reserved2 = record.request_extras.reserved[1];

@@ -73,8 +73,8 @@ void CheckGroundedSnapshot(VS::Actors::ActorRecord& actor) {
                   (static_cast<std::uint32_t>(
                        static_cast<std::uint16_t>(instance.position.vy))
                    << 16);
-  expected.instance.support_offset = std::bit_cast<std::int32_t>(xy);
-  expected.instance.reserved50 = instance.position.vz;
+  expected.instance.grounded_xy = std::bit_cast<std::int32_t>(xy);
+  expected.instance.grounded_z = instance.position.vz;
   expected.instance.previous_facing = instance.facing;
   if (instance.support_layer == 0) {
     expected.saved_placement = std::bit_cast<std::int32_t>(tile);
@@ -82,8 +82,8 @@ void CheckGroundedSnapshot(VS::Actors::ActorRecord& actor) {
 
   VS::Actors::SaveLiveActorGroundedTransform(&actor);
   CHECK(actor.saved_placement == expected.saved_placement);
-  CHECK(actor.instance.support_offset == expected.instance.support_offset);
-  CHECK(actor.instance.reserved50 == expected.instance.reserved50);
+  CHECK(actor.instance.grounded_xy == expected.instance.grounded_xy);
+  CHECK(actor.instance.grounded_z == expected.instance.grounded_z);
   CHECK(actor.instance.previous_facing == expected.instance.previous_facing);
   CHECK(Bytes(actor) == Bytes(expected));
 }
@@ -133,7 +133,7 @@ struct JumpFixture {
     actor.turn_rate = 17;
     actor.jump_started = 1;
     actor.fast_animation = 1;
-    actor.preview_pose = 1;
+    actor.root_key_pinned = 1;
     actor.holds_texture_slots = 1;
     actor.reserved5b0_bits6 = 3;
     actor.route_target = {11, 22, 33, 44};
@@ -171,7 +171,7 @@ struct JumpFixture {
     actor.common_sequence = bank;
     actor.battle_sequence = bank;
     actor.owned_sequence = bank;
-    actor.sequence_flags = 100;
+    actor.common_entry_count = 100;
     actor.common_animation_count = 100;
     actor.instance.weapon_drawn = 0;
     actor.animation_locked = 0;
@@ -287,12 +287,12 @@ TEST_CASE("Grounded snapshots write only the actual actor history fields",
   actor.instance.previous_tile_layer = 0x22;
   actor.instance.previous_tile_z = 0x33;
   actor.instance.reserved63 = 0x44;
-  actor.instance.support_offset = 0x55667788;
-  actor.instance.reserved50 = -77;
+  actor.instance.grounded_xy = 0x55667788;
+  actor.instance.grounded_z = -77;
   actor.instance.previous_facing = 0x1234;
   actor.saved_placement = 0x11223344;
   actor.run_frames = 0x55;
-  actor.run_turns = 0x66;
+  actor.slow_ticks = 0x66;
   actor.opaque1860 = 0x77;
   actor.reserved1861 = 0x88;
   actor.reserved1862 = 0x99;

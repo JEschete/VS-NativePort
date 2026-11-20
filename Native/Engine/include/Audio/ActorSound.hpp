@@ -69,7 +69,7 @@ struct ActorSoundOverride {
 // projected again unless all of it is clear and its sound is enabled.
 struct ActorSoundMotion {
   std::uint8_t action_animation_state = 0;
-  bool preview_model = false;
+  bool is_culled = false;
   bool sound_enabled = true;
   std::uint8_t movement_mode = 0;
   std::uint8_t locomotion_state = 0;

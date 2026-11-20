@@ -39,9 +39,8 @@ enum class AppearanceStatus : std::int8_t {
   kBadPulseSlot = -2,
 };
 
-// The actor's root spin (palette_fade_active, palette_fade_reverse and
-// palette_fade_state): while active the model drawer turns the root by half the
-// phase.
+// The actor's root sway (is_swaying, sway_returning and sway_angles): while
+// active the model drawer turns the root by half the phase.
 struct PaletteFade {
   bool active = false;
   bool reverse = false;

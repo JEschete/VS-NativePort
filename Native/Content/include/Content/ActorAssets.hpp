@@ -269,14 +269,14 @@ struct ActorAssetRecord {
   AssetAddress model = AssetAddress::kNone;
   // The record.
   bool holds_texture_slots = false;
-  bool texture_header_bit = false;
+  bool is_8bit_texture = false;
   bool advance_requested = false;
   bool custom_tint = false;
   bool ignored_by_collision = false;
   std::uint8_t sequence_model_id = 0;
   std::uint8_t frames_per_step = 0;
-  std::uint8_t locomotion_counter = 0;
-  std::uint8_t sequence_flags = 0;
+  std::uint8_t idle_ticks = 0;
+  std::uint8_t common_entry_count = 0;
   std::uint8_t common_animation_count = 0;
   std::uint8_t battle_animation_count = 0;
   std::uint8_t texture_slot = 0;
@@ -292,7 +292,7 @@ struct ActorAssetRecord {
       texture_scroll_bounds{};
   std::uint16_t occupancy_radius = 0;
   std::uint16_t occupancy_height = 0;
-  std::uint16_t opaque648 = 0;  // the low 16 bits of the 0x648 word
+  std::uint16_t reserved648 = 0;  // the low 16 bits of the 0x648 word
   std::array<std::uint32_t, kActorBattleSequences> battle_sequence_lbas{};
   std::array<std::uint16_t, kActorBattleSequences> chain_attack_animation_ids{};
   std::array<std::uint32_t, kActorSpecialSequences> special_sequence_lbas{};

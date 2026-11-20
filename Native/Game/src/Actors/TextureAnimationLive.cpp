@@ -129,11 +129,11 @@ void StoreSlot(const TextureAnimationSlot& slot,
     const VS::Actors::ActorRecord& actor) {
   const std::size_t slot = actor.texture_slot;
   if (slot >= kTextureSlots) return std::nullopt;
-  // The original tested bit 27 of the word eight bytes before sequence_flags:
-  // this flag. It marks the 8-bit textures.
+  // The original tested bit 27 of the word eight bytes before
+  // common_entry_count: this flag. It marks the 8-bit textures.
   return ActorTextureLayout{
-      .depth = actor.texture_header_bit != 0 ? TextureDepth::k8Bit
-                                             : TextureDepth::k4Bit,
+      .depth = actor.is_8bit_texture != 0 ? TextureDepth::k8Bit
+                                          : TextureDepth::k4Bit,
       .slot_x = SlotOriginHalfword(slot, 0),
       .slot_y = SlotOriginHalfword(slot, 1),
       .slot_row = VS::Actors::textureSlotRowOffsets[slot]};

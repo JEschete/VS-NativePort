@@ -907,7 +907,7 @@ constexpr std::uint8_t kInitialTravelAnimation = 13;
 constexpr std::uint16_t kInitialMoveRate = 8;
 constexpr std::uint16_t kInitialTurnRate = 0x20;
 constexpr std::int16_t kUnitScale = 4096;
-constexpr std::uint16_t kInitialOpaque648 = 800;
+constexpr std::uint16_t kInitialReserved648 = 800;
 constexpr std::uint32_t kInitialBaseColor = 0x808080;
 constexpr std::uint32_t kInitialTint = 0x404040;
 constexpr std::uint8_t kFirstJointTag = 3;
@@ -1027,10 +1027,10 @@ void ResetActorRecordFields(ActorAssetHost& host, ActorAssetRecord& actor,
   actor.common_sequence = AssetAddress::kNone;
   actor.battle_sequence = AssetAddress::kNone;
   actor.shared_sequences[kSpecialSequenceRef] = AssetAddress::kNone;
-  actor.sequence_flags = 0;
+  actor.common_entry_count = 0;
   actor.common_animation_count = 0;
   actor.battle_animation_count = 0;
-  actor.locomotion_counter = 0;
+  actor.idle_ticks = 0;
   actor.sequence_model_id = 0;
   actor.animation_length = 0;
   actor.opaque6dc = 0;
@@ -1048,7 +1048,7 @@ void ResetActorRecordFields(ActorAssetHost& host, ActorAssetRecord& actor,
   actor.ignored_by_collision = false;
   actor.sound_enabled = true;
   actor.fade = 0;
-  actor.opaque648 = kInitialOpaque648;
+  actor.reserved648 = kInitialReserved648;
   actor.base_color = kInitialBaseColor;
   actor.tint = kInitialTint;
   actor.scale = host.RoomActorScale();
@@ -1266,7 +1266,7 @@ int CopySharedActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
   }
   actor.placement = request.placement;
   state.model_palette_words =
-      actor.texture_header_bit ? kHeaderBitPaletteWords : kPlainPaletteWords;
+      actor.is_8bit_texture ? kHeaderBitPaletteWords : kPlainPaletteWords;
   host.StoreActor(target, actor);
   return CompleteActorModel(host, state, request);
 }
@@ -1329,8 +1329,8 @@ int PlaceActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
   actor.texture_slot = static_cast<std::uint8_t>(first);
   AssetTextureSlot page = host.TextureSlot(AssetTextureTable::kActor, first);
   page.texture_page = static_cast<std::int16_t>(
-      actor.texture_header_bit ? (page.texture_page | kTexturePageHeaderBit)
-                               : (page.texture_page & ~kTexturePageClearBits));
+      actor.is_8bit_texture ? (page.texture_page | kTexturePageHeaderBit)
+                            : (page.texture_page & ~kTexturePageClearBits));
   host.SetTextureSlot(AssetTextureTable::kActor, first, page);
   const std::optional<VramRect> rect = ActorTextureRect(
       host, first, state.model_texture_width, state.model_texture_height);
@@ -1355,7 +1355,7 @@ int ParseActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
                       ActorAssetRecord& actor) {
   const int target = TargetSlot(request);
   const std::uint32_t header = cursor.U8();
-  actor.texture_header_bit = (header & 1U) != 0;
+  actor.is_8bit_texture = (header & 1U) != 0;
   constexpr unsigned kUvLayoutShift = 4;
   actor.uv_layout = ((header >> kUvLayoutShift) & 1U) != 0;
   state.model_header_word = static_cast<std::int32_t>(header);
@@ -1431,7 +1431,7 @@ int BorrowActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
   actor.texture_slot = other.texture_slot;
   actor.uv_layout = other.uv_layout;
   actor.holds_texture_slots = false;
-  actor.texture_header_bit = true;
+  actor.is_8bit_texture = true;
   host.StoreActor(target, actor);
   return ResumeActorModel(host, state, request);
 }
@@ -1984,12 +1984,12 @@ int ParseCommonSequence(ActorAssetHost& host, FileCursor& cursor, int target,
       return RefuseActor(host, "shared sequence record", *source);
     }
     const ActorAssetRecord other = host.LoadActor(*source);
-    actor.sequence_flags = other.sequence_flags;
+    actor.common_entry_count = other.common_entry_count;
     actor.common_sequence = other.common_sequence;
     host.StoreActor(target, actor);
     return kAssetDone;
   }
-  actor.sequence_flags = static_cast<std::uint8_t>(cursor.U8());
+  actor.common_entry_count = static_cast<std::uint8_t>(cursor.U8());
   cursor.Skip(kSequenceFlagsPadding);
   const std::uint32_t size = RoundUpToWord(cursor.I32());
   host.StoreActor(target, actor);

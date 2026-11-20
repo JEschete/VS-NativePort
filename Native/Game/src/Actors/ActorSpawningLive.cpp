@@ -471,7 +471,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     actor->ai_linked_group = details.settings.ai_linked_group;
     actor->reserved31_bit6 = details.settings.linked_reserved;
     actor->spawn_ai_settings = details.settings.extra;
-    actor->ai_settings = details.template_word;
+    actor->ai_settings = details.ai_settings;
     VS::Battle::ActorStats* stats = actor->stats;
     if (stats == nullptr) {
       return;
@@ -965,7 +965,7 @@ CharacterTemplate DecodeCharacterTemplate(
       .gait_class = init.gait_class,
       .run_speed = init.run_speed,
       .status_immunities = init.status_immunities,
-      .template_word = init.template_word,
+      .ai_settings = init.ai_settings,
       .mobility_limbs = init.mobility_limbs,
       .default_target_limb = init.default_target_limb,
       .blade_model =

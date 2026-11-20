@@ -77,24 +77,24 @@ void ClearTweens(ActorStateRecord& record) {
 }
 
 void ClearPaletteEffects(ActorStateRecord& record) {
-  record.palette_fade_state = 0;
+  record.sway_angles = 0;
   record.texture_timelines[0] = 0;
-  record.palette_fade_active = false;
+  record.is_swaying = false;
   record.texture_timelines[1] = 0;
-  record.palette_fade_reverse = false;
+  record.sway_returning = false;
 }
 
 // Everything the reset clears between the sound and animation resets.
 void ClearLayers(ActorStateRecord& record) {
-  record.collision_state = kFullCollision;
-  record.reserved_17ff = 0;
+  record.speed_quarters = kFullCollision;
+  record.ledge_attempts = 0;
   record.palette_pulse_kind = 0;
   record.reserved_1860 = 0;
   record.support_layer = 0;
   record.placement_layer = 0;
   record.motion.locomotion_state = 0;
   record.motion.movement_pending = false;
-  record.motion.action_pose_active = false;
+  record.motion.is_carrying = false;
   record.motion.action_animation_state = 0;
 }
 
@@ -140,7 +140,7 @@ void DropMovingActor(ActorStateHost& host, ActorStateRecord& record) {
 
 void PlayDeath(ActorStateHost& host, int id, ActorStateRecord& record) {
   int animation =
-      record.motion.action_pose_active ? kPoseDeathAnimation : kDeathAnimation;
+      record.motion.is_carrying ? kPoseDeathAnimation : kDeathAnimation;
   if (host.HasAnimation(id, kGroundDeathProbe) &&
       record.motion.movement_mode == 0) {
     animation = kGroundDeathAnimation;
@@ -183,9 +183,9 @@ void ResetAllActorMovement(ActorStateHost& host) {
     ActorStateRecord* record = host.Record(id);
     if (record == nullptr) continue;
     ActorMotion& motion = record->motion;
-    motion.action_pose_active = false;
+    motion.is_carrying = false;
     motion.jump_countdown = 0;
-    motion.weapon_pose_active = false;
+    motion.action_locked = false;
     record->support_layer = 0;
     record->placement_layer = 0;
     motion.locomotion_state = 0;

@@ -546,7 +546,7 @@ EventFlow BoneLock(EventContext& ctx) {
 
 EventFlow SetWeaponPose(EventContext& ctx, bool active) {
   ActorMotion motion = ctx.host.LoadMotion();
-  motion.weapon_pose_active = active;
+  motion.action_locked = active;
   ctx.host.StoreMotion(motion);
   return EventFlow::kNext;
 }

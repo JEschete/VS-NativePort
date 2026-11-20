@@ -41,7 +41,7 @@ struct ModelInstance {
   /* 0x08 */ std::int8_t texture_slot_count_minus_one : 3;
   /* 0x08 */ std::int8_t is_parsed : 1;
   /* 0x09 */ std::uint8_t action_animation_state : 4;
-  /* 0x09 */ std::uint8_t is_preview_model : 1;
+  /* 0x09 */ std::uint8_t is_culled : 1;
   /* 0x09 */ std::uint8_t is_attached : 1;
   /* 0x09 */ std::uint8_t movement_pending : 1;
   /* 0x09 */ std::uint8_t sound_enabled : 1;
@@ -65,7 +65,7 @@ struct ModelInstance {
   /* 0x14 */ std::uint16_t look_yaw;
   /* 0x16 */ std::uint16_t look_pitch;
   /* 0x18 */ std::uint16_t turn_frames;
-  /* 0x1A */ std::uint16_t current_animation;
+  /* 0x1A */ std::uint16_t move_frames;
   /* 0x1C */ VS::Core::Gte::SVECTOR position;
   /* 0x24 */ std::int16_t rotation_x;
   /* 0x26 */ std::int16_t facing;
@@ -81,8 +81,8 @@ struct ModelInstance {
   /* 0x40 */ std::int16_t rotation_step_z;
   /* 0x42 */ std::uint16_t reserved42;
   /* 0x44 */ VS::Core::Gte::SVECTOR scale_delta;
-  /* 0x4C */ std::int32_t support_offset;
-  /* 0x50 */ std::int16_t reserved50;
+  /* 0x4C */ std::int32_t grounded_xy;
+  /* 0x50 */ std::int16_t grounded_z;
   /* 0x52 */ std::int16_t previous_facing;
   /* 0x54 */ VS::Core::Gte::CVECTOR base_color;
   /* 0x58 */ Render::ColorCode tint;

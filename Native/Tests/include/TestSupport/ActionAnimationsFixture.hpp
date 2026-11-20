@@ -55,7 +55,7 @@ struct Actor final : b::ActionReactionActor {
   std::uint8_t special_entries = 64;
   bool map_present = true;
   std::uint8_t animation = 0;
-  bool action_pose_active = false;
+  bool is_carrying = false;
   std::uint8_t support_layer = 0;
   std::uint8_t animation_set = 0;
   std::uint8_t request_mode = 1;
@@ -87,7 +87,7 @@ struct Actor final : b::ActionReactionActor {
     flags =
         (flags & 0x8FFFFFFFU) | (static_cast<std::uint32_t>(state & 7U) << 28);
   }
-  bool ActionPoseActive() const override { return action_pose_active; }
+  bool ActionPoseActive() const override { return is_carrying; }
   std::uint8_t LocomotionState() const override {
     return static_cast<std::uint8_t>((flags >> 19) & 3U);
   }

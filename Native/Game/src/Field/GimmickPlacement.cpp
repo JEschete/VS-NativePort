@@ -402,7 +402,7 @@ std::optional<std::size_t> FindInteractableGimmickAhead(
     far.tile_z += step * 2;
   }
   if (adjacent.tile_x < 0 || adjacent.tile_z < 0) return std::nullopt;
-  return actor->motion.action_pose_active
+  return actor->motion.is_carrying
              ? HeldGimmickAhead(*actor, TileCenter(adjacent), host)
              : GroundGimmickAhead(*actor, adjacent, far, host);
 }
@@ -456,7 +456,7 @@ bool StartGimmickCarry(std::int32_t actor_slot, std::int32_t height,
                        GimmickInteractionStartHost& host) {
   const auto initial_actor = host.Actor(actor_slot);
   if (!initial_actor) return false;
-  const auto placing = initial_actor->motion.action_pose_active;
+  const auto placing = initial_actor->motion.is_carrying;
   if (!host.PlayAnimation(actor_slot, placing ? kPlaceAnimation
                                               : height + kLiftAnimationBase) ||
       !host.PlaySounds(actor_slot, placing ? kPlaceSoundFirst : kPushSoundFirst,
@@ -512,7 +512,7 @@ bool BeginGimmickInteraction(std::int32_t actor_slot,
     return false;
   }
   const auto initial_actor = host.Actor(actor_slot);
-  if (!initial_actor || initial_actor->motion.weapon_pose_active) return false;
+  if (!initial_actor || initial_actor->motion.action_locked) return false;
   const auto slot = host.SelectAhead(actor_slot);
   const auto direction = host.Direction();
   if (!slot || *slot >= kGimmickQuerySlots || !direction ||

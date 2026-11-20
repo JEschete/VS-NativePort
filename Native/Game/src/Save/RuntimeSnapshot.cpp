@@ -1249,7 +1249,7 @@ Result ValidateCaptureBoundary(const VS::Actors::ActorRecord& actor) {
       model.movement_pending || model.movement_mode != 0 ||
       model.locomotion_state != 0 || model.motion_locked || model.is_jumping ||
       model.jump_countdown != 0 || (!menu_paused && horizontal_motion) ||
-      model.current_animation != 0 || model.root_motion.vy != 0 ||
+      model.move_frames != 0 || model.root_motion.vy != 0 ||
       actor.support_gimmick != 0 || actor.route_phase != 0 ||
       actor.destination_mode != 0 || actor.jump_frames != 0 ||
       actor.transition_frames != 0) {
@@ -1264,7 +1264,7 @@ Result ValidateCaptureBoundary(const VS::Actors::ActorRecord& actor) {
         model.current_tile_layer, model.support_layer, model.placement_layer,
         model.is_attached, model.movement_pending, model.movement_mode,
         model.locomotion_state, model.motion_locked, model.is_jumping,
-        model.jump_countdown, model.turn_frames, model.current_animation,
+        model.jump_countdown, model.turn_frames, model.move_frames,
         model.root_motion.vx, model.root_motion.vy, model.root_motion.vz,
         actor.support_gimmick, actor.route_phase, actor.destination_mode,
         actor.jump_frames, actor.momentum_distance, actor.transition_frames));

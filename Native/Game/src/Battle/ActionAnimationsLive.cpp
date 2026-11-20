@@ -96,9 +96,7 @@ class LiveActor final : public ActionReactionActor {
   void SetPoseState(std::uint8_t state) override {
     record_.instance.pose_state = state;
   }
-  bool ActionPoseActive() const override {
-    return record_.action_pose_active != 0;
-  }
+  bool ActionPoseActive() const override { return record_.is_carrying != 0; }
   std::uint8_t LocomotionState() const override {
     return record_.instance.locomotion_state;
   }

@@ -498,9 +498,9 @@ TEST_CASE(
 TEST_CASE("The texture depth flag is bit 27 of the word before sequenceFlags",
           "[actors-appearance-rendering][actors]") {
   // The original tested bit 27 of the word eight bytes before the sequence
-  // flags; the record names that bit texture_header_bit.
+  // flags; the record names that bit is_8bit_texture.
   auto actor = std::make_unique<VS::Actors::ActorRecord>();
-  actor->texture_header_bit = 1;
+  actor->is_8bit_texture = 1;
   const auto bytes =
       std::bit_cast<std::array<std::byte, sizeof(VS::Actors::ActorRecord)>>(
           *actor);
@@ -508,7 +508,7 @@ TEST_CASE("The texture depth flag is bit 27 of the word before sequenceFlags",
   std::memcpy(
       &word,
       std::span(bytes)
-          .subspan(offsetof(VS::Actors::ActorRecord, sequence_flags) - 8,
+          .subspan(offsetof(VS::Actors::ActorRecord, common_entry_count) - 8,
                    sizeof word)
           .data(),
       sizeof word);
@@ -629,7 +629,7 @@ TEST_CASE("Live texture frame resets copy frame 0 for the shared bank's actors",
   state.AddActor(1);
   state.AddActor(5).texture_row_offsets[0] = 0xFF;
   VS::Actors::ActorRecord& eight_bit = state.AddActor(9);
-  eight_bit.texture_header_bit = 1;
+  eight_bit.is_8bit_texture = 1;
 
   // Another bank is not the shared one.
   actors::ResetLiveActorTextureFrames(1);

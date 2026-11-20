@@ -496,16 +496,16 @@ class LiveEventHost final : public AnimationEventHost {
     UploadLiveActorTextureOverlay(id_, copy);
   }
   void StartPaletteFade() override {
-    actor_.palette_fade_active = 1;
-    actor_.palette_fade_state[0] = 0;
-    actor_.palette_fade_reverse = 0;
-    actor_.palette_fade_state[1] = kPaletteFadeSteps;
+    actor_.is_swaying = 1;
+    actor_.sway_angles[0] = 0;
+    actor_.sway_returning = 0;
+    actor_.sway_angles[1] = kPaletteFadeSteps;
   }
   bool MoveModelVertex(std::size_t vertex,
                        const Render::ModelVertex& delta) override {
     return Render::MoveLiveActorModelVertex(actor_, vertex, delta);
   }
-  void MarkPoseOverridden() override { actor_.pose_override_active = 1; }
+  void MarkPoseOverridden() override { actor_.vertices_displaced = 1; }
   [[nodiscard]] ShadowBlend LoadShadow() const override {
     return LoadLiveShadowBlend(actor_.shadow_blend);
   }
@@ -611,7 +611,7 @@ class LiveMotionLookHost final : public MotionLookHost {
     workspace_.root_offset.vz = static_cast<std::int16_t>(offset.z);
   }
   [[nodiscard]] bool PreviewPose() const override {
-    return actor_.preview_pose != 0;
+    return actor_.root_key_pinned != 0;
   }
   void CenterPreviewPose() override {
     actor_.blend_pose.bone_keys[0].vx = kPreviewFacing;
@@ -720,7 +720,7 @@ AnimationBankLimits LiveAnimationBankLimits(
           .slot = actor.instance.slot,
           .model_id = actor.model_id,
           .sequence_model_id = actor.sequence_model_id,
-          .common_entries = actor.sequence_flags,
+          .common_entries = actor.common_entry_count,
           .battle_entries = actor.common_animation_count,
           .special_entries = actor.battle_animation_count,
           .special_pitch =
@@ -765,7 +765,7 @@ int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor) {
   const std::optional<AnimationClipRef> clip =
       bound ? std::optional(bound->clip) : std::nullopt;
   if (RestartActorAnimationEvents(host, tables.View(), clip,
-                                  actor.pose_override_active != 0) ==
+                                  actor.vertices_displaced != 0) ==
       EventRestart::kUnavailable) {
     VS::Core::Errorf(kChannel,
                      "cannot unwind actor=%u animation=%u: unavailable events",
@@ -817,11 +817,11 @@ void InitializeLiveActorAnimationPose(VS::Actors::ActorRecord* actor,
     VS::Core::Errorf(kChannel, "Pose start requires an actor and a pose");
     return;
   }
-  if (actor->pose_override_active != 0 &&
+  if (actor->vertices_displaced != 0 &&
       RestartLiveAnimationEvents(*actor) < 0) {
     return;
   }
-  actor->pose_override_active = 0;
+  actor->vertices_displaced = 0;
   const LiveHeader found = FindLiveHeader(*actor, actor->animation_id);
   std::optional<AnimationClipRef> clip;
   if (found.header.status == AnimationHeaderStatus::kFound) {

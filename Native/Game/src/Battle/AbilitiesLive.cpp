@@ -527,7 +527,7 @@ void TraceAbilityTiming(const ActionState& state) {
       "window={} effects={} action={}",
       static_cast<unsigned>(record->animation_id),
       static_cast<unsigned>(record->instance.action_animation_state),
-      static_cast<unsigned>(record->instance.current_animation),
+      static_cast<unsigned>(record->instance.move_frames),
       static_cast<unsigned>(record->pose.holding_last_frame),
       static_cast<int>(state.ability_timer),
       static_cast<unsigned>(state.ability_window),

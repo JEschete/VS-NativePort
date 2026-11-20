@@ -235,8 +235,8 @@ struct CharacterTemplate {
   std::uint8_t gait_class = 0;
   std::uint8_t run_speed = 0;
   std::int32_t status_immunities = 0;
-  // Copied to the battle actor's templateWord2C.
-  std::int32_t template_word = 0;
+  // Packed AI settings word, copied to the battle actor's template_word2c.
+  std::int32_t ai_settings = 0;
   std::array<std::uint8_t, 2> mobility_limbs{};
   std::uint8_t default_target_limb = 0;
   std::uint8_t blade_model = 0;
@@ -453,7 +453,7 @@ struct SpawnDetails {
   ItemDrop second_drop;
   ItemDrop random_drop;
   SpawnSettings settings;
-  std::int32_t template_word = 0;
+  std::int32_t ai_settings = 0;
 
   friend bool operator==(const SpawnDetails&, const SpawnDetails&) = default;
 };

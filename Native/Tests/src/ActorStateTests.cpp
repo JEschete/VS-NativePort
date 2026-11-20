@@ -313,7 +313,7 @@ TEST_CASE("State flags compose an actor's animation and reaction state",
   CHECK(Flags(record) == StateFlag::kActorRecord);
 
   record = Quiet();
-  record.motion.action_pose_active = true;
+  record.motion.is_carrying = true;
   CHECK(Flags(record) == (StateFlag::kActorRecord | StateFlag::kActionPose));
   for (const int animation : {0x47, 0x54}) {
     record = Quiet();
@@ -630,7 +630,7 @@ actors::ActorStateRecord Busy(int slot) {
   motion.pose_state = 5;
   motion.locomotion_state = 2;
   motion.movement_pending = true;
-  motion.action_pose_active = true;
+  motion.is_carrying = true;
   motion.action_animation_state = 4;
   motion.run_frames = 8;
   motion.is_running = true;
@@ -644,13 +644,13 @@ actors::ActorStateRecord Busy(int slot) {
   record.look_pitch = 17;
   record.look_yaw = 18;
   record.reaction_state = 4;
-  record.palette_fade_state = 3;
+  record.sway_angles = 3;
   record.texture_timelines = {5, 6};
-  record.palette_fade_active = true;
-  record.palette_fade_reverse = true;
+  record.is_swaying = true;
+  record.sway_returning = true;
   record.companion_slot = 1;
-  record.collision_state = 1;
-  record.reserved_17ff = 19;
+  record.speed_quarters = 1;
+  record.ledge_attempts = 19;
   record.palette_pulse_kind = 20;
   record.reserved_1860 = 21;
   record.support_layer = 3;
@@ -690,7 +690,7 @@ actors::ActorStateRecord BusyReset(int slot) {
   motion.pose_state = 0;
   motion.locomotion_state = 0;
   motion.movement_pending = false;
-  motion.action_pose_active = false;
+  motion.is_carrying = false;
   motion.action_animation_state = 0;
   motion.run_frames = 0;
   motion.is_running = false;
@@ -703,14 +703,14 @@ actors::ActorStateRecord BusyReset(int slot) {
   record.look_pitch = 0;
   record.look_yaw = 0;
   record.reaction_state = 0;
-  record.palette_fade_state = 0;
+  record.sway_angles = 0;
   record.texture_timelines = {};
-  record.palette_fade_active = false;
-  record.palette_fade_reverse = false;
+  record.is_swaying = false;
+  record.sway_returning = false;
   record.companion_slot = 0;
   record.sound_enabled = true;
-  record.collision_state = 4;
-  record.reserved_17ff = 0;
+  record.speed_quarters = 4;
+  record.ledge_attempts = 0;
   record.palette_pulse_kind = 0;
   record.reserved_1860 = 0;
   record.support_layer = 0;
@@ -766,15 +766,15 @@ TEST_CASE("The movement reset clears every actor's movement",
   FakeStateHost host;
   for (const int id : {0, 16}) {
     host.records.at(static_cast<std::size_t>(id)) = Busy(id);
-    host.At(id).motion.weapon_pose_active = true;
+    host.At(id).motion.action_locked = true;
   }
   actors::ResetAllActorMovement(host);
   for (const int id : {0, 16}) {
     actors::ActorStateRecord expected = Busy(id);
     actors::ActorMotion& motion = expected.motion;
-    motion.action_pose_active = false;
+    motion.is_carrying = false;
     motion.jump_countdown = 0;
-    motion.weapon_pose_active = false;
+    motion.action_locked = false;
     motion.locomotion_state = 0;
     motion.movement_pending = false;
     motion.is_running = false;
@@ -823,7 +823,7 @@ TEST_CASE("A grounded dying actor falls or takes its action pose",
 
   // An action pose takes 0x3A.
   host.calls.clear();
-  host.Add(6).motion.action_pose_active = true;
+  host.Add(6).motion.is_carrying = true;
   actors::BeginActorDeath(host, 6, true);
   CHECK(host.calls == Calls{"play 6 58 6", "head 6"});
 }

@@ -173,7 +173,7 @@ void StopActorMotion(ActorMotion& actor) {
 void ClearActorMovementModes(ActorMotion& actor) {
   actor.jump_countdown = 0;
   actor.movement_mode = 0;
-  actor.weapon_pose_active = false;
+  actor.action_locked = false;
   actor.pose_state = 0;
   actor.locomotion_state = 0;
   actor.movement_pending = false;
@@ -259,7 +259,7 @@ int ActorJumpAnimationProfile(const ActorMotion& actor) {
   if (actor.action_animation_state != 0) return kActionAnimationProfile;
   if (actor.is_jumping) return kJumpingProfile;
   if (actor.motion_locked) return kMotionLockedProfile;
-  if (actor.action_pose_active) return kActionPoseProfile;
+  if (actor.is_carrying) return kActionPoseProfile;
   return actor.jump_profile & kJumpProfileMask;
 }
 

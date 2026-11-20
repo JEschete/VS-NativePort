@@ -156,9 +156,9 @@ struct FakeScriptedPath final : actors::ScriptedPathHost {
   motion.current_tile = {.x = 33, .layer = 34, .z = 35};
   motion.route_phase = 3;
   motion.route_uses_duration = true;
-  motion.action_pose_active = true;
+  motion.is_carrying = true;
   motion.is_running = true;
-  motion.weapon_pose_active = true;
+  motion.action_locked = true;
   motion.jump_profile = 2;
   motion.run_speed = 36;
   motion.walk_speed = 37;
@@ -211,7 +211,7 @@ TEST_CASE("Stopping actor motion clears its modes, frames and root x and y",
   ActorMotion actor;
   actor.jump_countdown = 5;
   actor.movement_mode = 3;
-  actor.weapon_pose_active = true;
+  actor.action_locked = true;
   actor.pose_state = 2;
   actor.locomotion_state = 1;
   actor.movement_pending = true;
@@ -324,7 +324,7 @@ TEST_CASE("Jump animation profiles rank action, jump, lock and pose states",
   ActorMotion actor;
   actor.jump_profile = 2;
   CHECK(actors::ActorJumpAnimationProfile(actor) == 2);
-  actor.action_pose_active = true;
+  actor.is_carrying = true;
   CHECK(actors::ActorJumpAnimationProfile(actor) == 6);
   actor.motion_locked = true;
   CHECK(actors::ActorJumpAnimationProfile(actor) == 5);
@@ -779,7 +779,7 @@ TEST_CASE("Live actor motion stores and loads every record field",
   record->travel_animation = 7;
   actors::StoreLiveActorMotion(sample, *record);
   CHECK(actors::LoadLiveActorMotion(*record) == sample);
-  CHECK(record->instance.current_animation == sample.move_frames);
+  CHECK(record->instance.move_frames == sample.move_frames);
   CHECK(record->instance.current_tile_layer == sample.current_tile.layer);
   CHECK(record->turn_state.distance == sample.request_distance);
   CHECK(record->route_target.pad == sample.route_target.w);
@@ -932,7 +932,7 @@ TEST_CASE("Live routes wait on the record's turn and walk frames",
   CHECK(record->route_phase == actors::kRouteTurning);
 
   record->route_phase = actors::kRouteWalking;
-  record->instance.current_animation = 5;
+  record->instance.move_frames = 5;
   actors::UpdateLiveActorRoute(kActor, record.get());
   CHECK(record->route_phase == actors::kRouteWalking);
   record->route_phase = actors::kRouteIdle;

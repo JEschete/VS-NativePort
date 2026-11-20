@@ -61,7 +61,7 @@ struct CharacterInit {
   std::uint8_t gait_class = 0;  // upstream unk26
   std::uint8_t run_speed = 0;
   std::int32_t status_immunities = 0;  // upstream unk28
-  std::int32_t template_word = 0;      // upstream unk2C
+  std::int32_t ai_settings = 0;        // upstream unk2C
   // The two limbs whose loss slows the character (upstream unk30, unk31).
   std::array<std::uint8_t, 2> mobility_limbs{};
   std::uint8_t default_target_limb = 0;  // upstream unk32

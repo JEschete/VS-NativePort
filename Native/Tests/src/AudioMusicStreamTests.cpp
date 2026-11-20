@@ -1352,7 +1352,7 @@ TEST_CASE("An actor's sound mix pans and attenuates its projected position",
   CHECK_FALSE(
       Audio::ActorSoundPanAndVolume(host, kOtherSoundActor).has_value());
   const std::vector<Audio::ActorSoundMotion> stale{
-      {.action_animation_state = 1}, {.preview_model = true},
+      {.action_animation_state = 1}, {.is_culled = true},
       {.sound_enabled = false},      {.movement_mode = 1},
       {.locomotion_state = 1},       {.motion_locked = true}};
   for (const Audio::ActorSoundMotion& motion : stale) {

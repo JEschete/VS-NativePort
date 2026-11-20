@@ -133,7 +133,7 @@ constexpr std::size_t kGimmickHeightBone = 1;
   return {.has_bones = instance.bone_count != 0,
           .skipped = instance.is_skipped != 0,
           .visible = instance.is_visible != 0,
-          .culled = instance.is_preview_model != 0,
+          .culled = instance.is_culled != 0,
           .frozen = instance.is_frozen != 0,
           .attached = instance.is_attached != 0,
           .pulsing = instance.palette_pulse.kind != 0,

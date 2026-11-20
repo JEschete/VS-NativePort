@@ -165,15 +165,15 @@ void SetLiveActorPaletteFade(int actor_id, int fade_parameter) {
   VS::Actors::ActorRecord* actor =
       LiveActorRecord(actor_id, "SetActorPaletteFade");
   if (actor == nullptr) return;
-  PaletteFade fade{.active = actor->palette_fade_active != 0,
-                   .reverse = actor->palette_fade_reverse != 0,
-                   .phase = actor->palette_fade_state[0],
-                   .rate = actor->palette_fade_state[1]};
+  PaletteFade fade{.active = actor->is_swaying != 0,
+                   .reverse = actor->sway_returning != 0,
+                   .phase = actor->sway_angles[0],
+                   .rate = actor->sway_angles[1]};
   SetActorPaletteFade(fade, fade_parameter);
-  actor->palette_fade_active = fade.active ? 1 : 0;
-  actor->palette_fade_reverse = fade.reverse ? 1 : 0;
-  actor->palette_fade_state[0] = fade.phase;
-  actor->palette_fade_state[1] = fade.rate;
+  actor->is_swaying = fade.active ? 1 : 0;
+  actor->sway_returning = fade.reverse ? 1 : 0;
+  actor->sway_angles[0] = fade.phase;
+  actor->sway_angles[1] = fade.rate;
 }
 
 void ResetLiveActorWeaponVisibilityBlend(int actor_id) {

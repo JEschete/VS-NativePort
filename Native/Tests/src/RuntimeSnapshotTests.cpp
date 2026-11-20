@@ -924,7 +924,7 @@ void InvalidateLiveMotion(RuntimeFixture& fixture, int defect) {
   if (defect == 13) fixture.player_model.instance.locomotion_state = 1;
   if (defect == 14) fixture.player_model.instance.is_jumping = 1;
   if (defect == 15) fixture.player_model.instance.turn_frames = 2;
-  if (defect == 16) fixture.player_model.instance.current_animation = 1;
+  if (defect == 16) fixture.player_model.instance.move_frames = 1;
   if (defect == 17) fixture.player_model.instance.root_motion.vx = 1;
   if (defect == 18) fixture.player_model.route_phase = 1;
   if (defect == 19) fixture.player_model.momentum_distance = 2;
