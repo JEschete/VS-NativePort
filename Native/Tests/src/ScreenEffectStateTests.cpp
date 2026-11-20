@@ -16,7 +16,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Field/DoorMatchList.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct ScreenStateFixture {

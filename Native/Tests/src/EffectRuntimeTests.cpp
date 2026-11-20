@@ -801,7 +801,7 @@ TEST_CASE(
     "F01421 the Live reset clears the globals but keeps the pending "
     "tracks",
     "[effect-runtime][F01421]") {
-  const u_int pending = fx::pendingTracks;
+  const std::uint32_t pending = fx::pendingTracks;
   const std::array<int, 4> tokens{fx::tokenBitmaps[0], fx::tokenBitmaps[1],
                                   fx::tokenBitmaps[2], fx::tokenBitmaps[3]};
   fx::pendingTracks = 0x30;
@@ -825,7 +825,7 @@ TEST_CASE(
 
 TEST_CASE("F01433 the Live action effect refuses a missing request",
           "[effect-runtime][F01433]") {
-  const u_int phase = fx::primaryPhase;
+  const std::uint32_t phase = fx::primaryPhase;
   fx::primaryPhase = 0;
   CHECK(fx::LiveBeginActionEffect(nullptr, 1, 2) == 0);
   CHECK(fx::primaryPhase == 0);

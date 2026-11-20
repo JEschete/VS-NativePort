@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/Matrix.hpp"
@@ -14,7 +14,17 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Core/Math/VectorLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::RotTransPers4;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 // Contracts of the #276 slice A3 (#278) typed math kernels and their record
 // bindings: every input is defined, and adapters keep the original shapes.
@@ -229,13 +239,13 @@ TEST_CASE("Timed interpolation with no duration stays defined",
 namespace {
 struct ProjectionFixture {
   ProjectionFixture() {
-    Core_Gte_Reset();
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    VS::Core::Gte::Reset();
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
   }
   ProjectionFixture(const ProjectionFixture&) = delete;
   ProjectionFixture& operator=(const ProjectionFixture&) = delete;
-  ~ProjectionFixture() { Core_Gte_Reset(); }
+  ~ProjectionFixture() { VS::Core::Gte::Reset(); }
 };
 
 struct ProjectionWitness {
@@ -260,8 +270,8 @@ constexpr std::array<ProjectionWitness, 10> kProjectionWitnesses{{
     {-128, 1024, 128},
 }};
 
-Core_GteWord PackScreen(std::int16_t x, std::int16_t y) {
-  return static_cast<Core_GteWord>(
+VS::Core::Gte::Word PackScreen(std::int16_t x, std::int16_t y) {
+  return static_cast<VS::Core::Gte::Word>(
       (static_cast<std::uint32_t>(static_cast<std::uint16_t>(y)) << 16) |
       static_cast<std::uint16_t>(x));
 }
@@ -305,10 +315,10 @@ TEST_CASE("Single-point projection matches the SDK issue vectors",
     CAPTURE(x, z);
     ProjectionFixture fixture;
     SVECTOR point{x, 0, z, 91};
-    Core_GteWord screen = -1;
-    Core_GteWord cue = -1;
-    Core_GteWord flags = -1;
-    CHECK(Core_Gte_RotTransPers(&point, &screen, &cue, &flags) == z / 4);
+    VS::Core::Gte::Word screen = -1;
+    VS::Core::Gte::Word cue = -1;
+    VS::Core::Gte::Word flags = -1;
+    CHECK(RotTransPers(&point, &screen, &cue, &flags) == z / 4);
     CHECK(screen == PackScreen(screen_x, 120));
     CHECK(cue == 0);
     CHECK(flags == 0);
@@ -324,15 +334,15 @@ TEST_CASE("Four-point projection matches the SDK issue vectors",
     CAPTURE(x, z);
     ProjectionFixture fixture;
     SVECTOR point{x, 0, z, 91};
-    Core_GteWord cue = -1;
-    Core_GteWord flags = -1;
+    VS::Core::Gte::Word cue = -1;
+    VS::Core::Gte::Word flags = -1;
     const auto expected = PackScreen(screen_x, 120);
-    std::array<Core_GteWord, 4> screens{};
-    CHECK(Core_Gte_RotTransPers4(&point, &point, &point, &point, &screens[0],
-                                 &screens[1], &screens[2], &screens[3], &cue,
-                                 &flags) == z / 4);
-    CHECK(screens ==
-          std::array<Core_GteWord, 4>{expected, expected, expected, expected});
+    std::array<VS::Core::Gte::Word, 4> screens{};
+    CHECK(RotTransPers4(&point, &point, &point, &point, &screens[0],
+                        &screens[1], &screens[2], &screens[3], &cue,
+                        &flags) == z / 4);
+    CHECK(screens == std::array<VS::Core::Gte::Word, 4>{expected, expected,
+                                                        expected, expected});
     CHECK(cue == 0);
     CHECK(flags == 0);
   }
@@ -343,7 +353,7 @@ TEST_CASE("Projection reports the SDK status flags and saturated results",
   struct FlagCase {
     MATRIX transform;
     SVECTOR point;
-    Core_GteWord depth;
+    VS::Core::Gte::Word depth;
     std::int16_t screen_x;
     std::int16_t screen_y;
     std::uint32_t flags;
@@ -368,12 +378,12 @@ TEST_CASE("Projection reports the SDK status flags and saturated results",
   for (auto [transform, point, depth, screen_x, screen_y, flags] : kCases) {
     CAPTURE(point.vx, point.vy, point.vz);
     ProjectionFixture fixture;
-    Core_Gte_SetRotMatrix(&transform);
-    Core_Gte_SetTransMatrix(&transform);
-    Core_GteWord screen = -1;
-    Core_GteWord cue = -1;
-    Core_GteWord status = -1;
-    CHECK(Core_Gte_RotTransPers(&point, &screen, &cue, &status) == depth);
+    SetRotMatrix(&transform);
+    SetTransMatrix(&transform);
+    VS::Core::Gte::Word screen = -1;
+    VS::Core::Gte::Word cue = -1;
+    VS::Core::Gte::Word status = -1;
+    CHECK(RotTransPers(&point, &screen, &cue, &status) == depth);
     CHECK(screen == PackScreen(screen_x, screen_y));
     CHECK(cue == 0);
     CHECK(static_cast<std::uint32_t>(status) == flags);

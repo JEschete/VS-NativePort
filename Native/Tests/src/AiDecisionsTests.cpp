@@ -11,7 +11,7 @@
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/Decisions.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace Ai = VS::Battle::Ai;

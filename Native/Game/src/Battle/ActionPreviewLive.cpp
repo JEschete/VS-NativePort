@@ -30,6 +30,8 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::HitStatusView;

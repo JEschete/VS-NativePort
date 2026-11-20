@@ -11,13 +11,15 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/GameClearScore.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+
+using VS::Core::Gte::CVECTOR;
 
 namespace VS::Menu::Results {
 namespace {

@@ -8,10 +8,15 @@
 #include <cstdint>
 #include <cstring>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ScaledFont.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setUV4;
+using VS::Legacy::setXY4;
 
 namespace VS::Render {
 namespace {

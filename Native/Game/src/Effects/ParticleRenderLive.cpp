@@ -22,7 +22,7 @@
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -31,6 +31,16 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "nlohmann/json.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects {
 namespace {
@@ -48,8 +58,8 @@ constexpr unsigned kHalfShift = 16;
 constexpr unsigned kHalfMask = 0xFFFF;
 constexpr unsigned kSemiTransparentQuad = 0x2E000000;
 constexpr unsigned kTexturedQuad = 0x2C000000;
-constexpr u_long kEnableTextureWindow = 0xE1000200;
-constexpr u_long kRestoreDrawMode = 0xE1000000;
+constexpr std::uint32_t kEnableTextureWindow = 0xE1000200;
+constexpr std::uint32_t kRestoreDrawMode = 0xE1000000;
 constexpr std::size_t kSpatialDimensions = 3;
 
 enum QuadWord {
@@ -83,9 +93,9 @@ unsigned Packed(int x, int y) {
          (static_cast<unsigned>(y) << kHalfShift);
 }
 
-void Link(u_long* packet, unsigned length, u_long* ordering) {
+void Link(std::uint32_t* packet, unsigned length, std::uint32_t* ordering) {
   packet[0] = (*ordering & kLinkMask) | (length << kLengthShift);
-  *ordering = (*ordering & ~kLinkMask) | LegacyGpu_Handle(packet);
+  *ordering = (*ordering & ~kLinkMask) | GpuHandle(packet);
 }
 
 void CheckCapacity(unsigned quads) {
@@ -95,15 +105,15 @@ void CheckCapacity(unsigned quads) {
       VS::Render::FrameScratchpad().primitive_cursor);
   const auto bytes = (static_cast<std::uint64_t>(quads) * kQuadWords +
                       std::uint64_t{kModeWords} * 2) *
-                     sizeof(u_long);
+                     sizeof(std::uint32_t);
   Require(base != 0 && cursor >= base && cursor - base <= kPrimitiveBytes &&
               bytes <= kPrimitiveBytes - (cursor - base),
           "Particle rendering exceeds the native frame packet buffer");
 }
 
-void Mode(u_long word, u_long* ordering) {
-  auto* packet =
-      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+void Mode(std::uint32_t word, std::uint32_t* ordering) {
+  auto* packet = static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   Link(packet, 1, ordering);
   packet[1] = word;
   packet[2] = 0;
@@ -122,8 +132,9 @@ std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
       static_cast<int>(curve), static_cast<int>(age)));
 }
 
-bool ProjectNode(LiveParticle& node, SVECTOR& point, Core_GteWord& xy,
-                 Core_GteWord& depth, Core_GteWord& projection_flags) {
+bool ProjectNode(LiveParticle& node, SVECTOR& point, VS::Core::Gte::Word& xy,
+                 VS::Core::Gte::Word& depth,
+                 VS::Core::Gte::Word& projection_flags) {
   point = {Half((node.motion.position.vx >> kFixedShift) +
                 node.texture_animation.frame_offset_x),
            Half((node.motion.position.vy >> kFixedShift) +
@@ -136,27 +147,28 @@ bool ProjectNode(LiveParticle& node, SVECTOR& point, Core_GteWord& xy,
             "Attached particle has no valid native transform");
     const auto& transform = currentInstance->transforms[node.transform_index];
     if ((node.emit_flags & kCullBelow) != 0) {
-      Core_Gte_SetRotMatrix(&transform.world);
-      Core_Gte_SetTransMatrix(&transform.world);
+      SetRotMatrix(&transform.world);
+      SetTransMatrix(&transform.world);
       VECTOR world{};
-      Core_GteWord flags;
-      Core_Gte_RotTrans(&point, &world, &flags);
+      VS::Core::Gte::Word flags;
+      RotTrans(&point, &world, &flags);
       if (world.vy > 0) return false;
     }
     matrix = &transform.view;
   } else if ((node.emit_flags & kCullBelow) != 0 && point.vy > 0) {
     return false;
   }
-  Core_Gte_SetRotMatrix(matrix);
-  Core_Gte_SetTransMatrix(matrix);
-  Core_GteWord p;
-  depth = Core_Gte_RotTransPers(&point, &xy, &p, &projection_flags);
+  SetRotMatrix(matrix);
+  SetTransMatrix(matrix);
+  VS::Core::Gte::Word p;
+  depth = RotTransPers(&point, &xy, &p, &projection_flags);
   return true;
 }
 
-void TraceParticle(const LiveParticle& node, SVECTOR point, Core_GteWord xy,
-                   Core_GteWord depth, Core_GteWord flags,
-                   std::string_view outcome, const u_long* first_quad = nullptr,
+void TraceParticle(const LiveParticle& node, SVECTOR point,
+                   VS::Core::Gte::Word xy, VS::Core::Gte::Word depth,
+                   VS::Core::Gte::Word flags, std::string_view outcome,
+                   const std::uint32_t* first_quad = nullptr,
                    unsigned quad_count = 0) {
   if (!VS::Render::GamePages().IsEffectPathTraceEnabled() ||
       !VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "effect-path")) {
@@ -307,8 +319,8 @@ class LiveParticleRenderer final : public ParticleRenderer {
                  Half(point_.vy + (node.motion.velocity.vy >> kVelocityShift)),
                  Half(point_.vz + (node.motion.velocity.vz >> kVelocityShift)),
                  0};
-    Core_GteWord projected = 0, p = 0, flags = 0;
-    Core_Gte_RotTransPers(&lead, &projected, &p, &flags);
+    VS::Core::Gte::Word projected = 0, p = 0, flags = 0;
+    RotTransPers(&lead, &projected, &p, &flags);
     return {Half(projected), Half(projected >> kHalfShift)};
   }
 
@@ -319,7 +331,7 @@ class LiveParticleRenderer final : public ParticleRenderer {
   [[nodiscard]] ParticleColorSamples ColorSamples(
       std::size_t particle) override {
     const auto& node = Node(particle);
-    const auto age = static_cast<u_char>(node.age + 1);
+    const auto age = static_cast<std::uint8_t>(node.age + 1);
     return {ColorSample(node.color_curves[0], age),
             ColorSample(node.color_curves[1], age),
             ColorSample(node.color_curves[2], age)};
@@ -352,14 +364,14 @@ class LiveParticleRenderer final : public ParticleRenderer {
     CheckCapacity(quad_count);
     Mode(kEnableTextureWindow, Ordering(bucket));
     TraceParticle(Node(particle), point_, xy_, depth_, flags_, "draw",
-                  static_cast<const u_long*>(
+                  static_cast<const std::uint32_t*>(
                       VS::Render::FrameScratchpad().primitive_cursor),
                   quad_count);
   }
 
   void DrawQuad(int bucket, const ParticleQuad& quad) override {
-    auto* packet =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+    auto* packet = static_cast<std::uint32_t*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     Link(packet, kQuadWords - 1, Ordering(bucket));
     packet[kColor] = quad.color | (quad.semi_transparent ? kSemiTransparentQuad
                                                          : kTexturedQuad);
@@ -392,15 +404,16 @@ class LiveParticleRenderer final : public ParticleRenderer {
     return particlePool[particle];
   }
 
-  static u_long* Ordering(int bucket) {
-    return static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+  static std::uint32_t* Ordering(int bucket) {
+    return static_cast<std::uint32_t*>(
+               VS::Render::FrameScratchpad().ordering_table) +
            bucket;
   }
 
   SVECTOR point_{};
-  Core_GteWord xy_ = 0;
-  Core_GteWord depth_ = 0;
-  Core_GteWord flags_ = 0;
+  VS::Core::Gte::Word xy_ = 0;
+  VS::Core::Gte::Word depth_ = 0;
+  VS::Core::Gte::Word flags_ = 0;
 };
 }  // namespace
 

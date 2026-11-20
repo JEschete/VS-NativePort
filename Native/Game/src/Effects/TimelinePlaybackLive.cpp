@@ -36,6 +36,8 @@
 #include "Effects/TimelineTracksLive.hpp"
 #include "Input/ControllerLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Effects {
 namespace {
 using Request = LiveActionEffectRequest;
@@ -189,7 +191,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.script = VS::Effects::package->programs;
   spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
-  spawn.token = static_cast<u_char>(instance_->token);
+  spawn.token = static_cast<std::uint8_t>(instance_->token);
   LiveEffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
   if (child == nullptr) {
     RefuseTimelineCall("child effect track", "no free effect instance");

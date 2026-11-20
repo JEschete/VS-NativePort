@@ -19,6 +19,9 @@
 #include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::VECTOR;
+
 namespace {
 namespace event = VS::Event;
 using VS::Core::Math::Position3;

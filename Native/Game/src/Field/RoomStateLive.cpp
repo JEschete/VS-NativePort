@@ -28,10 +28,12 @@
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLiveState.hpp"
 #include "Field/Zone.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/MapTerminalLive.hpp"
 #include "Menu/Score/ScoreScreen.hpp"
 #include "State/Progress.hpp"
+
+using VS::Core::Gte::DVECTOR;
 
 // decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
 int VS::Field::isRoomVisitPending;
@@ -151,7 +153,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
     namespace Memory = Core::Memory;
     switch (buffer) {
       case RoomBuffer::kRoomPalettes:
-        roomPalettes = static_cast<u_short*>(
+        roomPalettes = static_cast<std::uint16_t*>(
             Memory::AllocateLiveFromLowEnd(kRoomPaletteBytes));
         return;
       case RoomBuffer::kFloatingLabels:
@@ -170,7 +172,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
     VS::Field::enteredDoorId =
         static_cast<std::int16_t>(defaults.entered_door_id);
     areRoomUpdatesPaused =
-        static_cast<u_short>(defaults.room_updates_paused ? 1 : 0);
+        static_cast<std::uint16_t>(defaults.room_updates_paused ? 1 : 0);
     roomTint.is_active =
         static_cast<std::int16_t>(defaults.room_tint_active ? 1 : 0);
     VS::Battle::submenuState = 0;

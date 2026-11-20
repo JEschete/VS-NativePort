@@ -18,6 +18,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Doors.hpp"
 #include "Field/Gimmicks.hpp"
@@ -27,7 +28,7 @@
 #include "Field/Room.hpp"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -36,6 +37,14 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Core::Math::kQ12Unit;
+using VS::Legacy::ClearOTagR;
 
 namespace {
 constexpr auto kGroupBytes = VS::Render::kRoomGroupRecordBytes;
@@ -242,9 +251,9 @@ struct PlatformPlacementFixture {
     std::fill_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
                 7);
     for (auto& platform : platforms) {
-      platform.position_x = 1216 * ONE;
-      platform.position_y = 768 * ONE;
-      platform.position_z = 448 * ONE;
+      platform.position_x = 1216 * kQ12Unit;
+      platform.position_y = 768 * kQ12Unit;
+      platform.position_z = 448 * kQ12Unit;
       platform.is_hidden = 1;
     }
   }
@@ -295,12 +304,14 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
   void* saved_table = VS::Render::legacyOrderingTables[0];
   void* saved_overlay = VS::Render::legacyCurrentOrderingTable;
   int saved_frame_buffer = VS::Render::frameBuf;
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / sizeof(u_long));
-  std::vector<u_long> ordering = std::vector<u_long>(0x2088 / sizeof(u_long));
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / sizeof(std::uint32_t));
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(0x2088 / sizeof(std::uint32_t));
   GeometryWords geometry{1};
   PlatformShadowLiveFixture() {
     // Project with the GTE's own screen distance, not one a prior test left.
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data();
     VS::Render::legacyOrderingTables[0] = ordering.data();
@@ -315,17 +326,17 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
     VS::Render::FrameScratchpad().view_matrix.t[2] = 512;
     platforms[0].is_hidden = 0;
     platforms[0].position_x = platforms[0].position_z = 0;
-    platforms[0].position_y = 100 * ONE;
+    platforms[0].position_y = 100 * kQ12Unit;
     platforms[0].scene_object_id = 0;
     platforms[1].scene_object_id = 99;
     VS::Field::roomData.geometry = geometry.data();
     VS::Field::roomData.header.geometry_length = sizeof geometry;
   }
   std::int64_t ProjectedArea() const {
-    const auto x = [](u_long word) {
+    const auto x = [](std::uint32_t word) {
       return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(word));
     };
-    const auto y = [](u_long word) {
+    const auto y = [](std::uint32_t word) {
       return std::bit_cast<std::int16_t>(
           static_cast<std::uint16_t>(word >> 16));
     };
@@ -340,8 +351,8 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
     VS::Render::legacyOrderingTables[0] = saved_table;
     VS::Render::legacyCurrentOrderingTable = saved_overlay;
     VS::Render::frameBuf = saved_frame_buffer;
-    Core_Gte_SetRotMatrix(&saved_frame.view_matrix);
-    Core_Gte_SetTransMatrix(&saved_frame.view_matrix);
+    SetRotMatrix(&saved_frame.view_matrix);
+    SetTransMatrix(&saved_frame.view_matrix);
   }
 };
 
@@ -356,7 +367,7 @@ struct PlatformAppearanceGeometry {
 struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
   VS::Render::PaletteAnimation saved_palette =
       VS::Render::LivePaletteAnimation();
-  u_short* saved_room_palettes = VS::Field::roomPalettes;
+  std::uint16_t* saved_room_palettes = VS::Field::roomPalettes;
   std::array<std::uint16_t, 0x240> palettes{};
   PlatformAppearanceGeometry geometry;
   PlatformAppearanceLiveFixture() {
@@ -1718,7 +1729,7 @@ TEST_CASE("Visible-platform lookup returns its contact by value",
   const auto contact = VS::Field::FindLiveMovingPlatformById(3);
   REQUIRE(contact.has_value());
   REQUIRE(VS::Field::LiveMovingPlatformPlacement(2).has_value());
-  fixture.platforms[1].position_x += 64 * ONE;
+  fixture.platforms[1].position_x += 64 * kQ12Unit;
   CheckAuthoredPlacement(*contact);
 }
 
@@ -1747,8 +1758,11 @@ VS::Field::MovingPlatformRoom Room(std::span<const MovingPlatformPose> poses) {
 
 TEST_CASE("Typed platform lookup finds a visible platform by support layer",
           "[field][platform-placement]") {
-  const std::array<MovingPlatformPose, 1> poses{MovingPlatformPose{
-      .x = 64 * ONE, .y = 32 * ONE, .z = 16 * ONE, .bounce_frame = 7}};
+  const std::array<MovingPlatformPose, 1> poses{
+      MovingPlatformPose{.x = 64 * kQ12Unit,
+                         .y = 32 * kQ12Unit,
+                         .z = 16 * kQ12Unit,
+                         .bounce_frame = 7}};
   CHECK(VS::Field::FindMovingPlatformById(Room(poses), 2) ==
         VS::Field::PlatformContact{
             .x = 64, .height = -32, .z = 16, .platform_index = 0});
@@ -1759,7 +1773,7 @@ TEST_CASE("Typed platform placement reads a platform the lookup hides",
   const std::array<MovingPlatformPose, 2> poses{
       MovingPlatformPose{},
       MovingPlatformPose{
-          .x = -4097, .y = -ONE, .bounce_frame = 2, .hidden = true}};
+          .x = -4097, .y = -kQ12Unit, .bounce_frame = 2, .hidden = true}};
   CHECK_FALSE(VS::Field::FindMovingPlatformById(Room(poses), 3).has_value());
   // C division truncates toward zero: -4097 / 4096 is -1.
   CHECK(VS::Field::MovingPlatformPlacement(Room(poses), 3) ==
@@ -1778,7 +1792,7 @@ TEST_CASE("Typed platform lookup rejects absent layers and bad frames",
   CHECK_FALSE(VS::Field::MovingPlatformPlacement(room, 2).has_value());
   poses[0].bounce_frame = -1;
   CHECK_FALSE(VS::Field::MovingPlatformPlacement(room, 2).has_value());
-  poses[0] = {.x = 40000 * ONE, .bounce_frame = 7};
+  poses[0] = {.x = 40000 * kQ12Unit, .bounce_frame = 7};
   CHECK_FALSE(VS::Field::FindMovingPlatformById(room, 2).has_value());
   const std::array<MovingPlatformPose, 5> crowded{};
   CHECK_FALSE(VS::Field::FindMovingPlatformById(Room(crowded), 2).has_value());

@@ -10,7 +10,7 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;
@@ -498,7 +498,7 @@ struct PerceptionView {
   std::array<std::uint8_t, kPerceptionViewReserved26Bytes> reserved26;
   TilePosition tile;
   std::array<std::uint8_t, kPerceptionViewReserved38Bytes> reserved38;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   void* native_pointer54;  // PS1 pointer slot 0x54
   PerceivedObjectView* model;
   void* native_pointer_5c;  // PS1 pointer slot 0x5C
@@ -1558,7 +1558,7 @@ struct PerceivedObjectView {
   std::array<std::uint8_t, kPerceivedObjectViewReservedCBytes> reserved_c;
   std::int16_t opaque14;
   std::array<std::uint8_t, kPerceivedObjectViewReserved16Bytes> reserved16;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   std::int16_t reserved24;
   std::int16_t facing;
   std::array<std::uint8_t, kPerceivedObjectViewReserved28Bytes> reserved28;

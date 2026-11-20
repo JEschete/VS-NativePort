@@ -28,7 +28,7 @@
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

@@ -21,7 +21,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
@@ -34,6 +34,10 @@
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::StoreImage;
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -334,10 +338,10 @@ struct LiveClutFixture {
   RECT area{768, 511, 160, 1};
   LiveClutFixture() {
     std::ranges::copy(r::clutBuf, saved_clut.begin());
-    StoreImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
+    StoreImage(&area, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
   }
   ~LiveClutFixture() {
-    LoadImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
+    LoadImage(&area, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
     std::ranges::copy(saved_clut, std::begin(r::clutBuf));
   }
   LiveClutFixture(const LiveClutFixture&) = delete;
@@ -346,7 +350,7 @@ struct LiveClutFixture {
   LiveClutFixture& operator=(LiveClutFixture&&) = delete;
   [[nodiscard]] Clut Vram() {
     Clut vram{};
-    StoreImage(&area, reinterpret_cast<u_long*>(vram.data()));
+    StoreImage(&area, reinterpret_cast<std::uint32_t*>(vram.data()));
     return vram;
   }
 };
@@ -500,14 +504,14 @@ struct LiveScreenFixture {
   int saved_step = VS::Battle::submenuState;
   int saved_timer = r::screenTimer;
   int saved_state = r::screenState;
-  u_int saved_animation = r::elementAnimationState;
+  std::uint32_t saved_animation = r::elementAnimationState;
   int saved_completion = r::onScreenMapCompletion;
   int saved_score = r::onScreenScore;
-  u_int saved_reel = r::buffReelSelection;
+  std::uint32_t saved_reel = r::buffReelSelection;
   std::int16_t saved_par = r::puzzleParTime;
   std::int16_t saved_cap = r::puzzleRankCap;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
-  u_int saved_misc = VS::State::scoreData.misc_score;
+  std::uint32_t saved_misc = VS::State::scoreData.misc_score;
   LiveClutFixture clut;
 
   LiveScreenFixture() { r::ResetLiveCubePuzzleLifecycleStatics(); }
@@ -587,7 +591,8 @@ struct LiveReadFixture {
   VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
   VS::Content::DiscDrive saved_drive = VS::Content::discDriveState;
   VS::Field::MapScene* saved_scene = VS::Field::roomData.minimap_scene;
-  u_int saved_scene_length = VS::Field::roomData.header.minimap_scene_length;
+  std::uint32_t saved_scene_length =
+      VS::Field::roomData.header.minimap_scene_length;
   RECT images{r::kCubePuzzleImageX, r::kCubePuzzleImageY, kImageAreaWidth,
               r::kCubePuzzleImageRows};
   std::vector<std::uint16_t> saved_vram =
@@ -601,10 +606,10 @@ struct LiveReadFixture {
                 VS::Content::DiscQueueSlot{});
     VS::Content::discRequestCounts = {};
     VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
-    StoreImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
+    StoreImage(&images, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
   }
   ~LiveReadFixture() {
-    LoadImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
+    LoadImage(&images, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
     VS::Field::roomData.minimap_scene = saved_scene;
     VS::Field::roomData.header.minimap_scene_length = saved_scene_length;
     std::ranges::copy(saved_slots, std::begin(VS::Content::discRequestSlots));
@@ -637,7 +642,7 @@ struct LiveReadFixture {
   [[nodiscard]] std::vector<std::uint16_t> ImageRow(std::int16_t x) const {
     RECT row{x, r::kCubePuzzleImageY, 64, 1};
     std::vector<std::uint16_t> pixels(64);
-    StoreImage(&row, reinterpret_cast<u_long*>(pixels.data()));
+    StoreImage(&row, reinterpret_cast<std::uint32_t*>(pixels.data()));
     return pixels;
   }
 };

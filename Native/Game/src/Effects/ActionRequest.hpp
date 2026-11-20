@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Effects/ActionEffectCallbacks.hpp"
 #include "Effects/EffectRuntime.hpp"
 
@@ -35,7 +35,7 @@ struct LiveActorEndpoint {
 struct LiveActionEffectTarget {
   std::uint16_t type;
   std::uint16_t color_preset;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
 
   // The actor endpoint in `position`'s x and y.
   [[nodiscard]] LiveActorEndpoint Actor() const {
@@ -61,14 +61,14 @@ struct LiveActionEffectRequest {
   LiveActionEffectTarget source;
   std::array<LiveActionEffectTarget, kActionEffectTargets> targets;
   std::array<std::uint8_t, kPrimaryEffectOthers> others;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
 };
 
 namespace layout {
 // The actor endpoint overlays a point's x and y.
 static_assert(sizeof(LiveActorEndpoint) == 2 * sizeof(std::int16_t));
 static_assert(sizeof(LiveActionEffectTarget) ==
-              (2 * sizeof(std::uint16_t)) + sizeof(SVECTOR));
+              (2 * sizeof(std::uint16_t)) + sizeof(VS::Core::Gte::SVECTOR));
 // The request's size as the module bindings place the globals
 // (0xE8 bytes, battleEffect.h:25).
 inline constexpr std::size_t kActionEffectRequestBytes = 0xE8;

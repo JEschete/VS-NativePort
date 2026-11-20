@@ -46,6 +46,8 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Legacy::ClearOTagR;
+
 namespace {
 namespace event = VS::Event;
 namespace content = VS::Content;
@@ -1198,8 +1200,8 @@ struct CutsceneFrameFixture {
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  std::array<u_long, 0x2088 / sizeof(u_long)> ordering{};
-  std::array<u_long, 18> storage{};
+  std::array<std::uint32_t, 0x2088 / sizeof(std::uint32_t)> ordering{};
+  std::array<std::uint32_t, 18> storage{};
   std::uint64_t dropped = VS::Render::DroppedLiveUiPacketCount();
 
   CutsceneFrameFixture() {

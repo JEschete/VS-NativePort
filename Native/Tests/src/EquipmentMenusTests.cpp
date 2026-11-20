@@ -1275,13 +1275,14 @@ struct MenuGlobals {
   detail::ValueRestore<std::uint8_t> load{VS::Content::objectDataLoadStep};
   detail::ArrayRestore<std::uint16_t, std::size(VS::Menu::Inventory::menuText)>
       text{VS::Menu::Inventory::menuText};
-  detail::ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)>
+  detail::ArrayRestore<std::uint8_t,
+                       std::size(VS::Menu::Framework::weaponHands)>
       hands{VS::Menu::Framework::weaponHands};
 
   MenuGlobals() {
     VS::Menu::Inventory::itemsText = nullptr;
     VS::Menu::Inventory::equipListStep = 0;
-    std::ranges::fill(VS::Menu::Framework::weaponHands, u_char{0});
+    std::ranges::fill(VS::Menu::Framework::weaponHands, std::uint8_t{0});
     inv::ResetEquipmentRowsLive();
     inv::ResetEquipmentMenusLive();
   }
@@ -1313,7 +1314,7 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
     AddArmor(3, 144, 5, 1);
     AddArmor(5, 223, inv::kAccessoryLimb, 0);
     AddArmor(9, 224, inv::kAccessoryLimb, inv::kAccessoryLimb);
-    const std::array<u_char, 4> armor{4, 1, 10, 6};
+    const std::array<std::uint8_t, 4> armor{4, 1, 10, 6};
     std::ranges::copy(armor, std::begin(VS::Items::inventoryIndices.armor));
   }
 

@@ -53,7 +53,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Zone.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"
@@ -65,8 +65,24 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 using VS::Battle::ActionState;
 using VS::Battle::TargetVolume;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_MOVE;
+using VS::Legacy::GpuHandle;
+using VS::Legacy::GpuWalkList;
+using VS::Legacy::LoadImage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::RECT;
+using VS::Legacy::setVector;
+using VS::Legacy::StoreImage;
 
 enum {
   kSpatialDimensions = 3,
@@ -80,7 +96,7 @@ enum {
 
 int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   enum { kActorId = 2, kMapOffset = 32, kMapEntries = 256 };
-  u_short file[256] = {0};
+  std::uint16_t file[256] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
   VS::Actors::ActorRecord actor = {0};
@@ -88,8 +104,8 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   const char saved_index = VS::Actors::lastResolvedSequenceIndex;
   const std::int8_t saved_pitch = VS::Battle::specialActionPitch;
   bank->animation_map = kMapOffset;
-  memset(reinterpret_cast<u_char*>(file) + kMapOffset, available ? 0 : 0xFF,
-         kMapEntries);
+  memset(reinterpret_cast<std::uint8_t*>(file) + kMapOffset,
+         available ? 0 : 0xFF, kMapEntries);
   actor.instance.slot = kActorId;
   actor.animation_locked = 1;
   actor.sequence_model_id = 1;
@@ -131,6 +147,12 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   return passed;
 }
 
+// The model's first vertex: vertex_section is a byte offset from the header.
+static SVECTOR* FirstModelVertex(auto* model) {
+  return reinterpret_cast<SVECTOR*>(reinterpret_cast<char*>(model) +
+                                    model->vertex_section);
+}
+
 struct MorphAnimationFixture {
   VS::Actors::ActorRecord actor;
   unsigned model[64];
@@ -144,21 +166,21 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
       reinterpret_cast<VS::Actors::ShpModel*>(fixture->model);
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(fixture->sequence);
-  const u_char events[] = {0, 36, 2, 0, 0xFF, 0xFF};
+  const std::uint8_t events[] = {0, 36, 2, 0, 0xFF, 0xFF};
   bank->animation_map = 32;
   bank->animation_data = 128;
-  memset(reinterpret_cast<u_char*>(bank) + bank->animation_map, 0xFF, 64);
-  (reinterpret_cast<u_char*>(
+  memset(reinterpret_cast<std::uint8_t*>(bank) + bank->animation_map, 0xFF, 64);
+  (reinterpret_cast<std::uint8_t*>(
       bank))[bank->animation_map +
              (animation >= 220 ? animation - 220 : animation)] = 0;
   bank->headers[0] = 16;
   bank->headers[2] = 1;
-  memcpy(reinterpret_cast<u_char*>(bank) + bank->animation_data + 1, events,
-         sizeof events);
+  memcpy(reinterpret_cast<std::uint8_t*>(bank) + bank->animation_data + 1,
+         events, sizeof events);
   model->group_section = 64;
   model->vertex_section = 128;
   model->polygon_section = 136;
-  SVECTOR* vertex = VS_ONDISC(model, vertex_section, SVECTOR*);
+  SVECTOR* vertex = FirstModelVertex(model);
   *vertex = (SVECTOR){11, 22, 33, 44};
   fixture->actor.instance.model = model;
   fixture->actor.model_data_size = sizeof fixture->model;
@@ -171,7 +193,7 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
   fixture->actor.common_sequence = bank;
   fixture->actor.shared_sequences[2] = bank;
   fixture->actor.pose.event_script =
-      reinterpret_cast<u_char*>(bank) + bank->animation_data + 2;
+      reinterpret_cast<std::uint8_t*>(bank) + bank->animation_data + 2;
   fixture->actor.blend_pose.event_script = fixture->actor.pose.event_script;
   fixture->actor.pose.bone_keys[0] = (SVECTOR){101, 202, 303, 0};
   VS::Actors::RegisterSequenceBank(bank, sizeof fixture->sequence);
@@ -184,8 +206,8 @@ static void ForgetMorphAnimation(MorphAnimationFixture* fixture) {
 struct MorphBindingScope {
   VS::Actors::ActorRecord* actors[17];
   int bank;
-  u_char length;
-  u_char page;
+  std::uint8_t length;
+  std::uint8_t page;
   void* data;
   char resolved;
   char skip;
@@ -222,8 +244,7 @@ static void EndMorphBindings(const MorphBindingScope* scope) {
 }
 
 static int MorphIsRetired(const MorphAnimationFixture* fixture) {
-  const SVECTOR* vertex =
-      VS_ONDISC(fixture->actor.instance.model, vertex_section, SVECTOR*);
+  const SVECTOR* vertex = FirstModelVertex(fixture->actor.instance.model);
   return vertex->vx == 10 && vertex->vy == 22 && vertex->vz == 33 &&
          vertex->pad == 44 && !fixture->actor.pose_override_active &&
          fixture->actor.animation_header == 0 &&
@@ -272,20 +293,19 @@ int TestSharedSequenceRetirementControl(int scenario) {
     MorphAnimationFixture* invalid = scenario == 4 ? &first : &second;
     VS::Actors::SeqAnimationBank* bank =
         reinterpret_cast<VS::Actors::SeqAnimationBank*>(invalid->sequence);
-    (reinterpret_cast<u_char*>(bank))[bank->animation_map + 2] = 0xFF;
+    (reinterpret_cast<std::uint8_t*>(bank))[bank->animation_map + 2] = 0xFF;
   }
   const intptr_t expected_header = first.actor.animation_header;
   if (scenario == 6) VS::Actors::SelectLiveSharedSequenceBank(2);
   int status;
   if (scenario == 4) {
-    u_char instruction[] = {0x82, 3};
+    std::uint8_t instruction[] = {0x82, 3};
     status = static_cast<int>(
         VS::Event::ScriptReleaseObjectModelOpcode(instruction, 0));
   } else {
     status = VS::Actors::UnloadLiveSharedSequence(scenario == 3 ? 0 : 3);
   }
-  const SVECTOR* vertex =
-      VS_ONDISC(first.actor.instance.model, vertex_section, SVECTOR*);
+  const SVECTOR* vertex = FirstModelVertex(first.actor.instance.model);
   int passed;
   if (scenario >= 3 && scenario <= 5) {
     passed = status == (scenario == 4 ? 1 : -1) && vertex->vx == 11 &&
@@ -316,7 +336,7 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
     memcpy(wide_sequence, fixture->sequence, sizeof fixture->sequence);
     VS::Actors::SeqAnimationBank* wide =
         reinterpret_cast<VS::Actors::SeqAnimationBank*>(wide_sequence);
-    (reinterpret_cast<u_char*>(wide))[wide->animation_map + 2] = 200;
+    (reinterpret_cast<std::uint8_t*>(wide))[wide->animation_map + 2] = 200;
     wide->headers[static_cast<size_t>(5) * 200] = 16;
     wide->headers[static_cast<size_t>(5) * 200 + 2] = 1;
     fixture->actor.animation_header = reinterpret_cast<intptr_t>(wide);
@@ -332,7 +352,7 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
   if (scenario >= 11 && scenario <= 13) fixture->actor.animation_set = 0xFF;
   if (scenario == 14) fixture->actor.animation_set = 5;
   if (scenario == 3) {
-    (reinterpret_cast<u_char*>(bank))[bank->animation_map + 1] = 0xFF;
+    (reinterpret_cast<std::uint8_t*>(bank))[bank->animation_map + 1] = 0xFF;
   }
   if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
   if (scenario == 4) fixture->actor.pose_override_active = 0;
@@ -340,13 +360,12 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
 
 static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
                                 int scenario, int result,
-                                const u_char* expected_script,
+                                const std::uint8_t* expected_script,
                                 int unchanged_frame) {
   if (scenario == 13) {
     return result != -1 && fixture.actor.animation_set == 0;
   }
-  const SVECTOR* vertex =
-      VS_ONDISC(fixture.actor.instance.model, vertex_section, SVECTOR*);
+  const SVECTOR* vertex = FirstModelVertex(fixture.actor.instance.model);
   const int successful = scenario < 2 || scenario == 8 || scenario == 9 ||
                          scenario == 10 || scenario == 11 || scenario == 12;
   int passed = vertex->vx == (successful ? 10 : 11);
@@ -356,8 +375,8 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
       passed &= VS::Actors::sharedSequenceBankIndex == 1;
     }
     if (scenario == 10) {
-      passed &=
-          static_cast<u_char>(VS::Actors::lastResolvedSequenceIndex) == 200;
+      passed &= static_cast<std::uint8_t>(
+                    VS::Actors::lastResolvedSequenceIndex) == 200;
     }
   } else {
     passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
@@ -387,7 +406,8 @@ int TestAnimationEventUnwind(int scenario) {
   }
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   const int saved_bank = VS::Actors::sharedSequenceBankIndex;
-  const u_char saved_length = VS::Actors::animationEventLengths[kMorphOpcode];
+  const std::uint8_t saved_length =
+      VS::Actors::animationEventLengths[kMorphOpcode];
   const char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
   VS::Actors::actorRecords[kSlot] = &fixture.actor;
   VS::Actors::sharedSequenceBankIndex = 2;
@@ -397,7 +417,7 @@ int TestAnimationEventUnwind(int scenario) {
   VS::Actors::animationEventLengths[kMorphOpcode] = 3;
   fixture.actor.blend_pose.next_event_frame = kUnchangedFrame;
   fixture.actor.pose.frame = 9;
-  u_char* expected_script = fixture.actor.blend_pose.event_script;
+  std::uint8_t* expected_script = fixture.actor.blend_pose.event_script;
   ArrangeUnwindScenario(&fixture, scenario, wide_sequence);
   int result = 0;
   if (scenario == 6 || scenario == 13) {
@@ -444,7 +464,7 @@ int Tests_ActionCameraRecovery(void) {
   VS::Render::projectionDistance = saved_projection;
   VS::Battle::cameraEaseMode = saved_ease;
   VS::Battle::settledCameraDistance = saved_distance;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
@@ -505,16 +525,16 @@ int Tests_TargetSphereWireframe(void) {
   VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   VS::Battle::TargetSphereRecord sphere = {0};
   TargetVolume volume = {0};
-  u_long ordering[0x822];
-  u_long packets[12];
+  std::uint32_t ordering[0x822];
+  std::uint32_t packets[12];
   memset(packets, 0xA5, sizeof packets);
   // The Live wire line reserves its packets inside the frame's primitive
   // buffer.
   VS::Render::frameBuf = 0;
   VS::Render::legacyPrimitiveBuffers[0] = packets + 1;
-  Core_Gte_Reset();
-  Core_Gte_SetGeomOffset(160, 120);
-  Core_Gte_SetGeomScreen(256);
+  VS::Core::Gte::Reset();
+  SetGeomOffset(160, 120);
+  SetGeomScreen(256);
   *frame = (VS::Render::FrameScratch){nullptr};
   for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
     frame->view_matrix.m[axis][axis] = kFixedPointOne;
@@ -534,7 +554,7 @@ int Tests_TargetSphereWireframe(void) {
       4;
   VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   int passed = frame->primitive_cursor == packets + 6 &&
-               (ordering[128] & 0xFFFFFF) == LegacyGpu_Handle(packets + 1) &&
+               (ordering[128] & 0xFFFFFF) == GpuHandle(packets + 1) &&
                (packets[1] >> 24) == 4 && packets[3] == 0x42208020u &&
                packets[5] == 0x007800A0u && packets[0] == 0xA5A5A5A5u &&
                packets[6] == 0xA5A5A5A5u;
@@ -549,7 +569,7 @@ int Tests_TargetSphereWireframe(void) {
   VS::Render::legacyPrimitiveBuffers[0] = saved_primitives;
   VS::Render::frameBuf = saved_frame_buffer;
   *frame = saved_frame;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
@@ -611,14 +631,14 @@ int Tests_GimmickRoomScale(void) {
   VS::Actors::skeletonPose = saved_pose;
   VS::Actors::skeletonRootMatrix = saved_root;
   VS::Actors::roomActorScale = saved_scale;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
 static int FacialTexturePixelsMatch(RECT* destination, const uint16_t* image,
                                     unsigned source_column) {
   uint16_t pixels[kFacialUploadWidth * kFacialImageHeight];
-  StoreImage(destination, reinterpret_cast<u_long*>(pixels));
+  StoreImage(destination, reinterpret_cast<std::uint32_t*>(pixels));
   for (unsigned row = 0; row < kFacialImageHeight; ++row) {
     for (unsigned column = 0; column < kFacialUploadWidth; ++column) {
       if (pixels[row * kFacialUploadWidth + column] !=
@@ -644,8 +664,8 @@ int Tests_FacialTextureBankHandoff(void) {
   RECT source = {640, 256, 64, 2}, destination = {264, 84, 4, 2};
   uint16_t saved_source[kFacialImageWidth * kFacialImageHeight];
   uint16_t saved_destination[kFacialUploadWidth * kFacialImageHeight];
-  StoreImage(&source, reinterpret_cast<u_long*>(saved_source));
-  StoreImage(&destination, reinterpret_cast<u_long*>(saved_destination));
+  StoreImage(&source, reinterpret_cast<std::uint32_t*>(saved_source));
+  StoreImage(&destination, reinterpret_cast<std::uint32_t*>(saved_destination));
   const VS::Render::FrameScratch saved_frame =
       *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
@@ -703,7 +723,7 @@ int Tests_FacialTextureBankHandoff(void) {
   const int16_t origin[2] = {4, 0};
   memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
   VS::Actors::textureSlotRowOffsets[0] = 1;
-  u_long ordering[0x822];
+  std::uint32_t ordering[0x822];
   DR_MOVE packet = {0};
   // The texture move is bounded to the frame's primitive buffer.
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = &packet;
@@ -716,7 +736,7 @@ int Tests_FacialTextureBankHandoff(void) {
       passed &&
       (reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase()))
               ->primitive_cursor == &packet + 1;
-  LegacyGpu_WalkList(&ordering[0x821]);
+  GpuWalkList(&ordering[0x821]);
   passed = FacialTexturePixelsMatch(&destination, image, kFirstFrameColumn) &&
            passed;
   std::ranges::fill(VS::Actors::actorRecords, nullptr);
@@ -737,7 +757,7 @@ int Tests_FacialTextureBankHandoff(void) {
         VS::Actors::sharedSequenceBankIndex == selected - 1 &&
         (reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase()))
                 ->primitive_cursor == &packet + 1;
-    LegacyGpu_WalkList(&ordering[0x821]);
+    GpuWalkList(&ordering[0x821]);
     passed =
         FacialTexturePixelsMatch(&destination, image, kSharedFrameColumn) &&
         passed;
@@ -754,13 +774,13 @@ int Tests_FacialTextureBankHandoff(void) {
           VS::Render::TexturePageState::kRetiring &&
       (reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase()))
               ->primitive_cursor == &packet + 1;
-  LegacyGpu_WalkList(&ordering[0x821]);
+  GpuWalkList(&ordering[0x821]);
   passed = FacialTexturePixelsMatch(&destination, image, kSharedFrameColumn) &&
            passed;
   passed = passed && VS::Content::ReleaseLiveSequenceEffectTexture(0) == -1 &&
            VS::Content::ReleaseLiveSequenceEffectTexture(4) == -1;
-  LoadImage(&source, reinterpret_cast<u_long*>(saved_source));
-  LoadImage(&destination, reinterpret_cast<u_long*>(saved_destination));
+  LoadImage(&source, reinterpret_cast<std::uint32_t*>(saved_source));
+  LoadImage(&destination, reinterpret_cast<std::uint32_t*>(saved_destination));
   *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase()) =
       saved_frame;
   VS::Render::legacyCurrentOrderingTable = saved_ordering;
@@ -804,7 +824,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
     unsigned after;
   } guarded;
   memset(&guarded, 0xA5, sizeof guarded);
-  u_long ordering[0x822];
+  std::uint32_t ordering[0x822];
   ClearOTagR(ordering, 0x822);
   VS::Render::legacyCurrentOrderingTable = ordering;
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
@@ -971,8 +991,8 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   const char saved_control = VS::Event::scriptControlledActors[kSlot];
   const char saved_skip = VS::Event::skipState;
-  u_char instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
-  instruction[9] = static_cast<u_char>(rate);
+  std::uint8_t instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
+  instruction[9] = static_cast<std::uint8_t>(rate);
   VS::Actors::actorRecords[kSlot] = present ? &actor : nullptr;
   actor.move_rate = kDefaultRate;
   actor.instance.position = (SVECTOR){100, 200, 300, 0};
@@ -1005,7 +1025,7 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
 
 enum { kScriptedEffectSlot = 3, kScriptedEffectModel = 53 };
 
-static u_short ScriptedEffectSelector(int scenario) {
+static std::uint16_t ScriptedEffectSelector(int scenario) {
   switch (scenario) {
     case 0:
     case 3:
@@ -1039,11 +1059,11 @@ int TestScriptedEffectTargetBinding(int scenario) {
   const VS::Effects::LiveEffectCamera saved_action_camera =
       VS::Effects::savedActionCamera;
   VS::Effects::LiveEffectPackage* saved_package = VS::Effects::package;
-  const u_int saved_phase = VS::Effects::primaryPhase;
+  const std::uint32_t saved_phase = VS::Effects::primaryPhase;
   const char saved_token = VS::Effects::primaryToken;
   int saved_bitmaps[4];
-  u_char request_before[sizeof VS::Effects::actionRequest];
-  u_char request_after[sizeof VS::Effects::actionRequest];
+  std::uint8_t request_before[sizeof VS::Effects::actionRequest];
+  std::uint8_t request_after[sizeof VS::Effects::actionRequest];
   memcpy(request_before, &VS::Effects::actionRequest, sizeof request_before);
   for (int i = 0; i < kSlots; ++i) {
     saved_battle[i] = VS::Battle::actors[i];
@@ -1070,11 +1090,12 @@ int TestScriptedEffectTargetBinding(int scenario) {
       VS::Actors::actorRecords[slot] = &actor;
     }
   }
-  const u_short selector = ScriptedEffectSelector(scenario);
+  const std::uint16_t selector = ScriptedEffectSelector(scenario);
   const int effect = scenario == 10 ? 298 : kEffect;
-  u_char instruction[] = {
-      0xA0, static_cast<u_char>(effect), static_cast<u_char>(effect >> 8),
-      static_cast<u_char>(selector), static_cast<u_char>(selector >> 8)};
+  std::uint8_t instruction[] = {0xA0, static_cast<std::uint8_t>(effect),
+                                static_cast<std::uint8_t>(effect >> 8),
+                                static_cast<std::uint8_t>(selector),
+                                static_cast<std::uint8_t>(selector >> 8)};
   VS::Effects::primaryPhase = 3;
   const intptr_t result =
       VS::Event::CommandPlayActorEffectOpcode(instruction, 0);
@@ -1167,7 +1188,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
     actor.bone_matrices[0].t[axis] = (axis + 1) * 110;
     object.matrices[0].t[axis] = actor.bone_matrices[0].t[axis] + 100;
   }
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   SVECTOR result = {1, 2, 3, 77};
   const int status =
       VS::Actors::LiveActorBoneEndpointPosition(slot, 0, &result, endpoint);
@@ -1198,7 +1219,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   VS::Render::ForgetLiveModelExtent(model);
   VS::Actors::boneMatrixScratch = saved_matrix;
   *VS::Render::ModelWorkspace() = saved_workspace;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed && result.pad == 77;
 }
 
@@ -1217,9 +1238,9 @@ int Tests_ProjectedBoneEndpoints(void) {
     actor.bone_matrices[0].m[axis][axis] = kFixedPointOne;
   }
   actor.bone_matrices[0].t[2] = 1024;
-  Core_Gte_Reset();
-  Core_Gte_SetGeomOffset(160, 120);
-  Core_Gte_SetGeomScreen(256);
+  VS::Core::Gte::Reset();
+  SetGeomOffset(160, 120);
+  SetGeomScreen(256);
   int output[2] = {0};
   int passed = VS::Actors::ProjectLiveActorBoneEndpoint(0, 0, output, 0) == 0 &&
                output[0] == ((120 << 16) | 160) && output[1] == 1024;
@@ -1233,7 +1254,7 @@ int Tests_ProjectedBoneEndpoints(void) {
            VS::Actors::ProjectLiveActorBoneEndpoint(0, 1, output, 0) == -4 &&
            VS::Actors::ProjectLiveActorBoneEndpoint(-1, 0, output, 0) == -1;
   VS::Actors::actorRecords[0] = saved;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
@@ -1284,8 +1305,8 @@ int Tests_ActorPoseHierarchy(void) {
   group[0] = 0;
   group[1] = 1;
   setVector(&VS::Render::ModelWorkspace()->root_offset, 0, 0, 1024);
-  Core_Gte_Reset();
-  Core_Gte_SetGeomScreen(256);
+  VS::Core::Gte::Reset();
+  SetGeomScreen(256);
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
   passed = passed && actor.instance.was_drawn &&
            VS::Actors::modelRenderContext.projected_vertex_count == 1;
@@ -1306,7 +1327,7 @@ int Tests_ActorPoseHierarchy(void) {
   VS::Actors::skeletonPose = saved_pose;
   VS::Actors::modelRenderContext = saved_context;
   *VS::Render::ModelWorkspace() = saved_workspace;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
@@ -1322,9 +1343,9 @@ static void BuildModelPacketFixture(VS::Actors::ShpModel* model,
                                     const ModelPacketOptions* options) {
   instance->triangle_count = 1;
   instance->uv_layout = static_cast<std::int8_t>(options->colored != 0);
-  instance->palette_pulse.kind = static_cast<u_char>(options->pulse_mask);
+  instance->palette_pulse.kind = static_cast<std::uint8_t>(options->pulse_mask);
   if (static_cast<unsigned>(options->limb) < 8) {
-    const u_short count = 1;
+    const std::uint16_t count = 1;
     const size_t group =
         (options->split != 0 ? 32 : 0) + static_cast<size_t>(options->limb) * 2;
     memcpy(model->header + group, &count, sizeof count);
@@ -1371,7 +1392,7 @@ static void BuildModelPacketFixture(VS::Actors::ShpModel* model,
   }
 }
 
-static int ModelPacketColorsMatch(const u_long* packet, int colored,
+static int ModelPacketColorsMatch(const std::uint32_t* packet, int colored,
                                   unsigned blend, const CVECTOR* tint) {
   enum { kVertexPacketWords = 3, kTriangleCorners = 3 };
   if (!colored) return 1;
@@ -1470,7 +1491,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   unsigned char* memory = static_cast<unsigned char*>(malloc(0x20010));
   if (memory == nullptr) return 0;
   memset(memory, 0xA5, 0x20010);
-  u_long ordering[2048];
+  std::uint32_t ordering[2048];
   ClearOTagR(ordering, 2048);
   memset(frame, 0, sizeof *frame);
   frame->primitive_cursor = memory + 8;
@@ -1507,7 +1528,8 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   VS::Render::ForgetLiveModelExtent(model);
   // The static record must not keep the stack model past this frame.
   actor = {};
-  const u_long* packet = reinterpret_cast<const u_long*>(memory + 8);
+  const std::uint32_t* packet =
+      reinterpret_cast<const std::uint32_t*>(memory + 8);
   const unsigned palette = 0x1234 + (static_cast<unsigned>(limb) < 8 &&
                                              (pulse_mask & (0x80u >> limb)) != 0
                                          ? 0x480
@@ -1529,18 +1551,18 @@ static int ModelPolygonPackets(int colored, int split, int limb,
                nextPrim(&ordering[254]) == packet;
   passed = passed && ModelPacketColorsMatch(packet, colored, blend, &tint);
   if (split != 0) {
-    const u_long* second = packet + 8;
+    const std::uint32_t* second = packet + 8;
     const auto& projected = VS::Actors::modelRenderContext.projected_vertices;
-    passed = frame->primitive_cursor == memory + 72 &&
-             (packet[1] >> 24) == (0x24 | command_bit) &&
-             (second[1] >> 24) == (0x24 | command_bit) &&
-             packet[3] == first_uv && second[3] >> 16 == palette &&
-             packet[5] == page_uv &&
-             packet[7] == (split > 0 ? 0x3C32u : 0x5046u) &&
-             packet[6] == static_cast<u_long>(projected[split > 0 ? 2 : 3]) &&
-             second[2] == static_cast<u_long>(projected[split > 0 ? 1 : 0]) &&
-             second[4] == static_cast<u_long>(projected[3]) &&
-             second[6] == static_cast<u_long>(projected[2]);
+    passed =
+        frame->primitive_cursor == memory + 72 &&
+        (packet[1] >> 24) == (0x24 | command_bit) &&
+        (second[1] >> 24) == (0x24 | command_bit) && packet[3] == first_uv &&
+        second[3] >> 16 == palette && packet[5] == page_uv &&
+        packet[7] == (split > 0 ? 0x3C32u : 0x5046u) &&
+        packet[6] == static_cast<std::uint32_t>(projected[split > 0 ? 2 : 3]) &&
+        second[2] == static_cast<std::uint32_t>(projected[split > 0 ? 1 : 0]) &&
+        second[4] == static_cast<std::uint32_t>(projected[3]) &&
+        second[6] == static_cast<std::uint32_t>(projected[2]);
   }
   passed = passed && memory[0] == 0xA5 && memory[0x2000F] == 0xA5;
   *frame = saved_frame;
@@ -1602,9 +1624,9 @@ int Tests_ModelProjectionGroups(void) {
     matrices[bone].t[2] = 1024;
   }
   matrices[1].t[0] = 128;
-  Core_Gte_Reset();
-  Core_Gte_SetGeomOffset(160, 120);
-  Core_Gte_SetGeomScreen(256);
+  VS::Core::Gte::Reset();
+  SetGeomOffset(160, 120);
+  SetGeomScreen(256);
   static VS::Actors::ActorRecord actor;
   actor = {};
   actor.instance = instance;
@@ -1627,7 +1649,7 @@ int Tests_ModelProjectionGroups(void) {
   groups[3] = 769;
   passed = passed && !VS::Render::ProjectLiveActorModel(actor, matrices);
   VS::Actors::modelRenderContext = saved;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
@@ -1676,15 +1698,16 @@ int Tests_ModelWorkspaceIsolation(void) {
   *workspace = saved_workspace;
   VS::Render::cameraBasisMatrix = saved_basis;
   VS::Actors::boneMatrixScratch = saved_inverse;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   return passed;
 }
 
 // _loadSeq, BATTLE/30DB0.c:1748-1779: adjacent four-byte offsets must not
 // become one native pointer.
 int Tests_SharedSequenceOffsets(void) {
-  u_int source[128] = {2, 101, 102, 5, 6, 32, 144};
-  u_char* payload = reinterpret_cast<u_char*>(source) + 7 * sizeof(u_int);
+  std::uint32_t source[128] = {2, 101, 102, 5, 6, 32, 144};
+  std::uint8_t* payload =
+      reinterpret_cast<std::uint8_t*>(source) + 7 * sizeof(std::uint32_t);
   VS::Actors::SeqAnimationBank* first =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>((payload + 32 + 8));
   VS::Actors::SeqAnimationBank* second =
@@ -1697,12 +1720,12 @@ int Tests_SharedSequenceOffsets(void) {
   int16_t saved_ids[16];
   int16_t saved_params[16];
   char* saved_entries[16];
-  u_char saved_page = VS::Actors::sharedSequenceBankTexturePages[0];
-  u_char saved_bank = VS::Actors::sharedSequenceBankIndex;
+  std::uint8_t saved_page = VS::Actors::sharedSequenceBankTexturePages[0];
+  std::uint8_t saved_bank = VS::Actors::sharedSequenceBankIndex;
   char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
-  u_char saved_phase = VS::Content::legacySequenceParsePhase;
-  u_char* saved_parse_data = VS::Content::legacySequenceParseData;
-  u_short* header = nullptr;
+  std::uint8_t saved_phase = VS::Content::legacySequenceParsePhase;
+  std::uint8_t* saved_parse_data = VS::Content::legacySequenceParseData;
+  std::uint16_t* header = nullptr;
   int passed;
 
   std::ranges::copy(VS::Actors::actorRecords, saved_actors);
@@ -1721,13 +1744,13 @@ int Tests_SharedSequenceOffsets(void) {
   actor.instance.bone_count = 2;
   first->animation_map = second->animation_map = 64;
   // Each embedded file's size word bounds the bank the parse registers.
-  const u_int first_bytes = 144 - 32 - 8;
-  const u_int second_bytes =
-      static_cast<u_int>(sizeof source - (7 * sizeof(u_int) + 144 + 8));
+  const std::uint32_t first_bytes = 144 - 32 - 8;
+  const std::uint32_t second_bytes = static_cast<std::uint32_t>(
+      sizeof source - (7 * sizeof(std::uint32_t) + 144 + 8));
   memcpy(payload + 32 + 4, &first_bytes, sizeof first_bytes);
   memcpy(payload + 144 + 4, &second_bytes, sizeof second_bytes);
-  (reinterpret_cast<u_char*>(first))[64] = 1;
-  (reinterpret_cast<u_char*>(second))[64] = 0;
+  (reinterpret_cast<std::uint8_t*>(first))[64] = 1;
+  (reinterpret_cast<std::uint8_t*>(second))[64] = 0;
   request.asset_kind = 8;
   request.target_slot = 1;
   request.sub_kind = 1;
@@ -1782,7 +1805,7 @@ int Tests_SharedSequenceOffsets(void) {
 }
 
 int Tests_AdvanceSequenceWithoutScratch(void) {
-  u_int file[64] = {0};
+  std::uint32_t file[64] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
   VS::Actors::ActorRecord actor = {0};
@@ -1795,7 +1818,7 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   bank->animation_map = 48;
   bank->headers[3] = 4;
   bank->headers[5] = 8;
-  memcpy(reinterpret_cast<u_char*>(file) + 68, tracks, sizeof tracks);
+  memcpy(reinterpret_cast<std::uint8_t*>(file) + 68, tracks, sizeof tracks);
   VS::Actors::RegisterSequenceBank(bank, sizeof file);
   actor.owned_sequence = bank;
   actor.instance.bone_count = 1;

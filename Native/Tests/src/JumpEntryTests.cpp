@@ -26,6 +26,8 @@
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 using JumpEntry = void (*)(int, int*, int, int);
 // The packed-word entries the copied callers use (each also has a typed

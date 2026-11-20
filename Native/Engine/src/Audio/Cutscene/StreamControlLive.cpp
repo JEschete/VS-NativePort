@@ -24,7 +24,7 @@
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Platform/Paths.hpp"
 
 namespace {

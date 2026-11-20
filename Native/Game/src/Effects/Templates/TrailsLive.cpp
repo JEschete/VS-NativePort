@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -60,13 +60,27 @@
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Trails.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+// GTE callers share this using list; it is not copy/paste to extract.
+// jscpd:ignore-start
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+// jscpd:ignore-end
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects::Templates {
 namespace {
@@ -453,8 +467,8 @@ bool LiveTrailHost<History>::BeginProjection(bool effect_view) {
   if (transform == nullptr) {
     return false;
   }
-  Core_Gte_SetRotMatrix(&transform->view);
-  Core_Gte_SetTransMatrix(&transform->view);
+  SetRotMatrix(&transform->view);
+  SetTransMatrix(&transform->view);
   return true;
 }
 
@@ -462,11 +476,11 @@ template <std::size_t History>
 RingProjection LiveTrailHost<History>::Project(TrailPoint point) {
   SVECTOR sample{};
   StorePoint(sample, point);
-  Core_Gte_LoadV0(&sample);
-  Core_Gte_Rtps();
-  std::array<Core_GteWord, 2> stored{};
-  Core_Gte_StoreSxy2(&stored[0]);
-  Core_Gte_StoreSz3Otz(&stored[1]);
+  LoadV0(&sample);
+  Rtps();
+  std::array<VS::Core::Gte::Word, 2> stored{};
+  StoreSxy2(&stored[0]);
+  StoreSz3Otz(&stored[1]);
   RingProjection projection;
   projection.screen = static_cast<std::uint32_t>(stored[0]);
   projection.depth = static_cast<std::int32_t>(stored[1]);
@@ -532,9 +546,9 @@ std::array<std::uint8_t, History> LiveTrailHost<History>::Transparency() {
 // dropped here.
 template <std::size_t History>
 void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
-  u_long* const bucket =
+  std::uint32_t* const bucket =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, depth);
-  u_long* const words =
+  std::uint32_t* const words =
       bucket == nullptr ? nullptr
                         : Render::ReserveLivePrimitiveWords(kRingPacketWords);
   if (words == nullptr) {
@@ -550,7 +564,7 @@ void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
   const std::uint32_t previous = static_cast<std::uint32_t>(*bucket);
   const auto packet = EncodeRingPacket(quad, previous);
   std::ranges::copy(packet, words);
-  const std::uint32_t handle = LegacyGpu_Handle(words);
+  const std::uint32_t handle = GpuHandle(words);
   *bucket = (previous & ~kRingLinkMask) | (handle & kRingLinkMask);
   VS::Render::FrameScratchpad().primitive_cursor = words + packet.size();
 }

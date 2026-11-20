@@ -31,8 +31,11 @@
 #include "Field/Room.hpp"
 #include "Field/Traps.hpp"
 #include "Field/TrapsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Progress.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionDefinition;
 

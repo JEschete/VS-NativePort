@@ -19,7 +19,7 @@
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
 #include "Field/RoomEffectsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {

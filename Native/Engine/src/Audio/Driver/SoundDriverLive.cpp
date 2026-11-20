@@ -17,7 +17,7 @@
 #include "Audio/SoundDriver.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::CloseEvent;
 using VS::Legacy::DisableEvent;

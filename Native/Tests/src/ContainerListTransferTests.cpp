@@ -1011,9 +1011,9 @@ using LiveFixture = live::PendingRowsLiveFixture;
 
 struct DirectionFrame {
   int result = 0;
-  u_short selection = 0;
+  std::uint16_t selection = 0;
   std::array<std::int16_t, 2> x{};
-  std::array<u_char, 2> selected{};
+  std::array<std::uint8_t, 2> selected{};
   friend bool operator==(const DirectionFrame&,
                          const DirectionFrame&) = default;
 };
@@ -1227,7 +1227,7 @@ TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",
   REQUIRE(transfer::LiveUpdateScreen(nullptr) == 0);
   live::equipment::ValueRestore<VS::Items::Container*> active{
       VS::Menu::container::containerData};
-  u_char step = 6;
+  std::uint8_t step = 6;
   VS::Menu::container::containerData = nullptr;
   REQUIRE(transfer::LiveUpdateScreen(&step) == 0);
   REQUIRE(step == 6);

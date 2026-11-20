@@ -14,6 +14,8 @@
 #include "Render/UiTexturedQuads.hpp"
 #include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
+using VS::Legacy::ClearOTagR;
+
 namespace {
 namespace b = VS::Battle;
 namespace r = VS::Render;

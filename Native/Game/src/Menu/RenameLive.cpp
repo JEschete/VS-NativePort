@@ -18,7 +18,7 @@
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -35,7 +35,7 @@
 #include "Render/UiPacketsLive.hpp"
 
 // decomp: _renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c)
-u_short VS::Menu::Rename::renderRenameMenuStrings
+std::uint16_t VS::Menu::Rename::renderRenameMenuStrings
     [VS::Menu::Rename::kMenuStringCount];
 
 namespace VS::Menu::Rename {
@@ -89,7 +89,7 @@ class LiveHost final : public Host {
   }
   void DrawGlyph(std::uint8_t glyph, int x, int y,
                  Framework::Layer layers) override {
-    u_long* const chain = Chain(layers);
+    std::uint32_t* const chain = Chain(layers);
     if (chain == nullptr) {
       Refuse("rename glyph outside the frame's ordering table");
       return;
@@ -114,7 +114,7 @@ class LiveHost final : public Host {
         Framework::LiveGradientStopColor(gradient, color_index, brightness));
   }
   int DrawCursor(int step, std::uint32_t position) override {
-    return Framework::DrawLiveCursor(static_cast<u_int>(step),
+    return Framework::DrawLiveCursor(static_cast<std::uint32_t>(step),
                                      static_cast<int>(position));
   }
   int DrawMainMenuCursor(int step, int position) override {
@@ -223,7 +223,7 @@ class LiveHost final : public Host {
  private:
   // The ordering table entry a layer links into; null when it lies outside
   // the frame's table.
-  [[nodiscard]] static u_long* Chain(Framework::Layer layer) {
+  [[nodiscard]] static std::uint32_t* Chain(Framework::Layer layer) {
     switch (layer.base) {
       case Framework::LayerBase::kScene:
         return Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene,

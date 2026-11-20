@@ -23,7 +23,9 @@
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 using VS::Field::CollisionCellRef;
@@ -166,7 +168,7 @@ class LiveActorCollisionFlags final : public VS::Field::ActorCollisionFlags {
 // The platform and gimmick an actor stands on (Actors movement state). The
 // original stores the layer as a word over the halfword and its padding.
 void RecordSupportingPlatformLayer(std::int32_t layer) {
-  VS::Actors::supportingPlatformLayer = static_cast<u_short>(layer);
+  VS::Actors::supportingPlatformLayer = static_cast<std::uint16_t>(layer);
 }
 
 void RecordSupportingGimmick(std::uint8_t slot) {

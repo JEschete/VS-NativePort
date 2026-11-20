@@ -17,11 +17,14 @@
 #include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Field/CameraLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::VECTOR;
 
 namespace VS::Effects {
 // decomp: D_800F54B8 (D_800F54B8@BATTLE/BATTLE.PRG)

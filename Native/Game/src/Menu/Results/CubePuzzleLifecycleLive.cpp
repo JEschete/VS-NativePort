@@ -23,7 +23,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
@@ -38,9 +38,12 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace VS::Menu::Results {
 namespace {
-static_assert(sizeof(u_short) == sizeof(std::uint16_t));
 static_assert(std::size(clutBuf) == kResultsClutWords);
 
 // Refusals so far; each warning repeats at each power of two.
@@ -134,8 +137,8 @@ class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the pixels.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    LoadImage(&rect,
-              reinterpret_cast<u_long*>(const_cast<std::byte*>(pixels.data())));
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
+                         const_cast<std::byte*>(pixels.data())));
   }
   // The original read the scene's first room without checking the scene.
   std::optional<CubePuzzleRoom> CurrentRoom() override {
@@ -183,7 +186,7 @@ class LiveClutTarget final : public ResultsClutTarget {
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the colors.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    LoadImage(&rect, reinterpret_cast<u_long*>(
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
                          const_cast<std::uint16_t*>(colors.data())));
   }
 };

@@ -21,7 +21,7 @@
 #include "Field/Traps.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::LimbStats;

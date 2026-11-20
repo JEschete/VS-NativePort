@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -57,7 +57,7 @@
 #include "Effects/Templates/SurfaceCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Frame.hpp"
 #include "Render/LegacyPackets.hpp"
@@ -65,6 +65,20 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::Rtv0Tr;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects::Templates {
 namespace {
@@ -395,18 +409,18 @@ void LiveSurfaceServices::BeginProjection(bool effect_view) const {
     return;
   }
   const MATRIX& view = instance_->transforms[definition_->transform_index].view;
-  Core_Gte_SetRotMatrix(&view);
-  Core_Gte_SetTransMatrix(&view);
+  SetRotMatrix(&view);
+  SetTransMatrix(&view);
 }
 
 RingProjection LiveSurfaceServices::Project(RingPoint point) {
   const SVECTOR vertex{point.x, point.y, point.z, 0};
-  Core_Gte_LoadV0(&vertex);
-  Core_Gte_Rtps();
-  Core_GteWord screen = 0;
-  Core_GteWord depth = 0;
-  Core_Gte_StoreSxy2(&screen);
-  Core_Gte_StoreSz3Otz(&depth);
+  LoadV0(&vertex);
+  Rtps();
+  VS::Core::Gte::Word screen = 0;
+  VS::Core::Gte::Word depth = 0;
+  StoreSxy2(&screen);
+  StoreSz3Otz(&depth);
   return {.screen = static_cast<std::uint32_t>(screen),
           .depth = static_cast<std::int32_t>(depth)};
 }
@@ -452,11 +466,11 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
 // here.
 void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
                                  std::int32_t depth) const {
-  u_long* const entry =
+  std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, depth);
-  u_long* const packet = entry != nullptr
-                             ? Render::ReserveLivePrimitiveWords(words.size())
-                             : nullptr;
+  std::uint32_t* const packet =
+      entry != nullptr ? Render::ReserveLivePrimitiveWords(words.size())
+                       : nullptr;
   if (packet == nullptr) {
     if (ShouldReport(dropped_primitives)) {
       VS::Core::LogWarn(
@@ -469,8 +483,7 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
   }
   std::ranges::copy(words, packet);
   packet[0] |= *entry & kRingLinkMask;
-  *entry =
-      (*entry & kOrderingHighMask) | (LegacyGpu_Handle(packet) & kRingLinkMask);
+  *entry = (*entry & kOrderingHighMask) | (GpuHandle(packet) & kRingLinkMask);
   VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
 }
 
@@ -479,15 +492,15 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
 Vec3 LiveSurfaceServices::TransformByActor(RingPoint point) const {
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
-  Core_Gte_SetRotMatrix(&world);
-  Core_Gte_SetTransMatrix(&world);
+  SetRotMatrix(&world);
+  SetTransMatrix(&world);
   LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.vector.vx = point.x;
   scratch.vector.vy = point.y;
   scratch.vector.vz = point.z;
-  Core_Gte_LoadV0(&scratch.vector);
-  Core_Gte_Rtv0Tr();
-  Core_Gte_StoreLvnl(&scratch.aim_point);
+  LoadV0(&scratch.vector);
+  Rtv0Tr();
+  StoreLvnl(&scratch.aim_point);
   return Wide(scratch.aim_point);
 }
 

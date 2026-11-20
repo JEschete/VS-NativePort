@@ -14,7 +14,7 @@
 #include "Battle/BattleTypes.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

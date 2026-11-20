@@ -25,7 +25,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 // Catch2's REQUIRE throws, but clang-tidy cannot see that; the explicit throw
@@ -50,8 +50,8 @@ struct CommandFixture {
   VS::Actors::ActorRecord target{};
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActionCandidateRecord candidate{};
-  u_short heights[32][32]{};
-  u_short flags[32][32]{};
+  std::uint16_t heights[32][32]{};
+  std::uint16_t flags[32][32]{};
 
   CommandFixture() {
     VS::Battle::actors[2] = &actor;
@@ -91,8 +91,8 @@ struct CommandFixture {
     frame->roomData = nullptr;
     frame->heightMap = heights;
     frame->tileFlags = flags;
-    const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
-                                           0x10, 0x11, 0x01, 0x31};
+    const std::array<std::uint8_t, 8> directions{0x30, 0x33, 0x03, 0x13,
+                                                 0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame->directions);
     VS::Battle::Ai::tileFlagMap = flags;
   }
@@ -181,7 +181,7 @@ TEST_CASE(
   const uint16_t threshold = 10;
   std::memcpy(fixture.state.step_height_bytes.data(), &threshold,
               sizeof(threshold));
-  fixture.state.movement_flags = static_cast<u_short>(flags);
+  fixture.state.movement_flags = static_cast<std::uint16_t>(flags);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 14);
   const auto expected =
       flags == 8 ? 23 : (flags == 0x30 ? 18 : (flags == 0xC0 ? 14 : 11));
@@ -352,7 +352,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
     REQUIRE(frame->heightMap == VS::Battle::Ai::specialTerrainHeights);
     REQUIRE(frame->heightMap != nullptr);
     CHECK(frame->randomState == 0x12345678);
-    frame->heightMap[1][1] = static_cast<u_short>(world);
+    frame->heightMap[1][1] = static_cast<std::uint16_t>(world);
     VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
     CHECK((fixture.actor.command_arg0 >> 16) == world * 64 + 16);
     frame->actors[0] = &fixture.state;

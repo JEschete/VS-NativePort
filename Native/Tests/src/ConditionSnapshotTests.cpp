@@ -11,7 +11,7 @@
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct StoredCondition {

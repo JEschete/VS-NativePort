@@ -10,7 +10,7 @@
 
 #include "Battle/Hit.hpp"
 #include "Battle/TargetingState.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 
@@ -65,7 +65,7 @@ struct ActionRequestRecord {
   std::uint16_t animation_parameter;
   std::uint16_t target_count;
   std::array<HitResult, kActionRequestTargetCount> targets;
-  SVECTOR focus_position;
+  VS::Core::Gte::SVECTOR focus_position;
 };
 
 inline constexpr std::size_t kActionQueueCount = 4;
@@ -86,8 +86,8 @@ struct ActionState {
   std::uint8_t camera_preview;
   std::int8_t selection_frames;
   std::int8_t reserved_298f;
-  SVECTOR saved_area_center;
-  SVECTOR area_center;
+  VS::Core::Gte::SVECTOR saved_area_center;
+  VS::Core::Gte::SVECTOR area_center;
   std::int8_t range_shape;
   std::int8_t range_kind;
   std::int16_t range_facing;
@@ -95,7 +95,7 @@ struct ActionState {
   std::int8_t range_y;
   std::int8_t range_z;
   std::int8_t range_angle;
-  SVECTOR range_origin;
+  VS::Core::Gte::SVECTOR range_origin;
   std::int8_t area_shape;
   std::int8_t area_kind;
   std::int16_t area_facing;
@@ -103,7 +103,7 @@ struct ActionState {
   std::int8_t area_y;
   std::int8_t area_z;
   std::int8_t area_angle;
-  SVECTOR area_origin;
+  VS::Core::Gte::SVECTOR area_origin;
   std::array<TargetPreview, kActionPreviewCount> previews;
   std::array<std::int32_t, kActionStateReservedWords> reserved_2be8;
   std::uint16_t preview_count;

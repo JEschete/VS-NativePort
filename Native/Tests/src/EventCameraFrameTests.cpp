@@ -17,6 +17,8 @@
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Field/CameraLive.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 namespace {
 namespace ev = VS::Event;
 using VS::Core::Math::Mat3;

@@ -31,8 +31,12 @@
 #include "Battle/Feedback.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Timers.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::StoreImage;
 
 namespace {
 struct CleanupFixture {
@@ -52,7 +56,7 @@ struct CleanupFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<VS::Battle::Actor, 3> actors{};
   VS::Battle::Ai::RoomAiState room{};
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
 
   CleanupFixture() {
     VS::Battle::Ai::roomAiState = &room;
@@ -100,7 +104,7 @@ struct CleanupFixture {
             sizeof(VS::Battle::Ai::ActorAiState)));
     REQUIRE(state != nullptr);
     std::construct_at(state);
-    state->actor_id = static_cast<u_char>(actors[index].id);
+    state->actor_id = static_cast<std::uint8_t>(actors[index].id);
     state->actor =
         reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
     state->next_tile.word = 0x00070004;
@@ -131,7 +135,7 @@ VS::Battle::Ai::ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
   auto* state = fixture.AllocateState(0);
   fixture.AllocateState(1);
   fixture.AllocateState(2);
-  fixture.actors[0].sub_type = static_cast<u_short>(sub_type);
+  fixture.actors[0].sub_type = static_cast<std::uint16_t>(sub_type);
   state->linked_actor = 7;
   VS::Battle::Ai::SettingsWord settings{};
   VS::Battle::Ai::ApplyLiveActorAiSettings(
@@ -348,7 +352,7 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
   CleanupFixture fixture;
   for (int cycle = 0; cycle < 2; ++cycle) {
     auto* state = fixture.AllocateState(1);
-    fixture.actors[1].sub_type = static_cast<u_short>(type);
+    fixture.actors[1].sub_type = static_cast<std::uint16_t>(type);
     VS::Battle::Ai::AllocateLiveOrbitingBossState(
         reinterpret_cast<VS::Battle::Ai::SettingsView*>(state));
     REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
@@ -366,11 +370,12 @@ struct AppearanceFixture {
   decltype(VS::Field::gimmickInstances) saved_objects =
       VS::Field::gimmickInstances;
   RECT palette_region{768, 224, 256, 32};
-  alignas(u_long) std::array<u_char, 16384> saved_cluts{};
+  alignas(std::uint32_t) std::array<std::uint8_t, 16384> saved_cluts{};
   VS::Actors::ActorRecord actor{};
 
   AppearanceFixture() {
-    StoreImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
+    StoreImage(&palette_region,
+               reinterpret_cast<std::uint32_t*>(saved_cluts.data()));
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_objects.size(),
@@ -389,45 +394,47 @@ struct AppearanceFixture {
               VS::Actors::actorRecords.begin());
     std::copy(saved_objects.begin(), saved_objects.end(),
               VS::Field::gimmickInstances.begin());
-    LoadImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
+    LoadImage(&palette_region,
+              reinterpret_cast<std::uint32_t*>(saved_cluts.data()));
     VS::State::tickSpeed = saved_speed;
   }
 };
 
-constexpr std::array<u_short, 16> kPulseColors = {
+constexpr std::array<std::uint16_t, 16> kPulseColors = {
     0,      0x001F, 0x03E0, 0x7C00, 0x8000, 0xFFFF, 0x4210, 0x1234,
     0x2222, 0x3333, 0x4444, 0x5555, 0x6666, 0x7777, 0x1357, 0x2468,
 };
 
-u_short PulseColor(u_short color, int level) {
+std::uint16_t PulseColor(std::uint16_t color, int level) {
   const int red = color & 31;
   const int green = (color >> 5) & 31;
   const int blue = (color >> 10) & 31;
   const int r = std::clamp(red + (level == 16 ? 8 : -level / 2), 0, 31);
   const int g = std::min(31, green + (level == 16 ? 18 : level / 2));
   const int b = std::min(31, blue + (level == 16 ? 30 : level));
-  return static_cast<u_short>((color & 0x8000) | r | (g << 5) | (b << 10));
+  return static_cast<std::uint16_t>((color & 0x8000) | r | (g << 5) |
+                                    (b << 10));
 }
 
 template <std::size_t Count>
-std::array<u_short, Count> PulseClut(int row, int offset) {
-  alignas(u_long) std::array<u_short, Count> colors{};
+std::array<std::uint16_t, Count> PulseClut(int row, int offset) {
+  alignas(std::uint32_t) std::array<std::uint16_t, Count> colors{};
   RECT area{static_cast<std::int16_t>(768 + offset),
             static_cast<std::int16_t>(224 + row),
             static_cast<std::int16_t>(Count), 1};
-  StoreImage(&area, reinterpret_cast<u_long*>(colors.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(colors.data()));
   return colors;
 }
 
 template <typename Record>
-std::array<u_char, sizeof(Record)> ObjectBytes(const Record& record) {
-  std::array<u_char, sizeof(Record)> bytes;
+std::array<std::uint8_t, sizeof(Record)> ObjectBytes(const Record& record) {
+  std::array<std::uint8_t, sizeof(Record)> bytes;
   std::memcpy(bytes.data(), &record, bytes.size());
   return bytes;
 }
 
 void CheckPulseCycle(VS::Field::GimmickInstance& object,
-                     std::array<u_short, 256>& expected_row) {
+                     std::array<std::uint16_t, 256>& expected_row) {
   const int slot = object.slot;
   REQUIRE(VS::Actors::EnableLiveModelPalettePulse(slot, 0, 0) == 0);
   CHECK(object.palette_pulse.kind == 128);
@@ -450,14 +457,14 @@ void CheckPulseCycle(VS::Field::GimmickInstance& object,
 TEST_CASE("Actor disappearance changes the owning fade byte, not a legacy view",
           "[actors][appearance]") {
   AppearanceFixture fixture;
-  std::array<u_char, sizeof(VS::Actors::ActorRecord)> expected;
+  std::array<std::uint8_t, sizeof(VS::Actors::ActorRecord)> expected;
   std::memcpy(expected.data(), &fixture.actor, expected.size());
   const auto color = offsetof(VS::Actors::ActorRecord, instance) +
                      offsetof(VS::Actors::ModelInstance, base_color);
   expected[color] = expected[color + 1] = expected[color + 2] = 124;
   expected[offsetof(VS::Actors::ActorRecord, fade_red)] = 32;
   VS::Actors::UpdateLiveActorAppearanceTransition(fixture.actor);
-  std::array<u_char, sizeof(VS::Actors::ActorRecord)> actual;
+  std::array<std::uint8_t, sizeof(VS::Actors::ActorRecord)> actual;
   std::memcpy(actual.data(), &fixture.actor, actual.size());
   CHECK(fixture.actor.fade_red == 32);
   CHECK(actual == expected);
@@ -475,7 +482,7 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
   std::fill_n(actor.base_palette, 160, 0x1234);
   std::fill_n(actor.base_palette + 160, 160, 0x7FFF);
   std::fill_n(actor.current_palette, 160, 0xA55A);
-  std::array<u_short, 160> expected;
+  std::array<std::uint16_t, 160> expected;
   expected.fill(0x7FFF);
   const int count = full_palette ? 160 : 16;
   const int skip = full_palette ? 1 : 0;
@@ -517,7 +524,7 @@ TEST_CASE("Gimmick palette fades stay on their own typed path",
   object.motion_state = GENERATE(2, 3);
   std::fill_n(object.base_palette.begin(), 16, 0x1234);
   std::fill_n(object.pulsed_palette.begin(), 16, 0x7FFF);
-  std::array<u_short, 16> expected;
+  std::array<std::uint16_t, 16> expected;
   expected.fill(0x7FFF);
   const int speed = object.motion_state == 2 ? 2 : 1;
   const int mode = object.motion_state == 2 ? 0 : 1;
@@ -554,13 +561,14 @@ TEST_CASE("Gimmick targeting pulses preserve native ownership and CLUT indices",
   const std::array fast{4, 14, 12, 2};
   const std::array directions{0, 2, 2, 0};
   object.palette_pulse.kind = 128;
-  object.palette_pulse.level = static_cast<u_char>(levels[phase]);
+  object.palette_pulse.level = static_cast<std::uint8_t>(levels[phase]);
   object.palette_pulse.flags = phase >= 2 ? 3 : 1;
   VS::Field::GimmickInstance expected;
   std::memcpy(&expected, &object, sizeof object);
   const int level = speed == 4 ? fast[phase] : slow[phase];
-  expected.palette_pulse.level = static_cast<u_char>(level);
-  expected.palette_pulse.flags = static_cast<u_char>(directions[phase] | 1);
+  expected.palette_pulse.level = static_cast<std::uint8_t>(level);
+  expected.palette_pulse.flags =
+      static_cast<std::uint8_t>(directions[phase] | 1);
   for (std::size_t i = 0; i < kPulseColors.size(); ++i) {
     if (kPulseColors[i] != 0) {
       expected.pulsed_palette[i] = PulseColor(kPulseColors[i], level);
@@ -612,7 +620,7 @@ TEST_CASE(
   const int slot = GENERATE(0, 15);
   AppearanceFixture fixture;
   VS::Field::GimmickInstance object{};
-  object.slot = static_cast<u_char>(slot);
+  object.slot = static_cast<std::uint8_t>(slot);
   std::copy(kPulseColors.begin(), kPulseColors.end(),
             object.base_palette.begin());
   VS::Field::gimmickInstances[slot] = &object;
@@ -634,7 +642,7 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   VS::Battle::Ai::LiveFrameContext().actors[2] = removed;
   VS::Battle::Ai::LiveFrameContext().actors[5] = peer;
-  fixture.actors[1].kind = static_cast<u_short>(kind);
+  fixture.actors[1].kind = static_cast<std::uint16_t>(kind);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CheckRetiredAiOwnership(fixture, peer);
   fixture.actors[1].kind = 4;
@@ -653,7 +661,7 @@ TEST_CASE(
   state->native_pointer_18c = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(state->native_pointer_18c != nullptr);
   VS::Battle::Ai::LiveFrameContext().actors[0] = state;
-  fixture.actors[0].kind = static_cast<u_short>(kind);
+  fixture.actors[0].kind = static_cast<std::uint16_t>(kind);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
   CHECK(VS::Battle::Ai::actorAiStates[0] == state);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[0] == state);
@@ -689,7 +697,7 @@ TEST_CASE("Actors past the equipment table fade without equipment",
   VS::Actors::weaponModels[18] = &(*weapons)[0];
   VS::Actors::weaponModels[19] = &(*weapons)[1];
   auto& actor = fixture.actor;
-  actor.instance.slot = static_cast<u_char>(slot);
+  actor.instance.slot = static_cast<std::uint8_t>(slot);
   actor.instance.action_animation_state = 2;
   std::fill_n(actor.base_palette, 320, 0x1234);
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);

@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
@@ -22,6 +22,10 @@
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::ClearOTagR;
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -340,8 +344,8 @@ TEST_CASE("F03059 counting time hides below one and refuses a short atlas",
   CHECK(host.calls.empty());
 }
 
-constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
-constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(u_long);
+constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kLiveSceneHead = 16;
 
 // A frame whose primitives land in `storage`, and the par time and puzzle
@@ -353,8 +357,10 @@ struct LiveCubeTextFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   std::int16_t saved_par = r::puzzleParTime;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::vector<u_long> ordering = std::vector<u_long>(kLiveOrderingWords, 0);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kLivePrimitiveWords, 0);
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(kLiveOrderingWords, 0);
 
   LiveCubeTextFixture() { Reset(); }
   ~LiveCubeTextFixture() {
@@ -381,8 +387,8 @@ struct LiveCubeTextFixture {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data();
   }
   // The primitive words written since the last reset.
-  [[nodiscard]] std::vector<u_long> Used() const {
-    const auto* const cursor = static_cast<const u_long*>(
+  [[nodiscard]] std::vector<std::uint32_t> Used() const {
+    const auto* const cursor = static_cast<const std::uint32_t*>(
         VS::Render::FrameScratchpad().primitive_cursor);
     return {storage.data(), cursor};
   }

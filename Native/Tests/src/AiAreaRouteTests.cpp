@@ -14,7 +14,7 @@
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -854,9 +854,9 @@ TEST_CASE("Area routing keeps its original module entries",
 namespace {
 struct LiveRouteFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
-  std::array<u_int, 256> routes{};
-  u_short flags[32][32]{};
-  u_short heights[32][32]{};
+  std::array<std::uint32_t, 256> routes{};
+  std::uint16_t flags[32][32]{};
+  std::uint16_t heights[32][32]{};
   VS::Battle::Ai::ActorAiState state{};
 
   LiveRouteFixture() {
@@ -884,7 +884,7 @@ TEST_CASE("Live area routing splits room route words and writes the AI state",
           "[ai][area-route][area-route-live]") {
   LiveRouteFixture fixture;
   fixture.routes[kRoute] =
-      Endpoint(12, 10) | (static_cast<u_int>(Endpoint(10, 13)) << 16);
+      Endpoint(12, 10) | (static_cast<std::uint32_t>(Endpoint(10, 13)) << 16);
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));
   CHECK(fixture.state.destination.word == Tile(12, 10));
   CHECK(fixture.state.reserved154_area == kArea);
@@ -893,7 +893,7 @@ TEST_CASE("Live area routing splits room route words and writes the AI state",
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));
   CHECK(fixture.state.destination.word == Tile(10, 13));
 
-  fixture.routes[kRoute] = static_cast<u_int>(Endpoint(10, 13)) << 16;
+  fixture.routes[kRoute] = static_cast<std::uint32_t>(Endpoint(10, 13)) << 16;
   fixture.state.reserved154_area = 1;
   fixture.state.destination.word = Tile(1, 1);
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));

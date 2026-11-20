@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBoxState.hpp"
 
@@ -21,7 +21,7 @@ void WriteLiveTextBoxSelector(const TextBoxSelector& selector);
 // refuse (returning 0, a null box or a zero anchor) instead of reaching past
 // them; a corrupt selector logs, restarts and returns 0.
 int SetLiveTextBoxText(int box_id, char* text);
-int SelectLiveTextBoxChoice(u_char box_mask);
+int SelectLiveTextBoxChoice(std::uint8_t box_mask);
 void InitLiveInformationTextBox(InformationHeader header);
 int DismissAllLiveTextBoxes();
 TextBoxState* LiveTextBox(int id);

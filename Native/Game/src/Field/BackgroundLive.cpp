@@ -14,7 +14,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -34,6 +34,31 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImageLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::LoadImage;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::POLY_GT4;
+using VS::Legacy::RECT;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setPolyGT4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::setTile;
+using VS::Legacy::setUV4;
+using VS::Legacy::setWH;
+using VS::Legacy::setXY0;
+using VS::Legacy::setXY4;
+using VS::Legacy::TILE;
+using VS::Legacy::TIM_IMAGE;
 
 // decomp: D_800F1CE0 (D_800F1CE0@BATTLE/BATTLE.PRG)
 VECTOR VS::Field::backgroundReferenceVectors[2];
@@ -59,11 +84,11 @@ char VS::Field::isSolidBackground;
 // decomp: D_800F1DC8 (D_800F1DC8@BATTLE/BATTLE.PRG)
 char VS::Field::legacyBackgroundTexturePage;
 // decomp: D_800F1DC9 (D_800F1DC9@BATTLE/BATTLE.PRG)
-u_char VS::Field::isTiledBackgroundEnabled;
+std::uint8_t VS::Field::isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (D_800F1DCC@BATTLE/BATTLE.PRG)
 VS::Field::BackgroundLayoutRecord* VS::Field::loadedBackgroundLayout;
 // decomp: D_800F1DD0 (D_800F1DD0@BATTLE/BATTLE.PRG)
-u_long* VS::Field::legacyBackgroundTimBuffer;
+std::uint32_t* VS::Field::legacyBackgroundTimBuffer;
 
 namespace {
 // D_80068C1C: 34 twelve-byte vertices, the third word of each its colour, and
@@ -109,9 +134,9 @@ static_assert(offsetof(VS::Field::MpdEnvironment, wind_strength) ==
 static_assert(offsetof(VS::Field::MpdEnvironment, weather_area) ==
               kEnvironmentWeatherAreaAt);
 static_assert(sizeof(VS::Content::DiscFile) == kDiscFileBytes);
-static_assert(sizeof(POLY_FT4) % sizeof(u_long) == 0);
-static_assert(sizeof(POLY_GT4) % sizeof(u_long) == 0);
-static_assert(sizeof(TILE) % sizeof(u_long) == 0);
+static_assert(sizeof(POLY_FT4) % sizeof(std::uint32_t) == 0);
+static_assert(sizeof(POLY_GT4) % sizeof(std::uint32_t) == 0);
+static_assert(sizeof(TILE) % sizeof(std::uint32_t) == 0);
 
 namespace VS::Field {
 namespace {
@@ -189,10 +214,10 @@ template <typename T, typename Id>
 // farthest entry, as the original's addPrim(ot + 0x1FFC) did.
 template <typename Packet>
 void LinkPacket(const Packet& packet, std::string_view kind) {
-  constexpr std::size_t kWords = sizeof(Packet) / sizeof(u_long);
-  u_long* const entry = Render::LiveFrameOrderingEntry(
+  constexpr std::size_t kWords = sizeof(Packet) / sizeof(std::uint32_t);
+  std::uint32_t* const entry = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene, kFarthestOrderingSlot);
-  u_long* const slot =
+  std::uint32_t* const slot =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
     if (ShouldReport(dropped_packets)) {
@@ -213,9 +238,9 @@ void SetCorners(Primitive& primitive, const TexturedQuad& quad) {
   const auto& xy = quad.corners;
   const auto& uv = quad.texels;
   setXY4(&primitive, xy[0].x, xy[0].y, xy[1].x, xy[1].y, xy[2].x, xy[2].y,
-         xy[3].x, xy[3].y);
+         xy.back().x, xy.back().y);
   setUV4(&primitive, uv[0].u, uv[0].v, uv[1].u, uv[1].v, uv[2].u, uv[2].v,
-         uv[3].u, uv[3].v);
+         uv.back().u, uv.back().v);
   primitive.tpage = quad.texture_page;
   primitive.clut = quad.clut;
 }
@@ -277,7 +302,7 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
   backgroundLayoutDiscRequest =
       PointerOf<VS::Content::DiscQueueSlot>(state.layout_read);
   loadedBackgroundLayout = PointerOf<BackgroundLayoutRecord>(state.layout);
-  legacyBackgroundTimBuffer = PointerOf<u_long>(state.tim_buffer);
+  legacyBackgroundTimBuffer = PointerOf<std::uint32_t>(state.tim_buffer);
 }
 
 std::optional<RoomEnvironment> LiveRoomEnvironment() {
@@ -360,7 +385,8 @@ void LiveBackgroundHost::AddShadedTexturedQuad(const TexturedQuad& quad) {
   setRGB0(&primitive, colors[0].red, colors[0].green, colors[0].blue);
   setRGB1(&primitive, colors[1].red, colors[1].green, colors[1].blue);
   setRGB2(&primitive, colors[2].red, colors[2].green, colors[2].blue);
-  setRGB3(&primitive, colors[3].red, colors[3].green, colors[3].blue);
+  setRGB3(&primitive, colors.back().red, colors.back().green,
+          colors.back().blue);
   SetCorners(primitive, quad);
   LinkPacket(primitive, "tile");
 }
@@ -378,8 +404,8 @@ void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
                                      const CameraVector& angles,
                                      bool scale_compensated) {
   const VS::Render::FrameScratch& scratch = Scratch();
-  Core_Gte_SetRotMatrix(&scratch.view_matrix);
-  Core_Gte_SetTransMatrix(&scratch.view_matrix);
+  SetRotMatrix(&scratch.view_matrix);
+  SetTransMatrix(&scratch.view_matrix);
   VECTOR dome_position{};
   VECTOR dome_angles{};
   Math::StoreVector(dome_position, position);
@@ -390,8 +416,8 @@ void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
   } else {
     Render::BuildLiveRoomGeometryViewMatrix(dome_position, dome_angles, view);
   }
-  Core_Gte_SetRotMatrix(&view);
-  Core_Gte_SetTransMatrix(&view);
+  SetRotMatrix(&view);
+  SetTransMatrix(&view);
   Render::DrawLiveSkyDome(Content_battleSkyDome, sizeof Content_battleSkyDome);
 }
 
@@ -432,7 +458,7 @@ std::optional<BackgroundLayout> LiveBackgroundHost::Layout(
 }
 
 std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
-  const u_short* const words = VS::Field::roomData.tiled_background;
+  const std::uint16_t* const words = VS::Field::roomData.tiled_background;
   if (words == nullptr) return std::nullopt;
   const std::size_t bytes = VS::Field::roomData.header.tiled_background_length;
   if (bytes < kTiledSectionBytes) {
@@ -504,7 +530,7 @@ void LiveBackgroundHost::ReleaseRead(BackgroundReadId read) {
 
 void LiveBackgroundHost::StampTimId(BackgroundBufferId buffer,
                                     std::uint32_t id) {
-  *PointerOf<u_long>(buffer) = id;
+  *PointerOf<std::uint32_t>(buffer) = id;
 }
 
 BackgroundTim LiveBackgroundHost::ParseTim(BackgroundBufferId buffer) {
@@ -538,9 +564,10 @@ void LiveBackgroundHost::UploadTimClut(BackgroundBufferId buffer, int row,
   TIM_IMAGE tim{};
   Render::ParseLiveTim(PointerOf<void>(buffer), &tim);
   if (tim.caddr == nullptr) return;
-  Render::LoadLiveClutColors(
-      reinterpret_cast<const u_short*>(tim.caddr), static_cast<u_int>(row),
-      static_cast<u_int>(first_color), static_cast<u_int>(count));
+  Render::LoadLiveClutColors(reinterpret_cast<const std::uint16_t*>(tim.caddr),
+                             static_cast<std::uint32_t>(row),
+                             static_cast<std::uint32_t>(first_color),
+                             static_cast<std::uint32_t>(count));
 }
 
 // decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17431)

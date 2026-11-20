@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 // decomp: D_800F54B8_t (src/BATTLE/BATTLE.PRG/5BF94.c:249): one shake
@@ -30,8 +30,8 @@ struct LiveCameraShakeChannel {
 // effect camera in its PS1 layout; EffectCameraPose (Camera.hpp) is its typed
 // value.
 struct LiveEffectCamera {
-  VECTOR position;
-  VECTOR look_at;
+  VS::Core::Gte::VECTOR position;
+  VS::Core::Gte::VECTOR look_at;
   std::int32_t shake_lateral;
   std::int32_t shake_vertical;
   std::int32_t shake_depth;

@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Audio/Cutscene/Stream.hpp"
 #include "Audio/StreamFormat.hpp"
 

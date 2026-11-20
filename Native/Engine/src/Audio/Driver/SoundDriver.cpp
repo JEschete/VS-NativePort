@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 
 // decomp: _soundEvent (_soundEvent@SLUS_010.40)
@@ -12,10 +12,10 @@ int VS::Audio::Driver::recentTickCostTotal; /* contents: module image (ModuleDat
 int VS::Audio::Driver::recentTickCosts[VS::Audio::Seq::kRecentTickCostCount]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _soundFlush (_soundFlush@SLUS_010.40)
-u_char VS::Audio::Driver::legacySpuFlushBytes[VS::Audio::Driver::kLegacySpuFlushByteCount]; /* contents: module image (ModuleData.cpp) */
+std::uint8_t VS::Audio::Driver::legacySpuFlushBytes[VS::Audio::Driver::kLegacySpuFlushByteCount]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _spuMemInfo (_spuMemInfo@SLUS_010.40)
-u_char VS::Audio::Driver::legacySpuAllocatorTable;
+std::uint8_t VS::Audio::Driver::legacySpuAllocatorTable;
 
 // decomp: D_800378C0 (D_800378C0@SLUS_010.40)
 VS::Audio::LegacyCommandArguments VS::Audio::Driver::commandArguments;

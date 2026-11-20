@@ -478,7 +478,7 @@ class LiveIconWorld final : public CategoryIconWorld {
     RequireFrame(icon.overlay);
     const auto xy = static_cast<int>(Framework::PackXy(icon.x, icon.y));
     const auto size = static_cast<int>(Framework::PackXy(kIconSize, kIconSize));
-    u_long* chain = nullptr;
+    std::uint32_t* chain = nullptr;
     if (!icon.overlay) {
       chain = Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene,
                                              kIconSceneLayer);

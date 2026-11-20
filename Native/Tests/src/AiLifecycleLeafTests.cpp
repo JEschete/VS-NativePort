@@ -30,7 +30,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Unported.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -276,7 +276,8 @@ TEST_CASE("AI persistence packs every original bit without mutating live state",
                                    (((expected >> 3) & 3) << 28) |
                                    (((expected >> 6) & 127) << 20);
     std::memcpy(&fixture.state.relations[0], &relation, sizeof(relation));
-    fixture.state.uses_room_action_delay = static_cast<u_char>(expected & 1);
+    fixture.state.uses_room_action_delay =
+        static_cast<std::uint8_t>(expected & 1);
     fixture.state.behavior_mode = (expected & 32) ? 0 : 0xA5;
     const auto before = StateBytes(fixture.state);
     REQUIRE(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot) ==
@@ -291,7 +292,7 @@ TEST_CASE("AI persistence preserves the complete original delay byte",
   VS::Battle::Ai::actorAiStates[4] = &fixture.state;
   fixture.state.behavior_mode = 1;
   for (unsigned delay = 0; delay < 256; ++delay) {
-    fixture.state.uses_room_action_delay = static_cast<u_char>(delay);
+    fixture.state.uses_room_action_delay = static_cast<std::uint8_t>(delay);
     CHECK(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(4) ==
           static_cast<int>(delay));
   }
@@ -379,7 +380,7 @@ TEST_CASE(
     "[ai][hostility]") {
   const unsigned busy = GENERATE(0u, 1u, 2u, 3u);
   HostilityFixture fixture;
-  fixture.state.decision_delay = static_cast<u_char>(busy & 1);
+  fixture.state.decision_delay = static_cast<std::uint8_t>(busy & 1);
   fixture.state.native_pointer_18c = (busy & 2) ? &fixture.actor : nullptr;
   fixture.SetRelation(7, 0xABCD7F7Fu);
   fixture.actor.command_flags = 0x5A;
@@ -523,7 +524,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
       auto* settings = fixture.Settings();
       settings->decision_callback = AshleyAllianceTestCallback;
       fixture.Reaction()->alliance_reaction_count =
-          static_cast<u_char>(counter);
+          static_cast<std::uint8_t>(counter);
       fixture.state.actor_id = 1;
       VS::Battle::actorMarkers[1] = 0x05;
       VS::Core::SeedBiosRand(seeds[roll]);
@@ -533,7 +534,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
       const bool favorable = roll < 0x4C;
       const bool entered = favorable && counter + 1 >= 2;
       CHECK(fixture.Reaction()->alliance_reaction_count ==
-            static_cast<u_char>(counter + (favorable ? 1 : 0)));
+            static_cast<std::uint8_t>(counter + (favorable ? 1 : 0)));
       CHECK(fixture.Reaction()->temporary_ashley_alliance == entered);
       CHECK(settings->decision_callback ==
             (entered ? VS::Battle::Ai::UpdateLiveEngagementApproachBehavior
@@ -599,7 +600,8 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
   const auto random = VS::Core::BiosRand().State();
   const auto frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   for (unsigned count = 0; count < 256; ++count) {
-    fixture.Reaction()->alliance_reaction_count = static_cast<u_char>(count);
+    fixture.Reaction()->alliance_reaction_count =
+        static_cast<std::uint8_t>(count);
     auto expected = fixture.state;
     reinterpret_cast<VS::Battle::Ai::ReactionView*>(&expected)
         ->alliance_reaction_count = 0;
@@ -622,7 +624,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
       VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
   settings->saved_decision_callback =
       saved_callback ? AshleyAllianceTestCallback : nullptr;
-  fixture.state.settings_bit25 = static_cast<u_char>(settings_bit);
+  fixture.state.settings_bit25 = static_cast<std::uint8_t>(settings_bit);
   fixture.state.decision_delay = busy == 1 ? 3 : 0;
   fixture.state.native_pointer_18c = busy == 2 ? &fixture : nullptr;
   fixture.state.awareness_marker = 0x71;
@@ -720,7 +722,8 @@ struct ActorSettingsFixture {
   void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
   void* saved_section6 = VS::Field::roomData.section6;
-  u_int saved_section6_length = VS::Field::roomData.header.section6_length;
+  std::uint32_t saved_section6_length =
+      VS::Field::roomData.header.section6_length;
   std::array<VS::Battle::Actor, 3> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};

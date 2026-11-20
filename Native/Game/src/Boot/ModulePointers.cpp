@@ -241,7 +241,7 @@
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Items/Materials.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"

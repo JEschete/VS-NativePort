@@ -4,14 +4,21 @@
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Movie/Intro/Playback.hpp"
 #include "Movie/IntroPlayer.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Movie/MoviePlayer.hpp"
 
+using VS::Legacy::ClearImage;
+using VS::Legacy::DISPENV;
 using VS::Legacy::kPadRright;
 using VS::Legacy::kPadStart;
+using VS::Legacy::PutDispEnv;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDefDispEnv;
+using VS::Legacy::SetDispMask;
+using VS::Legacy::setRECT;
 using VS::Legacy::VSync;
 
 namespace VS::Movie::Intro {

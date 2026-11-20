@@ -10,7 +10,7 @@
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct MovementFixture {
@@ -88,8 +88,8 @@ TEST_CASE("Repeated movement requests preserve every other state byte",
           "[ai][movement-behavior]") {
   const int mode = GENERATE(0, 1, 2, 3, 4, 5, 6);
   MovementFixture fixture;
-  fixture.state.current_movement_mode = static_cast<u_char>(mode);
-  fixture.state.requested_movement_mode = static_cast<u_char>(mode);
+  fixture.state.current_movement_mode = static_cast<std::uint8_t>(mode);
+  fixture.state.requested_movement_mode = static_cast<std::uint8_t>(mode);
   const auto expected = fixture.Bytes();
   fixture.state.requested_movement_mode = 99;
   CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, mode) == mode);

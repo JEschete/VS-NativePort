@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "Field/Weather.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Field {
 // decomp: D_800F1D98 (BATTLE/BATTLE.PRG 146C.c:710): [0..2] the particle

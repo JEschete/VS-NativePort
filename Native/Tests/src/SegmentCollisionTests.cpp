@@ -27,9 +27,13 @@
 #include "Field/Room.hpp"
 #include "Field/SegmentCollision.hpp"
 #include "Field/SegmentCollisionLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -53,7 +57,7 @@ struct SegmentFixture {
   std::array<VS::Battle::Actor, 2> actors{};
   std::array<VS::Actors::ActorRecord, 2> models{};
   std::array<VS::Battle::ActorStats, 2> stats{};
-  std::array<u_char, 1304> saved_bounce{};
+  std::array<std::uint8_t, 1304> saved_bounce{};
 
   SegmentFixture() {
     std::copy_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
@@ -68,7 +72,7 @@ struct SegmentFixture {
       VS::Actors::actorRecords[index] = &models[index];
       actors[index].id = static_cast<int>(index);
       actors[index].stats = &stats[index];
-      stats[index].actor_id = static_cast<u_char>(index);
+      stats[index].actor_id = static_cast<std::uint8_t>(index);
       models[index].instance.position = {static_cast<std::int16_t>(index * 128),
                                          0, 128, 0};
       models[index].collision_radius = 32;
@@ -101,9 +105,9 @@ struct ActionTraceFixture : SegmentFixture {
   ActionDefinition definition = VS::Battle::actionDefinitions[kAction];
   MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
   VS::Render::ModelScratchpad workspace = *VS::Render::ModelWorkspace();
-  u_int previous_hit = VS::Battle::previousHitResult;
-  u_int prerequisite = VS::Battle::hitPrerequisiteResult;
-  u_int last_stat = VS::Battle::lastActionStatValue;
+  std::uint32_t previous_hit = VS::Battle::previousHitResult;
+  std::uint32_t prerequisite = VS::Battle::hitPrerequisiteResult;
+  std::uint32_t last_stat = VS::Battle::lastActionStatValue;
   ActionState* action_state = VS::Battle::actionState;
   std::unique_ptr<ActionState> owned_state = std::make_unique<ActionState>();
 
@@ -117,7 +121,7 @@ struct ActionTraceFixture : SegmentFixture {
       VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
       models[0].bone_matrices[0].m[axis][axis] = 4096;
     }
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   ~ActionTraceFixture() {
@@ -128,7 +132,7 @@ struct ActionTraceFixture : SegmentFixture {
     VS::Battle::previousHitResult = previous_hit;
     VS::Battle::hitPrerequisiteResult = prerequisite;
     VS::Battle::lastActionStatValue = last_stat;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 };
 
@@ -163,7 +167,7 @@ TEST_CASE(
     "[field][segment-collision]") {
   SegmentFixture fixture;
   for (unsigned kind = 0; kind <= UINT8_MAX; ++kind) {
-    fixture.actors[1].kind = static_cast<u_short>(kind | 0xA500);
+    fixture.actors[1].kind = static_cast<std::uint16_t>(kind | 0xA500);
     SVECTOR output{9, 8, 7, 6};
     const auto* hit = TraceHorizontal(output);
     if ((kind & 0xEA) == 0) {
@@ -183,7 +187,8 @@ TEST_CASE("Segment tracing respects reactions animation lock and ignored actor",
           "[field][segment-collision]") {
   SegmentFixture fixture;
   for (unsigned reaction = 0; reaction < 16; ++reaction) {
-    fixture.models[1].instance.reaction_state = static_cast<u_char>(reaction);
+    fixture.models[1].instance.reaction_state =
+        static_cast<std::uint8_t>(reaction);
     SVECTOR output{};
     CHECK((TraceHorizontal(output) != nullptr) !=
           (reaction == 1 || reaction == 2));

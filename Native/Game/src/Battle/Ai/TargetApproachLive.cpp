@@ -23,7 +23,7 @@
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/TargetApproach.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

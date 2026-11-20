@@ -20,7 +20,7 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -29,6 +29,11 @@
 #include "Render/ModelWorkspace.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
 
 extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
@@ -46,7 +51,7 @@ struct ActorShadowFixture {
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
-  u_short saved_platform = VS::Actors::supportingPlatformLayer;
+  std::uint16_t saved_platform = VS::Actors::supportingPlatformLayer;
   VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   decltype(VS::Actors::supportingGimmickIndex) saved_gimmick_index =
       VS::Actors::supportingGimmickIndex;
@@ -54,9 +59,9 @@ struct ActorShadowFixture {
       VS::Field::gimmickInstances;
   std::array<unsigned int, 18> saved_vertices{};
   std::array<unsigned int, 24> saved_faces{};
-  std::vector<u_long> storage =
-      std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 2048> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      0x20000 / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 2048> ordering{};
   std::array<unsigned int, 32> model_bytes{};
   VS::Actors::ActorRecord actor{};
   MATRIX camera{};
@@ -101,9 +106,9 @@ struct ActorShadowFixture {
     const std::array<std::uint16_t, 2> group{0, 1};
     std::memcpy(reinterpret_cast<unsigned char*>(model) + 96, group.data(),
                 sizeof group);
-    Core_Gte_Reset();
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    VS::Core::Gte::Reset();
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
     ResetPackets();
   }
 
@@ -124,7 +129,7 @@ struct ActorShadowFixture {
     VS::Actors::skeletonPose = saved_pose;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   static void SetMesh() {
@@ -160,13 +165,13 @@ struct ActorShadowFixture {
   }
 
   std::size_t PacketCount() const {
-    return (static_cast<u_long*>(
+    return (static_cast<std::uint32_t*>(
                 VS::Render::FrameScratchpad().primitive_cursor) -
             (storage.data() + 1)) /
            8;
   }
 
-  const u_long* Packet(unsigned index) const {
+  const std::uint32_t* Packet(unsigned index) const {
     return storage.data() + 1 + std::size_t{index} * 8;
   }
 
@@ -258,7 +263,7 @@ struct ShadowScaleCase {
 
 void CheckScaleCase(ActorShadowFixture& fixture, const ShadowScaleCase& input) {
   fixture.ResetPackets();
-  fixture.actor.shadow_radius = static_cast<u_short>(input.radius);
+  fixture.actor.shadow_radius = static_cast<std::uint16_t>(input.radius);
   fixture.actor.instance.scale_x = fixture.actor.instance.scale_y = input.model;
   fixture.actor.shadow_blend.radius_expand_rate =
       fixture.actor.shadow_blend.radius_shrink_rate = input.blend;
@@ -344,7 +349,7 @@ TEST_CASE(
     for (unsigned fade = 0; fade <= UINT8_MAX; ++fade) {
       fixture.ResetPackets();
       fixture.actor.shadow_blend.color = std::bit_cast<std::int32_t>(rgb);
-      fixture.actor.fade_red = static_cast<u_char>(fade);
+      fixture.actor.fade_red = static_cast<std::uint8_t>(fade);
       const int signed_fade =
           fade < 128 ? static_cast<int>(fade) : static_cast<int>(fade) - 256;
       const auto luminance =

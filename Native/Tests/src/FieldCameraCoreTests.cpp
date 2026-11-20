@@ -12,10 +12,12 @@
 #include "Field/Camera.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Core::Gte::VECTOR;
 
 namespace {
 namespace fx = VS::Field;

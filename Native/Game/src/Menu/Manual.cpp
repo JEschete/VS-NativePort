@@ -5,7 +5,7 @@
 
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Menu::manual {
 // decomp: menuTextTable (src/MENU/MENUE.PRG/494.c:142); contents: the module
@@ -32,7 +32,7 @@ std::int32_t helpPageLoadCounter;
 // decomp: helpText (src/MENU/MENUE.PRG/494.c:222)
 std::int32_t* helpText;
 // decomp: helpAssets (src/MENU/MENUE.PRG/494.c:223)
-u_long* helpAssets;
+std::uint32_t* helpAssets;
 
 // decomp: helpFileCdFiles (src/MENU/MENUE.PRG/494.c:241): mkHfoPair(HELPnn)
 // for topics 1 to 14.

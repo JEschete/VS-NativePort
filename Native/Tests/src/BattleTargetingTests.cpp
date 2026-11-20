@@ -40,7 +40,9 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -412,7 +414,7 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
   params.blocking_statuses = 0x8;
   const ScopedOverride<VS::Battle::StatusEffectParams> strength(
       VS::Battle::statusEffectParams[5], params);
-  std::array<u_char, 4> bytes{5, 0, 0, 0};
+  std::array<std::uint8_t, 4> bytes{5, 0, 0, 0};
   CHECK(VS::Battle::IsAttackTargetUndeadSlot(nullptr, bytes.data()) == 1);
   CHECK(VS::Battle::IsAttackTargetLivingSlot(nullptr, bytes.data()) == 0);
   CHECK(VS::Battle::CanApplyStrengthDownSlot(nullptr, bytes.data()) == 1);
@@ -428,7 +430,7 @@ TEST_CASE("Attack prerequisite slots read the live target's equipment",
   LiveActor live;
   const ScopedOverride<VS::Battle::Actor*> slot(VS::Battle::actors[5],
                                                 live.actor.get());
-  std::array<u_char, 4> bytes{5, 0, 0, 0};
+  std::array<std::uint8_t, 4> bytes{5, 0, 0, 0};
   CHECK(VS::Battle::CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 0);
   live.stats->weapon.blade.id = 3;
   CHECK(VS::Battle::CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 1);
@@ -445,7 +447,7 @@ TEST_CASE("Attack prerequisite slots refuse an absent target actor",
           "[battle][battle-targeting]") {
   const BattleLog log;
   const ScopedOverride<VS::Battle::Actor*> slot(VS::Battle::actors[7], nullptr);
-  std::array<u_char, 4> bytes{7, 0, 0, 0};
+  std::array<std::uint8_t, 4> bytes{7, 0, 0, 0};
   CHECK(VS::Battle::CanApplyPoisonSlot(nullptr, bytes.data()) == 0);
   CHECK(log.Saw("attack prerequisite for absent target actor=7"));
   bytes[0] = 42;
@@ -463,7 +465,7 @@ TEST_CASE("Live hit prerequisite reads the action hit and impact byte",
   action.id = 77;
   action.hits[0].prerequisite_function_id = 4;
   action.hits[1].prerequisite_function_id = 1;
-  std::array<u_char, 4> bytes{3, 0, 0, 4};
+  std::array<std::uint8_t, 4> bytes{3, 0, 0, 4};
   live.stats->enemy_class = battle::kUndeadEnemyClass;
   CHECK(battle::LiveCheckActionHitPrerequisite(&action, bytes.data(), 0) == 1);
   live.stats->enemy_class = 1;
@@ -478,7 +480,7 @@ TEST_CASE("Live hit prerequisite refuses missing or unknown inputs",
   const BattleLog log;
   ActionDefinition action{};
   action.id = 77;
-  std::array<u_char, 4> bytes{};
+  std::array<std::uint8_t, 4> bytes{};
   CHECK(battle::LiveCheckActionHitPrerequisite(nullptr, bytes.data(), 0) == 0);
   CHECK(log.Saw("hit prerequisite without an action"));
   CHECK(battle::LiveCheckActionHitPrerequisite(&action, nullptr, 0) == 0);
@@ -3734,14 +3736,14 @@ TEST_CASE("Live target selection refuses without a sphere",
   const ScopedOverride<VS::Battle::TargetSphereSetupView*> sphere(
       VS::Battle::targetSphere, nullptr);
   const BattleLog log;
-  u_char target = 0;
+  std::uint8_t target = 0;
   CHECK(VS::Battle::LiveUpdateTargetSelectionMenu(&target) == 1);
   CHECK(target == 0xFF);
   CHECK(log.Saw("target list refused: no targeting sphere"));
   VS::Battle::LiveUpdateTargetSelectionHighlight(3);
   CHECK(log.Saw("target highlight refused: no targeting sphere"));
   // A null target only resets the list.
-  const ScopedOverride<u_char> step(VS::Battle::targetSelectionStep, 7);
+  const ScopedOverride<std::uint8_t> step(VS::Battle::targetSelectionStep, 7);
   CHECK(battle::LiveUpdateTargetSelectionMenu(nullptr) == 0);
   CHECK(VS::Battle::targetSelectionStep == 0);
 }

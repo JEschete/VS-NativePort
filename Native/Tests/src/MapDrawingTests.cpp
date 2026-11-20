@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Field/Doors.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
@@ -29,6 +29,16 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetTransVector;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
 
 namespace map = VS::Menu::map;
 
@@ -821,7 +831,7 @@ class Restore {
   T saved_;
 };
 
-constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
+constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kSceneHead = 4;
 constexpr std::size_t kChainLimit = 0x10000;
 constexpr std::uint32_t kTagLengthShift = 24;
@@ -832,7 +842,7 @@ constexpr std::uint32_t kTagLengthShift = 24;
 struct ChainedPacket {
   std::size_t entry = 0;
   std::size_t offset = 0;
-  std::vector<u_long> body{};
+  std::vector<std::uint32_t> body{};
 
   friend bool operator==(const ChainedPacket&, const ChainedPacket&) = default;
 };
@@ -843,9 +853,10 @@ struct ChainedPacket {
 // earlier test left loaded.
 class LiveMap {
  public:
-  std::vector<u_long> ordering = std::vector<u_long>(kOrderingWords);
-  std::vector<u_long> primitives =
-      std::vector<u_long>(0x20000 / sizeof(u_long));
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(kOrderingWords);
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(0x20000 / sizeof(std::uint32_t));
 
   LiveMap() {
     std::memcpy(&saved_flags_, &VS::State::stateFlags, sizeof(saved_flags_));
@@ -864,11 +875,11 @@ class LiveMap {
         box != nullptr) {
       saved_box_ = *box;
     }
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 112);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 112);
     const VECTOR translation{0, 0, 512, 0};
-    Core_Gte_SetTransVector(&translation);
+    SetTransVector(&translation);
     VS::Render::frameBuf = 0;
     VS::Render::legacyOrderingTables[0] = ordering.data();
     VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
@@ -902,7 +913,7 @@ class LiveMap {
       *box = saved_box_;
     }
     map::ResetMapDrawingLive();
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   // Empties the frame: the cursor at the buffer's start and every ordering
@@ -917,7 +928,8 @@ class LiveMap {
 
   [[nodiscard]] std::size_t UsedWords() const {
     return static_cast<std::size_t>(
-        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor) -
+        static_cast<std::uint32_t*>(
+            VS::Render::FrameScratchpad().primitive_cursor) -
         primitives.data());
   }
 
@@ -929,7 +941,7 @@ class LiveMap {
     const auto* table = ordering.data();
     const auto* buffer = primitives.data();
     const auto* end = buffer + UsedWords();
-    auto* at = const_cast<u_long*>(&ordering.back());
+    auto* at = const_cast<std::uint32_t*>(&ordering.back());
     std::size_t entry = ordering.size() - 1;
     for (std::size_t steps = 0; steps < kChainLimit; ++steps) {
       if (at >= table && at < table + ordering.size()) {
@@ -945,7 +957,7 @@ class LiveMap {
       if (isendprim(at)) {
         return at == table ? chain : std::vector<ChainedPacket>{};
       }
-      at = static_cast<u_long*>(nextPrim(at));
+      at = static_cast<std::uint32_t*>(nextPrim(at));
     }
     return {};
   }
@@ -968,19 +980,22 @@ class LiveMap {
   Restore<SVECTOR> angles_{map::cameraAngles};
   Restore<std::int16_t> door_{VS::Field::enteredDoorId};
   Restore<VS::Field::MapScene*> minimap_{VS::Field::roomData.minimap_scene};
-  Restore<u_int> minimap_length_{
+  Restore<std::uint32_t> minimap_length_{
       VS::Field::roomData.header.minimap_scene_length};
   VS::State::StateFlags saved_flags_{};
   std::array<map::CompassPoint, 4> saved_bounds_{};
-  std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
-  std::array<u_char, sizeof(VS::Render::compactGlyphWidths)> saved_widths_{};
-  std::array<u_char, sizeof(VS::Render::compactGlyphIndices)> saved_indices_{};
+  std::array<std::uint8_t, sizeof(VS::Render::compactGlyphLeftTrim)>
+      saved_trims_{};
+  std::array<std::uint8_t, sizeof(VS::Render::compactGlyphWidths)>
+      saved_widths_{};
+  std::array<std::uint8_t, sizeof(VS::Render::compactGlyphIndices)>
+      saved_indices_{};
   VS::Menu::TextBoxState saved_box_{};
 };
 
 // A one-room minimap scene whose room has a triangle, a quad, an outline, a
 // dim edge and a plain marker; the room data follows the record, 12 bytes on.
-std::vector<u_long> OneRoomScene(std::int32_t visited) {
+std::vector<std::uint32_t> OneRoomScene(std::int32_t visited) {
   const auto room =
       RoomBytes({.vertices = {{0, 0, 0}, {16, 0, 0}, {0, 16, 0}, {16, 16, 0}},
                  .triangles = {{0, 1, 2, 0}},
@@ -988,18 +1003,19 @@ std::vector<u_long> OneRoomScene(std::int32_t visited) {
                  .edges = {{0, 1, 0, 0}},
                  .dim_edges = {{1, 3, 0, 0}},
                  .markers = {{2, 0, 0, 0}}});
-  std::vector<u_long> scene{1, static_cast<u_long>(visited), 12, 0x00020001};
+  std::vector<std::uint32_t> scene{1, static_cast<std::uint32_t>(visited), 12,
+                                   0x00020001};
   const std::size_t head = scene.size();
-  scene.resize(head + (room.size() / sizeof(u_long)));
+  scene.resize(head + (room.size() / sizeof(std::uint32_t)));
   std::memcpy(scene.data() + head, room.data(), room.size());
   return scene;
 }
 
-void LoadMinimap(std::vector<u_long>& scene) {
+void LoadMinimap(std::vector<std::uint32_t>& scene) {
   VS::Field::roomData.minimap_scene =
       reinterpret_cast<VS::Field::MapScene*>(scene.data());
   VS::Field::roomData.header.minimap_scene_length =
-      static_cast<u_int>(scene.size() * sizeof(u_long));
+      static_cast<std::uint32_t>(scene.size() * sizeof(std::uint32_t));
 }
 
 // The four compass corners the drawing leaves in _compassBounds.
@@ -1279,7 +1295,7 @@ TEST_CASE("The live room refuses data outside the loaded scene",
   LiveMap frame;
   auto scene = OneRoomScene(1);
   LoadMinimap(scene);
-  std::vector<u_long> stray = scene;
+  std::vector<std::uint32_t> stray = scene;
   CHECK(map::LiveDrawRoom(0, stray.data() + 4, 1, 2) == 0);
   CHECK(map::LiveDrawRoom(0, nullptr, 1, 2) == 0);
   // The marker table reaches past the scene's end.
@@ -1381,8 +1397,8 @@ TEST_CASE("The live compass needle turns with the angle and camera roll",
   // The needle, the last quad drawn on entry 10, uses the stored bounds.
   const auto& needle = chain[8];
   CHECK(needle.entry == 10);
-  CHECK(needle.body[1] == ((static_cast<u_long>(expected[1]) << 16U) |
-                           static_cast<u_long>(expected[0])));
+  CHECK(needle.body[1] == ((static_cast<std::uint32_t>(expected[1]) << 16U) |
+                           static_cast<std::uint32_t>(expected[0])));
 }
 
 TEST_CASE("The live compass corners store the rotated rectangle",
@@ -1414,8 +1430,9 @@ void CheckLegendButtons(const std::vector<ChainedPacket>& chain,
     REQUIRE(sprite.body.size() == 5);
     CHECK(sprite.body[1] == 0x64808080);
     const std::int32_t x = kButtons[button][0] + slide;
-    CHECK(sprite.body[2] == ((static_cast<u_long>(kButtons[button][1]) << 16U) |
-                             (static_cast<u_long>(x) & 0xFFFFU)));
+    CHECK(sprite.body[2] ==
+          ((static_cast<std::uint32_t>(kButtons[button][1]) << 16U) |
+           (static_cast<std::uint32_t>(x) & 0xFFFFU)));
   }
 }
 }  // namespace
@@ -1442,7 +1459,7 @@ TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
     CheckLegendButtons(chain, 16 * step);
     // The legend's texture page is drawn between the backdrops and the
     // compass ticks on entry 11.
-    CHECK(chain[8].body == std::vector<u_long>{0xE1000303, 0});
+    CHECK(chain[8].body == std::vector<std::uint32_t>{0xE1000303, 0});
   }
 }
 

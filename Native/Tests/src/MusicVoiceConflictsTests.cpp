@@ -8,7 +8,7 @@
 
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 class FakeChannels final : public VS::Audio::Seq::MusicChannelVoices {

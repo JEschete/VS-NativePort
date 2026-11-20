@@ -7,7 +7,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -19,12 +19,14 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Legacy::ClearOTag;
+
 namespace {
 struct InformationFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_long* saved_ordering = VS::Menu::activeTextBoxOrderingTable;
+  std::uint32_t* saved_ordering = VS::Menu::activeTextBoxOrderingTable;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
   std::uint8_t saved_setting = VS::Input::settings.information;
@@ -32,7 +34,7 @@ struct InformationFixture {
   int* saved_rows = VS::Menu::Framework::rowTypeBuf;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   std::array<unsigned char, 0x20010> memory{};
-  std::array<u_long, 34> ordering{};
+  std::array<std::uint32_t, 34> ordering{};
   std::array<char, 96> message{};
   // The row types live in the open menu's workspace, beside its rows.
   std::array<VS::Menu::Framework::MenuRow, VS::Menu::Framework::kRowCount>
@@ -106,7 +108,7 @@ TEST_CASE(
     CHECK(VS::Menu::textBoxes[7].flags.done);
     CHECK(VS::Menu::textBoxes[7].previous_chunks == 3);
     CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
-          fixture.memory.data() + 8 + sizeof(u_long) * 3 * 6);
+          fixture.memory.data() + 8 + sizeof(std::uint32_t) * 3 * 6);
   }
   fixture.message[0] = static_cast<char>(VS::Core::TextCode::kTerminator);
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
@@ -136,7 +138,7 @@ TEST_CASE("Information control repair does not accelerate ordinary dialogue",
   CHECK_FALSE(dialogue.flags.done);
   CHECK(dialogue.previous_chunks == 1);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
-        fixture.memory.data() + 8 + 6 * sizeof(u_long));
+        fixture.memory.data() + 8 + 6 * sizeof(std::uint32_t));
 }
 
 TEST_CASE("Information toggles hide normal help but retain required cautions",

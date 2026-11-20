@@ -21,6 +21,21 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetTransVector;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_MODE;
+using VS::Legacy::getTPage;
+using VS::Legacy::isendprim;
+using VS::Legacy::LINE_G2;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_G3;
+using VS::Legacy::SPRT;
+
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {
   return {static_cast<const std::byte*>(data), size};
@@ -28,7 +43,7 @@ std::span<const std::byte> SceneBytes(const void* data, size_t size) {
 
 // The first room's payload in a resolved scene; its offset counts from the
 // room's record.
-void* FirstRoomData(std::vector<u_long>& scene) {
+void* FirstRoomData(std::vector<std::uint32_t>& scene) {
   auto* bytes = reinterpret_cast<unsigned char*>(scene.data());
   VS::Field::MapRoomRecord room{};
   std::memcpy(&room, bytes + VS::Field::kMapSceneHeaderBytes, sizeof(room));
@@ -42,21 +57,22 @@ struct MapFixture {
   std::array<void*, 2> saved_tables{VS::Render::legacyOrderingTables[0],
                                     VS::Render::legacyOrderingTables[1]};
   VS::Field::MapScene* saved_minimap = VS::Field::roomData.minimap_scene;
-  u_int saved_minimap_length = VS::Field::roomData.header.minimap_scene_length;
+  std::uint32_t saved_minimap_length =
+      VS::Field::roomData.header.minimap_scene_length;
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_room = VS::Menu::map::currentRoomIndex;
-  std::vector<u_long> storage =
-      std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 2084> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      0x20000 / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 2084> ordering{};
   std::array<unsigned char, 1024 - sizeof(VS::Render::FrameScratch)>
       saved_tail{};
 
   explicit MapFixture(int framebuffer = 0) {
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 112);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 112);
     const VECTOR translation{0, 0, 512, 0};
-    Core_Gte_SetTransVector(&translation);
+    SetTransVector(&translation);
     VS::Render::frameBuf = framebuffer;
     VS::Render::legacyPrimitiveBuffers[framebuffer] = storage.data() + 1;
     VS::Render::legacyOrderingTables[framebuffer] = ordering.data();
@@ -82,15 +98,31 @@ struct MapFixture {
     VS::Menu::map::ResetMapDrawingLive();
     VS::Render::frameBuf = saved_framebuffer;
     VS::Menu::map::currentRoomIndex = saved_room;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   // Loads scene as the room's minimap scene, the buffer room data must lie in.
-  static void LoadMinimap(std::vector<u_long>& scene) {
+  static void LoadMinimap(std::vector<std::uint32_t>& scene) {
     VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(scene.data());
     VS::Field::roomData.header.minimap_scene_length =
-        static_cast<u_int>(scene.size() * sizeof(u_long));
+        static_cast<std::uint32_t>(scene.size() * sizeof(std::uint32_t));
+  }
+
+  // A one-room scene around room, validated, resolved and loaded as the
+  // minimap scene.
+  static std::vector<std::uint32_t> LoadRoomScene(
+      const std::vector<std::uint32_t>& room) {
+    std::vector<std::uint32_t> scene{
+        1, 1, static_cast<std::uint32_t>(room.size() * sizeof(std::uint32_t)),
+        0x00010001};
+    scene.insert(scene.end(), room.begin(), room.end());
+    REQUIRE(VS::Field::IsValidMapScene(
+        SceneBytes(scene.data(), scene.size() * sizeof(std::uint32_t))));
+    VS::Field::ResolveLiveSceneRoomData(scene.data(),
+                                        scene.size() * sizeof(std::uint32_t));
+    LoadMinimap(scene);
+    return scene;
   }
 
   bool CompleteChain() const {
@@ -141,10 +173,10 @@ TEST_CASE("Map framebuffer darkening preserves both native strip chains",
   const auto* bytes =
       reinterpret_cast<const unsigned char*>(fixture.storage.data() + 1);
   const auto* first = reinterpret_cast<const SPRT*>(bytes + sizeof(DR_MODE));
-  const auto* first_page = reinterpret_cast<const u_long*>(first + 1);
+  const auto* first_page = reinterpret_cast<const std::uint32_t*>(first + 1);
   const auto* second =
       reinterpret_cast<const SPRT*>(bytes + 2 * sizeof(DR_MODE) + sizeof(SPRT));
-  const auto* second_page = reinterpret_cast<const u_long*>(second + 1);
+  const auto* second_page = reinterpret_cast<const std::uint32_t*>(second + 1);
   const std::array<int, 6> strips{first->code,  first->x0,  first->w,
                                   second->code, second->x0, second->w};
   const std::array<int, 6> expected{0x67, 0, 192, 0x67, 192, 128};
@@ -157,19 +189,12 @@ TEST_CASE("Map framebuffer darkening preserves both native strip chains",
 TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
           "[render][map][bounds]") {
   MapFixture fixture;
-  std::vector<u_long> room(1 + 256 * 2);
+  std::vector<std::uint32_t> room(1 + 256 * 2);
   room[0] = 256;
   room[3] = 16;
   room[1 + 255 * 2] = 16 << 16;
   room.insert(room.end(), {1, 0x00FF0100, 0, 0, 0, 0});
-  std::vector<u_long> scene{
-      1, 1, static_cast<u_long>(room.size() * sizeof(u_long)), 0x00010001};
-  scene.insert(scene.end(), room.begin(), room.end());
-  REQUIRE(VS::Field::IsValidMapScene(
-      SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
-  VS::Field::ResolveLiveSceneRoomData(scene.data(),
-                                      scene.size() * sizeof(u_long));
-  MapFixture::LoadMinimap(scene);
+  std::vector<std::uint32_t> scene = MapFixture::LoadRoomScene(room);
   CHECK(VS::Menu::map::LiveDrawRoom(1, FirstRoomData(scene), 1, 1) == 1);
   const auto* triangle =
       reinterpret_cast<const POLY_G3*>(fixture.storage.data() + 1);
@@ -187,20 +212,13 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
 TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
           "[render][map][fog]") {
   MapFixture fixture;
-  Core_Gte_SetGeomScreen(320);
-  Core_Gte_SetFarColor(0, 0, 0);
+  SetGeomScreen(320);
+  VS::Core::Gte::SetFarColor(0, 0, 0);
   const VECTOR translation{0, 0, 768, 0};
-  Core_Gte_SetTransVector(&translation);
-  const std::vector<u_long> room{3, 0,          0, 16, 0, 16 << 16, 0,
-                                 1, 0x00020100, 0, 0,  0, 0};
-  std::vector<u_long> scene{
-      1, 1, static_cast<u_long>(room.size() * sizeof(u_long)), 0x00010001};
-  scene.insert(scene.end(), room.begin(), room.end());
-  REQUIRE(VS::Field::IsValidMapScene(
-      SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
-  VS::Field::ResolveLiveSceneRoomData(scene.data(),
-                                      scene.size() * sizeof(u_long));
-  MapFixture::LoadMinimap(scene);
+  SetTransVector(&translation);
+  const std::vector<std::uint32_t> room{3, 0,          0, 16, 0, 16 << 16, 0,
+                                        1, 0x00020100, 0, 0,  0, 0};
+  std::vector<std::uint32_t> scene = MapFixture::LoadRoomScene(room);
   auto* data = FirstRoomData(scene);
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
                                                    128, 0,  64,  128};

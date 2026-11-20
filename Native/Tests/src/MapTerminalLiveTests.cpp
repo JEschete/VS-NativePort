@@ -25,7 +25,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
@@ -60,6 +60,17 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::Rtv0Tr;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
+
 namespace {
 namespace map = VS::Menu::map;
 namespace content = VS::Content;
@@ -67,7 +78,7 @@ namespace memory = VS::Core::Memory;
 namespace framework = VS::Menu::Framework;
 using equipment_detail_tests::ArrayRestore;
 using equipment_detail_tests::ValueRestore;
-constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(u_long);
+constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
 constexpr std::size_t kSceneEntry = 18;
 constexpr std::uint32_t kUnwritten = 0xDEADBEEF;
 constexpr std::uint32_t kLinkMask = 0xFFFFFF;
@@ -118,7 +129,7 @@ struct LiveWorld {
   ValueRestore<int> saved_current{map::isCurrentScene};
   ValueRestore<SVECTOR> saved_center{map::centerPoint};
   ArrayRestore<int, 32> saved_scene_rows{map::sceneRowIdMap};
-  ArrayRestore<u_short, 282> saved_map_names{map::mapNames};
+  ArrayRestore<std::uint16_t, 282> saved_map_names{map::mapNames};
   ArrayRestore<map::CompassPoint, 4> saved_compass{map::compassBounds};
   ArrayRestore<map::MapLabel, 8> saved_labels{map::mapLabels};
   ValueRestore<VS::Render::FrameScratch> saved_frame{
@@ -159,9 +170,9 @@ struct LiveWorld {
   content::DataStore::ScopedOverride store;
   std::vector<std::byte> arena = std::vector<std::byte>(0x80000);
   memory::ScopedLiveGameHeap heap{arena};
-  std::vector<u_long> primitives =
-      std::vector<u_long>(kPrimitiveWords + 2, kUnwritten);
-  std::array<u_long, 2084> ordering{};
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(kPrimitiveWords + 2, kUnwritten);
+  std::array<std::uint32_t, 2084> ordering{};
   std::array<VS::Menu::Framework::MenuRow, framework::kRowCount> rows{};
   std::vector<std::uint8_t> minimap;
   VS::Field::MpdEnvironment environment{};
@@ -199,9 +210,9 @@ struct LiveWorld {
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     std::ranges::fill(VS::State::stateFlags.map_paling, 0);
     std::ranges::fill(VS::Menu::textBoxes, VS::Menu::TextBoxState{});
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 112);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 112);
     VS::Render::frameBuf = 0;
     for (int buffer = 0; buffer < 2; ++buffer) {
       VS::Render::legacyPrimitiveBuffers[buffer] = primitives.data() + 1;
@@ -219,7 +230,7 @@ struct LiveWorld {
       VS::Field::roomData.minimap_scene =
           reinterpret_cast<VS::Field::MapScene*>(minimap.data());
       VS::Field::roomData.header.minimap_scene_length =
-          static_cast<u_int>(minimap.size());
+          static_cast<std::uint32_t>(minimap.size());
       environment.scene_id = 1;
       VS::Field::roomData.environment = &environment;
       VS::Field::roomData.header.environment_length = sizeof(environment);
@@ -235,7 +246,7 @@ struct LiveWorld {
     framework::ResetLiveMainMenuStatics();
     content::ResetLiveDiscDrive();
     content::InitializeLiveDiscQueue();
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   void ResetFrame() {
@@ -425,9 +436,9 @@ VS::Content::DiscQueueSlot* RecycleRequest(VS::Content::DiscQueueSlot* request,
 std::array<std::int32_t, 3> TransformOrigin() {
   const SVECTOR origin{};
   VECTOR translated{};
-  Core_Gte_LoadV0(&origin);
-  Core_Gte_Rtv0Tr();
-  Core_Gte_StoreLvnl(&translated);
+  LoadV0(&origin);
+  Rtv0Tr();
+  StoreLvnl(&translated);
   return {translated.vx, translated.vy, translated.vz};
 }
 
@@ -439,7 +450,7 @@ void SetFieldView() {
   VS::Render::FrameScratchpad().view_matrix.t[0] = 77;
   VS::Render::FrameScratchpad().view_matrix.t[1] = 88;
   VS::Render::FrameScratchpad().view_matrix.t[2] = 99;
-  Core_Gte_SetGeomOffset(171, 93);
+  SetGeomOffset(171, 93);
 }
 
 std::array<std::uint8_t, 30> OriginalPalingCaption() {
@@ -742,7 +753,7 @@ TEST_CASE(
   std::uint8_t step = 3;
   REQUIRE(map::LiveUpdateScreen(&step) == 0);
   REQUIRE(world.ReachInput(step));
-  Core_Gte_SetGeomOffset(17, 19);
+  SetGeomOffset(17, 19);
   REQUIRE(map::ResetMapTerminalModuleData());
   const auto projection = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(std::pair<int, int>{projection.x, projection.y} == std::pair{171, 93});

@@ -12,7 +12,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Palette.hpp"
 
 namespace VS::Battle::Ai {

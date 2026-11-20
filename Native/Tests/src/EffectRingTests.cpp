@@ -19,7 +19,7 @@
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/TiledRing.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace rings = VS::Effects::Templates;

@@ -97,8 +97,8 @@ inline void RestoreEffectSettings(
                                                        settings.scale.y, 0, 0};
   const VS::Render::FramebufferEffectTranslation offset{
       settings.offset.x, settings.offset.y, 0, 0};
-  const CVECTOR tint{settings.tint.red, settings.tint.green, settings.tint.blue,
-                     0};
+  const VS::Core::Gte::CVECTOR tint{settings.tint.red, settings.tint.green,
+                                    settings.tint.blue, 0};
   render::SetLiveFramebufferEffectRotation(settings.roll);
   render::SetLiveFramebufferEffectScale(&scale);
   render::SetLiveFramebufferEffectOffset(&offset);

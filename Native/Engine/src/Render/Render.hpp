@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Scratch.hpp"
 
 namespace VS::Render {
@@ -35,9 +35,9 @@ struct ScreenOffset {
 
 // decomp: vs_camera_t (src/include/scratch.h:10)
 struct Camera {
-  VECTOR position;
-  VECTOR look_at;
-  VECTOR angles;
+  VS::Core::Gte::VECTOR position;
+  VS::Core::Gte::VECTOR look_at;
+  VS::Core::Gte::VECTOR angles;
   std::int32_t far_clip;
 };
 
@@ -50,7 +50,7 @@ struct FrameScratch {
   void* overlay_ordering_table;
   void* reserved0c;
   std::uint32_t first_person_view_facing;
-  MATRIX view_matrix;
+  VS::Core::Gte::MATRIX view_matrix;
   Camera camera;
 };
 

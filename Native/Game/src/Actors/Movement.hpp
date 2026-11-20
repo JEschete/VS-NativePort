@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 
@@ -22,7 +22,7 @@ struct MovementRequest {
   /* 0x06 */ std::int16_t facing;
   /* 0x08 */ std::uint32_t distance;
   /* 0x0C */ std::int32_t reserved0c;
-  /* 0x10 */ SVECTOR step;
+  /* 0x10 */ VS::Core::Gte::SVECTOR step;
 };
 namespace layout {
 inline constexpr std::size_t kMovementRequestBytes = 0x18;

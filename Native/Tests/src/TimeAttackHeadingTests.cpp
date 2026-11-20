@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -25,6 +25,10 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 #include "TestSupport/TimeAttackDrawRecorder.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::StoreImage;
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -472,7 +476,7 @@ TEST_CASE("F03023 live pulse blends clutBuf and uploads it to the palette row",
   std::ranges::copy(r::clutBuf, saved_clut.begin());
   RECT area{768, 511, 160, 1};
   std::array<std::uint16_t, r::kResultsClutWords> saved_vram{};
-  StoreImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
 
   const auto clut = PulseClut();
   std::ranges::copy(clut, std::begin(r::clutBuf));
@@ -482,10 +486,10 @@ TEST_CASE("F03023 live pulse blends clutBuf and uploads it to the palette row",
   // Red 31 * 8 / 16 = 15, blue 31 * 8 / 16 = 15.
   CHECK(r::clutBuf[128] == (15 | (15 << 10)));
   std::array<std::uint16_t, r::kResultsClutWords> vram{};
-  StoreImage(&area, reinterpret_cast<u_long*>(vram.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(vram.data()));
   CHECK(std::ranges::equal(vram, r::clutBuf));
 
-  LoadImage(&area, reinterpret_cast<u_long*>(saved_vram.data()));
+  LoadImage(&area, reinterpret_cast<std::uint32_t*>(saved_vram.data()));
   std::ranges::copy(saved_clut, std::begin(r::clutBuf));
 }
 }  // namespace

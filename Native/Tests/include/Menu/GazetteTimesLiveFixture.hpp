@@ -38,8 +38,8 @@
 namespace gazette_times_live_tests {
 namespace score = VS::Menu::Score;
 namespace fw = VS::Menu::Framework;
-inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(u_long);
-inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
+inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 inline constexpr std::size_t kSceneHead = 18;
 inline constexpr std::size_t kOverlayHead = 2;
 inline constexpr std::size_t kInformationBox = 7;
@@ -168,13 +168,13 @@ inline EncodedText TerminatedText(std::span<const std::uint8_t> bytes) {
 }
 
 template <std::size_t Count>
-EncodedText Label(const u_short (&table)[Count], std::size_t index) {
+EncodedText Label(const std::uint16_t (&table)[Count], std::size_t index) {
   if (index >= Count || table[index] >= Count) {
     throw std::runtime_error("Gazette Live label offset left its table");
   }
   const auto* bytes = reinterpret_cast<const std::uint8_t*>(table);
-  return TerminatedText(
-      std::span(bytes, sizeof table).subspan(table[index] * sizeof(u_short)));
+  return TerminatedText(std::span(bytes, sizeof table)
+                            .subspan(table[index] * sizeof(std::uint16_t)));
 }
 
 inline EncodedText BorrowedText(const std::uint8_t* text) {
@@ -262,9 +262,9 @@ class Fixture {
 
  public:
   std::array<fw::MenuRow, fw::kRowCount> rows{};
-  std::vector<u_long> primitives =
-      std::vector<u_long>(kPrimitiveWords + 2, kCanary);
-  std::array<u_long, kOrderingWords> ordering{};
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(kPrimitiveWords + 2, kCanary);
+  std::array<std::uint32_t, kOrderingWords> ordering{};
 
   Fixture() {
     ReloadBorrowedTables();
@@ -302,7 +302,7 @@ class Fixture {
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + kSceneHead;
     VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kOverlayHead;
-    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    VS::Legacy::ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
   static void SetScore(std::size_t trial, std::size_t place, std::uint32_t time,
@@ -347,11 +347,11 @@ class Fixture {
     const auto start = reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
     const auto end = reinterpret_cast<std::uintptr_t>(
         VS::Render::FrameScratchpad().primitive_cursor);
-    if (end < start || end - start > kPrimitiveWords * sizeof(u_long) ||
-        (end - start) % sizeof(u_long) != 0) {
+    if (end < start || end - start > kPrimitiveWords * sizeof(std::uint32_t) ||
+        (end - start) % sizeof(std::uint32_t) != 0) {
       throw std::runtime_error("Gazette Live primitive cursor left its owner");
     }
-    return (end - start) / sizeof(u_long);
+    return (end - start) / sizeof(std::uint32_t);
   }
 
   [[nodiscard]] std::vector<Packet> Packets() const {
@@ -359,8 +359,8 @@ class Fixture {
     const auto primitive_start =
         reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
     const auto table_start = reinterpret_cast<std::uintptr_t>(ordering.data());
-    const std::size_t used_bytes = UsedWords() * sizeof(u_long);
-    const u_long* current = &ordering.back();
+    const std::size_t used_bytes = UsedWords() * sizeof(std::uint32_t);
+    const std::uint32_t* current = &ordering.back();
     for (std::size_t visits = 0; visits < kPrimitiveWords + kOrderingWords;
          ++visits) {
       const auto address = reinterpret_cast<std::uintptr_t>(current);
@@ -368,12 +368,12 @@ class Fixture {
           address >= table_start && address - table_start < sizeof ordering;
       const bool in_packets =
           address >= primitive_start && address - primitive_start < used_bytes;
-      if ((!in_table && !in_packets) || address % alignof(u_long) != 0) {
+      if ((!in_table && !in_packets) || address % alignof(std::uint32_t) != 0) {
         throw std::runtime_error("Gazette Live chain left its frame owners");
       }
       const std::size_t length = *current >> 24;
       if ((in_table && length != 0) ||
-          (in_packets && (length + 1) * sizeof(u_long) >
+          (in_packets && (length + 1) * sizeof(std::uint32_t) >
                              used_bytes - (address - primitive_start))) {
         throw std::runtime_error("Gazette Live packet length exceeds owner");
       }
@@ -384,7 +384,7 @@ class Fixture {
       }
       const auto next = *current & kLinkMask;
       if (next == kLinkMask) return packets;
-      current = static_cast<const u_long*>(LegacyGpu_Pointer(next));
+      current = static_cast<const std::uint32_t*>(VS::Legacy::GpuPointer(next));
     }
     throw std::runtime_error("Gazette Live ordering chain contains a cycle");
   }

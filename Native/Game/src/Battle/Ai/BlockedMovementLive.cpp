@@ -20,7 +20,9 @@
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Battle::Ai {
 namespace {

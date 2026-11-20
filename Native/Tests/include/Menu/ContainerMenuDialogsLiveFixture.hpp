@@ -60,7 +60,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
   equipment::ValueRestore<int> saved_previous{VS::Input::previousButtons};
   equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
       VS::State::tickSpeed};
-  equipment::ArrayRestore<u_int, std::size(VS::Input::buttonHeldFrames)>
+  equipment::ArrayRestore<std::uint32_t, std::size(VS::Input::buttonHeldFrames)>
       saved_held{VS::Input::buttonHeldFrames};
   equipment::ArrayRestore<std::uint16_t,
                           std::size(VS::Menu::container::menuText)>
@@ -73,10 +73,11 @@ struct DialogLiveFixture : equipment::LiveFixture {
       VS::Menu::Inventory::freezeTabArrows};
   equipment::ValueRestore<char> saved_animation{
       VS::Menu::Framework::itemsListRow};
-  equipment::ValueRestore<u_long*> saved_text_ordering{
+  equipment::ValueRestore<std::uint32_t*> saved_text_ordering{
       VS::Menu::activeTextBoxOrderingTable};
   equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
-  equipment::ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)>
+  equipment::ArrayRestore<std::uint32_t,
+                          std::size(VS::Menu::textBoxOrderingTables)>
       saved_text_tables{VS::Menu::textBoxOrderingTables};
 
   DialogLiveFixture() {
@@ -91,7 +92,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     VS::State::tickSpeed = 2;
     VS::Menu::textBoxBufferIndex = 0;
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
-    ClearOTag(VS::Menu::activeTextBoxOrderingTable, kTextOrderingTags);
+    VS::Legacy::ClearOTag(VS::Menu::activeTextBoxOrderingTable,
+                          kTextOrderingTags);
     VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
                               VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);
@@ -186,23 +188,24 @@ struct DialogLiveFixture : equipment::LiveFixture {
     const void* packet = &ordering.back();
     for (std::size_t count = 0; packet != nullptr && count < kVisitLimit;
          ++count) {
-      const auto* words = static_cast<const u_long*>(packet);
+      const auto* words = static_cast<const std::uint32_t*>(packet);
       if (!OwnsWords(words, 1)) {
         throw std::runtime_error(
             "ordering tag is outside its real frame owner");
       }
-      const auto length = static_cast<const P_TAG*>(packet)->len;
+      const auto length = static_cast<const VS::Legacy::P_TAG*>(packet)->len;
       if (!OwnsWords(words, static_cast<std::size_t>(length) + 1U)) {
         throw std::runtime_error(
             "declared packet payload exceeds its real owner");
       }
       packets.emplace_back(words, words + length + 1U);
-      packet = isendprim(packet) ? nullptr : nextPrim(packet);
+      packet = VS::Legacy::isendprim(packet) ? nullptr
+                                             : VS::Legacy::nextPrim(packet);
     }
     if (packet != nullptr) throw std::runtime_error("cyclic ordering chain");
     return packets;
   }
-  bool OwnsWords(const u_long* pointer, std::size_t words) const {
+  bool OwnsWords(const std::uint32_t* pointer, std::size_t words) const {
     const auto first = reinterpret_cast<std::uintptr_t>(pointer);
     const auto primitive =
         reinterpret_cast<std::uintptr_t>(primitives.data() + 1);
@@ -211,7 +214,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
     const auto table = reinterpret_cast<std::uintptr_t>(ordering.data());
     const auto text_table =
         reinterpret_cast<std::uintptr_t>(VS::Menu::textBoxOrderingTables);
-    const auto bytes = words * sizeof(u_long);
+    const auto bytes = words * sizeof(std::uint32_t);
     if (first >= primitive && first <= cursor && bytes <= cursor - first) {
       return true;
     }

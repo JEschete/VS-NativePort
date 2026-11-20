@@ -16,7 +16,7 @@
 #include "Battle/Actor.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Magic.hpp"
@@ -595,7 +595,7 @@ struct TeleportLiveFixture {
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
-  u_short* saved_text = VS::Menu::Framework::itemsText;
+  std::uint16_t* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
   char saved_display_cost = VS::Menu::Framework::displayActionCost;

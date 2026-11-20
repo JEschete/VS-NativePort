@@ -55,7 +55,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
 
@@ -385,12 +385,12 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     live->risk = 0;
     live->max_mp = stats.mp;
     live->current_mp = stats.mp;
-    live->total_strength = static_cast<u_short>(stats.strength);
-    live->strength = static_cast<u_short>(stats.strength);
-    live->total_intelligence = static_cast<u_short>(stats.intelligence);
-    live->intelligence = static_cast<u_short>(stats.intelligence);
-    live->total_agility = static_cast<u_short>(stats.agility);
-    live->agility = static_cast<u_short>(stats.agility);
+    live->total_strength = static_cast<std::uint16_t>(stats.strength);
+    live->strength = static_cast<std::uint16_t>(stats.strength);
+    live->total_intelligence = static_cast<std::uint16_t>(stats.intelligence);
+    live->intelligence = static_cast<std::uint16_t>(stats.intelligence);
+    live->total_agility = static_cast<std::uint16_t>(stats.agility);
+    live->agility = static_cast<std::uint16_t>(stats.agility);
     live->movement_class = static_cast<char>(stats.gait.movement_class);
     live->gait_class = static_cast<char>(stats.gait.gait_class);
     live->walk_speed = static_cast<char>(stats.walk_speed);
@@ -500,12 +500,13 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     stats->max_hp = remembered.max_hp;
     stats->current_mp = remembered.current_mp;
     stats->max_mp = remembered.max_mp;
-    stats->strength = static_cast<u_short>(remembered.strength);
-    stats->total_strength = static_cast<u_short>(remembered.strength);
-    stats->intelligence = static_cast<u_short>(remembered.intelligence);
-    stats->total_intelligence = static_cast<u_short>(remembered.intelligence);
-    stats->agility = static_cast<u_short>(remembered.agility);
-    stats->total_agility = static_cast<u_short>(remembered.agility);
+    stats->strength = static_cast<std::uint16_t>(remembered.strength);
+    stats->total_strength = static_cast<std::uint16_t>(remembered.strength);
+    stats->intelligence = static_cast<std::uint16_t>(remembered.intelligence);
+    stats->total_intelligence =
+        static_cast<std::uint16_t>(remembered.intelligence);
+    stats->agility = static_cast<std::uint16_t>(remembered.agility);
+    stats->total_agility = static_cast<std::uint16_t>(remembered.agility);
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
       stats->limbs[limb].hp = remembered.limb_hp.at(limb);
     }
@@ -798,14 +799,14 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     stats->max_hp = snapshot.max_hp;
     stats->current_mp = snapshot.current_mp;
     stats->max_mp = snapshot.max_mp;
-    stats->strength = static_cast<u_short>(snapshot.strength);
-    stats->total_strength = static_cast<u_short>(snapshot.total_strength);
-    stats->intelligence = static_cast<u_short>(snapshot.intelligence);
+    stats->strength = static_cast<std::uint16_t>(snapshot.strength);
+    stats->total_strength = static_cast<std::uint16_t>(snapshot.total_strength);
+    stats->intelligence = static_cast<std::uint16_t>(snapshot.intelligence);
     stats->total_intelligence =
-        static_cast<u_short>(snapshot.total_intelligence);
-    stats->agility = static_cast<u_short>(snapshot.agility);
-    stats->total_agility = static_cast<u_short>(snapshot.total_agility);
-    stats->risk = static_cast<u_short>(snapshot.risk);
+        static_cast<std::uint16_t>(snapshot.total_intelligence);
+    stats->agility = static_cast<std::uint16_t>(snapshot.agility);
+    stats->total_agility = static_cast<std::uint16_t>(snapshot.total_agility);
+    stats->risk = static_cast<std::uint16_t>(snapshot.risk);
     stats->action_recovery_timer = snapshot.recovery_timer;
   }
 

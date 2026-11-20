@@ -22,7 +22,7 @@
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::Samples {
 namespace {

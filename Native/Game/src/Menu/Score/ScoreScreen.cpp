@@ -6,6 +6,9 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 // decomp: _buttonHeld (_buttonHeld@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::buttonHeld;
 

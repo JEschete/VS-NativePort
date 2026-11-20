@@ -22,7 +22,7 @@
 #include "Field/Manual.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.hpp"
@@ -129,7 +129,7 @@ void SetHelpBuffer(HelpFile file, void* buffer) {
   if (file == HelpFile::kText) {
     helpText = static_cast<int*>(buffer);
   } else {
-    helpAssets = static_cast<u_long*>(buffer);
+    helpAssets = static_cast<std::uint32_t*>(buffer);
   }
 }
 
@@ -280,12 +280,12 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   }
   void UploadSpriteTiles(std::uint32_t byte_offset,
                          std::uint32_t count) override {
-    if (u_long* const first = AssetsAt(byte_offset); first != nullptr) {
+    if (std::uint32_t* const first = AssetsAt(byte_offset); first != nullptr) {
       LiveUploadSpriteTiles(first, static_cast<int>(count));
     }
   }
   void UploadCluts(std::uint32_t byte_offset, std::uint32_t count) override {
-    if (u_long* const first = AssetsAt(byte_offset); first != nullptr) {
+    if (std::uint32_t* const first = AssetsAt(byte_offset); first != nullptr) {
       LiveUploadCluts(first, static_cast<int>(count));
     }
   }
@@ -321,13 +321,13 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   }
   void DrawButtonIcon(Framework::ButtonIcon button, std::int32_t x,
                       std::int32_t y, std::int32_t layer) override {
-    if (u_long* const entry = OrderingEntry(layer); entry != nullptr) {
+    if (std::uint32_t* const entry = OrderingEntry(layer); entry != nullptr) {
       Framework::DrawLiveButtonIcon(button, x, y, entry);
     }
   }
   void DrawText(std::string_view text, std::int32_t xy, std::int32_t color,
                 std::int32_t layer) override {
-    if (u_long* const entry = OrderingEntry(layer); entry != nullptr) {
+    if (std::uint32_t* const entry = OrderingEntry(layer); entry != nullptr) {
       const std::string terminated(text);
       Render::DrawLiveCompactTextColor(terminated.c_str(), xy, color, entry);
     }
@@ -360,8 +360,8 @@ class LiveHelpPagesHost final : public HelpPagesHost {
 
  private:
   // The original's scratch[1] + layer: the frame's scene ordering table.
-  [[nodiscard]] static u_long* OrderingEntry(std::int32_t layer) {
-    u_long* const entry =
+  [[nodiscard]] static std::uint32_t* OrderingEntry(std::int32_t layer) {
+    std::uint32_t* const entry =
         Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, layer);
     if (entry == nullptr) {
       RefuseLive("Manual controls have no frame ordering table");
@@ -371,14 +371,14 @@ class LiveHelpPagesHost final : public HelpPagesHost {
 
   // The asset buffer at `byte_offset`, which must lie inside it; the
   // uploads check their counts against the rest of it.
-  [[nodiscard]] static u_long* AssetsAt(std::uint32_t byte_offset) {
+  [[nodiscard]] static std::uint32_t* AssetsAt(std::uint32_t byte_offset) {
     const std::optional<std::size_t> bytes = HelpAssetBytes();
     if (!bytes || byte_offset >= *bytes) {
       RefuseLive("Manual help upload starts past its asset buffer");
       return nullptr;
     }
-    return reinterpret_cast<u_long*>(reinterpret_cast<std::byte*>(helpAssets) +
-                                     byte_offset);
+    return reinterpret_cast<std::uint32_t*>(
+        reinterpret_cast<std::byte*>(helpAssets) + byte_offset);
   }
 
   const HelpPagesState& state_;
@@ -398,7 +398,7 @@ void LivePollMenuReady() {
 }
 
 // decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:142), 0x80102EDC
-int LiveUpdateScreen(u_char* state) {
+int LiveUpdateScreen(std::uint8_t* state) {
   if (state == nullptr) {
     RefuseLive("Manual screen step is null");
     return 0;

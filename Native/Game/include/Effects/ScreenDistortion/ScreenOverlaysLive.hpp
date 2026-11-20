@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Binding from the active screen effect overlay controller, the frame's
 // ordering tables and primitive buffer, and the lendable texture pages to the
@@ -27,7 +27,7 @@ void SetLiveVignetteEnabled(int enabled);
 // Returns the cursor after the queued triangles.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
-                              int* packet_words, u_long* ordering_head);
+                              int* packet_words, std::uint32_t* ordering_head);
 // func_800F9FB8: the vignette in front of the frame's overlay table.
 void DrawLiveVignette();
 

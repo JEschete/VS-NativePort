@@ -21,7 +21,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -34,6 +34,11 @@
 #include "Render/Render.hpp"
 #include "Render/Textures.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
 
 namespace menu8_rename = VS::Content::text::menu8_prg::rename;
 
@@ -97,9 +102,9 @@ struct EquipmentFixture {
   char saved_pages = VS::Menu::Framework::enabledStatPages;
   char saved_subtype = VS::Menu::Framework::equipmentSubtype;
   std::array<int16_t, 64> saved_stats{};
-  std::vector<u_long> storage =
-      std::vector<u_long>(0x20000 / 4 + 2, 0xDEADBEEF);
-  std::array<u_long, 32> ordering{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4 + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 32> ordering{};
 
   explicit EquipmentFixture(int page) {
     std::copy_n(VS::Menu::Framework::equipmentStats, saved_stats.size(),
@@ -159,7 +164,7 @@ struct EquipmentFixture {
     size_t visited = 0;
     while (packet != &ordering[13] && visited++ < 64) {
       if (packet == nullptr || !Owns(packet)) return 0;
-      const auto* words = static_cast<const u_long*>(packet);
+      const auto* words = static_cast<const std::uint32_t*>(packet);
       if (static_cast<const P_TAG*>(packet)->len == 5 &&
           words[5] == 0x000C000C) {
         ++count;
@@ -212,12 +217,12 @@ struct RenameFrameFixture {
     VS::Menu::Rename::LiveRenameState() = saved_state;
   }
 
-  std::vector<const u_long*> Packets() const {
-    std::vector<const u_long*> packets;
+  std::vector<const std::uint32_t*> Packets() const {
+    std::vector<const std::uint32_t*> packets;
     const void* packet = &frame.ordering.back();
     for (unsigned count = 0; packet != nullptr && count < 2048; ++count) {
       if (!frame.Owns(packet)) break;
-      const auto* words = static_cast<const u_long*>(packet);
+      const auto* words = static_cast<const std::uint32_t*>(packet);
       if ((*words >> 24) != 0) packets.push_back(words);
       packet = isendprim(packet) ? nullptr : nextPrim(packet);
     }
@@ -241,7 +246,7 @@ struct EquipmentReloadFixture {
 
   EquipmentReloadFixture(int category, bool has_preview, int unused_alias) {
     VS::Actors::actorRecords[1] = &preview;
-    preview.sequence_model_id = static_cast<u_char>(category);
+    preview.sequence_model_id = static_cast<std::uint8_t>(category);
     std::fill_n(VS::Actors::weaponModels, saved_models.size(), nullptr);
     shield.bone_count = 1;
     VS::Actors::weaponModels[1] = &shield;
@@ -289,16 +294,16 @@ TEST_CASE("Weapon naming frame retains its grid name commands and backdrops",
   VS::Menu::Rename::DrawLiveFrame(offset);
   CHECK(fixture.frame.ReachesLastEntry());
   const auto packets = fixture.Packets();
-  const auto glyphs =
-      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+  const auto glyphs = std::count_if(
+      packets.begin(), packets.end(), [](const std::uint32_t* packet) {
         return (*packet >> 24) == 5 && packet[5] == 0x000C000C;
       });
-  const auto lines =
-      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+  const auto lines = std::count_if(
+      packets.begin(), packets.end(), [](const std::uint32_t* packet) {
         return (*packet >> 24) == 6 && (packet[2] >> 24) == 0x50;
       });
-  const auto backdrops =
-      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+  const auto backdrops = std::count_if(
+      packets.begin(), packets.end(), [](const std::uint32_t* packet) {
         return (*packet >> 24) == 9 && (packet[2] >> 24) == 0x38;
       });
   CHECK(glyphs == 9 * 14 + 4 + 1);

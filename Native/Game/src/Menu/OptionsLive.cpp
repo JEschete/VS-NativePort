@@ -13,7 +13,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -24,7 +24,8 @@
 #include "State/StateFlags.hpp"
 
 // decomp: _menuStrings (src/MENU/MENU8.PRG/88.c)
-u_short VS::Menu::Options::menuStrings[VS::Menu::Options::kMenuStringCount];
+std::uint16_t
+    VS::Menu::Options::menuStrings[VS::Menu::Options::kMenuStringCount];
 
 namespace VS::Menu::Options {
 namespace {

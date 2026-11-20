@@ -23,7 +23,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
@@ -554,7 +554,7 @@ T* Pointer(AssetAddress address) {
 
 // The companion record, or the enemy's weapon and shield, follow the body at
 // the native record strides.
-void CheckAttachmentStrides(bool companion, const u_char* buffer) {
+void CheckAttachmentStrides(bool companion, const std::uint8_t* buffer) {
   const VS::Content::LegacyActorAssetRequest& attachment =
       VS::Content::legacyActorAssetRequests[1];
   CHECK(attachment.destination == buffer + sizeof(VS::Actors::ActorRecord));
@@ -797,8 +797,8 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   std::ranges::copy(ZudFile(), Pointer(state.file));
   Pointer<VS::Content::DiscQueueSlot>(state.read)->state =
       VS::Content::DiscRequestState::kLoaded;
-  auto* buffer = Pointer<u_char>(state.model_buffer);
-  auto* file = Pointer<u_char>(state.file);
+  auto* buffer = Pointer<std::uint8_t>(state.model_buffer);
+  auto* file = Pointer<std::uint8_t>(state.file);
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   const VS::Content::LegacyActorAssetRequest& body =
       VS::Content::legacyActorAssetRequests[0];

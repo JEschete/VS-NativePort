@@ -20,6 +20,8 @@
 #include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 
+using VS::Legacy::nextPrim;
+
 namespace {
 namespace status = VS::Menu::Status;
 namespace fw = VS::Menu::Framework;
@@ -65,8 +67,8 @@ struct LiveLimbFixture {
       saved_boxes{VS::Menu::textBoxes};
   ArrayRestore<std::uint16_t, std::size(status::statusStrings)>
       saved_status_text{status::statusStrings};
-  ArrayRestore<u_short, std::size(VS::Battle::statusStrings)> saved_battle_text{
-      VS::Battle::statusStrings.data()};
+  ArrayRestore<std::uint16_t, std::size(VS::Battle::statusStrings)>
+      saved_battle_text{VS::Battle::statusStrings.data()};
   VS::Battle::ActorStats stats{};
   VS::Battle::Actor actor{};
   std::array<char, fw::kStringBufferBytes> output{};
@@ -144,8 +146,8 @@ struct LiveLimbFixture {
   }
 
   static void BuildText() {
-    std::ranges::fill(status::statusStrings, u_short{0});
-    std::ranges::fill(VS::Battle::statusStrings, u_short{0});
+    std::ranges::fill(status::statusStrings, std::uint16_t{0});
+    std::ranges::fill(VS::Battle::statusStrings, std::uint16_t{0});
     VS::Battle::statusStrings[1] = 64;
     VS::Battle::statusStrings[64] = 0xE710;
     for (std::size_t index = 0; index < status::kLimbConditionCount; ++index) {
@@ -282,19 +284,21 @@ TEST_CASE("Limb module render entries emit into the real frame owners",
   equipment_detail_tests::LiveFixture frame;
   LiveLimbFixture fixture;
   const auto refused = status::RefusedLiveLimbControllerCount();
-  auto* before =
-      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+  auto* before = static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103E58, &status::LiveDrawLimbConditionIndicator)(0, 0, 0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == before + 7);
   CHECK(nextPrim(VS::Render::FrameScratchpad().overlay_ordering_table) ==
         before);
-  before = static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+  before = static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103EF8, &status::LiveDrawLimbLeaderLine)(0, 0, 0, 0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == before + 9);
   CHECK(nextPrim(frame.ordering.data() +
                  equipment_detail_tests::kSceneOrderingEntry - 1) == before);
   const auto sprites_before = frame.Sprites().size();
-  before = static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+  before = static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   ModuleEntry(0x80103FEC, &status::LiveDrawStatusEffectIcons)(&fixture.stats,
                                                               0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor > before);

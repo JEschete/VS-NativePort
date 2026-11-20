@@ -10,7 +10,7 @@
 #include <cstdint>
 
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -22,6 +22,8 @@
 #include "Render/TextureRegionDrawLive.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::CVECTOR;
 
 namespace VS::Menu::Results {
 namespace {

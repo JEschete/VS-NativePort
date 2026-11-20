@@ -99,7 +99,7 @@ class Fixture:
              "notes": r"native-refs:none;source:native:Native\Game\src\Sys\Thing.hpp:1;native:Thing.hpp Thing::spare"},
         ]
         self.bridges = [
-            {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.h", "kind": "header"},
+            {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.hpp", "kind": "header"},
             {"ec": "EC-03", "path": "Native/Engine/src/Core/Gte.cpp", "kind": "source"},
         ]
         self.relaxed = {"src\\Gen\\Generated.cpp", "src\\Sys\\OwnedC.cpp"}
@@ -113,9 +113,9 @@ class Fixture:
                 '#include "Sys/Thing.hpp"\nextern "C" int Sys_Thing(void) { return 2; }\n'
             ),
             "Native/Game/src/Sys/Thing.hpp": "#pragma once\n",
-            "Native/Engine/Legacy/Psx.h": '#include "Core/Gte.h"\n',
-            "Native/Engine/include/Core/Gte.h": "#pragma once\n",
-            "Native/Engine/src/Core/Gte.cpp": '#include "Core/Gte.h"\n',
+            "Native/Engine/Legacy/Psx.h": '#include "Core/Gte.hpp"\n',
+            "Native/Engine/include/Core/Gte.hpp": "#pragma once\n",
+            "Native/Engine/src/Core/Gte.cpp": '#include "Core/Gte.hpp"\n',
             "Native/Tests/src/ThingTests.cpp": (
                 'TEST_CASE("Thing adds one",\n          "[thing]") {}\n'
                 'TEST_CASE(\n    "Thing keeps "\n    "state") {}\n'
@@ -825,7 +825,7 @@ class RetirementGateTests(GateTestCase):
 
     def test_modernized_x_with_a_direct_bridge_include_is_rejected(self) -> None:
         self.fixture.catalog[2]["modernized"] = "x"
-        self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = '#include "Core/Gte.h"\n'
+        self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = '#include "Core/Gte.hpp"\n'
         self.assertIn("modernized-with-bridge", self.rules("retirement"))
 
     def test_modernized_x_with_an_indirect_bridge_include_is_rejected(self) -> None:
@@ -838,7 +838,7 @@ class RetirementGateTests(GateTestCase):
         self.assertIn("invalid-modernized", self.rules("retirement"))
 
     def test_consumers_are_counted_per_ec_by_ownership(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.hpp"\nint Sys_OwnedC(void) { return 1; }\n'
         entry = self.report().bridge_consumers["EC-03"]
         self.assertEqual(entry["direct"]["owned"], ["Native/Game/src/Sys/OwnedC.cpp"])
         self.assertEqual(entry["transitive"]["generated"], ["Native/Game/src/Gen/Generated.cpp"])
@@ -848,10 +848,18 @@ class RetirementGateTests(GateTestCase):
         self.assertEqual(legacy["generated"], ["Native/Game/src/Gen/Generated.cpp"])
         self.assertEqual(legacy["owned"], ["Native/Game/src/Sys/OwnedC.cpp"])
 
+    def test_legacy_cpp_header_consumers_are_reported(self) -> None:
+        self.fixture.files["Native/Engine/Legacy/Render/LibGpu.hpp"] = "#pragma once\n"
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = (
+            '#include "Legacy/Render/LibGpu.hpp"\nint Sys_OwnedC(void) { return 1; }\n'
+        )
+        legacy = self.report().legacy_consumers["Native/Engine/Legacy/Render/LibGpu.hpp"]
+        self.assertEqual(legacy["owned"], ["Native/Game/src/Sys/OwnedC.cpp"])
+
     def test_renamed_bridge_listed_in_the_map_keeps_its_consumer_count(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.hpp"\nint Sys_OwnedC(void) { return 1; }\n'
         before = self.report().bridge_consumers["EC-03"]
-        del self.fixture.files["Native/Engine/include/Core/Gte.h"]
+        del self.fixture.files["Native/Engine/include/Core/Gte.hpp"]
         self.fixture.files["Native/Engine/include/Modern/Transform.h"] = "#pragma once\n"
         self.fixture.files["Native/Engine/src/Core/Gte.cpp"] = '#include "Modern/Transform.h"\n'
         self.fixture.files["Native/Engine/Legacy/Psx.h"] = '#include "Modern/Transform.h"\n'
@@ -864,7 +872,7 @@ class RetirementGateTests(GateTestCase):
         self.assertEqual(after["transitive"], before["transitive"])
 
     def test_bridge_renamed_without_updating_the_map_fails_instead_of_dropping_to_zero(self) -> None:
-        del self.fixture.files["Native/Engine/include/Core/Gte.h"]
+        del self.fixture.files["Native/Engine/include/Core/Gte.hpp"]
         self.fixture.files["Native/Engine/include/Modern/Transform.h"] = "#pragma once\n"
         self.assertIn("bridge-path-missing", self.rules("retirement"))
 

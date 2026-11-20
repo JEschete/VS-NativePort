@@ -17,6 +17,8 @@
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 namespace {
 namespace fx = VS::Effects;
 namespace Memory = VS::Core::Memory;

@@ -45,7 +45,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -54,6 +54,8 @@
 #include "Menu/Magic.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;
@@ -619,7 +621,7 @@ EncounterNavigationState InspectNavigation() {
   VS::Actors::ActorLocationQuery placement{};
   VS::Actors::LiveActorPlacement(0, &placement);
   constexpr std::size_t kFacingTileBytes = 4;
-  std::array<u_char, kFacingTileBytes> facing{};
+  std::array<std::uint8_t, kFacingTileBytes> facing{};
   VS::Field::TileInFrontOfActorEntry(&placement, facing.data());
   result.facing_tile = {facing[0], facing[2], facing[1]};
   result.collision_radius = player->collision_radius;

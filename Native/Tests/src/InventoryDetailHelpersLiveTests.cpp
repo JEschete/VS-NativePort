@@ -43,7 +43,7 @@ struct LiveFixture {
       VS::Menu::Inventory::selectedItemCategoryIconOnTop;
   char previous_pages = VS::Menu::Framework::enabledStatPages;
   char previous_page = VS::Menu::Framework::itemStatPage;
-  std::array<u_char*, kIndexedCategories> previous_orders{};
+  std::array<std::uint8_t*, kIndexedCategories> previous_orders{};
   std::array<fw::MenuRow, fw::kRowCount> rows{};
   std::array<std::uint8_t, 48> order{};
 

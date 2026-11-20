@@ -191,7 +191,7 @@ int func_800F9800(void) {
         self.assertIn("VS::Field::sphericalCamera.values.distance", binding)
         self.assertNotIn("settledCameraDistance", binding)
         self.assertIn("Render::SetLiveCameraProjectionDistance", binding)
-        self.assertNotIn("Core_Gte_SetGeomScreen", binding)
+        self.assertNotIn("SetGeomScreen(", binding)
         self.assertIn("Target recovery refused: empty sequence has no last action", binding)
 
     def test_action_camera_selection_binds_all_eight_owned_entries(self):
@@ -1409,7 +1409,7 @@ int func_800F9800(void) {
         self.assertIn("biased < 0", core)
         self.assertNotIn("FrameScratchpad", core)
         self.assertIn(
-            "AddPrim(static_cast<u_long*>(FrameScratchpad().ordering_table) + depth,",
+            "AddPrim( static_cast<std::uint32_t*>(FrameScratchpad().ordering_table) + depth,",
             flat(live),
         )
         relaxed = (
@@ -1907,7 +1907,7 @@ int func_800F9800(void) {
         core, live = self.room_draw_sources()
         self.assertIn("view, Math::BuildEulerRotationMatrix(rotation));", flat(core))
         for source in (core, live):
-            self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
+            self.assertNotIn("RotMatrixYXZ(", source)
 
     def test_core_idle_entry_is_owned_and_matrix_entries_reuse_native_leaves(self):
         self.assertNotIn("F03568", copy_fixups.NATIVE_FUNCTION_REDIRECTS)
@@ -4682,7 +4682,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         self.assertIn('#include "Battle/TargetingDrawLive.hpp"', live)
         core = (root / "Native/Game/src/Battle/TargetingDraw.cpp").read_text(encoding="utf-8")
         self.assertNotIn("Legacy/", core)
-        self.assertNotIn("Core_Gte", core)
+        self.assertNotIn("Gte", core)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800C0B50u", table)
 
@@ -4754,7 +4754,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         self.assertTrue(source.startswith("// Hand-maintained (tools/port/owned.csv)."))
         self.assertNotIn("<< 8) >> 8", source)
         self.assertNotIn("Legacy/", source)
-        self.assertNotIn("LegacyGpu_Handle", source)
+        self.assertNotRegex(source, r"\b(?:LegacyGpu_Handle|GpuHandle)\b")
         for function, identifier in (("DrawFrame", "F02781"), ("DrawSelectionBox", "F02782")):
             with self.subTest(function=function):
                 self.assertNotIn(identifier, copy_fixups.FIXES)
@@ -4968,7 +4968,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         self.assertIn("queue.Emit(left)", arrow)
         self.assertIn("queue.Emit(right)", arrow)
         self.assertNotIn("spell_level_ordering_table", source)
-        self.assertNotIn("LegacyGpu_Handle", source)
+        self.assertNotRegex(source, r"\b(?:LegacyGpu_Handle|GpuHandle)\b")
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]

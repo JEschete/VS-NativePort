@@ -6,7 +6,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 std::span<const std::byte> VS::Field::LiveRoomCollisionMap() {
   if (VS::Field::roomData.collision_map == nullptr) return {};

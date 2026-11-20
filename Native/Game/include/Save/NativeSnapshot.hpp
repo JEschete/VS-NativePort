@@ -12,7 +12,7 @@
 #include "Field/Mpd.hpp"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Ashley.hpp"
 #include "State/Progress.hpp"
 #include "State/SceneTimer.hpp"

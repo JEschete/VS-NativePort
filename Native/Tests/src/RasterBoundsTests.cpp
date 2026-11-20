@@ -6,8 +6,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Legacy/Render/LibGpu.h"
+#include "Legacy/Render/LibGpu.hpp"
 #include "Render/PageSpace.hpp"
+
+using VS::Legacy::getClut;
+using VS::Legacy::getTPage;
 
 namespace {
 using VS::u16;

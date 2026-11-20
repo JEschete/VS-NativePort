@@ -22,7 +22,7 @@
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Items::Live {
 // The battle actor records the bindings read and write by name.

@@ -44,6 +44,8 @@
 #include "Field/Gimmicks.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
 
@@ -522,7 +524,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
         !ReadablePlanningBytes(
             VS::Battle::Ai::candidateExclusions,
             std::size_t{kCandidateTargetSlots} * kActionDefinitionCount,
-            alignof(u_char))) {
+            alignof(std::uint8_t))) {
       return false;
     }
     VS::Battle::Ai::candidateExclusions[target][action] = 0;
@@ -993,7 +995,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     Require(ReadablePlanningBytes(
                 VS::Battle::Ai::candidateExclusions,
                 std::size_t{kCandidateTargetSlots} * kActionDefinitionCount,
-                alignof(u_char)),
+                alignof(std::uint8_t)),
             "AI enumeration requires a complete exclusion table");
     return VS::Battle::Ai::candidateExclusions[target][action] != 0;
   }

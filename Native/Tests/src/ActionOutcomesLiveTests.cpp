@@ -21,6 +21,8 @@
 #include "Content/ModuleData.hpp"
 #include "State/Progress.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionState;
 

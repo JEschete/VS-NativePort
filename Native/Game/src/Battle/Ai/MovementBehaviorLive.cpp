@@ -36,6 +36,8 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionRequestRecord;
 
 namespace VS::Battle::Ai {

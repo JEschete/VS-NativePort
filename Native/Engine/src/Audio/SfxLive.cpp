@@ -17,12 +17,17 @@
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/Scratch.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
+
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Audio {
 namespace {
@@ -202,14 +207,14 @@ class LiveSfxHost final : public SfxHost {
   SfxProjection Project(const SfxPoint& point) override {
     auto* const scratch =
         static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
-    Core_Gte_SetRotMatrix(&scratch->view_matrix);
-    Core_Gte_SetTransMatrix(&scratch->view_matrix);
+    SetRotMatrix(&scratch->view_matrix);
+    SetTransMatrix(&scratch->view_matrix);
     SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
-    Core_GteWord screen_xy = 0;
-    Core_GteWord interpolation = 0;
-    Core_GteWord flag = 0;
-    const Core_GteWord depth =
-        Core_Gte_RotTransPers(&vector, &screen_xy, &interpolation, &flag);
+    VS::Core::Gte::Word screen_xy = 0;
+    VS::Core::Gte::Word interpolation = 0;
+    VS::Core::Gte::Word flag = 0;
+    const VS::Core::Gte::Word depth =
+        RotTransPers(&vector, &screen_xy, &interpolation, &flag);
     return {.screen_xy = static_cast<std::int32_t>(screen_xy),
             .depth = static_cast<std::int32_t>(depth)};
   }

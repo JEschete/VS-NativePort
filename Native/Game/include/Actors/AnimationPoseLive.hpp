@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "Actors/AnimationPose.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;
@@ -47,7 +47,7 @@ int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor);
 // address (0 when refused), and the clip header in `*header_out` (null
 // without one).
 std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
-                                           u_short** header_out);
+                                           std::uint16_t** header_out);
 // decomp: BATTLE.PRG func_800AD008. Starts `pose` at the actor's animation.
 void InitializeLiveActorAnimationPose(VS::Actors::ActorRecord* actor,
                                       VS::Actors::AnimationPose* pose);
@@ -59,5 +59,6 @@ void UpdateLiveMotionAndLookAt(VS::Actors::ActorRecord* actor, int skip_tweens);
 // saved matrix `saved` (1 or 2), in the skeleton pose and the actor.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void ApplyLiveLockedBoneTransform(VS::Actors::ActorRecord* actor,
-                                  const MATRIX* parent, int bone, int saved);
+                                  const VS::Core::Gte::MATRIX* parent, int bone,
+                                  int saved);
 }  // namespace VS::Actors

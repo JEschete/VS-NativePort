@@ -19,7 +19,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -46,6 +46,11 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Menu::map {
 namespace {
@@ -193,7 +198,8 @@ bool ShowRoomText(std::int32_t room) {
 // byte. LivePacketQueue otherwise replaces the entire head with its handle.
 class MapPacketQueue final : public Render::PacketQueue {
  public:
-  explicit MapPacketQueue(u_long* entry) : entry_(entry), queue_(entry) {}
+  explicit MapPacketQueue(std::uint32_t* entry)
+      : entry_(entry), queue_(entry) {}
   std::uint32_t ChainLink() const override { return queue_.ChainLink(); }
   bool CanEmit(std::size_t words) const {
     return entry_ != nullptr && queue_.CanEmit(words);
@@ -207,7 +213,7 @@ class MapPacketQueue final : public Render::PacketQueue {
   }
 
  private:
-  u_long* entry_;
+  std::uint32_t* entry_;
   Render::LivePacketQueue queue_;
 };
 
@@ -281,7 +287,7 @@ class LiveMapMenu final : public MapMenuHost {
  public:
   explicit LiveMapMenu(MapMenuState& state) : state_(state) {}
 
-  void SetFarColorBlack() override { Core_Gte_SetFarColor(0, 0, 0); }
+  void SetFarColorBlack() override { VS::Core::Gte::SetFarColor(0, 0, 0); }
   void SetBackgroundPriority(std::int32_t slot,
                              std::int32_t brightness) override {
     Call([&] { Framework::SetLiveBackgroundPriority(slot, brightness); });
@@ -559,8 +565,8 @@ void LiveApplyCamera() {
   StoreAngles(cameraPos, camera.position);
   MATRIX matrix{};
   Core::Math::StoreTransform(matrix, camera.transform);
-  Core_Gte_SetRotMatrix(&matrix);
-  Core_Gte_SetTransMatrix(&matrix);
+  SetRotMatrix(&matrix);
+  SetTransMatrix(&matrix);
 }
 
 // F02699: _darkenBackground, src/MENU/MENU5.PRG/4D8.c:1788.

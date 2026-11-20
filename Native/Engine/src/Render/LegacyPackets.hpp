@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Render/LibGpu.h"
+#include "Legacy/Render/LibGpu.hpp"
 
 namespace VS::Render {
 // decomp: vs_primAddr (src/include/gpu.h:17)
@@ -126,7 +126,7 @@ struct TileTexturePagePacket {
 // decomp: unkPrim (src/EFFECT/PLG005.BIN/18.c:33)
 struct EffectFlatQuadPacket {
   std::uint32_t tag0;
-  POLY_FT4 opaque4;
+  VS::Legacy::POLY_FT4 opaque4;
   std::int32_t draw_mode;
   std::int32_t reserved30[kFlatQuadPacketPaddingWords];
 };
@@ -137,14 +137,14 @@ struct EffectGouraudQuadPacket {
   std::uint8_t tag1;
   std::uint8_t tag2;
   std::uint8_t word_count;
-  POLY_GT4 opaque4;
+  VS::Legacy::POLY_GT4 opaque4;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_closedRingPrim (src/EFFECT/PLG077.BIN/18.c:30)
 struct ClosedRingPacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
@@ -157,7 +157,7 @@ struct ClosedRingTexCoord {
 // decomp: vs_gridPrim (src/EFFECT/grids.h:21)
 struct GridPacket {
   std::int32_t tag;
-  POLY_FT4 poly;
+  VS::Legacy::POLY_FT4 poly;
   std::int32_t draw_mode;
   std::int32_t reserved30[kFlatQuadPacketPaddingWords];
 };
@@ -165,7 +165,7 @@ struct GridPacket {
 // decomp: vs_mesh10Prim (src/EFFECT/meshes10.h:21)
 struct Mesh10Packet {
   std::int32_t tag;
-  POLY_GT3 poly;
+  VS::Legacy::POLY_GT3 poly;
   std::int32_t draw_mode;
 };
 
@@ -178,7 +178,7 @@ struct Mesh10TexCoord {
 // decomp: vs_mirrorSurfacePrim (src/EFFECT/mirroredSurfaces.h:22)
 struct MirrorSurfacePacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
@@ -188,7 +188,7 @@ struct ParticleLinePacket {
   std::uint8_t tag1;
   std::uint8_t tag2;
   std::uint8_t word_count;
-  LINE_F2 line;
+  VS::Legacy::LINE_F2 line;
   std::int32_t draw_mode;
 };
 
@@ -198,35 +198,35 @@ struct ParticleQuadPacket {
   std::uint8_t tag1;
   std::uint8_t tag2;
   std::uint8_t word_count;
-  POLY_GT4 opaque4;
+  VS::Legacy::POLY_GT4 opaque4;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_ringPrim (src/EFFECT/rings.h:22)
 struct RingPacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_rotatingSurfacePrim (src/EFFECT/rotatingSurfaces.h:23)
 struct RotatingSurfacePacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_surfacePrim (src/EFFECT/surfaces.h:22)
 struct SurfacePacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_tiledRingPrim (src/EFFECT/tiledRings.h:27)
 struct TiledRingPacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
@@ -242,14 +242,14 @@ struct Trail9Packet {
   std::uint8_t tag1;
   std::uint8_t tag2;
   std::uint8_t word_count;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 
 // decomp: vs_transposedRingPrim (src/EFFECT/PLG162.BIN/0.c:25)
 struct TransposedRingPacket {
   std::int32_t tag;
-  POLY_GT4 poly;
+  VS::Legacy::POLY_GT4 poly;
   std::int32_t draw_mode;
 };
 

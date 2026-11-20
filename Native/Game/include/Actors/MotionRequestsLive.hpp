@@ -8,7 +8,9 @@
 namespace VS::Actors {
 struct ActorRecord;
 }
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Binding from the movement scripts' actor table and request arguments to the
 // typed motion requests. Each entry aborts with a diagnostic on an actor id
@@ -23,10 +25,11 @@ void BeginLiveNavigationJump(int actor_id, int* target, int speed, int facing);
 void BeginLiveTeleport(int actor_id, int* target, int facing);
 void BeginLiveTileTravel(int actor_id, int* target, int facing);
 void BeginLiveTimedTravel(int actor_id, int* target, int facing);
-void QueueLiveGroundOffset(int actor_id, SVECTOR* step);
-void QueueLiveMovementVector(int actor_id, SVECTOR* step, int facing);
-void QueueLiveFlightMovement(int actor_id, SVECTOR* step, int speed,
+void QueueLiveGroundOffset(int actor_id, VS::Core::Gte::SVECTOR* step);
+void QueueLiveMovementVector(int actor_id, VS::Core::Gte::SVECTOR* step,
                              int facing);
+void QueueLiveFlightMovement(int actor_id, VS::Core::Gte::SVECTOR* step,
+                             int speed, int facing);
 // Typed entries for hand callers; they check only the actor.
 void BeginLiveTileJump(int actor_id, PackedTile target, int speed, int facing);
 void BeginLiveAirborneTileJump(int actor_id, PackedTile target, int speed,

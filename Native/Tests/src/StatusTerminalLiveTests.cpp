@@ -9,6 +9,9 @@
 
 #include "Menu/StatusTerminalLiveFixture.hpp"
 
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 namespace st = VS::Menu::Status;
 namespace fw = VS::Menu::Framework;
@@ -176,14 +179,14 @@ TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
           "[status-terminal][status-terminal-live][fixture-isolation]") {
   equipment_detail_tests::ValueRestore<decltype(VS::Render::projectionDistance)>
       projection{VS::Render::projectionDistance};
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   VS::Render::projectionDistance = 0;
   SVECTOR point{256, 0, 1024, 0};
-  Core_GteWord before{};
-  Core_GteWord after{};
-  Core_GteWord cue{};
-  Core_GteWord flags{};
-  Core_Gte_RotTransPers(&point, &before, &cue, &flags);
+  VS::Core::Gte::Word before{};
+  VS::Core::Gte::Word after{};
+  VS::Core::Gte::Word cue{};
+  VS::Core::Gte::Word flags{};
+  RotTransPers(&point, &before, &cue, &flags);
   REQUIRE(before != 0);
   {
     equipment_detail_tests::ValueRestore<decltype(st::delayScreenUpdate)> delay{
@@ -192,7 +195,7 @@ TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
     st::delayScreenUpdate = 2;
     st::LiveDrawFrame();
   }
-  Core_Gte_RotTransPers(&point, &after, &cue, &flags);
+  RotTransPers(&point, &after, &cue, &flags);
   CHECK(after == before);
   CHECK(VS::Render::projectionDistance == 0);
 }

@@ -14,12 +14,24 @@
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtv0Tr;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::GetClut;
+using VS::Legacy::GetTPage;
 
 // Contracts of the #276 row 22 room model pass and model transforms
 // (BATTLE.PRG 44F14.c:826-1143 and 1695, 49268.c:48-245; INITBTL.PRG FB0.c:19).
@@ -68,12 +80,12 @@ constexpr std::int16_t kOne = 4096;
   const SVECTOR vertex{static_cast<std::int16_t>(point.x),
                        static_cast<std::int16_t>(point.y),
                        static_cast<std::int16_t>(point.z), 0};
-  Core_Gte_SetRotMatrix(&matrix);
-  Core_Gte_SetTransMatrix(&matrix);
-  Core_Gte_LoadV0(&vertex);
-  Core_Gte_Rtv0Tr();
+  SetRotMatrix(&matrix);
+  SetTransMatrix(&matrix);
+  LoadV0(&vertex);
+  Rtv0Tr();
   VECTOR result{};
-  Core_Gte_StoreLvnl(&result);
+  StoreLvnl(&result);
   return Vec3{static_cast<std::int32_t>(result.vx),
               static_cast<std::int32_t>(result.vy),
               static_cast<std::int32_t>(result.vz)};
@@ -95,7 +107,7 @@ TEST_CASE("RotateTranslate matches the GTE's RTV0TR",
             GteRotateTranslate(transform, point));
     }
   }
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 constexpr std::uint32_t kVramColumns = 1024;
@@ -728,7 +740,7 @@ TEST_CASE("A held gimmick whose holder slot is empty is not drawn",
   VS::Actors::actorRecords[kHolder] = nullptr;
   VS::Field::GimmickInstance object{};
   object.object_info.object_id = 4;
-  object.parent = static_cast<u_char>(kHolder);
+  object.parent = static_cast<std::uint8_t>(kHolder);
   object.slot = 3;
   MATRIX camera{};
   {

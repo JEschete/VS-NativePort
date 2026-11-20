@@ -28,6 +28,9 @@
 #include "Title/TitleMenuLive.hpp"
 #include "Title/TitleMenuLiveState.hpp"
 
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+
 namespace {
 namespace title = VS::Title;
 using title::MenuItemMotion;
@@ -622,7 +625,7 @@ int ContinueFromCard(FakeHost& host) {
 class PresetLiveExit {
  public:
   static constexpr char kFlag = 7;
-  static constexpr u_char kDestination = 9;
+  static constexpr std::uint8_t kDestination = 9;
 
   PresetLiveExit() {
     VS::State::stateFlags.opaque_c = kFlag;

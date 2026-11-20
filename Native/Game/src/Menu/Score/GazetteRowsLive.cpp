@@ -17,7 +17,7 @@
 #include "Battle/StatusEffects.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -28,6 +28,8 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Menu::Score {
 namespace {
@@ -61,20 +63,20 @@ void Refuse(std::string_view what) {
   }
 }
 
-[[nodiscard]] u_long* RowOrderingEntry() {
-  auto* table = static_cast<u_long*>(
+[[nodiscard]] std::uint32_t* RowOrderingEntry() {
+  auto* table = static_cast<std::uint32_t*>(
       VS::Render::FrameScratchpad().overlay_ordering_table);
   return table == nullptr ? nullptr : table + kRowOrderingEntry;
 }
 
 class LiveScrollableRow final : public ScrollableRowHost {
  public:
-  LiveScrollableRow(Framework::MenuRow* row, u_long* before)
+  LiveScrollableRow(Framework::MenuRow* row, std::uint32_t* before)
       : row_(row), before_(before) {}
 
   int FrameBufferIndex() override { return VS::Render::frameBuf; }
   void DrawScrollArrow(const ScrollArrowSprite& arrow) override {
-    u_long* packet = Render::QueueLiveSpriteWithTexturePage(
+    std::uint32_t* packet = Render::QueueLiveSpriteWithTexturePage(
         arrow.brightness, static_cast<int>(arrow.position),
         static_cast<int>(arrow.size),
         before_ - (kRowOrderingEntry - kArrowOrderingEntry));
@@ -91,14 +93,14 @@ class LiveScrollableRow final : public ScrollableRowHost {
         Framework::LiveGradientStopColor(gradient, color_index, brightness));
   }
   void AddGradientLine(const GradientLine& line) override {
-    u_long* packet = Render::ReserveLivePrimitiveWords(kLineWords);
+    std::uint32_t* packet = Render::ReserveLivePrimitiveWords(kLineWords);
     if (packet == nullptr) {
       Refuse("no room for a row background line");
       return;
     }
     packet[0] = (*before_ & kLinkMask) | kLineTag;
     std::ranges::copy(line, packet + 1);
-    *before_ = LegacyGpu_Handle(packet);
+    *before_ = GpuHandle(packet);
     VS::Render::FrameScratchpad().primitive_cursor = packet + kLineWords;
   }
   void AddShadowTile(std::uint32_t position, std::uint32_t size) override {
@@ -107,7 +109,7 @@ class LiveScrollableRow final : public ScrollableRowHost {
                                          static_cast<int>(size));
   }
   void AddReflection(const ReflectionSprite& reflection) override {
-    u_long* packet = Render::QueueLiveSprite(
+    std::uint32_t* packet = Render::QueueLiveSprite(
         reflection.brightness, static_cast<int>(reflection.position),
         static_cast<int>(reflection.size), before_);
     packet[kSpriteDrawModeWord] = reflection.draw_mode;
@@ -117,7 +119,7 @@ class LiveScrollableRow final : public ScrollableRowHost {
 
  private:
   Framework::MenuRow* row_;
-  u_long* before_;
+  std::uint32_t* before_;
 };
 
 // _menuText's string at offset entry `choice`, or null when the entry or
@@ -191,7 +193,7 @@ class LiveGazetteMenu final : public GazetteMenuHost {
 // decomp: MENU9.PRG _renderScrollableMenuItem
 // (src/MENU/MENU9.PRG/238.c:54), 80102A7C
 void RenderLiveScrollableRow(Framework::MenuRow* row) {
-  u_long* before = RowOrderingEntry();
+  std::uint32_t* before = RowOrderingEntry();
   if (row == nullptr || before == nullptr) {
     Refuse("scrollable row without a row or an ordering table");
     return;

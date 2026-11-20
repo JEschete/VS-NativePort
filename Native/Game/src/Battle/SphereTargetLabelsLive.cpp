@@ -18,7 +18,7 @@
 #include "Battle/TargetVolume.hpp"
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingState.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -26,6 +26,11 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::TargetLabelLine;
 
@@ -96,8 +101,8 @@ void WriteLabel(const SphereTargetLabel& value,
 
 // Entry `slot` of the frame's overlay ordering table, or null (reported, at
 // powers of two) when it lies outside the table.
-u_long* LabelOverlayEntry(int slot) {
-  u_long* entry =
+std::uint32_t* LabelOverlayEntry(int slot) {
+  std::uint32_t* entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, slot);
   if (entry == nullptr && std::has_single_bit(++unordered_labels)) {
     VS::Core::LogError("battle.sphere",
@@ -109,7 +114,7 @@ u_long* LabelOverlayEntry(int slot) {
 }
 
 // The link and draw-mode helpers drop and count a primitive with no chain.
-u_long* LinkOverlayEntry() {
+std::uint32_t* LinkOverlayEntry() {
   return Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay,
                                         kLinkOverlaySlot);
 }
@@ -132,19 +137,19 @@ class LiveTargetLabelCanvas final : public SphereTargetLabelCanvas {
   std::uint32_t GradientStopColor(int gradient, int color_index,
                                   int brightness) override {
     return static_cast<std::uint32_t>(Menu::Framework::LiveGradientStopColor(
-        static_cast<u_int>(gradient), static_cast<u_int>(color_index),
-        brightness));
+        static_cast<std::uint32_t>(gradient),
+        static_cast<std::uint32_t>(color_index), brightness));
   }
 
   void DrawText(const TargetLabelTextDraw& text) override {
-    u_long* chain = LabelOverlayEntry(text.overlay_slot);
+    std::uint32_t* chain = LabelOverlayEntry(text.overlay_slot);
     if (chain == nullptr) return;
     Render::DrawLiveCompactTextColor(text_, PackPoint(text.position),
                                      static_cast<int>(text.color), chain);
   }
 
   void DrawBox(const TargetLabelBox& box) override {
-    u_long* chain = LabelOverlayEntry(box.overlay_slot);
+    std::uint32_t* chain = LabelOverlayEntry(box.overlay_slot);
     if (chain == nullptr) return;
     Render::LivePacketQueue queue(chain);
     queue.Emit(BuildTargetLabelBoxPacket(box, queue.ChainLink()));
@@ -154,10 +159,10 @@ class LiveTargetLabelCanvas final : public SphereTargetLabelCanvas {
 
   LabelScreenPoint Project(const TargetWorldPoint& world) override {
     SVECTOR point = {world[0], world[1], world[2], 0};
-    Core_GteWord screen = 0;
-    Core_Gte_LoadV0(&point);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSxy2(&screen);
+    VS::Core::Gte::Word screen = 0;
+    LoadV0(&point);
+    Rtps();
+    StoreSxy2(&screen);
     return UnpackPoint(static_cast<int>(screen));
   }
 

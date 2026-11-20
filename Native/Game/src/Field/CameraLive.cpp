@@ -23,7 +23,7 @@
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingState.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -41,10 +41,16 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/Zone.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Render.hpp"
+
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 using VS::Battle::ActionState;
 
@@ -392,14 +398,13 @@ std::optional<StickPosition> LiveCameraHost::AnalogRightStick() {
 std::int32_t LiveCameraHost::ProjectToScreen(
     const Actors::MotionVector& point) {
   VS::Render::FrameScratch& scratch = Scratch();
-  Core_Gte_SetRotMatrix(&scratch.view_matrix);
-  Core_Gte_SetTransMatrix(&scratch.view_matrix);
+  SetRotMatrix(&scratch.view_matrix);
+  SetTransMatrix(&scratch.view_matrix);
   SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
-  Core_GteWord screen_xy = 0;
-  Core_GteWord interpolation = 0;
-  Core_GteWord flag = 0;
-  static_cast<void>(
-      Core_Gte_RotTransPers(&vector, &screen_xy, &interpolation, &flag));
+  VS::Core::Gte::Word screen_xy = 0;
+  VS::Core::Gte::Word interpolation = 0;
+  VS::Core::Gte::Word flag = 0;
+  static_cast<void>(RotTransPers(&vector, &screen_xy, &interpolation, &flag));
   return static_cast<std::int32_t>(screen_xy);
 }
 

@@ -15,7 +15,7 @@
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -26,6 +26,9 @@
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
 
 // Contracts of the gazette's scrolling rows, top menu and unused menu
 // wrappers (MENU9.PRG 238.c:54-267, 1430-1471).
@@ -369,9 +372,9 @@ struct LivePacketsFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   score::ScrollableRowAnimation saved_animation =
       score::LiveScrollableRowAnimation();
-  std::vector<u_long> storage =
-      std::vector<u_long>((0x20000 / sizeof(u_long)) + 2, 0xDEADBEEF);
-  std::array<u_long, 8> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      (0x20000 / sizeof(std::uint32_t)) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 8> ordering{};
 
   LivePacketsFixture() {
     VS::Render::frameBuf = 0;
@@ -392,15 +395,16 @@ struct LivePacketsFixture {
   LivePacketsFixture& operator=(const LivePacketsFixture&) = delete;
 
   // The packets linked before ordering entry `entry`, nearest first.
-  [[nodiscard]] std::vector<const u_long*> PacketsBefore(std::size_t entry) {
-    std::vector<const u_long*> packets;
+  [[nodiscard]] std::vector<const std::uint32_t*> PacketsBefore(
+      std::size_t entry) {
+    std::vector<const std::uint32_t*> packets;
     const void* packet = nextPrim(&ordering[entry]);
     const auto begin = reinterpret_cast<std::uintptr_t>(storage.data());
-    const auto end = begin + (storage.size() * sizeof(u_long));
+    const auto end = begin + (storage.size() * sizeof(std::uint32_t));
     while (reinterpret_cast<std::uintptr_t>(packet) >= begin &&
            reinterpret_cast<std::uintptr_t>(packet) < end &&
            packets.size() < 64) {
-      packets.push_back(static_cast<const u_long*>(packet));
+      packets.push_back(static_cast<const std::uint32_t*>(packet));
       packet = nextPrim(packet);
     }
     return packets;
@@ -457,7 +461,7 @@ struct LiveMenuFixture {
       VS::Menu::Framework::menuMemory;
   VS::Input::Settings saved_settings = VS::Input::settings;
   score::CursorMemory saved_cursor = VS::Battle::menu9CursorMemory;
-  std::array<u_short, std::size(score::menuText)> saved_text{};
+  std::array<std::uint16_t, std::size(score::menuText)> saved_text{};
   score::TopMenuState saved_top_menu = score::LiveTopMenuState();
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 256> arena{};
@@ -475,8 +479,9 @@ struct LiveMenuFixture {
       names[i][1] = static_cast<char>(0xE7);
       text[i * 2] = names[i].data();
       // Each choice: an offset to halfword 4 + 2i, then [10 + i, 0xE7].
-      score::menuText[i] = static_cast<u_short>(4 + (2 * i));
-      score::menuText[4 + (2 * i)] = static_cast<u_short>(0xE700 | (10 + i));
+      score::menuText[i] = static_cast<std::uint16_t>(4 + (2 * i));
+      score::menuText[4 + (2 * i)] =
+          static_cast<std::uint16_t>(0xE700 | (10 + i));
     }
     score::ResetGazetteRowsLive();
   }

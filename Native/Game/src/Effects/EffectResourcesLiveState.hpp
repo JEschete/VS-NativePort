@@ -9,7 +9,7 @@
 
 #include "Content/DiscQueue.hpp"
 #include "Effects/EffectResources.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 // decomp: D_800F5638_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:18): the texture
@@ -48,7 +48,7 @@ extern LiveTextureLoadList textureLoads;
 extern void* packageBuffer;
 // decomp: D_800F5680 (BATTLE/BATTLE.PRG 6F014.c:612): the texture load
 // state (0 idle, 1 loading, 2 loaded).
-extern u_int textureLoadState;
+extern std::uint32_t textureLoadState;
 // decomp: D_800F5684 (BATTLE/BATTLE.PRG 6F014.c:570): nonzero once the
 // purge overlay's workspace was acquired.
 extern int purgeOverlayLoaded;
@@ -61,13 +61,13 @@ extern EffectFileExtent packageFile;
 extern VS::Content::DiscQueueSlot* resourceReadSlot;
 // decomp: _plgLoadState (BATTLE/BATTLE.PRG 0x800F5690): the plugin load
 // state (0 idle, 1 acquire the overlay, 2 loading, 3 loaded).
-extern u_int pluginLoadState;
+extern std::uint32_t pluginLoadState;
 // decomp: plgLoadContext (_plgLoadContext@
 // src/BATTLE/BATTLE.PRG/6E4CCShared.h:538): the plugin file.
 extern EffectFileExtent pluginFile;
 // decomp: D_800F56A0 (BATTLE/BATTLE.PRG 6F014.c:612): the texture staging
 // buffer (high heap).
-extern u_long* textureLoadBuffer;
+extern std::uint32_t* textureLoadBuffer;
 // decomp: _plgEntryPointCount (BATTLE/BATTLE.PRG 0x800F56A4): the plugin's
 // renderers.
 extern int pluginEntryPointCount;

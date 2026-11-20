@@ -20,7 +20,9 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/MovementBehavior.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace ai = VS::Battle::Ai;

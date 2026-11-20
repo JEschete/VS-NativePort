@@ -22,7 +22,7 @@
 #include "Battle/Ai/WanderLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/TerrainHeight.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -1016,9 +1016,9 @@ TEST_CASE("Wander movement refuses missing room bounds or tile flags",
 namespace {
 struct LiveFrameFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
-  u_short flags[32][32]{};
-  u_short heights[32][32]{};
-  std::array<u_char, std::size_t{32} * 32U> regions{};
+  std::uint16_t flags[32][32]{};
+  std::uint16_t heights[32][32]{};
+  std::array<std::uint8_t, std::size_t{32} * 32U> regions{};
   int room_data = 0;
 
   LiveFrameFixture() {

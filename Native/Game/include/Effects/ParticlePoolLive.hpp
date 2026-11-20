@@ -3,7 +3,9 @@
 
 #include "Effects/ParticlePool.hpp"
 
+namespace VS::Core::Gte {
 struct VECTOR;
+}  // namespace VS::Core::Gte
 
 // Live binding for the particle pool and forces (ParticlePool.hpp): the pool
 // is the particlePool globals, a list an effect instance's particles
@@ -32,7 +34,7 @@ void LiveReleaseEffectParticle(LiveParticle* particle,
 void LiveReleaseAllEffectParticles(LiveEffectInstance* instance);
 // func_800D5260 (5BF94.c:7826): the gravity's fourth word, which nothing
 // reads, is copied as in the original.
-void LiveSetParticleGravity(VECTOR* gravity);
+void LiveSetParticleGravity(VS::Core::Gte::VECTOR* gravity);
 // func_800D5294 (5BF94.c:7828).
 void LiveSetParticleDrag(int* drag);
 // The forces particleGravity and particleDrag hold.

@@ -9,7 +9,7 @@
 #include <array>
 
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/Framework.hpp"
 
@@ -22,7 +22,7 @@ namespace VS::Menu {
 extern char textBoxBufferIndex;
 // decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
 inline constexpr int kTextBoxOrderingTableCount = 102;
-extern u_long textBoxOrderingTables[kTextBoxOrderingTableCount];
+extern std::uint32_t textBoxOrderingTables[kTextBoxOrderingTableCount];
 // decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
 extern char saveLocationId;
 }  // namespace VS::Menu
@@ -46,7 +46,7 @@ extern VS::Items::LootListNode* lootLists;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
 extern VS::Items::BattleLoot* lootEntry;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
-extern u_int* menuBackgroundBuffer;
+extern std::uint32_t* menuBackgroundBuffer;
 // decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)
 extern int mainMenuCursorAnimation;
 // decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG 5BF94.c)
@@ -72,17 +72,17 @@ extern char openedWithoutMainMenu;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
 extern LiveMenuControl menuState;
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c): the list menu's entries.
-extern u_short* itemsText;
+extern std::uint16_t* itemsText;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
 extern char menuRowYOffset;
 // decomp: _selectedRow (MENU/MAINMENU.PRG 58EC.c)
 extern int selectedRow;
 // decomp: _subMenuId (MENU/MAINMENU.PRG 58EC.c)
-extern u_char subMenuId;
+extern std::uint8_t subMenuId;
 // decomp: _subMenuPage (MENU/MAINMENU.PRG 58EC.c)
 extern char subMenuPage;
 // decomp: _subMenuRowCount (MENU/MAINMENU.PRG 58EC.c)
-extern u_short subMenuRowCount;
+extern std::uint16_t subMenuRowCount;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
 extern char subMenuRowInfo;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)

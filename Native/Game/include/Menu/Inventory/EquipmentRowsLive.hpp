@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Bindings from the equipment choice list and preview model reload
 // (EquipmentRows.hpp) to MENU3.PRG's list globals (Inventory.hpp), the game
@@ -16,7 +16,8 @@
 namespace VS::Menu::Inventory {
 // decomp: MENU3.PRG _populateMenuRows (16C.c:39). menu_text holds a name and
 // a description string (or NULL) per row.
-void LiveCreateEquipmentRows(int count, u_short** menu_text, int* row_types);
+void LiveCreateEquipmentRows(int count, std::uint16_t** menu_text,
+                             int* row_types);
 // decomp: MENU3.PRG _getSelectedItemRow (16C.c:101).
 int LiveSelectedEquipmentRow();
 // decomp: MENU3.PRG _processEquipSubMenu (16C.c:111).

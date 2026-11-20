@@ -21,6 +21,9 @@
 #include "Render/UiPacketsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Legacy::AddPrims;
+using VS::Legacy::ClearOTag;
+
 namespace VS::Menu {
 namespace {
 constexpr int kTextOrderingSlot = -6;
@@ -42,7 +45,8 @@ void RefuseUpdate() {
 
 class LiveUpdateHost final : public TextBoxUpdateHost {
  public:
-  explicit LiveUpdateHost(u_long* destination) : destination_(destination) {}
+  explicit LiveUpdateHost(std::uint32_t* destination)
+      : destination_(destination) {}
 
   TextBox ReadBox(std::size_t index) const override {
     return ReadLiveTextBox(index);
@@ -95,7 +99,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
   void AdvanceRandomBits() override { Core::NextLiveInterfaceRandomBits(0); }
 
  private:
-  u_long* destination_;
+  std::uint32_t* destination_;
 };
 }  // namespace
 

@@ -13,7 +13,7 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.hpp"
 
@@ -22,7 +22,7 @@ namespace {
 [[nodiscard]] LiveActionEffectTarget LiveEndpoint(
     const EffectEndpoint& endpoint) {
   LiveActionEffectTarget target{};
-  target.type = static_cast<u_short>(endpoint.kind);
+  target.type = static_cast<std::uint16_t>(endpoint.kind);
   target.color_preset = endpoint.color_preset;
   if (endpoint.kind == EffectEndpointKind::kPosition) {
     target.position.vx = endpoint.position.x;

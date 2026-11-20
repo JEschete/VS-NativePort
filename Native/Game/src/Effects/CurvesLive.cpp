@@ -18,7 +18,7 @@
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 namespace {

@@ -20,6 +20,8 @@
 #include "TestSupport/ActorRecordTableScope.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace actors = VS::Actors;
 using actors::ActorMotion;
 using actors::MotionVector;

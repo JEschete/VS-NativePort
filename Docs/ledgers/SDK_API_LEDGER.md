@@ -69,21 +69,21 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [ ] | T | `setRGB1` | macro | 33 | 7 | MENU5.PRG (9), renderTextures.h (9), BATTLE.PRG (7), MENU9.PRG (5), MENUE.PRG (2), INITBTL.PRG (1) |
 | [ ] | D | `_get_mode` | macro | 31 | 7 | BATTLE.PRG (21), EFFECT (8), PLG005.BIN (2) |
 | [ ] | T | `setXY0` | macro | 31 | 5 | ENDING.PRG (16), BATTLE.PRG (6), MENU5.PRG (6), MENUE.PRG (3) |
-| [ ] | T | `applyVector` | macro | 28 | 12 | BATTLE.PRG (15), EFFECT (8), MAINMENU.PRG (2), PLG005.BIN (1), MENU5.PRG (1), MENU9.PRG (1) |
+| [x] | T | `applyVector` | macro | 28 | 12 | BATTLE.PRG (15), EFFECT (8), MAINMENU.PRG (2), PLG005.BIN (1), MENU5.PRG (1), MENU9.PRG (1) |
 | [ ] | T | `setTPage` | macro | 28 | 6 | BATTLE.PRG (14), MENU5.PRG (7), MENU9.PRG (5), MENUE.PRG (1), MENUF.PRG (1) |
 | [ ] | D | `SetDispMask` | function | 25 | 5 | TITLE.PRG (9), SLUS_010.40 (7), ENDING.PRG (4), MENU7.PRG (3), BATTLE.PRG (2) |
 | [ ] | T | `DrawPrim` | function | 24 | 2 | TITLE.PRG (15), MENU7.PRG (9) |
 | [ ] | T | `setRGB2` | macro | 21 | 7 | renderTextures.h (9), BATTLE.PRG (4), MENU9.PRG (4), MENU5.PRG (2), INITBTL.PRG (1), MENUE.PRG (1) |
 | [ ] | T | `setShadeTex` | macro | 21 | 6 | MENU5.PRG (9), BATTLE.PRG (7), MENUE.PRG (2), ENDING.PRG (1), MENU9.PRG (1), MENUF.PRG (1) |
 | [ ] | T | `setRGB3` | macro | 20 | 7 | renderTextures.h (9), BATTLE.PRG (4), MENU9.PRG (4), INITBTL.PRG (1), MENU5.PRG (1), MENUE.PRG (1) |
-| [ ] | T | `addVector` | macro | 17 | 8 | BATTLE.PRG (11), EFFECT (6) |
+| [x] | T | `addVector` | macro | 17 | 8 | BATTLE.PRG (11), EFFECT (6) |
 | [ ] | T | `setUV0` | macro | 17 | 3 | ENDING.PRG (12), MENU5.PRG (4), BATTLE.PRG (1) |
 | [ ] | T | `ClearImage` | function | 15 | 6 | TITLE.PRG (8), MAINMENU.PRG (2), MENU5.PRG (2), ENDING.PRG (1), MENU7.PRG (1), SLUS_010.40 (1) |
 | [ ] | T | `PutDispEnv` | function | 14 | 4 | TITLE.PRG (9), BATTLE.PRG (2), ENDING.PRG (2), SLUS_010.40 (1) |
 | [ ] | T | `SetDefDispEnv` | function | 14 | 4 | TITLE.PRG (9), BATTLE.PRG (2), ENDING.PRG (2), SLUS_010.40 (1) |
 | [ ] | T | `PutDrawEnv` | function | 12 | 3 | TITLE.PRG (8), BATTLE.PRG (2), ENDING.PRG (2) |
 | [ ] | T | `SetDefDrawEnv` | function | 12 | 3 | TITLE.PRG (8), BATTLE.PRG (2), ENDING.PRG (2) |
-| [ ] | T | `copyVector` | macro | 12 | 7 | EFFECT (8), BATTLE.PRG (4) |
+| [x] | T | `copyVector` | macro | 12 | 7 | EFFECT (8), BATTLE.PRG (4) |
 | [ ] | T | `SetSprt` | function | 11 | 2 | ENDING.PRG (10), BATTLE.PRG (1) |
 | [ ] | T | `StoreImage` | function | 11 | 4 | TITLE.PRG (5), BATTLE.PRG (2), MENU5.PRG (2), MENU7.PRG (2) |
 | [ ] | T | `setLineG2` | macro | 11 | 4 | MENU5.PRG (7), BATTLE.PRG (2), MENU9.PRG (1), MENUE.PRG (1) |
@@ -137,7 +137,7 @@ Target: VS.Core Math: Vec3/Mat3 fixed-point, Transform/Project, Camera; GTE ops 
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | R | `ONE` | constant | 636 | 22 | BATTLE.PRG (551), EFFECT (44), MENU5.PRG (19), MENU9.PRG (10), ENDING.PRG (8), MENU4.PRG (4) |
+| [x] | R | `ONE` | constant | 636 | 22 | BATTLE.PRG (551), EFFECT (44), MENU5.PRG (19), MENU9.PRG (10), ENDING.PRG (8), MENU4.PRG (4) |
 | [ ] | R | `rsin` | function | 154 | 38 | BATTLE.PRG (74), EFFECT (35), MENU5.PRG (9), PLG077.BIN (4), PLG128.BIN (4), PLG300.BIN (4), MENU9.PRG (4), MENU4.PRG (3), MENUF.PRG (3), PLG162.BIN (2), PLG236.BIN (2), PLG263.BIN (2), ENDING.PRG (2), MENU (2), PLG005.BIN (1), SCREFF2.PRG (1), MENUC.PRG (1), MENUD.PRG (1) |
 | [ ] | R | `rcos` | function | 136 | 34 | BATTLE.PRG (63), EFFECT (35), MENU5.PRG (6), MENU9.PRG (5), PLG077.BIN (4), PLG128.BIN (4), PLG300.BIN (4), MENU4.PRG (4), PLG162.BIN (2), PLG236.BIN (2), PLG263.BIN (2), MENU (2), PLG005.BIN (1), ENDING.PRG (1), SCREFF2.PRG (1) |
 | [ ] | R | `SetRotMatrix` | function | 87 | 29 | EFFECT (34), BATTLE.PRG (25), PLG077.BIN (6), PLG300.BIN (6), PLG162.BIN (3), PLG236.BIN (3), PLG263.BIN (3), PLG005.BIN (2), SLUS_010.40 (2), PLG128.BIN (1), ENDING.PRG (1), MENU5.PRG (1) |
@@ -218,7 +218,7 @@ Target: C++ standard library / VS.Core utilities (Random gets a deterministic se
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
 | [ ] | R | `rand` | function | 114 | 22 | BATTLE.PRG (53), EFFECT (44), PLG077.BIN (4), PLG300.BIN (4), PLG162.BIN (2), PLG236.BIN (2), PLG263.BIN (2), SLUS_010.40 (2), MENUF.PRG (1) |
-| [ ] | R | `ABS` | macro | 77 | 16 | BATTLE.PRG (56), MENU5.PRG (11), MENU9.PRG (6), ENDING.PRG (3), MENUF.PRG (1) |
+| [x] | R | `ABS` | macro | 77 | 16 | BATTLE.PRG (56), MENU5.PRG (11), MENU9.PRG (6), ENDING.PRG (3), MENUF.PRG (1) |
 | [ ] | R | `memset` | function | 52 | 13 | TITLE.PRG (20), MENU7.PRG (15), BATTLE.PRG (11), INITBTL.PRG (1), ENDING.PRG (1), MENU (1), MENU2.PRG (1), MENUC.PRG (1), MENUD.PRG (1) |
 | [ ] | R | `strlen` | function | 9 | 3 | MENU9.PRG (5), BATTLE.PRG (2), MENUF.PRG (2) |
 | [ ] | R | `memcpy` | function | 7 | 2 | BATTLE.PRG (7) |

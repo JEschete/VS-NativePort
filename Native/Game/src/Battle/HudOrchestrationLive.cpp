@@ -53,14 +53,14 @@ constexpr int kCoordinateShift = 16;
   std::abort();
 }
 
-u_long* CheckedChain(u_long* chain) {
+std::uint32_t* CheckedChain(std::uint32_t* chain) {
   if (chain == nullptr) {
     Refuse("HUD presentation has no bounded ordering entry");
   }
   return chain;
 }
 
-u_long* CurrentChain(Render::LiveOrderingBase base, int layer) {
+std::uint32_t* CurrentChain(Render::LiveOrderingBase base, int layer) {
   return CheckedChain(Render::LiveFrameOrderingEntry(base, layer));
 }
 
@@ -79,7 +79,7 @@ bool DrawText(std::string_view text, std::int32_t position, int layer) {
 
 class LiveHudSpriteConsumer final : public HudSpriteConsumer {
  public:
-  void Bind(u_long* packet) { packet_ = packet; }
+  void Bind(std::uint32_t* packet) { packet_ = packet; }
   void SetColor(std::uint32_t color) override {
     packet_[Render::kSpriteColorWord] = color;
   }
@@ -91,7 +91,7 @@ class LiveHudSpriteConsumer final : public HudSpriteConsumer {
   }
 
  private:
-  u_long* packet_ = nullptr;
+  std::uint32_t* packet_ = nullptr;
 };
 
 class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
@@ -160,7 +160,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   std::optional<HudPoint> ShortcutMarkerPosition(HudShortcutRow row,
                                                  std::size_t slot) override {
     if (slot >= kHudShortcutRowSize) return std::nullopt;
-    const std::span<const u_char> positions =
+    const std::span<const std::uint8_t> positions =
         row == HudShortcutRow::kAbilities
             ? std::span(VS::Battle::secondShortcutMarkerPositions)
                   .first<kHudShortcutRowSize * 2>()
@@ -172,7 +172,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   std::optional<HudElementGeometry> ShortcutIconGeometry(
       HudShortcutRow row, std::size_t slot) override {
     if (slot >= kHudShortcutRowSize) return std::nullopt;
-    const std::span<const u_char> positions =
+    const std::span<const std::uint8_t> positions =
         row == HudShortcutRow::kAbilities
             ? std::span(VS::Battle::secondShortcutIconPositions)
                   .first<kHudShortcutRowSize * 2>()
@@ -211,7 +211,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   }
   HudSpriteConsumer* QueueSprite(HudPresentationLayer layer,
                                  const Render::SpriteRequest& sprite) override {
-    u_long* chain = nullptr;
+    std::uint32_t* chain = nullptr;
     switch (layer) {
       case HudPresentationLayer::kShortcut:
         chain = CurrentChain(Render::LiveOrderingBase::kOverlay, 0);
@@ -233,7 +233,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
     }
     const bool page =
         layer != HudPresentationLayer::kIndicator && sprite.draw_mode != 0;
-    u_long* const packet =
+    std::uint32_t* const packet =
         page ? Render::QueueLiveSpriteWithTexturePage(
                    sprite.brightness_transparency, sprite.packed_position,
                    sprite.packed_size, chain)
@@ -320,8 +320,8 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
 
  private:
   VS::Battle::ActorStats* stats_ = nullptr;
-  u_long* limb_chain_ = nullptr;
-  u_long* count_chain_ = nullptr;
+  std::uint32_t* limb_chain_ = nullptr;
+  std::uint32_t* count_chain_ = nullptr;
   std::array<LiveHudSpriteConsumer, kQueuedHudSprites> sprites_{};
   std::size_t used_sprites_ = 0;
 };

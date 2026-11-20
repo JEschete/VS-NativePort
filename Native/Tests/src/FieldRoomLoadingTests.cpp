@@ -26,7 +26,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/DisplayControl.hpp"
 
 namespace VS::Field {
@@ -1657,7 +1657,7 @@ TEST_CASE("The live environment reads the loaded room's whole section",
   VS::Field::roomData.environment =
       reinterpret_cast<VS::Field::MpdEnvironment*>(environment.data());
   VS::Field::roomData.header.environment_length =
-      static_cast<u_int>(kRoomEnvironmentBytes);
+      static_cast<std::uint32_t>(kRoomEnvironmentBytes);
   VS::Field::roomData.sound_data = nullptr;
   VS::Field::roomData.header.sound_data_length = 0;
   CHECK(LiveIsCurrentRoomWorkshop() == 2);
@@ -1669,10 +1669,10 @@ TEST_CASE("The live environment reads the loaded room's whole section",
   CHECK(LiveCurrentSceneId() == 0);
   CHECK(LiveRoomTrapLevel() == 0);
 
-  std::array<u_int, 1> sound{};
+  std::array<std::uint32_t, 1> sound{};
   VS::Field::roomData.sound_data = sound.data();
   VS::Field::roomData.header.sound_data_length =
-      static_cast<u_int>(sizeof sound);
+      static_cast<std::uint32_t>(sizeof sound);
   CHECK(LiveIsRoomAudioSequenceAbsent() == 0);
 }
 

@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 // decomp: TRAIL_SAMPLE_COUNT (src/EFFECT/trails5.h:3 and trails9.h:3)
@@ -20,7 +20,7 @@ inline constexpr std::size_t kLiveTrailSplinePoints = 4;
 template <std::size_t Samples>
 struct LiveTrailRecord {
   // The origin, two control points and the target.
-  std::array<SVECTOR, kLiveTrailSplinePoints> spline_points;
+  std::array<VS::Core::Gte::SVECTOR, kLiveTrailSplinePoints> spline_points;
   // Emitter steps the trail spends crossing the spline.
   std::uint8_t step_count;
   // Samples taken so far, up to Samples.
@@ -31,7 +31,7 @@ struct LiveTrailRecord {
   // Newest entry of the sample ring.
   std::uint8_t current_spline_sample;
   // Ring of the spline samples the trail draws.
-  std::array<SVECTOR, Samples> spline_samples;
+  std::array<VS::Core::Gte::SVECTOR, Samples> spline_samples;
   // Position along the spline; (spline_progress >> 12) - 0x1000 is the
   // interpolation parameter.
   std::int32_t spline_progress;

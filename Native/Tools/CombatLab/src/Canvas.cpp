@@ -9,8 +9,10 @@
 
 #include "Content/DataStore.hpp"
 #include "Content/SystemResources.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Text/CompactFont.hpp"
+
+using VS::Legacy::RECT;
 
 namespace VS::combat_lab {
 namespace {

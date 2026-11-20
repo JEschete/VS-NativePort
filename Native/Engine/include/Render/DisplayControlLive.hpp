@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/DisplayControl.hpp"
 
 // Live binding for the display policies (DisplayControl.cpp): the libgpu
@@ -12,7 +12,7 @@ namespace VS::Render {
 void ConfigureLiveFieldDisplay(int frame_width, int frame_height,
                                int projection_distance, int clear_red,
                                int clear_green, int clear_blue);
-int PresentLiveFieldFrame(u_long* ordering_table);
+int PresentLiveFieldFrame(std::uint32_t* ordering_table);
 void EnableLiveDisplay();
 void DisableLiveDisplay();
 void ShowLiveDisplay();

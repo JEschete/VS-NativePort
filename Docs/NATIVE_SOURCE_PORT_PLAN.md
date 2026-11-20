@@ -427,9 +427,9 @@ PS1 layout under the x64 MSVC rules.
 - **Declaration differences between decomp files** (each file declared its own view of a global or prototype):
   98 uses go through a cast to that file's declaration, and 30 calls compiled through an implicit or unprototyped
   declaration go through `ret (*)()`. Both preserve what the original compiled; they are modernization targets.
-- **Legacy SDK layer** (`Native\Engine\Legacy\`, `Native\Content\Legacy\LibDs.h`, umbrella `Legacy/Psx.h`): own
+- **Legacy SDK layer** (`Native\Engine\Legacy\`, `Native\Content\Legacy\LibDs.h`, umbrella `Legacy/Psx.hpp`): own
   PS1 type layouts, packet macros and prototypes for the 287 SDK names in use. R: libgte and the GTE inline macros
-  become `Core/Gte.h` (fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
+  become `Core/Gte.hpp` (`VS::Core::Gte`, fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
   (now `Core/RandomLive.hpp`), `getScratchAddr` and scratch literals `Core/Scratch.hpp`, CRT-clashing libapi file calls
   `VS::Legacy::LibApi::*`. D: whole-statement calls are deleted (the last expression uses were folded or deleted and `Legacy/Removed.h` is retired, #441).
   T: shims record `VS::Core::RecordUnported` until they translate into their system.
@@ -657,8 +657,8 @@ components, and every fix lands there, never in a scene:
 | **Sequence handler**: playing SEQ animations, animation events | `Actors\Animation.c` (`Actors_PlayActorAnimation`, `Actors_FindActorAnimationHeader`, `Actors_InitializeActorAnimationPose`, `Actors_RunAnimationEvents`) | `Actors::Animator` over `Content::SeqBank`, with the same keyframe decoding and event script |
 
 x64 rule for these formats until the typed decoders replace them: a loaded file keeps its own layout. Pointers
-the PS1 loader relocated in place stay 32-bit offsets (`copy_fixups.ONDISC_OFFSETS`; uses go through
-`VS_ONDISC`, `Legacy/OnDisc.h`), and records the code addresses by PS1 offset are reached by named field
+the PS1 loader relocated in place stay 32-bit offsets (`copy_fixups.ONDISC_OFFSETS`; each use adds the
+offset to the record's address, and the `VS_ONDISC` macro that did so is retired), and records the code addresses by PS1 offset are reached by named field
 (`tools\port\field_at.py`). Each fix is a copy-tool rule or a reviewed fixup on the shared function, so it holds
 for every actor and every caller; `Native\Tests\src\LayoutAsserts.cpp` checks the layouts they rely on.
 
@@ -1274,7 +1274,7 @@ and a dependency boundary. No such new approval is implied by this audit.
 
 #### EC-01: GPU packet interpreter and page-image renderer
 
-**Evidence:** `Native/Engine/Legacy/Render/LibGpu.cpp` (`SubmitPacket`, `LegacyGpu_WalkList`),
+**Evidence:** `Native/Engine/Legacy/Render/LibGpu.cpp` (`SubmitPacket`, `VS::Legacy::GpuWalkList`),
 `Native/Engine/include/Render/PageSpace.hpp`, `Native/Engine/src/Render/PageSpace.cpp`, and
 `Native/Engine/src/Render/Device.cpp` (`PresentImage`).
 
@@ -1338,7 +1338,7 @@ are reported explicitly, not silently treated as working.
 
 #### EC-03: GTE-style implicit state
 
-**Evidence:** `Native/Engine/include/Core/Gte.h` and `Native/Engine/src/Core/Gte.cpp` (`GteState`, load/execute/store
+**Evidence:** `Native/Engine/include/Core/Gte.hpp` and `Native/Engine/src/Core/Gte.cpp` (`GteState`, load/execute/store
 operations, MAC/IR values, screen/depth FIFOs and flags).
 
 Arithmetic executes natively, but callers still rely on a persistent coprocessor-shaped state machine.

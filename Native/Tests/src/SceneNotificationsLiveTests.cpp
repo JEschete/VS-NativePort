@@ -30,6 +30,7 @@
 #include "State/Timers.hpp"
 
 using VS::Battle::ActionDefinition;
+using VS::Legacy::ClearOTag;
 
 namespace {
 namespace menu = VS::Menu;
@@ -94,7 +95,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     VS::Effects::screenEffectDefaults = {};
   }
   ~NotificationFixture() { menu::ReleaseLiveSceneNotification(); }
-  static void SetTemplate(std::span<u_short> table, std::size_t offset) {
+  static void SetTemplate(std::span<std::uint16_t> table, std::size_t offset) {
     table[offset] = 0x00FF;
     table[offset + 1] = 0x00E7;
   }
@@ -159,7 +160,7 @@ TEST_CASE("Live notification rejects invalid and oversized text before opening",
   } else {
     constexpr std::size_t kLongTextWords = 60;
     std::fill_n(VS::Battle::doorStrings + kNotificationText, kLongTextWords,
-                u_short{0x0101});
+                std::uint16_t{0x0101});
     VS::Battle::doorStrings[kNotificationText + kLongTextWords] = 0x00E7;
   }
   const auto box = menu::ReadLiveTextBox(kFirstBox);

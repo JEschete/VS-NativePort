@@ -30,7 +30,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -62,7 +62,7 @@ struct CursorFixture {
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
-  u_short* saved_text = VS::Menu::Framework::itemsText;
+  std::uint16_t* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_animation = VS::Menu::Framework::mainMenuCursorAnimation;
   char saved_root = VS::Menu::Framework::submenuStates[0];
@@ -70,8 +70,8 @@ struct CursorFixture {
   char saved_row_info = VS::Menu::Framework::subMenuRowInfo;
   char saved_row_y = VS::Menu::Framework::menuRowYOffset;
   char saved_list_row = VS::Menu::Framework::itemsListRow;
-  u_char saved_id = VS::Menu::Framework::subMenuId;
-  u_short saved_count = VS::Menu::Framework::subMenuRowCount;
+  std::uint8_t saved_id = VS::Menu::Framework::subMenuId;
+  std::uint16_t saved_count = VS::Menu::Framework::subMenuRowCount;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -116,7 +116,7 @@ struct CursorFixture {
 
 struct PuzzleOptionsFixture {
   CursorFixture rows;
-  std::array<u_short, 1070> saved_table =
+  std::array<std::uint16_t, 1070> saved_table =
       std::to_array(VS::Menu::Options::menuStrings);
   std::uint8_t saved_disabled = VS::State::stateFlags.puzzle_mode_disabled;
 
@@ -149,7 +149,7 @@ struct BreakArtMenuFixture {
   VS::Battle::ActorStats stats{};
   int category;
   int first_action;
-  u_char saved_arts;
+  std::uint8_t saved_arts;
 
   explicit BreakArtMenuFixture(int weapon_category)
       : category(weapon_category),
@@ -164,7 +164,7 @@ struct BreakArtMenuFixture {
     VS::State::artsStatus.arts_learned[category % 10] = 4;
     VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
-    actor.equipped_weapon_category = static_cast<u_char>(category);
+    actor.equipped_weapon_category = static_cast<std::uint8_t>(category);
     actor.weapon_drawn = 1;
     stats.current_hp = 999;
     VS::Menu::Framework::actionRestrictions = 0;
@@ -271,14 +271,14 @@ int RunSetup(const Call& call) {
 struct WorkshopGateFixture {
   CursorFixture rows;
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
-  u_short* saved_text = VS::Menu::Framework::menu12Text;
+  std::uint16_t* saved_text = VS::Menu::Framework::menu12Text;
   int* saved_types = VS::Menu::Framework::rowTypeBuf;
   VS::Field::MpdEnvironment* saved_environment =
       VS::Field::roomData.environment;
-  u_int saved_environment_length =
+  std::uint32_t saved_environment_length =
       VS::Field::roomData.header.environment_length;
   setup::State saved_state = setup::LiveSetupState();
-  std::array<u_short, 1024> strings{};
+  std::array<std::uint16_t, 1024> strings{};
   VS::Field::MpdEnvironment environment{};
 
   WorkshopGateFixture(int workshop, int weapon_count, bool cursor_memory) {
@@ -295,7 +295,7 @@ struct WorkshopGateFixture {
     for (int index = 0; index < weapon_count; ++index) {
       VS::Items::inventory.weapons[index].index = static_cast<char>(index + 1);
       VS::Items::inventory.weapons[index].blade =
-          static_cast<u_char>(index + 1);
+          static_cast<std::uint8_t>(index + 1);
     }
   }
 
@@ -327,11 +327,11 @@ struct WorkshopChoicesFixture {
   decltype(VS::Battle::stringContext) saved_context = VS::Battle::stringContext;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
-  u_short* saved_help = VS::Menu::Framework::itemHelp;
+  std::uint16_t* saved_help = VS::Menu::Framework::itemHelp;
   decltype(VS::Menu::Framework::shields) saved_shields =
       VS::Menu::Framework::shields;
-  std::array<u_short, 2048> strings{};
-  std::array<u_short, 16384> help{};
+  std::array<std::uint16_t, 2048> strings{};
+  std::array<std::uint16_t, 16384> help{};
   char names[512][24]{};
   std::array<int, 49> types{};
 
@@ -376,7 +376,7 @@ struct WorkshopChoicesFixture {
       blade.material = 3;
       auto& grip = VS::Items::inventory.grips[index];
       grip.id = 97;
-      grip.index = static_cast<u_short>(index + 1);
+      grip.index = static_cast<std::uint16_t>(index + 1);
       grip.category = 1;
     }
     for (int index = 0; index < 48; ++index) {
@@ -390,7 +390,7 @@ struct WorkshopChoicesFixture {
     for (int index = 0; index < 16; ++index) {
       auto& armor = VS::Items::inventory.armor[index];
       armor.id = 161;
-      armor.index = static_cast<u_char>(index + 1);
+      armor.index = static_cast<std::uint8_t>(index + 1);
       armor.category = 1;
       armor.material = 3;
       armor.max_dp = 1000;
@@ -455,8 +455,8 @@ struct WorkshopRepairFixture {
   VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
   VS::Battle::Actor actor{};
   VS::Battle::ActorStats stats{};
-  std::array<u_int, 0x180> sfx_offsets{};
-  std::array<u_short, 0x180> sfx_selectors{};
+  std::array<std::uint32_t, 0x180> sfx_offsets{};
+  std::array<std::uint16_t, 0x180> sfx_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
       {.program_offsets = sfx_offsets,
        .bank_selectors = sfx_selectors,
@@ -469,9 +469,9 @@ struct WorkshopRepairFixture {
     auto initialize = [missing_dp, pp](auto& item, int id) {
       item.id = static_cast<decltype(item.id)>(id);
       item.max_dp = 10000;
-      item.current_dp = static_cast<u_short>(10000 - missing_dp);
+      item.current_dp = static_cast<std::uint16_t>(10000 - missing_dp);
       item.max_pp = 200;
-      item.current_pp = static_cast<u_short>(pp);
+      item.current_pp = static_cast<std::uint16_t>(pp);
     };
     initialize(inventory.blades[0], 14);
     inventory.blades[0].index = 1;
@@ -529,7 +529,7 @@ struct WorkshopRepairFixture {
     REQUIRE(RunSetup([](setup::Context& c) {
               return setup::UpdateRepair(c, true);
             }) == 0);
-    VS::Input::buttonsPressed = static_cast<u_short>(button);
+    VS::Input::buttonsPressed = static_cast<std::uint16_t>(button);
     for (int step = 0; step < 5; ++step) {
       CAPTURE(step);
       REQUIRE(Tick() == 0);
@@ -672,7 +672,8 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   auto expected = original;
   auto repaired = [missing, pp](auto& item) {
     item.current_dp = item.max_dp;
-    item.current_pp = static_cast<u_short>(std::max(0, pp - missing / 100));
+    item.current_pp =
+        static_cast<std::uint16_t>(std::max(0, pp - missing / 100));
   };
   repaired(expected.blades[0]);
   repaired(expected.shields[0].base);
@@ -894,7 +895,7 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
   expected.blades[0].assembled_weapon_index = 3;
   expected.grips[0].assembled_weapon_index = 3;
   for (int index = 0; index < slots; ++index) {
-    weapon.gems[index] = static_cast<u_char>(index + 1);
+    weapon.gems[index] = static_cast<std::uint8_t>(index + 1);
     expected.gems[index].set_item_index = 3;
   }
   constexpr std::array<std::uint8_t, 4> kGems{1, 2, 3, 0};
@@ -922,7 +923,7 @@ TEST_CASE("Shield disassembly releases only its attached gem ownership",
   auto& inventory = VS::Items::inventory;
   inventory.shields[4].base.gem_slots = static_cast<char>(slots);
   for (int index = 0; index < slots; ++index) {
-    inventory.shields[4].gems[index] = static_cast<u_char>(index + 1);
+    inventory.shields[4].gems[index] = static_cast<std::uint8_t>(index + 1);
     inventory.gems[index].set_item_index = 0x85;
   }
   auto expected = inventory;
@@ -944,13 +945,13 @@ TEST_CASE("Workshop combination choices enforce original material masks",
   setup::LiveSetupState().combination.workshop =
       static_cast<std::uint8_t>(workshop);
   for (auto& blade : VS::Items::inventory.blades) {
-    blade.material = static_cast<u_short>(material);
+    blade.material = static_cast<std::uint16_t>(material);
   }
   for (auto& shield : VS::Items::inventory.shields) {
-    shield.base.material = static_cast<u_short>(material);
+    shield.base.material = static_cast<std::uint16_t>(material);
   }
   for (auto& armor : VS::Items::inventory.armor) {
-    armor.material = static_cast<u_short>(material);
+    armor.material = static_cast<std::uint16_t>(material);
   }
   constexpr std::array<WorkshopChoicesFixture::Selector, 3> kSelectors{
       setup::SelectCombinationBlade, setup::SelectCombinationShield,
@@ -1058,7 +1059,8 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
 TEST_CASE("Cursor Memory controls the actual root selection consumer",
           "[menu][options][cursor]") {
   const std::uint8_t enabled = GENERATE(std::uint8_t{0}, std::uint8_t{1});
-  const u_short flags = GENERATE(u_short{0x3FF}, u_short{0x3F8});
+  const std::uint16_t flags =
+      GENERATE(std::uint16_t{0x3FF}, std::uint16_t{0x3F8});
   CursorFixture fixture;
   VS::Input::settings.cursor_memory = enabled;
   VS::Input::settings.menu_flags = flags;
@@ -1135,7 +1137,7 @@ TEST_CASE(
   VS::Menu::Framework::shortcutInvoked = shortcut;
   if (!equipped) {
     fixture.actor.equipped_weapon_category =
-        static_cast<u_char>(category % 10 + 1);
+        static_cast<std::uint8_t>(category % 10 + 1);
   }
   VS::Input::settings.cursor_memory = cursor_memory;
   VS::Menu::Framework::menuMemory

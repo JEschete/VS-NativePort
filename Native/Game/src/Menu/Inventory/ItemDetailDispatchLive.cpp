@@ -266,7 +266,7 @@ class LiveIconWorld final : public CategoryIconWorld {
                        ? Render::QueueLiveDefaultSprite(size, xy)
                        : Render::QueueLiveSpriteWithTexturePage(
                              Render::kDefaultSpriteBrightness, xy, size,
-                             static_cast<u_long*>(
+                             static_cast<std::uint32_t*>(
                                  VS::Render::FrameScratchpad().ordering_table));
     packet[Render::kSpriteTextureWord] =
         (kFirstIconU + icon.category * kIconSize) | (kIconV << kTextureVShift) |

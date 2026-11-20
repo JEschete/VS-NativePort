@@ -11,10 +11,14 @@
 #include "Ending/Credits.hpp"
 #include "Ending/Credits/EmbeddedArt.hpp"
 #include "Ending/EndingLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_FT4;
 
 namespace {
 constexpr auto kOffsets = std::to_array<std::size_t>({
@@ -86,10 +90,10 @@ struct EndingFrameFixture {
       std::to_array(VS::Render::legacyPrimitiveBuffers);
   std::array<void*, 2> saved_ordering =
       std::to_array(VS::Render::legacyOrderingTables);
-  std::vector<u_long> packets = std::vector<u_long>(
-      5 * sizeof(POLY_FT4) / sizeof(u_long) + 2, 0xDEADBEEF);
+  std::vector<std::uint32_t> packets = std::vector<std::uint32_t>(
+      5 * sizeof(POLY_FT4) / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
   // AllocateRenderBuffers' 0x2088-byte ordering table.
-  std::array<u_long, 0x822> ordering{};
+  std::array<std::uint32_t, 0x822> ordering{};
 
   EndingFrameFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));

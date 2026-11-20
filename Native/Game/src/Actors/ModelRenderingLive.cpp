@@ -53,6 +53,11 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
 VS::Actors::ModelRenderContext VS::Actors::modelRenderContext;
 
@@ -103,9 +108,6 @@ constexpr int kSlowedTickSpeed = 4;
 constexpr int kEventPlaybackActive = 4;
 // A gimmick model's height is its bone 1 length.
 constexpr std::size_t kGimmickHeightBone = 1;
-
-static_assert(sizeof(u_long) == sizeof(std::uint32_t),
-              "ordering-table entries are 4-byte words");
 
 [[nodiscard]] VS::Render::ModelScratchpad& Workspace() {
   return *VS::Render::ModelWorkspace();
@@ -223,10 +225,12 @@ class LiveRoomModelPass final : public RoomModelPassHost {
       if (actor == nullptr) return;
     }
     if (VS::State::tickSpeed == kSlowedTickSpeed) {
-      actor->frames_per_step = static_cast<u_char>(actor->frames_per_step * 2);
+      actor->frames_per_step =
+          static_cast<std::uint8_t>(actor->frames_per_step * 2);
     }
     UpdateLiveActorAnimationBlend(actor);
-    actor->frames_per_step = static_cast<u_char>(actor->fast_animation + 1);
+    actor->frames_per_step =
+        static_cast<std::uint8_t>(actor->fast_animation + 1);
   }
 
   void PrepareRootTransform(std::size_t slot) override {
@@ -259,7 +263,8 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   void OffsetOrderingTable(std::int32_t entries) override {
     if (VS::Render::FrameScratchpad().ordering_table == nullptr) return;
     VS::Render::FrameScratchpad().ordering_table =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+        static_cast<std::uint32_t*>(
+            VS::Render::FrameScratchpad().ordering_table) +
         entries;
   }
 
@@ -473,9 +478,9 @@ void DrawWeaponForOwner(const VS::Actors::WeaponModel& weapon,
     return;
   }
   VS::Render::ModelScratchpad& workspace = Workspace();
-  workspace.texture_page = static_cast<u_short>(
+  workspace.texture_page = static_cast<std::uint16_t>(
       VS::Render::legacyWeaponTextureSlots[weapon.texture_slot].texture_page);
-  workspace.palette = static_cast<u_short>(
+  workspace.palette = static_cast<std::uint16_t>(
       VS::Render::legacyWeaponTextureSlots[weapon.palette_slot_offset].palette);
   CVECTOR color = instance.base_color;
   if (weapon.brightness_override != 0) {
@@ -666,7 +671,7 @@ void InitializeLiveActorModelResources() {
   constexpr std::size_t kClearedBankPages = 3;
   constexpr std::size_t kClearedSequenceBanks = 3;
   std::fill_n(std::begin(VS::Actors::sharedSequenceBankTexturePages),
-              kClearedBankPages, u_char{0});
+              kClearedBankPages, std::uint8_t{0});
   std::fill_n(std::begin(VS::Actors::sharedSequenceData), kClearedSequenceBanks,
               nullptr);
   VS::Content::legacySequenceParsePhase = 0;

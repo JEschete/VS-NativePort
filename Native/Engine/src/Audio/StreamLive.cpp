@@ -17,7 +17,7 @@
 #include "Audio/Stream.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/DiscQueue.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio {
 namespace {

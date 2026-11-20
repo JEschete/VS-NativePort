@@ -4,7 +4,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/SoundTransition.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Actors {

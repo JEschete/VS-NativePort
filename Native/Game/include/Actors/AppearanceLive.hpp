@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Actors/Appearance.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;
@@ -31,7 +31,7 @@ void ResetLiveActorWeaponVisibilityBlend(int actor_id);
 // `actor_id` names the slot whose first weapon model is changed.
 void SetLiveWeaponBrightnessOverride(int actor_id, int override_enabled,
                                      int brightness);
-void SetLiveRoomActorScale(const VECTOR* room_scale);
+void SetLiveRoomActorScale(const VS::Core::Gte::VECTOR* room_scale);
 // `actor_id` names an actor, or else the gimmick in that slot.
 int EnableLiveModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot);
 int DisableLiveModelPalettePulse(int actor_id, int pulse_slot);

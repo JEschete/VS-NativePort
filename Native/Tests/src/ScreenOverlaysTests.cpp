@@ -9,7 +9,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPackets.hpp"
 
@@ -290,7 +290,7 @@ TEST_CASE("Live screen overlays refuse a missing controller or cursor",
   CHECK(controller.overlay.radial_warp_scale == 0);
 
   std::vector<int> words(8, 0x5A5A5A5A);
-  u_long head = 0x77;
+  std::uint32_t head = 0x77;
   int* const result =
       sd::AppendLiveVignetteCorner(0, 0, words.data() + 1, &head);
   CHECK(result == words.data() + 1);

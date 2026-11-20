@@ -10,8 +10,8 @@
 
 #include "Battle/FloatingLabelPlacement.hpp"
 #include "Battle/ValueLabels.hpp"
-#include "Core/Gte.h"
-#include "Legacy/Psx.h"
+#include "Core/Gte.hpp"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle {
 
@@ -42,9 +42,9 @@ using MarkerFrameTexCoordTable =
 using StatusLabelLayoutTable =
     std::array<StatusLabelLayout, kStatusLabelLayoutCount>;
 using StatChangeFirstWordRectTable =
-    std::array<RECT, kStatChangeFirstWordCount>;
+    std::array<VS::Legacy::RECT, kStatChangeFirstWordCount>;
 using StatChangeSecondWordRectTable =
-    std::array<RECT, kStatChangeSecondWordCount>;
+    std::array<VS::Legacy::RECT, kStatChangeSecondWordCount>;
 // NOLINTEND
 
 // decomp: D_800E861C (src/BATTLE/BATTLE.PRG/2842C.c:230)
@@ -52,11 +52,11 @@ extern std::array<std::int32_t, kValueCaptionRectWords> valueCaptionRects;
 // decomp: D_800E8634 (src/BATTLE/BATTLE.PRG/2842C.c:231)
 extern LockedLabelHalfHeightTable lockedLabelHalfHeights;
 // decomp: D_800E8640 (src/BATTLE/BATTLE.PRG/2842C.c:232)
-extern std::array<RECT, kLockedLabelPieceCount> lockedLabelPieces;
+extern std::array<VS::Legacy::RECT, kLockedLabelPieceCount> lockedLabelPieces;
 // decomp: D_800F1BAC (src/BATTLE/BATTLE.PRG/146C.h:61)
 extern FloatingLabelSlots* floatingLabels;
 // decomp: D_800F1CBC (src/BATTLE/BATTLE.PRG/146C.h:51)
-extern DVECTOR* placedLabelPositions;
+extern VS::Core::Gte::DVECTOR* placedLabelPositions;
 // decomp: D_800F2260 (src/BATTLE/BATTLE.PRG/2842C.c:239)
 extern std::array<std::int8_t, kActorMarkerBytes> actorMarkers;
 // decomp: D_800F2270 (src/BATTLE/BATTLE.PRG/2842C.c:240)
@@ -74,7 +74,7 @@ extern std::int16_t placedLabelCount;
 // decomp: D_800F227E (src/BATTLE/BATTLE.PRG/2842C.c:246)
 extern std::int16_t floatingLabelCount;
 // decomp: D_800F2280 (src/BATTLE/BATTLE.PRG/2842C.c:247)
-extern SVECTOR abilityTimingCuePosition;
+extern VS::Core::Gte::SVECTOR abilityTimingCuePosition;
 
 // decomp: D_80068F04 (src/BATTLE/BATTLE.PRG/2842C.c:1477)
 extern const MarkerFrameCornerTable kMarkerFrameCorners;
@@ -83,11 +83,13 @@ extern const MarkerFrameTexCoordTable kMarkerFrameTexCoords;
 // decomp: D_80068F94 (src/BATTLE/BATTLE.PRG/2842C.c:1493)
 extern const std::array<std::int32_t, kMarkerFrameCount> kMarkerIconOffsets;
 // decomp: D_80068FAC (src/BATTLE/BATTLE.PRG/2842C.c:1496)
-extern const std::array<RECT, kLabelCaptionRectCount> kLabelCaptionRects;
+extern const std::array<VS::Legacy::RECT, kLabelCaptionRectCount>
+    kLabelCaptionRects;  // NOLINT(whitespace/indent_namespace)
 // decomp: D_800690B4 (src/BATTLE/BATTLE.PRG/2842C.c:1505-1518)
 extern const StatusLabelLayoutTable kStatusLabelLayouts;
 // decomp: D_80069134 (src/BATTLE/BATTLE.PRG/2842C.c:1520)
-extern const std::array<CVECTOR, kStatusLabelColorCount> kStatusLabelColors;
+extern const std::array<VS::Core::Gte::CVECTOR, kStatusLabelColorCount>
+    kStatusLabelColors;  // NOLINT(whitespace/indent_namespace)
 // decomp: D_80069144 (src/BATTLE/BATTLE.PRG/2842C.c:1523)
 extern const StatChangeFirstWordRectTable kStatChangeFirstWordRects;
 // decomp: D_8006917C (src/BATTLE/BATTLE.PRG/2842C.c:1527)

@@ -157,7 +157,7 @@ int SetLiveTextBoxText(int box_id, char* text) {
 }
 
 // decomp: F01330 vs_battle_selectTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1559).
-int SelectLiveTextBoxChoice(u_char box_mask) {
+int SelectLiveTextBoxChoice(std::uint8_t box_mask) {
   LiveTextBoxHost host;
   LiveTextBoxes boxes = ReadLiveTextBoxes();
   TextBoxSelector selector = ReadLiveTextBoxSelector();

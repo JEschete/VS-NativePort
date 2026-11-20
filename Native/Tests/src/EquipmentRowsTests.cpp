@@ -23,7 +23,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -851,7 +851,7 @@ struct LiveRowsFixture {
   std::array<fw::MenuRow, 40> rows{};
   Strings first{1};
   Strings second{60};
-  std::array<u_short*, 4> texts{};
+  std::array<std::uint16_t*, 4> texts{};
   std::array<int, 2> flags{Flags(0, 0, 3, 1, 4), Flags(1, 0, 0, 2, 0)};
 
   LiveRowsFixture() {
@@ -859,9 +859,9 @@ struct LiveRowsFixture {
     VS::Menu::Inventory::itemsText = nullptr;
     VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
-    texts[0] = reinterpret_cast<u_short*>(first.name.data());
-    texts[1] = reinterpret_cast<u_short*>(first.description.data());
-    texts[2] = reinterpret_cast<u_short*>(second.name.data());
+    texts[0] = reinterpret_cast<std::uint16_t*>(first.name.data());
+    texts[1] = reinterpret_cast<std::uint16_t*>(first.description.data());
+    texts[2] = reinterpret_cast<std::uint16_t*>(second.name.data());
     texts[3] = nullptr;
     inv::ResetEquipmentRowsLive();
   }
@@ -971,7 +971,7 @@ struct LiveAccessoryFixture {
   Restore<char> saved_page{VS::Menu::Framework::itemStatPage};
   Restore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
   Restore<char> saved_item{VS::Menu::Framework::currentStatusViewItem};
-  Restore<u_char> saved_selection{
+  Restore<std::uint8_t> saved_selection{
       VS::Menu::Framework::selectedStatusViewElement};
   GlobalArrayRestore<VS::Menu::Framework::equipmentStats> saved_stats;
   GlobalArrayRestore<VS::Menu::Framework::strIntAgi> saved_primary;

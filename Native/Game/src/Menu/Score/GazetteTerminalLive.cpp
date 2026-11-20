@@ -49,6 +49,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "State/Progress.hpp"
 
+using VS::Core::Gte::MATRIX;
+
 namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace VS::Menu::Score {
@@ -127,7 +129,7 @@ GazetteText Label(std::span<const std::byte> bytes, std::size_t index) {
 }
 
 template <std::size_t Size>
-GazetteText Label(const u_short (&table)[Size], std::size_t index) {
+GazetteText Label(const std::uint16_t (&table)[Size], std::size_t index) {
   return Label(std::as_bytes(std::span(table)), index);
 }
 
@@ -453,7 +455,7 @@ bool FinishRead() {
   monBinCdQueueSlot = nullptr;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   enemyDescriptions =
-      reinterpret_cast<u_short*>(enemy_data.data + kDescriptionOffset);
+      reinterpret_cast<std::uint16_t*>(enemy_data.data + kDescriptionOffset);
   return true;
 }
 

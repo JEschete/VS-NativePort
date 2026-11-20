@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Field {
 inline constexpr std::size_t kWeatherParticleRecordBytes = 0x10;
@@ -15,7 +15,7 @@ inline constexpr std::size_t kWeatherParticleRecordBytes = 0x10;
 // (Effects/WeatherPool.hpp) works on typed copies.
 // decomp: D_800F1DD4_t (src/BATTLE/BATTLE.PRG/146C.h:13)
 struct WeatherParticleRecord {
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   std::int16_t screen_x;
   std::int16_t screen_y;
   std::uint8_t opaque_c;

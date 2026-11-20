@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -23,7 +23,7 @@
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace effects = VS::Effects;
@@ -97,7 +97,7 @@ class LiveEmission {
     definition.interval_range[0] = 1;
     definition.interval_range[1] = 1;
     VS::Core::BiosRand().Seed(1);
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
     Scratch() = {};
   }
   LiveEmission(const LiveEmission&) = delete;
@@ -117,7 +117,7 @@ class LiveEmission {
     std::ranges::copy(saved_scratch_,
                       static_cast<std::byte*>(VS::Core::ScratchBase()));
     VS::Core::BiosRand().Seed(saved_random_);
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
   void Emit() {
     effects::EmitLiveParticleEvent(instance.get(), 0, 0, 0, nullptr);

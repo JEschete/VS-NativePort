@@ -12,7 +12,7 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
@@ -25,11 +25,16 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace VS::Menu::Results {
 namespace {
 constexpr std::uint32_t kTrialRoundShift = 24;
 constexpr std::uint32_t kTrialDifficultyShift = 31;
-static_assert(sizeof(u_short) == sizeof(std::uint16_t));
 static_assert(std::size(clutBuf) == kResultsClutWords);
 
 std::uint64_t refusals = 0;
@@ -81,7 +86,7 @@ class LiveClutTarget final : public ResultsClutTarget {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the colors; the core passes the whole buffer.
-    LoadImage(&rect, reinterpret_cast<u_long*>(
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
                          const_cast<std::uint16_t*>(colors.data())));
   }
 };

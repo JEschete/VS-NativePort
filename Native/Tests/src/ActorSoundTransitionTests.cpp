@@ -8,11 +8,12 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Audio/SurfaceSounds.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Timers.hpp"
 
 namespace {
-std::array<u_char, 4> SoundValues(const VS::Actors::ModelEffectSlot& state) {
+std::array<std::uint8_t, 4> SoundValues(
+    const VS::Actors::ModelEffectSlot& state) {
   return {state.kind, state.level, state.flags, state.parameter};
 }
 
@@ -103,8 +104,8 @@ TEST_CASE("Actor sound transitions retain the full unsigned timer range",
   fixture.actor.sound_effect_target = {1, 255, 0, 255};
   for (int frame = 1; frame <= 255; ++frame) {
     fixture.Tick(2);
-    const auto pan = static_cast<u_char>(frame);
-    const auto remaining = static_cast<u_char>(255 - frame);
+    const auto pan = static_cast<std::uint8_t>(frame);
+    const auto remaining = static_cast<std::uint8_t>(255 - frame);
     fixture.CheckCurrent({1, pan, remaining, remaining});
   }
 }

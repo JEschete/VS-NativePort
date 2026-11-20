@@ -6,10 +6,12 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapMarkers.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Menu::map {
 // decomp: currentMapRow (src/MENU/MENU5.PRG/4D8.c:128)

@@ -14,7 +14,7 @@
 #include "Battle/Ai/Movement.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -289,7 +289,7 @@ TEST_CASE("The live random state save copies the AI frame's state",
           "[ai][blocked-movement][blocked-movement-live]") {
   auto& frame = VS::Battle::Ai::LiveFrameContext();
   struct Restore {
-    u_int random;
+    std::uint32_t random;
     int saved;
     ~Restore() {
       VS::Battle::Ai::LiveFrameContext().randomState = random;

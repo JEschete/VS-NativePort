@@ -13,7 +13,7 @@
 #include "Actors/Movement.hpp"
 #include "Actors/Shadow.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Render/Palette.hpp"
 
 namespace VS::Actors {
@@ -54,7 +54,7 @@ struct ActorRecord {
   static constexpr std::size_t kReserved6bcWords = 4;
 
   ModelInstance instance;
-  MATRIX bone_matrices[kBoneMatrices];
+  VS::Core::Gte::MATRIX bone_matrices[kBoneMatrices];
   std::uint8_t route_phase : 2;
   std::uint8_t route_uses_duration : 1;
   std::uint8_t action_pose_active : 1;
@@ -115,7 +115,7 @@ struct ActorRecord {
   void* common_sequence;
   void* battle_sequence;
   void* shared_sequences[kSharedSequenceSlots];
-  SVECTOR route_target;
+  VS::Core::Gte::SVECTOR route_target;
   TextureOverlayRect texture_overlays[kTextureOverlays];
   TextureCellOriginRecord texture_cell_origins[kTextureCellOrigins];
   TextureScrollBoundsRecord texture_scroll_bounds[kTextureScrollLayers];
@@ -163,7 +163,7 @@ struct ActorRecord {
   std::uint8_t reserved6f3;
   CompanionOffsetRecord companion_state;
   Render::ColorCode companion_color;
-  SVECTOR sound_position;
+  VS::Core::Gte::SVECTOR sound_position;
   AnimationPose blend_pose;
   AnimationPose pose;
   std::uint8_t palettes[kPaletteBytes];
@@ -171,8 +171,8 @@ struct ActorRecord {
   std::uint16_t current_palette[kCurrentPaletteColors];
   ModelEffectSlot sound_effect;
   ModelEffectSlot sound_effect_target;
-  SVECTOR platform_anchor;
-  SVECTOR head_tracking;
+  VS::Core::Gte::SVECTOR platform_anchor;
+  VS::Core::Gte::SVECTOR head_tracking;
   std::int8_t head_track_target;
   std::uint8_t companion_slot;
   std::uint8_t terrain_facing;
@@ -207,7 +207,7 @@ struct ActorRecord {
   std::int32_t saved_placement;
   std::intptr_t animation_header;
   std::uint8_t joint_slots[kJointSlotBytes];
-  MATRIX locked_bone_matrices[kLockedBones];
+  VS::Core::Gte::MATRIX locked_bone_matrices[kLockedBones];
   std::uint8_t locked_bones[kLockedBones];
   std::uint16_t pending_target_x;
   std::uint16_t pending_target_z;

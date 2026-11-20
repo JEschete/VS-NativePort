@@ -23,7 +23,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -232,14 +232,14 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   }
 
   Render::PacketQueue& SceneQueue(int slot) override {
-    u_long* const chain = Entry(slot);
+    std::uint32_t* const chain = Entry(slot);
     queue_.emplace(chain);
     return *queue_;
   }
 
   std::uint32_t DrawComparedInteger(int value, std::uint32_t xy, int threshold,
                                     int slot) override {
-    u_long* const chain = Entry(slot);
+    std::uint32_t* const chain = Entry(slot);
     if (chain == nullptr) {
       return xy;
     }
@@ -249,21 +249,21 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
 
   void DrawColoredInteger(int value, std::uint32_t xy, std::uint32_t color,
                           int slot) override {
-    if (u_long* const chain = Entry(slot)) {
+    if (std::uint32_t* const chain = Entry(slot)) {
       DrawLiveColoredInteger(value, static_cast<int>(xy),
                              static_cast<int>(color), chain);
     }
   }
 
   void DrawNeutralInteger(int value, std::uint32_t xy, int slot) override {
-    if (u_long* const chain = Entry(slot)) {
+    if (std::uint32_t* const chain = Entry(slot)) {
       DrawLiveNeutralInteger(value, static_cast<int>(xy), chain);
     }
   }
 
   void DrawCompactText(const char* text, std::uint32_t xy, std::uint32_t color,
                        int slot) override {
-    if (u_long* const chain = Entry(slot)) {
+    if (std::uint32_t* const chain = Entry(slot)) {
       Render::DrawLiveCompactTextColor(text, static_cast<int>(xy),
                                        static_cast<int>(color), chain);
     }
@@ -271,7 +271,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
 
   std::uint32_t DrawRightAlignedInteger(int font, std::uint32_t xy, int value,
                                         int slot) override {
-    u_long* const chain = Entry(slot);
+    std::uint32_t* const chain = Entry(slot);
     if (chain == nullptr) {
       return xy;
     }
@@ -281,7 +281,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
 
   void DrawStatGauge(int color, int fill_width, std::uint32_t xy,
                      int slot) override {
-    if (u_long* const chain = Entry(slot)) {
+    if (std::uint32_t* const chain = Entry(slot)) {
       Render::DrawLiveStatGauge(color, fill_width, chain, static_cast<int>(xy));
     }
   }
@@ -291,7 +291,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   }
 
   void DrawButtonIcon(ButtonIcon button, int x, int y, int slot) override {
-    if (u_long* const chain = Entry(slot)) {
+    if (std::uint32_t* const chain = Entry(slot)) {
       DrawLiveButtonIcon(button, x, y, chain);
     }
   }
@@ -301,7 +301,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   }
 
   int DrawGlyph(std::uint8_t glyph, int x, int y, int slot) override {
-    u_long* const chain = Entry(slot);
+    std::uint32_t* const chain = Entry(slot);
     if (chain == nullptr) {
       return x;
     }
@@ -311,8 +311,8 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
  private:
   // The scene table's entry `slot`; a draw outside the frame's table is
   // refused (a null chain would send some draws to another table).
-  [[nodiscard]] u_long* Entry(int slot) {
-    u_long* const chain =
+  [[nodiscard]] std::uint32_t* Entry(int slot) {
+    std::uint32_t* const chain =
         Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
     if (chain == nullptr) {
       Warn("a draw outside the frame's ordering table");
@@ -587,14 +587,14 @@ char VS::Menu::Framework::equipmentSubtype;
 // decomp: vs_mainMenu_itemStatPage (MENU/MAINMENU.PRG)
 char VS::Menu::Framework::itemStatPage;
 // decomp: vs_mainMenu_selectedStatusViewElement (MENU/MAINMENU.PRG)
-u_char VS::Menu::Framework::selectedStatusViewElement;
+std::uint8_t VS::Menu::Framework::selectedStatusViewElement;
 // decomp: vs_mainMenu_statusViewCursorPositions (MENU/MAINMENU.PRG
 // 2D10.c:830): the module image values.
 int VS::Menu::Framework::statusViewCursorPositions
     [VS::Menu::Framework::kStatusViewElementCount];
 // decomp: vs_mainMenu_statusViewNavigationMap (MENU/MAINMENU.PRG
 // 2D10.c:823): the module image values.
-u_char VS::Menu::Framework::statusViewNavigationMap
+std::uint8_t VS::Menu::Framework::statusViewNavigationMap
     [VS::Menu::Framework::kStatusViewElementCount]
     [VS::Menu::Framework::kStatusViewDirections];
 // decomp: vs_mainMenu_strIntAgi (MENU/MAINMENU.PRG)

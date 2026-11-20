@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
+
+using VS::Core::Gte::MATRIX;
 
 // decomp: vs_main_nearClip (vs_main_nearClip@SLUS_010.40)
 int VS::Render::nearClip;

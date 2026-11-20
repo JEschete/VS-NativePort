@@ -34,7 +34,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
@@ -61,10 +61,13 @@
 #include "State/PlayTime.hpp"
 #include "Title/TitleMenuLive.hpp"
 
+using VS::Legacy::ClearImage;
 using VS::Legacy::InitCARD;
 using VS::Legacy::kModeNtsc;
 using VS::Legacy::PadInitDirect;
 using VS::Legacy::PadStartCom;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDispMask;
 using VS::Legacy::SetVideoMode;
 using VS::Legacy::StartCARD;
 using VS::Legacy::VSync;

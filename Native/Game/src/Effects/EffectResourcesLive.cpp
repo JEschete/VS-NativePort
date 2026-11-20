@@ -32,8 +32,13 @@
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/TexturePagesLive.hpp"
+
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int VS::Effects::textureLoadIndex;
@@ -42,7 +47,7 @@ VS::Effects::LiveTextureLoadList VS::Effects::textureLoads;
 // decomp: vs_battle_pfileBuf (vs_battle_pfileBuf@BATTLE/BATTLE.PRG)
 void* VS::Effects::packageBuffer;
 // decomp: D_800F5680 (D_800F5680@BATTLE/BATTLE.PRG)
-u_int VS::Effects::textureLoadState;
+std::uint32_t VS::Effects::textureLoadState;
 // decomp: D_800F5684 (D_800F5684@BATTLE/BATTLE.PRG)
 int VS::Effects::purgeOverlayLoaded;
 // decomp: vs_battle_pFileLoadContext
@@ -51,11 +56,11 @@ VS::Effects::EffectFileExtent VS::Effects::packageFile;
 // decomp: D_800F568C (D_800F568C@BATTLE/BATTLE.PRG)
 VS::Content::DiscQueueSlot* VS::Effects::resourceReadSlot;
 // decomp: _plgLoadState (_plgLoadState@BATTLE/BATTLE.PRG)
-u_int VS::Effects::pluginLoadState;
+std::uint32_t VS::Effects::pluginLoadState;
 // decomp: _plgLoadContext (_plgLoadContext@BATTLE/BATTLE.PRG)
 VS::Effects::EffectFileExtent VS::Effects::pluginFile;
 // decomp: D_800F56A0 (D_800F56A0@BATTLE/BATTLE.PRG)
-u_long* VS::Effects::textureLoadBuffer;
+std::uint32_t* VS::Effects::textureLoadBuffer;
 // decomp: _plgEntryPointCount (_plgEntryPointCount@BATTLE/BATTLE.PRG)
 int VS::Effects::pluginEntryPointCount;
 // decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
@@ -196,7 +201,7 @@ void PublishCurves(LiveEffectPackage& package,
                blocks.curves.size());
   // A refused curve has no view and publishes no pointer.
   for (std::size_t i = 0; i < count; ++i) {
-    package.curves[i] = LegacyPointer<u_char>(blocks.curves.at(i));
+    package.curves[i] = LegacyPointer<std::uint8_t>(blocks.curves.at(i));
   }
 }
 
@@ -209,7 +214,8 @@ void PublishBlocks(LiveEffectPackage& package,
   };
   if (bound(PackageBlockType::kAnimationTable)) {
     package.animation_count = blocks.animation_count;
-    package.animation_table = LegacyPointer<u_short>(blocks.animation_table);
+    package.animation_table =
+        LegacyPointer<std::uint16_t>(blocks.animation_table);
   }
   if (bound(PackageBlockType::kTimelines)) {
     package.timelines = LegacyPointer<LiveTimelineTable>(blocks.timelines);
@@ -233,7 +239,8 @@ void PublishBlocks(LiveEffectPackage& package,
         LegacyPointer<LiveTransformDefinition>(blocks.transform_definitions);
   }
   if (bound(PackageBlockType::kSoundSequences)) {
-    package.sound_sequences = LegacyPointer<u_char>(blocks.sound_sequences);
+    package.sound_sequences =
+        LegacyPointer<std::uint8_t>(blocks.sound_sequences);
   }
   if (bound(PackageBlockType::kSoundBank)) {
     package.sound_bank = blocks.sound_bank.data();
@@ -428,7 +435,7 @@ class LiveResourceHost final : public EffectResourceHost {
     rectangle.y = area.y;
     rectangle.w = area.w;
     rectangle.h = area.h;
-    static_cast<void>(LoadImage(&rectangle, PointerOf<u_long>(pixels)));
+    static_cast<void>(LoadImage(&rectangle, PointerOf<std::uint32_t>(pixels)));
   }
 };
 
@@ -617,14 +624,14 @@ EffectResourceState LoadLiveEffectResourceState() {
 void StoreLiveEffectResourceState(const EffectResourceState& state) {
   resourceReadSlot = PointerOf<VS::Content::DiscQueueSlot>(state.read);
   packageBuffer = PointerOf<void>(state.package_buffer.id);
-  textureLoadBuffer = PointerOf<u_long>(state.texture_buffer.id);
+  textureLoadBuffer = PointerOf<std::uint32_t>(state.texture_buffer.id);
   purgeOverlayLoaded = state.purge_overlay_loaded ? 1 : 0;
   packageFile = state.package_file;
   textureLoadIndex = state.texture_index;
-  textureLoadState = static_cast<u_int>(state.texture_state);
+  textureLoadState = static_cast<std::uint32_t>(state.texture_state);
   StoreTextures(textureLoads, state.textures);
   loadedTextureSlots = static_cast<int>(state.loaded_texture_pages);
-  pluginLoadState = static_cast<u_int>(state.plugin_state);
+  pluginLoadState = static_cast<std::uint32_t>(state.plugin_state);
   pluginFile = state.plugin_file;
   pluginEntryPointCount = state.plugin_entry_count;
 }

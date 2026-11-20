@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Live bindings for Sfx.hpp over the channel groups' tag cursors
 // (D_8005FE70-D_8005FE84), the sound-effect bank slots (vs_main_soundData),
@@ -19,7 +21,7 @@ void LivePlaySfxCentered(int group, int effect_id);
 // The pan in the high halfword and the volume in the low halfword.
 int LiveSfxPanAndVolume(int screen_xy, int depth);
 // A null `point` is refused.
-void LivePlayWorldSfx(int group, int effect_id, SVECTOR* point);
+void LivePlayWorldSfx(int group, int effect_id, VS::Core::Gte::SVECTOR* point);
 // The program of a banked group's effect, 0 for a built-in group's effect or
 // an unknown group, or -1 when refused.
 std::intptr_t LiveResolveSfxProgram(int group, int effect_id);

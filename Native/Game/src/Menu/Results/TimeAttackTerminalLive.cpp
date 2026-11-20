@@ -17,7 +17,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
@@ -36,6 +36,8 @@
 #include "State/Progress.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::CVECTOR;
 
 namespace VS::Menu::Results {
 namespace {

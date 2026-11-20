@@ -300,7 +300,7 @@ void UpdateLiveGimImages() {
       continue;
     }
     const GimOrderingEntry entry = GimLayerOrderingEntry(*live_set, layer);
-    u_long* chain = LiveFrameOrderingEntry(
+    std::uint32_t* chain = LiveFrameOrderingEntry(
         entry.scene ? LiveOrderingBase::kScene : LiveOrderingBase::kOverlay,
         entry.entry);
     if (chain == nullptr) {

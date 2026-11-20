@@ -7,38 +7,45 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/DepthCue.hpp"
 #include "Render/DepthCueLive.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::StoreOpz;
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace Render = VS::Render;
 
 struct FogFixture {
   FogFixture() {
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(320);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(320);
   }
 
-  ~FogFixture() { Core_Gte_Reset(); }
+  ~FogFixture() { VS::Core::Gte::Reset(); }
 };
 
-Core_GteWord ProjectCue(std::int16_t depth) {
+VS::Core::Gte::Word ProjectCue(std::int16_t depth) {
   SVECTOR vertex{0, 0, depth, 0};
-  Core_GteWord screen = 0;
-  Core_GteWord cue = -1;
-  Core_GteWord flags = 0;
-  Core_Gte_RotTransPers(&vertex, &screen, &cue, &flags);
+  VS::Core::Gte::Word screen = 0;
+  VS::Core::Gte::Word cue = -1;
+  VS::Core::Gte::Word flags = 0;
+  RotTransPers(&vertex, &screen, &cue, &flags);
   return cue;
 }
 
-Core_GteWord ReferenceCue(Core_GteWord near_distance, Core_GteWord projection,
-                          std::int16_t depth) {
+VS::Core::Gte::Word ReferenceCue(VS::Core::Gte::Word near_distance,
+                                 VS::Core::Gte::Word projection,
+                                 std::int16_t depth) {
   const auto coefficient =
       std::clamp<std::int64_t>(-std::int64_t{near_distance} * 320 /
-                                   std::max<Core_GteWord>(projection, 1),
+                                   std::max<VS::Core::Gte::Word>(projection, 1),
                                -32768, 32767);
   // RTPS divides with the UNR reciprocal and saturates IR0 from the wide
   // MAC0 sum, not from its stored low word (#371).
@@ -46,13 +53,13 @@ Core_GteWord ReferenceCue(Core_GteWord near_distance, Core_GteWord projection,
       VS::Core::Math::DividePerspective(static_cast<std::uint16_t>(projection),
                                         static_cast<std::uint16_t>(depth))};
   const auto accumulator = quotient * coefficient + 20971520;
-  return static_cast<Core_GteWord>(
+  return static_cast<VS::Core::Gte::Word>(
       std::clamp<std::int64_t>(accumulator >> 12, 0, 4096));
 }
 
-void CheckCue(Core_GteWord near_distance, Core_GteWord projection,
+void CheckCue(VS::Core::Gte::Word near_distance, VS::Core::Gte::Word projection,
               std::int16_t depth) {
-  Core_Gte_SetGeomScreen(projection);
+  SetGeomScreen(projection);
   Render::SetLiveFogNearDistance(near_distance, projection);
   CHECK(ProjectCue(depth) == ReferenceCue(near_distance, projection, depth));
 }
@@ -69,12 +76,12 @@ TEST_CASE("Map fog begins at its configured near plane without dimming it",
           "[render][fog]") {
   FogFixture fixture;
   Render::SetLiveFogNearDistance(768, 320);
-  Core_Gte_SetFarColor(0, 0, 0);
+  VS::Core::Gte::SetFarColor(0, 0, 0);
   SVECTOR vertex{0, 0, 768, 0};
-  Core_GteWord screen = 0;
-  Core_GteWord cue = -1;
-  Core_GteWord flags = 0;
-  CHECK(Core_Gte_RotTransPers(&vertex, &screen, &cue, &flags) == 192);
+  VS::Core::Gte::Word screen = 0;
+  VS::Core::Gte::Word cue = -1;
+  VS::Core::Gte::Word flags = 0;
+  CHECK(RotTransPers(&vertex, &screen, &cue, &flags) == 192);
   CHECK(cue == 0);
   CVECTOR input{160, 80, 40, 0x3C};
   CVECTOR output{};
@@ -174,14 +181,14 @@ TEST_CASE("Map fog reaches the source midpoint and far-color endpoints",
 TEST_CASE("Native fog covers source-scaled projection and depth tuples",
           "[render][fog]") {
   FogFixture fixture;
-  constexpr std::array<Core_GteWord, 8> kNear{1,   64,  127,  256,
-                                              320, 768, 1024, 8192};
-  constexpr std::array<Core_GteWord, 6> kProjection{64,  128, 256,
-                                                    320, 512, 1000};
+  constexpr std::array<VS::Core::Gte::Word, 8> kNear{1,   64,  127,  256,
+                                                     320, 768, 1024, 8192};
+  constexpr std::array<VS::Core::Gte::Word, 6> kProjection{64,  128, 256,
+                                                           320, 512, 1000};
   constexpr std::array<std::int16_t, 12> kDepth{
       1, 32, 64, 128, 320, 768, 1024, 1536, 3840, 8192, 16384, 32767};
-  for (Core_GteWord near_distance : kNear) {
-    for (Core_GteWord projection : kProjection) {
+  for (VS::Core::Gte::Word near_distance : kNear) {
+    for (VS::Core::Gte::Word projection : kProjection) {
       for (std::int16_t depth : kDepth) {
         CheckCue(near_distance, projection, depth);
       }
@@ -194,9 +201,9 @@ TEST_CASE("Map fog depth cue saturates from the wide product",
   // SDK RTPS fixtures from #371: the clipped gain times the saturated DQA
   // is negative beyond 32 bits, so IR0 is 0 while MAC0 keeps the low word.
   struct Fixture {
-    Core_GteWord projection;
+    VS::Core::Gte::Word projection;
     std::int16_t depth;
-    Core_GteWord mac0;
+    VS::Core::Gte::Word mac0;
   };
   constexpr std::array<Fixture, 5> kFixtures{{{64, 1, 21004288},
                                               {64, 32, 21004288},
@@ -205,16 +212,15 @@ TEST_CASE("Map fog depth cue saturates from the wide product",
                                               {128, 64, 1631604736}}};
   FogFixture fixture;
   for (const Fixture& entry : kFixtures) {
-    Core_Gte_SetGeomScreen(entry.projection);
+    SetGeomScreen(entry.projection);
     Render::SetLiveFogNearDistance(8192, entry.projection);
     SVECTOR vertex{0, 0, entry.depth, 91};
-    Core_GteWord screen = -1;
-    Core_GteWord cue = -1;
-    Core_GteWord flags = 0;
-    CHECK(Core_Gte_RotTransPers(&vertex, &screen, &cue, &flags) ==
-          entry.depth / 4);
-    Core_GteWord mac0 = 0;
-    Core_Gte_StoreOpz(&mac0);
+    VS::Core::Gte::Word screen = -1;
+    VS::Core::Gte::Word cue = -1;
+    VS::Core::Gte::Word flags = 0;
+    CHECK(RotTransPers(&vertex, &screen, &cue, &flags) == entry.depth / 4);
+    VS::Core::Gte::Word mac0 = 0;
+    StoreOpz(&mac0);
     CHECK(cue == 0);
     CHECK(mac0 == entry.mac0);
     CHECK(static_cast<std::uint32_t>(flags) == 0x80029000u);
@@ -225,8 +231,8 @@ TEST_CASE(
     "Fog preserves disabled state across positive and nonpositive reentry",
     "[render][fog]") {
   FogFixture fixture;
-  constexpr std::array<Core_GteWord, 3> kDisabled{0, -1, INT32_MIN};
-  for (Core_GteWord near_distance : kDisabled) {
+  constexpr std::array<VS::Core::Gte::Word, 3> kDisabled{0, -1, INT32_MIN};
+  for (VS::Core::Gte::Word near_distance : kDisabled) {
     Render::SetLiveFogNearDistance(768, 320);
     REQUIRE(ProjectCue(1536) == 2560);
     Render::SetLiveFogNearDistance(near_distance, 0);
@@ -238,9 +244,9 @@ TEST_CASE(
     "Large native fog distances saturate without signed multiply overflow",
     "[render][fog]") {
   FogFixture fixture;
-  constexpr std::array<Core_GteWord, 5> kNear{100000, 6710886, 7000000,
-                                              10000000, INT32_MAX};
-  for (Core_GteWord near_distance : kNear) {
+  constexpr std::array<VS::Core::Gte::Word, 5> kNear{100000, 6710886, 7000000,
+                                                     10000000, INT32_MAX};
+  for (VS::Core::Gte::Word near_distance : kNear) {
     CheckCue(near_distance, 512, 32767);
   }
 }
@@ -248,9 +254,9 @@ TEST_CASE(
 TEST_CASE("Typed depth cue preserves every in-range factor and color code",
           "[render][fog]") {
   FogFixture fixture;
-  Core_Gte_SetFarColor(24, 192, 96);
+  VS::Core::Gte::SetFarColor(24, 192, 96);
   CVECTOR input{160, 80, 40, 0x3C};
-  for (Core_GteWord cue = 0; cue <= 4096; ++cue) {
+  for (VS::Core::Gte::Word cue = 0; cue <= 4096; ++cue) {
     CVECTOR expected{
         static_cast<unsigned char>((160 * (4096 - cue) + 24 * cue) / 4096),
         static_cast<unsigned char>((80 * (4096 - cue) + 192 * cue) / 4096),
@@ -265,7 +271,7 @@ TEST_CASE("Typed depth cue preserves every in-range factor and color code",
 TEST_CASE("Typed depth cue supports an aliased color at the far endpoint",
           "[render][fog]") {
   FogFixture fixture;
-  Core_Gte_SetFarColor(24, 192, 96);
+  VS::Core::Gte::SetFarColor(24, 192, 96);
   CVECTOR color{160, 80, 40, 0x3C};
   Render::ApplyLiveDepthCueColor(&color, 4096, &color);
   CheckColor(color, CVECTOR{24, 192, 96, 0x3C});

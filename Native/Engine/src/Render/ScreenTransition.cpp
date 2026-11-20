@@ -1,6 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ScreenTransition.hpp"
+
+using VS::Legacy::DR_MODE;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_G4;
 
 // decomp: vs_battle_screenTransitionDrMode (vs_battle_screenTransitionDrMode@BATTLE/BATTLE.PRG)
 DR_MODE VS::Render::legacyTransitionDrawModes[VS::Render::kFrameBufferCount];

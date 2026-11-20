@@ -11,7 +11,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -35,7 +35,17 @@
 #include "Effects/TrailEmitter.hpp"
 #include "Effects/Trails.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::ClearTranslation;
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtv0Tr;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace VS::Effects {
 namespace {
@@ -136,7 +146,7 @@ class LiveOriginServices final : public TrailOriginServices {
   TrailVector Rotate(TrailPoint point) override {
     SVECTOR input{point.x, point.y, point.z, 0};
     VECTOR output{};
-    Core_Gte_ApplyRotMatrix(&input, &output);
+    VS::Core::Gte::ApplyRotMatrix(&input, &output);
     return Wide(output);
   }
 };
@@ -238,8 +248,8 @@ void GenerateOrigins(const LiveParticleDefinition& definition,
                              static_cast<std::int32_t>(matrix.t[2])},
       .ring_segments = definition.ring_segments,
       .ring_positions = definition.ring_positions};
-  Core_Gte_SetRotMatrix(&matrix);
-  Core_Gte_ClearTranslation();
+  SetRotMatrix(&matrix);
+  ClearTranslation();
 
   std::array<TrailPoint, kMaxTrailsPerEmitter> points{};
   for (std::size_t index = 0; index < trails.size(); ++index) {
@@ -452,14 +462,14 @@ void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
     const SVECTOR& sample = trail.spline_samples[trail.current_spline_sample];
     TrailVector point{sample.vx, sample.vy, sample.vz};
     if (world_events) {
-      Core_Gte_SetRotMatrix(&world);
-      Core_Gte_SetTransMatrix(&world);
+      SetRotMatrix(&world);
+      SetTransMatrix(&world);
       scratch.vector.vx = sample.vx;
       scratch.vector.vy = sample.vy;
       scratch.vector.vz = sample.vz;
-      Core_Gte_LoadV0(&scratch.vector);
-      Core_Gte_Rtv0Tr();
-      Core_Gte_StoreLvnl(&scratch.aim_point);
+      LoadV0(&scratch.vector);
+      Rtv0Tr();
+      StoreLvnl(&scratch.aim_point);
       point = Wide(scratch.aim_point);
     }
     // The original left the context's other fields, including its variant,

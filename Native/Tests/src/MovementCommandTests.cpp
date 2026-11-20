@@ -12,7 +12,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct StoredCommand {

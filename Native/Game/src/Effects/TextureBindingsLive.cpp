@@ -8,7 +8,7 @@
 #include "Effects/Package.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 static_assert(sizeof(VS::Effects::LiveEffectPackage::texture_tables) ==
               VS::Effects::kTextureTableCapacity *

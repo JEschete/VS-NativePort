@@ -51,15 +51,15 @@ std::size_t GaugeIndex(HudGaugeKind kind) {
   return index;
 }
 
-u_long* Chain(Render::LiveOrderingBase base, int layer) {
-  u_long* const chain = Render::LiveFrameOrderingEntry(base, layer);
+std::uint32_t* Chain(Render::LiveOrderingBase base, int layer) {
+  std::uint32_t* const chain = Render::LiveFrameOrderingEntry(base, layer);
   if (chain == nullptr) Refuse("HUD render target has no ordering entry");
   return chain;
 }
 
 class CheckedHudQueue final : public Render::PacketQueue {
  public:
-  explicit CheckedHudQueue(u_long* chain) : queue_(chain) {}
+  explicit CheckedHudQueue(std::uint32_t* chain) : queue_(chain) {}
   [[nodiscard]] std::uint32_t ChainLink() const override {
     return queue_.ChainLink();
   }
@@ -72,12 +72,13 @@ class CheckedHudQueue final : public Render::PacketQueue {
   Render::LivePacketQueue queue_;
 };
 
-u_long* QueueSprite(const Render::SpriteRequest& sprite, u_long* chain) {
+std::uint32_t* QueueSprite(const Render::SpriteRequest& sprite,
+                           std::uint32_t* chain) {
   if (Render::ReserveLivePrimitiveWords(Render::kSpritePacketWords) ==
       nullptr) {
     Refuse("HUD sprite has no primitive capacity");
   }
-  u_long* const packet = Render::QueueLiveSpriteWithTexturePage(
+  std::uint32_t* const packet = Render::QueueLiveSpriteWithTexturePage(
       sprite.brightness_transparency, sprite.packed_position,
       sprite.packed_size, chain);
   if (packet == nullptr) Refuse("HUD sprite renderer returned no packet");
@@ -135,7 +136,7 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
   bool DrawLabel(HudGaugeKind kind,
                  const Render::SpriteRequest& sprite) override {
     if (gauge_chain_ == nullptr) Refuse("Gauge label has no gauge owner");
-    u_long* const packet = QueueSprite(sprite, gauge_chain_);
+    std::uint32_t* const packet = QueueSprite(sprite, gauge_chain_);
     packet[Render::kSpriteTextureWord] =
         static_cast<std::uint8_t>(
             std::span(VS::Battle::hudGaugeLabelTexU)[GaugeIndex(kind)]) |
@@ -145,7 +146,7 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
 
  private:
   // _renderStatBar holds this owner across its external number renderers.
-  u_long* gauge_chain_ = nullptr;
+  std::uint32_t* gauge_chain_ = nullptr;
 };
 
 class LiveHudIconWorld final : public HudStatusIconWorld {
@@ -157,7 +158,7 @@ class LiveHudIconWorld final : public HudStatusIconWorld {
   }
   bool DrawSprite(HudSpriteLayer layer, const HudSprite& sprite) override {
     const bool status = layer == HudSpriteLayer::kStatus;
-    u_long* const packet = QueueSprite(
+    std::uint32_t* const packet = QueueSprite(
         sprite.geometry, Chain(status ? Render::LiveOrderingBase::kScene
                                       : Render::LiveOrderingBase::kOverlay,
                                status ? kStatusLayer : kShortcutLayer));

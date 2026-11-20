@@ -20,7 +20,7 @@
 #include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingDraw.hpp"
 #include "Battle/TargetingDrawLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Scratch.hpp"
@@ -30,13 +30,20 @@
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::TargetVolume;
+using VS::Legacy::GpuHandle;
 
 namespace VS::Battle {
 namespace {
@@ -52,9 +59,9 @@ constexpr std::size_t kBasisNegatedSine = 8;
 constexpr std::size_t kBasisCosineAgain = 10;
 constexpr std::size_t kWireLineWords = 5;
 constexpr std::size_t kCursorQuadWords = 1 + kSphereCursorQuadWords;
-constexpr u_long kLinkMask = 0x00FFFFFF;
-constexpr u_long kWireLineTag = 0x04000000;
-constexpr u_long kCursorQuadTag = 0x09000000;
+constexpr std::uint32_t kLinkMask = 0x00FFFFFF;
+constexpr std::uint32_t kWireLineTag = 0x04000000;
+constexpr std::uint32_t kCursorQuadTag = 0x09000000;
 constexpr std::size_t kSpriteTexcoordWord = 4;
 constexpr unsigned kHalfwordBits = 16;
 
@@ -134,10 +141,10 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
   std::int32_t ProjectCenterDepth(const TargetWorldPoint& position) override {
     const SVECTOR point = {position[0], position[1], position[2], 0};
-    Core_GteWord depth = 0;
-    Core_Gte_LoadV0(&point);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSz3Otz(&depth);
+    VS::Core::Gte::Word depth = 0;
+    LoadV0(&point);
+    Rtps();
+    StoreSz3Otz(&depth);
     return static_cast<std::int32_t>(depth);
   }
 
@@ -150,7 +157,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
   math::Mat3 VolumeTransform(const TargetVolumeExtents& extents,
                              std::int16_t angle) override {
-    std::array<u_char, kTargetVolumeExtents> scale{};
+    std::array<std::uint8_t, kTargetVolumeExtents> scale{};
     std::copy(extents.begin(), extents.end(), scale.begin());
     return math::MatrixOf(
         *BuildSphereVolumeTransformEntry(scale.data(), angle));
@@ -227,13 +234,14 @@ class LiveTerrainSource final : public SphereTerrainSource {
   }
 };
 
-[[nodiscard]] u_long* OrderingTable() {
-  return static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table);
+[[nodiscard]] std::uint32_t* OrderingTable() {
+  return static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().ordering_table);
 }
 
 // Reserves `words` words at the frame cursor and advances it past them.
-[[nodiscard]] u_long* ReserveLinkedPacket(std::size_t words) {
-  u_long* packet = VS::Render::ReserveLivePrimitiveWords(words);
+[[nodiscard]] std::uint32_t* ReserveLinkedPacket(std::size_t words) {
+  std::uint32_t* packet = VS::Render::ReserveLivePrimitiveWords(words);
   if (packet != nullptr) {
     VS::Render::FrameScratchpad().primitive_cursor = packet + words;
   }
@@ -242,7 +250,7 @@ class LiveTerrainSource final : public SphereTerrainSource {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/573B8.c:552).
-void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color,
+void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, std::uint32_t color,
                             int intensity) {
   if (start == nullptr || end == nullptr) {
     Refuse("wire line without both endpoints");
@@ -254,22 +262,22 @@ void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color,
   if (!line.has_value()) {
     return;
   }
-  u_long* ordering = OrderingTable();
+  std::uint32_t* ordering = OrderingTable();
   if (ordering == nullptr) {
     Refuse("wire line without an ordering table");
     return;
   }
-  u_long* packet = ReserveLinkedPacket(kWireLineWords);
+  std::uint32_t* packet = ReserveLinkedPacket(kWireLineWords);
   if (packet == nullptr) {
     Refuse("wire line with a full primitive buffer");
     return;
   }
-  u_long& slot = ordering[line->slot];
-  const std::array<u_long, kWireLineWords> words{
+  std::uint32_t& slot = ordering[line->slot];
+  const std::array<std::uint32_t, kWireLineWords> words{
       (slot & kLinkMask) | kWireLineTag, line->mode, line->color,
       line->start_xy, line->end_xy};
   std::copy(words.begin(), words.end(), packet);
-  slot = LegacyGpu_Handle(packet);
+  slot = GpuHandle(packet);
 }
 
 // decomp: BATTLE.PRG func_800C0D78 (src/BATTLE/BATTLE.PRG/58578.c:104).
@@ -310,15 +318,15 @@ void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
     Refuse("position cursor without a position");
     return;
   }
-  u_long* ordering = OrderingTable();
+  std::uint32_t* ordering = OrderingTable();
   if (ordering == nullptr) {
     Refuse("position cursor without an ordering table");
     return;
   }
-  Core_GteWord screen = 0;
-  Core_Gte_LoadV0(position);
-  Core_Gte_Rtps();
-  Core_Gte_StoreSxy2(&screen);
+  VS::Core::Gte::Word screen = 0;
+  LoadV0(position);
+  Rtps();
+  StoreSxy2(&screen);
   const std::optional<SpherePositionCursorFrame> frame =
       DrawSpherePositionCursor(static_cast<std::uint32_t>(screen), lock_pitch,
                                VS::Battle::positionCursorBlinkFrame,
@@ -329,21 +337,21 @@ void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
   }
   VS::Battle::positionCursorBlinkFrame = frame->blink;
   // The cursor links in front of the ordering table's first slot.
-  u_long* ot = std::prev(ordering);
+  std::uint32_t* ot = std::prev(ordering);
   if (frame->pitch_quads.has_value()) {
     for (const SphereCursorQuad& quad : *frame->pitch_quads) {
-      u_long* packet = ReserveLinkedPacket(kCursorQuadWords);
+      std::uint32_t* packet = ReserveLinkedPacket(kCursorQuadWords);
       if (packet == nullptr) {
         Refuse("position cursor with a full primitive buffer");
         break;
       }
       packet[0] = (*ot & kLinkMask) | kCursorQuadTag;
       std::copy(quad.begin(), quad.end(), std::next(packet));
-      *ot = LegacyGpu_Handle(packet);
+      *ot = GpuHandle(packet);
     }
   }
   for (const SphereCursorSprite& sprite : frame->sprites) {
-    u_long* packet = VS::Render::QueueLiveSpriteWithTexturePage(
+    std::uint32_t* packet = VS::Render::QueueLiveSpriteWithTexturePage(
         sprite.brightness, static_cast<int>(sprite.xy),
         static_cast<int>(sprite.wh), ot);
     packet[kSpriteTexcoordWord] = sprite.texcoord;
@@ -351,7 +359,7 @@ void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
 }
 
 // decomp: BATTLE.PRG func_800C2B0C (src/BATTLE/BATTLE.PRG/58578.c:1036).
-void LiveCacheSphereTerrainRow(SVECTOR* position, u_int row) {
+void LiveCacheSphereTerrainRow(SVECTOR* position, std::uint32_t row) {
   if (row >= kSphereTerrainRows) {
     return;
   }

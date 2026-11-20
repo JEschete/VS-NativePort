@@ -18,6 +18,8 @@
 #include "Actors/Movement.hpp"
 #include "Core/Diagnostics.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Actors {
 namespace {
 void Require(bool valid, const char* message) {

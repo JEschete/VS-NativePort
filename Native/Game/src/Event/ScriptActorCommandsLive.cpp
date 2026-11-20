@@ -27,7 +27,7 @@
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Event/Actors.hpp"
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
@@ -37,9 +37,15 @@
 #include "Field/MinimapSceneLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Palette.hpp"
 #include "State/ScriptFlagsLive.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace event = VS::Event;
@@ -272,10 +278,10 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
       return;
     }
     // The companion state travels as a colour code: x, y, z and depth bias.
-    const VS::Render::ColorCode state{static_cast<u_char>(style->offset.x),
-                                      static_cast<u_char>(style->offset.y),
-                                      static_cast<u_char>(style->offset.z),
-                                      style->offset.depth_bias};
+    const VS::Render::ColorCode state{
+        static_cast<std::uint8_t>(style->offset.x),
+        static_cast<std::uint8_t>(style->offset.y),
+        static_cast<std::uint8_t>(style->offset.z), style->offset.depth_bias};
     const VS::Render::ColorCode color = ToLiveColor(style->color);
     VS::Actors::SetLiveActorCompanion(actor, 1, &state, &color);
   }
@@ -367,19 +373,19 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   [[nodiscard]] event::DialogAnchorProjection ProjectDialogAnchor(
       int actor, const MotionVector& anchor) override {
     MATRIX bone{};
-    u_long bone_length = 0;
+    std::uint32_t bone_length = 0;
     if (VS::Actors::LiveActorTaggedBoneMatrix(actor, kDialogAnchorTag, &bone,
                                               &bone_length) < 0) {
       VS::Core::Warnf("event", "Actor %d has no dialog anchor bone", actor);
       return {.anchor = anchor};
     }
-    Core_Gte_SetRotMatrix(&bone);
-    Core_Gte_SetTransMatrix(&bone);
+    SetRotMatrix(&bone);
+    SetTransMatrix(&bone);
     SVECTOR point = VS::Actors::LiveSvector(anchor);
-    Core_GteWord screen = 0;
-    Core_GteWord depth = 0;
-    Core_GteWord flags = 0;
-    Core_Gte_RotTransPers(&point, &screen, &depth, &flags);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word depth = 0;
+    VS::Core::Gte::Word flags = 0;
+    RotTransPers(&point, &screen, &depth, &flags);
     VS::Actors::ProjectLiveActorTaggedBone(actor, kDialogAnchorTag, &point,
                                            static_cast<int>(bone_length));
     const auto word = static_cast<std::uint32_t>(screen);
@@ -392,7 +398,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
 using Handler = event::ScriptStep (*)(event::ScriptCommand,
                                       event::ScriptActorHost&);
 
-intptr_t RunCommand(Handler handler, const u_char* command,
+intptr_t RunCommand(Handler handler, const std::uint8_t* command,
                     std::size_t length) {
   Require(command != nullptr, "Script actor command is missing");
   LiveScriptActorHost host;

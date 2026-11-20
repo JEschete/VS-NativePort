@@ -10,8 +10,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Gte.h"
-#include "Legacy/Psx.h"
+#include "Core/Gte.hpp"
+#include "Legacy/Psx.hpp"
 #include "Render/CameraView.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"
@@ -25,6 +25,16 @@
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::LoadImage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::RECT;
+using VS::Legacy::setlen;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
 
 // Contracts of the #276 slice A4 (#279) camera, display and HUD packet
 // policies: values traced from 146C.c, 5BF94.c, 44F14.c and main.c, and every
@@ -82,7 +92,7 @@ TEST_CASE("Draw-mode commands are one-word packets (#279)",
 
 TEST_CASE("Live draw-mode commands advance the frame cursor by two words",
           "[render-display]") {
-  std::array<u_long, 8> storage{};
+  std::array<std::uint32_t, 8> storage{};
   storage.fill(0xDEADBEEF);
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* const saved_buffer =
@@ -90,9 +100,9 @@ TEST_CASE("Live draw-mode commands advance the frame cursor by two words",
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
       storage.data() + 1;
   VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
-  std::array<u_long, 2> ordering{};
+  std::array<std::uint32_t, 2> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-  const u_long old_head = ordering[1];
+  const std::uint32_t old_head = ordering[1];
 
   VS::Render::InsertLiveDrawModeCommand(static_cast<int>(0xE1000600u),
                                         &ordering[1]);
@@ -109,7 +119,7 @@ TEST_CASE("Live draw-mode commands advance the frame cursor by two words",
 
 TEST_CASE("Live HUD packets outside the frame buffer are dropped and counted",
           "[render-display]") {
-  std::array<u_long, 8> storage{};
+  std::array<std::uint32_t, 8> storage{};
   storage.fill(0xDEADBEEF);
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* const saved_buffer =
@@ -118,7 +128,7 @@ TEST_CASE("Live HUD packets outside the frame buffer are dropped and counted",
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
       storage.data() + 4;
   VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
-  u_long chain = 0x00FFFFFF;
+  std::uint32_t chain = 0x00FFFFFF;
   const std::uint64_t dropped = VS::Render::DroppedLiveUiPacketCount();
 
   VS::Render::InsertLiveThreeWordPrimitive(&chain, 1, 2, 3);
@@ -127,8 +137,8 @@ TEST_CASE("Live HUD packets outside the frame buffer are dropped and counted",
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 2);
   CHECK(chain == 0x00FFFFFF);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == storage.data() + 1);
-  CHECK(std::ranges::all_of(storage,
-                            [](u_long word) { return word == 0xDEADBEEF; }));
+  CHECK(std::ranges::all_of(
+      storage, [](std::uint32_t word) { return word == 0xDEADBEEF; }));
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = saved_buffer;
   VS::Render::FrameScratchpad() = saved_frame;
 }
@@ -211,8 +221,8 @@ TEST_CASE("Right-aligned numbers stop after ten digits", "[render-display]") {
 
 TEST_CASE("Live numbers default to the chain before the ordering table",
           "[render-display]") {
-  std::array<u_long, 32> storage{};
-  std::array<u_long, 8> ordering{};
+  std::array<std::uint32_t, 32> storage{};
+  std::array<std::uint32_t, 8> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* const saved_buffer =
@@ -351,14 +361,14 @@ TEST_CASE("Broken, cyclic or unbound chains are left untouched (#279)",
 TEST_CASE("Live overlay splices reach the ordering table's overlay bucket",
           "[render-display]") {
   constexpr int kOrderingWords = 0x822;
-  std::vector<u_long> ordering(kOrderingWords);
+  std::vector<std::uint32_t> ordering(kOrderingWords);
   ClearOTagR(ordering.data(), kOrderingWords);
-  std::array<u_long, 4> primitive{};
+  std::array<std::uint32_t, 4> primitive{};
   setlen(primitive.data(), 3);
   void* const saved_table = VS::Render::legacyCurrentOrderingTable;
   // The overlay bucket sits at byte 0x2084 of the table.
   constexpr std::size_t kOverlayHead = 0x821;
-  u_long* const head = ordering.data() + kOverlayHead;
+  std::uint32_t* const head = ordering.data() + kOverlayHead;
 
   VS::Render::legacyCurrentOrderingTable = nullptr;
   VS::Render::AppendLiveOverlayPrimitive(primitive.data());
@@ -405,7 +415,7 @@ TEST_CASE("Live image uploads write the packed VRAM rectangle",
   RECT area{};
   setRECT(&area, 1000, 500, 4, 2);
   std::array<std::uint16_t, 8> saved{};
-  StoreImage(&area, reinterpret_cast<u_long*>(saved.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(saved.data()));
   const std::array<std::uint16_t, 8> pixels{1, 2, 3, 4, 5, 6, 7, 8};
 
   VS::Render::UploadLiveImageRectangle(1000 | (500 << 16), pixels.data(),
@@ -413,9 +423,9 @@ TEST_CASE("Live image uploads write the packed VRAM rectangle",
   VS::Render::UploadLiveImageRectangle(1000 | (500 << 16), nullptr,
                                        4 | (2 << 16));
   std::array<std::uint16_t, 8> stored{};
-  StoreImage(&area, reinterpret_cast<u_long*>(stored.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(stored.data()));
   CHECK(stored == pixels);
-  LoadImage(&area, reinterpret_cast<u_long*>(saved.data()));
+  LoadImage(&area, reinterpret_cast<std::uint32_t*>(saved.data()));
 }
 
 // --- Camera --------------------------------------------------------------
@@ -697,7 +707,7 @@ TEST_CASE("Live field display configures both environments",
   VS::Render::legacyViewportTop = saved_top;
   VS::Render::viewportWidth = saved_width;
   VS::Render::viewportHeight = saved_height;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 class FakeFrame final : public Render::FieldFrameHost {

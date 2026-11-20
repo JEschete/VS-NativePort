@@ -1790,7 +1790,7 @@ TEST_CASE("Live effect package views follow the pointers the walk bound",
   static_cast<void>(Required(walk));
 
   // The pointer a typed reader trusts must still be the one the walk bound.
-  std::array<u_long, 2> other_curves{1, 2};
+  std::array<std::uint32_t, 2> other_curves{1, 2};
   VS::Effects::actionPackage.curve_block =
       reinterpret_cast<Effects::LiveCurveTable*>(other_curves.data());
   CHECK(Effects::LiveSampleEffectCurve(1, 0) == 0);
@@ -2105,9 +2105,9 @@ TEST_CASE("Live effect script presets read the module's preset tables",
   const PresetScope presets;
   auto package = ScriptPackage(0, 3);
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
-  std::ranges::copy(std::array<u_char, 4>{1, 2, 3, 0},
+  std::ranges::copy(std::array<std::uint8_t, 4>{1, 2, 3, 0},
                     std::begin(VS::Effects::pairedParticleColorPresets[0][0]));
-  std::ranges::copy(std::array<u_char, 4>{4, 5, 6, 0},
+  std::ranges::copy(std::array<std::uint8_t, 4>{4, 5, 6, 0},
                     std::begin(VS::Effects::pairedParticleColorPresets[0][1]));
   VS::Effects::LiveEffectInstance instance{};
   CHECK(Effects::LiveApplyPairedParticleColorPreset(&instance) == 1);
@@ -2115,7 +2115,8 @@ TEST_CASE("Live effect script presets read the module's preset tables",
   CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{4, 5, 6});
 
   for (auto& entry : VS::Effects::particleColorPresetTable[0]) {
-    std::ranges::copy(std::array<u_char, 4>{7, 8, 9, 2}, std::begin(entry));
+    std::ranges::copy(std::array<std::uint8_t, 4>{7, 8, 9, 2},
+                      std::begin(entry));
   }
   CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 1);
   CHECK(CurvesOf(BoundDefinitions()[2]) == Rgb{7, 8, 9});

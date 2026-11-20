@@ -11,7 +11,7 @@
 
 #include "Core/Log.hpp"
 #include "Field/RoomSwitchesLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Map.hpp"
@@ -23,6 +23,17 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Legacy::AddPrim;
+using VS::Legacy::LINE_F2;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::setLineF2;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setShadeTex;
+using VS::Legacy::setUV4;
+using VS::Legacy::setXY2;
+using VS::Legacy::setXY4;
+
 namespace VS::Menu::map {
 namespace {
 // The state flags func_80107630 and func_8010839C index by door state.
@@ -33,7 +44,6 @@ constexpr std::size_t kLabelLineSlot = 8;
 
 static_assert(offsetof(VS::State::StateFlags, opaque_33f) ==
               kDoorStateFlagsOffset);
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::uint64_t refused_calls = 0;
 
@@ -64,14 +74,15 @@ void Refuse(std::string_view call, std::string_view reason) {
 template <typename Primitive>
 [[nodiscard]] Primitive* ReservePrimitive() {
   constexpr std::size_t kWords =
-      (sizeof(Primitive) + sizeof(u_long) - 1) / sizeof(u_long);
+      (sizeof(Primitive) + sizeof(std::uint32_t) - 1) / sizeof(std::uint32_t);
   return reinterpret_cast<Primitive*>(
       Render::ReserveLivePrimitiveWords(kWords));
 }
 
 class LiveMapMarkerHost final : public MapMarkerHost {
  public:
-  explicit LiveMapMarkerHost(std::string_view call, u_long* caller = nullptr)
+  explicit LiveMapMarkerHost(std::string_view call,
+                             std::uint32_t* caller = nullptr)
       : call_(call), caller_(caller) {}
 
   void AddMarkerQuad(const MarkerQuad& quad) override {
@@ -85,13 +96,14 @@ class LiveMapMarkerHost final : public MapMarkerHost {
     setShadeTex(poly, 1);
     const auto& corner = quad.corners;
     setXY4(poly, corner[0].x, corner[0].y, corner[1].x, corner[1].y,
-           corner[2].x, corner[2].y, corner[3].x, corner[3].y);
+           corner[2].x, corner[2].y, corner.back().x, corner.back().y);
     const auto& texture = quad.texture;
     setUV4(poly, texture[0].u, texture[0].v, texture[1].u, texture[1].v,
-           texture[2].u, texture[2].v, texture[3].u, texture[3].v);
+           texture[2].u, texture[2].v, texture.back().u, texture.back().v);
     poly->tpage = quad.texture_page;
     poly->clut = quad.clut;
-    AddPrim(static_cast<u_char*>(VS::Render::FrameScratchpad().ordering_table) +
+    AddPrim(static_cast<std::uint8_t*>(
+                VS::Render::FrameScratchpad().ordering_table) +
                 kMarkerQuadSlotBytes,
             poly);
     VS::Render::FrameScratchpad().primitive_cursor = poly + 1;
@@ -107,19 +119,20 @@ class LiveMapMarkerHost final : public MapMarkerHost {
     setLineF2(packet);
     setXY2(packet, line.from.x, line.from.y, line.to.x, line.to.y);
     setRGB0(packet, kLabelLineShade, kLabelLineShade, kLabelLineShade);
-    AddPrim(static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+    AddPrim(static_cast<std::uint32_t*>(
+                VS::Render::FrameScratchpad().ordering_table) +
                 kLabelLineSlot,
             packet);
     VS::Render::FrameScratchpad().primitive_cursor = packet + 1;
   }
 
   void AddAshleyMarker(const AshleyMarkerSprite& sprite) override {
-    u_long* target =
+    std::uint32_t* target =
         sprite.list == SpriteList::kCaller
             ? caller_
-            : static_cast<u_long*>(
+            : static_cast<std::uint32_t*>(
                   VS::Render::FrameScratchpad().overlay_ordering_table);
-    u_long* packet = Render::QueueLiveSpriteWithTexturePage(
+    std::uint32_t* packet = Render::QueueLiveSpriteWithTexturePage(
         sprite.brightness_transparency, sprite.packed_position,
         sprite.packed_size, target);
     // The original writes the colour through the cursor 16 bytes back, the
@@ -130,7 +143,7 @@ class LiveMapMarkerHost final : public MapMarkerHost {
   }
 
   void DrawLabelText(const LabelText& text) override {
-    u_short* table =
+    std::uint16_t* table =
         text.table == LabelTextTable::kDoorNames ? doors : connectingMaps;
     Framework::MenuRow* row = Framework::SetLiveMenuItem(
         0, text.x, text.y, text.width, 0,
@@ -147,12 +160,13 @@ class LiveMapMarkerHost final : public MapMarkerHost {
 
  private:
   std::string_view call_;
-  u_long* caller_;
+  std::uint32_t* caller_;
 };
 }  // namespace
 
 // decomp: MENU5.PRG _renderDefaultIcon (4D8.c:106).
-void LiveDrawAshleyMarker(int id, int xy, int brightness, u_long* next_prim) {
+void LiveDrawAshleyMarker(int id, int xy, int brightness,
+                          std::uint32_t* next_prim) {
   LiveMapMarkerHost host("DrawAshleyMarker", next_prim);
   DrawAshleyMarker(
       host, id, xy, brightness,

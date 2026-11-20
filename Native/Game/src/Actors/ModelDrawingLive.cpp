@@ -31,7 +31,7 @@
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/RoomLightingLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -42,6 +42,15 @@
 #include "Render/Textures.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace VS::Actors {
 namespace {
@@ -117,8 +126,8 @@ static void TransformBonePosition(const MATRIX* parent, const SVECTOR* local,
     for (int axis = 0; axis < kSpatialDimensions; ++axis) {
       value += static_cast<int64_t>(parent->m[row][axis]) * coordinates[axis];
     }
-    output->t[row] = static_cast<Core_GteWord>((value >> kFixedFractionBits) +
-                                               parent->t[row]);
+    output->t[row] = static_cast<VS::Core::Gte::Word>(
+        (value >> kFixedFractionBits) + parent->t[row]);
   }
 }
 
@@ -495,14 +504,14 @@ class LiveBoneProjection final : public BoneProjectionHost {
   }
   ProjectedBonePoint Project(std::int16_t offset_x) override {
     SVECTOR position = {offset_x, 0, 0, 0};
-    Core_Gte_SetRotMatrix(matrix_);
-    Core_Gte_SetTransMatrix(matrix_);
-    Core_GteWord screen = 0;
-    Core_GteWord fog = 0;
-    Core_GteWord flags = 0;
+    SetRotMatrix(matrix_);
+    SetTransMatrix(matrix_);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word fog = 0;
+    VS::Core::Gte::Word flags = 0;
     VECTOR transformed{};
-    Core_Gte_RotTransPers(&position, &screen, &fog, &flags);
-    Core_Gte_StoreLvnl(&transformed);
+    RotTransPers(&position, &screen, &fog, &flags);
+    StoreLvnl(&transformed);
     return {static_cast<std::int32_t>(screen), transformed.vz};
   }
 

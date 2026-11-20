@@ -67,6 +67,8 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 
 constexpr std::int32_t kActorSlots = 17;

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Binds the gazette camera and panels (GazetteCamera.hpp) to the frame's
 // primitive buffer and scene ordering table (VS::Render::FrameScratchpad(),
@@ -18,7 +18,7 @@
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 // MENU9.PRG (238.c).
 void RestoreLiveCamera();
-void BuildLiveViewerCamera(MATRIX* camera_matrix);
+void BuildLiveViewerCamera(VS::Core::Gte::MATRIX* camera_matrix);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void DrawLiveEnemyBanner(int x, int y, int width, int height, int gradient);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

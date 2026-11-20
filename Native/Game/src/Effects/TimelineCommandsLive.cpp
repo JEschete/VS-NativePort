@@ -14,7 +14,7 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
@@ -31,7 +31,9 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Effects {
 namespace {

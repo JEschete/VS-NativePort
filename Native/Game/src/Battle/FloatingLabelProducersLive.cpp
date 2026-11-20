@@ -14,6 +14,8 @@
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Battle {
 namespace {
 static_assert(sizeof(FloatingLabelRecord) == sizeof(VS::Battle::FloatingLabel));

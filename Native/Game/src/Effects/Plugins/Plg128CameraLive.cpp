@@ -9,7 +9,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/Matrix.hpp"
@@ -27,6 +27,12 @@
 #include "Effects/Plugins/Plg128Camera.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace VS::Effects::Plg128 {
 namespace {
@@ -318,8 +324,8 @@ int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
   // Only a refused tick leaves the age alone.
   if (kind == CameraCommand::kTick && state.age != age) {
     // The original left its view in the GTE's rotation and translation.
-    Core_Gte_SetRotMatrix(&live.view);
-    Core_Gte_SetTransMatrix(&live.view);
+    SetRotMatrix(&live.view);
+    SetTransMatrix(&live.view);
   }
   return alive;
 }

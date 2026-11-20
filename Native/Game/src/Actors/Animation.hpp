@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "Actors/TextureAnimationRecords.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 
@@ -18,10 +18,10 @@ inline constexpr int kPoseBones = 42;
 // (src/BATTLE/BATTLE.PRG/entity.h:43); the native record folds the original's
 // 41 bones plus one into 42.
 struct AnimationPose {
-  /* 0x00 */ SVECTOR bone_keys[kPoseBones];
-  /* 0x150 */ SVECTOR scale_keys[kPoseBones];
-  /* 0x2A0 */ SVECTOR rotation_deltas[kPoseBones];
-  /* 0x3F0 */ SVECTOR track_states[kPoseBones];
+  /* 0x00 */ VS::Core::Gte::SVECTOR bone_keys[kPoseBones];
+  /* 0x150 */ VS::Core::Gte::SVECTOR scale_keys[kPoseBones];
+  /* 0x2A0 */ VS::Core::Gte::SVECTOR rotation_deltas[kPoseBones];
+  /* 0x3F0 */ VS::Core::Gte::SVECTOR track_states[kPoseBones];
   /* 0x540 */ std::int16_t frame;
   /* 0x542 */ std::uint16_t next_event_frame;
   /* 0x544 */ std::uint8_t* event_script;

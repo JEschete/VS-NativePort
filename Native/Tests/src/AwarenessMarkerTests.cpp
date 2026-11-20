@@ -10,11 +10,20 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
 
 namespace {
 struct MarkerFixture {
@@ -27,8 +36,9 @@ struct MarkerFixture {
   int saved_sides = VS::Battle::actorMarkerSides;
   VS::Actors::ActorRecord player{};
   VS::Actors::ActorRecord enemy{};
-  std::vector<u_long> storage = std::vector<u_long>(4098, 0xDEADBEEF);
-  std::array<u_long, 2048> ordering{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(4098, 0xDEADBEEF);
+  std::array<std::uint32_t, 2048> ordering{};
 
   MarkerFixture() {
     VS::Actors::actorRecords[0] = &player;
@@ -47,8 +57,8 @@ struct MarkerFixture {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
     VS::Battle::actorMarkerSides = 0;
   }
 
@@ -60,11 +70,11 @@ struct MarkerFixture {
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Battle::actorMarkerSides = saved_sides;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   void CheckChain(int icons) const {
-    const auto* end = static_cast<const u_long*>(
+    const auto* end = static_cast<const std::uint32_t*>(
         VS::Render::FrameScratchpad().primitive_cursor);
     const auto* frame = end - 10;
     constexpr unsigned kDepth = 384 - 16;

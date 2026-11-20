@@ -17,7 +17,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptVmLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace actors = VS::Actors;

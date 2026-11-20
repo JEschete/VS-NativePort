@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 
 namespace VS::Menu::Framework {
@@ -42,13 +42,13 @@ extern char equipmentSubtype;
 // decomp: vs_mainMenu_itemStatPage (MENU/MAINMENU.PRG 2D10.c)
 extern char itemStatPage;
 // decomp: vs_mainMenu_selectedStatusViewElement (MENU/MAINMENU.PRG 2D10.c)
-extern u_char selectedStatusViewElement;
+extern std::uint8_t selectedStatusViewElement;
 // decomp: vs_mainMenu_statusViewCursorPositions (MENU/MAINMENU.PRG 2D10.c):
 // vs_getXY words.
 extern int statusViewCursorPositions[kStatusViewElementCount];
 // decomp: vs_mainMenu_statusViewNavigationMap (MENU/MAINMENU.PRG 2D10.c):
 // the element up, down, left and right of each element.
-using StatusViewNeighbours = u_char[kStatusViewDirections];
+using StatusViewNeighbours = std::uint8_t[kStatusViewDirections];
 extern StatusViewNeighbours statusViewNavigationMap[kStatusViewElementCount];
 // decomp: vs_mainMenu_strIntAgi (MENU/MAINMENU.PRG 2D10.c)
 extern int16_t strIntAgi[kPrimaryStatCount];

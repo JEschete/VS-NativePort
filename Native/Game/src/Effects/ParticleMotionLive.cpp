@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string_view>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
@@ -14,7 +14,12 @@
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::LINE_F2;
 
 namespace VS::Effects {
 namespace {
@@ -59,7 +64,7 @@ class LiveRotation final : public ParticleRotation {
   Vec3 Rotate(ParticleOffset offset) override {
     SVECTOR input{offset.x, offset.y, offset.z, 0};
     VECTOR output{};
-    Core_Gte_ApplyRotMatrix(&input, &output);
+    VS::Core::Gte::ApplyRotMatrix(&input, &output);
     return Wide(output);
   }
 };

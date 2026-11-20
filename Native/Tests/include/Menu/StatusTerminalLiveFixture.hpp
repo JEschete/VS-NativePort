@@ -55,8 +55,8 @@ namespace memory = VS::Core::Memory;
 using equipment_detail_tests::ArrayRestore;
 using equipment_detail_tests::ValueRestore;
 inline constexpr std::size_t kArenaBytes = 0x400000;
-inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(u_long);
-inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
+inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 inline constexpr int kSourceModel = 1;
 inline constexpr int kSourceBattleSequence = 2;
 inline constexpr int kAssetPollLimit = 256;
@@ -80,13 +80,13 @@ struct FrameRestore {
 };
 
 struct GeometryRestore {
-  Core_GteWord offset_x = 0;
-  Core_GteWord offset_y = 0;
+  VS::Core::Gte::Word offset_x = 0;
+  VS::Core::Gte::Word offset_y = 0;
   GeometryRestore() {
-    Core_Gte_GetGeomOffset(&offset_x, &offset_y);
-    Core_Gte_SetGeomOffset(160, 112);
+    VS::Core::Gte::GetGeomOffset(&offset_x, &offset_y);
+    VS::Core::Gte::SetGeomOffset(160, 112);
   }
-  ~GeometryRestore() { Core_Gte_SetGeomOffset(offset_x, offset_y); }
+  ~GeometryRestore() { VS::Core::Gte::SetGeomOffset(offset_x, offset_y); }
 };
 
 struct MainMenuScope {
@@ -114,29 +114,33 @@ struct MainMenuScope {
       VS::Menu::Framework::hideMenu};
   ValueRestore<decltype(VS::Menu::Framework::itemsListRow)> list{
       VS::Menu::Framework::itemsListRow};
-  ValueRestore<u_short*> items{VS::Menu::Framework::itemsText};
+  ValueRestore<std::uint16_t*> items{VS::Menu::Framework::itemsText};
   MainMenuScope() { fw::ResetLiveMainMenuStatics(); }
   ~MainMenuScope() { fw::ResetLiveMainMenuStatics(); }
 };
 
 struct VramRestore {
-  RECT area{0, 0, 1024, 512};
-  std::vector<u_long> pixels = std::vector<u_long>(1024 * 512 / 2);
-  VramRestore() { StoreImage(&area, pixels.data()); }
-  ~VramRestore() { LoadImage(&area, pixels.data()); }
+  VS::Legacy::RECT area{0, 0, 1024, 512};
+  std::vector<std::uint32_t> pixels =
+      std::vector<std::uint32_t>(1024 * 512 / 2);
+  VramRestore() { VS::Legacy::StoreImage(&area, pixels.data()); }
+  ~VramRestore() { VS::Legacy::LoadImage(&area, pixels.data()); }
 };
 
 struct AssetStateRestore {
   ArrayRestore<VS::Content::LegacyActorAssetRequest,
                VS::Content::kActorAssetRequestCount>
       requests{VS::Content::legacyActorAssetRequests.data()};
-  ValueRestore<u_char> model_phase{VS::Content::legacyModelLoadPhase};
+  ValueRestore<std::uint8_t> model_phase{VS::Content::legacyModelLoadPhase};
   ValueRestore<unsigned char> parse_phase{VS::Content::modelParseResetFlag};
-  ValueRestore<u_char> sequence_phase{VS::Content::legacySequenceParsePhase};
-  ValueRestore<u_char> effect_phase{VS::Content::legacyEtmLoadPhase};
-  ValueRestore<u_char*> model_cursor{VS::Content::legacyShpParseCursor};
-  ValueRestore<u_char*> sequence_cursor{VS::Content::legacySequenceParseData};
-  ValueRestore<u_char> palette_words{VS::Content::legacyShpCopiedWordCount};
+  ValueRestore<std::uint8_t> sequence_phase{
+      VS::Content::legacySequenceParsePhase};
+  ValueRestore<std::uint8_t> effect_phase{VS::Content::legacyEtmLoadPhase};
+  ValueRestore<std::uint8_t*> model_cursor{VS::Content::legacyShpParseCursor};
+  ValueRestore<std::uint8_t*> sequence_cursor{
+      VS::Content::legacySequenceParseData};
+  ValueRestore<std::uint8_t> palette_words{
+      VS::Content::legacyShpCopiedWordCount};
   ValueRestore<int> header_word{VS::Content::legacyShpHeaderWord};
   ValueRestore<int> texture_width{VS::Content::legacyShpTextureWidth};
   ValueRestore<int> texture_height{VS::Content::legacyShpTextureHeight};
@@ -150,10 +154,10 @@ struct AssetStateRestore {
       weapon_textures{VS::Render::legacyWeaponTextureSlots};
   ValueRestore<VS::Render::TexturePageTable> texture_pages{
       VS::Render::LiveTexturePages()};
-  ArrayRestore<u_char, VS::Actors::kTextureSlotOriginBytes> texture_origins{
-      VS::Actors::textureSlotOrigins.data()};
-  ArrayRestore<u_char, VS::Actors::kTextureSlotRowOffsetBytes> texture_rows{
-      VS::Actors::textureSlotRowOffsets.data()};
+  ArrayRestore<std::uint8_t, VS::Actors::kTextureSlotOriginBytes>
+      texture_origins{VS::Actors::textureSlotOrigins.data()};
+  ArrayRestore<std::uint8_t, VS::Actors::kTextureSlotRowOffsetBytes>
+      texture_rows{VS::Actors::textureSlotRowOffsets.data()};
   ArrayRestore<VS::Actors::WeaponModelData*,
                std::size(VS::Content::legacyWeaponModelBuffers)>
       weapon_buffers{VS::Content::legacyWeaponModelBuffers.data()};
@@ -165,9 +169,9 @@ struct AssetStateRestore {
   ValueRestore<decltype(VS::Actors::sharedSequenceData)> shared_sequences{
       VS::Actors::sharedSequenceData};
   ValueRestore<char> forced_overrides{VS::Actors::forcedModelOverrides};
-  ValueRestore<u_char> bank_index{VS::Actors::sharedSequenceBankIndex};
+  ValueRestore<std::uint8_t> bank_index{VS::Actors::sharedSequenceBankIndex};
   ValueRestore<char> update_complete{VS::Actors::isActorUpdateComplete};
-  ValueRestore<u_char> pushed_gimmick{VS::Actors::pushedGimmickIndex};
+  ValueRestore<std::uint8_t> pushed_gimmick{VS::Actors::pushedGimmickIndex};
   ValueRestore<decltype(VS::Content::objectDataLoadStep)> equipment_step{
       VS::Content::objectDataLoadStep};
   ValueRestore<void*> sequence_work{VS::Actors::sequenceWorkBuffer};
@@ -258,11 +262,11 @@ struct Fixture {
   ValueRestore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   ValueRestore<char*> saved_strings{VS::Menu::Framework::stringBuf};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
-  ValueRestore<u_short*> saved_list_text{VS::Menu::Framework::itemsText};
+  ValueRestore<std::uint16_t*> saved_list_text{VS::Menu::Framework::itemsText};
   ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
       VS::Menu::Framework::itemNames};
-  ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
-  ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
+  ValueRestore<std::uint16_t*> saved_help{VS::Menu::Framework::itemHelp};
+  ValueRestore<std::uint16_t*> saved_menu12{VS::Menu::Framework::menu12Text};
   ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
   ValueRestore<VS::Menu::StringContext> saved_context{
@@ -276,11 +280,14 @@ struct Fixture {
   ArrayRestore<VS::Actors::WeaponModel*, std::size(VS::Actors::weaponModels)>
       saved_weapons{VS::Actors::weaponModels};
   ValueRestore<void*> saved_primary_sequence{VS::Actors::primarySequenceBuffer};
-  ValueRestore<VECTOR> saved_scale{VS::Actors::roomActorScale};
+  ValueRestore<VS::Core::Gte::VECTOR> saved_scale{VS::Actors::roomActorScale};
   ValueRestore<VS::Actors::SkeletonPose> saved_pose{VS::Actors::skeletonPose};
-  ValueRestore<MATRIX> saved_root_matrix{VS::Actors::skeletonRootMatrix};
-  ValueRestore<MATRIX> saved_bone_camera{VS::Actors::boneMatrixScratch};
-  ValueRestore<MATRIX> saved_camera_basis{VS::Render::cameraBasisMatrix};
+  ValueRestore<VS::Core::Gte::MATRIX> saved_root_matrix{
+      VS::Actors::skeletonRootMatrix};
+  ValueRestore<VS::Core::Gte::MATRIX> saved_bone_camera{
+      VS::Actors::boneMatrixScratch};
+  ValueRestore<VS::Core::Gte::MATRIX> saved_camera_basis{
+      VS::Render::cameraBasisMatrix};
   ValueRestore<VS::Actors::ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
   ValueRestore<char> saved_sequence_index{
@@ -291,8 +298,8 @@ struct Fixture {
   AudioRestore saved_audio;
   ArrayRestore<std::uint16_t, std::size(st::statusStrings)> saved_status_text{
       st::statusStrings};
-  ArrayRestore<u_short, std::size(VS::Battle::statusStrings)> saved_battle_text{
-      VS::Battle::statusStrings.data()};
+  ArrayRestore<std::uint16_t, std::size(VS::Battle::statusStrings)>
+      saved_battle_text{VS::Battle::statusStrings.data()};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
   ArrayRestore<std::uint8_t, std::size(VS::Menu::Framework::animationIndices)>
@@ -300,8 +307,9 @@ struct Fixture {
   std::vector<std::byte> arena = std::vector<std::byte>(kArenaBytes);
   memory::ScopedLiveGameHeap heap{arena};
   PreviewOwner preview_owner{arena};
-  std::vector<u_long> primitives = std::vector<u_long>(kPrimitiveWords);
-  std::array<u_long, kOrderingWords> ordering{};
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(kPrimitiveWords);
+  std::array<std::uint32_t, kOrderingWords> ordering{};
   VS::Battle::ActorStats stats{};
   VS::Battle::Actor actor{};
   void* workspace = nullptr;
@@ -345,7 +353,7 @@ struct Fixture {
     // VS::Render::projectionDistance is not that distance's previous value (0
     // versus 1000 at start-up), so reset the GTE; saved_projection and geometry
     // restore their own state.
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   static VS::Content::AssetAddress Address(const void* pointer) {
@@ -452,11 +460,11 @@ struct Fixture {
     VS::Menu::Framework::itemNames =
         static_cast<char (*)[fw::kItemNameRowBytes]>(text);
     VS::Menu::Framework::itemHelp =
-        reinterpret_cast<u_short*>(bytes.data() + fw::kItemNamesBytes);
-    VS::Menu::Framework::menu12Text = reinterpret_cast<u_short*>(
+        reinterpret_cast<std::uint16_t*>(bytes.data() + fw::kItemNamesBytes);
+    VS::Menu::Framework::menu12Text = reinterpret_cast<std::uint16_t*>(
         bytes.data() + fw::kItemNamesBytes + fw::kItemHelpBytes);
     std::fill_n(VS::Menu::Framework::itemHelp,
-                equipment_detail_tests::kHelpEntries, u_short{4000});
+                equipment_detail_tests::kHelpEntries, std::uint16_t{4000});
     VS::Menu::Framework::itemHelp[4000] = 0xE751;
     std::ranges::fill(st::statusStrings, std::uint16_t{0xE7E7});
     std::fill_n(st::statusStrings, 61, std::uint16_t{400});
@@ -464,7 +472,7 @@ struct Fixture {
     st::statusStrings[253] = 0x00FF;
     st::statusStrings[254] = 0xFF8F;
     st::statusStrings[255] = 0xE701;
-    std::ranges::fill(VS::Battle::statusStrings, u_short{0xE7E7});
+    std::ranges::fill(VS::Battle::statusStrings, std::uint16_t{0xE7E7});
     VS::Battle::statusStrings[1] = 400;
     VS::Battle::statusStrings[400] = 0xE731;
     std::ranges::fill(VS::Menu::Framework::animationIndices, std::uint8_t{10});
@@ -483,7 +491,7 @@ struct Fixture {
   }
   void BeginFrame() {
     VS::Render::FrameScratchpad().primitive_cursor = primitives.data();
-    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    VS::Legacy::ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   void IdleRows() const {
     for (std::size_t row = 0; row < fw::kRowCount; ++row) {

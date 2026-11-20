@@ -17,7 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Manual.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.hpp"

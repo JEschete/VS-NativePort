@@ -22,7 +22,9 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Battle::Ai {
 namespace {
@@ -142,7 +144,7 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
   [[nodiscard]] std::optional<AreaRouteEndpoints> Route(
       int index) const override {
     if (Frame().roomData == nullptr) return std::nullopt;
-    const auto word = static_cast<const u_int*>(
+    const auto word = static_cast<const std::uint32_t*>(
         Frame().roomData)[static_cast<std::size_t>(index)];
     return AreaRouteEndpoints{
         static_cast<std::uint16_t>(word & kHalfwordMask),
@@ -367,7 +369,7 @@ void MoveLiveWithHeightFilteredDirections(
       "AI height-filtered move refused its room or movement");
   if (!move.walk_heading) return;
   Require(actor != nullptr, "AI height-filtered walk requires an actor");
-  actor->command_opcode = static_cast<u_char>(CommandOpcode::kWalk);
+  actor->command_opcode = static_cast<std::uint8_t>(CommandOpcode::kWalk);
   actor->command_heading = *move.walk_heading;
 }
 }  // namespace VS::Battle::Ai

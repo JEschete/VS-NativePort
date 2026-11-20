@@ -41,6 +41,7 @@
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/RandomLive.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -69,6 +70,8 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "Title/NewGame.hpp"
+
+using VS::Core::Math::kQ12Unit;
 
 namespace {
 namespace Save = VS::Game::Save;
@@ -399,7 +402,7 @@ struct RuntimeFixture {
     VS::Render::nearClip = 64;
     VS::Render::projectionDistance = 512;
     VS::Render::FrameScratchpad().camera = {};
-    VS::Render::FrameScratchpad().camera.far_clip = ONE;
+    VS::Render::FrameScratchpad().camera.far_clip = kQ12Unit;
     VS::Render::FrameScratchpad().camera.look_at = {100000, -200000, 300000, 0};
     VS::Render::FrameScratchpad().camera.angles = {-384, 1027, 0, 0};
     UpdateOrbitPosition();

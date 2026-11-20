@@ -8,7 +8,7 @@
 
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 struct Actor;
@@ -234,7 +234,7 @@ struct ActorAiState {
   /* 0x44 */ std::uint8_t opaque44;
   /* 0x45 */ std::array<std::uint8_t, kActorAiStateReserved45Bytes> reserved45;
   /* 0x48 */ TilePosition saved_destination;
-  /* 0x4C */ SVECTOR position;
+  /* 0x4C */ VS::Core::Gte::SVECTOR position;
   /* 0x54 */ EngagementData* actor;
   /* 0x58 */ ModelStatePrefix* model;
   /* 0x5C */ VS::Battle::ActorStats* stats;
@@ -390,7 +390,7 @@ struct ActorAiState {
   /* 0x170 */ TilePosition next_tile;
   /* 0x174 */ union {
     std::array<std::uint8_t, kActorAiStateReserved174Bytes> reserved174;
-    SVECTOR next_position;
+    VS::Core::Gte::SVECTOR next_position;
   };
   /* 0x17C */ std::int32_t move_x;
   /* 0x180 */ std::int32_t move_z;
@@ -462,7 +462,7 @@ struct EngagementData {
   std::uint8_t reserved_b_bit4 : 4;
   std::uint16_t opaque_c;
   std::uint16_t opaque_e;
-  SVECTOR opaque10;
+  VS::Core::Gte::SVECTOR opaque10;
   std::array<std::uint8_t, kEngagementDataReserved18Bytes> reserved18;
   VS::Battle::ActorStats* opaque_3c;
 };

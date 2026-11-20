@@ -37,7 +37,7 @@
 #include "Field/Mpd.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Images.hpp"
@@ -51,7 +51,49 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers4;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionDefinition;
+using VS::Legacy::ClearImage;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::DrawOTag;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::POLY_G4;
+using VS::Legacy::POLY_GT4;
+using VS::Legacy::PutDispEnv;
+using VS::Legacy::PutDrawEnv;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDefDispEnv;
+using VS::Legacy::SetDefDrawEnv;
+using VS::Legacy::SetDispMask;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setPolyG4;
+using VS::Legacy::setPolyGT4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setShadeTex;
+using VS::Legacy::setSprt;
+using VS::Legacy::setSprt8;
+using VS::Legacy::setTile;
+using VS::Legacy::setUV0;
+using VS::Legacy::setUV4;
+using VS::Legacy::setWH;
+using VS::Legacy::setXY0;
+using VS::Legacy::setXY4;
+using VS::Legacy::SPRT;
+using VS::Legacy::SPRT_8;
+using VS::Legacy::TILE;
 
 namespace VS::Ending {
 namespace {
@@ -117,31 +159,33 @@ template <typename Packet>
 void SetCorners(Packet& packet,
                 const std::array<ScreenPoint, kQuadCorners>& corners) {
   setXY4(&packet, corners[0].x, corners[0].y, corners[1].x, corners[1].y,
-         corners[2].x, corners[2].y, corners[3].x, corners[3].y);
+         corners[2].x, corners[2].y, corners.back().x, corners.back().y);
 }
 
 template <typename Packet>
 void SetTexels(Packet& packet,
                const std::array<TexelPoint, kQuadCorners>& texels) {
   setUV4(&packet, texels[0].u, texels[0].v, texels[1].u, texels[1].v,
-         texels[2].u, texels[2].v, texels[3].u, texels[3].v);
+         texels[2].u, texels[2].v, texels.back().u, texels.back().v);
 }
 
 // Entry `slot` from the scene table BeginFrame set, in whichever frame's
 // table holds it: PresentFrame draws the table after flipping the frame
 // buffer (D4.c:1480 takes the address before the flip).
-u_long* SceneOrderingEntry(int slot) {
+std::uint32_t* SceneOrderingEntry(int slot) {
   const auto head = reinterpret_cast<std::uintptr_t>(
       VS::Render::FrameScratchpad().ordering_table);
   for (void* const frame_table : VS::Render::legacyOrderingTables) {
     const auto table = reinterpret_cast<std::uintptr_t>(frame_table);
-    if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
+    if (table == 0 || head < table ||
+        (head - table) % sizeof(std::uint32_t) != 0) {
       continue;
     }
     const auto entry =
-        static_cast<std::int64_t>((head - table) / sizeof(u_long)) + slot;
+        static_cast<std::int64_t>((head - table) / sizeof(std::uint32_t)) +
+        slot;
     if (entry >= 0 && entry < kOrderingTableEntries) {
-      return std::span(static_cast<u_long*>(frame_table),
+      return std::span(static_cast<std::uint32_t*>(frame_table),
                        static_cast<std::size_t>(kOrderingTableEntries))
           .subspan(static_cast<std::size_t>(entry))
           .data();
@@ -273,7 +317,7 @@ class LiveDisplay : public Host {
     setRGB0(&packet, shade[0], shade[0], shade[0]);
     setRGB1(&packet, shade[1], shade[1], shade[1]);
     setRGB2(&packet, shade[2], shade[2], shade[2]);
-    setRGB3(&packet, shade[3], shade[3], shade[3]);
+    setRGB3(&packet, shade.back(), shade.back(), shade.back());
     QueuePacket(packet, quad.ordering_slot);
   }
 
@@ -294,12 +338,8 @@ class LiveDisplay : public Host {
   void SetDisplayEnabled(bool enabled) override {
     SetDispMask(enabled ? 1 : 0);
   }
-  void SetGeometryOffset(int x, int y) override {
-    Core_Gte_SetGeomOffset(x, y);
-  }
-  void SetProjectionDistance(int distance) override {
-    Core_Gte_SetGeomScreen(distance);
-  }
+  void SetGeometryOffset(int x, int y) override { SetGeomOffset(x, y); }
+  void SetProjectionDistance(int distance) override { SetGeomScreen(distance); }
 
   void ApplyDisplayLayout(const DisplayLayout& layout) override {
     for (std::size_t buffer = 0; buffer < kFrameBufferCount; ++buffer) {
@@ -320,7 +360,8 @@ class LiveDisplay : public Host {
     VS::Render::legacyViewportLeft = 0;
     VS::Render::legacyViewportTop = 0;
     VS::Render::viewportWidth = layout.width;
-    VS::Render::viewportHeight = static_cast<u_short>(layout.viewport_height);
+    VS::Render::viewportHeight =
+        static_cast<std::uint16_t>(layout.viewport_height);
   }
 
   void ApplyDrawEnvironment(int buffer,
@@ -363,8 +404,8 @@ class LiveDisplay : public Host {
     }
     RECT rect = ToRect(area);
     // libgpu's LoadImage only reads the pixels.
-    ::LoadImage(&rect, reinterpret_cast<u_long*>(
-                           const_cast<std::byte*>(pixels.data())));
+    VS::Legacy::LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
+                                     const_cast<std::byte*>(pixels.data())));
   }
 
   void ShowFrameBuffer(int buffer) override {
@@ -378,7 +419,7 @@ class LiveDisplay : public Host {
   void SetFrameBuffer(int buffer) override { VS::Render::frameBuf = buffer; }
 
   void DrawOrderingTable(int ordering_slot) override {
-    u_long* entry = SceneOrderingEntry(ordering_slot);
+    std::uint32_t* entry = SceneOrderingEntry(ordering_slot);
     if (entry == nullptr) {
       VS::Core::LogWarn(
           kChannel,
@@ -407,7 +448,8 @@ class LiveDisplay : public Host {
 
   void BeginOrderingTables(const OrderingTableLayout& layout) override {
     const std::size_t buffer = BufferIndex(layout.buffer);
-    auto* base = static_cast<u_long*>(VS::Render::legacyOrderingTables[buffer]);
+    auto* base =
+        static_cast<std::uint32_t*>(VS::Render::legacyOrderingTables[buffer]);
     VS::Render::FrameScratchpad().primitive_cursor =
         VS::Render::legacyPrimitiveBuffers[buffer];
     if (base == nullptr) {
@@ -416,8 +458,8 @@ class LiveDisplay : public Host {
       VS::Render::FrameScratchpad().ordering_table = nullptr;
       return;
     }
-    const std::span<u_long> table(base,
-                                  static_cast<std::size_t>(layout.entries));
+    const std::span<std::uint32_t> table(
+        base, static_cast<std::size_t>(layout.entries));
     VS::Render::FrameScratchpad().overlay_ordering_table =
         table.subspan(static_cast<std::size_t>(layout.overlay_offset)).data();
     VS::Render::FrameScratchpad().ordering_table =
@@ -726,8 +768,8 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
     matrix.t[0] = 0;
     matrix.t[1] = 0;
     matrix.t[2] = depth;
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
 
   [[nodiscard]] std::array<ScreenPoint, kQuadCorners> ProjectQuad(
@@ -737,19 +779,20 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
                            [](const Credits::ModelVertex& vertex) {
                              return SVECTOR{vertex.x, vertex.y, vertex.z, 0};
                            });
-    std::array<Core_GteWord, kQuadCorners> screen{};
-    Core_GteWord depth = 0;
-    Core_GteWord flags = 0;
+    std::array<VS::Core::Gte::Word, kQuadCorners> screen{};
+    VS::Core::Gte::Word depth = 0;
+    VS::Core::Gte::Word flags = 0;
     auto& [model0, model1, model2, model3] = model;
     auto& [screen0, screen1, screen2, screen3] = screen;
-    Core_Gte_RotTransPers4(&model0, &model1, &model2, &model3, &screen0,
-                           &screen1, &screen2, &screen3, &depth, &flags);
+    RotTransPers4(&model0, &model1, &model2, &model3, &screen0, &screen1,
+                  &screen2, &screen3, &depth, &flags);
     std::array<ScreenPoint, kQuadCorners> points{};
-    std::ranges::transform(screen, points.begin(), [](Core_GteWord packed) {
-      const auto word = static_cast<std::uint32_t>(packed);
-      return ScreenPoint{static_cast<std::int16_t>(word & kHalfwordMask),
-                         static_cast<std::int16_t>(word >> kHalfwordShift)};
-    });
+    std::ranges::transform(
+        screen, points.begin(), [](VS::Core::Gte::Word packed) {
+          const auto word = static_cast<std::uint32_t>(packed);
+          return ScreenPoint{static_cast<std::int16_t>(word & kHalfwordMask),
+                             static_cast<std::int16_t>(word >> kHalfwordShift)};
+        });
     return points;
   }
 

@@ -275,7 +275,7 @@ class TerminalFixture
     }
     score::monBinData = reinterpret_cast<score::EnemyEntry*>(borrowed_mon_);
     score::enemyDescriptions =
-        reinterpret_cast<u_short*>(borrowed_mon_ + kDescriptionOffset);
+        reinterpret_cast<std::uint16_t*>(borrowed_mon_ + kDescriptionOffset);
   }
 
   void ReleaseBorrowedMon() {

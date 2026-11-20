@@ -14,7 +14,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Legacy/Render/LibGpu.h"
+#include "Legacy/Render/LibGpu.hpp"
 #include "Render/Device.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -23,16 +23,39 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::addPrim;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_STP;
+using VS::Legacy::DrawPrim;
+using VS::Legacy::getaddr;
+using VS::Legacy::GpuHandle;
+using VS::Legacy::GpuWalkList;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_G3;
+using VS::Legacy::POLY_GT3;
+using VS::Legacy::POLY_GT4;
+using VS::Legacy::setaddr;
+using VS::Legacy::SetDrawStp;
+using VS::Legacy::setlen;
+using VS::Legacy::termPrim;
+
 namespace {
 
 struct Packet {
-  u_long tag;
-  u_long body[3];
+  std::uint32_t tag;
+  std::uint32_t body[3];
 };
 
 void SubmitThroughDrawPrim(Packet* packet) { DrawPrim(packet); }
 
-std::vector<const void*> Walk(u_long* head) {
+std::vector<const void*> Walk(std::uint32_t* head) {
   std::vector<const void*> out;
   for (void* p = head; p != nullptr && out.size() < 64;
        p = isendprim(p) ? nullptr : nextPrim(p)) {
@@ -75,7 +98,7 @@ TEST_CASE("Ordering-table links survive 64-bit addresses", "[legacy][gpu]") {
   setlen(a, 3);
   setlen(b, 3);
 
-  u_long ot[4];
+  std::uint32_t ot[4];
   ClearOTagR(ot, 4);
   addPrim(&ot[2], a);
   addPrim(&ot[1], b);
@@ -90,8 +113,8 @@ TEST_CASE("Ordering-table links survive 64-bit addresses", "[legacy][gpu]") {
   CHECK(order[3] == &ot[1]);
   CHECK(order[4] == b);
   CHECK(order[5] == &ot[0]);
-  CHECK(LegacyGpu_Handle(a) != LegacyGpu_Handle(b));
-  CHECK(LegacyGpu_WalkList(&ot[3]) == 6);
+  CHECK(GpuHandle(a) != GpuHandle(b));
+  CHECK(GpuWalkList(&ot[3]) == 6);
 }
 
 TEST_CASE("setaddr accepts a packet pointer or a copied link word",
@@ -111,9 +134,9 @@ TEST_CASE("Packet traversal rejects cycles immediately", "[legacy][gpu]") {
   Packet first{}, second{};
   setaddr(&first, &second);
   setaddr(&second, &first);
-  CHECK(LegacyGpu_WalkList(&first) == -1);
+  CHECK(GpuWalkList(&first) == -1);
   termPrim(&second);
-  CHECK(LegacyGpu_WalkList(&first) == 2);
+  CHECK(GpuWalkList(&first) == 2);
 }
 
 TEST_CASE("Packet decoder validates complete polygon line and sprite commands",
@@ -268,7 +291,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   geometry.polygon[30] = 0x15;
   std::vector<unsigned char> memory(0x20000 + 16, 0xA5);
   auto* buffer = memory.data() + 8;
-  std::array<u_long, 2048> ordering{};
+  std::array<std::uint32_t, 2048> ordering{};
   auto* frame = static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -278,9 +301,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   *frame = {};
   frame->primitive_cursor = buffer;
   frame->ordering_table = ordering.data();
-  Core_Gte_Reset();
-  Core_Gte_SetGeomOffset(160, 120);
-  Core_Gte_SetGeomScreen(256);
+  VS::Core::Gte::Reset();
+  SetGeomOffset(160, 120);
+  SetGeomScreen(256);
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   VS::Render::SetRoomPolygonNearClip(room_clip, 8);
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
@@ -514,7 +537,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
   VS::Render::frameBuf = saved_frame;
   *frame = saved;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 TEST_CASE("Sky background emits visible colored triangles behind room geometry",
@@ -536,7 +559,7 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   sky.triangles[0][1] = 1;
   sky.triangles[0][2] = 2;
   std::vector<unsigned char> buffer(0x20000);
-  std::array<u_long, 2048> ordering{};
+  std::array<std::uint32_t, 2048> ordering{};
   auto* frame = static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -546,7 +569,7 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   frame->primitive_cursor = buffer.data();
   frame->ordering_table = ordering.data();
   ClearOTagR(ordering.data(), 2048);
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   static_assert(sizeof sky == VS::Render::kSkyDomeBytes);
   CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky) ==
         VS::Render::RoomDrawStatus::kDrawn);
@@ -589,8 +612,9 @@ TEST_CASE("GPU frame byte counts reject invalid and overflowing dimensions",
 // reason. DrawPrim had C linkage until #441, so /EHsc gave its frame no
 // cleanups; it now unwinds like any C++ frame.
 TEST_CASE("Live failures cross DrawPrim with their reason", "[legacy][gpu]") {
-  constexpr u_long kOneWordPacket = 1u << 24;
-  constexpr u_long kFlatTriangle = 0x20u << 24;  // needs four command words
+  constexpr std::uint32_t kOneWordPacket = 1u << 24;
+  constexpr std::uint32_t kFlatTriangle = 0x20u
+                                          << 24;  // needs four command words
   Packet packet{.tag = kOneWordPacket, .body = {kFlatTriangle}};
   void (*volatile submit)(Packet*) = &SubmitThroughDrawPrim;
   CHECK_THROWS_WITH(submit(&packet), "Truncated render command");
@@ -647,4 +671,141 @@ TEST_CASE("GPU validation states have stable manifest names",
   CHECK(GpuValidationName(GpuValidation::kPartial) == "partial");
   CHECK(GpuValidationName(GpuValidation::kUnavailable) == "unavailable");
   CHECK(GpuValidationName(GpuValidation::kUnreported) == "unreported");
+}
+
+namespace {
+
+namespace gpu = VS::Legacy;
+
+struct PacketHeader {
+  const char* name;
+  void (*set)(Packet*);
+  unsigned length;
+  unsigned code;
+};
+
+}  // namespace
+
+TEST_CASE("setlen, setaddr and setcode pack the libgpu tag and code bytes",
+          "[legacy][gpu]") {
+  // the tag word holds the link in bits 0-23 and the length in bits 24-31;
+  // the command code is the top byte of the first command word
+  Packet packet{};
+  gpu::setaddr(&packet, 0x00ABCDEFu);
+  gpu::setlen(&packet, 0x1FF);  // truncated to its 8 bits
+  CHECK(packet.tag == 0xFFABCDEFu);
+  gpu::setcode(&packet, 0x12C);
+  CHECK(packet.body[0] >> 24 == 0x2C);
+  CHECK(gpu::getcode(&packet) == 0x2C);
+  gpu::setlen(&packet, 3);
+  CHECK(gpu::getaddr(&packet) == 0xABCDEFu);
+  static_assert(std::is_same_v<decltype(gpu::getcode(&packet)), std::uint8_t>);
+  static_assert(std::is_same_v<decltype(gpu::getaddr(&packet)), std::uint32_t>);
+}
+
+TEST_CASE("setSemiTrans and setShadeTex toggle their command code bits",
+          "[legacy][gpu]") {
+  Packet packet{};
+  gpu::setcode(&packet, 0x2C);
+  gpu::setSemiTrans(&packet, 1);
+  CHECK(gpu::getcode(&packet) == 0x2E);
+  gpu::setShadeTex(&packet, 1);
+  CHECK(gpu::getcode(&packet) == 0x2F);
+  gpu::setSemiTrans(&packet, 0);
+  gpu::setShadeTex(&packet, 0);
+  CHECK(gpu::getcode(&packet) == 0x2C);
+}
+
+TEST_CASE("Primitive initializers set the libgpu length and command code",
+          "[legacy][gpu]") {
+  const std::array<PacketHeader, 11> headers{{
+      {"setPolyF3", [](Packet* p) { gpu::setPolyF3(p); }, 4, 0x20},
+      {"setPolyF4", [](Packet* p) { gpu::setPolyF4(p); }, 5, 0x28},
+      {"setPolyFT4", [](Packet* p) { gpu::setPolyFT4(p); }, 9, 0x2C},
+      {"setPolyG3", [](Packet* p) { gpu::setPolyG3(p); }, 6, 0x30},
+      {"setPolyG4", [](Packet* p) { gpu::setPolyG4(p); }, 8, 0x38},
+      {"setPolyGT4", [](Packet* p) { gpu::setPolyGT4(p); }, 12, 0x3C},
+      {"setSprt", [](Packet* p) { gpu::setSprt(p); }, 4, 0x64},
+      {"setSprt8", [](Packet* p) { gpu::setSprt8(p); }, 3, 0x74},
+      {"setTile", [](Packet* p) { gpu::setTile(p); }, 3, 0x60},
+      {"setLineF2", [](Packet* p) { gpu::setLineF2(p); }, 3, 0x40},
+      {"setLineG2", [](Packet* p) { gpu::setLineG2(p); }, 4, 0x50},
+  }};
+  for (const auto& header : headers) {
+    CAPTURE(header.name);
+    Packet packet{};
+    header.set(&packet);
+    CHECK(packet.tag >> 24 == header.length);
+    CHECK(gpu::getcode(&packet) == header.code);
+  }
+}
+
+TEST_CASE("setLineG4 writes the polyline terminator and clears the pads",
+          "[legacy][gpu]") {
+  gpu::LINE_G4 line{};
+  line.p2 = line.p3 = 0xFF;
+  gpu::setLineG4(&line);
+  CHECK(line.tag >> 24 == 9);
+  CHECK(line.code == 0x5C);
+  CHECK(line.pad == 0x55555555u);
+  CHECK(line.p2 == 0);
+  CHECK(line.p3 == 0);
+}
+
+TEST_CASE("getTPage keeps the libgpu texture page bit layout",
+          "[legacy][gpu]") {
+  // mode in bits 7-8, blend rate in 5-6, x / 64 in 0-3, y / 256 in bits 4 and
+  // 11; each field is masked before it is shifted
+  static_assert(gpu::getTPage(0, 0, 640, 0) == 10);
+  CHECK(gpu::getTPage(1, 2, 640, 256) == 0xDA);
+  CHECK(gpu::getTPage(2, 3, 960, 768) == 0x97F);
+  CHECK(gpu::getTPage(7, 7, 0x7FF, 0) == 0x1EF);
+  CHECK(gpu::GetTPage(2, 3, 960, 768) == 0x97F);
+  static_assert(std::is_same_v<decltype(gpu::getTPage(0, 0, 0, 0)), int>);
+  static_assert(
+      std::is_same_v<decltype(gpu::getTPage(std::uint32_t{}, 0, 0, 0)),
+                     std::uint32_t>);
+  gpu::POLY_FT4 poly{};
+  gpu::setTPage(&poly, 2, 3, 960, 768);
+  CHECK(poly.tpage == 0x97F);
+}
+
+TEST_CASE("getClut keeps the libgpu palette bit layout", "[legacy][gpu]") {
+  // y from bit 6 up, x / 16 in bits 0-5; the int result is only truncated
+  // when it is stored in a 16-bit field
+  CHECK(gpu::getClut(320, 480) == 0x7814);
+  CHECK(gpu::getClut(0x3FF, 0) == 0x3F);
+  CHECK(gpu::getClut(16, 1024) == 0x10001);
+  static_assert(std::is_same_v<decltype(gpu::getClut(0, 0)), int>);
+  gpu::POLY_FT4 poly{};
+  gpu::setClut(&poly, 16, 1024);
+  CHECK(poly.clut == 1);
+  CHECK(gpu::GetClut(16, 1024) == 1);
+}
+
+TEST_CASE("_get_mode builds the E1 draw mode command", "[legacy][gpu]") {
+  // dither in bit 9, drawing to the display area in bit 10, the page masked
+  // to 0x9FF
+  CHECK(gpu::_get_mode(1, 1, 0x1FFF) == 0xE1000FFFu);
+  CHECK(gpu::_get_mode(0, 0, 0x25) == 0xE1000025u);
+  CHECK(gpu::_get_mode(2, 0, 0) == 0xE1000400u);
+  static_assert(std::is_same_v<decltype(gpu::_get_mode(0, 0, 0)), unsigned>);
+}
+
+TEST_CASE("addPrim inserts after the table entry and catPrim appends",
+          "[legacy][gpu]") {
+  std::uint32_t ot[1]{};
+  gpu::termPrim(ot);
+  Packet first{}, second{}, third{};
+  gpu::setlen(&first, 3);
+  gpu::addPrim(ot, &first);
+  CHECK(gpu::isendprim(&first));
+  CHECK(first.tag >> 24 == 3);  // the link leaves the length alone
+  gpu::addPrim(ot, &second);
+  CHECK(gpu::nextPrim(ot) == &second);
+  CHECK(gpu::nextPrim(&second) == &first);
+  gpu::catPrim(&first, &third);
+  CHECK(gpu::getaddr(&first) == gpu::GpuHandle(&third));
+  gpu::termPrim(&third);
+  CHECK(gpu::GpuWalkList(ot) == 4);
 }

@@ -16,13 +16,18 @@
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionState;
 
@@ -101,7 +106,7 @@ struct ProjectionReset {
   ProjectionReset(const ProjectionReset&) = delete;
   ProjectionReset& operator=(const ProjectionReset&) = delete;
   ~ProjectionReset() {
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
     VS::Render::projectionDistance = saved_projection;
   }
 };
@@ -243,17 +248,17 @@ TEST_CASE(
 TEST_CASE("Camera fixture leaves unused math projection unchanged",
           "[camera-selection][fixture-isolation]") {
   const ProjectionReset reset;
-  Core_Gte_Reset();
-  Core_Gte_SetGeomScreen(333);
+  VS::Core::Gte::Reset();
+  SetGeomScreen(333);
   VS::Render::projectionDistance = 0;
   SVECTOR point{256, 0, 1024, 0};
-  Core_GteWord before{}, after{}, cue{}, flags{};
-  Core_Gte_RotTransPers(&point, &before, &cue, &flags);
+  VS::Core::Gte::Word before{}, after{}, cue{}, flags{};
+  RotTransPers(&point, &before, &cue, &flags);
   REQUIRE(before != 0);
   {
     auto fixture = std::make_unique<LiveFixture>();
   }
-  Core_Gte_RotTransPers(&point, &after, &cue, &flags);
+  RotTransPers(&point, &after, &cue, &flags);
   CHECK(after == before);
   CHECK(VS::Render::projectionDistance == 0);
 }

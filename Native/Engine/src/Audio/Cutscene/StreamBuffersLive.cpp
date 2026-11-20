@@ -24,7 +24,7 @@
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::SpuSetTransferCallback;
 using VS::Legacy::SpuSetTransferStartAddr;

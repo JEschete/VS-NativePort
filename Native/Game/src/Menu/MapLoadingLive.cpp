@@ -15,14 +15,14 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Map.hpp"
@@ -37,6 +37,8 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Menu::map {
 namespace {
@@ -193,9 +195,9 @@ class LiveBackground final : public BackgroundLoadHost {
   }
   void LoadBackgroundClut(std::int32_t row, std::int32_t first,
                           std::int32_t count) override {
-    Render::LoadLiveClutColors(Image(), static_cast<u_int>(row),
-                               static_cast<u_int>(first),
-                               static_cast<u_int>(count));
+    Render::LoadLiveClutColors(Image(), static_cast<std::uint32_t>(row),
+                               static_cast<std::uint32_t>(first),
+                               static_cast<std::uint32_t>(count));
   }
   void UploadBackground(std::int32_t x, std::int32_t y, std::int32_t offset,
                         std::int32_t width, std::int32_t height) override {
@@ -217,8 +219,8 @@ class LiveBackground final : public BackgroundLoadHost {
   }
 
  private:
-  [[nodiscard]] static const u_short* Image() {
-    return static_cast<const u_short*>(background.image);
+  [[nodiscard]] static const std::uint16_t* Image() {
+    return static_cast<const std::uint16_t*>(background.image);
   }
 };
 
@@ -293,7 +295,7 @@ class LiveSceneMap final : public SceneMapHost {
   }
   void SetFarColor(std::int32_t red, std::int32_t green,
                    std::int32_t blue) override {
-    Core_Gte_SetFarColor(red, green, blue);
+    VS::Core::Gte::SetFarColor(red, green, blue);
   }
   void ShowAreaName(std::int32_t scene, std::int32_t font_color) override {
     LiveShowAreaName(AreaNameOf(scene), static_cast<char>(font_color));

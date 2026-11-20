@@ -17,8 +17,10 @@
 #include "Field/Room.hpp"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Legacy::RECT;
 
 // The polygon bytes the typed room effects rewrite in place, as the legacy
 // views and renderer read them.
@@ -161,7 +163,7 @@ class LiveHost final : public RoomEffectHost {
   void MoveImage(const RoomImageRect& source, std::int32_t x,
                  std::int32_t y) override {
     RECT rect{source.x, source.y, source.w, source.h};
-    ::MoveImage(&rect, x, y);
+    VS::Legacy::MoveImage(&rect, x, y);
   }
 
   std::optional<RoomEffectStorageId> ReserveObjectStorage(

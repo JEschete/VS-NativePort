@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -20,6 +20,8 @@
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "Render/UiTexturedQuads.hpp"
+
+using VS::Legacy::nextPrim;
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -368,20 +370,21 @@ TEST_CASE("F03044 prompt reports a full target after drawing its text",
   CHECK(target.refused == 1);
 }
 
-constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(u_long);
+constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kLiveSceneHead = 16;
 constexpr std::size_t kLiveOverlayHead = 2;
-constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
-constexpr u_long kLiveEnd = 0xFFFFFF;
+constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+constexpr std::uint32_t kLiveEnd = 0xFFFFFF;
 
 struct LiveResultsFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::vector<u_long> ordering =
-      std::vector<u_long>(kLiveOrderingWords, kLiveEnd);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kLivePrimitiveWords, 0);
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(kLiveOrderingWords, kLiveEnd);
 
   LiveResultsFixture() {
     VS::Render::frameBuf = 0;
@@ -406,11 +409,11 @@ struct LiveResultsFixture {
   LiveResultsFixture& operator=(LiveResultsFixture&&) = delete;
 
   [[nodiscard]] std::ptrdiff_t Used() const {
-    return static_cast<u_long*>(
+    return static_cast<std::uint32_t*>(
                VS::Render::FrameScratchpad().primitive_cursor) -
            storage.data();
   }
-  u_long& QuadEntry() { return ordering[kLiveSceneHead - 7]; }
+  std::uint32_t& QuadEntry() { return ordering[kLiveSceneHead - 7]; }
 };
 
 TEST_CASE(

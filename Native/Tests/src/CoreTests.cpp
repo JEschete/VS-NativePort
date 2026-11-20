@@ -14,7 +14,7 @@
 
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/InterpolationLive.hpp"
@@ -28,7 +28,13 @@
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
 #include "Legacy/Core/LibEtc.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::ApplyMatrixLV;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AdvanceRootCounter2;
 using VS::Legacy::CloseEvent;
@@ -389,10 +395,10 @@ TEST_CASE("Short and wide matrix inputs share signed and alias-safe arithmetic",
                                        kExpected.pad};
   constexpr std::array kWideExpectedValues{kWideExpected.vx, kWideExpected.vy,
                                            kWideExpected.vz, kWideExpected.pad};
-  CHECK(Core_Gte_ApplyMatrix(&matrix, &narrow, &result) == &result);
+  CHECK(VS::Core::Gte::ApplyMatrix(&matrix, &narrow, &result) == &result);
   const std::array values{result.vx, result.vy, result.vz, result.pad};
   CHECK(values == kExpectedValues);
-  CHECK(Core_Gte_ApplyMatrixLV(&matrix, &wide, &wide) == &wide);
+  CHECK(ApplyMatrixLV(&matrix, &wide, &wide) == &wide);
   const std::array wide_values{wide.vx, wide.vy, wide.vz, wide.pad};
   CHECK(wide_values == kWideExpectedValues);
 }
@@ -400,24 +406,26 @@ TEST_CASE("Short and wide matrix inputs share signed and alias-safe arithmetic",
 TEST_CASE("ApplyRotMatrix saturates IR outputs while ApplyMatrix retains MACs",
           "[core][math][gte]") {
   struct ResetGte {
-    ~ResetGte() { Core_Gte_Reset(); }
+    ~ResetGte() { VS::Core::Gte::Reset(); }
   } reset;
   MATRIX matrix{{{4096, 4096, 0}, {-4096, -4096, 0}, {0, 0, 4096}}, {0, 0, 0}};
   SVECTOR input{32767, 32767, 0, 91};
   VECTOR rotated{0, 0, 0, 73};
   VECTOR applied{0, 0, 0, 53};
 
-  Core_Gte_SetRotMatrix(&matrix);
-  CHECK(Core_Gte_ApplyRotMatrix(&input, &rotated) == &rotated);
-  const std::array<Core_GteWord, 3> rotated_values{rotated.vx, rotated.vy,
-                                                   rotated.vz};
-  constexpr std::array<Core_GteWord, 3> kExpectedRotated{32767, -32768, 0};
+  SetRotMatrix(&matrix);
+  CHECK(VS::Core::Gte::ApplyRotMatrix(&input, &rotated) == &rotated);
+  const std::array<VS::Core::Gte::Word, 3> rotated_values{
+      rotated.vx, rotated.vy, rotated.vz};
+  constexpr std::array<VS::Core::Gte::Word, 3> kExpectedRotated{32767, -32768,
+                                                                0};
   CHECK(rotated_values == kExpectedRotated);
   CHECK(rotated.pad == 73);
-  CHECK(Core_Gte_ApplyMatrix(&matrix, &input, &applied) == &applied);
-  const std::array<Core_GteWord, 3> applied_values{applied.vx, applied.vy,
-                                                   applied.vz};
-  constexpr std::array<Core_GteWord, 3> kExpectedApplied{65534, -65534, 0};
+  CHECK(VS::Core::Gte::ApplyMatrix(&matrix, &input, &applied) == &applied);
+  const std::array<VS::Core::Gte::Word, 3> applied_values{
+      applied.vx, applied.vy, applied.vz};
+  constexpr std::array<VS::Core::Gte::Word, 3> kExpectedApplied{65534, -65534,
+                                                                0};
   CHECK(applied_values == kExpectedApplied);
   CHECK(applied.pad == 53);
 }

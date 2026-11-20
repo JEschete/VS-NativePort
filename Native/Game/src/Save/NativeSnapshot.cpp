@@ -287,11 +287,11 @@ void Fields(VS::Input::Settings& r, V&& v) {
   v("ability_timing", timing);
   v("weapon_status", weapon);
   v("armor_status", armor);
-  r.mode_flags = static_cast<u_char>(mode.value);
-  r.container_empty = static_cast<u_char>(container.value);
-  r.ability_timing_display = static_cast<u_char>(timing.value);
-  r.weapon_stat_change = static_cast<u_char>(weapon.value);
-  r.armor_stat_change = static_cast<u_char>(armor.value);
+  r.mode_flags = static_cast<std::uint8_t>(mode.value);
+  r.container_empty = static_cast<std::uint8_t>(container.value);
+  r.ability_timing_display = static_cast<std::uint8_t>(timing.value);
+  r.weapon_stat_change = static_cast<std::uint8_t>(weapon.value);
+  r.armor_stat_change = static_cast<std::uint8_t>(armor.value);
   v("cursor_memory", r.cursor_memory);
   v("menu_flags", r.menu_flags);
   v("campaign_identity", r.slot_state);
@@ -453,11 +453,11 @@ void Fields(VS::State::SceneTimer& r, V&& v) {
 
 template <class V>
 void Fields(VS::Field::MpdDoorRecord& r, V&& v) {
-#define VS_SAVE_DOOR_BITS(key, field, mask)          \
-  {                                                  \
-    Bits bits{static_cast<unsigned>(r.field), mask}; \
-    v(key, bits);                                    \
-    r.field = static_cast<u_short>(bits.value);      \
+#define VS_SAVE_DOOR_BITS(key, field, mask)           \
+  {                                                   \
+    Bits bits{static_cast<unsigned>(r.field), mask};  \
+    v(key, bits);                                     \
+    r.field = static_cast<std::uint16_t>(bits.value); \
   }
   v("zone", r.destination_zone_id);
   v("room", r.destination_room_id);

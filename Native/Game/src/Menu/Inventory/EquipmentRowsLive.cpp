@@ -29,7 +29,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Container/ItemView.hpp"
 #include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -73,8 +73,8 @@ void Refuse(std::string_view reason) {
   }
 }
 
-[[nodiscard]] std::span<const std::uint8_t> CallerText(const u_short* text,
-                                                       std::size_t bytes) {
+[[nodiscard]] std::span<const std::uint8_t> CallerText(
+    const std::uint16_t* text, std::size_t bytes) {
   if (text == nullptr) {
     return {};
   }
@@ -185,7 +185,7 @@ class LiveRowsHost final : public EquipmentRowsHost {
   return {};
 }
 
-[[nodiscard]] std::uint16_t Unsigned(u_short value) { return value; }
+[[nodiscard]] std::uint16_t Unsigned(std::uint16_t value) { return value; }
 
 class LiveAccessoryHost final : public AccessoryPreviewHost {
  public:
@@ -314,7 +314,8 @@ class LiveModelHost final : public EquipmentModelHost {
 };
 }  // namespace
 
-void LiveCreateEquipmentRows(int count, u_short** menu_text, int* row_types) {
+void LiveCreateEquipmentRows(int count, std::uint16_t** menu_text,
+                             int* row_types) {
   if (count < 1 || static_cast<std::size_t>(count) > kEquipmentRowCapacity) {
     Refuse("a row count outside the list's capacity");
     return;

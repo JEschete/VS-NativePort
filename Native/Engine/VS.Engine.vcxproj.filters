@@ -921,7 +921,7 @@
     <ClInclude Include="include\Core\FrameTiming.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Gte.h">
+    <ClInclude Include="include\Core\Gte.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Handle.hpp">
@@ -1188,7 +1188,7 @@
     <ClInclude Include="Legacy\Core\LibEtc.hpp">
       <Filter>Legacy\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Legacy\Core\PsxTypes.h">
+    <ClInclude Include="Legacy\Core\PsxTypes.hpp">
       <Filter>Legacy\Core</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\Input\LibPad.cpp">
@@ -1197,16 +1197,13 @@
     <ClInclude Include="Legacy\Input\LibPad.hpp">
       <Filter>Legacy\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Legacy\OnDisc.h">
-      <Filter>Legacy</Filter>
-    </ClInclude>
-    <ClInclude Include="Legacy\Psx.h">
+    <ClInclude Include="Legacy\Psx.hpp">
       <Filter>Legacy</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\Render\LibGpu.cpp">
       <Filter>Legacy\Render</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\Render\LibGpu.h">
+    <ClInclude Include="Legacy\Render\LibGpu.hpp">
       <Filter>Legacy\Render</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\Save\LibCard.cpp">

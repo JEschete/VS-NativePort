@@ -84,7 +84,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<std::uint8_t> saved_type{abilities::selectedAbilityType};
   ValueRestore<std::int32_t> saved_highlight{abilities::highlightedAbility};
   ValueRestore<std::uint8_t> saved_first{abilities::firstAbility};
-  ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
+  ValueRestore<std::uint16_t*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> types{};
   VS::Battle::Actor actor{};
@@ -223,17 +223,18 @@ TEST_CASE(
     "F02619 module ABI publishes owned rows and unsigned Risk through Live",
     "[battle-abilities-live][F02615][F02618][F02619]") {
   LiveFoundationFixture fixture;
-  std::array text{
-      reinterpret_cast<u_short*>(
-          VS::Battle::actionDefinitions[kAction].name.data()),
-      reinterpret_cast<u_short*>(abilities::LiveUnlockDescription(kAction))};
+  std::array text{reinterpret_cast<std::uint16_t*>(
+                      VS::Battle::actionDefinitions[kAction].name.data()),
+                  reinterpret_cast<std::uint16_t*>(
+                      abilities::LiveUnlockDescription(kAction))};
   auto* address = VS::Content::ResolveModuleAddress(
       VS::Content::ModuleSymbols(), kModule, 0x80102928);
   if (address == nullptr) {
     FAIL("missing ability row entry");
     return;
   }
-  const auto entry = reinterpret_cast<int (*)(int, int, u_short**)>(address);
+  const auto entry =
+      reinterpret_cast<int (*)(int, int, std::uint16_t**)>(address);
   REQUIRE(entry(1, 24, text.data()) == 1);
   CHECK(abilities::menuAbilityCount == 1);
   CHECK(abilities::selectedAbilityType == 24);

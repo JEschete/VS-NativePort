@@ -29,7 +29,7 @@
 #include "Field/Manual.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -43,6 +43,10 @@
 #include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::nextPrim;
 
 // Contracts of the manual screen's lifecycle and help pages (MENUE.PRG
 // 494.c:132-448): the unused menu wrappers, the screen's open, wait, show and
@@ -891,15 +895,16 @@ struct LiveManualFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
   fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int* saved_text = manual::helpText;
-  u_long* saved_assets = manual::helpAssets;
+  std::uint32_t* saved_assets = manual::helpAssets;
   VS::Content::DiscQueueSlot* saved_text_request = manual::helpTextCdQueue;
   VS::Content::DiscQueueSlot* saved_assets_request = manual::helpAssetsCdQueue;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   VS::Menu::Framework::LiveMenuControl saved_menu_state =
       VS::Menu::Framework::menuState;
-  std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(kTableWords);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kPacketWords, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(kTableWords);
   VS::Menu::TextBoxState saved_box =
       *VS::Menu::LiveTextBox(manual::kPageTextBox);
   VS::Menu::TextBoxState saved_information_box =
@@ -913,7 +918,7 @@ struct LiveManualFixture {
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
   int saved_selected = VS::Menu::Framework::selectedRow;
-  u_int saved_pressed = VS::Input::buttonsPressed;
+  std::uint32_t saved_pressed = VS::Input::buttonsPressed;
   int saved_previous = VS::Input::previousButtons;
   int saved_repeat = VS::Input::buttonRepeat;
   int saved_step = manual::showMenuState;
@@ -1034,9 +1039,9 @@ struct LiveManualFixture {
   }
 
   [[nodiscard]] bool Linked(std::int32_t slot) {
-    u_long* const entry =
+    std::uint32_t* const entry =
         ordering.data() + kFrameSlotBase + static_cast<std::size_t>(slot);
-    const auto* const next = static_cast<const u_long*>(nextPrim(entry));
+    const auto* const next = static_cast<const std::uint32_t*>(nextPrim(entry));
     return next >= storage.data() && next < storage.data() + storage.size();
   }
 };
@@ -1150,7 +1155,7 @@ TEST_CASE("F04161 LiveUpdateScreen fades in and arms the open delay",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   VS::Menu::Framework::backgroundFadeStep = 0;
-  u_char step = manual::kScreenOpen;
+  std::uint8_t step = manual::kScreenOpen;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenInitialize);
   CHECK(manual::LiveManualScreenState() ==
@@ -1164,7 +1169,7 @@ TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
   manual::showMenuState = 5;
   VS::Battle::hudHidden = 0;
   VS::Field::isFieldRenderingEnabled = 1;
-  u_char step = manual::kScreenInitialize;
+  std::uint8_t step = manual::kScreenInitialize;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(manual::LiveManualScreenState().initialized == 1);
   CHECK(manual::showMenuState == manual::kHelpStart);
@@ -1184,7 +1189,7 @@ TEST_CASE("F04161 LiveUpdateScreen leaves the help for the game",
   VS::Battle::hudHidden = 1;
   VS::Battle::hudSlideOffset = manual::kHudSlideHidden;
   VS::Field::isFieldRenderingEnabled = 0;
-  u_char step = manual::kScreenShow;
+  std::uint8_t step = manual::kScreenShow;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenShutDown);
   CHECK(manual::LiveManualScreenState().help_result == manual::kHelpExitToGame);
@@ -1199,7 +1204,7 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
   manual::LiveManualScreenState().help_result = manual::kHelpExitToGame;
   VS::Menu::Framework::hideMenu = 1;
   VS::Menu::Framework::menuState.control.current_menu = 0;
-  u_char step = manual::kScreenShutDown;
+  std::uint8_t step = manual::kScreenShutDown;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenExit);
   VS::Menu::Framework::backgroundFadeStep = 2;
@@ -1220,7 +1225,7 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
   VS::Field::manualDisplayState.current_manual = 3;
   VS::Field::manualDisplayState.scroll_positions[3] = 20;
   std::array<int, 2> text{};
-  std::array<u_long, 2> assets{};
+  std::array<std::uint32_t, 2> assets{};
   manual::helpText = text.data();
   manual::helpAssets = assets.data();
   manual::showMenuState = 5;
@@ -1278,8 +1283,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   const std::array<std::uint8_t, 16> assets{};
-  manual::helpAssets = LiveManualFixture::Payload<u_long>(assets);
-  u_long* const buffer = manual::helpAssets;
+  manual::helpAssets = LiveManualFixture::Payload<std::uint32_t>(assets);
+  std::uint32_t* const buffer = manual::helpAssets;
   VS::Content::DiscQueueSlot* const request =
       LiveManualFixture::LoadedRequest();
   manual::helpAssetsCdQueue = request;
@@ -1306,7 +1311,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages refuses missing requests and uploads",
 
   // A header whose tiles run past the buffer: the CLUT upload is refused.
   const std::array<std::uint8_t, 16> assets{1, 0, 0, 0, 1, 0, 0, 0};
-  manual::helpAssets = LiveManualFixture::Payload<u_long>(assets);
+  manual::helpAssets = LiveManualFixture::Payload<std::uint32_t>(assets);
   manual::helpAssetsCdQueue = LiveManualFixture::LoadedRequest();
   manual::showMenuState = manual::kHelpLoadAssets;
   CHECK(manual::LiveUpdateHelpPages() == 0);
@@ -1390,9 +1395,9 @@ TEST_CASE("F04163 LiveUpdateHelpPages frees both buffers and keeps them",
   REQUIRE(VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5) == 0x1D);
   const std::array<std::uint8_t, 16> bytes{};
   manual::helpText = LiveManualFixture::Payload<int>(bytes);
-  manual::helpAssets = LiveManualFixture::Payload<u_long>(bytes);
+  manual::helpAssets = LiveManualFixture::Payload<std::uint32_t>(bytes);
   int* const text = manual::helpText;
-  u_long* const assets = manual::helpAssets;
+  std::uint32_t* const assets = manual::helpAssets;
   manual::showMenuState = manual::kHelpLeaveToMenu;
   CHECK(manual::LiveUpdateHelpPages() == manual::kHelpExitToMenu);
   CHECK(Freed(text));
@@ -1495,7 +1500,7 @@ struct MissingHelpFiles {
 
 // The topic's reads are cancelled, its requests and buffers released, and the
 // topic list shown again after one refusal.
-void CheckTopicAbandoned(const int* text, const u_long* assets,
+void CheckTopicAbandoned(const int* text, const std::uint32_t* assets,
                          std::uint64_t refusals) {
   CHECK(manual::showMenuState == manual::kHelpListTopics);
   CHECK(manual::LiveManualScreenRefusalCount() == refusals + 1);
@@ -1523,7 +1528,7 @@ TEST_CASE(
   CHECK(manual::LiveUpdateHelpPages() == 0);
   REQUIRE(manual::showMenuState == manual::kHelpLoadAssets);
   int* const text = manual::helpText;
-  u_long* const assets = manual::helpAssets;
+  std::uint32_t* const assets = manual::helpAssets;
   REQUIRE(text != nullptr);
   REQUIRE(assets != nullptr);
   REQUIRE(manual::helpTextCdQueue != nullptr);

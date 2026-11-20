@@ -15,7 +15,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Platform/GameFiber.hpp"
 
 static_assert(std::is_same_v<
@@ -31,8 +31,8 @@ struct SpecialTerrainFixture {
   decltype(VS::Battle::Ai::directionDeltas) saved_directions =
       VS::Battle::Ai::directionDeltas;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  u_short flags[32][32]{};
-  u_short heights[32][32]{};
+  std::uint16_t flags[32][32]{};
+  std::uint16_t heights[32][32]{};
   alignas(VS::Field::MpdCollisionHeader)
       std::array<unsigned char, 4120> collision{};
 
@@ -55,7 +55,7 @@ struct SpecialTerrainFixture {
     }
     for (unsigned z = 0; z < 32; ++z) {
       for (unsigned x = 0; x < 32; ++x) {
-        heights[z][x] = static_cast<u_short>(0x8800 | (z * 32 + x));
+        heights[z][x] = static_cast<std::uint16_t>(0x8800 | (z * 32 + x));
       }
     }
   }

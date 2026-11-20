@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 
 namespace VS::Battle {
@@ -16,7 +16,7 @@ namespace VS::Battle {
 // One target candidate of the target list or the sphere's target lists.
 // decomp: D_800F19CC_t5 (src/BATTLE/BATTLE.PRG/57B1C.h:24-38)
 struct TargetPreview {
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   std::uint8_t kind;
   std::uint8_t actor_id;
   std::int8_t limb;

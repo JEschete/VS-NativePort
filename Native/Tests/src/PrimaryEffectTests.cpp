@@ -53,10 +53,10 @@ class PrimaryEffectGlobals {
   }
 
  private:
-  u_int phase_ = fx::primaryPhase;
+  std::uint32_t phase_ = fx::primaryPhase;
   int count_ = fx::trackCount;
   int started_ = fx::startedTrackCount;
-  u_int pending_ = fx::pendingTracks;
+  std::uint32_t pending_ = fx::pendingTracks;
   char loaded_ = fx::primaryLoaded;
   std::array<int, fx::kEffectTokenWords> tokens_{};
 };

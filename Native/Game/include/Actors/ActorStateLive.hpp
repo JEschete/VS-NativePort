@@ -18,7 +18,9 @@ struct Actor;
 namespace VS::Render {
 struct ColorCode;
 }  // namespace VS::Render
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Binding from the actor table, the battle actors, the slot gimmicks and the
 // weapon models to the typed actor state rules (ActorFlags.hpp,
@@ -109,10 +111,12 @@ void PlaceLiveActorInRoom(int actor_id, const SpawnPlacement* placement,
                           int drop_height, int movement_class);
 // decomp: BATTLE.PRG func_800A3310 (src/BATTLE/BATTLE.PRG/3A1A0.c:350)
 // The flyer's slot, or 0 when none is there.
-int FindLiveActorAtFlightPosition(int actor_id, const SVECTOR* position);
+int FindLiveActorAtFlightPosition(int actor_id,
+                                  const VS::Core::Gte::SVECTOR* position);
 // decomp: BATTLE.PRG func_800A3394 (src/BATTLE/BATTLE.PRG/3A1A0.c:365)
 // Raises position->vy above the stacked flyers.
-void SeparateLiveActorFlightPlacement(int actor_id, SVECTOR* position);
+void SeparateLiveActorFlightPlacement(int actor_id,
+                                      VS::Core::Gte::SVECTOR* position);
 // decomp: BATTLE.PRG func_800A36E0 (src/BATTLE/BATTLE.PRG/3A1A0.c:448)
 // Writes only the packed tile, and only for an actor with a record.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

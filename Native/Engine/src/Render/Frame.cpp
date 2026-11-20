@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Frame.hpp"
+
+using VS::Legacy::DR_STP;
 
 // decomp: D_800F1870 (D_800F1870@BATTLE/BATTLE.PRG)
 void* VS::Render::legacyCurrentOrderingTable;

@@ -118,8 +118,8 @@ class LiveEngagedList final : public EngagedList {
     Require(state.actor != nullptr, "AI engagement pose requires the actor");
     auto& actor = *reinterpret_cast<VS::Battle::Actor*>(state.actor);
     actor.command_flags =
-        static_cast<u_char>((actor.command_flags & ~kPoseMask) |
-                            ((pose << kPoseShift) & kPoseMask));
+        static_cast<std::uint8_t>((actor.command_flags & ~kPoseMask) |
+                                  ((pose << kPoseShift) & kPoseMask));
   }
   [[nodiscard]] unsigned AshleyClassification(int actor_id) const override {
     return At(actor_id).relations[0].classification;

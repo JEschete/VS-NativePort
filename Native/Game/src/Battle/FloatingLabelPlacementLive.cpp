@@ -17,12 +17,18 @@
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::DVECTOR;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::RECT;
 
 namespace VS::Battle {
 namespace {
@@ -230,11 +236,11 @@ class LiveUpdateWorld final : public FloatingLabelUpdateWorld {
   std::int32_t Project(const LabelPoint& point,
                        LabelScreenPoint& screen) override {
     auto input = std::bit_cast<SVECTOR>(point);
-    Core_GteWord packed = 0;
-    Core_GteWord depth = 0;
-    Core_GteWord flag = 0;
-    const auto visible = static_cast<std::int32_t>(
-        Core_Gte_RotTransPers(&input, &packed, &depth, &flag));
+    VS::Core::Gte::Word packed = 0;
+    VS::Core::Gte::Word depth = 0;
+    VS::Core::Gte::Word flag = 0;
+    const auto visible =
+        static_cast<std::int32_t>(RotTransPers(&input, &packed, &depth, &flag));
     const auto word = static_cast<std::uint32_t>(packed);
     screen = {static_cast<std::int16_t>(word & kHalfMask),
               static_cast<std::int16_t>(word >> kHalfShift)};

@@ -15,24 +15,26 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 struct TerrainFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
-  u_short heights[VS::Battle::Ai::kNavigationGridSide]
-                 [VS::Battle::Ai::kNavigationGridSide]{};
-  u_short flags[VS::Battle::Ai::kNavigationGridSide]
-               [VS::Battle::Ai::kNavigationGridSide]{};
+  std::uint16_t heights[VS::Battle::Ai::kNavigationGridSide]
+                       [VS::Battle::Ai::kNavigationGridSide]{};
+  std::uint16_t flags[VS::Battle::Ai::kNavigationGridSide]
+                     [VS::Battle::Ai::kNavigationGridSide]{};
 
   TerrainFixture() {
     auto* frame = &VS::Battle::Ai::LiveFrameContext();
     frame->heightMap = heights;
     frame->tileFlags = flags;
-    const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
-                                           0x10, 0x11, 0x01, 0x31};
+    const std::array<std::uint8_t, 8> directions{0x30, 0x33, 0x03, 0x13,
+                                                 0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame->directions);
     VS::Battle::Ai::tileFlagMap = flags;
   }
@@ -60,7 +62,7 @@ TEST_CASE("Tile height decoding covers every 16-bit cell value",
           "[ai][terrain]") {
   TerrainFixture fixture;
   for (unsigned cell = 0; cell < 65536; ++cell) {
-    fixture.heights[9][17] = static_cast<u_short>(cell);
+    fixture.heights[9][17] = static_cast<std::uint16_t>(cell);
     const auto [raw, ground] = ReferenceHeights(cell);
     CAPTURE(cell);
     CHECK(VS::Field::GroundHeightFlagsAtTile(Grid(), 17, 9) == raw);
@@ -72,7 +74,7 @@ TEST_CASE("Packed height decoding ignores both non-coordinate bytes",
           "[ai][terrain]") {
   TerrainFixture fixture;
   for (unsigned cell = 0; cell < 65536; ++cell) {
-    fixture.heights[9][17] = static_cast<u_short>(cell);
+    fixture.heights[9][17] = static_cast<std::uint16_t>(cell);
     const auto [raw, ground] = ReferenceHeights(cell);
     CAPTURE(cell);
     CHECK(VS::Field::GroundHeightFlagsAtPackedTile(
@@ -133,7 +135,7 @@ TEST_CASE("Original above-ground comparison covers every encoded terrain cell",
           "[ai][terrain][occlusion]") {
   TerrainFixture fixture;
   for (unsigned cell = 0; cell < 65536; ++cell) {
-    fixture.heights[9][17] = static_cast<u_short>(cell);
+    fixture.heights[9][17] = static_cast<std::uint16_t>(cell);
     const int decoded = ReferenceHeights(cell).second;
     const int ground = (cell & 0x2000) != 0 ? 0 : decoded;
     CAPTURE(cell);
@@ -197,7 +199,7 @@ TEST_CASE("World height decoding selects the tile before decoding its cell",
           "[ai][terrain]") {
   TerrainFixture fixture;
   for (unsigned cell = 0; cell < 65536; ++cell) {
-    fixture.heights[9][17] = static_cast<u_short>(cell);
+    fixture.heights[9][17] = static_cast<std::uint16_t>(cell);
     const auto [raw, ground] = ReferenceHeights(cell);
     CAPTURE(cell);
     CHECK(VS::Field::GroundHeightFlagsAtWorldPosition(Grid(), 2303, 1155) ==
@@ -282,7 +284,7 @@ TEST_CASE("Terrain lookup preserves full grid row stride and final cell bounds",
   TerrainFixture fixture;
   for (int z = 0; z < VS::Battle::Ai::kNavigationGridSide; ++z) {
     for (int x = 0; x < VS::Battle::Ai::kNavigationGridSide; ++x) {
-      fixture.heights[z][x] = static_cast<u_short>(z * 109 + x * 53);
+      fixture.heights[z][x] = static_cast<std::uint16_t>(z * 109 + x * 53);
     }
   }
   for (int z = 0; z < VS::Battle::Ai::kNavigationGridSide; ++z) {
@@ -320,7 +322,7 @@ TEST_CASE(
   const std::array<int, 8> dz{-1, -1, 0, 1, 1, 1, 0, -1};
   TerrainFixture fixture;
   fixture.heights[15 + dz[direction]][15 + dx[direction]] =
-      static_cast<u_short>(cell);
+      static_cast<std::uint16_t>(cell);
   CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0x000F000F, direction) ==
         (cell != 0));
 }

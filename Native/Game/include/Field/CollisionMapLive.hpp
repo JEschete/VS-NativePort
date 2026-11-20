@@ -9,7 +9,9 @@
 namespace VS::Field {
 struct MpdTileCell;
 }  // namespace VS::Field
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Binds the typed room collision map rules (CollisionMap.hpp) to the loaded
 // room, the gimmick and actor tables and the platform support state, in the
@@ -31,8 +33,8 @@ const VS::Field::MpdTileCell* LiveCollisionCellOrAbsent(unsigned int tile_x,
                                                         int layer);
 // Returns 1 when a cell was changed; a cell outside the tables is refused.
 int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer, int blocked);
-VS::Field::MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
-                                                        int layer);
+VS::Field::MpdTileCell* FindLiveCollisionCellAtPosition(
+    const VS::Core::Gte::SVECTOR* position, int layer);
 
 std::int16_t LiveInterpolatedFloorHeight(int world_x, int world_z);
 std::int16_t LiveFloorHeightAt(int world_x, int world_z);
@@ -48,7 +50,8 @@ void SnapLiveRoomActorsToSupport();
 int LiveGimmickSupportHeight(int tile_x, int tile_z);
 int LiveGimmickSupportHeightBelow(int tile_x, int tile_z, int reference_height);
 
-int LiveIsPointOnMovingPlatform(int platform_layer, const SVECTOR* position);
+int LiveIsPointOnMovingPlatform(int platform_layer,
+                                const VS::Core::Gte::SVECTOR* position);
 // The room's authored platforms; 0 when the section is absent or malformed.
 int LiveMovingPlatformCount();
 // Also records the supporting platform layer

@@ -20,7 +20,7 @@
 #include "Content/DataStore.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::combat_lab {
 namespace {

@@ -5,7 +5,7 @@
 
 #include "Audio/Seq/Sequencer.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::Seq {
 

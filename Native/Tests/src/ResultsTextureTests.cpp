@@ -9,7 +9,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Ending/Results.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -20,6 +20,14 @@
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::getClut;
+using VS::Legacy::getTPage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_GT4;
+
 namespace {
 struct ResultsTextureFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
@@ -28,9 +36,9 @@ struct ResultsTextureFixture {
   VS::Render::TextureRegion saved_ending_region =
       VS::Ending::resultAtlasRegions[12];
   int saved_time = VS::Menu::Results::timeTrialTime;
-  std::vector<u_long> storage = std::vector<u_long>(
-      32 * sizeof(POLY_GT4) / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 32> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      32 * sizeof(POLY_GT4) / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 32> ordering{};
 
   ResultsTextureFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
@@ -166,7 +174,7 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
   const bool flash = GENERATE(false, true);
   ResultsTextureFixture fixture;
   std::array<CVECTOR, 2> colors{{{128, 96, 64, 0}, {200, 180, 160, 0}}};
-  colors[0].cd = static_cast<u_char>(fade);
+  colors[0].cd = static_cast<std::uint8_t>(fade);
   auto draw = flash ? VS::Render::DrawLiveTextureFlashFade
                     : VS::Render::DrawLiveTextureTintFade;
   draw(VS::Menu::Results::kDisMap, 10, 20, 12, colors);

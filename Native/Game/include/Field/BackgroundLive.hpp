@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Field/Background.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Live binding for the room background (Background.hpp) over the copied
 // background globals (BackgroundLiveState.hpp), the room record, the frame
@@ -85,7 +85,7 @@ void LiveSetTiledBackgroundEnabled(int enabled);
 // func_8008EB30 (146C.c:17533): reads five colour words.
 void LiveSetRoomBackgroundColors(const int* gradient_colors);
 // func_8008EC48 (146C.c:17571); a null override uses the room's turn.
-void LiveDrawRoomBackground(const VECTOR* rotation_override);
+void LiveDrawRoomBackground(const VS::Core::Gte::VECTOR* rotation_override);
 // func_8008EFCC (146C.c:17638).
 int LiveQueueTiledBackgroundLoad(int texture_page);
 // func_8008F0FC (146C.c:17680).

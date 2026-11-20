@@ -14,7 +14,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 

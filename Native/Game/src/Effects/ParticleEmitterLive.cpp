@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -28,7 +28,12 @@
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::ClearTranslation;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Effects {
 // decomp: D_800EC328 (BATTLE.PRG); contents: module image (ModuleData.cpp).
@@ -431,11 +436,11 @@ void EmitLiveParticleEvent(LiveEffectInstance* instance, int event,
   const auto result = EmitParticleEvent(
       definition, *context, scratch, emissionCounter, Core::BiosRand(), host);
   StoreScratch(live_scratch, scratch);
-  if (result.clear_translation) Core_Gte_ClearTranslation();
+  if (result.clear_translation) ClearTranslation();
   if (result.rotation) {
     MATRIX rotation{};
     math::StoreMatrix(rotation, *result.rotation);
-    Core_Gte_SetRotMatrix(&rotation);
+    SetRotMatrix(&rotation);
   }
   if (result.status >= ParticleEmissionStatus::kMissingSamples) {
     Refuse("checked emission core declined its inputs or allocation");

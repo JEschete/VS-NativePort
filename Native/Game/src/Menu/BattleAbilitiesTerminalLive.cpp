@@ -168,7 +168,7 @@ class LiveAssignmentHost final : public AssignmentHost {
     }
     Framework::DrawLiveButtonIcon(
         icons[static_cast<std::size_t>(button)], x, y,
-        reinterpret_cast<u_long*>(table + kAssignmentLayerByteOffset));
+        reinterpret_cast<std::uint32_t*>(table + kAssignmentLayerByteOffset));
   }
   AssignmentInput Input() const override {
     const auto pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed);

@@ -10,18 +10,30 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/TransitionsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlay.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/ScreenTransition.hpp"
+
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_MODE;
+using VS::Legacy::getcode;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDrawMode;
+using VS::Legacy::SPRT;
 
 namespace {
 namespace Render = VS::Render;
@@ -130,12 +142,12 @@ class LiveOverlayGuard {
     VS::Field::screenTransitionWipeAngle = angle_;
     VS::Field::screenTransitionSpeed = speed_;
     VS::Render::frameBuf = frame_buffer_;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
  private:
   int alpha_ = VS::Field::screenTransitionAlpha;
-  u_int step_ = VS::Field::screenTransitionStep;
+  std::uint32_t step_ = VS::Field::screenTransitionStep;
   int effect_ = VS::Field::screenTransitionEffect;
   int angle_ = VS::Field::screenTransitionWipeAngle;
   int speed_ = VS::Field::screenTransitionSpeed;
@@ -143,7 +155,8 @@ class LiveOverlayGuard {
 };
 
 // The packets linked at `entry`, in the order the GPU runs them.
-std::vector<const void*> Chain(u_long* entry, const u_long* next_entry) {
+std::vector<const void*> Chain(std::uint32_t* entry,
+                               const std::uint32_t* next_entry) {
   std::vector<const void*> packets;
   const void* packet = nextPrim(entry);
   while (packet != next_entry && packets.size() < 64) {
@@ -653,7 +666,7 @@ TEST_CASE("Live framebuffer effect stays off without heap for its packets",
   CHECK_FALSE(Render::IsLiveFramebufferEffectShowing());
   CHECK(Render::RefusedLiveScreenOverlayCount() == refused + 1);
 
-  std::array<u_long, 4> ordering{};
+  std::array<std::uint32_t, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveFramebufferEffect(ordering.data());
   CHECK(Render::LiveFramebufferEffect().phase == FramebufferEffectPhase::kOff);
@@ -679,7 +692,7 @@ void CheckFlatStrips(const std::vector<const void*>& chain) {
 }
 
 // Disabling hides the effect at once and frees the block two draws later.
-void CheckDisableFreesBlock(u_long* ordering) {
+void CheckDisableFreesBlock(std::uint32_t* ordering) {
   Render::SetLiveFramebufferEffectEnabled(0);
   CHECK_FALSE(Render::IsLiveFramebufferEffectShowing());
   Render::DrawLiveFramebufferEffect(ordering);
@@ -705,7 +718,7 @@ TEST_CASE("Live framebuffer effect links flat strips and frees its block",
   Render::SetLiveFramebufferEffectOffset(&offset);
   Render::SetLiveFramebufferEffectBlendMode(1);
   Render::SetLiveFramebufferEffectDepth(3);
-  std::array<u_long, 6> ordering{};
+  std::array<std::uint32_t, 6> ordering{};
   for (int cycle = 0; cycle < 3; ++cycle) {
     CAPTURE(cycle);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
@@ -732,7 +745,7 @@ TEST_CASE("Live framebuffer effect places scaled strips through the GTE",
   Render::SetLiveFramebufferEffectScale(&scale);
   Render::SetLiveFramebufferEffectDepth(1);
   Render::SetLiveFramebufferEffectEnabled(1);
-  std::array<u_long, 4> ordering{};
+  std::array<std::uint32_t, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveFramebufferEffect(ordering.data());
   Render::DrawLiveFramebufferEffect(ordering.data());
@@ -863,7 +876,7 @@ TEST_CASE("Live screen transition fades the frame being built",
   VS::Field::screenTransitionStep = 1;
   VS::Field::screenTransitionEffect = 0;
   VS::Field::screenTransitionSpeed = 10;
-  std::array<u_long, 4> ordering{};
+  std::array<std::uint32_t, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveScreenTransition(ordering.data());
   CHECK(VS::Field::screenTransitionAlpha == 110);
@@ -889,7 +902,7 @@ TEST_CASE("Live screen transition wipes across the centred band",
   VS::Field::screenTransitionEffect = 2;
   VS::Field::screenTransitionWipeAngle = 0;
   VS::Field::screenTransitionSpeed = 5;
-  std::array<u_long, 4> ordering{};
+  std::array<std::uint32_t, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveScreenTransition(ordering.data());
   CHECK(VS::Field::screenTransitionAlpha == 255);

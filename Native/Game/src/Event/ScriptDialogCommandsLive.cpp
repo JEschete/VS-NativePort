@@ -21,12 +21,14 @@
 #include "Event/ScriptDialogOpcodes.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace event = VS::Event;
@@ -252,7 +254,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
 using Handler = event::ScriptStep (*)(event::ScriptCommand,
                                       event::ScriptDialogHost&);
 
-intptr_t RunCommand(Handler handler, const u_char* command,
+intptr_t RunCommand(Handler handler, const std::uint8_t* command,
                     std::size_t length) {
   Require(command != nullptr, "Script dialog command is missing");
   LiveScriptDialogHost host;

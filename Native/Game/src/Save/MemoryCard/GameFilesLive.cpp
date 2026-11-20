@@ -27,7 +27,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Save/MemoryCard/CardResources.hpp"

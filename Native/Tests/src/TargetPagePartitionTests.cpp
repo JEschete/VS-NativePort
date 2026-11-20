@@ -10,7 +10,7 @@
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 constexpr std::size_t kPageSize = 24;

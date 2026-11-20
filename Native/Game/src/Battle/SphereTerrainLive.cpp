@@ -11,9 +11,18 @@
 #include "Battle/SphereTerrain.hpp"
 #include "Battle/TargetVolume.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::GpuHandle;
 
 namespace {
 constexpr int kCoordinateBits = 16;
@@ -32,12 +41,12 @@ class LiveCanvas final : public VS::Battle::SphereTerrainCanvas {
     const SVECTOR vertex{static_cast<std::int16_t>(x),
                          static_cast<std::int16_t>(y),
                          static_cast<std::int16_t>(z), 0};
-    Core_GteWord xy = 0;
-    Core_GteWord depth = 0;
-    Core_Gte_LoadV0(&vertex);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSxy2(&xy);
-    Core_Gte_StoreSz3Otz(&depth);
+    VS::Core::Gte::Word xy = 0;
+    VS::Core::Gte::Word depth = 0;
+    LoadV0(&vertex);
+    Rtps();
+    StoreSxy2(&xy);
+    StoreSz3Otz(&depth);
     return {static_cast<std::int16_t>(xy),
             static_cast<std::int16_t>(xy >> kCoordinateBits),
             static_cast<int>(depth)};
@@ -50,17 +59,17 @@ class LiveCanvas final : public VS::Battle::SphereTerrainCanvas {
     constexpr std::uint32_t kLinkMask = 0xFFFFFF;
     constexpr int kGreenShift = 8;
     constexpr std::size_t kLinePacketWords = 5;
-    auto* packet =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
-    auto* ordering =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
-        depth;
-    const std::array<u_long, kLinePacketWords> words{
+    auto* packet = static_cast<std::uint32_t*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
+    auto* ordering = static_cast<std::uint32_t*>(
+                         VS::Render::FrameScratchpad().ordering_table) +
+                     depth;
+    const std::array<std::uint32_t, kLinePacketWords> words{
         (*ordering & kLinkMask) | kPacketSize, kAdditiveDrawMode,
         kTranslucentLine | (static_cast<unsigned>(y / 2) << kGreenShift),
         ScreenPosition(begin, y), ScreenPosition(end, y)};
     std::copy(words.begin(), words.end(), packet);
-    *ordering = LegacyGpu_Handle(packet);
+    *ordering = GpuHandle(packet);
     VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
   }
 };

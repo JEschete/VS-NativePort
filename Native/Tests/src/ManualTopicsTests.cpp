@@ -12,7 +12,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Manual.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.hpp"
@@ -439,13 +439,14 @@ struct LiveTopicFixture {
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
-  u_short* saved_text = VS::Menu::Framework::itemsText;
+  std::uint16_t* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
-  u_short saved_count = VS::Menu::Framework::subMenuRowCount;
-  std::array<u_short, 516> saved_table = std::to_array(manual::menuTextTable);
+  std::uint16_t saved_count = VS::Menu::Framework::subMenuRowCount;
+  std::array<std::uint16_t, 516> saved_table =
+      std::to_array(manual::menuTextTable);
   int saved_step = manual::topMenu_state;
   int saved_row = manual::menuSelectedRow;
-  u_short saved_manual = VS::Field::manualDisplayState.current_manual;
+  std::uint16_t saved_manual = VS::Field::manualDisplayState.current_manual;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -460,7 +461,7 @@ struct LiveTopicFixture {
     VS::Menu::Framework::menuMemory = {};
     VS::Input::settings.menu_flags = 0x3FF;
     std::fill(std::begin(manual::menuTextTable),
-              std::end(manual::menuTextTable), u_short{0});
+              std::end(manual::menuTextTable), std::uint16_t{0});
     const std::vector<std::uint16_t> table = TopicTable();
     std::copy(table.begin(), table.end(), manual::menuTextTable);
   }
@@ -562,7 +563,7 @@ TEST_CASE("Live topic menu refuses an unterminated table as a cancel",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
   std::fill(std::begin(manual::menuTextTable) + manual::kTopicStrings,
-            std::end(manual::menuTextTable), u_short{0x2020});
+            std::end(manual::menuTextTable), std::uint16_t{0x2020});
   const auto refusals = manual::LiveTopicRefusalCount();
   CHECK(manual::LiveUpdateTopicMenu(1) == -2);
   CHECK(manual::LiveTopicRefusalCount() == refusals + 1);

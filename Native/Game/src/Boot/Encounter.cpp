@@ -76,7 +76,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -364,7 +364,7 @@ unsigned EquippedBreakArt() {
 void StockEncounterItems(EncounterProfile profile) {
   // Named misc IDs from ITEMNAME.BIN.yaml, checked against the original
   // MAINMENU/2D10.c misc-action map. Exclude equipment and unnamed holes.
-  constexpr auto kItems = std::to_array<u_short>(
+  constexpr auto kItems = std::to_array<std::uint16_t>(
       {323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335,
        336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348,
        349, 350, 351, 352, 353, 354, 355, 356, 386, 387, 388, 389, 390,
@@ -431,8 +431,8 @@ std::expected<void, std::string> ApplyAdjustment(
       stats.current_mp = stats.max_mp;
       return {};
     case EncounterAdjustment::kRaiseRisk:
-      stats.risk =
-          static_cast<u_short>(std::min(kMaxRisk, stats.risk + kRiskStep));
+      stats.risk = static_cast<std::uint16_t>(
+          std::min(kMaxRisk, stats.risk + kRiskStep));
       return {};
     default:
       break;
@@ -733,15 +733,15 @@ void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
   }
   if (overrides.strength) {
     stats.strength = stats.total_strength =
-        static_cast<u_short>(*overrides.strength);
+        static_cast<std::uint16_t>(*overrides.strength);
   }
   if (overrides.intelligence) {
     stats.intelligence = stats.total_intelligence =
-        static_cast<u_short>(*overrides.intelligence);
+        static_cast<std::uint16_t>(*overrides.intelligence);
   }
   if (overrides.agility) {
     stats.agility = stats.total_agility =
-        static_cast<u_short>(*overrides.agility);
+        static_cast<std::uint16_t>(*overrides.agility);
   }
   VS::Core::LogInfo(
       "encounter.stats", "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",

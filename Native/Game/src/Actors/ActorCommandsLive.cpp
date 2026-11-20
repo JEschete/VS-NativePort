@@ -42,6 +42,8 @@
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Legacy::kPadLdown;
 using VS::Legacy::kPadLleft;
 using VS::Legacy::kPadLright;

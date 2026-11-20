@@ -28,7 +28,7 @@
 #include "Ending/Credits/StaffRoll.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Movie/MoviePlayer.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"

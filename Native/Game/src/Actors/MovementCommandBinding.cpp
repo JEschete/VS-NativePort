@@ -4,7 +4,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
 #include "Actors/MovementCommand.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 class ActorTableMovementRequests final

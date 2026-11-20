@@ -7,13 +7,26 @@
 #include <span>
 
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::GetGeomOffset;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::setlen;
 
 namespace VS::Render {
 namespace {
@@ -25,8 +38,7 @@ constexpr const char* kChannel = "render";
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 // One room draw writes at most this much of the frame buffer (2EA3C.s:10).
 constexpr std::size_t kRoomBatchBytes = 0x10000;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-static_assert(sizeof(Core_GteWord) == sizeof(std::int32_t));
+static_assert(sizeof(VS::Core::Gte::Word) == sizeof(std::int32_t));
 
 [[nodiscard]] MATRIX MatrixFrom(const RoomView& view) {
   MATRIX matrix{};
@@ -45,35 +57,35 @@ class LiveRoomTransformer final : public RoomTransformer {
  public:
   void LoadView(const RoomView& view) override {
     const MATRIX matrix = MatrixFrom(view);
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   RoomProjectedPoint Project(const RoomPosition& position) override {
     SVECTOR input = VectorFrom(position);
-    Core_GteWord screen = 0;
-    Core_GteWord fog = 0;
-    Core_GteWord flags = 0;
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word fog = 0;
+    VS::Core::Gte::Word flags = 0;
     // Native projection returns the quarter depth (SZ3 >> 2) directly.
-    const Core_GteWord depth =
-        Core_Gte_RotTransPers(&input, &screen, &fog, &flags);
+    const VS::Core::Gte::Word depth =
+        RotTransPers(&input, &screen, &fog, &flags);
     return {static_cast<std::int32_t>(screen),
             static_cast<std::int32_t>(depth)};
   }
   Math::Vec3 Transform(const RoomPosition& position) override {
     SVECTOR input = VectorFrom(position);
     VECTOR output{};
-    Core_GteWord flags = 0;
-    Core_Gte_RotTrans(&input, &output, &flags);
+    VS::Core::Gte::Word flags = 0;
+    RotTrans(&input, &output, &flags);
     return Math::VectorOf(output);
   }
   [[nodiscard]] RoomScreenOffset ScreenOffset() const override {
-    Core_GteWord x = 0;
-    Core_GteWord y = 0;
-    Core_Gte_GetGeomOffset(&x, &y);
+    VS::Core::Gte::Word x = 0;
+    VS::Core::Gte::Word y = 0;
+    GetGeomOffset(&x, &y);
     return {static_cast<std::int32_t>(x), static_cast<std::int32_t>(y)};
   }
   void SetScreenOffset(const RoomScreenOffset& offset) override {
-    Core_Gte_SetGeomOffset(offset.x, offset.y);
+    SetGeomOffset(offset.x, offset.y);
   }
 };
 
@@ -109,11 +121,13 @@ class LiveRoomPacketQueue final : public RoomPacketQueue {
         packet.size_bytes() > limit_ - cursor) {
       return false;
     }
-    auto* slot = static_cast<u_long*>(FrameScratchpad().primitive_cursor);
+    auto* slot =
+        static_cast<std::uint32_t*>(FrameScratchpad().primitive_cursor);
     std::ranges::copy(packet, slot);
     setlen(slot, packet.size() - 1);
-    AddPrim(static_cast<u_long*>(FrameScratchpad().ordering_table) + depth,
-            slot);
+    AddPrim(
+        static_cast<std::uint32_t*>(FrameScratchpad().ordering_table) + depth,
+        slot);
     FrameScratchpad().primitive_cursor = slot + packet.size();
     return true;
   }

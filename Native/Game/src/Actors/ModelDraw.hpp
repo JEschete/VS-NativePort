@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 namespace layout {
@@ -37,8 +37,8 @@ struct ModelRenderContext {
 
 // decomp: D_800F3C58_t (src/BATTLE/BATTLE.PRG/49268.h:4-7)
 struct SkeletonPose {
-  std::array<MATRIX, layout::kSkeletonPoseBones> bone_matrices;
-  VECTOR scale;
+  std::array<VS::Core::Gte::MATRIX, layout::kSkeletonPoseBones> bone_matrices;
+  VS::Core::Gte::VECTOR scale;
 };
 
 namespace layout {

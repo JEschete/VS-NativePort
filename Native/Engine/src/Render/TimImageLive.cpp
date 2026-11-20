@@ -11,6 +11,9 @@
 
 #include "Core/Diagnostics.hpp"
 
+using VS::Legacy::RECT;
+using VS::Legacy::TIM_IMAGE;
+
 namespace VS::Render {
 namespace {
 constexpr std::size_t kRectWidthOffset = kTimRectOffset + 4;
@@ -78,10 +81,12 @@ void ParseLiveTim(void* data, TIM_IMAGE* tim) {
   }
   if (image->clut.has_value()) {
     tim->crect = reinterpret_cast<RECT*>(bytes + image->clut->rect_offset);
-    tim->caddr = reinterpret_cast<u_long*>(bytes + image->clut->pixel_offset);
+    tim->caddr =
+        reinterpret_cast<std::uint32_t*>(bytes + image->clut->pixel_offset);
   }
   tim->prect = reinterpret_cast<RECT*>(bytes + image->image.rect_offset);
-  tim->paddr = reinterpret_cast<u_long*>(bytes + image->image.pixel_offset);
+  tim->paddr =
+      reinterpret_cast<std::uint32_t*>(bytes + image->image.pixel_offset);
 }
 
 std::uint64_t RefusedLiveTimCount() { return refused_tims; }

@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Render/Palette.hpp"
 
 namespace VS::Actors {
@@ -66,7 +66,7 @@ struct ModelInstance {
   /* 0x16 */ std::uint16_t look_pitch;
   /* 0x18 */ std::uint16_t turn_frames;
   /* 0x1A */ std::uint16_t current_animation;
-  /* 0x1C */ SVECTOR position;
+  /* 0x1C */ VS::Core::Gte::SVECTOR position;
   /* 0x24 */ std::int16_t rotation_x;
   /* 0x26 */ std::int16_t facing;
   /* 0x28 */ std::int16_t rotation_z;
@@ -75,16 +75,16 @@ struct ModelInstance {
   /* 0x2E */ std::int16_t scale_y;
   /* 0x30 */ std::int16_t scale_z;
   /* 0x32 */ std::int16_t reserved32;
-  /* 0x34 */ SVECTOR root_motion;
+  /* 0x34 */ VS::Core::Gte::SVECTOR root_motion;
   /* 0x3C */ std::int16_t rotation_step_x;
   /* 0x3E */ std::int16_t facing_delta;
   /* 0x40 */ std::int16_t rotation_step_z;
   /* 0x42 */ std::uint16_t reserved42;
-  /* 0x44 */ SVECTOR scale_delta;
+  /* 0x44 */ VS::Core::Gte::SVECTOR scale_delta;
   /* 0x4C */ std::int32_t support_offset;
   /* 0x50 */ std::int16_t reserved50;
   /* 0x52 */ std::int16_t previous_facing;
-  /* 0x54 */ CVECTOR base_color;
+  /* 0x54 */ VS::Core::Gte::CVECTOR base_color;
   /* 0x58 */ Render::ColorCode tint;
   /* 0x5C */ std::uint8_t current_tile_x;
   /* 0x5D */ std::uint8_t current_tile_layer;

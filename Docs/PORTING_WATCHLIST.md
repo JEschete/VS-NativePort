@@ -79,10 +79,10 @@ sort keys (plan Step 6). The size-literal asserts are not generated yet.
 **Fixed before 1b (2026-10-17)**, by the copy tool from `tools\port\hazard_index.py` (libclang over the decomp:
 every pointer-to-4-byte-integer cast and where its value goes):
 
-- **Links:** ordering-table links are 24-bit handles (`LegacyGpu_Handle`/`LegacyGpu_Pointer`,
-  `Legacy/Render/LibGpu.h`), so packets anywhere in 64-bit memory link correctly. `addPrim`, `setaddr` (pointer or
+- **Links:** ordering-table links are 24-bit handles (`VS::Legacy::GpuHandle`/`GpuPointer`,
+  `Legacy/Render/LibGpu.hpp`), so packets anywhere in 64-bit memory link correctly. `addPrim`, `setaddr` (pointer or
   copied link word), `nextPrim`, `ClearOTag(R)`, `AddPrim(s)`, `DrawOTag`/`DrawPrim` (which walk the list and hand
-  each packet to the renderer) use them; 37 `(u_long)p & 0xFFFFFF` sites become `LegacyGpu_Handle(p)`, and
+  each packet to the renderer) use them; 37 `(u_long)p & 0xFFFFFF` sites become `GpuHandle(p)`, and
   `_insertTPage` and `Render::SplicePrimitiveList` were fixed by review. Unit-tested with packets 16 MiB apart.
 - **Pointer storage:** casts whose value lands in something made pointer-sized become `(uintptr_t)`: three runtime
   members (`Content::ActorAssetRequest.dataAddress`, `Audio::CommandParams.param1`, `Audio::MusicConfig.sequenceBase`),
@@ -133,9 +133,9 @@ is now logged in [PLATFORM_HAZARDS.md](PLATFORM_HAZARDS.md).
 actor and room:
 
 - **On-disc offsets stay offsets.** `ONDISC_OFFSETS` lists members of file images that the PS1 relocated in place
-  (SHP, SEQ, SEQ animation bank, WEP, MPD section E). They stay 32-bit `u_int` offsets; every use becomes
-  `VS_ONDISC(base, member, T)` (`Legacy/OnDisc.h`), which resolves base + offset when read, and the in-place
-  relocation loops are deleted.
+  (SHP, SEQ, SEQ animation bank, WEP, MPD section E). They stay 32-bit `u_int` offsets; every use resolves
+  base + offset when read (once through the `VS_ONDISC` macro, retired in #441), and the in-place relocation
+  loops are deleted.
 - **Signatures that carry pointers.** `SIG_RETYPE` (plus hazard `return:`/`param:` rows) makes such returns and
   parameters `intptr_t`/`uintptr_t`, in definitions, stubs and view casts (e.g. `Actors::FindActorAnimationHeader`,
   `Field::RoomAuxiliaryData`).
@@ -281,7 +281,7 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
   functions record `VS::Core::RecordUnported` and do nothing yet. `Core::DumpUnportedToLog` lists the ones a run reaches, which
   orders the work. libpad, VSync and the root counters (strategy R in the SDK ledger) are still shims with the SDK
   names because Engine\Input and Core::FrameClock have no matching API yet.
-- **GTE math.** `Core/Gte.h` follows the documented GTE arithmetic; its rotation order, `rsin`/`ratan2` rounding,
+- **GTE math.** `Core/Gte.hpp` follows the documented GTE arithmetic; its rotation order, `rsin`/`ratan2` rounding,
   projection divide and fog setup need the parity tests of plan ?6.1 before gameplay depends on them.
 - **Casts for per-file declarations.** 98 uses go through a cast to the view a decomp file declared and 30 calls go
   through an unprototyped pointer (copy report `view-cast`, `implicit-call-cast`). Each marks a place where two

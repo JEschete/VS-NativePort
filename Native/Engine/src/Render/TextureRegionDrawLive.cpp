@@ -7,13 +7,26 @@
 #include <cstring>
 #include <span>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Images.hpp"
 #include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::POLY_GT4;
+using VS::Legacy::setPolyGT4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setUV4;
+using VS::Legacy::setXY4;
 
 namespace {
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;

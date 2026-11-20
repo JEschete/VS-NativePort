@@ -8,7 +8,7 @@
 
 #include "Content/ModuleData.hpp"
 #include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 // One table at offset 8 holding one frame record, then two descriptors.

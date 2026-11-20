@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Audio/SfxChannelGroups.hpp"
 
 // decomp: D_8005FE70 (D_8005FE70@SLUS_010.40)

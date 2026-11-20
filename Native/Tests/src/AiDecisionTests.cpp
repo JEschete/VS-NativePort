@@ -23,7 +23,7 @@
 #include "Battle/TargetingState.hpp"
 #include "Core/Random.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionDefinition;
 
@@ -108,8 +108,8 @@ TEST_CASE(
   const auto timer = GENERATE(0, 1, 30);
   const uint16_t gate = GENERATE(0, 1, 65535);
   DecisionFixture fixture;
-  fixture.state.uses_room_action_delay = static_cast<u_char>(busy);
-  fixture.state.min_action_delay = static_cast<u_char>(timer);
+  fixture.state.uses_room_action_delay = static_cast<std::uint8_t>(busy);
+  fixture.state.min_action_delay = static_cast<std::uint8_t>(timer);
   std::memcpy(fixture.state.reserved90.data(), &gate, sizeof(gate));
   fixture.candidate.opaque10.opaque0_bit4 = target_flag;
   VS::Field::gimmickInstances[3] =
@@ -129,7 +129,7 @@ TEST_CASE("AI reaction-delay reset updates only existing non-player states",
   std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
               nullptr);
   for (std::size_t id = 0; id < states.size(); ++id) {
-    states[id].min_action_delay = static_cast<u_char>(id + 1);
+    states[id].min_action_delay = static_cast<std::uint8_t>(id + 1);
     VS::Battle::Ai::actorAiStates[id] = &states[id];
   }
   VS::Battle::Ai::actorAiStates[3] = nullptr;
@@ -396,7 +396,7 @@ struct PerceptionFixture : DecisionFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::ActorAiState player{};
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
 
   PerceptionFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),

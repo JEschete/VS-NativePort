@@ -30,6 +30,8 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::MATRIX;
+
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {
 EquipmentDetailState detail_state;

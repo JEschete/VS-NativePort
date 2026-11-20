@@ -24,6 +24,8 @@
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 // decomp: D_800F4438 (D_800F4438@BATTLE/BATTLE.PRG)
 VECTOR VS::Actors::roomActorScale;
 

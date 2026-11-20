@@ -153,7 +153,7 @@ void LiveInitializeParticleTextureAnimation(Animation* animation,
   const std::optional<std::span<std::byte>> program =
       AnimationProgram(program_index);
   animation->program =
-      program ? reinterpret_cast<u_char*>(program->data()) : nullptr;
+      program ? reinterpret_cast<std::uint8_t*>(program->data()) : nullptr;
   if (!program) {
     Refuse("initialize", "program index outside the animation table");
   }

@@ -13,6 +13,8 @@
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"
 
+using VS::Core::Gte::MATRIX;
+
 using VS::Battle::ShapeVertex;
 using VS::Battle::TargetVolume;
 
@@ -176,7 +178,7 @@ int AppendSphereArcVerticesEntry(int phase, int segments, int index) {
 }
 
 // decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523).
-MATRIX* BuildSphereVolumeTransformEntry(u_char* scale, int angle) {
+MATRIX* BuildSphereVolumeTransformEntry(std::uint8_t* scale, int angle) {
   if (scale == nullptr) {
     Refuse("sphere volume transform", "missing scale extents");
   }

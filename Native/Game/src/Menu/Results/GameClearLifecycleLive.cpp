@@ -22,7 +22,7 @@
 #include "Core/RandomLive.hpp"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
@@ -41,6 +41,11 @@
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::DR_AREA;
+using VS::Legacy::RECT;
+
 namespace VS::Menu::Results {
 namespace {
 constexpr int kOrderingSlot = -7;
@@ -54,7 +59,6 @@ constexpr unsigned kEntryShift = 4;
 constexpr std::size_t kHalfwordBytes = 2;
 constexpr std::size_t kPaletteClearBytes = 4;
 constexpr std::size_t kAreaCommandWords = 2;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
               Score::kRoomFlagWords);
 static_assert(std::size(VS::Field::countableRoomMask) == Score::kRoomFlagWords);
@@ -232,7 +236,7 @@ class LiveReel final : public BonusReelTarget {
     if (entry == nullptr) return false;
     RECT rect{.x = area.x, .y = area.y, .w = area.width, .h = area.height};
     DR_AREA command{};
-    ::SetDrawArea(&command, &rect);
+    VS::Legacy::SetDrawArea(&command, &rect);
     Render::LivePacketQueue queue(entry);
     const std::array<std::uint32_t, kAreaCommandWords + 1> words{
         Render::PackTagWord(kAreaCommandWords, queue.ChainLink()),

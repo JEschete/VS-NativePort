@@ -4,7 +4,7 @@
 // defines it; UpdateLiveAshleyMovementInput writes words 1 and 3 and the room
 // loader word 0.
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 

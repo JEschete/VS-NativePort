@@ -2,7 +2,7 @@
 
 #include <span>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Images.hpp"
 
 // The results screens' atlas draws over the current frame's primitive buffer
@@ -11,13 +11,15 @@
 // past its array.
 namespace VS::Render {
 void DrawLiveTextureTintFade(std::span<const TextureRegion> atlas, int x, int y,
-                             int region_id, std::span<const CVECTOR> colors);
+                             int region_id,
+                             std::span<const VS::Core::Gte::CVECTOR> colors);
 
 void DrawLiveTextureFlashFade(std::span<const TextureRegion> atlas, int x,
                               int y, int region_id,
-                              std::span<const CVECTOR> colors);
+                              std::span<const VS::Core::Gte::CVECTOR> colors);
 
 void DrawLiveTextureWipe(std::span<const TextureRegion> atlas, int x, int y,
-                         int region_id, std::span<const CVECTOR> colors,
+                         int region_id,
+                         std::span<const VS::Core::Gte::CVECTOR> colors,
                          int wipe_edge_x);
 }  // namespace VS::Render

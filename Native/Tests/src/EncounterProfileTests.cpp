@@ -29,7 +29,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "State/Progress.hpp"
@@ -59,7 +59,7 @@ struct ProfileFixture {
       VS::Battle::spellClassCounts;
   decltype(VS::Battle::spellClassSpellIds) saved_spells =
       VS::Battle::spellClassSpellIds;
-  std::array<u_char, 4> spells{97, 54, 60, 84};
+  std::array<std::uint8_t, 4> spells{97, 54, 60, 84};
 
   ProfileFixture() {
     VS::Input::settings = {};
@@ -152,7 +152,7 @@ void CheckUnusedSlots() {
   }
 }
 std::set<unsigned> BindFullSpellClasses(
-    std::array<std::array<u_char, 18>, 4>& classes) {
+    std::array<std::array<std::uint8_t, 18>, 4>& classes) {
   // Original BATTLE.PRG spell-class tables at 0x835A8/0x835AC.
   classes = {{
       {97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 110, 114, 118, 122, 126,
@@ -161,7 +161,7 @@ std::set<unsigned> BindFullSpellClasses(
       {60, 54, 61, 55, 62, 56, 63, 57, 75, 76, 82, 83, 85, 79, 80, 92, 93, 58},
       {66, 67, 68, 69, 70, 71, 72, 73},
   }};
-  const std::array<u_char, 4> counts{18, 6, 18, 8};
+  const std::array<std::uint8_t, 4> counts{18, 6, 18, 8};
   std::set<unsigned> expected;
   for (std::size_t index = 0; index < classes.size(); ++index) {
     VS::Battle::spellClassCounts[index] = counts[index];
@@ -248,7 +248,7 @@ TEST_CASE("Encounter presets persist Ashley profiles and accept older presets",
 TEST_CASE("All-spells profile learns every battle spell and rank only",
           "[combat][profile][spells]") {
   ProfileFixture fixture;
-  std::array<std::array<u_char, 18>, 4> classes{};
+  std::array<std::array<std::uint8_t, 18>, 4> classes{};
   const auto expected = BindFullSpellClasses(classes);
   REQUIRE(expected.size() == 71);
   VS::Game::InitializeEncounterPlayerProfile(
@@ -268,7 +268,7 @@ TEST_CASE("All-spells profile preserves inventory equipment and resources",
   const auto inventory = VS::Items::inventory;
   const auto indices = VS::Items::inventoryIndices;
   const auto stats = actor.stats;
-  std::array<std::array<u_char, 18>, 4> classes{};
+  std::array<std::array<std::uint8_t, 18>, 4> classes{};
   BindFullSpellClasses(classes);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);
@@ -285,7 +285,7 @@ TEST_CASE("All-spells profile preserves inventory equipment and resources",
 TEST_CASE("All-spells profile supports repeat entry and saved presets",
           "[combat][profile][spells]") {
   ProfileFixture fixture;
-  std::array<std::array<u_char, 18>, 4> classes{};
+  std::array<std::array<std::uint8_t, 18>, 4> classes{};
   BindFullSpellClasses(classes);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);

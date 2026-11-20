@@ -26,7 +26,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 #include "Core/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/GameClockLive.hpp"
 
 namespace VS::Audio {

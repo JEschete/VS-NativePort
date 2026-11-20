@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -24,6 +24,11 @@
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
+
+using VS::Core::Gte::ApplyMatrixLV;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace VS::Event {
 namespace {
@@ -155,7 +160,7 @@ class LiveCameraOutput final : public EventCameraOutputPort {
                                    &local_vector);
     Core::Math::StoreMatrix(*matrix, rotation);
     StoreVector(*record, vector);
-    Core_Gte_ApplyMatrixLV(matrix, record, record);
+    ApplyMatrixLV(matrix, record, record);
     return VectorOf(*record);
   }
 

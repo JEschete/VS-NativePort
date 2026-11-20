@@ -26,6 +26,8 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 
 constexpr std::uint8_t kNoParent = 0xFF;

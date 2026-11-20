@@ -13,7 +13,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -26,9 +26,16 @@
 #include "Effects/Runtime.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 static_assert(sizeof(VS::Effects::LiveTransformDefinition) ==
               VS::Effects::kTransformDefinitionBytes);
@@ -176,10 +183,10 @@ class LiveTransformHostImpl final : public TransformHost {
                      static_cast<std::int16_t>(point.y),
                      static_cast<std::int16_t>(point.z), 0};
     VECTOR output{};
-    Core_GteWord flags = 0;
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
-    Core_Gte_RotTrans(&input, &output, &flags);
+    VS::Core::Gte::Word flags = 0;
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
+    RotTrans(&input, &output, &flags);
     return Math::VectorOf(output);
   }
 };

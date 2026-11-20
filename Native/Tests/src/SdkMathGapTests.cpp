@@ -11,17 +11,21 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/Unported.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace Math = VS::Core::Math;
 using FixedTrig = std::int32_t (*)(std::int32_t) noexcept;

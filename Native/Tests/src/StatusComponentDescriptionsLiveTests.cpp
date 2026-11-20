@@ -40,7 +40,7 @@ constexpr std::size_t kGripArgument = 5;
 
 struct LiveFixture : equipment_detail_tests::LiveFixture {
   equipment_detail_tests::ArrayRestore<
-      u_char, std::size(VS::Menu::Framework::weaponHands)>
+      std::uint8_t, std::size(VS::Menu::Framework::weaponHands)>
       saved_hands{VS::Menu::Framework::weaponHands};
   data::World text;
 

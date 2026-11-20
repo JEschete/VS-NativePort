@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 
@@ -63,8 +63,8 @@ struct WeaponModel {
   std::int16_t reserved18;
   std::int16_t reserved1a;
   WeaponModelData* section_offsets;
-  MATRIX bone_world_matrices[kWeaponModelBones];
-  SVECTOR bones[kWeaponModelBones];
+  VS::Core::Gte::MATRIX bone_world_matrices[kWeaponModelBones];
+  VS::Core::Gte::SVECTOR bones[kWeaponModelBones];
   std::uint16_t palettes[kWeaponModelPalettes][kWeaponPaletteColors];
   std::uint16_t working_palette[kWeaponWorkPaletteColors];
   std::uint16_t upload_palette[kWeaponWorkPaletteColors];

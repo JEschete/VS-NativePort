@@ -16,7 +16,7 @@
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/TerrainHeight.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -312,7 +312,7 @@ TEST_CASE("Live waypoint search writes only the nearest active tile",
   auto* const saved_waypoints = VS::Battle::Ai::roomWaypoints;
   auto* const saved_heights = VS::Battle::Ai::specialTerrainHeights;
   Waypoints waypoints{};
-  u_short heights[32][32]{};
+  std::uint16_t heights[32][32]{};
   VS::Battle::Ai::roomWaypoints = waypoints.data();
   VS::Battle::Ai::specialTerrainHeights = heights;
   VS::Battle::Ai::ActorAiState state{};

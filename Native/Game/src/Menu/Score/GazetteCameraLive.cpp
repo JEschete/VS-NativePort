@@ -30,10 +30,12 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::VECTOR;
+
 namespace VS::Menu::Score {
 namespace {
 constexpr std::size_t kTagWords = 1;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(sizeof(VECTOR) == kCameraVectorWords * sizeof(std::int32_t));
 
 std::uint64_t refusals = 0;
@@ -45,7 +47,7 @@ void Refuse(std::string_view what) {
   }
 }
 
-u_long* OrderingEntry(std::int32_t slot) {
+std::uint32_t* OrderingEntry(std::int32_t slot) {
   return Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
 }
 
@@ -77,7 +79,7 @@ class LivePanelTarget final : public PanelTarget {
  private:
   template <std::size_t Words>
   void Queue(std::int32_t slot, const std::array<std::uint32_t, Words>& body) {
-    u_long* const entry = OrderingEntry(slot);
+    std::uint32_t* const entry = OrderingEntry(slot);
     if (mode_ == Mode::kTally) {
       tallied_words_ += kTagWords + Words;
       missed_entry_ = missed_entry_ || entry == nullptr;
@@ -193,7 +195,7 @@ class LiveOverviewHost final : public OverviewHost {
   }
   void DrawText(std::string_view text, std::uint32_t position,
                 std::uint32_t color) override {
-    u_long* const chain = OrderingEntry(kPanelSlot);
+    std::uint32_t* const chain = OrderingEntry(kPanelSlot);
     if (chain == nullptr) {
       // The compact font would fall back to the overlay table instead.
       Refuse("overview text has no frame ordering-table entry");

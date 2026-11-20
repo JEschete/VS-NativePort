@@ -18,7 +18,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Input/Vibration.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::PadInitDirect;
 using VS::Legacy::PadSetAct;

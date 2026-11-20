@@ -21,6 +21,8 @@
 #include "Event/ScriptCommand.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 namespace {
 namespace event = VS::Event;
 using VS::Core::Math::Position3;

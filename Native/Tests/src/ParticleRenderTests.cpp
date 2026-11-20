@@ -52,7 +52,7 @@
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Trails.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -61,6 +61,18 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "nlohmann/json.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DrawPrim;
+using VS::Legacy::GpuHandle;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_GT4;
 
 namespace {
 struct EffectTraceScope {
@@ -121,11 +133,12 @@ struct ParticleFixture {
   VS::Effects::LivePackageTexture texture{};
   VS::Effects::LivePackageTextureFrame info{.texture_count = 1,
                                             .first_texture = 0};
-  std::array<u_long, 2> script{8u << 16, 0x30000000u};
-  std::array<u_long, 2> curve_block{1, 2};
-  std::array<u_char, 2> curve{32, 64};
-  std::vector<u_long> storage = std::vector<u_long>(0x8002, 0xDEADBEEF);
-  std::array<u_long, 2064> ordering{};
+  std::array<std::uint32_t, 2> script{8u << 16, 0x30000000u};
+  std::array<std::uint32_t, 2> curve_block{1, 2};
+  std::array<std::uint8_t, 2> curve{32, 64};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x8002, 0xDEADBEEF);
+  std::array<std::uint32_t, 2064> ordering{};
 
   ParticleFixture() {
     VS::Effects::package = &package;
@@ -146,7 +159,7 @@ struct ParticleFixture {
     texture.tpage = 0x567;
     texture.corners = {{{-4, -4}, {4, -4}, {-4, 4}, {4, 4}}};
     particle.texture_animation.program =
-        reinterpret_cast<u_char*>(script.data());
+        reinterpret_cast<std::uint8_t*>(script.data());
     VS::Effects::RecordLiveAnimationTable(
         std::as_writable_bytes(std::span(script)));
     particle.motion.position.vz = 1024 << 12;
@@ -165,8 +178,8 @@ struct ParticleFixture {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     VS::Render::nearClip = 0;
     VS::Render::projectionDistance = 256;
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
   }
 
   ~ParticleFixture() {
@@ -184,7 +197,7 @@ struct ParticleFixture {
     VS::Effects::particleCapacity = saved_capacity;
     VS::Effects::usedParticleCount = saved_used;
     VS::Effects::freeParticles = saved_free;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   void CheckEmissionPool(bool occupied) const {
@@ -200,8 +213,8 @@ struct ParticleFixture {
           storage.data() + 17);
     const auto* quad = storage.data() + 4;
     CHECK(quad[1] == 0x2C808080);
-    CHECK(quad[2] == static_cast<u_long>(156 | (116 << 16)));
-    CHECK(quad[8] == static_cast<u_long>(164 | (124 << 16)));
+    CHECK(quad[2] == static_cast<std::uint32_t>(156 | (116 << 16)));
+    CHECK(quad[8] == static_cast<std::uint32_t>(164 | (124 << 16)));
     CHECK(quad[3] == 0x12342010);
     CHECK(quad[5] == 0x05672018);
     CHECK(storage.front() == 0xDEADBEEF);
@@ -453,8 +466,8 @@ TEST_CASE(
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   const auto* quad = fixture.storage.data() + 4;
   CHECK(quad[1] == 0x2E808080);
-  CHECK(quad[2] == static_cast<u_long>(164 | (116 << 16)));
-  CHECK(quad[8] == static_cast<u_long>(156 | (124 << 16)));
+  CHECK(quad[2] == static_cast<std::uint32_t>(164 | (116 << 16)));
+  CHECK(quad[8] == static_cast<std::uint32_t>(156 | (124 << 16)));
 }
 
 TEST_CASE("Particle texture timers advance once per render without resetting",
@@ -486,7 +499,7 @@ struct EmissionFixture : ParticleFixture {
     int reserved;
     VS::Effects::LiveParticleDefinition entries[1];
   } definitions{};
-  std::array<u_short, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
+  std::array<std::uint16_t, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
 
   EmissionFixture() {
     package.particle_definitions =
@@ -507,7 +520,7 @@ struct EmissionFixture : ParticleFixture {
 
   void CheckTexture(const VS::Effects::LiveParticleQuadSet& state) const {
     CHECK(state.texture_animation.program ==
-          reinterpret_cast<const u_char*>(programs.data()) + 8);
+          reinterpret_cast<const std::uint8_t*>(programs.data()) + 8);
     CHECK(state.texture_animation.texture_info == nullptr);
     CHECK(state.texture_animation.frame_timer == 0);
     CHECK(state.texture_animation.cursor == 0);
@@ -522,7 +535,7 @@ struct ChildEmissionFixture : EmissionFixture {
   int saved_drag = VS::Effects::particleDrag;
   int saved_sample = VS::Effects::curveSamples[0];
   std::array<VS::Effects::LiveParticle, 2> nodes{};
-  std::array<u_long, 1> terminal{0x30000000u};
+  std::array<std::uint32_t, 1> terminal{0x30000000u};
 
   explicit ChildEmissionFixture(ChildTrigger trigger) {
     package.texture_table_count = 1;
@@ -549,7 +562,7 @@ struct ChildEmissionFixture : EmissionFixture {
     }
     if (trigger == ChildTrigger::kTextureEnd) {
       parent.texture_animation.program =
-          reinterpret_cast<u_char*>(terminal.data());
+          reinterpret_cast<std::uint8_t*>(terminal.data());
       parent.texture_animation.texture_info = &info;
       VS::Effects::RecordLiveAnimationTable(
           std::as_writable_bytes(std::span(terminal)));
@@ -697,7 +710,7 @@ using LiveParticleDispatch = int (*)(VS::Effects::LiveRendererSlot*,
 struct LiveParticleCase {
   LiveParticleDispatch dispatch;
   std::size_t words;
-  u_long code;
+  std::uint32_t code;
   int* counter;
 };
 
@@ -729,7 +742,7 @@ void PrepareLiveCornerSet(EmissionFixture& fixture) {
 
 // The first segment's packet opens with its draw-mode word, carries the
 // set's grey and the segment's GPU code, and closes with the reset word.
-void CheckLiveSegmentPacket(const u_long* packet,
+void CheckLiveSegmentPacket(const std::uint32_t* packet,
                             const LiveParticleCase& live) {
   CHECK(packet[1] >> 24 == 0xE1);
   CHECK(packet[2] == ((live.code << 24) | 0x808080));
@@ -763,7 +776,7 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
   REQUIRE(state != nullptr);
   CHECK(state->age == 1);
   CHECK(*live.counter == 4);
-  const u_long* packet = fixture.storage.data() + 1;
+  const std::uint32_t* packet = fixture.storage.data() + 1;
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         packet + (8 * live.words));
   CheckLiveSegmentPacket(packet, live);
@@ -799,7 +812,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   } else {
     CHECK(static_cast<unsigned char>(fixture.particle.age) == 255);
     CHECK(fixture.particle.texture_animation.program ==
-          reinterpret_cast<u_char*>(fixture.programs.data()) + 8);
+          reinterpret_cast<std::uint8_t*>(fixture.programs.data()) + 8);
   }
   VS::Core::SeedBiosRand(1);
 }
@@ -951,7 +964,7 @@ TEST_CASE("Particle rendering flags cannot invent target attraction",
   ParticleMotionFixture fixture;
   auto& particle = fixture.particle;
   particle.emit_flags = GENERATE(0, 1, 0x40, 0x20000, 0x40000, 0x80000);
-  std::array<u_char, 4> program{};
+  std::array<std::uint8_t, 4> program{};
   VS::Effects::LivePackageTextureFrame texture{};
   particle.texture_animation.program = program.data();
   particle.texture_animation.texture_info = &texture;
@@ -1060,10 +1073,10 @@ void CheckTrailReferenceStep(const std::array<Trail, 2>& entries,
 template <class Trail, class State, class Initialize, class Update>
 void CheckTrailReferencePath(State& state, Initialize initialize,
                              Update update) {
-  constexpr u_long kGuard = 0xA1B2C3D4;
+  constexpr std::uint32_t kGuard = 0xA1B2C3D4;
   struct Storage {
     std::array<Trail, 2> entries{};
-    u_long guard = kGuard;
+    std::uint32_t guard = kGuard;
   } storage;
   auto& trail = storage.entries[0];
   constexpr std::array<SVECTOR, 4> kPoints{
@@ -1176,9 +1189,9 @@ void InitializeTrailRenderHistory(std::array<Trail, 2>& trails,
   constexpr auto kSamples = std::size(Trail{}.spline_samples);
   for (std::size_t actor = 0; actor < trails.size(); ++actor) {
     auto& trail = trails[actor];
-    trail.spline_sample_count = static_cast<u_char>(count);
-    trail.trail_collapse_counter = static_cast<u_char>(count - 1);
-    trail.current_spline_sample = static_cast<u_char>(current);
+    trail.spline_sample_count = static_cast<std::uint8_t>(count);
+    trail.trail_collapse_counter = static_cast<std::uint8_t>(count - 1);
+    trail.current_spline_sample = static_cast<std::uint8_t>(current);
     for (std::size_t index = 0; index < kSamples; ++index) {
       trail.spline_samples[(current + kSamples - index) % kSamples] = {
           static_cast<std::int16_t>(index * 32),
@@ -1189,7 +1202,7 @@ void InitializeTrailRenderHistory(std::array<Trail, 2>& trails,
 
 void CheckTrailReferenceRenderState(
     const VS::Effects::LiveParticleTextureAnimation& animation,
-    const ParticleFixture& fixture, const u_long* end) {
+    const ParticleFixture& fixture, const std::uint32_t* end) {
   CHECK(animation.cursor == 4);
   CHECK(animation.frame_timer == 8);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == end);
@@ -1198,10 +1211,10 @@ void CheckTrailReferenceRenderState(
 }
 
 template <class Trail, class Packet, class ReadQuad>
-void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
-                                std::size_t count, int origin_x,
-                                ReadQuad read_quad) {
-  constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
+void CheckTrailReferencePackets(const std::uint32_t* begin,
+                                std::size_t trail_count, std::size_t count,
+                                int origin_x, ReadQuad read_quad) {
+  constexpr auto kPacketWords = sizeof(Packet) / sizeof(std::uint32_t);
   constexpr auto kSamples = std::size(Trail{}.spline_samples);
   for (std::size_t actor = 0; actor < trail_count; ++actor) {
     for (std::size_t segment = 0; segment < count - 1; ++segment) {
@@ -1223,7 +1236,7 @@ void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
 template <class Trail, class Packet, class State, class Render, class ReadQuad>
 void CheckTrailReferenceRendering(
     State& state, VS::Effects::LiveParticleTextureAnimation& animation,
-    std::span<u_char> transparency, Render render, ReadQuad read_quad) {
+    std::span<std::uint8_t> transparency, Render render, ReadQuad read_quad) {
   constexpr auto kSamples = std::size(Trail{}.spline_samples);
   const bool attached = GENERATE(false, true);
   const bool clipped = GENERATE(false, true);
@@ -1235,9 +1248,9 @@ void CheckTrailReferenceRendering(
   std::array<Trail, 2> trails{};
   InitializeTrailRenderHistory(trails, count, current);
   state.trails = trails.data();
-  animation.program = reinterpret_cast<u_char*>(fixture.script.data());
+  animation.program = reinterpret_cast<std::uint8_t*>(fixture.script.data());
   for (std::size_t index = 0; index < transparency.size(); ++index) {
-    transparency[index] = static_cast<u_char>((index + 1) * 8);
+    transparency[index] = static_cast<std::uint8_t>((index + 1) * 8);
   }
   VS::Effects::LiveParticleDefinition definition{};
   definition.vector_ranges[4][0] = definition.vector_ranges[4][1] = 8;
@@ -1249,7 +1262,7 @@ void CheckTrailReferenceRendering(
       VS::Render::FrameScratchpad().view_matrix;
   fixture.instance.transforms[1].view.t[0] = 128;
   VS::Render::nearClip = clipped ? 256 : 255;
-  constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
+  constexpr auto kPacketWords = sizeof(Packet) / sizeof(std::uint32_t);
   const auto packets = trails.size() * (count - 1);
   auto* begin = fixture.storage.data() + 1;
   if (at_boundary) begin += 0x8000 - packets * kPacketWords;
@@ -1265,7 +1278,7 @@ void CheckTrailReferenceRendering(
                                             attached ? 192 : 144, read_quad);
   const auto* last = begin + (packets - 1) * kPacketWords;
   CHECK((fixture.ordering[16 + 256] & 0xFFFFFF) ==
-        (LegacyGpu_Handle(last) & 0xFFFFFF));
+        (GpuHandle(last) & 0xFFFFFF));
 }
 }  // namespace
 
@@ -1307,7 +1320,7 @@ struct Plg074Fixture : EmissionFixture {
   VS::Effects::LiveActionEffectRequest saved_request =
       VS::Effects::actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
-  std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
+  std::array<std::array<std::uint8_t, 4>, 8> saved_arc_colors{};
   VS::Effects::LiveParticleEmitterScratch scratch{};
   std::array<VS::Effects::LiveTrail, 16> trails{};
   VS::Effects::LiveTrailState trail_state{};
@@ -1327,7 +1340,7 @@ struct Plg074Fixture : EmissionFixture {
     for (int mode = 0; mode < 8; ++mode) {
       for (int row = 0; row < 3; ++row) {
         VS::Effects::Plg073::ringColorFactors[mode][row] =
-            static_cast<u_char>(32 * (row + 1) + mode);
+            static_cast<std::uint8_t>(32 * (row + 1) + mode);
       }
     }
     instance.transforms[0].world.t[0] = 700;
@@ -1496,7 +1509,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   const auto mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
-  fixture.Definition().transparency_curve = static_cast<u_int>(mode);
+  fixture.Definition().transparency_curve = static_cast<std::uint32_t>(mode);
   DispatchHeap heap;
   VS::Effects::LiveRendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
@@ -1790,9 +1803,9 @@ struct LogCapture {
 // A package whose curve block (type 4, 20 bytes) holds three curves of one,
 // four and two entries after a four-byte header and three size bytes.
 struct CurveBlockStorage {
-  alignas(4) std::array<u_char, 24> bytes{20, 0, 4, 0, 3,  0,  8,  0,
-                                          1,  4, 2, 0, 90, 10, 20, 30,
-                                          40, 5, 6, 0, 0,  0,  0,  0};
+  alignas(4) std::array<std::uint8_t, 24> bytes{20, 0, 4, 0, 3,  0,  8,  0,
+                                                1,  4, 2, 0, 90, 10, 20, 30,
+                                                40, 5, 6, 0, 0,  0,  0,  0};
 
   // Binding a package forgets the previous blocks' extents, so the caller's
   // particle definitions are recorded again.
@@ -1803,14 +1816,14 @@ struct CurveBlockStorage {
   }
 };
 
-std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
-                                          u_char curve) {
+std::array<std::uint8_t, 5> CreatedTransparency(Plg074Fixture& fixture,
+                                                std::uint8_t curve) {
   fixture.Definition().transparency_curve = curve;
   VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
-  std::array<u_char, 5> samples = state->transparency;
+  std::array<std::uint8_t, 5> samples = state->transparency;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(state);
   return samples;
@@ -1881,13 +1894,13 @@ TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
   curves.Bind(std::as_bytes(std::span{&fixture.definitions, 1}));
   fixture.Definition().interval_range[0] = 1;
   CHECK(CreatedTransparency(fixture, 0) ==
-        std::array<u_char, 5>{128, 128, 128, 128, 128});
+        std::array<std::uint8_t, 5>{128, 128, 128, 128, 128});
   CHECK(CreatedTransparency(fixture, 1) ==
-        std::array<u_char, 5>{10, 10, 20, 30, 40});
+        std::array<std::uint8_t, 5>{10, 10, 20, 30, 40});
   CHECK(CreatedTransparency(fixture, 2) ==
-        std::array<u_char, 5>{5, 5, 5, 5, 6});
+        std::array<std::uint8_t, 5>{5, 5, 5, 5, 6});
   CHECK(CreatedTransparency(fixture, 3) ==
-        std::array<u_char, 5>{128, 128, 128, 128, 128});
+        std::array<std::uint8_t, 5>{128, 128, 128, 128, 128});
   CHECK(log.Contains("transparency curve 3 is outside"));
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
@@ -1918,29 +1931,30 @@ namespace {
 struct StaleCurveBlock {
   explicit StaleCurveBlock(Plg074Fixture& fixture) {
     curves.Bind(std::as_bytes(std::span{&fixture.definitions, 1}));
-    curves.bytes[11] = static_cast<u_char>(stale.size());
+    curves.bytes[11] = static_cast<std::uint8_t>(stale.size());
     fixture.package.curves[3] = stale.data();
   }
 
   CurveBlockStorage curves;
-  std::array<u_char, 5> stale{200, 200, 200, 200, 200};
+  std::array<std::uint8_t, 5> stale{200, 200, 200, 200, 200};
 };
 
-std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
-                                                  u_char curve) {
+std::array<std::uint8_t, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
+                                                        std::uint8_t curve) {
   fixture.Definition().transparency_curve = curve;
   VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
   auto* state =
       static_cast<VS::Effects::LiveTrailNineState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
-  std::array<u_char, 9> samples = state->transparency;
+  std::array<std::uint8_t, 9> samples = state->transparency;
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(state);
   return samples;
 }
 
-std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture, u_char curve) {
+std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture,
+                                       std::uint8_t curve) {
   fixture.Definition().transparency_curve = curve;
   VS::Effects::LiveRendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1,
@@ -1964,12 +1978,13 @@ TEST_CASE("Nine-sample trail transparency reads only the package's curves",
   const StaleCurveBlock curves(fixture);
   fixture.Definition().interval_range[0] = 1;
   CHECK(NineSampleTrailTransparency(fixture, 1) ==
-        std::array<u_char, 9>{10, 10, 10, 20, 20, 20, 30, 30, 40});
+        std::array<std::uint8_t, 9>{10, 10, 10, 20, 20, 20, 30, 30, 40});
   CHECK_FALSE(log.Contains("transparency curve"));
-  for (const u_char curve : {u_char{3}, u_char{63}}) {
+  for (const std::uint8_t curve : {std::uint8_t{3}, std::uint8_t{63}}) {
     CAPTURE(curve);
     CHECK(NineSampleTrailTransparency(fixture, curve) ==
-          std::array<u_char, 9>{128, 128, 128, 128, 128, 128, 128, 128, 128});
+          std::array<std::uint8_t, 9>{128, 128, 128, 128, 128, 128, 128, 128,
+                                      128});
   }
   CHECK(
       log.Contains("PLG049 trail emitter: transparency curve 3 is outside "
@@ -2090,7 +2105,7 @@ TEST_CASE("Live surfaces draw full-intensity rows for curves the package lacks",
   CHECK(RotatingSurfaceRows(fixture, 1) ==
         std::array<int, 5>{20, 20, 40, 60, 80});
   CHECK_FALSE(log.Contains("transparency curve"));
-  for (const u_char curve : {u_char{3}, u_char{63}}) {
+  for (const std::uint8_t curve : {std::uint8_t{3}, std::uint8_t{63}}) {
     CAPTURE(curve);
     CHECK(RotatingSurfaceRows(fixture, curve) ==
           std::array<int, 5>{255, 255, 255, 255, 255});

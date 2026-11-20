@@ -18,7 +18,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -88,7 +88,7 @@ template <typename T, std::size_t N>
   return &table[static_cast<std::size_t>(slot)];
 }
 
-[[nodiscard]] std::span<const u_char> IndexList(EquipmentTable table) {
+[[nodiscard]] std::span<const std::uint8_t> IndexList(EquipmentTable table) {
   switch (table) {
     case EquipmentTable::kWeapons:
       return VS::Items::inventoryIndices.weapons;
@@ -236,7 +236,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
     const std::size_t count = std::min(flags.size(), row_types.size());
     std::copy_n(flags.begin(), count, row_types.begin());
     LiveCreateEquipmentRows(static_cast<int>(count),
-                            reinterpret_cast<u_short**>(text_.data()),
+                            reinterpret_cast<std::uint16_t**>(text_.data()),
                             row_types.data());
   }
   void UpdateChoices(std::int32_t has_sfx) override {

@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Event/ScriptControlOpcodes.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/RoomMemory.hpp"
 
 namespace {
@@ -88,7 +88,7 @@ TEST_CASE("Event branch handlers return complete native addresses",
 TEST_CASE("Room cache opcode clears matching room and zone without loading",
           "[event][room-cache]") {
   RoomActorCacheFixture fixture;
-  std::array<u_char, 3> command{0, 31, 7};
+  std::array<std::uint8_t, 3> command{0, 31, 7};
   CHECK(VS::Event::ScriptClearRoomActorCacheOpcode(command.data(), 2) == 0);
   CheckRoomActorCache(0, 7, 31, std::byte{0});
   CheckRoomActorCache(1, 7, 32, std::byte{0x5A});

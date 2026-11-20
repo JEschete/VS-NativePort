@@ -9,7 +9,7 @@
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -18,6 +18,9 @@
 #include "State/SceneTimerLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+
+using VS::Legacy::GpuWalkList;
+using VS::Legacy::nextPrim;
 
 int Tests_EncodedTextFormatting(void);
 
@@ -115,15 +118,15 @@ struct PuzzleTimerFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  std::array<u_long, 256> storage{};
-  std::array<u_long, 16> ordering{};
+  std::array<std::uint32_t, 256> storage{};
+  std::array<std::uint32_t, 16> ordering{};
 
   PuzzleTimerFixture() {
     VS::Battle::puzzleTimerTextPointer = nullptr;
     std::fill_n(VS::Render::compactGlyphWidths + 8, 6, 0x66);
     for (int glyph = 0; glyph < 11; ++glyph) {
       VS::Render::compactGlyphIndices[16 + glyph] =
-          static_cast<u_char>(glyph * 2);
+          static_cast<std::uint8_t>(glyph * 2);
     }
   }
 
@@ -175,12 +178,14 @@ struct PuzzleTimerFixture {
     DrawCounter(VS::State::sceneTimer, hundredths);
   }
 
-  static void CheckGlyph(const u_long* sprite, std::size_t glyph,
+  static void CheckGlyph(const std::uint32_t* sprite, std::size_t glyph,
                          char character) {
     CHECK(sprite[1] == 0x64808080);
-    CHECK(sprite[2] == static_cast<u_long>((128 + glyph * 6) | (200 << 16)));
+    CHECK(sprite[2] ==
+          static_cast<std::uint32_t>((128 + glyph * 6) | (200 << 16)));
     CHECK(sprite[4] == 0x000A0006);
-    CHECK((sprite[3] & 0xFF) == static_cast<u_long>((character - '0') * 2));
+    CHECK((sprite[3] & 0xFF) ==
+          static_cast<std::uint32_t>((character - '0') * 2));
   }
 
   void CheckGuards() const {
@@ -195,11 +200,12 @@ struct PuzzleTimerFixture {
     // The draw mode and eight glyphs; the chain, not the buffer, orders them.
     CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
           storage.data() + 43);
-    CHECK(LegacyGpu_WalkList(ordering.data()) == 10);
-    const auto* packet = static_cast<const u_long*>(nextPrim(ordering.data()));
+    CHECK(GpuWalkList(ordering.data()) == 10);
+    const auto* packet =
+        static_cast<const std::uint32_t*>(nextPrim(ordering.data()));
     CHECK(packet[1] == 0xE100000C);
     for (std::size_t glyph = 0; glyph < 8; ++glyph) {
-      packet = static_cast<const u_long*>(nextPrim(packet));
+      packet = static_cast<const std::uint32_t*>(nextPrim(packet));
       CheckGlyph(packet, glyph, expected[glyph]);
     }
     CheckGuards();

@@ -30,7 +30,7 @@
 #include "Audio/SoundState.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace Core = VS::Core;

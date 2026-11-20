@@ -19,7 +19,7 @@
 #include "Boot/GameLoop.hpp"
 #include "Boot/PlayerSettings.hpp"
 #include "Content/StringTables.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -27,7 +27,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Sounds.hpp"
@@ -55,6 +55,19 @@
 #include "Title/TitleMenuLiveState.hpp"
 #include "Title/TitleScreen.hpp"
 
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::DrawPrim;
+using VS::Legacy::PutDispEnv;
+using VS::Legacy::PutDrawEnv;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDefDispEnv;
+using VS::Legacy::SetDefDrawEnv;
+using VS::Legacy::SetDispMask;
+using VS::Legacy::setRGB0;
 using VS::Legacy::VSync;
 
 namespace mcman_text = VS::Content::text::mcman_bin;
@@ -157,7 +170,7 @@ struct ImageSource {
 class LiveHost final : public Host {
  public:
   void Submit(std::span<const std::uint32_t> packet) override {
-    std::array<u_long, kPacketWords> words{};
+    std::array<std::uint32_t, kPacketWords> words{};
     if (packet.size() > words.size()) {
       VS::Core::LogWarn(kChannel, "Title packet of {} words exceeds {} words",
                         packet.size(), words.size());
@@ -241,8 +254,9 @@ class LiveHost final : public Host {
     }
     RECT rect = ToRect(area);
     // libgpu's LoadImage only reads the pixels.
-    ::LoadImage(&rect, reinterpret_cast<u_long*>(
-                           const_cast<std::uint16_t*>(pixels.data())));
+    VS::Legacy::LoadImage(&rect,
+                          reinterpret_cast<std::uint32_t*>(
+                              const_cast<std::uint16_t*>(pixels.data())));
   }
   void StoreImage(const Render::ScreenRect& area,
                   std::span<std::uint16_t> pixels) override {
@@ -250,11 +264,12 @@ class LiveHost final : public Host {
       return;
     }
     RECT rect = ToRect(area);
-    ::StoreImage(&rect, reinterpret_cast<u_long*>(pixels.data()));
+    VS::Legacy::StoreImage(&rect,
+                           reinterpret_cast<std::uint32_t*>(pixels.data()));
   }
   void ClearImage(const Render::ScreenRect& area) override {
     RECT rect = ToRect(area);
-    ::ClearImage(&rect, 0, 0, 0);
+    VS::Legacy::ClearImage(&rect, 0, 0, 0);
   }
   void SetDisplayEnabled(bool enabled) override {
     SetDispMask(enabled ? 1 : 0);
@@ -271,12 +286,8 @@ class LiveHost final : public Host {
     PutDispEnv(&display);
     PutDrawEnv(&draw);
   }
-  void SetGeometryOffset(int x, int y) override {
-    Core_Gte_SetGeomOffset(x, y);
-  }
-  void SetProjectionDistance(int distance) override {
-    Core_Gte_SetGeomScreen(distance);
-  }
+  void SetGeometryOffset(int x, int y) override { SetGeomOffset(x, y); }
+  void SetProjectionDistance(int distance) override { SetGeomScreen(distance); }
   void ApplyGameDisplay(const GameDisplayLayout& layout) override {
     for (std::size_t buffer = 0; buffer < Render::kFrameBufferCount; ++buffer) {
       DRAWENV& draw = VS::Render::legacyDrawEnvironments[buffer];

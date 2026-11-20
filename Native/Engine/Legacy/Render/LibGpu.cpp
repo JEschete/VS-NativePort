@@ -1,4 +1,4 @@
-#include "Legacy/Render/LibGpu.h"
+#include "Legacy/Render/LibGpu.hpp"
 
 #include <span>
 #include <stdexcept>
@@ -8,7 +8,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Unported.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
@@ -23,6 +23,8 @@ using VS::usize;
 using VS::Render::GamePages;
 using VS::Render::PageSpace;
 
+namespace VS::Legacy {
+
 namespace {
 
 // Ordering-table link handles. A packet keeps one handle for its address for
@@ -31,7 +33,7 @@ namespace {
 // 2^24 a link can address. Handle 0 is never issued (a zeroed tag is not a
 // link); 0xFFFFFF is the end marker.
 struct LinkTable {
-  std::unordered_map<const void*, u_long> handles;
+  std::unordered_map<const void*, std::uint32_t> handles;
   std::vector<const void*> pointers{nullptr};
 };
 
@@ -80,32 +82,32 @@ u32 TextureWindow(const RECT* tw) {
 
 }  // namespace
 
-u_long LegacyGpu_Handle(const void* p) {
+std::uint32_t GpuHandle(const void* p) {
   LinkTable& t = Links();
   auto [it, added] =
-      t.handles.try_emplace(p, static_cast<u_long>(t.pointers.size()));
+      t.handles.try_emplace(p, static_cast<std::uint32_t>(t.pointers.size()));
   if (added) {
-    if (t.pointers.size() >= LEGACY_GPU_LINK_END) {
+    if (t.pointers.size() >= kGpuLinkEnd) {
       VS::Core::RecordUnported(
           "libgpu: more than 2^24 packet addresses linked");
       t.handles.erase(it);
-      return LEGACY_GPU_LINK_END;
+      return kGpuLinkEnd;
     }
     t.pointers.push_back(p);
   }
   return it->second;
 }
 
-void* LegacyGpu_Pointer(u_long link) {
+void* GpuPointer(std::uint32_t link) {
   link &= 0xFFFFFF;
   const LinkTable& t = Links();
-  if (link == LEGACY_GPU_LINK_END || link == 0 || link >= t.pointers.size()) {
+  if (link == kGpuLinkEnd || link == 0 || link >= t.pointers.size()) {
     return nullptr;
   }
   return const_cast<void*>(t.pointers[link]);
 }
 
-int LegacyGpu_WalkList(const void* p) {
+int GpuWalkList(const void* p) {
   int count = 0;
   const P_TAG* previous = nullptr;
   std::unordered_set<const void*> visited;
@@ -133,8 +135,7 @@ int LegacyGpu_WalkList(const void* p) {
     SubmitPacket(tag);
     ++count;
     previous = tag;
-    p = tag->addr == LEGACY_GPU_LINK_END ? nullptr
-                                         : LegacyGpu_Pointer(tag->addr);
+    p = tag->addr == kGpuLinkEnd ? nullptr : GpuPointer(tag->addr);
   }
   return count;
 }
@@ -179,7 +180,7 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h) {
   setRECT(&env->clip, x, y, w, h);
   env->ofs[0] = static_cast<short>(x);
   env->ofs[1] = static_cast<short>(y);
-  env->tpage = static_cast<u_short>(getTPage(0, 0, 640, 0));
+  env->tpage = static_cast<std::uint16_t>(getTPage(0, 0, 640, 0));
   env->dtd = 1;
   env->dfe = h < 289 ? 1 : 0;
   return env;
@@ -188,23 +189,23 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h) {
 // ----------------------------------------------------------------------------------------------------
 // transfers
 
-int ClearImage(RECT* rect, u_char r, u_char g, u_char b) {
+int ClearImage(RECT* rect, std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   GamePages().Fill(ToRect(rect), r, g, b);
   return 0;
 }
 
-int ClearImage2(RECT* rect, u_char r, u_char g, u_char b) {
+int ClearImage2(RECT* rect, std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   return ClearImage(rect, r, g, b);
 }
 
-int LoadImage(RECT* rect, u_long* p) {
+int LoadImage(RECT* rect, std::uint32_t* p) {
   GamePages().Upload(ToRect(rect), reinterpret_cast<const u16*>(p));
   return 0;
 }
 
-int LoadImage2(RECT* rect, u_long* p) { return LoadImage(rect, p); }
+int LoadImage2(RECT* rect, std::uint32_t* p) { return LoadImage(rect, p); }
 
-int StoreImage(RECT* rect, u_long* p) {
+int StoreImage(RECT* rect, std::uint32_t* p) {
   GamePages().Download(ToRect(rect), reinterpret_cast<u16*>(p));
   return 0;
 }
@@ -214,16 +215,18 @@ int MoveImage(RECT* rect, int x, int y) {
   return 0;
 }
 
-u_short GetClut(int x, int y) { return static_cast<u_short>(getClut(x, y)); }
+std::uint16_t GetClut(int x, int y) {
+  return static_cast<std::uint16_t>(getClut(x, y));
+}
 
-u_short GetTPage(int tp, int abr, int x, int y) {
-  return static_cast<u_short>(getTPage(tp, abr, x, y));
+std::uint16_t GetTPage(int tp, int abr, int x, int y) {
+  return static_cast<std::uint16_t>(getTPage(tp, abr, x, y));
 }
 
 // ----------------------------------------------------------------------------------------------------
 // lists
 
-u_long* ClearOTag(u_long* ot, int n) {
+std::uint32_t* ClearOTag(std::uint32_t* ot, int n) {
   // forward list: each entry links to the next, the last ends the list
   for (int i = 0; i < n; ++i) {
     ot[i] = 0;
@@ -236,7 +239,7 @@ u_long* ClearOTag(u_long* ot, int n) {
   return ot;
 }
 
-u_long* ClearOTagR(u_long* ot, int n) {
+std::uint32_t* ClearOTagR(std::uint32_t* ot, int n) {
   // reverse list: each entry links to the previous, entry 0 ends the list;
   // drawing starts at ot[n - 1]
   for (int i = 0; i < n; ++i) {
@@ -250,7 +253,7 @@ u_long* ClearOTagR(u_long* ot, int n) {
   return ot;
 }
 
-void DrawOTag(u_long* p) { LegacyGpu_WalkList(p); }
+void DrawOTag(std::uint32_t* p) { GpuWalkList(p); }
 
 void DrawPrim(void* p) {
   // one packet, not a list
@@ -262,7 +265,7 @@ void AddPrim(void* ot, void* p) { addPrim(ot, p); }
 void AddPrims(void* ot, void* p0, void* p1) {
   // insert the already-linked run p0..p1 at the head of `ot`
   ((P_TAG*)p1)->addr = ((P_TAG*)ot)->addr;
-  ((P_TAG*)ot)->addr = LegacyGpu_Handle(p0);
+  ((P_TAG*)ot)->addr = GpuHandle(p0);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -313,3 +316,5 @@ void SetPolyG4(POLY_G4* p) { setPolyG4(p); }
 void SetSemiTrans(void* p, int abe) { setSemiTrans(p, abe); }
 void SetSprt(SPRT* p) { setSprt(p); }
 void SetTile(TILE* p) { setTile(p); }
+
+}  // namespace VS::Legacy

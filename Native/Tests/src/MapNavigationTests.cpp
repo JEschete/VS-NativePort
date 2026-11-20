@@ -13,10 +13,12 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
 #include "Menu/MapNavigationLive.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace nav = VS::Menu::map;
@@ -293,11 +295,11 @@ struct LiveMapState {
     VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(image.bytes.data());
     VS::Field::roomData.header.minimap_scene_length =
-        static_cast<u_int>(image.bytes.size());
+        static_cast<std::uint32_t>(image.bytes.size());
   }
 
   VS::Field::MapScene* minimap;
-  u_int minimap_length;
+  std::uint32_t minimap_length;
   void* arm;
   int scene;
   SVECTOR center;

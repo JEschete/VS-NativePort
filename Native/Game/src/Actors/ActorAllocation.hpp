@@ -9,7 +9,7 @@
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 namespace layout {
@@ -31,7 +31,7 @@ struct ActorAndStats {
 struct ActorCore {
   ActorAndStats actor;
   VS::Actors::ModelInstance model;
-  std::array<MATRIX, layout::kActorCoreMatrices> reserved_6c;
+  std::array<VS::Core::Gte::MATRIX, layout::kActorCoreMatrices> reserved_6c;
   // The model's object word (0x16C), which actor creation sets.
   std::int32_t object_word;
   std::int32_t reserved_170;

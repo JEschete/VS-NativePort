@@ -22,18 +22,24 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Legacy::DrawPrim;
+using VS::Legacy::GpuHandle;
+using VS::Legacy::GpuPointer;
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
+
 namespace VS::Render {
 namespace {
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-
 // The overlay bucket's head entry, 0x2084 bytes into the current ordering
 // table; its chain ends at the entry before it (146C.c:8055).
-constexpr std::size_t kOverlayBucketHead = 0x2084 / sizeof(u_long);
+constexpr std::size_t kOverlayBucketHead = 0x2084 / sizeof(std::uint32_t);
 // vs_battle_renderValue's default chain (5BF94.c:3037).
 constexpr std::uintptr_t kNumberChainOffset = 0x10;
 // Both frames' ordering tables are 0x2088 bytes (Boot/GameLoop.cpp and
 // Ending/Credits/StaffRoll.cpp allocate them).
-constexpr std::size_t kOrderingTableEntries = 0x2088 / sizeof(u_long);
+constexpr std::size_t kOrderingTableEntries = 0x2088 / sizeof(std::uint32_t);
 
 std::uint64_t dropped_packets = 0;
 std::uint64_t unspliced_primitives = 0;
@@ -70,7 +76,7 @@ class LivePrimitiveChain final : public PrimitiveChain {
  public:
   [[nodiscard]] std::optional<std::uint32_t> TagWord(
       std::uint32_t handle) const override {
-    const void* tag = LegacyGpu_Pointer(handle);
+    const void* tag = GpuPointer(handle);
     if (tag == nullptr) {
       return std::nullopt;
     }
@@ -80,21 +86,21 @@ class LivePrimitiveChain final : public PrimitiveChain {
   }
 
   void SetTagWord(std::uint32_t handle, std::uint32_t word) override {
-    void* tag = LegacyGpu_Pointer(handle);
+    void* tag = GpuPointer(handle);
     if (tag != nullptr) {
       std::memcpy(tag, &word, sizeof word);
     }
   }
 
   [[nodiscard]] std::optional<ChainBucket> OverlayBucket() const override {
-    auto* table = static_cast<u_long*>(legacyCurrentOrderingTable);
+    auto* table = static_cast<std::uint32_t*>(legacyCurrentOrderingTable);
     if (table == nullptr) {
       return std::nullopt;
     }
     return ChainBucket{.head = static_cast<std::uint32_t>(
-                           LegacyGpu_Handle(table + kOverlayBucketHead)),
+                           GpuHandle(table + kOverlayBucketHead)),
                        .next = static_cast<std::uint32_t>(
-                           LegacyGpu_Handle(table + kOverlayBucketHead - 1))};
+                           GpuHandle(table + kOverlayBucketHead - 1))};
   }
 };
 
@@ -106,7 +112,7 @@ class LiveImageUpload final : public ImageUploadTarget {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the pixels.
-    LoadImage(&rect, static_cast<u_long*>(const_cast<void*>(pixels_)));
+    LoadImage(&rect, static_cast<std::uint32_t*>(const_cast<void*>(pixels_)));
   }
 
  private:
@@ -120,7 +126,7 @@ class LiveImageRead final : public ImageReadTarget {
   void Read(const ScreenRect& area) override {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
-    StoreImage(&rect, static_cast<u_long*>(pixels_));
+    StoreImage(&rect, static_cast<std::uint32_t*>(pixels_));
   }
 
  private:
@@ -132,7 +138,7 @@ class LiveImageRead final : public ImageReadTarget {
 class LiveOverlayQueue final : public OverlayPacketQueue {
  public:
   bool AppendOverlay(std::span<const std::uint32_t> packet) override {
-    u_long* slot = ReserveLivePrimitiveWords(packet.size());
+    std::uint32_t* slot = ReserveLivePrimitiveWords(packet.size());
     if (slot == nullptr) {
       ReportDropped();
       return false;
@@ -140,7 +146,7 @@ class LiveOverlayQueue final : public OverlayPacketQueue {
     std::ranges::copy(packet, slot);
     LivePrimitiveChain chain;
     const SpliceResult result = AppendOverlayPrimitive(
-        chain, static_cast<std::uint32_t>(LegacyGpu_Handle(slot)));
+        chain, static_cast<std::uint32_t>(GpuHandle(slot)));
     if (result != SpliceResult::kSpliced) {
       ReportUnspliced(result);
       return false;
@@ -153,7 +159,7 @@ class LiveOverlayQueue final : public OverlayPacketQueue {
 class LiveImmediateTarget final : public ImmediatePacketTarget {
  public:
   void Submit(std::span<const std::uint32_t> packet) override {
-    std::array<u_long, kImmediateSpriteWords> words{};
+    std::array<std::uint32_t, kImmediateSpriteWords> words{};
     if (packet.size() > words.size()) {
       ReportDropped();
       return;
@@ -163,13 +169,13 @@ class LiveImmediateTarget final : public ImmediatePacketTarget {
   }
 };
 
-u_long* DefaultNumberChain() {
+std::uint32_t* DefaultNumberChain() {
   const auto table =
       reinterpret_cast<std::uintptr_t>(FrameScratchpad().ordering_table);
   if (table < kNumberChainOffset) {
     return nullptr;
   }
-  return reinterpret_cast<u_long*>(table - kNumberChainOffset);
+  return reinterpret_cast<std::uint32_t*>(table - kNumberChainOffset);
 }
 }  // namespace
 
@@ -186,34 +192,36 @@ bool LivePacketQueue::CanEmit(std::size_t words) const {
 }
 
 bool LivePacketQueue::Emit(std::span<const std::uint32_t> packet) {
-  u_long* slot =
+  std::uint32_t* slot =
       chain_ != nullptr ? ReserveLivePrimitiveWords(packet.size()) : nullptr;
   if (slot == nullptr) {
     ReportDropped();
     return false;
   }
   std::ranges::copy(packet, slot);
-  *chain_ = LegacyGpu_Handle(slot);
+  *chain_ = GpuHandle(slot);
   FrameScratchpad().primitive_cursor = slot + packet.size();
   return true;
 }
 
-u_long* LiveFrameOrderingEntry(LiveOrderingBase base, int slot) {
+std::uint32_t* LiveFrameOrderingEntry(LiveOrderingBase base, int slot) {
   void* const frame_table = legacyOrderingTables[frameBuf & 1];
   const auto table = reinterpret_cast<std::uintptr_t>(frame_table);
   const auto head = reinterpret_cast<std::uintptr_t>(
       base == LiveOrderingBase::kScene
           ? FrameScratchpad().ordering_table
           : FrameScratchpad().overlay_ordering_table);
-  if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
+  if (table == 0 || head < table ||
+      (head - table) % sizeof(std::uint32_t) != 0) {
     return nullptr;
   }
-  const auto index = static_cast<std::int64_t>((head - table) / sizeof(u_long));
+  const auto index =
+      static_cast<std::int64_t>((head - table) / sizeof(std::uint32_t));
   const std::int64_t entry = index + slot;
   if (entry < 0 || entry >= static_cast<std::int64_t>(kOrderingTableEntries)) {
     return nullptr;
   }
-  return static_cast<u_long*>(frame_table) + entry;
+  return static_cast<std::uint32_t*>(frame_table) + entry;
 }
 
 void AppendLiveOverlayPrimitive(void* primitive) {
@@ -221,19 +229,20 @@ void AppendLiveOverlayPrimitive(void* primitive) {
   const SpliceResult result =
       primitive != nullptr
           ? AppendOverlayPrimitive(
-                chain, static_cast<std::uint32_t>(LegacyGpu_Handle(primitive)))
+                chain, static_cast<std::uint32_t>(GpuHandle(primitive)))
           : SpliceResult::kMissingPrimitive;
   if (result != SpliceResult::kSpliced) {
     ReportUnspliced(result);
   }
 }
 
-void DrawLiveNumericGlyph(int font, int xy, int digit, u_long* before) {
+void DrawLiveNumericGlyph(int font, int xy, int digit, std::uint32_t* before) {
   LivePacketQueue queue(before);
   DrawNumericGlyph(queue, {.font = font, .position = xy, .digit = digit});
 }
 
-int DrawLiveIntegerRightAligned(int font, int xy, int value, u_long* before) {
+int DrawLiveIntegerRightAligned(int font, int xy, int value,
+                                std::uint32_t* before) {
   LivePacketQueue queue(before != nullptr ? before : DefaultNumberChain());
   const RightAlignedNumber number = DrawIntegerRightAligned(
       queue, {.font = font, .position = xy, .value = value});
@@ -247,7 +256,7 @@ int DrawLiveIntegerRightAligned(int font, int xy, int value, u_long* before) {
   return number.next_position;
 }
 
-void DrawLiveStatGauge(int color_index, int w, u_long* before, int xy) {
+void DrawLiveStatGauge(int color_index, int w, std::uint32_t* before, int xy) {
   std::array<std::uint32_t, std::size(kStatGaugeColors)> palette{};
   std::ranges::transform(kStatGaugeColors, palette.begin(), [](int color) {
     return static_cast<std::uint32_t>(color);
@@ -263,7 +272,8 @@ void DrawLiveStatGauge(int color_index, int w, u_long* before, int xy) {
                 {.color_index = index, .fill_width = w, .position = xy});
 }
 
-void InsertLiveThreeWordPrimitive(u_long* before, int rgb0, int xy, int wh) {
+void InsertLiveThreeWordPrimitive(std::uint32_t* before, int rgb0, int xy,
+                                  int wh) {
   LivePacketQueue queue(before);
   InsertThreeWordPrimitive(queue,
                            {.color_command = static_cast<std::uint32_t>(rgb0),
@@ -271,7 +281,7 @@ void InsertLiveThreeWordPrimitive(u_long* before, int rgb0, int xy, int wh) {
                             .size = static_cast<std::uint32_t>(wh)});
 }
 
-void InsertLiveDrawModeCommand(int tpage, u_long* before) {
+void InsertLiveDrawModeCommand(int tpage, std::uint32_t* before) {
   LivePacketQueue queue(before);
   InsertDrawModeCommand(queue, static_cast<std::uint32_t>(tpage));
 }
@@ -315,7 +325,8 @@ void QueueLiveTextureRectangleMove(const RECT* source, int x, int y) {
 }
 
 void* AppendLiveTexturePage(int tpage, int ot_slot) {
-  u_long* entry = LiveFrameOrderingEntry(LiveOrderingBase::kScene, ot_slot);
+  std::uint32_t* entry =
+      LiveFrameOrderingEntry(LiveOrderingBase::kScene, ot_slot);
   if (entry == nullptr) {
     if (CountAndReport(refused_texture_pages)) {
       VS::Core::Errorf("render",

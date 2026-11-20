@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "Battle/Targeting.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle {
 struct ActorStats;
@@ -39,7 +39,7 @@ void LiveBeginActorActionSelection(int source_actor_slot,
                                    std::uint16_t action_id);
 // decomp: BATTLE.PRG func_800C4794 (src/BATTLE/BATTLE.PRG/5BF94.c:640): 1
 // when the player confirmed or cancelled (a cancel sets the pad to 1).
-int LiveUpdateSphereTargetPosition(SVECTOR* target_position);
+int LiveUpdateSphereTargetPosition(VS::Core::Gte::SVECTOR* target_position);
 // decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:1058): 1
 // when the list closed; a null target resets the list.
 int LiveUpdateTargetSelectionMenu(std::uint8_t* target);

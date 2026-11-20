@@ -29,6 +29,9 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Actors {
 namespace {
 constexpr std::size_t kEquipmentPerActor = 2;
@@ -39,8 +42,8 @@ constexpr int kEquipmentClutStride = 48;
 constexpr int kCarryFirstBone = 0xF0;
 constexpr int kCarrySecondBone = 0xF1;
 constexpr int kReleasedGimmickHeight = 60;
-constexpr u_char kReleasedGimmickMode = 0xFC;
-constexpr u_char kDetachedParent = 0xFF;
+constexpr std::uint8_t kReleasedGimmickMode = 0xFC;
+constexpr std::uint8_t kDetachedParent = 0xFF;
 constexpr int kFacingMask = 0xFFF;
 constexpr int kCollisionDiagonalAngle = 0x200;
 constexpr int kFixedOne = 4096;
@@ -78,30 +81,31 @@ Equipment EquipmentFor(int slot) {
 }
 
 // An equipment palette clamped to its storage (#260).
-std::span<u_short> EquipmentPalette(std::span<u_short> palette,
-                                    const VS::Actors::WeaponModel& weapon) {
+std::span<std::uint16_t> EquipmentPalette(
+    std::span<std::uint16_t> palette, const VS::Actors::WeaponModel& weapon) {
   return palette.first(
       std::min<std::size_t>(weapon.palette_color_count, palette.size()));
 }
 
-bool ApplyTransition(std::span<u_short> colors, std::span<u_short> reference,
-                     PaletteTransition mode, int speed) {
+bool ApplyTransition(std::span<std::uint16_t> colors,
+                     std::span<std::uint16_t> reference, PaletteTransition mode,
+                     int speed) {
   Require(reference.size() >= colors.size(),
           "palette transition reference is shorter than its colors");
   return ApplyPaletteTransition(colors, reference, mode, speed);
 }
 
-void UploadClut(std::span<const u_short> colors, int row, int offset) {
+void UploadClut(std::span<const std::uint16_t> colors, int row, int offset) {
   (void)VS::Render::LoadLiveClutRow(static_cast<std::uint32_t>(row),
                                     static_cast<std::uint32_t>(offset), colors);
 }
 
-u_char StateBits(int state) {
-  return static_cast<u_char>(static_cast<unsigned>(state) & kStateMask);
+std::uint8_t StateBits(int state) {
+  return static_cast<std::uint8_t>(static_cast<unsigned>(state) & kStateMask);
 }
 
-AppearanceColors ColorsFrom(const ColorBytes& color, u_char fade_level,
-                            u_char fade_target,
+AppearanceColors ColorsFrom(const ColorBytes& color, std::uint8_t fade_level,
+                            std::uint8_t fade_target,
                             const VS::Render::ColorCode& tint) {
   AppearanceColors colors;
   std::copy_n(color.begin(), colors.rgb.size(), colors.rgb.begin());
@@ -113,7 +117,7 @@ AppearanceColors ColorsFrom(const ColorBytes& color, u_char fade_level,
 }
 
 void ColorsTo(const AppearanceColors& colors, ColorBytes& color,
-              u_char& fade_level) {
+              std::uint8_t& fade_level) {
   std::copy(colors.rgb.begin(), colors.rgb.end(), color.begin());
   color[kDelayByte] = colors.delay;
   fade_level = colors.fade_level;
@@ -151,7 +155,7 @@ class LiveActorAppearance final : public ActorAppearance {
   }
 
   bool ApplyPalettes(PaletteTransition mode, int speed) override {
-    const std::span<u_short> palette(actor_.base_palette);
+    const std::span<std::uint16_t> palette(actor_.base_palette);
     const std::size_t count = Count();
     const std::size_t skip = Skip();
     bool changed = ApplyTransition(
@@ -169,7 +173,7 @@ class LiveActorAppearance final : public ActorAppearance {
 
   void UploadPalettes(int state) override {
     const int row = actor_.instance.slot + kActorClutRowBase;
-    UploadClut(std::span<const u_short>(actor_.base_palette)
+    UploadClut(std::span<const std::uint16_t>(actor_.base_palette)
                    .subspan(kActorPaletteColors, Count()),
                row, 0);
     const Equipment equipment = EquipmentFor(actor_.instance.slot);
@@ -212,8 +216,9 @@ class LiveActorAppearance final : public ActorAppearance {
     object->mode = kReleasedGimmickMode;
     object->slide_x = object->velocity_y = 0;
     object->parent = kDetachedParent;
-    object->rotation_y = static_cast<u_short>(
-        (object->rotation_y + static_cast<u_short>(actor_.instance.facing)) &
+    object->rotation_y = static_cast<std::uint16_t>(
+        (object->rotation_y +
+         static_cast<std::uint16_t>(actor_.instance.facing)) &
         kFacingMask);
     actor_.action_pose_active = 0;
     VS::Actors::pushedGimmickIndex = actor_.support_gimmick;
@@ -286,11 +291,12 @@ void UpdateLiveActorPalettePulse(VS::Actors::ActorRecord& actor) {
       actor.texture_header_bit ? kActorPaletteColors : kSmallPaletteColors;
   PalettePulse pulse{actor.instance.palette_pulse.level,
                      actor.instance.palette_pulse.flags};
-  const std::span<u_short> destination =
-      std::span<u_short>(actor.current_palette).first(count);
+  const std::span<std::uint16_t> destination =
+      std::span<std::uint16_t>(actor.current_palette).first(count);
   (void)UpdatePalettePulse(
       pulse, VS::State::tickSpeed,
-      std::span<const u_short>(actor.base_palette).first(count), destination);
+      std::span<const std::uint16_t>(actor.base_palette).first(count),
+      destination);
   actor.instance.palette_pulse.level = pulse.level;
   actor.instance.palette_pulse.flags = pulse.flags;
   UploadClut(destination, actor.instance.slot + kPulseActorClutRowBase, 0);

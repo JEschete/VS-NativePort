@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/SaveImage.hpp"
 

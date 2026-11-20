@@ -12,8 +12,10 @@
 #include "Core/Math/Distance.hpp"
 #include "Event/EventCameraTrack.hpp"
 
+namespace VS::Core::Gte {
 struct MATRIX;
 struct VECTOR;
+}  // namespace VS::Core::Gte
 
 namespace VS::Event {
 struct CameraState;
@@ -53,11 +55,12 @@ void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* other);
 void AdvanceTerrainCameraTrackEntry(CameraTrack* track);
 // decomp: BATTLE.PRG func_800BD2B8 (F01225, 4A0A8.c:3556)
 // Reads the probe frame from the record; the GTE registers are untouched.
-int EventCameraGroundClearanceEntry(MATRIX* probe);
+int EventCameraGroundClearanceEntry(VS::Core::Gte::MATRIX* probe);
 // decomp: BATTLE.PRG func_800BE53C (F01239, 4A0A8.c:4074)
 void ScaleEventCameraTrackDurationEntry(CameraTrack* track);
 // decomp: BATTLE.PRG func_800BE5A4 (F01240, 4A0A8.c:4082)
 void ScaleEventCameraDurationEntry(std::int16_t selector);
 // decomp: BATTLE.PRG _setVectorImm (F01246, 4A0A8.c:4148)
-VECTOR* ReadScriptFixedVectorEntry(VECTOR* destination, std::uint8_t* operands);
+VS::Core::Gte::VECTOR* ReadScriptFixedVectorEntry(
+    VS::Core::Gte::VECTOR* destination, std::uint8_t* operands);
 }  // namespace VS::Event

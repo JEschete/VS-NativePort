@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 struct ShpModel;
@@ -33,13 +33,13 @@ struct ModelScratchpad {
   std::uint16_t angle_x;
   std::uint16_t angle_y;
   std::uint8_t reserved3e[layout::kModelScratchpadGapBytes];
-  SVECTOR position;
-  SVECTOR root_offset;
-  MATRIX* parent_bone_matrix;
+  VS::Core::Gte::SVECTOR position;
+  VS::Core::Gte::SVECTOR root_offset;
+  VS::Core::Gte::MATRIX* parent_bone_matrix;
   std::int32_t reserved60;
-  MATRIX matrix;
-  SVECTOR rotation;
-  VECTOR scale;
+  VS::Core::Gte::MATRIX matrix;
+  VS::Core::Gte::SVECTOR rotation;
+  VS::Core::Gte::VECTOR scale;
   VS::Actors::ShpModel* model;
 };
 
@@ -49,18 +49,18 @@ struct ModelScratchpadAnglesView {
   std::uint16_t angle_x;
   std::uint16_t angle_y;
   std::uint8_t reserved3e[layout::kAnglesViewGapBytes];
-  SVECTOR root_offset;
+  VS::Core::Gte::SVECTOR root_offset;
   std::uint8_t reserved5c[layout::kViewRootGapBytes];
-  MATRIX matrix;
-  SVECTOR rotation;
+  VS::Core::Gte::MATRIX matrix;
+  VS::Core::Gte::SVECTOR rotation;
 };
 
 // decomp: cameraTransformScratch (src/BATTLE/BATTLE.PRG/44F14.c:82)
 struct ModelScratchpadCameraView {
   std::uint8_t reserved0[layout::kCameraViewLeadBytes];
-  MATRIX reserved64;
+  VS::Core::Gte::MATRIX reserved64;
   std::uint8_t reserved84[layout::kCameraViewGapBytes];
-  VECTOR reserved8c;
+  VS::Core::Gte::VECTOR reserved8c;
 };
 
 // decomp: frameScratch (src/BATTLE/BATTLE.PRG/44F14.c:137)
@@ -72,10 +72,10 @@ struct DrawDepthScratch {
 // decomp: func_800A1DE8_t (src/BATTLE/BATTLE.PRG/38C1C.c:16)
 struct ModelScratchpadBoneView {
   std::uint8_t reserved0[layout::kBoneViewLeadBytes];
-  SVECTOR position;
-  SVECTOR root_offset;
+  VS::Core::Gte::SVECTOR position;
+  VS::Core::Gte::SVECTOR root_offset;
   std::uint8_t reserved5c[layout::kViewRootGapBytes];
-  MATRIX matrix;
+  VS::Core::Gte::MATRIX matrix;
 };
 
 namespace layout {

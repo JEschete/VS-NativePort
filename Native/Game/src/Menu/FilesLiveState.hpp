@@ -6,13 +6,13 @@
 // FilesLive.cpp defines them and hands the typed screens (Files.hpp) a view of
 // them.
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Menu::Files {
 // decomp: _containerStrings (MENU/MENU7.PRG 260.c): halfword offsets, then
 // the strings; ModuleData.cpp fills it from the disc string table.
 inline constexpr int kContainerStringCount = 895;
-extern u_short containerStrings[kContainerStringCount];
+extern std::uint16_t containerStrings[kContainerStringCount];
 // decomp: _dataNotSaved (MENU/MENU7.PRG 260.c)
 extern char dataNotSaved;
 // decomp: _fileProgressCounter (MENU/MENU7.PRG 260.c)
@@ -24,7 +24,7 @@ extern char* memoryCardMessage;
 extern int selectCursorXy;
 // decomp: _textTable (MENU/MENU7.PRG 260.c): MCMAN.BIN's text once the menu
 // resources load.
-extern u_short* textTable;
+extern std::uint16_t* textTable;
 // decomp: _frameBuf (TITLE/TITLE.PRG 22C.c)
 extern char frameBuf;
 }  // namespace VS::Menu::Files

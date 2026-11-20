@@ -26,16 +26,20 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SVECTOR;
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
 VS::Actors::SkeletonPose VS::Actors::skeletonPose;
@@ -280,11 +284,11 @@ struct ProjectedPoint {
   SVECTOR position{};
   StoreVector(position, point);
   Render::LoadLiveFrameViewMatrix();
-  Core_GteWord screen = 0;
-  Core_GteWord depth_cue = 0;
-  Core_GteWord flags = 0;
-  const Core_GteWord depth =
-      Core_Gte_RotTransPers(&position, &screen, &depth_cue, &flags);
+  VS::Core::Gte::Word screen = 0;
+  VS::Core::Gte::Word depth_cue = 0;
+  VS::Core::Gte::Word flags = 0;
+  const VS::Core::Gte::Word depth =
+      RotTransPers(&position, &screen, &depth_cue, &flags);
   return {.screen = SplitWord(static_cast<std::int32_t>(screen)),
           .depth = static_cast<std::int32_t>(depth)};
 }
@@ -365,7 +369,7 @@ void ResetLiveActorHeadTrackingSpeed(VS::Actors::ActorRecord* actor) {
 
 // decomp: BATTLE.PRG func_800A1178 (src/BATTLE/BATTLE.PRG/30DB0.c:4200)
 int LiveActorTaggedBoneMatrix(int actor_id, int tag, MATRIX* matrix_out,
-                              u_long* length_out) {
+                              std::uint32_t* length_out) {
   const int bone =
       FindLiveActorBoneTag(actor_id, tag, static_cast<int>(BoneTagKind::kTag));
   if (bone < 0) return bone;
@@ -375,7 +379,7 @@ int LiveActorTaggedBoneMatrix(int actor_id, int tag, MATRIX* matrix_out,
 
 // decomp: BATTLE.PRG func_800A11D8 (src/BATTLE/BATTLE.PRG/30DB0.c:4210)
 void LiveActorBoneMatrix(int actor_id, int bone, MATRIX* matrix_out,
-                         u_long* length_out) {
+                         std::uint32_t* length_out) {
   constexpr const char* kOperation = "ActorBoneMatrix";
   const LiveSkeleton skeleton = FindLiveSkeleton(actor_id, kOperation);
   if (!skeleton.Present()) return;
@@ -389,7 +393,7 @@ void LiveActorBoneMatrix(int actor_id, int bone, MATRIX* matrix_out,
       StoredBoneLength(skeleton.ModelBytes(), bone, kOperation);
   if (!length) return;
   *matrix_out = *matrix;
-  *length_out = static_cast<u_long>(*length);
+  *length_out = static_cast<std::uint32_t>(*length);
 }
 
 // decomp: BATTLE.PRG func_800A1280 (src/BATTLE/BATTLE.PRG/30DB0.c:4224)

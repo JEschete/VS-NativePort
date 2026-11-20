@@ -57,7 +57,7 @@ FULL_SCAN_NAMES = {
 }
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
-    "Native/Engine/include/Core/Gte.h": "EC-03",
+    "Native/Engine/include/Core/Gte.hpp": "EC-03",
     "Native/Engine/src/Core/Gte.cpp": "EC-03",
     "Native/Engine/include/Core/Scratch.hpp": "EC-05",
     "Native/Engine/src/Core/Scratch.cpp": "EC-05",

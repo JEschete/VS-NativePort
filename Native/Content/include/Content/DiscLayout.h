@@ -1,6 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 
 // Generated from the disc listing (tools/port/gen_decomp_headers.py).

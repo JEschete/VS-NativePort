@@ -4,7 +4,7 @@
 // RenameLive.cpp defines it and hands the typed screen (Rename.hpp) a view of
 // it.
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Menu::Rename {
 
@@ -12,6 +12,6 @@ namespace VS::Menu::Rename {
 // the strings, then the character grid; ModuleData.cpp fills it from the disc
 // string table.
 inline constexpr int kMenuStringCount = 208;
-extern u_short renderRenameMenuStrings[kMenuStringCount];
+extern std::uint16_t renderRenameMenuStrings[kMenuStringCount];
 
 }  // namespace VS::Menu::Rename

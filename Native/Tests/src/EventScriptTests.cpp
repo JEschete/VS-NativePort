@@ -54,7 +54,7 @@
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/Palette.hpp"
 #include "TestSupport/ScriptSources.hpp"
@@ -192,7 +192,7 @@ int TestsNativeMusicSnapshot(void) {
   VS::Audio::SeqChannel original_channels[32];
   VS::Audio::SeqChannel original_saved_channels[32];
   HeapSequenceFile sequence;
-  u_short keymap = 0;
+  std::uint16_t keymap = 0;
   unsigned channel;
   int result, swap;
   memcpy(original_channels, VS::Audio::Seq::musicChannels,
@@ -573,8 +573,8 @@ static void CaptureMenuSound(VS::Audio::CommandParams* params) {
 }
 
 int TestsMenuSoundDispatch(void) {
-  u_int offsets[12] = {0};
-  u_short selectors[12] = {0};
+  std::uint32_t offsets[12] = {0};
+  std::uint16_t selectors[12] = {0};
   const VS::Audio::CommandHandler saved_handler =
       VS::Audio::Mixer::kCommandHandlers[0x20];
   const VS::Audio::LegacyCommandArguments saved_arguments =
@@ -806,7 +806,7 @@ int Tests_NativeSessionTransitions(void) {
 
 // 573B8.c:67 mixes control codes with addresses; every dispatch boundary must
 // retain native pointer width.
-using TestOpcodeHandler = intptr_t (*)(u_char*, int16_t);
+using TestOpcodeHandler = intptr_t (*)(std::uint8_t*, int16_t);
 static_assert(_Generic(VS::Event::opcodeHandlers[0],
                   TestOpcodeHandler: 1,
                   default: 0),
@@ -823,8 +823,8 @@ int Tests_EventScriptNativeBranches(int skip) {
   const VS::test_support::LiveScriptRuntimeScope runtime;
   std::array<TestOpcodeHandler, 4> saved_normal{};
   std::array<TestOpcodeHandler, 4> saved_skip_handlers{};
-  std::array<u_char, 4> saved_sizes{};
-  constexpr std::array<u_char, 4> kOpcodeSizes{3, 1, 1, 1};
+  std::array<std::uint8_t, 4> saved_sizes{};
+  constexpr std::array<std::uint8_t, 4> kOpcodeSizes{3, 1, 1, 1};
   TestOpcodeHandler skipCopy[256];
   char saved_skip = VS::Event::skipState;
   const auto script =
@@ -873,13 +873,13 @@ int Tests_EventScriptBranchHandlers(void) {
   std::int8_t saved_flag = VS::Event::cachedFlagValue;
   const char saved_skip = VS::Event::skipState;
   std::array<TestOpcodeHandler, 2> saved_handlers{};
-  std::array<u_char, 2> saved_sizes{};
+  std::array<std::uint8_t, 2> saved_sizes{};
   std::copy_n(VS::Event::opcodeHandlers + 0xE0, saved_handlers.size(),
               saved_handlers.begin());
   std::copy_n(VS::Event::opcodeSizes + 0xE0, saved_sizes.size(),
               saved_sizes.begin());
-  u_char conditional[] = {0, 7, 4, 0, 0};
-  u_char backward[] = {0, 0, 0, 0, 0, 0xFF, 4, 0};
+  std::uint8_t conditional[] = {0, 7, 4, 0, 0};
+  std::uint8_t backward[] = {0, 0, 0, 0, 0, 0xFF, 4, 0};
   int passed;
   auto& host = VS::Event::LiveScriptVm();
   VS::Event::cachedFlagValue = 7;

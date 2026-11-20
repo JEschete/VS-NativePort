@@ -16,7 +16,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GimImages.hpp"
@@ -26,6 +26,16 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Math::kQ12Unit;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::getClut;
+using VS::Legacy::getTPage;
+using VS::Legacy::LoadImage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
 
 // Contracts of the #276 row 6 GIM slice: the event scripts' tiled images
 // (BATTLE.PRG 5BF94.c:2347-4449, 4A0A8.c:609-905).
@@ -83,7 +93,7 @@ std::int16_t Coordinate(int index, int count, int scale, int offset,
 struct TileCase {
   int columns = 0;
   int rows = 0;
-  int scale = ONE;
+  int scale = kQ12Unit;
   int offset_x = 0;
   int offset_y = 0;
 };
@@ -139,8 +149,9 @@ std::vector<Packet> ExpectedTiles(const TileCase& c, int brightness,
       const auto v = static_cast<std::uint32_t>(((tile * 64) & 0x1F00) * 15);
       const auto page =
           static_cast<std::uint32_t>(getTPage(1, 1, (tile >> 2) & 0x1C0, 256));
-      const auto mode = static_cast<std::uint32_t>(page | _get_mode(0, 0, 0));
-      if (scale == ONE) {
+      const auto mode =
+          static_cast<std::uint32_t>(page | VS::Legacy::_get_mode(0, 0, 0));
+      if (scale == kQ12Unit) {
         packets.push_back(
             Sprite(mode, static_cast<std::uint32_t>(brightness | (blend << 8)),
                    Position(left, top), 64 | (15 << 16), u | v | kClut));
@@ -281,7 +292,7 @@ TEST_CASE("GIM transparent black fills empty tiles only when not blending",
 TEST_CASE("GIM unit-scale sprites keep the unmasked left edge",
           "[render-gim]") {
   // Columns start at x -200, -136, -72, -8, 56 and 120.
-  const TileCase c{5, 1, ONE, -200, 0};
+  const TileCase c{5, 1, kQ12Unit, -200, 0};
   FakeQueue queue;
   REQUIRE(Render::DrawGimTiles(queue, NumberedLayer(c, 128), Texture()));
   REQUIRE(queue.packets.size() == 2);
@@ -341,7 +352,7 @@ Render::GimLayer WipeLayer(int scale, int brightness) {
 
 std::uint32_t WipeTileMode() {
   return static_cast<std::uint32_t>(getTPage(1, 1, 64, 256) |
-                                    _get_mode(0, 0, 0));
+                                    VS::Legacy::_get_mode(0, 0, 0));
 }
 
 TEST_CASE("GIM scanline wipes split odd starts and draw empty tiles as lines",
@@ -398,12 +409,12 @@ TEST_CASE("GIM crossfades compose each column in the workspace page",
   // column is 15 lines high from y 113.
   const auto page_mode = [](int blend) {
     return static_cast<std::uint32_t>(getTPage(2, blend, 256, 256) |
-                                      _get_mode(0, 0, 0));
+                                      VS::Legacy::_get_mode(0, 0, 0));
   };
   const Packet workspace = Tile(0xE3040100, 0xE407FD3F, 0xE5080100);
   const Packet framebuffer = Tile(0xE3000140, 0xE403BE7F, 0xE5000140);
-  const auto screen_mode =
-      static_cast<std::uint32_t>(getTPage(2, 0, 320, 0) | _get_mode(0, 0, 0));
+  const auto screen_mode = static_cast<std::uint32_t>(
+      getTPage(2, 0, 320, 0) | VS::Legacy::_get_mode(0, 0, 0));
   std::vector<Packet> expected;
   expected.push_back(
       Sprite(page_mode(1), 384, Position(0, 113), 64 | (15 << 16), 0));
@@ -418,9 +429,10 @@ TEST_CASE("GIM crossfades compose each column in the workspace page",
     expected.push_back(framebuffer);
   }
   // The tile one line up from the column's top.
-  expected.push_back(Sprite(
-      static_cast<std::uint32_t>(getTPage(1, 0, 64, 256) | _get_mode(0, 0, 0)),
-      128, 0xFFFF0000, 64 | (15 << 16), 128 | (15 << 8) | kClut));
+  expected.push_back(
+      Sprite(static_cast<std::uint32_t>(getTPage(1, 0, 64, 256) |
+                                        VS::Legacy::_get_mode(0, 0, 0)),
+             128, 0xFFFF0000, 64 | (15 << 16), 128 | (15 << 8) | kClut));
   expected.push_back(workspace);
   for (const int x : {0, 32}) {
     const auto texel = static_cast<std::uint32_t>(x | (113 << 8));
@@ -869,7 +881,7 @@ TEST_CASE("GIM layer setups past the three layers are refused",
 
 TEST_CASE("GIM layers pick their ordering table and CLUT", "[render-gim]") {
   Render::GimImageSet set = Render::MakeGimImageSet(0, 20);
-  set.layers[1].placement.scale_and_order = 0x4000 | ONE;
+  set.layers[1].placement.scale_and_order = 0x4000 | kQ12Unit;
   CHECK(Render::GimLayerOrderingEntry(set, 0) ==
         Render::GimOrderingEntry{.scene = false, .entry = 6});
   CHECK(Render::GimLayerOrderingEntry(set, 1) ==
@@ -890,7 +902,7 @@ TEST_CASE("GIM layers pick their ordering table and CLUT", "[render-gim]") {
 // Layer 0 is a full-brightness 5x16 numbered grid; the set is not yet usable.
 Render::GimImageSet DrawableSet() {
   Render::GimImageSet set = Render::MakeGimImageSet(0, 18);
-  set.layers[0] = NumberedLayer({5, 16, ONE, 0, 0}, 128);
+  set.layers[0] = NumberedLayer({5, 16, kQ12Unit, 0, 0}, 128);
   set.page_count = 2;
   return set;
 }
@@ -947,20 +959,22 @@ struct LiveGimFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   RECT clut_strip{};
   RECT texture_strip{};
-  std::vector<u_short> saved_clut_strip = std::vector<u_short>(64);
-  std::vector<u_short> saved_texture_strip =
-      std::vector<u_short>(std::size_t{64} * 15);
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
+  std::vector<std::uint16_t> saved_clut_strip = std::vector<std::uint16_t>(64);
+  std::vector<std::uint16_t> saved_texture_strip =
+      std::vector<std::uint16_t>(std::size_t{64} * 15);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(0x2088 / 4);
 
   LiveGimFixture() {
     Render::ForgetLiveGimImages();
     Render::InitializeLiveTexturePages();
     setRECT(&clut_strip, 576, 511, 64, 1);
     setRECT(&texture_strip, 576, 256, 64, 15);
-    StoreImage(&clut_strip, reinterpret_cast<u_long*>(saved_clut_strip.data()));
+    StoreImage(&clut_strip,
+               reinterpret_cast<std::uint32_t*>(saved_clut_strip.data()));
     StoreImage(&texture_strip,
-               reinterpret_cast<u_long*>(saved_texture_strip.data()));
+               reinterpret_cast<std::uint32_t*>(saved_texture_strip.data()));
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data();
     VS::Render::legacyOrderingTables[0] = ordering.data();
@@ -977,9 +991,10 @@ struct LiveGimFixture {
     std::ranges::copy(saved_slots, std::begin(VS::Content::discRequestSlots));
     VS::Content::discRequestCounts = saved_counts;
     Render::LoadLiveClutRow(3, 0, saved_clut);
-    LoadImage(&clut_strip, reinterpret_cast<u_long*>(saved_clut_strip.data()));
+    LoadImage(&clut_strip,
+              reinterpret_cast<std::uint32_t*>(saved_clut_strip.data()));
     LoadImage(&texture_strip,
-              reinterpret_cast<u_long*>(saved_texture_strip.data()));
+              reinterpret_cast<std::uint32_t*>(saved_texture_strip.data()));
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_table;
@@ -995,8 +1010,8 @@ TEST_CASE("Live GIM requests without an image set do nothing", "[render-gim]") {
   CHECK(Render::LiveGimImageLoading() == 0);
   CHECK(Render::RefusedLiveGimRequestCount() == refused + 1);
   CHECK_FALSE(Render::LiveGimLayerPlacement(0).has_value());
-  Render::ConfigureLiveGimLayer(0, 0, 1, 2, ONE, 128);
-  Render::PlaceLiveGimLayer(0, 1, 2, ONE, 128);
+  Render::ConfigureLiveGimLayer(0, 0, 1, 2, kQ12Unit, 128);
+  Render::PlaceLiveGimLayer(0, 1, 2, kQ12Unit, 128);
   Render::UpdateLiveGimImages();
   Render::ReleaseLiveGimImages();
   CHECK(Render::LiveGimImages() == nullptr);
@@ -1048,13 +1063,13 @@ TEST_CASE("Live GIM layers keep their placement while the file loads",
           "[render-gim]") {
   const LiveGimFixture live;
   QueueStaffImage();
-  Render::ConfigureLiveGimLayer(0, 0, 0, 0, ONE, 128);
-  Render::PlaceLiveGimLayer(0, 0, 0, ONE | 0x10000, 128);
+  Render::ConfigureLiveGimLayer(0, 0, 0, 0, kQ12Unit, 128);
+  Render::PlaceLiveGimLayer(0, 0, 0, kQ12Unit | 0x10000, 128);
   CHECK(Render::LiveGimLayerPlacement(0).has_value());
   // Placements keep the low 16 bits of the scale and order word.
   const Render::GimPlacement placement =
       Render::LiveGimLayerPlacement(0).value_or(Render::GimPlacement{});
-  CHECK(placement.scale_and_order == ONE);
+  CHECK(placement.scale_and_order == kQ12Unit);
   Render::UpdateLiveGimImages();
   REQUIRE(Render::LiveGimImages() != nullptr);
   CHECK(Render::LiveGimImages()->phase == Render::GimLoadPhase::kReading);
@@ -1065,9 +1080,9 @@ TEST_CASE("Live GIM layer setups past the four routines are refused",
   const LiveGimFixture live;
   QueueStaffImage();
   const std::uint64_t refused = Render::RefusedLiveGimRequestCount();
-  Render::ConfigureLiveGimLayer(0, Render::kGimDrawRoutineCount, 0, 0, ONE,
+  Render::ConfigureLiveGimLayer(0, Render::kGimDrawRoutineCount, 0, 0, kQ12Unit,
                                 128);
-  Render::ConfigureLiveGimLayer(0, -1, 0, 0, ONE, 128);
+  Render::ConfigureLiveGimLayer(0, -1, 0, 0, kQ12Unit, 128);
   CHECK(Render::RefusedLiveGimRequestCount() == refused + 2);
   REQUIRE(Render::LiveGimImages() != nullptr);
   CHECK_FALSE(Render::LiveGimImages()->layers[0].draw_enabled);
@@ -1093,7 +1108,7 @@ TEST_CASE("Live GIM images upload once their read is loaded", "[render-gim]") {
 TEST_CASE("Live GIM images draw into the overlay table", "[render-gim]") {
   LiveGimFixture live;
   VS::Content::DiscQueueSlot& slot = QueueStaffImage();
-  Render::ConfigureLiveGimLayer(0, 0, 0, 0, ONE, 128);
+  Render::ConfigureLiveGimLayer(0, 0, 0, 0, kQ12Unit, 128);
   FinishStaffRead(slot);
   Render::UpdateLiveGimImages();
   // The backdrop bands above and below the row (colour 0x4000, full blue),

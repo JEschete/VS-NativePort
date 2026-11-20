@@ -9,7 +9,7 @@
 
 #include "Content/DiscQueue.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapMarkers.hpp"
@@ -70,11 +70,11 @@ extern std::int16_t menuCommandsState;
 // decomp: uiAnimationState (src/MENU/MENU5.PRG/4D8.c:441)
 extern std::int16_t uiAnimationState;
 // decomp: cameraAngles (src/MENU/MENU5.PRG/4D8.c:443)
-extern SVECTOR cameraAngles;
+extern VS::Core::Gte::SVECTOR cameraAngles;
 // decomp: cameraPos (src/MENU/MENU5.PRG/4D8.c:444)
-extern SVECTOR cameraPos;
+extern VS::Core::Gte::SVECTOR cameraPos;
 // decomp: centerPoint (src/MENU/MENU5.PRG/4D8.c:445)
-extern SVECTOR centerPoint;
+extern VS::Core::Gte::SVECTOR centerPoint;
 // decomp: sceneCdQueueSlot (src/MENU/MENU5.PRG/4D8.c:446)
 extern VS::Content::DiscQueueSlot* sceneCdQueueSlot;
 // decomp: armFileBuff (src/MENU/MENU5.PRG/4D8.c:447)

@@ -43,7 +43,7 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.hpp"
@@ -124,7 +124,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetActionFlowMode(int mode) override {
-    VS::Battle::actionFlowMode = static_cast<u_int>(mode);
+    VS::Battle::actionFlowMode = static_cast<std::uint32_t>(mode);
   }
   [[nodiscard]] int RecoveryRewardMode() const override {
     return VS::Battle::recoveryRewardMode;
@@ -146,7 +146,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
         static_cast<signed char>(limb);
   }
   void SetSelectionTargetCount(int count) override {
-    state_->selection.target_count = static_cast<u_short>(count);
+    state_->selection.target_count = static_cast<std::uint16_t>(count);
   }
   void FocusSelectionOnActor(int actor) override;
 
@@ -174,19 +174,19 @@ class LiveAbilityHost final : public battle::AbilityHost {
     return VS::State::artsStatus.kills.total_kills;
   }
   void SetTotalKills(int kills) override {
-    VS::State::artsStatus.kills.total_kills = static_cast<u_short>(kills);
+    VS::State::artsStatus.kills.total_kills = static_cast<std::uint16_t>(kills);
   }
   [[nodiscard]] int MaxChain() const override {
     return VS::State::scoreData.max_chain;
   }
   void SetMaxChain(int chain) override {
-    VS::State::scoreData.max_chain = static_cast<u_short>(chain);
+    VS::State::scoreData.max_chain = static_cast<std::uint16_t>(chain);
   }
   [[nodiscard]] int ChainStreak() const override {
     return VS::State::scoreData.chain_streak;
   }
   void SetChainStreak(int streak) override {
-    VS::State::scoreData.chain_streak = static_cast<u_short>(streak);
+    VS::State::scoreData.chain_streak = static_cast<std::uint16_t>(streak);
   }
   [[nodiscard]] int ScriptFlag(int flag) const override {
     return VS::State::LiveScriptFlag(flag);
@@ -302,10 +302,10 @@ void LiveAbilityHost::SetField(AbilityField field, int value) {
       state_->chain_continued = byte;
       break;
     case AbilityField::kAbilityTimer:
-      state_->ability_timer = static_cast<u_short>(value);
+      state_->ability_timer = static_cast<std::uint16_t>(value);
       break;
     case AbilityField::kAbilityWindow:
-      state_->ability_window = static_cast<u_short>(value);
+      state_->ability_window = static_cast<std::uint16_t>(value);
       break;
   }
 }
@@ -364,7 +364,8 @@ bool LiveAbilityHost::ActionAvailable(int action_id) const {
   }
   const auto availability =
       static_cast<std::uint32_t>(battle::LiveActionCostAndAvailability(
-          static_cast<u_int>(action_id), VS::Battle::characterState->stats, 0));
+          static_cast<std::uint32_t>(action_id),
+          VS::Battle::characterState->stats, 0));
   return (availability & kActionAvailableMask) != 0;
 }
 

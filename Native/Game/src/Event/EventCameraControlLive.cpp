@@ -18,6 +18,8 @@
 #include "Field/CameraLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 namespace VS::Event {
 namespace {
 // The saved field view's script flags (vs_battle_getStateFlag ids).

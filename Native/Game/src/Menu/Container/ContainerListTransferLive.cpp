@@ -55,8 +55,8 @@ constexpr std::size_t kStorageCount = 5;
 constexpr std::size_t kTextsPerRow = 2;
 // "OK" is linked 0xC bytes in front of the frame's ordering table.
 constexpr std::size_t kAboveMenuChainBytes = 0xC;
-static_assert(kAboveMenuChainBytes % sizeof(u_long) == 0);
-constexpr auto kChainSlots = kAboveMenuChainBytes / sizeof(u_long);
+static_assert(kAboveMenuChainBytes % sizeof(std::uint32_t) == 0);
+constexpr auto kChainSlots = kAboveMenuChainBytes / sizeof(std::uint32_t);
 constexpr int kAboveMenuChainSlot = -static_cast<int>(kChainSlots);
 
 ItemListState g_item_list{};
@@ -532,7 +532,7 @@ class LiveTransferWorld final : public TransferWorld {
   void DrawCompactText(std::string_view text, std::int32_t xy,
                        std::optional<std::uint32_t> color,
                        TransferTextLayer layer) override {
-    u_long* chain = nullptr;
+    std::uint32_t* chain = nullptr;
     if (layer == TransferTextLayer::kAboveMenu) {
       chain = Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene,
                                              kAboveMenuChainSlot);
@@ -675,7 +675,7 @@ int LiveUpdateTransferDirection(int initialize_direction_menu) {
   });
 }
 
-int LiveUpdateScreen(u_char* screen_step) {
+int LiveUpdateScreen(std::uint8_t* screen_step) {
   return Guard("UpdateScreen", [&] {
     if (screen_step == nullptr) Refuse("missing screen step");
     LiveTransferWorld world;

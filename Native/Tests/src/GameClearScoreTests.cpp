@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/GameClearScore.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/Results.hpp"
@@ -20,6 +20,10 @@
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::ClearOTagR;
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -417,7 +421,7 @@ TEST_CASE("F03031 rank refuses rows and words outside its tables",
   CHECK(host.calls.empty());
 }
 
-constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
+constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(std::uint32_t);
 constexpr std::size_t kLiveOrderingWords = 32;
 constexpr std::size_t kLiveSceneHead = 16;
 
@@ -427,15 +431,16 @@ struct LiveGameClearFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_int saved_score = r::score;
-  u_int saved_map = r::mapCompletion;
+  std::uint32_t saved_score = r::score;
+  std::uint32_t saved_map = r::mapCompletion;
   int saved_rank = r::rank;
   int saved_shown_score = r::onScreenScore;
   int saved_counting_score = r::incrementingScore;
   int saved_shown_map = r::onScreenMapCompletion;
   int saved_counting_map = r::incrementingMapCompletion;
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::array<u_long, kLiveOrderingWords> ordering{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kLivePrimitiveWords, 0);
+  std::array<std::uint32_t, kLiveOrderingWords> ordering{};
 
   LiveGameClearFixture() { Reset(); }
   ~LiveGameClearFixture() {
@@ -464,10 +469,10 @@ struct LiveGameClearFixture {
     VS::Render::FrameScratchpad().ordering_table =
         ordering.data() + kLiveSceneHead;
   }
-  [[nodiscard]] std::vector<u_long> Used() const {
-    const auto used =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor) -
-        storage.data();
+  [[nodiscard]] std::vector<std::uint32_t> Used() const {
+    const auto used = static_cast<std::uint32_t*>(
+                          VS::Render::FrameScratchpad().primitive_cursor) -
+                      storage.data();
     return {storage.begin(), storage.begin() + used};
   }
 };

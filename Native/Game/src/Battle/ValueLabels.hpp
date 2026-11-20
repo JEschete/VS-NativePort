@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 
@@ -26,7 +26,7 @@ inline constexpr std::size_t kFloatingLabelTextBytes = 4;
 
 // decomp: D_800F1BAC_t (src/BATTLE/BATTLE.PRG/146C.h:22-37)
 struct FloatingLabel {
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   ValueLabelKey key;
   std::uint8_t limb;
   std::uint8_t frame;

@@ -63,7 +63,7 @@
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
@@ -97,6 +97,7 @@ using VS::Battle::kActionTypeBreakArt;
 using VS::Battle::kActionTypeItem;
 using VS::Battle::kActionTypeSpell;
 
+using VS::Legacy::ClearOTagR;
 using VS::Legacy::kPadLup;
 using VS::Legacy::kPadRdown;
 using VS::Legacy::kPadRleft;
@@ -116,7 +117,7 @@ constexpr std::array<std::pair<int, int>, 28> kAbilityCosts{{
 
 // SLUS_010.40 _artsPointsRequirements / _battleAbilitiesPointsRequirements,
 // file offsets 0x405E4 / 0x4065C.
-constexpr std::array<std::array<u_short, 4>, 10> kBreakArtThresholds{{
+constexpr std::array<std::array<std::uint16_t, 4>, 10> kBreakArtThresholds{{
     {10, 65, 175, 340},
     {20, 90, 235, 425},
     {25, 110, 260, 485},
@@ -128,7 +129,7 @@ constexpr std::array<std::array<u_short, 4>, 10> kBreakArtThresholds{{
     {20, 95, 230, 430},
     {30, 105, 250, 460},
 }};
-constexpr std::array<u_short, 22> kAbilityThresholds{{
+constexpr std::array<std::uint16_t, 22> kAbilityThresholds{{
     20,  54,   72,   95,   125,  165,  216,  283,  369,  482,  628,
     818, 1066, 1387, 1805, 2349, 3055, 3973, 5167, 6719, 8737, 11359,
 }};
@@ -291,7 +292,7 @@ struct AbilityEffectFixture : AbilityFixture {
       VS::Battle::statusEffectParams;
   std::array<VS::Battle::Ai::ActorAiState*, 2> saved_ai{
       VS::Battle::Ai::actorAiStates[0], VS::Battle::Ai::actorAiStates[1]};
-  u_int saved_last_value = VS::Battle::lastActionStatValue;
+  std::uint32_t saved_last_value = VS::Battle::lastActionStatValue;
   int saved_critical = VS::Battle::criticalHitOccurred;
   VS::Battle::Ai::ActorAiState ai[2]{};
   VS::Battle::HitResult source{};
@@ -696,7 +697,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   }
 };
 
-VS::Items::EquipmentPart EquipmentDropPart(u_short id) {
+VS::Items::EquipmentPart EquipmentDropPart(std::uint16_t id) {
   VS::Items::EquipmentPart part{};
   part.id = id;
   part.sub_id = 7;
@@ -1022,9 +1023,12 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       EnableEquipmentDrop(stats.limbs[0].armor);
       EnableEquipmentDrop(stats.limbs[1].armor);
       EnableEquipmentDrop(stats.accessory);
-      stats.limbs[0].armor.armor.id = static_cast<u_short>(149 + actor * 3);
-      stats.limbs[1].armor.armor.id = static_cast<u_short>(150 + actor * 3);
-      stats.accessory.accessory.id = static_cast<u_short>(151 + actor * 3);
+      stats.limbs[0].armor.armor.id =
+          static_cast<std::uint16_t>(149 + actor * 3);
+      stats.limbs[1].armor.armor.id =
+          static_cast<std::uint16_t>(150 + actor * 3);
+      stats.accessory.accessory.id =
+          static_cast<std::uint16_t>(151 + actor * 3);
       VS::Items::QueueLiveEnemyLoot(&enemy);
     }
   }
@@ -1147,10 +1151,11 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
       VS::Menu::Loot::lootLeftEdge;
   std::array<VS::Menu::Framework::MenuRow, 40> menu_rows{};
   char item_names[512][24]{};
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4 + 2);
-  std::array<u_long, 32> ordering{};
-  std::array<u_int, 0x180> sfx_offsets{};
-  std::array<u_short, 0x180> sfx_selectors{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4 + 2);
+  std::array<std::uint32_t, 32> ordering{};
+  std::array<std::uint32_t, 0x180> sfx_offsets{};
+  std::array<std::uint16_t, 0x180> sfx_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
       {.program_offsets = sfx_offsets,
        .bank_selectors = sfx_selectors,
@@ -1203,8 +1208,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   static int Tick(int buttons = 0) {
-    VS::Input::buttonsPressed = static_cast<u_short>(buttons);
-    VS::Input::buttonRepeat = static_cast<u_short>(buttons);
+    VS::Input::buttonsPressed = static_cast<std::uint16_t>(buttons);
+    VS::Input::buttonRepeat = static_cast<std::uint16_t>(buttons);
     return VS::Menu::Loot::UpdateLiveLootSelection(0);
   }
 
@@ -1280,12 +1285,12 @@ struct EquipmentLootFixture : LootInventoryFixture {
       source.weapons[0].name[23] = static_cast<char>(0xE7);
     }
     for (int index = 0; index < attached; ++index) {
-      auto gem = EquipmentDropPart(static_cast<u_short>(300 + index));
+      auto gem = EquipmentDropPart(static_cast<std::uint16_t>(300 + index));
       VS::Items::WriteLiveInventoryGemStats(&source.gems[index], &gem);
       source.gems[index].index = static_cast<std::int16_t>(index + 1);
       source.gems[index].set_item_index = shield ? 0x81 : 1;
       auto& slots = shield ? source.shields[0].gems : source.weapons[0].gems;
-      slots[index] = static_cast<u_char>(index + 1);
+      slots[index] = static_cast<std::uint8_t>(index + 1);
     }
   }
 
@@ -1296,8 +1301,8 @@ struct EquipmentLootFixture : LootInventoryFixture {
         target.shields[index].base.id = 147;
         target.shields[index].index = static_cast<char>(index + 1);
       } else {
-        target.weapons[index].blade = static_cast<u_char>(index + 1);
-        target.weapons[index].grip = static_cast<u_char>(index + 1);
+        target.weapons[index].blade = static_cast<std::uint8_t>(index + 1);
+        target.weapons[index].grip = static_cast<std::uint8_t>(index + 1);
         target.weapons[index].index = static_cast<char>(index + 1);
       }
     }
@@ -1311,10 +1316,10 @@ struct EquipmentLootFixture : LootInventoryFixture {
     }
     for (int index = 0; index < occupied.grips; ++index) {
       target.grips[index].id = 96;
-      target.grips[index].index = static_cast<u_short>(index + 1);
+      target.grips[index].index = static_cast<std::uint16_t>(index + 1);
       if (!shield && index < occupied.parents) {
         target.grips[index].assembled_weapon_index =
-            static_cast<u_short>(index + 1);
+            static_cast<std::uint16_t>(index + 1);
       }
     }
     for (int index = 0; index < occupied.gems; ++index) {
@@ -1346,26 +1351,26 @@ struct EquipmentLootFixture : LootInventoryFixture {
       weapon = source.weapons[0];
       weapon.index = static_cast<char>(parent);
       weapon.is_equipped = 0;
-      weapon.blade = static_cast<u_char>(occupied.blades + 1);
-      weapon.grip = static_cast<u_char>(occupied.grips + 1);
+      weapon.blade = static_cast<std::uint8_t>(occupied.blades + 1);
+      weapon.grip = static_cast<std::uint8_t>(occupied.grips + 1);
       auto& blade = expected.blades[occupied.blades];
       blade = source.blades[0];
       blade.index = static_cast<char>(occupied.blades + 1);
       blade.assembled_weapon_index = static_cast<char>(parent);
       auto& grip = expected.grips[occupied.grips];
       grip = source.grips[0];
-      grip.index = static_cast<u_short>(occupied.grips + 1);
-      grip.assembled_weapon_index = static_cast<u_short>(parent);
+      grip.index = static_cast<std::uint16_t>(occupied.grips + 1);
+      grip.assembled_weapon_index = static_cast<std::uint16_t>(parent);
     }
     for (int index = 0; index < attached; ++index) {
       const int slot = occupied.gems + index;
       expected.gems[slot] = source.gems[index];
       expected.gems[slot].index = static_cast<std::int16_t>(slot + 1);
       expected.gems[slot].set_item_index =
-          static_cast<u_short>(parent | (shield ? 0x80 : 0));
+          static_cast<std::uint16_t>(parent | (shield ? 0x80 : 0));
       auto& slots = shield ? expected.shields[occupied.parents].gems
                            : expected.weapons[occupied.parents].gems;
-      slots[index] = static_cast<u_char>(slot + 1);
+      slots[index] = static_cast<std::uint8_t>(slot + 1);
     }
     return expected;
   }
@@ -1393,8 +1398,8 @@ struct EquipmentLootFixture : LootInventoryFixture {
 
 struct LootPresentationFixture : EnemyLootFixture {
   std::uint8_t saved_intro = VS::State::LiveScriptFlag(0xAB);
-  u_int saved_control = VS::Field::controlMode;
-  u_int saved_flow = VS::Battle::actionFlowMode;
+  std::uint32_t saved_control = VS::Field::controlMode;
+  std::uint32_t saved_flow = VS::Battle::actionFlowMode;
   VS::Actors::ActorRecord* saved_player = VS::Actors::actorRecords[0];
   VS::Items::LootListNode* saved_menu_list = VS::Menu::Framework::lootLists;
   VS::Items::BattleLoot* saved_menu_entry = VS::Menu::Framework::lootEntry;
@@ -1456,8 +1461,8 @@ struct AbilityUnlockFixture : AbilityFixture {
 
 struct ChainCreditFixture : AbilityUnlockFixture {
   std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
-  u_int saved_flow = VS::Battle::actionFlowMode;
-  u_int saved_control = VS::Field::controlMode;
+  std::uint32_t saved_flow = VS::Battle::actionFlowMode;
+  std::uint32_t saved_control = VS::Field::controlMode;
   int saved_reward = VS::Battle::recoveryRewardMode;
 
   ChainCreditFixture() {
@@ -1510,11 +1515,12 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
 
   BreakArtKillFixture(unsigned category, unsigned tier)
       : counter(category % 10) {
-    actors[0].equipped_weapon_category = static_cast<u_char>(category);
+    actors[0].equipped_weapon_category = static_cast<std::uint8_t>(category);
     VS::State::SetLiveScriptFlag(0x82, 10);
-    VS::State::artsStatus.arts_learned[counter] = static_cast<u_char>(tier);
+    VS::State::artsStatus.arts_learned[counter] =
+        static_cast<std::uint8_t>(tier);
     VS::State::artsStatus.kills.weapon_category_kills[counter] =
-        static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
+        static_cast<std::uint16_t>(kBreakArtThresholds[counter][tier] - 1);
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
     target.target.target_actor = 1;
@@ -1679,9 +1685,10 @@ TEST_CASE("Ability rewards use all original cumulative thresholds",
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int delta = GENERATE(-1, 0, 1);
   auto& progress = VS::State::artsStatus;
-  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.battle_abilities_unlocked =
+      static_cast<std::uint16_t>(unlocked);
   progress.kills.total_kills =
-      static_cast<u_short>(kAbilityThresholds[unlocked] + delta);
+      static_cast<std::uint16_t>(kAbilityThresholds[unlocked] + delta);
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == (delta >= 0 ? 1 : 0));
   CheckAbilityProgress(before);
@@ -1692,7 +1699,8 @@ TEST_CASE("Successful lethal chain timing retains ability credit",
   ChainCreditFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   auto& progress = VS::State::artsStatus;
-  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.battle_abilities_unlocked =
+      static_cast<std::uint16_t>(unlocked);
   progress.kills.total_kills = kAbilityThresholds[unlocked] - 1;
   auto expected = progress;
   ++expected.kills.total_kills;
@@ -1725,9 +1733,10 @@ TEST_CASE("Pending ability rewards do not discard later chain credit",
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int extra = GENERATE(0, 1, 500);
   auto& progress = VS::State::artsStatus;
-  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.battle_abilities_unlocked =
+      static_cast<std::uint16_t>(unlocked);
   progress.kills.total_kills =
-      static_cast<u_short>(kAbilityThresholds[unlocked] + extra);
+      static_cast<std::uint16_t>(kAbilityThresholds[unlocked] + extra);
   auto expected = progress;
   ++expected.kills.total_kills;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
@@ -1756,13 +1765,14 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
   const int delta = GENERATE(-1, 0);
   const int unlocked = GENERATE(0, 21, 22);
   fixture.actors[0].equipped_weapon_category =
-      static_cast<u_char>(category + category_offset);
+      static_cast<std::uint8_t>(category + category_offset);
   auto& progress = VS::State::artsStatus;
-  progress.arts_learned[category] = static_cast<u_char>(tier);
+  progress.arts_learned[category] = static_cast<std::uint8_t>(tier);
   progress.kills.weapon_category_kills[category] =
-      static_cast<u_short>(kBreakArtThresholds[category][tier] + delta);
+      static_cast<std::uint16_t>(kBreakArtThresholds[category][tier] + delta);
   progress.kills.total_kills = 65535;
-  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.battle_abilities_unlocked =
+      static_cast<std::uint16_t>(unlocked);
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() ==
         (delta == 0 ? 0x10000 : (unlocked < 22 ? 1 : 0)));
@@ -1774,7 +1784,7 @@ TEST_CASE("Ability reward cap prevents further pending unlocks",
   AbilityUnlockFixture fixture;
   auto& progress = VS::State::artsStatus;
   progress.kills.battle_abilities_unlocked =
-      static_cast<u_short>(GENERATE(22, 23, 65535));
+      static_cast<std::uint16_t>(GENERATE(22, 23, 65535));
   progress.kills.total_kills = 65535;
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == 0);
@@ -1786,8 +1796,9 @@ TEST_CASE("Ineligible ability reward menus leave progression unchanged",
   AbilityUnlockFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 23));
   auto& progress = VS::State::artsStatus;
-  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
-  progress.kills.total_kills = static_cast<u_short>(
+  progress.kills.battle_abilities_unlocked =
+      static_cast<std::uint16_t>(unlocked);
+  progress.kills.total_kills = static_cast<std::uint16_t>(
       unlocked == 22 ? 65535 : kAbilityThresholds[unlocked] - 1);
   const auto before = progress;
   CHECK(VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock(1) == 1);
@@ -2743,7 +2754,7 @@ TEST_CASE("Six limb rolls retain only the first two successful armor drops",
   for (int index = 0; index < 6; ++index) {
     auto& source = fixture.stats.limbs[index].armor;
     if ((present & (1 << index)) != 0) {
-      source.armor = EquipmentDropPart(static_cast<u_short>(149 + index));
+      source.armor = EquipmentDropPart(static_cast<std::uint16_t>(149 + index));
       expected.Next(255);
     }
     if ((eligible & (1 << index)) != 0) {
@@ -2774,12 +2785,13 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
   LootInventoryFixture fixture;
   VS::Items::inventory = {};
   fixture.source = {};
-  auto part = EquipmentDropPart(static_cast<u_short>(id));
+  auto part = EquipmentDropPart(static_cast<std::uint16_t>(id));
   VS::Items::WriteLiveInventoryArmorStats(&fixture.source.armor[0], &part);
   fixture.source.armor[0].index = 1;
   for (int index = 0; index < count; ++index) {
     VS::Items::inventory.armor[index].id = 150;
-    VS::Items::inventory.armor[index].index = static_cast<u_char>(index + 1);
+    VS::Items::inventory.armor[index].index =
+        static_cast<std::uint8_t>(index + 1);
   }
   auto expected = VS::Items::inventory;
   const auto source_before = fixture.source;
@@ -2795,7 +2807,7 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
             &fixture.source) == (count < 16 ? count + 1 : 0));
   if (count < 16) {
     expected.armor[count] = fixture.source.armor[0];
-    expected.armor[count].index = static_cast<u_char>(count + 1);
+    expected.armor[count].index = static_cast<std::uint8_t>(count + 1);
     expected.armor[count].limb = 0;
   }
   EquipmentLootFixture::CheckInventory(VS::Items::inventory, expected);
@@ -2812,7 +2824,8 @@ TEST_CASE(
   VS::State::stateFlags.difficulty = static_cast<char>(difficulty);
   for (int index = 0; index < armor_count; ++index) {
     VS::Items::inventory.armor[index].id = 150;
-    VS::Items::inventory.armor[index].index = static_cast<u_char>(index + 1);
+    VS::Items::inventory.armor[index].index =
+        static_cast<std::uint8_t>(index + 1);
   }
   fixture.Stage(flags);
   const bool allowed = (flags & (difficulty + 1)) != 0;
@@ -2897,7 +2910,7 @@ TEST_CASE("Composite loot staging preflights all component storage",
   part.id = 147;
   VS::Items::WriteLiveInventoryArmorStats(&loot.shield.shield, &part);
   for (int index = 0; index < attached; ++index) {
-    part.id = static_cast<u_short>(300 + index);
+    part.id = static_cast<std::uint16_t>(300 + index);
     VS::Items::WriteLiveInventoryGemStats(&loot.weapon.gems[index], &part);
     VS::Items::WriteLiveInventoryGemStats(&loot.shield.gems[index], &part);
   }

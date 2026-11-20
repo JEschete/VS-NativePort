@@ -23,7 +23,9 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Battle/Damage.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 unsigned Tile(int x, int z) {
@@ -45,9 +47,9 @@ struct GroundFixture {
   std::array<VS::Actors::ActorRecord, 2> models{};
   std::array<VS::Battle::Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
-  u_short heights[32][32]{};
-  u_short flags[32][32]{};
-  std::array<u_char, 1024> regions{};
+  std::uint16_t heights[32][32]{};
+  std::uint16_t flags[32][32]{};
+  std::array<std::uint8_t, 1024> regions{};
 
   GroundFixture() {
     auto& frame = VS::Battle::Ai::LiveFrameContext();
@@ -66,8 +68,8 @@ struct GroundFixture {
     VS::Content::battleAiHesitationLengths[0] = 0x01184614;
     frame.randomState = 40;
     frame.lastBudgetTick = 1;
-    const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
-                                           0x10, 0x11, 0x01, 0x31};
+    const std::array<std::uint8_t, 8> directions{0x30, 0x33, 0x03, 0x13,
+                                                 0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame.directions);
     ClearCache();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
@@ -81,7 +83,7 @@ struct GroundFixture {
       VS::Actors::actorRecords[index] = &models[index];
       VS::Battle::actors[index] = &actors[index];
       actors[index].id = static_cast<int>(index);
-      states[index].actor_id = static_cast<u_char>(index);
+      states[index].actor_id = static_cast<std::uint8_t>(index);
       states[index].actor =
           reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
       states[index].model = reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(
@@ -167,7 +169,7 @@ TEST_CASE(
   CHECK(fixture.Occupancy(Tile(9, 8)) == 0);
   fixture.states[0].previous_tile = -1;
   for (unsigned bit = 0; bit < 16; ++bit) {
-    fixture.flags[8][9] = static_cast<u_short>(1u << bit);
+    fixture.flags[8][9] = static_cast<std::uint16_t>(1u << bit);
     CAPTURE(bit);
     CHECK(fixture.Occupancy(Tile(9, 8)) ==
           ((0x80B0u & (1u << bit)) != 0 ? 0 : 1));
@@ -444,7 +446,8 @@ TEST_CASE("Hesitation phase thresholds execute the actual timed-turn consumer",
   const int count = GENERATE(1, 2, 17, 18, 52, 53, 70);
   GroundFixture fixture;
   fixture.states[0].movement_mode_counters[2] = 1;
-  fixture.states[0].movement_mode_counters[3] = static_cast<u_char>(count);
+  fixture.states[0].movement_mode_counters[3] =
+      static_cast<std::uint8_t>(count);
   CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 128, 1,
                                                  1) == (count >= 2));
   CHECK(fixture.states[0].movement_mode_counters[3] == count - 1);
@@ -459,7 +462,7 @@ TEST_CASE("Vertical gait selection retains source priorities and output widths",
           "[ai][ground-motion]") {
   const int running = GENERATE(0, 1);
   GroundFixture fixture;
-  fixture.states[0].opaque1 = static_cast<u_char>(running);
+  fixture.states[0].opaque1 = static_cast<std::uint8_t>(running);
   fixture.states[0].locomotion_flags = 0x3010;
   fixture.states[0].walk_step = 17;
   fixture.states[0].run_step = 93;
@@ -478,11 +481,11 @@ TEST_CASE("Room contact flags preserve all original shift/sign cases",
   const unsigned mask = 1u << bit;
   VS::Battle::Ai::SetLiveAiContactOccupancy(static_cast<int>(bit));
   CHECK(fixture.room.reserved_e_prefix[0] ==
-        static_cast<u_char>(bit == 31 ? 0 : 0x55u | mask));
+        static_cast<std::uint8_t>(bit == 31 ? 0 : 0x55u | mask));
   fixture.room.reserved_e_prefix[0] = 0x55;
   VS::Battle::Ai::ClearLiveAiContactOccupancy(static_cast<int>(bit));
   CHECK(fixture.room.reserved_e_prefix[0] ==
-        static_cast<u_char>(bit == 31 ? 0xFF : 0x55u & ~mask));
+        static_cast<std::uint8_t>(bit == 31 ? 0xFF : 0x55u & ~mask));
 }
 
 TEST_CASE(
@@ -631,14 +634,15 @@ TEST_CASE("Actor contact release clears the reserved moving-platform bit",
 }
 
 namespace {
-u_char ExpectedContactRelease(unsigned command, unsigned layer, unsigned bit) {
+std::uint8_t ExpectedContactRelease(unsigned command, unsigned layer,
+                                    unsigned bit) {
   constexpr unsigned kInitial = 0xA5;
   if (((1u << (command & 31)) & 0x4800) == 0 || bit == 0 || layer != 0) {
     return kInitial;
   }
   const auto mask = ~(1u << (bit & 31));
-  return static_cast<u_char>((mask & 0x80000000u) ? kInitial & mask
-                                                  : kInitial | mask);
+  return static_cast<std::uint8_t>((mask & 0x80000000u) ? kInitial & mask
+                                                        : kInitial | mask);
 }
 
 void CheckActorContactBits(GroundFixture& fixture, unsigned command,
@@ -658,9 +662,10 @@ TEST_CASE(
     "[ai][contact-release]") {
   GroundFixture fixture;
   for (unsigned command = 0; command < 256; ++command) {
-    fixture.actors[1].command_opcode = static_cast<u_char>(command);
+    fixture.actors[1].command_opcode = static_cast<std::uint8_t>(command);
     for (unsigned layer = 0; layer < 16; ++layer) {
-      fixture.models[1].instance.support_layer = static_cast<u_char>(layer);
+      fixture.models[1].instance.support_layer =
+          static_cast<std::uint8_t>(layer);
       fixture.models[1].instance.placement_layer = 15;
       CheckActorContactBits(fixture, command, layer);
     }

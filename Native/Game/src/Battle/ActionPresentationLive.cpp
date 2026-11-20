@@ -56,6 +56,8 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;

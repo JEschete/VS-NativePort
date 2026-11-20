@@ -13,7 +13,7 @@
 #include "Effects/EffectInstances.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/LegacyPackets.hpp"
 
@@ -170,7 +170,7 @@ bool Tick(TestTrailHost& host, int count) {
 
 int other_renderer_calls = 0;
 
-int OtherRenderer(fx::LiveRendererSlot* /*slot*/, u_int /*command*/,
+int OtherRenderer(fx::LiveRendererSlot* /*slot*/, std::uint32_t /*command*/,
                   int /*parameter*/) {
   ++other_renderer_calls;
   return 1;
@@ -375,7 +375,7 @@ TEST_CASE("A texel is clamped to 1..254 on each axis", "[bone-trail][F01451]") {
   CHECK(fx::ClampTrailTexturePoint(-100, 10, Point(100, -20)) ==
         RingUv{.u = 1, .v = 1});
 
-  u_short uv = 0xFFFF;
+  std::uint16_t uv = 0xFFFF;
   fx::LiveClampTrailTexturePoint(3, -2, static_cast<int>(Point(100, 50)), &uv);
   CHECK(uv == (103 | (48 << 8)));
   fx::LiveClampTrailTexturePoint(0, 0, 0, nullptr);

@@ -11,7 +11,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
@@ -20,6 +20,16 @@
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::isendprim;
+using VS::Legacy::LINE_G2;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::POLY_G4;
+using VS::Legacy::TILE;
 
 namespace {
 __declspec(noinline) void ReuseReturnedStack() {
@@ -36,8 +46,9 @@ struct ManualFrameFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_scroll = VS::Menu::manual::scrollPosition;
   int saved_arrow = VS::Menu::manual::pageArrowAnimState;
-  std::vector<u_long> storage = std::vector<u_long>(0x8002, 0xDEADBEEF);
-  std::array<u_long, 64> ordering{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x8002, 0xDEADBEEF);
+  std::array<std::uint32_t, 64> ordering{};
 
   ManualFrameFixture() {
     VS::Render::frameBuf = 0;
@@ -95,17 +106,19 @@ TEST_CASE("Manual panels use full native frame pointers and packet links",
       break;
     case 1:
       VS::Menu::manual::LiveDrawPageBackground(8, 52, 310, 136, 0);
-      bytes = sizeof(POLY_G4) + 3 * sizeof(u_long);
+      bytes = sizeof(POLY_G4) + 3 * sizeof(std::uint32_t);
       packets = 2;
       break;
     case 2:
       VS::Menu::manual::LiveDrawUpperScrollFade();
-      bytes = 49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(u_long);
+      bytes =
+          49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(std::uint32_t);
       packets = 66;
       break;
     case 3:
       VS::Menu::manual::LiveDrawLowerScrollFade();
-      bytes = 49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(u_long);
+      bytes =
+          49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(std::uint32_t);
       packets = 66;
       break;
     default:
@@ -123,10 +136,10 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
           "[menu][manual][text]") {
   const int scroll = GENERATE(0, 10);
   std::array<int, 32> help{};
-  auto* offsets = reinterpret_cast<u_short*>(help.data() + 4);
+  auto* offsets = reinterpret_cast<std::uint16_t*>(help.data() + 4);
   offsets[0] = 12;
   for (int index = 0; index < 12; ++index) {
-    offsets[index + 1] = static_cast<u_short>(14 + index * 2);
+    offsets[index + 1] = static_cast<std::uint16_t>(14 + index * 2);
     auto* line = reinterpret_cast<char*>(offsets + offsets[index + 1]);
     line[0] = static_cast<char>(17 + index);
     line[1] = static_cast<char>(40 + index);

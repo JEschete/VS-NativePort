@@ -30,7 +30,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 using VS::Battle::ActionDefinition;
@@ -47,7 +47,7 @@ struct PlanningFixture {
   VS::Battle::Ai::ActorAiState peer{};
   VS::Battle::Ai::EngagementData actor{};
   VS::Battle::ActorStats stats{};
-  u_char exclusions[16][256]{};
+  std::uint8_t exclusions[16][256]{};
 
   PlanningFixture() {
     VS::Battle::Ai::candidateExclusions = exclusions;
@@ -77,7 +77,7 @@ struct PlanningFixture {
 struct PlanningAdvanceFixture : PlanningFixture {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  std::array<u_int, 5> saved_masks{};
+  std::array<std::uint32_t, 5> saved_masks{};
   VS::Battle::StatusEffectParams saved_poison =
       VS::Battle::statusEffectParams[14];
   VS::Battle::StatusEffectParams saved_regeneration =
@@ -300,7 +300,7 @@ struct TargetMemoryFixture {
     std::memset(state.reserved_3c.data(), 0xA5, sizeof(state.reserved_3c));
     VS::Actors::actorRecords[target] = &model;
     VS::Actors::actorRecords[alternate.target_id] = &alternate_model;
-    const std::array<u_char, 4> tile{0xD4, 0xC3, 0xB2, 0xA1};
+    const std::array<std::uint8_t, 4> tile{0xD4, 0xC3, 0xB2, 0xA1};
     std::memcpy(&model.instance.current_tile_x, tile.data(), tile.size());
   }
 
@@ -1217,7 +1217,7 @@ TEST_CASE("Native simulated results accept the complete native target capacity",
   SimulationResultsFixture fixture;
   fixture.workspace->opaque4.opaque40 = 1;
   fixture.workspace->opaque_4a =
-      static_cast<u_short>(std::size(fixture.request->targets));
+      static_cast<std::uint16_t>(std::size(fixture.request->targets));
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
   REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
@@ -1302,7 +1302,7 @@ TEST_CASE("Native condition ratios read each term from the requested row",
       rows{};
   for (std::size_t index = 0; index < rows.size(); ++index) {
     auto& row = rows[index];
-    row.opaque0_bit0 = static_cast<u_int>(rows.size() - 1 - index);
+    row.opaque0_bit0 = static_cast<std::uint32_t>(rows.size() - 1 - index);
     row.opaque4 = static_cast<std::int16_t>(2 * index);
     row.opaque6 = 128;
     row.opaque8 = static_cast<std::int16_t>(3 * index);
@@ -1547,7 +1547,7 @@ TEST_CASE("Blocked movement forgets its target after exhausting detours",
   view->tile.word = 0x00120034;
   view->previous_tile.word = 0x05120034;
   view->opaque_1c = 7;
-  view->detour_step = static_cast<u_char>(GENERATE(5, 255));
+  view->detour_step = static_cast<std::uint8_t>(GENERATE(5, 255));
   std::array<std::byte, sizeof(state)> expected{};
   std::memcpy(expected.data(), &state, expected.size());
   expected[offsetof(VS::Battle::Ai::ActorAiState, is_stuck)] = std::byte{1};
@@ -1761,7 +1761,7 @@ TEST_CASE(
       candidate.target_id = 3;
       candidate.action = static_cast<unsigned>(40 + index);
       fixture.stats.limb_actions[index][0].action_id =
-          static_cast<u_short>(candidate.action);
+          static_cast<std::uint16_t>(candidate.action);
       VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
       CHECK(fixture.exclusions[3][candidate.action] == 1);
     }
@@ -1850,7 +1850,7 @@ TEST_CASE("AI action usability applies resource thresholds to every limb slot",
   slot = std::bit_cast<VS::Battle::Ai::ActionSlotMetadataRecord>(
       std::array<uint32_t, 2>{0xA5CAFE13, 0xDEADBEAF});
   auto& action = VS::Battle::actionDefinitions[42];
-  action.type = static_cast<u_char>(type);
+  action.type = static_cast<std::uint8_t>(type);
   action.cost = 10;
   fixture.stats.current_hp = 59;
   fixture.stats.current_mp = 9;
@@ -1872,7 +1872,7 @@ TEST_CASE("AI action usability applies status and damaged-limb restrictions",
           "[ai][planning]") {
   const auto type = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   PlanningFixture fixture;
-  VS::Battle::actionDefinitions[42].type = static_cast<u_char>(type);
+  VS::Battle::actionDefinitions[42].type = static_cast<std::uint8_t>(type);
   fixture.stats.statuses = 0x2000;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1) ==
         (type == 1 || type == 2));
@@ -1935,7 +1935,7 @@ TEST_CASE(
   fixture.stats.current_mp = 9;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
   VS::Battle::actionDefinitions[42].ai_flags =
-      std::bit_cast<VS::Battle::ActionAiFlags>(u_short{0x400});
+      std::bit_cast<VS::Battle::ActionAiFlags>(std::uint16_t{0x400});
   CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
                                                    3));
   fixture.stats.current_mp = 50;

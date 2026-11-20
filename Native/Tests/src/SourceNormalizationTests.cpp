@@ -9,7 +9,10 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace {
 namespace Math = VS::Core::Math;

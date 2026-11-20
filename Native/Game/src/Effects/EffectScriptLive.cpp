@@ -33,7 +33,7 @@
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 static_assert(std::extent_v<decltype(VS::Effects::actionVariantValues)> >=
               VS::Effects::kActionVariantValues);
@@ -362,7 +362,7 @@ class InstanceEffectHost final : public ScriptEffectHost {
     spawn.priority = static_cast<std::uint8_t>(instance_->priority);
     spawn.script = instance_->script;
     spawn.script_offset = script_offset;
-    spawn.token = static_cast<u_char>(instance_->token);
+    spawn.token = static_cast<std::uint8_t>(instance_->token);
     (void)LiveCreatePrimaryEffectInstance(&spawn);
   }
   void AttachRenderer(std::uint8_t index, std::int32_t parameters) override {

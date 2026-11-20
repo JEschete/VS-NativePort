@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -19,7 +19,11 @@
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::VECTOR;
 
 namespace {
 namespace fx = VS::Effects;
@@ -112,8 +116,8 @@ template <std::size_t N>
 std::array<Particle, N> LinkedParticles() {
   std::array<Particle, N> particles{};
   for (std::size_t index = 0; index < N; ++index) {
-    particles.at(index).transparency = static_cast<u_char>(index);
-    particles.at(index).age = static_cast<u_char>(index);
+    particles.at(index).transparency = static_cast<std::uint8_t>(index);
+    particles.at(index).age = static_cast<std::uint8_t>(index);
     if (index + 1 < N) {
       particles.at(index).next = &particles.at(index + 1);
     }
@@ -154,7 +158,7 @@ class AnimationPackage {
   AnimationPackage() {
     package.texture_table_count = 1;
     package.texture_tables[0] = frames.data();
-    package.animation_table = reinterpret_cast<u_short*>(table.data());
+    package.animation_table = reinterpret_cast<std::uint16_t*>(table.data());
     fx::package = &package;
     fx::RecordLiveAnimationTable(std::as_writable_bytes(std::span(table)));
   }
@@ -167,8 +171,8 @@ class AnimationPackage {
     fx::package = saved_;
   }
 
-  [[nodiscard]] const u_char* Program(std::size_t offset) const {
-    return reinterpret_cast<const u_char*>(table.data()) + offset;
+  [[nodiscard]] const std::uint8_t* Program(std::size_t offset) const {
+    return reinterpret_cast<const std::uint8_t*>(table.data()) + offset;
   }
 
  private:
@@ -250,7 +254,7 @@ TEST_CASE("The live spawn rotates through the loaded GTE matrix",
   swap.m[0][1] = 4096;  // x' = y
   swap.m[1][0] = 4096;  // y' = x
   swap.m[2][2] = 4096;
-  Core_Gte_SetRotMatrix(&swap);
+  SetRotMatrix(&swap);
   VS::Effects::LiveParticleEmitterScratch scratch{};
   scratch.flags = rotated ? fx::kParticleRotateSpawnOffset : 0;
   scratch.vector = {5, -6, 7, 0};
@@ -266,7 +270,7 @@ TEST_CASE("The live spawn rotates through the loaded GTE matrix",
   CHECK(particle.motion.position.vy == 20 + aim[1] * 4096);
   CHECK(particle.motion.position.vz == 30 + aim[2] * 4096);
   fx::LiveSetParticleSpawnPosition(nullptr, &particle);
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 TEST_CASE("A tick integrates and draws before ageing each particle",
@@ -431,7 +435,7 @@ TEST_CASE("A cleared texture animation holds nothing",
   animation.texture_index = 3;
   animation.rotation = 9;
   fx::LivePackageTextureFrame frame{};
-  animation.program = reinterpret_cast<u_char*>(&frame);
+  animation.program = reinterpret_cast<std::uint8_t*>(&frame);
   animation.texture_info = &frame;
   fx::LiveClearParticleTextureState(&animation);
   CHECK(animation.frame_offset_x == 0);
@@ -554,7 +558,7 @@ TEST_CASE("The live step selects the frame of its texture table",
           "[particle-texture][F01592]") {
   AnimationPackage package;
   VS::Effects::LiveParticleTextureAnimation animation{};
-  animation.program = const_cast<u_char*>(package.Program(12));
+  animation.program = const_cast<std::uint8_t*>(package.Program(12));
   fx::LiveAdvanceParticleTextureAnimation(&animation);
   CHECK(animation.texture_info == &package.frames[3]);
   CHECK(animation.frame_timer == 4);
@@ -574,7 +578,7 @@ TEST_CASE("The live step refuses a program outside every recorded table",
   AnimationPackage package;
   std::array<std::uint32_t, 1> unrecorded{FrameWord(1, 2)};
   VS::Effects::LiveParticleTextureAnimation animation{};
-  animation.program = reinterpret_cast<u_char*>(unrecorded.data());
+  animation.program = reinterpret_cast<std::uint8_t*>(unrecorded.data());
   fx::LiveAdvanceParticleTextureAnimation(&animation);
   CHECK(animation.texture_info == nullptr);
   CHECK(animation.cursor == 0);

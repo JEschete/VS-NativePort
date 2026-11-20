@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Actors/ModelRendering.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;
@@ -27,17 +27,19 @@ namespace VS::Actors {
 // TransformLiveActorRootOffset, and its look angles.
 void PrepareLiveActorRootTransform(VS::Actors::ActorRecord* actor);
 // func_800AEF94: UpdateAndDrawRoomModels over the live tables.
-void UpdateAndDrawLiveRoomActors(MATRIX* camera);
+void UpdateAndDrawLiveRoomActors(VS::Core::Gte::MATRIX* camera);
 // func_800B07DC: rotates the workspace root offset by the actor's angles. It
 // leaves the rotation in the workspace matrix, with the rotated offset as its
 // translation, and the offset moved to the actor's position in rootOffset.
 void TransformLiveActorRootOffset(VS::Actors::ActorRecord* actor);
 // func_800B1A68: places the gimmick centered at the workspace rootOffset and
 // draws it. A held gimmick whose holder slot is empty is refused.
-void DrawLiveGimmickModel(VS::Field::GimmickInstance* object, MATRIX* camera);
+void DrawLiveGimmickModel(VS::Field::GimmickInstance* object,
+                          VS::Core::Gte::MATRIX* camera);
 // func_800B217C: fades the weapon, builds its bone chain from `source` and
 // draws it.
-void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source);
+void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon,
+                              VS::Core::Gte::MATRIX* source);
 // INITBTL.PRG func_800FA7B0: the texture slots, the model tables and the
 // sequence buffers a battle starts from.
 void InitializeLiveActorModelResources();

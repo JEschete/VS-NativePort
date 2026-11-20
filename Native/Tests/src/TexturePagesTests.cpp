@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -20,6 +20,19 @@
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_MOVE;
+using VS::Legacy::DR_TPAGE;
+using VS::Legacy::LoadImage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDrawMove;
+using VS::Legacy::SetDrawTPage;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
+using VS::Legacy::TIM_IMAGE;
 
 // Contracts of the #276 row 6 texture slice: the lendable texture pages
 // (146C.c:9480-9549), the TIM parse (146C.c:16935, D4.c:2235), the texture
@@ -376,8 +389,9 @@ struct LiveFrameFixture {
   void* saved_overlay_table = VS::Render::legacyCurrentOrderingTable;
   int saved_framebuffer = VS::Render::frameBuf;
   // The frame's whole 0x20000-byte primitive buffer.
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(0x2088 / 4);
 
   LiveFrameFixture() {
     VS::Render::frameBuf = 0;
@@ -404,7 +418,7 @@ TEST_CASE("Live texture moves are spliced last into the overlay bucket",
   LiveFrameFixture frame;
   RECT rect{};
   setRECT(&rect, 16, 20, 8, 2);
-  u_long* const head = &frame.ordering[0x821];
+  std::uint32_t* const head = &frame.ordering[0x821];
 
   Render::QueueLiveTextureRectangleMove(&rect, 264, 84);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -421,7 +435,8 @@ TEST_CASE("Live texture moves without room or a source are dropped",
   LiveFrameFixture frame;
   RECT rect{};
   setRECT(&rect, 16, 20, 8, 2);
-  u_long* const near_end = frame.storage.data() + frame.storage.size() - 5;
+  std::uint32_t* const near_end =
+      frame.storage.data() + frame.storage.size() - 5;
   VS::Render::FrameScratchpad().primitive_cursor = near_end;
   const std::uint64_t dropped = Render::DroppedLiveUiPacketCount();
 
@@ -460,7 +475,7 @@ TEST_CASE("Texture-page commands match SetDrawTPage with dithering",
 TEST_CASE("Live texture pages link into the frame's ordering-table slot",
           "[render-textures]") {
   LiveFrameFixture frame;
-  u_long* const slot = &frame.ordering[18 + 3];
+  std::uint32_t* const slot = &frame.ordering[18 + 3];
 
   void* next = Render::AppendLiveTexturePage(0x2E, 3);
   CHECK(next == frame.storage.data() + 2);
@@ -590,7 +605,7 @@ TEST_CASE("Live image reads return what the upload wrote",
   RECT area{};
   setRECT(&area, 1000, 500, 4, 2);
   std::array<std::uint16_t, 8> saved{};
-  StoreImage(&area, reinterpret_cast<u_long*>(saved.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(saved.data()));
   const std::array<std::uint16_t, 8> pixels{9, 8, 7, 6, 5, 4, 3, 2};
   const int position = 1000 | (500 << 16);
   const int size = 4 | (2 << 16);
@@ -600,6 +615,6 @@ TEST_CASE("Live image reads return what the upload wrote",
   Render::ReadLiveImageRectangle(position, read.data(), size);
   Render::ReadLiveImageRectangle(position, nullptr, size);
   CHECK(read == pixels);
-  LoadImage(&area, reinterpret_cast<u_long*>(saved.data()));
+  LoadImage(&area, reinterpret_cast<std::uint32_t*>(saved.data()));
 }
 }  // namespace

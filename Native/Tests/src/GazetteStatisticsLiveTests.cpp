@@ -17,6 +17,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "State/Progress.hpp"
 
+using VS::Legacy::GpuHandle;
+
 namespace {
 namespace live = gazette_statistics_live_tests;
 namespace shared = gazette_times_live_tests;
@@ -26,7 +28,7 @@ namespace render = VS::Render;
 using Text = shared::EncodedText;
 
 template <std::size_t Count>
-const std::uint8_t* LabelPointer(const u_short (&table)[Count],
+const std::uint8_t* LabelPointer(const std::uint16_t (&table)[Count],
                                  std::size_t index) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   return reinterpret_cast<const std::uint8_t*>(table + table[index]);
@@ -147,12 +149,13 @@ void Progress() {
   VS::State::scoreData.max_chain = 65535;
   for (std::size_t index = 0;
        index < std::size(VS::State::scoreData.enemy_kills); ++index) {
-    VS::State::scoreData.enemy_kills[index] = static_cast<u_short>(100 + index);
+    VS::State::scoreData.enemy_kills[index] =
+        static_cast<std::uint16_t>(100 + index);
   }
   for (std::size_t index = 0;
        index < std::size(VS::State::scoreData.weapon_attacks); ++index) {
     VS::State::scoreData.weapon_attacks[index] =
-        static_cast<u_short>(1000 + index);
+        static_cast<std::uint16_t>(1000 + index);
   }
 }
 
@@ -178,8 +181,8 @@ void CheckTitleInformationOwnership(live::StatisticsFixture& fixture) {
   CHECK(shared::Fixture::InformationText() == information);
 }
 
-void CheckDigitPayload(std::span<const u_long> units,
-                       std::span<const u_long> tens, bool dimmed) {
+void CheckDigitPayload(std::span<const std::uint32_t> units,
+                       std::span<const std::uint32_t> tens, bool dimmed) {
   CHECK(units[1] == (dimmed ? 0x2E202020U : 0x2E808080U));
   CHECK(units[2] == 0x00440041U);
   CHECK(units[3] == (dimmed ? 0x37F7000CU : 0x37F4000CU));
@@ -249,7 +252,8 @@ TEST_CASE("F02814 Live malformed chosen label leaves the actual rows intact",
   score::CreateLiveTitleRows();
   const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
-  score::titleText[31] = static_cast<u_short>(std::size(score::titleText));
+  score::titleText[31] =
+      static_cast<std::uint16_t>(std::size(score::titleText));
   score::CreateLiveTitleRows();
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
   CHECK(SameRows(score::gazetteRows, before));
@@ -313,8 +317,8 @@ TEST_CASE("F02816 Live digits use the real primitive owner and ordering links",
   const auto* units = fixture.primitives.data() + 1;
   const auto* tens = units + render::kUiTexturedQuadWords;
   CHECK(units[0] == (0x09000000U | prior));
-  CHECK(tens[0] == (0x09000000U | LegacyGpu_Handle(units)));
-  CHECK(*head == LegacyGpu_Handle(tens));
+  CHECK(tens[0] == (0x09000000U | GpuHandle(units)));
+  CHECK(*head == GpuHandle(tens));
   CheckDigitPayload({units, render::kUiTexturedQuadWords},
                     {tens, render::kUiTexturedQuadWords}, dimmed);
   CHECK(fixture.Packets().size() == 2);
@@ -374,7 +378,7 @@ TEST_CASE("F02824 Live invalid final description is an atomic native refusal",
   const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::statDescriptions[22] =
-      static_cast<u_short>(std::size(score::statDescriptions));
+      static_cast<std::uint16_t>(std::size(score::statDescriptions));
   score::CreateLiveStatisticRows();
   CHECK(score::LiveGazetteStatisticsRefusals() == refused + 1);
   CHECK(SameRows(score::gazetteRows, before));

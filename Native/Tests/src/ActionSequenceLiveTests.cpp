@@ -19,7 +19,7 @@
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Effects/Runtime.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Menu/TextBox.hpp"
@@ -92,7 +92,7 @@ struct ProjectionReset {
   ProjectionReset() = default;
   ProjectionReset(const ProjectionReset&) = delete;
   ProjectionReset& operator=(const ProjectionReset&) = delete;
-  ~ProjectionReset() { Core_Gte_Reset(); }
+  ~ProjectionReset() { VS::Core::Gte::Reset(); }
 };
 
 TEST_CASE("Action sequence bindings retain five original VOID0 module ABIs",

@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Status/ActorSwitching.hpp"
 
 // Live binding for the status screen's actor switching and vitals
@@ -22,7 +22,7 @@ int LiveFindNextInspectableActor(int current_actor, int target_actor);
 // _switchCurrentActor (120.c:579).
 int LiveAnimateActorSwitch(int init);
 // _renderUnknownValue (120.c:692).
-void LiveDrawUnanalyzedValue(int xy, int with_max, u_long* before);
+void LiveDrawUnanalyzedValue(int xy, int with_max, std::uint32_t* before);
 // _renderStatBar (120.c:721).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveDrawVitalBar(int color_index, int current, int max, int xy);

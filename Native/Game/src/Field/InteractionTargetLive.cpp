@@ -14,6 +14,8 @@
 #include "Items/ItemRecords.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Field {
 namespace {
 

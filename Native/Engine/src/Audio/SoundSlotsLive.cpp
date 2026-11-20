@@ -12,7 +12,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio {
 namespace {

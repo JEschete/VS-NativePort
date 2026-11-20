@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBoxState.hpp"
 
@@ -37,5 +37,5 @@ extern TextBoxSelectorState textBoxSelector;
 extern TextBoxState textBoxes[kTextBoxCount];
 // decomp: D_800F51B8 (src/BATTLE/BATTLE.PRG/5BF94.c:426): the ordering table
 // the boxes draw into this frame, four entries per box.
-extern u_long* activeTextBoxOrderingTable;
+extern std::uint32_t* activeTextBoxOrderingTable;
 }  // namespace VS::Menu

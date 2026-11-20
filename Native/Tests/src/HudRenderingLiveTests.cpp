@@ -11,6 +11,8 @@
 #include "Render/Sprites.hpp"
 #include "Render/UiPackets.hpp"
 
+using VS::Legacy::GpuHandle;
+
 namespace {
 namespace b = VS::Battle;
 namespace f = hud_rendering_fixture;
@@ -28,7 +30,7 @@ TEST_CASE(
   CHECK(frame.primitives[26 + r::kSpriteTextureWord] == 0x37F40B20);
   CHECK(frame.primitives[38 + r::kSpriteSizeWord] == 0x000900FE);
   CHECK(frame.primitives[38 + r::kSpriteTextureWord] == 0x37F600E1);
-  CHECK(frame.ordering[1] == LegacyGpu_Handle(frame.primitives.data() + 38));
+  CHECK(frame.ordering[1] == GpuHandle(frame.primitives.data() + 38));
 }
 
 TEST_CASE("F01354 Live zero maximum needs no render target",
@@ -65,7 +67,7 @@ TEST_CASE("F01355 Live emits both clipped production sprites",
   CHECK(frame.primitives[r::kSpriteTextureWord] == 0x37F91081);
   CHECK(frame.primitives[6 + r::kSpritePositionWord] == 0x000800A7);
   CHECK(frame.primitives[6 + r::kSpriteTextureWord] == 0x37FF3068);
-  CHECK(frame.ordering[3] == LegacyGpu_Handle(frame.primitives.data() + 6));
+  CHECK(frame.ordering[3] == GpuHandle(frame.primitives.data() + 6));
 }
 
 TEST_CASE("F01355 Live skips sentinel and panel-hidden invalid icons",
@@ -93,6 +95,6 @@ TEST_CASE("F01360 Live emits the exact production shortcut marker packet",
   CHECK(std::ranges::equal(std::span(frame.primitives).first(expected.size()),
                            expected));
   CHECK(frame.ordering[f::kHudOverlayHead] ==
-        LegacyGpu_Handle(frame.primitives.data()));
+        GpuHandle(frame.primitives.data()));
   CHECK(frame.ordering[3] == f::kEndLink);
 }

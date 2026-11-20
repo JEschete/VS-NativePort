@@ -10,9 +10,12 @@
 #include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::GpuPointer;
+using VS::Legacy::kGpuLinkEnd;
 
 namespace VS::Effects::ScreenDistortion {
 namespace {
@@ -27,21 +30,21 @@ static_assert(sizeof(VS::Core::Math::kArcTangentTable) ==
   std::abort();
 }
 
-std::uint32_t TagWord(const u_long* packet) {
+std::uint32_t TagWord(const std::uint32_t* packet) {
   return static_cast<std::uint32_t>(*packet);
 }
 
 // Follows the ordering-table link after `packet`. The terminal entry and the
 // table base end the walk without being visited, matching 3D8.s.
-u_long* NextPacket(u_long* packet, const u_long* base) {
+std::uint32_t* NextPacket(std::uint32_t* packet, const std::uint32_t* base) {
   if (packet == nullptr || packet == base) return nullptr;
   const auto link = TagWord(packet) & kLinkMask;
-  if (link == LEGACY_GPU_LINK_END) return nullptr;
-  auto* next = static_cast<u_long*>(LegacyGpu_Pointer(link));
+  if (link == kGpuLinkEnd) return nullptr;
+  auto* next = static_cast<std::uint32_t*>(GpuPointer(link));
   if (next == nullptr) {
     InvalidLiveWarp("ordering link has no registered native packet");
   }
-  if (next == base || (TagWord(next) & kLinkMask) == LEGACY_GPU_LINK_END) {
+  if (next == base || (TagWord(next) & kLinkMask) == kGpuLinkEnd) {
     return nullptr;
   }
   return next;
@@ -51,7 +54,7 @@ u_long* NextPacket(u_long* packet, const u_long* base) {
 // cyclic list with a second cursor that advances two links per step.
 class OrderingTablePackets final : public PrimitivePacketCursor {
  public:
-  explicit OrderingTablePackets(u_long* base)
+  explicit OrderingTablePackets(std::uint32_t* base)
       : base_(base), fast_(base + kLastSceneBucket) {}
 
   bool Advance() override {
@@ -81,13 +84,13 @@ class OrderingTablePackets final : public PrimitivePacketCursor {
   }
 
  private:
-  [[nodiscard]] std::span<u_long> Payload() const {
+  [[nodiscard]] std::span<std::uint32_t> Payload() const {
     return {packet_ + 1, WordCount()};
   }
 
-  u_long* base_;
-  u_long* packet_{};
-  u_long* fast_;
+  std::uint32_t* base_;
+  std::uint32_t* packet_{};
+  std::uint32_t* fast_;
   bool started_{};
 };
 }  // namespace
@@ -103,8 +106,8 @@ void WarpLivePolygonVertices() {
           static_cast<std::uint16_t>(screenEffectOverlay->radial_warp_scale),
       .growth = screenEffectOverlay->radial_warp_growth,
   };
-  OrderingTablePackets packets(
-      static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table));
+  OrderingTablePackets packets(static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().ordering_table));
   WarpPolygonVertices(settings, std::span(VS::Core::Math::kArcTangentTable),
                       packets);
 }

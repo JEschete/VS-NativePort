@@ -789,7 +789,7 @@ class LiveActorTables {
  private:
   decltype(VS::Actors::actorRecords) records_;
   decltype(VS::Battle::actors) battle_actors_;
-  u_int control_mode_;
+  std::uint32_t control_mode_;
 };
 }  // namespace
 

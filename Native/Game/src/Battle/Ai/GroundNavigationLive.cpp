@@ -31,7 +31,7 @@
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -106,7 +106,7 @@ VS::Battle::Ai::ActorAiState& State(void* view) {
   return *static_cast<VS::Battle::Ai::ActorAiState*>(view);
 }
 
-std::uint32_t Word(const u_char* bytes) {
+std::uint32_t Word(const std::uint8_t* bytes) {
   std::uint32_t value = 0;
   std::memcpy(&value, bytes, sizeof(value));
   return value;

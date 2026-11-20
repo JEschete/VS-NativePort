@@ -74,7 +74,7 @@ def main() -> int:
     if not hdr_file.exists():
         hdr_file.parent.mkdir(parents=True, exist_ok=True)
         hdr_file.write_text(f"#pragma once\n// Hand-maintained (tools/port/owned.csv).\n#ifndef {guard}\n#define {guard}\n"
-                            f'#include "Legacy/Psx.h"\n\n#endif // {guard}\n', encoding="utf-8")
+                            f'#include "Legacy/Psx.hpp"\n\n#endif // {guard}\n', encoding="utf-8")
     h = hdr_file.read_text(encoding="utf-8")
     # what the declaration needs: the includes of the generated header it came from
     need = includes_of(rendered.get(decl[0][0], "")) if decl else includes_of(rendered.get(src_path, ""))

@@ -20,6 +20,8 @@
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Battle {
 namespace {
 constexpr std::size_t kRetainedOwners = 3;
@@ -85,7 +87,7 @@ class LiveActor final : public ActionReactionActor {
     record_.instance.facing_delta = delta;
   }
   void SetTurnFrames(std::int16_t frames) override {
-    record_.instance.turn_frames = static_cast<u_short>(frames);
+    record_.instance.turn_frames = static_cast<std::uint16_t>(frames);
   }
   void ClearMovementMode() override { record_.instance.movement_mode = 0; }
   void ClearJumpCountdown() override { record_.instance.jump_countdown = 0; }
@@ -150,7 +152,7 @@ class LiveWorld final : public ActionReactionWorld {
     return root.vy;
   }
   bool HasAnimation(ActionAnimationActor& actor, int animation) override {
-    u_short* header = nullptr;
+    std::uint16_t* header = nullptr;
     auto& record = static_cast<LiveActor&>(actor).Record();
     static_cast<void>(
         Actors::FindLiveActorAnimationHeader(&record, animation, &header));

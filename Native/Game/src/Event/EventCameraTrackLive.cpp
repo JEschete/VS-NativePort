@@ -25,6 +25,10 @@
 #include "Field/CollisionMapLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 namespace VS::Event {
 namespace {
 using Core::Math::Vec3;

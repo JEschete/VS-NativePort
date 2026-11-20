@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Bindings from the event VM, screen and dialog callers to the typed actor
 // selection, activity and dialog-anchor helpers (ScriptActorCommands.hpp), in
@@ -22,5 +24,5 @@ void BuildLiveScriptActorSelection(std::uint16_t actor_selector,
 // next id, or kSelectionEnd once the selection is spent.
 std::uint16_t NextLiveScriptSelectedActor(ActorSelection& selection);
 // decomp: func_800BB7C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2920)
-int LiveActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor);
+int LiveActorDialogAnchor(int actor_id, VS::Core::Gte::SVECTOR* dialog_anchor);
 }  // namespace VS::Event

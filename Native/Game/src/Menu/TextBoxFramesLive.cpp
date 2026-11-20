@@ -54,7 +54,7 @@ class LiveInformationBoxWorld final : public InformationBoxWorld {
                       ? nullptr
                       : activeTextBoxOrderingTable +
                             index * kBoxOrderingStride + 1),
-        headers_(static_cast<u_long*>(
+        headers_(static_cast<std::uint32_t*>(
             VS::Render::FrameScratchpad().overlay_ordering_table)) {}
 
   TextBox ReadBox() const override { return ReadLiveTextBox(index_); }

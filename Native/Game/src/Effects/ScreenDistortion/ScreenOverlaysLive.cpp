@@ -112,7 +112,7 @@ void SetLiveVignetteEnabled(int enabled) {
 }
 
 int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
-                              int* packet_words, u_long* ordering_head) {
+                              int* packet_words, std::uint32_t* ordering_head) {
   if (packet_words == nullptr ||
       static_cast<void*>(packet_words) !=
           VS::Render::FrameScratchpad().primitive_cursor) {

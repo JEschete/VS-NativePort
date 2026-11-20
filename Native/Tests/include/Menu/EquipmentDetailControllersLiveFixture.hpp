@@ -148,7 +148,7 @@ struct LiveFixture {
   ValueRestore<char> saved_page{VS::Menu::Framework::itemStatPage};
   ValueRestore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
   ValueRestore<char> saved_item{VS::Menu::Framework::currentStatusViewItem};
-  ValueRestore<u_char> saved_selection{
+  ValueRestore<std::uint8_t> saved_selection{
       VS::Menu::Framework::selectedStatusViewElement};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
@@ -173,7 +173,7 @@ struct LiveFixture {
   ValueRestore<VS::Items::InventoryArmor*> saved_armor{
       VS::Menu::Framework::armor};
   ValueRestore<VS::Items::InventoryGem*> saved_gems{VS::Menu::Framework::gems};
-  ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
+  ValueRestore<std::uint16_t*> saved_help{VS::Menu::Framework::itemHelp};
   ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
       VS::Menu::Framework::itemNames};
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
@@ -187,24 +187,24 @@ struct LiveFixture {
   ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
   ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   ValueRestore<VS::Render::FontStyle> saved_font{VS::Render::LiveFontStyle()};
-  ArrayRestore<u_char, sizeof VS::Render::compactGlyphLeftTrim>
+  ArrayRestore<std::uint8_t, sizeof VS::Render::compactGlyphLeftTrim>
       saved_compact_trim{VS::Render::compactGlyphLeftTrim};
-  ArrayRestore<u_char, sizeof VS::Render::compactGlyphWidths>
+  ArrayRestore<std::uint8_t, sizeof VS::Render::compactGlyphWidths>
       saved_compact_widths{VS::Render::compactGlyphWidths};
-  ArrayRestore<u_char, sizeof VS::Render::compactGlyphIndices>
+  ArrayRestore<std::uint8_t, sizeof VS::Render::compactGlyphIndices>
       saved_compact_indices{VS::Render::compactGlyphIndices};
   ArrayRestore<std::uint8_t, sizeof VS::Render::variableFontGlyphWidths>
       saved_variable_widths{VS::Render::variableFontGlyphWidths};
 
   std::array<fw::MenuRow, fw::kRowCount> rows{};
   std::array<char, fw::kStringBufferBytes> description{};
-  std::array<u_short, fw::kItemHelpBytes / 2> help{};
+  std::array<std::uint16_t, fw::kItemHelpBytes / 2> help{};
   std::array<std::array<char, fw::kItemNameRowBytes>,
              fw::kItemNamesBytes / fw::kItemNameRowBytes>
       names{};
-  std::vector<u_long> primitives =
-      std::vector<u_long>(kPrimitiveBytes / sizeof(u_long) + 2);
-  std::array<u_long, kOrderingEntries> ordering{};
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(kPrimitiveBytes / sizeof(std::uint32_t) + 2);
+  std::array<std::uint32_t, kOrderingEntries> ordering{};
 
   LiveFixture() {
     inventory::ResetLiveEquipmentDetailControllers();
@@ -256,7 +256,7 @@ struct LiveFixture {
     VS::Menu::Framework::shields = VS::Items::inventory.shields.data();
     VS::Menu::Framework::armor = VS::Items::inventory.armor.data();
     VS::Menu::Framework::gems = VS::Items::inventory.gems.data();
-    const std::array<u_char*, kIndexedCategories> orders{
+    const std::array<std::uint8_t*, kIndexedCategories> orders{
         VS::Items::inventoryIndices.weapons.data(),
         VS::Items::inventoryIndices.blades.data(),
         VS::Items::inventoryIndices.grips.data(),
@@ -278,8 +278,9 @@ struct LiveFixture {
     auto bytes = std::as_writable_bytes(std::span(help));
     std::fill(bytes.begin(), bytes.end(),
               static_cast<std::byte>(VS::Render::kTextTerminator));
-    std::fill_n(help.begin(), kHelpEntries, static_cast<u_short>(kTextOffset));
-    bytes[kTextOffset * sizeof(u_short)] = std::byte{1};
+    std::fill_n(help.begin(), kHelpEntries,
+                static_cast<std::uint16_t>(kTextOffset));
+    bytes[kTextOffset * sizeof(std::uint16_t)] = std::byte{1};
     for (auto& name : names) {
       name.fill(static_cast<char>(VS::Render::kTextTerminator));
       name[0] = 1;
@@ -297,7 +298,7 @@ struct LiveFixture {
     VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
     VS::Render::FrameScratchpad().ordering_table =
         ordering.data() + kSceneOrderingEntry;
-    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    VS::Legacy::ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
   void IdleRows() {
     for (auto& row : rows) {
@@ -393,8 +394,8 @@ struct LiveFixture {
       if (!Owns(packet)) {
         return {};
       }
-      const auto* words = static_cast<const u_long*>(packet);
-      const auto length = static_cast<const P_TAG*>(packet)->len;
+      const auto* words = static_cast<const std::uint32_t*>(packet);
+      const auto length = static_cast<const VS::Legacy::P_TAG*>(packet)->len;
       if (length == 1 &&
           (words[1] >> VS::Render::kPacketLengthShift) == kDrawModeCommand) {
         draw_mode = words[1];
@@ -415,7 +416,8 @@ struct LiveFixture {
                            words[kCompactTexture], words[kCompactSize],
                            draw_mode, true});
       }
-      packet = isendprim(packet) ? nullptr : nextPrim(packet);
+      packet = VS::Legacy::isendprim(packet) ? nullptr
+                                             : VS::Legacy::nextPrim(packet);
     }
     return sprites;
   }

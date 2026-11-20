@@ -25,12 +25,18 @@
 #include "Field/Room.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotAverage4;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 using VS::Field::kMovingPlatformCapacity;
@@ -214,8 +220,8 @@ class LivePlatformShadowHost final
     matrix.t[0] = camera.view.translation.x;
     matrix.t[1] = camera.view.translation.y;
     matrix.t[2] = camera.view.translation.z;
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   VS::Field::MovingPlatformShadowSurface SurfaceFor(
       std::size_t index, const MovingPlatformPose& platform) override {
@@ -242,9 +248,9 @@ class LivePlatformShadowHost final
       const auto& vertex = shadow.vertices[index];
       vertices[index] = {vertex.x, vertex.y, vertex.z, 0};
     }
-    Core_GteWord projection = 0;
-    Core_GteWord flags = 0;
-    return static_cast<std::int32_t>(Core_Gte_RotAverage4(
+    VS::Core::Gte::Word projection = 0;
+    VS::Core::Gte::Word flags = 0;
+    return static_cast<std::int32_t>(RotAverage4(
         &vertices[0], &vertices[1], &vertices[2], &vertices.back(), &screen_[0],
         &screen_[1], &screen_[2], &screen_.back(), &projection, &flags));
   }
@@ -276,7 +282,7 @@ class LivePlatformShadowHost final
 
  private:
   std::span<VS::Field::MpdMovingPlatform> records_;
-  std::array<Core_GteWord, kShadowCornerCount> screen_{};
+  std::array<VS::Core::Gte::Word, kShadowCornerCount> screen_{};
 };
 
 VS::Field::MovingPlatformWaypointState WaypointStateOf(

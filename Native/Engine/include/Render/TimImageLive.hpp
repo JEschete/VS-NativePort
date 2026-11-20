@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/TimImage.hpp"
 
 // Live binding for the TIM parse (TimImage.cpp) behind the original
@@ -16,7 +16,7 @@
 namespace VS::Render {
 // vs_battle_parseTim (146C.c:16935) and ENDING _parseTim (D4.c:2235). The
 // TIM_IMAGE pointers point into `data`, which the callers patch in place.
-void ParseLiveTim(void* data, TIM_IMAGE* tim);
+void ParseLiveTim(void* data, VS::Legacy::TIM_IMAGE* tim);
 // TIMs refused since start-up.
 [[nodiscard]] std::uint64_t RefusedLiveTimCount();
 }  // namespace VS::Render

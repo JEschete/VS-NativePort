@@ -12,7 +12,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkers.hpp"
 #include "Battle/Feedback.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -21,11 +21,13 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Battle {
 namespace {
 constexpr int kAnchorTag = 251;
 constexpr int kAnchorPositionTag = 255;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::uint64_t refusals = 0;
 
@@ -39,8 +41,8 @@ void Refuse(const char* what) {
   }
 }
 
-[[nodiscard]] u_long* SceneEntry(int slot) {
-  u_long* const entry =
+[[nodiscard]] std::uint32_t* SceneEntry(int slot) {
+  std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
   if (entry == nullptr) {
     Refuse("no current scene ordering-table entry");
@@ -48,15 +50,16 @@ void Refuse(const char* what) {
   return entry;
 }
 
-[[nodiscard]] u_long* Reserve(std::size_t words) {
-  u_long* const storage = Render::ReserveLivePrimitiveWords(words);
+[[nodiscard]] std::uint32_t* Reserve(std::size_t words) {
+  std::uint32_t* const storage = Render::ReserveLivePrimitiveWords(words);
   if (storage == nullptr) {
     Refuse("insufficient primitive capacity");
   }
   return storage;
 }
 
-[[nodiscard]] bool Emit(u_long* chain, std::span<const std::uint32_t> packet) {
+[[nodiscard]] bool Emit(std::uint32_t* chain,
+                        std::span<const std::uint32_t> packet) {
   Render::LivePacketQueue queue(chain);
   if (!queue.Emit(packet)) {
     Refuse("packet refused by the current frame owner");
@@ -88,21 +91,21 @@ class LiveActorMarkerWorld final : public ActorMarkerWorld {
   MarkerScreenPoint ProjectThroughView(MarkerWorldPoint point) override {
     Render::LoadLiveFrameViewMatrix();
     SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
-    Core_GteWord screen = 0;
-    Core_GteWord depth = 0;
-    Core_GteWord flag = 0;
-    static_cast<void>(Core_Gte_RotTransPers(&vector, &screen, &depth, &flag));
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word depth = 0;
+    VS::Core::Gte::Word flag = 0;
+    static_cast<void>(RotTransPers(&vector, &screen, &depth, &flag));
     return UnpackMarkerPoint(static_cast<std::uint32_t>(screen));
   }
   int GimmickSubtype(int actor) override {
     return VS::Field::GimmickSubtypeEntry(actor);
   }
   bool DrawSprite(const ActorMarkerSprite& sprite) override {
-    u_long* const chain = SceneEntry(sprite.ordering_slot);
+    std::uint32_t* const chain = SceneEntry(sprite.ordering_slot);
     if (chain == nullptr || Reserve(Render::kSpritePacketWords) == nullptr) {
       return false;
     }
-    u_long* const packet = Render::QueueLiveSprite(
+    std::uint32_t* const packet = Render::QueueLiveSprite(
         Render::kDefaultSpriteBrightness,
         static_cast<int>(PackMarkerPoint(sprite.position)),
         static_cast<int>(PackMarkerSize(sprite.size)), chain);
@@ -117,7 +120,7 @@ class LiveActorMarkerWorld final : public ActorMarkerWorld {
     return true;
   }
   bool DrawFrame(const ActorMarkerFrame& frame) override {
-    u_long* const chain = SceneEntry(frame.ordering_slot);
+    std::uint32_t* const chain = SceneEntry(frame.ordering_slot);
     if (chain == nullptr || Reserve(kMarkerFramePacketWords) == nullptr) {
       return false;
     }
@@ -125,15 +128,16 @@ class LiveActorMarkerWorld final : public ActorMarkerWorld {
                            frame, static_cast<std::uint32_t>(*chain)));
   }
   bool DrawArrow(const OffscreenActorArrow& arrow) override {
-    u_long* const chain = SceneEntry(kOffscreenArrowOrderingSlot);
+    std::uint32_t* const chain = SceneEntry(kOffscreenArrowOrderingSlot);
     if (chain == nullptr) {
       return false;
     }
-    u_long* const reserved = Reserve(kMarkerFramePacketWords);
+    std::uint32_t* const reserved = Reserve(kMarkerFramePacketWords);
     if (reserved == nullptr) {
       return false;
     }
-    const std::span<const u_long> storage(reserved, kMarkerFramePacketWords);
+    const std::span<const std::uint32_t> storage(reserved,
+                                                 kMarkerFramePacketWords);
     MarkerFramePacket packet{};
     std::ranges::copy(storage, packet.begin());
     WriteOffscreenArrowPacket(packet, arrow,

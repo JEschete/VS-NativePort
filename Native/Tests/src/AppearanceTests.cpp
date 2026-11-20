@@ -2,7 +2,6 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
-#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -18,7 +17,10 @@
 #include "Actors/WeaponModel.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.hpp"
+#include "TestSupport/ActorRecordTableScope.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Core::Gte::VECTOR;
 
 namespace actors = VS::Actors;
 using actors::AppearanceStatus;
@@ -26,18 +28,14 @@ using actors::AppearanceStatus;
 namespace {
 // The actor, weapon and gimmick tables and the room scale, emptied for one
 // test and then restored.
-struct LiveAppearanceState {
-  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
+struct LiveAppearanceState : VS::test_support::ActorRecordTableScope {
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   VECTOR saved_scale = VS::Actors::roomActorScale;
-  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
 
   LiveAppearanceState() {
-    std::fill(std::begin(VS::Actors::actorRecords),
-              std::end(VS::Actors::actorRecords), nullptr);
     std::fill(std::begin(VS::Actors::weaponModels),
               std::end(VS::Actors::weaponModels), nullptr);
     std::fill(std::begin(VS::Field::gimmickInstances),
@@ -48,18 +46,9 @@ struct LiveAppearanceState {
   LiveAppearanceState(LiveAppearanceState&&) = delete;
   LiveAppearanceState& operator=(LiveAppearanceState&&) = delete;
   ~LiveAppearanceState() {
-    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(VS::Field::gimmickInstances));
     VS::Actors::roomActorScale = saved_scale;
-  }
-
-  VS::Actors::ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
-    VS::Actors::ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<u_char>(actor_id);
-    VS::Actors::actorRecords[actor_id] = &actor;
-    return actor;
   }
 };
 

@@ -56,7 +56,8 @@ void DrawExpectedIcons() {
         VS::Render::kDefaultSpriteBrightness,
         static_cast<int>(fw::PackXy(x, -kIconPitch)),
         static_cast<int>(fw::PackXy(kIconPitch, kIconPitch)),
-        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) -
+        static_cast<std::uint32_t*>(
+            VS::Render::FrameScratchpad().ordering_table) -
             kIconLayer);
     packet[VS::Render::kSpriteTextureWord] =
         static_cast<std::uint32_t>(kFirstIconU + category * kIconPitch) |

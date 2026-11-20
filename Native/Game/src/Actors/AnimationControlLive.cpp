@@ -45,7 +45,7 @@ constexpr std::size_t kRegistryCapacity = kActorSlots + 1;
 constexpr int kQuadrants = 4;
 // The weapon models' draw state (VS::Actors::WeaponModel reserved11,
 // reserved12).
-constexpr u_char kDrawnWeaponModel = 0x40;
+constexpr std::uint8_t kDrawnWeaponModel = 0x40;
 // The battle-window mode of the animation event runner.
 constexpr int kBattleWindowEvents = 3;
 // The texture animation restart (channel 1, timeline 1, command 1).
@@ -84,11 +84,11 @@ PoseEventCursor LoadCursor(const VS::Actors::AnimationPose& pose) {
 
 void StoreCursor(const PoseEventCursor& cursor,
                  VS::Actors::AnimationPose& pose) {
-  pose.event_script = PointerOf<u_char>(cursor.script);
+  pose.event_script = PointerOf<std::uint8_t>(cursor.script);
   pose.next_event_frame = cursor.next_event_frame;
 }
 
-u_char Bit(bool value) { return value ? 1 : 0; }
+std::uint8_t Bit(bool value) { return value ? 1 : 0; }
 
 AnimationActor LoadLiveAnimationActor(const VS::Actors::ActorRecord& live) {
   AnimationActor actor;
@@ -343,7 +343,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     return VS::Actors::sharedSequenceBankIndex;
   }
   void SetSharedSequenceBankIndex(int index) override {
-    VS::Actors::sharedSequenceBankIndex = static_cast<u_char>(index);
+    VS::Actors::sharedSequenceBankIndex = static_cast<std::uint8_t>(index);
   }
   void SetTransitionControl(int control) override {
     VS::Actors::forcedModelOverrides = static_cast<char>(control);
@@ -374,7 +374,7 @@ class LiveAnimationHost final : public AnimationControlHost {
       }
       VS::Actors::WeaponModel* model = weaponModels[index];
       if (model == nullptr) continue;
-      const u_char state = drawn ? kDrawnWeaponModel : 0;
+      const std::uint8_t state = drawn ? kDrawnWeaponModel : 0;
       model->blend_level = state;
       model->blend_target = state;
       model->shown = Bit(drawn);
@@ -486,7 +486,7 @@ class LiveAnimationHost final : public AnimationControlHost {
       VS::Core::LogWarn("actors", "Bone pose lock refused bone {}", bone);
       return;
     }
-    model->bones[bone].pose_lock_slot = static_cast<u_char>(lock_slot);
+    model->bones[bone].pose_lock_slot = static_cast<std::uint8_t>(lock_slot);
   }
 
  private:

@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/RoomDraw.hpp"
 
 namespace VS::Field {
@@ -32,10 +32,12 @@ bool UpdateLiveRoomGroupTransforms(void* geometry, std::size_t bytes);
 // Draws the visible groups into at most 64 KiB of the current frame buffer.
 RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
                                     int mode);
-void BuildLiveRoomGeometryViewMatrix(const VECTOR& position,
-                                     const VECTOR& angles, MATRIX& output);
-void BuildLiveScaleCompensatedRoomView(const VECTOR& position,
-                                       const VECTOR& angles, MATRIX& output);
+void BuildLiveRoomGeometryViewMatrix(const VS::Core::Gte::VECTOR& position,
+                                     const VS::Core::Gte::VECTOR& angles,
+                                     VS::Core::Gte::MATRIX& output);
+void BuildLiveScaleCompensatedRoomView(const VS::Core::Gte::VECTOR& position,
+                                       const VS::Core::Gte::VECTOR& angles,
+                                       VS::Core::Gte::MATRIX& output);
 // Draws the sky through the loaded GTE view at the farthest ordering entry.
 RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes);
 // Tints the room packets written between `start` and `end`, which must lie

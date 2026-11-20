@@ -15,7 +15,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPage.hpp"
@@ -25,14 +25,18 @@
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 
+using VS::Legacy::DR_AREA;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace VS::Menu::manual {
 namespace {
 constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
 constexpr std::size_t kTagWords = 1;
 constexpr std::size_t kDrawAreaWords = 2;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-static_assert(sizeof(DR_AREA) == (kTagWords + kDrawAreaWords) * sizeof(u_long));
+static_assert(sizeof(DR_AREA) ==
+              (kTagWords + kDrawAreaWords) * sizeof(std::uint32_t));
 std::uint64_t g_refusals = 0;
 
 void Refuse(std::string_view reason) {
@@ -42,7 +46,7 @@ void Refuse(std::string_view reason) {
   }
 }
 
-u_long* SlotEntry(std::int32_t slot) {
+std::uint32_t* SlotEntry(std::int32_t slot) {
   return Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
 }
 
@@ -166,7 +170,7 @@ class LiveContentTarget final : public PageContentTarget {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
     DR_AREA packet{};
-    ::SetDrawArea(&packet, &rect);
+    VS::Legacy::SetDrawArea(&packet, &rect);
     if (SlotEntry(kPageContentSlot) == nullptr) {
       Refuse("Manual page content has no frame ordering-table entry");
       return;

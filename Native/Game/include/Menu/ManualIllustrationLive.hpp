@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Bindings from the manual illustration cores (ManualIllustration.hpp) to the
 // help files, the scroll position, VRAM and the current frame's primitive
@@ -14,9 +14,9 @@ namespace VS::Menu::manual {
 struct VisibilityAnimation;
 
 // decomp: MENUE.PRG _copySprites (494.c:481).
-void LiveUploadSpriteTiles(u_long const* buffer, int count);
+void LiveUploadSpriteTiles(std::uint32_t const* buffer, int count);
 // decomp: MENUE.PRG _copyCluts (494.c:498).
-void LiveUploadCluts(u_long* buffer, int count);
+void LiveUploadCluts(std::uint32_t* buffer, int count);
 // decomp: MENUE.PRG _drawSprite (494.c:629). `data` points into the help
 // text file.
 void LiveDrawIllustration(std::int16_t* data);

@@ -9,7 +9,7 @@
 
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
 #include "Menu/ManualIllustration.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
@@ -17,6 +17,13 @@
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::LoadImage;
+using VS::Legacy::nextPrim;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
 
 // Contracts of the manual's illustrations (MENUE.PRG 494.c:481-511, 619-713,
 // 883-960): the help asset uploads, the atlas sprites and diagram lines of a
@@ -500,8 +507,9 @@ struct LiveFrameFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_scroll = manual::scrollPosition;
   int* saved_help_text = manual::helpText;
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(0x2088 / 4);
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{16} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -618,15 +626,16 @@ TEST_CASE("Live uploads copy heap tiles and palettes into VRAM",
   std::array<std::uint32_t, manual::kTileWords> saved{};
   RECT tile{};
   setRECT(&tile, 832, 256, 4, 16);
-  StoreImage(&tile, reinterpret_cast<u_long*>(saved.data()));
+  StoreImage(&tile, reinterpret_cast<std::uint32_t*>(saved.data()));
   const std::vector<std::uint32_t> words = Words(manual::kTileWords);
   const std::uint64_t refusals = manual::LiveIllustrationRefusalCount();
 
-  manual::LiveUploadSpriteTiles(
-      reinterpret_cast<const u_long*>(frame.Allocate<std::uint32_t>(words)), 1);
+  manual::LiveUploadSpriteTiles(reinterpret_cast<const std::uint32_t*>(
+                                    frame.Allocate<std::uint32_t>(words)),
+                                1);
   std::array<std::uint32_t, manual::kTileWords> uploaded{};
-  StoreImage(&tile, reinterpret_cast<u_long*>(uploaded.data()));
-  LoadImage(&tile, reinterpret_cast<u_long*>(saved.data()));
+  StoreImage(&tile, reinterpret_cast<std::uint32_t*>(uploaded.data()));
+  LoadImage(&tile, reinterpret_cast<std::uint32_t*>(saved.data()));
   CHECK(std::ranges::equal(uploaded, words));
   CHECK(manual::LiveIllustrationRefusalCount() == refusals);
 }
@@ -636,9 +645,9 @@ TEST_CASE("Live uploads outside the heap or past their buffer are refused",
   LiveFrameFixture frame;
   std::vector<std::uint32_t> words = Words(manual::kClutWords);
   const std::uint64_t refusals = manual::LiveIllustrationRefusalCount();
-  manual::LiveUploadCluts(reinterpret_cast<u_long*>(words.data()), 1);
+  manual::LiveUploadCluts(reinterpret_cast<std::uint32_t*>(words.data()), 1);
   auto* heap_words =
-      reinterpret_cast<u_long*>(frame.Allocate<std::uint32_t>(words));
+      reinterpret_cast<std::uint32_t*>(frame.Allocate<std::uint32_t>(words));
   manual::LiveUploadCluts(heap_words, 2);
   manual::LiveUploadCluts(heap_words, 257);
   manual::LiveUploadSpriteTiles(heap_words, 1);

@@ -11,7 +11,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopy.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 void CopyHalfwords(void* destination, const void* source, int size) {

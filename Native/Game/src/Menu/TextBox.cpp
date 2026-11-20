@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBoxState.hpp"
 
@@ -33,5 +33,5 @@ TextBoxSelectorState textBoxSelector;
 TextBoxState textBoxes[kTextBoxCount];
 
 // decomp: D_800F51B8 (src/BATTLE/BATTLE.PRG/5BF94.c:426)
-u_long* activeTextBoxOrderingTable;
+std::uint32_t* activeTextBoxOrderingTable;
 }  // namespace VS::Menu

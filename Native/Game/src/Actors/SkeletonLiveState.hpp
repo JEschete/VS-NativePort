@@ -5,7 +5,7 @@
 
 #include "Actors/ModelDraw.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 
@@ -16,13 +16,13 @@ extern SkeletonPose skeletonPose;
 // root matrix. The original address is bone_matrices[1] of D_800F3C58; the
 // native keeps it apart, as nothing reads it and the actor pose writes its own
 // bone_matrices[1] before reading it.
-extern MATRIX skeletonRootMatrix;
+extern VS::Core::Gte::MATRIX skeletonRootMatrix;
 // decomp: vs_battle_wepModels (BATTLE/BATTLE.PRG 3A1A0.h): two weapon model
 // slots per actor slot, for the first ten actor slots.
 inline constexpr int kWeaponModelCount = 20;
 extern VS::Actors::WeaponModel* weaponModels[kWeaponModelCount];
 // decomp: D_800F49B8 (BATTLE/BATTLE.PRG 38C1C.c): the camera the bone queries
 // view the bones from; the room pass and the pose builder prepare it.
-extern MATRIX boneMatrixScratch;
+extern VS::Core::Gte::MATRIX boneMatrixScratch;
 
 }  // namespace VS::Actors

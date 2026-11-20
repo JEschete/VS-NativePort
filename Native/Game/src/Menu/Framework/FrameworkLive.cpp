@@ -50,7 +50,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
@@ -99,6 +99,11 @@
 #include "Save/NativeContainerLive.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::MATRIX;
+
+using VS::Legacy::ClearOTag;
+using VS::Legacy::RECT;
+
 namespace VS::Menu::Framework {
 namespace {
 // D_800EBA78: the main menu help text in words (its module image range).
@@ -124,12 +129,12 @@ VS::Items::BattleLoot* VS::Menu::Framework::lootEntry = nullptr;
 // decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c): the module image byte is 0.
 char VS::Menu::textBoxBufferIndex = 0;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
-u_int* VS::Menu::Framework::menuBackgroundBuffer = nullptr;
+std::uint32_t* VS::Menu::Framework::menuBackgroundBuffer = nullptr;
 // decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)
 int VS::Menu::Framework::mainMenuCursorAnimation = 0;
 // decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
-u_long VS::Menu::textBoxOrderingTables[VS::Menu::kTextBoxOrderingTableCount] =
-    {};
+std::uint32_t
+    VS::Menu::textBoxOrderingTables[VS::Menu::kTextBoxOrderingTableCount] = {};
 // decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG 5BF94.c)
 char VS::Menu::Framework::shortcutInvoked = 0;
 // decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
@@ -156,17 +161,17 @@ char VS::Menu::Framework::openedWithoutMainMenu = 0;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
 VS::Menu::Framework::LiveMenuControl VS::Menu::Framework::menuState = {};
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c)
-u_short* VS::Menu::Framework::itemsText = nullptr;
+std::uint16_t* VS::Menu::Framework::itemsText = nullptr;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::menuRowYOffset = 0;
 // decomp: _selectedRow (MENU/MAINMENU.PRG 58EC.c)
 int VS::Menu::Framework::selectedRow = 0;
 // decomp: _subMenuId (MENU/MAINMENU.PRG 58EC.c)
-u_char VS::Menu::Framework::subMenuId = 0;
+std::uint8_t VS::Menu::Framework::subMenuId = 0;
 // decomp: _subMenuPage (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::subMenuPage = 0;
 // decomp: _subMenuRowCount (MENU/MAINMENU.PRG 58EC.c)
-u_short VS::Menu::Framework::subMenuRowCount = 0;
+std::uint16_t VS::Menu::Framework::subMenuRowCount = 0;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::subMenuRowInfo = 0;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
@@ -221,16 +226,17 @@ constexpr std::uint32_t kMenuTexturePageFirst = 0x1A;
 constexpr std::uint32_t kMenuTexturePageCount = 3;
 constexpr int kMenuTexturePageOwner = 6;
 // The background CLUT: 256 colours into row 3.
-constexpr u_int kBackgroundClutRow = 3;
-constexpr u_int kClutColors = 256;
-constexpr std::size_t kBackgroundClutBytes = kClutColors * sizeof(u_short);
+constexpr std::uint32_t kBackgroundClutRow = 3;
+constexpr std::uint32_t kClutColors = 256;
+constexpr std::size_t kClutColorBytes = sizeof(std::uint16_t);
+constexpr std::size_t kBackgroundClutBytes = kClutColors * kClutColorBytes;
 // VS::Battle::statusIconCarousel with no icon highlighted.
 constexpr int kStatusIconCarouselIdle = 0xFFFFFF;
 // The text boxes' ordering table tags ClearOTag sets.
 constexpr int kTextBoxOrderingTags = 0x22;
 // The information box and its portrait.
 constexpr int kInformationBox = 7;
-constexpr u_int kInformationPortrait = 32;
+constexpr std::uint32_t kInformationPortrait = 32;
 // VS::Battle::lowerScreenUiState: the raised background bit and the bit kept.
 constexpr int kLowerScreenBackgroundRaised = 2;
 constexpr int kLowerScreenKept = 1;
@@ -376,7 +382,7 @@ void StoreMainMenu() {
   displayActionCost = Char(menu.display_action_cost);
   hideMenu = Char(menu.hide_menu);
   itemsListRow = Char(menu.items_list_row);
-  itemsText = reinterpret_cast<u_short*>(Tracked(ItemList::kRows).items);
+  itemsText = reinterpret_cast<std::uint16_t*>(Tracked(ItemList::kRows).items);
 }
 
 // The live variables into the State.
@@ -607,7 +613,7 @@ void Flatten(const std::array<std::array<T, Columns>, Rows>& values,
 
 class LiveHost final : public Host {
  public:
-  explicit LiveHost(u_long* caller_chain = nullptr)
+  explicit LiveHost(std::uint32_t* caller_chain = nullptr)
       : caller_chain_(caller_chain) {}
 
   void Refuse(std::string_view what) override {
@@ -687,7 +693,7 @@ class LiveHost final : public Host {
     TrackedItems& tracked = Tracked(list);
     tracked = {.items = items, .count = items != nullptr ? entries : 0};
     if (list == ItemList::kRows) {
-      itemsText = reinterpret_cast<u_short*>(items);
+      itemsText = reinterpret_cast<std::uint16_t*>(items);
     }
     if (items == nullptr) {
       return {};
@@ -921,8 +927,8 @@ class LiveHost final : public Host {
 
   std::span<std::uint32_t> AllocateBackgroundBuffer() override {
     menuBackgroundBuffer =
-        static_cast<u_int*>(VS::Core::Memory::AllocateLiveFromHighEnd(
-            kBackgroundWords * sizeof(u_int)));
+        static_cast<std::uint32_t*>(VS::Core::Memory::AllocateLiveFromHighEnd(
+            kBackgroundWords * sizeof(std::uint32_t)));
     if (menuBackgroundBuffer == nullptr) {
       return {};
     }
@@ -947,7 +953,7 @@ class LiveHost final : public Host {
 
   int RunSubmenu(Submenu submenu, int state_index) override {
     char& state = submenuStates[state_index & kSubmenuStateMask];
-    auto* const bytes = reinterpret_cast<u_char*>(&state);
+    auto* const bytes = reinterpret_cast<std::uint8_t*>(&state);
     const CallOutScope scope;
     switch (submenu) {
       case Submenu::kMagic:
@@ -1025,7 +1031,7 @@ class LiveHost final : public Host {
 
   void ClearImage(const ImageRect& rect) override {
     RECT area{.x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h};
-    ::ClearImage(&area, 0, 0, 0);
+    VS::Legacy::ClearImage(&area, 0, 0, 0);
   }
 
   void LoadBackgroundClut(std::span<const std::uint8_t> colors) override {
@@ -1034,8 +1040,8 @@ class LiveHost final : public Host {
       return;
     }
     VS::Render::LoadLiveClutColors(
-        reinterpret_cast<const u_short*>(colors.data()), kBackgroundClutRow, 0,
-        kClutColors);
+        reinterpret_cast<const std::uint16_t*>(colors.data()),
+        kBackgroundClutRow, 0, kClutColors);
   }
 
   // func_800CA9C0's resets outside the menu (BATTLE.PRG 5BF94.c:3484).
@@ -1077,7 +1083,7 @@ class LiveHost final : public Host {
 
   void DrawCompactText(Layer layer, std::string_view text,
                        std::uint32_t position, std::uint32_t color) override {
-    u_long* const chain = Chain(layer);
+    std::uint32_t* const chain = Chain(layer);
     if (chain == nullptr && layer.base != LayerBase::kCaller) {
       Refuse("compact text outside the frame's ordering table");
       return;
@@ -1174,7 +1180,7 @@ class LiveHost final : public Host {
  private:
   // The ordering table entry a layer links into; null when it lies outside
   // the frame's table.
-  [[nodiscard]] u_long* Chain(Layer layer) const {
+  [[nodiscard]] std::uint32_t* Chain(Layer layer) const {
     switch (layer.base) {
       case LayerBase::kCaller:
         return caller_chain_;
@@ -1188,7 +1194,7 @@ class LiveHost final : public Host {
     return nullptr;
   }
 
-  u_long* caller_chain_;
+  std::uint32_t* caller_chain_;
   std::optional<VS::Render::LivePacketQueue> queue_;
 };
 
@@ -1196,7 +1202,7 @@ class LiveHost final : public Host {
 // then the State stored back.
 class LiveCall {
  public:
-  explicit LiveCall(u_long* caller_chain = nullptr)
+  explicit LiveCall(std::uint32_t* caller_chain = nullptr)
       : host_(caller_chain), tables_(LiveTables()) {
     Load();
   }
@@ -1266,7 +1272,8 @@ Buttons LiveButtons() {
           .held = static_cast<std::uint32_t>(VS::Input::buttonsState)};
 }
 
-int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness) {
+int LiveGradientStopColor(std::uint32_t gradient, std::uint32_t color_index,
+                          int brightness) {
   LiveCall call;
   return static_cast<int>(
       GradientStopColor(call.Ctx(), gradient, color_index, brightness));
@@ -1453,22 +1460,24 @@ void SetLiveInformationMessageText(std::span<const std::uint8_t> message) {
   SetInformationMessage(call.Ctx(), message);
 }
 
-void DrawLiveButtonIcon(ButtonIcon button, int x, int y, u_long* before) {
-  u_long* const chain =
+void DrawLiveButtonIcon(ButtonIcon button, int x, int y,
+                        std::uint32_t* before) {
+  std::uint32_t* const chain =
       before != nullptr
           ? before
-          : static_cast<u_long*>(
+          : static_cast<std::uint32_t*>(
                 VS::Render::FrameScratchpad().overlay_ordering_table);
   LiveCall call(chain);
   DrawButtonIcon(call.Ctx(), button, x, y, kCallerLayer);
 }
 
-int DrawLiveCursor(u_int step, int position) {
+int DrawLiveCursor(std::uint32_t step, int position) {
   LiveCall call;
   return DrawCursor(call.Ctx(), step, static_cast<std::uint32_t>(position));
 }
 
-int DrawLiveColoredInteger(int value, int xy, int color, u_long* before) {
+int DrawLiveColoredInteger(int value, int xy, int color,
+                           std::uint32_t* before) {
   LiveCall call(before);
   return static_cast<int>(
       DrawColoredInteger(call.Ctx(),
@@ -1478,21 +1487,22 @@ int DrawLiveColoredInteger(int value, int xy, int color, u_long* before) {
                          kCallerLayer));
 }
 
-int DrawLiveComparedInteger(int value, int xy, int threshold, u_long* before) {
+int DrawLiveComparedInteger(int value, int xy, int threshold,
+                            std::uint32_t* before) {
   LiveCall call(before);
   return static_cast<int>(DrawComparedInteger(call.Ctx(), value,
                                               static_cast<std::uint32_t>(xy),
                                               threshold, kCallerLayer));
 }
 
-void DrawLiveNeutralInteger(int value, int xy, u_long* before) {
+void DrawLiveNeutralInteger(int value, int xy, std::uint32_t* before) {
   LiveCall call(before);
   DrawNeutralInteger(call.Ctx(), value, static_cast<std::uint32_t>(xy),
                      kCallerLayer);
 }
 
 void DrawLiveFeatheredRowIcon(int direction, int xy, int uv_clut,
-                              u_long* before) {
+                              std::uint32_t* before) {
   LiveCall call(before);
   DrawFeatheredRowIcon(call.Ctx(), direction, static_cast<std::uint32_t>(xy),
                        static_cast<std::uint32_t>(uv_clut), kCallerLayer);
@@ -1534,7 +1544,7 @@ void SetLiveBackgroundPriority(int ot_offset, int brightness) {
   SetBackgroundPriority(call.Ctx(), ot_offset, brightness);
 }
 
-void LoadLiveBackgroundTexture(u_int* buffer) {
+void LoadLiveBackgroundTexture(std::uint32_t* buffer) {
   if (buffer == nullptr) {
     VS::Core::LogWarn("menu.framework", "menu background without a buffer");
     return;
@@ -1582,8 +1592,8 @@ void DrawLiveBackground(int brightness) {
   DrawBackground(call.Ctx(), brightness);
 }
 
-int DrawLiveFeatheredRowCharacter(u_int character, int x, MenuRow* row,
-                                  u_long* before) {
+int DrawLiveFeatheredRowCharacter(std::uint32_t character, int x, MenuRow* row,
+                                  std::uint32_t* before) {
   if (row == nullptr) {
     VS::Core::LogWarn("menu.framework", "row character without a menu row");
     return x;
@@ -1678,8 +1688,8 @@ void ContinueLiveItemDetailsTransition(int row) {
   ContinueItemDetailsTransition(call.Ctx(), row);
 }
 
-void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
-                                    int page) {
+void UpdateLiveItemDetailsSelection(int row, char* text[],
+                                    std::uint32_t row_type, int page) {
   const RowText details =
       text != nullptr
           ? RowText{.name = Trusted(text[0]), .description = Trusted(text[1])}

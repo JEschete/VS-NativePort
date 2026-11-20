@@ -17,6 +17,8 @@
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 namespace VS::Effects {
 // decomp: D_800F55F0 (src/BATTLE/BATTLE.PRG/5BF94.c:446)
 std::int32_t particleCapacity = 0;

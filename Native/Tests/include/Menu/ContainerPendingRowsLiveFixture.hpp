@@ -52,12 +52,13 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
   equipment::ValueRestore<int> saved_previous{VS::Input::previousButtons};
   equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
       VS::State::tickSpeed};
-  equipment::ArrayRestore<u_int, std::size(VS::Input::buttonHeldFrames)>
+  equipment::ArrayRestore<std::uint32_t, std::size(VS::Input::buttonHeldFrames)>
       saved_held{VS::Input::buttonHeldFrames};
-  equipment::ValueRestore<u_long*> saved_text_ordering{
+  equipment::ValueRestore<std::uint32_t*> saved_text_ordering{
       VS::Menu::activeTextBoxOrderingTable};
   equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
-  equipment::ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)>
+  equipment::ArrayRestore<std::uint32_t,
+                          std::size(VS::Menu::textBoxOrderingTables)>
       saved_text_tables{VS::Menu::textBoxOrderingTables};
   std::array<int, framework::kRowTypeCount> row_types{};
   RowWorkspace workspace;
@@ -77,7 +78,8 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     VS::State::tickSpeed = 2;
     VS::Menu::textBoxBufferIndex = 0;
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
-    ClearOTag(VS::Menu::activeTextBoxOrderingTable, kTextOrderingEntries);
+    VS::Legacy::ClearOTag(VS::Menu::activeTextBoxOrderingTable,
+                          kTextOrderingEntries);
     VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
                               VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);
@@ -130,7 +132,7 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     owner.indices.misc[0] = 1;
     owner.indices.misc[1] = data::kRowCount;
   }
-  bool OwnsWords(const u_long* pointer, std::size_t count) const {
+  bool OwnsWords(const std::uint32_t* pointer, std::size_t count) const {
     const auto address = reinterpret_cast<std::uintptr_t>(pointer);
     const auto bytes = count * sizeof(*pointer);
     const auto within = [address, bytes](const void* first, const void* last) {
@@ -152,24 +154,25 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     const auto last = reinterpret_cast<std::uintptr_t>(primitives.data() +
                                                        primitives.size() - 1);
     if (cursor < first || cursor > last ||
-        (cursor - first) % sizeof(u_long) != 0) {
+        (cursor - first) % sizeof(std::uint32_t) != 0) {
       throw std::runtime_error("physical packet cursor escaped its allocation");
     }
     std::vector<std::vector<std::uint32_t>> packets;
     const void* packet = &ordering.back();
     while (packet != nullptr && packets.size() < kPacketLimit) {
-      const auto* words = static_cast<const u_long*>(packet);
+      const auto* words = static_cast<const std::uint32_t*>(packet);
       if (!OwnsWords(words, 1)) {
         throw std::runtime_error(
             "physical ordering tag escaped its actual owner");
       }
-      const auto length = static_cast<const P_TAG*>(packet)->len;
+      const auto length = static_cast<const VS::Legacy::P_TAG*>(packet)->len;
       if (!OwnsWords(words, static_cast<std::size_t>(length) + 1U)) {
         throw std::runtime_error(
             "physical packet payload escaped its actual owner");
       }
       packets.emplace_back(words, words + length + 1U);
-      packet = isendprim(packet) ? nullptr : nextPrim(packet);
+      packet = VS::Legacy::isendprim(packet) ? nullptr
+                                             : VS::Legacy::nextPrim(packet);
     }
     if (packet != nullptr) {
       throw std::runtime_error("cyclic physical ordering chain");

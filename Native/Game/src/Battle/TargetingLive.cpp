@@ -68,7 +68,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Sounds.hpp"
@@ -78,6 +78,9 @@
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;

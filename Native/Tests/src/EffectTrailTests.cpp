@@ -29,7 +29,7 @@
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "Effects/Trails.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace trails = VS::Effects::Templates;

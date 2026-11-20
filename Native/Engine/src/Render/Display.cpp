@@ -1,6 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
+
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
 
 // decomp: D_8005DFD4 (D_8005DFD4@SLUS_010.40)
 std::int16_t VS::Render::legacyViewportLeft;

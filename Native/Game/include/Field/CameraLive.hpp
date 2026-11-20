@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Field/Camera.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct TileTarget;
@@ -91,20 +91,23 @@ void LiveUpdateCameraFacingState();
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 [[nodiscard]] int LiveAddClampedCameraStep(int base, int step, int remaining);
 // _clampPositionToZoneBounds (146C.c:2426). The records may alias.
-void LiveClampCameraLookAtToZone(const VECTOR* in_position,
-                                 VECTOR* out_position);
+void LiveClampCameraLookAtToZone(const VS::Core::Gte::VECTOR* in_position,
+                                 VS::Core::Gte::VECTOR* out_position);
 // _computeStepAndDisplacement (146C.c:2481): 1 when the target is off the
 // screen's centre.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-int LiveComputeCameraTrackingStep(const SVECTOR* target_position,
-                                  VECTOR* out_step, VECTOR* out_displacement,
+int LiveComputeCameraTrackingStep(const VS::Core::Gte::SVECTOR* target_position,
+                                  VS::Core::Gte::VECTOR* out_step,
+                                  VS::Core::Gte::VECTOR* out_displacement,
                                   int clamp_to_zone, int max_speed);
 // _stepTowardTarget (146C.c:2569): the tracking speed.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-int LiveStepCameraLookAtTowardTarget(const SVECTOR* target_position,
-                                     int clamp_to_zone, int max_speed);
+int LiveStepCameraLookAtTowardTarget(
+    const VS::Core::Gte::SVECTOR* target_position, int clamp_to_zone,
+    int max_speed);
 // _snapLookAtToPosition (146C.c:2597).
-void LiveTrackCameraLookAtWithinDeadZone(const VECTOR* target_position);
+void LiveTrackCameraLookAtWithinDeadZone(
+    const VS::Core::Gte::VECTOR* target_position);
 // func_8006E158 (146C.c:2641).
 void LiveUpdateCameraOrbitInput();
 // func_8006E640 (146C.c:2794).
@@ -117,7 +120,8 @@ void LiveUpdateFirstPersonCamera();
 // func_8006EF10 (146C.c:3044).
 void LiveStorePreferredActionCameraDistance();
 // _computeCameraTransition (146C.c:3058).
-void LiveComputeFirstPersonCameraTransition(const VECTOR* target_position);
+void LiveComputeFirstPersonCameraTransition(
+    const VS::Core::Gte::VECTOR* target_position);
 // _stepCameraTransition (146C.c:3121): 1 once the camera arrives.
 int LiveStepFirstPersonCameraTransition();
 // _initBattleCameraTransition (146C.c:4544).
@@ -142,21 +146,21 @@ void LiveResetCameraToAshley();
 int LiveSyncCameraAnglesFromPosition(SphericalCamera* output);
 // _computeSphericalOffset (146C.c:8092). An output that aliases the base
 // reads the normalized direction back as the base, as the original did.
-void LiveComputeSphericalCameraPosition(VECTOR* out_position,
-                                        const VECTOR* base_position,
-                                        const OrbitAngles* angles);
+void LiveComputeSphericalCameraPosition(
+    VS::Core::Gte::VECTOR* out_position,
+    const VS::Core::Gte::VECTOR* base_position, const OrbitAngles* angles);
 // _setCameraPositionFromAngles (146C.c:8104).
 void LiveSetCameraPositionFromAngles(const OrbitAngles* angles);
 // _setCameraLookAtFromAngles (146C.c:8110).
 void LiveSetCameraLookAtFromAngles(const OrbitAngles* angles);
 // vs_battle_getCameraPosition (146C.c:8125).
-void LiveCameraPosition(VECTOR* out_position);
+void LiveCameraPosition(VS::Core::Gte::VECTOR* out_position);
 // vs_battle_setCameraPosition (146C.c:8132).
-void LiveSetCameraPosition(const VECTOR* in_position);
+void LiveSetCameraPosition(const VS::Core::Gte::VECTOR* in_position);
 // vs_battle_getCameraLookAt (146C.c:8139).
-void LiveCameraLookAt(VECTOR* out_look_at);
+void LiveCameraLookAt(VS::Core::Gte::VECTOR* out_look_at);
 // vs_battle_setCameraLookAt (146C.c:8146).
-void LiveSetCameraLookAt(const VECTOR* in_look_at);
+void LiveSetCameraLookAt(const VS::Core::Gte::VECTOR* in_look_at);
 // vs_battle_setCameraRoll (146C.c:8153).
 void LiveSetCameraRoll(int roll_angle);
 // vs_battle_getCameraRoll (146C.c:8155).
@@ -165,7 +169,8 @@ void LiveSetCameraRoll(int roll_angle);
 int LiveSetFirstPersonViewDisabled(int disabled);
 // vs_battle_initialiseCameraFromSpherical (146C.c:9071).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void LiveInitializeSphericalCamera(VECTOR* out_position, VECTOR* out_look_at,
+void LiveInitializeSphericalCamera(VS::Core::Gte::VECTOR* out_position,
+                                   VS::Core::Gte::VECTOR* out_look_at,
                                    int facing, int mode);
 // func_8007CE74 (146C.c:9106).
 void LiveSetCameraPitchPreset(int requested_pitch);

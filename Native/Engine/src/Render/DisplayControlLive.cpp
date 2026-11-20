@@ -10,7 +10,7 @@
 #include <span>
 
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLive.hpp"
@@ -22,6 +22,23 @@
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+
+using VS::Legacy::ClearImage2;
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::DrawOTag;
+using VS::Legacy::LoadImage;
+using VS::Legacy::PutDispEnv;
+using VS::Legacy::PutDrawEnv;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDefDispEnv;
+using VS::Legacy::SetDefDrawEnv;
+using VS::Legacy::SetDispMask;
+using VS::Legacy::setRECT;
+using VS::Legacy::setRGB0;
 
 namespace VS::Render {
 namespace {
@@ -48,10 +65,10 @@ void PresentEnvironments(std::size_t index) {
 class LiveDisplayDevice final : public DisplayDevice {
  public:
   void SetGeometryOffset(std::int32_t x, std::int32_t y) override {
-    Core_Gte_SetGeomOffset(x, y);
+    SetGeomOffset(x, y);
   }
   void SetProjectionDistance(std::int32_t distance) override {
-    Core_Gte_SetGeomScreen(distance);
+    SetGeomScreen(distance);
   }
   void ApplyFieldLayout(const FieldDisplayLayout& layout) override {
     for (std::size_t index = 0; index < kFrameBufferCount; ++index) {
@@ -71,7 +88,7 @@ class LiveDisplayDevice final : public DisplayDevice {
     legacyViewportLeft = layout.viewport.x;
     legacyViewportTop = layout.viewport.y;
     viewportWidth = layout.viewport.width;
-    viewportHeight = static_cast<u_short>(layout.viewport.height);
+    viewportHeight = static_cast<std::uint16_t>(layout.viewport.height);
     PresentEnvironments(CurrentBuffer());
   }
   void ShowDisplayArea(const ScreenRect& area,
@@ -92,7 +109,7 @@ class LiveDisplayDevice final : public DisplayDevice {
                    std::span<const std::uint16_t> pixels) override {
     RECT rect = ToRect(area);
     // LoadImage only reads the pixels; the policy sized the span to the area.
-    LoadImage(&rect, reinterpret_cast<u_long*>(
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
                          const_cast<std::uint16_t*>(pixels.data())));
   }
   void SetDisplayEnabled(bool enabled) override {
@@ -102,14 +119,14 @@ class LiveDisplayDevice final : public DisplayDevice {
 
 class LiveFieldFrame final : public FieldFrameHost {
  public:
-  explicit LiveFieldFrame(u_long* ordering_table)
+  explicit LiveFieldFrame(std::uint32_t* ordering_table)
       : ordering_table_(ordering_table) {}
 
   [[nodiscard]] int FrameBuffer() const override { return frameBuf; }
   void SelectFrameBuffer(int index) override { frameBuf = index; }
   void AdvanceRandom() override { VS::Core::NextLiveRandomBounded(0); }
   void SetGeometryOffset(std::int32_t x, std::int32_t y) override {
-    Core_Gte_SetGeomOffset(x, y);
+    SetGeomOffset(x, y);
   }
   [[nodiscard]] std::int32_t TickSpeed() const override {
     return VS::State::tickSpeed;
@@ -151,7 +168,7 @@ class LiveFieldFrame final : public FieldFrameHost {
   void DrawOrderingTable() override { DrawOTag(ordering_table_); }
 
  private:
-  u_long* ordering_table_;
+  std::uint32_t* ordering_table_;
 };
 
 std::int32_t HeaderSize(std::uint8_t low, std::uint8_t high) {
@@ -177,7 +194,7 @@ void ConfigureLiveFieldDisplay(int frame_width, int frame_height,
                                      static_cast<std::uint8_t>(clear_blue)}});
 }
 
-int PresentLiveFieldFrame(u_long* ordering_table) {
+int PresentLiveFieldFrame(std::uint32_t* ordering_table) {
   LiveFieldFrame host(ordering_table);
   return PresentFieldFrame(host);
 }

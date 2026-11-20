@@ -25,12 +25,12 @@
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Event/WeaponModeOpcode.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 namespace {
-using Handler = intptr_t (*)(u_char*, std::int16_t);
+using Handler = intptr_t (*)(std::uint8_t*, std::int16_t);
 
 auto RecordBytes(const VS::Actors::ActorRecord& record) {
   std::array<std::byte, sizeof(record)> bytes{};
@@ -122,9 +122,9 @@ struct WeaponModeFixture {
     VS::Actors::RegisterSequenceBank(bank, sizeof storage);
     bank->animation_map = 1536;
     bank->animation_data = 1792;
-    auto* map = reinterpret_cast<u_char*>(bank) + bank->animation_map;
+    auto* map = reinterpret_cast<std::uint8_t*>(bank) + bank->animation_map;
     for (std::size_t index = 0; index < 128; ++index) {
-      map[index] = static_cast<u_char>(index);
+      map[index] = static_cast<std::uint8_t>(index);
       bank->headers[index * 5] = 4;
       bank->headers[index * 5 + 1] = 0xFF;
     }
@@ -132,7 +132,7 @@ struct WeaponModeFixture {
   }
 
   void Prepare(int mode) {
-    actor.weapon_drawn = static_cast<u_char>(0xA4 | (mode ^ 1));
+    actor.weapon_drawn = static_cast<std::uint8_t>(0xA4 | (mode ^ 1));
     record.instance.weapon_drawn = mode ^ 1;
     for (auto& weapon : weapons) {
       weapon.shown = mode ^ 1;
@@ -220,12 +220,12 @@ struct WeaponModeFixture {
     return handler;
   }
 
-  static u_char Opcode(Handler handler) {
+  static std::uint8_t Opcode(Handler handler) {
     auto* found = std::find(std::begin(VS::Event::skipOpcodeHandlers),
                             std::end(VS::Event::skipOpcodeHandlers), handler);
     REQUIRE(found != std::end(VS::Event::skipOpcodeHandlers));
-    return static_cast<u_char>(found -
-                               std::begin(VS::Event::skipOpcodeHandlers));
+    return static_cast<std::uint8_t>(found -
+                                     std::begin(VS::Event::skipOpcodeHandlers));
   }
 };
 }  // namespace
@@ -236,7 +236,7 @@ TEST_CASE("Script weapon mode honors its story gate without changing actors",
   fixture.Prepare(1);
   VS::State::SetLiveScriptFlag(0xAC, 0);
   const auto before = RecordBytes(fixture.record);
-  std::array<u_char, 3> command{0, 1, 1};
+  std::array<std::uint8_t, 3> command{0, 1, 1};
   CHECK(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weapon_drawn & 1) == 0);
@@ -250,8 +250,8 @@ TEST_CASE("Script weapon mode applies immediate and skipped final visibility",
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
   VS::Event::skipState = static_cast<char>(skip);
-  std::array<u_char, 3> command{0, static_cast<u_char>(mode),
-                                static_cast<u_char>(skip ? 3 : 0)};
+  std::array<std::uint8_t, 3> command{0, static_cast<std::uint8_t>(mode),
+                                      static_cast<std::uint8_t>(skip ? 3 : 0)};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckImmediate(mode);
 }
@@ -265,8 +265,8 @@ TEST_CASE("Script weapon mode waits for real skeletal animation completion",
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
   VS::Event::playbackPhase = static_cast<std::uint8_t>(phase);
-  std::array<u_char, 3> command{0, static_cast<u_char>(mode),
-                                static_cast<u_char>(variant)};
+  std::array<std::uint8_t, 3> command{0, static_cast<std::uint8_t>(mode),
+                                      static_cast<std::uint8_t>(variant)};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   fixture.CheckAnimatedStart(mode, variant, phase);
   CHECK(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
@@ -282,7 +282,7 @@ TEST_CASE("Script weapon mode also waits for the original queued idle",
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
   VS::Event::playbackPhase = 0;
-  std::array<u_char, 3> command{0, static_cast<u_char>(mode), 2};
+  std::array<std::uint8_t, 3> command{0, static_cast<std::uint8_t>(mode), 2};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.record.queued_animation == 1);
   fixture.AdvanceFrames(5);
@@ -301,7 +301,7 @@ TEST_CASE("Skipping an active weapon transition clears its wait without replay",
   const int mode = GENERATE(0, 1);
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
-  std::array<u_char, 3> command{0, static_cast<u_char>(mode), 1};
+  std::array<std::uint8_t, 3> command{0, static_cast<std::uint8_t>(mode), 1};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   const auto animation = fixture.record.animation_id;
   VS::Event::skipState = 2;
@@ -331,7 +331,7 @@ TEST_CASE("Production event dispatch holds then advances the weapon opcode",
   VS::Event::opcodeSizes[weapon] = 3;
   VS::Event::opcodeSizes[stop] = 1;
   const auto script = VS::test_support::MountLiveEventScript(
-      {weapon, static_cast<u_char>(mode), 1, stop});
+      {weapon, static_cast<std::uint8_t>(mode), 1, stop});
   auto& host = VS::Event::LiveScriptVm();
   host.SetThreadCursor(0, script);
   REQUIRE_FALSE(VS::Event::ExecuteLiveScriptThread(0));
@@ -354,7 +354,8 @@ TEST_CASE(
   constexpr auto kOperand = std::size(VS::Event::weaponDrawStates) - 1;
   VS::Event::weaponDrawStates[kOperand] = 0;
   VS::Event::skipState = 2;
-  std::array<u_char, 3> command{0, static_cast<u_char>(kOperand), 255};
+  std::array<std::uint8_t, 3> command{0, static_cast<std::uint8_t>(kOperand),
+                                      255};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weapon_drawn & 1) == 0);

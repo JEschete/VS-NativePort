@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Binds the container list transfer (ContainerListTransfer.hpp) to MENUD's
 // variables, the menu framework and the container helpers in the shapes the
@@ -19,7 +19,7 @@ int LiveUpdateItemList(int transfer_direction_selection);
 // decomp: func_801089BC (src/MENU/MENUD.PRG/234.c:3037), 801089BC.
 int LiveUpdateTransferDirection(int initialize_direction_menu);
 // decomp: vs_menuD_exec (src/MENU/MENUD.PRG/234.c:3130), 80108C6C.
-int LiveUpdateScreen(u_char* screen_step);
+int LiveUpdateScreen(std::uint8_t* screen_step);
 // Restores the controllers' MENUD statics to their load-time values; a
 // MENUD.PRG reload (VS::Boot::ResetMenudStatics) must call it.
 void ResetLiveContainerTransferStatics();

@@ -17,10 +17,15 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Core/Gte.h"
-#include "Legacy/Psx.h"
+#include "Core/Gte.hpp"
+#include "Legacy/Psx.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomScreen;
+
+using VS::Legacy::setVector;
 
 namespace {
 using VS::Actors::ActorModelDrawHost;
@@ -353,7 +358,7 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
   auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
   VS::Actors::actorRecords[0] = &actor;
   actor.instance.model = model;
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   int output[2] = {33, 44};
 
   // #263: a bone count and bone table beyond the 42 pose matrices still
@@ -379,7 +384,7 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
         VS::Actors::kBoneProjectionMissing);
 
   std::copy(saved.begin(), saved.end(), std::begin(VS::Actors::actorRecords));
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 namespace {
@@ -421,8 +426,8 @@ struct BorrowedGeometryFixture {
     VS::Actors::actorRecords[kGeometrySlot] = &geometry;
     for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
     setVector(&VS::Render::ModelWorkspace()->root_offset, 0, 0, 1024);
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
   }
   ~BorrowedGeometryFixture() {
     std::copy(saved_records.begin(), saved_records.end(),
@@ -430,7 +435,7 @@ struct BorrowedGeometryFixture {
     VS::Actors::skeletonPose = saved_pose;
     VS::Actors::modelRenderContext = saved_context;
     *VS::Render::ModelWorkspace() = saved_workspace;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
   BorrowedGeometryFixture(const BorrowedGeometryFixture&) = delete;
   BorrowedGeometryFixture& operator=(const BorrowedGeometryFixture&) = delete;

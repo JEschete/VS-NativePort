@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -48,7 +48,7 @@
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Frame.hpp"
 #include "Render/LegacyPackets.hpp"
@@ -56,6 +56,20 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+// GTE callers share this using list; it is not copy/paste to extract.
+// jscpd:ignore-start
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+// jscpd:ignore-end
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects::Templates {
 namespace {
@@ -92,7 +106,6 @@ static_assert(sizeof(VS::Render::ParticleLinePacket) ==
               kParticleLineWords * sizeof(std::uint32_t));
 static_assert(sizeof(SVECTOR) * kParticleControlPoints ==
               kParticleControlPointBytes);
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::uint64_t refused_curves = 0;
 std::uint64_t refused_textures = 0;
@@ -326,18 +339,18 @@ class LiveParticleHost final : public ParticleSetHost {
     }
     const MATRIX& view =
         instance_->transforms[definition_->transform_index].view;
-    Core_Gte_SetRotMatrix(&view);
-    Core_Gte_SetTransMatrix(&view);
+    SetRotMatrix(&view);
+    SetTransMatrix(&view);
   }
 
   [[nodiscard]] ParticleProjection Project(ParticlePoint point) override {
     const SVECTOR vertex{point.x, point.y, point.z, 0};
-    Core_Gte_LoadV0(&vertex);
-    Core_Gte_Rtps();
-    Core_GteWord screen = 0;
-    Core_GteWord depth = 0;
-    Core_Gte_StoreSxy2(&screen);
-    Core_Gte_StoreSz3Otz(&depth);
+    LoadV0(&vertex);
+    Rtps();
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word depth = 0;
+    StoreSxy2(&screen);
+    StoreSz3Otz(&depth);
     return {.screen = static_cast<std::uint32_t>(screen),
             .depth = static_cast<std::int32_t>(depth)};
   }
@@ -355,9 +368,9 @@ class LiveParticleHost final : public ParticleSetHost {
   // kParticleSetCapacity ribbons of them.
   [[nodiscard]] std::span<SVECTOR> ControlPoints() const;
   // Room for `words` words linked at `depth` of the scene table, or nothing.
-  [[nodiscard]] std::optional<std::pair<u_long*, u_long*>> Reserve(
-      std::int32_t depth, std::size_t words);
-  void Link(u_long* entry, u_long* packet, std::size_t words);
+  [[nodiscard]] std::optional<std::pair<std::uint32_t*, std::uint32_t*>>
+  Reserve(std::int32_t depth, std::size_t words);
+  void Link(std::uint32_t* entry, std::uint32_t* packet, std::size_t words);
 
   LiveRendererSlot& slot_;
   const LiveParticleDefinition* definition_ = nullptr;
@@ -622,11 +635,11 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
 // at the segment's depth). The original wrote past the primitive buffer when
 // it was full; a packet without room or outside the scene table is dropped
 // here.
-std::optional<std::pair<u_long*, u_long*>> LiveParticleHost::Reserve(
-    std::int32_t depth, std::size_t words) {
-  u_long* const entry =
+std::optional<std::pair<std::uint32_t*, std::uint32_t*>>
+LiveParticleHost::Reserve(std::int32_t depth, std::size_t words) {
+  std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, depth);
-  u_long* const packet =
+  std::uint32_t* const packet =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
   if (packet == nullptr) {
     if (ShouldReport(dropped_packets)) {
@@ -641,9 +654,10 @@ std::optional<std::pair<u_long*, u_long*>> LiveParticleHost::Reserve(
   return std::pair{entry, packet};
 }
 
-void LiveParticleHost::Link(u_long* entry, u_long* packet, std::size_t words) {
-  *entry = (*entry & kOrderingHighMask) |
-           (LegacyGpu_Handle(packet) & kParticleLinkMask);
+void LiveParticleHost::Link(std::uint32_t* entry, std::uint32_t* packet,
+                            std::size_t words) {
+  *entry =
+      (*entry & kOrderingHighMask) | (GpuHandle(packet) & kParticleLinkMask);
   VS::Render::FrameScratchpad().primitive_cursor = packet + words;
 }
 
@@ -656,8 +670,8 @@ void LiveParticleHost::SubmitQuad(const ParticleQuad& quad,
   const auto [entry, packet] = *reserved;
   // The encoder keeps the high halfwords of the u2v2 and u3v3 words the
   // buffer held.
-  const std::span<u_long, kParticleQuadWords> stored(packet,
-                                                     kParticleQuadWords);
+  const std::span<std::uint32_t, kParticleQuadWords> stored(packet,
+                                                            kParticleQuadWords);
   std::array<std::uint32_t, kParticleQuadWords> words{};
   std::ranges::copy(stored, words.begin());
   EncodeParticleQuadPacket(quad, static_cast<std::uint32_t>(*entry), words);

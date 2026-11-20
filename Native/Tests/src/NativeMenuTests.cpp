@@ -72,8 +72,8 @@ struct MenuFixture {
   int active = VS::Boot::isGameplayActive;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   int repeat = VS::Input::buttonRepeat;
-  std::array<u_int, 12> sound_offsets{};
-  std::array<u_short, 12> sound_selectors{};
+  std::array<std::uint32_t, 12> sound_offsets{};
+  std::array<std::uint16_t, 12> sound_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
       {.program_offsets = sound_offsets,
        .bank_selectors = sound_selectors,

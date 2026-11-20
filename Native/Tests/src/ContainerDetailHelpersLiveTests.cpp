@@ -20,6 +20,10 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/Inventory.hpp"
 
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
+
 namespace {
 namespace detail = VS::Menu::container;
 namespace items = VS::Items;
@@ -87,7 +91,7 @@ std::vector<DrawnSprite> CompletePageSprites(const LiveFixture& fixture) {
     if (!fixture.Owns(packet)) {
       throw std::runtime_error("stat-page packet outside current frame owner");
     }
-    const auto* words = static_cast<const u_long*>(packet);
+    const auto* words = static_cast<const std::uint32_t*>(packet);
     const auto length = static_cast<const P_TAG*>(packet)->len;
     const auto command = length == VS::Render::kSpritePacketWords - 1
                              ? words[VS::Render::kSpriteColorWord] >>

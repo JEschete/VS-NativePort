@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ScaledFont.hpp"
 
 namespace VS::Render {
@@ -11,12 +11,12 @@ namespace VS::Render {
 class LiveScaledGlyphTarget final : public ScaledGlyphTarget {
  public:
   // Null when the box has no layer to draw into.
-  explicit LiveScaledGlyphTarget(u_long* layer) : layer_(layer) {}
+  explicit LiveScaledGlyphTarget(std::uint32_t* layer) : layer_(layer) {}
 
   [[nodiscard]] bool CanDraw() const override { return layer_ != nullptr; }
   void Draw(const ScaledGlyphQuad& quad) override;
 
  private:
-  u_long* layer_;
+  std::uint32_t* layer_;
 };
 }  // namespace VS::Render

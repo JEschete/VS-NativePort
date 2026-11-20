@@ -11,8 +11,10 @@
 #include "Field/MapProgress.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/RoomStateLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Progress.hpp"
+
+using VS::Core::Gte::MATRIX;
 
 namespace {
 using VS::Field::RoomVisitFlags;

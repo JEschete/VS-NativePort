@@ -44,11 +44,17 @@
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Items/Materials.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
 
 // decomp: vs_battle_loadObjectDataState
 // (vs_battle_loadObjectDataState@BATTLE/BATTLE.PRG)
@@ -190,7 +196,7 @@ static_assert(offsetof(LegacyActorAssetRequest, variant) ==
 // Live binding is built without /J, so its char bit-fields are read raw.
 constexpr std::size_t kInstanceFlagsAt = 8;
 static_assert(offsetof(VS::Actors::ModelInstance, other_polygon_count) +
-                  sizeof(u_short) ==
+                  sizeof(std::uint16_t) ==
               kInstanceFlagsAt);
 // The bit-field bytes run from the flag byte to reservedD.
 constexpr std::size_t kInstanceBitFieldBytes = 5;
@@ -253,7 +259,7 @@ static_assert(sizeof(VS::Actors::WeaponModel::working_palette) ==
               sizeof(WeaponAssetRecord::working_palette));
 static_assert(sizeof(VS::Actors::WeaponModel::upload_palette) ==
               sizeof(WeaponAssetRecord::upload_palette));
-static_assert(std::is_same_v<u_short, std::uint16_t>);
+static_assert(std::is_same_v<std::uint16_t, std::uint16_t>);
 // The original's 8-byte texture slot entries.
 constexpr std::size_t kTextureSlotBytes = 8;
 static_assert(sizeof(VS::Render::TextureSlot) == kTextureSlotBytes);
@@ -468,12 +474,12 @@ void StoreWeaponRecord(const WeaponAssetRecord& in,
   out.triangle_count = in.triangle_count;
   out.quad_count = in.quad_count;
   out.other_primitive_count = in.other_primitive_count;
-  out.actor_id = static_cast<u_char>(in.actor_id & kNibbleMask);
+  out.actor_id = static_cast<std::uint8_t>(in.actor_id & kNibbleMask);
   out.shown = in.reserved08_bit4 ? 1 : 0;
   out.is_wide_texture = in.wide_texture ? 1 : 0;
   out.brightness_override = in.reserved08_bit6 ? 1 : 0;
   out.is_double_clut = in.double_clut ? 1 : 0;
-  out.material = static_cast<u_char>(in.material & kNibbleMask);
+  out.material = static_cast<std::uint8_t>(in.material & kNibbleMask);
   out.palette_color_count = in.palette_color_count;
   out.attachment_slot = in.attachment_slot;
   out.attachment_bone = in.attachment_bone;
@@ -544,12 +550,13 @@ void StoreInstance(const ActorAssetRecord& in, VS::Actors::ModelInstance& out) {
   value |= in.is_parsed ? kParsedBit : 0;
   flags = value;
   out.action_animation_state =
-      static_cast<u_char>(in.action_animation_state & kNibbleMask);
+      static_cast<std::uint8_t>(in.action_animation_state & kNibbleMask);
   out.is_attached = in.is_attached ? 1 : 0;
   out.sound_enabled = in.sound_enabled ? 1 : 0;
   out.weapon_drawn = in.weapon_drawn ? 1 : 0;
-  out.support_layer = static_cast<u_char>(in.support_layer & kNibbleMask);
-  out.placement_layer = static_cast<u_char>(in.placement_layer & kNibbleMask);
+  out.support_layer = static_cast<std::uint8_t>(in.support_layer & kNibbleMask);
+  out.placement_layer =
+      static_cast<std::uint8_t>(in.placement_layer & kNibbleMask);
   out.copied_word_count = in.palette_words;
   out.slot = in.slot;
   out.variant = in.variant;
@@ -964,8 +971,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
                    std::span<const std::byte> pixels) override {
     RECT area{.x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h};
     // LoadImage only reads the pixels.
-    LoadImage(&area,
-              reinterpret_cast<u_long*>(const_cast<std::byte*>(pixels.data())));
+    LoadImage(&area, reinterpret_cast<std::uint32_t*>(
+                         const_cast<std::byte*>(pixels.data())));
   }
   void UploadClut(std::span<const std::uint16_t> colors, std::uint32_t row,
                   std::uint32_t first, std::uint32_t count) override {

@@ -29,6 +29,8 @@
 #include "State/KillScoreLive.hpp"
 #include "State/Progress.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;
 

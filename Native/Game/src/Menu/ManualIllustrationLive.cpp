@@ -13,15 +13,18 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
 #include "Menu/ManualIllustration.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace VS::Menu::manual {
 namespace {
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(sizeof(VisibilityAnimation) ==
               kAnimationHalfwords * sizeof(std::int16_t));
 
@@ -72,12 +75,12 @@ class LiveUploader final : public ImageUploader {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the pixels.
-    LoadImage(&rect, reinterpret_cast<u_long*>(
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
                          const_cast<std::uint32_t*>(pixels.data())));
   }
 };
 
-void UploadLive(const u_long* buffer, int count, bool cluts) {
+void UploadLive(const std::uint32_t* buffer, int count, bool cluts) {
   if (count <= 0) {
     return;
   }
@@ -101,7 +104,7 @@ void UploadLive(const u_long* buffer, int count, bool cluts) {
 
 // The frame's first scene ordering-table entry, the original's scratch[1].
 std::optional<Render::LivePacketQueue> SceneQueue(std::size_t words) {
-  u_long* const entry =
+  std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, 0);
   if (entry == nullptr) {
     Refuse("Manual illustration has no frame ordering table");
@@ -154,12 +157,12 @@ class LiveDiagramLineTarget final : public DiagramLineTarget {
 }  // namespace
 
 // decomp: MENUE.PRG _copySprites (494.c:481).
-void LiveUploadSpriteTiles(u_long const* buffer, int count) {
+void LiveUploadSpriteTiles(std::uint32_t const* buffer, int count) {
   UploadLive(buffer, count, false);
 }
 
 // decomp: MENUE.PRG _copyCluts (494.c:498).
-void LiveUploadCluts(u_long* buffer, int count) {
+void LiveUploadCluts(std::uint32_t* buffer, int count) {
   UploadLive(buffer, count, true);
 }
 

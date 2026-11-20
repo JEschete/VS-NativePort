@@ -28,7 +28,7 @@
 #include "Event/ScriptEffects.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.hpp"
@@ -103,7 +103,7 @@ struct EventCameraFixture {
         scratch.data(), scratch.size());
     VS::Event::cameraWorkspace = saved_camera;
     VS::State::tickSpeed = saved_speed;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   void CheckStarted() const {
@@ -111,10 +111,10 @@ struct EventCameraFixture {
     CHECK(camera.look_at.motion_mode == 2);
     CHECK(camera.eye.duration_frames == 85);
     CHECK(camera.look_at.duration_frames == 85);
-    const std::array<u_char, 4> easing{
+    const std::array<std::uint8_t, 4> easing{
         camera.eye.easing_primary, camera.eye.easing_secondary,
         camera.eye.easing_tertiary, camera.look_at.easing_primary};
-    CHECK(easing == std::array<u_char, 4>{1, 0, 1, 1});
+    CHECK(easing == std::array<std::uint8_t, 4>{1, 0, 1, 1});
   }
 
   void CheckFinished() const {

@@ -9,7 +9,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReader.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Content {
 namespace {

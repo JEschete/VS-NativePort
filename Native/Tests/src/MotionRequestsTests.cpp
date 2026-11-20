@@ -10,6 +10,8 @@
 #include "Actors/MotionRequestsLive.hpp"
 #include "Battle/Actor.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 static_assert(sizeof(SVECTOR) == 2 * sizeof(int));
 static_assert(offsetof(VS::Battle::Actor, command_arg1) ==

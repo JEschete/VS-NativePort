@@ -58,6 +58,8 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Render/Palette.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Actors {
 namespace {
 static_assert(std::size(VS::Actors::actorRecords) == kActorStateSlots);
@@ -73,7 +75,7 @@ constexpr int kNoParentArgument = -1;
 constexpr int kNoNearestActor = -1;
 
 // A one-bit unsigned field's value.
-u_char Bit(bool value) { return value ? 1 : 0; }
+std::uint8_t Bit(bool value) { return value ? 1 : 0; }
 // A one-bit signed (char) field's value; its only set value is -1.
 char SignedBit(bool value) { return value ? -1 : 0; }
 
@@ -470,7 +472,7 @@ class LiveActorStateHost final : public ActorStateHost {
   bool HasAnimation(int id, int animation) override {
     VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     if (record == nullptr) return false;
-    u_short* header = nullptr;
+    std::uint16_t* header = nullptr;
     const Synced synced(*this);
     static_cast<void>(FindLiveActorAnimationHeader(record, animation, &header));
     return header != nullptr;

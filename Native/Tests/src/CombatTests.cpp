@@ -7,7 +7,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;

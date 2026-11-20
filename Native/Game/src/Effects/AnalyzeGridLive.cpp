@@ -11,7 +11,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -29,6 +29,20 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+// GTE callers share this using list; it is not copy/paste to extract.
+// jscpd:ignore-start
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
+// jscpd:ignore-end
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects {
 namespace {
@@ -212,20 +226,20 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
     if (effect_view) {
       const MATRIX& view =
           instance_->transforms[definition_->transform_index].view;
-      Core_Gte_SetRotMatrix(&view);
-      Core_Gte_SetTransMatrix(&view);
+      SetRotMatrix(&view);
+      SetTransMatrix(&view);
     } else {
       Render::LoadLiveFrameViewMatrix();
     }
   }
   AnalyzeGridProjection Project(grid::RingPoint point) override {
     const SVECTOR vertex{point.x, point.y, point.z, 0};
-    Core_GteWord screen = 0;
-    Core_GteWord depth = 0;
-    Core_Gte_LoadV0(&vertex);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSxy2(&screen);
-    Core_Gte_StoreSz3Otz(&depth);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word depth = 0;
+    LoadV0(&vertex);
+    Rtps();
+    StoreSxy2(&screen);
+    StoreSz3Otz(&depth);
     const auto xy = static_cast<std::uint32_t>(screen);
     return {{math::WrapSigned16(xy), math::WrapSigned16(xy >> kHalfwordBits)},
             static_cast<std::int32_t>(depth)};
@@ -282,9 +296,9 @@ void LiveAnalyzeGridHost::PublishScratch(const grid::SurfaceScratch& values) {
 }
 
 void LiveAnalyzeGridHost::Draw(const AnalyzeGridQuad& quad) {
-  u_long* entry = Render::LiveFrameOrderingEntry(
+  std::uint32_t* entry = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene, quad.depth);
-  u_long* packet =
+  std::uint32_t* packet =
       entry != nullptr
           ? Render::ReserveLivePrimitiveWords(grid::kGridPacketWords)
           : nullptr;
@@ -307,7 +321,7 @@ void LiveAnalyzeGridHost::Draw(const AnalyzeGridQuad& quad) {
   std::ranges::copy(words, packet);
   packet[0] |= *entry & grid::kRingLinkMask;
   *entry = (*entry & ~grid::kRingLinkMask) |
-           (LegacyGpu_Handle(packet) & grid::kRingLinkMask);
+           (GpuHandle(packet) & grid::kRingLinkMask);
   VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
 }
 

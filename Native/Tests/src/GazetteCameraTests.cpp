@@ -18,7 +18,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Scratch.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
@@ -31,6 +31,14 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::GpuPointer;
+using VS::Legacy::nextPrim;
 
 // Contracts of the gazette's viewer camera, panels and overview (MENU9.PRG
 // 238.c:1402-1408, 1474-1509, 1552-1717, 2146-2174).
@@ -460,9 +468,9 @@ class Digest {
     AddWord(static_cast<std::uint32_t>(bits));
     AddWord(static_cast<std::uint32_t>(bits >> kWordBits));
   }
-  void AddWords(const std::vector<u_long>& words) {
+  void AddWords(const std::vector<std::uint32_t>& words) {
     AddWord(static_cast<std::uint32_t>(words.size()));
-    for (const u_long word : words) {
+    for (const std::uint32_t word : words) {
       AddWord(static_cast<std::uint32_t>(word));
     }
   }
@@ -493,11 +501,13 @@ class Digest {
 // may or may not have loaded, so the fixture pins them: no left trim, every
 // glyph 6 pixels wide, and each character in its own cell.
 struct LiveFrameFixture {
-  static constexpr std::size_t kStorageWords = (0x20000 / sizeof(u_long)) + 2;
-  static constexpr std::size_t kOrderingEntries = 0x2088 / sizeof(u_long);
+  static constexpr std::size_t kStorageWords =
+      (0x20000 / sizeof(std::uint32_t)) + 2;
+  static constexpr std::size_t kOrderingEntries =
+      0x2088 / sizeof(std::uint32_t);
   static constexpr std::size_t kSceneEntry = 16;
-  static constexpr u_long kFill = 0xDEADBEEF;
-  static constexpr u_char kGlyphWidths = 0x66;
+  static constexpr std::uint32_t kFill = 0xDEADBEEF;
+  static constexpr std::uint8_t kGlyphWidths = 0x66;
 
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -519,18 +529,20 @@ struct LiveFrameFixture {
       std::to_array(VS::Render::compactGlyphWidths);
   decltype(std::to_array(VS::Render::compactGlyphIndices)) saved_indices =
       std::to_array(VS::Render::compactGlyphIndices);
-  std::vector<u_long> storage = std::vector<u_long>(kStorageWords, kFill);
-  std::vector<u_long> ordering = std::vector<u_long>(kOrderingEntries);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kStorageWords, kFill);
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(kOrderingEntries);
 
   LiveFrameFixture() {
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::legacyOrderingTables[0] = ordering.data();
     VS::Actors::actorRecords[VS::Menu::Framework::kPreviewActorSlot] = nullptr;
-    std::ranges::fill(VS::Render::compactGlyphLeftTrim, u_char{0});
+    std::ranges::fill(VS::Render::compactGlyphLeftTrim, std::uint8_t{0});
     std::ranges::fill(VS::Render::compactGlyphWidths, kGlyphWidths);
     for (std::size_t cell = 0; cell < saved_indices.size(); ++cell) {
-      VS::Render::compactGlyphIndices[cell] = static_cast<u_char>(cell);
+      VS::Render::compactGlyphIndices[cell] = static_cast<std::uint8_t>(cell);
     }
     Reset();
   }
@@ -564,11 +576,11 @@ struct LiveFrameFixture {
     VS::Render::FrameScratchpad().camera = VS::Render::Camera{};
   }
 
-  [[nodiscard]] static bool In(const std::vector<u_long>& words,
+  [[nodiscard]] static bool In(const std::vector<std::uint32_t>& words,
                                const void* address) {
     const auto at = reinterpret_cast<std::uintptr_t>(address);
     const auto begin = reinterpret_cast<std::uintptr_t>(words.data());
-    return at >= begin && at < begin + (words.size() * sizeof(u_long));
+    return at >= begin && at < begin + (words.size() * sizeof(std::uint32_t));
   }
 
   [[nodiscard]] bool InStorage(const void* packet) const {
@@ -578,12 +590,12 @@ struct LiveFrameFixture {
   // A link word with its handle, which depends on the order the process
   // issued handles in, replaced by the buffer and index of the word it
   // reaches; the end marker is kept.
-  [[nodiscard]] std::uint32_t Located(u_long word) const {
+  [[nodiscard]] std::uint32_t Located(std::uint32_t word) const {
     constexpr std::uint32_t kLinkMask = 0xFFFFFF;
     constexpr std::uint32_t kStorageLink = 0x800000;
     constexpr std::uint32_t kOrderingLink = 0x400000;
     const auto value = static_cast<std::uint32_t>(word);
-    const auto* target = static_cast<const u_long*>(LegacyGpu_Pointer(word));
+    const auto* target = static_cast<const std::uint32_t*>(GpuPointer(word));
     std::uint32_t link = value & kLinkMask;
     if (In(storage, target)) {
       link = kStorageLink | static_cast<std::uint32_t>(target - storage.data());
@@ -595,8 +607,8 @@ struct LiveFrameFixture {
   }
 
   struct Frame {
-    std::vector<u_long> ordering;
-    std::vector<u_long> storage;
+    std::vector<std::uint32_t> ordering;
+    std::vector<std::uint32_t> storage;
     std::ptrdiff_t cursor = 0;
     std::array<std::int64_t, 8> camera{};
   };
@@ -605,13 +617,13 @@ struct LiveFrameFixture {
   // which the copied body left unwritten and the binding zeroes, masked.
   [[nodiscard]] Frame Capture() const {
     Frame frame{.ordering = ordering, .storage = storage};
-    for (u_long& entry : frame.ordering) {
+    for (std::uint32_t& entry : frame.ordering) {
       entry = Located(entry);
     }
-    for (const u_long& head : ordering) {
+    for (const std::uint32_t& head : ordering) {
       const void* packet = nextPrim(&head);
       for (int guard = 0; InStorage(packet) && guard < 4096; ++guard) {
-        const auto* words = static_cast<const u_long*>(packet);
+        const auto* words = static_cast<const std::uint32_t*>(packet);
         const auto index = static_cast<std::size_t>(words - storage.data());
         frame.storage[index] = Located(words[0]);
         const auto length = static_cast<std::uint32_t>(words[0]) >> 24;
@@ -623,7 +635,7 @@ struct LiveFrameFixture {
         packet = nextPrim(packet);
       }
     }
-    frame.cursor = static_cast<const u_long*>(
+    frame.cursor = static_cast<const std::uint32_t*>(
                        VS::Render::FrameScratchpad().primitive_cursor) -
                    storage.data();
     const VS::Render::Camera& camera = VS::Render::FrameScratchpad().camera;
@@ -724,7 +736,7 @@ TEST_CASE("Live panels refuse bad colours, tall banners and missing entries",
   CHECK(score::LiveGazetteCameraRefusals() == refused + 6);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + 1);
-  CHECK(std::ranges::all_of(fixture.storage, [](u_long word) {
+  CHECK(std::ranges::all_of(fixture.storage, [](std::uint32_t word) {
     return word == LiveFrameFixture::kFill;
   }));
 }

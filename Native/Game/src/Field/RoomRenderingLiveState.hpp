@@ -6,7 +6,7 @@
 // (Field/RoomRendering.hpp) around each call.
 
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Field {
 
@@ -15,10 +15,10 @@ namespace VS::Field {
 extern int isFieldRenderingEnabled;
 // decomp: D_800F1BA4 (BATTLE/BATTLE.PRG 146C.c:16010): nonzero while the
 // room's animations, effects and weather hold still.
-extern u_short areRoomUpdatesPaused;
+extern std::uint16_t areRoomUpdatesPaused;
 // decomp: D_800F1BA8 (BATTLE/BATTLE.PRG 146C.c:15953): the room's 1024
 // palette colours (low heap, 18.c:595), or null before a session starts.
-extern u_short* roomPalettes;
+extern std::uint16_t* roomPalettes;
 // decomp: D_800F1BB0 (BATTLE/BATTLE.PRG 146C.c:15995): the room tint's
 // channel offsets, strength and on switch.
 extern VS::Field::RoomTintRecord roomTint;

@@ -27,7 +27,9 @@
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Audio {
 namespace {
@@ -103,7 +105,7 @@ void Report(const char* operation, ActorSoundStatus status) {
   }
 }
 
-// The SHP's sound section (VS_ONDISC(model, sound_section, void*)).
+// The SHP's sound section: sound_section is a byte offset from the model.
 BankBuffer SoundBank(const VS::Actors::ShpModel* shp) {
   if (shp == nullptr) return BankBuffer::kNone;
   return LiveBankBuffer(reinterpret_cast<const std::byte*>(shp) +

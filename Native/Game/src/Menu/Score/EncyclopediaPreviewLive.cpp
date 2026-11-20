@@ -24,7 +24,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"

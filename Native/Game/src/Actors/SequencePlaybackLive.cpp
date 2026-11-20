@@ -18,8 +18,10 @@
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Shadow.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Actors {
 namespace {
@@ -171,7 +173,7 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
     actor_.pose.frame = WrapSigned16(static_cast<std::uint32_t>(frame));
   }
   int AnimationLength() const override {
-    return static_cast<u_short>(actor_.animation_length);
+    return static_cast<std::uint16_t>(actor_.animation_length);
   }
   void AdvanceShadow() override {
     ShadowBlend shadow = LoadLiveShadowBlend(actor_.shadow_blend);

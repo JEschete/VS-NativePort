@@ -10,7 +10,9 @@ namespace VS::Field {
 struct MpdLockTrigger;
 struct MpdFloorTrigger;
 }  // namespace VS::Field
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 namespace VS::Field {
 
@@ -37,6 +39,6 @@ void InvalidateLiveInteractionTargets();
 VS::Field::MpdFloorTrigger* RoomTriggerAtTileEntry(int x, int z, int layer);
 void SetRoomTriggerEnabledEntry(VS::Field::MpdFloorTrigger* selected,
                                 int activation);
-void DisableTrapAtPositionEntry(SVECTOR* position);
+void DisableTrapAtPositionEntry(VS::Core::Gte::SVECTOR* position);
 
 }  // namespace VS::Field

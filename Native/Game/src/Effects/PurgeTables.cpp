@@ -7,7 +7,7 @@
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Content/DiscLayout.h"
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.hpp"

@@ -5,7 +5,9 @@
 
 #include "Battle/Ai/MovementBehavior.hpp"
 
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 namespace VS::Battle::Ai {
 struct ActorAiState;
 struct CandidateMovementView;
@@ -47,7 +49,8 @@ int FindLiveActorByRelationship(VS::Battle::Ai::EscortView* state,
                                 int relation);
 int FindLiveActorByRelationship(VS::Battle::Ai::ActorAiState* state,
                                 std::uint32_t* tile, int relation);
-[[nodiscard]] int LiveTargetFacingCosine(const SVECTOR* from, const SVECTOR* to,
+[[nodiscard]] int LiveTargetFacingCosine(const VS::Core::Gte::SVECTOR* from,
+                                         const VS::Core::Gte::SVECTOR* to,
                                          int angle, std::uint32_t distance);
 void SelectLiveActionMovementMode(
     VS::Battle::Ai::CandidateReadinessView* state);

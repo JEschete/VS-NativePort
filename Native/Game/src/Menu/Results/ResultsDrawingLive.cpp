@@ -12,7 +12,7 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Render/GameFontLive.hpp"
@@ -28,7 +28,6 @@ namespace {
 // 0x1C`).
 constexpr int kQuadOrderingSlot = -7;
 constexpr std::size_t kTextBytes = 8;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::uint64_t refusals = 0;
 
@@ -43,13 +42,13 @@ void Refuse(const char* what) {
 class LiveResultsTarget final : public ResultsDrawTarget {
  public:
   bool DrawQuad(const Render::UiTexturedQuad& quad) override {
-    u_long* const entry = Render::LiveFrameOrderingEntry(
+    std::uint32_t* const entry = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kQuadOrderingSlot);
     if (entry == nullptr) {
       Refuse("no ordering entry for the quad");
       return false;
     }
-    u_long* const storage =
+    std::uint32_t* const storage =
         Render::ReserveLivePrimitiveWords(Render::kUiTexturedQuadWords);
     if (storage == nullptr) {
       Refuse("primitive buffer full");

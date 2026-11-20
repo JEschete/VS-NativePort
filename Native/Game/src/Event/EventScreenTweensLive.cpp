@@ -21,6 +21,8 @@
 #include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::CVECTOR;
+
 namespace VS::Event {
 namespace {
 // The scratchpad word (0x1F800088) func_800BDBB4 kept each eased fraction in.
@@ -116,7 +118,7 @@ class LiveScreenEffect final : public EventScreenEffectPort {
     Render::SetLiveFramebufferEffectEnabled(enabled);
   }
   void SetDepth(std::int32_t depth) override {
-    Render::SetLiveFramebufferEffectDepth(static_cast<u_int>(depth));
+    Render::SetLiveFramebufferEffectDepth(static_cast<std::uint32_t>(depth));
   }
   void SetPreviousFrame(std::int32_t use_previous_frame) override {
     Render::SetLiveFramebufferPreviousFrame(use_previous_frame);

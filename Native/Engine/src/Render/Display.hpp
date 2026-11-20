@@ -4,7 +4,7 @@
 // step pause.
 #include <cstdint>
 
-#include "Legacy/Render/LibGpu.h"
+#include "Legacy/Render/LibGpu.hpp"
 #include "Render/DisplayControl.hpp"
 
 namespace VS::Render {
@@ -17,9 +17,9 @@ extern std::int16_t legacyViewportTop;
 // decomp: D_8005DFDA (D_8005DFDA@SLUS_010.40)
 extern std::uint16_t viewportHeight;
 // decomp: vs_main_drawEnv (vs_main_drawEnv@SLUS_010.40)
-extern DRAWENV legacyDrawEnvironments[kFrameBufferCount];
+extern VS::Legacy::DRAWENV legacyDrawEnvironments[kFrameBufferCount];
 // decomp: vs_main_dispEnv (vs_main_dispEnv@SLUS_010.40)
-extern DISPENV legacyDisplayEnvironments[kFrameBufferCount];
+extern VS::Legacy::DISPENV legacyDisplayEnvironments[kFrameBufferCount];
 // decomp: vs_main_frameBuf (vs_main_frameBuf@SLUS_010.40)
 extern int frameBuf;
 // decomp: D_8004A52C (D_8004A52C@SLUS_010.40)

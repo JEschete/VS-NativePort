@@ -63,6 +63,10 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::VECTOR;
+
+using VS::Core::Math::kQ12Unit;
+
 namespace VS::Game::Save {
 namespace {
 using Result = std::expected<void, std::string>;
@@ -77,7 +81,7 @@ constexpr std::size_t kSectionCount = 24;
 constexpr unsigned kShieldParent = VS::Items::kShieldGemFlag;
 constexpr int kLastLocation = 255;
 constexpr int kLastScene = 1023;
-constexpr int kLastAngle = ONE - 1;
+constexpr int kLastAngle = kQ12Unit - 1;
 constexpr unsigned kItemIdEnd = 512;
 constexpr int kTileUnits = 128;
 constexpr int kTileLimit = 32;
@@ -88,20 +92,20 @@ constexpr unsigned kLearnedFirstBit = 0x80;
 constexpr int kEquipmentGems = 3;
 constexpr int kGripCategoryCount = 5;
 constexpr int kArmorCategoryCount = 8;
-constexpr int kQuarterTurn = ONE / 4;
+constexpr int kQuarterTurn = kQ12Unit / 4;
 constexpr unsigned kActiveAnimationEnd = 6;
 constexpr int kCameraLookAtHeight = 90;
-constexpr int kNearCameraDistance = 3 * ONE / 8;
-constexpr int kFarCameraDistance = 9 * ONE / 16;
+constexpr int kNearCameraDistance = 3 * kQ12Unit / 8;
+constexpr int kFarCameraDistance = 9 * kQ12Unit / 16;
 constexpr int kFarZoomMode = 3;
 constexpr int kMaximumOrbitStep = 40;
 constexpr int kMaximumZoomVelocity = 64;
 constexpr int kMaximumTrackingSpeed = 40;
 constexpr int kWorldExtent = -std::numeric_limits<std::int16_t>::min();
 constexpr int kCameraWorldExtent = kWorldExtent + kCameraLookAtHeight;
-constexpr int kCameraCoordinateLimit = kCameraWorldExtent * ONE;
-constexpr int kFieldNearClip = ONE / 64;
-constexpr int kFieldProjection = ONE / 8;
+constexpr int kCameraCoordinateLimit = kCameraWorldExtent * kQ12Unit;
+constexpr int kFieldNearClip = kQ12Unit / 64;
+constexpr int kFieldProjection = kQ12Unit / 8;
 constexpr unsigned kStereoCommand = 0x80;
 constexpr unsigned kMonoCommand = 0x81;
 constexpr unsigned kMonoOutput = 2;
@@ -1275,7 +1279,7 @@ Result ValidateCaptureBoundary(const VS::Actors::ActorRecord& actor) {
       VS::Field::sphericalCamera.motion.turn != 0 ||
       VS::Render::nearClip != kFieldNearClip ||
       VS::Render::projectionDistance != kFieldProjection ||
-      VS::Render::FrameScratchpad().camera.far_clip != ONE) {
+      VS::Render::FrameScratchpad().camera.far_clip != kQ12Unit) {
     return std::unexpected(
         "schema3 requires a settled orbit camera, not a transition/custom "
         "view");
@@ -1420,7 +1424,7 @@ std::expected<Document, std::string> CaptureClearGame() {
   // F03601 TITLE _packageGameSaveData, 22C.c:632-700; original MIPS
   // 800698dc/800698e8, 80069c34, 80069c94..80069cc0. Container clearing is
   // exactly 0x100 bytes (64 stacks), NOT the entire 256-stack container.
-  state.settings.menu_flags &= static_cast<u_short>(~kClearMenuFlag);
+  state.settings.menu_flags &= static_cast<std::uint16_t>(~kClearMenuFlag);
   state.settings.current_game_save_count = 0;
   state.script_flags[offsetof(VS::State::StateFlags, puzzle_mode)] =
       static_cast<std::uint8_t>(

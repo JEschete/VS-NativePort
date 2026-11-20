@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Field {
 
@@ -23,6 +23,6 @@ extern std::uint8_t collisionProbeDirection;
 extern std::int16_t platformContactSearchDepth;
 // decomp: D_800F4B08 (src/BATTLE/BATTLE.PRG/3A1A0.c:49); the original's
 // D_800F4B0A is this probe's height, read here as .vy.
-extern SVECTOR collisionProbePosition;
+extern VS::Core::Gte::SVECTOR collisionProbePosition;
 
 }  // namespace VS::Field

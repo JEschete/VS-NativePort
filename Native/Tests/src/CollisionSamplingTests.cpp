@@ -12,7 +12,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 // A 1x1 map: header, floor and ceiling descriptors, then two 4x4 patterns.

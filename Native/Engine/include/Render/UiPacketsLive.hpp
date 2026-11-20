@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/UiPackets.hpp"
 
 // The UI packets queued into the current frame's primitive buffer in front of
@@ -17,14 +17,14 @@ namespace VS::Render {
 // `chain` (addPrim).
 class LivePacketQueue final : public PacketQueue {
  public:
-  explicit LivePacketQueue(u_long* chain) : chain_(chain) {}
+  explicit LivePacketQueue(std::uint32_t* chain) : chain_(chain) {}
 
   [[nodiscard]] std::uint32_t ChainLink() const override;
   [[nodiscard]] bool CanEmit(std::size_t words) const;
   bool Emit(std::span<const std::uint32_t> packet) override;
 
  private:
-  u_long* chain_;
+  std::uint32_t* chain_;
 };
 
 // The frame's ordering tables (Boot/GameLoop.cpp): the scene table
@@ -33,20 +33,23 @@ class LivePacketQueue final : public PacketQueue {
 enum class LiveOrderingBase : std::uint8_t { kScene, kOverlay };
 // Entry `slot` from the base's pointer, or null when it lies outside the
 // current frame's table.
-[[nodiscard]] u_long* LiveFrameOrderingEntry(LiveOrderingBase base, int slot);
+[[nodiscard]] std::uint32_t* LiveFrameOrderingEntry(LiveOrderingBase base,
+                                                    int slot);
 
 // Splices the packet last into the current ordering table's overlay bucket. A
 // broken chain, an unknown packet or no table leaves every tag untouched.
 void AppendLiveOverlayPrimitive(void* primitive);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void DrawLiveNumericGlyph(int font, int xy, int digit, u_long* before);
+void DrawLiveNumericGlyph(int font, int xy, int digit, std::uint32_t* before);
 // With no chain, the digits go 0x10 bytes before the frame's ordering table.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-int DrawLiveIntegerRightAligned(int font, int xy, int value, u_long* before);
-void DrawLiveStatGauge(int color_index, int w, u_long* before, int xy);
+int DrawLiveIntegerRightAligned(int font, int xy, int value,
+                                std::uint32_t* before);
+void DrawLiveStatGauge(int color_index, int w, std::uint32_t* before, int xy);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void InsertLiveThreeWordPrimitive(u_long* before, int rgb0, int xy, int wh);
-void InsertLiveDrawModeCommand(int tpage, u_long* before);
+void InsertLiveThreeWordPrimitive(std::uint32_t* before, int rgb0, int xy,
+                                  int wh);
+void InsertLiveDrawModeCommand(int tpage, std::uint32_t* before);
 // The caller's pixels must cover the packed w | h << 16 size.
 void UploadLiveImageRectangle(int xy, const void* pixels, int wh);
 // The caller's buffer must cover the packed w | h << 16 size.
@@ -54,7 +57,8 @@ void ReadLiveImageRectangle(int xy, void* pixels, int wh);
 // Copies `source` to (x, y) when the overlay bucket is drawn.
 void QueueLiveTextureRectangleMove(const ScreenRect& source, std::int32_t x,
                                    std::int32_t y);
-void QueueLiveTextureRectangleMove(const RECT* source, int x, int y);
+void QueueLiveTextureRectangleMove(const VS::Legacy::RECT* source, int x,
+                                   int y);
 // The texture page's draw-mode command linked in front of entry `ot_slot` of
 // the frame's ordering table. Returns the primitive cursor after it, or the
 // unchanged cursor when the entry is outside the frame's table or the

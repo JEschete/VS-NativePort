@@ -12,7 +12,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/StateFlags.hpp"
 
 namespace {

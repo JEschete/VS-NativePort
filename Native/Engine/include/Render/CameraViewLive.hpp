@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/CameraView.hpp"
 
 // Live binding for the camera view (CameraView.cpp): the frame scratch camera
@@ -14,5 +14,5 @@ void SetLiveCameraProjectionDistance(int distance);
 void SetLiveCameraFarClip(int far_clip, int preserve_texture_lod);
 // The actor model workspace and bone scratch matrices; the bone scratch keeps
 // `source`'s translation.
-void PrepareLiveActorCameraMatrices(const MATRIX* source);
+void PrepareLiveActorCameraMatrices(const VS::Core::Gte::MATRIX* source);
 }  // namespace VS::Render

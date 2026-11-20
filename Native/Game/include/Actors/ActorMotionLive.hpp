@@ -14,7 +14,9 @@ struct FallDirection;
 namespace VS::Actors {
 struct TileTarget;
 }
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 // Binding from the actor table and the original arguments to the typed actor
 // motion rules (ActorMotion.hpp). Each adapter keeps the original argument
@@ -24,8 +26,8 @@ struct SVECTOR;
 // missing record now refuse it with a warning.
 namespace VS::Actors {
 // A legacy SVECTOR as the typed MotionVector (pad becomes w), and back.
-[[nodiscard]] MotionVector LiveMotionVector(const SVECTOR& live);
-[[nodiscard]] SVECTOR LiveSvector(const MotionVector& motion);
+[[nodiscard]] MotionVector LiveMotionVector(const VS::Core::Gte::SVECTOR& live);
+[[nodiscard]] VS::Core::Gte::SVECTOR LiveSvector(const MotionVector& motion);
 
 // The record's motion fields as the typed ActorMotion, and their store.
 [[nodiscard]] ActorMotion LoadLiveActorMotion(
@@ -33,13 +35,14 @@ namespace VS::Actors {
 void StoreLiveActorMotion(const ActorMotion& motion,
                           VS::Actors::ActorRecord& live);
 
-void BeginLiveScriptedActorPath(int actor_id, SVECTOR* target_position);
+void BeginLiveScriptedActorPath(int actor_id,
+                                VS::Core::Gte::SVECTOR* target_position);
 int IsLiveScriptedActorPathFinished(int actor_id);
 void ResetLiveActorMovement(int actor_id);
 void StopLiveActorMotion(int actor_id);
 void ClearLiveActorMovementModes(int actor_id);
 int LiveActorFacingDeltaToPoint(VS::Actors::ActorRecord* actor,
-                                SVECTOR* target_point);
+                                VS::Core::Gte::SVECTOR* target_point);
 void ResetLiveActorRunMomentum(int actor_id);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetLiveActorWalkRunSpeeds(int actor_id, int walk_speed_fixed,
@@ -63,7 +66,7 @@ void MoveLiveActorToTileAtRate(int actor_id,
                                int move_steps_per_tile,
                                int turn_steps_per_revolution);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void MoveLiveActorToPositionAtRate(int actor_id, SVECTOR* target,
+void MoveLiveActorToPositionAtRate(int actor_id, VS::Core::Gte::SVECTOR* target,
                                    int move_steps_per_tile,
                                    int turn_steps_per_revolution);
 void TranslateLiveActorToTileAtRate(int actor_id,
@@ -72,17 +75,21 @@ void TranslateLiveActorToTileAtRate(int actor_id,
 void TurnLiveActorTowardTileAtRate(int actor_id,
                                    VS::Actors::TileTarget* tile_target,
                                    int turn_steps_per_revolution);
-void TranslateLiveActorByAtRate(int actor_id, SVECTOR* translation,
+void TranslateLiveActorByAtRate(int actor_id,
+                                VS::Core::Gte::SVECTOR* translation,
                                 int move_steps_per_tile);
-void TranslateLiveActorToAtRate(int actor_id, SVECTOR* target_position,
+void TranslateLiveActorToAtRate(int actor_id,
+                                VS::Core::Gte::SVECTOR* target_position,
                                 int move_steps_per_tile);
 void TurnLiveActorByAtRate(int actor_id, std::int16_t yaw_delta,
                            int turn_steps_per_revolution);
 void TurnLiveActorToAtRate(int actor_id, std::int16_t target_yaw,
                            int turn_steps_per_revolution);
-void RotateLiveActorByAtRate(int actor_id, SVECTOR* rotation_delta,
+void RotateLiveActorByAtRate(int actor_id,
+                             VS::Core::Gte::SVECTOR* rotation_delta,
                              int turn_steps_per_revolution);
-void RotateLiveActorToAtRate(int actor_id, SVECTOR* target_rotation,
+void RotateLiveActorToAtRate(int actor_id,
+                             VS::Core::Gte::SVECTOR* target_rotation,
                              int turn_steps_per_revolution);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void MoveLiveActorToTileOverTime(int actor_id,
@@ -101,10 +108,12 @@ void TurnLiveActorTowardTileOverTime(int actor_id,
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetLiveActorTileTurn(int actor_id, VS::Actors::TileTarget* tile_target,
                           int turn_steps, int turn_steps_per_revolution);
-void SetLiveActorMotion(int actor_id, SVECTOR* translation, int move_steps);
-void TranslateLiveActorToOverTime(int actor_id, SVECTOR* target_position,
+void SetLiveActorMotion(int actor_id, VS::Core::Gte::SVECTOR* translation,
+                        int move_steps);
+void TranslateLiveActorToOverTime(int actor_id,
+                                  VS::Core::Gte::SVECTOR* target_position,
                                   int move_steps);
-void SetLiveActorTranslation(int actor_id, SVECTOR* translation,
+void SetLiveActorTranslation(int actor_id, VS::Core::Gte::SVECTOR* translation,
                              int move_steps);
 void SetLiveActorYawMotion(int actor_id, std::int16_t yaw_delta,
                            int turn_steps);
@@ -113,11 +122,13 @@ void TurnLiveActorToOverTime(int actor_id, std::uint16_t target_yaw,
 void TurnLiveActorToAtAngularSpeed(int actor_id, std::int16_t target_yaw,
                                    int angular_speed);
 void SetLiveActorYawTurn(int actor_id, std::int16_t yaw_delta, int turn_steps);
-void SetLiveActorRotationMotion(int actor_id, SVECTOR* rotation_delta,
+void SetLiveActorRotationMotion(int actor_id,
+                                VS::Core::Gte::SVECTOR* rotation_delta,
                                 int turn_steps);
-void SetLiveActorRotation(int actor_id, SVECTOR* rotation_delta,
+void SetLiveActorRotation(int actor_id, VS::Core::Gte::SVECTOR* rotation_delta,
                           int turn_steps);
-void ScaleLiveActorToOverTime(int actor_id, SVECTOR* target_scale,
+void ScaleLiveActorToOverTime(int actor_id,
+                              VS::Core::Gte::SVECTOR* target_scale,
                               int scale_steps);
 // Steps the route of `actor`, which the generated callers pass alongside its
 // id; the moves and animations run for the id.

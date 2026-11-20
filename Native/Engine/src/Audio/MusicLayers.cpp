@@ -12,7 +12,7 @@
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 class SequenceChannelVoices final : public VS::Audio::Seq::MusicChannelVoices {

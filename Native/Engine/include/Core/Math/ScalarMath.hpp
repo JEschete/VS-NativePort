@@ -15,6 +15,10 @@
 // nothing reads module-loaded tables, emulated GTE registers or raw pointers,
 // and none of these routines is reachable through a module address.
 namespace VS::Core::Math {
+// One in Q12 fixed point (the PS1 SDK's ONE): a unit scale, a world unit in
+// position math and a full turn in 4096-per-turn angles.
+inline constexpr std::int32_t kQ12Unit = 4096;
+
 // Rows and columns in a rotation or scale matrix.
 inline constexpr int kMatrixOrder = 3;
 

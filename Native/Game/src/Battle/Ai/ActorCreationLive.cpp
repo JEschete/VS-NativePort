@@ -30,6 +30,8 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Battle::Ai {
 namespace {
 using AiState = VS::Battle::Ai::ActorAiState;

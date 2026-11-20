@@ -19,7 +19,7 @@
 #include "Actors/Shadow.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -29,6 +29,19 @@
 #include "Render/ModelWorkspace.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::setlen;
 
 extern unsigned int
     Content_battleShadowVertices[VS::Render::kShadowVertexCount];
@@ -45,7 +58,6 @@ constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 constexpr int kShadowSupportMode = 3;
 constexpr std::size_t kWeaponPaletteMatrix = 2;
 constexpr std::size_t kWeaponPaletteColumn = 2;
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(sizeof(ModelCounts) == sizeof(std::uint64_t) &&
               std::is_trivially_copyable_v<ModelCounts>);
 static_assert(std::is_same_v<decltype(VS::Actors::ModelRenderContext::
@@ -95,29 +107,29 @@ class LiveModelTransformer final : public ModelTransformer {
 
   void LoadBone(std::size_t bone) override {
     const MATRIX& matrix = matrices_[bone];
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   void LoadTransform(const ModelTransform& transform) override {
     const MATRIX matrix = MatrixFrom(transform);
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   Math::Vec3 Transform(const ModelVertex& vertex) override {
     SVECTOR input = {vertex.x, vertex.y, vertex.z, 0};
     VECTOR output{};
-    Core_GteWord flags = 0;
-    Core_Gte_RotTrans(&input, &output, &flags);
+    VS::Core::Gte::Word flags = 0;
+    RotTrans(&input, &output, &flags);
     return Math::VectorOf(output);
   }
   ProjectedPoint Project(const ModelVertex& vertex) override {
     SVECTOR input = {vertex.x, vertex.y, vertex.z, 0};
-    Core_GteWord screen = 0;
-    Core_GteWord fog = 0;
-    Core_GteWord flags = 0;
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word fog = 0;
+    VS::Core::Gte::Word flags = 0;
     VECTOR transformed{};
-    Core_Gte_RotTransPers(&input, &screen, &fog, &flags);
-    Core_Gte_StoreLvnl(&transformed);
+    RotTransPers(&input, &screen, &fog, &flags);
+    StoreLvnl(&transformed);
     return {static_cast<std::int32_t>(screen),
             static_cast<std::int32_t>(transformed.vz)};
   }
@@ -144,7 +156,8 @@ class LivePacketQueue final : public ModelPacketQueue {
 
   bool Emit(std::span<const std::uint32_t> packet,
             std::uint32_t depth) override {
-    auto* ordering = static_cast<u_long*>(FrameScratchpad().ordering_table);
+    auto* ordering =
+        static_cast<std::uint32_t*>(FrameScratchpad().ordering_table);
     if (ordering == nullptr) {
       return true;
     }
@@ -154,7 +167,8 @@ class LivePacketQueue final : public ModelPacketQueue {
         packet.size_bytes() > limit_ - cursor) {
       return false;
     }
-    auto* slot = static_cast<u_long*>(FrameScratchpad().primitive_cursor);
+    auto* slot =
+        static_cast<std::uint32_t*>(FrameScratchpad().primitive_cursor);
     std::ranges::copy(packet, slot);
     setlen(slot, packet.size() - 1);
     AddPrim(ordering + depth, slot);

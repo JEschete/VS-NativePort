@@ -12,7 +12,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -30,7 +30,7 @@
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -40,12 +40,35 @@
 #include "Render/UiPacketsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::DR_AREA;
+using VS::Legacy::DR_MODE;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::LINE_G2;
+using VS::Legacy::LINE_G4;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDrawArea;
+using VS::Legacy::setlen;
+using VS::Legacy::setLineG2;
+using VS::Legacy::setLineG4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setXY2;
+using VS::Legacy::setXY4;
+
 // decomp: D_800F190C (D_800F190C@BATTLE/BATTLE.PRG)
 int VS::Field::isFieldRenderingEnabled;
 // decomp: D_800F1BA4 (D_800F1BA4@BATTLE/BATTLE.PRG)
-u_short VS::Field::areRoomUpdatesPaused;
+std::uint16_t VS::Field::areRoomUpdatesPaused;
 // decomp: D_800F1BA8 (D_800F1BA8@BATTLE/BATTLE.PRG)
-u_short* VS::Field::roomPalettes;
+std::uint16_t* VS::Field::roomPalettes;
 // decomp: D_800F1BB0 (D_800F1BB0@BATTLE/BATTLE.PRG)
 VS::Field::RoomTintRecord VS::Field::roomTint;
 
@@ -146,8 +169,8 @@ void StoreTint(const RoomTintState& tint) {
 }
 
 void LoadViewTransform() {
-  Core_Gte_SetRotMatrix(&Scratch().view_matrix);
-  Core_Gte_SetTransMatrix(&Scratch().view_matrix);
+  SetRotMatrix(&Scratch().view_matrix);
+  SetTransMatrix(&Scratch().view_matrix);
 }
 
 [[nodiscard]] DRAWENV& DrawnEnvironment() {
@@ -159,11 +182,11 @@ void LoadViewTransform() {
 // minimap's entry, as the original's AddPrim(orderingTable + 5) did.
 template <typename Packet>
 void LinkPacket(const Packet& packet, std::string_view kind) {
-  constexpr std::size_t kWords = sizeof(Packet) / sizeof(u_long);
-  static_assert(sizeof(Packet) % sizeof(u_long) == 0);
-  u_long* const entry = Render::LiveFrameOrderingEntry(
+  constexpr std::size_t kWords = sizeof(Packet) / sizeof(std::uint32_t);
+  static_assert(sizeof(Packet) % sizeof(std::uint32_t) == 0);
+  std::uint32_t* const entry = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene, kMinimapOrderingSlot);
-  u_long* const slot =
+  std::uint32_t* const slot =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
     if (ShouldReport(dropped_packets)) {
@@ -196,7 +219,8 @@ void LinkDrawArea(RECT area, std::string_view kind) {
   setRGB0(&border, corners[0].red, corners[0].green, corners[0].blue);
   setRGB1(&border, corners[1].red, corners[1].green, corners[1].blue);
   setRGB2(&border, corners[2].red, corners[2].green, corners[2].blue);
-  setRGB3(&border, corners[3].red, corners[3].green, corners[3].blue);
+  setRGB3(&border, corners.back().red, corners.back().green,
+          corners.back().blue);
   return border;
 }
 
@@ -282,7 +306,7 @@ class LiveSceneHost final : public RoomSceneHost {
     return static_cast<int>(Scratch().camera.angles.vy);
   }
   void SetViewFacing(std::uint8_t mask) override {
-    u_int& facing = Scratch().first_person_view_facing;
+    std::uint32_t& facing = Scratch().first_person_view_facing;
     facing = (facing & ~kViewFacingMask) | mask;
   }
   void DrawGeometry() override {
@@ -337,7 +361,7 @@ class ProjectionOffsetScope {
 void LiveSceneHost::DrawMinimap(const MinimapLayout& layout) {
   MATRIX rotation{};
   BuildLiveMinimapRotation(&rotation, layout.map_yaw);
-  Core_Gte_SetRotMatrix(&rotation);
+  SetRotMatrix(&rotation);
   LinkDrawArea(DrawnEnvironment().clip, "display draw area");
   {
     const ProjectionOffsetScope scope(
@@ -356,8 +380,8 @@ void LiveSceneHost::DrawMinimap(const MinimapLayout& layout) {
 class LivePaletteHost final : public RoomPaletteHost {
  public:
   void UploadClutRow(std::span<const std::uint16_t> colors, int row) override {
-    Render::LoadLiveClutColors(colors.data(), static_cast<u_int>(row), 0,
-                               static_cast<u_int>(colors.size()));
+    Render::LoadLiveClutColors(colors.data(), static_cast<std::uint32_t>(row),
+                               0, static_cast<std::uint32_t>(colors.size()));
   }
   void SetGimmickPalettes(std::span<std::uint16_t> palettes) override {
     static_cast<void>(SetLiveGimmickPaletteTable(std::as_bytes(palettes)));
@@ -459,7 +483,7 @@ void LiveClearRoomTint() {
 void LiveSetRoomAnimationsPaused(int paused) {
   RoomRenderState state = LiveRoomRenderState();
   SetRoomAnimationsPaused(state, paused != 0);
-  areRoomUpdatesPaused = static_cast<u_short>(state.updates_paused);
+  areRoomUpdatesPaused = static_cast<std::uint16_t>(state.updates_paused);
 }
 
 int LiveApplyCameraGeometryOcclusion(int tile_x, int tile_z, int floor_layer,

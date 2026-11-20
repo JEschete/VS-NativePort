@@ -16,7 +16,7 @@
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 // D_80068C1C, loaded from BATTLE.PRG by Content.

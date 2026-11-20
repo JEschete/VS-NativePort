@@ -28,7 +28,7 @@
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::SoundEffects {
 namespace {

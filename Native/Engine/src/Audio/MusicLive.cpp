@@ -23,7 +23,7 @@
 #include "Content/CdDrive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/GameClockLive.hpp"
 
 namespace VS::Audio {

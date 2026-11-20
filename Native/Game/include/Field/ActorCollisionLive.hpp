@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include "Field/ActorCollision.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;
@@ -20,13 +20,14 @@ namespace VS::Field {
 VS::Actors::ActorRecord* LiveFindActorOccupyingTile(int tile_x, int tile_z,
                                                     int minimum_height,
                                                     int mode);
-int LiveCheckPlatformActorObstruction(int layer, SVECTOR* point);
-int LiveCanActorHangFromLedge(VS::Actors::ActorRecord* actor, SVECTOR* offset,
-                              SVECTOR* motion);
+int LiveCheckPlatformActorObstruction(int layer, VS::Core::Gte::SVECTOR* point);
+int LiveCanActorHangFromLedge(VS::Actors::ActorRecord* actor,
+                              VS::Core::Gte::SVECTOR* offset,
+                              VS::Core::Gte::SVECTOR* motion);
 int LiveHasActorLedgeSideSupport(VS::Actors::ActorRecord* actor);
 // Modes outside 0 to 4 sample as mode 1, as in the original.
-int LiveSampleActorSupportHeight(const SVECTOR* origin, int offset_x,
-                                 int offset_z, int mode);
+int LiveSampleActorSupportHeight(const VS::Core::Gte::SVECTOR* origin,
+                                 int offset_x, int offset_z, int mode);
 // The same sample from a position held as three halfwords (a gimmick's).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 int LiveSampleSupportHeightAt(int x, int y, int z, int offset_x, int offset_z,
@@ -34,11 +35,13 @@ int LiveSampleSupportHeightAt(int x, int y, int z, int offset_x, int offset_z,
 void LiveSampleActorCollisionPerimeter(VS::Actors::ActorRecord* actor,
                                        int diagonal);
 void LiveApplyActorWallRepulsion(VS::Actors::ActorRecord* actor,
-                                 SVECTOR* motion);
+                                 VS::Core::Gte::SVECTOR* motion);
 // Writes `result` only when the motion reached a probe.
 int LiveResolveActorTerrainMotion(VS::Actors::ActorRecord* actor,
-                                  SVECTOR* motion, int* result, int probe_only);
-int LiveCalcActorLedgeOffset(VS::Actors::ActorRecord* actor, SVECTOR* offset);
+                                  VS::Core::Gte::SVECTOR* motion, int* result,
+                                  int probe_only);
+int LiveCalcActorLedgeOffset(VS::Actors::ActorRecord* actor,
+                             VS::Core::Gte::SVECTOR* offset);
 
 // The word of the cell the last support sample found; kAbsentCellWord when
 // none was found or the room's tables no longer hold it.

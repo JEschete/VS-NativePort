@@ -29,6 +29,9 @@
 #include "State/StateFlags.hpp"
 
 using VS::Battle::ActionDefinition;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
 
 namespace {
 namespace magic = VS::Menu::Magic;
@@ -232,7 +235,7 @@ void CheckRankPackets(const MagicLiveFixture& fixture) {
       FAIL("rank drawing linked outside the active frame");
       return;
     }
-    const auto* words = static_cast<const u_long*>(packet);
+    const auto* words = static_cast<const std::uint32_t*>(packet);
     const auto length = static_cast<const P_TAG*>(packet)->len;
     if (length == kGlyphWords &&
         (words[1] >> VS::Render::kPacketLengthShift) == kRankGlyphCommand) {

@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <span>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ModelGeometry.hpp"
 
 namespace VS::Actors {
@@ -45,24 +45,26 @@ void ForgetLiveModelExtent(const void* model);
 // Projects the actor model's vertices through `matrices` into the render
 // context; false when nothing was projected or every depth was zero.
 [[nodiscard]] bool ProjectLiveActorModel(
-    const VS::Actors::ActorRecord& geometry, std::span<const MATRIX> matrices);
+    const VS::Actors::ActorRecord& geometry,
+    std::span<const VS::Core::Gte::MATRIX> matrices);
 // The geometry actor's model and counts through func_800B3CF0 (flat) or
 // func_800B4594 (Gouraud).
 void DrawLiveActorGouraudPolygons(const VS::Actors::ActorRecord& geometry,
-                                  const CVECTOR& tint);
+                                  const VS::Core::Gte::CVECTOR& tint);
 void DrawLiveActorFlatPolygons(const VS::Actors::ActorRecord& geometry,
-                               const CVECTOR& tint);
+                               const VS::Core::Gte::CVECTOR& tint);
 // The geometry actor's model and counts through the override drawers,
 // func_800B516C (flat) or func_800B5C30 (Gouraud), with the pulsed palettes
 // and appearance material of `overrides`, which the original reads from the
 // drawing actor.
 void DrawLiveActorPolygonsWithOverrides(const VS::Actors::ActorRecord& geometry,
-                                        bool colored, const CVECTOR& tint,
+                                        bool colored,
+                                        const VS::Core::Gte::CVECTOR& tint,
                                         const ModelOverrides& overrides);
 // Writes the shadow anchor to the actor's sound position.
 void DrawLiveActorGroundShadow(VS::Actors::ActorRecord& actor,
-                               const MATRIX& camera,
-                               const SVECTOR& root_offset);
+                               const VS::Core::Gte::MATRIX& camera,
+                               const VS::Core::Gte::SVECTOR& root_offset);
 
 [[nodiscard]] bool ProjectLiveGimmickModel(
     const VS::Field::GimmickInstance& object);
@@ -73,7 +75,7 @@ void DrawLiveGimmickGouraudPolygonsWithOverrides(
 [[nodiscard]] bool ProjectLiveWeaponModel(
     const VS::Actors::WeaponModel& weapon);
 void DrawLiveWeaponFlatPolygons(const VS::Actors::WeaponModel& weapon,
-                                const CVECTOR& tint);
+                                const VS::Core::Gte::CVECTOR& tint);
 void DrawLiveWeaponFlatPolygonsWithOverrides(
-    const VS::Actors::WeaponModel& weapon, const CVECTOR& tint);
+    const VS::Actors::WeaponModel& weapon, const VS::Core::Gte::CVECTOR& tint);
 }  // namespace VS::Render

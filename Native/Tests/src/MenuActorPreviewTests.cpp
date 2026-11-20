@@ -16,7 +16,7 @@
 #include "Actors/ActorStateRecord.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Render/DepthCue.hpp"

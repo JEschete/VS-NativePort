@@ -88,9 +88,11 @@
 #include "Effects/Transforms.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/RoomLoading.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Movie/MoviePlayer.hpp"
 #include "Render/PageSpace.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 using VS::u16;
 using VS::u32;

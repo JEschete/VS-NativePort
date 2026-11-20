@@ -15,13 +15,19 @@
 #include "Battle/ActorMarkers.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::nextPrim;
 
 namespace {
 namespace b = VS::Battle;
@@ -415,10 +421,10 @@ TEST_CASE("Ability timing cue waits for display and an anchor",
 }
 
 namespace {
-constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(u_long);
+constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kLiveSceneHead = 4;
-constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
-constexpr u_long kLiveEnd = 0xFFFFFF;
+constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+constexpr std::uint32_t kLiveEnd = 0xFFFFFF;
 
 struct LiveMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
@@ -437,8 +443,9 @@ struct LiveMarkerFixture {
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   VS::Actors::ActorRecord player{};
   VS::Actors::ActorRecord enemy{};
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::array<u_long, kLiveOrderingWords> ordering{};
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kLivePrimitiveWords, 0);
+  std::array<std::uint32_t, kLiveOrderingWords> ordering{};
 
   LiveMarkerFixture() {
     std::ranges::copy(VS::Battle::actorMarkers, saved_markers.begin());
@@ -460,8 +467,8 @@ struct LiveMarkerFixture {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data();
     VS::Render::FrameScratchpad().ordering_table =
         ordering.data() + kLiveSceneHead;
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
     VS::Battle::actorMarkerSides = 0;
     VS::Battle::actorMarkersHidden = 0;
   }
@@ -479,7 +486,7 @@ struct LiveMarkerFixture {
     VS::Battle::abilityTimingCueFrames = saved_frames;
     VS::Battle::abilityTimingCuePosition = saved_cue;
     VS::Input::settings = saved_settings;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
   LiveMarkerFixture(const LiveMarkerFixture&) = delete;
   LiveMarkerFixture& operator=(const LiveMarkerFixture&) = delete;
@@ -487,7 +494,7 @@ struct LiveMarkerFixture {
   LiveMarkerFixture& operator=(LiveMarkerFixture&&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<const u_long*>(
+    return static_cast<const std::uint32_t*>(
                VS::Render::FrameScratchpad().primitive_cursor) -
            storage.data();
   }
@@ -508,8 +515,8 @@ TEST_CASE("Live actor marker links its dot then its frame at the depth slot",
   REQUIRE(projected.vz == 384);
   VS::Battle::LiveDrawActorMarker(2, 1);
   REQUIRE(fixture.UsedWords() == 16);
-  const u_long* sprite = fixture.storage.data();
-  const u_long* frame = sprite + 6;
+  const std::uint32_t* sprite = fixture.storage.data();
+  const std::uint32_t* frame = sprite + 6;
   CHECK(nextPrim(&fixture.ordering[kLiveSceneHead + 368]) == frame);
   CHECK(nextPrim(frame) == sprite);
   CHECK((sprite[0] & kLiveEnd) == kLiveEnd);
@@ -528,7 +535,7 @@ TEST_CASE("Live off-screen arrow links in front of the scene head",
   SVECTOR position{.vx = 100, .vy = 50, .vz = 0, .pad = 0};
   VS::Battle::LiveDrawOffscreenActorArrow(&position, 4);
   REQUIRE(fixture.UsedWords() == 10);
-  const u_long* arrow = fixture.storage.data();
+  const std::uint32_t* arrow = fixture.storage.data();
   CHECK(nextPrim(&fixture.ordering[0]) == arrow);
   CHECK(arrow[1] == 0x2D123456U);
   CHECK(arrow[2] == b::PackMarkerPoint({.x = 92, .y = 42}));

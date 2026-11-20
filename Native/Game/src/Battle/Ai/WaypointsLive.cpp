@@ -16,7 +16,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/TerrainHeight.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

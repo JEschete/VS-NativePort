@@ -19,7 +19,9 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacement.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Field {
 namespace {

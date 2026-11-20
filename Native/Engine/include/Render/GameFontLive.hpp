@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/GameFont.hpp"
 
 namespace VS::Menu {
@@ -23,12 +23,13 @@ namespace VS::Render {
 // BATTLE.PRG vs_battle_renderTextRawColor: in front of `chain`, or of the
 // frame's overlay ordering table when it is null.
 void DrawLiveCompactTextColor(const char* text, int xy, int color,
-                              u_long* chain);
+                              std::uint32_t* chain);
 // BATTLE.PRG vs_battle_renderTextRaw: in gray.
 void DrawLiveCompactText(const char* text, int xy, void* chain);
 // BATTLE.PRG vs_battle_printVariableWidthFontChar: in front of entry 3 of the
 // four text box layers at `layers`.
-int DrawLiveVariableWidthGlyph(u_int glyph, int x, int y, u_long* layers);
+int DrawLiveVariableWidthGlyph(std::uint32_t glyph, int x, int y,
+                               std::uint32_t* layers);
 // BATTLE.PRG vs_battle_setFontStyle.
 void SetLiveMenuFontStyle(int palette_offset);
 

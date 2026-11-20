@@ -15,16 +15,17 @@
 #include "Render/UiPrimitives.hpp"
 
 namespace hud_rendering_fixture {
-inline constexpr std::size_t kHudOrderingWords = 0x2088 / sizeof(u_long);
-inline constexpr std::size_t kHudPrimitiveWords = 0x20000 / sizeof(u_long);
+inline constexpr std::size_t kHudWordBytes = sizeof(std::uint32_t);
+inline constexpr std::size_t kHudOrderingWords = 0x2088 / kHudWordBytes;
+inline constexpr std::size_t kHudPrimitiveWords = 0x20000 / kHudWordBytes;
 inline constexpr std::size_t kHudSceneHead = 4;
-inline constexpr std::size_t kHudOverlayHead = 0x2084 / sizeof(u_long);
+inline constexpr std::size_t kHudOverlayHead = 0x2084 / kHudWordBytes;
 inline constexpr std::uint32_t kEndLink = 0xFFFFFF;
 
 class LiveFrame {
  public:
-  std::array<u_long, kHudOrderingWords> ordering{};
-  std::array<u_long, kHudPrimitiveWords> primitives{};
+  std::array<std::uint32_t, kHudOrderingWords> ordering{};
+  std::array<std::uint32_t, kHudPrimitiveWords> primitives{};
 
   LiveFrame()
       : saved_scratch_(VS::Render::FrameScratchpad()),
@@ -59,7 +60,7 @@ class LiveFrame {
   LiveFrame& operator=(LiveFrame&&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<u_long*>(
+    return static_cast<std::uint32_t*>(
                VS::Render::FrameScratchpad().primitive_cursor) -
            primitives.data();
   }
@@ -81,7 +82,7 @@ class LiveFrame {
   std::array<int, VS::Battle::kHudGaugeCount> positions_{}, labels_{},
       palette_{};
   std::array<char, VS::Battle::kHudGaugeCount> widths_{}, textures_{};
-  std::array<u_short, VS::Battle::kHudStatusIconCount> icons_{};
+  std::array<std::uint16_t, VS::Battle::kHudStatusIconCount> icons_{};
 
   static void SeedLayout() {
     auto positions = std::span(VS::Battle::hudGaugePositions);
@@ -96,7 +97,7 @@ class LiveFrame {
       textures[index] = static_cast<char>(0xE1);
       palette[index] = 0x00123456;
     }
-    std::ranges::fill(VS::Battle::statusIconTexOffsets, u_short{0x1080});
+    std::ranges::fill(VS::Battle::statusIconTexOffsets, std::uint16_t{0x1080});
   }
 
   void CaptureLayout() {

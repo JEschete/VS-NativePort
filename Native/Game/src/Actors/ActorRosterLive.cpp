@@ -31,8 +31,8 @@
 
 namespace VS::Actors {
 namespace {
-constexpr u_short kLinkableKindMask = 0x7;
-constexpr u_short kGimmickKind = 0x10;
+constexpr std::uint16_t kLinkableKindMask = 0x7;
+constexpr std::uint16_t kGimmickKind = 0x10;
 constexpr int kSecondModelAllocation = 2;
 
 static_assert(std::size(VS::Battle::actors) >= kRosterSlots);

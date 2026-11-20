@@ -16,6 +16,8 @@
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionState;
 
 namespace {

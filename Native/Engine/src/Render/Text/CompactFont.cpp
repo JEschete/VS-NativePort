@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Text/CompactFont.hpp"
 
 // decomp: D_800EB708 (D_800EB708@BATTLE/BATTLE.PRG)

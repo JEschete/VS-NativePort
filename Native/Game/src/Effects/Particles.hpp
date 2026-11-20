@@ -12,7 +12,7 @@
 #include <cstdint>
 
 #include "Effects/EffectScript.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 struct LivePackageTextureFrame;
@@ -178,37 +178,37 @@ struct LiveParticleColorCurves {
 // emitter's scratch at scratchpad offset 0x1D0, carried between emissions.
 struct LiveParticleEmitterScratch {
   // RotMatrix_gte overlays the first eighteen bytes with the direction matrix.
-  VECTOR reserved_0;
-  VECTOR reserved_10;
+  VS::Core::Gte::VECTOR reserved_0;
+  VS::Core::Gte::VECTOR reserved_10;
   std::int32_t reserved_20;
   std::uint32_t flags;
   // The definition flags of the previous emission.
   std::uint16_t saved_flags;
   std::uint16_t reserved_2a;
   // The spawn offset from the aim point.
-  SVECTOR vector;
-  VECTOR aim_point;
-  VECTOR spawn_point;
+  VS::Core::Gte::SVECTOR vector;
+  VS::Core::Gte::VECTOR aim_point;
+  VS::Core::Gte::VECTOR spawn_point;
   std::array<std::uint8_t, kParticleScratchMatrixGapBytes> reserved_54;
-  MATRIX aim_matrix;
+  VS::Core::Gte::MATRIX aim_matrix;
   std::array<std::uint8_t, kParticleScratchTailGapBytes> reserved_84;
-  VECTOR position;
-  VECTOR extent;
-  VECTOR direction;
-  VECTOR direction_jitter;
-  VECTOR inner_extent;
-  VECTOR base_direction;
-  SVECTOR force_min;
-  SVECTOR force_max;
-  SVECTOR acceleration_min;
-  SVECTOR acceleration_max;
+  VS::Core::Gte::VECTOR position;
+  VS::Core::Gte::VECTOR extent;
+  VS::Core::Gte::VECTOR direction;
+  VS::Core::Gte::VECTOR direction_jitter;
+  VS::Core::Gte::VECTOR inner_extent;
+  VS::Core::Gte::VECTOR base_direction;
+  VS::Core::Gte::SVECTOR force_min;
+  VS::Core::Gte::SVECTOR force_max;
+  VS::Core::Gte::SVECTOR acceleration_min;
+  VS::Core::Gte::SVECTOR acceleration_max;
   std::array<std::int32_t, kParticleScalarRangeHalfwords> speed_range;
   std::int32_t speed;
   std::array<std::int32_t, kParticleScalarRangeHalfwords> mass_range;
   std::array<std::int32_t, kParticleScalarRangeHalfwords> gravity_scale_range;
   std::array<std::int32_t, kParticleScalarRangeHalfwords> lifetime_range;
-  SVECTOR attraction_offset;
-  SVECTOR attraction_jitter;
+  VS::Core::Gte::SVECTOR attraction_offset;
+  VS::Core::Gte::SVECTOR attraction_jitter;
   std::array<std::int32_t, kParticleScalarRangeHalfwords> attraction_range;
   LiveParticleColorCurves color_curves;
   std::array<std::uint8_t, kParticleScratchColorGapBytes> reserved_158;
@@ -231,7 +231,7 @@ struct LiveParticleQuadSet {
   std::uint8_t lifetime;
   std::uint8_t definition_index;
   std::int16_t count;
-  SVECTOR* control_points;
+  VS::Core::Gte::SVECTOR* control_points;
   // Ticks until the set emits again.
   std::int32_t cooldown;
   std::int32_t age;
@@ -243,7 +243,7 @@ struct LiveParticleQuadSet {
 // toward its first (x0, y0).
 struct LiveParticleLinePacket {
   std::uint32_t tag;
-  LINE_F2 line;
+  VS::Legacy::LINE_F2 line;
   std::uint32_t draw_mode;
 };
 
@@ -291,5 +291,5 @@ extern std::int32_t particlePoolReferences;
 extern std::int32_t particleDrag;
 // decomp: D_800F5620 (src/BATTLE/BATTLE.PRG/5BF94.c:452): the gravity on
 // every particle; pad is carried but unused.
-extern VECTOR particleGravity;
+extern VS::Core::Gte::VECTOR particleGravity;
 }  // namespace VS::Effects

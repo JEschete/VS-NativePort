@@ -14,7 +14,7 @@
 
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
@@ -25,7 +25,7 @@
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/LegacyPackets.hpp"
@@ -33,6 +33,12 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::RotAverage4;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects {
 // decomp: D_800EC2E8 (src/BATTLE/BATTLE.PRG/5BF94.c:398); contents: module
@@ -100,16 +106,17 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
       const std::array<TrailPoint, kTrailCorners>& corners) override {
     std::array<SVECTOR, kTrailCorners> vertices{};
     std::ranges::transform(corners, vertices.begin(), VectorOf);
-    std::array<Core_GteWord, kTrailCorners> screens{};
-    Core_GteWord interpolation = 0;
-    Core_GteWord flags = 0;
-    const Core_GteWord depth = Core_Gte_RotAverage4(
+    std::array<VS::Core::Gte::Word, kTrailCorners> screens{};
+    VS::Core::Gte::Word interpolation = 0;
+    VS::Core::Gte::Word flags = 0;
+    const VS::Core::Gte::Word depth = RotAverage4(
         &vertices[0], &vertices[1], &vertices[2], &vertices.back(), &screens[0],
         &screens[1], &screens[2], &screens.back(), &interpolation, &flags);
     TrailProjection projection{.depth = static_cast<std::int32_t>(depth)};
-    std::ranges::transform(
-        screens, projection.screens.begin(),
-        [](Core_GteWord screen) { return static_cast<std::uint32_t>(screen); });
+    std::ranges::transform(screens, projection.screens.begin(),
+                           [](VS::Core::Gte::Word screen) {
+                             return static_cast<std::uint32_t>(screen);
+                           });
     return projection;
   }
   const TrailPalettes& Palettes() override {
@@ -124,9 +131,9 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
   // without room or outside the scene table is dropped here.
   void Submit(const RingQuad& quad, std::uint8_t code,
               std::int32_t depth) override {
-    u_long* const entry =
+    std::uint32_t* const entry =
         Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, depth);
-    u_long* const packet =
+    std::uint32_t* const packet =
         entry != nullptr ? Render::ReserveLivePrimitiveWords(kRingPacketWords)
                          : nullptr;
     if (packet == nullptr) {
@@ -143,8 +150,7 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
         Templates::EncodeRingPacket(quad, static_cast<std::uint32_t>(*entry),
                                     code);
     std::ranges::copy(words, packet);
-    *entry = (*entry & kOrderingHighMask) |
-             (LegacyGpu_Handle(packet) & kRingLinkMask);
+    *entry = (*entry & kOrderingHighMask) | (GpuHandle(packet) & kRingLinkMask);
     VS::Render::FrameScratchpad().primitive_cursor = packet + kRingPacketWords;
   }
 
@@ -327,7 +333,7 @@ void LiveMapTrailFramebufferTexture(VS::Render::TrailPacket* packet,
       quad, u_offset, v_offset, static_cast<std::uint16_t>(flags),
       static_cast<std::uint32_t>(VS::Render::frameBuf) & 1U);
   const auto packed = [](RingUv uv) {
-    return static_cast<u_short>(uv.u | (uv.v << kByteBits));
+    return static_cast<std::uint16_t>(uv.u | (uv.v << kByteBits));
   };
   packet->texture_page = quad.tpage;
   packet->uv0 = packed(quad.uvs[0]);

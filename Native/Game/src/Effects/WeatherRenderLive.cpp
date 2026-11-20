@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/WeatherPool.hpp"
@@ -24,7 +24,7 @@
 #include "Field/Mpd.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/Weather.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Frame.hpp"
 #include "Render/LegacyPackets.hpp"
 #include "Render/Render.hpp"
@@ -32,6 +32,14 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::RotTransPers4;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::GpuHandle;
 
 namespace VS::Effects {
 namespace {
@@ -64,7 +72,7 @@ void Refuse(std::string_view call, std::string_view reason) {
   return {.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
 }
 
-[[nodiscard]] WeatherScreenPoint ScreenOf(Core_GteWord sxy) noexcept {
+[[nodiscard]] WeatherScreenPoint ScreenOf(VS::Core::Gte::Word sxy) noexcept {
   const auto word = static_cast<std::uint32_t>(sxy);
   return {.x = static_cast<std::int16_t>(static_cast<std::uint16_t>(word)),
           .y = static_cast<std::int16_t>(
@@ -77,11 +85,11 @@ class LiveRenderHost final : public WeatherRenderHost {
 
   WeatherProjection Project(const WeatherPoint& point) override {
     SVECTOR vertex = VectorOf(point);
-    Core_GteWord screen = 0;
-    Core_GteWord interpolation = 0;
-    Core_GteWord flags = 0;
-    const Core_GteWord depth =
-        Core_Gte_RotTransPers(&vertex, &screen, &interpolation, &flags);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word interpolation = 0;
+    VS::Core::Gte::Word flags = 0;
+    const VS::Core::Gte::Word depth =
+        RotTransPers(&vertex, &screen, &interpolation, &flags);
     return {.screen = ScreenOf(screen),
             .depth = static_cast<std::int32_t>(depth)};
   }
@@ -90,10 +98,10 @@ class LiveRenderHost final : public WeatherRenderHost {
       const std::array<WeatherPoint, kWeatherQuadCorners>& corners) override {
     std::array<SVECTOR, kWeatherQuadCorners> vertices{};
     std::ranges::transform(corners, vertices.begin(), VectorOf);
-    std::array<Core_GteWord, kWeatherQuadCorners> screens{};
-    Core_GteWord interpolation = 0;
-    Core_GteWord flags = 0;
-    const Core_GteWord depth = Core_Gte_RotTransPers4(
+    std::array<VS::Core::Gte::Word, kWeatherQuadCorners> screens{};
+    VS::Core::Gte::Word interpolation = 0;
+    VS::Core::Gte::Word flags = 0;
+    const VS::Core::Gte::Word depth = RotTransPers4(
         &vertices[0], &vertices[1], &vertices[2], &vertices.back(), &screens[0],
         &screens[1], &screens[2], &screens.back(), &interpolation, &flags);
     WeatherQuadProjection projection{.depth = static_cast<std::int32_t>(depth)};
@@ -104,8 +112,8 @@ class LiveRenderHost final : public WeatherRenderHost {
   WeatherTransform Transform(const WeatherPoint& point) override {
     SVECTOR vertex = VectorOf(point);
     VECTOR result{};
-    Core_GteWord flags = 0;
-    Core_Gte_RotTrans(&vertex, &result, &flags);
+    VS::Core::Gte::Word flags = 0;
+    RotTrans(&vertex, &result, &flags);
     return {.x = static_cast<std::int32_t>(result.vx),
             .y = static_cast<std::int32_t>(result.vy),
             .z = static_cast<std::int32_t>(result.vz)};
@@ -127,10 +135,10 @@ class LiveRenderHost final : public WeatherRenderHost {
   // addPrim in front of the scene table's entry. The original wrote past the
   // table or the primitive buffer; such a packet is dropped here.
   void Submit(std::int32_t slot, const WeatherPacket& packet) override {
-    u_long* const entry =
+    std::uint32_t* const entry =
         Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
     const std::size_t words = std::size_t{packet.size} + 1;
-    u_long* const tag =
+    std::uint32_t* const tag =
         entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
     if (tag == nullptr || packet.size > kWeatherPacketMaxWords) {
       if (ShouldReport(dropped_packets)) {
@@ -145,7 +153,7 @@ class LiveRenderHost final : public WeatherRenderHost {
     const auto link = static_cast<std::uint32_t>(*entry);
     tag[0] = (std::uint32_t{packet.size} << kLengthShift) | (link & kLinkMask);
     std::copy_n(packet.words.begin(), packet.size, tag + 1);
-    *entry = (link & ~kLinkMask) | (LegacyGpu_Handle(tag) & kLinkMask);
+    *entry = (link & ~kLinkMask) | (GpuHandle(tag) & kLinkMask);
     VS::Render::FrameScratchpad().primitive_cursor = tag + words;
   }
 };

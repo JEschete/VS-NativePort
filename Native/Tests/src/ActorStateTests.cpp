@@ -30,8 +30,10 @@
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 namespace actors = VS::Actors;
@@ -1297,7 +1299,7 @@ struct LiveStateFixture {
 
 std::unique_ptr<VS::Actors::ActorRecord> LiveRecord(int slot) {
   auto record = std::make_unique<VS::Actors::ActorRecord>();
-  record->instance.slot = static_cast<u_char>(slot);
+  record->instance.slot = static_cast<std::uint8_t>(slot);
   record->instance.attach_parent = 0xFF;
   VS::Actors::actorRecords[slot] = record.get();
   return record;
@@ -1484,7 +1486,7 @@ TEST_CASE("Live battle actors switch their logic and hostility",
 TEST_CASE("A live companion takes its offset and colour", "[actors-state]") {
   const LiveStateFixture fixture;
   const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(3);
-  const VS::Render::ColorCode offset{2, static_cast<u_char>(-2), 2, 16};
+  const VS::Render::ColorCode offset{2, static_cast<std::uint8_t>(-2), 2, 16};
   const VS::Render::ColorCode color{10, 20, 30, 40};
   constexpr std::array kStyle{2, -2, 2, 16, 10, 20, 30, 40};
   VS::Actors::SetLiveActorCompanion(3, 5, &offset, &color);

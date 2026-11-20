@@ -14,12 +14,12 @@ H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,
 H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,Content_SystemDatHeader became VS::Content::SystemDatHeader in Native/Content/include/Content/SystemResources.hpp (#441)
 H0014,header,Native/Engine/Legacy/Audio/LibSpu.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0015,header,Native/Engine/Legacy/Core/LibEtc.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0016,header,Native/Engine/Legacy/Core/PsxTypes.h,legacy,no,pragma-once,0,0,0,0,0,2,7,0,0,remaining,
+H0016,header,Native/Engine/Legacy/Core/PsxTypes.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0017,header,Native/Engine/Legacy/Input/LibPad.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0018,header,Native/Engine/Legacy/OnDisc.h,legacy,no,pragma-once,0,0,0,0,0,2,0,0,0,remaining,
-H0019,header,Native/Engine/Legacy/Psx.h,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,remaining,
+H0018,header,Native/Engine/Legacy/OnDisc.h,legacy,no,pragma-once,0,0,0,0,0,2,0,0,0,retired,retired-by:nothing; no production reader of VS_ONDISC/VS_ONDISC_DOT remained (readers add the on-disc offset to the record address directly); the four SequenceTests.cpp uses read the SHP vertex section through a file-local FirstModelVertex helper (#441)
+H0019,header,Native/Engine/Legacy/Psx.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0020,header,Native/Engine/Legacy/Removed.h,legacy,no,pragma-once,0,0,0,0,0,0,32,0,5,retired,deleted: no stand-in kept a call site; the DrawSync calls were deleted (Menu Files host seam and test fixtures) and LiveCardHost::TestEvent folds TestEvent's constant 0 into false (#441)
-H0021,header,Native/Engine/Legacy/Render/LibGpu.h,legacy,no,pragma-once,0,0,0,0,0,48,61,0,0,remaining,
+H0021,header,Native/Engine/Legacy/Render/LibGpu.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0022,header,Native/Engine/Legacy/Save/LibCard.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0023,header,Native/Engine/include/Audio/LfoWaveforms.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0024,header,Native/Engine/include/Audio/MusicState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -29,7 +29,7 @@ H0027,header,Native/Engine/include/Audio/XaPlayback.hpp,owned,no,pragma-once,0,0
 H0028,header,Native/Engine/include/Core/Arena.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0029,header,Native/Engine/include/Core/BiosRand.h,owned,no,pragma-once,0,0,0,0,0,0,3,0,0,retired,merged into Core/RandomLive.hpp (#441)
 H0030,header,Native/Engine/include/Core/Diagnostics.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0031,header,Native/Engine/include/Core/Gte.h,owned,no,pragma-once,0,0,0,0,0,0,41,0,0,remaining,
+H0031,header,Native/Engine/include/Core/Gte.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0032,header,Native/Engine/include/Core/IntPair.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Core_IntPair had no native users; TYPE T00544 retired (#441)
 H0033,header,Native/Engine/include/Core/Log.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0034,header,Native/Engine/include/Core/Memory/HeapLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

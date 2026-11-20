@@ -12,9 +12,13 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/AppearanceTransition.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/PaletteAnimation.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::StoreImage;
 
 namespace {
 namespace Render = VS::Render;
@@ -242,7 +246,7 @@ struct TransitionCase {
 class LiveClutGuard {
  public:
   LiveClutGuard() {
-    StoreImage(&region_, reinterpret_cast<u_long*>(saved_.data()));
+    StoreImage(&region_, reinterpret_cast<std::uint32_t*>(saved_.data()));
     Render::InitializeLiveClutAnimation();
   }
   LiveClutGuard(const LiveClutGuard&) = delete;
@@ -251,18 +255,19 @@ class LiveClutGuard {
   LiveClutGuard& operator=(LiveClutGuard&&) = delete;
   ~LiveClutGuard() {
     Render::InitializeLiveClutAnimation();
-    LoadImage(&region_, reinterpret_cast<u_long*>(saved_.data()));
+    LoadImage(&region_, reinterpret_cast<std::uint32_t*>(saved_.data()));
   }
 
  private:
   RECT region_{768, 224, 256, 32};
-  std::vector<u_short> saved_ = std::vector<u_short>(std::size_t{256} * 32);
+  std::vector<std::uint16_t> saved_ =
+      std::vector<std::uint16_t>(std::size_t{256} * 32);
 };
 
 std::vector<std::uint16_t> ReadVram(RECT area) {
   // Padded so an odd width still has a whole word to land in.
   std::vector<std::uint16_t> pixels(static_cast<std::size_t>(area.w) + 1);
-  StoreImage(&area, reinterpret_cast<u_long*>(pixels.data()));
+  StoreImage(&area, reinterpret_cast<std::uint32_t*>(pixels.data()));
   pixels.resize(static_cast<std::size_t>(area.w));
   return pixels;
 }
@@ -854,7 +859,7 @@ TEST_CASE("Actor palette transitions cover the shorter span",
 TEST_CASE("The live palette adapters refuse what the original overran",
           "[render-palette][live]") {
   const LiveClutGuard guard;
-  const std::array<u_short, 7> colors{1, 2, 3, 4, 5, 6, 7};
+  const std::array<std::uint16_t, 7> colors{1, 2, 3, 4, 5, 6, 7};
   const std::array refused{
       RefusalsOf([] { Render::LoadLiveClutColors(nullptr, 20, 0, 4); }),
       RefusalsOf([] { Render::LoadLiveClutColors(nullptr, 20, 0, 0); }),
@@ -873,8 +878,8 @@ TEST_CASE("The live palette adapters refuse what the original overran",
 TEST_CASE("A live direct CLUT row reaches its VRAM line",
           "[render-palette][live]") {
   const LiveClutGuard guard;
-  const std::array<u_short, 3> colors{Pack(1, 2, 3), Pack(4, 5, 6),
-                                      Pack(7, 8, 9)};
+  const std::array<std::uint16_t, 3> colors{Pack(1, 2, 3), Pack(4, 5, 6),
+                                            Pack(7, 8, 9)};
   Render::LoadLiveClutColors(colors.data(), 20, 8, 3);
   CHECK(ReadVram({768 + 8, 224 + 20, 3, 1}) ==
         std::vector<std::uint16_t>{colors.begin(), colors.end()});

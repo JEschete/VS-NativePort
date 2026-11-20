@@ -31,7 +31,9 @@
 #include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ActionRequestRecord;
 
@@ -53,10 +55,10 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
                          actor_id_);
       std::abort();
     }
-    std::array<u_short, kWorldAxes> world = {
-        static_cast<u_short>(position_->vx),
-        static_cast<u_short>(position_->vy),
-        static_cast<u_short>(position_->vz)};
+    std::array<std::uint16_t, kWorldAxes> world = {
+        static_cast<std::uint16_t>(position_->vx),
+        static_cast<std::uint16_t>(position_->vy),
+        static_cast<std::uint16_t>(position_->vz)};
     QueueLiveWorldLockedLabel(world);
   }
 

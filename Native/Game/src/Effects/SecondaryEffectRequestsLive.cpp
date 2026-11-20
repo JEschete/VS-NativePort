@@ -19,7 +19,7 @@
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequests.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionRequestRecord;
 
@@ -48,7 +48,7 @@ void Refuse(const char* what) {
 [[nodiscard]] LiveActionEffectTarget LiveEndpoint(
     const EffectEndpoint& endpoint) {
   LiveActionEffectTarget target{};
-  target.type = static_cast<u_short>(endpoint.kind);
+  target.type = static_cast<std::uint16_t>(endpoint.kind);
   target.color_preset = endpoint.color_preset;
   if (endpoint.kind == EffectEndpointKind::kActor) {
     target.SetActor({.actor = endpoint.actor,

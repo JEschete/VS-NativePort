@@ -101,9 +101,10 @@ class LiveTextureAnimationKeys final : public TextureAnimationKeys {
 void StoreSlot(const TextureAnimationSlot& slot,
                VS::Actors::TextureAnimationSlotRecord& record) {
   constexpr unsigned kModeMask = 0xF;
-  record.timeline = static_cast<u_char>(slot.timeline & kTextureTimelineMask);
+  record.timeline =
+      static_cast<std::uint8_t>(slot.timeline & kTextureTimelineMask);
   record.mode =
-      static_cast<u_char>(static_cast<unsigned>(slot.mode) & kModeMask);
+      static_cast<std::uint8_t>(static_cast<unsigned>(slot.mode) & kModeMask);
   record.current_frame = slot.current_frame;
   record.key_index = slot.key_index;
   record.ticks = slot.ticks;

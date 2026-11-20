@@ -30,7 +30,7 @@
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::DisableEvent;
 using VS::Legacy::EnableEvent;

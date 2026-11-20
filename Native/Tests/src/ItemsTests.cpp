@@ -31,7 +31,7 @@
 #include "Items/LootLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Items/Recovery.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 using VS::Battle::ActionDefinition;
@@ -200,7 +200,7 @@ struct LiveItemsState {
   unsigned char saved_invoked = VS::Items::miscItemInvoked;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   VS::Battle::Actor* saved_character = VS::Battle::characterState;
-  std::array<u_int, 8> saved_upper_ids{};
+  std::array<std::uint32_t, 8> saved_upper_ids{};
   VS::Battle::Actor actor{};
   VS::Battle::ActorStats stats{};
 
@@ -2796,7 +2796,7 @@ struct LiveRoomChests {
     }
     VS::Field::roomData.containers = legacy.data();
     VS::Field::roomData.header.containers_length =
-        static_cast<u_int>(sizeof(VS::Items::TreasureChest) * 2 + 5);
+        static_cast<std::uint32_t>(sizeof(VS::Items::TreasureChest) * 2 + 5);
     loot.misc[0] = {0x150, items::kLootDropped, 2};
     section = loot;
   }
@@ -2832,7 +2832,7 @@ TEST_CASE("A live room without a whole chest record refuses chest loot",
 
   // A section shorter than one chest refuses the loot.
   VS::Field::roomData.header.containers_length =
-      static_cast<u_int>(sizeof(VS::Items::TreasureChest) - 1);
+      static_cast<std::uint32_t>(sizeof(VS::Items::TreasureChest) - 1);
   CHECK(items::LiveRoomTreasureChests(&count) == room.legacy.data());
   CHECK(count == 0);
   items::LoadLiveRoomChestLoot(&section);

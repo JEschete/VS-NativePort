@@ -7,7 +7,7 @@
 #include "Battle/Encounter.hpp"
 #include "Field/Mpd.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Game {
 

@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "Field/Camera.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 
 namespace VS::Field {
@@ -25,10 +25,10 @@ struct CameraTransitionRecord {
   std::int32_t to_near_clip;
   std::int32_t to_projection_distance;
   std::int32_t to_far_clip;
-  VECTOR target_position;
-  VECTOR target_look_at;
-  VECTOR direction;
-  VECTOR look_at_step;
+  VS::Core::Gte::VECTOR target_position;
+  VS::Core::Gte::VECTOR target_look_at;
+  VS::Core::Gte::VECTOR direction;
+  VS::Core::Gte::VECTOR look_at_step;
   std::int32_t far_clip_step;
   std::int32_t near_clip_step;
   std::int32_t projection_distance_step;

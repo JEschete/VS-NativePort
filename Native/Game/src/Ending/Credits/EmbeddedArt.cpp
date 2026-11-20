@@ -10,7 +10,7 @@
 
 #include "Core/Diagnostics.hpp"
 #include "Ending/Credits.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 constexpr std::size_t kTimCapacity = 72224;

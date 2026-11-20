@@ -899,7 +899,7 @@ class Gates:
                 "transitive_counts": {key: len(value) for key, value in far_groups.items()},
             }
         for path in sorted(self.sources.text):
-            if "/Legacy/" in path and path.endswith(".h"):
+            if "/Legacy/" in path and path.endswith((".h", ".hpp")):
                 near, _ = self.sources.consumers(path)
                 report.legacy_consumers[path] = self.consumer_groups(near)
         sliced_ids = {

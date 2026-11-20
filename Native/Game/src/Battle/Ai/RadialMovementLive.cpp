@@ -20,7 +20,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RadialMovement.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

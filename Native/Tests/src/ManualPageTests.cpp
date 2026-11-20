@@ -12,7 +12,7 @@
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
 #include "Menu/ManualPage.hpp"
 #include "Menu/ManualPageLive.hpp"
@@ -20,6 +20,11 @@
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::nextPrim;
+using VS::Legacy::setRECT;
 
 // Contracts of the manual page's frame (MENUE.PRG 494.c:577-616, 716-881,
 // 962-987): content clipping, the page background, the scroll fades, the
@@ -494,8 +499,9 @@ constexpr std::size_t kFrameSlotBase = 18;
 // A primitive buffer, ordering table and game heap bound as frame 0.
 struct PageFrame {
   PageGlobalsSnapshot globals;
-  std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(kTableWords);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kPacketWords, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(kTableWords);
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{16} * 1024> heap_bytes{};
   VS::Core::Memory::ScopedLiveGameHeap heap{heap_bytes};
@@ -512,21 +518,21 @@ struct PageFrame {
     manual::pageArrowAnimState = 0;
   }
 
-  [[nodiscard]] u_long* Word(std::size_t index) {
+  [[nodiscard]] std::uint32_t* Word(std::size_t index) {
     return storage.data() + index;
   }
-  [[nodiscard]] u_long* Slot(std::int32_t slot) {
+  [[nodiscard]] std::uint32_t* Slot(std::int32_t slot) {
     return ordering.data() + kFrameSlotBase + slot;
   }
   [[nodiscard]] std::size_t Used() const {
     return static_cast<std::size_t>(
-        static_cast<const u_long*>(
+        static_cast<const std::uint32_t*>(
             VS::Render::FrameScratchpad().primitive_cursor) -
         storage.data());
   }
 };
 
-std::uint32_t TagLength(const u_long* packet) {
+std::uint32_t TagLength(const std::uint32_t* packet) {
   return static_cast<std::uint32_t>(*packet) >> 24U;
 }
 

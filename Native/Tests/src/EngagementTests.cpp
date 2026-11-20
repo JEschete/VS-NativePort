@@ -14,7 +14,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct EngagementFixture {

@@ -41,7 +41,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Palette.hpp"
 
 namespace {
@@ -60,8 +60,10 @@ enum {
 // 0x38/0x838) is provenance only; the native size comes from this type.
 struct RoomAiStorage {
   VS::Battle::Ai::RoomAiState state;
-  u_short flags[VS::Battle::Ai::kRoomGridSide][VS::Battle::Ai::kRoomGridSide];
-  u_short heights[VS::Battle::Ai::kRoomGridSide][VS::Battle::Ai::kRoomGridSide];
+  std::uint16_t flags[VS::Battle::Ai::kRoomGridSide]
+                     [VS::Battle::Ai::kRoomGridSide];
+  std::uint16_t heights[VS::Battle::Ai::kRoomGridSide]
+                       [VS::Battle::Ai::kRoomGridSide];
 };
 
 void ClearRoomAiBindings() {
@@ -77,8 +79,9 @@ void ClearRoomAiBindings() {
 }
 
 std::optional<std::uint32_t> CollisionCell(TileCoordinate tile) {
-  const VS::Field::MpdTileCell* cell = VS::Field::LiveCollisionCellAt(
-      static_cast<u_int>(tile.x), static_cast<u_int>(tile.z), 0);
+  const VS::Field::MpdTileCell* cell =
+      VS::Field::LiveCollisionCellAt(static_cast<std::uint32_t>(tile.x),
+                                     static_cast<std::uint32_t>(tile.z), 0);
   if (cell == nullptr) return std::nullopt;
   std::uint32_t bits = 0;
   memcpy(&bits, cell, sizeof bits);

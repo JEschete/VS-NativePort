@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include "Core/Math/Matrix.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 // decomp: func_800D0548_arg1 (src/BATTLE/BATTLE.PRG/battleEffect.h:281):
@@ -31,7 +31,7 @@ struct LiveTransformSlot {
   std::array<std::int32_t, Core::Math::kMatrixOrder> reserved_10;
   // Position along the motion; scripts set vy to raise or lower the effect
   // (5BF94.c:6602-6606). The instance start clears only pad.
-  VECTOR position;
+  VS::Core::Gte::VECTOR position;
   // Cleared when the instance starts (5BF94.c:4663-4664); never read.
   std::array<std::int32_t, 2> reserved_2c;
   // Actor and bone the transform attaches to.
@@ -41,18 +41,18 @@ struct LiveTransformSlot {
   std::uint8_t target_actor;
   std::uint8_t target_bone;
   // Effect-space matrix the renderers draw through.
-  MATRIX world;
+  VS::Core::Gte::MATRIX world;
   // world composed with the camera's view matrix.
-  MATRIX view;
+  VS::Core::Gte::MATRIX view;
   // Matrix of the attached actor bone, the camera or the action origin.
-  MATRIX attachment;
+  VS::Core::Gte::MATRIX attachment;
   // Rotation that turns the transform towards its target.
-  MATRIX facing;
+  VS::Core::Gte::MATRIX facing;
   // Resolved target point; pad keeps the attached actor's facing angle.
-  SVECTOR saved;
+  VS::Core::Gte::SVECTOR saved;
   // Spline control points between the world translation and saved.
-  SVECTOR control0;
-  SVECTOR control1;
+  VS::Core::Gte::SVECTOR control0;
+  VS::Core::Gte::SVECTOR control1;
 };
 
 // Values in each transform range table: (start, end) for x, y and z.

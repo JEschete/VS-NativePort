@@ -49,6 +49,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/Scratch.hpp"
@@ -88,7 +89,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"
@@ -104,6 +105,13 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Core::Math::kQ12Unit;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::RECT;
 
 // decomp: zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
 VS::Field::ZoneContext VS::Field::zoneContext;
@@ -122,7 +130,7 @@ static_assert(sizeof(VS::Field::roomData.header) ==
               VS::Field::kRoomSectionHeaderBytes);
 static_assert(sizeof(VS::Field::MpdEnvironment) ==
               VS::Field::kRoomEnvironmentBytes);
-static_assert(sizeof(u_long) == kOrderingEntryBytes);
+static_assert(sizeof(std::uint32_t) == kOrderingEntryBytes);
 
 namespace VS::Field {
 namespace {
@@ -774,7 +782,7 @@ class LivePlacements : public Host {
     zoneContext.room_enemies =
         reinterpret_cast<VS::Field::MpdEnemySpawn*>(block);
     zoneContext.room_enemy_count =
-        static_cast<u_int>(records.size() / kRoomPlacementBytes);
+        static_cast<std::uint32_t>(records.size() / kRoomPlacementBytes);
   }
 };
 
@@ -852,8 +860,8 @@ class LiveZoneLoadHost final
     }
     RECT rect = ToRect(area);
     // libgpu's LoadImage only reads the pixels.
-    ::LoadImage(&rect, reinterpret_cast<u_long*>(
-                           const_cast<std::byte*>(pixels.data())));
+    VS::Legacy::LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
+                                     const_cast<std::byte*>(pixels.data())));
   }
 
   [[nodiscard]] Content::DiscFileExtent ZoneFile(int zone_id) const override {
@@ -1098,7 +1106,7 @@ class LiveRoomLoadHost final
     VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonsState = 0;
-    Scratch().camera.far_clip = ONE;
+    Scratch().camera.far_clip = kQ12Unit;
   }
 
   [[nodiscard]] int ScreenTransitionEffect() const override {
@@ -1118,8 +1126,9 @@ class LiveRoomLoadHost final
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15414-15435)
   void ResetCamera(const RoomEntryCamera& camera) override {
-    Render::SetLiveCameraNearClip(ONE / kNearClipDivisor);
-    Render::SetLiveCameraProjectionDistance(ONE / kProjectionDistanceDivisor);
+    Render::SetLiveCameraNearClip(kQ12Unit / kNearClipDivisor);
+    Render::SetLiveCameraProjectionDistance(kQ12Unit /
+                                            kProjectionDistanceDivisor);
     SphericalCamera& orbit = sphericalCamera;
     orbit.motion.turn = 0;
     orbit.motion.turn_speed = 0;
@@ -1136,10 +1145,11 @@ class LiveRoomLoadHost final
     VS::Actors::ActorLocationQuery ashley{};
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
     const SVECTOR& feet = ashley.location.position;
-    const VECTOR target{.vx = feet.vx * ONE,
-                        .vy = (feet.vy * ONE) - (kCameraTargetLift * ONE),
-                        .vz = feet.vz * ONE,
-                        .pad = 0};
+    const VECTOR target{
+        .vx = feet.vx * kQ12Unit,
+        .vy = (feet.vy * kQ12Unit) - (kCameraTargetLift * kQ12Unit),
+        .vz = feet.vz * kQ12Unit,
+        .pad = 0};
     VECTOR look_at{};
     LiveClampCameraLookAtToZone(&target, &look_at);
     VS::Render::FrameScratch& scratch = Scratch();
@@ -1221,8 +1231,8 @@ class LiveRoomUnloadHost final
       RefuseCall("DrawTransitionFrame", "no ordering table for the frame");
       return;
     }
-    u_long* ordering_table =
-        static_cast<u_long*>(VS::Render::legacyOrderingTables[buffer]) +
+    std::uint32_t* ordering_table =
+        static_cast<std::uint32_t*>(VS::Render::legacyOrderingTables[buffer]) +
         kOrderingTableOffsetEntries;
     Scratch().ordering_table = ordering_table;
     ClearOTagR(ordering_table, kOrderingTableEntries);

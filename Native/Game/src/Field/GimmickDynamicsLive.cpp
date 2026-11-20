@@ -19,6 +19,8 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace {
 using Record = VS::Field::GimmickInstance;
 using PhysicsView = VS::Field::GimmickPhysicsView;

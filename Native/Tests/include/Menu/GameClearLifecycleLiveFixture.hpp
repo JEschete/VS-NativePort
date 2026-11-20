@@ -40,7 +40,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.hpp"
@@ -215,9 +215,12 @@ class Fixture {
   void BeginFrame() {
     frame.Reset();
     VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 18;
-    ClearOTagR(frame.ordering.data(), static_cast<int>(frame.ordering.size()));
-    SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[0], 0, 0, 320, 240);
-    SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[1], 320, 0, 320, 240);
+    VS::Legacy::ClearOTagR(frame.ordering.data(),
+                           static_cast<int>(frame.ordering.size()));
+    VS::Legacy::SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[0], 0, 0, 320,
+                              240);
+    VS::Legacy::SetDefDrawEnv(&VS::Render::legacyDrawEnvironments[1], 320, 0,
+                              320, 240);
   }
 
   // The actual music loader allocates this request and high-heap destination.

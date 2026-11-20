@@ -16,6 +16,8 @@
 #include "State/Timers.hpp"
 #include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
+using VS::Core::Gte::DVECTOR;
+
 // The generated F00719-F00742 bodies are retired. Each parity case runs the
 // Live entry over the inputs the generated body ran and compares a digest of
 // every result with the digest the generated body produced.
@@ -29,7 +31,7 @@ constexpr std::size_t kPlacedCapacity = 32;
 constexpr std::uint8_t kEquipmentKind = 6;
 constexpr std::uint8_t kPendingKind = 7;
 constexpr std::int16_t kSeededLabels = 6;
-constexpr u_char kOversizedText = 5;
+constexpr std::uint8_t kOversizedText = 5;
 
 // Digests of the generated bodies over the inputs below, recorded while they
 // still ran (generated BATTLE/BATTLE.PRG Feedback.cpp at 3452e95db, #276).
@@ -137,7 +139,7 @@ Capture Run(f::LiveFrame& frame, const std::function<void()>& draw) {
 }
 
 void SetDigits(VS::Battle::FloatingLabel& label, std::string_view digits) {
-  label.text_length = static_cast<u_char>(digits.size());
+  label.text_length = static_cast<std::uint8_t>(digits.size());
   for (std::size_t index = 0; index < digits.size(); ++index) {
     std::span(label.text)[index] = static_cast<signed char>(digits[index]);
   }
@@ -160,7 +162,7 @@ class SavedState {
  private:
   DVECTOR* positions_ = VS::Battle::placedLabelPositions;
   std::int16_t suppressed_ = VS::Battle::ashleyStatusLabelsSuppressed;
-  u_short paused_ = VS::Field::areRoomUpdatesPaused;
+  std::uint16_t paused_ = VS::Field::areRoomUpdatesPaused;
   int tick_ = VS::State::tickSpeed;
   VS::Input::Settings settings_ = VS::Input::settings;
 };
@@ -190,7 +192,7 @@ std::uint64_t ValueDigitsDigest(LabelDraw draw) {
       for (const auto x : kColumns) {
         label.value = value;
         label.frame = elapsed;
-        label.color_flags = static_cast<u_char>(elapsed & 1U);
+        label.color_flags = static_cast<std::uint8_t>(elapsed & 1U);
         digest.Add(RunLeaf(frame, draw, x));
       }
     }
@@ -206,7 +208,7 @@ std::uint64_t StatusCaptionsDigest(LabelDraw draw) {
   Digest digest;
   for (const auto layout : kLayouts) {
     for (std::uint8_t elapsed = 0; elapsed <= kLastFrame; ++elapsed) {
-      for (const u_char removal : {u_char{0}, u_char{1}}) {
+      for (const std::uint8_t removal : {std::uint8_t{0}, std::uint8_t{1}}) {
         label.value = layout;
         label.frame = elapsed;
         label.color_flags = removal;
@@ -218,18 +220,18 @@ std::uint64_t StatusCaptionsDigest(LabelDraw draw) {
 }
 
 std::uint64_t StatChangeRowsDigest(LabelDraw draw) {
-  constexpr u_char kFirstWords = 7;
-  constexpr u_char kSecondWords = 13;
+  constexpr std::uint8_t kFirstWords = 7;
+  constexpr std::uint8_t kSecondWords = 13;
   constexpr std::int16_t kLift = 20;
   constexpr int kStackX = 8;
-  constexpr u_short kLowered = 0x8000;
+  constexpr std::uint16_t kLowered = 0x8000;
   f::LiveFrame frame;
   auto& label = frame.labels.front();
   SetDigits(label, "315");
   label.scale_y = kLift;
   Digest digest;
-  for (u_char first = 0; first < kFirstWords; ++first) {
-    for (u_char second = 0; second < kSecondWords; ++second) {
+  for (std::uint8_t first = 0; first < kFirstWords; ++first) {
+    for (std::uint8_t second = 0; second < kSecondWords; ++second) {
       label.color_flags = first;
       label.limb = second;
       label.value = (second & 1U) != 0 ? kLowered : 1;
@@ -349,8 +351,8 @@ void SeedUpdate(f::LiveFrame& frame) {
     label.position.pad = kWaiting[index];
     label.frame = kFrames[index];
     SetDigits(label, "12");
-    label.limb = static_cast<u_char>(index);
-    label.color_flags = static_cast<u_char>(index);
+    label.limb = static_cast<std::uint8_t>(index);
+    label.color_flags = static_cast<std::uint8_t>(index);
   }
   VS::Battle::floatingLabelCount = static_cast<std::int16_t>(kKinds.size());
   VS::Battle::abilityTimingCueFrames = 0;

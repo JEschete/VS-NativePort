@@ -12,24 +12,26 @@
 #include "Render/Sprites.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Legacy::GpuPointer;
+
 namespace {
 namespace b = VS::Battle;
 namespace f = hud_orchestration_live_fixture;
 
-const u_long* NextPacket(const u_long* packet) {
-  return static_cast<const u_long*>(LegacyGpu_Pointer(packet[0]));
+const std::uint32_t* NextPacket(const std::uint32_t* packet) {
+  return static_cast<const std::uint32_t*>(GpuPointer(packet[0]));
 }
 
-int CheckTimerGlyph(const u_long* packet, char character, int x) {
+int CheckTimerGlyph(const std::uint32_t* packet, char character, int x) {
   const auto glyph = static_cast<std::uint8_t>(character - ' ');
   const auto widths = std::span(VS::Render::compactGlyphWidths);
   const auto width = (widths[glyph / 2] >> ((glyph & 1U) * 4)) & 15;
   const auto cell = std::span(VS::Render::compactGlyphIndices)[glyph];
   CHECK(packet[1] == 0x64808080);
-  CHECK(packet[2] == static_cast<u_long>(x | (200 << 16)));
+  CHECK(packet[2] == static_cast<std::uint32_t>(x | (200 << 16)));
   CHECK(packet[3] ==
         (0x37F60000U | (cell & 0xFEU) | ((76U + (cell & 1U) * 10U) << 8)));
-  CHECK(packet[4] == static_cast<u_long>(width | (10 << 16)));
+  CHECK(packet[4] == static_cast<std::uint32_t>(width | (10 << 16)));
   return width;
 }
 }  // namespace
@@ -96,7 +98,7 @@ TEST_CASE("F01361 Live emits both actual sprite rows and reverse digit owners",
   b::DrawLiveShortcutHud();
   CHECK(fixture.frame.UsedWords() == 42);
   CHECK(VS::Battle::shortcutHudRequested == 0);
-  const auto* digit = NextPacket(static_cast<const u_long*>(
+  const auto* digit = NextPacket(static_cast<const std::uint32_t*>(
       VS::Render::FrameScratchpad().overlay_ordering_table));
   REQUIRE(digit != nullptr);
   CHECK(digit[VS::Render::kSpriteTextureWord] == 0x37FB8000);

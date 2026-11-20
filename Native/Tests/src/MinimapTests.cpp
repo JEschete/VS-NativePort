@@ -31,6 +31,15 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
+using VS::Legacy::POLY_F4;
+
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {
   return {static_cast<const std::byte*>(data), size};
@@ -41,7 +50,7 @@ std::size_t SceneRoomOffset(std::size_t room) {
          (room * VS::Field::kMapSceneRoomRecordBytes);
 }
 
-VS::Field::MapRoomRecord SceneRoom(const std::vector<u_long>& words,
+VS::Field::MapRoomRecord SceneRoom(const std::vector<std::uint32_t>& words,
                                    std::size_t room) {
   VS::Field::MapRoomRecord record{};
   std::memcpy(&record,
@@ -51,7 +60,7 @@ VS::Field::MapRoomRecord SceneRoom(const std::vector<u_long>& words,
   return record;
 }
 
-std::vector<u_long> Scene() {
+std::vector<std::uint32_t> Scene() {
   return {2,
           1,
           76,
@@ -95,10 +104,10 @@ std::vector<u_long> Scene() {
           0};
 }
 
-u_long FileWord(const std::vector<unsigned char>& data, size_t offset) {
+std::uint32_t FileWord(const std::vector<unsigned char>& data, size_t offset) {
   REQUIRE(offset <= data.size());
-  REQUIRE(data.size() - offset >= sizeof(u_long));
-  u_long value;
+  REQUIRE(data.size() - offset >= sizeof(std::uint32_t));
+  std::uint32_t value;
   std::memcpy(&value, data.data() + offset, sizeof value);
   return value;
 }
@@ -128,14 +137,14 @@ struct SceneDoorFixture {
   decltype(VS::Field::enteredDoorId) saved_id = VS::Field::enteredDoorId;
   decltype(VS::Field::entranceDoorRecord) saved_entrance =
       VS::Field::entranceDoorRecord;
-  std::vector<u_long> words = Scene();
+  std::vector<std::uint32_t> words = Scene();
 
   SceneDoorFixture() {
     VS::Field::roomData = {};
     VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(words.data());
     VS::Field::roomData.header.minimap_scene_length =
-        static_cast<std::uint32_t>(words.size() * sizeof(u_long));
+        static_cast<std::uint32_t>(words.size() * sizeof(std::uint32_t));
   }
 
   ~SceneDoorFixture() {
@@ -160,16 +169,16 @@ struct RenderFixture {
   std::array<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers[0],
                                      VS::Render::legacyPrimitiveBuffers[1]};
   int saved_framebuffer = VS::Render::frameBuf;
-  u_short saved_ticks = VS::Field::roomAnimationTicks;
+  std::uint16_t saved_ticks = VS::Field::roomAnimationTicks;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
-  std::vector<u_long> packets =
-      std::vector<u_long>(0x20000 / sizeof(u_long) + 1);
-  std::array<u_long, 16> ordering{};
+  std::vector<std::uint32_t> packets =
+      std::vector<std::uint32_t>(0x20000 / sizeof(std::uint32_t) + 1);
+  std::array<std::uint32_t, 16> ordering{};
 
   explicit RenderFixture(int framebuffer = 0) {
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(264, 196);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(264, 196);
     VS::Render::frameBuf = framebuffer;
     VS::Render::legacyPrimitiveBuffers[framebuffer] = packets.data();
     VS::Render::FrameScratchpad().primitive_cursor = packets.data();
@@ -187,7 +196,7 @@ struct RenderFixture {
     VS::Render::frameBuf = saved_framebuffer;
     VS::Field::roomAnimationTicks = saved_ticks;
     VS::State::stateFlags = saved_flags;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   std::vector<const P_TAG*> Commands() {
@@ -209,12 +218,12 @@ TEST_CASE(
     "[content][minimap][layout]") {
   auto bytes = Scene();
   REQUIRE(VS::Field::IsValidMapScene(
-      SceneBytes(bytes.data(), bytes.size() * sizeof(u_long))));
+      SceneBytes(bytes.data(), bytes.size() * sizeof(std::uint32_t))));
   auto* end = VS::Field::ResolveLiveSceneRoomData(
-      bytes.data(), bytes.size() * sizeof(u_long));
+      bytes.data(), bytes.size() * sizeof(std::uint32_t));
   CHECK(reinterpret_cast<void*>(end) ==
         reinterpret_cast<unsigned char*>(bytes.data()) +
-            bytes.size() * sizeof(u_long));
+            bytes.size() * sizeof(std::uint32_t));
   CHECK(bytes[2] == 24);
   CHECK(bytes[5] == 88);
   const auto first = SceneRoom(bytes, 0);
@@ -222,14 +231,15 @@ TEST_CASE(
   CHECK(first.zone_id == 9);
   CHECK(second.map_id == 2);
   // Each resolved offset counts from its own record.
-  CHECK(SceneRoomOffset(0) + first.data_offset == 7 * sizeof(u_long));
-  CHECK(SceneRoomOffset(1) + second.data_offset == 26 * sizeof(u_long));
+  CHECK(SceneRoomOffset(0) + first.data_offset == 7 * sizeof(std::uint32_t));
+  CHECK(SceneRoomOffset(1) + second.data_offset == 26 * sizeof(std::uint32_t));
 }
 
 TEST_CASE("Malformed map counts, payloads and indices fail without mutation",
           "[content][minimap][bounds]") {
   const auto valid = Scene();
-  for (size_t length = 0; length < valid.size() * sizeof(u_long); ++length) {
+  for (size_t length = 0; length < valid.size() * sizeof(std::uint32_t);
+       ++length) {
     CHECK_FALSE(VS::Field::IsValidMapScene(SceneBytes(valid.data(), length)));
   }
   for (const size_t index : {0, 2, 7, 16, 17}) {
@@ -237,10 +247,10 @@ TEST_CASE("Malformed map counts, payloads and indices fail without mutation",
     bad[index] = UINT32_MAX;
     const auto saved = bad;
     CHECK_FALSE(VS::Field::IsValidMapScene(
-        SceneBytes(bad.data(), bad.size() * sizeof(u_long))));
+        SceneBytes(bad.data(), bad.size() * sizeof(std::uint32_t))));
     CHECK(bad == saved);
     CHECK_THROWS_AS(VS::Field::ResolveLiveSceneRoomData(
-                        bad.data(), bad.size() * sizeof(u_long)),
+                        bad.data(), bad.size() * sizeof(std::uint32_t)),
                     std::runtime_error);
     CHECK(bad == saved);
   }
@@ -300,7 +310,7 @@ TEST_CASE("Scene door bounds reject truncated and overflowing tables",
           "[scene-door-core][minimap][bounds]") {
   const auto words = Scene();
   const auto bytes = std::as_bytes(std::span(words));
-  for (std::size_t length = 0; length < 26 * sizeof(u_long); ++length) {
+  for (std::size_t length = 0; length < 26 * sizeof(std::uint32_t); ++length) {
     CHECK_FALSE(VS::Field::SceneDoorId(bytes.first(length), 0));
   }
   for (const std::size_t count : {0, 7, 16, 18, 20, 22, 24}) {
@@ -426,14 +436,14 @@ TEST_CASE("Native entrance lookup accepts bounded scene index 128",
   fixture.words.assign(141, 0);
   fixture.words[0] = 1;
   fixture.words[1] = 1;
-  fixture.words[2] = (141 - 4) * sizeof(u_long);
+  fixture.words[2] = (141 - 4) * sizeof(std::uint32_t);
   fixture.words[4] = 1;
   fixture.words[11] = 129;
   fixture.words[140] = 0xFE00;
   VS::Field::roomData.minimap_scene =
       reinterpret_cast<VS::Field::MapScene*>(fixture.words.data());
   VS::Field::roomData.header.minimap_scene_length =
-      static_cast<std::uint32_t>(fixture.words.size() * sizeof(u_long));
+      static_cast<std::uint32_t>(fixture.words.size() * sizeof(std::uint32_t));
   CHECK(VS::Field::IsValidMapScene(std::as_bytes(std::span(fixture.words))));
   CHECK(VS::Field::SceneDoorIdEntry(128) == 254);
   VS::Field::MpdDoorRecord door{};
@@ -530,7 +540,8 @@ TEST_CASE("Native entrance lookup uses bounded unsigned scene bytes",
     CHECK(VS::Field::enteredDoorId == id);
     CHECK(VS::Field::entranceDoorRecord.required_flag_id == 321);
   }
-  VS::Field::roomData.header.minimap_scene_length = 26 * sizeof(u_long) - 1;
+  VS::Field::roomData.header.minimap_scene_length =
+      26 * sizeof(std::uint32_t) - 1;
   CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
   VS::Field::SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
   CHECK(VS::Field::enteredDoorId == -1);
@@ -567,8 +578,9 @@ TEST_CASE("Minimap geometry, visited connections and markers use native links",
   RenderFixture fixture(GENERATE(0, 1));
   auto bytes = Scene();
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
-                                      bytes.size() * sizeof(u_long));
-  VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
+                                      bytes.size() * sizeof(std::uint32_t));
+  VS::Field::DrawLiveMinimapScene(bytes.data(),
+                                  bytes.size() * sizeof(std::uint32_t));
   const auto packets = fixture.Commands();
   REQUIRE(packets.size() == 9);
   const std::array<int, 9> commands{0xE1, 0x42, 0x42, 0x42, 0x2A,
@@ -592,7 +604,7 @@ TEST_CASE(
     "Minimap door gates, entry blinking and visited rooms retain semantics",
     "[render][minimap][doors]") {
   const auto door = GENERATE(0u, 0x00100000u, 0x01000000u);
-  const auto ticks = GENERATE(u_short{0}, u_short{32});
+  const auto ticks = GENERATE(std::uint16_t{0}, std::uint16_t{32});
   const auto gate = GENERATE(char{0}, char{1});
   RenderFixture fixture;
   auto bytes = Scene();
@@ -601,8 +613,9 @@ TEST_CASE(
   VS::Field::roomAnimationTicks = ticks;
   VS::State::stateFlags.opaque_33f[1] = gate;
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
-                                      bytes.size() * sizeof(u_long));
-  VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
+                                      bytes.size() * sizeof(std::uint32_t));
+  VS::Field::DrawLiveMinimapScene(bytes.data(),
+                                  bytes.size() * sizeof(std::uint32_t));
   const auto packets = fixture.Commands();
   const bool locked = door == 0x01000000u && gate == 0;
   const bool hidden = door == 0x00100000u && ticks == 0;
@@ -616,12 +629,12 @@ TEST_CASE("Minimap capacity errors do not overwrite packets or ordering links",
   RenderFixture fixture;
   auto bytes = Scene();
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
-                                      bytes.size() * sizeof(u_long));
+                                      bytes.size() * sizeof(std::uint32_t));
   VS::Render::FrameScratchpad().primitive_cursor =
       fixture.packets.data() + 0x20000 / 4 - 1;
   const auto saved = fixture.ordering;
   CHECK_THROWS_AS(VS::Field::DrawLiveMinimapScene(
-                      bytes.data(), bytes.size() * sizeof(u_long)),
+                      bytes.data(), bytes.size() * sizeof(std::uint32_t)),
                   std::runtime_error);
   CHECK(fixture.ordering == saved);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
@@ -645,7 +658,7 @@ TEST_CASE(
   observed = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == 160);
   CHECK(observed.y == 112);
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 TEST_CASE("Projection centers preserve the original high-halfword semantics",
@@ -655,9 +668,9 @@ TEST_CASE("Projection centers preserve the original high-halfword semantics",
   VS::Render::SetLiveProjectionScreenOffset(offset);
   const VS::Render::ScreenOffset observed =
       VS::Render::GetLiveProjectionScreenOffset();
-  CHECK(observed.x == static_cast<u_short>(offset.x));
-  CHECK(observed.y == static_cast<u_short>(offset.y));
-  Core_Gte_Reset();
+  CHECK(observed.x == static_cast<std::uint16_t>(offset.x));
+  CHECK(observed.y == static_cast<std::uint16_t>(offset.y));
+  VS::Core::Gte::Reset();
 }
 
 TEST_CASE("Every extracted ARM scene decodes packed rooms and its name table",
@@ -698,11 +711,11 @@ TEST_CASE("Every extracted MPD minimap decodes and draws within packet bounds",
     auto bytes = FileBytes(entry.path());
     if (bytes.empty()) continue;
     const size_t header = FileWord(bytes, 0);
-    const size_t size = FileWord(bytes, header + 14 * sizeof(u_long));
+    const size_t size = FileWord(bytes, header + 14 * sizeof(std::uint32_t));
     if (size == 0) continue;
-    size_t offset = header + 24 * sizeof(u_long);
+    size_t offset = header + 24 * sizeof(std::uint32_t);
     for (size_t section = 0; section < 14; ++section) {
-      offset += FileWord(bytes, header + section * sizeof(u_long));
+      offset += FileWord(bytes, header + section * sizeof(std::uint32_t));
     }
     CAPTURE(entry.path().filename().string(), offset, size);
     REQUIRE(offset <= bytes.size());
@@ -774,7 +787,7 @@ struct RecordingMinimapRenderer final : VS::Field::MinimapRenderer {
   void Finish() override { calls.emplace_back("finish"); }
 };
 
-std::vector<std::byte> ResolvedScene(std::vector<u_long> words) {
+std::vector<std::byte> ResolvedScene(std::vector<std::uint32_t> words) {
   const auto view = std::as_bytes(std::span(words));
   std::vector<std::byte> bytes(view.begin(), view.end());
   CHECK(VS::Field::ResolveSceneRoomData(bytes) == bytes.size());

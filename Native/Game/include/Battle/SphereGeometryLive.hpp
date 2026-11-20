@@ -5,7 +5,7 @@
 #include "Battle/BattleTypes.hpp"
 #include "Battle/SphereGeometry.hpp"
 #include "Battle/TargetVolume.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle {
 [[nodiscard]] std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
@@ -20,7 +20,8 @@ BuildLiveSphereWireframe(VS::Battle::TargetSphereSetupView* sphere,
 
 [[nodiscard]] int AppendSphereArcVerticesEntry(int phase, int segments,
                                                int index);
-[[nodiscard]] MATRIX* BuildSphereVolumeTransformEntry(u_char* scale, int angle);
+[[nodiscard]] VS::Core::Gte::MATRIX* BuildSphereVolumeTransformEntry(
+    std::uint8_t* scale, int angle);
 [[nodiscard]] int AppendSphereCircleVerticesEntry(int angle, int index);
 [[nodiscard]] int AppendSphereConeVerticesEntry(int step, int radius,
                                                 int index);

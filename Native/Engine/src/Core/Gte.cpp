@@ -1,4 +1,4 @@
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -11,6 +11,7 @@
 // details that gameplay may depend on are checked by the GTE parity tests (plan
 // §6.1).
 
+namespace VS::Core::Gte {
 namespace {
 
 struct GteState {
@@ -127,13 +128,13 @@ void Project() {
   g.ir0 = static_cast<int16_t>(Limit(cue >> 12, 0, 0x1000, 12));
 }
 
-long PackXY(int i) {
-  return static_cast<long>(
+Word PackXY(int i) {
+  return static_cast<Word>(
       (static_cast<uint32_t>(static_cast<uint16_t>(g.sy[i])) << 16) |
       static_cast<uint16_t>(g.sx[i]));
 }
 
-void UnpackXY(long sxy, int16_t& x, int16_t& y) {
+void UnpackXY(Word sxy, int16_t& x, int16_t& y) {
   x = static_cast<int16_t>(sxy & 0xFFFF);
   y = static_cast<int16_t>((static_cast<uint32_t>(sxy) >> 16) & 0xFFFF);
 }
@@ -158,43 +159,41 @@ void Multiply(const short a[3][3], const short b[3][3], short out[3][3]) {
 
 }  // namespace
 
-void Core_Gte_Reset(void) { g = GteState{}; }
+void Reset() { g = GteState{}; }
 
-void Core_Gte_SetRotMatrix(const MATRIX* m) {
+void SetRotMatrix(const MATRIX* m) {
   std::copy(&m->m[0][0], &m->m[0][0] + 9, &g.rot[0][0]);
 }
 
-void Core_Gte_SetTransMatrix(const MATRIX* m) {
+void SetTransMatrix(const MATRIX* m) {
   for (int i = 0; i < 3; ++i) {
     g.trans[i] = static_cast<int32_t>(m->t[i]);
   }
 }
 
-void Core_Gte_SetTransVector(const VECTOR* v) {
+void SetTransVector(const VECTOR* v) {
   g.trans[0] = static_cast<int32_t>(v->vx);
   g.trans[1] = static_cast<int32_t>(v->vy);
   g.trans[2] = static_cast<int32_t>(v->vz);
 }
 
-void Core_Gte_ClearTranslation(void) {
-  g.trans[0] = g.trans[1] = g.trans[2] = 0;
-}
+void ClearTranslation() { g.trans[0] = g.trans[1] = g.trans[2] = 0; }
 
-void Core_Gte_SetGeomOffset(long ofx, long ofy) {
+void SetGeomOffset(Word ofx, Word ofy) {
   g.ofx = static_cast<int32_t>(static_cast<uint32_t>(ofx) << 16);
   g.ofy = static_cast<int32_t>(static_cast<uint32_t>(ofy) << 16);
 }
 
-void Core_Gte_GetGeomOffset(long* ofx, long* ofy) {
+void GetGeomOffset(Word* ofx, Word* ofy) {
   *ofx = g.ofx >> 16;
   *ofy = g.ofy >> 16;
 }
 
-void Core_Gte_SetGeomScreen(long h) { g.h = static_cast<uint16_t>(h); }
+void SetGeomScreen(Word h) { g.h = static_cast<uint16_t>(h); }
 
 // SDK-compatible entry point; copied callers retain this parameter order.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-void Core_Gte_SetFarColor(long r, long gg, long b) {
+void SetFarColor(Word r, Word gg, Word b) {
   g.farColor[0] = static_cast<int32_t>(r) * 16;
   g.farColor[1] = static_cast<int32_t>(gg) * 16;
   g.farColor[2] = static_cast<int32_t>(b) * 16;
@@ -202,40 +201,40 @@ void Core_Gte_SetFarColor(long r, long gg, long b) {
 
 // Mirrors SetFarColor's channel order.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-void Core_Gte_GetFarColor(long* r, long* gg, long* b) {
+void GetFarColor(Word* r, Word* gg, Word* b) {
   *r = g.farColor[0];
   *gg = g.farColor[1];
   *b = g.farColor[2];
 }
 
 // The DQA register holds a halfword, as ctc2 stores it.
-void Core_Gte_SetDepthCue(long coefficient, long offset) {
+void SetDepthCue(Word coefficient, Word offset) {
   g.dqa = static_cast<int16_t>(coefficient);
   g.dqb = static_cast<int32_t>(offset);
 }
 
-void Core_Gte_LoadV0(const SVECTOR* v) { LoadVector(v); }
+void LoadV0(const SVECTOR* v) { LoadVector(v); }
 
-void Core_Gte_LoadSxy3(long sxy0, long sxy1, long sxy2) {
+void LoadSxy3(Word sxy0, Word sxy1, Word sxy2) {
   UnpackXY(sxy0, g.sx[0], g.sy[0]);
   UnpackXY(sxy1, g.sx[1], g.sy[1]);
   UnpackXY(sxy2, g.sx[2], g.sy[2]);
 }
 
-void Core_Gte_Rtps(void) {
+void Rtps() {
   g.flag = 0;
   RotateTranslate(g.v0);
   Project();
   FinishFlag();
 }
 
-void Core_Gte_Rtv0Tr(void) {
+void Rtv0Tr() {
   g.flag = 0;
   RotateTranslate(g.v0);
   FinishFlag();
 }
 
-void Core_Gte_Nclip(void) {
+void Nclip() {
   const int64_t r = static_cast<int64_t>(g.sx[0]) * g.sy[1] +
                     static_cast<int64_t>(g.sx[1]) * g.sy[2] +
                     static_cast<int64_t>(g.sx[2]) * g.sy[0] -
@@ -245,67 +244,67 @@ void Core_Gte_Nclip(void) {
   g.mac0 = static_cast<int32_t>(r);
 }
 
-void Core_Gte_StoreSxy2(long* out) { *out = PackXY(2); }
+void StoreSxy2(Word* out) { *out = PackXY(2); }
 
-void Core_Gte_StoreSz3Otz(long* out) { *out = g.sz[3] >> 2; }
+void StoreSz3Otz(Word* out) { *out = g.sz[3] >> 2; }
 
-void Core_Gte_StoreOtz(long* out) { *out = g.otz; }
+void StoreOtz(Word* out) { *out = g.otz; }
 
-void Core_Gte_StoreOpz(long* out) { *out = g.mac0; }
+void StoreOpz(Word* out) { *out = g.mac0; }
 
-void Core_Gte_StoreLvnl(VECTOR* out) {
+void StoreLvnl(VECTOR* out) {
   out->vx = g.mac[0], out->vy = g.mac[1], out->vz = g.mac[2];
 }
 
-void Core_Gte_StoreIr(SVECTOR* out) {
+void StoreIr(SVECTOR* out) {
   out->vx = g.ir[0], out->vy = g.ir[1], out->vz = g.ir[2];
 }
 
-MATRIX* Core_Gte_MulMatrix(MATRIX* m0, MATRIX* m1) {
+MATRIX* MulMatrix(MATRIX* m0, MATRIX* m1) {
   Multiply(m0->m, m1->m, m0->m);
   return m0;
 }
 
-MATRIX* Core_Gte_CompMatrix(MATRIX* m0, MATRIX* m1, MATRIX* m2) {
-  long t[3];
+MATRIX* CompMatrix(MATRIX* m0, MATRIX* m1, MATRIX* m2) {
+  Word t[3];
   for (int i = 0; i < 3; ++i) {
     int64_t acc = 0;
     for (int k = 0; k < 3; ++k) {
       acc += static_cast<int64_t>(m0->m[i][k]) * m1->t[k];
     }
-    t[i] = static_cast<long>((acc >> 12) + m0->t[i]);
+    t[i] = static_cast<Word>((acc >> 12) + m0->t[i]);
   }
   Multiply(m0->m, m1->m, m2->m);
   std::copy(t, t + 3, m2->t);
   return m2;
 }
 
-VECTOR* Core_Gte_ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1) {
+VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1) {
   VECTOR input{v0->vx, v0->vy, v0->vz, 0};
-  return Core_Gte_ApplyMatrixLV(m, &input, v1);
+  return ApplyMatrixLV(m, &input, v1);
 }
 
-VECTOR* Core_Gte_ApplyRotMatrix(SVECTOR* v0, VECTOR* v1) {
+VECTOR* ApplyRotMatrix(SVECTOR* v0, VECTOR* v1) {
   MATRIX m{};
   std::copy(&g.rot[0][0], &g.rot[0][0] + 9, &m.m[0][0]);
   SVECTOR result{};
-  Core_Gte_ApplyMatrixSV(&m, v0, &result);
+  ApplyMatrixSV(&m, v0, &result);
   v1->vx = result.vx, v1->vy = result.vy, v1->vz = result.vz;
   return v1;
 }
 
-VECTOR* Core_Gte_ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1) {
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1) {
   const int64_t v[3] = {v0->vx, v0->vy, v0->vz};
-  long r[3];
+  Word r[3];
   for (int i = 0; i < 3; ++i) {
-    r[i] = static_cast<long>(
+    r[i] = static_cast<Word>(
         (m->m[i][0] * v[0] + m->m[i][1] * v[1] + m->m[i][2] * v[2]) >> 12);
   }
   v1->vx = r[0], v1->vy = r[1], v1->vz = r[2];
   return v1;
 }
 
-SVECTOR* Core_Gte_ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1) {
+SVECTOR* ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1) {
   const int64_t v[3] = {v0->vx, v0->vy, v0->vz};
   short r[3];
   for (int i = 0; i < 3; ++i) {
@@ -317,13 +316,13 @@ SVECTOR* Core_Gte_ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1) {
   return v1;
 }
 
-MATRIX* Core_Gte_TransMatrix(MATRIX* m, VECTOR* v) {
+MATRIX* TransMatrix(MATRIX* m, VECTOR* v) {
   m->t[0] = v->vx, m->t[1] = v->vy, m->t[2] = v->vz;
   return m;
 }
 
-MATRIX* Core_Gte_ScaleMatrix(MATRIX* m, VECTOR* v) {
-  const long s[3] = {v->vx, v->vy, v->vz};
+MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v) {
+  const Word s[3] = {v->vx, v->vy, v->vz};
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       m->m[i][j] =
@@ -335,45 +334,44 @@ MATRIX* Core_Gte_ScaleMatrix(MATRIX* m, VECTOR* v) {
 
 // SDK-compatible entry point; output pointers have distinct register roles.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-long Core_Gte_RotTransPers(SVECTOR* v0, long* sxy, long* p, long* flag) {
+Word RotTransPers(SVECTOR* v0, Word* sxy, Word* p, Word* flag) {
   LoadVector(v0);
-  Core_Gte_Rtps();
+  Rtps();
   *sxy = PackXY(2);
   *p = g.ir0;
-  *flag = static_cast<long>(g.flag);
+  *flag = static_cast<Word>(g.flag);
   return g.sz[3] >> 2;
 }
 
-void Core_Gte_RotTrans(SVECTOR* v0, VECTOR* v1, long* flag) {
+void RotTrans(SVECTOR* v0, VECTOR* v1, Word* flag) {
   LoadVector(v0);
-  Core_Gte_Rtv0Tr();
+  Rtv0Tr();
   v1->vx = g.mac[0], v1->vy = g.mac[1], v1->vz = g.mac[2];
-  *flag = static_cast<long>(g.flag);
+  *flag = static_cast<Word>(g.flag);
 }
 
 // SDK-compatible entry point; copied callers retain this parameter order.
-long Core_Gte_RotTransPers4(
-    SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-    long* sxy0, long* sxy1, long* sxy2, long* sxy3, long* p, long* flag) {
+Word RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
+                   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+                   Word* sxy0, Word* sxy1, Word* sxy2, Word* sxy3, Word* p,
+                   Word* flag) {
   SVECTOR* v[4] = {v0, v1, v2, v3};
-  long* out[4] = {sxy0, sxy1, sxy2, sxy3};
+  Word* out[4] = {sxy0, sxy1, sxy2, sxy3};
   uint32_t f = 0;
   for (int i = 0; i < 4; ++i) {
     LoadVector(v[i]);
-    Core_Gte_Rtps();
+    Rtps();
     *out[i] = PackXY(2);
     f |= g.flag;
   }
   *p = g.ir0;
-  *flag = static_cast<long>(f);
+  *flag = static_cast<Word>(f);
   return g.sz[3] >> 2;
 }
 
-long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
-                          long* sxy0, long* sxy1, long* sxy2, long* sxy3,
-                          long* p, long* flag) {
-  Core_Gte_RotTransPers4(v0, v1, v2, v3, sxy0, sxy1, sxy2, sxy3, p, flag);
+Word RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, Word* sxy0,
+                 Word* sxy1, Word* sxy2, Word* sxy3, Word* p, Word* flag) {
+  RotTransPers4(v0, v1, v2, v3, sxy0, sxy1, sxy2, sxy3, p, flag);
   const int64_t sum =
       static_cast<int64_t>(g.sz[0]) + g.sz[1] + g.sz[2] + g.sz[3];
   g.otz = static_cast<uint16_t>(
@@ -381,8 +379,10 @@ long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
   return g.otz;
 }
 
-long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2) {
-  Core_Gte_LoadSxy3(sxy0, sxy1, sxy2);
-  Core_Gte_Nclip();
+Word NormalClip(Word sxy0, Word sxy1, Word sxy2) {
+  LoadSxy3(sxy0, sxy1, sxy2);
+  Nclip();
   return g.mac0;
 }
+
+}  // namespace VS::Core::Gte

@@ -15,7 +15,7 @@
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Field/TriggerMarkers.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
@@ -24,6 +24,12 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
 
@@ -64,13 +70,13 @@ struct TriggerMarkerFixture {
   int saved_mode = VS::Field::roomGeometryDrawMode;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
-  u_short saved_animation = VS::Field::roomAnimationTicks;
-  u_short saved_marker_ticks = VS::Field::triggerMarkerFrameTicks;
+  std::uint16_t saved_animation = VS::Field::roomAnimationTicks;
+  std::uint16_t saved_marker_ticks = VS::Field::triggerMarkerFrameTicks;
   std::array<unsigned int, 29> saved_definition{};
   std::array<unsigned int, 29> expected_definition{};
-  std::vector<u_long> storage =
-      std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 2048> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      0x20000 / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 2048> ordering{};
   std::array<VS::Field::MpdFloorTrigger, 2> triggers{};
   MarkerDefinition definition;
 
@@ -117,9 +123,9 @@ struct TriggerMarkerFixture {
     VS::Render::FrameScratchpad().view_matrix.m[1][2] = -4096;
     VS::Render::FrameScratchpad().view_matrix.m[2][1] = 4096;
     VS::Render::FrameScratchpad().view_matrix.t[2] = 1024;
-    Core_Gte_Reset();
-    Core_Gte_SetGeomOffset(160, 120);
-    Core_Gte_SetGeomScreen(256);
+    VS::Core::Gte::Reset();
+    SetGeomOffset(160, 120);
+    SetGeomScreen(256);
     ResetPackets();
   }
 
@@ -137,7 +143,7 @@ struct TriggerMarkerFixture {
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   void StoreDefinition() {
@@ -152,7 +158,7 @@ struct TriggerMarkerFixture {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   }
 
-  const u_long* Packet(std::size_t index = 0) const {
+  const std::uint32_t* Packet(std::size_t index = 0) const {
     return storage.data() + 1 + index * 13;
   }
 

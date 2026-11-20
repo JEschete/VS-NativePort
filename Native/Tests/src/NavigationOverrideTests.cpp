@@ -33,8 +33,10 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Platform/CrashHandler.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::HasLiveActorNavigationState),
@@ -62,7 +64,7 @@ struct NavigationOverrideFixture {
   decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::tileFlagMap) saved_grid =
       VS::Battle::Ai::tileFlagMap;
-  u_short grid[32][32]{};
+  std::uint16_t grid[32][32]{};
   VS::Battle::Ai::ActorAiState source{};
   VS::Battle::Ai::ActorAiState route{};
   VS::Battle::Ai::TilePosition tile{};
@@ -83,11 +85,11 @@ struct NavigationOverrideFixture {
     VS::Battle::Ai::tileFlagMap = saved_grid;
   }
 
-  static void CheckCellValue(u_short actual, u_short expected) {
+  static void CheckCellValue(std::uint16_t actual, std::uint16_t expected) {
     CHECK(actual == expected);
   }
 
-  void CheckOtherCells(int x, int z, u_short expected) const {
+  void CheckOtherCells(int x, int z, std::uint16_t expected) const {
     for (int row = 0; row < 32; ++row) {
       for (int column = 0; column < 32; ++column) {
         if (row != z || column != x) {
@@ -115,7 +117,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   std::array<VS::Battle::Actor, 2> actors{};
   VS::Actors::ActorRecord ashley_model{};
   VS::Battle::Ai::RoomAiState room{};
-  u_short heights[32][32]{};
+  std::uint16_t heights[32][32]{};
 
   ScriptedOverrideFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
@@ -153,10 +155,10 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     VS::Battle::Ai::specialTerrainHeights = heights;
     VS::Battle::Ai::savedMovementRandomState = 0x1234;
     room.max_tile_x = room.min_tile_x = 31;
-    const u_int dimensions = 0x2020;
+    const std::uint32_t dimensions = 0x2020;
     std::memcpy(room.reserved4.data(), &dimensions, sizeof dimensions);
-    const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
-                                           0x10, 0x11, 0x01, 0x31};
+    const std::array<std::uint8_t, 8> directions{0x30, 0x33, 0x03, 0x13,
+                                                 0x10, 0x11, 0x01, 0x31};
     std::memcpy(VS::Battle::Ai::directionDeltas.data(), directions.data(),
                 directions.size());
   }
@@ -236,7 +238,7 @@ struct GimmickOccupancyFixture : NavigationOverrideFixture {
       VS::Battle::Ai::specialTerrainHeights;
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
-  u_short heights[32][32]{};
+  std::uint16_t heights[32][32]{};
   VS::Field::GimmickInstance gimmick{};
   VS::Field::GimmickInstance sibling{};
 
@@ -263,8 +265,8 @@ struct RouteAvailabilityFixture {
   void* saved_auxiliary = VS::Battle::Ai::roomHasWaypoints;
   VS::Battle::Ai::RouteGateEndRecord* saved_gates = VS::Battle::Ai::routeGates;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  std::array<u_char, 13> saved_bounce{};
-  alignas(u_int) std::array<u_char, 0x498> auxiliary{};
+  std::array<std::uint8_t, 13> saved_bounce{};
+  alignas(std::uint32_t) std::array<std::uint8_t, 0x498> auxiliary{};
   std::array<VS::Field::MpdMovingPlatform, 13> platforms{};
 
   RouteAvailabilityFixture() {
@@ -294,8 +296,8 @@ struct RouteAvailabilityFixture {
 
   void SetEnd(std::size_t pair, unsigned x, unsigned z) {
     VS::Battle::Ai::RouteGateEndRecord end{};
-    end.tile_x = static_cast<u_short>(x);
-    end.tile_z = static_cast<u_short>(z);
+    end.tile_x = static_cast<std::uint16_t>(x);
+    end.tile_z = static_cast<std::uint16_t>(z);
     std::memcpy(auxiliary.data() + 0x454 + pair * 4, &end, sizeof end);
   }
 
@@ -305,12 +307,12 @@ struct RouteAvailabilityFixture {
     }
   }
 
-  void SetWord(std::size_t index, u_int word) {
+  void SetWord(std::size_t index, std::uint32_t word) {
     std::memcpy(auxiliary.data() + index * sizeof(word), &word, sizeof(word));
   }
 
-  u_int Word(std::size_t index) const {
-    u_int word;
+  std::uint32_t Word(std::size_t index) const {
+    std::uint32_t word;
     std::memcpy(&word, auxiliary.data() + index * sizeof(word), sizeof(word));
     return word;
   }
@@ -344,7 +346,7 @@ void SeedCopyState(VS::Battle::Ai::ActorAiState& state) {
 
 void SetExpectedOverrideFields(VS::Battle::Ai::ActorAiState& state,
                                int actor_id) {
-  state.actor_id = static_cast<u_char>(actor_id);
+  state.actor_id = static_cast<std::uint8_t>(actor_id);
   state.step_height_bytes[0] = 0x40;
   state.step_height_bytes[1] = 1;
   state.reserved_b2 = 3;
@@ -440,10 +442,10 @@ TEST_CASE("Dynamic navigation marking preserves every source flag word",
   const int x = GENERATE(0, 31);
   const int z = GENERATE(0, 31);
   NavigationOverrideFixture fixture;
-  constexpr u_short kCanary = 0xA15A;
+  constexpr std::uint16_t kCanary = 0xA15A;
   for (auto& row : fixture.grid) std::ranges::fill(row, kCanary);
   for (unsigned word = 0; word < 65536; ++word) {
-    fixture.grid[z][x] = static_cast<u_short>(word);
+    fixture.grid[z][x] = static_cast<std::uint16_t>(word);
     VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(x, z);
     REQUIRE(fixture.grid[z][x] == (word | 0x400u));
     VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(x, z);
@@ -475,7 +477,7 @@ TEST_CASE("Dynamic navigation marking follows grid availability and rebinding",
   VS::Battle::Ai::tileFlagMap = fixture.grid;
   VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(1, 2);
   CHECK(fixture.grid[2][1] == 0x403);
-  u_short second[32][32]{};
+  std::uint16_t second[32][32]{};
   second[2][1] = 0xA0;
   VS::Battle::Ai::tileFlagMap = second;
   VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(1, 2);
@@ -517,13 +519,13 @@ TEST_CASE("Gimmick occupancy preserves source halfword wrap for every value",
           "[ai][navigation][gimmick-occupancy]") {
   GimmickOccupancyFixture fixture;
   for (unsigned word = 0; word < 65536; ++word) {
-    fixture.heights[7][13] = static_cast<u_short>(word);
+    fixture.heights[7][13] = static_cast<std::uint16_t>(word);
     VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
-    REQUIRE(fixture.heights[7][13] == static_cast<u_short>(word + 0x400));
+    REQUIRE(fixture.heights[7][13] == static_cast<std::uint16_t>(word + 0x400));
     VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == word);
     VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
-    CHECK(fixture.heights[7][13] == static_cast<u_short>(word - 0x400));
+    CHECK(fixture.heights[7][13] == static_cast<std::uint16_t>(word - 0x400));
   }
 }
 
@@ -535,7 +537,7 @@ TEST_CASE("Gimmick placement retains original layer bits and native row carry",
     for (unsigned x = 0; x < 256; ++x) {
       const unsigned placement = 0xFF030000u | (layer << 8) | x;
       const unsigned offset = (placement & 255) * 2 + ((placement << 8) >> 18);
-      const auto index = offset / sizeof(u_short);
+      const auto index = offset / sizeof(std::uint16_t);
       fixture.gimmick.tile_x = static_cast<char>(x);
       fixture.gimmick.tile_z = 3;
       fixture.gimmick.tile_layer = static_cast<char>(layer);
@@ -560,7 +562,7 @@ TEST_CASE("Gimmick occupancy follows room map absence and rebinding",
   VS::Battle::Ai::tileFlagMap = fixture.grid;
   VS::Battle::Ai::specialTerrainHeights = fixture.heights;
   VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
-  u_short second[32][32]{};
+  std::uint16_t second[32][32]{};
   VS::Battle::Ai::specialTerrainHeights = second;
   VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
@@ -650,8 +652,8 @@ TEST_CASE("Route availability connects both endpoints to visible platforms",
           "[ai][route-availability][route-availability-red]") {
   RouteAvailabilityFixture fixture;
   fixture.SetVisible(1);
-  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
-  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16);
+  constexpr std::uint32_t kFirst = 0x400 | (3u << 5) | 7;
+  constexpr std::uint32_t kSecond = 0x04000000 | (3u << 21) | (7u << 16);
   fixture.SetWord(1, kFirst);
   fixture.SetWord(2, kSecond);
   fixture.SetWord(3, kFirst | kSecond);
@@ -664,8 +666,8 @@ TEST_CASE("Route availability connects both endpoints to visible platforms",
 TEST_CASE("Route availability preserves every platform mask and selector",
           "[ai][route-availability]") {
   RouteAvailabilityFixture fixture;
-  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
-  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16);
+  constexpr std::uint32_t kFirst = 0x400 | (3u << 5) | 7;
+  constexpr std::uint32_t kSecond = 0x04000000 | (3u << 21) | (7u << 16);
   for (unsigned mask = 0; mask < 16; ++mask) {
     fixture.SetVisible(mask);
     for (unsigned selector = 0; selector < 4; ++selector) {
@@ -692,8 +694,9 @@ TEST_CASE("Route availability retains mutated shift operands between pairs",
   fixture.SetVisible(8);
   fixture.SetEnd(0, 3, 6);
   fixture.SetEnd(1, 3, 7);
-  constexpr u_int kFirst = 0x400 | (3u << 5) | 7 | (3u << 13);
-  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16) | (3u << 29);
+  constexpr std::uint32_t kFirst = 0x400 | (3u << 5) | 7 | (3u << 13);
+  constexpr std::uint32_t kSecond =
+      0x04000000 | (3u << 21) | (7u << 16) | (3u << 29);
   fixture.SetWord(1, kFirst);
   fixture.SetWord(2, kSecond);
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
@@ -705,7 +708,7 @@ TEST_CASE(
     "Route availability updates all words and reopens after visibility changes",
     "[ai][route-availability]") {
   RouteAvailabilityFixture fixture;
-  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  constexpr std::uint32_t kFirst = 0x400 | (3u << 5) | 7;
   for (unsigned word = 0; word < 256; ++word) fixture.SetWord(word, kFirst);
   for (unsigned mask : {1u, 0u, 1u}) {
     fixture.SetVisible(mask);
@@ -731,7 +734,7 @@ TEST_CASE("Route availability retains the original thirteen-point capacity",
           "[ai][route-availability]") {
   RouteAvailabilityFixture fixture;
   fixture.SetVisible(1u << 12);
-  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  constexpr std::uint32_t kFirst = 0x400 | (3u << 5) | 7;
   fixture.SetWord(1, kFirst);
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == (kFirst | 0x80008000u));
@@ -822,7 +825,7 @@ TEST_CASE(
   REQUIRE(engaged);
   VS::Battle::actorMarkers[1] = static_cast<char>(0x85);
   fixture.source.current_candidate = &fixture.source.candidates[0];
-  const u_int preserved = 0x11223344;
+  const std::uint32_t preserved = 0x11223344;
   std::memcpy(fixture.source.reserved160.data() + 4, &preserved,
               sizeof preserved);
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
@@ -831,7 +834,7 @@ TEST_CASE(
   CHECK(record->current_candidate == &fixture.source.candidates[0]);
   CHECK(record->actor == fixture.source.actor);
   fixture.CheckEngagementReleased();
-  u_int actual;
+  std::uint32_t actual;
   std::memcpy(&actual, record->reserved160.data() + 4, sizeof actual);
   CHECK(actual == preserved);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(1);
@@ -947,7 +950,7 @@ TEST_CASE("Scripted route updates skip suspended and missing-AI actors safely",
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   const auto before = Snapshot(*fixture.ActiveRoute());
-  fixture.actors[1].command_state = static_cast<u_char>(flags);
+  fixture.actors[1].command_state = static_cast<std::uint8_t>(flags);
   VS::Battle::Ai::LiveFrameContext().lastBudgetTick = 0x1234;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
@@ -964,7 +967,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   const auto mode = GENERATE(1, 2);
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1200u | (1300u << 16));
-  fixture.ActiveRoute()->locomotion_mode = static_cast<u_char>(mode);
+  fixture.ActiveRoute()->locomotion_mode = static_cast<std::uint8_t>(mode);
   fixture.ActiveRoute()->destination.word = 0xA5080308;
   fixture.model.instance.current_tile_layer = 5;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();

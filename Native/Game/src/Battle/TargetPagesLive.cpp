@@ -19,7 +19,7 @@
 #include "Core/Log.hpp"
 #include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPackets.hpp"
@@ -36,8 +36,8 @@ using ResultBuffer = decltype(ActionRequestRecord::targets);
 using SphereRecord = VS::Battle::TargetSphereRecord;
 constexpr auto kPageSize = std::extent_v<decltype(SphereRecord::labels)>;
 constexpr unsigned char kNoTarget = std::numeric_limits<unsigned char>::max();
-constexpr u_int kChooseDirectTarget = 1;
-constexpr u_int kChooseAreaTarget = 3;
+constexpr std::uint32_t kChooseDirectTarget = 1;
+constexpr std::uint32_t kChooseAreaTarget = 3;
 constexpr int kHintX = 112;
 constexpr int kHintY = 32;
 constexpr int kHintColor = 0x808080;

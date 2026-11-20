@@ -31,7 +31,7 @@
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::Seq {
 namespace {

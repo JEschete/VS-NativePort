@@ -18,7 +18,7 @@
 #include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBox.hpp"
 #include "Render/Display.hpp"
@@ -35,6 +35,11 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
 
 namespace VS::Render {
 namespace {
@@ -61,7 +66,7 @@ void ReportTextBox(const VS::Menu::TextBoxState* box, const char* problem) {
 
 // The box's layers: its index in textBoxes selects them (the original
 // kept the index in D_800F4E80 while drawing the box).
-u_long* TextBoxLayers(const VS::Menu::TextBoxState* box) {
+std::uint32_t* TextBoxLayers(const VS::Menu::TextBoxState* box) {
   const std::span boxes(VS::Menu::textBoxes);
   for (std::size_t index = 0; index < boxes.size(); ++index) {
     if (&boxes[index] == box) {
@@ -149,7 +154,7 @@ class LiveVramPixels final : public VramPixelTarget {
     }
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
-    StoreImage(&rect, reinterpret_cast<u_long*>(pixels.data()));
+    StoreImage(&rect, reinterpret_cast<std::uint32_t*>(pixels.data()));
   }
 
   void Upload(const ScreenRect& area,
@@ -161,7 +166,7 @@ class LiveVramPixels final : public VramPixelTarget {
     RECT rect{};
     setRECT(&rect, area.x, area.y, area.width, area.height);
     // LoadImage only reads the pixels.
-    LoadImage(&rect, reinterpret_cast<u_long*>(
+    LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
                          const_cast<std::uint16_t*>(pixels.data())));
   }
 };
@@ -172,21 +177,22 @@ FontStyle& LiveFontStyle() noexcept { return font_style; }
 std::uint64_t RefusedLiveTextBoxCount() noexcept { return text_box_problems; }
 
 void DrawLiveCompactTextColor(const char* text, int xy, int color,
-                              u_long* chain) {
-  LivePacketQueue queue(
-      chain != nullptr
-          ? chain
-          : static_cast<u_long*>(FrameScratchpad().overlay_ordering_table));
+                              std::uint32_t* chain) {
+  LivePacketQueue queue(chain != nullptr
+                            ? chain
+                            : static_cast<std::uint32_t*>(
+                                  FrameScratchpad().overlay_ordering_table));
   DrawCompactText(queue, LiveCompactFontTables(), CompactText(text), xy,
                   static_cast<std::uint32_t>(color));
 }
 
 void DrawLiveCompactText(const char* text, int xy, void* chain) {
   DrawLiveCompactTextColor(text, xy, static_cast<int>(kCompactTextGray),
-                           static_cast<u_long*>(chain));
+                           static_cast<std::uint32_t*>(chain));
 }
 
-int DrawLiveVariableWidthGlyph(u_int glyph, int x, int y, u_long* layers) {
+int DrawLiveVariableWidthGlyph(std::uint32_t glyph, int x, int y,
+                               std::uint32_t* layers) {
   LivePacketQueue queue(layers != nullptr ? layers + kTextForegroundLayer
                                           : nullptr);
   return DrawVariableWidthGlyph(queue, font_style,
@@ -201,7 +207,7 @@ void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box) {
   if (box == nullptr || box->speed == 0) {
     return;
   }
-  u_long* const layers = TextBoxLayers(box);
+  std::uint32_t* const layers = TextBoxLayers(box);
   if (layers == nullptr) {
     ReportTextBox(box, "is not a dialogue text box or has no ordering table");
     return;
@@ -241,7 +247,7 @@ void DrawLiveScaledTextBoxText(VS::Menu::TextBoxState* box, int scale) {
   if (box == nullptr || box->speed == 0) {
     return;
   }
-  u_long* const layers = TextBoxLayers(box);
+  std::uint32_t* const layers = TextBoxLayers(box);
   if (layers == nullptr) {
     ReportTextBox(box, "is not a dialogue text box or has no ordering table");
     return;

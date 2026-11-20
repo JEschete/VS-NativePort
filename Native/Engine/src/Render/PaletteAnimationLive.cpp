@@ -16,6 +16,10 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/Palette.hpp"
 
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace VS::Render {
 namespace {
 namespace Math = VS::Core::Math;
@@ -52,8 +56,8 @@ void Upload(std::uint32_t x, std::uint32_t y, std::size_t width,
   setRECT(&rect, static_cast<std::int16_t>(x), static_cast<std::int16_t>(y),
           static_cast<std::int16_t>(width), static_cast<std::int16_t>(height));
   // LoadImage only reads the pixels; the core sized the span to the area.
-  LoadImage(&rect,
-            reinterpret_cast<u_long*>(const_cast<std::uint16_t*>(pixels)));
+  LoadImage(&rect, reinterpret_cast<std::uint32_t*>(
+                       const_cast<std::uint16_t*>(pixels)));
 }
 
 ColorCode CodeOf(const TintCode& tint) {
@@ -123,8 +127,8 @@ bool LoadLiveClutRow(std::uint32_t row, std::uint32_t first_color,
   return true;
 }
 
-void LoadLiveClutColors(const u_short* colors, u_int row, u_int first_color,
-                        u_int count) {
+void LoadLiveClutColors(const std::uint16_t* colors, std::uint32_t row,
+                        std::uint32_t first_color, std::uint32_t count) {
   if (colors == nullptr && count != 0) {
     ReportRefusal("null CLUT colours");
     return;

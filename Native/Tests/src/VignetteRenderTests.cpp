@@ -6,10 +6,16 @@
 
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
+
+using VS::Legacy::GpuHandle;
+using VS::Legacy::GpuWalkList;
+using VS::Legacy::kGpuLinkEnd;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
 
 namespace {
 constexpr int kGuard = 0x13572468;
@@ -28,14 +34,14 @@ struct VignetteFixture {
       VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1];
   void* const saved_primitives =
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
-  alignas(8) std::array<u_long, 8> ordering{};
+  alignas(8) std::array<std::uint32_t, 8> ordering{};
   std::array<int, kPacketWords + 2> packets{};
-  u_long tail = LEGACY_GPU_LINK_END;
+  std::uint32_t tail = kGpuLinkEnd;
 
   VignetteFixture() {
-    ordering.fill(static_cast<u_long>(kGuard));
+    ordering.fill(static_cast<std::uint32_t>(kGuard));
     packets.fill(kGuard);
-    ordering[2] = LegacyGpu_Handle(&tail);
+    ordering[2] = GpuHandle(&tail);
     *frame = {};
     frame->primitive_cursor = packets.data() + 1;
     frame->overlay_ordering_table = ordering.data() + 2;
@@ -61,8 +67,8 @@ struct VignetteFixture {
   }
 
   void CheckBounds() const {
-    REQUIRE(ordering[3] == static_cast<u_long>(kGuard));
-    CHECK(ordering[1] == static_cast<u_long>(kGuard));
+    REQUIRE(ordering[3] == static_cast<std::uint32_t>(kGuard));
+    CHECK(ordering[1] == static_cast<std::uint32_t>(kGuard));
     CHECK(packets.front() == kGuard);
     CHECK(packets.back() == kGuard);
     CHECK(frame->primitive_cursor == packets.data() + 1 + kPacketWords);
@@ -96,14 +102,14 @@ TEST_CASE("Vignette links occupy one word and retain the previous chain",
   }
   CHECK(node == &fixture.tail);
   CHECK(nextPrim(node) == nullptr);
-  CHECK(LegacyGpu_WalkList(&fixture.ordering[2]) == 82);
+  CHECK(GpuWalkList(&fixture.ordering[2]) == 82);
 }
 
 TEST_CASE("Vignette retains every original corner and elliptical ring packet",
           "[render][effects][vignette]") {
   VignetteFixture fixture;
   VS::Effects::ScreenDistortion::DrawLiveVignette();
-  REQUIRE(fixture.ordering[3] == static_cast<u_long>(kGuard));
+  REQUIRE(fixture.ordering[3] == static_cast<std::uint32_t>(kGuard));
   constexpr std::array kCorners{0xE00140, 0xE00000, 0, 0x140};
   for (std::size_t index = 0; index < kTriangleCount; ++index) {
     const int angle = static_cast<int>((index / 4) * 16 + 6 + index % 4);

@@ -14,7 +14,7 @@
 #include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Score/Records.hpp"
@@ -24,6 +24,8 @@
 #include "Render/Render.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::VECTOR;
 
 using VS::Battle::ActionDefinition;
 
@@ -246,7 +248,7 @@ std::uint32_t ResultsRankRow(std::uint32_t titles, std::uint32_t score) {
 
 void SetLiveScoreInputs() {
   VS::State::scoreData.titles = 0x00070000;
-  for (u_short& kills : VS::State::scoreData.enemy_kills) {
+  for (std::uint16_t& kills : VS::State::scoreData.enemy_kills) {
     kills = 5000;
   }
   VS::State::scoreData.boss_time_trial_scores[3][0].time = 0x123;

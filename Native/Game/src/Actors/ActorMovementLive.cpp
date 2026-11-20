@@ -31,6 +31,8 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Actors {
 namespace {
 constexpr std::size_t kActorSlots = std::size(VS::Actors::actorRecords);
@@ -44,12 +46,12 @@ static_assert(sizeof(GroundedPair) == sizeof(std::int32_t));
 static_assert(sizeof(PackedTile) == sizeof(std::int32_t));
 
 template <std::size_t SourceSize, typename Target, std::size_t TargetSize>
-void CopyTable(const u_char (&source)[SourceSize],
+void CopyTable(const std::uint8_t (&source)[SourceSize],
                std::array<Target, TargetSize>& target) {
   static_assert(SourceSize >= TargetSize);
   std::transform(std::begin(source), std::begin(source) + TargetSize,
                  target.begin(),
-                 [](u_char value) { return static_cast<Target>(value); });
+                 [](std::uint8_t value) { return static_cast<Target>(value); });
 }
 
 template <std::size_t SourceSize, typename Target, std::size_t TargetSize>
@@ -231,8 +233,8 @@ class LiveMovementHost final : public MovementHost {
   }
   // The effect reads the X and Z components of a three-halfword position.
   void SpawnGroundImpact(int x, int z) override {
-    std::array<u_short, kPositionAxes> position{static_cast<u_short>(x), 0,
-                                                static_cast<u_short>(z)};
+    std::array<std::uint16_t, kPositionAxes> position{
+        static_cast<std::uint16_t>(x), 0, static_cast<std::uint16_t>(z)};
     VS::Effects::LiveSpawnGroundPlaneImpactEffect(position.data());
   }
 

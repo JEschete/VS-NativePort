@@ -12,7 +12,7 @@
 #include "Boot/GameLoop.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Save/MemoryCard/CardResources.hpp"
@@ -20,6 +20,11 @@
 #include "Save/MenuAssetsLive.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+using VS::Legacy::StoreImage;
 
 namespace {
 using VS::Save::MemoryCard::InitializeMenuResourcesStep;
@@ -305,11 +310,11 @@ class LiveAssetFixture {
     VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
     VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
     setRECT(&image_, kImageX, kImageY, kImageWidth, kImageHeight);
-    StoreImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
+    StoreImage(&image_, reinterpret_cast<std::uint32_t*>(saved_vram_.data()));
   }
   ~LiveAssetFixture() {
     VS::Render::LiveTexturePages() = saved_pages_;
-    LoadImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
+    LoadImage(&image_, reinterpret_cast<std::uint32_t*>(saved_vram_.data()));
     VS::Menu::Files::textTable = saved_menu_text_;
     VS::Title::saveMenuText = saved_title_text_;
     VS::Title::saveFileSummaries = saved_summaries_;
@@ -333,8 +338,8 @@ class LiveAssetFixture {
   VS::Content::DiscRequestCounts saved_counts_ = VS::Content::discRequestCounts;
   VS::Content::DiscDrive saved_drive_ = VS::Content::discDriveState;
   int saved_soft_reset_ = VS::Boot::isSoftResetEnabled;
-  u_short* saved_menu_text_ = VS::Menu::Files::textTable;
-  u_short* saved_title_text_ = VS::Title::saveMenuText;
+  std::uint16_t* saved_menu_text_ = VS::Menu::Files::textTable;
+  std::uint16_t* saved_title_text_ = VS::Title::saveMenuText;
   VS::Save::CardFileInfoRecord* saved_summaries_ = VS::Title::saveFileSummaries;
   VS::Legacy::DIRENTRY* saved_directory_ = VS::Title::cardDirectoryEntryBuffer;
   RECT image_{};
@@ -388,8 +393,8 @@ void LoadLive(int (*step)(int)) {
 struct AssetViews {
   char* image = VS::Title::memoryCardUiResource;
   VS::Save::CardUiResources* resources = VS::Save::MemoryCard::uiResources;
-  u_short* menu_text = VS::Menu::Files::textTable;
-  u_short* title_text = VS::Title::saveMenuText;
+  std::uint16_t* menu_text = VS::Menu::Files::textTable;
+  std::uint16_t* title_text = VS::Title::saveMenuText;
   VS::Save::CardFileInfoRecord* summaries = VS::Title::saveFileSummaries;
   VS::Legacy::DIRENTRY* directory = VS::Title::cardDirectoryEntryBuffer;
 

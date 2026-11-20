@@ -29,7 +29,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Files.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -59,8 +59,19 @@
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::ClearImage;
+using VS::Legacy::DISPENV;
+using VS::Legacy::DRAWENV;
+using VS::Legacy::DrawPrim;
+using VS::Legacy::PutDispEnv;
+using VS::Legacy::PutDrawEnv;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDefDispEnv;
+using VS::Legacy::SetDefDrawEnv;
+using VS::Legacy::SetDispMask;
+
 // decomp: _containerStrings (_containerStrings@src/MENU/MENU7.PRG/260.c)
-u_short
+std::uint16_t
     VS::Menu::Files::containerStrings[VS::Menu::Files::kContainerStringCount];
 // decomp: _dataNotSaved (_dataNotSaved@src/MENU/MENU7.PRG/260.c)
 char VS::Menu::Files::dataNotSaved;
@@ -71,7 +82,7 @@ char* VS::Menu::Files::memoryCardMessage;
 // decomp: _selectCursorXy (_selectCursorXy@src/MENU/MENU7.PRG/260.c)
 int VS::Menu::Files::selectCursorXy;
 // decomp: _textTable (_textTable@src/MENU/MENU7.PRG/260.c)
-u_short* VS::Menu::Files::textTable;
+std::uint16_t* VS::Menu::Files::textTable;
 // decomp: _frameBuf (_frameBuf@src/TITLE/TITLE.PRG/22C.c)
 char VS::Menu::Files::frameBuf;
 
@@ -139,7 +150,7 @@ void Warn(std::string_view what) {
 
 // The packet drawn at once from a copy (DrawPrim of the original's primBuf).
 void SubmitLive(std::span<const std::uint32_t> packet) {
-  std::array<u_long, kImmediatePacketWords> words{};
+  std::array<std::uint32_t, kImmediatePacketWords> words{};
   if (packet.size() > words.size()) {
     Warn(std::format("file menu packet of {} words exceeds the {}-word buffer",
                      packet.size(), words.size()));
@@ -182,7 +193,8 @@ void ClearBothBuffers() {
   ClearImage(&rect, 0, 0, 0);
 }
 
-[[nodiscard]] std::span<const std::uint16_t> TableSpan(const u_short* table) {
+[[nodiscard]] std::span<const std::uint16_t> TableSpan(
+    const std::uint16_t* table) {
   if (table == nullptr) {
     return {};
   }
@@ -227,7 +239,7 @@ void ClearBothBuffers() {
 
 // The table's text at `offset` as the message pointer, or null for none or
 // an offset the table does not hold.
-char* TableMessage(u_short* table, std::optional<std::uint16_t> offset,
+char* TableMessage(std::uint16_t* table, std::optional<std::uint16_t> offset,
                    CardHost& host) {
   if (!offset) {
     return nullptr;
@@ -290,11 +302,12 @@ class LiveGpuHost : public Host {
       return;
     }
     RECT rect = RectAt(position, size);
-    ::StoreImage(&rect, reinterpret_cast<u_long*>(pixels.data()));
+    VS::Legacy::StoreImage(&rect,
+                           reinterpret_cast<std::uint32_t*>(pixels.data()));
   }
   void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(false); }
   void DrawCompactText(std::string_view text, std::uint32_t position) override {
-    u_long* const chain = Render::LiveFrameOrderingEntry(
+    std::uint32_t* const chain = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kCompactTextSlot);
     if (chain == nullptr) {
       Refuse("play time text outside the frame's ordering table");
@@ -318,9 +331,9 @@ class LiveGpuHost : public Host {
   void SetDisplayMask(bool shown) override { SetDispMask(shown ? 1 : 0); }
   void LoadClutColors(std::span<const std::uint16_t> colors, int row,
                       int first) override {
-    Render::LoadLiveClutColors(colors.data(), static_cast<u_int>(row),
-                               static_cast<u_int>(first),
-                               static_cast<u_int>(colors.size()));
+    Render::LoadLiveClutColors(colors.data(), static_cast<std::uint32_t>(row),
+                               static_cast<std::uint32_t>(first),
+                               static_cast<std::uint32_t>(colors.size()));
   }
   void RetireTexturePages(std::uint32_t first, std::uint32_t count,
                           int owner) override {

@@ -23,6 +23,9 @@
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;
 

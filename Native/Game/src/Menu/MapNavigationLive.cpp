@@ -19,10 +19,12 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Menu::map {
 namespace {

@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Actors {
 
@@ -34,7 +34,7 @@ static_assert(sizeof(PackedTileTarget) == kPackedTileTargetBytes,
 // decomp: ActorLocation (src/BATTLE/BATTLE.PRG/actorPosition.h:6)
 struct ActorLocation {
   PackedTileTarget packed_tile;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
 };
 inline constexpr std::size_t kActorLocationBytes = 0xC;
 static_assert(sizeof(ActorLocation) == kActorLocationBytes,

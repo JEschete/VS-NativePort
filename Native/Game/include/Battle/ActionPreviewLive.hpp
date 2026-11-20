@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle {
 
@@ -21,7 +21,7 @@ void ResolveLiveActionTargets(int action,
 int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
                                  void* result);
 int PreviewLiveActionAgainstActor(int action, int source, int target, int limb,
-                                  SVECTOR* source_position,
-                                  SVECTOR* target_position,
+                                  VS::Core::Gte::SVECTOR* source_position,
+                                  VS::Core::Gte::SVECTOR* target_position,
                                   VS::Battle::ActionRequestRecord* result);
 }  // namespace VS::Battle

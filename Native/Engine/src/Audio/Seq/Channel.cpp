@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Audio/Mixer/MixControl.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/AkaoFormat.hpp"
@@ -24,7 +24,7 @@ VS::Audio::MusicConfig VS::Audio::Seq::primaryMusicConfig;
 VS::Audio::CommandParams VS::Audio::Seq::pendingMusicData;
 
 // decomp: g_Music_LoopCounter (g_Music_LoopCounter@SLUS_010.40)
-u_int VS::Audio::Seq::musicLoopsRemaining;
+std::uint32_t VS::Audio::Seq::musicLoopsRemaining;
 
 // decomp: g_pActiveMusicConfig (g_pActiveMusicConfig@SLUS_010.40)
 VS::Audio::MusicConfig* VS::Audio::Seq::activeMusicConfig;

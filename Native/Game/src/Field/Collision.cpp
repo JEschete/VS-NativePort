@@ -2,6 +2,8 @@
 // (Collision.hpp).
 #include "Field/Collision.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Field {
 // decomp: D_800E9278 (D_800E9278@BATTLE/BATTLE.PRG); contents: module image
 // (ModuleData.cpp)

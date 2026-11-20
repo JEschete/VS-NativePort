@@ -5,7 +5,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Core/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/GameClock.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Timers.hpp"

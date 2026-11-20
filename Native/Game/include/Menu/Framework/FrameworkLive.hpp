@@ -5,7 +5,7 @@
 #include <span>
 
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Prompts.hpp"
 
 // Binds the menu framework (Framework.hpp) to its variables
@@ -36,7 +36,8 @@ MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
 // LiveMenuItem for typed hosts.
 MenuRow& LiveMenuRow(int row);
 [[nodiscard]] std::span<std::uint8_t> LiveMenuCursorMemory();
-int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness);
+int LiveGradientStopColor(std::uint32_t gradient, std::uint32_t color_index,
+                          int brightness);
 void DrawLiveMenuItem(MenuRow* row);
 int UpdateLiveMainMenuSelection(int mode);
 void UpdateLiveMenuOverlay();
@@ -73,13 +74,14 @@ void InitializeLiveInformationBox();
 void SetLiveInformationMessage(char* message);
 void SetLiveInformationMessageText(std::span<const std::uint8_t> message);
 // A null `before` links into the overlay ordering table.
-void DrawLiveButtonIcon(ButtonIcon button, int x, int y, u_long* before);
-int DrawLiveCursor(u_int step, int position);
-int DrawLiveColoredInteger(int value, int xy, int color, u_long* before);
-int DrawLiveComparedInteger(int value, int xy, int threshold, u_long* before);
-void DrawLiveNeutralInteger(int value, int xy, u_long* before);
+void DrawLiveButtonIcon(ButtonIcon button, int x, int y, std::uint32_t* before);
+int DrawLiveCursor(std::uint32_t step, int position);
+int DrawLiveColoredInteger(int value, int xy, int color, std::uint32_t* before);
+int DrawLiveComparedInteger(int value, int xy, int threshold,
+                            std::uint32_t* before);
+void DrawLiveNeutralInteger(int value, int xy, std::uint32_t* before);
 void DrawLiveFeatheredRowIcon(int direction, int xy, int uv_clut,
-                              u_long* before);
+                              std::uint32_t* before);
 void DrawLiveMaterialIndicator(int material, int xy);
 void DrawLiveEquipmentStateIcon(int icon, int xy);
 void DrawLiveRowIcon(int icon, int x, int y);
@@ -88,7 +90,7 @@ void SetLiveActionCostText(int index, char const* text, int x_offset,
 void DrawLiveActionCostPanel();
 void DrawLiveButtonPromptBackground(int x, int y, int w, int h);
 void SetLiveBackgroundPriority(int ot_offset, int brightness);
-void LoadLiveBackgroundTexture(u_int* buffer);
+void LoadLiveBackgroundTexture(std::uint32_t* buffer);
 void CreateLiveMenuRows(int row_count, int row_info, char* strings[],
                         int row_types[]);
 int CloseLiveRowsAndRememberCursor();
@@ -97,8 +99,8 @@ int LiveSelectedRow();
 MenuRow* CreateLiveListRow(int row, int x);
 void UpdateLiveRowSelection();
 void DrawLiveBackground(int brightness);
-int DrawLiveFeatheredRowCharacter(u_int character, int x, MenuRow* row,
-                                  u_long* before);
+int DrawLiveFeatheredRowCharacter(std::uint32_t character, int x, MenuRow* row,
+                                  std::uint32_t* before);
 void DrawLiveTabNavigation(int mode);
 void DrawLiveScrollableRow(MenuRow* row);
 void UpdateAndDrawLiveRows();
@@ -117,16 +119,16 @@ void UpdateLiveMainMenu(int packed_menu_state);
 // The MENU*.PRG copies.
 void RenderLiveAshley(AshleyRenderMode mode);
 void ContinueLiveItemDetailsTransition(int row);
-void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
-                                    int page);
+void UpdateLiveItemDetailsSelection(int row, char* text[],
+                                    std::uint32_t row_type, int page);
 int LiveWeaponSortValue(int stat, const VS::Items::WeaponLoadout* weapon);
 int LiveShieldSortValue(int stat, const VS::Items::ShieldLoadout* shield);
 int LiveMiscSortValue(int stat, const VS::Items::InventoryMisc* misc);
 int LiveEquipmentSortValue(int stat, const VS::Items::EquipmentPart* equipment);
 void SetLiveMenuVisible(int display);
 void ClearLiveMenuExceptTitle();
-void BuildLiveYawMatrix(MATRIX* matrix, std::int16_t angle);
-void BuildLivePitchMatrix(MATRIX* matrix, std::int16_t angle);
+void BuildLiveYawMatrix(VS::Core::Gte::MATRIX* matrix, std::int16_t angle);
+void BuildLivePitchMatrix(VS::Core::Gte::MATRIX* matrix, std::int16_t angle);
 void ShowLiveSecondaryTitle(char* text);
 
 // Restores the MAINMENU.PRG statics a fresh load of the overlay brings back

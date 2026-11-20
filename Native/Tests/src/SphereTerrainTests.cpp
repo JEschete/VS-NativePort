@@ -23,27 +23,38 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::GpuPointer;
+using VS::Legacy::nextPrim;
 
 namespace {
-constexpr u_long kGuard = 0xA1B2C3D4;
+constexpr std::uint32_t kGuard = 0xA1B2C3D4;
 
 struct SliceFixture {
   VS::Battle::TargetSphereSetupView storage{};
   VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  u_int saved_control = VS::Field::controlMode;
-  u_int saved_action_mode = VS::Battle::actionFlowMode;
-  std::array<u_long, 2050> ordering{};
-  std::vector<u_long> packets = std::vector<u_long>(65538, kGuard);
+  std::uint32_t saved_control = VS::Field::controlMode;
+  std::uint32_t saved_action_mode = VS::Battle::actionFlowMode;
+  std::array<std::uint32_t, 2050> ordering{};
+  std::vector<std::uint32_t> packets =
+      std::vector<std::uint32_t>(65538, kGuard);
   SVECTOR center{64, -64, 64, 0};
   MATRIX shape{{{256, 0, 0}, {0, 256, 0}, {0, 0, 256}}, {0, 0, 0}};
 
@@ -60,7 +71,7 @@ struct SliceFixture {
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Field::controlMode = saved_control;
     VS::Battle::actionFlowMode = saved_action_mode;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   static int Terrain(int floor, int ceiling) {
@@ -78,17 +89,17 @@ struct SliceFixture {
   void Camera(int yaw) {
     SVECTOR angles{512, static_cast<std::int16_t>(yaw), 0, 0};
     MATRIX camera{};
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
     VS::Core::Math::BuildLiveRotationXyz(&angles, &camera);
     camera.t[2] = 2048;
-    Core_Gte_SetRotMatrix(&camera);
-    Core_Gte_SetTransMatrix(&camera);
-    Core_Gte_SetGeomOffset(160, 112);
-    Core_Gte_SetGeomScreen(256);
+    SetRotMatrix(&camera);
+    SetTransMatrix(&camera);
+    SetGeomOffset(160, 112);
+    SetGeomScreen(256);
     Sphere().camera_yaw = static_cast<std::int16_t>(yaw);
   }
 
-  std::vector<u_long> Draw(int scale = 4096) {
+  std::vector<std::uint32_t> Draw(int scale = 4096) {
     ordering.fill(0xFFFFFF);
     ordering.front() = ordering.back() = kGuard;
     std::fill(packets.begin(), packets.end(), kGuard);
@@ -99,14 +110,14 @@ struct SliceFixture {
     REQUIRE(ordering.back() == kGuard);
     REQUIRE(packets.front() == kGuard);
     REQUIRE(packets.back() == kGuard);
-    auto* cursor =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+    auto* cursor = static_cast<std::uint32_t*>(
+        VS::Render::FrameScratchpad().primitive_cursor);
     const auto count = cursor - packets.data() - 1;
     REQUIRE(count >= 0);
     REQUIRE(count < 65536);
     REQUIRE(count % 5 == 0);
     CheckLinks(cursor, count);
-    std::vector<u_long> geometry;
+    std::vector<std::uint32_t> geometry;
     for (std::ptrdiff_t index = 1; index <= count; index += 5) {
       geometry.push_back(packets[index + 3]);
       geometry.push_back(packets[index + 4]);
@@ -114,12 +125,12 @@ struct SliceFixture {
     return geometry;
   }
 
-  void CheckLinks(const u_long* cursor, std::ptrdiff_t count) {
+  void CheckLinks(const std::uint32_t* cursor, std::ptrdiff_t count) {
     std::size_t linked = 0;
     for (std::size_t depth = 1; depth + 1 < ordering.size(); ++depth) {
       auto* link = &ordering[depth];
       while ((*link & 0xFFFFFF) != 0xFFFFFF) {
-        link = static_cast<u_long*>(nextPrim(link));
+        link = static_cast<std::uint32_t*>(nextPrim(link));
         REQUIRE(link >= packets.data() + 1);
         REQUIRE(link + 5 <= cursor);
         CheckScanline(link);
@@ -130,7 +141,7 @@ struct SliceFixture {
     REQUIRE(linked == static_cast<std::size_t>(count / 5));
   }
 
-  static void CheckScanline(const u_long* link) {
+  static void CheckScanline(const std::uint32_t* link) {
     REQUIRE(link[0] >> 24 == 4);
     REQUIRE(link[1] == 0xE1000220);
     const int y = static_cast<std::int16_t>(link[3] >> 16);
@@ -145,13 +156,13 @@ struct SliceFixture {
 
 struct SphereLabelFixture {
   SliceFixture slice;
-  std::array<u_char, 92> saved_widths =
+  std::array<std::uint8_t, 92> saved_widths =
       std::to_array(VS::Render::compactGlyphWidths);
-  std::array<u_char, 60> saved_indices =
+  std::array<std::uint8_t, 60> saved_indices =
       std::to_array(VS::Render::compactGlyphIndices);
-  std::array<u_char, 264> saved_trim =
+  std::array<std::uint8_t, 264> saved_trim =
       std::to_array(VS::Render::compactGlyphLeftTrim);
-  std::array<u_long, 2200> ordering{};
+  std::array<std::uint32_t, 2200> ordering{};
   void* saved_buffer =
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
 
@@ -211,7 +222,7 @@ struct ExtendedPageFixture : SliceFixture {
   }
 };
 
-int Coverage(const std::vector<u_long>& lines) {
+int Coverage(const std::vector<std::uint32_t>& lines) {
   int pixels = 0;
   for (std::size_t index = 0; index < lines.size(); index += 2) {
     pixels += static_cast<std::int16_t>(lines[index + 1]) -
@@ -254,7 +265,7 @@ TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
   using PreviewBuffer = decltype(ActionState::previews);
   struct GuardedPreviews {
     PreviewBuffer entries{};
-    u_long guard = kGuard;
+    std::uint32_t guard = kGuard;
   } storage;
   REQUIRE(std::size(storage.entries) > 31);
   const int index = VS::Battle::ValidateTargetPreviewIndex(31);
@@ -299,9 +310,9 @@ TEST_CASE(
 TEST_CASE("Native action result clearing covers the entire native capacity",
           "[combat][targeting][capacity]") {
   struct GuardedRequest {
-    u_long before;
+    std::uint32_t before;
     ActionRequestRecord request;
-    u_long after;
+    std::uint32_t after;
   } storage{};
   storage.before = storage.after = kGuard;
   std::memset(&storage.request, 0xA5, sizeof storage.request);
@@ -375,13 +386,13 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
   SphereLabelFixture fixture;
   fixture.Labels(labels);
   auto& volume = fixture.slice.Sphere().volumes[0];
-  volume.kind = static_cast<u_char>(kind);
+  volume.kind = static_cast<std::uint8_t>(kind);
   volume.scale.extents[0] = volume.scale.extents[2] = 16;
   volume.scale.extents[1] = 24;
   volume.scale.extents[3] = 32;
   VS::Battle::LiveDrawSphere();
-  auto* cursor =
-      static_cast<u_long*>(VS::Render::FrameScratchpad().primitive_cursor);
+  auto* cursor = static_cast<std::uint32_t*>(
+      VS::Render::FrameScratchpad().primitive_cursor);
   REQUIRE(cursor >= fixture.slice.packets.data() + 1);
   REQUIRE(cursor < fixture.slice.packets.data() + fixture.slice.packets.size());
   CHECK(VS::Render::FrameScratchpad().ordering_table ==
@@ -397,20 +408,20 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
 TEST_CASE("Live sphere position cursor links both pitch quads",
           "[render][sphere][sphere-draw]") {
   SphereLabelFixture fixture;
-  const u_char saved_blink = VS::Battle::positionCursorBlinkFrame;
+  const std::uint8_t saved_blink = VS::Battle::positionCursorBlinkFrame;
   VS::Battle::positionCursorBlinkFrame = 0;
   SVECTOR position = fixture.slice.center;
   VS::Battle::LiveDrawSpherePositionCursor(&position, 0);
   VS::Battle::positionCursorBlinkFrame = saved_blink;
-  const auto* cursor = static_cast<const u_long*>(
+  const auto* cursor = static_cast<const std::uint32_t*>(
       VS::Render::FrameScratchpad().primitive_cursor);
-  const u_long* const next_slot = &fixture.ordering[62];
-  const u_long* link = &fixture.ordering[63];
+  const std::uint32_t* const next_slot = &fixture.ordering[62];
+  const std::uint32_t* link = &fixture.ordering[63];
   int quads = 0;
   int sprites = 0;
   for (int steps = 0; link != next_slot; ++steps) {
     REQUIRE(steps < 16);
-    link = static_cast<const u_long*>(LegacyGpu_Pointer(*link));
+    link = static_cast<const std::uint32_t*>(GpuPointer(*link));
     REQUIRE(link != nullptr);
     if (link == next_slot) break;
     REQUIRE(link >= fixture.slice.packets.data() + 1);
@@ -477,19 +488,19 @@ TEST_CASE("Spell elevation clipping stays within screen and depth bounds",
   SliceFixture fixture;
   MATRIX camera{{{4096, 0, 0}, {0, 2896, -2896}, {0, 2896, 2896}},
                 {0, 0, 2048}};
-  Core_Gte_SetRotMatrix(&camera);
-  Core_Gte_SetTransMatrix(&camera);
-  Core_Gte_SetGeomOffset(160, -200);
+  SetRotMatrix(&camera);
+  SetTransMatrix(&camera);
+  SetGeomOffset(160, -200);
   REQUIRE(fixture.Draw().empty());
-  Core_Gte_SetGeomOffset(160, 400);
+  SetGeomOffset(160, 400);
   REQUIRE(fixture.Draw().empty());
-  Core_Gte_SetGeomOffset(160, 0);
+  SetGeomOffset(160, 0);
   REQUIRE(!fixture.Draw().empty());
-  Core_Gte_SetGeomOffset(160, 224);
+  SetGeomOffset(160, 224);
   REQUIRE(!fixture.Draw().empty());
   camera.t[2] = 10000;
-  Core_Gte_SetTransMatrix(&camera);
-  Core_Gte_SetGeomOffset(160, 112);
+  SetTransMatrix(&camera);
+  SetGeomOffset(160, 112);
   REQUIRE(fixture.Draw().empty());
 }
 

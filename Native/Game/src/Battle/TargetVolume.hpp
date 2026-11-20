@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "Battle/BattleTypes.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 
@@ -46,7 +46,7 @@ struct SphereTargetLabelRecord {
   std::int16_t screen_x;
   std::uint8_t offset_y;
   char fade;
-  SVECTOR world_position;
+  VS::Core::Gte::SVECTOR world_position;
   char* text;
 };
 

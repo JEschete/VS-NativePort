@@ -3,7 +3,9 @@
 
 #include <cstddef>
 
+namespace VS::Core::Gte {
 struct MATRIX;
+}  // namespace VS::Core::Gte
 
 // Binds the typed map progress rules (Map.hpp) to the minimap flag, the room
 // visit progress and the location table, in the shapes the copied callers use.
@@ -18,7 +20,7 @@ void RestoreLiveSceneRoomVisits(void* scene, std::size_t size);
 
 // Writes the minimap rotation into `rotation`'s 3x3 part; the translation is
 // left alone.
-void BuildLiveMinimapRotation(MATRIX* rotation, int yaw_angle);
+void BuildLiveMinimapRotation(VS::Core::Gte::MATRIX* rotation, int yaw_angle);
 
 // The map completion percent of the current visit progress.
 int LiveMapCompletionPercent();

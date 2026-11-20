@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/PaletteAnimation.hpp"
 
 // Live binding for the scene's animated colours (PaletteAnimation.cpp): one
@@ -16,8 +16,8 @@
 // refused, counted and reported instead of reaching the core.
 namespace VS::Render {
 // vs_main_loadClut (main.c:11470).
-void LoadLiveClutColors(const u_short* colors, u_int row, u_int first_color,
-                        u_int count);
+void LoadLiveClutColors(const std::uint16_t* colors, std::uint32_t row,
+                        std::uint32_t first_color, std::uint32_t count);
 // vs_main_commitClut (main.c:11621).
 void CommitLiveClutRows();
 // vs_main_clutInit (main.c:11634).

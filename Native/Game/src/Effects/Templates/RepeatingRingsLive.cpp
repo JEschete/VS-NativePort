@@ -22,7 +22,7 @@
 #include "Effects/Templates/RepeatingRings.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects::Templates {
 namespace {

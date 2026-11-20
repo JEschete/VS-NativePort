@@ -22,7 +22,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ItemView.hpp"
 #include "Menu/Container/Storage.hpp"
@@ -98,7 +98,7 @@ static_assert(item_text::kWoodName == itemname_text::index::kWood);
 static_assert(sizeof(*itemNames) == kItemNameRowBytes);
 
 // decomp: vs_mainMenu_weaponHands' module image values (2D10.c:157).
-constexpr std::array<u_char, kWeaponHandCategories> kInitialWeaponHands{
+constexpr std::array<std::uint8_t, kWeaponHandCategories> kInitialWeaponHands{
     0, 0, 1, 0, 1, 0, 1, 1, 1, 0,
 };
 
@@ -240,9 +240,9 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
       return;
     }
     itemNames = static_cast<char (*)[kItemNameRowBytes]>(block);
-    itemHelp = reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes);
-    menu12Text = reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes +
-                                            kItemHelpBytes);
+    itemHelp = reinterpret_cast<std::uint16_t*>(Bytes(block) + kItemNamesBytes);
+    menu12Text = reinterpret_cast<std::uint16_t*>(
+        Bytes(block) + kItemNamesBytes + kItemHelpBytes);
     // The three files are contiguous on the disc.
     const VS::Content::DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
                                      .size = static_cast<int>(kItemTextBytes)};
@@ -499,14 +499,14 @@ void ResetLiveItemRowsStatics() {
 }  // namespace VS::Menu::Framework
 
 // decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c:42)
-u_short* VS::Menu::Framework::itemHelp = nullptr;
+std::uint16_t* VS::Menu::Framework::itemHelp = nullptr;
 // decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG 2D10.c:150): the module
 // image value is null.
 char (*VS::Menu::Framework::itemNames)[VS::Menu::Framework::kItemNameRowBytes] =
     nullptr;
 // decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG 2D10.c:1132)
-u_short* VS::Menu::Framework::menu12Text = nullptr;
+std::uint16_t* VS::Menu::Framework::menu12Text = nullptr;
 // decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG 2D10.c:157)
-u_char VS::Menu::Framework::weaponHands
+std::uint8_t VS::Menu::Framework::weaponHands
     [VS::Menu::Framework::kWeaponHandCategories] = {0, 0, 1, 0, 1,
                                                     0, 1, 1, 1, 0};

@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 
@@ -155,7 +155,7 @@ struct TargetSphereLabelView {
   std::uint8_t opaque31;
   std::array<std::int8_t, 2> reserved32;
   std::int32_t opaque34;
-  SVECTOR opaque38;
+  VS::Core::Gte::SVECTOR opaque38;
   TargetInfoLine* opaque40;
   TargetInfoLine* opaque44;
   std::array<std::int8_t, kTargetSphereReserved48Bytes> reserved48;

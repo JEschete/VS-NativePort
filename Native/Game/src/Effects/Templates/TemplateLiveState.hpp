@@ -12,7 +12,7 @@
 #include "Effects/Templates/SurfaceCore.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "Effects/Trails.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Effects {
 // decomp: vs_RingState (src/EFFECT/effectCommon.h:22): the state of the ring
@@ -81,7 +81,7 @@ struct LiveMesh10State {
   LiveParticleTextureAnimation texture;
   // Accumulated rotation; the sampled spin adds to it each tick
   // (meshes10.h:152-157).
-  SVECTOR rotation;
+  VS::Core::Gte::SVECTOR rotation;
 };
 
 // decomp: VS_SURFACE_STATE_TYPE (src/EFFECT/surfaces.h:31): the surface

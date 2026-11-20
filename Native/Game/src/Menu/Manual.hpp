@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "Content/DiscQueue.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/ManualScreen.hpp"
 #include "Menu/ManualTopics.hpp"
 
@@ -40,7 +40,7 @@ extern std::int32_t helpPageLoadCounter;
 // decomp: helpText (src/MENU/MENUE.PRG/494.c:222)
 extern std::int32_t* helpText;
 // decomp: helpAssets (src/MENU/MENUE.PRG/494.c:223)
-extern u_long* helpAssets;
+extern std::uint32_t* helpAssets;
 // decomp: helpFileCdFiles (src/MENU/MENUE.PRG/494.c:241): each topic's
 // asset file (HF1), then its text file (HF0).
 extern const VS::Content::DiscFile kHelpFileCdFiles[kHelpFileCount];

@@ -31,7 +31,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Materials.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -275,7 +275,7 @@ class LiveHost final : public Host {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   int DrawCursor(int step, std::uint32_t position) override {
-    return Framework::DrawLiveCursor(static_cast<u_int>(step),
+    return Framework::DrawLiveCursor(static_cast<std::uint32_t>(step),
                                      static_cast<int>(position));
   }
   int DrawMainMenuCursor(int step, int position) override {
@@ -283,7 +283,7 @@ class LiveHost final : public Host {
   }
   void DrawConfirmationText(std::uint32_t position,
                             std::uint32_t color) override {
-    u_long* const chain = Render::LiveFrameOrderingEntry(
+    std::uint32_t* const chain = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kConfirmationOrderingSlot);
     if (chain == nullptr) {
       Refuse("workshop OK label outside the frame's ordering table");

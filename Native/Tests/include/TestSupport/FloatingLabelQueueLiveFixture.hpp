@@ -80,7 +80,8 @@ class State {
       VS::Battle::ashleyStatusLabelsSuppressed,
       VS::Battle::placedLabelCount};
   int saved_sides_ = VS::Battle::actorMarkerSides;
-  SVECTOR saved_cue_position_ = VS::Battle::abilityTimingCuePosition;
+  VS::Core::Gte::SVECTOR saved_cue_position_ =
+      VS::Battle::abilityTimingCuePosition;
   decltype(VS::Battle::actorMarkers) saved_markers_ = VS::Battle::actorMarkers;
   unsigned saved_random_state_ = VS::Core::BiosRand().State();
 };
@@ -147,7 +148,7 @@ class Producers {
  private:
   static constexpr int kActor = 1;
   VS::Actors::ActorRecord* saved_actor_ = VS::Actors::actorRecords[kActor];
-  MATRIX saved_matrix_ = VS::Actors::boneMatrixScratch;
+  VS::Core::Gte::MATRIX saved_matrix_ = VS::Actors::boneMatrixScratch;
   decltype(VS::Input::settings) saved_settings_ = VS::Input::settings;
   decltype(VS::Field::areRoomUpdatesPaused) saved_pause_ =
       VS::Field::areRoomUpdatesPaused;

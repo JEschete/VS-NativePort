@@ -23,7 +23,7 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.hpp"
 #include "Field/Mpd.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"

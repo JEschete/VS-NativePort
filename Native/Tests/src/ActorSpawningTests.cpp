@@ -21,7 +21,7 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Field/Mpd.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {

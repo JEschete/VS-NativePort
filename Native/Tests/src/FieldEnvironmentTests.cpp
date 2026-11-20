@@ -14,7 +14,7 @@
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/EnvironmentLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {

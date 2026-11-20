@@ -43,16 +43,16 @@ void Refuse(std::string_view reason) {
 }
 
 template <std::size_t Size>
-TimeTrialText Bytes(const u_short (&table)[Size]) {
+TimeTrialText Bytes(const std::uint16_t (&table)[Size]) {
   // The text tables contain halfword offsets followed by encoded bytes.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   return {reinterpret_cast<const std::uint8_t*>(table), sizeof table};
 }
 
 template <std::size_t Size>
-TimeTrialText Label(const u_short (&table)[Size], std::size_t index) {
+TimeTrialText Label(const std::uint16_t (&table)[Size], std::size_t index) {
   if (index >= Size || table[index] >= Size) return {};
-  return Bytes(table).subspan(table[index] * sizeof(u_short));
+  return Bytes(table).subspan(table[index] * sizeof(std::uint16_t));
 }
 
 TimeTrialText BorrowedText(const std::uint8_t* pointer) {
@@ -148,8 +148,8 @@ class LiveTimeTrialHost final : public TimeTrialHost {
   }
   void DrawText(std::string_view text, int x, int y,
                 std::uint32_t color) override {
-    auto* ordering =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table);
+    auto* ordering = static_cast<std::uint32_t*>(
+        VS::Render::FrameScratchpad().ordering_table);
     if (ordering == nullptr) {
       Score::Refuse("time trial text without a scene ordering table");
       return;

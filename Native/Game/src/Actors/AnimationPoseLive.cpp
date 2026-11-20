@@ -44,6 +44,9 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+
 namespace VS::Actors {
 namespace {
 using Core::Math::Transform3;
@@ -80,12 +83,12 @@ constexpr std::int16_t kEventPlaybackRunning = 4;
 // VS::Effects::effectBusyFlags while an action's effects play.
 constexpr int kEffectsBusy = 1;
 // Event 29's palette fade: from 0 over 0x20 steps.
-constexpr u_char kPaletteFadeSteps = 0x20;
+constexpr std::uint8_t kPaletteFadeSteps = 0x20;
 // The preview model faces its first bone forward.
 constexpr std::int16_t kPreviewFacing = 2048;
 constexpr int kLockedBoneMatrices = 2;
 
-u_char Bit(bool value) { return value ? 1 : 0; }
+std::uint8_t Bit(bool value) { return value ? 1 : 0; }
 
 std::intptr_t BankHandle(const void* bank) {
   return reinterpret_cast<std::intptr_t>(bank);
@@ -109,11 +112,11 @@ class LiveAnimationBanks final : public AnimationBankSource {
       : actor_(actor) {}
 
   [[nodiscard]] AnimationBankView Bank(const AnimationEntry& entry) override {
-    address_ = static_cast<u_char*>(Address(entry));
+    address_ = static_cast<std::uint8_t*>(Address(entry));
     return {.loaded = address_ != nullptr,
             .bytes = SequenceBankBytes(address_)};
   }
-  [[nodiscard]] u_char* LastAddress() const { return address_; }
+  [[nodiscard]] std::uint8_t* LastAddress() const { return address_; }
 
  private:
   [[nodiscard]] void* Address(const AnimationEntry& entry) const {
@@ -142,13 +145,13 @@ class LiveAnimationBanks final : public AnimationBankSource {
   }
 
   const VS::Actors::ActorRecord& actor_;
-  u_char* address_ = nullptr;
+  std::uint8_t* address_ = nullptr;
 };
 
 struct LiveHeader {
   AnimationHeader header;
   // The bank's writable address, when an entry selected one.
-  u_char* address = nullptr;
+  std::uint8_t* address = nullptr;
 };
 
 // decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
@@ -176,7 +179,7 @@ LiveHeader FindLiveHeader(const VS::Actors::ActorRecord& actor,
 
 struct LiveBoundClip {
   AnimationClipRef clip;
-  u_char* address = nullptr;
+  std::uint8_t* address = nullptr;
 };
 
 void ReportBoundLookup(const void* bank, int animation,
@@ -202,13 +205,13 @@ void ReportBoundLookup(const void* bank, int animation,
 }
 
 // The shared bank (slots 0..2) the record's animation header names.
-u_char* BoundSharedBank(const VS::Actors::ActorRecord& actor) {
+std::uint8_t* BoundSharedBank(const VS::Actors::ActorRecord& actor) {
   if (actor.animation_header == 0) {
     return nullptr;
   }
   for (std::size_t slot = 0; slot < kBoundSharedSlots; ++slot) {
     if (BankHandle(actor.shared_sequences[slot]) == actor.animation_header) {
-      return static_cast<u_char*>(actor.shared_sequences[slot]);
+      return static_cast<std::uint8_t*>(actor.shared_sequences[slot]);
     }
   }
   return nullptr;
@@ -235,7 +238,7 @@ std::optional<LiveBoundClip> FindLiveBoundClip(
                                   .bones = bones},
                          .address = found.address};
   }
-  u_char* bound = BoundSharedBank(actor);
+  std::uint8_t* bound = BoundSharedBank(actor);
   if (bound == nullptr) {
     return std::nullopt;
   }
@@ -340,7 +343,7 @@ bool EventPlaybackRunning() {
 class LiveEventHost final : public AnimationEventHost {
  public:
   LiveEventHost(VS::Actors::ActorRecord& actor, VS::Actors::AnimationPose& pose,
-                u_char* bound_bank)
+                std::uint8_t* bound_bank)
       : actor_(actor),
         pose_(pose),
         bound_bank_(bound_bank),
@@ -356,7 +359,7 @@ class LiveEventHost final : public AnimationEventHost {
   }
   void StoreCursor(const EventScriptPosition& position,
                    std::uint16_t frame) override {
-    u_char* bank = WritableBank(position.bank);
+    std::uint8_t* bank = WritableBank(position.bank);
     if (bank == nullptr) {
       ReportEventProblem(AnimationEventStatus::kNoScript, 0);
       return;
@@ -542,7 +545,8 @@ class LiveEventHost final : public AnimationEventHost {
 
   // The writable address of `bank`: the bound bank, or the bank the pose's
   // script lies in.
-  [[nodiscard]] u_char* WritableBank(std::span<const std::uint8_t> bank) const {
+  [[nodiscard]] std::uint8_t* WritableBank(
+      std::span<const std::uint8_t> bank) const {
     if (bound_bank_ != nullptr && bound_bank_ == bank.data()) {
       return bound_bank_;
     }
@@ -555,7 +559,7 @@ class LiveEventHost final : public AnimationEventHost {
 
   VS::Actors::ActorRecord& actor_;
   VS::Actors::AnimationPose& pose_;
-  u_char* bound_bank_;
+  std::uint8_t* bound_bank_;
   int id_;
 };
 
@@ -569,7 +573,7 @@ AnimationPoseState LoadPoseState(const VS::Actors::AnimationPose& pose) {
           .animation_id = pose.animation_id};
 }
 
-void StorePoseState(const AnimationPoseState& state, u_char* bank,
+void StorePoseState(const AnimationPoseState& state, std::uint8_t* bank,
                     VS::Actors::AnimationPose& pose) {
   StoreLiveSkeletalPose(state.pose, pose);
   pose.frame = state.frame;
@@ -631,8 +635,8 @@ class LiveMotionLookHost final : public MotionLookHost {
   void StoreHeadLook(const HeadLook& look) override {
     actor_.head_track_target = look.target;
     actor_.head_tracking = LiveSvector(look.tracking);
-    actor_.instance.look_yaw = static_cast<u_short>(look.yaw);
-    actor_.instance.look_pitch = static_cast<u_short>(look.pitch);
+    actor_.instance.look_yaw = static_cast<std::uint16_t>(look.yaw);
+    actor_.instance.look_pitch = static_cast<std::uint16_t>(look.pitch);
   }
   [[nodiscard]] HeadLookContext LookContext(const HeadLook& look) override {
     const VS::Actors::ModelInstance& instance = actor_.instance;
@@ -654,8 +658,8 @@ class LiveMotionLookHost final : public MotionLookHost {
     return context;
   }
   void SetLookAngles(LookAngles angles) override {
-    workspace_.angle_x = static_cast<u_short>(angles.yaw);
-    workspace_.angle_y = static_cast<u_short>(angles.pitch);
+    workspace_.angle_x = static_cast<std::uint16_t>(angles.yaw);
+    workspace_.angle_y = static_cast<std::uint16_t>(angles.pitch);
   }
 
  private:
@@ -776,7 +780,7 @@ int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor) {
 // A bank without a registered extent, or a map entry or header outside it,
 // is reported and refused instead of returned.
 std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
-                                           u_short** header_out) {
+                                           std::uint16_t** header_out) {
   if (header_out == nullptr) {
     VS::Core::Errorf(kChannel,
                      "Animation header lookup requires a header output");
@@ -791,8 +795,8 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
       *static_cast<const VS::Actors::ActorRecord*>(actor), animation_id);
   switch (found.header.status) {
     case AnimationHeaderStatus::kFound:
-      *header_out = reinterpret_cast<u_short*>(found.address +
-                                               found.header.header_offset);
+      *header_out = reinterpret_cast<std::uint16_t*>(
+          found.address + found.header.header_offset);
       return BankHandle(found.address);
     case AnimationHeaderStatus::kNoClip:
       return BankHandle(found.address);

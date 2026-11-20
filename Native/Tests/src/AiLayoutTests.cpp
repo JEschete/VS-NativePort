@@ -6,7 +6,7 @@
 
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Runtime.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
 
 int Tests_LayoutAssertsLinked(void);
@@ -99,8 +99,8 @@ TEST_CASE("Effect register instructions consume the index before the halfword",
   REQUIRE(VS::Effects::LiveSetEffectScriptRegister(&instance) == 1);
   CHECK(instance.script_offset == script.size());
   for (unsigned reg = 0; reg < 4; ++reg) {
-    CHECK(static_cast<u_char>(instance.registers[reg]) ==
-          (reg == index ? static_cast<u_char>(value) : 0x40 + reg));
+    CHECK(static_cast<std::uint8_t>(instance.registers[reg]) ==
+          (reg == index ? static_cast<std::uint8_t>(value) : 0x40 + reg));
   }
 }
 

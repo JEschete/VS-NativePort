@@ -14,16 +14,30 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::GetGeomOffset;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
 
 namespace {
 namespace Render = VS::Render;
@@ -89,12 +103,12 @@ Render::RoomCamera RolledCamera() {
 class GteTransformer final : public Render::RoomTransformer {
  public:
   GteTransformer() {
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 120);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 120);
     LoadView(IdentityView(1024));
   }
-  ~GteTransformer() override { Core_Gte_Reset(); }
+  ~GteTransformer() override { VS::Core::Gte::Reset(); }
   GteTransformer(const GteTransformer&) = delete;
   GteTransformer& operator=(const GteTransformer&) = delete;
   GteTransformer(GteTransformer&&) = delete;
@@ -106,35 +120,35 @@ class GteTransformer final : public Render::RoomTransformer {
     matrix.t[0] = view.translation.x;
     matrix.t[1] = view.translation.y;
     matrix.t[2] = view.translation.z;
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   Render::RoomProjectedPoint Project(
       const Render::RoomPosition& position) override {
     SVECTOR input{position.x, position.y, position.z, 0};
-    Core_GteWord screen = 0;
-    Core_GteWord fog = 0;
-    Core_GteWord flags = 0;
-    const Core_GteWord depth =
-        Core_Gte_RotTransPers(&input, &screen, &fog, &flags);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word fog = 0;
+    VS::Core::Gte::Word flags = 0;
+    const VS::Core::Gte::Word depth =
+        RotTransPers(&input, &screen, &fog, &flags);
     return {static_cast<std::int32_t>(screen),
             static_cast<std::int32_t>(depth)};
   }
   Math::Vec3 Transform(const Render::RoomPosition& position) override {
     SVECTOR input{position.x, position.y, position.z, 0};
     VECTOR output{};
-    Core_GteWord flags = 0;
-    Core_Gte_RotTrans(&input, &output, &flags);
+    VS::Core::Gte::Word flags = 0;
+    RotTrans(&input, &output, &flags);
     return Math::VectorOf(output);
   }
   [[nodiscard]] Render::RoomScreenOffset ScreenOffset() const override {
-    Core_GteWord x = 0;
-    Core_GteWord y = 0;
-    Core_Gte_GetGeomOffset(&x, &y);
+    VS::Core::Gte::Word x = 0;
+    VS::Core::Gte::Word y = 0;
+    GetGeomOffset(&x, &y);
     return {static_cast<std::int32_t>(x), static_cast<std::int32_t>(y)};
   }
   void SetScreenOffset(const Render::RoomScreenOffset& offset) override {
-    Core_Gte_SetGeomOffset(offset.x, offset.y);
+    SetGeomOffset(offset.x, offset.y);
   }
 };
 
@@ -558,7 +572,7 @@ struct LiveFrame {
   Render::RoomClipState saved_clip = Render::LiveRoomClipState();
   std::vector<std::uint32_t> memory = std::vector<std::uint32_t>(
       0x20000 / sizeof(std::uint32_t) + 2, 0xA5A5A5A5);
-  std::array<u_long, 2048> ordering{};
+  std::array<std::uint32_t, 2048> ordering{};
 
   LiveFrame() {
     VS::Render::FrameScratchpad() = {};
@@ -568,16 +582,16 @@ struct LiveFrame {
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     Render::LiveRoomClipState() = {};
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 120);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 120);
   }
   ~LiveFrame() {
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     Render::LiveRoomClipState() = saved_clip;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
   LiveFrame(const LiveFrame&) = delete;
   LiveFrame& operator=(const LiveFrame&) = delete;

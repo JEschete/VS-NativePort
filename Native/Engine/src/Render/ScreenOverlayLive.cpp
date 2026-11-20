@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "Core/Diagnostics.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
@@ -22,6 +22,31 @@
 #include "Render/ScreenTransition.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::RotTrans;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::DR_MODE;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::POLY_G4;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDrawMode;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setSprt;
+using VS::Legacy::setUV0;
+using VS::Legacy::setUV4;
+using VS::Legacy::setWH;
+using VS::Legacy::setXY4;
+using VS::Legacy::SPRT;
+
 namespace VS::Render {
 namespace {
 namespace Math = VS::Core::Math;
@@ -31,7 +56,7 @@ constexpr const char* kChannel = "render";
 // (146C.c:2249 `ot + 4`).
 constexpr std::size_t kOrderingEntryBytes = 4;
 constexpr std::size_t kTransitionEntry = 1;
-static_assert(sizeof(u_long) == kOrderingEntryBytes);
+static_assert(sizeof(std::uint32_t) == kOrderingEntryBytes);
 constexpr std::int16_t kScreenWidth = 320;
 constexpr std::int16_t kScreenHeight = 240;
 constexpr std::int16_t kStripRight{kFramebufferEffectStripWidth};
@@ -78,14 +103,14 @@ class LiveScreenTransformer final : public ScreenTransformer {
     matrix.t[0] = transform.translation.x;
     matrix.t[1] = transform.translation.y;
     matrix.t[2] = transform.translation.z;
-    Core_Gte_SetRotMatrix(&matrix);
-    Core_Gte_SetTransMatrix(&matrix);
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
   }
   Math::Vec3 Transform(std::int16_t x, std::int16_t y) override {
     SVECTOR input = {x, y, 0, 0};
     VECTOR output{};
-    Core_GteWord flags = 0;
-    Core_Gte_RotTrans(&input, &output, &flags);
+    VS::Core::Gte::Word flags = 0;
+    RotTrans(&input, &output, &flags);
     return Math::VectorOf(output);
   }
 };
@@ -123,7 +148,7 @@ void SubmitRotated(EffectPacketBlock& block,
   setRGB0(&quad, frame.tint.red, frame.tint.green, frame.tint.blue);
   quad.tpage = strip.texture_page;
   setXY4(&quad, corners[0].x, corners[0].y, corners[1].x, corners[1].y,
-         corners[2].x, corners[2].y, corners[3].x, corners[3].y);
+         corners[2].x, corners[2].y, corners.back().x, corners.back().y);
   AddPrim(entry, &quad);
 }
 
@@ -351,7 +376,7 @@ void SetLiveFramebufferEffectBlendMode(int blend_mode) {
 
 // decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9446). A
 // depth past the table is ignored, as in the original.
-void SetLiveFramebufferEffectDepth(u_int ordering_depth) {
+void SetLiveFramebufferEffectDepth(std::uint32_t ordering_depth) {
   static_cast<void>(
       SetFramebufferEffectDepth(live_effect.settings, ordering_depth));
 }

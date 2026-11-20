@@ -14,7 +14,9 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 static_assert(offsetof(VS::Actors::ModelInstance, position) ==
@@ -35,7 +37,7 @@ struct AuxiliaryPerceptionFixture {
   VS::Battle::Ai::ActorAiState owner{};
   VS::Battle::Ai::ActorAiState target{};
   VS::Field::GimmickInstance auxiliary{};
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
 
   explicit AuxiliaryPerceptionFixture(bool auxiliary_target,
                                       bool target_ai = true) {
@@ -92,7 +94,7 @@ struct AuxiliaryPerceptionFixture {
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Core_Gte_Reset();
+    VS::Core::Gte::Reset();
   }
 
   VS::Battle::Ai::PerceptionView& View() {
@@ -102,7 +104,7 @@ struct AuxiliaryPerceptionFixture {
     return *reinterpret_cast<VS::Battle::Ai::PerceptionView*>(&target);
   }
   void SetAuxiliary(int id, SVECTOR position) {
-    auxiliary.slot = static_cast<u_char>(id);
+    auxiliary.slot = static_cast<std::uint8_t>(id);
     auxiliary.position_x = position.vx;
     auxiliary.position_y = position.vy;
     auxiliary.position_z = position.vz;

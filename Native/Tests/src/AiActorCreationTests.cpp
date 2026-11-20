@@ -606,7 +606,7 @@ struct LiveCreationFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Battle::Ai::RoomAiState room{};
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
   VS::Battle::Actor actor{};
   VS::Battle::ActorStats stats{};
   VS::Actors::ActorRecord record{};
@@ -657,7 +657,7 @@ struct LiveCreationFixture {
     stats.run_speed = 9;
     record.instance.slot = 0;
     record.instance.model = &model.header;
-    record.instance.bone_count = static_cast<u_char>(model.bones.size());
+    record.instance.bone_count = static_cast<std::uint8_t>(model.bones.size());
     record.instance.position = {100, -50, 300, 0};
     record.instance.current_tile_x = 7;
     record.instance.current_tile_layer = 0x0A;

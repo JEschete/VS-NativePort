@@ -110,7 +110,7 @@
 #include "Field/TriggerMarkers.hpp"
 #include "Items/Categories.hpp"
 #include "Items/Materials.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ItemView.hpp"

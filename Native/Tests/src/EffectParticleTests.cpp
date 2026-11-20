@@ -27,7 +27,7 @@
 #include "Effects/Templates/ParticleRender.hpp"
 #include "Effects/Templates/ParticleTarget.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace fx = VS::Effects;

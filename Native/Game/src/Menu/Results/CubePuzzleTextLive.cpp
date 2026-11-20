@@ -10,7 +10,7 @@
 #include <cstdint>
 
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/Results.hpp"
@@ -19,6 +19,8 @@
 #include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Core::Gte::CVECTOR;
 
 namespace VS::Menu::Results {
 namespace {

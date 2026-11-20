@@ -20,7 +20,9 @@
 #include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
+
+using VS::Core::Gte::SVECTOR;
 
 namespace {
 using VS::Field::ActorCollisionHost;
@@ -928,7 +930,7 @@ struct LiveCollisionFixture {
   CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   CollisionSamples saved_samples = VS::Field::LiveCollisionSamples();
   SVECTOR saved_position = VS::Field::collisionProbePosition;
-  u_char saved_direction = VS::Field::collisionProbeDirection;
+  std::uint8_t saved_direction = VS::Field::collisionProbeDirection;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
 

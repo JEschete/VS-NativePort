@@ -19,6 +19,10 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
+using VS::Legacy::MoveImage;
+using VS::Legacy::RECT;
+using VS::Legacy::setRECT;
+
 namespace {
 constexpr std::size_t kMarkerRecordBytes = 116;
 constexpr std::size_t kMarkerPolygonCountsOffset = 68;

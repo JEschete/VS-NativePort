@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"

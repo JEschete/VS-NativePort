@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 
 namespace VS::Content {
 struct DiscFile;
@@ -80,15 +80,15 @@ inline constexpr std::size_t kRankTextWords = 192;
 // decomp: _buttonHeld (src/MENU/MENU9.PRG/238.c:1088)
 extern std::int32_t buttonHeld;
 // decomp: _cameraAngles (src/MENU/MENU9.PRG/238.c:579)
-extern SVECTOR cameraAngles;
+extern VS::Core::Gte::SVECTOR cameraAngles;
 // decomp: _cameraAnglesBackup (src/MENU/MENU9.PRG/238.c:466)
-extern VECTOR cameraAnglesBackup;
+extern VS::Core::Gte::VECTOR cameraAnglesBackup;
 // decomp: _cameraDistance (src/MENU/MENU9.PRG/238.c:576)
 extern std::int32_t cameraDistance;
 // decomp: _cameraHeightOffset (src/MENU/MENU9.PRG/238.c:577)
 extern std::int16_t cameraHeightOffset;
 // decomp: _cameraPositionBackup (src/MENU/MENU9.PRG/238.c:463)
-extern VECTOR cameraPositionBackup;
+extern VS::Core::Gte::VECTOR cameraPositionBackup;
 // decomp: _characterRank (src/MENU/MENU9.PRG/238.c:584)
 extern std::uint16_t characterRank;
 // decomp: _enemyDescriptions (src/MENU/MENU9.PRG/238.c:946)

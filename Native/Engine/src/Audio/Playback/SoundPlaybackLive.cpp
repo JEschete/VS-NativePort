@@ -26,7 +26,7 @@
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundPlayback.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::Playback {
 namespace {

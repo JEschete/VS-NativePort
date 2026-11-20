@@ -3,6 +3,12 @@
 
 #include "Render/UiPackets.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::DVECTOR;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::RECT;
+
 namespace VS::Battle {
 namespace {
 using Render::PackScreenWord;

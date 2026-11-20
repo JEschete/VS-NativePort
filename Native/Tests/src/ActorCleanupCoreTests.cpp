@@ -20,7 +20,7 @@
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/Navigation.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -741,9 +741,9 @@ TEST_CASE("Hostility toward a hostile target only rewrites its relation",
 
 TEST_CASE("Live destination release uses the live tile grid", "[ai][cleanup]") {
   const auto saved = VS::Battle::Ai::tileFlagMap;
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
   for (auto& row : flags) {
-    for (u_short& cell : row) cell = 0xFFFF;
+    for (std::uint16_t& cell : row) cell = 0xFFFF;
   }
   VS::Battle::Ai::tileFlagMap = flags;
   ai::ReleaseLiveAiDestinationTile(3, 5);
@@ -768,9 +768,9 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
                                                 {7, 13, false}}));
   const auto saved_flags = VS::Battle::Ai::tileFlagMap;
   VS::Battle::Ai::RoomAiState* const saved_room = VS::Battle::Ai::roomAiState;
-  u_short flags[32][32]{};
+  std::uint16_t flags[32][32]{};
   for (auto& row : flags) {
-    for (u_short& cell : row) cell = 0xFFFF;
+    for (std::uint16_t& cell : row) cell = 0xFFFF;
   }
   VS::Battle::Ai::RoomAiState room{};
   room.max_tile_x = 10;
@@ -779,7 +779,7 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
   room.min_tile_z = 6;
   auto state = std::make_unique<VS::Battle::Ai::ActorAiState>();
   state->opaque_1a = 1;
-  state->next_tile.word = static_cast<u_int>(x | (z << 16));
+  state->next_tile.word = static_cast<std::uint32_t>(x | (z << 16));
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::roomAiState = &room;
   ai::ReleaseLiveActorAiReservations(state.get());

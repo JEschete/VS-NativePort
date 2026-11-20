@@ -9,7 +9,7 @@
 
 #include "Actors/SequencePlayback.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 int Tests_SharedSequenceOffsets(void);
 int Tests_AdvanceSequenceWithoutScratch(void);

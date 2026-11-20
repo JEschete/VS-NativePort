@@ -22,6 +22,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiTexturedQuads.hpp"
 
+using VS::Legacy::RECT;
+
 namespace VS::Battle {
 namespace {
 constexpr std::size_t kLabelBytes = 24;
@@ -40,7 +42,6 @@ constexpr auto kCompactPairs = kCompactCapitalCount * kCompactCapitalCount;
 constexpr auto kCompactTrimBytes = kCompactPairs / kTrimsPerByte;
 constexpr std::string_view kBattleModule = "BATTLE/BATTLE.PRG";
 static_assert(sizeof(VS::Battle::FloatingLabel) == kLabelBytes);
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 [[noreturn]] void Refuse(const char* reason) {
   VS::Core::Errorf("battle.labels.render", "%s", reason);
@@ -95,19 +96,20 @@ void RequireCurrentFrame() {
   }
 }
 
-u_long* Primitive(std::size_t words) {
+std::uint32_t* Primitive(std::size_t words) {
   RequireCurrentFrame();
-  u_long* const primitive = Render::ReserveLivePrimitiveWords(words);
+  std::uint32_t* const primitive = Render::ReserveLivePrimitiveWords(words);
   if (primitive == nullptr ||
-      reinterpret_cast<std::uintptr_t>(primitive) % alignof(u_long) != 0) {
+      reinterpret_cast<std::uintptr_t>(primitive) % alignof(std::uint32_t) !=
+          0) {
     Refuse("Floating-label draw has no aligned current primitive capacity");
   }
   return primitive;
 }
 
-u_long* OrderingEntry(int layer) {
+std::uint32_t* OrderingEntry(int layer) {
   RequireCurrentFrame();
-  u_long* const entry =
+  std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, layer);
   if (entry == nullptr) {
     Refuse("Floating-label draw has no current scene ordering-table entry");

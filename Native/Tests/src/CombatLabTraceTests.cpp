@@ -38,7 +38,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootScreen.hpp"
@@ -828,9 +828,10 @@ struct GameplayInspectionFixture {
       std::to_array(VS::Menu::Framework::submenuStates);
   int saved_results_state = VS::Menu::Results::screenState;
   int saved_results_timer = VS::Menu::Results::screenTimer;
-  u_int saved_results_animation = VS::Menu::Results::elementAnimationState;
+  std::uint32_t saved_results_animation =
+      VS::Menu::Results::elementAnimationState;
   int saved_results_reel = VS::Menu::Results::buffReelIndex;
-  u_int saved_results_selection = VS::Menu::Results::buffReelSelection;
+  std::uint32_t saved_results_selection = VS::Menu::Results::buffReelSelection;
   unsigned saved_random = VS::Core::BiosRand().State();
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;

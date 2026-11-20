@@ -68,6 +68,9 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+
 TEST_CASE(
     "Gimmick sharing keeps first slot signed exclusion and three-bit identity",
     "[gimmick-resource-core][field]") {

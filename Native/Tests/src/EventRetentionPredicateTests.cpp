@@ -12,7 +12,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Event/Triggers.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 static_assert(
     std::is_same_v<decltype(&VS::Actors::IsLiveActorRetainedAfterDefeat),
@@ -30,7 +30,7 @@ struct RetentionPredicateFixture {
   decltype(VS::Event::eventSource) saved_source = VS::Event::eventSource;
   decltype(VS::Event::isDirectEventRequest) saved_direct =
       VS::Event::isDirectEventRequest;
-  std::array<u_char, 64> triggers{};
+  std::array<std::uint8_t, 64> triggers{};
   VS::Battle::Actor actor{};
   VS::Battle::ActorStats stats{};
 
@@ -38,9 +38,9 @@ struct RetentionPredicateFixture {
     triggers.fill(0xFF);
     triggers[0] = kTriggerOffset;
     triggers[1] = 0;
-    const std::array<u_char, 7> retained{8,          0,    0x80, 16,
-                                         kActorSlot, 0x10, 0xFF};
-    const std::array<u_char, 13> retained_dead{
+    const std::array<std::uint8_t, 7> retained{8,          0,    0x80, 16,
+                                               kActorSlot, 0x10, 0xFF};
+    const std::array<std::uint8_t, 13> retained_dead{
         8, 0,          0x80, 16, kActorSlot, 0x10, 0xFE,
         7, kActorSlot, 0x10, 0,  0,          0xFF};
     if (test_health) {

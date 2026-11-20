@@ -118,7 +118,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       VS::Field::isFieldRenderingEnabled};
   ValueRestore<int> saved_background{VS::Menu::Framework::backgroundFadeStep};
   ValueRestore<int> saved_restrictions{VS::Menu::Framework::actionRestrictions};
-  ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
+  ValueRestore<std::uint16_t*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   ValueRestore<std::uint8_t> saved_freeze{VS::Menu::Inventory::freezeTabArrows};
   ValueRestore<std::uint8_t> saved_title_step{
@@ -163,10 +163,10 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::Inventory::secondaryTitleAnimationStep = 0;
     VS::Menu::Inventory::itemCategoryIconsAnimationStep = 0;
     VS::Menu::Inventory::statusCommandAnimationStep = 0;
-    for (auto text : {std::span<u_short>(VS::Menu::Inventory::menuText),
-                      std::span<u_short>(VS::Menu::menuStrings)}) {
-      std::ranges::fill(text, u_short{0xE7E7});
-      std::fill_n(text.begin(), 32, u_short{32});
+    for (auto text : {std::span<std::uint16_t>(VS::Menu::Inventory::menuText),
+                      std::span<std::uint16_t>(VS::Menu::menuStrings)}) {
+      std::ranges::fill(text, std::uint16_t{0xE7E7});
+      std::fill_n(text.begin(), 32, std::uint16_t{32});
       text[32] = 0xE701;
     }
     inventory::BindLiveLootInventoryText(
@@ -193,7 +193,7 @@ struct TextLoadingFixture : TerminalFixture {
   ValueRestore<VS::Content::DiscRequestCounts> saved_request_counts{
       VS::Content::discRequestCounts};
   ValueRestore<VS::Content::DiscDrive> saved_drive{VS::Content::discDriveState};
-  ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
+  ValueRestore<std::uint16_t*> saved_menu12{VS::Menu::Framework::menu12Text};
 
   TextLoadingFixture() {
     if (!content::DataStore::Open(R"(Native\data)")) {

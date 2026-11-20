@@ -53,17 +53,18 @@ struct LiveFixture {
   std::int16_t saved_weather_alias = VS::Field::weatherParameters[6];
   std::int16_t saved_effect_sound = VS::Field::LiveRoomEffectState().sound_id;
   decltype(VS::Field::roomTint) saved_tint = VS::Field::roomTint;
-  u_int saved_phase = VS::Battle::actionFlowMode;
+  std::uint32_t saved_phase = VS::Battle::actionFlowMode;
   int saved_follow = VS::Battle::rewardsFollowAction;
   int saved_pause = VS::Field::isInteractionPaused;
-  u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
+  std::uint16_t saved_room_pause = VS::Field::areRoomUpdatesPaused;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
-  u_char saved_platform_pause = VS::Field::areMovingPlatformsPaused;
+  std::uint8_t saved_platform_pause = VS::Field::areMovingPlatformsPaused;
   ActionState* saved_action = VS::Battle::actionState;
   VS::Battle::Actor* saved_character = VS::Battle::characterState;
   VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
   decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
-  u_short saved_requirement = VS::Battle::battleAbilityPointRequirements[0];
+  std::uint16_t saved_requirement =
+      VS::Battle::battleAbilityPointRequirements[0];
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
   std::uint8_t saved_b6 = VS::State::LiveScriptFlag(0xB6);
   ActionState action{};
@@ -160,7 +161,7 @@ struct LiveMenuFixture : LiveFixture {
 struct LiveDialogFixture : LiveMenuFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  u_int saved_control = VS::Field::controlMode;
+  std::uint32_t saved_control = VS::Field::controlMode;
   int saved_recovery = VS::Battle::recoveryRewardMode;
   int saved_effects = VS::Effects::effectBusyFlags;
   int saved_loot_opened = VS::Battle::lootMenuOpened;
@@ -322,8 +323,9 @@ TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
   CHECK(VS::Field::areMovingPlatformsPaused == 0);
   CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(VS::Battle::actionFlowMode == 0);
-  CHECK(VS::Field::controlMode ==
-        static_cast<u_int>(VS::Field::FieldControlMode::kGimmickMotion));
+  CHECK(
+      VS::Field::controlMode ==
+      static_cast<std::uint32_t>(VS::Field::FieldControlMode::kGimmickMotion));
 }
 
 TEST_CASE("F00197 live delay uses older ability grant not reward phase six",
@@ -383,8 +385,9 @@ TEST_CASE("F00198 live absent notice proceeds to actual older ability recovery",
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(VS::Battle::actionFlowMode == 0);
-  CHECK(VS::Field::controlMode ==
-        static_cast<u_int>(VS::Field::FieldControlMode::kGimmickMotion));
+  CHECK(
+      VS::Field::controlMode ==
+      static_cast<std::uint32_t>(VS::Field::FieldControlMode::kGimmickMotion));
 }
 
 TEST_CASE("F00198 live busy menu never advances the scene notice timer",
@@ -570,8 +573,8 @@ TEST_CASE(
 TEST_CASE("F00229 live unknown full phases are not narrowed or booleanized",
           "[reward-dispatch][reward-live][F00229]") {
   LiveDialogFixture fixture;
-  const u_int phase = GENERATE(0U, 2U, 7U, 0x10003U, 0x10004U, 0x10005U,
-                               0x10006U, 0x80000003U, 0xFFFFFFFFU);
+  const std::uint32_t phase = GENERATE(0U, 2U, 7U, 0x10003U, 0x10004U, 0x10005U,
+                                       0x10006U, 0x80000003U, 0xFFFFFFFFU);
   VS::Battle::actionFlowMode = phase;
   VS::Battle::actionState = nullptr;
   VS::Battle::characterState = nullptr;
@@ -584,7 +587,7 @@ TEST_CASE("F00229 live unknown full phases are not narrowed or booleanized",
 TEST_CASE("F00229 live handled waiting phases preserve the original int result",
           "[reward-dispatch][reward-live][F00229]") {
   LiveDialogFixture fixture;
-  const u_int phase = GENERATE(3U, 4U, 5U, 6U);
+  const std::uint32_t phase = GENERATE(3U, 4U, 5U, 6U);
   VS::Battle::actionFlowMode = phase;
   VS::Menu::Framework::actionSelection.menu_status = 1;
   VS::Effects::effectBusyFlags = 2;

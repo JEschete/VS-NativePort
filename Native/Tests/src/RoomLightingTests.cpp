@@ -16,7 +16,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Room.hpp"
 #include "Field/RoomLightingLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Palette.hpp"
 #include "Render/RoomLighting.hpp"
 

@@ -7,13 +7,19 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Ending/ClearResults.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::CVECTOR;
+
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::nextPrim;
+using VS::Legacy::POLY_GT4;
 
 namespace {
 using VS::Render::QuadColor;
@@ -152,9 +158,9 @@ struct LiveRegionFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  std::vector<u_long> storage =
-      std::vector<u_long>(4 * sizeof(POLY_GT4) / sizeof(u_long), 0);
-  std::array<u_long, 16> ordering{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      4 * sizeof(POLY_GT4) / sizeof(std::uint32_t), 0);
+  std::array<std::uint32_t, 16> ordering{};
   std::array<VS::Render::TextureRegion, 2> atlas{
       {{1, 2, 3, 4, 0x15, 0x345}, {5, 6, 7, 8, 0x16, 0x346}}};
 

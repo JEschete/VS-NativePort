@@ -22,6 +22,9 @@
 #include "Content/ModuleData.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+
 using VS::Battle::ActionState;
 
 namespace {
@@ -44,7 +47,7 @@ struct LiveFixture {
   char saved_clip = VS::Actors::lastResolvedSequenceIndex;
   ActionState* saved_action = VS::Battle::actionState;
   ActionState action{};
-  u_char saved_group = VS::Battle::chainAbilityAnimationGroups[kAbility];
+  std::uint8_t saved_group = VS::Battle::chainAbilityAnimationGroups[kAbility];
   Model model{};
   std::array<std::uint32_t, 1024> sequence{};
   VS::Actors::ActorRecord actor{};
@@ -78,8 +81,8 @@ struct LiveFixture {
     bank->animation_data = 1536;
     bank->headers[0] = 24;
     bank->headers[1] = 0xFF;
-    auto* motion = reinterpret_cast<u_char*>(bank) + bank->animation_data;
-    const std::array<u_char, 6> rotation{0, 16, 0, 32, 0, 48};
+    auto* motion = reinterpret_cast<std::uint8_t*>(bank) + bank->animation_data;
+    const std::array<std::uint8_t, 6> rotation{0, 16, 0, 32, 0, 48};
     std::ranges::copy(rotation, motion);
     a::RegisterSequenceBank(bank, sizeof(sequence));
     VS::Actors::sequenceWorkBuffer = bank;
@@ -111,7 +114,7 @@ struct LiveFixture {
     return reinterpret_cast<VS::Actors::SeqAnimationBank*>(sequence.data());
   }
   void Missing(int index) {
-    auto* bytes = reinterpret_cast<u_char*>(sequence.data());
+    auto* bytes = reinterpret_cast<std::uint8_t*>(sequence.data());
     bytes[Bank()->animation_map + index] = 0xFF;
   }
 };

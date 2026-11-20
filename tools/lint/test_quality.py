@@ -227,7 +227,7 @@ class BaselineTests(unittest.TestCase):
 
     def test_finding_areas_do_not_exempt_owned_c_code_or_tests(self) -> None:
         for path, expected in (
-            ("Native/Engine/Legacy/Render/LibGpu.h", "legacy"),
+            ("Native/Engine/Legacy/Render/LibGpu.hpp", "legacy"),
             ("Native/Tests/src/LegacyGpuTests.cpp", "tests"),
             ("Native/Game/src/Battle/ActionResults.cpp", "native"),
             ("Native/Engine/src/Core/Gte.cpp", "native"),

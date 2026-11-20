@@ -33,7 +33,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Room.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Palette.hpp"
 
 namespace {
@@ -140,12 +140,12 @@ int CacheLiveActorAiWorkingState() {
   frame_context.terrain_region_count = 0;
   if (window->terrain_regions) {
     frame_context.terrainRegions =
-        static_cast<u_char*>(frame_context.roomData) +
+        static_cast<std::uint8_t*>(frame_context.roomData) +
         window->terrain_regions->offset;
     frame_context.terrain_region_count = window->terrain_regions->count;
   }
   frame_context.randomState =
-      static_cast<u_int>(VS::Battle::Ai::savedMovementRandomState);
+      static_cast<std::uint32_t>(VS::Battle::Ai::savedMovementRandomState);
   memcpy(frame_context.directions, VS::Battle::Ai::directionDeltas.data(),
          sizeof frame_context.directions);
   frame_context.roomBounds = window->room_bounds;

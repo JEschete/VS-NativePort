@@ -196,7 +196,7 @@ class LiveFrameFixture {
   int slot_;
   void* saved_buffer_;
   std::vector<std::uint32_t> storage_;
-  std::array<u_long, 4> ordering_{};
+  std::array<std::uint32_t, 4> ordering_{};
 };
 
 VS::Menu::FrameRequest RandomFrameRequest(std::mt19937& random) {

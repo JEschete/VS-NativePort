@@ -21,7 +21,7 @@
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -29,6 +29,8 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Legacy::ClearOTagR;
 
 // Contracts of the #276 row 22 texture animation: the keyed channels, the
 // frame and scripted cell copies and the scrolling regions (BATTLE.PRG
@@ -78,8 +80,9 @@ struct LiveFrame {
   void* saved_table = VS::Render::legacyOrderingTables[0];
   void* saved_overlay_table = VS::Render::legacyCurrentOrderingTable;
   int saved_framebuffer = VS::Render::frameBuf;
-  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
-  std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(0x20000 / 4, 0xDEADBEEF);
+  std::vector<std::uint32_t> ordering = std::vector<std::uint32_t>(0x2088 / 4);
 
   LiveFrame() {
     VS::Render::frameBuf = 0;
@@ -112,7 +115,7 @@ struct LiveFrame {
   };
 
   [[nodiscard]] std::vector<Move> Moves() const {
-    const auto* cursor = static_cast<const u_long*>(
+    const auto* cursor = static_cast<const std::uint32_t*>(
         VS::Render::FrameScratchpad().primitive_cursor);
     const auto words = static_cast<std::size_t>(cursor - storage.data());
     std::vector<Move> moves;
@@ -137,8 +140,8 @@ struct LiveFrame {
 // page 0, row 1; the shared bank is 0 with sheet page 0x1A.
 struct LiveTextureState {
   decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
-  u_char saved_bank = VS::Actors::sharedSequenceBankIndex;
-  std::array<u_char, 4> saved_pages{};
+  std::uint8_t saved_bank = VS::Actors::sharedSequenceBankIndex;
+  std::array<std::uint8_t, 4> saved_pages{};
   decltype(VS::Actors::textureSlotOrigins) saved_origins =
       VS::Actors::textureSlotOrigins;
   decltype(VS::Actors::textureSlotRowOffsets) saved_rows =
@@ -157,7 +160,7 @@ struct LiveTextureState {
               std::end(VS::Actors::actorRecords), nullptr);
     VS::Actors::sharedSequenceBankIndex = 0;
     VS::Actors::sharedSequenceBankTexturePages[0] = 0x1A;
-    const std::array<u_char, 4> origin{4, 0, 0, 0};
+    const std::array<std::uint8_t, 4> origin{4, 0, 0, 0};
     std::ranges::copy(origin, std::begin(VS::Actors::textureSlotOrigins));
     VS::Actors::textureSlotRowOffsets[0] = 1;
   }
@@ -186,7 +189,7 @@ struct LiveTextureState {
   VS::Actors::ActorRecord& AddActor(int actor_id) {
     records.push_back(std::make_unique<VS::Actors::ActorRecord>());
     VS::Actors::ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<u_char>(actor_id);
+    actor.instance.slot = static_cast<std::uint8_t>(actor_id);
     actor.texture_slot = 0;
     actor.texture_row_offsets[0] = 7;
     actor.texture_overlays[0] = {.x = 16, .y = 20, .width = 32, .height = 12};

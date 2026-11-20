@@ -1,5 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Textures.hpp"
 
 // decomp: D_800F46A8 (D_800F46A8@BATTLE/BATTLE.PRG)

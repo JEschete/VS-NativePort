@@ -45,7 +45,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
@@ -77,7 +77,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -94,6 +94,15 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetRotMatrix;
+using VS::Core::Gte::SetTransMatrix;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::DR_STP;
+using VS::Legacy::SetDrawStp;
 
 namespace VS::Boot {
 namespace {
@@ -193,7 +202,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   void PollEncounterStop() override { EncounterPollStop(); }
   void BeginFrame() override {
-    ordering_table_ = static_cast<u_long*>(
+    ordering_table_ = static_cast<std::uint32_t*>(
         VS::Render::legacyOrderingTables[VS::Render::frameBuf]);
     VS::Render::legacyCurrentOrderingTable = ordering_table_;
     VS::Render::FrameScratchpad().overlay_ordering_table =
@@ -348,8 +357,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void BuildCameraView() override {
     VS::Field::LiveUpdateCameraFacingState();
     VS::Render::BuildLiveCameraViewMatrix();
-    Core_Gte_SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
-    Core_Gte_SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
   }
   void BeginFirstPersonView() override {
     VS::Field::LiveBeginFirstPersonView();
@@ -416,8 +425,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Effects::LiveEndAshleyStandaloneEffect();
   }
   void BeginActorActionSelection(int slot, int action) override {
-    VS::Battle::LiveBeginActorActionSelection(slot,
-                                              static_cast<u_short>(action));
+    VS::Battle::LiveBeginActorActionSelection(
+        slot, static_cast<std::uint16_t>(action));
   }
   void BeginAshleyWeaponToggle() override {
     VS::Battle::BeginLiveAshleyWeaponToggle();
@@ -491,14 +500,14 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::LiveDrawRoomBackground(nullptr);
     VS::Field::LiveDrawRoomScene();
     VS::Field::LiveAdvanceRoomAnimationClock();
-    Core_Gte_SetGeomOffset(kGeometryOffsetX, kGeometryOffsetY);
+    SetGeomOffset(kGeometryOffsetX, kGeometryOffsetY);
   }
   void DrawRoomActors() override {
     VS::Actors::UpdateAndDrawLiveRoomActors(
         &VS::Render::FrameScratchpad().view_matrix);
     static_cast<void>(VS::Content::UpdateLiveActorAssetQueue());
-    Core_Gte_SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
-    Core_Gte_SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
+    SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
     Battle::LiveUpdateAndDrawFloatingLabels();
   }
   void UpdateEffectRuntime() override {
@@ -542,7 +551,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return VS::Battle::actors[slot];
   }
 
-  u_long* ordering_table_ = nullptr;
+  std::uint32_t* ordering_table_ = nullptr;
   VS::Actors::ActorLocationQuery ashley_placement_{};
   std::optional<VS::Field::RoomObjectTarget> facing_room_object_;
   std::optional<VS::Field::ChestTarget> facing_chest_;

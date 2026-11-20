@@ -5,9 +5,20 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/SphereContainmentLive.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "TestSupport/SphereContainmentLiveFixture.hpp"
+
+using VS::Core::Gte::ApplyMatrixSV;
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::StoreIr;
+using VS::Core::Gte::StoreLvnl;
+using VS::Core::Gte::StoreOpz;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
 
 namespace {
 namespace b = VS::Battle;
@@ -16,9 +27,9 @@ namespace math = VS::Core::Math;
 
 struct Projection {
   std::array<std::int16_t, 3> ir{};
-  std::array<Core_GteWord, 3> mac{};
-  Core_GteWord winding{};
-  Core_GteWord screen{};
+  std::array<VS::Core::Gte::Word, 3> mac{};
+  VS::Core::Gte::Word winding{};
+  VS::Core::Gte::Word screen{};
 
   friend bool operator==(const Projection&, const Projection&) = default;
 };
@@ -27,10 +38,10 @@ Projection CurrentProjection() {
   SVECTOR ir{};
   VECTOR mac{};
   Projection projection;
-  Core_Gte_StoreIr(&ir);
-  Core_Gte_StoreLvnl(&mac);
-  Core_Gte_StoreOpz(&projection.winding);
-  Core_Gte_StoreSxy2(&projection.screen);
+  StoreIr(&ir);
+  StoreLvnl(&mac);
+  StoreOpz(&projection.winding);
+  StoreSxy2(&projection.screen);
   projection.ir = {ir.vx, ir.vy, ir.vz};
   projection.mac = {mac.vx, mac.vy, mac.vz};
   return projection;
@@ -62,16 +73,16 @@ TEST_CASE(
   math::StoreMatrix(matrix, transform.rotation);
   SVECTOR input{32767, 0, 32767, 0};
   SVECTOR output{};
-  CHECK(Core_Gte_ApplyMatrixSV(&matrix, &input, &output) == &output);
+  CHECK(ApplyMatrixSV(&matrix, &input, &output) == &output);
   CHECK(transform.LocalPoint({input.vx, input.vy, input.vz}) ==
         math::Position3{output.vx, output.vy, output.vz});
   CHECK(output.vx == 32767);
   input = {-32768, 0, -32768, 0};
-  Core_Gte_ApplyMatrixSV(&matrix, &input, &output);
+  ApplyMatrixSV(&matrix, &input, &output);
   CHECK(transform.LocalPoint({input.vx, input.vy, input.vz}) ==
         math::Position3{output.vx, output.vy, output.vz});
   CHECK(output.vx == -32768);
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }
 
 TEST_CASE("F01291 Live point reads ignore a fourth supplied component",
@@ -156,15 +167,15 @@ TEST_CASE("Current-sphere containment resolves a rebound owner on every query",
 
 TEST_CASE("Containment no longer publishes unconsumed projection scratch state",
           "[sphere-containment-live][F01291][F01294]") {
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
   SVECTOR position{17, -31, 1000, 0};
-  Core_Gte_LoadV0(&position);
-  Core_Gte_Rtps();
+  LoadV0(&position);
+  Rtps();
   const auto before = CurrentProjection();
   auto volume = f::Volume(6);
   CHECK(b::IsLivePointInTargetVolume(&volume, f::Point{}) == 1);
   volume.kind = 1;
   CHECK(b::IsLivePointInTargetVolume(&volume, f::Point{}) == 1);
   CHECK(CurrentProjection() == before);
-  Core_Gte_Reset();
+  VS::Core::Gte::Reset();
 }

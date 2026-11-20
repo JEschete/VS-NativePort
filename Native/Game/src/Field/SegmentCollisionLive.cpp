@@ -20,6 +20,9 @@
 #include "Field/Room.hpp"
 #include "Field/SegmentCollision.hpp"
 
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
 namespace VS::Field {
 namespace {
 constexpr unsigned kExcludedKindMask = 0xEA;

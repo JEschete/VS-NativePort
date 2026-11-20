@@ -20,8 +20,23 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
 #include "Field/TransitionsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ScreenTransition.hpp"
+
+using VS::Legacy::DR_MODE;
+using VS::Legacy::getTPage;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_G4;
+using VS::Legacy::RECT;
+using VS::Legacy::SetDrawMode;
+using VS::Legacy::SetPolyF4;
+using VS::Legacy::SetPolyG4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::SetSemiTrans;
+using VS::Legacy::setXY4;
 
 // decomp: vs_battle_screenTransitionStep
 // (vs_battle_screenTransitionStep@BATTLE/BATTLE.PRG)

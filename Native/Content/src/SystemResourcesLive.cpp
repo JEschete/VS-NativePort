@@ -11,9 +11,12 @@
 #include "Content/SystemResources.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
 
 namespace VS::Content {
 namespace {
@@ -54,13 +57,14 @@ class LiveSystemResourcesHost final : public SystemResourcesHost {
                    std::span<const std::byte> pixels) override {
     RECT area{.x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h};
     // LoadImage only reads the pixels.
-    LoadImage(&area,
-              reinterpret_cast<u_long*>(const_cast<std::byte*>(pixels.data())));
+    LoadImage(&area, reinterpret_cast<std::uint32_t*>(
+                         const_cast<std::byte*>(pixels.data())));
   }
   void LoadClutColors(std::span<const std::byte> colors, std::uint32_t row,
                       std::uint32_t first, std::uint32_t count) override {
-    Render::LoadLiveClutColors(reinterpret_cast<const u_short*>(colors.data()),
-                               row, first, count);
+    Render::LoadLiveClutColors(
+        reinterpret_cast<const std::uint16_t*>(colors.data()), row, first,
+        count);
   }
   void InitializeGameInterface(std::span<const std::byte> data) override {
     // The menu only uploads the interface images from it.

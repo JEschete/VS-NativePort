@@ -14,7 +14,7 @@
 #include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreScreen.hpp"

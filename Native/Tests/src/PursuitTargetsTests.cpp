@@ -16,7 +16,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct PursuitFixture {
@@ -44,7 +44,7 @@ struct PursuitFixture {
       VS::Battle::actors[index] = &actors[index];
       VS::Battle::Ai::LiveFrameContext().actors[index] = &states[index];
       actors[index].id = static_cast<int>(index);
-      states[index].actor_id = static_cast<u_char>(index);
+      states[index].actor_id = static_cast<std::uint8_t>(index);
       states[index].actor =
           reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
       states[index].model = reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(
@@ -93,8 +93,8 @@ struct PursuitFixture {
     platforms[group].waypoints[3].vz = 6 << 19;
     gates[group * 4 + 3].tile_x = 4;
     gates[group * 4 + 3].tile_z = 6;
-    gates[group * 4 + 2].tile_x = static_cast<u_char>(12 + group);
-    gates[group * 4 + 2].tile_z = static_cast<u_char>(9 + group);
+    gates[group * 4 + 2].tile_x = static_cast<std::uint8_t>(12 + group);
+    gates[group * 4 + 2].tile_z = static_cast<std::uint8_t>(9 + group);
   }
 };
 }  // namespace
@@ -130,7 +130,7 @@ TEST_CASE("Conditional target refresh tests the requested movement mode",
           "[ai][pursuit-targets]") {
   const int mode = GENERATE(0, 1, 2, 3, 4, 5, 6);
   PursuitFixture fixture;
-  fixture.states[0].requested_movement_mode = static_cast<u_char>(mode);
+  fixture.states[0].requested_movement_mode = static_cast<std::uint8_t>(mode);
   fixture.states[0].current_movement_mode = 1;
   fixture.Approach().target_tile_x = 17;
   fixture.Approach().target_tile_z = 18;
@@ -150,7 +150,7 @@ TEST_CASE("Pursuit refresh resolves current and planned moving-platform gates",
   auto& model = fixture.models[1].instance;
   model.movement_mode = planned ? 1 : 0;
   model.current_tile_layer = model.previous_tile_layer =
-      static_cast<u_char>(group + 2);
+      static_cast<std::uint8_t>(group + 2);
   VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().target_tile_x == (12 + group) * 2);
   CHECK(fixture.Approach().target_tile_z == (9 + group) * 2);
@@ -190,7 +190,7 @@ TEST_CASE("Approach hands a successful real consumer into the movement mode",
           "[ai][pursuit-targets]") {
   const int mode = GENERATE(0, 1);
   PursuitFixture fixture;
-  fixture.states[0].current_movement_mode = static_cast<u_char>(mode);
+  fixture.states[0].current_movement_mode = static_cast<std::uint8_t>(mode);
   CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 0, 640, 0) ==
         (mode == 0 ? 3 : 1));
   CHECK(fixture.actors[0].command_opcode == 2);

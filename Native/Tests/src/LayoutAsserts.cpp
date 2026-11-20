@@ -35,7 +35,7 @@
 #include "Effects/Package.hpp"
 #include "Effects/Runtime.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::kActionTypeBaseAttack;
@@ -298,8 +298,8 @@ int Tests_AiMovementSetup(void) {
   VS::Battle::Ai::TickLiveActorDecisionTimers(
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state));
   passed = passed && state.decision_delay == 0 && state.min_action_delay == 0;
-  const u_short flags[3] = {0x1000, 0x800, 0x100};
-  const u_char modes[3] = {1, 2, 0};
+  const std::uint16_t flags[3] = {0x1000, 0x800, 0x100};
+  const std::uint8_t modes[3] = {1, 2, 0};
   for (size_t index = 0; index < sizeof flags / sizeof flags[0]; ++index) {
     state.locomotion_flags = flags[index];
     VS::Battle::Ai::InitializeLiveActorLocomotionMode(
@@ -348,7 +348,7 @@ int Tests_AiFrameStages(void) {
   VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
-  u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
+  std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   const int saved_target = VS::Battle::Ai::secondPerceptionTarget;
   const int saved_mask = VS::Battle::Ai::attributeActorMask;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
@@ -359,7 +359,7 @@ int Tests_AiFrameStages(void) {
   VS::Battle::Ai::PerceptionUpdateView* view =
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
   VS::Battle::Ai::RoomAiState room = {0};
-  u_short flags[32][32] = {{0}};
+  std::uint16_t flags[32][32] = {{0}};
   actor.stats = &stats;
   view->actor = reinterpret_cast<VS::Battle::Actor*>(&actor);
   view->model = reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&model);
@@ -402,23 +402,24 @@ int Tests_AiFrameCache(void) {
       VS::Battle::Ai::LiveFrameContext();
   const auto saved_actors = VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
-  u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
-  u_short(*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
+  std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
+  std::uint16_t (*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
   void* saved_data = VS::Battle::Ai::roomHasWaypoints;
   const unsigned saved_aux_length = VS::Field::roomData.header.section6_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  u_char savedScratch[132];
-  u_char* scratch = reinterpret_cast<u_char*>(VS::Core::ScratchBase()) + 0x37C;
+  std::uint8_t savedScratch[132];
+  std::uint8_t* scratch =
+      reinterpret_cast<std::uint8_t*>(VS::Core::ScratchBase()) + 0x37C;
   memcpy(savedScratch, scratch, sizeof savedScratch);
   for (size_t index = 0; index < sizeof savedScratch; ++index) {
     scratch[index] = kScratchSentinel;
   }
   VS::Battle::Ai::ActorAiState actor = {0};
   VS::Battle::Ai::RoomAiState room = {0};
-  u_short flags[32][32] = {{0}};
-  u_short heights[32][32] = {{0}};
-  u_char auxiliary[0x898] = {0};
-  const u_int bounds = 0x01021F1Eu;
+  std::uint16_t flags[32][32] = {{0}};
+  std::uint16_t heights[32][32] = {{0}};
+  std::uint8_t auxiliary[0x898] = {0};
+  const std::uint32_t bounds = 0x01021F1Eu;
   memcpy(room.reserved4.data(), &bounds, sizeof bounds);
   VS::Battle::Ai::actorAiStates.fill(nullptr);
   VS::Battle::Ai::actorAiStates[15] = &actor;
@@ -458,7 +459,7 @@ int Tests_AiFrameCache(void) {
 int Tests_DefaultEffectPackageLoaded(void) {
   if (sizeof VS::Effects::emptyPackage != 0x5200 ||
       VS::Effects::emptyPackage[0] != 0x00010A70 ||
-      VS::Effects::emptyPackage[0x51FC / sizeof(u_int)] != 0) {
+      VS::Effects::emptyPackage[0x51FC / sizeof(std::uint32_t)] != 0) {
     return 0;
   }
   VS::Effects::LiveEffectPackage package = {0};

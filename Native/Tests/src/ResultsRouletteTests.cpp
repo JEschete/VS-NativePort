@@ -17,7 +17,7 @@
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -35,8 +35,8 @@ struct RouletteFixture {
   int saved_state = VS::Menu::Results::screenState;
   int saved_timer = VS::Menu::Results::screenTimer;
   int saved_reel = VS::Menu::Results::buffReelIndex;
-  u_int saved_selection = VS::Menu::Results::buffReelSelection;
-  u_int saved_animation = VS::Menu::Results::elementAnimationState;
+  std::uint32_t saved_selection = VS::Menu::Results::buffReelSelection;
+  std::uint32_t saved_animation = VS::Menu::Results::elementAnimationState;
   int saved_counting_score = VS::Menu::Results::incrementingScore;
   int saved_counting_map = VS::Menu::Results::incrementingMapCompletion;
   int saved_visible_score = VS::Menu::Results::onScreenScore;
@@ -54,8 +54,8 @@ struct RouletteFixture {
       VS::Audio::Driver::commandArguments;
   VS::Audio::CommandParams saved_parameters = VS::Audio::Mixer::commandParams;
   int saved_channel = VS::Audio::nextSfxChannelGroup7E;
-  std::array<u_int, 256> offsets{};
-  std::array<u_short, 256> selectors{};
+  std::array<std::uint32_t, 256> offsets{};
+  std::array<std::uint16_t, 256> selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
       {.program_offsets = offsets,
        .bank_selectors = selectors,

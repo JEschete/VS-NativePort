@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Binds the actor preview (ActorPreview.hpp) to the actor and weapon records
 // (VS::Actors::actorRecords, VS::Actors::weaponModels), the game heap, the
@@ -15,7 +15,7 @@ void LoadLiveActorPreview(int source_actor_slot);
 void CloneLiveActorPreview(int source_actor_slot);
 void ResetLiveActorPreviewPose();
 void ReleaseLiveActorPreview();
-int DrawLiveActorPreview(MATRIX* preview_camera_matrix);
+int DrawLiveActorPreview(VS::Core::Gte::MATRIX* preview_camera_matrix);
 void ResetLiveAshleyEquipmentPose();
 void QueueLiveAshleyWeaponAnimations(int sequence_model_id);
 }  // namespace VS::Menu::Framework

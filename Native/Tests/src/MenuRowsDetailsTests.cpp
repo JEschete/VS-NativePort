@@ -923,14 +923,15 @@ TEST_CASE("Live item row statics reset the hand table",
   auto* const saved_names = VS::Menu::Framework::itemNames;
   auto* const saved_help = VS::Menu::Framework::itemHelp;
   auto* const saved_menu12 = VS::Menu::Framework::menu12Text;
-  const std::vector<u_char> saved_hands(
+  const std::vector<std::uint8_t> saved_hands(
       std::begin(VS::Menu::Framework::weaponHands),
       std::end(VS::Menu::Framework::weaponHands));
   VS::Menu::Framework::weaponHands[0] = 9;
   fw::ResetLiveItemRowsStatics();
-  const std::vector<u_char> hands(std::begin(VS::Menu::Framework::weaponHands),
-                                  std::end(VS::Menu::Framework::weaponHands));
-  CHECK(hands == std::vector<u_char>{0, 0, 1, 0, 1, 0, 1, 1, 1, 0});
+  const std::vector<std::uint8_t> hands(
+      std::begin(VS::Menu::Framework::weaponHands),
+      std::end(VS::Menu::Framework::weaponHands));
+  CHECK(hands == std::vector<std::uint8_t>{0, 0, 1, 0, 1, 0, 1, 1, 1, 0});
   CHECK(VS::Menu::Framework::itemNames == nullptr);
   VS::Menu::Framework::itemNames = saved_names;
   VS::Menu::Framework::itemHelp = saved_help;
@@ -2342,7 +2343,8 @@ TEST_CASE("Live stat pages and the detail cursor reach the shared variables",
           "[menu][menu-rows-details]") {
   const char saved_page = VS::Menu::Framework::itemStatPage;
   const char saved_enabled = VS::Menu::Framework::enabledStatPages;
-  const u_char saved_selected = VS::Menu::Framework::selectedStatusViewElement;
+  const std::uint8_t saved_selected =
+      VS::Menu::Framework::selectedStatusViewElement;
   VS::test_support::ChannelWarnings warnings{"menu.framework"};
   VS::Menu::Framework::itemStatPage = 2;
   fw::SetLiveEnabledStatPages(3);

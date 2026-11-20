@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #include "Actors/SkeletonLiveState.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/Camera.hpp"
@@ -15,6 +15,9 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomScreen;
 
 namespace VS::Render {
 namespace {
@@ -28,7 +31,7 @@ class LiveCameraClip final : public CameraClipTarget {
     projectionDistance = distance;
   }
   void SetScreenDistance(std::int32_t distance) override {
-    Core_Gte_SetGeomScreen(distance);
+    SetGeomScreen(distance);
   }
   void RecordFarClip(std::int32_t far_clip) override {
     FrameScratchpad().camera.far_clip = far_clip;

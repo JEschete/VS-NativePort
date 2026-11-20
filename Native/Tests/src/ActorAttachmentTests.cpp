@@ -10,7 +10,7 @@
 #include "Actors/ShpModel.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 struct AttachmentFixture {
@@ -102,7 +102,7 @@ TEST_CASE("Attachments reject invalid parent slots and bone bounds",
   AttachmentFixture fixture;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(nullptr) == nullptr);
   fixture.child.instance.attach_parent =
-      static_cast<u_char>(std::size(VS::Actors::actorRecords));
+      static_cast<std::uint8_t>(std::size(VS::Actors::actorRecords));
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
   fixture.child.instance.attach_parent = 2;
@@ -111,7 +111,7 @@ TEST_CASE("Attachments reject invalid parent slots and bone bounds",
         nullptr);
   fixture.child.instance.attach_bone = 2;
   fixture.parent.instance.bone_count =
-      static_cast<u_char>(std::size(fixture.parent.bone_matrices) + 1);
+      static_cast<std::uint8_t>(std::size(fixture.parent.bone_matrices) + 1);
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
   fixture.parent.instance.bone_count = 3;

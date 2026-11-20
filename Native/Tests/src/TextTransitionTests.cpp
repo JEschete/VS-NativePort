@@ -10,15 +10,19 @@
 
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/Text/VariableFont.hpp"
 
+using VS::Legacy::LoadImage;
+using VS::Legacy::RECT;
+using VS::Legacy::StoreImage;
+
 namespace {
-constexpr u_short kBackground = 0x1234;
+constexpr std::uint16_t kBackground = 0x1234;
 constexpr int kWidth = 58;
 constexpr int kHeight = 30;
 
@@ -35,14 +39,15 @@ struct TextTransitionFixture {
   decltype(VS::Input::buttonsPressed) buttons = VS::Input::buttonsPressed;
   RECT target{32, 32, kWidth, kHeight};
   RECT atlas{832, 108, 63, 12};
-  std::vector<u_short> saved_target =
-      std::vector<u_short>(std::size_t{kWidth} * kHeight);
-  std::vector<u_short> saved_atlas = std::vector<u_short>(std::size_t{63} * 12);
+  std::vector<std::uint16_t> saved_target =
+      std::vector<std::uint16_t>(std::size_t{kWidth} * kHeight);
+  std::vector<std::uint16_t> saved_atlas =
+      std::vector<std::uint16_t>(std::size_t{63} * 12);
   VS::Menu::TextBoxState box{};
 
   TextTransitionFixture() {
-    StoreImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
-    StoreImage(&atlas, reinterpret_cast<u_long*>(saved_atlas.data()));
+    StoreImage(&target, reinterpret_cast<std::uint32_t*>(saved_target.data()));
+    StoreImage(&atlas, reinterpret_cast<std::uint32_t*>(saved_atlas.data()));
     std::fill(std::begin(VS::Render::variableFontGlyphWidths),
               std::end(VS::Render::variableFontGlyphWidths), 6);
     VS::Render::kGlyphPixelExpansion[1] = 0x7FFF;
@@ -53,8 +58,9 @@ struct TextTransitionFixture {
     Glyph(10, 2);
     Glyph(11, 3);
     Glyph(12, 4);
-    std::vector<u_short> pixels(std::size_t{kWidth} * kHeight, kBackground);
-    LoadImage(&target, reinterpret_cast<u_long*>(pixels.data()));
+    std::vector<std::uint16_t> pixels(std::size_t{kWidth} * kHeight,
+                                      kBackground);
+    LoadImage(&target, reinterpret_cast<std::uint32_t*>(pixels.data()));
     VS::Render::frameBuf = 0;
     VS::Input::buttonsPressed = 0;
     box.x = box.x_indent = target.x;
@@ -65,8 +71,8 @@ struct TextTransitionFixture {
   }
 
   ~TextTransitionFixture() {
-    LoadImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
-    LoadImage(&atlas, reinterpret_cast<u_long*>(saved_atlas.data()));
+    LoadImage(&target, reinterpret_cast<std::uint32_t*>(saved_target.data()));
+    LoadImage(&atlas, reinterpret_cast<std::uint32_t*>(saved_atlas.data()));
     std::copy(widths.begin(), widths.end(),
               std::begin(VS::Render::variableFontGlyphWidths));
     std::copy(expansion.begin(), expansion.end(),
@@ -76,25 +82,26 @@ struct TextTransitionFixture {
     VS::Input::buttonsPressed = buttons;
   }
 
-  void Glyph(unsigned code, u_short index) {
+  void Glyph(unsigned code, std::uint16_t index) {
     const unsigned glyph = code + 189;
     RECT location{static_cast<std::int16_t>(832 + glyph % 21 * 3),
                   static_cast<std::int16_t>(glyph / 21 * 12), 3, 12};
-    std::array<u_short, 36> pixels{};
+    std::array<std::uint16_t, 36> pixels{};
     for (unsigned row = 0; row < 12; ++row) {
-      pixels[std::size_t{row} * 3] = static_cast<u_short>(index * 0x1111);
-      pixels[std::size_t{row} * 3 + 1] = static_cast<u_short>(index * 0x11);
+      pixels[std::size_t{row} * 3] = static_cast<std::uint16_t>(index * 0x1111);
+      pixels[std::size_t{row} * 3 + 1] =
+          static_cast<std::uint16_t>(index * 0x11);
     }
-    LoadImage(&location, reinterpret_cast<u_long*>(pixels.data()));
+    LoadImage(&location, reinterpret_cast<std::uint32_t*>(pixels.data()));
   }
 
   template <std::size_t Size>
-  std::vector<u_short> Draw(std::array<u_char, Size>& text) {
+  std::vector<std::uint16_t> Draw(std::array<std::uint8_t, Size>& text) {
     INFO(std::string("Encoded transition bytes: ") + std::to_string(Size));
     box.text = reinterpret_cast<char*>(text.data());
     VS::Render::BlendLiveTextBoxIntoFramebuffer(&box, 0x10000);
-    std::vector<u_short> pixels(std::size_t{kWidth} * kHeight);
-    StoreImage(&target, reinterpret_cast<u_long*>(pixels.data()));
+    std::vector<std::uint16_t> pixels(std::size_t{kWidth} * kHeight);
+    StoreImage(&target, reinterpret_cast<std::uint32_t*>(pixels.data()));
     return pixels;
   }
 };
@@ -104,10 +111,10 @@ TEST_CASE("Control-only transition text stops before zero padding",
           "[text-transition]") {
   TextTransitionFixture fixture;
   // The final byte bounds the legacy ASCII-control bug in the red regression.
-  std::array<u_char, 8> text{0xFC, 4, 0xE7, 0, 0, 0, 0, 0x0E};
+  std::array<std::uint8_t, 8> text{0xFC, 4, 0xE7, 0, 0, 0, 0, 0x0E};
   const auto pixels = fixture.Draw(text);
   CHECK(std::all_of(pixels.begin(), pixels.end(),
-                    [](u_short pixel) { return pixel == kBackground; }));
+                    [](std::uint16_t pixel) { return pixel == kBackground; }));
   const auto repeated = fixture.Draw(text);
   CHECK(std::equal(pixels.begin(), pixels.end(), repeated.begin()));
 }
@@ -115,7 +122,7 @@ TEST_CASE("Control-only transition text stops before zero padding",
 TEST_CASE("Framebuffer transitions draw encoded letters beyond ASCII controls",
           "[text-transition]") {
   TextTransitionFixture fixture;
-  std::array<u_char, 3> text{12, 0xE7, 0x0E};
+  std::array<std::uint8_t, 3> text{12, 0xE7, 0x0E};
   const auto pixels = fixture.Draw(text);
   CHECK(pixels[0] == 0x7C00);
   CHECK(pixels[6] == kBackground);
@@ -124,7 +131,7 @@ TEST_CASE("Framebuffer transitions draw encoded letters beyond ASCII controls",
 TEST_CASE("Framebuffer transitions advance encoded spaces without a glyph",
           "[text-transition]") {
   TextTransitionFixture fixture;
-  std::array<u_char, 5> text{10, 0x8F, 11, 0xE7, 0x0E};
+  std::array<std::uint8_t, 5> text{10, 0x8F, 11, 0xE7, 0x0E};
   const auto pixels = fixture.Draw(text);
   CHECK(pixels[0] == 0x001F);
   CHECK(pixels[6] == kBackground);
@@ -134,7 +141,7 @@ TEST_CASE("Framebuffer transitions advance encoded spaces without a glyph",
 TEST_CASE("Framebuffer transition newlines use the encoded control range",
           "[text-transition]") {
   TextTransitionFixture fixture;
-  std::array<u_char, 5> text{10, 0xE8, 11, 0xE7, 0x0E};
+  std::array<std::uint8_t, 5> text{10, 0xE8, 11, 0xE7, 0x0E};
   const auto pixels = fixture.Draw(text);
   CHECK(pixels[0] == 0x001F);
   CHECK(pixels[6] == kBackground);

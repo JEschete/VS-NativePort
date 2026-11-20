@@ -32,7 +32,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DepthCue.hpp"
@@ -40,6 +40,9 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
 
 namespace VS::Menu::Framework {
 namespace {
@@ -235,9 +238,9 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   void SetCompanion(int slot, int companion_slot,
                     const Actors::CompanionStyle& style) override {
-    const VS::Render::ColorCode state{static_cast<u_char>(style.offset.x),
-                                      static_cast<u_char>(style.offset.y),
-                                      static_cast<u_char>(style.offset.z),
+    const VS::Render::ColorCode state{static_cast<std::uint8_t>(style.offset.x),
+                                      static_cast<std::uint8_t>(style.offset.y),
+                                      static_cast<std::uint8_t>(style.offset.z),
                                       style.offset.depth_bias};
     const VS::Render::ColorCode color = LiveColor(style.color);
     Actors::SetLiveActorCompanion(slot, companion_slot, &state, &color);
@@ -260,13 +263,13 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   void SetAnimation(int slot, int animation) override {
     VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
-    record->animation_id = static_cast<u_char>(animation);
+    record->animation_id = static_cast<std::uint8_t>(animation);
     record->weapon_pose_active = 0;
-    u_short* length = nullptr;
+    std::uint16_t* length = nullptr;
     record->animation_header =
         Actors::FindLiveActorAnimationHeader(record, animation, &length);
     record->animation_set =
-        static_cast<u_char>(VS::Actors::lastResolvedSequenceIndex);
+        static_cast<std::uint8_t>(VS::Actors::lastResolvedSequenceIndex);
     // The original read the clip length through the header unchecked
     // (224.c:340).
     if (length == nullptr) {
@@ -351,7 +354,8 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   void OffsetOrderingTable(int entries) override {
     if (VS::Render::FrameScratchpad().ordering_table == nullptr) return;
     VS::Render::FrameScratchpad().ordering_table =
-        static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) +
+        static_cast<std::uint32_t*>(
+            VS::Render::FrameScratchpad().ordering_table) +
         entries;
   }
 

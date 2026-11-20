@@ -38,15 +38,15 @@ void Refuse(std::string_view reason) {
 }
 
 template <std::size_t Size>
-GazetteText Bytes(const u_short (&table)[Size]) {
+GazetteText Bytes(const std::uint16_t (&table)[Size]) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   return {reinterpret_cast<const std::uint8_t*>(table), sizeof table};
 }
 
 template <std::size_t Size>
-GazetteText Label(const u_short (&table)[Size], std::size_t index) {
+GazetteText Label(const std::uint16_t (&table)[Size], std::size_t index) {
   if (index >= Size || table[index] >= Size) return {};
-  return Bytes(table).subspan(table[index] * sizeof(u_short));
+  return Bytes(table).subspan(table[index] * sizeof(std::uint16_t));
 }
 
 GazetteText BorrowedText(const std::uint8_t* pointer) {

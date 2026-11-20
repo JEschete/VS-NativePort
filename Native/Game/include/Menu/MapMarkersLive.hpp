@@ -9,10 +9,11 @@
 // and a primitive buffer without room are refused and logged, where the
 // original reads or writes unchecked.
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Menu::map {
-void LiveDrawAshleyMarker(int id, int xy, int brightness, u_long* next_prim);
+void LiveDrawAshleyMarker(int id, int xy, int brightness,
+                          std::uint32_t* next_prim);
 void LiveDrawFeatureMarker(int id, int x, int y);
 void LiveDrawDoorStateMarker(int x, int y, int id);
 void LiveDrawDoorLabel(int x, int y, int door_id);

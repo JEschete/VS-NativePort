@@ -173,8 +173,8 @@ TEST_CASE("Door queries preserve ordered tile and platform matches on repeat",
   std::array<int, 40> expected{};
   for (std::size_t index = 0; index < fixture.doors.size(); ++index) {
     auto& tile = fixture.doors[index].tile_location;
-    tile.tile_x = static_cast<u_short>(index % 32);
-    tile.tile_z = static_cast<u_short>(index / 32);
+    tile.tile_x = static_cast<std::uint16_t>(index % 32);
+    tile.tile_z = static_cast<std::uint16_t>(index / 32);
     tile.floor_layer = 2;
     expected[index] = static_cast<int>(index);
   }

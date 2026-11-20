@@ -15,7 +15,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -35,10 +35,21 @@
 #include "State/PlayTime.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::ClearOTagR;
+using VS::Legacy::getaddr;
+using VS::Legacy::getClut;
+using VS::Legacy::getTPage;
+using VS::Legacy::GpuHandle;
+using VS::Legacy::isendprim;
 using VS::Legacy::kPadLdown;
 using VS::Legacy::kPadRdown;
 using VS::Legacy::kPadRright;
 using VS::Legacy::kPadStart;
+using VS::Legacy::LINE_G2;
+using VS::Legacy::nextPrim;
+using VS::Legacy::P_TAG;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_FT4;
 
 namespace {
 namespace files = VS::Menu::Files;
@@ -51,15 +62,15 @@ struct EmptySlotsFixture {
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
   VS::Save::CardFileInfoRecord* saved_summaries = VS::Title::saveFileSummaries;
-  u_short* saved_table = VS::Menu::Files::textTable;
+  std::uint16_t* saved_table = VS::Menu::Files::textTable;
   char* saved_message = VS::Menu::Files::memoryCardMessage;
   int saved_cursor = VS::Menu::Files::selectCursorXy;
   std::array<files::Element, files::kElementCount> saved_elements =
       files::LiveFilesState().elements;
   std::array<VS::Save::CardFileInfoRecord, 5> summaries{};
-  std::array<u_short, 2048> text{};
-  std::array<u_int, 0x180> sfx_offsets{};
-  std::array<u_short, 0x180> sfx_selectors{};
+  std::array<std::uint16_t, 2048> text{};
+  std::array<std::uint32_t, 0x180> sfx_offsets{};
+  std::array<std::uint16_t, 0x180> sfx_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
       {.program_offsets = sfx_offsets,
        .bank_selectors = sfx_selectors,
@@ -108,13 +119,13 @@ struct ClockFixture {
   void* saved_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
   VS::State::PlayTime saved_time = VS::State::playTime;
-  u_int saved_random = VS::Core::interfaceRandomState;
-  std::array<u_char, 264> saved_trim{};
-  std::array<u_char, 92> saved_widths{};
-  std::array<u_char, 60> saved_indices{};
-  std::vector<u_long> storage =
-      std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 32> ordering{};
+  std::uint32_t saved_random = VS::Core::interfaceRandomState;
+  std::array<std::uint8_t, 264> saved_trim{};
+  std::array<std::uint8_t, 92> saved_widths{};
+  std::array<std::uint8_t, 60> saved_indices{};
+  std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
+      0x20000 / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
+  std::array<std::uint32_t, 32> ordering{};
 
   ClockFixture() {
     std::copy_n(VS::Render::compactGlyphLeftTrim, saved_trim.size(),
@@ -126,7 +137,7 @@ struct ClockFixture {
     std::fill_n(VS::Render::compactGlyphLeftTrim, saved_trim.size(), 0);
     std::fill_n(VS::Render::compactGlyphWidths, saved_widths.size(), 0x66);
     for (size_t index = 0; index < saved_indices.size(); ++index) {
-      VS::Render::compactGlyphIndices[index] = static_cast<u_char>(index);
+      VS::Render::compactGlyphIndices[index] = static_cast<std::uint8_t>(index);
     }
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
@@ -164,7 +175,7 @@ struct ClockFixture {
     for (size_t count = 0; packet != nullptr && count < 4096; ++count) {
       const auto* tag = static_cast<const P_TAG*>(packet);
       if (tag->len == 4) {
-        const auto* words = static_cast<const u_long*>(packet);
+        const auto* words = static_cast<const std::uint32_t*>(packet);
         if ((words[2] >> 16) == static_cast<unsigned>(y)) {
           const unsigned uv = words[3];
           const unsigned index = (uv & 0xFE) + (((uv >> 8) & 0xFF) == 86);
@@ -227,7 +238,7 @@ TEST_CASE("Game Over fade links packets through native handles",
   const auto* fade_packet = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
-  CHECK(getaddr(render.ordering.data() + 2) == LegacyGpu_Handle(fade_packet));
+  CHECK(getaddr(render.ordering.data() + 2) == GpuHandle(fade_packet));
   files::UpdateGameOverChoices(context, true);
   (void)input;
 }
@@ -357,11 +368,12 @@ TEST_CASE("Score viewer banners use the native main ordering pointer",
       VS::Render::FrameScratchpad().primitive_cursor);
   VS::Menu::Score::DrawLiveEnemyBanner(8, 18, 96, 12, 3);
   const size_t bytes =
-      11 * sizeof(LINE_G2) + sizeof(POLY_F4) + 3 * sizeof(u_long);
+      11 * sizeof(LINE_G2) + sizeof(POLY_F4) + 3 * sizeof(std::uint32_t);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
-        reinterpret_cast<const u_char*>(first) + bytes);
+        reinterpret_cast<const std::uint8_t*>(first) + bytes);
   CHECK(nextPrim(fixture.ordering.data() + 25) ==
-        reinterpret_cast<const u_char*>(first) + bytes - 3 * sizeof(u_long));
+        reinterpret_cast<const std::uint8_t*>(first) + bytes -
+            3 * sizeof(std::uint32_t));
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
 }

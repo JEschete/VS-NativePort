@@ -26,6 +26,9 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SVECTOR;
+
 namespace actors = VS::Actors;
 using actors::BoneLabels;
 using actors::BoneTagKind;
@@ -136,9 +139,9 @@ struct LiveSkeletonState {
   VS::Actors::ActorRecord& AddActor(int actor_id, TestModel& model) {
     records.push_back(std::make_unique<VS::Actors::ActorRecord>());
     VS::Actors::ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<u_char>(actor_id);
+    actor.instance.slot = static_cast<std::uint8_t>(actor_id);
     actor.instance.model = &model.header;
-    actor.instance.bone_count = static_cast<u_char>(kTestBones);
+    actor.instance.bone_count = static_cast<std::uint8_t>(kTestBones);
     actor.model_data_size = static_cast<unsigned>(sizeof model);
     actor.scale = kOne;
     VS::Actors::actorRecords[actor_id] = &actor;
@@ -358,7 +361,7 @@ TEST_CASE("Live bone tags refuse bad kinds and bones past the loaded table",
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
   VS::Actors::ActorRecord& actor = state.AddActor(2, model);
-  actor.instance.bone_count = static_cast<u_char>(kTestBones + 2);
+  actor.instance.bone_count = static_cast<std::uint8_t>(kTestBones + 2);
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   CHECK(actors::FindLiveActorBoneTag(2, 6, kTagKind) ==
@@ -434,7 +437,7 @@ TEST_CASE("Live bone matrices copy the stored matrix and bone length",
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   MATRIX matrix{};
-  u_long length = 0;
+  std::uint32_t length = 0;
   CHECK(actors::LiveActorTaggedBoneMatrix(2, 7, &matrix, &length) == 0);
   CHECK(TranslationOf(matrix) == Vec3{1, 2, 3});
   CHECK(length == 77);

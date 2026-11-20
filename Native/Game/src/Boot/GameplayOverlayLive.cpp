@@ -32,7 +32,7 @@
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -45,7 +45,10 @@
 #include "State/SceneTimerLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Core::Gte::VECTOR;
+
 using VS::Battle::ActionState;
+using VS::Legacy::SetDrawStp;
 
 namespace VS::Boot {
 namespace {

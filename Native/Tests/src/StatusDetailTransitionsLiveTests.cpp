@@ -25,8 +25,8 @@ using equipment_detail_tests::ValueRestore;
 struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
   ArrayRestore<std::uint16_t, std::size(status::statusStrings)> saved_status{
       status::statusStrings};
-  ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)> saved_hands{
-      VS::Menu::Framework::weaponHands};
+  ArrayRestore<std::uint8_t, std::size(VS::Menu::Framework::weaponHands)>
+      saved_hands{VS::Menu::Framework::weaponHands};
   vs_test::status_components::World text;
 
   LiveTransitionFixture() {
@@ -34,7 +34,7 @@ struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
     std::memcpy(names.data(), text.names.data(), text.names.size());
     std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
     VS::Battle::stringContext = {};
-    std::fill_n(status::statusStrings, 48, u_short{74});
+    std::fill_n(status::statusStrings, 48, std::uint16_t{74});
     status::statusStrings[74] = 0xE701;
   }
 };

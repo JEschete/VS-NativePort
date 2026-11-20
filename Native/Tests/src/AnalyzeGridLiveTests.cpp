@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
@@ -24,11 +24,15 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Core::Gte::MATRIX;
+using VS::Core::Gte::SetGeomOffset;
+using VS::Core::Gte::SetGeomScreen;
+
 namespace {
 namespace effects = VS::Effects;
 namespace memory = VS::Core::Memory;
-constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(u_long);
-constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
+constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kSceneOffset = 32;
 constexpr std::size_t kEmitterOffset = 0x1D0;
 constexpr std::uint32_t kInitialLink = 0xC4000007;
@@ -69,9 +73,9 @@ class LiveGrid {
     }
     VS::Render::FrameScratchpad().view_matrix.t[2] = 400;
     ordering.fill(kInitialLink);
-    Core_Gte_Reset();
-    Core_Gte_SetGeomScreen(256);
-    Core_Gte_SetGeomOffset(160, 120);
+    VS::Core::Gte::Reset();
+    SetGeomScreen(256);
+    SetGeomOffset(160, 120);
   }
   ~LiveGrid() {
     if (memory::LivePayloadCapacity(slot.renderer_state).has_value()) {
@@ -109,8 +113,8 @@ class LiveGrid {
   VS::Effects::LiveEffectPackage package{};
   VS::Effects::LiveEffectInstance instance{};
   VS::Effects::LiveRendererSlot slot{};
-  std::array<u_long, kPrimitiveWords> primitives{};
-  std::array<u_long, kOrderingWords> ordering{};
+  std::array<std::uint32_t, kPrimitiveWords> primitives{};
+  std::array<std::uint32_t, kOrderingWords> ordering{};
 
  private:
   VS::Effects::LiveEffectPackage* saved_package_ = VS::Effects::package;

@@ -28,7 +28,7 @@
 #include "Audio/VoiceMixer.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace Driver = VS::Audio::Driver;

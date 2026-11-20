@@ -4,7 +4,7 @@
 // defines it.
 
 #include "Actors/ModelDraw.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 

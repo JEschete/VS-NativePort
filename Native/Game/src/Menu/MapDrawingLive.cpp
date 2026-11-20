@@ -14,14 +14,14 @@
 #include <vector>
 
 #include "Battle/StatusEffects.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Doors.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Map.hpp"
@@ -38,6 +38,37 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::CVECTOR;
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SVECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::LINE_G2;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::POLY_FT4;
+using VS::Legacy::POLY_G3;
+using VS::Legacy::POLY_G4;
+using VS::Legacy::setlen;
+using VS::Legacy::setLineG2;
+using VS::Legacy::setPolyF4;
+using VS::Legacy::setPolyFT4;
+using VS::Legacy::setPolyG3;
+using VS::Legacy::setPolyG4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setRGB1;
+using VS::Legacy::setRGB2;
+using VS::Legacy::setRGB3;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setShadeTex;
+using VS::Legacy::setTile;
+using VS::Legacy::setUV4;
+using VS::Legacy::setWH;
+using VS::Legacy::setXY0;
+using VS::Legacy::setXY2;
+using VS::Legacy::setXY3;
+using VS::Legacy::setXY4;
+using VS::Legacy::TILE;
+
 namespace VS::Menu::map {
 namespace {
 constexpr std::size_t kWordBytes = 4;
@@ -50,21 +81,20 @@ constexpr int kLegendSlot = 6;
 constexpr int kAshleySlot = 8;
 constexpr int kTexturePageSlot = 7;
 // getTPage(2, 0, 192, 0).
-constexpr u_long kLegendTexturePage = 0x103;
+constexpr std::uint32_t kLegendTexturePage = 0x103;
 // insertTPage's draw-mode command with dithering enabled.
-constexpr u_long kTexturePageCommand = 0xE1000200;
+constexpr std::uint32_t kTexturePageCommand = 0xE1000200;
 constexpr int kTexturePageWords = 2;
 
 struct LegendTexturePage {
-  u_long tag;
-  u_long mode;
-  u_long padding;
+  std::uint32_t tag;
+  std::uint32_t mode;
+  std::uint32_t padding;
 };
 // The legend's slide starts and stops here (uiXOffset).
 constexpr int kHiddenLegendOffset = -128;
 
 static_assert(offsetof(Field::MapRoomRecord, data_offset) == kDataOffset);
-static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
               kMapPalingScenes);
 
@@ -82,7 +112,7 @@ void Refuse(std::string_view call, std::string_view reason) {
 template <typename Primitive>
 [[nodiscard]] Primitive* ReservePrimitive() {
   constexpr std::size_t kWords =
-      (sizeof(Primitive) + sizeof(u_long) - 1) / sizeof(u_long);
+      (sizeof(Primitive) + sizeof(std::uint32_t) - 1) / sizeof(std::uint32_t);
   return reinterpret_cast<Primitive*>(
       Render::ReserveLivePrimitiveWords(kWords));
 }
@@ -91,7 +121,7 @@ template <typename Primitive>
 // the entry lies outside the frame's table or the buffer is full.
 template <typename Primitive>
 [[nodiscard]] Primitive* PacketFor(std::string_view call, int slot,
-                                   u_long*& entry) {
+                                   std::uint32_t*& entry) {
   entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
   if (entry == nullptr) {
@@ -106,7 +136,7 @@ template <typename Primitive>
 }
 
 template <typename Primitive>
-void Link(u_long* entry, Primitive* packet) {
+void Link(std::uint32_t* entry, Primitive* packet) {
   AddPrim(entry, packet);
   VS::Render::FrameScratchpad().primitive_cursor = packet + 1;
 }
@@ -165,11 +195,11 @@ class LiveRoomHost final : public RoomDrawHost {
  public:
   Projection Project(const RoomVertex& vertex) override {
     SVECTOR input{.vx = vertex.x, .vy = vertex.y, .vz = vertex.z, .pad = 0};
-    Core_GteWord screen = 0;
-    Core_GteWord interpolation = 0;
-    Core_GteWord flag = 0;
-    const Core_GteWord depth =
-        Core_Gte_RotTransPers(&input, &screen, &interpolation, &flag);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word interpolation = 0;
+    VS::Core::Gte::Word flag = 0;
+    const VS::Core::Gte::Word depth =
+        RotTransPers(&input, &screen, &interpolation, &flag);
     const auto packed = static_cast<std::uint32_t>(screen);
     constexpr std::uint32_t kHalfShift = 16;
     return {.screen = {.x = Core::Math::WrapSigned16(packed),
@@ -186,7 +216,7 @@ class LiveRoomHost final : public RoomDrawHost {
   }
 
   void AddTriangle(const RoomTriangle& triangle, std::int32_t depth) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* poly = PacketFor<POLY_G3>(kCall, depth, entry);
     if (poly == nullptr) return;
     setPolyG3(poly);
@@ -200,7 +230,7 @@ class LiveRoomHost final : public RoomDrawHost {
   }
 
   void AddQuad(const RoomQuad& quad, std::int32_t depth) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* poly = PacketFor<POLY_G4>(kCall, depth, entry);
     if (poly == nullptr) return;
     setPolyG4(poly);
@@ -215,7 +245,7 @@ class LiveRoomHost final : public RoomDrawHost {
   }
 
   void AddEdge(const RoomEdge& edge, std::int32_t depth) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* line = PacketFor<LINE_G2>(kCall, depth, entry);
     if (line == nullptr) return;
     setLineG2(line);
@@ -227,7 +257,7 @@ class LiveRoomHost final : public RoomDrawHost {
   }
 
   void AddTile(const RoomTile& tile, std::int32_t depth) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* packet = PacketFor<TILE>(kCall, depth, entry);
     if (packet == nullptr) return;
     setTile(packet);
@@ -257,7 +287,7 @@ class LiveRoomHost final : public RoomDrawHost {
   }
 
   void DrawAshley(std::int32_t position, std::int32_t brightness) override {
-    u_long* entry = Render::LiveFrameOrderingEntry(
+    std::uint32_t* entry = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kAshleySlot);
     if (entry == nullptr) {
       Refuse(kCall, "ordering-table entry outside the frame's table");
@@ -348,7 +378,7 @@ class LiveLabelHost final : public LabelDrainHost {
 class LiveBackdropHost final : public BackdropHost {
  public:
   void AddBackdropLine(const BackdropLine& line) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* packet = PacketFor<LINE_G2>(kCall, kBackdropSlot, entry);
     if (packet == nullptr) return;
     setLineG2(packet);
@@ -362,7 +392,7 @@ class LiveBackdropHost final : public BackdropHost {
 
   void AddBackdropShadow(
       const std::array<ScreenPoint, kQuadCorners>& corners) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* poly = PacketFor<POLY_F4>(kCall, kBackdropSlot, entry);
     if (poly == nullptr) return;
     setPolyF4(poly);
@@ -387,10 +417,11 @@ class LiveCompassHost final : public CompassHost {
   }
 
   void AddCompassQuad(const CompassQuad& compass) override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* poly = PacketFor<POLY_FT4>(
         "DrawCompass",
-        compass.slot_bytes / static_cast<std::int32_t>(sizeof(u_long)), entry);
+        compass.slot_bytes / static_cast<std::int32_t>(sizeof(std::uint32_t)),
+        entry);
     if (poly == nullptr) return;
     setPolyFT4(poly);
     setSemiTrans(poly, compass.semi_transparent ? 1 : 0);
@@ -427,7 +458,7 @@ class LiveControlsHost final : public ControlsHost {
 
   void DrawButton(Framework::ButtonIcon button, std::int32_t x,
                   std::int32_t y) override {
-    if (u_long* entry = LegendEntry(); entry != nullptr) {
+    if (std::uint32_t* entry = LegendEntry(); entry != nullptr) {
       Framework::DrawLiveButtonIcon(button, x, y, entry);
     }
   }
@@ -436,7 +467,7 @@ class LiveControlsHost final : public ControlsHost {
                    std::uint32_t color) override {
     constexpr std::array<const char*, 6> kTexts{"BACK", "NEXT", "ROTATION",
                                                 "ZOOM", "MENU", "JAMMING"};
-    if (u_long* entry = LegendEntry(); entry != nullptr) {
+    if (std::uint32_t* entry = LegendEntry(); entry != nullptr) {
       Render::DrawLiveCompactTextColor(
           kTexts.at(static_cast<std::size_t>(caption)), packed_xy,
           static_cast<int>(color), entry);
@@ -451,7 +482,7 @@ class LiveControlsHost final : public ControlsHost {
   // The original's inline insertTPage: a two-word packet whose second word
   // is zero, not AppendLiveTexturePage's one-word DR_TPAGE.
   void AddTexturePage() override {
-    u_long* entry = nullptr;
+    std::uint32_t* entry = nullptr;
     auto* packet =
         PacketFor<LegendTexturePage>("DrawControls", kTexturePageSlot, entry);
     if (packet == nullptr) return;
@@ -469,8 +500,8 @@ class LiveControlsHost final : public ControlsHost {
  private:
   static constexpr std::string_view kCall = "DrawControls";
 
-  [[nodiscard]] static u_long* LegendEntry() {
-    u_long* entry = Render::LiveFrameOrderingEntry(
+  [[nodiscard]] static std::uint32_t* LegendEntry() {
+    std::uint32_t* entry = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kLegendSlot);
     if (entry == nullptr) {
       Refuse(kCall, "ordering-table entry outside the frame's table");

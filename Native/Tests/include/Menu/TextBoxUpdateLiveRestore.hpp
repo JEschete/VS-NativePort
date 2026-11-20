@@ -15,9 +15,9 @@
 namespace text_box_tests {
 struct LiveUpdateRestore {
   equipment_detail_tests::ArrayRestore<
-      u_long, std::size(VS::Menu::textBoxOrderingTables)>
+      std::uint32_t, std::size(VS::Menu::textBoxOrderingTables)>
       saved_tables{VS::Menu::textBoxOrderingTables};
-  equipment_detail_tests::ValueRestore<u_long*> saved_active{
+  equipment_detail_tests::ValueRestore<std::uint32_t*> saved_active{
       VS::Menu::activeTextBoxOrderingTable};
   equipment_detail_tests::ValueRestore<char> saved_index{
       VS::Menu::textBoxBufferIndex};

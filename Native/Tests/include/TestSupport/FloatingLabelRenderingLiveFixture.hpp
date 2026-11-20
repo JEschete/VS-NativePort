@@ -29,8 +29,8 @@
 namespace VS::test_support::floating_label_rendering {
 inline constexpr std::size_t kLabelCapacity = 32;
 inline constexpr std::size_t kLabelWords = 6;
-inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(u_long);
-inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
+inline constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
+inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 inline constexpr std::size_t kSceneHead = 18;
 inline constexpr std::size_t kOverlayHead = 2;
 inline constexpr std::size_t kQuadBucket = kSceneHead - 5;
@@ -130,9 +130,9 @@ class LiveFrame {
 
  public:
   std::span<VS::Battle::FloatingLabel, kLabelCapacity> labels{storage_[0]};
-  std::vector<u_long> primitives =
-      std::vector<u_long>(kPrimitiveWords, kStorageSeed);
-  std::array<u_long, kOrderingWords> ordering{};
+  std::vector<std::uint32_t> primitives =
+      std::vector<std::uint32_t>(kPrimitiveWords, kStorageSeed);
+  std::array<std::uint32_t, kOrderingWords> ordering{};
 
   LiveFrame() {
     ordering.fill(kEnd);
@@ -163,7 +163,7 @@ class LiveFrame {
   LiveFrame& operator=(const LiveFrame&) = delete;
 
   [[nodiscard]] std::size_t UsedWords() const {
-    return static_cast<u_long*>(
+    return static_cast<std::uint32_t*>(
                VS::Render::FrameScratchpad().primitive_cursor) -
            primitives.data();
   }
@@ -183,13 +183,13 @@ class LiveFrame {
         throw std::runtime_error("OT traversal exceeded its bounded owners");
       }
       const auto* primitive =
-          static_cast<const u_long*>(LegacyGpu_Pointer(handle));
+          static_cast<const std::uint32_t*>(VS::Legacy::GpuPointer(handle));
       const auto base = reinterpret_cast<std::uintptr_t>(primitives.data());
       const auto address = reinterpret_cast<std::uintptr_t>(primitive);
       const auto table = reinterpret_cast<std::uintptr_t>(ordering.data());
       if (address >= table &&
-          address - table < ordering.size() * sizeof(u_long) &&
-          (address - table) % alignof(u_long) == 0) {
+          address - table < ordering.size() * sizeof(std::uint32_t) &&
+          (address - table) % alignof(std::uint32_t) == 0) {
         if ((*primitive & kLengthMask) != 0) {
           throw std::runtime_error("An ordering-table entry contains commands");
         }
@@ -197,11 +197,11 @@ class LiveFrame {
         continue;
       }
       if (primitive == nullptr || address < base ||
-          address - base >= primitives.size() * sizeof(u_long)) {
+          address - base >= primitives.size() * sizeof(std::uint32_t)) {
         throw std::runtime_error(
             "OT traversal left the current primitive owner");
       }
-      const auto offset = (address - base) / sizeof(u_long);
+      const auto offset = (address - base) / sizeof(std::uint32_t);
       const auto length = *primitive >> Render::kPacketLengthShift;
       if (length >= primitives.size() - offset ||
           packets.size() > primitives.size()) {
@@ -225,7 +225,7 @@ class LiveFrame {
   decltype(VS::Battle::floatingLabels) saved_labels_ =
       VS::Battle::floatingLabels;
   std::int16_t saved_count_ = VS::Battle::floatingLabelCount;
-  SVECTOR saved_cue_ = VS::Battle::abilityTimingCuePosition;
+  VS::Core::Gte::SVECTOR saved_cue_ = VS::Battle::abilityTimingCuePosition;
   std::array<std::int16_t, kTimerFields> saved_timers_{
       VS::Battle::abilityTimingCueFrames, VS::Battle::statusLabelStepTimer,
       VS::Battle::placedLabelCount};

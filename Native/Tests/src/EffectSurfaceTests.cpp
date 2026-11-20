@@ -22,7 +22,7 @@
 #include "Effects/Templates/Surface.hpp"
 #include "Effects/Templates/SurfaceCore.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {

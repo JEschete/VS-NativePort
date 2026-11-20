@@ -22,7 +22,7 @@
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Game {
 namespace {
@@ -401,11 +401,11 @@ std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
     return std::unexpected("placement exceeds the production encoding");
   }
   auto placement = source;
-  placement.index = static_cast<u_char>(index);
-  placement.tile_x = static_cast<u_char>(position.x);
-  placement.tile_z = static_cast<u_char>(position.z);
-  placement.height = static_cast<u_char>(position.elevation);
-  placement.direction = static_cast<u_char>(position.direction);
+  placement.index = static_cast<std::uint8_t>(index);
+  placement.tile_x = static_cast<std::uint8_t>(position.x);
+  placement.tile_z = static_cast<std::uint8_t>(position.z);
+  placement.height = static_cast<std::uint8_t>(position.elevation);
+  placement.direction = static_cast<std::uint8_t>(position.direction);
   // VS::Field::SpawnRoomActors (146C.c:14901) allocates slots when slot is
   // zero.
   // Membership is explicit, not story-gated. AI, hostility, loot and variant

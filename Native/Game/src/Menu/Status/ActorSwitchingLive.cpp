@@ -15,7 +15,7 @@
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -81,16 +81,16 @@ void Refuse(std::string_view call, std::string_view reason) {
   return names;
 }
 
-[[nodiscard]] u_long* VitalsChain() {
+[[nodiscard]] std::uint32_t* VitalsChain() {
   auto* const table =
       static_cast<std::uint8_t*>(VS::Render::FrameScratchpad().ordering_table);
   if (table == nullptr) return nullptr;
-  return reinterpret_cast<u_long*>(table - kVitalsChainBytes);
+  return reinterpret_cast<std::uint32_t*>(table - kVitalsChainBytes);
 }
 
 class LiveVitalsHost final : public VitalsHost {
  public:
-  explicit LiveVitalsHost(u_long* chain) : chain_(chain) {}
+  explicit LiveVitalsHost(std::uint32_t* chain) : chain_(chain) {}
 
   void SetHudHidden(std::int32_t hidden) override {
     Battle::SetLiveHudHidden(hidden);
@@ -114,7 +114,7 @@ class LiveVitalsHost final : public VitalsHost {
   }
 
  private:
-  u_long* chain_;
+  std::uint32_t* chain_;
 };
 
 class LiveRoster final : public InspectableActorRoster {
@@ -240,7 +240,7 @@ int LiveAnimateActorSwitch(int init) {
 }
 
 // decomp: MENU4.PRG _renderUnknownValue (120.c:692).
-void LiveDrawUnanalyzedValue(int xy, int with_max, u_long* before) {
+void LiveDrawUnanalyzedValue(int xy, int with_max, std::uint32_t* before) {
   LiveVitalsHost host(before);
   DrawUnanalyzedValue(host, xy, with_max != 0);
 }

@@ -20,7 +20,7 @@
 #include "Input/Controllers.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/Timers.hpp"
 
 namespace {

@@ -23,7 +23,7 @@
 #include "Content/ModuleData.hpp"
 #include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Save/MemoryCard/CardResources.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"

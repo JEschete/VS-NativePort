@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Event/Screen.hpp"
 
@@ -32,16 +32,16 @@ struct CameraTrack {
   std::int32_t motion_scalar_delta{};
   std::int16_t orbit_angle{};
   std::int16_t orbit_angle_delta{};
-  VECTOR start_position{};
-  VECTOR destination{};
-  VECTOR displacement{};
-  VECTOR height_offset{};
-  VECTOR follow_delta{};
-  VECTOR follow_position{};
-  VECTOR previous_camera_position{};
-  VECTOR computed_position{};
-  VECTOR current_position{};
-  VECTOR partner_position{};
+  VS::Core::Gte::VECTOR start_position{};
+  VS::Core::Gte::VECTOR destination{};
+  VS::Core::Gte::VECTOR displacement{};
+  VS::Core::Gte::VECTOR height_offset{};
+  VS::Core::Gte::VECTOR follow_delta{};
+  VS::Core::Gte::VECTOR follow_position{};
+  VS::Core::Gte::VECTOR previous_camera_position{};
+  VS::Core::Gte::VECTOR computed_position{};
+  VS::Core::Gte::VECTOR current_position{};
+  VS::Core::Gte::VECTOR partner_position{};
 };
 
 // decomp: func_800BD57C_t (src/BATTLE/BATTLE.PRG/4DEA8.c:62)
@@ -115,12 +115,12 @@ struct CameraState {
   // 0x2000 when the camera has no origin actor.
   std::uint16_t origin_actor_id{};
   std::uint16_t reserved1ea{};
-  VECTOR origin_offset{};
+  VS::Core::Gte::VECTOR origin_offset{};
   TripleTween screen_scale{};
   TripleTween screen_tint{};
   TripleTween screen_translation{};
   TripleTween screen_effect_tween{};
-  VECTOR last_terrain_position{};
+  VS::Core::Gte::VECTOR last_terrain_position{};
 };
 
 // The byte sizes and field offsets the original stored these records with.

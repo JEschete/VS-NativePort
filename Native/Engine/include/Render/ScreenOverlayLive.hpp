@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/ScreenOverlay.hpp"
 
 namespace VS::Render {
@@ -29,17 +29,17 @@ void SetLiveFramebufferEffectEnabled(int enabled);
 void SetLiveFramebufferEffectRotation(int roll_angle);
 void SetLiveFramebufferEffectScale(
     const VS::Render::FramebufferEffectTranslation* scale);
-void SetLiveFramebufferEffectTint(const CVECTOR* tint);
+void SetLiveFramebufferEffectTint(const VS::Core::Gte::CVECTOR* tint);
 void SetLiveFramebufferEffectOffset(
     const VS::Render::FramebufferEffectTranslation* offset);
 void SetLiveFramebufferEffectBlendMode(int blend_mode);
-void SetLiveFramebufferEffectDepth(u_int ordering_depth);
+void SetLiveFramebufferEffectDepth(std::uint32_t ordering_depth);
 void SetLiveFramebufferPreviousFrame(int use_previous_frame);
 // Writes x, the x scale again as y (the original quirk) and 0.
 void ReadLiveFramebufferEffectScale(
     VS::Render::FramebufferEffectTranslation* output);
 // Writes r, g and b; cd is left as it was.
-void ReadLiveFramebufferEffectTint(CVECTOR* output);
+void ReadLiveFramebufferEffectTint(VS::Core::Gte::CVECTOR* output);
 // Writes x and y; the two reserved words are left as they were.
 void ReadLiveFramebufferEffectOffset(
     VS::Render::FramebufferEffectTranslation* output);

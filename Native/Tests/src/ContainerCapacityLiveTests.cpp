@@ -25,6 +25,9 @@
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
 
+using VS::Legacy::GpuHandle;
+using VS::Legacy::GpuPointer;
+
 namespace {
 namespace items = VS::Items;
 namespace capacity = VS::Menu::container;
@@ -70,7 +73,7 @@ TEST_CASE("F02971 live emits actual compact packets, colors and palette",
         equipment::kCompactClut);
   CHECK(sprites.front().position == kPosition - 32U - GlyphWidth('3'));
   constexpr std::size_t kDrawModeWords = 2;
-  const auto* cursor = static_cast<const u_long*>(
+  const auto* cursor = static_cast<const std::uint32_t*>(
       VS::Render::FrameScratchpad().primitive_cursor);
   CHECK(cursor - (fixture.primitives.data() + 1) ==
         kGlyphCount * (equipment::kCompactWords + kDrawModeWords));
@@ -87,7 +90,7 @@ TEST_CASE("F02971 live half equality is gray on the real overlay chain",
   REQUIRE_FALSE(sprites.empty());
   CHECK((sprites.front().color & equipment::kRgbMask) ==
         VS::Render::kCompactTextGray);
-  CHECK(LegacyGpu_Pointer(LegacyGpu_Handle(fixture.primitives.data() + 1)) ==
+  CHECK(GpuPointer(GpuHandle(fixture.primitives.data() + 1)) ==
         fixture.primitives.data() + 1);
 }
 
@@ -210,7 +213,7 @@ TEST_CASE("F02975 live uses nonzero direction, full gems and staging",
   LiveFixture fixture;
   auto& target = fixture.containers.storage->gadget_bag.items;
   constexpr int kGemCategory = static_cast<int>(items::ItemCategory::kGem);
-  constexpr u_char kNonzeroDirection = 255;
+  constexpr std::uint8_t kNonzeroDirection = 255;
   VS::Menu::container::browsingGadgetBag = kNonzeroDirection;
   LiveFixture::Fill(target, items::ItemCategory::kGem, live::kLastGem);
   CHECK(capacity::WouldExceedLiveCapacity(kGemCategory, 1) == 0);

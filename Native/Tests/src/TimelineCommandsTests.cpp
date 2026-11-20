@@ -148,7 +148,7 @@ TEST_CASE("Random reaction variants redraw until they differ from the last",
 
 TEST_CASE("Live timeline commands refuse a missing instance",
           "[timeline-commands]") {
-  const u_char last = fx::lastReactionSoundVariant;
+  const std::uint8_t last = fx::lastReactionSoundVariant;
   fx::LiveApplyTargetActionImpact(nullptr);
   fx::LiveApplySourceActionImpact(nullptr);
   fx::LiveActivateTargetRoomTile(nullptr);
@@ -164,7 +164,7 @@ TEST_CASE("Live reaction sound skips a non-actor emitter",
           "[timeline-commands]") {
   static fx::LiveEffectInstance instance{};
   instance.context.emit_from.type = fx::kRoomPointEndpoint;
-  const u_char last = fx::lastReactionSoundVariant;
+  const std::uint8_t last = fx::lastReactionSoundVariant;
   fx::LivePlaySourceActorReactionSound(&instance, 4);
   CHECK(fx::lastReactionSoundVariant == last);
 }

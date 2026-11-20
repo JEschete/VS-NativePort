@@ -14,11 +14,17 @@
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingDraw.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/SpritesLive.hpp"
+
+using VS::Core::Gte::LoadV0;
+using VS::Core::Gte::Rtps;
+using VS::Core::Gte::StoreSxy2;
+using VS::Core::Gte::StoreSz3Otz;
+using VS::Core::Gte::SVECTOR;
 
 using VS::Battle::ShapeVertex;
 using VS::Battle::TargetVolume;
@@ -35,7 +41,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
  public:
   math::Mat3 VolumeTransform(const TargetVolumeExtents& extents,
                              std::int16_t angle) override {
-    std::array<u_char, kTargetVolumeExtents> scale{};
+    std::array<std::uint8_t, kTargetVolumeExtents> scale{};
     std::copy(extents.begin(), extents.end(), scale.begin());
     return math::MatrixOf(
         *BuildSphereVolumeTransformEntry(scale.data(), angle));
@@ -45,12 +51,12 @@ class LiveWireCanvas final : public TargetWireCanvas {
 
   TargetWirePoint Project(const TargetWorldPoint& world) override {
     SVECTOR point = {world[0], world[1], world[2], 0};
-    Core_GteWord screen = 0;
-    Core_GteWord depth = 0;
-    Core_Gte_LoadV0(&point);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSxy2(&screen);
-    Core_Gte_StoreSz3Otz(&depth);
+    VS::Core::Gte::Word screen = 0;
+    VS::Core::Gte::Word depth = 0;
+    LoadV0(&point);
+    Rtps();
+    StoreSxy2(&screen);
+    StoreSz3Otz(&depth);
     const auto packed = static_cast<std::uint32_t>(screen);
     return {.x = math::WrapSigned16(packed),
             .y = math::WrapSigned16(packed >> kCoordinateBits),

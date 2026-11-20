@@ -603,7 +603,7 @@
     <ClInclude Include="include\Core\Diagnostics.hpp" />
     <ClInclude Include="include\Core\FrameClock.hpp" />
     <ClInclude Include="include\Core\FrameTiming.hpp" />
-    <ClInclude Include="include\Core\Gte.h" />
+    <ClInclude Include="include\Core\Gte.hpp" />
     <ClInclude Include="include\Core\Handle.hpp" />
     <ClInclude Include="include\Core\Log.hpp" />
     <ClInclude Include="include\Core\Math\Distance.hpp" />
@@ -690,11 +690,10 @@
     <ClInclude Include="include\Save\Snapshot.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.hpp" />
     <ClInclude Include="Legacy\Core\LibEtc.hpp" />
-    <ClInclude Include="Legacy\Core\PsxTypes.h" />
+    <ClInclude Include="Legacy\Core\PsxTypes.hpp" />
     <ClInclude Include="Legacy\Input\LibPad.hpp" />
-    <ClInclude Include="Legacy\OnDisc.h" />
-    <ClInclude Include="Legacy\Psx.h" />
-    <ClInclude Include="Legacy\Render\LibGpu.h" />
+    <ClInclude Include="Legacy\Psx.hpp" />
+    <ClInclude Include="Legacy\Render\LibGpu.hpp" />
     <ClInclude Include="Legacy\Save\LibCard.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

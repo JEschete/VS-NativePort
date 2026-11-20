@@ -18,7 +18,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -156,7 +156,7 @@ class LiveScriptAudioHost final : public event::ScriptAudioHost {
 using Handler = event::ScriptStep (*)(event::ScriptCommand,
                                       event::ScriptAudioHost&);
 
-intptr_t RunCommand(Handler handler, const u_char* command,
+intptr_t RunCommand(Handler handler, const std::uint8_t* command,
                     std::size_t length) {
   Require(command != nullptr, "Script sound command is missing");
   LiveScriptAudioHost host;

@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Field/Doors.hpp"
 
 namespace VS::Field {
@@ -205,8 +205,8 @@ struct MpdMovingPlatform {
   std::uint32_t terminal_waypoint : 2;
   std::uint32_t reserved04_bits10 : 6;
   std::uint32_t motion_ticks : 16;
-  std::array<VECTOR, kMpdPlatformWaypoints> waypoints;
-  std::array<VECTOR, kMpdPlatformSegments> segment_velocities;
+  std::array<VS::Core::Gte::VECTOR, kMpdPlatformWaypoints> waypoints;
+  std::array<VS::Core::Gte::VECTOR, kMpdPlatformSegments> segment_velocities;
   std::int32_t position_x;
   std::int32_t position_y;
   std::int32_t position_z;
@@ -265,7 +265,7 @@ union PackedShortPair {
 inline constexpr std::size_t kMpdBackgroundColors = 5;
 struct MpdEnvironment {
   std::array<std::int32_t, kMpdBackgroundColors> background_colors;
-  VECTOR background_rotation;
+  VS::Core::Gte::VECTOR background_rotation;
   std::int32_t reserved24;
   std::int32_t reserved28;
   std::int32_t freeze_effect_id;

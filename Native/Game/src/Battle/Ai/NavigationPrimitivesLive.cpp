@@ -38,7 +38,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -54,7 +54,7 @@ static_assert(kFrameActorSlots == kNavigationActorSlots);
 static_assert(std::size(FrameContext{}.directions) == kNavigationDirections);
 // The route table is 256 words followed, at 0x454, by eight link end pairs.
 static_assert(sizeof(VS::Battle::Ai::RouteGateEndRecord) == 2);
-static_assert(kRouteWordCount * sizeof(u_int) <= kRouteEndOffset);
+static_assert(kRouteWordCount * sizeof(std::uint32_t) <= kRouteEndOffset);
 static_assert(kRouteEndOffset + (kRouteGateEndCount *
                                  sizeof(VS::Battle::Ai::RouteGateEndRecord)) <=
               kRouteAuxiliaryBytes);
@@ -187,7 +187,7 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
       int actor_id) const override {
     const auto& route = OverrideRoute(actor_id);
     if (route.native_pointer64 == nullptr) return std::nullopt;
-    u_int tile;
+    std::uint32_t tile;
     std::memcpy(&tile, route.native_pointer64, sizeof(tile));
     return tile;
   }
@@ -429,26 +429,28 @@ void BuildLiveAiTerrainHeightsWithWorkspace() {
 void UpdateLiveRouteGateAvailability() {
   const auto active = LiveVisiblePlatformMask();
   if (VS::Battle::Ai::roomHasWaypoints == nullptr) return;
-  auto* auxiliary = static_cast<u_char*>(VS::Battle::Ai::roomHasWaypoints);
+  auto* auxiliary =
+      static_cast<std::uint8_t*>(VS::Battle::Ai::roomHasWaypoints);
   Require(
       auxiliary == VS::Field::roomData.section6 &&
           VS::Field::roomData.header.section6_length >= kRouteAuxiliaryBytes &&
-          reinterpret_cast<const u_char*>(VS::Battle::Ai::routeGates) ==
+          reinterpret_cast<const std::uint8_t*>(VS::Battle::Ai::routeGates) ==
               auxiliary + kRouteEndOffset,
       "Route availability: route table does not belong to the active "
       "room auxiliary section");
   std::array<std::uint32_t, kRouteWordCount> routes{};
   for (std::size_t index = 0; index < kRouteWordCount; ++index) {
-    u_int word;
-    std::memcpy(&word, auxiliary + (index * sizeof(u_int)), sizeof word);
+    std::uint32_t word;
+    std::memcpy(&word, auxiliary + (index * sizeof(std::uint32_t)),
+                sizeof word);
     routes[index] = word;
   }
   Require(UpdateRouteGateAvailability(routes, LiveRouteGateEnds(), active),
           "Route availability: first route word depends on an original "
           "stack-register value");
   for (std::size_t index = 0; index < kRouteWordCount; ++index) {
-    auto* location = auxiliary + (index * sizeof(u_int));
-    const u_int word = routes[index];
+    auto* location = auxiliary + (index * sizeof(std::uint32_t));
+    const std::uint32_t word = routes[index];
     std::memcpy(location, &word, sizeof word);
   }
 }

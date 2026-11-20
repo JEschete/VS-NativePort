@@ -26,7 +26,7 @@
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
 #include "TestSupport/ChannelWarnings.hpp"

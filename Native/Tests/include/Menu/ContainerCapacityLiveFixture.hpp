@@ -31,7 +31,7 @@ inline constexpr std::size_t kRealCategories = 7;
 
 struct LiveFixture : equipment::LiveFixture {
   container_transfers_tests::LiveFixture containers;
-  equipment::ValueRestore<u_char> saved_direction{
+  equipment::ValueRestore<std::uint8_t> saved_direction{
       VS::Menu::container::browsingGadgetBag};
 
   LiveFixture() {

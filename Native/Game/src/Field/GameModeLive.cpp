@@ -27,7 +27,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/MagicCosts.hpp"
@@ -54,7 +54,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     controlMode = static_cast<std::uint32_t>(mode);
   }
   void SetActionFlowMode(int mode) override {
-    VS::Battle::actionFlowMode = static_cast<u_int>(mode);
+    VS::Battle::actionFlowMode = static_cast<std::uint32_t>(mode);
   }
   void SetInteractionPaused(bool paused) override {
     isInteractionPaused = Flag(paused);

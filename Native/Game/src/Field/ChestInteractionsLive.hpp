@@ -16,7 +16,9 @@ struct ActorLocationQuery;
 namespace VS::Actors {
 struct ActorRecord;
 }
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 
 namespace VS::Effects {
 struct LiveActionEffectRequest;
@@ -27,7 +29,8 @@ inline constexpr int kEntranceRecordBytes = 12;
 int CurrentSavePointIdEntry();
 void RefreshAshleyInteractionTileEntry(VS::Actors::ActorRecord* record);
 void StoreEntranceDoorForReloadEntry();
-void ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position);
+void ApplyUnlockEffectToRoomObjectEntry(
+    VS::Core::Gte::SVECTOR* target_position);
 void SetEntranceDoorRecordEntry(char (*record)[kEntranceRecordBytes]);
 void FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);
 int CheckAshleyTileTriggersEntry(int actor, unsigned char* location);

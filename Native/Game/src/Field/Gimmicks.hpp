@@ -11,7 +11,7 @@
 #include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/Shadow.hpp"
-#include "Core/Gte.h"
+#include "Core/Gte.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
 #include "Items/ItemRecords.hpp"
@@ -148,8 +148,8 @@ struct GimmickInstance {
   std::int32_t saved_tile;
   VS::Actors::ModelEffectSlot palette_pulse;
   VS::Actors::ShpModel* model;
-  std::array<MATRIX, kGimmickBoneMatrixCount> matrices;
-  SVECTOR rotation_offset;
+  std::array<VS::Core::Gte::MATRIX, kGimmickBoneMatrixCount> matrices;
+  VS::Core::Gte::SVECTOR rotation_offset;
   std::array<std::uint8_t, kGimmickInstanceReserved114Bytes> reserved114;
   std::array<std::uint16_t, kGimmickPaletteColorCount> base_palette;
   std::array<std::uint16_t, kGimmickPaletteColorCount> pulsed_palette;
@@ -293,7 +293,7 @@ struct GimmickPhysicsView {
   std::int32_t reserved14;
   std::int16_t rotation_ticks;
   std::int16_t mode;
-  SVECTOR position;
+  VS::Core::Gte::SVECTOR position;
   std::int16_t rotation_x;
   std::int16_t rotation_y;
   std::int16_t rotation_z;

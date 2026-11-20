@@ -19,6 +19,30 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
 
+using VS::Core::Gte::RotTransPers;
+using VS::Core::Gte::SetTransVector;
+using VS::Core::Gte::SVECTOR;
+using VS::Core::Gte::VECTOR;
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::DR_MODE;
+using VS::Legacy::getTPage;
+using VS::Legacy::LINE_F2;
+using VS::Legacy::POLY_F3;
+using VS::Legacy::POLY_F4;
+using VS::Legacy::SetDrawMode;
+using VS::Legacy::setLineF2;
+using VS::Legacy::setPolyF3;
+using VS::Legacy::setPolyF4;
+using VS::Legacy::setRGB0;
+using VS::Legacy::setSemiTrans;
+using VS::Legacy::setSprt8;
+using VS::Legacy::setTile;
+using VS::Legacy::setUV0;
+using VS::Legacy::setWH;
+using VS::Legacy::SPRT_8;
+using VS::Legacy::TILE;
+
 namespace VS::Field {
 namespace {
 
@@ -69,9 +93,10 @@ class Packets {
 };
 
 void Link(std::size_t slot, void* packet) {
-  AddPrim(
-      static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table) + slot,
-      packet);
+  AddPrim(static_cast<std::uint32_t*>(
+              VS::Render::FrameScratchpad().ordering_table) +
+              slot,
+          packet);
 }
 
 void SetPoint(std::int16_t& x, std::int16_t& y, MinimapScreenPoint point) {
@@ -87,15 +112,15 @@ class LiveMinimapRenderer final : public MinimapRenderer {
                      counts.lines * sizeof(LINE_F2) +
                      counts.doors * 2 * sizeof(TILE));
     const VECTOR translation{0, 0, kMinimapDepth, 0};
-    Core_Gte_SetTransVector(&translation);
+    SetTransVector(&translation);
   }
 
   MinimapScreenPoint Project(const MinimapVertex& vertex) override {
     SVECTOR point{vertex.x, vertex.y, vertex.z, 0};
-    Core_GteWord xy = 0;
-    Core_GteWord depth = 0;
-    Core_GteWord flags = 0;
-    Core_Gte_RotTransPers(&point, &xy, &depth, &flags);
+    VS::Core::Gte::Word xy = 0;
+    VS::Core::Gte::Word depth = 0;
+    VS::Core::Gte::Word flags = 0;
+    RotTransPers(&point, &xy, &depth, &flags);
     const auto packed = static_cast<std::uint32_t>(xy);
     return {static_cast<std::int16_t>(packed & UINT16_MAX),
             static_cast<std::int16_t>(packed >> kScreenYShift)};

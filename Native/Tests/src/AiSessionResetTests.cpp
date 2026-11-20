@@ -17,7 +17,7 @@
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 namespace {
 template <typename Pointer>

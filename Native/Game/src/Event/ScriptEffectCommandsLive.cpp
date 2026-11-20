@@ -39,13 +39,21 @@
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Timers.hpp"
+
+using VS::Legacy::AddPrim;
+using VS::Legacy::DR_TPAGE;
+using VS::Legacy::GetTPage;
+using VS::Legacy::LINE_F2;
+using VS::Legacy::SetDrawTPage;
+using VS::Legacy::SetLineF2;
+using VS::Legacy::setSemiTrans;
 
 namespace {
 namespace event = VS::Event;
@@ -203,7 +211,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
 using Handler = event::ScriptStep (*)(event::ScriptCommand,
                                       event::ScriptEffectHost&);
 
-intptr_t RunCommand(Handler handler, const u_char* command,
+intptr_t RunCommand(Handler handler, const std::uint8_t* command,
                     std::size_t length) {
   Require(command != nullptr, "Script effect command is missing");
   LiveScriptEffectHost host;
@@ -223,7 +231,7 @@ class LiveScanlineCanvas final : public event::ScanlineCanvas {
     }
     std::memset(line, 0, sizeof *line);
     SetLineF2(line);
-    line->r0 = line->g0 = line->b0 = static_cast<u_char>(grey);
+    line->r0 = line->g0 = line->b0 = static_cast<std::uint8_t>(grey);
     setSemiTrans(line, 1);
     line->x0 = 0;
     line->y0 = line->y1 = static_cast<std::int16_t>(y);

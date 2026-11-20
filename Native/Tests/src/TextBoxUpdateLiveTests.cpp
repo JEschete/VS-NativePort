@@ -21,6 +21,9 @@
 #include "Menu/TextBoxUpdateLiveRestore.hpp"
 #include "State/Timers.hpp"
 
+using VS::Legacy::ClearOTag;
+using VS::Legacy::GpuHandle;
+
 namespace {
 namespace menu = VS::Menu;
 using equipment_detail_tests::ArrayRestore;
@@ -28,7 +31,7 @@ using equipment_detail_tests::ValueRestore;
 constexpr std::size_t kFrameEntries = 32;
 constexpr std::size_t kSceneEntry = 18;
 constexpr std::size_t kTextEntry = 12;
-constexpr u_long kTerminator = 0xFFFFFF;
+constexpr std::uint32_t kTerminator = 0xFFFFFF;
 constexpr std::uint32_t kRandomSeed = 0x12345678;
 
 struct LiveUpdateFixture {
@@ -39,7 +42,7 @@ struct LiveUpdateFixture {
   ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
   ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   text_box_tests::LiveUpdateRestore saved_update;
-  std::array<u_long, kFrameEntries> ordering{};
+  std::array<std::uint32_t, kFrameEntries> ordering{};
 
   explicit LiveUpdateFixture(std::uint8_t buffer = 0) {
     std::ranges::fill(menu::textBoxes, menu::TextBoxState{});
@@ -81,7 +84,7 @@ TEST_CASE(
   menu::UpdateLiveTextBoxes();
   CHECK(menu::textBoxes[0].state == 3);
   CHECK(menu::textBoxes[0].frame_x == 40);
-  CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
+  CHECK(fixture.ordering[kTextEntry] == GpuHandle(submitted));
   CHECK(submitted[menu::kTextBoxOrderingTags - 1] == kTerminator);
   CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxBufferIndex) == next);
   CHECK(menu::activeTextBoxOrderingTable ==
@@ -127,7 +130,7 @@ TEST_CASE("Original text-box update module entry advances the production frame",
   reinterpret_cast<decltype(&menu::UpdateLiveTextBoxes)>(resolved)();
   CHECK(menu::textBoxes[0].state == 3);
   CHECK(VS::Menu::textBoxBufferIndex == 1);
-  CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
+  CHECK(fixture.ordering[kTextEntry] == GpuHandle(submitted));
 }
 
 namespace {

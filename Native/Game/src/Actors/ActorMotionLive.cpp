@@ -19,6 +19,8 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 
+using VS::Core::Gte::SVECTOR;
+
 static_assert(sizeof(VS::Actors::TileTarget) == sizeof(VS::Actors::PackedTile));
 static_assert(sizeof(SVECTOR) == sizeof(VS::Actors::MotionVector));
 
@@ -167,7 +169,7 @@ class LiveActorRoute final : public ActorRouteHost {
             .turn_rate = actor_.route_turn_rate};
   }
   void SetRoutePhase(int phase) override {
-    actor_.route_phase = static_cast<u_char>(phase);
+    actor_.route_phase = static_cast<std::uint8_t>(phase);
   }
   int TurnFrames() override { return actor_.instance.turn_frames; }
   int MoveFrames() override { return actor_.instance.current_animation; }

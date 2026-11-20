@@ -28,6 +28,8 @@
 #include "Save/MemoryCard/CardResources.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Legacy::getTPage;
+
 namespace mcman_text = VS::Content::text::mcman_bin;
 
 namespace VS::Game::Save {

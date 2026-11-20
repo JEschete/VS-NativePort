@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
@@ -104,11 +104,12 @@ class RecordHost final : public results::TimeAttackResultsDrawHost {
   }
 };
 
-inline constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
-inline constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(u_long);
+inline constexpr std::size_t kLiveWordBytes = sizeof(std::uint32_t);
+inline constexpr std::size_t kLivePrimitiveWords = 0x20000 / kLiveWordBytes;
+inline constexpr std::size_t kLiveOrderingWords = 0x2088 / kLiveWordBytes;
 inline constexpr std::size_t kLiveSceneHead = 16;
 inline constexpr std::size_t kLiveOverlayHead = 2;
-inline constexpr u_long kLiveEnd = 0xFFFFFF;
+inline constexpr std::uint32_t kLiveEnd = 0xFFFFFF;
 
 // A frame whose primitives land in `storage`, and the time-attack state the
 // Live entries read, restored afterwards.
@@ -117,13 +118,14 @@ struct LiveTimeAttackFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_char saved_course = VS::State::stateFlags.time_attack_boss;
+  std::uint8_t saved_course = VS::State::stateFlags.time_attack_boss;
   VS::State::ScoreData saved_scores = VS::State::scoreData;
   int saved_time = results::timeTrialTime;
   int saved_new_slot = results::newTimeSlot;
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::vector<u_long> ordering =
-      std::vector<u_long>(kLiveOrderingWords, kLiveEnd);
+  std::vector<std::uint32_t> storage =
+      std::vector<std::uint32_t>(kLivePrimitiveWords, 0);
+  std::vector<std::uint32_t> ordering =
+      std::vector<std::uint32_t>(kLiveOrderingWords, kLiveEnd);
 
   LiveTimeAttackFixture() { Reset(); }
   ~LiveTimeAttackFixture() {
@@ -156,10 +158,10 @@ struct LiveTimeAttackFixture {
   }
   // The primitives written so far followed by the whole ordering table, so a
   // replay must also link them into the same entries.
-  [[nodiscard]] std::vector<u_long> Frame() const {
-    const auto* const cursor = static_cast<const u_long*>(
+  [[nodiscard]] std::vector<std::uint32_t> Frame() const {
+    const auto* const cursor = static_cast<const std::uint32_t*>(
         VS::Render::FrameScratchpad().primitive_cursor);
-    std::vector<u_long> words(storage.data(), cursor);
+    std::vector<std::uint32_t> words(storage.data(), cursor);
     words.insert(words.end(), ordering.begin(), ordering.end());
     return words;
   }
@@ -168,7 +170,7 @@ struct LiveTimeAttackFixture {
   }
 };
 
-inline std::array<CVECTOR, 2> Cvectors(
+inline std::array<VS::Core::Gte::CVECTOR, 2> Cvectors(
     const results::TimeAttackColors& colors) {
   return {{{colors[0].r, colors[0].g, colors[0].b, colors[0].step},
            {colors[1].r, colors[1].g, colors[1].b, colors[1].step}}};

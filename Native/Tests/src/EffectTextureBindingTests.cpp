@@ -22,7 +22,7 @@
 #include "Effects/TextureBindings.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "Effects/TransformsLiveState.hpp"
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Render/Frame.hpp"
@@ -176,7 +176,7 @@ TEST_CASE("Gravity animation keeps authored holds offsets and ended frames",
                                        0};
   const RecordedProgram recorded{program};
   VS::Effects::LiveParticleTextureAnimation animation{};
-  animation.program = reinterpret_cast<u_char*>(program.data());
+  animation.program = reinterpret_cast<std::uint8_t*>(program.data());
   animation.texture_index = 1;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   TextureBindingFixture::CheckFirstFrame(animation);
@@ -228,7 +228,7 @@ TEST_CASE("Ended and delayed texture programs preserve explicit frame state",
   std::array<std::uint32_t, 1> program{0x30000000};
   const RecordedProgram recorded{program};
   VS::Effects::LiveParticleTextureAnimation animation{};
-  animation.program = reinterpret_cast<u_char*>(program.data());
+  animation.program = reinterpret_cast<std::uint8_t*>(program.data());
   animation.texture_index = 1;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   CHECK(animation.texture_info == nullptr);

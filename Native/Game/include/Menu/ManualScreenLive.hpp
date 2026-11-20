@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Legacy/Psx.hpp"
 
 // Bindings from the manual screen and help page cores (ManualScreen.hpp) to
 // MENUE.PRG's statics (Menu/Manual.hpp), the menu framework, the HUD, the game
@@ -22,7 +22,7 @@ void LiveClearMenuExceptRow8();
 // decomp: MENUE.PRG _menuReady (494.c:134).
 void LivePollMenuReady();
 // decomp: MENUE.PRG vs_menuE_exec (494.c:142).
-int LiveUpdateScreen(u_char* state);
+int LiveUpdateScreen(std::uint8_t* state);
 // decomp: MENUE.PRG _initMenuState (494.c:219).
 int LiveInitHelpState();
 // decomp: MENUE.PRG _showMenu (494.c:245).

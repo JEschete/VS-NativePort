@@ -3,7 +3,9 @@
 
 #include "Battle/ActionResults.hpp"
 
+namespace VS::Core::Gte {
 struct SVECTOR;
+}  // namespace VS::Core::Gte
 namespace VS::Battle {
 struct HitResult;
 }  // namespace VS::Battle
@@ -14,7 +16,8 @@ namespace VS::Battle {
 // queues a world-locked label at `position` for a tagged world target id.
 // Aborts on a negative id, a missing action state, an invalid hit count or
 // action id, or a tagged world target without a position.
-void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position);
+void ApplyLiveActionTargetEffects(int actor_id,
+                                  VS::Core::Gte::SVECTOR* position);
 // Applies one hit through the same result pipeline used by target effects.
 // Refuses a missing hit/target/stats or a selected armor limb out of range.
 void ApplyLiveActorActionResult(VS::Battle::HitResult* hit);
