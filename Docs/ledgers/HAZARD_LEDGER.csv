@@ -1,4 +1,5 @@
 key,class,confidence,evidence,function,symbol,path,line,detail,issue,imp_step,status,notes
+cc6311a4708e,CAPACITY,medium,pattern,,legacyWeaponModelBuffers,Native/Content/include/Content/ActorAssetsLive.hpp,213,legacyWeaponModelBuffers[kWeaponModelBuffers],none,,open,
 cd16e365a329,CAPACITY,medium,pattern,,voiceOwners,Native/Engine/src/Audio/Mixer/VoiceMixer.hpp,107,voiceOwners[kVoiceCount],253,30A,open,
 59ecebc9dfec,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,573,AshleyInventory.weapons[kInventoryWeapons],none,,open,
 f2c96369ce13,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,575,AshleyInventory.blades[kInventoryBlades],none,,open,
@@ -73,6 +74,7 @@ ea6cd897af4c,CAPACITY,medium,pattern,,LootInventoryText,Native/Game/include/Menu
 12d96aa54bff,CAPACITY,medium,pattern,,InventoryNavigationState,Native/Game/include/Menu/Inventory/InventoryTerminal.hpp,137,InventoryNavigationState.actions[kInventoryActionSlots],none,,open,
 6eb601b56ba7,CAPACITY,medium,pattern,,Actors_actorRecords,Native/Game/src/Actors/Movement.h,65,Actors_actorRecords[17],55,14,open,
 1f67a5a4c900,CAPACITY,medium,pattern,,weaponModels,Native/Game/src/Actors/SkeletonLiveState.hpp,23,weaponModels[kWeaponModelCount],55,14,open,
+d05a9859fc87,CAPACITY,medium,pattern,,actorAiStates,Native/Game/src/Battle/Ai/ActorState.hpp,57,actorAiStates[kActorAiStateSlots],57,23,open,
 a9d5134e7b49,CAPACITY,medium,pattern,,Battle_actors,Native/Game/src/Battle/Damage.h,17,Battle_actors[42],56,24,open,
 485a0b0474c6,CAPACITY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.h,92,Battle_unusedGlobal1[1],56,24,open,
 91d5b0a224b0,CAPACITY,medium,pattern,,Field_gimmickInstances,Native/Game/src/Field/Gimmicks.h,311,Field_gimmickInstances[16],45,3,open,

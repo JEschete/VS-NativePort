@@ -173,6 +173,9 @@ COMPILER_LINE = re.compile(
     r"^\s*(?P<path>[^\s(][^(]*)\((?P<line>\d+),\d+\)\s*:\s*warning\s*:\s*(?P<message>.*?)\s*\[-W(?P<flag>[\w-]+)\]"
     r"(?:\s*\[(?P<project>[^\]]+\.vcxproj)\])?")
 TABLE = re.compile(r"^\s*extern\s+(?P<type>[A-Za-z_][\w: ]*?)\s*\*\s*(?P<name>[A-Za-z_]\w*)\[(?P<size>\w+)\]\s*;", re.M)
+# The C++ form of a table (#478): `extern std::array<T*, N> name;`, or a `using` alias of that array type.
+ARRAY_TABLE = re.compile(
+    r"^\s*extern\s+(?:const\s+)?(?P<kind>(?:std::)?array\s*<[^;]*>|[A-Za-z_][\w:]*)\s+(?P<name>[A-Za-z_]\w*)\s*;", re.M)
 SCALAR_ELEMENTS = re.compile(r"\b(?:char|short|u_char|u_short|u_int|void|int|u?int(?:8|16|32|64)_t)\b")
 # The head of a named struct definition, C++ (`struct X {`) or the C form the headers are leaving (`typedef struct X {`).
 STRUCT_HEAD = r"\b(?:typedef\s+)?struct\s+{name}\s*\{{"
@@ -285,7 +288,7 @@ class FunctionScan:
                     continue
                 confidence = "low" if index.isdigit() else "medium"
                 found.append(("NULL-TABLE", f"{table}[{index}]", confidence, match.group(0)))
-            alias = rf"(?P<alias>[A-Za-z_]\w*)\s*=\s*{CAST}{table}\[(?P<index>[^\]]*)\]\s*;"
+            alias = rf"(?P<alias>[A-Za-z_]\w*)\s*=\s*{CAST}{QUALIFIER}{table}\[(?P<index>[^\]]*)\]\s*;"
             for match in re.finditer(alias, body):
                 found += self.alias_reads(body, match, "NULL-TABLE", f"{table}[{match['index'].strip()}]")
         return found
@@ -390,13 +393,25 @@ def definition_start(text: str, name: str) -> int:
     return 0
 
 
+def extern_tables(code: str, aliases: dict[str, str]) -> list[tuple[str, str, str]]:
+    """(element, name, size) of each extern pointer table, in C (`T* name[N];`) or `std::array<T*, N>` form."""
+    found = [(match["type"], match["name"], match["size"]) for match in TABLE.finditer(code)]
+    for match in ARRAY_TABLE.finditer(code):
+        kind = " ".join(match["kind"].split())
+        parts = array_parts(aliases.get(kind.rsplit("::", 1)[-1], kind))
+        if parts and parts[0].endswith("*"):
+            found.append((parts[0][:-1].strip(), match["name"], parts[1]))
+    return found
+
+
 def declared_tables(sources: gates.Sources) -> dict[str, str]:
     tables: dict[str, str] = {}
+    aliases = array_aliases(sources)
     for path, code in sources.code.items():
         if in_scope(path) and path.endswith(HEADER_SUFFIXES):
-            for match in TABLE.finditer(code):
-                if not SCALAR_ELEMENTS.search(match["type"]):
-                    tables[match["name"]] = match["size"]
+            for element, name, size in extern_tables(code, aliases):
+                if not SCALAR_ELEMENTS.search(element):
+                    tables[name] = size
     return tables
 
 
@@ -431,10 +446,11 @@ def capacity_rows(sources: gates.Sources, tables: dict[str, str]) -> list[Hazard
         if not in_scope(path) or not path.endswith(HEADER_SUFFIXES):
             continue
         text = sources.text[path]
-        for match in TABLE.finditer(code):
-            if match["name"] in tables:
-                rows.append(Hazard("CAPACITY", path, line_of(text, f"{match['name']}["), match["name"], "",
-                                   f"{match['name']}[{match['size']}]", "pattern", "medium"))
+        for _, name, size in extern_tables(code, aliases):
+            if name in tables:
+                declaration = re.search(rf"\b{re.escape(name)}\b(?=\s*(?:\[|;))", text)
+                line = line_of(text, "", declaration.start()) if declaration else line_of(text, f"{name}[")
+                rows.append(Hazard("CAPACITY", path, line, name, "", f"{name}[{size}]", "pattern", "medium"))
         for name, body in struct_definitions(code):
             if CAPACITY_STRUCT.match(name) or path.startswith(ITEMS_HEADERS):
                 rows += struct_rows(path, text, name, body, aliases)

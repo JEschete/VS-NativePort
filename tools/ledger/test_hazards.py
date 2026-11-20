@@ -269,6 +269,24 @@ class CapacityTests(unittest.TestCase):
                       [item.detail for item in found if item.hazard_class == "CAPACITY"])
         self.assertEqual([item.detail for item in found if item.hazard_class == "NULL-TABLE"], ["cardDirectoryEntries[i]"])
 
+    def test_a_std_array_table_keeps_its_table_rows(self) -> None:
+        # #478: a table rewritten as `std::array<T*, N>`, directly or through an alias, dropped its rows.
+        header = ("namespace VS::Field {\nusing Doors = std::array<VS::Field::Door*, kDoorCount>;\n"
+                  "extern std::array<GimmickInstance*, kGimmickInstanceCount> gimmickInstances;\n"
+                  "extern Doors doors;\nextern std::array<std::uint8_t*, 4> frameStyles;\n}\n")
+        body = ("int Battle_Hit(int i) { return gimmickInstances[i]->flags + doors[i]->state + frameStyles[i][0]; }\n"
+                "int Battle_Miss(int i) { GimmickInstance* g = VS::Field::gimmickInstances[i]; return g->flags; }\n")
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.files["Native/Game/src/Field/Gimmicks.hpp"] = header
+            fixture.files[SOURCE] = body
+            found = hazards.scan(fixture.write())
+        capacity = {(item.detail, item.line) for item in found
+                    if item.hazard_class == "CAPACITY" and item.path.endswith("Gimmicks.hpp")}
+        self.assertEqual(capacity, {("gimmickInstances[kGimmickInstanceCount]", 3), ("doors[kDoorCount]", 4)})
+        self.assertEqual(sorted(item.detail for item in found if item.hazard_class == "NULL-TABLE"),
+                         ["doors[i]", "g = gimmickInstances[i]", "gimmickInstances[i]"])
+
     def test_cpp_records_in_an_items_header_are_scanned(self) -> None:
         # The typed records keep the copied capacities and one-byte ids in C++ syntax and without the Items_ prefix.
         header = ("#pragma once\nnamespace VS::Items {\nusing Gems = std::array<InventoryGem, kGemSlots>;\n"
