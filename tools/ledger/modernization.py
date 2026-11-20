@@ -99,6 +99,12 @@ ROADMAP = {
     "Native\\Game\\src\\Title": ("62", "39"),
 }
 ALIAS = re.compile(r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)[ \t]+([A-Za-z_]\w*)[ \t]*$", re.M)
+# Public headers mirror their module's src tree, so a header moved to include\ keeps its system's roadmap issue.
+INCLUDE_ROOTS = {
+    "Native\\Game\\include\\": "Native\\Game\\src\\",
+    "Native\\Engine\\include\\": "Native\\Engine\\src\\",
+    "Native\\Content\\include\\Content\\": "Native\\Content\\src\\",
+}
 SHIM_SITE = re.compile(r'\bRecordUnported\s*\(\s*"([^"]+)"')
 TEMPLATE_NAME = re.compile(r"^VS_\w+_FUNCTION$")
 HEADER_SUFFIXES = (".h", ".hpp")
@@ -114,6 +120,10 @@ class ModernizationWorkspace(gates.Workspace):
 
 
 def roadmap_for(path: str) -> tuple[str, str]:
+    for include, source in INCLUDE_ROOTS.items():
+        if path.startswith(include):
+            path = source + path[len(include):]
+            break
     matches = [prefix for prefix in ROADMAP if path.startswith(prefix)]
     return ROADMAP[max(matches, key=len)] if matches else UNASSIGNED
 

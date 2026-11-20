@@ -244,6 +244,13 @@ class ModernizationTests(unittest.TestCase):
     def test_audio_belongs_to_its_roadmap_issue(self) -> None:
         self.assertEqual(modernization.roadmap_for(r"Native\Engine\src\Audio\Voice.cpp"), ("253", "30A"))
 
+    def test_a_public_header_shares_its_src_tree_roadmap_issue(self) -> None:
+        # #479: headers moved to include\ lost their system's issue.
+        self.assertEqual(modernization.roadmap_for(r"Native\Game\include\Items\ItemRecords.hpp"), ("58", "15"))
+        self.assertEqual(modernization.roadmap_for(r"Native\Game\include\Battle\Ai\State.hpp")[0], "57")
+        self.assertEqual(modernization.roadmap_for(r"Native\Content\include\Content\CdDrive.hpp"), ("48", "7"))
+        self.assertEqual(modernization.roadmap_for(r"Native\Game\include\Diagnostics\Log.hpp")[0], "none")
+
     def test_a_lettered_step_sorts_after_its_number(self) -> None:
         steps = sorted(["31", "30A", "", "3", "30"], key=modernization.step_order)
         self.assertEqual(steps, ["3", "30", "30A", "31", ""])

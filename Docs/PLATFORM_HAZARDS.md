@@ -90,18 +90,19 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Roadmap issue | Sites |
 | --- | ---: |
-| no roadmap issue | 112 |
-| #60 | 23 |
-| #55 | 21 |
+| #58 | 102 |
+| #55 | 26 |
+| #60 | 25 |
 | #45 | 19 |
 | #61 | 17 |
 | #56 | 16 |
 | #253 | 12 |
 | #50 | 10 |
 | #48 | 6 |
+| #47 | 5 |
 | #57 | 5 |
-| #47 | 4 |
 | #54 | 3 |
+| no roadmap issue | 2 |
 | #59 | 2 |
 | #44 | 2 |
 | #62 | 1 |
