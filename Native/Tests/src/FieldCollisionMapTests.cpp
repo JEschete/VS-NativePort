@@ -26,8 +26,8 @@
 #include "Field/Gimmicks.h"
 #include "Field/Map.hpp"
 #include "Field/MapLive.hpp"
-#include "Field/MapProgress.h"
-#include "Field/Minimap.h"
+#include "Field/MapProgress.hpp"
+#include "Field/Minimap.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/Traps.hpp"
@@ -811,9 +811,9 @@ TEST_CASE("The live bypass binding refuses slots outside the actor table",
 
 TEST_CASE("The live map binding updates the minimap",
           "[field-collision-map][field]") {
-  const SavedGlobal saved_visible(Field_isMinimapVisible);
+  const SavedGlobal saved_visible(VS::Field::isMinimapVisible);
   CHECK(VS::Field::SetLiveMinimapVisible(0x101) == 1);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
   MATRIX rotation{};
   VS::Field::BuildLiveMinimapRotation(&rotation, 0);
   CHECK(rotation.m[0][0] == 4096);
@@ -824,11 +824,11 @@ TEST_CASE("The live map binding updates the minimap",
 TEST_CASE("The live map binding marks visits while counting completion",
           "[field-collision-map][field]") {
   const SavedGlobal saved_progress(VS::State::roomVisitProgress);
-  const SavedGlobal saved_countable(Field_countableRoomMask);
+  const SavedGlobal saved_countable(VS::Field::countableRoomMask);
   std::memset(&VS::State::roomVisitProgress.room_flags, 0,
               sizeof VS::State::roomVisitProgress.room_flags);
-  std::memset(&Field_countableRoomMask, 0, sizeof Field_countableRoomMask);
-  Field_countableRoomMask[1] = 0x400000;
+  VS::Field::countableRoomMask = {};
+  VS::Field::countableRoomMask[1] = 0x400000;
   VS::State::roomVisitProgress.room_flags[1] = 0x800000;
   CHECK(VS::Field::LiveMapCompletionPercent() == 0);
   CHECK(VS::State::roomVisitProgress.room_flags[1] == 0xC00000);

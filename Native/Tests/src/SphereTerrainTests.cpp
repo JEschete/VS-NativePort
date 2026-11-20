@@ -21,7 +21,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Math/MatrixLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
@@ -37,7 +37,7 @@ struct SliceFixture {
   Battle_TargetSphereSetupView storage{};
   Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  u_int saved_control = Field_controlMode;
+  u_int saved_control = VS::Field::controlMode;
   u_int saved_action_mode = Battle_actionFlowMode;
   std::array<u_long, 2050> ordering{};
   std::vector<u_long> packets = std::vector<u_long>(65538, kGuard);
@@ -55,7 +55,7 @@ struct SliceFixture {
     VS::Battle::ResetTargetPages();
     Battle_targetSphere = saved_sphere;
     VS::Render::FrameScratchpad() = saved_frame;
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_actionFlowMode = saved_action_mode;
     Core_Gte_Reset();
   }
@@ -355,14 +355,14 @@ TEST_CASE("Paged target lists own shoulders only during target selection",
     entries[index].actorId = static_cast<char>(index / 5);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
-  Field_controlMode = 2;
+  VS::Field::controlMode = 2;
   Battle_actionFlowMode = 1;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
   Battle_actionFlowMode = 2;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
   Battle_actionFlowMode = 3;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
-  Field_controlMode = 1;
+  VS::Field::controlMode = 1;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
 }
 

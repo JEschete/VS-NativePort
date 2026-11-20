@@ -24,7 +24,7 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -136,7 +136,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Field::isInteractionPaused = defaults.interaction_paused ? 1 : 0;
     VS::Items::lootListHead = nullptr;
     // The original also cleared the write-only D_800F1874 (18.c:570).
-    Field_controlMode = defaults.field_control_mode;
+    VS::Field::controlMode = defaults.field_control_mode;
     VS::State::SetLiveTickSpeed(defaults.tick_speed);
     VS::Render::SetLiveCameraProjectionDistance(defaults.projection_distance);
     VS::Render::SetLiveCameraNearClip(defaults.near_clip);

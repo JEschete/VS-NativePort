@@ -19,7 +19,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Progress.hpp"
@@ -98,7 +98,7 @@ class LiveWorld final : public ActionPhaseWorld {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
   }
   void SetControlMode(Field::FieldControlMode mode) override {
-    Field_controlMode = static_cast<std::uint32_t>(mode);
+    VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   int TrailBone(std::uint8_t actor) override {
     constexpr int kWeaponTag = 0xF0;

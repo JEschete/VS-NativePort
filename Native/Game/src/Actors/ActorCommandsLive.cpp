@@ -37,7 +37,7 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -128,7 +128,7 @@ class LiveCommandHost final : public ActorCommandHost {
     return LiveActorStateFlags(actor_id);
   }
   [[nodiscard]] int ControlMode() const override {
-    return static_cast<int>(Field_controlMode);
+    return static_cast<int>(VS::Field::controlMode);
   }
   [[nodiscard]] CommandPlacement Placement(int actor_id) override {
     return PlacementOf(actor_id);

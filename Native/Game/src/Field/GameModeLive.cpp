@@ -21,7 +21,7 @@
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -51,7 +51,7 @@ class LiveFieldModeHost final : public FieldModeHost {
       : selection_(selection) {}
 
   void SetControlMode(FieldControlMode mode) override {
-    Field_controlMode = static_cast<u_int>(mode);
+    controlMode = static_cast<std::uint32_t>(mode);
   }
   void SetActionFlowMode(int mode) override {
     Battle_actionFlowMode = static_cast<u_int>(mode);

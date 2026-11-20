@@ -22,7 +22,7 @@
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 
 namespace actors = VS::Actors;
 using actors::ActorCommand;
@@ -774,15 +774,15 @@ class LiveActorTables {
   LiveActorTables()
       : records_(std::to_array(Actors_actorRecords)),
         battle_actors_(std::to_array(Battle_actors)),
-        control_mode_(Field_controlMode) {
+        control_mode_(VS::Field::controlMode) {
     std::ranges::fill(Actors_actorRecords, nullptr);
     std::ranges::fill(Battle_actors, nullptr);
-    Field_controlMode = 0;
+    VS::Field::controlMode = 0;
   }
   ~LiveActorTables() {
     std::ranges::copy(records_, std::begin(Actors_actorRecords));
     std::ranges::copy(battle_actors_, std::begin(Battle_actors));
-    Field_controlMode = control_mode_;
+    VS::Field::controlMode = control_mode_;
   }
   LiveActorTables(const LiveActorTables&) = delete;
   LiveActorTables& operator=(const LiveActorTables&) = delete;

@@ -34,7 +34,7 @@ char VS::Field::roomWeatherKind;
 // decomp: D_800F1DCB (D_800F1DCB@BATTLE/BATTLE.PRG)
 char VS::Field::isWeatherVariationEnabled;
 // decomp: D_800F1DD4 (D_800F1DD4@BATTLE/BATTLE.PRG)
-Field_WeatherParticle* VS::Field::weatherParticles;
+VS::Field::WeatherParticleRecord* VS::Field::weatherParticles;
 
 namespace {
 // The original's particle record (146C.h) and D_800F1D98's word indices:
@@ -49,7 +49,8 @@ constexpr std::size_t kIntensityStepWord = 8;
 constexpr std::size_t kStrengthStepWord = 9;
 }  // namespace
 
-static_assert(sizeof(Field_WeatherParticle) == kWeatherParticleBytes);
+static_assert(sizeof(VS::Field::WeatherParticleRecord) ==
+              kWeatherParticleBytes);
 
 namespace VS::Field {
 namespace {
@@ -60,15 +61,15 @@ constexpr int kFieldSoundGroup = 0x200;
 
 // The particle id names only kNone; the live buffer's address is made here.
 [[nodiscard]] WeatherParticlesId ParticlesIdOf(
-    Field_WeatherParticle* particles) {
+    WeatherParticleRecord* particles) {
   const auto address = reinterpret_cast<std::uintptr_t>(particles);
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   return static_cast<WeatherParticlesId>(address);
 }
 
-[[nodiscard]] Field_WeatherParticle* ParticlesOf(WeatherParticlesId particles) {
+[[nodiscard]] WeatherParticleRecord* ParticlesOf(WeatherParticlesId particles) {
   const auto address = static_cast<std::uintptr_t>(particles);
-  return reinterpret_cast<Field_WeatherParticle*>(address);
+  return reinterpret_cast<WeatherParticleRecord*>(address);
 }
 
 // Runs a rule over the loaded globals and stores them back before returning

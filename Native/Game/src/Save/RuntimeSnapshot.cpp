@@ -43,7 +43,7 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -1224,8 +1224,9 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
   const auto& model = actor.instance;
   // func_8006C39C (146C.c:1893) freezes ordinary walk/turn intent in menus.
   // Resume rebuilds an idle actor at this position, not that transient intent.
-  const bool menu_paused = VS::Field::isInteractionPaused != 0 &&
-                           (Field_controlMode == 5 || Field_controlMode == 6);
+  const bool menu_paused =
+      VS::Field::isInteractionPaused != 0 &&
+      (VS::Field::controlMode == 5 || VS::Field::controlMode == 6);
   const bool horizontal_motion =
       model.turnFrames != 0 || model.rootMotion.vx != 0 ||
       model.rootMotion.vz != 0 || actor.momentumDistance != 0;

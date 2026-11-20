@@ -11,7 +11,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
-#include "Field/Minimap.h"
+#include "Field/Minimap.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -23,7 +23,7 @@ struct LiveHudFixture {
   char saved_indicator = Battle_battleModeIndicatorStep;
   u_short saved_wobble = Battle_battleModeIndicatorWobble;
   u_char saved_animation = Battle_shortcutHudAnimationStep;
-  char saved_minimap = Field_isMinimapVisible;
+  std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<u_short, 10> saved_mapping =
       std::to_array(Battle_upperStatusIconFlags);
@@ -38,7 +38,7 @@ struct LiveHudFixture {
     Battle_shortcutHudRequested = static_cast<char>(0xA9);
     Battle_shortcutHudAnimationStep = 0xD3;
     Battle_lowerScreenUiState = static_cast<char>(0xFF);
-    Field_isMinimapVisible = static_cast<char>(0xAB);
+    VS::Field::isMinimapVisible = 0xAB;
     Battle_characterState = nullptr;
   }
   ~LiveHudFixture() {
@@ -51,7 +51,7 @@ struct LiveHudFixture {
     Battle_battleModeIndicatorStep = saved_indicator;
     Battle_battleModeIndicatorWobble = saved_wobble;
     Battle_shortcutHudAnimationStep = saved_animation;
-    Field_isMinimapVisible = saved_minimap;
+    VS::Field::isMinimapVisible = saved_minimap;
     Battle_characterState = saved_character;
     std::ranges::copy(saved_mapping,
                       std::span(Battle_upperStatusIconFlags).begin());
@@ -65,10 +65,10 @@ TEST_CASE(
   const LiveHudFixture fixture;
   CHECK(b::SetLiveGameplayHudHidden(256) == 256);
   CHECK(Battle_hudHidden == 1);
-  CHECK(Field_isMinimapVisible == 0);
+  CHECK(VS::Field::isMinimapVisible == 0);
   CHECK(b::SetLiveGameplayHudHidden(0) == 0);
   CHECK(Battle_hudHidden == 0);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(Battle_hudSlideOffset == 0x12345678);
   CHECK(Battle_lowerScreenUiState == static_cast<char>(0xFF));
 }

@@ -1,7 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Field/Manual.h"
+// The manual screen's display state (Manual.hpp).
+#include "Field/Manual.hpp"
 
-// decomp: vs_battle_manualDisplayState (vs_battle_manualDisplayState@BATTLE/BATTLE.PRG)
-Field_ManualDisplayState Field_manualDisplayState;
-
+namespace VS::Field {
+// decomp: vs_battle_manualDisplayState
+// (vs_battle_manualDisplayState@BATTLE/BATTLE.PRG)
+ManualDisplayState manualDisplayState;
+}  // namespace VS::Field

@@ -88,7 +88,7 @@
 #include "Effects/PurgeTables.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Transforms.hpp"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
@@ -678,8 +678,9 @@ TEST_CASE("Generated module extents stop before the next source symbol",
         nullptr);
   CHECK(Content::ResolveModuleAddress(
             symbols, kBattle,
-            kRoomMask + (kLastRoomWord * sizeof Field_countableRoomMask[0])) ==
-        &Field_countableRoomMask[kLastRoomWord]);
+            kRoomMask +
+                (kLastRoomWord * sizeof VS::Field::countableRoomMask[0])) ==
+        &VS::Field::countableRoomMask[kLastRoomWord]);
   CHECK(Content::ResolveModuleAddress(symbols, kBattle, kTriggerMarkerBytes) ==
         Content_battleTriggerMarkerBytes);
 }

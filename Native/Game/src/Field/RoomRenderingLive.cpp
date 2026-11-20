@@ -21,7 +21,7 @@
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/MapLive.hpp"
-#include "Field/Minimap.h"
+#include "Field/Minimap.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -288,10 +288,10 @@ class LiveSceneHost final : public RoomSceneHost {
                            .framed = (VS::Input::settings.simple_map & 2) != 0,
                            .has_scene = Field_roomData.minimapScene != nullptr};
   }
-  bool MinimapVisible() override { return Field_isMinimapVisible != 0; }
-  std::int16_t MinimapSlideFrame() override { return Field_minimapSlideFrame; }
+  bool MinimapVisible() override { return isMinimapVisible != 0; }
+  std::int16_t MinimapSlideFrame() override { return minimapSlideFrame; }
   void SetMinimapSlideFrame(std::int16_t frame) override {
-    Field_minimapSlideFrame = frame;
+    minimapSlideFrame = frame;
   }
   int DisplayClipX() override { return DrawnEnvironment().clip.x; }
   void DrawMinimap(const MinimapLayout& layout) override;
@@ -299,9 +299,9 @@ class LiveSceneHost final : public RoomSceneHost {
     return Battle_characterState != nullptr &&
            Battle_characterState->weaponDrawn == 1;
   }
-  int BorderPulsePhase() override { return Field_minimapBorderPulsePhase; }
+  int BorderPulsePhase() override { return minimapBorderPulsePhase; }
   void SetBorderPulsePhase(int phase) override {
-    Field_minimapBorderPulsePhase = phase;
+    minimapBorderPulsePhase = phase;
   }
   void DrawMinimapFrame(const MinimapFrameColors& colors) override {
     LinkPacket(FrameBorder(colors), "frame border");

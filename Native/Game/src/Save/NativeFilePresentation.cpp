@@ -18,7 +18,7 @@
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.hpp"
 #include "Field/Map.h"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -392,8 +392,7 @@ unsigned MapPercent(const VS::State::RoomVisitFlags& visits) {
   for (std::size_t index = 0; index < std::size(visits.room_flags); ++index) {
     auto flags = static_cast<unsigned>(visits.room_flags[index]);
     if (index == kMirrorWord && (flags & kSourceRoom)) flags |= kMirroredRoom;
-    rooms += std::popcount(
-        flags & static_cast<unsigned>(Field_countableRoomMask[index]));
+    rooms += std::popcount(flags & VS::Field::countableRoomMask[index]);
   }
   return rooms * kPercentScale / kEligibleRooms;
 }

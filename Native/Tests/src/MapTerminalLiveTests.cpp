@@ -33,9 +33,9 @@
 #include "Field/Doors.h"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Field/Map.h"
-#include "Field/Minimap.h"
+#include "Field/Minimap.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
@@ -891,12 +891,12 @@ struct FullDiscQueue {
 struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
       VS::Field::backgroundReferenceVectors, Field_entranceDoorRecord,
-      Battle_unusedMenu9CursorMemory, Field_manualDisplayState,
+      Battle_unusedMenu9CursorMemory, VS::Field::manualDisplayState,
       VS::Field::roomPalettes, Battle_floatingLabels,
       Battle_placedLabelPositions, Field_enteredDoorId,
       VS::Field::areRoomUpdatesPaused, VS::Field::roomTint,
-      Battle_unusedSubmenuState, Field_isMinimapVisible,
-      Field_minimapSlideFrame, Field_gimmickAnimationQueue,
+      Battle_unusedSubmenuState, VS::Field::isMinimapVisible,
+      VS::Field::minimapSlideFrame, Field_gimmickAnimationQueue,
       Field_pendingGimmickAnimationCount>
       saved;
   VS::Field::RoomBackgroundState background =

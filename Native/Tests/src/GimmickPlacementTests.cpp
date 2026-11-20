@@ -55,7 +55,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTarget.hpp"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -1363,7 +1363,7 @@ struct ActorTileTriggerLiveFixture {
   Battle_Actor* saved_actor = Battle_actors[2];
   Actors_ActorRecord* saved_record = Actors_actorRecords[2];
   decltype(Field_roomData) saved_room = Field_roomData;
-  decltype(Field_controlMode) saved_control = Field_controlMode;
+  decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
   std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
   std::unique_ptr<Actors_ActorRecord> record =
       std::make_unique<Actors_ActorRecord>();
@@ -1372,13 +1372,13 @@ struct ActorTileTriggerLiveFixture {
     Battle_actors[2] = actor.get();
     Actors_actorRecords[2] = record.get();
     Field_roomData = {};
-    Field_controlMode = 3;
+    VS::Field::controlMode = 3;
   }
   ~ActorTileTriggerLiveFixture() {
     Battle_actors[2] = saved_actor;
     Actors_actorRecords[2] = saved_record;
     Field_roomData = saved_room;
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
   }
 };
 
@@ -1698,9 +1698,10 @@ struct AnimationQueueFixture {
 
 struct ChestTargetFixture {
   Field_RoomRecord saved = Field_roomData;
-  std::uint32_t control_mode = Field_controlMode;
+  std::uint32_t control_mode = VS::Field::controlMode;
   decltype(Battle_actionFlowMode) action_flow = Battle_actionFlowMode;
-  Actors_ActorLocationQuery actor_query = Field_interactionFocus.actor_query;
+  Actors_ActorLocationQuery actor_query =
+      VS::Field::interactionFocus.actor_query;
   AnimationQueueFixture queue;
   std::array<VS::Items::TreasureChest, 1> chests{};
 
@@ -1716,9 +1717,9 @@ struct ChestTargetFixture {
   ~ChestTargetFixture() {
     Field_roomData = saved;
     VS::Field::InvalidateLiveInteractionTargets();
-    Field_controlMode = control_mode;
+    VS::Field::controlMode = control_mode;
     Battle_actionFlowMode = action_flow;
-    Field_interactionFocus.actor_query = actor_query;
+    VS::Field::interactionFocus.actor_query = actor_query;
   }
 };
 

@@ -1,13 +1,15 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Field/Minimap.h"
+// The minimap's slide, border pulse and visibility (Minimap.hpp).
+#include "Field/Minimap.hpp"
 
+#include <cstdint>
+
+namespace VS::Field {
 // decomp: D_800F1BA0 (D_800F1BA0@BATTLE/BATTLE.PRG)
-int Field_minimapBorderPulsePhase;
+std::int32_t minimapBorderPulsePhase;
 
 // decomp: D_800F1CD4 (D_800F1CD4@BATTLE/BATTLE.PRG)
-short Field_minimapSlideFrame;
+std::int16_t minimapSlideFrame;
 
 // decomp: D_800F1CD6 (D_800F1CD6@BATTLE/BATTLE.PRG)
-char Field_isMinimapVisible;
-
+std::uint8_t isMinimapVisible;
+}  // namespace VS::Field

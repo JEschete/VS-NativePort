@@ -65,7 +65,7 @@
 #include "Field/Doors.h"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -783,7 +783,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
     return reject("NO READY COMBAT LAB ENCOUNTER");
   }
   constexpr int kFieldControl = 1;
-  if (Field_controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
+  if (VS::Field::controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
       VS::Menu::Framework::menuState.control.current_menu !=
           VS::Menu::Framework::kMenuClosed) {
     return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
@@ -864,11 +864,11 @@ void InspectFloorTriggers(EncounterState& state) {
 EncounterState InspectGameplay() {
   EncounterState state;
   state.ready = gameplay_inspection_ready && VS::Boot::isGameplayActive != 0 &&
-                Field_controlMode != 0;
+                VS::Field::controlMode != 0;
   if (!state.ready) return state;
   state.zone = VS::Field::zoneContext.zndId;
   state.room = VS::Field::zoneContext.mapId;
-  state.control_mode = Field_controlMode;
+  state.control_mode = VS::Field::controlMode;
   state.game_over = VS::State::stateFlags.game_over != 0;
   state.field_rendering_enabled =
       VS::Field::LiveRoomRenderState().field_rendering_enabled;
@@ -968,7 +968,7 @@ nlohmann::json InspectModels() {
 nlohmann::json InspectGameplayScene(const EncounterState& state) {
   const bool available = state.ready && gameplay_inspection_ready &&
                          VS::Boot::isGameplayActive != 0 &&
-                         Field_controlMode != 0;
+                         VS::Field::controlMode != 0;
   nlohmann::json scene{{"available", available},
                        {"in_game", VS::Boot::isGameplayActive != 0}};
   // ENDING.PRG staff roll (Start skips it) and _renderCongratulationsScreen,
@@ -1030,8 +1030,8 @@ EncounterDoorRequest CheckDoorRequest(int index) {
     return {EncounterDoorRequestStatus::kInvalid,
             "original-room session required"};
   }
-  if (!gameplay_inspection_ready || !room_prepared || Field_controlMode != 1 ||
-      VS::Event::playbackPhase != 0 ||
+  if (!gameplay_inspection_ready || !room_prepared ||
+      VS::Field::controlMode != 1 || VS::Event::playbackPhase != 0 ||
       VS::Field::LiveScreenTransitionPhase() != 0 ||
       Actors_actorRecords[0] == nullptr) {
     return {EncounterDoorRequestStatus::kBusy,
@@ -1159,7 +1159,7 @@ void VS::Boot::EncounterPollStop() {
       // External and room-local components start at the first free-control
       // frame in the configured room, after any production entry events.
       const bool configured_room_ready =
-          VS::Event::playbackPhase == 0 && Field_controlMode == 1 &&
+          VS::Event::playbackPhase == 0 && VS::Field::controlMode == 1 &&
           VS::Field::zoneContext.zndId == VS::Game::configuration.zone &&
           VS::Field::zoneContext.mapId == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&

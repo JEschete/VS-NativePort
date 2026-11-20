@@ -11,7 +11,7 @@
 // the modes; the host performs every effect on actors, the HUD, the room and
 // the menu.
 namespace VS::Field {
-// Field_controlMode values, named after the functions that select them.
+// controlMode values, named after the functions that select them.
 enum class FieldControlMode : std::int32_t {
   kNone = 0,
   kExploration = 1,             // EnterFieldExplorationMode

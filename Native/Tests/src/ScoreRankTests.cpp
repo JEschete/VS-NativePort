@@ -12,7 +12,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Scratch.hpp"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.hpp"
@@ -109,15 +109,14 @@ class LiveGlobals {
         cursor_(Battle_unusedMenu9CursorMemory),
         position_(s::cameraPositionBackup),
         angles_(s::cameraAnglesBackup) {
-    std::memcpy(masks_.data(), Field_countableRoomMask,
-                sizeof Field_countableRoomMask);
+    masks_ = VS::Field::countableRoomMask;
     std::memcpy(actions_.data(), Battle_actionDefinitions,
                 sizeof Battle_actionDefinitions);
     std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
     VS::State::roomVisitProgress = {};
-    std::memset(Field_countableRoomMask, 0, sizeof Field_countableRoomMask);
+    VS::Field::countableRoomMask = {};
     for (Battle_ActionDefinition& action : Battle_actionDefinitions) {
       action.unlocked = 0;
     }
@@ -138,8 +137,7 @@ class LiveGlobals {
     Battle_unusedMenu9CursorMemory = cursor_;
     s::cameraPositionBackup = position_;
     s::cameraAnglesBackup = angles_;
-    std::memcpy(Field_countableRoomMask, masks_.data(),
-                sizeof Field_countableRoomMask);
+    VS::Field::countableRoomMask = masks_;
     std::memcpy(Battle_actionDefinitions, actions_.data(),
                 sizeof Battle_actionDefinitions);
     std::memcpy(VS::Core::ScratchBase(), scratch_.data(), scratch_.size());
@@ -153,7 +151,7 @@ class LiveGlobals {
   s::CursorMemory cursor_;
   VECTOR position_;
   VECTOR angles_;
-  std::array<std::byte, sizeof Field_countableRoomMask> masks_{};
+  VS::Field::RoomVisitFlags masks_{};
   std::array<std::byte, sizeof Battle_actionDefinitions> actions_{};
   std::array<std::byte, 0x400> scratch_{};
 };
@@ -283,8 +281,8 @@ void SetLiveProgressInputs() {
       static_cast<int>(world.room_flags[0]);
   VS::State::roomVisitProgress.room_flags[1] =
       static_cast<int>(world.room_flags[1]);
-  Field_countableRoomMask[0] = static_cast<int>(world.countable_room_masks[0]);
-  Field_countableRoomMask[1] = -1;
+  VS::Field::countableRoomMask[0] = world.countable_room_masks[0];
+  VS::Field::countableRoomMask[1] = ~0U;
   VS::State::stateFlags.chests_opened[0] = 1;
   VS::State::stateFlags.chests_opened[5] = static_cast<char>(0x80);
   VS::State::stateFlags.chests_opened[63] = 2;

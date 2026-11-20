@@ -59,7 +59,7 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -690,7 +690,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
 
   void SetFieldControlMode(int mode) override {
-    Field_controlMode = static_cast<std::uint32_t>(mode);
+    VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   void SetActionFlowMode(int mode) override {
     Battle_actionFlowMode = static_cast<std::uint32_t>(mode);

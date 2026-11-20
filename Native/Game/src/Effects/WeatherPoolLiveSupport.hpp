@@ -9,7 +9,9 @@
 #include "Effects/WeatherPool.hpp"
 #include "Field/Background.hpp"
 
-struct Field_WeatherParticle;
+namespace VS::Field {
+struct WeatherParticleRecord;
+}  // namespace VS::Field
 
 // The weather pool's bindings to the copied globals, shared by
 // WeatherPoolLive.cpp and WeatherRenderLive.cpp.
@@ -25,18 +27,19 @@ class PoolHost final : public WeatherPoolHost {
   void SetRoomWeather(std::int32_t kind) override;
 };
 
-[[nodiscard]] WeatherParticle ParticleOf(const Field_WeatherParticle& record);
-void StoreParticle(Field_WeatherParticle& record,
+[[nodiscard]] WeatherParticle ParticleOf(
+    const VS::Field::WeatherParticleRecord& record);
+void StoreParticle(VS::Field::WeatherParticleRecord& record,
                    const WeatherParticle& particle);
 // Typed copies of `records`, and their store back.
 [[nodiscard]] std::vector<WeatherParticle> LoadParticles(
-    std::span<const Field_WeatherParticle> records);
-void StoreParticles(std::span<Field_WeatherParticle> records,
+    std::span<const VS::Field::WeatherParticleRecord> records);
+void StoreParticles(std::span<VS::Field::WeatherParticleRecord> records,
                     std::span<const WeatherParticle> particles);
 // The 0x800-byte buffer LiveAllocateWeatherParticles made, empty when none.
-[[nodiscard]] std::span<Field_WeatherParticle> Buffer();
+[[nodiscard]] std::span<VS::Field::WeatherParticleRecord> Buffer();
 // Whether `particle` is one of the live buffer's records.
-[[nodiscard]] bool InBuffer(const Field_WeatherParticle* particle);
+[[nodiscard]] bool InBuffer(const VS::Field::WeatherParticleRecord* particle);
 // The room record's weather area, absent outside a room.
 [[nodiscard]] std::optional<Field::WeatherArea> Area();
 [[nodiscard]] WeatherPoolState LoadState();

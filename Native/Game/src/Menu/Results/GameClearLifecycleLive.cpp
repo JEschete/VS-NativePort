@@ -20,7 +20,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
@@ -57,7 +57,7 @@ constexpr std::size_t kAreaCommandWords = 2;
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
               Score::kRoomFlagWords);
-static_assert(std::size(Field_countableRoomMask) == Score::kRoomFlagWords);
+static_assert(std::size(VS::Field::countableRoomMask) == Score::kRoomFlagWords);
 static_assert(std::size(VS::State::stateFlags.chests_opened) ==
               Score::kChestFlagCount);
 
@@ -374,7 +374,7 @@ class LiveInit final : public GameClearInitHost {
       world.room_flags.at(index) = static_cast<std::uint32_t>(
           VS::State::roomVisitProgress.room_flags[index]);
       world.countable_room_masks.at(index) =
-          static_cast<std::uint32_t>(Field_countableRoomMask[index]);
+          VS::Field::countableRoomMask[index];
     }
     for (std::size_t index = 0; index < world.chests_opened.size(); ++index) {
       world.chests_opened.at(index) =

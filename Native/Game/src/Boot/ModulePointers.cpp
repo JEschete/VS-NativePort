@@ -212,15 +212,15 @@
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Input.h"
+#include "Field/Input.hpp"
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Locations.h"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Field/Map.h"
-#include "Field/MapProgress.h"
-#include "Field/Minimap.h"
+#include "Field/MapProgress.hpp"
+#include "Field/Minimap.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -387,7 +387,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8498u, 4u, (void*)&Battle_targetingRiskTimer, sizeof Battle_targetingRiskTimer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E849Cu, 16u, (void*)&Field_lockedDoorIndexRanges, sizeof Field_lockedDoorIndexRanges, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E84ACu, 92u, (void*)&Field_lockedDoorRoomPairs, sizeof Field_lockedDoorRoomPairs, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8508u, 64u, (void*)&Field_countableRoomMask, sizeof Field_countableRoomMask, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8508u, 64u, (void*)&VS::Field::countableRoomMask, sizeof VS::Field::countableRoomMask, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85A0u, 28u, (void*)&Field_triggerMarkerRecordTail, sizeof Field_triggerMarkerRecordTail, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85BCu, 8u, (void*)&Field_triggerMarkerTextureSource, sizeof Field_triggerMarkerTextureSource, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85C4u, 8u, (void*)&Field_triggerMarkerPaletteSource, sizeof Field_triggerMarkerPaletteSource, 1u, 1u},
@@ -541,7 +541,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F17C8u, 16u, (void*)&Battle_Ai_settingsBits8Values, sizeof Battle_Ai_settingsBits8Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F17D8u, 4u, (void*)&Battle_Ai_facingDelayScales, sizeof Battle_Ai_facingDelayScales, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F17DCu, 124u, (void*)&Battle_Ai_radialRetreatPath, sizeof Battle_Ai_radialRetreatPath, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1858u, 4u, (void*)&Field_isMenuRequestQueued, sizeof Field_isMenuRequestQueued, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1858u, 4u, (void*)&VS::Field::isMenuRequestQueued, sizeof VS::Field::isMenuRequestQueued, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F185Cu, 4u, (void*)&VS::Effects::tintedActor, sizeof VS::Effects::tintedActor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1860u, 4u, (void*)&Battle_lootMenuOpened, sizeof Battle_lootMenuOpened, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1864u, 4u, (void*)&Battle_rewardsFollowAction, sizeof Battle_rewardsFollowAction, 1u, 1u},
@@ -556,10 +556,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1900u, 4u, (void*)&VS::Items::lootListHead, sizeof VS::Items::lootListHead, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1904u, 4u, (void*)&VS::Field::cameraTransition, sizeof VS::Field::cameraTransition, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F190Cu, 4u, (void*)&VS::Field::isFieldRenderingEnabled, sizeof VS::Field::isFieldRenderingEnabled, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1910u, 20u, (void*)&Field_interactionFocus, sizeof Field_interactionFocus, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1910u, 20u, (void*)&VS::Field::interactionFocus, sizeof VS::Field::interactionFocus, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1928u, 4u, (void*)&Battle_actors, sizeof Battle_actors, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1968u, 4u, (void*)&VS::Field::isInteractionPaused, sizeof VS::Field::isInteractionPaused, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F196Cu, 4u, (void*)&Field_controlMode, sizeof Field_controlMode, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F196Cu, 4u, (void*)&VS::Field::controlMode, sizeof VS::Field::controlMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1970u, 24u, (void*)&VS::Render::legacyMaskBitOffPackets, sizeof VS::Render::legacyMaskBitOffPackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1988u, 24u, (void*)&VS::Render::legacyMaskBitOnPackets, sizeof VS::Render::legacyMaskBitOnPackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F19A0u, 4u, (void*)&VS::Field::isRoomVisitPending, sizeof VS::Field::isRoomVisitPending, 0u, 0u},
@@ -585,20 +585,20 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1AC0u, 96u, (void*)&VS::Render::legacyTransitionWipePackets, sizeof VS::Render::legacyTransitionWipePackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1B20u, 72u, (void*)&VS::Render::legacyTransitionEdgePackets, sizeof VS::Render::legacyTransitionEdgePackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1B68u, 48u, (void*)&VS::Render::legacyTransitionFadePackets, sizeof VS::Render::legacyTransitionFadePackets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BA0u, 4u, (void*)&Field_minimapBorderPulsePhase, sizeof Field_minimapBorderPulsePhase, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BA0u, 4u, (void*)&VS::Field::minimapBorderPulsePhase, sizeof VS::Field::minimapBorderPulsePhase, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BA4u, 4u, (void*)&VS::Field::areRoomUpdatesPaused, sizeof VS::Field::areRoomUpdatesPaused, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BA8u, 4u, (void*)&VS::Field::roomPalettes, sizeof VS::Field::roomPalettes, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BACu, 4u, (void*)&Battle_floatingLabels, sizeof Battle_floatingLabels, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB0u, 8u, (void*)&VS::Field::roomTint, sizeof VS::Field::roomTint, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB8u, 4u, (void*)&Field_roomPrimitiveRangeEnd, sizeof Field_roomPrimitiveRangeEnd, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC0u, 4u, (void*)&Battle_unusedSceneBuffer, sizeof Battle_unusedSceneBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BC8u, 36u, (void*)&Field_manualDisplayState, sizeof Field_manualDisplayState, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BC8u, 36u, (void*)&VS::Field::manualDisplayState, sizeof VS::Field::manualDisplayState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BF0u, 8u, (void*)&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BF8u, 196u, (void*)&Field_roomData, sizeof Field_roomData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CBCu, 4u, (void*)&Battle_placedLabelPositions, sizeof Battle_placedLabelPositions, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CC0u, 4u, (void*)&Field_roomPrimitiveRangeStart, sizeof Field_roomPrimitiveRangeStart, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CC8u, 12u, (void*)&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1CD4u, 4u, (void*)&Field_minimapSlideFrame, sizeof Field_minimapSlideFrame, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1CD4u, 4u, (void*)&VS::Field::minimapSlideFrame, sizeof VS::Field::minimapSlideFrame, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CD8u, 4u, (void*)&Battle_unusedSubmenuState, sizeof Battle_unusedSubmenuState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&Field_roomAnimationTicks, sizeof Field_roomAnimationTicks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CE0u, 32u, (void*)&VS::Field::backgroundReferenceVectors, sizeof VS::Field::backgroundReferenceVectors, 0u, 0u},

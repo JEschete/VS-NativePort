@@ -229,6 +229,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Boot\GameplayOverlayLive.cpp",
                 r"src\Boot\GameplayLoopLive.cpp",
                 r"src\Field\InteractionsLive.cpp",
+                r"src\Field\Interactions.cpp",
                 r"src\Field\InteractionTargetLive.cpp",
                 r"src\Field\ChestInteractionsLive.cpp",
                 r"src\Field\GimmickPlacementLive.cpp",

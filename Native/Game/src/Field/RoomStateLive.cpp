@@ -19,8 +19,8 @@
 #include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
-#include "Field/Manual.h"
-#include "Field/Minimap.h"
+#include "Field/Manual.hpp"
+#include "Field/Minimap.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLive.hpp"
@@ -139,8 +139,8 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
                                      sizeof Battle_unusedMenu9CursorMemory);
         return;
       case RoomRecord::kManualDisplay:
-        Memory::ZeroLiveAlignedWords(&Field_manualDisplayState,
-                                     sizeof Field_manualDisplayState);
+        Memory::ZeroLiveAlignedWords(&manualDisplayState,
+                                     sizeof manualDisplayState);
         return;
     }
   }
@@ -169,10 +169,9 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
         static_cast<std::int16_t>(defaults.room_tint_active ? 1 : 0);
     Battle_unusedSubmenuState = 0;
     Battle_unusedSceneBuffer = nullptr;
-    Field_isMinimapVisible =
-        static_cast<char>(defaults.minimap_visible ? 1 : 0);
-    Field_minimapSlideFrame =
-        static_cast<std::int16_t>(defaults.minimap_slide_frame);
+    isMinimapVisible =
+        static_cast<std::uint8_t>(defaults.minimap_visible ? 1 : 0);
+    minimapSlideFrame = static_cast<std::int16_t>(defaults.minimap_slide_frame);
   }
   void InitializeRoomBackground() override { LiveInitializeRoomBackground(); }
   void ResetGimmickAnimationQueue() override {

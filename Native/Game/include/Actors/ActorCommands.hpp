@@ -36,7 +36,7 @@ inline constexpr std::uint32_t kStateActionPose = 0x00080000;
 // Battle actor kinds (actor 0x1C) whose commands also run outside the field
 // control mode.
 inline constexpr std::array<unsigned, 2> kBattleCommandActorKinds{2, 4};
-// Field_controlMode while the field runs actor movement itself.
+// VS::Field::controlMode while the field runs actor movement itself.
 inline constexpr int kFieldMovementControlMode = 3;
 
 // The argument words of a queued command.

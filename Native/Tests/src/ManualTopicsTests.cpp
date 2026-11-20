@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -445,7 +445,7 @@ struct LiveTopicFixture {
   std::array<u_short, 516> saved_table = std::to_array(manual::menuTextTable);
   int saved_step = manual::topMenu_state;
   int saved_row = manual::menuSelectedRow;
-  u_short saved_manual = Field_manualDisplayState.currentManual;
+  u_short saved_manual = VS::Field::manualDisplayState.current_manual;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -479,7 +479,7 @@ struct LiveTopicFixture {
     std::copy(saved_table.begin(), saved_table.end(), manual::menuTextTable);
     manual::topMenu_state = saved_step;
     manual::menuSelectedRow = saved_row;
-    Field_manualDisplayState.currentManual = saved_manual;
+    VS::Field::manualDisplayState.current_manual = saved_manual;
   }
 
   static void ReleaseRows() {
@@ -534,7 +534,7 @@ struct LivePageFixture {
 TEST_CASE("Live topic menu lists the module's topic rows then polls",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
-  Field_manualDisplayState.currentManual = 10;
+  VS::Field::manualDisplayState.current_manual = 10;
   CHECK(manual::LiveUpdateTopicMenu(1) == -1);
   CHECK(manual::topMenu_state == 1);
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[4] == 5);

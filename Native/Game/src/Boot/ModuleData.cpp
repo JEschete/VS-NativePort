@@ -107,7 +107,7 @@
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Field/TriggerMarkers.h"
 #include "Items/Categories.hpp"
 #include "Items/Materials.hpp"
@@ -232,9 +232,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FCAC, sizeof Field_lockedDoorRoomPairs,
      &Field_lockedDoorRoomPairs,
      sizeof Field_lockedDoorRoomPairs},  // G00037 D_800E84AC
-    {"BATTLE/BATTLE.PRG", 0x7FD08, sizeof Field_countableRoomMask,
-     &Field_countableRoomMask,
-     sizeof Field_countableRoomMask},  // G00038 vs_battle_mapCompletionFlags
+    {"BATTLE/BATTLE.PRG", 0x7FD08, sizeof VS::Field::countableRoomMask,
+     &VS::Field::countableRoomMask,
+     sizeof VS::Field::countableRoomMask},  // G00038 vs_battle_mapCompletionFlags
     {"BATTLE/BATTLE.PRG", 0x7FD6C, sizeof Field_triggerMarkerMatrix,
      &Field_triggerMarkerMatrix,
      sizeof Field_triggerMarkerMatrix},  // G00039 D_800E856C

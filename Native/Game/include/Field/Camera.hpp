@@ -28,7 +28,7 @@ inline constexpr std::uint32_t kPadRight = 1U << 13;
 inline constexpr std::uint32_t kPadDown = 1U << 14;
 inline constexpr std::uint32_t kPadLeft = 1U << 15;
 
-// Field_controlMode values the camera tests.
+// controlMode values the camera tests.
 inline constexpr std::uint32_t kControlModeAction = 2;
 inline constexpr std::uint32_t kControlModeLocked = 3;
 inline constexpr std::uint32_t kControlModeFirstPerson = 7;

@@ -65,9 +65,9 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Input.h"
+#include "Field/Input.hpp"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/InteractionsLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -130,10 +130,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return VS::Boot::gameEntryMode;
   }
   [[nodiscard]] FieldControlMode ControlMode() const override {
-    return static_cast<FieldControlMode>(Field_controlMode);
+    return static_cast<FieldControlMode>(VS::Field::controlMode);
   }
   void SetControlMode(FieldControlMode mode) override {
-    Field_controlMode = static_cast<u_int>(mode);
+    VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   [[nodiscard]] std::int32_t ActionFlowMode() const override {
     return static_cast<std::int32_t>(Battle_actionFlowMode);
@@ -145,10 +145,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return VS::Field::screenTransitionAlpha;
   }
   [[nodiscard]] bool IsMenuRequestQueued() const override {
-    return Field_isMenuRequestQueued != 0;
+    return VS::Field::isMenuRequestQueued != 0;
   }
   void SetMenuRequestQueued(bool queued) override {
-    Field_isMenuRequestQueued = queued ? 1 : 0;
+    VS::Field::isMenuRequestQueued = queued ? 1 : 0;
   }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
     return VS::Input::buttonsPressed;

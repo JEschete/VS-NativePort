@@ -10,7 +10,7 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Field/Minimap.h"
+#include "Field/Minimap.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -38,14 +38,14 @@ static_assert(std::is_same_v<decltype(&b::LiveLimbCondition),
 TEST_CASE("F00235 production module returns a full-word visibility command",
           "[hud-state-module][F00235]") {
   const char hidden = Battle_hudHidden;
-  const char minimap = Field_isMinimapVisible;
+  const std::uint8_t minimap = VS::Field::isMinimapVisible;
   const auto command = ModuleEntry(0x8007BD8C, &b::SetLiveGameplayHudHidden);
   if (command == nullptr) return;
   CHECK(command(-256) == -256);
   CHECK(Battle_hudHidden == 1);
-  CHECK(Field_isMinimapVisible == 0);
+  CHECK(VS::Field::isMinimapVisible == 0);
   Battle_hudHidden = hidden;
-  Field_isMinimapVisible = minimap;
+  VS::Field::isMinimapVisible = minimap;
 }
 
 TEST_CASE("F01356 production module preserves the signed status-mask ABI",

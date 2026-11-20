@@ -26,7 +26,7 @@
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -928,7 +928,7 @@ struct LiveManualFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   DRAWENV saved_back_env = VS::Render::legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
-  Field_ManualDisplayState saved_display = Field_manualDisplayState;
+  VS::Field::ManualDisplayState saved_display = VS::Field::manualDisplayState;
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
   char saved_hud_hidden = Battle_hudHidden;
@@ -952,7 +952,7 @@ struct LiveManualFixture {
     manual::helpAssets = nullptr;
     manual::helpTextCdQueue = nullptr;
     manual::helpAssetsCdQueue = nullptr;
-    Field_manualDisplayState = Field_ManualDisplayState{};
+    VS::Field::manualDisplayState = VS::Field::ManualDisplayState{};
     // The page text box as the manual opens it (ManualTopicsTests).
     VS::Menu::LiveTextBox(manual::kPageTextBox)->flags.speaker_texture = 32;
     VS::Render::InitializeLiveTexturePages();
@@ -985,7 +985,7 @@ struct LiveManualFixture {
     VS::Input::buttonsPressed = saved_pressed;
     VS::Input::previousButtons = saved_previous;
     VS::Input::buttonRepeat = saved_repeat;
-    Field_manualDisplayState = saved_display;
+    VS::Field::manualDisplayState = saved_display;
     manual::showMenuState = saved_step;
     manual::scrollPosition = saved_scroll;
     manual::totalLineCount = saved_line_count;
@@ -1214,8 +1214,8 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   VS::Input::settings.cursor_memory = 0;
-  Field_manualDisplayState.currentManual = 3;
-  Field_manualDisplayState.scrollPositions[3] = 20;
+  VS::Field::manualDisplayState.current_manual = 3;
+  VS::Field::manualDisplayState.scroll_positions[3] = 20;
   std::array<int, 2> text{};
   std::array<u_long, 2> assets{};
   manual::helpText = text.data();
@@ -1226,8 +1226,8 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
   manual::pageArrowAnimState = 6;
   manual::helpPageLoadCounter = 8;
   CHECK(manual::LiveInitHelpState() == 1);
-  CHECK(Field_manualDisplayState.currentManual == 0);
-  CHECK(Field_manualDisplayState.scrollPositions[3] == 0);
+  CHECK(VS::Field::manualDisplayState.current_manual == 0);
+  CHECK(VS::Field::manualDisplayState.scroll_positions[3] == 0);
   CHECK(manual::helpText == nullptr);
   CHECK(manual::helpAssets == nullptr);
   CHECK(CurrentHelpPages() == HelpPagesState{.step = 0,
@@ -1246,11 +1246,11 @@ TEST_CASE("F04162 LiveInitHelpState keeps the display state with memory on",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   VS::Input::settings.cursor_memory = 1;
-  Field_manualDisplayState.currentManual = 3;
-  Field_manualDisplayState.scrollPositions[3] = 20;
+  VS::Field::manualDisplayState.current_manual = 3;
+  VS::Field::manualDisplayState.scroll_positions[3] = 20;
   CHECK(manual::LiveInitHelpState() == 1);
-  CHECK(Field_manualDisplayState.currentManual == 3);
-  CHECK(Field_manualDisplayState.scrollPositions[3] == 20);
+  CHECK(VS::Field::manualDisplayState.current_manual == 3);
+  CHECK(VS::Field::manualDisplayState.scroll_positions[3] == 20);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
@@ -1266,7 +1266,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
   VS::Menu::Framework::menuMemory.cursor_memories[5] = 6;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(manual::showMenuState == step);
-  CHECK(Field_manualDisplayState.currentManual == 10);
+  CHECK(VS::Field::manualDisplayState.current_manual == 10);
   CHECK(Content_discRequestSlots[0].state == Content_DiscRequestState_Free);
 }
 
@@ -1316,8 +1316,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages opens the loaded text where it was left",
   manual::helpTextCdQueue = LiveManualFixture::LoadedRequest();
   manual::showMenuState = manual::kHelpLoadText;
   manual::helpPageLoadCounter = 5;
-  Field_manualDisplayState.currentManual = 2;
-  Field_manualDisplayState.scrollPositions[2] = 10;
+  VS::Field::manualDisplayState.current_manual = 2;
+  VS::Field::manualDisplayState.scroll_positions[2] = 10;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(manual::showMenuState == manual::kHelpShowPage);
   CHECK(manual::scrollPosition == 10);
@@ -1335,12 +1335,12 @@ TEST_CASE("F04163 LiveUpdateHelpPages draws a page into the frame",
   manual::scrollPosition = 10;
   manual::totalLineCount = 20;
   manual::pageArrowAnimState = 15;
-  Field_manualDisplayState.currentManual = 2;
+  VS::Field::manualDisplayState.current_manual = 2;
   VS::Input::buttonRepeat = static_cast<int>(manual::kButtonDown);
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(manual::scrollPosition == 11);
-  CHECK(Field_manualDisplayState.scrollPositions[2] == 11);
+  CHECK(VS::Field::manualDisplayState.scroll_positions[2] == 11);
   CHECK(manual::pageArrowAnimState == 0);
   CHECK(manual::helpPageLoadCounter == 1);
   CHECK(fixture.Linked(manual::kControlsLayer));

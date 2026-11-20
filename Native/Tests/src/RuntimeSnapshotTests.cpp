@@ -48,7 +48,7 @@
 #include "Field/Doors.h"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -269,7 +269,7 @@ struct RuntimeFixture {
   int near_clip = VS::Render::nearClip;
   int projection = VS::Render::projectionDistance;
   int first_person = VS::Field::isFirstPersonViewEnabled;
-  unsigned control_mode = Field_controlMode;
+  unsigned control_mode = VS::Field::controlMode;
   int interaction_paused = VS::Field::isInteractionPaused;
   Field_CameraTransition* transition = VS::Field::cameraTransition;
   VS::Audio::DriverFlags audio_flags = VS::Audio::Driver::controlLatches;
@@ -377,7 +377,7 @@ struct RuntimeFixture {
   }
 
   void SetWorld() {
-    Field_controlMode = 1;
+    VS::Field::controlMode = 1;
     VS::Field::isInteractionPaused = 0;
     VS::Field::isFirstPersonViewEnabled = 0;
     VS::Field::cameraTransition = nullptr;
@@ -639,7 +639,7 @@ struct RuntimeFixture {
     VS::Render::nearClip = near_clip;
     VS::Render::projectionDistance = projection;
     VS::Field::isFirstPersonViewEnabled = first_person;
-    Field_controlMode = control_mode;
+    VS::Field::controlMode = control_mode;
     VS::Field::isInteractionPaused = interaction_paused;
     VS::Field::cameraTransition = transition;
     VS::Audio::Driver::controlLatches = audio_flags;
@@ -683,7 +683,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::Field::zoneContext);
   Append(bytes, Field_roomData);
   Append(bytes, VS::Field::isFirstPersonViewEnabled);
-  Append(bytes, Field_controlMode);
+  Append(bytes, VS::Field::controlMode);
   Append(bytes, VS::Field::isInteractionPaused);
   Append(bytes, VS::Field::cameraTransition != nullptr);
   Append(bytes, VS::Render::nearClip);
@@ -1214,7 +1214,7 @@ TEST_CASE("Runtime capture does not repair corrupt display references",
 TEST_CASE("Runtime capture accepts horizontal motion frozen by a field menu",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
-  Field_controlMode = GENERATE(5, 6);
+  VS::Field::controlMode = GENERATE(5, 6);
   VS::Field::isInteractionPaused = 1;
   fixture.player_model.instance.turnFrames = 11;
   fixture.player_model.instance.rootMotion.vx = -18;
@@ -1234,7 +1234,7 @@ TEST_CASE("Runtime capture accepts horizontal motion frozen by a field menu",
 TEST_CASE("Menu-paused capture still rejects airborne and supported motion",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
-  Field_controlMode = GENERATE(5, 6);
+  VS::Field::controlMode = GENERATE(5, 6);
   VS::Field::isInteractionPaused = 1;
   const auto defect = GENERATE(6, 7, 11, 12, 13, 14, 16, 18, 20, 21, 31, 32);
   InvalidateLiveFixture(fixture, defect);
@@ -1248,7 +1248,7 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   const auto defect = GENERATE(0, 1, 2, 3);
-  Field_controlMode = defect == 0 ? 1 : (defect == 1 ? 3 : 5);
+  VS::Field::controlMode = defect == 0 ? 1 : (defect == 1 ? 3 : 5);
   VS::Field::isInteractionPaused = defect == 3 ? 0 : 1;
   fixture.player_model.instance.rootMotion.vx = 18;
   if (defect == 2) fixture.player_model.supportGimmick = 1;

@@ -15,7 +15,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -177,7 +177,7 @@ int LiveUpdateTopicMenu(int init) {
   LiveTopicMenuHost host;
   const auto result =
       UpdateTopicMenu(state, init != 0, TopicTable(),
-                      Field_manualDisplayState.currentManual, host);
+                      VS::Field::manualDisplayState.current_manual, host);
   topMenu_state = state.step;
   menuSelectedRow = state.selected_row;
   if (!result.has_value()) {

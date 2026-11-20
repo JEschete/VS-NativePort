@@ -17,7 +17,7 @@
 #include "Battle/StatusHelpers.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -75,7 +75,7 @@ struct LiveRiskFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
   Battle_Actor* saved_player = Battle_characterState;
   Battle_ActionState* saved_action = Battle_actionState;
-  std::uint32_t saved_control = Field_controlMode;
+  std::uint32_t saved_control = VS::Field::controlMode;
   std::uint32_t saved_flow = Battle_actionFlowMode;
   int saved_ticks = VS::State::tickSpeed;
   int saved_timer = Battle_targetingRiskTimer;
@@ -94,7 +94,7 @@ struct LiveRiskFixture {
     Battle_actors[0] = &target_actor;
     Battle_characterState = &player_actor;
     Battle_actionState = &action;
-    Field_controlMode = 2;
+    VS::Field::controlMode = 2;
     Battle_actionFlowMode = 1;
     VS::State::tickSpeed = 1;
     Battle_targetingRiskTimer = 0;
@@ -103,7 +103,7 @@ struct LiveRiskFixture {
     Battle_actors[0] = saved_actor;
     Battle_characterState = saved_player;
     Battle_actionState = saved_action;
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_actionFlowMode = saved_flow;
     VS::State::tickSpeed = saved_ticks;
     Battle_targetingRiskTimer = saved_timer;

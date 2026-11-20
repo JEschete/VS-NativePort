@@ -12,7 +12,7 @@
 #include "Battle/StatusEffects.h"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Scratch.hpp"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Score/Records.hpp"
@@ -27,7 +27,7 @@ namespace {
 static_assert(std::size(Battle_actionDefinitions) >= kTitleActionCount);
 static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
               kRoomFlagWords);
-static_assert(std::size(Field_countableRoomMask) == kRoomFlagWords);
+static_assert(std::size(VS::Field::countableRoomMask) == kRoomFlagWords);
 static_assert(std::size(VS::State::stateFlags.chests_opened) ==
               kChestFlagCount);
 static_assert(std::size(VS::State::scoreData.enemy_kills) ==
@@ -81,8 +81,7 @@ ProgressWorld ReadLiveProgressWorld() {
   for (std::size_t i = 0; i < kRoomFlagWords; ++i) {
     world.room_flags.at(i) =
         static_cast<std::uint32_t>(VS::State::roomVisitProgress.room_flags[i]);
-    world.countable_room_masks.at(i) =
-        static_cast<std::uint32_t>(Field_countableRoomMask[i]);
+    world.countable_room_masks.at(i) = VS::Field::countableRoomMask[i];
   }
   for (std::size_t i = 0; i < kChestFlagCount; ++i) {
     world.chests_opened.at(i) =

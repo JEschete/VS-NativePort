@@ -26,8 +26,8 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Input.h"
-#include "Field/Interactions.h"
+#include "Field/Input.hpp"
+#include "Field/Interactions.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -75,7 +75,7 @@ class LiveCutsceneHost final : public CutsceneHost {
                                VS::Field::sphericalCamera.initialDistance};
   }
   void SetPreparation(CutscenePreparation preparation) override {
-    Field_controlMode = kFieldCutsceneMode;
+    VS::Field::controlMode = kFieldCutsceneMode;
     Battle_actionFlowMode = preparation == CutscenePreparation::kPreparing
                                 ? kPreparingActionFlow
                                 : kWaitingActionFlow;
@@ -105,7 +105,7 @@ class LiveCutsceneHost final : public CutsceneHost {
   void SetMarkersHidden(bool hidden) override {
     VS::Battle::SetLiveActorMarkersHidden(hidden ? 1 : 0);
   }
-  void ClearMenuRequest() override { Field_isMenuRequestQueued = 0; }
+  void ClearMenuRequest() override { VS::Field::isMenuRequestQueued = 0; }
   void PauseMovingPlatforms(bool paused) override {
     VS::Field::SetMovingPlatformsPausedEntry(paused ? 1 : 0);
   }

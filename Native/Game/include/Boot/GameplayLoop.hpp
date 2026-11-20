@@ -11,7 +11,7 @@
 // host performs every effect, so modes can be replaced or extended without
 // reaching overlay memory, ordering tables or actor tables directly.
 namespace VS::Boot {
-// The field control modes (Field_controlMode) and screen transition steps
+// The field control modes (VS::Field::controlMode) and screen transition steps
 // (VS::Field::screenTransitionStep) are the field rules' own
 // (Field/GameMode.hpp, Field/Transitions.hpp).
 using FieldControlMode = Field::FieldControlMode;

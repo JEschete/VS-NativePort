@@ -34,7 +34,7 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -348,11 +348,9 @@ void LiveCameraHost::EnterFieldExploration() {
   Escape([] { LiveEnterFieldExplorationMode(); });
 }
 
-std::uint32_t LiveCameraHost::ControlMode() { return Field_controlMode; }
+std::uint32_t LiveCameraHost::ControlMode() { return controlMode; }
 
-void LiveCameraHost::SetControlMode(std::uint32_t mode) {
-  Field_controlMode = mode;
-}
+void LiveCameraHost::SetControlMode(std::uint32_t mode) { controlMode = mode; }
 
 std::uint32_t LiveCameraHost::ActionFlowMode() { return Battle_actionFlowMode; }
 

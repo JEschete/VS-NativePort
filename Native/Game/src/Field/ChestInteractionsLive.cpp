@@ -47,7 +47,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
@@ -197,7 +197,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
                                   .spare = bytes[kTriggerModeByte]};
   }
   bool EventOwnsControl() override {
-    return Field_controlMode == kActorEventControlMode;
+    return VS::Field::controlMode == kActorEventControlMode;
   }
   std::optional<VS::Field::ActorTileTrap> Trap(
       const VS::Actors::PackedTile& tile) override {
@@ -448,7 +448,8 @@ class LiveInteractionCameraHost final
     if (target.Trap(domain) == nullptr && target.Chest(domain) == nullptr) {
       return std::nullopt;
     }
-    const auto& point = Field_interactionFocus.actor_query.location.position;
+    const auto& point =
+        VS::Field::interactionFocus.actor_query.location.position;
     return VS::Field::TrapPosition{point.vx, point.vy, point.vz};
   }
   std::optional<VS::Field::TrapPosition> AshleyPosition() const override {
@@ -720,8 +721,9 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
       return false;
     }
     VS::Field::LiveInteractionTargetState().Select(target);
-    VS::Actors::LiveActorPlacement(actor, &Field_interactionFocus.actor_query);
-    Field_interactionFocus.actor_query.actorIndex =
+    VS::Actors::LiveActorPlacement(actor,
+                                   &VS::Field::interactionFocus.actor_query);
+    VS::Field::interactionFocus.actor_query.actorIndex =
         static_cast<std::int16_t>(actor);
     return true;
   }
@@ -731,7 +733,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     return target ? std::optional{*target} : std::nullopt;
   }
   void BeginChestFlow() override {
-    Field_controlMode = kChestControlMode;
+    VS::Field::controlMode = kChestControlMode;
     Battle_actionFlowMode = 1;
     VS::Field::LiveStorePreferredActionCameraDistance();
   }
@@ -798,7 +800,7 @@ class LiveInteractionDispatchHost final
     return VS::Field::LiveInteractionTargetState().Target();
   }
   bool TrapMode() const override {
-    return Field_controlMode == kTrapControlMode;
+    return VS::Field::controlMode == kTrapControlMode;
   }
   void BeginDispatch() override { Battle_actionFlowMode = 2; }
   bool DispatchChest(VS::Field::ChestTarget target) override {
@@ -806,13 +808,14 @@ class LiveInteractionDispatchHost final
   }
   bool DispatchTrap(VS::Field::TrapTarget target) override {
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
-    const int actor = Field_interactionFocus.actor_query.actorIndex;
+    const int actor = VS::Field::interactionFocus.actor_query.actorIndex;
     if (trap == nullptr || actor < 0 || actor >= kActorSlots ||
         Battle_actionState == nullptr || Battle_actors[actor] == nullptr ||
         Battle_actors[actor]->stats == nullptr) {
       return false;
     }
-    const auto& point = Field_interactionFocus.actor_query.location.position;
+    const auto& point =
+        VS::Field::interactionFocus.actor_query.location.position;
     VS::State::tickSpeed = kTrapTickSpeed;
     return VS::Field::TriggerLiveActorTrap(
         target, {.x = point.vx, .y = point.vy, .z = point.vz}, actor);
@@ -856,14 +859,14 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
            VS::Field::ResolveLiveTrapTarget(target) != nullptr;
   }
   void BeginFlow() override {
-    Field_controlMode = kTrapControlMode;
+    VS::Field::controlMode = kTrapControlMode;
     Battle_actionFlowMode = 1;
     VS::Field::LiveStorePreferredActionCameraDistance();
   }
   void Select(VS::Field::TrapTarget target, std::int32_t actor) override {
     VS::Field::LiveInteractionTargetState().Select(target);
-    Field_interactionFocus.actor_query.location = *location_;
-    Field_interactionFocus.actor_query.actorIndex =
+    VS::Field::interactionFocus.actor_query.location = *location_;
+    VS::Field::interactionFocus.actor_query.actorIndex =
         static_cast<std::int16_t>(actor);
   }
   void RestoreIdle(std::int32_t actor) override {
@@ -891,7 +894,7 @@ class LiveObjectInteractionWaitHost final
     : public VS::Field::ObjectInteractionWaitHost {
  public:
   void SetControlMode(VS::Field::FieldControlMode mode) override {
-    Field_controlMode = static_cast<std::uint32_t>(mode);
+    VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   void PauseField() override {
     VS::Field::LivePauseFieldForObjectInteraction();

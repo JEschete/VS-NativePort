@@ -16,7 +16,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Log.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
@@ -147,7 +147,7 @@ int VS::Battle::HandleTargetPageButtons(void) {
 
 int VS::Battle::TargetPagesUseShoulders(void) {
   return book.pages.size() > 1 && Sphere() != nullptr &&
-         Sphere()->targetCount > 0 && Field_controlMode == 2 &&
+         Sphere()->targetCount > 0 && VS::Field::controlMode == 2 &&
          (Battle_actionFlowMode == kChooseDirectTarget ||
           Battle_actionFlowMode == kChooseAreaTarget);
 }

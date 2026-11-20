@@ -27,8 +27,8 @@
 #include "Field/GameMode.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
-#include "Field/Minimap.h"
+#include "Field/Interactions.hpp"
+#include "Field/Minimap.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Items/LootLiveState.hpp"
@@ -56,7 +56,7 @@ struct LiveFixture {
   int saved_follow = Battle_rewardsFollowAction;
   int saved_pause = VS::Field::isInteractionPaused;
   u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
-  char saved_minimap = Field_isMinimapVisible;
+  std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
   u_char saved_platform_pause = Field_areMovingPlatformsPaused;
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_Actor* saved_character = Battle_characterState;
@@ -80,7 +80,7 @@ struct LiveFixture {
     Battle_rewardsFollowAction = 0;
     VS::Field::isInteractionPaused = 77;
     VS::Field::areRoomUpdatesPaused = 0;
-    Field_isMinimapVisible = 1;
+    VS::Field::isMinimapVisible = 1;
     Field_areMovingPlatformsPaused = 0;
     Battle_actionState = &action;
     Battle_characterState = &actor;
@@ -106,7 +106,7 @@ struct LiveFixture {
     Battle_rewardsFollowAction = saved_follow;
     VS::Field::isInteractionPaused = saved_pause;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;
-    Field_isMinimapVisible = saved_minimap;
+    VS::Field::isMinimapVisible = saved_minimap;
     Field_areMovingPlatformsPaused = saved_platform_pause;
     Battle_actionState = saved_action;
     Battle_characterState = saved_character;
@@ -158,7 +158,7 @@ struct LiveMenuFixture : LiveFixture {
 struct LiveDialogFixture : LiveMenuFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  u_int saved_control = Field_controlMode;
+  u_int saved_control = VS::Field::controlMode;
   int saved_recovery = Battle_recoveryRewardMode;
   int saved_effects = VS::Effects::effectBusyFlags;
   int saved_loot_opened = Battle_lootMenuOpened;
@@ -184,7 +184,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     if (VS::Core::Memory::LivePayloadCapacity(notice.data())) {
       VS::Core::Memory::FreeLiveFromHighEnd(notice.data());
     }
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_recoveryRewardMode = saved_recovery;
     VS::Effects::effectBusyFlags = saved_effects;
     Battle_lootMenuOpened = saved_loot_opened;
@@ -203,7 +203,7 @@ TEST_CASE("F04123 live pause drives the production room and palette services",
   b::BeginLiveRewardPause();
   CHECK(VS::Field::isInteractionPaused == 1);
   CHECK(VS::Field::areRoomUpdatesPaused == 1);
-  CHECK(Field_isMinimapVisible == 0);
+  CHECK(VS::Field::isMinimapVisible == 0);
   CHECK_FALSE(render::LivePaletteAnimation().enabled);
   CHECK(render::LivePaletteAnimation().rows.at(0).timer.mode ==
         render::ColorTransform::kThreeQuarterBase);
@@ -217,7 +217,7 @@ TEST_CASE("F04124 live restoration includes scene colors but leaves the map",
   b::EndLiveRewardPause();
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::areRoomUpdatesPaused == 0);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(render::LivePaletteAnimation().enabled);
   CHECK(render::LivePaletteAnimation().rows.at(13).timer.mode ==
         render::ColorTransform::kRestoreBase);
@@ -232,7 +232,7 @@ TEST_CASE("F04125 live resume requires no unused action or actor owner",
   b::ResumeLiveAfterRewards();
   CHECK(Battle_actionFlowMode == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
 }
 
 TEST_CASE("F04126 live pending acquisition bypasses action and actor stats",
@@ -311,16 +311,16 @@ TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
   VS::Menu::Framework::menuItems = nullptr;
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Field_isMinimapVisible = 0;
+  VS::Field::isMinimapVisible = 0;
   Field_areMovingPlatformsPaused = 1;
   b::UpdateLiveLootResults();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::areRoomUpdatesPaused == 0);
   CHECK(Field_areMovingPlatformsPaused == 0);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(Battle_actionFlowMode == 0);
-  CHECK(Field_controlMode ==
+  CHECK(VS::Field::controlMode ==
         static_cast<u_int>(VS::Field::FieldControlMode::kGimmickMotion));
 }
 
@@ -374,14 +374,14 @@ TEST_CASE("F00198 live absent notice proceeds to actual older ability recovery",
   VS::Menu::Framework::menuItems = nullptr;
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Field_isMinimapVisible = 0;
+  VS::Field::isMinimapVisible = 0;
   b::UpdateLiveAbilityUnlockResults();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(VS::Menu::sceneNotificationBuffer == nullptr);
   CHECK(VS::Field::isInteractionPaused == 0);
-  CHECK(Field_isMinimapVisible == 1);
+  CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(Battle_actionFlowMode == 0);
-  CHECK(Field_controlMode ==
+  CHECK(VS::Field::controlMode ==
         static_cast<u_int>(VS::Field::FieldControlMode::kGimmickMotion));
 }
 
@@ -411,13 +411,13 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   Battle_rewardsFollowAction = 0x10000;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
-  Field_isMinimapVisible = 0;
+  VS::Field::isMinimapVisible = 0;
   Field_areMovingPlatformsPaused = 1;
   b::UpdateLivePendingLootDialog();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(Battle_actionFlowMode == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
-  CHECK(Field_isMinimapVisible == 0);
+  CHECK(VS::Field::isMinimapVisible == 0);
   CHECK(Field_areMovingPlatformsPaused == 1);
   CHECK(Battle_lootMenuOpened == INT32_MIN);
 }
@@ -501,8 +501,8 @@ void PrepareClosedUnlock() {
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
   Battle_actionState = nullptr;
-  Field_controlMode = 0x89ABCDEF;
-  Field_isMinimapVisible = 0;
+  VS::Field::controlMode = 0x89ABCDEF;
+  VS::Field::isMinimapVisible = 0;
 }
 
 TEST_CASE("F00226 live close ends reward pause then checks actual unlocks",
@@ -523,8 +523,8 @@ TEST_CASE(
   PrepareClosedUnlock();
   b::UpdateLiveRewardUnlockDialog();
   CHECK(Field_areMovingPlatformsPaused == 1);
-  CHECK(Field_controlMode == 0x89ABCDEF);
-  CHECK(Field_isMinimapVisible == 0);
+  CHECK(VS::Field::controlMode == 0x89ABCDEF);
+  CHECK(VS::Field::isMinimapVisible == 0);
   CHECK(render::LivePaletteAnimation().enabled);
 }
 

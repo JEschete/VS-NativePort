@@ -11,7 +11,7 @@
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PaletteAnimationLive.hpp"
@@ -57,7 +57,7 @@ class LiveHost final : public ActionEffectCallbackHost {
   std::int32_t TintedActor() override { return tintedActor; }
   void SetTintedActor(std::int32_t actor) override { tintedActor = actor; }
   void SetFieldControlMode(Field::FieldControlMode mode) override {
-    Field_controlMode = static_cast<u_int>(mode);
+    VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   void SetTickSpeed(std::int32_t tick_speed) override {
     VS::State::tickSpeed = tick_speed;

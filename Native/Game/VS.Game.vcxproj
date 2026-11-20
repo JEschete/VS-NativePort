@@ -1464,19 +1464,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Field\Input.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\Input.cpp" />
     <ClCompile Include="src\Field\Interactions.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Field\InteractionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1492,31 +1482,13 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Field\Manual.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\Manual.cpp" />
     <ClCompile Include="src\Field\Map.cpp" />
     <ClCompile Include="src\Field\MapLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\MapProgress.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Field\Minimap.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\MapProgress.cpp" />
+    <ClCompile Include="src\Field\Minimap.cpp" />
     <ClCompile Include="src\Field\MinimapScene.cpp" />
     <ClCompile Include="src\Field\MinimapSceneLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1580,13 +1552,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Field\Weather.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\Weather.cpp" />
     <ClCompile Include="src\Items\Categories.cpp" />
     <ClCompile Include="src\Items\ContainerGemCounts.cpp" />
     <ClCompile Include="src\Items\ContainerGemCountsLive.cpp">
@@ -2307,14 +2273,14 @@
     <ClInclude Include="src\Field\GimmickLookup.hpp" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
-    <ClInclude Include="src\Field\Input.h" />
+    <ClInclude Include="src\Field\Input.hpp" />
     <ClInclude Include="src\Field\InteractionFocusLive.hpp" />
-    <ClInclude Include="src\Field\Interactions.h" />
+    <ClInclude Include="src\Field\Interactions.hpp" />
     <ClInclude Include="src\Field\Locations.h" />
-    <ClInclude Include="src\Field\Manual.h" />
+    <ClInclude Include="src\Field\Manual.hpp" />
     <ClInclude Include="src\Field\Map.h" />
-    <ClInclude Include="src\Field\MapProgress.h" />
-    <ClInclude Include="src\Field\Minimap.h" />
+    <ClInclude Include="src\Field\MapProgress.hpp" />
+    <ClInclude Include="src\Field\Minimap.hpp" />
     <ClInclude Include="src\Field\Mpd.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />
@@ -2324,7 +2290,7 @@
     <ClInclude Include="src\Field\RoomSwitchesLive.hpp" />
     <ClInclude Include="src\Field\TransitionsLiveState.hpp" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />
-    <ClInclude Include="src\Field\Weather.h" />
+    <ClInclude Include="src\Field\Weather.hpp" />
     <ClInclude Include="src\Field\Znd.h" />
     <ClInclude Include="src\Field\Zone.h" />
     <ClInclude Include="src\Items\Categories.hpp" />

@@ -32,7 +32,7 @@
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
@@ -798,7 +798,7 @@ TEST_CASE("Detailed runs preserve previous evidence and report invalid output",
 namespace {
 struct GameplayInspectionFixture {
   int saved_gameplay = VS::Boot::isGameplayActive;
-  decltype(Field_controlMode) saved_control = Field_controlMode;
+  decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
   decltype(Battle_actionState) saved_action = Battle_actionState;
   decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
   decltype(Field_roomData.floorTriggers) saved_triggers =
@@ -836,7 +836,7 @@ struct GameplayInspectionFixture {
   GameplayInspectionFixture() {
     VS::Boot::ResetGameplayInspection();
     VS::Boot::isGameplayActive = 1;
-    Field_controlMode = 1;
+    VS::Field::controlMode = 1;
     Battle_actionState = nullptr;
     VS::Items::lootListHead = nullptr;
     Field_roomData.floorTriggers = nullptr;
@@ -865,7 +865,7 @@ struct GameplayInspectionFixture {
   ~GameplayInspectionFixture() {
     VS::Boot::ResetGameplayInspection();
     VS::Boot::isGameplayActive = saved_gameplay;
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_actionState = saved_action;
     VS::Items::lootListHead = saved_loot;
     Field_roomData.floorTriggers = saved_triggers;
@@ -1067,7 +1067,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
       std::to_array(VS::Menu::Magic::shamanSpellIds);
 
   ReactionInspectionFixture() {
-    Field_controlMode = 2;
+    VS::Field::controlMode = 2;
     Battle_actionFlowMode = 7;
     VS::State::tickSpeed = 2;
     Battle_actionState = action.get();
@@ -1272,7 +1272,7 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
   std::array<std::remove_pointer_t<decltype(VS::Menu::Framework::menuItems)>, 1>
       rows{};
   VS::Menu::Framework::menuItems = rows.data();
-  Field_controlMode = kMenuControl;
+  VS::Field::controlMode = kMenuControl;
   VS::Menu::Framework::menuState.control.current_menu = kResultsMenu;
   VS::State::stateFlags.menu_f_submenu = static_cast<char>(200);
   VS::Menu::Framework::menuMemory.cursor_memories[12] = 200;
@@ -1563,7 +1563,7 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(reward.menu.available);
   CHECK(reward.menu.selected_menu == 3);
-  CHECK(Field_controlMode == 2);
+  CHECK(VS::Field::controlMode == 2);
   CHECK(Battle_actionFlowMode == 14);
   Battle_actionFlowMode = 7;
   CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
@@ -1652,7 +1652,7 @@ TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
   ItemInspectionFixture fixture;
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   std::array<VS::Menu::Framework::ItemText, 1> text{};
-  Field_controlMode = 5;
+  VS::Field::controlMode = 5;
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::itemsText =
       reinterpret_cast<std::uint16_t*>(text.data());
@@ -1695,7 +1695,7 @@ TEST_CASE(
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.control.current_menu = 12;
-  Field_controlMode = 3;
+  VS::Field::controlMode = 3;
   Battle_actionFlowMode = 4;
   VS::Event::isMenuTransitionActive = 1;
   VS::Menu::Loot::controlsEnabled = 1;
@@ -1706,7 +1706,7 @@ TEST_CASE(
   CHECK(data.at("menu").at("available") == true);
   CHECK(data.at("menu").at("event_owned") == true);
   CHECK(data.at("menu").at("loot_input_ready") == true);
-  CHECK(Field_controlMode == 3);
+  CHECK(VS::Field::controlMode == 3);
   CHECK(Battle_actionFlowMode == 4);
   CHECK(VS::Menu::Loot::lootListCount == 2);
 }

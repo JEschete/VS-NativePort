@@ -24,7 +24,7 @@
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "DiscQueue.h"
-#include "Field/MapProgress.h"
+#include "Field/MapProgress.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"

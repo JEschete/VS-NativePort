@@ -9,7 +9,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Items/ItemRecords.hpp"
 #include "State/StateFlags.hpp"
@@ -219,7 +219,7 @@ InteractionTargetDomain LiveInteractionTargetDomain() {
 
 void InvalidateLiveInteractionTargets() {
   target_state.Clear();
-  Field_interactionFocus.actor_query = {};
+  interactionFocus.actor_query = {};
   if (++room_generation == 0) {
     ++room_generation;
   }

@@ -51,7 +51,7 @@
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingsLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
@@ -1374,7 +1374,7 @@ struct EquipmentLootFixture : LootInventoryFixture {
 
 struct LootPresentationFixture : EnemyLootFixture {
   std::uint8_t saved_intro = VS::State::LiveScriptFlag(0xAB);
-  u_int saved_control = Field_controlMode;
+  u_int saved_control = VS::Field::controlMode;
   u_int saved_flow = Battle_actionFlowMode;
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
   VS::Items::LootListNode* saved_menu_list = VS::Menu::Framework::lootLists;
@@ -1387,13 +1387,13 @@ struct LootPresentationFixture : EnemyLootFixture {
     Actors_actorRecords[0] = &locked_player_pose;
     VS::Menu::Framework::lootLists = nullptr;
     VS::Menu::Framework::lootEntry = nullptr;
-    Field_controlMode = 1;
+    VS::Field::controlMode = 1;
     Battle_actionFlowMode = 11;
   }
 
   ~LootPresentationFixture() {
     VS::State::SetLiveScriptFlag(0xAB, saved_intro);
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_actionFlowMode = saved_flow;
     Actors_actorRecords[0] = saved_player;
     VS::Menu::Framework::lootLists = saved_menu_list;
@@ -1438,7 +1438,7 @@ struct AbilityUnlockFixture : AbilityFixture {
 struct ChainCreditFixture : AbilityUnlockFixture {
   std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
   u_int saved_flow = Battle_actionFlowMode;
-  u_int saved_control = Field_controlMode;
+  u_int saved_control = VS::Field::controlMode;
   int saved_reward = Battle_recoveryRewardMode;
 
   ChainCreditFixture() {
@@ -1452,7 +1452,7 @@ struct ChainCreditFixture : AbilityUnlockFixture {
   ~ChainCreditFixture() {
     VS::State::SetLiveScriptFlag(0x82, saved_story);
     Battle_actionFlowMode = saved_flow;
-    Field_controlMode = saved_control;
+    VS::Field::controlMode = saved_control;
     Battle_recoveryRewardMode = saved_reward;
   }
 
@@ -2654,7 +2654,7 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   auto* const queued = VS::Items::lootListHead;
   VS::Items::OpenLivePendingEnemyLoot();
-  CHECK(Field_controlMode == 12);
+  CHECK(VS::Field::controlMode == 12);
   CHECK(Battle_actionFlowMode == 0);
   CHECK(VS::Menu::Framework::lootLists == nullptr);
   CHECK(VS::Menu::Framework::lootEntry == nullptr);

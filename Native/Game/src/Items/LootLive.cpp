@@ -24,7 +24,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
@@ -46,7 +46,7 @@ using Live::WarnRefusal;
 
 // The script flag holding the reward stage (LootFlowHost::RewardStage).
 constexpr std::int16_t kRewardStageFlag = 0xAB;
-// Field_controlMode while a menu has the pad.
+// VS::Field::controlMode while a menu has the pad.
 constexpr std::uint32_t kMenuControlMode = 2;
 // Battle_actionFlowMode while the enemy loot list, and the scripted one, is
 // open.
@@ -124,7 +124,7 @@ class LiveLootFlowHost final : public LootFlowHost {
   }
   void OpenEnemyLootList() override {
     VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
-    Field_controlMode = kMenuControlMode;
+    VS::Field::controlMode = kMenuControlMode;
     Battle_actionFlowMode = kEnemyLootFlowMode;
     VS::Field::LivePauseFieldForMenu();
   }

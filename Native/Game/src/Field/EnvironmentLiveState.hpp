@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "Field/Weather.h"
+#include "Field/Weather.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Field {
@@ -38,5 +38,5 @@ extern char roomWeatherKind;
 extern char isWeatherVariationEnabled;
 // decomp: D_800F1DD4 (BATTLE/BATTLE.PRG 146C.c:729): the 0x800-byte particle
 // buffer (low heap), or null.
-extern Field_WeatherParticle* weatherParticles;
+extern WeatherParticleRecord* weatherParticles;
 }  // namespace VS::Field

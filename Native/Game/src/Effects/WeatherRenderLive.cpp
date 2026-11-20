@@ -23,7 +23,7 @@
 #include "Field/EnvironmentLiveState.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Field/Weather.h"
+#include "Field/Weather.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Frame.hpp"
 #include "Render/LegacyPackets.hpp"
@@ -174,7 +174,8 @@ class LiveRenderHost final : public WeatherRenderHost {
 // them back. `draw` returns whether the particles fitted.
 template <typename Draw>
 void RunDraw(std::string_view call, Draw draw) {
-  const std::span<Field_WeatherParticle> buffer = weather_live::Buffer();
+  const std::span<VS::Field::WeatherParticleRecord> buffer =
+      weather_live::Buffer();
   std::vector<WeatherParticle> particles = weather_live::LoadParticles(buffer);
   weather_live::PoolHost pool;
   LiveRenderHost render;
@@ -217,7 +218,8 @@ void LiveInitializeRisingEmberParticles(int particle_count, int weather_kind) {
 }
 
 // decomp: BATTLE.PRG func_8008FA14 (146C.c:17878).
-void LiveResetRisingEmberParticle(Field_WeatherParticle* weather_particle) {
+void LiveResetRisingEmberParticle(
+    VS::Field::WeatherParticleRecord* weather_particle) {
   const std::optional<Field::WeatherArea> area = weather_live::Area();
   if (!area) {
     Refuse("ResetRisingEmberParticle", "no room record");

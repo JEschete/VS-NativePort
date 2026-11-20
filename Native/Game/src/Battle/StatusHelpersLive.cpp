@@ -19,7 +19,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpers.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "State/Timers.hpp"
 
@@ -59,7 +59,7 @@ class LiveStatNumberWorld final : public StatNumberWorld {
 class LiveTargetingRiskWorld final : public TargetingRiskWorld {
  public:
   [[nodiscard]] std::uint32_t ControlMode() const override {
-    return Field_controlMode;
+    return VS::Field::controlMode;
   }
   [[nodiscard]] std::uint32_t ActionFlowMode() const override {
     return Battle_actionFlowMode;

@@ -2145,7 +2145,7 @@
     <ClCompile Include="src\Field\Input.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Input.h">
+    <ClInclude Include="src\Field\Input.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClInclude Include="src\Field\InteractionFocusLive.hpp">
@@ -2154,7 +2154,7 @@
     <ClCompile Include="src\Field\Interactions.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Interactions.h">
+    <ClInclude Include="src\Field\Interactions.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\InteractionsLive.cpp">
@@ -2175,7 +2175,7 @@
     <ClCompile Include="src\Field\Manual.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Manual.h">
+    <ClInclude Include="src\Field\Manual.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Map.cpp">
@@ -2190,13 +2190,13 @@
     <ClCompile Include="src\Field\MapProgress.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\MapProgress.h">
+    <ClInclude Include="src\Field\MapProgress.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Minimap.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Minimap.h">
+    <ClInclude Include="src\Field\Minimap.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\MinimapScene.cpp">
@@ -2310,7 +2310,7 @@
     <ClCompile Include="src\Field\Weather.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Weather.h">
+    <ClInclude Include="src\Field\Weather.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClInclude Include="src\Field\Znd.h">

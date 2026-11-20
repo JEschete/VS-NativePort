@@ -28,7 +28,7 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Items/LootLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.hpp"
@@ -141,7 +141,7 @@ class LiveWorld final : public ActionSequenceWorld {
   void ResolveDefeat(int source, int target) override {
     ResolveLiveActorDefeat(source, target, 1);
   }
-  std::uint32_t ControlMode() override { return Field_controlMode; }
+  std::uint32_t ControlMode() override { return VS::Field::controlMode; }
   std::int32_t EvaluateRoomEvents() override {
     constexpr int kAfterAction = 12;
     return VS::Event::EvaluateRoomEventTriggersEntry(kAfterAction, 0, nullptr,

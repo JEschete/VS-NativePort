@@ -18,7 +18,8 @@
 // sine table and the room weather only through WeatherPoolHost.
 // WeatherPoolLive.hpp binds them to the copied globals.
 namespace VS::Effects {
-// D_800F1DD4_t (146C.c:184): one weather particle, Field_WeatherParticle.
+// D_800F1DD4_t (146C.c:184): one weather particle,
+// VS::Field::WeatherParticleRecord.
 struct WeatherParticle {
   std::int16_t x = 0;
   std::int16_t y = 0;

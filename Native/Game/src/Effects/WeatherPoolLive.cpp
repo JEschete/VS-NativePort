@@ -22,7 +22,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/Weather.h"
+#include "Field/Weather.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -34,7 +34,8 @@ constexpr std::size_t kElevationWord = 4;
 constexpr std::size_t kAzimuthWord = 5;
 constexpr std::size_t kScaleWord = 6;
 
-static_assert(sizeof(Field_WeatherParticle) == kWeatherParticleBytes);
+static_assert(sizeof(VS::Field::WeatherParticleRecord) ==
+              kWeatherParticleBytes);
 
 std::uint64_t refused_calls = 0;
 
@@ -46,23 +47,24 @@ void Refuse(std::string_view call, std::string_view reason) {
 }
 
 [[nodiscard]] Field::WeatherParticlesId ParticlesIdOf(
-    Field_WeatherParticle* particles) {
+    VS::Field::WeatherParticleRecord* particles) {
   const auto address = reinterpret_cast<std::uintptr_t>(particles);
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   return static_cast<Field::WeatherParticlesId>(address);
 }
 
-[[nodiscard]] Field_WeatherParticle* ParticlesOf(
+[[nodiscard]] VS::Field::WeatherParticleRecord* ParticlesOf(
     Field::WeatherParticlesId particles) {
   const auto address = static_cast<std::uintptr_t>(particles);
-  return reinterpret_cast<Field_WeatherParticle*>(address);
+  return reinterpret_cast<VS::Field::WeatherParticleRecord*>(address);
 }
 
 // Runs a spawn over typed copies of the live buffer's particles and stores
 // them and the pool globals back.
 template <typename Spawn>
 void RunSpawn(std::string_view call, Spawn spawn) {
-  const std::span<Field_WeatherParticle> buffer = weather_live::Buffer();
+  const std::span<VS::Field::WeatherParticleRecord> buffer =
+      weather_live::Buffer();
   std::vector<WeatherParticle> particles = weather_live::LoadParticles(buffer);
   WeatherPoolState state = weather_live::LoadState();
   weather_live::PoolHost host;
@@ -85,7 +87,7 @@ std::int32_t PoolHost::Cosine(std::int32_t angle) {
   return Core::Math::Cosine(angle);
 }
 Field::WeatherParticlesId PoolHost::AllocateParticles(std::int32_t bytes) {
-  return ParticlesIdOf(static_cast<Field_WeatherParticle*>(
+  return ParticlesIdOf(static_cast<VS::Field::WeatherParticleRecord*>(
       Core::Memory::AllocateLiveFromLowEnd(static_cast<std::size_t>(bytes))));
 }
 void PoolHost::FreeParticles(Field::WeatherParticlesId particles) {
@@ -95,44 +97,44 @@ void PoolHost::SetRoomWeather(std::int32_t kind) {
   Field::LiveSetRoomWeather(kind);
 }
 
-WeatherParticle ParticleOf(const Field_WeatherParticle& record) {
+WeatherParticle ParticleOf(const VS::Field::WeatherParticleRecord& record) {
   return {.x = record.position.vx,
           .y = record.position.vy,
           .z = record.position.vz,
           .pad = record.position.pad,
-          .screen_x = record.screenX,
-          .screen_y = record.screenY,
-          .opaque_c = static_cast<std::uint8_t>(record.opaqueC),
-          .sway_phase = static_cast<std::uint8_t>(record.swayPhase),
-          .fall_shift = static_cast<std::uint8_t>(record.fallShift),
-          .speed = static_cast<std::uint8_t>(record.speed)};
+          .screen_x = record.screen_x,
+          .screen_y = record.screen_y,
+          .opaque_c = record.opaque_c,
+          .sway_phase = record.sway_phase,
+          .fall_shift = record.fall_shift,
+          .speed = record.speed};
 }
 
-void StoreParticle(Field_WeatherParticle& record,
+void StoreParticle(VS::Field::WeatherParticleRecord& record,
                    const WeatherParticle& particle) {
   record.position.vx = particle.x;
   record.position.vy = particle.y;
   record.position.vz = particle.z;
   record.position.pad = particle.pad;
-  record.screenX = particle.screen_x;
-  record.screenY = particle.screen_y;
-  record.opaqueC = static_cast<char>(particle.opaque_c);
-  record.swayPhase = static_cast<char>(particle.sway_phase);
-  record.fallShift = static_cast<char>(particle.fall_shift);
-  record.speed = static_cast<char>(particle.speed);
+  record.screen_x = particle.screen_x;
+  record.screen_y = particle.screen_y;
+  record.opaque_c = particle.opaque_c;
+  record.sway_phase = particle.sway_phase;
+  record.fall_shift = particle.fall_shift;
+  record.speed = particle.speed;
 }
 
 std::vector<WeatherParticle> LoadParticles(
-    std::span<const Field_WeatherParticle> records) {
+    std::span<const VS::Field::WeatherParticleRecord> records) {
   std::vector<WeatherParticle> particles;
   particles.reserve(records.size());
-  for (const Field_WeatherParticle& record : records) {
+  for (const VS::Field::WeatherParticleRecord& record : records) {
     particles.push_back(ParticleOf(record));
   }
   return particles;
 }
 
-void StoreParticles(std::span<Field_WeatherParticle> records,
+void StoreParticles(std::span<VS::Field::WeatherParticleRecord> records,
                     std::span<const WeatherParticle> particles) {
   const std::size_t count =
       records.size() < particles.size() ? records.size() : particles.size();
@@ -141,13 +143,13 @@ void StoreParticles(std::span<Field_WeatherParticle> records,
   }
 }
 
-std::span<Field_WeatherParticle> Buffer() {
+std::span<VS::Field::WeatherParticleRecord> Buffer() {
   if (VS::Field::weatherParticles == nullptr) return {};
   return {VS::Field::weatherParticles, kWeatherParticleCapacity};
 }
 
-bool InBuffer(const Field_WeatherParticle* particle) {
-  const std::span<Field_WeatherParticle> buffer = Buffer();
+bool InBuffer(const VS::Field::WeatherParticleRecord* particle) {
+  const std::span<VS::Field::WeatherParticleRecord> buffer = Buffer();
   if (buffer.empty() || particle == nullptr) return false;
   const auto first = reinterpret_cast<std::uintptr_t>(buffer.data());
   const auto address = reinterpret_cast<std::uintptr_t>(particle);
@@ -168,14 +170,14 @@ WeatherPoolState LoadState() {
   return {.particle_count = VS::Field::weatherParticleCount,
           .particle_capacity = VS::Field::weatherParticleCapacity,
           .kind = static_cast<std::uint8_t>(VS::Field::roomWeatherKind),
-          .screen_fade = static_cast<std::uint8_t>(Field_screenWeatherFade)};
+          .screen_fade = VS::Field::screenWeatherFade};
 }
 
 void StoreState(const WeatherPoolState& state) {
   VS::Field::weatherParticleCount = state.particle_count;
   VS::Field::weatherParticleCapacity = state.particle_capacity;
   VS::Field::roomWeatherKind = static_cast<char>(state.kind);
-  Field_screenWeatherFade = static_cast<char>(state.screen_fade);
+  VS::Field::screenWeatherFade = state.screen_fade;
 }
 }  // namespace weather_live
 
@@ -233,7 +235,8 @@ void LiveInitializeScreenWeatherParticles(int particle_count,
 }
 
 // decomp: BATTLE.PRG func_80090A1C (146C.c:18200).
-void LiveResetFallingWeatherParticle(Field_WeatherParticle* weather_particle) {
+void LiveResetFallingWeatherParticle(
+    VS::Field::WeatherParticleRecord* weather_particle) {
   if (!weather_live::InBuffer(weather_particle)) {
     Refuse("ResetFallingWeatherParticle",
            "particle outside the particle buffer");

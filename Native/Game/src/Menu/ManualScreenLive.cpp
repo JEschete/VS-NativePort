@@ -10,7 +10,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.h"
@@ -19,7 +18,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Manual.h"
+#include "Field/Manual.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -41,9 +40,8 @@ namespace {
 static_assert(kHelpFileLoaded == Content_DiscRequestState_Loaded);
 static_assert(kHelpFileFailed == Content_DiscRequestState_Error);
 static_assert(kNoMenuItem == Framework::kNoRow);
-static_assert(
-    std::extent_v<decltype(Field_ManualDisplayState::scrollPositions)> ==
-    std::size_t{kTopicCount});
+static_assert(VS::Field::kManualScrollPositionCount ==
+              std::size_t{kTopicCount});
 
 constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
@@ -167,9 +165,7 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
-  void ClearDisplayState() override {
-    Field_manualDisplayState = Field_ManualDisplayState{};
-  }
+  void ClearDisplayState() override { VS::Field::manualDisplayState = {}; }
   void ReserveTexturePages(std::uint32_t first, std::uint32_t count,
                            std::int32_t owner) override {
     static_cast<void>(Render::ReserveLiveTexturePageRange(first, count, owner));
@@ -200,16 +196,16 @@ class LiveHelpPagesHost final : public HelpPagesHost {
                       .cursor_memories[kCursorScrollMemory]};
   }
   [[nodiscard]] std::uint16_t CurrentManual() const override {
-    return Field_manualDisplayState.currentManual;
+    return VS::Field::manualDisplayState.current_manual;
   }
   void SetCurrentManual(std::uint16_t manual) override {
-    Field_manualDisplayState.currentManual = manual;
+    VS::Field::manualDisplayState.current_manual = manual;
   }
   [[nodiscard]] std::uint16_t ScrollMemory(std::size_t topic) const override {
-    return Field_manualDisplayState.scrollPositions[topic];
+    return VS::Field::manualDisplayState.scroll_positions[topic];
   }
   void SetScrollMemory(std::size_t topic, std::uint16_t scroll) override {
-    Field_manualDisplayState.scrollPositions[topic] = scroll;
+    VS::Field::manualDisplayState.scroll_positions[topic] = scroll;
   }
   [[nodiscard]] bool HelpBufferHeld(HelpFile file) const override {
     return HelpBuffer(file) != nullptr;

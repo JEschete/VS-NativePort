@@ -166,7 +166,7 @@ bool DrawRoomGeometry(const RoomTintState& tint, RoomGeometryHost& host);
 // neighbours (146C.c:15791).
 [[nodiscard]] std::uint8_t RoomViewFacingMask(int camera_yaw);
 
-// The minimap's slide in and out (Field_minimapSlideFrame).
+// The minimap's slide in and out (minimapSlideFrame).
 inline constexpr std::int16_t kMinimapSlideFrames = 8;
 
 // The slide frame after one frame: in by one while the minimap is visible,

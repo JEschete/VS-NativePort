@@ -39,7 +39,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"

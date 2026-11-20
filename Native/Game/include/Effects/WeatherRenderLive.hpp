@@ -3,7 +3,9 @@
 
 #include "Effects/WeatherRender.hpp"
 
-struct Field_WeatherParticle;
+namespace VS::Field {
+struct WeatherParticleRecord;
+}  // namespace VS::Field
 
 // Live binding for the weather draws (WeatherRender.hpp) over the copied
 // weather globals, the room record's weather area, the GTE, the room's
@@ -22,7 +24,8 @@ void LiveDrawRainParticles();
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveInitializeRisingEmberParticles(int particle_count, int weather_kind);
 // func_8008FA14 (146C.c:17878).
-void LiveResetRisingEmberParticle(Field_WeatherParticle* weather_particle);
+void LiveResetRisingEmberParticle(
+    VS::Field::WeatherParticleRecord* weather_particle);
 // func_8008FAC8 (146C.c:17889).
 void LiveDrawRisingEmberParticles();
 // func_8008FDC4 (146C.c:17938).
