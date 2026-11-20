@@ -758,9 +758,9 @@ void CheckCapturedCache(const Save::Snapshot& state) {
   CHECK(actor.strength == 123);
   CHECK(actor.limb_hp[5] == 32);
   CHECK(actor.tile_x == 2);
-  CHECK(actor.direction == 1);
+  CHECK(actor.surface == 1);
   CHECK(actor.tile_z == 3);
-  CHECK(actor.height == 179);
+  CHECK(actor.facing == 179);
 }
 
 void CheckCapturedRandom(const Save::Snapshot& state) {

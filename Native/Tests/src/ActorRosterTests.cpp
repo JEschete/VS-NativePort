@@ -551,9 +551,9 @@ VS::Actors::RoomActorRecord StoredLiveEnemy() {
   }
   record.statuses = 0x12345;
   record.tile_x = 7;
-  record.direction = 10;
+  record.surface = 10;
   record.tile_z = 3;
-  record.height = 0x34;
+  record.facing = 0x34;
   return record;
 }
 

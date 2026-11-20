@@ -376,10 +376,12 @@ void Fields(VS::Actors::RoomActorRecord& r, V&& v) {
   v("agility", r.agility);
   v("limb_hp", r.limb_hp);
   v("statuses", r.statuses);
+  // The "direction" and "height" keys predate the surface and facing names.
+  // The keys stay so existing snapshots still load.
   v("tile_x", r.tile_x);
-  v("direction", r.direction);
+  v("direction", r.surface);
   v("tile_z", r.tile_z);
-  v("height", r.height);
+  v("height", r.facing);
 }
 
 template <class V>

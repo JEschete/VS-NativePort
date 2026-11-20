@@ -1621,9 +1621,9 @@ VS::Actors::RoomActorRecord LegacyRoomRecord() {
   record.limb_hp[5] = 66;
   record.statuses = 0x1000;
   record.tile_x = 8;
-  record.direction = 1;
+  record.surface = 1;
   record.tile_z = 9;
-  record.height = 10;
+  record.facing = 10;
   return record;
 }
 

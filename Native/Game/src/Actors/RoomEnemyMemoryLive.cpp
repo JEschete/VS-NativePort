@@ -53,9 +53,9 @@ RememberedEnemy Decode(const VS::Actors::RoomActorRecord& record) {
   enemy.reserved = record.reserved_1e;
   enemy.statuses = record.statuses;
   enemy.placement = {.tile_x = record.tile_x,
-                     .tile_layer = record.direction,
+                     .tile_layer = record.surface,
                      .tile_z = record.tile_z,
-                     .facing = record.height};
+                     .facing = record.facing};
   return enemy;
 }
 
@@ -75,9 +75,9 @@ VS::Actors::RoomActorRecord Encode(const RememberedEnemy& enemy) {
   record.reserved_1e = enemy.reserved;
   record.statuses = enemy.statuses;
   record.tile_x = enemy.placement.tile_x;
-  record.direction = enemy.placement.tile_layer;
+  record.surface = enemy.placement.tile_layer;
   record.tile_z = enemy.placement.tile_z;
-  record.height = enemy.placement.facing;
+  record.facing = enemy.placement.facing;
   return record;
 }
 

@@ -1212,11 +1212,11 @@ Result CaptureActors(Snapshot& state) {
     VS::Actors::LiveActorSavedPlacement(slot, stats.movement_class, &placement);
     found->tile_x = static_cast<unsigned char>(
         placement.location.packed_tile.target.tile_x);
-    found->direction = static_cast<unsigned char>(
+    found->surface = static_cast<unsigned char>(
         placement.location.packed_tile.target.tile_layer);
     found->tile_z = static_cast<unsigned char>(
         placement.location.packed_tile.target.tile_z);
-    found->height = static_cast<unsigned char>(
+    found->facing = static_cast<unsigned char>(
         placement.location.packed_tile.target.facing);
   }
   return {};

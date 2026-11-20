@@ -1014,9 +1014,9 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
                           .agility = record.agility,
                           .statuses = record.statuses,
                           .placement = {.tile_x = record.tile_x,
-                                        .surface = record.direction,
+                                        .surface = record.surface,
                                         .tile_z = record.tile_z,
-                                        .facing = record.height}};
+                                        .facing = record.facing}};
   std::ranges::copy(record.limb_hp, decoded.limb_hp.begin());
   return decoded;
 }

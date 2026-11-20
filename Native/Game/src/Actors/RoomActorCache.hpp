@@ -28,9 +28,12 @@ struct RoomActorRecord {
   std::int16_t reserved_1e = 0;
   std::int32_t statuses = 0;
   std::uint8_t tile_x = 0;
-  std::uint8_t direction = 0;
+  // vs_TilePosition surface: the collision surface the enemy stands on.
+  std::uint8_t surface = 0;
   std::uint8_t tile_z = 0;
-  std::uint8_t height = 0;
+  // vs_TilePosition extra, a placement's facing in 1/256 turns
+  // (src/include/tilePosition.h:7-10).
+  std::uint8_t facing = 0;
 };
 
 namespace layout {
