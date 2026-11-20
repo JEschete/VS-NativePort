@@ -42,7 +42,7 @@ constexpr std::size_t kDoorStateFlagsOffset = 0x33F;
 constexpr std::size_t kMarkerQuadSlotBytes = 28;
 constexpr std::size_t kLabelLineSlot = 8;
 
-static_assert(offsetof(VS::State::StateFlags, opaque_33f) ==
+static_assert(offsetof(VS::State::StateFlags, door_lock_states) ==
               kDoorStateFlagsOffset);
 
 std::uint64_t refusedCalls = 0;

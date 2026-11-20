@@ -38,9 +38,9 @@ struct MpdEnemySpawn {
   std::uint8_t item2_count;
   std::uint8_t item3_count;
   std::uint8_t facing;
-  std::uint8_t actor_state_byte;
+  std::uint8_t retain_after_defeat;
   std::uint8_t variant;
-  std::uint8_t reserved26;
+  std::uint8_t combat_pose;
   std::uint8_t scene_test;
 };
 inline constexpr std::size_t kMpdEnemySpawnBytes = 0x28;
@@ -123,7 +123,7 @@ struct MpdDoorRecord {
   std::uint16_t has_entry_step : 1;
   std::uint16_t required_flag_id : 10;
   std::uint16_t entry_tile_z : 5;
-  std::uint16_t reserved06_bit15 : 1;
+  std::uint16_t walks_in : 1;
   std::uint8_t door_id;
   std::uint8_t reserved09;
   std::uint8_t reserved0a;
@@ -190,7 +190,7 @@ inline constexpr std::size_t kMpdPlatformWaypoints = 4;
 inline constexpr std::size_t kMpdPlatformSegments = 6;
 struct MpdMovingPlatform {
   std::uint32_t scene_object_id : 8;
-  std::uint32_t is_looping : 1;
+  std::uint32_t needs_rider : 1;
   std::uint32_t is_hidden : 1;
   std::uint32_t end_waypoint : 2;
   std::uint32_t swaps_colors_when_frozen : 2;

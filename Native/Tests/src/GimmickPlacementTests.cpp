@@ -303,12 +303,12 @@ TEST_CASE(
           VS::Field::GimmickReactionResult::kAdvanced);
   CHECK(record.position_y == INT16_MAX);
   CHECK(record.rotation_x == -128);
-  CHECK(record.object_info.support_index == 2);
-  record.object_info.support_index = 14;
+  CHECK(record.object_info.motion_frame == 2);
+  record.object_info.motion_frame = 14;
   REQUIRE(VS::Field::UpdateLiveGimmickReactionAnimation(&record) ==
           VS::Field::GimmickReactionResult::kComplete);
   CHECK(record.mode == 0);
-  CHECK(record.object_info.support_index == 14);
+  CHECK(record.object_info.motion_frame == 14);
 }
 
 TEST_CASE("Native gimmick reaction preserves unsigned roll angle bytes",
@@ -332,7 +332,7 @@ TEST_CASE(
   GimmickReactionLiveFixture fixture;
   auto& record = fixture.instances[0];
   record.mode = 248;
-  record.object_info.support_index = 9;
+  record.object_info.motion_frame = 9;
   record.is_visible = -1;
   record.reserved9_bits4 = 15;
   for (std::size_t color = 0; color < std::size(record.base_palette); ++color) {
@@ -345,7 +345,7 @@ TEST_CASE(
                    std::end(record.base_palette),
                    std::begin(record.pulsed_palette)));
   CHECK(record.position_y == 3);
-  CHECK(record.object_info.support_index == 10);
+  CHECK(record.object_info.motion_frame == 10);
   CHECK(record.motion_state == 12);
   CHECK(record.is_visible != 0);
   CHECK(record.reserved9_bits4 == 15);
@@ -359,14 +359,14 @@ TEST_CASE(
   record.mode = 249;
   record.object_info.object_id = 0;
   record.object_info.material = 0;
-  record.object_info.support_index = 14;
+  record.object_info.motion_frame = 14;
   record.rotation_ticks = 7;
   record.rotation_x = 11;
   record.reserved2a = 99;
   REQUIRE(VS::Field::UpdateLiveGimmickReactionAnimation(&record) ==
           VS::Field::GimmickReactionResult::kComplete);
   CHECK(record.mode == 0);
-  CHECK(record.object_info.support_index == 14);
+  CHECK(record.object_info.motion_frame == 14);
   CHECK(record.rotation_ticks == 0);
   CHECK(record.rotation_x == 0);
   CHECK(record.reserved2a == 0);
@@ -383,7 +383,7 @@ TEST_CASE(
   auto& record = fixture.instances[0];
   record.model = static_cast<VS::Actors::ShpModel*>(model);
   record.mode = 248;
-  record.object_info.support_index = 40;
+  record.object_info.motion_frame = 40;
   VS::Field::gimmickInstances[5] = nullptr;
   VS::Render::RecordLiveModelExtent(model, 128);
   REQUIRE(VS::Field::UpdateLiveGimmickReactionAnimation(&record) ==
@@ -391,7 +391,7 @@ TEST_CASE(
   CHECK(VS::Field::gimmickInstances[1] == nullptr);
   CHECK(record.position_y == 3);
   CHECK(record.mode == 0);
-  CHECK(record.object_info.support_index == 40);
+  CHECK(record.object_info.motion_frame == 40);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(model).has_value());
   CHECK(VS::Render::LiveModelBytes(model).empty());
 }
@@ -404,10 +404,10 @@ TEST_CASE(
   CHECK(VS::Field::UpdateLiveGimmickReactionAnimation(nullptr) ==
         VS::Field::GimmickReactionResult::kRefused);
   fixture.instances[0].mode = 253;
-  fixture.instances[0].object_info.support_index = 255;
+  fixture.instances[0].object_info.motion_frame = 255;
   CHECK(VS::Field::UpdateLiveGimmickReactionAnimation(&fixture.instances[0]) ==
         VS::Field::GimmickReactionResult::kRefused);
-  CHECK(fixture.instances[0].object_info.support_index == 255);
+  CHECK(fixture.instances[0].object_info.motion_frame == 255);
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   void* short_record = VS::Core::Memory::AllocateLiveFromLowEnd(32);
@@ -1331,7 +1331,7 @@ struct SigilDoorLiveFixture {
                         saved_pairs[index].begin());
       std::ranges::fill(VS::Field::lockedDoorRoomPairs[index], 0);
     }
-    std::ranges::fill(VS::State::stateFlags.opaque_186, 0);
+    std::ranges::fill(VS::State::stateFlags.sigil_doors_unlocked, 0);
     VS::Field::lockedDoorIndexRanges[1] = 2;
     for (std::size_t index = 0; index < 2; ++index) {
       VS::Field::lockedDoorRoomPairs[index][0] = 9;
@@ -1503,8 +1503,8 @@ void CheckValidSnapshot(int slot, const VS::Field::GimmickInstance& object) {
   const auto expected_height = ExpectedHeight(object);
   auto output = SentinelSnapshot();
   REQUIRE(VS::Field::GimmickPlacementEntry(slot, &output) == 0);
-  CHECK(output.placement_byte0 == 5);
-  CHECK(output.placement_byte2 == 9);
+  CHECK(output.tile_x == 5);
+  CHECK(output.tile_z == 9);
   CHECK(output.orientation == 3);
   CHECK(output.height_above_ground == expected_height);
   CHECK((std::bit_cast<std::uint32_t>(output.position_xy) & 0xFFFF) == 0xFB2E);
@@ -2647,7 +2647,7 @@ TEST_CASE("Scripted fall entry masks every input byte to original field widths",
     CHECK(door.floor_layer == (value & 7));
     CHECK(door.entry_elevation == ((UINT8_MAX - value) >> 6));
     CHECK_FALSE(door.has_entry_step);
-    CHECK_FALSE(door.reserved_entry_bit);
+    CHECK_FALSE(door.walks_in);
   }
 }
 
@@ -3296,11 +3296,11 @@ TEST_CASE("Typed chest animation never stores a lock-record alias",
   CHECK(VS::Field::pendingGimmickAnimationCount == 1);
   CHECK(VS::Field::gimmickAnimationQueue[0].job_kind == 2);
   CHECK(VS::Field::gimmickAnimationQueue[0].trigger == nullptr);
-  CHECK(static_cast<std::uint16_t>(fixture.chests[0].reserved_a) == 0x0114);
-  fixture.chests[0].reserved_a = 0x0101;
+  CHECK(static_cast<std::uint16_t>(fixture.chests[0].toggle_state) == 0x0114);
+  fixture.chests[0].toggle_state = 0x0101;
   VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(fixture.chests[0].is_open == 1);
-  CHECK(fixture.chests[0].reserved_a == 0);
+  CHECK(fixture.chests[0].toggle_state == 0);
   CHECK(VS::Field::pendingGimmickAnimationCount == 0);
 }
 
@@ -3311,10 +3311,10 @@ TEST_CASE("Typed chest animation refuses a stale room-generation target",
   REQUIRE(target);
   REQUIRE(VS::Field::BeginLiveChestSwitch(*target));
   VS::Field::InvalidateLiveInteractionTargets();
-  const auto before = fixture.chests[0].reserved_a;
+  const auto before = fixture.chests[0].toggle_state;
   VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(VS::Field::pendingGimmickAnimationCount == 0);
-  CHECK(fixture.chests[0].reserved_a == before);
+  CHECK(fixture.chests[0].toggle_state == before);
   CHECK_FALSE(VS::Field::BeginLiveChestSwitch(*target));
 }
 
@@ -3502,13 +3502,15 @@ TEST_CASE("Live door lookup refuses partial misaligned and absent records",
 TEST_CASE("Native sigil lookup and marking preserve unsigned first-pair state",
           "[sigil-door-live][field]") {
   SigilDoorLiveFixture fixture;
-  VS::State::stateFlags.opaque_186[0] = std::bit_cast<char>(std::uint8_t{128});
-  VS::State::stateFlags.opaque_186[1] = std::bit_cast<char>(std::uint8_t{254});
+  VS::State::stateFlags.sigil_doors_unlocked[0] =
+      std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.sigil_doors_unlocked[1] =
+      std::bit_cast<char>(std::uint8_t{254});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(10, 1, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
   auto expected = VS::State::stateFlags;
-  expected.opaque_186[0] = 1;
+  expected.sigil_doors_unlocked[0] = 1;
   VS::Field::MarkSigilDoorUnlockedEntry(0);
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
@@ -3550,11 +3552,12 @@ TEST_CASE("Live sigil groups stop at the eight original boundary words",
   SigilDoorLiveFixture fixture;
   VS::Field::lockedDoorIndexRanges[7] = 0;
   VS::Field::lockedDoorIndexRanges[8] = 2;
-  VS::State::stateFlags.opaque_186[0] = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.sigil_doors_unlocked[0] =
+      std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 7) == 0);
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(7));
-  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.opaque_186[0]) ==
-        128);
+  CHECK(std::bit_cast<std::uint8_t>(
+            VS::State::stateFlags.sigil_doors_unlocked[0]) == 128);
 }
 
 TEST_CASE("Door table native entries retain original module addresses",
@@ -4118,12 +4121,13 @@ TEST_CASE(
     "[room-trigger-live][field]") {
   RoomTriggerLiveFixture fixture;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
-  VS::State::stateFlags.opaque_20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.floor_traps_disabled_20 =
+      std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
   fixture.triggers[0].kind = 16;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == nullptr);
-  VS::State::stateFlags.opaque_20 = 0;
+  VS::State::stateFlags.floor_traps_disabled_20 = 0;
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == &fixture.triggers[2]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(65535, 0, 0) == nullptr);
 }
@@ -4201,12 +4205,14 @@ TEST_CASE("Active room triggers preserve both unsigned suppression flags",
   std::array<VS::Field::MpdFloorTrigger, 1> triggers{};
   VS::Field::roomData.floor_triggers = triggers.data();
   VS::Field::roomData.header.floor_triggers_length = sizeof triggers;
-  VS::State::stateFlags.opaque_20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.floor_traps_disabled_20 =
+      std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  VS::State::stateFlags.opaque_20 = 0;
-  VS::State::stateFlags.opaque_40 = std::bit_cast<char>(std::uint8_t{255});
+  VS::State::stateFlags.floor_traps_disabled_20 = 0;
+  VS::State::stateFlags.floor_traps_disabled_40 =
+      std::bit_cast<char>(std::uint8_t{255});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  VS::State::stateFlags.opaque_40 = 0;
+  VS::State::stateFlags.floor_traps_disabled_40 = 0;
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().size() == 1);
 }
 
@@ -4759,7 +4765,7 @@ TEST_CASE("Gimmick snapshots reject attached falling and moving records",
   const auto before = std::bit_cast<SnapshotBytes>(output);
   for (int refusal = 0; refusal < 3; ++refusal) {
     fixture.object->parent = refusal == 0 ? 0 : 0xFF;
-    fixture.object->object_info.is_falling = refusal == 1;
+    fixture.object->object_info.is_removed = refusal == 1;
     fixture.object->mode = static_cast<std::int16_t>(refusal == 2);
     CHECK(VS::Field::GimmickPlacementEntry(0, &output) == -1);
     CHECK(std::bit_cast<SnapshotBytes>(output) == before);
@@ -4775,7 +4781,7 @@ TEST_CASE("Gimmick snapshots preserve packed coordinates and height rounding",
   object.object_info.material = 3;
   object.position_x = -1234;
   object.position_z = 2345;
-  object.reserved22 = 0x1357;
+  object.position_pad = 0x1357;
   for (const int slot : {0, 15}) {
     VS::Field::gimmickInstances[slot] = &object;
     for (const int height : {-129, -128, -127, 0, 127, 128, 129}) {
@@ -5047,7 +5053,7 @@ TEST_CASE(
     record.parent = record.object_info.carrier = 255;
     record.tile_x = std::bit_cast<char>(std::uint8_t{255});
     record.tile_z = std::bit_cast<char>(std::uint8_t{254});
-    record.reserved5f = std::bit_cast<char>(std::uint8_t{192});
+    record.tile_extra = std::bit_cast<char>(std::uint8_t{192});
     record.position_y = 128;
   }
   using InstanceBytes = std::array<std::byte, sizeof(fixture.instances)>;
@@ -5058,7 +5064,7 @@ TEST_CASE(
   CHECK(VS::Field::FindTopGimmickAtTileEntry(255, 254, 0) == 5);
   CHECK(VS::Field::FindTopGimmickAtTileEntry(-1, 254, 0) == 0);
   CHECK(std::bit_cast<InstanceBytes>(fixture.instances) == saved);
-  reference.reserved5f = 0;
+  reference.tile_extra = 0;
   CHECK(VS::Field::FindGimmickBelowEntry(&reference) == -1);
 }
 
@@ -5204,7 +5210,7 @@ TEST_CASE(
   GimmickResourcesLiveFixture fixture;
   auto& record = fixture.instances[0];
   record.mode = -1;
-  record.object_info.is_falling = 1;
+  record.object_info.is_removed = 1;
   record.parent = 0;
   CHECK(VS::Field::AreGimmicksMovingEntry() == 1);
   CHECK(VS::Field::AreLiveGimmicksMoving());
@@ -5335,7 +5341,7 @@ TEST_CASE(
     record.tile_z = std::bit_cast<char>(std::uint8_t{254});
     record.position_y = 128;
   }
-  fixture.instances[0].object_info.interaction = 2;
+  fixture.instances[0].object_info.stack_state = 2;
   using Bytes = std::array<std::byte, sizeof(fixture.instances)>;
   const auto before = std::bit_cast<Bytes>(fixture.instances);
   int offset = 7;
@@ -7188,8 +7194,8 @@ TEST_CASE("Native save point query returns unsigned activation bytes",
   VS::Field::roomData.floor_triggers = room.triggers.data();
   VS::Field::roomData.header.floor_triggers_length = sizeof(room.triggers);
   room.triggers[0].kind = 16;
-  VS::State::stateFlags.opaque_20 = 0;
-  VS::State::stateFlags.opaque_40 = 0;
+  VS::State::stateFlags.floor_traps_disabled_20 = 0;
+  VS::State::stateFlags.floor_traps_disabled_40 = 0;
   room.triggers[0].activation = 1;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 1);
   for (const auto value : {127, 128, 255}) {
@@ -7226,12 +7232,12 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
   VS::Field::roomData.header.floor_triggers_length = sizeof(room.triggers);
   room.triggers[0].kind = 16;
   room.triggers[0].activation = 7;
-  VS::State::stateFlags.opaque_20 = 0;
-  VS::State::stateFlags.opaque_40 = 0;
+  VS::State::stateFlags.floor_traps_disabled_20 = 0;
+  VS::State::stateFlags.floor_traps_disabled_40 = 0;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 7);
   room.triggers[0].kind = 15;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
-  VS::State::stateFlags.opaque_20 = 1;
+  VS::State::stateFlags.floor_traps_disabled_20 = 1;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   room.triggers[0].kind = 16;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 7);
@@ -7317,7 +7323,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
     VS::Field::interactingGimmickId = 1;
     VS::Field::gimmickInteractionDirection = 0;
     instances[0].rotation_y = 1000;
-    instances[0].object_info.support_index = 9;
+    instances[0].object_info.motion_frame = 9;
     VS::Actors::boneMatrixScratch = IdentityMatrix();
     for (auto& matrix : actor.bone_matrices) matrix = IdentityMatrix();
     actor.bone_matrices[0].t[1] = -1;
@@ -7347,7 +7353,7 @@ struct GimmickDynamicsLiveFixture : GimmickCommandLiveFixture {
     record.slot = 1;
     record.position_y = 0;
     record.slide_x = record.slide_z = record.velocity_y = 0;
-    record.object_info.support_index = 0;
+    record.object_info.motion_frame = 0;
     record.parent = 255;
     record.rotation_ticks = 0;
     heights[1][0] = 0;
@@ -7417,7 +7423,7 @@ TEST_CASE(
   record.mode = 255;
   REQUIRE(VS::Field::UpdateLiveGimmickMotion(&record));
   CHECK(record.mode == 0);
-  CHECK(record.object_info.support_index == 0);
+  CHECK(record.object_info.motion_frame == 0);
   CHECK(fixture.heights[1][0] == 0x400);
   CHECK(fixture.flags[1][0] == 0x400);
   CHECK(fixture.instances[1].object_info.carrier == 255);
@@ -7433,7 +7439,7 @@ TEST_CASE("Native gimmick dynamics final durability leaves child untouched",
   REQUIRE(VS::Field::UpdateLiveGimmickMotion(&record));
   CHECK(record.mode == 248);
   CHECK(record.object_info.subtype == 0);
-  CHECK(record.object_info.support_index == 0);
+  CHECK(record.object_info.motion_frame == 0);
   CHECK(fixture.instances[1].position_y == 20);
   CHECK(fixture.instances[1].object_info.carrier == 1);
 }
@@ -7445,10 +7451,10 @@ TEST_CASE(
   GimmickDynamicsLiveFixture fixture;
   auto& record = fixture.instances[0];
   record.mode = 253;
-  record.object_info.support_index = 14;
+  record.object_info.motion_frame = 14;
   REQUIRE(VS::Field::UpdateLiveGimmickMotion(&record));
   CHECK(record.mode == 0);
-  CHECK(record.object_info.support_index == 14);
+  CHECK(record.object_info.motion_frame == 14);
   CHECK(fixture.heights[1][0] == 0x800);
   CHECK(fixture.flags[1][0] == 0x400);
 }
@@ -7494,7 +7500,7 @@ TEST_CASE(
   GimmickDynamicsLiveFixture fixture;
   CHECK_FALSE(VS::Field::UpdateLiveGimmickMotion(nullptr));
   fixture.instances[0].mode = 253;
-  fixture.instances[0].object_info.support_index = 14;
+  fixture.instances[0].object_info.motion_frame = 14;
   VS::Battle::Ai::specialTerrainHeights = nullptr;
   CHECK_FALSE(VS::Field::UpdateLiveGimmickMotion(&fixture.instances[0]));
   CHECK(fixture.flags[1][0] == 0x480);
@@ -7521,7 +7527,7 @@ TEST_CASE(
   GimmickCommandLiveFixture fixture;
   REQUIRE(VS::Field::ApplyLiveGimmickInteractionCommand(nullptr, 2));
   CHECK(fixture.instances[0].mode == 255);
-  CHECK(fixture.instances[0].object_info.support_index == 0);
+  CHECK(fixture.instances[0].object_info.motion_frame == 0);
   CHECK(fixture.heights[1][0] == 0x400);
 }
 
@@ -7529,7 +7535,7 @@ TEST_CASE(
     "Native gimmick command attach releases and balances double occupancy",
     "[gimmick-interaction-command-live][field]") {
   GimmickCommandLiveFixture fixture;
-  fixture.instances[0].object_info.interaction = 2;
+  fixture.instances[0].object_info.stack_state = 2;
   REQUIRE(VS::Field::ApplyLiveGimmickInteractionCommand(&fixture.actor, 0));
   CHECK(fixture.flags[1][0] == 0x400);
   CHECK(fixture.heights[1][0] == 0);
@@ -7655,7 +7661,7 @@ TEST_CASE(
   VS::Actors::actorRecords[2] = &blocker;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   VS::Actors::actorRecords[2] = nullptr;
-  fixture.instances[0].object_info.interaction = 1;
+  fixture.instances[0].object_info.stack_state = 1;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
 }
 
@@ -7918,12 +7924,12 @@ TEST_CASE(
     "Native unsupported stack drop applies real base and actor fall resets",
     "[gimmick-stack-drop-live][field]") {
   GimmickStackDropLiveFixture fixture;
-  fixture.instances[1].object_info.interaction = 2;
+  fixture.instances[1].object_info.stack_state = 2;
   fixture.actor.instance.root_motion = {1, 2, 3, 4};
   fixture.actor.instance.movement_pending = 1;
   fixture.actor.support_gimmick = 7;
   REQUIRE(VS::Field::DropLiveUnsupportedGimmickStack(3));
-  CHECK(fixture.instances[0].object_info.is_falling == 1);
+  CHECK(fixture.instances[0].object_info.is_removed == 1);
   CHECK(fixture.instances[1].velocity_y == 0);
   CHECK(fixture.instances[1].mode == 252);
   fixture.CheckActorFall();
@@ -7956,7 +7962,7 @@ TEST_CASE(
   VS::Field::gimmickInstances[1] = nullptr;
   fixture.instances[0].parent = 0;
   REQUIRE(VS::Field::DropLiveUnsupportedGimmickStack(3));
-  CHECK(fixture.instances[0].object_info.is_falling == 1);
+  CHECK(fixture.instances[0].object_info.is_removed == 1);
   CHECK(fixture.actor.instance.movement_mode == 0);
 }
 
@@ -8214,7 +8220,7 @@ TEST_CASE(
   CHECK(fixture.instances[1].position_x == 32704);
   CHECK(fixture.instances[1].position_z == 32576);
   CHECK(fixture.instances[1].position_y == 29896);
-  CHECK(fixture.instances[1].reserved5f == 0);
+  CHECK(fixture.instances[1].tile_extra == 0);
 }
 
 TEST_CASE("Gimmick creation retains its original module address",

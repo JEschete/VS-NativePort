@@ -19,8 +19,8 @@ namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 // fields unsigned (-funsigned-char).
 struct ListRow {
   std::uint8_t selected = 0;
-  // Read per list: the title list's unlocked flag, the time trials' style.
-  std::uint8_t opaque1 = 0;
+  // Title list: nonzero when the title is unlocked; the time trials set 1.
+  std::uint8_t unlocked = 0;
   std::uint8_t animation_state = 0;
   std::uint8_t disabled = 0;
   std::int16_t x = 0;

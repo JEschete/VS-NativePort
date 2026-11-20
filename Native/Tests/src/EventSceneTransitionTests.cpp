@@ -475,7 +475,7 @@ TEST_CASE("ScriptChangeRoom masks the door fields and zeroes the unset ones",
       .entry_tile_z = VS::Field::kDoorTileMask,
       .entry_elevation = VS::Field::kDoorEntryElevationMask,
       .has_entry_step = true,
-      .reserved_entry_bit = true,
+      .walks_in = true,
   };
   CHECK(transition->door == expected);
   CHECK(transition->effect == 0xFF);

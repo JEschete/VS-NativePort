@@ -110,10 +110,8 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   std::optional<actors::AttackReach> reach;
   std::optional<actors::SpawnDetails> details;
   std::optional<actors::RememberedSpawn> restored;
-  actors::WeaponRange weapon_range{.range = 3,
-                                   .second_range = 4,
-                                   .third_range = 5,
-                                   .attack_shape_angle = 0x21};
+  actors::WeaponRange weapon_range{
+      .range = 3, .range_y = 4, .range_z = 5, .attack_shape_angle = 0x21};
   std::optional<actors::EquippedModels> equipped;
   int zone_enemies = 4;
   std::uint8_t enemy_model = 0x21;
@@ -131,7 +129,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   actors::AshleyInventory inventory;
   actors::CharacterTemplate ashley;
   actors::WeaponRange ashley_range{
-      .range = 6, .second_range = 7, .third_range = 8, .attack_shape_angle = 2};
+      .range = 6, .range_y = 7, .range_z = 8, .attack_shape_angle = 2};
 
   void Refuse(SpawnRefusal refusal) override { refusals.push_back(refusal); }
   void Diagnostic(int code) override {
@@ -546,10 +544,9 @@ TEST_CASE("Spawn stat, speed and reach rules follow the original",
   CHECK(actors::InitialStatuses(-1) == static_cast<std::int32_t>(0x80000000U));
   CHECK(actors::InitialStatuses(5) == 0);
 
-  CHECK(actors::AttackReachFor({.range = 3,
-                                .second_range = 4,
-                                .third_range = 5,
-                                .attack_shape_angle = 0x3F},
+  CHECK(
+      actors::AttackReachFor(
+          {.range = 3, .range_y = 4, .range_z = 5, .attack_shape_angle = 0x3F},
                                0xE2) ==
         actors::AttackReach{
             .range = 5, .range_y = 6, .range_z = 7, .shape_angle = 0x1F});
@@ -1593,7 +1590,7 @@ VS::Field::MpdEnemySpawn LegacyRoomSpawn() {
   spawn.item3_count = 40;
   spawn.facing = 5;
   spawn.variant = 7;
-  spawn.reserved26 = 9;
+  spawn.combat_pose = 9;
   return spawn;
 }
 

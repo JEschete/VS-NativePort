@@ -118,7 +118,7 @@ struct MovementProbe {
 struct MovementGimmick {
   std::int16_t mode = 0;
   std::int16_t position_y = 0;
-  std::uint8_t support_index = 0;
+  std::uint8_t motion_frame = 0;
   std::uint8_t bone_count = 0;
 };
 

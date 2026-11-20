@@ -317,7 +317,7 @@ void FallRain(WeatherPoolHost& pool, WeatherRenderHost& render,
     const std::optional<std::uint8_t> surface =
         render.CollisionSurface(particle.x / kTileSize, particle.z / kTileSize);
     if (surface && *surface != kNoFloorSurface) {
-      particle.opaque_c = 1;
+      particle.has_landed = 1;
       particle.y = FloorOf(render, particle);
       return;
     }
@@ -397,7 +397,7 @@ void FallSnow(WeatherPoolHost& pool, WeatherRenderHost& render,
   }
   if (particle.y <= 0) return;
   if (particle.fall_shift == 0 && IsOdd(index)) {
-    particle.opaque_c = 1;
+    particle.has_landed = 1;
     particle.sway_phase = 0;
     particle.y = FloorOf(render, particle);
     return;
@@ -483,7 +483,7 @@ bool DrawRainParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
   const std::span<WeatherParticle> drawn = DrawnOf(particles, count);
   for (std::size_t index = 0; index < drawn.size(); ++index) {
     WeatherParticle& particle = drawn[index];
-    if (particle.opaque_c == 0) {
+    if (particle.has_landed == 0) {
       FallRain(pool, render, frame, particle, index, area);
     } else {
       SplashRain(pool, render, frame, particle, area);
@@ -501,7 +501,7 @@ WeatherParticle ResetRisingEmberParticle(WeatherPoolHost& pool,
   particle.z = Half(Math::WrappingAdd(
       area.origin_z, Math::R3000Remainder(pool.Random(), area.extent_z)));
   particle.y = Half((pool.Random() % kEmberHeightBand) + kEmberDepth);
-  particle.opaque_c = 0;
+  particle.has_landed = 0;
   particle.speed = static_cast<std::uint8_t>(
       (static_cast<std::uint32_t>(pool.Random()) & kEmberSpeedMask) +
       kEmberMinimumSpeed);
@@ -531,7 +531,7 @@ bool DrawRisingEmberParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
                               const Field::WeatherArea& area) {
   render.BeginProjection();
   for (WeatherParticle& particle : DrawnOf(particles, count)) {
-    if (particle.opaque_c != 0) continue;
+    if (particle.has_landed != 0) continue;
     if (!frame.paused) {
       particle.y = Half(Math::WrappingSubtract(
           particle.y,
@@ -575,7 +575,7 @@ bool DrawSnowParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
   const std::span<WeatherParticle> drawn = DrawnOf(particles, count);
   for (std::size_t index = 0; index < drawn.size(); ++index) {
     WeatherParticle& particle = drawn[index];
-    if (particle.opaque_c == 0) {
+    if (particle.has_landed == 0) {
       FallSnow(pool, render, frame, particle, index, area);
     } else {
       SettledSnow(pool, render, frame, particle, area);

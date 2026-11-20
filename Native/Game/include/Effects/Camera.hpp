@@ -40,8 +40,8 @@ struct EffectCameraPose {
 struct CameraShakeChannel {
   std::uint8_t phase{};
   std::uint8_t shape_curve{};
-  bool curve_step{};
-  bool random_step{};
+  bool step_uses_curve{};
+  bool random_step_uses_curve{};
   std::uint8_t step_curve{};
   std::uint8_t random_step_curve{};
   std::uint8_t amplitude{};

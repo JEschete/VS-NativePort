@@ -70,7 +70,7 @@ std::array<GazetteRecordRow, kGazetteTitleCount> Rows() {
   for (std::size_t index = 0; index < rows.size(); ++index) {
     const auto& original = gazetteRows[index];
     rows[index] = {.selected = original.selected,
-                   .unlocked = original.opaque1,
+                   .unlocked = original.unlocked,
                    .highlight_step = original.animation_state,
                    .disabled = original.disabled,
                    .x = original.x,
@@ -93,7 +93,7 @@ void StoreRows(std::span<const GazetteRecordRow> rows, bool labels) {
     original.selected = row.selected;
     original.animation_state = row.highlight_step;
     if (labels) {
-      original.opaque1 = row.unlocked;
+      original.unlocked = row.unlocked;
       original.disabled = row.disabled;
       original.x = row.x;
       original.row_index = row.number;

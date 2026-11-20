@@ -1002,7 +1002,7 @@ void AddGimmickSpin(MoveContext& ctx) {
   }
   if (gimmick->mode != kSpinGimmickMode) return;
   const auto& steps = ctx.host.Tables().gimmick_spin_steps;
-  for (std::size_t i = gimmick->support_index; i < steps.size(); ++i) {
+  for (std::size_t i = gimmick->motion_frame; i < steps.size(); ++i) {
     ctx.motion.y = Narrow16(ctx.motion.y + steps.at(i));
     actor.ledge_height = Narrow16(actor.ledge_height + steps.at(i));
   }

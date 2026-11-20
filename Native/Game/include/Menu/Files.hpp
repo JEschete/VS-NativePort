@@ -162,7 +162,7 @@ struct TransferProgress {
 
 // What the data and game-over screens read of vs_main_stateFlags.
 struct GameFlags {
-  std::uint8_t opaque_a7 = 0;
+  std::uint8_t save_disabled = 0;
   std::uint8_t intro_state = 0;
   std::uint8_t clear_count = 0;
   std::uint8_t difficulty = 0;

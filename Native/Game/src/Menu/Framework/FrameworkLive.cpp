@@ -810,7 +810,7 @@ class LiveHost final : public Host {
   }
 
   StoryFlags Story() override {
-    return {.opaque_b5 = VS::State::stateFlags.opaque_b5,
+    return {.teleportation_state = VS::State::stateFlags.teleportation_state,
             .intro_state = VS::State::stateFlags.intro_state,
             .game_over = VS::State::stateFlags.game_over};
   }

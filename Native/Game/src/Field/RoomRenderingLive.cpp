@@ -297,7 +297,7 @@ class LiveSceneHost final : public RoomSceneHost {
   // 146C.c:15791 compares isLoaded and displayFlag as one halfword to 0x101.
   bool RoomShown() override {
     return VS::Field::roomData.is_loaded == 1 &&
-           VS::Field::roomData.display_flag == 1;
+           VS::Field::roomData.is_displayed == 1;
   }
   bool HasGeometry() override {
     return VS::Field::roomData.geometry != nullptr;
@@ -420,10 +420,10 @@ void LiveAdvanceRoomAnimationClock() {
 
 void LiveSetRoomRenderingEnabled(int enabled) {
   RoomDisplay display{.loaded = VS::Field::roomData.is_loaded != 0,
-                      .displayed = VS::Field::roomData.display_flag != 0,
+                      .displayed = VS::Field::roomData.is_displayed != 0,
                       .owner_room_index = VS::Field::roomData.room_index};
   if (SetRoomRenderingEnabled(display, enabled != 0)) {
-    VS::Field::roomData.display_flag =
+    VS::Field::roomData.is_displayed =
         static_cast<char>(display.displayed ? 1 : 0);
   }
 }

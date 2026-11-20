@@ -118,10 +118,10 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     if (VS::Field::roomData.environment != nullptr) {
       source.environment_parameter = VS::Field::LiveRoomEnvironmentParameter();
     }
-    if (VS::Field::roomData.section6 != nullptr) {
+    if (VS::Field::roomData.ai_navigation != nullptr) {
       source.auxiliary = std::span<const std::byte>(
-          static_cast<const std::byte*>(VS::Field::roomData.section6),
-          VS::Field::roomData.header.section6_length);
+          static_cast<const std::byte*>(VS::Field::roomData.ai_navigation),
+          VS::Field::roomData.header.ai_navigation_length);
     }
     // std::function keeps its small target inline; NRVO or the move rebinds it.
     // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
@@ -158,7 +158,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     VS::Battle::Ai::roomAiState = &storage->state;
     VS::Battle::Ai::tileFlagMap = storage->flags;
     VS::Battle::Ai::specialTerrainHeights = storage->heights;
-    auto* auxiliary = static_cast<unsigned char*>(VS::Field::roomData.section6);
+    auto* auxiliary = static_cast<unsigned char*>(VS::Field::roomData.ai_navigation);
     VS::Battle::Ai::roomAuxiliaryData = auxiliary;
     VS::Battle::Ai::patrolRoutes =
         auxiliary != nullptr

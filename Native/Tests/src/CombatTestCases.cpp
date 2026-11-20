@@ -717,7 +717,7 @@ VS::Items::EquipmentPart EquipmentDropPart(std::uint16_t id) {
   part.recovery_delay = 0x42;
   part.gem_slots = 3;
   part.gem_effects = 5;
-  part.range = {.range = 5, .second_range = 7, .third_range = 9};
+  part.range = {.range = 5, .range_y = 7, .range_z = 9};
   part.range.SetAttackShape(2);
   part.range.SetAttackShapeAngle(13);
   for (int index = 0; index < 4; ++index) {

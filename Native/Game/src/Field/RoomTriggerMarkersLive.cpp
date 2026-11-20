@@ -125,9 +125,10 @@ void DrawLiveRoomTriggerMarkers() {
         record.tile_x, record.tile_z, record.kind, record.activation != 0,
         static_cast<std::uint8_t>(record.marker_fade)});
   }
-  const TriggerMarkerFrame frame{VS::State::tickSpeed,
-                                 VS::State::stateFlags.opaque_20 != 0 ||
-                                     VS::State::stateFlags.opaque_40 != 0,
+  const TriggerMarkerFrame frame{
+      VS::State::tickSpeed,
+      VS::State::stateFlags.floor_traps_disabled_20 != 0 ||
+          VS::State::stateFlags.floor_traps_disabled_40 != 0,
                                  VS::Field::roomAnimationTicks};
   TriggerMarkerAnimation animation{VS::Field::triggerMarkerFrameTicks};
   LiveTriggerMarkerRenderer renderer;

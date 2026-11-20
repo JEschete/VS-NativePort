@@ -180,7 +180,7 @@ bool ResetMovingPlatformWaypoint(
 struct MovingPlatformMotionState {
   MovingPlatformWaypointState waypoint{};
   std::uint8_t bounce_frame = 0;
-  bool looping = false;
+  bool needs_rider = false;
   bool docked = false;
   friend bool operator==(const MovingPlatformMotionState&,
                          const MovingPlatformMotionState&) = default;

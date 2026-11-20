@@ -49,8 +49,9 @@ struct LivePackageParameters {
   std::uint8_t reserved_11;
   std::uint8_t gravity_curve;
   std::uint8_t drag_curve;
-  // Copied to the effect's frame limit when a primary effect updates.
-  std::uint8_t frame_count;
+  // The tracks the primary effect plays: binding the package sets that many
+  // pending-track bits.
+  std::uint8_t track_count;
   // The transforms the package animates.
   std::uint8_t transform_count;
   // The timelines a root instance's register timelines map through.

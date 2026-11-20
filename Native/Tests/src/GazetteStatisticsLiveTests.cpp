@@ -35,7 +35,7 @@ const std::uint8_t* LabelPointer(const std::uint16_t (&table)[Count],
 }
 
 auto RowFields(const score::ListRow& row) {
-  return std::tuple(row.selected, row.opaque1, row.animation_state,
+  return std::tuple(row.selected, row.unlocked, row.animation_state,
                     row.disabled, row.x, row.row_index, row.title,
                     row.description);
 }
@@ -225,7 +225,7 @@ TEST_CASE("F02814 Live title creation borrows original tables and bit 31",
   for (std::size_t index = 0; index < 32; ++index) {
     const auto& row = score::gazetteRows[index];
     const bool unlocked = index == 0 || index == 2 || index == 31;
-    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animation_state,
+    CHECK(std::array<int, 6>{row.selected, row.unlocked, row.animation_state,
                              row.disabled, row.x, row.row_index} ==
           std::array<int, 6>{0, unlocked ? 1 : 0, 0, 0, 60,
                              static_cast<int>(index + 1)});
@@ -353,7 +353,7 @@ TEST_CASE(
   score::CreateLiveStatisticRows();
   for (std::size_t index = 0; index < 23; ++index) {
     const auto& row = score::gazetteRows[index];
-    CHECK(std::array<int, 6>{row.selected, row.opaque1, row.animation_state,
+    CHECK(std::array<int, 6>{row.selected, row.unlocked, row.animation_state,
                              row.disabled, row.x, row.row_index} ==
           std::array<int, 6>{0, 1, 0, 0, 16, static_cast<int>(index + 1)});
     CHECK(row.title == LabelPointer(score::statHeaders, index));

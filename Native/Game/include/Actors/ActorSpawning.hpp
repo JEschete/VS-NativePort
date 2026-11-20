@@ -374,8 +374,8 @@ struct InitialStats {
 // The weapon's reach as built (VS::Items::WeaponRange).
 struct WeaponRange {
   std::uint8_t range = 0;
-  std::uint8_t second_range = 0;
-  std::uint8_t third_range = 0;
+  std::uint8_t range_y = 0;
+  std::uint8_t range_z = 0;
   std::uint8_t attack_shape_angle = 0;
 
   friend bool operator==(const WeaponRange&, const WeaponRange&) = default;
@@ -437,7 +437,7 @@ struct RoomSpawn {
   ItemDrop random_drop;
   std::uint8_t facing = 0;
   std::uint8_t variant = 0;
-  // reserved26: the combat pose of an actor without an AI script, also
+  // The combat pose of an actor without an AI script, also
   // kept as the actor's spawn byte.
   std::uint8_t combat_pose = 0;
 

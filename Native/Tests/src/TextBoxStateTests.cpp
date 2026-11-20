@@ -363,8 +363,8 @@ struct LiveTextBoxFixture {
   std::array<m::TextBoxState, m::kTextBoxCount> saved_boxes =
       std::to_array(m::textBoxes);
   m::TextBoxSelectorState saved_selector = m::textBoxSelector;
-  decltype(VS::State::stateFlags.opaque_11) saved_default_choice =
-      VS::State::stateFlags.opaque_11;
+  decltype(VS::State::stateFlags.text_box_default_choice) saved_default_choice =
+      VS::State::stateFlags.text_box_default_choice;
   std::array<std::array<std::uint32_t, 2>, m::kTextAnchorPresetCount>
       saved_anchors{};
 
@@ -374,7 +374,7 @@ struct LiveTextBoxFixture {
                         saved_anchors[i].begin());
     }
     m::textBoxSelector = {};
-    VS::State::stateFlags.opaque_11 = 0;
+    VS::State::stateFlags.text_box_default_choice = 0;
     for (std::size_t i = 0; i < m::kTextBoxCount; ++i) {
       m::TextBox box{.state = 0};
       box.flags.speaker_texture = m::kNoTextBoxSpeaker;
@@ -384,7 +384,7 @@ struct LiveTextBoxFixture {
   ~LiveTextBoxFixture() {
     std::ranges::copy(saved_boxes, std::span(m::textBoxes).begin());
     m::textBoxSelector = saved_selector;
-    VS::State::stateFlags.opaque_11 = saved_default_choice;
+    VS::State::stateFlags.text_box_default_choice = saved_default_choice;
     for (std::size_t i = 0; i < saved_anchors.size(); ++i) {
       std::ranges::copy(saved_anchors[i],
                         std::begin(std::span(m::textBoxAnchors)[i]));

@@ -104,7 +104,7 @@ WeatherParticle ResetFallingWeatherParticle(
   }
   particle.y = Half((host.Random() % kFallHeightBand) - kFallHeight);
   particle.fall_shift = kRespawnFallShift;
-  particle.opaque_c = 0;
+  particle.has_landed = 0;
   particle.sway_phase = 0;
   particle.speed = RandomSpeed(host);
   return particle;

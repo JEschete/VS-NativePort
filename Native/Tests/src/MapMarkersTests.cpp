@@ -336,10 +336,10 @@ TEST_CASE("The live label queue refuses an append past its capacity",
 TEST_CASE("The live door state test reads its flag unsigned",
           "[map-markers][map-markers-live]") {
   const LiveLabelState state;
-  VS::State::stateFlags.opaque_33f[3] = 1;
+  VS::State::stateFlags.door_lock_states[3] = 1;
   CHECK(map::LiveShouldDrawDoorStateMarker(3, 0, 0) == 1);
   // The original's lbu reads 0x80 as 128, which hides the marker.
-  VS::State::stateFlags.opaque_33f[3] = static_cast<char>(0x80);
+  VS::State::stateFlags.door_lock_states[3] = static_cast<char>(0x80);
   CHECK(map::LiveShouldDrawDoorStateMarker(3, 0, 0) == 0);
 }
 

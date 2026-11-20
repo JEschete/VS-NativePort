@@ -77,11 +77,11 @@ VS::Field::GimmickQueryState QueryState(
        << kTileByteBits) |
       (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tile_z))
        << kTileZShift) |
-      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.reserved5f))
+      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tile_extra))
        << kTileReservedShift);
   return {.present = true,
           .skipped = record.is_skipped != 0,
-          .falling = record.object_info.is_falling != 0,
+          .falling = record.object_info.is_removed != 0,
           .movement_mode = record.mode,
           .parent = record.parent,
           .carrier = record.object_info.carrier,
@@ -90,7 +90,7 @@ VS::Field::GimmickQueryState QueryState(
           .object_id = record.object_info.object_id,
           .subtype = record.object_info.subtype,
           .motion_state = record.motion_state,
-          .interaction = record.object_info.interaction};
+          .interaction = record.object_info.stack_state};
 }
 
 QueryStates SnapshotQueryStates() {
@@ -193,7 +193,7 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
                     const VS::Field::GimmickStackState& state) override {
     if (!ValidGimmick(slot)) return false;
     auto& record = *gimmicks_[slot];
-    record.object_info.is_falling = state.query.falling;
+    record.object_info.is_removed = state.query.falling;
     record.mode = state.query.movement_mode;
     record.object_info.carrier = state.query.carrier;
     record.velocity_y = state.velocity_y;
@@ -266,7 +266,7 @@ class LiveGimmickPlacementHost final : public VS::Field::GimmickPlacementHost {
     if (gimmick.parent != kNoParent) {
       return VS::Field::GimmickPlacementState{.attached = true};
     }
-    if (gimmick.object_info.is_falling != 0) {
+    if (gimmick.object_info.is_removed != 0) {
       return VS::Field::GimmickPlacementState{.falling = true};
     }
     if (gimmick.mode != 0) {
@@ -279,7 +279,7 @@ class LiveGimmickPlacementHost final : public VS::Field::GimmickPlacementHost {
         .position_x = gimmick.position_x,
         .position_y = gimmick.position_y,
         .position_z = gimmick.position_z,
-        .position_tail = gimmick.reserved22};
+        .position_tail = gimmick.position_pad};
   }
 
   std::int32_t SupportHeight(
@@ -546,7 +546,7 @@ class LiveGimmickInteractionCommandHost final
   bool PreparePush(std::optional<std::int16_t> mode) override {
     if (!ValidObject()) return false;
     if (mode) object_->mode = *mode;
-    object_->object_info.support_index = 0;
+    object_->object_info.motion_frame = 0;
     return true;
   }
   bool RemoveOccupant() override {

@@ -51,7 +51,7 @@ struct LiveDialogFixture {
     event::ResetLiveScriptRuntime();
     VS::Menu::textBoxSelector = {};
     VS::Input::buttonsPressed = {};
-    VS::State::stateFlags.opaque_11 = 1;
+    VS::State::stateFlags.text_box_default_choice = 1;
     for (auto& box : VS::Menu::textBoxes) {
       box = {};
       box.flags.speaker_texture = event::kNoSpeakerTexture;

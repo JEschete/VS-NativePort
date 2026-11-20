@@ -377,8 +377,8 @@ TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
   std::array<std::uint8_t, 0x498 + 308> auxiliary{};
   auxiliary[0x494] = 17;
   auxiliary[0x495] = 16;
-  VS::Field::roomData.section6 = auxiliary.data();
-  VS::Field::roomData.header.section6_length = auxiliary.size();
+  VS::Field::roomData.ai_navigation = auxiliary.data();
+  VS::Field::roomData.header.ai_navigation_length = auxiliary.size();
   const auto original = auxiliary;
   const auto grid = VS::Battle::Ai::BuildRoomAiMap(
       VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom());

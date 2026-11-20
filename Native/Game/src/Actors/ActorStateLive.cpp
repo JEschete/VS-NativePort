@@ -399,11 +399,11 @@ class LiveActorStateHost final : public ActorStateHost {
         .tile = {.x = static_cast<std::uint8_t>(gimmick->tile_x),
                  .layer = static_cast<std::uint8_t>(gimmick->tile_layer),
                  .z = static_cast<std::uint8_t>(gimmick->tile_z),
-                 .spare = static_cast<std::uint8_t>(gimmick->reserved5f)},
+                 .spare = static_cast<std::uint8_t>(gimmick->tile_extra)},
         .position = {.x = gimmick->position_x,
                      .y = gimmick->position_y,
                      .z = gimmick->position_z,
-                     .w = gimmick->reserved22},
+                     .w = gimmick->position_pad},
         .facing = gimmick->rotation_y};
   }
   void SetGimmickDisplay(int id, bool skipped, bool visible) override {
@@ -419,7 +419,7 @@ class LiveActorStateHost final : public ActorStateHost {
   }
   void ClearGimmickSupport(int id) override {
     if (VS::Field::GimmickInstance* gimmick = KnownGimmick(id)) {
-      gimmick->object_info.support_index = 0;
+      gimmick->object_info.motion_frame = 0;
     }
   }
   void PlayGimmickSound(int id, int sound, int variant) override {

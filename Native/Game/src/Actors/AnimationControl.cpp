@@ -682,7 +682,7 @@ void RestoreActorBasePose(AnimationControlHost& host, int actor_id,
     if (gimmick &&
         (gimmick->mode == kGimmickSettling ||
          gimmick->mode == kGimmickSettlingAlt) &&
-        gimmick->support_index == 0) {
+        gimmick->motion_frame == 0) {
       host.SetGimmickMode(actor_id, 0);
     }
     return;

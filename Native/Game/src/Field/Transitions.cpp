@@ -186,7 +186,7 @@ bool TeleportToLocation(RoomTransitionState& state, TransitionHost& host,
             request.speed);
   // The original keeps Ashley's facing quadrant in the entry elevation bits.
   door.entry_elevation = FacingQuadrant(placement.position.w);
-  door.reserved_entry_bit = false;
+  door.walks_in = false;
   if (location->zone_id != door.destination_zone_id) {
     state.screen.step = StepValue(TransitionStep::kZoneExit);
     host.QueueZoneLoad(location->zone_id);

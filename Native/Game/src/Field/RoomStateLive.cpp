@@ -101,14 +101,14 @@ class LiveRoomVisitHost final : public RoomVisitHost {
 
 RoomDisplay LoadRoomDisplay() {
   return RoomDisplay{.loaded = VS::Field::roomData.is_loaded == 1,
-                     .displayed = VS::Field::roomData.display_flag != 0,
+                     .displayed = VS::Field::roomData.is_displayed != 0,
                      .owner_room_index = VS::Field::roomData.room_index};
 }
 
 // The display flag is written only when the owner check passed (146C.c:15756
 // stores 1 or 0 then); the room keeps its load state and owner.
 void StoreRoomDisplayed(const RoomDisplay& display) {
-  VS::Field::roomData.display_flag =
+  VS::Field::roomData.is_displayed =
       static_cast<char>(display.displayed ? 1 : 0);
 }
 

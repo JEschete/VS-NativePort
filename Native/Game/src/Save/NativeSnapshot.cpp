@@ -101,8 +101,8 @@ void ApplyWordIds(const IdSet& ids, int (&words)[N]) {
 template <class V>
 void Fields(VS::Items::WeaponRange& r, V&& v) {
   v("range", r.range);
-  v("second_range", r.second_range);
-  v("third_range", r.third_range);
+  v("second_range", r.range_y);
+  v("third_range", r.range_z);
   Bits shape{r.AttackShape(), kThreeBitMask};
   Bits angle{r.AttackShapeAngle(), kFiveBitMask};
   v("shape", shape);
@@ -472,7 +472,7 @@ void Fields(VS::Field::MpdDoorRecord& r, V&& v) {
   VS_SAVE_DOOR_BITS("has_entry_step", has_entry_step, 1);
   VS_SAVE_DOOR_BITS("required_flag_id", required_flag_id, kMaximumSceneId);
   VS_SAVE_DOOR_BITS("entry_tile_z", entry_tile_z, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("reserved_bit", reserved06_bit15, 1);
+  VS_SAVE_DOOR_BITS("reserved_bit", walks_in, 1);
   v("door_id", r.door_id);
   v("reserved_09", r.reserved09);
   v("reserved_0a", r.reserved0a);

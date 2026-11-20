@@ -18,7 +18,7 @@ struct WeatherParticleRecord {
   VS::Core::Gte::SVECTOR position;
   std::int16_t screen_x;
   std::int16_t screen_y;
-  std::uint8_t opaque_c;
+  std::uint8_t has_landed;
   std::uint8_t sway_phase;
   std::uint8_t fall_shift;
   std::uint8_t speed;

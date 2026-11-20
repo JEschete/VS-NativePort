@@ -49,7 +49,7 @@ namespace {
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 constexpr std::size_t kGeometrySlot = 5;
 constexpr std::size_t kMarkerSlot = 4;
-constexpr auto kDoorStateBase = offsetof(VS::State::StateFlags, opaque_33f);
+constexpr auto kDoorStateBase = offsetof(State::StateFlags, door_lock_states);
 constexpr int kMinimapDepth = 256;
 constexpr int kDoorPulseMask = 0x20;
 constexpr int kMarkerClut = 0x37F8;

@@ -1299,7 +1299,7 @@ void PrepareWorkspace(Context& ctx) {
     }
   }
   const StoryFlags story = ctx.host.Story();
-  if (story.opaque_b5 != 0) {
+  if (story.teleportation_state != 0) {
     flags = static_cast<std::uint16_t>(flags | 1U);
   }
   if (story.intro_state >= kIntroDone) {

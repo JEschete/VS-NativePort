@@ -464,9 +464,9 @@ ItemsStatus EquipAshleyWeapon(AshleyWeaponState& ashley,
   const auto& range = ashley.weapon.range;
   ashley.current_range = static_cast<std::uint8_t>(range.range + ashley.reach);
   ashley.current_range_y =
-      static_cast<std::uint8_t>(range.second_range + ashley.reach);
+      static_cast<std::uint8_t>(range.range_y + ashley.reach);
   ashley.current_range_z =
-      static_cast<std::uint8_t>(range.third_range + ashley.reach);
+      static_cast<std::uint8_t>(range.range_z + ashley.reach);
   ashley.current_attack_shape_angle = range.AttackShapeAngle();
   ashley.current_attack_shape = 1;
   RemoveEquipmentBoostOnEquip(host);

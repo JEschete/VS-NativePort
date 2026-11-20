@@ -96,8 +96,8 @@ namespace {
     const LiveCameraShakeChannel& channel) {
   return {.phase = channel.phase,
           .shape_curve = channel.shape_curve,
-          .curve_step = channel.curve_step != 0,
-          .random_step = channel.random_step != 0,
+          .step_uses_curve = channel.step_uses_curve != 0,
+          .random_step_uses_curve = channel.random_step_uses_curve != 0,
           .step_curve = channel.step_curve,
           .random_step_curve = channel.random_step_curve,
           .amplitude = channel.amplitude,
@@ -108,8 +108,8 @@ void StoreChannel(LiveCameraShakeChannel& channel,
                   const CameraShakeChannel& value) {
   channel.phase = value.phase;
   channel.shape_curve = value.shape_curve & kShapeCurveMask;
-  channel.curve_step = value.curve_step ? 1U : 0U;
-  channel.random_step = value.random_step ? 1U : 0U;
+  channel.step_uses_curve = value.step_uses_curve ? 1U : 0U;
+  channel.random_step_uses_curve = value.random_step_uses_curve ? 1U : 0U;
   channel.step_curve = value.step_curve;
   channel.random_step_curve = value.random_step_curve;
   channel.amplitude = value.amplitude;

@@ -333,7 +333,7 @@ void FillClearEntry(auto& entry) {
   entry.required_flag_id = 1023;
   entry.required_flag_value = 255;
   entry.door_id = 255;
-  entry.reserved06_bit15 = 1;
+  entry.walks_in = 1;
   entry.reserved0b = 255;
 }
 

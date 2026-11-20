@@ -925,7 +925,7 @@ int TestGimmickStackTop(int scenario) {
     VS::Actors::actorRecords[2] = &actor;
   }
   VS::Field::DropUnsupportedGimmickStackEntry(kRoot);
-  int passed = root.object_info.is_falling == 1;
+  int passed = root.object_info.is_removed == 1;
   if (has_actor) {
     passed &= actor.instance.movement_mode == 3 &&
               actor.instance.jump_countdown == 4 &&

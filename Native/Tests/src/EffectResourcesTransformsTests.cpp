@@ -536,8 +536,8 @@ namespace {
 Effects::CameraShakeChannel StartedChannel() {
   return {.phase = 0,
           .shape_curve = 3,
-          .curve_step = false,
-          .random_step = false,
+          .step_uses_curve = false,
+          .random_step_uses_curve = false,
           .step_curve = 7,
           .random_step_curve = 10,
           .amplitude = 0x80,
@@ -577,8 +577,8 @@ TEST_CASE("Effect camera shake phase steps sample their curves",
                                             host) == 0);
   CHECK(host.random_calls == 0);
   host.curve = {.value = 300};
-  const Effects::CameraShakeChannel sampled{.curve_step = true,
-                                            .random_step = true};
+  const Effects::CameraShakeChannel sampled{.step_uses_curve = true,
+                                            .random_step_uses_curve = true};
   CHECK(Effects::CameraShakePhaseStep(sampled, host) == 44);
   CHECK(Effects::RandomCameraShakePhaseStep(sampled, host) == 23);
 }
@@ -1270,7 +1270,7 @@ TEST_CASE("Package parameters read the ranges, counts and timelines",
   const auto& full = Required(read);
   CHECK(full.gravity_range == kGravity);
   CHECK(full.drag_range == std::array<std::int16_t, 2>{0, 128});
-  CHECK(full.frame_count == 30);
+  CHECK(full.track_count == 30);
   CHECK(full.transform_count == 2);
   CHECK(full.timeline_ids == std::array<std::uint8_t, 4>{1, 2, 3, 4});
 }

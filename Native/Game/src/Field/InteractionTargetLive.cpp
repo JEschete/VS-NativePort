@@ -117,8 +117,8 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
 }  // namespace
 
 std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo() {
-  if (VS::State::stateFlags.opaque_20 != 0 ||
-      VS::State::stateFlags.opaque_40 != 0) {
+  if (VS::State::stateFlags.floor_traps_disabled_20 != 0 ||
+      VS::State::stateFlags.floor_traps_disabled_40 != 0) {
     return {};
   }
   const auto records = TrapRecords();
@@ -149,9 +149,10 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
                       record.tile_z,
                       record.floor_layer});
   }
-  return FindRoomTriggerAtTile(values, tile,
-                               VS::State::stateFlags.opaque_20 != 0 ||
-                                   VS::State::stateFlags.opaque_40 != 0);
+  return FindRoomTriggerAtTile(
+      values, tile,
+      VS::State::stateFlags.floor_traps_disabled_20 != 0 ||
+          VS::State::stateFlags.floor_traps_disabled_40 != 0);
 }
 
 bool SetLiveRoomTriggerEnabled(std::optional<TrapTarget> target,

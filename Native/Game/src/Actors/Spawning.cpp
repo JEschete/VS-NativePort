@@ -100,7 +100,7 @@ constexpr EquipmentPart kStartingBlade{
     .damage_type = 2,
     .cost_type = 2,
     .cost = 1,
-    .range = {.range = 3, .second_range = 2, .third_range = 3, .shape_bits = 1},
+    .range = {.range = 3, .range_y = 2, .range_z = 3, .shape_bits = 1},
     .classes = {-1, -1, -2, -1, -1, -5},
     .affinities = {8, 5, 5, -3, -3, 2, 2, 0},
 };

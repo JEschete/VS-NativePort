@@ -42,7 +42,7 @@ static_assert(offsetof(PhysicsView, material) == offsetof(Record, object_info));
 
 VS::Field::GimmickDynamicsState LoadState(const Record& record) {
   return {
-      .reaction = {record.object_info.support_index,
+      .reaction = {record.object_info.motion_frame,
                    record.slot,
                    record.object_info.material,
                    record.mode,
@@ -64,7 +64,7 @@ VS::Field::GimmickDynamicsState LoadState(const Record& record) {
       .carrier = record.object_info.carrier,
       .kind = static_cast<std::uint8_t>(record.object_info.object_id),
       .durability = record.object_info.subtype,
-      .interaction = static_cast<std::uint8_t>(record.object_info.interaction),
+      .interaction = static_cast<std::uint8_t>(record.object_info.stack_state),
       .skipped = record.is_skipped != 0};
 }
 
@@ -114,8 +114,8 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
     record_->parent = state.parent;
     record_->object_info.carrier = state.carrier;
     record_->object_info.subtype = state.durability;
-    record_->object_info.interaction = state.interaction;
-    record_->object_info.support_index = state.reaction.frame;
+    record_->object_info.stack_state = state.interaction;
+    record_->object_info.motion_frame = state.reaction.frame;
     return true;
   }
   VS::Field::GimmickReactionResult React() override {

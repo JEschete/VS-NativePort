@@ -634,8 +634,8 @@ struct WorkshopRecipeFixture {
       CHECK(actual[index] == expected[index]);
     }
     const VS::Items::WeaponRange range{.range = record[12],
-                                       .second_range = record[13],
-                                       .third_range = record[14],
+                                       .range_y = record[13],
+                                       .range_z = record[14],
                                        .shape_bits = record[15]};
     CHECK(result.range == range);
   }

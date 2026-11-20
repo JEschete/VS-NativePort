@@ -245,7 +245,7 @@ class LiveHost final : public MenuHost {
     return VS::Battle::LiveHasUnlockedSpellClass(static_cast<int>(school)) != 0;
   }
   std::uint8_t TeleportAvailability() override {
-    return static_cast<std::uint8_t>(VS::State::stateFlags.opaque_b5);
+    return static_cast<std::uint8_t>(VS::State::stateFlags.teleportation_state);
   }
   std::span<const std::uint8_t> SavePointStates() override {
     return Bytes(VS::State::stateFlags.save_point_states);

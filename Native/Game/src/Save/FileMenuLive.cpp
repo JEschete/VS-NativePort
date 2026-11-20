@@ -383,7 +383,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   }
   [[nodiscard]] bool SavePointEnabled() const override {
     return VS::Field::LiveCurrentSavePointId() != 0 &&
-           !VS::State::stateFlags.opaque_a7;
+           !VS::State::stateFlags.save_disabled;
   }
   std::expected<void, std::string> WriteSelection(
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;

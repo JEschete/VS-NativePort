@@ -29,7 +29,7 @@ constexpr std::size_t kOptionsOperand = 7;
 constexpr std::size_t kEffectOperand = 8;
 constexpr std::size_t kSpeedOperand = 9;
 constexpr std::uint8_t kEntryStepBit = 0x01;
-constexpr std::uint8_t kReservedEntryBit = 0x02;
+constexpr std::uint8_t kWalksInBit = 0x02;
 constexpr std::uint8_t kKeepEventBit = 0x04;
 constexpr std::uint8_t kZoneMusicSwitchBit = 0x08;
 // A destination zone of 0 changes room within the current zone.
@@ -149,7 +149,7 @@ Field::DoorRecord ScriptedDoor(ScriptCommand command) {
           OperandByte(command, kEntryElevationOperand) &
           Field::kDoorEntryElevationMask),
       .has_entry_step = (options & kEntryStepBit) != 0,
-      .reserved_entry_bit = (options & kReservedEntryBit) != 0,
+      .walks_in = (options & kWalksInBit) != 0,
   };
 }
 }  // namespace

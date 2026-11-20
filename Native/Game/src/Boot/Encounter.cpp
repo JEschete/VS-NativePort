@@ -698,7 +698,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
         "instance={} definition={} source={} row={} "
         "source_retains_after_defeat={} isolated_retains_after_defeat={}",
         index, spawn.enemy, definition->spawn_asset, definition->spawn_index,
-        source->actor_state_byte != 0, placement->actor_state_byte != 0);
+        source->retain_after_defeat != 0, placement->retain_after_defeat != 0);
   }
   configuration = setup;
   placements = staged_placements;

@@ -16,8 +16,8 @@ namespace VS::Effects {
 struct LiveCameraShakeChannel {
   std::uint8_t phase;
   std::uint8_t shape_curve : 5;
-  std::uint8_t curve_step : 1;
-  std::uint8_t random_step : 1;
+  std::uint8_t step_uses_curve : 1;
+  std::uint8_t random_step_uses_curve : 1;
   // Not used by native code; kept for the original layout.
   std::uint8_t reserved_bit7 : 1;
   std::uint8_t step_curve;

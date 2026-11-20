@@ -807,7 +807,7 @@ TEST_CASE("Looping detached platforms skip motion but still place geometry",
       VS::Field::MovingPlatformMotionRecord{
           .state = {.waypoint = {.control_state = 127, .x = 4096},
                     .bounce_frame = 7,
-                    .looping = true},
+                    .needs_rider = true},
           .waypoints = {},
           .velocities = {}}};
   VS::Field::MovingPlatformUpdateState state{.tick_speed = 4,

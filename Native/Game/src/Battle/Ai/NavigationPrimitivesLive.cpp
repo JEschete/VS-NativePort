@@ -432,8 +432,8 @@ void UpdateLiveRouteGateAvailability() {
   auto* auxiliary =
       static_cast<std::uint8_t*>(VS::Battle::Ai::roomAuxiliaryData);
   Require(
-      auxiliary == VS::Field::roomData.section6 &&
-          VS::Field::roomData.header.section6_length >= kRouteAuxiliaryBytes &&
+      auxiliary == VS::Field::roomData.ai_navigation &&
+          VS::Field::roomData.header.ai_navigation_length >= kRouteAuxiliaryBytes &&
           reinterpret_cast<const std::uint8_t*>(VS::Battle::Ai::routeGates) ==
               auxiliary + kRouteEndOffset,
       "Route availability: route table does not belong to the active "

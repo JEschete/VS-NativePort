@@ -324,7 +324,7 @@ void VisitSectionPointer(RoomSectionId section, Visit&& visit) {
     case RoomSectionId::kLighting:
       return visit(room.lighting);
     case RoomSectionId::kAuxiliary:
-      return visit(room.section6);
+      return visit(room.ai_navigation);
     case RoomSectionId::kSupplemental:
       return visit(room.section7);
     case RoomSectionId::kSection8:
@@ -340,7 +340,7 @@ void VisitSectionPointer(RoomSectionId section, Visit&& visit) {
     case RoomSectionId::kEffectScripts:
       return visit(room.effect_scripts);
     case RoomSectionId::kSectionE:
-      return visit(room.section_e);
+      return visit(room.room_code);
     case RoomSectionId::kMinimapScene:
       return visit(room.minimap_scene);
     case RoomSectionId::kTiledBackground:
@@ -543,7 +543,7 @@ class LiveSections : public Host {
                          : nullptr);
     }
     VS::Field::roomData.is_loaded = 1;
-    VS::Field::roomData.display_flag = 0;
+    VS::Field::roomData.is_displayed = 0;
     VS::Field::roomData.room_index =
         static_cast<std::int16_t>(owner_room_index);
     return true;
@@ -603,7 +603,7 @@ class LiveSections : public Host {
 
   [[nodiscard]] RoomDisplay LoadedRoom() const override {
     return {.loaded = VS::Field::roomData.is_loaded == 1,
-            .displayed = VS::Field::roomData.display_flag != 0,
+            .displayed = VS::Field::roomData.is_displayed != 0,
             .owner_room_index = VS::Field::roomData.room_index};
   }
 

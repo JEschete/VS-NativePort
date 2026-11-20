@@ -550,7 +550,7 @@ int LiveActorTaggedBonePosition(int actor_id, int tag, SVECTOR* position_out,
     }
     if (skeleton.gimmick == nullptr) return kSkeletonNoOwner;
     // The original copied the position record, its padding included.
-    position_out->pad = skeleton.gimmick->reserved22;
+    position_out->pad = skeleton.gimmick->position_pad;
     StoreVector(*position_out, TargetPoint(GimmickPosition(*skeleton.gimmick),
                                            kGimmickTargetHeight));
     return 0;

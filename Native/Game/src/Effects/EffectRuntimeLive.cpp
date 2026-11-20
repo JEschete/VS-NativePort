@@ -151,7 +151,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
       Refuse("track count", "the package has no particle block");
       return 0;
     }
-    return package->parameters->frame_count;
+    return package->parameters->track_count;
   }
   VS::Content::DiscQueueSlot* RequestMenuReload() override {
     const VS::Content::DiscFile file{

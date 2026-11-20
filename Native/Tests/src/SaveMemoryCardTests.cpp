@@ -1662,7 +1662,7 @@ std::array<int, 12> KeptFields(const VS::Field::MpdDoorRecord& door) {
           door.tile_location.floor_layer,
           door.required_flag_value,
           door.has_entry_step,
-          door.reserved06_bit15,
+          door.walks_in,
           door.door_id,
           door.reserved09,
           door.reserved0a,

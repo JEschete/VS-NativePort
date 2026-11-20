@@ -110,7 +110,7 @@ struct AnimationLookup {
 
 struct AnimationGimmick {
   std::int16_t mode = 0;
-  std::uint8_t support_index = 0;
+  std::uint8_t motion_frame = 0;
 };
 
 struct SoundPanVolume {

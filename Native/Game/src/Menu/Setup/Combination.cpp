@@ -1186,8 +1186,8 @@ BladeRecipe DecodeBladeRecipe(
           .intelligence = record[kBladeIntelligenceByte],
           .agility = record[kBladeAgilityByte],
           .range = {.range = record[kBladeRangeByte],
-                    .second_range = record[kBladeSecondRangeByte],
-                    .third_range = record[kBladeThirdRangeByte],
+                    .range_y = record[kBladeSecondRangeByte],
+                    .range_z = record[kBladeThirdRangeByte],
                     .shape_bits = record[kBladeShapeByte]}};
 }
 

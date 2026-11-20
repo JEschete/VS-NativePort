@@ -194,7 +194,7 @@ void SetEffectCameraTransitionMode(EffectCameraState& state,
 // decomp: BATTLE.PRG func_800D1E2C (src/BATTLE/BATTLE.PRG/5BF94.c:6577)
 std::uint8_t CameraShakePhaseStep(const CameraShakeChannel& channel,
                                   EffectCameraHost& host) {
-  if (!channel.curve_step) {
+  if (!channel.step_uses_curve) {
     return channel.step_curve;
   }
   return static_cast<std::uint8_t>(
@@ -205,7 +205,7 @@ std::uint8_t CameraShakePhaseStep(const CameraShakeChannel& channel,
 std::uint8_t RandomCameraShakePhaseStep(const CameraShakeChannel& channel,
                                         EffectCameraHost& host) {
   const std::int32_t limit =
-      channel.random_step
+      channel.random_step_uses_curve
           ? host.SampleCurve(channel.random_step_curve, channel.phase).value
           : channel.random_step_curve;
   if (limit == 0) {
@@ -226,10 +226,10 @@ void StartCameraShakeChannels(EffectCameraState& state, EffectCameraHost& host,
     channel.shape_curve =
         static_cast<std::uint8_t>(settings.shape_curve & kShapeCurveMask);
     channel.amplitude = static_cast<std::uint8_t>(settings.amplitude);
-    channel.curve_step = (settings.step_uses_curve & 1) != 0;
+    channel.step_uses_curve = (settings.step_uses_curve & 1) != 0;
     channel.step_curve =
         static_cast<std::uint8_t>(settings.step_curve_or_value);
-    channel.random_step = (settings.random_step_uses_curve & 1) != 0;
+    channel.random_step_uses_curve = (settings.random_step_uses_curve & 1) != 0;
     channel.random_step_curve =
         static_cast<std::uint8_t>(settings.random_step_curve_or_value);
     channel.phase = 0;

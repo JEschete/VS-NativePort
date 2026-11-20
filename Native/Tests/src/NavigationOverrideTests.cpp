@@ -276,8 +276,8 @@ struct RouteAvailabilityFixture {
     std::fill_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
                 0);
     VS::Field::roomData = {};
-    VS::Field::roomData.section6 = auxiliary.data();
-    VS::Field::roomData.header.section6_length = auxiliary.size();
+    VS::Field::roomData.ai_navigation = auxiliary.data();
+    VS::Field::roomData.header.ai_navigation_length = auxiliary.size();
     VS::Field::roomData.moving_platforms = platforms.data();
     VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
     VS::Battle::Ai::roomAuxiliaryData = auxiliary.data();
@@ -541,7 +541,7 @@ TEST_CASE("Gimmick placement retains original layer bits and native row carry",
       fixture.gimmick.tile_x = static_cast<char>(x);
       fixture.gimmick.tile_z = 3;
       fixture.gimmick.tile_layer = static_cast<char>(layer);
-      fixture.gimmick.reserved5f = static_cast<char>(0xFF);
+      fixture.gimmick.tile_extra = static_cast<char>(0xFF);
       auto& cell = fixture.heights[index / 32][index % 32];
       cell = 0xA15A;
       VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
@@ -769,7 +769,7 @@ TEST_CASE("Route availability rejects a truncated room auxiliary section",
           "[.routegate-room-bound]") {
   VS::Platform::InstallCrashHandler();
   RouteAvailabilityFixture fixture;
-  VS::Field::roomData.header.section6_length = 0x497;
+  VS::Field::roomData.header.ai_navigation_length = 0x497;
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Truncated room route table was accepted");
 }

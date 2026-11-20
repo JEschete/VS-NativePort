@@ -104,7 +104,7 @@ WeatherParticle ParticleOf(const VS::Field::WeatherParticleRecord& record) {
           .pad = record.position.pad,
           .screen_x = record.screen_x,
           .screen_y = record.screen_y,
-          .opaque_c = record.opaque_c,
+          .has_landed = record.has_landed,
           .sway_phase = record.sway_phase,
           .fall_shift = record.fall_shift,
           .speed = record.speed};
@@ -118,7 +118,7 @@ void StoreParticle(VS::Field::WeatherParticleRecord& record,
   record.position.pad = particle.pad;
   record.screen_x = particle.screen_x;
   record.screen_y = particle.screen_y;
-  record.opaque_c = particle.opaque_c;
+  record.has_landed = particle.has_landed;
   record.sway_phase = particle.sway_phase;
   record.fall_shift = particle.fall_shift;
   record.speed = particle.speed;

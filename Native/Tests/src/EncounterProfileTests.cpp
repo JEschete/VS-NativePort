@@ -338,7 +338,7 @@ TEST_CASE("Ability profiles preserve resources and story progression",
   StatFixture actor;
   BindFullBattleAbilities();
   BindBreakArts();
-  VS::State::stateFlags.opaque_b5 = 1;
+  VS::State::stateFlags.teleportation_state = 1;
   VS::State::stateFlags.magic_used = 1;
   VS::State::artsStatus.arts_learned[0] = 2;
   VS::State::artsStatus.kills.total_kills = 321;

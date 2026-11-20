@@ -75,7 +75,7 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   std::optional<VS::Field::GimmickReactionState> State() override {
     if (!Valid()) return std::nullopt;
     return VS::Field::GimmickReactionState{
-        record_->object_info.support_index,
+        record_->object_info.motion_frame,
         record_->slot,
         record_->object_info.material,
         record_->mode,
@@ -88,7 +88,7 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   }
   bool Store(const VS::Field::GimmickReactionState& state) override {
     if (!Valid()) return false;
-    record_->object_info.support_index = state.frame;
+    record_->object_info.motion_frame = state.frame;
     record_->mode = state.mode;
     record_->position_x = state.position[0];
     record_->position_y = state.position[1];

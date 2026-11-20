@@ -806,8 +806,8 @@ nlohmann::json EncodePlayerGimmicks() {
     gimmicks.push_back(
         {{"slot", slot},
          {"object_id", object->object_info.object_id},
-         {"interaction", object->object_info.interaction},
-         {"falling", object->object_info.is_falling != 0},
+         {"interaction", object->object_info.stack_state},
+         {"falling", object->object_info.is_removed != 0},
          {"tile_x", static_cast<int>(object->tile_x)},
          {"tile_z", static_cast<int>(object->tile_z)},
          {"position",

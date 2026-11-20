@@ -2029,7 +2029,7 @@ void CreateDataRows(Context& ctx, std::uint8_t& step) {
     strings[(row * 2) + 1] = TableText(host, kTextSaveDisabled);
   }
   host.SetSaveLocationId(host.CurrentSavePointId());
-  if (host.SaveLocationId() == 0 || host.Flags().opaque_a7 != 0) {
+  if (host.SaveLocationId() == 0 || host.Flags().save_disabled != 0) {
     row_types[0] |= 1;
   }
   const std::uint8_t memory = host.CursorMemory();
@@ -2064,7 +2064,7 @@ void DataMenuSelect(Context& ctx, std::uint8_t& step) {
     host.SetFieldRendering(true);
     host.ClearMenuExcept(Framework::kNoRow);
     step = row == kCancelToMenuRow ? kDataCloseToMenu : kDataClose;
-  } else if (host.SaveLocationId() != 0 && host.Flags().opaque_a7 != 0 &&
+  } else if (host.SaveLocationId() != 0 && host.Flags().save_disabled != 0 &&
              host.HighlightedRow() == 0) {
     host.InitInformationBox(Framework::InformationHeader::kCaution);
     host.SetInformationBoxState(kInformationBoxShown);

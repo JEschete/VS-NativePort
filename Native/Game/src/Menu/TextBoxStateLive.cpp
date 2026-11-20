@@ -163,8 +163,8 @@ int SelectLiveTextBoxChoice(std::uint8_t box_mask) {
   TextBoxSelector selector = ReadLiveTextBoxSelector();
   const TextBoxSelectionInput input{
       .pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed),
-      .default_choice =
-          static_cast<std::uint8_t>(VS::State::stateFlags.opaque_11),
+      .default_choice = static_cast<std::uint8_t>(
+          VS::State::stateFlags.text_box_default_choice),
   };
   const auto choice =
       SelectTextBoxChoice(boxes, selector, host, box_mask, input);

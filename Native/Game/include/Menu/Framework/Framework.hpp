@@ -452,7 +452,7 @@ struct RestrictionInputs {
 };
 
 struct StoryFlags {
-  std::uint8_t opaque_b5 = 0;
+  std::uint8_t teleportation_state = 0;
   std::int32_t intro_state = 0;
   std::int32_t game_over = 0;
 };

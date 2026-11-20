@@ -107,7 +107,7 @@ std::array<TimeTrialRow, kTimeTrialCount> Rows() {
   for (std::size_t index = 0; index < rows.size(); ++index) {
     const auto& original = gazetteRows[index];
     rows[index] = {.selected = original.selected,
-                   .enabled_style = original.opaque1,
+                   .enabled_style = original.unlocked,
                    .entrance_delay = original.animation_state,
                    .disabled = original.disabled,
                    .x = original.x,
@@ -195,7 +195,7 @@ void CreateLiveTimeTrialRows() {
     const TimeTrialRow& row = rows[index];
     original.x = row.x;
     original.disabled = row.disabled;
-    original.opaque1 = row.enabled_style;
+    original.unlocked = row.enabled_style;
     original.title = OriginalPointer(row.title);
     original.description = OriginalPointer(row.description);
   }

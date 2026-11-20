@@ -36,9 +36,10 @@ struct DoorRecord {
   std::uint8_t entry_tile_z = 0;
   std::uint8_t entry_elevation = 0;
   bool has_entry_step = false;
-  // Bit 15 of the record's third halfword; scripts copy their step byte's
-  // second bit into it.
-  bool reserved_entry_bit = false;
+  // Bit 15 of the record's third halfword (upstream faceCamera): Ashley walks
+  // in along the entry facing at half walk speed. Scripts copy their step
+  // byte's second bit into it.
+  bool walks_in = false;
   std::uint8_t door_id = 0;
   std::array<std::uint8_t, kDoorReservedBytes> reserved{};
 

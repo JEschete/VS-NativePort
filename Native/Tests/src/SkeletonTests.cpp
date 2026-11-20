@@ -626,7 +626,7 @@ TEST_CASE("Live gimmick target points and the ground anchor matrix",
   gimmick.position_x = 5;
   gimmick.position_y = 6;
   gimmick.position_z = 7;
-  gimmick.reserved22 = 0x55;
+  gimmick.position_pad = 0x55;
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   SVECTOR point{};

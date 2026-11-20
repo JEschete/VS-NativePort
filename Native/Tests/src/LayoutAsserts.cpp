@@ -200,7 +200,7 @@ SAME_FIELD(VS::Battle::Ai::CandidateReadinessView, candidate_count,
 SAME_FIELD(VS::Field::GimmickPhysicsView, native_pointer68,
            VS::Field::GimmickInstance, model);
 SAME_FIELD(VS::Field::GimmickPhysicsView, frame, VS::Field::GimmickInstance,
-           object_info.support_index);
+           object_info.motion_frame);
 SAME_FIELD(VS::Field::GimmickPhysicsView, carrier, VS::Field::GimmickInstance,
            object_info.carrier);
 static_assert(sizeof(VS::Battle::Ai::AiCreationView) <=
@@ -406,7 +406,7 @@ int Tests_AiFrameCache(void) {
   std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   std::uint16_t (*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
   void* saved_data = VS::Battle::Ai::roomAuxiliaryData;
-  const unsigned saved_aux_length = VS::Field::roomData.header.section6_length;
+  const unsigned saved_aux_length = VS::Field::roomData.header.ai_navigation_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
   std::uint8_t saved_scratch[132];
   std::uint8_t* scratch =
@@ -428,7 +428,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::specialTerrainHeights = heights;
   VS::Battle::Ai::roomAuxiliaryData = auxiliary;
-  VS::Field::roomData.header.section6_length = sizeof auxiliary;
+  VS::Field::roomData.header.ai_navigation_length = sizeof auxiliary;
   VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   const int returned = VS::Battle::Ai::CacheLiveActorAiWorkingState();
   const VS::Battle::Ai::FrameContext* frame =
@@ -451,7 +451,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::specialTerrainHeights = saved_heights;
   VS::Battle::Ai::roomAuxiliaryData = saved_data;
-  VS::Field::roomData.header.section6_length = saved_aux_length;
+  VS::Field::roomData.header.ai_navigation_length = saved_aux_length;
   VS::Battle::Ai::savedMovementRandomState = saved_random;
   memcpy(scratch, saved_scratch, sizeof saved_scratch);
   return passed;
@@ -550,13 +550,13 @@ int Tests_GimmickViewsRoundTrip(void) {
   VS::Field::GimmickPhysicsView* physics =
       reinterpret_cast<VS::Field::GimmickPhysicsView*>(&object);
   object.model = &model;
-  object.object_info.support_index = 13;
+  object.object_info.motion_frame = 13;
   physics->position.vy = -64;
   int passed = physics->native_pointer68 == &model && physics->frame == 13 &&
                object.position_y == -64;
   physics->frame = 14;
   physics->carrier = 3;
-  passed = passed && object.object_info.support_index == 14 &&
+  passed = passed && object.object_info.motion_frame == 14 &&
            object.object_info.carrier == 3 && object.model == &model;
   return passed;
 }

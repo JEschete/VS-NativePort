@@ -299,7 +299,7 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     if (chest == nullptr) {
       return std::nullopt;
     }
-    const auto bytes = static_cast<std::uint16_t>(chest->reserved_a);
+    const auto bytes = static_cast<std::uint16_t>(chest->toggle_state);
     return VS::Field::RoomSwitchState{
         .switch_value = static_cast<std::uint16_t>(chest->is_open),
         .marker_fade = static_cast<std::uint8_t>(bytes >> kMarkerByteShift),
@@ -321,8 +321,8 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
       return;
     }
     chest->is_open = static_cast<std::int16_t>(value);
-    const auto activation = static_cast<std::uint8_t>(chest->reserved_a);
-    chest->reserved_a = static_cast<std::int16_t>(
+    const auto activation = static_cast<std::uint8_t>(chest->toggle_state);
+    chest->toggle_state = static_cast<std::int16_t>(
         (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
   }
   void SetCellPassability(const VS::Field::RoomSwitchState& state,
@@ -338,7 +338,7 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     if (chest == nullptr) {
       return false;
     }
-    chest->reserved_a = static_cast<std::int16_t>(
+    chest->toggle_state = static_cast<std::int16_t>(
         (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
     return true;
   }
@@ -410,7 +410,8 @@ bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index) {
       {.zone_id = room->zone_id,
        .map_id = room->map_id,
        .sigil_index = sigil_index},
-      std::as_writable_bytes(std::span(VS::State::stateFlags.opaque_186)));
+      std::as_writable_bytes(
+          std::span(VS::State::stateFlags.sigil_doors_unlocked)));
 }
 
 std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
@@ -420,7 +421,7 @@ std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
       pairs};
   return RoomSigilDoorUnlockByte(
       tables, query,
-      std::as_bytes(std::span(VS::State::stateFlags.opaque_186)));
+      std::as_bytes(std::span(VS::State::stateFlags.sigil_doors_unlocked)));
 }
 
 bool BeginLiveChestSwitch(ChestTarget target) {

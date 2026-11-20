@@ -149,8 +149,8 @@ std::optional<RoomWaypoints> LiveRoomWaypoints() {
   const auto* auxiliary =
       static_cast<const unsigned char*>(VS::Battle::Ai::roomAuxiliaryData);
   Require(
-      auxiliary == VS::Field::roomData.section6 &&
-          VS::Field::roomData.header.section6_length >= kWaypointsEnd &&
+      auxiliary == VS::Field::roomData.ai_navigation &&
+          VS::Field::roomData.header.ai_navigation_length >= kWaypointsEnd &&
           reinterpret_cast<const unsigned char*>(
               VS::Battle::Ai::roomWaypoints) == auxiliary + kWaypointsOffset,
       "AI settings: room waypoints do not belong to the active room "

@@ -300,7 +300,7 @@ struct PackageParameters {
   std::array<std::int16_t, kDragRangeCount> drag_range{};
   std::uint8_t gravity_curve{};
   std::uint8_t drag_curve{};
-  std::uint8_t frame_count{};
+  std::uint8_t track_count{};
   std::uint8_t transform_count{};
   std::array<std::uint8_t, kParameterTimelineCount> timeline_ids{};
 

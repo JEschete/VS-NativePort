@@ -240,8 +240,8 @@ TEST_CASE("The battle runtime reads the current room as a bounded source",
   std::array<std::byte, VS::Battle::Ai::kRoomAuxiliaryHeaderBytes + 6>
       auxiliary{};
   VS::Field::roomData.collision_map = &dimensions;
-  VS::Field::roomData.section6 = auxiliary.data();
-  VS::Field::roomData.header.section6_length = 0x497;
+  VS::Field::roomData.ai_navigation = auxiliary.data();
+  VS::Field::roomData.header.ai_navigation_length = 0x497;
   const RoomAiSource source =
       VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom();
   const VS::Battle::Ai::RoomCollisionExtent& extent =

@@ -288,7 +288,7 @@ class LiveAshleyHost final : public AshleyMovementHost {
     return VS::Field::screenTransitionStep;
   }
   [[nodiscard]] std::optional<int> DoorEntryElevation() const override {
-    if (VS::Field::pendingDestinationDoor.reserved06_bit15 == 0) {
+    if (VS::Field::pendingDestinationDoor.walks_in == 0) {
       return std::nullopt;
     }
     return static_cast<int>(VS::Field::pendingDestinationDoor.entry_elevation);

@@ -721,9 +721,9 @@ struct ActorSettingsFixture {
   VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   void* saved_has_waypoints = VS::Battle::Ai::roomAuxiliaryData;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
-  void* saved_section6 = VS::Field::roomData.section6;
+  void* saved_section6 = VS::Field::roomData.ai_navigation;
   std::uint32_t saved_section6_length =
-      VS::Field::roomData.header.section6_length;
+      VS::Field::roomData.header.ai_navigation_length;
   std::array<VS::Battle::Actor, 3> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
@@ -744,16 +744,16 @@ struct ActorSettingsFixture {
     states[2].linked_actor = 16;
     VS::Battle::actors[0] = actors.data();
     VS::Battle::Ai::roomAuxiliaryData = nullptr;
-    VS::Field::roomData.section6 = auxiliary.data();
-    VS::Field::roomData.header.section6_length = auxiliary.size();
+    VS::Field::roomData.ai_navigation = auxiliary.data();
+    VS::Field::roomData.header.ai_navigation_length = auxiliary.size();
   }
 
   ~ActorSettingsFixture() {
     VS::Battle::actors[0] = saved_head;
     VS::Battle::Ai::roomAuxiliaryData = saved_has_waypoints;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
-    VS::Field::roomData.section6 = saved_section6;
-    VS::Field::roomData.header.section6_length = saved_section6_length;
+    VS::Field::roomData.ai_navigation = saved_section6;
+    VS::Field::roomData.header.ai_navigation_length = saved_section6_length;
   }
 
   // Waypoint 5 of the room's auxiliary section, active or not.

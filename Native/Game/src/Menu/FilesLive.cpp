@@ -585,7 +585,7 @@ class LiveHost : public LiveCardHost {
   }
   GameFlags Flags() override {
     const VS::State::StateFlags& flags = VS::State::stateFlags;
-    return {.opaque_a7 = static_cast<std::uint8_t>(flags.opaque_a7),
+    return {.save_disabled = static_cast<std::uint8_t>(flags.save_disabled),
             .intro_state = static_cast<std::uint8_t>(flags.intro_state),
             .clear_count = static_cast<std::uint8_t>(flags.clear_count),
             .difficulty = static_cast<std::uint8_t>(flags.difficulty)};

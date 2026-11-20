@@ -685,7 +685,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
       return std::nullopt;
     }
     return VS::Field::ChestLockState{chest->tile_x, chest->tile_z,
-                                     chest->lock_level, chest->reserved_e,
+                                     chest->lock_level, chest->required_item,
                                      chest->opened_flag};
   }
   bool ScriptFlag(std::int32_t flag) override {

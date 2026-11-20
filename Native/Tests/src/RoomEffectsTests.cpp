@@ -1601,9 +1601,9 @@ struct LiveRoom {
 
   void SetSectionE(std::size_t bytes) {
     section_e.assign(bytes, std::byte{0});
-    VS::Field::roomData.section_e =
+    VS::Field::roomData.room_code =
         reinterpret_cast<VS::Field::MpdSectionE*>(section_e.data());
-    VS::Field::roomData.header.section_e_length = Length(section_e);
+    VS::Field::roomData.header.room_code_length = Length(section_e);
   }
 };
 }  // namespace

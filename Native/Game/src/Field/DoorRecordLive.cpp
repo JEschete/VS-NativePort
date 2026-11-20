@@ -38,7 +38,7 @@ DoorRecord DoorRecordOf(const VS::Field::MpdDoorRecord& record) {
   door.has_entry_step = record.has_entry_step != 0;
   door.required_flag_id = static_cast<std::uint16_t>(record.required_flag_id);
   door.entry_tile_z = static_cast<std::uint8_t>(record.entry_tile_z);
-  door.reserved_entry_bit = record.reserved06_bit15 != 0;
+  door.walks_in = record.walks_in != 0;
   door.door_id = record.door_id;
   door.reserved = {record.reserved09, record.reserved0a, record.reserved0b};
   return door;
@@ -58,7 +58,7 @@ void StoreDoorRecord(const DoorRecord& door, VS::Field::MpdDoorRecord& record) {
   record.has_entry_step = door.has_entry_step ? 1U : 0U;
   record.required_flag_id = door.required_flag_id & kDoorRequiredFlagIdMask;
   record.entry_tile_z = door.entry_tile_z & kDoorTileMask;
-  record.reserved06_bit15 = door.reserved_entry_bit ? 1U : 0U;
+  record.walks_in = door.walks_in ? 1U : 0U;
   record.door_id = door.door_id;
   record.reserved09 = door.reserved[0];
   record.reserved0a = door.reserved[1];

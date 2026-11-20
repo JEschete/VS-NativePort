@@ -240,7 +240,7 @@ constexpr std::array kMusicLayerFields{
     FieldPin{offsetof(VS::Audio::MusicConfig, tick_accumulator), 0x28},
     FieldPin{offsetof(VS::Audio::MusicConfig, resume_key_on_mask), 0x2C},
     FieldPin{offsetof(VS::Audio::MusicConfig, push_release_mask), 0x30},
-    FieldPin{offsetof(VS::Audio::MusicConfig, reserved34), 0x34},
+    FieldPin{offsetof(VS::Audio::MusicConfig, sequence_control_value), 0x34},
     FieldPin{offsetof(VS::Audio::MusicConfig, sequence_base), 0x38},
 };
 static_assert(PinsMatch(kMusicLayerFields, {0, 0}));
@@ -455,7 +455,7 @@ void VisitLayerMasks(Typed& typed, Legacy& legacy, Visit visit) {
   visit(typed.tick_accumulator, legacy.tick_accumulator);
   visit(typed.resume_key_on_mask, legacy.resume_key_on_mask);
   visit(typed.push_release_mask, legacy.push_release_mask);
-  visit(typed.sequence_control_value, legacy.reserved34);
+  visit(typed.sequence_control_value, legacy.sequence_control_value);
   visit(typed.voice_search_start, legacy.voice_search_start);
   visit(typed.noise_channels, legacy.noise_channels);
   visit(typed.reverb_channels, legacy.reverb_channels);

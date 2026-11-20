@@ -333,7 +333,7 @@ VS::Field::MovingPlatformMotionState MotionStateOf(
     const VS::Field::MpdMovingPlatform& record, std::size_t index) {
   return {.waypoint = WaypointStateOf(record),
           .bounce_frame = VS::Field::platformBounceFrames[index],
-          .looping = record.is_looping != 0,
+          .needs_rider = record.needs_rider != 0,
           .docked = record.tile_cell.is_platform_docked != 0};
 }
 
@@ -380,7 +380,7 @@ class LivePlatformUpdateHost final
     if (!Valid() || index >= records_.size()) return false;
     auto& record = records_[index];
     StoreWaypointState(record, state.waypoint);
-    record.is_looping = state.looping;
+    record.needs_rider = state.needs_rider;
     record.tile_cell.is_platform_docked = state.docked;
     VS::Field::platformBounceFrames[index] = state.bounce_frame;
     return true;

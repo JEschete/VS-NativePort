@@ -31,7 +31,7 @@ void CheckCreatedRows(const live::EncodedText& minotaur) {
     const auto& row = score::gazetteRows[i];
     CHECK(row.x == 194);
     CHECK(row.selected == 0);
-    CHECK(row.opaque1 == 1);
+    CHECK(row.unlocked == 1);
     CHECK(static_cast<std::uint8_t>(row.animation_state) == i + 1);
     CHECK(row.disabled == (i == 0 ? 0 : 1));
     CHECK(row.row_index == static_cast<std::int16_t>(20 + i));

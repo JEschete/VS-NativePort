@@ -92,9 +92,7 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
     const auto world_y = std::bit_cast<std::int16_t>(
         static_cast<std::uint16_t>(word >> kHalfwordBits));
     return TriggerPlacement{
-        {snapshot.placement_byte0, snapshot.placement_byte2},
-        world_y,
-        snapshot.orientation};
+        {snapshot.tile_x, snapshot.tile_z}, world_y, snapshot.orientation};
   }
   int GimmickSupportHeight(TriggerTile tile) override {
     return Field::LiveGimmickSupportHeight(tile.x, tile.z);

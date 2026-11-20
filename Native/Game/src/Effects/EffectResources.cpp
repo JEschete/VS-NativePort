@@ -30,7 +30,7 @@ constexpr std::size_t kGravityRangeAt = 0x0;
 constexpr std::size_t kDragRangeAt = 0xC;
 constexpr std::size_t kGravityCurveAt = 0x12;
 constexpr std::size_t kDragCurveAt = 0x13;
-constexpr std::size_t kFrameCountAt = 0x14;
+constexpr std::size_t kTrackCountAt = 0x14;
 constexpr std::size_t kTransformCountAt = 0x15;
 constexpr std::size_t kTimelineIdsAt = 0x16;
 // One past the last effect texture page.
@@ -386,7 +386,7 @@ std::optional<PackageParameters> ReadPackageParameters(
   }
   parameters.gravity_curve = ReadByte(block, kGravityCurveAt);
   parameters.drag_curve = ReadByte(block, kDragCurveAt);
-  parameters.frame_count = ReadByte(block, kFrameCountAt);
+  parameters.track_count = ReadByte(block, kTrackCountAt);
   parameters.transform_count = ReadByte(block, kTransformCountAt);
   for (std::size_t i = 0;
        i < parameters.timeline_ids.size() && kTimelineIdsAt + i < block.size();

@@ -120,7 +120,7 @@ struct MusicConfig {
   std::uint32_t tick_accumulator;
   std::uint32_t resume_key_on_mask;
   std::int32_t push_release_mask;
-  std::int32_t reserved34;
+  std::int32_t sequence_control_value;
   std::uintptr_t sequence_base;
   AkaoSequenceFile* patch_table;
   std::uint16_t* keymap_table;

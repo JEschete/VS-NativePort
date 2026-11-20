@@ -518,8 +518,8 @@ std::int32_t InitialStatuses(std::int32_t immunities) {
 AttackReach AttackReachFor(WeaponRange range, std::uint8_t reach) {
   const int bonus = reach & kReachMask;
   return {.range = static_cast<std::uint8_t>(range.range + bonus),
-          .range_y = static_cast<std::uint8_t>(range.second_range + bonus),
-          .range_z = static_cast<std::uint8_t>(range.third_range + bonus),
+          .range_y = static_cast<std::uint8_t>(range.range_y + bonus),
+          .range_z = static_cast<std::uint8_t>(range.range_z + bonus),
           .shape_angle = static_cast<std::uint8_t>(range.attack_shape_angle &
                                                    kAttackShapeAngleMask)};
 }

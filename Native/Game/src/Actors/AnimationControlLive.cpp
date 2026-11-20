@@ -306,9 +306,8 @@ class LiveAnimationHost final : public AnimationControlHost {
     const VS::Field::GimmickInstance* gimmick =
         VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) return std::nullopt;
-    return AnimationGimmick{
-        .mode = gimmick->mode,
-        .support_index = gimmick->object_info.support_index};
+    return AnimationGimmick{.mode = gimmick->mode,
+                            .motion_frame = gimmick->object_info.motion_frame};
   }
   void SetGimmickMode(int slot, std::int16_t mode) override {
     VS::Field::GimmickInstance* gimmick =

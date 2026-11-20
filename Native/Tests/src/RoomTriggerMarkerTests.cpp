@@ -307,8 +307,10 @@ TEST_CASE(
   trigger.activation = static_cast<char>(sample.active);
   trigger.marker_fade = static_cast<char>(sample.initial);
   VS::State::tickSpeed = sample.ticks;
-  VS::State::stateFlags.opaque_20 = static_cast<char>(sample.gate20);
-  VS::State::stateFlags.opaque_40 = static_cast<char>(sample.gate40);
+  VS::State::stateFlags.floor_traps_disabled_20 =
+      static_cast<char>(sample.gate20);
+  VS::State::stateFlags.floor_traps_disabled_40 =
+      static_cast<char>(sample.gate40);
   VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(static_cast<unsigned char>(trigger.marker_fade) == sample.expected);
   CHECK(VS::Field::triggerMarkerFrameTicks == 0);

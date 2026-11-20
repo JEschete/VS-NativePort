@@ -611,7 +611,7 @@ TEST_CASE(
   bytes[4] = 0;
   bytes[25] = door;
   VS::Field::roomAnimationTicks = ticks;
-  VS::State::stateFlags.opaque_33f[1] = gate;
+  VS::State::stateFlags.door_lock_states[1] = gate;
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
                                       bytes.size() * sizeof(std::uint32_t));
   VS::Field::DrawLiveMinimapScene(bytes.data(),

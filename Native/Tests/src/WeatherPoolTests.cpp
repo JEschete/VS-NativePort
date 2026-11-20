@@ -120,7 +120,7 @@ TEST_CASE("Falling particle respawns over the weather area", "[weather-pool]") {
   CHECK(particle.y == (600 % 512) - 2560);
   CHECK(particle.speed == 0x7F);
   CHECK(particle.fall_shift == 2);
-  CHECK(particle.opaque_c == 0);
+  CHECK(particle.has_landed == 0);
   CHECK(particle.sway_phase == 0);
   CHECK(particle.pad == 14);
   CHECK((particle.screen_x == 15 && particle.screen_y == 16));
@@ -205,7 +205,7 @@ TEST_CASE("Screen spawn places particles on the screen unprojected",
                                      .pad = 14,
                                      .screen_x = -1,
                                      .screen_y = -1,
-                                     .opaque_c = 17,
+                                     .has_landed = 17,
                                      .sway_phase = 18,
                                      .fall_shift = 19,
                                      .speed = 0x7F};

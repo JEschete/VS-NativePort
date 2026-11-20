@@ -132,8 +132,8 @@ class LiveHost final : public RoomEffectHost {
   }
   std::span<const std::byte> EntryPointSection() override {
     return Section<const std::byte>(
-        VS::Field::roomData.section_e,
-        VS::Field::roomData.header.section_e_length);
+        VS::Field::roomData.room_code,
+        VS::Field::roomData.header.room_code_length);
   }
 
   bool HasSoundBank() override {
@@ -186,7 +186,7 @@ class LiveHost final : public RoomEffectHost {
     return static_cast<std::uint16_t>(LiveFloorHeightAt(world_x, world_z));
   }
   bool FastForwarding() override {
-    return VS::State::stateFlags.opaque_a8 != 0;
+    return VS::State::stateFlags.room_script_fast_forward != 0;
   }
   bool RunRoomEntryPoint(std::span<const std::byte> code) override {
     const std::uint32_t hash = Fnv1a(code);

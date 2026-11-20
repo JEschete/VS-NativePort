@@ -219,7 +219,7 @@ EncounterZone ReadZone(const Content::DataStore& store,
   // Preserve the profile choice for already supported enemies; retained boss
   // records are a fallback when no ordinary hostile placement exists.
   std::stable_partition(profiles.begin(), profiles.end(), [](const auto& p) {
-    return p.placement.actor_state_byte == 0;
+    return p.placement.retain_after_defeat == 0;
   });
   if (header.enemies_size == 0) return zone;
   const auto enemies =
@@ -418,7 +418,7 @@ std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   // func_80076F24 (146C.c:6367) maps this byte to retainAfterDefeat.
   // Isolated encounters have no story death event: use ordinary production
   // defeat/removal instead, without changing the original room or its actor.
-  placement.actor_state_byte = 0;
+  placement.retain_after_defeat = 0;
   return placement;
 }
 

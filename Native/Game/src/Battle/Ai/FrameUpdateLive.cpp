@@ -122,7 +122,7 @@ int CacheLiveActorAiWorkingState() {
   frameContext.roomData = VS::Battle::Ai::roomAuxiliaryData;
   WorkingStateSource source;
   source.has_room_data = frameContext.roomData != nullptr;
-  source.auxiliary_bytes = VS::Field::roomData.header.section6_length;
+  source.auxiliary_bytes = VS::Field::roomData.header.ai_navigation_length;
   if (frameContext.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
     static_assert(sizeof frameContext.room->collision_extent == extent.size());

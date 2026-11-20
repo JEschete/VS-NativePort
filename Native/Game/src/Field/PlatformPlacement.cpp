@@ -411,7 +411,7 @@ bool UpdateMovingPlatforms(MovingPlatformUpdateState& state,
     auto& platform = platforms[index];
     auto& motion = platform.state;
     const bool hidden = motion.waypoint.hidden;
-    if (!hidden && !(motion.looping &&
+    if (!hidden && !(motion.needs_rider &&
                      motion.waypoint.control_state == kDetachedLoopControl)) {
       for (std::int32_t tick = 0; tick < (state.tick_speed >> 1); ++tick) {
         if (!AdvanceMovingPlatformMotion(motion, platform.waypoints,

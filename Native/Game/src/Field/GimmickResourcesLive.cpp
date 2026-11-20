@@ -70,7 +70,7 @@ std::uint32_t TileWord(const VS::Field::GimmickInstance& record) {
          (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tile_z))
           << (kTileByteBits * 2)) |
          (static_cast<std::uint32_t>(
-              static_cast<std::uint8_t>(record.reserved5f))
+              static_cast<std::uint8_t>(record.tile_extra))
           << kReservedTileShift);
 }
 
@@ -81,7 +81,7 @@ VS::Field::GimmickCreationState CreationState(
           .subtype = record.object_info.subtype,
           .carrier = record.object_info.carrier,
           .parent = record.parent,
-          .interaction = record.object_info.interaction,
+          .interaction = record.object_info.stack_state,
           .pulse_kind = record.palette_pulse.kind,
           .base_color = record.base_color,
           .scale_x = record.scale_x,
@@ -103,7 +103,7 @@ void StoreCreationState(VS::Field::GimmickInstance& record,
   record.object_info.subtype = state.subtype;
   record.object_info.carrier = state.carrier;
   record.parent = state.parent;
-  record.object_info.interaction = state.interaction;
+  record.object_info.stack_state = state.interaction;
   record.palette_pulse.kind = state.pulse_kind;
   record.base_color = state.base_color;
   record.scale_x = state.scale_x;
@@ -118,7 +118,7 @@ void StoreCreationState(VS::Field::GimmickInstance& record,
       static_cast<std::uint8_t>(state.tile_word >> kTileByteBits));
   record.tile_z = std::bit_cast<char>(
       static_cast<std::uint8_t>(state.tile_word >> (kTileByteBits * 2)));
-  record.reserved5f = std::bit_cast<char>(
+  record.tile_extra = std::bit_cast<char>(
       static_cast<std::uint8_t>(state.tile_word >> kReservedTileShift));
   record.position_x = state.x;
   record.position_y = state.y;
@@ -137,7 +137,7 @@ bool CreateModel(VS::Field::GimmickInstance& record, std::uint8_t kind,
   std::memcpy(&record.bone_count, &header.instance_flags, kTemplateFlagBytes);
   record.reserved4 = header.instance_word4;
   if (header.model_data_size < static_cast<int>(sizeof(VS::Actors::ShpModel)) ||
-      header.recolor_count < 0 ||
+      header.polygon_count < 0 ||
       static_cast<std::size_t>(header.model_data_size) >
           source.size() - sizeof(header)) {
     return false;
@@ -156,7 +156,7 @@ bool CreateModel(VS::Field::GimmickInstance& record, std::uint8_t kind,
   const auto uv = static_cast<std::size_t>(uv_kind) * kUvPairBytes;
   if (uv + 1 >= std::size(VS::Field::gimmickPaletteParameters)) return false;
   return VS::Content::OffsetModelTextureCoordinates(
-      polygons, header.recolor_count, true,
+      polygons, header.polygon_count, true,
       VS::Field::gimmickPaletteParameters[uv],
       VS::Field::gimmickPaletteParameters[uv + 1]);
 }

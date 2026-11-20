@@ -210,7 +210,7 @@ fx::DoorRecord TeleportEntry(std::int16_t facing) {
   fx::RoomTransitionState state;
   state.pending_door = SampleDoor();
   state.pending_door.entry_direction = 5;
-  state.pending_door.reserved_entry_bit = true;
+  state.pending_door.walks_in = true;
   REQUIRE(fx::TeleportToLocation(
       state, host, {.location_id = 30, .tile_x = 0x25, .tile_z = 0x3F}));
   return state.pending_door;
@@ -223,7 +223,7 @@ TEST_CASE("A teleport enters at the clamped tile facing ahead",
   CHECK(door.entry_tile_x == 5);
   CHECK(door.entry_tile_z == 0x1F);
   CHECK(door.entry_direction == 0);
-  CHECK_FALSE(door.reserved_entry_bit);
+  CHECK_FALSE(door.walks_in);
   CHECK(door.entry_elevation == 1);
 }
 

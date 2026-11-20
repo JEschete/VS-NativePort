@@ -146,8 +146,8 @@ template <typename T, typename Id>
 
 [[nodiscard]] WeaponRange RangeOf(const VS::Items::WeaponRange& range) {
   return {.range = range.range,
-          .second_range = range.second_range,
-          .third_range = range.third_range,
+          .range_y = range.range_y,
+          .range_z = range.range_z,
           .attack_shape_angle = range.AttackShapeAngle()};
 }
 
@@ -347,8 +347,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     stats->run_speed = static_cast<char>(kDefaultRunSpeed);
     stats->weapon.recovery_delay = kDefaultRecoveryDelay;
     stats->weapon.range.range = kDefaultWeaponRange[0];
-    stats->weapon.range.second_range = kDefaultWeaponRange[1];
-    stats->weapon.range.third_range = kDefaultWeaponRange[2];
+    stats->weapon.range.range_y = kDefaultWeaponRange[1];
+    stats->weapon.range.range_z = kDefaultWeaponRange[2];
     stats->cancels_hit_results = 0;
     stats->weapon.range.SetAttackShapeAngle(0);
     stats->actor_id = kNoRoomSpawn;
@@ -998,7 +998,7 @@ RoomSpawn DecodeRoomSpawn(const VS::Field::MpdEnemySpawn& spawn) {
       .random_drop = {.id = spawn.item3_id, .count = spawn.item3_count},
       .facing = spawn.facing,
       .variant = spawn.variant,
-      .combat_pose = spawn.reserved26};
+      .combat_pose = spawn.combat_pose};
   std::ranges::copy(spawn.settings, decoded.settings.begin());
   return decoded;
 }

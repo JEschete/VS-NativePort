@@ -156,8 +156,8 @@ inline constexpr std::uint8_t kAttackShapeBitsMask = 0x07;
 inline constexpr int kAttackShapeAngleShift = 3;
 struct WeaponRange {
   std::uint8_t range{};
-  std::uint8_t second_range{};
-  std::uint8_t third_range{};
+  std::uint8_t range_y{};
+  std::uint8_t range_z{};
   std::uint8_t shape_bits{};
   [[nodiscard]] constexpr std::uint8_t AttackShape() const {
     return static_cast<std::uint8_t>(shape_bits & kAttackShapeBitsMask);
@@ -694,9 +694,12 @@ struct TreasureChest {
   std::int16_t layer{};
   std::int16_t lid_rotation_id{};
   std::int16_t is_open{};
-  std::int16_t reserved_a{};
+  // Lid toggle: low byte frames until the toggle (0x14 at start), high byte
+  // 1 while a toggle is pending (func_8008D5FC).
+  std::int16_t toggle_state{};
   std::int16_t lock_level{};
-  std::int16_t reserved_e{};
+  // The key or sigil that unlocks the chest (func_80073E30).
+  std::int16_t required_item{};
   std::int16_t opened_flag{};
   std::int16_t facing{};
   BattleLoot loot{};

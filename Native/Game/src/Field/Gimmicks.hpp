@@ -45,7 +45,7 @@ inline constexpr std::size_t kGimmickPhysicsReserved6CBytes = 256;
 struct GimmickTemplate {
   std::int32_t instance_flags;
   std::int32_t instance_word4;
-  std::int32_t recolor_count;
+  std::int32_t polygon_count;
   std::int32_t model_data_size;
 };
 inline constexpr std::size_t kGimmickTemplateBytes = 0x10;
@@ -60,13 +60,13 @@ struct GimmickAnimationJob {
 // decomp: D_800F4538_t2 (src/BATTLE/BATTLE.PRG/entity.h:7-20)
 struct GimmickObjectInfo {
   std::uint8_t object_id : 3;
-  std::uint8_t is_falling : 1;
-  std::uint8_t interaction : 2;
+  std::uint8_t is_removed : 1;
+  std::uint8_t stack_state : 2;
   std::uint8_t reserved_bits7 : 2;
   std::uint8_t subtype;
   std::uint8_t material;
   std::uint8_t carrier;
-  std::uint8_t support_index;
+  std::uint8_t motion_frame;
   std::uint8_t reserved5;
   std::uint8_t reserved6;
   std::uint8_t reserved7;
@@ -116,7 +116,7 @@ struct GimmickInstance {
   std::int16_t position_x;
   std::int16_t position_y;
   std::int16_t position_z;
-  std::int16_t reserved22;
+  std::int16_t position_pad;
   std::int16_t rotation_x;
   std::uint16_t rotation_y;
   std::uint16_t rotation_z;
@@ -144,7 +144,7 @@ struct GimmickInstance {
   // Volatile as declared by the original.
   volatile char tile_layer;
   char tile_z;
-  char reserved5f;
+  char tile_extra;
   std::int32_t saved_tile;
   VS::Actors::ModelEffectSlot palette_pulse;
   VS::Actors::ShpModel* model;
@@ -269,9 +269,9 @@ struct GimmickInstance {
 // decomp: func_800A0024_t (BATTLE.PRG 30DB0.c:24 when copied; no longer
 // declared upstream)
 struct GimmickSnapshot {
-  std::uint8_t placement_byte0;
+  std::uint8_t tile_x;
   std::uint8_t height_above_ground;
-  std::uint8_t placement_byte2;
+  std::uint8_t tile_z;
   std::uint8_t orientation;
   std::int32_t position_xy;
   std::int32_t position_z;

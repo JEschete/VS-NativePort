@@ -201,7 +201,7 @@ TEST_CASE("Rain splashes an odd drop at the floor's 15-bit height",
           "[weather-render]") {
   const RainLandingRun run(3);
   CHECK(run.fitted);
-  CHECK(run.particles[1].opaque_c == 1);
+  CHECK(run.particles[1].has_landed == 1);
   CHECK(run.particles[1].y == 0x4123 - 0x8000);
   CHECK(run.hosts.calls.back() == "Floor -300 700");
   CHECK(run.hosts.calls[run.hosts.calls.size() - 2] == "Surface -2 5");
@@ -213,7 +213,7 @@ TEST_CASE("Rain respawns a drop landing on the no-floor surface",
           "[weather-render]") {
   const RainLandingRun run(31);
   CHECK(run.fitted);
-  CHECK(run.particles[1].opaque_c == 0);
+  CHECK(run.particles[1].has_landed == 0);
   CHECK(run.particles[1].y == 3 - 2560);
   CHECK(run.hosts.calls.back() == "Random");
   CHECK(run.particles[0].y == -5);
@@ -232,7 +232,7 @@ struct RainSplashRun {
   }
 
   Hosts hosts;
-  std::vector<fx::WeatherParticle> particles{{.y = 10, .opaque_c = 1}};
+  std::vector<fx::WeatherParticle> particles{{.y = 10, .has_landed = 1}};
   bool fitted = false;
 };
 
@@ -248,14 +248,14 @@ TEST_CASE("Rain splash frames advance by half the tick speed",
                             0x0071C030, 0x00060005, 0x0000D020, 0x00080007,
                             0x0000D030}});
   CHECK(run.particles[0].sway_phase == 7);
-  CHECK(run.particles[0].opaque_c == 1);
+  CHECK(run.particles[0].has_landed == 1);
 }
 
 TEST_CASE("Rain splash past its frames respawns after drawing",
           "[weather-render]") {
   const RainSplashRun run(kPaused, 9, 100);
   CHECK(run.hosts.render.submitted.size() == 1);
-  CHECK(run.particles[0].opaque_c == 0);
+  CHECK(run.particles[0].has_landed == 0);
   CHECK(run.particles[0].sway_phase == 0);
 }
 
@@ -263,7 +263,7 @@ TEST_CASE("Rain splash at the near plane respawns undrawn",
           "[weather-render]") {
   const RainSplashRun run(kPaused, 5, 64);
   CHECK(run.hosts.render.submitted.empty());
-  CHECK(run.particles[0].opaque_c == 0);
+  CHECK(run.particles[0].has_landed == 0);
 }
 
 TEST_CASE("Ember respawn draws four randoms over the weather area",
@@ -273,7 +273,7 @@ TEST_CASE("Ember respawn draws four randoms over the weather area",
   const fx::WeatherParticle marked{.pad = 1,
                                    .screen_x = 2,
                                    .screen_y = 3,
-                                   .opaque_c = 4,
+                                   .has_landed = 4,
                                    .sway_phase = 5,
                                    .fall_shift = 6,
                                    .speed = 7};
@@ -289,7 +289,7 @@ TEST_CASE("Ember respawn draws four randoms over the weather area",
                             .pad = 1,
                             .screen_x = 2,
                             .screen_y = 3,
-                            .opaque_c = 0,
+                            .has_landed = 0,
                             .sway_phase = 5,
                             .fall_shift = 6,
                             .speed = 23});
@@ -315,7 +315,7 @@ TEST_CASE("Embers rise and draw a flame to the point 192 below",
   Hosts hosts;
   const WeatherArea area{.extent_x = 10, .extent_z = 10};
   std::vector<fx::WeatherParticle> particles{
-      {.x = 1, .y = 100, .z = 2, .speed = 10}, {.opaque_c = 1}};
+      {.x = 1, .y = 100, .z = 2, .speed = 10}, {.has_landed = 1}};
   hosts.render.projections = {Projected(100, 100, 200),
                               Projected(132, 164, 5000)};
 
@@ -394,7 +394,7 @@ TEST_CASE("Snow draws a flake pair and settles odd flakes",
   CHECK(hosts.render.submitted[1].words ==
         Words{0x62FFFFFF, 0x0050006E, 0x00010001});
   CHECK(hosts.render.submitted[2].words == Words{0xE1000271, 0});
-  CHECK(particles[1].opaque_c == 1);
+  CHECK(particles[1].has_landed == 1);
   CHECK(particles[1].y == 0x10);
   CHECK(hosts.calls.back() == "Floor 5 6");
 }
@@ -402,7 +402,7 @@ TEST_CASE("Snow draws a flake pair and settles odd flakes",
 TEST_CASE("Settled snow fades out over its frames", "[weather-render]") {
   Hosts hosts;
   std::vector<fx::WeatherParticle> particles{
-      {.y = 10, .opaque_c = 1, .sway_phase = 3}};
+      {.y = 10, .has_landed = 1, .sway_phase = 3}};
   hosts.render.projections = {Projected(20, 30, 40)};
   hosts.pool.randoms = {1, 2, 3, 4};
 
@@ -413,7 +413,7 @@ TEST_CASE("Settled snow fades out over its frames", "[weather-render]") {
         Submitted{.slot = 40, .words = {0x62505050, 0x001E0014, 0x00020002}});
   CHECK(hosts.render.submitted[1].words == RainPage());
   // Three plus five frames is past the fourth: respawned.
-  CHECK(particles[0].opaque_c == 0);
+  CHECK(particles[0].has_landed == 0);
   CHECK(particles[0].y == 3 - 2560);
 }
 

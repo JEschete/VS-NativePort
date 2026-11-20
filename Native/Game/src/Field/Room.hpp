@@ -41,7 +41,7 @@ struct MpdSectionLengths {
   std::uint32_t tile_cells_length;
   std::uint32_t doors_length;
   std::uint32_t lighting_length;
-  std::uint32_t section6_length;
+  std::uint32_t ai_navigation_length;
   std::uint32_t section7_length;
   std::uint32_t section8_length;
   std::uint32_t floor_triggers_length;
@@ -49,7 +49,7 @@ struct MpdSectionLengths {
   std::uint32_t environment_length;
   std::uint32_t texture_effects_length;
   std::uint32_t effect_scripts_length;
-  std::uint32_t section_e_length;
+  std::uint32_t room_code_length;
   std::uint32_t minimap_scene_length;
   std::uint32_t tiled_background_length;
   std::uint32_t view_triggers_length;
@@ -69,7 +69,7 @@ static_assert(sizeof(MpdSectionLengths) == kMpdSectionLengthsBytes);
 // memory, so only the header keeps its PS1 layout.
 struct RoomDataRecord {
   char is_loaded;
-  char display_flag;
+  char is_displayed;
   std::int16_t room_index;
   MpdSectionLengths header;
   std::int32_t* geometry;
@@ -77,7 +77,7 @@ struct RoomDataRecord {
   MpdTileCell* tile_cells;
   MpdDoorRecord* doors;
   void* lighting;
-  void* section6;
+  void* ai_navigation;
   void* section7;
   void* section8;
   MpdFloorTrigger* floor_triggers;
@@ -85,7 +85,7 @@ struct RoomDataRecord {
   MpdEnvironment* environment;
   void* texture_effects;
   void* effect_scripts;
-  MpdSectionE* section_e;
+  MpdSectionE* room_code;
   MapScene* minimap_scene;
   std::uint16_t* tiled_background;
   MpdViewTrigger* view_triggers;

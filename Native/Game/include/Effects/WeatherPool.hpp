@@ -27,7 +27,7 @@ struct WeatherParticle {
   std::int16_t pad = 0;
   std::int16_t screen_x = 0;
   std::int16_t screen_y = 0;
-  std::uint8_t opaque_c = 0;    // unkC
+  std::uint8_t has_landed = 0;  // unkC
   std::uint8_t sway_phase = 0;  // unkD
   std::uint8_t fall_shift = 0;  // unkE
   std::uint8_t speed = 0;       // unkF

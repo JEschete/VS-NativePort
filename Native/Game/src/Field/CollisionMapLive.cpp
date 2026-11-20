@@ -119,7 +119,7 @@ GimmickStates LiveGimmicks() {
     if (gimmick == nullptr) continue;
     states.at(slot) = GimmickSupportState{
         .skipped = gimmick->is_skipped != 0,
-        .falling = gimmick->object_info.is_falling != 0,
+        .falling = gimmick->object_info.is_removed != 0,
         .motion_state = gimmick->motion_state,
         .tile_x = static_cast<std::uint8_t>(gimmick->tile_x),
         .tile_z = static_cast<std::uint8_t>(gimmick->tile_z),

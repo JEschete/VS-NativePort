@@ -434,7 +434,7 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   source.item2_count = 2;
   source.item3_count = 3;
   source.variant = 7;
-  source.reserved26 = 8;
+  source.combat_pose = 8;
   source.flag_value = 9;
   source.stat_value = 10;
   source.slot = 3;
@@ -444,9 +444,9 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   source.scene_test = 1;
   SECTION("ordinary enemy") {}
   SECTION("boss retained for a story defeat event") {
-    source.actor_state_byte = 1;
+    source.retain_after_defeat = 1;
   }
-  SECTION("any nonzero retention byte") { source.actor_state_byte = 255; }
+  SECTION("any nonzero retention byte") { source.retain_after_defeat = 255; }
   const auto original = source;
   CHECK(VS::Game::IsEncounterHostileSpawn(source));
   const auto prepared =
@@ -463,7 +463,7 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   expected.flag_test = 0;
   expected.stat_test = 0;
   expected.scene_test = 0;
-  expected.actor_state_byte = 0;
+  expected.retain_after_defeat = 0;
   CHECK(std::memcmp(&*prepared, &expected, sizeof(expected)) == 0);
   CHECK(std::memcmp(&source, &original, sizeof(source)) == 0);
 }
@@ -490,7 +490,7 @@ TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
 TEST_CASE("Encounter catalog hostility is independent of defeat retention",
           "[combat][encounter]") {
   VS::Field::MpdEnemySpawn source{};
-  source.actor_state_byte = 1;
+  source.retain_after_defeat = 1;
   SECTION("neutral") { source.facing = 0; }
   SECTION("friendly") { source.facing = 1; }
   SECTION("script-only") { source.facing = 3; }

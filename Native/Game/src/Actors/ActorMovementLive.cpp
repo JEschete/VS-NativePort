@@ -170,7 +170,7 @@ class LiveMovementTerrain final : public MotionTerrainHost {
 MovementGimmick GimmickOf(const VS::Field::GimmickInstance& gimmick) {
   return {.mode = gimmick.mode,
           .position_y = gimmick.position_y,
-          .support_index = gimmick.object_info.support_index,
+          .motion_frame = gimmick.object_info.motion_frame,
           .bone_count = static_cast<std::uint8_t>(gimmick.bone_count)};
 }
 

@@ -122,7 +122,7 @@ class LiveAnimationDispatchHost final
           chest != nullptr &&
           kind == VS::Field::GimmickAnimationKind::kToggleSwitch;
       if (valid_chest) {
-        countdown = static_cast<std::uint8_t>(chest->reserved_a);
+        countdown = static_cast<std::uint8_t>(chest->toggle_state);
       }
       return VS::Field::GimmickAnimationJobSnapshot{
           kind, countdown, jobSerials[slot], valid_chest};
@@ -153,8 +153,8 @@ class LiveAnimationDispatchHost final
         return false;
       }
       const auto marker =
-          static_cast<std::uint16_t>(chest->reserved_a) & 0xFF00;
-      chest->reserved_a = static_cast<std::int16_t>(marker | countdown);
+          static_cast<std::uint16_t>(chest->toggle_state) & 0xFF00;
+      chest->toggle_state = static_cast<std::int16_t>(marker | countdown);
       return true;
     }
     auto& target = *targets_[slot];

@@ -847,7 +847,7 @@ TEST_CASE("Base pose restores settle a waiting gimmick by its full mode word",
   host.calls.clear();
   host.gimmick = AnimationGimmick{.mode = kWideMode};
   actors::RestoreActorBasePose(host, kOther, kIdle);
-  host.gimmick = AnimationGimmick{.mode = kSettling, .support_index = 1};
+  host.gimmick = AnimationGimmick{.mode = kSettling, .motion_frame = 1};
   actors::RestoreActorNeutralPose(host, kOther);
   host.gimmick.reset();
   actors::RestoreActorIdlePose(host, kOther);
