@@ -184,13 +184,7 @@
     <ClCompile Include="src\Battle\ActionEffectDispatchLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionExecution.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\ActionExecution.cpp" />
     <ClCompile Include="src\Battle\ActionFlow.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -422,13 +416,7 @@
     <ClCompile Include="src\Battle\AttackPrerequisitesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\AttackPrerequisiteTable.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\AttackPrerequisiteTable.cpp" />
     <ClCompile Include="src\Battle\BasicActionEffects.cpp" />
     <ClCompile Include="src\Battle\BasicActionEffectsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -483,13 +471,7 @@
     <ClCompile Include="src\Battle\HitCalculationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\HitChance.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\HitChance.cpp" />
     <ClCompile Include="src\Battle\HitModifiers.cpp" />
     <ClCompile Include="src\Battle\HitModifiersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -517,13 +499,7 @@
     <ClCompile Include="src\Battle\RewardFlowLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Rewards.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Rewards.cpp" />
     <ClCompile Include="src\Battle\Sphere.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2096,7 +2072,7 @@
     <ClInclude Include="src\Actors\WeaponModel.h" />
     <ClInclude Include="src\Battle\AbilityState.h" />
     <ClInclude Include="src\Battle\ActionAnimation.h" />
-    <ClInclude Include="src\Battle\ActionExecution.h" />
+    <ClInclude Include="src\Battle\ActionExecution.hpp" />
     <ClInclude Include="src\Battle\ActionFlow.h" />
     <ClInclude Include="src\Battle\ActionMenu.h" />
     <ClInclude Include="src\Battle\ActionResolution.h" />
@@ -2114,15 +2090,15 @@
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
     <ClInclude Include="src\Battle\Ai\RoomState.hpp" />
-    <ClInclude Include="src\Battle\AttackPrerequisiteTable.h" />
+    <ClInclude Include="src\Battle\AttackPrerequisiteTable.hpp" />
     <ClInclude Include="src\Battle\BattleTypes.h" />
     <ClInclude Include="src\Battle\Damage.h" />
     <ClInclude Include="src\Battle\EncounterHooks.hpp" />
     <ClInclude Include="src\Battle\Feedback.h" />
     <ClInclude Include="src\Battle\Hit.h" />
-    <ClInclude Include="src\Battle\HitChance.h" />
+    <ClInclude Include="src\Battle\HitChance.hpp" />
     <ClInclude Include="src\Battle\Hud.h" />
-    <ClInclude Include="src\Battle\Rewards.h" />
+    <ClInclude Include="src\Battle\Rewards.hpp" />
     <ClInclude Include="src\Battle\Sphere.h" />
     <ClInclude Include="src\Battle\StatusEffects.h" />
     <ClInclude Include="src\Battle\TargetingState.h" />

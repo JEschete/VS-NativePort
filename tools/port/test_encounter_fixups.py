@@ -182,13 +182,13 @@ int func_800F9800(void) {
                 self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Battle\ActionSequence.cpp")
                 self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
                                  r"Native\Game\include\Battle\ActionSequenceLive.hpp")
-        generated = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
-        self.assertNotIn("void Battle_", generated)
-        self.assertIn("Battle_settledCameraDistance", generated)
-        self.assertIn("Battle_cameraEaseMode", generated)
+        definitions = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("void Battle_", definitions)
+        self.assertIn("std::int32_t settledCameraDistance;", definitions)
+        self.assertIn("std::int32_t cameraEaseMode;", definitions)
         binding = (root / r"Native\Game\src\Battle\ActionSequenceLive.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Field::sphericalCamera.values.distance", binding)
-        self.assertNotIn("Battle_settledCameraDistance", binding)
+        self.assertNotIn("settledCameraDistance", binding)
         self.assertIn("Render::SetLiveCameraProjectionDistance", binding)
         self.assertNotIn("Core_Gte_SetGeomScreen", binding)
         self.assertIn("Target recovery refused: empty sequence has no last action", binding)
@@ -210,11 +210,11 @@ int func_800F9800(void) {
                 self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
                                  r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp")
         root = Path(__file__).resolve().parents[2]
-        generated = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
+        definitions = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
         for name in names:
-            self.assertNotIn(f"Battle_{name}(", generated)
-        self.assertIn("Battle_settledCameraDistance", generated)
-        self.assertIn("Battle_cameraEaseMode", generated)
+            self.assertNotIn(f"Battle_{name}(", definitions)
+        self.assertIn("std::int32_t settledCameraDistance;", definitions)
+        self.assertIn("std::int32_t cameraEaseMode;", definitions)
 
     def test_action_outcomes_keep_globals_and_bind_owned_module_entries(self):
         names = {

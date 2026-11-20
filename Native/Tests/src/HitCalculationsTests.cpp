@@ -22,7 +22,7 @@
 #include "Battle/Hit.h"
 #include "Battle/HitCalculations.hpp"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 
@@ -140,8 +140,7 @@ struct DispatchWorld final : battle::ActionCalculationWorld {
 };
 struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_hitFunctions)) hits =
-      std::to_array(Battle_hitFunctions);
+  decltype(VS::Battle::hitFunctions) hits = VS::Battle::hitFunctions;
   decltype(std::to_array(Battle_statCalculators)) stats =
       std::to_array(Battle_statCalculators);
   decltype(std::to_array(Battle_actionEffectMediators)) effects =
@@ -166,7 +165,7 @@ struct LiveFixture {
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), Battle_actors);
-    std::copy(hits.begin(), hits.end(), Battle_hitFunctions);
+    std::copy(hits.begin(), hits.end(), VS::Battle::hitFunctions.begin());
     std::copy(stats.begin(), stats.end(), Battle_statCalculators);
     std::copy(effects.begin(), effects.end(), Battle_actionEffectMediators);
     Battle_lastActionStatValue = last;
@@ -522,15 +521,16 @@ TEST_CASE("Original tables relocate active calculators and distinct sentinels",
           "[hit-calculations][sentinel-retirement]") {
   LiveFixture f;
   const auto image = ReadModule("BATTLE/BATTLE.PRG");
-  Relocate(reinterpret_cast<void**>(Battle_hitFunctions), image);
+  Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), image);
   Relocate(reinterpret_cast<void**>(Battle_statCalculators), image);
   Relocate(reinterpret_cast<void**>(Battle_actionEffectMediators), image);
-  CHECK(Battle_hitFunctions[0] == &battle::RejectLiveHitSelector);
+  CHECK(VS::Battle::hitFunctions[0] == &battle::RejectLiveHitSelector);
   CHECK(Battle_statCalculators[0] == &battle::RejectLiveStatSelector);
   CHECK(Battle_actionEffectMediators[0] == &battle::RejectLiveEffectSelector);
-  CHECK(Battle_hitFunctions[3] == &battle::LiveAgilityHitChance);
-  CHECK(Battle_hitFunctions[4] == &battle::LiveIntelligenceHitChance);
-  CHECK(Battle_hitFunctions[5] == &battle::LiveCostAdjustedAgilityHitChance);
+  CHECK(VS::Battle::hitFunctions[3] == &battle::LiveAgilityHitChance);
+  CHECK(VS::Battle::hitFunctions[4] == &battle::LiveIntelligenceHitChance);
+  CHECK(VS::Battle::hitFunctions[5] ==
+        &battle::LiveCostAdjustedAgilityHitChance);
 }
 TEST_CASE("Live stat dispatch invokes actual short table ABI",
           "[hit-calculations][F00435][battle][action][typed]") {
@@ -552,7 +552,7 @@ TEST_CASE("Live stat dispatch invokes actual short table ABI",
 TEST_CASE("Live roll invokes actual int table ABI and lazy exemption",
           "[hit-calculations][F00349][battle][action][typed]") {
   LiveFixture f;
-  Battle_hitFunctions[7] =
+  VS::Battle::hitFunctions[7] =
       +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int,
           int) -> int { return 255; };
   f.action.hits[0].hitFunctionId = 7;

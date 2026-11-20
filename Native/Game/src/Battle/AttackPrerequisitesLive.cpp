@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed attack prerequisites (AttackPrerequisites.cpp) to the battle
 // actor table, the status effect parameters and the prerequisite table slots.
-// Each slot of Battle_attackPrerequisiteFunctions in the BATTLE.PRG module
+// Each slot of VS::Battle::attackPrerequisiteFunctions in the BATTLE.PRG module
 // image resolves to the C binding of its rule here
 // (tools/port/copy_fixups.py MODULE_BINDING_ENTRIES).
 #include "Battle/AttackPrerequisitesLive.hpp"
@@ -13,7 +13,7 @@
 
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/AttackPrerequisiteTable.h"
+#include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
@@ -22,7 +22,7 @@
 namespace {
 namespace battle = VS::Battle;
 
-static_assert(std::size(Battle_attackPrerequisiteFunctions) ==
+static_assert(std::size(battle::attackPrerequisiteFunctions) ==
               battle::kPrerequisiteCount);
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> ==
               static_cast<std::size_t>(battle::kArmorLimbCount));

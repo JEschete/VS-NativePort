@@ -43,7 +43,7 @@
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-#include "Battle/ActionExecution.h"
+#include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionOutcomesLive.hpp"
@@ -88,7 +88,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
-#include "Battle/AttackPrerequisiteTable.h"
+#include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/BattleTypes.h"
@@ -103,14 +103,14 @@
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Battle/Hit.h"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/Hud.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Battle/Rewards.h"
+#include "Battle/Rewards.hpp"
 #include "Battle/Sphere.h"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereDrawLive.hpp"
@@ -375,8 +375,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8200u, 4u, (void*)&Battle_limbInjuryStatusIds, sizeof Battle_limbInjuryStatusIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8204u, 16u, (void*)&Battle_limbStatusFlags, sizeof Battle_limbStatusFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8214u, 32u, (void*)&VS::Items::itemCategoryUpperIds, sizeof VS::Items::itemCategoryUpperIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8234u, 32u, (void*)&Battle_hitFunctions, sizeof Battle_hitFunctions, 4u, sizeof Battle_hitFunctions[0]},
-    {"BATTLE/BATTLE.PRG", 0x800E8254u, 160u, (void*)&Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions, 4u, sizeof Battle_attackPrerequisiteFunctions[0]},
+    {"BATTLE/BATTLE.PRG", 0x800E8234u, 32u, (void*)&VS::Battle::hitFunctions, sizeof VS::Battle::hitFunctions, 4u, sizeof VS::Battle::hitFunctions[0]},
+    {"BATTLE/BATTLE.PRG", 0x800E8254u, 160u, (void*)&VS::Battle::attackPrerequisiteFunctions, sizeof VS::Battle::attackPrerequisiteFunctions, 4u, sizeof VS::Battle::attackPrerequisiteFunctions[0]},
     {"BATTLE/BATTLE.PRG", 0x800E82F4u, 24u, (void*)&Battle_bladePpDamageBonuses, sizeof Battle_bladePpDamageBonuses, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E830Cu, 108u, (void*)&Battle_statCalculators, sizeof Battle_statCalculators, 4u, sizeof Battle_statCalculators[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8378u, 280u, (void*)&Battle_actionEffectMediators, sizeof Battle_actionEffectMediators, 4u, sizeof Battle_actionEffectMediators[0]},
@@ -541,8 +541,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F17DCu, 124u, (void*)&Battle_Ai_radialRetreatPath, sizeof Battle_Ai_radialRetreatPath, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1858u, 4u, (void*)&VS::Field::isMenuRequestQueued, sizeof VS::Field::isMenuRequestQueued, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F185Cu, 4u, (void*)&VS::Effects::tintedActor, sizeof VS::Effects::tintedActor, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1860u, 4u, (void*)&Battle_lootMenuOpened, sizeof Battle_lootMenuOpened, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1864u, 4u, (void*)&Battle_rewardsFollowAction, sizeof Battle_rewardsFollowAction, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1860u, 4u, (void*)&VS::Battle::lootMenuOpened, sizeof VS::Battle::lootMenuOpened, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1864u, 4u, (void*)&VS::Battle::rewardsFollowAction, sizeof VS::Battle::rewardsFollowAction, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1868u, 4u, (void*)&VS::Effects::effectBusyFlags, sizeof VS::Effects::effectBusyFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F186Cu, 4u, (void*)&VS::Field::isFirstPersonViewEnabled, sizeof VS::Field::isFirstPersonViewEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1870u, 4u, (void*)&VS::Render::legacyCurrentOrderingTable, sizeof VS::Render::legacyCurrentOrderingTable, 0u, 0u},
@@ -564,8 +564,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F19C8u, 4u, (void*)&VS::Field::roomGeometryDrawMode, sizeof VS::Field::roomGeometryDrawMode, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19CCu, 4u, (void*)&Battle_actionState, sizeof Battle_actionState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19D0u, 4u, (void*)&VS::Field::sphericalCamera, sizeof VS::Field::sphericalCamera, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F19D8u, 4u, (void*)&Battle_settledCameraDistance, sizeof Battle_settledCameraDistance, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F19ECu, 4u, (void*)&Battle_cameraEaseMode, sizeof Battle_cameraEaseMode, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F19D8u, 4u, (void*)&VS::Battle::settledCameraDistance, sizeof VS::Battle::settledCameraDistance, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F19ECu, 4u, (void*)&VS::Battle::cameraEaseMode, sizeof VS::Battle::cameraEaseMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F19FCu, 4u, (void*)&Battle_characterState, sizeof Battle_characterState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1A00u, 4u, (void*)&Battle_hitPrerequisiteResult, sizeof Battle_hitPrerequisiteResult, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1A04u, 4u, (void*)&Battle_previousHitResult, sizeof Battle_previousHitResult, 1u, 1u},
@@ -2394,8 +2394,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
 const unsigned VS::Content::kModuleSymbolCount = sizeof VS::Content::kModuleSymbols / sizeof VS::Content::kModuleSymbols[0];
 
 const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
-    {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)Battle_hitFunctions, sizeof Battle_hitFunctions / sizeof Battle_hitFunctions[0], NULL}, // G00028 _hitFunctions
-    {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions / sizeof Battle_attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
+    {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)VS::Battle::hitFunctions.data(), sizeof VS::Battle::hitFunctions / sizeof VS::Battle::hitFunctions[0], NULL}, // G00028 _hitFunctions
+    {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)VS::Battle::attackPrerequisiteFunctions.data(), sizeof VS::Battle::attackPrerequisiteFunctions / sizeof VS::Battle::attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
     {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
     {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)Battle_actionEffectMediators, sizeof Battle_actionEffectMediators / sizeof Battle_actionEffectMediators[0], NULL}, // G00032 _actionEffectMediators
     {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates / sizeof Field_gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4

@@ -18,7 +18,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Battle/Rewards.h"
+#include "Battle/Rewards.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -134,7 +134,7 @@ class LiveLootFlowHost final : public LootFlowHost {
     VS::Battle::WaitForLivePostActionMovement();
   }
   void OpenScriptedLootList() override {
-    Battle_lootMenuOpened = 1;
+    VS::Battle::lootMenuOpened = 1;
     VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
     Battle_actionFlowMode = kScriptedLootFlowMode;
     VS::Battle::BeginLiveRewardPause();

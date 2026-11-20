@@ -1,11 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
-#include "Battle/HitChance.h"
+// The hit chance function table (HitChance.hpp).
+#include "Battle/HitChance.hpp"
 
-// decomp: _hitFunctions (_hitFunctions@BATTLE/BATTLE.PRG)
-int (*Battle_hitFunctions[8])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.cpp) */
-
+namespace VS::Battle {
+// decomp: _hitFunctions (_hitFunctions@BATTLE/BATTLE.PRG); contents: module
+// image, relocated (ModulePointers.cpp)
+std::array<HitFunction, kHitFunctionCount> hitFunctions;
+}  // namespace VS::Battle

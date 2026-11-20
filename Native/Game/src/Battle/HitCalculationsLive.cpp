@@ -15,7 +15,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/HitCalculations.hpp"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
@@ -154,12 +154,11 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
   std::optional<int> HitCalculator(int hit, int execute) override {
     if (!HasHit(hit)) return std::nullopt;
     const auto selector = action_->hits[hit].hitFunctionId;
-    if (selector == 0 || selector >= std::size(Battle_hitFunctions) ||
-        Battle_hitFunctions[selector] == nullptr) {
+    if (selector == 0 || selector >= std::size(hitFunctions) ||
+        hitFunctions[selector] == nullptr) {
       return std::nullopt;
     }
-    return Battle_hitFunctions[selector](action_, source_, target_, hit,
-                                         execute);
+    return hitFunctions[selector](action_, source_, target_, hit, execute);
   }
   std::optional<std::int16_t> StatCalculator(int hit, int execute) override {
     if (!HasHit(hit)) return std::nullopt;
@@ -244,13 +243,13 @@ void RejectLiveEffectSelector(Battle_ActionDefinition*, Battle_HitResult*,
                               Battle_HitResult*, int, int) {
   Refuse();
 }
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
+static_assert(std::is_same_v<decltype(hitFunctions[0]),
                              decltype(&LiveAgilityHitChance)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
+static_assert(std::is_same_v<decltype(hitFunctions[0]),
                              decltype(&LiveIntelligenceHitChance)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
+static_assert(std::is_same_v<decltype(hitFunctions[0]),
                              decltype(&LiveCostAdjustedAgilityHitChance)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
+static_assert(std::is_same_v<decltype(hitFunctions[0]),
                              decltype(&RejectLiveHitSelector)&>);
 static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&RejectLiveStatSelector)&>);

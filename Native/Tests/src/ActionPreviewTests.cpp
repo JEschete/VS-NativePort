@@ -21,7 +21,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -502,8 +502,7 @@ struct PreviewFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Battle_hitFunctions)) saved_hits =
-      std::to_array(Battle_hitFunctions);
+  decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
   decltype(std::to_array(Battle_statCalculators)) saved_stats =
       std::to_array(Battle_statCalculators);
   decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
@@ -532,7 +531,8 @@ struct PreviewFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
-    std::copy(saved_hits.begin(), saved_hits.end(), Battle_hitFunctions);
+    std::copy(saved_hits.begin(), saved_hits.end(),
+              VS::Battle::hitFunctions.begin());
     std::copy(saved_stats.begin(), saved_stats.end(), Battle_statCalculators);
     std::copy(saved_effects.begin(), saved_effects.end(),
               Battle_actionEffectMediators);
@@ -561,7 +561,7 @@ struct PreviewFixture {
     std::memcpy(Battle_actionDefinitions, main.data() + kActionOffset,
                 sizeof(Battle_actionDefinitions));
     const auto battle = Module("Native\\data\\disc\\BATTLE\\BATTLE.PRG");
-    Relocate(reinterpret_cast<void**>(Battle_hitFunctions), battle);
+    Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), battle);
     Relocate(reinterpret_cast<void**>(Battle_statCalculators), battle);
     Relocate(reinterpret_cast<void**>(Battle_actionEffectMediators), battle);
   }
@@ -570,7 +570,7 @@ struct PreviewFixture {
     stats[0].defaultTargetLimb = 4;
     REQUIRE(Battle_actionDefinitions[action].hits[0].prerequisiteFunctionId ==
             3);
-    REQUIRE(Battle_hitFunctions[7] == &b::LiveChainHitChance);
+    REQUIRE(VS::Battle::hitFunctions[7] == &b::LiveChainHitChance);
   }
 };
 }  // namespace
@@ -631,7 +631,7 @@ TEST_CASE(
   definition.hits[0].prerequisiteFunctionId = 1;
   definition.hits[0].hitFunctionId = 7;
   definition.hits[0].effectId = 1;
-  Battle_hitFunctions[7] = &b::LiveChainHitChance;
+  VS::Battle::hitFunctions[7] = &b::LiveChainHitChance;
   Battle_actionEffectMediators[1] =
       +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult* target,
           int, int) {

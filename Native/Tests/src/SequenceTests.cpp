@@ -30,7 +30,7 @@
 #include "Actors/Textures.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionExecution.h"
+#include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/Damage.h"
@@ -422,23 +422,23 @@ int Tests_ActionCameraRecovery(void) {
   Battle_ActionState* saved_action = Battle_actionState;
   const VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   const int saved_projection = VS::Render::projectionDistance;
-  const int saved_ease = Battle_cameraEaseMode;
-  const int saved_distance = Battle_settledCameraDistance;
+  const int saved_ease = VS::Battle::cameraEaseMode;
+  const int saved_distance = VS::Battle::settledCameraDistance;
   state.preferredCameraDistance = 2304;
   Battle_actionState = &state;
   VS::Field::sphericalCamera.motion.zoom_mode = 1;
   VS::Field::sphericalCamera.values.distance = 1536;
   VS::Render::projectionDistance = 640;
-  Battle_cameraEaseMode = 0;
-  Battle_settledCameraDistance = 0;
+  VS::Battle::cameraEaseMode = 0;
+  VS::Battle::settledCameraDistance = 0;
   VS::Battle::FinishLiveActionSequence();
   const int passed = VS::Render::projectionDistance == 576 &&
                      VS::Field::sphericalCamera.values.distance == 1728;
   Battle_actionState = saved_action;
   VS::Field::sphericalCamera = saved_camera;
   VS::Render::projectionDistance = saved_projection;
-  Battle_cameraEaseMode = saved_ease;
-  Battle_settledCameraDistance = saved_distance;
+  VS::Battle::cameraEaseMode = saved_ease;
+  VS::Battle::settledCameraDistance = saved_distance;
   Core_Gte_Reset();
   return passed;
 }

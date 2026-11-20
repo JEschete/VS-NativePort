@@ -12,7 +12,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/RewardFlow.hpp"
-#include "Battle/Rewards.h"
+#include "Battle/Rewards.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.hpp"
 #include "Effects/Runtime.hpp"
@@ -58,7 +58,7 @@ class LiveWorld final : public RewardDispatchWorld {
   void SetInteractionPaused(bool paused) override {
     VS::Field::isInteractionPaused = paused ? 1 : 0;
   }
-  std::int32_t FollowAction() override { return Battle_rewardsFollowAction; }
+  std::int32_t FollowAction() override { return rewardsFollowAction; }
   std::uint8_t ScriptFlag(int flag) override {
     return State::LiveScriptFlag(flag);
   }
@@ -145,7 +145,7 @@ class LiveWorld final : public RewardDispatchWorld {
   std::int32_t SceneNotificationPending() override {
     return Menu::IsLiveSceneNotificationPending();
   }
-  std::int32_t LootMenuOpened() override { return Battle_lootMenuOpened; }
+  std::int32_t LootMenuOpened() override { return lootMenuOpened; }
   void ResumeFieldAfterMenu() override { Field::LiveResumeFieldAfterMenu(); }
   void ReleaseSceneNotification() override {
     Menu::ReleaseLiveSceneNotification();
@@ -154,10 +154,10 @@ class LiveWorld final : public RewardDispatchWorld {
   void GrantPendingAbilityUnlock() override { LiveGrantPendingAbilityUnlock(); }
   std::uint32_t CurrentPhase() override { return Battle_actionFlowMode; }
   void SetLootMenuOpened(std::int32_t value) override {
-    Battle_lootMenuOpened = value;
+    lootMenuOpened = value;
   }
   void SetFollowAction(std::int32_t value) override {
-    Battle_rewardsFollowAction = value;
+    rewardsFollowAction = value;
   }
 };
 }  // namespace

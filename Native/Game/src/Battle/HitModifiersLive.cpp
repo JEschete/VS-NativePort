@@ -13,7 +13,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Core/Diagnostics.hpp"
 
@@ -138,12 +138,12 @@ int LiveChainHitChance(Battle_ActionDefinition*, Battle_HitResult*,
 }
 
 // Bind against the actual table element type, not an independently guessed ABI.
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
+static_assert(std::is_same_v<decltype(hitFunctions[0]),
                              decltype(&PreviousLiveHitSuccessThreshold)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
-                             decltype(&LiveGemHitChance)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
-                             decltype(&LiveRiskHitChance)&>);
-static_assert(std::is_same_v<decltype(Battle_hitFunctions[0]),
-                             decltype(&LiveChainHitChance)&>);
+static_assert(
+    std::is_same_v<decltype(hitFunctions[0]), decltype(&LiveGemHitChance)&>);
+static_assert(
+    std::is_same_v<decltype(hitFunctions[0]), decltype(&LiveRiskHitChance)&>);
+static_assert(
+    std::is_same_v<decltype(hitFunctions[0]), decltype(&LiveChainHitChance)&>);
 }  // namespace VS::Battle

@@ -17,7 +17,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/RewardFlowLive.hpp"
-#include "Battle/Rewards.h"
+#include "Battle/Rewards.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -53,7 +53,7 @@ struct LiveFixture {
   std::int16_t saved_effect_sound = VS::Field::LiveRoomEffectState().sound_id;
   decltype(VS::Field::roomTint) saved_tint = VS::Field::roomTint;
   u_int saved_phase = Battle_actionFlowMode;
-  int saved_follow = Battle_rewardsFollowAction;
+  int saved_follow = VS::Battle::rewardsFollowAction;
   int saved_pause = VS::Field::isInteractionPaused;
   u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
@@ -77,7 +77,7 @@ struct LiveFixture {
     VS::Field::weatherAmbientSoundId = -1;
     VS::Field::LiveRoomEffectState().sound_id = -1;
     Battle_actionFlowMode = 99;
-    Battle_rewardsFollowAction = 0;
+    VS::Battle::rewardsFollowAction = 0;
     VS::Field::isInteractionPaused = 77;
     VS::Field::areRoomUpdatesPaused = 0;
     VS::Field::isMinimapVisible = 1;
@@ -103,7 +103,7 @@ struct LiveFixture {
     VS::Field::LiveRoomEffectState().sound_id = saved_effect_sound;
     VS::Field::roomTint = saved_tint;
     Battle_actionFlowMode = saved_phase;
-    Battle_rewardsFollowAction = saved_follow;
+    VS::Battle::rewardsFollowAction = saved_follow;
     VS::Field::isInteractionPaused = saved_pause;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;
     VS::Field::isMinimapVisible = saved_minimap;
@@ -161,7 +161,7 @@ struct LiveDialogFixture : LiveMenuFixture {
   u_int saved_control = VS::Field::controlMode;
   int saved_recovery = Battle_recoveryRewardMode;
   int saved_effects = VS::Effects::effectBusyFlags;
-  int saved_loot_opened = Battle_lootMenuOpened;
+  int saved_loot_opened = VS::Battle::lootMenuOpened;
   int* saved_notification = VS::Menu::sceneNotificationBuffer;
   VS::Menu::TextBoxState saved_notice_box = VS::Menu::textBoxes[7];
   std::uint8_t saved_notice_timer = VS::Menu::sceneNotificationTimer;
@@ -176,7 +176,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     notice = {allocation, VS::Menu::kSceneNotificationBytes / sizeof(int)};
     Battle_recoveryRewardMode = 0;
     VS::Effects::effectBusyFlags = 0;
-    Battle_lootMenuOpened = 0;
+    VS::Battle::lootMenuOpened = 0;
     VS::Menu::sceneNotificationBuffer = nullptr;
   }
   ~LiveDialogFixture() {
@@ -187,7 +187,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     VS::Field::controlMode = saved_control;
     Battle_recoveryRewardMode = saved_recovery;
     VS::Effects::effectBusyFlags = saved_effects;
-    Battle_lootMenuOpened = saved_loot_opened;
+    VS::Battle::lootMenuOpened = saved_loot_opened;
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Menu::textBoxes[7] = saved_notice_box;
     VS::Menu::sceneNotificationTimer = saved_notice_timer;
@@ -407,8 +407,8 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   VS::Menu::Framework::menuItems = nullptr;
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Battle_lootMenuOpened = INT32_MIN;
-  Battle_rewardsFollowAction = 0x10000;
+  VS::Battle::lootMenuOpened = INT32_MIN;
+  VS::Battle::rewardsFollowAction = 0x10000;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   VS::Field::isMinimapVisible = 0;
@@ -419,7 +419,7 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::isMinimapVisible == 0);
   CHECK(Field_areMovingPlatformsPaused == 1);
-  CHECK(Battle_lootMenuOpened == INT32_MIN);
+  CHECK(VS::Battle::lootMenuOpened == INT32_MIN);
 }
 
 TEST_CASE("F00224 live empty loot selects actual pending unlock policy lazily",
@@ -435,7 +435,7 @@ TEST_CASE("F00224 live empty loot selects actual pending unlock policy lazily",
   CHECK(Battle_actionFlowMode == 5);
   CHECK(Field_areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
-  CHECK(Battle_lootMenuOpened == 0);
+  CHECK(VS::Battle::lootMenuOpened == 0);
 }
 
 TEST_CASE("Reward dialogs retain four original void module entrypoints",
@@ -531,14 +531,14 @@ TEST_CASE(
 TEST_CASE("F00227 live event start resets full flags before challenge results",
           "[reward-dispatch][reward-live][F00227]") {
   LiveDialogFixture fixture;
-  Battle_lootMenuOpened = INT32_MIN;
-  Battle_rewardsFollowAction = 0x10000;
+  VS::Battle::lootMenuOpened = INT32_MIN;
+  VS::Battle::rewardsFollowAction = 0x10000;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   VS::State::SetLiveScriptFlag(0xAB, 3);
   b::BeginLiveEventRewardResults();
-  CHECK(Battle_lootMenuOpened == 0);
-  CHECK(Battle_rewardsFollowAction == 0);
+  CHECK(VS::Battle::lootMenuOpened == 0);
+  CHECK(VS::Battle::rewardsFollowAction == 0);
   CHECK(Battle_actionFlowMode == 3);
   CHECK(VS::Menu::Framework::menuState.control.current_menu == 15);
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 1);
@@ -551,14 +551,14 @@ TEST_CASE(
   LiveDialogFixture fixture;
   VS::Items::LootListNode node{};
   VS::Items::lootListHead = &node;
-  Battle_lootMenuOpened = INT32_MIN;
-  Battle_rewardsFollowAction = INT32_MIN;
+  VS::Battle::lootMenuOpened = INT32_MIN;
+  VS::Battle::rewardsFollowAction = INT32_MIN;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   VS::State::SetLiveScriptFlag(0xAB, 3);
   b::BeginLivePostActionRewards();
-  CHECK(Battle_lootMenuOpened == 0);
-  CHECK(Battle_rewardsFollowAction == 1);
+  CHECK(VS::Battle::lootMenuOpened == 0);
+  CHECK(VS::Battle::rewardsFollowAction == 1);
   CHECK(Battle_actionFlowMode == 4);
   CHECK(VS::Menu::Framework::menuState.control.current_menu == 12);
   CHECK(VS::Menu::Framework::lootLists == &node);

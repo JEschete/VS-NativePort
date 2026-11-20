@@ -28,7 +28,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/AttackPrerequisiteTable.h"
+#include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/Damage.h"
@@ -37,7 +37,7 @@
 #include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusEffects.h"
@@ -401,11 +401,9 @@ constexpr auto kTwoHitArts = std::to_array<TwoHitArt>({
 });
 
 struct ArtResolutionFixture : AbilityEffectFixture {
-  decltype(std::to_array(Battle_hitFunctions)) saved_hits =
-      std::to_array(Battle_hitFunctions);
-  decltype(std::to_array(
-      Battle_attackPrerequisiteFunctions)) saved_prerequisites =
-      std::to_array(Battle_attackPrerequisiteFunctions);
+  decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
+  decltype(VS::Battle::attackPrerequisiteFunctions) saved_prerequisites =
+      VS::Battle::attackPrerequisiteFunctions;
   decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
       std::to_array(Battle_actionEffectMediators);
   std::uint32_t saved_previous_hit = Battle_previousHitResult;
@@ -413,11 +411,11 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 
   ArtResolutionFixture() {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
-    Battle_hitFunctions[1] = VS::Battle::PreviousLiveHitSuccessThreshold;
-    Battle_hitFunctions[3] = VS::Battle::LiveAgilityHitChance;
-    Battle_attackPrerequisiteFunctions[1] =
+    VS::Battle::hitFunctions[1] = VS::Battle::PreviousLiveHitSuccessThreshold;
+    VS::Battle::hitFunctions[3] = VS::Battle::LiveAgilityHitChance;
+    VS::Battle::attackPrerequisiteFunctions[1] =
         VS::Battle::AcceptAttackPrerequisiteSlot;
-    Battle_attackPrerequisiteFunctions[2] =
+    VS::Battle::attackPrerequisiteFunctions[2] =
         VS::Battle::AcceptAttackPrerequisiteSlot;
     Battle_actionEffectMediators[58] =
         VS::Battle::QueueLiveHitDamageAndEquipmentWear;
@@ -435,9 +433,10 @@ struct ArtResolutionFixture : AbilityEffectFixture {
   }
 
   ~ArtResolutionFixture() {
-    std::copy(saved_hits.begin(), saved_hits.end(), Battle_hitFunctions);
+    std::copy(saved_hits.begin(), saved_hits.end(),
+              VS::Battle::hitFunctions.begin());
     std::copy(saved_prerequisites.begin(), saved_prerequisites.end(),
-              Battle_attackPrerequisiteFunctions);
+              VS::Battle::attackPrerequisiteFunctions.begin());
     std::copy(saved_effects.begin(), saved_effects.end(),
               Battle_actionEffectMediators);
     Battle_previousHitResult = saved_previous_hit;

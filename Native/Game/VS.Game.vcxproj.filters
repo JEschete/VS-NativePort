@@ -426,7 +426,7 @@
     <ClCompile Include="src\Battle\ActionExecution.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionExecution.h">
+    <ClInclude Include="src\Battle\ActionExecution.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionFlow.cpp">
@@ -750,7 +750,7 @@
     <ClCompile Include="src\Battle\AttackPrerequisiteTable.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\AttackPrerequisiteTable.h">
+    <ClInclude Include="src\Battle\AttackPrerequisiteTable.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\BasicActionEffects.cpp">
@@ -837,7 +837,7 @@
     <ClCompile Include="src\Battle\HitChance.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\HitChance.h">
+    <ClInclude Include="src\Battle\HitChance.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\HitModifiers.cpp">
@@ -879,7 +879,7 @@
     <ClCompile Include="src\Battle\Rewards.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Rewards.h">
+    <ClInclude Include="src\Battle\Rewards.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Sphere.cpp">

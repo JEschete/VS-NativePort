@@ -24,7 +24,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/AttackPrerequisiteTable.h"
+#include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisites.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BattleMode.hpp"
@@ -3905,7 +3905,7 @@ TEST_CASE("Battle targeting bindings retire the module entries they replace",
     INFO("address " << address);
     CHECK(resolve(address) == nullptr);
   }
-  // Battle_attackPrerequisiteFunctions still stores the rule slots.
+  // VS::Battle::attackPrerequisiteFunctions still stores the rule slots.
   using Slot = decltype(&VS::Battle::RejectAttackPrerequisiteSlot);
   constexpr std::array<std::pair<unsigned, Slot>, 40> kSlots{{
       {0x8007F548u, &VS::Battle::RejectAttackPrerequisiteSlot},

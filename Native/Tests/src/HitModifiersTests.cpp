@@ -17,7 +17,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/HitChance.h"
+#include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/DataStore.hpp"
@@ -57,8 +57,7 @@ auto Bytes(const T& value) {
 
 struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_hitFunctions)) callbacks =
-      std::to_array(Battle_hitFunctions);
+  decltype(VS::Battle::hitFunctions) callbacks = VS::Battle::hitFunctions;
   std::uint32_t previous = Battle_previousHitResult;
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 2> stats{};
@@ -80,7 +79,8 @@ struct LiveFixture {
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), Battle_actors);
-    std::copy(callbacks.begin(), callbacks.end(), Battle_hitFunctions);
+    std::copy(callbacks.begin(), callbacks.end(),
+              VS::Battle::hitFunctions.begin());
     Battle_previousHitResult = previous;
   }
 };
@@ -101,9 +101,9 @@ std::vector<std::uint8_t> ReadOriginalBattleModule() {
 
 void RelocateHits(std::span<const std::uint8_t> image) {
   const auto tables = VS::Content::ModulePointerTables();
-  const auto table =
-      std::ranges::find(tables, reinterpret_cast<void**>(Battle_hitFunctions),
-                        &VS::Content::ModulePointerTable::target);
+  const auto table = std::ranges::find(
+      tables, reinterpret_cast<void**>(VS::Battle::hitFunctions.data()),
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
       *table, image, VS::Content::ModuleSymbols()));
@@ -444,14 +444,17 @@ TEST_CASE("Original hit table dispatches all four typed callbacks",
   f.stats.at(0).risk = 506;
   f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(128);
   f.target.target.targetLimb = 5;
-  CHECK(Battle_hitFunctions[1] == &battle::PreviousLiveHitSuccessThreshold);
-  CHECK(Battle_hitFunctions[2] == &battle::LiveGemHitChance);
-  CHECK(Battle_hitFunctions[6] == &battle::LiveRiskHitChance);
-  CHECK(Battle_hitFunctions[7] == &battle::LiveChainHitChance);
-  CHECK(Battle_hitFunctions[1](nullptr, nullptr, nullptr, -1, -1) == 100);
-  CHECK(Battle_hitFunctions[2](&f.action, &f.source, &f.target, 0, 0) == 100);
-  CHECK(Battle_hitFunctions[6](nullptr, &f.source, nullptr, -1, -1) == 256);
-  CHECK(Battle_hitFunctions[7](nullptr, nullptr, &f.target, -1, -1) == 49);
+  CHECK(VS::Battle::hitFunctions[1] ==
+        &battle::PreviousLiveHitSuccessThreshold);
+  CHECK(VS::Battle::hitFunctions[2] == &battle::LiveGemHitChance);
+  CHECK(VS::Battle::hitFunctions[6] == &battle::LiveRiskHitChance);
+  CHECK(VS::Battle::hitFunctions[7] == &battle::LiveChainHitChance);
+  CHECK(VS::Battle::hitFunctions[1](nullptr, nullptr, nullptr, -1, -1) == 100);
+  CHECK(VS::Battle::hitFunctions[2](&f.action, &f.source, &f.target, 0, 0) ==
+        100);
+  CHECK(VS::Battle::hitFunctions[6](nullptr, &f.source, nullptr, -1, -1) ==
+        256);
+  CHECK(VS::Battle::hitFunctions[7](nullptr, nullptr, &f.target, -1, -1) == 49);
 }
 
 TEST_CASE("Original gem helper symbols dispatch short-return bindings",

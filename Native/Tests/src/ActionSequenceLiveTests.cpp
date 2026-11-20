@@ -12,7 +12,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
-#include "Battle/ActionExecution.h"
+#include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/Actor.h"
@@ -52,7 +52,7 @@ struct LiveFixture {
       VS::Effects::actionVariant;
   int saved_busy = VS::Effects::effectBusyFlags;
   int saved_projection = VS::Render::projectionDistance;
-  int saved_distance_alias = Battle_settledCameraDistance;
+  int saved_distance_alias = VS::Battle::settledCameraDistance;
   unsigned saved_phase = Battle_actionFlowMode;
   Battle_ActionState state{};
   Battle_Ai_RoomAiState room{};
@@ -84,7 +84,7 @@ struct LiveFixture {
     VS::Effects::actionVariant = saved_variant;
     VS::Effects::effectBusyFlags = saved_busy;
     Battle_actionFlowMode = saved_phase;
-    Battle_settledCameraDistance = saved_distance_alias;
+    VS::Battle::settledCameraDistance = saved_distance_alias;
     VS::Render::projectionDistance = saved_projection;
   }
 };
@@ -198,12 +198,12 @@ TEST_CASE(
   VS::Field::sphericalCamera.motion.zoom_mode = 3;
   VS::Field::sphericalCamera.values.distance = -32600;
   fixture->state.preferredCameraDistance = -32768;
-  Battle_settledCameraDistance = 12345;
+  VS::Battle::settledCameraDistance = 12345;
   VS::Render::SetLiveCameraProjectionDistance(577);
   b::FinishLiveActionSequence();
   CHECK(VS::Render::projectionDistance == 513);
   CHECK(VS::Field::sphericalCamera.values.distance == -32768);
-  CHECK(Battle_settledCameraDistance == 12345);
+  CHECK(VS::Battle::settledCameraDistance == 12345);
   CHECK(fixture->state.chainStep == 0);
 }
 TEST_CASE(

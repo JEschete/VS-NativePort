@@ -17,7 +17,7 @@ int LiveCheckActionHitPrerequisite(Battle_ActionDefinition* action,
                                    unsigned char* target_result_bytes,
                                    int hit_number);
 
-// The Battle_attackPrerequisiteFunctions slots of the typed rules; each runs
+// The attackPrerequisiteFunctions slots of the typed rules; each runs
 // its rule on the target actor named by the hit's target result bytes.
 int RejectAttackPrerequisiteSlot(Battle_ActionDefinition* action,
                                  unsigned char* target_result_bytes);
