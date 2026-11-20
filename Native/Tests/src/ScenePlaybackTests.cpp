@@ -212,7 +212,7 @@ nlohmann::json AttractSetup() {
           {"zone", 20},
           {"room", 0},
           {"seed", 1},
-          {"player", {{"x", 4}, {"z", 2}, {"elevation", 2}, {"direction", 0}}},
+          {"player", {{"x", 4}, {"z", 2}, {"facing", 2}, {"surface", 0}}},
           {"enemies", nlohmann::json::array()},
           {"room_events", "production"},
           {"attract_demo", 3}};
@@ -226,6 +226,8 @@ void BreakAttractSetup(nlohmann::json& setup) {
   SECTION("wrong door") { setup["zone"] = 21; }
   SECTION("other cause door") { setup["attract_demo"] = 4; }
   SECTION("moved entry") { setup["player"]["x"] = 0; }
+  SECTION("turned entry") { setup["player"]["facing"] = 0; }
+  SECTION("other surface") { setup["player"]["surface"] = 1; }
   SECTION("isolated room") { setup["room_events"] = "isolated"; }
   SECTION("granted kit") { setup["ashley_profile"] = "post-prologue"; }
   SECTION("stat assist") { setup["ashley_stats"] = {{"max_hp", 999}}; }
@@ -250,6 +252,10 @@ TEST_CASE("Attract demos accept only the original title-timeout start",
     setup["zone"] = 2;
     setup["room"] = 1;
     CHECK(VS::combat_lab::DecodeSetup(setup).attract_demo == 4);
+  }
+  SECTION("legacy position keys") {
+    setup["player"] = {{"x", 4}, {"z", 2}, {"elevation", 2}, {"direction", 0}};
+    CHECK(VS::combat_lab::DecodeSetup(setup).attract_demo == 3);
   }
   SECTION("invalid") {
     BreakAttractSetup(setup);

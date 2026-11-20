@@ -116,11 +116,13 @@ nlohmann::json DescribeCommand(Bytes instruction, std::size_t offset,
         static_cast<std::int16_t>(ReadInteger(instruction, 1));
   } else if (operation == SceneOperation::kChangeRoom) {
     // func_800B98C0 (4A0A8.c:2018): zone 0 uses the room-only transition.
+    // vs_battle_script_68 reads the arrival surface before the tile z and the
+    // facing quadrant after it.
     constexpr std::size_t kRoomHandoffOperands = 9;
     std::array<std::uint8_t, kRoomHandoffOperands> operands{};
     std::ranges::copy(Section(instruction, 1, operands.size()),
                       operands.begin());
-    const auto [zone, room, x, direction, z, elevation, flags, effect, speed] =
+    const auto [zone, room, x, surface, z, facing, flags, effect, speed] =
         operands;
     command["operation"] = "change_room";
     command["destination"] = {
@@ -128,7 +130,7 @@ nlohmann::json DescribeCommand(Bytes instruction, std::size_t offset,
         {"room", room},
         {"zone_mode", zone == 0 ? "current" : "explicit"}};
     command["entry"] = {
-        {"x", x}, {"z", z}, {"direction", direction}, {"elevation", elevation}};
+        {"x", x}, {"z", z}, {"surface", surface}, {"facing", facing}};
     command["flags"] = flags;
     command["transition"] = {{"effect", effect}, {"speed", speed}};
   }
@@ -202,8 +204,8 @@ nlohmann::json DescribeRoomContext(int zone, const Game::EncounterRoom& room) {
   }
   context["supported_start"] = {{"x", start->x},
                                 {"z", start->z},
-                                {"elevation", start->elevation},
-                                {"direction", start->direction}};
+                                {"facing", start->facing},
+                                {"surface", start->surface}};
   context["fixture_scope"] =
       "original supported non-door tile; story prerequisites not granted";
   auto alternatives = nlohmann::json::array();
@@ -213,8 +215,8 @@ nlohmann::json DescribeRoomContext(int zone, const Game::EncounterRoom& room) {
       if (corner) {
         alternatives.push_back({{"x", corner->x},
                                 {"z", corner->z},
-                                {"elevation", corner->elevation},
-                                {"direction", corner->direction}});
+                                {"facing", corner->facing},
+                                {"surface", corner->surface}});
       }
     }
   }

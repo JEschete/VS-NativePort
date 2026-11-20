@@ -154,9 +154,9 @@ int EnterOrFinishEncounter() {
   VS::State::savedEntryDoor.destination_room_id = configuration.room;
   VS::State::savedEntryDoor.entry_tile_x = configuration.player.x;
   VS::State::savedEntryDoor.entry_tile_z = configuration.player.z;
-  VS::State::savedEntryDoor.entry_elevation = configuration.player.elevation;
+  VS::State::savedEntryDoor.entry_elevation = configuration.player.facing;
   VS::State::savedEntryDoor.tile_location.entry_direction =
-      configuration.player.direction;
+      configuration.player.surface;
   VS::Boot::gameEntryMode = 0;
   RestoreBootEventSelector();
   if (configuration.attract_demo) {

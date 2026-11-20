@@ -17,7 +17,7 @@ struct EncounterLimits {
   static constexpr int kEnemies = 8;
   static constexpr int kActorSlots = 16;
   static constexpr int kTiles = 32;
-  static constexpr int kElevations = 4;
+  static constexpr int kFacings = 4;
   static constexpr int kEnemyIdEnd = 127;
   static constexpr int kLastZone = 255;
   static constexpr int kLastExternalEvent = 9999;
@@ -31,11 +31,14 @@ struct EncounterLimits {
   static constexpr int kMaxPlayerStat = 999;
 };
 
+// A start tile in the original placement encoding: facing is the quarter turn
+// the actor faces (0..3) and surface is the static collision layer it stands on
+// (0 or 1).
 struct EncounterPosition {
   int x = 0;
   int z = 0;
-  int elevation = 0;
-  int direction = 0;
+  int facing = 0;
+  int surface = 0;
 };
 
 struct EncounterEnemy {

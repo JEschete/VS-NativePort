@@ -165,7 +165,7 @@ nlohmann::json EncodeDoorTest(const DoorTestCase& test) {
           {"trigger", {test.door.tile_x, test.door.tile_z, test.door.layer}},
           {"entry",
            {test.door.destination.x, test.door.destination.z,
-            test.door.destination.elevation, test.door.destination.direction}},
+            test.door.destination.facing, test.door.destination.surface}},
           {"entry_step", test.door.entry_step},
           {"door_id", test.door.door_id},
           {"required_flag", test.door.required_flag},

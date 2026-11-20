@@ -21,7 +21,11 @@ def verify_script(directory: Path) -> dict:
     require(
         setup["ashley_weapon"] == "crossbow"
         and setup["ashley_profile"] == "post-prologue"
-        and setup["player"] == {"x": 6, "z": 10, "elevation": 0, "direction": 0}
+        and setup["player"] in (
+            {"x": 6, "z": 10, "facing": 0, "surface": 0},
+            # Runs recorded before #487 named the facing "elevation" and the surface "direction".
+            {"x": 6, "z": 10, "elevation": 0, "direction": 0},
+        )
         and setup["ashley_stats"] == {}
         and setup["enemies"] == []
         and "external_event" not in setup,

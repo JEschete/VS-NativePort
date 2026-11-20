@@ -92,7 +92,7 @@ activates it (on value rows it also steps the value). Main rows:
 | ZONE, ROOM | Zone (default 9) and room within it. |
 | ENEMY | Enemy definition. IDs are local to the zone. |
 | QUANTITY | 0 (SOLO) to 8 enemies in the current group. |
-| ASHLEY TILE X, ASHLEY TILE Z, ELEVATION | Ashley's start tile and elevation. |
+| ASHLEY TILE X, ASHLEY TILE Z, FACING | Ashley's start tile and facing in quarter turns (0..3). Enemies added from the group rows copy Ashley's facing and surface. |
 | GROUP OFFSET X, GROUP OFFSET Z, LINE SPACING | The first enemy starts at Ashley's tile plus the offset; the rest follow along X, LINE SPACING tiles apart. |
 | RANDOM SEED | RNG seed for the encounter. |
 | ASHLEY | Testing profile. See [Ashley testing profiles](#ashley-testing-profiles). |
@@ -106,7 +106,8 @@ activates it (on value rows it also steps the value). Main rows:
 - The grid preview shows start tiles over a conservative static-floor check. Green tiles have full floor support;
   dark tiles are blocked, partial, pits or missing data. A rejected start names the actor, tile and reason.
 - Production-room and external-event presets lock the group rows; the labels read ORIGINAL ROOM or SCRIPT-OWNED.
-  Facing direction, room-event policy, external events and progression fields have no editor row; set them in JSON.
+  Surface, per-enemy facing, room-event policy, external events and progression fields have no editor row; set them
+  in JSON.
 
 ### Ashley setup
 
@@ -143,7 +144,7 @@ menus or resolving actions, and are rejected in door and scene fixtures. Every r
 `control.adjust` with before/after state or a rejection. Item use itself still goes through the normal menus.
 F10 and then START ENCOUNTER gives a fresh player and world.
 
-Example, four Silver Wolves: zone 9, room 0, Ashley X=4 / Z=9, elevation 0, enemy definition 4, quantity 4, group
+Example, four Silver Wolves: zone 9, room 0, Ashley X=4 / Z=9, facing 0, enemy definition 4, quantity 4, group
 offset X -2 / Z +3, spacing 1. This places the wolves at (2,12), (3,12), (4,12) and (5,12). The same setup (with the
 post-prologue profile) is in [silver_wolves.json](../tools/test/scenarios/silver_wolves.json).
 
@@ -157,8 +158,8 @@ Unknown values are rejected. Omitted optional fields keep their defaults, so old
 {
   "version": 1, "zone": 9, "room": 0, "seed": 1,
   "ashley_profile": "post-prologue", "ashley_weapon": "default", "ashley_stats": {"max_hp": 999, "max_mp": 999},
-  "player": {"x": 4, "z": 9, "elevation": 0, "direction": 0},
-  "enemies": [{"definition": 4, "position": {"x": 2, "z": 12, "elevation": 0, "direction": 0}}]
+  "player": {"x": 4, "z": 9, "facing": 0, "surface": 0},
+  "enemies": [{"definition": 4, "position": {"x": 2, "z": 12, "facing": 0, "surface": 0}}]
 }
 ```
 
@@ -167,8 +168,8 @@ Unknown values are rejected. Omitted optional fields keep their defaults, so old
 | `version` | Required. Must be 1. |
 | `zone`, `room` | Required. Zone and room index. |
 | `seed` | Required. RNG seed, 0..4294967295. |
-| `player` | Required. `{x, z, elevation, direction}` tile position. `elevation` (0..3) and `direction` (0..1) default to 0. |
-| `enemies` | Required array (may be empty), at most 8 entries of `{definition, position}`. Definitions are zone-local. |
+| `player` | Required. `{x, z, facing, surface}` tile position. `facing` is the quarter turn the actor faces (0..3) and `surface` the tile's static collision layer it stands on (0..1); both default to 0. Presets saved before #487 named them `elevation` and `direction`; those keys are still read when `facing` or `surface` is absent. |
+| `enemies` | Required array (may be empty), at most 8 entries of `{definition, position}`. Definitions are zone-local; `position` has the same form as `player`. |
 | `ashley_profile` | Testing profile, default `prologue`. |
 | `ashley_weapon` | Weapon choice, default `default` (the profile's equipment). |
 | `ashley_stats` | Overrides `max_hp`, `max_mp`, `strength`, `intelligence`, `agility`, each 1..999. |
@@ -184,12 +185,13 @@ Unknown values are rejected. Omitted optional fields keep their defaults, so old
 Notes:
 
 - Validation checks tiles, floor support, overlaps and actor slots. It never moves actors or changes counts to pass.
+  Two starts overlap when they share a tile and surface; facing does not separate them.
   `position_units` may appear in saved presets; it is ignored when loading.
 - `story_progress`, `clear_count`, `crossed_puzzles` and `inherited_music` are declared fixture state, not earned
   campaign progress. Some original enemy placements and checks read `story_progress`; play does not change it later.
 - `inherited_music` stands in for a wave bank that an earlier zone or event would have left loaded. It is rejected
   if the music has no mapped bank, if the zone loads its own music, or with `attract_demo`.
-- `attract_demo` needs Ashley at tile 4,2, elevation 2, direction 0, production room events, the `prologue` profile,
+- `attract_demo` needs Ashley at tile 4,2, facing 2, surface 0, production room events, the `prologue` profile,
   the default weapon and no other overrides, and a sequence script with a `terminal: attract_to_title` scene and no
   presses.
 - Samples: [silver_wolves.json](../tools/test/scenarios/silver_wolves.json) (isolated combat) and

@@ -17,7 +17,7 @@ enum Row {
   kQuantity,
   kPlayerX,
   kPlayerZ,
-  kElevation,
+  kFacing,
   kOffsetX,
   kOffsetZ,
   kSpacing,
@@ -237,10 +237,9 @@ void Editor::Change(int direction) {
     case kPlayerZ:
       setup_.player.z = std::clamp(setup_.player.z + direction, 0, kMaxTile);
       break;
-    case kElevation:
-      setup_.player.elevation =
-          std::clamp(setup_.player.elevation + direction, 0,
-                     Game::EncounterLimits::kElevations - 1);
+    case kFacing:
+      setup_.player.facing = std::clamp(setup_.player.facing + direction, 0,
+                                        Game::EncounterLimits::kFacings - 1);
       break;
     case kOffsetX:
       offset_x_ = std::clamp(offset_x_ + direction, -kMaxTile, kMaxTile);
@@ -425,7 +424,7 @@ void Editor::Draw(Canvas& canvas) const {
                                             quantity_ == 0 ? " (SOLO)" : ""),
       std::format("ASHLEY TILE X: {}", setup_.player.x),
       std::format("ASHLEY TILE Z: {}", setup_.player.z),
-      std::format("ELEVATION: {}", setup_.player.elevation),
+      std::format("FACING: {}", setup_.player.facing),
       std::format("GROUP OFFSET X: {}", offset_x_),
       std::format("GROUP OFFSET Z: {}", offset_z_),
       std::format("LINE SPACING: {}", spacing_),

@@ -21,13 +21,22 @@ namespace {
 nlohmann::json EncodePosition(const Game::EncounterPosition& position) {
   return {{"x", position.x},
           {"z", position.z},
-          {"elevation", position.elevation},
-          {"direction", position.direction}};
+          {"facing", position.facing},
+          {"surface", position.surface}};
+}
+
+// Presets written before #487 used "elevation" for the facing and "direction"
+// for the surface; read them when the current keys are absent.
+int PositionField(const nlohmann::json& value, const char* key,
+                  const char* legacy_key) {
+  if (value.contains(key)) return value.at(key).get<int>();
+  return value.value(legacy_key, 0);
 }
 
 Game::EncounterPosition DecodePosition(const nlohmann::json& value) {
   return {value.at("x").get<int>(), value.at("z").get<int>(),
-          value.value("elevation", 0), value.value("direction", 0)};
+          PositionField(value, "facing", "elevation"),
+          PositionField(value, "surface", "direction")};
 }
 
 nlohmann::json EncodeStats(const Game::EncounterStatOverrides& stats) {
@@ -656,7 +665,8 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
        setup.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
            ? "production"
            : "isolated"},
-      {"position_units", "tiles; elevation steps of 64 native units"}};
+      {"position_units",
+       "tiles; facing in quarter turns; surface is the collision layer"}};
   if (setup.external_event) result["external_event"] = *setup.external_event;
   if (setup.room_local_event) {
     result["room_local_event"] = *setup.room_local_event;
@@ -786,8 +796,8 @@ void CheckAttractDemo(const Game::EncounterSetup& setup) {
   const bool first = setup.attract_demo == Game::kAttractDemoCutscene1;
   if (setup.zone != (first ? kFirstDemoZone : 2) ||
       setup.room != (first ? 0 : 1) || setup.player.x != kEntryTileX ||
-      setup.player.z != 2 || setup.player.elevation != 2 ||
-      setup.player.direction != 0 ||
+      setup.player.z != 2 || setup.player.facing != 2 ||
+      setup.player.surface != 0 ||
       setup.room_policy != Game::EncounterRoomPolicy::kOriginalRoom ||
       setup.profile != Game::EncounterProfile::kPrologue ||
       setup.weapon != Game::EncounterWeapon::kDefault ||

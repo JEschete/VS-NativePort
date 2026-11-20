@@ -174,7 +174,7 @@ TEST_CASE("Scene inventory decodes current-zone room handoffs losslessly",
   CHECK(command.at("destination") ==
         nlohmann::json{{"zone", 0}, {"room", 21}, {"zone_mode", "current"}});
   CHECK(command.at("entry") ==
-        nlohmann::json{{"x", 3}, {"z", 5}, {"direction", 7}, {"elevation", 2}});
+        nlohmann::json{{"x", 3}, {"z", 5}, {"surface", 7}, {"facing", 2}});
   CHECK(command.at("flags") == 4);
   CHECK(command.at("transition") ==
         nlohmann::json{{"effect", 0}, {"speed", 60}});

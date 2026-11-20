@@ -96,9 +96,9 @@ void CheckOriginalDoorEntry(std::span<const std::uint8_t> bytes,
   const auto tile = ReadDoorInteger(bytes, 2, 2);
   const auto entry = ReadDoorInteger(bytes, 4, 2);
   const auto flag = ReadDoorInteger(bytes, 6, 2);
-  CHECK(door.destination.direction == ((tile >> 13) & 7));
+  CHECK(door.destination.surface == ((tile >> 13) & 7));
   CHECK(door.destination.x == ((entry >> 8) & 31));
-  CHECK(door.destination.elevation == ((entry >> 13) & 3));
+  CHECK(door.destination.facing == ((entry >> 13) & 3));
   CHECK(door.entry_step == ((entry >> 15) != 0));
   CHECK(door.destination.z == ((flag >> 10) & 31));
   CHECK(door.door_id == bytes[8]);
@@ -465,7 +465,7 @@ TEST_CASE(
     "[doors][resume]") {
   auto cases = ResumeCases();
   const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
-  cases[4].door.destination.direction = 3;
+  cases[4].door.destination.surface = 3;
   const auto plan = VS::combat_lab::PlanDoorResume(cases, {}, prior);
   REQUIRE(plan.invalidated.size() == 1);
   CHECK(plan.invalidated.front() == "stage-004");

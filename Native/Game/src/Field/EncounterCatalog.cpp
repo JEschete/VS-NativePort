@@ -387,7 +387,7 @@ std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
     std::size_t index) {
   constexpr std::size_t kPrimaryCapacity = kEnemySlotEnd - kFirstEnemySlot;
   constexpr int kTileLimit = 32;
-  constexpr int kElevationLimit = 4;
+  constexpr int kFacingLimit = 4;
   if (!IsEncounterHostileSpawn(source) || source.enemy_id != instance.enemy ||
       instance.enemy < 0 || instance.enemy >= EncounterLimits::kEnemyIdEnd ||
       index >= kPrimaryCapacity) {
@@ -395,17 +395,17 @@ std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   }
   const auto& position = instance.position;
   if (position.x < 0 || position.x >= kTileLimit || position.z < 0 ||
-      position.z >= kTileLimit || position.elevation < 0 ||
-      position.elevation >= kElevationLimit || position.direction < 0 ||
-      position.direction > 1) {
+      position.z >= kTileLimit || position.facing < 0 ||
+      position.facing >= kFacingLimit || position.surface < 0 ||
+      position.surface > 1) {
     return std::unexpected("placement exceeds the production encoding");
   }
   auto placement = source;
   placement.index = static_cast<std::uint8_t>(index);
   placement.tile_x = static_cast<std::uint8_t>(position.x);
   placement.tile_z = static_cast<std::uint8_t>(position.z);
-  placement.height = static_cast<std::uint8_t>(position.elevation);
-  placement.direction = static_cast<std::uint8_t>(position.direction);
+  placement.height = static_cast<std::uint8_t>(position.facing);
+  placement.direction = static_cast<std::uint8_t>(position.surface);
   // VS::Field::SpawnRoomActors (146C.c:14901) allocates slots when slot is
   // zero.
   // Membership is explicit, not story-gated. AI, hostility, loot and variant
@@ -599,13 +599,15 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
   const auto check_position = [&](const EncounterPosition& position,
                                   std::string_view actor) {
     if (position.x < 0 || position.x >= room->width || position.z < 0 ||
-        position.z >= room->depth || position.elevation < 0 ||
-        position.elevation >= EncounterLimits::kElevations ||
-        position.direction < 0 || position.direction > 1) {
+        position.z >= room->depth || position.facing < 0 ||
+        position.facing >= EncounterLimits::kFacings || position.surface < 0 ||
+        position.surface > 1) {
       errors.emplace_back("placement is outside supported room coordinates");
       return;
     }
-    if (!positions.emplace(position.x, position.z, position.elevation).second) {
+    // Facing only turns an actor in place; two starts share a tile when their
+    // tile and collision surface match.
+    if (!positions.emplace(position.x, position.z, position.surface).second) {
       errors.emplace_back("two actors occupy the same starting tile");
     }
     const auto index =

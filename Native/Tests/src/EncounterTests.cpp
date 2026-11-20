@@ -3,6 +3,7 @@
 #include <cstring>
 #include <span>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -213,14 +214,63 @@ TEST_CASE("Encounter validation rejects overlaps and invalid content",
   SECTION("same tile") { setup.enemies[0].position = setup.player; }
   SECTION("negative offset") { setup.enemies[0].position.x = -1; }
   SECTION("room boundary") { setup.player.z = 32; }
-  SECTION("elevation encoding") { setup.player.elevation = 4; }
-  SECTION("direction encoding") { setup.enemies[0].position.direction = 2; }
+  SECTION("facing encoding") { setup.player.facing = 4; }
+  SECTION("surface encoding") { setup.enemies[0].position.surface = 2; }
   SECTION("wrong zone") { setup.zone = 10; }
   SECTION("unknown room") { setup.room = 30; }
   SECTION("unknown enemy") { setup.enemies[0].enemy = 30; }
   SECTION("missing assets") { setup.enemies[0].enemy = 2; }
   SECTION("room unavailable") { zone.rooms[0].unavailable_reason = "bad data"; }
   CHECK_FALSE(ValidateEncounter(setup, zone).empty());
+}
+
+TEST_CASE("Encounter validation keys shared starts on tile and surface",
+          "[combat][encounter]") {
+  const auto zone = TestZone();
+  const auto shares_start = [&zone](const EncounterSetup& setup) {
+    const auto errors = ValidateEncounter(setup, zone);
+    return std::ranges::find(
+               errors,
+               std::string_view("two actors occupy the same starting tile")) !=
+           errors.end();
+  };
+  // Positions are {x, z, facing, surface}; Ashley starts at {4, 2, 0, 0}.
+  auto setup = TestSetup();
+  for (int facing = 0; facing < VS::Game::EncounterLimits::kFacings; ++facing) {
+    CAPTURE(facing);
+    setup.enemies[0].position = {4, 2, facing, 0};
+    CHECK(shares_start(setup));
+  }
+  setup.enemies[0].position = {4, 2, 0, 1};
+  CHECK(ValidateEncounter(setup, zone).empty());
+}
+
+TEST_CASE("Encounter presets write facing and surface and read the old keys",
+          "[combat][encounter]") {
+  auto setup = TestSetup();
+  setup.player = {4, 2, 3, 1};
+  setup.enemies[0].position = {1, 8, 2, 1};
+  const auto encoded = VS::combat_lab::EncodeSetup(setup);
+  CHECK(encoded.at("player") ==
+        nlohmann::json{{"x", 4}, {"z", 2}, {"facing", 3}, {"surface", 1}});
+  CHECK(encoded.at("enemies").at(0).at("position") ==
+        nlohmann::json{{"x", 1}, {"z", 8}, {"facing", 2}, {"surface", 1}});
+  // Presets saved before #487 named the facing "elevation" and the surface
+  // "direction".
+  auto legacy = encoded;
+  legacy["player"] = {{"x", 4}, {"z", 2}, {"elevation", 3}, {"direction", 1}};
+  legacy["enemies"][0]["position"] = {
+      {"x", 1}, {"z", 8}, {"elevation", 2}, {"direction", 1}};
+  const auto restored = VS::combat_lab::DecodeSetup(legacy);
+  CHECK(restored.player.facing == 3);
+  CHECK(restored.player.surface == 1);
+  CHECK(restored.enemies.at(0).position.facing == 2);
+  CHECK(restored.enemies.at(0).position.surface == 1);
+  legacy["player"]["facing"] = 1;
+  legacy["player"]["surface"] = 0;
+  const auto current = VS::combat_lab::DecodeSetup(legacy);
+  CHECK(current.player.facing == 1);
+  CHECK(current.player.surface == 0);
 }
 
 TEST_CASE("Solo encounters retain Ashley placement and profile validation",
@@ -481,8 +531,8 @@ TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
   SECTION("wrong enemy") { source.enemy_id = 1; }
   SECTION("negative coordinate") { spawn.position.x = -1; }
   SECTION("coordinate overflow") { spawn.position.z = 256; }
-  SECTION("elevation overflow") { spawn.position.elevation = 4; }
-  SECTION("direction overflow") { spawn.position.direction = 2; }
+  SECTION("facing overflow") { spawn.position.facing = 4; }
+  SECTION("surface overflow") { spawn.position.surface = 2; }
   SECTION("instance budget") { index = 8; }
   CHECK_FALSE(VS::Game::PrepareEncounterSpawn(source, spawn, index));
 }
