@@ -10,10 +10,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Content/ModuleData.hpp"
@@ -34,7 +34,7 @@ extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
 
 static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
-                             void (*)(Actors_ActorRecord&, const MATRIX&,
+                             void (*)(VS::Actors::ActorRecord&, const MATRIX&,
                                       const SVECTOR&)>);
 
 namespace {
@@ -46,10 +46,10 @@ struct ActorShadowFixture {
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
-  u_short saved_platform = Actors_supportingPlatformLayer;
+  u_short saved_platform = VS::Actors::supportingPlatformLayer;
   VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
-  decltype(Actors_supportingGimmickIndex) saved_gimmick_index =
-      Actors_supportingGimmickIndex;
+  decltype(VS::Actors::supportingGimmickIndex) saved_gimmick_index =
+      VS::Actors::supportingGimmickIndex;
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   std::array<unsigned int, 18> saved_vertices{};
@@ -58,7 +58,7 @@ struct ActorShadowFixture {
       std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
   std::array<u_long, 2048> ordering{};
   std::array<unsigned int, 32> model_bytes{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   MATRIX camera{};
   alignas(
       VS::Field::MpdCollisionHeader) std::array<unsigned char, 188> terrain{};
@@ -71,7 +71,7 @@ struct ActorShadowFixture {
                 saved_faces.begin());
     SetMesh();
     VS::Field::roomData = {};
-    Actors_supportingPlatformLayer = 0;
+    VS::Actors::supportingPlatformLayer = 0;
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::FrameScratchpad() = {};
@@ -82,17 +82,17 @@ struct ActorShadowFixture {
     VS::Render::FrameScratchpad().view_matrix = camera;
     *VS::Render::ModelWorkspace() = {};
     VS::Actors::modelRenderContext = {};
-    actor.instance.isVisible = -1;
-    actor.instance.soundEnabled = 1;
-    actor.instance.boneCount = 1;
-    actor.instance.vertexGroupCount = 1;
-    actor.instance.scaleX = actor.instance.scaleY = actor.instance.scaleZ =
+    actor.instance.is_visible = -1;
+    actor.instance.sound_enabled = 1;
+    actor.instance.bone_count = 1;
+    actor.instance.vertex_group_count = 1;
+    actor.instance.scale_x = actor.instance.scale_y = actor.instance.scale_z =
         actor.scale = 4096;
-    actor.shadowRadius = 64;
-    actor.shadowBlend.radius_expand_rate =
-        actor.shadowBlend.radius_shrink_rate = 8192;
-    actor.blendPose.scale_keys[0] = {64, 64, 64, 0};
-    actor.modelDataSize = sizeof model_bytes;
+    actor.shadow_radius = 64;
+    actor.shadow_blend.radius_expand_rate =
+        actor.shadow_blend.radius_shrink_rate = 8192;
+    actor.blend_pose.scale_keys[0] = {64, 64, 64, 0};
+    actor.model_data_size = sizeof model_bytes;
     auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
     actor.instance.model = model;
     model->group_section = 96;
@@ -113,8 +113,8 @@ struct ActorShadowFixture {
     std::copy(saved_faces.begin(), saved_faces.end(),
               Content_battleShadowFaces);
     VS::Field::roomData = saved_room;
-    Actors_supportingPlatformLayer = saved_platform;
-    Actors_supportingGimmickIndex = saved_gimmick_index;
+    VS::Actors::supportingPlatformLayer = saved_platform;
+    VS::Actors::supportingGimmickIndex = saved_gimmick_index;
     VS::Field::LiveCollisionProbe() = saved_probe;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());
@@ -203,7 +203,7 @@ struct ActorShadowFixture {
                 nullptr);
     const std::int16_t coordinate = steep ? 176 : 160;
     actor.instance.position = {coordinate, 0, coordinate, 0};
-    actor.shadowRadius = steep ? 32 : 64;
+    actor.shadow_radius = steep ? 32 : 64;
     VS::Render::ModelWorkspace()->root_offset = {
         coordinate, static_cast<std::int16_t>(steep ? 64 : 56), coordinate, 0};
     camera.t[0] = -coordinate;
@@ -258,10 +258,10 @@ struct ShadowScaleCase {
 
 void CheckScaleCase(ActorShadowFixture& fixture, const ShadowScaleCase& input) {
   fixture.ResetPackets();
-  fixture.actor.shadowRadius = static_cast<u_short>(input.radius);
-  fixture.actor.instance.scaleX = fixture.actor.instance.scaleY = input.model;
-  fixture.actor.shadowBlend.radius_expand_rate =
-      fixture.actor.shadowBlend.radius_shrink_rate = input.blend;
+  fixture.actor.shadow_radius = static_cast<u_short>(input.radius);
+  fixture.actor.instance.scale_x = fixture.actor.instance.scale_y = input.model;
+  fixture.actor.shadow_blend.radius_expand_rate =
+      fixture.actor.shadow_blend.radius_shrink_rate = input.blend;
   VS::Render::ModelWorkspace()->root_offset.vy =
       static_cast<std::int16_t>(input.height);
   fixture.Draw();
@@ -286,11 +286,11 @@ TEST_CASE("Actor drawing submits the original gated ground-shadow pass",
   }
   VS::Actors::DrawLiveActorModel(fixture.actor, fixture.camera, 0);
   CHECK(fixture.PacketCount() == 24);
-  CHECK(static_cast<bool>(fixture.actor.instance.isPreviewModel) !=
+  CHECK(static_cast<bool>(fixture.actor.instance.is_preview_model) !=
         body_visible);
-  CHECK(fixture.actor.soundPosition.vx == 160);
-  CHECK(fixture.actor.soundPosition.vy == 120);
-  CHECK(fixture.actor.soundPosition.vz == 1024);
+  CHECK(fixture.actor.sound_position.vx == 160);
+  CHECK(fixture.actor.sound_position.vy == 120);
+  CHECK(fixture.actor.sound_position.vz == 1024);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
 }
@@ -301,20 +301,20 @@ TEST_CASE(
   ActorShadowFixture fixture;
   const int gate = GENERATE(0, 1, 2, 3);
   char companion = 0;
-  if (gate == 0) fixture.actor.instance.soundEnabled = 0;
+  if (gate == 0) fixture.actor.instance.sound_enabled = 0;
   if (gate == 1) companion = 1;
-  if (gate == 2) fixture.actor.instance.isVisible = 0;
+  if (gate == 2) fixture.actor.instance.is_visible = 0;
   if (gate == 3) fixture.actor.instance.position.vy = 256;
   VS::Actors::DrawLiveActorModel(fixture.actor, fixture.camera, companion);
   CHECK(fixture.PacketCount() == 0);
-  CHECK(fixture.actor.soundPosition.vz == 0);
+  CHECK(fixture.actor.sound_position.vz == 0);
 }
 
 TEST_CASE(
     "Actor shadow packets retain subtractive mode bands and nearest depth",
     "[render][actor-shadow]") {
   ActorShadowFixture fixture;
-  fixture.actor.shadowBlend.color = 0x808080;
+  fixture.actor.shadow_blend.color = 0x808080;
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
   CheckShadowBands(fixture, 192);
@@ -343,8 +343,8 @@ TEST_CASE(
        {0u, 0x808080u, 0xFFFFFFu, 0x01204060u, 0xFF0A0B0Cu}) {
     for (unsigned fade = 0; fade <= UINT8_MAX; ++fade) {
       fixture.ResetPackets();
-      fixture.actor.shadowBlend.color = std::bit_cast<std::int32_t>(rgb);
-      fixture.actor.fadeRed = static_cast<u_char>(fade);
+      fixture.actor.shadow_blend.color = std::bit_cast<std::int32_t>(rgb);
+      fixture.actor.fade_red = static_cast<u_char>(fade);
       const int signed_fade =
           fade < 128 ? static_cast<int>(fade) : static_cast<int>(fade) - 256;
       const auto luminance =
@@ -383,9 +383,9 @@ TEST_CASE(
   fixture.camera.t[2] = depth;
   fixture.Draw();
   CHECK(fixture.PacketCount() == (depth >= 8 && depth < 7944 ? 24 : 0));
-  CHECK(static_cast<std::uint16_t>(fixture.actor.soundPosition.vz) ==
+  CHECK(static_cast<std::uint16_t>(fixture.actor.sound_position.vz) ==
         std::clamp(depth, 0, 65535));
-  CHECK(fixture.actor.soundPosition.pad == 0);
+  CHECK(fixture.actor.sound_position.pad == 0);
 }
 
 TEST_CASE("Actor shadow buffer exhaustion cannot overwrite adjacent storage",
@@ -430,7 +430,7 @@ TEST_CASE("Actor shadows follow actual interpolated terrain on both axes",
             &fixture.actor.instance.position, 0, 0, 3) == 56);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
-  CHECK(fixture.actor.soundPosition.vz == 1080);
+  CHECK(fixture.actor.sound_position.vz == 1080);
   CHECK(static_cast<std::int16_t>(fixture.Packet(0)[5]) ==
         (along_z ? 190 : 188));
   CHECK(static_cast<std::int16_t>(fixture.Packet(0)[7]) ==
@@ -448,7 +448,7 @@ TEST_CASE("Actor shadows flatten source-rejected steep terrain",
             &fixture.actor.instance.position, 0, 0, 3) == 64);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
-  CHECK(fixture.actor.soundPosition.vz == 1088);
+  CHECK(fixture.actor.sound_position.vz == 1088);
   CHECK(static_cast<std::int16_t>(fixture.Packet(0)[5]) == 175);
   CHECK(static_cast<std::int16_t>(fixture.Packet(0)[7]) == 170);
   CHECK(static_cast<std::int16_t>(fixture.Packet(0)[7] >> 16) == 109);
@@ -463,8 +463,8 @@ TEST_CASE("Actor shadows reject reversed winding but retain the sound anchor",
   }
   fixture.Draw();
   CHECK(fixture.PacketCount() == 0);
-  CHECK(fixture.actor.soundPosition.vx == 160);
-  CHECK(fixture.actor.soundPosition.vy == 120);
-  CHECK(fixture.actor.soundPosition.vz == 1024);
+  CHECK(fixture.actor.sound_position.vx == 160);
+  CHECK(fixture.actor.sound_position.vy == 120);
+  CHECK(fixture.actor.sound_position.vz == 1024);
   CHECK(fixture.storage[1] == 0xDEADBEEF);
 }

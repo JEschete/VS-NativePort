@@ -14,8 +14,8 @@
 #include <iterator>
 #include <span>
 
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
@@ -50,7 +50,7 @@
 namespace {
 namespace event = VS::Event;
 
-static_assert(std::size(Actors_actorRecords) >=
+static_assert(std::size(VS::Actors::actorRecords) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
 static_assert(std::size(VS::Field::gimmickInstances) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
@@ -103,7 +103,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     return {.battle_actor = target != nullptr,
             .model_id = target != nullptr ? target->modelId
                                           : static_cast<std::uint16_t>(0),
-            .occupied = Actors_actorRecords[actor] != nullptr ||
+            .occupied = VS::Actors::actorRecords[actor] != nullptr ||
                         VS::Field::gimmickInstances[actor] != nullptr};
   }
 

@@ -8,8 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionPresentationLive.hpp"
@@ -28,12 +27,11 @@ struct Model {
 };
 struct LivePresentation {
   decltype(VS::Battle::actors) saved_battle = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   Battle_ActionDefinition saved_definition = Battle_actionDefinitions[60];
   std::array<Battle_Actor, 3> battle{};
   std::array<Battle_ActorStats, 3> stats{};
-  std::array<Actors_ActorRecord, 3> actors{};
+  std::array<VS::Actors::ActorRecord, 3> actors{};
   Model model{};
   Battle_ActionRequest action{};
   struct Guarded {
@@ -43,7 +41,7 @@ struct LivePresentation {
   } output;
   LivePresentation() {
     std::ranges::fill(VS::Battle::actors, nullptr);
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     for (std::size_t i = 0; i < model.bones.size(); ++i) {
       model.bones.at(i).limb_ids = static_cast<unsigned char>(i + 1);
     }
@@ -53,10 +51,10 @@ struct LivePresentation {
       battle.at(i).stats = &stats.at(i);
       stats.at(i).defaultTargetLimb = 4;
       actors.at(i).instance.model = &model.header;
-      actors.at(i).instance.boneCount = 6;
-      actors.at(i).modelDataSize = sizeof(model);
+      actors.at(i).instance.bone_count = 6;
+      actors.at(i).model_data_size = sizeof(model);
       VS::Battle::actors[i] = &battle.at(i);
-      Actors_actorRecords[i] = &actors.at(i);
+      VS::Actors::actorRecords[i] = &actors.at(i);
     }
     action.actionId = 60;
     Battle_actionDefinitions[60].effectId = 39;
@@ -67,7 +65,7 @@ struct LivePresentation {
   ~LivePresentation() {
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_battle, std::begin(VS::Battle::actors));
-    std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     Battle_actionDefinitions[60] = saved_definition;
   }
   void ActorHit(std::size_t index, int slot, int limb) {

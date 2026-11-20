@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -44,10 +44,10 @@ struct CommandFixture {
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
   Battle_Actor* saved_actor = VS::Battle::actors[2];
-  Actors_ActorRecord* saved_target = Actors_actorRecords[3];
+  VS::Actors::ActorRecord* saved_target = VS::Actors::actorRecords[3];
   Battle_Actor actor{};
-  Actors_ModelInstance model{};
-  Actors_ActorRecord target{};
+  VS::Actors::ModelInstance model{};
+  VS::Actors::ActorRecord target{};
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActionCandidateRecord candidate{};
   u_short heights[32][32]{};
@@ -55,7 +55,7 @@ struct CommandFixture {
 
   CommandFixture() {
     VS::Battle::actors[2] = &actor;
-    Actors_actorRecords[3] = &target;
+    VS::Actors::actorRecords[3] = &target;
     actor.id = state.actor_id = 2;
     actor.model = &model;
     actor.commandArg0 = 0x13572468;
@@ -101,7 +101,7 @@ struct CommandFixture {
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Battle::actors[2] = saved_actor;
-    Actors_actorRecords[3] = saved_target;
+    VS::Actors::actorRecords[3] = saved_target;
   }
 };
 }  // namespace

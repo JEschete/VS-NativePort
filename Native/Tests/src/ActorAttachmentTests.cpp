@@ -5,9 +5,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -15,32 +14,31 @@
 
 namespace {
 struct AttachmentFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved = VS::Actors::actorRecords;
   VS::Core::LogLevel console =
       VS::Core::SetConsoleLogLevel(VS::Core::LogLevel::Off);
-  Actors_ActorRecord parent{};
-  Actors_ActorRecord child{};
+  VS::Actors::ActorRecord parent{};
+  VS::Actors::ActorRecord child{};
   VS::Actors::ShpModel model{};
 
   AttachmentFixture() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
-    Actors_actorRecords[2] = &parent;
-    Actors_actorRecords[7] = &child;
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
+    VS::Actors::actorRecords[2] = &parent;
+    VS::Actors::actorRecords[7] = &child;
     parent.instance.slot = 2;
     parent.instance.model = &model;
-    parent.instance.boneCount = 24;
+    parent.instance.bone_count = 24;
     child.instance.slot = 7;
-    child.instance.isAttached = 1;
-    child.instance.attachParent = 2;
-    child.instance.attachBone = 2;
-    parent.boneMatrices[2].m[0][0] = 1234;
-    parent.boneMatrices[2].t[0] = 3456;
+    child.instance.is_attached = 1;
+    child.instance.attach_parent = 2;
+    child.instance.attach_bone = 2;
+    parent.bone_matrices[2].m[0][0] = 1234;
+    parent.bone_matrices[2].t[0] = 3456;
   }
 
   ~AttachmentFixture() {
-    std::copy(saved.begin(), saved.end(), std::begin(Actors_actorRecords));
+    std::copy(saved.begin(), saved.end(), std::begin(VS::Actors::actorRecords));
     VS::Core::SetConsoleLogLevel(console);
   }
 };
@@ -50,38 +48,38 @@ TEST_CASE("Attached props borrow the actual resident parent bone matrix",
           "[actor-attachment]") {
   AttachmentFixture fixture;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
-        &fixture.parent.boneMatrices[2]);
-  CHECK(fixture.parent.boneMatrices[2].m[0][0] == 1234);
-  CHECK(fixture.parent.boneMatrices[2].t[0] == 3456);
-  fixture.child.instance.attachBone = 0;
+        &fixture.parent.bone_matrices[2]);
+  CHECK(fixture.parent.bone_matrices[2].m[0][0] == 1234);
+  CHECK(fixture.parent.bone_matrices[2].t[0] == 3456);
+  fixture.child.instance.attach_bone = 0;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
-        &fixture.parent.boneMatrices[0]);
+        &fixture.parent.bone_matrices[0]);
 }
 
 TEST_CASE("Scene prop survives parent release without a fabricated camera",
           "[actor-attachment]") {
   AttachmentFixture fixture;
-  std::array<unsigned char, sizeof(Actors_ActorRecord)> before{};
-  std::array<unsigned char, sizeof(Actors_ActorRecord)> after{};
+  std::array<unsigned char, sizeof(VS::Actors::ActorRecord)> before{};
+  std::array<unsigned char, sizeof(VS::Actors::ActorRecord)> after{};
   std::memcpy(before.data(), &fixture.child, before.size());
   REQUIRE(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) !=
           nullptr);
-  Actors_actorRecords[2] = nullptr;
+  VS::Actors::actorRecords[2] = nullptr;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
   std::memcpy(after.data(), &fixture.child, after.size());
   CHECK(before == after);
-  CHECK(Actors_actorRecords[7] == &fixture.child);
+  CHECK(VS::Actors::actorRecords[7] == &fixture.child);
 
-  Actors_ActorRecord replacement{};
+  VS::Actors::ActorRecord replacement{};
   replacement.instance.slot = 2;
   replacement.instance.model = &fixture.model;
-  replacement.instance.boneCount = 3;
-  replacement.boneMatrices[2].t[0] = -9876;
-  Actors_actorRecords[2] = &replacement;
+  replacement.instance.bone_count = 3;
+  replacement.bone_matrices[2].t[0] = -9876;
+  VS::Actors::actorRecords[2] = &replacement;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
-        &replacement.boneMatrices[2]);
-  CHECK(replacement.boneMatrices[2].t[0] == -9876);
+        &replacement.bone_matrices[2]);
+  CHECK(replacement.bone_matrices[2].t[0] == -9876);
 }
 
 TEST_CASE("Attachments defer until a parent model and pose become resident",
@@ -91,32 +89,32 @@ TEST_CASE("Attachments defer until a parent model and pose become resident",
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
   fixture.parent.instance.model = &fixture.model;
-  fixture.parent.instance.boneCount = 0;
+  fixture.parent.instance.bone_count = 0;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
-  fixture.parent.instance.boneCount = 3;
+  fixture.parent.instance.bone_count = 3;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
-        &fixture.parent.boneMatrices[2]);
+        &fixture.parent.bone_matrices[2]);
 }
 
 TEST_CASE("Attachments reject invalid parent slots and bone bounds",
           "[actor-attachment]") {
   AttachmentFixture fixture;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(nullptr) == nullptr);
-  fixture.child.instance.attachParent =
-      static_cast<u_char>(std::size(Actors_actorRecords));
+  fixture.child.instance.attach_parent =
+      static_cast<u_char>(std::size(VS::Actors::actorRecords));
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
-  fixture.child.instance.attachParent = 2;
-  fixture.child.instance.attachBone = fixture.parent.instance.boneCount;
+  fixture.child.instance.attach_parent = 2;
+  fixture.child.instance.attach_bone = fixture.parent.instance.bone_count;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
-  fixture.child.instance.attachBone = 2;
-  fixture.parent.instance.boneCount =
-      static_cast<u_char>(std::size(fixture.parent.boneMatrices) + 1);
+  fixture.child.instance.attach_bone = 2;
+  fixture.parent.instance.bone_count =
+      static_cast<u_char>(std::size(fixture.parent.bone_matrices) + 1);
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
         nullptr);
-  fixture.parent.instance.boneCount = 3;
+  fixture.parent.instance.bone_count = 3;
   CHECK(VS::Actors::ResolveLiveAttachmentParentMatrix(&fixture.child) ==
-        &fixture.parent.boneMatrices[2]);
+        &fixture.parent.bone_matrices[2]);
 }

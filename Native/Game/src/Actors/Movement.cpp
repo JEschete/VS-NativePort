@@ -1,58 +1,26 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/ShpModel.hpp"
-#include "Actors/TextureAnimationRecords.hpp"
-#include "Render/Palette.hpp"
+// The battle program's jump, landing and locomotion animation tables and the
+// actors' support state (Movement.hpp).
+#include "Actors/Movement.hpp"
 
-// decomp: D_800E90AC (D_800E90AC@BATTLE/BATTLE.PRG)
-u_char Actors_kJumpHangFrames[3204]; /* contents: module image (ModuleData.cpp) */
+namespace VS::Actors {
 
-// decomp: D_800E90B4 (D_800E90B4@BATTLE/BATTLE.PRG)
-u_char Actors_kJumpHeightAdjustments[3196]; /* contents: module image (ModuleData.cpp) */
+// Contents: module image (ModuleData.cpp) for every table down to
+// landingRecoveryAnimations.
+MovementTable<kJumpHangFramesBytes> jumpHangFrames;
+MovementTable<kJumpHeightAdjustmentsBytes> jumpHeightAdjustments;
+MovementTable<kMotionResultAnimationsBytes> motionResultAnimations;
+std::uint8_t motionResultOneAnimationId;
+std::uint8_t hangMotionAnimationId;
+MovementTable<kSlowQuadrantMoveBytes> slowQuadrantMoveAnimations;
+MovementTable<kFastQuadrantMoveBytes> fastQuadrantMoveAnimations;
+MovementTable<kAirTimerEndAnimationsBytes> airTimerEndAnimations;
+MovementTable<kSoftLandingAnimationsBytes> softLandingAnimations;
+MovementTable<kHardLandingAnimationsBytes> hardLandingAnimations;
+MovementTable<kLandingRecoveryAnimationsBytes> landingRecoveryAnimations;
 
-// decomp: D_800E90C3 (D_800E90C3@BATTLE/BATTLE.PRG)
-u_char Actors_kMotionResultAnimations[3181]; /* contents: module image (ModuleData.cpp) */
+std::uint16_t supportingPlatformLayer;
+std::uint8_t supportingGimmickIndex;
+char isActorUpdateComplete;
+std::uint8_t pushedGimmickIndex;
 
-// decomp: D_800E90C4 (D_800E90C4@BATTLE/BATTLE.PRG)
-u_char Actors_kMotionResultOneAnimationId; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E90C6 (D_800E90C6@BATTLE/BATTLE.PRG)
-u_char Actors_kHangMotionAnimationId; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E90CC (D_800E90CC@BATTLE/BATTLE.PRG)
-u_char Actors_kSlowQuadrantMoveAnimations[3172]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E90D0 (D_800E90D0@BATTLE/BATTLE.PRG)
-u_char Actors_kFastQuadrantMoveAnimations[3168]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E92E8 (D_800E92E8@BATTLE/BATTLE.PRG)
-u_char Actors_kAirTimerEndAnimations[2632]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E92F0 (D_800E92F0@BATTLE/BATTLE.PRG)
-u_char Actors_kSoftLandingAnimations[2624]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E92F8 (D_800E92F8@BATTLE/BATTLE.PRG)
-u_char Actors_kHardLandingAnimations[2616]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E9300 (D_800E9300@BATTLE/BATTLE.PRG)
-u_char Actors_kLandingRecoveryAnimations[2608]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800F4538 (D_800F4538@BATTLE/BATTLE.PRG)
-Actors_ActorRecord* Actors_actorRecords[17];
-
-// decomp: D_800F49F4 (D_800F49F4@BATTLE/BATTLE.PRG)
-u_short Actors_supportingPlatformLayer;
-
-// decomp: D_800F49F8 (D_800F49F8@BATTLE/BATTLE.PRG)
-u_char Actors_supportingGimmickIndex;
-
-// decomp: D_800F4B18 (D_800F4B18@BATTLE/BATTLE.PRG)
-char Actors_isActorUpdateComplete;
-
-// decomp: D_800F4B19 (D_800F4B19@BATTLE/BATTLE.PRG)
-u_char Actors_pushedGimmickIndex;
-
+}  // namespace VS::Actors

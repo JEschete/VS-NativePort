@@ -9,9 +9,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
@@ -33,14 +32,14 @@
 namespace {
 using Handler = intptr_t (*)(u_char*, std::int16_t);
 
-auto RecordBytes(const Actors_ActorRecord& record) {
+auto RecordBytes(const VS::Actors::ActorRecord& record) {
   std::array<std::byte, sizeof(record)> bytes{};
   std::memcpy(bytes.data(), &record, bytes.size());
   return bytes;
 }
 
 struct WeaponModeFixture {
-  Actors_ActorRecord* saved_record = Actors_actorRecords[0];
+  VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[0];
   Battle_Actor* saved_actor = VS::Battle::actors[0];
   Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<VS::Actors::WeaponModel*, 2> saved_weapons{
@@ -60,14 +59,14 @@ struct WeaponModeFixture {
   std::uint8_t saved_gate = VS::State::LiveScriptFlag(0xAC);
   char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
   decltype(VS::Battle::hudBattleMode) saved_hud = VS::Battle::hudBattleMode;
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   Battle_Actor actor{};
   std::array<VS::Actors::WeaponModel, 2> weapons{};
   std::array<std::uint32_t, 512> common{};
   std::array<std::uint32_t, 512> battle{};
 
   WeaponModeFixture() {
-    Actors_actorRecords[0] = &record;
+    VS::Actors::actorRecords[0] = &record;
     VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     for (std::size_t index = 0; index < weapons.size(); ++index) {
       VS::Actors::weaponModels[index] = &weapons[index];
@@ -79,22 +78,22 @@ struct WeaponModeFixture {
     VS::Event::skipState = 0;
     VS::Event::playbackPhase = 4;
     pending = 0;
-    record.commonSequence = MakeBank(common);
-    record.battleSequence = MakeBank(battle);
-    record.ownedSequence = record.commonSequence;
-    record.sequenceFlags = 128;
-    record.commonAnimationCount = 128;
-    record.framesPerStep = 1;
-    record.instance.attachParent = 0xFF;
-    record.instance.isVisible = -1;
-    record.instance.isFrozen = -1;
-    record.instance.soundEnabled = 1;
-    record.soundEffect.kind = 2;
-    record.modelId = 1;
+    record.common_sequence = MakeBank(common);
+    record.battle_sequence = MakeBank(battle);
+    record.owned_sequence = record.common_sequence;
+    record.sequence_flags = 128;
+    record.common_animation_count = 128;
+    record.frames_per_step = 1;
+    record.instance.attach_parent = 0xFF;
+    record.instance.is_visible = -1;
+    record.instance.is_frozen = -1;
+    record.instance.sound_enabled = 1;
+    record.sound_effect.kind = 2;
+    record.model_id = 1;
   }
 
   ~WeaponModeFixture() {
-    Actors_actorRecords[0] = saved_record;
+    VS::Actors::actorRecords[0] = saved_record;
     VS::Battle::actors[0] = saved_actor;
     VS::Battle::characterState = saved_character;
     std::copy(saved_weapons.begin(), saved_weapons.end(),
@@ -134,7 +133,7 @@ struct WeaponModeFixture {
 
   void Prepare(int mode) {
     actor.weaponDrawn = static_cast<u_char>(0xA4 | (mode ^ 1));
-    record.instance.weaponDrawn = mode ^ 1;
+    record.instance.weapon_drawn = mode ^ 1;
     for (auto& weapon : weapons) {
       weapon.shown = mode ^ 1;
       weapon.blend_level = 17;
@@ -147,7 +146,7 @@ struct WeaponModeFixture {
     CHECK(pending == 0);
     CHECK((actor.weaponDrawn & 1) == mode);
     CHECK((actor.weaponDrawn & 0xFE) == 0xA4);
-    CHECK(record.instance.weaponDrawn == mode);
+    CHECK(record.instance.weapon_drawn == mode);
     CHECK(VS::Battle::hudBattleMode == mode);
     CheckVisibility(mode);
   }
@@ -168,26 +167,26 @@ struct WeaponModeFixture {
   }
 
   void FinishAnimation(int count = 5) {
-    REQUIRE(record.animationLength == 4);
+    REQUIRE(record.animation_length == 4);
     for (int frame = 0; frame < count; ++frame) {
       CHECK(record.pose.holding_last_frame == 0);
       VS::Actors::AdvanceLiveSkeletalAnimation(record, 0);
     }
-    CAPTURE(record.animationId, record.queuedAnimation, record.pose.frame);
+    CAPTURE(record.animation_id, record.queued_animation, record.pose.frame);
     REQUIRE(record.pose.holding_last_frame != 0);
   }
 
   void CheckAnimatedStart(int mode, int variant, int phase) const {
     CHECK(pending == 1);
-    CHECK(record.animationId == (variant - 1) * 2 + (mode ^ 1) + 109);
-    CHECK(record.animationLength == 4);
+    CHECK(record.animation_id == (variant - 1) * 2 + (mode ^ 1) + 109);
+    CHECK(record.animation_length == 4);
     CHECK(record.pose.holding_last_frame == 0);
-    CHECK(record.queuedAnimation == (phase == 0 && variant == 2 ? 1 : 0));
+    CHECK(record.queued_animation == (phase == 0 && variant == 2 ? 1 : 0));
   }
 
   void CheckAnimatedFinish(int mode, bool retained_idle = false) const {
     CHECK(pending == 0);
-    CHECK(record.animationId == (mode ? 101 : 6));
+    CHECK(record.animation_id == (mode ? 101 : 6));
     CHECK(record.pose.frame == (retained_idle ? 4 : 0));
     CHECK((record.pose.holding_last_frame != 0) == retained_idle);
   }
@@ -201,7 +200,7 @@ struct WeaponModeFixture {
   void CheckVmFinish(VS::Event::ScriptLocation cursor, int mode) const {
     CHECK_FALSE(cursor.Present());
     CHECK(pending == 0);
-    CHECK(record.animationId == (mode ? 101 : 6));
+    CHECK(record.animation_id == (mode ? 101 : 6));
   }
 
   void CheckVmSkip(VS::Event::ScriptLocation cursor, int mode) const {
@@ -285,10 +284,10 @@ TEST_CASE("Script weapon mode also waits for the original queued idle",
   VS::Event::playbackPhase = 0;
   std::array<u_char, 3> command{0, static_cast<u_char>(mode), 2};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
-  CHECK(fixture.record.queuedAnimation == 1);
+  CHECK(fixture.record.queued_animation == 1);
   fixture.AdvanceFrames(5);
-  CHECK(fixture.record.animationId == (mode ? 101 : 1));
-  CHECK(fixture.record.queuedAnimation == 0);
+  CHECK(fixture.record.animation_id == (mode ? 101 : 1));
+  CHECK(fixture.record.queued_animation == 0);
   CHECK(fixture.record.pose.frame == 0);
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.pending == 1);
@@ -304,12 +303,12 @@ TEST_CASE("Skipping an active weapon transition clears its wait without replay",
   fixture.Prepare(mode);
   std::array<u_char, 3> command{0, static_cast<u_char>(mode), 1};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
-  const auto animation = fixture.record.animationId;
+  const auto animation = fixture.record.animation_id;
   VS::Event::skipState = 2;
   VS::State::SetLiveScriptFlag(0xAC, 0);
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckImmediate(mode);
-  CHECK(fixture.record.animationId == animation);
+  CHECK(fixture.record.animation_id == animation);
 }
 
 TEST_CASE("Production event dispatch holds then advances the weapon opcode",
@@ -359,7 +358,7 @@ TEST_CASE(
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weaponDrawn & 1) == 0);
-  CHECK(fixture.record.instance.weaponDrawn == 0);
+  CHECK(fixture.record.instance.weapon_drawn == 0);
   CHECK(VS::Battle::hudBattleMode == 0);
   fixture.CheckVisibility(1);
 }

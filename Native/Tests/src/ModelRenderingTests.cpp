@@ -9,11 +9,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/WeaponModel.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
@@ -725,8 +724,8 @@ TEST_CASE("The live model transforms refuse missing records",
 TEST_CASE("A held gimmick whose holder slot is empty is not drawn",
           "[actors-appearance-rendering]") {
   constexpr std::size_t kHolder = 6;
-  Actors_ActorRecord* const saved = Actors_actorRecords[kHolder];
-  Actors_actorRecords[kHolder] = nullptr;
+  VS::Actors::ActorRecord* const saved = VS::Actors::actorRecords[kHolder];
+  VS::Actors::actorRecords[kHolder] = nullptr;
   VS::Field::GimmickInstance object{};
   object.object_info.object_id = 4;
   object.parent = static_cast<u_char>(kHolder);
@@ -742,7 +741,7 @@ TEST_CASE("A held gimmick whose holder slot is empty is not drawn",
   // Nothing of the gimmick was written.
   CHECK(object.matrices[0].m[0][0] == 0);
   CHECK(object.matrices[1].t[0] == 0);
-  Actors_actorRecords[kHolder] = saved;
+  VS::Actors::actorRecords[kHolder] = saved;
 }
 
 TEST_CASE("A weapon with more bones than its chain holds is not drawn",

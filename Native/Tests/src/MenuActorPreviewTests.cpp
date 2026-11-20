@@ -12,9 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateRecord.hpp"
-#include "Actors/Movement.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
@@ -684,10 +683,10 @@ TEST_CASE("Ashley's weapon animations replace her weapon sequences",
 
 TEST_CASE("Actor preview live adapter refuses a missing record or camera",
           "[menu][menu-rows-details][menu-actor-preview]") {
-  std::array<Actors_ActorRecord*, 2> saved{Actors_actorRecords[0],
-                                           Actors_actorRecords[5]};
-  Actors_actorRecords[0] = nullptr;
-  Actors_actorRecords[5] = nullptr;
+  std::array<VS::Actors::ActorRecord*, 2> saved{VS::Actors::actorRecords[0],
+                                                VS::Actors::actorRecords[5]};
+  VS::Actors::actorRecords[0] = nullptr;
+  VS::Actors::actorRecords[5] = nullptr;
   {
     VS::test_support::ChannelWarnings warnings{"menu.framework"};
     CHECK(fw::DrawLiveActorPreview(nullptr) ==
@@ -704,8 +703,8 @@ TEST_CASE("Actor preview live adapter refuses a missing record or camera",
               "actor preview: preview clone of a missing actor",
               "actor preview: Ashley's equipment pose without her record"});
   }
-  Actors_actorRecords[0] = saved[0];
-  Actors_actorRecords[5] = saved[1];
+  VS::Actors::actorRecords[0] = saved[0];
+  VS::Actors::actorRecords[5] = saved[1];
 }
 
 TEST_CASE("Menu rows, details and actor preview retire their module symbols",

@@ -10,9 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorPerception.hpp"
@@ -50,7 +49,7 @@ constexpr std::uint32_t kHalfMask = 0xFFFF;
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kPerceptionSlots);
 static_assert(std::size(VS::Field::gimmickInstances) == kPerceptionSlots);
 static_assert(kFrameActorSlots == kPerceptionSlots);
-static_assert(std::size(Actors_actorRecords) == kPerceptionRecordSlots);
+static_assert(std::size(VS::Actors::actorRecords) == kPerceptionRecordSlots);
 
 // Both views are the actor's AI state.
 static_assert(offsetof(ObserverView, tile) == offsetof(AiState, tile));
@@ -95,18 +94,19 @@ static_assert(offsetof(UpdateView, opaque_19a) ==
               offsetof(AiState, opaque_19a));
 static_assert(offsetof(UpdateView, relations) == offsetof(AiState, relations));
 
-std::uint32_t CurrentTileWord(const Actors_ModelInstance& instance) {
-  return static_cast<std::uint32_t>(instance.currentTileX) |
-         (static_cast<std::uint32_t>(instance.currentTileLayer) << kByteShift) |
-         (static_cast<std::uint32_t>(instance.currentTileZ) << kHalfShift) |
-         (static_cast<std::uint32_t>(instance.reserved5F) << kTopByteShift);
+std::uint32_t CurrentTileWord(const VS::Actors::ModelInstance& instance) {
+  return static_cast<std::uint32_t>(instance.current_tile_x) |
+         (static_cast<std::uint32_t>(instance.current_tile_layer)
+          << kByteShift) |
+         (static_cast<std::uint32_t>(instance.current_tile_z) << kHalfShift) |
+         (static_cast<std::uint32_t>(instance.reserved5f) << kTopByteShift);
 }
 
-std::uint32_t PreviousTileWord(const Actors_ModelInstance& instance) {
-  return static_cast<std::uint32_t>(instance.previousTileX) |
-         (static_cast<std::uint32_t>(instance.previousTileLayer)
+std::uint32_t PreviousTileWord(const VS::Actors::ModelInstance& instance) {
+  return static_cast<std::uint32_t>(instance.previous_tile_x) |
+         (static_cast<std::uint32_t>(instance.previous_tile_layer)
           << kByteShift) |
-         (static_cast<std::uint32_t>(instance.previousTileZ) << kHalfShift) |
+         (static_cast<std::uint32_t>(instance.previous_tile_z) << kHalfShift) |
          (static_cast<std::uint32_t>(instance.reserved63) << kTopByteShift);
 }
 
@@ -168,19 +168,19 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   [[nodiscard]] std::optional<PerceivedModel> Model(int target) const override {
     const Battle_Actor* actor = VS::Battle::actors[target];
     if (actor == nullptr || actor->model == nullptr) return std::nullopt;
-    const Actors_ModelInstance& model = *actor->model;
+    const VS::Actors::ModelInstance& model = *actor->model;
     return PerceivedModel{.position = Core::Math::PositionOf(model.position),
                           .tile = CurrentTileWord(model),
                           .last_tile = PreviousTileWord(model),
-                          .locomoting = model.locomotionState != 0};
+                          .locomoting = model.locomotion_state != 0};
   }
   [[nodiscard]] std::optional<ObserverPose> ObserverModel() const override {
     const auto* model =
-        reinterpret_cast<const Actors_ModelInstance*>(view_.model);
+        reinterpret_cast<const VS::Actors::ModelInstance*>(view_.model);
     if (model == nullptr) return std::nullopt;
     return ObserverPose{.position = Core::Math::PositionOf(model->position),
                         .facing = model->facing,
-                        .look_yaw = static_cast<std::int16_t>(model->lookYaw)};
+                        .look_yaw = static_cast<std::int16_t>(model->look_yaw)};
   }
   [[nodiscard]] std::optional<PerceptionShape> AiStateShape(
       int target) const override {
@@ -356,13 +356,13 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
   [[nodiscard]] std::optional<PerceiverModel> Model() const override {
     // The AI state's model is the actor's record.
     const auto* record =
-        reinterpret_cast<const Actors_ActorRecord*>(view_.model);
+        reinterpret_cast<const VS::Actors::ActorRecord*>(view_.model);
     if (record == nullptr) return std::nullopt;
-    const Actors_ModelInstance& instance = record->instance;
+    const VS::Actors::ModelInstance& instance = record->instance;
     return PerceiverModel{
-        .moving = instance.movementMode != 0 || instance.locomotionState != 0,
-        .running = record->isRunning != 0,
-        .forces_perception = instance.wasDrawn != 0,
+        .moving = instance.movement_mode != 0 || instance.locomotion_state != 0,
+        .running = record->is_running != 0,
+        .forces_perception = instance.was_drawn != 0,
         .tile = CurrentTileWord(instance)};
   }
   [[nodiscard]] std::optional<std::uint32_t> LinkedTile() const override {
@@ -390,7 +390,7 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
     return ids;
   }
   [[nodiscard]] std::optional<std::uint32_t> RecordTile(int id) const override {
-    const Actors_ActorRecord* record = Actors_actorRecords[id];
+    const VS::Actors::ActorRecord* record = VS::Actors::actorRecords[id];
     if (record == nullptr) return std::nullopt;
     return CurrentTileWord(record->instance);
   }

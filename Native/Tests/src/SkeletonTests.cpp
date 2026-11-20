@@ -12,9 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Appearance.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -87,21 +86,20 @@ constexpr std::array<BoneLabels, kTestBones> kLabels{{
 // The actor, gimmick and weapon tables and the bone camera, emptied for one
 // test and then restored. The bone camera sits at (10, 20, 30) unrotated.
 struct LiveSkeletonState {
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   MATRIX saved_camera = VS::Actors::boneMatrixScratch;
-  std::vector<std::unique_ptr<Actors_ActorRecord>> records;
+  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
   std::vector<std::unique_ptr<VS::Field::GimmickInstance>> gimmicks;
   std::vector<std::unique_ptr<VS::Actors::WeaponModel>> weapons;
   std::vector<std::unique_ptr<TestModel>> models;
 
   LiveSkeletonState() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     std::fill(std::begin(VS::Actors::weaponModels),
               std::end(VS::Actors::weaponModels), nullptr);
     std::fill(std::begin(VS::Field::gimmickInstances),
@@ -113,7 +111,7 @@ struct LiveSkeletonState {
   LiveSkeletonState(LiveSkeletonState&&) = delete;
   LiveSkeletonState& operator=(LiveSkeletonState&&) = delete;
   ~LiveSkeletonState() {
-    std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(VS::Field::gimmickInstances));
     VS::Actors::boneMatrixScratch = saved_camera;
@@ -135,15 +133,15 @@ struct LiveSkeletonState {
     return model;
   }
 
-  Actors_ActorRecord& AddActor(int actor_id, TestModel& model) {
-    records.push_back(std::make_unique<Actors_ActorRecord>());
-    Actors_ActorRecord& actor = *records.back();
+  VS::Actors::ActorRecord& AddActor(int actor_id, TestModel& model) {
+    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
+    VS::Actors::ActorRecord& actor = *records.back();
     actor.instance.slot = static_cast<u_char>(actor_id);
     actor.instance.model = &model.header;
-    actor.instance.boneCount = static_cast<u_char>(kTestBones);
-    actor.modelDataSize = static_cast<unsigned>(sizeof model);
+    actor.instance.bone_count = static_cast<u_char>(kTestBones);
+    actor.model_data_size = static_cast<unsigned>(sizeof model);
     actor.scale = kOne;
-    Actors_actorRecords[actor_id] = &actor;
+    VS::Actors::actorRecords[actor_id] = &actor;
     return actor;
   }
 
@@ -168,11 +166,11 @@ struct LiveSkeletonState {
 };
 
 // Actor 2 with bones 1 and 2 posed in front of the bone camera.
-Actors_ActorRecord& AddPosedActor(LiveSkeletonState& state) {
+VS::Actors::ActorRecord& AddPosedActor(LiveSkeletonState& state) {
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.boneMatrices[1] = TranslationMatrix({10, 20, 130});
-  actor.boneMatrices[2] = TranslationMatrix({110, 220, 330});
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.bone_matrices[1] = TranslationMatrix({10, 20, 130});
+  actor.bone_matrices[2] = TranslationMatrix({110, 220, 330});
   model.bones[2].length = 64;
   return actor;
 }
@@ -359,8 +357,8 @@ TEST_CASE("Live bone tags refuse bad kinds and bones past the loaded table",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.instance.boneCount = static_cast<u_char>(kTestBones + 2);
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.instance.bone_count = static_cast<u_char>(kTestBones + 2);
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   CHECK(actors::FindLiveActorBoneTag(2, 6, kTagKind) ==
@@ -384,23 +382,23 @@ TEST_CASE("Live head tracking aims the actor with a head bone",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.collisionRadius = 200;
-  actor.instance.lookPitch = 0x123;
-  actor.instance.lookYaw = 0x456;
-  actor.headTracking = {11, 22, 33, 4};
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.collision_radius = 200;
+  actor.instance.look_pitch = 0x123;
+  actor.instance.look_yaw = 0x456;
+  actor.head_tracking = {11, 22, 33, 4};
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   CHECK(actors::SetLiveActorHeadTracking(
             2, 3, nullptr, actors::kHeadTrackingUsesRadiusStep) == 0);
-  CHECK(actor.headTrackTarget == 3);
-  CHECK(PointOf(actor.headTracking) == Vec3{0x123, 0x456, 33});
-  CHECK(actor.headTracking.pad == 20);
+  CHECK(actor.head_track_target == 3);
+  CHECK(PointOf(actor.head_tracking) == Vec3{0x123, 0x456, 33});
+  CHECK(actor.head_tracking.pad == 20);
 
   const SVECTOR aim{7, 8, 9, 10};
   CHECK(actors::SetLiveActorHeadTracking(2, 1, &aim, 12) == 0);
-  CHECK(PointOf(actor.headTracking) == Vec3{7, 8, 9});
-  CHECK(actor.headTracking.pad == 12);
+  CHECK(PointOf(actor.head_tracking) == Vec3{7, 8, 9});
+  CHECK(actor.head_tracking.pad == 12);
   CHECK(warnings.messages.empty());
 }
 
@@ -408,19 +406,19 @@ TEST_CASE("Live head tracking resets its step and needs a head bone",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.headTracking = {11, 22, 33, 4};
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.head_tracking = {11, 22, 33, 4};
   VS::test_support::ChannelWarnings warnings{"actors"};
 
-  actor.collisionRadius = 100;
+  actor.collision_radius = 100;
   actors::ResetLiveActorHeadTrackingSpeed(&actor);
-  CHECK(actor.headTracking.pad == 30);
+  CHECK(actor.head_tracking.pad == 30);
 
   const SVECTOR aim{7, 8, 9, 10};
   model.bones[1].auxiliary_tag = 0;
   CHECK(actors::SetLiveActorHeadTracking(2, 3, &aim, 12) ==
         actors::kSkeletonNoHeadBone);
-  CHECK(PointOf(actor.headTracking) == Vec3{11, 22, 33});
+  CHECK(PointOf(actor.head_tracking) == Vec3{11, 22, 33});
   CHECK(actors::SetLiveActorHeadTracking(5, 3, &aim, 12) ==
         actors::kSkeletonNoOwner);
   CHECK(warnings.messages.empty());
@@ -430,8 +428,8 @@ TEST_CASE("Live bone matrices copy the stored matrix and bone length",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.boneMatrices[2] = TranslationMatrix({1, 2, 3});
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.bone_matrices[2] = TranslationMatrix({1, 2, 3});
   model.bones[2].length = 77;
   VS::test_support::ChannelWarnings warnings{"actors"};
 
@@ -445,7 +443,7 @@ TEST_CASE("Live bone matrices copy the stored matrix and bone length",
   CHECK(warnings.messages.empty());
 
   constexpr auto kMatrices =
-      std::extent_v<decltype(Actors_ActorRecord::boneMatrices)>;
+      std::extent_v<decltype(VS::Actors::ActorRecord::bone_matrices)>;
   length = 5;
   actors::LiveActorBoneMatrix(2, kMatrices, &matrix, &length);
   CHECK(length == 5);
@@ -506,8 +504,8 @@ TEST_CASE("Live bone positions read the actor root at its position",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(1, model);
-  actor.blendPose.bone_keys[std::size(actor.blendPose.bone_keys) - 1] = {
+  VS::Actors::ActorRecord& actor = state.AddActor(1, model);
+  actor.blend_pose.bone_keys[std::size(actor.blend_pose.bone_keys) - 1] = {
       100, 200, 300, 0};
   actor.instance.position = {1000, 2000, 3000, 0};
   VS::test_support::ChannelWarnings warnings{"actors"};
@@ -594,10 +592,10 @@ TEST_CASE("Live target, ground and anchor points read the actor's position",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
   actor.instance.position = {100, -50, 300, 9};
-  actor.targetPointHeight = 40;
-  actor.anchorHeight = 0x100;
+  actor.target_point_height = 40;
+  actor.anchor_height = 0x100;
   actor.scale = 2 * kOne;
   VS::test_support::ChannelWarnings warnings{"actors"};
 
@@ -619,7 +617,7 @@ TEST_CASE("Live gimmick target points and the ground anchor matrix",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
   actor.instance.position = {100, -50, 300, 9};
   VS::Field::GimmickInstance& gimmick = state.AddGimmick(4, model);
   gimmick.position_x = 5;
@@ -634,7 +632,7 @@ TEST_CASE("Live gimmick target points and the ground anchor matrix",
   CHECK(PointOf(point) == Vec3{5, 6 - actors::kGimmickTargetHeight, 7});
   CHECK(point.pad == 0x55);
 
-  actor.boneMatrices[0] = TranslationMatrix({110, 220, 330});
+  actor.bone_matrices[0] = TranslationMatrix({110, 220, 330});
   model.bones[0].length = 12;
   MATRIX matrix{};
   int length = 0;
@@ -682,9 +680,9 @@ TEST_CASE("Live pitch measures from the actor's root bone",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Actors_ActorRecord& actor = state.AddActor(2, model);
-  actor.boneMatrices[0] = TranslationMatrix({10, 120, 30});
-  actor.instance.reactionState = 1;
+  VS::Actors::ActorRecord& actor = state.AddActor(2, model);
+  actor.bone_matrices[0] = TranslationMatrix({10, 120, 30});
+  actor.instance.reaction_state = 1;
   VS::test_support::ChannelWarnings warnings{"actors"};
 
   const SVECTOR target{300, 600, 400, 0};

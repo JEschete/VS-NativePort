@@ -6,9 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/MotionRequestsLive.hpp"
-#include "Actors/Movement.h"
 #include "Battle/Actor.h"
 
 namespace {
@@ -16,48 +15,48 @@ static_assert(sizeof(SVECTOR) == 2 * sizeof(int));
 static_assert(offsetof(Battle_Actor, commandArg1) ==
               offsetof(Battle_Actor, commandArg0) + sizeof(int));
 
-std::array<int, 8> TransitionState(const Actors_ActorRecord& actor) {
-  const auto& route = actor.routeTarget;
+std::array<int, 8> TransitionState(const VS::Actors::ActorRecord& actor) {
+  const auto& route = actor.route_target;
   const auto& instance = actor.instance;
   return {route.vx,
           route.vy,
           route.vz,
           route.pad,
-          instance.reactionState,
-          instance.poseState,
-          instance.wasDrawn,
-          instance.turnFrames};
+          instance.reaction_state,
+          instance.pose_state,
+          instance.was_drawn,
+          instance.turn_frames};
 }
 
 struct MotionFixture {
-  Actors_ActorRecord* saved = Actors_actorRecords[2];
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord* saved = VS::Actors::actorRecords[2];
+  VS::Actors::ActorRecord actor{};
 
   MotionFixture() {
-    Actors_actorRecords[2] = &actor;
+    VS::Actors::actorRecords[2] = &actor;
     actor.instance.facing = 0xF00;
-    actor.turnRate = 17;
-    actor.animationId = 0x76;
+    actor.turn_rate = 17;
+    actor.animation_id = 0x76;
   }
 
-  ~MotionFixture() { Actors_actorRecords[2] = saved; }
+  ~MotionFixture() { VS::Actors::actorRecords[2] = saved; }
 };
 
 struct LinkedMotionFixture : MotionFixture {
-  Actors_ActorRecord* saved_linked = Actors_actorRecords[3];
-  Actors_ActorRecord linked{};
+  VS::Actors::ActorRecord* saved_linked = VS::Actors::actorRecords[3];
+  VS::Actors::ActorRecord linked{};
 
-  LinkedMotionFixture() { Actors_actorRecords[3] = &linked; }
-  ~LinkedMotionFixture() { Actors_actorRecords[3] = saved_linked; }
+  LinkedMotionFixture() { VS::Actors::actorRecords[3] = &linked; }
+  ~LinkedMotionFixture() { VS::Actors::actorRecords[3] = saved_linked; }
 };
 }  // namespace
 
 TEST_CASE("Ground offset requests preserve vectors, flags and unrelated fields",
           "[actors][motion-request]") {
   MotionFixture fixture;
-  auto& request = fixture.actor.turnState;
+  auto& request = fixture.actor.turn_state;
   std::memset(&request, 0x55, sizeof(request));
-  fixture.actor.instance.motionLocked = 1;
+  fixture.actor.instance.motion_locked = 1;
   const auto original = request;
   SVECTOR step{-120, 31, 124, 0x4567};
   VS::Actors::QueueLiveGroundOffset(2, &step);
@@ -67,56 +66,56 @@ TEST_CASE("Ground offset requests preserve vectors, flags and unrelated fields",
   CHECK(std::memcmp(&request.step, &step, sizeof(step)) == 0);
   CHECK((std::array<int, 4>{request.direction, request.facing,
                             static_cast<int>(request.distance),
-                            request.reservedC} ==
+                            request.reserved0c} ==
          std::array<int, 4>{original.direction, original.facing,
                             static_cast<int>(original.distance),
-                            original.reservedC}));
-  CHECK(fixture.actor.instance.motionLocked == 1);
+                            original.reserved0c}));
+  CHECK(fixture.actor.instance.motion_locked == 1);
 }
 
 TEST_CASE("Flight and vector requests retain packed facing and complete step",
           "[actors][motion-request]") {
   const bool flight = GENERATE(false, true);
   MotionFixture fixture;
-  fixture.actor.turnState.direction = 19;
+  fixture.actor.turn_state.direction = 19;
   SVECTOR step{-8, -16, 127, -1};
   if (flight) {
     VS::Actors::QueueLiveFlightMovement(2, &step, -10, 0x10003);
   } else {
     VS::Actors::QueueLiveMovementVector(2, &step, 0x10003);
   }
-  CHECK(fixture.actor.turnState.mode == (flight ? 3 : 4));
-  CHECK(fixture.actor.turnState.facing == 3);
-  CHECK(fixture.actor.turnState.direction == 19);
-  CHECK(fixture.actor.turnState.distance ==
+  CHECK(fixture.actor.turn_state.mode == (flight ? 3 : 4));
+  CHECK(fixture.actor.turn_state.facing == 3);
+  CHECK(fixture.actor.turn_state.direction == 19);
+  CHECK(fixture.actor.turn_state.distance ==
         (flight ? static_cast<unsigned>(-10) : 0x10003u));
-  CHECK(std::memcmp(&fixture.actor.turnState.step, &step, sizeof(step)) == 0);
-  CHECK(fixture.actor.instance.motionLocked == 1);
+  CHECK(std::memcmp(&fixture.actor.turn_state.step, &step, sizeof(step)) == 0);
+  CHECK(fixture.actor.instance.motion_locked == 1);
 }
 
 TEST_CASE("Queued movement accepts input aliased with native request storage",
           "[actors][motion-request]") {
   MotionFixture fixture;
-  fixture.actor.turnState.step = {-16, 17, -18, 19};
-  VS::Actors::QueueLiveFlightMovement(2, &fixture.actor.turnState.step, 77,
+  fixture.actor.turn_state.step = {-16, 17, -18, 19};
+  VS::Actors::QueueLiveFlightMovement(2, &fixture.actor.turn_state.step, 77,
                                       -200);
-  CHECK(fixture.actor.turnState.step.vx == -16);
-  CHECK(fixture.actor.turnState.step.vy == 17);
-  CHECK(fixture.actor.turnState.step.vz == -18);
-  CHECK(fixture.actor.turnState.step.pad == 19);
-  CHECK(fixture.actor.turnState.facing == -200);
+  CHECK(fixture.actor.turn_state.step.vx == -16);
+  CHECK(fixture.actor.turn_state.step.vy == 17);
+  CHECK(fixture.actor.turn_state.step.vz == -18);
+  CHECK(fixture.actor.turn_state.step.pad == 19);
+  CHECK(fixture.actor.turn_state.facing == -200);
 }
 
 TEST_CASE("Navigation turns use the original radius threshold and shortest yaw",
           "[actors][motion-request]") {
   const unsigned radius = GENERATE(0u, 127u, 128u, 65535u);
   MotionFixture fixture;
-  fixture.actor.collisionRadius = static_cast<std::uint16_t>(radius);
+  fixture.actor.collision_radius = static_cast<std::uint16_t>(radius);
   VS::Actors::TurnLiveNavigationActor(2, 0x100);
-  CHECK(fixture.actor.instance.facingDelta == 512);
-  CHECK(fixture.actor.instance.turnFrames == (radius < 128 ? 4 : 16));
-  CHECK(fixture.actor.turnRate == 17);
-  CHECK(fixture.actor.turnState.mode == 6);
+  CHECK(fixture.actor.instance.facing_delta == 512);
+  CHECK(fixture.actor.instance.turn_frames == (radius < 128 ? 4 : 16));
+  CHECK(fixture.actor.turn_rate == 17);
+  CHECK(fixture.actor.turn_state.mode == 6);
 }
 
 TEST_CASE("Speed turns use the existing angular-speed consumer and animation",
@@ -124,10 +123,10 @@ TEST_CASE("Speed turns use the existing angular-speed consumer and animation",
   const int speed = GENERATE(128, -128, 200);
   MotionFixture fixture;
   VS::Actors::TurnLiveActorAtSpeed(2, 0x100, speed);
-  CHECK(fixture.actor.instance.facingDelta == 512);
-  CHECK(fixture.actor.instance.turnFrames == (speed == 200 ? 3 : 4));
-  CHECK(fixture.actor.turnRate == 17);
-  CHECK(fixture.actor.turnState.mode == 6);
+  CHECK(fixture.actor.instance.facing_delta == 512);
+  CHECK(fixture.actor.instance.turn_frames == (speed == 200 ? 3 : 4));
+  CHECK(fixture.actor.turn_rate == 17);
+  CHECK(fixture.actor.turn_state.mode == 6);
 }
 
 TEST_CASE(
@@ -137,11 +136,11 @@ TEST_CASE(
   const int reaction = GENERATE(0, 1, 7, 15);
   MotionFixture fixture;
   auto& actor = fixture.actor;
-  actor.routeTarget = {10, 11, 12, 13};
-  actor.instance.reactionState = static_cast<u_char>(reaction);
-  actor.instance.poseState = 7;
-  actor.instance.wasDrawn = 1;
-  actor.instance.turnFrames = 44;
+  actor.route_target = {10, 11, 12, 13};
+  actor.instance.reaction_state = static_cast<u_char>(reaction);
+  actor.instance.pose_state = 7;
+  actor.instance.was_drawn = 1;
+  actor.instance.turn_frames = 44;
   const auto before = TransitionState(actor);
   std::array<int, 2> target{0x4321FFFE, 0x7ABCDEFF};
   const auto original = target;
@@ -152,7 +151,7 @@ TEST_CASE(
   CHECK(TransitionState(actor) == (reaction == 0 ? expected : before));
   CHECK(target == original);
   CHECK(actor.instance.facing == 0xF00);
-  CHECK(actor.animationId == 0x76);
+  CHECK(actor.animation_id == 0x76);
 }
 
 TEST_CASE("Teleport companion propagation respects busy state and cyclic links",
@@ -160,13 +159,13 @@ TEST_CASE("Teleport companion propagation respects busy state and cyclic links",
   const bool linked_busy = GENERATE(false, true);
   const int linked_slot = GENERATE(0, 1, 2, 3);
   LinkedMotionFixture fixture;
-  fixture.actor.companionSlot = static_cast<u_char>(linked_slot);
-  fixture.linked.companionSlot = 2;
-  fixture.linked.routeTarget = {21, 22, 23, 24};
-  fixture.linked.instance.reactionState = linked_busy ? 3 : 0;
-  fixture.linked.instance.poseState = 7;
-  fixture.linked.instance.wasDrawn = 1;
-  fixture.linked.instance.turnFrames = 99;
+  fixture.actor.companion_slot = static_cast<u_char>(linked_slot);
+  fixture.linked.companion_slot = 2;
+  fixture.linked.route_target = {21, 22, 23, 24};
+  fixture.linked.instance.reaction_state = linked_busy ? 3 : 0;
+  fixture.linked.instance.pose_state = 7;
+  fixture.linked.instance.was_drawn = 1;
+  fixture.linked.instance.turn_frames = 99;
   const auto before = TransitionState(fixture.linked);
   std::array<int, 2> target{0x0009002B, 0x77777777};
 
@@ -181,9 +180,9 @@ TEST_CASE("Teleport companion propagation respects busy state and cyclic links",
 TEST_CASE("A busy teleport parent never starts its idle companion",
           "[actors][motion-request][transition-request]") {
   LinkedMotionFixture fixture;
-  fixture.actor.companionSlot = 3;
-  fixture.actor.instance.reactionState = 1;
-  fixture.actor.routeTarget = {1, 2, 3, 4};
+  fixture.actor.companion_slot = 3;
+  fixture.actor.instance.reaction_state = 1;
+  fixture.actor.route_target = {1, 2, 3, 4};
   const auto parent = TransitionState(fixture.actor);
   const auto linked = TransitionState(fixture.linked);
   std::array<int, 2> target{0x0009002B, 0};
@@ -201,10 +200,10 @@ TEST_CASE(
   const bool drawn = GENERATE(false, true);
   MotionFixture fixture;
   auto& actor = fixture.actor;
-  actor.instance.reactionState = static_cast<u_char>(reaction);
-  actor.instance.wasDrawn = drawn;
-  actor.instance.poseState = 7;
-  actor.instance.turnFrames = 71;
+  actor.instance.reaction_state = static_cast<u_char>(reaction);
+  actor.instance.was_drawn = drawn;
+  actor.instance.pose_state = 7;
+  actor.instance.turn_frames = 71;
   const SVECTOR position{-300, 32767, -32768, 0x1234};
   std::array<int, 2> target{};
   std::memcpy(target.data(), &position, sizeof(position));
@@ -221,15 +220,15 @@ TEST_CASE(
   CHECK(TransitionState(actor) == expected);
   CHECK(target == original);
   CHECK(actor.instance.facing == 0xF00);
-  CHECK(actor.animationId == 0x76);
+  CHECK(actor.animation_id == 0x76);
 }
 
 TEST_CASE("Travel captures aliased target storage before replacing facing",
           "[actors][motion-request][transition-request]") {
   const bool timed = GENERATE(false, true);
   MotionFixture fixture;
-  fixture.actor.routeTarget = {-120, 121, -122, 123};
-  auto* target = reinterpret_cast<int*>(&fixture.actor.routeTarget);
+  fixture.actor.route_target = {-120, 121, -122, 123};
+  auto* target = reinterpret_cast<int*>(&fixture.actor.route_target);
   if (timed) {
     VS::Actors::BeginLiveTimedTravel(2, target, 0x1FFFF);
   } else {
@@ -243,9 +242,9 @@ TEST_CASE("Travel captures aliased target storage before replacing facing",
 TEST_CASE("Teleport captures an aliased tile before clearing its route tail",
           "[actors][motion-request][transition-request]") {
   MotionFixture fixture;
-  fixture.actor.routeTarget = {-120, 121, -122, 123};
+  fixture.actor.route_target = {-120, 121, -122, 123};
   VS::Actors::BeginLiveTeleport(
-      2, reinterpret_cast<int*>(&fixture.actor.routeTarget), 0x1FFFF);
+      2, reinterpret_cast<int*>(&fixture.actor.route_target), 0x1FFFF);
   const std::array<int, 8> expected{-120, 121, 0, -1, 1, 0, 0, 0};
   CHECK(TransitionState(fixture.actor) == expected);
 }

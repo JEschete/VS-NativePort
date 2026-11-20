@@ -13,12 +13,12 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.hpp"
@@ -166,8 +166,8 @@ struct AssetStateRestore {
       VS::Actors::sharedSequenceData};
   ValueRestore<char> forced_overrides{VS::Actors::forcedModelOverrides};
   ValueRestore<u_char> bank_index{VS::Actors::sharedSequenceBankIndex};
-  ValueRestore<char> update_complete{Actors_isActorUpdateComplete};
-  ValueRestore<u_char> pushed_gimmick{Actors_pushedGimmickIndex};
+  ValueRestore<char> update_complete{VS::Actors::isActorUpdateComplete};
+  ValueRestore<u_char> pushed_gimmick{VS::Actors::pushedGimmickIndex};
   ValueRestore<decltype(VS::Content::objectDataLoadStep)> equipment_step{
       VS::Content::objectDataLoadStep};
   ValueRestore<void*> sequence_work{VS::Actors::sequenceWorkBuffer};
@@ -205,18 +205,18 @@ struct AudioRestore {
 
 struct PreviewOwner {
   std::span<std::byte> arena;
-  Actors_ActorRecord* source = nullptr;
+  VS::Actors::ActorRecord* source = nullptr;
 
   ~PreviewOwner() {
     const bool source_live =
         source != nullptr && memory::LivePayloadCapacity(source).has_value();
     const void* model = source_live ? source->instance.model : nullptr;
-    if (Actors_actorRecords[1] != nullptr &&
-        memory::LivePayloadCapacity(Actors_actorRecords[1])) {
+    if (VS::Actors::actorRecords[1] != nullptr &&
+        memory::LivePayloadCapacity(VS::Actors::actorRecords[1])) {
       fw::ReleaseLiveActorPreview();
     }
     if (source_live) {
-      if (Actors_actorRecords[0] == source) {
+      if (VS::Actors::actorRecords[0] == source) {
         static_cast<void>(VS::Content::ReleaseLiveActorModel(0));
       }
       memory::FreeLiveFromLowEnd(source);
@@ -271,8 +271,8 @@ struct Fixture {
       VS::Menu::Framework::submenuStates};
   ArrayRestore<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{
       VS::Battle::actors.data()};
-  ArrayRestore<Actors_ActorRecord*, std::size(Actors_actorRecords)>
-      saved_models{Actors_actorRecords};
+  ArrayRestore<VS::Actors::ActorRecord*, std::size(VS::Actors::actorRecords)>
+      saved_models{VS::Actors::actorRecords.data()};
   ArrayRestore<VS::Actors::WeaponModel*, std::size(VS::Actors::weaponModels)>
       saved_weapons{VS::Actors::weaponModels};
   ValueRestore<void*> saved_primary_sequence{VS::Actors::primarySequenceBuffer};
@@ -407,8 +407,8 @@ struct Fixture {
     }
     LoadTextureOrigins();
     VS::Actors::InitializeLiveActorModelResources();
-    preview_owner.source = static_cast<Actors_ActorRecord*>(
-        memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
+    preview_owner.source = static_cast<VS::Actors::ActorRecord*>(
+        memory::AllocateLiveFromLowEnd(sizeof(VS::Actors::ActorRecord)));
     if (preview_owner.source == nullptr) {
       throw std::runtime_error("source actor owner allocation failed");
     }
@@ -434,12 +434,12 @@ struct Fixture {
                 .model_id = kSourceBattleSequence});
     const auto refused = content::LiveActorAssetRefusals();
     fw::LoadLiveActorPreview(0);
-    const auto* preview = Actors_actorRecords[1];
+    const auto* preview = VS::Actors::actorRecords[1];
     if (content::LiveActorAssetRefusals() != refused || preview == nullptr ||
-        preview->instance.boneCount == 0 ||
+        preview->instance.bone_count == 0 ||
         !VS::Render::ValidateLiveActorModel(*preview) ||
-        VS::Actors::SequenceBankBytes(preview->commonSequence).empty() ||
-        VS::Actors::SequenceBankBytes(preview->battleSequence).empty()) {
+        VS::Actors::SequenceBankBytes(preview->common_sequence).empty() ||
+        VS::Actors::SequenceBankBytes(preview->battle_sequence).empty()) {
       throw std::runtime_error(
           "production actor preview did not acquire its owners");
     }

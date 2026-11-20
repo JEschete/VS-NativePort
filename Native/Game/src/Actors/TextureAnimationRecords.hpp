@@ -1,7 +1,7 @@
 #pragma once
 // An actor's texture animation records as the battle program stores them: the
 // per-channel animation slots, texture overlays, cell origins and scrolling
-// layers inside Actors_ActorRecord, and the module image's timeline keys.
+// layers inside VS::Actors::ActorRecord, and the module image's timeline keys.
 // The typed views live in Actors/TextureAnimation.hpp.
 
 #include <cstddef>

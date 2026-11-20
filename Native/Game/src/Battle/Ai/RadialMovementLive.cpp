@@ -9,8 +9,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -32,7 +31,7 @@ using AiState = VS::Battle::Ai::ActorAiState;
 RadialMover Load(const AiState& state) {
   const auto* model = state.model;
   const auto* model_record =
-      model != nullptr ? reinterpret_cast<const Actors_ActorRecord*>(model)
+      model != nullptr ? reinterpret_cast<const VS::Actors::ActorRecord*>(model)
                        : nullptr;
   return {.toward_point = state.opaque9,
           .approach_directly = state.opaque_d,
@@ -43,7 +42,7 @@ RadialMover Load(const AiState& state) {
           .flies = model != nullptr && model->opaque_a_bit5 != 0,
           .model_look_yaw =
               model_record != nullptr
-                  ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
+                  ? std::bit_cast<std::int16_t>(model_record->instance.look_yaw)
                   : static_cast<std::int16_t>(0),
           .model_facing = model_record != nullptr
                               ? model_record->instance.facing
@@ -120,11 +119,11 @@ class LiveRadialWorld final : public RadialMovementWorld {
   }
   [[nodiscard]] std::optional<RadialPoint> ActorPosition(
       int actor_id) const override {
-    if (actor_id < 0 ||
-        static_cast<std::size_t>(actor_id) >= std::size(Actors_actorRecords)) {
+    if (actor_id < 0 || static_cast<std::size_t>(actor_id) >=
+                            std::size(VS::Actors::actorRecords)) {
       return std::nullopt;
     }
-    const auto* record = Actors_actorRecords[actor_id];
+    const auto* record = VS::Actors::actorRecords[actor_id];
     if (record == nullptr) return std::nullopt;
     return RadialPoint{record->instance.position.vx,
                        record->instance.position.vz};

@@ -17,10 +17,9 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
@@ -246,8 +245,8 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
       : state_(state), rows_(rows) {}
 
   std::optional<TargetPoint> TargetPosition(unsigned target) const override {
-    if (target >= std::size(Actors_actorRecords)) return std::nullopt;
-    const auto* actor = Actors_actorRecords[target];
+    if (target >= std::size(VS::Actors::actorRecords)) return std::nullopt;
+    const auto* actor = VS::Actors::actorRecords[target];
     if (!ReadablePlanningRecord(actor)) return std::nullopt;
     const auto& position = actor->instance.position;
     return TargetPoint{position.vx, position.vy, position.vz};
@@ -396,7 +395,7 @@ class LiveTargetMemory final : public TargetMemoryHost {
   }
   [[nodiscard]] std::optional<std::uint32_t> TargetTile(
       unsigned target) const override {
-    if (Actors_actorRecords[target] == nullptr) return std::nullopt;
+    if (VS::Actors::actorRecords[target] == nullptr) return std::nullopt;
     VS::Actors::ActorLocationQuery placement{};
     if (VS::Actors::LiveActorPlacement(static_cast<int>(target), &placement) !=
         0) {

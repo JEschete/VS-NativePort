@@ -5,8 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -18,21 +17,20 @@
 #include "Legacy/Psx.h"
 
 namespace {
-static_assert(offsetof(Actors_ModelInstance, position) ==
+static_assert(offsetof(VS::Actors::ModelInstance, position) ==
               offsetof(VS::Field::GimmickInstance, position_x));
 static_assert(offsetof(VS::Battle::Ai::PerceivedObjectView, position) ==
-              offsetof(Actors_ModelInstance, position));
+              offsetof(VS::Actors::ModelInstance, position));
 
 struct AuxiliaryPerceptionFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  std::array<Actors_ActorRecord, 2> records{};
+  std::array<VS::Actors::ActorRecord, 2> records{};
   std::array<Battle_Actor, 3> actors{};
   VS::Battle::Ai::ActorAiState owner{};
   VS::Battle::Ai::ActorAiState target{};
@@ -42,7 +40,8 @@ struct AuxiliaryPerceptionFixture {
   explicit AuxiliaryPerceptionFixture(bool auxiliary_target,
                                       bool target_ai = true) {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
+                nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
@@ -54,8 +53,8 @@ struct AuxiliaryPerceptionFixture {
     if (target_ai) frame.actors[2] = VS::Battle::Ai::actorAiStates[2] = &target;
     records[0].instance.position = {16, 0, 16, 0};
     records[1].instance.position = {16, 0, 112, 0};
-    Actors_actorRecords[0] = &records[0];
-    Actors_actorRecords[2] = &records[1];
+    VS::Actors::actorRecords[0] = &records[0];
+    VS::Actors::actorRecords[2] = &records[1];
     actors[0].id = 0;
     actors[0].model = &records[0].instance;
     actors[0].next = &actors[1];
@@ -75,17 +74,19 @@ struct AuxiliaryPerceptionFixture {
     TargetView().radius = 16;
     if (auxiliary_target) {
       SetAuxiliary(2, records[1].instance.position);
-      actors[1].model = reinterpret_cast<Actors_ModelInstance*>(&auxiliary);
+      actors[1].model =
+          reinterpret_cast<VS::Actors::ModelInstance*>(&auxiliary);
       actors[1].kind = 0x10;
       actors[1].modelId = 0xFE;
-      Actors_actorRecords[2] = nullptr;
+      VS::Actors::actorRecords[2] = nullptr;
     }
   }
 
   ~AuxiliaryPerceptionFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
-    std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
+    std::copy(saved_records.begin(), saved_records.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());
     std::copy(saved_states.begin(), saved_states.end(),
@@ -111,7 +112,7 @@ struct AuxiliaryPerceptionFixture {
     SetAuxiliary(3, {static_cast<std::int16_t>(blocking ? 16 : 112), 0, 64, 0});
     actors[2].id = 3;
     actors[2].kind = 0x10;
-    actors[2].model = reinterpret_cast<Actors_ModelInstance*>(&auxiliary);
+    actors[2].model = reinterpret_cast<VS::Actors::ModelInstance*>(&auxiliary);
     actors[1].next = &actors[2];
     VS::Battle::actors[3] = &actors[2];
     View().distances_squared[3] = blocking ? 48 * 48 : 96 * 96 + 48 * 48;
@@ -125,7 +126,7 @@ TEST_CASE(
     "[ai][perception][auxiliary-target]") {
   for (bool with_ai : {false, true}) {
     AuxiliaryPerceptionFixture fixture(true, with_ai);
-    REQUIRE(Actors_actorRecords[2] == nullptr);
+    REQUIRE(VS::Actors::actorRecords[2] == nullptr);
     REQUIRE(VS::Battle::actors[2]->model != nullptr);
     fixture.Update();
     CHECK(fixture.View().distances_squared[2] == (with_ai ? 13312 : 10240));
@@ -140,7 +141,7 @@ TEST_CASE(
   AuxiliaryPerceptionFixture fixture(false);
   fixture.Update();
   CHECK(fixture.View().distances_squared[2] == 13312);
-  CHECK(Actors_actorRecords[2] == &fixture.records[1]);
+  CHECK(VS::Actors::actorRecords[2] == &fixture.records[1]);
 }
 
 TEST_CASE("Perception evaluates valid auxiliary occluders through their owners",
@@ -148,7 +149,7 @@ TEST_CASE("Perception evaluates valid auxiliary occluders through their owners",
   for (bool blocking : {false, true}) {
     AuxiliaryPerceptionFixture fixture(false);
     fixture.AddAuxiliaryBlocker(blocking);
-    REQUIRE(Actors_actorRecords[3] == nullptr);
+    REQUIRE(VS::Actors::actorRecords[3] == nullptr);
     fixture.Update();
     CHECK(fixture.View().relations[2].bits.blocked == blocking);
     CHECK(VS::Battle::actors[3] == &fixture.actors[2]);

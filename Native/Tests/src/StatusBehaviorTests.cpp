@@ -3,8 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResolution.hpp"
@@ -23,7 +22,7 @@
 namespace {
 struct ConditionFixture {
   Battle_Actor* saved_actor = VS::Battle::actors[0];
-  Actors_ActorRecord* saved_record = Actors_actorRecords[0];
+  VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[0];
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_ActionState* saved_action = VS::Battle::actionState;
   decltype(VS::Battle::floatingLabels) saved_labels =
@@ -39,7 +38,7 @@ struct ConditionFixture {
   int saved_random_index = VS::Core::randomShuffleIndex;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   VS::Battle::Ai::ActorAiState ai{};
   Battle_ActionState action{};
   VS::Battle::FloatingLabelSlots labels{};
@@ -48,7 +47,7 @@ struct ConditionFixture {
     VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
     actor.weaponDrawn = 1;
-    Actors_actorRecords[0] = &record;
+    VS::Actors::actorRecords[0] = &record;
     VS::Battle::Ai::actorAiStates[0] = &ai;
     VS::Battle::actionState = &action;
     VS::Battle::floatingLabels = &labels;
@@ -61,7 +60,7 @@ struct ConditionFixture {
 
   ~ConditionFixture() {
     VS::Battle::actors[0] = saved_actor;
-    Actors_actorRecords[0] = saved_record;
+    VS::Actors::actorRecords[0] = saved_record;
     VS::Battle::Ai::actorAiStates[0] = saved_ai;
     VS::Battle::actionState = saved_action;
     VS::Battle::floatingLabels = saved_labels;

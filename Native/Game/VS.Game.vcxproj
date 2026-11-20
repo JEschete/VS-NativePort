@@ -54,6 +54,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Actors\ActorPlacement.cpp" />
+    <ClCompile Include="src\Actors\ActorRecord.cpp" />
     <ClCompile Include="src\Actors\ActorRoster.cpp" />
     <ClCompile Include="src\Actors\ActorRosterLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -99,13 +100,7 @@
     <ClCompile Include="src\Actors\MotionRequestsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Actors\Movement.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Actors\Movement.cpp" />
     <ClCompile Include="src\Actors\MovementCommandBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -1924,15 +1919,15 @@
     <ClInclude Include="src\Actors\ActorAllocation.hpp" />
     <ClInclude Include="src\Actors\ActorCommandsLiveState.hpp" />
     <ClInclude Include="src\Actors\ActorModelSlot.hpp" />
-    <ClInclude Include="src\Actors\ActorRecord.h" />
+    <ClInclude Include="src\Actors\ActorRecord.hpp" />
     <ClInclude Include="src\Actors\Animation.hpp" />
     <ClInclude Include="src\Actors\AppearanceLiveState.hpp" />
     <ClInclude Include="src\Actors\CharacterInit.hpp" />
     <ClInclude Include="src\Actors\Location.hpp" />
     <ClInclude Include="src\Actors\ModelDraw.hpp" />
-    <ClInclude Include="src\Actors\ModelInstance.h" />
+    <ClInclude Include="src\Actors\ModelInstance.hpp" />
     <ClInclude Include="src\Actors\ModelRenderingLiveState.hpp" />
-    <ClInclude Include="src\Actors\Movement.h" />
+    <ClInclude Include="src\Actors\Movement.hpp" />
     <ClInclude Include="src\Actors\RoomActorCache.hpp" />
     <ClInclude Include="src\Actors\Shadow.hpp" />
     <ClInclude Include="src\Actors\ShpModel.hpp" />

@@ -4,7 +4,9 @@
 #include "Actors/Appearance.hpp"
 #include "Legacy/Psx.h"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 namespace VS::Actors {
 struct WeaponModel;
 }
@@ -33,7 +35,8 @@ void SetLiveRoomActorScale(const VECTOR* room_scale);
 // `actor_id` names an actor, or else the gimmick in that slot.
 int EnableLiveModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot);
 int DisableLiveModelPalettePulse(int actor_id, int pulse_slot);
-void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames);
+void BeginLiveActorShadowBlend(VS::Actors::ActorRecord* actor,
+                               int blend_frames);
 int LiveActorFadeParameters(int actor_id,
                             VS::Render::ColorCode* fade_color_out);
 int SetLiveActorFadeParameters(int actor_id,

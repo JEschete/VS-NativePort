@@ -11,9 +11,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
@@ -43,13 +42,12 @@ static_assert(
 namespace {
 struct SegmentFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   std::array<Battle_Actor, 2> actors{};
-  std::array<Actors_ActorRecord, 2> models{};
+  std::array<VS::Actors::ActorRecord, 2> models{};
   std::array<Battle_ActorStats, 2> stats{};
   std::array<u_char, 1304> saved_bounce{};
 
@@ -57,20 +55,20 @@ struct SegmentFixture {
     std::copy_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
                 saved_bounce.begin());
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
     VS::Field::roomData = {};
     for (unsigned index = 0; index < actors.size(); ++index) {
       VS::Battle::actors[index] = &actors[index];
-      Actors_actorRecords[index] = &models[index];
+      VS::Actors::actorRecords[index] = &models[index];
       actors[index].id = static_cast<int>(index);
       actors[index].stats = &stats[index];
       stats[index].actorId = static_cast<u_char>(index);
       models[index].instance.position = {static_cast<std::int16_t>(index * 128),
                                          0, 128, 0};
-      models[index].collisionRadius = 32;
-      models[index].collisionHeight = 128;
+      models[index].collision_radius = 32;
+      models[index].collision_height = 128;
     }
   }
 
@@ -79,7 +77,8 @@ struct SegmentFixture {
               VS::Field::platformBounceFrames.begin());
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());
     VS::Field::roomData = saved_room;
@@ -113,7 +112,7 @@ struct ActionTraceFixture : SegmentFixture {
     VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
       VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
-      models[0].boneMatrices[0].m[axis][axis] = 4096;
+      models[0].bone_matrices[0].m[axis][axis] = 4096;
     }
     Core_Gte_Reset();
   }
@@ -181,16 +180,16 @@ TEST_CASE("Segment tracing respects reactions animation lock and ignored actor",
           "[field][segment-collision]") {
   SegmentFixture fixture;
   for (unsigned reaction = 0; reaction < 16; ++reaction) {
-    fixture.models[1].instance.reactionState = static_cast<u_char>(reaction);
+    fixture.models[1].instance.reaction_state = static_cast<u_char>(reaction);
     SVECTOR output{};
     CHECK((TraceHorizontal(output) != nullptr) !=
           (reaction == 1 || reaction == 2));
   }
-  fixture.models[1].instance.reactionState = 0;
-  fixture.models[1].animationLocked = 1;
+  fixture.models[1].instance.reaction_state = 0;
+  fixture.models[1].animation_locked = 1;
   SVECTOR output{};
   CHECK(TraceHorizontal(output) == nullptr);
-  fixture.models[1].animationLocked = 0;
+  fixture.models[1].animation_locked = 0;
   VS::Battle::actors[0] = nullptr;
   CHECK(TraceHorizontal(output, 1) == nullptr);
 }
@@ -233,7 +232,7 @@ TEST_CASE(
     "Segment sampling uses signed floor steps and exactly thirty-two samples",
     "[field][segment-collision]") {
   SegmentFixture fixture;
-  fixture.models[1].collisionRadius = 1;
+  fixture.models[1].collision_radius = 1;
   fixture.models[1].instance.position.vx = -33;
   const SVECTOR from{-1, -64, 128, 5}, to{-32, -64, 128, 6};
   SVECTOR output{7, 8, 9, 10};

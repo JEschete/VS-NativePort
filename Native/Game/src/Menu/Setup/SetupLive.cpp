@@ -14,8 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -515,11 +514,11 @@ class LiveHost final : public Host {
   void FreeRecipes() override { FreeRecipeBlock(); }
 
   std::optional<int> AshleySequenceModel() override {
-    const Actors_ActorRecord* const ashley = Actors_actorRecords[0];
+    const VS::Actors::ActorRecord* const ashley = VS::Actors::actorRecords[0];
     if (ashley == nullptr) {
       return std::nullopt;
     }
-    return ashley->sequenceModelId;
+    return ashley->sequence_model_id;
   }
   void ReleaseWeaponModel(int slot) override {
     Content::ReleaseLiveWeaponModel(slot);

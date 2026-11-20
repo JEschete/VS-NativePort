@@ -3,7 +3,9 @@
 
 #include "Actors/TextureAnimation.hpp"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 
 // Bindings from the actor records, the shared sequence bank's texture page
 // and row and the texture slot tables to the typed texture animation
@@ -15,8 +17,8 @@ namespace VS::Actors {
 // is a TextureAnimationCommand; another value changes nothing.
 int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
                                  int command);
-void UpdateLiveActorTextureAnimations(Actors_ActorRecord* actor);
-void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
+void UpdateLiveActorTextureAnimations(VS::Actors::ActorRecord* actor);
+void UploadLiveActorTextureFrame(VS::Actors::ActorRecord* actor, int channel,
                                  int frame);
 // Copies frame 0 of both channels for each actor with a row in `bank_index`,
 // when that is the shared bank.
@@ -26,5 +28,6 @@ void UploadLiveActorTextureOverlay(int actor_id, TextureOverlayCopy copy);
 // func_800F9EB8) carried its camera matrix pointer, which no byte width
 // matches.
 void UpdateLiveActorTextureScrolling(
-    Actors_ActorRecord* actor, int carried_height = kNoCarriedScrollHeight);
+    VS::Actors::ActorRecord* actor,
+    int carried_height = kNoCarriedScrollHeight);
 }  // namespace VS::Actors

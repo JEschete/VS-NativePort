@@ -4,7 +4,9 @@
 #include "Actors/ModelRendering.hpp"
 #include "Legacy/Psx.h"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 namespace VS::Actors {
 struct WeaponModel;
 }
@@ -23,13 +25,13 @@ struct GimmickInstance;
 namespace VS::Actors {
 // func_800AEAE8: the actor's root offset into the model workspace, rotated by
 // TransformLiveActorRootOffset, and its look angles.
-void PrepareLiveActorRootTransform(Actors_ActorRecord* actor);
+void PrepareLiveActorRootTransform(VS::Actors::ActorRecord* actor);
 // func_800AEF94: UpdateAndDrawRoomModels over the live tables.
 void UpdateAndDrawLiveRoomActors(MATRIX* camera);
 // func_800B07DC: rotates the workspace root offset by the actor's angles. It
 // leaves the rotation in the workspace matrix, with the rotated offset as its
 // translation, and the offset moved to the actor's position in rootOffset.
-void TransformLiveActorRootOffset(Actors_ActorRecord* actor);
+void TransformLiveActorRootOffset(VS::Actors::ActorRecord* actor);
 // func_800B1A68: places the gimmick centered at the workspace rootOffset and
 // draws it. A held gimmick whose holder slot is empty is refused.
 void DrawLiveGimmickModel(VS::Field::GimmickInstance* object, MATRIX* camera);

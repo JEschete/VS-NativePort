@@ -15,8 +15,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
@@ -1374,22 +1373,22 @@ struct SnapshotFixture {
 
 struct ActorTileTriggerLiveFixture {
   Battle_Actor* saved_actor = VS::Battle::actors[2];
-  Actors_ActorRecord* saved_record = Actors_actorRecords[2];
+  VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[2];
   decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
   std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
-  std::unique_ptr<Actors_ActorRecord> record =
-      std::make_unique<Actors_ActorRecord>();
+  std::unique_ptr<VS::Actors::ActorRecord> record =
+      std::make_unique<VS::Actors::ActorRecord>();
 
   ActorTileTriggerLiveFixture() {
     VS::Battle::actors[2] = actor.get();
-    Actors_actorRecords[2] = record.get();
+    VS::Actors::actorRecords[2] = record.get();
     VS::Field::roomData = {};
     VS::Field::controlMode = 3;
   }
   ~ActorTileTriggerLiveFixture() {
     VS::Battle::actors[2] = saved_actor;
-    Actors_actorRecords[2] = saved_record;
+    VS::Actors::actorRecords[2] = saved_record;
     VS::Field::roomData = saved_room;
     VS::Field::controlMode = saved_control;
   }
@@ -1401,7 +1400,7 @@ struct ScriptedFallDoorFixture {
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{};
-  std::array<Actors_ActorRecord*, std::size(Actors_actorRecords)>
+  std::array<VS::Actors::ActorRecord*, std::size(VS::Actors::actorRecords)>
       saved_records{};
   VS::Field::RoomTransitionState saved_transition =
       VS::Field::LoadLiveRoomTransition();
@@ -1416,11 +1415,11 @@ struct ScriptedFallDoorFixture {
     REQUIRE(saved_zone.zone_data == nullptr);
     REQUIRE(saved_zone.zone_disc_request == nullptr);
     std::ranges::copy(VS::Battle::actors, saved_actors.begin());
-    std::ranges::copy(Actors_actorRecords, saved_records.begin());
+    std::ranges::copy(VS::Actors::actorRecords, saved_records.begin());
     std::ranges::fill(VS::Battle::actors, nullptr);
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     VS::Battle::actors[2] = actors.actor.get();
-    Actors_actorRecords[2] = actors.record.get();
+    VS::Actors::actorRecords[2] = actors.record.get();
     VS::Field::StoreLiveRoomTransition({});
     VS::Field::zoneContext = {};
     VS::Field::zoneContext.zone_id = 9;
@@ -1447,7 +1446,7 @@ struct ScriptedFallDoorFixture {
     VS::Field::zoneContext = saved_zone;
     VS::Field::roomData = actors.saved_room;
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
-    std::ranges::copy(saved_records, Actors_actorRecords);
+    std::ranges::copy(saved_records, VS::Actors::actorRecords.begin());
   }
 };
 
@@ -6916,8 +6915,7 @@ TEST_CASE(
 namespace {
 struct GimmickPointLiveFixture : GimmickResourcesLiveFixture {
   decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   VS::Field::CollisionSamples saved_samples = VS::Field::LiveCollisionSamples();
   struct CollisionStorage {
@@ -6927,11 +6925,11 @@ struct GimmickPointLiveFixture : GimmickResourcesLiveFixture {
     std::array<std::uint8_t, 16> pattern{};
   } collision;
   std::array<VS::Field::MpdTileCell, 4> cells{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   GimmickPointLiveFixture() {
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_instances.size(),
                 nullptr);
-    std::fill_n(Actors_actorRecords, saved_actors.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_actors.size(), nullptr);
     VS::Field::roomData = {};
     VS::Field::roomData.collision_map = &collision.header;
     VS::Field::roomData.tile_cells = cells.data();
@@ -6940,7 +6938,8 @@ struct GimmickPointLiveFixture : GimmickResourcesLiveFixture {
   }
   ~GimmickPointLiveFixture() {
     VS::Field::roomData = saved_room;
-    std::copy(saved_actors.begin(), saved_actors.end(), Actors_actorRecords);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Actors::actorRecords.begin());
     VS::Field::LiveCollisionProbe() = saved_probe;
     VS::Field::LiveCollisionSamples() = saved_samples;
   }
@@ -6957,9 +6956,9 @@ TEST_CASE(
   CHECK((VS::Field::LiveCollisionProbeCellWord() & (1u << 20)) == 0);
   CHECK(result == 1);
   CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 1) == 0);
-  Actors_actorRecords[2] = &fixture.actor;
-  fixture.actor.instance.currentTileX = 0;
-  fixture.actor.instance.currentTileZ = 0;
+  VS::Actors::actorRecords[2] = &fixture.actor;
+  fixture.actor.instance.current_tile_x = 0;
+  fixture.actor.instance.current_tile_z = 0;
   CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
 }
 
@@ -7117,10 +7116,10 @@ TEST_CASE("Save point query refuses absent actors collision and trigger",
 TEST_CASE("Native interaction tile release clears only the actual reservation",
           "[interaction-tile-live][field]") {
   RoomTriggerLiveFixture room;
-  Actors_ActorRecord record{};
-  record.instance.currentTileX = 2;
-  record.instance.currentTileZ = 2;
-  record.animationId = 0x47;
+  VS::Actors::ActorRecord record{};
+  record.instance.current_tile_x = 2;
+  record.instance.current_tile_z = 2;
+  record.animation_id = 0x47;
   room.flags[1][2] = 0xF5A5;
   auto expected = room.flags;
   expected[1][2] &= ~VS::Battle::Ai::kReservedTileFlag;
@@ -7131,7 +7130,7 @@ TEST_CASE("Native interaction tile release clears only the actual reservation",
   CHECK((std::bit_cast<FlagBytes>(room.flags) ==
          std::bit_cast<FlagBytes>(expected)));
   CHECK(std::bit_cast<std::array<std::byte, sizeof(record)>>(record) == saved);
-  record.animationId = 0x4F;
+  record.animation_id = 0x4F;
   record.instance.facing = 3072;
   room.flags[2][4] = 0x80;
   VS::Field::RefreshAshleyInteractionTileEntry(&record);
@@ -7142,15 +7141,15 @@ TEST_CASE(
     "Native interaction tile release retains inactive and out of grid state",
     "[interaction-tile-live][field]") {
   RoomTriggerLiveFixture room;
-  Actors_ActorRecord record{};
-  record.animationId = 0x47;
+  VS::Actors::ActorRecord record{};
+  record.animation_id = 0x47;
   using FlagBytes = std::array<std::byte, sizeof(room.flags)>;
   const auto saved = std::bit_cast<FlagBytes>(room.flags);
   CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(&record));
   CHECK((std::bit_cast<FlagBytes>(room.flags) == saved));
-  record.animationId = 0;
+  record.animation_id = 0;
   CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
-  record.animationId = 0x47;
+  record.animation_id = 0x47;
   record.instance.slot = 1;
   CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
   CHECK((std::bit_cast<FlagBytes>(room.flags) == saved));
@@ -7163,24 +7162,24 @@ TEST_CASE(
     "Native interaction tile release refuses null misaligned and short records",
     "[interaction-tile-live][field]") {
   RoomTriggerLiveFixture room;
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(nullptr));
   CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(
-      reinterpret_cast<Actors_ActorRecord*>(
+      reinterpret_cast<VS::Actors::ActorRecord*>(
           reinterpret_cast<std::byte*>(&record) + 1)));
   std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap(arena);
   auto* short_record = VS::Core::Memory::AllocateLiveFromLowEnd(16);
   REQUIRE(short_record != nullptr);
   CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(
-      static_cast<Actors_ActorRecord*>(short_record)));
+      static_cast<VS::Actors::ActorRecord*>(short_record)));
 }
 
 TEST_CASE("Native save point query returns unsigned activation bytes",
           "[save-point-byte-regression][save-point-live][field]") {
   RoomTriggerLiveFixture room;
   GimmickPointLiveFixture placement;
-  Actors_actorRecords[0] = &placement.actor;
+  VS::Actors::actorRecords[0] = &placement.actor;
   placement.cells[0].has_room_trigger = 1;
   VS::Field::roomData.floor_triggers = room.triggers.data();
   VS::Field::roomData.header.floor_triggers_length = sizeof(room.triggers);
@@ -7217,7 +7216,7 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
           "[save-point-live][field]") {
   RoomTriggerLiveFixture room;
   GimmickPointLiveFixture placement;
-  Actors_actorRecords[0] = &placement.actor;
+  VS::Actors::actorRecords[0] = &placement.actor;
   placement.cells[0].has_room_trigger = 1;
   VS::Field::roomData.floor_triggers = room.triggers.data();
   VS::Field::roomData.header.floor_triggers_length = sizeof(room.triggers);
@@ -7237,7 +7236,7 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
   VS::Field::roomData.header.floor_triggers_length = sizeof(room.triggers);
   placement.cells[0].has_room_trigger = 0;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
-  Actors_actorRecords[0] = nullptr;
+  VS::Actors::actorRecords[0] = nullptr;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
 }
 
@@ -7246,9 +7245,9 @@ struct GimmickInteractionLiveFixture : GimmickPointLiveFixture {
   decltype(VS::Field::gimmickInteractionDirection) saved_direction =
       VS::Field::gimmickInteractionDirection;
   GimmickInteractionLiveFixture() {
-    Actors_actorRecords[0] = &actor;
-    actor.instance.currentTileX = 0;
-    actor.instance.currentTileZ = 2;
+    VS::Actors::actorRecords[0] = &actor;
+    actor.instance.current_tile_x = 0;
+    actor.instance.current_tile_z = 2;
     actor.instance.position.vx = 64;
     actor.instance.position.vz = 320;
     auto& object = instances[0];
@@ -7282,7 +7281,7 @@ struct GimmickStartLiveFixture : GimmickInteractionLiveFixture {
     instances[0].velocity_y = 99;
     instances[0].slide_x = 37;
     instances[0].slide_z = 29;
-    actor.instance.reserved5F = 255;
+    actor.instance.reserved5f = 255;
     actor.instance.facing = 100;
     VS::Field::interactingGimmickId = -1;
     flags[0][0] = 0x400;
@@ -7316,13 +7315,13 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
     instances[0].rotation_y = 1000;
     instances[0].object_info.support_index = 9;
     VS::Actors::boneMatrixScratch = IdentityMatrix();
-    for (auto& matrix : actor.boneMatrices) matrix = IdentityMatrix();
-    actor.boneMatrices[0].t[1] = -1;
+    for (auto& matrix : actor.bone_matrices) matrix = IdentityMatrix();
+    actor.bone_matrices[0].t[1] = -1;
     model.bones[0].tag = 0xF0;
     model.bones[1].tag = 0xF1;
     actor.instance.model = &model.header;
-    actor.instance.boneCount = 2;
-    actor.modelDataSize = sizeof(model);
+    actor.instance.bone_count = 2;
+    actor.model_data_size = sizeof(model);
     actor.scale = 4096;
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
   }
@@ -7369,7 +7368,7 @@ void CheckNativeRollRefusal(const GimmickStartLiveFixture& fixture) {
   CHECK(VS::Field::interactingGimmickId == 1);
   CHECK(fixture.instances[0].slide_x == 0);
   CHECK(fixture.instances[0].slide_z == 0);
-  CHECK(fixture.actor.weaponPoseActive == 0);
+  CHECK(fixture.actor.weapon_pose_active == 0);
   CHECK(fixture.flags[0][0] == 0x400);
 }
 
@@ -7387,7 +7386,7 @@ void CheckNativeCommandDrop(const GimmickCommandLiveFixture& fixture) {
   CHECK(fixture.instances[0].mode == 252);
   CHECK(fixture.instances[0].velocity_y == 24);
   CHECK(fixture.instances[0].parent == 255);
-  CHECK(fixture.actor.actionPoseActive == 0);
+  CHECK(fixture.actor.action_pose_active == 0);
 }
 }  // namespace
 
@@ -7531,15 +7530,15 @@ TEST_CASE(
   CHECK(fixture.flags[1][0] == 0x400);
   CHECK(fixture.heights[1][0] == 0);
   CheckNativeCommandAttachment(fixture);
-  CHECK(fixture.actor.instance.attachBone == 1);
-  CHECK(fixture.actor.actionPoseActive == 1);
+  CHECK(fixture.actor.instance.attach_bone == 1);
+  CHECK(fixture.actor.action_pose_active == 1);
 }
 
 TEST_CASE("Native gimmick command drop uses actual tagged parent bone heights",
           "[gimmick-interaction-command-live][field]") {
   GimmickCommandLiveFixture fixture;
   fixture.instances[0].parent = 0;
-  fixture.actor.actionPoseActive = 1;
+  fixture.actor.action_pose_active = 1;
   SVECTOR first{};
   SVECTOR second{};
   REQUIRE(VS::Actors::LiveActorTaggedBonePosition(0, 0xF0, &first, 1) == 0);
@@ -7557,7 +7556,7 @@ TEST_CASE("Native gimmick command refuses missing data without fatal helpers",
   VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(&fixture.actor, 0));
   CHECK(fixture.heights[1][0] == 0x800);
-  CHECK(fixture.actor.actionPoseActive == 0);
+  CHECK(fixture.actor.action_pose_active == 0);
   VS::Field::gimmickInstances[1] = nullptr;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(nullptr, 2));
 }
@@ -7566,10 +7565,10 @@ TEST_CASE(
     "Native gimmick command refuses misaligned actor before reading its fields",
     "[gimmick-interaction-command-live][field]") {
   GimmickCommandLiveFixture fixture;
-  alignas(Actors_ActorRecord)
-      std::array<std::byte, sizeof(Actors_ActorRecord) + 1>
+  alignas(VS::Actors::ActorRecord)
+      std::array<std::byte, sizeof(VS::Actors::ActorRecord) + 1>
           storage{};
-  auto* actor = reinterpret_cast<Actors_ActorRecord*>(storage.data() + 1);
+  auto* actor = reinterpret_cast<VS::Actors::ActorRecord*>(storage.data() + 1);
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(actor, 1));
   CHECK(fixture.instances[0].mode == 0);
   CHECK(fixture.heights[1][0] == 0x800);
@@ -7592,9 +7591,9 @@ TEST_CASE(
   REQUIRE(VS::Field::BeginGimmickInteractionEntry(0) == 0);
   CHECK(VS::Field::interactingGimmickId == 1);
   CheckNativeInitiationSlide(fixture);
-  CHECK(fixture.actor.weaponPoseActive == 1);
-  CHECK(fixture.actor.instance.reserved5F == 255);
-  CHECK(fixture.actor.instance.turnFrames == 4);
+  CHECK(fixture.actor.weapon_pose_active == 1);
+  CHECK(fixture.actor.instance.reserved5f == 255);
+  CHECK(fixture.actor.instance.turn_frames == 4);
 }
 
 TEST_CASE(
@@ -7605,13 +7604,13 @@ TEST_CASE(
   CHECK(VS::Field::BeginGimmickInteractionEntry(-1) == -1);
   CHECK(VS::Field::BeginGimmickInteractionEntry(17) == -1);
   CHECK(VS::Field::BeginGimmickInteractionEntry(2) == -1);
-  fixture.actor.weaponPoseActive = 1;
+  fixture.actor.weapon_pose_active = 1;
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(VS::Field::interactingGimmickId == -1);
-  fixture.actor.weaponPoseActive = 0;
+  fixture.actor.weapon_pose_active = 0;
   VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
-  CHECK(fixture.actor.instance.turnFrames == 0);
+  CHECK(fixture.actor.instance.turn_frames == 0);
 }
 
 TEST_CASE(
@@ -7647,11 +7646,11 @@ TEST_CASE(
   GimmickInteractionLiveFixture fixture;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == 1);
   CHECK(VS::Field::gimmickInteractionDirection == 0);
-  Actors_ActorRecord blocker{};
-  blocker.instance.currentTileZ = 1;
-  Actors_actorRecords[2] = &blocker;
+  VS::Actors::ActorRecord blocker{};
+  blocker.instance.current_tile_z = 1;
+  VS::Actors::actorRecords[2] = &blocker;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
-  Actors_actorRecords[2] = nullptr;
+  VS::Actors::actorRecords[2] = nullptr;
   fixture.instances[0].object_info.interaction = 1;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
 }
@@ -7665,15 +7664,15 @@ TEST_CASE(
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(17) == -1);
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(2) == -1);
   CHECK(VS::Field::gimmickInteractionDirection == 77);
-  fixture.actor.routePhase = 1;
+  fixture.actor.route_phase = 1;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(VS::Field::gimmickInteractionDirection == 77);
-  fixture.actor.routePhase = 0;
-  fixture.actor.actionPoseActive = 1;
-  fixture.actor.instance.attachBone = 255;
+  fixture.actor.route_phase = 0;
+  fixture.actor.action_pose_active = 1;
+  fixture.actor.instance.attach_bone = 255;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(VS::Field::gimmickInteractionDirection == 0);
-  fixture.actor.instance.attachBone = 1;
+  fixture.actor.instance.attach_bone = 1;
   VS::Field::gimmickInstances[1] = nullptr;
   CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
 }
@@ -7699,9 +7698,9 @@ TEST_CASE(
     "height",
     "[gimmick-actor-above-retirement][field]") {
   GimmickPointLiveFixture fixture;
-  Actors_actorRecords[2] = &fixture.actor;
-  fixture.actor.instance.currentTileX = 255;
-  fixture.actor.instance.currentTileZ = 254;
+  VS::Actors::actorRecords[2] = &fixture.actor;
+  fixture.actor.instance.current_tile_x = 255;
+  fixture.actor.instance.current_tile_z = 254;
   VS::Field::GimmickInstance support{};
   support.tile_x = std::bit_cast<char>(std::uint8_t{255});
   support.tile_z = std::bit_cast<char>(std::uint8_t{254});
@@ -7888,25 +7887,25 @@ struct GimmickStackDropLiveFixture : GimmickPointLiveFixture {
     instances[1].position_y = 128;
     instances[1].velocity_y = 17;
     actor.instance.slot = 2;
-    actor.instance.currentTileX = 0;
-    actor.instance.currentTileZ = 0;
+    actor.instance.current_tile_x = 0;
+    actor.instance.current_tile_z = 0;
     actor.instance.position.vy = 256;
-    Actors_actorRecords[2] = &actor;
+    VS::Actors::actorRecords[2] = &actor;
   }
   ~GimmickStackDropLiveFixture() {
     VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
   }
   void CheckActorFall() {
-    CHECK(actor.instance.movementMode == 3);
-    CHECK(actor.instance.rootMotion.vx == 0);
-    CHECK(actor.instance.rootMotion.vy == 0);
-    CHECK(actor.instance.rootMotion.vz == 0);
-    CHECK(actor.instance.rootMotion.pad == 0);
-    CHECK(actor.instance.jumpCountdown == 4);
-    CHECK(actor.destinationMode == 1);
-    CHECK(actor.instance.movementPending == 0);
-    CHECK(actor.supportGimmick == 0);
+    CHECK(actor.instance.movement_mode == 3);
+    CHECK(actor.instance.root_motion.vx == 0);
+    CHECK(actor.instance.root_motion.vy == 0);
+    CHECK(actor.instance.root_motion.vz == 0);
+    CHECK(actor.instance.root_motion.pad == 0);
+    CHECK(actor.instance.jump_countdown == 4);
+    CHECK(actor.destination_mode == 1);
+    CHECK(actor.instance.movement_pending == 0);
+    CHECK(actor.support_gimmick == 0);
   }
 };
 }  // namespace
@@ -7916,9 +7915,9 @@ TEST_CASE(
     "[gimmick-stack-drop-live][field]") {
   GimmickStackDropLiveFixture fixture;
   fixture.instances[1].object_info.interaction = 2;
-  fixture.actor.instance.rootMotion = {1, 2, 3, 4};
-  fixture.actor.instance.movementPending = 1;
-  fixture.actor.supportGimmick = 7;
+  fixture.actor.instance.root_motion = {1, 2, 3, 4};
+  fixture.actor.instance.movement_pending = 1;
+  fixture.actor.support_gimmick = 7;
   REQUIRE(VS::Field::DropLiveUnsupportedGimmickStack(3));
   CHECK(fixture.instances[0].object_info.is_falling == 1);
   CHECK(fixture.instances[1].velocity_y == 0);
@@ -7932,14 +7931,14 @@ TEST_CASE(
     "[gimmick-stack-drop-live][field]") {
   GimmickStackDropLiveFixture fixture;
   VS::Field::gimmickInstances[5] = &fixture.instances[1];
-  fixture.actor.instance.movementMode = 3;
-  fixture.actor.instance.rootMotion = {1, 2, 3, 4};
-  fixture.actor.instance.jumpCountdown = 9;
+  fixture.actor.instance.movement_mode = 3;
+  fixture.actor.instance.root_motion = {1, 2, 3, 4};
+  fixture.actor.instance.jump_countdown = 9;
   REQUIRE(VS::Field::DropLiveUnsupportedGimmickStack(3));
   CHECK(fixture.instances[1].object_info.carrier == 255);
-  CHECK(fixture.actor.instance.rootMotion.vx == 1);
-  CHECK(fixture.actor.instance.rootMotion.pad == 4);
-  CHECK(fixture.actor.instance.jumpCountdown == 9);
+  CHECK(fixture.actor.instance.root_motion.vx == 1);
+  CHECK(fixture.actor.instance.root_motion.pad == 4);
+  CHECK(fixture.actor.instance.jump_countdown == 9);
 }
 
 TEST_CASE(
@@ -7954,7 +7953,7 @@ TEST_CASE(
   fixture.instances[0].parent = 0;
   REQUIRE(VS::Field::DropLiveUnsupportedGimmickStack(3));
   CHECK(fixture.instances[0].object_info.is_falling == 1);
-  CHECK(fixture.actor.instance.movementMode == 0);
+  CHECK(fixture.actor.instance.movement_mode == 0);
 }
 
 TEST_CASE("Unsupported gimmick stack drop retains its original module address",

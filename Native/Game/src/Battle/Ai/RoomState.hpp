@@ -2,9 +2,9 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.hpp"

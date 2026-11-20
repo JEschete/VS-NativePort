@@ -11,12 +11,12 @@
 #include <string_view>
 #include <utility>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
@@ -52,7 +52,7 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Audio::Driver::controlLatches),
                     BytesOf(VS::Audio::Mixer::voiceScheduler),
                     BytesOf(VS::Audio::SoundEffects::channels),
-                    BytesOf(Actors_actorRecords),
+                    BytesOf(VS::Actors::actorRecords),
                     BytesOf(VS::Actors::weaponModels),
                     BytesOf(VS::Field::gimmickInstances),
                     BytesOf(VS::Actors::primarySequenceBuffer),
@@ -69,8 +69,8 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Actors::sharedSequenceBankIndex),
                     BytesOf(VS::Actors::lastResolvedSequenceIndex),
                     BytesOf(VS::Actors::roomActorScale),
-                    BytesOf(Actors_pushedGimmickIndex),
-                    BytesOf(Actors_isActorUpdateComplete),
+                    BytesOf(VS::Actors::pushedGimmickIndex),
+                    BytesOf(VS::Actors::isActorUpdateComplete),
                     BytesOf(VS::Actors::skeletonPose),
                     BytesOf(VS::Actors::skeletonRootMatrix),
                     BytesOf(VS::Actors::boneMatrixScratch),
@@ -123,7 +123,7 @@ class PreviewFixture : public TerminalFixture {
   PreviewFixture() {
     if (!AssetsIdle() ||
         score::LiveEnemyPreviewState() != score::EnemyPreviewState() ||
-        std::ranges::any_of(Actors_actorRecords, [](const auto* actor) {
+        std::ranges::any_of(VS::Actors::actorRecords, [](const auto* actor) {
           return actor != nullptr;
         })) {
       throw std::runtime_error("terminal preview fixture requires idle actors");
@@ -165,7 +165,7 @@ class PreviewFixture : public TerminalFixture {
     if (score::LiveEnemyPreviewState().model_buffer !=
         content::AssetAddress::kNone) {
       score::FreeLiveEnemyPreview();
-    } else if (Actors_actorRecords[1] != nullptr) {
+    } else if (VS::Actors::actorRecords[1] != nullptr) {
       fw::ReleaseLiveActorPreview();
     }
     static_cast<void>(content::ReleaseLiveActorModel(0));
@@ -201,7 +201,8 @@ class PreviewFixture : public TerminalFixture {
     }
     source_file_ =
         static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(entry->size));
-    source_record_ = memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord));
+    source_record_ =
+        memory::AllocateLiveFromLowEnd(sizeof(VS::Actors::ActorRecord));
     if (source_file_ == nullptr || source_record_ == nullptr ||
         content::ReadLiveDiscFileBlocking(static_cast<int>(entry->lba),
                                           static_cast<int>(entry->size),

@@ -1,7 +1,6 @@
 #include <stdint.h>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResultsLive.hpp"
@@ -18,7 +17,7 @@ int Tests_CombatTargetResults(void) {
   VS::Battle::FloatingLabelSlots labels{};
   Battle_ActionState* saved_action = VS::Battle::actionState;
   Battle_Actor* saved_target = VS::Battle::actors[2];
-  Actors_ActorRecord* savedModel = Actors_actorRecords[2];
+  VS::Actors::ActorRecord* savedModel = VS::Actors::actorRecords[2];
   auto* saved_labels = VS::Battle::floatingLabels;
   const int16_t saved_label_count = VS::Battle::floatingLabelCount;
   target.id = 2;
@@ -31,7 +30,7 @@ int Tests_CombatTargetResults(void) {
     stats.limbs[limb].hp = stats.limbs[limb].maxHp = kInitialLimbHp;
   }
   VS::Battle::actors[2] = &target;
-  Actors_actorRecords[2] = nullptr;
+  VS::Actors::actorRecords[2] = nullptr;
   VS::Battle::floatingLabels = &labels;
   VS::Battle::floatingLabelCount = 0;
   VS::Battle::actionState = &actionState;
@@ -67,7 +66,7 @@ int Tests_CombatTargetResults(void) {
   passed = passed && stats.currentMp == 40;
   VS::Battle::actionState = saved_action;
   VS::Battle::actors[2] = saved_target;
-  Actors_actorRecords[2] = savedModel;
+  VS::Actors::actorRecords[2] = savedModel;
   VS::Battle::floatingLabels = saved_labels;
   VS::Battle::floatingLabelCount = saved_label_count;
   return passed;

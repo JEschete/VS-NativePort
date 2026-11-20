@@ -1,8 +1,8 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <iterator>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Legacy/Psx.h"
 
@@ -13,12 +13,12 @@ class ActorTableMovementRequests final
   bool StoreMovementRequest(
       int actor_id, const VS::Actors::MovementCommand& command) override {
     if (actor_id < 0 ||
-        actor_id >= static_cast<int>(std::size(Actors_actorRecords))) {
+        actor_id >= static_cast<int>(std::size(VS::Actors::actorRecords))) {
       return false;
     }
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    VS::Actors::ActorRecord* actor = VS::Actors::actorRecords[actor_id];
     if (actor == nullptr) return false;
-    Actors_MovementRequest& request = actor->turnState;
+    VS::Actors::MovementRequest& request = actor->turn_state;
     request.mode = command.mode;
     request.reserved1 = 0;
     request.reserved2 = 0;

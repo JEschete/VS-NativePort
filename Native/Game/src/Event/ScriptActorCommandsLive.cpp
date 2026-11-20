@@ -18,7 +18,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/BattleModeLive.hpp"
@@ -220,10 +220,10 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     VS::Actors::SetLiveActorTravelAnimation(actor, animation);
   }
   void SetSoundOverrides(int actor, VS::Actors::SoundEffectSlot slot) override {
-    Actors_ModelEffectSlot live{.kind = slot.kind,
-                                .level = slot.level,
-                                .flags = slot.flags,
-                                .parameter = slot.parameter};
+    VS::Actors::ModelEffectSlot live{.kind = slot.kind,
+                                     .level = slot.level,
+                                     .flags = slot.flags,
+                                     .parameter = slot.parameter};
     VS::Actors::SetLiveActorSoundOverrides(actor, &live);
   }
   void PlayWeaponDrawSound(int actor, int sound) override {

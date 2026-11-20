@@ -11,11 +11,11 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelDraw.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/Shadow.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
@@ -175,7 +175,7 @@ class LiveShadowGround final : public ShadowGround {
                                                    kShadowSupportMode);
   }
   [[nodiscard]] bool OnPlatform() const override {
-    return static_cast<std::int8_t>(Actors_supportingPlatformLayer) > 0;
+    return static_cast<std::int8_t>(VS::Actors::supportingPlatformLayer) > 0;
   }
 
  private:
@@ -204,12 +204,12 @@ class LiveShadowGround final : public ShadowGround {
 }
 
 [[nodiscard]] std::span<const std::byte> ActorModelBytes(
-    const Actors_ActorRecord& geometry) {
+    const VS::Actors::ActorRecord& geometry) {
   if (geometry.instance.model == nullptr) {
     return {};
   }
   return {reinterpret_cast<const std::byte*>(geometry.instance.model),
-          geometry.modelDataSize};
+          geometry.model_data_size};
 }
 
 // The recorded bytes of a gimmick or weapon model; logs (at powers of two)
@@ -356,30 +356,30 @@ std::span<const std::byte> LiveModelBytes(const void* model) {
   return {static_cast<const std::byte*>(model), found->bytes};
 }
 
-bool ValidateLiveActorModel(const Actors_ActorRecord& geometry) {
+bool ValidateLiveActorModel(const VS::Actors::ActorRecord& geometry) {
   return ValidateModelData(CountsOf(geometry.instance),
-                           geometry.instance.uvLayout != 0,
+                           geometry.instance.uv_layout != 0,
                            ActorModelBytes(geometry));
 }
 
-bool MoveLiveActorModelVertex(Actors_ActorRecord& actor, std::size_t vertex,
-                              const ModelVertex& delta) {
+bool MoveLiveActorModelVertex(VS::Actors::ActorRecord& actor,
+                              std::size_t vertex, const ModelVertex& delta) {
   if (actor.instance.model == nullptr) {
     return false;
   }
-  return MoveModelVertex(
-      CountsOf(actor.instance),
-      {reinterpret_cast<std::byte*>(actor.instance.model), actor.modelDataSize},
-      vertex, delta);
+  return MoveModelVertex(CountsOf(actor.instance),
+                         {reinterpret_cast<std::byte*>(actor.instance.model),
+                          actor.model_data_size},
+                         vertex, delta);
 }
 
-bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,
+bool ProjectLiveActorModel(const VS::Actors::ActorRecord& geometry,
                            std::span<const MATRIX> matrices) {
   return ProjectLive(CountsOf(geometry.instance), ActorModelBytes(geometry),
                      matrices);
 }
 
-void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
+void DrawLiveActorPolygonsWithOverrides(const VS::Actors::ActorRecord& geometry,
                                         bool colored, const CVECTOR& tint,
                                         const ModelOverrides& overrides) {
   DrawLive(
@@ -388,19 +388,20 @@ void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
       overrides);
 }
 
-void DrawLiveActorGouraudPolygons(const Actors_ActorRecord& geometry,
+void DrawLiveActorGouraudPolygons(const VS::Actors::ActorRecord& geometry,
                                   const CVECTOR& tint) {
   DrawLive(PolygonKind::kGouraud, CountsOf(geometry.instance),
            ActorModelBytes(geometry), TintOf(tint), {});
 }
 
-void DrawLiveActorFlatPolygons(const Actors_ActorRecord& geometry,
+void DrawLiveActorFlatPolygons(const VS::Actors::ActorRecord& geometry,
                                const CVECTOR& tint) {
   DrawLive(PolygonKind::kFlat, CountsOf(geometry.instance),
            ActorModelBytes(geometry), TintOf(tint), {});
 }
 
-void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
+void DrawLiveActorGroundShadow(VS::Actors::ActorRecord& actor,
+                               const MATRIX& camera,
                                const SVECTOR& root_offset) {
   const std::uintptr_t limit = PrimitiveLimit();
   if (limit == 0 || FrameScratchpad().ordering_table == nullptr) {
@@ -408,21 +409,21 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                      "Actor shadow requires actor, view and packet buffers");
     std::abort();
   }
-  const Actors_ModelInstance& instance = actor.instance;
+  const VS::Actors::ModelInstance& instance = actor.instance;
   const ActorShadowSource source{
       .height = instance.position.vy,
-      .radius = actor.shadowRadius,
-      .rotation_x = instance.rotationX,
+      .radius = actor.shadow_radius,
+      .rotation_x = instance.rotation_x,
       .facing = instance.facing,
-      .rotation_z = instance.rotationZ,
-      .scale_x = instance.scaleX,
-      .scale_y = instance.scaleY,
-      .scale_z = instance.scaleZ,
-      .blend_level = actor.shadowBlend.level,
-      .radius_shrink_rate = actor.shadowBlend.radius_shrink_rate,
-      .radius_expand_rate = actor.shadowBlend.radius_expand_rate,
-      .blend_color = static_cast<std::uint32_t>(actor.shadowBlend.color),
-      .fade_red = static_cast<std::int8_t>(actor.fadeRed)};
+      .rotation_z = instance.rotation_z,
+      .scale_x = instance.scale_x,
+      .scale_y = instance.scale_y,
+      .scale_z = instance.scale_z,
+      .blend_level = actor.shadow_blend.level,
+      .radius_shrink_rate = actor.shadow_blend.radius_shrink_rate,
+      .radius_expand_rate = actor.shadow_blend.radius_expand_rate,
+      .blend_color = static_cast<std::uint32_t>(actor.shadow_blend.color),
+      .fade_red = static_cast<std::int8_t>(actor.fade_red)};
   LiveShadowGround ground(actor.instance.position);
   LiveModelTransformer transformer;
   LivePacketQueue queue(limit);
@@ -435,8 +436,8 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
     VS::Core::Errorf(kChannel, "Invalid actor shadow vertex offset");
     std::abort();
   }
-  actor.soundPosition = {result.anchor[0], result.anchor[1], result.anchor[2],
-                         0};
+  actor.sound_position = {result.anchor[0], result.anchor[1], result.anchor[2],
+                          0};
   if (result.status == ActorShadowStatus::kBufferFull) {
     VS::Core::Debugf(kChannel, "Actor shadow primitive buffer exhausted");
   }

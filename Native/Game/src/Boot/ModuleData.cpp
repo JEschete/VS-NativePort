@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's
 // decomp line.
 #include "Actors/Animation.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/Spawning.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
@@ -346,27 +346,27 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x808A8, sizeof VS::Field::interactingGimmickId,
      &VS::Field::interactingGimmickId,
      sizeof VS::Field::interactingGimmickId},  // G00080 D_800E90A8
-    {"BATTLE/BATTLE.PRG", 0x808AC, sizeof Actors_kJumpHangFrames,
-     &Actors_kJumpHangFrames,
-     sizeof Actors_kJumpHangFrames},  // G00081 D_800E90AC
-    {"BATTLE/BATTLE.PRG", 0x808B4, sizeof Actors_kJumpHeightAdjustments,
-     &Actors_kJumpHeightAdjustments,
-     sizeof Actors_kJumpHeightAdjustments},  // G00082 D_800E90B4
-    {"BATTLE/BATTLE.PRG", 0x808C3, sizeof Actors_kMotionResultAnimations,
-     &Actors_kMotionResultAnimations,
-     sizeof Actors_kMotionResultAnimations},  // G00084 D_800E90C3
-    {"BATTLE/BATTLE.PRG", 0x808C4, sizeof Actors_kMotionResultOneAnimationId,
-     &Actors_kMotionResultOneAnimationId,
-     sizeof Actors_kMotionResultOneAnimationId},  // G00085 D_800E90C4
-    {"BATTLE/BATTLE.PRG", 0x808C6, sizeof Actors_kHangMotionAnimationId,
-     &Actors_kHangMotionAnimationId,
-     sizeof Actors_kHangMotionAnimationId},  // G00086 D_800E90C6
-    {"BATTLE/BATTLE.PRG", 0x808CC, sizeof Actors_kSlowQuadrantMoveAnimations,
-     &Actors_kSlowQuadrantMoveAnimations,
-     sizeof Actors_kSlowQuadrantMoveAnimations},  // G00087 D_800E90CC
-    {"BATTLE/BATTLE.PRG", 0x808D0, sizeof Actors_kFastQuadrantMoveAnimations,
-     &Actors_kFastQuadrantMoveAnimations,
-     sizeof Actors_kFastQuadrantMoveAnimations},  // G00088 D_800E90D0
+    {"BATTLE/BATTLE.PRG", 0x808AC, sizeof VS::Actors::jumpHangFrames,
+     &VS::Actors::jumpHangFrames,
+     sizeof VS::Actors::jumpHangFrames},  // G00081 D_800E90AC
+    {"BATTLE/BATTLE.PRG", 0x808B4, sizeof VS::Actors::jumpHeightAdjustments,
+     &VS::Actors::jumpHeightAdjustments,
+     sizeof VS::Actors::jumpHeightAdjustments},  // G00082 D_800E90B4
+    {"BATTLE/BATTLE.PRG", 0x808C3, sizeof VS::Actors::motionResultAnimations,
+     &VS::Actors::motionResultAnimations,
+     sizeof VS::Actors::motionResultAnimations},  // G00084 D_800E90C3
+    {"BATTLE/BATTLE.PRG", 0x808C4, sizeof VS::Actors::motionResultOneAnimationId,
+     &VS::Actors::motionResultOneAnimationId,
+     sizeof VS::Actors::motionResultOneAnimationId},  // G00085 D_800E90C4
+    {"BATTLE/BATTLE.PRG", 0x808C6, sizeof VS::Actors::hangMotionAnimationId,
+     &VS::Actors::hangMotionAnimationId,
+     sizeof VS::Actors::hangMotionAnimationId},  // G00086 D_800E90C6
+    {"BATTLE/BATTLE.PRG", 0x808CC, sizeof VS::Actors::slowQuadrantMoveAnimations,
+     &VS::Actors::slowQuadrantMoveAnimations,
+     sizeof VS::Actors::slowQuadrantMoveAnimations},  // G00087 D_800E90CC
+    {"BATTLE/BATTLE.PRG", 0x808D0, sizeof VS::Actors::fastQuadrantMoveAnimations,
+     &VS::Actors::fastQuadrantMoveAnimations,
+     sizeof VS::Actors::fastQuadrantMoveAnimations},  // G00088 D_800E90D0
     {"BATTLE/BATTLE.PRG", 0x8096C, sizeof VS::Actors::secondarySlotSequences,
      &VS::Actors::secondarySlotSequences,
      sizeof VS::Actors::secondarySlotSequences},  // G00089 D_800E916C
@@ -427,18 +427,18 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80ADC, sizeof VS::Actors::drawnWeaponSoundIds,
      &VS::Actors::drawnWeaponSoundIds,
      sizeof VS::Actors::drawnWeaponSoundIds},  // G00108 D_800E92DC
-    {"BATTLE/BATTLE.PRG", 0x80AE8, sizeof Actors_kAirTimerEndAnimations,
-     &Actors_kAirTimerEndAnimations,
-     sizeof Actors_kAirTimerEndAnimations},  // G00109 D_800E92E8
-    {"BATTLE/BATTLE.PRG", 0x80AF0, sizeof Actors_kSoftLandingAnimations,
-     &Actors_kSoftLandingAnimations,
-     sizeof Actors_kSoftLandingAnimations},  // G00110 D_800E92F0
-    {"BATTLE/BATTLE.PRG", 0x80AF8, sizeof Actors_kHardLandingAnimations,
-     &Actors_kHardLandingAnimations,
-     sizeof Actors_kHardLandingAnimations},  // G00111 D_800E92F8
-    {"BATTLE/BATTLE.PRG", 0x80B00, sizeof Actors_kLandingRecoveryAnimations,
-     &Actors_kLandingRecoveryAnimations,
-     sizeof Actors_kLandingRecoveryAnimations},  // G00112 D_800E9300
+    {"BATTLE/BATTLE.PRG", 0x80AE8, sizeof VS::Actors::airTimerEndAnimations,
+     &VS::Actors::airTimerEndAnimations,
+     sizeof VS::Actors::airTimerEndAnimations},  // G00109 D_800E92E8
+    {"BATTLE/BATTLE.PRG", 0x80AF0, sizeof VS::Actors::softLandingAnimations,
+     &VS::Actors::softLandingAnimations,
+     sizeof VS::Actors::softLandingAnimations},  // G00110 D_800E92F0
+    {"BATTLE/BATTLE.PRG", 0x80AF8, sizeof VS::Actors::hardLandingAnimations,
+     &VS::Actors::hardLandingAnimations,
+     sizeof VS::Actors::hardLandingAnimations},  // G00111 D_800E92F8
+    {"BATTLE/BATTLE.PRG", 0x80B00, sizeof VS::Actors::landingRecoveryAnimations,
+     &VS::Actors::landingRecoveryAnimations,
+     sizeof VS::Actors::landingRecoveryAnimations},  // G00112 D_800E9300
     {"BATTLE/BATTLE.PRG", 0x81228, sizeof VS::Actors::animationEventPoints,
      &VS::Actors::animationEventPoints,
      sizeof VS::Actors::animationEventPoints},  // G00114 D_800E9A28

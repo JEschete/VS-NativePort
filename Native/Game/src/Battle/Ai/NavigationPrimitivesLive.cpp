@@ -13,8 +13,8 @@
 #include <optional>
 #include <span>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -329,15 +329,16 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   }
   [[nodiscard]] std::optional<RouteModelPlacement> Placement(
       int actor_id) const override {
-    const auto* model = Actors_actorRecords[static_cast<std::size_t>(actor_id)];
+    const auto* model =
+        VS::Actors::actorRecords[static_cast<std::size_t>(actor_id)];
     if (model == nullptr || LiveFrameContext().tileFlags == nullptr) {
       return std::nullopt;
     }
     const auto& instance = model->instance;
-    return RouteModelPlacement{.tile_x = instance.currentTileX,
-                               .tile_layer = instance.currentTileLayer,
-                               .tile_z = instance.currentTileZ,
-                               .tile_status = instance.reserved5F,
+    return RouteModelPlacement{.tile_x = instance.current_tile_x,
+                               .tile_layer = instance.current_tile_layer,
+                               .tile_z = instance.current_tile_z,
+                               .tile_status = instance.reserved5f,
                                .x = instance.position.vx,
                                .y = instance.position.vy,
                                .z = instance.position.vz,

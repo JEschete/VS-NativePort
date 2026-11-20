@@ -15,14 +15,14 @@
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/CharacterInit.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -70,7 +70,7 @@ constexpr int kSecondaryBodyAllocation = 2;
 // record there, not a weapon model (146C.c:6597).
 constexpr std::size_t SecondaryBodyBytes() {
   return offsetof(VS::Actors::ActorAllocation, model_slots) +
-         sizeof(Actors_ActorRecord);
+         sizeof(VS::Actors::ActorRecord);
 }
 // The ZND record byte holding the zone enemy's body model.
 constexpr std::size_t kZoneEnemyModelByte = 2;

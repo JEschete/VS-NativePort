@@ -8,10 +8,9 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
@@ -62,69 +61,73 @@ void Require(ActionAnimationResult result) {
 
 class LiveActor final : public ActionReactionActor {
  public:
-  explicit LiveActor(Actors_ActorRecord& record) : record_(record) {}
-  Actors_ActorRecord& Record() { return record_; }
+  explicit LiveActor(VS::Actors::ActorRecord& record) : record_(record) {}
+  VS::Actors::ActorRecord& Record() { return record_; }
   std::uint8_t Slot() const override { return record_.instance.slot; }
   bool WeaponDrawn() const override {
-    return record_.instance.weaponDrawn != 0;
+    return record_.instance.weapon_drawn != 0;
   }
   std::uint8_t MovementMode() const override {
-    return record_.instance.movementMode;
+    return record_.instance.movement_mode;
   }
   bool MovementBlocked() const override {
-    return record_.instance.motionLocked != 0 ||
-           record_.instance.isJumping != 0;
+    return record_.instance.motion_locked != 0 ||
+           record_.instance.is_jumping != 0;
   }
-  std::uint16_t Radius() const override { return record_.collisionRadius; }
-  std::uint16_t ModelId() const override { return record_.modelId; }
+  std::uint16_t Radius() const override { return record_.collision_radius; }
+  std::uint16_t ModelId() const override { return record_.model_id; }
   Actors::MotionVector Position() const override {
     const auto& point = record_.instance.position;
     return {point.vx, point.vy, point.vz};
   }
   std::int16_t Facing() const override { return record_.instance.facing; }
   void SetFacingDelta(std::int16_t delta) override {
-    record_.instance.facingDelta = delta;
+    record_.instance.facing_delta = delta;
   }
   void SetTurnFrames(std::int16_t frames) override {
-    record_.instance.turnFrames = static_cast<u_short>(frames);
+    record_.instance.turn_frames = static_cast<u_short>(frames);
   }
-  void ClearMovementMode() override { record_.instance.movementMode = 0; }
-  void ClearJumpCountdown() override { record_.instance.jumpCountdown = 0; }
-  std::uint8_t AnimationId() const override { return record_.animationId; }
-  void CopyPoseToBlend() override { record_.blendPose = record_.pose; }
+  void ClearMovementMode() override { record_.instance.movement_mode = 0; }
+  void ClearJumpCountdown() override { record_.instance.jump_countdown = 0; }
+  std::uint8_t AnimationId() const override { return record_.animation_id; }
+  void CopyPoseToBlend() override { record_.blend_pose = record_.pose; }
   void SetPoseState(std::uint8_t state) override {
-    record_.instance.poseState = state;
+    record_.instance.pose_state = state;
   }
   bool ActionPoseActive() const override {
-    return record_.actionPoseActive != 0;
+    return record_.action_pose_active != 0;
   }
   std::uint8_t LocomotionState() const override {
-    return record_.instance.locomotionState;
+    return record_.instance.locomotion_state;
   }
   std::uint8_t SupportLayer() const override {
-    return record_.instance.supportLayer;
+    return record_.instance.support_layer;
   }
   std::uint8_t ReactionState() const override {
-    return record_.instance.reactionState;
+    return record_.instance.reaction_state;
   }
-  void ClearLocomotionState() override { record_.instance.locomotionState = 0; }
-  void ClearMovementPending() override { record_.instance.movementPending = 0; }
-  void ClearSupportLayer() override { record_.instance.supportLayer = 0; }
+  void ClearLocomotionState() override {
+    record_.instance.locomotion_state = 0;
+  }
+  void ClearMovementPending() override {
+    record_.instance.movement_pending = 0;
+  }
+  void ClearSupportLayer() override { record_.instance.support_layer = 0; }
   void SetAnimationSet(std::uint8_t animation_set) override {
-    record_.animationSet = animation_set;
+    record_.animation_set = animation_set;
   }
 
  private:
-  Actors_ActorRecord& record_;
+  VS::Actors::ActorRecord& record_;
 };
 
 class LiveWorld final : public ActionReactionWorld {
  public:
   explicit LiveWorld(SVECTOR* target) : target_(target) {}
   ActionReactionActor* Actor(int slot) override {
-    Require(slot >= 0 &&
-            static_cast<std::size_t>(slot) < std::size(Actors_actorRecords));
-    auto* record = Actors_actorRecords[slot];
+    Require(slot >= 0 && static_cast<std::size_t>(slot) <
+                             std::size(VS::Actors::actorRecords));
+    auto* record = VS::Actors::actorRecords[slot];
     if (record == nullptr) return nullptr;
     for (auto& owner : owners_) {
       if (owner && &owner->Record() == record) return &owner.value();

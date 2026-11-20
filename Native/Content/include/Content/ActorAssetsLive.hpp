@@ -15,8 +15,8 @@ struct WeaponModelData;
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp) over
 // the legacy request queue (legacyActorAssetRequests), the loaders' globals
 // and disc file tables (below), the actor and weapon records
-// (Actors_actorRecords, VS::Actors::weaponModels), the shared sequence banks
-// and the texture slot tables. Generated callers keep the original call
+// (VS::Actors::actorRecords, VS::Actors::weaponModels), the shared sequence
+// banks and the texture slot tables. Generated callers keep the original call
 // shapes.
 //
 // A record, buffer or file the typed loaders cannot bound, or a request they

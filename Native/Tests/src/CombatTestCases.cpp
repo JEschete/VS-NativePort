@@ -11,8 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
@@ -132,8 +131,8 @@ struct AbilityFixture {
   Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<Battle_Actor*, 2> saved_actors{VS::Battle::actors[0],
                                             VS::Battle::actors[1]};
-  std::array<Actors_ActorRecord*, 2> saved_records{Actors_actorRecords[0],
-                                                   Actors_actorRecords[1]};
+  std::array<VS::Actors::ActorRecord*, 2> saved_records{
+      VS::Actors::actorRecords[0], VS::Actors::actorRecords[1]};
   VS::Input::Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::State::scoreData) saved_score = VS::State::scoreData;
@@ -146,7 +145,7 @@ struct AbilityFixture {
   Battle_ActionState action{};
   Battle_Actor actors[2]{};
   Battle_ActorStats stats[2]{};
-  Actors_ActorRecord records[2]{};
+  VS::Actors::ActorRecord records[2]{};
   VS::Battle::FloatingLabelSlots labels{};
 
   AbilityFixture() {
@@ -154,14 +153,14 @@ struct AbilityFixture {
     VS::Battle::characterState = &actors[0];
     for (int index = 0; index < 2; ++index) {
       VS::Battle::actors[index] = &actors[index];
-      Actors_actorRecords[index] = &records[index];
+      VS::Actors::actorRecords[index] = &records[index];
       actors[index].id = index;
       actors[index].stats = &stats[index];
       actors[index].roomSpawnIndex = 1;
       stats[index].actorId = index;
       stats[index].currentHp = 600;
       stats[index].currentMp = 120;
-      records[index].instance.actionAnimationState = 1;
+      records[index].instance.action_animation_state = 1;
     }
     std::fill_n(Battle_actionDefinitions, saved_definitions.size(),
                 Battle_ActionDefinition{});
@@ -196,7 +195,7 @@ struct AbilityFixture {
     VS::Battle::characterState = saved_character;
     for (int index = 0; index < 2; ++index) {
       VS::Battle::actors[index] = saved_actors[index];
-      Actors_actorRecords[index] = saved_records[index];
+      VS::Actors::actorRecords[index] = saved_records[index];
     }
     VS::Input::settings = saved_settings;
     VS::Input::buttonsPressed = saved_pressed;
@@ -221,7 +220,7 @@ struct AbilityFixture {
   void PrepareLimbResults(int limb_count, unsigned queue_index,
                           bool filtered_entries) {
     Prepare(false, 1, queue_index);
-    Actors_actorRecords[1] = nullptr;
+    VS::Actors::actorRecords[1] = nullptr;
     auto& target = stats[1];
     target.currentHp = target.maxHp = 63;
     target.currentMp = target.maxMp = 40;
@@ -1387,15 +1386,15 @@ struct LootPresentationFixture : EnemyLootFixture {
   std::uint8_t saved_intro = VS::State::LiveScriptFlag(0xAB);
   u_int saved_control = VS::Field::controlMode;
   u_int saved_flow = VS::Battle::actionFlowMode;
-  Actors_ActorRecord* saved_player = Actors_actorRecords[0];
+  VS::Actors::ActorRecord* saved_player = VS::Actors::actorRecords[0];
   VS::Items::LootListNode* saved_menu_list = VS::Menu::Framework::lootLists;
   VS::Items::BattleLoot* saved_menu_entry = VS::Menu::Framework::lootEntry;
-  Actors_ActorRecord locked_player_pose{};
+  VS::Actors::ActorRecord locked_player_pose{};
 
   LootPresentationFixture() {
     // A locked pose keeps this presentation-gate test independent of model I/O.
-    locked_player_pose.animationId = 0x63;
-    Actors_actorRecords[0] = &locked_player_pose;
+    locked_player_pose.animation_id = 0x63;
+    VS::Actors::actorRecords[0] = &locked_player_pose;
     VS::Menu::Framework::lootLists = nullptr;
     VS::Menu::Framework::lootEntry = nullptr;
     VS::Field::controlMode = 1;
@@ -1406,7 +1405,7 @@ struct LootPresentationFixture : EnemyLootFixture {
     VS::State::SetLiveScriptFlag(0xAB, saved_intro);
     VS::Field::controlMode = saved_control;
     VS::Battle::actionFlowMode = saved_flow;
-    Actors_actorRecords[0] = saved_player;
+    VS::Actors::actorRecords[0] = saved_player;
     VS::Menu::Framework::lootLists = saved_menu_list;
     VS::Menu::Framework::lootEntry = saved_menu_entry;
   }
@@ -1457,7 +1456,7 @@ struct ChainCreditFixture : AbilityUnlockFixture {
     action.abilityInputSucceeded = 1;
     action.chainAbilitySlot = 1;
     stats[1].currentHp = 0;
-    records[0].animationId = 0x63;
+    records[0].animation_id = 0x63;
   }
 
   ~ChainCreditFixture() {
@@ -1626,7 +1625,7 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
   target.cancelsHitResults = 1;
   target.currentHp = target.maxHp = 1;
   // Field_CreateGimmickInstance registers VS::Field::gimmickInstances only.
-  Actors_actorRecords[1] = nullptr;
+  VS::Actors::actorRecords[1] = nullptr;
 
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
@@ -1639,13 +1638,13 @@ TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
   AbilityFixture fixture;
   fixture.Request().targets[0].target.impact_kind = 4;
   auto& instance = fixture.records[1].instance;
-  instance.movementMode = 1;
-  instance.jumpCountdown = 5;
+  instance.movement_mode = 1;
+  instance.jump_countdown = 5;
 
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
-  CHECK(static_cast<int>(instance.movementMode) == 0);
-  CHECK(static_cast<int>(instance.jumpCountdown) == 0);
+  CHECK(static_cast<int>(instance.movement_mode) == 0);
+  CHECK(static_cast<int>(instance.jump_countdown) == 0);
 }
 
 TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",

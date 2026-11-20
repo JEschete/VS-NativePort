@@ -7,7 +7,9 @@
 #include "Core/Math/Matrix.hpp"
 #include "Legacy/Psx.h"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 
 // Bindings from the actor records, the field gimmicks that share their ids
 // and the weapon models to the typed skeleton queries (Skeleton.cpp), in the
@@ -20,7 +22,7 @@ struct Actors_ActorRecord;
 // workspace alone; only the projections use the GTE.
 namespace VS::Actors {
 // func_8009E228: the pitch from the actor towards `target`; 0 for no target.
-int LiveActorPitchToPoint(const Actors_ActorRecord* actor,
+int LiveActorPitchToPoint(const VS::Actors::ActorRecord* actor,
                           const SVECTOR* target);
 // func_8009FC60: starts head tracking towards `target`; a null `aim` looks
 // along the actor's look angles and kHeadTrackingUsesRadiusStep picks the
@@ -29,7 +31,7 @@ int LiveActorPitchToPoint(const Actors_ActorRecord* actor,
 int SetLiveActorHeadTracking(int actor_id, int target, const SVECTOR* aim,
                              int step);
 // func_8009FD38: the actor's default head turn step.
-void ResetLiveActorHeadTrackingSpeed(Actors_ActorRecord* actor);
+void ResetLiveActorHeadTrackingSpeed(VS::Actors::ActorRecord* actor);
 
 // func_800A1178: the stored matrix and length of the bone with `tag`.
 int LiveActorTaggedBoneMatrix(int actor_id, int tag, MATRIX* matrix_out,

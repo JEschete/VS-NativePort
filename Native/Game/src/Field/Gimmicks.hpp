@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/Shadow.hpp"
 #include "Core/Gte.h"
 #include "Field/Mpd.hpp"
@@ -146,7 +146,7 @@ struct GimmickInstance {
   char tile_z;
   char reserved5f;
   std::int32_t saved_tile;
-  Actors_ModelEffectSlot palette_pulse;
+  VS::Actors::ModelEffectSlot palette_pulse;
   VS::Actors::ShpModel* model;
   std::array<MATRIX, kGimmickBoneMatrixCount> matrices;
   SVECTOR rotation_offset;
@@ -231,7 +231,7 @@ struct GimmickInstance {
   std::uint8_t fade_green;
   std::uint8_t fade_red;
   std::uint8_t reserved6f3;
-  Actors_CompanionOffset reserved6f4;
+  VS::Actors::CompanionOffsetRecord reserved6f4;
   VS::Render::ColorCode reserved6f8;
   std::int32_t reserved6fc;
   std::int32_t reserved700;

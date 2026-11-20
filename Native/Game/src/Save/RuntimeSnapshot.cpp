@@ -16,9 +16,8 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
@@ -1169,7 +1168,7 @@ Result CaptureActors(Snapshot& state) {
        ++slot) {
     const auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) continue;
-    if (actor->stats == nullptr || Actors_actorRecords[slot] == nullptr ||
+    if (actor->stats == nullptr || VS::Actors::actorRecords[slot] == nullptr ||
         actor->roomSpawnIndex == kLastLocation) {
       return std::unexpected("live room actor is not ready");
     }
@@ -1188,7 +1187,7 @@ Result CaptureActors(Snapshot& state) {
     // (ActorFlags.cpp), read directly so the snapshot does not compose the
     // weapon and model state.
     const auto animation =
-        Actors_actorRecords[slot]->instance.actionAnimationState;
+        VS::Actors::actorRecords[slot]->instance.action_animation_state;
     found->current_hp =
         animation != 0 && animation < kActiveAnimationEnd ? 1 : stats.currentHp;
     found->max_hp = stats.maxHp;
@@ -1224,7 +1223,7 @@ void ApplyClock(std::uint64_t ticks) {
   VS::State::playTime.hours = static_cast<std::int8_t>(ticks / kClockRadix);
 }
 
-Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
+Result ValidateCaptureBoundary(const VS::Actors::ActorRecord& actor) {
   const auto& model = actor.instance;
   // func_8006C39C (146C.c:1893) freezes ordinary walk/turn intent in menus.
   // Resume rebuilds an idle actor at this position, not that transient intent.
@@ -1232,19 +1231,20 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
       VS::Field::isInteractionPaused != 0 &&
       (VS::Field::controlMode == 5 || VS::Field::controlMode == 6);
   const bool horizontal_motion =
-      model.turnFrames != 0 || model.rootMotion.vx != 0 ||
-      model.rootMotion.vz != 0 || actor.momentumDistance != 0;
+      model.turn_frames != 0 || model.root_motion.vx != 0 ||
+      model.root_motion.vz != 0 || actor.momentum_distance != 0;
   // supportLayer/placementLayer are platform bindings, not collision floor1.
   // VS::Actors::PlaceActorInRoom (3A1A0.c:274) uses ids>=2 for moving
   // supports.
-  if (model.currentTileLayer > 1 || model.supportLayer != 0 ||
-      model.placementLayer != 0 || model.isAttached || model.movementPending ||
-      model.movementMode != 0 || model.locomotionState != 0 ||
-      model.motionLocked || model.isJumping || model.jumpCountdown != 0 ||
-      (!menu_paused && horizontal_motion) || model.currentAnimation != 0 ||
-      model.rootMotion.vy != 0 || actor.supportGimmick != 0 ||
-      actor.routePhase != 0 || actor.destinationMode != 0 ||
-      actor.jumpFrames != 0 || actor.transitionFrames != 0) {
+  if (model.current_tile_layer > 1 || model.support_layer != 0 ||
+      model.placement_layer != 0 || model.is_attached ||
+      model.movement_pending || model.movement_mode != 0 ||
+      model.locomotion_state != 0 || model.motion_locked || model.is_jumping ||
+      model.jump_countdown != 0 || (!menu_paused && horizontal_motion) ||
+      model.current_animation != 0 || model.root_motion.vy != 0 ||
+      actor.support_gimmick != 0 || actor.route_phase != 0 ||
+      actor.destination_mode != 0 || actor.jump_frames != 0 ||
+      actor.transition_frames != 0) {
     return std::unexpected(std::format(
         "schema3 requires a static floor and quiescent unattached actor: "
         "tileLayer={} supportLayer={} placementLayer={} attached={} "
@@ -1253,16 +1253,16 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
         "animation={} rootMotion={},{},{} supportGimmick={} routePhase={} "
         "destinationMode={} jumpFrames={} momentumDistance={} "
         "transitionFrames={}",
-        model.currentTileLayer, model.supportLayer, model.placementLayer,
-        model.isAttached, model.movementPending, model.movementMode,
-        model.locomotionState, model.motionLocked, model.isJumping,
-        model.jumpCountdown, model.turnFrames, model.currentAnimation,
-        model.rootMotion.vx, model.rootMotion.vy, model.rootMotion.vz,
-        actor.supportGimmick, actor.routePhase, actor.destinationMode,
-        actor.jumpFrames, actor.momentumDistance, actor.transitionFrames));
+        model.current_tile_layer, model.support_layer, model.placement_layer,
+        model.is_attached, model.movement_pending, model.movement_mode,
+        model.locomotion_state, model.motion_locked, model.is_jumping,
+        model.jump_countdown, model.turn_frames, model.current_animation,
+        model.root_motion.vx, model.root_motion.vy, model.root_motion.vz,
+        actor.support_gimmick, actor.route_phase, actor.destination_mode,
+        actor.jump_frames, actor.momentum_distance, actor.transition_frames));
   }
-  if (model.currentTileX != model.position.vx / kTileUnits ||
-      model.currentTileZ != model.position.vz / kTileUnits) {
+  if (model.current_tile_x != model.position.vx / kTileUnits ||
+      model.current_tile_z != model.position.vz / kTileUnits) {
     return std::unexpected(
         "current tile does not match the static world position");
   }
@@ -1437,7 +1437,8 @@ std::expected<Snapshot, std::string> Capture(
       VS::Battle::characterState == nullptr ||
       VS::Battle::characterState != VS::Battle::actors[0] ||
       VS::Battle::characterState->stats == nullptr ||
-      Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
+      VS::Actors::actorRecords[0] == nullptr ||
+      !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.room_disc_request != nullptr ||
       VS::Field::zoneContext.zone_disc_request != nullptr) {
@@ -1451,7 +1452,7 @@ std::expected<Snapshot, std::string> Capture(
       VS::Field::zoneContext.scene_id > kLastScene) {
     return std::unexpected("live scene identity is invalid");
   }
-  const auto phase = ValidateCaptureBoundary(*Actors_actorRecords[0]);
+  const auto phase = ValidateCaptureBoundary(*VS::Actors::actorRecords[0]);
   if (!phase) return std::unexpected(phase.error());
   Snapshot state;
   CapturePersistent(state);
@@ -1461,7 +1462,7 @@ std::expected<Snapshot, std::string> Capture(
   if (!valid) return std::unexpected(valid.error());
   valid = CaptureInventoryOrder(state);
   if (!valid) return std::unexpected(valid.error());
-  const auto& model = Actors_actorRecords[0]->instance;
+  const auto& model = VS::Actors::actorRecords[0]->instance;
   state.location.zone =
       static_cast<std::uint16_t>(VS::Field::zoneContext.zone_id);
   state.location.room =
@@ -1473,12 +1474,12 @@ std::expected<Snapshot, std::string> Capture(
                              model.position.vz};
   state.location.facing = model.facing;
   state.location.camera_yaw = VS::Field::sphericalCamera.values.yaw;
-  state.location.floor_layer = model.currentTileLayer;
-  state.location.previous_tile = {model.previousTileX, model.previousTileZ,
-                                  model.previousTileLayer};
-  state.location.previous_facing = model.previousFacing;
+  state.location.floor_layer = model.current_tile_layer;
+  state.location.previous_tile = {model.previous_tile_x, model.previous_tile_z,
+                                  model.previous_tile_layer};
+  state.location.previous_facing = model.previous_facing;
   const auto saved = std::bit_cast<VS::Actors::TileTarget>(
-      Actors_actorRecords[0]->savedPlacement);
+      VS::Actors::actorRecords[0]->saved_placement);
   state.location.saved_placement = {
       {static_cast<std::uint8_t>(saved.tile_x),
        static_cast<std::uint8_t>(saved.tile_z),
@@ -1612,7 +1613,8 @@ std::expected<void, std::string> FinishResume() {
   if (!VS::Boot::isGameplayActive || VS::Battle::characterState == nullptr ||
       VS::Battle::characterState != VS::Battle::actors[0] ||
       VS::Battle::characterState->stats == nullptr ||
-      Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
+      VS::Actors::actorRecords[0] == nullptr ||
+      !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.zone_id != state.location.zone ||
       VS::Field::zoneContext.room_id != state.location.room ||
@@ -1629,31 +1631,31 @@ std::expected<void, std::string> FinishResume() {
     pending.reset();
     return {};
   }
-  auto& actor = *Actors_actorRecords[0];
+  auto& actor = *VS::Actors::actorRecords[0];
   auto& model = actor.instance;
   RestoreAshleyValues(state.ashley, *VS::Battle::characterState);
   model.position.vx = static_cast<std::int16_t>(state.location.position[0]);
   model.position.vy = static_cast<std::int16_t>(state.location.position[1]);
   model.position.vz = static_cast<std::int16_t>(state.location.position[2]);
   model.facing = static_cast<std::int16_t>(state.location.facing);
-  model.previousFacing = state.location.previous_facing;
-  model.currentTileX =
+  model.previous_facing = state.location.previous_facing;
+  model.current_tile_x =
       static_cast<unsigned char>(state.location.position[0] / kTileUnits);
-  model.currentTileZ =
+  model.current_tile_z =
       static_cast<unsigned char>(state.location.position[2] / kTileUnits);
-  model.currentTileLayer = state.location.floor_layer;
-  model.previousTileX = state.location.previous_tile.x;
-  model.previousTileZ = state.location.previous_tile.z;
-  model.previousTileLayer = state.location.previous_tile.layer;
-  model.supportLayer = 0;
-  model.placementLayer = 0;
+  model.current_tile_layer = state.location.floor_layer;
+  model.previous_tile_x = state.location.previous_tile.x;
+  model.previous_tile_z = state.location.previous_tile.z;
+  model.previous_tile_layer = state.location.previous_tile.layer;
+  model.support_layer = 0;
+  model.placement_layer = 0;
   VS::Actors::TileTarget saved_placement{};
   const auto& saved = state.location.saved_placement;
   saved_placement.tile_x = saved.tile.x;
   saved_placement.tile_layer = saved.tile.layer;
   saved_placement.tile_z = saved.tile.z;
   saved_placement.facing = saved.facing;
-  actor.savedPlacement = std::bit_cast<int>(saved_placement);
+  actor.saved_placement = std::bit_cast<int>(saved_placement);
   RestoreCamera(state);
   // Room load consumes time/random numbers and may clear zone flags. Restore
   // their exact saved values before the first room event/frame can run.

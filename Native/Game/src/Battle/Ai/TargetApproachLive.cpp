@@ -10,8 +10,7 @@
 #include <optional>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -36,7 +35,7 @@ static_assert(std::tuple_size_v<decltype(AiState::relations)> ==
               kTargetApproachActorSlots);
 static_assert(std::tuple_size_v<decltype(AiState::distances_squared)> ==
               kTargetApproachActorSlots);
-static_assert(std::size(Actors_actorRecords) >= kTargetApproachActorSlots);
+static_assert(std::size(VS::Actors::actorRecords) >= kTargetApproachActorSlots);
 static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
 static_assert(sizeof(VS::Battle::Ai::ApproachRelationBits) ==
               sizeof(std::uint32_t));
@@ -104,7 +103,7 @@ TargetApproacher Load(const AiState& state) {
   const Approach& view = ApproachOf(state);
   const auto* model = state.model;
   const auto* model_record =
-      model != nullptr ? reinterpret_cast<const Actors_ActorRecord*>(model)
+      model != nullptr ? reinterpret_cast<const VS::Actors::ActorRecord*>(model)
                        : nullptr;
   TargetApproacher approacher{
       .close_approach = view.opaque0,
@@ -123,7 +122,7 @@ TargetApproacher Load(const AiState& state) {
       .flies = model != nullptr && model->opaque_a_bit5 != 0,
       .model_look_yaw =
           model_record != nullptr
-              ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
+              ? std::bit_cast<std::int16_t>(model_record->instance.look_yaw)
               : static_cast<std::int16_t>(0),
       .model_facing = model_record != nullptr ? model_record->instance.facing
                                               : static_cast<std::int16_t>(0),
@@ -216,15 +215,15 @@ class LiveTargetApproachWorld final : public TargetApproachWorld {
 
   [[nodiscard]] std::optional<ApproachTargetModel> TargetModel(
       int actor_id) const override {
-    if (actor_id < 0 ||
-        static_cast<std::size_t>(actor_id) >= std::size(Actors_actorRecords)) {
+    if (actor_id < 0 || static_cast<std::size_t>(actor_id) >=
+                            std::size(VS::Actors::actorRecords)) {
       return std::nullopt;
     }
-    const auto* record = Actors_actorRecords[actor_id];
+    const auto* record = VS::Actors::actorRecords[actor_id];
     if (record == nullptr) return std::nullopt;
     const auto& instance = record->instance;
     return ApproachTargetModel{
-        .moving = instance.movementMode != 0 || instance.locomotionState != 0,
+        .moving = instance.movement_mode != 0 || instance.locomotion_state != 0,
         .x = instance.position.vx,
         .z = instance.position.vz};
   }

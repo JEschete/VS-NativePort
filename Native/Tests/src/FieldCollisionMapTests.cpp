@@ -14,8 +14,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
@@ -785,12 +784,12 @@ TEST_CASE("The live collision binding reads the room's heights",
 
 TEST_CASE("The live bypass binding writes and reads a filled actor slot",
           "[field-collision-map][field]") {
-  const SavedGlobal saved_actors(Actors_actorRecords);
-  auto actor = std::make_unique<Actors_ActorRecord>();
-  Actors_actorRecords[5] = actor.get();
+  const SavedGlobal saved_actors(VS::Actors::actorRecords);
+  auto actor = std::make_unique<VS::Actors::ActorRecord>();
+  VS::Actors::actorRecords[5] = actor.get();
   VS::Field::SetLiveActorCollisionBypass(5, 3);
-  CHECK(actor->bypassActorCollision == 1);
-  CHECK(actor->ignoredByCollision == 1);
+  CHECK(actor->bypass_actor_collision == 1);
+  CHECK(actor->ignored_by_collision == 1);
   CHECK(VS::Field::LiveActorCollisionBypass(5) == 3);
   VS::Field::SetLiveActorCollisionBypass(5, 2);
   CHECK(VS::Field::LiveActorCollisionBypass(5) == 2);
@@ -798,8 +797,8 @@ TEST_CASE("The live bypass binding writes and reads a filled actor slot",
 
 TEST_CASE("The live bypass binding refuses slots outside the actor table",
           "[field-collision-map][field]") {
-  const SavedGlobal saved_actors(Actors_actorRecords);
-  Actors_actorRecords[6] = nullptr;
+  const SavedGlobal saved_actors(VS::Actors::actorRecords);
+  VS::Actors::actorRecords[6] = nullptr;
   CHECK(VS::Field::LiveActorCollisionBypass(6) == 0);
   VS::Field::SetLiveActorCollisionBypass(6, 3);
   CHECK(VS::Field::LiveActorCollisionBypass(6) == 0);

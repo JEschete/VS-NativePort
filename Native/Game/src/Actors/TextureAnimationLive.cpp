@@ -11,10 +11,9 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/Movement.h"
 #include "Actors/TextureAnimation.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
@@ -25,7 +24,8 @@
 namespace VS::Actors {
 namespace {
 constexpr std::size_t kTextureBanks = 3;
-static_assert(sizeof(Actors_ActorRecord::textureRowOffsets) == kTextureBanks);
+static_assert(sizeof(VS::Actors::ActorRecord::texture_row_offsets) ==
+              kTextureBanks);
 // Each slot origin is a halfword column and a halfword page.
 constexpr std::size_t kSlotOriginBytes = 4;
 constexpr unsigned kByteBits = 8;
@@ -53,12 +53,12 @@ static_assert((((kTextureTimelineMask * kChannel0TimelineKeys) + kLastKeyIndex +
                kKeyBytes) <= sizeof VS::Actors::sheathedWeaponAnimationBases);
 static_assert(((kTextureTimelineMask * kChannel1TimelineKeys) + kLastKeyIndex +
                1) <= kChannel1Keys);
-static_assert(sizeof(Actors_ActorRecord::textureAnimationSlots) ==
+static_assert(sizeof(VS::Actors::ActorRecord::texture_animation_slots) ==
               kTextureAnimationChannels *
                   sizeof(VS::Actors::TextureAnimationSlotRecord));
-static_assert(sizeof(Actors_ActorRecord::textureOverlays) ==
+static_assert(sizeof(VS::Actors::ActorRecord::texture_overlays) ==
               kTextureOverlayCount * sizeof(VS::Actors::TextureOverlayRect));
-static_assert(sizeof(Actors_ActorRecord::textureScroll) ==
+static_assert(sizeof(VS::Actors::ActorRecord::texture_scroll) ==
               kTextureScrollLayers *
                   sizeof(VS::Actors::TextureScrollStateRecord));
 
@@ -125,23 +125,24 @@ void StoreSlot(const TextureAnimationSlot& slot,
 // Where the actor's drawn texture lives, or none for a slot past the tables.
 // The sheet's page and row are left for the bank.
 [[nodiscard]] std::optional<ActorTextureLayout> SlotLayout(
-    const Actors_ActorRecord& actor) {
-  const std::size_t slot = actor.textureSlot;
+    const VS::Actors::ActorRecord& actor) {
+  const std::size_t slot = actor.texture_slot;
   if (slot >= kTextureSlots) return std::nullopt;
-  // The original tested bit 27 of the word eight bytes before sequenceFlags:
+  // The original tested bit 27 of the word eight bytes before sequence_flags:
   // this flag. It marks the 8-bit textures.
   return ActorTextureLayout{
-      .depth = actor.textureHeaderBit != 0 ? TextureDepth::k8Bit
-                                           : TextureDepth::k4Bit,
+      .depth = actor.texture_header_bit != 0 ? TextureDepth::k8Bit
+                                             : TextureDepth::k4Bit,
       .slot_x = SlotOriginHalfword(slot, 0),
       .slot_y = SlotOriginHalfword(slot, 1),
       .slot_row = VS::Actors::textureSlotRowOffsets[slot]};
 }
 
-void WarnSlotRefused(const Actors_ActorRecord& actor, const char* operation) {
+void WarnSlotRefused(const VS::Actors::ActorRecord& actor,
+                     const char* operation) {
   VS::Core::Warnf("actors",
                   "%s refused: texture slot %u is outside the slot tables",
-                  operation, static_cast<unsigned>(actor.textureSlot));
+                  operation, static_cast<unsigned>(actor.texture_slot));
 }
 
 [[nodiscard]] std::optional<std::size_t> LiveBank(const char* operation) {
@@ -162,14 +163,15 @@ void WarnSlotRefused(const Actors_ActorRecord& actor, const char* operation) {
 
 // The actor's layout for copying from the shared bank's sheet.
 [[nodiscard]] std::optional<ActorTextureLayout> SheetLayout(
-    const Actors_ActorRecord& actor, std::size_t bank, const char* operation) {
+    const VS::Actors::ActorRecord& actor, std::size_t bank,
+    const char* operation) {
   std::optional<ActorTextureLayout> layout = SlotLayout(actor);
   if (!layout.has_value()) {
     WarnSlotRefused(actor, operation);
     return std::nullopt;
   }
   layout->sheet_page = static_cast<int>(SheetPage() & kSheetPageMask);
-  layout->sheet_row = actor.textureRowOffsets[bank];
+  layout->sheet_row = actor.texture_row_offsets[bank];
   return layout;
 }
 
@@ -177,13 +179,14 @@ void QueueMove(const TextureMove& move) {
   Render::QueueLiveTextureRectangleMove(move.source, move.x, move.y);
 }
 
-[[nodiscard]] TextureScrolling ScrollingOf(const Actors_ActorRecord& actor) {
+[[nodiscard]] TextureScrolling ScrollingOf(
+    const VS::Actors::ActorRecord& actor) {
   TextureScrolling scrolling;
   for (std::size_t layer = 0; layer < kTextureScrollLayers; ++layer) {
     const VS::Actors::TextureScrollBoundsRecord& bounds =
-        actor.textureScrollBounds[layer];
+        actor.texture_scroll_bounds[layer];
     const VS::Actors::TextureScrollStateRecord& state =
-        actor.textureScroll[layer];
+        actor.texture_scroll[layer];
     scrolling.bounds.at(layer) = {.x = bounds.x,
                                   .y = bounds.y,
                                   .width = bounds.width,
@@ -195,16 +198,16 @@ void QueueMove(const TextureMove& move) {
                                   .step_y = state.step_y,
                                   .interval = state.interval,
                                   .timer = state.timer};
-    scrolling.overlays.at(layer) = OverlayOf(actor.textureOverlays[layer]);
+    scrolling.overlays.at(layer) = OverlayOf(actor.texture_overlays[layer]);
   }
   return scrolling;
 }
 
 void StoreScrolling(const TextureScrolling& scrolling,
-                    Actors_ActorRecord& actor) {
+                    VS::Actors::ActorRecord& actor) {
   for (std::size_t layer = 0; layer < kTextureScrollLayers; ++layer) {
     const TextureScrollState& state = scrolling.states.at(layer);
-    VS::Actors::TextureScrollStateRecord& stored = actor.textureScroll[layer];
+    VS::Actors::TextureScrollStateRecord& stored = actor.texture_scroll[layer];
     stored.x = state.x;
     stored.y = state.y;
     stored.step_x = state.step_x;
@@ -219,7 +222,7 @@ void StoreScrolling(const TextureScrolling& scrolling,
 int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
                                  int command) {
   constexpr const char* kOperation = "SetActorTextureAnimation";
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr || channel >= kTextureAnimationChannels) return -1;
   if (channel < 0) {
     VS::Core::Warnf("actors", "%s refused: channel %d is negative", kOperation,
@@ -231,7 +234,7 @@ int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
     return 0;
   }
   VS::Actors::TextureAnimationSlotRecord& stored =
-      actor->textureAnimationSlots[channel];
+      actor->texture_animation_slots[channel];
   TextureAnimationSlot slot = SlotOf(stored);
   SetTextureAnimation(slot, channel, actor_id, timeline,
                       static_cast<TextureAnimationCommand>(command));
@@ -240,19 +243,19 @@ int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
 }
 
 // decomp: BATTLE.PRG func_800AAE9C (src/BATTLE/BATTLE.PRG/40564.c:1357)
-void UpdateLiveActorTextureAnimations(Actors_ActorRecord* actor) {
+void UpdateLiveActorTextureAnimations(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("UpdateActorTextureAnimations", "null actor");
     return;
   }
   if (SheetPage() == 0) return;
   std::array<TextureAnimationSlot, kTextureAnimationChannels> slots{
-      SlotOf(actor->textureAnimationSlots[0]),
-      SlotOf(actor->textureAnimationSlots[1])};
+      SlotOf(actor->texture_animation_slots[0]),
+      SlotOf(actor->texture_animation_slots[1])};
   const TextureAnimationFrames frames =
       StepTextureAnimations(slots, LiveTextureAnimationKeys{});
   for (std::size_t channel = 0; channel < slots.size(); ++channel) {
-    StoreSlot(slots.at(channel), actor->textureAnimationSlots[channel]);
+    StoreSlot(slots.at(channel), actor->texture_animation_slots[channel]);
   }
   // The frames copy from the sheets, which the slots never touch, so copying
   // after both steps queues the same moves in the same order.
@@ -264,7 +267,7 @@ void UpdateLiveActorTextureAnimations(Actors_ActorRecord* actor) {
 }
 
 // decomp: BATTLE.PRG func_800AB098 (src/BATTLE/BATTLE.PRG/40564.c:1417)
-void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
+void UploadLiveActorTextureFrame(VS::Actors::ActorRecord* actor, int channel,
                                  int frame) {
   constexpr const char* kOperation = "UploadActorTextureFrame";
   if (actor == nullptr) {
@@ -278,11 +281,11 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
   }
   const std::optional<std::size_t> bank = LiveBank(kOperation);
   if (!bank.has_value()) return;
-  if (actor->textureRowOffsets[*bank] == kNoTextureRow) return;
+  if (actor->texture_row_offsets[*bank] == kNoTextureRow) return;
   const VS::Actors::TextureAnimationFrame& frames =
-      actor->textureAnimationFrames[channel];
+      actor->texture_animation_frames[channel];
   const VS::Actors::TextureCellOriginRecord& origin =
-      actor->textureCellOrigins[channel];
+      actor->texture_cell_origins[channel];
   const std::optional<TextureCellSheet> found = ChannelCellSheet(
       {.overlay = frames.overlay_index,
        .source_x = frames.source_x,
@@ -301,16 +304,16 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
       SheetLayout(*actor, *bank, kOperation);
   if (!layout.has_value()) return;
   const TextureMove move = TextureFrameMove(
-      sheet, OverlayOf(actor->textureOverlays[sheet.overlay - 1]), *layout,
+      sheet, OverlayOf(actor->texture_overlays[sheet.overlay - 1]), *layout,
       frame);
   VS::Core::Debugf(
       "texture",
       "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d "
       "overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",
       static_cast<unsigned>(actor->instance.slot),
-      static_cast<unsigned>(actor->modelId), static_cast<unsigned>(*bank),
-      static_cast<unsigned>(actor->textureSlot),
-      static_cast<unsigned>(actor->clutA), channel, frame,
+      static_cast<unsigned>(actor->model_id), static_cast<unsigned>(*bank),
+      static_cast<unsigned>(actor->texture_slot),
+      static_cast<unsigned>(actor->clut_a), channel, frame,
       static_cast<unsigned>(sheet.overlay),
       static_cast<unsigned>(layout->sheet_row), move.source.x, move.source.y,
       move.x, move.y, move.source.width, move.source.height);
@@ -324,10 +327,10 @@ void ResetLiveActorTextureFrames(int bank_index) {
   if (bank_index != shared_bank) return;
   const std::optional<std::size_t> bank = LiveBank("ResetActorTextureFrames");
   if (!bank.has_value()) return;
-  for (Actors_ActorRecord* actor : Actors_actorRecords) {
+  for (VS::Actors::ActorRecord* actor : VS::Actors::actorRecords) {
     if (actor != nullptr &&
         RestartsTextureFrames(bank_index, shared_bank,
-                              actor->textureRowOffsets[*bank])) {
+                              actor->texture_row_offsets[*bank])) {
       UploadLiveActorTextureFrame(actor, 0, 0);
       UploadLiveActorTextureFrame(actor, 1, 0);
     }
@@ -338,7 +341,7 @@ void ResetLiveActorTextureFrames(int bank_index) {
 void UploadLiveActorTextureOverlay(int actor_id, TextureOverlayCopy copy) {
   constexpr const char* kOperation = "UploadActorTextureOverlay";
   if (SheetPage() == 0) return;
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) {
     // The original read through the empty slot.
     if (IsActorTableId(actor_id)) {
@@ -359,12 +362,12 @@ void UploadLiveActorTextureOverlay(int actor_id, TextureOverlayCopy copy) {
   if (!layout.has_value()) return;
   // Unlike the keyed frames, a scripted copy adds even an unset (0xFF) row.
   QueueMove(TextureOverlayMove(copy.source_x, copy.source_y,
-                               OverlayOf(actor->textureOverlays[copy.overlay]),
+                               OverlayOf(actor->texture_overlays[copy.overlay]),
                                *layout));
 }
 
 // decomp: BATTLE.PRG func_800AB4F0 (src/BATTLE/BATTLE.PRG/40564.c:1552)
-void UpdateLiveActorTextureScrolling(Actors_ActorRecord* actor,
+void UpdateLiveActorTextureScrolling(VS::Actors::ActorRecord* actor,
                                      int carried_height) {
   constexpr const char* kOperation = "UpdateActorTextureScrolling";
   if (actor == nullptr) {

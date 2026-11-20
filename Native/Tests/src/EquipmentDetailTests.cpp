@@ -10,8 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
@@ -227,7 +226,7 @@ struct RenameFrameFixture {
 };
 
 struct EquipmentReloadFixture {
-  Actors_ActorRecord* saved_preview = Actors_actorRecords[1];
+  VS::Actors::ActorRecord* saved_preview = VS::Actors::actorRecords[1];
   decltype(std::to_array(VS::Actors::weaponModels)) saved_models =
       std::to_array(VS::Actors::weaponModels);
   VS::Render::TextureSlot saved_texture =
@@ -236,13 +235,13 @@ struct EquipmentReloadFixture {
       VS::Event::playbackPhase;
   std::uint8_t saved_reload = VS::Content::objectDataLoadStep;
   int saved_alias = VS::Battle::previewShieldModelAlias;
-  Actors_ActorRecord preview{};
+  VS::Actors::ActorRecord preview{};
   VS::Actors::WeaponModel shield{};
   VS::Actors::WeaponModel preview_shield{};
 
   EquipmentReloadFixture(int category, bool has_preview, int unused_alias) {
-    Actors_actorRecords[1] = &preview;
-    preview.sequenceModelId = static_cast<u_char>(category);
+    VS::Actors::actorRecords[1] = &preview;
+    preview.sequence_model_id = static_cast<u_char>(category);
     std::fill_n(VS::Actors::weaponModels, saved_models.size(), nullptr);
     shield.bone_count = 1;
     VS::Actors::weaponModels[1] = &shield;
@@ -254,7 +253,7 @@ struct EquipmentReloadFixture {
   }
 
   ~EquipmentReloadFixture() {
-    Actors_actorRecords[1] = saved_preview;
+    VS::Actors::actorRecords[1] = saved_preview;
     std::copy(saved_models.begin(), saved_models.end(),
               VS::Actors::weaponModels);
     VS::Render::legacyWeaponTextureSlots[0] = saved_texture;

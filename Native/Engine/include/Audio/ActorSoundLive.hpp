@@ -5,8 +5,10 @@
 
 #include "Audio/Sfx.hpp"
 
-struct Actors_ActorRecord;
-struct Actors_ModelInstance;
+namespace VS::Actors {
+struct ActorRecord;
+struct ModelInstance;
+}  // namespace VS::Actors
 namespace VS::Field {
 struct GimmickInstance;
 }  // namespace VS::Field
@@ -24,15 +26,15 @@ namespace VS::Audio {
 [[nodiscard]] std::optional<SfxMix> LiveActorSoundMix(int actor_index);
 void LiveActorSoundPanAndVolume(int actor_index, int* output_pan,
                                 int* output_volume);
-void LivePlayActorModelSound(const Actors_ModelInstance* model_instance,
+void LivePlayActorModelSound(const VS::Actors::ModelInstance* model_instance,
                              int sound_index);
 void LivePlayActorModelSoundVariant(int actor_index, int variant_index);
-void LivePlayActorSoundPair(const Actors_ActorRecord* source_actor,
+void LivePlayActorSoundPair(const VS::Actors::ActorRecord* source_actor,
                             int first_effect_id, int second_effect_id);
 void LivePlayGimmickSoundPair(const VS::Field::GimmickInstance* gimmick,
                               int first_effect_id, int second_effect_id);
 void LivePlayActorSurfaceContactSound(int actor_index,
-                                      const Actors_ActorRecord* actor,
+                                      const VS::Actors::ActorRecord* actor,
                                       int contact_sound_code);
 void LivePlayActorScriptSound(int actor_index, int sound_index);
 }  // namespace VS::Audio

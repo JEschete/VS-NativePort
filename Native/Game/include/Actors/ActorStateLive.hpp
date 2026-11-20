@@ -69,9 +69,9 @@ void ResetAllLiveActorMovement();
 // `context` is only passed down the original's companion recursion.
 void BeginLiveActorDeath(int actor_id, void* context, int animate);
 // decomp: BATTLE.PRG func_8009F940 (src/BATTLE/BATTLE.PRG/30DB0.c:3388)
-// `companion_state` holds the four Actors_CompanionOffset bytes; a nonzero
-// slot without both arguments keeps the actor's current style, and a slot
-// outside a byte is refused.
+// `companion_state` holds the four VS::Actors::CompanionOffsetRecord bytes; a
+// nonzero slot without both arguments keeps the actor's current style, and a
+// slot outside a byte is refused.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetLiveActorCompanion(int actor_id, int companion_slot,
                            const VS::Render::ColorCode* companion_state,

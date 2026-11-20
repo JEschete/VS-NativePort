@@ -33,7 +33,7 @@ struct PoseEventCursor {
                          const PoseEventCursor&) = default;
 };
 
-// An actor's sound effect setting (Actors_ModelEffectSlot).
+// An actor's sound effect setting (VS::Actors::ModelEffectSlot).
 struct SoundEffectSlot {
   std::uint8_t kind = 0;
   std::uint8_t level = 0;

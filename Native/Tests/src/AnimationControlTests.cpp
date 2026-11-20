@@ -12,10 +12,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControl.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Movement.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -299,23 +298,23 @@ AnimationActor& PosedFromBank(FakeAnimationHost& host, int id) {
 // Places a zeroed actor record in the actor table for the test's lifetime.
 class TableRecord {
  public:
-  explicit TableRecord(int id) : id_(id), saved_(Actors_actorRecords[id]) {
-    Actors_actorRecords[id_] = record_.get();
+  explicit TableRecord(int id) : id_(id), saved_(VS::Actors::actorRecords[id]) {
+    VS::Actors::actorRecords[id_] = record_.get();
   }
   TableRecord(const TableRecord&) = delete;
   TableRecord& operator=(const TableRecord&) = delete;
   TableRecord(TableRecord&&) = delete;
   TableRecord& operator=(TableRecord&&) = delete;
-  ~TableRecord() { Actors_actorRecords[id_] = saved_; }
+  ~TableRecord() { VS::Actors::actorRecords[id_] = saved_; }
 
-  Actors_ActorRecord& operator*() const { return *record_; }
-  Actors_ActorRecord* Get() const { return record_.get(); }
+  VS::Actors::ActorRecord& operator*() const { return *record_; }
+  VS::Actors::ActorRecord* Get() const { return record_.get(); }
 
  private:
   int id_;
-  Actors_ActorRecord* saved_;
-  std::unique_ptr<Actors_ActorRecord> record_ =
-      std::make_unique<Actors_ActorRecord>();
+  VS::Actors::ActorRecord* saved_;
+  std::unique_ptr<VS::Actors::ActorRecord> record_ =
+      std::make_unique<VS::Actors::ActorRecord>();
 };
 
 TEST_CASE("Shared bank retirement checks every posed actor before changing one",
@@ -1387,12 +1386,12 @@ TEST_CASE("Live animation bindings read and write the table's record",
           "[actors][actors-animation-control]") {
   const TableRecord record(kActor);
   CHECK(actors::SetLiveActorTravelAnimation(kActor, -1) == 0);
-  CHECK((*record).travelAnimation == kWalk);
+  CHECK((*record).travel_animation == kWalk);
   int animation = 0;
   CHECK(actors::LiveActorTravelAnimation(kActor, &animation) == 0);
   CHECK(animation == kWalk);
   CHECK(actors::QueueLiveActorAnimation(kActor, kRun, kBlend, 0) == 0);
-  CHECK((*record).queuedAnimation == kRun);
+  CHECK((*record).queued_animation == kRun);
 
   const ChannelWarnings warnings("actors");
   actors::SetLiveActorBonePoseLock(record.Get(), 0, 1);

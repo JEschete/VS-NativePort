@@ -9,9 +9,8 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -98,7 +97,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   bool HasActorRecord(int actor_id) override {
-    return Actors_actorRecords[actor_id] != nullptr;
+    return VS::Actors::actorRecords[actor_id] != nullptr;
   }
 
   void PlayDefense(int actor_id) override {

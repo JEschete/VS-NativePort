@@ -11,11 +11,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Core/Gte.h"
@@ -348,26 +347,26 @@ TEST_CASE("Bone projection reports lookup failures without writing output",
 
 TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
           "[actors][model-drawing]") {
-  const auto saved = std::to_array(Actors_actorRecords);
-  Actors_ActorRecord actor{};
+  const auto saved = VS::Actors::actorRecords;
+  VS::Actors::ActorRecord actor{};
   std::array<unsigned, 256> model_bytes{};
   auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
-  Actors_actorRecords[0] = &actor;
+  VS::Actors::actorRecords[0] = &actor;
   actor.instance.model = model;
   Core_Gte_Reset();
   int output[2] = {33, 44};
 
   // #263: a bone count and bone table beyond the 42 pose matrices still
   // reject bones outside the pose.
-  actor.instance.boneCount = 60;
-  actor.modelDataSize = sizeof model_bytes;
+  actor.instance.bone_count = 60;
+  actor.model_data_size = sizeof model_bytes;
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, 41, output, 0) == 0);
   output[0] = 33;
   output[1] = 44;
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, 42, output, 0) ==
         VS::Actors::kBoneProjectionInvalidBone);
   // #263: a bone past the loaded bone table is rejected; two bones fit here.
-  actor.modelDataSize =
+  actor.model_data_size =
       sizeof(VS::Actors::ShpModel) + (2 * sizeof(VS::Actors::ShpBone));
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, 2, output, 0) ==
         VS::Actors::kBoneProjectionInvalidBone);
@@ -379,7 +378,7 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(-1, 0, output, 0) ==
         VS::Actors::kBoneProjectionMissing);
 
-  std::copy(saved.begin(), saved.end(), std::begin(Actors_actorRecords));
+  std::copy(saved.begin(), saved.end(), std::begin(VS::Actors::actorRecords));
   Core_Gte_Reset();
 }
 
@@ -388,14 +387,13 @@ namespace {
 // one-vertex model in front of the camera.
 struct BorrowedGeometryFixture {
   static constexpr int kGeometrySlot = 5;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   VS::Actors::ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   std::array<unsigned, 32> model_bytes{};
-  Actors_ActorRecord actor{};
-  Actors_ActorRecord geometry{};
+  VS::Actors::ActorRecord actor{};
+  VS::Actors::ActorRecord geometry{};
   MATRIX camera{};
 
   BorrowedGeometryFixture() {
@@ -405,22 +403,22 @@ struct BorrowedGeometryFixture {
     model->polygon_section = 108;
     const std::array<std::uint16_t, 2> group{0, 1};
     std::memcpy(model_bytes.data() + 24, group.data(), sizeof group);
-    for (Actors_ActorRecord* record : {&actor, &geometry}) {
+    for (VS::Actors::ActorRecord* record : {&actor, &geometry}) {
       record->instance.model = model;
-      record->modelDataSize = sizeof model_bytes;
-      record->instance.boneCount = 1;
-      record->instance.vertexGroupCount = 1;
-      record->instance.isVisible = -1;
-      record->instance.scaleX = record->instance.scaleY =
-          record->instance.scaleZ = record->scale = 4096;
-      record->blendPose.scale_keys[0] = {64, 64, 64, 0};
+      record->model_data_size = sizeof model_bytes;
+      record->instance.bone_count = 1;
+      record->instance.vertex_group_count = 1;
+      record->instance.is_visible = -1;
+      record->instance.scale_x = record->instance.scale_y =
+          record->instance.scale_z = record->scale = 4096;
+      record->blend_pose.scale_keys[0] = {64, 64, 64, 0};
     }
-    actor.customTint = 1;
+    actor.custom_tint = 1;
     actor.instance.tint = {100, 70, 20, 0};
-    geometry.fadeRed = 255;
-    geometry.fadeGreen = 50;
-    geometry.fadeBlue = 246;
-    Actors_actorRecords[kGeometrySlot] = &geometry;
+    geometry.fade_red = 255;
+    geometry.fade_green = 50;
+    geometry.fade_blue = 246;
+    VS::Actors::actorRecords[kGeometrySlot] = &geometry;
     for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
     setVector(&VS::Render::ModelWorkspace()->root_offset, 0, 0, 1024);
     Core_Gte_Reset();
@@ -428,7 +426,7 @@ struct BorrowedGeometryFixture {
   }
   ~BorrowedGeometryFixture() {
     std::copy(saved_records.begin(), saved_records.end(),
-              std::begin(Actors_actorRecords));
+              std::begin(VS::Actors::actorRecords));
     VS::Actors::skeletonPose = saved_pose;
     VS::Actors::modelRenderContext = saved_context;
     *VS::Render::ModelWorkspace() = saved_workspace;
@@ -438,23 +436,24 @@ struct BorrowedGeometryFixture {
   BorrowedGeometryFixture& operator=(const BorrowedGeometryFixture&) = delete;
 
   void Draw() { VS::Actors::DrawLiveActorModel(actor, camera, kGeometrySlot); }
-  [[nodiscard]] static bool Unlit(const Actors_ActorRecord& record) {
-    return record.instance.baseColor.r == 0 &&
-           record.instance.baseColor.g == 0 &&
-           record.instance.baseColor.b == 0 &&
-           (record.shadowBlend.color & 0xFFFFFF) == 0;
+  [[nodiscard]] static bool Unlit(const VS::Actors::ActorRecord& record) {
+    return record.instance.base_color.r == 0 &&
+           record.instance.base_color.g == 0 &&
+           record.instance.base_color.b == 0 &&
+           (record.shadow_blend.color & 0xFFFFFF) == 0;
   }
   // The flat pass's colour: the actor's tint {100, 70, 20} adjusted by the
   // geometry's fades {255, 50, 246}, and the tint itself as the shadow.
-  [[nodiscard]] static bool LitInTint(const Actors_ActorRecord& record) {
-    return record.instance.baseColor.r == 96 &&
-           record.instance.baseColor.g == 255 &&
-           record.instance.baseColor.b == 0 &&
-           (record.shadowBlend.color & 0xFFFFFF) == 0x144664;
+  [[nodiscard]] static bool LitInTint(const VS::Actors::ActorRecord& record) {
+    return record.instance.base_color.r == 96 &&
+           record.instance.base_color.g == 255 &&
+           record.instance.base_color.b == 0 &&
+           (record.shadow_blend.color & 0xFFFFFF) == 0x144664;
   }
   // The Gouraud pass's ground shadow is never darker than 64 per channel.
-  [[nodiscard]] static bool GroundShaded(const Actors_ActorRecord& record) {
-    const auto shadow = static_cast<std::uint32_t>(record.shadowBlend.color);
+  [[nodiscard]] static bool GroundShaded(
+      const VS::Actors::ActorRecord& record) {
+    const auto shadow = static_cast<std::uint32_t>(record.shadow_blend.color);
     return (shadow & 0xFF) >= 64 && ((shadow >> 8) & 0xFF) >= 64 &&
            ((shadow >> 16) & 0xFF) >= 64;
   }
@@ -467,21 +466,21 @@ TEST_CASE("Live model lighting follows the drawing actor's layout and state",
           "[actors][model-drawing]") {
   BorrowedGeometryFixture fixture;
   SECTION("a flat actor lights the borrowed UV-laid-out geometry") {
-    fixture.geometry.instance.uvLayout = -1;
+    fixture.geometry.instance.uv_layout = -1;
     fixture.Draw();
     CHECK(BorrowedGeometryFixture::LitInTint(fixture.geometry));
     CHECK(BorrowedGeometryFixture::Unlit(fixture.actor));
   }
   SECTION("a UV-laid-out actor shades itself while the geometry fades") {
-    fixture.actor.instance.uvLayout = -1;
-    fixture.geometry.instance.actionAnimationState = 5;
+    fixture.actor.instance.uv_layout = -1;
+    fixture.geometry.instance.action_animation_state = 5;
     fixture.Draw();
     CHECK(BorrowedGeometryFixture::GroundShaded(fixture.actor));
     CHECK(BorrowedGeometryFixture::Unlit(fixture.geometry));
   }
   SECTION("a fading UV-laid-out actor skips the lighting") {
-    fixture.actor.instance.uvLayout = -1;
-    fixture.actor.instance.actionAnimationState = 4;
+    fixture.actor.instance.uv_layout = -1;
+    fixture.actor.instance.action_animation_state = 4;
     fixture.Draw();
     CHECK(BorrowedGeometryFixture::Unlit(fixture.actor));
     CHECK(BorrowedGeometryFixture::Unlit(fixture.geometry));

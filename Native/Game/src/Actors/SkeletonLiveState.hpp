@@ -13,9 +13,9 @@ namespace VS::Actors {
 // skeleton being drawn and its scale.
 extern SkeletonPose skeletonPose;
 // decomp: D_800F3C78 (BATTLE/BATTLE.PRG 49268.c): the placed gimmick model's
-// root matrix. The original address is boneMatrices[1] of D_800F3C58; the
+// root matrix. The original address is bone_matrices[1] of D_800F3C58; the
 // native keeps it apart, as nothing reads it and the actor pose writes its own
-// boneMatrices[1] before reading it.
+// bone_matrices[1] before reading it.
 extern MATRIX skeletonRootMatrix;
 // decomp: vs_battle_wepModels (BATTLE/BATTLE.PRG 3A1A0.h): two weapon model
 // slots per actor slot, for the first ten actor slots.

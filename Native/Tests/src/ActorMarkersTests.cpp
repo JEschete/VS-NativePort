@@ -10,8 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkers.hpp"
 #include "Battle/ActorMarkersLive.hpp"
@@ -423,8 +422,8 @@ constexpr u_long kLiveEnd = 0xFFFFFF;
 
 struct LiveMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  Actors_ActorRecord* saved_player = Actors_actorRecords[0];
-  Actors_ActorRecord* saved_enemy = Actors_actorRecords[2];
+  VS::Actors::ActorRecord* saved_player = VS::Actors::actorRecords[0];
+  VS::Actors::ActorRecord* saved_enemy = VS::Actors::actorRecords[2];
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
@@ -436,19 +435,19 @@ struct LiveMarkerFixture {
   SVECTOR saved_cue = VS::Battle::abilityTimingCuePosition;
   std::array<char, 40> saved_markers{};
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
-  Actors_ActorRecord player{};
-  Actors_ActorRecord enemy{};
+  VS::Actors::ActorRecord player{};
+  VS::Actors::ActorRecord enemy{};
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::array<u_long, kLiveOrderingWords> ordering{};
 
   LiveMarkerFixture() {
     std::ranges::copy(VS::Battle::actorMarkers, saved_markers.begin());
     std::ranges::fill(VS::Battle::actorMarkers, char{0});
-    Actors_actorRecords[0] = &player;
-    Actors_actorRecords[2] = &enemy;
+    VS::Actors::actorRecords[0] = &player;
+    VS::Actors::actorRecords[2] = &enemy;
     player.instance.position.vx = -256;
     player.instance.position.vz = enemy.instance.position.vz = 512;
-    player.targetPointHeight = enemy.targetPointHeight = 64;
+    player.target_point_height = enemy.target_point_height = 64;
     ordering.fill(kLiveEnd);
     VS::Render::frameBuf = 0;
     VS::Render::legacyOrderingTables[0] = ordering.data();
@@ -469,8 +468,8 @@ struct LiveMarkerFixture {
 
   ~LiveMarkerFixture() {
     std::ranges::copy(saved_markers, std::begin(VS::Battle::actorMarkers));
-    Actors_actorRecords[0] = saved_player;
-    Actors_actorRecords[2] = saved_enemy;
+    VS::Actors::actorRecords[0] = saved_player;
+    VS::Actors::actorRecords[2] = saved_enemy;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;

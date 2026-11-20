@@ -10,11 +10,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Content/ModuleData.hpp"
@@ -28,18 +27,17 @@ namespace {
 // The actor, weapon and gimmick tables and the room scale, emptied for one
 // test and then restored.
 struct LiveAppearanceState {
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   VECTOR saved_scale = VS::Actors::roomActorScale;
-  std::vector<std::unique_ptr<Actors_ActorRecord>> records;
+  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
 
   LiveAppearanceState() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     std::fill(std::begin(VS::Actors::weaponModels),
               std::end(VS::Actors::weaponModels), nullptr);
     std::fill(std::begin(VS::Field::gimmickInstances),
@@ -50,17 +48,17 @@ struct LiveAppearanceState {
   LiveAppearanceState(LiveAppearanceState&&) = delete;
   LiveAppearanceState& operator=(LiveAppearanceState&&) = delete;
   ~LiveAppearanceState() {
-    std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(VS::Field::gimmickInstances));
     VS::Actors::roomActorScale = saved_scale;
   }
 
-  Actors_ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<Actors_ActorRecord>());
-    Actors_ActorRecord& actor = *records.back();
+  VS::Actors::ActorRecord& AddActor(int actor_id) {
+    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
+    VS::Actors::ActorRecord& actor = *records.back();
     actor.instance.slot = static_cast<u_char>(actor_id);
-    Actors_actorRecords[actor_id] = &actor;
+    VS::Actors::actorRecords[actor_id] = &actor;
     return actor;
   }
 };
@@ -288,8 +286,8 @@ TEST_CASE("Appearance transitions refuse a missing or looping companion",
 TEST_CASE("Live room scale sets each actor's scale from the stored x",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& first = state.AddActor(0);
-  Actors_ActorRecord& last = state.AddActor(16);
+  VS::Actors::ActorRecord& first = state.AddActor(0);
+  VS::Actors::ActorRecord& last = state.AddActor(16);
   first.scale = 1;
   last.scale = 2;
   const VECTOR room_scale{0x11000, 2048, 1024, 7};
@@ -349,32 +347,32 @@ TEST_CASE("Live weapon brightness keeps the low flag bit and level byte",
 TEST_CASE("Live palette fade and shadow blend bind the actor record",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& actor = state.AddActor(3);
-  actor.paletteFadeState[0] = 50;
+  VS::Actors::ActorRecord& actor = state.AddActor(3);
+  actor.palette_fade_state[0] = 50;
   actors::SetLiveActorPaletteFade(3, 3);
-  CHECK(actor.paletteFadeActive == 1);
-  CHECK(actor.paletteFadeReverse == 0);
-  CHECK(actor.paletteFadeState[0] == 0);
-  CHECK(actor.paletteFadeState[1] == 6);
+  CHECK(actor.palette_fade_active == 1);
+  CHECK(actor.palette_fade_reverse == 0);
+  CHECK(actor.palette_fade_state[0] == 0);
+  CHECK(actor.palette_fade_state[1] == 6);
 
-  actor.shadowRadiusExpandRate = 70;
-  actor.shadowRadiusShrinkRate = 80;
-  actor.shadowBlend.level = 12;
+  actor.shadow_radius_expand_rate = 70;
+  actor.shadow_radius_shrink_rate = 80;
+  actor.shadow_blend.level = 12;
   actors::BeginLiveActorShadowBlend(&actor, 0);
-  CHECK(actor.shadowBlend.radius_expand_rate == 70);
-  CHECK(actor.shadowBlend.radius_shrink_rate == 80);
-  CHECK(actor.shadowBlend.level == 0);
+  CHECK(actor.shadow_blend.radius_expand_rate == 70);
+  CHECK(actor.shadow_blend.radius_shrink_rate == 80);
+  CHECK(actor.shadow_blend.level == 0);
 }
 
 TEST_CASE("Live fade color requests bind the actor record",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& actor = state.AddActor(3);
+  VS::Actors::ActorRecord& actor = state.AddActor(3);
   const VS::Render::ColorCode fade{11, 22, 33, 44};
   CHECK(actors::SetLiveActorFadeParameters(3, &fade) == 0);
-  CHECK(actor.fadeRed == 11);
-  CHECK(actor.fadeGreen == 22);
-  CHECK(actor.fadeBlue == 33);
+  CHECK(actor.fade_red == 11);
+  CHECK(actor.fade_green == 22);
+  CHECK(actor.fade_blue == 33);
   VS::Render::ColorCode out{0, 0, 0, 55};
   CHECK(actors::LiveActorFadeParameters(3, &out) == 0);
   CHECK(out.red == 11);
@@ -385,13 +383,13 @@ TEST_CASE("Live fade color requests bind the actor record",
 TEST_CASE("Live tint requests bind the actor's model instance",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& actor = state.AddActor(3);
+  VS::Actors::ActorRecord& actor = state.AddActor(3);
   const VS::Render::ColorCode tint{1, 2, 3, 4};
   CHECK(actors::SetLiveActorTint(3, &tint) == 0);
-  CHECK(actor.customTint == 1);
+  CHECK(actor.custom_tint == 1);
   CHECK(actor.instance.tint.green == 2);
   CHECK(actors::SetLiveActorTint(3, nullptr) == 0);
-  CHECK(actor.customTint == 0);
+  CHECK(actor.custom_tint == 0);
   VS::Render::ColorCode tint_out{};
   CHECK(actors::LiveActorTint(3, &tint_out) == 0);
   CHECK(tint_out.code == 4);
@@ -400,16 +398,16 @@ TEST_CASE("Live tint requests bind the actor's model instance",
 TEST_CASE("Live palette pulse requests bind the actor's model instance",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& actor = state.AddActor(3);
-  actor.instance.palettePulse = {
+  VS::Actors::ActorRecord& actor = state.AddActor(3);
+  actor.instance.palette_pulse = {
       .kind = 0x80, .level = 5, .flags = 0, .parameter = 0};
   CHECK(actors::EnableLiveModelPalettePulse(3, 1, 1) == 0);
-  CHECK(actor.instance.palettePulse.kind == 0xC0);
-  CHECK(actor.instance.palettePulse.level == 5);
+  CHECK(actor.instance.palette_pulse.kind == 0xC0);
+  CHECK(actor.instance.palette_pulse.level == 5);
   CHECK(actors::EnableLiveModelPalettePulse(3, 1, 8) ==
         static_cast<int>(AppearanceStatus::kBadPulseSlot));
   CHECK(actors::DisableLiveModelPalettePulse(3, 0) == 0);
-  CHECK(actor.instance.palettePulse.kind == 0x40);
+  CHECK(actor.instance.palette_pulse.kind == 0x40);
 }
 
 TEST_CASE("Live appearance requests treat an empty actor slot as no model",
@@ -460,19 +458,19 @@ TEST_CASE("Live appearance requests refuse bad ids and null colors",
 TEST_CASE("Live appearance transitions refuse a broken companion chain",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  Actors_ActorRecord& lead = state.AddActor(0);
-  Actors_ActorRecord& companion = state.AddActor(4);
-  lead.companionSlot = 4;
-  companion.companionSlot = 1;
+  VS::Actors::ActorRecord& lead = state.AddActor(0);
+  VS::Actors::ActorRecord& companion = state.AddActor(4);
+  lead.companion_slot = 4;
+  companion.companion_slot = 1;
   VS::test_support::ChannelWarnings warnings{"actors"};
   actors::StartLiveActorAppearanceTransition(0, 0);
-  CHECK(lead.instance.actionAnimationState == actors::kAppearanceBlack);
-  CHECK(companion.instance.actionAnimationState == actors::kAppearanceBlack);
+  CHECK(lead.instance.action_animation_state == actors::kAppearanceBlack);
+  CHECK(companion.instance.action_animation_state == actors::kAppearanceBlack);
   CHECK(warnings.messages.empty());
 
-  companion.companionSlot = 4;
+  companion.companion_slot = 4;
   actors::StartLiveActorAppearanceTransition(0, 1);
-  CHECK(lead.instance.actionAnimationState == actors::kAppearanceDelay);
+  CHECK(lead.instance.action_animation_state == actors::kAppearanceDelay);
   CHECK(warnings.messages ==
         std::vector<std::string>{
             "StartActorAppearanceTransition refused: the chain from actor 0 "

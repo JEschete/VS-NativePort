@@ -8,8 +8,8 @@
 #include <cstring>
 #include <iterator>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -94,7 +94,7 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
   [[nodiscard]] ActorFacing Facing() const override {
     Require(actor_.model != nullptr, "AI turning requires an actor model");
     return ActorFacing{actor_.model->facing,
-                       std::bit_cast<std::int16_t>(actor_.model->lookYaw)};
+                       std::bit_cast<std::int16_t>(actor_.model->look_yaw)};
   }
 
   [[nodiscard]] AttackSelection SelectedAttack() const override {
@@ -113,9 +113,9 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
 
   [[nodiscard]] CommandPosition TargetPosition(
       unsigned target_id) const override {
-    Require(target_id < std::size(Actors_actorRecords),
+    Require(target_id < std::size(VS::Actors::actorRecords),
             "AI positional attack target is out of bounds");
-    const auto* target = Actors_actorRecords[target_id];
+    const auto* target = VS::Actors::actorRecords[target_id];
     Require(target != nullptr, "AI positional attack requires a target model");
     return CommandPosition{target->instance.position.vx,
                            target->instance.position.vy,

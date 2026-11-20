@@ -8,8 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -30,8 +29,7 @@
 namespace {
 namespace b = VS::Battle;
 struct LiveFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   Battle_ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Battle::Ai::roomAiState) saved_room =
@@ -56,10 +54,10 @@ struct LiveFixture {
   unsigned saved_phase = VS::Battle::actionFlowMode;
   Battle_ActionState state{};
   VS::Battle::Ai::RoomAiState room{};
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   Battle_Actor actor{};
   LiveFixture() {
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     std::ranges::fill(VS::Battle::actors, nullptr);
     VS::Battle::actionState = &state;
     VS::Battle::Ai::roomAiState = &room;
@@ -69,7 +67,7 @@ struct LiveFixture {
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
   ~LiveFixture() {
-    std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_actors, std::begin(VS::Battle::actors));
     VS::Battle::actionState = saved_state;
     VS::Battle::Ai::roomAiState = saved_room;
@@ -131,7 +129,7 @@ TEST_CASE(
     "F00187 production actor assets and effect gates advance the owned phase",
     "[action-sequence][F00187][action-presentation][actors-state]") {
   auto fixture = std::make_unique<LiveFixture>();
-  Actors_actorRecords[15] = &fixture->record;
+  VS::Actors::actorRecords[15] = &fixture->record;
   fixture->record.instance.slot = 15;
   fixture->record.pose.holding_last_frame = -1;
   fixture->record.pose.reached_end = -1;
@@ -182,8 +180,8 @@ TEST_CASE("F00193 production255 targets use real animation readiness",
   for (auto& target : fixture->state.queue[0].targets) {
     target.target.target_actor = 15;
   }
-  fixture->record.instance.actionAnimationState = 1;
-  Actors_actorRecords[15] = &fixture->record;
+  fixture->record.instance.action_animation_state = 1;
+  VS::Actors::actorRecords[15] = &fixture->record;
   VS::Battle::actionFlowMode = 10;
   b::WaitForLiveTargetRecovery();
   CHECK(VS::Battle::actionFlowMode == 10);

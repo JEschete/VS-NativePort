@@ -207,7 +207,10 @@
     <ClCompile Include="src\Actors\ActorPlacement.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ActorRecord.h">
+    <ClCompile Include="src\Actors\ActorRecord.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ActorRecord.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\ActorRoster.cpp">
@@ -282,7 +285,7 @@
     <ClCompile Include="src\Actors\ModelDrawingLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ModelInstance.h">
+    <ClInclude Include="src\Actors\ModelInstance.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\ModelRendering.cpp">
@@ -303,7 +306,7 @@
     <ClCompile Include="src\Actors\Movement.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Movement.h">
+    <ClInclude Include="src\Actors\Movement.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\MovementCommandBinding.cpp">

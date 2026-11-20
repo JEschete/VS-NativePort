@@ -550,7 +550,7 @@ int func_800F9800(void) {
         self.assertTrue(handler.rstrip().endswith(
             "host.StartActorEffect(effect, actor);\n  return ScriptStep::kAdvance;"))
         live = (root / r"Native\Game\src\Event\ScriptEffectCommandsLive.cpp").read_text(encoding="utf-8")
-        self.assertRegex(live, r"\.occupied = Actors_actorRecords\[actor\] != nullptr \|\|\s+"
+        self.assertRegex(live, r"\.occupied = VS::Actors::actorRecords\[actor\] != nullptr \|\|\s+"
                                r"VS::Field::gimmickInstances\[actor\] != nullptr")
         self.assertNotIn("Deferred", handler + live)
         self.assertNotIn("Deferred", "".join(copy_fixups.NATIVE_HELPER_HEADERS))
@@ -708,12 +708,12 @@ int func_800F9800(void) {
         root = Path(__file__).resolve().parents[2]
         self.assertFalse((root / r"Native\Game\src\Actors\AnimationBindings.h").exists())
         live = (root / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(encoding="utf-8")
-        start = live.index("int RestartLiveAnimationEvents(Actors_ActorRecord& actor) {")
+        start = live.index("int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor) {")
         restart = live[start:live.index("\n}\n", start)]
         self.assertIn("FindLiveBoundClip(actor)", restart)
         self.assertIn("EventRestart::kUnavailable", restart)
         self.assertIn("return -1;", restart)
-        self.assertIn("BankHandle(actor.sharedSequences[slot]) == actor.animationHeader", live)
+        self.assertIn("BankHandle(actor.shared_sequences[slot]) == actor.animation_header", live)
         # #276 slice 20b: shared-bank retirement is owned; the Live host asks whether the bound clip has events.
         control = (root / r"Native\Game\src\Actors\AnimationControlLive.cpp").read_text(encoding="utf-8")
         self.assertIn("BoundLiveAnimationClip(record)", control)
@@ -1238,7 +1238,7 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn("ClearLiveAiContactOccupancy(contact);", live)
-        self.assertIn("model.supportLayer |", live)
+        self.assertIn("model.support_layer |", live)
 
     def test_ashley_alliance_uses_native_callback_storage_without_shifting_views(self):
         self.assertEqual(
@@ -1853,7 +1853,7 @@ int func_800F9800(void) {
             "if (role == ModelDrawRole::kSelf && host.CastsShadow()) host.DrawShadow();",
             core,
         )
-        self.assertIn("return actor_.instance.soundEnabled != 0;", live)
+        self.assertIn("return actor_.instance.sound_enabled != 0;", live)
         self.assertRegex(live, r"VS::Render::DrawLiveActorGroundShadow\(\s*actor_,")
 
     def test_model_geometry_reads_models_only_through_recorded_extents(self):
@@ -2842,7 +2842,7 @@ int func_800F9800(void) {
             "if (MATRIX* parent = ResolveLiveAttachmentParentMatrix(actor))", live
         )
         self.assertNotIn("entries[", live)
-        self.assertNotIn("boneMatrices[actor->instance.attachBone]", live)
+        self.assertNotIn("bone_matrices[actor->instance.attach_bone]", live)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Actors::ResolveLiveAttachmentParentMatrix"],
             r"Native\Game\include\Actors\ModelDrawingLive.hpp",
@@ -3346,7 +3346,7 @@ int func_800F9800(void) {
         live = (root / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(encoding="utf-8")
         start = live.index("void InitializeLiveActorAnimationPose(")
         init = live[start:live.index("\n}\n", start)]
-        self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->poseOverrideActive = 0;"))
+        self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->pose_override_active = 0;"))
         self.assertIn("VS::Core::Errorf", live)
         # #276 slice 20b: PlayActorAnimation (F00856) is owned and keeps the override when the unwind fails.
         core = (root / r"Native\Game\src\Actors\AnimationControl.cpp").read_text(encoding="utf-8")
@@ -3454,7 +3454,7 @@ int func_800F9800(void) {
         listed = world[world.index("std::vector<ListedPerceptionActor> ListedActors()"):]
         listed = listed[:listed.index("\n  }\n")]
         self.assertIn("Core::Math::PositionOf(actor.model->position)", listed)
-        self.assertNotIn("Actors_actorRecords", model + listed)
+        self.assertNotIn("VS::Actors::actorRecords", model + listed)
         self.assertNotIn("(short*)", (ai / "ActorPerception.cpp").read_text(encoding="utf-8"))
 
     def test_optional_actor_wrappers_diagnose_and_return_before_dereferencing(self):
@@ -3500,7 +3500,7 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn("VS::Field::FindGimmickForActorSlot(actor_id)", live)
-        self.assertNotIn("(Actors_ActorRecord*)", live)
+        self.assertNotIn("(VS::Actors::ActorRecord*)", live)
         self.assertNotIn("VS::Field::gimmickInstances[", live)
 
     def test_room_lifetimes_revoke_diagnostic_readiness(self):
@@ -3604,7 +3604,7 @@ int func_800F9800(void) {
         live = self.model_rendering_live_source()
         self.assertIn("UpdateLiveActorAppearanceTransition(*actor);", live)
         self.assertIn("UpdateLiveGimmickAppearanceTransition(*object);", live)
-        self.assertNotIn("(Actors_ActorRecord*)", live)
+        self.assertNotIn("(VS::Actors::ActorRecord*)", live)
 
     def test_effect_register_consumers_preserve_original_operand_order(self):
         # 5BF94.c:7633/7639 read the register index before the halfword and compare the unsigned
@@ -3630,7 +3630,7 @@ int func_800F9800(void) {
         core = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp").read_text(encoding="utf-8")
         self.assertIn("ActorAssetRequest request{};", core)
         live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("constexpr std::size_t kRecordBytes = sizeof(Actors_ActorRecord);", live)
+        self.assertIn("constexpr std::size_t kRecordBytes = sizeof(VS::Actors::ActorRecord);", live)
         self.assertIn("constexpr std::size_t kWeaponBytes = sizeof(VS::Actors::WeaponModel);", live)
         self.assertIn("constexpr std::size_t kCompanionBufferBytes = 2 * kRecordBytes;", live)
         self.assertIn("constexpr std::size_t kEquippedBufferBytes = kRecordBytes + (2 * kWeaponBytes);", live)

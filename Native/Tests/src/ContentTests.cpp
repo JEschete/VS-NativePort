@@ -19,9 +19,8 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Audio/Seq/Sequencer.hpp"
 #include "Battle/Damage.hpp"
@@ -1245,14 +1244,13 @@ struct ContentWorkspaceState {
 };
 
 struct ActorAssetState {
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Content::legacyActorAssetRequests) saved_requests =
       VS::Content::legacyActorAssetRequests;
   decltype(VS::Actors::sharedSequenceData) saved_banks =
       VS::Actors::sharedSequenceData;
   std::array<unsigned char, 3> saved_pages{};
-  std::array<Actors_ActorRecord, 4> records{};
+  std::array<VS::Actors::ActorRecord, 4> records{};
   VS::Content::SequenceBuffer sequence{};
 
   ActorAssetState() {
@@ -1261,16 +1259,18 @@ struct ActorAssetState {
     std::fill_n(VS::Actors::sharedSequenceBankTexturePages.begin(),
                 saved_pages.size(), 0);
     VS::Actors::sharedSequenceData.fill(nullptr);
-    std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
+                nullptr);
     VS::Content::legacyActorAssetRequests.fill({});
     for (std::size_t index = 0; index < records.size(); ++index) {
-      records[index].modelId = 7;
-      Actors_actorRecords[index] = &records[index];
+      records[index].model_id = 7;
+      VS::Actors::actorRecords[index] = &records[index];
     }
   }
 
   ~ActorAssetState() {
-    std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
+    std::copy(saved_records.begin(), saved_records.end(),
+              VS::Actors::actorRecords.begin());
     VS::Content::legacyActorAssetRequests = saved_requests;
     VS::Actors::sharedSequenceData = saved_banks;
     std::copy(saved_pages.begin(), saved_pages.end(),
@@ -1375,22 +1375,22 @@ TEST_CASE("Timeline section and track indices retain block-relative offsets",
 TEST_CASE("Sequence release distinguishes actor slots from one-based banks",
           "[content][semantic-names][sequence]") {
   ActorAssetState state;
-  state.records[0].battleSequence = &state.sequence;
+  state.records[0].battle_sequence = &state.sequence;
   CHECK(Content::ReleaseLiveActorSequence(0, 0) == 0);
-  CHECK(state.records[0].battleSequence == nullptr);
-  state.records[2].sharedSequences[0] = &state.sequence;
+  CHECK(state.records[0].battle_sequence == nullptr);
+  state.records[2].shared_sequences[0] = &state.sequence;
   CHECK(Content::ReleaseLiveActorSequence(1, 1) == 0);
-  CHECK(state.records[2].sharedSequences[0] == nullptr);
+  CHECK(state.records[2].shared_sequences[0] == nullptr);
   CHECK(Content::ReleaseLiveActorSequence(1, 1) == 0);
 }
 
 TEST_CASE("Special actor model release clears only its record slot",
           "[content][semantic-names][sequence]") {
   ActorAssetState state;
-  state.records[2].modelId = 0x7F;
+  state.records[2].model_id = 0x7F;
   CHECK(Content::ReleaseLiveActorModel(2) == 0);
-  CHECK(Actors_actorRecords[2] == nullptr);
-  CHECK(Actors_actorRecords[3] == &state.records[3]);
+  CHECK(VS::Actors::actorRecords[2] == nullptr);
+  CHECK(VS::Actors::actorRecords[3] == &state.records[3]);
   CHECK(Content::ReleaseLiveActorModel(2) == -1);
   CHECK(Content::ReleaseLiveActorModel(17) == -1);
 }

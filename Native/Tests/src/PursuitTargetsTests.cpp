@@ -5,8 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -21,8 +20,7 @@
 
 namespace {
 struct PursuitFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Field::roomData.moving_platforms) saved_platforms =
@@ -30,19 +28,19 @@ struct PursuitFixture {
   decltype(VS::Field::roomData.header.moving_platforms_length)
       saved_platform_bytes = VS::Field::roomData.header.moving_platforms_length;
   decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
-  std::array<Actors_ActorRecord, 2> models{};
+  std::array<VS::Actors::ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
   std::array<VS::Field::MpdMovingPlatform, 4> platforms{};
   std::array<VS::Battle::Ai::RouteGateEndRecord, 16> gates{};
 
   PursuitFixture() {
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::LiveFrameContext().actors,
                 VS::Battle::Ai::kFrameActorSlots, nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
-      Actors_actorRecords[index] = &models[index];
+      VS::Actors::actorRecords[index] = &models[index];
       VS::Battle::actors[index] = &actors[index];
       VS::Battle::Ai::LiveFrameContext().actors[index] = &states[index];
       actors[index].id = static_cast<int>(index);
@@ -56,21 +54,22 @@ struct PursuitFixture {
     VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
     VS::Battle::Ai::routeGates = gates.data();
     auto& model = models[1].instance;
-    model.currentTileX = 4;
-    model.currentTileZ = 6;
-    model.reserved5F = 0x22;
-    model.previousTileX = 9;
-    model.previousTileZ = 10;
+    model.current_tile_x = 4;
+    model.current_tile_z = 6;
+    model.reserved5f = 0x22;
+    model.previous_tile_x = 9;
+    model.previous_tile_z = 10;
     model.reserved63 = 0x33;
     model.position.vx = 1234;
     model.position.vz = -129;
-    model.supportOffset = 0x1234FFBF;
+    model.support_offset = 0x1234FFBF;
     model.reserved50 = 193;
     Approach().target_id = 1;
   }
 
   ~PursuitFixture() {
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
@@ -104,7 +103,7 @@ TEST_CASE("Pursuit refresh reads signed position halfwords in subtile units",
           "[ai][pursuit-targets]") {
   const bool planned = GENERATE(false, true);
   PursuitFixture fixture;
-  fixture.models[1].instance.movementMode = planned ? 1 : 0;
+  fixture.models[1].instance.movement_mode = planned ? 1 : 0;
   fixture.Approach().reserved_f5[0] = 0x55;
   fixture.Approach().reserved_f7[0] = 0x66;
   VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
@@ -121,7 +120,7 @@ TEST_CASE(
   fixture.Approach().target_tile_x = 17;
   fixture.Approach().target_tile_z = 18;
   VS::Battle::Ai::LiveFrameContext().actors[1] = nullptr;
-  Actors_actorRecords[1] = nullptr;
+  VS::Actors::actorRecords[1] = nullptr;
   VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().target_tile_x == 17);
   CHECK(fixture.Approach().target_tile_z == 18);
@@ -149,8 +148,8 @@ TEST_CASE("Pursuit refresh resolves current and planned moving-platform gates",
   PursuitFixture fixture;
   fixture.SetPlatform(group);
   auto& model = fixture.models[1].instance;
-  model.movementMode = planned ? 1 : 0;
-  model.currentTileLayer = model.previousTileLayer =
+  model.movement_mode = planned ? 1 : 0;
+  model.current_tile_layer = model.previous_tile_layer =
       static_cast<u_char>(group + 2);
   VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().target_tile_x == (12 + group) * 2);
@@ -162,7 +161,7 @@ TEST_CASE("Approach retains the original missing-cache target-zero distinction",
   const int target = GENERATE(0, 1);
   PursuitFixture fixture;
   VS::Battle::Ai::LiveFrameContext().actors[target] = nullptr;
-  Actors_actorRecords[target] = nullptr;
+  VS::Actors::actorRecords[target] = nullptr;
   fixture.states[0].requested_movement_mode = 3;
   fixture.states[0].current_movement_mode = 2;
   CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], target, 640, 1) ==
@@ -176,7 +175,7 @@ TEST_CASE("Approach preserves the full current or planned destination word",
   const bool planned = GENERATE(false, true);
   PursuitFixture fixture;
   fixture.UseVisibleInactiveTarget();
-  fixture.models[1].instance.movementMode = planned ? 1 : 0;
+  fixture.models[1].instance.movement_mode = planned ? 1 : 0;
   CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 1, 640, 1) == 0);
   CHECK(fixture.states[0].destination.word ==
         (planned ? 0x330A0009u : 0x22060004u));
@@ -206,9 +205,9 @@ TEST_CASE("Approach platform selection preserves the original other tile bytes",
   PursuitFixture fixture;
   fixture.UseVisibleInactiveTarget();
   fixture.SetPlatform(0);
-  fixture.models[1].instance.movementMode = branch == 1 ? 0 : 1;
-  fixture.models[1].instance.previousTileLayer = 2;
-  fixture.models[1].instance.supportLayer = 2;
+  fixture.models[1].instance.movement_mode = branch == 1 ? 0 : 1;
+  fixture.models[1].instance.previous_tile_layer = 2;
+  fixture.models[1].instance.support_layer = 2;
   fixture.states[0].settings_bit14 = branch == 1 ? 1 : 0;
   fixture.states[0].movement_flags = branch == 2 ? 8 : 0;
   fixture.states[0].destination.word = 0xAABBCCDD;

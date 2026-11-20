@@ -13,8 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -512,8 +511,8 @@ struct LiveFrameFixture {
   std::uint32_t saved_score = score::score;
   VS::Render::ScreenOffset saved_offset =
       VS::Render::GetLiveProjectionScreenOffset();
-  Actors_ActorRecord* saved_preview =
-      Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot];
+  VS::Actors::ActorRecord* saved_preview =
+      VS::Actors::actorRecords[VS::Menu::Framework::kPreviewActorSlot];
   decltype(std::to_array(VS::Render::compactGlyphLeftTrim)) saved_trim =
       std::to_array(VS::Render::compactGlyphLeftTrim);
   decltype(std::to_array(VS::Render::compactGlyphWidths)) saved_widths =
@@ -527,7 +526,7 @@ struct LiveFrameFixture {
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::legacyOrderingTables[0] = ordering.data();
-    Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot] = nullptr;
+    VS::Actors::actorRecords[VS::Menu::Framework::kPreviewActorSlot] = nullptr;
     std::ranges::fill(VS::Render::compactGlyphLeftTrim, u_char{0});
     std::ranges::fill(VS::Render::compactGlyphWidths, kGlyphWidths);
     for (std::size_t cell = 0; cell < saved_indices.size(); ++cell) {
@@ -550,7 +549,8 @@ struct LiveFrameFixture {
     score::cameraAnglesBackup = saved_angles_backup;
     score::score = saved_score;
     VS::Render::SetLiveProjectionScreenOffset(saved_offset);
-    Actors_actorRecords[VS::Menu::Framework::kPreviewActorSlot] = saved_preview;
+    VS::Actors::actorRecords[VS::Menu::Framework::kPreviewActorSlot] =
+        saved_preview;
   }
   LiveFrameFixture(const LiveFrameFixture&) = delete;
   LiveFrameFixture& operator=(const LiveFrameFixture&) = delete;

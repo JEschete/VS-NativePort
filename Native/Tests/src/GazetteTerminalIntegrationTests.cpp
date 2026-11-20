@@ -78,7 +78,7 @@ MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
 
 struct ForeignOwner {
   std::vector<std::byte> cursor;
-  void* actor = Actors_actorRecords[0];
+  void* actor = VS::Actors::actorRecords[0];
   void* allocation = memory::AllocateLiveFromLowEnd(64);
   VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
@@ -107,7 +107,7 @@ struct ForeignOwner {
   void Check() const {
     CHECK(content::LiveDiscRequestGeneration(request) == generation);
     CHECK(memory::LivePayloadCapacity(allocation).has_value());
-    CHECK(Actors_actorRecords[0] == actor);
+    CHECK(VS::Actors::actorRecords[0] == actor);
     CHECK(std::ranges::equal(live::BytesOf(VS::Battle::menu9CursorMemory),
                              cursor));
     CHECK(VS::Content::discRequestCounts.reading == 0);
@@ -162,7 +162,7 @@ TEST_CASE("Gazette terminal module entries initialize real preview and screen",
   CHECK(score::menuState == 1);
   CHECK(ModuleEntry(0x8010337C, &score::UpdateLiveGazette)() == 0);
   CHECK(score::menuState == 2);
-  CHECK(Actors_actorRecords[1] != nullptr);
+  CHECK(VS::Actors::actorRecords[1] != nullptr);
   std::array<std::uint8_t, 2> phase{3, 0xAA};
   CHECK(ModuleEntry(0x80102FF8,
                     &score::UpdateLiveGazetteScreen)(phase.data()) == 0);

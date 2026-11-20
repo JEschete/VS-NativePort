@@ -12,9 +12,8 @@
 #include <span>
 #include <string_view>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
@@ -58,7 +57,7 @@ constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
 // vs_main_playSfxDefault's menu sound group (16C.c:191).
 constexpr int kMenuSoundGroup = 0x7E;
-// Actors_actorRecords' preview actor (vs_battle_actors[1]).
+// VS::Actors::actorRecords' preview actor (vs_battle_actors[1]).
 constexpr int kPreviewActor = 1;
 constexpr int kAdvanceAllBones = 1;
 constexpr int kWeaponDrawTransition = 1;
@@ -253,9 +252,9 @@ class LiveModelHost final : public EquipmentModelHost {
  public:
   bool HasPreviewActor() override { return actor_ != nullptr; }
   std::uint8_t PreviewSequenceModel() override {
-    return actor_->sequenceModelId;
+    return actor_->sequence_model_id;
   }
-  std::uint8_t PreviewAnimation() override { return actor_->animationId; }
+  std::uint8_t PreviewAnimation() override { return actor_->animation_id; }
   bool HasWeaponModel(int slot) override {
     return WeaponModel(slot) != nullptr;
   }
@@ -292,7 +291,7 @@ class LiveModelHost final : public EquipmentModelHost {
     Framework::CloneLiveActorPreview(source_slot);
   }
   void ResetPreviewPose() override { Framework::ResetLiveActorPreviewPose(); }
-  void SheathePreviewWeapon() override { actor_->instance.weaponDrawn = 0; }
+  void SheathePreviewWeapon() override { actor_->instance.weapon_drawn = 0; }
   void PlayPreviewAnimation(int animation) override {
     static_cast<void>(
         Actors::PlayLiveActorAnimation(kPreviewActor, animation, 0, 0));
@@ -301,8 +300,8 @@ class LiveModelHost final : public EquipmentModelHost {
     Actors::AdvanceLiveSkeletalAnimation(*actor_, kAdvanceAllBones);
   }
   void CopyPreviewPoseToBlend() override {
-    Core::Memory::CopyLiveAlignedWords(&actor_->blendPose, &actor_->pose,
-                                       sizeof actor_->blendPose);
+    Core::Memory::CopyLiveAlignedWords(&actor_->blend_pose, &actor_->pose,
+                                       sizeof actor_->blend_pose);
   }
   void ClearWeaponModelFlag(int slot) override {
     if (VS::Actors::WeaponModel* model = WeaponModel(slot)) {
@@ -311,7 +310,7 @@ class LiveModelHost final : public EquipmentModelHost {
   }
 
  private:
-  Actors_ActorRecord* actor_ = Actors_actorRecords[kPreviewActor];
+  VS::Actors::ActorRecord* actor_ = VS::Actors::actorRecords[kPreviewActor];
 };
 }  // namespace
 

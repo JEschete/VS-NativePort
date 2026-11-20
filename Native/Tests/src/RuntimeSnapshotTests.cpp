@@ -21,9 +21,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorSpawningLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControlLive.hpp"
@@ -250,8 +249,7 @@ struct RuntimeFixture {
   decltype(std::to_array(Battle_actionDefinitions)) actions =
       std::to_array(Battle_actionDefinitions);
   decltype(VS::Battle::actors) actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) models = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::actorAiStates) ai = VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(VS::Core::randomShuffleTable)) shuffle =
       std::to_array(VS::Core::randomShuffleTable);
@@ -290,8 +288,8 @@ struct RuntimeFixture {
   Battle_Actor enemy{};
   Battle_ActorStats player_stats{};
   Battle_ActorStats enemy_stats{};
-  Actors_ActorRecord player_model{};
-  Actors_ActorRecord enemy_model{};
+  VS::Actors::ActorRecord player_model{};
+  VS::Actors::ActorRecord enemy_model{};
   VS::Battle::Ai::ActorAiState enemy_ai{};
   VS::Field::MpdEnvironment environment{};
   VS::Field::CameraTransitionRecord camera_transition{};
@@ -301,11 +299,11 @@ struct RuntimeFixture {
     REQUIRE_FALSE(Save::ResumePending());
     std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
     std::fill_n(VS::Battle::actors.begin(), actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), models.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), ai.size(), nullptr);
     VS::Battle::characterState = &player;
     VS::Battle::actors[0] = &player;
-    Actors_actorRecords[0] = &player_model;
+    VS::Actors::actorRecords[0] = &player_model;
     // The three-byte textureRowOffsets union member does not initialize the
     // high byte of momentumDistance. Match VS::Actors::PlaceActorInRoom's
     // reset.
@@ -315,16 +313,16 @@ struct RuntimeFixture {
     player.roomSpawnIndex = 0x80;
     player_model.instance.position = {193, -73, 325, 0};
     player_model.instance.facing = 2051;
-    player_model.instance.currentTileX = 1;
-    player_model.instance.currentTileZ = 2;
-    player_model.instance.previousTileX = 1;
-    player_model.instance.previousTileZ = 2;
-    player_model.instance.previousFacing = 2016;
+    player_model.instance.current_tile_x = 1;
+    player_model.instance.current_tile_z = 2;
+    player_model.instance.previous_tile_x = 1;
+    player_model.instance.previous_tile_z = 2;
+    player_model.instance.previous_facing = 2016;
     VS::Actors::TileTarget grounded{};
     grounded.tile_x = 1;
     grounded.tile_z = 2;
     grounded.facing = 128;
-    player_model.savedPlacement = std::bit_cast<int>(grounded);
+    player_model.saved_placement = std::bit_cast<int>(grounded);
     player_stats.currentHp = 123;
     player_stats.maxHp = 300;
     player_stats.currentMp = 31;
@@ -543,7 +541,7 @@ struct RuntimeFixture {
 
   void AddEnemy() {
     VS::Battle::actors[2] = &enemy;
-    Actors_actorRecords[2] = &enemy_model;
+    VS::Actors::actorRecords[2] = &enemy_model;
     VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
     enemy.roomSpawnIndex = 0;
     enemy.stats = &enemy_stats;
@@ -561,7 +559,7 @@ struct RuntimeFixture {
     placement.tile_x = 2;
     placement.tile_layer = 1;
     placement.tile_z = 3;
-    enemy_model.savedPlacement = std::bit_cast<int>(placement);
+    enemy_model.saved_placement = std::bit_cast<int>(placement);
     enemy_ai.uses_room_action_delay = 1;
     enemy_ai.behavior_mode = 0;
     enemy_ai.relations[0].classification = 3;
@@ -572,9 +570,9 @@ struct RuntimeFixture {
   Save::Snapshot Capture() const {
     const auto result = Save::Capture(storage);
     INFO((result ? "" : result.error()));
-    INFO("momentumDistance=" << player_model.momentumDistance
+    INFO("momentumDistance=" << player_model.momentum_distance
                              << ", transitionFrames="
-                             << player_model.transitionFrames);
+                             << player_model.transition_frames);
     REQUIRE(result.has_value());
     return *result;
   }
@@ -624,7 +622,7 @@ struct RuntimeFixture {
     std::copy(learned.begin(), learned.end(), VS::State::learnedActionFlags);
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
     std::copy(actors.begin(), actors.end(), VS::Battle::actors.begin());
-    std::copy(models.begin(), models.end(), Actors_actorRecords);
+    std::copy(models.begin(), models.end(), VS::Actors::actorRecords.begin());
     std::copy(ai.begin(), ai.end(), VS::Battle::Ai::actorAiStates.begin());
     std::copy(shuffle.begin(), shuffle.end(), VS::Core::randomShuffleTable);
     std::copy(bounds.begin(), bounds.end(), VS::Items::itemCategoryUpperIds);
@@ -795,11 +793,11 @@ TEST_CASE("Runtime fixtures clear reused momentum union storage",
   std::unique_ptr<RuntimeFixture, decltype(destroy)> fixture(
       std::construct_at(reinterpret_cast<RuntimeFixture*>(storage.data())),
       destroy);
-  CHECK(fixture->player_model.momentumDistance == 0);
+  CHECK(fixture->player_model.momentum_distance == 0);
   const auto before = LiveFingerprint(*fixture);
   (void)fixture->Capture();
   CHECK(LiveFingerprint(*fixture) == before);
-  fixture->player_model.momentumDistance = 0x6500;
+  fixture->player_model.momentum_distance = 0x6500;
   const auto moving = LiveFingerprint(*fixture);
   CHECK_FALSE(Save::Capture(fixture->storage).has_value());
   CHECK(LiveFingerprint(*fixture) == moving);
@@ -917,18 +915,18 @@ TEST_CASE(
 
 namespace {
 void InvalidateLiveMotion(RuntimeFixture& fixture, int defect) {
-  if (defect == 11) fixture.player_model.instance.movementPending = 1;
-  if (defect == 12) fixture.player_model.instance.movementMode = 3;
-  if (defect == 13) fixture.player_model.instance.locomotionState = 1;
-  if (defect == 14) fixture.player_model.instance.isJumping = 1;
-  if (defect == 15) fixture.player_model.instance.turnFrames = 2;
-  if (defect == 16) fixture.player_model.instance.currentAnimation = 1;
-  if (defect == 17) fixture.player_model.instance.rootMotion.vx = 1;
-  if (defect == 18) fixture.player_model.routePhase = 1;
-  if (defect == 19) fixture.player_model.momentumDistance = 2;
-  if (defect == 20) fixture.player_model.instance.placementLayer = 2;
-  if (defect == 21) fixture.player_model.instance.isAttached = 1;
-  if (defect == 31) fixture.player_model.transitionFrames = 1;
+  if (defect == 11) fixture.player_model.instance.movement_pending = 1;
+  if (defect == 12) fixture.player_model.instance.movement_mode = 3;
+  if (defect == 13) fixture.player_model.instance.locomotion_state = 1;
+  if (defect == 14) fixture.player_model.instance.is_jumping = 1;
+  if (defect == 15) fixture.player_model.instance.turn_frames = 2;
+  if (defect == 16) fixture.player_model.instance.current_animation = 1;
+  if (defect == 17) fixture.player_model.instance.root_motion.vx = 1;
+  if (defect == 18) fixture.player_model.route_phase = 1;
+  if (defect == 19) fixture.player_model.momentum_distance = 2;
+  if (defect == 20) fixture.player_model.instance.placement_layer = 2;
+  if (defect == 21) fixture.player_model.instance.is_attached = 1;
+  if (defect == 31) fixture.player_model.transition_frames = 1;
 }
 
 void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
@@ -939,8 +937,8 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 3) VS::Items::inventory.weapons[0].grip = 255;
   if (defect == 4) VS::State::currentRoomStateSlot = 4;
   if (defect == 5) VS::Field::roomData.environment = nullptr;
-  if (defect == 6) fixture.player_model.instance.currentTileLayer = 2;
-  if (defect == 7) fixture.player_model.instance.supportLayer = 2;
+  if (defect == 6) fixture.player_model.instance.current_tile_layer = 2;
+  if (defect == 7) fixture.player_model.instance.support_layer = 2;
   if (defect == 8) VS::Field::isFirstPersonViewEnabled = 1;
   if (defect == 9) VS::Field::sphericalCamera.values.distance = 2000;
   if (defect == 10) VS::Field::sphericalCamera.values.pitch = -768;
@@ -1216,10 +1214,10 @@ TEST_CASE("Runtime capture accepts horizontal motion frozen by a field menu",
   RuntimeFixture fixture;
   VS::Field::controlMode = GENERATE(5, 6);
   VS::Field::isInteractionPaused = 1;
-  fixture.player_model.instance.turnFrames = 11;
-  fixture.player_model.instance.rootMotion.vx = -18;
-  fixture.player_model.instance.rootMotion.vz = 3;
-  fixture.player_model.momentumDistance = 18;
+  fixture.player_model.instance.turn_frames = 11;
+  fixture.player_model.instance.root_motion.vx = -18;
+  fixture.player_model.instance.root_motion.vz = 3;
+  fixture.player_model.momentum_distance = 18;
   const auto before = LiveFingerprint(fixture);
   const auto state = fixture.Capture();
   CHECK(LiveFingerprint(fixture) == before);
@@ -1238,7 +1236,7 @@ TEST_CASE("Menu-paused capture still rejects airborne and supported motion",
   VS::Field::isInteractionPaused = 1;
   const auto defect = GENERATE(6, 7, 11, 12, 13, 14, 16, 18, 20, 21, 31, 32);
   InvalidateLiveFixture(fixture, defect);
-  if (defect == 32) fixture.player_model.instance.rootMotion.vy = 1;
+  if (defect == 32) fixture.player_model.instance.root_motion.vy = 1;
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::Capture(fixture.storage).has_value());
   CHECK(LiveFingerprint(fixture) == before);
@@ -1250,8 +1248,8 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
   const auto defect = GENERATE(0, 1, 2, 3);
   VS::Field::controlMode = defect == 0 ? 1 : (defect == 1 ? 3 : 5);
   VS::Field::isInteractionPaused = defect == 3 ? 0 : 1;
-  fixture.player_model.instance.rootMotion.vx = 18;
-  if (defect == 2) fixture.player_model.supportGimmick = 1;
+  fixture.player_model.instance.root_motion.vx = 18;
+  if (defect == 2) fixture.player_model.support_gimmick = 1;
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::Capture(fixture.storage).has_value());
   CHECK(LiveFingerprint(fixture) == before);
@@ -1376,8 +1374,8 @@ void CheckRestoredPlayer(const RuntimeFixture& fixture) {
   CHECK(fixture.player_model.instance.position.vy == -73);
   CHECK(fixture.player_model.instance.position.vz == 325);
   CHECK(fixture.player_model.instance.facing == 2051);
-  CHECK(fixture.player_model.instance.currentTileX == 1);
-  CHECK(fixture.player_model.instance.currentTileZ == 2);
+  CHECK(fixture.player_model.instance.current_tile_x == 1);
+  CHECK(fixture.player_model.instance.current_tile_z == 2);
 }
 
 void CheckRestoredClockCamera() {
@@ -1424,17 +1422,17 @@ void CheckCompletedResumeStable(const RuntimeFixture& fixture,
 
 void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
   auto& model = fixture.player_model.instance;
-  model.currentTileLayer = static_cast<unsigned char>(layer);
-  model.previousTileX = 0;
-  model.previousTileZ = 1;
-  model.previousTileLayer = static_cast<unsigned char>(layer);
-  model.previousFacing = -144;
+  model.current_tile_layer = static_cast<unsigned char>(layer);
+  model.previous_tile_x = 0;
+  model.previous_tile_z = 1;
+  model.previous_tile_layer = static_cast<unsigned char>(layer);
+  model.previous_facing = -144;
   VS::Actors::TileTarget saved{};
   saved.tile_x = 2;
   saved.tile_z = 3;
   saved.tile_layer = layer;
   saved.facing = 77;
-  fixture.player_model.savedPlacement = std::bit_cast<int>(saved);
+  fixture.player_model.saved_placement = std::bit_cast<int>(saved);
   VS::Field::sphericalCamera.values.pitch = -768;
   VS::Field::sphericalCamera.values.distance = 2304;
   VS::Field::sphericalCamera.values.mode = 17;
@@ -1452,13 +1450,13 @@ void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
 void CheckStaticLayer(const RuntimeFixture& fixture,
                       const Save::Snapshot& state) {
   const auto& model = fixture.player_model.instance;
-  CHECK(model.currentTileLayer == state.location.floor_layer);
-  CHECK(model.previousTileLayer == state.location.previous_tile.layer);
-  CHECK(model.previousTileX == 0);
-  CHECK(model.previousTileZ == 1);
-  CHECK(model.previousFacing == -144);
+  CHECK(model.current_tile_layer == state.location.floor_layer);
+  CHECK(model.previous_tile_layer == state.location.previous_tile.layer);
+  CHECK(model.previous_tile_x == 0);
+  CHECK(model.previous_tile_z == 1);
+  CHECK(model.previous_facing == -144);
   const auto saved = std::bit_cast<VS::Actors::TileTarget>(
-      fixture.player_model.savedPlacement);
+      fixture.player_model.saved_placement);
   CHECK(saved.tile_x == 2);
   CHECK(saved.tile_z == 3);
   CHECK(saved.tile_layer == state.location.floor_layer);
@@ -1509,9 +1507,9 @@ TEST_CASE("Schema3 resumes both static floors and a settled nondefault orbit",
   for (int repeat = 0; repeat < 2; ++repeat) {
     REQUIRE(Save::PrepareResume(*decoded).has_value());
     SimulateRoomEntryWork(fixture);
-    fixture.player_model.instance.currentTileLayer = 0;
-    fixture.player_model.instance.previousTileLayer = 0;
-    fixture.player_model.savedPlacement = 0;
+    fixture.player_model.instance.current_tile_layer = 0;
+    fixture.player_model.instance.previous_tile_layer = 0;
+    fixture.player_model.saved_placement = 0;
     VS::Field::sphericalCamera = {};
     VS::Render::FrameScratchpad().camera.look_at = {};
     REQUIRE(Save::FinishResume().has_value());
@@ -1612,7 +1610,7 @@ TEST_CASE("Ending component capture preserves carryover without live actors",
   CheckClearCarryover(document);
   VS::Battle::characterState = nullptr;
   VS::Battle::actors[0] = nullptr;
-  Actors_actorRecords[0] = nullptr;
+  VS::Actors::actorRecords[0] = nullptr;
   VS::Field::roomData = {};
   const auto before = LiveFingerprint(fixture);
   const auto captured = Save::CaptureClearGame();

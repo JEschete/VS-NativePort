@@ -12,7 +12,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/Animation.hpp"
@@ -21,7 +21,6 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
@@ -46,10 +45,10 @@ namespace VS::Menu::Framework {
 namespace {
 using Content::AssetAddress;
 
-static_assert(kActorSlots == std::size(Actors_actorRecords));
+static_assert(kActorSlots == std::size(VS::Actors::actorRecords));
 static_assert(kWeaponModelSlots == std::size(VS::Actors::weaponModels));
 static_assert(kActorBoneMatrices ==
-              std::extent_v<decltype(Actors_ActorRecord::boneMatrices)>);
+              std::extent_v<decltype(VS::Actors::ActorRecord::bone_matrices)>);
 
 // Ashley's battle sequence copy (224.c:81).
 constexpr std::size_t kBattleSequenceBytes = 0x7800;
@@ -73,7 +72,7 @@ T* Pointer(AssetAddress address) {
 [[nodiscard]] std::size_t AllocationBytes(PreviewAllocation kind) {
   switch (kind) {
     case PreviewAllocation::kActorRecord:
-      return sizeof(Actors_ActorRecord);
+      return sizeof(VS::Actors::ActorRecord);
     case PreviewAllocation::kWeaponModel:
       return sizeof(VS::Actors::WeaponModel);
     case PreviewAllocation::kBattleSequence:
@@ -90,22 +89,22 @@ T* Pointer(AssetAddress address) {
   return static_cast<std::int16_t>(value + (sign * offset));
 }
 
-[[nodiscard]] PreviewActor PreviewOf(const Actors_ActorRecord& record) {
-  const Actors_ModelInstance& instance = record.instance;
-  const Actors_CompanionOffset& companion = record.companionState;
-  return {.model_id = record.modelId,
+[[nodiscard]] PreviewActor PreviewOf(const VS::Actors::ActorRecord& record) {
+  const VS::Actors::ModelInstance& instance = record.instance;
+  const VS::Actors::CompanionOffsetRecord& companion = record.companion_state;
+  return {.model_id = record.model_id,
           .variant = instance.variant,
           .weapon_pair = instance.slot,
-          .companion_slot = record.companionSlot,
-          .companion = {.x = companion.offsetX,
-                        .y = companion.offsetY,
-                        .z = companion.offsetZ,
-                        .depth_bias = companion.depthBias},
-          .bone_count = instance.boneCount,
-          .skipped = instance.isSkipped != 0,
-          .frozen = instance.isFrozen != 0,
-          .culled = instance.isPreviewModel != 0,
-          .weapon_drawn = instance.weaponDrawn != 0};
+          .companion_slot = record.companion_slot,
+          .companion = {.x = companion.offset_x,
+                        .y = companion.offset_y,
+                        .z = companion.offset_z,
+                        .depth_bias = companion.depth_bias},
+          .bone_count = instance.bone_count,
+          .skipped = instance.is_skipped != 0,
+          .frozen = instance.is_frozen != 0,
+          .culled = instance.is_preview_model != 0,
+          .weapon_drawn = instance.weapon_drawn != 0};
 }
 
 [[nodiscard]] PreviewWeapon PreviewOf(const VS::Actors::WeaponModel& model) {
@@ -121,7 +120,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   explicit LiveActorPreviewHost(MATRIX* camera = nullptr) : camera_(camera) {}
 
   [[nodiscard]] std::optional<PreviewActor> Actor(int slot) const override {
-    const Actors_ActorRecord* record = Record(slot);
+    const VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return std::nullopt;
     return PreviewOf(*record);
   }
@@ -164,29 +163,29 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:78-90)
   void CopySequences(const PreviewSequenceCopy& copy) override {
-    auto* preview = Pointer<Actors_ActorRecord>(copy.clone);
-    const auto* source = Pointer<Actors_ActorRecord>(copy.source);
+    auto* preview = Pointer<VS::Actors::ActorRecord>(copy.clone);
+    const auto* source = Pointer<VS::Actors::ActorRecord>(copy.source);
     if (preview == nullptr || source == nullptr) {
       Refuse("sequence copy without the clone or its source");
       return;
     }
-    preview->commonSequence = source->commonSequence;
+    preview->common_sequence = source->common_sequence;
     if (copy.battle_copy != AssetAddress::kNone) {
-      preview->battleSequence = Pointer(copy.battle_copy);
+      preview->battle_sequence = Pointer(copy.battle_copy);
       Content::CopyLiveWeaponSequence(
-          static_cast<VS::Content::SequenceBuffer*>(preview->battleSequence),
-          static_cast<VS::Content::SequenceBuffer*>(source->battleSequence));
+          static_cast<VS::Content::SequenceBuffer*>(preview->battle_sequence),
+          static_cast<VS::Content::SequenceBuffer*>(source->battle_sequence));
     } else {
-      preview->battleSequence = source->battleSequence;
+      preview->battle_sequence = source->battle_sequence;
     }
-    preview->sequenceModelId = source->sequenceModelId;
-    preview->sequenceFlags = source->sequenceFlags;
-    preview->commonAnimationCount = source->commonAnimationCount;
+    preview->sequence_model_id = source->sequence_model_id;
+    preview->sequence_flags = source->sequence_flags;
+    preview->common_animation_count = source->common_animation_count;
   }
 
   void SetWeaponDrawn(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->instance.weaponDrawn = 1;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->instance.weapon_drawn = 1;
     }
   }
 
@@ -204,25 +203,25 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   // decomp: MAINMENU.PRG func_800F9CB0 (src/MENU/MAINMENU.PRG/224.c:118-123)
   void ResetPlacement(int slot) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
     record->instance.position.vx = 0;
     record->instance.position.vy = 0;
     record->instance.position.vz = 0;
-    record->previewPose = 0;
-    record->instance.isSkipped = 0;
-    record->instance.soundEnabled = 0;
+    record->preview_pose = 0;
+    record->instance.is_skipped = 0;
+    record->instance.sound_enabled = 0;
   }
 
   void ClearSkipped(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->instance.isSkipped = 0;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->instance.is_skipped = 0;
     }
   }
 
   void ClearPreviewFlag(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->previewFlag = 0;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->preview_flag = 0;
     }
   }
 
@@ -252,59 +251,59 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   void ClearTint(int slot) override { Actors::SetLiveActorTint(slot, nullptr); }
 
   void RefreshInteractionTile(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       static_cast<void>(Field::RefreshLiveAshleyInteractionTile(record));
     }
   }
 
   // decomp: MAINMENU.PRG func_800FA2CC (src/MENU/MAINMENU.PRG/224.c:336-340)
   void SetAnimation(int slot, int animation) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
-    record->animationId = static_cast<u_char>(animation);
-    record->weaponPoseActive = 0;
+    record->animation_id = static_cast<u_char>(animation);
+    record->weapon_pose_active = 0;
     u_short* length = nullptr;
-    record->animationHeader =
+    record->animation_header =
         Actors::FindLiveActorAnimationHeader(record, animation, &length);
-    record->animationSet =
+    record->animation_set =
         static_cast<u_char>(VS::Actors::lastResolvedSequenceIndex);
     // The original read the clip length through the header unchecked
     // (224.c:340).
     if (length == nullptr) {
       Refuse("Ashley's equipment pose without the animation's header");
-      record->animationLength = 0;
+      record->animation_length = 0;
       return;
     }
-    record->animationLength = static_cast<std::int16_t>(*length);
+    record->animation_length = static_cast<std::int16_t>(*length);
   }
 
   void InitializePose(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       Actors::InitializeLiveActorAnimationPose(record, &record->pose);
     }
   }
 
   void AdvanceAnimation(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       Actors::AdvanceLiveSkeletalAnimation(*record, 1);
     }
   }
 
   void SnapshotBlendPose(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      Core::Memory::CopyLiveAlignedWords(&record->blendPose, &record->pose,
-                                         sizeof record->blendPose);
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      Core::Memory::CopyLiveAlignedWords(&record->blend_pose, &record->pose,
+                                         sizeof record->blend_pose);
     }
   }
 
   // decomp: MAINMENU.PRG func_800FA2CC (src/MENU/MAINMENU.PRG/224.c:346-349)
   void ClearPoseCounters(int slot) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
     record->pose.frame = 0;
-    record->queuedAnimation = 0;
-    record->blendFrames = 0;
-    record->blendFrame = 0;
+    record->queued_animation = 0;
+    record->blend_frames = 0;
+    record->blend_frame = 0;
   }
 
   void PrepareCamera() override {
@@ -314,14 +313,14 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
 
   void SetFramesPerStep(int slot, std::uint8_t frames) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->framesPerStep = frames;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->frames_per_step = frames;
     }
   }
 
   // The original scrolled the companion record unchecked (224.c:212-213).
   void UpdateTextureScrolling(int slot) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) {
       Refuse("texture scrolling of a missing record");
       return;
@@ -330,19 +329,19 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   }
 
   void UpdateAnimationBlend(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       Actors::UpdateLiveActorAnimationBlend(record);
     }
   }
 
   void PrepareRootTransform(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       Actors::PrepareLiveActorRootTransform(record);
     }
   }
 
   void DrawModel(int slot, int companion_slot) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr || camera_ == nullptr) return;
     Actors::DrawLiveActorModel(*record, *camera_, companion_slot);
   }
@@ -358,7 +357,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   void MoveActor(int slot, const Actors::CompanionOffset& offset,
                  int sign) override {
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (record == nullptr) return;
     SVECTOR& position = record->instance.position;
     position.vx = Moved(position.vx, offset.x, sign);
@@ -367,7 +366,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   }
 
   void UpdateMotionAndLookAt(int slot, int companion_slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
       Actors::UpdateLiveMotionAndLookAt(record, companion_slot);
     }
   }
@@ -376,13 +375,13 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   void DrawWeapon(int weapon_slot, int slot, std::uint8_t bone,
                   const Actors::CompanionOffset& offset) override {
     VS::Actors::WeaponModel* model = Model(weapon_slot);
-    Actors_ActorRecord* record = Record(slot);
+    VS::Actors::ActorRecord* record = Record(slot);
     if (model == nullptr || record == nullptr) return;
     if (bone >= kActorBoneMatrices) {
       Refuse("weapon on a bone past the bone matrices");
       return;
     }
-    MATRIX& matrix = record->boneMatrices[bone];
+    MATRIX& matrix = record->bone_matrices[bone];
     matrix.t[0] -= offset.x;
     matrix.t[1] -= offset.y;
     matrix.t[2] -= offset.z;
@@ -395,12 +394,12 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   void Refuse(std::string_view what) override { Warn(what); }
 
  private:
-  [[nodiscard]] static Actors_ActorRecord* Record(int slot) {
+  [[nodiscard]] static VS::Actors::ActorRecord* Record(int slot) {
     if (slot < 0 || slot >= kActorSlots) {
       Warn("actor slot past the actor table");
       return nullptr;
     }
-    return Actors_actorRecords[slot];
+    return VS::Actors::actorRecords[slot];
   }
 
   [[nodiscard]] static VS::Actors::WeaponModel* Model(int slot) {

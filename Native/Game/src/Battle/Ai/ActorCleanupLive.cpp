@@ -12,8 +12,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -34,7 +33,7 @@ namespace VS::Battle::Ai {
 namespace {
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kCleanupActorSlots);
 static_assert(std::size(VS::Battle::actors) >= kCleanupActorSlots);
-static_assert(std::size(Actors_actorRecords) >= kCleanupActorSlots);
+static_assert(std::size(VS::Actors::actorRecords) >= kCleanupActorSlots);
 static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kCleanupActorSlots);
 static_assert(
@@ -174,25 +173,26 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<ModelMotion> RecordMotion(
       int actor_id) const override {
-    const Actors_ActorRecord* record =
-        Actors_actorRecords[static_cast<std::size_t>(actor_id)];
+    const VS::Actors::ActorRecord* record =
+        VS::Actors::actorRecords[static_cast<std::size_t>(actor_id)];
     if (record == nullptr) return std::nullopt;
     // Model byte 0x0A packs the movement mode (bits 0-2) and locomotion
     // state (bits 3-4); byte 0x0B starts with the reaction state.
-    const Actors_ModelInstance& model = record->instance;
+    const VS::Actors::ModelInstance& model = record->instance;
     return ModelMotion{
         .movement = static_cast<std::uint8_t>(
-            model.movementMode | (model.locomotionState << kLocomotionShift)),
-        .reaction = model.reactionState};
+            model.movement_mode | (model.locomotion_state << kLocomotionShift)),
+        .reaction = model.reaction_state};
   }
   [[nodiscard]] std::optional<std::uint8_t> StateModelSupport(
       int actor_id) const override {
     const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr || state->model == nullptr) return std::nullopt;
-    const Actors_ModelInstance& model =
-        reinterpret_cast<const Actors_ActorRecord*>(state->model)->instance;
-    return static_cast<std::uint8_t>(model.supportLayer |
-                                     (model.placementLayer << kLayerBits));
+    const VS::Actors::ModelInstance& model =
+        reinterpret_cast<const VS::Actors::ActorRecord*>(state->model)
+            ->instance;
+    return static_cast<std::uint8_t>(model.support_layer |
+                                     (model.placement_layer << kLayerBits));
   }
   [[nodiscard]] std::optional<PersistenceFields> Persistence(
       int actor_id) const override {

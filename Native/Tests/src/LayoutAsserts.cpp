@@ -8,8 +8,9 @@
 #include <type_traits>
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
+#include "Actors/ShpModel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
 #include "Battle/ActionTable.h"
@@ -137,12 +138,12 @@ static_assert(_Alignof(VS::Actors::ActorModelSlot) >=
                   _Alignof(VS::Actors::WeaponModel),
               "equipment slot must align a native weapon model");
 static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) %
-                      _Alignof(Actors_ActorRecord) ==
+                      _Alignof(VS::Actors::ActorRecord) ==
                   0,
               "secondary body record must be aligned");
 static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) -
                       offsetof(VS::Actors::ActorAllocation, core.model) >=
-                  sizeof(Actors_ActorRecord),
+                  sizeof(VS::Actors::ActorRecord),
               "the actor record overlaps the weapon model slots");
 
 // VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
@@ -157,10 +158,9 @@ static_assert(sizeof(VS::Actors::ShpModel) == 64, "SHP header layout");
 static_assert(offsetof(VS::Actors::ShpModel, bones) == 64, "SHP bones offset");
 static_assert(offsetof(VS::Actors::SeqAnimationBank, headers) == 8,
               "SEQ bank header layout");
-static_assert(
-    sizeof((static_cast<Actors_ActorRecord*>(nullptr))->animationHeader) ==
-        sizeof(void*),
-    "SEQ bank cache must be pointer-sized");
+static_assert(sizeof((static_cast<VS::Actors::ActorRecord*>(nullptr))
+                         ->animation_header) == sizeof(void*),
+              "SEQ bank cache must be pointer-sized");
 
 // Runtime views must follow the native object, including pointers hidden in the
 // original PS1 padding.
@@ -173,10 +173,10 @@ SAME_FIELD(VS::Battle::Ai::AiActorView, stats, Battle_Actor, stats);
 SAME_FIELD(VS::Battle::Ai::AiActorView, model, Battle_Actor, model);
 SAME_FIELD(VS::Battle::Ai::SettingsActorView, opaque34, Battle_Actor,
            reserved34);
-SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, Actors_ActorRecord,
-           collisionRadius);
-SAME_FIELD(VS::Battle::Ai::CreationModelView, opaque_63e, Actors_ActorRecord,
-           collisionHeight);
+SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, VS::Actors::ActorRecord,
+           collision_radius);
+SAME_FIELD(VS::Battle::Ai::CreationModelView, opaque_63e,
+           VS::Actors::ActorRecord, collision_height);
 SAME_FIELD(VS::Battle::Ai::AiCreationView, actor, VS::Battle::Ai::ActorAiState,
            actor);
 SAME_FIELD(VS::Battle::Ai::AiCreationView, model, VS::Battle::Ai::ActorAiState,
@@ -352,7 +352,7 @@ int Tests_AiFrameStages(void) {
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
   Battle_Actor actor = {nullptr};
   Battle_ActorStats stats = {0};
-  Actors_ActorRecord model = {0};
+  VS::Actors::ActorRecord model = {0};
   VS::Battle::Ai::ActorAiState state = {0};
   VS::Battle::Ai::PerceptionUpdateView* view =
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
@@ -566,7 +566,7 @@ int Tests_AiViewsRoundTrip(void) {
     uint64_t after;
   } guarded;
   Battle_Actor actor = {nullptr};
-  Actors_ActorRecord model = {0};
+  VS::Actors::ActorRecord model = {0};
   Battle_ActorStats stats = {0};
   VS::Battle::Ai::AiCreationView* creation =
       reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&guarded.state);
@@ -594,8 +594,8 @@ int Tests_AiViewsRoundTrip(void) {
   actor.stats = &stats;
   actor.model = &model.instance;
   model.instance.position.vy = -300;
-  model.collisionRadius = 61;
-  model.collisionHeight = kCollisionHeight;
+  model.collision_radius = 61;
+  model.collision_height = kCollisionHeight;
   if (actor_view->actor_id != 2 || actor_view->ai_control_flags != 5 ||
       reinterpret_cast<void*>(actor_view->model) != &model ||
       reinterpret_cast<void*>(actor_view->stats) != &stats ||

@@ -8,9 +8,8 @@
 #include <span>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
@@ -58,17 +57,17 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
                               static_cast<std::uint16_t>(object->position_z),
                               kGimmickRadius, kGimmickHalfHeight};
     }
-    const auto* model = Actors_actorRecords[slot];
-    if (model == nullptr || model->animationLocked ||
-        model->instance.reactionState == 1 ||
-        model->instance.reactionState == 2) {
+    const auto* model = VS::Actors::actorRecords[slot];
+    if (model == nullptr || model->animation_locked ||
+        model->instance.reaction_state == 1 ||
+        model->instance.reaction_state == 2) {
       return std::nullopt;
     }
-    const int half_height = model->collisionHeight / 2;
+    const int half_height = model->collision_height / 2;
     return ActorTraceBounds{
         model->instance.position.vx, model->instance.position.vy - half_height,
         static_cast<std::uint16_t>(model->instance.position.vz),
-        model->collisionRadius, half_height};
+        model->collision_radius, half_height};
   }
 
   [[nodiscard]] std::vector<SolidVolume> CollectSolidVolumes() override {

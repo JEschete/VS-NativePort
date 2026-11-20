@@ -10,10 +10,9 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -179,7 +178,8 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
       : generation_(VS::Field::LiveInteractionTargetDomain().generation) {
     std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
                 gimmicks_.begin());
-    std::copy_n(Actors_actorRecords, actors_.size(), actors_.begin());
+    std::copy_n(VS::Actors::actorRecords.begin(), actors_.size(),
+                actors_.begin());
   }
   std::optional<VS::Field::GimmickStackState> Gimmick(
       std::size_t slot) override {
@@ -216,7 +216,7 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
         support.position_y, first_actor);
     if (actor == nullptr || !Valid()) return std::nullopt;
     for (std::size_t index = 0; index < actors_.size(); ++index) {
-      if (actors_[index] == actor && Actors_actorRecords[index] == actor) {
+      if (actors_[index] == actor && VS::Actors::actorRecords[index] == actor) {
         return VS::Field::GimmickSupportedActor{
             index, VS::Actors::LoadLiveMovementActor(*actor)};
       }
@@ -226,11 +226,11 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
   bool StoreActor(const VS::Field::GimmickSupportedActor& actor) override {
     const auto index = actor.table_index;
     if (!Valid() || index >= actors_.size() || actors_[index] == nullptr ||
-        Actors_actorRecords[index] != actors_[index]) {
+        VS::Actors::actorRecords[index] != actors_[index]) {
       return false;
     }
     VS::Actors::StoreLiveMovementActor(actor.state, *actors_[index]);
-    return Valid() && Actors_actorRecords[index] == actors_[index];
+    return Valid() && VS::Actors::actorRecords[index] == actors_[index];
   }
 
  private:
@@ -245,7 +245,7 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
   std::uint64_t generation_;
   std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
       gimmicks_{};
-  decltype(std::to_array(Actors_actorRecords)) actors_{};
+  decltype(VS::Actors::actorRecords) actors_{};
 };
 
 class LiveGimmickPlacementHost final : public VS::Field::GimmickPlacementHost {
@@ -292,13 +292,14 @@ class LiveGimmickInteractionQueryHost final
  public:
   explicit LiveGimmickInteractionQueryHost(std::size_t actor_slot)
       : actor_slot_(actor_slot),
-        actor_(Actors_actorRecords[actor_slot]),
+        actor_(VS::Actors::actorRecords[actor_slot]),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
     std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
                 gimmicks_.begin());
   }
   bool Valid() const {
-    return actor_ != nullptr && Actors_actorRecords[actor_slot_] == actor_ &&
+    return actor_ != nullptr &&
+           VS::Actors::actorRecords[actor_slot_] == actor_ &&
            generation_ == VS::Field::LiveInteractionTargetDomain().generation;
   }
   std::optional<VS::Actors::MovementActor> Actor(std::int32_t slot) override {
@@ -349,7 +350,7 @@ class LiveGimmickInteractionQueryHost final
 
  private:
   std::size_t actor_slot_;
-  Actors_ActorRecord* actor_;
+  VS::Actors::ActorRecord* actor_;
   std::uint64_t generation_;
   std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
       gimmicks_{};
@@ -360,7 +361,7 @@ class LiveGimmickInteractionStartHost final
  public:
   explicit LiveGimmickInteractionStartHost(std::size_t actor_slot)
       : actor_slot_(actor_slot),
-        actor_(Actors_actorRecords[actor_slot]),
+        actor_(VS::Actors::actorRecords[actor_slot]),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
     std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
                 gimmicks_.begin());
@@ -443,7 +444,7 @@ class LiveGimmickInteractionStartHost final
   }
   bool SetWeaponPose(std::int32_t actor_slot) override {
     if (!ValidActor(actor_slot)) return false;
-    actor_->weaponPoseActive = 1;
+    actor_->weapon_pose_active = 1;
     return true;
   }
   bool ReserveTile(const VS::Field::GimmickTileQuery& tile) override {
@@ -478,7 +479,7 @@ class LiveGimmickInteractionStartHost final
 
  private:
   bool Valid() const {
-    if (actor_ == nullptr || Actors_actorRecords[actor_slot_] != actor_ ||
+    if (actor_ == nullptr || VS::Actors::actorRecords[actor_slot_] != actor_ ||
         generation_ != VS::Field::LiveInteractionTargetDomain().generation) {
       return false;
     }
@@ -496,7 +497,7 @@ class LiveGimmickInteractionStartHost final
     return slot == static_cast<std::int32_t>(actor_slot_) && Valid();
   }
   std::size_t actor_slot_;
-  Actors_ActorRecord* actor_;
+  VS::Actors::ActorRecord* actor_;
   std::uint64_t generation_;
   std::optional<std::size_t> selected_;
   std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
@@ -505,7 +506,7 @@ class LiveGimmickInteractionStartHost final
 class LiveGimmickInteractionCommandHost final
     : public VS::Field::GimmickInteractionCommandHost {
  public:
-  explicit LiveGimmickInteractionCommandHost(Actors_ActorRecord* actor)
+  explicit LiveGimmickInteractionCommandHost(VS::Actors::ActorRecord* actor)
       : actor_(actor),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
     const auto selected = VS::Field::interactingGimmickId;
@@ -515,8 +516,9 @@ class LiveGimmickInteractionCommandHost final
       object_ = VS::Field::gimmickInstances[*object_slot_];
     }
     for (std::size_t index = 0;
-         actor_ != nullptr && index < std::size(Actors_actorRecords); ++index) {
-      if (Actors_actorRecords[index] == actor_) {
+         actor_ != nullptr && index < std::size(VS::Actors::actorRecords);
+         ++index) {
+      if (VS::Actors::actorRecords[index] == actor_) {
         actor_slot_ = index;
         break;
       }
@@ -592,10 +594,10 @@ class LiveGimmickInteractionCommandHost final
   bool SetCarrying(bool carrying) override {
     if (!ValidActor()) return false;
     if (carrying) {
-      actor_->instance.attachBone =
+      actor_->instance.attach_bone =
           static_cast<std::uint8_t>(VS::Field::interactingGimmickId);
     }
-    actor_->actionPoseActive = carrying;
+    actor_->action_pose_active = carrying;
     return true;
   }
   bool StoreSlide(std::int16_t x, std::int16_t z) override {
@@ -627,12 +629,12 @@ class LiveGimmickInteractionCommandHost final
  private:
   bool ValidDomain() const {
     return generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
-           (!actor_slot_ || Actors_actorRecords[*actor_slot_] == actor_);
+           (!actor_slot_ || VS::Actors::actorRecords[*actor_slot_] == actor_);
   }
   bool ValidActor() const {
     if (!ValidDomain() || actor_ == nullptr ||
         reinterpret_cast<std::uintptr_t>(actor_) %
-                alignof(Actors_ActorRecord) !=
+                alignof(VS::Actors::ActorRecord) !=
             0) {
       return false;
     }
@@ -643,14 +645,14 @@ class LiveGimmickInteractionCommandHost final
     const auto at = reinterpret_cast<std::uintptr_t>(actor_);
     const auto start = reinterpret_cast<std::uintptr_t>(allocation->data());
     return at >= start && at - start <= allocation->size() &&
-           sizeof(Actors_ActorRecord) <= allocation->size() - (at - start);
+           sizeof(VS::Actors::ActorRecord) <= allocation->size() - (at - start);
   }
   bool ValidObject() const {
     return ValidDomain() && object_slot_ &&
            VS::Field::gimmickInstances[*object_slot_] == object_ &&
            ReadableQueryRecord(object_);
   }
-  Actors_ActorRecord* actor_;
+  VS::Actors::ActorRecord* actor_;
   std::uint64_t generation_;
   std::optional<std::size_t> actor_slot_;
   std::optional<std::size_t> object_slot_;
@@ -659,15 +661,15 @@ class LiveGimmickInteractionCommandHost final
 }  // namespace
 
 namespace VS::Field {
-bool ApplyLiveGimmickInteractionCommand(Actors_ActorRecord* actor,
+bool ApplyLiveGimmickInteractionCommand(VS::Actors::ActorRecord* actor,
                                         std::int32_t mode) {
   LiveGimmickInteractionCommandHost host(actor);
   return ApplyGimmickInteractionCommand(mode, host);
 }
 
 bool BeginLiveGimmickInteraction(std::int32_t actor_slot) {
-  if (actor_slot < 0 ||
-      static_cast<std::size_t>(actor_slot) >= std::size(Actors_actorRecords)) {
+  if (actor_slot < 0 || static_cast<std::size_t>(actor_slot) >=
+                            std::size(VS::Actors::actorRecords)) {
     return false;
   }
   LiveGimmickInteractionStartHost host(static_cast<std::size_t>(actor_slot));
@@ -676,8 +678,8 @@ bool BeginLiveGimmickInteraction(std::int32_t actor_slot) {
 
 std::optional<std::size_t> FindLiveInteractableGimmickAhead(
     std::int32_t actor_slot) {
-  if (actor_slot < 0 ||
-      static_cast<std::size_t>(actor_slot) >= std::size(Actors_actorRecords)) {
+  if (actor_slot < 0 || static_cast<std::size_t>(actor_slot) >=
+                            std::size(VS::Actors::actorRecords)) {
     return std::nullopt;
   }
   LiveGimmickInteractionQueryHost host(static_cast<std::size_t>(actor_slot));
@@ -794,8 +796,8 @@ int VS::Field::BeginGimmickInteractionEntry(int actor_slot) {
   return VS::Field::BeginLiveGimmickInteraction(actor_slot) ? 0 : -1;
 }
 
-void VS::Field::ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor,
-                                                    int mode) {
+void VS::Field::ApplyGimmickInteractionCommandEntry(
+    VS::Actors::ActorRecord* actor, int mode) {
   static_cast<void>(VS::Field::ApplyLiveGimmickInteractionCommand(actor, mode));
 }
 

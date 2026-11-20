@@ -1,26 +1,26 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Actors/SoundTransitionBinding.hpp"
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/SoundTransition.hpp"
 #include "Legacy/Psx.h"
 #include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
-SoundTransition FromSlot(const Actors_ModelEffectSlot& slot) {
+SoundTransition FromSlot(const VS::Actors::ModelEffectSlot& slot) {
   return {slot.kind, slot.level, slot.flags, slot.parameter};
 }
 }  // namespace
 
-void UpdateActorSoundTransition(Actors_ActorRecord& actor) {
+void UpdateActorSoundTransition(VS::Actors::ActorRecord& actor) {
   const SoundTransition next = StepSoundTransition(
-      FromSlot(actor.soundEffect), FromSlot(actor.soundEffectTarget),
+      FromSlot(actor.sound_effect), FromSlot(actor.sound_effect_target),
       VS::State::tickSpeed);
-  actor.soundEffect.kind = next.mode;
-  actor.soundEffect.level = next.pan;
-  actor.soundEffect.flags = next.volume;
-  actor.soundEffect.parameter = next.frames_remaining;
+  actor.sound_effect.kind = next.mode;
+  actor.sound_effect.level = next.pan;
+  actor.sound_effect.flags = next.volume;
+  actor.sound_effect.parameter = next.frames_remaining;
 }
 }  // namespace VS::Actors

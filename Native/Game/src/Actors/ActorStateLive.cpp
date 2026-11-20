@@ -18,7 +18,7 @@
 #include "Actors/ActorLifecycle.hpp"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorPlacement.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateRecord.hpp"
@@ -29,9 +29,9 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/BattleActorState.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/MotionRequestsLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Shadow.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -60,7 +60,7 @@
 
 namespace VS::Actors {
 namespace {
-static_assert(std::size(Actors_actorRecords) == kActorStateSlots);
+static_assert(std::size(VS::Actors::actorRecords) == kActorStateSlots);
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> == kActorLimbs);
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
@@ -84,152 +84,156 @@ VS::Render::ColorCode ToLiveColor(const Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
-void LoadInstance(const Actors_ModelInstance& live, ActorStateRecord& record) {
-  record.motion.current_tile.spare = live.reserved5F;
-  record.skipped = live.isSkipped != 0;
-  record.visible = live.isVisible != 0;
-  record.frozen = live.isFrozen != 0;
-  record.sound_enabled = live.soundEnabled != 0;
-  record.attached = live.isAttached != 0;
-  record.reaction_state = live.reactionState;
-  record.support_layer = live.supportLayer;
-  record.placement_layer = live.placementLayer;
-  record.bone_count = live.boneCount;
-  record.attach_parent = live.attachParent;
-  record.attach_bone = live.attachBone;
-  record.look_yaw = live.lookYaw;
-  record.look_pitch = live.lookPitch;
-  record.rotation_reserved = live.reserved2A;
-  record.palette_pulse_kind = live.palettePulse.kind;
+void LoadInstance(const VS::Actors::ModelInstance& live,
+                  ActorStateRecord& record) {
+  record.motion.current_tile.spare = live.reserved5f;
+  record.skipped = live.is_skipped != 0;
+  record.visible = live.is_visible != 0;
+  record.frozen = live.is_frozen != 0;
+  record.sound_enabled = live.sound_enabled != 0;
+  record.attached = live.is_attached != 0;
+  record.reaction_state = live.reaction_state;
+  record.support_layer = live.support_layer;
+  record.placement_layer = live.placement_layer;
+  record.bone_count = live.bone_count;
+  record.attach_parent = live.attach_parent;
+  record.attach_bone = live.attach_bone;
+  record.look_yaw = live.look_yaw;
+  record.look_pitch = live.look_pitch;
+  record.rotation_reserved = live.reserved2a;
+  record.palette_pulse_kind = live.palette_pulse.kind;
 }
 
-void StoreInstance(const ActorStateRecord& record, Actors_ModelInstance& live) {
-  live.reserved5F = record.motion.current_tile.spare;
-  live.isSkipped = SignedBit(record.skipped);
-  live.isVisible = SignedBit(record.visible);
-  live.isFrozen = SignedBit(record.frozen);
-  live.soundEnabled = Bit(record.sound_enabled);
-  live.isAttached = Bit(record.attached);
-  live.reactionState = record.reaction_state;
-  live.supportLayer = record.support_layer;
-  live.placementLayer = record.placement_layer;
-  live.attachParent = record.attach_parent;
-  live.attachBone = record.attach_bone;
-  live.lookYaw = record.look_yaw;
-  live.lookPitch = record.look_pitch;
-  live.reserved2A = record.rotation_reserved;
-  live.palettePulse.kind = record.palette_pulse_kind;
+void StoreInstance(const ActorStateRecord& record,
+                   VS::Actors::ModelInstance& live) {
+  live.reserved5f = record.motion.current_tile.spare;
+  live.is_skipped = SignedBit(record.skipped);
+  live.is_visible = SignedBit(record.visible);
+  live.is_frozen = SignedBit(record.frozen);
+  live.sound_enabled = Bit(record.sound_enabled);
+  live.is_attached = Bit(record.attached);
+  live.reaction_state = record.reaction_state;
+  live.support_layer = record.support_layer;
+  live.placement_layer = record.placement_layer;
+  live.attach_parent = record.attach_parent;
+  live.attach_bone = record.attach_bone;
+  live.look_yaw = record.look_yaw;
+  live.look_pitch = record.look_pitch;
+  live.reserved2a = record.rotation_reserved;
+  live.palette_pulse.kind = record.palette_pulse_kind;
 }
 
-CompanionStyle LoadCompanion(const Actors_ActorRecord& live) {
-  const Actors_CompanionOffset& offset = live.companionState;
-  return {.offset = {.x = offset.offsetX,
-                     .y = offset.offsetY,
-                     .z = offset.offsetZ,
-                     .depth_bias = offset.depthBias},
-          .color = ToColor(live.companionColor)};
+CompanionStyle LoadCompanion(const VS::Actors::ActorRecord& live) {
+  const VS::Actors::CompanionOffsetRecord& offset = live.companion_state;
+  return {.offset = {.x = offset.offset_x,
+                     .y = offset.offset_y,
+                     .z = offset.offset_z,
+                     .depth_bias = offset.depth_bias},
+          .color = ToColor(live.companion_color)};
 }
 
-void StoreCompanion(const CompanionStyle& companion, Actors_ActorRecord& live) {
-  live.companionState = {.offsetX = companion.offset.x,
-                         .offsetY = companion.offset.y,
-                         .offsetZ = companion.offset.z,
-                         .depthBias = companion.offset.depth_bias};
-  live.companionColor = ToLiveColor(companion.color);
+void StoreCompanion(const CompanionStyle& companion,
+                    VS::Actors::ActorRecord& live) {
+  live.companion_state = {.offset_x = companion.offset.x,
+                          .offset_y = companion.offset.y,
+                          .offset_z = companion.offset.z,
+                          .depth_bias = companion.offset.depth_bias};
+  live.companion_color = ToLiveColor(companion.color);
 }
 
-void LoadRecordFlags(const Actors_ActorRecord& live, ActorStateRecord& record) {
-  record.attached_child_count = live.attachedChildCount;
-  record.animation_locked = live.animationLocked != 0;
-  record.animation_event = live.animationEventFlag != 0;
-  record.support_gimmick = live.supportGimmick;
-  record.bypass_actor_collision = live.bypassActorCollision != 0;
-  record.palette_fade_active = live.paletteFadeActive != 0;
-  record.palette_fade_reverse = live.paletteFadeReverse != 0;
+void LoadRecordFlags(const VS::Actors::ActorRecord& live,
+                     ActorStateRecord& record) {
+  record.attached_child_count = live.attached_child_count;
+  record.animation_locked = live.animation_locked != 0;
+  record.animation_event = live.animation_event_flag != 0;
+  record.support_gimmick = live.support_gimmick;
+  record.bypass_actor_collision = live.bypass_actor_collision != 0;
+  record.palette_fade_active = live.palette_fade_active != 0;
+  record.palette_fade_reverse = live.palette_fade_reverse != 0;
   record.holding_last_frame = live.pose.holding_last_frame != 0;
   record.pose_reached_end = live.pose.reached_end != 0;
-  record.texture_timelines = {live.textureAnimationSlots[0].timeline,
-                              live.textureAnimationSlots[1].timeline};
+  record.texture_timelines = {live.texture_animation_slots[0].timeline,
+                              live.texture_animation_slots[1].timeline};
 }
 
 void StoreRecordFlags(const ActorStateRecord& record,
-                      Actors_ActorRecord& live) {
-  live.attachedChildCount = record.attached_child_count;
-  live.animationLocked = Bit(record.animation_locked);
-  live.paletteFadeActive = Bit(record.palette_fade_active);
-  live.paletteFadeReverse = Bit(record.palette_fade_reverse);
-  live.textureAnimationSlots[0].timeline = record.texture_timelines[0];
-  live.textureAnimationSlots[1].timeline = record.texture_timelines[1];
+                      VS::Actors::ActorRecord& live) {
+  live.attached_child_count = record.attached_child_count;
+  live.animation_locked = Bit(record.animation_locked);
+  live.palette_fade_active = Bit(record.palette_fade_active);
+  live.palette_fade_reverse = Bit(record.palette_fade_reverse);
+  live.texture_animation_slots[0].timeline = record.texture_timelines[0];
+  live.texture_animation_slots[1].timeline = record.texture_timelines[1];
 }
 
-void LoadRecordFields(const Actors_ActorRecord& live,
+void LoadRecordFields(const VS::Actors::ActorRecord& live,
                       ActorStateRecord& record) {
-  record.animation_id = live.animationId;
-  record.collision_state = live.collisionState;
-  record.collision_height = live.collisionHeight;
-  record.queued_animation = live.queuedAnimation;
-  record.contact_kind = live.contactKind;
-  record.ledge_height = live.ledgeHeight;
-  record.platform_offset_x = live.platformOffsetX;
-  record.platform_offset_z = live.platformOffsetZ;
+  record.animation_id = live.animation_id;
+  record.collision_state = live.collision_state;
+  record.collision_height = live.collision_height;
+  record.queued_animation = live.queued_animation;
+  record.contact_kind = live.contact_kind;
+  record.ledge_height = live.ledge_height;
+  record.platform_offset_x = live.platform_offset_x;
+  record.platform_offset_z = live.platform_offset_z;
   record.companion = LoadCompanion(live);
-  record.platform_anchor = LiveMotionVector(live.platformAnchor);
-  record.head_track_target = live.headTrackTarget;
-  record.companion_slot = live.companionSlot;
-  record.reserved_17ff = live.opaque17FF;
-  record.palette_fade_state = live.paletteFadeState[0];
-  const Actors_MovementRequest& request = live.turnState;
+  record.platform_anchor = LiveMotionVector(live.platform_anchor);
+  record.head_track_target = live.head_track_target;
+  record.companion_slot = live.companion_slot;
+  record.reserved_17ff = live.opaque17ff;
+  record.palette_fade_state = live.palette_fade_state[0];
+  const VS::Actors::MovementRequest& request = live.turn_state;
   record.request_extras = {
       .reserved = {request.reserved1, request.reserved2, request.reserved3},
-      .reserved_c = request.reservedC,
+      .reserved_c = request.reserved0c,
       .step = LiveMotionVector(request.step)};
   record.reserved_1860 = live.opaque1860;
-  record.shadow = LoadLiveShadowBlend(live.shadowBlend);
-  record.shadow_extras = {.color = live.shadowBlend.color,
-                          .reserved6 = live.shadowBlend.reserved6,
-                          .reserved7 = live.shadowBlend.reserved7};
-  record.shadow_expand_rate = live.shadowRadiusExpandRate;
-  record.shadow_shrink_rate = live.shadowRadiusShrinkRate;
-  record.saved_placement = std::bit_cast<PackedTile>(live.savedPlacement);
-  record.pending_target_x = live.pendingTargetX;
-  record.pending_target_z = live.pendingTargetZ;
-  record.previous_target_x = live.previousTargetX;
-  record.previous_target_z = live.previousTargetZ;
+  record.shadow = LoadLiveShadowBlend(live.shadow_blend);
+  record.shadow_extras = {.color = live.shadow_blend.color,
+                          .reserved6 = live.shadow_blend.reserved6,
+                          .reserved7 = live.shadow_blend.reserved7};
+  record.shadow_expand_rate = live.shadow_radius_expand_rate;
+  record.shadow_shrink_rate = live.shadow_radius_shrink_rate;
+  record.saved_placement = std::bit_cast<PackedTile>(live.saved_placement);
+  record.pending_target_x = live.pending_target_x;
+  record.pending_target_z = live.pending_target_z;
+  record.previous_target_x = live.previous_target_x;
+  record.previous_target_z = live.previous_target_z;
 }
 
 void StoreRecordFields(const ActorStateRecord& record,
-                       Actors_ActorRecord& live) {
-  live.collisionState = record.collision_state;
-  live.queuedAnimation = record.queued_animation;
-  live.contactKind = record.contact_kind;
-  live.ledgeHeight = record.ledge_height;
-  live.platformOffsetX = record.platform_offset_x;
-  live.platformOffsetZ = record.platform_offset_z;
+                       VS::Actors::ActorRecord& live) {
+  live.collision_state = record.collision_state;
+  live.queued_animation = record.queued_animation;
+  live.contact_kind = record.contact_kind;
+  live.ledge_height = record.ledge_height;
+  live.platform_offset_x = record.platform_offset_x;
+  live.platform_offset_z = record.platform_offset_z;
   StoreCompanion(record.companion, live);
-  live.platformAnchor = LiveSvector(record.platform_anchor);
-  live.headTrackTarget = record.head_track_target;
-  live.companionSlot = record.companion_slot;
-  live.opaque17FF = record.reserved_17ff;
-  live.paletteFadeState[0] = record.palette_fade_state;
-  Actors_MovementRequest& request = live.turnState;
+  live.platform_anchor = LiveSvector(record.platform_anchor);
+  live.head_track_target = record.head_track_target;
+  live.companion_slot = record.companion_slot;
+  live.opaque17ff = record.reserved_17ff;
+  live.palette_fade_state[0] = record.palette_fade_state;
+  VS::Actors::MovementRequest& request = live.turn_state;
   request.reserved1 = record.request_extras.reserved[0];
   request.reserved2 = record.request_extras.reserved[1];
   request.reserved3 = record.request_extras.reserved[2];
-  request.reservedC = record.request_extras.reserved_c;
+  request.reserved0c = record.request_extras.reserved_c;
   request.step = LiveSvector(record.request_extras.step);
   live.opaque1860 = record.reserved_1860;
-  StoreLiveShadowBlend(record.shadow, live.shadowBlend);
-  live.shadowBlend.color = record.shadow_extras.color;
-  live.shadowBlend.reserved6 = record.shadow_extras.reserved6;
-  live.shadowBlend.reserved7 = record.shadow_extras.reserved7;
-  live.pendingTargetX = record.pending_target_x;
-  live.pendingTargetZ = record.pending_target_z;
-  live.previousTargetX = record.previous_target_x;
-  live.previousTargetZ = record.previous_target_z;
+  StoreLiveShadowBlend(record.shadow, live.shadow_blend);
+  live.shadow_blend.color = record.shadow_extras.color;
+  live.shadow_blend.reserved6 = record.shadow_extras.reserved6;
+  live.shadow_blend.reserved7 = record.shadow_extras.reserved7;
+  live.pending_target_x = record.pending_target_x;
+  live.pending_target_z = record.pending_target_z;
+  live.previous_target_x = record.previous_target_x;
+  live.previous_target_z = record.previous_target_z;
 }
 
 struct RecordTraits {
-  using Live = Actors_ActorRecord;
+  using Live = VS::Actors::ActorRecord;
   using Typed = ActorStateRecord;
   static constexpr std::size_t kCapacity = kActorStateSlots;
   static constexpr const char* kWhat = "actor records";
@@ -379,7 +383,7 @@ class LiveActorStateHost final : public ActorStateHost {
   void ReloadAll() { records_.ReloadAll(); }
 
   ActorStateRecord* Record(int id) override {
-    Actors_ActorRecord* record = LiveActorRecord(id, operation_);
+    VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     return record != nullptr ? &records_.Attach(*record) : nullptr;
   }
   std::optional<GimmickView> Gimmick(int id) override {
@@ -438,13 +442,13 @@ class LiveActorStateHost final : public ActorStateHost {
                [VS::Actors::sharedSequenceBankIndex] != 0;
   }
   void ResetHeadTrackingSpeed(int id) override {
-    Actors_ActorRecord* record = LiveActorRecord(id, operation_);
+    VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     if (record == nullptr) return;
     const Synced synced(*this);
     ResetLiveActorHeadTrackingSpeed(record);
   }
   void UploadTextureFrame(int id, int channel, int frame) override {
-    Actors_ActorRecord* record = LiveActorRecord(id, operation_);
+    VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     if (record == nullptr) return;
     const Synced synced(*this);
     UploadLiveActorTextureFrame(record, channel, frame);
@@ -454,7 +458,7 @@ class LiveActorStateHost final : public ActorStateHost {
     static_cast<void>(SetLiveActorTint(id, nullptr));
   }
   void ClearSoundOverrides(int id) override {
-    Actors_ModelEffectSlot silent{};
+    VS::Actors::ModelEffectSlot silent{};
     const Synced synced(*this);
     SetLiveActorSoundOverrides(id, &silent);
   }
@@ -463,7 +467,7 @@ class LiveActorStateHost final : public ActorStateHost {
     static_cast<void>(PlayLiveActorAnimation(id, animation, 0, blend_frames));
   }
   bool HasAnimation(int id, int animation) override {
-    Actors_ActorRecord* record = LiveActorRecord(id, operation_);
+    VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     if (record == nullptr) return false;
     u_short* header = nullptr;
     const Synced synced(*this);
@@ -489,7 +493,7 @@ class LiveActorStateHost final : public ActorStateHost {
     return Field::LiveMovingPlatformPlacement(support_layer);
   }
   void SaveGroundedTransform(int id) override {
-    Actors_ActorRecord* record = LiveActorRecord(id, operation_);
+    VS::Actors::ActorRecord* record = LiveActorRecord(id, operation_);
     if (record == nullptr) return;
     const Synced synced(*this);
     SaveLiveActorGroundedTransform(record);

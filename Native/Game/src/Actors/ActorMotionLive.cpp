@@ -7,11 +7,11 @@
 #include <cstdlib>
 #include <iterator>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.hpp"
@@ -59,16 +59,16 @@ std::uint8_t* LiveBattleCommandState(int actor_id) {
 }
 // End of the cross-slice calls.
 
-Actors_ActorRecord* Record(int actor_id) {
-  if (actor_id < 0 ||
-      static_cast<std::size_t>(actor_id) >= std::size(Actors_actorRecords)) {
+VS::Actors::ActorRecord* Record(int actor_id) {
+  if (actor_id < 0 || static_cast<std::size_t>(actor_id) >=
+                          std::size(VS::Actors::actorRecords)) {
     VS::Core::Warnf(
         "actors",
         "Actor motion refused: actor id %d lies outside the actor table",
         actor_id);
     return nullptr;
   }
-  return Actors_actorRecords[actor_id];
+  return VS::Actors::actorRecords[actor_id];
 }
 
 template <typename Pointer>
@@ -91,7 +91,7 @@ PackedTile TileArgument(const VS::Actors::TileTarget* tile) {
 
 // Runs `rule` over the motion of `actor` and stores it back.
 template <typename Rule>
-void WithRecord(Actors_ActorRecord& actor, Rule rule) {
+void WithRecord(VS::Actors::ActorRecord& actor, Rule rule) {
   ActorMotion motion = LoadLiveActorMotion(actor);
   rule(motion);
   StoreLiveActorMotion(motion, actor);
@@ -101,7 +101,7 @@ void WithRecord(Actors_ActorRecord& actor, Rule rule) {
 // which `absent` (when given) names in the log.
 template <typename Rule>
 void WithActor(int actor_id, Rule rule, const char* absent = nullptr) {
-  Actors_ActorRecord* actor = Record(actor_id);
+  VS::Actors::ActorRecord* actor = Record(actor_id);
   if (actor == nullptr) {
     if (absent != nullptr) {
       VS::Core::Debugf("actors", "%s skips absent actor=%d", absent, actor_id);
@@ -113,7 +113,7 @@ void WithActor(int actor_id, Rule rule, const char* absent = nullptr) {
 
 // The record-pointer entries the originals dereference without a check.
 template <typename Rule>
-void WithPointer(Actors_ActorRecord* actor, const char* name, Rule rule) {
+void WithPointer(VS::Actors::ActorRecord* actor, const char* name, Rule rule) {
   if (actor == nullptr) {
     VS::Core::Warnf("actors", "%s refused: no actor record", name);
     return;
@@ -156,23 +156,23 @@ class LiveScriptedPath final : public ScriptedPathHost {
 
 class LiveActorRoute final : public ActorRouteHost {
  public:
-  LiveActorRoute(int actor_id, Actors_ActorRecord& actor)
+  LiveActorRoute(int actor_id, VS::Actors::ActorRecord& actor)
       : id_(actor_id), actor_(actor) {}
 
   ActorRoute Route() override {
-    return {.phase = actor_.routePhase,
-            .uses_duration = actor_.routeUsesDuration != 0,
-            .target = LiveMotionVector(actor_.routeTarget),
-            .move_rate = actor_.routeMoveRate,
-            .turn_rate = actor_.routeTurnRate};
+    return {.phase = actor_.route_phase,
+            .uses_duration = actor_.route_uses_duration != 0,
+            .target = LiveMotionVector(actor_.route_target),
+            .move_rate = actor_.route_move_rate,
+            .turn_rate = actor_.route_turn_rate};
   }
   void SetRoutePhase(int phase) override {
-    actor_.routePhase = static_cast<u_char>(phase);
+    actor_.route_phase = static_cast<u_char>(phase);
   }
-  int TurnFrames() override { return actor_.instance.turnFrames; }
-  int MoveFrames() override { return actor_.instance.currentAnimation; }
-  bool MotionLocked() override { return actor_.instance.motionLocked != 0; }
-  int TravelAnimation() override { return actor_.travelAnimation; }
+  int TurnFrames() override { return actor_.instance.turn_frames; }
+  int MoveFrames() override { return actor_.instance.current_animation; }
+  bool MotionLocked() override { return actor_.instance.motion_locked != 0; }
+  int TravelAnimation() override { return actor_.travel_animation; }
   void PlayAnimation(int animation) override {
     PlayLiveRouteAnimation(id_, animation);
   }
@@ -196,7 +196,7 @@ class LiveActorRoute final : public ActorRouteHost {
 
  private:
   int id_;
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
 };
 }  // namespace
 
@@ -209,113 +209,114 @@ SVECTOR LiveSvector(const MotionVector& motion) {
       .vx = motion.x, .vy = motion.y, .vz = motion.z, .pad = motion.w};
 }
 
-ActorMotion LoadLiveActorMotion(const Actors_ActorRecord& live) {
-  const Actors_ModelInstance& instance = live.instance;
+ActorMotion LoadLiveActorMotion(const VS::Actors::ActorRecord& live) {
+  const VS::Actors::ModelInstance& instance = live.instance;
   ActorMotion motion;
-  motion.action_animation_state = instance.actionAnimationState;
-  motion.movement_pending = instance.movementPending != 0;
-  motion.movement_mode = instance.movementMode;
-  motion.locomotion_state = instance.locomotionState;
-  motion.motion_locked = instance.motionLocked != 0;
-  motion.is_jumping = instance.isJumping != 0;
-  motion.pose_state = instance.poseState;
+  motion.action_animation_state = instance.action_animation_state;
+  motion.movement_pending = instance.movement_pending != 0;
+  motion.movement_mode = instance.movement_mode;
+  motion.locomotion_state = instance.locomotion_state;
+  motion.motion_locked = instance.motion_locked != 0;
+  motion.is_jumping = instance.is_jumping != 0;
+  motion.pose_state = instance.pose_state;
   motion.slot = instance.slot;
-  motion.jump_countdown = instance.jumpCountdown;
-  motion.turn_frames = instance.turnFrames;
-  motion.move_frames = instance.currentAnimation;
+  motion.jump_countdown = instance.jump_countdown;
+  motion.turn_frames = instance.turn_frames;
+  motion.move_frames = instance.current_animation;
   motion.position = LiveMotionVector(instance.position);
-  motion.rotation_x = instance.rotationX;
+  motion.rotation_x = instance.rotation_x;
   motion.facing = instance.facing;
-  motion.rotation_z = instance.rotationZ;
+  motion.rotation_z = instance.rotation_z;
   motion.scale = {
-      .x = instance.scaleX, .y = instance.scaleY, .z = instance.scaleZ};
-  motion.root_motion = LiveMotionVector(instance.rootMotion);
-  motion.rotation_step_x = instance.rotationStepX;
-  motion.facing_delta = instance.facingDelta;
-  motion.rotation_step_z = instance.rotationStepZ;
-  motion.scale_delta = LiveMotionVector(instance.scaleDelta);
-  motion.current_tile = {.x = instance.currentTileX,
-                         .layer = instance.currentTileLayer,
-                         .z = instance.currentTileZ};
-  motion.route_phase = live.routePhase;
-  motion.route_uses_duration = live.routeUsesDuration != 0;
-  motion.action_pose_active = live.actionPoseActive != 0;
-  motion.is_running = live.isRunning != 0;
-  motion.weapon_pose_active = live.weaponPoseActive != 0;
-  motion.jump_profile = live.jumpProfile;
-  motion.run_speed = live.runSpeed;
-  motion.walk_speed = live.walkSpeed;
-  motion.turn_rate = live.turnRate;
-  motion.move_rate = live.moveRate;
-  motion.route_move_rate = live.routeMoveRate;
-  motion.route_turn_rate = live.routeTurnRate;
-  motion.scale_frames = live.scaleFrames;
-  motion.transition_frames = live.transitionFrames;
-  motion.route_target = LiveMotionVector(live.routeTarget);
-  motion.destination_x = live.destinationX;
-  motion.destination_z = live.destinationZ;
-  motion.destination_mode = live.destinationMode;
-  motion.momentum_distance = live.momentumDistance;
-  motion.run_frames = live.runFrames;
-  motion.request_mode = live.turnState.mode;
-  motion.request_direction = live.turnState.direction;
-  motion.request_facing = live.turnState.facing;
-  motion.request_distance = live.turnState.distance;
+      .x = instance.scale_x, .y = instance.scale_y, .z = instance.scale_z};
+  motion.root_motion = LiveMotionVector(instance.root_motion);
+  motion.rotation_step_x = instance.rotation_step_x;
+  motion.facing_delta = instance.facing_delta;
+  motion.rotation_step_z = instance.rotation_step_z;
+  motion.scale_delta = LiveMotionVector(instance.scale_delta);
+  motion.current_tile = {.x = instance.current_tile_x,
+                         .layer = instance.current_tile_layer,
+                         .z = instance.current_tile_z};
+  motion.route_phase = live.route_phase;
+  motion.route_uses_duration = live.route_uses_duration != 0;
+  motion.action_pose_active = live.action_pose_active != 0;
+  motion.is_running = live.is_running != 0;
+  motion.weapon_pose_active = live.weapon_pose_active != 0;
+  motion.jump_profile = live.jump_profile;
+  motion.run_speed = live.run_speed;
+  motion.walk_speed = live.walk_speed;
+  motion.turn_rate = live.turn_rate;
+  motion.move_rate = live.move_rate;
+  motion.route_move_rate = live.route_move_rate;
+  motion.route_turn_rate = live.route_turn_rate;
+  motion.scale_frames = live.scale_frames;
+  motion.transition_frames = live.transition_frames;
+  motion.route_target = LiveMotionVector(live.route_target);
+  motion.destination_x = live.destination_x;
+  motion.destination_z = live.destination_z;
+  motion.destination_mode = live.destination_mode;
+  motion.momentum_distance = live.momentum_distance;
+  motion.run_frames = live.run_frames;
+  motion.request_mode = live.turn_state.mode;
+  motion.request_direction = live.turn_state.direction;
+  motion.request_facing = live.turn_state.facing;
+  motion.request_distance = live.turn_state.distance;
   return motion;
 }
 
-void StoreLiveActorMotion(const ActorMotion& motion, Actors_ActorRecord& live) {
-  Actors_ModelInstance& instance = live.instance;
-  instance.actionAnimationState = motion.action_animation_state;
-  instance.movementPending = motion.movement_pending ? 1 : 0;
-  instance.movementMode = motion.movement_mode;
-  instance.locomotionState = motion.locomotion_state;
-  instance.motionLocked = motion.motion_locked ? 1 : 0;
-  instance.isJumping = motion.is_jumping ? 1 : 0;
-  instance.poseState = motion.pose_state;
+void StoreLiveActorMotion(const ActorMotion& motion,
+                          VS::Actors::ActorRecord& live) {
+  VS::Actors::ModelInstance& instance = live.instance;
+  instance.action_animation_state = motion.action_animation_state;
+  instance.movement_pending = motion.movement_pending ? 1 : 0;
+  instance.movement_mode = motion.movement_mode;
+  instance.locomotion_state = motion.locomotion_state;
+  instance.motion_locked = motion.motion_locked ? 1 : 0;
+  instance.is_jumping = motion.is_jumping ? 1 : 0;
+  instance.pose_state = motion.pose_state;
   instance.slot = motion.slot;
-  instance.jumpCountdown = motion.jump_countdown;
-  instance.turnFrames = motion.turn_frames;
-  instance.currentAnimation = motion.move_frames;
+  instance.jump_countdown = motion.jump_countdown;
+  instance.turn_frames = motion.turn_frames;
+  instance.current_animation = motion.move_frames;
   instance.position = LiveSvector(motion.position);
-  instance.rotationX = motion.rotation_x;
+  instance.rotation_x = motion.rotation_x;
   instance.facing = motion.facing;
-  instance.rotationZ = motion.rotation_z;
-  instance.scaleX = motion.scale.x;
-  instance.scaleY = motion.scale.y;
-  instance.scaleZ = motion.scale.z;
-  instance.rootMotion = LiveSvector(motion.root_motion);
-  instance.rotationStepX = motion.rotation_step_x;
-  instance.facingDelta = motion.facing_delta;
-  instance.rotationStepZ = motion.rotation_step_z;
-  instance.scaleDelta = LiveSvector(motion.scale_delta);
-  instance.currentTileX = motion.current_tile.x;
-  instance.currentTileLayer = motion.current_tile.layer;
-  instance.currentTileZ = motion.current_tile.z;
-  live.routePhase = motion.route_phase;
-  live.routeUsesDuration = motion.route_uses_duration ? 1 : 0;
-  live.actionPoseActive = motion.action_pose_active ? 1 : 0;
-  live.isRunning = motion.is_running ? 1 : 0;
-  live.weaponPoseActive = motion.weapon_pose_active ? 1 : 0;
-  live.jumpProfile = motion.jump_profile;
-  live.runSpeed = motion.run_speed;
-  live.walkSpeed = motion.walk_speed;
-  live.turnRate = motion.turn_rate;
-  live.moveRate = motion.move_rate;
-  live.routeMoveRate = motion.route_move_rate;
-  live.routeTurnRate = motion.route_turn_rate;
-  live.scaleFrames = motion.scale_frames;
-  live.transitionFrames = motion.transition_frames;
-  live.routeTarget = LiveSvector(motion.route_target);
-  live.destinationX = motion.destination_x;
-  live.destinationZ = motion.destination_z;
-  live.destinationMode = motion.destination_mode;
-  live.momentumDistance = motion.momentum_distance;
-  live.runFrames = motion.run_frames;
-  live.turnState.mode = motion.request_mode;
-  live.turnState.direction = motion.request_direction;
-  live.turnState.facing = motion.request_facing;
-  live.turnState.distance = motion.request_distance;
+  instance.rotation_z = motion.rotation_z;
+  instance.scale_x = motion.scale.x;
+  instance.scale_y = motion.scale.y;
+  instance.scale_z = motion.scale.z;
+  instance.root_motion = LiveSvector(motion.root_motion);
+  instance.rotation_step_x = motion.rotation_step_x;
+  instance.facing_delta = motion.facing_delta;
+  instance.rotation_step_z = motion.rotation_step_z;
+  instance.scale_delta = LiveSvector(motion.scale_delta);
+  instance.current_tile_x = motion.current_tile.x;
+  instance.current_tile_layer = motion.current_tile.layer;
+  instance.current_tile_z = motion.current_tile.z;
+  live.route_phase = motion.route_phase;
+  live.route_uses_duration = motion.route_uses_duration ? 1 : 0;
+  live.action_pose_active = motion.action_pose_active ? 1 : 0;
+  live.is_running = motion.is_running ? 1 : 0;
+  live.weapon_pose_active = motion.weapon_pose_active ? 1 : 0;
+  live.jump_profile = motion.jump_profile;
+  live.run_speed = motion.run_speed;
+  live.walk_speed = motion.walk_speed;
+  live.turn_rate = motion.turn_rate;
+  live.move_rate = motion.move_rate;
+  live.route_move_rate = motion.route_move_rate;
+  live.route_turn_rate = motion.route_turn_rate;
+  live.scale_frames = motion.scale_frames;
+  live.transition_frames = motion.transition_frames;
+  live.route_target = LiveSvector(motion.route_target);
+  live.destination_x = motion.destination_x;
+  live.destination_z = motion.destination_z;
+  live.destination_mode = motion.destination_mode;
+  live.momentum_distance = motion.momentum_distance;
+  live.run_frames = motion.run_frames;
+  live.turn_state.mode = motion.request_mode;
+  live.turn_state.direction = motion.request_direction;
+  live.turn_state.facing = motion.request_facing;
+  live.turn_state.distance = motion.request_distance;
 }
 
 void BeginLiveScriptedActorPath(int actor_id, SVECTOR* target_position) {
@@ -330,7 +331,7 @@ int IsLiveScriptedActorPathFinished(int actor_id) {
 
 void ResetLiveActorMovement(int actor_id) {
   std::uint8_t* command_state = LiveBattleCommandState(actor_id);
-  Actors_ActorRecord* actor = Record(actor_id);
+  VS::Actors::ActorRecord* actor = Record(actor_id);
   if (actor == nullptr) {
     ResetActorMovement(command_state, nullptr);
     return;
@@ -349,7 +350,7 @@ void ClearLiveActorMovementModes(int actor_id) {
             [](ActorMotion& motion) { ClearActorMovementModes(motion); });
 }
 
-int LiveActorFacingDeltaToPoint(Actors_ActorRecord* actor,
+int LiveActorFacingDeltaToPoint(VS::Actors::ActorRecord* actor,
                                 SVECTOR* target_point) {
   if (target_point == nullptr) return 0;
   if (actor == nullptr) {
@@ -383,7 +384,7 @@ void SetLiveActorTravelStepCounts(int actor_id, int move_steps_per_tile,
 
 void LiveActorTravelStepCounts(int actor_id, int* move_steps_per_tile_out,
                                int* turn_steps_per_revolution_out) {
-  const Actors_ActorRecord* actor = Record(actor_id);
+  const VS::Actors::ActorRecord* actor = Record(actor_id);
   if (actor == nullptr) return;
   const TravelStepCounts counts =
       ActorTravelStepCounts(LoadLiveActorMotion(*actor));
@@ -393,28 +394,29 @@ void LiveActorTravelStepCounts(int actor_id, int* move_steps_per_tile_out,
       counts.turn_steps_per_revolution;
 }
 
-void StepLiveActorTransitionDisplacement(Actors_ActorRecord* actor) {
+void StepLiveActorTransitionDisplacement(VS::Actors::ActorRecord* actor) {
   WithPointer(
       actor, "StepActorTransitionDisplacement",
       [](ActorMotion& motion) { StepActorTransitionDisplacement(motion); });
 }
 
-void SetLiveActorFallDestination(Actors_ActorRecord* actor,
-                                 Actors_FallDirection* fall_direction) {
-  const Actors_FallDirection& direction =
+void SetLiveActorFallDestination(VS::Actors::ActorRecord* actor,
+                                 VS::Actors::FallDirection* fall_direction) {
+  const VS::Actors::FallDirection& direction =
       Required(fall_direction, "Fall destination requires a direction");
   WithPointer(actor, "SetActorFallDestination", [&](ActorMotion& motion) {
-    SetActorFallDestination(motion, direction.directionX, direction.directionZ);
+    SetActorFallDestination(motion, direction.direction_x,
+                            direction.direction_z);
   });
 }
 
-void ClearLiveActorMovementRequest(Actors_ActorRecord* actor) {
+void ClearLiveActorMovementRequest(VS::Actors::ActorRecord* actor) {
   WithPointer(actor, "ClearActorMovementRequest",
               [](ActorMotion& motion) { ClearActorMovementRequest(motion); });
 }
 
-int LiveActorJumpAnimationProfile(Actors_ActorRecord* actor) {
-  const Actors_ActorRecord& record =
+int LiveActorJumpAnimationProfile(VS::Actors::ActorRecord* actor) {
+  const VS::Actors::ActorRecord& record =
       Required(actor, "Jump animation profile requires an actor");
   return ActorJumpAnimationProfile(LoadLiveActorMotion(record));
 }
@@ -649,7 +651,7 @@ void ScaleLiveActorToOverTime(int actor_id, SVECTOR* target_scale,
   });
 }
 
-void UpdateLiveActorRoute(int actor_id, Actors_ActorRecord* actor) {
+void UpdateLiveActorRoute(int actor_id, VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     VS::Core::Warnf("actors", "UpdateActorRoute refused: no actor record");
     return;

@@ -12,11 +12,10 @@
 #include <span>
 #include <string_view>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssets.hpp"
@@ -32,11 +31,11 @@
 
 namespace VS::Menu::Score {
 namespace {
-static_assert(kEnemyPreviewActorSlot < std::size(Actors_actorRecords));
+static_assert(kEnemyPreviewActorSlot < std::size(VS::Actors::actorRecords));
 
 // The model buffer's parts (592C.c:197-199, 229-253): the enemy's record,
 // then a companion record or the weapon and shield models.
-constexpr std::size_t kRecordBytes = sizeof(Actors_ActorRecord);
+constexpr std::size_t kRecordBytes = sizeof(VS::Actors::ActorRecord);
 constexpr std::size_t kWeaponBytes = sizeof(VS::Actors::WeaponModel);
 constexpr std::size_t kAttachmentOffset = kRecordBytes;
 constexpr std::size_t kShieldOffset = kRecordBytes + kWeaponBytes;
@@ -81,7 +80,7 @@ T* Pointer(AssetAddress address) {
   switch (part) {
     case EnemyPreviewPart::kEnemy:
     case EnemyPreviewPart::kCompanion:
-      return sizeof(Actors_ActorRecord);
+      return sizeof(VS::Actors::ActorRecord);
     case EnemyPreviewPart::kWeapon:
     case EnemyPreviewPart::kShield:
       return sizeof(VS::Actors::WeaponModel);
@@ -205,14 +204,14 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   void ResetPreviewPose() override { Framework::ResetLiveActorPreviewPose(); }
 
   void SetWeaponDrawn(int slot, bool drawn) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->instance.weaponDrawn = drawn ? 1 : 0;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->instance.weapon_drawn = drawn ? 1 : 0;
     }
   }
 
   void SetAnimation(int slot, std::uint8_t animation) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      record->animationId = animation;
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      record->animation_id = animation;
     }
   }
 
@@ -223,8 +222,8 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   // decomp: MENU9.PRG func_801080C8 (src/MENU/MENU9.PRG/57BC.c:56): the
   // pose blends from the record's own blend pose (unk704).
   void InitializeAnimationPose(int slot) override {
-    if (Actors_ActorRecord* record = Record(slot)) {
-      Actors::InitializeLiveActorAnimationPose(record, &record->blendPose);
+    if (VS::Actors::ActorRecord* record = Record(slot)) {
+      Actors::InitializeLiveActorAnimationPose(record, &record->blend_pose);
     }
   }
 
@@ -239,14 +238,14 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   void Refuse(std::string_view what) override { Report(what); }
 
  private:
-  [[nodiscard]] static Actors_ActorRecord* Record(int slot) {
+  [[nodiscard]] static VS::Actors::ActorRecord* Record(int slot) {
     if (slot < 0 ||
-        static_cast<std::size_t>(slot) >= std::size(Actors_actorRecords)) {
+        static_cast<std::size_t>(slot) >= std::size(VS::Actors::actorRecords)) {
       Report("actor slot past the actor table");
       return nullptr;
     }
-    Actors_ActorRecord* record =
-        Actors_actorRecords[static_cast<std::size_t>(slot)];
+    VS::Actors::ActorRecord* record =
+        VS::Actors::actorRecords[static_cast<std::size_t>(slot)];
     if (record == nullptr) Report("preview actor record missing");
     return record;
   }
@@ -276,8 +275,9 @@ bool InPreviewBuffer(std::span<const std::byte> buffer, const void* pointer) {
 }
 
 bool ValidatePreviewRecords(std::span<const std::byte> buffer) {
-  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
-    const auto* actor = Actors_actorRecords[slot];
+  for (std::size_t slot = 0; slot < std::size(VS::Actors::actorRecords);
+       ++slot) {
+    const auto* actor = VS::Actors::actorRecords[slot];
     if (!InPreviewBuffer(buffer, actor)) continue;
     const auto offset = reinterpret_cast<std::uintptr_t>(actor) -
                         reinterpret_cast<std::uintptr_t>(buffer.data());
@@ -307,8 +307,9 @@ bool ValidatePreviewRecords(std::span<const std::byte> buffer) {
 }
 
 void ReleasePreviewRecords(std::span<const std::byte> buffer) {
-  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
-    if (InPreviewBuffer(buffer, Actors_actorRecords[slot])) {
+  for (std::size_t slot = 0; slot < std::size(VS::Actors::actorRecords);
+       ++slot) {
+    if (InPreviewBuffer(buffer, VS::Actors::actorRecords[slot])) {
       Content::ReleaseLiveActorModel(static_cast<int>(slot));
     }
   }

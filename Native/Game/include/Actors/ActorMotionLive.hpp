@@ -5,8 +5,12 @@
 
 #include "Actors/ActorMotion.hpp"
 
-struct Actors_ActorRecord;
-struct Actors_FallDirection;
+namespace VS::Actors {
+struct ActorRecord;
+}
+namespace VS::Actors {
+struct FallDirection;
+}
 namespace VS::Actors {
 struct TileTarget;
 }
@@ -24,15 +28,17 @@ namespace VS::Actors {
 [[nodiscard]] SVECTOR LiveSvector(const MotionVector& motion);
 
 // The record's motion fields as the typed ActorMotion, and their store.
-[[nodiscard]] ActorMotion LoadLiveActorMotion(const Actors_ActorRecord& live);
-void StoreLiveActorMotion(const ActorMotion& motion, Actors_ActorRecord& live);
+[[nodiscard]] ActorMotion LoadLiveActorMotion(
+    const VS::Actors::ActorRecord& live);
+void StoreLiveActorMotion(const ActorMotion& motion,
+                          VS::Actors::ActorRecord& live);
 
 void BeginLiveScriptedActorPath(int actor_id, SVECTOR* target_position);
 int IsLiveScriptedActorPathFinished(int actor_id);
 void ResetLiveActorMovement(int actor_id);
 void StopLiveActorMotion(int actor_id);
 void ClearLiveActorMovementModes(int actor_id);
-int LiveActorFacingDeltaToPoint(Actors_ActorRecord* actor,
+int LiveActorFacingDeltaToPoint(VS::Actors::ActorRecord* actor,
                                 SVECTOR* target_point);
 void ResetLiveActorRunMomentum(int actor_id);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
@@ -45,11 +51,11 @@ void SetLiveActorTravelStepCounts(int actor_id, int move_steps_per_tile,
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveActorTravelStepCounts(int actor_id, int* move_steps_per_tile_out,
                                int* turn_steps_per_revolution_out);
-void StepLiveActorTransitionDisplacement(Actors_ActorRecord* actor);
-void SetLiveActorFallDestination(Actors_ActorRecord* actor,
-                                 Actors_FallDirection* fall_direction);
-void ClearLiveActorMovementRequest(Actors_ActorRecord* actor);
-int LiveActorJumpAnimationProfile(Actors_ActorRecord* actor);
+void StepLiveActorTransitionDisplacement(VS::Actors::ActorRecord* actor);
+void SetLiveActorFallDestination(VS::Actors::ActorRecord* actor,
+                                 VS::Actors::FallDirection* fall_direction);
+void ClearLiveActorMovementRequest(VS::Actors::ActorRecord* actor);
+int LiveActorJumpAnimationProfile(VS::Actors::ActorRecord* actor);
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void MoveLiveActorToTileAtRate(int actor_id,
@@ -115,5 +121,5 @@ void ScaleLiveActorToOverTime(int actor_id, SVECTOR* target_scale,
                               int scale_steps);
 // Steps the route of `actor`, which the generated callers pass alongside its
 // id; the moves and animations run for the id.
-void UpdateLiveActorRoute(int actor_id, Actors_ActorRecord* actor);
+void UpdateLiveActorRoute(int actor_id, VS::Actors::ActorRecord* actor);
 }  // namespace VS::Actors

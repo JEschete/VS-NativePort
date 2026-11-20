@@ -14,9 +14,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/Movement.h"
 #include "Actors/TextureAnimation.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
@@ -137,8 +136,7 @@ struct LiveFrame {
 // tick speed, set for one test and then restored. Slot 0 sits at column 4,
 // page 0, row 1; the shared bank is 0 with sheet page 0x1A.
 struct LiveTextureState {
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   u_char saved_bank = VS::Actors::sharedSequenceBankIndex;
   std::array<u_char, 4> saved_pages{};
   decltype(VS::Actors::textureSlotOrigins) saved_origins =
@@ -150,13 +148,13 @@ struct LiveTextureState {
   std::remove_cvref_t<decltype(VS::Actors::secondarySlotSequences[2])>
       saved_channel1_keys = VS::Actors::secondarySlotSequences[2];
   int saved_tick_speed = VS::State::tickSpeed;
-  std::vector<std::unique_ptr<Actors_ActorRecord>> records;
+  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
 
   LiveTextureState() {
     std::copy_n(std::begin(VS::Actors::sharedSequenceBankTexturePages),
                 saved_pages.size(), saved_pages.begin());
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     VS::Actors::sharedSequenceBankIndex = 0;
     VS::Actors::sharedSequenceBankTexturePages[0] = 0x1A;
     const std::array<u_char, 4> origin{4, 0, 0, 0};
@@ -168,7 +166,7 @@ struct LiveTextureState {
   LiveTextureState(LiveTextureState&&) = delete;
   LiveTextureState& operator=(LiveTextureState&&) = delete;
   ~LiveTextureState() {
-    std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     VS::Actors::sharedSequenceBankIndex = saved_bank;
     std::ranges::copy(saved_pages,
                       std::begin(VS::Actors::sharedSequenceBankTexturePages));
@@ -185,19 +183,19 @@ struct LiveTextureState {
 
   // A 4-bit actor in slot 0 with bank 0's row 7 and overlay 0 at (16, 20),
   // 32x12, whose channels copy cells of two columns from (32, 5) over it.
-  Actors_ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<Actors_ActorRecord>());
-    Actors_ActorRecord& actor = *records.back();
+  VS::Actors::ActorRecord& AddActor(int actor_id) {
+    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
+    VS::Actors::ActorRecord& actor = *records.back();
     actor.instance.slot = static_cast<u_char>(actor_id);
-    actor.textureSlot = 0;
-    actor.textureRowOffsets[0] = 7;
-    actor.textureOverlays[0] = {.x = 16, .y = 20, .width = 32, .height = 12};
+    actor.texture_slot = 0;
+    actor.texture_row_offsets[0] = 7;
+    actor.texture_overlays[0] = {.x = 16, .y = 20, .width = 32, .height = 12};
     for (VS::Actors::TextureAnimationFrame& frames :
-         actor.textureAnimationFrames) {
+         actor.texture_animation_frames) {
       frames = {
           .overlay_index = 1, .source_x = 32, .source_y = 5, .columns = 2};
     }
-    Actors_actorRecords[actor_id] = &actor;
+    VS::Actors::actorRecords[actor_id] = &actor;
     return actor;
   }
 };
@@ -497,16 +495,18 @@ TEST_CASE(
 TEST_CASE("The texture depth flag is bit 27 of the word before sequenceFlags",
           "[actors-appearance-rendering][actors]") {
   // The original tested bit 27 of the word eight bytes before the sequence
-  // flags; the record names that bit textureHeaderBit.
-  auto actor = std::make_unique<Actors_ActorRecord>();
-  actor->textureHeaderBit = 1;
+  // flags; the record names that bit texture_header_bit.
+  auto actor = std::make_unique<VS::Actors::ActorRecord>();
+  actor->texture_header_bit = 1;
   const auto bytes =
-      std::bit_cast<std::array<std::byte, sizeof(Actors_ActorRecord)>>(*actor);
+      std::bit_cast<std::array<std::byte, sizeof(VS::Actors::ActorRecord)>>(
+          *actor);
   std::uint32_t word = 0;
   std::memcpy(
       &word,
       std::span(bytes)
-          .subspan(offsetof(Actors_ActorRecord, sequenceFlags) - 8, sizeof word)
+          .subspan(offsetof(VS::Actors::ActorRecord, sequence_flags) - 8,
+                   sizeof word)
           .data(),
       sizeof word);
   CHECK(word == (1U << 27));
@@ -516,11 +516,11 @@ TEST_CASE("Live texture animation commands bind the actor's channel",
           "[actors-appearance-rendering][actors]") {
   LiveTextureState state;
   ChannelWarnings warnings{"actors"};
-  Actors_ActorRecord& actor = state.AddActor(2);
+  VS::Actors::ActorRecord& actor = state.AddActor(2);
 
   CHECK(actors::SetLiveActorTextureAnimation(2, 1, 3, 1) == 0);
   const VS::Actors::TextureAnimationSlotRecord& slot =
-      actor.textureAnimationSlots[1];
+      actor.texture_animation_slots[1];
   CHECK(std::array<int, 5>{slot.timeline, slot.mode, slot.current_frame,
                            slot.key_index,
                            slot.ticks} == std::array<int, 5>{3, 1, 0, 0, 20});
@@ -552,14 +552,14 @@ TEST_CASE("Live texture animation updates copy both channels' key frames",
           "[actors-appearance-rendering][actors]") {
   LiveTextureState state;
   LiveFrame frame;
-  Actors_ActorRecord& actor = state.AddActor(1);
+  VS::Actors::ActorRecord& actor = state.AddActor(1);
   // Timeline 2: channel 0 keys sit 28 apart, channel 1 keys 8 apart.
   constexpr std::size_t kChannel0Key = std::size_t{2} * 28 * 2;
   VS::Actors::sheathedWeaponAnimationBases[kChannel0Key] = 3;
   VS::Actors::sheathedWeaponAnimationBases[kChannel0Key + 1] = 4;
   VS::Actors::secondarySlotSequences[2][0] = {.frame = 2, .duration = 4};
   for (VS::Actors::TextureAnimationSlotRecord& slot :
-       actor.textureAnimationSlots) {
+       actor.texture_animation_slots) {
     slot.timeline = 2;
     slot.mode = 1;
   }
@@ -567,27 +567,27 @@ TEST_CASE("Live texture animation updates copy both channels' key frames",
   actors::UpdateLiveActorTextureAnimations(&actor);
   CHECK(frame.Moves() ==
         std::vector<LiveFrame::Move>{ActorFrameMove(2), ActorFrameMove(1)});
-  CHECK(actor.textureAnimationSlots[0].current_frame == 3);
-  CHECK(actor.textureAnimationSlots[1].current_frame == 2);
-  CHECK(actor.textureAnimationSlots[1].ticks == 1);
+  CHECK(actor.texture_animation_slots[0].current_frame == 3);
+  CHECK(actor.texture_animation_slots[1].current_frame == 2);
+  CHECK(actor.texture_animation_slots[1].ticks == 1);
 
   // Without a sheet page nothing steps.
   VS::Actors::sharedSequenceBankTexturePages[0] = 0;
   actors::UpdateLiveActorTextureAnimations(&actor);
   CHECK(frame.Moves().size() == 2);
-  CHECK(actor.textureAnimationSlots[1].ticks == 1);
+  CHECK(actor.texture_animation_slots[1].ticks == 1);
 }
 
 TEST_CASE("Live texture frames copy the sheet cell unless the row is unset",
           "[actors-appearance-rendering][actors]") {
   LiveTextureState state;
   LiveFrame frame;
-  Actors_ActorRecord& actor = state.AddActor(1);
+  VS::Actors::ActorRecord& actor = state.AddActor(1);
 
   actors::UploadLiveActorTextureFrame(&actor, 0, 3);
   CHECK(frame.Moves() == std::vector<LiveFrame::Move>{ActorFrameMove(3)});
   // An unset row copies nothing, as in the original.
-  actor.textureRowOffsets[0] = 0xFF;
+  actor.texture_row_offsets[0] = 0xFF;
   actors::UploadLiveActorTextureFrame(&actor, 0, 3);
   CHECK(frame.Moves().size() == 1);
 }
@@ -597,12 +597,12 @@ TEST_CASE("Live texture frames are refused outside the record's tables",
   LiveTextureState state;
   LiveFrame frame;
   ChannelWarnings warnings{"actors"};
-  Actors_ActorRecord& actor = state.AddActor(1);
+  VS::Actors::ActorRecord& actor = state.AddActor(1);
 
-  actor.textureAnimationFrames[0].overlay_index = 9;
+  actor.texture_animation_frames[0].overlay_index = 9;
   actors::UploadLiveActorTextureFrame(&actor, 0, 3);
-  actor.textureAnimationFrames[0].overlay_index = 1;
-  actor.textureSlot = 38;
+  actor.texture_animation_frames[0].overlay_index = 1;
+  actor.texture_slot = 38;
   actors::UploadLiveActorTextureFrame(&actor, 0, 3);
   VS::Actors::sharedSequenceBankIndex = 3;
   actors::UploadLiveActorTextureFrame(&actor, 0, 3);
@@ -624,9 +624,9 @@ TEST_CASE("Live texture frame resets copy frame 0 for the shared bank's actors",
   LiveTextureState state;
   LiveFrame frame;
   state.AddActor(1);
-  state.AddActor(5).textureRowOffsets[0] = 0xFF;
-  Actors_ActorRecord& eight_bit = state.AddActor(9);
-  eight_bit.textureHeaderBit = 1;
+  state.AddActor(5).texture_row_offsets[0] = 0xFF;
+  VS::Actors::ActorRecord& eight_bit = state.AddActor(9);
+  eight_bit.texture_header_bit = 1;
 
   // Another bank is not the shared one.
   actors::ResetLiveActorTextureFrames(1);
@@ -644,9 +644,9 @@ TEST_CASE("Live scripted texture copies take the actor's overlay",
   LiveTextureState state;
   LiveFrame frame;
   ChannelWarnings warnings{"actors"};
-  Actors_ActorRecord& actor = state.AddActor(3);
+  VS::Actors::ActorRecord& actor = state.AddActor(3);
   // A scripted copy adds even an unset row.
-  actor.textureRowOffsets[0] = 0xFF;
+  actor.texture_row_offsets[0] = 0xFF;
 
   actors::UploadLiveActorTextureOverlay(
       3, {.overlay = 0, .source_x = 40, .source_y = 3});
@@ -673,22 +673,22 @@ TEST_CASE("Live texture scrolling runs its timers without a usable slot",
   LiveTextureState state;
   LiveFrame frame;
   ChannelWarnings warnings{"actors"};
-  Actors_ActorRecord& actor = state.AddActor(1);
+  VS::Actors::ActorRecord& actor = state.AddActor(1);
   VS::State::tickSpeed = 2;
-  actor.textureScrollBounds[0].width = 16;
-  actor.textureScrollBounds[0].height = 16;
-  actor.textureScroll[0].step_x = 1;
-  actor.textureOverlays[0] = {.x = 8, .y = 0, .width = 4, .height = 4};
+  actor.texture_scroll_bounds[0].width = 16;
+  actor.texture_scroll_bounds[0].height = 16;
+  actor.texture_scroll[0].step_x = 1;
+  actor.texture_overlays[0] = {.x = 8, .y = 0, .width = 4, .height = 4};
 
   actors::UpdateLiveActorTextureScrolling(&actor);
   CHECK(frame.Moves() ==
         std::vector<LiveFrame::Move>{{.source = Packed(256, 64),
                                       .destination = Packed(256 + 2, 64),
                                       .size = Packed(1, 4)}});
-  CHECK(actor.textureScroll[0].x == 1);
-  actor.textureSlot = 0xFF;
+  CHECK(actor.texture_scroll[0].x == 1);
+  actor.texture_slot = 0xFF;
   actors::UpdateLiveActorTextureScrolling(&actor);
-  CHECK(actor.textureScroll[0].x == 2);
+  CHECK(actor.texture_scroll[0].x == 2);
   CHECK(frame.Moves().size() == 1);
   actors::UpdateLiveActorTextureScrolling(nullptr);
   const std::string operation = "UpdateActorTextureScrolling";

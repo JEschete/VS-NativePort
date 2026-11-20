@@ -15,7 +15,7 @@
 #include <type_traits>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationPoseLive.hpp"
@@ -24,10 +24,10 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDraw.hpp"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
@@ -71,7 +71,7 @@ constexpr const char* kRoomPass = "UpdateAndDrawRoomActors";
 constexpr const char* kGimmickDraw = "DrawGimmickModel";
 constexpr const char* kWeaponDraw = "DrawActorWeaponModel";
 
-static_assert(std::size(Actors_actorRecords) == kRoomActorSlots);
+static_assert(std::size(VS::Actors::actorRecords) == kRoomActorSlots);
 static_assert(std::size(weaponModels) == kRoomWeaponSlots);
 static_assert(std::size(VS::Field::gimmickInstances) == kRoomGimmickSlots);
 static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
@@ -111,39 +111,39 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t),
   return *VS::Render::ModelWorkspace();
 }
 
-[[nodiscard]] Actors_ActorRecord* RoomActor(std::size_t slot) {
+[[nodiscard]] VS::Actors::ActorRecord* RoomActor(std::size_t slot) {
   return LiveActorRecord(static_cast<int>(slot), kRoomPass);
 }
 
-[[nodiscard]] Vec3 InstanceScale(const Actors_ModelInstance& instance) {
-  return Vec3{instance.scaleX, instance.scaleY, instance.scaleZ};
+[[nodiscard]] Vec3 InstanceScale(const VS::Actors::ModelInstance& instance) {
+  return Vec3{instance.scale_x, instance.scale_y, instance.scale_z};
 }
 
 [[nodiscard]] Core::Math::Angles3 ActorAngles(
-    const Actors_ModelInstance& instance) {
-  return Core::Math::Angles3{instance.rotationX, instance.facing,
-                             instance.rotationZ};
+    const VS::Actors::ModelInstance& instance) {
+  return Core::Math::Angles3{instance.rotation_x, instance.facing,
+                             instance.rotation_z};
 }
 
-[[nodiscard]] RoomActorState StateOf(const Actors_ActorRecord& actor) {
-  const Actors_ModelInstance& instance = actor.instance;
-  const Actors_CompanionOffset& companion = actor.companionState;
-  return {.has_bones = instance.boneCount != 0,
-          .skipped = instance.isSkipped != 0,
-          .visible = instance.isVisible != 0,
-          .culled = instance.isPreviewModel != 0,
-          .frozen = instance.isFrozen != 0,
-          .attached = instance.isAttached != 0,
-          .pulsing = instance.palettePulse.kind != 0,
-          .transitioning = instance.actionAnimationState != 0,
-          .attach_bone = instance.attachBone,
-          .companion_slot = actor.companionSlot,
-          .model_id = actor.modelId,
-          .collision_radius = actor.collisionRadius,
-          .blend_frame = static_cast<std::uint8_t>(actor.blendFrame),
+[[nodiscard]] RoomActorState StateOf(const VS::Actors::ActorRecord& actor) {
+  const VS::Actors::ModelInstance& instance = actor.instance;
+  const VS::Actors::CompanionOffsetRecord& companion = actor.companion_state;
+  return {.has_bones = instance.bone_count != 0,
+          .skipped = instance.is_skipped != 0,
+          .visible = instance.is_visible != 0,
+          .culled = instance.is_preview_model != 0,
+          .frozen = instance.is_frozen != 0,
+          .attached = instance.is_attached != 0,
+          .pulsing = instance.palette_pulse.kind != 0,
+          .transitioning = instance.action_animation_state != 0,
+          .attach_bone = instance.attach_bone,
+          .companion_slot = actor.companion_slot,
+          .model_id = actor.model_id,
+          .collision_radius = actor.collision_radius,
+          .blend_frame = static_cast<std::uint8_t>(actor.blend_frame),
           .companion_offset =
-              Vec3{companion.offsetX, companion.offsetY, companion.offsetZ},
-          .depth_bias = companion.depthBias};
+              Vec3{companion.offset_x, companion.offset_y, companion.offset_z},
+          .depth_bias = companion.depth_bias};
 }
 
 // The model's height: its bone 1 length (the int at model + 0x50), or 0 for a
@@ -170,44 +170,44 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   [[nodiscard]] std::optional<RoomActorState> Actor(
       std::size_t slot) const override {
-    const Actors_ActorRecord* actor = RoomActor(slot);
+    const VS::Actors::ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return std::nullopt;
     return StateOf(*actor);
   }
 
   void UpdateTextureAnimations(std::size_t slot) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateLiveActorTextureAnimations(actor);
     }
   }
 
   void UpdatePalettePulse(std::size_t slot) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateLiveActorPalettePulse(*actor);
     }
   }
 
   void UpdateAppearanceTransition(std::size_t slot) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateLiveActorAppearanceTransition(*actor);
     }
   }
 
   void SetDrawn(std::size_t slot, bool drawn) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
-      actor->instance.wasDrawn = drawn ? 1 : 0;
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
+      actor->instance.was_drawn = drawn ? 1 : 0;
     }
   }
 
   void UpdateSoundTransition(std::size_t slot) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateActorSoundTransition(*actor);
     }
   }
 
   void UpdateTextureScrolling(std::size_t slot,
                               std::size_t carried_index) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateLiveActorTextureScrolling(actor, static_cast<int>(carried_index));
     }
   }
@@ -215,18 +215,18 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   // decomp: 44F14.c:960-971. The route may release the slot; the original
   // kept writing through its pointer.
   void StepFrozenAnimation(std::size_t slot) override {
-    Actors_ActorRecord* actor = RoomActor(slot);
+    VS::Actors::ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return;
-    if (actor->routePhase != 0) {
+    if (actor->route_phase != 0) {
       UpdateLiveActorRoute(static_cast<int>(slot), actor);
       actor = RoomActor(slot);
       if (actor == nullptr) return;
     }
     if (VS::State::tickSpeed == kSlowedTickSpeed) {
-      actor->framesPerStep = static_cast<u_char>(actor->framesPerStep * 2);
+      actor->frames_per_step = static_cast<u_char>(actor->frames_per_step * 2);
     }
     UpdateLiveActorAnimationBlend(actor);
-    actor->framesPerStep = static_cast<u_char>(actor->fastAnimation + 1);
+    actor->frames_per_step = static_cast<u_char>(actor->fast_animation + 1);
   }
 
   void PrepareRootTransform(std::size_t slot) override {
@@ -234,7 +234,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
 
   void DrawAttached(std::size_t slot) override {
-    Actors_ActorRecord* actor = RoomActor(slot);
+    VS::Actors::ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return;
     if (MATRIX* parent = ResolveLiveAttachmentParentMatrix(actor)) {
       DrawLiveActorModel(*actor, *parent, 0);
@@ -242,13 +242,13 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
 
   void DrawActor(std::size_t slot, std::uint8_t companion) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       DrawLiveActorModel(*actor, *camera_, companion);
     }
   }
 
   void MoveActor(std::size_t slot, Vec3 offset) override {
-    Actors_ActorRecord* actor = RoomActor(slot);
+    VS::Actors::ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return;
     const Vec3 position = VectorOf(actor->instance.position);
     StoreVector(actor->instance.position,
@@ -265,7 +265,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   void UpdateMotionAndLookAt(std::size_t slot,
                              std::uint8_t companion) override {
-    if (Actors_ActorRecord* actor = RoomActor(slot)) {
+    if (VS::Actors::ActorRecord* actor = RoomActor(slot)) {
       UpdateLiveMotionAndLookAt(actor, companion);
     }
   }
@@ -284,16 +284,16 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   void DrawWeapon(std::size_t index) override {
     VS::Actors::WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return;
-    Actors_ActorRecord* owner = RoomActor(weapon->actor_id);
+    VS::Actors::ActorRecord* owner = RoomActor(weapon->actor_id);
     if (owner == nullptr) return;
-    if (weapon->attachment_bone >= std::size(owner->boneMatrices)) {
+    if (weapon->attachment_bone >= std::size(owner->bone_matrices)) {
       VS::Core::Warnf("actors", "%s refused: weapon %zu attaches to bone %u",
                       kRoomPass, index,
                       static_cast<unsigned>(weapon->attachment_bone));
       return;
     }
     DrawLiveActorWeaponModel(weapon,
-                             &owner->boneMatrices[weapon->attachment_bone]);
+                             &owner->bone_matrices[weapon->attachment_bone]);
   }
 
   [[nodiscard]] std::optional<RoomGimmickState> Gimmick(
@@ -309,9 +309,9 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   [[nodiscard]] PushedGimmick PushedGimmickState() const override {
     return PushedGimmick{
-        .index = Actors_pushedGimmickIndex,
+        .index = VS::Actors::pushedGimmickIndex,
         .update_complete =
-            static_cast<std::uint8_t>(Actors_isActorUpdateComplete) != 0};
+            static_cast<std::uint8_t>(VS::Actors::isActorUpdateComplete) != 0};
   }
 
   void UpdateGimmickMotion(std::size_t index) override {
@@ -352,7 +352,9 @@ class LiveRoomModelPass final : public RoomModelPassHost {
     }
   }
 
-  void ClearGimmickPushUpdate() override { Actors_isActorUpdateComplete = 0; }
+  void ClearGimmickPushUpdate() override {
+    VS::Actors::isActorUpdateComplete = 0;
+  }
 
  private:
   MATRIX* camera_;
@@ -369,7 +371,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   pose.placement = MatrixOf(object.matrices[kPlacementMatrix]);
   pose.scale = Vec3{object.scale_x, object.scale_y, object.scale_z};
   if (placement != GimmickPlacement::kHeld) return pose;
-  const Actors_ActorRecord* holder =
+  const VS::Actors::ActorRecord* holder =
       LiveActorRecord(object.parent, kGimmickDraw);
   if (holder == nullptr) {
     VS::Core::Warnf("actors",
@@ -449,9 +451,9 @@ void StoreWeaponPose(VS::Actors::WeaponModel& weapon,
 
 // decomp: 49268.c:203-245, after the bone chain.
 void DrawWeaponForOwner(const VS::Actors::WeaponModel& weapon,
-                        const Actors_ActorRecord& owner) {
-  const Actors_ModelInstance& instance = owner.instance;
-  const bool visible = instance.isVisible != 0;
+                        const VS::Actors::ActorRecord& owner) {
+  const VS::Actors::ModelInstance& instance = owner.instance;
+  const bool visible = instance.is_visible != 0;
   const std::int32_t height = instance.position.vy;
   const bool leader = instance.slot == 0;
   const bool event_playing =
@@ -475,11 +477,11 @@ void DrawWeaponForOwner(const VS::Actors::WeaponModel& weapon,
       VS::Render::legacyWeaponTextureSlots[weapon.texture_slot].texture_page);
   workspace.palette = static_cast<u_short>(
       VS::Render::legacyWeaponTextureSlots[weapon.palette_slot_offset].palette);
-  CVECTOR color = instance.baseColor;
+  CVECTOR color = instance.base_color;
   if (weapon.brightness_override != 0) {
     color = CVECTOR{weapon.brightness, weapon.brightness, weapon.brightness, 0};
   }
-  if (WeaponDrawsWithOverrides(instance.actionAnimationState)) {
+  if (WeaponDrawsWithOverrides(instance.action_animation_state)) {
     Render::DrawLiveWeaponFlatPolygonsWithOverrides(weapon, color);
   } else {
     Render::DrawLiveWeaponFlatPolygons(weapon, color);
@@ -504,7 +506,7 @@ void StoreSlotIds(VS::Render::TextureSlot& slot, const TextureSlotIds& ids) {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800AEAE8 (src/BATTLE/BATTLE.PRG/44F14.c:826)
-void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
+void PrepareLiveActorRootTransform(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("PrepareActorRootTransform", "no actor record");
     return;
@@ -513,11 +515,11 @@ void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
             std::end(modelRenderContext.model_scale), kUnitModelScale);
   VS::Render::ModelScratchpad& workspace = Workspace();
   StoreVector(workspace.root_offset,
-              ActorRootOffset(VectorOf(actor->blendPose.bone_keys[kRootKey]),
+              ActorRootOffset(VectorOf(actor->blend_pose.bone_keys[kRootKey]),
                               InstanceScale(actor->instance), actor->scale));
   TransformLiveActorRootOffset(actor);
-  workspace.angle_x = actor->instance.lookYaw;
-  workspace.angle_y = actor->instance.lookPitch;
+  workspace.angle_x = actor->instance.look_yaw;
+  workspace.angle_y = actor->instance.look_pitch;
 }
 
 // decomp: BATTLE.PRG func_800AEF94 (src/BATTLE/BATTLE.PRG/44F14.c:923)
@@ -531,7 +533,7 @@ void UpdateAndDrawLiveRoomActors(MATRIX* camera) {
 }
 
 // decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695)
-void TransformLiveActorRootOffset(Actors_ActorRecord* actor) {
+void TransformLiveActorRootOffset(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("TransformActorRootOffset", "no actor record");
     return;
@@ -619,7 +621,7 @@ void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source) {
   StoreWeaponPose(*weapon, fade,
                   std::span(*chain).first(std::max<std::size_t>(bone_count, 1)),
                   used);
-  const Actors_ActorRecord* owner =
+  const VS::Actors::ActorRecord* owner =
       LiveActorRecord(weapon->actor_id, kWeaponDraw);
   if (owner == nullptr) {
     WarnActorRefused(kWeaponDraw, "the weapon's owner slot is empty");
@@ -642,8 +644,8 @@ void InitializeLiveActorModelResources() {
     StoreSlotIds(stored, ids);
     stored.alternate_palette = static_cast<std::int16_t>(ids.alternate_palette);
   }
-  std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-            nullptr);
+  std::fill(std::begin(VS::Actors::actorRecords),
+            std::end(VS::Actors::actorRecords), nullptr);
   VS::Actors::primarySequenceBuffer =
       Core::Memory::AllocateLiveFromLowEnd(Content::kWeaponSequenceBytes);
   VS::Actors::sequenceWorkBuffer =
@@ -678,7 +680,7 @@ void InitializeLiveActorModelResources() {
   unit_room_scale.vy = kUnitActorScale;
   unit_room_scale.vz = kUnitActorScale;
   SetLiveRoomActorScale(&unit_room_scale);
-  Actors_pushedGimmickIndex = 0;
-  Actors_isActorUpdateComplete = 0;
+  VS::Actors::pushedGimmickIndex = 0;
+  VS::Actors::isActorUpdateComplete = 0;
 }
 }  // namespace VS::Actors

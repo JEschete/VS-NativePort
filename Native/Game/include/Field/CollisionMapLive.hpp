@@ -43,14 +43,16 @@ int LiveRoomCeilingHeight(int world_x, int world_z);
 
 int LiveActorSupportHeight(int world_x, int world_z);
 void SnapLiveRoomActorsToSupport();
-// Also records the supporting gimmick slot (Actors_supportingGimmickIndex).
+// Also records the supporting gimmick slot
+// (VS::Actors::supportingGimmickIndex).
 int LiveGimmickSupportHeight(int tile_x, int tile_z);
 int LiveGimmickSupportHeightBelow(int tile_x, int tile_z, int reference_height);
 
 int LiveIsPointOnMovingPlatform(int platform_layer, const SVECTOR* position);
 // The room's authored platforms; 0 when the section is absent or malformed.
 int LiveMovingPlatformCount();
-// Also records the supporting platform layer (Actors_supportingPlatformLayer).
+// Also records the supporting platform layer
+// (VS::Actors::supportingPlatformLayer).
 int LiveMovingPlatformContactHeight(int world_x, int world_y, int world_z,
                                     int search_mode);
 
@@ -63,9 +65,11 @@ std::optional<CollisionCellRef> LiveCollisionCellRefAtPosition(
     std::int16_t world_x, std::int16_t world_z, int layer);
 // A cell's word; nullopt for a reference outside the current room's tables.
 std::optional<std::uint32_t> LiveCollisionCellWord(CollisionCellRef cell);
-// Also records the supporting gimmick slot (Actors_supportingGimmickIndex).
+// Also records the supporting gimmick slot
+// (VS::Actors::supportingGimmickIndex).
 GimmickSupport LiveGimmickSupport(int tile_x, int tile_z);
-// Also records the supporting platform layer (Actors_supportingPlatformLayer).
+// Also records the supporting platform layer
+// (VS::Actors::supportingPlatformLayer).
 PlatformContactHeight LiveMovingPlatformContact(PlatformProbe probe,
                                                 int search_mode);
 // The visible platform on `support_layer`.

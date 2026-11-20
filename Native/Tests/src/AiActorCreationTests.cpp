@@ -19,9 +19,8 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
@@ -596,8 +595,7 @@ struct LiveCreationFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
@@ -611,15 +609,15 @@ struct LiveCreationFixture {
   u_short flags[32][32]{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   CreationTestModel model{};
 
   LiveCreationFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::tileFlagMap = flags;
     VS::Battle::Ai::roomHasWaypoints = nullptr;
@@ -635,7 +633,7 @@ struct LiveCreationFixture {
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_actors, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_states, std::begin(VS::Battle::Ai::actorAiStates));
-    std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
@@ -659,18 +657,18 @@ struct LiveCreationFixture {
     stats.runSpeed = 9;
     record.instance.slot = 0;
     record.instance.model = &model.header;
-    record.instance.boneCount = static_cast<u_char>(model.bones.size());
+    record.instance.bone_count = static_cast<u_char>(model.bones.size());
     record.instance.position = {100, -50, 300, 0};
-    record.instance.currentTileX = 7;
-    record.instance.currentTileLayer = 0x0A;
-    record.instance.currentTileZ = 5;
-    record.instance.reserved5F = 0x3C;
-    record.modelDataSize = static_cast<unsigned>(sizeof model);
+    record.instance.current_tile_x = 7;
+    record.instance.current_tile_layer = 0x0A;
+    record.instance.current_tile_z = 5;
+    record.instance.reserved5f = 0x3C;
+    record.model_data_size = static_cast<unsigned>(sizeof model);
     record.scale = 2 * kOne;
-    record.anchorHeight = 0x100;
-    record.collisionRadius = 20;
-    record.collisionHeight = 0x90;
-    Actors_actorRecords[0] = &record;
+    record.anchor_height = 0x100;
+    record.collision_radius = 20;
+    record.collision_height = 0x90;
+    VS::Actors::actorRecords[0] = &record;
     VS::Battle::actors[0] = &actor;
   }
 };
@@ -689,7 +687,7 @@ void CheckLiveStateLinks(const VS::Battle::Ai::ActorAiState& state,
             &fixture.record.instance));
   CHECK(state.stats == &fixture.stats);
   CHECK(state.native_pointer60 == &fixture.record.instance.position);
-  CHECK(state.native_pointer64 == &fixture.record.instance.currentTileX);
+  CHECK(state.native_pointer64 == &fixture.record.instance.current_tile_x);
 }
 
 void CheckLiveStateBody(const VS::Battle::Ai::ActorAiState& state) {

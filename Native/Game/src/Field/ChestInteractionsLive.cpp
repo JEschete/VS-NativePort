@@ -11,7 +11,7 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
@@ -924,13 +924,13 @@ std::uint8_t LiveCurrentSavePointId() {
   return CurrentSavePointId(host);
 }
 
-bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record) {
+bool RefreshLiveAshleyInteractionTile(const VS::Actors::ActorRecord* record) {
   constexpr std::size_t kRequiredBytes =
-      offsetof(Actors_ActorRecord, animationId) +
-      sizeof(decltype(Actors_ActorRecord::animationId));
-  if (record == nullptr ||
-      reinterpret_cast<std::uintptr_t>(record) % alignof(Actors_ActorRecord) !=
-          0) {
+      offsetof(VS::Actors::ActorRecord, animation_id) +
+      sizeof(decltype(VS::Actors::ActorRecord::animation_id));
+  if (record == nullptr || reinterpret_cast<std::uintptr_t>(record) %
+                                   alignof(VS::Actors::ActorRecord) !=
+                               0) {
     return false;
   }
   const auto allocation = Core::Memory::LivePayloadContaining(record);
@@ -946,10 +946,10 @@ bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record) {
   }
   const AshleyInteractionTileState state{
       .actor_slot = static_cast<std::uint8_t>(record->instance.slot),
-      .animation_id = static_cast<std::uint8_t>(record->animationId),
+      .animation_id = static_cast<std::uint8_t>(record->animation_id),
       .facing = record->instance.facing,
-      .tile_x = static_cast<std::uint8_t>(record->instance.currentTileX),
-      .tile_z = static_cast<std::uint8_t>(record->instance.currentTileZ)};
+      .tile_x = static_cast<std::uint8_t>(record->instance.current_tile_x),
+      .tile_z = static_cast<std::uint8_t>(record->instance.current_tile_z)};
   LiveAshleyInteractionTileHost host;
   return RefreshAshleyInteractionTile(state, host);
 }
@@ -1200,7 +1200,8 @@ int VS::Field::CurrentSavePointIdEntry(void) {
   return VS::Field::LiveCurrentSavePointId();
 }
 
-void VS::Field::RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record) {
+void VS::Field::RefreshAshleyInteractionTileEntry(
+    VS::Actors::ActorRecord* record) {
   static_cast<void>(VS::Field::RefreshLiveAshleyInteractionTile(record));
 }
 

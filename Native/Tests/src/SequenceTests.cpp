@@ -8,7 +8,7 @@
 #include <span>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -19,7 +19,6 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/ShpModel.hpp"
@@ -81,24 +80,24 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   u_short file[256] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
-  Actors_ActorRecord actor = {0};
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[kActorId];
+  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kActorId];
   const char saved_index = VS::Actors::lastResolvedSequenceIndex;
   const std::int8_t saved_pitch = VS::Battle::specialActionPitch;
   bank->animation_map = kMapOffset;
   memset(reinterpret_cast<u_char*>(file) + kMapOffset, available ? 0 : 0xFF,
          kMapEntries);
   actor.instance.slot = kActorId;
-  actor.animationLocked = 1;
-  actor.sequenceModelId = 1;
-  actor.sequenceFlags = 100;
-  actor.commonAnimationCount = 128;
-  actor.battleAnimationCount = 64;
-  actor.commonSequence = bank;
-  actor.battleSequence = bank;
-  actor.sharedSequences[3] = bank;
-  actor.animationId = 0xC6;
-  Actors_actorRecords[kActorId] = &actor;
+  actor.animation_locked = 1;
+  actor.sequence_model_id = 1;
+  actor.sequence_flags = 100;
+  actor.common_animation_count = 128;
+  actor.battle_animation_count = 64;
+  actor.common_sequence = bank;
+  actor.battle_sequence = bank;
+  actor.shared_sequences[3] = bank;
+  actor.animation_id = 0xC6;
+  VS::Actors::actorRecords[kActorId] = &actor;
   VS::Battle::specialActionPitch = 2;
   VS::Actors::RegisterSequenceBank(bank, sizeof file);
   if (consumer == 0) {
@@ -110,19 +109,19 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   } else {
     VS::Battle::SetLiveEnemyCombatPose(kActorId, 3);
   }
-  int passed = actor.animationLocked == 1 && actor.animationId == 0xC6;
+  int passed = actor.animation_locked == 1 && actor.animation_id == 0xC6;
   if (consumer < 2) {
     const int executing = mode == 1 && available;
     passed &= VS::Battle::specialActionPitch == (executing ? 1 : 2);
-    passed &= actor.headTracking.pad == (executing ? 0 : 30);
-    passed &= actor.instance.turnFrames == (executing ? 0 : 10);
-    passed &= actor.queuedAnimation ==
+    passed &= actor.head_tracking.pad == (executing ? 0 : 30);
+    passed &= actor.instance.turn_frames == (executing ? 0 : 10);
+    passed &= actor.queued_animation ==
               (consumer == 1 && mode == 1 && available ? 0xFE : 0);
   } else if (consumer == 2) {
-    passed &= actor.headTracking.pad == 30;
-    passed &= actor.instance.turnFrames == (mode == 0 ? 10 : 0);
+    passed &= actor.head_tracking.pad == 30;
+    passed &= actor.instance.turn_frames == (mode == 0 ? 10 : 0);
   }
-  Actors_actorRecords[kActorId] = saved_actor;
+  VS::Actors::actorRecords[kActorId] = saved_actor;
   VS::Actors::lastResolvedSequenceIndex = saved_index;
   VS::Battle::specialActionPitch = saved_pitch;
   VS::Actors::ForgetSequenceBanks(bank, sizeof file);
@@ -130,7 +129,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
 }
 
 struct MorphAnimationFixture {
-  Actors_ActorRecord actor;
+  VS::Actors::ActorRecord actor;
   unsigned model[64];
   unsigned sequence[128];
 };
@@ -159,18 +158,18 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
   SVECTOR* vertex = VS_ONDISC(model, vertex_section, SVECTOR*);
   *vertex = (SVECTOR){11, 22, 33, 44};
   fixture->actor.instance.model = model;
-  fixture->actor.modelDataSize = sizeof fixture->model;
+  fixture->actor.model_data_size = sizeof fixture->model;
   fixture->actor.instance.slot = 3;
-  fixture->actor.poseOverrideActive = 1;
-  fixture->actor.animationId = animation;
-  fixture->actor.animationLength = 16;
-  fixture->actor.animationHeader = reinterpret_cast<intptr_t>(bank);
-  fixture->actor.sequenceFlags = 64;
-  fixture->actor.commonSequence = bank;
-  fixture->actor.sharedSequences[2] = bank;
+  fixture->actor.pose_override_active = 1;
+  fixture->actor.animation_id = animation;
+  fixture->actor.animation_length = 16;
+  fixture->actor.animation_header = reinterpret_cast<intptr_t>(bank);
+  fixture->actor.sequence_flags = 64;
+  fixture->actor.common_sequence = bank;
+  fixture->actor.shared_sequences[2] = bank;
   fixture->actor.pose.event_script =
       reinterpret_cast<u_char*>(bank) + bank->animation_data + 2;
-  fixture->actor.blendPose.event_script = fixture->actor.pose.event_script;
+  fixture->actor.blend_pose.event_script = fixture->actor.pose.event_script;
   fixture->actor.pose.bone_keys[0] = (SVECTOR){101, 202, 303, 0};
   VS::Actors::RegisterSequenceBank(bank, sizeof fixture->sequence);
 }
@@ -180,7 +179,7 @@ static void ForgetMorphAnimation(MorphAnimationFixture* fixture) {
 }
 
 struct MorphBindingScope {
-  Actors_ActorRecord* actors[17];
+  VS::Actors::ActorRecord* actors[17];
   int bank;
   u_char length;
   u_char page;
@@ -197,8 +196,8 @@ static void BeginMorphBindings(MorphBindingScope* scope) {
   scope->resolved = VS::Actors::lastResolvedSequenceIndex;
   scope->skip = VS::Event::skipState;
   for (int i = 0; i < 17; ++i) {
-    scope->actors[i] = Actors_actorRecords[i];
-    Actors_actorRecords[i] = nullptr;
+    scope->actors[i] = VS::Actors::actorRecords[i];
+    VS::Actors::actorRecords[i] = nullptr;
   }
   VS::Actors::sharedSequenceBankIndex = 2;
   VS::Actors::animationEventLengths[36] = 3;
@@ -209,7 +208,7 @@ static void BeginMorphBindings(MorphBindingScope* scope) {
 
 static void EndMorphBindings(const MorphBindingScope* scope) {
   for (int i = 0; i < 17; ++i) {
-    Actors_actorRecords[i] = scope->actors[i];
+    VS::Actors::actorRecords[i] = scope->actors[i];
   }
   VS::Actors::sharedSequenceBankIndex = scope->bank;
   VS::Actors::animationEventLengths[36] = scope->length;
@@ -223,13 +222,13 @@ static int MorphIsRetired(const MorphAnimationFixture* fixture) {
   const SVECTOR* vertex =
       VS_ONDISC(fixture->actor.instance.model, vertex_section, SVECTOR*);
   return vertex->vx == 10 && vertex->vy == 22 && vertex->vz == 33 &&
-         vertex->pad == 44 && !fixture->actor.poseOverrideActive &&
-         fixture->actor.animationHeader == 0 &&
-         fixture->actor.sharedSequences[2] == nullptr &&
+         vertex->pad == 44 && !fixture->actor.pose_override_active &&
+         fixture->actor.animation_header == 0 &&
+         fixture->actor.shared_sequences[2] == nullptr &&
          fixture->actor.pose.event_script == nullptr &&
-         fixture->actor.blendPose.event_script == nullptr &&
+         fixture->actor.blend_pose.event_script == nullptr &&
          fixture->actor.pose.next_event_frame == 0xFFFF &&
-         fixture->actor.blendPose.next_event_frame == 0xFFFF &&
+         fixture->actor.blend_pose.next_event_frame == 0xFFFF &&
          fixture->actor.pose.bone_keys[0].vx == 101 &&
          fixture->actor.pose.bone_keys[0].vy == 202 &&
          fixture->actor.pose.bone_keys[0].vz == 303;
@@ -241,7 +240,7 @@ int TestSharedSequenceRetirement(void) {
   InitializeMorphAnimation(&fixture, 222);
   MorphBindingScope scope;
   BeginMorphBindings(&scope);
-  Actors_actorRecords[3] = &fixture.actor;
+  VS::Actors::actorRecords[3] = &fixture.actor;
   VS::Actors::UnloadLiveSharedSequence(kBank + 1);
   const int passed = MorphIsRetired(&fixture) &&
                      VS::Actors::LiveAnimationBattleWindowFrame(3) == 0;
@@ -258,13 +257,13 @@ int TestSharedSequenceRetirementControl(int scenario) {
   InitializeMorphAnimation(&second, 222);
   second.actor.instance.slot = 4;
   BeginMorphBindings(&scope);
-  Actors_actorRecords[3] = &first.actor;
-  Actors_actorRecords[4] = &second.actor;
+  VS::Actors::actorRecords[3] = &first.actor;
+  VS::Actors::actorRecords[4] = &second.actor;
   if (scenario == 1) {
-    first.actor.animationHeader = reinterpret_cast<intptr_t>(second.sequence);
+    first.actor.animation_header = reinterpret_cast<intptr_t>(second.sequence);
     first.actor.pose.event_script = second.actor.pose.event_script;
-    first.actor.blendPose.event_script = second.actor.blendPose.event_script;
-    Actors_actorRecords[4] = nullptr;
+    first.actor.blend_pose.event_script = second.actor.blend_pose.event_script;
+    VS::Actors::actorRecords[4] = nullptr;
   }
   if (scenario == 4 || scenario == 5) {
     MorphAnimationFixture* invalid = scenario == 4 ? &first : &second;
@@ -272,7 +271,7 @@ int TestSharedSequenceRetirementControl(int scenario) {
         reinterpret_cast<VS::Actors::SeqAnimationBank*>(invalid->sequence);
     (reinterpret_cast<u_char*>(bank))[bank->animation_map + 2] = 0xFF;
   }
-  const intptr_t expected_header = first.actor.animationHeader;
+  const intptr_t expected_header = first.actor.animation_header;
   if (scenario == 6) VS::Actors::SelectLiveSharedSequenceBank(2);
   int status;
   if (scenario == 4) {
@@ -287,16 +286,16 @@ int TestSharedSequenceRetirementControl(int scenario) {
   int passed;
   if (scenario >= 3 && scenario <= 5) {
     passed = status == (scenario == 4 ? 1 : -1) && vertex->vx == 11 &&
-             first.actor.poseOverrideActive &&
-             first.actor.animationHeader == expected_header &&
-             first.actor.sharedSequences[2] != nullptr &&
+             first.actor.pose_override_active &&
+             first.actor.animation_header == expected_header &&
+             first.actor.shared_sequences[2] != nullptr &&
              first.actor.pose.event_script != nullptr;
   } else if (scenario == 1) {
     passed = status == 0 && vertex->vx == 11 &&
-             first.actor.poseOverrideActive &&
-             first.actor.animationHeader == expected_header &&
+             first.actor.pose_override_active &&
+             first.actor.animation_header == expected_header &&
              first.actor.pose.event_script == second.actor.pose.event_script &&
-             first.actor.sharedSequences[2] == nullptr;
+             first.actor.shared_sequences[2] == nullptr;
   } else {
     passed = status == 0 && MorphIsRetired(&first) && MorphIsRetired(&second);
   }
@@ -317,23 +316,23 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
     (reinterpret_cast<u_char*>(wide))[wide->animation_map + 2] = 200;
     wide->headers[static_cast<size_t>(5) * 200] = 16;
     wide->headers[static_cast<size_t>(5) * 200 + 2] = 1;
-    fixture->actor.animationHeader = reinterpret_cast<intptr_t>(wide);
-    fixture->actor.animationSet = 200;
-    fixture->actor.sharedSequences[2] = wide;
+    fixture->actor.animation_header = reinterpret_cast<intptr_t>(wide);
+    fixture->actor.animation_set = 200;
+    fixture->actor.shared_sequences[2] = wide;
     VS::Actors::RegisterSequenceBank(wide, sizeof fixture->sequence * 8);
   }
   if (scenario == 2 || (scenario >= 6 && scenario <= 10)) {
-    fixture->actor.commonSequence = nullptr;
+    fixture->actor.common_sequence = nullptr;
   }
   // Finished steps, falls and reactions leave this "reinitialize on next play"
   // sentinel; it says nothing about which clip's pose is still bound (#252).
-  if (scenario >= 11 && scenario <= 13) fixture->actor.animationSet = 0xFF;
-  if (scenario == 14) fixture->actor.animationSet = 5;
+  if (scenario >= 11 && scenario <= 13) fixture->actor.animation_set = 0xFF;
+  if (scenario == 14) fixture->actor.animation_set = 5;
   if (scenario == 3) {
     (reinterpret_cast<u_char*>(bank))[bank->animation_map + 1] = 0xFF;
   }
   if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
-  if (scenario == 4) fixture->actor.poseOverrideActive = 0;
+  if (scenario == 4) fixture->actor.pose_override_active = 0;
 }
 
 static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
@@ -341,7 +340,7 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
                                 const u_char* expected_script,
                                 int unchanged_frame) {
   if (scenario == 13) {
-    return result != -1 && fixture.actor.animationSet == 0;
+    return result != -1 && fixture.actor.animation_set == 0;
   }
   const SVECTOR* vertex =
       VS_ONDISC(fixture.actor.instance.model, vertex_section, SVECTOR*);
@@ -349,7 +348,7 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
                          scenario == 10 || scenario == 11 || scenario == 12;
   int passed = vertex->vx == (successful ? 10 : 11);
   if (successful) {
-    passed &= result == 0 && fixture.actor.blendPose.next_event_frame == 510;
+    passed &= result == 0 && fixture.actor.blend_pose.next_event_frame == 510;
     if (scenario == 8 || scenario == 9 || scenario == 10) {
       passed &= VS::Actors::sharedSequenceBankIndex == 1;
     }
@@ -359,9 +358,9 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
     }
   } else {
     passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
-              fixture.actor.poseOverrideActive == (scenario != 4) &&
-              fixture.actor.blendPose.next_event_frame == unchanged_frame &&
-              fixture.actor.blendPose.event_script == expected_script &&
+              fixture.actor.pose_override_active == (scenario != 4) &&
+              fixture.actor.blend_pose.next_event_frame == unchanged_frame &&
+              fixture.actor.blend_pose.event_script == expected_script &&
               fixture.actor.pose.frame == 9;
   }
   return passed;
@@ -381,21 +380,21 @@ int TestAnimationEventUnwind(int scenario) {
     InitializeMorphAnimation(&selected, 222);
     (reinterpret_cast<VS::Actors::SeqAnimationBank*>(selected.sequence))
         ->headers[2] = 0;
-    fixture.actor.sharedSequences[1] = selected.sequence;
+    fixture.actor.shared_sequences[1] = selected.sequence;
   }
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   const int saved_bank = VS::Actors::sharedSequenceBankIndex;
   const u_char saved_length = VS::Actors::animationEventLengths[kMorphOpcode];
   const char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
-  Actors_actorRecords[kSlot] = &fixture.actor;
+  VS::Actors::actorRecords[kSlot] = &fixture.actor;
   VS::Actors::sharedSequenceBankIndex = 2;
   if (scenario == 8 || scenario == 9 || scenario == 10) {
     VS::Actors::SelectLiveSharedSequenceBank(2);
   }
   VS::Actors::animationEventLengths[kMorphOpcode] = 3;
-  fixture.actor.blendPose.next_event_frame = kUnchangedFrame;
+  fixture.actor.blend_pose.next_event_frame = kUnchangedFrame;
   fixture.actor.pose.frame = 9;
-  u_char* expected_script = fixture.actor.blendPose.event_script;
+  u_char* expected_script = fixture.actor.blend_pose.event_script;
   ArrangeUnwindScenario(&fixture, scenario, wide_sequence);
   int result = 0;
   if (scenario == 6 || scenario == 13) {
@@ -408,7 +407,7 @@ int TestAnimationEventUnwind(int scenario) {
   }
   const int passed = UnwindScenarioPassed(fixture, scenario, result,
                                           expected_script, kUnchangedFrame);
-  Actors_actorRecords[kSlot] = saved_actor;
+  VS::Actors::actorRecords[kSlot] = saved_actor;
   VS::Actors::sharedSequenceBankIndex = saved_bank;
   VS::Actors::animationEventLengths[kMorphOpcode] = saved_length;
   VS::Actors::lastResolvedSequenceIndex = saved_resolved;
@@ -447,25 +446,25 @@ int Tests_ActionCameraRecovery(void) {
 }
 
 int Tests_SparseIdlePoseReset(void) {
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[4];
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[4];
   VS::Field::GimmickInstance* saved_object = VS::Field::gimmickInstances[4];
   VS::Field::GimmickInstance object = {0};
-  Actors_ActorRecord actor = {0};
-  Actors_actorRecords[4] = nullptr;
+  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::actorRecords[4] = nullptr;
   VS::Field::gimmickInstances[4] = nullptr;
   VS::Actors::RestoreLiveActorIdlePose(4);
   object.mode = 0xF9;
   VS::Field::gimmickInstances[4] = &object;
   VS::Actors::RestoreLiveActorIdlePose(4);
   int passed = object.mode == 0;
-  actor.animationId = 0x63;
-  Actors_actorRecords[4] = &actor;
+  actor.animation_id = 0x63;
+  VS::Actors::actorRecords[4] = &actor;
   VS::Actors::RestoreLiveActorIdlePose(4);
-  passed = passed && actor.animationId == 0x63;
-  actor.animationId = 0xC7;
+  passed = passed && actor.animation_id == 0x63;
+  actor.animation_id = 0xC7;
   VS::Actors::RestoreLiveActorIdlePose(4);
-  passed = passed && actor.animationId == 0xC7;
-  Actors_actorRecords[4] = saved_actor;
+  passed = passed && actor.animation_id == 0xC7;
+  VS::Actors::actorRecords[4] = saved_actor;
   VS::Field::gimmickInstances[4] = saved_object;
   return passed;
 }
@@ -552,31 +551,31 @@ int Tests_TargetSphereWireframe(void) {
 }
 
 int Tests_DirectMovementCommand(void) {
-  Actors_ActorRecord actor;
+  VS::Actors::ActorRecord actor;
   std::ranges::fill(std::as_writable_bytes(std::span(&actor, 1)),
                     std::byte{0xA5});
-  Actors_ActorRecord* saved = Actors_actorRecords[3];
-  Actors_actorRecords[3] = &actor;
+  VS::Actors::ActorRecord* saved = VS::Actors::actorRecords[3];
+  VS::Actors::actorRecords[3] = &actor;
   VS::Actors::ActorMovementRequests& requests =
       VS::Actors::ActorRecordMovementRequests();
   VS::Actors::SetDirectMovement(requests, 3, 0xC00, 1536);
   int passed =
-      actor.turnState.mode == 0 && actor.turnState.reserved1 == 0 &&
-      actor.turnState.reserved2 == 0 && actor.turnState.reserved3 == 0 &&
-      actor.turnState.direction == 0xC00 && actor.turnState.facing == 0xC00 &&
-      actor.turnState.distance == 1536 &&
-      static_cast<unsigned>(actor.turnState.reservedC) == 0xA5A5A5A5u;
+      actor.turn_state.mode == 0 && actor.turn_state.reserved1 == 0 &&
+      actor.turn_state.reserved2 == 0 && actor.turn_state.reserved3 == 0 &&
+      actor.turn_state.direction == 0xC00 && actor.turn_state.facing == 0xC00 &&
+      actor.turn_state.distance == 1536 &&
+      static_cast<unsigned>(actor.turn_state.reserved0c) == 0xA5A5A5A5u;
   VS::Actors::SetDirectMovement(requests, 3, 0, 0);
-  passed = passed && actor.turnState.mode == 0 &&
-           actor.turnState.distance == 0 && actor.turnState.direction == 0 &&
-           actor.turnState.facing == 0;
+  passed = passed && actor.turn_state.mode == 0 &&
+           actor.turn_state.distance == 0 && actor.turn_state.direction == 0 &&
+           actor.turn_state.facing == 0;
   VS::Actors::QueueNavigationTileTarget(requests, 3, 0x300, 1024, 0x800);
-  passed = passed && actor.turnState.mode == 1 &&
-           actor.turnState.direction == 0x300 &&
-           actor.turnState.facing == 0x800 &&
-           actor.turnState.distance == 1024 &&
-           static_cast<unsigned>(actor.turnState.reservedC) == 0xA5A5A5A5u;
-  Actors_actorRecords[3] = saved;
+  passed = passed && actor.turn_state.mode == 1 &&
+           actor.turn_state.direction == 0x300 &&
+           actor.turn_state.facing == 0x800 &&
+           actor.turn_state.distance == 1024 &&
+           static_cast<unsigned>(actor.turn_state.reserved0c) == 0xA5A5A5A5u;
+  VS::Actors::actorRecords[3] = saved;
   return passed;
 }
 
@@ -660,8 +659,8 @@ int Tests_FacialTextureBankHandoff(void) {
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   const unsigned char saved_bank = VS::Actors::sharedSequenceBankIndex;
   const unsigned char saved_row = VS::Actors::textureSlotRowOffsets[0];
-  Actors_ActorRecord* saved_actors[17];
-  std::ranges::copy(Actors_actorRecords, saved_actors);
+  VS::Actors::ActorRecord* saved_actors[17];
+  std::ranges::copy(VS::Actors::actorRecords, saved_actors);
   unsigned char saved_origins[4];
   memcpy(saved_origins, VS::Actors::textureSlotOrigins.data(),
          sizeof saved_origins);
@@ -688,13 +687,13 @@ int Tests_FacialTextureBankHandoff(void) {
   int passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
                VS::Content::legacyActorAssetRequests[0].asset_kind == 9 &&
                VS::Actors::sharedSequenceBankTexturePages[0] == 26;
-  Actors_ActorRecord actor = {0};
-  actor.textureHeaderBit = 1;
-  actor.textureOverlays[6] = VS::Actors::TextureOverlayRect{16, 20, 8, 2};
-  actor.textureAnimationFrames[1] =
+  VS::Actors::ActorRecord actor = {0};
+  actor.texture_header_bit = 1;
+  actor.texture_overlays[6] = VS::Actors::TextureOverlayRect{16, 20, 8, 2};
+  actor.texture_animation_frames[1] =
       VS::Actors::TextureAnimationFrame{7, 8, 0, 2};
-  actor.textureAnimationSlots[1].timeline = 1;
-  actor.textureAnimationSlots[1].mode = 1;
+  actor.texture_animation_slots[1].timeline = 1;
+  actor.texture_animation_slots[1].mode = 1;
   VS::Actors::secondarySlotSequences[1][0] =
       VS::Actors::TextureAnimationKeyRecord{2, 5};
   VS::Actors::sharedSequenceBankIndex = 0;
@@ -717,13 +716,13 @@ int Tests_FacialTextureBankHandoff(void) {
   LegacyGpu_WalkList(&ordering[0x821]);
   passed = FacialTexturePixelsMatch(&destination, image, kFirstFrameColumn) &&
            passed;
-  std::ranges::fill(Actors_actorRecords, nullptr);
-  Actors_actorRecords[1] = &actor;
-  actor.textureRowOffsets[1] = 0xFF;
-  actor.momentumDistance = 0x12FF;
-  passed = passed && actor.textureRowOffsets[2] == 0xFF &&
-           offsetof(Actors_ActorRecord, momentumDistance) ==
-               offsetof(Actors_ActorRecord, textureRowOffsets) + 2;
+  std::ranges::fill(VS::Actors::actorRecords, nullptr);
+  VS::Actors::actorRecords[1] = &actor;
+  actor.texture_row_offsets[1] = 0xFF;
+  actor.momentum_distance = 0x12FF;
+  passed = passed && actor.texture_row_offsets[2] == 0xFF &&
+           offsetof(VS::Actors::ActorRecord, momentum_distance) ==
+               offsetof(VS::Actors::ActorRecord, texture_row_offsets) + 2;
   for (unsigned selected = 2; selected <= 3; ++selected) {
     VS::Actors::sharedSequenceBankIndex = 0;
     ClearOTagR(ordering, 0x822);
@@ -774,7 +773,7 @@ int Tests_FacialTextureBankHandoff(void) {
       saved_primitives;
   VS::Actors::sharedSequenceBankIndex = saved_bank;
   VS::Actors::textureSlotRowOffsets[0] = saved_row;
-  std::ranges::copy(saved_actors, Actors_actorRecords);
+  std::ranges::copy(saved_actors, VS::Actors::actorRecords.begin());
   memcpy(VS::Actors::textureSlotOrigins.data(), saved_origins,
          sizeof saved_origins);
   VS::Actors::secondarySlotSequences[1][0] = saved_key;
@@ -783,7 +782,7 @@ int Tests_FacialTextureBankHandoff(void) {
 
 int Tests_ActorTextureFrameRectangles(int wide, int fallback,
                                       unsigned* command) {
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   const VS::Render::FrameScratch saved_frame =
       *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
@@ -814,15 +813,15 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   const int16_t origin[2] = {4, 0};
   memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
   VS::Actors::textureSlotRowOffsets[0] = 1;
-  actor.textureHeaderBit = wide;
-  actor.textureSlot = 0;
-  actor.textureRowOffsets[0] = 7;
+  actor.texture_header_bit = wide;
+  actor.texture_slot = 0;
+  actor.texture_row_offsets[0] = 7;
   const VS::Actors::TextureOverlayRect rectangle = {16, 20, 32, 12};
-  actor.textureOverlays[0] = rectangle;
-  actor.textureOverlays[6] = rectangle;
-  actor.textureAnimationFrames[0] =
+  actor.texture_overlays[0] = rectangle;
+  actor.texture_overlays[6] = rectangle;
+  actor.texture_animation_frames[0] =
       VS::Actors::TextureAnimationFrame{1, 32, 5, 2};
-  actor.textureCellOrigins[1] =
+  actor.texture_cell_origins[1] =
       VS::Actors::TextureCellOriginRecord{32, 5, 2, 0};
   VS::Actors::UploadLiveActorTextureFrame(&actor, fallback ? 1 : 0, 3);
   const unsigned divisor = wide ? 2 : 4;
@@ -869,17 +868,17 @@ int Tests_RoomSpawnCountGuard(void) {
 
 int TestGimmickStackTop(int scenario) {
   enum { kActorSlots = 17, kGimmickSlots = 16, kRoot = 3, kMember = 4 };
-  Actors_ActorRecord* saved_actors[kActorSlots];
+  VS::Actors::ActorRecord* saved_actors[kActorSlots];
   VS::Field::GimmickInstance* saved_objects[kGimmickSlots];
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   VS::Field::GimmickInstance root = {0};
   VS::Field::GimmickInstance member = {0};
   const int skipped = scenario == 0;
   const int has_actor = scenario != 0;
   const int has_member = scenario == 2;
   for (int i = 0; i < kActorSlots; ++i) {
-    saved_actors[i] = Actors_actorRecords[i];
-    Actors_actorRecords[i] = nullptr;
+    saved_actors[i] = VS::Actors::actorRecords[i];
+    VS::Actors::actorRecords[i] = nullptr;
   }
   for (int i = 0; i < kGimmickSlots; ++i) {
     saved_objects[i] = VS::Field::gimmickInstances[i];
@@ -897,24 +896,24 @@ int TestGimmickStackTop(int scenario) {
   if (has_member) VS::Field::gimmickInstances[kMember] = &member;
   if (has_actor) {
     actor.instance.slot = 2;
-    actor.instance.currentTileX = actor.instance.currentTileZ = 2;
+    actor.instance.current_tile_x = actor.instance.current_tile_z = 2;
     actor.instance.position = (SVECTOR){320, -128, 320, 0};
-    actor.instance.rootMotion = (SVECTOR){1, 2, 3, 4};
-    Actors_actorRecords[2] = &actor;
+    actor.instance.root_motion = (SVECTOR){1, 2, 3, 4};
+    VS::Actors::actorRecords[2] = &actor;
   }
   VS::Field::DropUnsupportedGimmickStackEntry(kRoot);
   int passed = root.object_info.is_falling == 1;
   if (has_actor) {
-    passed &= actor.instance.movementMode == 3 &&
-              actor.instance.jumpCountdown == 4 && actor.destinationMode == 1 &&
-              actor.destinationX == 2 && actor.destinationZ == 2 &&
-              actor.instance.rootMotion.vx == 0 &&
-              actor.instance.rootMotion.vy == 0 &&
-              actor.instance.rootMotion.vz == 0 && actor.supportGimmick == 0;
+    passed &= actor.instance.movement_mode == 3 &&
+              actor.instance.jump_countdown == 4 &&
+              actor.destination_mode == 1 && actor.destination_x == 2 &&
+              actor.destination_z == 2 && actor.instance.root_motion.vx == 0 &&
+              actor.instance.root_motion.vy == 0 &&
+              actor.instance.root_motion.vz == 0 && actor.support_gimmick == 0;
   }
   if (has_member) passed &= member.mode == 0xFC && member.velocity_y == 0;
   for (int i = 0; i < kActorSlots; ++i) {
-    Actors_actorRecords[i] = saved_actors[i];
+    VS::Actors::actorRecords[i] = saved_actors[i];
   }
   for (int i = 0; i < kGimmickSlots; ++i) {
     VS::Field::gimmickInstances[i] = saved_objects[i];
@@ -924,11 +923,11 @@ int TestGimmickStackTop(int scenario) {
 
 int TestOptionalMovementWrapper(int operation, int rate) {
   enum { kSlot = 4 };
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   SVECTOR target = {117, -384, 370, 0};
   VS::Actors::TileTarget tile = {0};
   int valid = 1;
-  Actors_actorRecords[kSlot] = nullptr;
+  VS::Actors::actorRecords[kSlot] = nullptr;
   switch (operation) {
     case 0:
       VS::Actors::MoveLiveActorToPositionAtRate(kSlot, &target, rate, rate);
@@ -958,21 +957,21 @@ int TestOptionalMovementWrapper(int operation, int rate) {
       valid = 0;
       break;
   }
-  const int passed = valid && Actors_actorRecords[kSlot] == nullptr;
-  Actors_actorRecords[kSlot] = saved_actor;
+  const int passed = valid && VS::Actors::actorRecords[kSlot] == nullptr;
+  VS::Actors::actorRecords[kSlot] = saved_actor;
   return passed;
 }
 
 int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   enum { kSlot = 4, kDefaultRate = 3 };
-  Actors_ActorRecord actor = {0};
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   const char saved_control = VS::Event::scriptControlledActors[kSlot];
   const char saved_skip = VS::Event::skipState;
   u_char instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
   instruction[9] = static_cast<u_char>(rate);
-  Actors_actorRecords[kSlot] = present ? &actor : nullptr;
-  actor.moveRate = kDefaultRate;
+  VS::Actors::actorRecords[kSlot] = present ? &actor : nullptr;
+  actor.move_rate = kDefaultRate;
   actor.instance.position = (SVECTOR){100, 200, 300, 0};
   VS::Event::skipState = skip ? 2 : 0;
   VS::Event::scriptControlledActors[kSlot] = 0;
@@ -980,10 +979,10 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
       VS::Event::ScriptSlideActorToWorldPosOpcode(instruction, 0);
   int passed = status == 0 && VS::Event::scriptControlledActors[kSlot] == 1;
   if (present) {
-    passed &= actor.moveRate == kDefaultRate;
-    passed &= actor.instance.rootMotion.vx == 17 &&
-              actor.instance.rootMotion.vy == -584 &&
-              actor.instance.rootMotion.vz == 70;
+    passed &= actor.move_rate == kDefaultRate;
+    passed &= actor.instance.root_motion.vx == 17 &&
+              actor.instance.root_motion.vy == -584 &&
+              actor.instance.root_motion.vz == 70;
     if (rate == 0 || skip) {
       passed &= actor.instance.position.vx == 117 &&
                 actor.instance.position.vy == -384 &&
@@ -992,10 +991,10 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
       passed &= actor.instance.position.vx == 100 &&
                 actor.instance.position.vy == 200 &&
                 actor.instance.position.vz == 300 &&
-                actor.instance.currentAnimation > 0;
+                actor.instance.current_animation > 0;
     }
   }
-  Actors_actorRecords[kSlot] = saved_actor;
+  VS::Actors::actorRecords[kSlot] = saved_actor;
   VS::Event::scriptControlledActors[kSlot] = saved_control;
   VS::Event::skipState = saved_skip;
   return passed;
@@ -1025,11 +1024,11 @@ static u_short ScriptedEffectSelector(int scenario) {
 
 int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   VS::Field::GimmickInstance object = {0};
   Battle_Actor battle_actor = {nullptr};
   Battle_Actor* saved_battle[kSlots];
-  Actors_ActorRecord* saved_actor[kSlots];
+  VS::Actors::ActorRecord* saved_actor[kSlots];
   VS::Field::GimmickInstance* saved_object[kSlots];
   const VS::Effects::LiveActionEffectRequest saved_request =
       VS::Effects::actionRequest;
@@ -1045,10 +1044,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   memcpy(request_before, &VS::Effects::actionRequest, sizeof request_before);
   for (int i = 0; i < kSlots; ++i) {
     saved_battle[i] = VS::Battle::actors[i];
-    saved_actor[i] = Actors_actorRecords[i];
+    saved_actor[i] = VS::Actors::actorRecords[i];
     saved_object[i] = VS::Field::gimmickInstances[i];
     VS::Battle::actors[i] = nullptr;
-    Actors_actorRecords[i] = nullptr;
+    VS::Actors::actorRecords[i] = nullptr;
     VS::Field::gimmickInstances[i] = nullptr;
   }
   memcpy(saved_bitmaps, VS::Effects::tokenBitmaps, sizeof saved_bitmaps);
@@ -1065,7 +1064,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
     if (scenario == 2) {
       VS::Field::gimmickInstances[slot] = &object;
     } else {
-      Actors_actorRecords[slot] = &actor;
+      VS::Actors::actorRecords[slot] = &actor;
     }
   }
   const u_short selector = ScriptedEffectSelector(scenario);
@@ -1090,7 +1089,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
               VS::Effects::actionRequest.targets[0].Actor().actor == slot;
     if (empty) {
       passed &= VS::Battle::actors[slot] == nullptr &&
-                Actors_actorRecords[slot] == nullptr &&
+                VS::Actors::actorRecords[slot] == nullptr &&
                 VS::Field::gimmickInstances[slot] == nullptr;
       // The started effect's emit_to readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
@@ -1117,7 +1116,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   }
   for (int i = 0; i < kSlots; ++i) {
     VS::Battle::actors[i] = saved_battle[i];
-    Actors_actorRecords[i] = saved_actor[i];
+    VS::Actors::actorRecords[i] = saved_actor[i];
     VS::Field::gimmickInstances[i] = saved_object[i];
   }
   memcpy(VS::Effects::tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
@@ -1134,36 +1133,36 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   enum { kModelWords = 20, kBoneLength = 128 };
   const int slot = owner >= 4 ? 16 : 3;
   const int has_gimmick_slot = slot < std::ssize(VS::Field::gimmickInstances);
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   VS::Field::GimmickInstance object = {0};
   unsigned model_bytes[kModelWords] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(model_bytes);
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[slot];
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[slot];
   VS::Field::GimmickInstance* saved_object =
       has_gimmick_slot ? VS::Field::gimmickInstances[slot] : nullptr;
   const MATRIX saved_matrix = VS::Actors::boneMatrixScratch;
   const VS::Render::ModelScratchpad saved_workspace =
       *VS::Render::ModelWorkspace();
-  Actors_actorRecords[slot] =
+  VS::Actors::actorRecords[slot] =
       owner == 0 || owner == 2 || owner == 5 ? &actor : nullptr;
   if (has_gimmick_slot) {
     VS::Field::gimmickInstances[slot] =
         owner == 1 || owner == 2 ? &object : nullptr;
   }
   actor.instance.model = object.model = model;
-  actor.instance.boneCount = object.bone_count = 1;
-  actor.modelDataSize = sizeof model_bytes;
+  actor.instance.bone_count = object.bone_count = 1;
+  actor.model_data_size = sizeof model_bytes;
   VS::Render::RecordLiveModelExtent(model, sizeof model_bytes);
   model->bones[0].length = kBoneLength;
   VS::Actors::boneMatrixScratch = (MATRIX){0};
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
     VS::Actors::boneMatrixScratch.m[axis][axis] = kFixedPointOne;
     VS::Actors::boneMatrixScratch.t[axis] = (axis + 1) * 10;
-    actor.boneMatrices[0].m[axis][axis] = kFixedPointOne;
+    actor.bone_matrices[0].m[axis][axis] = kFixedPointOne;
     object.matrices[0].m[axis][axis] = kFixedPointOne;
-    actor.boneMatrices[0].t[axis] = (axis + 1) * 110;
-    object.matrices[0].t[axis] = actor.boneMatrices[0].t[axis] + 100;
+    actor.bone_matrices[0].t[axis] = (axis + 1) * 110;
+    object.matrices[0].t[axis] = actor.bone_matrices[0].t[axis] + 100;
   }
   Core_Gte_Reset();
   SVECTOR result = {1, 2, 3, 77};
@@ -1191,7 +1190,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
               memcmp(untouched.t, original.t, sizeof untouched.t) == 0 &&
               bone_length == 777;
   }
-  Actors_actorRecords[slot] = saved_actor;
+  VS::Actors::actorRecords[slot] = saved_actor;
   if (has_gimmick_slot) VS::Field::gimmickInstances[slot] = saved_object;
   VS::Render::ForgetLiveModelExtent(model);
   VS::Actors::boneMatrixScratch = saved_matrix;
@@ -1201,20 +1200,20 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
 }
 
 int Tests_ProjectedBoneEndpoints(void) {
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   unsigned modelBytes[24] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(modelBytes);
-  Actors_ActorRecord* saved = Actors_actorRecords[0];
-  Actors_actorRecords[0] = &actor;
-  actor.instance.boneCount = 1;
+  VS::Actors::ActorRecord* saved = VS::Actors::actorRecords[0];
+  VS::Actors::actorRecords[0] = &actor;
+  actor.instance.bone_count = 1;
   actor.instance.model = model;
-  actor.modelDataSize = sizeof modelBytes;
+  actor.model_data_size = sizeof modelBytes;
   model->bones[0].length = 128;
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
-    actor.boneMatrices[0].m[axis][axis] = kFixedPointOne;
+    actor.bone_matrices[0].m[axis][axis] = kFixedPointOne;
   }
-  actor.boneMatrices[0].t[2] = 1024;
+  actor.bone_matrices[0].t[2] = 1024;
   Core_Gte_Reset();
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
@@ -1230,14 +1229,14 @@ int Tests_ProjectedBoneEndpoints(void) {
   passed = passed &&
            VS::Actors::ProjectLiveActorBoneEndpoint(0, 1, output, 0) == -4 &&
            VS::Actors::ProjectLiveActorBoneEndpoint(-1, 0, output, 0) == -1;
-  Actors_actorRecords[0] = saved;
+  VS::Actors::actorRecords[0] = saved;
   Core_Gte_Reset();
   return passed;
 }
 
 int Tests_ActorPoseHierarchy(void) {
   unsigned file[32] = {0};
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   VS::Actors::ShpModel* model = reinterpret_cast<VS::Actors::ShpModel*>(file);
   const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   const VS::Actors::ModelRenderContext saved_context =
@@ -1245,34 +1244,35 @@ int Tests_ActorPoseHierarchy(void) {
   const VS::Render::ModelScratchpad saved_workspace =
       *VS::Render::ModelWorkspace();
   actor.instance.model = model;
-  actor.modelDataSize = sizeof file;
-  actor.instance.boneCount = 2;
-  actor.instance.scaleX = actor.instance.scaleY = actor.instance.scaleZ =
+  actor.model_data_size = sizeof file;
+  actor.instance.bone_count = 2;
+  actor.instance.scale_x = actor.instance.scale_y = actor.instance.scale_z =
       actor.scale = 4096;
   model->bones[0].length = 128;
   model->bones[1].parent_index = 0;
   for (int bone = 0; bone < 2; ++bone) {
-    actor.blendPose.scale_keys[bone].vx = actor.blendPose.scale_keys[bone].vy =
-        actor.blendPose.scale_keys[bone].vz = 64;
+    actor.blend_pose.scale_keys[bone].vx =
+        actor.blend_pose.scale_keys[bone].vy =
+            actor.blend_pose.scale_keys[bone].vz = 64;
   }
-  actor.blendPose.scale_keys[1].vx = 32;
+  actor.blend_pose.scale_keys[1].vx = 32;
   MATRIX camera = {0};
   for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
   setVector(&VS::Render::ModelWorkspace()->root_offset, 100, 200, 300);
   int passed = VS::Actors::BuildLiveActorModelPose(actor, camera) == 1 &&
-               actor.boneMatrices[0].t[0] == 100 &&
-               actor.boneMatrices[1].t[0] == -28 &&
-               actor.boneMatrices[1].t[1] == 200 &&
-               actor.boneMatrices[1].m[0][0] == 2048 &&
+               actor.bone_matrices[0].t[0] == 100 &&
+               actor.bone_matrices[1].t[0] == -28 &&
+               actor.bone_matrices[1].t[1] == 200 &&
+               actor.bone_matrices[1].m[0][0] == 2048 &&
                VS::Actors::skeletonPose.bone_matrices[1].m[0][0] == 4096;
-  actor.instance.isVisible = 1;
-  actor.instance.wasDrawn = 1;
-  actor.customTint = 1;
+  actor.instance.is_visible = -1;
+  actor.instance.was_drawn = 1;
+  actor.custom_tint = 1;
   actor.instance.tint = (VS::Render::ColorCode){100, 70, 20, 0};
-  actor.fadeRed = 255;
-  actor.fadeGreen = 50;
-  actor.fadeBlue = 246;
-  actor.instance.vertexGroupCount = 1;
+  actor.fade_red = 255;
+  actor.fade_green = 50;
+  actor.fade_blue = 246;
+  actor.instance.vertex_group_count = 1;
   model->group_section = 96;
   model->vertex_section = 100;
   model->polygon_section = 108;
@@ -1284,21 +1284,21 @@ int Tests_ActorPoseHierarchy(void) {
   Core_Gte_Reset();
   Core_Gte_SetGeomScreen(256);
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
-  passed = passed && actor.instance.wasDrawn &&
+  passed = passed && actor.instance.was_drawn &&
            VS::Actors::modelRenderContext.projected_vertex_count == 1;
-  passed = passed && actor.instance.baseColor.r == 96 &&
-           actor.instance.baseColor.g == 255 &&
-           actor.instance.baseColor.b == 0 &&
-           (actor.shadowBlend.color & 0xFFFFFF) == 0x144664;
-  actor.customTint = 0;
+  passed = passed && actor.instance.base_color.r == 96 &&
+           actor.instance.base_color.g == 255 &&
+           actor.instance.base_color.b == 0 &&
+           (actor.shadow_blend.color & 0xFFFFFF) == 0x144664;
+  actor.custom_tint = 0;
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
-  passed = passed && actor.instance.baseColor.r == 124 &&
-           actor.instance.baseColor.g == 255 &&
-           actor.instance.baseColor.b == 88;
+  passed = passed && actor.instance.base_color.r == 124 &&
+           actor.instance.base_color.g == 255 &&
+           actor.instance.base_color.b == 88;
   model->bones[1].parent_index = 1;
   passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
   model->bones[1].parent_index = 0;
-  actor.modelDataSize = sizeof(VS::Actors::ShpModel);
+  actor.model_data_size = sizeof(VS::Actors::ShpModel);
   passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
   VS::Actors::skeletonPose = saved_pose;
   VS::Actors::modelRenderContext = saved_context;
@@ -1315,11 +1315,11 @@ struct ModelPacketOptions {
 };
 
 static void BuildModelPacketFixture(VS::Actors::ShpModel* model,
-                                    Actors_ModelInstance* instance,
+                                    VS::Actors::ModelInstance* instance,
                                     const ModelPacketOptions* options) {
-  instance->triangleCount = 1;
-  instance->uvLayout = options->colored != 0;
-  instance->palettePulse.kind = static_cast<u_char>(options->pulse_mask);
+  instance->triangle_count = 1;
+  instance->uv_layout = static_cast<std::int8_t>(options->colored != 0);
+  instance->palette_pulse.kind = static_cast<u_char>(options->pulse_mask);
   if (static_cast<unsigned>(options->limb) < 8) {
     const u_short count = 1;
     const size_t group =
@@ -1356,8 +1356,8 @@ static void BuildModelPacketFixture(VS::Actors::ShpModel* model,
     VS::Actors::modelRenderContext.projected_vertices[3] = (160 << 16) | 160;
     VS::Actors::modelRenderContext.vertex_depths[3] =
         1024 + options->split * 128;
-    instance->triangleCount = 0;
-    instance->otherPolygonCount = 1;
+    instance->triangle_count = 0;
+    instance->other_polygon_count = 1;
     polygon[0] = 0x2C;
     polygon[1] = 20;
     polygon[2] = 3;
@@ -1386,11 +1386,9 @@ static int ModelPacketColorsMatch(const u_long* packet, int colored,
   return 1;
 }
 
-static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
-                                       const CVECTOR* tint,
-                                       VS::Actors::ShpModel* model,
-                                       unsigned appearance,
-                                       unsigned pulse_mask) {
+static void DrawGimmickOverrideFixture(
+    const VS::Actors::ModelInstance* instance, const CVECTOR* tint,
+    VS::Actors::ShpModel* model, unsigned appearance, unsigned pulse_mask) {
   VS::Field::GimmickInstance object = {0};
   enum { kSharedRendererHeaderBytes = 8 };
   memcpy(&object, instance, kSharedRendererHeaderBytes);
@@ -1413,7 +1411,7 @@ static_assert(0x20 + 2 * sizeof(MATRIX) + 2 * sizeof(int16_t) == 0x64,
 static_assert(offsetof(VS::Actors::WeaponModel, bone_world_matrices) != 0x20,
               "Native weapon pointers must not use the guest matrix offset");
 
-static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
+static void DrawWeaponOverrideFixture(const VS::Actors::ModelInstance* instance,
                                       const CVECTOR* tint,
                                       VS::Actors::ShpModel* model,
                                       unsigned appearance,
@@ -1432,7 +1430,7 @@ static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
 
 // An actor drawing its own geometry: the override drawers when its pulse or
 // appearance selects them (func_800B28A8 49EB8.c:292-304), else the plain pass.
-static void DrawActorPolygonsFixture(const Actors_ActorRecord& actor,
+static void DrawActorPolygonsFixture(const VS::Actors::ActorRecord& actor,
                                      bool colored, const CVECTOR& tint,
                                      unsigned pulse_mask, unsigned appearance) {
   if (VS::Actors::UsesModelOverrides(
@@ -1455,7 +1453,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   unsigned modelWords[32] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(modelWords);
-  Actors_ModelInstance instance = {0};
+  VS::Actors::ModelInstance instance = {0};
   const ModelPacketOptions options = {colored, split, limb, pulse_mask};
   const VS::Actors::ModelRenderContext saved_context =
       VS::Actors::modelRenderContext;
@@ -1488,13 +1486,13 @@ static int ModelPolygonPackets(int colored, int split, int limb,
     VS::Actors::modelRenderContext.vertex_depths[index] = kVertexDepth;
   }
   BuildModelPacketFixture(model, &instance, &options);
-  instance.actionAnimationState = appearance;
+  instance.action_animation_state = appearance;
   CVECTOR tint = {128, 96, 64, 0};
-  static Actors_ActorRecord actor;
+  static VS::Actors::ActorRecord actor;
   actor = {};
   actor.instance = instance;
   actor.instance.model = model;
-  actor.modelDataSize = sizeof modelWords;
+  actor.model_data_size = sizeof modelWords;
   VS::Render::RecordLiveModelExtent(model, sizeof modelWords);
   if (override_kind == 1) {
     DrawGimmickOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
@@ -1578,7 +1576,7 @@ int TestsModelWeaponOverridePackets(unsigned state, unsigned pulse_mask,
 int Tests_ModelProjectionGroups(void) {
   unsigned file[64] = {0};
   VS::Actors::ShpModel* model = reinterpret_cast<VS::Actors::ShpModel*>(file);
-  Actors_ModelInstance instance = {0};
+  VS::Actors::ModelInstance instance = {0};
   MATRIX matrices[2] = {0};
   const VS::Actors::ModelRenderContext saved = VS::Actors::modelRenderContext;
   model->group_section = 96;
@@ -1594,8 +1592,8 @@ int Tests_ModelProjectionGroups(void) {
       reinterpret_cast<SVECTOR*>(reinterpret_cast<unsigned char*>(file) + 104);
   vertices[0].vx = -64;
   vertices[2].vx = 64;
-  instance.boneCount = 2;
-  instance.vertexGroupCount = 2;
+  instance.bone_count = 2;
+  instance.vertex_group_count = 2;
   for (int bone = 0; bone < 2; ++bone) {
     for (int axis = 0; axis < 3; ++axis) matrices[bone].m[axis][axis] = 4096;
     matrices[bone].t[2] = 1024;
@@ -1604,11 +1602,11 @@ int Tests_ModelProjectionGroups(void) {
   Core_Gte_Reset();
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
-  static Actors_ActorRecord actor;
+  static VS::Actors::ActorRecord actor;
   actor = {};
   actor.instance = instance;
   actor.instance.model = model;
-  actor.modelDataSize = sizeof file;
+  actor.model_data_size = sizeof file;
   int passed =
       VS::Render::ProjectLiveActorModel(actor, matrices) &&
       VS::Actors::modelRenderContext.projected_vertex_count == 3 &&
@@ -1637,20 +1635,20 @@ int Tests_ModelWorkspaceIsolation(void) {
   const VS::Render::ModelScratchpad saved_workspace = *workspace;
   const MATRIX saved_basis = VS::Render::cameraBasisMatrix;
   const MATRIX saved_inverse = VS::Actors::boneMatrixScratch;
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   memcpy(saved_scratch, VS::Core::ScratchBase(), sizeof saved_scratch);
   memset(sentinel, 0xA5, sizeof sentinel);
   memcpy(VS::Core::ScratchBase(), sentinel, sizeof sentinel);
   memset(workspace, 0, sizeof *workspace);
-  actor.instance.scaleX = actor.instance.scaleY = actor.instance.scaleZ =
+  actor.instance.scale_x = actor.instance.scale_y = actor.instance.scale_z =
       actor.scale = 4096;
   actor.instance.position.vx = 100;
   actor.instance.position.vy = 200;
   actor.instance.position.vz = 300;
   actor.instance.facing = 1024;
-  actor.blendPose.bone_keys[41].vx = 8;
-  actor.blendPose.bone_keys[41].vy = -4;
-  actor.blendPose.bone_keys[41].vz = 12;
+  actor.blend_pose.bone_keys[41].vx = 8;
+  actor.blend_pose.bone_keys[41].vy = -4;
+  actor.blend_pose.bone_keys[41].vz = 12;
   VS::Actors::PrepareLiveActorRootTransform(&actor);
   int passed = workspace->root_offset.vx == 106 &&
                workspace->root_offset.vy == 198 &&
@@ -1688,10 +1686,10 @@ int Tests_SharedSequenceOffsets(void) {
       reinterpret_cast<VS::Actors::SeqAnimationBank*>((payload + 32 + 8));
   VS::Actors::SeqAnimationBank* second =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>((payload + 144 + 8));
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   VS::Content::LegacyActorAssetRequest request{};
   const auto saved_requests = VS::Content::legacyActorAssetRequests;
-  Actors_ActorRecord* saved_actors[17];
+  VS::Actors::ActorRecord* saved_actors[17];
   void* saved_data = VS::Actors::sharedSequenceData[0];
   int16_t saved_ids[16];
   int16_t saved_params[16];
@@ -1704,20 +1702,20 @@ int Tests_SharedSequenceOffsets(void) {
   u_short* header = nullptr;
   int passed;
 
-  std::ranges::copy(Actors_actorRecords, saved_actors);
+  std::ranges::copy(VS::Actors::actorRecords, saved_actors);
   memcpy(saved_ids, VS::Actors::sharedSequenceAnimationIds[0].data(),
          sizeof saved_ids);
   memcpy(saved_params, VS::Actors::sharedSequenceEntryParams[0].data(),
          sizeof saved_params);
   std::ranges::copy(VS::Actors::sharedSequenceAnimationData[0], saved_entries);
-  std::ranges::fill(Actors_actorRecords, nullptr);
-  Actors_actorRecords[0] = &actor;
+  std::ranges::fill(VS::Actors::actorRecords, nullptr);
+  VS::Actors::actorRecords[0] = &actor;
   VS::Actors::sharedSequenceData[0] = nullptr;
   VS::Actors::sharedSequenceBankIndex = 0;
   VS::Content::legacySequenceParsePhase = 0;
 
-  actor.modelId = 101;
-  actor.instance.boneCount = 2;
+  actor.model_id = 101;
+  actor.instance.bone_count = 2;
   first->animation_map = second->animation_map = 64;
   // Each embedded file's size word bounds the bank the parse registers.
   const u_int first_bytes = 144 - 32 - 8;
@@ -1740,7 +1738,8 @@ int Tests_SharedSequenceOffsets(void) {
            VS::Actors::sharedSequenceAnimationData[0][1] ==
                reinterpret_cast<char*>(payload) + 144 &&
            VS::Actors::sharedSequenceAnimationIds[0][2] == -1 &&
-           actor.sharedSequences[0] == first && actor.textureRowOffsets[0] == 5;
+           actor.shared_sequences[0] == first &&
+           actor.texture_row_offsets[0] == 5;
   if (passed) {
     passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
                  reinterpret_cast<intptr_t>(first) &&
@@ -1748,12 +1747,12 @@ int Tests_SharedSequenceOffsets(void) {
              VS::Actors::lastResolvedSequenceIndex == 1;
   }
   // Reparsing the bank rebinds every actor (func_8009CAEC).
-  actor.modelId = 102;
+  actor.model_id = 102;
   VS::Actors::sharedSequenceData[0] = nullptr;
   VS::Content::legacyActorAssetRequests[0] = request;
   passed = passed && VS::Content::UpdateLiveActorAssetQueue() == 1;
-  passed = passed && actor.sharedSequences[0] == second &&
-           actor.textureRowOffsets[0] == 6;
+  passed = passed && actor.shared_sequences[0] == second &&
+           actor.texture_row_offsets[0] == 6;
   if (passed) {
     passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
                  reinterpret_cast<intptr_t>(second) &&
@@ -1761,7 +1760,7 @@ int Tests_SharedSequenceOffsets(void) {
              VS::Actors::lastResolvedSequenceIndex == 0;
   }
 
-  std::ranges::copy(saved_actors, Actors_actorRecords);
+  std::ranges::copy(saved_actors, VS::Actors::actorRecords.begin());
   memcpy(VS::Actors::sharedSequenceAnimationIds[0].data(), saved_ids,
          sizeof saved_ids);
   memcpy(VS::Actors::sharedSequenceEntryParams[0].data(), saved_params,
@@ -1783,7 +1782,7 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   u_int file[64] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
-  Actors_ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {0};
   unsigned char scratch[1024];
   const unsigned char tracks[] = {0xE0, 1, 2, 3, 0xE0, 1, 1, 1};
   char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
@@ -1795,10 +1794,10 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   bank->headers[5] = 8;
   memcpy(reinterpret_cast<u_char*>(file) + 68, tracks, sizeof tracks);
   VS::Actors::RegisterSequenceBank(bank, sizeof file);
-  actor.ownedSequence = bank;
-  actor.instance.boneCount = 1;
-  actor.framesPerStep = 1;
-  actor.animationLength = 10;
+  actor.owned_sequence = bank;
+  actor.instance.bone_count = 1;
+  actor.frames_per_step = 1;
+  actor.animation_length = 10;
   actor.pose.frame = 1;
   actor.pose.bone_keys[0].vx = 8191;
   memcpy(scratch, VS::Core::ScratchBase(), sizeof scratch);

@@ -11,8 +11,7 @@
 #include <string>
 #include <string_view>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -480,11 +479,11 @@ class LiveGazetteHost final : public GazetteHost {
     InitializeLiveAshleyPreviewPose();
   }
   std::optional<GazettePreviewCamera> PreviewCamera() override {
-    const auto* actor = Actors_actorRecords[kPreviewActor];
+    const auto* actor = VS::Actors::actorRecords[kPreviewActor];
     if (actor == nullptr) return std::nullopt;
     return GazettePreviewCamera{
-        actor->menuCameraDistance,
-        std::bit_cast<std::int16_t>(actor->collisionHeight)};
+        actor->menu_camera_distance,
+        std::bit_cast<std::int16_t>(actor->collision_height)};
   }
   GazetteText RankText() override {
     if (characterRank >= kRiskbreakerRankCount) return {};

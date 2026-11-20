@@ -153,7 +153,7 @@ TEST_CASE(
   fixture.BindFrame();
   st::fadeScreen = 0;
   st::delayScreenUpdate = 2;
-  Actors_actorRecords[1]->collisionHeight = 32768;
+  VS::Actors::actorRecords[1]->collision_height = 32768;
   ModuleEntry(0x80106150, &st::LiveDrawFrame)();
   CHECK(VS::Render::FrameScratchpad().camera.look_at.vy == -67108864);
   CHECK(st::delayScreenUpdate == 1);

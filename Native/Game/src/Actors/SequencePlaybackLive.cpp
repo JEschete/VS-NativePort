@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
@@ -115,10 +115,10 @@ void StoreKeys(const PoseKeyArray& keys,
 }
 
 // Resolves the actor's current clip within its registered bank.
-bool ResolveClip(const Actors_ActorRecord& actor, AnimationClip& clip,
+bool ResolveClip(const VS::Actors::ActorRecord& actor, AnimationClip& clip,
                  const void*& bank_address) {
   const AnimationHeader header =
-      FindLiveAnimationHeader(actor, actor.animationId);
+      FindLiveAnimationHeader(actor, actor.animation_id);
   bank_address = header.bank.data();
   if (header.status != AnimationHeaderStatus::kFound) {
     return false;
@@ -127,7 +127,7 @@ bool ResolveClip(const Actors_ActorRecord& actor, AnimationClip& clip,
   std::int32_t motion = 0;
   std::memcpy(&motion, header.bank.data(), sizeof motion);
   if (motion < 0 || static_cast<std::size_t>(motion) > header.bank.size()) {
-    Report(bank_address, actor.animationId, Problem::kMotionOutsideBank);
+    Report(bank_address, actor.animation_id, Problem::kMotionOutsideBank);
     return false;
   }
   clip = {.header = header.bank.subspan(header.header_offset),
@@ -135,7 +135,7 @@ bool ResolveClip(const Actors_ActorRecord& actor, AnimationClip& clip,
   return true;
 }
 
-void ApplyLivePoseTracks(Actors_ActorRecord& actor,
+void ApplyLivePoseTracks(VS::Actors::ActorRecord& actor,
                          VS::Actors::AnimationPose& pose, TrackFrames frames) {
   AnimationClip clip;
   const void* bank = nullptr;
@@ -144,7 +144,7 @@ void ApplyLivePoseTracks(Actors_ActorRecord& actor,
   }
   SkeletalPose typed = LoadLiveSkeletalPose(pose);
   const PoseTrackResult result =
-      ApplyPoseTracks(clip, actor.instance.boneCount, frames, typed);
+      ApplyPoseTracks(clip, actor.instance.bone_count, frames, typed);
   StoreLiveSkeletalPose(typed, pose);
   if (result.moved) {
     SVECTOR& position = actor.instance.position;
@@ -156,43 +156,43 @@ void ApplyLivePoseTracks(Actors_ActorRecord& actor,
                                static_cast<std::uint32_t>(result.step.z));
   }
   if (result.overrun) {
-    Report(bank, actor.animationId, Problem::kTrackOverrun);
+    Report(bank, actor.animation_id, Problem::kTrackOverrun);
   }
 }
 
 class LiveSkeletalAnimation final : public SkeletalAnimationHost {
  public:
-  LiveSkeletalAnimation(Actors_ActorRecord& actor, int mode)
+  LiveSkeletalAnimation(VS::Actors::ActorRecord& actor, int mode)
       : actor_(actor), mode_(mode) {}
 
-  int FramesPerStep() const override { return actor_.framesPerStep; }
+  int FramesPerStep() const override { return actor_.frames_per_step; }
   int Frame() const override { return actor_.pose.frame; }
   void SetFrame(int frame) override {
     actor_.pose.frame = WrapSigned16(static_cast<std::uint32_t>(frame));
   }
   int AnimationLength() const override {
-    return static_cast<u_short>(actor_.animationLength);
+    return static_cast<u_short>(actor_.animation_length);
   }
   void AdvanceShadow() override {
-    ShadowBlend shadow = LoadLiveShadowBlend(actor_.shadowBlend);
+    ShadowBlend shadow = LoadLiveShadowBlend(actor_.shadow_blend);
     AdvanceShadowBlend(shadow);
-    StoreLiveShadowBlend(shadow, actor_.shadowBlend);
+    StoreLiveShadowBlend(shadow, actor_.shadow_blend);
   }
   void SetReachedEnd(bool reached) override {
     actor_.pose.reached_end = reached ? -1 : 0;
   }
   bool PlayQueuedAnimation() override {
-    if (actor_.queuedAnimation == 0) {
+    if (actor_.queued_animation == 0) {
       return false;
     }
-    PlayLiveActorAnimationAtFrame(actor_.instance.slot, actor_.queuedAnimation,
-                                  actor_.queuedParameterA,
-                                  actor_.queuedParameterB);
-    actor_.queuedAnimation = 0;
+    PlayLiveActorAnimationAtFrame(actor_.instance.slot, actor_.queued_animation,
+                                  actor_.queued_parameter_a,
+                                  actor_.queued_parameter_b);
+    actor_.queued_animation = 0;
     return true;
   }
   bool EventsDue() const override {
-    return actor_.instance.isFrozen &&
+    return actor_.instance.is_frozen &&
            actor_.pose.next_event_frame == actor_.pose.frame;
   }
   void RunEvents() override {
@@ -208,7 +208,7 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
   }
 
  private:
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
   int mode_;
 };
 }  // namespace
@@ -360,7 +360,7 @@ void StoreLiveShadowBlend(const ShadowBlend& shadow, ShadowBlendRecord& live) {
   live.radius_shrink_delta = shadow.radius_shrink_delta;
 }
 
-void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {
+void AdvanceLiveSkeletalAnimation(VS::Actors::ActorRecord& actor, int mode) {
   LiveSkeletalAnimation host(actor, mode);
   AdvanceSkeletalAnimation(host);
 }

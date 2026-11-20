@@ -48,14 +48,14 @@ std::vector<std::string> ChangedModuleBindings(
 TEST_CASE("Terminal fixture owns production model resources",
           "[status-terminal][status-terminal-live]") {
   Fixture fixture;
-  const auto* source = Actors_actorRecords[0];
-  const auto* preview = Actors_actorRecords[1];
+  const auto* source = VS::Actors::actorRecords[0];
+  const auto* preview = VS::Actors::actorRecords[1];
   REQUIRE(source != nullptr);
   REQUIRE(preview != nullptr);
   CHECK(preview != source);
   CHECK(memory::LivePayloadCapacity(source).has_value());
   CHECK(memory::LivePayloadCapacity(preview).has_value());
-  CHECK(preview->instance.boneCount > 0);
+  CHECK(preview->instance.bone_count > 0);
   CHECK(VS::Render::ValidateLiveActorModel(*preview));
   CHECK(preview->instance.model == source->instance.model);
 }
@@ -63,13 +63,13 @@ TEST_CASE("Terminal fixture owns production model resources",
 TEST_CASE("Terminal fixture loads production sequence font and queue resources",
           "[status-terminal][status-terminal-live]") {
   Fixture fixture;
-  const auto* source = Actors_actorRecords[0];
-  const auto* preview = Actors_actorRecords[1];
+  const auto* source = VS::Actors::actorRecords[0];
+  const auto* preview = VS::Actors::actorRecords[1];
   REQUIRE(source != nullptr);
   REQUIRE(preview != nullptr);
-  CHECK_FALSE(VS::Actors::SequenceBankBytes(preview->commonSequence).empty());
-  CHECK_FALSE(VS::Actors::SequenceBankBytes(preview->battleSequence).empty());
-  CHECK(preview->battleSequence != source->battleSequence);
+  CHECK_FALSE(VS::Actors::SequenceBankBytes(preview->common_sequence).empty());
+  CHECK_FALSE(VS::Actors::SequenceBankBytes(preview->battle_sequence).empty());
+  CHECK(preview->battle_sequence != source->battle_sequence);
   CHECK(std::ranges::all_of(
       VS::Content::legacyActorAssetRequests,
       [](const auto& request) { return request.asset_kind == 0; }));
@@ -155,7 +155,7 @@ TEST_CASE(
     "[status-terminal][status-terminal-live][F02679]") {
   Fixture fixture;
   st::delayScreenUpdate = 2;
-  Actors_actorRecords[1]->collisionHeight = 32768;
+  VS::Actors::actorRecords[1]->collision_height = 32768;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   st::LiveDrawFrame();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
@@ -164,9 +164,9 @@ TEST_CASE(
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data() + 37);
   {
-    equipment_detail_tests::ValueRestore<Actors_ActorRecord*> preview{
-        Actors_actorRecords[1]};
-    Actors_actorRecords[1] = nullptr;
+    equipment_detail_tests::ValueRestore<VS::Actors::ActorRecord*> preview{
+        VS::Actors::actorRecords[1]};
+    VS::Actors::actorRecords[1] = nullptr;
     st::LiveDrawFrame();
     CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
   }
@@ -222,14 +222,14 @@ TEST_CASE("Terminal Live rejects expired item text and preview allocations",
   CHECK(st::LiveUpdateStatusTerminal(fixture.State()) == 0);
   CHECK(*fixture.State() == 3);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
-  auto* expired_preview = Actors_actorRecords[1];
+  auto* expired_preview = VS::Actors::actorRecords[1];
   fw::ReleaseLiveActorPreview();
-  Actors_actorRecords[1] = expired_preview;
+  VS::Actors::actorRecords[1] = expired_preview;
   st::LiveDrawFrame();
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 2);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.primitives.data());
-  Actors_actorRecords[1] = nullptr;
+  VS::Actors::actorRecords[1] = nullptr;
 }
 
 TEST_CASE(
@@ -261,8 +261,8 @@ TEST_CASE("Terminal fixture restores production module bindings",
     Fixture fixture;
     *fixture.State() = 3;
     REQUIRE(st::LiveUpdateStatusTerminal(fixture.State()) == 0);
-    model = Actors_actorRecords[0]->instance.model;
-    sequence = Actors_actorRecords[1]->battleSequence;
+    model = VS::Actors::actorRecords[0]->instance.model;
+    sequence = VS::Actors::actorRecords[1]->battle_sequence;
   }
   const auto changed = ChangedModuleBindings(snapshots);
   CAPTURE(changed);

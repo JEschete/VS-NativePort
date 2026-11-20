@@ -19,7 +19,7 @@
 // as ActorStateRecord values the host lends them, so they reach no actor
 // record layout, PS1 address or bitfield word.
 namespace VS::Actors {
-// The actor table (Actors_actorRecords): Ashley, the room actors and their
+// The actor table (VS::Actors::actorRecords): Ashley, the room actors and their
 // companion models.
 inline constexpr int kActorStateSlots = 17;
 // attach_parent of an actor attached to no parent.
@@ -27,7 +27,8 @@ inline constexpr std::uint8_t kNoAttachParent = 0xFF;
 // Companion slots below this are none (0) or a marker (1), not a record.
 inline constexpr int kFirstCompanionRecord = 2;
 
-// Where a companion model draws relative to its owner (Actors_CompanionOffset).
+// Where a companion model draws relative to its owner
+// (VS::Actors::CompanionOffsetRecord).
 struct CompanionOffset {
   std::int8_t x = 0;
   std::int8_t y = 0;
@@ -47,7 +48,8 @@ struct CompanionStyle {
                          const CompanionStyle&) = default;
 };
 
-// The unnamed request bytes reserved1 to reserved3 (Actors_MovementRequest).
+// The unnamed request bytes reserved1 to reserved3
+// (VS::Actors::MovementRequest).
 inline constexpr std::size_t kMovementRequestReservedBytes = 3;
 
 // The movement-request bytes ActorMotion does not hold; the movement resets

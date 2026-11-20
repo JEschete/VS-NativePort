@@ -15,8 +15,8 @@
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorMovement.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -558,49 +558,49 @@ namespace {
 }
 
 // The fields the rules only read, which a store leaves to the record.
-void SetReadFields(const MovementActor& actor, Actors_ActorRecord& record) {
-  record.instance.isSkipped = static_cast<char>(actor.skipped ? -1 : 0);
-  record.instance.wasDrawn = actor.was_drawn ? 1 : 0;
-  record.instance.weaponDrawn = actor.weapon_drawn ? 1 : 0;
-  record.instance.attachParent = actor.attach_parent;
-  record.instance.attachBone = actor.attach_bone;
-  record.instance.reserved5F = actor.tile_spare;
-  record.wallContact = actor.wall_contact ? 1 : 0;
-  record.animationId = actor.animation_id;
-  record.blendFrame = static_cast<char>(actor.blend_frame);
-  record.collisionRadius = actor.collision_radius;
-  record.collisionHeight = actor.collision_height;
+void SetReadFields(const MovementActor& actor,
+                   VS::Actors::ActorRecord& record) {
+  record.instance.is_skipped = static_cast<char>(actor.skipped ? -1 : 0);
+  record.instance.was_drawn = actor.was_drawn ? 1 : 0;
+  record.instance.weapon_drawn = actor.weapon_drawn ? 1 : 0;
+  record.instance.attach_parent = actor.attach_parent;
+  record.instance.attach_bone = actor.attach_bone;
+  record.instance.reserved5f = actor.tile_spare;
+  record.wall_contact = actor.wall_contact ? 1 : 0;
+  record.animation_id = actor.animation_id;
+  record.blend_frame = static_cast<char>(actor.blend_frame);
+  record.collision_radius = actor.collision_radius;
+  record.collision_height = actor.collision_height;
   record.pose.reached_end = actor.pose_reached_end ? -1 : 0;
-  record.companionSlot = actor.companion_slot;
-  record.turnState.step = {.vx = actor.request_step.x,
-                           .vy = actor.request_step.y,
-                           .vz = actor.request_step.z,
-                           .pad = actor.request_step.w};
+  record.companion_slot = actor.companion_slot;
+  record.turn_state.step = {.vx = actor.request_step.x,
+                            .vy = actor.request_step.y,
+                            .vz = actor.request_step.z,
+                            .pad = actor.request_step.w};
 }
 
 // The actor table, emptied for one test and then restored.
 struct LiveMovementState {
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
-  std::vector<std::unique_ptr<Actors_ActorRecord>> records;
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
+  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
 
   LiveMovementState() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
   }
   LiveMovementState(const LiveMovementState&) = delete;
   LiveMovementState& operator=(const LiveMovementState&) = delete;
   LiveMovementState(LiveMovementState&&) = delete;
   LiveMovementState& operator=(LiveMovementState&&) = delete;
   ~LiveMovementState() {
-    std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
   }
 
-  Actors_ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<Actors_ActorRecord>());
-    Actors_ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<u_char>(actor_id);
-    Actors_actorRecords[actor_id] = &actor;
+  VS::Actors::ActorRecord& AddActor(int actor_id) {
+    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
+    VS::Actors::ActorRecord& actor = *records.back();
+    actor.instance.slot = static_cast<std::uint8_t>(actor_id);
+    VS::Actors::actorRecords[actor_id] = &actor;
     return actor;
   }
 };
@@ -609,33 +609,33 @@ struct LiveMovementState {
 TEST_CASE("Live actor movement stores and loads every record field",
           "[actors][actors-movement]") {
   const MovementActor sample = SampleMovementActor();
-  auto record = std::make_unique<Actors_ActorRecord>();
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
   actors::StoreLiveMovementActor(sample, *record);
   SetReadFields(sample, *record);
   CHECK(actors::LoadLiveMovementActor(*record) == sample);
-  CHECK(record->instance.supportLayer == 3);
-  CHECK(record->supportGimmick == 12);
-  CHECK(record->opaque17FF == 6);
+  CHECK(record->instance.support_layer == 3);
+  CHECK(record->support_gimmick == 12);
+  CHECK(record->opaque17ff == 6);
   CHECK(record->instance.reserved50 == -7);
 
   // The rules never store the fields they only read.
-  auto other = std::make_unique<Actors_ActorRecord>();
-  other->animationId = 99;
-  other->companionSlot = 3;
+  auto other = std::make_unique<VS::Actors::ActorRecord>();
+  other->animation_id = 99;
+  other->companion_slot = 3;
   actors::StoreLiveMovementActor(sample, *other);
-  CHECK(other->animationId == 99);
-  CHECK(other->companionSlot == 3);
+  CHECK(other->animation_id == 99);
+  CHECK(other->companion_slot == 3);
 }
 
 TEST_CASE("Live movement tables copy the module tables",
           "[actors][actors-movement]") {
   const actors::MovementTables tables = actors::LiveMovementTables();
-  CHECK(tables.hang_frames.front() == Actors_kJumpHangFrames[0]);
+  CHECK(tables.hang_frames.front() == VS::Actors::jumpHangFrames[0]);
   CHECK(tables.result_animations.back() ==
-        Actors_kMotionResultAnimations[actors::kMotionResults - 1]);
-  CHECK(tables.hang_animation == Actors_kHangMotionAnimationId);
+        VS::Actors::motionResultAnimations[actors::kMotionResults - 1]);
+  CHECK(tables.hang_animation == VS::Actors::hangMotionAnimationId);
   CHECK(tables.landing_recovery.back() ==
-        Actors_kLandingRecoveryAnimations[actors::kJumpProfiles - 1]);
+        VS::Actors::landingRecoveryAnimations[actors::kJumpProfiles - 1]);
   for (std::size_t step = 0; step < actors::kGimmickSpinSteps; ++step) {
     CAPTURE(step);
     CHECK(tables.gimmick_spin_steps.at(step) ==
@@ -646,21 +646,21 @@ TEST_CASE("Live movement tables copy the module tables",
 TEST_CASE("Live movement adapters run the rules on the actor table",
           "[actors][actors-movement]") {
   LiveMovementState state;
-  Actors_ActorRecord& actor = state.AddActor(kActor);
+  VS::Actors::ActorRecord& actor = state.AddActor(kActor);
   // A locked animation keeps the jump's animation request off the bare
   // record's sequences.
-  actor.animationLocked = 1;
+  actor.animation_locked = 1;
   actors::BeginLiveActorJumpMovement(kActor, 0x100, 0);
-  CHECK(actor.instance.movementMode == kModeTakeoff);
-  CHECK(actor.instance.jumpCountdown == 6);
-  CHECK(actor.turnState.mode == 7);
-  CHECK(actor.turnState.direction == 0x100);
+  CHECK(actor.instance.movement_mode == kModeTakeoff);
+  CHECK(actor.instance.jump_countdown == 6);
+  CHECK(actor.turn_state.mode == 7);
+  CHECK(actor.turn_state.direction == 0x100);
 
-  actor.instance.jumpCountdown = 0;
-  actor.destinationMode = 0;
+  actor.instance.jump_countdown = 0;
+  actor.destination_mode = 0;
   actors::UpdateLiveActorJumpAndFall(kActor, &actor);
-  CHECK(actor.instance.movementMode == kModeAirborne);
-  CHECK(actor.instance.rootMotion.vy == -30);
+  CHECK(actor.instance.movement_mode == kModeAirborne);
+  CHECK(actor.instance.root_motion.vy == -30);
 }
 
 TEST_CASE("Live movement adapters refuse a missing record or a bad mode",
@@ -670,7 +670,7 @@ TEST_CASE("Live movement adapters refuse a missing record or a bad mode",
   actors::CancelLiveActorTeleportTransition(nullptr);
   actors::UpdateLiveActorPlatformContact(nullptr, 0);
   actors::UpdateLiveActorJumpAndFall(kActor, nullptr);
-  auto record = std::make_unique<Actors_ActorRecord>();
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
   actors::UpdateLiveActorPlatformContact(record.get(), 3);
   CHECK(warnings.messages ==
         std::vector<std::string>{

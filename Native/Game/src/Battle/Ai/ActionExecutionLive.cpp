@@ -11,9 +11,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -83,9 +82,9 @@ class LiveExecution final : public ActionExecutionWorld {
     VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   }
   bool TargetMoving(unsigned target) const override {
-    return target < std::size(Actors_actorRecords) &&
-           Actors_actorRecords[target] != nullptr &&
-           Actors_actorRecords[target]->instance.locomotionState != 0;
+    return target < std::size(VS::Actors::actorRecords) &&
+           VS::Actors::actorRecords[target] != nullptr &&
+           VS::Actors::actorRecords[target]->instance.locomotion_state != 0;
   }
   int RandomMasked(int mask) override {
     return NextLiveActorRandomMasked(mask);
@@ -159,10 +158,10 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
   std::optional<DecisionPlayer> Player() const override {
     const auto* ai = VS::Battle::Ai::actorAiStates[0];
     if (ai == nullptr) return DecisionPlayer{};
-    const auto* record = Actors_actorRecords[0];
+    const auto* record = VS::Actors::actorRecords[0];
     if (record == nullptr) return std::nullopt;
     return DecisionPlayer{.has_ai = true,
-                          .moving = record->instance.locomotionState != 0,
+                          .moving = record->instance.locomotion_state != 0,
                           .y = record->instance.position.vy,
                           .point_height = ai->point_height,
                           .body_height = ai->body_height};

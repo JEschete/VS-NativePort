@@ -13,10 +13,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
@@ -446,8 +445,7 @@ namespace {
 // restores them afterwards.
 struct LiveRosterFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
       VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
@@ -459,7 +457,8 @@ struct LiveRosterFixture {
 
   LiveRosterFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
+                nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
                 nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
@@ -474,7 +473,7 @@ struct LiveRosterFixture {
   LiveRosterFixture& operator=(LiveRosterFixture&&) = delete;
   ~LiveRosterFixture() {
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
-    std::ranges::copy(saved_records, Actors_actorRecords);
+    std::ranges::copy(saved_records, VS::Actors::actorRecords.begin());
     std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
@@ -505,8 +504,8 @@ VS::Actors::RoomActorRecord SavedRecord(std::size_t room, std::size_t slot) {
 struct LiveEnemy {
   std::unique_ptr<Battle_ActorStats> stats =
       std::make_unique<Battle_ActorStats>();
-  std::unique_ptr<Actors_ActorRecord> record =
-      std::make_unique<Actors_ActorRecord>();
+  std::unique_ptr<VS::Actors::ActorRecord> record =
+      std::make_unique<VS::Actors::ActorRecord>();
   Battle_Actor actor{};
 
   LiveEnemy() {
@@ -526,11 +525,11 @@ struct LiveEnemy {
     }
     stats->statuses = 0x12345;
     record->instance.slot = 3;
-    record->instance.attachParent = 0xFF;
+    record->instance.attach_parent = 0xFF;
     record->instance.facing = 0x340;
-    record->savedPlacement = 0x00030A07;
+    record->saved_placement = 0x00030A07;
     VS::Battle::actors[3] = &actor;
-    Actors_actorRecords[3] = record.get();
+    VS::Actors::actorRecords[3] = record.get();
   }
 };
 
@@ -638,7 +637,7 @@ TEST_CASE("Storing a live enemy remembers it in the current saved room",
   CHECK(VS::State::recentRoomEnemyStates[1].next_slot == 1);
 
   // A fading enemy keeps 1 HP and reuses its record.
-  enemy.record->instance.actionAnimationState = 2;
+  enemy.record->instance.action_animation_state = 2;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   VS::Actors::RoomActorRecord faded = StoredLiveEnemy();
   faded.hidden = 0;

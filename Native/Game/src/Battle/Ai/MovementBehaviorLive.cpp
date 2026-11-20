@@ -12,7 +12,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -41,7 +41,7 @@ namespace {
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kMovementActorSlots);
 static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kMovementActorSlots);
-static_assert(std::size(Actors_actorRecords) >= kMovementActorSlots);
+static_assert(std::size(VS::Actors::actorRecords) >= kMovementActorSlots);
 static_assert(
     std::tuple_size_v<decltype(VS::Battle::Ai::ActorAiState::relations)> ==
     kMovementActorSlots);
@@ -275,22 +275,24 @@ class LiveMovementHost final : public MovementHost {
   }
   [[nodiscard]] std::optional<TargetPlacement> Placement(
       int actor_id) const override {
-    const Actors_ActorRecord* record =
-        Actors_actorRecords[static_cast<std::size_t>(actor_id)];
+    const VS::Actors::ActorRecord* record =
+        VS::Actors::actorRecords[static_cast<std::size_t>(actor_id)];
     if (record == nullptr) return std::nullopt;
-    const Actors_ModelInstance& model = record->instance;
+    const VS::Actors::ModelInstance& model = record->instance;
     return TargetPlacement{
-        .planned_move = model.movementMode != 0 || model.locomotionState != 0,
-        .support_layer = model.supportLayer,
+        .planned_move = model.movement_mode != 0 || model.locomotion_state != 0,
+        .support_layer = model.support_layer,
         .x = model.position.vx,
         .z = model.position.vz,
         .planned_x = std::bit_cast<std::int16_t>(
-            static_cast<std::uint16_t>(model.supportOffset)),
+            static_cast<std::uint16_t>(model.support_offset)),
         .planned_z = model.reserved50,
-        .current_tile = PackBytes(model.currentTileX, model.currentTileLayer,
-                                  model.currentTileZ, model.reserved5F),
-        .planned_tile = PackBytes(model.previousTileX, model.previousTileLayer,
-                                  model.previousTileZ, model.reserved63)};
+        .current_tile =
+            PackBytes(model.current_tile_x, model.current_tile_layer,
+                      model.current_tile_z, model.reserved5f),
+        .planned_tile =
+            PackBytes(model.previous_tile_x, model.previous_tile_layer,
+                      model.previous_tile_z, model.reserved63)};
   }
   [[nodiscard]] std::optional<RouteGate> PlatformRouteGate(
       int group) const override {

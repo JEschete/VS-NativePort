@@ -6,8 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -32,8 +32,7 @@ unsigned Tile(int x, int z) {
 
 struct GroundFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
@@ -43,7 +42,7 @@ struct GroundFixture {
       VS::Battle::Ai::tileFlagMap;
   unsigned saved_lengths = VS::Content::battleAiHesitationLengths[0];
   VS::Battle::Ai::RoomAiState room{};
-  std::array<Actors_ActorRecord, 2> models{};
+  std::array<VS::Actors::ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
   u_short heights[32][32]{};
@@ -72,14 +71,14 @@ struct GroundFixture {
     std::copy(directions.begin(), directions.end(), frame.directions);
     ClearCache();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
       frame.actors[index] = &states[index];
       VS::Battle::Ai::actorAiStates[index] = &states[index];
-      Actors_actorRecords[index] = &models[index];
+      VS::Actors::actorRecords[index] = &models[index];
       VS::Battle::actors[index] = &actors[index];
       actors[index].id = static_cast<int>(index);
       states[index].actor_id = static_cast<u_char>(index);
@@ -109,7 +108,8 @@ struct GroundFixture {
 
   ~GroundFixture() {
     VS::Battle::Ai::LiveFrameContext() = saved;
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     std::copy(saved_states.begin(), saved_states.end(),
@@ -231,7 +231,7 @@ TEST_CASE(
 TEST_CASE("Ground occupancy reads planned positions and native non-AI volumes",
           "[ai][ground-query]") {
   GroundFixture fixture;
-  fixture.models[1].instance.movementMode = 1;
+  fixture.models[1].instance.movement_mode = 1;
   fixture.states[1].next_position.vx = 1216;
   fixture.states[1].next_position.vz = 1088;
   CHECK(fixture.Occupancy(Tile(9, 8)) == -1);
@@ -239,8 +239,8 @@ TEST_CASE("Ground occupancy reads planned positions and native non-AI volumes",
   CHECK(fixture.Occupancy(Tile(9, 8)) == 1);
   fixture.models[1].instance.position.vx = 1264;
   fixture.models[1].instance.position.vz = 1088;
-  fixture.models[1].occupancyRadius = 16;
-  fixture.models[1].occupancyHeight = 128;
+  fixture.models[1].occupancy_radius = 16;
+  fixture.models[1].occupancy_height = 128;
   CHECK(fixture.Occupancy(Tile(9, 8)) == -1);
   fixture.models[1].instance.position.vx = 1265;
   CHECK(fixture.Occupancy(Tile(9, 8)) == 1);
@@ -554,8 +554,8 @@ TEST_CASE("Relationship queries retain list order and optional native tiles",
           "[ai][behavior-continuation]") {
   GroundFixture fixture;
   fixture.states[0].relations[1].classification = 2;
-  fixture.models[1].instance.currentTileX = 9;
-  fixture.models[1].instance.currentTileZ = 10;
+  fixture.models[1].instance.current_tile_x = 9;
+  fixture.models[1].instance.current_tile_z = 10;
   unsigned tile = 0;
   CHECK(VS::Battle::Ai::FindLiveActorByRelationship(&fixture.states[0], &tile,
                                                     2) == 1);
@@ -624,7 +624,7 @@ TEST_CASE("Actor contact release clears the reserved moving-platform bit",
   GroundFixture fixture;
   fixture.actors[1].commandOpcode = 11;
   fixture.states[1].next_tile.word = 2u << 8;
-  fixture.models[1].instance.supportLayer = 0;
+  fixture.models[1].instance.support_layer = 0;
   fixture.room.reserved_e_prefix[0] = 0xFF;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reserved_e_prefix[0] == 0xFB);
@@ -660,8 +660,8 @@ TEST_CASE(
   for (unsigned command = 0; command < 256; ++command) {
     fixture.actors[1].commandOpcode = static_cast<u_char>(command);
     for (unsigned layer = 0; layer < 16; ++layer) {
-      fixture.models[1].instance.supportLayer = static_cast<u_char>(layer);
-      fixture.models[1].instance.placementLayer = 15;
+      fixture.models[1].instance.support_layer = static_cast<u_char>(layer);
+      fixture.models[1].instance.placement_layer = 15;
       CheckActorContactBits(fixture, command, layer);
     }
   }

@@ -13,8 +13,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/ActorCollision.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -931,13 +930,12 @@ struct LiveCollisionFixture {
   SVECTOR saved_position = VS::Field::collisionProbePosition;
   u_char saved_direction = VS::Field::collisionProbeDirection;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
 
   LiveCollisionFixture() {
     VS::Field::roomData = {};
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
   }
   ~LiveCollisionFixture() {
     VS::Field::LiveCollisionProbe() = saved_probe;
@@ -946,7 +944,7 @@ struct LiveCollisionFixture {
     VS::Field::collisionProbeDirection = saved_direction;
     VS::Field::roomData = saved_room;
     std::copy(saved_records.begin(), saved_records.end(),
-              std::begin(Actors_actorRecords));
+              std::begin(VS::Actors::actorRecords));
   }
   LiveCollisionFixture(const LiveCollisionFixture&) = delete;
   LiveCollisionFixture& operator=(const LiveCollisionFixture&) = delete;
@@ -988,30 +986,30 @@ TEST_CASE("The probe cell word reads a missing or stale cell as absent",
 TEST_CASE("Wall repulsion of an actor's own root motion keeps the push",
           "[field-actor-collision][field][live-binding]") {
   const LiveCollisionFixture fixture;
-  Actors_ActorRecord record{};
-  record.wallContact = 1;
-  record.platformOffsetX = 4;
-  record.instance.rootMotion = SVECTOR{10, 5, 7, 9};
+  VS::Actors::ActorRecord record{};
+  record.wall_contact = 1;
+  record.platform_offset_x = 4;
+  record.instance.root_motion = SVECTOR{10, 5, 7, 9};
   VS::Field::LiveCollisionSamples().blocked = {0, 0, 0, 0, 0, 0, 1, 0};
 
-  VS::Field::LiveApplyActorWallRepulsion(&record, &record.instance.rootMotion);
-  CHECK(record.instance.rootMotion.vx == -16);
-  CHECK(record.instance.rootMotion.vy == 5);
-  CHECK(record.instance.rootMotion.vz == 7);
-  CHECK(record.instance.rootMotion.pad == 9);
-  CHECK(record.platformOffsetX == 0);
+  VS::Field::LiveApplyActorWallRepulsion(&record, &record.instance.root_motion);
+  CHECK(record.instance.root_motion.vx == -16);
+  CHECK(record.instance.root_motion.vy == 5);
+  CHECK(record.instance.root_motion.vz == 7);
+  CHECK(record.instance.root_motion.pad == 9);
+  CHECK(record.platform_offset_x == 0);
 }
 
 TEST_CASE("Terrain motion blocked by an overlap leaves the result unwritten",
           "[field-actor-collision][field][live-binding]") {
   const LiveCollisionFixture fixture;
-  Actors_ActorRecord mover{};
+  VS::Actors::ActorRecord mover{};
   mover.instance.position = SVECTOR{200, 0, 200, 0};
-  mover.occupancyRadius = 32;
-  mover.occupancyHeight = 128;
-  Actors_ActorRecord other = mover;
+  mover.occupancy_radius = 32;
+  mover.occupancy_height = 128;
+  VS::Actors::ActorRecord other = mover;
   other.instance.position.vx = 230;
-  Actors_actorRecords[2] = &other;
+  VS::Actors::actorRecords[2] = &other;
   SVECTOR motion{8, 0, 0, 0};
   int result = 77;
 

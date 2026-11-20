@@ -8,8 +8,7 @@
 #include <cstring>
 #include <span>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Feedback.hpp"
@@ -96,7 +95,7 @@ inline std::array<LabelWords, 32> Snapshot(const State& state) {
 
 class Producers {
  public:
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   Producers() {
     VS::Actors::ShpBone bone{};
     bone.length = 64;
@@ -104,18 +103,18 @@ class Producers {
                 sizeof bone);
     actor.instance.model =
         reinterpret_cast<VS::Actors::ShpModel*>(model_.data());
-    actor.instance.boneCount = 1;
-    actor.modelDataSize = static_cast<unsigned>(model_.size());
+    actor.instance.bone_count = 1;
+    actor.model_data_size = static_cast<unsigned>(model_.size());
     actor.instance.position = {32, -64, 96, 0};
-    actor.boneMatrices[0].m[0][0] = 4096;
-    actor.boneMatrices[0].m[1][1] = 4096;
-    actor.boneMatrices[0].m[2][2] = 4096;
-    VS::Actors::boneMatrixScratch = actor.boneMatrices[0];
-    Actors_actorRecords[kActor] = &actor;
+    actor.bone_matrices[0].m[0][0] = 4096;
+    actor.bone_matrices[0].m[1][1] = 4096;
+    actor.bone_matrices[0].m[2][2] = 4096;
+    VS::Actors::boneMatrixScratch = actor.bone_matrices[0];
+    VS::Actors::actorRecords[kActor] = &actor;
     VS::Input::settings.weapon_stat_change = 1;
   }
   ~Producers() {
-    Actors_actorRecords[kActor] = saved_actor_;
+    VS::Actors::actorRecords[kActor] = saved_actor_;
     VS::Actors::boneMatrixScratch = saved_matrix_;
     VS::Input::settings = saved_settings_;
     VS::Field::areRoomUpdatesPaused = saved_pause_;
@@ -147,7 +146,7 @@ class Producers {
 
  private:
   static constexpr int kActor = 1;
-  Actors_ActorRecord* saved_actor_ = Actors_actorRecords[kActor];
+  VS::Actors::ActorRecord* saved_actor_ = VS::Actors::actorRecords[kActor];
   MATRIX saved_matrix_ = VS::Actors::boneMatrixScratch;
   decltype(VS::Input::settings) saved_settings_ = VS::Input::settings;
   decltype(VS::Field::areRoomUpdatesPaused) saved_pause_ =

@@ -8,8 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -23,7 +22,7 @@ struct ImpactFixture {
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Battle_ActionState* previous_action = VS::Battle::actionState;
-  Actors_ActorRecord* previous_actor = Actors_actorRecords[16];
+  VS::Actors::ActorRecord* previous_actor = VS::Actors::actorRecords[16];
   VS::Effects::LiveEffectPackage* previous_package = VS::Effects::package;
   VS::Effects::LiveEffectPackage* previous_saved = VS::Effects::savedPackage;
   VS::Effects::LiveEffectPackage previous_secondary =
@@ -40,12 +39,12 @@ struct ImpactFixture {
       std::to_array(VS::Effects::tokenBitmaps);
   int previous_busy = VS::Effects::effectBusyFlags;
   Battle_ActionState action{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   std::array<char, 256> script{};
 
   ImpactFixture() {
     VS::Battle::actionState = &action;
-    Actors_actorRecords[16] = &actor;
+    VS::Actors::actorRecords[16] = &actor;
     VS::Effects::secondaryPackage = {};
     VS::Effects::secondaryPackage.programs = script.data();
     VS::Effects::secondaryInstances = nullptr;
@@ -57,7 +56,7 @@ struct ImpactFixture {
   ImpactFixture& operator=(const ImpactFixture&) = delete;
   ~ImpactFixture() {
     VS::Battle::actionState = previous_action;
-    Actors_actorRecords[16] = previous_actor;
+    VS::Actors::actorRecords[16] = previous_actor;
     VS::Effects::package = previous_package;
     VS::Effects::savedPackage = previous_saved;
     VS::Effects::secondaryPackage = previous_secondary;
@@ -74,8 +73,8 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
           "[action-reactions][F00832][effects]") {
   auto fixture = std::make_unique<ImpactFixture>();
   fixture->actor.instance.slot = 0;
-  fixture->actor.instance.movementMode = 2;
-  fixture->actor.instance.jumpCountdown = 99;
+  fixture->actor.instance.movement_mode = 2;
+  fixture->actor.instance.jump_countdown = 99;
   fixture->action.queueIndex = 0xFFFFFFFFU;
   auto& queued = fixture->action.queue[3];
   queued.targetCount = 1;
@@ -83,8 +82,8 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
   auto* unused = reinterpret_cast<SVECTOR*>(std::uintptr_t{1});
   VS::Battle::PlayLiveDefenseAbilityAnimation(16, unused,
                                               std::numeric_limits<int>::min());
-  CHECK(fixture->actor.instance.movementMode == 0);
-  CHECK(fixture->actor.instance.jumpCountdown == 0);
+  CHECK(fixture->actor.instance.movement_mode == 0);
+  CHECK(fixture->actor.instance.jump_countdown == 0);
   CHECK(VS::Effects::secondaryRequest.effect_id == 0x26);
   CHECK(VS::Effects::secondaryRequest.count == 1);
   REQUIRE(VS::Effects::secondaryInstances != nullptr);

@@ -14,15 +14,15 @@
 #include <type_traits>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationEvents.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
@@ -105,7 +105,7 @@ void SetLastResolvedClip(int clip) {
 // cursor keeps.
 class LiveAnimationBanks final : public AnimationBankSource {
  public:
-  explicit LiveAnimationBanks(const Actors_ActorRecord& actor)
+  explicit LiveAnimationBanks(const VS::Actors::ActorRecord& actor)
       : actor_(actor) {}
 
   [[nodiscard]] AnimationBankView Bank(const AnimationEntry& entry) override {
@@ -119,11 +119,11 @@ class LiveAnimationBanks final : public AnimationBankSource {
   [[nodiscard]] void* Address(const AnimationEntry& entry) const {
     switch (entry.bank) {
       case AnimationBank::kOwned:
-        return actor_.ownedSequence;
+        return actor_.owned_sequence;
       case AnimationBank::kCommon:
-        return actor_.commonSequence;
+        return actor_.common_sequence;
       case AnimationBank::kBattle:
-        return actor_.battleSequence;
+        return actor_.battle_sequence;
       case AnimationBank::kShared:
         return SharedBank(entry.shared_slot);
       case AnimationBank::kWork:
@@ -133,15 +133,15 @@ class LiveAnimationBanks final : public AnimationBankSource {
   }
   [[nodiscard]] void* SharedBank(int slot) const {
     if (slot < 0 ||
-        static_cast<std::size_t>(slot) >= std::size(actor_.sharedSequences)) {
+        static_cast<std::size_t>(slot) >= std::size(actor_.shared_sequences)) {
       VS::Core::Errorf(kChannel, "actor=%u shared SEQ slot %d refused",
                        static_cast<unsigned>(actor_.instance.slot), slot);
       return nullptr;
     }
-    return actor_.sharedSequences[slot];
+    return actor_.shared_sequences[slot];
   }
 
-  const Actors_ActorRecord& actor_;
+  const VS::Actors::ActorRecord& actor_;
   u_char* address_ = nullptr;
 };
 
@@ -152,7 +152,8 @@ struct LiveHeader {
 };
 
 // decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
-LiveHeader FindLiveHeader(const Actors_ActorRecord& actor, int animation_id) {
+LiveHeader FindLiveHeader(const VS::Actors::ActorRecord& actor,
+                          int animation_id) {
   LiveAnimationBanks banks(actor);
   LiveHeader found{.header = FindActorAnimationHeader(
                        LiveAnimationBankLimits(actor), banks, animation_id),
@@ -201,13 +202,13 @@ void ReportBoundLookup(const void* bank, int animation,
 }
 
 // The shared bank (slots 0..2) the record's animation header names.
-u_char* BoundSharedBank(const Actors_ActorRecord& actor) {
-  if (actor.animationHeader == 0) {
+u_char* BoundSharedBank(const VS::Actors::ActorRecord& actor) {
+  if (actor.animation_header == 0) {
     return nullptr;
   }
   for (std::size_t slot = 0; slot < kBoundSharedSlots; ++slot) {
-    if (BankHandle(actor.sharedSequences[slot]) == actor.animationHeader) {
-      return static_cast<u_char*>(actor.sharedSequences[slot]);
+    if (BankHandle(actor.shared_sequences[slot]) == actor.animation_header) {
+      return static_cast<u_char*>(actor.shared_sequences[slot]);
     }
   }
   return nullptr;
@@ -218,15 +219,15 @@ u_char* BoundSharedBank(const Actors_ActorRecord& actor) {
 // a shared clip is looked up in the bank the record bound, not the selected
 // shared slot.
 std::optional<LiveBoundClip> FindLiveBoundClip(
-    const Actors_ActorRecord& actor) {
-  const int animation = actor.animationId;
-  const int bones = actor.instance.boneCount;
+    const VS::Actors::ActorRecord& actor) {
+  const int animation = actor.animation_id;
+  const int bones = actor.instance.bone_count;
   if (animation < kFirstSharedAnimation ||
       animation >= kFirstSpecialAnimation) {
     const LiveHeader found = FindLiveHeader(actor, animation);
     if (found.header.status != AnimationHeaderStatus::kFound ||
-        BankHandle(found.address) != actor.animationHeader ||
-        !MatchesBoundSet(found.header.clip, actor.animationSet)) {
+        BankHandle(found.address) != actor.animation_header ||
+        !MatchesBoundSet(found.header.clip, actor.animation_set)) {
       return std::nullopt;
     }
     return LiveBoundClip{.clip = {.bank = found.header.bank,
@@ -243,7 +244,7 @@ std::optional<LiveBoundClip> FindLiveBoundClip(
       LookupAnimationClip(bank, animation - kFirstSharedAnimation, bones);
   ReportBoundLookup(bound, animation, lookup, !bank.empty());
   if (lookup.status != ClipLookupStatus::kFound ||
-      !MatchesBoundSet(lookup.clip, actor.animationSet)) {
+      !MatchesBoundSet(lookup.clip, actor.animation_set)) {
     return std::nullopt;
   }
   SetLastResolvedClip(lookup.clip);
@@ -338,7 +339,7 @@ bool EventPlaybackRunning() {
 // starts it in.
 class LiveEventHost final : public AnimationEventHost {
  public:
-  LiveEventHost(Actors_ActorRecord& actor, VS::Actors::AnimationPose& pose,
+  LiveEventHost(VS::Actors::ActorRecord& actor, VS::Actors::AnimationPose& pose,
                 u_char* bound_bank)
       : actor_(actor),
         pose_(pose),
@@ -376,25 +377,25 @@ class LiveEventHost final : public AnimationEventHost {
   }
   void SetEventWait(std::uint8_t wait) override { pose_.event_wait = wait; }
 
-  [[nodiscard]] int AnimationId() const override { return actor_.animationId; }
+  [[nodiscard]] int AnimationId() const override { return actor_.animation_id; }
   [[nodiscard]] std::uint16_t AnimationLength() const override {
-    return static_cast<std::uint16_t>(actor_.animationLength);
+    return static_cast<std::uint16_t>(actor_.animation_length);
   }
   [[nodiscard]] bool EventFlag() const override {
-    return actor_.animationEventFlag != 0;
+    return actor_.animation_event_flag != 0;
   }
   void SetEventFlag(bool flag) override {
-    actor_.animationEventFlag = Bit(flag);
+    actor_.animation_event_flag = Bit(flag);
   }
   [[nodiscard]] bool AdvanceRequested() const override {
-    return actor_.advanceRequested != 0;
+    return actor_.advance_requested != 0;
   }
-  void ClearAdvanceRequest() override { actor_.advanceRequested = 0; }
+  void ClearAdvanceRequest() override { actor_.advance_requested = 0; }
   [[nodiscard]] bool WeaponDrawn() const override {
-    return actor_.instance.weaponDrawn != 0;
+    return actor_.instance.weapon_drawn != 0;
   }
   [[nodiscard]] std::uint8_t SequenceModelId() const override {
-    return actor_.sequenceModelId;
+    return actor_.sequence_model_id;
   }
   [[nodiscard]] bool EventPlaybackActive() const override {
     return EventPlaybackRunning();
@@ -409,10 +410,11 @@ class LiveEventHost final : public AnimationEventHost {
     StoreLiveActorMotion(motion, actor_);
   }
   [[nodiscard]] std::uint8_t CompanionSlot() const override {
-    return actor_.companionSlot;
+    return actor_.companion_slot;
   }
   bool FinishCompanionAction(std::uint8_t slot) override {
-    Actors_ActorRecord* companion = LiveActorRecord(slot, kCompanionOperation);
+    VS::Actors::ActorRecord* companion =
+        LiveActorRecord(slot, kCompanionOperation);
     if (companion == nullptr) {
       return false;
     }
@@ -422,7 +424,7 @@ class LiveEventHost final : public AnimationEventHost {
     return true;
   }
   void SetFastAnimation(bool fast) override {
-    actor_.fastAnimation = Bit(fast);
+    actor_.fast_animation = Bit(fast);
   }
 
   bool QueueImpactEffects() override {
@@ -472,11 +474,11 @@ class LiveEventHost final : public AnimationEventHost {
   void SetTextureCellSheet(int channel,
                            const TextureCellSheet& sheet) override {
     if (channel < 0 || static_cast<std::size_t>(channel) >=
-                           std::size(actor_.textureAnimationFrames)) {
+                           std::size(actor_.texture_animation_frames)) {
       return;
     }
     VS::Actors::TextureAnimationFrame& frame =
-        actor_.textureAnimationFrames[channel];
+        actor_.texture_animation_frames[channel];
     frame.overlay_index = sheet.overlay;
     frame.source_x = sheet.source_x;
     frame.source_y = sheet.source_y;
@@ -491,21 +493,21 @@ class LiveEventHost final : public AnimationEventHost {
     UploadLiveActorTextureOverlay(id_, copy);
   }
   void StartPaletteFade() override {
-    actor_.paletteFadeActive = 1;
-    actor_.paletteFadeState[0] = 0;
-    actor_.paletteFadeReverse = 0;
-    actor_.paletteFadeState[1] = kPaletteFadeSteps;
+    actor_.palette_fade_active = 1;
+    actor_.palette_fade_state[0] = 0;
+    actor_.palette_fade_reverse = 0;
+    actor_.palette_fade_state[1] = kPaletteFadeSteps;
   }
   bool MoveModelVertex(std::size_t vertex,
                        const Render::ModelVertex& delta) override {
     return Render::MoveLiveActorModelVertex(actor_, vertex, delta);
   }
-  void MarkPoseOverridden() override { actor_.poseOverrideActive = 1; }
+  void MarkPoseOverridden() override { actor_.pose_override_active = 1; }
   [[nodiscard]] ShadowBlend LoadShadow() const override {
-    return LoadLiveShadowBlend(actor_.shadowBlend);
+    return LoadLiveShadowBlend(actor_.shadow_blend);
   }
   void StoreShadow(const ShadowBlend& shadow) override {
-    StoreLiveShadowBlend(shadow, actor_.shadowBlend);
+    StoreLiveShadowBlend(shadow, actor_.shadow_blend);
   }
   void LockBonePose(int bone, bool locked) override {
     SetLiveActorBonePoseLock(&actor_, bone, locked ? 1 : 0);
@@ -529,7 +531,7 @@ class LiveEventHost final : public AnimationEventHost {
   void ReportEventProblem(AnimationEventStatus status,
                           std::uint8_t op) override {
     ReportEventProblemOnce({.actor = static_cast<unsigned>(id_),
-                            .animation = actor_.animationId,
+                            .animation = actor_.animation_id,
                             .status = status,
                             .op = op});
   }
@@ -551,7 +553,7 @@ class LiveEventHost final : public AnimationEventHost {
     return nullptr;
   }
 
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
   VS::Actors::AnimationPose& pose_;
   u_char* bound_bank_;
   int id_;
@@ -582,7 +584,7 @@ void StorePoseState(const AnimationPoseState& state, u_char* bank,
 
 class LiveMotionLookHost final : public MotionLookHost {
  public:
-  LiveMotionLookHost(Actors_ActorRecord& actor,
+  LiveMotionLookHost(VS::Actors::ActorRecord& actor,
                      VS::Render::ModelScratchpad& workspace)
       : actor_(actor), workspace_(workspace) {}
 
@@ -593,7 +595,7 @@ class LiveMotionLookHost final : public MotionLookHost {
     StoreLiveActorMotion(motion, actor_);
   }
   [[nodiscard]] Vec3 RootKey() const override {
-    const SVECTOR& root = actor_.blendPose.bone_keys[kRootPoseKey];
+    const SVECTOR& root = actor_.blend_pose.bone_keys[kRootPoseKey];
     return {root.vx, root.vy, root.vz};
   }
   [[nodiscard]] std::int32_t ActorScale() const override {
@@ -605,46 +607,46 @@ class LiveMotionLookHost final : public MotionLookHost {
     workspace_.root_offset.vz = static_cast<std::int16_t>(offset.z);
   }
   [[nodiscard]] bool PreviewPose() const override {
-    return actor_.previewPose != 0;
+    return actor_.preview_pose != 0;
   }
   void CenterPreviewPose() override {
-    actor_.blendPose.bone_keys[0].vx = kPreviewFacing;
+    actor_.blend_pose.bone_keys[0].vx = kPreviewFacing;
     actor_.pose.bone_keys[0].vx = kPreviewFacing;
   }
-  void FinishLocomotion() override { actor_.animationSet = kReinitializeSet; }
+  void FinishLocomotion() override { actor_.animation_set = kReinitializeSet; }
   void SettleOnTile(int tile_x, int tile_z) override {
     static_cast<void>(Field::LiveGimmickSupportHeight(tile_x, tile_z));
-    actor_.supportGimmick = Actors_supportingGimmickIndex;
+    actor_.support_gimmick = VS::Actors::supportingGimmickIndex;
   }
   void TransformRootOffset() override { TransformLiveActorRootOffset(&actor_); }
   void SaveGroundedTransform() override {
     SaveLiveActorGroundedTransform(&actor_);
   }
   [[nodiscard]] HeadLook LoadHeadLook() const override {
-    return {.target = actor_.headTrackTarget,
-            .tracking = LiveMotionVector(actor_.headTracking),
-            .yaw = static_cast<std::int16_t>(actor_.instance.lookYaw),
-            .pitch = static_cast<std::int16_t>(actor_.instance.lookPitch)};
+    return {.target = actor_.head_track_target,
+            .tracking = LiveMotionVector(actor_.head_tracking),
+            .yaw = static_cast<std::int16_t>(actor_.instance.look_yaw),
+            .pitch = static_cast<std::int16_t>(actor_.instance.look_pitch)};
   }
   void StoreHeadLook(const HeadLook& look) override {
-    actor_.headTrackTarget = look.target;
-    actor_.headTracking = LiveSvector(look.tracking);
-    actor_.instance.lookYaw = static_cast<u_short>(look.yaw);
-    actor_.instance.lookPitch = static_cast<u_short>(look.pitch);
+    actor_.head_track_target = look.target;
+    actor_.head_tracking = LiveSvector(look.tracking);
+    actor_.instance.look_yaw = static_cast<u_short>(look.yaw);
+    actor_.instance.look_pitch = static_cast<u_short>(look.pitch);
   }
   [[nodiscard]] HeadLookContext LookContext(const HeadLook& look) override {
-    const Actors_ModelInstance& instance = actor_.instance;
+    const VS::Actors::ModelInstance& instance = actor_.instance;
     HeadLookContext context{.event_playback_active = EventPlaybackRunning(),
-                            .was_drawn = instance.wasDrawn != 0,
-                            .animation_id = actor_.animationId,
-                            .is_jumping = instance.isJumping != 0,
-                            .motion_locked = instance.motionLocked != 0,
+                            .was_drawn = instance.was_drawn != 0,
+                            .animation_id = actor_.animation_id,
+                            .is_jumping = instance.is_jumping != 0,
+                            .motion_locked = instance.motion_locked != 0,
                             .position = LiveMotionVector(instance.position),
-                            .rotation_x = instance.rotationX,
+                            .rotation_x = instance.rotation_x,
                             .facing = instance.facing,
                             .target_position = std::nullopt};
     if (look.target >= 0) {
-      if (const Actors_ActorRecord* target =
+      if (const VS::Actors::ActorRecord* target =
               LiveActorRecord(look.target, kLookOperation)) {
         context.target_position = LiveMotionVector(target->instance.position);
       }
@@ -657,11 +659,11 @@ class LiveMotionLookHost final : public MotionLookHost {
   }
 
  private:
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
   VS::Render::ModelScratchpad& workspace_;
 };
 
-void UpdateLiveMotion(Actors_ActorRecord& actor, bool skip_tweens) {
+void UpdateLiveMotion(VS::Actors::ActorRecord& actor, bool skip_tweens) {
   VS::Render::ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   if (workspace == nullptr) {
     VS::Core::Errorf(kChannel, "Motion update has no model workspace");
@@ -673,61 +675,62 @@ void UpdateLiveMotion(Actors_ActorRecord& actor, bool skip_tweens) {
 
 class LiveBlendHost final : public AnimationBlendHost {
  public:
-  explicit LiveBlendHost(Actors_ActorRecord& actor) : actor_(actor) {}
+  explicit LiveBlendHost(VS::Actors::ActorRecord& actor) : actor_(actor) {}
 
   void AdvanceAnimation() override { AdvanceLiveSkeletalAnimation(actor_, 0); }
   [[nodiscard]] BlendClock Clock() const override {
-    return {.frame = static_cast<std::int8_t>(actor_.blendFrame),
-            .frames = static_cast<std::int8_t>(actor_.blendFrames)};
+    return {.frame = static_cast<std::int8_t>(actor_.blend_frame),
+            .frames = static_cast<std::int8_t>(actor_.blend_frames)};
   }
   void SetClock(BlendClock clock) override {
-    actor_.blendFrame = static_cast<char>(clock.frame);
-    actor_.blendFrames = static_cast<char>(clock.frames);
+    actor_.blend_frame = static_cast<char>(clock.frame);
+    actor_.blend_frames = static_cast<char>(clock.frames);
   }
   [[nodiscard]] int FramesPerStep() const override {
-    return actor_.framesPerStep;
+    return actor_.frames_per_step;
   }
   void AlignBlendRotations() override {
-    PoseKeys keys = LoadLivePoseKeys(actor_.blendPose);
+    PoseKeys keys = LoadLivePoseKeys(actor_.blend_pose);
     AlignPoseRotationBranches(keys.rotations,
                               LoadLivePoseKeys(actor_.pose).rotations,
-                              actor_.instance.boneCount);
-    StoreLivePoseKeys(keys, actor_.blendPose);
+                              actor_.instance.bone_count);
+    StoreLivePoseKeys(keys, actor_.blend_pose);
   }
   void BlendTowardPose(BlendClock clock) override {
-    BlendLiveActorPose(actor_.blendPose, actor_.pose, actor_.instance.boneCount,
-                       clock.frame, clock.frames);
-    actor_.blendPose.holding_last_frame = actor_.pose.holding_last_frame;
-    actor_.blendPose.reached_end = actor_.pose.reached_end;
+    BlendLiveActorPose(actor_.blend_pose, actor_.pose,
+                       actor_.instance.bone_count, clock.frame, clock.frames);
+    actor_.blend_pose.holding_last_frame = actor_.pose.holding_last_frame;
+    actor_.blend_pose.reached_end = actor_.pose.reached_end;
   }
-  void CopyPoseToBlend() override { actor_.blendPose = actor_.pose; }
+  void CopyPoseToBlend() override { actor_.blend_pose = actor_.pose; }
   void UpdateMotion() override { UpdateLiveMotion(actor_, false); }
 
  private:
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
 };
 }  // namespace
 
-AnimationBankLimits LiveAnimationBankLimits(const Actors_ActorRecord& actor) {
-  return {.bones = actor.instance.boneCount,
+AnimationBankLimits LiveAnimationBankLimits(
+    const VS::Actors::ActorRecord& actor) {
+  return {.bones = actor.instance.bone_count,
           .slot = actor.instance.slot,
-          .model_id = actor.modelId,
-          .sequence_model_id = actor.sequenceModelId,
-          .common_entries = actor.sequenceFlags,
-          .battle_entries = actor.commonAnimationCount,
-          .special_entries = actor.battleAnimationCount,
+          .model_id = actor.model_id,
+          .sequence_model_id = actor.sequence_model_id,
+          .common_entries = actor.sequence_flags,
+          .battle_entries = actor.common_animation_count,
+          .special_entries = actor.battle_animation_count,
           .special_pitch =
               std::bit_cast<std::uint8_t>(VS::Battle::specialActionPitch),
           .shared_slot = VS::Actors::sharedSequenceBankIndex};
 }
 
-AnimationHeader FindLiveAnimationHeader(const Actors_ActorRecord& actor,
+AnimationHeader FindLiveAnimationHeader(const VS::Actors::ActorRecord& actor,
                                         int animation_id) {
   return FindLiveHeader(actor, animation_id).header;
 }
 
 std::optional<AnimationClipRef> BoundLiveAnimationClip(
-    const Actors_ActorRecord& actor) {
+    const VS::Actors::ActorRecord& actor) {
   const auto bound = FindLiveBoundClip(actor);
   if (!bound) {
     return std::nullopt;
@@ -736,7 +739,7 @@ std::optional<AnimationClipRef> BoundLiveAnimationClip(
 }
 
 // decomp: BATTLE.PRG func_800AD714 (src/BATTLE/BATTLE.PRG/44F14.c:168)
-int RunLiveAnimationEvents(Actors_ActorRecord& actor,
+int RunLiveAnimationEvents(VS::Actors::ActorRecord& actor,
                            VS::Actors::AnimationPose& pose, int mode) {
   if (mode < 0 || mode > static_cast<int>(AnimationEventMode::kFindImpact)) {
     VS::Core::Errorf(kChannel, "actor=%u animation event mode %d refused",
@@ -751,19 +754,19 @@ int RunLiveAnimationEvents(Actors_ActorRecord& actor,
 }
 
 // decomp: BATTLE.PRG func_800AE47C (src/BATTLE/BATTLE.PRG/44F14.c:610)
-int RestartLiveAnimationEvents(Actors_ActorRecord& actor) {
+int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor) {
   const std::optional<LiveBoundClip> bound = FindLiveBoundClip(actor);
-  LiveEventHost host(actor, actor.blendPose, bound ? bound->address : nullptr);
+  LiveEventHost host(actor, actor.blend_pose, bound ? bound->address : nullptr);
   const LiveEventTables tables;
   const std::optional<AnimationClipRef> clip =
       bound ? std::optional(bound->clip) : std::nullopt;
   if (RestartActorAnimationEvents(host, tables.View(), clip,
-                                  actor.poseOverrideActive != 0) ==
+                                  actor.pose_override_active != 0) ==
       EventRestart::kUnavailable) {
     VS::Core::Errorf(kChannel,
                      "cannot unwind actor=%u animation=%u: unavailable events",
                      static_cast<unsigned>(actor.instance.slot),
-                     static_cast<unsigned>(actor.animationId));
+                     static_cast<unsigned>(actor.animation_id));
     return -1;
   }
   return 0;
@@ -785,7 +788,7 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
     return 0;
   }
   const LiveHeader found = FindLiveHeader(
-      *static_cast<const Actors_ActorRecord*>(actor), animation_id);
+      *static_cast<const VS::Actors::ActorRecord*>(actor), animation_id);
   switch (found.header.status) {
     case AnimationHeaderStatus::kFound:
       *header_out = reinterpret_cast<u_short*>(found.address +
@@ -804,38 +807,38 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
 }
 
 // decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2623)
-void InitializeLiveActorAnimationPose(Actors_ActorRecord* actor,
+void InitializeLiveActorAnimationPose(VS::Actors::ActorRecord* actor,
                                       VS::Actors::AnimationPose* pose) {
   if (actor == nullptr || pose == nullptr) {
     VS::Core::Errorf(kChannel, "Pose start requires an actor and a pose");
     return;
   }
-  if (actor->poseOverrideActive != 0 &&
+  if (actor->pose_override_active != 0 &&
       RestartLiveAnimationEvents(*actor) < 0) {
     return;
   }
-  actor->poseOverrideActive = 0;
-  const LiveHeader found = FindLiveHeader(*actor, actor->animationId);
+  actor->pose_override_active = 0;
+  const LiveHeader found = FindLiveHeader(*actor, actor->animation_id);
   std::optional<AnimationClipRef> clip;
   if (found.header.status == AnimationHeaderStatus::kFound) {
     clip = AnimationClipRef{.bank = found.header.bank,
                             .header_offset = found.header.header_offset,
-                            .bones = actor->instance.boneCount};
+                            .bones = actor->instance.bone_count};
   }
   AnimationPoseState state = LoadPoseState(*pose);
   const PoseStart start =
-      InitializeActorAnimationPose(clip, actor->animationId, state);
+      InitializeActorAnimationPose(clip, actor->animation_id, state);
   StorePoseState(state, found.address, *pose);
   if (start == PoseStart::kOutOfBank) {
     VS::Core::Errorf(kChannel,
                      "actor=%u animation=%u has a clip start outside its bank",
                      static_cast<unsigned>(actor->instance.slot),
-                     static_cast<unsigned>(actor->animationId));
+                     static_cast<unsigned>(actor->animation_id));
   }
 }
 
 // decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
-void UpdateLiveActorAnimationBlend(Actors_ActorRecord* actor) {
+void UpdateLiveActorAnimationBlend(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     VS::Core::Errorf(kChannel, "Animation blend requires an actor");
     return;
@@ -845,7 +848,8 @@ void UpdateLiveActorAnimationBlend(Actors_ActorRecord* actor) {
 }
 
 // decomp: BATTLE.PRG func_800B002C (src/BATTLE/BATTLE.PRG/44F14.c:1486)
-void UpdateLiveMotionAndLookAt(Actors_ActorRecord* actor, int skip_tweens) {
+void UpdateLiveMotionAndLookAt(VS::Actors::ActorRecord* actor,
+                               int skip_tweens) {
   if (actor == nullptr) {
     VS::Core::Errorf(kChannel, "Motion update requires an actor");
     return;
@@ -854,21 +858,21 @@ void UpdateLiveMotionAndLookAt(Actors_ActorRecord* actor, int skip_tweens) {
 }
 
 // decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49268.c:246)
-void ApplyLiveLockedBoneTransform(Actors_ActorRecord* actor,
+void ApplyLiveLockedBoneTransform(VS::Actors::ActorRecord* actor,
                                   const MATRIX* parent, int bone, int saved) {
   if (actor == nullptr || parent == nullptr || bone < 0 ||
-      static_cast<std::size_t>(bone) >= std::size(actor->boneMatrices) ||
+      static_cast<std::size_t>(bone) >= std::size(actor->bone_matrices) ||
       saved < 1 || saved > kLockedBoneMatrices) {
     VS::Core::Errorf(kChannel, "Locked bone %d with saved matrix %d refused",
                      bone, saved);
     return;
   }
   // The saved matrix's padding carries over, as the original copied it whole.
-  MATRIX locked = actor->lockedBoneMatrices[saved - 1];
+  MATRIX locked = actor->locked_bone_matrices[saved - 1];
   const Transform3 transform = ApplyLockedBoneTransform(
       Core::Math::TransformOf(*parent), Core::Math::TransformOf(locked));
   Core::Math::StoreTransform(locked, transform);
   skeletonPose.bone_matrices[bone] = locked;
-  actor->boneMatrices[bone] = locked;
+  actor->bone_matrices[bone] = locked;
 }
 }  // namespace VS::Actors

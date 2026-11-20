@@ -1441,7 +1441,7 @@ void UpdateActorTeleportTransition(MovementHost& host, MovementActor& actor) {
 }
 
 // decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
-// The route target is the original's sharedSequences[4] alias.
+// The route target is the original's shared_sequences[4] alias.
 void CancelActorTeleportTransition(MovementHost& host, MovementActor& actor) {
   std::array<bool, kActorSlots> cancelled{};
   MovementActor* current = &actor;

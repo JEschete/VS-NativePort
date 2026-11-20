@@ -8,10 +8,9 @@
 #include <optional>
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Battle/Action.h"

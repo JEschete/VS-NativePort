@@ -12,8 +12,8 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -141,7 +141,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
                             .position = std::nullopt};
     if (other->model != nullptr) {
       const auto& position =
-          reinterpret_cast<const Actors_ActorRecord*>(other->model)
+          reinterpret_cast<const VS::Actors::ActorRecord*>(other->model)
               ->instance.position;
       obstacle.position =
           FlightPoint{.x = position.vx, .y = position.vy, .z = position.vz};
@@ -168,16 +168,16 @@ class LiveFlightWorld final : public FlightMovementWorld {
   }
   [[nodiscard]] std::optional<FlightTargetRecord> TargetRecord(
       int actor_id) const override {
-    if (actor_id < 0 ||
-        static_cast<std::size_t>(actor_id) >= std::size(Actors_actorRecords)) {
+    if (actor_id < 0 || static_cast<std::size_t>(actor_id) >=
+                            std::size(VS::Actors::actorRecords)) {
       return std::nullopt;
     }
-    const auto* record = Actors_actorRecords[actor_id];
+    const auto* record = VS::Actors::actorRecords[actor_id];
     if (record == nullptr) return std::nullopt;
     return FlightTargetRecord{.y = record->instance.position.vy,
-                              .tile_x = record->instance.currentTileX,
-                              .tile_z = record->instance.currentTileZ,
-                              .collision_height = record->collisionHeight};
+                              .tile_x = record->instance.current_tile_x,
+                              .tile_z = record->instance.current_tile_z,
+                              .collision_height = record->collision_height};
   }
   [[nodiscard]] std::optional<FlightStep> SelectVerticalStep(
       FlightMover& mover) override {

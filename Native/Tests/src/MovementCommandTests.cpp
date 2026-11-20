@@ -9,8 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
@@ -78,29 +77,29 @@ TEST_CASE("The actor-table adapter rejects IDs outside the table",
       VS::Actors::ActorRecordMovementRequests();
   CHECK_FALSE(requests.StoreMovementRequest(-1, {}));
   CHECK_FALSE(requests.StoreMovementRequest(
-      static_cast<int>(std::size(Actors_actorRecords)), {}));
-  Actors_ActorRecord* saved = Actors_actorRecords[3];
-  Actors_actorRecords[3] = nullptr;
+      static_cast<int>(std::size(VS::Actors::actorRecords)), {}));
+  VS::Actors::ActorRecord* saved = VS::Actors::actorRecords[3];
+  VS::Actors::actorRecords[3] = nullptr;
   CHECK_FALSE(requests.StoreMovementRequest(3, {}));
-  Actors_actorRecords[3] = saved;
+  VS::Actors::actorRecords[3] = saved;
 }
 
 TEST_CASE("The actor-table adapter writes only the request fields",
           "[actors][movement][movement-command]") {
   VS::Actors::ActorMovementRequests& requests =
       VS::Actors::ActorRecordMovementRequests();
-  Actors_ActorRecord* saved = Actors_actorRecords[3];
-  Actors_ActorRecord actor;
+  VS::Actors::ActorRecord* saved = VS::Actors::actorRecords[3];
+  VS::Actors::ActorRecord actor;
   std::ranges::fill(std::as_writable_bytes(std::span(&actor, 1)),
                     std::byte{0xA5});
-  Actors_actorRecords[3] = &actor;
+  VS::Actors::actorRecords[3] = &actor;
   CHECK(requests.StoreMovementRequest(
       3, VS::Actors::MakeTileTargetCommand(0x300, 1024, 0x800)));
-  CHECK(actor.turnState.mode == VS::Actors::kMovementRequestTileTarget);
-  CHECK(actor.turnState.reserved1 == 0);
-  CHECK(actor.turnState.direction == 0x300);
-  CHECK(actor.turnState.facing == 0x800);
-  CHECK(actor.turnState.distance == 1024u);
-  CHECK(static_cast<unsigned>(actor.turnState.reservedC) == 0xA5A5A5A5u);
-  Actors_actorRecords[3] = saved;
+  CHECK(actor.turn_state.mode == VS::Actors::kMovementRequestTileTarget);
+  CHECK(actor.turn_state.reserved1 == 0);
+  CHECK(actor.turn_state.direction == 0x300);
+  CHECK(actor.turn_state.facing == 0x800);
+  CHECK(actor.turn_state.distance == 1024u);
+  CHECK(static_cast<unsigned>(actor.turn_state.reserved0c) == 0xA5A5A5A5u);
+  VS::Actors::actorRecords[3] = saved;
 }

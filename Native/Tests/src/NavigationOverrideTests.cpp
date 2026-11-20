@@ -12,8 +12,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -59,15 +59,14 @@ namespace {
 struct NavigationOverrideFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::tileFlagMap) saved_grid =
       VS::Battle::Ai::tileFlagMap;
   u_short grid[32][32]{};
   VS::Battle::Ai::ActorAiState source{};
   VS::Battle::Ai::ActorAiState route{};
   VS::Battle::Ai::TilePosition tile{};
-  Actors_ActorRecord model{};
+  VS::Actors::ActorRecord model{};
 
   NavigationOverrideFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
@@ -79,7 +78,8 @@ struct NavigationOverrideFixture {
   ~NavigationOverrideFixture() {
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     VS::Battle::Ai::tileFlagMap = saved_grid;
   }
 
@@ -113,7 +113,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Battle_Actor, 2> actors{};
-  Actors_ActorRecord ashley_model{};
+  VS::Actors::ActorRecord ashley_model{};
   VS::Battle::Ai::RoomAiState room{};
   u_short heights[32][32]{};
 
@@ -125,22 +125,22 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     actors[0].commandState = 0xC0;
     actors[0].model = &ashley_model.instance;
     ashley_model.instance.position = {3000, -64, 3000, 0};
-    ashley_model.occupancyRadius = 16;
-    ashley_model.occupancyHeight = 128;
-    Actors_actorRecords[0] = &ashley_model;
+    ashley_model.occupancy_radius = 16;
+    ashley_model.occupancy_height = 128;
+    VS::Actors::actorRecords[0] = &ashley_model;
     actors[1].id = 1;
     actors[1].model = &model.instance;
     model.instance.slot = 1;
     model.instance.position = {1088, -64, 1088, 0x55AA};
-    model.instance.currentTileX = model.instance.currentTileZ = 8;
-    Actors_actorRecords[1] = &model;
+    model.instance.current_tile_x = model.instance.current_tile_z = 8;
+    VS::Actors::actorRecords[1] = &model;
     source.native_pointer_18c = nullptr;
     source.actor_id = 1;
     source.actor =
         reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[1]);
     source.model =
         reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(&model.instance);
-    source.native_pointer64 = &model.instance.currentTileX;
+    source.native_pointer64 = &model.instance.current_tile_x;
     source.radius = 16;
     source.walk_step = 32;
     source.run_step = 64;
@@ -490,9 +490,9 @@ TEST_CASE(
   const int status = GENERATE(0, 1, 2);
   NavigationOverrideFixture fixture;
   VS::Battle::Ai::actorAiStates[7] = &fixture.source;
-  Actors_actorRecords[7] = &fixture.model;
-  fixture.model.bypassActorCollision = 1;
-  fixture.model.ignoredByCollision = 1;
+  VS::Actors::actorRecords[7] = &fixture.model;
+  fixture.model.bypass_actor_collision = 1;
+  fixture.model.ignored_by_collision = 1;
   fixture.tile.word = 0xABCD12EF;
   fixture.route.destination.word = fixture.tile.word ^ (status == 1 ? 1u : 0u);
   if (status == 2) fixture.source.native_pointer_18c = nullptr;
@@ -794,7 +794,7 @@ TEST_CASE("Production scripted path request allocates a complete native route",
   CHECK(route->actor_id == 1);
   CHECK(route->scripted_target_xz == (1200u | (1300u << 16)));
   CHECK(route->native_pointer_18c == route);
-  CHECK(route->native_pointer64 == &fixture.model.instance.currentTileX);
+  CHECK(route->native_pointer64 == &fixture.model.instance.current_tile_x);
   CHECK(VS::Field::LiveActorCollisionBypass(1) == 2);
 }
 
@@ -921,7 +921,7 @@ TEST_CASE(
   record->opaque_19a = record->opaque1 = record->is_stuck = record->opaque3 =
       0xA5;
   record->route_gate = 1;
-  fixture.model.instance.currentTileLayer = 1;
+  fixture.model.instance.current_tile_layer = 1;
   fixture.grid[8][8] = 0xAB;
   auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.walk_valid = frame.walk_passable = 0xFF;
@@ -966,7 +966,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   fixture.AllocateCopiedRoute(1200u | (1300u << 16));
   fixture.ActiveRoute()->locomotion_mode = static_cast<u_char>(mode);
   fixture.ActiveRoute()->destination.word = 0xA5080308;
-  fixture.model.instance.currentTileLayer = 5;
+  fixture.model.instance.current_tile_layer = 5;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);

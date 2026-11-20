@@ -11,9 +11,9 @@
 
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
@@ -180,15 +180,14 @@ struct FakeScriptedPath final : actors::ScriptedPathHost {
 
 // The actor and battle actor tables, emptied for one test and then restored.
 struct LiveMotionState {
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Battle::actors) saved_battle_actors = VS::Battle::actors;
-  std::vector<std::unique_ptr<Actors_ActorRecord>> records;
+  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
   std::vector<std::unique_ptr<Battle_Actor>> battle_actors;
 
   LiveMotionState() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
   }
@@ -197,15 +196,15 @@ struct LiveMotionState {
   LiveMotionState(LiveMotionState&&) = delete;
   LiveMotionState& operator=(LiveMotionState&&) = delete;
   ~LiveMotionState() {
-    std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_battle_actors, std::begin(VS::Battle::actors));
   }
 
-  Actors_ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<Actors_ActorRecord>());
-    Actors_ActorRecord& actor = *records.back();
+  VS::Actors::ActorRecord& AddActor(int actor_id) {
+    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
+    VS::Actors::ActorRecord& actor = *records.back();
     actor.instance.slot = static_cast<u_char>(actor_id);
-    Actors_actorRecords[actor_id] = &actor;
+    VS::Actors::actorRecords[actor_id] = &actor;
     return actor;
   }
 
@@ -786,21 +785,21 @@ TEST_CASE("Movement resets keep the locked command state and allow absences",
 TEST_CASE("Live actor motion stores and loads every record field",
           "[actors][actors-movement]") {
   const ActorMotion sample = SampleMotion();
-  auto record = std::make_unique<Actors_ActorRecord>();
-  record->travelAnimation = 7;
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
+  record->travel_animation = 7;
   actors::StoreLiveActorMotion(sample, *record);
   CHECK(actors::LoadLiveActorMotion(*record) == sample);
-  CHECK(record->instance.currentAnimation == sample.move_frames);
-  CHECK(record->instance.currentTileLayer == sample.current_tile.layer);
-  CHECK(record->turnState.distance == sample.request_distance);
-  CHECK(record->routeTarget.pad == sample.route_target.w);
-  CHECK(record->travelAnimation == 7);
+  CHECK(record->instance.current_animation == sample.move_frames);
+  CHECK(record->instance.current_tile_layer == sample.current_tile.layer);
+  CHECK(record->turn_state.distance == sample.request_distance);
+  CHECK(record->route_target.pad == sample.route_target.w);
+  CHECK(record->travel_animation == 7);
 }
 
 TEST_CASE("Live adapters run the motion rules on the actor table's record",
           "[actors][actors-movement]") {
   LiveMotionState state;
-  Actors_ActorRecord& actor = state.AddActor(kActor);
+  VS::Actors::ActorRecord& actor = state.AddActor(kActor);
   actors::SetLiveActorTravelStepCounts(kActor, -1, 32);
   int move_steps = 0;
   int turn_steps = 0;
@@ -808,31 +807,31 @@ TEST_CASE("Live adapters run the motion rules on the actor table's record",
   CHECK(move_steps == 1);
   CHECK(turn_steps == 32);
   actors::SetLiveActorWalkRunSpeeds(kActor, 0x2000, 0x1000);
-  CHECK(actor.walkSpeed == 2);
-  CHECK(actor.runSpeed == 0xFF);
+  CHECK(actor.walk_speed == 2);
+  CHECK(actor.run_speed == 0xFF);
 
   actor.instance.position = SVECTOR{.vx = 100, .vy = 0, .vz = 200, .pad = 0};
   SVECTOR step{.vx = 200, .vy = 10, .vz = 100, .pad = 0};
   actors::SetLiveActorTranslation(kActor, &step, 0);
   CHECK(actor.instance.position.vx == 300);
-  CHECK(actor.instance.currentTileZ == 2);
+  CHECK(actor.instance.current_tile_z == 2);
   actors::StopLiveActorMotion(kActor);
-  CHECK(actor.instance.rootMotion.vx == 0);
+  CHECK(actor.instance.root_motion.vx == 0);
 }
 
 TEST_CASE("Live turns and scales write the record's angles and scale",
           "[actors][actors-movement]") {
   LiveMotionState state;
-  Actors_ActorRecord& actor = state.AddActor(kActor);
-  actor.turnRate = 4;
+  VS::Actors::ActorRecord& actor = state.AddActor(kActor);
+  actor.turn_rate = 4;
   actor.instance.facing = 0x100;
   actors::TurnLiveActorToAtRate(kActor, 0xF00, 8);
-  CHECK(actor.instance.facingDelta == -0x200);
-  CHECK(actor.instance.turnFrames == 1);
-  CHECK(actor.turnRate == 4);
+  CHECK(actor.instance.facing_delta == -0x200);
+  CHECK(actor.instance.turn_frames == 1);
+  CHECK(actor.turn_rate == 4);
 
-  actor.instance.currentTileX = 1;
-  actor.instance.currentTileZ = 1;
+  actor.instance.current_tile_x = 1;
+  actor.instance.current_tile_z = 1;
   VS::Actors::TileTarget tile{
       .tile_x = 2, .tile_layer = 0, .tile_z = 1, .facing = 0};
   actors::TurnLiveActorTowardTileAtRate(kActor, &tile, 0);
@@ -840,24 +839,24 @@ TEST_CASE("Live turns and scales write the record's angles and scale",
 
   SVECTOR scale{.vx = 2048, .vy = 4096, .vz = 8192, .pad = 0};
   actors::ScaleLiveActorToOverTime(kActor, &scale, 0);
-  CHECK(actor.instance.scaleX == 2048);
-  CHECK(actor.instance.scaleZ == 8192);
+  CHECK(actor.instance.scale_x == 2048);
+  CHECK(actor.instance.scale_z == 8192);
 }
 
 TEST_CASE("Live adapters skip an empty slot and refuse ids past the table",
           "[actors][actors-movement]") {
   LiveMotionState state;
-  Actors_ActorRecord& actor = state.AddActor(kActor);
-  actor.moveRate = 9;
+  VS::Actors::ActorRecord& actor = state.AddActor(kActor);
+  actor.move_rate = 9;
   actors::SetLiveActorTravelStepCounts(kEmptySlot, 4, 4);
-  CHECK(actor.moveRate == 9);
+  CHECK(actor.move_rate == 9);
   int move_steps = -5;
   int turn_steps = -5;
   actors::LiveActorTravelStepCounts(kEmptySlot, &move_steps, &turn_steps);
   CHECK(move_steps == -5);
 
   ChannelWarnings warnings{"actors"};
-  const int past_table = static_cast<int>(std::size(Actors_actorRecords));
+  const int past_table = static_cast<int>(std::size(VS::Actors::actorRecords));
   actors::StopLiveActorMotion(past_table);
   actors::LiveActorTravelStepCounts(-1, &move_steps, &turn_steps);
   CHECK(turn_steps == -5);
@@ -871,15 +870,15 @@ TEST_CASE("Live adapters skip an empty slot and refuse ids past the table",
 TEST_CASE("Live movement resets drop the battle command unless locked",
           "[actors][actors-movement]") {
   LiveMotionState state;
-  Actors_ActorRecord& actor = state.AddActor(kActor);
+  VS::Actors::ActorRecord& actor = state.AddActor(kActor);
   Battle_Actor& battle_actor = state.AddBattleActor(kActor);
   battle_actor.commandState = 5;
-  actor.instance.movementMode = 3;
-  actor.instance.turnFrames = 4;
+  actor.instance.movement_mode = 3;
+  actor.instance.turn_frames = 4;
   actors::ResetLiveActorMovement(kActor);
   CHECK(battle_actor.commandState == 0);
-  CHECK(actor.instance.movementMode == 0);
-  CHECK(actor.instance.turnFrames == 0);
+  CHECK(actor.instance.movement_mode == 0);
+  CHECK(actor.instance.turn_frames == 0);
 
   battle_actor.commandState = 0x20;
   actors::ResetLiveActorMovement(kActor);
@@ -893,32 +892,32 @@ TEST_CASE("Live movement resets drop the battle command unless locked",
 
 TEST_CASE("Live record entries apply the fall, request and transition rules",
           "[actors][actors-movement]") {
-  auto record = std::make_unique<Actors_ActorRecord>();
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
   record->instance.slot = kActor;
   record->instance.position = SVECTOR{.vx = 100, .vy = 5, .vz = 200, .pad = 0};
-  Actors_FallDirection direction{
-      .directionX = -3, .reserved2 = 0, .directionZ = 4};
+  VS::Actors::FallDirection direction{
+      .direction_x = -3, .reserved2 = 0, .direction_z = 4};
   actors::SetLiveActorFallDestination(record.get(), &direction);
-  CHECK(record->destinationX == 37);
-  CHECK(record->destinationZ == 263);
-  record->turnState.distance = 99;
+  CHECK(record->destination_x == 37);
+  CHECK(record->destination_z == 263);
+  record->turn_state.distance = 99;
   actors::ClearLiveActorMovementRequest(record.get());
-  CHECK(record->turnState.mode == 1);
-  CHECK(record->turnState.distance == 0);
+  CHECK(record->turn_state.mode == 1);
+  CHECK(record->turn_state.distance == 0);
 
-  record->transitionFrames = 4;
-  record->instance.rootMotion.vx = 100;
+  record->transition_frames = 4;
+  record->instance.root_motion.vx = 100;
   actors::StepLiveActorTransitionDisplacement(record.get());
   CHECK(record->instance.position.vx == 125);
-  CHECK(record->transitionFrames == 3);
-  record->instance.isJumping = 1;
+  CHECK(record->transition_frames == 3);
+  record->instance.is_jumping = 1;
   CHECK(actors::LiveActorJumpAnimationProfile(record.get()) == 4);
 }
 
 TEST_CASE("Live record entries refuse a missing record with a warning",
           "[actors][actors-movement]") {
   ChannelWarnings warnings{"actors"};
-  Actors_FallDirection direction{};
+  VS::Actors::FallDirection direction{};
   SVECTOR point{};
   actors::StepLiveActorTransitionDisplacement(nullptr);
   actors::SetLiveActorFallDestination(nullptr, &direction);
@@ -936,19 +935,19 @@ TEST_CASE("Live record entries refuse a missing record with a warning",
 
 TEST_CASE("Live routes wait on the record's turn and walk frames",
           "[actors][actors-movement]") {
-  auto record = std::make_unique<Actors_ActorRecord>();
-  record->routePhase = actors::kRouteTurning;
-  record->instance.turnFrames = 3;
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
+  record->route_phase = actors::kRouteTurning;
+  record->instance.turn_frames = 3;
   actors::UpdateLiveActorRoute(kActor, record.get());
-  CHECK(record->routePhase == actors::kRouteTurning);
+  CHECK(record->route_phase == actors::kRouteTurning);
 
-  record->routePhase = actors::kRouteWalking;
-  record->instance.currentAnimation = 5;
+  record->route_phase = actors::kRouteWalking;
+  record->instance.current_animation = 5;
   actors::UpdateLiveActorRoute(kActor, record.get());
-  CHECK(record->routePhase == actors::kRouteWalking);
-  record->routePhase = actors::kRouteIdle;
+  CHECK(record->route_phase == actors::kRouteWalking);
+  record->route_phase = actors::kRouteIdle;
   actors::UpdateLiveActorRoute(kActor, record.get());
-  CHECK(record->routePhase == actors::kRouteIdle);
+  CHECK(record->route_phase == actors::kRouteIdle);
 }
 
 TEST_CASE("Promoted actor motion leaves no module address binding",

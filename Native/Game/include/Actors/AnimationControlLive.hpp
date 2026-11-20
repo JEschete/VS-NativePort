@@ -3,8 +3,12 @@
 
 #include <cstdint>
 
-struct Actors_ActorRecord;
-struct Actors_ModelEffectSlot;
+namespace VS::Actors {
+struct ActorRecord;
+}
+namespace VS::Actors {
+struct ModelEffectSlot;
+}
 struct Battle_Actor;
 
 // Binding from the actor table and the original arguments to the typed actor
@@ -57,9 +61,9 @@ int LiveAnimationBattleWindowFrame(int actor_id);
 void SetLiveActorSoundOverrides(int actor_id,
                                 const SoundEffectSlot& sound_override);
 void SetLiveActorSoundOverrides(int actor_id,
-                                Actors_ModelEffectSlot* sound_override);
+                                VS::Actors::ModelEffectSlot* sound_override);
 void ApplyLiveActorSoundOverrides(int actor_id,
-                                  Actors_ModelEffectSlot* sound_override);
+                                  VS::Actors::ModelEffectSlot* sound_override);
 int SetLiveActorTravelAnimation(int actor_id, int animation);
 // -1 without an actor or an output, else 0 with the animation written.
 int LiveActorTravelAnimation(int actor_id, int* animation_out);
@@ -78,8 +82,9 @@ void SetLiveActorAnimationLocked(int actor_id, int locked);
 void PlayLiveActorTurnAnimation(int actor_id, int target_facing);
 // `direction` is unused, as in the original; returns 0.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-int UpdateLiveActorLocomotionAnimation(Actors_ActorRecord* actor, int speed,
-                                       int direction);
-void SetLiveActorBonePoseLock(Actors_ActorRecord* actor, int bone, int lock);
-void ClearLiveActorBonePoseLocks(Actors_ActorRecord* actor);
+int UpdateLiveActorLocomotionAnimation(VS::Actors::ActorRecord* actor,
+                                       int speed, int direction);
+void SetLiveActorBonePoseLock(VS::Actors::ActorRecord* actor, int bone,
+                              int lock);
+void ClearLiveActorBonePoseLocks(VS::Actors::ActorRecord* actor);
 }  // namespace VS::Actors

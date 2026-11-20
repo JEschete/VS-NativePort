@@ -12,9 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
@@ -181,12 +180,12 @@ struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* old_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
-  Actors_ActorRecord* old_record = Actors_actorRecords[0];
+  VS::Actors::ActorRecord* old_record = VS::Actors::actorRecords[0];
   int old_budget = VS::Battle::Ai::frameTickBudget;
   Battle_Actor head{}, actor{};
   VS::Battle::Ai::ActorAiState player{}, state{};
-  Actors_ActorRecord record{};
-  Actors_ModelInstance model{};
+  VS::Actors::ActorRecord record{};
+  VS::Actors::ModelInstance model{};
   LiveDecisionFixture() {
     head.next = &actor;
     head.model = &model;
@@ -196,14 +195,14 @@ struct LiveDecisionFixture {
     VS::Battle::actors[0] = &head;
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     VS::Battle::Ai::actorAiStates[0] = &player;
-    Actors_actorRecords[0] = &record;
+    VS::Actors::actorRecords[0] = &record;
     VS::Battle::Ai::frameTickBudget = std::numeric_limits<int>::max();
   }
   ~LiveDecisionFixture() {
     VS::Battle::Ai::LiveFrameContext() = old_frame;
     VS::Battle::actors[0] = old_head;
     VS::Battle::Ai::actorAiStates[0] = old_player;
-    Actors_actorRecords[0] = old_record;
+    VS::Actors::actorRecords[0] = old_record;
     VS::Battle::Ai::frameTickBudget = old_budget;
   }
 };
@@ -487,7 +486,7 @@ TEST_CASE("Live partial decisions keep player record and battle model distinct",
   LiveDecisionFixture fixture;
   fixture.model.position = {100, 20, 30, 0};
   fixture.record.instance.position = {900, 100, 800, 0};
-  fixture.record.instance.locomotionState = 1;
+  fixture.record.instance.locomotion_state = 1;
   fixture.player.body_height = 30;
   fixture.player.point_height = 77;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
@@ -496,7 +495,7 @@ TEST_CASE("Live partial decisions keep player record and battle model distinct",
   CHECK(ai::UpdateCheckedLiveActorDecisions());
   CHECK(fixture.state.distances_squared[0] == 20309);
   VS::Battle::Ai::actorAiStates[0] = nullptr;
-  Actors_actorRecords[0] = nullptr;
+  VS::Actors::actorRecords[0] = nullptr;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
   CHECK(fixture.state.distances_squared[0] == 12836);
 }
@@ -507,9 +506,9 @@ TEST_CASE("Live decisions diagnose missing listed states and player records",
   VS::Battle::Ai::LiveFrameContext().actors[1] = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
   VS::Battle::Ai::LiveFrameContext().actors[1] = &fixture.state;
-  Actors_actorRecords[0] = nullptr;
+  VS::Actors::actorRecords[0] = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
-  Actors_actorRecords[0] = &fixture.record;
+  VS::Actors::actorRecords[0] = &fixture.record;
   fixture.head.model = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
   fixture.actor.id = 16;

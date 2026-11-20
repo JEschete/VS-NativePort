@@ -9,7 +9,7 @@ namespace VS::Actors {
 // Mode of a gliding transition; any other mode holds the current state.
 inline constexpr std::uint8_t kSoundTransitionGliding = 1;
 
-// An actor sound state (original Actors_ModelEffectSlot byte order).
+// An actor sound state (original VS::Actors::ModelEffectSlot byte order).
 struct SoundTransition {
   std::uint8_t mode = 0;
   std::uint8_t pan = 0;

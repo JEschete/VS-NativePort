@@ -9,7 +9,9 @@ namespace VS::Field {
 struct GimmickSnapshot;
 struct GimmickInstance;
 }  // namespace VS::Field
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}  // namespace VS::Actors
 
 namespace VS::Field {
 bool IsLiveGimmickPrefixReadable(const VS::Field::GimmickInstance* record);
@@ -23,7 +25,7 @@ bool DropLiveUnsupportedGimmickStack(std::int32_t slot);
 std::optional<std::size_t> FindLiveInteractableGimmickAhead(
     std::int32_t actor_slot);
 bool BeginLiveGimmickInteraction(std::int32_t actor_slot);
-bool ApplyLiveGimmickInteractionCommand(Actors_ActorRecord* actor,
+bool ApplyLiveGimmickInteractionCommand(VS::Actors::ActorRecord* actor,
                                         std::int32_t mode);
 
 int GimmickPlacementEntry(int gimmick_slot,
@@ -37,7 +39,8 @@ int CanPlaceGimmickAtPointEntry(int x, int z, int minimum_height);
 void DropUnsupportedGimmickStackEntry(int slot);
 int FindInteractableGimmickAheadEntry(int actor_slot);
 int BeginGimmickInteractionEntry(int actor_slot);
-void ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor, int mode);
+void ApplyGimmickInteractionCommandEntry(VS::Actors::ActorRecord* actor,
+                                         int mode);
 int MeasureTileStackEntry(int tile_x, int tile_z, int* height_offset);
 int IsGimmickWithinHeightBandEntry(int tile_x, int tile_z, int minimum_height);
 }  // namespace VS::Field

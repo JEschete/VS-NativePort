@@ -13,7 +13,9 @@ struct ActorLocation;
 namespace VS::Actors {
 struct ActorLocationQuery;
 }
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 struct SVECTOR;
 
 namespace VS::Effects {
@@ -23,7 +25,7 @@ struct LiveActionEffectRequest;
 namespace VS::Field {
 inline constexpr int kEntranceRecordBytes = 12;
 int CurrentSavePointIdEntry();
-void RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record);
+void RefreshAshleyInteractionTileEntry(VS::Actors::ActorRecord* record);
 void StoreEntranceDoorForReloadEntry();
 void ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position);
 void SetEntranceDoorRecordEntry(char (*record)[kEntranceRecordBytes]);
@@ -55,7 +57,7 @@ void FinishTrapInteractionEntry();
 void BeginTrapInteractionEntry(VS::Field::MpdLockTrigger* address,
                                VS::Actors::ActorLocation* location, int actor);
 std::uint8_t LiveCurrentSavePointId();
-bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record);
+bool RefreshLiveAshleyInteractionTile(const VS::Actors::ActorRecord* record);
 void SetLiveEntranceDoor(const std::optional<DoorRecord>& door);
 void FindLiveEntranceDoorNearTile(std::int32_t tile_x, std::int32_t tile_z,
                                   std::int32_t layer);

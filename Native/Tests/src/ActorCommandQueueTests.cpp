@@ -16,8 +16,7 @@
 #include "Actors/ActorCommands.hpp"
 #include "Actors/ActorCommandsLive.hpp"
 #include "Actors/ActorCommandsLiveState.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
@@ -763,24 +762,24 @@ LiveCommandFields FieldsOf(const Battle_Actor& actor) {
       .args = {actor.commandArg0, actor.commandArg1.word, actor.commandArg2}};
 }
 
-std::array<int, 3> StepOf(const Actors_ActorRecord& record) {
-  return {record.turnState.step.vx, record.turnState.step.vy,
-          record.turnState.step.vz};
+std::array<int, 3> StepOf(const VS::Actors::ActorRecord& record) {
+  return {record.turn_state.step.vx, record.turn_state.step.vy,
+          record.turn_state.step.vz};
 }
 
 // Swaps in empty actor tables and restores the live ones on scope exit.
 class LiveActorTables {
  public:
   LiveActorTables()
-      : records_(std::to_array(Actors_actorRecords)),
+      : records_(VS::Actors::actorRecords),
         battle_actors_(VS::Battle::actors),
         control_mode_(VS::Field::controlMode) {
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     std::ranges::fill(VS::Battle::actors, nullptr);
     VS::Field::controlMode = 0;
   }
   ~LiveActorTables() {
-    std::ranges::copy(records_, std::begin(Actors_actorRecords));
+    std::ranges::copy(records_, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(battle_actors_, std::begin(VS::Battle::actors));
     VS::Field::controlMode = control_mode_;
   }
@@ -788,7 +787,7 @@ class LiveActorTables {
   LiveActorTables& operator=(const LiveActorTables&) = delete;
 
  private:
-  decltype(std::to_array(Actors_actorRecords)) records_;
+  decltype(VS::Actors::actorRecords) records_;
   decltype(VS::Battle::actors) battle_actors_;
   u_int control_mode_;
 };
@@ -797,9 +796,9 @@ class LiveActorTables {
 TEST_CASE("The live executor steps a waiting ground offset in the actor tables",
           "[actors][actor-command-queue]") {
   const LiveActorTables tables;
-  const auto record = std::make_unique<Actors_ActorRecord>();
-  record->instance.attachParent = 0xFF;
-  Actors_actorRecords[0] = record.get();
+  const auto record = std::make_unique<VS::Actors::ActorRecord>();
+  record->instance.attach_parent = 0xFF;
+  VS::Actors::actorRecords[0] = record.get();
   const auto battle_actor = std::make_unique<Battle_Actor>();
   battle_actor->kind = 2;
   battle_actor->commandState = actors::kCommandWaiting;

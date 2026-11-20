@@ -12,8 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -279,13 +278,12 @@ struct ActorPlanFixture : EnumerationFixture {
 };
 
 struct TargetMemoryFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActionCandidateRecord best{};
   VS::Battle::Ai::ActionCandidateRecord alternate{};
-  Actors_ActorRecord model{};
-  Actors_ActorRecord alternate_model{};
+  VS::Actors::ActorRecord model{};
+  VS::Actors::ActorRecord alternate_model{};
 
   explicit TargetMemoryFixture(unsigned target) {
     best.target_id = target;
@@ -295,14 +293,15 @@ struct TargetMemoryFixture {
     state.candidate_order[1] = &alternate;
     state.previous_tile = 0x12345678;
     std::memset(state.reserved_3c.data(), 0xA5, sizeof(state.reserved_3c));
-    Actors_actorRecords[target] = &model;
-    Actors_actorRecords[alternate.target_id] = &alternate_model;
+    VS::Actors::actorRecords[target] = &model;
+    VS::Actors::actorRecords[alternate.target_id] = &alternate_model;
     const std::array<u_char, 4> tile{0xD4, 0xC3, 0xB2, 0xA1};
-    std::memcpy(&model.instance.currentTileX, tile.data(), tile.size());
+    std::memcpy(&model.instance.current_tile_x, tile.data(), tile.size());
   }
 
   ~TargetMemoryFixture() {
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
   }
 
   auto Bytes() const {
@@ -326,13 +325,12 @@ struct CompletedPlanFixture {
       VS::Battle::Ai::actorAiStates;
   decltype(VS::Field::gimmickInstances) saved_objects =
       VS::Field::gimmickInstances;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   VS::Battle::Ai::ActorAiState state{};
   Battle_Actor actor{};
   VS::Battle::Ai::ActionCandidateRecord first{};
   VS::Battle::Ai::ActionCandidateRecord second{};
-  Actors_ActorRecord model{};
+  VS::Actors::ActorRecord model{};
   VS::Field::GimmickInstance object{};
   Battle_ActionRequest request{};
 
@@ -357,7 +355,7 @@ struct CompletedPlanFixture {
     state.candidate_count = 2;
     state.candidate_order[0] = &first;
     state.candidate_order[1] = &second;
-    Actors_actorRecords[5] = &model;
+    VS::Actors::actorRecords[5] = &model;
     request.actionId = 42;
     request.primaryTarget.target.target_actor = 2;
     request.targetCount = 1;
@@ -370,7 +368,8 @@ struct CompletedPlanFixture {
               VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_objects.begin(), saved_objects.end(),
               VS::Field::gimmickInstances.begin());
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
   }
 
   void Reconcile() {

@@ -8,13 +8,12 @@
 #include <iterator>
 
 #include "Actors/ActorModelSlot.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Battle/AbilityState.hpp"
@@ -514,17 +513,17 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
   const Battle_ActionRequest& queued =
       state.queue[state.queueIndex & kQueueSlotMask];
   const int actor = queued.primaryTarget.target.target_actor;
-  const Actors_ActorRecord* record = InRange(Actors_actorRecords, actor)
-                                         ? Actors_actorRecords[actor]
-                                         : nullptr;
+  const VS::Actors::ActorRecord* record =
+      InRange(VS::Actors::actorRecords, actor) ? VS::Actors::actorRecords[actor]
+                                               : nullptr;
   if (record == nullptr) return;
   VS::Core::LogDebug(
       "combat-flow",
       "animation id={} state={} active={} held={} timer={} "
       "window={} effects={} action={}",
-      static_cast<unsigned>(record->animationId),
-      static_cast<unsigned>(record->instance.actionAnimationState),
-      static_cast<unsigned>(record->instance.currentAnimation),
+      static_cast<unsigned>(record->animation_id),
+      static_cast<unsigned>(record->instance.action_animation_state),
+      static_cast<unsigned>(record->instance.current_animation),
       static_cast<unsigned>(record->pose.holding_last_frame),
       static_cast<int>(state.abilityTimer),
       static_cast<unsigned>(state.abilityWindow),

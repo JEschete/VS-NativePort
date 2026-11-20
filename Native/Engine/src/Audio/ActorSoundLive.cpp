@@ -7,9 +7,8 @@
 #include <optional>
 #include <span>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSound.hpp"
@@ -50,24 +49,24 @@ constexpr std::size_t kPositionVectorBytes = 8;
 constexpr std::size_t kSoundSectionBytes = 4;
 
 // The record tables and the fields the original reads (lbu, lh) as typed.
-static_assert(std::size(Actors_actorRecords) == kActorRecordCount);
+static_assert(std::size(VS::Actors::actorRecords) == kActorRecordCount);
 static_assert(std::size(VS::Battle::actors) == kBattleActorCount);
 static_assert(std::size(VS::Field::gimmickInstances) == kGimmickCount);
 static_assert(std::size(VS::Audio::objectSurfaceSoundIds) ==
               kObjectSurfaceSoundBytes);
 static_assert(std::size(VS::Field::tileSurfaceIds) == kTileSurfaceSoundBytes);
-static_assert(sizeof(Actors_ModelEffectSlot) == kModelEffectSlotBytes);
-static_assert(offsetof(Actors_ModelEffectSlot, kind) == 0);
-static_assert(offsetof(Actors_ModelEffectSlot, level) == 1);
-static_assert(offsetof(Actors_ModelEffectSlot, flags) == 2);
-static_assert(sizeof(Actors_ActorRecord::animationId) == 1);
-static_assert(sizeof(Actors_ActorRecord::contactKind) == 1);
-static_assert(sizeof(Actors_ModelInstance::slot) == 1);
-static_assert(sizeof(Actors_ModelInstance::currentTileX) == 1);
-static_assert(offsetof(Actors_ModelInstance, currentTileLayer) ==
-              offsetof(Actors_ModelInstance, currentTileX) + 1);
-static_assert(offsetof(Actors_ModelInstance, currentTileZ) ==
-              offsetof(Actors_ModelInstance, currentTileX) + 2);
+static_assert(sizeof(VS::Actors::ModelEffectSlot) == kModelEffectSlotBytes);
+static_assert(offsetof(VS::Actors::ModelEffectSlot, kind) == 0);
+static_assert(offsetof(VS::Actors::ModelEffectSlot, level) == 1);
+static_assert(offsetof(VS::Actors::ModelEffectSlot, flags) == 2);
+static_assert(sizeof(VS::Actors::ActorRecord::animation_id) == 1);
+static_assert(sizeof(VS::Actors::ActorRecord::contact_kind) == 1);
+static_assert(sizeof(VS::Actors::ModelInstance::slot) == 1);
+static_assert(sizeof(VS::Actors::ModelInstance::current_tile_x) == 1);
+static_assert(offsetof(VS::Actors::ModelInstance, current_tile_layer) ==
+              offsetof(VS::Actors::ModelInstance, current_tile_x) + 1);
+static_assert(offsetof(VS::Actors::ModelInstance, current_tile_z) ==
+              offsetof(VS::Actors::ModelInstance, current_tile_x) + 2);
 static_assert(sizeof(SVECTOR) == kPositionVectorBytes);
 static_assert(offsetof(VS::Actors::ShpModel, sound_section) ==
               sizeof(VS::Actors::ShpModel::header));
@@ -111,17 +110,17 @@ BankBuffer SoundBank(const VS::Actors::ShpModel* shp) {
                         shp->sound_section);
 }
 
-ActorModelSound ModelSound(const Actors_ModelInstance& instance) {
+ActorModelSound ModelSound(const VS::Actors::ModelInstance& instance) {
   return {.height = instance.position.vy,
           .actor = instance.slot,
           .bank = SoundBank(instance.model)};
 }
 
-Actors_ActorRecord* Record(std::int32_t actor) {
+VS::Actors::ActorRecord* Record(std::int32_t actor) {
   if (actor < 0 || static_cast<std::size_t>(actor) >= kActorRecordCount) {
     return nullptr;
   }
-  return Actors_actorRecords[actor];
+  return VS::Actors::actorRecords[actor];
 }
 
 Battle_Actor* BattleActor(std::int32_t actor) {
@@ -134,38 +133,38 @@ Battle_Actor* BattleActor(std::int32_t actor) {
 class LiveActorSoundHost final : public ActorSoundHost {
  public:
   std::optional<ActorSoundRecord> ActorSound(std::int32_t actor) override {
-    const Actors_ActorRecord* record = Record(actor);
+    const VS::Actors::ActorRecord* record = Record(actor);
     if (record == nullptr) return std::nullopt;
-    const Actors_ModelInstance& instance = record->instance;
+    const VS::Actors::ModelInstance& instance = record->instance;
     return ActorSoundRecord{
-        .sound_override = {.kind = record->soundEffect.kind,
-                           .pan = record->soundEffect.level,
-                           .volume = record->soundEffect.flags},
-        .motion = {.action_animation_state = instance.actionAnimationState,
-                   .preview_model = instance.isPreviewModel != 0,
-                   .sound_enabled = instance.soundEnabled != 0,
-                   .movement_mode = instance.movementMode,
-                   .locomotion_state = instance.locomotionState,
-                   .motion_locked = instance.motionLocked != 0}};
+        .sound_override = {.kind = record->sound_effect.kind,
+                           .pan = record->sound_effect.level,
+                           .volume = record->sound_effect.flags},
+        .motion = {.action_animation_state = instance.action_animation_state,
+                   .preview_model = instance.is_preview_model != 0,
+                   .sound_enabled = instance.sound_enabled != 0,
+                   .movement_mode = instance.movement_mode,
+                   .locomotion_state = instance.locomotion_state,
+                   .motion_locked = instance.motion_locked != 0}};
   }
 
   std::optional<ActorModelSound> ActorModel(std::int32_t actor) override {
-    const Actors_ActorRecord* record = Record(actor);
+    const VS::Actors::ActorRecord* record = Record(actor);
     if (record == nullptr) return std::nullopt;
     return ModelSound(record->instance);
   }
 
   void ProjectSoundPosition(std::int32_t actor) override {
-    Actors_ActorRecord* record = Record(actor);
+    VS::Actors::ActorRecord* record = Record(actor);
     if (record == nullptr) return;
     Actors::ProjectLiveActorTaggedBone(actor, kSoundPositionTag,
-                                       &record->soundPosition, 0);
+                                       &record->sound_position, 0);
   }
 
   SfxPoint SoundPosition(std::int32_t actor) override {
-    const Actors_ActorRecord* record = Record(actor);
+    const VS::Actors::ActorRecord* record = Record(actor);
     if (record == nullptr) return {};
-    const SVECTOR& position = record->soundPosition;
+    const SVECTOR& position = record->sound_position;
     return {.x = position.vx, .y = position.vy, .z = position.vz};
   }
 
@@ -260,7 +259,7 @@ void LiveActorSoundPanAndVolume(int actor_index, int* output_pan,
 }
 
 // decomp: BATTLE.PRG func_800AE4FC (src/BATTLE/BATTLE.PRG/44F14.c:637)
-void LivePlayActorModelSound(const Actors_ModelInstance* model_instance,
+void LivePlayActorModelSound(const VS::Actors::ModelInstance* model_instance,
                              int sound_index) {
   if (model_instance == nullptr) {
     Seq::ReportRefusal("PlayActorModelSound", "no model instance");
@@ -279,7 +278,7 @@ void LivePlayActorModelSoundVariant(int actor_index, int variant_index) {
 }
 
 // decomp: BATTLE.PRG func_800AE6C0 (src/BATTLE/BATTLE.PRG/44F14.c:690)
-void LivePlayActorSoundPair(const Actors_ActorRecord* source_actor,
+void LivePlayActorSoundPair(const VS::Actors::ActorRecord* source_actor,
                             int first_effect_id, int second_effect_id) {
   if (source_actor == nullptr) {
     Seq::ReportRefusal("PlayActorSoundPair", "no source actor");
@@ -309,19 +308,19 @@ void LivePlayGimmickSoundPair(const VS::Field::GimmickInstance* gimmick,
 
 // decomp: BATTLE.PRG func_800AE828 (src/BATTLE/BATTLE.PRG/44F14.c:739)
 void LivePlayActorSurfaceContactSound(int actor_index,
-                                      const Actors_ActorRecord* actor,
+                                      const VS::Actors::ActorRecord* actor,
                                       int contact_sound_code) {
   if (actor == nullptr) {
     Seq::ReportRefusal("PlayActorSurfaceContactSound", "no actor");
     return;
   }
-  const Actors_ModelInstance& instance = actor->instance;
-  const ActorContactSource source{.animation_id = actor->animationId,
-                                  .on_gimmick = actor->supportGimmick != 0,
-                                  .tile_x = instance.currentTileX,
-                                  .tile_layer = instance.currentTileLayer,
-                                  .tile_z = instance.currentTileZ,
-                                  .contact_layer = actor->contactKind,
+  const VS::Actors::ModelInstance& instance = actor->instance;
+  const ActorContactSource source{.animation_id = actor->animation_id,
+                                  .on_gimmick = actor->support_gimmick != 0,
+                                  .tile_x = instance.current_tile_x,
+                                  .tile_layer = instance.current_tile_layer,
+                                  .tile_z = instance.current_tile_z,
+                                  .contact_layer = actor->contact_kind,
                                   .model = ModelSound(instance)};
   LiveActorSoundHost host;
   Report("PlayActorSurfaceContactSound",

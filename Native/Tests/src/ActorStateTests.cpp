@@ -19,12 +19,11 @@
 #include "Actors/ActorLifecycle.hpp"
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorPlacement.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/BattleActorState.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Battle/Actor.h"
@@ -1267,8 +1266,7 @@ namespace {
 // the test.
 struct LiveStateFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
@@ -1277,7 +1275,8 @@ struct LiveStateFixture {
 
   LiveStateFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
+                nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
@@ -1289,18 +1288,18 @@ struct LiveStateFixture {
   LiveStateFixture& operator=(LiveStateFixture&&) = delete;
   ~LiveStateFixture() {
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
-    std::ranges::copy(saved_records, Actors_actorRecords);
+    std::ranges::copy(saved_records, VS::Actors::actorRecords.begin());
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_gimmicks, VS::Field::gimmickInstances.begin());
     std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
   }
 };
 
-std::unique_ptr<Actors_ActorRecord> LiveRecord(int slot) {
-  auto record = std::make_unique<Actors_ActorRecord>();
+std::unique_ptr<VS::Actors::ActorRecord> LiveRecord(int slot) {
+  auto record = std::make_unique<VS::Actors::ActorRecord>();
   record->instance.slot = static_cast<u_char>(slot);
-  record->instance.attachParent = 0xFF;
-  Actors_actorRecords[slot] = record.get();
+  record->instance.attach_parent = 0xFF;
+  VS::Actors::actorRecords[slot] = record.get();
   return record;
 }
 
@@ -1310,11 +1309,11 @@ std::array<int, 4> Position(const SVECTOR& position) {
 }
 
 // A live record's companion offset (x, y, z, depth bias) and colour.
-std::array<int, 8> LiveCompanionStyle(const Actors_ActorRecord& record) {
-  const Actors_CompanionOffset& offset = record.companionState;
-  const VS::Render::ColorCode& color = record.companionColor;
-  return {offset.offsetX, offset.offsetY, offset.offsetZ, offset.depthBias,
-          color.red,      color.green,    color.blue,     color.code};
+std::array<int, 8> LiveCompanionStyle(const VS::Actors::ActorRecord& record) {
+  const VS::Actors::CompanionOffsetRecord& offset = record.companion_state;
+  const VS::Render::ColorCode& color = record.companion_color;
+  return {offset.offset_x, offset.offset_y, offset.offset_z, offset.depth_bias,
+          color.red,       color.green,     color.blue,      color.code};
 }
 
 // A hostile battle actor at 30 of 120 HP with model 0x44, in slot 3.
@@ -1337,8 +1336,8 @@ std::array<int, 2> LogicState(const Battle_Actor& actor) {
 TEST_CASE("Live display flags round-trip the record and weapon bits",
           "[actors-state]") {
   const LiveStateFixture fixture;
-  const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
-  record->instance.isFrozen = -1;
+  const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(3);
+  record->instance.is_frozen = -1;
   VS::Actors::WeaponModel first{};
   VS::Actors::WeaponModel second{};
   VS::Actors::weaponModels[6] = &first;
@@ -1349,29 +1348,29 @@ TEST_CASE("Live display flags round-trip the record and weapon bits",
       3, static_cast<int>(StateFlag::kShown | StateFlag::kVisible |
                           StateFlag::kSoundEnabled |
                           StateFlag::kFirstWeaponShown));
-  CHECK(record->instance.isSkipped == 0);
-  CHECK(record->instance.isVisible != 0);
-  CHECK(record->instance.isFrozen == 0);
-  CHECK(record->instance.soundEnabled == 1);
+  CHECK(record->instance.is_skipped == 0);
+  CHECK(record->instance.is_visible != 0);
+  CHECK(record->instance.is_frozen == 0);
+  CHECK(record->instance.sound_enabled == 1);
   CHECK(std::array<int, 2>{first.shown, second.shown} == std::array{1, 0});
   CHECK(VS::Actors::LiveActorStateFlags(3) ==
         (StateFlag::kActorRecord | StateFlag::kShown | StateFlag::kVisible |
          StateFlag::kSoundEnabled | StateFlag::kFirstWeaponShown));
   // The rest of the record is left alone.
-  CHECK(record->instance.attachParent == 0xFF);
+  CHECK(record->instance.attach_parent == 0xFF);
   CHECK(record->instance.slot == 3);
 }
 
 TEST_CASE("Live model switches need a battle actor and a slot",
           "[actors-state]") {
   const LiveStateFixture fixture;
-  const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(2);
+  const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(2);
   Battle_Actor actor{};
   VS::Battle::actors[2] = &actor;
   VS::Actors::DisableLiveActorModel(2);
-  CHECK(record->instance.isSkipped != 0);
+  CHECK(record->instance.is_skipped != 0);
   VS::Actors::EnableAllLiveActorModels();
-  CHECK(record->instance.isSkipped == 0);
+  CHECK(record->instance.is_skipped == 0);
 
   const ChannelWarnings warnings("actors");
   VS::Actors::EnableLiveActorModel(-1);
@@ -1385,11 +1384,11 @@ TEST_CASE("Live model switches need a battle actor and a slot",
 TEST_CASE("Live placement writes the tile, position and facing",
           "[actors-state]") {
   const LiveStateFixture fixture;
-  const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
-  record->instance.currentTileX = 7;
-  record->instance.currentTileLayer = 2;
-  record->instance.currentTileZ = 9;
-  record->instance.reserved5F = 4;
+  const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(3);
+  record->instance.current_tile_x = 7;
+  record->instance.current_tile_layer = 2;
+  record->instance.current_tile_z = 9;
+  record->instance.reserved5f = 4;
   record->instance.position = {10, -20, 30, 99};
   record->instance.facing = 0x340;
   VS::Actors::ActorLocationQuery query{};
@@ -1426,8 +1425,8 @@ TEST_CASE("Live placement falls back to a slot gimmick", "[actors-state]") {
 TEST_CASE("Live saved placement writes only the packed tile",
           "[actors-state]") {
   const LiveStateFixture fixture;
-  const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
-  record->savedPlacement = 0x00030A07;
+  const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(3);
+  record->saved_placement = 0x00030A07;
   record->instance.facing = 0x340;
   VS::Actors::ActorLocationQuery query{};
   query.location.position.vx = 77;
@@ -1483,22 +1482,22 @@ TEST_CASE("Live battle actors switch their logic and hostility",
 
 TEST_CASE("A live companion takes its offset and colour", "[actors-state]") {
   const LiveStateFixture fixture;
-  const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
+  const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(3);
   const VS::Render::ColorCode offset{2, static_cast<u_char>(-2), 2, 16};
   const VS::Render::ColorCode color{10, 20, 30, 40};
   constexpr std::array kStyle{2, -2, 2, 16, 10, 20, 30, 40};
   VS::Actors::SetLiveActorCompanion(3, 5, &offset, &color);
-  CHECK(record->companionSlot == 5);
+  CHECK(record->companion_slot == 5);
   CHECK(LiveCompanionStyle(*record) == kStyle);
   VS::Actors::SetLiveActorCompanion(3, 0, nullptr, nullptr);
-  CHECK(record->companionSlot == 0);
+  CHECK(record->companion_slot == 0);
   CHECK(LiveCompanionStyle(*record) == kStyle);
 
   // A slot that does not fit the record's byte changes nothing.
   const ChannelWarnings warnings("actors");
   constexpr int kSlotPastByte = 256;
   VS::Actors::SetLiveActorCompanion(3, kSlotPastByte, &color, &offset);
-  CHECK(record->companionSlot == 0);
+  CHECK(record->companion_slot == 0);
   CHECK(LiveCompanionStyle(*record) == kStyle);
   CHECK(warnings.messages ==
         std::vector<std::string>{

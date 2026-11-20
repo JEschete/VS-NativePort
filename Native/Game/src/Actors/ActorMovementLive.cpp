@@ -12,10 +12,10 @@
 #include <optional>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -33,7 +33,7 @@
 
 namespace VS::Actors {
 namespace {
-constexpr std::size_t kActorSlots = std::size(Actors_actorRecords);
+constexpr std::size_t kActorSlots = std::size(VS::Actors::actorRecords);
 // Every table slot plus one record a caller names outside the table.
 constexpr std::size_t kRegistryCapacity = kActorSlots + 1;
 constexpr std::uint8_t kFourBits = 0xF;
@@ -73,7 +73,7 @@ class MovementRegistry {
   MovementRegistry& operator=(MovementRegistry&&) = delete;
   ~MovementRegistry() { StoreAll(); }
 
-  MovementActor& Attach(Actors_ActorRecord& record) {
+  MovementActor& Attach(VS::Actors::ActorRecord& record) {
     for (std::size_t index = 0; index < count_; ++index) {
       if (entries_.at(index).record == &record) {
         return entries_.at(index).actor;
@@ -91,7 +91,7 @@ class MovementRegistry {
     return entry.actor;
   }
 
-  Actors_ActorRecord& RecordOf(const MovementActor& actor) {
+  VS::Actors::ActorRecord& RecordOf(const MovementActor& actor) {
     for (std::size_t index = 0; index < count_; ++index) {
       if (&entries_.at(index).actor == &actor) {
         return *entries_.at(index).record;
@@ -118,7 +118,7 @@ class MovementRegistry {
 
  private:
   struct Entry {
-    Actors_ActorRecord* record = nullptr;
+    VS::Actors::ActorRecord* record = nullptr;
     MovementActor actor;
   };
   std::array<Entry, kRegistryCapacity> entries_{};
@@ -182,13 +182,13 @@ class LiveMovementHost final : public MovementHost {
  public:
   LiveMovementHost() : tables_(LiveMovementTables()), terrain_(registry_) {}
 
-  MovementActor& Attach(Actors_ActorRecord& record) {
+  MovementActor& Attach(VS::Actors::ActorRecord& record) {
     return registry_.Attach(record);
   }
 
   MovementActor* Actor(int id) override {
     if (id < 0 || static_cast<std::size_t>(id) >= kActorSlots) return nullptr;
-    Actors_ActorRecord* record = Actors_actorRecords[id];
+    VS::Actors::ActorRecord* record = VS::Actors::actorRecords[id];
     return record != nullptr ? &registry_.Attach(*record) : nullptr;
   }
   const MovementTables& Tables() override { return tables_; }
@@ -207,25 +207,25 @@ class LiveMovementHost final : public MovementHost {
   }
   void UpdateLocomotionAnimation(MovementActor& actor, int distance,
                                  int direction) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     UpdateLiveActorLocomotionAnimation(&record, distance, direction);
   }
 
   void PlayModelSound(const MovementActor& actor, int sound) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     VS::Audio::LivePlayActorModelSound(&record.instance, sound);
   }
   void PlaySoundPair(const MovementActor& actor, int first,
                      int second) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     VS::Audio::LivePlayActorSoundPair(&record, first, second);
   }
   void PlaySurfaceContactSound(int id, const MovementActor& actor,
                                int sound) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     VS::Audio::LivePlayActorSurfaceContactSound(id, &record, sound);
   }
@@ -256,10 +256,10 @@ class LiveMovementHost final : public MovementHost {
     return VS::Field::LiveMovingPlatformContactHeight(x, y, z, mode);
   }
   SupportContact CurrentSupport() override {
-    return {.layer = Actors_supportingPlatformLayer,
-            .gimmick = Actors_supportingGimmickIndex};
+    return {.layer = VS::Actors::supportingPlatformLayer,
+            .gimmick = VS::Actors::supportingGimmickIndex};
   }
-  void ClearSupportLayer() override { Actors_supportingPlatformLayer = 0; }
+  void ClearSupportLayer() override { VS::Actors::supportingPlatformLayer = 0; }
   void SetContactSearchDepth(int depth) override {
     VS::Field::platformContactSearchDepth = static_cast<std::int16_t>(depth);
   }
@@ -305,7 +305,7 @@ class LiveMovementHost final : public MovementHost {
   TerrainResolve ResolveTerrainMotion(MovementActor& actor,
                                       MotionVector& motion,
                                       bool probe_only) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     SVECTOR live_motion = LiveSvector(motion);
     TerrainResolve resolve;
     {
@@ -323,7 +323,7 @@ class LiveMovementHost final : public MovementHost {
   }
   bool CanHangFromLedge(MovementActor& actor, MotionVector& offset,
                         MotionVector& motion) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     SVECTOR live_offset = LiveSvector(offset);
     SVECTOR live_motion = LiveSvector(motion);
     bool hangs = false;
@@ -337,7 +337,7 @@ class LiveMovementHost final : public MovementHost {
     return hangs;
   }
   bool CalcLedgeOffset(MovementActor& actor, MotionVector& offset) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     SVECTOR live_offset = LiveSvector(offset);
     bool found = false;
     {
@@ -348,7 +348,7 @@ class LiveMovementHost final : public MovementHost {
     return found;
   }
   bool HasLedgeSideSupport(MovementActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     return VS::Field::LiveHasActorLedgeSideSupport(&record) != 0;
   }
@@ -400,7 +400,9 @@ class LiveMovementHost final : public MovementHost {
     VS::Actors::SetDirectMovement(ActorRecordMovementRequests(), id, direction,
                                   distance);
   }
-  void SetActorUpdateComplete() override { Actors_isActorUpdateComplete = 1; }
+  void SetActorUpdateComplete() override {
+    VS::Actors::isActorUpdateComplete = 1;
+  }
 
  private:
   MovementTables tables_;
@@ -410,7 +412,7 @@ class LiveMovementHost final : public MovementHost {
 
 // Runs `rule` over the actor `actor` names; a null record is refused.
 template <typename Rule>
-void WithPointer(Actors_ActorRecord* actor, const char* name, Rule rule) {
+void WithPointer(VS::Actors::ActorRecord* actor, const char* name, Rule rule) {
   if (actor == nullptr) {
     VS::Core::LogWarn("actors", "{} refused: no actor record", name);
     return;
@@ -420,120 +422,120 @@ void WithPointer(Actors_ActorRecord* actor, const char* name, Rule rule) {
 }
 }  // namespace
 
-MovementActor LoadLiveMovementActor(const Actors_ActorRecord& live) {
-  const Actors_ModelInstance& instance = live.instance;
+MovementActor LoadLiveMovementActor(const VS::Actors::ActorRecord& live) {
+  const VS::Actors::ModelInstance& instance = live.instance;
   MovementActor actor;
   actor.motion = LoadLiveActorMotion(live);
-  actor.skipped = instance.isSkipped != 0;
-  actor.reaction_state = instance.reactionState;
-  actor.was_drawn = instance.wasDrawn != 0;
-  actor.weapon_drawn = instance.weaponDrawn != 0;
-  actor.support_layer = instance.supportLayer;
-  actor.placement_layer = instance.placementLayer;
-  actor.attach_parent = instance.attachParent;
-  actor.attach_bone = instance.attachBone;
-  actor.base_color_code = instance.baseColor.cd;
-  actor.tile_spare = instance.reserved5F;
-  actor.previous_tile = {.x = instance.previousTileX,
-                         .layer = instance.previousTileLayer,
-                         .z = instance.previousTileZ,
+  actor.skipped = instance.is_skipped != 0;
+  actor.reaction_state = instance.reaction_state;
+  actor.was_drawn = instance.was_drawn != 0;
+  actor.weapon_drawn = instance.weapon_drawn != 0;
+  actor.support_layer = instance.support_layer;
+  actor.placement_layer = instance.placement_layer;
+  actor.attach_parent = instance.attach_parent;
+  actor.attach_bone = instance.attach_bone;
+  actor.base_color_code = instance.base_color.cd;
+  actor.tile_spare = instance.reserved5f;
+  actor.previous_tile = {.x = instance.previous_tile_x,
+                         .layer = instance.previous_tile_layer,
+                         .z = instance.previous_tile_z,
                          .spare = instance.reserved63};
   // Original 0x4C/0x50 history packs X/Y then Z.
-  const auto grounded = std::bit_cast<GroundedPair>(instance.supportOffset);
+  const auto grounded = std::bit_cast<GroundedPair>(instance.support_offset);
   actor.grounded_position = {grounded[0], grounded[1], instance.reserved50};
-  actor.previous_facing = instance.previousFacing;
-  actor.saved_placement = std::bit_cast<PackedTile>(live.savedPlacement);
-  actor.wall_contact = live.wallContact != 0;
-  actor.landing_pending = live.landingPending != 0;
-  actor.jump_started = live.jumpStarted != 0;
-  actor.support_gimmick = live.supportGimmick;
-  actor.tick_remainder = live.jumpLanding;
-  actor.animation_id = live.animationId;
-  actor.collision_state = live.collisionState;
-  actor.blend_frame = static_cast<std::int8_t>(live.blendFrame);
-  actor.collision_radius = live.collisionRadius;
-  actor.collision_height = live.collisionHeight;
-  actor.queued_animation = live.queuedAnimation;
-  actor.animation_set = live.animationSet;
-  actor.contact_kind = live.contactKind;
-  actor.ledge_height = live.ledgeHeight;
-  actor.platform_offset_x = live.platformOffsetX;
-  actor.platform_offset_z = live.platformOffsetZ;
+  actor.previous_facing = instance.previous_facing;
+  actor.saved_placement = std::bit_cast<PackedTile>(live.saved_placement);
+  actor.wall_contact = live.wall_contact != 0;
+  actor.landing_pending = live.landing_pending != 0;
+  actor.jump_started = live.jump_started != 0;
+  actor.support_gimmick = live.support_gimmick;
+  actor.tick_remainder = live.jump_landing;
+  actor.animation_id = live.animation_id;
+  actor.collision_state = live.collision_state;
+  actor.blend_frame = static_cast<std::int8_t>(live.blend_frame);
+  actor.collision_radius = live.collision_radius;
+  actor.collision_height = live.collision_height;
+  actor.queued_animation = live.queued_animation;
+  actor.animation_set = live.animation_set;
+  actor.contact_kind = live.contact_kind;
+  actor.ledge_height = live.ledge_height;
+  actor.platform_offset_x = live.platform_offset_x;
+  actor.platform_offset_z = live.platform_offset_z;
   actor.pose_reached_end = live.pose.reached_end != 0;
-  actor.platform_anchor = LiveMotionVector(live.platformAnchor);
-  actor.companion_slot = live.companionSlot;
-  actor.ledge_attempts = live.opaque17FF;
-  actor.move_facing = live.moveFacing;
-  actor.jump_frames = live.jumpFrames;
-  actor.momentum_direction = live.momentumDirection;
-  actor.run_turns = live.runTurns;
-  actor.request_step = LiveMotionVector(live.turnState.step);
-  actor.pending_target_x = live.pendingTargetX;
-  actor.pending_target_z = live.pendingTargetZ;
-  actor.previous_target_x = live.previousTargetX;
-  actor.previous_target_z = live.previousTargetZ;
+  actor.platform_anchor = LiveMotionVector(live.platform_anchor);
+  actor.companion_slot = live.companion_slot;
+  actor.ledge_attempts = live.opaque17ff;
+  actor.move_facing = live.move_facing;
+  actor.jump_frames = live.jump_frames;
+  actor.momentum_direction = live.momentum_direction;
+  actor.run_turns = live.run_turns;
+  actor.request_step = LiveMotionVector(live.turn_state.step);
+  actor.pending_target_x = live.pending_target_x;
+  actor.pending_target_z = live.pending_target_z;
+  actor.previous_target_x = live.previous_target_x;
+  actor.previous_target_z = live.previous_target_z;
   return actor;
 }
 
 // The fields marked read in MovementActor are never stored.
 void StoreLiveMovementActor(const MovementActor& actor,
-                            Actors_ActorRecord& live) {
+                            VS::Actors::ActorRecord& live) {
   StoreLiveActorMotion(actor.motion, live);
-  Actors_ModelInstance& instance = live.instance;
-  instance.reactionState = actor.reaction_state & kFourBits;
-  instance.supportLayer = actor.support_layer & kFourBits;
-  instance.placementLayer = actor.placement_layer & kFourBits;
-  instance.baseColor.cd = actor.base_color_code;
-  instance.previousTileX = actor.previous_tile.x;
-  instance.previousTileLayer = actor.previous_tile.layer;
-  instance.previousTileZ = actor.previous_tile.z;
+  VS::Actors::ModelInstance& instance = live.instance;
+  instance.reaction_state = actor.reaction_state & kFourBits;
+  instance.support_layer = actor.support_layer & kFourBits;
+  instance.placement_layer = actor.placement_layer & kFourBits;
+  instance.base_color.cd = actor.base_color_code;
+  instance.previous_tile_x = actor.previous_tile.x;
+  instance.previous_tile_layer = actor.previous_tile.layer;
+  instance.previous_tile_z = actor.previous_tile.z;
   instance.reserved63 = actor.previous_tile.spare;
-  instance.supportOffset = std::bit_cast<std::int32_t>(
+  instance.support_offset = std::bit_cast<std::int32_t>(
       GroundedPair{actor.grounded_position[0], actor.grounded_position[1]});
   instance.reserved50 = actor.grounded_position[2];
-  instance.previousFacing = actor.previous_facing;
-  live.savedPlacement = std::bit_cast<std::int32_t>(actor.saved_placement);
-  live.landingPending = actor.landing_pending ? 1 : 0;
-  live.jumpStarted = actor.jump_started ? 1 : 0;
-  live.supportGimmick = actor.support_gimmick & kFourBits;
-  live.jumpLanding = actor.tick_remainder;
-  live.collisionState = actor.collision_state;
-  live.queuedAnimation = actor.queued_animation;
-  live.animationSet = actor.animation_set;
-  live.contactKind = actor.contact_kind;
-  live.ledgeHeight = actor.ledge_height;
-  live.platformOffsetX = actor.platform_offset_x;
-  live.platformOffsetZ = actor.platform_offset_z;
-  live.platformAnchor = LiveSvector(actor.platform_anchor);
-  live.opaque17FF = actor.ledge_attempts;
-  live.moveFacing = actor.move_facing;
-  live.jumpFrames = actor.jump_frames;
-  live.momentumDirection = actor.momentum_direction;
-  live.runTurns = actor.run_turns;
-  live.pendingTargetX = actor.pending_target_x;
-  live.pendingTargetZ = actor.pending_target_z;
-  live.previousTargetX = actor.previous_target_x;
-  live.previousTargetZ = actor.previous_target_z;
+  instance.previous_facing = actor.previous_facing;
+  live.saved_placement = std::bit_cast<std::int32_t>(actor.saved_placement);
+  live.landing_pending = actor.landing_pending ? 1 : 0;
+  live.jump_started = actor.jump_started ? 1 : 0;
+  live.support_gimmick = actor.support_gimmick & kFourBits;
+  live.jump_landing = actor.tick_remainder;
+  live.collision_state = actor.collision_state;
+  live.queued_animation = actor.queued_animation;
+  live.animation_set = actor.animation_set;
+  live.contact_kind = actor.contact_kind;
+  live.ledge_height = actor.ledge_height;
+  live.platform_offset_x = actor.platform_offset_x;
+  live.platform_offset_z = actor.platform_offset_z;
+  live.platform_anchor = LiveSvector(actor.platform_anchor);
+  live.opaque17ff = actor.ledge_attempts;
+  live.move_facing = actor.move_facing;
+  live.jump_frames = actor.jump_frames;
+  live.momentum_direction = actor.momentum_direction;
+  live.run_turns = actor.run_turns;
+  live.pending_target_x = actor.pending_target_x;
+  live.pending_target_z = actor.pending_target_z;
+  live.previous_target_x = actor.previous_target_x;
+  live.previous_target_z = actor.previous_target_z;
 }
 
 // The BATTLE.PRG tables D_800E90AC-D_800E9300 and Field D_800E86C0.
 MovementTables LiveMovementTables() {
   MovementTables tables;
-  CopyTable(Actors_kJumpHangFrames, tables.hang_frames);
-  CopyTable(Actors_kJumpHeightAdjustments, tables.height_adjustments);
-  CopyTable(Actors_kMotionResultAnimations, tables.result_animations);
-  tables.result_one_animation = Actors_kMotionResultOneAnimationId;
-  tables.hang_animation = Actors_kHangMotionAnimationId;
-  CopyTable(Actors_kAirTimerEndAnimations, tables.air_timer_end);
-  CopyTable(Actors_kSoftLandingAnimations, tables.soft_landing);
-  CopyTable(Actors_kHardLandingAnimations, tables.hard_landing);
-  CopyTable(Actors_kLandingRecoveryAnimations, tables.landing_recovery);
+  CopyTable(VS::Actors::jumpHangFrames, tables.hang_frames);
+  CopyTable(VS::Actors::jumpHeightAdjustments, tables.height_adjustments);
+  CopyTable(VS::Actors::motionResultAnimations, tables.result_animations);
+  tables.result_one_animation = VS::Actors::motionResultOneAnimationId;
+  tables.hang_animation = VS::Actors::hangMotionAnimationId;
+  CopyTable(VS::Actors::airTimerEndAnimations, tables.air_timer_end);
+  CopyTable(VS::Actors::softLandingAnimations, tables.soft_landing);
+  CopyTable(VS::Actors::hardLandingAnimations, tables.hard_landing);
+  CopyTable(VS::Actors::landingRecoveryAnimations, tables.landing_recovery);
   CopyTable(VS::Field::kGimmickSpinHeightSteps, tables.gimmick_spin_steps);
   return tables;
 }
 
 // decomp: BATTLE.PRG func_800A208C (src/BATTLE/BATTLE.PRG/38C1C.c:450)
-void BeginLiveActorJumpToTile(Actors_ActorRecord* actor, PackedTile target,
+void BeginLiveActorJumpToTile(VS::Actors::ActorRecord* actor, PackedTile target,
                               int speed, std::int16_t facing) {
   WithPointer(actor, "Actor tile jump",
               [&](LiveMovementHost& host, MovementActor& moving) {
@@ -542,7 +544,7 @@ void BeginLiveActorJumpToTile(Actors_ActorRecord* actor, PackedTile target,
 }
 
 // decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
-void CancelLiveActorTeleportTransition(Actors_ActorRecord* actor) {
+void CancelLiveActorTeleportTransition(VS::Actors::ActorRecord* actor) {
   WithPointer(actor, "Actor teleport cancel",
               [](LiveMovementHost& host, MovementActor& moving) {
                 CancelActorTeleportTransition(host, moving);
@@ -556,7 +558,7 @@ void BeginLiveActorJumpMovement(int actor_id, int direction, int distance) {
 }
 
 // decomp: BATTLE.PRG func_800A4A88 (src/BATTLE/BATTLE.PRG/3A1A0.c:1107)
-void UpdateLiveActorPlatformContact(Actors_ActorRecord* actor, int mode) {
+void UpdateLiveActorPlatformContact(VS::Actors::ActorRecord* actor, int mode) {
   if (mode < 0 || mode > kLastContactMode) {
     VS::Core::LogWarn("actors",
                       "Platform contact refused: mode {} is not 0 to {}", mode,
@@ -583,7 +585,7 @@ void UpdateLiveActorMovement(int actor_id) {
 }
 
 // decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:2297)
-void UpdateLiveActorJumpAndFall(int actor_id, Actors_ActorRecord* actor) {
+void UpdateLiveActorJumpAndFall(int actor_id, VS::Actors::ActorRecord* actor) {
   WithPointer(actor, "Actor jump and fall",
               [actor_id](LiveMovementHost& host, MovementActor& moving) {
                 UpdateActorJumpAndFall(host, actor_id, moving);

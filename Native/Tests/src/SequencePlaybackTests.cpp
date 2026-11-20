@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/SequencePlayback.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
@@ -242,7 +242,7 @@ namespace {
 // bone 0 tracks start at motion bytes 4 and 8.
 struct LivePlayback {
   std::array<std::uint32_t, 64> file{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
 
   LivePlayback() {
@@ -254,10 +254,10 @@ struct LivePlayback {
     const std::uint8_t tracks[] = {0xE0, 1, 2, 3, 0xE0, 1, 1, 1};
     std::memcpy(reinterpret_cast<std::uint8_t*>(file.data()) + 68, tracks,
                 sizeof tracks);
-    actor.ownedSequence = bank;
-    actor.instance.boneCount = 1;
-    actor.framesPerStep = 1;
-    actor.animationLength = 10;
+    actor.owned_sequence = bank;
+    actor.instance.bone_count = 1;
+    actor.frames_per_step = 1;
+    actor.animation_length = 10;
     actor.pose.frame = 1;
   }
   LivePlayback(const LivePlayback&) = delete;

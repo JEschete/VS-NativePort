@@ -5,20 +5,20 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Audio/SurfaceSounds.hpp"
 #include "Legacy/Psx.h"
 #include "State/Timers.hpp"
 
 namespace {
-std::array<u_char, 4> SoundValues(const Actors_ModelEffectSlot& state) {
+std::array<u_char, 4> SoundValues(const VS::Actors::ModelEffectSlot& state) {
   return {state.kind, state.level, state.flags, state.parameter};
 }
 
 struct SoundTransitionFixture {
   int saved_tick_speed = VS::State::tickSpeed;
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
 
   ~SoundTransitionFixture() { VS::State::tickSpeed = saved_tick_speed; }
 
@@ -27,16 +27,16 @@ struct SoundTransitionFixture {
     VS::Actors::UpdateActorSoundTransition(actor);
   }
 
-  void CheckCurrent(Actors_ModelEffectSlot expected) const {
-    CHECK(SoundValues(actor.soundEffect) == SoundValues(expected));
+  void CheckCurrent(VS::Actors::ModelEffectSlot expected) const {
+    CHECK(SoundValues(actor.sound_effect) == SoundValues(expected));
   }
 };
 
 struct TransitionCase {
-  Actors_ModelEffectSlot current;
-  Actors_ModelEffectSlot target;
+  VS::Actors::ModelEffectSlot current;
+  VS::Actors::ModelEffectSlot target;
   int speed;
-  Actors_ModelEffectSlot expected;
+  VS::Actors::ModelEffectSlot expected;
 };
 
 // func_800AEEC4: unsigned bytes, signed division and timer clamp, 44F14.c:886.
@@ -62,14 +62,14 @@ TEST_CASE("Actor sound transitions preserve original unsigned-byte arithmetic",
   CAPTURE(index);
   const auto& sample = kCases[index];
   SoundTransitionFixture fixture;
-  fixture.actor.soundEffect = sample.current;
-  fixture.actor.soundEffectTarget = sample.target;
+  fixture.actor.sound_effect = sample.current;
+  fixture.actor.sound_effect_target = sample.target;
   fixture.actor.instance.position.vx = 1234;
 
   fixture.Tick(sample.speed);
 
   fixture.CheckCurrent(sample.expected);
-  CHECK(SoundValues(fixture.actor.soundEffectTarget) ==
+  CHECK(SoundValues(fixture.actor.sound_effect_target) ==
         SoundValues(sample.target));
   CHECK(fixture.actor.instance.position.vx == 1234);
 }
@@ -77,15 +77,15 @@ TEST_CASE("Actor sound transitions preserve original unsigned-byte arithmetic",
 TEST_CASE("Actor sound transitions finish, retarget and reset independently",
           "[actors][audio][sound-transition]") {
   SoundTransitionFixture fixture;
-  fixture.actor.soundEffect = {1, 128, 1, 3};
-  fixture.actor.soundEffectTarget = {1, 127, 2, 3};
+  fixture.actor.sound_effect = {1, 128, 1, 3};
+  fixture.actor.sound_effect_target = {1, 127, 2, 3};
   fixture.Tick(2);
   fixture.Tick(2);
   fixture.Tick(2);
   fixture.CheckCurrent({1, 127, 2, 0});
 
-  fixture.actor.soundEffect.parameter = 2;
-  fixture.actor.soundEffectTarget = {1, 1, 254, 2};
+  fixture.actor.sound_effect.parameter = 2;
+  fixture.actor.sound_effect_target = {1, 1, 254, 2};
   fixture.Tick(2);
   fixture.CheckCurrent({1, 64, 128, 1});
   fixture.Tick(2);
@@ -99,8 +99,8 @@ TEST_CASE("Actor sound transitions finish, retarget and reset independently",
 TEST_CASE("Actor sound transitions retain the full unsigned timer range",
           "[actors][audio][sound-transition]") {
   SoundTransitionFixture fixture;
-  fixture.actor.soundEffect = {1, 0, 255, 255};
-  fixture.actor.soundEffectTarget = {1, 255, 0, 255};
+  fixture.actor.sound_effect = {1, 0, 255, 255};
+  fixture.actor.sound_effect_target = {1, 255, 0, 255};
   for (int frame = 1; frame <= 255; ++frame) {
     fixture.Tick(2);
     const auto pan = static_cast<u_char>(frame);

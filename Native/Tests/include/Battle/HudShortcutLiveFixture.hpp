@@ -7,8 +7,8 @@
 #include <iterator>
 #include <span>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
@@ -18,20 +18,20 @@
 namespace hud_rendering_fixture {
 class LiveShortcut {
  public:
-  Actors_ActorRecord record{};
+  VS::Actors::ActorRecord record{};
   Battle_ActorStats stats{};
   Battle_Actor actor{};
 
   LiveShortcut()
       : saved_character_(VS::Battle::characterState),
-        saved_record_(Actors_actorRecords[0]) {
+        saved_record_(VS::Actors::actorRecords[0]) {
     Capture();
     VS::Battle::characterState = &actor;
-    Actors_actorRecords[0] = &record;
+    VS::Actors::actorRecords[0] = &record;
     actor.stats = &stats;
     actor.model = &record.instance;
     actor.equippedWeaponCategory = 1;
-    record.instance.weaponDrawn = 1;
+    record.instance.weapon_drawn = 1;
     stats.currentHp = 1;
     stats.currentMp = 1;
     std::ranges::fill(VS::Battle::spellClassCounts, u_char{0});
@@ -42,7 +42,7 @@ class LiveShortcut {
   }
   ~LiveShortcut() {
     Restore();
-    Actors_actorRecords[0] = saved_record_;
+    VS::Actors::actorRecords[0] = saved_record_;
     VS::Battle::characterState = saved_character_;
   }
   LiveShortcut(const LiveShortcut&) = delete;
@@ -60,7 +60,7 @@ class LiveShortcut {
 
  private:
   Battle_Actor* saved_character_;
-  Actors_ActorRecord* saved_record_;
+  VS::Actors::ActorRecord* saved_record_;
   std::array<u_char, 4> counts_{};
   std::array<u_char*, 4> ids_{};
   std::array<char, 16> chain_{}, defense_{};

@@ -5,7 +5,9 @@
 
 #include "Actors/MotionRequests.hpp"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 struct SVECTOR;
 
 // Binding from the movement scripts' actor table and request arguments to the
@@ -13,7 +15,7 @@ struct SVECTOR;
 // outside the actor table or without a record, and on a missing target or
 // step; the packed targets are copied before any actor state is written.
 namespace VS::Actors {
-void SaveLiveActorGroundedTransform(Actors_ActorRecord* actor);
+void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor);
 void BeginLiveTileJump(int actor_id, int* target, int speed, int facing);
 void BeginLiveAirborneTileJump(int actor_id, int* target, int speed,
                                int facing);

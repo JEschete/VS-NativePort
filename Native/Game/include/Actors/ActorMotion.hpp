@@ -31,7 +31,7 @@ inline constexpr int kRouteWalking = 2;
 // The actor-record fields the motion rules read and write. Bitfield widths
 // are noted; every rule keeps the values it stores within them.
 struct ActorMotion {
-  // Model instance (Actors_ModelInstance, at the start of the record).
+  // Model instance (VS::Actors::ModelInstance, at the start of the record).
   std::uint8_t action_animation_state = 0;  // 4 bits
   bool movement_pending = false;
   std::uint8_t movement_mode = 0;     // 3 bits

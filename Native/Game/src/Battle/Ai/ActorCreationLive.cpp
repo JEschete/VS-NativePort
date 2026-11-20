@@ -13,8 +13,8 @@
 #include <type_traits>
 
 #include "Actors/ActorAllocation.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
@@ -86,16 +86,16 @@ static_assert(offsetof(ActorView, list_exempt_flag) ==
 static_assert(offsetof(ActorView, model) == offsetof(Battle_Actor, model));
 
 // ...its model through the creation model view...
-static_assert(offsetof(Actors_ActorRecord, instance) == 0);
+static_assert(offsetof(VS::Actors::ActorRecord, instance) == 0);
 static_assert(offsetof(ModelView, position) ==
-              offsetof(Actors_ModelInstance, position));
+              offsetof(VS::Actors::ModelInstance, position));
 static_assert(offsetof(ModelView, tile) ==
-              offsetof(Actors_ModelInstance, currentTileX));
+              offsetof(VS::Actors::ModelInstance, current_tile_x));
 static_assert(offsetof(ModelView, kind) == kModelObjectWordOffset);
 static_assert(offsetof(ModelView, radius) ==
-              offsetof(Actors_ActorRecord, collisionRadius));
+              offsetof(VS::Actors::ActorRecord, collision_radius));
 static_assert(offsetof(ModelView, opaque_63e) ==
-              offsetof(Actors_ActorRecord, collisionHeight));
+              offsetof(VS::Actors::ActorRecord, collision_height));
 
 // ...its stats through the creation stats view...
 static_assert(offsetof(StatsView, opaque30) ==
@@ -186,20 +186,20 @@ Battle_Actor& ActorOf(BattleActorHandle actor) {
 // Only actors with an equipped or secondary body allocation carry the actor
 // record fields past the model instance; an auxiliary core ends after its
 // matrices.
-const Actors_ActorRecord* RecordOf(const Battle_Actor& actor) {
+const VS::Actors::ActorRecord* RecordOf(const Battle_Actor& actor) {
   if (actor.model == nullptr ||
       actor.allocationKind == kAuxiliaryAllocationKind) {
     return nullptr;
   }
-  return reinterpret_cast<const Actors_ActorRecord*>(actor.model);
+  return reinterpret_cast<const VS::Actors::ActorRecord*>(actor.model);
 }
 
-std::uint32_t TileWord(const Actors_ModelInstance& model) {
-  return model.currentTileX |
-         (static_cast<std::uint32_t>(model.currentTileLayer)
+std::uint32_t TileWord(const VS::Actors::ModelInstance& model) {
+  return model.current_tile_x |
+         (static_cast<std::uint32_t>(model.current_tile_layer)
           << kTileLayerShift) |
-         (static_cast<std::uint32_t>(model.currentTileZ) << kTileZShift) |
-         (static_cast<std::uint32_t>(model.reserved5F) << kTileStatusShift);
+         (static_cast<std::uint32_t>(model.current_tile_z) << kTileZShift) |
+         (static_cast<std::uint32_t>(model.reserved5f) << kTileStatusShift);
 }
 
 template <typename Value, typename Bytes>
@@ -339,14 +339,14 @@ class LiveCreationHost final : public ActorCreationHost {
   }
   [[nodiscard]] std::optional<CreationModel> Model(
       BattleActorHandle actor) const override {
-    const Actors_ActorRecord* record = RecordOf(ActorOf(actor));
+    const VS::Actors::ActorRecord* record = RecordOf(ActorOf(actor));
     if (record == nullptr) return std::nullopt;
-    const Actors_ModelInstance& model = record->instance;
-    return CreationModel{.motion_locked = model.motionLocked != 0,
+    const VS::Actors::ModelInstance& model = record->instance;
+    return CreationModel{.motion_locked = model.motion_locked != 0,
                          .position_y = model.position.vy,
                          .tile = TileWord(model),
-                         .radius = record->collisionRadius,
-                         .body_height = record->collisionHeight};
+                         .radius = record->collision_radius,
+                         .body_height = record->collision_height};
   }
   [[nodiscard]] std::optional<CreationStats> Stats(
       BattleActorHandle actor) const override {
@@ -378,7 +378,7 @@ class LiveCreationHost final : public ActorCreationHost {
         reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(live.model);
     state->stats = live.stats;
     state->native_pointer60 = &live.model->position;
-    state->native_pointer64 = &live.model->currentTileX;
+    state->native_pointer64 = &live.model->current_tile_x;
     VS::Core::Debugf(
         "ai", "created state=%p id=%u model=%p stats=%p",
         static_cast<void*>(state), static_cast<unsigned int>(state->actor_id),

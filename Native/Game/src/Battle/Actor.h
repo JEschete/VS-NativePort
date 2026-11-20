@@ -5,7 +5,9 @@
 namespace VS::Actors {
 struct ActorModelSlot;
 }  // namespace VS::Actors
-struct Actors_ModelInstance;
+namespace VS::Actors {
+struct ModelInstance;
+}
 struct Battle_ActionSlot;
 struct Battle_Actor;
 struct Battle_ActorStats;
@@ -64,7 +66,7 @@ struct Battle_Actor {
     int templateWord2C;
     Battle_ActorStats* stats;
     int allocationKind;
-    Actors_ModelInstance* model;
+    VS::Actors::ModelInstance* model;
     VS::Actors::ActorModelSlot* equipmentModels[2];
 };
 

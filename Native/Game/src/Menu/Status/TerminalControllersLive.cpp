@@ -7,9 +7,8 @@
 #include <span>
 #include <string_view>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -300,12 +299,12 @@ class FrameHost final : public TerminalFrameHost {
   TerminalFrame& Frame() override { return frame_; }
   TerminalCamera& Camera() override { return view_.camera; }
   std::optional<TerminalModelCamera> ModelCamera() override {
-    const auto* record = Actors_actorRecords[kPreviewSlot];
-    if (!InPayload(record, sizeof(Actors_ActorRecord))) {
+    const auto* record = VS::Actors::actorRecords[kPreviewSlot];
+    if (!InPayload(record, sizeof(VS::Actors::ActorRecord))) {
       return std::nullopt;
     }
-    return TerminalModelCamera{record->menuCameraDistance,
-                               record->collisionHeight};
+    return TerminalModelCamera{record->menu_camera_distance,
+                               record->collision_height};
   }
   bool BuildCamera() override {
     Publish();
@@ -314,8 +313,8 @@ class FrameHost final : public TerminalFrameHost {
     return true;
   }
   bool DrawPreview() override {
-    if (!InPayload(Actors_actorRecords[kPreviewSlot],
-                   sizeof(Actors_ActorRecord)) ||
+    if (!InPayload(VS::Actors::actorRecords[kPreviewSlot],
+                   sizeof(VS::Actors::ActorRecord)) ||
         !RenderSpace()) {
       return false;
     }

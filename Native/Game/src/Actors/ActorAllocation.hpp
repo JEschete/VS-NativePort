@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "Actors/ActorModelSlot.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.h"
 #include "Core/Gte.h"
 
@@ -30,7 +30,7 @@ struct ActorAndStats {
 // decomp: Actor_dat2 (src/BATTLE/BATTLE.PRG/actor.h:151-162)
 struct ActorCore {
   ActorAndStats actor;
-  Actors_ModelInstance model;
+  VS::Actors::ModelInstance model;
   std::array<MATRIX, layout::kActorCoreMatrices> reserved_6c;
   // The model's object word (0x16C), which actor creation sets.
   std::int32_t object_word;

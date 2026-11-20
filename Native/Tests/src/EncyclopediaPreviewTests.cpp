@@ -12,8 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/SessionLive.hpp"
@@ -558,13 +557,13 @@ T* Pointer(AssetAddress address) {
 void CheckAttachmentStrides(bool companion, const u_char* buffer) {
   const VS::Content::LegacyActorAssetRequest& attachment =
       VS::Content::legacyActorAssetRequests[1];
-  CHECK(attachment.destination == buffer + sizeof(Actors_ActorRecord));
+  CHECK(attachment.destination == buffer + sizeof(VS::Actors::ActorRecord));
   CHECK(attachment.asset_kind == (companion ? 1 : 4));
   CHECK(attachment.target_slot == (companion ? 16 : 2));
   if (!companion) {
     const VS::Content::LegacyActorAssetRequest& shield =
         VS::Content::legacyActorAssetRequests[2];
-    CHECK(shield.destination == buffer + sizeof(Actors_ActorRecord) +
+    CHECK(shield.destination == buffer + sizeof(VS::Actors::ActorRecord) +
                                     sizeof(VS::Actors::WeaponModel));
     CHECK(shield.target_slot == 3);
   }
@@ -609,7 +608,7 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   game_clear_live_tests::SavedModuleData saved_module;
   game_clear_live_tests::SavedRuntime saved_runtime;
   game_clear_live_tests::SavedGlobals<
-      Actors_actorRecords, VS::Actors::weaponModels,
+      VS::Actors::actorRecords, VS::Actors::weaponModels,
       VS::Content::legacyModelLoadPhase, VS::Content::modelParseResetFlag,
       VS::Content::legacySequenceParsePhase, VS::Content::legacyShpFileBuffer,
       VS::Content::legacyShpAllocated, VS::Content::legacyShpFileLocation,
@@ -623,7 +622,7 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   equipment_detail_tests::ValueRestore<int> saved_zud_size{score::zudSizes[7]};
 
   PreviewLifecycleFixture() {
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     std::ranges::fill(VS::Actors::weaponModels, nullptr);
     VS::Content::legacyModelLoadPhase = 0;
     VS::Content::modelParseResetFlag = 0;
@@ -695,8 +694,9 @@ void CheckEmptyPreviewQueue() {
 }
 
 std::span<std::byte> StartForeignModelRead() {
-  auto* foreign = static_cast<std::byte*>(
-      VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
+  auto* foreign =
+      static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(
+          sizeof(VS::Actors::ActorRecord)));
   REQUIRE(foreign != nullptr);
   VS::Content::legacyShpSectorCounts[20] = 1;
   VS::Content::legacyShpDiscOffsets[20] = 7;
@@ -707,7 +707,7 @@ std::span<std::byte> StartForeignModelRead() {
   request.destination = At(reinterpret_cast<std::uintptr_t>(foreign));
   REQUIRE(VS::Content::QueueLiveActorAsset(request) == 0);
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  return {foreign, sizeof(Actors_ActorRecord)};
+  return {foreign, sizeof(VS::Actors::ActorRecord)};
 }
 
 void CheckForeignModelRead(const void* file,
@@ -723,7 +723,7 @@ void CheckForeignModelRead(const void* file,
 const void* BeginPreviewParser() {
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
   REQUIRE(VS::Content::modelParseResetFlag == 1);
-  auto* actor = Actors_actorRecords[1];
+  auto* actor = VS::Actors::actorRecords[1];
   if (actor == nullptr) throw std::runtime_error("preview actor was not bound");
   const auto* geometry = actor->instance.model;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
@@ -739,8 +739,9 @@ void FinishPreviewParts() {
 }
 
 std::span<std::byte> BindForeignPreviewActor() {
-  auto* record = static_cast<std::byte*>(
-      VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
+  auto* record =
+      static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(
+          sizeof(VS::Actors::ActorRecord)));
   REQUIRE(record != nullptr);
   ActorAssetRequest request;
   request.kind =
@@ -750,8 +751,8 @@ std::span<std::byte> BindForeignPreviewActor() {
   request.destination = At(reinterpret_cast<std::uintptr_t>(record));
   REQUIRE(VS::Content::QueueLiveActorAsset(request) == 0);
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  REQUIRE(static_cast<void*>(Actors_actorRecords[1]) == record);
-  return {record, sizeof(Actors_ActorRecord)};
+  REQUIRE(static_cast<void*>(VS::Actors::actorRecords[1]) == record);
+  return {record, sizeof(VS::Actors::ActorRecord)};
 }
 
 void FillForeignPreviewQueue(std::span<std::byte> record) {
@@ -941,7 +942,7 @@ TEST_CASE("Preview cleanup cancels the companion model-file owner",
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
   CHECK(VS::Content::legacyModelLoadPhase == 0);
   CHECK(VS::Content::legacyShpAllocated == 0);
-  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
 }
 
 TEST_CASE("Preview cleanup releases partial and completed original model parts",
@@ -955,7 +956,7 @@ TEST_CASE("Preview cleanup releases partial and completed original model parts",
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
   CheckEmptyPreviewQueue();
-  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
   CHECK(VS::Content::LiveActorAssetRefusals() == refused);
 }
@@ -1012,7 +1013,7 @@ TEST_CASE("Preview cleanup preserves foreign actors queue order and tail",
   const auto tail = VS::Content::legacyActorAssetRequests[15];
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
-  CHECK(static_cast<void*>(Actors_actorRecords[1]) == foreign.data());
+  CHECK(static_cast<void*>(VS::Actors::actorRecords[1]) == foreign.data());
   CHECK(VS::Core::Memory::LivePayloadCapacity(foreign.data()).has_value());
   CHECK(VS::Content::legacyActorAssetRequests[0].variant == first_foreign);
   CHECK(VS::Content::legacyActorAssetRequests[15].variant == tail.variant);

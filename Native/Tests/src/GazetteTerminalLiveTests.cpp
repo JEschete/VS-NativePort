@@ -282,10 +282,10 @@ void LoadFirstEnemy(live::PreviewFixture& fixture) {
 }
 
 void CheckLoadedEnemyGeometry() {
-  REQUIRE(Actors_actorRecords[1] != nullptr);
-  REQUIRE(Actors_actorRecords[1]->instance.boneCount > 0);
-  REQUIRE(Actors_actorRecords[1]->instance.triangleCount +
-              Actors_actorRecords[1]->instance.quadCount >
+  REQUIRE(VS::Actors::actorRecords[1] != nullptr);
+  REQUIRE(VS::Actors::actorRecords[1]->instance.bone_count > 0);
+  REQUIRE(VS::Actors::actorRecords[1]->instance.triangle_count +
+              VS::Actors::actorRecords[1]->instance.quad_count >
           0);
 }
 
@@ -293,7 +293,7 @@ void CheckRenderedEnemyModel(const live::PreviewFixture& fixture) {
   const auto projection = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(projection.x == 127);
   CHECK(projection.y == 93);
-  CHECK(Actors_actorRecords[1]->framesPerStep == 2);
+  CHECK(VS::Actors::actorRecords[1]->frames_per_step == 2);
   REQUIRE(fixture.UsedWords() > 0);
   CHECK_FALSE(fixture.Packets().empty());
   CHECK(std::ranges::any_of(fixture.Packets(), [](const auto& packet) {
@@ -325,9 +325,9 @@ TEST_CASE(
 }
 
 void CheckOverviewActor() {
-  REQUIRE(Actors_actorRecords[1] != nullptr);
-  CHECK(Actors_actorRecords[1]->animationId == 33);
-  CHECK(Actors_actorRecords[1]->instance.weaponDrawn == 0);
+  REQUIRE(VS::Actors::actorRecords[1] != nullptr);
+  CHECK(VS::Actors::actorRecords[1]->animation_id == 33);
+  CHECK(VS::Actors::actorRecords[1]->instance.weapon_drawn == 0);
   CHECK(VS::Menu::textBoxes[0].text != nullptr);
 }
 
@@ -346,8 +346,8 @@ TEST_CASE("F02803 Live prepares the real overview rank and actor preview",
   live::PreviewFixture fixture;
   const auto assets_before = live::content::LiveActorAssetRefusals();
   fixture.LoadSourceActor();
-  REQUIRE(Actors_actorRecords[0] != nullptr);
-  REQUIRE(Actors_actorRecords[0]->instance.boneCount > 0);
+  REQUIRE(VS::Actors::actorRecords[0] != nullptr);
+  REQUIRE(VS::Actors::actorRecords[0]->instance.bone_count > 0);
   score::menuState = 1;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   InitializeOverviewForCheck();
@@ -390,12 +390,12 @@ void OpenControlledViewer(live::PreviewFixture& fixture) {
   REQUIRE(fixture.TickGazette() == 0);
   REQUIRE(score::menuState == 15);
   fixture.AdvanceTo(20);
-  REQUIRE(Actors_actorRecords[1] != nullptr);
+  REQUIRE(VS::Actors::actorRecords[1] != nullptr);
   CHECK(score::selectedEnemy == 0);
   CHECK(score::cameraDistance > 0);
   const auto preview_image =
       shared::ReadImage(R"(Native\data\disc\MAP\Z009U16.ZUD)");
-  CHECK(Actors_actorRecords[1]->modelId == preview_image.front());
+  CHECK(VS::Actors::actorRecords[1]->model_id == preview_image.front());
 }
 
 void CheckViewerSlide(live::PreviewFixture& fixture) {
@@ -447,15 +447,15 @@ void BeginEnemySwitch(live::PreviewFixture& fixture) {
   REQUIRE(fixture.TickGazette() == 0);
   REQUIRE(score::menuState == 25);
   fixture.AdvanceTo(26);
-  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
 }
 
 void FinishEnemySwitch(live::PreviewFixture& fixture) {
   fixture.AdvanceTo(20);
   const auto replacement_image =
       shared::ReadImage(R"(Native\data\disc\MAP\Z013U15.ZUD)");
-  REQUIRE(Actors_actorRecords[1] != nullptr);
-  CHECK(Actors_actorRecords[1]->modelId == replacement_image.front());
+  REQUIRE(VS::Actors::actorRecords[1] != nullptr);
+  CHECK(VS::Actors::actorRecords[1]->model_id == replacement_image.front());
   CHECK(score::selectedEnemy == 1);
   CHECK(fixture.InformationText() == live::Fixture::Description(1));
   CHECK(live::AssetsIdle());
@@ -467,7 +467,7 @@ void ReturnViewerToList(live::PreviewFixture& fixture) {
   REQUIRE(fixture.TickGazette() == 0);
   REQUIRE(score::menuState == 21);
   fixture.AdvanceTo(14);
-  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
   CHECK(fixture.InformationText() == live::Fixture::Description(0));
   REQUIRE(score::monBinData != nullptr);
 }
@@ -902,7 +902,7 @@ void RequestScreenExit(live::PreviewFixture& fixture, std::uint8_t& phase) {
 }
 
 void CheckScreenRestoredField() {
-  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
   CHECK(VS::Battle::hudHidden == 0);
   CHECK(VS::Battle::hudSlideOffset == 0);
   CHECK(VS::Field::isFieldRenderingEnabled == 1);

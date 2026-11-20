@@ -19,14 +19,13 @@
 #include <tuple>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -157,7 +156,7 @@ legacy_files::ModelSectors legacyMaterialModelSequenceSectorCounts;
 namespace VS::Content {
 namespace {
 static_assert(std::size(legacyActorAssetRequests) == kActorAssetRequestCount);
-static_assert(std::size(Actors_actorRecords) == kActorRecordSlots);
+static_assert(std::size(VS::Actors::actorRecords) == kActorRecordSlots);
 static_assert(std::size(VS::Actors::weaponModels) == kWeaponModelSlots);
 static_assert(std::size(VS::Render::legacyActorTextureSlots) ==
               kActorTextureSlots);
@@ -187,61 +186,65 @@ static_assert(offsetof(LegacyActorAssetRequest, material) ==
 static_assert(offsetof(LegacyActorAssetRequest, variant) ==
               offsetof(LegacyActorAssetRequest, material) + 1);
 
-// The instance's flag byte (isSkipped .. isParsed) follows the counts; the
+// The instance's flag byte (is_skipped .. is_parsed) follows the counts; the
 // Live binding is built without /J, so its char bit-fields are read raw.
 constexpr std::size_t kInstanceFlagsAt = 8;
-static_assert(offsetof(Actors_ModelInstance, otherPolygonCount) +
+static_assert(offsetof(VS::Actors::ModelInstance, other_polygon_count) +
                   sizeof(u_short) ==
               kInstanceFlagsAt);
 // The bit-field bytes run from the flag byte to reservedD.
 constexpr std::size_t kInstanceBitFieldBytes = 5;
-static_assert(offsetof(Actors_ModelInstance, reservedD) ==
+static_assert(offsetof(VS::Actors::ModelInstance, reserved0d) ==
               kInstanceFlagsAt + kInstanceBitFieldBytes);
-static_assert(offsetof(Actors_ModelInstance, copiedWordCount) ==
-              offsetof(Actors_ModelInstance, reservedD) + 1);
-// The placement word runs from currentTileX to reserved5F.
-static_assert(offsetof(Actors_ModelInstance, reserved5F) + 1 ==
-              offsetof(Actors_ModelInstance, currentTileX) +
+static_assert(offsetof(VS::Actors::ModelInstance, copied_word_count) ==
+              offsetof(VS::Actors::ModelInstance, reserved0d) + 1);
+// The placement word runs from current_tile_x to reserved5f.
+static_assert(offsetof(VS::Actors::ModelInstance, reserved5f) + 1 ==
+              offsetof(VS::Actors::ModelInstance, current_tile_x) +
                   sizeof(std::uint32_t));
 static_assert(sizeof(CVECTOR) == sizeof(std::uint32_t));
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(std::uint32_t));
-static_assert(offsetof(Actors_ActorRecord, reserved6F3) + 1 ==
-              offsetof(Actors_ActorRecord, fadeBlue) + sizeof(std::uint32_t));
-// textureRowOffsets shares four bytes with momentumDistance.
-static_assert(offsetof(Actors_ActorRecord, momentumDirection) ==
-              offsetof(Actors_ActorRecord, textureRowOffsets) +
+static_assert(offsetof(VS::Actors::ActorRecord, reserved6f3) + 1 ==
+              offsetof(VS::Actors::ActorRecord, fade_blue) +
+                  sizeof(std::uint32_t));
+// texture_row_offsets shares four bytes with momentum_distance.
+static_assert(offsetof(VS::Actors::ActorRecord, momentum_direction) ==
+              offsetof(VS::Actors::ActorRecord, texture_row_offsets) +
                   kActorTextureRowOffsets);
-static_assert(sizeof(Actors_ActorRecord::palettes) ==
+static_assert(sizeof(VS::Actors::ActorRecord::palettes) ==
               sizeof(ActorAssetRecord::palettes));
-static_assert(sizeof(Actors_ActorRecord::basePalette) ==
+static_assert(sizeof(VS::Actors::ActorRecord::base_palette) ==
               sizeof(ActorAssetRecord::base_palette));
-static_assert(sizeof(Actors_ActorRecord::currentPalette) ==
+static_assert(sizeof(VS::Actors::ActorRecord::current_palette) ==
               sizeof(ActorAssetRecord::current_palette));
-static_assert(sizeof(Actors_ActorRecord::jointSlots) ==
+static_assert(sizeof(VS::Actors::ActorRecord::joint_slots) ==
               sizeof(ActorAssetRecord::joint_slots));
 static_assert(
-    std::extent_v<decltype(Actors_ActorRecord::battleSequenceLbas)> ==
+    std::extent_v<decltype(VS::Actors::ActorRecord::battle_sequence_lbas)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::battle_sequence_lbas)>);
 static_assert(
-    std::extent_v<decltype(Actors_ActorRecord::chainAttackAnimationIds)> ==
+    std::extent_v<
+        decltype(VS::Actors::ActorRecord::chain_attack_animation_ids)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::chain_attack_animation_ids)>);
 static_assert(
-    std::extent_v<decltype(Actors_ActorRecord::specialSequenceLbas)> ==
+    std::extent_v<decltype(VS::Actors::ActorRecord::special_sequence_lbas)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::special_sequence_lbas)>);
 static_assert(
-    std::extent_v<decltype(Actors_ActorRecord::specialSequenceSizes)> ==
+    std::extent_v<decltype(VS::Actors::ActorRecord::special_sequence_sizes)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::special_sequence_sizes)>);
-static_assert(std::extent_v<decltype(Actors_ActorRecord::sharedSequences)> ==
-              std::tuple_size_v<decltype(ActorAssetRecord::shared_sequences)>);
 static_assert(
-    std::extent_v<decltype(Actors_ActorRecord::textureScrollBounds)> ==
+    std::extent_v<decltype(VS::Actors::ActorRecord::shared_sequences)> ==
+    std::tuple_size_v<decltype(ActorAssetRecord::shared_sequences)>);
+static_assert(
+    std::extent_v<decltype(VS::Actors::ActorRecord::texture_scroll_bounds)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::texture_scroll_bounds)>);
-static_assert(std::extent_v<decltype(Actors_ActorRecord::textureScroll)> ==
-              std::tuple_size_v<decltype(ActorAssetRecord::texture_scroll)>);
-// The SHP texture layout fills textureOverlays and the fields after it.
-static_assert(offsetof(Actors_ActorRecord, textureOverlays) +
+static_assert(
+    std::extent_v<decltype(VS::Actors::ActorRecord::texture_scroll)> ==
+    std::tuple_size_v<decltype(ActorAssetRecord::texture_scroll)>);
+// The SHP texture layout fills texture_overlays and the fields after it.
+static_assert(offsetof(VS::Actors::ActorRecord, texture_overlays) +
                   kActorTextureLayoutBytes <=
-              sizeof(Actors_ActorRecord));
+              sizeof(VS::Actors::ActorRecord));
 static_assert(sizeof(VS::Actors::WeaponModel::bones) ==
               kWeaponModelBones * sizeof(SVECTOR));
 static_assert(sizeof(VS::Actors::WeaponModel::palettes) ==
@@ -261,7 +264,7 @@ static_assert(std::is_same_v<decltype(DiscFile::size), std::int32_t>);
 constexpr std::uint8_t kSkippedBit = 0x01;
 constexpr std::uint8_t kUvLayoutBit = 0x08;
 constexpr std::uint8_t kParsedBit = 0x80;
-// isVisible and isFrozen: not loader fields.
+// is_visible and is_frozen: not loader fields.
 constexpr std::uint8_t kKeptInstanceFlags = 0x06;
 constexpr unsigned kTextureSlotCountShift = 4;
 constexpr std::uint8_t kTextureSlotCountMask = 7;
@@ -327,8 +330,9 @@ VS::Actors::WeaponModel* WeaponAt(int slot) {
                                           : nullptr;
 }
 
-Actors_ActorRecord* ActorAt(int slot) {
-  return InRange(slot, kActorRecordSlots) ? Actors_actorRecords[slot] : nullptr;
+VS::Actors::ActorRecord* ActorAt(int slot) {
+  return InRange(slot, kActorRecordSlots) ? VS::Actors::actorRecords[slot]
+                                          : nullptr;
 }
 
 // --- Requests and loader state ---------------------------------------------
@@ -491,44 +495,45 @@ void StoreWeaponRecord(const WeaponAssetRecord& in,
 
 // --- Actor records -----------------------------------------------------------
 
-void LoadInstance(const Actors_ModelInstance& in, ActorAssetRecord& out) {
-  out.bone_count = in.boneCount;
-  out.vertex_group_count = in.vertexGroupCount;
-  out.triangle_count = in.triangleCount;
-  out.quad_count = in.quadCount;
-  out.other_polygon_count = in.otherPolygonCount;
+void LoadInstance(const VS::Actors::ModelInstance& in, ActorAssetRecord& out) {
+  out.bone_count = in.bone_count;
+  out.vertex_group_count = in.vertex_group_count;
+  out.triangle_count = in.triangle_count;
+  out.quad_count = in.quad_count;
+  out.other_polygon_count = in.other_polygon_count;
   const std::uint8_t flags = ByteOf(in, kInstanceFlagsAt);
   out.is_skipped = (flags & kSkippedBit) != 0;
   out.uv_layout = (flags & kUvLayoutBit) != 0;
   out.texture_slot_count_minus_one = static_cast<std::uint8_t>(
       (flags >> kTextureSlotCountShift) & kTextureSlotCountMask);
   out.is_parsed = (flags & kParsedBit) != 0;
-  out.action_animation_state = in.actionAnimationState;
-  out.is_attached = in.isAttached != 0;
-  out.sound_enabled = in.soundEnabled != 0;
-  out.weapon_drawn = in.weaponDrawn != 0;
-  out.support_layer = in.supportLayer;
-  out.placement_layer = in.placementLayer;
-  out.palette_words = in.copiedWordCount;
+  out.action_animation_state = in.action_animation_state;
+  out.is_attached = in.is_attached != 0;
+  out.sound_enabled = in.sound_enabled != 0;
+  out.weapon_drawn = in.weapon_drawn != 0;
+  out.support_layer = in.support_layer;
+  out.placement_layer = in.placement_layer;
+  out.palette_words = in.copied_word_count;
   out.slot = in.slot;
   out.variant = in.variant;
-  out.attach_parent = in.attachParent;
-  out.attach_bone = in.attachBone;
-  out.scale_x = in.scaleX;
-  out.scale_y = in.scaleY;
-  out.scale_z = in.scaleZ;
-  out.base_color = WordAt(in, offsetof(Actors_ModelInstance, baseColor));
-  out.tint = WordAt(in, offsetof(Actors_ModelInstance, tint));
-  out.placement = WordAt(in, offsetof(Actors_ModelInstance, currentTileX));
+  out.attach_parent = in.attach_parent;
+  out.attach_bone = in.attach_bone;
+  out.scale_x = in.scale_x;
+  out.scale_y = in.scale_y;
+  out.scale_z = in.scale_z;
+  out.base_color = WordAt(in, offsetof(VS::Actors::ModelInstance, base_color));
+  out.tint = WordAt(in, offsetof(VS::Actors::ModelInstance, tint));
+  out.placement =
+      WordAt(in, offsetof(VS::Actors::ModelInstance, current_tile_x));
   out.model = Address(in.model);
 }
 
-void StoreInstance(const ActorAssetRecord& in, Actors_ModelInstance& out) {
-  out.boneCount = in.bone_count;
-  out.vertexGroupCount = in.vertex_group_count;
-  out.triangleCount = in.triangle_count;
-  out.quadCount = in.quad_count;
-  out.otherPolygonCount = in.other_polygon_count;
+void StoreInstance(const ActorAssetRecord& in, VS::Actors::ModelInstance& out) {
+  out.bone_count = in.bone_count;
+  out.vertex_group_count = in.vertex_group_count;
+  out.triangle_count = in.triangle_count;
+  out.quad_count = in.quad_count;
+  out.other_polygon_count = in.other_polygon_count;
   std::uint8_t& flags = ByteAt(out, kInstanceFlagsAt);
   std::uint8_t value = flags & kKeptInstanceFlags;
   value |= in.is_skipped ? kSkippedBit : 0;
@@ -538,117 +543,120 @@ void StoreInstance(const ActorAssetRecord& in, Actors_ModelInstance& out) {
       << kTextureSlotCountShift);
   value |= in.is_parsed ? kParsedBit : 0;
   flags = value;
-  out.actionAnimationState =
+  out.action_animation_state =
       static_cast<u_char>(in.action_animation_state & kNibbleMask);
-  out.isAttached = in.is_attached ? 1 : 0;
-  out.soundEnabled = in.sound_enabled ? 1 : 0;
-  out.weaponDrawn = in.weapon_drawn ? 1 : 0;
-  out.supportLayer = static_cast<u_char>(in.support_layer & kNibbleMask);
-  out.placementLayer = static_cast<u_char>(in.placement_layer & kNibbleMask);
-  out.copiedWordCount = in.palette_words;
+  out.is_attached = in.is_attached ? 1 : 0;
+  out.sound_enabled = in.sound_enabled ? 1 : 0;
+  out.weapon_drawn = in.weapon_drawn ? 1 : 0;
+  out.support_layer = static_cast<u_char>(in.support_layer & kNibbleMask);
+  out.placement_layer = static_cast<u_char>(in.placement_layer & kNibbleMask);
+  out.copied_word_count = in.palette_words;
   out.slot = in.slot;
   out.variant = in.variant;
-  out.attachParent = in.attach_parent;
-  out.attachBone = in.attach_bone;
-  out.scaleX = in.scale_x;
-  out.scaleY = in.scale_y;
-  out.scaleZ = in.scale_z;
-  SetWordAt(out, offsetof(Actors_ModelInstance, baseColor), in.base_color);
-  SetWordAt(out, offsetof(Actors_ModelInstance, tint), in.tint);
-  SetWordAt(out, offsetof(Actors_ModelInstance, currentTileX), in.placement);
+  out.attach_parent = in.attach_parent;
+  out.attach_bone = in.attach_bone;
+  out.scale_x = in.scale_x;
+  out.scale_y = in.scale_y;
+  out.scale_z = in.scale_z;
+  SetWordAt(out, offsetof(VS::Actors::ModelInstance, base_color),
+            in.base_color);
+  SetWordAt(out, offsetof(VS::Actors::ModelInstance, tint), in.tint);
+  SetWordAt(out, offsetof(VS::Actors::ModelInstance, current_tile_x),
+            in.placement);
   out.model = Pointer<VS::Actors::ShpModel>(in.model);
 }
 
-void LoadActorFields(const Actors_ActorRecord& in, ActorAssetRecord& out) {
-  out.holds_texture_slots = in.holdsTextureSlots != 0;
-  out.texture_header_bit = in.textureHeaderBit != 0;
-  out.advance_requested = in.advanceRequested != 0;
-  out.custom_tint = in.customTint != 0;
-  out.ignored_by_collision = in.ignoredByCollision != 0;
-  out.sequence_model_id = in.sequenceModelId;
-  out.frames_per_step = in.framesPerStep;
-  out.locomotion_counter = in.locomotionCounter;
-  out.sequence_flags = in.sequenceFlags;
-  out.common_animation_count = in.commonAnimationCount;
-  out.battle_animation_count = in.battleAnimationCount;
-  out.texture_slot = in.textureSlot;
-  out.travel_animation = in.travelAnimation;
-  out.animation_length = in.animationLength;
-  out.turn_rate = in.turnRate;
-  out.move_rate = in.moveRate;
-  out.owned_sequence = Address(in.ownedSequence);
-  out.common_sequence = Address(in.commonSequence);
-  out.battle_sequence = Address(in.battleSequence);
+void LoadActorFields(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
+  out.holds_texture_slots = in.holds_texture_slots != 0;
+  out.texture_header_bit = in.texture_header_bit != 0;
+  out.advance_requested = in.advance_requested != 0;
+  out.custom_tint = in.custom_tint != 0;
+  out.ignored_by_collision = in.ignored_by_collision != 0;
+  out.sequence_model_id = in.sequence_model_id;
+  out.frames_per_step = in.frames_per_step;
+  out.locomotion_counter = in.locomotion_counter;
+  out.sequence_flags = in.sequence_flags;
+  out.common_animation_count = in.common_animation_count;
+  out.battle_animation_count = in.battle_animation_count;
+  out.texture_slot = in.texture_slot;
+  out.travel_animation = in.travel_animation;
+  out.animation_length = in.animation_length;
+  out.turn_rate = in.turn_rate;
+  out.move_rate = in.move_rate;
+  out.owned_sequence = Address(in.owned_sequence);
+  out.common_sequence = Address(in.common_sequence);
+  out.battle_sequence = Address(in.battle_sequence);
   for (std::size_t i = 0; i < out.shared_sequences.size(); ++i) {
-    out.shared_sequences[i] = Address(in.sharedSequences[i]);
+    out.shared_sequences[i] = Address(in.shared_sequences[i]);
   }
-  out.occupancy_radius = in.occupancyRadius;
-  out.occupancy_height = in.occupancyHeight;
+  out.occupancy_radius = in.occupancy_radius;
+  out.occupancy_height = in.occupancy_height;
   out.opaque648 = static_cast<std::uint16_t>(in.opaque648);
-  out.opaque6dc = in.opaque6DC;
-  out.model_id = in.modelId;
-  out.clut_a = in.clutA;
-  out.clut_b = in.clutB;
-  out.fade = WordAt(in, offsetof(Actors_ActorRecord, fadeBlue));
-  out.companion_slot = in.companionSlot;
-  out.companion = {.x = in.companionState.offsetX,
-                   .y = in.companionState.offsetY,
-                   .z = in.companionState.offsetZ,
-                   .depth_bias = in.companionState.depthBias};
+  out.opaque6dc = in.opaque6dc;
+  out.model_id = in.model_id;
+  out.clut_a = in.clut_a;
+  out.clut_b = in.clut_b;
+  out.fade = WordAt(in, offsetof(VS::Actors::ActorRecord, fade_blue));
+  out.companion_slot = in.companion_slot;
+  out.companion = {.x = in.companion_state.offset_x,
+                   .y = in.companion_state.offset_y,
+                   .z = in.companion_state.offset_z,
+                   .depth_bias = in.companion_state.depth_bias};
   out.scale = in.scale;
   const std::uint32_t rows =
-      WordAt(in, offsetof(Actors_ActorRecord, textureRowOffsets));
+      WordAt(in, offsetof(VS::Actors::ActorRecord, texture_row_offsets));
   std::memcpy(out.texture_row_offsets.data(), &rows, sizeof rows);
-  out.model_data_size = in.modelDataSize;
+  out.model_data_size = in.model_data_size;
 }
 
-void StoreActorFields(const ActorAssetRecord& in, Actors_ActorRecord& out) {
-  out.holdsTextureSlots = in.holds_texture_slots ? 1 : 0;
-  out.textureHeaderBit = in.texture_header_bit ? 1 : 0;
-  out.advanceRequested = in.advance_requested ? 1 : 0;
-  out.customTint = in.custom_tint ? 1 : 0;
-  out.ignoredByCollision = in.ignored_by_collision ? 1 : 0;
-  out.sequenceModelId = in.sequence_model_id;
-  out.framesPerStep = in.frames_per_step;
-  out.locomotionCounter = in.locomotion_counter;
-  out.sequenceFlags = in.sequence_flags;
-  out.commonAnimationCount = in.common_animation_count;
-  out.battleAnimationCount = in.battle_animation_count;
-  out.textureSlot = in.texture_slot;
-  out.travelAnimation = in.travel_animation;
-  out.animationLength = in.animation_length;
-  out.turnRate = in.turn_rate;
-  out.moveRate = in.move_rate;
-  out.ownedSequence = Pointer(in.owned_sequence);
-  out.commonSequence = Pointer(in.common_sequence);
-  out.battleSequence = Pointer(in.battle_sequence);
+void StoreActorFields(const ActorAssetRecord& in,
+                      VS::Actors::ActorRecord& out) {
+  out.holds_texture_slots = in.holds_texture_slots ? 1 : 0;
+  out.texture_header_bit = in.texture_header_bit ? 1 : 0;
+  out.advance_requested = in.advance_requested ? 1 : 0;
+  out.custom_tint = in.custom_tint ? 1 : 0;
+  out.ignored_by_collision = in.ignored_by_collision ? 1 : 0;
+  out.sequence_model_id = in.sequence_model_id;
+  out.frames_per_step = in.frames_per_step;
+  out.locomotion_counter = in.locomotion_counter;
+  out.sequence_flags = in.sequence_flags;
+  out.common_animation_count = in.common_animation_count;
+  out.battle_animation_count = in.battle_animation_count;
+  out.texture_slot = in.texture_slot;
+  out.travel_animation = in.travel_animation;
+  out.animation_length = in.animation_length;
+  out.turn_rate = in.turn_rate;
+  out.move_rate = in.move_rate;
+  out.owned_sequence = Pointer(in.owned_sequence);
+  out.common_sequence = Pointer(in.common_sequence);
+  out.battle_sequence = Pointer(in.battle_sequence);
   for (std::size_t i = 0; i < in.shared_sequences.size(); ++i) {
-    out.sharedSequences[i] = Pointer(in.shared_sequences[i]);
+    out.shared_sequences[i] = Pointer(in.shared_sequences[i]);
   }
-  out.occupancyRadius = in.occupancy_radius;
-  out.occupancyHeight = in.occupancy_height;
+  out.occupancy_radius = in.occupancy_radius;
+  out.occupancy_height = in.occupancy_height;
   out.opaque648 = in.opaque648;
-  out.opaque6DC = in.opaque6dc;
-  out.modelId = in.model_id;
-  out.clutA = in.clut_a;
-  out.clutB = in.clut_b;
-  SetWordAt(out, offsetof(Actors_ActorRecord, fadeBlue), in.fade);
-  out.companionSlot = in.companion_slot;
-  out.companionState.offsetX = in.companion.x;
-  out.companionState.offsetY = in.companion.y;
-  out.companionState.offsetZ = in.companion.z;
-  out.companionState.depthBias = in.companion.depth_bias;
+  out.opaque6dc = in.opaque6dc;
+  out.model_id = in.model_id;
+  out.clut_a = in.clut_a;
+  out.clut_b = in.clut_b;
+  SetWordAt(out, offsetof(VS::Actors::ActorRecord, fade_blue), in.fade);
+  out.companion_slot = in.companion_slot;
+  out.companion_state.offset_x = in.companion.x;
+  out.companion_state.offset_y = in.companion.y;
+  out.companion_state.offset_z = in.companion.z;
+  out.companion_state.depth_bias = in.companion.depth_bias;
   out.scale = in.scale;
   std::uint32_t rows = 0;
   std::memcpy(&rows, in.texture_row_offsets.data(), sizeof rows);
-  SetWordAt(out, offsetof(Actors_ActorRecord, textureRowOffsets), rows);
-  out.modelDataSize = in.model_data_size;
+  SetWordAt(out, offsetof(VS::Actors::ActorRecord, texture_row_offsets), rows);
+  out.model_data_size = in.model_data_size;
 }
 
-void LoadActorTables(const Actors_ActorRecord& in, ActorAssetRecord& out) {
+void LoadActorTables(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
   for (std::size_t i = 0; i < out.texture_scroll_bounds.size(); ++i) {
     const VS::Actors::TextureScrollBoundsRecord& bounds =
-        in.textureScrollBounds[i];
+        in.texture_scroll_bounds[i];
     out.texture_scroll_bounds[i] = {.x = bounds.x,
                                     .y = bounds.y,
                                     .initial_step_x = bounds.initial_step_x,
@@ -656,7 +664,7 @@ void LoadActorTables(const Actors_ActorRecord& in, ActorAssetRecord& out) {
                                     .interval = bounds.interval};
   }
   for (std::size_t i = 0; i < out.texture_scroll.size(); ++i) {
-    const VS::Actors::TextureScrollStateRecord& scroll = in.textureScroll[i];
+    const VS::Actors::TextureScrollStateRecord& scroll = in.texture_scroll[i];
     out.texture_scroll[i] = {.x = scroll.x,
                              .y = scroll.y,
                              .step_x = scroll.step_x,
@@ -664,21 +672,24 @@ void LoadActorTables(const Actors_ActorRecord& in, ActorAssetRecord& out) {
                              .interval = scroll.interval,
                              .timer = scroll.timer};
   }
-  std::ranges::copy(in.battleSequenceLbas, out.battle_sequence_lbas.begin());
-  std::ranges::copy(in.chainAttackAnimationIds,
+  std::ranges::copy(in.battle_sequence_lbas, out.battle_sequence_lbas.begin());
+  std::ranges::copy(in.chain_attack_animation_ids,
                     out.chain_attack_animation_ids.begin());
-  std::ranges::copy(in.specialSequenceLbas, out.special_sequence_lbas.begin());
-  std::ranges::copy(in.specialSequenceSizes,
+  std::ranges::copy(in.special_sequence_lbas,
+                    out.special_sequence_lbas.begin());
+  std::ranges::copy(in.special_sequence_sizes,
                     out.special_sequence_sizes.begin());
   std::memcpy(out.palettes.data(), in.palettes, sizeof in.palettes);
-  std::ranges::copy(in.basePalette, out.base_palette.begin());
-  std::ranges::copy(in.currentPalette, out.current_palette.begin());
-  std::memcpy(out.joint_slots.data(), in.jointSlots, sizeof in.jointSlots);
+  std::ranges::copy(in.base_palette, out.base_palette.begin());
+  std::ranges::copy(in.current_palette, out.current_palette.begin());
+  std::memcpy(out.joint_slots.data(), in.joint_slots, sizeof in.joint_slots);
 }
 
-void StoreActorTables(const ActorAssetRecord& in, Actors_ActorRecord& out) {
+void StoreActorTables(const ActorAssetRecord& in,
+                      VS::Actors::ActorRecord& out) {
   for (std::size_t i = 0; i < in.texture_scroll_bounds.size(); ++i) {
-    VS::Actors::TextureScrollBoundsRecord& bounds = out.textureScrollBounds[i];
+    VS::Actors::TextureScrollBoundsRecord& bounds =
+        out.texture_scroll_bounds[i];
     bounds.x = in.texture_scroll_bounds[i].x;
     bounds.y = in.texture_scroll_bounds[i].y;
     bounds.initial_step_x = in.texture_scroll_bounds[i].initial_step_x;
@@ -686,7 +697,7 @@ void StoreActorTables(const ActorAssetRecord& in, Actors_ActorRecord& out) {
     bounds.interval = in.texture_scroll_bounds[i].interval;
   }
   for (std::size_t i = 0; i < in.texture_scroll.size(); ++i) {
-    VS::Actors::TextureScrollStateRecord& scroll = out.textureScroll[i];
+    VS::Actors::TextureScrollStateRecord& scroll = out.texture_scroll[i];
     scroll.x = in.texture_scroll[i].x;
     scroll.y = in.texture_scroll[i].y;
     scroll.step_x = in.texture_scroll[i].step_x;
@@ -695,17 +706,17 @@ void StoreActorTables(const ActorAssetRecord& in, Actors_ActorRecord& out) {
     scroll.timer = in.texture_scroll[i].timer;
   }
   std::ranges::copy(in.battle_sequence_lbas,
-                    std::begin(out.battleSequenceLbas));
+                    std::begin(out.battle_sequence_lbas));
   std::ranges::copy(in.chain_attack_animation_ids,
-                    std::begin(out.chainAttackAnimationIds));
+                    std::begin(out.chain_attack_animation_ids));
   std::ranges::copy(in.special_sequence_lbas,
-                    std::begin(out.specialSequenceLbas));
+                    std::begin(out.special_sequence_lbas));
   std::ranges::copy(in.special_sequence_sizes,
-                    std::begin(out.specialSequenceSizes));
+                    std::begin(out.special_sequence_sizes));
   std::memcpy(out.palettes, in.palettes.data(), sizeof out.palettes);
-  std::ranges::copy(in.base_palette, std::begin(out.basePalette));
-  std::ranges::copy(in.current_palette, std::begin(out.currentPalette));
-  std::memcpy(out.jointSlots, in.joint_slots.data(), sizeof out.jointSlots);
+  std::ranges::copy(in.base_palette, std::begin(out.base_palette));
+  std::ranges::copy(in.current_palette, std::begin(out.current_palette));
+  std::memcpy(out.joint_slots, in.joint_slots.data(), sizeof out.joint_slots);
 }
 
 // --- Files -------------------------------------------------------------------
@@ -1044,28 +1055,28 @@ class LiveActorAssetHost final : public ActorAssetHost {
 
   // Actor records.
   [[nodiscard]] ActorAssetSummary ActorSummary(int slot) const override {
-    const Actors_ActorRecord* actor = ActorAt(slot);
+    const VS::Actors::ActorRecord* actor = ActorAt(slot);
     if (actor == nullptr) {
       return {};
     }
     return {.present = true,
-            .model_id = actor->modelId,
-            .sequence_model_id = actor->sequenceModelId,
-            .common_sequence = Address(actor->commonSequence)};
+            .model_id = actor->model_id,
+            .sequence_model_id = actor->sequence_model_id,
+            .common_sequence = Address(actor->common_sequence)};
   }
   bool BindActorRecord(int slot, AssetAddress destination) override {
-    auto* actor = BindRecord<Actors_ActorRecord>(
+    auto* actor = BindRecord<VS::Actors::ActorRecord>(
         slot, kActorRecordSlots, destination, "actor record destination");
     if (actor == nullptr) {
       return false;
     }
-    Actors_actorRecords[slot] = actor;
-    actor->textureSlot = kNoAssetTextureSlot;
-    actor->instance.attachParent = kNoAssetTextureSlot;
+    VS::Actors::actorRecords[slot] = actor;
+    actor->texture_slot = kNoAssetTextureSlot;
+    actor->instance.attach_parent = kNoAssetTextureSlot;
     return true;
   }
   [[nodiscard]] ActorAssetRecord LoadActor(int slot) const override {
-    const Actors_ActorRecord* actor = ActorAt(slot);
+    const VS::Actors::ActorRecord* actor = ActorAt(slot);
     if (actor == nullptr) {
       CountRefusal("actor record read", slot);
       return {};
@@ -1077,7 +1088,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return record;
   }
   void StoreActor(int slot, const ActorAssetRecord& record) override {
-    Actors_ActorRecord* actor = ActorAt(slot);
+    VS::Actors::ActorRecord* actor = ActorAt(slot);
     if (actor == nullptr) {
       CountRefusal("actor record write", slot);
       return;
@@ -1087,8 +1098,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     StoreActorTables(record, *actor);
   }
   void CopyActorRecord(int target, int source) override {
-    Actors_ActorRecord* to = ActorAt(target);
-    const Actors_ActorRecord* from = ActorAt(source);
+    VS::Actors::ActorRecord* to = ActorAt(target);
+    const VS::Actors::ActorRecord* from = ActorAt(source);
     if (to == nullptr || from == nullptr) {
       CountRefusal("actor record copy", source);
       return;
@@ -1097,19 +1108,19 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void WriteActorTextureLayout(int slot,
                                std::span<const std::byte> layout) override {
-    Actors_ActorRecord* actor = ActorAt(slot);
+    VS::Actors::ActorRecord* actor = ActorAt(slot);
     if (actor == nullptr || layout.size() > kActorTextureLayoutBytes) {
       CountRefusal("actor texture layout", slot);
       return;
     }
-    // The layout fills textureOverlays and the fields after it.
+    // The layout fills texture_overlays and the fields after it.
     std::memcpy(reinterpret_cast<std::byte*>(actor) +
-                    offsetof(Actors_ActorRecord, textureOverlays),
+                    offsetof(VS::Actors::ActorRecord, texture_overlays),
                 layout.data(), layout.size());
   }
   void ClearActorSlot(int slot) override {
     if (InRange(slot, kActorRecordSlots)) {
-      Actors_actorRecords[slot] = nullptr;
+      VS::Actors::actorRecords[slot] = nullptr;
     }
   }
   [[nodiscard]] std::int16_t RoomActorScale() const override {

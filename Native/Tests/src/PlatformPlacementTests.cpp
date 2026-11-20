@@ -12,8 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
@@ -263,15 +262,14 @@ struct PlatformPlacementFixture {
 
 struct PlatformMotionLiveFixture : PlatformPlacementFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::State::tickSpeed) saved_tick_speed = VS::State::tickSpeed;
   decltype(VS::Field::areRoomUpdatesPaused) saved_room_pause =
       VS::Field::areRoomUpdatesPaused;
   decltype(VS::Render::frameBuf) saved_frame_buffer = VS::Render::frameBuf;
   PlatformMotionLiveFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     VS::Field::areRoomUpdatesPaused = 0;
     VS::Field::areMovingPlatformsPaused = 0;
     VS::Field::platformFreezeFrames = 0;
@@ -283,7 +281,8 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
   ~PlatformMotionLiveFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     VS::State::tickSpeed = saved_tick_speed;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;
     VS::Render::frameBuf = saved_frame_buffer;
@@ -1814,28 +1813,28 @@ struct PlatformErrorLog {
   }
 };
 
-Actors_ActorRecord OnPlatform() {
-  Actors_ActorRecord actor{};
-  actor.instance.supportLayer = kLayer;
-  actor.instance.placementLayer = kLayer;
+VS::Actors::ActorRecord OnPlatform() {
+  VS::Actors::ActorRecord actor{};
+  actor.instance.support_layer = kLayer;
+  actor.instance.placement_layer = kLayer;
   actor.instance.position = {1200, -768, 440, 0};
-  actor.runSpeed = 64;
-  actor.collisionRadius = 20;
+  actor.run_speed = 64;
+  actor.collision_radius = 20;
   return actor;
 }
 
 // The fields the jump, contact and ledge paths write.
-auto Observed(const Actors_ActorRecord& actor) {
+auto Observed(const VS::Actors::ActorRecord& actor) {
   const auto& position = actor.instance.position;
-  const auto& anchor = actor.platformAnchor;
+  const auto& anchor = actor.platform_anchor;
   return std::tuple(position.vx, position.vy, position.vz, anchor.vx, anchor.vy,
-                    anchor.vz, actor.platformOffsetX, actor.platformOffsetZ,
-                    actor.moveFacing, actor.instance.jumpCountdown,
-                    actor.landingPending, actor.destinationX,
-                    actor.destinationZ);
+                    anchor.vz, actor.platform_offset_x, actor.platform_offset_z,
+                    actor.move_facing, actor.instance.jump_countdown,
+                    actor.landing_pending, actor.destination_x,
+                    actor.destination_z);
 }
 
-bool Same(const Actors_ActorRecord& a, const Actors_ActorRecord& b) {
+bool Same(const VS::Actors::ActorRecord& a, const VS::Actors::ActorRecord& b) {
   return Observed(a) == Observed(b);
 }
 }  // namespace
@@ -1860,14 +1859,14 @@ TEST_CASE("Jump to a visible platform targets its contact position",
   fixture.platforms[1].is_hidden = 0;
   auto actor = OnPlatform();
   actor.instance.position.vy = -600;  // the platform top is 168 above
-  auto* saved = Actors_actorRecords[0];
-  Actors_actorRecords[0] = &actor;
+  auto* saved = VS::Actors::actorRecords[0];
+  VS::Actors::actorRecords[0] = &actor;
   const VS::Actors::PackedTile target{.x = 5, .layer = kLayer, .z = 7};
   VS::Actors::BeginLiveActorJumpToTile(&actor, target, 32, 0);
-  Actors_actorRecords[0] = saved;
+  VS::Actors::actorRecords[0] = saved;
   CHECK(log.errors.empty());
-  CHECK(actor.destinationX == 1216);
-  CHECK(actor.destinationZ == 448);
+  CHECK(actor.destination_x == 1216);
+  CHECK(actor.destination_z == 448);
 }
 
 TEST_CASE("Platform contact update keeps the actor when its platform is hidden",
@@ -1889,17 +1888,17 @@ TEST_CASE("Platform contact update follows and anchors a visible platform",
   PlatformErrorLog log;
   fixture.platforms[1].is_hidden = 0;
   auto actor = OnPlatform();
-  actor.platformAnchor = {1210, -768, 440, 0};
+  actor.platform_anchor = {1210, -768, 440, 0};
   VS::Actors::UpdateLiveActorPlatformContact(&actor, 0);
-  CHECK(actor.platformOffsetX == 6);
-  CHECK(actor.platformOffsetZ == 8);
+  CHECK(actor.platform_offset_x == 6);
+  CHECK(actor.platform_offset_z == 8);
   CHECK(actor.instance.position.vx == 1206);
   CHECK(actor.instance.position.vz == 448);
   auto anchored = OnPlatform();
   VS::Actors::UpdateLiveActorPlatformContact(&anchored, 1);
-  CHECK(anchored.platformAnchor.vx == 1216);
-  CHECK(anchored.platformAnchor.vy == -768);
-  CHECK(anchored.platformAnchor.vz == 448);
+  CHECK(anchored.platform_anchor.vx == 1216);
+  CHECK(anchored.platform_anchor.vy == -768);
+  CHECK(anchored.platform_anchor.vz == 448);
   CHECK(log.errors.empty());
 }
 
@@ -1908,7 +1907,7 @@ TEST_CASE("Ledge probe on a hidden platform reports no ledge unchanged",
   PlatformPlacementFixture fixture;
   PlatformErrorLog log;
   auto actor = OnPlatform();
-  actor.moveFacing = 123;
+  actor.move_facing = 123;
   const auto before = actor;
   SVECTOR offset{1, 2, 3, 4};
   CHECK(VS::Field::LiveCalcActorLedgeOffset(&actor, &offset) == 0);

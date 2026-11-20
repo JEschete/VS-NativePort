@@ -13,8 +13,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
@@ -827,11 +827,10 @@ struct GameplayInspectionFixture {
   u_int saved_results_selection = VS::Menu::Results::buffReelSelection;
   unsigned saved_random = VS::Core::BiosRand().State();
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(std::to_array(VS::Event::isTextBoxAwaitingClose)) saved_waits =
       std::to_array(VS::Event::isTextBoxAwaitingClose);
-  Actors_ActorRecord model{};
+  VS::Actors::ActorRecord model{};
 
   GameplayInspectionFixture() {
     VS::Boot::ResetGameplayInspection();
@@ -850,11 +849,11 @@ struct GameplayInspectionFixture {
         VS::Menu::Framework::kMenuClosed;
     VS::Event::isMenuTransitionActive = 0;
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    model.modelId = 58;
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
+    model.model_id = 58;
     model.pose.frame = 7;
-    model.animationLength = 91;
-    Actors_actorRecords[2] = &model;
+    model.animation_length = 91;
+    VS::Actors::actorRecords[2] = &model;
     std::fill_n(VS::Event::isTextBoxAwaitingClose, saved_waits.size(), 1);
     for (std::size_t box = 0; box < 8; ++box) {
       VS::Event::isTextBoxAwaitingClose[box] =
@@ -887,7 +886,8 @@ struct GameplayInspectionFixture {
     VS::Core::SeedBiosRand(saved_random);
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_waits.begin(), saved_waits.end(),
               VS::Event::isTextBoxAwaitingClose);
   }
@@ -919,7 +919,7 @@ void CheckEventScene(const nlohmann::json& event) {
 }
 
 void CheckReadyScene(const VS::Game::EncounterState& state,
-                     const Actors_ActorRecord& model) {
+                     const VS::Actors::ActorRecord& model) {
   REQUIRE(state.ready);
   CHECK_FALSE(VS::Game::InspectEncounter().ready);
   const auto scene = VS::Game::InspectGameplayScene(state);
@@ -1063,7 +1063,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   Battle_Actor enemy{};
   Battle_ActorStats player_stats{};
   Battle_ActorStats enemy_stats{};
-  Actors_ActorRecord player_model{};
+  VS::Actors::ActorRecord player_model{};
   VS::Battle::Ai::ActorAiState enemy_ai{};
   decltype(std::to_array(VS::Menu::Magic::shamanSpellIds)) saved_shaman =
       std::to_array(VS::Menu::Magic::shamanSpellIds);
@@ -1085,8 +1085,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     enemy_stats.currentHp = enemy_stats.maxHp = 73;
     VS::Battle::actors[0] = VS::Battle::characterState = &player;
     VS::Battle::actors[2] = &enemy;
-    player_model.modelId = 0;
-    Actors_actorRecords[0] = &player_model;
+    player_model.model_id = 0;
+    VS::Actors::actorRecords[0] = &player_model;
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
                 nullptr);
     enemy_ai.relations[0].classification = 3;
@@ -1498,8 +1498,8 @@ struct NavigationInspectionFixture : ReactionInspectionFixture {
     VS::Field::roomData.tile_cells = cells.data();
     VS::Field::roomData.header.collision_map_length = sizeof(samples);
     VS::Field::roomData.header.tile_cells_length = sizeof(cells);
-    player_model.collisionHeight = 128;
-    player_model.collisionRadius = 48;
+    player_model.collision_height = 128;
+    player_model.collision_radius = 48;
   }
   ~NavigationInspectionFixture() {
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
@@ -1546,11 +1546,11 @@ TEST_CASE("Navigation observes stacked support without mutating contact state",
   upper.position_y = -128;
   VS::Field::gimmickInstances[0] = &lower;
   VS::Field::gimmickInstances[1] = &upper;
-  const auto contact = Actors_supportingGimmickIndex;
+  const auto contact = VS::Actors::supportingGimmickIndex;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(state.navigation.samples[21] == std::array<int, 3>{32512, 30736, 5});
-  CHECK(Actors_supportingGimmickIndex == contact);
+  CHECK(VS::Actors::supportingGimmickIndex == contact);
   upper.motion_state = 1;
   const auto moving =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());

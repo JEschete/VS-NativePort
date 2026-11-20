@@ -12,8 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Content/ActorAssets.hpp"
@@ -1017,22 +1017,22 @@ TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
 }
 
 struct LiveModelFixture {
-  Restore<Actors_ActorRecord*> saved_actor{Actors_actorRecords[1]};
+  Restore<VS::Actors::ActorRecord*> saved_actor{VS::Actors::actorRecords[1]};
   Restore<std::uint8_t> saved_step{VS::Content::objectDataLoadStep};
   Restore<Battle_Actor*> saved_character{VS::Battle::characterState};
-  std::unique_ptr<Actors_ActorRecord> actor =
-      std::make_unique<Actors_ActorRecord>();
+  std::unique_ptr<VS::Actors::ActorRecord> actor =
+      std::make_unique<VS::Actors::ActorRecord>();
 };
 
 TEST_CASE("ReloadLiveEquipmentModels waits for the settled preview animation",
           "[equipment-rows-live]") {
   LiveModelFixture fixture;
-  Actors_actorRecords[1] = fixture.actor.get();
+  VS::Actors::actorRecords[1] = fixture.actor.get();
   VS::Content::objectDataLoadStep = 3;
-  fixture.actor->animationId = 1;
+  fixture.actor->animation_id = 1;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 1);
   CHECK(VS::Content::objectDataLoadStep == 3);
-  fixture.actor->animationId = 101;
+  fixture.actor->animation_id = 101;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   CHECK(VS::Content::objectDataLoadStep == 0);
 }
@@ -1040,11 +1040,11 @@ TEST_CASE("ReloadLiveEquipmentModels waits for the settled preview animation",
 TEST_CASE("ReloadLiveEquipmentModels refuses without a preview actor",
           "[equipment-rows-live]") {
   LiveModelFixture fixture;
-  Actors_actorRecords[1] = nullptr;
+  VS::Actors::actorRecords[1] = nullptr;
   VS::Content::objectDataLoadStep = 0;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
-  Actors_actorRecords[1] = fixture.actor.get();
+  VS::Actors::actorRecords[1] = fixture.actor.get();
   VS::Battle::characterState = nullptr;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 2);

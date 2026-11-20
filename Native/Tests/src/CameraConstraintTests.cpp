@@ -6,9 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
 #include "Core/Log.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -22,9 +21,9 @@
 namespace {
 struct CameraConstraintFixture {
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[0];
+  VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[0];
   VS::Core::LogObserver saved_observer = VS::Core::SetLogObserver({});
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   VS::Field::MpdCollisionHeader header{3, 3, 0, 9};
   std::array<VS::Field::MpdTileCell, 9> cells{};
   std::array<int, 17> geometry{};
@@ -40,7 +39,7 @@ struct CameraConstraintFixture {
     VS::Field::roomData.header.geometry_length = sizeof geometry;
     geometry[0] = 1;
     geometry[1] = 0x1000;
-    Actors_actorRecords[0] = &actor;
+    VS::Actors::actorRecords[0] = &actor;
     VS::Core::SetLogObserver([this](const VS::Core::LogRecord& record) {
       if (record.channel == "field.camera") {
         CHECK(record.level == VS::Core::LogLevel::Warn);
@@ -50,7 +49,7 @@ struct CameraConstraintFixture {
   }
   ~CameraConstraintFixture() {
     VS::Field::roomData = saved_room;
-    Actors_actorRecords[0] = saved_actor;
+    VS::Actors::actorRecords[0] = saved_actor;
     VS::Core::SetLogObserver(std::move(saved_observer));
   }
 };

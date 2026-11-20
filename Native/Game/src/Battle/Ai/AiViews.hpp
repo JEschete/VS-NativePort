@@ -12,7 +12,9 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Core/Gte.h"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 struct Battle_Actor;
 struct Battle_ActorStats;
 
@@ -902,7 +904,7 @@ struct MovementDecisionView {
   std::int16_t z;
   std::array<std::uint8_t, 2> reserved52_52;
   void* native_pointer54;  // PS1 pointer slot 0x54
-  Actors_ActorRecord* model;
+  VS::Actors::ActorRecord* model;
   void* native_pointer_5c;  // PS1 pointer slot 0x5C
   void* native_pointer60;   // PS1 pointer slot 0x60
   void* native_pointer64;   // PS1 pointer slot 0x64

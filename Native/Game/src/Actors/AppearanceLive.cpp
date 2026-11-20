@@ -10,11 +10,10 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLiveState.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
@@ -33,7 +32,7 @@ namespace {
 using Core::Math::StoreVector;
 using Core::Math::VectorOf;
 
-static_assert(std::size(Actors_actorRecords) == kActorTableSize);
+static_assert(std::size(VS::Actors::actorRecords) == kActorTableSize);
 static_assert(std::size(weaponModels) % kWeaponsPerActor == 0);
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
 
@@ -64,28 +63,28 @@ constexpr int kNoActorStatus = static_cast<int>(AppearanceStatus::kNoModel);
   return {color.red, color.green, color.blue, color.code};
 }
 
-[[nodiscard]] ActorColors LoadColors(const Actors_ActorRecord& actor) {
-  return {.fade = {actor.fadeRed, actor.fadeGreen, actor.fadeBlue},
-          .custom_tint = actor.customTint != 0,
+[[nodiscard]] ActorColors LoadColors(const VS::Actors::ActorRecord& actor) {
+  return {.fade = {actor.fade_red, actor.fade_green, actor.fade_blue},
+          .custom_tint = actor.custom_tint != 0,
           .tint = ToColor(actor.instance.tint)};
 }
 
-void StoreColors(const ActorColors& colors, Actors_ActorRecord& actor) {
-  actor.fadeRed = colors.fade[0];
-  actor.fadeGreen = colors.fade[1];
-  actor.fadeBlue = colors.fade[2];
-  actor.customTint = colors.custom_tint ? 1 : 0;
+void StoreColors(const ActorColors& colors, VS::Actors::ActorRecord& actor) {
+  actor.fade_red = colors.fade[0];
+  actor.fade_green = colors.fade[1];
+  actor.fade_blue = colors.fade[2];
+  actor.custom_tint = colors.custom_tint ? 1 : 0;
   actor.instance.tint = ToLiveColor(colors.tint);
 }
 
 [[nodiscard]] PalettePulseRequest LoadPulse(
-    const Actors_ModelEffectSlot& slot) {
+    const VS::Actors::ModelEffectSlot& slot) {
   return {.kind = slot.kind,
           .pulse = {.level = slot.level, .flags = slot.flags}};
 }
 
 void StorePulse(const PalettePulseRequest& request,
-                Actors_ModelEffectSlot& slot) {
+                VS::Actors::ModelEffectSlot& slot) {
   slot.kind = request.kind;
   slot.level = request.pulse.level;
   slot.flags = request.pulse.flags;
@@ -94,17 +93,17 @@ void StorePulse(const PalettePulseRequest& request,
 // The palette pulse of the actor, or else the gimmick, that `actor_id`
 // names, and the upload of its base palettes.
 struct LivePulseModel {
-  Actors_ActorRecord* actor = nullptr;
+  VS::Actors::ActorRecord* actor = nullptr;
   VS::Field::GimmickInstance* gimmick = nullptr;
 
-  [[nodiscard]] Actors_ModelEffectSlot* Slot() const {
-    if (actor != nullptr) return &actor->instance.palettePulse;
+  [[nodiscard]] VS::Actors::ModelEffectSlot* Slot() const {
+    if (actor != nullptr) return &actor->instance.palette_pulse;
     return gimmick != nullptr ? &gimmick->palette_pulse : nullptr;
   }
 
   void ReloadBasePalettes() const {
     if (actor != nullptr) {
-      Render::LoadLiveClutColors(actor->basePalette,
+      Render::LoadLiveClutColors(actor->base_palette,
                                  actor->instance.slot + kActorClutRowBase, 0,
                                  kActorPaletteColors);
     } else {
@@ -117,7 +116,7 @@ struct LivePulseModel {
 
 [[nodiscard]] LivePulseModel FindPulseModel(int actor_id,
                                             const char* operation) {
-  if (Actors_ActorRecord* actor = LiveActorRecord(actor_id, operation)) {
+  if (VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, operation)) {
     return {.actor = actor};
   }
   return {.gimmick = VS::Field::FindGimmickForActorSlot(actor_id)};
@@ -126,14 +125,15 @@ struct LivePulseModel {
 class LiveTransitionActors final : public AppearanceTransitionActors {
  public:
   [[nodiscard]] bool Exists(int actor_id) const override {
-    return IsActorTableId(actor_id) && Actors_actorRecords[actor_id] != nullptr;
+    return IsActorTableId(actor_id) &&
+           VS::Actors::actorRecords[actor_id] != nullptr;
   }
   void SetTransitionState(int actor_id, int state) override {
-    Actors_actorRecords[actor_id]->instance.actionAnimationState =
+    VS::Actors::actorRecords[actor_id]->instance.action_animation_state =
         static_cast<unsigned>(state);
   }
   [[nodiscard]] int CompanionSlot(int actor_id) const override {
-    return Actors_actorRecords[actor_id]->companionSlot;
+    return VS::Actors::actorRecords[actor_id]->companion_slot;
   }
 };
 }  // namespace
@@ -160,22 +160,23 @@ void StoreLiveWeaponAppearance(const WeaponAppearance& appearance,
 }
 
 void SetLiveActorPaletteFade(int actor_id, int fade_parameter) {
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorPaletteFade");
+  VS::Actors::ActorRecord* actor =
+      LiveActorRecord(actor_id, "SetActorPaletteFade");
   if (actor == nullptr) return;
-  PaletteFade fade{.active = actor->paletteFadeActive != 0,
-                   .reverse = actor->paletteFadeReverse != 0,
-                   .phase = actor->paletteFadeState[0],
-                   .rate = actor->paletteFadeState[1]};
+  PaletteFade fade{.active = actor->palette_fade_active != 0,
+                   .reverse = actor->palette_fade_reverse != 0,
+                   .phase = actor->palette_fade_state[0],
+                   .rate = actor->palette_fade_state[1]};
   SetActorPaletteFade(fade, fade_parameter);
-  actor->paletteFadeActive = fade.active ? 1 : 0;
-  actor->paletteFadeReverse = fade.reverse ? 1 : 0;
-  actor->paletteFadeState[0] = fade.phase;
-  actor->paletteFadeState[1] = fade.rate;
+  actor->palette_fade_active = fade.active ? 1 : 0;
+  actor->palette_fade_reverse = fade.reverse ? 1 : 0;
+  actor->palette_fade_state[0] = fade.phase;
+  actor->palette_fade_state[1] = fade.rate;
 }
 
 void ResetLiveActorWeaponVisibilityBlend(int actor_id) {
   constexpr const char* kOperation = "ResetActorWeaponVisibilityBlend";
-  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  const VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return;
   VS::Actors::WeaponModel** pair =
       LiveWeaponPair(actor->instance.slot, kOperation);
@@ -212,7 +213,7 @@ void SetLiveRoomActorScale(const VECTOR* room_scale) {
       SetRoomActorScale(stored, VectorOf(*room_scale));
   StoreVector(roomActorScale, stored);
   roomActorScale.pad = room_scale->pad;
-  for (Actors_ActorRecord* actor : Actors_actorRecords) {
+  for (VS::Actors::ActorRecord* actor : VS::Actors::actorRecords) {
     if (actor != nullptr) actor->scale = actor_scale;
   }
 }
@@ -220,7 +221,7 @@ void SetLiveRoomActorScale(const VECTOR* room_scale) {
 int EnableLiveModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot) {
   const LivePulseModel model =
       FindPulseModel(actor_id, "EnableModelPalettePulse");
-  Actors_ModelEffectSlot* slot = model.Slot();
+  VS::Actors::ModelEffectSlot* slot = model.Slot();
   if (slot == nullptr) return kNoActorStatus;
   PalettePulseRequest request = LoadPulse(*slot);
   const PalettePulseChange change =
@@ -231,7 +232,7 @@ int EnableLiveModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot) {
 }
 
 int DisableLiveModelPalettePulse(int actor_id, int pulse_slot) {
-  Actors_ModelEffectSlot* slot =
+  VS::Actors::ModelEffectSlot* slot =
       FindPulseModel(actor_id, "DisableModelPalettePulse").Slot();
   if (slot == nullptr) return kNoActorStatus;
   PalettePulseRequest request = LoadPulse(*slot);
@@ -240,23 +241,24 @@ int DisableLiveModelPalettePulse(int actor_id, int pulse_slot) {
   return static_cast<int>(status);
 }
 
-void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames) {
+void BeginLiveActorShadowBlend(VS::Actors::ActorRecord* actor,
+                               int blend_frames) {
   if (actor == nullptr) {
     WarnActorRefused("BeginActorShadowBlend", "null actor");
     return;
   }
-  ShadowBlend shadow = LoadLiveShadowBlend(actor->shadowBlend);
+  ShadowBlend shadow = LoadLiveShadowBlend(actor->shadow_blend);
   BeginActorShadowBlend(shadow,
-                        {.expand = actor->shadowRadiusExpandRate,
-                         .shrink = actor->shadowRadiusShrinkRate},
+                        {.expand = actor->shadow_radius_expand_rate,
+                         .shrink = actor->shadow_radius_shrink_rate},
                         blend_frames);
-  StoreLiveShadowBlend(shadow, actor->shadowBlend);
+  StoreLiveShadowBlend(shadow, actor->shadow_blend);
 }
 
 int LiveActorFadeParameters(int actor_id,
                             VS::Render::ColorCode* fade_color_out) {
   constexpr const char* kOperation = "ActorFadeParameters";
-  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  const VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (fade_color_out == nullptr) {
     WarnActorRefused(kOperation, "null color");
@@ -271,7 +273,7 @@ int LiveActorFadeParameters(int actor_id,
 int SetLiveActorFadeParameters(int actor_id,
                                const VS::Render::ColorCode* fade_color) {
   constexpr const char* kOperation = "SetActorFadeParameters";
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (fade_color == nullptr) {
     WarnActorRefused(kOperation, "null color");
@@ -285,7 +287,7 @@ int SetLiveActorFadeParameters(int actor_id,
 
 int LiveActorTint(int actor_id, VS::Render::ColorCode* tint_out) {
   constexpr const char* kOperation = "ActorTint";
-  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  const VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (tint_out == nullptr) {
     WarnActorRefused(kOperation, "null color");
@@ -296,7 +298,7 @@ int LiveActorTint(int actor_id, VS::Render::ColorCode* tint_out) {
 }
 
 int SetLiveActorTint(int actor_id, const VS::Render::ColorCode* tint) {
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorTint");
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, "SetActorTint");
   if (actor == nullptr) return kNoActorStatus;
   ActorColors colors = LoadColors(*actor);
   SetActorTint(colors, tint != nullptr

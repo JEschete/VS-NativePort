@@ -13,15 +13,14 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelInstance.h"
+#include "Actors/ModelInstance.hpp"
 #include "Actors/ModelRenderingLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLiveState.hpp"
@@ -77,7 +76,7 @@ static_assert(kWeaponTableSize % kWeaponsPerActor == 0);
 // The skeleton an id names: the actor in its slot, else the gimmick in that
 // slot.
 struct LiveSkeleton {
-  Actors_ActorRecord* actor = nullptr;
+  VS::Actors::ActorRecord* actor = nullptr;
   VS::Field::GimmickInstance* gimmick = nullptr;
 
   [[nodiscard]] bool Present() const {
@@ -89,20 +88,20 @@ struct LiveSkeleton {
     if (actor != nullptr) {
       if (actor->instance.model == nullptr) return {};
       return {reinterpret_cast<const std::byte*>(actor->instance.model),
-              actor->modelDataSize};
+              actor->model_data_size};
     }
     if (gimmick == nullptr) return {};
     return Render::LiveModelBytes(gimmick->model);
   }
 
   [[nodiscard]] std::size_t BoneCount() const {
-    if (actor != nullptr) return actor->instance.boneCount;
+    if (actor != nullptr) return actor->instance.bone_count;
     if (gimmick == nullptr) return 0;
     return static_cast<std::uint8_t>(gimmick->bone_count);
   }
 
   [[nodiscard]] std::span<const MATRIX> Matrices() const {
-    if (actor != nullptr) return actor->boneMatrices;
+    if (actor != nullptr) return actor->bone_matrices;
     if (gimmick != nullptr) return gimmick->matrices;
     return {};
   }
@@ -110,7 +109,7 @@ struct LiveSkeleton {
 
 [[nodiscard]] LiveSkeleton FindLiveSkeleton(int actor_id,
                                             const char* operation) {
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, operation);
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, operation);
   if (actor != nullptr) return {.actor = actor, .gimmick = nullptr};
   return {.actor = nullptr,
           .gimmick = VS::Field::FindGimmickForActorSlot(actor_id)};
@@ -217,8 +216,8 @@ struct BoneLabelTable {
 }
 
 [[nodiscard]] Core::Math::Angles3 ActorAngles(
-    const Actors_ModelInstance& instance) {
-  return {instance.rotationX, instance.facing, instance.rotationZ};
+    const VS::Actors::ModelInstance& instance) {
+  return {instance.rotation_x, instance.facing, instance.rotation_z};
 }
 
 [[nodiscard]] Vec3 GimmickPosition(const VS::Field::GimmickInstance& gimmick) {
@@ -240,9 +239,9 @@ struct BoneLabelTable {
     if (weapon == nullptr) return std::nullopt;
     bone = WeaponBoneMatrix(*weapon, selector, operation);
   } else if (selector == kRootSelector) {
-    const Actors_ActorRecord& actor = *skeleton.actor;
+    const VS::Actors::ActorRecord& actor = *skeleton.actor;
     return RootSelectorTransform(ActorAngles(actor.instance),
-                                 VectorOf(actor.blendPose.bone_keys[kRootKey]),
+                                 VectorOf(actor.blend_pose.bone_keys[kRootKey]),
                                  actor.scale,
                                  VectorOf(actor.instance.position));
   } else {
@@ -290,21 +289,22 @@ struct ProjectedPoint {
           .depth = static_cast<std::int32_t>(depth)};
 }
 
-[[nodiscard]] HeadTracking LoadHeadTracking(const Actors_ActorRecord& actor) {
-  return {.target = actor.headTrackTarget,
-          .aim_x = actor.headTracking.vx,
-          .aim_y = actor.headTracking.vy,
-          .aim_z = actor.headTracking.vz,
-          .speed = actor.headTracking.pad};
+[[nodiscard]] HeadTracking LoadHeadTracking(
+    const VS::Actors::ActorRecord& actor) {
+  return {.target = actor.head_track_target,
+          .aim_x = actor.head_tracking.vx,
+          .aim_y = actor.head_tracking.vy,
+          .aim_z = actor.head_tracking.vz,
+          .speed = actor.head_tracking.pad};
 }
 
 void StoreHeadTracking(const HeadTracking& tracking,
-                       Actors_ActorRecord& actor) {
-  actor.headTrackTarget = tracking.target;
-  actor.headTracking.vx = tracking.aim_x;
-  actor.headTracking.vy = tracking.aim_y;
-  actor.headTracking.vz = tracking.aim_z;
-  actor.headTracking.pad = tracking.speed;
+                       VS::Actors::ActorRecord& actor) {
+  actor.head_track_target = tracking.target;
+  actor.head_tracking.vx = tracking.aim_x;
+  actor.head_tracking.vy = tracking.aim_y;
+  actor.head_tracking.vz = tracking.aim_z;
+  actor.head_tracking.pad = tracking.speed;
 }
 
 [[nodiscard]] int LimbGroupBonePosition(int actor_id, int limb,
@@ -317,7 +317,7 @@ void StoreHeadTracking(const HeadTracking& tracking,
 }  // namespace
 
 // decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2525)
-int LiveActorPitchToPoint(const Actors_ActorRecord* actor,
+int LiveActorPitchToPoint(const VS::Actors::ActorRecord* actor,
                           const SVECTOR* target) {
   if (target == nullptr) return 0;
   if (actor == nullptr) {
@@ -334,7 +334,8 @@ int LiveActorPitchToPoint(const Actors_ActorRecord* actor,
 // decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)
 int SetLiveActorHeadTracking(int actor_id, int target, const SVECTOR* aim,
                              int step) {
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorHeadTracking");
+  VS::Actors::ActorRecord* actor =
+      LiveActorRecord(actor_id, "SetActorHeadTracking");
   if (actor == nullptr) return kSkeletonNoOwner;
   if (FindLiveActorBoneTag(actor_id, kHeadAuxiliaryTag,
                            static_cast<int>(BoneTagKind::kAuxiliary)) < 0) {
@@ -345,21 +346,21 @@ int SetLiveActorHeadTracking(int actor_id, int target, const SVECTOR* aim,
       .aim =
           aim != nullptr ? std::optional<Vec3>(VectorOf(*aim)) : std::nullopt,
       .step = step};
-  const ActorLook look{.pitch = actor->instance.lookPitch,
-                       .yaw = actor->instance.lookYaw,
-                       .collision_radius = actor->collisionRadius};
+  const ActorLook look{.pitch = actor->instance.look_pitch,
+                       .yaw = actor->instance.look_yaw,
+                       .collision_radius = actor->collision_radius};
   StoreHeadTracking(StartHeadTracking(LoadHeadTracking(*actor), request, look),
                     *actor);
   return 0;
 }
 
 // decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3540)
-void ResetLiveActorHeadTrackingSpeed(Actors_ActorRecord* actor) {
+void ResetLiveActorHeadTrackingSpeed(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("ResetActorHeadTrackingSpeed", "no actor record");
     return;
   }
-  actor->headTracking.pad = HeadTrackingSpeed(actor->collisionRadius);
+  actor->head_tracking.pad = HeadTrackingSpeed(actor->collision_radius);
 }
 
 // decomp: BATTLE.PRG func_800A1178 (src/BATTLE/BATTLE.PRG/30DB0.c:4200)
@@ -403,9 +404,9 @@ int ProjectLiveActorTaggedBone(int actor_id, int tag, SVECTOR* screen_out,
     const LiveSkeleton skeleton = FindLiveSkeleton(actor_id, kOperation);
     Vec3 point;
     if (skeleton.actor != nullptr) {
-      if (skeleton.actor->instance.reactionState != 0) return kSkeletonNoOwner;
+      if (skeleton.actor->instance.reaction_state != 0) return kSkeletonNoOwner;
       point = TargetPoint(VectorOf(skeleton.actor->instance.position),
-                          skeleton.actor->targetPointHeight);
+                          skeleton.actor->target_point_height);
     } else if (skeleton.gimmick != nullptr) {
       point =
           TargetPoint(GimmickPosition(*skeleton.gimmick), kGimmickTargetHeight);
@@ -493,7 +494,7 @@ int LiveActorAnchorMatrix(int actor_id, int selector, MATRIX* matrix_out,
     return LiveActorBoneWorldMatrix(actor_id, selector, matrix_out, length_out);
   }
   constexpr const char* kOperation = "ActorAnchorMatrix";
-  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  const VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) {
     WarnActorRefused(kOperation, "the ground anchor needs an actor");
     return kSkeletonNoOwner;
@@ -540,7 +541,7 @@ int LiveActorTaggedBonePosition(int actor_id, int tag, SVECTOR* position_out,
       *position_out = position;
       StoreVector(
           *position_out,
-          TargetPoint(VectorOf(position), skeleton.actor->targetPointHeight));
+          TargetPoint(VectorOf(position), skeleton.actor->target_point_height));
       return 0;
     }
     if (skeleton.gimmick == nullptr) return kSkeletonNoOwner;
@@ -551,7 +552,8 @@ int LiveActorTaggedBonePosition(int actor_id, int tag, SVECTOR* position_out,
     return 0;
   }
   if (tag == kGroundAnchorSelector || tag == kAnchorHeightSelector) {
-    const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+    const VS::Actors::ActorRecord* actor =
+        LiveActorRecord(actor_id, kOperation);
     if (actor == nullptr) {
       WarnActorRefused(kOperation,
                        "the ground and anchor points need an actor");
@@ -562,7 +564,7 @@ int LiveActorTaggedBonePosition(int actor_id, int tag, SVECTOR* position_out,
     if (tag == kAnchorHeightSelector) {
       StoreVector(
           *position_out,
-          AnchorPoint(VectorOf(position), actor->anchorHeight, actor->scale));
+          AnchorPoint(VectorOf(position), actor->anchor_height, actor->scale));
     }
     return 0;
   }
@@ -630,18 +632,18 @@ std::optional<Transform3> LiveActorBoneViewTransform(int actor_id,
 // decomp: BATTLE.PRG func_800A4828 (src/BATTLE/BATTLE.PRG/3A1A0.c:1036)
 void BuildLiveActorPoseAtMatrix(int actor_id, MATRIX* camera) {
   constexpr const char* kOperation = "BuildActorPoseAtMatrix";
-  Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
+  VS::Actors::ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr || camera == nullptr) {
     WarnActorRefused(kOperation, "no actor record or camera matrix");
     return;
   }
-  const char visible = actor->instance.isVisible;
-  actor->instance.isVisible = 0;
-  actor->framesPerStep = 1;
+  const char visible = actor->instance.is_visible;
+  actor->instance.is_visible = 0;
+  actor->frames_per_step = 1;
   Render::PrepareLiveActorCameraMatrices(camera);
   PrepareLiveActorRootTransform(actor);
   // A hidden actor's draw builds its bone matrices without drawing it.
   DrawLiveActorModel(*actor, *camera, 0);
-  actor->instance.isVisible = visible;
+  actor->instance.is_visible = visible;
 }
 }  // namespace VS::Actors

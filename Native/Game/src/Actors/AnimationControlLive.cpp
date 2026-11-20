@@ -12,13 +12,13 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControl.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -39,7 +39,7 @@
 
 namespace VS::Actors {
 namespace {
-constexpr std::size_t kActorSlots = std::size(Actors_actorRecords);
+constexpr std::size_t kActorSlots = std::size(VS::Actors::actorRecords);
 // Every table slot plus one record a caller names outside the table.
 constexpr std::size_t kRegistryCapacity = kActorSlots + 1;
 constexpr int kQuadrants = 4;
@@ -63,14 +63,14 @@ Pointer* PointerOf(Handle handle) {
   return reinterpret_cast<Pointer*>(static_cast<std::uintptr_t>(handle));
 }
 
-SoundEffectSlot LoadSlot(const Actors_ModelEffectSlot& live) {
+SoundEffectSlot LoadSlot(const VS::Actors::ModelEffectSlot& live) {
   return {.kind = live.kind,
           .level = live.level,
           .flags = live.flags,
           .parameter = live.parameter};
 }
 
-void StoreSlot(const SoundEffectSlot& slot, Actors_ModelEffectSlot& live) {
+void StoreSlot(const SoundEffectSlot& slot, VS::Actors::ModelEffectSlot& live) {
   live.kind = slot.kind;
   live.level = slot.level;
   live.flags = slot.flags;
@@ -90,99 +90,99 @@ void StoreCursor(const PoseEventCursor& cursor,
 
 u_char Bit(bool value) { return value ? 1 : 0; }
 
-AnimationActor LoadLiveAnimationActor(const Actors_ActorRecord& live) {
+AnimationActor LoadLiveAnimationActor(const VS::Actors::ActorRecord& live) {
   AnimationActor actor;
   actor.motion = LoadLiveActorMotion(live);
-  const Actors_ModelInstance& instance = live.instance;
-  actor.weapon_drawn = instance.weaponDrawn != 0;
-  actor.reaction_state = instance.reactionState;
-  actor.support_layer = instance.supportLayer;
-  actor.bone_count = instance.boneCount;
+  const VS::Actors::ModelInstance& instance = live.instance;
+  actor.weapon_drawn = instance.weapon_drawn != 0;
+  actor.reaction_state = instance.reaction_state;
+  actor.support_layer = instance.support_layer;
+  actor.bone_count = instance.bone_count;
   actor.has_model = instance.model != nullptr;
-  actor.animation_id = live.animationId;
-  actor.animation_set = live.animationSet;
+  actor.animation_id = live.animation_id;
+  actor.animation_set = live.animation_set;
   actor.animation_header = static_cast<SequenceHandle>(
-      static_cast<std::uintptr_t>(live.animationHeader));
-  actor.animation_length = live.animationLength;
-  actor.queued_animation = live.queuedAnimation;
-  actor.queued_blend_frames = live.queuedParameterA;
-  actor.queued_start_frame = live.queuedParameterB;
-  actor.travel_animation = live.travelAnimation;
-  actor.animation_locked = live.animationLocked != 0;
-  actor.animation_event_flag = live.animationEventFlag != 0;
-  actor.pose_override_active = live.poseOverrideActive != 0;
-  actor.fast_animation = live.fastAnimation != 0;
-  actor.advance_requested = live.advanceRequested != 0;
-  actor.locomotion_animation_state = live.locomotionAnimationState;
-  actor.locomotion_counter = live.locomotionCounter;
-  actor.blend_frame = static_cast<std::uint8_t>(live.blendFrame);
-  actor.blend_frames = static_cast<std::uint8_t>(live.blendFrames);
-  actor.collision_radius = live.collisionRadius;
-  actor.move_facing = live.moveFacing;
-  actor.sequence_model_id = live.sequenceModelId;
-  actor.model_id = live.modelId;
-  actor.frames_per_step = live.framesPerStep;
+      static_cast<std::uintptr_t>(live.animation_header));
+  actor.animation_length = live.animation_length;
+  actor.queued_animation = live.queued_animation;
+  actor.queued_blend_frames = live.queued_parameter_a;
+  actor.queued_start_frame = live.queued_parameter_b;
+  actor.travel_animation = live.travel_animation;
+  actor.animation_locked = live.animation_locked != 0;
+  actor.animation_event_flag = live.animation_event_flag != 0;
+  actor.pose_override_active = live.pose_override_active != 0;
+  actor.fast_animation = live.fast_animation != 0;
+  actor.advance_requested = live.advance_requested != 0;
+  actor.locomotion_animation_state = live.locomotion_animation_state;
+  actor.locomotion_counter = live.locomotion_counter;
+  actor.blend_frame = static_cast<std::uint8_t>(live.blend_frame);
+  actor.blend_frames = static_cast<std::uint8_t>(live.blend_frames);
+  actor.collision_radius = live.collision_radius;
+  actor.move_facing = live.move_facing;
+  actor.sequence_model_id = live.sequence_model_id;
+  actor.model_id = live.model_id;
+  actor.frames_per_step = live.frames_per_step;
   for (std::size_t channel = 0; channel < kTextureAnimationChannels;
        ++channel) {
     actor.texture_overlay_index.at(channel) =
-        live.textureAnimationFrames[channel].overlay_index;
+        live.texture_animation_frames[channel].overlay_index;
     actor.texture_current_frame.at(channel) =
-        live.textureAnimationSlots[channel].current_frame;
+        live.texture_animation_slots[channel].current_frame;
   }
   for (std::size_t bank = 0; bank < kSharedSequenceBanks; ++bank) {
-    // textureRowOffsets[2] aliases the low byte of momentumDistance.
-    actor.texture_rows.at(bank) = live.textureRowOffsets[bank];
+    // texture_row_offsets[2] aliases the low byte of momentum_distance.
+    actor.texture_rows.at(bank) = live.texture_row_offsets[bank];
     actor.shared_sequences.at(bank) =
-        HandleOf<SequenceHandle>(live.sharedSequences[bank]);
+        HandleOf<SequenceHandle>(live.shared_sequences[bank]);
   }
-  actor.sound_effect = LoadSlot(live.soundEffect);
-  actor.sound_effect_target = LoadSlot(live.soundEffectTarget);
+  actor.sound_effect = LoadSlot(live.sound_effect);
+  actor.sound_effect_target = LoadSlot(live.sound_effect_target);
   for (std::size_t lock = 0; lock < kBonePoseLocks; ++lock) {
-    actor.locked_bones.at(lock) = live.lockedBones[lock];
+    actor.locked_bones.at(lock) = live.locked_bones[lock];
   }
   actor.pose = LoadCursor(live.pose);
-  actor.blend_pose = LoadCursor(live.blendPose);
+  actor.blend_pose = LoadCursor(live.blend_pose);
   actor.holding_last_frame = live.pose.holding_last_frame != 0;
   return actor;
 }
 
 // Stores the fields the controls write; the read-only fields stay as loaded.
 void StoreLiveAnimationActor(const AnimationActor& actor,
-                             Actors_ActorRecord& live) {
+                             VS::Actors::ActorRecord& live) {
   StoreLiveActorMotion(actor.motion, live);
-  live.instance.weaponDrawn = Bit(actor.weapon_drawn);
-  live.animationId = actor.animation_id;
-  live.animationSet = actor.animation_set;
-  live.animationHeader = static_cast<std::intptr_t>(
+  live.instance.weapon_drawn = Bit(actor.weapon_drawn);
+  live.animation_id = actor.animation_id;
+  live.animation_set = actor.animation_set;
+  live.animation_header = static_cast<std::intptr_t>(
       static_cast<std::uintptr_t>(actor.animation_header));
-  live.animationLength = actor.animation_length;
-  live.queuedAnimation = actor.queued_animation;
-  live.queuedParameterA = actor.queued_blend_frames;
-  live.queuedParameterB = actor.queued_start_frame;
-  live.travelAnimation = actor.travel_animation;
-  live.animationLocked = Bit(actor.animation_locked);
-  live.animationEventFlag = Bit(actor.animation_event_flag);
-  live.poseOverrideActive = Bit(actor.pose_override_active);
-  live.fastAnimation = Bit(actor.fast_animation);
-  live.advanceRequested = Bit(actor.advance_requested);
-  live.locomotionAnimationState = actor.locomotion_animation_state & 1U;
-  live.locomotionCounter = actor.locomotion_counter;
-  live.blendFrame = static_cast<char>(actor.blend_frame);
-  live.blendFrames = static_cast<char>(actor.blend_frames);
-  live.moveFacing = actor.move_facing;
-  live.framesPerStep = actor.frames_per_step;
+  live.animation_length = actor.animation_length;
+  live.queued_animation = actor.queued_animation;
+  live.queued_parameter_a = actor.queued_blend_frames;
+  live.queued_parameter_b = actor.queued_start_frame;
+  live.travel_animation = actor.travel_animation;
+  live.animation_locked = Bit(actor.animation_locked);
+  live.animation_event_flag = Bit(actor.animation_event_flag);
+  live.pose_override_active = Bit(actor.pose_override_active);
+  live.fast_animation = Bit(actor.fast_animation);
+  live.advance_requested = Bit(actor.advance_requested);
+  live.locomotion_animation_state = actor.locomotion_animation_state & 1U;
+  live.locomotion_counter = actor.locomotion_counter;
+  live.blend_frame = static_cast<char>(actor.blend_frame);
+  live.blend_frames = static_cast<char>(actor.blend_frames);
+  live.move_facing = actor.move_facing;
+  live.frames_per_step = actor.frames_per_step;
   for (std::size_t channel = 0; channel < kTextureAnimationChannels;
        ++channel) {
-    live.textureAnimationFrames[channel].overlay_index =
+    live.texture_animation_frames[channel].overlay_index =
         actor.texture_overlay_index.at(channel);
   }
-  StoreSlot(actor.sound_effect, live.soundEffect);
-  StoreSlot(actor.sound_effect_target, live.soundEffectTarget);
+  StoreSlot(actor.sound_effect, live.sound_effect);
+  StoreSlot(actor.sound_effect_target, live.sound_effect_target);
   for (std::size_t lock = 0; lock < kBonePoseLocks; ++lock) {
-    live.lockedBones[lock] = actor.locked_bones.at(lock);
+    live.locked_bones[lock] = actor.locked_bones.at(lock);
   }
   StoreCursor(actor.pose, live.pose);
-  StoreCursor(actor.blend_pose, live.blendPose);
+  StoreCursor(actor.blend_pose, live.blend_pose);
 }
 
 // The actors one control run touches, loaded on first use. Every legacy call
@@ -198,7 +198,7 @@ class AnimationRegistry {
   AnimationRegistry& operator=(AnimationRegistry&&) = delete;
   ~AnimationRegistry() { StoreAll(); }
 
-  AnimationActor& Attach(Actors_ActorRecord& record) {
+  AnimationActor& Attach(VS::Actors::ActorRecord& record) {
     for (std::size_t index = 0; index < count_; ++index) {
       if (entries_.at(index).record == &record) {
         return entries_.at(index).actor;
@@ -216,7 +216,7 @@ class AnimationRegistry {
     return entry.actor;
   }
 
-  Actors_ActorRecord& RecordOf(const AnimationActor& actor) {
+  VS::Actors::ActorRecord& RecordOf(const AnimationActor& actor) {
     for (std::size_t index = 0; index < count_; ++index) {
       if (&entries_.at(index).actor == &actor) {
         return *entries_.at(index).record;
@@ -243,7 +243,7 @@ class AnimationRegistry {
 
  private:
   struct Entry {
-    Actors_ActorRecord* record = nullptr;
+    VS::Actors::ActorRecord* record = nullptr;
     AnimationActor actor;
   };
   std::array<Entry, kRegistryCapacity> entries_{};
@@ -277,7 +277,7 @@ int TableByte(const std::array<std::uint8_t, Size>& table, int index,
 
 class LiveAnimationHost final : public AnimationControlHost {
  public:
-  AnimationActor& Attach(Actors_ActorRecord& record) {
+  AnimationActor& Attach(VS::Actors::ActorRecord& record) {
     return registry_.Attach(record);
   }
 
@@ -286,7 +286,7 @@ class LiveAnimationHost final : public AnimationControlHost {
       VS::Core::LogWarn("actors", "Actor animation refused actor id {}", id);
       return nullptr;
     }
-    Actors_ActorRecord* record = Actors_actorRecords[id];
+    VS::Actors::ActorRecord* record = VS::Actors::actorRecords[id];
     return record != nullptr ? &registry_.Attach(*record) : nullptr;
   }
   bool HasBattleActor(int index) override {
@@ -335,8 +335,8 @@ class LiveAnimationHost final : public AnimationControlHost {
                         quadrant);
       return 0;
     }
-    return fast ? Actors_kFastQuadrantMoveAnimations[quadrant]
-                : Actors_kSlowQuadrantMoveAnimations[quadrant];
+    return fast ? VS::Actors::fastQuadrantMoveAnimations[quadrant]
+                : VS::Actors::slowQuadrantMoveAnimations[quadrant];
   }
 
   int SharedSequenceBankIndex() override {
@@ -381,7 +381,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     }
   }
   void PlaySoundPair(AnimationActor& actor, int first, int second) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     Audio::LivePlayActorSoundPair(&record, first, second);
   }
@@ -392,7 +392,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     return result;
   }
   void CancelTeleportTransition(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     CancelLiveActorTeleportTransition(&record);
   }
@@ -402,7 +402,7 @@ class LiveAnimationHost final : public AnimationControlHost {
   }
   void UploadTextureFrame(AnimationActor& actor, int channel,
                           int frame) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     UploadLiveActorTextureFrame(&record, channel, frame);
   }
@@ -414,7 +414,7 @@ class LiveAnimationHost final : public AnimationControlHost {
 
   AnimationLookup FindAnimationHeader(AnimationActor& actor,
                                       int animation) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     const AnimationHeader header = FindLiveAnimationHeader(record, animation);
     const bool found = header.status == AnimationHeaderStatus::kFound;
@@ -433,34 +433,34 @@ class LiveAnimationHost final : public AnimationControlHost {
                 VS::Actors::lastResolvedSequenceIndex)};
   }
   bool CanUnwindBoundAnimation(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     const std::optional<AnimationClipRef> bound =
         BoundLiveAnimationClip(record);
     return bound && FindClipEvents(*bound).status == ClipEventsStatus::kStarts;
   }
   int RestartAnimationEvents(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     return RestartLiveAnimationEvents(record);
   }
   void InitializePose(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     InitializeLiveActorAnimationPose(&record, &record.pose);
   }
   void BeginShadowBlend(AnimationActor& actor, int blend_frames) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     BeginLiveActorShadowBlend(&record, blend_frames);
   }
   int RunBattleWindowEvents(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     return RunLiveAnimationEvents(record, record.pose, kBattleWindowEvents);
   }
   void AdvanceSkeletalAnimation(AnimationActor& actor) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     AdvanceLiveSkeletalAnimation(record, 1);
   }
@@ -471,16 +471,16 @@ class LiveAnimationHost final : public AnimationControlHost {
       VS::Core::LogWarn("actors", "Bone anchor refused lock {}", lock_index);
       return;
     }
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     const Synced synced(registry_);
     int length = 0;
-    static_cast<void>(
-        LiveActorAnchorMatrix(record.instance.slot, bone,
-                              &record.lockedBoneMatrices[lock_index], &length));
+    static_cast<void>(LiveActorAnchorMatrix(
+        record.instance.slot, bone, &record.locked_bone_matrices[lock_index],
+        &length));
   }
   void SetBonePoseLockSlot(AnimationActor& actor, int bone,
                            int lock_slot) override {
-    Actors_ActorRecord& record = registry_.RecordOf(actor);
+    VS::Actors::ActorRecord& record = registry_.RecordOf(actor);
     VS::Actors::ShpModel* model = record.instance.model;
     if (model == nullptr || bone < 0) {
       VS::Core::LogWarn("actors", "Bone pose lock refused bone {}", bone);
@@ -493,7 +493,7 @@ class LiveAnimationHost final : public AnimationControlHost {
   AnimationRegistry registry_;
 };
 
-SoundEffectSlot SlotOf(const Actors_ModelEffectSlot& live) {
+SoundEffectSlot SlotOf(const VS::Actors::ModelEffectSlot& live) {
   return LoadSlot(live);
 }
 }  // namespace
@@ -667,7 +667,7 @@ void SetLiveActorSoundOverrides(int actor_id,
 
 // decomp: BATTLE.PRG func_8009F990 (src/BATTLE/BATTLE.PRG/30DB0.c:3401)
 void SetLiveActorSoundOverrides(int actor_id,
-                                Actors_ModelEffectSlot* sound_override) {
+                                VS::Actors::ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
     VS::Core::LogWarn("actors", "Sound overrides refused: null override");
     return;
@@ -677,7 +677,7 @@ void SetLiveActorSoundOverrides(int actor_id,
 
 // decomp: BATTLE.PRG func_8009F9F4 (src/BATTLE/BATTLE.PRG/30DB0.c:3414)
 void ApplyLiveActorSoundOverrides(int actor_id,
-                                  Actors_ModelEffectSlot* sound_override) {
+                                  VS::Actors::ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
     VS::Core::LogWarn("actors", "Sound override apply refused: null override");
     return;
@@ -747,8 +747,8 @@ void PlayLiveActorTurnAnimation(int actor_id, int target_facing) {
 }
 
 // decomp: BATTLE.PRG func_800A6AA0 (src/BATTLE/BATTLE.PRG/3A1A0.c:2032)
-int UpdateLiveActorLocomotionAnimation(Actors_ActorRecord* actor, int speed,
-                                       int /*direction*/) {
+int UpdateLiveActorLocomotionAnimation(VS::Actors::ActorRecord* actor,
+                                       int speed, int /*direction*/) {
   if (actor == nullptr) {
     VS::Core::LogWarn("actors", "Locomotion animation refused: null actor");
     return 0;
@@ -759,7 +759,8 @@ int UpdateLiveActorLocomotionAnimation(Actors_ActorRecord* actor, int speed,
 }
 
 // decomp: BATTLE.PRG func_800AC440 (src/BATTLE/BATTLE.PRG/40564.c:2199)
-void SetLiveActorBonePoseLock(Actors_ActorRecord* actor, int bone, int lock) {
+void SetLiveActorBonePoseLock(VS::Actors::ActorRecord* actor, int bone,
+                              int lock) {
   if (actor == nullptr) {
     VS::Core::LogWarn("actors", "Bone pose lock refused: null actor");
     return;
@@ -769,7 +770,7 @@ void SetLiveActorBonePoseLock(Actors_ActorRecord* actor, int bone, int lock) {
 }
 
 // decomp: BATTLE.PRG func_800AC500 (src/BATTLE/BATTLE.PRG/40564.c:2221)
-void ClearLiveActorBonePoseLocks(Actors_ActorRecord* actor) {
+void ClearLiveActorBonePoseLocks(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     VS::Core::LogWarn("actors", "Bone pose lock clear refused: null actor");
     return;

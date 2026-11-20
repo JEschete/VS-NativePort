@@ -11,9 +11,9 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
+#include "Actors/Movement.hpp"
 #include "Core/Log.hpp"
 #include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
@@ -37,11 +37,11 @@ using VS::Field::PlatformContact;
 using PlatformWords = std::array<std::uint32_t, kMovingPlatformCapacity>;
 using GimmickState = std::optional<GimmickSupportState>;
 using GimmickStates = std::array<GimmickState, kGimmickSlotCount>;
-using ActorRecordTable = decltype(Actors_actorRecords);
+using ActorRecordTable = decltype(VS::Actors::actorRecords);
 
 constexpr std::size_t kPlatformRecordBytes = 0xB8;
 constexpr std::size_t kPlatformCellOffset = 0xB4;
-constexpr std::size_t kActorSlotCount = std::extent_v<ActorRecordTable>;
+constexpr std::size_t kActorSlotCount = std::tuple_size_v<ActorRecordTable>;
 constexpr std::size_t kFirstRoomActor = 2;
 
 static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
@@ -129,47 +129,48 @@ GimmickStates LiveGimmicks() {
   return states;
 }
 
-Actors_ActorRecord* LiveActor(int actor_index, const char* caller) {
+VS::Actors::ActorRecord* LiveActor(int actor_index, const char* caller) {
   if (actor_index < 0 ||
       static_cast<std::size_t>(actor_index) >= kActorSlotCount) {
     VS::Core::LogWarn("field.collision", "{} refused actor slot {}", caller,
                       actor_index);
     return nullptr;
   }
-  return Actors_actorRecords[actor_index];
+  return VS::Actors::actorRecords[actor_index];
 }
 
 class LiveActorCollisionFlags final : public VS::Field::ActorCollisionFlags {
  public:
-  explicit LiveActorCollisionFlags(Actors_ActorRecord* actor) : actor_(actor) {}
+  explicit LiveActorCollisionFlags(VS::Actors::ActorRecord* actor)
+      : actor_(actor) {}
 
   [[nodiscard]] std::optional<VS::Field::CollisionBypass> Bypass(
       std::int32_t /*actor_index*/) const override {
     if (actor_ == nullptr) return std::nullopt;
     return VS::Field::CollisionBypass{
-        .actor_collision = actor_->bypassActorCollision != 0,
-        .ignored = actor_->ignoredByCollision != 0};
+        .actor_collision = actor_->bypass_actor_collision != 0,
+        .ignored = actor_->ignored_by_collision != 0};
   }
 
   void SetBypass(std::int32_t /*actor_index*/,
                  VS::Field::CollisionBypass bypass) override {
-    actor_->bypassActorCollision = bypass.actor_collision ? 1 : 0;
-    actor_->ignoredByCollision = bypass.ignored ? 1 : 0;
+    actor_->bypass_actor_collision = bypass.actor_collision ? 1 : 0;
+    actor_->ignored_by_collision = bypass.ignored ? 1 : 0;
   }
 
  private:
-  Actors_ActorRecord* actor_;
+  VS::Actors::ActorRecord* actor_;
 };
 
 // Cross-slice calls: retarget when those rows are promoted.
 // The platform and gimmick an actor stands on (Actors movement state). The
 // original stores the layer as a word over the halfword and its padding.
 void RecordSupportingPlatformLayer(std::int32_t layer) {
-  Actors_supportingPlatformLayer = static_cast<u_short>(layer);
+  VS::Actors::supportingPlatformLayer = static_cast<u_short>(layer);
 }
 
 void RecordSupportingGimmick(std::uint8_t slot) {
-  Actors_supportingGimmickIndex = slot;
+  VS::Actors::supportingGimmickIndex = slot;
 }
 // End of cross-slice calls.
 }  // namespace
@@ -285,12 +286,12 @@ void SnapLiveRoomActorsToSupport() {
   std::array<std::optional<RoomActorSupport>, kActorSlotCount - kFirstRoomActor>
       actors{};
   for (std::size_t slot = kFirstRoomActor; slot < kActorSlotCount; ++slot) {
-    const Actors_ActorRecord* actor = Actors_actorRecords[slot];
+    const VS::Actors::ActorRecord* actor = VS::Actors::actorRecords[slot];
     if (actor == nullptr) continue;
     actors.at(slot - kFirstRoomActor) =
-        RoomActorSupport{.motion_locked = actor->instance.motionLocked != 0,
-                         .tile_layer = actor->instance.currentTileLayer,
-                         .movement_mode = actor->instance.movementMode,
+        RoomActorSupport{.motion_locked = actor->instance.motion_locked != 0,
+                         .tile_layer = actor->instance.current_tile_layer,
+                         .movement_mode = actor->instance.movement_mode,
                          .x = actor->instance.position.vx,
                          .y = actor->instance.position.vy,
                          .z = actor->instance.position.vz};
@@ -299,7 +300,9 @@ void SnapLiveRoomActorsToSupport() {
   SnapRoomActorsToSupport(LiveRoomCollisionMap(), gimmicks, actors);
   for (std::size_t slot = kFirstRoomActor; slot < kActorSlotCount; ++slot) {
     const auto& placed = actors.at(slot - kFirstRoomActor);
-    if (placed) Actors_actorRecords[slot]->instance.position.vy = placed->y;
+    if (placed) {
+      VS::Actors::actorRecords[slot]->instance.position.vy = placed->y;
+    }
   }
 }
 

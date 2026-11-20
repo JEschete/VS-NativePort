@@ -10,11 +10,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
-#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Battle/Actor.h"
@@ -363,31 +362,31 @@ struct AppearanceFixture {
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   int saved_speed = VS::State::tickSpeed;
-  decltype(std::to_array(Actors_actorRecords)) saved_models =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   decltype(VS::Field::gimmickInstances) saved_objects =
       VS::Field::gimmickInstances;
   RECT palette_region{768, 224, 256, 32};
   alignas(u_long) std::array<u_char, 16384> saved_cluts{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
 
   AppearanceFixture() {
     StoreImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_models.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_objects.size(),
                 nullptr);
     VS::State::tickSpeed = 2;
-    actor.instance.isParsed = -1;
-    actor.instance.baseColor = {128, 128, 128, 0};
-    actor.instance.actionAnimationState = 4;
-    actor.fadeRed = 30;
+    actor.instance.is_parsed = -1;
+    actor.instance.base_color = {128, 128, 128, 0};
+    actor.instance.action_animation_state = 4;
+    actor.fade_red = 30;
   }
 
   ~AppearanceFixture() {
     std::copy(saved_weapons.begin(), saved_weapons.end(),
               VS::Actors::weaponModels);
-    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_objects.begin(), saved_objects.end(),
               VS::Field::gimmickInstances.begin());
     LoadImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
@@ -451,16 +450,16 @@ void CheckPulseCycle(VS::Field::GimmickInstance& object,
 TEST_CASE("Actor disappearance changes the owning fade byte, not a legacy view",
           "[actors][appearance]") {
   AppearanceFixture fixture;
-  std::array<u_char, sizeof(Actors_ActorRecord)> expected;
+  std::array<u_char, sizeof(VS::Actors::ActorRecord)> expected;
   std::memcpy(expected.data(), &fixture.actor, expected.size());
-  const auto color = offsetof(Actors_ActorRecord, instance) +
-                     offsetof(Actors_ModelInstance, baseColor);
+  const auto color = offsetof(VS::Actors::ActorRecord, instance) +
+                     offsetof(VS::Actors::ModelInstance, base_color);
   expected[color] = expected[color + 1] = expected[color + 2] = 124;
-  expected[offsetof(Actors_ActorRecord, fadeRed)] = 32;
+  expected[offsetof(VS::Actors::ActorRecord, fade_red)] = 32;
   VS::Actors::UpdateLiveActorAppearanceTransition(fixture.actor);
-  std::array<u_char, sizeof(Actors_ActorRecord)> actual;
+  std::array<u_char, sizeof(VS::Actors::ActorRecord)> actual;
   std::memcpy(actual.data(), &fixture.actor, actual.size());
-  CHECK(fixture.actor.fadeRed == 32);
+  CHECK(fixture.actor.fade_red == 32);
   CHECK(actual == expected);
 }
 
@@ -470,12 +469,12 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
   const bool full_palette = GENERATE(false, true);
   AppearanceFixture fixture;
   auto& actor = fixture.actor;
-  actor.instance.actionAnimationState = state;
-  actor.textureHeaderBit = full_palette ? 1 : 0;
-  actor.fadeGreen = 10;
-  std::fill_n(actor.basePalette, 160, 0x1234);
-  std::fill_n(actor.basePalette + 160, 160, 0x7FFF);
-  std::fill_n(actor.currentPalette, 160, 0xA55A);
+  actor.instance.action_animation_state = state;
+  actor.texture_header_bit = full_palette ? 1 : 0;
+  actor.fade_green = 10;
+  std::fill_n(actor.base_palette, 160, 0x1234);
+  std::fill_n(actor.base_palette + 160, 160, 0x7FFF);
+  std::fill_n(actor.current_palette, 160, 0xA55A);
   std::array<u_short, 160> expected;
   expected.fill(0x7FFF);
   const int count = full_palette ? 160 : 16;
@@ -489,7 +488,7 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
                                               : 6;
   const auto expected_colors = std::span<std::uint16_t>(expected).subspan(
       static_cast<std::size_t>(skip), static_cast<std::size_t>(count - skip));
-  const auto reference = std::span<const std::uint16_t>(actor.basePalette)
+  const auto reference = std::span<const std::uint16_t>(actor.base_palette)
                              .subspan(static_cast<std::size_t>(skip),
                                       static_cast<std::size_t>(count - skip));
   const bool changed = VS::Actors::ApplyPaletteTransition(
@@ -501,9 +500,9 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
   }
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   for (int index = 0; index < 160; ++index) {
-    CHECK(actor.basePalette[index] == 0x1234);
-    CHECK(actor.basePalette[index + 160] == expected[index]);
-    CHECK(actor.currentPalette[index] == 0xA55A);
+    CHECK(actor.base_palette[index] == 0x1234);
+    CHECK(actor.base_palette[index + 160] == expected[index]);
+    CHECK(actor.current_palette[index] == 0xA55A);
   }
 }
 
@@ -583,25 +582,25 @@ TEST_CASE(
   AppearanceFixture fixture;
   auto& actor = fixture.actor;
   actor.instance.slot = 2;
-  actor.textureHeaderBit = full ? 1 : 0;
-  actor.instance.palettePulse.kind = 128;
-  actor.instance.palettePulse.level = 0;
-  actor.instance.palettePulse.flags = 0;
+  actor.texture_header_bit = full ? 1 : 0;
+  actor.instance.palette_pulse.kind = 128;
+  actor.instance.palette_pulse.level = 0;
+  actor.instance.palette_pulse.flags = 0;
   for (int i = 0; i < 160; ++i) {
-    actor.basePalette[i] = kPulseColors[i % kPulseColors.size()];
-    actor.currentPalette[i] = 0x5A5A;
+    actor.base_palette[i] = kPulseColors[i % kPulseColors.size()];
+    actor.current_palette[i] = 0x5A5A;
   }
-  Actors_ActorRecord expected;
+  VS::Actors::ActorRecord expected;
   std::memcpy(&expected, &actor, sizeof actor);
-  expected.instance.palettePulse.level = 2;
+  expected.instance.palette_pulse.level = 2;
   const int count = full ? 160 : 16;
   for (int i = 0; i < count; ++i) {
-    if (actor.basePalette[i] != 0) {
-      expected.currentPalette[i] = PulseColor(actor.basePalette[i], 2);
+    if (actor.base_palette[i] != 0) {
+      expected.current_palette[i] = PulseColor(actor.base_palette[i], 2);
     }
   }
   auto expected_row = PulseClut<256>(24, 0);
-  std::copy_n(expected.currentPalette, count, expected_row.begin());
+  std::copy_n(expected.current_palette, count, expected_row.begin());
   VS::Actors::UpdateLiveActorPalettePulse(actor);
   CHECK(ObjectBytes(actor) == ObjectBytes(expected));
   CHECK(PulseClut<256>(24, 0) == expected_row);
@@ -691,8 +690,8 @@ TEST_CASE("Actors past the equipment table fade without equipment",
   VS::Actors::weaponModels[19] = &(*weapons)[1];
   auto& actor = fixture.actor;
   actor.instance.slot = static_cast<u_char>(slot);
-  actor.instance.actionAnimationState = 2;
-  std::fill_n(actor.basePalette, 320, 0x1234);
+  actor.instance.action_animation_state = 2;
+  std::fill_n(actor.base_palette, 320, 0x1234);
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   for (const auto& weapon : *weapons) {
     const bool owned = slot == 9;
@@ -714,8 +713,8 @@ TEST_CASE("Equipment palette counts stop at their palette storage",
   VS::Actors::weaponModels[0] = weapon.get();
   auto& actor = fixture.actor;
   actor.instance.slot = 0;
-  actor.instance.actionAnimationState = 2;
-  std::fill_n(actor.basePalette, 320, 0x1234);
+  actor.instance.action_animation_state = 2;
+  std::fill_n(actor.base_palette, 320, 0x1234);
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   CHECK(weapon->upload_palette[95] != 0x7FFF);
   CHECK(weapon->brightness == 0xA5);

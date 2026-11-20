@@ -12,10 +12,10 @@
 #include <string>
 #include <utility>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
@@ -86,8 +86,8 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
     throw std::runtime_error("diagnostic actor vanished within a frame");
   }
   const auto& stats = *actor->stats;
-  if (Actors_actorRecords[slot] != nullptr) {
-    snapshot.model = Actors_actorRecords[slot]->modelId;
+  if (VS::Actors::actorRecords[slot] != nullptr) {
+    snapshot.model = VS::Actors::actorRecords[slot]->model_id;
   }
   snapshot.status_immunities =
       static_cast<std::uint32_t>(stats.statusImmunities);
@@ -515,7 +515,7 @@ int NavigationSupportHeight(int x, int z) {
   constexpr int kNoSupport = 3000, kHeightMask = 0x7FFF;
   int support = kNoSupport;
   // VS::Field::LiveGimmickSupportHeight, original 40564.c:317. Do not call that
-  // gameplay query here: it writes Actors_supportingGimmickIndex.
+  // gameplay query here: it writes VS::Actors::supportingGimmickIndex.
   for (const auto* object : VS::Field::gimmickInstances) {
     if (object != nullptr && !object->is_skipped && !object->motion_state &&
         object->mode != kInactiveMode && object->tile_x == x / kTileSize &&
@@ -584,7 +584,7 @@ bool NavigationFootprintClear(int x, int z, int radius, int body_height) {
 EncounterNavigationState InspectNavigation() {
   EncounterNavigationState result;
   const auto* map = VS::Field::roomData.collision_map;
-  const auto* player = Actors_actorRecords[0];
+  const auto* player = VS::Actors::actorRecords[0];
   if (map == nullptr || player == nullptr ||
       VS::Field::roomData.tile_cells == nullptr) {
     return result;
@@ -607,12 +607,12 @@ EncounterNavigationState InspectNavigation() {
   std::array<u_char, kFacingTileBytes> facing{};
   VS::Field::TileInFrontOfActorEntry(&placement, facing.data());
   result.facing_tile = {facing[0], facing[2], facing[1]};
-  result.collision_radius = player->collisionRadius;
-  result.collision_height = player->collisionHeight;
-  result.movement_mode = player->instance.movementMode;
-  result.locomotion_state = player->instance.locomotionState;
-  result.route_phase = player->routePhase;
-  result.jumping = player->instance.isJumping != 0;
+  result.collision_radius = player->collision_radius;
+  result.collision_height = player->collision_height;
+  result.movement_mode = player->instance.movement_mode;
+  result.locomotion_state = player->instance.locomotion_state;
+  result.route_phase = player->route_phase;
+  result.jumping = player->instance.is_jumping != 0;
   result.width = std::min(kPatchSide, map->width * 2);
   result.depth = std::min(kPatchSide, map->height * 2);
   result.origin_x =
@@ -777,9 +777,9 @@ nlohmann::json EncodeRoomTiles() {
 // VS::Field::LiveGimmickSupportHeight write interaction/support globals.
 nlohmann::json EncodePlayerGimmicks() {
   auto gimmicks = nlohmann::json::array();
-  const auto* ashley = Actors_actorRecords[0];
-  const int carried = ashley != nullptr && ashley->actionPoseActive
-                          ? ashley->instance.attachBone
+  const auto* ashley = VS::Actors::actorRecords[0];
+  const int carried = ashley != nullptr && ashley->action_pose_active
+                          ? ashley->instance.attach_bone
                           : -1;
   for (int slot = 0;
        slot < static_cast<int>(std::size(VS::Field::gimmickInstances));

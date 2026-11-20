@@ -255,7 +255,7 @@ struct ActorAssetRecord {
   bool weapon_drawn = false;
   std::uint8_t support_layer = 0;    // 4 bits
   std::uint8_t placement_layer = 0;  // 4 bits
-  std::uint8_t palette_words = 0;    // copiedWordCount
+  std::uint8_t palette_words = 0;    // copied_word_count
   std::uint8_t slot = 0;
   std::uint8_t variant = 0;
   std::uint8_t attach_parent = 0;
@@ -301,7 +301,7 @@ struct ActorAssetRecord {
   std::uint16_t model_id = 0;
   std::int16_t clut_a = 0;
   std::int16_t clut_b = 0;
-  std::uint32_t fade = 0;  // fadeBlue, fadeGreen, fadeRed and the pad
+  std::uint32_t fade = 0;  // fade_blue, fade_green, fade_red and the pad
   std::array<std::byte, kActorPaletteBytes> palettes{};
   std::array<std::uint16_t, kActorBasePaletteColors> base_palette{};
   std::array<std::uint16_t, kActorCurrentPaletteColors> current_palette{};
@@ -310,7 +310,7 @@ struct ActorAssetRecord {
   std::array<std::uint16_t, kActorJointSlots> joint_slots{};
   std::array<ActorTextureScroll, kActorTextureScrolls> texture_scroll{};
   std::int16_t scale = 0;
-  // textureRowOffsets[3] and the byte past it (momentumDistance's high
+  // texture_row_offsets[3] and the byte past it (momentum_distance's high
   // byte), which bank 3 writes.
   std::array<std::uint8_t, kActorTextureRowOffsets> texture_row_offsets{};
   std::uint32_t model_data_size = 0;

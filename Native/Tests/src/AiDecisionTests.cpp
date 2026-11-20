@@ -7,8 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
@@ -36,8 +35,8 @@ struct DecisionFixture {
   int saved_mask = VS::Battle::Ai::unusedPlanCounter;
   Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  std::array<Actors_ActorRecord*, 17> saved_records =
-      std::to_array(Actors_actorRecords);
+  std::array<VS::Actors::ActorRecord*, 17> saved_records =
+      VS::Actors::actorRecords;
   std::array<VS::Field::GimmickInstance*, 16> saved_gimmicks =
       VS::Field::gimmickInstances;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
@@ -45,14 +44,15 @@ struct DecisionFixture {
   VS::Battle::Ai::ActorAiState state{};
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 3> stats{};
-  std::array<Actors_ActorRecord, 3> records{};
+  std::array<VS::Actors::ActorRecord, 3> records{};
   VS::Field::GimmickInstance gimmick{};
   VS::Battle::Ai::ActionCandidateRecord candidate{};
   std::array<VS::Battle::Ai::CandidateEntryView, 16> fallback{};
 
   DecisionFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
+    std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
+                nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
     for (std::size_t index = 0; index < actors.size(); ++index) {
@@ -62,7 +62,7 @@ struct DecisionFixture {
       actors[index].next =
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       VS::Battle::actors[id] = &actors[index];
-      Actors_actorRecords[id] = &records[index];
+      VS::Actors::actorRecords[id] = &records[index];
     }
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::fallbackCandidates = fallback.data();
@@ -88,7 +88,8 @@ struct DecisionFixture {
     Battle_actionDefinitions[42] = saved_action;
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
-    std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
+    std::copy(saved_records.begin(), saved_records.end(),
+              VS::Actors::actorRecords.begin());
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
@@ -312,8 +313,8 @@ TEST_CASE("AI execution observes Ashley's exact movement and locomotion bits",
   const auto movement = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   const auto locomotion = GENERATE(0, 1, 2, 3);
   DecisionFixture fixture;
-  fixture.records[0].instance.movementMode = movement;
-  fixture.records[0].instance.locomotionState = locomotion;
+  fixture.records[0].instance.movement_mode = movement;
+  fixture.records[0].instance.locomotion_state = locomotion;
   CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
                                                       &fixture.candidate) ==
         (movement == 0 && locomotion != 1));
@@ -328,9 +329,9 @@ TEST_CASE(
   VS::Field::gimmickInstances[3] = &fixture.gimmick;
   fixture.gimmick.tile_x = fixture.gimmick.tile_z = 10;
   fixture.gimmick.tile_layer = 3;
-  fixture.records[0].instance.currentTileX = 10 + x_offset;
-  fixture.records[0].instance.currentTileZ = 10 + z_offset;
-  fixture.records[0].instance.currentTileLayer = 200;
+  fixture.records[0].instance.current_tile_x = 10 + x_offset;
+  fixture.records[0].instance.current_tile_z = 10 + z_offset;
+  fixture.records[0].instance.current_tile_layer = 200;
   fixture.state.relations[0].classification = 3;
   const bool outside = x_offset * x_offset + z_offset * z_offset >= 3;
   CHECK(VS::Battle::Ai::HasLiveNearbyEnemy(&fixture.state, 3) == !outside);
@@ -346,8 +347,8 @@ TEST_CASE(
   VS::Field::gimmickInstances[3] = &fixture.gimmick;
   fixture.gimmick.tile_x = fixture.gimmick.tile_z =
       std::bit_cast<char>(uint8_t{255});
-  fixture.records[0].instance.currentTileX =
-      fixture.records[0].instance.currentTileZ = 255;
+  fixture.records[0].instance.current_tile_x =
+      fixture.records[0].instance.current_tile_z = 255;
   fixture.state.relations[0].classification = relation;
   CHECK(VS::Battle::Ai::HasLiveNearbyEnemy(&fixture.state, 3) ==
         (relation >= 3));

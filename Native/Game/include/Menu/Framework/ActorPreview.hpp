@@ -18,7 +18,7 @@
 // asset queue and the actor model, animation and appearance systems through
 // an ActorPreviewHost (ActorPreviewLive.hpp binds it).
 namespace VS::Menu::Framework {
-// The actor table slots (Actors_actorRecords) and weapon model slots
+// The actor table slots (VS::Actors::actorRecords) and weapon model slots
 // (VS::Actors::weaponModels) the preview uses: each actor slot owns two weapon
 // models, the preview's are slots 2 and 3.
 inline constexpr int kAshleyActorSlot = 0;
@@ -30,7 +30,7 @@ inline constexpr int kWeaponModelsPerActor = 2;
 inline constexpr int kPreviewWeaponModelSlot = 2;
 static_assert(kPreviewWeaponModelSlot ==
               kPreviewActorSlot * kWeaponModelsPerActor);
-// The bone matrices of an actor record (Actors_ActorRecord.boneMatrices).
+// The bone matrices of an actor record (VS::Actors::ActorRecord.bone_matrices).
 inline constexpr int kActorBoneMatrices = 42;
 
 // The heap blocks the clone allocates: a record for the clone and its
@@ -46,11 +46,11 @@ enum class PreviewAllocation : std::uint8_t {
 enum class PreviewDrawResult : std::int8_t {
   kDrawn = 0,
   kNotDrawn = -1,
-  // The model was culled (instance.isPreviewModel): no weapons drawn.
+  // The model was culled (instance.is_preview_model): no weapons drawn.
   kCulled = -2,
 };
 
-// The actor record fields the preview reads (Actors_ActorRecord).
+// The actor record fields the preview reads (VS::Actors::ActorRecord).
 struct PreviewActor {
   std::uint16_t model_id = 0;
   // instance.variant and instance.slot: the actor's colour variant and the

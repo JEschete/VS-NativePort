@@ -4,9 +4,9 @@
 #include "Legacy/Psx.h"
 
 // Binds the actor preview (ActorPreview.hpp) to the actor and weapon records
-// (Actors_actorRecords, VS::Actors::weaponModels), the game heap, the battle
-// asset queue, the actor model, animation and appearance systems and the scene
-// ordering table, in the shapes the copied menus call. A slot outside its
+// (VS::Actors::actorRecords, VS::Actors::weaponModels), the game heap, the
+// battle asset queue, the actor model, animation and appearance systems and the
+// scene ordering table, in the shapes the copied menus call. A slot outside its
 // table, a missing record, a bone past the record's bone matrices and a null
 // camera matrix are refused and reported.
 namespace VS::Menu::Framework {

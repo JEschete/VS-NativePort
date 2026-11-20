@@ -20,10 +20,9 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -788,7 +787,7 @@ class LiveHost final : public Host {
     }
     return RestrictionInputs{
         .state_flags = VS::Actors::LiveActorStateFlags(0),
-        .weapon_drawn = actor->model->weaponDrawn != 0,
+        .weapon_drawn = actor->model->weapon_drawn != 0,
         .mp = actor->stats->currentMp,
         .hp = actor->stats->currentHp,
         .statuses = static_cast<std::uint32_t>(actor->stats->statuses)};
@@ -1106,13 +1105,14 @@ class LiveHost final : public Host {
   }
 
   std::optional<AshleyMetrics> Ashley() override {
-    const Actors_ActorRecord* const record = Actors_actorRecords[kAshleyRecord];
+    const VS::Actors::ActorRecord* const record =
+        VS::Actors::actorRecords[kAshleyRecord];
     if (record == nullptr) {
       Refuse("Ashley preview without Ashley's record");
       return std::nullopt;
     }
-    return AshleyMetrics{.camera_distance = record->menuCameraDistance,
-                         .collision_height = record->collisionHeight};
+    return AshleyMetrics{.camera_distance = record->menu_camera_distance,
+                         .collision_height = record->collision_height};
   }
 
   void BeginAshleyPreview() override {

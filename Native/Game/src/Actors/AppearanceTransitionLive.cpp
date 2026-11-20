@@ -13,11 +13,11 @@
 #include <span>
 
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
@@ -123,34 +123,35 @@ int TransitionSpeed() { return VS::State::tickSpeed / 2; }
 
 class LiveActorAppearance final : public ActorAppearance {
  public:
-  explicit LiveActorAppearance(Actors_ActorRecord& actor) : actor_(actor) {}
+  explicit LiveActorAppearance(VS::Actors::ActorRecord& actor)
+      : actor_(actor) {}
 
   [[nodiscard]] int TransitionState() const override {
-    return actor_.instance.actionAnimationState;
+    return actor_.instance.action_animation_state;
   }
 
   [[nodiscard]] AppearanceTransition LoadTransition() const override {
-    const CVECTOR& color = actor_.instance.baseColor;
-    return {.state = actor_.instance.actionAnimationState,
+    const CVECTOR& color = actor_.instance.base_color;
+    return {.state = actor_.instance.action_animation_state,
             .speed = TransitionSpeed(),
             .colors = ColorsFrom({color.r, color.g, color.b, color.cd},
-                                 actor_.fadeRed, actor_.fadeGreen,
+                                 actor_.fade_red, actor_.fade_green,
                                  actor_.instance.tint)};
   }
 
   void StoreTransition(const AppearanceTransition& transition) override {
     ColorBytes color{};
-    ColorsTo(transition.colors, color, actor_.fadeRed);
-    CVECTOR& base = actor_.instance.baseColor;
+    ColorsTo(transition.colors, color, actor_.fade_red);
+    CVECTOR& base = actor_.instance.base_color;
     base.r = color[0];
     base.g = color[1];
     base.b = color[2];
     base.cd = color[kDelayByte];
-    actor_.instance.actionAnimationState = StateBits(transition.state);
+    actor_.instance.action_animation_state = StateBits(transition.state);
   }
 
   bool ApplyPalettes(PaletteTransition mode, int speed) override {
-    const std::span<u_short> palette(actor_.basePalette);
+    const std::span<u_short> palette(actor_.base_palette);
     const std::size_t count = Count();
     const std::size_t skip = Skip();
     bool changed = ApplyTransition(
@@ -168,7 +169,7 @@ class LiveActorAppearance final : public ActorAppearance {
 
   void UploadPalettes(int state) override {
     const int row = actor_.instance.slot + kActorClutRowBase;
-    UploadClut(std::span<const u_short>(actor_.basePalette)
+    UploadClut(std::span<const u_short>(actor_.base_palette)
                    .subspan(kActorPaletteColors, Count()),
                row, 0);
     const Equipment equipment = EquipmentFor(actor_.instance.slot);
@@ -194,11 +195,11 @@ class LiveActorAppearance final : public ActorAppearance {
   // The carried gimmick drops at the actor's position between its carry
   // bones, facing with the actor.
   void ReleaseCarriedGimmick() override {
-    if (!actor_.actionPoseActive) {
+    if (!actor_.action_pose_active) {
       return;
     }
     VS::Field::GimmickInstance* object =
-        VS::Field::gimmickInstances[actor_.supportGimmick];
+        VS::Field::gimmickInstances[actor_.support_gimmick];
     Require(object != nullptr, "carrying actor has no carried gimmick");
     SVECTOR first;
     SVECTOR second;
@@ -214,12 +215,12 @@ class LiveActorAppearance final : public ActorAppearance {
     object->rotation_y = static_cast<u_short>(
         (object->rotation_y + static_cast<u_short>(actor_.instance.facing)) &
         kFacingMask);
-    actor_.actionPoseActive = 0;
-    Actors_pushedGimmickIndex = actor_.supportGimmick;
+    actor_.action_pose_active = 0;
+    VS::Actors::pushedGimmickIndex = actor_.support_gimmick;
   }
 
   [[nodiscard]] int MovementMode() const override {
-    return actor_.instance.movementMode;
+    return actor_.instance.movement_mode;
   }
   [[nodiscard]] bool IsPlayer() const override {
     return actor_.instance.slot == 0;
@@ -227,34 +228,35 @@ class LiveActorAppearance final : public ActorAppearance {
 
   void SettleDeathMotion() override {
     const int diagonal = VS::Core::Math::Sine(kCollisionDiagonalAngle) *
-                         actor_.collisionRadius / kFixedOne;
+                         actor_.collision_radius / kFixedOne;
     VS::Field::LiveSampleActorCollisionPerimeter(&actor_, diagonal);
     VS::Field::LiveApplyActorWallRepulsion(&actor_,
-                                           &actor_.instance.rootMotion);
-    actor_.instance.rootMotion.vx /= 2;
-    actor_.instance.rootMotion.vz /= 2;
+                                           &actor_.instance.root_motion);
+    actor_.instance.root_motion.vx /= 2;
+    actor_.instance.root_motion.vz /= 2;
     UpdateLiveActorJumpAndFall(actor_.instance.slot, &actor_);
   }
 
   void PlayFallingDeathAnimation() override {
     if (FindLiveAnimationHeader(actor_, kDeathAnimationProbe).status ==
         AnimationHeaderStatus::kFound) {
-      actor_.animationLocked = 0;
+      actor_.animation_locked = 0;
       PlayLiveActorAnimation(actor_.instance.slot, kFallingDeathAnimation, 0,
                              kDeathBlendFrames);
-      actor_.animationLocked = 1;
+      actor_.animation_locked = 1;
     }
   }
 
  private:
   [[nodiscard]] std::size_t Count() const {
-    return actor_.textureHeaderBit ? kActorPaletteColors : kSmallPaletteColors;
+    return actor_.texture_header_bit ? kActorPaletteColors
+                                     : kSmallPaletteColors;
   }
   [[nodiscard]] std::size_t Skip() const {
-    return actor_.textureHeaderBit ? 1 : 0;
+    return actor_.texture_header_bit ? 1 : 0;
   }
 
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
 };
 
 class LiveGimmickAppearance final : public AppearanceSubject {
@@ -279,18 +281,18 @@ class LiveGimmickAppearance final : public AppearanceSubject {
 }  // namespace
 
 // func_800AB788 (BATTLE.PRG 40564.c:1651) for an actor's selected palette.
-void UpdateLiveActorPalettePulse(Actors_ActorRecord& actor) {
+void UpdateLiveActorPalettePulse(VS::Actors::ActorRecord& actor) {
   const std::size_t count =
-      actor.textureHeaderBit ? kActorPaletteColors : kSmallPaletteColors;
-  PalettePulse pulse{actor.instance.palettePulse.level,
-                     actor.instance.palettePulse.flags};
+      actor.texture_header_bit ? kActorPaletteColors : kSmallPaletteColors;
+  PalettePulse pulse{actor.instance.palette_pulse.level,
+                     actor.instance.palette_pulse.flags};
   const std::span<u_short> destination =
-      std::span<u_short>(actor.currentPalette).first(count);
+      std::span<u_short>(actor.current_palette).first(count);
   (void)UpdatePalettePulse(
       pulse, VS::State::tickSpeed,
-      std::span<const u_short>(actor.basePalette).first(count), destination);
-  actor.instance.palettePulse.level = pulse.level;
-  actor.instance.palettePulse.flags = pulse.flags;
+      std::span<const u_short>(actor.base_palette).first(count), destination);
+  actor.instance.palette_pulse.level = pulse.level;
+  actor.instance.palette_pulse.flags = pulse.flags;
   UploadClut(destination, actor.instance.slot + kPulseActorClutRowBase, 0);
 }
 
@@ -306,9 +308,9 @@ void UpdateLiveGimmickPalettePulse(VS::Field::GimmickInstance& object) {
 }
 
 // func_800AB9A4 (BATTLE.PRG 40564.c:1769). Native actors own both selected
-// palette rows; currentPalette is a separate pulse buffer and is not the
+// palette rows; current_palette is a separate pulse buffer and is not the
 // transition row.
-void UpdateLiveActorAppearanceTransition(Actors_ActorRecord& actor) {
+void UpdateLiveActorAppearanceTransition(VS::Actors::ActorRecord& actor) {
   LiveActorAppearance subject(actor);
   UpdateActorAppearanceTransition(subject);
 }

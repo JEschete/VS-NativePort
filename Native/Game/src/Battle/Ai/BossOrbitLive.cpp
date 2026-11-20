@@ -9,8 +9,7 @@
 #include <optional>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -63,8 +62,8 @@ static_assert(offsetof(Tracking, move_z) == offsetof(AiState, move_z));
 static_assert(offsetof(Tracking, move_y) == offsetof(AiState, move_y));
 
 // The AI state's model is the actor's record.
-Actors_ActorRecord* RecordOf(const AiState& state) {
-  return reinterpret_cast<Actors_ActorRecord*>(state.model);
+VS::Actors::ActorRecord* RecordOf(const AiState& state) {
+  return reinterpret_cast<VS::Actors::ActorRecord*>(state.model);
 }
 
 // The position and stats are only read.
@@ -73,8 +72,8 @@ OrbitingBoss Load(const AiState& state) {
   boss.x = state.position.vx;
   boss.y = state.position.vy;
   boss.z = state.position.vz;
-  if (const Actors_ActorRecord* record = RecordOf(state)) {
-    boss.model_flag = record->previewPose != 0;
+  if (const VS::Actors::ActorRecord* record = RecordOf(state)) {
+    boss.model_flag = record->preview_pose != 0;
   }
   if (const Battle_ActorStats* stats = state.stats) {
     boss.stats = BossStats{.current_hp = stats->currentHp,
@@ -90,9 +89,9 @@ OrbitingBoss Load(const AiState& state) {
 }
 
 void Store(const OrbitingBoss& boss, AiState& state) {
-  if (Actors_ActorRecord* record = RecordOf(state);
+  if (VS::Actors::ActorRecord* record = RecordOf(state);
       record != nullptr && boss.model_flag) {
-    record->previewPose = *boss.model_flag ? 1 : 0;
+    record->preview_pose = *boss.model_flag ? 1 : 0;
   }
   state.movement_target = boss.movement_target;
   state.move_x = boss.move_x;
@@ -165,14 +164,14 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
     return RetreatStep{.distance = entry[0], .height = entry[1]};
   }
   [[nodiscard]] std::optional<BossPlayer> Player() const override {
-    const Actors_ActorRecord* record = Actors_actorRecords[0];
+    const VS::Actors::ActorRecord* record = VS::Actors::actorRecords[0];
     if (record == nullptr) return std::nullopt;
     const auto& instance = record->instance;
-    return BossPlayer{.moving = instance.movementMode != 0,
+    return BossPlayer{.moving = instance.movement_mode != 0,
                       .x = instance.position.vx,
                       .y = instance.position.vy,
                       .z = instance.position.vz,
-                      .collision_height = record->collisionHeight};
+                      .collision_height = record->collision_height};
   }
   [[nodiscard]] std::optional<bool> IsFirstCandidateCooldownReady(
       OrbitingBoss& boss) override {

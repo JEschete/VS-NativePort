@@ -4,6 +4,7 @@
 
 #include <array>
 #include <bit>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
@@ -11,10 +12,10 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Actors {
@@ -26,14 +27,14 @@ void Require(bool valid, const char* message) {
   }
 }
 
-Actors_ActorRecord& Actor(int actor_id) {
+VS::Actors::ActorRecord& Actor(int actor_id) {
   if (actor_id < 0 ||
-      static_cast<unsigned>(actor_id) >= std::size(Actors_actorRecords) ||
-      Actors_actorRecords[actor_id] == nullptr) {
+      static_cast<unsigned>(actor_id) >= std::size(VS::Actors::actorRecords) ||
+      VS::Actors::actorRecords[actor_id] == nullptr) {
     VS::Core::Errorf("actors", "Motion request requires actor %d", actor_id);
     std::abort();
   }
-  return *Actors_actorRecords[actor_id];
+  return *VS::Actors::actorRecords[actor_id];
 }
 
 PackedTile Tile(const int* target) {
@@ -74,7 +75,7 @@ const char* EntryName(JumpEntry entry) {
   return "plain";
 }
 
-void LogJumpRequest(const Actors_ActorRecord& actor, JumpEntry entry,
+void LogJumpRequest(const VS::Actors::ActorRecord& actor, JumpEntry entry,
                     const PackedTile& target, int speed, std::int16_t facing) {
   VS::Core::Debugf(
       "actors.jump",
@@ -83,24 +84,24 @@ void LogJumpRequest(const Actors_ActorRecord& actor, JumpEntry entry,
       actor.instance.slot, EntryName(entry), target.x, target.layer, target.z,
       target.spare, speed, facing, actor.instance.position.vx,
       actor.instance.position.vy, actor.instance.position.vz,
-      actor.instance.movementMode, actor.instance.motionLocked,
-      actor.instance.isJumping, actor.jumpProfile);
+      actor.instance.movement_mode, actor.instance.motion_locked,
+      actor.instance.is_jumping, actor.jump_profile);
 }
 
-void LogJumpResult(const Actors_ActorRecord& actor) {
+void LogJumpResult(const VS::Actors::ActorRecord& actor) {
   VS::Core::Debugf(
       "actors.jump",
       "result actor=%d phase=%d countdown=%d destination=[%d,%d] "
       "destination_mode=%d jump_frames=%d root=[%d,%d,%d] landing_pending=%d",
-      actor.instance.slot, actor.instance.movementMode,
-      actor.instance.jumpCountdown, actor.destinationX, actor.destinationZ,
-      actor.destinationMode, actor.jumpFrames, actor.instance.rootMotion.vx,
-      actor.instance.rootMotion.vy, actor.instance.rootMotion.vz,
-      actor.landingPending);
+      actor.instance.slot, actor.instance.movement_mode,
+      actor.instance.jump_countdown, actor.destination_x, actor.destination_z,
+      actor.destination_mode, actor.jump_frames, actor.instance.root_motion.vx,
+      actor.instance.root_motion.vy, actor.instance.root_motion.vz,
+      actor.landing_pending);
 }
 
-void SetMode(Actors_MovementRequest& request, MotionMode mode) {
-  request.mode = static_cast<u_char>(mode);
+void SetMode(VS::Actors::MovementRequest& request, MotionMode mode) {
+  request.mode = static_cast<std::uint8_t>(mode);
   request.reserved1 = 0;
   request.reserved2 = 0;
   request.reserved3 = 0;
@@ -112,17 +113,17 @@ class LiveMotionActor final : public MotionActor {
       : id_(actor_id), actor_(Actor(actor_id)) {}
 
   [[nodiscard]] bool Jumping() const override {
-    return actor_.instance.isJumping != 0;
+    return actor_.instance.is_jumping != 0;
   }
   [[nodiscard]] bool MotionLocked() const override {
-    return actor_.instance.motionLocked != 0;
+    return actor_.instance.motion_locked != 0;
   }
   void SetJumpFlags(bool motion_locked, bool jumping) override {
-    actor_.instance.motionLocked = motion_locked ? 1 : 0;
-    actor_.instance.isJumping = jumping ? 1 : 0;
+    actor_.instance.motion_locked = motion_locked ? 1 : 0;
+    actor_.instance.is_jumping = jumping ? 1 : 0;
   }
   void SetJumpProfile(int profile) override {
-    actor_.jumpProfile = static_cast<u_char>(profile);
+    actor_.jump_profile = static_cast<std::uint8_t>(profile);
   }
   void PlayAnimation(int animation, int blend_frames) override {
     PlayLiveActorAnimation(id_, animation, 0, blend_frames);
@@ -135,39 +136,39 @@ class LiveMotionActor final : public MotionActor {
   }
 
   [[nodiscard]] bool Reacting() const override {
-    return actor_.instance.reactionState != 0;
+    return actor_.instance.reaction_state != 0;
   }
   void StartTeleport(const MotionVector& route) override {
-    actor_.instance.turnFrames = 0;
-    actor_.routeTarget = Native(route);
-    actor_.instance.reactionState = 1;
-    actor_.instance.poseState = 0;
-    actor_.instance.wasDrawn = 0;
+    actor_.instance.turn_frames = 0;
+    actor_.route_target = Native(route);
+    actor_.instance.reaction_state = 1;
+    actor_.instance.pose_state = 0;
+    actor_.instance.was_drawn = 0;
   }
   [[nodiscard]] MotionActor* TeleportCompanion() override {
-    if (actor_.companionSlot < 2) return nullptr;
-    companion_ = std::make_unique<LiveMotionActor>(actor_.companionSlot);
+    if (actor_.companion_slot < 2) return nullptr;
+    companion_ = std::make_unique<LiveMotionActor>(actor_.companion_slot);
     return companion_.get();
   }
   void StartTravel(const MotionVector& route, TravelPose pose) override {
-    actor_.routeTarget = Native(route);
-    actor_.instance.poseState = static_cast<u_char>(pose);
+    actor_.route_target = Native(route);
+    actor_.instance.pose_state = static_cast<std::uint8_t>(pose);
   }
 
   void QueueGroundOffset(const MotionVector& step) override {
-    actor_.turnState.step = Native(step);
-    SetMode(actor_.turnState, MotionMode::kGround);
+    actor_.turn_state.step = Native(step);
+    SetMode(actor_.turn_state, MotionMode::kGround);
   }
   void QueueMovement(const QueuedMovement& movement) override {
-    actor_.turnState.distance = movement.distance;
-    actor_.turnState.facing = movement.facing;
-    actor_.turnState.step = Native(movement.step);
-    actor_.instance.motionLocked = 1;
-    SetMode(actor_.turnState, movement.mode);
+    actor_.turn_state.distance = movement.distance;
+    actor_.turn_state.facing = movement.facing;
+    actor_.turn_state.step = Native(movement.step);
+    actor_.instance.motion_locked = 1;
+    SetMode(actor_.turn_state, movement.mode);
   }
 
   [[nodiscard]] unsigned CollisionRadius() const override {
-    return actor_.collisionRadius;
+    return actor_.collision_radius;
   }
   void TurnAtRate(std::int16_t facing, int rate) override {
     TurnLiveActorToAtRate(id_, facing, rate);
@@ -181,35 +182,35 @@ class LiveMotionActor final : public MotionActor {
 
  private:
   int id_;
-  Actors_ActorRecord& actor_;
+  VS::Actors::ActorRecord& actor_;
   std::unique_ptr<LiveMotionActor> companion_;
 };
 }  // namespace
 
 // F00989 func_800ACF54, BATTLE/BATTLE.PRG/40564.c:2548-2560.
-void SaveLiveActorGroundedTransform(Actors_ActorRecord* actor) {
+void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor) {
   Require(actor != nullptr, "Grounded transform requires an actor");
   auto& instance = actor->instance;
   const auto history = SaveActorGroundedTransform(
-      {.tile = {instance.currentTileX, instance.currentTileLayer,
-                instance.currentTileZ, instance.reserved5F},
+      {.tile = {instance.current_tile_x, instance.current_tile_layer,
+                instance.current_tile_z, instance.reserved5f},
        .position = {instance.position.vx, instance.position.vy,
                     instance.position.vz},
        .facing = instance.facing,
-       .support_layer = instance.supportLayer});
-  instance.previousTileX = history.previous_tile.x;
-  instance.previousTileLayer = history.previous_tile.layer;
-  instance.previousTileZ = history.previous_tile.z;
+       .support_layer = instance.support_layer});
+  instance.previous_tile_x = history.previous_tile.x;
+  instance.previous_tile_layer = history.previous_tile.layer;
+  instance.previous_tile_z = history.previous_tile.z;
   instance.reserved63 = history.previous_tile.spare;
   // Original 0x4C/0x50 history packs X/Y then Z; 0x52 stores facing.
-  instance.supportOffset = std::bit_cast<std::int32_t>(
+  instance.support_offset = std::bit_cast<std::int32_t>(
       std::array{history.position[0], history.position[1]});
   instance.reserved50 = history.position[2];
   if (history.saved_placement) {
-    actor->savedPlacement =
+    actor->saved_placement =
         std::bit_cast<std::int32_t>(*history.saved_placement);
   }
-  instance.previousFacing = history.previous_facing;
+  instance.previous_facing = history.previous_facing;
 }
 
 // decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340)

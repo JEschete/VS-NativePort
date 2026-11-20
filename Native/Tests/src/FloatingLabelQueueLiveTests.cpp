@@ -225,7 +225,7 @@ TEST_CASE("Full actor projection early returns do not publish or undo reserve",
   f::Producers inputs;
   state.Populate();
   VS::Battle::floatingLabelCount = 32;
-  inputs.actor.instance.reactionState = 1;
+  inputs.actor.instance.reaction_state = 1;
   const auto before = f::Snapshot(state);
   CHECK(b::LiveQueueActorStatusLabel(1, 251, 3, 128) == 0);
   const auto after = f::Snapshot(state);

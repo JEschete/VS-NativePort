@@ -9,9 +9,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
@@ -44,8 +44,7 @@ namespace {
 namespace b = VS::Battle;
 namespace render = VS::Render;
 struct LiveFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved_records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   render::PaletteAnimation saved_palette = render::LivePaletteAnimation();
   VS::Field::RoomWeatherState saved_weather =
       VS::Field::LoadLiveRoomWeatherState();
@@ -68,11 +67,11 @@ struct LiveFixture {
   Battle_ActionState action{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Actors_ModelInstance model{};
+  VS::Actors::ModelInstance model{};
 
   LiveFixture() {
-    std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
-              nullptr);
+    std::fill(std::begin(VS::Actors::actorRecords),
+              std::end(VS::Actors::actorRecords), nullptr);
     render::InitializeLiveClutAnimation();
     VS::Field::weatherAmbientSoundId = -1;
     VS::Field::LiveRoomEffectState().sound_id = -1;
@@ -95,7 +94,8 @@ struct LiveFixture {
     VS::State::SetLiveScriptFlag(0xB6, 0);
   }
   ~LiveFixture() {
-    std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
+    std::copy(saved_records.begin(), saved_records.end(),
+              VS::Actors::actorRecords.begin());
     const_cast<render::PaletteAnimation&>(render::LivePaletteAnimation()) =
         saved_palette;
     VS::Field::StoreLiveRoomWeatherState(saved_weather);

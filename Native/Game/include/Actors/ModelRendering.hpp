@@ -197,7 +197,7 @@ struct RoomActorState {
   bool has_bones = false;
   bool skipped = false;
   bool visible = false;
-  // The last projection failed (isPreviewModel).
+  // The last projection failed (is_preview_model).
   bool culled = false;
   bool frozen = false;
   bool attached = false;

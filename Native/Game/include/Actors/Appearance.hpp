@@ -18,7 +18,7 @@
 // fade color and tint and the appearance transitions. Each works on the typed
 // state below; AppearanceLive.hpp binds them to the actor and gimmick tables.
 namespace VS::Actors {
-// Actor records the battle tables hold (Actors_actorRecords).
+// Actor records the battle tables hold (VS::Actors::actorRecords).
 inline constexpr int kActorTableSize = 17;
 // Weapon models each actor slot owns (VS::Actors::weaponModels).
 inline constexpr std::size_t kWeaponsPerActor = 2;
@@ -39,8 +39,8 @@ enum class AppearanceStatus : std::int8_t {
   kBadPulseSlot = -2,
 };
 
-// The actor's root spin (paletteFadeActive, paletteFadeReverse and
-// paletteFadeState): while active the model drawer turns the root by half the
+// The actor's root spin (palette_fade_active, palette_fade_reverse and
+// palette_fade_state): while active the model drawer turns the root by half the
 // phase.
 struct PaletteFade {
   bool active = false;

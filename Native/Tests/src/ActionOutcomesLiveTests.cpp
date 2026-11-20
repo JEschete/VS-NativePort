@@ -11,8 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
@@ -27,8 +26,7 @@ namespace b = VS::Battle;
 struct LiveReset {
   Battle_ActionState* state = VS::Battle::actionState;
   decltype(VS::Battle::actors) actors = VS::Battle::actors;
-  decltype(std::to_array(Actors_actorRecords)) records =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) records = VS::Actors::actorRecords;
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(VS::State::learnedActionFlags)) learned =
@@ -36,7 +34,7 @@ struct LiveReset {
   ~LiveReset() {
     VS::Battle::actionState = state;
     std::ranges::copy(actors, std::begin(VS::Battle::actors));
-    std::ranges::copy(records, std::begin(Actors_actorRecords));
+    std::ranges::copy(records, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(definitions, std::begin(Battle_actionDefinitions));
     std::ranges::copy(learned, std::begin(VS::State::learnedActionFlags));
   }
@@ -85,10 +83,10 @@ TEST_CASE("F00059 live full native target count uses real placement services",
           "[action-outcomes][F00059][actors-state]") {
   const LiveReset reset;
   auto state = std::make_unique<Battle_ActionState>();
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   actor.instance.position = {-32768, 32767, -9, 77};
   actor.instance.facing = 0x340;
-  Actors_actorRecords[15] = &actor;
+  VS::Actors::actorRecords[15] = &actor;
   VS::Battle::actionState = state.get();
   state->queueIndex = 0xFFFFFFFF;
   auto& action = state->queue[3];

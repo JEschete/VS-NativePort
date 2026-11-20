@@ -9,8 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
@@ -32,8 +31,7 @@ struct Model {
   std::array<VS::Actors::ShpBone, 2> bones{};
 };
 struct LiveFixture {
-  decltype(std::to_array(Actors_actorRecords)) saved_actors =
-      std::to_array(Actors_actorRecords);
+  decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
   Battle_ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
@@ -45,28 +43,28 @@ struct LiveFixture {
   int saved_projection = VS::Render::projectionDistance;
   MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   Model model{};
-  Actors_ActorRecord actor{};
+  VS::Actors::ActorRecord actor{};
   Battle_ActionState state{};
   LiveFixture() {
-    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(VS::Actors::actorRecords, nullptr);
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
     model.bones[1].limb_ids = 0x02;
     actor.instance.model = &model.header;
-    actor.instance.boneCount = 2;
-    actor.modelDataSize = sizeof(model);
+    actor.instance.bone_count = 2;
+    actor.model_data_size = sizeof(model);
     constexpr std::int16_t kOne = 4096;
     actor.scale = kOne;
-    for (auto& matrix : actor.boneMatrices) {
+    for (auto& matrix : actor.bone_matrices) {
       matrix.m[0][0] = kOne;
       matrix.m[1][1] = kOne;
       matrix.m[2][2] = kOne;
     }
-    actor.boneMatrices[0].t[0] = -1;
-    actor.boneMatrices[0].t[1] = -5;
-    actor.boneMatrices[0].t[2] = 9;
-    actor.boneMatrices[1].t[0] = 3;
-    actor.boneMatrices[1].t[1] = 4;
-    Actors_actorRecords[0] = &actor;
+    actor.bone_matrices[0].t[0] = -1;
+    actor.bone_matrices[0].t[1] = -5;
+    actor.bone_matrices[0].t[2] = 9;
+    actor.bone_matrices[1].t[0] = 3;
+    actor.bone_matrices[1].t[1] = 4;
+    VS::Actors::actorRecords[0] = &actor;
     VS::Actors::boneMatrixScratch = {};
     VS::Actors::boneMatrixScratch.m[0][0] = kOne;
     VS::Actors::boneMatrixScratch.m[1][1] = kOne;
@@ -83,7 +81,7 @@ struct LiveFixture {
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
   ~LiveFixture() {
-    std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
+    std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     VS::Battle::actionState = saved_state;
     VS::Field::sphericalCamera = saved_camera;
     VS::Field::cameraTransition = saved_transition;
@@ -149,9 +147,9 @@ TEST_CASE(
   queue.targets[0].target.target_actor = 0;
   queue.targets[0].target.target_limb = -1;
   CHECK(b::LiveActionTargetDistance() == 0);
-  fixture->actor.boneMatrices[0].t[0] = -2426;
-  fixture->actor.boneMatrices[0].t[1] = 7487;
-  fixture->actor.boneMatrices[0].t[2] = 1009;
+  fixture->actor.bone_matrices[0].t[0] = -2426;
+  fixture->actor.bone_matrices[0].t[1] = 7487;
+  fixture->actor.bone_matrices[0].t[2] = 1009;
   queue.targets[0].targets_position = 1;
   queue.targets[0].target = std::bit_cast<decltype(queue.targets[0].target)>(
       Point{-892, 4966, -6156, 4966});

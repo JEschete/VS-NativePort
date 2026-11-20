@@ -7,7 +7,9 @@
 #include "Legacy/Psx.h"
 #include "Render/ModelGeometry.hpp"
 
-struct Actors_ActorRecord;
+namespace VS::Actors {
+struct ActorRecord;
+}
 namespace VS::Actors {
 struct WeaponModel;
 }
@@ -33,31 +35,33 @@ void ForgetLiveModelExtent(const void* model);
 
 // Whether the actor's recorded model data holds every section and polygon
 // its counts claim.
-[[nodiscard]] bool ValidateLiveActorModel(const Actors_ActorRecord& geometry);
+[[nodiscard]] bool ValidateLiveActorModel(
+    const VS::Actors::ActorRecord& geometry);
 // MoveModelVertex over the actor's model and its recorded size; false when
 // the actor has no model or the vertex lies outside its vertex section.
-[[nodiscard]] bool MoveLiveActorModelVertex(Actors_ActorRecord& actor,
+[[nodiscard]] bool MoveLiveActorModelVertex(VS::Actors::ActorRecord& actor,
                                             std::size_t vertex,
                                             const ModelVertex& delta);
 // Projects the actor model's vertices through `matrices` into the render
 // context; false when nothing was projected or every depth was zero.
-[[nodiscard]] bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,
-                                         std::span<const MATRIX> matrices);
+[[nodiscard]] bool ProjectLiveActorModel(
+    const VS::Actors::ActorRecord& geometry, std::span<const MATRIX> matrices);
 // The geometry actor's model and counts through func_800B3CF0 (flat) or
 // func_800B4594 (Gouraud).
-void DrawLiveActorGouraudPolygons(const Actors_ActorRecord& geometry,
+void DrawLiveActorGouraudPolygons(const VS::Actors::ActorRecord& geometry,
                                   const CVECTOR& tint);
-void DrawLiveActorFlatPolygons(const Actors_ActorRecord& geometry,
+void DrawLiveActorFlatPolygons(const VS::Actors::ActorRecord& geometry,
                                const CVECTOR& tint);
 // The geometry actor's model and counts through the override drawers,
 // func_800B516C (flat) or func_800B5C30 (Gouraud), with the pulsed palettes
 // and appearance material of `overrides`, which the original reads from the
 // drawing actor.
-void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
+void DrawLiveActorPolygonsWithOverrides(const VS::Actors::ActorRecord& geometry,
                                         bool colored, const CVECTOR& tint,
                                         const ModelOverrides& overrides);
 // Writes the shadow anchor to the actor's sound position.
-void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
+void DrawLiveActorGroundShadow(VS::Actors::ActorRecord& actor,
+                               const MATRIX& camera,
                                const SVECTOR& root_offset);
 
 [[nodiscard]] bool ProjectLiveGimmickModel(

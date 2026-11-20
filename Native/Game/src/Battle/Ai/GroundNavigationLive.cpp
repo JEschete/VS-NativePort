@@ -12,8 +12,8 @@
 #include <optional>
 #include <utility>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/Movement.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -286,11 +286,11 @@ int FlightTest(VS::Battle::Ai::MovementPathView* view, int direction) {
       reinterpret_cast<VS::Battle::Ai::ActorAiState*>(view), direction);
 }
 
-const Actors_ActorRecord* Model(int actor_id) {
+const VS::Actors::ActorRecord* Model(int actor_id) {
   if (actor_id < 0 || std::cmp_greater_equal(actor_id, kFrameActorSlots)) {
     return nullptr;
   }
-  return Actors_actorRecords[actor_id];
+  return VS::Actors::actorRecords[actor_id];
 }
 
 // The room's AI frame, its maps and caches.
@@ -349,13 +349,13 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     const auto* ai = Frame().actors[actor_id];
     GroundCollisionActor actor{
         .has_ai_state = ai != nullptr,
-        .model_moving = model->instance.movementMode != 0 ||
-                        model->instance.locomotionState != 0,
+        .model_moving = model->instance.movement_mode != 0 ||
+                        model->instance.locomotion_state != 0,
         .model_x = model->instance.position.vx,
         .model_y = model->instance.position.vy,
         .model_z = model->instance.position.vz,
-        .model_radius = model->occupancyRadius,
-        .model_height = model->occupancyHeight};
+        .model_radius = model->occupancy_radius,
+        .model_height = model->occupancy_height};
     if (ai != nullptr) {
       actor.planned_x = ai->next_position.vx;
       actor.planned_y = ai->next_position.vy;

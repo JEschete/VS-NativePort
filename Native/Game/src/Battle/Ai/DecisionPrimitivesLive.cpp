@@ -13,8 +13,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -86,9 +85,10 @@ class LiveActorProximity {
       const auto id = static_cast<std::size_t>(actor->id);
       ActorProximity& entry = actors_.at(count_++);
       entry.classification = state.relations[id].classification;
-      if (const Actors_ActorRecord* record = Actors_actorRecords[id]) {
-        entry.tile = GridTile{.x = record->instance.currentTileX,
-                              .z = record->instance.currentTileZ};
+      if (const VS::Actors::ActorRecord* record =
+              VS::Actors::actorRecords[id]) {
+        entry.tile = GridTile{.x = record->instance.current_tile_x,
+                              .z = record->instance.current_tile_z};
       }
     }
   }
@@ -144,10 +144,10 @@ class LiveExecutionHost final : public ActionExecutionHost {
     return HostileNear(state_, target);
   }
   [[nodiscard]] std::optional<bool> AshleyMoving() const override {
-    const Actors_ActorRecord* ashley = Actors_actorRecords[0];
+    const VS::Actors::ActorRecord* ashley = VS::Actors::actorRecords[0];
     if (ashley == nullptr) return std::nullopt;
-    return ashley->instance.movementMode != 0 ||
-           ashley->instance.locomotionState == kSteppingLocomotion;
+    return ashley->instance.movement_mode != 0 ||
+           ashley->instance.locomotion_state == kSteppingLocomotion;
   }
 
  private:

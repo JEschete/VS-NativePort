@@ -12,9 +12,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -167,20 +166,20 @@ class LiveCandidateMovementWorld final
   }
   [[nodiscard]] std::optional<PursuitTarget> TargetModel(
       int target) const override {
-    if (!ValidTarget(target) || Actors_actorRecords[target] == nullptr) {
+    if (!ValidTarget(target) || VS::Actors::actorRecords[target] == nullptr) {
       return std::nullopt;
     }
-    const auto& model = Actors_actorRecords[target]->instance;
+    const auto& model = VS::Actors::actorRecords[target]->instance;
     constexpr int kLayerShift = 8;
     constexpr int kZShift = 16;
     constexpr int kStatusShift = 24;
     return PursuitTarget{
         .position = Core::Math::PositionOf(model.position),
-        .tile = static_cast<std::uint32_t>(model.currentTileX) |
-                (static_cast<std::uint32_t>(model.currentTileLayer)
+        .tile = static_cast<std::uint32_t>(model.current_tile_x) |
+                (static_cast<std::uint32_t>(model.current_tile_layer)
                  << kLayerShift) |
-                (static_cast<std::uint32_t>(model.currentTileZ) << kZShift) |
-                (static_cast<std::uint32_t>(model.reserved5F) << kStatusShift)};
+                (static_cast<std::uint32_t>(model.current_tile_z) << kZShift) |
+                (static_cast<std::uint32_t>(model.reserved5f) << kStatusShift)};
   }
   [[nodiscard]] std::optional<std::int16_t> TargetHeight(
       int target) const override {

@@ -6,12 +6,12 @@
 #include <cstdlib>
 #include <iterator>
 
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/Movement.h"
+#include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.hpp"
@@ -59,7 +59,7 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
             "Script weapon-mode table index is out of bounds");
     Require(VS::Battle::actors[kAshley] != nullptr &&
                 VS::Battle::characterState != nullptr &&
-                Actors_actorRecords[kAshley] != nullptr,
+                VS::Actors::actorRecords[kAshley] != nullptr,
             "Script weapon mode requires Ashley's battle and model state");
     VS::Battle::LiveSetActorBattleMode(kAshley, event::weaponDrawStates[mode]);
   }
@@ -72,12 +72,12 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
     VS::Actors::PlayLiveActorWeaponDrawSound(kAshley, sheathe);
   }
   [[nodiscard]] bool AnimationHeld() const override {
-    Require(Actors_actorRecords[kAshley] != nullptr,
+    Require(VS::Actors::actorRecords[kAshley] != nullptr,
             "Pending script weapon mode requires Ashley's model state");
     return (VS::Actors::LiveActorStateFlags(kAshley) & kAnimationHeld) != 0;
   }
   void SnapVisibility(bool drawn) override {
-    Require(Actors_actorRecords[kAshley] != nullptr,
+    Require(VS::Actors::actorRecords[kAshley] != nullptr,
             "Script weapon visibility requires Ashley's model state");
     auto flags = VS::Actors::LiveActorStateFlags(kAshley) & kLowWord;
     flags = drawn ? flags | kWeaponVisibility : flags & ~kWeaponVisibility;

@@ -15,10 +15,9 @@
 #include <vector>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorRecord.h"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
-#include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
@@ -938,30 +937,32 @@ nlohmann::json InspectThreads() {
 
 nlohmann::json InspectModels() {
   auto models = nlohmann::json::array();
-  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
-    const auto* actor = Actors_actorRecords[slot];
+  for (std::size_t slot = 0; slot < std::size(VS::Actors::actorRecords);
+       ++slot) {
+    const auto* actor = VS::Actors::actorRecords[slot];
     if (actor == nullptr) continue;
     models.push_back(
         {{"slot", slot},
-         {"model", actor->modelId},
-         {"bones", actor->instance.boneCount},
+         {"model", actor->model_id},
+         {"bones", actor->instance.bone_count},
          {"position",
           {actor->instance.position.vx, actor->instance.position.vy,
            actor->instance.position.vz}},
          {"facing", actor->instance.facing},
-         {"animation", actor->animationId},
-         {"animation_set", actor->animationSet},
+         {"animation", actor->animation_id},
+         {"animation_set", actor->animation_set},
          {"frame", actor->pose.frame},
-         {"length", actor->animationLength},
-         {"queued_animation", actor->queuedAnimation},
+         {"length", actor->animation_length},
+         {"queued_animation", actor->queued_animation},
          {"holding_last_frame", actor->pose.holding_last_frame != 0},
-         {"animation_locked", actor->animationLocked != 0},
-         {"attached", actor->instance.isAttached != 0},
+         {"animation_locked", actor->animation_locked != 0},
+         {"attached", actor->instance.is_attached != 0},
          {"attachment_parent",
-          static_cast<unsigned>(actor->instance.attachParent)},
-         {"attachment_bone", static_cast<unsigned>(actor->instance.attachBone)},
+          static_cast<unsigned>(actor->instance.attach_parent)},
+         {"attachment_bone",
+          static_cast<unsigned>(actor->instance.attach_bone)},
          {"appearance",
-          static_cast<unsigned>(actor->instance.actionAnimationState)}});
+          static_cast<unsigned>(actor->instance.action_animation_state)}});
   }
   return models;
 }
@@ -1035,7 +1036,7 @@ EncounterDoorRequest CheckDoorRequest(int index) {
   if (!gameplay_inspection_ready || !room_prepared ||
       VS::Field::controlMode != 1 || VS::Event::playbackPhase != 0 ||
       VS::Field::LiveScreenTransitionPhase() != 0 ||
-      Actors_actorRecords[0] == nullptr) {
+      VS::Actors::actorRecords[0] == nullptr) {
     return {EncounterDoorRequestStatus::kBusy,
             "source event/transition still active"};
   }
