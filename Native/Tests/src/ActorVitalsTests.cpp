@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorVitals.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Damage.hpp"
@@ -407,7 +407,7 @@ TEST_CASE(
       reinterpret_cast<int (*)()>(VS::Content::ResolveModuleAddress(
           symbols, "BATTLE/BATTLE.PRG", 0x80088B6C));
   REQUIRE(room == battle::UpdateLiveRoomActorVitals);
-  std::array<Battle_Actor*, 16> saved{};
+  std::array<VS::Battle::Actor*, 16> saved{};
   for (std::size_t slot = 0; slot < saved.size(); ++slot) {
     saved.at(slot) = VS::Battle::actors[slot];
     VS::Battle::actors[slot] = nullptr;

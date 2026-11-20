@@ -41,7 +41,7 @@ inline constexpr std::uint8_t kDistortionQuadCode = 0x3C;
 inline constexpr std::size_t kAdditiveTrailColors = 8;
 inline constexpr std::size_t kDistortionTrailColors = 7;
 
-// The renderer parameter of a trail (Battle_EffectTrailConfig): actor and
+// The renderer parameter of a trail (decomp: EffectTrailConfig): actor and
 // bone bytes, colour and texture nibbles, and the remaining-life byte.
 struct BoneTrailConfig {
   std::uint8_t actor{};

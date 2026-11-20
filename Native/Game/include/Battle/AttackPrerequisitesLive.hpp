@@ -3,7 +3,9 @@
 
 #include "Battle/AttackPrerequisites.hpp"
 
-struct Battle_ActionDefinition;
+namespace VS::Battle {
+struct ActionDefinition;
+}  // namespace VS::Battle
 
 // Binding from the generated hit resolution caller to the typed attack
 // prerequisites (AttackPrerequisites.hpp), in the original argument order
@@ -13,76 +15,76 @@ struct Battle_ActionDefinition;
 namespace VS::Battle {
 // decomp: _canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10523): 1 when the
 // hit's prerequisite lets it apply, else 0.
-int LiveCheckActionHitPrerequisite(Battle_ActionDefinition* action,
+int LiveCheckActionHitPrerequisite(VS::Battle::ActionDefinition* action,
                                    unsigned char* target_result_bytes,
                                    int hit_number);
 
 // The attackPrerequisiteFunctions slots of the typed rules; each runs
 // its rule on the target actor named by the hit's target result bytes.
-int RejectAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+int RejectAttackPrerequisiteSlot(VS::Battle::ActionDefinition* action,
                                  unsigned char* target_result_bytes);
-int AcceptAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+int AcceptAttackPrerequisiteSlot(VS::Battle::ActionDefinition* action,
                                  unsigned char* target_result_bytes);
-int IsAttackTargetUndeadSlot(Battle_ActionDefinition* action,
+int IsAttackTargetUndeadSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int IsAttackTargetLivingSlot(Battle_ActionDefinition* action,
+int IsAttackTargetLivingSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyStrengthDownSlot(Battle_ActionDefinition* action,
+int CanApplyStrengthDownSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyIntelligenceDownSlot(Battle_ActionDefinition* action,
+int CanApplyIntelligenceDownSlot(VS::Battle::ActionDefinition* action,
                                  unsigned char* target_result_bytes);
-int CanApplyAgilityDownSlot(Battle_ActionDefinition* action,
+int CanApplyAgilityDownSlot(VS::Battle::ActionDefinition* action,
                             unsigned char* target_result_bytes);
-int CanApplyEquipmentDownSlot(Battle_ActionDefinition* action,
+int CanApplyEquipmentDownSlot(VS::Battle::ActionDefinition* action,
                               unsigned char* target_result_bytes);
-int CanApplyHalfMovementSlot(Battle_ActionDefinition* action,
+int CanApplyHalfMovementSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyStrengthUpSlot(Battle_ActionDefinition* action,
+int CanApplyStrengthUpSlot(VS::Battle::ActionDefinition* action,
                            unsigned char* target_result_bytes);
-int CanApplyIntelligenceUpSlot(Battle_ActionDefinition* action,
+int CanApplyIntelligenceUpSlot(VS::Battle::ActionDefinition* action,
                                unsigned char* target_result_bytes);
-int CanApplyAgilityUpSlot(Battle_ActionDefinition* action,
+int CanApplyAgilityUpSlot(VS::Battle::ActionDefinition* action,
                           unsigned char* target_result_bytes);
-int CanApplyEquipmentUpSlot(Battle_ActionDefinition* action,
+int CanApplyEquipmentUpSlot(VS::Battle::ActionDefinition* action,
                             unsigned char* target_result_bytes);
-int CanApplyQuickenSlot(Battle_ActionDefinition* action,
+int CanApplyQuickenSlot(VS::Battle::ActionDefinition* action,
                         unsigned char* target_result_bytes);
-int CanApplySilenceSlot(Battle_ActionDefinition* action,
+int CanApplySilenceSlot(VS::Battle::ActionDefinition* action,
                         unsigned char* target_result_bytes);
-int CanApplyMagicWardSlot(Battle_ActionDefinition* action,
+int CanApplyMagicWardSlot(VS::Battle::ActionDefinition* action,
                           unsigned char* target_result_bytes);
-int CanApplyRegenerationSlot(Battle_ActionDefinition* action,
+int CanApplyRegenerationSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyParalysisSlot(Battle_ActionDefinition* action,
+int CanApplyParalysisSlot(VS::Battle::ActionDefinition* action,
                           unsigned char* target_result_bytes);
-int CanApplyPoisonSlot(Battle_ActionDefinition* action,
+int CanApplyPoisonSlot(VS::Battle::ActionDefinition* action,
                        unsigned char* target_result_bytes);
-int CanApplyNumbnessSlot(Battle_ActionDefinition* action,
+int CanApplyNumbnessSlot(VS::Battle::ActionDefinition* action,
                          unsigned char* target_result_bytes);
-int CanApplyCurseSlot(Battle_ActionDefinition* action,
+int CanApplyCurseSlot(VS::Battle::ActionDefinition* action,
                       unsigned char* target_result_bytes);
-int CanApplyAirAttackUpSlot(Battle_ActionDefinition* action,
+int CanApplyAirAttackUpSlot(VS::Battle::ActionDefinition* action,
                             unsigned char* target_result_bytes);
-int CanApplyFireAttackUpSlot(Battle_ActionDefinition* action,
+int CanApplyFireAttackUpSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyEarthAttackUpSlot(Battle_ActionDefinition* action,
+int CanApplyEarthAttackUpSlot(VS::Battle::ActionDefinition* action,
                               unsigned char* target_result_bytes);
-int CanApplyWaterAttackUpSlot(Battle_ActionDefinition* action,
+int CanApplyWaterAttackUpSlot(VS::Battle::ActionDefinition* action,
                               unsigned char* target_result_bytes);
-int CanApplyAirDefenseUpSlot(Battle_ActionDefinition* action,
+int CanApplyAirDefenseUpSlot(VS::Battle::ActionDefinition* action,
                              unsigned char* target_result_bytes);
-int CanApplyFireDefenseUpSlot(Battle_ActionDefinition* action,
+int CanApplyFireDefenseUpSlot(VS::Battle::ActionDefinition* action,
                               unsigned char* target_result_bytes);
-int CanApplyEarthDefenseUpSlot(Battle_ActionDefinition* action,
+int CanApplyEarthDefenseUpSlot(VS::Battle::ActionDefinition* action,
                                unsigned char* target_result_bytes);
-int CanApplyWaterDefenseUpSlot(Battle_ActionDefinition* action,
+int CanApplyWaterDefenseUpSlot(VS::Battle::ActionDefinition* action,
                                unsigned char* target_result_bytes);
-int CanApplyBanishSlot(Battle_ActionDefinition* action,
+int CanApplyBanishSlot(VS::Battle::ActionDefinition* action,
                        unsigned char* target_result_bytes);
-int CanApplyExorciseSlot(Battle_ActionDefinition* action,
+int CanApplyExorciseSlot(VS::Battle::ActionDefinition* action,
                          unsigned char* target_result_bytes);
-int CanApplyDrainSlot(Battle_ActionDefinition* action,
+int CanApplyDrainSlot(VS::Battle::ActionDefinition* action,
                       unsigned char* target_result_bytes);
-int IgnoreAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+int IgnoreAttackPrerequisiteSlot(VS::Battle::ActionDefinition* action,
                                  unsigned char* target_result_bytes);
 }  // namespace VS::Battle

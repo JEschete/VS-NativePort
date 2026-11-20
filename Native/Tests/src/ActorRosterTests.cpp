@@ -22,7 +22,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
@@ -502,24 +502,24 @@ VS::Actors::RoomActorRecord SavedRecord(std::size_t room, std::size_t slot) {
 // An enemy in actor slot 3 from room spawn 5, standing on tile (7, 3) of
 // layer 10 and facing 0x340.
 struct LiveEnemy {
-  std::unique_ptr<Battle_ActorStats> stats =
-      std::make_unique<Battle_ActorStats>();
+  std::unique_ptr<VS::Battle::ActorStats> stats =
+      std::make_unique<VS::Battle::ActorStats>();
   std::unique_ptr<VS::Actors::ActorRecord> record =
       std::make_unique<VS::Actors::ActorRecord>();
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
 
   LiveEnemy() {
     actor.id = 3;
     actor.kind = 1;
-    actor.roomSpawnIndex = 5;
+    actor.room_spawn_index = 5;
     actor.stats = stats.get();
-    stats->currentHp = 40;
-    stats->maxHp = 90;
-    stats->currentMp = 11;
-    stats->maxMp = 20;
-    stats->totalStrength = 33;
-    stats->totalIntelligence = 44;
-    stats->totalAgility = 55;
+    stats->current_hp = 40;
+    stats->max_hp = 90;
+    stats->current_mp = 11;
+    stats->max_mp = 20;
+    stats->total_strength = 33;
+    stats->total_intelligence = 44;
+    stats->total_agility = 55;
     for (std::size_t limb = 0; limb < 6; ++limb) {
       stats->limbs[limb].hp = static_cast<std::int16_t>(10 + limb);
     }
@@ -661,10 +661,10 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
   const RoomBytes empty = SavedRoomBytes();
 
   VS::Actors::StoreLiveRoomActorState(17, 0);
-  enemy.actor.roomSpawnIndex = actors::kNoRoomSpawn;
+  enemy.actor.room_spawn_index = actors::kNoRoomSpawn;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   VS::Actors::StoreLiveRoomActorState(4, 0);
-  enemy.actor.roomSpawnIndex = 5;
+  enemy.actor.room_spawn_index = 5;
   enemy.actor.stats = nullptr;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   enemy.actor.stats = enemy.stats.get();
@@ -693,7 +693,7 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
 }
 
 namespace {
-using LiveRoster = std::array<Battle_Actor, 4>;
+using LiveRoster = std::array<VS::Battle::Actor, 4>;
 
 // Actors 1 and 2 join after Ashley, the newest first; a member, Ashley and a
 // gimmick do not.
@@ -701,7 +701,7 @@ void CheckLiveLinks(LiveRoster& roster) {
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[1]) == 1);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[2]) == 1);
   CHECK(std::to_array({roster[0].next, roster[2].next, roster[1].next}) ==
-        std::array<Battle_Actor*, 3>{&roster[2], &roster[1], nullptr});
+        std::array<VS::Battle::Actor*, 3>{&roster[2], &roster[1], nullptr});
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[2]) == 0);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[0]) == 0);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[3]) == 0);
@@ -750,16 +750,16 @@ TEST_CASE("Live actors join and leave the list after Ashley",
 
 namespace {
 // The stats InitializeLivePlaceholderActor writes for auxiliary id 0x101.
-void CheckLivePlaceholderStats(const Battle_ActorStats& stats) {
-  CHECK(stats.currentHp == 1);
-  CHECK(stats.maxHp == 1);
+void CheckLivePlaceholderStats(const VS::Battle::ActorStats& stats) {
+  CHECK(stats.current_hp == 1);
+  CHECK(stats.max_hp == 1);
   CHECK(stats.statuses == 0);
-  CHECK(stats.cancelsHitResults == 1);
-  CHECK(stats.actorId == actors::kNoRoomSpawn);
+  CHECK(stats.cancels_hit_results == 1);
+  CHECK(stats.actor_id == actors::kNoRoomSpawn);
   constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
-  CHECK(std::memcmp(stats.name, VS::Actors::placeholderActorName.data(),
+  CHECK(std::memcmp(stats.name.data(), VS::Actors::placeholderActorName.data(),
                     kNameBytes) == 0);
-  CHECK(std::memcmp(stats.name + kNameBytes,
+  CHECK(std::memcmp(stats.name.data() + kNameBytes,
                     VS::Battle::breakArtPointRequirements.data(),
                     actors::kActorNameBytes - kNameBytes) == 0);
 }
@@ -768,12 +768,12 @@ void CheckLivePlaceholderStats(const Battle_ActorStats& stats) {
 TEST_CASE("A live placeholder actor gets the placeholder stats",
           "[actors-room-memory]") {
   const LiveRosterFixture fixture;
-  auto stats = std::make_unique<Battle_ActorStats>();
+  auto stats = std::make_unique<VS::Battle::ActorStats>();
   std::memset(stats.get(), 0xFF, sizeof *stats);
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   actor.stats = stats.get();
-  actor.roomSpawnIndex = 2;
-  actor.killCounted = 1;
+  actor.room_spawn_index = 2;
+  actor.kill_counted = 1;
   actor.defeated = 1;
   VS::Battle::actors[5] = &actor;
   VS::Battle::actorMarkers[5] = static_cast<char>(0x83);
@@ -783,13 +783,13 @@ TEST_CASE("A live placeholder actor gets the placeholder stats",
   CheckLivePlaceholderStats(*stats);
   // The actor forgets its spawn, kill count and defeat.
   CHECK(std::to_array<int>(
-            {actor.roomSpawnIndex, actor.killCounted, actor.defeated}) ==
+            {actor.room_spawn_index, actor.kill_counted, actor.defeated}) ==
         std::array<int, 3>{actors::kNoRoomSpawn, 0, 0});
   CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[5]) == 0x88);
 
   VS::Battle::actorMarkers[5] = 0;
   VS::Actors::InitializeLivePlaceholderActor(5, 2);
-  CHECK(stats->cancelsHitResults == 0);
+  CHECK(stats->cancels_hit_results == 0);
   CHECK(VS::Battle::actorMarkers[5] == 0);
   CHECK(warnings.messages.empty());
 

@@ -14,7 +14,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -112,7 +112,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Battle_Actor, 2> actors{};
+  std::array<VS::Battle::Actor, 2> actors{};
   VS::Actors::ActorRecord ashley_model{};
   VS::Battle::Ai::RoomAiState room{};
   u_short heights[32][32]{};
@@ -122,7 +122,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     VS::Battle::actors[0] = &actors[0];
     VS::Battle::actors[1] = &actors[1];
     actors[0].next = &actors[1];
-    actors[0].commandState = 0xC0;
+    actors[0].command_state = 0xC0;
     actors[0].model = &ashley_model.instance;
     ashley_model.instance.position = {3000, -64, 3000, 0};
     ashley_model.occupancy_radius = 16;
@@ -805,8 +805,8 @@ TEST_CASE(
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.native_pointer_18c == nullptr);
-  CHECK(fixture.actors[1].commandState == 0x80);
-  CHECK(fixture.actors[1].commandOpcode == 2);
+  CHECK(fixture.actors[1].command_state == 0x80);
+  CHECK(fixture.actors[1].command_opcode == 2);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -947,12 +947,12 @@ TEST_CASE("Scripted route updates skip suspended and missing-AI actors safely",
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   const auto before = Snapshot(*fixture.ActiveRoute());
-  fixture.actors[1].commandState = static_cast<u_char>(flags);
+  fixture.actors[1].command_state = static_cast<u_char>(flags);
   VS::Battle::Ai::LiveFrameContext().lastBudgetTick = 0x1234;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
   CHECK(VS::Battle::Ai::LiveFrameContext().lastBudgetTick == 0x1234);
-  fixture.actors[1].commandState = 0;
+  fixture.actors[1].command_state = 0;
   VS::Battle::Ai::actorAiStates[1] = nullptr;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
@@ -969,7 +969,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   fixture.model.instance.current_tile_layer = 5;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.native_pointer_18c == nullptr);
-  CHECK(fixture.actors[1].commandOpcode == 2);
+  CHECK(fixture.actors[1].command_opcode == 2);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -982,7 +982,7 @@ TEST_CASE("Scripted arrival retains signed source square-sum behavior",
   fixture.AllocateCopiedRoute(0);
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.native_pointer_18c == nullptr);
-  CHECK(fixture.actors[1].commandOpcode == 2);
+  CHECK(fixture.actors[1].command_opcode == 2);
 }
 
 TEST_CASE(
@@ -1022,7 +1022,7 @@ TEST_CASE("Scripted navigation rejects cyclic native actor lists",
           "[.override-cyclic-list]") {
   VS::Platform::InstallCrashHandler();
   ScriptedOverrideFixture fixture;
-  fixture.actors[1].commandState = 0xC0;
+  fixture.actors[1].command_state = 0xC0;
   fixture.actors[1].next = &fixture.actors[1];
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   FAIL("A cyclic actor list was accepted");

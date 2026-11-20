@@ -97,7 +97,7 @@ struct ActionPreviewResult {
 };
 
 // A targeting volume of the action state (shape, kind, facing, extents,
-// angle and origin, as Battle_TargetVolume reads it).
+// angle and origin, as VS::Battle::TargetVolume reads it).
 struct TargetingVolume {
   int shape = 0;
   int kind = 0;
@@ -312,7 +312,7 @@ class ActionTargetingHost {
   virtual void SetClutAnimationEnabled(bool enabled) = 0;
 };
 
-// One volume of the targeting sphere (Battle_TargetVolume): the kind byte
+// One volume of the targeting sphere (VS::Battle::TargetVolume): the kind byte
 // with its active bit, the range kind, the angle, the four extent bytes and
 // the position.
 struct SphereVolume {

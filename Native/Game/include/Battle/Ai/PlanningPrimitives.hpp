@@ -25,7 +25,7 @@ inline constexpr int kCandidateTargetSlots = 16;
 inline constexpr int kLimbActionRows = 6;
 inline constexpr int kLimbActionColumns = 4;
 inline constexpr unsigned kActionDefinitionCount = 256;
-// A Battle_ActorStats record (0x964 bytes).
+// A VS::Battle::ActorStats record (0x964 bytes).
 inline constexpr std::size_t kActorStatsRecordBytes = 0x964;
 inline constexpr std::uint16_t kTargetMemoryFrames = 900;
 // The previous-tile word of a forgotten target (AI state 0x38). It is negative,

@@ -12,7 +12,7 @@
 #include "Battle/ActionEffectDispatch.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/StatusEffects.hpp"
@@ -235,8 +235,8 @@ struct LiveFixture {
       VS::Battle::statusEffectParams;
   decltype(VS::Battle::limbInjuryStatusIds) ids =
       VS::Battle::limbInjuryStatusIds;
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Battle::HitResult hit{};
   LiveFixture() {
     actor.stats = &stats;
@@ -252,8 +252,8 @@ struct LiveFixture {
 TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
           "[resource-dispatch][F00506]") {
   LiveFixture fixture;
-  fixture.stats.mobilityLimb0 = 4;
-  fixture.stats.mobilityLimb1 = 5;
+  fixture.stats.mobility_limb0 = 4;
+  fixture.stats.mobility_limb1 = 5;
   VS::Battle::statusEffectParams[4].status_flags = 0x10;
   fixture.hit.target.target_actor = 41;
   fixture.hit.hp_effect = 2;
@@ -269,7 +269,7 @@ TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
 TEST_CASE("F00507 live exemption ignores genuinely unused action and source",
           "[resource-dispatch][F00507]") {
   LiveFixture fixture;
-  fixture.stats.actorId = 128;
+  fixture.stats.actor_id = 128;
   fixture.hit.target.target_actor = 41;
   fixture.hit.target.hp = 32767;
   fixture.hit.hp_effect = 3;

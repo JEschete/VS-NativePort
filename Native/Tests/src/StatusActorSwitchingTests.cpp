@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -349,11 +349,12 @@ struct LiveActorSlot {
   }
 
   int slot;
-  Battle_Actor* saved;
+  VS::Battle::Actor* saved;
   int saved_selected;
-  std::unique_ptr<Battle_ActorStats> stats =
-      std::make_unique<Battle_ActorStats>();
-  std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
+  std::unique_ptr<VS::Battle::ActorStats> stats =
+      std::make_unique<VS::Battle::ActorStats>();
+  std::unique_ptr<VS::Battle::Actor> actor =
+      std::make_unique<VS::Battle::Actor>();
 };
 
 // A local menu table and the switch globals, restored when the test ends.
@@ -388,8 +389,8 @@ struct LiveSwitchScene {
 TEST_CASE("Live limb and row counts read the actor's stats record",
           "[status-switching-live]") {
   const LiveActorSlot live(3);
-  live.stats->limbs[0].nameIndex = 4;
-  live.stats->limbs[1].nameIndex = 9;
+  live.stats->limbs[0].name_index = 4;
+  live.stats->limbs[1].name_index = 9;
   live.stats->accessory.accessory.id = 7;
   st::selectedActor = 4;
   CHECK(st::LiveLimbCount(3) == 2);

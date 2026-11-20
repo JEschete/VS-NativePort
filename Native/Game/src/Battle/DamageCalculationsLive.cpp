@@ -15,14 +15,16 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace VS::Battle {
 namespace {
 class LiveDamageOwner final : public DamageOwner {
  public:
-  LiveDamageOwner(Battle_ActorStats& stats, Battle_ActionDefinition* action)
+  LiveDamageOwner(VS::Battle::ActorStats& stats, ActionDefinition* action)
       : stats_(stats), action_(action) {}
   DamageStats Read() override {
-    return {stats_.actorId,  static_cast<std::uint8_t>(stats_.enemyClass),
+    return {stats_.actor_id, static_cast<std::uint8_t>(stats_.enemy_class),
             stats_.strength, stats_.intelligence,
             stats_.risk,     stats_.weapon,
             stats_.shield,   stats_.accessory};
@@ -50,7 +52,7 @@ class LiveDamageOwner final : public DamageOwner {
   }
   std::uint16_t Risk() override { return stats_.risk; }
   std::uint8_t EnemyClass() override {
-    return static_cast<std::uint8_t>(stats_.enemyClass);
+    return static_cast<std::uint8_t>(stats_.enemy_class);
   }
   void GrowAttacker(int target_class, int target_affinity) override {
     Items::GrowLiveAttackerWeaponRatings(action_, &stats_, target_class,
@@ -62,13 +64,12 @@ class LiveDamageOwner final : public DamageOwner {
   }
 
  private:
-  Battle_ActorStats& stats_;
-  Battle_ActionDefinition* action_;
+  VS::Battle::ActorStats& stats_;
+  ActionDefinition* action_;
 };
 class LiveDamageWorld final : public DamageWorld {
  public:
-  LiveDamageWorld(Battle_ActionDefinition* action,
-                  VS::Battle::HitResult* target)
+  LiveDamageWorld(ActionDefinition* action, VS::Battle::HitResult* target)
       : action_(action), target_(target) {}
   DamageOwner* Stats(std::uint8_t slot) override {
     if (slot >= std::size(VS::Battle::actors) ||
@@ -85,16 +86,16 @@ class LiveDamageWorld final : public DamageWorld {
         VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return static_cast<std::uint32_t>(VS::Battle::actors[slot]->weaponDrawn);
+    return static_cast<std::uint32_t>(VS::Battle::actors[slot]->weapon_drawn);
   }
   std::optional<DamageHit> Hit(int hit) override {
     if (action_ == nullptr || hit < 0 ||
         static_cast<std::size_t>(hit) >= std::size(action_->hits)) {
       return std::nullopt;
     }
-    return DamageHit{static_cast<std::uint8_t>(action_->hits[hit].damageType),
+    return DamageHit{static_cast<std::uint8_t>(action_->hits[hit].damage_type),
                      static_cast<std::uint8_t>(action_->hits[hit].affinity),
-                     static_cast<std::uint8_t>(action_->hits[hit].statFactor)};
+                     static_cast<std::uint8_t>(action_->hits[hit].stat_factor)};
   }
   std::optional<std::uint8_t> ActionType() override {
     return action_ ? std::optional{static_cast<std::uint8_t>(action_->type)}
@@ -119,7 +120,7 @@ class LiveDamageWorld final : public DamageWorld {
   void SetCriticalHit() override { VS::Battle::criticalHitOccurred = 1; }
 
  private:
-  Battle_ActionDefinition* action_;
+  ActionDefinition* action_;
   VS::Battle::HitResult* target_;
   std::array<std::optional<LiveDamageOwner>, 2> owners_{};
   std::size_t count_{};
@@ -141,7 +142,7 @@ std::int16_t Checked(std::optional<std::int16_t> value) {
   return value.value();
 }
 using Calculator = decltype(&CalculateSpellHitDamage);
-std::int16_t Calculate(Calculator function, Battle_ActionDefinition* action,
+std::int16_t Calculate(Calculator function, ActionDefinition* action,
                        VS::Battle::HitResult* source,
                        VS::Battle::HitResult* target, int hit, int random) {
   LiveDamageWorld world(action, target);
@@ -151,7 +152,7 @@ std::int16_t Calculate(Calculator function, Battle_ActionDefinition* action,
 }
 }  // namespace
 // decomp: _getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11271).
-std::int16_t LiveCalculatePhysicalHitDamage(Battle_ActionDefinition* action,
+std::int16_t LiveCalculatePhysicalHitDamage(ActionDefinition* action,
                                             VS::Battle::HitResult* source,
                                             VS::Battle::HitResult* target,
                                             int hit, int random,
@@ -164,7 +165,7 @@ std::int16_t LiveCalculatePhysicalHitDamage(Battle_ActionDefinition* action,
 }
 // decomp: _getPhysicalAttackDamageWithoutStatusModifiers
 // (src/BATTLE/BATTLE.PRG/146C.c:11467).
-std::int16_t LivePhysicalDamageWithoutDebuffs(Battle_ActionDefinition* action,
+std::int16_t LivePhysicalDamageWithoutDebuffs(ActionDefinition* action,
                                               VS::Battle::HitResult* source,
                                               VS::Battle::HitResult* target,
                                               int hit, int random) {
@@ -172,7 +173,7 @@ std::int16_t LivePhysicalDamageWithoutDebuffs(Battle_ActionDefinition* action,
                    random);
 }
 // decomp: _getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11473).
-std::int16_t LiveCalculateSpellHitDamage(Battle_ActionDefinition* action,
+std::int16_t LiveCalculateSpellHitDamage(ActionDefinition* action,
                                          VS::Battle::HitResult* source,
                                          VS::Battle::HitResult* target, int hit,
                                          int random) {
@@ -180,7 +181,7 @@ std::int16_t LiveCalculateSpellHitDamage(Battle_ActionDefinition* action,
                    random);
 }
 // decomp: _hpHealed (src/BATTLE/BATTLE.PRG/146C.c:11850).
-std::int16_t LiveCalculateSpellHealing(Battle_ActionDefinition* action,
+std::int16_t LiveCalculateSpellHealing(ActionDefinition* action,
                                        VS::Battle::HitResult* source,
                                        VS::Battle::HitResult* target, int hit,
                                        int random) {
@@ -188,7 +189,7 @@ std::int16_t LiveCalculateSpellHealing(Battle_ActionDefinition* action,
 }
 // decomp: _getPhysicalAttackDamageWithStatusModifiers
 // (src/BATTLE/BATTLE.PRG/146C.c:12235).
-std::int16_t LivePhysicalDamageWithDebuffs(Battle_ActionDefinition* action,
+std::int16_t LivePhysicalDamageWithDebuffs(ActionDefinition* action,
                                            VS::Battle::HitResult* source,
                                            VS::Battle::HitResult* target,
                                            int hit, int random) {

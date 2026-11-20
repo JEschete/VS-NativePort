@@ -62,7 +62,7 @@ TEST_CASE("F01358 production module consumes the packed brightness result",
       HudRenderingEntry(0x800C9EB8, &b::LiveShortcutIconBrightness);
   if (brightness == nullptr) return;
   f::LiveShortcut state;
-  state.stats.currentMp = 0;
+  state.stats.current_mp = 0;
   CHECK(brightness(4) == 0x180);
   CHECK(brightness(0) == 0);
 }

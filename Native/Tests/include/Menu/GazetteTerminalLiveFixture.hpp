@@ -17,7 +17,7 @@
 
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
@@ -131,7 +131,7 @@ inline auto ControlOwners() {
                     BytesOf(VS::Field::isFieldRenderingEnabled),
                     BytesOf(VS::State::tickSpeed),
                     BytesOf(VS::State::roomVisitProgress),
-                    BytesOf(Battle_actionDefinitions),
+                    BytesOf(VS::Battle::actionDefinitions),
                     BytesOf(VS::Content::discRequestSlots),
                     BytesOf(VS::Content::discRequestCounts),
                     BytesOf(VS::Content::discDriveState),

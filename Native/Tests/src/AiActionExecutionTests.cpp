@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelInstance.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -178,11 +178,11 @@ class Decisions final : public ai::DecisionUpdateWorld {
 
 struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* old_head = VS::Battle::actors[0];
+  VS::Battle::Actor* old_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
   VS::Actors::ActorRecord* old_record = VS::Actors::actorRecords[0];
   int old_budget = VS::Battle::Ai::frameTickBudget;
-  Battle_Actor head{}, actor{};
+  VS::Battle::Actor head{}, actor{};
   VS::Battle::Ai::ActorAiState player{}, state{};
   VS::Actors::ActorRecord record{};
   VS::Actors::ModelInstance model{};

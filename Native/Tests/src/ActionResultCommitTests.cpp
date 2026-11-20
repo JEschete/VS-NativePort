@@ -11,7 +11,7 @@
 
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
@@ -320,16 +320,16 @@ TEST_CASE(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800875C8));
   REQUIRE(apply == battle::ApplyLiveActorActionResult);
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   VS::Battle::HitResult hit{};
   auto* saved = VS::Battle::actors[41];
   actor.stats = &stats;
   VS::Battle::actors[41] = &actor;
-  stats.currentHp = 0;
-  stats.currentMp = -123;
-  stats.actionRecoveryTimer = 65535;
-  stats.isAnalyzed = 1;
+  stats.current_hp = 0;
+  stats.current_mp = -123;
+  stats.action_recovery_timer = 65535;
+  stats.is_analyzed = 1;
   stats.weapon.current_dp = 65535;
   stats.weapon.max_dp = 100;
   hit.target.target_actor = 41;
@@ -340,8 +340,8 @@ TEST_CASE(
   apply(&hit);
   VS::Battle::actors[41] = saved;
   CHECK(stats.weapon.current_dp == 1);
-  CHECK(stats.currentMp == -123);
-  CHECK(stats.actionRecoveryTimer == 65535);
-  CHECK(stats.isAnalyzed == 1);
+  CHECK(stats.current_mp == -123);
+  CHECK(stats.action_recovery_timer == 65535);
+  CHECK(stats.is_analyzed == 1);
   CHECK(std::bit_cast<std::uint32_t>(stats.statuses) == 0x80000000);
 }

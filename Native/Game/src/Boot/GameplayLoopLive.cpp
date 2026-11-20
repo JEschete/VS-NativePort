@@ -15,13 +15,13 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionSequenceLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -161,18 +161,18 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return BattleActor(slot) != nullptr;
   }
   [[nodiscard]] std::int32_t ActorInteractionFlags(int slot) const override {
-    const Battle_Actor* actor = BattleActor(slot);
-    return actor != nullptr ? actor->interactionFlags : 0;
+    const VS::Battle::Actor* actor = BattleActor(slot);
+    return actor != nullptr ? actor->interaction_flags : 0;
   }
   [[nodiscard]] int AshleyActionRecoveryTimer() const override {
-    return VS::Battle::characterState->stats->actionRecoveryTimer;
+    return VS::Battle::characterState->stats->action_recovery_timer;
   }
   [[nodiscard]] std::uint32_t AshleyStatuses() const override {
     return static_cast<std::uint32_t>(
         VS::Battle::characterState->stats->statuses);
   }
   [[nodiscard]] bool IsAshleyWeaponDrawn() const override {
-    return (VS::Battle::characterState->weaponDrawn & 1) != 0;
+    return (VS::Battle::characterState->weapon_drawn & 1) != 0;
   }
   [[nodiscard]] int CameraYawDelta() const override {
     return VS::Field::sphericalCamera.motion.turn;
@@ -534,7 +534,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
 
  private:
-  [[nodiscard]] static Battle_Actor* BattleActor(int slot) {
+  [[nodiscard]] static VS::Battle::Actor* BattleActor(int slot) {
     if (slot < 0 ||
         static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
       return nullptr;

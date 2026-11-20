@@ -6,11 +6,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Minimap.hpp"
+
+using VS::Battle::LimbStats;
 
 namespace {
 namespace b = VS::Battle;
@@ -30,9 +32,9 @@ Function ModuleEntry(unsigned address, Function expected) {
 static_assert(
     std::is_same_v<decltype(&b::SetLiveGameplayHudHidden), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&b::LiveStatusIconFlags),
-                             int (*)(Battle_ActorStats*)>);
-static_assert(std::is_same_v<decltype(&b::LiveLimbCondition),
-                             int (*)(Battle_LimbStats*)>);
+                             int (*)(VS::Battle::ActorStats*)>);
+static_assert(
+    std::is_same_v<decltype(&b::LiveLimbCondition), int (*)(LimbStats*)>);
 }  // namespace
 
 TEST_CASE("F00235 production module returns a full-word visibility command",
@@ -52,10 +54,10 @@ TEST_CASE("F01356 production module preserves the signed status-mask ABI",
           "[hud-state-module][F01356]") {
   const auto flags = ModuleEntry(0x800C9E08, &b::LiveStatusIconFlags);
   if (flags == nullptr) return;
-  Battle_ActorStats stats{};
+  VS::Battle::ActorStats stats{};
   stats.statuses = 0x20;
   CHECK(flags(&stats) == 1);
-  const u_short saved = VS::Battle::upperStatusIconFlags[0];
+  const std::uint16_t saved = VS::Battle::upperStatusIconFlags[0];
   VS::Battle::upperStatusIconFlags[0] = 0x8000;
   stats.statuses = 0x00200000;
   CHECK(std::bit_cast<std::uint32_t>(flags(&stats)) == 0x80000000);
@@ -66,9 +68,9 @@ TEST_CASE("F01357 production module retains the limb-pointer ABI",
           "[hud-state-module][F01357]") {
   const auto condition = ModuleEntry(0x800C9E5C, &b::LiveLimbCondition);
   if (condition == nullptr) return;
-  Battle_LimbStats limb{};
+  LimbStats limb{};
   limb.hp = 300;
-  limb.maxHp = 400;
+  limb.max_hp = 400;
   CHECK(condition(&limb) == 3);
 }
 
@@ -77,7 +79,7 @@ TEST_CASE("F01359 production module requests the shortcut without resetting it",
   const auto show = ModuleEntry(0x800C9F88, &b::ShowLiveShortcutHud);
   if (show == nullptr) return;
   const char saved = VS::Battle::shortcutHudRequested;
-  const u_char animation = VS::Battle::shortcutHudAnimationStep;
+  const std::uint8_t animation = VS::Battle::shortcutHudAnimationStep;
   show();
   CHECK(VS::Battle::shortcutHudRequested == 1);
   CHECK(VS::Battle::shortcutHudAnimationStep == animation);

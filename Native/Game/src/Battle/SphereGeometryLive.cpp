@@ -13,6 +13,9 @@
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"
 
+using VS::Battle::ShapeVertex;
+using VS::Battle::TargetVolume;
+
 namespace VS::Battle {
 namespace {
 constexpr std::size_t kSphereArcBaseCount = 72;
@@ -53,12 +56,10 @@ static_assert(
     sizeof(VS::Battle::TargetSphereSetupView{}.wire_vertices) /
         sizeof(VS::Battle::TargetSphereSetupView{}.wire_vertices[0]) ==
     kTargetWireVertices);
-static_assert(offsetof(Battle_TargetVolume, scale) == kTargetVolumeScaleOffset);
-static_assert(sizeof(Battle_TargetVolume{}.scale.extents) ==
-              kTargetVolumeExtents);
-static_assert(offsetof(Battle_ShapeVertex, xyz) == 0);
-static_assert(offsetof(Battle_ShapeVertex, opaque6) ==
-              kShapeVertexOpaqueOffset);
+static_assert(offsetof(TargetVolume, scale) == kTargetVolumeScaleOffset);
+static_assert(sizeof(TargetVolume{}.scale.extents) == kTargetVolumeExtents);
+static_assert(offsetof(ShapeVertex, xyz) == 0);
+static_assert(offsetof(ShapeVertex, opaque6) == kShapeVertexOpaqueOffset);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
@@ -115,7 +116,7 @@ void WriteVertices(VS::Battle::TargetSphereSetupView& sphere,
 
 // decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523).
 std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
-    const Battle_TargetVolume* volume) noexcept {
+    const TargetVolume* volume) noexcept {
   if (volume == nullptr) return std::nullopt;
   const TargetVolumeExtents extents{
       volume->scale.extents[0], volume->scale.extents[1],

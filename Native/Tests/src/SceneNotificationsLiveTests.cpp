@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Boot/SessionLive.hpp"
@@ -28,6 +28,8 @@
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Menu/TextBoxUpdateLiveRestore.hpp"
 #include "State/Timers.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace menu = VS::Menu;
@@ -50,8 +52,8 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<int*> saved_buffer{menu::sceneNotificationBuffer};
   ValueRestore<std::uint8_t> saved_timer{menu::sceneNotificationTimer};
   ValueRestore<std::uint8_t> saved_timed{menu::sceneNotificationTimed};
-  ValueRestore<Battle_ActionDefinition> saved_action{
-      Battle_actionDefinitions[kAction]};
+  ValueRestore<ActionDefinition> saved_action{
+      VS::Battle::actionDefinitions[kAction]};
   ArrayRestore<std::uint16_t, std::size(VS::Battle::doorStrings)> saved_door{
       VS::Battle::doorStrings};
   ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_menu{
@@ -73,7 +75,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::menuStrings[kActionTextIndex] = kActionText;
     SetTemplate(VS::Menu::menuStrings, kActionText);
     SetTemplate(VS::Menu::menuStrings, kSpellText);
-    auto& action = Battle_actionDefinitions[kAction];
+    auto& action = VS::Battle::actionDefinitions[kAction];
     action = {};
     action.type = kActionType;
     action.name[0] = 5;

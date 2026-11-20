@@ -2,14 +2,14 @@
 
 #include <optional>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/SphereGeometry.hpp"
 #include "Battle/TargetVolume.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle {
 [[nodiscard]] std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
-    const Battle_TargetVolume* volume) noexcept;
+    const VS::Battle::TargetVolume* volume) noexcept;
 
 // Reads and commits only the sphere's wire animation, vertex count and the
 // vertices written by the checked core. Table extents are supplied explicitly.

@@ -12,7 +12,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -43,9 +43,9 @@ struct CommandFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
-  Battle_Actor* saved_actor = VS::Battle::actors[2];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[2];
   VS::Actors::ActorRecord* saved_target = VS::Actors::actorRecords[3];
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   VS::Actors::ModelInstance model{};
   VS::Actors::ActorRecord target{};
   VS::Battle::Ai::ActorAiState state{};
@@ -58,9 +58,9 @@ struct CommandFixture {
     VS::Actors::actorRecords[3] = &target;
     actor.id = state.actor_id = 2;
     actor.model = &model;
-    actor.commandArg0 = 0x13572468;
-    actor.commandArg1.word = 0x22334455;
-    actor.commandArg2 = 0x66778899;
+    actor.command_arg0 = 0x13572468;
+    actor.command_arg1.word = 0x22334455;
+    actor.command_arg2 = 0x66778899;
     state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actor);
     state.movement_target = 3;
     state.position.vx = state.position.vz = 320;
@@ -114,9 +114,9 @@ TEST_CASE("AI dispatch covers all eighteen actor command intents",
                                     16, 17, 21, 22, 23, 11, 24, 6, 8};
   CommandFixture fixture;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, intent);
-  CHECK(fixture.actor.commandState == 0x80);
-  CHECK(fixture.actor.commandOpcode == opcodes[intent]);
-  CHECK(fixture.actor.commandTarget == 3);
+  CHECK(fixture.actor.command_state == 0x80);
+  CHECK(fixture.actor.command_opcode == opcodes[intent]);
+  CHECK(fixture.actor.command_target == 3);
   CHECK(VS::Battle::Ai::LiveFrameContext().movementResult == intent);
 }
 
@@ -128,17 +128,17 @@ TEST_CASE(
   fixture.state.heading = 0x2345;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, intent);
   if (intent == 3) {
-    CHECK(fixture.actor.commandArg0 == 0x00070345);
+    CHECK(fixture.actor.command_arg0 == 0x00070345);
   } else if (intent == 8) {
-    CHECK(fixture.actor.commandArg0 == 1234);
-    CHECK(fixture.actor.commandArg1.word == 2345);
-    CHECK(fixture.actor.commandArg2 == 3456);
+    CHECK(fixture.actor.command_arg0 == 1234);
+    CHECK(fixture.actor.command_arg1.word == 2345);
+    CHECK(fixture.actor.command_arg2 == 3456);
   } else if (intent == 16) {
-    CHECK(fixture.actor.commandArg0 == 0x00202345);
+    CHECK(fixture.actor.command_arg0 == 0x00202345);
   } else {
-    CHECK(fixture.actor.commandArg0 == (3456 << 16 | 1234));
-    CHECK(fixture.actor.commandArg1.word == (0x22330000 | 2345));
-    CHECK(fixture.actor.commandArg2 == 0x66778899);
+    CHECK(fixture.actor.command_arg0 == (3456 << 16 | 1234));
+    CHECK(fixture.actor.command_arg1.word == (0x22330000 | 2345));
+    CHECK(fixture.actor.command_arg2 == 0x66778899);
   }
 }
 
@@ -151,9 +151,9 @@ TEST_CASE("AI turning keeps strict rate boundaries and upper-body selection",
   fixture.state.has_tagged_bone3 = static_cast<char>(upper_body);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 4);
   const bool reached = target == 0 || target == 31 || target == 4095;
-  CHECK(fixture.actor.commandOpcode == (reached ? 4 : (upper_body ? 7 : 3)));
-  CHECK((static_cast<uint32_t>(fixture.actor.commandArg0) >> 16) == 32);
-  CHECK((fixture.actor.commandArg0 & 0xFFFF) == (reached ? target : 32));
+  CHECK(fixture.actor.command_opcode == (reached ? 4 : (upper_body ? 7 : 3)));
+  CHECK((static_cast<uint32_t>(fixture.actor.command_arg0) >> 16) == 32);
+  CHECK((fixture.actor.command_arg0 & 0xFFFF) == (reached ? target : 32));
 }
 
 TEST_CASE(
@@ -165,11 +165,11 @@ TEST_CASE(
   CHECK(fixture.state.next_position.vy == 0);
   CHECK(fixture.state.next_position.vz == 448);
   CHECK(fixture.state.next_position.pad == 0x5555);
-  CHECK(fixture.actor.commandArg0 == 0x00030003);
+  CHECK(fixture.actor.command_arg0 == 0x00030003);
   CHECK(fixture.flags[3][3] == 0x80);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
-  CHECK(fixture.actor.commandArg0 == 0x001001C0);
-  CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 448);
+  CHECK(fixture.actor.command_arg0 == 0x001001C0);
+  CHECK((fixture.actor.command_arg1.word & 0xFFFF) == 448);
 }
 
 TEST_CASE(
@@ -185,7 +185,7 @@ TEST_CASE(
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 14);
   const auto expected =
       flags == 8 ? 23 : (flags == 0x30 ? 18 : (flags == 0xC0 ? 14 : 11));
-  CHECK(fixture.actor.commandOpcode == expected);
+  CHECK(fixture.actor.command_opcode == expected);
   CHECK(fixture.state.next_position.vy == 64);
   CHECK(fixture.flags[3][3] == 0x80);
 }
@@ -198,14 +198,14 @@ TEST_CASE(
   CommandFixture fixture;
   fixture.state.action_slots[2][1].kind = kind;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 15);
-  CHECK(fixture.actor.commandOpcode == 24);
-  CHECK(fixture.actor.commandArg0 == 0x00010002);
+  CHECK(fixture.actor.command_opcode == 24);
+  CHECK(fixture.actor.command_arg0 == 0x00010002);
   if (kind == 1 || kind == 2) {
-    CHECK(fixture.actor.commandArg1.word == 0x00040003);
-    CHECK(fixture.actor.commandArg2 == 0x66778899);
+    CHECK(fixture.actor.command_arg1.word == 0x00040003);
+    CHECK(fixture.actor.command_arg2 == 0x66778899);
   } else {
-    CHECK(fixture.actor.commandArg1.word == (187 << 16 | 100));
-    CHECK(fixture.actor.commandArg2 == 0x6677012C);
+    CHECK(fixture.actor.command_arg1.word == (187 << 16 | 100));
+    CHECK(fixture.actor.command_arg2 == 0x6677012C);
   }
 }
 
@@ -218,11 +218,11 @@ TEST_CASE(
   fixture.state.heading = 1024;
   fixture.heights[2][1] = 1;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 7);
-  CHECK(fixture.actor.commandOpcode == 13);
-  CHECK(fixture.actor.commandArg0 == 32768);
-  CHECK(fixture.actor.commandArg1.word == 192512);
+  CHECK(fixture.actor.command_opcode == 13);
+  CHECK(fixture.actor.command_arg0 == 32768);
+  CHECK(fixture.actor.command_arg1.word == 192512);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 7);
-  CHECK(fixture.actor.commandOpcode == 9);
+  CHECK(fixture.actor.command_opcode == 9);
 }
 
 namespace {
@@ -337,8 +337,8 @@ TEST_CASE("Room terrain supports hover before the first AI update",
   frame->heightMap[1][1] = 2;
   frame->randomState = 0x87654321;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
-  CHECK(fixture.actor.commandArg0 == (144 << 16 | 192));
-  CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 192);
+  CHECK(fixture.actor.command_arg0 == (144 << 16 | 192));
+  CHECK((fixture.actor.command_arg1.word & 0xFFFF) == 192);
   CHECK(frame->randomState == 0x87654321);
   CHECK(VS::Battle::Ai::savedMovementRandomState == 0x12345678);
 }
@@ -354,7 +354,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
     CHECK(frame->randomState == 0x12345678);
     frame->heightMap[1][1] = static_cast<u_short>(world);
     VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
-    CHECK((fixture.actor.commandArg0 >> 16) == world * 64 + 16);
+    CHECK((fixture.actor.command_arg0 >> 16) == world * 64 + 16);
     frame->actors[0] = &fixture.state;
     frame->walk_valid = 1;
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());

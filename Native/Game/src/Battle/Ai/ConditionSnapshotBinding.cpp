@@ -9,9 +9,9 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ConditionSnapshot.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
@@ -47,13 +47,14 @@ class PlannerConditionRows final : public ActorConditionTable {
   std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows_;
 };
 
-std::optional<ActorCondition> ReadCondition(const Battle_ActorStats* stats) {
+std::optional<ActorCondition> ReadCondition(
+    const VS::Battle::ActorStats* stats) {
   if (stats == nullptr) return std::nullopt;
   return ActorCondition{
-      stats->currentHp,
-      stats->maxHp,
-      stats->currentMp,
-      stats->maxMp,
+      stats->current_hp,
+      stats->max_hp,
+      stats->current_mp,
+      stats->max_mp,
       static_cast<std::uint32_t>(stats->statuses),
       static_cast<std::int16_t>(stats->weapon.current_dp),
       static_cast<std::int16_t>(stats->weapon.max_dp),
@@ -67,7 +68,7 @@ void CaptureBattleActorConditions(
     std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows) {
   std::array<ActorConditionReading, std::size(VS::Battle::actors)> readings{};
   std::size_t count = 0;
-  for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
+  for (const VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     if (count == readings.size()) {
       VS::Core::Errorf("ai", "Battle actor list holds more than %zu actors",

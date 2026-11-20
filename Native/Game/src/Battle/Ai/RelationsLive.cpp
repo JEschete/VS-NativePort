@@ -12,9 +12,9 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -30,6 +30,9 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+
 namespace VS::Battle::Ai {
 namespace {
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kRelationActorSlots);
@@ -39,8 +42,8 @@ constexpr unsigned kPreservedRelationFlag = 8;
 class RoomActorList {
  public:
   RoomActorList() {
-    for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+    for (const VS::Battle::Actor* actor = VS::Battle::actors[0];
+         actor != nullptr; actor = actor->next) {
       Require(count_ < ids_.size() && actor->id >= 0 &&
                   actor->id < kRelationActorSlots,
               "AI relations require a bounded battle actor list");
@@ -188,10 +191,10 @@ class LiveSavedRelationActors final : public SavedRelationActors {
 class LiveLinkedActorTable final : public LinkedActorTable {
  public:
   LiveLinkedActorTable() {
-    const Battle_Actor* head = VS::Battle::actors[0];
+    const VS::Battle::Actor* head = VS::Battle::actors[0];
     Require(head != nullptr,
             "AI linked actors require Ashley at the battle actor list head");
-    for (const Battle_Actor* actor = head->next; actor != nullptr;
+    for (const VS::Battle::Actor* actor = head->next; actor != nullptr;
          actor = actor->next) {
       // The head takes one of the kRelationActorSlots list entries.
       Require(count_ + 1 < kRelationActorSlots && actor->id >= 0 &&
@@ -199,8 +202,8 @@ class LiveLinkedActorTable final : public LinkedActorTable {
               "AI linked actors require a bounded battle actor list");
       actors_.at(count_++) = {
           .id = static_cast<std::uint8_t>(actor->id),
-          .group = static_cast<std::uint8_t>(actor->aiGroup),
-          .linked_group = static_cast<std::uint8_t>(actor->aiLinkedGroup)};
+          .group = static_cast<std::uint8_t>(actor->ai_group),
+          .linked_group = static_cast<std::uint8_t>(actor->ai_linked_group)};
     }
   }
 
@@ -228,8 +231,8 @@ static_assert(offsetof(VS::Battle::Ai::ReactionView, relations) ==
               offsetof(VS::Battle::Ai::ActorAiState, relations));
 static_assert(sizeof(VS::Battle::Ai::RelationWordView) ==
               sizeof(VS::Battle::Ai::RelationWord));
-using ActionTargets = decltype(Battle_ActionRequest::targets);
-constexpr std::size_t kMaxActionHits = std::extent_v<ActionTargets>;
+using ActionTargets = decltype(ActionRequestRecord::targets);
+constexpr std::size_t kMaxActionHits = std::tuple_size_v<ActionTargets>;
 
 void RequireSlot(int actor) {
   Require(actor >= 0 && actor < kRelationActorSlots,
@@ -331,22 +334,24 @@ ReactionHit ReadHit(const VS::Battle::HitResult& hit) {
 // The completed action as the reaction policy reads it.
 class LiveAppliedAction {
  public:
-  explicit LiveAppliedAction(const Battle_ActionRequest& request) {
-    Require(request.targetCount <= kMaxActionHits,
+  explicit LiveAppliedAction(const ActionRequestRecord& request) {
+    Require(request.target_count <= kMaxActionHits,
             "AI action reaction requires a bounded hit list");
-    for (std::size_t i = 0; i < request.targetCount; ++i) {
+    for (std::size_t i = 0; i < request.target_count; ++i) {
       hits_.at(i) = ReadHit(request.targets[i]);
     }
-    action_.action = request.actionId;
-    if (request.actionId < std::size(Battle_actionDefinitions)) {
-      const Battle_ActionDefinition& definition =
-          Battle_actionDefinitions[request.actionId];
+    action_.action = request.action_id;
+    if (request.action_id < std::size(VS::Battle::actionDefinitions)) {
+      const ActionDefinition& definition =
+          VS::Battle::actionDefinitions[request.action_id];
       action_.hit_prerequisites = std::array<std::uint8_t, 2>{
-          static_cast<std::uint8_t>(definition.hits[0].prerequisiteFunctionId),
-          static_cast<std::uint8_t>(definition.hits[1].prerequisiteFunctionId)};
+          static_cast<std::uint8_t>(
+              definition.hits[0].prerequisite_function_id),
+          static_cast<std::uint8_t>(
+              definition.hits[1].prerequisite_function_id)};
     }
-    action_.acting = ReadHit(request.primaryTarget);
-    action_.targets = std::span(hits_).first(request.targetCount);
+    action_.acting = ReadHit(request.primary_target);
+    action_.targets = std::span(hits_).first(request.target_count);
   }
 
   [[nodiscard]] const AppliedAction& Action() const { return action_; }
@@ -358,7 +363,7 @@ class LiveAppliedAction {
 
 class LiveActionNotification final : public ActionNotificationHost {
  public:
-  explicit LiveActionNotification(Battle_ActionRequest& request)
+  explicit LiveActionNotification(ActionRequestRecord& request)
       : request_(request) {}
 
   void ClearReengagementGrace(int actor) override {
@@ -373,7 +378,7 @@ class LiveActionNotification final : public ActionNotificationHost {
   }
 
  private:
-  Battle_ActionRequest& request_;
+  ActionRequestRecord& request_;
 };
 }  // namespace
 
@@ -406,7 +411,7 @@ void ResolveLiveAiLinkedActors() {
 }
 
 void ApplyLiveActorActionReaction(VS::Battle::Ai::ReactionView* state,
-                                  const Battle_ActionRequest* request) {
+                                  const ActionRequestRecord* request) {
   if (request == nullptr) return;
   Require(state != nullptr, "AI action reaction requires a valid actor state");
   const LiveAppliedAction applied(*request);
@@ -426,11 +431,11 @@ void PropagateLiveActorRelationships(VS::Battle::Ai::ReactionView* state) {
           "AI relationship propagation requires every room actor's state");
 }
 
-void NotifyLiveActionRelationshipChanges(Battle_ActionRequest* request) {
+void NotifyLiveActionRelationshipChanges(ActionRequestRecord* request) {
   if (request == nullptr) return;
   LiveActionNotification host(*request);
   Require(
-      NotifyActionRelationshipChanges(host, ReadHit(request->primaryTarget)),
+      NotifyActionRelationshipChanges(host, ReadHit(request->primary_target)),
       "AI action notification actor is outside the AI slots");
 }
 }  // namespace VS::Battle::Ai

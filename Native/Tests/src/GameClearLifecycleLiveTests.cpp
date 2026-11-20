@@ -9,7 +9,7 @@
 
 #include "Audio/Seq/Channel.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
@@ -129,7 +129,7 @@ void CheckRealReelFrame(LiveFixture& fixture) {
 struct SavedServiceViews {
   decltype(VS::Render::FrameScratchpad()) frame = VS::Render::FrameScratchpad();
   decltype(VS::Audio::soundState) audio = VS::Audio::soundState;
-  Battle_Actor* actor = VS::Battle::characterState;
+  VS::Battle::Actor* actor = VS::Battle::characterState;
   unsigned random = VS::Core::BiosRand().State();
 
   void CheckRestored() const {
@@ -456,9 +456,9 @@ TEST_CASE("Game-clear Live initialization commits the real resident score",
   LiveFixture fixture;
   VS::State::scoreData.misc_score = 100;
   VS::State::scoreData.heal_count = 100;
-  fixture.stats.totalStrength = 13;
-  fixture.stats.totalIntelligence = 19;
-  fixture.stats.totalAgility = 27;
+  fixture.stats.total_strength = 13;
+  fixture.stats.total_intelligence = 19;
+  fixture.stats.total_agility = 27;
   QueueGameClearMusic();
   CHECK(VS::Audio::LivePollMusicLoads() == VS::Audio::kLoadInFlight);
   CHECK(results::LiveInitializeGameClear() == 0);

@@ -10,9 +10,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -31,6 +31,9 @@
 #include "Core/Unported.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
 
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::ClearLiveActorAiNavigationReset),
@@ -54,9 +57,9 @@ struct AiLifecycleFixture {
 struct HostilityFixture {
   unsigned saved_random = VS::Core::BiosRand().State();
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* saved_actor = VS::Battle::actors[3];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[3];
   VS::Battle::Ai::ActorAiState state{};
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
 
   HostilityFixture() {
     state.actor_id = 3;
@@ -85,7 +88,7 @@ struct HostilityFixture {
     CHECK(state.awareness_marker == 6);
     CHECK(state.awareness_frames_remaining == 40);
     CHECK(state.decision_delay == (busy == 0 ? 30 : (busy & 1)));
-    CHECK(actor.commandFlags == (busy == 0 ? 2 : 0x5A));
+    CHECK(actor.command_flags == (busy == 0 ? 2 : 0x5A));
   }
 };
 
@@ -96,12 +99,12 @@ struct AshleyAllianceFixture {
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   unsigned saved_random = VS::Core::BiosRand().State();
-  Battle_Actor* saved_actor0 = VS::Battle::actors[0];
-  Battle_Actor* saved_actor1 = VS::Battle::actors[1];
+  VS::Battle::Actor* saved_actor0 = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_actor1 = VS::Battle::actors[1];
   char saved_marker1 = VS::Battle::actorMarkers[1];
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActorAiState other_state{};
-  Battle_Actor actors[2]{};
+  VS::Battle::Actor actors[2]{};
 
   AshleyAllianceFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai_states.size(),
@@ -160,7 +163,7 @@ struct AshleyAllianceFixture {
     CHECK(VS::Core::BiosRand().State() == random);
     CHECK(state.decision_delay ==
           (busy == 1 ? 3 : (!settings_bit && busy == 0 ? 30 : 0)));
-    CHECK(actors[1].commandFlags == (!settings_bit && busy == 0 ? 2 : 0x5A));
+    CHECK(actors[1].command_flags == (!settings_bit && busy == 0 ? 2 : 0x5A));
   }
 
   void CheckDeferredRecovery() {
@@ -202,29 +205,29 @@ std::array<unsigned, 3> TwoFavorableAllianceRolls() {
 }
 
 struct AshleyActionFixture : AshleyAllianceFixture {
-  Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
-  Battle_ActorStats stats{};
-  Battle_ActionRequest request{};
+  ActionDefinition saved_action = VS::Battle::actionDefinitions[42];
+  VS::Battle::ActorStats stats{};
+  ActionRequestRecord request{};
 
   AshleyActionFixture() {
-    Battle_actionDefinitions[42] = {};
+    VS::Battle::actionDefinitions[42] = {};
     actors[1].stats = &stats;
     state.settings_bit27 = 1;
     state.decision_delay = 1;
     state.saved_relation_options = -1;
     other_state.saved_relation_options = -1;
     Settings()->decision_callback = AshleyAllianceTestCallback;
-    request.actionId = 42;
-    request.primaryTarget.target.target_actor = 0;
-    request.targetCount = 1;
+    request.action_id = 42;
+    request.primary_target.target.target_actor = 0;
+    request.target_count = 1;
     request.targets[0].target.target_actor = 1;
   }
 
-  ~AshleyActionFixture() { Battle_actionDefinitions[42] = saved_action; }
+  ~AshleyActionFixture() { VS::Battle::actionDefinitions[42] = saved_action; }
 
   void Apply(std::uint16_t flags) {
-    Battle_actionDefinitions[42].aiFlags =
-        std::bit_cast<Battle_ActionAiFlags>(flags);
+    VS::Battle::actionDefinitions[42].ai_flags =
+        std::bit_cast<VS::Battle::ActionAiFlags>(flags);
     VS::Battle::Ai::ApplyLiveActorActionReaction(Reaction(), &request);
   }
 };
@@ -346,7 +349,7 @@ TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
     }
     const auto word = noise | (classification << 6) | (counter << 8);
     fixture.SetRelation(target, word);
-    fixture.actor.commandFlags = 0x5A;
+    fixture.actor.command_flags = 0x5A;
     auto expected = fixture.state;
     const std::uint32_t hostile = (word & 0xFFFF803Fu) | 0xC0u;
     std::memcpy(&expected.relations[target], &hostile, sizeof(hostile));
@@ -367,7 +370,7 @@ TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
     CHECK(VS::Core::BiosRand().State() == expected_random.State());
     CHECK(frame.randomState ==
           (classification == 3 ? 0xFFFF8001u : 0xFFFF8008u));
-    CHECK(fixture.actor.commandFlags == (classification == 3 ? 0x5A : 2));
+    CHECK(fixture.actor.command_flags == (classification == 3 ? 0x5A : 2));
   }
 }
 
@@ -379,7 +382,7 @@ TEST_CASE(
   fixture.state.decision_delay = static_cast<u_char>(busy & 1);
   fixture.state.native_pointer_18c = (busy & 2) ? &fixture.actor : nullptr;
   fixture.SetRelation(7, 0xABCD7F7Fu);
-  fixture.actor.commandFlags = 0x5A;
+  fixture.actor.command_flags = 0x5A;
   VS::Core::SeedBiosRand(1234);
   VS::Core::Rand15 expected_random(1234);
   expected_random.Next();
@@ -401,7 +404,7 @@ TEST_CASE(
   CHECK(StateBytes(fixture.state) == StateBytes(expected));
   CHECK(VS::Core::BiosRand().State() == expected_random.State());
   CHECK(frame.randomState == 16);
-  CHECK(fixture.actor.commandFlags == (busy == 0 ? 2 : 0x5A));
+  CHECK(fixture.actor.command_flags == (busy == 0 ? 2 : 0x5A));
 }
 
 TEST_CASE(
@@ -627,7 +630,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   fixture.Reaction()->temporary_ashley_alliance = 1;
   fixture.Reaction()->alliance_reaction_count = 9;
   VS::Battle::actorMarkers[1] = static_cast<char>(0xA5);
-  fixture.actors[1].commandFlags = 0x5A;
+  fixture.actors[1].command_flags = 0x5A;
   const auto random = VS::Core::BiosRand().State();
   auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.randomState = 0x2000;
@@ -645,11 +648,11 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
           "[ai][relations][linked-actors]") {
   struct ListFixture {
     AiLifecycleFixture table;
-    Battle_Actor* saved_head = VS::Battle::actors[0];
+    VS::Battle::Actor* saved_head = VS::Battle::actors[0];
     ~ListFixture() { VS::Battle::actors[0] = saved_head; }
   } fixture;
   constexpr std::array<int, 4> kIds{0, 2, 5, 9};
-  std::array<Battle_Actor, kIds.size()> actors{};
+  std::array<VS::Battle::Actor, kIds.size()> actors{};
   std::array<VS::Battle::Ai::ActorAiState, kIds.size()> states{};
   for (std::size_t index = 0; index < kIds.size(); ++index) {
     std::memset(&states[index], 0xA5, sizeof(states[index]));
@@ -659,15 +662,15 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
     VS::Battle::Ai::actorAiStates[kIds[index]] = &states[index];
   }
   // Ashley heads the list: it shares group 3 and is never examined or matched.
-  actors[0].aiGroup = 3;
-  actors[0].aiLinkedGroup = 3;
-  actors[1].aiGroup = 3;
-  actors[1].aiLinkedGroup = 4;
-  actors[2].aiGroup = 4;
-  actors[2].aiLinkedGroup = 3;
-  actors[3].aiGroup = 4;
-  actors[3].aiLinkedGroup = 4;
-  actors[3].reserved30Bit4 = 0x1F;
+  actors[0].ai_group = 3;
+  actors[0].ai_linked_group = 3;
+  actors[1].ai_group = 3;
+  actors[1].ai_linked_group = 4;
+  actors[2].ai_group = 4;
+  actors[2].ai_linked_group = 3;
+  actors[3].ai_group = 4;
+  actors[3].ai_linked_group = 4;
+  actors[3].reserved30_bit4 = 0x1F;
   states[3].linked_actor = 7;
   auto expected = states;
   expected[1].linked_actor = 5;
@@ -688,15 +691,15 @@ TEST_CASE("AI saved settings flags apply through the actor-state creation view",
   // The creation view's saved pair starts at the actor's group word, so its
   // second word is the room spawn's saved flags. Only that word's low half is
   // read and only the settings word is written.
-  const auto bytes = [](const Battle_Actor& actor) {
-    std::array<std::byte, sizeof(Battle_Actor)> image{};
+  const auto bytes = [](const VS::Battle::Actor& actor) {
+    std::array<std::byte, sizeof(VS::Battle::Actor)> image{};
     std::memcpy(image.data(), &actor, image.size());
     return image;
   };
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   std::memset(&actor, 0xA5, sizeof(actor));
   actor.reserved34 = static_cast<int>(0xBEEF0ACFu);
-  actor.templateWord2C = 0x12345678;
+  actor.template_word2c = 0x12345678;
   const auto before = bytes(actor);
   auto* view = reinterpret_cast<VS::Battle::Ai::AiActorView*>(&actor);
   REQUIRE((view->saved_ai_settings_flags & 1u) != 0);
@@ -713,12 +716,12 @@ namespace {
 // linked groups so the trailing link resolution has work to do.
 struct ActorSettingsFixture {
   AiLifecycleFixture table;
-  Battle_Actor* saved_head = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
   void* saved_section6 = VS::Field::roomData.section6;
   u_int saved_section6_length = VS::Field::roomData.header.section6_length;
-  std::array<Battle_Actor, 3> actors{};
+  std::array<VS::Battle::Actor, 3> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
 
@@ -730,10 +733,10 @@ struct ActorSettingsFixture {
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       VS::Battle::Ai::actorAiStates[kIds[index]] = &states[index];
     }
-    actors[1].aiGroup = 3;
-    actors[1].aiLinkedGroup = 4;
-    actors[2].aiGroup = 4;
-    actors[2].aiLinkedGroup = 3;
+    actors[1].ai_group = 3;
+    actors[1].ai_linked_group = 4;
+    actors[2].ai_group = 4;
+    actors[2].ai_linked_group = 3;
     states[1].linked_actor = 16;
     states[2].linked_actor = 16;
     VS::Battle::actors[0] = actors.data();
@@ -763,14 +766,14 @@ struct ActorSettingsFixture {
   // view, with the given behaviour index and movement flags.
   VS::Battle::Ai::SettingsView& PrepareLeader(unsigned behaviour,
                                               std::uint16_t movement_flags) {
-    Battle_Actor& actor = actors[0];
-    actor.subType = 0xAB;
+    VS::Battle::Actor& actor = actors[0];
+    actor.sub_type = 0xAB;
     // Spawn group: AI group 0xF, behaviour bits 4-8, linked group 0x1F,
     // patrol row 2, wander radius 0x2A and wander tile (0x15, 0x1B).
-    actor.aiGroup = 0xF;
-    actor.reserved30Bit4 = behaviour;
-    actor.aiLinkedGroup = 0x1F;
-    actor.reserved31Bit6 = 2u | (0x2Au << 2) | (0x15u << 8) | (0x1Bu << 13);
+    actor.ai_group = 0xF;
+    actor.reserved30_bit4 = behaviour;
+    actor.ai_linked_group = 0x1F;
+    actor.reserved31_bit6 = 2u | (0x2Au << 2) | (0x15u << 8) | (0x1Bu << 13);
     // Spawn flags: mode bits 12-13 both set and patrol rate bit 14.
     actor.reserved34 = 0x7FFF;
     VS::Battle::Ai::ActorAiState& state = states[0];

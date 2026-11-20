@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -235,7 +235,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
   }
 
   AiState& state_;
-  const Battle_Actor* cursor_ = nullptr;
+  const VS::Battle::Actor* cursor_ = nullptr;
 };
 
 AiState& RequireState(AiState* state) {

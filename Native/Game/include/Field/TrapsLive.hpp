@@ -3,8 +3,9 @@
 
 #include <cstdint>
 
-struct Battle_ActionDefinition;
 namespace VS::Battle {
+
+struct ActionDefinition;
 struct HitResult;
 }  // namespace VS::Battle
 
@@ -22,11 +23,13 @@ int RollLiveRiskLockBreak();
 // outside the actor table or limbs, or an unauthored affinity takes nothing
 // (0).
 std::int16_t CalculateLiveTrapPanelDamage(
-    Battle_ActionDefinition* action, VS::Battle::HitResult* attacker_result,
+    VS::Battle::ActionDefinition* action,
+    VS::Battle::HitResult* attacker_result,
     VS::Battle::HitResult* target_result, int hit_index,
     int add_random_variation);
 std::int16_t CalculateLiveHealingPanelRecovery(
-    Battle_ActionDefinition* action, VS::Battle::HitResult* attacker_result,
+    VS::Battle::ActionDefinition* action,
+    VS::Battle::HitResult* attacker_result,
     VS::Battle::HitResult* target_result, int hit_index,
     int add_random_variation);
 }  // namespace VS::Field

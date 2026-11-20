@@ -16,8 +16,8 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/DataStore.hpp"
@@ -532,7 +532,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     return VS::Menu::Inventory::kMiscItemToActionMap;
   }
   bool ActionUnlocked(std::uint32_t action) override {
-    const auto actions = std::span(Battle_actionDefinitions);
+    const auto actions = std::span(VS::Battle::actionDefinitions);
     if (action >= actions.size()) {
       Refuse("misc action outside battle definitions");
     }

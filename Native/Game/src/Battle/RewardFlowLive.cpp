@@ -8,9 +8,9 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/RewardFlow.hpp"
 #include "Battle/Rewards.hpp"
 #include "Battle/TargetingState.hpp"
@@ -30,6 +30,9 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionState;
+
 namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* reason) {
@@ -39,15 +42,15 @@ void Require(bool valid, const char* reason) {
   }
 }
 
-Battle_ActionState& CurrentAction() {
+ActionState& CurrentAction() {
   Require(VS::Battle::actionState != nullptr, "missing action state");
   return *VS::Battle::actionState;
 }
 
-Battle_ActionDefinition& Definition(std::uint16_t action) {
-  Require(action < std::size(Battle_actionDefinitions),
+ActionDefinition& Definition(std::uint16_t action) {
+  Require(action < std::size(VS::Battle::actionDefinitions),
           "action definition outside table");
-  return Battle_actionDefinitions[action];
+  return VS::Battle::actionDefinitions[action];
 }
 
 class LiveWorld final : public RewardDispatchWorld {
@@ -67,11 +70,12 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   RewardSelection Selection() override {
     const auto& state = CurrentAction();
-    return {.action_id = state.selection.actionId,
-            .targets_position = static_cast<std::uint32_t>(
-                state.selection.primaryTarget.targets_position),
-            .continued = static_cast<std::uint8_t>(state.chainContinued),
-            .primary_actor = state.selection.primaryTarget.target.target_actor};
+    return {
+        .action_id = state.selection.action_id,
+        .targets_position = static_cast<std::uint32_t>(
+            state.selection.primary_target.targets_position),
+        .continued = static_cast<std::uint8_t>(state.chain_continued),
+        .primary_actor = state.selection.primary_target.target.target_actor};
   }
   bool DefinitionUnlocked(std::uint16_t action) override {
     return Definition(action).unlocked != 0;

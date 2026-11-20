@@ -16,7 +16,7 @@
 #include "Actors/CharacterInit.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
@@ -1665,9 +1665,9 @@ TEST_CASE("Live spawn codecs decode room spawns, placements and memories",
 
 TEST_CASE("Live spawn adapters report their refusals on the actors channel",
           "[actors][actors-spawning]") {
-  Battle_Actor* const saved_actor = VS::Battle::actors[10];
-  Battle_Actor* const saved_character = VS::Battle::characterState;
-  Battle_Actor actor{};
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[10];
+  VS::Battle::Actor* const saved_character = VS::Battle::characterState;
+  VS::Battle::Actor actor{};
   {
     ChannelWarnings warnings("actors");
     CHECK(actors::CreateLiveAuxiliaryActor(2, 1, nullptr, 0, 0) == nullptr);

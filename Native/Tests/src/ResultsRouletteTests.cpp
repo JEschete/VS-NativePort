@@ -13,7 +13,7 @@
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -27,9 +27,9 @@ namespace {
 void IgnoreAudio(VS::Audio::CommandParams*) {}
 
 struct RouletteFixture {
-  Battle_Actor* saved_actor = VS::Battle::characterState;
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor* saved_actor = VS::Battle::characterState;
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   unsigned saved_random = VS::Core::BiosRand().State();
   decltype(VS::Input::buttonsPressed) saved_input = VS::Input::buttonsPressed;
   int saved_state = VS::Menu::Results::screenState;
@@ -216,15 +216,15 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
     std::memset(&fixture.stats, 0, sizeof fixture.stats);
     auto& stats = fixture.stats;
     stats.strength = near_cap ? 998 : 12;
-    stats.totalStrength = near_cap ? 998 : 17;
+    stats.total_strength = near_cap ? 998 : 17;
     stats.intelligence = near_cap ? 998 : 57;
-    stats.totalIntelligence = near_cap ? 998 : 76;
+    stats.total_intelligence = near_cap ? 998 : 76;
     stats.agility = near_cap ? 998 : 31;
-    stats.totalAgility = near_cap ? 998 : 45;
-    stats.currentHp = near_cap ? 998 : 200;
-    stats.maxHp = near_cap ? 998 : 250;
-    stats.currentMp = near_cap ? 998 : 40;
-    stats.maxMp = near_cap ? 998 : 60;
+    stats.total_agility = near_cap ? 998 : 45;
+    stats.current_hp = near_cap ? 998 : 200;
+    stats.max_hp = near_cap ? 998 : 250;
+    stats.current_mp = near_cap ? 998 : 40;
+    stats.max_mp = near_cap ? 998 : 60;
     auto expected = stats;
     const auto award = VS::Menu::Results::kBuffReels[reel][slot];
     const auto increment = [award](auto& value) {
@@ -235,23 +235,23 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
     switch (static_cast<VS::Menu::Results::BonusReelStat>(award.stat)) {
       case kStrength:
         increment(expected.strength);
-        increment(expected.totalStrength);
+        increment(expected.total_strength);
         break;
       case kAgility:
         increment(expected.agility);
-        increment(expected.totalAgility);
+        increment(expected.total_agility);
         break;
       case kIntelligence:
         increment(expected.intelligence);
-        increment(expected.totalIntelligence);
+        increment(expected.total_intelligence);
         break;
       case kHp:
-        increment(expected.currentHp);
-        increment(expected.maxHp);
+        increment(expected.current_hp);
+        increment(expected.max_hp);
         break;
       case kMp:
-        increment(expected.currentMp);
-        increment(expected.maxMp);
+        increment(expected.current_mp);
+        increment(expected.max_mp);
         break;
       default:
         FAIL("Original reel contains an unsupported stat");

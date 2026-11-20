@@ -9,19 +9,21 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Core/Diagnostics.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace VS::Battle {
 namespace {
-HitModifierStats ReadStats(const Battle_ActorStats& stats) {
+HitModifierStats ReadStats(const VS::Battle::ActorStats& stats) {
   HitModifierStats result;
-  result.actor_id = stats.actorId;
+  result.actor_id = stats.actor_id;
   result.risk = stats.risk;
   for (std::size_t i = 0; i < result.weapon_gems.size(); ++i) {
     result.weapon_gems.at(i) = stats.weapon.gems[i].gem_effects;
@@ -29,14 +31,14 @@ HitModifierStats ReadStats(const Battle_ActorStats& stats) {
   }
   for (std::size_t i = 0; i < result.chain_evasion.size(); ++i) {
     result.chain_evasion.at(i) =
-        static_cast<std::uint8_t>(stats.limbs[i].chainEvasion);
+        static_cast<std::uint8_t>(stats.limbs[i].chain_evasion);
   }
   return result;
 }
 
 class LiveHitModifierWorld final : public HitModifierWorld {
  public:
-  explicit LiveHitModifierWorld(Battle_ActionDefinition* action = nullptr)
+  explicit LiveHitModifierWorld(ActionDefinition* action = nullptr)
       : action_(action) {}
   std::optional<HitModifierStats> Stats(std::uint8_t slot) override {
     if (slot >= std::size(VS::Battle::actors) ||
@@ -51,19 +53,19 @@ class LiveHitModifierWorld final : public HitModifierWorld {
         VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return std::bit_cast<std::uint32_t>(VS::Battle::actors[slot]->weaponDrawn);
+    return std::bit_cast<std::uint32_t>(VS::Battle::actors[slot]->weapon_drawn);
   }
   std::optional<HitModifierAction> Action() override {
     if (action_ == nullptr) return std::nullopt;
     return HitModifierAction{
         action_->id,
         action_->type,
-        {static_cast<std::uint8_t>(action_->hits[0].effectId),
-         static_cast<std::uint8_t>(action_->hits[1].effectId)}};
+        {static_cast<std::uint8_t>(action_->hits[0].effect_id),
+         static_cast<std::uint8_t>(action_->hits[1].effect_id)}};
   }
 
  private:
-  Battle_ActionDefinition* action_;
+  ActionDefinition* action_;
 };
 
 std::optional<HitModifierTarget> ReadHit(const VS::Battle::HitResult* hit) {
@@ -92,32 +94,30 @@ T Checked(std::optional<T> result) {
 }  // namespace
 
 // decomp: _getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9712).
-std::int16_t AttackLiveGemHitBonus(Battle_ActionDefinition* action,
-                                   Battle_ActorStats* stats) {
+std::int16_t AttackLiveGemHitBonus(ActionDefinition* action,
+                                   VS::Battle::ActorStats* stats) {
   LiveHitModifierWorld world(action);
   const auto state = stats ? std::optional{ReadStats(*stats)} : std::nullopt;
   return Checked(AttackGemHitBonus(Pointer(state), world));
 }
 
 // decomp: _getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9741).
-std::int16_t DefenseLiveGemHitBonus(Battle_ActionDefinition* action,
-                                    Battle_ActorStats* stats, int hit) {
+std::int16_t DefenseLiveGemHitBonus(ActionDefinition* action,
+                                    VS::Battle::ActorStats* stats, int hit) {
   LiveHitModifierWorld world(action);
   const auto state = stats ? std::optional{ReadStats(*stats)} : std::nullopt;
   return Checked(DefenseGemHitBonus(Pointer(state), hit, world));
 }
 
 // decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867).
-int PreviousLiveHitSuccessThreshold(Battle_ActionDefinition*,
-                                    VS::Battle::HitResult*,
+int PreviousLiveHitSuccessThreshold(ActionDefinition*, VS::Battle::HitResult*,
                                     VS::Battle::HitResult*, int, int) {
   return PreviousHitSuccessThreshold(
       std::bit_cast<std::int32_t>(VS::Battle::previousHitResult));
 }
 
 // decomp: _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875).
-int LiveGemHitChance(Battle_ActionDefinition* action,
-                     VS::Battle::HitResult* source,
+int LiveGemHitChance(ActionDefinition* action, VS::Battle::HitResult* source,
                      VS::Battle::HitResult* target, int hit, int) {
   LiveHitModifierWorld world(action);
   const auto from = ReadHit(source);
@@ -126,7 +126,7 @@ int LiveGemHitChance(Battle_ActionDefinition* action,
 }
 
 // decomp: _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045).
-int LiveRiskHitChance(Battle_ActionDefinition*, VS::Battle::HitResult* source,
+int LiveRiskHitChance(ActionDefinition*, VS::Battle::HitResult* source,
                       VS::Battle::HitResult*, int, int) {
   LiveHitModifierWorld world;
   const auto from = ReadHit(source);
@@ -134,7 +134,7 @@ int LiveRiskHitChance(Battle_ActionDefinition*, VS::Battle::HitResult* source,
 }
 
 // decomp: _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057).
-int LiveChainHitChance(Battle_ActionDefinition*, VS::Battle::HitResult*,
+int LiveChainHitChance(ActionDefinition*, VS::Battle::HitResult*,
                        VS::Battle::HitResult* target, int, int) {
   LiveHitModifierWorld world;
   const auto to = ReadHit(target);

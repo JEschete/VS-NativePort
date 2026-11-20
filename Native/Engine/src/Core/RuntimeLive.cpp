@@ -5,7 +5,7 @@
 
 namespace VS::Core {
 void IgnoreLiveActorCallback(
-    [[maybe_unused]] Battle_ActorStats* actor) noexcept {
+    [[maybe_unused]] VS::Battle::ActorStats* actor) noexcept {
   IgnoreCallback();
 }
 }  // namespace VS::Core

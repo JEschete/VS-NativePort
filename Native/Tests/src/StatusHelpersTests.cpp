@@ -10,9 +10,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpers.hpp"
@@ -20,6 +20,8 @@
 #include "Content/ModuleData.hpp"
 #include "Field/Interactions.hpp"
 #include "State/Timers.hpp"
+
+using VS::Battle::ActionState;
 
 namespace {
 namespace battle = VS::Battle;
@@ -73,18 +75,18 @@ auto Bytes(const T& value) {
 }
 
 struct LiveRiskFixture {
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
-  Battle_Actor* saved_player = VS::Battle::characterState;
-  Battle_ActionState* saved_action = VS::Battle::actionState;
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_player = VS::Battle::characterState;
+  ActionState* saved_action = VS::Battle::actionState;
   std::uint32_t saved_control = VS::Field::controlMode;
   std::uint32_t saved_flow = VS::Battle::actionFlowMode;
   int saved_ticks = VS::State::tickSpeed;
   int saved_timer = VS::Battle::targetingRiskTimer;
-  Battle_Actor target_actor{};
-  Battle_Actor player_actor{};
-  Battle_ActorStats target_stats{};
-  Battle_ActorStats player_stats{};
-  Battle_ActionState action{};
+  VS::Battle::Actor target_actor{};
+  VS::Battle::Actor player_actor{};
+  VS::Battle::ActorStats target_stats{};
+  VS::Battle::ActorStats player_stats{};
+  ActionState action{};
 
   LiveRiskFixture() {
     target_actor.stats = &target_stats;
@@ -335,7 +337,7 @@ TEST_CASE("Targeting risk reset rearms the next targeting tick",
 
 TEST_CASE("Live enchantments keep all nonaffinity actor statistics unchanged",
           "[status-helpers][live]") {
-  Battle_ActorStats stats{};
+  VS::Battle::ActorStats stats{};
   stats.weapon.blade.id = 1;
   stats.shield.base.id = 1;
   stats.limbs[5].armor.armor.id = 1;

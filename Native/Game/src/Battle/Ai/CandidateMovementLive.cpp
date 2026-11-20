@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelInstance.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"

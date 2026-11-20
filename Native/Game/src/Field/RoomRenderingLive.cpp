@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.hpp"
 #include "Core/Gte.h"
@@ -303,7 +303,7 @@ class LiveSceneHost final : public RoomSceneHost {
   void DrawMinimap(const MinimapLayout& layout) override;
   bool WeaponDrawn() override {
     return VS::Battle::characterState != nullptr &&
-           VS::Battle::characterState->weaponDrawn == 1;
+           VS::Battle::characterState->weapon_drawn == 1;
   }
   int BorderPulsePhase() override { return minimapBorderPulsePhase; }
   void SetBorderPulsePhase(int phase) override {

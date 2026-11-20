@@ -15,7 +15,7 @@ std::array<std::uint16_t, kBladeCategoryCount> bladePpDamageBonuses;
 std::array<StatCalculator, kStatCalculatorCount> statCalculators;
 
 // decomp: vs_battle_actors (vs_battle_actors@BATTLE/BATTLE.PRG)
-std::array<Battle_Actor*, kBattleActorSlotCount> actors;
+std::array<VS::Battle::Actor*, kBattleActorSlotCount> actors;
 
 // decomp: _lastValue (_lastValue@BATTLE/BATTLE.PRG)
 std::uint32_t lastActionStatValue;

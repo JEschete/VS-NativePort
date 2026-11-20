@@ -10,7 +10,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -36,7 +36,7 @@ static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView,
 // The AI state's engagement data is the battle actor; its pose bits are the
 // command flags byte.
 static_assert(offsetof(VS::Battle::Ai::EngagementData, reserved_a) + 1 ==
-              offsetof(Battle_Actor, commandFlags));
+              offsetof(VS::Battle::Actor, command_flags));
 constexpr unsigned kPoseShift = 2;
 constexpr unsigned kPoseMask = 3u << kPoseShift;
 
@@ -68,7 +68,7 @@ class LiveEngagementHost final : public EngagementBuildupHost {
   }
   void UnlinkEngagedActor() override { UnlinkLiveEngagedActor(&state_); }
   [[nodiscard]] std::optional<bool> HasSingleOpponent() const override {
-    const Battle_Actor* first = VS::Battle::actors[0];
+    const VS::Battle::Actor* first = VS::Battle::actors[0];
     if (first == nullptr) return std::nullopt;
     return first->next != nullptr && first->next->next == nullptr;
   }
@@ -116,9 +116,10 @@ class LiveEngagedList final : public EngagedList {
   void SetPose(int actor_id, unsigned pose) override {
     VS::Battle::Ai::ActorAiState& state = At(actor_id);
     Require(state.actor != nullptr, "AI engagement pose requires the actor");
-    auto& actor = *reinterpret_cast<Battle_Actor*>(state.actor);
-    actor.commandFlags = static_cast<u_char>(
-        (actor.commandFlags & ~kPoseMask) | ((pose << kPoseShift) & kPoseMask));
+    auto& actor = *reinterpret_cast<VS::Battle::Actor*>(state.actor);
+    actor.command_flags =
+        static_cast<u_char>((actor.command_flags & ~kPoseMask) |
+                            ((pose << kPoseShift) & kPoseMask));
   }
   [[nodiscard]] unsigned AshleyClassification(int actor_id) const override {
     return At(actor_id).relations[0].classification;

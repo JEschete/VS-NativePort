@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -42,7 +42,8 @@ constexpr int kCoreLimb = 4;
 
 static_assert(std::size(VS::Battle::Ai::radialRetreatPath) >=
               kRetreatPathSteps);
-static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> > kCoreLimb);
+static_assert(std::tuple_size_v<decltype(VS::Battle::ActorStats::limbs)> >
+              kCoreLimb);
 
 // The retreat and tracking views are the actor's AI state.
 static_assert(offsetof(Retreat, x) == offsetof(AiState, position));
@@ -75,9 +76,9 @@ OrbitingBoss Load(const AiState& state) {
   if (const VS::Actors::ActorRecord* record = RecordOf(state)) {
     boss.model_flag = record->preview_pose != 0;
   }
-  if (const Battle_ActorStats* stats = state.stats) {
-    boss.stats = BossStats{.current_hp = stats->currentHp,
-                           .max_hp = stats->maxHp,
+  if (const VS::Battle::ActorStats* stats = state.stats) {
+    boss.stats = BossStats{.current_hp = stats->current_hp,
+                           .max_hp = stats->max_hp,
                            .core_hp = stats->limbs[kCoreLimb].hp};
   }
   boss.movement_target = state.movement_target;
@@ -219,29 +220,29 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
   }
   [[nodiscard]] int Random() override { return VS::Core::NextBiosRand(); }
   [[nodiscard]] std::optional<BossBattleActor> BattleActor() const override {
-    const Battle_Actor* actor = Actor();
+    const VS::Battle::Actor* actor = Actor();
     if (actor == nullptr || actor->stats == nullptr) return std::nullopt;
     return BossBattleActor{
         .core_hp = actor->stats->limbs[kCoreLimb].hp,
-        .command = {.opcode = static_cast<CommandOpcode>(actor->commandOpcode),
-                    .arg0 = actor->commandArg0,
-                    .arg1 = actor->commandArg1.word,
-                    .arg2 = actor->commandArg2}};
+        .command = {.opcode = static_cast<CommandOpcode>(actor->command_opcode),
+                    .arg0 = actor->command_arg0,
+                    .arg1 = actor->command_arg1.word,
+                    .arg2 = actor->command_arg2}};
   }
   void QueueBattleCommand(const ActorCommandPacket& packet) override {
-    Battle_Actor* actor = Actor();
+    VS::Battle::Actor* actor = Actor();
     Require(actor != nullptr, "AI orbiting boss attack requires its actor");
-    actor->commandArg0 = packet.arg0;
-    actor->commandArg1.word = packet.arg1;
-    actor->commandArg2 = packet.arg2;
-    actor->commandOpcode = static_cast<u_char>(packet.opcode);
-    actor->commandState = kCommandPending;
+    actor->command_arg0 = packet.arg0;
+    actor->command_arg1.word = packet.arg1;
+    actor->command_arg2 = packet.arg2;
+    actor->command_opcode = static_cast<std::uint8_t>(packet.opcode);
+    actor->command_state = kCommandPending;
   }
 
  private:
   // The AI state's actor is the battle actor.
-  [[nodiscard]] Battle_Actor* Actor() const {
-    return reinterpret_cast<Battle_Actor*>(state_.actor);
+  [[nodiscard]] VS::Battle::Actor* Actor() const {
+    return reinterpret_cast<VS::Battle::Actor*>(state_.actor);
   }
 
   template <typename Call>

@@ -15,7 +15,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -1019,7 +1019,7 @@ TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
 struct LiveModelFixture {
   Restore<VS::Actors::ActorRecord*> saved_actor{VS::Actors::actorRecords[1]};
   Restore<std::uint8_t> saved_step{VS::Content::objectDataLoadStep};
-  Restore<Battle_Actor*> saved_character{VS::Battle::characterState};
+  Restore<VS::Battle::Actor*> saved_character{VS::Battle::characterState};
   std::unique_ptr<VS::Actors::ActorRecord> actor =
       std::make_unique<VS::Actors::ActorRecord>();
 };

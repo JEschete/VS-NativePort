@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Battle_ActionDefinition;
-
 namespace VS::Battle {
+
+struct ActionDefinition;
 
 struct HitResult;
 
@@ -29,7 +29,7 @@ static_assert(sizeof(HitTargetWord) == kHitTargetWordBytes,
 
 // The table's entries return void, as upstream declares it, even where the
 // decomp's handlers declare int; a promoted mediator must match this type.
-using ActionEffectMediator = void (*)(Battle_ActionDefinition*, HitResult*,
+using ActionEffectMediator = void (*)(VS::Battle::ActionDefinition*, HitResult*,
                                       HitResult*, int, int);
 
 inline constexpr std::size_t kLimbInjuryStatusBytes = 20;

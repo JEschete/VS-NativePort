@@ -9,19 +9,21 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
 
+using VS::Battle::ActionState;
+
 namespace {
 struct ImpactFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_ActionState* previous_action = VS::Battle::actionState;
+  ActionState* previous_action = VS::Battle::actionState;
   VS::Actors::ActorRecord* previous_actor = VS::Actors::actorRecords[16];
   VS::Effects::LiveEffectPackage* previous_package = VS::Effects::package;
   VS::Effects::LiveEffectPackage* previous_saved = VS::Effects::savedPackage;
@@ -38,7 +40,7 @@ struct ImpactFixture {
   decltype(std::to_array(VS::Effects::tokenBitmaps)) previous_tokens =
       std::to_array(VS::Effects::tokenBitmaps);
   int previous_busy = VS::Effects::effectBusyFlags;
-  Battle_ActionState action{};
+  ActionState action{};
   VS::Actors::ActorRecord actor{};
   std::array<char, 256> script{};
 
@@ -75,9 +77,9 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
   fixture->actor.instance.slot = 0;
   fixture->actor.instance.movement_mode = 2;
   fixture->actor.instance.jump_countdown = 99;
-  fixture->action.queueIndex = 0xFFFFFFFFU;
+  fixture->action.queue_index = 0xFFFFFFFFU;
   auto& queued = fixture->action.queue[3];
-  queued.targetCount = 1;
+  queued.target_count = 1;
   queued.targets[0].targets_position = 1;
   auto* unused = reinterpret_cast<SVECTOR*>(std::uintptr_t{1});
   VS::Battle::PlayLiveDefenseAbilityAnimation(16, unused,

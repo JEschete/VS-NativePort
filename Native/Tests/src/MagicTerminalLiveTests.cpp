@@ -12,8 +12,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/ModuleData.hpp"
@@ -27,6 +27,8 @@
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace magic = VS::Menu::Magic;
@@ -62,7 +64,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
       VS::Battle::characterState};
-  ValueRestore<Battle_Actor*> saved_ashley{VS::Battle::actors[0]};
+  ValueRestore<VS::Battle::Actor*> saved_ashley{VS::Battle::actors[0]};
   ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
       VS::State::stateFlags};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
@@ -79,8 +81,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
       VS::Menu::Framework::displayActionCost};
   ValueRestore<decltype(VS::Menu::Framework::actionRestrictions)>
       saved_restrictions{VS::Menu::Framework::actionRestrictions};
-  ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
-      saved_actions{Battle_actionDefinitions};
+  ArrayRestore<ActionDefinition, std::size(VS::Battle::actionDefinitions)>
+      saved_actions{VS::Battle::actionDefinitions.data()};
   ArrayRestore<std::uint16_t, std::size(magic::magicStrings)> saved_magic{
       magic::magicStrings};
   ArrayRestore<std::uint16_t, std::size(magic::teleportationStrings)>
@@ -98,8 +100,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   ArrayRestore<std::uint8_t,
                std::size(VS::Menu::Framework::cursorBrightnessAnimation)>
       saved_brightness{VS::Menu::Framework::cursorBrightnessAnimation};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   MagicLiveFixture() {
     framework::ResetLiveMainMenuStatics();
@@ -108,7 +110,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     VS::Battle::characterState = &actor;
     VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
-    stats.currentMp = 500;
+    stats.current_mp = 500;
     VS::State::stateFlags = {};
     VS::Input::settings.cursor_memory = 0;
     VS::Menu::Framework::menuState = {};
@@ -116,7 +118,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::Framework::shortcutInvoked = 0;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::actionRestrictions = 0;
-    std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
+    std::ranges::fill(VS::Battle::actionDefinitions, ActionDefinition{});
     InitializeStrings();
     InitializeSpells();
   }
@@ -145,7 +147,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     for (std::size_t school = 0; school < schools.size(); ++school) {
       std::ranges::fill(schools[school], std::uint8_t{0});
       schools[school][0] = static_cast<std::uint8_t>(kActions[school]);
-      auto& action = Battle_actionDefinitions[kActions[school]];
+      auto& action = VS::Battle::actionDefinitions[kActions[school]];
       action.unlocked = 1;
       action.name[0] = 2;
       action.name[1] = static_cast<char>(0xE7);
@@ -189,7 +191,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     REQUIRE(magic::UpdateTeleportMenuLive(0) > 0);
   }
   void EnterRanks(unsigned init = 1) {
-    Battle_actionDefinitions[kActions[0] + 1].unlocked = 1;
+    VS::Battle::actionDefinitions[kActions[0] + 1].unlocked = 1;
     OpenSchool(0, init);
     VS::Menu::Framework::selectedRow = 0;
     static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
@@ -298,7 +300,7 @@ TEST_CASE("MENU0 completion and cold sessions restart every school owner",
   REQUIRE(kSchoolEntries[school](0) == 0);
   fixture.CheckSchoolRow(school, 0);
   CHECK(framework::LiveMenuCursorMemory()[kRetainedCursor] == 3);
-  CHECK(Battle_actionDefinitions[kActions[school]].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[kActions[school]].unlocked == 1);
 }
 
 TEST_CASE("MENU0 completion and cold sessions also restore teleport ownership",

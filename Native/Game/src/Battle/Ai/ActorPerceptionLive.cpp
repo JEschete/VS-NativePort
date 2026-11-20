@@ -12,7 +12,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelInstance.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -114,7 +114,7 @@ std::uint32_t PreviousTileWord(const VS::Actors::ModelInstance& instance) {
 template <typename Visit>
 void WalkBattleActors(Visit visit) {
   int walked = 0;
-  for (Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
+  for (VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     Require(++walked <= kBattleActorSlots,
             "AI perception found a battle actor list longer than its table");
@@ -166,7 +166,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   explicit LiveTargetPerceptionWorld(const ObserverView& view) : view_(view) {}
 
   [[nodiscard]] std::optional<PerceivedModel> Model(int target) const override {
-    const Battle_Actor* actor = VS::Battle::actors[target];
+    const VS::Battle::Actor* actor = VS::Battle::actors[target];
     if (actor == nullptr || actor->model == nullptr) return std::nullopt;
     const VS::Actors::ModelInstance& model = *actor->model;
     return PerceivedModel{.position = Core::Math::PositionOf(model.position),
@@ -216,7 +216,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   [[nodiscard]] std::vector<ListedPerceptionActor> ListedActors()
       const override {
     std::vector<ListedPerceptionActor> listed;
-    WalkBattleActors([&](const Battle_Actor& actor) {
+    WalkBattleActors([&](const VS::Battle::Actor& actor) {
       ListedPerceptionActor entry{.id = actor.id, .position = std::nullopt};
       if (actor.model != nullptr) {
         entry.position = Core::Math::PositionOf(actor.model->position);
@@ -244,15 +244,15 @@ Core::Math::Position3 UnpackPosition(std::uint32_t xy, std::uint32_t z) {
                                .z = static_cast<std::int16_t>(z & kHalfMask)};
 }
 
-PerceivingActor Load(const Battle_Actor& battle, const UpdateView& view) {
+PerceivingActor Load(const VS::Battle::Actor& battle, const UpdateView& view) {
   PerceivingActor actor;
   actor.battle = PerceivingBattleActor{
       .id = static_cast<std::uint8_t>(battle.id),
-      .command_state = battle.commandState,
-      .command_opcode = battle.commandOpcode,
+      .command_state = battle.command_state,
+      .command_opcode = battle.command_opcode,
       .command_flags =
-          static_cast<std::uint8_t>(battle.commandFlags & kCommandFlagBits),
-      .action_recovery_timer = battle.stats->actionRecoveryTimer};
+          static_cast<std::uint8_t>(battle.command_flags & kCommandFlagBits),
+      .action_recovery_timer = battle.stats->action_recovery_timer};
   actor.stayed_on_tile = view.opaque8;
   actor.alert = view.opaque_e;
   actor.perception_skipped = view.opaque14;
@@ -306,11 +306,11 @@ std::uint32_t PackHalves(std::int16_t low, std::int16_t high) {
 // The battle actor's command state, opcode and recovery timer, the alert
 // rule, remembered tile, flee timer, awareness, status, navigation override
 // and relations are only read.
-void Store(const PerceivingActor& actor, Battle_Actor& battle,
+void Store(const PerceivingActor& actor, VS::Battle::Actor& battle,
            UpdateView& view) {
-  battle.commandFlags =
-      static_cast<u_char>((battle.commandFlags & ~kCommandFlagBits) |
-                          (actor.battle.command_flags & kCommandFlagBits));
+  battle.command_flags = static_cast<std::uint8_t>(
+      (battle.command_flags & ~kCommandFlagBits) |
+      (actor.battle.command_flags & kCommandFlagBits));
   view.opaque8 = actor.stayed_on_tile;
   view.opaque_e = actor.alert;
   view.opaque14 = actor.perception_skipped;
@@ -350,7 +350,7 @@ void Store(const PerceivingActor& actor, Battle_Actor& battle,
 // it after.
 class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
  public:
-  LiveActorPerceptionWorld(Battle_Actor& battle, UpdateView& view)
+  LiveActorPerceptionWorld(VS::Battle::Actor& battle, UpdateView& view)
       : battle_(battle), view_(view) {}
 
   [[nodiscard]] std::optional<PerceiverModel> Model() const override {
@@ -377,16 +377,16 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
         .pad = static_cast<std::int16_t>(link->opaque4 >> kHalfShift)};
   }
   [[nodiscard]] std::optional<PerceivedHp> Hp() const override {
-    const Battle_Actor* actor = view_.actor;
+    const VS::Battle::Actor* actor = view_.actor;
     if (actor == nullptr || actor->stats == nullptr) return std::nullopt;
     return PerceivedHp{
-        .current = static_cast<std::uint16_t>(actor->stats->currentHp),
-        .max = static_cast<std::uint16_t>(actor->stats->maxHp)};
+        .current = static_cast<std::uint16_t>(actor->stats->current_hp),
+        .max = static_cast<std::uint16_t>(actor->stats->max_hp)};
   }
   [[nodiscard]] std::vector<int> ListedActorIds() const override {
     std::vector<int> ids;
     WalkBattleActors(
-        [&](const Battle_Actor& actor) { ids.push_back(actor.id); });
+        [&](const VS::Battle::Actor& actor) { ids.push_back(actor.id); });
     return ids;
   }
   [[nodiscard]] std::optional<std::uint32_t> RecordTile(int id) const override {
@@ -476,11 +476,11 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
     actor = Load(battle_, view_);
   }
 
-  Battle_Actor& battle_;
+  VS::Battle::Actor& battle_;
   UpdateView& view_;
 };
 
-void UpdateListedActor(Battle_Actor& battle) {
+void UpdateListedActor(VS::Battle::Actor& battle) {
   Require(battle.id >= 0 && std::cmp_less(battle.id, kFrameActorSlots),
           "AI perception requires a listed actor inside the AI state table");
   auto* view =

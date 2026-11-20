@@ -7,8 +7,8 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -115,7 +115,7 @@ class LiveItemRowsWorld final : public ItemRowsWorld {
       : menu_text_(menu_text), row_types_(row_types), text_buf_(text_buf) {}
 
   bool ActionUnlocked(std::uint32_t action) override {
-    const std::span actions(Battle_actionDefinitions);
+    const std::span actions(VS::Battle::actionDefinitions);
     return action < actions.size() && actions[action].unlocked != 0;
   }
 

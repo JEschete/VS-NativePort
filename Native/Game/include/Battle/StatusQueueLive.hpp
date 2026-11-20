@@ -1,8 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_ActionDefinition;
 namespace VS::Battle {
+
+struct ActionDefinition;
 struct HitResult;
 }  // namespace VS::Battle
 
@@ -11,69 +12,84 @@ int QueueLiveApplicableStatusChanges(int status_id, VS::Battle::HitResult* hit);
 int QueueLiveStatusRemovalMask(int status_id, VS::Battle::HitResult* hit);
 // Action-effect mediators are void callbacks; incidental MIPS v0 values
 // belong only to the differential projection, not this production contract.
-void QueueLiveStrengthDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveStrengthDown(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveIntelligenceDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveIntelligenceDown(VS::Battle::ActionDefinition*,
+                               VS::Battle::HitResult*,
                                VS::Battle::HitResult* target, int, int);
-void QueueLiveAgilityDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveAgilityDown(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                           VS::Battle::HitResult* target, int, int);
-void QueueLiveEquipmentDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveEquipmentDown(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int);
-void QueueLiveHalfMovement(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveHalfMovement(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveStrengthUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveStrengthUp(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult* target, int, int);
-void QueueLiveIntelligenceUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveIntelligenceUp(VS::Battle::ActionDefinition*,
+                             VS::Battle::HitResult*,
                              VS::Battle::HitResult* target, int, int);
-void QueueLiveAgilityUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveAgilityUp(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                         VS::Battle::HitResult* target, int, int);
-void QueueLiveEquipmentUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveEquipmentUp(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                           VS::Battle::HitResult* target, int, int);
-void QueueLiveQuicken(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveQuicken(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                       VS::Battle::HitResult* target, int, int);
-void QueueLiveSilence(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveSilence(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                       VS::Battle::HitResult* target, int, int);
-void QueueLiveMagicWard(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveMagicWard(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                         VS::Battle::HitResult* target, int, int);
-void QueueLiveRegeneration(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveRegeneration(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveBanish(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveBanish(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                      VS::Battle::HitResult* target, int, int execute_action);
-void QueueLiveParalysis(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveParalysis(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                         VS::Battle::HitResult* target, int, int);
-void QueueLivePoison(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLivePoison(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                      VS::Battle::HitResult* target, int, int);
-void QueueLiveNumbness(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveNumbness(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                        VS::Battle::HitResult* target, int, int);
-void QueueLiveCurse(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveCurse(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                     VS::Battle::HitResult* target, int, int);
-void QueueLiveAirAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveAirAttackUp(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                           VS::Battle::HitResult* target, int, int);
-void QueueLiveFireAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveFireAttackUp(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveEarthAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveEarthAttackUp(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int);
-void QueueLiveWaterAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveWaterAttackUp(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int);
-void QueueLiveAirDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveAirDefenseUp(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveFireDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveFireDefenseUp(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int);
-void QueueLiveEarthDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveEarthDefenseUp(VS::Battle::ActionDefinition*,
+                             VS::Battle::HitResult*,
                              VS::Battle::HitResult* target, int, int);
-void QueueLiveWaterDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveWaterDefenseUp(VS::Battle::ActionDefinition*,
+                             VS::Battle::HitResult*,
                              VS::Battle::HitResult* target, int, int);
-void QueueLiveParalysisCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveParalysisCure(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int);
-void QueueLivePoisonCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLivePoisonCure(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult* target, int, int);
-void QueueLiveCurseCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveCurseCure(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                         VS::Battle::HitResult* target, int, int);
-void QueueLiveNumbnessCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveNumbnessCure(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int);
-void QueueLiveDispel(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveDispel(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                      VS::Battle::HitResult* target, int, int);
-void QueueLiveNegativeStatusCure(Battle_ActionDefinition*,
+void QueueLiveNegativeStatusCure(VS::Battle::ActionDefinition*,
                                  VS::Battle::HitResult*,
                                  VS::Battle::HitResult* target, int, int);
 }  // namespace VS::Battle

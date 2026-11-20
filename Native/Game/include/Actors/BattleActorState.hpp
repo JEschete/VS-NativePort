@@ -10,8 +10,8 @@
 // model id and kind scans, post-defeat retention, the AI logic switch and the
 // room-list detach. The rules see battle actors as BattleActorState and
 // ActorVitals values the host lends them, and reach the roster, AI, markers
-// and status effects through the host, so they reach no Battle_Actor layout
-// or PS1 address.
+// and status effects through the host, so they reach no VS::Battle::Actor
+// layout or PS1 address.
 namespace VS::Actors {
 // VS::Battle::actors: the room actors, then the effect and target placeholders.
 inline constexpr int kBattleActorSlots = 42;

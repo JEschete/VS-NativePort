@@ -12,7 +12,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
@@ -54,8 +54,8 @@ std::uint8_t* LiveBattleCommandState(int actor_id) {
       static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  Battle_Actor* actor = VS::Battle::actors[actor_id];
-  return actor != nullptr ? &actor->commandState : nullptr;
+  VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
+  return actor != nullptr ? &actor->command_state : nullptr;
 }
 // End of the cross-slice calls.
 

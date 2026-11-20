@@ -1,17 +1,19 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 
 // Bindings from VS::Battle::actors and the actor records to the typed roster
 // (ActorRoster.cpp). Refusals are reported on the "actors" channel.
 namespace VS::Actors {
 // _insertActor (146C.c:884): 1 when `actor` joined the list after Ashley.
 // Refused (0) for a null actor or an empty Ashley slot.
-int LinkLiveActorAfterAshley(Battle_Actor* actor);
+int LinkLiveActorAfterAshley(VS::Battle::Actor* actor);
 // _removeActor (146C.c:909): 1 when `actor` left the list; its next link is
 // cleared. Refused (0) for a null actor.
-int UnlinkLiveActorFromRoomList(Battle_Actor* actor);
+int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor);
 // _removeActorAtIndex (146C.c:926): 0 for an index past the roster, else 1.
 int RemoveLiveActorAtSlot(unsigned index, int hidden);
 // func_8006C250 (146C.c:1842).

@@ -31,7 +31,7 @@
 #include "Audio/SoundState.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
@@ -174,8 +174,8 @@ class Fixture {
   static constexpr std::uint16_t kSequenceId = 128;
   std::vector<std::byte> arena = std::vector<std::byte>(kArenaBytes);
   memory::ScopedLiveGameHeap heap{arena};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Audio::MusicConfig music{};
   VS::test_support::time_attack::LiveTimeAttackFixture frame;
 

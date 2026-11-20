@@ -12,41 +12,44 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "State/Progress.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionState;
+
 namespace {
 namespace b = VS::Battle;
 struct LiveReset {
-  Battle_ActionState* state = VS::Battle::actionState;
+  ActionState* state = VS::Battle::actionState;
   decltype(VS::Battle::actors) actors = VS::Battle::actors;
   decltype(VS::Actors::actorRecords) records = VS::Actors::actorRecords;
-  decltype(std::to_array(Battle_actionDefinitions)) definitions =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) definitions =
+      VS::Battle::actionDefinitions;
   decltype(std::to_array(VS::State::learnedActionFlags)) learned =
       std::to_array(VS::State::learnedActionFlags);
   ~LiveReset() {
     VS::Battle::actionState = state;
     std::ranges::copy(actors, std::begin(VS::Battle::actors));
     std::ranges::copy(records, std::begin(VS::Actors::actorRecords));
-    std::ranges::copy(definitions, std::begin(Battle_actionDefinitions));
+    std::ranges::copy(definitions, std::begin(VS::Battle::actionDefinitions));
     std::ranges::copy(learned, std::begin(VS::State::learnedActionFlags));
   }
 };
-using Definition = Battle_ActionDefinition;
+using Definition = ActionDefinition;
 using DefinitionBytes = std::array<std::uint8_t, sizeof(Definition)>;
 
 TEST_CASE("F00048 live native room slots retain their full target index",
           "[action-outcomes][F00048]") {
   const LiveReset reset;
-  Battle_Actor actor{};
-  actor.roomSpawnIndex = 0x80;
+  VS::Battle::Actor actor{};
+  actor.room_spawn_index = 0x80;
   VS::Battle::actors[41] = &actor;
   b::ResolveLiveEnemyDefeat(-256, 41, -1);
   CHECK(actor.stats == nullptr);
@@ -82,21 +85,21 @@ TEST_CASE("Action outcome module bindings preserve all five original ABIs",
 TEST_CASE("F00059 live full native target count uses real placement services",
           "[action-outcomes][F00059][actors-state]") {
   const LiveReset reset;
-  auto state = std::make_unique<Battle_ActionState>();
+  auto state = std::make_unique<ActionState>();
   VS::Actors::ActorRecord actor{};
   actor.instance.position = {-32768, 32767, -9, 77};
   actor.instance.facing = 0x340;
   VS::Actors::actorRecords[15] = &actor;
   VS::Battle::actionState = state.get();
-  state->queueIndex = 0xFFFFFFFF;
+  state->queue_index = 0xFFFFFFFF;
   auto& action = state->queue[3];
-  action.targetCount = 255;
+  action.target_count = 255;
   for (auto& hit : action.targets) {
     hit.target.target_actor = 15;
     hit.target.impact_kind = 5;
   }
   CHECK(b::PlayLiveWeaponHitSounds(-1000) == 1);
-  CHECK(action.targetCount == 255);
+  CHECK(action.target_count == 255);
   CHECK(actor.instance.position.vx == -32768);
   CHECK(actor.instance.position.vy == 32767);
   CHECK(actor.instance.position.pad == 77);
@@ -104,27 +107,27 @@ TEST_CASE("F00059 live full native target count uses real placement services",
 TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
           "[action-outcomes][F00061][action-result-commit]") {
   const LiveReset reset;
-  auto state = std::make_unique<Battle_ActionState>();
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  auto state = std::make_unique<ActionState>();
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   actor.stats = &stats;
   VS::Battle::actors[15] = &actor;
   VS::Battle::actionState = state.get();
-  state->queueIndex = 0xFFFFFFFE;
-  auto& hit = state->queue[2].primaryTarget;
+  state->queue_index = 0xFFFFFFFE;
+  auto& hit = state->queue[2].primary_target;
   hit.target.target_actor = 15;
   hit.target.impact_kind = 2;
   hit.weapon_dp_change = 2;
   hit.weapon_dp_effect = 2;
   stats.weapon.current_dp = 65535;
   stats.weapon.max_dp = 100;
-  stats.currentHp = -7;
-  stats.actionRecoveryTimer = 65535;
+  stats.current_hp = -7;
+  stats.action_recovery_timer = 65535;
   b::ApplyLiveActionSourceEffects(15, nullptr);
   CHECK(stats.weapon.current_dp == 1);
-  CHECK(stats.currentHp == -7);
-  CHECK(stats.actionRecoveryTimer == 65535);
-  CHECK(state->queue[0].primaryTarget.weapon_dp_effect == 0);
+  CHECK(stats.current_hp == -7);
+  CHECK(stats.action_recovery_timer == 65535);
+  CHECK(state->queue[0].primary_target.weapon_dp_effect == 0);
 }
 TEST_CASE("F00061 live unused argument and signed early gate do not read state",
           "[action-outcomes][F00061]") {
@@ -144,29 +147,28 @@ TEST_CASE("F00156 live refresh and living path require no unused action state",
   VS::Battle::actionState = nullptr;
   VS::Battle::actors[1] = nullptr;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   actor.stats = &stats;
-  actor.commandState = 77;
-  stats.currentHp = static_cast<std::int16_t>(hp);
+  actor.command_state = 77;
+  stats.current_hp = static_cast<std::int16_t>(hp);
   VS::Battle::actors[1] = &actor;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
-  CHECK(actor.commandState == 0);
+  CHECK(actor.command_state == 0);
   CHECK(VS::Battle::actionState == nullptr);
 }
 TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
           "[action-outcomes][F01851]") {
   const auto pattern = GENERATE(0, 1, 2);
   const LiveReset reset;
-  for (std::size_t index = 0; index < std::size(Battle_actionDefinitions);
+  for (std::size_t index = 0; index < std::size(VS::Battle::actionDefinitions);
        ++index) {
     DefinitionBytes raw{};
     for (std::size_t byte = 0; byte < raw.size(); ++byte) {
       raw.at(byte) = static_cast<std::uint8_t>(index * 37 + byte * 109);
     }
     raw.at(0) = static_cast<std::uint8_t>(255 - index);
-    Battle_actionDefinitions[index] =
-        std::bit_cast<Battle_ActionDefinition>(raw);
+    VS::Battle::actionDefinitions[index] = std::bit_cast<ActionDefinition>(raw);
   }
   for (std::size_t byte = 0; byte < std::size(VS::State::learnedActionFlags);
        ++byte) {
@@ -174,7 +176,7 @@ TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
     VS::State::learnedActionFlags[byte] = static_cast<char>(bits);
   }
   const auto flags = std::to_array(VS::State::learnedActionFlags);
-  const auto before = std::to_array(Battle_actionDefinitions);
+  const auto before = VS::Battle::actionDefinitions;
   b::ApplyLiveLearnedActionUnlocks();
   for (std::size_t index = 0; index < before.size(); ++index) {
     auto expected = std::bit_cast<DefinitionBytes>(before.at(index));
@@ -182,13 +184,13 @@ TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
         static_cast<std::uint8_t>(flags.at(index / 8)) & (0x80 >> (index % 8));
     expected.at(13) = static_cast<std::uint8_t>((expected.at(13) & 0x7F) |
                                                 (bit != 0 ? 0x80 : 0));
-    CHECK(std::bit_cast<DefinitionBytes>(Battle_actionDefinitions[index]) ==
-          expected);
+    CHECK(std::bit_cast<DefinitionBytes>(
+              VS::Battle::actionDefinitions[index]) == expected);
   }
   CHECK(std::to_array(VS::State::learnedActionFlags) == flags);
   std::ranges::fill(VS::State::learnedActionFlags, 0);
   b::ApplyLiveLearnedActionUnlocks();
-  CHECK(Battle_actionDefinitions[0].unlocked == 0);
-  CHECK(Battle_actionDefinitions[255].unlocked == 0);
+  CHECK(VS::Battle::actionDefinitions[0].unlocked == 0);
+  CHECK(VS::Battle::actionDefinitions[255].unlocked == 0);
 }
 }  // namespace

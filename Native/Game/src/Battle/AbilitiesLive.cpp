@@ -17,19 +17,19 @@
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
@@ -50,6 +50,9 @@
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
+
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 namespace {
 namespace battle = VS::Battle;
@@ -73,22 +76,22 @@ bool InRange(const Array& array, int index) {
   return index >= 0 && static_cast<std::size_t>(index) < std::size(array);
 }
 
-Battle_Actor* LiveActor(int actor) {
+VS::Battle::Actor* LiveActor(int actor) {
   return InRange(VS::Battle::actors, actor) ? VS::Battle::actors[actor]
                                             : nullptr;
 }
 
-const Battle_ActorStats* LiveStats(int actor) {
-  const Battle_Actor* record = LiveActor(actor);
+const VS::Battle::ActorStats* LiveStats(int actor) {
+  const VS::Battle::Actor* record = LiveActor(actor);
   return record != nullptr ? record->stats : nullptr;
 }
 
-battle::ActionRequestView View(const Battle_ActionRequest& request) {
+battle::ActionRequestView View(const ActionRequestRecord& request) {
   battle::ActionRequestView view;
-  view.action_id = request.actionId;
-  view.primary_actor = request.primaryTarget.target.target_actor;
-  view.primary_targets_position = request.primaryTarget.targets_position != 0;
-  view.target_count = request.targetCount;
+  view.action_id = request.action_id;
+  view.primary_actor = request.primary_target.target.target_actor;
+  view.primary_targets_position = request.primary_target.targets_position != 0;
+  view.target_count = request.target_count;
   view.first_target_actor = request.targets[0].target.target_actor;
   view.first_target_targets_position = request.targets[0].targets_position != 0;
   return view;
@@ -98,18 +101,18 @@ class LiveAbilityHost final : public battle::AbilityHost {
  public:
   // The action state may be absent for the unlock queries, which never read
   // it; the callers that do read it refuse an absent one first.
-  explicit LiveAbilityHost(Battle_ActionState* state) : state_(state) {}
+  explicit LiveAbilityHost(ActionState* state) : state_(state) {}
 
   [[nodiscard]] std::uint32_t QueueIndex() const override {
-    return state_->queueIndex;
+    return state_->queue_index;
   }
   void SetQueueIndex(std::uint32_t index) override {
-    state_->queueIndex = index;
+    state_->queue_index = index;
   }
   [[nodiscard]] std::uint32_t ChainStep() const override {
-    return state_->chainStep;
+    return state_->chain_step;
   }
-  void SetChainStep(std::uint32_t step) override { state_->chainStep = step; }
+  void SetChainStep(std::uint32_t step) override { state_->chain_step = step; }
   [[nodiscard]] int Field(AbilityField field) const override;
   void SetField(AbilityField field, int value) override;
   [[nodiscard]] battle::ActionRequestView QueuedAction() const override {
@@ -131,11 +134,11 @@ class LiveAbilityHost final : public battle::AbilityHost {
       int index) const override;
   void CopySelectionTargetToPrimary(int index) override;
   void SetSelectionPrimaryVitals(int hp, int mp) override {
-    state_->selection.primaryTarget.target.hp = static_cast<std::int16_t>(hp);
-    state_->selection.primaryTarget.target.mp = static_cast<std::int16_t>(mp);
+    state_->selection.primary_target.target.hp = static_cast<std::int16_t>(hp);
+    state_->selection.primary_target.target.mp = static_cast<std::int16_t>(mp);
   }
   void SavePrimaryTarget() override {
-    saved_primary_ = state_->selection.primaryTarget;
+    saved_primary_ = state_->selection.primary_target;
   }
   void RestoreSavedTargetAsFirst(int limb) override {
     state_->selection.targets[0] = saved_primary_;
@@ -143,7 +146,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
         static_cast<signed char>(limb);
   }
   void SetSelectionTargetCount(int count) override {
-    state_->selection.targetCount = static_cast<u_short>(count);
+    state_->selection.target_count = static_cast<u_short>(count);
   }
   void FocusSelectionOnActor(int actor) override;
 
@@ -247,32 +250,32 @@ class LiveAbilityHost final : public battle::AbilityHost {
   }
 
  private:
-  [[nodiscard]] Battle_ActionRequest& Queued() const {
-    return state_->queue[state_->queueIndex & kQueueSlotMask];
+  [[nodiscard]] ActionRequestRecord& Queued() const {
+    return state_->queue[state_->queue_index & kQueueSlotMask];
   }
 
-  Battle_ActionState* state_;
+  ActionState* state_;
   VS::Battle::HitResult saved_primary_{};
 };
 
 int LiveAbilityHost::Field(AbilityField field) const {
   switch (field) {
     case AbilityField::kPreviousChainButtons:
-      return state_->previousChainButtons;
+      return state_->previous_chain_buttons;
     case AbilityField::kChainAbilitySlot:
-      return state_->chainAbilitySlot;
+      return state_->chain_ability_slot;
     case AbilityField::kPreviousChainInput:
-      return state_->previousChainInput;
+      return state_->previous_chain_input;
     case AbilityField::kAbilityInputSucceeded:
-      return state_->abilityInputSucceeded;
+      return state_->ability_input_succeeded;
     case AbilityField::kAbilityInputAttempted:
-      return state_->abilityInputAttempted;
+      return state_->ability_input_attempted;
     case AbilityField::kChainContinued:
-      return state_->chainContinued;
+      return state_->chain_continued;
     case AbilityField::kAbilityTimer:
-      return state_->abilityTimer;
+      return state_->ability_timer;
     case AbilityField::kAbilityWindow:
-      return state_->abilityWindow;
+      return state_->ability_window;
   }
   return 0;
 }
@@ -281,28 +284,28 @@ void LiveAbilityHost::SetField(AbilityField field, int value) {
   const auto byte = static_cast<char>(value);
   switch (field) {
     case AbilityField::kPreviousChainButtons:
-      state_->previousChainButtons = byte;
+      state_->previous_chain_buttons = byte;
       break;
     case AbilityField::kChainAbilitySlot:
-      state_->chainAbilitySlot = byte;
+      state_->chain_ability_slot = byte;
       break;
     case AbilityField::kPreviousChainInput:
-      state_->previousChainInput = byte;
+      state_->previous_chain_input = byte;
       break;
     case AbilityField::kAbilityInputSucceeded:
-      state_->abilityInputSucceeded = byte;
+      state_->ability_input_succeeded = byte;
       break;
     case AbilityField::kAbilityInputAttempted:
-      state_->abilityInputAttempted = byte;
+      state_->ability_input_attempted = byte;
       break;
     case AbilityField::kChainContinued:
-      state_->chainContinued = byte;
+      state_->chain_continued = byte;
       break;
     case AbilityField::kAbilityTimer:
-      state_->abilityTimer = static_cast<u_short>(value);
+      state_->ability_timer = static_cast<u_short>(value);
       break;
     case AbilityField::kAbilityWindow:
-      state_->abilityWindow = static_cast<u_short>(value);
+      state_->ability_window = static_cast<u_short>(value);
       break;
   }
 }
@@ -328,15 +331,15 @@ void LiveAbilityHost::CopySelectionTargetToPrimary(int index) {
                       "selection target index={} out of range", index);
     return;
   }
-  state_->selection.primaryTarget = state_->selection.targets[index];
+  state_->selection.primary_target = state_->selection.targets[index];
 }
 
 void LiveAbilityHost::FocusSelectionOnActor(int actor) {
   VS::Actors::ActorLocationQuery position{};
   VS::Actors::LiveActorPlacement(actor, &position);
-  state_->selection.focusPosition.vx = position.location.position.vx;
-  state_->selection.focusPosition.vz = position.location.position.vz;
-  state_->selection.focusPosition.vy = position.location.position.vy;
+  state_->selection.focus_position.vx = position.location.position.vx;
+  state_->selection.focus_position.vz = position.location.position.vz;
+  state_->selection.focus_position.vy = position.location.position.vy;
 }
 
 int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
@@ -366,49 +369,49 @@ bool LiveAbilityHost::ActionAvailable(int action_id) const {
 }
 
 bool LiveAbilityHost::ActionDefinitionUnlocked(int action_id) const {
-  if (!InRange(Battle_actionDefinitions, action_id)) {
+  if (!InRange(VS::Battle::actionDefinitions, action_id)) {
     VS::Core::LogWarn("battle.ability", "action definition {} out of range",
                       action_id);
     return false;
   }
-  return Battle_actionDefinitions[action_id].unlocked != 0;
+  return VS::Battle::actionDefinitions[action_id].unlocked != 0;
 }
 
 void LiveAbilityHost::SetActionDefinitionUnlocked(int action_id) {
-  if (!InRange(Battle_actionDefinitions, action_id)) {
+  if (!InRange(VS::Battle::actionDefinitions, action_id)) {
     VS::Core::LogWarn("battle.ability",
                       "unlock of action definition {} out of range", action_id);
     return;
   }
-  Battle_actionDefinitions[action_id].unlocked = 1;
+  VS::Battle::actionDefinitions[action_id].unlocked = 1;
 }
 
 int LiveAbilityHost::ActorRoomSpawnIndex(int actor) const {
-  const Battle_Actor* record = LiveActor(actor);
+  const VS::Battle::Actor* record = LiveActor(actor);
   if (record == nullptr) {
     VS::Core::LogWarn("battle.ability", "spawn slot of absent actor {}", actor);
     return 0;
   }
-  return record->roomSpawnIndex;
+  return record->room_spawn_index;
 }
 
 int LiveAbilityHost::ActorHp(int actor) const {
-  const Battle_ActorStats* stats = LiveStats(actor);
+  const VS::Battle::ActorStats* stats = LiveStats(actor);
   if (stats == nullptr) {
     VS::Core::LogWarn("battle.ability", "hp of absent actor {}", actor);
     return 0;
   }
-  return stats->currentHp;
+  return stats->current_hp;
 }
 
 int LiveAbilityHost::ActorDefaultTargetLimb(int actor) const {
-  const Battle_ActorStats* stats = LiveStats(actor);
+  const VS::Battle::ActorStats* stats = LiveStats(actor);
   if (stats == nullptr) {
     VS::Core::LogWarn("battle.ability", "target limb of absent actor {}",
                       actor);
     return 0;
   }
-  return static_cast<int>(stats->defaultTargetLimb);
+  return static_cast<int>(stats->default_target_limb);
 }
 
 int LiveAbilityHost::SpellClassCount(int spell_class) const {
@@ -449,7 +452,7 @@ int LiveAbilityHost::EquippedWeaponCategory() const {
                       "weapon category without character state");
     return 0;
   }
-  return VS::Battle::characterState->equippedWeaponCategory;
+  return VS::Battle::characterState->equipped_weapon_category;
 }
 
 int LiveAbilityHost::ArtsLearned(int category) const {
@@ -509,10 +512,10 @@ int PackPendingUnlocks(battle::PendingAbilityUnlocks pending) {
 
 // The original traces the acting actor's animation every timing update
 // (VS::Core::Debugf "combat-flow").
-void TraceAbilityTiming(const Battle_ActionState& state) {
-  const Battle_ActionRequest& queued =
-      state.queue[state.queueIndex & kQueueSlotMask];
-  const int actor = queued.primaryTarget.target.target_actor;
+void TraceAbilityTiming(const ActionState& state) {
+  const ActionRequestRecord& queued =
+      state.queue[state.queue_index & kQueueSlotMask];
+  const int actor = queued.primary_target.target.target_actor;
   const VS::Actors::ActorRecord* record =
       InRange(VS::Actors::actorRecords, actor) ? VS::Actors::actorRecords[actor]
                                                : nullptr;
@@ -525,10 +528,10 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
       static_cast<unsigned>(record->instance.action_animation_state),
       static_cast<unsigned>(record->instance.current_animation),
       static_cast<unsigned>(record->pose.holding_last_frame),
-      static_cast<int>(state.abilityTimer),
-      static_cast<unsigned>(state.abilityWindow),
+      static_cast<int>(state.ability_timer),
+      static_cast<unsigned>(state.ability_window),
       static_cast<unsigned>(VS::Effects::effectBusyFlags),
-      static_cast<unsigned>(queued.actionId));
+      static_cast<unsigned>(queued.action_id));
 }
 }  // namespace
 

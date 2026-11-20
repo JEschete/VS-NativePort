@@ -11,14 +11,14 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomes.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
@@ -28,6 +28,9 @@
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/Progress.hpp"
+
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 namespace VS::Battle {
 namespace {
@@ -39,16 +42,16 @@ void Require(bool valid) {
     std::abort();
   }
 }
-Battle_ActionState& State() {
+ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
-Battle_Actor* ActorAt(int slot) {
+VS::Battle::Actor* ActorAt(int slot) {
   Require(slot >= 0 &&
           static_cast<std::size_t>(slot) < std::size(VS::Battle::actors));
   return VS::Battle::actors[slot];
 }
-Battle_Actor& Actor(int slot) {
+VS::Battle::Actor& ActorInSlot(int slot) {
   auto* actor = ActorAt(slot);
   Require(actor != nullptr);
   return *actor;
@@ -60,8 +63,8 @@ ActionTargetHit Hit(const VS::Battle::HitResult& hit) {
 }
 class LiveEnemy final : public EnemyDefeatRecord {
  public:
-  explicit LiveEnemy(Battle_Actor& actor) : actor_(actor) {}
-  std::uint8_t Spawn() const override { return actor_.roomSpawnIndex; }
+  explicit LiveEnemy(VS::Battle::Actor& actor) : actor_(actor) {}
+  std::uint8_t Spawn() const override { return actor_.room_spawn_index; }
   bool Defeated() const override { return actor_.defeated != 0; }
   void RecordKill() override { VS::State::RecordLiveEnemyKillScore(&actor_); }
   void UpdateWeaponStreak() override {
@@ -71,38 +74,38 @@ class LiveEnemy final : public EnemyDefeatRecord {
   void MarkDefeated() override { actor_.defeated = 1; }
 
  private:
-  Battle_Actor& actor_;
+  VS::Battle::Actor& actor_;
 };
 class LiveAction final : public ActionOutcomeAction {
  public:
-  explicit LiveAction(Battle_ActionRequest& action) : action_(action) {}
+  explicit LiveAction(ActionRequestRecord& action) : action_(action) {}
   std::uint16_t Count() const override {
-    Require(action_.targetCount <= std::size(action_.targets));
-    return action_.targetCount;
+    Require(action_.target_count <= std::size(action_.targets));
+    return action_.target_count;
   }
   ActionTargetHit Target(std::size_t index) const override {
     Require(index < std::size(action_.targets));
     return Hit(action_.targets[index]);
   }
   ActionTargetHit Primary() const override {
-    return Hit(action_.primaryTarget);
+    return Hit(action_.primary_target);
   }
   void DamageReaction(int actor) override {
-    PlayLiveActorDamageReaction(actor, &action_.focusPosition);
+    PlayLiveActorDamageReaction(actor, &action_.focus_position);
   }
   void ApplyPrimaryResult() override {
-    ApplyLiveActorActionResult(&action_.primaryTarget);
+    ApplyLiveActorActionResult(&action_.primary_target);
   }
 
  private:
-  Battle_ActionRequest& action_;
+  ActionRequestRecord& action_;
 };
 class LiveOutcomeWorld final : public ActionOutcomeWorld {
  public:
   ActionOutcomeAction& Queued() override {
     auto& state = State();
     constexpr std::uint32_t kQueueMask = 3;
-    action_.emplace(state.queue[state.queueIndex & kQueueMask]);
+    action_.emplace(state.queue[state.queue_index & kQueueMask]);
     return action_.value();
   }
   ActionPoint Placement(int actor) override {
@@ -112,7 +115,7 @@ class LiveOutcomeWorld final : public ActionOutcomeWorld {
     return {point.vx, point.vy, point.vz, 0};
   }
   std::uint8_t WeaponCategory(int actor) override {
-    return Actor(actor).equippedWeaponCategory;
+    return ActorInSlot(actor).equipped_weapon_category;
   }
   void PlaySound(std::uint8_t sound, ActionPoint point) override {
     constexpr int kHitSoundGroup = 0x7E;
@@ -134,26 +137,28 @@ class LiveDefeatWorld final : public ActorDefeatWorld {
   }
   bool HasActor(int actor) override { return ActorAt(actor) != nullptr; }
   void SetCommandState(int actor, std::uint8_t state) override {
-    Actor(actor).commandState = state;
+    ActorInSlot(actor).command_state = state;
   }
   std::int16_t Hp(int actor) override {
-    auto* stats = Actor(actor).stats;
+    auto* stats = ActorInSlot(actor).stats;
     Require(stats != nullptr);
-    return stats->currentHp;
+    return stats->current_hp;
   }
   void HideMarker(int actor) override {
     VS::Battle::SetLiveActorMarker(actor, 0);
   }
   bool Retained(int actor) override {
-    return Actor(actor).retainAfterDefeat != 0;
+    return ActorInSlot(actor).retain_after_defeat != 0;
   }
   void BeginDeath(int actor) override {
-    Actors::BeginLiveActorDeath(actor, &State().rangeOrigin, 1);
+    Actors::BeginLiveActorDeath(actor, &State().range_origin, 1);
   }
   void LockAnimation(int actor) override {
     Actors::SetLiveActorAnimationLocked(actor, 1);
   }
-  std::uint8_t Spawn(int actor) override { return Actor(actor).roomSpawnIndex; }
+  std::uint8_t Spawn(int actor) override {
+    return ActorInSlot(actor).room_spawn_index;
+  }
 };
 class LiveLearnedWorld final : public LearnedActionWorld {
  public:
@@ -162,20 +167,21 @@ class LiveLearnedWorld final : public LearnedActionWorld {
     return static_cast<std::uint8_t>(VS::State::learnedActionFlags[index]);
   }
   void SetUnlocked(std::size_t index, bool unlocked) override {
-    Require(index < std::size(Battle_actionDefinitions));
-    Battle_actionDefinitions[index].unlocked = unlocked;
+    Require(index < std::size(VS::Battle::actionDefinitions));
+    VS::Battle::actionDefinitions[index].unlocked = unlocked;
   }
 };
 static_assert(std::size(VS::State::learnedActionFlags) ==
               Save::kLearnedActionBytes);
-static_assert(std::size(Battle_actionDefinitions) == Save::kLearnedActionCount);
-static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
+static_assert(std::size(VS::Battle::actionDefinitions) ==
+              Save::kLearnedActionCount);
+static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
               kActionTargetCapacity);
 }  // namespace
 
 void ResolveLiveEnemyDefeat(int source_actor, int target_actor,
                             int count_kill) {
-  LiveEnemy enemy(Actor(target_actor));
+  LiveEnemy enemy(ActorInSlot(target_actor));
   ResolveEnemyDefeat(source_actor, count_kill, enemy);
 }
 int PlayLiveWeaponHitSounds(int source_actor) {

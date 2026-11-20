@@ -8,8 +8,8 @@
 #include <iterator>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
@@ -69,7 +69,7 @@ class LiveProgress final : public UnlockProgress {
  public:
   int EquippedWeaponCategory() const override {
     return VS::Battle::characterState != nullptr
-               ? VS::Battle::characterState->equippedWeaponCategory
+               ? VS::Battle::characterState->equipped_weapon_category
                : -1;
   }
   int ArtsLearned(int category) const override {
@@ -99,10 +99,10 @@ class LiveProgress final : public UnlockProgress {
     return VS::State::artsStatus.kills.total_kills;
   }
   bool ActionUnlocked(std::uint8_t action) const override {
-    return Battle_actionDefinitions[action].unlocked != 0;
+    return VS::Battle::actionDefinitions[action].unlocked != 0;
   }
   void UnlockAction(std::uint8_t action) override {
-    Battle_actionDefinitions[action].unlocked = 1;
+    VS::Battle::actionDefinitions[action].unlocked = 1;
   }
 };
 
@@ -118,7 +118,7 @@ class LiveBreakArtHost final : public BreakArtUnlockHost {
     VS::Battle::stringContext.strings[0] =
         MenuText(battleAbilityMenuStrings[weapon]);
     VS::Battle::stringContext.strings[1] =
-        Battle_actionDefinitions[action].name;
+        VS::Battle::actionDefinitions[action].name.data();
     Framework::SetLiveInformationMessage(
         MenuText(menu2_battle_abilities_menu::offset::kBreakArtUnlock));
   }
@@ -184,7 +184,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     std::array<int, kUnlockableAbilityCount> types{};
     for (std::size_t index = 0; index < actions.size(); ++index) {
       strings[index * kPointersPerRow] =
-          Battle_actionDefinitions[actions[index]].name;
+          VS::Battle::actionDefinitions[actions[index]].name.data();
       auto* description = LiveUnlockDescription(actions[index]);
       if (description == nullptr) return false;
       strings[index * kPointersPerRow + 1] = description;
@@ -210,7 +210,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
   void SetAbilityMessage(bool all_unlocked, std::uint8_t action) override {
     if (!all_unlocked) {
       VS::Battle::stringContext.strings[1] =
-          Battle_actionDefinitions[action].name;
+          VS::Battle::actionDefinitions[action].name.data();
     }
     Framework::SetLiveInformationMessage(MenuText(
         all_unlocked
@@ -293,7 +293,7 @@ class LiveRowsHost final : public AbilityRowsHost {
 bool CopyOwnedWords(const std::uint16_t* source,
                     std::span<std::uint16_t> destination) {
   const std::array<std::span<const std::byte>, 3> owners{
-      std::as_bytes(std::span(Battle_actionDefinitions)),
+      std::as_bytes(std::span(VS::Battle::actionDefinitions)),
       std::as_bytes(std::span(battleAbilityStrings)),
       std::as_bytes(std::span(battleAbilityMenuStrings))};
   const auto address = reinterpret_cast<std::uintptr_t>(source);
@@ -387,12 +387,12 @@ int LiveUpdateUnlockNotifications(char* state) {
 
 // decomp binding: _setRiskCost (src/MENU/MENU2.PRG/64.c:15).
 void LiveSetRiskCost(int action) {
-  if (!InRange(Battle_actionDefinitions, action)) {
+  if (!InRange(VS::Battle::actionDefinitions, action)) {
     Refuse("Risk action outside action table");
     return;
   }
   LiveRiskHost host;
-  SetRiskCost(g_risk, Battle_actionDefinitions[action].cost, host);
+  SetRiskCost(g_risk, VS::Battle::actionDefinitions[action].cost, host);
 }
 
 // decomp binding: _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64).

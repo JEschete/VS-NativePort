@@ -13,8 +13,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/HitChance.hpp"
@@ -22,6 +22,8 @@
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace battle = VS::Battle;
@@ -59,9 +61,9 @@ struct LiveFixture {
   decltype(VS::Battle::actors) saved = VS::Battle::actors;
   decltype(VS::Battle::hitFunctions) callbacks = VS::Battle::hitFunctions;
   std::uint32_t previous = VS::Battle::previousHitResult;
-  std::array<Battle_Actor, 3> actors{};
-  std::array<Battle_ActorStats, 2> stats{};
-  Battle_ActionDefinition action{};
+  std::array<VS::Battle::Actor, 3> actors{};
+  std::array<VS::Battle::ActorStats, 2> stats{};
+  ActionDefinition action{};
   VS::Battle::HitResult source{};
   VS::Battle::HitResult target{};
   LiveFixture() {
@@ -72,9 +74,9 @@ struct LiveFixture {
     VS::Battle::actors[41] = &actors.at(2);
     actors.at(0).stats = &stats.at(0);
     actors.at(1).stats = &stats.at(1);
-    actors.at(2).weaponDrawn = 1;
-    stats.at(0).actorId = 41;
-    stats.at(1).actorId = 41;
+    actors.at(2).weapon_drawn = 1;
+    stats.at(0).actor_id = 41;
+    stats.at(1).actor_id = 41;
     source.target.target_actor = 0;
     target.target.target_actor = 1;
   }
@@ -364,7 +366,7 @@ TEST_CASE("Live attack gems use stats owner and ignore absent equipment IDs",
   const auto slot = GENERATE(0, 1, 2);
   f.stats.at(0).weapon.gems[slot].gem_effects = 1;
   CHECK(battle::AttackLiveGemHitBonus(&f.action, &f.stats.at(0)) == 20);
-  f.actors.at(2).weaponDrawn = 2;
+  f.actors.at(2).weapon_drawn = 2;
   CHECK(battle::AttackLiveGemHitBonus(nullptr, &f.stats.at(0)) == 0);
 }
 
@@ -372,14 +374,14 @@ TEST_CASE(
     "Live defense gems stop before a fourth candidate and ignore equipment IDs",
     "[hit-modifiers][F00340][live]") {
   LiveFixture f;
-  f.action.hits[1].effectId = 17;
+  f.action.hits[1].effect_id = 17;
   // A fourth 0x30-stride gem probe would read the low byte of baseAgility.
   f.stats.at(1).shield.attributes.base_agility = 21;
   CHECK(battle::DefenseLiveGemHitBonus(&f.action, &f.stats.at(1), 1) == 0);
   f.stats.at(1).shield.gems[2].gem_effects = 21;
   f.stats.at(1).shield.gems[0].gem_effects = 5;
   CHECK(battle::DefenseLiveGemHitBonus(&f.action, &f.stats.at(1), 1) == 40);
-  f.actors.at(2).weaponDrawn = 0;
+  f.actors.at(2).weapon_drawn = 0;
   CHECK(battle::DefenseLiveGemHitBonus(nullptr, &f.stats.at(1), -1) == 0);
 }
 
@@ -399,7 +401,7 @@ TEST_CASE("Live gem chance preserves aliased state and ignores inactive actors",
   f.stats.at(0).weapon.gems[0].gem_effects = 1;
   f.stats.at(0).shield.gems[0].gem_effects = 5;
   f.stats.at(0).shield.gems[1].gem_effects = 11;
-  f.action.hits[0].effectId = 1;
+  f.action.hits[0].effect_id = 1;
   const auto before = Bytes(f.stats);
   CHECK(battle::LiveGemHitChance(&f.action, &f.source, &f.source, 0, -1) == 80);
   CHECK(Bytes(f.stats) == before);
@@ -427,7 +429,7 @@ TEST_CASE("Live chain reads unsigned byte independently of char signedness",
   f.target.target.target_limb = 5;
   f.target.targets_position = -1;
   for (unsigned evasion = 0; evasion < 256; ++evasion) {
-    f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(evasion);
+    f.stats.at(1).limbs[5].chain_evasion = static_cast<char>(evasion);
     CHECK(battle::LiveChainHitChance(nullptr, nullptr, &f.target, -1, -1) ==
           static_cast<int>((255 - evasion) * 100 / 255));
   }
@@ -443,7 +445,7 @@ TEST_CASE("Original hit table dispatches all four typed callbacks",
   f.stats.at(0).weapon.gems[0].gem_effects = 1;
   f.stats.at(1).shield.gems[0].gem_effects = 5;
   f.stats.at(0).risk = 506;
-  f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(128);
+  f.stats.at(1).limbs[5].chain_evasion = static_cast<char>(128);
   f.target.target.target_limb = 5;
   CHECK(VS::Battle::hitFunctions[1] ==
         &battle::PreviousLiveHitSuccessThreshold);

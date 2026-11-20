@@ -237,7 +237,7 @@ int func_800F9800(void) {
                                  r"Native\Game\include\Battle\ActionOutcomesLive.hpp")
         generated = (Path(__file__).resolve().parents[2] / r"Native\Game\src\Battle\ActionFlow.cpp").read_text(
             encoding="utf-8")
-        for symbol in ("Battle_ActionState* actionState;", "std::uint32_t actionFlowMode;",
+        for symbol in ("ActionState* actionState;", "std::uint32_t actionFlowMode;",
                        "std::int32_t recoveryRewardMode;",
                        "VS::Menu::Framework::ActionSelection* actionSelection;"):
             self.assertIn(symbol, generated)
@@ -1748,7 +1748,7 @@ int func_800F9800(void) {
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
         live = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreviewLive.cpp").read_text(encoding="utf-8")
         core = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreview.cpp").read_text(encoding="utf-8")
-        self.assertIn("return definition.resetsHitResults != 0;", live)
+        self.assertIn("return definition.resets_hit_results != 0;", live)
         self.assertIn("Field::TraceLiveActorAndTerrainCollision(", live)
         self.assertIn("? std::optional{std::bit_cast<ActionPoint>(impact)}", live)
         self.assertIn("if (!impact) return false;", core)
@@ -4574,11 +4574,13 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
 
     def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
         root = Path(__file__).resolve().parents[2]
-        action = (root / "Native/Game/include/Battle/Action.h").read_text()
-        self.assertIn("VS::Battle::TargetPreview previews[255];", action)
-        self.assertIn("VS::Battle::HitResult targets[255];", action)
+        action = (root / "Native/Game/include/Battle/Action.hpp").read_text()
+        self.assertIn("inline constexpr std::size_t kActionPreviewCount = 255;", action)
+        self.assertIn("std::array<TargetPreview, kActionPreviewCount> previews;", action)
+        self.assertIn("inline constexpr std::size_t kActionRequestTargetCount = 255;", action)
+        self.assertIn("std::array<HitResult, kActionRequestTargetCount> targets;", action)
         boot = (root / "Native/Game/src/Boot/GameplayOverlayLive.cpp").read_text()
-        self.assertIn("AllocateLiveFromHighEnd(sizeof(Battle_ActionState))", boot)
+        self.assertIn("AllocateLiveFromHighEnd(sizeof(ActionState))", boot)
         self.assertNotIn("0x2C10", boot)
         self.assertNotIn("0x2C10", (root / "Native/Game/src/Boot/GameLoop.cpp").read_text())
         # #276 row 31: the targeting is typed C++ (Battle/Targeting.cpp) bound by Battle/TargetingLive.cpp.
@@ -4588,7 +4590,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         core = (root / "Native/Game/src/Battle/Targeting.cpp").read_text(encoding="utf-8")
         self.assertIn("if (!PreviewSlotAvailable(count)) {", core)
         live = flat((root / "Native/Game/src/Battle/TargetingLive.cpp").read_text(encoding="utf-8"))
-        self.assertIn("static_assert(std::extent_v<decltype(Battle_ActionState::previews)> == "
+        self.assertIn("static_assert(std::tuple_size_v<decltype(ActionState::previews)> == "
                       "static_cast<std::size_t>(battle::kTargetPreviewCapacity));", live)
         self.assertIn("state_.selection = {};", live)
         self.assertIn("VS::Battle::MapTargetPageIndex(", live)
@@ -4997,7 +4999,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         source = (root / "Native/Game/src/Boot/Encounter.cpp").read_text()
         inspect = source.split("void InspectTargeting(", 1)[1].split("\n}", 1)[0]
         self.assertIn(
-            "state.source_actor = action.selection.primaryTarget.target.target_actor;",
+            "state.source_actor = action.selection.primary_target.target.target_actor;",
             inspect,
         )
         self.assertNotIn("state.source_actor = action.sourceActorId;", inspect)

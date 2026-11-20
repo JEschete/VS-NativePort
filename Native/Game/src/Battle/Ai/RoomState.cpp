@@ -15,7 +15,7 @@
 #include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -199,7 +199,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   }
 
   void FreeActorAiStates() override {
-    for (Battle_Actor* actor : VS::Battle::actors) {
+    for (VS::Battle::Actor* actor : VS::Battle::actors) {
       if (actor != nullptr) VS::Battle::Ai::FreeLiveActorAiState(actor);
     }
   }

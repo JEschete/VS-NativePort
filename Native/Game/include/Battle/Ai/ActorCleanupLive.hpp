@@ -5,7 +5,9 @@
 
 #include "Battle/Ai/ActorCleanup.hpp"
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct ActorAiState;
 struct PerceptionUpdateView;
@@ -22,7 +24,7 @@ void ReleaseLiveAiDestinationTile(int x, int z);
 void FreeLiveActorNavigationOverride(int actor_id);
 void ForceReleaseLiveActorAiReservations(int actor_id);
 void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state);
-void FreeLiveActorAiState(Battle_Actor* actor);
+void FreeLiveActorAiState(VS::Battle::Actor* actor);
 void AllocateLiveOrbitingBossState(VS::Battle::Ai::SettingsView* state);
 void SetLiveActorAiReactionWithDelay(
     VS::Battle::Ai::PerceptionUpdateView* state, int value, int range);

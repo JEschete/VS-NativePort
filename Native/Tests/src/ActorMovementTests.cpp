@@ -19,6 +19,7 @@
 #include "Actors/Movement.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.hpp"
+#include "TestSupport/ActorRecordTableScope.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -579,31 +580,7 @@ void SetReadFields(const MovementActor& actor,
                             .pad = actor.request_step.w};
 }
 
-// The actor table, emptied for one test and then restored.
-struct LiveMovementState {
-  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
-  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
-
-  LiveMovementState() {
-    std::fill(std::begin(VS::Actors::actorRecords),
-              std::end(VS::Actors::actorRecords), nullptr);
-  }
-  LiveMovementState(const LiveMovementState&) = delete;
-  LiveMovementState& operator=(const LiveMovementState&) = delete;
-  LiveMovementState(LiveMovementState&&) = delete;
-  LiveMovementState& operator=(LiveMovementState&&) = delete;
-  ~LiveMovementState() {
-    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
-  }
-
-  VS::Actors::ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
-    VS::Actors::ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<std::uint8_t>(actor_id);
-    VS::Actors::actorRecords[actor_id] = &actor;
-    return actor;
-  }
-};
+using LiveMovementState = VS::test_support::ActorRecordTableScope;
 }  // namespace
 
 TEST_CASE("Live actor movement stores and loads every record field",

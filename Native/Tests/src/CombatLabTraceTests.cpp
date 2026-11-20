@@ -17,10 +17,10 @@
 #include "Actors/Movement.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.hpp"
@@ -49,6 +49,12 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+
+using VS::Battle::ActionState;
+using VS::Battle::kActionTypeAbility;
+using VS::Battle::kActionTypeBaseAttack;
+using VS::Battle::kActionTypeItem;
+using VS::Battle::kActionTypeSpell;
 
 namespace {
 struct TraceScope {
@@ -1055,14 +1061,13 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   int saved_tick_speed = VS::State::tickSpeed;
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
-      std::to_array(Battle_actionDefinitions);
-  std::unique_ptr<Battle_ActionState> action =
-      std::make_unique<Battle_ActionState>();
-  Battle_Actor player{};
-  Battle_Actor enemy{};
-  Battle_ActorStats player_stats{};
-  Battle_ActorStats enemy_stats{};
+  decltype(VS::Battle::actionDefinitions) saved_definitions =
+      VS::Battle::actionDefinitions;
+  std::unique_ptr<ActionState> action = std::make_unique<ActionState>();
+  VS::Battle::Actor player{};
+  VS::Battle::Actor enemy{};
+  VS::Battle::ActorStats player_stats{};
+  VS::Battle::ActorStats enemy_stats{};
   VS::Actors::ActorRecord player_model{};
   VS::Battle::Ai::ActorAiState enemy_ai{};
   decltype(std::to_array(VS::Menu::Magic::shamanSpellIds)) saved_shaman =
@@ -1075,14 +1080,14 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     VS::Battle::actionState = action.get();
     player.stats = &player_stats;
     enemy.stats = &enemy_stats;
-    player_stats.currentHp = player_stats.maxHp = 250;
-    player_stats.currentMp = player_stats.maxMp = 50;
+    player_stats.current_hp = player_stats.max_hp = 250;
+    player_stats.current_mp = player_stats.max_mp = 50;
     player_stats.risk = 12;
-    player_stats.currentRange = 4;
-    player_stats.currentRangeY = 6;
-    player_stats.currentRangeZ = 10;
-    player_stats.currentAttackShape = 1;
-    enemy_stats.currentHp = enemy_stats.maxHp = 73;
+    player_stats.current_range = 4;
+    player_stats.current_range_y = 6;
+    player_stats.current_range_z = 10;
+    player_stats.current_attack_shape = 1;
+    enemy_stats.current_hp = enemy_stats.max_hp = 73;
     VS::Battle::actors[0] = VS::Battle::characterState = &player;
     VS::Battle::actors[2] = &enemy;
     player_model.model_id = 0;
@@ -1093,11 +1098,11 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     enemy_ai.relations[0].active = 1;
     enemy_ai.relations[0].visible = 1;
     VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
-    action->abilityTimer = 42;
-    action->abilityWindow = 40;
-    action->previousChainInput = 1;
-    action->queue[0].primaryTarget.target.target_actor = 0;
-    action->queue[0].targetCount = 1;
+    action->ability_timer = 42;
+    action->ability_window = 40;
+    action->previous_chain_input = 1;
+    action->queue[0].primary_target.target.target_actor = 0;
+    action->queue[0].target_count = 1;
     action->queue[0].targets[0].target.target_actor = 2;
     for (std::size_t slot = 0;
          slot < VS::Game::EncounterReactionTimingState::kSlots; ++slot) {
@@ -1106,8 +1111,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
       VS::Input::settings.mapped_defense_abilities[slot] =
           static_cast<char>(40 + slot);
       for (const auto id : {22 + slot, 40 + slot}) {
-        Battle_actionDefinitions[id].type = Battle_ActionType_Ability;
-        Battle_actionDefinitions[id].cost = 5;
+        VS::Battle::actionDefinitions[id].type = kActionTypeAbility;
+        VS::Battle::actionDefinitions[id].cost = 5;
       }
     }
     VS::Boot::EncounterPollStop();
@@ -1121,7 +1126,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     std::copy(saved_ai.begin(), saved_ai.end(),
               VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
-              Battle_actionDefinitions);
+              VS::Battle::actionDefinitions.data());
     std::copy(saved_shaman.begin(), saved_shaman.end(),
               VS::Menu::Magic::shamanSpellIds);
   }
@@ -1158,11 +1163,11 @@ void CheckNativeTiming(const VS::Game::EncounterReactionTimingState& timing) {
 }
 
 void CheckResourcesUnchanged(const ReactionInspectionFixture& fixture) {
-  CHECK(fixture.player_stats.currentHp == 250);
-  CHECK(fixture.player_stats.currentMp == 50);
+  CHECK(fixture.player_stats.current_hp == 250);
+  CHECK(fixture.player_stats.current_mp == 50);
   CHECK(fixture.player_stats.risk == 12);
-  CHECK(fixture.action->abilityTimer == 42);
-  CHECK(fixture.action->abilityInputAttempted == 0);
+  CHECK(fixture.action->ability_timer == 42);
+  CHECK(fixture.action->ability_input_attempted == 0);
 }
 
 void CheckDefenseAcknowledgment(
@@ -1303,7 +1308,7 @@ TEST_CASE("Opt-in player target forecasts mirror native cached values",
           "[player][diagnostics][target-forecast]") {
   ReactionInspectionFixture fixture;
   VS::Battle::actionFlowMode = 1;
-  fixture.action->previewCount = 2;
+  fixture.action->preview_count = 2;
   auto& head = fixture.action->previews[0];
   head.actor_id = 2;
   head.limb = 0;
@@ -1330,7 +1335,7 @@ TEST_CASE("Unknown native target effects do not expose stale amounts",
           "[player][diagnostics][target-forecast]") {
   ReactionInspectionFixture fixture;
   VS::Battle::actionFlowMode = 1;
-  fixture.action->previewCount = 1;
+  fixture.action->preview_count = 1;
   auto& preview = fixture.action->previews[0];
   preview.actor_id = 2;
   preview.limb = 0;
@@ -1356,10 +1361,10 @@ TEST_CASE("Ordinary traces do not collect player target forecasts",
 TEST_CASE("Player timing keeps acknowledgments after the active input phase",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
-  fixture.action->queue[0].primaryTarget.target.target_actor = 2;
+  fixture.action->queue[0].primary_target.target.target_actor = 2;
   fixture.action->queue[0].targets[0].target.target_actor = 0;
-  fixture.action->queue[0].actionId = 54;
-  fixture.action->previousChainInput = 2;
+  fixture.action->queue[0].action_id = 54;
+  fixture.action->previous_chain_input = 2;
   const auto defense =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
           .reaction_timing;
@@ -1367,9 +1372,9 @@ TEST_CASE("Player timing keeps acknowledgments after the active input phase",
   CHECK(defense.source_actor == 2);
   CHECK(defense.target_actor == 0);
   CHECK(defense.eligible == std::array<bool, 3>{true, false, true});
-  fixture.action->abilityInputAttempted = 1;
-  fixture.action->abilityInputSucceeded = 2;
-  fixture.action->previousChainInput = 3;
+  fixture.action->ability_input_attempted = 1;
+  fixture.action->ability_input_succeeded = 2;
+  fixture.action->previous_chain_input = 3;
   VS::Battle::actionFlowMode = 8;
   const auto acknowledged =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
@@ -1388,13 +1393,13 @@ TEST_CASE("Player reads actual learned spell data without granting an action",
   constexpr unsigned kHeal = 96;
   std::ranges::fill(VS::Menu::Magic::shamanSpellIds, std::uint8_t{0});
   VS::Menu::Magic::shamanSpellIds[0] = kHeal;
-  auto& heal = Battle_actionDefinitions[kHeal];
+  auto& heal = VS::Battle::actionDefinitions[kHeal];
   heal = {};
-  heal.type = Battle_ActionType_Spell;
+  heal.type = kActionTypeSpell;
   heal.cost = 5;
   const std::array<char, 5> name{0x11, 0x28, 0x24, 0x2F,
                                  static_cast<char>(0xE7)};
-  std::copy(name.begin(), name.end(), heal.name);
+  std::copy(name.begin(), name.end(), heal.name.begin());
   const auto absent =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(std::ranges::none_of(absent.action_options, [](const auto& option) {
@@ -1416,10 +1421,10 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   auto& incoming = fixture.action->queue[0];
-  fixture.action->selection.actionId = 1;
-  Battle_actionDefinitions[1].type = Battle_ActionType_BaseAttack;
-  incoming.primaryTarget.target.target_actor = 2;
-  incoming.targetCount = 2;
+  fixture.action->selection.action_id = 1;
+  VS::Battle::actionDefinitions[1].type = kActionTypeBaseAttack;
+  incoming.primary_target.target.target_actor = 2;
+  incoming.target_count = 2;
   incoming.targets[0].target.target_actor = 0;
   incoming.targets[0].hp_effect = 1;
   incoming.targets[0].target.hp = 16;
@@ -1429,7 +1434,7 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
   const auto timing =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
           .reaction_timing;
-  CHECK(timing.incoming_type == Battle_ActionType_BaseAttack);
+  CHECK(timing.incoming_type == kActionTypeBaseAttack);
   CHECK(timing.incoming_hp_damage == 16);
   CHECK(timing.incoming_mp_damage == 0);
   CHECK(incoming.targets[1].target.hp == 80);
@@ -1595,13 +1600,13 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
     VS::Items::inventory.misc.fill(VS::Items::InventoryMisc{});
     VS::Items::inventory.misc[0].id = 323;
     VS::Items::inventory.misc[0].count = 2;
-    auto& definition = Battle_actionDefinitions[224];
-    definition.type = Battle_ActionType_Item;
+    auto& definition = VS::Battle::actionDefinitions[224];
+    definition.type = kActionTypeItem;
     definition.cost = 0;
     definition.unlocked = 0;
-    definition.hits[0].effectId = 62;
-    definition.hits[0].statCalculatorId = 15;
-    definition.hits[0].statFactor = 10;
+    definition.hits[0].effect_id = 62;
+    definition.hits[0].stat_calculator_id = 15;
+    definition.hits[0].stat_factor = 10;
   }
   ~ItemInspectionFixture() {
     VS::Items::inventory.misc = saved_items;
@@ -1634,7 +1639,7 @@ TEST_CASE("Consumable observations do not consume stock or grant a spell",
   REQUIRE(state.item_options.size() == 1);
   CheckRecoveryItemOption(state.item_options.front());
   CHECK(VS::Items::inventory.misc[0].count == 2);
-  CHECK(Battle_actionDefinitions[224].unlocked == 0);
+  CHECK(VS::Battle::actionDefinitions[224].unlocked == 0);
   CHECK(VS::Core::BiosRand().State() == random);
   CheckResourcesUnchanged(fixture);
 }

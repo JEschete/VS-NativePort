@@ -7,9 +7,11 @@
 
 #include "Battle/Ai/PlanningPrimitives.hpp"
 
-struct Battle_ActorStats;
-struct Battle_ActionDefinition;
-struct Battle_ActionRequest;
+namespace VS::Battle {
+struct ActorStats;
+struct ActionDefinition;
+struct ActionRequestRecord;
+}  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct ActionCandidateRecord;
 struct ActionPlanView;
@@ -39,7 +41,7 @@ bool UpdateLiveCandidateHitWeight(
 bool EvaluateLiveActionCandidate(
     VS::Battle::Ai::ActorAiState* state,
     VS::Battle::Ai::ActionCandidateRecord* candidate, int simulation_mode,
-    const Battle_ActionDefinition* action);
+    const VS::Battle::ActionDefinition* action);
 
 // The condition terms (ActorStatusConditionScore and the ratios,
 // PlanningPrimitives.hpp) of a row of the planner's condition snapshot. The
@@ -88,10 +90,11 @@ void AppendLiveActionCandidate(
 void SortLiveActionCandidates(VS::Battle::Ai::ActionPlanView* state);
 void BuildLiveActorActionPlan(VS::Battle::Ai::ActorAiState* state);
 // A null request is a no-op, as in the original.
-void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request);
+void ReconcileLiveCompletedActionPlan(
+    const VS::Battle::ActionRequestRecord* request);
 // The source and destination may be the same record.
-void CopyLivePlanningActorStats(const Battle_ActorStats* source,
-                                Battle_ActorStats* destination);
+void CopyLivePlanningActorStats(const VS::Battle::ActorStats* source,
+                                VS::Battle::ActorStats* destination);
 bool SnapshotLivePlanningActorStats();
 void RestoreLivePlanningActorStats();
 // The game arena is already reset; forget bindings without dereferencing them.
@@ -119,7 +122,7 @@ void UpdateCandidateHitWeightEntry(
 void EvaluateActionCandidateEntry(
     VS::Battle::Ai::ActorAiState* state,
     VS::Battle::Ai::ActionCandidateRecord* candidate, int mode,
-    Battle_ActionDefinition* action);
+    VS::Battle::ActionDefinition* action);
 void SelectFallbackActionEntry(VS::Battle::Ai::ActorAiState* state);
 void BuildActorActionPlanEntry(VS::Battle::Ai::ActorAiState* state);
 void ReconcileCompletedActionPlanEntry(

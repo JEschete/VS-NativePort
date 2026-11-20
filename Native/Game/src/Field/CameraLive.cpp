@@ -13,7 +13,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
@@ -45,6 +45,8 @@
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Render.hpp"
+
+using VS::Battle::ActionState;
 
 // decomp: _firstPersonViewEnabled (_firstPersonViewEnabled@BATTLE/BATTLE.PRG)
 int VS::Field::isFirstPersonViewEnabled;
@@ -97,7 +99,7 @@ namespace {
 namespace Math = VS::Core::Math;
 
 constexpr std::string_view kChannel = "field.camera";
-// Battle_ActionState::cameraPreview when no preview is framed.
+// VS::Battle::ActionState::cameraPreview when no preview is framed.
 constexpr std::uint8_t kNoCameraPreview = 0xFF;
 // LegacyControllerPort::controller_type (decomp: portInfo_t) of an analog
 // (DualShock) pad.
@@ -335,14 +337,15 @@ int LiveCameraHost::SphereInteractionMode() {
 
 // The core reports a missing action itself.
 std::optional<ActionCameraTargets> LiveCameraHost::ActionTargets() {
-  const Battle_ActionState* const action = VS::Battle::actionState;
+  const ActionState* const action = VS::Battle::actionState;
   if (action == nullptr) return std::nullopt;
   ActionCameraTargets targets{.preview = std::nullopt,
-                              .area_center = MotionOf(action->areaCenter)};
+                              .area_center = MotionOf(action->area_center)};
   // previews has 255 entries, so every preview index but 0xFF is in range.
-  if (action->cameraPreview != kNoCameraPreview && action->previewCount != 0) {
+  if (action->camera_preview != kNoCameraPreview &&
+      action->preview_count != 0) {
     targets.preview =
-        MotionOf(action->previews[action->cameraPreview].position);
+        MotionOf(action->previews[action->camera_preview].position);
   }
   return targets;
 }
@@ -356,7 +359,7 @@ void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
     }
     return;
   }
-  VS::Battle::actionState->preferredCameraDistance =
+  VS::Battle::actionState->preferred_camera_distance =
       static_cast<std::int16_t>(distance);
 }
 

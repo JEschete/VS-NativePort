@@ -205,6 +205,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\SphereTerrainLive.cpp",
                 r"src\Battle\TargetPagesLive.cpp",
                 r"src\Battle\Feedback.cpp",
+                r"src\Battle\ActionTable.cpp",
                 r"src\Battle\Ai\PlanningWorkspaceLive.cpp",
                 r"src\Battle\Ai\FrameUpdateLive.cpp",
                 r"src\Battle\Ai\CurrentTerrain.cpp",

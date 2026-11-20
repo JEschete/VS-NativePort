@@ -11,6 +11,8 @@
 #include "Battle/TargetingState.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
+using VS::Battle::TargetVolume;
+
 namespace {
 namespace battle = VS::Battle;
 
@@ -31,9 +33,9 @@ constexpr battle::SphereVolume kSecondary{
 constexpr std::uint16_t kEdgeSentinel = 0xBEEF;
 
 VS::Battle::TargetSphereSpec LegacySpec(const battle::SphereVolume& value) {
-  Battle_TargetVolume raw{};
-  raw.kind = static_cast<u_char>(value.kind);
-  raw.opaque1 = static_cast<u_char>(value.range_kind);
+  TargetVolume raw{};
+  raw.kind = static_cast<std::uint8_t>(value.kind);
+  raw.opaque1 = static_cast<std::uint8_t>(value.range_kind);
   raw.angle = static_cast<std::int16_t>(value.angle);
   for (std::size_t index = 0; index < value.extents.size(); ++index) {
     raw.scale.extents[index] = value.extents[index];
@@ -438,7 +440,7 @@ TEST_CASE("Live secondary volume adapter copies and ends transition",
   const auto secondary = LegacySpec(kSecondary);
   sphere.wire_shape = 91;
   VS::Battle::SetLiveSecondarySphereVolume(&sphere, &secondary);
-  CHECK(std::bit_cast<Battle_TargetVolume>(sphere.secondary_volume).kind ==
+  CHECK(std::bit_cast<TargetVolume>(sphere.secondary_volume).kind ==
         kSecondary.kind);
   CHECK(sphere.wire_shape == 0);
   VS::Battle::ClearLiveSecondarySphereVolume(nullptr);

@@ -8,10 +8,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Field/Minimap.hpp"
+
+using VS::Battle::LimbStats;
 
 namespace {
 namespace b = VS::Battle;
@@ -21,11 +23,12 @@ struct LiveHudFixture {
   char saved_icons = VS::Battle::hudStatusIconsHidden;
   int saved_slide = VS::Battle::hudSlideOffset;
   char saved_indicator = VS::Battle::battleModeIndicatorStep;
-  u_short saved_wobble = VS::Battle::battleModeIndicatorWobble;
-  u_char saved_animation = VS::Battle::shortcutHudAnimationStep;
+  std::uint16_t saved_wobble = VS::Battle::battleModeIndicatorWobble;
+  std::uint8_t saved_animation = VS::Battle::shortcutHudAnimationStep;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
-  Battle_Actor* saved_character = VS::Battle::characterState;
-  std::array<u_short, 10> saved_mapping = VS::Battle::upperStatusIconFlags;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
+  std::array<std::uint16_t, 10> saved_mapping =
+      VS::Battle::upperStatusIconFlags;
 
   LiveHudFixture() {
     VS::Battle::hudStatusIconsHidden = static_cast<char>(0xA7);
@@ -76,7 +79,7 @@ TEST_CASE(
     "F01356 Live reads its supplied stats and only the eight mapped entries",
     "[hud-state-live][F01356]") {
   const LiveHudFixture fixture;
-  Battle_ActorStats first{}, second{};
+  VS::Battle::ActorStats first{}, second{};
   std::fill(std::begin(VS::Battle::upperStatusIconFlags),
             std::end(VS::Battle::upperStatusIconFlags), 0xFFFF);
   std::fill_n(std::begin(VS::Battle::upperStatusIconFlags),
@@ -97,22 +100,22 @@ TEST_CASE(
     "F01357 Live classifies signed limb HP without unrelated actor owners",
     "[hud-state-live][F01357]") {
   const LiveHudFixture fixture;
-  Battle_LimbStats limb{};
+  LimbStats limb{};
   limb.hp = 100;
-  limb.maxHp = 400;
+  limb.max_hp = 400;
   CHECK(b::LiveLimbCondition(&limb) ==
         static_cast<int>(b::HudLimbCondition::kWounded));
   limb.hp = 300;
   CHECK(b::LiveLimbCondition(&limb) ==
         static_cast<int>(b::HudLimbCondition::kGood));
   limb.hp = 2;
-  limb.maxHp = 0;
+  limb.max_hp = 0;
   CHECK(b::LiveLimbCondition(&limb) ==
         static_cast<int>(b::HudLimbCondition::kExcellent));
   limb.hp = -32768;
   CHECK(b::LiveLimbCondition(&limb) ==
         static_cast<int>(b::HudLimbCondition::kCritical));
-  CHECK(limb.maxHp == 0);
+  CHECK(limb.max_hp == 0);
 }
 
 TEST_CASE("F01359 Live requests opening without resetting animation or peers",

@@ -26,7 +26,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
@@ -499,7 +499,8 @@ SoundEffectSlot SlotOf(const VS::Actors::ModelEffectSlot& live) {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800770FC (src/BATTLE/BATTLE.PRG/146C.c:6444)
-void QueueLiveActorBaseSequenceLoad(Battle_Actor* /*actor*/, int actor_id) {
+void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* /*actor*/,
+                                    int actor_id) {
   LiveAnimationHost host;
   QueueActorBaseSequenceLoad(host, actor_id);
 }
@@ -509,8 +510,8 @@ void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,
                                       int weapon_category, int spawn_flags) {
   std::optional<int> equipped;
   if (actor_bytes != nullptr) {
-    equipped = reinterpret_cast<const Battle_Actor*>(actor_bytes)
-                   ->equippedWeaponCategory;
+    equipped = reinterpret_cast<const VS::Battle::Actor*>(actor_bytes)
+                   ->equipped_weapon_category;
   }
   LiveAnimationHost host;
   QueueActorWeaponSequenceLoad(host, equipped, actor_id, weapon_category,

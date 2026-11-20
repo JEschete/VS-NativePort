@@ -15,7 +15,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
@@ -23,8 +23,8 @@
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentation.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.hpp"
@@ -56,6 +56,10 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
@@ -68,48 +72,50 @@ void Require(bool valid) {
     std::abort();
   }
 }
-Battle_ActionState& State() {
+ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
-Battle_Actor& Actor(int slot) {
+VS::Battle::Actor& ActorInSlot(int slot) {
   Require(slot >= 0 &&
           static_cast<std::size_t>(slot) < std::size(VS::Battle::actors) &&
           VS::Battle::actors[slot] != nullptr);
   return *VS::Battle::actors[slot];
 }
-Battle_ActorStats& Stats(int slot) {
-  auto* stats = Actor(slot).stats;
+VS::Battle::ActorStats& Stats(int slot) {
+  auto* stats = ActorInSlot(slot).stats;
   Require(stats != nullptr);
   return *stats;
 }
-Battle_ActionDefinition& Definition(std::uint16_t action) {
-  Require(action < std::size(Battle_actionDefinitions));
-  return Battle_actionDefinitions[action];
+ActionDefinition& Definition(std::uint16_t action) {
+  Require(action < std::size(VS::Battle::actionDefinitions));
+  return VS::Battle::actionDefinitions[action];
 }
 Menu::Framework::ActionSelection& MenuSelection() {
   Require(VS::Battle::actionSelection != nullptr);
   return *VS::Battle::actionSelection;
 }
 struct LiveAction final : PresentationAction {
-  explicit LiveAction(Battle_ActionRequest& value) : record(value) {}
-  Battle_ActionRequest& record;
-  std::uint16_t Id() const override { return record.actionId; }
-  void ClearId() override { record.actionId = 0; }
+  explicit LiveAction(ActionRequestRecord& value) : record(value) {}
+  ActionRequestRecord& record;
+  std::uint16_t Id() const override { return record.action_id; }
+  void ClearId() override { record.action_id = 0; }
   ActionHit Primary() const override {
-    return std::bit_cast<ActionHit>(record.primaryTarget);
+    return std::bit_cast<ActionHit>(record.primary_target);
   }
   ActionHit Target(std::size_t index) const override {
     Require(index < std::size(record.targets));
     return std::bit_cast<ActionHit>(record.targets[index]);
   }
-  std::uint16_t Count() const override { return record.targetCount; }
-  std::uint16_t Animation() const override { return record.animationParameter; }
+  std::uint16_t Count() const override { return record.target_count; }
+  std::uint16_t Animation() const override {
+    return record.animation_parameter;
+  }
   std::uint8_t Variant() const override {
-    return static_cast<std::uint8_t>(record.effectVariant);
+    return static_cast<std::uint8_t>(record.effect_variant);
   }
   ActionPoint Focus() const override {
-    return std::bit_cast<ActionPoint>(record.focusPosition);
+    return std::bit_cast<ActionPoint>(record.focus_position);
   }
 };
 VS::Effects::LiveActionEffectTarget LiveTarget(
@@ -149,18 +155,18 @@ class LiveWorld final : public ActionPresentationWorld {
   PresentationAction& Queued() override {
     auto& state = State();
     constexpr std::uint32_t kQueueMask = 3;
-    return Bind(state.queue[state.queueIndex & kQueueMask]);
+    return Bind(state.queue[state.queue_index & kQueueMask]);
   }
-  std::uint32_t QueueIndex() override { return State().queueIndex; }
-  std::uint8_t SelectedPreview() override { return State().selectedPreview; }
+  std::uint32_t QueueIndex() override { return State().queue_index; }
+  std::uint8_t SelectedPreview() override { return State().selected_preview; }
   void BeginCommit() override {
-    State().chainStep = 1;
-    State().queueIndex = 0;
+    State().chain_step = 1;
+    State().queue_index = 0;
   }
-  void SetZoom(std::uint8_t zoom) override { State().cameraZoomState = zoom; }
+  void SetZoom(std::uint8_t zoom) override { State().camera_zoom_state = zoom; }
   void SetField(AbilityField field, int value) override;
   std::uint8_t ChainSlot() override {
-    return static_cast<std::uint8_t>(State().chainAbilitySlot);
+    return static_cast<std::uint8_t>(State().chain_ability_slot);
   }
   std::uint8_t MappedChain(std::size_t slot) override {
     Require(slot < std::size(VS::Input::settings.mapped_chain_abilities));
@@ -168,13 +174,13 @@ class LiveWorld final : public ActionPresentationWorld {
         VS::Input::settings.mapped_chain_abilities[slot]);
   }
   bool HasPresentation(std::uint16_t action) override {
-    return Definition(action).returnsToMenuOnCancel != 0;
+    return Definition(action).returns_to_menu_on_cancel != 0;
   }
   std::uint8_t Effect(std::uint16_t action) override {
-    return Definition(action).effectId;
+    return Definition(action).effect_id;
   }
   std::uint8_t Zoom(std::uint16_t action) override {
-    return static_cast<std::uint8_t>(Definition(action).opaqueDBit4);
+    return static_cast<std::uint8_t>(Definition(action).opaque_d_bit4);
   }
   std::uint32_t PlayerStatuses() override {
     Require(VS::Battle::characterState != nullptr &&
@@ -228,13 +234,15 @@ class LiveWorld final : public ActionPresentationWorld {
   void CollectSingle() override { LiveSetSingleActionTarget(); }
   void ResolveSelection() override {
     auto& state = State();
-    ResolveLiveActionTargets(state.selection.actionId, state.queue,
+    ResolveLiveActionTargets(state.selection.action_id, state.queue.data(),
                              &state.selection, 1);
   }
-  std::uint8_t Spawn(int actor) override { return Actor(actor).roomSpawnIndex; }
+  std::uint8_t Spawn(int actor) override {
+    return ActorInSlot(actor).room_spawn_index;
+  }
   std::uint8_t WeaponCategory() override {
     Require(VS::Battle::characterState != nullptr);
-    return VS::Battle::characterState->equippedWeaponCategory;
+    return VS::Battle::characterState->equipped_weapon_category;
   }
   std::uint16_t WeaponAttacks(std::size_t category) override {
     Require(category < std::size(VS::State::scoreData.weapon_attacks));
@@ -280,12 +288,12 @@ class LiveWorld final : public ActionPresentationWorld {
     return Actors::FindLiveActorBoneTag(actor, limb, 2);
   }
   std::uint8_t DefaultLimb(int actor) const override {
-    return Stats(actor).defaultTargetLimb;
+    return Stats(actor).default_target_limb;
   }
   bool EligibleBystander(int actor) const override {
     const auto* value = VS::Battle::actors[actor];
     return value != nullptr &&
-           (value->allocationKind == 1 || value->allocationKind == 2);
+           (value->allocation_kind == 1 || value->allocation_kind == 2);
   }
   void Dispatch(const ActionPresentationRequest& request, int mode,
                 std::uint8_t variant) override {
@@ -293,7 +301,7 @@ class LiveWorld final : public ActionPresentationWorld {
     VS::Effects::LiveBeginActionEffect(&live, mode, variant);
   }
   std::uint8_t SourceMaterial(int actor) override {
-    return Actor(actor).equippedWeaponCategory;
+    return ActorInSlot(actor).equipped_weapon_category;
   }
   std::uint8_t SourceModel(int actor) override;
   void QueueAsset(PresentationAsset asset) override {
@@ -316,7 +324,7 @@ class LiveWorld final : public ActionPresentationWorld {
   }
 
  private:
-  PresentationAction& Bind(Battle_ActionRequest& value) {
+  PresentationAction& Bind(ActionRequestRecord& value) {
     for (auto& action : actions_) {
       if (&action->record == &value) return *action;
     }
@@ -329,34 +337,34 @@ void LiveWorld::SetField(AbilityField field, int value) {
   const auto byte = static_cast<char>(value);
   switch (field) {
     case AbilityField::kPreviousChainButtons:
-      state.previousChainButtons = byte;
+      state.previous_chain_buttons = byte;
       break;
     case AbilityField::kPreviousChainInput:
-      state.previousChainInput = byte;
+      state.previous_chain_input = byte;
       break;
     case AbilityField::kChainAbilitySlot:
-      state.chainAbilitySlot = byte;
+      state.chain_ability_slot = byte;
       break;
     case AbilityField::kAbilityInputSucceeded:
-      state.abilityInputSucceeded = byte;
+      state.ability_input_succeeded = byte;
       break;
     case AbilityField::kAbilityInputAttempted:
-      state.abilityInputAttempted = byte;
+      state.ability_input_attempted = byte;
       break;
     case AbilityField::kChainContinued:
-      state.chainContinued = byte;
+      state.chain_continued = byte;
       break;
     case AbilityField::kAbilityTimer:
-      state.abilityTimer = static_cast<std::uint16_t>(value);
+      state.ability_timer = static_cast<std::uint16_t>(value);
       break;
     case AbilityField::kAbilityWindow:
-      state.abilityWindow = static_cast<std::uint16_t>(value);
+      state.ability_window = static_cast<std::uint16_t>(value);
       break;
   }
 }
 void LiveWorld::Animate(ActionPose pose, int actor, int parameter,
                         std::uint32_t step) {
-  auto* focus = &State().selection.focusPosition;
+  auto* focus = &State().selection.focus_position;
   switch (pose) {
     case ActionPose::kMelee:
       PlayLiveMeleeAttackAnimation(actor, focus, parameter);
@@ -380,19 +388,19 @@ void LiveWorld::Animate(ActionPose pose, int actor, int parameter,
   }
 }
 std::uint8_t LiveWorld::SourceModel(int slot) {
-  const auto& actor = Actor(slot);
+  const auto& actor = ActorInSlot(slot);
   Require(actor.stats != nullptr);
-  const auto limb = static_cast<std::uint16_t>(actor.commandArg0);
+  const auto limb = static_cast<std::uint16_t>(actor.command_arg0);
   constexpr int kHalfwordBits = 16;
   const auto choice =
-      static_cast<std::uint32_t>(actor.commandArg0) >> kHalfwordBits;
-  Require(limb < std::size(actor.stats->limbActions) &&
-          choice < std::size(actor.stats->limbActions[limb]));
+      static_cast<std::uint32_t>(actor.command_arg0) >> kHalfwordBits;
+  Require(limb < std::size(actor.stats->limb_actions) &&
+          choice < std::size(actor.stats->limb_actions[limb]));
   // Imported char bitfields are signed; the original loaded the high nibble
   // with LBU/SRL, not a sign-extended four-bit value.
   constexpr std::uint8_t kModelNibble = 0x0F;
   return static_cast<std::uint8_t>(
-             actor.stats->limbActions[limb][choice].effectModelId) &
+             actor.stats->limb_actions[limb][choice].effect_model_id) &
          kModelNibble;
 }
 }  // namespace
@@ -417,7 +425,7 @@ void StartLiveActionPresentation() {
   Require(StartActionPresentation(world));
 }
 void BuildLiveActionPresentationRequest(
-    Battle_ActionRequest* action,
+    ActionRequestRecord* action,
     VS::Effects::LiveActionEffectRequest* request) {
   Require(action != nullptr && request != nullptr);
   LiveAction owner(*action);

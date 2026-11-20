@@ -12,11 +12,11 @@
 #include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SurfaceSounds.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/Navigation.hpp"
@@ -1411,9 +1411,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x39954, sizeof VS::Render::loadingScreenPixels,
      &VS::Render::loadingScreenPixels,
      sizeof VS::Render::loadingScreenPixels},  // G02005 _nowLoading_data
-    {"SLUS_010.40", 0x3C1DC, sizeof Battle_actionDefinitions,
-     &Battle_actionDefinitions,
-     sizeof Battle_actionDefinitions},  // G01904 vs_main_actions
+    {"SLUS_010.40", 0x3C1DC, sizeof VS::Battle::actionDefinitions,
+     VS::Battle::actionDefinitions.data(),
+     sizeof VS::Battle::actionDefinitions},  // G01904 vs_main_actions
     {"SLUS_010.40", 0x3F5DC, sizeof VS::Items::materialModifiers,
      &VS::Items::materialModifiers,
      sizeof VS::Items::materialModifiers},  // G01905 vs_main_materialModifiers

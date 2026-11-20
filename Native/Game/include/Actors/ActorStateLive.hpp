@@ -12,7 +12,9 @@ struct ActorLocation;
 namespace VS::Actors {
 struct ActorLocationQuery;
 }
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 namespace VS::Render {
 struct ColorCode;
 }  // namespace VS::Render
@@ -47,7 +49,7 @@ void RestoreLiveActorVitals(int actor_id);
 int FindLiveActorByModelId(int model_id);
 // decomp: BATTLE.PRG func_8007CF64 (src/BATTLE/BATTLE.PRG/146C.c:9139)
 // Null for an empty slot or an id outside VS::Battle::actors.
-Battle_Actor* LiveActorAtSlot(int actor_id);
+VS::Battle::Actor* LiveActorAtSlot(int actor_id);
 // decomp: BATTLE.PRG func_8007CF80 (src/BATTLE/BATTLE.PRG/146C.c:9141)
 int CountLiveActorsByDisposition(int actor_kind);
 // decomp: BATTLE.PRG func_8007CFCC (src/BATTLE/BATTLE.PRG/146C.c:9155)

@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
@@ -226,12 +226,12 @@ struct DialogLiveFixture : equipment::LiveFixture {
 };
 
 struct EquippedFixture : DialogLiveFixture {
-  equipment::ValueRestore<Battle_Actor*> saved_actor{
+  equipment::ValueRestore<VS::Battle::Actor*> saved_actor{
       VS::Battle::characterState};
   equipment::ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> row_types{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   EquippedFixture() {
     actor.stats = &stats;

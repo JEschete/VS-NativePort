@@ -3,7 +3,9 @@
 
 #include "Battle/TargetingDraw.hpp"
 
-struct Battle_TargetVolume;
+namespace VS::Battle {
+struct TargetVolume;
+}  // namespace VS::Battle
 
 // Binding from the battle target sphere to the typed volume wireframe.
 namespace VS::Battle {
@@ -11,5 +13,5 @@ namespace VS::Battle {
 // the frame view, the GTE projection and the sphere wire line primitive.
 // Nothing is drawn without an active sphere or volume; aborts with a
 // diagnostic when the sphere's vertex count exceeds its wire storage.
-void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color);
+void DrawLiveSphereVolumeWireframe(VS::Battle::TargetVolume* shape, int color);
 }  // namespace VS::Battle

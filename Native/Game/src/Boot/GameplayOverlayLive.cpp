@@ -7,7 +7,7 @@
 #include "Actors/ModelRenderingLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -44,6 +44,8 @@
 #include "State/Location.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/Timers.hpp"
+
+using VS::Battle::ActionState;
 
 namespace VS::Boot {
 namespace {
@@ -179,8 +181,8 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Actors::SpawnLiveAshleyWithEquipment();
   }
   void AllocateBattleActionState() override {
-    auto* action_state = static_cast<Battle_ActionState*>(
-        VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActionState)));
+    auto* action_state = static_cast<ActionState*>(
+        VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(ActionState)));
     if (action_state == nullptr) {
       VS::Core::Errorf("boot", "failed to allocate battle action state");
       std::abort();

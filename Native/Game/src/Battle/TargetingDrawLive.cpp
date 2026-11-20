@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <span>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
@@ -19,6 +19,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
 #include "Render/SpritesLive.hpp"
+
+using VS::Battle::ShapeVertex;
+using VS::Battle::TargetVolume;
 
 namespace VS::Battle {
 namespace {
@@ -64,7 +67,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
-void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
+void DrawLiveSphereVolumeWireframe(TargetVolume* shape, int color) {
   const auto* sphere = reinterpret_cast<VS::Battle::TargetSphereRecord*>(
       VS::Battle::targetSphere);
   if (sphere == nullptr || shape == nullptr || sphere->vertex_count < 2) return;
@@ -76,7 +79,7 @@ void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   }
   std::array<TargetWireVertex, kTargetWireVertices> vertices{};
   for (std::size_t index = 0; index < count; ++index) {
-    const Battle_ShapeVertex& source = sphere->wire_vertices[index];
+    const ShapeVertex& source = sphere->wire_vertices[index];
     vertices[index] = {
         .position = {source.xyz[0], source.xyz[1], source.xyz[2]},
         .segment = source.opaque6};

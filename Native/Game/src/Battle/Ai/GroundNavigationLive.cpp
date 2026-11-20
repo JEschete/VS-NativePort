@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -433,7 +433,7 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     return Frame().actors[actor_id];
   }
 
-  const Battle_Actor* cursor_ = nullptr;
+  const VS::Battle::Actor* cursor_ = nullptr;
 };
 
 // The room plus the actor AI state the navigator mirrors; each movement

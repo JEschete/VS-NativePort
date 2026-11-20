@@ -3,7 +3,9 @@
 
 #include "Battle/Ai/DecisionPrimitives.hpp"
 
-struct Battle_ActionDefinition;
+namespace VS::Battle {
+struct ActionDefinition;
+}  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct ActionCandidateRecord;
 struct ActionPlanView;
@@ -35,7 +37,7 @@ namespace VS::Battle::Ai {
 [[nodiscard]] int IsLiveActionBeneficialToActor(int action, int actor_id);
 void CacheLiveFallbackActionCandidate(
     const VS::Battle::Ai::ActionCandidateRecord* candidate,
-    const Battle_ActionDefinition* action);
+    const VS::Battle::ActionDefinition* action);
 // Promotes one of the first `count` ranked candidates.
 void PromoteLiveRandomizedActionCandidate(VS::Battle::Ai::ActionPlanView* state,
                                           int count);

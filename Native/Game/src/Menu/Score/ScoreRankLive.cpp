@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Scratch.hpp"
@@ -24,7 +24,7 @@
 
 namespace VS::Menu::Score {
 namespace {
-static_assert(std::size(Battle_actionDefinitions) >= kTitleActionCount);
+static_assert(std::size(VS::Battle::actionDefinitions) >= kTitleActionCount);
 static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
               kRoomFlagWords);
 static_assert(std::size(VS::Field::countableRoomMask) == kRoomFlagWords);
@@ -131,7 +131,7 @@ TitleConditions ReadLiveTitleConditions() {
   conditions.chest_key = IsSet(flags.chest_key_obtained);
   for (std::size_t i = 0; i < kTitleActionCount; ++i) {
     conditions.actions_unlocked.at(i) =
-        Battle_actionDefinitions[i].unlocked != 0;
+        VS::Battle::actionDefinitions[i].unlocked != 0;
   }
   return conditions;
 }

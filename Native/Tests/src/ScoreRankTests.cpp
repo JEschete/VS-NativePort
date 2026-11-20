@@ -8,8 +8,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
@@ -24,6 +24,8 @@
 #include "Render/Render.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace s = VS::Menu::Score;
@@ -110,14 +112,14 @@ class LiveGlobals {
         position_(s::cameraPositionBackup),
         angles_(s::cameraAnglesBackup) {
     masks_ = VS::Field::countableRoomMask;
-    std::memcpy(actions_.data(), Battle_actionDefinitions,
-                sizeof Battle_actionDefinitions);
+    std::memcpy(actions_.data(), VS::Battle::actionDefinitions.data(),
+                sizeof VS::Battle::actionDefinitions);
     std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
     VS::State::roomVisitProgress = {};
     VS::Field::countableRoomMask = {};
-    for (Battle_ActionDefinition& action : Battle_actionDefinitions) {
+    for (ActionDefinition& action : VS::Battle::actionDefinitions) {
       action.unlocked = 0;
     }
     for (VS::State::TrialScore(&boss)[3] :
@@ -138,8 +140,8 @@ class LiveGlobals {
     s::cameraPositionBackup = position_;
     s::cameraAnglesBackup = angles_;
     VS::Field::countableRoomMask = masks_;
-    std::memcpy(Battle_actionDefinitions, actions_.data(),
-                sizeof Battle_actionDefinitions);
+    std::memcpy(VS::Battle::actionDefinitions.data(), actions_.data(),
+                sizeof VS::Battle::actionDefinitions);
     std::memcpy(VS::Core::ScratchBase(), scratch_.data(), scratch_.size());
   }
 
@@ -152,7 +154,7 @@ class LiveGlobals {
   VECTOR position_;
   VECTOR angles_;
   VS::Field::RoomVisitFlags masks_{};
-  std::array<std::byte, sizeof Battle_actionDefinitions> actions_{};
+  std::array<std::byte, sizeof VS::Battle::actionDefinitions> actions_{};
   std::array<std::byte, 0x400> scratch_{};
 };
 

@@ -2,7 +2,9 @@
 #include "Items/ItemRecords.hpp"
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 
 // Binds the loot rules (Loot.hpp) to the battle loot list
 // (VS::Items::lootListHead, whose nodes live on the game heap), the battle flow
@@ -11,7 +13,7 @@ struct Battle_Actor;
 namespace VS::Items {
 // Rolls the drops of a defeated enemy (its battle actor statistics) into a
 // new loot list entry.
-void QueueLiveEnemyLoot(const Battle_Actor* enemy);
+void QueueLiveEnemyLoot(const VS::Battle::Actor* enemy);
 void OpenLivePendingEnemyLoot();
 // A script's two items: an id whose low 16 bits are 0 is no item.
 void PresentLiveScriptedLoot(int id0, int count0, int id1, int count1);

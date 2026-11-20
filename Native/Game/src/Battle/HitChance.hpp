@@ -6,15 +6,17 @@
 #include <array>
 #include <cstddef>
 
-struct Battle_ActionDefinition;
 namespace VS::Battle {
+
+struct ActionDefinition;
 struct HitResult;
 }  // namespace VS::Battle
 
 namespace VS::Battle {
 
-using HitFunction = int (*)(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                            VS::Battle::HitResult*, int, int);
+using HitFunction = int (*)(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*, VS::Battle::HitResult*, int,
+                            int);
 
 inline constexpr std::size_t kHitFunctionCount = 8;
 

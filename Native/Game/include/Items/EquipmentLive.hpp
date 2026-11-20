@@ -4,9 +4,10 @@
 
 #include "Items/ItemRecords.hpp"
 
-struct Battle_ActionDefinition;
-struct Battle_ActorStats;
 namespace VS::Battle {
+
+struct ActionDefinition;
+struct ActorStats;
 struct HitResult;
 }  // namespace VS::Battle
 
@@ -69,34 +70,33 @@ void StoreLiveInventoryAccessoryStats(
     VS::Items::InventoryArmor* target,
     const VS::Items::AccessorySpawnLoadout* source);
 
-void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
+void RebuildLiveArmorClassAffinity(VS::Battle::ActorStats* actor_stats,
                                    int limb_index);
-void RebuildLiveShieldClassAffinity(Battle_ActorStats* actor_stats);
-void RebuildLiveWeaponClassAffinity(Battle_ActorStats* actor_stats);
+void RebuildLiveShieldClassAffinity(VS::Battle::ActorStats* actor_stats);
+void RebuildLiveWeaponClassAffinity(VS::Battle::ActorStats* actor_stats);
 
 // The defender's weapon-drawn state comes from VS::Battle::actors and each
 // limb's armour loss from VS::Battle::limbArmorDpLoss.
-void ConsumeLiveHitEquipmentDp(const Battle_ActionDefinition* action,
-                               Battle_ActorStats* source,
-                               Battle_ActorStats* target, int amount);
-void AccumulateLiveHitEquipmentPp(const Battle_ActionDefinition* action,
-                                  Battle_ActorStats* source_stats,
-                                  Battle_ActorStats* target_stats,
+void ConsumeLiveHitEquipmentDp(const VS::Battle::ActionDefinition* action,
+                               VS::Battle::ActorStats* source,
+                               VS::Battle::ActorStats* target, int amount);
+void AccumulateLiveHitEquipmentPp(const VS::Battle::ActionDefinition* action,
+                                  VS::Battle::ActorStats* source_stats,
+                                  VS::Battle::ActorStats* target_stats,
                                   int dp_amount);
-void GrowLiveDefenderEquipmentRatings(const Battle_ActionDefinition* action,
-                                      Battle_ActorStats* defender_stats,
-                                      int attacker_class_id,
-                                      int attacker_affinity_id,
-                                      int hit_limb_index);
-void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
-                                   Battle_ActorStats* attacker_stats,
+void GrowLiveDefenderEquipmentRatings(
+    const VS::Battle::ActionDefinition* action,
+    VS::Battle::ActorStats* defender_stats, int attacker_class_id,
+    int attacker_affinity_id, int hit_limb_index);
+void GrowLiveAttackerWeaponRatings(const VS::Battle::ActionDefinition* action,
+                                   VS::Battle::ActorStats* attacker_stats,
                                    int defender_class_id,
                                    int defender_affinity_id);
 
 // BATTLE.PRG stores this address in its stat calculator table
 // (VS::Battle::statCalculators[15]), so it keeps the table's signature. A hit
 // index outside the action's hits recovers nothing.
-std::int16_t CalculateLiveItemRecovery(Battle_ActionDefinition* action,
+std::int16_t CalculateLiveItemRecovery(VS::Battle::ActionDefinition* action,
                                        VS::Battle::HitResult* attacker_result,
                                        VS::Battle::HitResult* target_result,
                                        int hit_index, int add_random_variation);

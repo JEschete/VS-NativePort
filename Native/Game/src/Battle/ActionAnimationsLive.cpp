@@ -12,7 +12,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimations.hpp"
 #include "Battle/ActionFlow.hpp"

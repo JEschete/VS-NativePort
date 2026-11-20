@@ -16,7 +16,7 @@
 
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
@@ -99,7 +99,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   TerminalSession session;
   ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
       VS::Battle::characterState};
-  ValueRestore<Battle_Actor*> saved_ashley{VS::Battle::actors[kAshleyActor]};
+  ValueRestore<VS::Battle::Actor*> saved_ashley{
+      VS::Battle::actors[kAshleyActor]};
   ValueRestore<int> saved_sound_group{VS::Audio::nextSfxChannelGroup7E};
   ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
       VS::State::stateFlags};

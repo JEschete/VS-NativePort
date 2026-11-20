@@ -75,7 +75,8 @@ struct CommandPlacement {
   bool operator==(const CommandPlacement&) const = default;
 };
 
-// The speeds and gait class (Battle_ActorStats 0x31-0x33) a command moves at.
+// The speeds and gait class (VS::Battle::ActorStats 0x31-0x33) a command moves
+// at.
 struct CommandActorGait {
   std::uint8_t walk_speed = 0;
   std::uint8_t gait_class = 0;

@@ -3,7 +3,9 @@
 namespace VS::Battle {
 struct SphereTargetLabelRecord;
 }  // namespace VS::Battle
-struct Battle_TargetLabelLine;
+namespace VS::Battle {
+struct TargetLabelLine;
+}  // namespace VS::Battle
 
 // The ABI-compatible entries of the sphere's target labels
 // (SphereTargetLabels.hpp) over the live target sphere, its label text, the
@@ -17,6 +19,6 @@ void DrawLeftTargetLabelLinkEntry(int anchor_xy, int ring_xy, int pulse_head);
 [[nodiscard]] int AreTargetLabelsSettledEntry();
 void DrawSphereTargetLabelEntry(VS::Battle::SphereTargetLabelRecord* label);
 void UpdateSphereTargetLabelsEntry();
-void UpdateSphereTargetHighlightsEntry(Battle_TargetLabelLine* targets,
+void UpdateSphereTargetHighlightsEntry(VS::Battle::TargetLabelLine* targets,
                                        int count);
 }  // namespace VS::Battle

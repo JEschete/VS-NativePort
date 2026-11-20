@@ -30,7 +30,7 @@
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
@@ -59,6 +59,9 @@
 #include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
 
+using VS::Battle::ActionSlot;
+using VS::Battle::LimbStats;
+
 namespace VS::Actors {
 namespace {
 using Content::AssetAddress;
@@ -79,11 +82,12 @@ constexpr int kNibbleSignBit = 0x8;
 constexpr int kNibbleRange = 0x10;
 
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
-static_assert(sizeof Battle_ActorStats{}.name == kActorNameBytes);
+static_assert(sizeof VS::Battle::ActorStats{}.name == kActorNameBytes);
 static_assert(sizeof VS::Actors::CharacterInit{}.name == kActorNameBytes);
-static_assert(std::size(Battle_ActorStats{}.limbs) == kActorLimbs);
+static_assert(std::size(VS::Battle::ActorStats{}.limbs) == kActorLimbs);
 static_assert(std::size(VS::Actors::CharacterInit{}.limbs) == kActorLimbs);
-static_assert(std::size(Battle_ActorStats{}.statusTimers) == kStatusTimers);
+static_assert(std::size(VS::Battle::ActorStats{}.status_timers) ==
+              kStatusTimers);
 static_assert(std::size(VS::Actors::usesSecondaryBodyModel) >
               std::numeric_limits<std::uint8_t>::max());
 static_assert(std::size(VS::Items::weaponCategoryUpperIds) >=
@@ -124,17 +128,17 @@ template <typename T, typename Id>
                                                     : nibble);
 }
 
-[[nodiscard]] Battle_Actor* SlotActor(std::size_t slot) {
+[[nodiscard]] VS::Battle::Actor* SlotActor(std::size_t slot) {
   return slot < std::size(VS::Battle::actors) ? VS::Battle::actors[slot]
                                               : nullptr;
 }
 
-[[nodiscard]] Battle_ActorStats* SlotStats(std::size_t slot) {
-  Battle_Actor* actor = SlotActor(slot);
+[[nodiscard]] VS::Battle::ActorStats* SlotStats(std::size_t slot) {
+  VS::Battle::Actor* actor = SlotActor(slot);
   return actor != nullptr ? actor->stats : nullptr;
 }
 
-[[nodiscard]] Battle_ActorStats* CharacterStats() {
+[[nodiscard]] VS::Battle::ActorStats* CharacterStats() {
   return VS::Battle::characterState != nullptr
              ? VS::Battle::characterState->stats
              : nullptr;
@@ -157,36 +161,37 @@ template <typename T, typename Id>
 }
 
 void WriteName(std::span<const std::uint8_t, kActorNameBytes> name,
-               Battle_ActorStats& stats) {
+               VS::Battle::ActorStats& stats) {
   for (std::size_t i = 0; i < kActorNameBytes; ++i) {
     stats.name[i] = static_cast<char>(name[i]);
   }
 }
 
-void WriteInitialLimbs(const InitialStats& stats, Battle_ActorStats& live) {
+void WriteInitialLimbs(const InitialStats& stats,
+                       VS::Battle::ActorStats& live) {
   for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
     const LimbInitialStats& source = stats.limbs.at(limb);
-    Battle_LimbStats& target = live.limbs[limb];
+    LimbStats& target = live.limbs[limb];
     target.hp = static_cast<std::int16_t>(source.hp);
-    target.maxHp = static_cast<std::int16_t>(source.hp);
-    target.agilityDefenseBonus =
+    target.max_hp = static_cast<std::int16_t>(source.hp);
+    target.agility_defense_bonus =
         static_cast<signed char>(source.agility_defense_bonus);
-    target.anchorBone = static_cast<char>(source.anchor_bone);
-    target.nameIndex = source.name_index;
-    target.chainEvasion = static_cast<char>(source.chain_evasion);
+    target.anchor_bone = static_cast<char>(source.anchor_bone);
+    target.name_index = source.name_index;
+    target.chain_evasion = static_cast<char>(source.chain_evasion);
     std::ranges::copy(source.types, std::begin(target.types));
     std::ranges::copy(source.affinities, std::begin(target.affinities));
     for (std::size_t action = 0; action < kLimbActions; ++action) {
       const LimbActionStats& from = stats.limb_actions.at(limb).at(action);
-      Battle_ActionSlot& to = live.limbActions[limb][action];
-      to.actionId = from.action_id;
+      ActionSlot& to = live.limb_actions[limb][action];
+      to.action_id = from.action_id;
       to.index = Nibble(from.index);
-      to.effectModelId = Nibble(from.effect_model);
+      to.effect_model_id = Nibble(from.effect_model);
       to.opaque3 = 1;
     }
     for (std::size_t target_limb = 0; target_limb < kDpSplashTargets;
          ++target_limb) {
-      live.dpSplash[limb][target_limb] =
+      live.dp_splash[limb][target_limb] =
           static_cast<char>(stats.dp_splash.at(limb).at(target_limb));
     }
   }
@@ -219,10 +224,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         if (core == nullptr) {
           return SpawnedActor::kNone;
         }
-        Battle_Actor& actor = core->actor.actor;
+        VS::Battle::Actor& actor = core->actor.actor;
         actor.stats = &core->actor.stats;
         actor.model = &core->model;
-        actor.allocationKind = kAuxiliaryAllocation;
+        actor.allocation_kind = kAuxiliaryAllocation;
         return IdOf<SpawnedActor>(&actor);
       }
       case ActorShape::kEquipped: {
@@ -231,12 +236,12 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         if (allocation == nullptr) {
           return SpawnedActor::kNone;
         }
-        Battle_Actor& actor = allocation->core.actor.actor;
+        VS::Battle::Actor& actor = allocation->core.actor.actor;
         actor.stats = &allocation->core.actor.stats;
         actor.model = &allocation->core.model;
-        actor.equipmentModels[0] = &allocation->model_slots[0];
-        actor.equipmentModels[1] = &allocation->model_slots[1];
-        actor.allocationKind = kEquippedAllocation;
+        actor.equipment_models[0] = &allocation->model_slots[0];
+        actor.equipment_models[1] = &allocation->model_slots[1];
+        actor.allocation_kind = kEquippedAllocation;
         return IdOf<SpawnedActor>(&actor);
       }
       case ActorShape::kSecondaryBody: {
@@ -245,11 +250,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         if (allocation == nullptr) {
           return SpawnedActor::kNone;
         }
-        Battle_Actor& actor = allocation->core.actor.actor;
+        VS::Battle::Actor& actor = allocation->core.actor.actor;
         actor.stats = &allocation->core.actor.stats;
         actor.model = &allocation->core.model;
-        actor.equipmentModels[0] = &allocation->model_slots[0];
-        actor.allocationKind = kSecondaryBodyAllocation;
+        actor.equipment_models[0] = &allocation->model_slots[0];
+        actor.allocation_kind = kSecondaryBodyAllocation;
         return IdOf<SpawnedActor>(&actor);
       }
     }
@@ -258,42 +263,43 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void Install(std::size_t slot, SpawnedActor actor) override {
     if (slot < std::size(VS::Battle::actors)) {
-      VS::Battle::actors[slot] = PointerOf<Battle_Actor>(actor);
+      VS::Battle::actors[slot] = PointerOf<VS::Battle::Actor>(actor);
     }
   }
 
   [[nodiscard]] AssetAddress ModelAddress(SpawnedActor actor) const override {
-    const Battle_Actor* live = PointerOf<Battle_Actor>(actor);
+    const VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
     return live != nullptr ? Address(live->model) : AssetAddress::kNone;
   }
 
   [[nodiscard]] AssetAddress EquipmentAddress(
       SpawnedActor actor, EquipmentHand hand) const override {
-    const Battle_Actor* live = PointerOf<Battle_Actor>(actor);
+    const VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
     if (live == nullptr) {
       return AssetAddress::kNone;
     }
-    return Address(live->equipmentModels[static_cast<std::size_t>(hand)]);
+    return Address(live->equipment_models[static_cast<std::size_t>(hand)]);
   }
 
   void SetEquippedWeaponCategory(SpawnedActor actor,
                                  std::uint8_t category) override {
-    if (Battle_Actor* live = PointerOf<Battle_Actor>(actor); live != nullptr) {
-      live->equippedWeaponCategory = category;
+    if (VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
+        live != nullptr) {
+      live->equipped_weapon_category = category;
     }
   }
 
   void WriteAuxiliaryIdentity(SpawnedActor actor,
                               const AuxiliaryIdentity& identity) override {
-    Battle_Actor* live = PointerOf<Battle_Actor>(actor);
+    VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
     if (live == nullptr) {
       return;
     }
-    live->modelId = identity.model_id;
+    live->model_id = identity.model_id;
     live->kind = identity.kind;
     live->id = identity.id;
     live->next = nullptr;
-    live->retainAfterDefeat = 0;
+    live->retain_after_defeat = 0;
   }
 
   [[nodiscard]] std::array<std::uint8_t, kWeaponCategoryBounds>
@@ -307,108 +313,108 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   // --- The installed actor in `slot`
   void WriteDefaults(std::size_t slot, const ActorDefaults& defaults) override {
-    Battle_Actor* actor = SlotActor(slot);
+    VS::Battle::Actor* actor = SlotActor(slot);
     if (actor == nullptr) {
       return;
     }
     actor->id = defaults.id;
-    actor->modelId = defaults.model_id;
-    actor->subType = 0;
-    actor->bladeId = defaults.blade_id;
-    actor->shieldId = defaults.shield_id;
-    actor->weaponDrawn = defaults.disposition.weapon_drawn ? 1 : 0;
+    actor->model_id = defaults.model_id;
+    actor->sub_type = 0;
+    actor->blade_id = defaults.blade_id;
+    actor->shield_id = defaults.shield_id;
+    actor->weapon_drawn = defaults.disposition.weapon_drawn ? 1 : 0;
     actor->kind = defaults.disposition.kind;
-    actor->interactionFlags = defaults.interaction_flags;
-    actor->lastTriggerTile.word = 0;
+    actor->interaction_flags = defaults.interaction_flags;
+    actor->last_trigger_tile.word = 0;
     actor->facing = 0;
-    actor->commandState = 0;
-    actor->roomSpawnIndex = kNoRoomSpawn;
-    actor->killCounted = 0;
+    actor->command_state = 0;
+    actor->room_spawn_index = kNoRoomSpawn;
+    actor->kill_counted = 0;
     actor->defeated = 0;
-    Battle_ActorStats* stats = actor->stats;
+    VS::Battle::ActorStats* stats = actor->stats;
     if (stats == nullptr) {
       return;
     }
-    stats->maxHp = kDefaultVitals;
-    stats->currentHp = kDefaultVitals;
-    stats->maxMp = kDefaultVitals;
-    stats->currentMp = kDefaultVitals;
+    stats->max_hp = kDefaultVitals;
+    stats->current_hp = kDefaultVitals;
+    stats->max_mp = kDefaultVitals;
+    stats->current_mp = kDefaultVitals;
     stats->risk = 0;
-    stats->actionRecoveryTimer = 0;
-    stats->movementClass = static_cast<char>(defaults.gait.movement_class);
-    stats->gaitClass = static_cast<char>(defaults.gait.gait_class);
-    stats->walkSpeed = static_cast<char>(kDefaultWalkSpeed);
-    stats->runSpeed = static_cast<char>(kDefaultRunSpeed);
+    stats->action_recovery_timer = 0;
+    stats->movement_class = static_cast<char>(defaults.gait.movement_class);
+    stats->gait_class = static_cast<char>(defaults.gait.gait_class);
+    stats->walk_speed = static_cast<char>(kDefaultWalkSpeed);
+    stats->run_speed = static_cast<char>(kDefaultRunSpeed);
     stats->weapon.recovery_delay = kDefaultRecoveryDelay;
     stats->weapon.range.range = kDefaultWeaponRange[0];
     stats->weapon.range.second_range = kDefaultWeaponRange[1];
     stats->weapon.range.third_range = kDefaultWeaponRange[2];
-    stats->cancelsHitResults = 0;
+    stats->cancels_hit_results = 0;
     stats->weapon.range.SetAttackShapeAngle(0);
-    stats->actorId = kNoRoomSpawn;
+    stats->actor_id = kNoRoomSpawn;
   }
 
   void WriteTemplateIdentity(std::size_t slot,
                              const TemplateIdentity& identity) override {
-    Battle_Actor* actor = SlotActor(slot);
+    VS::Battle::Actor* actor = SlotActor(slot);
     if (actor == nullptr) {
       return;
     }
     actor->id = identity.id;
-    actor->modelId = identity.model_id;
-    actor->subType = identity.sub_type;
-    actor->bladeId = identity.blade_id;
-    actor->shieldId = identity.shield_id;
-    actor->weaponDrawn = identity.disposition.weapon_drawn ? 1 : 0;
+    actor->model_id = identity.model_id;
+    actor->sub_type = identity.sub_type;
+    actor->blade_id = identity.blade_id;
+    actor->shield_id = identity.shield_id;
+    actor->weapon_drawn = identity.disposition.weapon_drawn ? 1 : 0;
     actor->kind = identity.disposition.kind;
-    actor->retainAfterDefeat = identity.retain_after_defeat ? 1 : 0;
-    actor->interactionFlags = identity.interaction_flags;
-    actor->commandState = 0;
-    actor->lastTriggerTile.word = 0;
+    actor->retain_after_defeat = identity.retain_after_defeat ? 1 : 0;
+    actor->interaction_flags = identity.interaction_flags;
+    actor->command_state = 0;
+    actor->last_trigger_tile.word = 0;
   }
 
   void WriteInitialStats(std::size_t slot, const InitialStats& stats) override {
-    Battle_ActorStats* live = SlotStats(slot);
+    VS::Battle::ActorStats* live = SlotStats(slot);
     if (live == nullptr) {
       return;
     }
-    live->actorId = stats.actor_id;
+    live->actor_id = stats.actor_id;
     WriteName(stats.name, *live);
-    live->maxHp = stats.hp;
-    live->currentHp = stats.hp;
+    live->max_hp = stats.hp;
+    live->current_hp = stats.hp;
     live->risk = 0;
-    live->maxMp = stats.mp;
-    live->currentMp = stats.mp;
-    live->totalStrength = static_cast<u_short>(stats.strength);
+    live->max_mp = stats.mp;
+    live->current_mp = stats.mp;
+    live->total_strength = static_cast<u_short>(stats.strength);
     live->strength = static_cast<u_short>(stats.strength);
-    live->totalIntelligence = static_cast<u_short>(stats.intelligence);
+    live->total_intelligence = static_cast<u_short>(stats.intelligence);
     live->intelligence = static_cast<u_short>(stats.intelligence);
-    live->totalAgility = static_cast<u_short>(stats.agility);
+    live->total_agility = static_cast<u_short>(stats.agility);
     live->agility = static_cast<u_short>(stats.agility);
-    live->movementClass = static_cast<char>(stats.gait.movement_class);
-    live->gaitClass = static_cast<char>(stats.gait.gait_class);
-    live->walkSpeed = static_cast<char>(stats.walk_speed);
-    live->baseWalkSpeed = static_cast<char>(stats.walk_speed);
-    live->runSpeed = static_cast<char>(stats.run_speed);
-    live->baseRunSpeed = static_cast<char>(stats.run_speed);
-    live->enemyClass = stats.enemy_class;
+    live->movement_class = static_cast<char>(stats.gait.movement_class);
+    live->gait_class = static_cast<char>(stats.gait.gait_class);
+    live->walk_speed = static_cast<char>(stats.walk_speed);
+    live->base_walk_speed = static_cast<char>(stats.walk_speed);
+    live->run_speed = static_cast<char>(stats.run_speed);
+    live->base_run_speed = static_cast<char>(stats.run_speed);
+    live->enemy_class = stats.enemy_class;
     live->reach = stats.reach;
-    live->recoveryDelayBonus = stats.recovery_delay_bonus;
-    live->mobilityLimb0 = stats.mobility_limbs[0];
-    live->mobilityLimb1 = stats.mobility_limbs[1];
-    live->defaultTargetLimb = stats.default_target_limb;
-    live->cancelsHitResults = 0;
-    live->isAnalyzed = 0;
+    live->recovery_delay_bonus = stats.recovery_delay_bonus;
+    live->mobility_limb0 = stats.mobility_limbs[0];
+    live->mobility_limb1 = stats.mobility_limbs[1];
+    live->default_target_limb = stats.default_target_limb;
+    live->cancels_hit_results = 0;
+    live->is_analyzed = 0;
     WriteInitialLimbs(stats, *live);
-    live->statusImmunities = stats.status_immunities;
+    live->status_immunities = stats.status_immunities;
     live->statuses = stats.statuses;
-    std::fill_n(std::begin(live->statusTimers), kInitialStatusTimers, 0);
-    live->actionRecoveryTimer = 0;
+    std::fill_n(std::begin(live->status_timers), kInitialStatusTimers, 0);
+    live->action_recovery_timer = 0;
   }
 
   [[nodiscard]] WeaponRange BuildTemplateEquipment(
       std::size_t slot, TemplateEquipment equipment) override {
-    Battle_ActorStats* stats = SlotStats(slot);
+    VS::Battle::ActorStats* stats = SlotStats(slot);
     const auto* init = PointerOf<const VS::Actors::CharacterInit>(equipment);
     if (stats == nullptr || init == nullptr) {
       return {};
@@ -424,95 +430,96 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void WriteAttackReach(std::size_t slot, const AttackReach& reach) override {
-    Battle_ActorStats* stats = SlotStats(slot);
+    VS::Battle::ActorStats* stats = SlotStats(slot);
     if (stats == nullptr) {
       return;
     }
-    stats->currentRange = reach.range;
-    stats->currentRangeY = reach.range_y;
-    stats->currentRangeZ = reach.range_z;
-    stats->currentAttackShapeAngle = reach.shape_angle;
-    stats->currentAttackShape = kInitialAttackShape;
+    stats->current_range = reach.range;
+    stats->current_range_y = reach.range_y;
+    stats->current_range_z = reach.range_z;
+    stats->current_attack_shape_angle = reach.shape_angle;
+    stats->current_attack_shape = kInitialAttackShape;
   }
 
   [[nodiscard]] SpawnedState State(std::size_t slot) const override {
-    const Battle_Actor* actor = SlotActor(slot);
+    const VS::Battle::Actor* actor = SlotActor(slot);
     if (actor == nullptr) {
       return {};
     }
-    SpawnedState state{.kind = actor->kind, .weapon_drawn = actor->weaponDrawn};
-    if (const Battle_ActorStats* stats = actor->stats; stats != nullptr) {
-      state.walk_speed = Byte(stats->walkSpeed);
-      state.run_speed = Byte(stats->runSpeed);
+    SpawnedState state{.kind = actor->kind,
+                       .weapon_drawn = actor->weapon_drawn};
+    if (const VS::Battle::ActorStats* stats = actor->stats; stats != nullptr) {
+      state.walk_speed = Byte(stats->walk_speed);
+      state.run_speed = Byte(stats->run_speed);
     }
     return state;
   }
 
   void WriteSpawnDetails(std::size_t slot,
                          const SpawnDetails& details) override {
-    Battle_Actor* actor = SlotActor(slot);
+    VS::Battle::Actor* actor = SlotActor(slot);
     if (actor == nullptr) {
       return;
     }
     actor->facing = details.facing;
-    actor->spawnByte26 = details.spawn_byte;
-    actor->roomSpawnIndex = details.room_spawn_index;
-    actor->killCounted = 0;
+    actor->spawn_byte26 = details.spawn_byte;
+    actor->room_spawn_index = details.room_spawn_index;
+    actor->kill_counted = 0;
     actor->defeated = 0;
-    actor->aiGroup = details.settings.ai_group;
-    actor->reserved30Bit4 = details.settings.group_reserved;
-    actor->aiLinkedGroup = details.settings.ai_linked_group;
-    actor->reserved31Bit6 = details.settings.linked_reserved;
+    actor->ai_group = details.settings.ai_group;
+    actor->reserved30_bit4 = details.settings.group_reserved;
+    actor->ai_linked_group = details.settings.ai_linked_group;
+    actor->reserved31_bit6 = details.settings.linked_reserved;
     actor->reserved34 = details.settings.extra;
-    actor->templateWord2C = details.template_word;
-    Battle_ActorStats* stats = actor->stats;
+    actor->template_word2c = details.template_word;
+    VS::Battle::ActorStats* stats = actor->stats;
     if (stats == nullptr) {
       return;
     }
-    stats->dropItem.id = details.drop.id;
-    stats->dropItem.count = details.drop.count;
-    stats->secondDropItem.id = details.second_drop.id;
-    stats->secondDropItem.count = details.second_drop.count;
-    stats->randomDropItem.id = details.random_drop.id;
-    stats->randomDropItem.drop_rate = details.random_drop.count;
+    stats->drop_item.id = details.drop.id;
+    stats->drop_item.count = details.drop.count;
+    stats->second_drop_item.id = details.second_drop.id;
+    stats->second_drop_item.count = details.second_drop.count;
+    stats->random_drop_item.id = details.random_drop.id;
+    stats->random_drop_item.drop_rate = details.random_drop.count;
   }
 
   void SetTemplateWord(std::size_t slot, std::int32_t word) override {
-    if (Battle_Actor* actor = SlotActor(slot); actor != nullptr) {
-      actor->templateWord2C = word;
+    if (VS::Battle::Actor* actor = SlotActor(slot); actor != nullptr) {
+      actor->template_word2c = word;
     }
   }
 
   void RestoreRemembered(std::size_t slot,
                          const RememberedSpawn& remembered) override {
-    Battle_ActorStats* stats = SlotStats(slot);
+    VS::Battle::ActorStats* stats = SlotStats(slot);
     if (stats == nullptr) {
       return;
     }
-    stats->currentHp = remembered.current_hp;
-    stats->maxHp = remembered.max_hp;
-    stats->currentMp = remembered.current_mp;
-    stats->maxMp = remembered.max_mp;
+    stats->current_hp = remembered.current_hp;
+    stats->max_hp = remembered.max_hp;
+    stats->current_mp = remembered.current_mp;
+    stats->max_mp = remembered.max_mp;
     stats->strength = static_cast<u_short>(remembered.strength);
-    stats->totalStrength = static_cast<u_short>(remembered.strength);
+    stats->total_strength = static_cast<u_short>(remembered.strength);
     stats->intelligence = static_cast<u_short>(remembered.intelligence);
-    stats->totalIntelligence = static_cast<u_short>(remembered.intelligence);
+    stats->total_intelligence = static_cast<u_short>(remembered.intelligence);
     stats->agility = static_cast<u_short>(remembered.agility);
-    stats->totalAgility = static_cast<u_short>(remembered.agility);
+    stats->total_agility = static_cast<u_short>(remembered.agility);
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
       stats->limbs[limb].hp = remembered.limb_hp.at(limb);
     }
   }
 
   void InflictStatuses(std::size_t slot, std::int32_t statuses) override {
-    if (Battle_ActorStats* stats = SlotStats(slot); stats != nullptr) {
+    if (VS::Battle::ActorStats* stats = SlotStats(slot); stats != nullptr) {
       VS::Battle::InflictLiveActorStatuses(statuses, stats);
     }
   }
 
   void LinkAfterLeader(std::size_t slot) override {
-    Battle_Actor* actor = SlotActor(slot);
-    Battle_Actor* leader = VS::Battle::actors[kAshleySlot];
+    VS::Battle::Actor* actor = SlotActor(slot);
+    VS::Battle::Actor* leader = VS::Battle::actors[kAshleySlot];
     if (actor == nullptr || leader == nullptr || actor == leader) {
       return;
     }
@@ -521,7 +528,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void ClearNext(std::size_t slot) override {
-    if (Battle_Actor* actor = SlotActor(slot); actor != nullptr) {
+    if (VS::Battle::Actor* actor = SlotActor(slot); actor != nullptr) {
       actor->next = nullptr;
     }
   }
@@ -538,7 +545,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   [[nodiscard]] std::optional<EquippedModels> Equipped(
       std::size_t slot) const override {
-    const Battle_ActorStats* stats = SlotStats(slot);
+    const VS::Battle::ActorStats* stats = SlotStats(slot);
     if (stats == nullptr) {
       return std::nullopt;
     }
@@ -568,7 +575,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     Battle::SetLiveEnemyCombatPose(static_cast<int>(slot), pose);
   }
   [[nodiscard]] int CreateAiState(std::size_t slot, int flags) override {
-    Battle_Actor* actor = SlotActor(slot);
+    VS::Battle::Actor* actor = SlotActor(slot);
     if (actor == nullptr) {
       return 0;
     }
@@ -578,7 +585,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     InitializeLivePlaceholderActor(static_cast<int>(slot), actor_id);
   }
   void QueueBaseSequence(SpawnedActor actor, std::size_t slot) override {
-    QueueLiveActorBaseSequenceLoad(PointerOf<Battle_Actor>(actor),
+    QueueLiveActorBaseSequenceLoad(PointerOf<VS::Battle::Actor>(actor),
                                    static_cast<int>(slot));
   }
   void QueueWeaponSequence(SpawnedActor actor, std::size_t slot,
@@ -779,46 +786,46 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void SetCharacter(SpawnedActor actor) override {
-    VS::Battle::characterState = PointerOf<Battle_Actor>(actor);
+    VS::Battle::characterState = PointerOf<VS::Battle::Actor>(actor);
   }
 
   void RestoreAshleyVitals(const AshleySnapshot& snapshot) override {
-    Battle_ActorStats* stats = CharacterStats();
+    VS::Battle::ActorStats* stats = CharacterStats();
     if (stats == nullptr) {
       return;
     }
-    stats->currentHp = snapshot.current_hp;
-    stats->maxHp = snapshot.max_hp;
-    stats->currentMp = snapshot.current_mp;
-    stats->maxMp = snapshot.max_mp;
+    stats->current_hp = snapshot.current_hp;
+    stats->max_hp = snapshot.max_hp;
+    stats->current_mp = snapshot.current_mp;
+    stats->max_mp = snapshot.max_mp;
     stats->strength = static_cast<u_short>(snapshot.strength);
-    stats->totalStrength = static_cast<u_short>(snapshot.total_strength);
+    stats->total_strength = static_cast<u_short>(snapshot.total_strength);
     stats->intelligence = static_cast<u_short>(snapshot.intelligence);
-    stats->totalIntelligence =
+    stats->total_intelligence =
         static_cast<u_short>(snapshot.total_intelligence);
     stats->agility = static_cast<u_short>(snapshot.agility);
-    stats->totalAgility = static_cast<u_short>(snapshot.total_agility);
+    stats->total_agility = static_cast<u_short>(snapshot.total_agility);
     stats->risk = static_cast<u_short>(snapshot.risk);
-    stats->actionRecoveryTimer = snapshot.recovery_timer;
+    stats->action_recovery_timer = snapshot.recovery_timer;
   }
 
   void InflictCharacterStatuses(std::int32_t statuses) override {
-    if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
+    if (VS::Battle::ActorStats* stats = CharacterStats(); stats != nullptr) {
       VS::Battle::InflictLiveActorStatuses(statuses, stats);
     }
   }
 
   void RestoreAshleyConditions(const AshleySnapshot& snapshot) override {
-    Battle_ActorStats* stats = CharacterStats();
+    VS::Battle::ActorStats* stats = CharacterStats();
     if (stats == nullptr) {
       return;
     }
-    std::ranges::copy(snapshot.status_timers, std::begin(stats->statusTimers));
+    std::ranges::copy(snapshot.status_timers, std::begin(stats->status_timers));
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
       const AshleyLimbSnapshot& source = snapshot.limbs.at(limb);
-      Battle_LimbStats& target = stats->limbs[limb];
+      LimbStats& target = stats->limbs[limb];
       target.hp = static_cast<std::int16_t>(source.hp);
-      target.maxHp = static_cast<std::int16_t>(source.max_hp);
+      target.max_hp = static_cast<std::int16_t>(source.max_hp);
       for (std::size_t i = 0; i < kLimbTypes; ++i) {
         target.types[i] = static_cast<std::int16_t>(source.types.at(i));
       }
@@ -831,7 +838,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void SetCharacterWeaponDrawn(std::int32_t weapon_drawn) override {
     if (VS::Battle::characterState != nullptr) {
-      VS::Battle::characterState->weaponDrawn = weapon_drawn;
+      VS::Battle::characterState->weapon_drawn = weapon_drawn;
     }
   }
 
@@ -877,7 +884,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   [[nodiscard]] WeaponRange LoadAshleyWeapon(
       std::optional<std::size_t> weapon) override {
-    Battle_ActorStats* stats = CharacterStats();
+    VS::Battle::ActorStats* stats = CharacterStats();
     if (stats == nullptr) {
       return {};
     }
@@ -889,7 +896,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void LoadAshleyShield(std::optional<std::size_t> shield) override {
-    if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
+    if (VS::Battle::ActorStats* stats = CharacterStats(); stats != nullptr) {
       Items::LoadLiveInventoryShieldStats(
           &stats->shield, shield && *shield < kInventoryShields
                               ? &VS::Items::inventory.shields[*shield]
@@ -899,7 +906,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void LoadAshleyArmor(std::size_t limb,
                        std::optional<std::size_t> armor) override {
-    Battle_ActorStats* stats = CharacterStats();
+    VS::Battle::ActorStats* stats = CharacterStats();
     if (stats == nullptr || limb >= kActorLimbs) {
       return;
     }
@@ -910,7 +917,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void LoadAshleyAccessory(std::optional<std::size_t> armor) override {
-    if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
+    if (VS::Battle::ActorStats* stats = CharacterStats(); stats != nullptr) {
       Items::LoadLiveInventoryAccessoryStats(
           &stats->accessory, armor && *armor < kInventoryArmor
                                  ? &VS::Items::inventory.armor[*armor]
@@ -1014,47 +1021,47 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
 }
 
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:6064)
-Battle_Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
-                                       const SpawnPlacement* placement,
-                                       int material, int /*unused*/) {
+VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
+                                            const SpawnPlacement* placement,
+                                            int material, int /*unused*/) {
   constexpr const char* kOperation = "CreateAuxiliaryActor";
   if (placement == nullptr) {
     WarnActorRefused(kOperation, "no placement");
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<Battle_Actor>(
+  return PointerOf<VS::Battle::Actor>(
       CreateAuxiliaryActor(host, index, actor_id, *placement, material));
 }
 
 // decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
-Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
-                                           int blade_model, int blade_material,
-                                           int shield_model,
-                                           int shield_material,
-                                           const SpawnPlacement* placement,
-                                           int flags) {
+VS::Battle::Actor* CreateLiveActorWithEquipment(
+    int actor_id, int model_id, int blade_model, int blade_material,
+    int shield_model, int shield_material, const SpawnPlacement* placement,
+    int flags) {
   constexpr const char* kOperation = "CreateActorWithEquipment";
   if (placement == nullptr) {
     WarnActorRefused(kOperation, "no placement");
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<Battle_Actor>(CreateActorWithEquipment(
+  return PointerOf<VS::Battle::Actor>(CreateActorWithEquipment(
       host, actor_id, model_id, blade_model, blade_material, shield_model,
       shield_material, *placement, flags));
 }
 
 // decomp: BATTLE.PRG func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6578)
-Battle_Actor* SpawnLiveRoomEnemy(int actor_id, VS::Field::MpdEnemySpawn* spawn,
-                                 VS::Actors::CharacterInit* init, int flags) {
+VS::Battle::Actor* SpawnLiveRoomEnemy(int actor_id,
+                                      VS::Field::MpdEnemySpawn* spawn,
+                                      VS::Actors::CharacterInit* init,
+                                      int flags) {
   constexpr const char* kOperation = "SpawnRoomEnemy";
   if (spawn == nullptr || init == nullptr) {
     WarnActorRefused(kOperation, "no spawn record or template");
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<Battle_Actor>(
+  return PointerOf<VS::Battle::Actor>(
       SpawnRoomEnemy(host, actor_id, DecodeRoomSpawn(*spawn),
                      DecodeCharacterTemplate(*init), flags));
 }

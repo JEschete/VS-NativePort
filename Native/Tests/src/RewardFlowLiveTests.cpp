@@ -13,9 +13,9 @@
 #include "Actors/ModelInstance.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.hpp"
 #include "Battle/TargetingState.hpp"
@@ -40,6 +40,8 @@
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Battle::ActionState;
+
 namespace {
 namespace b = VS::Battle;
 namespace render = VS::Render;
@@ -57,16 +59,16 @@ struct LiveFixture {
   u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
   u_char saved_platform_pause = VS::Field::areMovingPlatformsPaused;
-  Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_character = VS::Battle::characterState;
+  ActionState* saved_action = VS::Battle::actionState;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
   VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
   decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
   u_short saved_requirement = VS::Battle::battleAbilityPointRequirements[0];
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
   std::uint8_t saved_b6 = VS::State::LiveScriptFlag(0xB6);
-  Battle_ActionState action{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  ActionState action{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Actors::ModelInstance model{};
 
   LiveFixture() {
@@ -85,7 +87,7 @@ struct LiveFixture {
     VS::Battle::characterState = &actor;
     actor.stats = &stats;
     actor.model = &model;
-    actor.equippedWeaponCategory = 1;
+    actor.equipped_weapon_category = 1;
     VS::State::artsStatus = {};
     std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
     VS::Battle::battleAbilityPointRequirements[0] = 1;

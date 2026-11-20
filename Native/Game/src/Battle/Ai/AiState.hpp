@@ -10,8 +10,10 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Core/Gte.h"
 
-struct Battle_Actor;
-struct Battle_ActorStats;
+namespace VS::Battle {
+struct Actor;
+struct ActorStats;
+}  // namespace VS::Battle
 
 namespace VS::Battle::Ai {
 
@@ -55,7 +57,7 @@ struct RoomAiState {
   /* 0x1C */ ActorAiState* engaged_head;
   /* 0x20 */ ActorAiState* engaged_tail;
   /* 0x24 */ std::int32_t approach_moves;
-  /* 0x28 */ std::array<Battle_Actor*, kRoomAiStateSpecialActorsCount>
+  /* 0x28 */ std::array<VS::Battle::Actor*, kRoomAiStateSpecialActorsCount>
       special_actors;
 };
 
@@ -235,7 +237,7 @@ struct ActorAiState {
   /* 0x4C */ SVECTOR position;
   /* 0x54 */ EngagementData* actor;
   /* 0x58 */ ModelStatePrefix* model;
-  /* 0x5C */ Battle_ActorStats* stats;
+  /* 0x5C */ VS::Battle::ActorStats* stats;
   void* native_pointer60;  // PS1 pointer slot 0x60
   void* native_pointer64;  // PS1 pointer slot 0x64
   void* native_pointer68;  // PS1 pointer slot 0x68
@@ -462,7 +464,7 @@ struct EngagementData {
   std::uint16_t opaque_e;
   SVECTOR opaque10;
   std::array<std::uint8_t, kEngagementDataReserved18Bytes> reserved18;
-  Battle_ActorStats* opaque_3c;
+  VS::Battle::ActorStats* opaque_3c;
 };
 
 // decomp: func_800E1238_t (src/BATTLE/BATTLE.PRG/6F014.c:139)

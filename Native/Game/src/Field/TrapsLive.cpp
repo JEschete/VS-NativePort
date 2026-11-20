@@ -10,9 +10,9 @@
 #include <type_traits>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Core/Log.hpp"
@@ -23,22 +23,25 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::LimbStats;
+
 namespace {
 using VS::Field::TrapPanelHit;
 using VS::Field::TrapPanelTarget;
 
 constexpr std::size_t kActionHitCount = 2;
-using LimbTable = decltype(Battle_ActorStats::limbs);
-constexpr std::size_t kLimbCount = std::extent_v<LimbTable>;
+using LimbTable = decltype(VS::Battle::ActorStats::limbs);
+constexpr std::size_t kLimbCount = std::tuple_size_v<LimbTable>;
 
 // Cross-slice calls: retarget when those rows are promoted.
-Battle_ActorStats* PlayerStats() {
+VS::Battle::ActorStats* PlayerStats() {
   return VS::Battle::characterState != nullptr
              ? VS::Battle::characterState->stats
              : nullptr;
 }
 
-Battle_Actor* BattleActor(std::size_t index) {
+VS::Battle::Actor* BattleActor(std::size_t index) {
   const std::span actors(VS::Battle::actors);
   return index < actors.size() ? actors[index] : nullptr;
 }
@@ -68,12 +71,11 @@ std::array<Out, N> Ratings(const std::array<In, N>& values) {
   return Ratings<Out>(std::span<const In, N>(values));
 }
 
-TrapPanelTarget ToPanelTarget(const Battle_ActorStats& stats,
-                              const Battle_LimbStats& limb,
-                              bool shield_raised) {
+TrapPanelTarget ToPanelTarget(const VS::Battle::ActorStats& stats,
+                              const LimbStats& limb, bool shield_raised) {
   TrapPanelTarget target;
-  target.current_hp = stats.currentHp;
-  target.max_hp = stats.maxHp;
+  target.current_hp = stats.current_hp;
+  target.max_hp = stats.max_hp;
   target.risk = stats.risk;
   target.strength = stats.strength;
   target.limb.types = Ratings<std::int16_t>(limb.types);
@@ -111,7 +113,7 @@ struct PanelInputs {
 };
 
 std::optional<PanelInputs> ReadPanelInputs(
-    const char* rule, const Battle_ActionDefinition* action,
+    const char* rule, const ActionDefinition* action,
     const VS::Battle::HitResult* target_result, int hit_index) {
   if (action == nullptr || target_result == nullptr) {
     WarnRefusal(rule, "null record");
@@ -121,7 +123,8 @@ std::optional<PanelInputs> ReadPanelInputs(
     WarnRefusal(rule, "hit index outside the action's hits");
     return std::nullopt;
   }
-  const Battle_Actor* struck = BattleActor(target_result->target.target_actor);
+  const VS::Battle::Actor* struck =
+      BattleActor(target_result->target.target_actor);
   // The original loads the limb signed (lb at 0x800825B8); reading the byte
   // unsigned refuses the same values, since only 0..5 name a limb.
   const auto limb =
@@ -130,8 +133,8 @@ std::optional<PanelInputs> ReadPanelInputs(
     WarnRefusal(rule, "target outside the actor table or its limbs");
     return std::nullopt;
   }
-  const Battle_ActorStats& stats = *struck->stats;
-  const Battle_Actor* owner = BattleActor(stats.actorId);
+  const VS::Battle::ActorStats& stats = *struck->stats;
+  const VS::Battle::Actor* owner = BattleActor(stats.actor_id);
   if (owner == nullptr) {
     WarnRefusal(rule, "target's actor id outside the actor table");
     return std::nullopt;
@@ -139,12 +142,12 @@ std::optional<PanelInputs> ReadPanelInputs(
   const auto& hit =
       std::span(action->hits)[static_cast<std::size_t>(hit_index)];
   return PanelInputs{
-      .hit = {.stat_factor = static_cast<std::uint8_t>(hit.statFactor),
-              .damage_type = static_cast<std::uint8_t>(hit.damageType),
+      .hit = {.stat_factor = static_cast<std::uint8_t>(hit.stat_factor),
+              .damage_type = static_cast<std::uint8_t>(hit.damage_type),
               .affinity = static_cast<std::uint8_t>(hit.affinity)},
       .target = ToPanelTarget(
           stats, std::span(stats.limbs)[static_cast<std::size_t>(limb)],
-          (owner->weaponDrawn & 1) != 0)};
+          (owner->weapon_drawn & 1) != 0)};
 }
 
 using PanelRule = std::optional<std::int16_t> (*)(const TrapPanelHit&,
@@ -153,7 +156,7 @@ using PanelRule = std::optional<std::int16_t> (*)(const TrapPanelHit&,
                                                   VS::Field::TrapRandom&);
 
 std::int16_t RunPanelRule(const char* rule, PanelRule calculate,
-                          const Battle_ActionDefinition* action,
+                          const ActionDefinition* action,
                           const VS::Battle::HitResult* target_result,
                           int hit_index, int add_random_variation) {
   const auto inputs = ReadPanelInputs(rule, action, target_result, hit_index);
@@ -171,7 +174,7 @@ std::int16_t RunPanelRule(const char* rule, PanelRule calculate,
 
 namespace VS::Field {
 int RollLiveRiskLockBreak() {
-  const Battle_ActorStats* stats = PlayerStats();
+  const VS::Battle::ActorStats* stats = PlayerStats();
   if (stats == nullptr) {
     WarnRefusal("RollRiskLockBreak", "null player record");
     return 0;
@@ -181,7 +184,7 @@ int RollLiveRiskLockBreak() {
 }
 
 std::int16_t CalculateLiveTrapPanelDamage(
-    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
     VS::Battle::HitResult* target_result, int hit_index,
     int add_random_variation) {
   return RunPanelRule("CalculateTrapPanelDamage", &CalculateTrapPanelDamage,
@@ -189,7 +192,7 @@ std::int16_t CalculateLiveTrapPanelDamage(
 }
 
 std::int16_t CalculateLiveHealingPanelRecovery(
-    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
     VS::Battle::HitResult* target_result, int hit_index,
     int add_random_variation) {
   return RunPanelRule("CalculateHealingPanelRecovery",

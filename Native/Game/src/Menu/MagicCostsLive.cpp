@@ -13,10 +13,10 @@
 #include <string_view>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -82,7 +82,7 @@ class LiveHost final : public Host {
 
   std::optional<std::uint8_t> ActionCost(int action_id) override {
     if (ValidAction(action_id)) {
-      return Battle_actionDefinitions[action_id].cost;
+      return VS::Battle::actionDefinitions[action_id].cost;
     }
     return std::nullopt;
   }
@@ -112,7 +112,7 @@ class LiveHost final : public Host {
         VS::Battle::characterState->stats == nullptr) {
       return std::nullopt;
     }
-    return VS::Battle::characterState->stats->currentMp;
+    return VS::Battle::characterState->stats->current_mp;
   }
   std::span<const std::uint16_t> TeleportationStrings() override {
     return teleportationStrings;

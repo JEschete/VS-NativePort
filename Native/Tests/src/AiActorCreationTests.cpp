@@ -23,7 +23,7 @@
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCreation.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettings.hpp"
@@ -607,8 +607,8 @@ struct LiveCreationFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Battle::Ai::RoomAiState room{};
   u_short flags[32][32]{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Actors::ActorRecord record{};
   CreationTestModel model{};
 
@@ -645,16 +645,16 @@ struct LiveCreationFixture {
   void PrepareAshley() {
     actor.id = 0;
     actor.kind = 0x04;
-    actor.allocationKind = 1;
-    actor.spawnByte26 = 1;
-    actor.commandOpcode = 7;
-    actor.commandFlags = 0xAB;
+    actor.allocation_kind = 1;
+    actor.spawn_byte26 = 1;
+    actor.command_opcode = 7;
+    actor.command_flags = 0xAB;
     actor.stats = &stats;
     actor.model = &record.instance;
-    stats.movementClass = 0x18;
-    stats.walkSpeed = 6;
-    stats.gaitClass = 0x40;
-    stats.runSpeed = 9;
+    stats.movement_class = 0x18;
+    stats.walk_speed = 6;
+    stats.gait_class = 0x40;
+    stats.run_speed = 9;
     record.instance.slot = 0;
     record.instance.model = &model.header;
     record.instance.bone_count = static_cast<u_char>(model.bones.size());
@@ -739,8 +739,8 @@ TEST_CASE("Live AI creation builds Ashley's state from her actor record",
   CHECK(state->saved_relation_options == static_cast<std::int16_t>(options));
   // Ashley starts no command; only her command is cleared.
   CHECK(state->behavior_mode == 0);
-  CHECK(fixture.actor.commandOpcode == 0);
-  CHECK(fixture.actor.commandFlags == 0xA0);
+  CHECK(fixture.actor.command_opcode == 0);
+  CHECK(fixture.actor.command_flags == 0xA0);
 }
 
 TEST_CASE("Live AI creation registers an auxiliary special actor",
@@ -748,11 +748,11 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
   LiveCreationFixture fixture;
   VS::Actors::ActorCore core{};
   core.object_word = static_cast<int>(0xFFFFFF04u);
-  Battle_Actor holder{};
+  VS::Battle::Actor holder{};
   fixture.room.special_actors[0] = &holder;
   fixture.actor.id = 6;
   fixture.actor.kind = 0x10;
-  fixture.actor.allocationKind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+  fixture.actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
   fixture.actor.model = &core.model;
 
   CHECK(VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, -1) == 0);
@@ -801,7 +801,7 @@ TEST_CASE("Terminate handler logs live planning invariant",
 TEST_CASE("Planning invariant termination child",
           "[.planning-uncaught-child]") {
   VS::Platform::InstallCrashHandler();
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   VS::Battle::Ai::RoomAiState room{};
   actor.id = 0;
   VS::Battle::Ai::roomAiState = &room;

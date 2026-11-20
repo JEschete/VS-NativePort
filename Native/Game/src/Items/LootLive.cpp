@@ -161,7 +161,7 @@ class LiveChestStateHost final : public ChestStateHost {
   }
 };
 
-std::optional<EnemyDrops> ToEnemyDrops(const Battle_Actor* enemy) {
+std::optional<EnemyDrops> ToEnemyDrops(const VS::Battle::Actor* enemy) {
   if (enemy == nullptr || enemy->stats == nullptr) return std::nullopt;
   const auto& stats = *enemy->stats;
   EnemyDrops drops{};
@@ -172,8 +172,8 @@ std::optional<EnemyDrops> ToEnemyDrops(const Battle_Actor* enemy) {
   for (std::size_t i = 0; i < kLimbCount; ++i) {
     drops.limb_armor[i] = stats.limbs[i].armor;
   }
-  drops.guaranteed_items = {stats.dropItem, stats.secondDropItem};
-  drops.random_item = stats.randomDropItem;
+  drops.guaranteed_items = {stats.drop_item, stats.second_drop_item};
+  drops.random_item = stats.random_drop_item;
   return drops;
 }
 
@@ -186,7 +186,7 @@ std::span<TreasureChest> LiveRoomChestRecords() {
 }  // namespace
 
 // decomp: BATTLE.PRG _dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1720)
-void QueueLiveEnemyLoot(const Battle_Actor* enemy) {
+void QueueLiveEnemyLoot(const VS::Battle::Actor* enemy) {
   const auto drops = ToEnemyDrops(enemy);
   if (!drops) {
     WarnNullRecord("QueueEnemyLoot");

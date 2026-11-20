@@ -9,7 +9,9 @@ struct ActorRecord;
 namespace VS::Actors {
 struct ModelEffectSlot;
 }
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 
 // Binding from the actor table and the original arguments to the typed actor
 // animation controls (AnimationControl.hpp). Each adapter keeps the original
@@ -19,8 +21,8 @@ struct Battle_Actor;
 namespace VS::Actors {
 struct SoundEffectSlot;
 // `actor` is unused, as in the original.
-void QueueLiveActorBaseSequenceLoad(Battle_Actor* actor, int actor_id);
-// `actor_bytes` is the Battle_Actor whose equipped weapon category is read
+void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* actor, int actor_id);
+// `actor_bytes` is the VS::Battle::Actor whose equipped weapon category is read
 // when the weapon sequence is queued.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,

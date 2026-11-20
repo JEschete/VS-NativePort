@@ -6,7 +6,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
@@ -29,7 +29,7 @@ struct PursuitFixture {
       saved_platform_bytes = VS::Field::roomData.header.moving_platforms_length;
   decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
   std::array<VS::Actors::ActorRecord, 2> models{};
-  std::array<Battle_Actor, 2> actors{};
+  std::array<VS::Battle::Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
   std::array<VS::Field::MpdMovingPlatform, 4> platforms{};
   std::array<VS::Battle::Ai::RouteGateEndRecord, 16> gates{};
@@ -193,8 +193,8 @@ TEST_CASE("Approach hands a successful real consumer into the movement mode",
   fixture.states[0].current_movement_mode = static_cast<u_char>(mode);
   CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 0, 640, 0) ==
         (mode == 0 ? 3 : 1));
-  CHECK(fixture.actors[0].commandOpcode == 2);
-  CHECK(fixture.actors[0].commandState == 0x80);
+  CHECK(fixture.actors[0].command_opcode == 2);
+  CHECK(fixture.actors[0].command_state == 0x80);
   CHECK(fixture.states[0].requested_movement_mode == 1);
   CHECK(fixture.states[0].current_movement_mode == 1);
 }

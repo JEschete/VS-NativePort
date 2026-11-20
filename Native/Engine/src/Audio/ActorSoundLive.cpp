@@ -18,7 +18,7 @@
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/SurfaceSounds.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
@@ -123,7 +123,7 @@ VS::Actors::ActorRecord* Record(std::int32_t actor) {
   return VS::Actors::actorRecords[actor];
 }
 
-Battle_Actor* BattleActor(std::int32_t actor) {
+VS::Battle::Actor* BattleActor(std::int32_t actor) {
   if (actor < 0 || static_cast<std::size_t>(actor) >= kBattleActorCount) {
     return nullptr;
   }
@@ -173,7 +173,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
   }
 
   std::optional<ActorModelSound> ScriptActorModel(std::int32_t actor) override {
-    const Battle_Actor* battle_actor = BattleActor(actor);
+    const VS::Battle::Actor* battle_actor = BattleActor(actor);
     if (battle_actor == nullptr || battle_actor->model == nullptr) {
       return std::nullopt;
     }

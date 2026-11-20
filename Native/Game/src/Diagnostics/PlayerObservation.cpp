@@ -18,13 +18,13 @@
 #include "Actors/Movement.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -55,22 +55,33 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+using VS::Battle::kActionTypeSpell;
+using VS::Battle::kWarlockSpellAvalanche;
+using VS::Battle::kWarlockSpellExplosion;
+using VS::Battle::kWarlockSpellFlameSphere;
+using VS::Battle::kWarlockSpellGaeaStrike;
+using VS::Battle::kWarlockSpellMeteor;
+using VS::Battle::kWarlockSpellRadialSurge;
+using VS::Battle::kWarlockSpellThunderburst;
+
 namespace VS::Game {
 namespace {
 constexpr unsigned kFullyBlockedPassability = 5;
 constexpr int kFootprintClearFlag = 4;
-void InspectActorActions(const Battle_ActorStats& stats,
+void InspectActorActions(const VS::Battle::ActorStats& stats,
                          PlayerActorObservation& snapshot) {
-  for (const auto& limb : stats.limbActions) {
+  for (const auto& limb : stats.limb_actions) {
     for (const auto& action : limb) {
-      if (action.actionId != 0 &&
-          action.actionId < std::size(Battle_actionDefinitions) &&
-          std::ranges::find(snapshot.action_ids, action.actionId) ==
+      if (action.action_id != 0 &&
+          action.action_id < std::size(VS::Battle::actionDefinitions) &&
+          std::ranges::find(snapshot.action_ids, action.action_id) ==
               snapshot.action_ids.end()) {
-        snapshot.action_ids.push_back(action.actionId);
-        if (Battle_actionDefinitions[action.actionId].type ==
-            Battle_ActionType_Spell) {
-          snapshot.spell_action_ids.push_back(action.actionId);
+        snapshot.action_ids.push_back(action.action_id);
+        if (VS::Battle::actionDefinitions[action.action_id].type ==
+            kActionTypeSpell) {
+          snapshot.spell_action_ids.push_back(action.action_id);
         }
       }
     }
@@ -90,7 +101,7 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
     snapshot.model = VS::Actors::actorRecords[slot]->model_id;
   }
   snapshot.status_immunities =
-      static_cast<std::uint32_t>(stats.statusImmunities);
+      static_cast<std::uint32_t>(stats.status_immunities);
   InspectActorActions(stats, snapshot);
   snapshot.base_attack_type = stats.weapon.action_type;
   snapshot.shield_pp = stats.shield.current_pp;
@@ -99,17 +110,18 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
   constexpr int kRangeUnit = 32;
   VS::Battle::Ai::ActionRangeShape range{};
   range.range_y =
-      std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeY));
+      std::bit_cast<char>(static_cast<std::uint8_t>(stats.current_range_y));
   range.range_z =
-      std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeZ));
-  range.shape = stats.currentAttackShape;
-  range.angle = stats.currentAttackShapeAngle;
-  snapshot.weapon_range = {{static_cast<int>(stats.currentRange) * kRangeUnit,
-                            static_cast<int>(stats.currentRangeY) * kRangeUnit,
-                            static_cast<int>(stats.currentRangeZ) * kRangeUnit},
-                           static_cast<int>(stats.currentAttackShape),
-                           static_cast<int>(stats.currentAttackShapeAngle),
-                           VS::Battle::LiveCalculateRangeShapeExtent(&range)};
+      std::bit_cast<char>(static_cast<std::uint8_t>(stats.current_range_z));
+  range.shape = stats.current_attack_shape;
+  range.angle = stats.current_attack_shape_angle;
+  snapshot.weapon_range = {
+      {static_cast<int>(stats.current_range) * kRangeUnit,
+       static_cast<int>(stats.current_range_y) * kRangeUnit,
+       static_cast<int>(stats.current_range_z) * kRangeUnit},
+      static_cast<int>(stats.current_attack_shape),
+      static_cast<int>(stats.current_attack_shape_angle),
+      VS::Battle::LiveCalculateRangeShapeExtent(&range)};
   if (const auto* ai = VS::Battle::Ai::actorAiStates[slot]; ai != nullptr) {
     constexpr unsigned kHostileRelation = 3;
     const auto& relation = ai->relations[0];
@@ -148,19 +160,20 @@ std::string InspectGameText(std::span<const std::byte> bytes) {
 // unlocked opens the rank selector with 2..4 rows; anything else casts as is.
 int WarlockSpellRankCount(int action) {
   constexpr std::array kLevelledSpells{
-      Battle_WarlockSpell_Explosion,   Battle_WarlockSpell_Thunderburst,
-      Battle_WarlockSpell_FlameSphere, Battle_WarlockSpell_GaeaStrike,
-      Battle_WarlockSpell_Avalanche,   Battle_WarlockSpell_RadialSurge,
-      Battle_WarlockSpell_Meteor};
+      kWarlockSpellExplosion,   kWarlockSpellThunderburst,
+      kWarlockSpellFlameSphere, kWarlockSpellGaeaStrike,
+      kWarlockSpellAvalanche,   kWarlockSpellRadialSurge,
+      kWarlockSpellMeteor};
   if (std::ranges::find(kLevelledSpells, action) == kLevelledSpells.end() ||
-      !Battle_actionDefinitions[action + 1].unlocked) {
+      !VS::Battle::actionDefinitions[action + 1].unlocked) {
     return 1;
   }
-  if (!Battle_actionDefinitions[action + 2].unlocked) return 2;
+  if (!VS::Battle::actionDefinitions[action + 2].unlocked) return 2;
   constexpr int kThirdRank = 3;
   constexpr int kFourthRank = 4;
-  return Battle_actionDefinitions[action + kThirdRank].unlocked ? kFourthRank
-                                                                : kThirdRank;
+  return VS::Battle::actionDefinitions[action + kThirdRank].unlocked
+             ? kFourthRank
+             : kThirdRank;
 }
 
 void InspectActionOptions(PlayerObservationState& state) {
@@ -177,17 +190,17 @@ void InspectActionOptions(PlayerObservationState& state) {
     int menu_order = 0;
     for (std::size_t index = 0; index < count; ++index) {
       const auto id = static_cast<unsigned char>(ids[index]);
-      if (id == 0 || !Battle_actionDefinitions[id].unlocked) continue;
+      if (id == 0 || !VS::Battle::actionDefinitions[id].unlocked) continue;
       const int ranks = family == "warlock" ? WarlockSpellRankCount(id) : 1;
       for (int rank = 0; rank < ranks; ++rank) {
         const int action = id + rank;
-        const auto& definition = Battle_actionDefinitions[action];
+        const auto& definition = VS::Battle::actionDefinitions[action];
         state.action_options.push_back(
             {action, InspectGameText(std::as_bytes(std::span(definition.name))),
              std::string(family), menu_order, static_cast<int>(definition.type),
              static_cast<int>(definition.cost),
              VS::Battle::LiveActorActionRestrictionFlags(0, action),
-             std::bit_cast<std::uint16_t>(definition.aiFlags), rank, ranks});
+             std::bit_cast<std::uint16_t>(definition.ai_flags), rank, ranks});
       }
       ++menu_order;
     }
@@ -223,22 +236,23 @@ void InspectItemOptions(PlayerObservationState& state) {
         action_map[static_cast<std::size_t>(item.id - kFirstItem)];
     if (action - kFirstRankedSpell < kRankedSpellCount) {
       for (unsigned rank = 0; rank < kRanks; ++rank) {
-        if (Battle_actionDefinitions[action].unlocked) ++action;
+        if (VS::Battle::actionDefinitions[action].unlocked) ++action;
       }
     }
-    if (action >= std::size(Battle_actionDefinitions)) {
+    if (action >= std::size(VS::Battle::actionDefinitions)) {
       throw std::runtime_error(
           "observed item action exceeds native definitions");
     }
-    const auto& definition = Battle_actionDefinitions[action];
+    const auto& definition = VS::Battle::actionDefinitions[action];
     const auto& hit = definition.hits[0];
     state.item_options.push_back(
         {item.id, static_cast<int>(action), item.count,
          InspectGameText(std::as_bytes(std::span(definition.name))),
          VS::Battle::LiveActorActionRestrictionFlags(0,
                                                      static_cast<int>(action)),
-         static_cast<int>(hit.effectId), static_cast<int>(hit.statCalculatorId),
-         static_cast<int>(hit.statFactor)});
+         static_cast<int>(hit.effect_id),
+         static_cast<int>(hit.stat_calculator_id),
+         static_cast<int>(hit.stat_factor)});
   }
 }
 
@@ -341,22 +355,22 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   return result;
 }
 
-void InspectIncomingEffect(const Battle_ActionState& action,
-                           const Battle_ActionRequest& queued,
+void InspectIncomingEffect(const ActionState& action,
+                           const ActionRequestRecord& queued,
                            EncounterReactionTimingState& snapshot) {
   constexpr unsigned kHpDamage = 1, kCombinedDamage = 3;
-  const auto incoming_id = action.selection.actionId;
-  if (incoming_id < std::size(Battle_actionDefinitions)) {
-    snapshot.incoming_type = Battle_actionDefinitions[incoming_id].type;
-    snapshot.incoming_cost = Battle_actionDefinitions[incoming_id].cost;
+  const auto incoming_id = action.selection.action_id;
+  if (incoming_id < std::size(VS::Battle::actionDefinitions)) {
+    snapshot.incoming_type = VS::Battle::actionDefinitions[incoming_id].type;
+    snapshot.incoming_cost = VS::Battle::actionDefinitions[incoming_id].cost;
     snapshot.incoming_affinity =
-        static_cast<unsigned char>(action.selection.effectVariant);
+        static_cast<unsigned char>(action.selection.effect_variant);
   }
-  if (queued.targetCount > std::size(queued.targets)) {
+  if (queued.target_count > std::size(queued.targets)) {
     throw std::runtime_error(
         "reaction inspection exceeds native target storage");
   }
-  for (unsigned index = 0; index < queued.targetCount; ++index) {
+  for (unsigned index = 0; index < queued.target_count; ++index) {
     const auto& hit = queued.targets[index];
     if (hit.targets_position != 0 || hit.target.target_actor != 0) continue;
     if (hit.hp_effect == kHpDamage || hit.hp_effect == kCombinedDamage) {
@@ -390,7 +404,7 @@ void InspectReactionEligibility(EncounterReactionTimingState& snapshot) {
   for (std::size_t slot = 0; slot < mapped.size(); ++slot) {
     if (mapped[slot] == 0) continue;
     if (static_cast<std::size_t>(mapped[slot]) >=
-        std::size(Battle_actionDefinitions)) {
+        std::size(VS::Battle::actionDefinitions)) {
       snapshot.eligibility_status = "invalid_equipped_action";
       snapshot.eligible.fill(false);
       return;
@@ -416,25 +430,26 @@ EncounterReactionTimingState InspectReactionTiming(
   const auto& action = *VS::Battle::actionState;
   snapshot.active =
       state.control_mode == 2 && state.action_phase == kAbilityTimingPhase;
-  snapshot.queue_index = action.queueIndex;
-  snapshot.chain_step = action.chainStep;
-  snapshot.timer = action.abilityTimer;
-  snapshot.window = action.abilityWindow;
+  snapshot.queue_index = action.queue_index;
+  snapshot.chain_step = action.chain_step;
+  snapshot.timer = action.ability_timer;
+  snapshot.window = action.ability_window;
   snapshot.previous_slot =
-      static_cast<unsigned char>(action.previousChainInput);
+      static_cast<unsigned char>(action.previous_chain_input);
   snapshot.previous_buttons =
-      static_cast<unsigned char>(action.previousChainButtons);
-  snapshot.attempted = action.abilityInputAttempted != 0;
-  snapshot.succeeded = static_cast<unsigned char>(action.abilityInputSucceeded);
-  const auto& queued = action.queue[action.queueIndex & kQueueIndexMask];
-  snapshot.action = queued.actionId;
+      static_cast<unsigned char>(action.previous_chain_buttons);
+  snapshot.attempted = action.ability_input_attempted != 0;
+  snapshot.succeeded =
+      static_cast<unsigned char>(action.ability_input_succeeded);
+  const auto& queued = action.queue[action.queue_index & kQueueIndexMask];
+  snapshot.action = queued.action_id;
   InspectIncomingEffect(action, queued, snapshot);
-  if (queued.primaryTarget.targets_position != 0 || queued.targetCount == 0 ||
+  if (queued.primary_target.targets_position != 0 || queued.target_count == 0 ||
       queued.targets[0].targets_position != 0) {
     if (snapshot.active) snapshot.eligibility_status = "not_actor_targeted";
     return snapshot;
   }
-  snapshot.source_actor = queued.primaryTarget.target.target_actor;
+  snapshot.source_actor = queued.primary_target.target.target_actor;
   snapshot.target_actor = queued.targets[0].target.target_actor;
   if (!snapshot.active) return snapshot;
   InspectReactionEligibility(snapshot);
@@ -911,8 +926,8 @@ nlohmann::json EncodeTargetForecasts(const EncounterState& base) {
   if (!base.ready || base.target_previews.empty()) return forecasts;
   const auto* action = VS::Battle::actionState;
   if (action == nullptr ||
-      base.target_previews.size() != action->previewCount ||
-      action->previewCount > std::size(action->previews)) {
+      base.target_previews.size() != action->preview_count ||
+      action->preview_count > std::size(action->previews)) {
     throw std::runtime_error(
         "native target forecast storage changed within a frame");
   }

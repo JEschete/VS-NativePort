@@ -3,7 +3,9 @@
 
 #include "State/KillScore.hpp"
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 
 // Bindings from the live score record (VS::State::scoreData, the
 // original vs_main_scoredata) and the battle actors to the typed kill
@@ -14,7 +16,7 @@ namespace VS::State {
 void StoreLiveKillScore(const KillScore& score) noexcept;
 
 // A null enemy is refused with a "state" warning; the original read it.
-void RecordLiveEnemyKillScore(Battle_Actor* enemy);
+void RecordLiveEnemyKillScore(VS::Battle::Actor* enemy);
 // Reads the selected action and the player's blade category. A missing
 // action state, player or player stats is refused with a "state" warning.
 void UpdateLiveWeaponKillStreak(int unused);

@@ -8,7 +8,7 @@
 
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Gte.h"
 
 namespace VS::Actors {
@@ -23,8 +23,8 @@ inline constexpr std::size_t kActorRecordRoomBytes = 0x1788 + 80;
 // decomp: the unnamed unk0 member of Actor_dat2
 // (src/BATTLE/BATTLE.PRG/actor.h:152-155)
 struct ActorAndStats {
-  Battle_Actor actor;
-  Battle_ActorStats stats;
+  VS::Battle::Actor actor;
+  VS::Battle::ActorStats stats;
 };
 
 // decomp: Actor_dat2 (src/BATTLE/BATTLE.PRG/actor.h:151-162)

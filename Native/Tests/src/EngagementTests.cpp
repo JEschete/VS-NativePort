@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -26,7 +26,7 @@ struct EngagementFixture {
   decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   int saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
   VS::Battle::Ai::RoomAiState room{};
-  std::array<Battle_Actor, 3> actors{};
+  std::array<VS::Battle::Actor, 3> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
 
   EngagementFixture() {

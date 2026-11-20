@@ -8,8 +8,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -25,6 +25,8 @@
 #include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Battle::ActionDefinition;
+
 namespace {
 struct DecisionFixture {
   decltype(VS::Battle::Ai::roomAiState) saved_room =
@@ -33,7 +35,7 @@ struct DecisionFixture {
       VS::Battle::Ai::fallbackCandidates;
   int saved_count = VS::Battle::Ai::fallbackCandidateCount;
   int saved_mask = VS::Battle::Ai::unusedPlanCounter;
-  Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
+  ActionDefinition saved_action = VS::Battle::actionDefinitions[42];
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   std::array<VS::Actors::ActorRecord*, 17> saved_records =
       VS::Actors::actorRecords;
@@ -42,8 +44,8 @@ struct DecisionFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   VS::Battle::Ai::RoomAiState room{};
   VS::Battle::Ai::ActorAiState state{};
-  std::array<Battle_Actor, 3> actors{};
-  std::array<Battle_ActorStats, 3> stats{};
+  std::array<VS::Battle::Actor, 3> actors{};
+  std::array<VS::Battle::ActorStats, 3> stats{};
   std::array<VS::Actors::ActorRecord, 3> records{};
   VS::Field::GimmickInstance gimmick{};
   VS::Battle::Ai::ActionCandidateRecord candidate{};
@@ -85,7 +87,7 @@ struct DecisionFixture {
     VS::Battle::Ai::fallbackCandidates = saved_fallback;
     VS::Battle::Ai::fallbackCandidateCount = saved_count;
     VS::Battle::Ai::unusedPlanCounter = saved_mask;
-    Battle_actionDefinitions[42] = saved_action;
+    VS::Battle::actionDefinitions[42] = saved_action;
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     std::copy(saved_records.begin(), saved_records.end(),
@@ -173,24 +175,24 @@ TEST_CASE("AI target action flags preserve the special class-two inversion",
   const auto actor_class = GENERATE(0, 2, 7);
   const auto action_id = GENERATE(42, 96);
   DecisionFixture fixture;
-  const auto previous = Battle_actionDefinitions[action_id].aiFlags;
-  Battle_actionDefinitions[action_id].aiFlags =
-      std::bit_cast<Battle_ActionAiFlags>(flags);
-  fixture.stats[2].enemyClass = actor_class;
+  const auto previous = VS::Battle::actionDefinitions[action_id].ai_flags;
+  VS::Battle::actionDefinitions[action_id].ai_flags =
+      std::bit_cast<VS::Battle::ActionAiFlags>(flags);
+  fixture.stats[2].enemy_class = actor_class;
   const bool special = action_id == 96 && actor_class == 2;
   CHECK(VS::Battle::Ai::IsLiveActionHarmfulToActor(action_id, 3) ==
         (special ? ((flags >> 15) ^ 1) : ((flags >> 15) & 1)));
   CHECK(VS::Battle::Ai::IsLiveActionBeneficialToActor(action_id, 3) ==
         (special ? ((flags >> 14) ^ 1) : ((flags >> 14) & 1)));
-  Battle_actionDefinitions[action_id].aiFlags = previous;
+  VS::Battle::actionDefinitions[action_id].ai_flags = previous;
 }
 
 TEST_CASE(
     "AI fallback caching deduplicates slots and marks slots beyond capacity",
     "[ai][decisions]") {
   DecisionFixture fixture;
-  Battle_ActionDefinition action{};
-  action.aiFlags.reserved0Bit6 = 1;
+  ActionDefinition action{};
+  action.ai_flags.reserved0_bit6 = 1;
   for (unsigned index = 0; index < 24; ++index) {
     fixture.candidate.row = index / 4;
     fixture.candidate.column = index % 4;
@@ -214,7 +216,7 @@ TEST_CASE(
 TEST_CASE("AI fallback caching ignores actions without the cache flag",
           "[ai][decisions]") {
   DecisionFixture fixture;
-  Battle_ActionDefinition action{};
+  ActionDefinition action{};
   VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
   CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
   CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
@@ -379,11 +381,11 @@ TEST_CASE(
           offsetof(VS::Battle::Ai::ActorAiState, stats));
   DecisionFixture fixture;
   fixture.state.stats = &fixture.stats[1];
-  fixture.stats[1].currentRangeY = 4;
-  fixture.stats[1].currentRangeZ = 6;
-  fixture.stats[1].currentAttackShape = 1;
-  fixture.stats[1].currentAttackShapeAngle = 0;
-  Battle_actionDefinitions[42].rangeX = 0xFF;
+  fixture.stats[1].current_range_y = 4;
+  fixture.stats[1].current_range_z = 6;
+  fixture.stats[1].current_attack_shape = 1;
+  fixture.stats[1].current_attack_shape_angle = 0;
+  VS::Battle::actionDefinitions[42].range_x = 0xFF;
   CHECK(VS::Battle::LiveCalculateActionRangeSquared(
             reinterpret_cast<VS::Battle::Ai::ActionRangeView*>(&fixture.state),
             42) == 25600);

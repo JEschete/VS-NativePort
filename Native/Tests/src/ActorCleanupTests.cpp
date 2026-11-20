@@ -16,7 +16,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -50,7 +50,7 @@ struct CleanupFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Battle_Actor, 3> actors{};
+  std::array<VS::Battle::Actor, 3> actors{};
   VS::Battle::Ai::RoomAiState room{};
   u_short flags[32][32]{};
 
@@ -67,7 +67,7 @@ struct CleanupFixture {
     for (std::size_t index = 0; index < actors.size(); ++index) {
       actors[index].id = ids[index];
       actors[index].kind = 4;
-      actors[index].commandFlags = 0xFF;
+      actors[index].command_flags = 0xFF;
       actors[index].next =
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       VS::Battle::actors[ids[index]] = &actors[index];
@@ -131,7 +131,7 @@ VS::Battle::Ai::ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
   auto* state = fixture.AllocateState(0);
   fixture.AllocateState(1);
   fixture.AllocateState(2);
-  fixture.actors[0].subType = static_cast<u_short>(sub_type);
+  fixture.actors[0].sub_type = static_cast<u_short>(sub_type);
   state->linked_actor = 7;
   VS::Battle::Ai::SettingsWord settings{};
   VS::Battle::Ai::ApplyLiveActorAiSettings(
@@ -165,13 +165,13 @@ TEST_CASE("Reaction requests draw before checking full-width route ownership",
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(state), 1, 64);
   CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 41);
   CHECK(state->decision_delay == 0);
-  CHECK(fixture.actors[1].commandFlags == 0xFF);
+  CHECK(fixture.actors[1].command_flags == 0xFF);
   state->native_pointer_18c = nullptr;
   VS::Battle::Ai::SetLiveActorAiReactionWithDelay(
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(state), 0x123,
       64);
   CHECK(state->decision_delay == 30);
-  CHECK(fixture.actors[1].commandFlags == 0x23);
+  CHECK(fixture.actors[1].command_flags == 0x23);
   VS::Battle::Ai::LiveFrameContext() = saved_frame;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
@@ -273,7 +273,7 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   CHECK(fixture.room.engaged_head == nullptr);
   CHECK(fixture.room.engaged_tail == nullptr);
   CHECK(VS::Battle::actorMarkers[2] == 0);
-  CHECK(fixture.actors[1].commandFlags == 0xF8);
+  CHECK(fixture.actors[1].command_flags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
@@ -348,7 +348,7 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
   CleanupFixture fixture;
   for (int cycle = 0; cycle < 2; ++cycle) {
     auto* state = fixture.AllocateState(1);
-    fixture.actors[1].subType = static_cast<u_short>(type);
+    fixture.actors[1].sub_type = static_cast<u_short>(type);
     VS::Battle::Ai::AllocateLiveOrbitingBossState(
         reinterpret_cast<VS::Battle::Ai::SettingsView*>(state));
     REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
@@ -666,7 +666,7 @@ TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
           "[ai][cleanup][ownership-mask]") {
   CleanupFixture fixture;
   auto* peer = fixture.AllocateState(1);
-  Battle_Actor preview{};
+  VS::Battle::Actor preview{};
   preview.id = 20;
   VS::Battle::actors[20] = &preview;
   VS::Battle::Ai::FreeLiveActorAiState(&preview);

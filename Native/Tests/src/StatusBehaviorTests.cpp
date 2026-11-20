@@ -7,8 +7,8 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.hpp"
@@ -19,34 +19,38 @@
 #include "Core/RandomLive.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Battle::ActionState;
+using VS::Battle::kActionTypeBreakArt;
+using VS::Battle::kActionTypeSpell;
+
 namespace {
 struct ConditionFixture {
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
   VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[0];
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
-  Battle_ActionState* saved_action = VS::Battle::actionState;
+  ActionState* saved_action = VS::Battle::actionState;
   decltype(VS::Battle::floatingLabels) saved_labels =
       VS::Battle::floatingLabels;
   decltype(VS::Battle::floatingLabelCount) saved_label_count =
       VS::Battle::floatingLabelCount;
   decltype(VS::Battle::statusEffectParams) saved_params =
       VS::Battle::statusEffectParams;
-  decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) saved_definitions =
+      VS::Battle::actionDefinitions;
   decltype(std::to_array(VS::Core::randomShuffleTable)) saved_random =
       std::to_array(VS::Core::randomShuffleTable);
   int saved_random_index = VS::Core::randomShuffleIndex;
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   VS::Actors::ActorRecord record{};
   VS::Battle::Ai::ActorAiState ai{};
-  Battle_ActionState action{};
+  ActionState action{};
   VS::Battle::FloatingLabelSlots labels{};
 
   ConditionFixture() {
     VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
-    actor.weaponDrawn = 1;
+    actor.weapon_drawn = 1;
     VS::Actors::actorRecords[0] = &record;
     VS::Battle::Ai::actorAiStates[0] = &ai;
     VS::Battle::actionState = &action;
@@ -68,30 +72,30 @@ struct ConditionFixture {
     std::copy(saved_params.begin(), saved_params.end(),
               VS::Battle::statusEffectParams.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
-              Battle_actionDefinitions);
+              VS::Battle::actionDefinitions.data());
     std::copy(saved_random.begin(), saved_random.end(),
               VS::Core::randomShuffleTable);
     VS::Core::randomShuffleIndex = saved_random_index;
   }
 
   void InitializeStats() {
-    stats.currentHp = stats.maxHp = 1000;
-    stats.currentMp = stats.maxMp = 999;
-    stats.strength = stats.totalStrength = 101;
-    stats.intelligence = stats.totalIntelligence = 111;
-    stats.agility = stats.totalAgility = 121;
-    stats.walkSpeed = stats.baseWalkSpeed = 8;
-    stats.runSpeed = stats.baseRunSpeed = 12;
-    stats.mobilityLimb0 = 4;
-    stats.mobilityLimb1 = 5;
-    for (auto& limb : stats.limbs) limb.hp = limb.maxHp = 100;
+    stats.current_hp = stats.max_hp = 1000;
+    stats.current_mp = stats.max_mp = 999;
+    stats.strength = stats.total_strength = 101;
+    stats.intelligence = stats.total_intelligence = 111;
+    stats.agility = stats.total_agility = 121;
+    stats.walk_speed = stats.base_walk_speed = 8;
+    stats.run_speed = stats.base_run_speed = 12;
+    stats.mobility_limb0 = 4;
+    stats.mobility_limb1 = 5;
+    for (auto& limb : stats.limbs) limb.hp = limb.max_hp = 100;
     for (int id : {97, 141, 224}) {
-      Battle_actionDefinitions[id] = {};
-      Battle_actionDefinitions[id].unlocked = 1;
-      Battle_actionDefinitions[id].type = Battle_ActionType_Spell;
-      Battle_actionDefinitions[id].cost = 10;
+      VS::Battle::actionDefinitions[id] = {};
+      VS::Battle::actionDefinitions[id].unlocked = 1;
+      VS::Battle::actionDefinitions[id].type = kActionTypeSpell;
+      VS::Battle::actionDefinitions[id].cost = 10;
     }
-    Battle_actionDefinitions[141].type = Battle_ActionType_BreakArt;
+    VS::Battle::actionDefinitions[141].type = kActionTypeBreakArt;
   }
 
   void InitializePolicies() {
@@ -141,8 +145,8 @@ struct ConditionFixture {
   }
 
   void CheckMovement(int walk, int run) const {
-    CHECK(stats.walkSpeed == walk);
-    CHECK(stats.runSpeed == run);
+    CHECK(stats.walk_speed == walk);
+    CHECK(stats.run_speed == run);
     CHECK(ai.walk_step == walk);
     CHECK(ai.run_step == run);
   }
@@ -174,7 +178,7 @@ TEST_CASE("Attribute ailments change actual stats and expire or cure",
     fixture.CheckBaseAttributes();
     REQUIRE(fixture.Apply(effect));
     fixture.Cure(effect);
-    CHECK(stats.statusTimers[0] == 0);
+    CHECK(stats.status_timers[0] == 0);
     fixture.CheckBaseAttributes();
   }
 }
@@ -216,12 +220,12 @@ TEST_CASE("Half movement from injured legs clears only when legs recover",
   REQUIRE(fixture.Apply(4));
   fixture.Tick(1);
   CHECK(fixture.stats.statuses == 0x10);
-  CHECK(fixture.stats.walkSpeed == 4);
+  CHECK(fixture.stats.walk_speed == 4);
   CHECK_FALSE(fixture.Apply(15));
   fixture.Cure(4);
   CHECK(fixture.stats.limbs[4].hp == 2);
   CHECK(fixture.stats.limbs[5].hp == 2);
-  CHECK(fixture.stats.walkSpeed == 8);
+  CHECK(fixture.stats.walk_speed == 8);
   REQUIRE(fixture.Apply(4));
   fixture.Tick(1);
   CHECK(fixture.stats.statuses == 0);
@@ -245,45 +249,45 @@ TEST_CASE("Silence and paralysis restrict their actual action classes",
 TEST_CASE("Poison damages HP on its interval and stops after curing",
           "[combat][status][mechanics]") {
   ConditionFixture fixture;
-  fixture.stats.currentHp = 100;
+  fixture.stats.current_hp = 100;
   REQUIRE(fixture.Apply(14));
   CHECK_FALSE(fixture.Apply(17));
   fixture.Tick(1);
-  CHECK(fixture.stats.currentHp == 100);
+  CHECK(fixture.stats.current_hp == 100);
   fixture.Tick(1);
-  CHECK(fixture.stats.currentHp >= 90);
-  CHECK(fixture.stats.currentHp <= 95);
-  CHECK(fixture.stats.statusTimers[5] == 2);
+  CHECK(fixture.stats.current_hp >= 90);
+  CHECK(fixture.stats.current_hp <= 95);
+  CHECK(fixture.stats.status_timers[5] == 2);
   fixture.Cure(14);
-  const auto hp = fixture.stats.currentHp;
+  const auto hp = fixture.stats.current_hp;
   fixture.Tick(4);
-  CHECK(fixture.stats.currentHp == hp);
+  CHECK(fixture.stats.current_hp == hp);
 }
 
 TEST_CASE("Poison can exhaust the last point of HP",
           "[combat][status][mechanics]") {
   ConditionFixture fixture;
-  fixture.stats.currentHp = 1;
+  fixture.stats.current_hp = 1;
   REQUIRE(fixture.Apply(14));
   fixture.Tick(2);
-  CHECK(fixture.stats.currentHp == 0);
+  CHECK(fixture.stats.current_hp == 0);
 }
 
 TEST_CASE("Regeneration restores HP and limbs and is cancelled by poison",
           "[combat][status][mechanics]") {
   ConditionFixture fixture;
-  fixture.stats.currentHp = 50;
+  fixture.stats.current_hp = 50;
   fixture.stats.limbs[0].hp = 10;
   REQUIRE(fixture.Apply(17));
   fixture.Tick(4);
-  CHECK(fixture.stats.currentHp == 50);
+  CHECK(fixture.stats.current_hp == 50);
   fixture.Tick(1);
-  CHECK(fixture.stats.currentHp >= 98);
-  CHECK(fixture.stats.currentHp <= 102);
+  CHECK(fixture.stats.current_hp >= 98);
+  CHECK(fixture.stats.current_hp <= 102);
   CHECK(fixture.stats.limbs[0].hp == 16);
-  fixture.stats.currentHp = 999;
+  fixture.stats.current_hp = 999;
   fixture.Tick(5);
-  CHECK(fixture.stats.currentHp == 1000);
+  CHECK(fixture.stats.current_hp == 1000);
   REQUIRE(fixture.Apply(14));
   CHECK(fixture.stats.statuses == 0x4000);
 }
@@ -316,11 +320,11 @@ TEST_CASE("Equipment down reduces equipped strength and restores baseline",
 TEST_CASE("Ailment policy respects immunity and the training dummy exclusion",
           "[combat][status][mechanics]") {
   ConditionFixture fixture;
-  fixture.stats.statusImmunities = 0x4000;
+  fixture.stats.status_immunities = 0x4000;
   CHECK_FALSE(fixture.Apply(14));
   CHECK(fixture.stats.statuses == 0);
-  fixture.stats.statusImmunities = 0;
-  fixture.stats.actorId = 128;
+  fixture.stats.status_immunities = 0;
+  fixture.stats.actor_id = 128;
   CHECK_FALSE(fixture.Apply(14));
   CHECK(fixture.stats.statuses == 0);
 }

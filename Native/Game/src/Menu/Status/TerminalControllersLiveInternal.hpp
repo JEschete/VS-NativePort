@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -37,7 +37,7 @@ void StoreView(const TerminalView& view);
 [[nodiscard]] bool Workspace();
 [[nodiscard]] bool ItemText();
 [[nodiscard]] bool RenderSpace();
-[[nodiscard]] Battle_ActorStats* Stats(int slot);
+[[nodiscard]] VS::Battle::ActorStats* Stats(int slot);
 [[nodiscard]] std::optional<TerminalActor> ActorView(int slot);
 [[nodiscard]] std::span<const std::uint8_t> Encoded(
     std::span<const std::uint8_t> bytes);

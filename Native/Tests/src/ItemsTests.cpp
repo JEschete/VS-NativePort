@@ -34,6 +34,8 @@
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace {
 namespace items = VS::Items;
 namespace inv = VS::Items::Inventory;
@@ -197,10 +199,10 @@ struct LiveItemsState {
   VS::Items::InventoryIndices saved_indices = VS::Items::inventoryIndices;
   unsigned char saved_invoked = VS::Items::miscItemInvoked;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  Battle_Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
   std::array<u_int, 8> saved_upper_ids{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   LiveItemsState() {
     std::copy(std::begin(VS::Items::itemCategoryUpperIds),
@@ -2763,9 +2765,9 @@ TEST_CASE("Ashley's live armour and accessory follow the equip rules",
 TEST_CASE("The live item recovery reads the action's hit stat factor",
           "[items-slice][items]") {
   ItemsWarnings warnings;
-  Battle_ActionDefinition action{};
-  action.hits[0].statFactor = 3;
-  action.hits[1].statFactor = 31;
+  ActionDefinition action{};
+  action.hits[0].stat_factor = 3;
+  action.hits[1].stat_factor = 31;
   CHECK(items::CalculateLiveItemRecovery(&action, nullptr, nullptr, 0, 0) ==
         15);
   CHECK(items::CalculateLiveItemRecovery(&action, nullptr, nullptr, 1, 0) ==

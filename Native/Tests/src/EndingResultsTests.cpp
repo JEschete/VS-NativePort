@@ -11,8 +11,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
 #include "Content/ModuleData.hpp"
 #include "Ending/ClearResultsCore.hpp"
 #include "Ending/EndingLive.hpp"
@@ -25,6 +25,8 @@
 #include "State/StateFlags.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 #include "TestSupport/EndingDisplayRecorder.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace Ending = VS::Ending;
@@ -918,7 +920,7 @@ class LiveClearRecords {
     VS::State::roomVisitProgress = {};
     VS::State::savedEntryDoor = {};
     VS::Input::settings = {};
-    std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
+    std::ranges::fill(VS::Battle::actionDefinitions, ActionDefinition{});
     std::ranges::fill(VS::Ending::countableRoomBits, 0);
   }
   LiveClearRecords(const LiveClearRecords&) = delete;
@@ -932,7 +934,7 @@ class LiveClearRecords {
     VS::State::roomVisitProgress = rooms_;
     VS::State::savedEntryDoor = door_;
     VS::Input::settings = settings_;
-    std::ranges::copy(actions_, std::begin(Battle_actionDefinitions));
+    std::ranges::copy(actions_, std::begin(VS::Battle::actionDefinitions));
     std::ranges::copy(countable_, std::begin(VS::Ending::countableRoomBits));
   }
 
@@ -943,8 +945,8 @@ class LiveClearRecords {
   VS::State::RoomVisitFlags rooms_ = VS::State::roomVisitProgress;
   VS::Field::MpdDoorRecord door_ = VS::State::savedEntryDoor;
   VS::Input::Settings settings_ = VS::Input::settings;
-  decltype(std::to_array(Battle_actionDefinitions)) actions_ =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) actions_ =
+      VS::Battle::actionDefinitions;
   decltype(std::to_array(VS::Ending::countableRoomBits)) countable_ =
       std::to_array(VS::Ending::countableRoomBits);
 };

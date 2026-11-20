@@ -13,8 +13,8 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -35,6 +35,8 @@
 #include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
+
+using VS::Battle::ActionRequestRecord;
 
 namespace VS::Battle::Ai {
 namespace {
@@ -249,7 +251,7 @@ void StoreMovementState(const MovementState& state,
 std::optional<ActorRoster> LiveBattleActors() {
   ActorRoster roster;
   unsigned visited = 0;
-  for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
+  for (const VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     if (actor->id < 0 || actor->id >= kMovementActorSlots) return std::nullopt;
     const unsigned bit = 1u << static_cast<unsigned>(actor->id);
@@ -400,7 +402,7 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
     // The original passes the completed action as actionStatApplication.
     ApplyLiveActorActionReaction(
         ReactionState(actor_id),
-        reinterpret_cast<const Battle_ActionRequest*>(record_));
+        reinterpret_cast<const ActionRequestRecord*>(record_));
   }
   void PropagateRelationships(int actor_id) override {
     PropagateLiveActorRelationships(ReactionState(actor_id));

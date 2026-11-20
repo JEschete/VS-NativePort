@@ -9,10 +9,10 @@
 
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/Hit.hpp"
 #include "Core/Log.hpp"
 #include "Effects/ActionRequest.hpp"
@@ -20,6 +20,8 @@
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequests.hpp"
 #include "Legacy/Psx.h"
+
+using VS::Battle::ActionRequestRecord;
 
 namespace VS::Effects {
 namespace {
@@ -79,16 +81,16 @@ class LiveWorld final : public ActionImpactWorld {
   }
 
   std::optional<QueuedEffectAction> QueuedAction() override {
-    const Battle_ActionRequest* queued = Queued();
+    const ActionRequestRecord* queued = Queued();
     if (queued == nullptr) return std::nullopt;
     return QueuedEffectAction{
-        .action_id = queued->actionId,
-        .effect_variant = static_cast<std::uint8_t>(queued->effectVariant),
-        .source_actor = queued->primaryTarget.target.target_actor,
-        .target_count = queued->targetCount};
+        .action_id = queued->action_id,
+        .effect_variant = static_cast<std::uint8_t>(queued->effect_variant),
+        .source_actor = queued->primary_target.target.target_actor,
+        .target_count = queued->target_count};
   }
   std::optional<ImpactTarget> QueuedTarget(std::size_t index) override {
-    const Battle_ActionRequest* queued = Queued();
+    const ActionRequestRecord* queued = Queued();
     if (queued == nullptr) return std::nullopt;
     if (index >= std::size(queued->targets)) {
       Refuse("queued target past the target array");
@@ -97,9 +99,9 @@ class LiveWorld final : public ActionImpactWorld {
     return LiveImpactTarget(queued->targets[index]);
   }
   std::uint8_t HitPrerequisite(std::uint16_t action) override {
-    if (action >= std::size(Battle_actionDefinitions)) return 0;
+    if (action >= std::size(VS::Battle::actionDefinitions)) return 0;
     return static_cast<std::uint8_t>(
-        Battle_actionDefinitions[action].hits[0].prerequisiteFunctionId);
+        VS::Battle::actionDefinitions[action].hits[0].prerequisite_function_id);
   }
   std::int32_t BoneTag(std::uint8_t actor, std::int8_t limb,
                        std::int32_t kind) override {
@@ -110,14 +112,14 @@ class LiveWorld final : public ActionImpactWorld {
   }
 
  private:
-  static const Battle_ActionRequest* Queued() {
+  static const ActionRequestRecord* Queued() {
     if (VS::Battle::actionState == nullptr) {
       Refuse("no action state");
       return nullptr;
     }
     constexpr std::uint32_t kQueueMask = 3;
     return &VS::Battle::actionState
-                ->queue[VS::Battle::actionState->queueIndex & kQueueMask];
+                ->queue[VS::Battle::actionState->queue_index & kQueueMask];
   }
 };
 }  // namespace

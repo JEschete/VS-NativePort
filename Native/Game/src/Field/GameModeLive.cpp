@@ -10,7 +10,7 @@
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -98,7 +98,7 @@ class LiveFieldModeHost final : public FieldModeHost {
   }
 
   [[nodiscard]] bool IsWeaponDrawn() const override {
-    return (VS::Battle::characterState->weaponDrawn & kHudWeaponDrawn) != 0;
+    return (VS::Battle::characterState->weapon_drawn & kHudWeaponDrawn) != 0;
   }
   void SetHudBattleMode(int mode) override {
     VS::Battle::SetLiveHudBattleMode(mode);
@@ -127,10 +127,10 @@ class LiveFieldModeHost final : public FieldModeHost {
                                              request.effect, request.speed));
   }
   [[nodiscard]] std::int16_t AshleyMp() const override {
-    return VS::Battle::characterState->stats->currentMp;
+    return VS::Battle::characterState->stats->current_mp;
   }
   void SetAshleyMp(std::int16_t mp) override {
-    VS::Battle::characterState->stats->currentMp = mp;
+    VS::Battle::characterState->stats->current_mp = mp;
   }
   void PlayAshleyActionPose(int pose) override {
     Actors::PlayLiveActorActionPose(kAshley, nullptr, pose);

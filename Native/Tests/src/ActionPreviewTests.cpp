@@ -13,18 +13,22 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 namespace {
 namespace b = VS::Battle;
@@ -182,7 +186,7 @@ TEST_CASE("Request reset clears the complete expanded native record",
   auto request = std::bit_cast<b::ActionRequest>(poison);
   b::ClearActionRequest(request);
   CHECK(request == b::ActionRequest{});
-  auto live = std::bit_cast<Battle_ActionRequest>(poison);
+  auto live = std::bit_cast<ActionRequestRecord>(poison);
   b::ClearLiveActionRequest(&live);
   CHECK(std::bit_cast<b::ActionRequest>(live) == request);
 }
@@ -499,31 +503,31 @@ TEST_CASE("Preview category is reread after building the cached volume",
 namespace {
 struct PreviewFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) saved_definitions =
+      VS::Battle::actionDefinitions;
   decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
   decltype(VS::Battle::statCalculators) saved_stats =
       VS::Battle::statCalculators;
   decltype(VS::Battle::actionEffectMediators) saved_effects =
       VS::Battle::actionEffectMediators;
-  Battle_ActionState* saved_state = VS::Battle::actionState;
+  ActionState* saved_state = VS::Battle::actionState;
   std::uint32_t saved_last = VS::Battle::lastActionStatValue;
   std::uint32_t saved_prerequisite = VS::Battle::hitPrerequisiteResult;
   std::uint32_t saved_previous = VS::Battle::previousHitResult;
-  Battle_ActionState state{};
-  std::array<Battle_Actor, 2> actors{};
-  std::array<Battle_ActorStats, 2> stats{};
+  ActionState state{};
+  std::array<VS::Battle::Actor, 2> actors{};
+  std::array<VS::Battle::ActorStats, 2> stats{};
   PreviewFixture() {
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
     VS::Battle::actionState = &state;
-    state.chainStep = 1;
+    state.chain_step = 1;
     for (std::size_t i = 0; i < actors.size(); ++i) {
       VS::Battle::actors[i] = &actors.at(i);
       actors.at(i).stats = &stats.at(i);
-      stats.at(i).actorId = static_cast<std::uint8_t>(i);
-      stats.at(i).maxHp = stats.at(i).currentHp = 100;
-      stats.at(i).maxMp = stats.at(i).currentMp = 100;
+      stats.at(i).actor_id = static_cast<std::uint8_t>(i);
+      stats.at(i).max_hp = stats.at(i).current_hp = 100;
+      stats.at(i).max_mp = stats.at(i).current_mp = 100;
       for (auto& limb : stats.at(i).limbs) limb.hp = 100;
     }
   }
@@ -531,7 +535,7 @@ struct PreviewFixture {
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
-              Battle_actionDefinitions);
+              VS::Battle::actionDefinitions.data());
     std::copy(saved_hits.begin(), saved_hits.end(),
               VS::Battle::hitFunctions.begin());
     std::copy(saved_stats.begin(), saved_stats.end(),
@@ -559,9 +563,11 @@ struct PreviewFixture {
   void OriginalDefinitions() {
     const auto main = Module("Native\\data\\disc\\SLUS_010.40");
     constexpr auto kActionOffset = 0x3C1DC;
-    REQUIRE(main.size() >= kActionOffset + sizeof(Battle_actionDefinitions));
-    std::memcpy(Battle_actionDefinitions, main.data() + kActionOffset,
-                sizeof(Battle_actionDefinitions));
+    REQUIRE(main.size() >=
+            kActionOffset + sizeof(VS::Battle::actionDefinitions));
+    std::memcpy(VS::Battle::actionDefinitions.data(),
+                main.data() + kActionOffset,
+                sizeof(VS::Battle::actionDefinitions));
     const auto battle = Module("Native\\data\\disc\\BATTLE\\BATTLE.PRG");
     Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), battle);
     Relocate(reinterpret_cast<void**>(VS::Battle::statCalculators.data()),
@@ -570,10 +576,11 @@ struct PreviewFixture {
              battle);
   }
   void SelfRoute(int action) {
-    stats[0].limbs[0].chainEvasion = 51;
-    stats[0].defaultTargetLimb = 4;
-    REQUIRE(Battle_actionDefinitions[action].hits[0].prerequisiteFunctionId ==
-            3);
+    stats[0].limbs[0].chain_evasion = 51;
+    stats[0].default_target_limb = 4;
+    REQUIRE(VS::Battle::actionDefinitions[action]
+                .hits[0]
+                .prerequisite_function_id == 3);
     REQUIRE(VS::Battle::hitFunctions[7] == &b::LiveChainHitChance);
   }
 };
@@ -586,21 +593,21 @@ TEST_CASE(
   const int action = GENERATE(23, 25);
   const bool actor = GENERATE(false, true);
   const auto poison = GENERATE(0U, 127U, 255U);
-  std::array<std::uint8_t, sizeof(Battle_ActionRequest)> bytes;
+  std::array<std::uint8_t, sizeof(ActionRequestRecord)> bytes;
   bytes.fill(static_cast<std::uint8_t>(poison));
-  auto output = std::bit_cast<Battle_ActionRequest>(bytes);
+  auto output = std::bit_cast<ActionRequestRecord>(bytes);
   f.SelfRoute(action);
   const auto affordable =
       actor ? b::PreviewLiveActionAgainstActor(action, 0, 1, 4, nullptr,
                                                nullptr, &output)
             : b::PreviewLiveActionAgainstLimb(action, 0, 1, 4, &output);
   CHECK(affordable == 0x01000000);
-  CHECK(output.primaryTarget.target.target_limb == 0);
-  CHECK(output.primaryTarget.target.hit_threshold == 80);
-  CHECK(std::bit_cast<b::ActionPoint>(output.focusPosition) ==
+  CHECK(output.primary_target.target.target_limb == 0);
+  CHECK(output.primary_target.target.hit_threshold == 80);
+  CHECK(std::bit_cast<b::ActionPoint>(output.focus_position) ==
         b::ActionPoint{});
-  CHECK(output.targetCount == (actor ? 0 : 1));
-  Battle_ActionRequest fresh{};
+  CHECK(output.target_count == (actor ? 0 : 1));
+  ActionRequestRecord fresh{};
   if (actor) {
     b::PreviewLiveActionAgainstActor(action, 0, 1, 4, nullptr, nullptr, &fresh);
   } else {
@@ -615,46 +622,46 @@ TEST_CASE("Actual trap definitions support world sources without origin union",
   f.OriginalDefinitions();
   const int action =
       GENERATE(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
-  Battle_ActionRequest source{}, result{};
-  source.primaryTarget.targets_position = 3;
-  source.primaryTarget.target.hp = 123;
-  source.targetCount = 1;
+  ActionRequestRecord source{}, result{};
+  source.primary_target.targets_position = 3;
+  source.primary_target.target.hp = 123;
+  source.target_count = 1;
   source.targets[0].target.target_actor = 1;
   b::ResolveLiveActionTargets(action, &result, &source, 0);
-  CHECK(result.primaryTarget.targets_position == 3);
-  CHECK(result.primaryTarget.target.hp == 0);
-  CHECK(result.targetCount == 1);
+  CHECK(result.primary_target.targets_position == 3);
+  CHECK(result.primary_target.target.hp == 0);
+  CHECK(result.target_count == 1);
 }
 TEST_CASE(
     "Live resolution refreshes callback records and preserves cached stats",
     "[action-preview][F00514]") {
   PreviewFixture f;
   constexpr int kAction = 200;
-  Battle_actionDefinitions[kAction] = {};
-  auto& definition = Battle_actionDefinitions[kAction];
-  definition.hits[0].prerequisiteFunctionId = 1;
-  definition.hits[0].hitFunctionId = 7;
-  definition.hits[0].effectId = 1;
+  VS::Battle::actionDefinitions[kAction] = {};
+  auto& definition = VS::Battle::actionDefinitions[kAction];
+  definition.hits[0].prerequisite_function_id = 1;
+  definition.hits[0].hit_function_id = 7;
+  definition.hits[0].effect_id = 1;
   VS::Battle::hitFunctions[7] = &b::LiveChainHitChance;
   VS::Battle::actionEffectMediators[1] =
-      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
+      +[](ActionDefinition*, VS::Battle::HitResult*,
           VS::Battle::HitResult* target, int, int) {
         target->target.target_actor = 0;
         target->target.target_limb = 5;
         target->target.hp = 10;
         VS::Battle::actors[1]->stats = VS::Battle::actors[0]->stats;
-        VS::Battle::actionState->queueIndex = 0;
-        VS::Battle::actionState->queue[0].targetCount = 1;
+        VS::Battle::actionState->queue_index = 0;
+        VS::Battle::actionState->queue[0].target_count = 1;
         VS::Battle::actionState->queue[0].targets[254].target.hp = 321;
       };
-  f.stats[1].cancelsHitResults = 1;
-  f.actors[0].roomSpawnIndex = 128;
+  f.stats[1].cancels_hit_results = 1;
+  f.actors[0].room_spawn_index = 128;
   auto& source = f.state.selection;
   auto& result = f.state.queue[0];
-  source.targetCount = 2;
+  source.target_count = 2;
   source.targets[0].target.target_actor = 1;
   b::ResolveLiveActionTargets(kAction, &result, &source, 1);
-  CHECK(result.targetCount == 1);
+  CHECK(result.target_count == 1);
   CHECK(result.targets[0].target.target_actor == 0);
   CHECK(result.targets[0].target.target_limb == 5);
   CHECK(result.targets[0].target.hp == 0);
@@ -666,11 +673,11 @@ TEST_CASE(
 TEST_CASE("Live previews preserve unused null stats and real no-resource cost",
           "[action-preview][F00515][F00516]") {
   PreviewFixture f;
-  Battle_actionDefinitions[0] = {};
+  VS::Battle::actionDefinitions[0] = {};
   f.actors[0].stats = nullptr;
-  Battle_ActionRequest result{};
+  ActionRequestRecord result{};
   CHECK(b::PreviewLiveActionAgainstLimb(0, 0, 1, 0, &result) == 0x01000000);
   CHECK(b::PreviewLiveActionAgainstActor(0, 0, -1, -1, nullptr, nullptr,
                                          &result) == 0x01000000);
-  CHECK(result.targetCount == 0);
+  CHECK(result.target_count == 0);
 }

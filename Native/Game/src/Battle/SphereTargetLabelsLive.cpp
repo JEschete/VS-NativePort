@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "Actors/AppearanceLive.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereTargetLabels.hpp"
@@ -26,6 +26,8 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Battle::TargetLabelLine;
 
 namespace VS::Battle {
 namespace {
@@ -43,8 +45,7 @@ static_assert(std::size(VS::Battle::TargetSphereRecord{}.labels) ==
               kSphereTargetLabelCount);
 static_assert(std::size(VS::Menu::Framework::rowAnimationSteps) >=
               kTargetLabelSlideStepCount);
-static_assert(sizeof(Battle_TargetLabelLine) ==
-              sizeof(VS::Battle::TargetPreview));
+static_assert(sizeof(TargetLabelLine) == sizeof(VS::Battle::TargetPreview));
 
 std::uint64_t unordered_labels = 0;
 
@@ -212,7 +213,7 @@ class LiveHighlightHost final : public SphereTargetHighlightHost {
 
 // func_800C4650 reads its records as target previews
 // (VS::Battle::TargetPreview).
-ActionTargetPreview ReadTarget(const Battle_TargetLabelLine& line) noexcept {
+ActionTargetPreview ReadTarget(const TargetLabelLine& line) noexcept {
   const auto target = std::bit_cast<VS::Battle::TargetPreview>(line);
   return {.position = {.x = target.position.vx,
                        .y = target.position.vy,
@@ -282,16 +283,15 @@ void UpdateSphereTargetLabelsEntry() {
 
 // decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/5BE50.c:65),
 // F01310.
-void UpdateSphereTargetHighlightsEntry(Battle_TargetLabelLine* targets,
-                                       int count) {
+void UpdateSphereTargetHighlightsEntry(TargetLabelLine* targets, int count) {
   if (count <= 0) return;
   if (targets == nullptr) {
     VS::Core::LogError("battle.sphere", "{} highlight targets without a list",
                        count);
     return;
   }
-  const std::span<const Battle_TargetLabelLine> lines(
-      targets, static_cast<std::size_t>(count));
+  const std::span<const TargetLabelLine> lines(targets,
+                                               static_cast<std::size_t>(count));
   std::vector<ActionTargetPreview> previews;
   previews.reserve(lines.size());
   std::ranges::transform(lines, std::back_inserter(previews), ReadTarget);

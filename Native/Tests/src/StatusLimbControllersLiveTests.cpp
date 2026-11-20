@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
@@ -38,8 +38,8 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 }
 
 struct LiveLimbFixture {
-  ValueRestore<Battle_Actor*> saved_actor{VS::Battle::actors[0]};
-  ValueRestore<Battle_Actor*> saved_second_actor{VS::Battle::actors[1]};
+  ValueRestore<VS::Battle::Actor*> saved_actor{VS::Battle::actors[0]};
+  ValueRestore<VS::Battle::Actor*> saved_second_actor{VS::Battle::actors[1]};
   ValueRestore<std::int32_t> saved_selected{status::selectedActor};
   ValueRestore<std::uint8_t> saved_element{status::selectedElement};
   ValueRestore<std::int32_t> saved_x{status::screenXPos};
@@ -67,8 +67,8 @@ struct LiveLimbFixture {
       saved_status_text{status::statusStrings};
   ArrayRestore<u_short, std::size(VS::Battle::statusStrings)> saved_battle_text{
       VS::Battle::statusStrings.data()};
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   std::array<char, fw::kStringBufferBytes> output{};
 
   LiveLimbFixture() {
@@ -82,8 +82,8 @@ struct LiveLimbFixture {
     stats.statuses =
         std::bit_cast<decltype(stats.statuses)>(std::uint32_t{0x60});
     for (auto& limb : stats.limbs) {
-      limb.nameIndex = 1;
-      limb.hp = limb.maxHp = 100;
+      limb.name_index = 1;
+      limb.hp = limb.max_hp = 100;
     }
     BuildText();
   }
@@ -218,7 +218,7 @@ TEST_CASE("F02668 Live rejects the confirmed unnamed entering actor",
           "[status-limbs][status-limbs-live][F02668]") {
   LiveLimbFixture fixture;
   CHECK(status::LiveUpdateLimbPanel(-1) == 0);
-  fixture.stats.limbs[0].nameIndex = 0;
+  fixture.stats.limbs[0].name_index = 0;
   const auto refused = status::RefusedLiveLimbControllerCount();
   CHECK(status::LiveUpdateLimbPanel(0) == 0);
   CHECK(status::RefusedLiveLimbControllerCount() == refused + 1);

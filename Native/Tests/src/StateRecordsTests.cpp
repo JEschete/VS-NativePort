@@ -9,9 +9,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Core/RandomLive.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -30,6 +30,8 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+
+using VS::Battle::ActionState;
 
 namespace state = VS::State;
 using state::KillScore;
@@ -162,8 +164,8 @@ struct LiveTimerExpiry {
 // test.
 struct LiveScoreState {
   VS::State::ScoreData saved_score = VS::State::scoreData;
-  Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_player = VS::Battle::characterState;
+  ActionState* saved_action = VS::Battle::actionState;
+  VS::Battle::Actor* saved_player = VS::Battle::characterState;
 
   LiveScoreState() = default;
   LiveScoreState(const LiveScoreState&) = delete;
@@ -677,11 +679,11 @@ TEST_CASE("Live kill scoring records hostile and unscored kills",
   ChannelWarnings warnings("state");
   VS::State::StoreLiveKillScore(KillScore{});
 
-  Battle_ActorStats stats{};
-  stats.enemyClass = 3;
-  stats.maxHp = 80;
-  Battle_Actor enemy{};
-  enemy.subType = 40;
+  VS::Battle::ActorStats stats{};
+  stats.enemy_class = 3;
+  stats.max_hp = 80;
+  VS::Battle::Actor enemy{};
+  enemy.sub_type = 40;
   enemy.kind = 4;
   enemy.stats = &stats;
   VS::State::RecordLiveEnemyKillScore(&enemy);
@@ -692,7 +694,7 @@ TEST_CASE("Live kill scoring records hostile and unscored kills",
 
   // A non-hostile actor only sets its kill flag.
   enemy.kind = 2;
-  enemy.subType = 41;
+  enemy.sub_type = 41;
   VS::State::RecordLiveEnemyKillScore(&enemy);
   score = VS::State::LiveKillScore();
   CHECK(score.enemy_kills[3] == 1);
@@ -707,11 +709,11 @@ TEST_CASE("Live kill scoring refuses an uncounted class and null enemy",
   ChannelWarnings warnings("state");
   VS::State::StoreLiveKillScore(KillScore{});
 
-  Battle_ActorStats stats{};
-  stats.enemyClass = 7;
-  stats.maxHp = 40;
-  Battle_Actor enemy{};
-  enemy.subType = 41;
+  VS::Battle::ActorStats stats{};
+  stats.enemy_class = 7;
+  stats.max_hp = 40;
+  VS::Battle::Actor enemy{};
+  enemy.sub_type = 41;
   enemy.kind = 4;
   enemy.stats = &stats;
   VS::State::RecordLiveEnemyKillScore(&enemy);
@@ -736,19 +738,19 @@ TEST_CASE("The live weapon kill streak reads the action and the player",
 
   VS::Battle::actionState = nullptr;
   VS::State::UpdateLiveWeaponKillStreak(0);
-  Battle_ActionState action{};
+  ActionState action{};
   VS::Battle::actionState = &action;
   VS::Battle::characterState = nullptr;
-  action.selection.actionId = 50;
+  action.selection.action_id = 50;
   VS::State::UpdateLiveWeaponKillStreak(0);
   CHECK(warnings.messages == std::vector<std::string>{Refused(
                                  "UpdateWeaponKillStreak", "no action state")});
-  action.selection.actionId = 5;
+  action.selection.action_id = 5;
   VS::State::UpdateLiveWeaponKillStreak(0);
 
-  Battle_ActorStats stats{};
+  VS::Battle::ActorStats stats{};
   stats.weapon.blade.category = 2;
-  Battle_Actor player{};
+  VS::Battle::Actor player{};
   player.stats = &stats;
   VS::Battle::characterState = &player;
   VS::State::UpdateLiveWeaponKillStreak(0);
@@ -778,12 +780,12 @@ TEST_CASE("Committing a spell ends the live weapon kill streak only",
   CHECK(VS::State::LiveKillScore() == expected);
 
   // The kept blade category lets the next weapon kill extend from zero.
-  Battle_ActionState action{};
-  action.selection.actionId = 5;
+  ActionState action{};
+  action.selection.action_id = 5;
   VS::Battle::actionState = &action;
-  Battle_ActorStats stats{};
+  VS::Battle::ActorStats stats{};
   stats.weapon.blade.category = 2;
-  Battle_Actor player{};
+  VS::Battle::Actor player{};
   player.stats = &stats;
   VS::Battle::characterState = &player;
   VS::State::UpdateLiveWeaponKillStreak(0);

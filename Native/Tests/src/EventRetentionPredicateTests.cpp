@@ -5,7 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Encounter.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
@@ -23,7 +23,7 @@ constexpr int kActorSlot = 2;
 constexpr unsigned kTriggerOffset = 32;
 
 struct RetentionPredicateFixture {
-  Battle_Actor* saved_actor = VS::Battle::actors[kActorSlot];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[kActorSlot];
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   decltype(VS::Event::playbackPhase) saved_phase = VS::Event::playbackPhase;
   decltype(VS::Event::eventId) saved_id = VS::Event::eventId;
@@ -31,8 +31,8 @@ struct RetentionPredicateFixture {
   decltype(VS::Event::isDirectEventRequest) saved_direct =
       VS::Event::isDirectEventRequest;
   std::array<u_char, 64> triggers{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   explicit RetentionPredicateFixture(bool test_health = false) {
     triggers.fill(0xFF);
@@ -60,7 +60,7 @@ struct RetentionPredicateFixture {
     VS::Event::isDirectEventRequest = 0;
     VS::Battle::actors[kActorSlot] = nullptr;
     actor.stats = &stats;
-    stats.maxHp = 100;
+    stats.max_hp = 100;
   }
 
   ~RetentionPredicateFixture() {
@@ -98,7 +98,7 @@ TEST_CASE("Room death predicates reject absent and nonretained actors",
 TEST_CASE("Room death predicates distinguish retained dead and living actors",
           "[events][retention-predicate]") {
   RetentionPredicateFixture fixture(true);
-  fixture.actor.retainAfterDefeat = 1;
+  fixture.actor.retain_after_defeat = 1;
   VS::Battle::actors[kActorSlot] = &fixture.actor;
   SECTION("Retained dead actor activates the original local event") {
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 1);
@@ -107,8 +107,8 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
     CHECK(VS::Event::eventId == 0);
   }
   SECTION("A living one-percent actor is not dead") {
-    fixture.stats.currentHp = 1;
-    fixture.stats.maxHp = 1000;
+    fixture.stats.current_hp = 1;
+    fixture.stats.max_hp = 1000;
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
     CHECK(VS::Event::playbackPhase == 0);
   }

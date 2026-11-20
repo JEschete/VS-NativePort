@@ -16,6 +16,8 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 
+using VS::Battle::TargetVolume;
+
 namespace VS::Core::Memory {
 void* AllocateLiveFromLowEnd(std::size_t bytes, std::source_location site);
 void FreeLiveFromLowEnd(const void* payload, std::source_location site);
@@ -29,8 +31,7 @@ constexpr std::size_t kPositionZIndex = 2;
 constexpr std::size_t kPositionPadIndex = 3;
 constexpr std::uint32_t kSphereOverrideButtonMask = 0x80;
 
-static_assert(sizeof(VS::Battle::TargetSphereSpec) ==
-              sizeof(Battle_TargetVolume));
+static_assert(sizeof(VS::Battle::TargetSphereSpec) == sizeof(TargetVolume));
 static_assert(sizeof(VS::Battle::TargetSphereRecord) <=
               sizeof(VS::Battle::TargetSphereSetupView));
 static_assert(std::size(VS::Battle::TargetSphereSetupView{}.wire_edges) ==
@@ -58,7 +59,7 @@ const VS::Battle::TargetSphereSpec& RequiredVolume(
 }
 
 SphereVolume ReadVolume(const VS::Battle::TargetSphereSpec& spec) {
-  const Battle_TargetVolume volume = std::bit_cast<Battle_TargetVolume>(spec);
+  const TargetVolume volume = std::bit_cast<TargetVolume>(spec);
   TargetVolumeExtents extents{};
   for (std::size_t index = 0; index < extents.size(); ++index) {
     extents[index] = volume.scale.extents[index];
@@ -74,9 +75,9 @@ SphereVolume ReadVolume(const VS::Battle::TargetSphereSpec& spec) {
 }
 
 VS::Battle::TargetSphereSpec WriteVolume(const SphereVolume& value) {
-  Battle_TargetVolume volume{};
-  volume.kind = static_cast<u_char>(value.kind);
-  volume.opaque1 = static_cast<u_char>(value.range_kind);
+  TargetVolume volume{};
+  volume.kind = static_cast<std::uint8_t>(value.kind);
+  volume.opaque1 = static_cast<std::uint8_t>(value.range_kind);
   volume.angle = static_cast<std::int16_t>(value.angle);
   for (std::size_t index = 0; index < value.extents.size(); ++index) {
     volume.scale.extents[index] = value.extents[index];
@@ -247,7 +248,7 @@ void InitializeSphereEntry() {
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
 void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                            VS::Battle::TargetSphereSpec* secondary,
-                           u_char sphere_mode,
+                           std::uint8_t sphere_mode,
                            VS::Battle::TargetPreview* target_previews) {
   SetLiveSphereVolumes(VS::Battle::targetSphere, primary, secondary,
                        sphere_mode, target_previews,

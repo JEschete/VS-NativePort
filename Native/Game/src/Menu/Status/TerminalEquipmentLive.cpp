@@ -36,16 +36,16 @@ constexpr std::int32_t kEquipmentListStyle = 0x19142;
   }
   return Encoded(bank.subspan(address - start));
 }
-[[nodiscard]] int LimbRows(const Battle_ActorStats& actor) {
+[[nodiscard]] int LimbRows(const VS::Battle::ActorStats& actor) {
   std::array<std::uint8_t, kStatusLimbSlots> names{};
   for (std::size_t index = 0; index < names.size(); ++index) {
-    names[index] = actor.limbs[index].nameIndex;
+    names[index] = actor.limbs[index].name_index;
   }
   return LimbCount(names);
 }
 [[nodiscard]] std::span<const std::uint8_t> Resolve(
     Framework::TextRef ref, std::span<std::uint8_t> buffer,
-    const Battle_ActorStats& actor, Framework::LiveItemRowsHost& host) {
+    const VS::Battle::ActorStats& actor, Framework::LiveItemRowsHost& host) {
   if (ref.source == Framework::TextSource::kBuffer) {
     return ref.offset < buffer.size() ? Encoded(buffer.subspan(ref.offset))
                                       : std::span<const std::uint8_t>{};
@@ -298,13 +298,13 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
   }
 
  private:
-  Battle_ActorStats* Selected() { return Stats(frame.selected_actor - 1); }
-  static bool ValidRow(const Battle_ActorStats& actor, int row) {
+  VS::Battle::ActorStats* Selected() { return Stats(frame.selected_actor - 1); }
+  static bool ValidRow(const VS::Battle::ActorStats& actor, int row) {
     const int count = LimbRows(actor) + 2 + (actor.accessory.accessory.id != 0);
     return row >= 0 && row < count;
   }
-  static Framework::ItemRowText Format(const Battle_ActorStats& actor, int row,
-                                       std::span<std::uint8_t> buffer,
+  static Framework::ItemRowText Format(const VS::Battle::ActorStats& actor,
+                                       int row, std::span<std::uint8_t> buffer,
                                        Framework::LiveItemRowsHost& items) {
     if (row == kWeapon) {
       return Framework::FormatWeaponRow(items, actor.weapon, buffer);

@@ -1,5 +1,6 @@
 #include "Menu/SceneNotificationsLive.hpp"
 
+#include <array>
 #include <bit>
 #include <cinttypes>
 #include <cstddef>
@@ -8,7 +9,7 @@
 #include <optional>
 #include <span>
 
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Content/StringTables.hpp"
@@ -75,6 +76,11 @@ SceneNotificationText Bytes(const T (&text)[N]) {
   return {reinterpret_cast<const std::uint8_t*>(text), sizeof text};
 }
 
+template <typename T, std::size_t N>
+SceneNotificationText Bytes(const std::array<T, N>& text) {
+  return {reinterpret_cast<const std::uint8_t*>(text.data()), sizeof text};
+}
+
 std::optional<SceneNotificationText> TextAt(
     std::span<const std::uint16_t> table, std::size_t offset) {
   if (offset >= table.size()) return std::nullopt;
@@ -89,10 +95,10 @@ class LiveHost final : public SceneNotificationHost {
   std::optional<SceneNotificationAction> Action(
       std::int32_t index) const override {
     if (index < 0 || static_cast<std::size_t>(index) >=
-                         std::size(Battle_actionDefinitions)) {
+                         std::size(VS::Battle::actionDefinitions)) {
       return std::nullopt;
     }
-    const auto& action = Battle_actionDefinitions[index];
+    const auto& action = VS::Battle::actionDefinitions[index];
     return SceneNotificationAction{Bytes(action.name),
                                    static_cast<std::uint8_t>(action.type)};
   }

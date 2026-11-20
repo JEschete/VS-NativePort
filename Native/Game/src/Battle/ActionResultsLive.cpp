@@ -11,13 +11,13 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResults.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
@@ -33,6 +33,8 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 
+using VS::Battle::ActionRequestRecord;
+
 namespace VS::Battle {
 namespace {
 constexpr int kRecoveryPose = 6;
@@ -41,7 +43,7 @@ constexpr std::size_t kWorldAxes = 3;
 class LiveActionTargetEffects final : public ActionTargetEffects {
  public:
   // `action` is null for world target ids, which read no hits.
-  LiveActionTargetEffects(int actor_id, Battle_ActionRequest* action,
+  LiveActionTargetEffects(int actor_id, ActionRequestRecord* action,
                           SVECTOR* position)
       : actor_id_(actor_id), action_(action), position_(position) {}
 
@@ -59,12 +61,12 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   std::size_t HitCount() override {
-    if (action_->targetCount > std::size(action_->targets)) {
+    if (action_->target_count > std::size(action_->targets)) {
       VS::Core::LogError("combat", "Invalid action target count {}",
-                         action_->targetCount);
+                         action_->target_count);
       std::abort();
     }
-    return action_->targetCount;
+    return action_->target_count;
   }
 
   ActionTargetHit Hit(std::size_t index) override {
@@ -76,7 +78,8 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
   bool IsAreaAction() override {
     return VS::Battle::categoryIsAreaTarget
-               [Battle_actionDefinitions[action_->actionId].category] != 0;
+               [VS::Battle::actionDefinitions[action_->action_id].category] !=
+           0;
   }
 
   void ApplyHit(std::size_t index) override {
@@ -84,7 +87,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
     VS::Core::Debugf("combat.result",
                      "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
                      "hp_effect=%u mp_effect=%u",
-                     action_->actionId, actor_id_, hit->target.target_limb,
+                     action_->action_id, actor_id_, hit->target.target_limb,
                      hit->target.impact_kind, hit->target.hp, hit->target.mp,
                      hit->hp_effect, hit->mp_effect);
     ApplyLiveActorActionResult(hit);
@@ -93,7 +96,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   void PlayDamageReaction(int actor_id,
                           std::size_t visited_hit_count) override {
     PlayLiveTargetDamageReaction(
-        actor_id, &VS::Battle::actionState->rangeOrigin, visited_hit_count);
+        actor_id, &VS::Battle::actionState->range_origin, visited_hit_count);
   }
 
   bool HasActorRecord(int actor_id) override {
@@ -101,7 +104,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   void PlayDefense(int actor_id) override {
-    PlayLiveDefenseAnimation(actor_id, &VS::Battle::actionState->rangeOrigin);
+    PlayLiveDefenseAnimation(actor_id, &VS::Battle::actionState->range_origin);
   }
 
   void PlayRecoveryPose() override {
@@ -110,7 +113,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
  private:
   int actor_id_;
-  Battle_ActionRequest* action_;
+  ActionRequestRecord* action_;
   SVECTOR* position_;
 };
 
@@ -197,13 +200,13 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
     std::abort();
   }
   const std::size_t queue_mask = std::size(VS::Battle::actionState->queue) - 1;
-  Battle_ActionRequest& action =
+  ActionRequestRecord& action =
       VS::Battle::actionState
-          ->queue[VS::Battle::actionState->queueIndex & queue_mask];
-  if (action.targetCount > std::size(action.targets) ||
-      action.actionId >= std::size(Battle_actionDefinitions)) {
+          ->queue[VS::Battle::actionState->queue_index & queue_mask];
+  if (action.target_count > std::size(action.targets) ||
+      action.action_id >= std::size(VS::Battle::actionDefinitions)) {
     VS::Core::LogError("combat", "Invalid action {} with {} targets",
-                       action.actionId, action.targetCount);
+                       action.action_id, action.target_count);
     std::abort();
   }
   LiveActionTargetEffects effects(actor_id, &action, position);

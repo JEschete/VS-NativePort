@@ -16,12 +16,12 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
@@ -95,7 +95,7 @@ constexpr std::uint32_t kActorEventControlMode = 3;
 constexpr std::int32_t kActorFallEventRequest = 0xC;
 constexpr std::size_t kTriggerModeByte = 3;
 
-Battle_Actor* TileTriggerActor(std::size_t index) {
+VS::Battle::Actor* TileTriggerActor(std::size_t index) {
   const std::span actors(VS::Battle::actors);
   return index < actors.size() ? actors[index] : nullptr;
 }
@@ -195,7 +195,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
       std::int32_t actor) override {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr) return std::nullopt;
-    const auto& bytes = record->lastTriggerTile.bytes;
+    const auto& bytes = record->last_trigger_tile.bytes;
     return VS::Actors::PackedTile{.x = bytes[0],
                                   .layer = bytes[1],
                                   .z = bytes[2],
@@ -223,7 +223,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
                         std::uint8_t mode, bool store_location) override {
     auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr) return;
-    auto& bytes = record->lastTriggerTile.bytes;
+    auto& bytes = record->last_trigger_tile.bytes;
     if (store_location) {
       bytes[0] = tile.x;
       bytes[1] = tile.layer;
@@ -234,7 +234,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
   bool DefeatForFall(std::int32_t actor) override {
     auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return false;
-    record->stats->currentHp = 0;
+    record->stats->current_hp = 0;
     VS::Battle::ResolveLiveActorDefeat(0, actor, 0);
     return true;
   }
@@ -269,24 +269,24 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return std::nullopt;
     return std::bit_cast<std::int16_t>(
-        static_cast<std::uint16_t>(record->stats->currentHp));
+        static_cast<std::uint16_t>(record->stats->current_hp));
   }
   void ShowFallDamage(std::int32_t actor) override {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return;
     constexpr std::uint32_t kFallValueLabel = 0x80000014;
-    VS::Battle::LiveQueueActorValueLabel(record->stats->actorId, 0,
+    VS::Battle::LiveQueueActorValueLabel(record->stats->actor_id, 0,
                                          kFallValueLabel, 0);
   }
   void SetHp(std::int32_t actor, std::int16_t hp) override {
     auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return;
-    record->stats->currentHp = hp;
+    record->stats->current_hp = hp;
   }
   void BeginDefeat(std::int32_t actor) override {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return;
-    VS::Battle::BeginLiveActorDefeatAnimation(record->stats->actorId);
+    VS::Battle::BeginLiveActorDefeatAnimation(record->stats->actor_id);
   }
   VS::Field::DoorRecord StoreEntranceForReload() override {
     VS::Field::StoreEntranceDoorForReloadEntry();
@@ -499,19 +499,19 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
       return false;
     }
     auto& action = *VS::Battle::actionState;
-    action.selection.primaryTarget.targets_position =
+    action.selection.primary_target.targets_position =
         kTrapPrimaryTargetPosition;
-    action.selection.targetCount = 1;
+    action.selection.target_count = 1;
     action.selection.targets[0].targets_position = 0;
     action.selection.targets[0].target.target_actor =
         static_cast<std::uint8_t>(input.actor);
     action.selection.targets[0].target.target_limb =
         std::bit_cast<std::int8_t>(input.default_limb);
-    action.chainStep = 1;
-    action.queueIndex = 0;
-    action.rangeOrigin.vx = input.position.x;
-    action.rangeOrigin.vy = input.position.y;
-    action.rangeOrigin.vz = input.position.z;
+    action.chain_step = 1;
+    action.queue_index = 0;
+    action.range_origin.vx = input.position.x;
+    action.range_origin.vy = input.position.y;
+    action.range_origin.vz = input.position.z;
     return true;
   }
   bool ResolveAction(std::uint16_t action_id) override {
@@ -755,8 +755,8 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
   }
   void ResetActionSelection() override {
     if (VS::Battle::actionState != nullptr) {
-      VS::Battle::actionState->chainStep = 0;
-      VS::Battle::actionState->selection.actionId = 0;
+      VS::Battle::actionState->chain_step = 0;
+      VS::Battle::actionState->selection.action_id = 0;
     }
   }
   void ReleaseNotification() override {
@@ -889,8 +889,8 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   }
   void ResetActionSelection() override {
     if (VS::Battle::actionState != nullptr) {
-      VS::Battle::actionState->chainStep = 0;
-      VS::Battle::actionState->selection.actionId = 0;
+      VS::Battle::actionState->chain_step = 0;
+      VS::Battle::actionState->selection.action_id = 0;
     }
   }
 
@@ -1074,7 +1074,7 @@ bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
     return false;
   }
   input.default_limb = static_cast<std::uint8_t>(
-      VS::Battle::actors[actor]->stats->defaultTargetLimb);
+      VS::Battle::actors[actor]->stats->default_target_limb);
   return TriggerActorTrap(target, input, host);
 }
 }  // namespace VS::Field

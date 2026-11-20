@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -1327,8 +1327,8 @@ struct LivePerceptionFixture {
       VS::Battle::Ai::roomAiState;
   int saved_engaged = VS::Battle::Ai::candidateEngagedThisUpdate;
   VS::Battle::Ai::RoomAiState room{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Battle::Ai::ActorAiState state{};
 
   LivePerceptionFixture() {
@@ -1370,16 +1370,16 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
   state.decision_delay = 0;
   state.min_action_delay = 0;
   fixture.actor.id = kTarget;
-  fixture.actor.commandState = 0x80;
-  fixture.actor.commandFlags = 0xFF;
+  fixture.actor.command_state = 0x80;
+  fixture.actor.command_flags = 0xFF;
   fixture.actor.stats = &fixture.stats;
-  fixture.stats.actionRecoveryTimer = 77;
+  fixture.stats.action_recovery_timer = 77;
   VS::Battle::actors[0] = &fixture.actor;
   VS::Battle::Ai::LiveFrameContext().actors[kTarget] = &state;
   const VS::Battle::Ai::ActorAiState before = state;
 
   ai::UpdateLiveActorPerception();
-  CHECK(fixture.actor.commandFlags == 0xFC);
+  CHECK(fixture.actor.command_flags == 0xFC);
   CHECK(state.action_delay == 77);
   const auto& view =
       *reinterpret_cast<const VS::Battle::Ai::PerceptionUpdateView*>(&state);

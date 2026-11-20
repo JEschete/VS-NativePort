@@ -21,7 +21,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Battle/Damage.hpp"
@@ -1281,8 +1281,8 @@ struct UnlockEffectLiveFixture {
   std::array<std::int32_t, VS::Core::Random::TableSize> saved_shuffle{};
   decltype(VS::Core::randomShuffleIndex) saved_index =
       VS::Core::randomShuffleIndex;
-  Battle_Actor character{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor character{};
+  VS::Battle::ActorStats stats{};
   std::array<VS::Items::TreasureChest, 1> chests{};
   std::remove_pointer_t<decltype(VS::Battle::floatingLabels)> labels{};
 
@@ -1372,11 +1372,12 @@ struct SnapshotFixture {
 };
 
 struct ActorTileTriggerLiveFixture {
-  Battle_Actor* saved_actor = VS::Battle::actors[2];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[2];
   VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[2];
   decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
-  std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
+  std::unique_ptr<VS::Battle::Actor> actor =
+      std::make_unique<VS::Battle::Actor>();
   std::unique_ptr<VS::Actors::ActorRecord> record =
       std::make_unique<VS::Actors::ActorRecord>();
 
@@ -1399,7 +1400,7 @@ struct ScriptedFallDoorFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{};
+  std::array<VS::Battle::Actor*, std::size(VS::Battle::actors)> saved_actors{};
   std::array<VS::Actors::ActorRecord*, std::size(VS::Actors::actorRecords)>
       saved_records{};
   VS::Field::RoomTransitionState saved_transition =
@@ -2851,15 +2852,15 @@ TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",
 TEST_CASE("Actor native tile trigger stores packed location and computed mode",
           "[actor-tile-trigger-live][field]") {
   ActorTileTriggerLiveFixture fixture;
-  fixture.actor->lastTriggerTile.word = 0x01070809;
+  fixture.actor->last_trigger_tile.word = 0x01070809;
   VS::Actors::ActorLocation location{};
   location.packed_tile.target = {
       .tile_x = 3, .tile_layer = 2, .tile_z = 4, .facing = 255};
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
-  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  CHECK(fixture.actor->last_trigger_tile.word == 0x00040203);
   CHECK(std::bit_cast<std::uint32_t>(location.packed_tile.word) == 0xFF040203);
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
-  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  CHECK(fixture.actor->last_trigger_tile.word == 0x00040203);
   VS::Battle::actors[2] = nullptr;
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
 }

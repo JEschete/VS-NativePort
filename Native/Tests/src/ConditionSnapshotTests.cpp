@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Damage.hpp"
@@ -64,19 +64,19 @@ TEST_CASE("The promoted condition snapshot has no original module address",
 
 TEST_CASE("The planner-row binding writes only listed actors' rows",
           "[ai][condition][condition-snapshot]") {
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   actor.id = VS::Battle::Ai::kBattleActorSlotCount - 1;
   actor.stats = &stats;
-  stats.currentHp = 7;
-  stats.maxHp = 9;
+  stats.current_hp = 7;
+  stats.max_hp = 9;
   stats.statuses = 1 << 3;
   stats.shield.max_dp = 50;
   std::array<VS::Battle::Ai::ActionTiming,
              VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   std::memset(rows.data(), 0xA5, sizeof rows);
-  Battle_Actor* saved = VS::Battle::actors[0];
+  VS::Battle::Actor* saved = VS::Battle::actors[0];
   VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::CaptureBattleActorConditions(rows);
   VS::Battle::actors[0] = saved;

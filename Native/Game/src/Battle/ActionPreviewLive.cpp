@@ -13,15 +13,15 @@
 #include <vector>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -30,14 +30,19 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::HitStatusView;
+using VS::Battle::TargetVolume;
+
 namespace VS::Battle {
 namespace {
 static_assert(sizeof(ActionHit) == sizeof(VS::Battle::HitResult));
-static_assert(sizeof(ActionRequest) == sizeof(Battle_ActionRequest));
+static_assert(sizeof(ActionRequest) == sizeof(ActionRequestRecord));
 static_assert(offsetof(ActionRequest, targets) ==
-              offsetof(Battle_ActionRequest, targets));
+              offsetof(ActionRequestRecord, targets));
 static_assert(offsetof(ActionRequest, focus) ==
-              offsetof(Battle_ActionRequest, focusPosition));
+              offsetof(ActionRequestRecord, focus_position));
 [[noreturn]] void Refuse() {
   VS::Core::Errorf("battle",
                    "Action preview/resolution refused used missing state "
@@ -50,18 +55,18 @@ T Checked(std::optional<T> value) {
   if (!value) Refuse();
   return value.value();
 }
-Battle_Actor* ActorAt(int slot) {
+VS::Battle::Actor* ActorAt(int slot) {
   return slot >= 0 &&
                  static_cast<std::size_t>(slot) < std::size(VS::Battle::actors)
              ? VS::Battle::actors[slot]
              : nullptr;
 }
 struct LiveActor final : ResolutionActor {
-  explicit LiveActor(Battle_ActorStats& value) : stats(value) {}
-  Battle_ActorStats& stats;
-  std::uint8_t Slot() override { return stats.actorId; }
-  std::uint8_t DefaultLimb() override { return stats.defaultTargetLimb; }
-  bool Cancels() override { return stats.cancelsHitResults != 0; }
+  explicit LiveActor(VS::Battle::ActorStats& value) : stats(value) {}
+  VS::Battle::ActorStats& stats;
+  std::uint8_t Slot() override { return stats.actor_id; }
+  std::uint8_t DefaultLimb() override { return stats.default_target_limb; }
+  bool Cancels() override { return stats.cancels_hit_results != 0; }
   bool HasBlade() override { return stats.weapon.blade.id != 0; }
   std::uint8_t DamageType() override {
     return static_cast<std::uint8_t>(stats.weapon.damage_type);
@@ -74,52 +79,51 @@ struct LiveActor final : ResolutionActor {
   }
 };
 struct LiveDefinition final : ResolutionDefinition {
-  explicit LiveDefinition(Battle_ActionDefinition& value) : definition(value) {}
-  Battle_ActionDefinition& definition;
+  explicit LiveDefinition(ActionDefinition& value) : definition(value) {}
+  ActionDefinition& definition;
   ResolutionDescriptor Hit(int hit) override {
     const auto value = definition.hits[hit];
-    return {static_cast<std::uint8_t>(value.prerequisiteFunctionId),
-            static_cast<std::uint8_t>(value.statCalculatorId),
-            static_cast<std::uint8_t>(value.damageType),
+    return {static_cast<std::uint8_t>(value.prerequisite_function_id),
+            static_cast<std::uint8_t>(value.stat_calculator_id),
+            static_cast<std::uint8_t>(value.damage_type),
             static_cast<std::uint8_t>(value.affinity)};
   }
-  bool Redirects() override { return definition.resetsHitResults != 0; }
+  bool Redirects() override { return definition.resets_hit_results != 0; }
   std::uint8_t Category() override { return definition.category; }
   PreviewVolume Range() override {
     return {definition.shape,
             1,
             0,
-            {definition.rangeX, definition.rangeY, definition.rangeZ},
+            {definition.range_x, definition.range_y, definition.range_z},
             0,
             {}};
   }
   PreviewVolume Area() override {
-    return {
-        definition.areaShape,
-        1,
-        0,
-        {definition.areaRangeX, definition.areaRangeY, definition.areaRangeZ},
-        definition.areaShape,
-        {}};
+    return {definition.area_shape,
+            1,
+            0,
+            {definition.area_range_x, definition.area_range_y,
+             definition.area_range_z},
+            definition.area_shape,
+            {}};
   }
 };
 class LiveWorld final : public ActionPreviewWorld {
  public:
   LiveWorld() = default;
   LiveWorld(ActionRequest& result, ActionRequest& source,
-            Battle_ActionRequest& live_result,
-            Battle_ActionRequest& live_source)
+            ActionRequestRecord& live_result, ActionRequestRecord& live_source)
       : result_(&result),
         source_(&source),
         live_result_(&live_result),
         live_source_(&live_source) {}
   const SVECTOR* source_position{};
   const SVECTOR* target_position{};
-  Battle_ActionRequest* preview_result{};
+  ActionRequestRecord* preview_result{};
   ResolutionDefinition* Definition(std::uint32_t action) override {
     if (action >= definitions_.size()) return nullptr;
     auto& definition = definitions_.at(action);
-    if (!definition) definition.emplace(Battle_actionDefinitions[action]);
+    if (!definition) definition.emplace(VS::Battle::actionDefinitions[action]);
     return &definition.value();
   }
   std::optional<ResolutionActor*> Actor(int slot) override {
@@ -134,12 +138,13 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   std::optional<std::uint32_t> WeaponDrawn(int slot) override {
     const auto* actor = ActorAt(slot);
-    return actor ? std::optional{static_cast<std::uint32_t>(actor->weaponDrawn)}
-                 : std::nullopt;
+    return actor
+               ? std::optional{static_cast<std::uint32_t>(actor->weapon_drawn)}
+               : std::nullopt;
   }
   std::optional<std::uint8_t> SpawnId(int slot) override {
     const auto* actor = ActorAt(slot);
-    return actor ? std::optional{actor->roomSpawnIndex} : std::nullopt;
+    return actor ? std::optional{actor->room_spawn_index} : std::nullopt;
   }
   std::optional<ActionPoint> SourceOrigin(int slot) override {
     Callback callback(*this);
@@ -173,7 +178,7 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   bool Contains(const PreviewVolume& volume, ActionPoint point) override {
     Callback callback(*this);
-    auto live_volume = std::bit_cast<Battle_TargetVolume>(volume);
+    auto live_volume = std::bit_cast<TargetVolume>(volume);
     auto components =
         std::bit_cast<std::array<std::uint16_t, kActionPointComponents>>(point);
     return IsLivePointInTargetVolume(&live_volume, components) != 0;
@@ -201,7 +206,7 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   std::optional<std::uint32_t> QueueIndex() override {
     return VS::Battle::actionState
-               ? std::optional{VS::Battle::actionState->queueIndex}
+               ? std::optional{VS::Battle::actionState->queue_index}
                : std::nullopt;
   }
   std::uint32_t Check(ResolutionDefinition& definition, ActionHit& target,
@@ -247,7 +252,7 @@ class LiveWorld final : public ActionPreviewWorld {
   bool Resolve(std::uint32_t action, ActionRequest& result,
                ActionRequest& source, int execute) override {
     if (preview_result == nullptr) Refuse();
-    auto live_source = std::bit_cast<Battle_ActionRequest>(source);
+    auto live_source = std::bit_cast<ActionRequestRecord>(source);
     ResolveLiveActionTargets(std::bit_cast<int>(action), preview_result,
                              &live_source, execute);
     result = std::bit_cast<ActionRequest>(*preview_result);
@@ -256,9 +261,9 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   void Publish() override {
     if (live_result_ == nullptr) return;
-    *live_result_ = std::bit_cast<Battle_ActionRequest>(*result_);
+    *live_result_ = std::bit_cast<ActionRequestRecord>(*result_);
     if (live_source_ != live_result_) {
-      *live_source_ = std::bit_cast<Battle_ActionRequest>(*source_);
+      *live_source_ = std::bit_cast<ActionRequestRecord>(*source_);
     }
   }
 
@@ -283,7 +288,7 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   VS::Battle::HitResult* LiveHit(ActionHit& hit) {
     if (result_ == nullptr) Refuse();
-    if (&hit == &result_->primary) return &live_result_->primaryTarget;
+    if (&hit == &result_->primary) return &live_result_->primary_target;
     for (std::size_t i = 0; i < result_->targets.size(); ++i) {
       if (&hit == &result_->targets.at(i)) return &live_result_->targets[i];
     }
@@ -291,9 +296,10 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   ActionRequest* result_{};
   ActionRequest* source_{};
-  Battle_ActionRequest* live_result_{};
-  Battle_ActionRequest* live_source_{};
-  std::array<std::optional<LiveDefinition>, std::size(Battle_actionDefinitions)>
+  ActionRequestRecord* live_result_{};
+  ActionRequestRecord* live_source_{};
+  std::array<std::optional<LiveDefinition>,
+             std::size(VS::Battle::actionDefinitions)>
       definitions_{};
   std::vector<std::unique_ptr<LiveActor>> owners_;
 };
@@ -313,15 +319,15 @@ void InitializeLiveActionHit(VS::Battle::HitResult* hit) {
   *hit = std::bit_cast<VS::Battle::HitResult>(value);
 }
 // decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186).
-void FinalizeLiveActionHit(Battle_HitStatusView* hit) {
+void FinalizeLiveActionHit(HitStatusView* hit) {
   if (hit == nullptr) Refuse();
   auto value = std::bit_cast<ActionHit>(*hit);
   FinalizeActionHit(value);
-  *hit = std::bit_cast<Battle_HitStatusView>(value);
+  *hit = std::bit_cast<HitStatusView>(value);
 }
 // decomp: func_80085B10 (src/BATTLE/BATTLE.PRG/146C.c:13221).
-void ResolveLiveActionTargets(int action, Battle_ActionRequest* result,
-                              Battle_ActionRequest* source, int execute) {
+void ResolveLiveActionTargets(int action, ActionRequestRecord* result,
+                              ActionRequestRecord* source, int execute) {
   if (result == nullptr || source == nullptr) Refuse();
   ActionRequest native_result{};
   ActionRequest native_source{};
@@ -339,7 +345,7 @@ int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
                                  void* result) {
   if (result == nullptr) Refuse();
   LiveWorld world;
-  world.preview_result = static_cast<Battle_ActionRequest*>(result);
+  world.preview_result = static_cast<ActionRequestRecord*>(result);
   ActionRequest output{};
   return std::bit_cast<int>(
       Checked(PreviewActionAgainstLimb(static_cast<std::uint32_t>(action),
@@ -349,7 +355,7 @@ int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
 int PreviewLiveActionAgainstActor(int action, int source, int target, int limb,
                                   SVECTOR* source_position,
                                   SVECTOR* target_position,
-                                  Battle_ActionRequest* result) {
+                                  ActionRequestRecord* result) {
   if (result == nullptr) Refuse();
   LiveWorld world;
   world.preview_result = result;

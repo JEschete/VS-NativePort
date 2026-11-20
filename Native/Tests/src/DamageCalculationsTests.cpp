@@ -13,14 +13,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/DamageCalculations.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/Hit.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace b = VS::Battle;
@@ -108,13 +110,13 @@ struct World final : b::DamageWorld {
   }
 };
 struct LiveFixture {
-  std::array<Battle_Actor*, 42> saved{};
+  std::array<VS::Battle::Actor*, 42> saved{};
   std::array<std::remove_reference_t<decltype(VS::Battle::statCalculators[0])>,
              27>
       saved_calculators{};
-  std::array<Battle_Actor, 2> actors{};
-  std::array<Battle_ActorStats, 2> stats{};
-  Battle_ActionDefinition action{};
+  std::array<VS::Battle::Actor, 2> actors{};
+  std::array<VS::Battle::ActorStats, 2> stats{};
+  ActionDefinition action{};
   VS::Battle::HitResult source{}, target{};
   LiveFixture() {
     std::copy(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
@@ -123,7 +125,7 @@ struct LiveFixture {
               std::end(VS::Battle::statCalculators), saved_calculators.begin());
     for (std::size_t i = 0; i < actors.size(); ++i) {
       actors.at(i).stats = &stats.at(i);
-      stats.at(i).actorId = static_cast<std::uint8_t>(i);
+      stats.at(i).actor_id = static_cast<std::uint8_t>(i);
       VS::Battle::actors[i] = &actors.at(i);
     }
     target.target.target_actor = 1;
@@ -434,15 +436,14 @@ TEST_CASE(
     "[damage-calculations][F00421]") {
   const auto image = Module("SLUS_010.40");
   constexpr std::size_t kActions = 256, kActionOffset = 0x3C1DC;
-  REQUIRE(image.size() >=
-          kActionOffset + kActions * sizeof(Battle_ActionDefinition));
-  std::array<Battle_ActionDefinition, kActions> definitions{};
+  REQUIRE(image.size() >= kActionOffset + kActions * sizeof(ActionDefinition));
+  std::array<ActionDefinition, kActions> definitions{};
   std::memcpy(definitions.data(), image.data() + kActionOffset,
               sizeof(definitions));
   std::vector<unsigned> selected;
   for (std::size_t i = 0; i < definitions.size(); ++i) {
     for (std::size_t hit = 0; hit < 2; ++hit) {
-      if (definitions.at(i).hits[hit].statCalculatorId != 13) continue;
+      if (definitions.at(i).hits[hit].stat_calculator_id != 13) continue;
       CHECK(hit == 0);
       CHECK(definitions.at(i).hits[hit].affinity == 6);
       selected.push_back(static_cast<unsigned>(i));
@@ -531,10 +532,10 @@ TEST_CASE(
   std::memcpy(&f.action,
               image.data() + kActionOffset + index * sizeof(f.action),
               sizeof(f.action));
-  const auto expected = 100 + 10 * f.action.hits[0].statFactor;
+  const auto expected = 100 + 10 * f.action.hits[0].stat_factor;
   CHECK(b::LiveCalculateSpellHealing(&f.action, &f.source, &f.target, 0, 0) ==
         expected);
-  f.actors.at(0).weaponDrawn = 1;
+  f.actors.at(0).weapon_drawn = 1;
   CHECK(b::LiveCalculateSpellHealing(&f.action, &f.source, &f.target, 0, 0) ==
         expected);
 }

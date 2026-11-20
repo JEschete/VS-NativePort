@@ -13,9 +13,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -33,17 +33,20 @@
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+
 namespace {
 struct PlanningFixture {
   decltype(VS::Battle::Ai::candidateExclusions) saved_exclusions =
       VS::Battle::Ai::candidateExclusions;
   std::array<VS::Battle::Ai::ActorAiState*, 16> saved_states =
       VS::Battle::Ai::actorAiStates;
-  Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
+  ActionDefinition saved_action = VS::Battle::actionDefinitions[42];
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActorAiState peer{};
   VS::Battle::Ai::EngagementData actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::ActorStats stats{};
   u_char exclusions[16][256]{};
 
   PlanningFixture() {
@@ -51,23 +54,23 @@ struct PlanningFixture {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
     VS::Battle::Ai::actorAiStates[1] = &state;
     VS::Battle::Ai::actorAiStates[3] = &peer;
-    Battle_actionDefinitions[42] = {};
+    VS::Battle::actionDefinitions[42] = {};
     actor.opaque_3c = &stats;
     state.actor = &actor;
     state.stats = &stats;
     state.actor_id = 1;
-    stats.currentHp = stats.maxHp = 100;
-    stats.currentMp = stats.maxMp = 100;
+    stats.current_hp = stats.max_hp = 100;
+    stats.current_mp = stats.max_mp = 100;
     stats.weapon.current_pp = 100;
     stats.limbs[2].hp = 2;
-    stats.limbActions[2][1].actionId = 42;
+    stats.limb_actions[2][1].action_id = 42;
   }
 
   ~PlanningFixture() {
     VS::Battle::Ai::candidateExclusions = saved_exclusions;
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
-    Battle_actionDefinitions[42] = saved_action;
+    VS::Battle::actionDefinitions[42] = saved_action;
   }
 };
 
@@ -80,7 +83,7 @@ struct PlanningAdvanceFixture : PlanningFixture {
   VS::Battle::StatusEffectParams saved_regeneration =
       VS::Battle::statusEffectParams[17];
   VS::Battle::Ai::RoomAiState room{};
-  Battle_Actor battle_actor{};
+  VS::Battle::Actor battle_actor{};
 
   PlanningAdvanceFixture() {
     std::copy_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
@@ -99,8 +102,8 @@ struct PlanningAdvanceFixture : PlanningFixture {
     battle_actor.id = 1;
     battle_actor.stats = &stats;
     VS::Battle::actors[0] = &battle_actor;
-    for (auto& row : stats.limbActions) {
-      for (auto& slot : row) slot.actionId = 42;
+    for (auto& row : stats.limb_actions) {
+      for (auto& slot : row) slot.action_id = 42;
     }
   }
   ~PlanningAdvanceFixture() {
@@ -116,11 +119,12 @@ struct PlanningAdvanceFixture : PlanningFixture {
 
 struct PlanningStatsFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  Battle_ActorStats* saved_snapshot = VS::Battle::Ai::planningStatsSnapshot;
+  VS::Battle::ActorStats* saved_snapshot =
+      VS::Battle::Ai::planningStatsSnapshot;
   std::array<std::byte, 65536> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_Actor first{}, second{};
-  Battle_ActorStats first_stats{}, second_stats{};
+  VS::Battle::Actor first{}, second{};
+  VS::Battle::ActorStats first_stats{}, second_stats{};
 
   PlanningStatsFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
@@ -132,8 +136,8 @@ struct PlanningStatsFixture {
     second.id = 15;
     second.stats = &second_stats;
     VS::Battle::actors[0] = &first;
-    first_stats.currentHp = 100;
-    second_stats.currentHp = 50;
+    first_stats.current_hp = 100;
+    second_stats.current_hp = 50;
   }
   ~PlanningStatsFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
@@ -151,11 +155,11 @@ struct SimulationResultsFixture : PlanningFixture {
   std::array<VS::Battle::Ai::ActionTiming,
              VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
-  Battle_ActionRequest* request = nullptr;
+  ActionRequestRecord* request = nullptr;
   VS::Battle::Ai::ReactionRecord* workspace = nullptr;
   SimulationResultsFixture() {
-    request = static_cast<Battle_ActionRequest*>(
-        VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_ActionRequest)));
+    request = static_cast<ActionRequestRecord*>(
+        VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(ActionRequestRecord)));
     if (request == nullptr) throw std::bad_alloc();
     std::memset(request, 0, sizeof(*request));
     workspace = reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(request);
@@ -184,7 +188,7 @@ struct ReadinessFixture : PlanningFixture {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   VS::Battle::Ai::RoomAiState room{};
-  Battle_Actor hostile{};
+  VS::Battle::Actor hostile{};
   ReadinessFixture() {
     VS::Battle::Ai::roomAiState = &room;
     std::fill_n(VS::Battle::actors.begin(), std::size(VS::Battle::actors),
@@ -215,8 +219,8 @@ struct EnumerationFixture : ReadinessFixture {
   int saved_mask = VS::Battle::Ai::unusedPlanCounter;
   unsigned saved_random = VS::Core::BiosRand().State();
   std::array<VS::Battle::Ai::CandidateEntryView, 24> fallback{};
-  Battle_Actor battle_actor{};
-  Battle_ActorStats target_stats{};
+  VS::Battle::Actor battle_actor{};
+  VS::Battle::ActorStats target_stats{};
 
   EnumerationFixture() {
     VS::Battle::Ai::fallbackCandidates = fallback.data();
@@ -228,14 +232,14 @@ struct EnumerationFixture : ReadinessFixture {
     state.point_height = -4321;
     state.relations[1].classification = 2;
     target_stats = stats;
-    target_stats.limbActions[2][1].actionId = 0;
-    target_stats.limbs[2].maxHp = -7;
+    target_stats.limb_actions[2][1].action_id = 0;
+    target_stats.limbs[2].max_hp = -7;
     actor.opaque_3c = &target_stats;
     battle_actor.id = 1;
     battle_actor.stats = &target_stats;
     VS::Battle::actors[0] = VS::Battle::actors[1] = &battle_actor;
-    Battle_actionDefinitions[42].aiFlags =
-        std::bit_cast<Battle_ActionAiFlags>(std::uint16_t{0x150});
+    VS::Battle::actionDefinitions[42].ai_flags =
+        std::bit_cast<VS::Battle::ActionAiFlags>(std::uint16_t{0x150});
     auto& slot = state.action_slots[2][1];
     slot.opaque0_bit7 = 1;
     slot.kind = 1;
@@ -254,7 +258,8 @@ struct ActorPlanFixture : EnumerationFixture {
   decltype(VS::Battle::Ai::planningPassCandidates) saved_passes =
       VS::Battle::Ai::planningPassCandidates;
   VS::Battle::Ai::ArenaOrbitState* saved_orbit = VS::Battle::Ai::arenaOrbit;
-  Battle_ActorStats* saved_snapshot = VS::Battle::Ai::planningStatsSnapshot;
+  VS::Battle::ActorStats* saved_snapshot =
+      VS::Battle::Ai::planningStatsSnapshot;
   int saved_progress = VS::State::LiveScriptFlag(0xA6);
   std::array<std::byte, 65536> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -327,12 +332,12 @@ struct CompletedPlanFixture {
       VS::Field::gimmickInstances;
   decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
   VS::Battle::Ai::ActorAiState state{};
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   VS::Battle::Ai::ActionCandidateRecord first{};
   VS::Battle::Ai::ActionCandidateRecord second{};
   VS::Actors::ActorRecord model{};
   VS::Field::GimmickInstance object{};
-  Battle_ActionRequest request{};
+  ActionRequestRecord request{};
 
   static constexpr int kRememberedTile = 5 << 24;
   static constexpr int kUntouchedTile = 0x12345678;
@@ -343,8 +348,8 @@ struct CompletedPlanFixture {
     VS::Battle::Ai::actorAiStates[2] = &state;
     state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actor);
     state.previous_tile = kUntouchedTile;
-    actor.commandOpcode = 24;
-    actor.commandArg0 = (1 << 16) | 3;
+    actor.command_opcode = 24;
+    actor.command_arg0 = (1 << 16) | 3;
     first.row = 3;
     first.column = 1;
     first.action = 42;
@@ -356,9 +361,9 @@ struct CompletedPlanFixture {
     state.candidate_order[0] = &first;
     state.candidate_order[1] = &second;
     VS::Actors::actorRecords[5] = &model;
-    request.actionId = 42;
-    request.primaryTarget.target.target_actor = 2;
-    request.targetCount = 1;
+    request.action_id = 42;
+    request.primary_target.target.target_actor = 2;
+    request.target_count = 1;
     request.targets[0].target.target_actor = 4;
     VS::Field::gimmickInstances[4] = &object;
   }
@@ -412,7 +417,7 @@ TEST_CASE(
     "[ai][planning][stats-lifecycle-live]") {
   PlanningStatsFixture fixture;
   const auto original =
-      std::bit_cast<std::array<std::byte, sizeof(Battle_ActorStats)>>(
+      std::bit_cast<std::array<std::byte, sizeof(VS::Battle::ActorStats)>>(
           fixture.first_stats);
   const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
@@ -421,16 +426,16 @@ TEST_CASE(
   CHECK(VS::Core::Memory::LivePayloadCapacity(storage).value() >=
         VS::Battle::Ai::kPlanningStatsTableBytes);
   std::memset(&fixture.first_stats, 0x75, sizeof(fixture.first_stats));
-  fixture.second_stats.currentHp = 1;
+  fixture.second_stats.current_hp = 1;
   VS::Battle::Ai::RestoreLivePlanningActorStats();
   const auto restored =
-      std::bit_cast<std::array<std::byte, sizeof(Battle_ActorStats)>>(
+      std::bit_cast<std::array<std::byte, sizeof(VS::Battle::ActorStats)>>(
           fixture.first_stats);
   for (std::size_t offset = 0; offset < restored.size(); ++offset) {
     CHECK(restored[offset] ==
           (CopiedStatByte(offset) ? original[offset] : std::byte{0x75}));
   }
-  CHECK(fixture.second_stats.currentHp == 50);
+  CHECK(fixture.second_stats.current_hp == 50);
   CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(storage).has_value());
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
@@ -445,11 +450,12 @@ TEST_CASE(
   fixture.state.current_choice =
       std::bit_cast<VS::Battle::Ai::ActionCandidateRecord>(
           Words{0xDEADBEEF, 0xFFFFFFFF, 0xABCDEF01, 0xFFFFFFFF, 0xFFFFFFFF});
-  Battle_actionDefinitions[42].aiFlags.opaque1Bit4 = ignores_sight ? 1u : 0u;
+  VS::Battle::actionDefinitions[42].ai_flags.opaque1_bit4 =
+      ignores_sight ? 1u : 0u;
   for (int row = 0; row < 6; ++row) {
     fixture.stats.limbs[row].hp = 2;
     for (int column = 0; column < 4; ++column) {
-      fixture.stats.limbActions[row][column].actionId = 42;
+      fixture.stats.limb_actions[row][column].action_id = 42;
       fixture.state.action_slots[row][column].special = 1;
       fixture.state.action_slots[row][column].range_squared =
           static_cast<unsigned>(row * 4 + column + 1);
@@ -484,8 +490,8 @@ TEST_CASE(
   for (auto& row : fixture.state.action_slots) {
     for (auto& slot : row) slot.opaque0_bit7 = 1;
   }
-  for (auto& row : fixture.stats.limbActions) {
-    for (auto& slot : row) slot.actionId = 42;
+  for (auto& row : fixture.stats.limb_actions) {
+    for (auto& slot : row) slot.action_id = 42;
   }
   auto expected = fixture.state.current_choice;
   expected.action = 0;
@@ -504,9 +510,9 @@ TEST_CASE(
     "Native fallback selection keeps selection and usability stats distinct",
     "[ai][planning][fallback-selection-live]") {
   PlanningFixture fixture;
-  Battle_ActorStats selection_stats = fixture.stats;
+  VS::Battle::ActorStats selection_stats = fixture.stats;
   fixture.state.stats = &selection_stats;
-  selection_stats.limbActions[2][1].actionId = 0;
+  selection_stats.limb_actions[2][1].action_id = 0;
   fixture.state.action_slots[2][1].special = 1;
   fixture.state.action_slots[2][1].range_squared = 9;
   VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
@@ -516,7 +522,7 @@ TEST_CASE(
   CHECK(fixture.state.current_choice.distance_squared == 9);
   CHECK(fixture.state.current_choice.weight == 128);
   CHECK(fixture.state.current_choice.opaque10.opaque0_bit2 ==
-        Battle_actionDefinitions[0].aiFlags.opaque1Bit4);
+        VS::Battle::actionDefinitions[0].ai_flags.opaque1_bit4);
   CHECK(fixture.state.action_slots[2][1].opaque0_bit7 == 1);
 }
 
@@ -524,7 +530,7 @@ TEST_CASE(
     "Native fallback usability reads actor stats rather than selection stats",
     "[ai][planning][fallback-selection-live]") {
   PlanningFixture fixture;
-  Battle_ActorStats selection_stats = fixture.stats;
+  VS::Battle::ActorStats selection_stats = fixture.stats;
   fixture.state.stats = &selection_stats;
   fixture.stats.limbs[2].hp = 1;
   fixture.state.action_slots[2][1].special = 1;
@@ -545,7 +551,7 @@ TEST_CASE("Native planning simulation updates only the original stat fields",
   VS::Battle::Ai::kTimedStatusFlags[0] = 1;
   for (auto& limb : fixture.stats.limbs) {
     limb.hp = 0;
-    limb.maxHp = 10;
+    limb.max_hp = 10;
   }
   fixture.state.resource_status_restricted = 1;
   fixture.state.low_mp = fixture.state.low_hp = 1;
@@ -567,8 +573,8 @@ TEST_CASE(
     "Native planning simulation preserves distinct callback stats sources",
     "[ai][planning][simulation-advance-live]") {
   PlanningAdvanceFixture fixture;
-  Battle_ActorStats simulated = fixture.stats;
-  simulated.currentHp = 0;
+  VS::Battle::ActorStats simulated = fixture.stats;
+  simulated.current_hp = 0;
   fixture.battle_actor.stats = &simulated;
   fixture.state.stats = nullptr;
   for (auto& limb : fixture.stats.limbs) limb.hp = 0;
@@ -576,8 +582,8 @@ TEST_CASE(
     for (auto& slot : row) slot.opaque0_bit7 = 1;
   }
   VS::Battle::Ai::AdvanceLivePlanningSimulation(480);
-  CHECK(simulated.currentHp == 1);
-  CHECK(fixture.stats.currentHp == 100);
+  CHECK(simulated.current_hp == 1);
+  CHECK(fixture.stats.current_hp == 100);
   CHECK(fixture.state.low_hp == 0);
   for (const auto& row : fixture.state.action_slots) {
     for (const auto& slot : row) CHECK(slot.opaque0_bit7 == 0);
@@ -596,20 +602,20 @@ TEST_CASE("Native planning simulation advances an empty actor list",
 TEST_CASE("Native planning simulation refreshes each actor by its own slot",
           "[ai][planning][simulation-advance-live]") {
   PlanningAdvanceFixture fixture;
-  Battle_ActorStats second_stats = fixture.stats;
-  Battle_Actor second{};
+  VS::Battle::ActorStats second_stats = fixture.stats;
+  VS::Battle::Actor second{};
   VS::Battle::Ai::EngagementData second_actor{};
   second.id = 3;
   second.stats = &second_stats;
   second_actor.opaque_3c = &second_stats;
   fixture.peer.actor = &second_actor;
   fixture.battle_actor.next = &second;
-  fixture.stats.currentHp = 0;
+  fixture.stats.current_hp = 0;
   for (auto& limb : fixture.stats.limbs) limb.hp = 0;
   for (auto& limb : second_stats.limbs) limb.hp = 2;
   VS::Battle::Ai::AdvanceLivePlanningSimulation(480);
-  CHECK(fixture.stats.currentHp == 1);
-  CHECK(second_stats.currentHp == 100);
+  CHECK(fixture.stats.current_hp == 1);
+  CHECK(second_stats.current_hp == 100);
   CHECK(fixture.state.low_hp == 1);
   CHECK(fixture.peer.low_hp == 0);
   for (int row = 0; row < 6; ++row) {
@@ -645,16 +651,16 @@ TEST_CASE(
   PlanningStatsFixture fixture;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   auto* storage = VS::Battle::Ai::planningStatsSnapshot;
-  fixture.first_stats.currentHp = 7;
+  fixture.first_stats.current_hp = 7;
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   CHECK(VS::Battle::Ai::planningStatsSnapshot == storage);
   VS::Battle::Ai::RestoreLivePlanningActorStats();
-  CHECK(fixture.first_stats.currentHp == 100);
-  fixture.first_stats.currentHp = 80;
+  CHECK(fixture.first_stats.current_hp == 100);
+  fixture.first_stats.current_hp = 80;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  fixture.first_stats.currentHp = 3;
+  fixture.first_stats.current_hp = 3;
   VS::Battle::Ai::RestoreLivePlanningActorStats();
-  CHECK(fixture.first_stats.currentHp == 80);
+  CHECK(fixture.first_stats.current_hp == 80);
   CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
 }
 
@@ -663,10 +669,10 @@ TEST_CASE("Native planning stats handle empty and shortened actor lists",
   PlanningStatsFixture fixture;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   fixture.first.next = nullptr;
-  fixture.first_stats.currentHp = fixture.second_stats.currentHp = 1;
+  fixture.first_stats.current_hp = fixture.second_stats.current_hp = 1;
   VS::Battle::Ai::RestoreLivePlanningActorStats();
-  CHECK(fixture.first_stats.currentHp == 100);
-  CHECK(fixture.second_stats.currentHp == 1);
+  CHECK(fixture.first_stats.current_hp == 100);
+  CHECK(fixture.second_stats.current_hp == 1);
   VS::Battle::actors[0] = nullptr;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   VS::Battle::Ai::RestoreLivePlanningActorStats();
@@ -679,7 +685,8 @@ TEST_CASE(
   PlanningStatsFixture fixture;
   std::array<std::byte, 256> tiny{};
   const VS::Core::Memory::ScopedLiveGameHeap heap(tiny);
-  VS::Battle::actors[0] = reinterpret_cast<Battle_Actor*>(std::uintptr_t{1});
+  VS::Battle::actors[0] =
+      reinterpret_cast<VS::Battle::Actor*>(std::uintptr_t{1});
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
 }
@@ -698,12 +705,12 @@ TEST_CASE(
         VS::Battle::Ai::kPlanningStatsTableBytes);
     REQUIRE(next_storage != nullptr);
     VS::Core::Memory::FreeLiveFromHighEnd(next_storage);
-    fixture.second.stats = static_cast<Battle_ActorStats*>(next_storage);
+    fixture.second.stats = static_cast<VS::Battle::ActorStats*>(next_storage);
   }
   const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
-  CHECK(fixture.first_stats.currentHp == 100);
+  CHECK(fixture.first_stats.current_hp == 100);
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
   fixture.second.id = 15;
   fixture.second.stats = &fixture.second_stats;
@@ -773,10 +780,10 @@ TEST_CASE(
     "Native candidate evaluation owns its snapshot and preserves packed fields",
     "[ai][planning][candidate-evaluation-live]") {
   ReadinessFixture fixture;
-  Battle_Actor ally{};
-  Battle_Actor enemy{};
-  Battle_ActorStats enemy_stats = fixture.stats;
-  enemy_stats.currentHp = 50;
+  VS::Battle::Actor ally{};
+  VS::Battle::Actor enemy{};
+  VS::Battle::ActorStats enemy_stats = fixture.stats;
+  enemy_stats.current_hp = 50;
   ally.id = 1;
   ally.stats = &fixture.stats;
   ally.next = &enemy;
@@ -799,9 +806,9 @@ TEST_CASE(
   CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
   std::memcpy(scratch_rows, scratch.data(), scratch.size());
   fixture.state.settings_mode_low = 1;
-  Battle_actionDefinitions[42].aiFlags.opaque0Bit4 = 1;
-  VS::Battle::Ai::EvaluateActionCandidateEntry(&fixture.state, &candidate, 3,
-                                               &Battle_actionDefinitions[42]);
+  VS::Battle::actionDefinitions[42].ai_flags.opaque0_bit4 = 1;
+  VS::Battle::Ai::EvaluateActionCandidateEntry(
+      &fixture.state, &candidate, 3, &VS::Battle::actionDefinitions[42]);
   CHECK(candidate.opaque0 == 257 * 128 + 40);
   CHECK(candidate.weight == 40);
 }
@@ -966,7 +973,7 @@ TEST_CASE(
   const auto expected = fixture.Bytes();
   VS::Battle::Ai::ReconcileCompletedActionPlanEntry(nullptr);
   CHECK(fixture.Bytes() == expected);
-  fixture.request.primaryTarget.targets_position = 1;
+  fixture.request.primary_target.targets_position = 1;
   fixture.Reconcile();
   CHECK(fixture.Bytes() == expected);
 }
@@ -974,7 +981,7 @@ TEST_CASE(
 TEST_CASE("Completed action reconciliation leaves non-action commands",
           "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
-  fixture.actor.commandOpcode = 23;
+  fixture.actor.command_opcode = 23;
   const auto expected = fixture.Bytes();
   fixture.Reconcile();
   CHECK(fixture.Bytes() == expected);
@@ -1023,10 +1030,10 @@ TEST_CASE(
     "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
   SECTION("an action ID past the candidate field") {
-    fixture.request.actionId = 42 + 256;
+    fixture.request.action_id = 42 + 256;
   }
-  SECTION("another column") { fixture.actor.commandArg0 = 3; }
-  SECTION("a wider row half") { fixture.actor.commandArg0 = (1 << 16) | 11; }
+  SECTION("another column") { fixture.actor.command_arg0 = 3; }
+  SECTION("a wider row half") { fixture.actor.command_arg0 = (1 << 16) | 11; }
   VS::Field::gimmickInstances[4] = nullptr;
   fixture.Reconcile();
   CHECK(fixture.state.opaque_fb == 0);
@@ -1074,7 +1081,7 @@ TEST_CASE(
     "Native actor plan restores projected stats and releases its snapshot",
     "[ai][planning][actor-plan-live]") {
   ActorPlanFixture fixture;
-  fixture.stats.limbActions[2][1].actionId = 0;
+  fixture.stats.limb_actions[2][1].action_id = 0;
   using StatsBytes = std::array<std::byte, sizeof(fixture.target_stats)>;
   const auto before = std::bit_cast<StatsBytes>(fixture.target_stats);
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
@@ -1123,14 +1130,14 @@ TEST_CASE(
 TEST_CASE("Native actor plan reads the full arena command argument",
           "[ai][planning][actor-plan-live]") {
   ActorPlanFixture fixture;
-  fixture.stats.limbActions[2][1].actionId = 0;
+  fixture.stats.limb_actions[2][1].action_id = 0;
   const int argument = GENERATE(4, 0x10004);
   VS::Battle::Ai::arenaOrbit = &fixture.orbit;
   fixture.orbit.plan_saved = 1;
   fixture.orbit.saved_plan_count = 9;
-  fixture.battle_actor.commandOpcode = 24;
-  fixture.battle_actor.commandArg0 = argument;
-  fixture.battle_actor.subType = 173;
+  fixture.battle_actor.command_opcode = 24;
+  fixture.battle_actor.command_arg0 = argument;
+  fixture.battle_actor.sub_type = 173;
   fixture.state.actor =
       reinterpret_cast<VS::Battle::Ai::EngagementData*>(&fixture.battle_actor);
   VS::State::SetLiveScriptFlag(0xA6, 4);
@@ -1144,8 +1151,8 @@ TEST_CASE(
     "Native simulated results preserve row metadata maxima and target order",
     "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;
-  Battle_actionDefinitions[42].type = 3;
-  Battle_actionDefinitions[42].cost = 55;
+  VS::Battle::actionDefinitions[42].type = 3;
+  VS::Battle::actionDefinitions[42].cost = 55;
   fixture.workspace->opaque4.opaque4 = 7;
   fixture.workspace->opaque4.opaque_1c_bit0 = 2;
   fixture.workspace->opaque4.opaque14 = 3;
@@ -1170,8 +1177,8 @@ TEST_CASE("Native simulated results decode all signed resource operations",
           "[ai][planning][simulation-results-live]") {
   for (const unsigned type : {1u, 3u, 6u}) {
     SimulationResultsFixture fixture;
-    Battle_actionDefinitions[42].type = type;
-    Battle_actionDefinitions[42].cost = 5;
+    VS::Battle::actionDefinitions[42].type = type;
+    VS::Battle::actionDefinitions[42].cost = 5;
     auto& performer = fixture.workspace->opaque4;
     performer.opaque4 = 7;
     performer.opaque_1c_bit0 = 2;
@@ -1380,8 +1387,8 @@ TEST_CASE("Native candidate readiness refreshes actual action slot usability",
       std::bit_cast<VS::Battle::Ai::ActionCandidateRecord>(
           candidate.RawWords());
   fixture.state.relations[3].classification = 3;
-  Battle_actionDefinitions[42].aiFlags =
-      std::bit_cast<decltype(Battle_actionDefinitions[42].aiFlags)>(
+  VS::Battle::actionDefinitions[42].ai_flags =
+      std::bit_cast<decltype(VS::Battle::actionDefinitions[42].ai_flags)>(
           std::uint16_t{0x8000});
   CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
         false);
@@ -1578,16 +1585,16 @@ SlotBytes SlotBytesOf(const VS::Battle::Ai::ActorAiState& state) {
 
 // Action 42 as a radial category-14 action reaching 96 units.
 void DefineMetadataAction(unsigned type) {
-  Battle_ActionDefinition& action = Battle_actionDefinitions[42];
+  ActionDefinition& action = VS::Battle::actionDefinitions[42];
   action = {};
   action.type = type;
   action.category = 14;
   action.cost = 30;
-  action.rangeX = 1;
-  action.rangeZ = 4;
+  action.range_x = 1;
+  action.range_z = 4;
   action.shape = 1;
-  action.aiFlags.radialArea = 1;
-  action.areaRangeY = 3;
+  action.ai_flags.radial_area = 1;
+  action.area_range_y = 3;
 }
 }  // namespace
 
@@ -1626,10 +1633,10 @@ TEST_CASE("AI action metadata reads weapon ranges from the actor's stats",
           "[ai][planning][action-metadata-live]") {
   PlanningAdvanceFixture fixture;
   DefineMetadataAction(0);
-  Battle_actionDefinitions[42].rangeX = 0xFF;
-  Battle_actionDefinitions[42].aiFlags.radialArea = 0;
-  fixture.stats.currentRangeZ = 4;
-  fixture.stats.currentAttackShape = 1;
+  VS::Battle::actionDefinitions[42].range_x = 0xFF;
+  VS::Battle::actionDefinitions[42].ai_flags.radial_area = 0;
+  fixture.stats.current_range_z = 4;
+  fixture.stats.current_attack_shape = 1;
   VS::Battle::Ai::BuildLiveAiActionMetadata(&fixture.state);
   CHECK(fixture.state.action_slots[0][0].range_squared == 96 * 96);
   CHECK(fixture.state.action_slots[5][3].range_squared == 96 * 96);
@@ -1737,7 +1744,7 @@ TEST_CASE(
     "[ai][planning][pointer-sort]") {
   PlanningFixture fixture;
   auto saved_actor = VS::Battle::actors[0];
-  Battle_Actor listed{};
+  VS::Battle::Actor listed{};
   listed.id = 3;
   VS::Battle::actors[0] = &listed;
   auto& state = fixture.state;
@@ -1753,7 +1760,7 @@ TEST_CASE(
       candidate.weight = 1;
       candidate.target_id = 3;
       candidate.action = static_cast<unsigned>(40 + index);
-      fixture.stats.limbActions[index][0].actionId =
+      fixture.stats.limb_actions[index][0].action_id =
           static_cast<u_short>(candidate.action);
       VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
       CHECK(fixture.exclusions[3][candidate.action] == 1);
@@ -1816,8 +1823,8 @@ TEST_CASE("AI simulated stat deltas clamp add and subtract at real bounds",
 
 TEST_CASE("AI planning snapshots copy only the original simulation stat ranges",
           "[ai][planning]") {
-  Battle_ActorStats source;
-  Battle_ActorStats destination;
+  VS::Battle::ActorStats source;
+  VS::Battle::ActorStats destination;
   std::ranges::fill(std::as_writable_bytes(std::span{&source, 1}),
                     std::byte{0x5A});
   std::ranges::fill(std::as_writable_bytes(std::span{&destination, 1}),
@@ -1838,21 +1845,21 @@ TEST_CASE("AI action usability applies resource thresholds to every limb slot",
   const int column = GENERATE(0, 1, 2, 3);
   PlanningFixture fixture;
   fixture.stats.limbs[row].hp = 2;
-  fixture.stats.limbActions[row][column].actionId = 42;
+  fixture.stats.limb_actions[row][column].action_id = 42;
   auto& slot = fixture.state.action_slots[row][column];
   slot = std::bit_cast<VS::Battle::Ai::ActionSlotMetadataRecord>(
       std::array<uint32_t, 2>{0xA5CAFE13, 0xDEADBEAF});
-  auto& action = Battle_actionDefinitions[42];
+  auto& action = VS::Battle::actionDefinitions[42];
   action.type = static_cast<u_char>(type);
   action.cost = 10;
-  fixture.stats.currentHp = 59;
-  fixture.stats.currentMp = 9;
+  fixture.stats.current_hp = 59;
+  fixture.stats.current_mp = 9;
   fixture.stats.weapon.current_pp = 9;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
                                                      column) ==
         !(type == 1 || type == 3 || type == 4));
-  fixture.stats.currentHp = 60;
-  fixture.stats.currentMp = 10;
+  fixture.stats.current_hp = 60;
+  fixture.stats.current_mp = 10;
   fixture.stats.weapon.current_pp = 10;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
                                                      column));
@@ -1865,7 +1872,7 @@ TEST_CASE("AI action usability applies status and damaged-limb restrictions",
           "[ai][planning]") {
   const auto type = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   PlanningFixture fixture;
-  Battle_actionDefinitions[42].type = static_cast<u_char>(type);
+  VS::Battle::actionDefinitions[42].type = static_cast<u_char>(type);
   fixture.stats.statuses = 0x2000;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1) ==
         (type == 1 || type == 2));
@@ -1881,15 +1888,15 @@ TEST_CASE(
     "[ai][planning]") {
   PlanningFixture fixture;
   fixture.state.action_cost_enabled = 10;
-  fixture.stats.currentHp = 49;
-  fixture.stats.currentMp = 9;
+  fixture.stats.current_hp = 49;
+  fixture.stats.current_mp = 9;
   fixture.stats.statuses = 0x90000;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 0);
   CHECK(fixture.state.reserved10[1] == 1);
   CHECK(fixture.state.reserved10[2] == 1);
-  fixture.stats.currentHp = 50;
-  fixture.stats.currentMp = 50;
+  fixture.stats.current_hp = 50;
+  fixture.stats.current_mp = 50;
   fixture.stats.statuses = 0x1000;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 1);
@@ -1925,13 +1932,13 @@ TEST_CASE(
   fixture.state.relations[3].classification = 2;
   fixture.peer.actor = &fixture.actor;
   fixture.peer.action_cost_enabled = 10;
-  fixture.stats.currentMp = 9;
+  fixture.stats.current_mp = 9;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
-  Battle_actionDefinitions[42].aiFlags =
-      std::bit_cast<Battle_ActionAiFlags>(u_short{0x400});
+  VS::Battle::actionDefinitions[42].ai_flags =
+      std::bit_cast<VS::Battle::ActionAiFlags>(u_short{0x400});
   CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
                                                    3));
-  fixture.stats.currentMp = 50;
+  fixture.stats.current_mp = 50;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
   CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
                                                          &candidate, 3));
@@ -1994,13 +2001,13 @@ TEST_CASE(
     "AI resource comparisons retain signed MP/PP and unsigned HP semantics",
     "[ai][planning]") {
   PlanningFixture fixture;
-  auto& action = Battle_actionDefinitions[42];
+  auto& action = VS::Battle::actionDefinitions[42];
   action.cost = 10;
   action.type = 1;
-  fixture.stats.currentMp = -1;
+  fixture.stats.current_mp = -1;
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
-  fixture.stats.currentMp = 10;
+  fixture.stats.current_mp = 10;
   fixture.stats.statuses = 0x1000;
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
@@ -2010,7 +2017,7 @@ TEST_CASE(
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   action.type = 3;
-  fixture.stats.currentHp = -1;
+  fixture.stats.current_hp = -1;
   CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
 }
 

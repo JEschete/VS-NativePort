@@ -12,7 +12,7 @@
 
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
@@ -32,7 +32,7 @@ void Require(bool valid, const char* message) {
   }
 }
 
-Battle_ActorStats& StatsOf(Battle_ActorStats* stats) {
+VS::Battle::ActorStats& StatsOf(VS::Battle::ActorStats* stats) {
   Require(stats != nullptr, "Element enchantment requires actor stats");
   return *stats;
 }
@@ -49,7 +49,7 @@ class LiveStatNumberWorld final : public StatNumberWorld {
     if (!ValidActor(slot) || VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return VS::Battle::actors[slot]->roomSpawnIndex;
+    return VS::Battle::actors[slot]->room_spawn_index;
   }
   void QueueValueLabel(const StatNumberRequest& request) override {
     LiveQueueActorValueLabel(request.actor_slot, request.limb_tag,
@@ -71,7 +71,7 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
   [[nodiscard]] std::optional<TargetingRiskTarget> SelectedTarget()
       const override {
     if (VS::Battle::actionState == nullptr) return std::nullopt;
-    const auto& target = VS::Battle::actionState->selection.primaryTarget;
+    const auto& target = VS::Battle::actionState->selection.primary_target;
     const int slot = target.target.target_actor;
     if (!ValidActor(slot)) return std::nullopt;
     const auto* actor = VS::Battle::actors[slot];
@@ -98,7 +98,7 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
 }  // namespace
 
 // decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801).
-void ApplyLiveWeaponElementEnchantment(Battle_ActorStats* pointer,
+void ApplyLiveWeaponElementEnchantment(VS::Battle::ActorStats* pointer,
                                        int increased, int decreased,
                                        int amount) {
   auto& stats = StatsOf(pointer);
@@ -110,15 +110,16 @@ void ApplyLiveWeaponElementEnchantment(Battle_ActorStats* pointer,
 }
 
 // decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811).
-void ApplyLiveArmorElementEnchantment(Battle_ActorStats* pointer, int increased,
-                                      int decreased, int amount) {
+void ApplyLiveArmorElementEnchantment(VS::Battle::ActorStats* pointer,
+                                      int increased, int decreased,
+                                      int amount) {
   auto& stats = StatsOf(pointer);
   Items::ShieldLoadout shield{};
   if (stats.shield.base.id != 0) {
     shield = stats.shield;
   }
   std::array<Items::ArmorLoadout, Items::kLimbCount> armor{};
-  static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> ==
+  static_assert(std::tuple_size_v<decltype(VS::Battle::ActorStats::limbs)> ==
                 Items::kLimbCount);
   for (std::size_t index = 0; index < armor.size(); ++index) {
     if (stats.limbs[index].armor.armor.id != 0) {

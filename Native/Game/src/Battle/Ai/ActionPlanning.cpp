@@ -6,7 +6,7 @@ namespace VS::Battle::Ai {
 // (ModuleData.cpp)
 std::array<std::uint32_t, kTimedStatusFlagWords> kTimedStatusFlags;
 // decomp: D_800F58E8 (D_800F58E8@BATTLE/BATTLE.PRG)
-Battle_ActorStats* planningStatsSnapshot;
+VS::Battle::ActorStats* planningStatsSnapshot;
 // decomp: D_800F58EC (D_800F58EC@BATTLE/BATTLE.PRG)
 VS::Battle::Ai::CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (D_800F58F0@BATTLE/BATTLE.PRG)

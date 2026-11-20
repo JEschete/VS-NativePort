@@ -23,7 +23,13 @@ inline constexpr std::size_t kTrustedEncodedTextBytes = 0x1000;
 
 namespace encoded_text_live {
 template <typename T>
-inline constexpr bool kBounded = std::is_array_v<T> && std::extent_v<T> > 1;
+inline constexpr bool kBoundedArray = false;
+template <typename T, std::size_t N>
+inline constexpr bool kBoundedArray<T[N]> = N > 1;
+template <typename T, std::size_t N>
+inline constexpr bool kBoundedArray<std::array<T, N>> = N > 1;
+template <typename T>
+inline constexpr bool kBounded = kBoundedArray<std::remove_cv_t<T>>;
 
 // A text from a pointer, trusted for kTrustedEncodedTextBytes; null is empty.
 [[nodiscard]] inline std::span<const std::uint8_t> TrustedText(
@@ -51,7 +57,7 @@ template <typename T>
 template <typename T>
 [[nodiscard]] std::uint8_t* Start(T& target) {
   if constexpr (kBounded<T>) {
-    return reinterpret_cast<std::uint8_t*>(&target);
+    return reinterpret_cast<std::uint8_t*>(std::data(target));
   } else {
     return reinterpret_cast<std::uint8_t*>(target);
   }

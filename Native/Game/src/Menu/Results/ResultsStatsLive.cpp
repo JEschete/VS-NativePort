@@ -7,13 +7,13 @@
 #include <optional>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Menu/Results/ResultsStats.hpp"
 
 namespace VS::Menu::Results {
 namespace {
-Battle_ActorStats* LiveStats(const char* entry) {
+VS::Battle::ActorStats* LiveStats(const char* entry) {
   if (VS::Battle::characterState == nullptr) {
     VS::Core::Warnf("menu.results", "%s refused: no character state", entry);
     return nullptr;
@@ -30,34 +30,34 @@ class LiveAshleyStatHost final : public AshleyStatHost {
  public:
   explicit LiveAshleyStatHost(const char* entry) : entry_(entry) {}
   std::optional<AshleyResultStats> ReadAshleyStats() override {
-    const Battle_ActorStats* stats = LiveStats(entry_);
+    const VS::Battle::ActorStats* stats = LiveStats(entry_);
     if (stats == nullptr) return std::nullopt;
     return AshleyResultStats{
-        .current_hp = stats->currentHp,
-        .max_hp = stats->maxHp,
-        .current_mp = stats->currentMp,
-        .max_mp = stats->maxMp,
+        .current_hp = stats->current_hp,
+        .max_hp = stats->max_hp,
+        .current_mp = stats->current_mp,
+        .max_mp = stats->max_mp,
         .strength = stats->strength,
-        .total_strength = stats->totalStrength,
+        .total_strength = stats->total_strength,
         .intelligence = stats->intelligence,
-        .total_intelligence = stats->totalIntelligence,
+        .total_intelligence = stats->total_intelligence,
         .agility = stats->agility,
-        .total_agility = stats->totalAgility,
+        .total_agility = stats->total_agility,
     };
   }
   void WriteAshleyStats(const AshleyResultStats& view) override {
-    Battle_ActorStats* stats = LiveStats(entry_);
+    VS::Battle::ActorStats* stats = LiveStats(entry_);
     if (stats == nullptr) return;
-    stats->currentHp = view.current_hp;
-    stats->maxHp = view.max_hp;
-    stats->currentMp = view.current_mp;
-    stats->maxMp = view.max_mp;
+    stats->current_hp = view.current_hp;
+    stats->max_hp = view.max_hp;
+    stats->current_mp = view.current_mp;
+    stats->max_mp = view.max_mp;
     stats->strength = view.strength;
-    stats->totalStrength = view.total_strength;
+    stats->total_strength = view.total_strength;
     stats->intelligence = view.intelligence;
-    stats->totalIntelligence = view.total_intelligence;
+    stats->total_intelligence = view.total_intelligence;
     stats->agility = view.agility;
-    stats->totalAgility = view.total_agility;
+    stats->total_agility = view.total_agility;
   }
 
  private:

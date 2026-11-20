@@ -1,29 +1,35 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_ActionDefinition;
 namespace VS::Battle {
+
+struct ActionDefinition;
 struct HitResult;
 }  // namespace VS::Battle
 
 namespace VS::Battle {
-void QueueLiveWeaponPpRecovery(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                               VS::Battle::HitResult*, int, int);
-void QueueLiveWeaponDpRecovery(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                               VS::Battle::HitResult*, int, int);
-void QueueLiveRiskRecovery(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                           VS::Battle::HitResult*, int, int);
-void QueueLiveHitDamageAndEquipmentWear(Battle_ActionDefinition*,
+void QueueLiveWeaponPpRecovery(VS::Battle::ActionDefinition*,
+                               VS::Battle::HitResult*, VS::Battle::HitResult*,
+                               int, int);
+void QueueLiveWeaponDpRecovery(VS::Battle::ActionDefinition*,
+                               VS::Battle::HitResult*, VS::Battle::HitResult*,
+                               int, int);
+void QueueLiveRiskRecovery(VS::Battle::ActionDefinition*,
+                           VS::Battle::HitResult*, VS::Battle::HitResult*, int,
+                           int);
+void QueueLiveHitDamageAndEquipmentWear(VS::Battle::ActionDefinition*,
                                         VS::Battle::HitResult*,
                                         VS::Battle::HitResult*, int, int);
-void QueueLiveMpDrain(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveMpDrain(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                       VS::Battle::HitResult*, int, int);
-void QueueLiveWeaponPpDrain(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                            VS::Battle::HitResult*, int, int);
-void QueueLiveShieldPpDrain(Battle_ActionDefinition*, VS::Battle::HitResult*,
-                            VS::Battle::HitResult*, int, int);
-void QueueLiveHpRecovery(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveWeaponPpDrain(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*, VS::Battle::HitResult*, int,
+                            int);
+void QueueLiveShieldPpDrain(VS::Battle::ActionDefinition*,
+                            VS::Battle::HitResult*, VS::Battle::HitResult*, int,
+                            int);
+void QueueLiveHpRecovery(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult*, int, int);
-void QueueLiveMpRecovery(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void QueueLiveMpRecovery(VS::Battle::ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult*, int, int);
 }  // namespace VS::Battle

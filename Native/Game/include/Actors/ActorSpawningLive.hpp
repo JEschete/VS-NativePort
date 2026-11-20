@@ -3,7 +3,9 @@
 
 #include "Actors/ActorSpawning.hpp"
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 namespace VS::Field {
 struct MpdEnemySpawn;
 }  // namespace VS::Field
@@ -25,19 +27,18 @@ struct RoomActorRecord;
 [[nodiscard]] RememberedSpawn DecodeRemembered(const RoomActorRecord& record);
 
 // func_800765B0 (146C.c:6064). `unused` is unused, as in the original.
-Battle_Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
-                                       const SpawnPlacement* placement,
-                                       int material, int unused);
+VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
+                                            const SpawnPlacement* placement,
+                                            int material, int unused);
 // func_800774FC (146C.c:6562).
-Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
-                                           int blade_model, int blade_material,
-                                           int shield_model,
-                                           int shield_material,
-                                           const SpawnPlacement* placement,
-                                           int flags);
+VS::Battle::Actor* CreateLiveActorWithEquipment(
+    int actor_id, int model_id, int blade_model, int blade_material,
+    int shield_model, int shield_material, const SpawnPlacement* placement,
+    int flags);
 // func_800775C0 (146C.c:6578).
-Battle_Actor* SpawnLiveRoomEnemy(int actor_id, VS::Field::MpdEnemySpawn* spawn,
-                                 CharacterInit* init, int flags);
+VS::Battle::Actor* SpawnLiveRoomEnemy(int actor_id,
+                                      VS::Field::MpdEnemySpawn* spawn,
+                                      CharacterInit* init, int flags);
 // func_8007C8F8 (146C.c:8926): the queue index plus one.
 int QueueLiveAshleyModelLoad(int model_id);
 // func_8007C928 (146C.c:8936): the queue index plus one, or 0.

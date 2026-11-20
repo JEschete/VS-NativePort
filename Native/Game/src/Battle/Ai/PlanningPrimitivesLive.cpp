@@ -20,11 +20,11 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -44,23 +44,28 @@
 #include "Field/Gimmicks.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+
 namespace VS::Battle::Ai {
 namespace {
 static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
               sizeof(ActionCandidate::Words));
-static_assert(sizeof(Battle_ActorStats) == kActorStatsRecordBytes);
+static_assert(sizeof(VS::Battle::ActorStats) == kActorStatsRecordBytes);
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque9) ==
-              offsetof(Battle_Actor, commandOpcode));
+              offsetof(VS::Battle::Actor, command_opcode));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_3c) ==
-              offsetof(Battle_Actor, stats));
-static_assert(offsetof(Battle_ActorStats, currentHp) == kSnapshotVitals.offset);
-static_assert(offsetof(Battle_ActorStats, movementClass) ==
+              offsetof(VS::Battle::Actor, stats));
+static_assert(offsetof(VS::Battle::ActorStats, current_hp) ==
+              kSnapshotVitals.offset);
+static_assert(offsetof(VS::Battle::ActorStats, movement_class) ==
               kSnapshotMovement.offset);
-static_assert(offsetof(Battle_ActorStats, limbs) == kSnapshotLimbs.offset);
-static_assert(sizeof(Battle_ActorStats::limbs) == kSnapshotLimbs.size);
-static_assert(offsetof(Battle_ActorStats, statuses) ==
+static_assert(offsetof(VS::Battle::ActorStats, limbs) == kSnapshotLimbs.offset);
+static_assert(sizeof(VS::Battle::ActorStats::limbs) == kSnapshotLimbs.size);
+static_assert(offsetof(VS::Battle::ActorStats, statuses) ==
               kSnapshotStatuses.offset);
-static_assert(std::size(Battle_actionDefinitions) == kActionDefinitionCount);
+static_assert(std::size(VS::Battle::actionDefinitions) ==
+              kActionDefinitionCount);
 static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
               kCandidateTargetSlots);
 static_assert(
@@ -75,23 +80,24 @@ constexpr std::size_t kPoisonStatusIndex = 14;
 constexpr std::size_t kRegenerationStatusIndex = 17;
 constexpr auto kTargetOffset = offsetof(ReactionRecord, opaque_4c);
 PlanningStatsSnapshot planning_stats_snapshot;
-static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
+static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
               kTargetPreviewCapacity);
-static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
+static_assert(kTargetOffset == offsetof(ActionRequestRecord, targets));
 static_assert(sizeof(VS::Battle::Ai::EngagementActor) ==
               sizeof(VS::Battle::HitResult));
 // func_800DEB10 reads the completed request through func_800DEEA4_t and the
 // performer's command argument as two halves (lhu +0x0C, lhu +0x0E).
 static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque4) ==
-              offsetof(Battle_ActionRequest, primaryTarget));
+              offsetof(ActionRequestRecord, primary_target));
 static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque_4a) ==
-              offsetof(Battle_ActionRequest, targetCount));
+              offsetof(ActionRequestRecord, target_count));
 static_assert(offsetof(VS::Battle::Ai::EngagementActor, opaque40) ==
               offsetof(VS::Battle::HitResult, targets_position));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_c) ==
-              offsetof(Battle_Actor, commandArg0));
+              offsetof(VS::Battle::Actor, command_arg0));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_e) ==
-              offsetof(Battle_Actor, commandArg0) + sizeof(std::uint16_t));
+              offsetof(VS::Battle::Actor, command_arg0) +
+                  sizeof(std::uint16_t));
 static_assert(std::size(VS::Field::gimmickInstances) == kCandidateTargetSlots);
 
 static_assert(sizeof(VS::Battle::Ai::CandidateEntryView) ==
@@ -199,7 +205,7 @@ std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
       return std::nullopt;
     }
     auto bytes = std::as_writable_bytes(
-        std::span<Battle_ActorStats, 1>(actor->stats, 1));
+        std::span<VS::Battle::ActorStats, 1>(actor->stats, 1));
     if (OverlappingPlanningBytes(bytes.data(), bytes.size(),
                                  planning_stats_snapshot.bytes.data(),
                                  planning_stats_snapshot.bytes.size())) {
@@ -272,7 +278,7 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
                static_cast<int>(candidate.TargetId()),
                static_cast<int>(candidate.TargetLimb()), &source_position,
                &target_position,
-               reinterpret_cast<Battle_ActionRequest*>(
+               reinterpret_cast<ActionRequestRecord*>(
                    VS::Battle::Ai::planningWorkspace)) != 0;
   }
 
@@ -285,8 +291,8 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
     if (state_.actor_id >= std::size(VS::Battle::actors) ||
         candidate.TargetId() >= std::size(VS::Battle::actors) ||
         !ReadablePlanningBytes(VS::Battle::Ai::planningWorkspace,
-                               sizeof(Battle_ActionRequest),
-                               alignof(Battle_ActionRequest))) {
+                               sizeof(ActionRequestRecord),
+                               alignof(ActionRequestRecord))) {
       return false;
     }
     const auto* source = VS::Battle::actors[state_.actor_id];
@@ -356,7 +362,8 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
   std::vector<SimulatedActorEffect> hits_;
 };
 
-const Battle_ActorStats& StatsOf(const VS::Battle::Ai::ActorAiState& state) {
+const VS::Battle::ActorStats& StatsOf(
+    const VS::Battle::Ai::ActorAiState& state) {
   Require(state.actor != nullptr && state.actor->opaque_3c != nullptr,
           "AI planning requires the actor's stats");
   return *state.actor->opaque_3c;
@@ -364,11 +371,11 @@ const Battle_ActorStats& StatsOf(const VS::Battle::Ai::ActorAiState& state) {
 
 std::uint16_t Half(int value) { return static_cast<std::uint16_t>(value); }
 
-ActorResources ResourcesOf(const Battle_ActorStats& stats) {
-  return {.hp = Half(stats.currentHp),
-          .max_hp = Half(stats.maxHp),
-          .mp = Half(stats.currentMp),
-          .max_mp = Half(stats.maxMp),
+ActorResources ResourcesOf(const VS::Battle::ActorStats& stats) {
+  return {.hp = Half(stats.current_hp),
+          .max_hp = Half(stats.max_hp),
+          .mp = Half(stats.current_mp),
+          .max_mp = Half(stats.max_mp),
           .weapon_pp = Half(stats.weapon.current_pp),
           .statuses = static_cast<std::uint32_t>(stats.statuses)};
 }
@@ -462,7 +469,8 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
               !ReadablePlanningRecord(initial_stats_)) {
             return false;
           }
-          const auto action = initial_stats_->limbActions[row][column].actionId;
+          const auto action =
+              initial_stats_->limb_actions[row][column].action_id;
           if (!ClearExclusion(static_cast<unsigned>(actor->id), action)) {
             return false;
           }
@@ -482,7 +490,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   std::optional<ActionPlanTiming> Timing() const override {
     if (!ReadablePlanningRecord(state_.stats)) return std::nullopt;
     return ActionPlanTiming{state_.min_action_delay,
-                            state_.stats->actionRecoveryTimer};
+                            state_.stats->action_recovery_timer};
   }
   void AdvanceSimulation(int step) override {
     AdvanceLivePlanningSimulation(step);
@@ -558,7 +566,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   }
   bool BeginArenaAdjustment() override {
     if (VS::Battle::Ai::arenaOrbit == nullptr) return false;
-    arena_actor_ = reinterpret_cast<const Battle_Actor*>(state_.actor);
+    arena_actor_ = reinterpret_cast<const VS::Battle::Actor*>(state_.actor);
     return true;
   }
   std::uint8_t ArenaProgress() const override {
@@ -566,8 +574,8 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   }
   std::optional<ActionPlanCommand> ArenaCommand() const override {
     if (!ReadablePlanningRecord(arena_actor_)) return std::nullopt;
-    return ActionPlanCommand{arena_actor_->commandOpcode,
-                             arena_actor_->commandArg0};
+    return ActionPlanCommand{arena_actor_->command_opcode,
+                             arena_actor_->command_arg0};
   }
   void SetArenaProgress(std::uint8_t progress) override {
     State::SetLiveScriptFlag(kArenaProgressFlag, progress);
@@ -579,7 +587,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   }
   std::optional<std::uint16_t> ArenaActorSubtype() const override {
     if (!ReadablePlanningRecord(arena_actor_)) return std::nullopt;
-    return arena_actor_->subType;
+    return arena_actor_->sub_type;
   }
   void SetSavedPlanCount(std::uint8_t count) override {
     Require(ReadablePlanningRecord(VS::Battle::Ai::arenaOrbit),
@@ -613,14 +621,14 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   }
 
   VS::Battle::Ai::ActorAiState& state_;
-  const Battle_ActorStats* initial_stats_;
+  const VS::Battle::ActorStats* initial_stats_;
   LiveCandidateList list_;
-  const Battle_Actor* arena_actor_ = nullptr;
+  const VS::Battle::Actor* arena_actor_ = nullptr;
 };
 
 class LiveCompletedActionPlan final : public CompletedActionPlanHost {
  public:
-  explicit LiveCompletedActionPlan(const Battle_ActionRequest* request)
+  explicit LiveCompletedActionPlan(const ActionRequestRecord* request)
       : request_(request) {}
 
   std::optional<bool> SelectPerformer(unsigned slot) override {
@@ -632,9 +640,10 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     return true;
   }
   std::optional<ActionPlanCommand> PerformerCommand() const override {
-    const auto* actor = reinterpret_cast<const Battle_Actor*>(State().actor);
+    const auto* actor =
+        reinterpret_cast<const VS::Battle::Actor*>(State().actor);
     if (!ReadablePlanningRecord(actor)) return std::nullopt;
-    return ActionPlanCommand{actor->commandOpcode, actor->commandArg0};
+    return ActionPlanCommand{actor->command_opcode, actor->command_arg0};
   }
   int CandidateCount() const override { return State().candidate_count; }
   std::optional<ActionCandidate> Ranked(std::size_t rank) const override {
@@ -647,7 +656,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     State().opaque_fb = target;
   }
   int TargetCount() const override {
-    return request_ == nullptr ? 0 : request_->targetCount;
+    return request_ == nullptr ? 0 : request_->target_count;
   }
   std::optional<CompletedActionTarget> Target(
       std::size_t index) const override {
@@ -655,7 +664,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
         !ReadablePlanningBytes(
             request_,
             kTargetOffset + (index + 1) * sizeof(VS::Battle::HitResult),
-            alignof(Battle_ActionRequest))) {
+            alignof(ActionRequestRecord))) {
       return std::nullopt;
     }
     const auto& target = std::span(request_->targets)[index];
@@ -682,7 +691,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     return *state_;
   }
 
-  const Battle_ActionRequest* request_;
+  const ActionRequestRecord* request_;
   VS::Battle::Ai::ActorAiState* state_ = nullptr;
 };
 
@@ -707,7 +716,7 @@ class LiveTargeting final : public ActionTargetingHost {
   }
   [[nodiscard]] std::uint16_t ActionAiFlags(unsigned action) const override {
     return std::bit_cast<std::uint16_t>(
-        Battle_actionDefinitions[action].aiFlags);
+        VS::Battle::actionDefinitions[action].ai_flags);
   }
   [[nodiscard]] bool SlotExcludesSelf(int row, int column) const override {
     return state_.action_slots[row][column].opaque0_bit1 != 0;
@@ -720,14 +729,14 @@ class LiveTargeting final : public ActionTargetingHost {
 class LiveActionUsability final : public ActionUsabilityHost {
  public:
   LiveActionUsability(VS::Battle::Ai::ActorAiState& state,
-                      const Battle_ActorStats& stats)
+                      const VS::Battle::ActorStats& stats)
       : state_(state), stats_(stats) {}
 
   [[nodiscard]] unsigned SlotAction(int row, int column) const override {
-    return stats_.limbActions[row][column].actionId;
+    return stats_.limb_actions[row][column].action_id;
   }
   [[nodiscard]] ActionCost Action(unsigned action_id) const override {
-    const Battle_ActionDefinition& action = Battle_actionDefinitions[action_id];
+    const ActionDefinition& action = VS::Battle::actionDefinitions[action_id];
     return {.type = action.type, .cost = action.cost};
   }
   [[nodiscard]] std::int16_t LimbHp(int row) const override {
@@ -742,7 +751,7 @@ class LiveActionUsability final : public ActionUsabilityHost {
 
  private:
   VS::Battle::Ai::ActorAiState& state_;
-  const Battle_ActorStats& stats_;
+  const VS::Battle::ActorStats& stats_;
 };
 
 class LiveActionMetadata final : public ActionMetadataHost {
@@ -752,14 +761,14 @@ class LiveActionMetadata final : public ActionMetadataHost {
 
   [[nodiscard]] unsigned ActorId() const override { return state_.actor_id; }
   [[nodiscard]] unsigned SlotAction(int row, int column) const override {
-    return Stats().limbActions[row][column].actionId;
+    return Stats().limb_actions[row][column].action_id;
   }
   [[nodiscard]] MetadataAction Action(unsigned action_id) const override {
-    const Battle_ActionDefinition& action = Battle_actionDefinitions[action_id];
+    const ActionDefinition& action = VS::Battle::actionDefinitions[action_id];
     return {.type = action.type,
             .category = action.category,
             .cost = action.cost,
-            .radial_area = action.aiFlags.radialArea != 0};
+            .radial_area = action.ai_flags.radial_area != 0};
   }
   [[nodiscard]] std::uint32_t RangeSquared(unsigned action_id) override {
     return static_cast<std::uint32_t>(LiveCalculateActorActionRangeSquared(
@@ -807,7 +816,7 @@ class LiveActionMetadata final : public ActionMetadataHost {
 
  private:
   // The player's path never reads the stats record.
-  [[nodiscard]] const Battle_ActorStats& Stats() const {
+  [[nodiscard]] const VS::Battle::ActorStats& Stats() const {
     Require(ReadablePlanningRecord(state_.stats),
             "AI action metadata requires the actor's stats record");
     return *state_.stats;
@@ -818,11 +827,11 @@ class LiveActionMetadata final : public ActionMetadataHost {
 class LiveFallbackActionSelection final : public FallbackActionHost {
  public:
   LiveFallbackActionSelection(VS::Battle::Ai::ActorAiState& state,
-                              const Battle_ActorStats& stats)
+                              const VS::Battle::ActorStats& stats)
       : state_(state), stats_(stats) {}
 
   std::optional<FallbackActionSlot> RefreshSlot(int row, int column) override {
-    const unsigned action = stats_.limbActions[row][column].actionId;
+    const unsigned action = stats_.limb_actions[row][column].action_id;
     if (!ReadablePlanningRecord(state_.actor) ||
         !ReadablePlanningRecord(state_.actor->opaque_3c)) {
       return std::nullopt;
@@ -838,12 +847,12 @@ class LiveFallbackActionSelection final : public FallbackActionHost {
         .eligible = eligible};
   }
   bool IgnoresSight(unsigned action) const override {
-    return Battle_actionDefinitions[action].aiFlags.opaque1Bit4 != 0;
+    return VS::Battle::actionDefinitions[action].ai_flags.opaque1_bit4 != 0;
   }
 
  private:
   VS::Battle::Ai::ActorAiState& state_;
-  const Battle_ActorStats& stats_;
+  const VS::Battle::ActorStats& stats_;
 };
 
 class LivePlanningSimulation final : public PlanningSimulationHost {
@@ -868,23 +877,23 @@ class LivePlanningSimulation final : public PlanningSimulationHost {
     const auto* stats = actors_[index]->stats;
     if (!ReadablePlanningRecord(stats)) return std::nullopt;
     PlanningSimulationStats result{
-        .hp = {stats->currentHp, stats->maxHp},
-        .mp = {stats->currentMp, stats->maxMp},
-        .mobility_limbs = {stats->mobilityLimb0, stats->mobilityLimb1},
+        .hp = {stats->current_hp, stats->max_hp},
+        .mp = {stats->current_mp, stats->max_mp},
+        .mobility_limbs = {stats->mobility_limb0, stats->mobility_limb1},
         .statuses = static_cast<std::uint32_t>(stats->statuses)};
     for (std::size_t limb = 0; limb < result.limbs.size(); ++limb) {
       const auto& source = std::span(stats->limbs)[limb];
-      result.limbs[limb] = {source.hp, source.maxHp};
+      result.limbs[limb] = {source.hp, source.max_hp};
     }
-    std::copy_n(std::begin(stats->statusTimers), result.status_timers.size(),
+    std::copy_n(std::begin(stats->status_timers), result.status_timers.size(),
                 result.status_timers.begin());
     return result;
   }
   void WriteActor(std::size_t index,
                   const PlanningSimulationStats& result) override {
     auto& stats = *actors_[index]->stats;
-    stats.currentHp = result.hp.value;
-    stats.currentMp = result.mp.value;
+    stats.current_hp = result.hp.value;
+    stats.current_mp = result.mp.value;
     stats.statuses = std::bit_cast<std::int32_t>(result.statuses);
     for (std::size_t limb = 0; limb < result.limbs.size(); ++limb) {
       std::span(stats.limbs)[limb].hp = result.limbs[limb].value;
@@ -907,7 +916,7 @@ class LivePlanningSimulation final : public PlanningSimulationHost {
 
  private:
   VS::Battle::Ai::RoomAiState& room_;
-  std::array<Battle_Actor*, kBattleActorSlotCount> actors_{};
+  std::array<VS::Battle::Actor*, kBattleActorSlotCount> actors_{};
   std::size_t count_ = 0;
   VS::Battle::Ai::ActorAiState* state_ = nullptr;
 };
@@ -921,16 +930,16 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     if (!ReadablePlanningRecord(state_.stats)) return std::nullopt;
     const auto& metadata = state_.action_slots[row][column];
     EnumerationSlot slot{
-        .action = state_.stats->limbActions[row][column].actionId,
+        .action = state_.stats->limb_actions[row][column].action_id,
         .usable = metadata.opaque0_bit7 != 0};
     if (!slot.usable || slot.action == 0 ||
         slot.action >= kActionDefinitionCount) {
       return slot;
     }
-    const auto& action = Battle_actionDefinitions[slot.action];
+    const auto& action = VS::Battle::actionDefinitions[slot.action];
     slot.minimum_range =
-        action.aiFlags.shapedArea != 0 || action.aiFlags.radialArea != 0;
-    slot.ignores_sight = action.aiFlags.opaque1Bit4 != 0;
+        action.ai_flags.shaped_area != 0 || action.ai_flags.radial_area != 0;
+    slot.ignores_sight = action.ai_flags.opaque1_bit4 != 0;
     slot.ignores_obstruction = metadata.opaque0_bit2 != 0;
     slot.radius = static_cast<std::uint16_t>(metadata.radius);
     slot.range_squared = metadata.range_squared;
@@ -997,7 +1006,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
                 ReadablePlanningRecord(current_->stats) &&
                 limb < static_cast<unsigned>(kLimbActionRows),
             "AI enumeration requires readable target limbs");
-    return current_->stats->limbs[limb].maxHp;
+    return current_->stats->limbs[limb].max_hp;
   }
   std::int16_t TargetHeight() const override {
     Require(ReadablePlanningRecord(current_) && current_->id >= 0 &&
@@ -1012,7 +1021,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
                 std::optional<unsigned> action) override {
     auto record = RecordOf(candidate);
     const auto* definition =
-        action ? &Battle_actionDefinitions[*action] : nullptr;
+        action ? &VS::Battle::actionDefinitions[*action] : nullptr;
     if (!EvaluateLiveActionCandidate(&state_, &record, static_cast<int>(kind),
                                      definition)) {
       return false;
@@ -1023,7 +1032,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
   void Cache(const ActionCandidate& candidate, unsigned action) override {
     const auto record = RecordOf(candidate);
     CacheLiveFallbackActionCandidate(&record,
-                                     &Battle_actionDefinitions[action]);
+                                     &VS::Battle::actionDefinitions[action]);
   }
   void Append(const ActionCandidate& candidate) override {
     const auto record = RecordOf(candidate);
@@ -1040,8 +1049,8 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
   }
 
   VS::Battle::Ai::ActorAiState& state_;
-  const Battle_Actor* head_ = nullptr;
-  const Battle_Actor* current_ = nullptr;
+  const VS::Battle::Actor* head_ = nullptr;
+  const VS::Battle::Actor* current_ = nullptr;
   bool started_ = false;
   std::size_t visited_ = 0;
 };
@@ -1120,7 +1129,7 @@ class LiveCandidateReadiness final : public CandidateReadinessHost {
   std::optional<bool> HasHostileActor() const override {
     constexpr unsigned kHostile = 3;
     if (!Valid()) return std::nullopt;
-    std::array<const Battle_Actor*, kCandidateTargetSlots> visited{};
+    std::array<const VS::Battle::Actor*, kCandidateTargetSlots> visited{};
     std::size_t count = 0;
     for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
@@ -1172,8 +1181,9 @@ bool ApplyLiveSimulatedActionResults(
   }
   ActionCost cost{};
   if (header.opaque4.opaque40 == 0) {
-    if (header.opaque0 >= std::size(Battle_actionDefinitions)) return false;
-    const auto& action = Battle_actionDefinitions[header.opaque0];
+    if (header.opaque0 >= std::size(VS::Battle::actionDefinitions))
+      return false;
+    const auto& action = VS::Battle::actionDefinitions[header.opaque0];
     cost = {.type = action.type, .cost = action.cost};
   }
   std::array<ActorCondition, kBattleActorSlotCount> conditions{};
@@ -1208,17 +1218,17 @@ bool SimulateLiveActionCandidate(
         "AI simulation requires readable state candidate and rows");
   }
   if (!ReadablePlanningBytes(VS::Battle::Ai::planningWorkspace,
-                             sizeof(Battle_ActionRequest),
-                             alignof(Battle_ActionRequest)) ||
+                             sizeof(ActionRequestRecord),
+                             alignof(ActionRequestRecord)) ||
       OverlappingPlanningBytes(rows.data(), rows.size_bytes(),
                                VS::Battle::Ai::planningWorkspace,
-                               sizeof(Battle_ActionRequest)) ||
+                               sizeof(ActionRequestRecord)) ||
       OverlappingPlanningBytes(state, sizeof(*state),
                                VS::Battle::Ai::planningWorkspace,
-                               sizeof(Battle_ActionRequest)) ||
+                               sizeof(ActionRequestRecord)) ||
       OverlappingPlanningBytes(candidate, sizeof(*candidate),
                                VS::Battle::Ai::planningWorkspace,
-                               sizeof(Battle_ActionRequest))) {
+                               sizeof(ActionRequestRecord))) {
     return RefusePlanning(
         "AI simulation requires a separate complete result workspace");
   }
@@ -1244,15 +1254,16 @@ bool UpdateLiveCandidateHitWeight(
 bool EvaluateLiveActionCandidate(
     VS::Battle::Ai::ActorAiState* state,
     VS::Battle::Ai::ActionCandidateRecord* candidate, int simulation_mode,
-    const Battle_ActionDefinition* action) {
+    const ActionDefinition* action) {
   if (!ReadablePlanningRecord(state) || !ReadablePlanningRecord(candidate) ||
       (action != nullptr && !ReadablePlanningRecord(action))) {
     return RefusePlanning(
         "AI evaluation requires readable state candidate and action");
   }
   CandidateEvaluationOptions options{
-      .rarely_chosen = action != nullptr && action->aiFlags.rarelyChosen != 0,
-      .special_action = action != nullptr && action->aiFlags.opaque0Bit4 != 0};
+      .rarely_chosen = action != nullptr && action->ai_flags.rarely_chosen != 0,
+      .special_action =
+          action != nullptr && action->ai_flags.opaque0_bit4 != 0};
   if (simulation_mode != 0) {
     options.simulation = simulation_mode == kAimedSimulationMode
                              ? CandidateSimulationMode::kAimed
@@ -1397,13 +1408,14 @@ void SortLiveActionCandidates(VS::Battle::Ai::ActionPlanView* state) {
   ranking.Apply();
 }
 
-void CopyLivePlanningActorStats(const Battle_ActorStats* source,
-                                Battle_ActorStats* destination) {
+void CopyLivePlanningActorStats(const VS::Battle::ActorStats* source,
+                                VS::Battle::ActorStats* destination) {
   Require(source != nullptr && destination != nullptr,
           "AI stat snapshot requires a source and destination");
   CopyPlanningActorStats(
-      std::as_bytes(std::span<const Battle_ActorStats, 1>(source, 1)),
-      std::as_writable_bytes(std::span<Battle_ActorStats, 1>(destination, 1)));
+      std::as_bytes(std::span<const VS::Battle::ActorStats, 1>(source, 1)),
+      std::as_writable_bytes(
+          std::span<VS::Battle::ActorStats, 1>(destination, 1)));
 }
 
 bool SnapshotLivePlanningActorStats() {
@@ -1419,7 +1431,7 @@ bool SnapshotLivePlanningActorStats() {
   planning_stats_snapshot = {
       .bytes = std::span<std::byte>(storage, kPlanningStatsTableBytes)};
   VS::Battle::Ai::planningStatsSnapshot =
-      reinterpret_cast<Battle_ActorStats*>(storage);
+      reinterpret_cast<VS::Battle::ActorStats*>(storage);
   std::array<PlanningActorStats, kBattleActorSlotCount> rows{};
   const auto actors = ReadPlanningStatsRows(rows);
   if (actors && SnapshotPlanningActorStats(planning_stats_snapshot, *actors)) {
@@ -1455,17 +1467,17 @@ void BuildLiveActorActionPlan(VS::Battle::Ai::ActorAiState* state) {
           "Actor action planning refused invalid inputs");
 }
 
-void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request) {
+void ReconcileLiveCompletedActionPlan(const ActionRequestRecord* request) {
   std::optional<CompletedAction> action;
   if (request != nullptr) {
     Require(ReadablePlanningBytes(request, kTargetOffset,
-                                  alignof(Battle_ActionRequest)),
+                                  alignof(ActionRequestRecord)),
             "Completed action reconciliation requires a complete request");
-    action =
-        CompletedAction{.action_id = request->actionId,
-                        .performer = request->primaryTarget.target.target_actor,
-                        .performer_targets_position =
-                            request->primaryTarget.targets_position != 0};
+    action = CompletedAction{
+        .action_id = request->action_id,
+        .performer = request->primary_target.target.target_actor,
+        .performer_targets_position =
+            request->primary_target.targets_position != 0};
   }
   LiveCompletedActionPlan host(request);
   Require(ReconcileCompletedActionPlan(action, host),
@@ -1591,7 +1603,7 @@ void VS::Battle::Ai::UpdateCandidateHitWeightEntry(
 void VS::Battle::Ai::EvaluateActionCandidateEntry(
     VS::Battle::Ai::ActorAiState* state,
     VS::Battle::Ai::ActionCandidateRecord* candidate, int mode,
-    Battle_ActionDefinition* action) {
+    ActionDefinition* action) {
   if (VS::Battle::Ai::EvaluateLiveActionCandidate(state, candidate, mode,
                                                   action)) {
     return;
@@ -1622,5 +1634,5 @@ void VS::Battle::Ai::BuildActorActionPlanEntry(
 void VS::Battle::Ai::ReconcileCompletedActionPlanEntry(
     VS::Battle::Ai::ReactionRecord* completed_action) {
   VS::Battle::Ai::ReconcileLiveCompletedActionPlan(
-      reinterpret_cast<const Battle_ActionRequest*>(completed_action));
+      reinterpret_cast<const ActionRequestRecord*>(completed_action));
 }

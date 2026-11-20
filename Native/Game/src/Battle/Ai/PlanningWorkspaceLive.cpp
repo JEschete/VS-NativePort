@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -19,6 +19,8 @@
 #include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 
+using VS::Battle::ActionRequestRecord;
+
 namespace VS::Battle::Ai {
 namespace {
 
@@ -26,7 +28,7 @@ namespace {
 // header as func_800DEEA4_t; its target list starts where that header ends.
 static_assert(sizeof(VS::Battle::HitResult) ==
               sizeof(VS::Battle::Ai::EngagementActor));
-static_assert(offsetof(Battle_ActionRequest, targets) ==
+static_assert(offsetof(ActionRequestRecord, targets) ==
               sizeof(VS::Battle::Ai::ReactionRecord));
 
 // actor->command.fields.unk8 bit 5 (74088.c:1590, lbu 0x8).
@@ -67,8 +69,8 @@ VS::Battle::Ai::ActorAiState& AiStateOf(int slot) {
   return *VS::Battle::Ai::actorAiStates[slot];
 }
 
-Battle_Actor& ActorOf(const PlanningActor& actor) {
-  for (Battle_Actor* live = VS::Battle::actors[0]; live != nullptr;
+VS::Battle::Actor& ActorOf(const PlanningActor& actor) {
+  for (VS::Battle::Actor* live = VS::Battle::actors[0]; live != nullptr;
        live = live->next) {
     if (live->id == actor.slot) {
       return *live;
@@ -77,7 +79,7 @@ Battle_Actor& ActorOf(const PlanningActor& actor) {
   throw std::logic_error("planned actor left the battle actor list");
 }
 
-Battle_ActorStats& StatsOf(const Battle_Actor& actor) {
+VS::Battle::ActorStats& StatsOf(const VS::Battle::Actor& actor) {
   if (actor.stats == nullptr) {
     throw std::logic_error("battle actor has no stats");
   }
@@ -86,7 +88,7 @@ Battle_ActorStats& StatsOf(const Battle_Actor& actor) {
 
 class LiveActionPlanningRoom final : public ActionPlanningRoom {
  public:
-  explicit LiveActionPlanningRoom(Battle_ActionRequest* request)
+  explicit LiveActionPlanningRoom(ActionRequestRecord* request)
       : request_(request),
         record_(reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(request)) {}
 
@@ -104,10 +106,10 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
   [[nodiscard]] std::vector<PlanningActor> Actors() const override {
     std::vector<PlanningActor> actors;
-    for (const Battle_Actor* live = VS::Battle::actors[0]; live != nullptr;
+    for (const VS::Battle::Actor* live = VS::Battle::actors[0]; live != nullptr;
          live = live->next) {
       actors.push_back(
-          {live->id, AiStateOf(live->id).actor_id, StatsOf(*live).currentHp});
+          {live->id, AiStateOf(live->id).actor_id, StatsOf(*live).current_hp});
     }
     return actors;
   }
@@ -120,8 +122,8 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
     // The original loads both speeds with lbu.
     const auto& stats = StatsOf(ActorOf(actor));
     VS::Battle::Ai::SetLiveActorVerticalMovementSteps(
-        actor.actor_id, static_cast<unsigned char>(stats.walkSpeed),
-        static_cast<unsigned char>(stats.runSpeed));
+        actor.actor_id, static_cast<unsigned char>(stats.walk_speed),
+        static_cast<unsigned char>(stats.run_speed));
     SelectLiveFallbackAction(&plan);
   }
 
@@ -141,7 +143,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
   [[nodiscard]] bool SuppressesAwarenessIndicator(
       const PlanningActor& actor) const override {
-    return (ActorOf(actor).commandState & kSuppressAwarenessIndicator) != 0;
+    return (ActorOf(actor).command_state & kSuppressAwarenessIndicator) != 0;
   }
 
   void ResetAwarenessIndicator(const PlanningActor& actor) override {
@@ -155,18 +157,18 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   }
 
  private:
-  const Battle_ActionRequest* request_;
+  const ActionRequestRecord* request_;
   VS::Battle::Ai::ReactionRecord* record_;
 };
 
 }  // namespace
 
-PlanningRequest PlanningRequestOf(const Battle_ActionRequest& request) {
-  return {request.primaryTarget.target.target_actor,
-          request.primaryTarget.targets_position};
+PlanningRequest PlanningRequestOf(const ActionRequestRecord& request) {
+  return {request.primary_target.target.target_actor,
+          request.primary_target.targets_position};
 }
 
-int RebuildLiveActorActionPlans(Battle_ActionRequest* request) {
+int RebuildLiveActorActionPlans(ActionRequestRecord* request) {
   PlanningWorkspace workspace;
   const BoundPlanningWorkspace binding(workspace);
   LiveActionPlanningRoom room(request);

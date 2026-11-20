@@ -9,9 +9,9 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/HitCalculations.hpp"
@@ -19,6 +19,8 @@
 #include "Battle/HitModifiersLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace VS::Battle {
 namespace {
@@ -33,7 +35,7 @@ T Checked(std::optional<T> result) {
   if (!result) Refuse();
   return result.value();
 }
-Battle_ActorStats* StatsAt(std::uint8_t slot) {
+VS::Battle::ActorStats* StatsAt(std::uint8_t slot) {
   if (slot >= std::size(VS::Battle::actors) ||
       VS::Battle::actors[slot] == nullptr) {
     return nullptr;
@@ -43,14 +45,14 @@ Battle_ActorStats* StatsAt(std::uint8_t slot) {
 
 class LiveAttributeAccess final : public HitAttributeAccess {
  public:
-  LiveAttributeAccess(Battle_ActorStats& owner, Battle_ActionDefinition* action)
+  LiveAttributeAccess(VS::Battle::ActorStats& owner, ActionDefinition* action)
       : owner_(owner), action_(action) {}
   HitAttributeStats Read() override {
     HitAttributeStats result;
-    result.actor_id = owner_.actorId;
+    result.actor_id = owner_.actor_id;
     result.risk = owner_.risk;
-    result.hp = owner_.currentHp;
-    result.max_hp = owner_.maxHp;
+    result.hp = owner_.current_hp;
+    result.max_hp = owner_.max_hp;
     result.agility = {owner_.agility,
                       owner_.accessory.current_agility,
                       owner_.weapon.attributes.current_agility,
@@ -66,7 +68,7 @@ class LiveAttributeAccess final : public HitAttributeAccess {
           owner_.limbs[i].armor.attributes.current_agility;
       result.intelligence.armor.at(i) =
           owner_.limbs[i].armor.attributes.current_intelligence;
-      result.defense.at(i) = owner_.limbs[i].agilityDefenseBonus;
+      result.defense.at(i) = owner_.limbs[i].agility_defense_bonus;
     }
     return result;
   }
@@ -78,13 +80,12 @@ class LiveAttributeAccess final : public HitAttributeAccess {
   }
 
  private:
-  Battle_ActorStats& owner_;
-  Battle_ActionDefinition* action_;
+  VS::Battle::ActorStats& owner_;
+  ActionDefinition* action_;
 };
 class LiveAttributeWorld final : public HitAttributeWorld {
  public:
-  explicit LiveAttributeWorld(Battle_ActionDefinition* action)
-      : action_(action) {}
+  explicit LiveAttributeWorld(ActionDefinition* action) : action_(action) {}
   HitAttributeAccess* Stats(std::uint8_t slot) override {
     auto* owner = StatsAt(slot);
     if (owner == nullptr || count_ >= stats_.size()) return nullptr;
@@ -95,7 +96,7 @@ class LiveAttributeWorld final : public HitAttributeWorld {
         VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return std::bit_cast<std::uint32_t>(VS::Battle::actors[slot]->weaponDrawn);
+    return std::bit_cast<std::uint32_t>(VS::Battle::actors[slot]->weapon_drawn);
   }
   std::optional<std::uint8_t> Cost() override {
     return action_ ? std::optional{action_->cost} : std::nullopt;
@@ -105,7 +106,7 @@ class LiveAttributeWorld final : public HitAttributeWorld {
   }
 
  private:
-  Battle_ActionDefinition* action_;
+  ActionDefinition* action_;
   std::array<std::optional<LiveAttributeAccess>, 2> stats_{};
   std::size_t count_{};
 };
@@ -118,8 +119,7 @@ std::optional<HitModifierTarget> AttributeHit(
                            hit->targets_position};
 }
 using AttributeCalculator = decltype(&AgilityHitChance);
-int CalculateAttributes(AttributeCalculator calculate,
-                        Battle_ActionDefinition* action,
+int CalculateAttributes(AttributeCalculator calculate, ActionDefinition* action,
                         VS::Battle::HitResult* source,
                         VS::Battle::HitResult* target, int hit, int variance) {
   LiveAttributeWorld world(action);
@@ -136,8 +136,7 @@ std::optional<CalculationTarget> ReadTarget(const VS::Battle::HitResult* hit) {
 }
 class LiveCalculationWorld final : public ActionCalculationWorld {
  public:
-  LiveCalculationWorld(Battle_ActionDefinition* action,
-                       VS::Battle::HitResult* source,
+  LiveCalculationWorld(ActionDefinition* action, VS::Battle::HitResult* source,
                        VS::Battle::HitResult* target)
       : action_(action), source_(source), target_(target) {}
   std::optional<CalculationTarget> Target() override {
@@ -149,7 +148,7 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
   std::optional<CalculationActor> Actor(std::uint8_t slot) override {
     const auto* stats = StatsAt(slot);
     if (stats == nullptr) return std::nullopt;
-    return CalculationActor{stats->actorId, stats->statuses};
+    return CalculationActor{stats->actor_id, stats->statuses};
   }
   std::optional<std::uint8_t> ActionType() override {
     return action_ ? std::optional{static_cast<std::uint8_t>(action_->type)}
@@ -157,7 +156,7 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
   }
   std::optional<int> HitCalculator(int hit, int execute) override {
     if (!HasHit(hit)) return std::nullopt;
-    const auto selector = action_->hits[hit].hitFunctionId;
+    const auto selector = action_->hits[hit].hit_function_id;
     if (selector == 0 || selector >= std::size(hitFunctions) ||
         hitFunctions[selector] == nullptr) {
       return std::nullopt;
@@ -166,7 +165,7 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
   }
   std::optional<std::int16_t> StatCalculator(int hit, int execute) override {
     if (!HasHit(hit)) return std::nullopt;
-    const auto selector = action_->hits[hit].statCalculatorId;
+    const auto selector = action_->hits[hit].stat_calculator_id;
     if (selector == 0 || selector >= std::size(VS::Battle::statCalculators) ||
         VS::Battle::statCalculators[selector] == nullptr) {
       return std::nullopt;
@@ -192,21 +191,21 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
     return action_ != nullptr && hit >= 0 &&
            static_cast<std::size_t>(hit) < std::size(action_->hits);
   }
-  Battle_ActionDefinition* action_;
+  ActionDefinition* action_;
   VS::Battle::HitResult* source_;
   VS::Battle::HitResult* target_;
 };
 }  // namespace
 
 // decomp: _getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9890).
-int LiveAgilityHitChance(Battle_ActionDefinition* action,
+int LiveAgilityHitChance(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int variance) {
   return CalculateAttributes(AgilityHitChance, action, source, target, hit,
                              variance);
 }
 // decomp: _getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9941).
-int LiveIntelligenceHitChance(Battle_ActionDefinition* action,
+int LiveIntelligenceHitChance(ActionDefinition* action,
                               VS::Battle::HitResult* source,
                               VS::Battle::HitResult* target, int hit,
                               int variance) {
@@ -214,7 +213,7 @@ int LiveIntelligenceHitChance(Battle_ActionDefinition* action,
                              variance);
 }
 // decomp: _getAgilityDifference2 (src/BATTLE/BATTLE.PRG/146C.c:9992).
-int LiveCostAdjustedAgilityHitChance(Battle_ActionDefinition* action,
+int LiveCostAdjustedAgilityHitChance(ActionDefinition* action,
                                      VS::Battle::HitResult* source,
                                      VS::Battle::HitResult* target, int hit,
                                      int variance) {
@@ -222,14 +221,13 @@ int LiveCostAdjustedAgilityHitChance(Battle_ActionDefinition* action,
                              target, hit, variance);
 }
 // decomp: _doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10075).
-int LiveRollActionHit(Battle_ActionDefinition* action,
-                      VS::Battle::HitResult* source,
+int LiveRollActionHit(ActionDefinition* action, VS::Battle::HitResult* source,
                       VS::Battle::HitResult* target, int hit, int execute) {
   LiveCalculationWorld world(action, source, target);
   return Checked(RollActionHit(hit, execute, world));
 }
 // decomp: _calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12248).
-std::int16_t LiveCalculateActionStatChange(Battle_ActionDefinition* action,
+std::int16_t LiveCalculateActionStatChange(ActionDefinition* action,
                                            VS::Battle::HitResult* source,
                                            VS::Battle::HitResult* target,
                                            int hit, int execute) {
@@ -237,18 +235,17 @@ std::int16_t LiveCalculateActionStatChange(Battle_ActionDefinition* action,
   return Checked(CalculateActionStatChange(hit, execute, world));
 }
 // Retired _invalidHitFunction (146C.c:9860); see #350 routing evidence.
-int RejectLiveHitSelector(Battle_ActionDefinition*, VS::Battle::HitResult*,
+int RejectLiveHitSelector(ActionDefinition*, VS::Battle::HitResult*,
                           VS::Battle::HitResult*, int, int) {
   Refuse();
 }
 // Retired _statCalculatorNop (146C.c:11230); see #350 routing evidence.
-std::int16_t RejectLiveStatSelector(Battle_ActionDefinition*,
-                                    VS::Battle::HitResult*,
+std::int16_t RejectLiveStatSelector(ActionDefinition*, VS::Battle::HitResult*,
                                     VS::Battle::HitResult*, int, int) {
   Refuse();
 }
 // Retired func_80083990 (146C.c:12265); effect table has a void contract.
-void RejectLiveEffectSelector(Battle_ActionDefinition*, VS::Battle::HitResult*,
+void RejectLiveEffectSelector(ActionDefinition*, VS::Battle::HitResult*,
                               VS::Battle::HitResult*, int, int) {
   Refuse();
 }

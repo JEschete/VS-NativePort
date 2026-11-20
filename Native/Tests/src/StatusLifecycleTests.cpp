@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/StatusEffects.hpp"
@@ -114,7 +114,7 @@ State Actor() {
 }
 
 struct LiveFixture {
-  Battle_Actor* saved_player = VS::Battle::characterState;
+  VS::Battle::Actor* saved_player = VS::Battle::characterState;
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   VS::Battle::StatusEffectParams saved_attribute =
       VS::Battle::statusEffectParams[5];
@@ -124,22 +124,22 @@ struct LiveFixture {
       VS::Battle::statusEffectParams[14];
   VS::Battle::StatusEffectParams saved_regeneration =
       VS::Battle::statusEffectParams[17];
-  Battle_Actor player{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor player{};
+  VS::Battle::ActorStats stats{};
   VS::Battle::Ai::ActorAiState ai{};
   LiveFixture() {
     player.stats = &stats;
     VS::Battle::characterState = &player;
     VS::Battle::Ai::actorAiStates[0] = &ai;
-    stats.currentHp = -32768;
-    stats.currentMp = -123;
+    stats.current_hp = -32768;
+    stats.current_mp = -123;
     stats.risk = 65535;
-    stats.actionRecoveryTimer = 0x1234;
-    stats.cancelsHitResults = 1;
-    stats.recoveryDelayBonus = 63;
-    stats.baseWalkSpeed = std::bit_cast<char>(std::uint8_t{205});
-    stats.baseRunSpeed = std::bit_cast<char>(std::uint8_t{255});
-    stats.totalStrength = 65535;
+    stats.action_recovery_timer = 0x1234;
+    stats.cancels_hit_results = 1;
+    stats.recovery_delay_bonus = 63;
+    stats.base_walk_speed = std::bit_cast<char>(std::uint8_t{205});
+    stats.base_run_speed = std::bit_cast<char>(std::uint8_t{255});
+    stats.total_strength = 65535;
     VS::Battle::statusEffectParams[5].duration = 0x12FF;
     VS::Battle::statusEffectParams[11].duration = 0x3401;
     VS::Battle::statusEffectParams[14].tick_interval = 0x5602;
@@ -421,15 +421,15 @@ TEST_CASE("Player limb recovery uses a nonzero mobility byte only as a guard",
 TEST_CASE("Live preservation resolves Ashley rather than the actor table",
           "[status-lifecycle][F00254]") {
   auto* saved_player = VS::Battle::characterState;
-  Battle_ActorStats stats{};
-  Battle_Actor player{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor player{};
   player.stats = &stats;
   stats.statuses = -1;
-  stats.currentHp = -32768;
-  stats.currentMp = -123;
+  stats.current_hp = -32768;
+  stats.current_mp = -123;
   stats.risk = 65535;
-  stats.isAnalyzed = 1;
-  stats.statusTimers[7] = 255;
+  stats.is_analyzed = 1;
+  stats.status_timers[7] = 255;
   const auto before =
       std::bit_cast<std::array<std::byte, sizeof(stats)>>(stats);
   VS::Battle::characterState = &player;
@@ -442,14 +442,14 @@ TEST_CASE("Live infliction maps unsigned speed bytes and low-byte durations",
           "[status-lifecycle][F00520][live]") {
   LiveFixture fixture;
   battle::InflictLiveActorStatuses(0x20024840, &fixture.stats);
-  CHECK(fixture.stats.statusTimers[0] == 255);
-  CHECK(fixture.stats.statusTimers[1] == 1);
-  CHECK(fixture.stats.statusTimers[5] == 2);
-  CHECK(static_cast<std::uint8_t>(fixture.stats.walkSpeed) == 0);
-  CHECK(static_cast<std::uint8_t>(fixture.stats.runSpeed) == 62);
+  CHECK(fixture.stats.status_timers[0] == 255);
+  CHECK(fixture.stats.status_timers[1] == 1);
+  CHECK(fixture.stats.status_timers[5] == 2);
+  CHECK(static_cast<std::uint8_t>(fixture.stats.walk_speed) == 0);
+  CHECK(static_cast<std::uint8_t>(fixture.stats.run_speed) == 62);
   CHECK(fixture.ai.run_step == 62);
   CHECK(fixture.stats.strength == 6552);
-  CHECK(fixture.stats.isAnalyzed == 1);
+  CHECK(fixture.stats.is_analyzed == 1);
 }
 
 TEST_CASE("Live status writes preserve signed HP MP risk and neighboring flags",
@@ -457,13 +457,13 @@ TEST_CASE("Live status writes preserve signed HP MP risk and neighboring flags",
   LiveFixture fixture;
   battle::InflictLiveActorStatuses(0x20000000, &fixture.stats);
   battle::RemoveLiveActorStatuses(0x20000000, &fixture.stats);
-  CHECK(fixture.stats.currentHp == -32768);
-  CHECK(fixture.stats.currentMp == -123);
+  CHECK(fixture.stats.current_hp == -32768);
+  CHECK(fixture.stats.current_mp == -123);
   CHECK(fixture.stats.risk == 65535);
-  CHECK(fixture.stats.actionRecoveryTimer == 0x1234);
-  CHECK(fixture.stats.cancelsHitResults == 1);
-  CHECK(fixture.stats.recoveryDelayBonus == 63);
-  CHECK(fixture.stats.isAnalyzed == 1);
+  CHECK(fixture.stats.action_recovery_timer == 0x1234);
+  CHECK(fixture.stats.cancels_hit_results == 1);
+  CHECK(fixture.stats.recovery_delay_bonus == 63);
+  CHECK(fixture.stats.is_analyzed == 1);
   CHECK(fixture.stats.statuses == 0);
 }
 
@@ -475,8 +475,8 @@ TEST_CASE("Lifecycle module bindings execute their typed signatures",
                                              address);
   };
   LiveFixture fixture;
-  using Change = void (*)(int, Battle_ActorStats*);
-  using Tick = void (*)(Battle_ActorStats*);
+  using Change = void (*)(int, VS::Battle::ActorStats*);
+  using Tick = void (*)(VS::Battle::ActorStats*);
   using Preserve = void (*)();
   const auto inflict = reinterpret_cast<Change>(resolve(0x80086FA8));
   const auto remove = reinterpret_cast<Change>(resolve(0x80086754));
@@ -490,7 +490,7 @@ TEST_CASE("Lifecycle module bindings execute their typed signatures",
   preserve();
   CHECK(fixture.stats.statuses == 0x40);
   tick(&fixture.stats);
-  CHECK(fixture.stats.statusTimers[0] == 254);
+  CHECK(fixture.stats.status_timers[0] == 254);
   remove(0x40, &fixture.stats);
   CHECK(fixture.stats.statuses == 0);
   CHECK(fixture.stats.strength == 65535);

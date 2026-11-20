@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -599,15 +599,15 @@ struct TeleportLiveFixture {
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
   char saved_display_cost = VS::Menu::Framework::displayActionCost;
-  Battle_Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
   std::array<char, 48> saved_states{};
   std::array<std::uint16_t, magic::kTeleportationStringWords> saved_strings{};
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<VS::Menu::Framework::MenuRow, 40> rows{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   TeleportLiveFixture() {
     std::copy_n(VS::State::stateFlags.save_point_states, 48,
@@ -623,7 +623,7 @@ struct TeleportLiveFixture {
     VS::Input::settings.cursor_memory = 0;
     VS::Battle::characterState = &actor;
     actor.stats = &stats;
-    stats.currentMp = 500;
+    stats.current_mp = 500;
     VS::Menu::Magic::ResetTeleportMenuLiveState();
   }
 
@@ -658,7 +658,7 @@ struct TeleportLiveFixture {
 TEST_CASE("Magic SetSpellMpCostLive refuses invalid ids without cost text",
           "[magic-costs-live]") {
   const char saved = VS::Menu::Framework::displayActionCost;
-  Battle_Actor* const saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* const saved_character = VS::Battle::characterState;
   VS::Menu::Framework::displayActionCost = 0;
   magic::SetSpellMpCostLive(std::numeric_limits<int>::min());
   magic::SetSpellMpCostLive(256);

@@ -7,10 +7,12 @@
 #include <iterator>
 #include <span>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/MapLive.hpp"
+
+using VS::Battle::LimbStats;
 
 namespace VS::Battle {
 namespace {
@@ -48,7 +50,7 @@ int SetLiveGameplayHudHidden(int command) {
 }
 
 // decomp: F01356 vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:3158).
-int LiveStatusIconFlags(Battle_ActorStats* stats) {
+int LiveStatusIconFlags(VS::Battle::ActorStats* stats) {
   if (stats == nullptr) Refuse("Status icon flags require actor stats");
   const HudStatusView status{std::bit_cast<std::uint32_t>(stats->statuses)};
   static_assert(std::size(VS::Battle::upperStatusIconFlags) >=
@@ -63,9 +65,9 @@ int LiveStatusIconFlags(Battle_ActorStats* stats) {
 }
 
 // decomp: F01357 vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:3174).
-int LiveLimbCondition(Battle_LimbStats* limb) {
+int LiveLimbCondition(LimbStats* limb) {
   if (limb == nullptr) Refuse("Limb condition requires limb stats");
-  const HudLimbHealthView status{limb->hp, limb->maxHp};
+  const HudLimbHealthView status{limb->hp, limb->max_hp};
   return static_cast<int>(LimbCondition(status));
 }
 

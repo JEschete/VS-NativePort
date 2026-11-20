@@ -18,9 +18,9 @@
 // template, the equipment model requests and Ashley's spawn from the
 // inventory and the saved snapshot. The rules see actors as SpawnedActor
 // handles and typed records the host lends them, so they reach no
-// Battle_Actor, VS::Actors::CharacterInit or ZUD layout and no PS1 address.
-// ActorSpawningLive binds VS::Battle::actors, the actor allocations, the zone
-// context, the room enemy memory, Ashley's snapshot and the inventory.
+// VS::Battle::Actor, VS::Actors::CharacterInit or ZUD layout and no PS1
+// address. ActorSpawningLive binds VS::Battle::actors, the actor allocations,
+// the zone context, the room enemy memory, Ashley's snapshot and the inventory.
 namespace VS::Actors {
 // An actor allocation the host owns, before and after it joins its slot.
 enum class SpawnedActor : std::uintptr_t { kNone = 0 };

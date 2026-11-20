@@ -9,10 +9,10 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhases.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
@@ -25,6 +25,9 @@
 #include "State/Progress.hpp"
 #include "State/Timers.hpp"
 
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
@@ -34,39 +37,39 @@ void Require(bool valid) {
     std::abort();
   }
 }
-Battle_ActionState& State() {
+ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
-Battle_Actor* Actor(int slot) {
+VS::Battle::Actor* ActorInSlot(int slot) {
   Require(slot >= 0 &&
           static_cast<std::size_t>(slot) < std::size(VS::Battle::actors));
   return VS::Battle::actors[slot];
 }
 struct LiveSource final : ActionPhaseSource {
-  explicit LiveSource(Battle_ActionRequest& action) : action_(action) {}
+  explicit LiveSource(ActionRequestRecord& action) : action_(action) {}
   std::uint8_t Actor() const override {
-    return action_.primaryTarget.target.target_actor;
+    return action_.primary_target.target.target_actor;
   }
 
  private:
-  Battle_ActionRequest& action_;
+  ActionRequestRecord& action_;
 };
 class LiveWorld final : public ActionPhaseWorld {
  public:
   std::optional<Actors::ActorCommand> Command(int slot) override {
-    const auto* actor = Actor(slot);
+    const auto* actor = ActorInSlot(slot);
     if (actor == nullptr) return std::nullopt;
-    return Actors::ActorCommand{.state = actor->commandState,
-                                .opcode = actor->commandOpcode};
+    return Actors::ActorCommand{.state = actor->command_state,
+                                .opcode = actor->command_opcode};
   }
   void SetCommandState(int slot, std::uint8_t state) override {
-    auto* actor = Actor(slot);
+    auto* actor = ActorInSlot(slot);
     Require(actor != nullptr);
-    actor->commandState = state;
+    actor->command_state = state;
   }
   std::uint8_t PrimaryActor() override {
-    return State().selection.primaryTarget.target.target_actor;
+    return State().selection.primary_target.target.target_actor;
   }
   std::uint32_t ActorFlags(int slot) override {
     return Actors::LiveActorStateFlags(slot);

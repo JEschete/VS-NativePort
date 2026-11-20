@@ -12,7 +12,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -36,18 +36,18 @@ static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings) +
                   offsetof(VS::Battle::Ai::SavedSettingsPair, opaque4) ==
               offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags));
 static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags) ==
-              offsetof(Battle_Actor, reserved34));
+              offsetof(VS::Battle::Actor, reserved34));
 static_assert(offsetof(VS::Battle::Ai::AiActorView, ai_settings) ==
-              offsetof(Battle_Actor, templateWord2C));
+              offsetof(VS::Battle::Actor, template_word2c));
 // The settings actor view reads the actor's sub-type, its spawn group word
 // (the AI group bit-fields) and its spawn flags word.
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, kind) ==
-              offsetof(Battle_Actor, subType));
+              offsetof(VS::Battle::Actor, sub_type));
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque30) ==
-              offsetof(Battle_Actor, lastTriggerTile) +
-                  sizeof(Battle_Actor::lastTriggerTile));
+              offsetof(VS::Battle::Actor, last_trigger_tile) +
+                  sizeof(VS::Battle::Actor::last_trigger_tile));
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque34) ==
-              offsetof(Battle_Actor, reserved34));
+              offsetof(VS::Battle::Actor, reserved34));
 
 // The settings view aliases the AI state it initialises, so the fields it
 // writes must be the ones the AI behaviours read.

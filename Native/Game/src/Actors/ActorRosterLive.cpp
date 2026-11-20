@@ -18,7 +18,7 @@
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
@@ -37,12 +37,12 @@ constexpr int kSecondModelAllocation = 2;
 
 static_assert(std::size(VS::Battle::actors) >= kRosterSlots);
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
-static_assert(sizeof Battle_ActorStats{}.name == kActorNameBytes);
+static_assert(sizeof VS::Battle::ActorStats{}.name == kActorNameBytes);
 
-RosterView ViewFrom(const Battle_Actor* actor) {
+RosterView ViewFrom(const VS::Battle::Actor* actor) {
   RosterView view{};
   for (std::size_t slot = 0; slot < view.size(); ++slot) {
-    const Battle_Actor* occupant = VS::Battle::actors[slot];
+    const VS::Battle::Actor* occupant = VS::Battle::actors[slot];
     view[slot] = {
         .occupied = occupant != nullptr,
         .links_to_actor = occupant != nullptr && occupant->next == actor};
@@ -50,7 +50,7 @@ RosterView ViewFrom(const Battle_Actor* actor) {
   return view;
 }
 
-RosterCandidate CandidateOf(const Battle_Actor& actor) {
+RosterCandidate CandidateOf(const VS::Battle::Actor& actor) {
   return {.linkable_kind = (actor.kind & kLinkableKindMask) != 0,
           .leader = actor.id == 0};
 }
@@ -59,7 +59,7 @@ RosterCandidate CandidateOf(const Battle_Actor& actor) {
 // the original did, before anything is released.
 class LiveRemovalHost final : public ActorRemovalHost {
  public:
-  explicit LiveRemovalHost(Battle_Actor* actor) : actor_(actor) {}
+  explicit LiveRemovalHost(VS::Battle::Actor* actor) : actor_(actor) {}
 
   [[nodiscard]] std::optional<RosterOccupant> Occupant(
       std::size_t /*slot*/) const override {
@@ -68,7 +68,7 @@ class LiveRemovalHost final : public ActorRemovalHost {
     }
     return RosterOccupant{
         .gimmick = actor_->kind == kGimmickKind,
-        .second_model = actor_->allocationKind == kSecondModelAllocation};
+        .second_model = actor_->allocation_kind == kSecondModelAllocation};
   }
   void Remember(std::size_t slot, int hidden) override {
     StoreLiveRoomActorState(static_cast<int>(slot), hidden);
@@ -97,7 +97,7 @@ class LiveRemovalHost final : public ActorRemovalHost {
   }
 
  private:
-  Battle_Actor* actor_;
+  VS::Battle::Actor* actor_;
 };
 
 class LiveDisplayFlagsHost final : public DisplayFlagsHost {
@@ -131,7 +131,7 @@ std::array<std::uint8_t, kActorNameBytes> PlaceholderName() {
 }
 }  // namespace
 
-int LinkLiveActorAfterAshley(Battle_Actor* actor) {
+int LinkLiveActorAfterAshley(VS::Battle::Actor* actor) {
   constexpr const char* kOperation = "LinkLiveActorAfterAshley";
   if (actor == nullptr) {
     WarnActorRefused(kOperation, "no actor");
@@ -146,13 +146,13 @@ int LinkLiveActorAfterAshley(Battle_Actor* actor) {
   if (decision.edit != RosterEdit::kInsertAfterLeader) {
     return 0;
   }
-  Battle_Actor* leader = VS::Battle::actors[decision.slot];
+  VS::Battle::Actor* leader = VS::Battle::actors[decision.slot];
   actor->next = leader->next;
   leader->next = actor;
   return 1;
 }
 
-int UnlinkLiveActorFromRoomList(Battle_Actor* actor) {
+int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor) {
   if (actor == nullptr) {
     WarnActorRefused("UnlinkLiveActorFromRoomList", "no actor");
     return 0;
@@ -191,7 +191,7 @@ void InitializeLivePlaceholderActor(int actor_id, int auxiliary) {
     WarnActorRefused(kOperation, "the actor id is outside VS::Battle::actors");
     return;
   }
-  Battle_Actor* actor = VS::Battle::actors[actor_id];
+  VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
   if (actor == nullptr || actor->stats == nullptr) {
     WarnActorRefused(kOperation, "the actor slot has no actor stats");
     return;
@@ -199,18 +199,19 @@ void InitializeLivePlaceholderActor(int actor_id, int auxiliary) {
   const std::array<std::uint8_t, kActorNameBytes> name = PlaceholderName();
   const PlaceholderActorStats placeholder =
       BuildPlaceholderActorStats(auxiliary, name);
-  Battle_ActorStats* stats = actor->stats;
+  VS::Battle::ActorStats* stats = actor->stats;
   std::memset(stats, 0, sizeof *stats);
-  stats->maxHp = placeholder.max_hp;
-  stats->currentHp = placeholder.current_hp;
-  std::memcpy(stats->name, placeholder.name.data(), placeholder.name.size());
-  stats->cancelsHitResults = placeholder.cancels_hit_results ? 1 : 0;
+  stats->max_hp = placeholder.max_hp;
+  stats->current_hp = placeholder.current_hp;
+  std::memcpy(stats->name.data(), placeholder.name.data(),
+              placeholder.name.size());
+  stats->cancels_hit_results = placeholder.cancels_hit_results ? 1 : 0;
   if (placeholder.marker_flags.has_value()) {
     VS::Battle::SetLiveActorMarker(actor_id, *placeholder.marker_flags);
   }
-  actor->roomSpawnIndex = placeholder.room_spawn_index;
-  actor->killCounted = placeholder.kill_counted ? 1 : 0;
+  actor->room_spawn_index = placeholder.room_spawn_index;
+  actor->kill_counted = placeholder.kill_counted ? 1 : 0;
   actor->defeated = placeholder.defeated ? 1 : 0;
-  stats->actorId = placeholder.actor_id;
+  stats->actor_id = placeholder.actor_id;
 }
 }  // namespace VS::Actors

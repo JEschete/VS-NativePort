@@ -15,7 +15,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/ModuleData.hpp"
@@ -40,8 +40,8 @@ auto RecordBytes(const VS::Actors::ActorRecord& record) {
 
 struct WeaponModeFixture {
   VS::Actors::ActorRecord* saved_record = VS::Actors::actorRecords[0];
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
-  Battle_Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
   std::array<VS::Actors::WeaponModel*, 2> saved_weapons{
       VS::Actors::weaponModels[0], VS::Actors::weaponModels[1]};
   decltype(std::to_array(VS::Event::weaponDrawStates)) saved_modes =
@@ -60,7 +60,7 @@ struct WeaponModeFixture {
   char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
   decltype(VS::Battle::hudBattleMode) saved_hud = VS::Battle::hudBattleMode;
   VS::Actors::ActorRecord record{};
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   std::array<VS::Actors::WeaponModel, 2> weapons{};
   std::array<std::uint32_t, 512> common{};
   std::array<std::uint32_t, 512> battle{};
@@ -132,7 +132,7 @@ struct WeaponModeFixture {
   }
 
   void Prepare(int mode) {
-    actor.weaponDrawn = static_cast<u_char>(0xA4 | (mode ^ 1));
+    actor.weapon_drawn = static_cast<u_char>(0xA4 | (mode ^ 1));
     record.instance.weapon_drawn = mode ^ 1;
     for (auto& weapon : weapons) {
       weapon.shown = mode ^ 1;
@@ -144,8 +144,8 @@ struct WeaponModeFixture {
 
   void CheckImmediate(int mode) const {
     CHECK(pending == 0);
-    CHECK((actor.weaponDrawn & 1) == mode);
-    CHECK((actor.weaponDrawn & 0xFE) == 0xA4);
+    CHECK((actor.weapon_drawn & 1) == mode);
+    CHECK((actor.weapon_drawn & 0xFE) == 0xA4);
     CHECK(record.instance.weapon_drawn == mode);
     CHECK(VS::Battle::hudBattleMode == mode);
     CheckVisibility(mode);
@@ -239,7 +239,7 @@ TEST_CASE("Script weapon mode honors its story gate without changing actors",
   std::array<u_char, 3> command{0, 1, 1};
   CHECK(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
-  CHECK((fixture.actor.weaponDrawn & 1) == 0);
+  CHECK((fixture.actor.weapon_drawn & 1) == 0);
   CHECK(RecordBytes(fixture.record) == before);
 }
 
@@ -357,7 +357,7 @@ TEST_CASE(
   std::array<u_char, 3> command{0, static_cast<u_char>(kOperand), 255};
   REQUIRE(VS::Event::ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
-  CHECK((fixture.actor.weaponDrawn & 1) == 0);
+  CHECK((fixture.actor.weapon_drawn & 1) == 0);
   CHECK(fixture.record.instance.weapon_drawn == 0);
   CHECK(VS::Battle::hudBattleMode == 0);
   fixture.CheckVisibility(1);

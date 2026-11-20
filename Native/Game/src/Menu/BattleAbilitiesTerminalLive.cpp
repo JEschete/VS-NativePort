@@ -9,7 +9,7 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -221,7 +221,7 @@ class LiveListHost final : public AbilityListHost {
             actions.size()};
   }
   bool ActionUnlocked(std::uint8_t action) const override {
-    return Battle_actionDefinitions[action].unlocked != 0;
+    return VS::Battle::actionDefinitions[action].unlocked != 0;
   }
   void StoreLearnedAction(AbilityKind kind, int index,
                           std::uint8_t action) override {
@@ -243,7 +243,7 @@ class LiveListHost final : public AbilityListHost {
         return;
       }
       text[row * kPointersPerRow] = reinterpret_cast<std::uint16_t*>(
-          Battle_actionDefinitions[rows[row].action].name);
+          VS::Battle::actionDefinitions[rows[row].action].name.data());
       text[row * kPointersPerRow + 1] = battleAbilityStrings + offset;
     }
     LiveCreateAbilityRows(static_cast<int>(rows.size()),

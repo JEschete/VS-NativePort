@@ -15,8 +15,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
@@ -33,6 +33,8 @@
 #include "Field/TrapsLive.hpp"
 #include "Legacy/Psx.h"
 #include "State/Progress.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 using VS::Field::CollisionCellRef;
@@ -274,16 +276,17 @@ struct LiveRoom {
 struct LiveTrap {
   SavedGlobal saved_actors{VS::Battle::actors};
   SavedGlobal saved_room{VS::Field::roomData};
-  std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
-  std::unique_ptr<Battle_ActorStats> stats =
-      std::make_unique<Battle_ActorStats>();
+  std::unique_ptr<VS::Battle::Actor> actor =
+      std::make_unique<VS::Battle::Actor>();
+  std::unique_ptr<VS::Battle::ActorStats> stats =
+      std::make_unique<VS::Battle::ActorStats>();
   VS::Field::MpdEnvironment environment{};
-  Battle_ActionDefinition action{};
+  ActionDefinition action{};
   VS::Battle::HitResult struck{};
 
   LiveTrap() {
-    stats->maxHp = 300;
-    stats->currentHp = 120;
+    stats->max_hp = 300;
+    stats->current_hp = 120;
     stats->strength = 40;
     stats->limbs[1].armor.attributes.current_strength = 10;
     actor->stats = stats.get();
@@ -292,7 +295,7 @@ struct LiveTrap {
     environment.trap_level = 2;
     VS::Field::roomData.environment = &environment;
     VS::Field::roomData.header.environment_length = sizeof environment;
-    action.hits[1].statFactor = 4;
+    action.hits[1].stat_factor = 4;
     action.hits[1].affinity = 1;
     struck.target.target_limb = 1;
   }

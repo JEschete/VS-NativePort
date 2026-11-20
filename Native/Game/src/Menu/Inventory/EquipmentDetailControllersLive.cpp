@@ -8,7 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"

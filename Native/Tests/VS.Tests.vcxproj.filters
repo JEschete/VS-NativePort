@@ -1479,6 +1479,9 @@
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\ActorRecordTableScope.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>

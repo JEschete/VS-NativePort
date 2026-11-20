@@ -15,8 +15,10 @@
 namespace VS::Actors {
 struct ActorRecord;
 }
-struct Battle_Actor;
-struct Battle_ActorStats;
+namespace VS::Battle {
+struct Actor;
+struct ActorStats;
+}  // namespace VS::Battle
 
 namespace VS::Battle::Ai {
 
@@ -188,9 +190,9 @@ struct ActionPlanView {
   std::array<std::uint8_t, kActionPlanViewReserved0Bytes> reserved0;
   std::uint8_t allow_fallback_action;
   std::array<std::uint8_t, kActionPlanViewReserved27Bytes> reserved27;
-  Battle_Actor* actor;
+  VS::Battle::Actor* actor;
   void* native_pointer58;  // PS1 pointer slot 0x58
-  Battle_ActorStats* stats;
+  VS::Battle::ActorStats* stats;
   void* native_pointer60;  // PS1 pointer slot 0x60
   void* native_pointer64;  // PS1 pointer slot 0x64
   void* native_pointer68;  // PS1 pointer slot 0x68
@@ -658,7 +660,7 @@ struct PerceptionUpdateView {
   std::array<std::uint8_t, kPerceptionUpdateViewReserved48Bytes> reserved48;
   std::int32_t opaque_4c;
   std::int32_t opaque50;
-  Battle_Actor* actor;
+  VS::Battle::Actor* actor;
   PerceivedObjectView* model;
   PositionLinkView* stats;
   PositionLinkView* position_source;

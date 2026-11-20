@@ -19,7 +19,7 @@
 #include "Actors/WeaponModel.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -261,11 +261,11 @@ class LiveModelHost final : public EquipmentModelHost {
   std::optional<AssetAddress> EquipmentModelSlot(int index) override {
     if (VS::Battle::characterState == nullptr || index < 0 ||
         static_cast<std::size_t>(index) >=
-            std::size(VS::Battle::characterState->equipmentModels)) {
+            std::size(VS::Battle::characterState->equipment_models)) {
       return std::nullopt;
     }
     return Address(VS::Battle::characterState
-                       ->equipmentModels[static_cast<std::size_t>(index)]);
+                       ->equipment_models[static_cast<std::size_t>(index)]);
   }
   void ReleaseWeaponModel(int slot) override {
     static_cast<void>(Content::ReleaseLiveWeaponModel(slot));

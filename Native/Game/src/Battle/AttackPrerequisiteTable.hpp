@@ -6,11 +6,11 @@
 #include <array>
 #include <cstddef>
 
-struct Battle_ActionDefinition;
-
 namespace VS::Battle {
 
-using AttackPrerequisiteFunction = int (*)(Battle_ActionDefinition*,
+struct ActionDefinition;
+
+using AttackPrerequisiteFunction = int (*)(VS::Battle::ActionDefinition*,
                                            unsigned char*);
 
 inline constexpr std::size_t kAttackPrerequisiteCount = 40;

@@ -13,10 +13,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionMenu.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Trace.hpp"
@@ -36,6 +36,9 @@
 #include "State/StateFlags.hpp"
 #include "Title/NewGame.hpp"
 
+using VS::Battle::kActionTypeBreakArt;
+using VS::Battle::kActionTypeItem;
+
 namespace {
 struct ProfileFixture {
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
@@ -46,8 +49,8 @@ struct ProfileFixture {
       VS::Items::inventoryIndices;
   decltype(std::to_array(VS::State::learnedActionFlags)) saved_learned =
       std::to_array(VS::State::learnedActionFlags);
-  decltype(std::to_array(Battle_actionDefinitions)) saved_actions =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) saved_actions =
+      VS::Battle::actionDefinitions;
   decltype(VS::Battle::chainAbilityActionIds) saved_chain =
       VS::Battle::chainAbilityActionIds;
   decltype(VS::Battle::defenseAbilityActionIds) saved_defense =
@@ -87,7 +90,7 @@ struct ProfileFixture {
     std::copy(saved_learned.begin(), saved_learned.end(),
               VS::State::learnedActionFlags);
     std::copy(saved_actions.begin(), saved_actions.end(),
-              Battle_actionDefinitions);
+              VS::Battle::actionDefinitions.data());
     std::copy(saved_chain.begin(), saved_chain.end(),
               VS::Battle::chainAbilityActionIds.begin());
     std::copy(saved_defense.begin(), saved_defense.end(),
@@ -100,18 +103,18 @@ struct ProfileFixture {
 };
 
 struct StatFixture {
-  Battle_Actor* previous = VS::Battle::actors[0];
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::Actor* previous = VS::Battle::actors[0];
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
 
   StatFixture() {
-    stats.currentHp = 42;
-    stats.maxHp = 250;
-    stats.currentMp = 17;
-    stats.maxMp = 50;
-    stats.strength = stats.totalStrength = 100;
-    stats.intelligence = stats.totalIntelligence = 101;
-    stats.agility = stats.totalAgility = 102;
+    stats.current_hp = 42;
+    stats.max_hp = 250;
+    stats.current_mp = 17;
+    stats.max_mp = 50;
+    stats.strength = stats.total_strength = 100;
+    stats.intelligence = stats.total_intelligence = 101;
+    stats.agility = stats.total_agility = 102;
     stats.risk = 7;
     actor.stats = &stats;
     VS::Battle::actors[0] = &actor;
@@ -119,13 +122,13 @@ struct StatFixture {
   ~StatFixture() { VS::Battle::actors[0] = previous; }
 };
 
-void CheckBaseAttributes(const Battle_ActorStats& stats) {
+void CheckBaseAttributes(const VS::Battle::ActorStats& stats) {
   CHECK(stats.strength == 120);
-  CHECK(stats.totalStrength == 120);
+  CHECK(stats.total_strength == 120);
   CHECK(stats.intelligence == 130);
-  CHECK(stats.totalIntelligence == 130);
+  CHECK(stats.total_intelligence == 130);
   CHECK(stats.agility == 140);
-  CHECK(stats.totalAgility == 140);
+  CHECK(stats.total_agility == 140);
 }
 void CheckStockedSlots(std::set<int>& supplied) {
   for (std::size_t slot = 0; slot < 58; ++slot) {
@@ -186,7 +189,7 @@ std::set<unsigned> BindFullBattleAbilities() {
 
 void BindBreakArts() {
   for (unsigned action = 184; action < 224; ++action) {
-    Battle_actionDefinitions[action].type = Battle_ActionType_BreakArt;
+    VS::Battle::actionDefinitions[action].type = kActionTypeBreakArt;
   }
 }
 }  // namespace
@@ -218,12 +221,12 @@ TEST_CASE("Post-Minotaur Lab profiles grant only representative native actions",
   ProfileFixture fixture;
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostMinotaur);
-  CHECK(Battle_actionDefinitions[22].unlocked == 1);
-  CHECK(Battle_actionDefinitions[42].unlocked == 1);
-  CHECK(Battle_actionDefinitions[84].unlocked == 1);
-  CHECK(Battle_actionDefinitions[97].unlocked == 1);
-  CHECK(Battle_actionDefinitions[192].unlocked == 1);
-  CHECK(Battle_actionDefinitions[193].unlocked == 0);
+  CHECK(VS::Battle::actionDefinitions[22].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[42].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[84].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[97].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[192].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[193].unlocked == 0);
   CHECK(VS::Input::settings.mapped_chain_abilities[0] == 22);
   CHECK(VS::Input::settings.mapped_defense_abilities[2] == 42);
 }
@@ -250,10 +253,10 @@ TEST_CASE("All-spells profile learns every battle spell and rank only",
   REQUIRE(expected.size() == 71);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);
-  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+  for (unsigned action = 0; action < std::size(VS::Battle::actionDefinitions);
        ++action) {
     CAPTURE(action);
-    CHECK(Battle_actionDefinitions[action].unlocked ==
+    CHECK(VS::Battle::actionDefinitions[action].unlocked ==
           expected.contains(action));
   }
 }
@@ -313,10 +316,10 @@ TEST_CASE("All-abilities profile grants the original 28 abilities only",
   REQUIRE(expected.size() == 28);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllAbilities);
-  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+  for (unsigned action = 0; action < std::size(VS::Battle::actionDefinitions);
        ++action) {
     CAPTURE(action);
-    CHECK(Battle_actionDefinitions[action].unlocked ==
+    CHECK(VS::Battle::actionDefinitions[action].unlocked ==
           expected.contains(action));
   }
   for (unsigned slot = 0; slot < 3; ++slot) {
@@ -391,10 +394,10 @@ TEST_CASE("All-Break-Arts profile grants all forty original arts only",
   BindBreakArts();
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllBreakArts);
-  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+  for (unsigned action = 0; action < std::size(VS::Battle::actionDefinitions);
        ++action) {
     CAPTURE(action);
-    CHECK(Battle_actionDefinitions[action].unlocked ==
+    CHECK(VS::Battle::actionDefinitions[action].unlocked ==
           (action >= 184 && action < 224));
   }
   const auto learned = std::to_array(VS::State::learnedActionFlags);
@@ -412,7 +415,7 @@ TEST_CASE("All-Break-Arts profile rejects an incomplete original action table",
           "[combat][profile][break-arts]") {
   ProfileFixture fixture;
   BindBreakArts();
-  Battle_actionDefinitions[223].type = Battle_ActionType_Item;
+  VS::Battle::actionDefinitions[223].type = kActionTypeItem;
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllBreakArts));
 }
@@ -510,18 +513,18 @@ TEST_CASE("Ashley startup overrides fill resources and set base attributes",
           "[combat][profile][items][stats]") {
   StatFixture fixture;
   const auto inventory = VS::Items::inventory;
-  const auto learned = std::to_array(Battle_actionDefinitions);
+  const auto learned = VS::Battle::actionDefinitions;
   const VS::Game::EncounterStatOverrides overrides{999, 200, 120, 130, 140};
   VS::Game::InitializeEncounterPlayerStats(overrides);
-  CHECK(fixture.stats.currentHp == 999);
-  CHECK(fixture.stats.maxHp == 999);
-  CHECK(fixture.stats.currentMp == 200);
-  CHECK(fixture.stats.maxMp == 200);
+  CHECK(fixture.stats.current_hp == 999);
+  CHECK(fixture.stats.max_hp == 999);
+  CHECK(fixture.stats.current_mp == 200);
+  CHECK(fixture.stats.max_mp == 200);
   CheckBaseAttributes(fixture.stats);
   CHECK(fixture.stats.risk == 7);
   CHECK(std::memcmp(&inventory, &VS::Items::inventory, sizeof(inventory)) == 0);
-  CHECK(std::memcmp(learned.data(), Battle_actionDefinitions,
-                    sizeof(Battle_actionDefinitions)) == 0);
+  CHECK(std::memcmp(learned.data(), VS::Battle::actionDefinitions.data(),
+                    sizeof(VS::Battle::actionDefinitions)) == 0);
 }
 
 TEST_CASE("Ashley startup overrides preserve omitted stats",
@@ -533,11 +536,11 @@ TEST_CASE("Ashley startup overrides preserve omitted stats",
   VS::Game::EncounterStatOverrides overrides;
   overrides.max_mp = 999;
   VS::Game::InitializeEncounterPlayerStats(overrides);
-  CHECK(fixture.stats.currentHp == original.currentHp);
-  CHECK(fixture.stats.maxHp == original.maxHp);
-  CHECK(fixture.stats.totalStrength == original.totalStrength);
-  CHECK(fixture.stats.currentMp == 999);
-  CHECK(fixture.stats.maxMp == 999);
+  CHECK(fixture.stats.current_hp == original.current_hp);
+  CHECK(fixture.stats.max_hp == original.max_hp);
+  CHECK(fixture.stats.total_strength == original.total_strength);
+  CHECK(fixture.stats.current_mp == 999);
+  CHECK(fixture.stats.max_mp == 999);
 }
 
 TEST_CASE("Ashley startup overrides reject invalid data before mutation",
@@ -686,8 +689,8 @@ TEST_CASE("Default and bare-hands setup preserve stock parts and inventory",
   CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof expected) == 0);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostMinotaur);
-  CHECK(Battle_actionDefinitions[220].unlocked == 1);
-  CHECK(Battle_actionDefinitions[221].unlocked == 0);
+  CHECK(VS::Battle::actionDefinitions[220].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[221].unlocked == 0);
 }
 
 namespace {

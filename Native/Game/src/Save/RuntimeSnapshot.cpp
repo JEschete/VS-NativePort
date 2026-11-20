@@ -24,8 +24,8 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -904,7 +904,7 @@ void CapturePersistent(Snapshot& state, bool packed_actions = false) {
             ? (static_cast<unsigned char>(
                    VS::State::learnedActionFlags[index / kLearnedBitsPerByte]) &
                (kLearnedFirstBit >> (index % kLearnedBitsPerByte))) != 0
-            : Battle_actionDefinitions[index].unlocked != 0;
+            : VS::Battle::actionDefinitions[index].unlocked != 0;
   }
   state.inventory = VS::Items::inventory;
   state.inventory_order = VS::Items::inventoryIndices;
@@ -923,7 +923,8 @@ void ApplyPersistent(const Snapshot& state) {
   std::fill_n(VS::State::learnedActionFlags,
               std::size(VS::State::learnedActionFlags), 0);
   for (std::size_t index = 0; index < state.learned_actions.size(); ++index) {
-    Battle_actionDefinitions[index].unlocked = state.learned_actions[index];
+    VS::Battle::actionDefinitions[index].unlocked =
+        state.learned_actions[index];
     if (state.learned_actions[index]) {
       const auto value =
           static_cast<unsigned char>(
@@ -942,7 +943,8 @@ void ApplyPersistent(const Snapshot& state) {
   ApplyCaches(state);
 }
 
-Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
+Result OverlayHandEquipment(Snapshot& state,
+                            const VS::Battle::ActorStats& stats) {
   // vs_battle_copyUi{Weapon,Shield,Armor}Stats, 146C.c:1545-1600.
   // The original stores into canonical inventory and edits the loadouts.
   // Here only copied loadouts and the staged inventory may be written.
@@ -1027,7 +1029,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
   return {};
 }
 
-Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
+Result OverlayEquipped(Snapshot& state, const VS::Battle::ActorStats& stats) {
   const auto hands = OverlayHandEquipment(state, stats);
   if (!hands) return hands;
   for (std::size_t limb = 0; limb < std::size(stats.limbs); ++limb) {
@@ -1071,32 +1073,33 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
   return {};
 }
 
-void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
+void CaptureAshley(Snapshot& state, const VS::Battle::Actor& character) {
   const auto& source = *character.stats;
   auto& target = state.ashley;
   target.is_pending = 1;
-  target.current_hp = source.currentHp;
-  target.max_hp = source.maxHp;
-  target.current_mp = source.currentMp;
-  target.max_mp = source.maxMp;
+  target.current_hp = source.current_hp;
+  target.max_hp = source.max_hp;
+  target.current_mp = source.current_mp;
+  target.max_mp = source.max_mp;
   target.strength = std::bit_cast<std::int16_t>(source.strength);
-  target.total_strength = std::bit_cast<std::int16_t>(source.totalStrength);
+  target.total_strength = std::bit_cast<std::int16_t>(source.total_strength);
   target.intelligence = std::bit_cast<std::int16_t>(source.intelligence);
   target.total_intelligence =
-      std::bit_cast<std::int16_t>(source.totalIntelligence);
+      std::bit_cast<std::int16_t>(source.total_intelligence);
   target.agility = std::bit_cast<std::int16_t>(source.agility);
-  target.total_agility = std::bit_cast<std::int16_t>(source.totalAgility);
+  target.total_agility = std::bit_cast<std::int16_t>(source.total_agility);
   target.risk = std::bit_cast<std::int16_t>(source.risk);
-  target.action_recovery_timer = source.actionRecoveryTimer;
+  target.action_recovery_timer = source.action_recovery_timer;
   target.statuses = source.statuses;
-  for (std::size_t index = 0; index < std::size(source.statusTimers); ++index) {
-    target.status_timers[index] = source.statusTimers[index];
+  for (std::size_t index = 0; index < std::size(source.status_timers);
+       ++index) {
+    target.status_timers[index] = source.status_timers[index];
   }
   for (std::size_t index = 0; index < std::size(source.limbs); ++index) {
     const auto& limb = source.limbs[index];
     auto& saved = target.limbs[index];
     saved.hp = static_cast<std::uint16_t>(limb.hp);
-    saved.max_hp = static_cast<std::uint16_t>(limb.maxHp);
+    saved.max_hp = static_cast<std::uint16_t>(limb.max_hp);
     for (std::size_t type = 0; type < std::size(limb.types); ++type) {
       saved.types[type] = static_cast<std::uint16_t>(limb.types[type]);
     }
@@ -1106,39 +1109,39 @@ void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
           static_cast<std::uint16_t>(limb.affinities[affinity]);
     }
   }
-  target.weapon_drawn = character.weaponDrawn;
+  target.weapon_drawn = character.weapon_drawn;
   target.camera_pitch = VS::Field::sphericalCamera.motion.target_yaw;
   target.camera_distance = VS::Field::sphericalCamera.preferred_distance;
 }
 
 void RestoreAshleyValues(const VS::State::AshleyStatsSnapshot& source,
-                         Battle_Actor& character) {
+                         VS::Battle::Actor& character) {
   // func_800F9AD8, INITBTL/18.c:310. Spawn has already built equipment and
   // status effects. Reassert saved scalars after room-entry status cleanup.
   auto& target = *character.stats;
-  target.currentHp = source.current_hp;
-  target.maxHp = source.max_hp;
-  target.currentMp = source.current_mp;
-  target.maxMp = source.max_mp;
+  target.current_hp = source.current_hp;
+  target.max_hp = source.max_hp;
+  target.current_mp = source.current_mp;
+  target.max_mp = source.max_mp;
   target.strength = static_cast<std::uint16_t>(source.strength);
-  target.totalStrength = static_cast<std::uint16_t>(source.total_strength);
+  target.total_strength = static_cast<std::uint16_t>(source.total_strength);
   target.intelligence = static_cast<std::uint16_t>(source.intelligence);
-  target.totalIntelligence =
+  target.total_intelligence =
       static_cast<std::uint16_t>(source.total_intelligence);
   target.agility = static_cast<std::uint16_t>(source.agility);
-  target.totalAgility = static_cast<std::uint16_t>(source.total_agility);
+  target.total_agility = static_cast<std::uint16_t>(source.total_agility);
   target.risk = static_cast<std::uint16_t>(source.risk);
-  target.actionRecoveryTimer = source.action_recovery_timer;
+  target.action_recovery_timer = source.action_recovery_timer;
   target.statuses = source.statuses;
   for (std::size_t index = 0; index < std::size(source.status_timers);
        ++index) {
-    target.statusTimers[index] = source.status_timers[index];
+    target.status_timers[index] = source.status_timers[index];
   }
   for (std::size_t index = 0; index < std::size(source.limbs); ++index) {
     auto& limb = target.limbs[index];
     const auto& saved = source.limbs[index];
     limb.hp = static_cast<std::int16_t>(saved.hp);
-    limb.maxHp = static_cast<std::int16_t>(saved.max_hp);
+    limb.max_hp = static_cast<std::int16_t>(saved.max_hp);
     for (std::size_t type = 0; type < std::size(saved.types); ++type) {
       limb.types[type] = std::bit_cast<std::int16_t>(saved.types[type]);
     }
@@ -1148,7 +1151,7 @@ void RestoreAshleyValues(const VS::State::AshleyStatsSnapshot& source,
           std::bit_cast<std::int16_t>(saved.affinities[affinity]);
     }
   }
-  character.weaponDrawn = source.weapon_drawn;
+  character.weapon_drawn = source.weapon_drawn;
 }
 
 Result CaptureActors(Snapshot& state) {
@@ -1167,12 +1170,12 @@ Result CaptureActors(Snapshot& state) {
   for (int slot = 0; std::cmp_less(slot, VS::Battle::Ai::kFrameActorSlots);
        ++slot) {
     const auto* actor = VS::Battle::actors[slot];
-    if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) continue;
+    if (actor == nullptr || actor->room_spawn_index == kNoRoomSpawn) continue;
     if (actor->stats == nullptr || VS::Actors::actorRecords[slot] == nullptr ||
-        actor->roomSpawnIndex == kLastLocation) {
+        actor->room_spawn_index == kLastLocation) {
       return std::unexpected("live room actor is not ready");
     }
-    const auto spawn = static_cast<unsigned>(actor->roomSpawnIndex) + 1;
+    const auto spawn = static_cast<unsigned>(actor->room_spawn_index) + 1;
     auto found = std::ranges::find(cache.actors, spawn,
                                    &VS::Actors::RoomActorRecord::spawn_slot);
     if (found == cache.actors.end()) {
@@ -1188,20 +1191,21 @@ Result CaptureActors(Snapshot& state) {
     // weapon and model state.
     const auto animation =
         VS::Actors::actorRecords[slot]->instance.action_animation_state;
-    found->current_hp =
-        animation != 0 && animation < kActiveAnimationEnd ? 1 : stats.currentHp;
-    found->max_hp = stats.maxHp;
-    found->current_mp = stats.currentMp;
-    found->max_mp = stats.maxMp;
-    found->strength = std::bit_cast<std::int16_t>(stats.totalStrength);
-    found->intelligence = std::bit_cast<std::int16_t>(stats.totalIntelligence);
-    found->agility = std::bit_cast<std::int16_t>(stats.totalAgility);
+    found->current_hp = animation != 0 && animation < kActiveAnimationEnd
+                            ? 1
+                            : stats.current_hp;
+    found->max_hp = stats.max_hp;
+    found->current_mp = stats.current_mp;
+    found->max_mp = stats.max_mp;
+    found->strength = std::bit_cast<std::int16_t>(stats.total_strength);
+    found->intelligence = std::bit_cast<std::int16_t>(stats.total_intelligence);
+    found->agility = std::bit_cast<std::int16_t>(stats.total_agility);
     for (std::size_t limb = 0; limb < std::size(stats.limbs); ++limb) {
       found->limb_hp[limb] = stats.limbs[limb].hp;
     }
     found->statuses = stats.statuses;
     VS::Actors::ActorLocationQuery placement{};
-    VS::Actors::LiveActorSavedPlacement(slot, stats.movementClass, &placement);
+    VS::Actors::LiveActorSavedPlacement(slot, stats.movement_class, &placement);
     found->tile_x = static_cast<unsigned char>(
         placement.location.packed_tile.target.tile_x);
     found->direction = static_cast<unsigned char>(
@@ -1591,7 +1595,7 @@ void CancelResume() {
   std::copy(previous.learned.begin(), previous.learned.end(),
             VS::State::learnedActionFlags);
   for (std::size_t index = 0; index < previous.unlocked.size(); ++index) {
-    Battle_actionDefinitions[index].unlocked = previous.unlocked[index];
+    VS::Battle::actionDefinitions[index].unlocked = previous.unlocked[index];
   }
   if (AudioConsumerReady()) {
     SyncMonoOutput((previous.mix_behavior & kMonoOutput) != 0);

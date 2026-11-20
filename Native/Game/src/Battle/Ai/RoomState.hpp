@@ -6,7 +6,7 @@
 #include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"

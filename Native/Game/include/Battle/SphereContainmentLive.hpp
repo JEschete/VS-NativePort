@@ -5,24 +5,25 @@
 
 #include "Battle/SphereContainment.hpp"
 
-struct Battle_TargetVolume;
-
 namespace VS::Battle {
+
+struct TargetVolume;
 [[nodiscard]] SphereContainmentTransform BuildLiveTargetVolumeTestTransform(
-    const Battle_TargetVolume* volume);
+    const VS::Battle::TargetVolume* volume);
 [[nodiscard]] int IsLivePointInTargetEllipsoid(
-    const Battle_TargetVolume* volume, std::span<const std::uint16_t> point);
+    const VS::Battle::TargetVolume* volume,
+    std::span<const std::uint16_t> point);
 [[nodiscard]] int IsLivePointInTargetCylinder(
-    const Battle_TargetVolume* volume, std::span<const std::uint16_t> point,
-    int shift_height_origin);
-[[nodiscard]] int IsLivePointInTargetCone(const Battle_TargetVolume* volume,
-                                          std::span<const std::uint16_t> point,
-                                          int shift_height_origin);
-[[nodiscard]] int IsLivePointInTargetPrism(const Battle_TargetVolume* volume,
-                                           std::span<const std::uint16_t> point,
-                                           int rectangular);
+    const VS::Battle::TargetVolume* volume,
+    std::span<const std::uint16_t> point, int shift_height_origin);
+[[nodiscard]] int IsLivePointInTargetCone(
+    const VS::Battle::TargetVolume* volume,
+    std::span<const std::uint16_t> point, int shift_height_origin);
+[[nodiscard]] int IsLivePointInTargetPrism(
+    const VS::Battle::TargetVolume* volume,
+    std::span<const std::uint16_t> point, int rectangular);
 [[nodiscard]] int IsLivePointInTargetVolume(
-    Battle_TargetVolume* volume, std::span<const std::uint16_t> point);
+    VS::Battle::TargetVolume* volume, std::span<const std::uint16_t> point);
 
 // Resolves the current sphere on every call; no owner survives a room reset.
 [[nodiscard]] int IsLivePointInCurrentSphereVolume(

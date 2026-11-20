@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -182,8 +182,8 @@ TEST_CASE(
   SessionBindingSnapshot saved;
   std::array<std::byte, 65536> arena{};
   const VS::Core::Memory::ScopedLiveGameHeap heap(arena);
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   actor.id = 1;
   actor.stats = &stats;
   std::fill_n(VS::Battle::actors.begin(), saved.battle_actors.size(), nullptr);

@@ -8,7 +8,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Sphere.hpp"
@@ -24,12 +24,15 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPackets.hpp"
 
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+
 using VS::Legacy::kPadL1;
 using VS::Legacy::kPadR1;
 
 namespace {
-constexpr auto kSlots = std::extent_v<decltype(Battle_ActionState::previews)>;
-using ResultBuffer = decltype(Battle_ActionRequest::targets);
+constexpr auto kSlots = std::tuple_size_v<decltype(ActionState::previews)>;
+using ResultBuffer = decltype(ActionRequestRecord::targets);
 using SphereRecord = VS::Battle::TargetSphereRecord;
 constexpr auto kPageSize = std::extent_v<decltype(SphereRecord::labels)>;
 constexpr unsigned char kNoTarget = std::numeric_limits<unsigned char>::max();
@@ -40,7 +43,7 @@ constexpr int kHintY = 32;
 constexpr int kHintColor = 0x808080;
 constexpr std::size_t kHintBufferSize = 32;
 static_assert(kSlots == kNoTarget);
-static_assert(kSlots == std::extent_v<ResultBuffer>);
+static_assert(kSlots == std::tuple_size_v<ResultBuffer>);
 static_assert(kSlots == VS::Battle::kMaxSphereTargets);
 
 // The bound candidates and their pages. The candidates are viewed, not owned.

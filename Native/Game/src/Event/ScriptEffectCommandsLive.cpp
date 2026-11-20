@@ -16,7 +16,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -99,9 +99,9 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   }
   // The core checks the actor against kEffectActorSlots first.
   [[nodiscard]] event::EffectActorSlot ActorSlot(int actor) const override {
-    const Battle_Actor* target = VS::Actors::LiveActorAtSlot(actor);
+    const VS::Battle::Actor* target = VS::Actors::LiveActorAtSlot(actor);
     return {.battle_actor = target != nullptr,
-            .model_id = target != nullptr ? target->modelId
+            .model_id = target != nullptr ? target->model_id
                                           : static_cast<std::uint16_t>(0),
             .occupied = VS::Actors::actorRecords[actor] != nullptr ||
                         VS::Field::gimmickInstances[actor] != nullptr};

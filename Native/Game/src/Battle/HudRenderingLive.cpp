@@ -14,8 +14,8 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudRendering.hpp"
 #include "Core/Diagnostics.hpp"
@@ -167,11 +167,12 @@ class LiveHudIconWorld final : public HudStatusIconWorld {
 };
 
 bool ActionUnlocked(int action) {
-  if (action < 0 ||
-      static_cast<std::size_t>(action) >= std::size(Battle_actionDefinitions)) {
+  if (action < 0 || static_cast<std::size_t>(action) >=
+                        std::size(VS::Battle::actionDefinitions)) {
     Refuse("Shortcut unlock references an action outside its table");
   }
-  return std::span(Battle_actionDefinitions)[static_cast<std::size_t>(action)]
+  return std::span(
+             VS::Battle::actionDefinitions)[static_cast<std::size_t>(action)]
              .unlocked != 0;
 }
 
@@ -238,7 +239,7 @@ class LiveHudShortcutWorld final : public HudShortcutWorld {
     if (actor == nullptr) Refuse("Break-art shortcut has no current actor");
     const int first =
         kFirstWeaponBreakArt +
-        (actor->equippedWeaponCategory - 1) * kWeaponBreakArtCount;
+        (actor->equipped_weapon_category - 1) * kWeaponBreakArtCount;
     for (int tier = 0; tier < kWeaponBreakArtCount; ++tier) {
       if (ActionUnlocked(first + tier)) break;
     }

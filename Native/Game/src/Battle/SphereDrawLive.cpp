@@ -11,7 +11,7 @@
 #include <optional>
 #include <span>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereDraw.hpp"
 #include "Battle/SphereGeometryLive.hpp"
@@ -36,6 +36,8 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Battle::TargetVolume;
+
 namespace VS::Battle {
 namespace {
 namespace math = Core::Math;
@@ -57,7 +59,7 @@ constexpr std::size_t kSpriteTexcoordWord = 4;
 constexpr unsigned kHalfwordBits = 16;
 
 constexpr std::size_t kTargetVolumeBytes = 16;
-static_assert(sizeof(Battle_TargetVolume) == kTargetVolumeBytes);
+static_assert(sizeof(TargetVolume) == kTargetVolumeBytes);
 static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
 static_assert(std::size(VS::Battle::TargetSphereRecord{}.terrain_heights) ==
               kSphereTerrainRows * kSphereTerrainColumns);
@@ -83,7 +85,7 @@ void Refuse(const char* what) {
       VS::Battle::targetSphere);
 }
 
-[[nodiscard]] SphereDrawVolume VolumeOf(const Battle_TargetVolume& source) {
+[[nodiscard]] SphereDrawVolume VolumeOf(const TargetVolume& source) {
   SphereDrawVolume volume{.kind = source.kind,
                           .reserved = source.opaque1,
                           .angle = source.angle,
@@ -95,8 +97,8 @@ void Refuse(const char* what) {
   return volume;
 }
 
-[[nodiscard]] Battle_TargetVolume RecordOf(const SphereDrawVolume& volume) {
-  Battle_TargetVolume record{};
+[[nodiscard]] TargetVolume RecordOf(const SphereDrawVolume& volume) {
+  TargetVolume record{};
   record.kind = volume.kind;
   record.opaque1 = volume.reserved;
   record.angle = volume.angle;
@@ -108,9 +110,9 @@ void Refuse(const char* what) {
   return record;
 }
 
-[[nodiscard]] Battle_TargetVolume* StagedVolume(std::size_t slot) {
-  return reinterpret_cast<Battle_TargetVolume*>(
-      Scratch(kVolumeScratchOffset + (slot * sizeof(Battle_TargetVolume))));
+[[nodiscard]] TargetVolume* StagedVolume(std::size_t slot) {
+  return reinterpret_cast<TargetVolume*>(
+      Scratch(kVolumeScratchOffset + (slot * sizeof(TargetVolume))));
 }
 
 class LiveSphereDrawPort final : public SphereDrawPort {
@@ -160,7 +162,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
   void DrawVolumeWireframe(std::size_t slot, const SphereDrawVolume& volume,
                            std::uint32_t color) override {
-    Battle_TargetVolume* staged = StagedVolume(slot);
+    TargetVolume* staged = StagedVolume(slot);
     *staged = RecordOf(volume);
     DrawLiveSphereVolumeWireframe(staged, static_cast<int>(color));
   }

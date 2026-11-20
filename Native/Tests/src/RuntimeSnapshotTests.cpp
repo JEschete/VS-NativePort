@@ -31,8 +31,8 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -246,8 +246,8 @@ struct RuntimeFixture {
       std::to_array(VS::State::recentRoomEnemyStates);
   decltype(std::to_array(VS::State::learnedActionFlags)) learned =
       std::to_array(VS::State::learnedActionFlags);
-  decltype(std::to_array(Battle_actionDefinitions)) actions =
-      std::to_array(Battle_actionDefinitions);
+  decltype(VS::Battle::actionDefinitions) actions =
+      VS::Battle::actionDefinitions;
   decltype(VS::Battle::actors) actors = VS::Battle::actors;
   decltype(VS::Actors::actorRecords) models = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::actorAiStates) ai = VS::Battle::Ai::actorAiStates;
@@ -255,7 +255,7 @@ struct RuntimeFixture {
       std::to_array(VS::Core::randomShuffleTable);
   decltype(std::to_array(VS::Items::itemCategoryUpperIds)) bounds =
       std::to_array(VS::Items::itemCategoryUpperIds);
-  Battle_Actor* character = VS::Battle::characterState;
+  VS::Battle::Actor* character = VS::Battle::characterState;
   unsigned bios = VS::Core::BiosRand().State();
   unsigned interface_random = VS::Core::interfaceRandomState;
   int shuffle_index = VS::Core::randomShuffleIndex;
@@ -284,10 +284,10 @@ struct RuntimeFixture {
   unsigned active_effect_voices =
       VS::Audio::Mixer::voiceScheduler.active_voices;
   VS::Audio::MusicConfig silent_music{};
-  Battle_Actor player{};
-  Battle_Actor enemy{};
-  Battle_ActorStats player_stats{};
-  Battle_ActorStats enemy_stats{};
+  VS::Battle::Actor player{};
+  VS::Battle::Actor enemy{};
+  VS::Battle::ActorStats player_stats{};
+  VS::Battle::ActorStats enemy_stats{};
   VS::Actors::ActorRecord player_model{};
   VS::Actors::ActorRecord enemy_model{};
   VS::Battle::Ai::ActorAiState enemy_ai{};
@@ -310,7 +310,7 @@ struct RuntimeFixture {
     VS::Actors::ResetLiveActorRunMomentum(0);
     player.stats = &player_stats;
     player.model = &player_model.instance;
-    player.roomSpawnIndex = 0x80;
+    player.room_spawn_index = 0x80;
     player_model.instance.position = {193, -73, 325, 0};
     player_model.instance.facing = 2051;
     player_model.instance.current_tile_x = 1;
@@ -323,23 +323,23 @@ struct RuntimeFixture {
     grounded.tile_z = 2;
     grounded.facing = 128;
     player_model.saved_placement = std::bit_cast<int>(grounded);
-    player_stats.currentHp = 123;
-    player_stats.maxHp = 300;
-    player_stats.currentMp = 31;
-    player_stats.maxMp = 77;
+    player_stats.current_hp = 123;
+    player_stats.max_hp = 300;
+    player_stats.current_mp = 31;
+    player_stats.max_mp = 77;
     player_stats.strength = 300;
-    player_stats.totalStrength = 330;
+    player_stats.total_strength = 330;
     player_stats.intelligence = 222;
-    player_stats.totalIntelligence = 225;
+    player_stats.total_intelligence = 225;
     player_stats.agility = 111;
-    player_stats.totalAgility = 119;
+    player_stats.total_agility = 119;
     player_stats.risk = 77;
-    player_stats.actionRecoveryTimer = 19;
+    player_stats.action_recovery_timer = 19;
     player_stats.statuses = 0x21000;
-    player_stats.statusTimers[7] = 255;
+    player_stats.status_timers[7] = 255;
     for (auto& limb : player_stats.limbs) {
       limb.hp = 45;
-      limb.maxHp = 100;
+      limb.max_hp = 100;
       limb.types[3] = -29;
       limb.affinities[7] = -32768;
     }
@@ -368,9 +368,9 @@ struct RuntimeFixture {
     VS::State::scoreData.boss_time_trial_scores[7][2].time = 0xABCDEF;
     std::fill_n(VS::State::learnedActionFlags, learned.size(),
                 static_cast<char>(0xFF));
-    for (auto& action : Battle_actionDefinitions) action.unlocked = 0;
+    for (auto& action : VS::Battle::actionDefinitions) action.unlocked = 0;
     for (const auto index : {0, 7, 8, 97, 255}) {
-      Battle_actionDefinitions[index].unlocked = 1;
+      VS::Battle::actionDefinitions[index].unlocked = 1;
     }
   }
 
@@ -543,16 +543,16 @@ struct RuntimeFixture {
     VS::Battle::actors[2] = &enemy;
     VS::Actors::actorRecords[2] = &enemy_model;
     VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
-    enemy.roomSpawnIndex = 0;
+    enemy.room_spawn_index = 0;
     enemy.stats = &enemy_stats;
     enemy.model = &enemy_model.instance;
-    enemy_stats.currentHp = 43;
-    enemy_stats.maxHp = 90;
-    enemy_stats.currentMp = 12;
-    enemy_stats.maxMp = 44;
-    enemy_stats.totalStrength = 123;
-    enemy_stats.totalIntelligence = 234;
-    enemy_stats.totalAgility = 345;
+    enemy_stats.current_hp = 43;
+    enemy_stats.max_hp = 90;
+    enemy_stats.current_mp = 12;
+    enemy_stats.max_mp = 44;
+    enemy_stats.total_strength = 123;
+    enemy_stats.total_intelligence = 234;
+    enemy_stats.total_agility = 345;
     enemy_stats.limbs[5].hp = 32;
     enemy_model.instance.facing = 2864;
     VS::Actors::TileTarget placement{};
@@ -620,7 +620,8 @@ struct RuntimeFixture {
     VS::Render::FrameScratchpad().camera = rendered_camera;
     std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), VS::State::learnedActionFlags);
-    std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
+    std::copy(actions.begin(), actions.end(),
+              VS::Battle::actionDefinitions.data());
     std::copy(actors.begin(), actors.end(), VS::Battle::actors.begin());
     std::copy(models.begin(), models.end(), VS::Actors::actorRecords.begin());
     std::copy(ai.begin(), ai.end(), VS::Battle::Ai::actorAiStates.begin());
@@ -671,7 +672,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::State::recentRoomEnemyStates);
   Append(bytes, VS::State::currentRoomStateSlot);
   Append(bytes, VS::State::learnedActionFlags);
-  Append(bytes, Battle_actionDefinitions);
+  Append(bytes, VS::Battle::actionDefinitions);
   Append(bytes, VS::State::ashleySnapshot);
   Append(bytes, VS::State::savedEntryDoor);
   Append(bytes, VS::State::playTime);
@@ -1350,7 +1351,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   // pretending these scalar fixture writes are controller acceptance tests.
   VS::State::ashleySnapshot.stats.is_pending = 0;
   fixture.player_model.instance.position = {64, 0, 64, 0};
-  fixture.player_stats.currentHp = 7;
+  fixture.player_stats.current_hp = 7;
   fixture.player_stats.statuses = 0;
   VS::State::playTime = {};
   VS::State::sceneTimer = {};
@@ -1366,9 +1367,9 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
 }
 
 void CheckRestoredPlayer(const RuntimeFixture& fixture) {
-  CHECK(fixture.player_stats.currentHp == 123);
+  CHECK(fixture.player_stats.current_hp == 123);
   CHECK(fixture.player_stats.statuses == 0x21000);
-  CHECK(fixture.player_stats.statusTimers[7] == 255);
+  CHECK(fixture.player_stats.status_timers[7] == 255);
   CHECK(fixture.player_stats.limbs[5].types[3] == -29);
   CHECK(fixture.player_model.instance.position.vx == 193);
   CHECK(fixture.player_model.instance.position.vy == -73);
@@ -1643,8 +1644,8 @@ void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
   // Component setup only: the production spawn restoration consumes the
   // actual persistent Ashley data; this is not an ending playthrough.
   VS::Actors::RestoreLiveAshleyRuntimeState();
-  CHECK(fixture.player_stats.currentHp == 123);
-  CHECK(fixture.player_stats.currentMp == 31);
+  CHECK(fixture.player_stats.current_hp == 123);
+  CHECK(fixture.player_stats.current_mp == 31);
   CHECK(VS::State::ashleySnapshot.stats.is_pending == 0);
   const auto staged = LiveFingerprint(fixture);
   CHECK_FALSE(

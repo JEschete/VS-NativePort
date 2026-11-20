@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 
@@ -14,7 +14,7 @@ struct PlanningWorkspace {
   static constexpr int kActors = 16;
   static constexpr int kActions = 256;
 
-  Battle_ActionRequest result{};
+  VS::Battle::ActionRequestRecord result{};
   VS::Battle::Ai::CandidateEntryView candidates[kPasses][kCandidates]{};
   unsigned char exclusions[kActors][kActions]{};
   VS::Battle::Ai::CandidateEntryView fallback[kCandidates]{};
@@ -22,11 +22,12 @@ struct PlanningWorkspace {
 
 // Reads the queued action's primary target actor (+0x04, lbu) and its
 // targets-position word (+0x44, lw), as func_800DEC88 does (#255).
-PlanningRequest PlanningRequestOf(const Battle_ActionRequest& request);
+PlanningRequest PlanningRequestOf(
+    const VS::Battle::ActionRequestRecord& request);
 
 // Rebuilds every live actor's action plan against `request`, the queued action
 // (or null), with call-local planning storage bound to the planner globals for
 // the call only. Returns 0, as func_800DEC88 does for its callers' tests.
-int RebuildLiveActorActionPlans(Battle_ActionRequest* request);
+int RebuildLiveActorActionPlans(VS::Battle::ActionRequestRecord* request);
 
 }  // namespace VS::Battle::Ai

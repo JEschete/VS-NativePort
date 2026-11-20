@@ -5,7 +5,9 @@
 
 #include <cstdint>
 
-struct Battle_ActionState;
+namespace VS::Battle {
+struct ActionState;
+}  // namespace VS::Battle
 
 namespace VS::Menu::Framework {
 struct ActionSelection;
@@ -20,6 +22,6 @@ extern std::uint32_t actionFlowMode;
 // decomp: D_800F18FC (src/BATTLE/BATTLE.PRG/146C.c:329)
 extern std::int32_t recoveryRewardMode;
 // decomp: D_800F19CC (src/BATTLE/BATTLE.PRG/146C.c:335)
-extern Battle_ActionState* actionState;
+extern VS::Battle::ActionState* actionState;
 
 }  // namespace VS::Battle

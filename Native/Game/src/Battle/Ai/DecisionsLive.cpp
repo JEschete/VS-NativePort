@@ -8,7 +8,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -110,9 +110,10 @@ class LiveDecisionActor final : public DecisionActor {
   }
   void ClearBehaviorMode() override { state_.behavior_mode = 0; }
   [[nodiscard]] bool CommandIsLocomotion() const override {
-    const auto* actor = reinterpret_cast<const Battle_Actor*>(state_.actor);
+    const auto* actor =
+        reinterpret_cast<const VS::Battle::Actor*>(state_.actor);
     Require(actor != nullptr, "AI locomotion update requires a battle actor");
-    return actor->commandOpcode < kFirstNonLocomotionCommand;
+    return actor->command_opcode < kFirstNonLocomotionCommand;
   }
   void ReleaseReservations() override {
     ReleaseLiveActorAiReservations(&state_);

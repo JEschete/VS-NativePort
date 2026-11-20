@@ -8,7 +8,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
@@ -35,6 +35,9 @@
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
@@ -45,7 +48,7 @@ void Require(bool valid) {
     std::abort();
   }
 }
-Battle_ActionState& State() {
+ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
@@ -56,38 +59,38 @@ ActionTargetHit Hit(const VS::Battle::HitResult& hit) {
 }
 class LiveAction final : public SequenceAction {
  public:
-  explicit LiveAction(Battle_ActionRequest& action) : action_(action) {}
+  explicit LiveAction(ActionRequestRecord& action) : action_(action) {}
   ActionTargetHit Primary() const override {
-    return Hit(action_.primaryTarget);
+    return Hit(action_.primary_target);
   }
   ActionTargetHit Target(std::size_t index) const override {
     Require(index < std::size(action_.targets));
     return Hit(action_.targets[index]);
   }
   std::uint16_t Count() const override {
-    Require(action_.targetCount <= std::size(action_.targets));
-    return action_.targetCount;
+    Require(action_.target_count <= std::size(action_.targets));
+    return action_.target_count;
   }
   int RebuildPlans() override {
     return Ai::RebuildLiveActorActionPlans(&action_);
   }
 
  private:
-  Battle_ActionRequest& action_;
+  ActionRequestRecord& action_;
 };
 class LiveWorld final : public ActionSequenceWorld {
  public:
   SequenceAction& Queued() override {
     auto& state = State();
     constexpr std::uint32_t kQueueMask = 3;
-    return Bind(state.queue[state.queueIndex & kQueueMask]);
+    return Bind(state.queue[state.queue_index & kQueueMask]);
   }
   SequenceAction& Step(std::size_t index) override {
     auto& state = State();
     Require(index < std::size(state.queue));
     return Bind(state.queue[index]);
   }
-  std::uint32_t ChainCount() override { return State().chainStep; }
+  std::uint32_t ChainCount() override { return State().chain_step; }
   int NotificationPending() override {
     return Menu::IsLiveSceneNotificationPending();
   }
@@ -127,13 +130,13 @@ class LiveWorld final : public ActionSequenceWorld {
     VS::Field::sphericalCamera.values.distance = distance;
   }
   std::int16_t PreferredDistance() override {
-    return State().preferredCameraDistance;
+    return State().preferred_camera_distance;
   }
   int LookAtOnAshley() override { return Field::LiveIsCameraLookAtOnAshley(); }
   void ResumeField() override { Field::LiveResumeFieldAfterMenu(); }
   void ShowHud() override { VS::Battle::SetLiveHudHidden(0); }
   std::uint8_t SelectedActor() override {
-    return State().selection.primaryTarget.target.target_actor;
+    return State().selection.primary_target.target.target_actor;
   }
   void RestoreIdle(int actor) override {
     Actors::RestoreLiveActorIdlePose(actor);
@@ -151,7 +154,7 @@ class LiveWorld final : public ActionSequenceWorld {
   void OpenLoot() override { Items::OpenLivePendingEnemyLoot(); }
 
  private:
-  SequenceAction& Bind(Battle_ActionRequest& action) {
+  SequenceAction& Bind(ActionRequestRecord& action) {
     actions_.push_back(std::make_unique<LiveAction>(action));
     return *actions_.back();
   }

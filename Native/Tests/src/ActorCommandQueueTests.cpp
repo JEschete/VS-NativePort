@@ -17,7 +17,7 @@
 #include "Actors/ActorCommandsLive.hpp"
 #include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -753,13 +753,13 @@ struct LiveCommandFields {
   bool operator==(const LiveCommandFields&) const = default;
 };
 
-LiveCommandFields FieldsOf(const Battle_Actor& actor) {
-  return {
-      .state = actor.commandState,
-      .opcode = actor.commandOpcode,
-      .target = actor.commandTarget,
-      .flags = actor.commandFlags,
-      .args = {actor.commandArg0, actor.commandArg1.word, actor.commandArg2}};
+LiveCommandFields FieldsOf(const VS::Battle::Actor& actor) {
+  return {.state = actor.command_state,
+          .opcode = actor.command_opcode,
+          .target = actor.command_target,
+          .flags = actor.command_flags,
+          .args = {actor.command_arg0, actor.command_arg1.word,
+                   actor.command_arg2}};
 }
 
 std::array<int, 3> StepOf(const VS::Actors::ActorRecord& record) {
@@ -799,15 +799,15 @@ TEST_CASE("The live executor steps a waiting ground offset in the actor tables",
   const auto record = std::make_unique<VS::Actors::ActorRecord>();
   record->instance.attach_parent = 0xFF;
   VS::Actors::actorRecords[0] = record.get();
-  const auto battle_actor = std::make_unique<Battle_Actor>();
+  const auto battle_actor = std::make_unique<VS::Battle::Actor>();
   battle_actor->kind = 2;
-  battle_actor->commandState = actors::kCommandWaiting;
-  battle_actor->commandOpcode = 13;
-  battle_actor->commandTarget = kNoTarget;
-  battle_actor->commandFlags = 0x5A;
-  battle_actor->commandArg0 = 0x9000;
-  battle_actor->commandArg1.word = -0x3000;
-  battle_actor->commandArg2 = 0x2000;
+  battle_actor->command_state = actors::kCommandWaiting;
+  battle_actor->command_opcode = 13;
+  battle_actor->command_target = kNoTarget;
+  battle_actor->command_flags = 0x5A;
+  battle_actor->command_arg0 = 0x9000;
+  battle_actor->command_arg1.word = -0x3000;
+  battle_actor->command_arg2 = 0x2000;
   VS::Battle::actors[0] = battle_actor.get();
 
   CHECK(actors::ExecuteLiveQueuedActorCommands() == 0);

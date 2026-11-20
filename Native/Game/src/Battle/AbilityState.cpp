@@ -9,7 +9,7 @@ namespace VS::Battle {
 
 // decomp: vs_battle_characterState
 // (vs_battle_characterState@BATTLE/BATTLE.PRG)
-Battle_Actor* characterState;
+VS::Battle::Actor* characterState;
 
 // decomp: vs_main_artsPointsRequirements
 // (vs_main_artsPointsRequirements@SLUS_010.40)

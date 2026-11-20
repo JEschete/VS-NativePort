@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Battle_Actor;
-
 namespace VS::Battle {
+
+struct Actor;
 
 inline constexpr std::size_t kBreakArtCategoryCount = 15;
 inline constexpr std::size_t kBreakArtsPerCategory = 4;
@@ -20,7 +20,7 @@ using BreakArtPointTable = std::array<BreakArtPointRow, kBreakArtCategoryCount>;
 using AbilityPointTable = std::array<std::uint16_t, kAbilityRequirementCount>;
 
 // decomp: vs_battle_characterState (src/BATTLE/BATTLE.PRG/actor.h:173)
-extern Battle_Actor* characterState;
+extern VS::Battle::Actor* characterState;
 // decomp: vs_main_artsPointsRequirements (src/SLUS_010.40/actions.h:65)
 extern BreakArtPointTable breakArtPointRequirements;
 // decomp: vs_main_battleAbilitiesPointsRequirements

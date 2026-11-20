@@ -11,7 +11,7 @@
 #include <string_view>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestration.hpp"
@@ -289,11 +289,11 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   bool DrawActorGauge(HudGaugeKind kind) override {
     if (stats_ == nullptr) return false;
     if (kind == HudGaugeKind::kHp) {
-      DrawLiveHudStatGauge(static_cast<int>(kind), stats_->currentHp,
-                           stats_->maxHp);
+      DrawLiveHudStatGauge(static_cast<int>(kind), stats_->current_hp,
+                           stats_->max_hp);
     } else {
-      DrawLiveHudStatGauge(static_cast<int>(kind), stats_->currentMp,
-                           stats_->maxMp);
+      DrawLiveHudStatGauge(static_cast<int>(kind), stats_->current_mp,
+                           stats_->max_mp);
     }
     return true;
   }
@@ -319,7 +319,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   }
 
  private:
-  Battle_ActorStats* stats_ = nullptr;
+  VS::Battle::ActorStats* stats_ = nullptr;
   u_long* limb_chain_ = nullptr;
   u_long* count_chain_ = nullptr;
   std::array<LiveHudSpriteConsumer, kQueuedHudSprites> sprites_{};

@@ -3,7 +3,9 @@
 
 #include "Battle/Ai/Relations.hpp"
 
-struct Battle_ActionRequest;
+namespace VS::Battle {
+struct ActionRequestRecord;
+}  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct AiCreationView;
 struct ReactionView;
@@ -27,12 +29,14 @@ void ResolveLiveAiLinkedActors();
 // The AI state `state` reacts to the completed action `request`, which the
 // original reads as actionStatApplication; nothing happens without a request
 // (func_800DD000).
-void ApplyLiveActorActionReaction(VS::Battle::Ai::ReactionView* state,
-                                  const Battle_ActionRequest* request);
+void ApplyLiveActorActionReaction(
+    VS::Battle::Ai::ReactionView* state,
+    const VS::Battle::ActionRequestRecord* request);
 // Reclassifies the room or shares allies' hostility from the AI state
 // `state`'s point of view (func_800DD344).
 void PropagateLiveActorRelationships(VS::Battle::Ai::ReactionView* state);
 // Lets the completed action's acting actor engage again and has every AI
 // actor react to it; nothing happens without a request (func_800DEEA4).
-void NotifyLiveActionRelationshipChanges(Battle_ActionRequest* request);
+void NotifyLiveActionRelationshipChanges(
+    VS::Battle::ActionRequestRecord* request);
 }  // namespace VS::Battle::Ai

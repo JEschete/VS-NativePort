@@ -14,9 +14,10 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Location.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
+#include "TestSupport/ActorRecordTableScope.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -179,15 +180,11 @@ struct FakeScriptedPath final : actors::ScriptedPathHost {
 }
 
 // The actor and battle actor tables, emptied for one test and then restored.
-struct LiveMotionState {
-  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
+struct LiveMotionState : VS::test_support::ActorRecordTableScope {
   decltype(VS::Battle::actors) saved_battle_actors = VS::Battle::actors;
-  std::vector<std::unique_ptr<VS::Actors::ActorRecord>> records;
-  std::vector<std::unique_ptr<Battle_Actor>> battle_actors;
+  std::vector<std::unique_ptr<VS::Battle::Actor>> battle_actors;
 
   LiveMotionState() {
-    std::fill(std::begin(VS::Actors::actorRecords),
-              std::end(VS::Actors::actorRecords), nullptr);
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
   }
@@ -196,20 +193,11 @@ struct LiveMotionState {
   LiveMotionState(LiveMotionState&&) = delete;
   LiveMotionState& operator=(LiveMotionState&&) = delete;
   ~LiveMotionState() {
-    std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
     std::ranges::copy(saved_battle_actors, std::begin(VS::Battle::actors));
   }
 
-  VS::Actors::ActorRecord& AddActor(int actor_id) {
-    records.push_back(std::make_unique<VS::Actors::ActorRecord>());
-    VS::Actors::ActorRecord& actor = *records.back();
-    actor.instance.slot = static_cast<u_char>(actor_id);
-    VS::Actors::actorRecords[actor_id] = &actor;
-    return actor;
-  }
-
-  Battle_Actor& AddBattleActor(int actor_id) {
-    battle_actors.push_back(std::make_unique<Battle_Actor>());
+  VS::Battle::Actor& AddBattleActor(int actor_id) {
+    battle_actors.push_back(std::make_unique<VS::Battle::Actor>());
     VS::Battle::actors[actor_id] = battle_actors.back().get();
     return *battle_actors.back();
   }
@@ -871,23 +859,23 @@ TEST_CASE("Live movement resets drop the battle command unless locked",
           "[actors][actors-movement]") {
   LiveMotionState state;
   VS::Actors::ActorRecord& actor = state.AddActor(kActor);
-  Battle_Actor& battle_actor = state.AddBattleActor(kActor);
-  battle_actor.commandState = 5;
+  VS::Battle::Actor& battle_actor = state.AddBattleActor(kActor);
+  battle_actor.command_state = 5;
   actor.instance.movement_mode = 3;
   actor.instance.turn_frames = 4;
   actors::ResetLiveActorMovement(kActor);
-  CHECK(battle_actor.commandState == 0);
+  CHECK(battle_actor.command_state == 0);
   CHECK(actor.instance.movement_mode == 0);
   CHECK(actor.instance.turn_frames == 0);
 
-  battle_actor.commandState = 0x20;
+  battle_actor.command_state = 0x20;
   actors::ResetLiveActorMovement(kActor);
-  CHECK(battle_actor.commandState == 0x20);
+  CHECK(battle_actor.command_state == 0x20);
   // A battle actor without an actor record still drops its command.
-  Battle_Actor& other = state.AddBattleActor(kOtherActor);
-  other.commandState = 7;
+  VS::Battle::Actor& other = state.AddBattleActor(kOtherActor);
+  other.command_state = 7;
   actors::ResetLiveActorMovement(kOtherActor);
-  CHECK(other.commandState == 0);
+  CHECK(other.command_state == 0);
 }
 
 TEST_CASE("Live record entries apply the fall, request and transition rules",

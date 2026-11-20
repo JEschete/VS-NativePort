@@ -14,6 +14,8 @@
 #include "Battle/Targeting.hpp"
 #include "Menu/Framework/Menus.hpp"
 
+using VS::Battle::TargetLabelLine;
+
 namespace {
 namespace battle = VS::Battle;
 
@@ -620,7 +622,7 @@ TEST_CASE("Live sphere target highlights ignore an empty or missing list",
   VS::Battle::targetSphere = nullptr;
   battle::UpdateSphereTargetHighlightsEntry(nullptr, 0);
   battle::UpdateSphereTargetHighlightsEntry(nullptr, 3);
-  std::array<Battle_TargetLabelLine, 2> lines{};
+  std::array<TargetLabelLine, 2> lines{};
   lines[0].opaque9 = 16;
   lines[1].opaque9 = 0x30;
   battle::UpdateSphereTargetHighlightsEntry(lines.data(),

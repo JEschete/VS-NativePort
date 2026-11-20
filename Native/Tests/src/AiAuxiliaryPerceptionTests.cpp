@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -31,7 +31,7 @@ struct AuxiliaryPerceptionFixture {
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   std::array<VS::Actors::ActorRecord, 2> records{};
-  std::array<Battle_Actor, 3> actors{};
+  std::array<VS::Battle::Actor, 3> actors{};
   VS::Battle::Ai::ActorAiState owner{};
   VS::Battle::Ai::ActorAiState target{};
   VS::Field::GimmickInstance auxiliary{};
@@ -77,7 +77,7 @@ struct AuxiliaryPerceptionFixture {
       actors[1].model =
           reinterpret_cast<VS::Actors::ModelInstance*>(&auxiliary);
       actors[1].kind = 0x10;
-      actors[1].modelId = 0xFE;
+      actors[1].model_id = 0xFE;
       VS::Actors::actorRecords[2] = nullptr;
     }
   }

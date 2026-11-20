@@ -12,7 +12,7 @@
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/StatusEffects.hpp"
@@ -41,9 +41,9 @@ namespace {
 static_assert(sizeof VS::Menu::Framework::comparisonStatTotals == 8);
 
 struct ComparisonFixture {
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   std::array<int16_t, 4> saved_deltas{};
   std::array<unsigned char, 8> saved_totals{};
   std::array<int16_t, 4> saved_accessory{};
@@ -65,7 +65,7 @@ struct ComparisonFixture {
     std::memset(VS::Menu::Framework::comparisonStatTotals, 0,
                 sizeof saved_totals);
     stats.strength = stats.intelligence = stats.agility = 100;
-    stats.totalStrength = stats.totalIntelligence = stats.totalAgility = 100;
+    stats.total_strength = stats.total_intelligence = stats.total_agility = 100;
     stats.accessory.current_intelligence = 1;
     actor.stats = &stats;
     VS::Battle::actors[0] = &actor;

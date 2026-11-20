@@ -14,10 +14,10 @@
 #include <string_view>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -28,6 +28,8 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Render/GameFontLive.hpp"
 #include "State/Progress.hpp"
+
+using VS::Battle::kActionIdDaggerArtOne;
 
 namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
 namespace menu1_strings = VS::Content::text::menu1_prg::strings;
@@ -81,15 +83,13 @@ class LiveHost final : public Host {
   std::uint16_t BreakArtsHeaderIndex() const override {
     return battle_menu_strings::index::kBreakArts;
   }
-  std::int32_t DaggerArtOneId() const override {
-    return Battle_ActionId_DaggerArtOne;
-  }
+  std::int32_t DaggerArtOneId() const override { return kActionIdDaggerArtOne; }
 
   std::optional<std::uint8_t> ActionCost(int action_id) override {
     if (!ValidAction(action_id)) {
       return std::nullopt;
     }
-    return Battle_actionDefinitions[action_id].cost;
+    return VS::Battle::actionDefinitions[action_id].cost;
   }
   std::optional<std::uint32_t> ActionRestrictionFlags(int action_id) override {
     if (!ValidAction(action_id) || VS::Battle::characterState == nullptr) {
@@ -102,20 +102,20 @@ class LiveHost final : public Host {
     if (!ValidAction(action_id)) {
       return std::nullopt;
     }
-    return Battle_actionDefinitions[action_id].unlocked != 0;
+    return VS::Battle::actionDefinitions[action_id].unlocked != 0;
   }
   bool ActionNameAvailable(int action_id) override {
     if (!ValidAction(action_id)) {
       return false;
     }
-    return std::memchr(Battle_actionDefinitions[action_id].name, '\0',
-                       kActionNameBytes) != nullptr;
+    return std::memchr(VS::Battle::actionDefinitions[action_id].name.data(),
+                       '\0', kActionNameBytes) != nullptr;
   }
   std::optional<int> EquippedWeaponCategory() override {
     if (VS::Battle::characterState == nullptr) {
       return std::nullopt;
     }
-    return VS::Battle::characterState->equippedWeaponCategory;
+    return VS::Battle::characterState->equipped_weapon_category;
   }
   std::optional<int> ArtsLearned(int category) override {
     if (category < 0 || static_cast<std::size_t>(category) >=
@@ -275,9 +275,10 @@ class LiveHost final : public Host {
         if (!ValidAction(text.value)) {
           return std::nullopt;
         }
-        return NullTerminated(reinterpret_cast<const std::uint8_t*>(
-                                  Battle_actionDefinitions[text.value].name),
-                              kActionNameBytes);
+        return NullTerminated(
+            reinterpret_cast<const std::uint8_t*>(
+                VS::Battle::actionDefinitions[text.value].name.data()),
+            kActionNameBytes);
       case TextKind::kBattleMenuIndex: {
         const auto size = std::size(VS::Menu::menuStrings);
         if (text.value >= size || VS::Menu::menuStrings[text.value] >= size) {

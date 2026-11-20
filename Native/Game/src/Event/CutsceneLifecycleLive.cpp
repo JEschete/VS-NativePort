@@ -8,7 +8,7 @@
 #include "Audio/SoundState.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -71,7 +71,7 @@ class LiveCutsceneHost final : public CutsceneHost {
       return std::nullopt;
     }
     return CutscenePreferences{
-        (VS::Battle::characterState->weaponDrawn & 1) != 0,
+        (VS::Battle::characterState->weapon_drawn & 1) != 0,
         VS::Field::sphericalCamera.motion.target_yaw,
         VS::Field::sphericalCamera.preferred_distance};
   }
@@ -88,14 +88,14 @@ class LiveCutsceneHost final : public CutsceneHost {
     if (VS::Battle::actors[actor] == nullptr) {
       return std::nullopt;
     }
-    return VS::Battle::actors[actor]->commandState;
+    return VS::Battle::actors[actor]->command_state;
   }
   void SetActorCommand(int actor, std::uint8_t command) override {
     if (VS::Battle::actors[actor] == nullptr) {
       Refuse(CutsceneRefusal::kMissingActor, actor);
       return;
     }
-    VS::Battle::actors[actor]->commandState = command;
+    VS::Battle::actors[actor]->command_state = command;
   }
   void ResetActorHeadTracking(int actor) override {
     Actors::SetLiveActorHeadTracking(actor, -2, nullptr, -1);

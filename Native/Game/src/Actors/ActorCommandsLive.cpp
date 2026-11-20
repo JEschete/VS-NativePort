@@ -22,11 +22,11 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -65,11 +65,11 @@ constexpr std::uint8_t kNoPreviewSelected = 0xFF;
 
 static_assert(std::size(ashleyMoveInput) > kMoveInputForward);
 
-CommandActorGait GaitOf(const Battle_ActorStats& stats) {
+CommandActorGait GaitOf(const VS::Battle::ActorStats& stats) {
   // The stats bytes are unsigned (the original builds with unsigned char).
-  return {.walk_speed = static_cast<std::uint8_t>(stats.walkSpeed),
-          .gait_class = static_cast<std::uint8_t>(stats.gaitClass),
-          .run_speed = static_cast<std::uint8_t>(stats.runSpeed)};
+  return {.walk_speed = static_cast<std::uint8_t>(stats.walk_speed),
+          .gait_class = static_cast<std::uint8_t>(stats.gait_class),
+          .run_speed = static_cast<std::uint8_t>(stats.run_speed)};
 }
 
 PackedTile TileOf(const VS::Actors::TileTarget& tile) {
@@ -102,28 +102,28 @@ class LiveCommandHost final : public ActorCommandHost {
  public:
   [[nodiscard]] std::optional<ActorCommand> Command(
       int actor_id) const override {
-    const Battle_Actor* actor = Actor(actor_id);
+    const VS::Battle::Actor* actor = Actor(actor_id);
     if (actor == nullptr) {
       return std::nullopt;
     }
-    return ActorCommand{.state = actor->commandState,
-                        .opcode = actor->commandOpcode,
-                        .target = actor->commandTarget,
-                        .flags = actor->commandFlags,
-                        .args = {actor->commandArg0, actor->commandArg1.word,
-                                 actor->commandArg2}};
+    return ActorCommand{.state = actor->command_state,
+                        .opcode = actor->command_opcode,
+                        .target = actor->command_target,
+                        .flags = actor->command_flags,
+                        .args = {actor->command_arg0, actor->command_arg1.word,
+                                 actor->command_arg2}};
   }
   void SetCommandState(int actor_id, std::uint8_t state) override {
-    Required(actor_id).commandState = state;
+    Required(actor_id).command_state = state;
   }
   void SetCommandFlags(int actor_id, std::uint8_t flags) override {
-    Required(actor_id).commandFlags = flags;
+    Required(actor_id).command_flags = flags;
   }
   void SetCommandArgs(int actor_id, const CommandArgs& args) override {
-    Battle_Actor& actor = Required(actor_id);
-    actor.commandArg0 = args[0];
-    actor.commandArg1.word = args[1];
-    actor.commandArg2 = args[2];
+    VS::Battle::Actor& actor = Required(actor_id);
+    actor.command_arg0 = args[0];
+    actor.command_arg1.word = args[1];
+    actor.command_arg2 = args[2];
   }
   [[nodiscard]] unsigned Kind(int actor_id) const override {
     return Required(actor_id).kind;
@@ -235,31 +235,31 @@ class LiveCommandHost final : public ActorCommandHost {
   }
   [[nodiscard]] std::optional<std::uint16_t> LimbActionId(
       int actor_id, unsigned limb, unsigned slot) const override {
-    const Battle_ActorStats& stats = *Required(actor_id).stats;
-    if (limb >= std::size(stats.limbActions) ||
-        slot >= std::size(stats.limbActions[0])) {
+    const VS::Battle::ActorStats& stats = *Required(actor_id).stats;
+    if (limb >= std::size(stats.limb_actions) ||
+        slot >= std::size(stats.limb_actions[0])) {
       VS::Core::Debugf("actors.commands",
                        "Actor %d limb action [%u][%u] is outside its table",
                        actor_id, limb, slot);
       return std::nullopt;
     }
-    return stats.limbActions[limb][slot].actionId;
+    return stats.limb_actions[limb][slot].action_id;
   }
   bool BeginActionSelection(int actor_id, std::uint16_t action) override {
     VS::Battle::LiveBeginActorActionSelection(Required(actor_id).id, action);
-    return VS::Battle::actionState->selectedPreview == kNoPreviewSelected;
+    return VS::Battle::actionState->selected_preview == kNoPreviewSelected;
   }
 
  private:
-  static Battle_Actor* Actor(int actor_id) {
+  static VS::Battle::Actor* Actor(int actor_id) {
     if (actor_id < 0 ||
         static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
       return nullptr;
     }
     return VS::Battle::actors[actor_id];
   }
-  static Battle_Actor& Required(int actor_id) {
-    Battle_Actor* actor = Actor(actor_id);
+  static VS::Battle::Actor& Required(int actor_id) {
+    VS::Battle::Actor* actor = Actor(actor_id);
     if (actor == nullptr) {
       VS::Core::Errorf("actors.commands", "Command requires battle actor %d",
                        actor_id);

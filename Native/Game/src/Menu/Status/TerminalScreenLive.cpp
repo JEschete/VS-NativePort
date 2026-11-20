@@ -85,7 +85,7 @@ class ScreenHost final : public HostBase<StatusTerminalHost> {
   }
   std::optional<int> StatusEffects(std::optional<int> actor,
                                    bool selection) override {
-    Battle_ActorStats* target = nullptr;
+    VS::Battle::ActorStats* target = nullptr;
     if (actor) {
       target = Stats(*actor);
       if (target == nullptr) {

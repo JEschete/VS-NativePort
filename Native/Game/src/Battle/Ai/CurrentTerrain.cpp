@@ -10,7 +10,7 @@
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"

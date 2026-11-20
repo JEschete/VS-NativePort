@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "Battle/ActionResolution.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 
 namespace VS::Battle {
 
@@ -17,7 +17,7 @@ inline constexpr std::size_t kHitResultBytes = 0x44;
 // One limb's hit result: its two effect values, or both read as one word.
 // decomp: the limbs union of HitEntity (src/BATTLE/BATTLE.PRG/hitEntity.h:47)
 union HitLimbResult {
-  Battle_LimbEffects effects;
+  VS::Battle::LimbEffects effects;
   std::uint32_t packed;
 };
 

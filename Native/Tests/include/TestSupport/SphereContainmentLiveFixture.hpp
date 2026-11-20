@@ -7,7 +7,7 @@
 #include <cstring>
 #include <span>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/TargetVolume.hpp"
@@ -17,10 +17,10 @@ using Point = std::array<std::uint16_t, 3>;
 using VolumeBytes = std::array<std::uint8_t, 16>;
 inline constexpr Battle::TargetVolumeExtents kDefaultExtents{8, 4, 8, 0};
 
-inline Battle_TargetVolume Volume(
+inline VS::Battle::TargetVolume Volume(
     std::uint8_t kind, Battle::TargetVolumeExtents extents = kDefaultExtents,
     Core::Math::Position3 origin = {}) {
-  Battle_TargetVolume volume{};
+  VS::Battle::TargetVolume volume{};
   volume.kind = kind;
   std::memcpy(&volume.scale, extents.data(), sizeof extents);
   volume.position[0] = origin.x;
@@ -29,12 +29,12 @@ inline Battle_TargetVolume Volume(
   return volume;
 }
 
-inline VolumeBytes Bytes(const Battle_TargetVolume& volume) {
+inline VolumeBytes Bytes(const VS::Battle::TargetVolume& volume) {
   return std::bit_cast<VolumeBytes>(volume);
 }
 
 inline std::span<const std::uint16_t> FlagsPoint(
-    const Battle_TargetVolume& volume) {
+    const VS::Battle::TargetVolume& volume) {
   return {reinterpret_cast<const std::uint16_t*>(&volume.scale), 3};
 }
 

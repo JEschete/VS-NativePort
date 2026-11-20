@@ -8,25 +8,25 @@
 #include <optional>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Diagnostics.hpp"
 #include "State/KillScore.hpp"
 #include "State/Progress.hpp"
 
 namespace VS::State {
 namespace {
-// Actor kind bits (Battle_Actor::kind): 4 marks a hostile actor.
+// Actor kind bits (VS::Battle::Actor::kind): 4 marks a hostile actor.
 constexpr unsigned kHostileActorKind = 4;
 
-[[nodiscard]] DefeatedEnemy DefeatedEnemyOf(const Battle_Actor& enemy) {
-  DefeatedEnemy defeated{.sub_type = enemy.subType, .scored = std::nullopt};
-  const Battle_ActorStats* stats = enemy.stats;
+[[nodiscard]] DefeatedEnemy DefeatedEnemyOf(const VS::Battle::Actor& enemy) {
+  DefeatedEnemy defeated{.sub_type = enemy.sub_type, .scored = std::nullopt};
+  const VS::Battle::ActorStats* stats = enemy.stats;
   if (stats != nullptr && enemy.kind == kHostileActorKind) {
-    defeated.scored =
-        ScoredEnemy{.enemy_class = static_cast<std::uint8_t>(stats->enemyClass),
-                    .max_hp = stats->maxHp};
+    defeated.scored = ScoredEnemy{
+        .enemy_class = static_cast<std::uint8_t>(stats->enemy_class),
+        .max_hp = stats->max_hp};
   }
   return defeated;
 }
@@ -74,7 +74,7 @@ void StoreLiveKillScore(const KillScore& score) noexcept {
   record.chain_streak = score.chain_streak;
 }
 
-void RecordLiveEnemyKillScore(Battle_Actor* enemy) {
+void RecordLiveEnemyKillScore(VS::Battle::Actor* enemy) {
   if (enemy == nullptr) {
     VS::Core::Warnf("state", "RecordEnemyKillScore refused: no defeated enemy");
     return;
@@ -97,9 +97,9 @@ void UpdateLiveWeaponKillStreak(int /*unused*/) {
     VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no action state");
     return;
   }
-  const std::uint16_t action_id = VS::Battle::actionState->selection.actionId;
+  const std::uint16_t action_id = VS::Battle::actionState->selection.action_id;
   if (!ExtendsWeaponKillStreak(action_id)) return;
-  const Battle_Actor* player = VS::Battle::characterState;
+  const VS::Battle::Actor* player = VS::Battle::characterState;
   if (player == nullptr || player->stats == nullptr) {
     VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no player stats");
     return;

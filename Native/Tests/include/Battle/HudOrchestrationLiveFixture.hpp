@@ -164,7 +164,7 @@ class LiveState {
     VS::State::tickSpeed = 2;
     actor.stats = {};
     for (auto& limb : actor.stats.limbs) {
-      limb.hp = limb.maxHp = 100;
+      limb.hp = limb.max_hp = 100;
     }
     auto boxes = std::span(VS::Menu::textBoxes);
     boxes[7] = {};

@@ -10,7 +10,7 @@
 #include <string_view>
 #include <utility>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"

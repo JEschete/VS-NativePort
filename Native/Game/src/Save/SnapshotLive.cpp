@@ -16,9 +16,9 @@
 #include "Actors/Location.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.hpp"
@@ -28,6 +28,8 @@
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
 #include "State/Progress.hpp"
+
+using VS::Battle::LimbStats;
 
 namespace VS::Save {
 namespace {
@@ -41,29 +43,30 @@ static_assert(sizeof(VS::State::AshleyStatsSnapshot::is_pending) ==
               sizeof(std::int32_t));
 static_assert(std::extent_v<decltype(VS::State::learnedActionFlags)> ==
               kLearnedActionBytes);
-static_assert(std::extent_v<decltype(Battle_actionDefinitions)> ==
+static_assert(std::tuple_size_v<decltype(VS::Battle::actionDefinitions)> ==
               kLearnedActionCount);
 // The statistics the capture copies field by field.
-static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> ==
+static_assert(std::tuple_size_v<decltype(VS::Battle::ActorStats::limbs)> ==
               kSnapshotLimbCount);
 static_assert(std::extent_v<decltype(VS::State::AshleyStatsSnapshot::limbs)> ==
               kSnapshotLimbCount);
-static_assert(std::extent_v<decltype(Battle_ActorStats::statusTimers)> ==
-              kSnapshotStatusTimerCount);
+static_assert(
+    std::tuple_size_v<decltype(VS::Battle::ActorStats::status_timers)> ==
+    kSnapshotStatusTimerCount);
 static_assert(
     std::extent_v<decltype(VS::State::AshleyStatsSnapshot::status_timers)> ==
     kSnapshotStatusTimerCount);
-static_assert(std::extent_v<decltype(Battle_LimbStats::types)> ==
+static_assert(std::tuple_size_v<decltype(LimbStats::types)> ==
               kSnapshotLimbTypeCount);
 static_assert(std::extent_v<decltype(VS::State::AshleyLimbSnapshot::types)> ==
               kSnapshotLimbTypeCount);
-static_assert(std::extent_v<decltype(Battle_LimbStats::affinities)> ==
+static_assert(std::tuple_size_v<decltype(LimbStats::affinities)> ==
               kSnapshotLimbAffinityCount);
 static_assert(
     std::extent_v<decltype(VS::State::AshleyLimbSnapshot::affinities)> ==
     kSnapshotLimbAffinityCount);
-static_assert(sizeof(Battle_ActorStats::risk) == sizeof(std::uint16_t));
-static_assert(sizeof(Battle_ActorStats::actionRecoveryTimer) ==
+static_assert(sizeof(VS::Battle::ActorStats::risk) == sizeof(std::uint16_t));
+static_assert(sizeof(VS::Battle::ActorStats::action_recovery_timer) ==
               sizeof(std::uint16_t));
 static_assert(sizeof(VS::State::AshleyStatsSnapshot::action_recovery_timer) ==
               sizeof(std::uint16_t));
@@ -73,9 +76,9 @@ std::span<std::byte, sizeof(T)> BytesOf(T& value) {
   return std::as_writable_bytes(std::span<T, 1>{&value, 1});
 }
 
-SnapshotLimb LimbOf(const Battle_LimbStats& limb) {
+SnapshotLimb LimbOf(const LimbStats& limb) {
   SnapshotLimb copy{.hp = static_cast<std::uint16_t>(limb.hp),
-                    .max_hp = static_cast<std::uint16_t>(limb.maxHp)};
+                    .max_hp = static_cast<std::uint16_t>(limb.max_hp)};
   std::ranges::transform(limb.types, copy.types.begin(), [](auto type) {
     return static_cast<std::uint16_t>(type);
   });
@@ -85,25 +88,25 @@ SnapshotLimb LimbOf(const Battle_LimbStats& limb) {
   return copy;
 }
 
-AshleyCombatStats StatsOf(const Battle_Actor& actor,
-                          const Battle_ActorStats& stats) {
+AshleyCombatStats StatsOf(const VS::Battle::Actor& actor,
+                          const VS::Battle::ActorStats& stats) {
   AshleyCombatStats copy{
-      .current_hp = stats.currentHp,
-      .max_hp = stats.maxHp,
-      .current_mp = stats.currentMp,
-      .max_mp = stats.maxMp,
+      .current_hp = stats.current_hp,
+      .max_hp = stats.max_hp,
+      .current_mp = stats.current_mp,
+      .max_mp = stats.max_mp,
       .strength = static_cast<std::int16_t>(stats.strength),
-      .total_strength = static_cast<std::int16_t>(stats.totalStrength),
+      .total_strength = static_cast<std::int16_t>(stats.total_strength),
       .intelligence = static_cast<std::int16_t>(stats.intelligence),
-      .total_intelligence = static_cast<std::int16_t>(stats.totalIntelligence),
+      .total_intelligence = static_cast<std::int16_t>(stats.total_intelligence),
       .agility = static_cast<std::int16_t>(stats.agility),
-      .total_agility = static_cast<std::int16_t>(stats.totalAgility),
+      .total_agility = static_cast<std::int16_t>(stats.total_agility),
       .risk = static_cast<std::int16_t>(stats.risk),
-      .action_recovery_timer = stats.actionRecoveryTimer,
+      .action_recovery_timer = stats.action_recovery_timer,
       .statuses = stats.statuses,
-      .weapon_drawn = actor.weaponDrawn};
+      .weapon_drawn = actor.weapon_drawn};
   std::ranges::transform(
-      stats.statusTimers, copy.status_timers.begin(),
+      stats.status_timers, copy.status_timers.begin(),
       [](auto timer) { return static_cast<std::int8_t>(timer); });
   std::ranges::transform(stats.limbs, copy.limbs.begin(), LimbOf);
   return copy;
@@ -138,14 +141,14 @@ class LiveSnapshotHost final : public SnapshotHost {
         .facing = static_cast<std::uint8_t>(target.facing)};
   }
   bool ActionUnlocked(std::size_t action) override {
-    if (action >= std::extent_v<decltype(Battle_actionDefinitions)>) {
+    if (action >= std::tuple_size_v<decltype(VS::Battle::actionDefinitions)>) {
       return false;
     }
-    const std::span definitions{Battle_actionDefinitions};
+    const std::span definitions{VS::Battle::actionDefinitions};
     return definitions[action].unlocked != 0;
   }
   std::optional<AshleyCombatStats> AshleyStats() override {
-    const Battle_Actor* actor = VS::Battle::characterState;
+    const VS::Battle::Actor* actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr) {
       return std::nullopt;
     }

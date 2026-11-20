@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -29,6 +29,8 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Battle::LimbStats;
 
 namespace menu4_status = VS::Content::text::menu4_prg::status;
 
@@ -60,17 +62,17 @@ void Report(std::string_view call, const LimbControllerResult& result) {
   if (!result) Refuse(call, result.error());
 }
 
-[[nodiscard]] Battle_ActorStats* StatsOf(std::int32_t slot) {
+[[nodiscard]] VS::Battle::ActorStats* StatsOf(std::int32_t slot) {
   if (slot < 0 ||
       static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  const Battle_Actor* const actor =
+  const VS::Battle::Actor* const actor =
       VS::Battle::actors[static_cast<std::size_t>(slot)];
   return actor == nullptr ? nullptr : actor->stats;
 }
 [[nodiscard]] std::optional<std::int32_t> SlotOf(
-    const Battle_ActorStats* stats) {
+    const VS::Battle::ActorStats* stats) {
   if (stats == nullptr) return std::nullopt;
   for (std::size_t slot = 0; slot < std::size(VS::Battle::actors); ++slot) {
     if (StatsOf(static_cast<std::int32_t>(slot)) == stats) {
@@ -79,11 +81,10 @@ void Report(std::string_view call, const LimbControllerResult& result) {
   }
   return std::nullopt;
 }
-[[nodiscard]] std::expected<Battle_LimbStats*, LimbControllerError>
-SelectedLimb() {
+[[nodiscard]] std::expected<LimbStats*, LimbControllerError> SelectedLimb() {
   const auto slot = std::bit_cast<std::int32_t>(
       static_cast<std::uint32_t>(selectedActor) - 1U);
-  Battle_ActorStats* const stats = StatsOf(slot);
+  VS::Battle::ActorStats* const stats = StatsOf(slot);
   if (stats == nullptr) {
     return std::unexpected(LimbControllerError::kMissingActor);
   }
@@ -126,7 +127,7 @@ class LiveIcons final : public StatusIconHost {
     return queue.Emit(packet);
   }
 };
-[[nodiscard]] LimbControllerResult DrawLiveIcons(Battle_ActorStats* actor,
+[[nodiscard]] LimbControllerResult DrawLiveIcons(VS::Battle::ActorStats* actor,
                                                  int slide) {
   if (!SlotOf(actor)) {
     return std::unexpected(LimbControllerError::kMissingActor);
@@ -161,11 +162,11 @@ void DrawLabel(const char* label, std::int32_t position,
 class LivePanel final : public LimbPanelHost {
  public:
   std::optional<LimbNameIndices> Names(std::uint8_t actor_slot) override {
-    const Battle_ActorStats* const stats = StatsOf(actor_slot);
+    const VS::Battle::ActorStats* const stats = StatsOf(actor_slot);
     if (stats == nullptr) return std::nullopt;
     LimbNameIndices names{};
     for (std::size_t limb = 0; limb < names.size(); ++limb) {
-      names[limb] = stats->limbs[limb].nameIndex;
+      names[limb] = stats->limbs[limb].name_index;
     }
     return names;
   }
@@ -188,7 +189,7 @@ class LivePanel final : public LimbPanelHost {
   }
   std::optional<std::uint8_t> Condition(std::uint8_t actor_slot,
                                         std::size_t limb) override {
-    Battle_ActorStats* const stats = StatsOf(actor_slot);
+    VS::Battle::ActorStats* const stats = StatsOf(actor_slot);
     if (stats == nullptr || limb >= std::size(stats->limbs)) {
       return std::nullopt;
     }
@@ -210,14 +211,14 @@ class LivePanel final : public LimbPanelHost {
   }
   std::optional<std::int32_t> ProjectAnchor(std::uint8_t actor_slot,
                                             std::size_t limb) override {
-    const Battle_ActorStats* const stats = StatsOf(actor_slot);
+    const VS::Battle::ActorStats* const stats = StatsOf(actor_slot);
     if (stats == nullptr || limb >= std::size(stats->limbs)) {
       return std::nullopt;
     }
     std::array<int, 2> screen{};
     // The original uses LBU for this char, including anchors >= 128.
     const auto anchor =
-        static_cast<std::uint8_t>(stats->limbs[limb].anchorBone);
+        static_cast<std::uint8_t>(stats->limbs[limb].anchor_bone);
     if (Actors::ProjectLiveActorBone(kPreviewActor, anchor, screen.data(), 0) <
         0) {
       return std::nullopt;
@@ -324,11 +325,13 @@ void LiveDrawLimbLeaderLine(int limb, int position, int unused_fade,
       DrawLiveLeader({.limb = limb, .position = position, .opacity = opacity}));
 }
 // decomp: _renderStatusIcons (MENU4.PRG 120.c:913).
-void LiveDrawStatusEffectIcons(Battle_ActorStats* actor, int animation_step) {
+void LiveDrawStatusEffectIcons(VS::Battle::ActorStats* actor,
+                               int animation_step) {
   Report("DrawStatusEffectIcons", DrawLiveIcons(actor, animation_step));
 }
 // decomp: _navigateStatusModifiers (MENU4.PRG 120.c:961).
-int LiveNavigateStatusEffects(Battle_ActorStats* actor, int selection_active) {
+int LiveNavigateStatusEffects(VS::Battle::ActorStats* actor,
+                              int selection_active) {
   std::optional<StatusEffectTarget> target;
   if (actor != nullptr) {
     const auto slot = SlotOf(actor);
@@ -371,7 +374,7 @@ void LiveShowSelectedLimbCondition() {
     Refuse("ShowSelectedLimbCondition", LimbControllerError::kInvalidText);
     return;
   }
-  Battle_LimbStats* const limb = *selected;
+  LimbStats* const limb = *selected;
   const int condition = Battle::LiveLimbCondition(limb);
   if (condition < 0 ||
       static_cast<std::size_t>(condition) >= kLimbConditionCount) {
@@ -379,7 +382,7 @@ void LiveShowSelectedLimbCondition() {
     return;
   }
   const SelectedLimbText text{
-      .name = IndexedText(VS::Battle::statusStrings, limb->nameIndex),
+      .name = IndexedText(VS::Battle::statusStrings, limb->name_index),
       .condition =
           IndexedText(statusStrings,
                       static_cast<std::size_t>(menu4_status::index::kCritical) +
@@ -405,7 +408,7 @@ void LivePopulateSelectedLimbDefense() {
     Refuse("PopulateSelectedLimbDefense", selected.error());
     return;
   }
-  const Battle_LimbStats* const limb = *selected;
+  const LimbStats* const limb = *selected;
   LiveSelection host;
   Report(
       "PopulateSelectedLimbDefense",

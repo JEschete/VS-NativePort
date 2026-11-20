@@ -4,7 +4,9 @@
 
 #include "Menu/Status/LimbControllers.hpp"
 
-struct Battle_ActorStats;
+namespace VS::Battle {
+struct ActorStats;
+}  // namespace VS::Battle
 
 // Checked bindings over the existing actor roster, MENU4 text and menu
 // workspace. No actor, string bank or render storage is allocated or freed.
@@ -13,8 +15,10 @@ namespace VS::Menu::Status {
 void LiveDrawLimbConditionIndicator(int condition, int position, int dimming);
 void LiveDrawLimbLeaderLine(int limb, int position, int unused_fade,
                             int opacity);
-void LiveDrawStatusEffectIcons(Battle_ActorStats* actor, int animation_step);
-int LiveNavigateStatusEffects(Battle_ActorStats* actor, int selection_active);
+void LiveDrawStatusEffectIcons(VS::Battle::ActorStats* actor,
+                               int animation_step);
+int LiveNavigateStatusEffects(VS::Battle::ActorStats* actor,
+                              int selection_active);
 int LiveUpdateLimbPanel(int request);
 void LiveShowSelectedLimbCondition();
 void LivePopulateSelectedLimbDefense();

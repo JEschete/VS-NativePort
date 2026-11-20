@@ -13,8 +13,8 @@
 #include "Actors/ShpModel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -36,6 +36,10 @@
 #include "Effects/Runtime.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::kActionTypeBaseAttack;
+using VS::Battle::TargetSphereLabelView;
 
 static_assert(
     sizeof(VS::Actors::ActorCore) - offsetof(VS::Actors::ActorCore, model) >=
@@ -106,16 +110,13 @@ int TestsDiscReadSizeContract(void) {
   return passed;
 }
 
-static_assert(sizeof(Battle_ActionDefinition) == 52,
-              "action definition disc stride");
-static_assert(offsetof(Battle_ActionDefinition, cost) == 3,
-              "action cost offset");
-static_assert(offsetof(Battle_ActionDefinition, aiFlags) == 14,
+static_assert(sizeof(ActionDefinition) == 52, "action definition disc stride");
+static_assert(offsetof(ActionDefinition, cost) == 3, "action cost offset");
+static_assert(offsetof(ActionDefinition, ai_flags) == 14,
               "action AI flags offset");
-static_assert(offsetof(Battle_ActionDefinition, hits) == 20,
+static_assert(offsetof(ActionDefinition, hits) == 20,
               "action hit definitions offset");
-static_assert(offsetof(Battle_ActionDefinition, name) == 28,
-              "action name offset");
+static_assert(offsetof(ActionDefinition, name) == 28, "action name offset");
 static_assert(sizeof(VS::Battle::TargetSphereSetupView) >=
                   sizeof(VS::Battle::TargetSphereRecord),
               "sphere allocation extent");
@@ -125,7 +126,7 @@ static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_vertices) ==
 static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_edges) ==
                   offsetof(VS::Battle::TargetSphereRecord, wire_edges),
               "sphere edge view offset");
-static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
+static_assert(offsetof(TargetSphereLabelView, opaque990) ==
                   offsetof(VS::Battle::TargetSphereRecord, labels),
               "sphere label view offset");
 
@@ -149,8 +150,8 @@ static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) -
 // VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
 // block of an allocation as `actor + 1`.
 static_assert(offsetof(VS::Actors::ActorAllocation, core.actor.stats) ==
-                  sizeof(Battle_Actor),
-              "stats do not follow the Battle_Actor");
+                  sizeof(VS::Battle::Actor),
+              "stats do not follow the actor");
 
 // On-disc structs keep the file layout (ONDISC_OFFSETS): the SHP header is 64
 // bytes, the bones follow.
@@ -167,11 +168,12 @@ static_assert(sizeof((static_cast<VS::Actors::ActorRecord*>(nullptr))
 #define SAME_FIELD(View, member, Record, field)                    \
   static_assert(offsetof(View, member) == offsetof(Record, field), \
                 "native view mismatch: " #View "." #member)
-SAME_FIELD(VS::Battle::Ai::AiActorView, actor_id, Battle_Actor, id);
-SAME_FIELD(VS::Battle::Ai::AiActorView, ai_control_flags, Battle_Actor, kind);
-SAME_FIELD(VS::Battle::Ai::AiActorView, stats, Battle_Actor, stats);
-SAME_FIELD(VS::Battle::Ai::AiActorView, model, Battle_Actor, model);
-SAME_FIELD(VS::Battle::Ai::SettingsActorView, opaque34, Battle_Actor,
+SAME_FIELD(VS::Battle::Ai::AiActorView, actor_id, VS::Battle::Actor, id);
+SAME_FIELD(VS::Battle::Ai::AiActorView, ai_control_flags, VS::Battle::Actor,
+           kind);
+SAME_FIELD(VS::Battle::Ai::AiActorView, stats, VS::Battle::Actor, stats);
+SAME_FIELD(VS::Battle::Ai::AiActorView, model, VS::Battle::Actor, model);
+SAME_FIELD(VS::Battle::Ai::SettingsActorView, opaque34, VS::Battle::Actor,
            reserved34);
 SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, VS::Actors::ActorRecord,
            collision_radius);
@@ -236,10 +238,10 @@ int Tests_AiMovementDispatch(void) {
 }
 
 int Tests_AiRelations(void) {
-  Battle_Actor actors[3] = {{nullptr}};
+  VS::Battle::Actor actors[3] = {{nullptr}};
   VS::Battle::Ai::ActorAiState states[3] = {{0}};
   const unsigned ids[3] = {0, 2, 5};
-  Battle_Actor* saved_head = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_states[3];
   for (unsigned index = 0; index < 3; ++index) {
     saved_states[index] = VS::Battle::Ai::actorAiStates[ids[index]];
@@ -324,8 +326,8 @@ int Tests_TargetSphereViews(void) {
   VS::Battle::TargetSphereSetupView setup = {0};
   VS::Battle::TargetSphereRecord* sphere =
       reinterpret_cast<VS::Battle::TargetSphereRecord*>(&setup);
-  Battle_TargetSphereLabelView* labels =
-      reinterpret_cast<Battle_TargetSphereLabelView*>(&setup);
+  TargetSphereLabelView* labels =
+      reinterpret_cast<TargetSphereLabelView*>(&setup);
   VS::Battle::TargetPreview targets[2] = {{0}};
   char text[] = "limb";
   setup.target_list0 = &targets[0];
@@ -336,22 +338,22 @@ int Tests_TargetSphereViews(void) {
          sphere->target_lists[1] == &targets[1] &&
          labels->opaque40 == reinterpret_cast<void*>(&targets[0]) &&
          labels->opaque44 == reinterpret_cast<void*>(&targets[1]) &&
-         labels->opaque990[23].limbName == text &&
+         labels->opaque990[23].limb_name == text &&
          (reinterpret_cast<int16_t*>(sphere->wire_edges))[769] == 0x1234;
 }
 
 int Tests_AiFrameStages(void) {
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   const int saved_target = VS::Battle::Ai::secondPerceptionTarget;
   const int saved_mask = VS::Battle::Ai::attributeActorMask;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  Battle_Actor actor = {nullptr};
-  Battle_ActorStats stats = {0};
+  VS::Battle::Actor actor = {nullptr};
+  VS::Battle::ActorStats stats = {0};
   VS::Actors::ActorRecord model = {0};
   VS::Battle::Ai::ActorAiState state = {0};
   VS::Battle::Ai::PerceptionUpdateView* view =
@@ -359,7 +361,7 @@ int Tests_AiFrameStages(void) {
   VS::Battle::Ai::RoomAiState room = {0};
   u_short flags[32][32] = {{0}};
   actor.stats = &stats;
-  view->actor = reinterpret_cast<Battle_Actor*>(&actor);
+  view->actor = reinterpret_cast<VS::Battle::Actor*>(&actor);
   view->model = reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&model);
   VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::actorAiStates[0] = &state;
@@ -478,23 +480,23 @@ int Tests_DefaultEffectPackageLoaded(void) {
 }
 
 int Tests_ActionDefinitionsLoaded(void) {
-  const Battle_ActionDefinition* basic = &Battle_actionDefinitions[1];
-  return basic->id == 1 && basic->effectId == 1 &&
-         basic->type == Battle_ActionType_BaseAttack && basic->category == 14 &&
-         basic->cost == 255 && basic->rangeX == 255 && basic->rangeY == 255 &&
-         basic->rangeZ == 255 && basic->hits[0].effectId == 58 &&
-         basic->hits[0].prerequisiteFunctionId == 2 &&
-         basic->hits[0].hitFunctionId == 3 &&
-         basic->hits[0].statCalculatorId == 25 &&
+  const ActionDefinition* basic = &VS::Battle::actionDefinitions[1];
+  return basic->id == 1 && basic->effect_id == 1 &&
+         basic->type == kActionTypeBaseAttack && basic->category == 14 &&
+         basic->cost == 255 && basic->range_x == 255 && basic->range_y == 255 &&
+         basic->range_z == 255 && basic->hits[0].effect_id == 58 &&
+         basic->hits[0].prerequisite_function_id == 2 &&
+         basic->hits[0].hit_function_id == 3 &&
+         basic->hits[0].stat_calculator_id == 25 &&
          VS::Battle::categoryNeedsTargetSelection[basic->category] != 0 &&
          VS::Battle::categoryTargetsBodyParts[basic->category] != 0;
 }
 
 int Tests_ActorConditionSnapshot(void) {
-  Battle_Actor first = {nullptr}, second = {nullptr};
-  Battle_ActorStats firstStats = {0}, secondStats = {0};
+  VS::Battle::Actor first = {nullptr}, second = {nullptr};
+  VS::Battle::ActorStats firstStats = {0}, secondStats = {0};
   VS::Battle::Ai::ActorAiState first_ai = {0}, second_ai = {0};
-  Battle_Actor* saved_head = VS::Battle::actors[0];
+  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
   VS::Battle::Ai::ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
   struct {
@@ -508,16 +510,16 @@ int Tests_ActorConditionSnapshot(void) {
   first.stats = &firstStats;
   second.id = 5;
   second.stats = &secondStats;
-  firstStats.currentHp = 20;
-  firstStats.maxHp = 100;
-  firstStats.currentMp = 15;
-  firstStats.maxMp = 60;
+  firstStats.current_hp = 20;
+  firstStats.max_hp = 100;
+  firstStats.current_mp = 15;
+  firstStats.max_mp = 60;
   firstStats.statuses = (1 << 6) | (1 << 12);
   firstStats.weapon.current_dp = 10;
   firstStats.weapon.max_dp = 40;
   firstStats.shield.current_dp = 30;
   firstStats.shield.max_dp = 60;
-  secondStats.maxHp = 120;
+  secondStats.max_hp = 120;
   secondStats.statuses = (1 << 0) | (1 << 12);
   second_ai.action_cost_enabled = 1;
   VS::Battle::actors[0] = &first;
@@ -565,9 +567,9 @@ int Tests_AiViewsRoundTrip(void) {
     VS::Battle::Ai::ActorAiState state;
     uint64_t after;
   } guarded;
-  Battle_Actor actor = {nullptr};
+  VS::Battle::Actor actor = {nullptr};
   VS::Actors::ActorRecord model = {0};
-  Battle_ActorStats stats = {0};
+  VS::Battle::ActorStats stats = {0};
   VS::Battle::Ai::AiCreationView* creation =
       reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&guarded.state);
   VS::Battle::Ai::SettingsView* settings =

@@ -18,8 +18,8 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -50,6 +50,8 @@
 #include "State/PlayTime.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace VS::Ending {
 namespace {
@@ -515,12 +517,10 @@ ClearProgress LoadProgress() {
   std::ranges::transform(
       VS::State::roomVisitProgress.room_flags, progress.visited_rooms.begin(),
       [](int bits) { return static_cast<std::uint32_t>(bits); });
-  static_assert(std::size(Battle_actionDefinitions) == kActionCount);
-  std::ranges::transform(Battle_actionDefinitions,
-                         progress.unlocked_actions.begin(),
-                         [](const Battle_ActionDefinition& action) {
-                           return action.unlocked != 0;
-                         });
+  static_assert(std::size(VS::Battle::actionDefinitions) == kActionCount);
+  std::ranges::transform(
+      VS::Battle::actionDefinitions, progress.unlocked_actions.begin(),
+      [](const ActionDefinition& action) { return action.unlocked != 0; });
   return progress;
 }
 

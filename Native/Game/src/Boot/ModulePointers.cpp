@@ -35,7 +35,7 @@
 #include "Audio/StreamFormat.hpp"
 #include "Audio/SurfaceSounds.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
@@ -51,8 +51,8 @@
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActionSequenceLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
@@ -88,7 +88,7 @@
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
@@ -871,7 +871,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004AD00u, 800u, (void*)&VS::Audio::legacyMusicFileSizes, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B020u, 400u, (void*)&VS::Audio::legacySfxBankFileSizes, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B1B0u, 200u, (void*)&VS::Audio::waveBankFileMap, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 1u, 1u},
+    {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)VS::Battle::actionDefinitions.data(), sizeof VS::Battle::actionDefinitions, 1u, 1u},
     {"SLUS_010.40", 0x8004EDDCu, 240u, (void*)&VS::Items::materialModifiers, sizeof VS::Items::materialModifiers, 1u, 1u},
     {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&VS::Battle::statusEffectParams, sizeof VS::Battle::statusEffectParams, 1u, 1u},
     {"SLUS_010.40", 0x8004F0CCu, 1024u, (void*)&VS::Field::locationDestinations, sizeof VS::Field::locationDestinations, 1u, 1u},

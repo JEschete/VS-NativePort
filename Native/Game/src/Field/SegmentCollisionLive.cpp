@@ -10,7 +10,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"

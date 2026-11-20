@@ -10,6 +10,8 @@
 #include "Content/ModuleData.hpp"
 #include "TestSupport/SphereContainmentLiveFixture.hpp"
 
+using VS::Battle::TargetVolume;
+
 namespace {
 namespace b = VS::Battle;
 namespace f = VS::test_support::sphere_containment;
@@ -27,19 +29,19 @@ Function Entry(unsigned address, Function expected) {
   return reinterpret_cast<Function>(pointer);
 }
 
-static_assert(std::is_same_v<
-              decltype(&b::BuildLiveTargetVolumeTestTransform),
-              b::SphereContainmentTransform (*)(const Battle_TargetVolume*)>);
+static_assert(
+    std::is_same_v<decltype(&b::BuildLiveTargetVolumeTestTransform),
+                   b::SphereContainmentTransform (*)(const TargetVolume*)>);
 static_assert(std::is_same_v<decltype(&b::IsLivePointInTargetEllipsoid),
-                             int (*)(const Battle_TargetVolume*, Point)>);
+                             int (*)(const TargetVolume*, Point)>);
 static_assert(std::is_same_v<decltype(&b::IsLivePointInTargetCylinder),
-                             int (*)(const Battle_TargetVolume*, Point, int)>);
+                             int (*)(const TargetVolume*, Point, int)>);
 static_assert(std::is_same_v<decltype(&b::IsLivePointInTargetCone),
-                             int (*)(const Battle_TargetVolume*, Point, int)>);
+                             int (*)(const TargetVolume*, Point, int)>);
 static_assert(std::is_same_v<decltype(&b::IsLivePointInTargetPrism),
-                             int (*)(const Battle_TargetVolume*, Point, int)>);
+                             int (*)(const TargetVolume*, Point, int)>);
 static_assert(std::is_same_v<decltype(&b::IsLivePointInTargetVolume),
-                             int (*)(Battle_TargetVolume*, Point)>);
+                             int (*)(TargetVolume*, Point)>);
 }  // namespace
 
 TEST_CASE("F01290 actual production module entry returns a semantic transform",

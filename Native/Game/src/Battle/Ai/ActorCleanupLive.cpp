@@ -13,7 +13,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
@@ -84,17 +84,18 @@ VS::Battle::Ai::ActorAiState* StateAt(int actor_id) {
   return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
 }
 
-BattleActorHandle HandleOf(const Battle_Actor* actor) {
+BattleActorHandle HandleOf(const VS::Battle::Actor* actor) {
   return static_cast<BattleActorHandle>(
       reinterpret_cast<std::uintptr_t>(actor));
 }
 
 // Only FreeLiveActorAiState hands the core a non-empty handle to store
 // through, and it made that handle from a live actor.
-Battle_Actor* ActorOf(BattleActorHandle actor) {
+VS::Battle::Actor* ActorOf(BattleActorHandle actor) {
   Require(actor != kNoBattleActor,
           "AI teardown command flags require an actor");
-  return reinterpret_cast<Battle_Actor*>(static_cast<std::uintptr_t>(actor));
+  return reinterpret_cast<VS::Battle::Actor*>(
+      static_cast<std::uintptr_t>(actor));
 }
 
 ReservationState LoadReservations(const VS::Battle::Ai::ActorAiState& state) {
@@ -167,9 +168,9 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<std::uint8_t> CommandOpcode(
       int actor_id) const override {
-    const Battle_Actor* actor = VS::Battle::actors[actor_id];
+    const VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
     if (actor == nullptr) return std::nullopt;
-    return actor->commandOpcode;
+    return actor->command_opcode;
   }
   [[nodiscard]] std::optional<ModelMotion> RecordMotion(
       int actor_id) const override {
@@ -216,7 +217,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     return StateAt(actor_id)->native_pointer_18c != nullptr;
   }
   void StoreCommandFlags(BattleActorHandle actor, std::uint8_t flags) override {
-    ActorOf(actor)->commandFlags = flags;
+    ActorOf(actor)->command_flags = flags;
   }
   void FreeNavigationOverride(int actor_id) override {
     VS::Battle::Ai::ActorAiState& state = *StateAt(actor_id);
@@ -277,9 +278,9 @@ class LiveReactionDelay final : public ReactionDelayHost {
   void SetCommandFlags(std::uint8_t flags) override {
     Require(state_.actor_id < kCleanupActorSlots,
             "AI reaction request actor ID is outside the AI slots");
-    Battle_Actor* actor = VS::Battle::actors[state_.actor_id];
+    VS::Battle::Actor* actor = VS::Battle::actors[state_.actor_id];
     Require(actor != nullptr, "AI reaction request requires an actor");
-    actor->commandFlags = flags;
+    actor->command_flags = flags;
   }
 
  private:
@@ -357,12 +358,12 @@ void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state) {
   StoreRoomFields(room, *VS::Battle::Ai::roomAiState);
 }
 
-void FreeLiveActorAiState(Battle_Actor* actor) {
+void FreeLiveActorAiState(VS::Battle::Actor* actor) {
   Require(actor != nullptr, "AI teardown requires an actor");
   TeardownActor teardown{.handle = HandleOf(actor),
                          .id = actor->id,
-                         .command_flags = actor->commandFlags,
-                         .sub_type = actor->subType,
+                         .command_flags = actor->command_flags,
+                         .sub_type = actor->sub_type,
                          .kind = static_cast<std::uint8_t>(actor->kind)};
   LiveCleanupHost host;
   Require(FreeActorAiState(host, teardown),

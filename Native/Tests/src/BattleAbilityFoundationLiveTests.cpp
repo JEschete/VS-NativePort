@@ -15,8 +15,8 @@
 
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
@@ -31,6 +31,8 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/Progress.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace abilities = VS::Menu::BattleAbilities;
@@ -63,8 +65,8 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
       VS::State::artsStatus};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
       VS::Input::settings};
-  ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
-      saved_actions{Battle_actionDefinitions};
+  ArrayRestore<ActionDefinition, std::size(VS::Battle::actionDefinitions)>
+      saved_actions{VS::Battle::actionDefinitions.data()};
   ArrayRestore<std::uint16_t, std::size(abilities::battleAbilityStrings)>
       saved_ability_text{abilities::battleAbilityStrings};
   ArrayRestore<std::uint16_t, std::size(abilities::battleAbilityMenuStrings)>
@@ -85,12 +87,12 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> types{};
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
 
   LiveFoundationFixture() {
     abilities::ResetLiveAbilityFoundationState();
     VS::Battle::characterState = &actor;
-    actor.equippedWeaponCategory = 1;
+    actor.equipped_weapon_category = 1;
     VS::State::artsStatus = {};
     VS::State::artsStatus.kills.weapon_category_kills[1] = 65535;
     VS::State::artsStatus.kills.total_kills = 65535;
@@ -100,17 +102,17 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::Framework::rowTypeBuf = types.data();
     abilities::abilityText = nullptr;
     abilities::unlockedChainAbilities[0] = kAction;
-    std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
+    std::ranges::fill(VS::Battle::actionDefinitions, ActionDefinition{});
     std::ranges::fill(abilities::battleAbilityStrings, std::uint16_t{0xE7E7});
     std::fill_n(abilities::battleAbilityStrings, 34, std::uint16_t{64});
     abilities::battleAbilityStrings[64] = 0xE702;
     std::ranges::fill(abilities::battleAbilityMenuStrings,
                       std::uint16_t{0xE7E7});
     std::fill_n(abilities::battleAbilityMenuStrings, 16, std::uint16_t{64});
-    std::ranges::fill(Battle_actionDefinitions[kAction].name,
+    std::ranges::fill(VS::Battle::actionDefinitions[kAction].name,
                       static_cast<char>(0xE7));
-    Battle_actionDefinitions[kAction].name[0] = 1;
-    Battle_actionDefinitions[kAction].cost = 255;
+    VS::Battle::actionDefinitions[kAction].name[0] = 1;
+    VS::Battle::actionDefinitions[kAction].cost = 255;
   }
   ~LiveFoundationFixture() {
     if (abilities::abilityText != nullptr) {
@@ -152,11 +154,11 @@ struct LiveTerminalFixture : LiveFoundationFixture {
     std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{0});
     VS::Battle::chainAbilityActionIds[0] = kAction;
     VS::Battle::defenseAbilityActionIds[0] = kDefenseAction;
-    Battle_actionDefinitions[kAction].unlocked = 1;
-    Battle_actionDefinitions[kDefenseAction].unlocked = 1;
-    std::ranges::fill(Battle_actionDefinitions[kDefenseAction].name,
+    VS::Battle::actionDefinitions[kAction].unlocked = 1;
+    VS::Battle::actionDefinitions[kDefenseAction].unlocked = 1;
+    std::ranges::fill(VS::Battle::actionDefinitions[kDefenseAction].name,
                       static_cast<char>(0xE7));
-    Battle_actionDefinitions[kDefenseAction].name[0] = 2;
+    VS::Battle::actionDefinitions[kDefenseAction].name[0] = 2;
   }
   ~LiveTerminalFixture() {
     abilities::ResetLiveAbilityTerminalColdState();
@@ -197,7 +199,7 @@ TEST_CASE("MENU2 reload restores the file-backed Break Art timeout",
   LiveFoundationFixture fixture;
   menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(1) == 0);
-  CHECK(Battle_actionDefinitions[kArtAction].unlocked == 1);
+  CHECK(VS::Battle::actionDefinitions[kArtAction].unlocked == 1);
   VS::Menu::textBoxes[7].flags.done = 1;
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(0) == 0);
   CHECK(load.Complete() == 1);
@@ -222,7 +224,8 @@ TEST_CASE(
     "[battle-abilities-live][F02615][F02618][F02619]") {
   LiveFoundationFixture fixture;
   std::array text{
-      reinterpret_cast<u_short*>(Battle_actionDefinitions[kAction].name),
+      reinterpret_cast<u_short*>(
+          VS::Battle::actionDefinitions[kAction].name.data()),
       reinterpret_cast<u_short*>(abilities::LiveUnlockDescription(kAction))};
   auto* address = VS::Content::ResolveModuleAddress(
       VS::Content::ModuleSymbols(), kModule, 0x80102928);

@@ -9,7 +9,7 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Feedback.hpp"
@@ -32,67 +32,67 @@ void Require(bool valid, const char* message) {
   }
 }
 
-Battle_ActorStats& StatsOf(Battle_ActorStats* stats) {
+VS::Battle::ActorStats& StatsOf(VS::Battle::ActorStats* stats) {
   Require(stats != nullptr, "Status lifecycle requires actor stats");
   return *stats;
 }
 
-StatusLifecycleState Load(const Battle_ActorStats& stats) {
+StatusLifecycleState Load(const VS::Battle::ActorStats& stats) {
   StatusLifecycleState state{
       .statuses = std::bit_cast<std::uint32_t>(stats.statuses),
-      .hp = stats.currentHp,
-      .max_hp = stats.maxHp,
-      .strength = {stats.strength, stats.totalStrength},
-      .intelligence = {stats.intelligence, stats.totalIntelligence},
-      .agility = {stats.agility, stats.totalAgility},
-      .base_walk = static_cast<std::uint8_t>(stats.baseWalkSpeed),
-      .base_run = static_cast<std::uint8_t>(stats.baseRunSpeed),
-      .walk = static_cast<std::uint8_t>(stats.walkSpeed),
-      .run = static_cast<std::uint8_t>(stats.runSpeed),
-      .mobility_limbs = {static_cast<std::uint8_t>(stats.mobilityLimb0),
-                         static_cast<std::uint8_t>(stats.mobilityLimb1)},
-      .actor_id = stats.actorId,
-      .analyzed = stats.isAnalyzed != 0,
+      .hp = stats.current_hp,
+      .max_hp = stats.max_hp,
+      .strength = {stats.strength, stats.total_strength},
+      .intelligence = {stats.intelligence, stats.total_intelligence},
+      .agility = {stats.agility, stats.total_agility},
+      .base_walk = static_cast<std::uint8_t>(stats.base_walk_speed),
+      .base_run = static_cast<std::uint8_t>(stats.base_run_speed),
+      .walk = static_cast<std::uint8_t>(stats.walk_speed),
+      .run = static_cast<std::uint8_t>(stats.run_speed),
+      .mobility_limbs = {static_cast<std::uint8_t>(stats.mobility_limb0),
+                         static_cast<std::uint8_t>(stats.mobility_limb1)},
+      .actor_id = stats.actor_id,
+      .analyzed = stats.is_analyzed != 0,
       .weapon = stats.weapon,
       .shield = stats.shield};
   for (std::size_t index = 0; index < state.timers.size(); ++index) {
-    state.timers.at(index) = stats.statusTimers[index];
+    state.timers.at(index) = stats.status_timers[index];
   }
   for (std::size_t index = 0; index < state.limbs.size(); ++index) {
     const auto& limb = stats.limbs[index];
-    state.limbs.at(index) = {limb.hp, limb.maxHp, limb.nameIndex, limb.armor};
+    state.limbs.at(index) = {limb.hp, limb.max_hp, limb.name_index, limb.armor};
   }
   return state;
 }
 
-void Store(const StatusLifecycleState& state, Battle_ActorStats& stats) {
+void Store(const StatusLifecycleState& state, VS::Battle::ActorStats& stats) {
   stats.statuses = std::bit_cast<std::int32_t>(state.statuses);
-  stats.currentHp = state.hp;
-  stats.maxHp = state.max_hp;
+  stats.current_hp = state.hp;
+  stats.max_hp = state.max_hp;
   stats.strength = state.strength.current;
-  stats.totalStrength = state.strength.total;
+  stats.total_strength = state.strength.total;
   stats.intelligence = state.intelligence.current;
-  stats.totalIntelligence = state.intelligence.total;
+  stats.total_intelligence = state.intelligence.total;
   stats.agility = state.agility.current;
-  stats.totalAgility = state.agility.total;
-  stats.baseWalkSpeed = std::bit_cast<char>(state.base_walk);
-  stats.baseRunSpeed = std::bit_cast<char>(state.base_run);
-  stats.walkSpeed = std::bit_cast<char>(state.walk);
-  stats.runSpeed = std::bit_cast<char>(state.run);
-  stats.mobilityLimb0 = state.mobility_limbs.at(0);
-  stats.mobilityLimb1 = state.mobility_limbs.at(1);
-  stats.actorId = state.actor_id;
-  stats.isAnalyzed = state.analyzed;
+  stats.total_agility = state.agility.total;
+  stats.base_walk_speed = std::bit_cast<char>(state.base_walk);
+  stats.base_run_speed = std::bit_cast<char>(state.base_run);
+  stats.walk_speed = std::bit_cast<char>(state.walk);
+  stats.run_speed = std::bit_cast<char>(state.run);
+  stats.mobility_limb0 = state.mobility_limbs.at(0);
+  stats.mobility_limb1 = state.mobility_limbs.at(1);
+  stats.actor_id = state.actor_id;
+  stats.is_analyzed = state.analyzed;
   stats.weapon = state.weapon;
   stats.shield = state.shield;
   for (std::size_t index = 0; index < state.timers.size(); ++index) {
-    stats.statusTimers[index] = state.timers.at(index);
+    stats.status_timers[index] = state.timers.at(index);
   }
   for (std::size_t index = 0; index < state.limbs.size(); ++index) {
     const auto& limb = state.limbs.at(index);
     stats.limbs[index].hp = limb.hp;
-    stats.limbs[index].maxHp = limb.max_hp;
-    stats.limbs[index].nameIndex = limb.name_index;
+    stats.limbs[index].max_hp = limb.max_hp;
+    stats.limbs[index].name_index = limb.name_index;
     stats.limbs[index].armor = limb.armor;
   }
 }
@@ -120,7 +120,7 @@ StatusDurations Durations() {
 
 class LiveStatusWorld final : public StatusLifecycleWorld {
  public:
-  explicit LiveStatusWorld(Battle_ActorStats& stats) : stats_(stats) {}
+  explicit LiveStatusWorld(VS::Battle::ActorStats& stats) : stats_(stats) {}
 
   std::int32_t RandomBounded(StatusLifecycleState& state, int bound) override {
     return Call(state, [&] { return Core::NextLiveRandomBounded(bound); });
@@ -133,8 +133,8 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
             "Status movement requires a valid AI slot");
     Call(state, [&] {
       Ai::SetLiveActorVerticalMovementSteps(
-          stats_.actorId, static_cast<std::uint8_t>(stats_.walkSpeed),
-          static_cast<std::uint8_t>(stats_.runSpeed));
+          stats_.actor_id, static_cast<std::uint8_t>(stats_.walk_speed),
+          static_cast<std::uint8_t>(stats_.run_speed));
     });
   }
   void EquipmentLabel(StatusLifecycleState& state, int label, int stat,
@@ -145,12 +145,12 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
   }
   void ValueLabel(StatusLifecycleState& state, std::uint32_t amount) override {
     Call(state,
-         [&] { LiveQueueActorValueLabel(stats_.actorId, 0, amount, 0); });
+         [&] { LiveQueueActorValueLabel(stats_.actor_id, 0, amount, 0); });
   }
   void StatusLabels(StatusLifecycleState& state,
                     std::uint32_t statuses) override {
     Call(state, [&] {
-      LiveQueueActorStatusLabels(stats_.actorId, 0,
+      LiveQueueActorStatusLabels(stats_.actor_id, 0,
                                  std::bit_cast<int>(statuses), 1);
     });
   }
@@ -199,11 +199,11 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
       return result;
     }
   }
-  Battle_ActorStats& stats_;
+  VS::Battle::ActorStats& stats_;
 };
 
 template <typename Operation>
-void Apply(Battle_ActorStats* pointer, Operation operation) {
+void Apply(VS::Battle::ActorStats* pointer, Operation operation) {
   auto& stats = StatsOf(pointer);
   auto state = Load(stats);
   LiveStatusWorld world(stats);
@@ -213,12 +213,12 @@ void Apply(Battle_ActorStats* pointer, Operation operation) {
 }
 }  // namespace
 
-StatusLifecycleState ReadLiveStatusState(const Battle_ActorStats& stats) {
+StatusLifecycleState ReadLiveStatusState(const VS::Battle::ActorStats& stats) {
   return Load(stats);
 }
 
 void WriteLiveStatusState(const StatusLifecycleState& state,
-                          Battle_ActorStats& stats) {
+                          VS::Battle::ActorStats& stats) {
   Store(state, stats);
 }
 
@@ -230,7 +230,7 @@ void PreserveLiveAshleyStatuses() {
 }
 
 // decomp: func_80086754 (src/BATTLE/BATTLE.PRG/146C.c:13532).
-void RemoveLiveActorStatuses(int requested, Battle_ActorStats* stats) {
+void RemoveLiveActorStatuses(int requested, VS::Battle::ActorStats* stats) {
   Apply(stats, [&](auto& state, auto& world) {
     return RemoveActorStatuses(state, std::bit_cast<std::uint32_t>(requested),
                                world);
@@ -238,7 +238,7 @@ void RemoveLiveActorStatuses(int requested, Battle_ActorStats* stats) {
 }
 
 // decomp: func_80086FA8 (src/BATTLE/BATTLE.PRG/146C.c:13832).
-void InflictLiveActorStatuses(int requested, Battle_ActorStats* stats) {
+void InflictLiveActorStatuses(int requested, VS::Battle::ActorStats* stats) {
   Apply(stats, [&](auto& state, auto& world) {
     InflictActorStatuses(state, std::bit_cast<std::uint32_t>(requested),
                          Durations(), world);
@@ -247,7 +247,7 @@ void InflictLiveActorStatuses(int requested, Battle_ActorStats* stats) {
 }
 
 // decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14376).
-void UpdateLiveActorStatusTimers(Battle_ActorStats* stats) {
+void UpdateLiveActorStatusTimers(VS::Battle::ActorStats* stats) {
   LimbStatusMasks flags{};
   for (std::size_t index = 0; index < flags.size(); ++index) {
     flags.at(index) =

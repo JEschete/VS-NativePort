@@ -11,10 +11,10 @@
 
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Field/ChestInteractionsLive.hpp"
@@ -108,7 +108,7 @@ class LiveHost final : public MenuHost {
     if (!ValidAction(action)) {
       return std::nullopt;
     }
-    return Battle_actionDefinitions[action].unlocked != 0;
+    return VS::Battle::actionDefinitions[action].unlocked != 0;
   }
   std::optional<std::uint32_t> SpellRestrictions(int action) override {
     if (!ValidAction(action) || VS::Battle::characterState == nullptr ||
@@ -168,7 +168,8 @@ class LiveHost final : public MenuHost {
   }
   bool SpellCost(int action) override {
     const auto id = action < 0 ? -static_cast<std::int64_t>(action) : action;
-    if (id >= static_cast<std::int64_t>(std::size(Battle_actionDefinitions)) ||
+    if (id >= static_cast<std::int64_t>(
+                  std::size(VS::Battle::actionDefinitions)) ||
         VS::Battle::characterState == nullptr ||
         VS::Battle::characterState->stats == nullptr) {
       Refuse("Magic MP cost action or player is unavailable");
@@ -318,9 +319,14 @@ class LiveHost final : public MenuHost {
     static_assert(sizeof(Byte) == 1);
     return {reinterpret_cast<const std::uint8_t*>(bytes), N};
   }
+  template <typename Byte, std::size_t N>
+  static std::span<const std::uint8_t> Bytes(const std::array<Byte, N>& bytes) {
+    static_assert(sizeof(Byte) == 1);
+    return {reinterpret_cast<const std::uint8_t*>(bytes.data()), N};
+  }
   static bool ValidAction(int action) {
     return action >= 0 && static_cast<std::size_t>(action) <
-                              std::size(Battle_actionDefinitions);
+                              std::size(VS::Battle::actionDefinitions);
   }
   std::optional<std::span<const std::uint8_t>> Resolve(TextRef text) {
     switch (text.table) {
@@ -330,7 +336,8 @@ class LiveHost final : public MenuHost {
         return TableText(teleportationStrings, text.index);
       case TextTable::kActionName:
         if (ValidAction(text.index)) {
-          return Terminated(Bytes(Battle_actionDefinitions[text.index].name));
+          return Terminated(
+              Bytes(VS::Battle::actionDefinitions[text.index].name));
         }
         break;
     }

@@ -14,9 +14,9 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/Action.hpp"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -29,6 +29,8 @@
 #include "Core/RandomLive.hpp"
 #include "Field/Gimmicks.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace VS::Battle::Ai {
 namespace {
 static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
@@ -36,7 +38,8 @@ static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
 static_assert(sizeof(VS::Battle::Ai::CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
 static_assert(std::size(VS::Field::gimmickInstances) == kCandidateTargetSlots);
-static_assert(std::size(Battle_actionDefinitions) == kActionDefinitionCount);
+static_assert(std::size(VS::Battle::actionDefinitions) ==
+              kActionDefinitionCount);
 static_assert(std::tuple_size_v<
                   decltype(VS::Battle::Ai::ActorAiState::distances_squared)> ==
               kCandidateTargetSlots);
@@ -77,8 +80,8 @@ std::int16_t SignedHalf(int value) {
 class LiveActorProximity {
  public:
   explicit LiveActorProximity(const VS::Battle::Ai::ActorAiState& state) {
-    for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+    for (const VS::Battle::Actor* actor = VS::Battle::actors[0];
+         actor != nullptr; actor = actor->next) {
       Require(count_ < actors_.size() && actor->id >= 0 &&
                   actor->id < kCandidateTargetSlots,
               "AI proximity check requires a bounded battle actor list");
@@ -154,20 +157,21 @@ class LiveExecutionHost final : public ActionExecutionHost {
   const VS::Battle::Ai::ActorAiState& state_;
 };
 
-const Battle_Actor& TargetActor(int action, int actor_id) {
+const VS::Battle::Actor& TargetActor(int action, int actor_id) {
   Require(action >= 0 && static_cast<unsigned>(action) < kActionDefinitionCount,
           "AI targeting flag requires an action in the action table");
   Require(actor_id >= 0 && static_cast<std::size_t>(actor_id) <
                                std::size(VS::Battle::actors),
           "AI targeting flag requires an ID in the battle actor table");
-  const Battle_Actor* actor = VS::Battle::actors[actor_id];
+  const VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
   Require(actor != nullptr && actor->stats != nullptr,
           "AI targeting flag requires the actor's stats");
   return *actor;
 }
 
 std::uint16_t ActionAiFlags(unsigned action) {
-  return std::bit_cast<std::uint16_t>(Battle_actionDefinitions[action].aiFlags);
+  return std::bit_cast<std::uint16_t>(
+      VS::Battle::actionDefinitions[action].ai_flags);
 }
 
 class LiveFallbackCache final : public FallbackCandidateCache {
@@ -247,26 +251,26 @@ int ScoreLiveActorCondition(int status, int hp, int mp, int dp) {
 }
 
 int IsLiveActionHarmfulToActor(int action, int actor_id) {
-  const Battle_Actor& actor = TargetActor(action, actor_id);
+  const VS::Battle::Actor& actor = TargetActor(action, actor_id);
   const auto id = static_cast<unsigned>(action);
   return static_cast<int>(
-      IsActionHarmfulToActor(id, ActionAiFlags(id), actor.stats->enemyClass));
+      IsActionHarmfulToActor(id, ActionAiFlags(id), actor.stats->enemy_class));
 }
 
 int IsLiveActionBeneficialToActor(int action, int actor_id) {
-  const Battle_Actor& actor = TargetActor(action, actor_id);
+  const VS::Battle::Actor& actor = TargetActor(action, actor_id);
   const auto id = static_cast<unsigned>(action);
   return static_cast<int>(IsActionBeneficialToActor(id, ActionAiFlags(id),
-                                                    actor.stats->enemyClass));
+                                                    actor.stats->enemy_class));
 }
 
 void CacheLiveFallbackActionCandidate(
     const VS::Battle::Ai::ActionCandidateRecord* candidate,
-    const Battle_ActionDefinition* action) {
+    const ActionDefinition* action) {
   Require(action != nullptr, "AI fallback cache requires an action");
   LiveFallbackCache cache;
   Require(CacheFallbackActionCandidate(cache, CandidateOf(candidate),
-                                       action->aiFlags.reserved0Bit6 != 0)
+                                       action->ai_flags.reserved0_bit6 != 0)
               .has_value(),
           "AI fallback cache requires a valid slot, count and storage");
 }

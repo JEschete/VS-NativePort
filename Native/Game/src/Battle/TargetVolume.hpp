@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Core/Gte.h"
 
 namespace VS::Battle {
@@ -72,7 +72,7 @@ struct TargetSphereSetupView {
   std::int32_t cursor_z_and_input_locked;
   TargetPreview* target_list0;
   TargetPreview* target_list1;
-  Battle_ShapeVertex wire_vertices[kSphereWireVertexCount];
+  VS::Battle::ShapeVertex wire_vertices[kSphereWireVertexCount];
   SphereTargetLabelRecord labels[kSphereTargetLabelSlots];
   char reserved_b70[kSphereReservedB70Bytes +
                     (kSphereTerrainCellCount * sizeof(std::int32_t))];
@@ -82,7 +82,7 @@ struct TargetSphereSetupView {
 
 // decomp: D_800EB9B8_t (src/BATTLE/BATTLE.PRG/58578.h:41)
 struct TargetSphereRecord {
-  Battle_TargetVolume volumes[2];
+  VS::Battle::TargetVolume volumes[2];
   std::int16_t depth;
   std::int16_t camera_yaw;
   std::int16_t wire_phase_a;
@@ -102,7 +102,7 @@ struct TargetSphereRecord {
   std::int16_t cursor_z;
   std::int16_t input_locked;
   TargetPreview* target_lists[2];
-  Battle_ShapeVertex wire_vertices[kSphereWireVertexCount];
+  VS::Battle::ShapeVertex wire_vertices[kSphereWireVertexCount];
   SphereTargetLabelRecord labels[kSphereTargetLabelSlots];
   char reserved_b70[kSphereReservedB70Bytes];
   std::int32_t terrain_heights[kSphereTerrainCellCount];

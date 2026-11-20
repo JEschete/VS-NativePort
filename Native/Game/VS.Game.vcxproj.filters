@@ -483,10 +483,10 @@
     <ClCompile Include="src\Battle\ActionTable.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionTable.h">
+    <ClInclude Include="src\Battle\ActionTable.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
-    <ClInclude Include="src\Battle\Actor.h">
+    <ClInclude Include="src\Battle\Actor.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActorMarkers.cpp">
@@ -765,7 +765,7 @@
     <ClCompile Include="src\Battle\BattleModeLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\BattleTypes.h">
+    <ClInclude Include="src\Battle\BattleTypes.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Damage.cpp">
@@ -3234,7 +3234,7 @@
     <ClInclude Include="include\Battle\AbilitiesLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
-    <ClInclude Include="include\Battle\Action.h">
+    <ClInclude Include="include\Battle\Action.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionAnimations.hpp">

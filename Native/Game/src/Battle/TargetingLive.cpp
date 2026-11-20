@@ -23,16 +23,16 @@
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionRecords.hpp"
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hit.hpp"
@@ -79,6 +79,13 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+using VS::Battle::TargetLabelLine;
+using VS::Battle::TargetSphereLabelView;
+using VS::Battle::TargetVolume;
+
 namespace {
 namespace battle = VS::Battle;
 using battle::ActionTargetPreview;
@@ -109,25 +116,23 @@ using HalfwordPair = std::array<std::int16_t, 2>;
 static_assert(sizeof(VS::Field::MpdMovingPlatform) == kSourcePlatformBytes);
 // The native action state holds every preview and hit target the typed
 // collectors can produce; the PS1 0x2C10 allocation is not a limit here.
-static_assert(std::extent_v<decltype(Battle_ActionState::previews)> ==
+static_assert(std::tuple_size_v<decltype(ActionState::previews)> ==
               static_cast<std::size_t>(battle::kTargetPreviewCapacity));
-static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
+static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
               static_cast<std::size_t>(battle::kSelectionTargetCapacity));
 // The sphere's area previews are read as label lines by its highlights.
-static_assert(sizeof(VS::Battle::TargetPreview) ==
-              sizeof(Battle_TargetLabelLine));
+static_assert(sizeof(VS::Battle::TargetPreview) == sizeof(TargetLabelLine));
 static_assert(offsetof(VS::Battle::TargetPreview, actor_id) ==
-              offsetof(Battle_TargetLabelLine, opaque9));
+              offsetof(TargetLabelLine, opaque9));
 static_assert(offsetof(VS::Battle::TargetPreview, limb) ==
-              offsetof(Battle_TargetLabelLine, opaqueA));
+              offsetof(TargetLabelLine, opaque_a));
 // A sphere spec is a targeting volume in the action state's byte order.
-static_assert(sizeof(VS::Battle::TargetSphereSpec) ==
-              sizeof(Battle_TargetVolume));
+static_assert(sizeof(VS::Battle::TargetSphereSpec) == sizeof(TargetVolume));
 // The label and text views share the sphere allocation.
 static_assert(offsetof(VS::Battle::TargetSphereRecord, labels) ==
-              offsetof(Battle_TargetSphereLabelView, opaque990));
-static_assert(offsetof(Battle_TargetSphereLabelView, textBuffer) +
-                  sizeof(Battle_TargetSphereLabelView::textBuffer) <=
+              offsetof(TargetSphereLabelView, opaque990));
+static_assert(offsetof(TargetSphereLabelView, text_buffer) +
+                  sizeof(TargetSphereLabelView::text_buffer) <=
               sizeof(VS::Battle::TargetSphereSetupView));
 static_assert(sizeof(VS::Battle::TargetSphereRecord) <=
               sizeof(VS::Battle::TargetSphereSetupView));
@@ -137,7 +142,7 @@ static_assert(sizeof(VS::Render::ColorCode) ==
               sizeof(VS::Battle::TargetSphereRecord::highlight_tint));
 static_assert(sizeof(HalfwordPair) ==
               sizeof(VS::Battle::TargetSphereRecord::cursor_xy));
-static_assert(sizeof(HalfwordPair) == sizeof(Battle_Actor::commandArg2));
+static_assert(sizeof(HalfwordPair) == sizeof(VS::Battle::Actor::command_arg2));
 static_assert(sizeof(SVECTOR) == sizeof(VS::Battle::HitTargetWord));
 
 template <typename Array>
@@ -155,12 +160,12 @@ SVECTOR ToSvector(TargetPoint point) {
   return {point.x, point.y, point.z, point.pad};
 }
 
-TargetPoint PositionOf(const Battle_TargetVolume& volume) {
+TargetPoint PositionOf(const TargetVolume& volume) {
   return {volume.position[0], volume.position[1], volume.position[2],
           volume.position[kPointHalfwords - 1]};
 }
 
-Battle_Actor* LiveActor(int actor) {
+VS::Battle::Actor* LiveActor(int actor) {
   return InRange(VS::Battle::actors, actor) ? VS::Battle::actors[actor]
                                             : nullptr;
 }
@@ -204,25 +209,25 @@ void WritePreview(VS::Battle::TargetPreview& raw,
 // One targeting volume of the action state (rangeShape..rangeOrigin or
 // areaShape..areaOrigin).
 struct VolumeFields {
-  char& shape;
-  char& kind;
+  std::int8_t& shape;
+  std::int8_t& kind;
   std::int16_t& facing;
-  char& x;
-  char& y;
-  char& z;
-  char& angle;
+  std::int8_t& x;
+  std::int8_t& y;
+  std::int8_t& z;
+  std::int8_t& angle;
   SVECTOR& origin;
 };
 
-VolumeFields FieldsOf(Battle_ActionState& state, TargetingVolumeSlot slot) {
+VolumeFields FieldsOf(ActionState& state, TargetingVolumeSlot slot) {
   if (slot == TargetingVolumeSlot::kArea) {
-    return {state.areaShape, state.areaKind,  state.areaFacing,
-            state.areaX,     state.areaY,     state.areaZ,
-            state.areaAngle, state.areaOrigin};
+    return {state.area_shape, state.area_kind,  state.area_facing,
+            state.area_x,     state.area_y,     state.area_z,
+            state.area_angle, state.area_origin};
   }
-  return {state.rangeShape, state.rangeKind,  state.rangeFacing,
-          state.rangeX,     state.rangeY,     state.rangeZ,
-          state.rangeAngle, state.rangeOrigin};
+  return {state.range_shape, state.range_kind,  state.range_facing,
+          state.range_x,     state.range_y,     state.range_z,
+          state.range_angle, state.range_origin};
 }
 
 TargetingVolume ReadVolume(const VolumeFields& fields) {
@@ -247,9 +252,9 @@ void WriteVolume(const VolumeFields& fields, const TargetingVolume& volume) {
   fields.origin = ToSvector(volume.origin);
 }
 
-// The volume as Battle_TargetVolume reads the action state's bytes.
-Battle_TargetVolume RawVolume(const TargetingVolume& volume) {
-  Battle_TargetVolume raw{};
+// The volume as VS::Battle::TargetVolume reads the action state's bytes.
+TargetVolume RawVolume(const TargetingVolume& volume) {
+  TargetVolume raw{};
   raw.kind = static_cast<std::uint8_t>(volume.shape);
   raw.opaque1 = static_cast<std::uint8_t>(volume.kind);
   raw.angle = static_cast<std::int16_t>(volume.facing);
@@ -276,32 +281,32 @@ battle::RangeShape RangeOf(const VS::Battle::Ai::ActionRangeShape& shape) {
 
 // The weapon range bytes at stats 0x38, which VS::Battle::Ai::ActionRangeShape
 // views.
-battle::RangeShape WeaponRangeOf(const Battle_ActorStats& stats) {
-  return {static_cast<int>(stats.currentRange),
-          static_cast<int>(stats.currentRangeY),
-          static_cast<int>(stats.currentRangeZ),
-          static_cast<int>(stats.currentAttackShape),
-          static_cast<int>(stats.currentAttackShapeAngle)};
+battle::RangeShape WeaponRangeOf(const VS::Battle::ActorStats& stats) {
+  return {static_cast<int>(stats.current_range),
+          static_cast<int>(stats.current_range_y),
+          static_cast<int>(stats.current_range_z),
+          static_cast<int>(stats.current_attack_shape),
+          static_cast<int>(stats.current_attack_shape_angle)};
 }
 
 std::optional<battle::TargetingActionView> ActionView(int action_id) {
-  if (!InRange(Battle_actionDefinitions, action_id)) {
+  if (!InRange(VS::Battle::actionDefinitions, action_id)) {
     VS::Core::LogError("battle.targeting",
                        "action {} is outside the action table", action_id);
     return std::nullopt;
   }
-  const Battle_ActionDefinition& action = Battle_actionDefinitions[action_id];
+  const ActionDefinition& action = VS::Battle::actionDefinitions[action_id];
   return battle::TargetingActionView{
       .category = action.category,
-      .effect = static_cast<int>(action.hits[0].effectId),
-      .returns_to_menu_on_cancel = action.returnsToMenuOnCancel != 0,
-      .range = {action.rangeX, action.rangeY, action.rangeZ, action.shape,
+      .effect = static_cast<int>(action.hits[0].effect_id),
+      .returns_to_menu_on_cancel = action.returns_to_menu_on_cancel != 0,
+      .range = {action.range_x, action.range_y, action.range_z, action.shape,
                 action.angle},
-      .area = {action.areaRangeX, action.areaRangeY, action.areaRangeZ,
-               action.areaShape & kAreaShapeMask,
-               action.areaShape >> kAreaAngleShift},
-      .radial_area = action.aiFlags.radialArea != 0,
-      .shaped_area = action.aiFlags.shapedArea != 0};
+      .area = {action.area_range_x, action.area_range_y, action.area_range_z,
+               action.area_shape & kAreaShapeMask,
+               action.area_shape >> kAreaAngleShift},
+      .radial_area = action.ai_flags.radial_area != 0,
+      .shaped_area = action.ai_flags.shaped_area != 0};
 }
 
 // decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476); a
@@ -324,30 +329,30 @@ int ActionRangeSquared(int action_id,
 }
 
 // The point the actor's two command words form (*(SVECTOR*)&commandArg1).
-TargetPoint CommandPoint(const Battle_Actor& actor) {
-  const auto upper = std::bit_cast<HalfwordPair>(actor.commandArg2);
-  return {static_cast<std::int16_t>(actor.commandArg1.halves[0]),
-          static_cast<std::int16_t>(actor.commandArg1.halves[1]), upper[0],
+TargetPoint CommandPoint(const VS::Battle::Actor& actor) {
+  const auto upper = std::bit_cast<HalfwordPair>(actor.command_arg2);
+  return {static_cast<std::int16_t>(actor.command_arg1.halves[0]),
+          static_cast<std::int16_t>(actor.command_arg1.halves[1]), upper[0],
           upper[1]};
 }
 
-battle::TargetingActor ActorView(const Battle_Actor& actor,
-                                 const Battle_ActorStats& stats) {
+battle::TargetingActor ActorView(const VS::Battle::Actor& actor,
+                                 const VS::Battle::ActorStats& stats) {
   battle::TargetingActor view;
   view.kind = actor.kind;
-  view.default_limb = static_cast<int>(stats.defaultTargetLimb);
-  view.enemy_class = static_cast<int>(stats.enemyClass);
+  view.default_limb = static_cast<int>(stats.default_target_limb);
+  view.enemy_class = static_cast<int>(stats.enemy_class);
   view.risk = stats.risk;
-  view.weapon_range = {static_cast<int>(stats.currentRange),
-                       static_cast<int>(stats.currentRangeY),
-                       static_cast<int>(stats.currentRangeZ),
-                       static_cast<int>(stats.currentAttackShape),
-                       static_cast<int>(stats.currentAttackShapeAngle)};
-  view.command_actor = actor.commandArg1.halves[0];
-  view.command_limb = actor.commandArg1.halves[1];
+  view.weapon_range = {static_cast<int>(stats.current_range),
+                       static_cast<int>(stats.current_range_y),
+                       static_cast<int>(stats.current_range_z),
+                       static_cast<int>(stats.current_attack_shape),
+                       static_cast<int>(stats.current_attack_shape_angle)};
+  view.command_actor = actor.command_arg1.halves[0];
+  view.command_limb = actor.command_arg1.halves[1];
   view.command_point = CommandPoint(actor);
-  view.command_target_byte = actor.commandArg1.bytes[0];
-  view.command_limb_byte = actor.commandArg1.bytes[2];
+  view.command_target_byte = actor.command_arg1.bytes[0];
+  view.command_limb_byte = actor.command_arg1.bytes[2];
   return view;
 }
 
@@ -396,7 +401,7 @@ std::vector<battle::PlatformPoint> CollectPlatformPoints() {
 
 class LiveActionTargetingHost final : public battle::ActionTargetingHost {
  public:
-  explicit LiveActionTargetingHost(Battle_ActionState& state) : state_(state) {}
+  explicit LiveActionTargetingHost(ActionState& state) : state_(state) {}
 
   [[nodiscard]] battle::TargetingActionView Action(
       int action_id) const override {
@@ -421,29 +426,29 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
 
   [[nodiscard]] int SelectionActionId() const override {
-    return state_.selection.actionId;
+    return state_.selection.action_id;
   }
   void SetSelectionActionId(int action_id) override {
-    state_.selection.actionId = static_cast<std::uint16_t>(action_id);
+    state_.selection.action_id = static_cast<std::uint16_t>(action_id);
   }
   void ResetSelection(int source_actor, int action_id) override {
     state_.selection = {};
-    state_.selection.primaryTarget.targets_position = 0;
-    state_.selection.primaryTarget.target.target_actor =
+    state_.selection.primary_target.targets_position = 0;
+    state_.selection.primary_target.target.target_actor =
         static_cast<std::uint8_t>(source_actor);
-    state_.selection.actionId = static_cast<std::uint16_t>(action_id);
+    state_.selection.action_id = static_cast<std::uint16_t>(action_id);
   }
   [[nodiscard]] int PrimaryActor() const override {
-    return state_.selection.primaryTarget.target.target_actor;
+    return state_.selection.primary_target.target.target_actor;
   }
   [[nodiscard]] bool PrimaryTargetsPosition() const override {
-    return state_.selection.primaryTarget.targets_position != 0;
+    return state_.selection.primary_target.targets_position != 0;
   }
   [[nodiscard]] int SelectionTargetCount() const override {
-    return state_.selection.targetCount;
+    return state_.selection.target_count;
   }
   void SetSelectionTargetCount(int count) override {
-    state_.selection.targetCount = static_cast<std::uint16_t>(count);
+    state_.selection.target_count = static_cast<std::uint16_t>(count);
   }
   void SetSelectionActorTarget(int index, ActorLimbTarget target) override {
     VS::Battle::HitResult* hit = SelectionTarget(index);
@@ -464,43 +469,45 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     target->target = std::bit_cast<VS::Battle::HitTargetWord>(ToSvector(point));
   }
   [[nodiscard]] TargetPoint FocusPosition() const override {
-    return ToPoint(state_.selection.focusPosition);
+    return ToPoint(state_.selection.focus_position);
   }
   void SetFocusPosition(TargetPoint point) override {
-    state_.selection.focusPosition = ToSvector(point);
+    state_.selection.focus_position = ToSvector(point);
   }
 
   [[nodiscard]] bool IsPlayerAction() const override {
-    return state_.isPlayerAction != 0;
+    return state_.is_player_action != 0;
   }
   void SetIsPlayerAction(bool player_action) override {
-    state_.isPlayerAction = player_action ? 1 : 0;
+    state_.is_player_action = player_action ? 1 : 0;
   }
-  void SetSourceActorId(int source) override { state_.sourceActorId = source; }
+  void SetSourceActorId(int source) override {
+    state_.source_actor_id = source;
+  }
   [[nodiscard]] int SelectedPreview() const override {
-    return state_.selectedPreview;
+    return state_.selected_preview;
   }
   void SetSelectedPreview(int index) override {
-    state_.selectedPreview = static_cast<std::uint8_t>(index);
+    state_.selected_preview = static_cast<std::uint8_t>(index);
   }
   void SetCameraPreview(int index) override {
-    state_.cameraPreview = static_cast<std::uint8_t>(index);
+    state_.camera_preview = static_cast<std::uint8_t>(index);
   }
   void ResetSelectionTimers() override {
-    state_.selectionFrames = 0;
-    state_.chainStep = 0;
+    state_.selection_frames = 0;
+    state_.chain_step = 0;
   }
   [[nodiscard]] TargetPoint AreaCenter() const override {
-    return ToPoint(state_.areaCenter);
+    return ToPoint(state_.area_center);
   }
   void SetAreaCenter(TargetPoint point) override {
-    state_.areaCenter = ToSvector(point);
+    state_.area_center = ToSvector(point);
   }
   [[nodiscard]] TargetPoint SavedAreaCenter() const override {
-    return ToPoint(state_.savedAreaCenter);
+    return ToPoint(state_.saved_area_center);
   }
   void SetSavedAreaCenter(TargetPoint point) override {
-    state_.savedAreaCenter = ToSvector(point);
+    state_.saved_area_center = ToSvector(point);
   }
   [[nodiscard]] TargetingVolume Volume(
       TargetingVolumeSlot slot) const override {
@@ -527,14 +534,14 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     WritePreview(state_.previews[index], preview);
   }
   [[nodiscard]] int PreviewCount() const override {
-    return state_.previewCount;
+    return state_.preview_count;
   }
   void SetPreviewCount(int count) override {
-    state_.previewCount = static_cast<std::uint16_t>(count);
+    state_.preview_count = static_cast<std::uint16_t>(count);
   }
   [[nodiscard]] bool IsPointInVolume(TargetingVolumeSlot slot,
                                      TargetPoint point) const override {
-    Battle_TargetVolume volume = RawVolume(Volume(slot));
+    TargetVolume volume = RawVolume(Volume(slot));
     std::array<std::uint16_t, kPointHalfwords> components{
         static_cast<std::uint16_t>(point.x),
         static_cast<std::uint16_t>(point.y),
@@ -544,13 +551,13 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   [[nodiscard]] battle::ActionPreviewResult PreviewActionAgainstLimb(
       int action_id, int source_actor, int target_actor, int limb) override {
-    Battle_ActionRequest result{};
+    ActionRequestRecord result{};
     VS::Battle::PreviewLiveActionAgainstLimb(action_id, source_actor,
                                              target_actor, limb, &result);
     const VS::Battle::HitResult& hit = result.targets[0];
-    return {.action_id = result.actionId,
-            .damage_type = result.damageType,
-            .effect_variant = result.effectVariant,
+    return {.action_id = result.action_id,
+            .damage_type = result.damage_type,
+            .effect_variant = result.effect_variant,
             .target_actor = hit.target.target_actor,
             .target_hp = hit.target.hp,
             .target_mp = hit.target.mp,
@@ -560,7 +567,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
 
   [[nodiscard]] std::optional<battle::TargetingActor> Actor(
       int slot) const override {
-    const Battle_Actor* actor = LiveActor(slot);
+    const VS::Battle::Actor* actor = LiveActor(slot);
     if (actor == nullptr || actor->stats == nullptr) {
       return std::nullopt;
     }
@@ -678,7 +685,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
         SphereSpec(Volume(TargetingVolumeSlot::kArea));
     VS::Battle::SetSphereVolumesEntry(&range, &area,
                                       static_cast<std::uint8_t>(preview_count),
-                                      state_.previews);
+                                      state_.previews.data());
   }
   void ShowAreaVolume() override {
     if (!SphereReady("area volume")) {
@@ -705,7 +712,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
                          "no character state; weapon sheathed");
       return false;
     }
-    return (VS::Battle::characterState->weaponDrawn & 1) != 0;
+    return (VS::Battle::characterState->weapon_drawn & 1) != 0;
   }
   void SetHudBattleMode(int mode) override {
     VS::Battle::SetLiveHudBattleMode(mode);
@@ -772,7 +779,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     return true;
   }
 
-  Battle_ActionState& state_;
+  ActionState& state_;
 };
 
 // One column of the target list (D_800F4C70 and its group tables).
@@ -851,9 +858,9 @@ char* LiveTargetText(battle::TargetText text) {
       }
       break;
     case TargetTextSource::kActorName:
-      if (Battle_Actor* actor = LiveActor(text.value);
+      if (VS::Battle::Actor* actor = LiveActor(text.value);
           actor != nullptr && actor->stats != nullptr) {
-        return actor->stats->name;
+        return actor->stats->name.data();
       }
       break;
     case TargetTextSource::kEmptyStatus:
@@ -878,11 +885,11 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                          index);
       return {};
     }
-    const Battle_TargetVolume& volume = sphere_.volumes[index];
+    const TargetVolume& volume = sphere_.volumes[index];
     return {.kind = volume.kind,
             .range_kind = volume.opaque1,
             .angle = volume.angle,
-            .extents = std::to_array(volume.scale.extents),
+            .extents = volume.scale.extents,
             .position = PositionOf(volume)};
   }
   void SetVolume(int index, const battle::SphereVolume& volume) override {
@@ -891,7 +898,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                          index);
       return;
     }
-    Battle_TargetVolume& raw = sphere_.volumes[index];
+    TargetVolume& raw = sphere_.volumes[index];
     raw.kind = static_cast<std::uint8_t>(volume.kind);
     raw.opaque1 = static_cast<std::uint8_t>(volume.range_kind);
     raw.angle = static_cast<std::int16_t>(volume.angle);
@@ -956,9 +963,9 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     static_cast<void>(VS::Battle::LiveBuildSphereCameraBasis());
   }
   [[nodiscard]] battle::SphereBasis BuildVolumeTransform() override {
-    Battle_TargetVolume& volume = sphere_.volumes[0];
+    TargetVolume& volume = sphere_.volumes[0];
     const MATRIX* matrix = VS::Battle::BuildSphereVolumeTransformEntry(
-        volume.scale.extents, volume.angle);
+        volume.scale.extents.data(), volume.angle);
     VS::Render::LoadLiveFrameViewMatrix();
     if (matrix == nullptr) {
       VS::Core::LogError("battle.targeting",
@@ -983,7 +990,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
       return;
     }
     VS::Battle::UpdateSphereTargetHighlightsEntry(
-        reinterpret_cast<Battle_TargetLabelLine*>(list), count);
+        reinterpret_cast<TargetLabelLine*>(list), count);
   }
   void DrawTerrainIntersection(TargetPoint point, int scale) override {
     if (!transform_) {
@@ -1024,7 +1031,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     VS::Actors::SetLiveActorTint(actor, &tint);
   }
   [[nodiscard]] std::optional<int> ActorKind(int actor) const override {
-    const Battle_Actor* live = LiveActor(actor);
+    const VS::Battle::Actor* live = LiveActor(actor);
     if (live == nullptr) {
       return std::nullopt;
     }
@@ -1153,10 +1160,10 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     VS::Battle::stringContext.integers[slot] = value;
   }
   void ShowTargetInfo() override {
-    auto* view = reinterpret_cast<Battle_TargetSphereLabelView*>(&sphere_);
-    VS::Render::FormatLiveEncodedText(view->textBuffer,
+    auto* view = reinterpret_cast<TargetSphereLabelView*>(&sphere_);
+    VS::Render::FormatLiveEncodedText(view->text_buffer,
                                       VS::Battle::targetInfoTemplate);
-    VS::Menu::SetLiveTextBoxText(kInformationTextBox, view->textBuffer);
+    VS::Menu::SetLiveTextBoxText(kInformationTextBox, view->text_buffer.data());
   }
   void DismissInformationBox() override {
     VS::Menu::DismissLiveTextBox(kInformationTextBox);
@@ -1286,7 +1293,7 @@ int LiveCalculateActionRangeSquared(
           : std::nullopt);
 }
 
-int LiveCalculateActorActionRangeSquared(const Battle_ActorStats* stats,
+int LiveCalculateActorActionRangeSquared(const VS::Battle::ActorStats* stats,
                                          int action_id) {
   return ActionRangeSquared(
       action_id,

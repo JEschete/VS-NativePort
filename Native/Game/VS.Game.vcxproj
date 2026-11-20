@@ -184,11 +184,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\ActionTable.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\ActorMarkers.cpp" />
     <ClCompile Include="src\Battle\ActorMarkersLive.cpp">
@@ -1943,8 +1939,8 @@
     <ClInclude Include="src\Battle\ActionFlow.hpp" />
     <ClInclude Include="src\Battle\ActionMenu.hpp" />
     <ClInclude Include="src\Battle\ActionResolution.hpp" />
-    <ClInclude Include="src\Battle\ActionTable.h" />
-    <ClInclude Include="src\Battle\Actor.h" />
+    <ClInclude Include="src\Battle\ActionTable.hpp" />
+    <ClInclude Include="src\Battle\Actor.hpp" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.hpp" />
     <ClInclude Include="src\Battle\Ai\ActionRecords.hpp" />
     <ClInclude Include="src\Battle\Ai\ActorState.hpp" />
@@ -1959,7 +1955,7 @@
     <ClInclude Include="src\Battle\Ai\Perception.hpp" />
     <ClInclude Include="src\Battle\Ai\RoomState.hpp" />
     <ClInclude Include="src\Battle\AttackPrerequisiteTable.hpp" />
-    <ClInclude Include="src\Battle\BattleTypes.h" />
+    <ClInclude Include="src\Battle\BattleTypes.hpp" />
     <ClInclude Include="src\Battle\Damage.hpp" />
     <ClInclude Include="src\Battle\EncounterHooks.hpp" />
     <ClInclude Include="src\Battle\Feedback.hpp" />
@@ -2208,7 +2204,7 @@
     <ClInclude Include="include\Actors\TextureAnimationLive.hpp" />
     <ClInclude Include="include\Battle\Abilities.hpp" />
     <ClInclude Include="include\Battle\AbilitiesLive.hpp" />
-    <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\Action.hpp" />
     <ClInclude Include="include\Battle\ActionAnimations.hpp" />
     <ClInclude Include="include\Battle\ActionAnimationsLive.hpp" />
     <ClInclude Include="include\Battle\ActionCameraSelection.hpp" />

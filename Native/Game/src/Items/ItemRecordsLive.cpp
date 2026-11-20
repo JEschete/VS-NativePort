@@ -11,6 +11,8 @@
 #include "Core/RandomLive.hpp"
 #include "Items/ItemRecords.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace VS::Items::Live {
 void WarnRefusal(const char* operation, ItemsStatus status) {
   if (status == ItemsStatus::kOk) return;
@@ -23,19 +25,19 @@ void WarnNullRecord(const char* operation) {
   VS::Core::Warnf("items", "%s refused: null record", operation);
 }
 
-ItemAction ToItemAction(const Battle_ActionDefinition& action) {
+ItemAction ToItemAction(const ActionDefinition& action) {
   ItemAction typed{};
   typed.type = static_cast<std::uint8_t>(action.type);
   typed.category = static_cast<std::uint8_t>(action.category);
   typed.first_hit_affinity = static_cast<std::uint8_t>(action.hits[0].affinity);
   for (std::size_t i = 0; i < kActionHitCount; ++i) {
     typed.hit_stat_factors[i] =
-        static_cast<std::uint8_t>(action.hits[i].statFactor);
+        static_cast<std::uint8_t>(action.hits[i].stat_factor);
   }
   return typed;
 }
 
-Battle_Actor* BattleActor(std::int32_t actor_id) {
+VS::Battle::Actor* BattleActor(std::int32_t actor_id) {
   if (actor_id < 0 ||
       static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
     return nullptr;
@@ -43,23 +45,23 @@ Battle_Actor* BattleActor(std::int32_t actor_id) {
   return VS::Battle::actors[actor_id];
 }
 
-DefenderEquipment ToDefender(const Battle_ActorStats& stats) {
+DefenderEquipment ToDefender(const VS::Battle::ActorStats& stats) {
   DefenderEquipment defender{};
   defender.shield = stats.shield;
   for (std::size_t i = 0; i < kLimbCount; ++i) {
     auto& limb = defender.limbs[i];
-    limb.max_hp = stats.limbs[i].maxHp;
-    limb.name_index = stats.limbs[i].nameIndex;
+    limb.max_hp = stats.limbs[i].max_hp;
+    limb.name_index = stats.limbs[i].name_index;
     limb.armor = stats.limbs[i].armor;
   }
-  if (const auto* actor = BattleActor(stats.actorId); actor != nullptr) {
-    defender.weapon_drawn = (actor->weaponDrawn & 1) != 0;
+  if (const auto* actor = BattleActor(stats.actor_id); actor != nullptr) {
+    defender.weapon_drawn = (actor->weapon_drawn & 1) != 0;
   }
-  defender.shows_notices = stats.actorId == 0;
+  defender.shows_notices = stats.actor_id == 0;
   return defender;
 }
 
-void CommitDefender(Battle_ActorStats& stats,
+void CommitDefender(VS::Battle::ActorStats& stats,
                     const DefenderEquipment& defender) {
   stats.shield = defender.shield;
   for (std::size_t i = 0; i < kLimbCount; ++i) {
@@ -67,7 +69,7 @@ void CommitDefender(Battle_ActorStats& stats,
   }
 }
 
-Battle_ActorStats* AshleyStats(const char* operation) {
+VS::Battle::ActorStats* AshleyStats(const char* operation) {
   if (VS::Battle::characterState == nullptr ||
       VS::Battle::characterState->stats == nullptr) {
     WarnRefusal(operation, ItemsStatus::kActorOutOfRange);
@@ -76,31 +78,31 @@ Battle_ActorStats* AshleyStats(const char* operation) {
   return VS::Battle::characterState->stats;
 }
 
-AshleyWeaponState ToAshleyWeapon(const Battle_ActorStats& stats,
-                                 const Battle_Actor& actor) {
+AshleyWeaponState ToAshleyWeapon(const VS::Battle::ActorStats& stats,
+                                 const VS::Battle::Actor& actor) {
   return AshleyWeaponState{
       .weapon = stats.weapon,
       .reach = static_cast<std::uint8_t>(stats.reach),
-      .equipped_weapon_category = actor.equippedWeaponCategory,
-      .current_range = static_cast<std::uint8_t>(stats.currentRange),
-      .current_range_y = static_cast<std::uint8_t>(stats.currentRangeY),
-      .current_range_z = static_cast<std::uint8_t>(stats.currentRangeZ),
+      .equipped_weapon_category = actor.equipped_weapon_category,
+      .current_range = static_cast<std::uint8_t>(stats.current_range),
+      .current_range_y = static_cast<std::uint8_t>(stats.current_range_y),
+      .current_range_z = static_cast<std::uint8_t>(stats.current_range_z),
       .current_attack_shape =
-          static_cast<std::uint8_t>(stats.currentAttackShape),
+          static_cast<std::uint8_t>(stats.current_attack_shape),
       .current_attack_shape_angle =
-          static_cast<std::uint8_t>(stats.currentAttackShapeAngle),
+          static_cast<std::uint8_t>(stats.current_attack_shape_angle),
   };
 }
 
-void CommitAshleyWeapon(Battle_ActorStats& stats, Battle_Actor& actor,
+void CommitAshleyWeapon(VS::Battle::ActorStats& stats, VS::Battle::Actor& actor,
                         const AshleyWeaponState& ashley) {
   stats.weapon = ashley.weapon;
-  actor.equippedWeaponCategory = ashley.equipped_weapon_category;
-  stats.currentRange = ashley.current_range;
-  stats.currentRangeY = ashley.current_range_y;
-  stats.currentRangeZ = ashley.current_range_z;
-  stats.currentAttackShape = ashley.current_attack_shape;
-  stats.currentAttackShapeAngle = ashley.current_attack_shape_angle;
+  actor.equipped_weapon_category = ashley.equipped_weapon_category;
+  stats.current_range = ashley.current_range;
+  stats.current_range_y = ashley.current_range_y;
+  stats.current_range_z = ashley.current_range_z;
+  stats.current_attack_shape = ashley.current_attack_shape;
+  stats.current_attack_shape_angle = ashley.current_attack_shape_angle;
 }
 
 std::int32_t LiveItemRandom::NextBounded(std::int32_t bound) {

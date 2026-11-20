@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Menu/Results/ResultsStats.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 
@@ -135,8 +135,8 @@ void CheckBonusRefusal(AttributeBonus apply) {
 
 class LiveCharacter {
  public:
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
 
   LiveCharacter() : saved_(VS::Battle::characterState) {
     actor.stats = &stats;
@@ -149,7 +149,7 @@ class LiveCharacter {
   LiveCharacter& operator=(LiveCharacter&&) = delete;
 
  private:
-  Battle_Actor* saved_;
+  VS::Battle::Actor* saved_;
 };
 }  // namespace
 
@@ -227,10 +227,10 @@ TEST_CASE("F03073 MP bonus raises maximum and current with a signed cap",
 TEST_CASE("Live results totals read the character stat record",
           "[results-stats]") {
   LiveCharacter live;
-  live.stats.totalStrength = 321;
+  live.stats.total_strength = 321;
   live.stats.strength = 1;
-  live.stats.totalIntelligence = 0xFFFF;
-  live.stats.totalAgility = 999;
+  live.stats.total_intelligence = 0xFFFF;
+  live.stats.total_agility = 999;
   CHECK(r::AshleyLiveTotalStrength() == 321);
   CHECK(r::AshleyLiveTotalIntelligence() == 0xFFFF);
   CHECK(r::AshleyLiveTotalAgility() == 999);
@@ -239,23 +239,23 @@ TEST_CASE("Live results totals read the character stat record",
 TEST_CASE("Live results bonuses write only their own fields",
           "[results-stats]") {
   LiveCharacter live;
-  live.stats.totalStrength = 995;
+  live.stats.total_strength = 995;
   live.stats.strength = 900;
-  live.stats.maxHp = 400;
-  live.stats.currentHp = -3;
-  live.stats.maxMp = 998;
+  live.stats.max_hp = 400;
+  live.stats.current_hp = -3;
+  live.stats.max_mp = 998;
   live.stats.risk = 77;
   r::ApplyLiveStrengthBonus(10);
   r::ApplyLiveHpBonus(5);
   r::ApplyLiveMpBonus(5);
   r::ApplyLiveIntelligenceBonus(2);
   r::ApplyLiveAgilityBonus(3);
-  CHECK(live.stats.totalStrength == 999);
+  CHECK(live.stats.total_strength == 999);
   CHECK(live.stats.strength == 910);
-  CHECK(live.stats.maxHp == 405);
-  CHECK(live.stats.currentHp == 2);
-  CHECK(live.stats.maxMp == 999);
-  CHECK(live.stats.totalIntelligence == 2);
+  CHECK(live.stats.max_hp == 405);
+  CHECK(live.stats.current_hp == 2);
+  CHECK(live.stats.max_mp == 999);
+  CHECK(live.stats.total_intelligence == 2);
   CHECK(live.stats.agility == 3);
   CHECK(live.stats.risk == 77);
 }
@@ -263,15 +263,15 @@ TEST_CASE("Live results bonuses write only their own fields",
 TEST_CASE("Live results stats refuse a missing character or record",
           "[results-stats]") {
   LiveCharacter live;
-  live.stats.totalStrength = 50;
+  live.stats.total_strength = 50;
   live.actor.stats = nullptr;
   CHECK(r::AshleyLiveTotalStrength() == 0);
   r::ApplyLiveStrengthBonus(10);
-  CHECK(live.stats.totalStrength == 50);
+  CHECK(live.stats.total_strength == 50);
   CHECK_FALSE(r::ReadLiveAshleyResultStats().has_value());
   VS::Battle::characterState = nullptr;
   CHECK(r::AshleyLiveTotalAgility() == 0);
   r::ApplyLiveHpBonus(10);
   r::WriteLiveAshleyResultStats(r::AshleyResultStats{});
-  CHECK(live.stats.maxHp == 0);
+  CHECK(live.stats.max_hp == 0);
 }

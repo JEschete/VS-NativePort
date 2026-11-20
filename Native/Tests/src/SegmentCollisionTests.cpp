@@ -14,12 +14,12 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.hpp"
@@ -30,6 +30,10 @@
 #include "Legacy/Psx.h"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 static_assert(std::is_same_v<
               decltype(&VS::Field::TraceLiveActorAndTerrainCollision),
@@ -46,9 +50,9 @@ struct SegmentFixture {
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
       VS::Field::gimmickInstances;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  std::array<Battle_Actor, 2> actors{};
+  std::array<VS::Battle::Actor, 2> actors{};
   std::array<VS::Actors::ActorRecord, 2> models{};
-  std::array<Battle_ActorStats, 2> stats{};
+  std::array<VS::Battle::ActorStats, 2> stats{};
   std::array<u_char, 1304> saved_bounce{};
 
   SegmentFixture() {
@@ -64,7 +68,7 @@ struct SegmentFixture {
       VS::Actors::actorRecords[index] = &models[index];
       actors[index].id = static_cast<int>(index);
       actors[index].stats = &stats[index];
-      stats[index].actorId = static_cast<u_char>(index);
+      stats[index].actor_id = static_cast<u_char>(index);
       models[index].instance.position = {static_cast<std::int16_t>(index * 128),
                                          0, 128, 0};
       models[index].collision_radius = 32;
@@ -94,21 +98,20 @@ SVECTOR* TraceHorizontal(SVECTOR& output, int ignored_actor = 0) {
 
 struct ActionTraceFixture : SegmentFixture {
   static constexpr int kAction = 255;
-  Battle_ActionDefinition definition = Battle_actionDefinitions[kAction];
+  ActionDefinition definition = VS::Battle::actionDefinitions[kAction];
   MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
   VS::Render::ModelScratchpad workspace = *VS::Render::ModelWorkspace();
   u_int previous_hit = VS::Battle::previousHitResult;
   u_int prerequisite = VS::Battle::hitPrerequisiteResult;
   u_int last_stat = VS::Battle::lastActionStatValue;
-  Battle_ActionState* action_state = VS::Battle::actionState;
-  std::unique_ptr<Battle_ActionState> owned_state =
-      std::make_unique<Battle_ActionState>();
+  ActionState* action_state = VS::Battle::actionState;
+  std::unique_ptr<ActionState> owned_state = std::make_unique<ActionState>();
 
   ActionTraceFixture() {
     VS::Battle::actionState = owned_state.get();
-    Battle_actionDefinitions[kAction] = {};
-    Battle_actionDefinitions[kAction].resetsHitResults = 1;
-    Battle_actionDefinitions[kAction].hits[0].prerequisiteFunctionId = 1;
+    VS::Battle::actionDefinitions[kAction] = {};
+    VS::Battle::actionDefinitions[kAction].resets_hit_results = 1;
+    VS::Battle::actionDefinitions[kAction].hits[0].prerequisite_function_id = 1;
     VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
       VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
@@ -119,7 +122,7 @@ struct ActionTraceFixture : SegmentFixture {
 
   ~ActionTraceFixture() {
     VS::Battle::actionState = action_state;
-    Battle_actionDefinitions[kAction] = definition;
+    VS::Battle::actionDefinitions[kAction] = definition;
     VS::Actors::boneMatrixScratch = bone_matrix;
     *VS::Render::ModelWorkspace() = workspace;
     VS::Battle::previousHitResult = previous_hit;
@@ -335,18 +338,18 @@ TEST_CASE(
     "Production action resolution redirects a blocked positional projectile",
     "[field][segment-collision][battle]") {
   const ActionTraceFixture fixture;
-  auto input = std::make_unique<Battle_ActionRequest>();
-  auto result = std::make_unique<Battle_ActionRequest>();
-  input->targetCount = 1;
+  auto input = std::make_unique<ActionRequestRecord>();
+  auto result = std::make_unique<ActionRequestRecord>();
+  input->target_count = 1;
   input->targets[0].targets_position = 1;
   const SVECTOR target{256, 0, 96, 0};
   std::memcpy(&input->targets[0].target, &target, sizeof target);
   VS::Battle::ResolveLiveActionTargets(ActionTraceFixture::kAction,
                                        result.get(), input.get(), 1);
-  CHECK(result->targetCount == 1);
+  CHECK(result->target_count == 1);
   CHECK(result->targets[0].targets_position == 1);
   CHECK(result->targets[0].target.mp == 0x80);
-  CHECK(result->animationParameter == 1);
+  CHECK(result->animation_parameter == 1);
   SVECTOR impact{};
   std::memcpy(&impact, &result->targets[0].target, sizeof impact);
   CHECK(impact.vx == 8);

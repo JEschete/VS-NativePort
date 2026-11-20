@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -51,32 +51,32 @@ void Refuse(std::string_view call, std::string_view reason) {
 
 // The stats record of VS::Battle::actors[slot], or null outside the table or
 // without an actor or record.
-[[nodiscard]] const Battle_ActorStats* StatsOf(std::int32_t slot) {
+[[nodiscard]] const VS::Battle::ActorStats* StatsOf(std::int32_t slot) {
   if (slot < 0 ||
       static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  const Battle_Actor* const actor =
+  const VS::Battle::Actor* const actor =
       VS::Battle::actors[static_cast<std::size_t>(slot)];
   return actor != nullptr ? actor->stats : nullptr;
 }
 
 [[nodiscard]] std::optional<ActorVitals> VitalsOf(std::int32_t slot) {
-  const Battle_ActorStats* const stats = StatsOf(slot);
+  const VS::Battle::ActorStats* const stats = StatsOf(slot);
   if (stats == nullptr) return std::nullopt;
-  return ActorVitals{.current_hp = stats->currentHp,
-                     .max_hp = stats->maxHp,
-                     .current_mp = stats->currentMp,
-                     .max_mp = stats->maxMp,
+  return ActorVitals{.current_hp = stats->current_hp,
+                     .max_hp = stats->max_hp,
+                     .current_mp = stats->current_mp,
+                     .max_mp = stats->max_mp,
                      .risk = stats->risk,
-                     .analyzed = stats->isAnalyzed != 0};
+                     .analyzed = stats->is_analyzed != 0};
 }
 
 [[nodiscard]] std::array<std::uint8_t, kStatusLimbSlots> LimbNamesOf(
-    const Battle_ActorStats& stats) {
+    const VS::Battle::ActorStats& stats) {
   std::array<std::uint8_t, kStatusLimbSlots> names{};
   for (std::size_t limb = 0; limb < names.size(); ++limb) {
-    names[limb] = stats.limbs[limb].nameIndex;
+    names[limb] = stats.limbs[limb].name_index;
   }
   return names;
 }
@@ -127,7 +127,7 @@ class LiveRoster final : public InspectableActorRoster {
         static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
       return std::nullopt;
     }
-    const Battle_Actor* const actor =
+    const VS::Battle::Actor* const actor =
         VS::Battle::actors[static_cast<std::size_t>(slot)];
     if (actor == nullptr) return std::nullopt;
     return actor->kind;
@@ -138,7 +138,7 @@ class LiveActorSwitchHost final : public ActorSwitchHost {
  public:
   void PlaySwitchSound() override { PlayOpenSound(); }
   void ShowActorName(std::int32_t slot, const ActorNameRow& row) override {
-    const Battle_ActorStats* const stats = StatsOf(slot);
+    const VS::Battle::ActorStats* const stats = StatsOf(slot);
     if (stats == nullptr) {
       Refuse("AnimateActorSwitch", "no actor record to name");
       return;
@@ -267,7 +267,7 @@ void LiveDrawVitals() {
 
 // decomp: MENU4.PRG _getLimbCount (120.c:1114).
 int LiveLimbCount(int actor) {
-  const Battle_ActorStats* const stats = StatsOf(actor);
+  const VS::Battle::ActorStats* const stats = StatsOf(actor);
   if (stats == nullptr) {
     Refuse("LimbCount", "no stats record for the actor");
     return 0;
@@ -277,7 +277,7 @@ int LiveLimbCount(int actor) {
 
 // decomp: MENU4.PRG _getEquipmentListRowCount (120.c:1132).
 int LiveEquipmentRowCount() {
-  const Battle_ActorStats* const stats = StatsOf(SelectedSlot());
+  const VS::Battle::ActorStats* const stats = StatsOf(SelectedSlot());
   if (stats == nullptr) {
     Refuse("EquipmentRowCount", "no stats record for the selected actor");
     return 0;

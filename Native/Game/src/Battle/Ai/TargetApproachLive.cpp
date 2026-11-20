@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -228,9 +228,10 @@ class LiveTargetApproachWorld final : public TargetApproachWorld {
         .z = instance.position.vz};
   }
   [[nodiscard]] std::optional<std::uint8_t> CommandOpcode() const override {
-    const auto* actor = reinterpret_cast<const Battle_Actor*>(state_.actor);
+    const auto* actor =
+        reinterpret_cast<const VS::Battle::Actor*>(state_.actor);
     if (actor == nullptr) return std::nullopt;
-    return actor->commandOpcode;
+    return actor->command_opcode;
   }
   void IssueCommand(TargetApproacher& approacher,
                     CommandIntent intent) override {

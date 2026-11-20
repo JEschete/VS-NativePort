@@ -15,17 +15,20 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/CharacterInit.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCosts.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionState;
 
 namespace {
 namespace battle = VS::Battle;
@@ -121,28 +124,28 @@ struct World final : battle::ActionCostWorld {
 };
 struct LiveFixture {
   decltype(VS::Battle::actors) saved = VS::Battle::actors;
-  decltype(std::to_array(Battle_actionDefinitions)) definitions =
-      std::to_array(Battle_actionDefinitions);
-  Battle_ActionState* saved_state = VS::Battle::actionState;
-  Battle_ActionState state{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  decltype(VS::Battle::actionDefinitions) definitions =
+      VS::Battle::actionDefinitions;
+  ActionState* saved_state = VS::Battle::actionState;
+  ActionState state{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   LiveFixture() {
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
     VS::Battle::actors[0] = &actor;
     VS::Battle::actors[41] = &actor;
     actor.stats = &stats;
-    actor.weaponDrawn = 2;
+    actor.weapon_drawn = 2;
     VS::Battle::actionState = &state;
-    Battle_actionDefinitions[22] = {};
-    Battle_actionDefinitions[22].type = 6;
-    Battle_actionDefinitions[22].unlocked = 1;
+    VS::Battle::actionDefinitions[22] = {};
+    VS::Battle::actionDefinitions[22].type = 6;
+    VS::Battle::actionDefinitions[22].unlocked = 1;
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), std::begin(VS::Battle::actors));
     std::copy(definitions.begin(), definitions.end(),
-              std::begin(Battle_actionDefinitions));
+              std::begin(VS::Battle::actionDefinitions));
     VS::Battle::actionState = saved_state;
   }
 };
@@ -373,7 +376,7 @@ TEST_CASE("Preview forwards absent unused stats to the real cost policy",
   CHECK_FALSE(battle::PreviewActorActionCost(0, 0, world));
   LiveFixture fixture;
   fixture.actor.stats = nullptr;
-  Battle_actionDefinitions[22].type = 5;
+  VS::Battle::actionDefinitions[22].type = 5;
   battle::LivePreviewActorActionCost(22, 0);
 }
 TEST_CASE("Recovery rejection does not resolve unused data",
@@ -476,10 +479,10 @@ TEST_CASE("Restrictions refuse used fields while skipping unused drawn state",
 TEST_CASE("Live costs preserve unrelated fields and preview never writes",
           "[action-costs][F00510][F00511]") {
   LiveFixture fixture;
-  fixture.stats.currentMp = 30;
+  fixture.stats.current_mp = 30;
   fixture.stats.weapon.action_type = 1;
   fixture.stats.weapon.risk = 10;
-  fixture.stats.maxMp = 33;
+  fixture.stats.max_mp = 33;
   fixture.stats.statuses = 0x8000;
   const auto before = Bytes(fixture.stats);
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 0) ==
@@ -488,7 +491,7 @@ TEST_CASE("Live costs preserve unrelated fields and preview never writes",
   CHECK(Bytes(fixture.stats) == before);
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, -1) ==
         0x0101000A);
-  fixture.stats.currentMp = 30;
+  fixture.stats.current_mp = 30;
   CHECK(Bytes(fixture.stats) == before);
 }
 TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
@@ -522,13 +525,13 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
 TEST_CASE("Live recovery and restrictions preserve their exact interfaces",
           "[action-costs][F00512][F00548]") {
   LiveFixture fixture;
-  Battle_actionDefinitions[54] = {};
-  Battle_actionDefinitions[54].recoveryDelay = 255;
+  VS::Battle::actionDefinitions[54] = {};
+  VS::Battle::actionDefinitions[54].recovery_delay = 255;
   fixture.stats.weapon.recovery_delay = 255;
-  fixture.stats.recoveryDelayBonus = 63;
-  fixture.stats.actionRecoveryTimer = 65535;
+  fixture.stats.recovery_delay_bonus = 63;
+  fixture.stats.action_recovery_timer = 65535;
   auto expected = fixture.stats;
-  expected.actionRecoveryTimer = 15871;
+  expected.action_recovery_timer = 15871;
   battle::LiveAddActionRecoveryDelay(54, &fixture.stats, -1);
   CHECK(Bytes(fixture.stats) == Bytes(expected));
   battle::LiveAddActionRecoveryDelay(0xFFFFFFFF, nullptr, 0);
@@ -569,12 +572,12 @@ TEST_CASE(
   const auto main = ReadAsset("SLUS_010.40");
   const auto action = natural.limbs[0].actions[0].action_id;
   REQUIRE(action == 1);
-  Battle_actionDefinitions[action] = ReadRecord<Battle_ActionDefinition>(
-      main, 0x3C1DC + action * sizeof(Battle_ActionDefinition));
+  VS::Battle::actionDefinitions[action] = ReadRecord<ActionDefinition>(
+      main, 0x3C1DC + action * sizeof(ActionDefinition));
   VS::Items::BuildLiveWeaponStatsFromParts(&fixture.stats.weapon,
                                            &natural.weapon);
-  fixture.stats.currentHp = natural.hp;
-  fixture.stats.currentMp = natural.mp;
+  fixture.stats.current_hp = natural.hp;
+  fixture.stats.current_mp = natural.mp;
   const auto before = Bytes(fixture.stats);
   VS::Battle::actionState = nullptr;
   CHECK(battle::LiveActionCostAndAvailability(action, &fixture.stats, 0) ==

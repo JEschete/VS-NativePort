@@ -7,10 +7,10 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffects.hpp"
@@ -18,6 +18,8 @@
 #include "Battle/HitCalculationsLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Items/EquipmentLive.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace VS::Battle {
 namespace {
@@ -34,20 +36,20 @@ VS::Battle::HitResult& HitOf(VS::Battle::HitResult* hit) {
   Require(hit != nullptr);
   return *hit;
 }
-Battle_ActorStats* CaptureStats(VS::Battle::HitResult* hit) {
+VS::Battle::ActorStats* CaptureStats(VS::Battle::HitResult* hit) {
   const auto slot = HitOf(hit).target.target_actor;
   Require(slot < std::size(VS::Battle::actors) &&
           VS::Battle::actors[slot] != nullptr);
   return VS::Battle::actors[slot]->stats;
 }
-Battle_ActorStats& StatsOf(Battle_ActorStats* stats) {
+VS::Battle::ActorStats& StatsOf(VS::Battle::ActorStats* stats) {
   Require(stats != nullptr);
   return *stats;
 }
 
 class LiveQueue final : public DamageRecoveryQueue {
  public:
-  LiveQueue(Battle_ActionDefinition* action, VS::Battle::HitResult* source,
+  LiveQueue(ActionDefinition* action, VS::Battle::HitResult* source,
             VS::Battle::HitResult* target, int hit, int execute)
       : action_(action),
         source_(source),
@@ -133,8 +135,8 @@ class LiveQueue final : public DamageRecoveryQueue {
     const auto& stats = StatsOf(target_stats_);
     constexpr std::uint8_t kExemptActor = 128;
     constexpr std::uint32_t kRemovedOnDamage = 0x8000;
-    return stats.actorId == kExemptActor ? 0
-                                         : stats.statuses & kRemovedOnDamage;
+    return stats.actor_id == kExemptActor ? 0
+                                          : stats.statuses & kRemovedOnDamage;
   }
   void QueueRemovalStatuses(std::uint32_t statuses) override {
     auto& hit = HitOf(target_);
@@ -151,7 +153,7 @@ class LiveQueue final : public DamageRecoveryQueue {
     Items::AccumulateLiveHitEquipmentPp(action_, &StatsOf(source_stats_),
                                         &StatsOf(target_stats_), amount);
   }
-  std::int16_t TargetMp() override { return StatsOf(target_stats_).currentMp; }
+  std::int16_t TargetMp() override { return StatsOf(target_stats_).current_mp; }
   void StoreLastValue(std::int16_t amount) override {
     VS::Battle::lastActionStatValue =
         static_cast<std::uint32_t>(static_cast<std::int32_t>(amount));
@@ -171,17 +173,17 @@ class LiveQueue final : public DamageRecoveryQueue {
   std::uint8_t SelectedPrimaryHpMode() override {
     Require(VS::Battle::actionState != nullptr);
     return static_cast<std::uint8_t>(
-        VS::Battle::actionState->selection.primaryTarget.hp_effect);
+        VS::Battle::actionState->selection.primary_target.hp_effect);
   }
 
  private:
-  Battle_ActionDefinition* action_;
+  ActionDefinition* action_;
   VS::Battle::HitResult* source_;
   VS::Battle::HitResult* target_;
   int hit_;
   int execute_;
-  Battle_ActorStats* source_stats_{};
-  Battle_ActorStats* target_stats_{};
+  VS::Battle::ActorStats* source_stats_{};
+  VS::Battle::ActorStats* target_stats_{};
 };
 
 using Mediator = VS::Battle::ActionEffectMediator;
@@ -198,7 +200,7 @@ static_assert(std::is_same_v<decltype(&QueueLiveRiskRecovery), Mediator>);
 }  // namespace
 
 // decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
-void QueueLiveWeaponPpRecovery(Battle_ActionDefinition* action,
+void QueueLiveWeaponPpRecovery(ActionDefinition* action,
                                VS::Battle::HitResult* source,
                                VS::Battle::HitResult* target, int hit,
                                int execute) {
@@ -206,7 +208,7 @@ void QueueLiveWeaponPpRecovery(Battle_ActionDefinition* action,
   QueueWeaponPpRecovery(queue);
 }
 // decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
-void QueueLiveWeaponDpRecovery(Battle_ActionDefinition* action,
+void QueueLiveWeaponDpRecovery(ActionDefinition* action,
                                VS::Battle::HitResult* source,
                                VS::Battle::HitResult* target, int hit,
                                int execute) {
@@ -214,7 +216,7 @@ void QueueLiveWeaponDpRecovery(Battle_ActionDefinition* action,
   QueueWeaponDpRecovery(queue);
 }
 // decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
-void QueueLiveRiskRecovery(Battle_ActionDefinition* action,
+void QueueLiveRiskRecovery(ActionDefinition* action,
                            VS::Battle::HitResult* source,
                            VS::Battle::HitResult* target, int hit,
                            int execute) {
@@ -223,7 +225,7 @@ void QueueLiveRiskRecovery(Battle_ActionDefinition* action,
 }
 
 // decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12789).
-void QueueLiveHitDamageAndEquipmentWear(Battle_ActionDefinition* action,
+void QueueLiveHitDamageAndEquipmentWear(ActionDefinition* action,
                                         VS::Battle::HitResult* source,
                                         VS::Battle::HitResult* target, int hit,
                                         int execute) {
@@ -231,14 +233,13 @@ void QueueLiveHitDamageAndEquipmentWear(Battle_ActionDefinition* action,
   QueueHitDamageAndEquipmentWear(queue, execute != 0);
 }
 // decomp: func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12820).
-void QueueLiveMpDrain(Battle_ActionDefinition* action,
-                      VS::Battle::HitResult* source,
+void QueueLiveMpDrain(ActionDefinition* action, VS::Battle::HitResult* source,
                       VS::Battle::HitResult* target, int hit, int execute) {
   LiveQueue queue(action, source, target, hit, execute);
   QueueMpDrain(queue);
 }
 // decomp: func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12835).
-void QueueLiveWeaponPpDrain(Battle_ActionDefinition* action,
+void QueueLiveWeaponPpDrain(ActionDefinition* action,
                             VS::Battle::HitResult* source,
                             VS::Battle::HitResult* target, int hit,
                             int execute) {
@@ -246,7 +247,7 @@ void QueueLiveWeaponPpDrain(Battle_ActionDefinition* action,
   QueueWeaponPpDrain(queue);
 }
 // decomp: func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12847).
-void QueueLiveShieldPpDrain(Battle_ActionDefinition* action,
+void QueueLiveShieldPpDrain(ActionDefinition* action,
                             VS::Battle::HitResult* source,
                             VS::Battle::HitResult* target, int hit,
                             int execute) {
@@ -254,14 +255,14 @@ void QueueLiveShieldPpDrain(Battle_ActionDefinition* action,
   QueueShieldPpDrain(queue);
 }
 // decomp: func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12862).
-void QueueLiveHpRecovery(Battle_ActionDefinition* action,
+void QueueLiveHpRecovery(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int execute) {
   LiveQueue queue(action, source, target, hit, execute);
   QueueHpRecovery(queue);
 }
 // decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874).
-void QueueLiveMpRecovery(Battle_ActionDefinition* action,
+void QueueLiveMpRecovery(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int execute) {
   LiveQueue queue(action, source, target, hit, execute);

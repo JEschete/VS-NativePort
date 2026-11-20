@@ -12,7 +12,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Content/ModuleData.hpp"
@@ -24,6 +24,8 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
+using VS::Battle::ActionState;
+
 namespace {
 namespace b = VS::Battle;
 struct Model {
@@ -32,7 +34,7 @@ struct Model {
 };
 struct LiveFixture {
   decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
-  Battle_ActionState* saved_state = VS::Battle::actionState;
+  ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
   decltype(VS::Field::cameraTransition) saved_transition =
@@ -44,7 +46,7 @@ struct LiveFixture {
   MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   Model model{};
   VS::Actors::ActorRecord actor{};
-  Battle_ActionState state{};
+  ActionState state{};
   LiveFixture() {
     std::ranges::fill(VS::Actors::actorRecords, nullptr);
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
@@ -75,8 +77,8 @@ struct LiveFixture {
     VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext.bounds = {-100, -100, 100, 100};
     VS::Battle::actionState = &state;
-    state.queueIndex = 3;
-    state.queue[3].focusPosition = {-4, -2, 2, 71};
+    state.queue_index = 3;
+    state.queue[3].focus_position = {-4, -2, 2, 71};
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
@@ -138,7 +140,7 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   auto& queue = fixture->state.queue[3];
   CHECK(b::LiveActionTargetDistance() == 0);
-  queue.targetCount = 65535;
+  queue.target_count = 65535;
   queue.targets[0].targets_position = -1;
   queue.targets[0].target =
       std::bit_cast<decltype(queue.targets[0].target)>(Point{2, -1, 9, 71});
@@ -159,53 +161,53 @@ TEST_CASE(
     "F00181 production alias keeps focus padding and source-relative rounding",
     "[camera-selection][F00181][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  auto& focus = fixture->state.queue[3].focusPosition;
+  auto& focus = fixture->state.queue[3].focus_position;
   b::LiveActionCameraMidpoint(&focus);
   CHECK(std::bit_cast<Point>(focus) == Point{-2, -4, 6, 71});
 }
 TEST_CASE("F00182 production dry step still queries the live skeleton",
           "[camera-selection][F00182][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.queue[3].targetCount = 1;
+  fixture->state.queue[3].target_count = 1;
   fixture->state.queue[3].targets[0].target.target_limb = -1;
   b::LiveStepCameraTowardActionMidpoint(0);
-  CHECK(fixture->state.queue[3].targetCount == 1);
-  CHECK(fixture->state.queueIndex == 3);
+  CHECK(fixture->state.queue[3].target_count == 1);
+  CHECK(fixture->state.queue_index == 3);
 }
 TEST_CASE("F00183 production enemy wait has no actor record dependency",
           "[camera-selection][F00183][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.isPlayerAction = -1;
-  fixture->state.selection.primaryTarget.target.target_actor = 255;
-  fixture->state.selectionFrames = static_cast<char>(255);
-  fixture->state.selectedPreview = 77;
+  fixture->state.is_player_action = -1;
+  fixture->state.selection.primary_target.target.target_actor = 255;
+  fixture->state.selection_frames = static_cast<char>(255);
+  fixture->state.selected_preview = 77;
   b::LiveUpdateInitialTargetSelection();
-  CHECK(static_cast<unsigned char>(fixture->state.selectionFrames) == 0);
-  CHECK(fixture->state.selectedPreview == 77);
+  CHECK(static_cast<unsigned char>(fixture->state.selection_frames) == 0);
+  CHECK(fixture->state.selected_preview == 77);
 }
 TEST_CASE("F00184 production area wait wraps unsigned frames before readiness",
           "[camera-selection][F00184][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.isPlayerAction = 0x10000;
-  fixture->state.selection.primaryTarget.target.target_actor = 255;
-  fixture->state.selectionFrames = static_cast<char>(255);
-  fixture->state.areaCenter = {1, 2, 3, 4};
+  fixture->state.is_player_action = 0x10000;
+  fixture->state.selection.primary_target.target.target_actor = 255;
+  fixture->state.selection_frames = static_cast<char>(255);
+  fixture->state.area_center = {1, 2, 3, 4};
   b::LiveUpdateActionAreaSelection();
-  CHECK(static_cast<unsigned char>(fixture->state.selectionFrames) == 0);
-  CHECK(std::bit_cast<Point>(fixture->state.areaCenter) == Point{1, 2, 3, 4});
+  CHECK(static_cast<unsigned char>(fixture->state.selection_frames) == 0);
+  CHECK(std::bit_cast<Point>(fixture->state.area_center) == Point{1, 2, 3, 4});
 }
 TEST_CASE(
     "F00185 production enemy wait never consults unused cancel definition",
     "[camera-selection][F00185][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.isPlayerAction = 1;
-  fixture->state.selection.primaryTarget.target.target_actor = 255;
-  fixture->state.selection.actionId = 65535;
-  fixture->state.selectionFrames = static_cast<char>(255);
-  fixture->state.selectedPreview = 255;
+  fixture->state.is_player_action = 1;
+  fixture->state.selection.primary_target.target.target_actor = 255;
+  fixture->state.selection.action_id = 65535;
+  fixture->state.selection_frames = static_cast<char>(255);
+  fixture->state.selected_preview = 255;
   b::LiveUpdateFinalTargetSelection();
-  CHECK(static_cast<unsigned char>(fixture->state.selectionFrames) == 0);
-  CHECK(fixture->state.selectedPreview == 255);
+  CHECK(static_cast<unsigned char>(fixture->state.selection_frames) == 0);
+  CHECK(fixture->state.selected_preview == 255);
 }
 TEST_CASE(
     "F00186 production inactive diagnostics do not read missing action state",
@@ -223,7 +225,7 @@ TEST_CASE(
     "[camera-selection][F00186][F00182][redirect-binding]") {
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.cameraZoomState = 1;
+  fixture->state.camera_zoom_state = 1;
   VS::Field::sphericalCamera = {};
   VS::Field::sphericalCamera.motion.zoom_mode = 1;
   VS::Field::sphericalCamera.motion.turn = 1;
@@ -236,7 +238,7 @@ TEST_CASE(
   CHECK(VS::Field::sphericalCamera.tracking_speed > 0);
   CHECK((VS::Render::FrameScratchpad().camera.look_at.vx != 0 ||
          VS::Render::FrameScratchpad().camera.look_at.vz != 0));
-  CHECK(fixture->state.queueIndex == 3);
+  CHECK(fixture->state.queue_index == 3);
 }
 TEST_CASE("Camera fixture leaves unused math projection unchanged",
           "[camera-selection][fixture-isolation]") {

@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/StatusEffects.hpp"
@@ -163,8 +163,8 @@ struct LiveFixture {
       VS::Battle::statusEffectParams;
   decltype(VS::Battle::actionEffectMediators) saved_mediators =
       VS::Battle::actionEffectMediators;
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   VS::Battle::HitResult hit{};
 
   LiveFixture() {
@@ -173,7 +173,7 @@ struct LiveFixture {
                       VS::Battle::StatusEffectParams{});
     actor.stats = &stats;
     VS::Battle::actors[41] = &actor;
-    stats.actorId = 255;
+    stats.actor_id = 255;
     hit.target.target_actor = 41;
     hit.hp_effect = 3;
     hit.stat_status_effect = 3;
@@ -207,9 +207,9 @@ void CheckRelocatedMediator(LiveHandler handler, int rule_id, unsigned feedback,
   rule.blocking_statuses = removal ? -1 : 0;
   fixture.stats.statuses =
       removal ? std::bit_cast<std::int32_t>(kHighStatus | 1) : 1;
-  fixture.stats.statusImmunities = removal ? -1 : 0;
-  fixture.stats.actionRecoveryTimer = kRecoveryTimer;
-  fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+  fixture.stats.status_immunities = removal ? -1 : 0;
+  fixture.stats.action_recovery_timer = kRecoveryTimer;
+  fixture.stats.recovery_delay_bonus = kRecoveryBonus;
   fixture.hit.remove_statuses = 2;
   fixture.hit.inflict_statuses = 4;
   auto expected_hit = fixture.hit;
@@ -219,11 +219,11 @@ void CheckRelocatedMediator(LiveHandler handler, int rule_id, unsigned feedback,
       std::bit_cast<std::int32_t>(removal ? kHighStatus | 4 : 5);
   expected_hit.stat_status_effect = feedback;
   auto expected_stats = fixture.stats;
-  expected_stats.isAnalyzed = rule_id == kBanishRule;
+  expected_stats.is_analyzed = rule_id == kBanishRule;
   (*mediator)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
   CHECK(Bytes(fixture.hit) == Bytes(expected_hit));
   CHECK(Bytes(fixture.stats) == Bytes(expected_stats));
-  fixture.stats.actorId = kExemptActor;
+  fixture.stats.actor_id = kExemptActor;
   (*mediator)(nullptr, nullptr, &fixture.hit, 0, 0);
   CHECK(Bytes(fixture.hit) == Bytes(expected_hit));
 }
@@ -511,7 +511,7 @@ TEST_CASE(
     expected.stat_status_effect = index == 5 ? 2 : 1;
     handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, 23);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
-    fixture.stats.actorId = 128;
+    fixture.stats.actor_id = 128;
     handlers.at(index)(nullptr, nullptr, &fixture.hit, 0, 0);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
   }
@@ -553,8 +553,8 @@ TEST_CASE("New status callbacks preserve all hit and stats neighbors",
   constexpr std::size_t kSilenceIndex = 4;
   for (std::size_t index = 0; index < handlers.size(); ++index) {
     LiveFixture fixture;
-    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
-    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+    fixture.stats.action_recovery_timer = kRecoveryTimer;
+    fixture.stats.recovery_delay_bonus = kRecoveryBonus;
     const auto before_stats = Bytes(fixture.stats);
     VS::Battle::statusEffectParams[rules.at(index)].status_flags = 0x40000000;
     auto expected = fixture.hit;
@@ -573,9 +573,9 @@ TEST_CASE("New status callbacks preserve all hit and stats neighbors",
 TEST_CASE("Live magic ward preserves feedback and the complete stats record",
           "[status-queue][F00448][live]") {
   LiveFixture fixture;
-  fixture.stats.actionRecoveryTimer = kRecoveryTimer;
-  fixture.stats.cancelsHitResults = 1;
-  fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+  fixture.stats.action_recovery_timer = kRecoveryTimer;
+  fixture.stats.cancels_hit_results = 1;
+  fixture.stats.recovery_delay_bonus = kRecoveryBonus;
   VS::Battle::statusEffectParams[kWardRule].status_flags =
       std::bit_cast<std::int32_t>(kHighStatus);
   const auto before_stats = Bytes(fixture.stats);
@@ -585,20 +585,20 @@ TEST_CASE("Live magic ward preserves feedback and the complete stats record",
                              kNegativeExecute);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
   CHECK(Bytes(fixture.stats) == before_stats);
-  fixture.stats.actorId = kExemptActor;
+  fixture.stats.actor_id = kExemptActor;
   battle::QueueLiveMagicWard(nullptr, nullptr, &fixture.hit, 0, 1);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
-  CHECK(fixture.stats.isAnalyzed == 0);
+  CHECK(fixture.stats.is_analyzed == 0);
 }
 
 TEST_CASE("Live Banish preview queues status changes without analyzing",
           "[status-queue][F00450][live]") {
   for (const unsigned analyzed : {0U, 1U}) {
     LiveFixture fixture;
-    fixture.stats.isAnalyzed = static_cast<u_char>(analyzed);
-    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
-    fixture.stats.cancelsHitResults = 1;
-    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+    fixture.stats.is_analyzed = static_cast<std::uint8_t>(analyzed);
+    fixture.stats.action_recovery_timer = kRecoveryTimer;
+    fixture.stats.cancels_hit_results = 1;
+    fixture.stats.recovery_delay_bonus = kRecoveryBonus;
     VS::Battle::statusEffectParams[kBanishRule].status_flags =
         std::bit_cast<std::int32_t>(kHighStatus);
     const auto before_stats = Bytes(fixture.stats);
@@ -617,12 +617,12 @@ TEST_CASE(
   for (const int execute :
        {1, kNegativeExecute, std::numeric_limits<int>::min()}) {
     LiveFixture fixture;
-    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
-    fixture.stats.cancelsHitResults = 1;
-    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
-    fixture.stats.statusTimers[7] = 0xA5;
+    fixture.stats.action_recovery_timer = kRecoveryTimer;
+    fixture.stats.cancels_hit_results = 1;
+    fixture.stats.recovery_delay_bonus = kRecoveryBonus;
+    fixture.stats.status_timers[7] = 0xA5;
     auto expected_stats = fixture.stats;
-    expected_stats.isAnalyzed = 1;
+    expected_stats.is_analyzed = 1;
     const auto before_hit = Bytes(fixture.hit);
     battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, -1, execute);
     CHECK(Bytes(fixture.hit) == before_hit);
@@ -638,18 +638,18 @@ TEST_CASE(
     "[status-queue][F00450][live]") {
   LiveFixture fixture;
   VS::Battle::statusEffectParams[kBanishRule].status_flags = 2;
-  fixture.stats.actorId = kExemptActor;
+  fixture.stats.actor_id = kExemptActor;
   const auto before_hit = Bytes(fixture.hit);
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 1);
   CHECK(Bytes(fixture.hit) == before_hit);
-  CHECK(fixture.stats.isAnalyzed == 1);
-  fixture.stats.actorId = 1;
-  fixture.stats.isAnalyzed = 0;
+  CHECK(fixture.stats.is_analyzed == 1);
+  fixture.stats.actor_id = 1;
+  fixture.stats.is_analyzed = 0;
   fixture.stats.statuses = 4;
   VS::Battle::statusEffectParams[kBanishRule].blocking_statuses = 4;
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, kNegativeExecute);
   CHECK(Bytes(fixture.hit) == before_hit);
-  CHECK(fixture.stats.isAnalyzed == 1);
+  CHECK(fixture.stats.is_analyzed == 1);
   VS::Battle::actors[0] = &fixture.actor;
   fixture.hit.target.target_actor = 0;
   fixture.stats.statuses = 0;
@@ -738,9 +738,9 @@ TEST_CASE(
     const auto mediator = std::ranges::find(VS::Battle::actionEffectMediators,
                                             kHandlers.at(index));
     REQUIRE(mediator != std::end(VS::Battle::actionEffectMediators));
-    fixture.stats.actorId = kExemptActor;
+    fixture.stats.actor_id = kExemptActor;
     fixture.stats.statuses = -1;
-    fixture.stats.statusImmunities = -1;
+    fixture.stats.status_immunities = -1;
     fixture.hit.remove_statuses = 4;
     fixture.hit.inflict_statuses = 1;
     fixture.hit.stat_status_effect = 3;

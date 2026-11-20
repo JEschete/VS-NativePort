@@ -16,7 +16,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.hpp"
 #include "State/RoomCache.hpp"
@@ -35,7 +35,7 @@ static_assert(sizeof VS::State::recentRoomEnemyStates[0].actor_states[0] ==
               sizeof(VS::Actors::RoomActorRecord));
 static_assert(std::size(VS::Actors::RoomActorRecord{}.limb_hp) ==
               kRememberedLimbs);
-static_assert(std::size(Battle_ActorStats{}.limbs) == kRememberedLimbs);
+static_assert(std::size(VS::Battle::ActorStats{}.limbs) == kRememberedLimbs);
 
 RememberedEnemy Decode(const VS::Actors::RoomActorRecord& record) {
   RememberedEnemy enemy;
@@ -138,19 +138,19 @@ RememberedPlacement PlacementOf(const VS::Actors::TileTarget& tile) {
           .facing = static_cast<std::uint8_t>(tile.facing)};
 }
 
-EnemyStanding StandingOf(int actor_id, const Battle_Actor& actor,
-                         const Battle_ActorStats& stats) {
+EnemyStanding StandingOf(int actor_id, const VS::Battle::Actor& actor,
+                         const VS::Battle::ActorStats& stats) {
   EnemyStanding standing;
-  standing.spawn_index = actor.roomSpawnIndex;
+  standing.spawn_index = actor.room_spawn_index;
   standing.fading = (LiveActorStateFlags(actor_id) & kFadingStateFlag) != 0;
   standing.ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(actor_id);
-  standing.current_hp = stats.currentHp;
-  standing.max_hp = stats.maxHp;
-  standing.current_mp = stats.currentMp;
-  standing.max_mp = stats.maxMp;
-  standing.strength = std::bit_cast<std::int16_t>(stats.totalStrength);
-  standing.intelligence = std::bit_cast<std::int16_t>(stats.totalIntelligence);
-  standing.agility = std::bit_cast<std::int16_t>(stats.totalAgility);
+  standing.current_hp = stats.current_hp;
+  standing.max_hp = stats.max_hp;
+  standing.current_mp = stats.current_mp;
+  standing.max_mp = stats.max_mp;
+  standing.strength = std::bit_cast<std::int16_t>(stats.total_strength);
+  standing.intelligence = std::bit_cast<std::int16_t>(stats.total_intelligence);
+  standing.agility = std::bit_cast<std::int16_t>(stats.total_agility);
   for (std::size_t limb = 0; limb < standing.limb_hp.size(); ++limb) {
     standing.limb_hp[limb] = stats.limbs[limb].hp;
   }
@@ -160,8 +160,8 @@ EnemyStanding StandingOf(int actor_id, const Battle_Actor& actor,
   // when the slot had neither.
   VS::Actors::ActorLocationQuery query{};
   LiveActorPlacement(actor_id, &query);
-  LiveActorSavedPlacement(actor_id, std::bit_cast<u_char>(stats.movementClass),
-                          &query);
+  LiveActorSavedPlacement(
+      actor_id, std::bit_cast<std::uint8_t>(stats.movement_class), &query);
   standing.placement = PlacementOf(query.location.packed_tile.target);
   return standing;
 }
@@ -186,8 +186,8 @@ void StoreLiveRoomActorState(int actor_id, int hidden) {
                      "the actor id is outside the actor record table");
     return;
   }
-  const Battle_Actor* actor = VS::Battle::actors[actor_id];
-  if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) {
+  const VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
+  if (actor == nullptr || actor->room_spawn_index == kNoRoomSpawn) {
     return;
   }
   if (actor->stats == nullptr) {

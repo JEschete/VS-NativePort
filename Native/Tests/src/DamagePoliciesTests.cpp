@@ -10,9 +10,9 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/DamagePolicies.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
@@ -20,6 +20,9 @@
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/EquipmentLive.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionState;
 
 namespace {
 namespace b = VS::Battle;
@@ -36,17 +39,17 @@ struct Fixture {
   decltype(VS::Battle::statCalculators) saved_callbacks =
       VS::Battle::statCalculators;
   std::uint32_t saved_last = VS::Battle::lastActionStatValue;
-  Battle_ActionState* saved_state = VS::Battle::actionState;
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
-  Battle_ActionDefinition action{};
+  ActionState* saved_state = VS::Battle::actionState;
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
+  ActionDefinition action{};
   VS::Battle::HitResult hit{};
   Fixture() {
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
     VS::Battle::actors[40] = &actor;
     actor.stats = &stats;
-    stats.actorId = 255;
+    stats.actor_id = 255;
     hit.target.target_actor = 40;
     hit.targets_position = 1;
     VS::Battle::actionState = nullptr;
@@ -123,7 +126,7 @@ TEST_CASE("F00394 wrong codes negative truncation and overflow",
 TEST_CASE("F00394 live uses passed stats without actor table or drawn state",
           "[damage-policies][F00394]") {
   Fixture f;
-  Battle_ActorStats target{};
+  VS::Battle::ActorStats target{};
   VS::Battle::actors[40] = nullptr;
   f.action.type = 1;
   f.stats.weapon.gems[2].gem_effects = 4;
@@ -228,7 +231,7 @@ TEST_CASE("F00396 live splash selects each unsigned row ignoring position",
   const auto limb = GENERATE(0, 1, 2, 3, 4, 5);
   f.action.category = 14;
   f.hit.target.target_limb = static_cast<signed char>(limb);
-  f.stats.dpSplash[limb][2] = static_cast<char>(255);
+  f.stats.dp_splash[limb][2] = static_cast<char>(255);
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 32767);
   CHECK(VS::Battle::limbArmorDpLoss[2] == 18019);
   CHECK(f.hit.limbs[2].packed == 0xCAFEC662U);
@@ -239,16 +242,16 @@ TEST_CASE("F00396 live even shares count signed maxima and ignore limb",
   Fixture f;
   f.action.category = 4;
   f.hit.target.target_limb = -128;
-  f.stats.limbs[0].maxHp = -100;
-  f.stats.limbs[4].maxHp = 100;
+  f.stats.limbs[0].max_hp = -100;
+  f.stats.limbs[4].max_hp = 100;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 101);
   CHECK(VS::Battle::limbArmorDpLoss[0] == 50);
   CHECK(VS::Battle::limbArmorDpLoss[4] == 50);
   CHECK(VS::Battle::limbArmorDpLoss[2] == 0);
   CHECK(f.hit.limbs[0].packed == 0xCAFE8031U);
   CHECK(f.hit.limbs[2].packed == 0xCAFE7FFFU);
-  f.stats.limbs[0].maxHp = 0;
-  f.stats.limbs[4].maxHp = 0;
+  f.stats.limbs[0].max_hp = 0;
+  f.stats.limbs[4].max_hp = 0;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 101);
   CHECK(VS::Battle::limbArmorDpLoss[0] == 0);
   CHECK(f.hit.limbs[0].packed == 0xCAFE8031U);
@@ -298,7 +301,7 @@ TEST_CASE("F00397 live ignores action and preserves inactive hit neighbors",
           "[damage-policies][F00397]") {
   Fixture f;
   f.hit.target.target_limb = -128;
-  f.stats.limbs[2].maxHp = 100;
+  f.stats.limbs[2].max_hp = 100;
   f.stats.limbs[2].hp = 50;
   b::LiveDistributeLimbRecovery(nullptr, &f.hit, 32767);
   CHECK(VS::Battle::limbArmorDpLoss[2] == 32767);
@@ -312,8 +315,8 @@ TEST_CASE("F00397 live ignores action and preserves inactive hit neighbors",
 TEST_CASE("F00396 equipment wear consumes only the current first six DP losses",
           "[damage-policies][F00396][items]") {
   Fixture f;
-  f.stats.actorId = 40;
-  f.actor.weaponDrawn = 1;
+  f.stats.actor_id = 40;
+  f.actor.weapon_drawn = 1;
   f.stats.weapon.current_dp = 1000;
   f.stats.shield.current_dp = 500;
   for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
@@ -331,13 +334,13 @@ TEST_CASE(
     "F00397 equipment consumer sees preserved inactive DP from prior damage",
     "[damage-policies][F00397][items]") {
   Fixture f;
-  f.stats.actorId = 40;
-  f.actor.weaponDrawn = 1;
+  f.stats.actor_id = 40;
+  f.actor.weapon_drawn = 1;
   for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
   f.action.category = 6;
   f.hit.target.target_limb = 2;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 100);
-  f.stats.limbs[0].maxHp = 100;
+  f.stats.limbs[0].max_hp = 100;
   b::LiveDistributeLimbRecovery(nullptr, &f.hit, 25);
   VS::Items::ConsumeLiveHitEquipmentDp(&f.action, &f.stats, &f.stats, 0);
   CHECK(f.stats.limbs[0].armor.current_dp == 475);
@@ -361,8 +364,8 @@ TEST_CASE("F00432 full unsigned last value wraps product before division",
           "[damage-policies][F00432]") {
   Fixture f;
   VS::Battle::lastActionStatValue = 0x80000001U;
-  f.action.hits[0].statFactor = 2;
-  f.action.hits[1].statFactor = 31;
+  f.action.hits[0].stat_factor = 2;
+  f.action.hits[1].stat_factor = 31;
   CHECK(b::ScaleLastActionStatValue(0x80000001U, 2) == 0);
   CHECK(b::ScaleLastActionStatValue(0xFFFFFFFFU, 31) == -26218);
   CHECK(b::LiveScaleLastActionStatValue(&f.action, nullptr, nullptr, 0, -1) ==
@@ -378,8 +381,8 @@ TEST_CASE(
   Fixture f;
   const auto factor = GENERATE(Catch::Generators::range(0, 32));
   const auto slot = GENERATE(0, 1);
-  f.action.hits[slot].statFactor = factor;
-  f.action.hits[1 - slot].statFactor = 31 - factor;
+  f.action.hits[slot].stat_factor = factor;
+  f.action.hits[1 - slot].stat_factor = 31 - factor;
   VS::Battle::lastActionStatValue = 0xFFFF8000U;
   const std::uint32_t product = 0xFFFF8000U * factor;
   CHECK(b::LiveScaleLastActionStatValue(&f.action, nullptr, nullptr, slot, 0) ==
@@ -405,7 +408,7 @@ TEST_CASE("C6 stat callbacks retain actual SHORT ABI in relocated table",
                              b::LiveScaleLastActionStatValue,
                              b::LiveTargetRisk};
   VS::Battle::lastActionStatValue = 0xFFFF8000U;
-  f.action.hits[1].statFactor = 3;
+  f.action.hits[1].stat_factor = 3;
   f.stats.risk = 65535;
   constexpr std::array kExpected{-32768, 29491, -1};
   for (std::size_t i = 0; i < callbacks.size(); ++i) {

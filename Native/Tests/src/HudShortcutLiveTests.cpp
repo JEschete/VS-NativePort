@@ -16,7 +16,7 @@ TEST_CASE("F01358 Live permits unused null spell rows but hides their classes",
           "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
   CHECK(b::LiveShortcutIconBrightness(0) == 0);
-  state.stats.currentMp = 0;
+  state.stats.current_mp = 0;
   CHECK(b::LiveShortcutIconBrightness(4) == 0x180);
   CHECK(VS::Battle::spellClassSpellIds[1] == nullptr);
   CHECK(VS::Battle::spellClassCounts[1] == 0);
@@ -29,9 +29,9 @@ TEST_CASE(
   auto* last = std::end(VS::Menu::Magic::warlockSpellIds) - 1;
   *last = 255;
   f::LiveShortcut::SpellClass(1, last, 2);
-  Battle_actionDefinitions[255].unlocked = 1;
+  VS::Battle::actionDefinitions[255].unlocked = 1;
   CHECK(b::LiveShortcutIconBrightness(0) == 0x180);
-  state.stats.currentMp = 0;
+  state.stats.current_mp = 0;
   CHECK(b::LiveShortcutIconBrightness(0) == 0x140);
   CHECK(VS::Battle::spellClassSpellIds[0] == nullptr);
   CHECK(VS::Battle::spellClassCounts[1] == 2);
@@ -43,10 +43,10 @@ TEST_CASE(
   f::LiveShortcut state;
   std::ranges::fill(VS::Battle::chainAbilityActionIds, char{100});
   std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{101});
-  Battle_actionDefinitions[202].unlocked = 1;
+  VS::Battle::actionDefinitions[202].unlocked = 1;
   VS::Battle::chainAbilityActionIds[14] = static_cast<char>(202);
   VS::Battle::defenseAbilityActionIds[13] = static_cast<char>(202);
-  state.stats.currentMp = 0;
+  state.stats.current_mp = 0;
   CHECK(b::LiveShortcutIconBrightness(6) == 0);
   CHECK(b::LiveShortcutIconBrightness(5) == 0x180);
   VS::Battle::chainAbilityActionIds[13] = static_cast<char>(202);
@@ -57,13 +57,13 @@ TEST_CASE(
 TEST_CASE("F01358 Live resamples the current weapon class on repeated queries",
           "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
-  Battle_actionDefinitions[184].unlocked = 1;
-  state.stats.currentHp = 0;
+  VS::Battle::actionDefinitions[184].unlocked = 1;
+  state.stats.current_hp = 0;
   CHECK(b::LiveShortcutIconBrightness(7) == 0x140);
-  state.actor.equippedWeaponCategory = 2;
-  state.stats.currentHp = 1;
+  state.actor.equipped_weapon_category = 2;
+  state.stats.current_hp = 1;
   CHECK(b::LiveShortcutIconBrightness(7) == 0);
-  Battle_actionDefinitions[188].unlocked = 1;
+  VS::Battle::actionDefinitions[188].unlocked = 1;
   CHECK(b::LiveShortcutIconBrightness(7) == 0x180);
 }
 
@@ -72,7 +72,7 @@ TEST_CASE(
     "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
   VS::Battle::spellClassCounts[0] = 255;
-  state.stats.currentHp = 0;
+  state.stats.current_hp = 0;
   CHECK(b::LiveShortcutIconBrightness(-1) == 0x180);
   CHECK(b::LiveShortcutIconBrightness(8) == 0x180);
   CHECK(VS::Battle::spellClassSpellIds[0] == nullptr);

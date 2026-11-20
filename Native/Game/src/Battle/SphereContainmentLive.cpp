@@ -8,21 +8,22 @@
 #include <iterator>
 #include <span>
 
-#include "Battle/BattleTypes.h"
+#include "Battle/BattleTypes.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/TargetVolume.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+
+using VS::Battle::TargetVolume;
 
 namespace VS::Battle {
 namespace {
 namespace math = Core::Math;
 constexpr std::size_t kPointComponents = math::kMatrixOrder;
 constexpr std::size_t kSphereVolumes = 2;
-static_assert(sizeof(Battle_TargetVolume{}.scale) ==
-              sizeof(TargetVolumeExtents));
+static_assert(sizeof(TargetVolume{}.scale) == sizeof(TargetVolumeExtents));
 
-const Battle_TargetVolume& RequiredVolume(const Battle_TargetVolume* volume) {
+const TargetVolume& RequiredVolume(const TargetVolume* volume) {
   if (volume == nullptr) {
     VS::Core::LogError("battle.sphere", "Containment requires a target volume");
     std::abort();
@@ -30,13 +31,13 @@ const Battle_TargetVolume& RequiredVolume(const Battle_TargetVolume* volume) {
   return *volume;
 }
 
-TargetVolumeExtents ReadExtents(const Battle_TargetVolume& volume) {
+TargetVolumeExtents ReadExtents(const TargetVolume& volume) {
   TargetVolumeExtents extents{};
   std::memcpy(extents.data(), &volume.scale, sizeof extents);
   return extents;
 }
 
-SphereVolumeGeometry Geometry(const Battle_TargetVolume& volume) {
+SphereVolumeGeometry Geometry(const TargetVolume& volume) {
   return {
       .extents = ReadExtents(volume),
       .yaw = volume.angle,
@@ -58,7 +59,7 @@ math::Position3 RequiredPoint(std::span<const std::uint16_t> point) {
 
 class LiveContainmentQuery final : public SphereContainmentQuery {
  public:
-  LiveContainmentQuery(Battle_TargetVolume& volume,
+  LiveContainmentQuery(TargetVolume& volume,
                        std::span<const std::uint16_t> point)
       : volume_(volume), point_(point) {}
 
@@ -81,26 +82,26 @@ class LiveContainmentQuery final : public SphereContainmentQuery {
   }
 
  private:
-  Battle_TargetVolume& volume_;
+  TargetVolume& volume_;
   std::span<const std::uint16_t> point_;
 };
 }  // namespace
 
 // decomp: func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:170).
 SphereContainmentTransform BuildLiveTargetVolumeTestTransform(
-    const Battle_TargetVolume* volume) {
+    const TargetVolume* volume) {
   return BuildTargetVolumeTestTransform(Geometry(RequiredVolume(volume)));
 }
 
 // decomp: func_800C1034 (src/BATTLE/BATTLE.PRG/58578.c:188).
-int IsLivePointInTargetEllipsoid(const Battle_TargetVolume* volume,
+int IsLivePointInTargetEllipsoid(const TargetVolume* volume,
                                  std::span<const std::uint16_t> point) {
   const auto geometry = Geometry(RequiredVolume(volume));
   return IsPointInTargetEllipsoid(geometry, RequiredPoint(point));
 }
 
 // decomp: func_800C110C (src/BATTLE/BATTLE.PRG/58578.c:242).
-int IsLivePointInTargetCylinder(const Battle_TargetVolume* volume,
+int IsLivePointInTargetCylinder(const TargetVolume* volume,
                                 std::span<const std::uint16_t> point,
                                 int shift_height_origin) {
   const auto geometry = Geometry(RequiredVolume(volume));
@@ -109,7 +110,7 @@ int IsLivePointInTargetCylinder(const Battle_TargetVolume* volume,
 }
 
 // decomp: func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:299).
-int IsLivePointInTargetCone(const Battle_TargetVolume* volume,
+int IsLivePointInTargetCone(const TargetVolume* volume,
                             std::span<const std::uint16_t> point,
                             int shift_height_origin) {
   const auto geometry = Geometry(RequiredVolume(volume));
@@ -118,7 +119,7 @@ int IsLivePointInTargetCone(const Battle_TargetVolume* volume,
 }
 
 // decomp: func_800C1384 (src/BATTLE/BATTLE.PRG/58578.c:348).
-int IsLivePointInTargetPrism(const Battle_TargetVolume* volume,
+int IsLivePointInTargetPrism(const TargetVolume* volume,
                              std::span<const std::uint16_t> point,
                              int rectangular) {
   const auto geometry = Geometry(RequiredVolume(volume));
@@ -126,7 +127,7 @@ int IsLivePointInTargetPrism(const Battle_TargetVolume* volume,
 }
 
 // decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:411).
-int IsLivePointInTargetVolume(Battle_TargetVolume* volume,
+int IsLivePointInTargetVolume(TargetVolume* volume,
                               std::span<const std::uint16_t> point) {
   static_cast<void>(RequiredVolume(volume));
   LiveContainmentQuery query(*volume, point);

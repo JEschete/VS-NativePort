@@ -12,10 +12,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -23,6 +23,9 @@
 #include "Battle/StatFactorsLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionState;
 
 namespace {
 namespace battle = VS::Battle;
@@ -105,14 +108,13 @@ struct LiveFixture {
   decltype(VS::Battle::actors) actors_saved = VS::Battle::actors;
   decltype(VS::Battle::statCalculators) callbacks_saved =
       VS::Battle::statCalculators;
-  Battle_ActionState* saved_state = VS::Battle::actionState;
-  Battle_ActionDefinition saved_selected = Battle_actionDefinitions[255];
+  ActionState* saved_state = VS::Battle::actionState;
+  ActionDefinition saved_selected = VS::Battle::actionDefinitions[255];
   std::uint32_t saved_last = VS::Battle::lastActionStatValue;
-  std::unique_ptr<Battle_ActionState> state =
-      std::make_unique<Battle_ActionState>();
-  Battle_ActionDefinition action{};
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  std::unique_ptr<ActionState> state = std::make_unique<ActionState>();
+  ActionDefinition action{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   VS::Battle::HitResult source{};
   VS::Battle::HitResult target{};
   LiveFixture() {
@@ -123,17 +125,17 @@ struct LiveFixture {
     actor.stats = &stats;
     source.target.target_actor = 40;
     target.target.target_actor = 40;
-    stats.actorId = 255;
-    state->queueIndex = 0xABCD0001;
-    state->selection.actionId = 255;
-    state->selection.primaryTarget.hp_effect = 1;
-    state->selection.primaryTarget.target.hp = -101;
-    state->selection.primaryTarget.target.mp = 50;
+    stats.actor_id = 255;
+    state->queue_index = 0xABCD0001;
+    state->selection.action_id = 255;
+    state->selection.primary_target.hp_effect = 1;
+    state->selection.primary_target.target.hp = -101;
+    state->selection.primary_target.target.mp = 50;
     state->selection.targets[0].target.hp = -101;
     state->selection.targets[0].target.mp = 50;
-    action.hits[0].statFactor = 3;
-    action.hits[1].statFactor = 31;
-    Battle_actionDefinitions[255].type = 1;
+    action.hits[0].stat_factor = 3;
+    action.hits[1].stat_factor = 31;
+    VS::Battle::actionDefinitions[255].type = 1;
   }
   ~LiveFixture() {
     std::copy(actors_saved.begin(), actors_saved.end(),
@@ -141,7 +143,7 @@ struct LiveFixture {
     std::copy(callbacks_saved.begin(), callbacks_saved.end(),
               VS::Battle::statCalculators.begin());
     VS::Battle::actionState = saved_state;
-    Battle_actionDefinitions[255] = saved_selected;
+    VS::Battle::actionDefinitions[255] = saved_selected;
     VS::Battle::lastActionStatValue = saved_last;
   }
 };
@@ -180,12 +182,12 @@ void CheckAlias(std::uint32_t address) {
   REQUIRE(entry != symbols.end());
   CHECK(entry->target ==
         reinterpret_cast<void*>(&battle::LiveScalePreviousTargetHit));
-  fixture.state->selection.targetCount = 0;
-  fixture.state->selection.actionId = 65535;
+  fixture.state->selection.target_count = 0;
+  fixture.state->selection.action_id = 65535;
   const auto hit = GENERATE(0, 1);
   CHECK(battle::LiveScalePreviousTargetHit(&fixture.action, nullptr, nullptr,
                                            hit, -1) == (hit == 0 ? -15 : -158));
-  CHECK(fixture.state->queueIndex == 0xABCD0001);
+  CHECK(fixture.state->queue_index == 0xABCD0001);
   CHECK(fixture.state->selection.targets[0].target.hp == -101);
 }
 using Calculator = decltype(&battle::ScaleSourceMissingHp);
@@ -367,9 +369,9 @@ TEST_CASE("Incoming spell refuses only values past reached gates",
 TEST_CASE("Live missing HP uses hit slot not stats identity",
           "[stat-factors][F00413]") {
   LiveFixture fixture;
-  fixture.stats.currentHp = 201;
-  fixture.stats.maxHp = 100;
-  fixture.state->selection.actionId = 65535;
+  fixture.stats.current_hp = 201;
+  fixture.stats.max_hp = 100;
+  fixture.state->selection.action_id = 65535;
   CHECK(battle::LiveScaleSourceMissingHp(&fixture.action, &fixture.source,
                                          nullptr, 0, -1) == -30);
   CHECK(battle::LiveScaleSourceMissingHp(&fixture.action, &fixture.source,
@@ -378,9 +380,9 @@ TEST_CASE("Live missing HP uses hit slot not stats identity",
 TEST_CASE("Live missing MP uses independent signed MP fields",
           "[stat-factors][F00419]") {
   LiveFixture fixture;
-  fixture.stats.currentMp = 301;
-  fixture.stats.maxMp = 200;
-  fixture.state->selection.actionId = 65535;
+  fixture.stats.current_mp = 301;
+  fixture.stats.max_mp = 200;
+  fixture.state->selection.action_id = 65535;
   CHECK(battle::LiveScaleSourceMissingMp(&fixture.action, &fixture.source,
                                          nullptr, 0, -1) == -30);
   CHECK(battle::LiveScaleSourceMissingMp(&fixture.action, &fixture.source,
@@ -389,8 +391,8 @@ TEST_CASE("Live missing MP uses independent signed MP fields",
 TEST_CASE("Live target HP needs no source or selected definition",
           "[stat-factors][F00415]") {
   LiveFixture fixture;
-  fixture.stats.currentHp = -101;
-  fixture.state->selection.actionId = 65535;
+  fixture.stats.current_hp = -101;
+  fixture.state->selection.action_id = 65535;
   CHECK(battle::LiveScaleTargetCurrentHp(&fixture.action, nullptr,
                                          &fixture.target, 0, 0) == -3);
   CHECK(battle::LiveScaleTargetCurrentHp(&fixture.action, nullptr,
@@ -400,11 +402,11 @@ TEST_CASE("Live weapon PP ignores equipment presence action and hit index",
           "[stat-factors][F00416]") {
   LiveFixture fixture;
   fixture.stats.weapon.current_pp = 65535;
-  fixture.state->selection.actionId = 65535;
+  fixture.state->selection.action_id = 65535;
   const auto index = GENERATE(-1, 0, 1, 2);
   CHECK(battle::LiveWeaponPpWithChainOffset(nullptr, &fixture.source, nullptr,
                                             index, -1) == -1);
-  fixture.state->queueIndex = 0xFFFF0000;
+  fixture.state->queue_index = 0xFFFF0000;
   CHECK(battle::LiveWeaponPpWithChainOffset(nullptr, &fixture.source, nullptr,
                                             index, 0) == -2);
 }
@@ -412,16 +414,16 @@ TEST_CASE("Live spell selected and input actions are independent owners",
           "[stat-factors][F00417]") {
   LiveFixture fixture;
   fixture.action.type = 7;
-  fixture.state->queueIndex = 0xFFFFFFFF;
+  fixture.state->queue_index = 0xFFFFFFFF;
   CHECK(battle::LiveScaleIncomingSpellDamage(&fixture.action, nullptr, nullptr,
                                              0, -1) == -15);
   CHECK(battle::LiveScaleIncomingSpellDamage(&fixture.action, nullptr, nullptr,
                                              1, 0) == -158);
-  Battle_actionDefinitions[255].type = 7;
+  VS::Battle::actionDefinitions[255].type = 7;
   CHECK(battle::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, -1,
                                              -1) == 0);
-  Battle_actionDefinitions[255].type = 1;
-  fixture.state->selection.primaryTarget.hp_effect = 2;
+  VS::Battle::actionDefinitions[255].type = 1;
+  fixture.state->selection.primary_target.hp_effect = 2;
   CHECK(battle::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, 2,
                                              -1) == 0);
 }
@@ -451,11 +453,11 @@ TEST_CASE("Original SHORT table relocates and dispatches all eight factors",
   LiveFixture fixture;
   RelocateStatTable();
   const auto selector = GENERATE(4, 5, 7, 6, 8, 9, 11, 18);
-  fixture.action.hits[1].statCalculatorId = selector;
-  fixture.stats.currentHp = 201;
-  fixture.stats.maxHp = 100;
-  fixture.stats.currentMp = 301;
-  fixture.stats.maxMp = 200;
+  fixture.action.hits[1].stat_calculator_id = selector;
+  fixture.stats.current_hp = 201;
+  fixture.stats.max_hp = 100;
+  fixture.stats.current_mp = 301;
+  fixture.stats.max_mp = 200;
   fixture.stats.weapon.current_pp = 65535;
   constexpr std::array<int, 19> kExpected{0,  0,  0,    0, -158, -313, -158,
                                           62, -1, -158, 0, -313, 0,    0,
@@ -535,13 +537,14 @@ void CheckIncomingLive(LiveCalculator calculator, IncomingGate gate,
       std::ranges::find(symbols, address, &VS::Content::ModuleSymbol::address);
   REQUIRE(entry != symbols.end());
   CHECK(entry->target == reinterpret_cast<void*>(calculator));
-  Battle_actionDefinitions[255].type = gate == IncomingGate::kSpell ? 1 : 7;
+  VS::Battle::actionDefinitions[255].type =
+      gate == IncomingGate::kSpell ? 1 : 7;
   fixture.action.type = gate == IncomingGate::kSpell ? 7 : 1;
-  fixture.state->queueIndex = 65535;
-  if (gate == IncomingGate::kAny) fixture.state->selection.actionId = 65535;
+  fixture.state->queue_index = 65535;
+  if (gate == IncomingGate::kAny) fixture.state->selection.action_id = 65535;
   CHECK(calculator(&fixture.action, nullptr, nullptr, 0, -1) == -15);
   CHECK(calculator(&fixture.action, nullptr, nullptr, 1, 0) == -158);
-  fixture.state->selection.primaryTarget.hp_effect = 2;
+  fixture.state->selection.primary_target.hp_effect = 2;
   CHECK(calculator(nullptr, nullptr, nullptr, -1, -1) == 0);
   CHECK(calculator(nullptr, nullptr, nullptr, 2, 0) == 0);
 }
@@ -569,12 +572,12 @@ void CheckTargetMissing(VitalCalculator calculator,
 }
 void CheckTargetLive(LiveCalculator calculator) {
   LiveFixture fixture;
-  fixture.stats.currentHp = 201;
-  fixture.stats.maxHp = 100;
-  fixture.stats.currentMp = 302;
-  fixture.stats.maxMp = 200;
+  fixture.stats.current_hp = 201;
+  fixture.stats.max_hp = 100;
+  fixture.stats.current_mp = 302;
+  fixture.stats.max_mp = 200;
   fixture.target.targets_position = GENERATE(0, 1);
-  fixture.state->selection.actionId = 65535;
+  fixture.state->selection.action_id = 65535;
   VS::Battle::actionState = nullptr;
   const auto hit = GENERATE(-1, 0, 1, 2);
   CHECK(calculator(nullptr, nullptr, &fixture.target, hit, -1) ==
@@ -712,16 +715,16 @@ TEST_CASE("F00429 refuses reached inputs even when cost is zero",
 TEST_CASE("F00429 live cost and factor have different action owners",
           "[stat-factors][stat-factors-b8][F00429]") {
   LiveFixture fixture;
-  Battle_actionDefinitions[255].cost = 255;
-  Battle_actionDefinitions[255].hits[1].statFactor = 0;
+  VS::Battle::actionDefinitions[255].cost = 255;
+  VS::Battle::actionDefinitions[255].hits[1].stat_factor = 0;
   fixture.action.type = 7;
   fixture.action.cost = 0;
-  fixture.state->selection.primaryTarget.hp_effect = GENERATE(0, 1, 2, 3);
+  fixture.state->selection.primary_target.hp_effect = GENERATE(0, 1, 2, 3);
   CHECK(battle::LiveScaleIncomingSpellCost(&fixture.action, nullptr, nullptr, 0,
                                            -1) == 76);
   CHECK(battle::LiveScaleIncomingSpellCost(&fixture.action, nullptr, nullptr, 1,
                                            0) == 790);
-  Battle_actionDefinitions[255].type = 7;
+  VS::Battle::actionDefinitions[255].type = 7;
   CHECK(battle::LiveScaleIncomingSpellCost(nullptr, nullptr, nullptr, -1, -1) ==
         0);
 }
@@ -753,13 +756,14 @@ TEST_CASE("Original SHORT table relocates and dispatches all B8 factors",
   LiveFixture fixture;
   RelocateStatTable();
   const auto selector = GENERATE(10, 16, 17, 19, 20, 21, 22, 23);
-  fixture.action.hits[1].statCalculatorId = selector;
-  Battle_actionDefinitions[255].type = selector == 10 || selector == 20 ? 7 : 1;
-  Battle_actionDefinitions[255].cost = 255;
-  fixture.stats.currentHp = 201;
-  fixture.stats.maxHp = 100;
-  fixture.stats.currentMp = 302;
-  fixture.stats.maxMp = 200;
+  fixture.action.hits[1].stat_calculator_id = selector;
+  VS::Battle::actionDefinitions[255].type =
+      selector == 10 || selector == 20 ? 7 : 1;
+  VS::Battle::actionDefinitions[255].cost = 255;
+  fixture.stats.current_hp = 201;
+  fixture.stats.max_hp = 100;
+  fixture.stats.current_mp = 302;
+  fixture.stats.max_mp = 200;
   fixture.stats.shield.current_pp = 65535;
   const int expected = selector == 16   ? -101
                        : selector == 17 ? -102

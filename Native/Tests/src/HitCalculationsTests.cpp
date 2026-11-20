@@ -15,9 +15,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/HitCalculations.hpp"
@@ -25,6 +25,8 @@
 #include "Battle/HitChance.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionDefinition;
 
 namespace {
 namespace battle = VS::Battle;
@@ -146,9 +148,9 @@ struct LiveFixture {
       VS::Battle::actionEffectMediators;
   std::uint32_t last = VS::Battle::lastActionStatValue;
   std::uint32_t prerequisite = VS::Battle::hitPrerequisiteResult;
-  std::array<Battle_Actor, 2> actors{};
-  std::array<Battle_ActorStats, 2> owners{};
-  Battle_ActionDefinition action{};
+  std::array<VS::Battle::Actor, 2> actors{};
+  std::array<VS::Battle::ActorStats, 2> owners{};
+  ActionDefinition action{};
   VS::Battle::HitResult source{};
   VS::Battle::HitResult target{};
   LiveFixture() {
@@ -157,8 +159,8 @@ struct LiveFixture {
     for (unsigned i = 0; i < actors.size(); ++i) {
       VS::Battle::actors[i] = &actors.at(i);
       actors.at(i).stats = &owners.at(i);
-      owners.at(i).actorId = static_cast<std::uint8_t>(i);
-      owners.at(i).maxHp = 1;
+      owners.at(i).actor_id = static_cast<std::uint8_t>(i);
+      owners.at(i).max_hp = 1;
     }
     target.target.target_actor = 1;
     VS::Battle::hitPrerequisiteResult = 1;
@@ -195,19 +197,19 @@ void Relocate(void** target, std::span<const std::uint8_t> image) {
       *table, image, VS::Content::ModuleSymbols()));
 }
 
-bool RoutedSelectorsAreActive(
-    std::span<const Battle_ActionDefinition> definitions) {
+bool RoutedSelectorsAreActive(std::span<const ActionDefinition> definitions) {
   constexpr std::array kStatEffects{40U, 41U, 42U, 43U, 44U, 45U, 46U, 47U, 48U,
                                     49U, 58U, 59U, 62U, 63U, 64U, 65U, 66U};
   for (const auto& action : definitions) {
     for (const auto& hit : action.hits) {
-      const auto prerequisite = hit.prerequisiteFunctionId;
+      const auto prerequisite = hit.prerequisite_function_id;
       if (prerequisite == 0) continue;
-      if (hit.effectId == 0) return false;
+      if (hit.effect_id == 0) return false;
       const bool direct = prerequisite >= 6 && prerequisite <= 8;
-      if (!direct && hit.hitFunctionId == 0) return false;
-      if (std::ranges::find(kStatEffects, hit.effectId) != kStatEffects.end() &&
-          hit.statCalculatorId == 0) {
+      if (!direct && hit.hit_function_id == 0) return false;
+      if (std::ranges::find(kStatEffects, hit.effect_id) !=
+              kStatEffects.end() &&
+          hit.stat_calculator_id == 0) {
         return false;
       }
     }
@@ -509,7 +511,7 @@ TEST_CASE("Live attributes use existing gear fields and real gem helpers",
   f.owners.at(0).agility = 180;
   f.owners.at(0).intelligence = 180;
   f.owners.at(0).weapon.gems[2].gem_effects = 1;
-  f.actors.at(0).weaponDrawn = 1;
+  f.actors.at(0).weapon_drawn = 1;
   f.action.cost = 30;
   CHECK(battle::LiveAgilityHitChance(&f.action, &f.source, &f.target, 0, 0) ==
         300);
@@ -539,16 +541,16 @@ TEST_CASE("Live stat dispatch invokes actual short table ABI",
           "[hit-calculations][F00435][battle][action][typed]") {
   LiveFixture f;
   VS::Battle::statCalculators[26] =
-      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
-          VS::Battle::HitResult*, int hit, int execute) -> std::int16_t {
+      +[](ActionDefinition*, VS::Battle::HitResult*, VS::Battle::HitResult*,
+          int hit, int execute) -> std::int16_t {
     VS::Battle::lastActionStatValue = 123;
     return static_cast<std::int16_t>(hit + execute);
   };
-  f.action.hits[1].statCalculatorId = 26;
+  f.action.hits[1].stat_calculator_id = 26;
   CHECK(battle::LiveCalculateActionStatChange(&f.action, nullptr, &f.target, 1,
                                               -32769) == -32768);
   CHECK(VS::Battle::lastActionStatValue == 0xFFFF8000U);
-  f.owners.at(1).actorId = 128;
+  f.owners.at(1).actor_id = 128;
   CHECK(battle::LiveCalculateActionStatChange(nullptr, nullptr, &f.target, -1,
                                               -1) == 999);
 }
@@ -556,12 +558,12 @@ TEST_CASE("Live roll invokes actual int table ABI and lazy exemption",
           "[hit-calculations][F00349][battle][action][typed]") {
   LiveFixture f;
   VS::Battle::hitFunctions[7] =
-      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
-          VS::Battle::HitResult*, int, int) -> int { return 255; };
-  f.action.hits[0].hitFunctionId = 7;
+      +[](ActionDefinition*, VS::Battle::HitResult*, VS::Battle::HitResult*,
+          int, int) -> int { return 255; };
+  f.action.hits[0].hit_function_id = 7;
   CHECK(battle::LiveRollActionHit(&f.action, nullptr, &f.target, 0, 0) == 0);
   CHECK(f.target.target.hit_threshold == 255);
-  f.owners.at(1).actorId = 128;
+  f.owners.at(1).actor_id = 128;
   CHECK(battle::LiveRollActionHit(nullptr, &f.source, &f.target, -1, -1) == 1);
 }
 
@@ -569,19 +571,19 @@ TEST_CASE("Original action table never routes to retired selectors",
           "[hit-calculations][sentinel-retirement]") {
   auto image = ReadModule("SLUS_010.40");
   constexpr std::size_t kTableOffset = 0x3C1DC;
-  std::array<Battle_ActionDefinition, 256> definitions{};
+  std::array<ActionDefinition, 256> definitions{};
   REQUIRE(image.size() >= kTableOffset + sizeof(definitions));
   std::memcpy(definitions.data(), image.data() + kTableOffset,
               sizeof(definitions));
   REQUIRE(RoutedSelectorsAreActive(definitions));
   SECTION("hit sentinel negative control") {
-    definitions.at(79).hits[0].prerequisiteFunctionId = 1;
+    definitions.at(79).hits[0].prerequisite_function_id = 1;
   }
   SECTION("stat sentinel negative control") {
-    definitions.at(1).hits[0].statCalculatorId = 0;
+    definitions.at(1).hits[0].stat_calculator_id = 0;
   }
   SECTION("effect sentinel negative control") {
-    definitions.at(1).hits[0].effectId = 0;
+    definitions.at(1).hits[0].effect_id = 0;
   }
   CHECK_FALSE(RoutedSelectorsAreActive(definitions));
 }

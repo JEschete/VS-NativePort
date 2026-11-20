@@ -13,7 +13,7 @@
 
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"

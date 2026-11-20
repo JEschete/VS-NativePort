@@ -122,8 +122,8 @@ void FreezeAllActorAnimations(DisplayFlagsHost& host);
 void UnfreezeAllActorAnimations(DisplayFlagsHost& host);
 
 inline constexpr std::size_t kActorNameBytes = 24;
-// Battle_Actor::roomSpawnIndex and Battle_ActorStats::actorId of an actor no
-// room spawn placed.
+// VS::Battle::Actor::roomSpawnIndex and VS::Battle::ActorStats::actorId of an
+// actor no room spawn placed.
 inline constexpr std::uint8_t kNoRoomSpawn = 0x80;
 // The Battle_SetActorMarker flags a target-only placeholder receives.
 inline constexpr int kPlaceholderMarkerFlags = 0x8;

@@ -14,7 +14,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -37,11 +37,13 @@ void Require(bool valid, const char* message) {
 
 class LiveVitalsActor final : public VitalsActor {
  public:
-  explicit LiveVitalsActor(Battle_Actor& actor) : actor_(actor) {}
-  std::uint8_t SpawnIndex() override { return actor_.roomSpawnIndex; }
-  std::uint8_t RetainAfterDefeat() override { return actor_.retainAfterDefeat; }
+  explicit LiveVitalsActor(VS::Battle::Actor& actor) : actor_(actor) {}
+  std::uint8_t SpawnIndex() override { return actor_.room_spawn_index; }
+  std::uint8_t RetainAfterDefeat() override {
+    return actor_.retain_after_defeat;
+  }
   std::uint32_t WeaponDrawn() override {
-    return std::bit_cast<std::uint32_t>(actor_.weaponDrawn);
+    return std::bit_cast<std::uint32_t>(actor_.weapon_drawn);
   }
   ActorVitalsAccess* Stats() override {
     if (actor_.stats == nullptr) return nullptr;
@@ -50,7 +52,7 @@ class LiveVitalsActor final : public VitalsActor {
   }
 
  private:
-  Battle_Actor& actor_;
+  VS::Battle::Actor& actor_;
   std::optional<LiveActorVitalsAccess> stats_;
 };
 
@@ -123,23 +125,23 @@ int Checked(std::optional<int> result) {
 }
 }  // namespace
 
-LiveActorVitalsAccess::LiveActorVitalsAccess(Battle_ActorStats& stats)
+LiveActorVitalsAccess::LiveActorVitalsAccess(VS::Battle::ActorStats& stats)
     : stats_(stats) {}
 
 ActorVitalsState LiveActorVitalsAccess::Read() {
-  return {ReadLiveStatusState(stats_), stats_.currentMp, stats_.maxMp,
-          stats_.risk, stats_.actionRecoveryTimer};
+  return {ReadLiveStatusState(stats_), stats_.current_mp, stats_.max_mp,
+          stats_.risk, stats_.action_recovery_timer};
 }
 
 void LiveActorVitalsAccess::Write(const ActorVitalsState& state) {
   WriteLiveStatusState(state.status, stats_);
-  stats_.currentMp = state.mp;
-  stats_.maxMp = state.max_mp;
+  stats_.current_mp = state.mp;
+  stats_.max_mp = state.max_mp;
   stats_.risk = state.risk;
-  stats_.actionRecoveryTimer = state.recovery;
+  stats_.action_recovery_timer = state.recovery;
 }
 
-Battle_ActorStats& LiveActorVitalsAccess::Owner() { return stats_; }
+VS::Battle::ActorStats& LiveActorVitalsAccess::Owner() { return stats_; }
 
 // decomp: func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7413).
 int ResolveLiveActorDefeat(int source, int target, int count_kill) {

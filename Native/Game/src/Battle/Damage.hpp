@@ -8,15 +8,15 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Battle_ActionDefinition;
-struct Battle_Actor;
-
 namespace VS::Battle {
+
+struct ActionDefinition;
+struct Actor;
 
 struct HitResult;
 
-using StatCalculator = std::int16_t (*)(Battle_ActionDefinition*, HitResult*,
-                                        HitResult*, int, int);
+using StatCalculator = std::int16_t (*)(VS::Battle::ActionDefinition*,
+                                        HitResult*, HitResult*, int, int);
 
 inline constexpr std::size_t kBladeCategoryCount = 12;
 inline constexpr std::size_t kStatCalculatorCount = 27;
@@ -29,7 +29,7 @@ extern std::array<std::uint16_t, kBladeCategoryCount> bladePpDamageBonuses;
 // (src/BATTLE/BATTLE.PRG/146C.c:303)
 extern std::array<StatCalculator, kStatCalculatorCount> statCalculators;
 // decomp: vs_battle_actors (src/BATTLE/BATTLE.PRG/actor.h:172)
-extern std::array<Battle_Actor*, kBattleActorSlotCount> actors;
+extern std::array<VS::Battle::Actor*, kBattleActorSlotCount> actors;
 // decomp: _lastValue, upstream lastValue (src/BATTLE/BATTLE.PRG/146C.c:340)
 extern std::uint32_t lastActionStatValue;
 // decomp: D_800F1A0C (src/BATTLE/BATTLE.PRG/146C.c:341)

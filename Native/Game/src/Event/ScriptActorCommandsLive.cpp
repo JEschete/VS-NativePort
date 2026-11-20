@@ -20,7 +20,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatusEffects.hpp"
@@ -113,7 +113,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     event::scriptControlledActors[actor] = 1;
   }
   [[nodiscard]] std::optional<int> PresentActorKind(int actor) const override {
-    const Battle_Actor* present = VS::Actors::LiveActorAtSlot(actor);
+    const VS::Battle::Actor* present = VS::Actors::LiveActorAtSlot(actor);
     if (present == nullptr) return std::nullopt;
     return present->kind;
   }

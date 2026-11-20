@@ -15,12 +15,15 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Content/ModuleData.hpp"
 #include "Render/ModelGeometryLive.hpp"
+
+using VS::Battle::ActionState;
+
 namespace {
 namespace b = VS::Battle;
 namespace a = VS::Actors;
@@ -39,8 +42,8 @@ struct LiveFixture {
   int saved_side = VS::Battle::chainAbilityAnimationSide;
   char saved_pitch = VS::Battle::specialActionPitch;
   char saved_clip = VS::Actors::lastResolvedSequenceIndex;
-  Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_ActionState action{};
+  ActionState* saved_action = VS::Battle::actionState;
+  ActionState action{};
   u_char saved_group = VS::Battle::chainAbilityAnimationGroups[kAbility];
   Model model{};
   std::array<std::uint32_t, 1024> sequence{};

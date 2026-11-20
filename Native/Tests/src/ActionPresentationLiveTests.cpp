@@ -10,14 +10,17 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ShpModel.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionPresentationLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Effects/Runtime.hpp"
 #include "Render/ModelGeometryLive.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
 
 namespace {
 namespace b = VS::Battle;
@@ -28,12 +31,12 @@ struct Model {
 struct LivePresentation {
   decltype(VS::Battle::actors) saved_battle = VS::Battle::actors;
   decltype(VS::Actors::actorRecords) saved_actors = VS::Actors::actorRecords;
-  Battle_ActionDefinition saved_definition = Battle_actionDefinitions[60];
-  std::array<Battle_Actor, 3> battle{};
-  std::array<Battle_ActorStats, 3> stats{};
+  ActionDefinition saved_definition = VS::Battle::actionDefinitions[60];
+  std::array<VS::Battle::Actor, 3> battle{};
+  std::array<VS::Battle::ActorStats, 3> stats{};
   std::array<VS::Actors::ActorRecord, 3> actors{};
   Model model{};
-  Battle_ActionRequest action{};
+  ActionRequestRecord action{};
   struct Guarded {
     std::uint32_t before = 0x12345678;
     VS::Effects::LiveActionEffectRequest request{};
@@ -47,18 +50,18 @@ struct LivePresentation {
     }
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
     for (std::size_t i = 0; i < battle.size(); ++i) {
-      battle.at(i).allocationKind = i == 2 ? 2 : 1;
+      battle.at(i).allocation_kind = i == 2 ? 2 : 1;
       battle.at(i).stats = &stats.at(i);
-      stats.at(i).defaultTargetLimb = 4;
+      stats.at(i).default_target_limb = 4;
       actors.at(i).instance.model = &model.header;
       actors.at(i).instance.bone_count = 6;
       actors.at(i).model_data_size = sizeof(model);
       VS::Battle::actors[i] = &battle.at(i);
       VS::Actors::actorRecords[i] = &actors.at(i);
     }
-    action.actionId = 60;
-    Battle_actionDefinitions[60].effectId = 39;
-    action.focusPosition = {11, 22, 33, 44};
+    action.action_id = 60;
+    VS::Battle::actionDefinitions[60].effect_id = 39;
+    action.focus_position = {11, 22, 33, 44};
   }
   LivePresentation(const LivePresentation&) = delete;
   LivePresentation& operator=(const LivePresentation&) = delete;
@@ -66,7 +69,7 @@ struct LivePresentation {
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_battle, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
-    Battle_actionDefinitions[60] = saved_definition;
+    VS::Battle::actionDefinitions[60] = saved_definition;
   }
   void ActorHit(std::size_t index, int slot, int limb) {
     auto& hit = action.targets[index];
@@ -87,7 +90,7 @@ struct LivePresentation {
 TEST_CASE("F00109 production builder excludes real targets from bystanders",
           "[action-presentation][F00109][redirect-binding]") {
   auto fixture = std::make_unique<LivePresentation>();
-  fixture->action.targetCount = 1;
+  fixture->action.target_count = 1;
   fixture->ActorHit(0, 1, 2);
   fixture->Build();
   const auto& request = fixture->output.request;
@@ -103,7 +106,7 @@ TEST_CASE("F00109 production builder excludes real targets from bystanders",
 TEST_CASE("F00109 production duplicate does not change a later default limb",
           "[action-presentation][F00109][redirect-binding]") {
   auto fixture = std::make_unique<LivePresentation>();
-  fixture->action.targetCount = 3;
+  fixture->action.target_count = 3;
   fixture->ActorHit(0, 1, 2);
   fixture->ActorHit(1, 1, 3);
   fixture->ActorHit(2, 2, -1);
@@ -118,7 +121,7 @@ TEST_CASE("F00109 production duplicate does not change a later default limb",
 TEST_CASE("F00109 production compacted world is never mistaken for an actor",
           "[action-presentation][F00109][redirect-binding]") {
   auto fixture = std::make_unique<LivePresentation>();
-  fixture->action.targetCount = 4;
+  fixture->action.target_count = 4;
   fixture->ActorHit(0, 1, 2);
   fixture->ActorHit(1, 1, 3);
   fixture->WorldHit(2);
@@ -137,7 +140,7 @@ TEST_CASE(
     "F00109 production sixteen-world boundary preserves neighboring storage",
     "[action-presentation][F00109][redirect-binding]") {
   auto fixture = std::make_unique<LivePresentation>();
-  fixture->action.targetCount = 16;
+  fixture->action.target_count = 16;
   for (std::size_t i = 0; i < 16; ++i) fixture->WorldHit(i);
   fixture->Build();
   CHECK(fixture->output.request.count == 16);
@@ -148,7 +151,7 @@ TEST_CASE(
 TEST_CASE("F00109 production deduplication remains valid at full capacity",
           "[action-presentation][F00109][redirect-binding]") {
   auto fixture = std::make_unique<LivePresentation>();
-  fixture->action.targetCount = 17;
+  fixture->action.target_count = 17;
   for (std::size_t i = 0; i < 17; ++i) fixture->ActorHit(i, 1, 3);
   fixture->Build();
   CHECK(fixture->output.request.count == 1);

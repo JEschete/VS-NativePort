@@ -22,12 +22,12 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.hpp"
@@ -91,6 +91,12 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "Title/TitleMenuLive.hpp"
+
+using VS::Battle::ActionState;
+using VS::Battle::kActionIdDaggerArtOne;
+using VS::Battle::kActionTypeBreakArt;
+using VS::Battle::kWarlockSpellExplosion;
+using VS::Battle::kWarlockSpellMeteor;
 
 namespace VS::Game {
 namespace {
@@ -221,29 +227,29 @@ int EnterOrFinishEncounter() {
   return ResumeEncounter();
 }
 
-EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
+EncounterActorState InspectActor(int slot, const VS::Battle::Actor& actor) {
   const auto& stats = *actor.stats;
   EncounterActorState snapshot;
   snapshot.slot = slot;
-  snapshot.hp = stats.currentHp;
-  snapshot.mp = stats.currentMp;
-  snapshot.max_hp = stats.maxHp;
-  snapshot.max_mp = stats.maxMp;
+  snapshot.hp = stats.current_hp;
+  snapshot.mp = stats.current_mp;
+  snapshot.max_hp = stats.max_hp;
+  snapshot.max_mp = stats.max_mp;
   snapshot.risk = stats.risk;
   snapshot.strength = stats.strength;
   snapshot.intelligence = stats.intelligence;
   snapshot.agility = stats.agility;
-  snapshot.total_strength = stats.totalStrength;
-  snapshot.total_intelligence = stats.totalIntelligence;
-  snapshot.total_agility = stats.totalAgility;
-  snapshot.walk_speed = static_cast<unsigned char>(stats.walkSpeed);
-  snapshot.run_speed = static_cast<unsigned char>(stats.runSpeed);
+  snapshot.total_strength = stats.total_strength;
+  snapshot.total_intelligence = stats.total_intelligence;
+  snapshot.total_agility = stats.total_agility;
+  snapshot.walk_speed = static_cast<unsigned char>(stats.walk_speed);
+  snapshot.run_speed = static_cast<unsigned char>(stats.run_speed);
   snapshot.statuses = static_cast<std::uint32_t>(stats.statuses);
-  std::ranges::copy(stats.statusTimers, snapshot.status_timers.begin());
-  snapshot.command = actor.commandOpcode;
-  snapshot.command_state = actor.commandState;
-  snapshot.weapon_drawn = actor.weaponDrawn;
-  snapshot.weapon_category = actor.equippedWeaponCategory;
+  std::ranges::copy(stats.status_timers, snapshot.status_timers.begin());
+  snapshot.command = actor.command_opcode;
+  snapshot.command_state = actor.command_state;
+  snapshot.weapon_drawn = actor.weapon_drawn;
+  snapshot.weapon_category = actor.equipped_weapon_category;
   snapshot.weapon_blade = stats.weapon.blade.id;
   snapshot.weapon_grip = stats.weapon.grip.id;
   snapshot.weapon_model =
@@ -251,13 +257,13 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.shield_model =
       static_cast<unsigned char>(stats.shield.weapon_model_id);
   snapshot.actor_flags = VS::Actors::LiveActorStateFlags(slot);
-  snapshot.recovery = stats.actionRecoveryTimer;
+  snapshot.recovery = stats.action_recovery_timer;
   VS::Actors::ActorLocationQuery location{};
   VS::Actors::LiveActorPlacement(slot, &location);
   snapshot.x = location.location.position.vx;
   snapshot.y = location.location.position.vy;
   snapshot.z = location.location.position.vz;
-  snapshot.spawn_index = actor.roomSpawnIndex;
+  snapshot.spawn_index = actor.room_spawn_index;
   snapshot.defeated = actor.defeated != 0;
   snapshot.awareness_marker =
       static_cast<unsigned char>(VS::Battle::actorMarkers[slot]);
@@ -276,10 +282,10 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   return snapshot;
 }
 
-void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
-  state.action = action.selection.actionId;
-  state.source_actor = action.selection.primaryTarget.target.target_actor;
-  state.target_count = action.selection.targetCount;
+void InspectTargeting(EncounterState& state, const ActionState& action) {
+  state.action = action.selection.action_id;
+  state.source_actor = action.selection.primary_target.target.target_actor;
+  state.target_count = action.selection.target_count;
   const auto page = VS::Battle::GetTargetPageInfo();
   state.target_page = {page.total, page.page,    page.pages,
                        page.first, page.visible, page.selected};
@@ -290,9 +296,9 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
       state.action_phase > kLastTargetPhase) {
     return;
   }
-  const auto& center = action.areaCenter;
+  const auto& center = action.area_center;
   state.area_center = {center.vx, center.vy, center.vz};
-  if (action.previewCount > std::size(action.previews)) {
+  if (action.preview_count > std::size(action.previews)) {
     throw std::runtime_error("encounter target previews exceed storage");
   }
   // BATTLE.PRG func_800C4794 positioning mode (sphere +0x3E): D-pad moves the
@@ -311,7 +317,7 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
            {volume.position[0], volume.position[1], volume.position[2]}});
     }
   }
-  for (unsigned index = 0; index < action.previewCount; ++index) {
+  for (unsigned index = 0; index < action.preview_count; ++index) {
     const auto& target = action.previews[index];
     state.target_previews.push_back(
         {target.actor_id,
@@ -349,10 +355,10 @@ unsigned EquippedBreakArt() {
       throw std::runtime_error(
           "encounter profile has an invalid weapon family");
     }
-    return Battle_ActionId_DaggerArtOne +
+    return kActionIdDaggerArtOne +
            static_cast<unsigned>(category - 1) * kArtsPerWeapon;
   }
-  return Battle_ActionId_DaggerArtOne + kWeaponFamilies * kArtsPerWeapon;
+  return kActionIdDaggerArtOne + kWeaponFamilies * kArtsPerWeapon;
 }
 
 void StockEncounterItems(EncounterProfile profile) {
@@ -409,20 +415,20 @@ constexpr std::array<AdjustmentDefinition, 13> kAdjustments = {
 static_assert(kAdjustments.size() ==
               static_cast<std::size_t>(EncounterAdjustment::kCount));
 
-std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
-                                                 Battle_ActorStats& stats) {
+std::expected<void, std::string> ApplyAdjustment(
+    EncounterAdjustment adjustment, VS::Battle::ActorStats& stats) {
   constexpr int kHpStep = 50, kMpStep = 25, kRiskStep = 25, kMaxRisk = 100;
   switch (adjustment) {
     case EncounterAdjustment::kLowerHp:
-      stats.currentHp =
-          static_cast<std::int16_t>(std::max(1, stats.currentHp - kHpStep));
+      stats.current_hp =
+          static_cast<std::int16_t>(std::max(1, stats.current_hp - kHpStep));
       return {};
     case EncounterAdjustment::kLowerMp:
-      stats.currentMp =
-          static_cast<std::int16_t>(std::max(0, stats.currentMp - kMpStep));
+      stats.current_mp =
+          static_cast<std::int16_t>(std::max(0, stats.current_mp - kMpStep));
       return {};
     case EncounterAdjustment::kRestoreMp:
-      stats.currentMp = stats.maxMp;
+      stats.current_mp = stats.max_mp;
       return {};
     case EncounterAdjustment::kRaiseRisk:
       stats.risk =
@@ -496,9 +502,9 @@ void LearnProfileSpells(bool all_spells) {
       // MAINMENU/2D10.c and MENU0/84.c use four consecutive action IDs per
       // rank.
       constexpr unsigned kSpellRanks = 4;
-      if (all_spells && action >= Battle_WarlockSpell_Explosion &&
-          action <= Battle_WarlockSpell_Meteor &&
-          (action - Battle_WarlockSpell_Explosion) % kSpellRanks == 0) {
+      if (all_spells && action >= kWarlockSpellExplosion &&
+          action <= kWarlockSpellMeteor &&
+          (action - kWarlockSpellExplosion) % kSpellRanks == 0) {
         for (unsigned rank = 1; rank < kSpellRanks; ++rank) {
           LearnAction(action + rank);
         }
@@ -561,8 +567,8 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
     // Original MENU1/30.c: ten categories, four consecutive arts each.
     constexpr unsigned kBreakArtCount = 40;
     for (unsigned index = 0; index < kBreakArtCount; ++index) {
-      const unsigned action = Battle_ActionId_DaggerArtOne + index;
-      if (Battle_actionDefinitions[action].type != Battle_ActionType_BreakArt) {
+      const unsigned action = kActionIdDaggerArtOne + index;
+      if (VS::Battle::actionDefinitions[action].type != kActionTypeBreakArt) {
         throw std::runtime_error(
             "encounter profile requires valid Break Art definitions");
       }
@@ -718,29 +724,29 @@ void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
   }
   auto& stats = *actor->stats;
   if (overrides.max_hp) {
-    stats.currentHp = stats.maxHp =
+    stats.current_hp = stats.max_hp =
         static_cast<std::int16_t>(*overrides.max_hp);
   }
   if (overrides.max_mp) {
-    stats.currentMp = stats.maxMp =
+    stats.current_mp = stats.max_mp =
         static_cast<std::int16_t>(*overrides.max_mp);
   }
   if (overrides.strength) {
-    stats.strength = stats.totalStrength =
+    stats.strength = stats.total_strength =
         static_cast<u_short>(*overrides.strength);
   }
   if (overrides.intelligence) {
-    stats.intelligence = stats.totalIntelligence =
+    stats.intelligence = stats.total_intelligence =
         static_cast<u_short>(*overrides.intelligence);
   }
   if (overrides.agility) {
-    stats.agility = stats.totalAgility =
+    stats.agility = stats.total_agility =
         static_cast<u_short>(*overrides.agility);
   }
-  VS::Core::LogInfo("encounter.stats",
-                    "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",
-                    stats.currentHp, stats.maxHp, stats.currentMp, stats.maxMp,
-                    stats.strength, stats.intelligence, stats.agility);
+  VS::Core::LogInfo(
+      "encounter.stats", "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",
+      stats.current_hp, stats.max_hp, stats.current_mp, stats.max_mp,
+      stats.strength, stats.intelligence, stats.agility);
 }
 
 void RunEncounter() {
@@ -791,7 +797,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   }
   auto* actor = VS::Battle::actors[0];
   if (actor == nullptr || actor->stats == nullptr || actor->defeated ||
-      actor->stats->currentHp <= 0 || VS::State::stateFlags.game_over) {
+      actor->stats->current_hp <= 0 || VS::State::stateFlags.game_over) {
     return reject("ASHLEY IS NOT ALIVE AND READY");
   }
   EncounterAdjustmentResult result{InspectActor(0, *actor), {}};
@@ -812,9 +818,9 @@ EncounterState InspectEncounter() {
 
 namespace {
 void InspectLearnedActions(EncounterState& state) {
-  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+  for (unsigned action = 0; action < std::size(VS::Battle::actionDefinitions);
        ++action) {
-    if (Battle_actionDefinitions[action].unlocked) {
+    if (VS::Battle::actionDefinitions[action].unlocked) {
       state.learned_actions.push_back(static_cast<int>(action));
     }
   }

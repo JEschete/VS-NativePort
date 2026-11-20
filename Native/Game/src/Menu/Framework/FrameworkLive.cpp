@@ -26,8 +26,8 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/TargetingState.hpp"
@@ -779,7 +779,7 @@ class LiveHost final : public Host {
   int CurrentSceneId() override { return VS::Field::LiveCurrentSceneId(); }
 
   std::optional<RestrictionInputs> Restrictions() override {
-    const Battle_Actor* const actor = VS::Battle::characterState;
+    const VS::Battle::Actor* const actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr ||
         actor->model == nullptr) {
       Refuse("action restrictions without Ashley");
@@ -788,18 +788,18 @@ class LiveHost final : public Host {
     return RestrictionInputs{
         .state_flags = VS::Actors::LiveActorStateFlags(0),
         .weapon_drawn = actor->model->weapon_drawn != 0,
-        .mp = actor->stats->currentMp,
-        .hp = actor->stats->currentHp,
+        .mp = actor->stats->current_mp,
+        .hp = actor->stats->current_hp,
         .statuses = static_cast<std::uint32_t>(actor->stats->statuses)};
   }
 
   bool IsActionUnlocked(int action) override {
     if (action < 0 || static_cast<std::size_t>(action) >=
-                          std::size(Battle_actionDefinitions)) {
+                          std::size(VS::Battle::actionDefinitions)) {
       Refuse("action outside the action table");
       return false;
     }
-    return Battle_actionDefinitions[action].unlocked != 0;
+    return VS::Battle::actionDefinitions[action].unlocked != 0;
   }
 
   StoryFlags Story() override {

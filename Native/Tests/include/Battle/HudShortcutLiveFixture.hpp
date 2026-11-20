@@ -11,16 +11,16 @@
 #include "Actors/Movement.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Menu/Magic.hpp"
 
 namespace hud_rendering_fixture {
 class LiveShortcut {
  public:
   VS::Actors::ActorRecord record{};
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
 
   LiveShortcut()
       : saved_character_(VS::Battle::characterState),
@@ -30,15 +30,15 @@ class LiveShortcut {
     VS::Actors::actorRecords[0] = &record;
     actor.stats = &stats;
     actor.model = &record.instance;
-    actor.equippedWeaponCategory = 1;
+    actor.equipped_weapon_category = 1;
     record.instance.weapon_drawn = 1;
-    stats.currentHp = 1;
-    stats.currentMp = 1;
-    std::ranges::fill(VS::Battle::spellClassCounts, u_char{0});
+    stats.current_hp = 1;
+    stats.current_mp = 1;
+    std::ranges::fill(VS::Battle::spellClassCounts, std::uint8_t{0});
     std::ranges::fill(VS::Battle::spellClassSpellIds, nullptr);
     std::ranges::fill(VS::Battle::chainAbilityActionIds, char{0});
     std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{0});
-    for (auto& action : Battle_actionDefinitions) action.unlocked = 0;
+    for (auto& action : VS::Battle::actionDefinitions) action.unlocked = 0;
   }
   ~LiveShortcut() {
     Restore();
@@ -59,10 +59,10 @@ class LiveShortcut {
   }
 
  private:
-  Battle_Actor* saved_character_;
+  VS::Battle::Actor* saved_character_;
   VS::Actors::ActorRecord* saved_record_;
-  std::array<u_char, 4> counts_{};
-  std::array<u_char*, 4> ids_{};
+  std::array<std::uint8_t, 4> counts_{};
+  std::array<std::uint8_t*, 4> ids_{};
   std::array<char, 16> chain_{}, defense_{};
   std::array<std::uint8_t, 20> warlock_{}, sorcerer_{};
   std::array<std::uint8_t, 8> shaman_{}, enchanter_{};
@@ -79,7 +79,7 @@ class LiveShortcut {
     std::ranges::copy(VS::Menu::Magic::enchanterSpellIds, enchanter_.begin());
     for (std::size_t index = 0; index < unlocked_.size(); ++index) {
       unlocked_.at(index) = static_cast<std::uint8_t>(
-          std::span(Battle_actionDefinitions)[index].unlocked);
+          std::span(VS::Battle::actionDefinitions)[index].unlocked);
     }
   }
   void Restore() {
@@ -94,7 +94,8 @@ class LiveShortcut {
     std::ranges::copy(enchanter_,
                       std::begin(VS::Menu::Magic::enchanterSpellIds));
     for (std::size_t index = 0; index < unlocked_.size(); ++index) {
-      std::span(Battle_actionDefinitions)[index].unlocked = unlocked_.at(index);
+      std::span(VS::Battle::actionDefinitions)[index].unlocked =
+          unlocked_.at(index);
     }
   }
 };

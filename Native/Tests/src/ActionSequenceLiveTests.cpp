@@ -9,11 +9,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionSequenceLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.hpp"
@@ -26,12 +26,14 @@
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
+using VS::Battle::ActionState;
+
 namespace {
 namespace b = VS::Battle;
 struct LiveFixture {
   decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  Battle_ActionState* saved_state = VS::Battle::actionState;
+  ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Battle::Ai::roomAiState) saved_room =
       VS::Battle::Ai::roomAiState;
   decltype(VS::Effects::secondaryInstances) saved_trails =
@@ -52,10 +54,10 @@ struct LiveFixture {
   int saved_projection = VS::Render::projectionDistance;
   int saved_distance_alias = VS::Battle::settledCameraDistance;
   unsigned saved_phase = VS::Battle::actionFlowMode;
-  Battle_ActionState state{};
+  ActionState state{};
   VS::Battle::Ai::RoomAiState room{};
   VS::Actors::ActorRecord record{};
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   LiveFixture() {
     std::ranges::fill(VS::Actors::actorRecords, nullptr);
     std::ranges::fill(VS::Battle::actors, nullptr);
@@ -133,8 +135,8 @@ TEST_CASE(
   fixture->record.instance.slot = 15;
   fixture->record.pose.holding_last_frame = -1;
   fixture->record.pose.reached_end = -1;
-  fixture->state.queueIndex = 0xFFFFFFFF;
-  fixture->state.queue[3].primaryTarget.target.target_actor = 15;
+  fixture->state.queue_index = 0xFFFFFFFF;
+  fixture->state.queue[3].primary_target.target.target_actor = 15;
   VS::Content::legacyActorAssetRequests[0].asset_kind = 0;
   VS::Effects::primaryPhase = 4;
   VS::Effects::trackCount = 1;
@@ -145,7 +147,7 @@ TEST_CASE(
   b::WaitForLiveActionEffectReady();
   CHECK(VS::Battle::actionFlowMode == 6);
   CHECK(VS::Effects::actionVariant == 0);
-  CHECK(fixture->state.queueIndex == 0xFFFFFFFF);
+  CHECK(fixture->state.queue_index == 0xFFFFFFFF);
 }
 TEST_CASE("F00188 production busy bit uses no missing action owner",
           "[action-sequence][F00188]") {
@@ -160,23 +162,23 @@ TEST_CASE("F00188 production busy bit uses no missing action owner",
 TEST_CASE("F00192 production planning release and trail phase use real helpers",
           "[action-sequence][F00192][ai-completed-plan][action-phases]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.queueIndex = 0xFFFFFFFE;
-  fixture->state.queue[2].primaryTarget.targets_position = 1;
+  fixture->state.queue_index = 0xFFFFFFFE;
+  fixture->state.queue[2].primary_target.targets_position = 1;
   fixture->room.readiness_level = 19;
-  fixture->actor.commandState = 0x80;
-  fixture->actor.commandOpcode = 0x18;
+  fixture->actor.command_state = 0x80;
+  fixture->actor.command_opcode = 0x18;
   VS::Battle::actors[15] = &fixture->actor;
   b::WaitForLiveActionResolution();
   CHECK(fixture->room.readiness_level == 0);
-  CHECK(fixture->actor.commandState == 8);
+  CHECK(fixture->actor.command_state == 8);
   CHECK(VS::Battle::actionFlowMode == 10);
-  CHECK(fixture->state.queueIndex == 0xFFFFFFFE);
+  CHECK(fixture->state.queue_index == 0xFFFFFFFE);
 }
 TEST_CASE("F00193 production255 targets use real animation readiness",
           "[action-sequence][F00193][actors-animation]") {
   auto fixture = std::make_unique<LiveFixture>();
-  fixture->state.chainStep = 1;
-  fixture->state.queue[0].targetCount = 255;
+  fixture->state.chain_step = 1;
+  fixture->state.queue[0].target_count = 255;
   for (auto& target : fixture->state.queue[0].targets) {
     target.target.target_actor = 15;
   }
@@ -185,7 +187,7 @@ TEST_CASE("F00193 production255 targets use real animation readiness",
   VS::Battle::actionFlowMode = 10;
   b::WaitForLiveTargetRecovery();
   CHECK(VS::Battle::actionFlowMode == 10);
-  CHECK(fixture->state.queue[0].targetCount == 255);
+  CHECK(fixture->state.queue[0].target_count == 255);
 }
 TEST_CASE(
     "F00195 production restoration uses the native renderer and signed "
@@ -195,14 +197,14 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   VS::Field::sphericalCamera.motion.zoom_mode = 3;
   VS::Field::sphericalCamera.values.distance = -32600;
-  fixture->state.preferredCameraDistance = -32768;
+  fixture->state.preferred_camera_distance = -32768;
   VS::Battle::settledCameraDistance = 12345;
   VS::Render::SetLiveCameraProjectionDistance(577);
   b::FinishLiveActionSequence();
   CHECK(VS::Render::projectionDistance == 513);
   CHECK(VS::Field::sphericalCamera.values.distance == -32768);
   CHECK(VS::Battle::settledCameraDistance == 12345);
-  CHECK(fixture->state.chainStep == 0);
+  CHECK(fixture->state.chain_step == 0);
 }
 TEST_CASE(
     "F00195 production early projection gate leaves an unused owner absent",

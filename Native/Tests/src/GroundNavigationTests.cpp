@@ -8,7 +8,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -43,7 +43,7 @@ struct GroundFixture {
   unsigned saved_lengths = VS::Content::battleAiHesitationLengths[0];
   VS::Battle::Ai::RoomAiState room{};
   std::array<VS::Actors::ActorRecord, 2> models{};
-  std::array<Battle_Actor, 2> actors{};
+  std::array<VS::Battle::Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
   u_short heights[32][32]{};
   u_short flags[32][32]{};
@@ -451,7 +451,7 @@ TEST_CASE("Hesitation phase thresholds execute the actual timed-turn consumer",
   CHECK(fixture.states[0].heading == (count >= 53   ? 0x320
                                       : count >= 18 ? -0x320
                                                     : 0));
-  CHECK(fixture.actors[0].commandOpcode == 6);
+  CHECK(fixture.actors[0].command_opcode == 6);
   CHECK(fixture.states[0].opaque_13a == 64);
 }
 
@@ -492,8 +492,8 @@ TEST_CASE(
   fixture.states[0].destination.word = Tile(10, 8);
   VS::Battle::Ai::DispatchLiveAiLocomotionMode(&fixture.states[0], 1, 3072);
   CHECK(fixture.states[0].is_stuck == 1);
-  CHECK(fixture.actors[0].commandOpcode == 9);
-  CHECK(fixture.actors[0].commandState == 0x80);
+  CHECK(fixture.actors[0].command_opcode == 9);
+  CHECK(fixture.actors[0].command_state == 0x80);
 }
 
 TEST_CASE("Gate release precedes movement when the actor is off its link tile",
@@ -507,7 +507,7 @@ TEST_CASE("Gate release precedes movement when the actor is off its link tile",
   unsigned exit;
   std::memcpy(&exit, fixture.states[0].route_exit_bytes.data(), sizeof(exit));
   CHECK(exit == 0xFFFFFFFFu);
-  CHECK(fixture.actors[0].commandOpcode == 0);
+  CHECK(fixture.actors[0].command_opcode == 0);
 }
 
 TEST_CASE("Tile goals inside their radius stop through the real command API",
@@ -519,7 +519,7 @@ TEST_CASE("Tile goals inside their radius stop through the real command API",
       Tile(8, 8), 64);
   CHECK(fixture.states[0].current_movement_mode == 2);
   CHECK(fixture.states[0].destination.word == Tile(8, 8));
-  CHECK(fixture.actors[0].commandOpcode == 2);
+  CHECK(fixture.actors[0].command_opcode == 2);
 }
 
 TEST_CASE("Fleeing remembers a hostile position without changing enemy health",
@@ -547,7 +547,7 @@ TEST_CASE("Flee memory expires without issuing a new movement packet",
                 &fixture.states[0]),
             1) == 0);
   CHECK(fixture.states[0].flee_timer == 0);
-  CHECK(fixture.actors[0].commandOpcode == 0);
+  CHECK(fixture.actors[0].command_opcode == 0);
 }
 
 TEST_CASE("Relationship queries retain list order and optional native tiles",
@@ -622,7 +622,7 @@ TEST_CASE("Near target gating preserves the actual strict hundred cutoff",
 TEST_CASE("Actor contact release clears the reserved moving-platform bit",
           "[ai][contact-release][occupancy-red]") {
   GroundFixture fixture;
-  fixture.actors[1].commandOpcode = 11;
+  fixture.actors[1].command_opcode = 11;
   fixture.states[1].next_tile.word = 2u << 8;
   fixture.models[1].instance.support_layer = 0;
   fixture.room.reserved_e_prefix[0] = 0xFF;
@@ -658,7 +658,7 @@ TEST_CASE(
     "[ai][contact-release]") {
   GroundFixture fixture;
   for (unsigned command = 0; command < 256; ++command) {
-    fixture.actors[1].commandOpcode = static_cast<u_char>(command);
+    fixture.actors[1].command_opcode = static_cast<u_char>(command);
     for (unsigned layer = 0; layer < 16; ++layer) {
       fixture.models[1].instance.support_layer = static_cast<u_char>(layer);
       fixture.models[1].instance.placement_layer = 15;
@@ -677,7 +677,7 @@ TEST_CASE("Actor contact release preserves source no-state and no-room gates",
   CHECK(fixture.room.reserved_e_prefix[0] == 0xA5);
   VS::Battle::actors[1] = &fixture.actors[1];
   VS::Battle::Ai::actorAiStates[1] = &fixture.states[1];
-  fixture.actors[1].commandOpcode = 11;
+  fixture.actors[1].command_opcode = 11;
   fixture.states[1].next_tile.word = 0x200;
   VS::Battle::Ai::roomAiState = nullptr;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
@@ -708,7 +708,7 @@ TEST_CASE("Live patrols store the cursor and walk to the next waypoint",
   CHECK(state.patrol_direction == 1);
   CHECK(state.patrol_cooldown == 10);
   CHECK(state.destination.word == Tile(10, 8));
-  CHECK(fixture.actors[0].commandOpcode == 9);
+  CHECK(fixture.actors[0].command_opcode == 9);
 }
 
 TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
@@ -735,5 +735,5 @@ TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
   CHECK(frame.reserved_cache == 0x5A);
   CHECK((frame.walk_valid == 0xFF) == !stuck);
   if (stuck) CHECK(state.is_stuck == 1);
-  CHECK(fixture.actors[0].commandOpcode == 9);
+  CHECK(fixture.actors[0].command_opcode == 9);
 }

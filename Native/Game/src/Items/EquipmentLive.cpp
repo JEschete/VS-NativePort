@@ -25,6 +25,8 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Recovery.hpp"
 
+using VS::Battle::ActionDefinition;
+
 namespace VS::Items {
 namespace {
 using Live::AshleyStats;
@@ -345,7 +347,7 @@ void StoreLiveInventoryAccessoryStats(
 
 // decomp: BATTLE.PRG _calculateArmorClassAffinity
 // (src/BATTLE/BATTLE.PRG/146C.c:9582)
-void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
+void RebuildLiveArmorClassAffinity(VS::Battle::ActorStats* actor_stats,
                                    int limb_index) {
   if (actor_stats == nullptr) {
     WarnNullRecord("RebuildArmorClassAffinity");
@@ -363,7 +365,7 @@ void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
 
 // decomp: BATTLE.PRG _calculateShieldClassAffinity
 // (src/BATTLE/BATTLE.PRG/146C.c:9600)
-void RebuildLiveShieldClassAffinity(Battle_ActorStats* actor_stats) {
+void RebuildLiveShieldClassAffinity(VS::Battle::ActorStats* actor_stats) {
   if (actor_stats == nullptr) {
     WarnNullRecord("RebuildShieldClassAffinity");
     return;
@@ -375,7 +377,7 @@ void RebuildLiveShieldClassAffinity(Battle_ActorStats* actor_stats) {
 
 // decomp: BATTLE.PRG _calculateWeaponClassAffinity
 // (src/BATTLE/BATTLE.PRG/146C.c:9622)
-void RebuildLiveWeaponClassAffinity(Battle_ActorStats* actor_stats) {
+void RebuildLiveWeaponClassAffinity(VS::Battle::ActorStats* actor_stats) {
   if (actor_stats == nullptr) {
     WarnNullRecord("RebuildWeaponClassAffinity");
     return;
@@ -388,9 +390,9 @@ void RebuildLiveWeaponClassAffinity(Battle_ActorStats* actor_stats) {
 // decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
 // The attacker's weapon and the defender's shield and armour are disjoint, so
 // an actor hitting itself commits both sides.
-void ConsumeLiveHitEquipmentDp(const Battle_ActionDefinition* action,
-                               Battle_ActorStats* source,
-                               Battle_ActorStats* target, int amount) {
+void ConsumeLiveHitEquipmentDp(const ActionDefinition* action,
+                               VS::Battle::ActorStats* source,
+                               VS::Battle::ActorStats* target, int amount) {
   if (action == nullptr || source == nullptr || target == nullptr) {
     WarnNullRecord("ConsumeHitEquipmentDp");
     return;
@@ -406,9 +408,9 @@ void ConsumeLiveHitEquipmentDp(const Battle_ActionDefinition* action,
 }
 
 // decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10721)
-void AccumulateLiveHitEquipmentPp(const Battle_ActionDefinition* action,
-                                  Battle_ActorStats* source_stats,
-                                  Battle_ActorStats* target_stats,
+void AccumulateLiveHitEquipmentPp(const ActionDefinition* action,
+                                  VS::Battle::ActorStats* source_stats,
+                                  VS::Battle::ActorStats* target_stats,
                                   int dp_amount) {
   if (action == nullptr || source_stats == nullptr || target_stats == nullptr) {
     WarnNullRecord("AccumulateHitEquipmentPp");
@@ -424,8 +426,8 @@ void AccumulateLiveHitEquipmentPp(const Battle_ActionDefinition* action,
 }
 
 // decomp: BATTLE.PRG func_80080C9C (src/BATTLE/BATTLE.PRG/146C.c:11090)
-void GrowLiveDefenderEquipmentRatings(const Battle_ActionDefinition* action,
-                                      Battle_ActorStats* defender_stats,
+void GrowLiveDefenderEquipmentRatings(const ActionDefinition* action,
+                                      VS::Battle::ActorStats* defender_stats,
                                       int attacker_class_id,
                                       int attacker_affinity_id,
                                       int hit_limb_index) {
@@ -445,8 +447,8 @@ void GrowLiveDefenderEquipmentRatings(const Battle_ActionDefinition* action,
 }
 
 // decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11178)
-void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
-                                   Battle_ActorStats* attacker_stats,
+void GrowLiveAttackerWeaponRatings(const ActionDefinition* action,
+                                   VS::Battle::ActorStats* attacker_stats,
                                    int defender_class_id,
                                    int defender_affinity_id) {
   if (action == nullptr || attacker_stats == nullptr) {
@@ -456,7 +458,7 @@ void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
   auto weapon = attacker_stats->weapon;
   LiveGrowthHost host;
   const auto status = GrowAttackerWeaponRatings(
-      Live::ToItemAction(*action), weapon, attacker_stats->actorId == 0,
+      Live::ToItemAction(*action), weapon, attacker_stats->actor_id == 0,
       HitRatings{.class_id = defender_class_id,
                  .affinity_id = defender_affinity_id},
       host);
@@ -466,7 +468,7 @@ void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
 
 // decomp: BATTLE.PRG _itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12109)
 std::int16_t CalculateLiveItemRecovery(
-    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
     VS::Battle::HitResult* /*target_result*/, int hit_index,
     int add_random_variation) {
   if (action == nullptr) {

@@ -16,8 +16,8 @@
 
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
@@ -49,6 +49,10 @@
 #include "Menu/TextBox.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Battle::ActionDefinition;
+using VS::Battle::kActionIdDaggerArtOne;
+using VS::Battle::kActionTypeBreakArt;
 
 namespace menu1_strings = VS::Content::text::menu1_prg::strings;
 
@@ -132,24 +136,24 @@ struct BreakArtMenuFixture {
   CursorFixture rows;
   std::array<std::uint16_t, VS::Menu::break_arts::kMenuStringHalfwords>
       saved_strings = std::to_array(VS::Menu::break_arts::strings);
-  std::array<Battle_ActionDefinition, 4> saved_actions{};
-  Battle_Actor* saved_character = VS::Battle::characterState;
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
+  std::array<ActionDefinition, 4> saved_actions{};
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
   decltype(VS::Menu::Framework::shortcutInvoked) saved_shortcut =
       VS::Menu::Framework::shortcutInvoked;
   decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
       VS::Menu::Framework::actionRestrictions;
   decltype(VS::Menu::Framework::displayActionCost) saved_cost =
       VS::Menu::Framework::displayActionCost;
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   int category;
   int first_action;
   u_char saved_arts;
 
   explicit BreakArtMenuFixture(int weapon_category)
       : category(weapon_category),
-        first_action(Battle_ActionId_DaggerArtOne + (category - 1) * 4),
+        first_action(kActionIdDaggerArtOne + (category - 1) * 4),
         saved_arts(VS::State::artsStatus.arts_learned[category % 10]) {
     VS::Menu::break_arts::ResetLiveStatics();
     std::fill_n(VS::Menu::break_arts::strings, saved_strings.size(), 0xE7E7);
@@ -160,18 +164,19 @@ struct BreakArtMenuFixture {
     VS::State::artsStatus.arts_learned[category % 10] = 4;
     VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
-    actor.equippedWeaponCategory = static_cast<u_char>(category);
-    actor.weaponDrawn = 1;
-    stats.currentHp = 999;
+    actor.equipped_weapon_category = static_cast<u_char>(category);
+    actor.weapon_drawn = 1;
+    stats.current_hp = 999;
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Menu::Framework::shortcutInvoked = 0;
     for (int index = 0; index < 4; ++index) {
-      auto& action = Battle_actionDefinitions[first_action + index];
+      auto& action = VS::Battle::actionDefinitions[first_action + index];
       saved_actions[index] = action;
       action = {};
-      action.type = Battle_ActionType_BreakArt;
+      action.type = kActionTypeBreakArt;
       action.unlocked = 1;
-      std::fill_n(action.name, std::size(action.name), static_cast<char>(0xE7));
+      std::fill_n(action.name.begin(), action.name.size(),
+                  static_cast<char>(0xE7));
       action.name[0] = '\0';
     }
   }
@@ -181,7 +186,7 @@ struct BreakArtMenuFixture {
     std::copy(saved_strings.begin(), saved_strings.end(),
               VS::Menu::break_arts::strings);
     std::copy(saved_actions.begin(), saved_actions.end(),
-              &Battle_actionDefinitions[first_action]);
+              &VS::Battle::actionDefinitions[first_action]);
     VS::Battle::characterState = saved_character;
     VS::Battle::actors[0] = saved_actor;
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
@@ -219,11 +224,11 @@ struct EquipmentGateFixture {
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) saved_indices =
       VS::Items::inventoryIndices;
-  Battle_Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
   decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
       VS::Menu::Framework::actionRestrictions;
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
 
   EquipmentGateFixture() {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
@@ -446,10 +451,10 @@ struct WorkshopRepairFixture {
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   int saved_repeat = VS::Input::buttonRepeat;
   VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
-  Battle_Actor* saved_character = VS::Battle::characterState;
-  Battle_Actor* saved_actor = VS::Battle::actors[0];
-  Battle_Actor actor{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
+  VS::Battle::Actor actor{};
+  VS::Battle::ActorStats stats{};
   std::array<u_int, 0x180> sfx_offsets{};
   std::array<u_short, 0x180> sfx_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
@@ -1129,7 +1134,7 @@ TEST_CASE(
   BreakArtMenuFixture fixture(category);
   VS::Menu::Framework::shortcutInvoked = shortcut;
   if (!equipped) {
-    fixture.actor.equippedWeaponCategory =
+    fixture.actor.equipped_weapon_category =
         static_cast<u_char>(category % 10 + 1);
   }
   VS::Input::settings.cursor_memory = cursor_memory;

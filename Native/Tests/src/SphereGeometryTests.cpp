@@ -12,6 +12,8 @@
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetVolume.hpp"
 
+using VS::Battle::TargetVolume;
+
 namespace {
 namespace battle = VS::Battle;
 
@@ -133,7 +135,7 @@ TEST_CASE("F01286 returns a typed scaled yaw and pitch transform",
 TEST_CASE("F01286 live mapping rejects a missing volume",
           "[battle][sphere-geometry][F01286][live]") {
   CHECK_FALSE(battle::BuildLiveSphereVolumeTransform(nullptr));
-  Battle_TargetVolume volume{};
+  TargetVolume volume{};
   volume.scale.extents[0] = 8;
   volume.scale.extents[1] = 4;
   volume.scale.extents[2] = 2;

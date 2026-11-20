@@ -202,7 +202,7 @@ bool RenderSpace() {
   }
   return true;
 }
-Battle_ActorStats* Stats(int slot) {
+VS::Battle::ActorStats* Stats(int slot) {
   if (slot < 0 || slot >= kInspectableActorSlots) {
     return nullptr;
   }
@@ -220,13 +220,13 @@ std::optional<TerminalActor> ActorView(int slot) {
           static_cast<std::uint8_t>(stats->weapon.grip.gem_slots),
       .shield_gem_slots =
           static_cast<std::uint8_t>(stats->shield.base.gem_slots),
-      .analyzed = stats->isAnalyzed != 0,
+      .analyzed = stats->is_analyzed != 0,
       .statuses =
           static_cast<std::uint32_t>(Battle::LiveStatusIconFlags(stats))};
   result.equipment_ids[0] = stats->weapon.blade.id;
   result.equipment_ids[1] = stats->shield.base.id;
   for (std::size_t limb = 0; limb < kStatusLimbSlots; ++limb) {
-    result.limb_names[limb] = stats->limbs[limb].nameIndex;
+    result.limb_names[limb] = stats->limbs[limb].name_index;
     result.equipment_ids[limb + 2] = stats->limbs[limb].armor.armor.id;
   }
   return result;

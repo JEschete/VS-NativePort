@@ -17,7 +17,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -116,7 +116,7 @@ bool LoadStatusViewTables() noexcept {
 [[maybe_unused]] const bool kStatusViewTablesLoaded = LoadStatusViewTables();
 
 // Ashley's statistics; null before they are loaded.
-[[nodiscard]] Battle_ActorStats* AshleyStats() {
+[[nodiscard]] VS::Battle::ActorStats* AshleyStats() {
   return VS::Battle::characterState == nullptr
              ? nullptr
              : VS::Battle::characterState->stats;
@@ -129,7 +129,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   ItemRowsHost& Rows() override { return rows_; }
 
   std::optional<Items::WeaponLoadout> EquippedWeapon() override {
-    const Battle_ActorStats* stats = AshleyStats();
+    const VS::Battle::ActorStats* stats = AshleyStats();
     if (stats == nullptr) {
       return std::nullopt;
     }
@@ -137,7 +137,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   }
 
   std::optional<Items::ShieldLoadout> EquippedShield() override {
-    const Battle_ActorStats* stats = AshleyStats();
+    const VS::Battle::ActorStats* stats = AshleyStats();
     if (stats == nullptr) {
       return std::nullopt;
     }
@@ -145,7 +145,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   }
 
   std::optional<Items::ArmorLoadout> EquippedArmor(int limb) override {
-    const Battle_ActorStats* stats = AshleyStats();
+    const VS::Battle::ActorStats* stats = AshleyStats();
     if (stats == nullptr || limb < 0 ||
         static_cast<std::size_t>(limb) >= std::size(stats->limbs)) {
       return std::nullopt;
@@ -165,21 +165,21 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
         static_cast<std::size_t>(actor) >= std::size(VS::Battle::actors)) {
       return std::nullopt;
     }
-    const Battle_Actor* record =
+    const VS::Battle::Actor* record =
         VS::Battle::actors[static_cast<std::size_t>(actor)];
     if (record == nullptr || record->stats == nullptr) {
       return std::nullopt;
     }
-    const Battle_ActorStats& stats = *record->stats;
+    const VS::Battle::ActorStats& stats = *record->stats;
     return ActorComparisonStats{
         .accessory = {stats.accessory.current_strength,
                       stats.accessory.current_intelligence,
                       stats.accessory.current_agility},
         .base = {stats.strength, stats.intelligence, stats.agility},
-        .totals = {stats.totalStrength, stats.totalIntelligence,
-                   stats.totalAgility},
-        .analyzed = stats.isAnalyzed != 0,
-        .current_range = static_cast<std::uint8_t>(stats.currentRange),
+        .totals = {stats.total_strength, stats.total_intelligence,
+                   stats.total_agility},
+        .analyzed = stats.is_analyzed != 0,
+        .current_range = static_cast<std::uint8_t>(stats.current_range),
         .weapon_range = static_cast<std::uint8_t>(stats.weapon.range.range)};
   }
 
@@ -444,7 +444,7 @@ void PopulateLiveWeaponStats(const VS::Items::WeaponLoadout* weapon) {
     Warn("missing weapon loadout for status details");
     return;
   }
-  const Battle_ActorStats* const ashley = AshleyStats();
+  const VS::Battle::ActorStats* const ashley = AshleyStats();
   const bool equipped = ashley != nullptr && weapon == &ashley->weapon;
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
@@ -458,7 +458,7 @@ void PopulateLiveShieldStats(const VS::Items::ShieldLoadout* shield) {
     Warn("missing shield loadout for status details");
     return;
   }
-  const Battle_ActorStats* const ashley = AshleyStats();
+  const VS::Battle::ActorStats* const ashley = AshleyStats();
   const bool equipped = ashley != nullptr && shield == &ashley->shield;
   LiveCall([&](EquipmentDetailsContext& ctx) {
     const auto effects =
@@ -472,7 +472,7 @@ void PopulateLiveArmorStats(const VS::Items::ArmorLoadout* armor) {
     Warn("missing armor loadout for status details");
     return;
   }
-  const Battle_ActorStats* const ashley = AshleyStats();
+  const VS::Battle::ActorStats* const ashley = AshleyStats();
   bool equipped = false;
   if (ashley != nullptr) {
     for (std::size_t limb = 0; limb < kArmorStatsLimbCount; ++limb) {

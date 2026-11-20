@@ -3,19 +3,19 @@
 
 #include "Battle/ActorVitals.hpp"
 
-struct Battle_ActorStats;
-
 namespace VS::Battle {
+
+struct ActorStats;
 // Checked projection shared by the result and room-vitals bindings.
 class LiveActorVitalsAccess final : public ActorVitalsAccess {
  public:
-  explicit LiveActorVitalsAccess(Battle_ActorStats& stats);
+  explicit LiveActorVitalsAccess(VS::Battle::ActorStats& stats);
   ActorVitalsState Read() override;
   void Write(const ActorVitalsState& state) override;
-  Battle_ActorStats& Owner();
+  VS::Battle::ActorStats& Owner();
 
  private:
-  Battle_ActorStats& stats_;
+  VS::Battle::ActorStats& stats_;
 };
 
 int ResolveLiveActorDefeat(int source, int target, int count_kill);

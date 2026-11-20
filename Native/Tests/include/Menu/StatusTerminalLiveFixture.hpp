@@ -26,7 +26,7 @@
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/ActorAssets.hpp"
@@ -269,7 +269,7 @@ struct Fixture {
       VS::Battle::stringContext};
   ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{
       VS::Menu::Framework::submenuStates};
-  ArrayRestore<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{
+  ArrayRestore<VS::Battle::Actor*, std::size(VS::Battle::actors)> saved_actors{
       VS::Battle::actors.data()};
   ArrayRestore<VS::Actors::ActorRecord*, std::size(VS::Actors::actorRecords)>
       saved_models{VS::Actors::actorRecords.data()};
@@ -302,8 +302,8 @@ struct Fixture {
   PreviewOwner preview_owner{arena};
   std::vector<u_long> primitives = std::vector<u_long>(kPrimitiveWords);
   std::array<u_long, kOrderingWords> ordering{};
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   void* workspace = nullptr;
   void* text = nullptr;
 
@@ -318,8 +318,8 @@ struct Fixture {
     stats.name[0] = 0x51;
     VS::Battle::actors[0] = &actor;
     for (auto& limb : stats.limbs) {
-      limb.nameIndex = 1;
-      limb.hp = limb.maxHp = 100;
+      limb.name_index = 1;
+      limb.hp = limb.max_hp = 100;
     }
     workspace = memory::AllocateLiveFromHighEnd(kWorkspaceBytes);
     text = memory::AllocateLiveFromHighEnd(fw::kItemTextBytes);

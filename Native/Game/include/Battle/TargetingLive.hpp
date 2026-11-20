@@ -6,7 +6,9 @@
 #include "Battle/Targeting.hpp"
 #include "Legacy/Psx.h"
 
-struct Battle_ActorStats;
+namespace VS::Battle {
+struct ActorStats;
+}  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct ActionRangeShape;
 struct ActionRangeView;
@@ -49,7 +51,7 @@ int LiveCalculateActionAreaReach(std::intptr_t unused, int action_id,
 int LiveCalculateActionRangeSquared(
     VS::Battle::Ai::ActionRangeView* actor_range_view, int action_id);
 // func_800E5698 for typed callers, from the weapon range in the actor's stats.
-int LiveCalculateActorActionRangeSquared(const Battle_ActorStats* stats,
+int LiveCalculateActorActionRangeSquared(const VS::Battle::ActorStats* stats,
                                          int action_id);
 // decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:890)
 void LiveUpdateTargetSelectionHighlight(int mode);

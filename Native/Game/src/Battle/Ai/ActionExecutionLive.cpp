@@ -13,7 +13,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ModelInstance.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -219,13 +219,13 @@ std::size_t LiveDecisionListHead() {
 
 std::optional<int> LiveDecisionListId(std::size_t node) {
   if (node == 0) return std::nullopt;
-  return reinterpret_cast<const Battle_Actor*>(node)->id;
+  return reinterpret_cast<const VS::Battle::Actor*>(node)->id;
 }
 
 std::size_t LiveDecisionListNext(std::size_t node) {
   Require(node != 0, "AI decision successor requires a list node");
   return reinterpret_cast<std::size_t>(
-      reinterpret_cast<const Battle_Actor*>(node)->next);
+      reinterpret_cast<const VS::Battle::Actor*>(node)->next);
 }
 
 void ResetLiveDecisionMovement(State& state, std::uint8_t area) {

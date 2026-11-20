@@ -15,7 +15,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -313,7 +313,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
     if (actor_ == nullptr) return std::nullopt;
     return ScriptedRouteActor{
         .id = actor_->id,
-        .suspended = (actor_->commandState & kSuspendedActorCommands) != 0};
+        .suspended = (actor_->command_state & kSuspendedActorCommands) != 0};
   }
   void StampBudgetTick() override {
     LiveFrameContext().lastBudgetTick = VS::Core::ElapsedFrameCounterTicks();
@@ -379,7 +379,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
 
  private:
   bool started_ = false;
-  const Battle_Actor* actor_ = nullptr;
+  const VS::Battle::Actor* actor_ = nullptr;
   VS::Battle::Ai::ActorAiState* route_ = nullptr;
 };
 }  // namespace

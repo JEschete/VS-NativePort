@@ -3,10 +3,12 @@
 
 // Live binding for the empty handlers (Runtime.hpp) whose original callers
 // and function tables pass an actor's stats.
-struct Battle_ActorStats;
+namespace VS::Battle {
+struct ActorStats;
+}  // namespace VS::Battle
 
 namespace VS::Core {
-// BATTLE.PRG vs_battle_nop0 with its original void(Battle_ActorStats*)
+// BATTLE.PRG vs_battle_nop0 with its original void(VS::Battle::ActorStats*)
 // shape, for the copied callers and the module function table.
-void IgnoreLiveActorCallback(Battle_ActorStats* actor) noexcept;
+void IgnoreLiveActorCallback(VS::Battle::ActorStats* actor) noexcept;
 }  // namespace VS::Core

@@ -27,13 +27,13 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionSequenceLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
@@ -64,6 +64,9 @@
 #include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.hpp"
+
+using VS::Battle::ActionState;
+using VS::Battle::TargetVolume;
 
 enum {
   kSpatialDimensions = 3,
@@ -420,13 +423,13 @@ int TestAnimationEventUnwind(int scenario) {
 }
 
 int Tests_ActionCameraRecovery(void) {
-  Battle_ActionState state = {0};
-  Battle_ActionState* saved_action = VS::Battle::actionState;
+  ActionState state = {0};
+  ActionState* saved_action = VS::Battle::actionState;
   const VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   const int saved_projection = VS::Render::projectionDistance;
   const int saved_ease = VS::Battle::cameraEaseMode;
   const int saved_distance = VS::Battle::settledCameraDistance;
-  state.preferredCameraDistance = 2304;
+  state.preferred_camera_distance = 2304;
   VS::Battle::actionState = &state;
   VS::Field::sphericalCamera.motion.zoom_mode = 1;
   VS::Field::sphericalCamera.values.distance = 1536;
@@ -501,7 +504,7 @@ int Tests_TargetSphereWireframe(void) {
   const int saved_frame_buffer = VS::Render::frameBuf;
   VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   VS::Battle::TargetSphereRecord sphere = {0};
-  Battle_TargetVolume volume = {0};
+  TargetVolume volume = {0};
   u_long ordering[0x822];
   u_long packets[12];
   memset(packets, 0xA5, sizeof packets);
@@ -1026,8 +1029,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
   VS::Actors::ActorRecord actor = {0};
   VS::Field::GimmickInstance object = {0};
-  Battle_Actor battle_actor = {nullptr};
-  Battle_Actor* saved_battle[kSlots];
+  VS::Battle::Actor battle_actor = {nullptr};
+  VS::Battle::Actor* saved_battle[kSlots];
   VS::Actors::ActorRecord* saved_actor[kSlots];
   VS::Field::GimmickInstance* saved_object[kSlots];
   const VS::Effects::LiveActionEffectRequest saved_request =
@@ -1059,7 +1062,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
                        : kScriptedEffectSlot;
   if (present || scenario == 6) {
     VS::Battle::actors[slot] = &battle_actor;
-    battle_actor.modelId =
+    battle_actor.model_id =
         scenario == 6 ? kScriptedEffectModel + 1 : kScriptedEffectModel;
     if (scenario == 2) {
       VS::Field::gimmickInstances[slot] = &object;

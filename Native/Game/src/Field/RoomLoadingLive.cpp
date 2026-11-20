@@ -28,7 +28,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -637,7 +637,7 @@ class LiveSpawning : public Host {
         VS::Battle::characterState->stats == nullptr) {
       return 0;
     }
-    return VS::Battle::characterState->stats->currentHp;
+    return VS::Battle::characterState->stats->current_hp;
   }
 
   [[nodiscard]] std::span<const std::byte> PlacementRecords() const override {
@@ -1079,7 +1079,7 @@ class LiveRoomLoadHost final
       RefuseCall("ClearAshleyStatuses", "Ashley has no stats");
       return;
     }
-    Battle_ActorStats* stats = VS::Battle::characterState->stats;
+    VS::Battle::ActorStats* stats = VS::Battle::characterState->stats;
     static_cast<void>(VS::Battle::LiveQueueActorStatusLabels(
         0, 0, stats->statuses & statuses, 1));
     VS::Battle::RemoveLiveActorStatuses(statuses, stats);

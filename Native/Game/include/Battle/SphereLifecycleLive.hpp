@@ -34,7 +34,7 @@ void ClearLiveSphereTargets(VS::Battle::TargetSphereSetupView* sphere);
 void InitializeSphereEntry();
 void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                            VS::Battle::TargetSphereSpec* secondary,
-                           u_char sphere_mode,
+                           std::uint8_t sphere_mode,
                            VS::Battle::TargetPreview* target_previews);
 void ClearPrimarySphereVolumeEntry();
 void SetSecondarySphereVolumeEntry(VS::Battle::TargetSphereSpec* secondary);

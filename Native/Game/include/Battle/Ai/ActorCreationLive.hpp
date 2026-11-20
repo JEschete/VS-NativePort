@@ -3,7 +3,9 @@
 
 #include "Battle/Ai/ActorCreation.hpp"
 
-struct Battle_Actor;
+namespace VS::Battle {
+struct Actor;
+}  // namespace VS::Battle
 
 // Binding from the AI state table, the room AI state, the tile flag grid, the
 // battle actors, their actor records, skeletons and the heap to the typed
@@ -15,5 +17,5 @@ namespace VS::Battle::Ai {
 // remembered as idle and 0 otherwise or without an AI state. The battle
 // module's pointer table stores this binding (0x800E6178). Aborts with a
 // diagnostic when creation refuses the actor.
-int CreateLiveActorAiState(Battle_Actor* actor, int options);
+int CreateLiveActorAiState(VS::Battle::Actor* actor, int options);
 }  // namespace VS::Battle::Ai

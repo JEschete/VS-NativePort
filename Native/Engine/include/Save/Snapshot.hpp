@@ -47,8 +47,8 @@ struct SnapshotLimb {
   std::array<std::uint16_t, kSnapshotLimbAffinityCount> affinities{};
 };
 
-// The Battle_ActorStats and Battle_Actor fields the snapshot keeps, in the
-// snapshot's own field types.
+// The VS::Battle::ActorStats and VS::Battle::Actor fields the snapshot keeps,
+// in the snapshot's own field types.
 struct AshleyCombatStats {
   std::int16_t current_hp = 0;
   std::int16_t max_hp = 0;

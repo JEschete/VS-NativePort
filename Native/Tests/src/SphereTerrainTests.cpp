@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
@@ -29,6 +29,9 @@
 #include "Render/Render.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 namespace {
 constexpr u_long kGuard = 0xA1B2C3D4;
@@ -221,9 +224,8 @@ int Coverage(const std::vector<u_long>& lines) {
 TEST_CASE("Native action buffers cover every supported actor limb",
           "[combat][targeting][capacity]") {
   constexpr int kActorLimbDomain = 16 * 6;
-  CHECK(std::extent_v<decltype(Battle_ActionState::previews)> >=
-        kActorLimbDomain);
-  CHECK(std::extent_v<decltype(Battle_ActionRequest::targets)> >=
+  CHECK(std::tuple_size_v<decltype(ActionState::previews)> >= kActorLimbDomain);
+  CHECK(std::tuple_size_v<decltype(ActionRequestRecord::targets)> >=
         kActorLimbDomain);
   CHECK(VS::Battle::ValidateTargetPreviewIndex(254) == 254);
   CHECK(VS::Battle::TargetPreviewIndexIsValid(254) == 1);
@@ -249,7 +251,7 @@ TEST_CASE("Extended target pages retain complete actors and absolute indices",
 
 TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
           "[combat][targeting][capacity]") {
-  using PreviewBuffer = decltype(Battle_ActionState::previews);
+  using PreviewBuffer = decltype(ActionState::previews);
   struct GuardedPreviews {
     PreviewBuffer entries{};
     u_long guard = kGuard;
@@ -298,13 +300,13 @@ TEST_CASE("Native action result clearing covers the entire native capacity",
           "[combat][targeting][capacity]") {
   struct GuardedRequest {
     u_long before;
-    Battle_ActionRequest request;
+    ActionRequestRecord request;
     u_long after;
   } storage{};
   storage.before = storage.after = kGuard;
   std::memset(&storage.request, 0xA5, sizeof storage.request);
   VS::Battle::ClearLiveActionRequest(&storage.request);
-  std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
+  std::array<unsigned char, sizeof(ActionRequestRecord)> cleared{};
   CHECK(std::memcmp(&storage.request, cleared.data(), cleared.size()) == 0);
   CHECK(storage.before == kGuard);
   CHECK(storage.after == kGuard);
@@ -318,7 +320,7 @@ TEST_CASE("AI planning result clearing preserves every adjacent native buffer",
   std::memset(workspace.exclusions, 0xA5, sizeof workspace.exclusions);
   std::memset(workspace.fallback, 0xA5, sizeof workspace.fallback);
   VS::Battle::ClearLiveActionRequest(&workspace.result);
-  std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
+  std::array<unsigned char, sizeof(ActionRequestRecord)> cleared{};
   CHECK(std::memcmp(&workspace.result, cleared.data(), cleared.size()) == 0);
   const auto untouched = [](const auto& buffer) {
     const auto* bytes = reinterpret_cast<const unsigned char*>(&buffer);
@@ -512,8 +514,8 @@ TEST_CASE("Spell elevation clipping handles stepped terrain across camera yaw",
 
 namespace {
 struct AreaActionFixture {
-  Battle_ActionState storage{};
-  Battle_ActionState* saved = VS::Battle::actionState;
+  ActionState storage{};
+  ActionState* saved = VS::Battle::actionState;
 
   AreaActionFixture() { VS::Battle::actionState = &storage; }
   ~AreaActionFixture() { VS::Battle::actionState = saved; }
@@ -525,22 +527,22 @@ TEST_CASE("NPC area filtering does not require a player targeting sphere",
   SliceFixture sphere;
   AreaActionFixture action;
   VS::Battle::targetSphere = nullptr;
-  action.storage.areaCenter = {64, -32, 96, 0};
-  action.storage.areaShape = 2;
-  action.storage.areaKind = 3;
-  action.storage.areaX = 4;
-  action.storage.areaY = 6;
-  action.storage.areaZ = 8;
+  action.storage.area_center = {64, -32, 96, 0};
+  action.storage.area_shape = 2;
+  action.storage.area_kind = 3;
+  action.storage.area_x = 4;
+  action.storage.area_y = 6;
+  action.storage.area_z = 8;
   VS::Battle::LiveFilterAreaActionTargets();
   CHECK(VS::Battle::targetSphere == nullptr);
-  CHECK(action.storage.previewCount == 0);
+  CHECK(action.storage.preview_count == 0);
   CHECK(VS::Battle::actionFlowMode == 3);
-  const auto& origin = action.storage.areaOrigin;
+  const auto& origin = action.storage.area_origin;
   const std::array<int, 3> position{origin.vx, origin.vy, origin.vz};
   CHECK(position == std::array{64, -32, 96});
-  const std::array<int, 5> shape{action.storage.areaShape,
-                                 action.storage.areaKind, action.storage.areaX,
-                                 action.storage.areaY, action.storage.areaZ};
+  const std::array<int, 5> shape{
+      action.storage.area_shape, action.storage.area_kind,
+      action.storage.area_x, action.storage.area_y, action.storage.area_z};
   const std::array expected_shape{2, 3, 4, 6, 8};
   CHECK(shape == expected_shape);
 }

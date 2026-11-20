@@ -10,7 +10,7 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Movement.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -56,7 +56,7 @@ unsigned DirectionForOffset(int dx, int dz) {
 class LiveActorCommandRoom final : public ActorCommandRoom {
  public:
   LiveActorCommandRoom(const VS::Battle::Ai::ActorAiState& state,
-                       const Battle_Actor& actor)
+                       const VS::Battle::Actor& actor)
       : state_(state), actor_(actor) {}
 
   [[nodiscard]] Field::TerrainGrid Terrain() const override {
@@ -128,11 +128,11 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
 
  private:
   const VS::Battle::Ai::ActorAiState& state_;
-  const Battle_Actor& actor_;
+  const VS::Battle::Actor& actor_;
 };
 
 ActorCommandState Snapshot(const VS::Battle::Ai::ActorAiState& state,
-                           const Battle_Actor& actor) {
+                           const VS::Battle::Actor& actor) {
   ActorCommandState snapshot{};
   snapshot.actor_id = actor.id;
   snapshot.tile = state.tile.word;
@@ -188,18 +188,18 @@ void IssueLiveActorCommand(VS::Battle::Ai::ActorAiState* state, int action) {
               static_cast<void*>(actor) == static_cast<void*>(state->actor),
           "AI actor command identity does not match the actor table");
   LiveFrameContext().movementResult = action;
-  actor->commandState = kCommandPending;
-  actor->commandTarget = state->movement_target;
-  ActorCommandPacket packet{static_cast<CommandOpcode>(actor->commandOpcode),
-                            actor->commandArg0, actor->commandArg1.word,
-                            actor->commandArg2};
+  actor->command_state = kCommandPending;
+  actor->command_target = state->movement_target;
+  ActorCommandPacket packet{static_cast<CommandOpcode>(actor->command_opcode),
+                            actor->command_arg0, actor->command_arg1.word,
+                            actor->command_arg2};
   ActorCommandState snapshot = Snapshot(*state, *actor);
   LiveActorCommandRoom room(*state, *actor);
   IssueActorCommand(room, snapshot, packet, static_cast<CommandIntent>(action));
   StoreBack(snapshot, *state);
-  actor->commandOpcode = static_cast<u_char>(packet.opcode);
-  actor->commandArg0 = packet.arg0;
-  actor->commandArg1.word = packet.arg1;
-  actor->commandArg2 = packet.arg2;
+  actor->command_opcode = static_cast<std::uint8_t>(packet.opcode);
+  actor->command_arg0 = packet.arg0;
+  actor->command_arg1.word = packet.arg1;
+  actor->command_arg2 = packet.arg2;
 }
 }  // namespace VS::Battle::Ai

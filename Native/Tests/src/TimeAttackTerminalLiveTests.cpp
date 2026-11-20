@@ -10,7 +10,7 @@
 
 #include "Audio/Seq/Channel.hpp"
 #include "Battle/AbilityState.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"

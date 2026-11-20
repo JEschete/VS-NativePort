@@ -17,7 +17,7 @@
 #include "Actors/ModelInstance.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -67,23 +67,23 @@ static_assert(
     kTileFlagGridSide);
 
 // The original read the battle actor through the creation actor view.
-static_assert(offsetof(ActorView, actor_id) == offsetof(Battle_Actor, id));
+static_assert(offsetof(ActorView, actor_id) == offsetof(VS::Battle::Actor, id));
 static_assert(offsetof(ActorView, state_flags) + kCommandOpcodeByte ==
-              offsetof(Battle_Actor, commandOpcode));
+              offsetof(VS::Battle::Actor, command_opcode));
 static_assert(offsetof(ActorView, state_flags) + kCommandFlagsByte ==
-              offsetof(Battle_Actor, commandFlags));
+              offsetof(VS::Battle::Actor, command_flags));
 static_assert(offsetof(ActorView, ai_control_flags) ==
-              offsetof(Battle_Actor, kind));
+              offsetof(VS::Battle::Actor, kind));
 static_assert(offsetof(ActorView, start_command_flag) ==
-              offsetof(Battle_Actor, spawnByte26));
+              offsetof(VS::Battle::Actor, spawn_byte26));
 static_assert(offsetof(ActorView, saved_ai_settings_flags) ==
-              offsetof(Battle_Actor, reserved34));
+              offsetof(VS::Battle::Actor, reserved34));
 static_assert(offsetof(ActorView, ai_settings) ==
-              offsetof(Battle_Actor, templateWord2C));
-static_assert(offsetof(ActorView, stats) == offsetof(Battle_Actor, stats));
+              offsetof(VS::Battle::Actor, template_word2c));
+static_assert(offsetof(ActorView, stats) == offsetof(VS::Battle::Actor, stats));
 static_assert(offsetof(ActorView, list_exempt_flag) ==
-              offsetof(Battle_Actor, allocationKind));
-static_assert(offsetof(ActorView, model) == offsetof(Battle_Actor, model));
+              offsetof(VS::Battle::Actor, allocation_kind));
+static_assert(offsetof(ActorView, model) == offsetof(VS::Battle::Actor, model));
 
 // ...its model through the creation model view...
 static_assert(offsetof(VS::Actors::ActorRecord, instance) == 0);
@@ -99,13 +99,13 @@ static_assert(offsetof(ModelView, opaque_63e) ==
 
 // ...its stats through the creation stats view...
 static_assert(offsetof(StatsView, opaque30) ==
-              offsetof(Battle_ActorStats, movementClass));
+              offsetof(VS::Battle::ActorStats, movement_class));
 static_assert(offsetof(StatsView, opaque31) ==
-              offsetof(Battle_ActorStats, walkSpeed));
+              offsetof(VS::Battle::ActorStats, walk_speed));
 static_assert(offsetof(StatsView, opaque32) ==
-              offsetof(Battle_ActorStats, gaitClass));
+              offsetof(VS::Battle::ActorStats, gait_class));
 static_assert(offsetof(StatsView, opaque33) ==
-              offsetof(Battle_ActorStats, runSpeed));
+              offsetof(VS::Battle::ActorStats, run_speed));
 
 // ...and wrote the AI state through the creation view.
 static_assert(offsetof(CreationView, has_tagged_bone3) ==
@@ -171,24 +171,25 @@ static_assert(offsetof(CreationView, opaque226) ==
               offsetof(AiState, walk_step));
 static_assert(offsetof(CreationView, opaque227) == offsetof(AiState, run_step));
 
-BattleActorHandle HandleOf(const Battle_Actor* actor) {
+BattleActorHandle HandleOf(const VS::Battle::Actor* actor) {
   return static_cast<BattleActorHandle>(
       reinterpret_cast<std::uintptr_t>(actor));
 }
 
 // The core hands back only the handle CreateLiveActorAiState made from a
 // live actor.
-Battle_Actor& ActorOf(BattleActorHandle actor) {
+VS::Battle::Actor& ActorOf(BattleActorHandle actor) {
   Require(actor != kNoBattleActor, "AI creation requires an actor");
-  return *reinterpret_cast<Battle_Actor*>(static_cast<std::uintptr_t>(actor));
+  return *reinterpret_cast<VS::Battle::Actor*>(
+      static_cast<std::uintptr_t>(actor));
 }
 
 // Only actors with an equipped or secondary body allocation carry the actor
 // record fields past the model instance; an auxiliary core ends after its
 // matrices.
-const VS::Actors::ActorRecord* RecordOf(const Battle_Actor& actor) {
+const VS::Actors::ActorRecord* RecordOf(const VS::Battle::Actor& actor) {
   if (actor.model == nullptr ||
-      actor.allocationKind == kAuxiliaryAllocationKind) {
+      actor.allocation_kind == kAuxiliaryAllocationKind) {
     return nullptr;
   }
   return reinterpret_cast<const VS::Actors::ActorRecord*>(actor.model);
@@ -328,7 +329,7 @@ class LiveCreationHost final : public ActorCreationHost {
   }
   [[nodiscard]] std::optional<std::uint32_t> ModelObjectWord(
       BattleActorHandle actor) const override {
-    const Battle_Actor& live = ActorOf(actor);
+    const VS::Battle::Actor& live = ActorOf(actor);
     if (live.model == nullptr) return std::nullopt;
     const std::span model_bytes{reinterpret_cast<const std::byte*>(live.model),
                                 kModelObjectWordOffset + sizeof(std::uint32_t)};
@@ -350,19 +351,19 @@ class LiveCreationHost final : public ActorCreationHost {
   }
   [[nodiscard]] std::optional<CreationStats> Stats(
       BattleActorHandle actor) const override {
-    const Battle_ActorStats* stats = ActorOf(actor).stats;
+    const VS::Battle::ActorStats* stats = ActorOf(actor).stats;
     if (stats == nullptr) return std::nullopt;
     return CreationStats{
-        .movement_class = static_cast<std::uint8_t>(stats->movementClass),
-        .walk_speed = static_cast<std::uint8_t>(stats->walkSpeed),
-        .gait_class = static_cast<std::uint8_t>(stats->gaitClass),
-        .run_speed = static_cast<std::uint8_t>(stats->runSpeed)};
+        .movement_class = static_cast<std::uint8_t>(stats->movement_class),
+        .walk_speed = static_cast<std::uint8_t>(stats->walk_speed),
+        .gait_class = static_cast<std::uint8_t>(stats->gait_class),
+        .run_speed = static_cast<std::uint8_t>(stats->run_speed)};
   }
   [[nodiscard]] bool AllocateAiState(int actor_id,
                                      BattleActorHandle actor) override {
     Require(actor_id >= 0 && actor_id < kCleanupActorSlots,
             "AI creation requires an actor ID in the AI state table");
-    Battle_Actor& live = ActorOf(actor);
+    VS::Battle::Actor& live = ActorOf(actor);
     Require(live.model != nullptr, "AI creation requires the actor's model");
     auto* state = static_cast<AiState*>(
         Core::Memory::AllocateLiveFromLowEnd(sizeof(AiState)));
@@ -399,9 +400,9 @@ class LiveCreationHost final : public ActorCreationHost {
            0;
   }
   void ClearActorCommand(BattleActorHandle actor) override {
-    Battle_Actor& live = ActorOf(actor);
-    live.commandOpcode = 0;
-    live.commandFlags &= kKeptCommandFlags;
+    VS::Battle::Actor& live = ActorOf(actor);
+    live.command_opcode = 0;
+    live.command_flags &= kKeptCommandFlags;
   }
 
   void ApplySettings(CreatedAiState& created, std::uint32_t settings) override {
@@ -446,7 +447,7 @@ class LiveCreationHost final : public ActorCreationHost {
 }  // namespace
 
 // decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934).
-int CreateLiveActorAiState(Battle_Actor* actor, int options) {
+int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
   Require(actor != nullptr, "AI creation requires an actor");
   VS::Core::Debugf(
       "ai", "create actor=%p id=%d options=0x%X model=%p stats=%p",
@@ -456,11 +457,11 @@ int CreateLiveActorAiState(Battle_Actor* actor, int options) {
       .handle = HandleOf(actor),
       .id = actor->id,
       .kind = actor->kind,
-      .combat_pose = actor->spawnByte26,
+      .combat_pose = actor->spawn_byte26,
       .saved_settings_flags = static_cast<std::uint16_t>(
           std::bit_cast<std::uint32_t>(actor->reserved34)),
-      .settings = std::bit_cast<std::uint32_t>(actor->templateWord2C),
-      .allocation_kind = actor->allocationKind};
+      .settings = std::bit_cast<std::uint32_t>(actor->template_word2c),
+      .allocation_kind = actor->allocation_kind};
   LiveCreationHost host;
   const std::optional<bool> remembered_idle =
       CreateActorAiState(host, creation, static_cast<std::int16_t>(options));

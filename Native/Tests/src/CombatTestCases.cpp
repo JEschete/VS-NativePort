@@ -24,8 +24,8 @@
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
+#include "Battle/ActionTable.hpp"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/AttackPrerequisiteTable.hpp"
@@ -88,6 +88,15 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
+using VS::Battle::ActionDefinition;
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
+using VS::Battle::kActionTypeAbility;
+using VS::Battle::kActionTypeBaseAttack;
+using VS::Battle::kActionTypeBreakArt;
+using VS::Battle::kActionTypeItem;
+using VS::Battle::kActionTypeSpell;
+
 using VS::Legacy::kPadLup;
 using VS::Legacy::kPadRdown;
 using VS::Legacy::kPadRleft;
@@ -125,12 +134,12 @@ constexpr std::array<u_short, 22> kAbilityThresholds{{
 }};
 
 struct AbilityFixture {
-  decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
-      std::to_array(Battle_actionDefinitions);
-  Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_character = VS::Battle::characterState;
-  std::array<Battle_Actor*, 2> saved_actors{VS::Battle::actors[0],
-                                            VS::Battle::actors[1]};
+  decltype(VS::Battle::actionDefinitions) saved_definitions =
+      VS::Battle::actionDefinitions;
+  ActionState* saved_action = VS::Battle::actionState;
+  VS::Battle::Actor* saved_character = VS::Battle::characterState;
+  std::array<VS::Battle::Actor*, 2> saved_actors{VS::Battle::actors[0],
+                                                 VS::Battle::actors[1]};
   std::array<VS::Actors::ActorRecord*, 2> saved_records{
       VS::Actors::actorRecords[0], VS::Actors::actorRecords[1]};
   VS::Input::Settings saved_settings = VS::Input::settings;
@@ -142,9 +151,9 @@ struct AbilityFixture {
       VS::Battle::floatingLabelCount;
   int saved_tick_speed = VS::State::tickSpeed;
   std::uint8_t saved_difficulty = VS::State::LiveScriptFlag(1);
-  Battle_ActionState action{};
-  Battle_Actor actors[2]{};
-  Battle_ActorStats stats[2]{};
+  ActionState action{};
+  VS::Battle::Actor actors[2]{};
+  VS::Battle::ActorStats stats[2]{};
   VS::Actors::ActorRecord records[2]{};
   VS::Battle::FloatingLabelSlots labels{};
 
@@ -156,23 +165,23 @@ struct AbilityFixture {
       VS::Actors::actorRecords[index] = &records[index];
       actors[index].id = index;
       actors[index].stats = &stats[index];
-      actors[index].roomSpawnIndex = 1;
-      stats[index].actorId = index;
-      stats[index].currentHp = 600;
-      stats[index].currentMp = 120;
+      actors[index].room_spawn_index = 1;
+      stats[index].actor_id = index;
+      stats[index].current_hp = 600;
+      stats[index].current_mp = 120;
       records[index].instance.action_animation_state = 1;
     }
-    std::fill_n(Battle_actionDefinitions, saved_definitions.size(),
-                Battle_ActionDefinition{});
+    std::fill_n(VS::Battle::actionDefinitions.data(), saved_definitions.size(),
+                ActionDefinition{});
     for (const auto& [id, cost] : kAbilityCosts) {
-      Battle_actionDefinitions[id].type = Battle_ActionType_Ability;
-      Battle_actionDefinitions[id].cost = cost;
-      Battle_actionDefinitions[id].unlocked = 1;
+      VS::Battle::actionDefinitions[id].type = kActionTypeAbility;
+      VS::Battle::actionDefinitions[id].cost = cost;
+      VS::Battle::actionDefinitions[id].unlocked = 1;
     }
-    Battle_actionDefinitions[1].type = Battle_ActionType_BaseAttack;
-    Battle_actionDefinitions[54].type = Battle_ActionType_Spell;
-    Battle_actionDefinitions[99].type = Battle_ActionType_Spell;
-    Battle_actionDefinitions[141].type = Battle_ActionType_BreakArt;
+    VS::Battle::actionDefinitions[1].type = kActionTypeBaseAttack;
+    VS::Battle::actionDefinitions[54].type = kActionTypeSpell;
+    VS::Battle::actionDefinitions[99].type = kActionTypeSpell;
+    VS::Battle::actionDefinitions[141].type = kActionTypeBreakArt;
     VS::Input::settings = {};
     for (int index = 0; index < 3; ++index) {
       VS::Input::settings.mapped_chain_abilities[index] =
@@ -190,7 +199,7 @@ struct AbilityFixture {
 
   ~AbilityFixture() {
     std::copy(saved_definitions.begin(), saved_definitions.end(),
-              Battle_actionDefinitions);
+              VS::Battle::actionDefinitions.data());
     VS::Battle::actionState = saved_action;
     VS::Battle::characterState = saved_character;
     for (int index = 0; index < 2; ++index) {
@@ -208,13 +217,13 @@ struct AbilityFixture {
 
   void Prepare(bool defense = false, int action_id = 1, unsigned index = 0) {
     action = {};
-    action.queueIndex = index;
+    action.queue_index = index;
     auto& request = Request();
-    request.actionId = action_id;
-    request.primaryTarget.target.target_actor = defense ? 1 : 0;
-    request.targetCount = 1;
+    request.action_id = action_id;
+    request.primary_target.target.target_actor = defense ? 1 : 0;
+    request.target_count = 1;
     request.targets[0].target.target_actor = defense ? 0 : 1;
-    action.abilityWindow = 100;
+    action.ability_window = 100;
   }
 
   void PrepareLimbResults(int limb_count, unsigned queue_index,
@@ -222,14 +231,14 @@ struct AbilityFixture {
     Prepare(false, 1, queue_index);
     VS::Actors::actorRecords[1] = nullptr;
     auto& target = stats[1];
-    target.currentHp = target.maxHp = 63;
-    target.currentMp = target.maxMp = 40;
+    target.current_hp = target.max_hp = 63;
+    target.current_mp = target.max_mp = 40;
     for (auto& limb : target.limbs) {
-      limb.hp = limb.maxHp = 20;
+      limb.hp = limb.max_hp = 20;
     }
     auto& request = Request();
     const int first_limb = filtered_entries ? 2 : 0;
-    request.targetCount = first_limb + limb_count;
+    request.target_count = first_limb + limb_count;
     if (filtered_entries) {
       auto& other_actor = request.targets[0];
       other_actor.target.target_actor = 0;
@@ -251,14 +260,14 @@ struct AbilityFixture {
     }
   }
 
-  Battle_ActionRequest& Request() {
-    return action.queue[action.queueIndex & 3];
+  ActionRequestRecord& Request() {
+    return action.queue[action.queue_index & 3];
   }
 
   void CheckInputResult(int success, int slot) const {
-    CHECK(action.abilityInputSucceeded == success);
-    CHECK(action.chainAbilitySlot == slot);
-    CHECK(action.previousChainInput == slot);
+    CHECK(action.ability_input_succeeded == success);
+    CHECK(action.chain_ability_slot == slot);
+    CHECK(action.previous_chain_input == slot);
   }
 };
 
@@ -289,28 +298,28 @@ struct AbilityEffectFixture : AbilityFixture {
   VS::Battle::HitResult target{};
 
   AbilityEffectFixture() {
-    action.queueIndex = 3;
-    action.selection.actionId = 99;
-    action.selection.primaryTarget.hp_effect = 1;
-    action.selection.primaryTarget.target.hp = 101;
-    action.selection.primaryTarget.target.mp = 9;
+    action.queue_index = 3;
+    action.selection.action_id = 99;
+    action.selection.primary_target.hp_effect = 1;
+    action.selection.primary_target.target.hp = 101;
+    action.selection.primary_target.target.mp = 9;
     action.selection.targets[0].target.hp = 83;
     action.selection.targets[0].target.mp = 18;
-    Battle_actionDefinitions[99].type = Battle_ActionType_Spell;
-    Battle_actionDefinitions[99].cost = 25;
-    Battle_actionDefinitions[99].unlocked = 1;
+    VS::Battle::actionDefinitions[99].type = kActionTypeSpell;
+    VS::Battle::actionDefinitions[99].cost = 25;
+    VS::Battle::actionDefinitions[99].unlocked = 1;
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
     target.target.target_actor = 1;
     for (int index = 0; index < 2; ++index) {
       VS::Battle::Ai::actorAiStates[index] = &ai[index];
       auto& actor = stats[index];
-      actor.maxHp = 1000;
-      actor.maxMp = 300;
-      actor.currentHp = index == 0 ? 600 : 800;
-      actor.currentMp = index == 0 ? 100 : 200;
-      actor.walkSpeed = actor.baseWalkSpeed = 8;
-      actor.runSpeed = actor.baseRunSpeed = 12;
+      actor.max_hp = 1000;
+      actor.max_mp = 300;
+      actor.current_hp = index == 0 ? 600 : 800;
+      actor.current_mp = index == 0 ? 100 : 200;
+      actor.walk_speed = actor.base_walk_speed = 8;
+      actor.run_speed = actor.base_run_speed = 12;
       actor.weapon.blade.id = 1;
       actor.weapon.current_dp = 100;
       actor.weapon.max_dp = 1000;
@@ -321,8 +330,8 @@ struct AbilityEffectFixture : AbilityFixture {
       actor.shield.max_pp = 255;
       for (int limb = 0; limb < 6; ++limb) {
         actor.limbs[limb].hp = 50;
-        actor.limbs[limb].maxHp = 100;
-        actor.dpSplash[limb][limb] = 100;
+        actor.limbs[limb].max_hp = 100;
+        actor.dp_splash[limb][limb] = 100;
       }
     }
     BindCalculators();
@@ -367,10 +376,10 @@ struct AbilityEffectFixture : AbilityFixture {
   }
 
   void Queue(int id, int hit, const AbilityHit& contract) {
-    auto& definition = Battle_actionDefinitions[id];
+    auto& definition = VS::Battle::actionDefinitions[id];
     definition.category = id <= 31 ? 14 : 0;
-    definition.hits[hit].statCalculatorId = contract.calculator;
-    definition.hits[hit].statFactor = contract.factor;
+    definition.hits[hit].stat_calculator_id = contract.calculator;
+    definition.hits[hit].stat_factor = contract.factor;
     contract.apply(&definition, &source, contract.self ? &source : &target, hit,
                    0);
   }
@@ -382,10 +391,10 @@ struct AbilityEffectFixture : AbilityFixture {
 
   void CheckResources(int source_hp, int source_mp, int target_hp,
                       int target_mp) const {
-    CHECK(stats[0].currentHp == source_hp);
-    CHECK(stats[0].currentMp == source_mp);
-    CHECK(stats[1].currentHp == target_hp);
-    CHECK(stats[1].currentMp == target_mp);
+    CHECK(stats[0].current_hp == source_hp);
+    CHECK(stats[0].current_mp == source_mp);
+    CHECK(stats[1].current_hp == target_hp);
+    CHECK(stats[1].current_mp == target_mp);
   }
 };
 
@@ -453,10 +462,10 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     VS::Battle::hitPrerequisiteResult = saved_prerequisite_result;
   }
 
-  Battle_ActionRequest Resolve(int id) {
-    Battle_ActionRequest input{};
-    Battle_ActionRequest result{};
-    input.targetCount = 1;
+  ActionRequestRecord Resolve(int id) {
+    ActionRequestRecord input{};
+    ActionRequestRecord result{};
+    input.target_count = 1;
     input.targets[0].target.target_actor = 1;
     VS::Battle::ResolveLiveActionTargets(id, &result, &input, 0);
     return result;
@@ -464,11 +473,11 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 
   void CheckResolvedHits(int id, int damage) {
     const auto resolved = Resolve(id);
-    REQUIRE(resolved.targetCount == 1);
+    REQUIRE(resolved.target_count == 1);
     CHECK(resolved.targets[0].target.hp == damage);
     CHECK(resolved.targets[0].hp_effect == 1);
-    stats[1].cancelsHitResults = 1;
-    actors[1].roomSpawnIndex = 0x80;
+    stats[1].cancels_hit_results = 1;
+    actors[1].room_spawn_index = 0x80;
     const auto cancelled = Resolve(id);
     CHECK(cancelled.targets[0].target.hp == 0);
     CHECK(cancelled.targets[0].target.impact_kind == 4);
@@ -600,7 +609,7 @@ struct EnemyLootFixture : LootInventoryFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Items::LootListNode* saved_head = VS::Items::lootListHead;
-  Battle_Actor* saved_actor = VS::Battle::actors[1];
+  VS::Battle::Actor* saved_actor = VS::Battle::actors[1];
   VS::Items::InventoryContents* saved_staging = VS::Menu::Loot::stagedInventory;
   VS::Items::BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
   VS::Menu::Loot::LootRow* saved_rows = VS::Menu::Loot::lootList;
@@ -609,13 +618,13 @@ struct EnemyLootFixture : LootInventoryFixture {
   std::uint8_t saved_selection = VS::Menu::Loot::selectedLoot;
   std::uint8_t saved_difficulty = VS::State::stateFlags.difficulty;
   std::array<VS::Menu::Loot::LootRow, VS::Menu::Loot::kRowCapacity> rows{};
-  Battle_Actor enemy{};
-  Battle_ActorStats stats{};
+  VS::Battle::Actor enemy{};
+  VS::Battle::ActorStats stats{};
 
   EnemyLootFixture() {
     VS::Items::lootListHead = nullptr;
     enemy.id = 1;
-    enemy.roomSpawnIndex = 1;
+    enemy.room_spawn_index = 1;
     enemy.stats = &stats;
     VS::Battle::actors[1] = &enemy;
     VS::Items::inventory = {};
@@ -644,12 +653,12 @@ struct EnemyLootFixture : LootInventoryFixture {
 
   void SetGuaranteed(int count) {
     if (count > 0) {
-      stats.dropItem.id = 323;
-      stats.dropItem.count = 2;
+      stats.drop_item.id = 323;
+      stats.drop_item.count = 2;
     }
     if (count > 1) {
-      stats.secondDropItem.id = 324;
-      stats.secondDropItem.count = 3;
+      stats.second_drop_item.id = 324;
+      stats.second_drop_item.count = 3;
     }
   }
 
@@ -1453,9 +1462,9 @@ struct ChainCreditFixture : AbilityUnlockFixture {
 
   ChainCreditFixture() {
     VS::State::SetLiveScriptFlag(0x82, 10);
-    action.abilityInputSucceeded = 1;
-    action.chainAbilitySlot = 1;
-    stats[1].currentHp = 0;
+    action.ability_input_succeeded = 1;
+    action.chain_ability_slot = 1;
+    stats[1].current_hp = 0;
     records[0].animation_id = 0x63;
   }
 
@@ -1468,8 +1477,8 @@ struct ChainCreditFixture : AbilityUnlockFixture {
 
   void CheckTerminated() const {
     CHECK(VS::Battle::actionFlowMode == 9);
-    CHECK(action.queueIndex == 0);
-    CHECK(action.chainStep == 0);
+    CHECK(action.queue_index == 0);
+    CHECK(action.chain_step == 0);
   }
 };
 
@@ -1501,7 +1510,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
 
   BreakArtKillFixture(unsigned category, unsigned tier)
       : counter(category % 10) {
-    actors[0].equippedWeaponCategory = static_cast<u_char>(category);
+    actors[0].equipped_weapon_category = static_cast<u_char>(category);
     VS::State::SetLiveScriptFlag(0x82, 10);
     VS::State::artsStatus.arts_learned[counter] = static_cast<u_char>(tier);
     VS::State::artsStatus.kills.weapon_category_kills[counter] =
@@ -1509,12 +1518,12 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
     target.target.target_actor = 1;
-    target.target.hp = stats[1].currentHp;
-    Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;
-    Battle_actionDefinitions[160].type = Battle_ActionType_Item;
+    target.target.hp = stats[1].current_hp;
+    VS::Battle::actionDefinitions[184].type = kActionTypeBreakArt;
+    VS::Battle::actionDefinitions[160].type = kActionTypeItem;
     VS::Battle::actionEffectMediators[0] =
-        [](Battle_ActionDefinition*, VS::Battle::HitResult*,
-           VS::Battle::HitResult*, int, int) {};
+        [](ActionDefinition*, VS::Battle::HitResult*, VS::Battle::HitResult*,
+           int, int) {};
   }
 
   ~BreakArtKillFixture() {
@@ -1538,7 +1547,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         target.targets_position = 1;
         break;
       case KillGate::kDummy:
-        stats[1].actorId = 0x80;
+        stats[1].actor_id = 0x80;
         break;
       case KillGate::kSpell:
         action_id = 99;
@@ -1553,7 +1562,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         target.target.target_actor = 0;
         break;
       case KillGate::kAlreadyCounted:
-        actors[1].killCounted = 1;
+        actors[1].kill_counted = 1;
         break;
       case KillGate::kStory:
         VS::State::SetLiveScriptFlag(0x82, 9);
@@ -1568,8 +1577,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   }
 
   void Resolve() {
-    VS::Battle::ApplyLiveActionHitEffect(&Battle_actionDefinitions[action_id],
-                                         &source, &target, apply, 0);
+    VS::Battle::ApplyLiveActionHitEffect(
+        &VS::Battle::actionDefinitions[action_id], &source, &target, apply, 0);
   }
 };
 
@@ -1602,16 +1611,16 @@ TEST_CASE("Every matching limb result contributes once to its actor",
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
   const int total = limb_count * (limb_count + 1) / 2;
-  CHECK(target.currentHp == 63 - total);
-  CHECK(target.currentMp == 40 - total);
+  CHECK(target.current_hp == 63 - total);
+  CHECK(target.current_mp == 40 - total);
   for (std::size_t limb = 0; limb < std::size(target.limbs); ++limb) {
     const int damage = limb < static_cast<std::size_t>(limb_count)
                            ? static_cast<int>(limb) + 1
                            : 0;
     CHECK(target.limbs[limb].hp == 20 - damage);
   }
-  CHECK(fixture.stats[0].currentHp == 600);
-  CHECK(fixture.stats[0].currentMp == 120);
+  CHECK(fixture.stats[0].current_hp == 600);
+  CHECK(fixture.stats[0].current_mp == 120);
 }
 
 TEST_CASE("Indestructible gimmick hit applies without an actor record",
@@ -1619,17 +1628,17 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
   AbilityFixture fixture;
   auto& hit = fixture.Request().targets[0];
   hit.target.impact_kind = 4;
-  fixture.actors[1].roomSpawnIndex = 0x80;
+  fixture.actors[1].room_spawn_index = 0x80;
   auto& target = fixture.stats[1];
-  target.actorId = 0x80;
-  target.cancelsHitResults = 1;
-  target.currentHp = target.maxHp = 1;
+  target.actor_id = 0x80;
+  target.cancels_hit_results = 1;
+  target.current_hp = target.max_hp = 1;
   // Field_CreateGimmickInstance registers VS::Field::gimmickInstances only.
   VS::Actors::actorRecords[1] = nullptr;
 
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
-  CHECK(target.currentHp == 1);
+  CHECK(target.current_hp == 1);
   CHECK(VS::Battle::floatingLabelCount == 0);
 }
 
@@ -1696,7 +1705,7 @@ TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
   const int gate = GENERATE(0, 1, 2, 3);
-  if (gate == 0) fixture.action.abilityInputSucceeded = 0;
+  if (gate == 0) fixture.action.ability_input_succeeded = 0;
   if (gate == 1) VS::State::SetLiveScriptFlag(0x82, 9);
   if (gate == 2) {
     VS::State::artsStatus.kills.total_kills = UINT16_MAX;
@@ -1746,7 +1755,7 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
   const int category_offset = GENERATE(0, 10);
   const int delta = GENERATE(-1, 0);
   const int unlocked = GENERATE(0, 21, 22);
-  fixture.actors[0].equippedWeaponCategory =
+  fixture.actors[0].equipped_weapon_category =
       static_cast<u_char>(category + category_offset);
   auto& progress = VS::State::artsStatus;
   progress.arts_learned[category] = static_cast<u_char>(tier);
@@ -1795,7 +1804,7 @@ TEST_CASE("Qualifying lethal actions count once at every Break Art threshold",
   auto expected = VS::State::artsStatus;
   ++expected.kills.weapon_category_kills[fixture.counter];
   fixture.Resolve();
-  CHECK(fixture.actors[1].killCounted == 1);
+  CHECK(fixture.actors[1].kill_counted == 1);
   CheckAbilityProgress(expected);
   fixture.Resolve();
   CheckAbilityProgress(expected);
@@ -1818,8 +1827,8 @@ TEST_CASE("Break Art kill points preserve original qualification and cap gates",
   const bool counted =
       gate == KillGate::kAlreadyCounted || gate == KillGate::kStory ||
       gate == KillGate::kFourArts || gate == KillGate::kPendingThreshold;
-  CHECK(fixture.actors[1].killCounted == counted);
-  CHECK(fixture.actors[0].killCounted == 0);
+  CHECK(fixture.actors[1].kill_counted == counted);
+  CHECK(fixture.actors[0].kill_counted == 0);
 }
 
 TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
@@ -1830,20 +1839,20 @@ TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
   const int risk = GENERATE(0, 97, 100);
   for (const auto& [id, base_cost] : kAbilityCosts) {
     CAPTURE(id, step, risk);
-    fixture.action.chainStep = step;
+    fixture.action.chain_step = step;
     fixture.stats[0].risk = risk;
     const int cost =
         base_cost + (id < 40 && step >= 10 ? (step * step) / 10 : 0);
     const auto expected = static_cast<std::uint32_t>(
-        (1 << 24) + (Battle_ActionType_Ability << 16) + cost);
+        (1 << 24) + (kActionTypeAbility << 16) + cost);
     CHECK(VS::Battle::LiveActionCostAndAvailability(id, &fixture.stats[0], 0) ==
           expected);
     CHECK(fixture.stats[0].risk == risk);
     CHECK(VS::Battle::LiveActionCostAndAvailability(id, &fixture.stats[0], 1) ==
           expected);
     CHECK(fixture.stats[0].risk == std::min(100, risk + cost));
-    CHECK(fixture.stats[0].currentHp == 600);
-    CHECK(fixture.stats[0].currentMp == 120);
+    CHECK(fixture.stats[0].current_hp == 600);
+    CHECK(fixture.stats[0].current_mp == 120);
   }
 }
 
@@ -1857,23 +1866,23 @@ TEST_CASE("All forty Break Arts require surviving their original HP cost",
   const std::array<int, 5> health{0, cost - 1, cost, cost + 1, 999};
   const int hp = health[boundary];
   const bool affordable = hp > cost;
-  auto& definition = Battle_actionDefinitions[action_id];
-  definition.type = Battle_ActionType_BreakArt;
+  auto& definition = VS::Battle::actionDefinitions[action_id];
+  definition.type = kActionTypeBreakArt;
   definition.cost = cost;
   auto& actor = fixture.stats[0];
-  actor.currentHp = static_cast<decltype(actor.currentHp)>(hp);
+  actor.current_hp = static_cast<decltype(actor.current_hp)>(hp);
   actor.risk = 7;
   actor.weapon.current_pp = 35;
-  const auto expected = static_cast<std::uint32_t>(
-      (affordable ? 1 << 24 : 0) + (Battle_ActionType_BreakArt << 16) + cost +
-      (affordable ? 0 : 1));
+  const auto expected = static_cast<std::uint32_t>((affordable ? 1 << 24 : 0) +
+                                                   (kActionTypeBreakArt << 16) +
+                                                   cost + (affordable ? 0 : 1));
   CHECK(VS::Battle::LiveActionCostAndAvailability(action_id, &actor, 0) ==
         expected);
-  CHECK(actor.currentHp == hp);
+  CHECK(actor.current_hp == hp);
   CHECK(VS::Battle::LiveActionCostAndAvailability(action_id, &actor, 1) ==
         expected);
-  CHECK(actor.currentHp == (affordable ? hp - cost : hp));
-  CHECK(actor.currentMp == 120);
+  CHECK(actor.current_hp == (affordable ? hp - cost : hp));
+  CHECK(actor.current_mp == 120);
   CHECK(actor.risk == 7);
   CHECK(actor.weapon.current_pp == 35);
 }
@@ -1886,25 +1895,25 @@ TEST_CASE(
   const int gate = GENERATE(0, 1, 2, 3, 4, 5, 6);
   constexpr std::array<int, 4> kCosts{25, 40, 55, 75};
   const int cost = kCosts[(action_id - 184) % 4];
-  auto& definition = Battle_actionDefinitions[action_id];
-  definition.type = Battle_ActionType_BreakArt;
+  auto& definition = VS::Battle::actionDefinitions[action_id];
+  definition.type = kActionTypeBreakArt;
   definition.cost = cost;
   definition.unlocked = gate != 1;
-  fixture.actors[0].weaponDrawn = gate != 2;
+  fixture.actors[0].weapon_drawn = gate != 2;
   auto& actor = fixture.stats[0];
   actor.statuses = gate == 3 ? 0x2000 : (gate == 4 ? 0x1000 : 0);
-  actor.actionRecoveryTimer = gate == 5 ? 1 : 0;
-  actor.currentHp =
-      static_cast<decltype(actor.currentHp)>(gate == 6 ? cost : 999);
-  actor.currentMp = 0;
+  actor.action_recovery_timer = gate == 5 ? 1 : 0;
+  actor.current_hp =
+      static_cast<decltype(actor.current_hp)>(gate == 6 ? cost : 999);
+  actor.current_mp = 0;
   constexpr std::array<int, 7> kFlags{0, 4, 4, 4, 0, 1, 2};
   const auto before = actor;
   CHECK(VS::Battle::LiveActorActionRestrictionFlags(0, action_id) ==
         kFlags[gate]);
-  CHECK(actor.currentHp == before.currentHp);
-  CHECK(actor.currentMp == before.currentMp);
+  CHECK(actor.current_hp == before.current_hp);
+  CHECK(actor.current_mp == before.current_mp);
   CHECK(actor.statuses == before.statuses);
-  CHECK(actor.actionRecoveryTimer == before.actionRecoveryTimer);
+  CHECK(actor.action_recovery_timer == before.action_recovery_timer);
 }
 
 TEST_CASE("Ability eligibility requires mapped input",
@@ -1931,12 +1940,12 @@ TEST_CASE("Ability eligibility requires a fresh and distinct input",
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(1) == 1);
   SECTION("consecutive buttons must differ") {
-    fixture.action.previousChainInput = 1;
+    fixture.action.previous_chain_input = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(1) == 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(2) == 1);
   }
   SECTION("only one attempt per action") {
-    fixture.action.abilityInputAttempted = 1;
+    fixture.action.ability_input_attempted = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(2) == 0);
   }
@@ -1947,7 +1956,7 @@ TEST_CASE("Ability eligibility requires real non-dummy actor targets",
   AbilityFixture fixture;
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   SECTION("source is a position") {
-    fixture.Request().primaryTarget.targets_position = 1;
+    fixture.Request().primary_target.targets_position = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("target is a position") {
@@ -1955,11 +1964,11 @@ TEST_CASE("Ability eligibility requires real non-dummy actor targets",
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no target") {
-    fixture.Request().targetCount = 0;
+    fixture.Request().target_count = 0;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("training dummy") {
-    fixture.actors[1].roomSpawnIndex = 0x80;
+    fixture.actors[1].room_spawn_index = 0x80;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
 }
@@ -1978,14 +1987,14 @@ TEST_CASE("Ability eligibility requires an appropriate combat relationship",
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("Ashley cannot chain from magic") {
-    fixture.Request().actionId = 99;
+    fixture.Request().action_id = 99;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("defenses cannot continue") {
     for (int id = 40; id <= 53; ++id) {
       CAPTURE(id);
       fixture.Prepare(true);
-      fixture.Request().actionId = id;
+      fixture.Request().action_id = id;
       CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
     }
   }
@@ -2012,7 +2021,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     constexpr std::array kButtons{kPadRright, kPadRup, kPadRleft};
     VS::Input::buttonsPressed = kButtons[slot - 1];
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
-    fixture.action.abilityTimer = 100 + delta;
+    fixture.action.ability_timer = 100 + delta;
     constexpr int kStreak = 7;
     VS::State::scoreData.chain_streak = kStreak;
     VS::Battle::LiveUpdateBattleAbilityTiming();
@@ -2024,10 +2033,10 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
                                              : 4;
     REQUIRE(VS::Battle::floatingLabelCount == 1);
     CHECK(fixture.labels[0].value == result);
-    CHECK(fixture.action.abilityInputAttempted == 1);
+    CHECK(fixture.action.ability_input_attempted == 1);
     fixture.CheckInputResult(success ? (defense ? 2 : 1) : 0,
                              success ? slot : 0);
-    CHECK(fixture.action.abilityTimer == 102 + delta);
+    CHECK(fixture.action.ability_timer == 102 + delta);
     // A successful defense extends the streak; a missed input ends it (#448).
     CHECK(VS::State::scoreData.chain_streak ==
           (success ? kStreak + (defense ? 1 : 0) : 0));
@@ -2037,42 +2046,42 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
 TEST_CASE("Unarmed windows and repeated buttons cannot start an ability",
           "[combat][abilities][timing]") {
   AbilityFixture fixture;
-  fixture.action.abilityTimer = 102;
+  fixture.action.ability_timer = 102;
   SECTION("input before a timing window") {
-    fixture.action.abilityWindow = 0;
+    fixture.action.ability_window = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
-    CHECK(fixture.action.abilityInputAttempted == 1);
+    CHECK(fixture.action.ability_input_attempted == 1);
     REQUIRE(VS::Battle::floatingLabelCount == 1);
     CHECK(fixture.labels[0].value == 1);
   }
   SECTION("repeat previous chain button") {
-    fixture.action.previousChainInput = 1;
+    fixture.action.previous_chain_input = 1;
     VS::Battle::LiveUpdateBattleAbilityTiming();
-    CHECK(fixture.action.abilityInputAttempted == 1);
+    CHECK(fixture.action.ability_input_attempted == 1);
     CHECK(VS::Battle::floatingLabelCount == 0);
   }
-  CHECK(fixture.action.abilityInputSucceeded == 0);
-  CHECK(fixture.action.chainAbilitySlot == 0);
+  CHECK(fixture.action.ability_input_succeeded == 0);
+  CHECK(fixture.action.chain_ability_slot == 0);
 }
 
 TEST_CASE("Unmapped buttons and no input cannot start an ability",
           "[combat][abilities][timing]") {
   AbilityFixture fixture;
-  fixture.action.abilityTimer = 102;
+  fixture.action.ability_timer = 102;
   SECTION("unmapped button") {
     VS::Input::settings.mapped_chain_abilities[0] = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
-    CHECK(fixture.action.abilityInputAttempted == 0);
+    CHECK(fixture.action.ability_input_attempted == 0);
     CHECK(VS::Battle::floatingLabelCount == 0);
   }
   SECTION("no button") {
     VS::Input::buttonsPressed = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
-    CHECK(fixture.action.abilityInputAttempted == 0);
+    CHECK(fixture.action.ability_input_attempted == 0);
     CHECK(VS::Battle::floatingLabelCount == 0);
   }
-  CHECK(fixture.action.abilityInputSucceeded == 0);
-  CHECK(fixture.action.chainAbilitySlot == 0);
+  CHECK(fixture.action.ability_input_succeeded == 0);
+  CHECK(fixture.action.chain_ability_slot == 0);
 }
 
 TEST_CASE("Simultaneous ability buttons keep the original input priority",
@@ -2083,7 +2092,7 @@ TEST_CASE("Simultaneous ability buttons keep the original input priority",
                std::make_pair(kPadRup | kPadRleft, 3),
                std::make_pair(kPadRright | kPadRup | kPadRleft, 3));
   AbilityFixture fixture;
-  fixture.action.abilityTimer = 102;
+  fixture.action.ability_timer = 102;
   VS::Input::buttonsPressed = buttons;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(1, slot);
@@ -2096,7 +2105,7 @@ TEST_CASE("Successful defensive timing saturates rather than wraps its score",
                std::make_pair(65535, 65535));
   AbilityFixture fixture;
   fixture.Prepare(true);
-  fixture.action.abilityTimer = 102;
+  fixture.action.ability_timer = 102;
   VS::State::scoreData.chain_streak = before;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(2, 1);
@@ -2175,7 +2184,7 @@ TEST_CASE("Siphon Soul restores half the incoming spell cost as MP",
           "[combat][abilities][ability-effects]") {
   const bool spell = GENERATE(false, true);
   AbilityEffectFixture fixture;
-  fixture.action.selection.actionId = spell ? 99 : 1;
+  fixture.action.selection.action_id = spell ? 99 : 1;
   fixture.Queue(41, 0, {21, 5, VS::Battle::QueueLiveMpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, spell ? 112 : 100, 800, 200);
@@ -2187,8 +2196,8 @@ TEST_CASE("Reflect abilities return damage only for the matching action type",
   const bool spell = GENERATE(false, true);
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.actionId = spell ? 99 : 1;
-  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
+  fixture.action.selection.action_id = spell ? 99 : 1;
+  fixture.action.selection.primary_target.hp_effect = incoming_effect;
   fixture.Queue(
       id, 0,
       {id == 42 ? 9 : 10, 4, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
@@ -2204,8 +2213,8 @@ TEST_CASE("Absorb abilities recover damage only for the matching action type",
   const bool spell = GENERATE(false, true);
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.actionId = spell ? 99 : 1;
-  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
+  fixture.action.selection.action_id = spell ? 99 : 1;
+  fixture.action.selection.primary_target.hp_effect = incoming_effect;
   fixture.Queue(id, 0,
                 {id == 44 ? 19 : 20, 2,
                  id == 44 ? VS::Battle::QueueLiveSpellTriggeredRecovery
@@ -2231,8 +2240,8 @@ TEST_CASE("All seven affinity defenses recover only matching damage",
   const int incoming = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int incoming_effect = GENERATE(1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.effectVariant = static_cast<char>(incoming);
-  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
+  fixture.action.selection.effect_variant = static_cast<char>(incoming);
+  fixture.action.selection.primary_target.hp_effect = incoming_effect;
   fixture.Queue(46 + affinity, 0, {22, 5, kEffects[affinity], true});
   fixture.Commit();
   const bool applies = affinity == incoming && incoming_effect != 2;
@@ -2243,7 +2252,7 @@ TEST_CASE("Phantom Shield converts shield PP to recovery only after damage",
           "[combat][abilities][ability-effects]") {
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
+  fixture.action.selection.primary_target.hp_effect = incoming_effect;
   fixture.Queue(53, 0,
                 {23, 0, VS::Battle::QueueLiveDamageTriggeredRecovery, true});
   fixture.Queue(53, 1, {1, 0, VS::Battle::QueueLiveShieldPpDrain, true});
@@ -2289,8 +2298,8 @@ TEST_CASE("Ward removes paralysis and numbness without curing poison",
   VS::Battle::RemoveLiveActorStatuses(fixture.source.inflict_statuses,
                                       &fixture.stats[0]);
   CHECK(fixture.stats[0].statuses == 0x4000);
-  CHECK(fixture.stats[0].walkSpeed == 8);
-  CHECK(fixture.stats[0].runSpeed == 12);
+  CHECK(fixture.stats[0].walk_speed == 8);
+  CHECK(fixture.stats[0].run_speed == 12);
   fixture.CheckResources(600, 100, 800, 200);
 }
 
@@ -2298,16 +2307,16 @@ TEST_CASE("Restorative abilities respect HP MP and equipment capacity",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
   SECTION("Gain Life") {
-    fixture.stats[0].currentHp = 995;
+    fixture.stats[0].current_hp = 995;
     fixture.Queue(23, 0, {18, 3, VS::Battle::QueueLiveHpRecovery, true});
     fixture.Commit();
-    CHECK(fixture.stats[0].currentHp == 1000);
+    CHECK(fixture.stats[0].current_hp == 1000);
   }
   SECTION("Gain Magic") {
-    fixture.stats[0].currentMp = 299;
+    fixture.stats[0].current_mp = 299;
     fixture.Queue(25, 0, {18, 3, VS::Battle::QueueLiveMpRecovery, true});
     fixture.Commit();
-    CHECK(fixture.stats[0].currentMp == 300);
+    CHECK(fixture.stats[0].current_mp == 300);
   }
   SECTION("Temper") {
     fixture.stats[0].weapon.current_dp = 995;
@@ -2328,8 +2337,8 @@ TEST_CASE("MP damage abilities cannot drain more MP than the target has",
   const int id = GENERATE(24, 27);
   const int mp = GENERATE(0, 10, 200);
   AbilityEffectFixture fixture;
-  fixture.stats[1].currentMp =
-      static_cast<decltype(fixture.stats[1].currentMp)>(mp);
+  fixture.stats[1].current_mp =
+      static_cast<decltype(fixture.stats[1].current_mp)>(mp);
   fixture.Queue(
       id, 0,
       {id == 24 ? 4 : 11, id == 24 ? 3 : 2, VS::Battle::QueueLiveMpDrain});
@@ -2345,17 +2354,17 @@ TEST_CASE("Two-hit Break Arts accumulate both original physical hit contracts",
   for (const auto& art : kTwoHitArts) {
     CAPTURE(art.id);
     ArtResolutionFixture fixture;
-    auto& definition = Battle_actionDefinitions[art.id];
+    auto& definition = VS::Battle::actionDefinitions[art.id];
     definition.id = static_cast<decltype(definition.id)>(art.id);
-    definition.type = Battle_ActionType_BreakArt;
-    definition.hits[0].damageType = art.damage_type;
-    definition.hits[1].damageType = art.damage_type;
+    definition.type = kActionTypeBreakArt;
+    definition.hits[0].damage_type = art.damage_type;
+    definition.hits[1].damage_type = art.damage_type;
     definition.hits[0].affinity = art.first_affinity;
     definition.hits[1].affinity = art.second_affinity;
     for (int hit = 0; hit < 2; ++hit) {
-      definition.hits[hit].effectId = 58;
-      definition.hits[hit].prerequisiteFunctionId = hit == 0 ? 2 : 1;
-      definition.hits[hit].hitFunctionId = hit == 0 ? 3 : 1;
+      definition.hits[hit].effect_id = 58;
+      definition.hits[hit].prerequisite_function_id = hit == 0 ? 2 : 1;
+      definition.hits[hit].hit_function_id = hit == 0 ? 3 : 1;
     }
     const int first_affinity = std::max(0, art.first_affinity - 1);
     const int second_affinity = std::max(0, art.second_affinity - 1);
@@ -2527,9 +2536,9 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
   VS::Core::Random expected;
   for (int index = 0; index < 3 + armor_count; ++index) expected.Next(255);
   if (candidate) {
-    fixture.stats.randomDropItem.id = 325;
-    fixture.stats.randomDropItem.drop_rate =
-        static_cast<decltype(fixture.stats.randomDropItem.drop_rate)>(
+    fixture.stats.random_drop_item.id = 325;
+    fixture.stats.random_drop_item.drop_rate =
+        static_cast<decltype(fixture.stats.random_drop_item.drop_rate)>(
             expected.Next(255) + above_roll);
   }
   const bool success = candidate && above_roll != 0;
@@ -2555,8 +2564,8 @@ TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
   const bool retained = GENERATE(false, true);
   EnemyLootFixture fixture;
   fixture.SetGuaranteed(guaranteed);
-  fixture.enemy.retainAfterDefeat = retained ? 1 : 0;
-  fixture.enemy.roomSpawnIndex = guard == 1 ? 0x80 : 1;
+  fixture.enemy.retain_after_defeat = retained ? 1 : 0;
+  fixture.enemy.room_spawn_index = guard == 1 ? 0x80 : 1;
   fixture.enemy.defeated = guard == 2 ? 1 : 0;
   VS::Core::Random expected;
   if (guard == 0) {
@@ -2575,12 +2584,12 @@ TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
 void PrepareScoredEnemyDefeat(AbilityFixture& ability, EnemyLootFixture& loot) {
   VS::State::StoreLiveKillScore(
       {.weapon_kill_streak_blade_category = 3, .weapon_kill_streak = 4});
-  ability.action.selection.actionId = 1;
+  ability.action.selection.action_id = 1;
   ability.stats[0].weapon.blade.category = 3;
   loot.enemy.kind = 4;
-  loot.enemy.subType = 7;
-  loot.stats.enemyClass = 2;
-  loot.stats.maxHp = 100;
+  loot.enemy.sub_type = 7;
+  loot.stats.enemy_class = 2;
+  loot.stats.max_hp = 100;
   loot.SetGuaranteed(1);
 }
 

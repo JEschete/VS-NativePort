@@ -574,6 +574,7 @@
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
+    <ClInclude Include="include\TestSupport\ActorRecordTableScope.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EffectProgramScope.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />

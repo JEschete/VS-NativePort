@@ -8,11 +8,11 @@
 #include <vector>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionCameraSelection.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPresentationLive.hpp"
-#include "Battle/ActionTable.h"
+#include "Battle/ActionTable.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -22,6 +22,9 @@
 #include "Field/CameraLiveState.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
+
+using VS::Battle::ActionRequestRecord;
+using VS::Battle::ActionState;
 
 namespace VS::Battle {
 namespace {
@@ -36,30 +39,30 @@ namespace {
 void Require(bool valid) {
   if (!valid) Refuse();
 }
-Battle_ActionState& State() {
+ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
 struct LiveQueue final : ActionCameraRequest {
-  explicit LiveQueue(Battle_ActionRequest& value) : record(value) {}
-  Battle_ActionRequest& record;
+  explicit LiveQueue(ActionRequestRecord& value) : record(value) {}
+  ActionRequestRecord& record;
   std::uint8_t PrimaryActor() const override {
-    return record.primaryTarget.target.target_actor;
+    return record.primary_target.target.target_actor;
   }
   ActionHit FirstTarget() const override {
     return std::bit_cast<ActionHit>(record.targets[0]);
   }
-  std::uint16_t Count() const override { return record.targetCount; }
+  std::uint16_t Count() const override { return record.target_count; }
   ActionPoint Focus() const override {
-    return std::bit_cast<ActionPoint>(record.focusPosition);
+    return std::bit_cast<ActionPoint>(record.focus_position);
   }
 };
 class LiveCamera final : public ActionCameraWorld {
  public:
   ActionCameraRequest* Queued() override {
     auto& state = State();
-    Require(state.queueIndex < std::size(state.queue));
-    auto& record = state.queue[state.queueIndex];
+    Require(state.queue_index < std::size(state.queue));
+    auto& record = state.queue[state.queue_index];
     for (auto& owner : queues_) {
       if (&owner->record == &record) return owner.get();
     }
@@ -100,10 +103,10 @@ class LiveCamera final : public ActionCameraWorld {
     VS::Core::Debugf(
         "combat-flow",
         "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",
-        CameraMode(), state.cameraZoomState, YawDelta(), Distance(),
-        static_cast<unsigned>(state.selection.actionId),
-        static_cast<unsigned>(state.selection.targetCount));
-    return state.cameraZoomState;
+        CameraMode(), state.camera_zoom_state, YawDelta(), Distance(),
+        static_cast<unsigned>(state.selection.action_id),
+        static_cast<unsigned>(state.selection.target_count));
+    return state.camera_zoom_state;
   }
   std::int32_t YawDelta() override {
     return VS::Field::sphericalCamera.motion.turn;
@@ -127,29 +130,29 @@ class LiveCamera final : public ActionCameraWorld {
   std::vector<std::unique_ptr<LiveQueue>> queues_;
 };
 struct LiveSelection final : ActionSelectionState {
-  explicit LiveSelection(Battle_ActionState& value) : state(value) {}
-  Battle_ActionState& state;
-  bool Selecting() const override { return state.isPlayerAction != 0; }
+  explicit LiveSelection(ActionState& value) : state(value) {}
+  ActionState& state;
+  bool Selecting() const override { return state.is_player_action != 0; }
   std::uint8_t SourceActor() const override {
-    return state.selection.primaryTarget.target.target_actor;
+    return state.selection.primary_target.target.target_actor;
   }
   std::uint8_t Frames() const override {
-    return static_cast<std::uint8_t>(state.selectionFrames);
+    return static_cast<std::uint8_t>(state.selection_frames);
   }
   void SetFrames(std::uint8_t frames) override {
-    state.selectionFrames = static_cast<char>(frames);
+    state.selection_frames = static_cast<char>(frames);
   }
-  std::uint8_t Preview() const override { return state.cameraPreview; }
-  std::uint8_t Selected() const override { return state.selectedPreview; }
+  std::uint8_t Preview() const override { return state.camera_preview; }
+  std::uint8_t Selected() const override { return state.selected_preview; }
   void SetSelected(std::uint8_t selected) override {
-    state.selectedPreview = selected;
+    state.selected_preview = selected;
   }
-  std::uint16_t ActionId() const override { return state.selection.actionId; }
+  std::uint16_t ActionId() const override { return state.selection.action_id; }
   int UpdateMenu() override {
-    return LiveUpdateTargetSelectionMenu(&state.cameraPreview);
+    return LiveUpdateTargetSelectionMenu(&state.camera_preview);
   }
   int UpdateArea() override {
-    return LiveUpdateSphereTargetPosition(&state.areaCenter);
+    return LiveUpdateSphereTargetPosition(&state.area_center);
   }
 };
 class LiveSelectionWorld final : public ActionSelectionWorld {
@@ -164,8 +167,8 @@ class LiveSelectionWorld final : public ActionSelectionWorld {
   void Commit(int mode) override { CommitLiveSelectedAction(mode); }
   void FilterArea() override { LiveFilterAreaActionTargets(); }
   std::optional<bool> NeedsTargeting(std::uint16_t action) override {
-    Require(action < std::size(Battle_actionDefinitions));
-    const auto category = Battle_actionDefinitions[action].category;
+    Require(action < std::size(VS::Battle::actionDefinitions));
+    const auto category = VS::Battle::actionDefinitions[action].category;
     return static_cast<std::uint8_t>(
                VS::Battle::categoryNeedsTargetSelection[category]) != 0;
   }

@@ -10,13 +10,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Action.h"
+#include "Battle/Action.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhases.hpp"
 #include "Battle/ActionPhasesLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
+
+using VS::Battle::ActionState;
 
 namespace {
 namespace b = VS::Battle;
@@ -118,14 +120,14 @@ struct World final : b::ActionPhaseWorld {
 
 struct LiveStateReset {
   std::uint32_t phase = VS::Battle::actionFlowMode;
-  Battle_ActionState* state = VS::Battle::actionState;
+  ActionState* state = VS::Battle::actionState;
   ~LiveStateReset() {
     VS::Battle::actionFlowMode = phase;
     VS::Battle::actionState = state;
   }
 };
 struct LiveActorsReset {
-  std::array<Battle_Actor*, 42> actors{};
+  std::array<VS::Battle::Actor*, 42> actors{};
   LiveActorsReset() {
     std::copy(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               actors.begin());
@@ -177,17 +179,17 @@ TEST_CASE(
   const LiveActorsReset reset;
   std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
             nullptr);
-  Battle_Actor first{}, last{}, extra{};
-  first.commandState = last.commandState = extra.commandState = 0x80;
-  first.commandOpcode = last.commandOpcode = extra.commandOpcode = 0x18;
+  VS::Battle::Actor first{}, last{}, extra{};
+  first.command_state = last.command_state = extra.command_state = 0x80;
+  first.command_opcode = last.command_opcode = extra.command_opcode = 0x18;
   VS::Battle::actors[0] = &first;
   VS::Battle::actors[15] = &last;
   VS::Battle::actors[16] = &extra;
   b::ReleaseLiveQueuedActorAttacks();
-  CHECK(first.commandState == 8);
-  CHECK(last.commandState == 8);
-  CHECK(extra.commandState == 0x80);
-  CHECK(first.commandOpcode == 0x18);
+  CHECK(first.command_state == 8);
+  CHECK(last.command_state == 8);
+  CHECK(extra.command_state == 0x80);
+  CHECK(first.command_opcode == 0x18);
 }
 
 TEST_CASE("F00096 rereads source ownership and both actor flag results",

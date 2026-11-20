@@ -8,12 +8,12 @@
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/MotionRequestsLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 
 namespace {
 static_assert(sizeof(SVECTOR) == 2 * sizeof(int));
-static_assert(offsetof(Battle_Actor, commandArg1) ==
-              offsetof(Battle_Actor, commandArg0) + sizeof(int));
+static_assert(offsetof(VS::Battle::Actor, command_arg1) ==
+              offsetof(VS::Battle::Actor, command_arg0) + sizeof(int));
 
 std::array<int, 8> TransitionState(const VS::Actors::ActorRecord& actor) {
   const auto& route = actor.route_target;
@@ -137,7 +137,7 @@ TEST_CASE(
   MotionFixture fixture;
   auto& actor = fixture.actor;
   actor.route_target = {10, 11, 12, 13};
-  actor.instance.reaction_state = static_cast<u_char>(reaction);
+  actor.instance.reaction_state = static_cast<std::uint8_t>(reaction);
   actor.instance.pose_state = 7;
   actor.instance.was_drawn = 1;
   actor.instance.turn_frames = 44;
@@ -159,7 +159,7 @@ TEST_CASE("Teleport companion propagation respects busy state and cyclic links",
   const bool linked_busy = GENERATE(false, true);
   const int linked_slot = GENERATE(0, 1, 2, 3);
   LinkedMotionFixture fixture;
-  fixture.actor.companion_slot = static_cast<u_char>(linked_slot);
+  fixture.actor.companion_slot = static_cast<std::uint8_t>(linked_slot);
   fixture.linked.companion_slot = 2;
   fixture.linked.route_target = {21, 22, 23, 24};
   fixture.linked.instance.reaction_state = linked_busy ? 3 : 0;
@@ -200,7 +200,7 @@ TEST_CASE(
   const bool drawn = GENERATE(false, true);
   MotionFixture fixture;
   auto& actor = fixture.actor;
-  actor.instance.reaction_state = static_cast<u_char>(reaction);
+  actor.instance.reaction_state = static_cast<std::uint8_t>(reaction);
   actor.instance.was_drawn = drawn;
   actor.instance.pose_state = 7;
   actor.instance.turn_frames = 71;

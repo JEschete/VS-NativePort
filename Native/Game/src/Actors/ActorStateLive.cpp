@@ -40,7 +40,7 @@
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -62,7 +62,8 @@ namespace VS::Actors {
 namespace {
 static_assert(std::size(VS::Actors::actorRecords) == kActorStateSlots);
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
-static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> == kActorLimbs);
+static_assert(std::tuple_size_v<decltype(VS::Battle::ActorStats::limbs)> ==
+              kActorLimbs);
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
 
 constexpr int kAllStatuses = 0x7FFFFFFF;
@@ -255,47 +256,47 @@ struct RecordTraits {
 };
 
 struct BattleActorTraits {
-  using Live = Battle_Actor;
+  using Live = VS::Battle::Actor;
   using Typed = BattleActorState;
   static constexpr std::size_t kCapacity = kBattleActorSlots;
   static constexpr const char* kWhat = "battle actors";
 
   static Typed Load(const Live& live) {
-    return {.command_state = live.commandState,
-            .model_id = live.modelId,
+    return {.command_state = live.command_state,
+            .model_id = live.model_id,
             .kind = live.kind,
-            .retain_after_defeat = live.retainAfterDefeat != 0};
+            .retain_after_defeat = live.retain_after_defeat != 0};
   }
   static void Store(const Typed& actor, Live& live) {
-    live.commandState = actor.command_state;
+    live.command_state = actor.command_state;
     live.kind = actor.kind;
   }
 };
 
 struct VitalsTraits {
-  using Live = Battle_ActorStats;
+  using Live = VS::Battle::ActorStats;
   using Typed = ActorVitals;
   static constexpr std::size_t kCapacity = kBattleActorSlots;
   static constexpr const char* kWhat = "battle actor stats";
 
   static Typed Load(const Live& live) {
-    ActorVitals vitals{.current_hp = live.currentHp,
-                       .max_hp = live.maxHp,
-                       .current_mp = live.currentMp,
-                       .max_mp = live.maxMp,
+    ActorVitals vitals{.current_hp = live.current_hp,
+                       .max_hp = live.max_hp,
+                       .current_mp = live.current_mp,
+                       .max_mp = live.max_mp,
                        .risk = live.risk,
-                       .action_recovery_timer = live.actionRecoveryTimer};
+                       .action_recovery_timer = live.action_recovery_timer};
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
       vitals.limbs.at(limb) = {.hp = live.limbs[limb].hp,
-                               .max_hp = live.limbs[limb].maxHp};
+                               .max_hp = live.limbs[limb].max_hp};
     }
     return vitals;
   }
   static void Store(const Typed& vitals, Live& live) {
-    live.currentHp = vitals.current_hp;
-    live.currentMp = vitals.current_mp;
+    live.current_hp = vitals.current_hp;
+    live.current_mp = vitals.current_mp;
     live.risk = vitals.risk;
-    live.actionRecoveryTimer = vitals.action_recovery_timer;
+    live.action_recovery_timer = vitals.action_recovery_timer;
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
       live.limbs[limb].hp = vitals.limbs.at(limb).hp;
     }
@@ -525,16 +526,16 @@ class LiveBattleActorHost final : public BattleActorHost {
   }
 
   BattleActorState* Actor(int id) override {
-    Battle_Actor* actor = LiveActor(id);
+    VS::Battle::Actor* actor = LiveActor(id);
     return actor != nullptr ? &actors_.Attach(*actor) : nullptr;
   }
   ActorVitals* Vitals(int id) override {
-    const Battle_Actor* actor = LiveActor(id);
+    const VS::Battle::Actor* actor = LiveActor(id);
     if (actor == nullptr || actor->stats == nullptr) return nullptr;
     return &vitals_.Attach(*actor->stats);
   }
   void ClearStatuses(int id) override {
-    const Battle_Actor* actor = LiveActor(id);
+    const VS::Battle::Actor* actor = LiveActor(id);
     if (actor == nullptr || actor->stats == nullptr) return;
     const Synced synced(*this);
     VS::Battle::RemoveLiveActorStatuses(kAllStatuses, actor->stats);
@@ -570,7 +571,7 @@ class LiveBattleActorHost final : public BattleActorHost {
   }
 
  private:
-  static Battle_Actor* LiveActor(int id) {
+  static VS::Battle::Actor* LiveActor(int id) {
     return IsBattleActorSlot(id) ? VS::Battle::actors[id] : nullptr;
   }
 
@@ -665,7 +666,7 @@ int FindLiveActorByModelId(int model_id) {
   return FindActorByModelId(host, model_id);
 }
 
-Battle_Actor* LiveActorAtSlot(int actor_id) {
+VS::Battle::Actor* LiveActorAtSlot(int actor_id) {
   if (!IsBattleActorSlot(actor_id)) {
     WarnActorRefused("ActorAtSlot",
                      "the actor id is outside VS::Battle::actors");

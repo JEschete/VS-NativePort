@@ -26,7 +26,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Battle/Actor.h"
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Field/Gimmicks.hpp"
@@ -1317,19 +1317,20 @@ std::array<int, 8> LiveCompanionStyle(const VS::Actors::ActorRecord& record) {
 }
 
 // A hostile battle actor at 30 of 120 HP with model 0x44, in slot 3.
-void PlaceLiveBattleActor(Battle_Actor& actor, Battle_ActorStats& stats) {
-  stats.currentHp = 30;
-  stats.maxHp = 120;
+void PlaceLiveBattleActor(VS::Battle::Actor& actor,
+                          VS::Battle::ActorStats& stats) {
+  stats.current_hp = 30;
+  stats.max_hp = 120;
   actor.stats = &stats;
   actor.kind = actors::kHostileActorKind;
-  actor.modelId = 0x44;
-  actor.retainAfterDefeat = 1;
+  actor.model_id = 0x44;
+  actor.retain_after_defeat = 1;
   VS::Battle::actors[3] = &actor;
 }
 
 // A battle actor's command state and kind.
-std::array<int, 2> LogicState(const Battle_Actor& actor) {
-  return {actor.commandState, actor.kind};
+std::array<int, 2> LogicState(const VS::Battle::Actor& actor) {
+  return {actor.command_state, actor.kind};
 }
 }  // namespace
 
@@ -1365,7 +1366,7 @@ TEST_CASE("Live model switches need a battle actor and a slot",
           "[actors-state]") {
   const LiveStateFixture fixture;
   const std::unique_ptr<VS::Actors::ActorRecord> record = LiveRecord(2);
-  Battle_Actor actor{};
+  VS::Battle::Actor actor{};
   VS::Battle::actors[2] = &actor;
   VS::Actors::DisableLiveActorModel(2);
   CHECK(record->instance.is_skipped != 0);
@@ -1440,8 +1441,8 @@ TEST_CASE("Live saved placement writes only the packed tile",
 
 TEST_CASE("Live battle actors answer the state queries", "[actors-state]") {
   const LiveStateFixture fixture;
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   PlaceLiveBattleActor(actor, stats);
 
   CHECK(VS::Actors::LiveActorHpPercentage(3) == 25);
@@ -1462,8 +1463,8 @@ TEST_CASE("Live battle actors answer the state queries", "[actors-state]") {
 TEST_CASE("Live battle actors switch their logic and hostility",
           "[actors-state]") {
   const LiveStateFixture fixture;
-  Battle_ActorStats stats{};
-  Battle_Actor actor{};
+  VS::Battle::ActorStats stats{};
+  VS::Battle::Actor actor{};
   PlaceLiveBattleActor(actor, stats);
 
   VS::Battle::actorMarkers[3] = static_cast<char>(0x85);
@@ -1476,7 +1477,7 @@ TEST_CASE("Live battle actors switch their logic and hostility",
   VS::Actors::SetLiveActorHostile(3, 0);
   CHECK(actor.kind == actors::kPeacefulActorKind);
   // Only the written fields change.
-  CHECK(std::array<int, 2>{actor.modelId, stats.currentHp} ==
+  CHECK(std::array<int, 2>{actor.model_id, stats.current_hp} ==
         std::array{0x44, 30});
 }
 
