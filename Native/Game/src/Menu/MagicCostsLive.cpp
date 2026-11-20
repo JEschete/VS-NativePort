@@ -17,7 +17,7 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -29,6 +29,9 @@
 #include "Menu/Magic.hpp"
 #include "Menu/MagicCosts.hpp"
 #include "State/StateFlags.hpp"
+
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
+namespace menu0_teleportation = VS::Content::text::menu0_prg::teleportation;
 
 namespace VS::Menu::Magic {
 namespace {
@@ -115,10 +118,10 @@ class LiveHost final : public Host {
     return teleportationStrings;
   }
   std::uint16_t LocationsIndex() const override {
-    return Text_Menu0_teleportation_Index_locations;
+    return menu0_teleportation::index::kLocations;
   }
   std::uint16_t DisabledDescriptionOffset() const override {
-    return Text_Menu0_teleportation_Offset_teleportationDisabled;
+    return menu0_teleportation::offset::kTeleportationDisabled;
   }
 
   void FlyOutRowsAndHoistSelection(int row, int offset) override {
@@ -178,7 +181,7 @@ class LiveHost final : public Host {
     return VS::Menu::menuStrings;
   }
   std::uint16_t MagicHeaderIndex() const override {
-    return Text_Battle_menuStrings_Index_magic;
+    return battle_menu_strings::index::kMagic;
   }
   void SetMenuItem(const MenuItem& item) override {
     const auto text = NullTerminated(VS::Menu::menuStrings, item.text_offset);

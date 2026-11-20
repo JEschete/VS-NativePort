@@ -3,7 +3,7 @@ H0001,header,Native/Content/Legacy/LibDs.h,legacy,no,pragma-once,0,0,0,0,0,0,5,0
 H0002,header,Native/Content/include/Content/DataAccess.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0003,header,Native/Content/include/Content/DiscLayout.h,generated,yes,pragma-once,0,0,0,0,0,10324,0,0,0,remaining,
 H0004,header,Native/Content/include/Content/ModuleData.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0005,header,Native/Content/include/Content/StringTables.h,generated,yes,pragma-once,0,0,0,0,0,0,66,0,0,remaining,
+H0005,header,Native/Content/include/Content/StringTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0006,header,Native/Content/src/ActorAssets.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0007,header,Native/Content/src/ActorAssetsLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,5,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp (#441)
 H0008,header,Native/Content/src/DiscQueue.h,generated,yes,pragma-once,0,0,0,0,0,0,17,0,0,remaining,

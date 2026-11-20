@@ -15,7 +15,7 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -32,6 +32,8 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/StateFlags.hpp"
+
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
 
 namespace VS::Menu::Magic {
 namespace {
@@ -262,7 +264,7 @@ class LiveHost final : public MenuHost {
     return true;
   }
   bool CreateHeader() override {
-    constexpr auto kHeader = Text_Battle_menuStrings_Index_magic;
+    constexpr auto kHeader = battle_menu_strings::index::kMagic;
     if (!TableText(VS::Menu::menuStrings, VS::Menu::menuStrings[kHeader])) {
       Refuse("Magic header text is invalid or unterminated");
       return false;

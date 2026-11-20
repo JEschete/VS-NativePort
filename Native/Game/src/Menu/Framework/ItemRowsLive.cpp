@@ -14,7 +14,7 @@
 #include "Battle/TargetingState.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
@@ -36,6 +36,9 @@
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 
+namespace itemhelp_text = VS::Content::text::itemhelp_bin;
+namespace itemname_text = VS::Content::text::itemname_bin;
+
 namespace VS::Menu::Framework {
 namespace {
 // The typed constants name the disc's tables.
@@ -44,58 +47,54 @@ static_assert(kItemHelpBytes == VS_ITEMHELP_BIN_SIZE);
 static_assert(kMenu12Bytes == VS_MENU12_BIN_SIZE);
 static_assert(kRowDescriptionBufferBytes == kStringBufferBytes);
 static_assert(item_text::kBattleKnifeDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_battleKnifeDesc);
-static_assert(item_text::kGemFeldspar ==
-              Text_Menu_ITEMHELP_BIN_Index_gemFeldspar);
-static_assert(item_text::kCureRootDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_cureRootDesc);
+              itemhelp_text::index::kBattleKnifeDesc);
+static_assert(item_text::kGemFeldspar == itemhelp_text::index::kGemFeldspar);
+static_assert(item_text::kCureRootDesc == itemhelp_text::index::kCureRootDesc);
 static_assert(item_text::kWarriorEquipment ==
-              Text_Menu_ITEMHELP_BIN_Index_warriorEquipment);
+              itemhelp_text::index::kWarriorEquipment);
 static_assert(item_text::kWeaponBasePrestige ==
-              Text_Menu_ITEMHELP_BIN_Index_weaponBasePrestige);
+              itemhelp_text::index::kWeaponBasePrestige);
 static_assert(item_text::kArmorBasePrestige ==
-              Text_Menu_ITEMHELP_BIN_Index_armorBasePrestige);
-static_assert(item_text::kDagger == Text_Menu_ITEMHELP_BIN_Index_dagger);
-static_assert(item_text::kBlunt == Text_Menu_ITEMHELP_BIN_Index_blunt);
-static_assert(item_text::kOneHanded == Text_Menu_ITEMHELP_BIN_Index_oneHanded);
+              itemhelp_text::index::kArmorBasePrestige);
+static_assert(item_text::kDagger == itemhelp_text::index::kDagger);
+static_assert(item_text::kBlunt == itemhelp_text::index::kBlunt);
+static_assert(item_text::kOneHanded == itemhelp_text::index::kOneHanded);
 static_assert(item_text::kPhantomPointsDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_phantomPointsDesc);
+              itemhelp_text::index::kPhantomPointsDesc);
 static_assert(item_text::kHumanClassDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_humanClassDesc);
+              itemhelp_text::index::kHumanClassDesc);
 static_assert(item_text::kPhysicalAffinityDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_physicalAffinityDesc);
+              itemhelp_text::index::kPhysicalAffinityDesc);
 static_assert(item_text::kBluntTypeDesc ==
-              Text_Menu_ITEMHELP_BIN_Index_bluntTypeDesc);
-static_assert(item_text::kRangeDesc == Text_Menu_ITEMHELP_BIN_Index_rangeDesc);
+              itemhelp_text::index::kBluntTypeDesc);
+static_assert(item_text::kRangeDesc == itemhelp_text::index::kRangeDesc);
 static_assert(item_text::kWeaponPrestige ==
-              Text_Menu_ITEMHELP_BIN_Index_weaponPrestige);
+              itemhelp_text::index::kWeaponPrestige);
 static_assert(item_text::kArmorPrestige ==
-              Text_Menu_ITEMHELP_BIN_Index_armorPrestige);
-static_assert(item_text::kRoodNecklace ==
-              Text_Menu_ITEMHELP_BIN_Index_roodNecklace);
-static_assert(item_text::kShortGrip == Text_Menu_ITEMHELP_BIN_Index_shortGrip);
+              itemhelp_text::index::kArmorPrestige);
+static_assert(item_text::kRoodNecklace == itemhelp_text::index::kRoodNecklace);
+static_assert(item_text::kShortGrip == itemhelp_text::index::kShortGrip);
 static_assert(item_text::kArmorCategory ==
-              Text_Menu_ITEMHELP_BIN_Index_armorCategory);
-static_assert(item_text::kAttackStr == Text_Menu_ITEMHELP_BIN_Index_attackStr);
-static_assert(item_text::kDefStr == Text_Menu_ITEMHELP_BIN_Index_defStr);
+              itemhelp_text::index::kArmorCategory);
+static_assert(item_text::kAttackStr == itemhelp_text::index::kAttackStr);
+static_assert(item_text::kDefStr == itemhelp_text::index::kDefStr);
 static_assert(item_text::kArmorBasePrestigeOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_armorBasePrestige);
+              itemhelp_text::offset::kArmorBasePrestige);
 static_assert(item_text::kArmorCategoryOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_armorCategory);
+              itemhelp_text::offset::kArmorCategory);
 static_assert(item_text::kClassTemplateOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_classTemplate);
+              itemhelp_text::offset::kClassTemplate);
 static_assert(item_text::kWeaponDescTemplateOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_weaponDescTemplate);
+              itemhelp_text::offset::kWeaponDescTemplate);
 static_assert(item_text::kGripTemplateOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_gripTemplate);
+              itemhelp_text::offset::kGripTemplate);
 static_assert(item_text::kArmorTemplateOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_armorTemplate);
-static_assert(item_text::kNoneOffset == Text_Menu_ITEMHELP_BIN_Offset_none);
-static_assert(item_text::kNoGemsOffset == Text_Menu_ITEMHELP_BIN_Offset_noGems);
-static_assert(item_text::kEndsSetupOffset ==
-              Text_Menu_ITEMHELP_BIN_Offset_endsSetup);
-static_assert(item_text::kItem0Name == Text_Menu_ITEMNAME_BIN_Index_item0);
-static_assert(item_text::kWoodName == Text_Menu_ITEMNAME_BIN_Index_wood);
+              itemhelp_text::offset::kArmorTemplate);
+static_assert(item_text::kNoneOffset == itemhelp_text::offset::kNone);
+static_assert(item_text::kNoGemsOffset == itemhelp_text::offset::kNoGems);
+static_assert(item_text::kEndsSetupOffset == itemhelp_text::offset::kEndsSetup);
+static_assert(item_text::kItem0Name == itemname_text::index::kItem0);
+static_assert(item_text::kWoodName == itemname_text::index::kWood);
 static_assert(sizeof(*itemNames) == kItemNameRowBytes);
 
 // decomp: vs_mainMenu_weaponHands' module image values (2D10.c:157).

@@ -18,7 +18,7 @@
 #include "Audio/XaMixLive.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Boot/PlayerSettings.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -55,6 +55,8 @@
 #include "Title/TitleMenu.hpp"  // NOLINT(build/include): typed API
 #include "Title/TitleMenuLiveState.hpp"
 #include "Title/TitleScreen.hpp"
+
+namespace mcman_text = VS::Content::text::mcman_bin;
 
 // decomp: vs_main_titleScreenCount (vs_main_titleScreenCount@SLUS_010.40)
 int VS::Title::titleScreenVisitCount = 0;
@@ -365,7 +367,7 @@ class LiveHost final : public Host {
       return;
     }
     VS::Title::memoryCardMessage = reinterpret_cast<char*>(
-        VS::Title::saveMenuText + Text_Menu_MCMAN_BIN_Offset_savePrompt);
+        VS::Title::saveMenuText + mcman_text::offset::kSavePrompt);
   }
   int UpdateClearSaveReminder(int init) override {
     return Menu::Files::UpdateLiveClearSaveReminder(init);

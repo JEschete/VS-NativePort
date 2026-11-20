@@ -15,7 +15,7 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -29,6 +29,8 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+namespace menu4_status = VS::Content::text::menu4_prg::status;
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
@@ -231,7 +233,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
   bool ShowStatusDescription(std::uint8_t effect) override {
     const auto text = IndexedText(
         statusStrings,
-        static_cast<std::size_t>(Text_Menu4_status_Index_strDown) + effect);
+        static_cast<std::size_t>(menu4_status::index::kStrDown) + effect);
     if (text.empty()) return false;
     Framework::SetLiveInformationMessageText(text);
     return true;
@@ -376,11 +378,11 @@ void LiveShowSelectedLimbCondition() {
   }
   const SelectedLimbText text{
       .name = IndexedText(Battle_statusStrings, limb->nameIndex),
-      .condition = IndexedText(
-          statusStrings,
-          static_cast<std::size_t>(Text_Menu4_status_Index_critical) +
-              static_cast<std::size_t>(condition)),
-      .format = TextAt(statusStrings, Text_Menu4_status_Offset_values)};
+      .condition =
+          IndexedText(statusStrings,
+                      static_cast<std::size_t>(menu4_status::index::kCritical) +
+                          static_cast<std::size_t>(condition)),
+      .format = TextAt(statusStrings, menu4_status::offset::kValues)};
   if (text.name.empty() || text.condition.empty() || text.format.empty()) {
     Refuse("ShowSelectedLimbCondition", LimbControllerError::kInvalidText);
     return;

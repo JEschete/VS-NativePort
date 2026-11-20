@@ -36,7 +36,7 @@ constexpr std::uint8_t kSpace = Render::kTextSpaceGlyph;
 constexpr std::uint8_t kTerminator = Render::kTextTerminator;
 constexpr int kLastColumn = static_cast<int>(kNameColumns) - 1;
 
-// _renderRenameMenuStrings (Text_Menu8_rename_*): the index entries of the
+// _renderRenameMenuStrings (text::menu8_prg::rename): the index entries of the
 // first confirmation option and of the insert command, and the halfword
 // offsets of the prompt and the character grid.
 constexpr std::size_t kOptionYesIndex = 6;

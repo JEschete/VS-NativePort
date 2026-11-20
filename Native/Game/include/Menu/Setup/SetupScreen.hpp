@@ -22,7 +22,7 @@
 // item texts, the disc queue and Ashley's equipment).
 namespace VS::Menu::Setup {
 // MENU12.BIN's fixed texts as halfword offsets
-// (Text_Menu_MENU12_BIN_Offset_*); SetupLive.cpp pins them.
+// (VS::Content::text::menu12_bin::offset); SetupLive.cpp pins them.
 namespace menu12 {
 inline constexpr std::size_t kSetup = 87;
 inline constexpr std::size_t kAttachGems = 123;
@@ -68,7 +68,8 @@ inline constexpr std::size_t kCombineArmor = 1175;
 inline constexpr std::size_t kCancelCombine = 1183;
 inline constexpr std::size_t kCancelCombineConfirm = 1191;
 
-// MENU12.BIN's offset-table entries (Text_Menu_MENU12_BIN_Index_*).
+// MENU12.BIN's offset-table entries
+// (VS::Content::text::menu12_bin::index).
 inline constexpr int kAssembleWeaponsIndex = 1;
 inline constexpr int kAssembleWeaponsDescIndex = 2;
 inline constexpr int kAssembleIndex = 13;

@@ -17,8 +17,8 @@ struct ChoiceSpec {
   int row_info;
 };
 // decomp: MENU8.PRG _simpleMapOptionMenu .. _vibrationOptionMenu
-// (src/MENU/MENU8.PRG/88.c:20-486), Text_Menu8_menu_Index_frame ..
-// Text_Menu8_menu_Index_vibrationOn.
+// (src/MENU/MENU8.PRG/88.c:20-486), text::menu8_prg::menu::index
+// kFrame .. kVibrationOn.
 constexpr std::array<ChoiceSpec, kChoiceCount> kChoiceSpecs{{
     {.rows = 3, .first_text = 20, .row_info = 0x246},
     {.rows = 2, .first_text = 26, .row_info = 0x247},
@@ -37,7 +37,7 @@ constexpr std::array<std::uint8_t, kMaxChoiceRows> kSimpleMapValues{3, 1, 0};
 // The settings list.
 constexpr int kSettingsRowInfo = 0x145;
 constexpr std::size_t kPuzzleModeRow = 6;
-// Text_Menu8_menu_Offset_puzzleModeSettingDisabled.
+// text::menu8_prg::menu::offset::kPuzzleModeSettingDisabled.
 constexpr std::uint16_t kPuzzleModeDisabledText = 999;
 // The row type that greys a row out and the bit that marks a current value.
 constexpr std::int32_t kDisabledRowType = 1;

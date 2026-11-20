@@ -34,10 +34,10 @@ inline constexpr std::size_t kItemNameRowBytes = 24;
 // callers' description buffers.
 inline constexpr std::size_t kRowDescriptionBufferBytes = 96;
 
-// ITEMHELP.BIN's halfword offset table entries (Text_Menu_ITEMHELP_BIN_Index_*)
-// and the halfword offsets of its fixed texts
-// (Text_Menu_ITEMHELP_BIN_Offset_*); ITEMNAME.BIN's rows
-// (Text_Menu_ITEMNAME_BIN_Index_*). ItemRowsLive.cpp pins them.
+// ITEMHELP.BIN's halfword offset table entries (VS::Content::text::
+// itemhelp_bin::index) and the halfword offsets of its fixed texts
+// (itemhelp_bin::offset); ITEMNAME.BIN's rows (itemname_bin::index).
+// ItemRowsLive.cpp pins them.
 namespace item_text {
 inline constexpr int kBattleKnifeDesc = 0;
 inline constexpr int kGemFeldspar = 121;

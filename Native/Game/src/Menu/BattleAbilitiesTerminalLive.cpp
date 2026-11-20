@@ -10,7 +10,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -26,6 +26,9 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Progress.hpp"
+
+namespace menu2_battle_abilities =
+    VS::Content::text::menu2_prg::battle_abilities;
 
 namespace VS::Menu::BattleAbilities {
 namespace {
@@ -229,8 +232,8 @@ class LiveListHost final : public AbilityListHost {
     std::array<std::uint16_t*, kLearnedAbilitySlots * kPointersPerRow> text{};
     const auto description_base =
         kind == AbilityKind::kChain
-            ? Text_Menu2_battleAbilities_Index_chainAbilityEffect0
-            : Text_Menu2_battleAbilities_Index_defenseAbilityEffect0;
+            ? menu2_battle_abilities::index::kChainAbilityEffect0
+            : menu2_battle_abilities::index::kDefenseAbilityEffect0;
     for (std::size_t row = 0; row < rows.size(); ++row) {
       const auto description = static_cast<std::size_t>(description_base) +
                                rows[row].description_slot;
@@ -299,8 +302,8 @@ class LiveScreenHost final : public AbilityScreenHost {
   }
   bool ShowShortcutCategory(const AbilityShortcutRow& row) override {
     const auto index = row.kind == AbilityKind::kChain
-                           ? Text_Menu2_battleAbilities_Index_chainAbilities
-                           : Text_Menu2_battleAbilities_Index_defenseAbilities;
+                           ? menu2_battle_abilities::index::kChainAbilities
+                           : menu2_battle_abilities::index::kDefenseAbilities;
     const auto offset = battleAbilityStrings[index];
     if (offset >= std::size(battleAbilityStrings)) {
       Refuse("ability shortcut category text is outside its table");
@@ -323,7 +326,7 @@ class LiveScreenHost final : public AbilityScreenHost {
   void ShowCategories(bool chain_available, bool defense_available,
                       bool force_cursor_memory) override {
     auto* chain_name =
-        MenuText(Text_Menu2_battleAbilities_Offset_chainAbilities);
+        MenuText(menu2_battle_abilities::offset::kChainAbilities);
     // Original 0x801039FC shifts the absent-chain label by a byte, not its
     // type. Preserve this source quirk separately from the disabled defense
     // row.
@@ -331,12 +334,12 @@ class LiveScreenHost final : public AbilityScreenHost {
     std::array<char*, kCategoryCount * kPointersPerRow> text{
         chain_name,
         MenuText(chain_available
-                     ? Text_Menu2_battleAbilities_Offset_chainAbilitiesDesc
-                     : Text_Menu2_battleAbilities_Offset_noChainAbilities),
-        MenuText(Text_Menu2_battleAbilities_Offset_defenseAbilities),
+                     ? menu2_battle_abilities::offset::kChainAbilitiesDesc
+                     : menu2_battle_abilities::offset::kNoChainAbilities),
+        MenuText(menu2_battle_abilities::offset::kDefenseAbilities),
         MenuText(defense_available
-                     ? Text_Menu2_battleAbilities_Offset_defenseAbilitiesDesc
-                     : Text_Menu2_battleAbilities_Offset_noDefenseAbilities)};
+                     ? menu2_battle_abilities::offset::kDefenseAbilitiesDesc
+                     : menu2_battle_abilities::offset::kNoDefenseAbilities)};
     std::array<int, kCategoryCount> types{0, defense_available ? 0 : 1};
     const auto remembered = VS::Input::settings.cursor_memory;
     if (force_cursor_memory) VS::Input::settings.cursor_memory = 1;

@@ -17,7 +17,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/BreakArts.hpp"
@@ -27,6 +27,9 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Render/GameFontLive.hpp"
 #include "State/Progress.hpp"
+
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
+namespace menu1_strings = VS::Content::text::menu1_prg::strings;
 
 namespace VS::Menu::break_arts {
 // decomp: _strings (_strings@src/MENU/MENU1.PRG/30.c)
@@ -66,16 +69,16 @@ class LiveHost final : public Host {
     return VS::Menu::menuStrings;
   }
   std::uint16_t DaggerArtDescriptionIndex() const override {
-    return Text_Menu1_strings_Index_daggerArt1;
+    return menu1_strings::index::kDaggerArt1;
   }
   std::uint16_t ViewArtsNameOffset() const override {
-    return Text_Menu1_strings_Offset_viewArts;
+    return menu1_strings::offset::kViewArts;
   }
   std::uint16_t ViewArtsDescriptionOffset() const override {
-    return Text_Menu1_strings_Offset_viewArtsDesc;
+    return menu1_strings::offset::kViewArtsDesc;
   }
   std::uint16_t BreakArtsHeaderIndex() const override {
-    return Text_Battle_menuStrings_Index_breakArts;
+    return battle_menu_strings::index::kBreakArts;
   }
   std::int32_t DaggerArtOneId() const override {
     return Battle_ActionId_DaggerArtOne;

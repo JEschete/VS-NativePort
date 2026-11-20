@@ -288,9 +288,10 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
   files disagreed about a type or an argument list; modernization picks the real type.
 - **Disc positions.** `Content/DiscLayout.h` keeps real LBAs/sizes because the code does sector arithmetic; Content
   must map a sector to its converted file. `MENUBGSZ` is the ledger size of the title background asset.
-- **String ids.** `Content/StringTables.h` holds the decomp's per-overlay string-table ids. Offsets are read from
-  the user's extracted tables by `gen_decomp_headers.py` (`--data`), as the decomp's build reads them from the disc;
-  the strings themselves stay in the extracted files.
+- **String ids.** `Content/StringTables.hpp` holds the decomp's per-overlay string-table ids as
+  `VS::Content::text::<file>::<table>::{offset,index}` constants. The retired `gen_decomp_headers.py` read the
+  offsets from the user's extracted tables (`--data`), as the decomp's build reads them from the disc; the header is
+  now hand-maintained. The strings themselves stay in the extracted files.
 - **Disc data.** Module data and pointer tables are filled at start-up (plan "Phase 1b status"). 88 arrays whose
   size neither the ledger nor the splat configs give stay tentative one-element definitions (84 are effect-plugin
   arrays; reported as `module-data-unsized`).

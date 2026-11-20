@@ -7,7 +7,7 @@
 
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/Copy.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -35,6 +35,8 @@
 #include "Save/NativeContainer.hpp"
 #include "Save/NativeMenu.hpp"
 #include "Title/SaveFiles.hpp"
+
+namespace menu7_container = VS::Content::text::menu7_prg::container;
 
 namespace VS::Menu::Files {
 namespace {
@@ -94,8 +96,8 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Menu::Files::UpdateLiveContainerConfirmation(
         opening ? kConfirmContainerOpening : kConfirmContainerDiscard);
     VS::Menu::Framework::SetLiveInformationMessage(
-        ContainerString(opening ? Text_Menu7_container_Offset_checkContainer
-                                : Text_Menu7_container_Offset_cancelWarning));
+        ContainerString(opening ? menu7_container::offset::kCheckContainer
+                                : menu7_container::offset::kCancelWarning));
   }
 
   int PollPrompt() override {
@@ -109,7 +111,7 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Menu::Framework::MenuRow* row = VS::Menu::Framework::SetLiveMenuItem(
         0, kContainerHeadingX, kContainerHeadingY, kContainerHeadingWidth,
         kContainerHeadingBackgroundWidth,
-        ContainerString(Text_Menu7_container_Offset_container));
+        ContainerString(menu7_container::offset::kContainer));
     row->state = VS::Menu::Framework::RowState::kSlideX;
     row->target0 = kContainerHeadingTargetX;
     row->selected = 1;

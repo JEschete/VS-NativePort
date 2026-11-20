@@ -18,7 +18,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -49,6 +49,8 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Progress.hpp"
+
+namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace VS::Menu::Score {
 namespace {
@@ -740,7 +742,7 @@ void ShowLiveEnemyDescription() {
   }
   static_cast<void>(ShowEnemyDescription(
       enemies, selectedEnemy,
-      Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNotDefeated), host));
+      Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host));
 }
 
 // decomp: _renderEnemyNo (src/MENU/MENU9.PRG/238.c:1878).
@@ -778,8 +780,8 @@ void RenderLiveEnemyList(int step) {
   LiveEnemyListHost host;
   if (RenderEnemyList(
           enemies, ReadCursor().enemies, step, enemy_animation,
-          Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNameNone),
-          Label(miscInfo, Text_Menu9_miscInfo_Index_enemyNotDefeated), host)) {
+          Label(miscInfo, menu9_misc_info::index::kEnemyNameNone),
+          Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host)) {
     StoreEnemies(enemies, false);
   }
 }

@@ -11,7 +11,7 @@
 #include <string_view>
 
 #include "Battle/StatusEffects.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/String/GameText.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -22,6 +22,8 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Progress.hpp"
+
+namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace VS::Menu::Score {
 namespace {
@@ -75,10 +77,9 @@ TimeTrialLabels Labels() {
     labels.titles[index] = Label(timeAttacks, index);
     labels.descriptions[index] = Label(timeAttackDescriptions, index);
   }
-  labels.missing_title =
-      Label(miscInfo, Text_Menu9_miscInfo_Index_noneBossRush);
+  labels.missing_title = Label(miscInfo, menu9_misc_info::index::kNoneBossRush);
   labels.missing_description =
-      Label(miscInfo, Text_Menu9_miscInfo_Index_noneBossRushDesc);
+      Label(miscInfo, menu9_misc_info::index::kNoneBossRushDesc);
   return labels;
 }
 
@@ -176,7 +177,7 @@ std::size_t FormatLiveFastestClearTime(std::span<char> destination,
                         destination.size());
   const std::size_t written = FormatFastestClearTime(
       bytes, {clearCount, round_index, completion_minutes},
-      Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear));
+      Label(miscInfo, menu9_misc_info::index::kNoneClear));
   if (written == 0) Refuse("fastest clear text does not fit or has no end");
   return written;
 }

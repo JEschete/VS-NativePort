@@ -20,7 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -49,6 +49,8 @@
 #include "Menu/TextBox.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+namespace menu1_strings = VS::Content::text::menu1_prg::strings;
 
 namespace {
 struct CursorFixture {
@@ -153,8 +155,8 @@ struct BreakArtMenuFixture {
     std::fill_n(VS::Menu::break_arts::strings, saved_strings.size(), 0xE7E7);
     std::fill_n(VS::Menu::break_arts::strings, 72, 96);
     VS::Menu::break_arts::strings[96] = 0;
-    VS::Menu::break_arts::strings[Text_Menu1_strings_Offset_viewArts] = 0;
-    VS::Menu::break_arts::strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
+    VS::Menu::break_arts::strings[menu1_strings::offset::kViewArts] = 0;
+    VS::Menu::break_arts::strings[menu1_strings::offset::kViewArtsDesc] = 0;
     VS::State::artsStatus.arts_learned[category % 10] = 4;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;

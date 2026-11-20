@@ -15,7 +15,7 @@
 
 #include "Battle/Feedback.h"
 #include "Content/DataStore.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/MinimapScene.hpp"
@@ -27,6 +27,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveFiles.hpp"
+
+namespace mcman_text = VS::Content::text::mcman_bin;
 
 namespace VS::Game::Save {
 namespace {
@@ -508,10 +510,9 @@ void Card(const Frontend& frontend, const NativeFileScreen& screen,
   frontend.Panel({kCardLeft, y}, {kCardWidth, kCardHeight}, selected);
   if (file.status == FileStatus::kEmpty) {
     Artwork(frontend, screen.save ? kNewArtwork : kEmptyArtwork, y, selected);
-    frontend.Encoded(
-        OriginalText(screen.save ? Text_Menu_MCMAN_BIN_Offset_new
-                                 : Text_Menu_MCMAN_BIN_Offset_empty),
-        AtRow(kEmptyText, y), screen.save ? 0 : kDimTextClut);
+    frontend.Encoded(OriginalText(screen.save ? mcman_text::offset::kNew
+                                              : mcman_text::offset::kEmpty),
+                     AtRow(kEmptyText, y), screen.save ? 0 : kDimTextClut);
   } else if (file.status == FileStatus::kInvalid) {
     Artwork(frontend, kInvalidArtwork, y, selected);
     frontend.Ascii("Invalid save data", AtRow(kInvalidText, y));
@@ -564,10 +565,9 @@ void Confirmation(const Frontend& frontend, bool affirmative) {
     const bool selected = affirmative == (row == 0);
     const int y = kTop + row * kStride;
     frontend.Panel({0, y}, kChoiceSize, selected);
-    frontend.Encoded(
-        OriginalText(row == 0 ? Text_Menu_MCMAN_BIN_Offset_yesIndent
-                              : Text_Menu_MCMAN_BIN_Offset_noIndent),
-        {kTextX, y});
+    frontend.Encoded(OriginalText(row == 0 ? mcman_text::offset::kYesIndent
+                                           : mcman_text::offset::kNoIndent),
+                     {kTextX, y});
     if (selected) {
       frontend.Sprite({0, y + kCursorYOffset}, kCursorSprite);
     }
@@ -616,8 +616,8 @@ void DrawNativeFileScreen(const NativeFileScreen& screen) {
   // F02756/F03623 _drawFileMenuElement: original gradient, 64x32 artwork,
   // NO.xx, label/digit sprites and HP/MP bars; no PS1 card-summary backend.
   frontend.Panel(kOperationHeader, kHeaderSize, false, true);
-  frontend.Encoded(OriginalText(screen.save ? Text_Menu_MCMAN_BIN_Offset_save
-                                            : Text_Menu_MCMAN_BIN_Offset_load),
+  frontend.Encoded(OriginalText(screen.save ? mcman_text::offset::kSave
+                                            : mcman_text::offset::kLoad),
                    kOperationText);
   frontend.Panel(kLocalHeader, kHeaderSize, false, true);
   frontend.Ascii("LOCAL SAVES", kLocalText);

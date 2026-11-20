@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "Battle/StatusEffects.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
@@ -21,6 +21,8 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Progress.hpp"
+
+namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace VS::Menu::Score {
 namespace {
@@ -107,9 +109,9 @@ GazetteTitleLabels TitleLabels() {
     labels.titles[index] = Label(titleText, index);
     labels.descriptions[index] = Label(titleDescriptions, index);
   }
-  labels.locked_title = Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear);
+  labels.locked_title = Label(miscInfo, menu9_misc_info::index::kNoneClear);
   labels.locked_description =
-      Label(miscInfo, Text_Menu9_miscInfo_Index_conditionsNotMet);
+      Label(miscInfo, menu9_misc_info::index::kConditionsNotMet);
   return labels;
 }
 
@@ -227,7 +229,7 @@ void RenderLiveStatistics(std::int32_t presentation_step) {
                   .rank = {}},
       .best = ReadLiveScoreRecord(),
       .best_clear_round = VS::State::scoreData.clear_count,
-      .no_clear = Label(miscInfo, Text_Menu9_miscInfo_Index_noneClear)};
+      .no_clear = Label(miscInfo, menu9_misc_info::index::kNoneClear)};
   LiveRecordHost host;
   if (RenderStatistics(rows, values,
                        {Battle_unusedMenu9CursorMemory.record_time_page,

@@ -439,7 +439,8 @@ PS1 layout under the x64 MSVC rules.
   ones).
 - **Disc-derived constants:** LBAs/sizes stay real values in `Content/DiscLayout.h` (the code does sector
   arithmetic; Content maps a sector to its converted file at run time). String-table ids are
-  `Content/StringTables.h`, named per overlay because same-named tables differ. Data the decomp spliced in from
+  `Content/StringTables.hpp` (`VS::Content::text`, hand-maintained since #441), named per overlay because
+  same-named tables differ. Data the decomp spliced in from
   the disc is zero until Step 5 loads it.
 - **Module reload (PORTING_WATCHLIST.md §1):** 158 function-local statics with an initial value are hoisted to
   file scope; per-file reset functions restore every reloadable module's initialised statics, and

@@ -21,7 +21,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
@@ -53,118 +53,109 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
+namespace menu12_text = VS::Content::text::menu12_bin;
+
 namespace VS::Menu::Setup {
 namespace {
 // MENU12.BIN's texts and offset-table entries the typed menu names.
-static_assert(menu12::kSetup == std::size_t{Text_Menu_MENU12_BIN_Offset_setup});
+static_assert(menu12::kSetup == std::size_t{menu12_text::offset::kSetup});
 static_assert(menu12::kAttachGems ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_attachGems});
+              std::size_t{menu12_text::offset::kAttachGems});
 static_assert(menu12::kDisassemble ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_disassemble});
-static_assert(menu12::kRename ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_rename});
-static_assert(menu12::kCombine ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_combine});
-static_assert(menu12::kAssemble ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_assemble});
+              std::size_t{menu12_text::offset::kDisassemble});
+static_assert(menu12::kRename == std::size_t{menu12_text::offset::kRename});
+static_assert(menu12::kCombine == std::size_t{menu12_text::offset::kCombine});
+static_assert(menu12::kAssemble == std::size_t{menu12_text::offset::kAssemble});
 static_assert(menu12::kInvalidGrip ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_invalidGrip});
+              std::size_t{menu12_text::offset::kInvalidGrip});
 static_assert(menu12::kInvalidBlade ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_invalidBlade});
+              std::size_t{menu12_text::offset::kInvalidBlade});
 static_assert(menu12::kInvalidBladeMaterial ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_invalidBladeMaterial});
+              std::size_t{menu12_text::offset::kInvalidBladeMaterial});
 static_assert(menu12::kInvalidShieldMaterial ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_invalidShieldMaterial});
+              std::size_t{menu12_text::offset::kInvalidShieldMaterial});
 static_assert(menu12::kInvalidArmorMaterial ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_invalidArmorMaterial});
+              std::size_t{menu12_text::offset::kInvalidArmorMaterial});
 static_assert(menu12::kChooseWeaponRename ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_chooseWeaponRename});
+              std::size_t{menu12_text::offset::kChooseWeaponRename});
 static_assert(menu12::kRenamePrompt ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_renamePrompt});
-static_assert(menu12::kNoGems ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_noGems});
+              std::size_t{menu12_text::offset::kRenamePrompt});
+static_assert(menu12::kNoGems == std::size_t{menu12_text::offset::kNoGems});
 static_assert(menu12::kChooseWeaponDisassemble ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_chooseWeaponDisassemble});
+              std::size_t{menu12_text::offset::kChooseWeaponDisassemble});
 static_assert(menu12::kChooseShieldDisassemble ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_chooseShieldDisassemble});
+              std::size_t{menu12_text::offset::kChooseShieldDisassemble});
 static_assert(menu12::kRepairConfirm ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_repairConfirm});
+              std::size_t{menu12_text::offset::kRepairConfirm});
 static_assert(menu12::kRepairComplete ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_repairComplete});
+              std::size_t{menu12_text::offset::kRepairComplete});
 static_assert(menu12::kNotInWorkshop ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_notInWorkshop});
+              std::size_t{menu12_text::offset::kNotInWorkshop});
 static_assert(menu12::kWeaponsFull ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_weaponsFull});
+              std::size_t{menu12_text::offset::kWeaponsFull});
 static_assert(menu12::kNoWeapons ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_noWeapons});
-static_assert(menu12::kNoItems ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_noItems});
+              std::size_t{menu12_text::offset::kNoWeapons});
+static_assert(menu12::kNoItems == std::size_t{menu12_text::offset::kNoItems});
 static_assert(menu12::kSelectGem ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_selectGem});
-static_assert(menu12::kPressOk ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_pressOk});
-static_assert(menu12::kWeapon ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_weapon});
-static_assert(menu12::kBlades ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_blades});
+              std::size_t{menu12_text::offset::kSelectGem});
+static_assert(menu12::kPressOk == std::size_t{menu12_text::offset::kPressOk});
+static_assert(menu12::kWeapon == std::size_t{menu12_text::offset::kWeapon});
+static_assert(menu12::kBlades == std::size_t{menu12_text::offset::kBlades});
 static_assert(menu12::kBladesDesc ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_bladesDesc});
-static_assert(menu12::kGrips == std::size_t{Text_Menu_MENU12_BIN_Offset_grips});
+              std::size_t{menu12_text::offset::kBladesDesc});
+static_assert(menu12::kGrips == std::size_t{menu12_text::offset::kGrips});
 static_assert(menu12::kGripsDesc ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_gripsDesc});
-static_assert(menu12::kGems == std::size_t{Text_Menu_MENU12_BIN_Offset_gems});
-static_assert(menu12::kGemsDesc ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_gemsDesc});
+              std::size_t{menu12_text::offset::kGripsDesc});
+static_assert(menu12::kGems == std::size_t{menu12_text::offset::kGems});
+static_assert(menu12::kGemsDesc == std::size_t{menu12_text::offset::kGemsDesc});
 static_assert(menu12::kAttachmentConfirm ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_attachmentConfirm});
-static_assert(menu12::kBlade == std::size_t{Text_Menu_MENU12_BIN_Offset_blade});
-static_assert(menu12::kShield ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_shield});
-static_assert(menu12::kArmor == std::size_t{Text_Menu_MENU12_BIN_Offset_armor});
+              std::size_t{menu12_text::offset::kAttachmentConfirm});
+static_assert(menu12::kBlade == std::size_t{menu12_text::offset::kBlade});
+static_assert(menu12::kShield == std::size_t{menu12_text::offset::kShield});
+static_assert(menu12::kArmor == std::size_t{menu12_text::offset::kArmor});
 static_assert(menu12::kSelectBladeToCombine ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_selectBladeToCombine});
+              std::size_t{menu12_text::offset::kSelectBladeToCombine});
 static_assert(menu12::kSelectShield ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_selectShield});
+              std::size_t{menu12_text::offset::kSelectShield});
 static_assert(menu12::kSelectArmor ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_selectArmor});
+              std::size_t{menu12_text::offset::kSelectArmor});
 static_assert(menu12::kCombineBlade ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_combineBlade});
+              std::size_t{menu12_text::offset::kCombineBlade});
 static_assert(menu12::kCombineShield ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_combineShield});
+              std::size_t{menu12_text::offset::kCombineShield});
 static_assert(menu12::kCombineArmor ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_combineArmor});
+              std::size_t{menu12_text::offset::kCombineArmor});
 static_assert(menu12::kCancelCombine ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_cancelCombine});
+              std::size_t{menu12_text::offset::kCancelCombine});
 static_assert(menu12::kCancelCombineConfirm ==
-              std::size_t{Text_Menu_MENU12_BIN_Offset_cancelCombineConfirm});
+              std::size_t{menu12_text::offset::kCancelCombineConfirm});
 static_assert(menu12::kAssembleWeaponsIndex ==
-              Text_Menu_MENU12_BIN_Index_assembleWeapons);
+              menu12_text::index::kAssembleWeapons);
 static_assert(menu12::kAssembleWeaponsDescIndex ==
-              Text_Menu_MENU12_BIN_Index_assembleWeaponsDesc);
-static_assert(menu12::kAssembleIndex == Text_Menu_MENU12_BIN_Index_assemble);
-static_assert(menu12::kWeaponsIndex == Text_Menu_MENU12_BIN_Index_weapons);
-static_assert(menu12::kAttachWeaponIndex ==
-              Text_Menu_MENU12_BIN_Index_attachWeapon);
-static_assert(menu12::kOptionYesIndex == Text_Menu_MENU12_BIN_Index_optionYes);
+              menu12_text::index::kAssembleWeaponsDesc);
+static_assert(menu12::kAssembleIndex == menu12_text::index::kAssemble);
+static_assert(menu12::kWeaponsIndex == menu12_text::index::kWeapons);
+static_assert(menu12::kAttachWeaponIndex == menu12_text::index::kAttachWeapon);
+static_assert(menu12::kOptionYesIndex == menu12_text::index::kOptionYes);
 static_assert(menu12::kDisassembleWeaponDescIndex ==
-              Text_Menu_MENU12_BIN_Index_disassembleWeaponDesc);
+              menu12_text::index::kDisassembleWeaponDesc);
 static_assert(menu12::kDisassembleWeaponConfirmIndex ==
-              Text_Menu_MENU12_BIN_Index_disassembleWeaponConfirm);
+              menu12_text::index::kDisassembleWeaponConfirm);
 static_assert(menu12::kDisassembleWeaponIndex ==
-              Text_Menu_MENU12_BIN_Index_disassembleWeapon);
-static_assert(menu12::kNoItemsIndex == Text_Menu_MENU12_BIN_Index_noItems);
+              menu12_text::index::kDisassembleWeapon);
+static_assert(menu12::kNoItemsIndex == menu12_text::index::kNoItems);
 static_assert(menu12::kSelectBladeToAssembleIndex ==
-              Text_Menu_MENU12_BIN_Index_selectBladeToAssemble);
-static_assert(menu12::kSelectGemIndex == Text_Menu_MENU12_BIN_Index_selectGem);
-static_assert(menu12::kPressOkIndex == Text_Menu_MENU12_BIN_Index_pressOk);
+              menu12_text::index::kSelectBladeToAssemble);
+static_assert(menu12::kSelectGemIndex == menu12_text::index::kSelectGem);
+static_assert(menu12::kPressOkIndex == menu12_text::index::kPressOk);
 static_assert(menu12::kWeaponGemSlotsIndex ==
-              Text_Menu_MENU12_BIN_Index_weaponGemSlots);
+              menu12_text::index::kWeaponGemSlots);
 static_assert(menu12::kWeaponNoGemSlotsIndex ==
-              Text_Menu_MENU12_BIN_Index_weaponNoGemSlots);
-static_assert(menu12::kBladeIndex == Text_Menu_MENU12_BIN_Index_blade);
+              menu12_text::index::kWeaponNoGemSlots);
+static_assert(menu12::kBladeIndex == menu12_text::index::kBlade);
 static_assert(menu12::kCombineBladesIndex ==
-              Text_Menu_MENU12_BIN_Index_combineBlades);
-static_assert(menu12::kNewBladeIndex == Text_Menu_MENU12_BIN_Index_newBlade);
+              menu12_text::index::kCombineBlades);
+static_assert(menu12::kNewBladeIndex == menu12_text::index::kNewBlade);
 static_assert(Framework::kMenu12Bytes == VS_MENU12_BIN_SIZE);
 
 // _loadSyd's files (168.c:2658): BLADE.SYD, SHIELD.SYD and ARMOR.SYD.

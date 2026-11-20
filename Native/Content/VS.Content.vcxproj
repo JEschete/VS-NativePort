@@ -120,7 +120,7 @@
     <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />
     <ClInclude Include="include\Content\PFile.hpp" />
     <ClInclude Include="include\Content\PFileLive.hpp" />
-    <ClInclude Include="include\Content\StringTables.h" />
+    <ClInclude Include="include\Content\StringTables.hpp" />
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
     <ClInclude Include="Legacy\LibDs.h" />

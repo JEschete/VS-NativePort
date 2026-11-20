@@ -21,7 +21,7 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -53,6 +53,11 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
+
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
+namespace itemhelp_text = VS::Content::text::itemhelp_bin;
+namespace menu3_menu_text = VS::Content::text::menu3_prg::menu_text;
+namespace menub_menu_text = VS::Content::text::menub_prg::menu_text;
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -283,73 +288,70 @@ class LiveTerminalHost final : public InventoryTerminalHost,
                           : LiveLootInventoryText();
     switch (text) {
       case TerminalText::kSortName:
-        return EntryText(help, Text_Menu_ITEMHELP_BIN_Index_sortMenu +
-                                   index * kTextPairEntries);
+        return EntryText(
+            help, itemhelp_text::index::kSortMenu + index * kTextPairEntries);
       case TerminalText::kSortDescription:
-        return EntryText(help, Text_Menu_ITEMHELP_BIN_Index_sortMenuDesc +
+        return EntryText(help, itemhelp_text::index::kSortMenuDesc +
                                    index * kTextPairEntries);
       case TerminalText::kYesNo:
-        return EntryText(help, Text_Menu_ITEMHELP_BIN_Index_confirmYes + index);
+        return EntryText(help, itemhelp_text::index::kConfirmYes + index);
       case TerminalText::kDiscardPrompt:
-        return EntryText(help,
-                         Text_Menu_ITEMHELP_BIN_Index_discardConfirm + index);
+        return EntryText(help, itemhelp_text::index::kDiscardConfirm + index);
       case TerminalText::kQuantityPrompt:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_discardConfirm);
+        return OffsetText(help, itemhelp_text::offset::kDiscardConfirm);
       case TerminalText::kNoItems:
-        return OffsetText(help,
-                          Text_Menu_ITEMHELP_BIN_Offset_noItemsInCategory);
+        return OffsetText(help, itemhelp_text::offset::kNoItemsInCategory);
       case TerminalText::kManage:
         return EntryText(
             menu, (context_ == ItemRowsContext::kItemMenu
-                       ? static_cast<int>(Text_Menu3_menuText_Index_equip)
-                       : static_cast<int>(Text_Menub_menuText_Index_equip)) +
+                       ? static_cast<int>(menu3_menu_text::index::kEquip)
+                       : static_cast<int>(menub_menu_text::index::kEquip)) +
                       index);
       case TerminalText::kTarnished:
-        return OffsetText(menu, Text_Menu3_menuText_Offset_equipmentTarnished);
+        return OffsetText(menu, menu3_menu_text::offset::kEquipmentTarnished);
       case TerminalText::kUse:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_useItem);
+        return OffsetText(help, itemhelp_text::offset::kUseItem);
       case TerminalText::kUseDescription:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_useItemDesc);
+        return OffsetText(help, itemhelp_text::offset::kUseItemDesc);
       case TerminalText::kCannotUse:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_cannotUse);
+        return OffsetText(help, itemhelp_text::offset::kCannotUse);
       case TerminalText::kInsufficientMp:
-        return OffsetText(menu, Text_Menu3_menuText_Offset_insufficientMp);
+        return OffsetText(menu, menu3_menu_text::offset::kInsufficientMp);
       case TerminalText::kUseProhibited:
-        return OffsetText(menu, Text_Menub_menuText_Offset_itemUseProhibited);
+        return OffsetText(menu, menub_menu_text::offset::kItemUseProhibited);
       case TerminalText::kSearch:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_searchItem);
+        return OffsetText(help, itemhelp_text::offset::kSearchItem);
       case TerminalText::kSearchDescription:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_searchItemDesc);
+        return OffsetText(help, itemhelp_text::offset::kSearchItemDesc);
       case TerminalText::kInvalidSearch:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_invalidSearch);
+        return OffsetText(help, itemhelp_text::offset::kInvalidSearch);
       case TerminalText::kDiscard:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_discardItem);
+        return OffsetText(help, itemhelp_text::offset::kDiscardItem);
       case TerminalText::kDiscardDescription:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_discardItemDesc);
+        return OffsetText(help, itemhelp_text::offset::kDiscardItemDesc);
       case TerminalText::kDiscardRestriction:
         return EntryText(
-            help,
-            Text_Menu_ITEMHELP_BIN_Index_cannotDiscardEquipped - 1 + index);
+            help, itemhelp_text::index::kCannotDiscardEquipped - 1 + index);
       case TerminalText::kDiscardAll:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_discardAll);
+        return OffsetText(help, itemhelp_text::offset::kDiscardAll);
       case TerminalText::kDiscardAllDescription:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_discardAllDesc);
+        return OffsetText(help, itemhelp_text::offset::kDiscardAllDesc);
       case TerminalText::kCannotDiscard:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_cannotDiscard);
+        return OffsetText(help, itemhelp_text::offset::kCannotDiscard);
       case TerminalText::kSort:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_sortItem);
+        return OffsetText(help, itemhelp_text::offset::kSortItem);
       case TerminalText::kSortHint:
-        return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_sortItemDesc);
+        return OffsetText(help, itemhelp_text::offset::kSortItemDesc);
       case TerminalText::kItemsTitle:
         return EntryText(ByteView(VS::Menu::menuStrings),
-                         Text_Battle_menuStrings_Index_items);
+                         battle_menu_strings::index::kItems);
       case TerminalText::kMiscTitle:
         return ByteView(kMiscTitle);
       case TerminalText::kCategoryTitle:
         return EntryText(
             menu, (context_ == ItemRowsContext::kItemMenu
-                       ? static_cast<int>(Text_Menu3_menuText_Index_weapons)
-                       : static_cast<int>(Text_Menub_menuText_Index_weapons)) +
+                       ? static_cast<int>(menu3_menu_text::index::kWeapons)
+                       : static_cast<int>(menub_menu_text::index::kWeapons)) +
                       index);
     }
     Refuse("unknown inventory text selector");

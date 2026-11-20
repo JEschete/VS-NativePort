@@ -11,7 +11,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Menus.hpp"
@@ -22,6 +22,9 @@
 #include "Render/EncodedTextLive.hpp"
 #include "State/Timers.hpp"
 
+namespace battle_door_strings = VS::Content::text::battle_prg::door_strings;
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
+
 namespace VS::Menu {
 namespace {
 constexpr int kNotificationBox = 7;
@@ -30,10 +33,10 @@ constexpr int kNotificationLines = 3;
 constexpr std::int32_t kFirstNotificationItem = 0x1CA;
 constexpr std::size_t kActionTextStart = 22;
 constexpr std::size_t kActionTextCount{
-    Text_Battle_menuStrings_Index_spellMastered - kActionTextStart,
+    battle_menu_strings::index::kSpellMastered - kActionTextStart,
 };
 constexpr std::int32_t kNotificationCount{
-    Text_Battle_doorStrings_Index_doorLocked + 1,
+    battle_door_strings::index::kDoorLocked + 1,
 };
 std::uint64_t refused_notifications = 0;
 
@@ -116,7 +119,7 @@ class LiveHost final : public SceneNotificationHost {
   }
   std::optional<SceneNotificationText> SpellMasteredText() const override {
     return TextAt(VS::Menu::menuStrings,
-                  Text_Battle_menuStrings_Offset_spellMastered);
+                  battle_menu_strings::offset::kSpellMastered);
   }
   bool CanFormat(SceneNotificationText source, SceneNotificationText subject,
                  std::size_t capacity) const override {

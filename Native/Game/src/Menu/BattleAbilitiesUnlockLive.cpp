@@ -10,7 +10,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -22,6 +22,9 @@
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/Progress.hpp"
+
+namespace menu2_battle_abilities_menu =
+    VS::Content::text::menu2_prg::battle_abilities_menu;
 
 namespace VS::Menu::BattleAbilities {
 namespace {
@@ -115,7 +118,7 @@ class LiveBreakArtHost final : public BreakArtUnlockHost {
         MenuText(battleAbilityMenuStrings[weapon]);
     Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
     Framework::SetLiveInformationMessage(
-        MenuText(Text_Menu2_battleAbilitiesMenu_Offset_breakArtUnlock));
+        MenuText(menu2_battle_abilities_menu::offset::kBreakArtUnlock));
   }
   bool InformationBoxDone() const override { return InformationDone(); }
   bool ConfirmPressed() const override {
@@ -149,8 +152,8 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     auto* item = Framework::SetLiveMenuItem(
         chain ? 0 : 1, row.x, row.y, row.width, row.background_width,
         MenuText(chain
-                     ? Text_Menu2_battleAbilitiesMenu_Offset_chainAbilities
-                     : Text_Menu2_battleAbilitiesMenu_Offset_defenseAbilities));
+                     ? menu2_battle_abilities_menu::offset::kChainAbilities
+                     : menu2_battle_abilities_menu::offset::kDefenseAbilities));
     if (item == nullptr) {
       Refuse("missing category menu item");
       return false;
@@ -162,10 +165,10 @@ class LiveAbilityHost final : public AbilityUnlockHost {
   }
   void ShowBothCategories() override {
     std::array<char*, kAbilityCategoryCount * kPointersPerRow> strings{
-        MenuText(Text_Menu2_battleAbilitiesMenu_Offset_chainAbilities),
-        MenuText(Text_Menu2_battleAbilitiesMenu_Offset_select),
-        MenuText(Text_Menu2_battleAbilitiesMenu_Offset_defenseAbilities),
-        MenuText(Text_Menu2_battleAbilitiesMenu_Offset_select)};
+        MenuText(menu2_battle_abilities_menu::offset::kChainAbilities),
+        MenuText(menu2_battle_abilities_menu::offset::kSelect),
+        MenuText(menu2_battle_abilities_menu::offset::kDefenseAbilities),
+        MenuText(menu2_battle_abilities_menu::offset::kSelect)};
     std::array<int, kAbilityCategoryCount> types{};
     const auto saved_cursor = VS::Input::settings.cursor_memory;
     VS::Input::settings.cursor_memory = 1;
@@ -208,8 +211,8 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     }
     Framework::SetLiveInformationMessage(MenuText(
         all_unlocked
-            ? Text_Menu2_battleAbilitiesMenu_Offset_allAbilitiesUnlocked
-            : Text_Menu2_battleAbilitiesMenu_Offset_battleAbilityUnlock));
+            ? menu2_battle_abilities_menu::offset::kAllAbilitiesUnlocked
+            : menu2_battle_abilities_menu::offset::kBattleAbilityUnlock));
   }
   void InitializeInformationBox() override {
     InitLiveInformationTextBox(InformationHeader::kCheck);
@@ -351,7 +354,7 @@ int LiveUpdateBreakArtUnlock(int initialize) {
 char* LiveUnlockDescription(int ability) {
   const auto text =
       UnlockDescription(ability, battleAbilityStrings, battleAbilityMenuStrings,
-                        Text_Menu2_battleAbilitiesMenu_Offset_unknown1);
+                        menu2_battle_abilities_menu::offset::kUnknown1);
   if (text.empty()) {
     Refuse("ability description outside text table");
     return nullptr;

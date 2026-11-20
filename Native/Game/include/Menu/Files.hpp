@@ -42,7 +42,8 @@ inline constexpr std::size_t kGameOverImageHalfwords = std::size_t{24} * 128;
 // _containerStrings (MENU7.PRG container string table) in halfwords.
 inline constexpr std::size_t kContainerStringHalfwords = 895;
 
-// Text_Menu_MCMAN_BIN offsets (halfwords into the table) and indices.
+// VS::Content::text::mcman_bin offsets (halfwords into the table) and
+// indices.
 inline constexpr std::uint16_t kTextChecking = 196;
 inline constexpr std::uint16_t kTextInsertError = 227;
 inline constexpr std::uint16_t kTextSaveFailed = 258;
@@ -69,7 +70,7 @@ inline constexpr std::size_t kIndexAccessing0 = 22;
 inline constexpr std::size_t kIndexYesOption = 26;
 inline constexpr std::size_t kIndexYesIndent = 36;
 inline constexpr std::size_t kIndexSaveLocations = 41;
-// Text_Menu7_container offsets.
+// VS::Content::text::menu7_prg::container offsets.
 inline constexpr std::uint16_t kContainerTextYes = 16;
 inline constexpr std::uint16_t kContainerTextNo = 18;
 

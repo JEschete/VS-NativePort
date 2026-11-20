@@ -7,7 +7,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/StringTables.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
+
+namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace {
 namespace live = gazette_times_live_tests;
@@ -35,11 +38,11 @@ void CheckCreatedRows(const live::EncodedText& minotaur) {
     CHECK(live::BorrowedText(row.title) ==
           (i == 0 ? minotaur
                   : live::Label(score::miscInfo,
-                                Text_Menu9_miscInfo_Index_noneBossRush)));
+                                menu9_misc_info::index::kNoneBossRush)));
     CHECK(live::BorrowedText(row.description) ==
           (i == 0 ? live::Label(score::timeAttackDescriptions, 0)
                   : live::Label(score::miscInfo,
-                                Text_Menu9_miscInfo_Index_noneBossRushDesc)));
+                                menu9_misc_info::index::kNoneBossRushDesc)));
   }
 }
 
@@ -128,7 +131,7 @@ TEST_CASE(
   const auto output = std::span(storage).subspan(1, storage.size() - 2);
   score::clearCount = 0;
   const auto missing =
-      live::Label(score::miscInfo, Text_Menu9_miscInfo_Index_noneClear);
+      live::Label(score::miscInfo, menu9_misc_info::index::kNoneClear);
   REQUIRE(missing ==
           live::EncodedText{0x8F, 0x8F, 0x17, 0x18, 0x17, 0x0E, 0xE7});
   CheckFastestClearFormat(output, missing);

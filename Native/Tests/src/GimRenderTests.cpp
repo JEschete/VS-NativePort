@@ -12,7 +12,7 @@
 #include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "DiscQueue.h"
@@ -41,6 +41,8 @@
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+namespace menu4_status = VS::Content::text::menu4_prg::status;
 
 static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
               "three textbox ordering buffers");
@@ -496,14 +498,14 @@ int CheckMenuReloadClosingDelay(void) {
 
 int CheckMenuDiscStringsLoaded(void) {
   const unsigned char* format = reinterpret_cast<const unsigned char*>(
-      &VS::Menu::Status::statusStrings[Text_Menu4_status_Offset_values]);
+      &VS::Menu::Status::statusStrings[menu4_status::offset::kValues]);
   const size_t status_words = sizeof VS::Menu::Status::statusStrings /
                               sizeof VS::Menu::Status::statusStrings[0];
   const size_t inventory_words = sizeof VS::Menu::Inventory::menuText /
                                  sizeof VS::Menu::Inventory::menuText[0];
   const unsigned int condition =
-      VS::Menu::Status::statusStrings[Text_Menu4_status_Index_critical];
-  return status_words > Text_Menu4_status_Offset_values && condition > 0 &&
+      VS::Menu::Status::statusStrings[menu4_status::index::kCritical];
+  return status_words > menu4_status::offset::kValues && condition > 0 &&
          condition < status_words && VS::Menu::Inventory::menuText[0] > 0 &&
          VS::Menu::Inventory::menuText[0] < inventory_words &&
          format[0] == VS::Core::TextCode::kPrintString && format[1] == 0 &&

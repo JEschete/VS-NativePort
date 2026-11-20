@@ -18,7 +18,7 @@
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/ActorAssetsLive.hpp"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -35,6 +35,8 @@
 #include "Render/Render.hpp"
 #include "Render/Textures.hpp"
 #include "Render/UiPrimitives.hpp"
+
+namespace menu8_rename = VS::Content::text::menu8_prg::rename;
 
 namespace {
 static_assert(sizeof VS::Menu::Framework::comparisonStatTotals == 8);
@@ -188,14 +190,14 @@ struct RenameFrameFixture {
         frame.ordering.data() + 8;
     std::fill_n(VS::Menu::Rename::renderRenameMenuStrings, saved_strings.size(),
                 0xE7E7);
-    for (int index = Text_Menu8_rename_Index_ok;
-         index <= Text_Menu8_rename_Index_insert; ++index) {
+    for (int index = menu8_rename::index::kOk;
+         index <= menu8_rename::index::kInsert; ++index) {
       VS::Menu::Rename::renderRenameMenuStrings[index] = 150;
     }
     VS::Menu::Rename::renderRenameMenuStrings[150] = 0xE70A;
     auto* grid = reinterpret_cast<unsigned char*>(
         VS::Menu::Rename::renderRenameMenuStrings +
-        Text_Menu8_rename_Offset_charTable);
+        menu8_rename::offset::kCharTable);
     std::fill_n(grid, 15 * 9, 10);
     VS::Menu::Rename::State& state = VS::Menu::Rename::LiveRenameState();
     state.name.fill(VS::Core::TextCode::kSpace);

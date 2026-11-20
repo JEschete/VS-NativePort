@@ -188,7 +188,7 @@ constexpr int kChooseStep = 19;
 constexpr int kConfirmedStep = 20;
 constexpr int kCloseStep = 21;
 
-// Battle_statusStrings indices (Content/StringTables.h).
+// BATTLE.PRG statusStrings indices (Content/StringTables.hpp).
 constexpr int kStrDownText = 57;
 constexpr int kBlockerText = 18;
 constexpr int kMpTemplateText = 22;

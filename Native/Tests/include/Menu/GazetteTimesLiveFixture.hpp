@@ -16,7 +16,6 @@
 
 #include "Battle/StatusEffects.h"
 #include "Content/ModuleData.hpp"
-#include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"

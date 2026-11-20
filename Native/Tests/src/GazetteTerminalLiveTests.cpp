@@ -11,9 +11,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/StringTables.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/GazetteTerminalPreviewFixture.hpp"
 #include "State/Progress.hpp"
+
+namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace {
 namespace live = gazette_terminal_live_tests;
@@ -100,7 +103,7 @@ TEST_CASE(
   score::ShowLiveEnemyDescription();
   CHECK(shared::Fixture::InformationText() ==
         shared::Label(score::miscInfo,
-                      Text_Menu9_miscInfo_Index_enemyNotDefeated));
+                      menu9_misc_info::index::kEnemyNotDefeated));
   CHECK(score::LiveGazetteTerminalRefusals() == refusals);
   CHECK(fixture.GuardsIntact());
 }

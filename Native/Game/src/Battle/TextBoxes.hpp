@@ -1,7 +1,7 @@
 #pragma once
 // BATTLE.PRG's door and chest messages (src/BATTLE/BATTLE.PRG/5BF94.c).
-// ModuleData.cpp fills the table from the module image; Content/StringTables.h
-// names its entries.
+// ModuleData.cpp fills the table from the module image;
+// Content/StringTables.hpp names its entries.
 #include <cstddef>
 #include <cstdint>
 

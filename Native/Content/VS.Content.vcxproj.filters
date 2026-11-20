@@ -153,7 +153,7 @@
     <ClInclude Include="include\Content\PFileLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
-    <ClInclude Include="include\Content\StringTables.h">
+    <ClInclude Include="include\Content\StringTables.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\SystemResources.hpp">

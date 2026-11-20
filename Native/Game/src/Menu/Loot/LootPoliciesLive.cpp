@@ -16,7 +16,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -41,6 +41,8 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
+
+namespace menub_menu_text = VS::Content::text::menub_prg::menu_text;
 
 namespace VS::Menu::Loot::Live {
 namespace {
@@ -143,27 +145,27 @@ void StoreRows(std::span<const LootRow> rows) {
 [[nodiscard]] std::span<const std::uint8_t> PromptTextBytes(PromptText text) {
   switch (text) {
     case PromptText::kOptionYes:
-      return MenuText(Text_Menub_menuText_Offset_optionYes);
+      return MenuText(menub_menu_text::offset::kOptionYes);
     case PromptText::kOptionNo:
-      return MenuText(Text_Menub_menuText_Offset_optionNo);
+      return MenuText(menub_menu_text::offset::kOptionNo);
     case PromptText::kItemsRemaining:
-      return MenuText(Text_Menub_menuText_Offset_itemsRemaining);
+      return MenuText(menub_menu_text::offset::kItemsRemaining);
     case PromptText::kInvalidDiscard:
-      return MenuText(Text_Menub_menuText_Offset_invalidDiscard);
+      return MenuText(menub_menu_text::offset::kInvalidDiscard);
     case PromptText::kDiscardAllConfirm:
-      return MenuText(Text_Menub_menuText_Offset_discardAllConfirm);
+      return MenuText(menub_menu_text::offset::kDiscardAllConfirm);
     case PromptText::kDisassemble:
       return ActionText(1);
     case PromptText::kOrganize:
       return ActionText(2);
     case PromptText::kOrganizeInventory:
-      return MenuText(Text_Menub_menuText_Offset_organizeInventory);
+      return MenuText(menub_menu_text::offset::kOrganizeInventory);
     case PromptText::kDisassembleInfo:
-      return MenuText(Text_Menub_menuText_Offset_disassembleInfo);
+      return MenuText(menub_menu_text::offset::kDisassembleInfo);
     case PromptText::kOrganizeInfo:
-      return MenuText(Text_Menub_menuText_Offset_organizeInfo);
+      return MenuText(menub_menu_text::offset::kOrganizeInfo);
     case PromptText::kOrganizeInventoryInfo:
-      return MenuText(Text_Menub_menuText_Offset_organizeInventoryInfo);
+      return MenuText(menub_menu_text::offset::kOrganizeInventoryInfo);
   }
   return {};
 }

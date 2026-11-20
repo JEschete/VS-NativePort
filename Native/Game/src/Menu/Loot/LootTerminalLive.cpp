@@ -18,7 +18,7 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
+#include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -50,6 +50,9 @@
 #include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
+namespace menub_menu_text = VS::Content::text::menub_prg::menu_text;
 
 namespace VS::Menu::Loot {
 namespace {
@@ -329,7 +332,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       return EntryText(
           {reinterpret_cast<const std::uint8_t*>(VS::Menu::menuStrings),
            sizeof(VS::Menu::menuStrings)},
-          Text_Battle_menuStrings_Index_items);
+          battle_menu_strings::index::kItems);
     }
     const auto menu = Inventory::LiveLootInventoryText();
     switch (text) {
@@ -337,17 +340,17 @@ class LiveTerminalHost final : public LootTerminalHost {
         if (index < 0 || index >= static_cast<int>(Items::kItemCategoryCount)) {
           Refuse("loot category-title index outside text table");
         }
-        return EntryText(menu, Text_Menub_menuText_Index_weapons + index);
+        return EntryText(menu, menub_menu_text::index::kWeapons + index);
       case LootTerminalText::kYes:
-        return OffsetText(menu, Text_Menub_menuText_Offset_optionYes);
+        return OffsetText(menu, menub_menu_text::offset::kOptionYes);
       case LootTerminalText::kNo:
-        return OffsetText(menu, Text_Menub_menuText_Offset_optionNo);
+        return OffsetText(menu, menub_menu_text::offset::kOptionNo);
       case LootTerminalText::kDisassembleConfirm:
-        return OffsetText(menu, Text_Menub_menuText_Offset_disassembleConfirm);
+        return OffsetText(menu, menub_menu_text::offset::kDisassembleConfirm);
       case LootTerminalText::kOrganizeConfirm:
-        return OffsetText(menu, Text_Menub_menuText_Offset_organizeConfirm);
+        return OffsetText(menu, menub_menu_text::offset::kOrganizeConfirm);
       case LootTerminalText::kEmptyChest:
-        return OffsetText(menu, Text_Menub_menuText_Offset_emptyChest);
+        return OffsetText(menu, menub_menu_text::offset::kEmptyChest);
       case LootTerminalText::kItemsTitle:
         break;
     }
