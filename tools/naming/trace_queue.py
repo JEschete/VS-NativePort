@@ -39,6 +39,7 @@ PRIORITY = {"opaque": 1, "low-named": 2, "global": 2, "type": 3, "reserved": 4}
 COLUMNS = ["id", "kind", "priority", "name", "original", "offset", "current_meaning", "touched_by", "watch", "note"]
 ANCHOR = re.compile(r"unk([0-9A-Fa-f]+)(?:_(\d+))?")
 CITATION = re.compile(r"native-refs:(?P<use>[\w-]+);source:native:[^;]+:\d+")
+UNNAMED = re.compile(r"\(unnamed (?:\w+ )?at (?P<at>[^)]+)\)")
 UNREAD = ("none", "write-only", "copy-only")
 MEANING = {
     "none": "Not used by native code; kept for the original layout",
@@ -137,9 +138,11 @@ class Native:
                     pending.append(source)
         return consumed
 
-    def record(self, row: dict, member_names: set[str]) -> str | None:
+    def record(self, row: dict, member_names: set[str], owner: str | None = None) -> str | None:
         """The native record of a ledger type: by name, else the unnamed record in its file sharing at least half
-        its member names, else the one unnamed record anywhere that has all of them."""
+        its member names, else the one unnamed record anywhere that has all of them. Unnamed records sharing as many
+        names (two `{word, bits}` unions in one header) are told apart by `owner`, the native record of the type
+        that declares this one as a member: the record nested in it is taken."""
         final = row["final_name"]
         for name in (final.replace("::", "_"), f"VS::{final}", final, row["name"], *row["aliases"].split()):
             if name in self.records:
@@ -147,9 +150,12 @@ class Native:
         suffix = f"@{row['final_location']}"
         scored = [(len(member_names & set(members)), record) for record, members in self.records.items()
                   if record.endswith(suffix)]
-        best = max(scored, default=(0, None))
-        if best[0] and best[0] * 2 >= len(member_names):
-            return best[1]
+        top = max((score for score, _record in scored), default=0)
+        if top and top * 2 >= len(member_names):
+            tied = sorted(record for score, record in scored if score == top)
+            parent = owner.split("@", 1)[0] if owner else None
+            return next((record for record in tied if record.split("@", 1)[0].rsplit("::", 1)[0] == parent),
+                        tied[-1])
         complete = [record for record, members in self.records.items()
                     if "(anonymous:" in record and member_names and member_names <= set(members)]
         return complete[0] if len(complete) == 1 else None
@@ -240,6 +246,32 @@ class Native:
         return list(seen)
 
 
+class Records:
+    """The native record of each ledger type (`Native.record`), with the record of the type that declares an unnamed
+    type as a member (the field row whose `type` names the same `unnamed ... at` location) as its owner."""
+
+    def __init__(self, native: Native, fields: list[dict], types: list[dict]) -> None:
+        self.native = native
+        self.types = {row["id"]: row for row in types}
+        self.names: dict[str, set[str]] = collections.defaultdict(set)
+        unnamed = {match["at"]: row["id"] for row in types if (match := UNNAMED.search(row["name"]))}
+        self.parents: dict[str, str] = {}
+        for row in fields:
+            self.names[row["type_id"]].add(row["final_name"])
+            match = UNNAMED.search(row.get("type", ""))
+            if match and match["at"] in unnamed:
+                self.parents.setdefault(unnamed[match["at"]], row["type_id"])
+        self.found: dict[str, str | None] = {}
+
+    def __call__(self, type_id: str) -> str | None:
+        if type_id not in self.found:
+            self.found[type_id] = None  # ends a cycle of parent links
+            parent = self.parents.get(type_id)
+            owner = self(parent) if parent in self.types else None
+            self.found[type_id] = self.native.record(self.types[type_id], self.names[type_id], owner)
+        return self.found[type_id]
+
+
 class Labels:
     """Native function name -> `name@ADDRESS` where the catalog row has an original address."""
 
@@ -283,16 +315,11 @@ def member_offset(native: Native, record: str | None, usr: str | None, type_row:
 
 def resolve(native: Native, fields: list[dict], types: list[dict], data: list[dict]) -> collections.Counter:
     """Record native evidence for selected rows that production code never reads."""
-    type_by_id = {row["id"]: row for row in types}
-    by_type = collections.defaultdict(list)
-    for row in fields:
-        by_type[row["type_id"]].append(row)
+    records = Records(native, fields, types)
     members, globals_, _types = selection(fields, types, data)
     counts: collections.Counter = collections.Counter()
     for row in members:
-        type_row = type_by_id[row["type_id"]]
-        names = {member["final_name"] for member in by_type[row["type_id"]]}
-        usr = native.member(native.record(type_row, names), row)
+        usr = native.member(records(row["type_id"]), row)
         use = native.classify(usr)
         if use in UNREAD:
             row["meaning"], row["confidence"] = native_meaning(row["meaning"], MEANING[use]), "med"
@@ -315,9 +342,7 @@ def refresh(native: Native, fields: list[dict], types: list[dict], data: list[di
     is returned for review instead, since its recorded meaning may no longer hold. Retired types and globals keep
     the evidence they were retired with."""
     type_by_id = {row["id"]: row for row in types}
-    by_type = collections.defaultdict(list)
-    for row in fields:
-        by_type[row["type_id"]].append(row)
+    records = Records(native, fields, types)
     counts: collections.Counter = collections.Counter()
     review: list[str] = []
 
@@ -336,8 +361,7 @@ def refresh(native: Native, fields: list[dict], types: list[dict], data: list[di
     for row in fields:
         type_row = type_by_id.get(row["type_id"])
         if CITATION.match(row["notes"]) and type_row and type_row["copied"] != "retired":
-            names = {member["final_name"] for member in by_type[row["type_id"]]}
-            update(row, native.member(native.record(type_row, names), row))
+            update(row, native.member(records(row["type_id"]), row))
     for row in data:
         if CITATION.match(row["notes"]) and row["copied"] != "retired":
             update(row, native.variable(row))
@@ -348,19 +372,13 @@ def spelling(native: Native, fields: list[dict], types: list[dict]) -> list[str]
     """Rows whose member the index finds only by the case-insensitive fallback of `Native.member`: the code spells it
     neither as `final_name` nor as the original name, so `final_name` is wrong (#458)."""
     type_by_id = {row["id"]: row for row in types}
-    by_type = collections.defaultdict(list)
-    for row in fields:
-        by_type[row["type_id"]].append(row)
-    records: dict[str, str | None] = {}
+    records = Records(native, fields, types)
     differ = []
     for row in fields:
         type_row = type_by_id.get(row["type_id"])
         if not row["final_name"] or not type_row or type_row["copied"] == "retired":
             continue
-        if row["type_id"] not in records:
-            names = {member["final_name"] for member in by_type[row["type_id"]]}
-            records[row["type_id"]] = native.record(type_row, names)
-        usr = native.member(records[row["type_id"]], row)
+        usr = native.member(records(row["type_id"]), row)
         declared = native.decls[usr]["name"] if usr else None
         if declared and declared not in (row["final_name"], row["name"]):
             differ.append(f"{row['id']}: final_name {row['final_name']}, native {declared}")
@@ -377,11 +395,11 @@ def queue(native: Native, labels: Labels, fields: list[dict], types: list[dict],
         if row["type_id"] and row["address"].startswith("0x"):
             instances[row["type_id"]].append((row["final_name"] or row["name"], int(row["address"], 16), row["type"]))
     members, globals_, low_types = selection(fields, types, data)
+    records = Records(native, fields, types)
     rows = []
     for row in members:
         type_row = type_by_id[row["type_id"]]
-        names = {member["final_name"] for member in by_type[row["type_id"]]}
-        record = native.record(type_row, names)
+        record = records(row["type_id"])
         usr = native.member(record, row)
         kind = member_kind(row["final_name"])
         bit = member_offset(native, record, usr, type_row, by_type[row["type_id"]])

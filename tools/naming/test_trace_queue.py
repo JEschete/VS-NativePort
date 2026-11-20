@@ -1,5 +1,5 @@
-"""Tests for the native-evidence classification, resolution, citation refresh and spelling report in trace_queue.py
-(#445, #457, #458)."""
+"""Tests for the native-evidence classification, record resolution, citation refresh and spelling report in
+trace_queue.py (#445, #450, #457, #458)."""
 from __future__ import annotations
 
 import sys
@@ -130,6 +130,26 @@ class RefreshTests(unittest.TestCase):
                                              data)
         self.assertEqual((dict(counts), review), ({}, []))
         self.assertEqual((fields[0]["notes"], data[0]["notes"]), (stale, stale))
+
+
+class RecordTests(unittest.TestCase):
+    def test_unnamed_records_sharing_members_are_told_apart_by_their_owner(self):
+        decls = {}
+        for owner, line in (("High", 9), ("Low", 5)):
+            record = f"{owner}::(anonymous:{line})"
+            decls[f"c:@S@{owner}@FI@flags"] = {"kind": "field", "record": owner, "path": HEADER, "name": "flags",
+                                              "line": line}
+            for offset, name in enumerate(("word", "bits"), start=1):
+                decls[f"c:@S@{owner}@Ua@FI@{name}"] = {"kind": "field", "record": record, "path": HEADER,
+                                                      "name": name, "line": line + offset, "owner": owner}
+        native = trace_queue.Native({"decls": decls, "refs": {}, "loose": []})
+        types = [dict(TYPE, id="T00001", name="high", final_name="High"),
+                 dict(TYPE, id="T00002", name="(unnamed at rec.c:3:5)", final_name="HighFlags")]
+        fields = [dict(member_row("flags"), type_id="T00001", type="union (unnamed union at rec.c:3:5)"),
+                  dict(member_row("word"), type_id="T00002"), dict(member_row("bits"), type_id="T00002")]
+        records = trace_queue.Records(native, fields, types)
+        self.assertEqual(records("T00002"), f"High::(anonymous:9)@{HEADER}")
+        self.assertEqual(native.record(types[1], {"word", "bits"}), f"Low::(anonymous:5)@{HEADER}")
 
 
 class SpellingTests(unittest.TestCase):

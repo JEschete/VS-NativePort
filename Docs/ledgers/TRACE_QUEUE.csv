@@ -1,6 +1,5 @@
 id,kind,priority,name,original,offset,current_meaning,touched_by,watch,note
 T00239.026,low-named,2,Actors::ActorRecord.landing_pending,unk5AC_26,0x5AF.2,Cleared by the jump and fall update,VS::Actors::LoadLiveMovementActor VS::Actors::StoreLiveMovementActor VS::Actors::(anonymous)::LogJumpResult,*Actors::actorRecords+0x5AF.2,native:read
-T00759.001,low-named,2,Battle::Ai::PerceivedObjectFlags.bits,bits,0x0,Bit fields,,,native:none
 T00311.022,low-named,2,Battle::HitResult.source_result,unk1C_26,0x1F.2,Set to 2 when the source action succeeds,VS::Battle::MarkLiveSourceActionSuccess,,native:read
 T00132.002,low-named,2,Battle::TargetLabelBox.texturePageCommand,tpage,,Texture-page command word,,,native:missing
 T00343.008,low-named,2,Effects::LiveTrail.first_step,unk,,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",,,native:missing
@@ -10,31 +9,9 @@ T00329.010,low-named,2,Field::RoomDataRecord.section7,section7,0x7C,Unidentified
 T00277,type,3,Audio::LegacyVoiceChannelState,FSound80094FA0,size 0x60,Describes a Ghidra-derived voice channel record with no current function references.,,,State
 T00428,type,3,Audio::SfxSlotRequest,func_800172D4_t,size 0x14,Describes a declared sound-effect slot request whose fields other than index are unidentified.,,,State
 T00429,type,3,Audio::SoundReleaseView,func_8004644C_t,size 0x34,Views a sound record while it is released; not read.,,,State
-T00610,type,3,Battle::Ai::ApproachActorView,targetMovementActor,size 0xA,Views a battle actor's id while a target approach is updated.,,,State
-T00611,type,3,Battle::Ai::ApproachRelationBits,targetMovementFlags,size 0x4,Views the relation word bits tested while a target approach is updated.,,,State
-T00612,type,3,Battle::Ai::ApproachTargetRecordView,targetMovementModel,size 0x24,Views a target's actor record flags and position while a target approach is updated.,,,State
-T00359,type,3,Battle::Ai::DispatchEntryView,actionDispatchEntry,size 0x10,Views an action candidate entry while decisions are dispatched; not read.,,,State
-T00589,type,3,Battle::Ai::ModelActiveView,radialMotionContext,size 0x5B4,Views the actor record's active bit (bit 4 of the word at 0x5B0) set while a boss moves along its path.,,,State
-T00826,type,3,Battle::Ai::PerceivedObjectFlagBits,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Splits a perceived object's flag word into the bits perception tests.,,,State
-T00759,type,3,Battle::Ai::PerceivedObjectFlags,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,"Holds a perceived object's flag word, or its bit fields.",,,State
-T00140,type,3,Battle::Ai::TargetRelationBytes,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views the per-target relation word as bytes; the top two bits of byte 0 are the classification.,,,State
-T00139,type,3,Battle::Ai::TargetRelationReactionView,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views the per-target relation word as the reaction code uses it.,,,State
 T00405,type,3,Render::ModelScratchpadCameraView,cameraTransformScratch,size 0x9C,Views the model scratchpad's matrix and scale; not read.,,,State
 T00241.060,reserved,4,Actors::ModelInstance.reserved5f,unk5F,0x5F,Height byte of the placement word; not read,VS::Actors::LoadLiveMovementActor VS::Actors::(anonymous)::LoadInstance VS::Actors::(anonymous)::StoreInstance VS::Actors::SaveLiveActorGroundedTransform VS::Battle::Ai::(anonymous)::TileWord VS::Battle::Ai::(anonymous)::CurrentTileWord,,native:read
 T00241.064,reserved,4,Actors::ModelInstance.reserved63,unk63,0x63,Not read,VS::Actors::LoadLiveMovementActor VS::Actors::StoreLiveMovementActor VS::Actors::SaveLiveActorGroundedTransform VS::Battle::Ai::(anonymous)::PreviousTileWord VS::Battle::Ai::(anonymous)::LiveMovementHost::Placement,,native:read
-T00532.048,reserved,4,Battle::Ai::ActorAiState.reserved60,unk60,,Not read through this view,,,native:missing
-T00532.121,reserved,4,Battle::Ai::ActorAiState.reserved_18c,unk18C,,Not read through this view,,,native:missing
-T00399.029,reserved,4,Battle::Ai::PerceptionUpdateView.reserved68,unk68,,Not read through this view,,,native:missing
-T00399.059,reserved,4,Battle::Ai::PerceptionUpdateView.reserved_19b,unk19B,,Not read through this view,,,native:split
-T00389.008,reserved,4,Battle::Ai::PerceptionView.reserved54,unk54,,Not read through this view,,,native:missing
-T00389.024,reserved,4,Battle::Ai::PerceptionView.reserved_12c,unk12C,,Not read through this view,,,native:split
-T00389.010,reserved,4,Battle::Ai::PerceptionView.reserved_5c,unk5C,,Not read through this view,,,native:split
-T00373.011,reserved,4,Battle::Ai::ReactionView.reserved31,pad31,,Not read through this view,,,native:split
-T00373.015,reserved,4,Battle::Ai::ReactionView.reserved_12e,pad12E,,Not read through this view,,,native:split
-T00613.054,reserved,4,Battle::Ai::TargetApproachView.reserved184,pad184,,Not read through this view,,,native:split
-T00613.023,reserved,4,Battle::Ai::TargetApproachView.reserved_5c,pad5C,,Not read through this view,,,native:split
-T00740.012,reserved,4,Battle::Ai::WanderView.reserved52,pad52,,Not read through this view,,,native:split
-T00740.014,reserved,4,Battle::Ai::WanderView.reserved_5c,pad5C,,Not read through this view,,,native:split
 T00259.009,reserved,4,Event::CameraState.reserved1BC,unk1BC,,Tail bytes of the second oscillator view,,,native:missing
 T00255.074,reserved,4,Field::GimmickInstance.reserved178,unk178,0x178,Not read by the decompiled users,,*Field::gimmickInstances+0x178,native:read
 T00697.014,reserved,4,Items::InventoryBlade.reserved_bits,unk10_5,,Not read by decompiled code,,,native:missing
