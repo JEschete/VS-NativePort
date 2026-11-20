@@ -338,6 +338,18 @@ class ModuleDataTests(unittest.TestCase):
     def test_a_real_one_element_initialized_array_is_clean(self) -> None:
         self.assertEqual(classes("int Effects_rows[1] = {4};\n"), set())
 
+    def test_a_placeholder_row_rewritten_as_std_array_is_found(self) -> None:
+        # #481: the C++ header rewrite turns `T name[1];` into `std::array<T, 1> name;` and keeps the placeholder.
+        for body in ("std::array<Actors::WeaponModel*, 1> previewWeaponModelAliases;\n",
+                     "std::array<std::uint8_t, 1> VS::Battle::previewWeaponModelAliases;\n"):
+            with self.subTest(body=body):
+                found = [item.detail for item in scan_all(body) if item.hazard_class == "UNSIZED-ARRAY"]
+                self.assertEqual(found, [body.split("> ")[1].rstrip(";\n")])
+        for body in ("std::array<std::uint8_t, 1> kEmpty{0};\n", "extern std::array<int, 1> rows;\n",
+                     "void F() {\n  std::array<int, 1> rows;\n}\n", "std::array<int, 16> rows;\n"):
+            with self.subTest(body=body):
+                self.assertEqual([item for item in scan_all(body) if item.hazard_class == "UNSIZED-ARRAY"], [])
+
     def test_a_flag_mask_below_program_memory_is_not_an_address(self) -> None:
         for mask in ("0x80000000", "0x80000014", "0x80008000"):
             self.assertEqual(classes(f"int Battle_Hit(int a) {{ return a & {mask}; }}\n"), set(), mask)
