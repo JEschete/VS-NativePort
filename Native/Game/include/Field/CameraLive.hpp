@@ -5,8 +5,6 @@
 #include "Legacy/Psx.h"
 
 struct Actors_TileTarget;
-struct Field_SphericalCamera;
-struct Field_SphericalCameraValues;
 
 // Live binding for the field camera (Camera.hpp) over the copied camera
 // globals (CameraLiveState.hpp) and the frame scratch camera: each entry loads
@@ -139,16 +137,16 @@ void LiveUpdateCameraTileConstraint(int actor_index,
 void LiveResetCameraToAshley();
 // vs_battle_syncCameraAnglesFromPosition (146C.c:8057): the yaw. A null
 // record only updates the view camera's angles.
-int LiveSyncCameraAnglesFromPosition(Field_SphericalCamera* output);
+int LiveSyncCameraAnglesFromPosition(SphericalCamera* output);
 // _computeSphericalOffset (146C.c:8092). An output that aliases the base
 // reads the normalized direction back as the base, as the original did.
-void LiveComputeSphericalCameraPosition(
-    VECTOR* out_position, const VECTOR* base_position,
-    const Field_SphericalCameraValues* angles);
+void LiveComputeSphericalCameraPosition(VECTOR* out_position,
+                                        const VECTOR* base_position,
+                                        const OrbitAngles* angles);
 // _setCameraPositionFromAngles (146C.c:8104).
-void LiveSetCameraPositionFromAngles(const Field_SphericalCameraValues* angles);
+void LiveSetCameraPositionFromAngles(const OrbitAngles* angles);
 // _setCameraLookAtFromAngles (146C.c:8110).
-void LiveSetCameraLookAtFromAngles(const Field_SphericalCameraValues* angles);
+void LiveSetCameraLookAtFromAngles(const OrbitAngles* angles);
 // vs_battle_getCameraPosition (146C.c:8125).
 void LiveCameraPosition(VECTOR* out_position);
 // vs_battle_setCameraPosition (146C.c:8132).

@@ -190,8 +190,6 @@
 "Native\\Game\\src\\Ending\\Credits.cpp": "1dc0caeae91c45e7d8509f8ca436064e01ac7fb29db78472467e7a7916e65020",
 "Native\\Game\\src\\Ending\\Credits\\StaffRoll.cpp": "74a43488f60ca390c487c2b4f45db5c3eea9a270adad31024341bef40a012193",
 "Native\\Game\\src\\Ending\\Results.cpp": "14b05a22e687fa4bf2e0c47615cb5f1f29567d01254f0e31f23c370c59d71d33",
-"Native\\Game\\src\\Field\\Background.h": "4d1bd15f041a759fbd500e7d626168303f1b90da745970b9b14fe54072291892",
-"Native\\Game\\src\\Field\\Camera.h": "b43006d2df86bb3094d61ee38fdf21be358e23d5d6998f8c96cba5397c0803c0",
 "Native\\Game\\src\\Field\\Collision.cpp": "7ff7883d7dfdac8322fed14ccf81b225db6613cee09baccd1c65a2d20875c95b",
 "Native\\Game\\src\\Field\\Collision.h": "8a384544a1c96a32d56f6d6d79b6829de8bb8f66171f76211a1f9223b332800e",
 "Native\\Game\\src\\Field\\Doors.cpp": "48b85b6da159175916e60623340e3794d33aa96a941c89ca36053d0dd34ded71",

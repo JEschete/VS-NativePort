@@ -840,8 +840,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void RestoreCamera(std::int32_t pitch, std::int32_t distance) override {
-    VS::Field::sphericalCamera.delta.pitch = pitch;
-    VS::Field::sphericalCamera.initialDistance = distance;
+    VS::Field::sphericalCamera.motion.target_yaw = pitch;
+    VS::Field::sphericalCamera.preferred_distance = distance;
   }
 
   [[nodiscard]] AshleyInventory ReadAshleyInventory() const override {

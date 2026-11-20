@@ -1005,9 +1005,9 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
                      {"pitch", camera.values.pitch},
                      {"distance", camera.values.distance},
                      {"mode", camera.values.mode},
-                     {"delta_yaw", camera.delta.yaw},
-                     {"delta_pitch", camera.delta.pitch},
-                     {"delta_distance", camera.delta.distance}};
+                     {"delta_yaw", camera.motion.turn},
+                     {"delta_pitch", camera.motion.target_yaw},
+                     {"delta_distance", camera.motion.turn_speed}};
   const auto& view = VS::Render::FrameScratchpad().view_matrix;
   scene["camera"]["view_rotation"] = {
       {view.m[0][0], view.m[0][1], view.m[0][2]},

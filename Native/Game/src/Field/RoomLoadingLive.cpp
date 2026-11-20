@@ -1106,21 +1106,21 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] int InitialCameraDistance() const override {
-    return sphericalCamera.initialDistance;
+    return sphericalCamera.preferred_distance;
   }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15414-15435)
   void ResetCamera(const RoomEntryCamera& camera) override {
     Render::SetLiveCameraNearClip(ONE / kNearClipDivisor);
     Render::SetLiveCameraProjectionDistance(ONE / kProjectionDistanceDivisor);
-    Field_SphericalCamera& orbit = sphericalCamera;
-    orbit.delta.yaw = 0;
-    orbit.delta.distance = 0;
-    orbit.values.yaw = orbit.delta.pitch;
-    orbit.values.distance = orbit.initialDistance;
-    orbit.delta.mode = camera.mode;
+    SphericalCamera& orbit = sphericalCamera;
+    orbit.motion.turn = 0;
+    orbit.motion.turn_speed = 0;
+    orbit.values.yaw = orbit.motion.target_yaw;
+    orbit.values.distance = orbit.preferred_distance;
+    orbit.motion.zoom_mode = camera.mode;
     orbit.values.pitch = camera.pitch;
-    orbit.zoomVelocity = 0;
+    orbit.zoom_velocity = 0;
     // The original also cleared the write-only D_800F1908 (146C.c:15305).
   }
 

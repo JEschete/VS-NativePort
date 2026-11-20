@@ -7,11 +7,32 @@
 
 #include <stdint.h>
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
 #include "DiscQueue.h"
-#include "Field/Background.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Field {
+inline constexpr std::size_t kBackgroundTileCorners = 4;
+
+// decomp: vs_battle_backgroundTile (BATTLE/BATTLE.PRG 2842C.h:9): one tile of
+// the tiled background's layout file, its texture rectangle and its corner
+// colours.
+struct BackgroundTileRecord {
+  RECT texture_rect;
+  std::array<CVECTOR, kBackgroundTileCorners> corner_colors;
+};
+
+// decomp: vs_battle_backgroundLayout (BATTLE/BATTLE.PRG 2842C.h:16): the
+// layout file's header; width * height BackgroundTileRecords follow it.
+struct BackgroundLayoutRecord {
+  std::int32_t width;
+  std::int32_t height;
+  std::int32_t reserved08;
+};
+
 // decomp: D_800F1CE0 (BATTLE/BATTLE.PRG 146C.h:1113): zero vectors; [0] is
 // the sky dome's turn outside a room.
 extern VECTOR backgroundReferenceVectors[2];
@@ -47,7 +68,7 @@ extern char legacyBackgroundTexturePage;
 extern u_char isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (BATTLE/BATTLE.PRG 146C.c:727): the tiled background's
 // layout (high heap), or null.
-extern Field_BackgroundLayout* loadedBackgroundLayout;
+extern BackgroundLayoutRecord* loadedBackgroundLayout;
 // decomp: D_800F1DD0 (BATTLE/BATTLE.PRG 146C.c:728): its TIM until the
 // upload (high heap), or null.
 extern u_long* legacyBackgroundTimBuffer;

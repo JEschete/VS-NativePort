@@ -93,7 +93,7 @@ class LiveCamera final : public ActionCameraWorld {
     return Core::Math::VectorOf(displacement);
   }
   std::int32_t CameraMode() override {
-    return VS::Field::sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.motion.zoom_mode;
   }
   std::optional<std::int16_t> Zoom() override {
     auto& state = State();
@@ -106,7 +106,7 @@ class LiveCamera final : public ActionCameraWorld {
     return state.cameraZoomState;
   }
   std::int32_t YawDelta() override {
-    return VS::Field::sphericalCamera.delta.yaw;
+    return VS::Field::sphericalCamera.motion.turn;
   }
   std::int32_t Distance() override {
     return VS::Field::sphericalCamera.values.distance;

@@ -176,10 +176,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return (Battle_characterState->weaponDrawn & 1) != 0;
   }
   [[nodiscard]] int CameraYawDelta() const override {
-    return VS::Field::sphericalCamera.delta.yaw;
+    return VS::Field::sphericalCamera.motion.turn;
   }
   [[nodiscard]] int CameraDeltaMode() const override {
-    return VS::Field::sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.motion.zoom_mode;
   }
   [[nodiscard]] std::uint32_t EffectBusyFlags() const override {
     return static_cast<std::uint32_t>(VS::Effects::effectBusyFlags);

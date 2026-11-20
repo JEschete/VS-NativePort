@@ -71,8 +71,8 @@ class LiveCutsceneHost final : public CutsceneHost {
       return std::nullopt;
     }
     return CutscenePreferences{(Battle_characterState->weaponDrawn & 1) != 0,
-                               VS::Field::sphericalCamera.delta.pitch,
-                               VS::Field::sphericalCamera.initialDistance};
+                               VS::Field::sphericalCamera.motion.target_yaw,
+                               VS::Field::sphericalCamera.preferred_distance};
   }
   void SetPreparation(CutscenePreparation preparation) override {
     VS::Field::controlMode = kFieldCutsceneMode;

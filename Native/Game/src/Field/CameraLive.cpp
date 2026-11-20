@@ -28,7 +28,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
-#include "Field/Camera.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -51,12 +50,12 @@
 int VS::Field::isFirstPersonViewEnabled;
 // decomp: vs_battle_cameraTransition
 // (vs_battle_cameraTransition@BATTLE/BATTLE.PRG)
-Field_CameraTransition* VS::Field::cameraTransition;
+VS::Field::CameraTransitionRecord* VS::Field::cameraTransition;
 // decomp: D_800F19C8 (D_800F19C8@BATTLE/BATTLE.PRG)
 int VS::Field::roomGeometryDrawMode;
 // decomp: vs_battle_cameraCurrentSpherical
 // (vs_battle_cameraCurrentSpherical@BATTLE/BATTLE.PRG)
-Field_SphericalCamera VS::Field::sphericalCamera;
+VS::Field::SphericalCamera VS::Field::sphericalCamera;
 
 namespace {
 // The original's layouts (146C.h:738-823 and scratch.h:10).
@@ -73,20 +72,24 @@ constexpr std::size_t kTransitionTargetPositionAt = 0xA4;
 constexpr std::size_t kTransitionFramesAt = 0xF4;
 }  // namespace
 
-static_assert(sizeof(Field_SphericalCameraValues) == kSphericalValuesBytes);
-static_assert(sizeof(Field_SphericalCamera) == kSphericalCameraBytes);
-static_assert(offsetof(Field_SphericalCamera, delta) == kSphericalDeltaAt);
-static_assert(offsetof(Field_SphericalCamera, speed) == kSphericalSpeedAt);
+static_assert(sizeof(VS::Field::OrbitAngles) == kSphericalValuesBytes);
+static_assert(sizeof(VS::Field::OrbitMotion) == kSphericalValuesBytes);
+static_assert(sizeof(VS::Field::SphericalCamera) == kSphericalCameraBytes);
+static_assert(offsetof(VS::Field::SphericalCamera, motion) ==
+              kSphericalDeltaAt);
+static_assert(offsetof(VS::Field::SphericalCamera, tracking_speed) ==
+              kSphericalSpeedAt);
+static_assert(std::is_trivially_copyable_v<VS::Field::SphericalCamera>);
 static_assert(sizeof(VS::Render::Camera) == kViewCameraBytes);
 static_assert(offsetof(VS::Render::Camera, far_clip) == kViewCameraFarClipAt);
-static_assert(sizeof(Field_CameraTransition) == kTransitionBytes);
-static_assert(offsetof(Field_CameraTransition, fromSpherical) ==
+static_assert(sizeof(VS::Field::CameraTransitionRecord) == kTransitionBytes);
+static_assert(offsetof(VS::Field::CameraTransitionRecord, from_spherical) ==
               kTransitionFromSphericalAt);
-static_assert(offsetof(Field_CameraTransition, toSpherical) ==
+static_assert(offsetof(VS::Field::CameraTransitionRecord, to_spherical) ==
               kTransitionToSphericalAt);
-static_assert(offsetof(Field_CameraTransition, targetPosition) ==
+static_assert(offsetof(VS::Field::CameraTransitionRecord, target_position) ==
               kTransitionTargetPositionAt);
-static_assert(offsetof(Field_CameraTransition, transitionFrames) ==
+static_assert(offsetof(VS::Field::CameraTransitionRecord, transition_frames) ==
               kTransitionFramesAt);
 
 namespace VS::Field {
@@ -137,86 +140,48 @@ void StoreViewCamera(VS::Render::Camera& record, const ViewCamera& camera) {
   record.far_clip = camera.far_clip;
 }
 
-[[nodiscard]] OrbitAngles AnglesOf(const Field_SphericalCameraValues& values) {
-  return {.yaw = values.yaw,
-          .pitch = values.pitch,
-          .distance = values.distance,
-          .mode = values.mode};
-}
-
-void StoreAngles(Field_SphericalCameraValues& record,
-                 const OrbitAngles& angles) {
-  record.yaw = angles.yaw;
-  record.pitch = angles.pitch;
-  record.distance = angles.distance;
-  record.mode = angles.mode;
-}
-
-[[nodiscard]] SphericalCamera SphericalOf(const Field_SphericalCamera& orbit) {
-  return {.values = AnglesOf(orbit.values),
-          .motion = {.turn = orbit.delta.yaw,
-                     .target_yaw = orbit.delta.pitch,
-                     .turn_speed = orbit.delta.distance,
-                     .zoom_mode = orbit.delta.mode},
-          .preferred_distance = orbit.initialDistance,
-          .zoom_velocity = orbit.zoomVelocity,
-          .tracking_speed = orbit.speed};
-}
-
-void StoreSpherical(Field_SphericalCamera& record,
-                    const SphericalCamera& orbit) {
-  StoreAngles(record.values, orbit.values);
-  record.delta.yaw = orbit.motion.turn;
-  record.delta.pitch = orbit.motion.target_yaw;
-  record.delta.distance = orbit.motion.turn_speed;
-  record.delta.mode = orbit.motion.zoom_mode;
-  record.initialDistance = orbit.preferred_distance;
-  record.zoomVelocity = orbit.zoom_velocity;
-  record.speed = orbit.tracking_speed;
-}
-
 [[nodiscard]] FirstPersonTransition TransitionOf(
-    const Field_CameraTransition& record) {
-  return {.from_camera = ViewCameraOf(record.fromCameraState),
-          .from_spherical = SphericalOf(record.fromSpherical),
-          .from_near_clip = record.fromNearClip,
-          .from_projection_distance = record.fromProjectionDistance,
-          .from_far_clip = record.fromFarClip,
-          .to_spherical = SphericalOf(record.toSpherical),
-          .to_near_clip = record.toNearClip,
-          .to_projection_distance = record.toProjectionDistance,
-          .to_far_clip = record.toFarClip,
-          .target_position = Math::VectorOf(record.targetPosition),
-          .target_look_at = Math::VectorOf(record.targetLookAt),
+    const CameraTransitionRecord& record) {
+  return {.from_camera = ViewCameraOf(record.from_camera_state),
+          .from_spherical = record.from_spherical,
+          .from_near_clip = record.from_near_clip,
+          .from_projection_distance = record.from_projection_distance,
+          .from_far_clip = record.from_far_clip,
+          .to_spherical = record.to_spherical,
+          .to_near_clip = record.to_near_clip,
+          .to_projection_distance = record.to_projection_distance,
+          .to_far_clip = record.to_far_clip,
+          .target_position = Math::VectorOf(record.target_position),
+          .target_look_at = Math::VectorOf(record.target_look_at),
           .direction = Math::VectorOf(record.direction),
-          .look_at_step = Math::VectorOf(record.lookAtStep),
-          .far_clip_step = record.farClipStep,
-          .near_clip_step = record.nearClipStep,
-          .projection_distance_step = record.projectionDistanceStep,
-          .speed = record.transitionSpeed,
-          .frames = record.transitionFrames};
+          .look_at_step = Math::VectorOf(record.look_at_step),
+          .far_clip_step = record.far_clip_step,
+          .near_clip_step = record.near_clip_step,
+          .projection_distance_step = record.projection_distance_step,
+          .speed = record.transition_speed,
+          .frames = record.transition_frames};
 }
 
-void StoreTransition(Field_CameraTransition& record,
+void StoreTransition(CameraTransitionRecord& record,
                      const FirstPersonTransition& transition) {
-  StoreViewCamera(record.fromCameraState, transition.from_camera);
-  StoreSpherical(record.fromSpherical, transition.from_spherical);
-  record.fromNearClip = transition.from_near_clip;
-  record.fromProjectionDistance = transition.from_projection_distance;
-  record.fromFarClip = transition.from_far_clip;
-  StoreSpherical(record.toSpherical, transition.to_spherical);
-  record.toNearClip = transition.to_near_clip;
-  record.toProjectionDistance = transition.to_projection_distance;
-  record.toFarClip = transition.to_far_clip;
-  Math::StoreVector(record.targetPosition, transition.target_position);
-  Math::StoreVector(record.targetLookAt, transition.target_look_at);
+  StoreViewCamera(record.from_camera_state, transition.from_camera);
+  record.from_spherical = transition.from_spherical;
+  record.from_near_clip = transition.from_near_clip;
+  record.from_projection_distance = transition.from_projection_distance;
+  record.from_far_clip = transition.from_far_clip;
+  record.to_spherical = transition.to_spherical;
+  record.to_near_clip = transition.to_near_clip;
+  record.to_projection_distance = transition.to_projection_distance;
+  record.to_far_clip = transition.to_far_clip;
+  Math::StoreVector(record.target_position, transition.target_position);
+  Math::StoreVector(record.target_look_at, transition.target_look_at);
   Math::StoreVector(record.direction, transition.direction);
-  Math::StoreVector(record.lookAtStep, transition.look_at_step);
-  record.farClipStep = transition.far_clip_step;
-  record.nearClipStep = transition.near_clip_step;
-  record.projectionDistanceStep = transition.projection_distance_step;
-  record.transitionSpeed = transition.speed;
-  record.transitionFrames = transition.frames;
+  Math::StoreVector(record.look_at_step, transition.look_at_step);
+  record.far_clip_step = transition.far_clip_step;
+  record.near_clip_step = transition.near_clip_step;
+  record.projection_distance_step = transition.projection_distance_step;
+  record.transition_speed = transition.speed;
+  record.transition_frames = transition.frames;
 }
 
 // Runs a rule over the loaded globals and stores them back before returning
@@ -239,7 +204,7 @@ auto RunLive(Rule rule) {
 FieldCameraState LoadLiveFieldCameraState() {
   const VS::Render::FrameScratch& scratch = Scratch();
   FieldCameraState state{.camera = ViewCameraOf(scratch.camera),
-                         .spherical = SphericalOf(sphericalCamera),
+                         .spherical = sphericalCamera,
                          .transition = std::nullopt,
                          .first_person_view_enabled = isFirstPersonViewEnabled,
                          .geometry_draw_mode = roomGeometryDrawMode,
@@ -253,7 +218,7 @@ FieldCameraState LoadLiveFieldCameraState() {
 void StoreLiveFieldCameraState(const FieldCameraState& state) {
   VS::Render::FrameScratch& scratch = Scratch();
   StoreViewCamera(scratch.camera, state.camera);
-  StoreSpherical(sphericalCamera, state.spherical);
+  sphericalCamera = state.spherical;
   if (state.transition && cameraTransition != nullptr) {
     StoreTransition(*cameraTransition, *state.transition);
   }
@@ -448,8 +413,8 @@ void LiveCameraHost::SetProjectionDistance(std::int32_t distance) {
 }
 
 std::optional<FirstPersonTransition> LiveCameraHost::AllocateTransition() {
-  auto* const record = static_cast<Field_CameraTransition*>(
-      Core::Memory::AllocateLiveFromHighEnd(sizeof(Field_CameraTransition)));
+  auto* const record = static_cast<CameraTransitionRecord*>(
+      Core::Memory::AllocateLiveFromHighEnd(sizeof(CameraTransitionRecord)));
   if (record == nullptr) return std::nullopt;
   cameraTransition = record;
   return TransitionOf(*record);
@@ -645,27 +610,27 @@ void LiveResetCameraToAshley() {
   });
 }
 
-int LiveSyncCameraAnglesFromPosition(Field_SphericalCamera* output) {
+int LiveSyncCameraAnglesFromPosition(SphericalCamera* output) {
   OrbitAngles angles{};
-  if (output != nullptr) angles = AnglesOf(output->values);
+  if (output != nullptr) angles = output->values;
   const std::int32_t yaw =
       RunLive([output, &angles](CameraHost&, FieldCameraState& state) {
         return SyncCameraAnglesFromPosition(
             state, output != nullptr ? &angles : nullptr);
       });
-  if (output != nullptr) StoreAngles(output->values, angles);
+  if (output != nullptr) output->values = angles;
   return yaw;
 }
 
-void LiveComputeSphericalCameraPosition(
-    VECTOR* out_position, const VECTOR* base_position,
-    const Field_SphericalCameraValues* angles) {
+void LiveComputeSphericalCameraPosition(VECTOR* out_position,
+                                        const VECTOR* base_position,
+                                        const OrbitAngles* angles) {
   if (out_position == nullptr || base_position == nullptr ||
       angles == nullptr) {
     RefuseNull("ComputeSphericalCameraPosition");
     return;
   }
-  const OrbitAngles orbit = AnglesOf(*angles);
+  const OrbitAngles orbit = *angles;
   CameraVector base = Math::VectorOf(*base_position);
   if (out_position == base_position) {
     // The original normalizes the direction into the output before adding
@@ -679,24 +644,23 @@ void LiveComputeSphericalCameraPosition(
   Math::StoreVector(*out_position, ComputeSphericalCameraPosition(base, orbit));
 }
 
-void LiveSetCameraPositionFromAngles(
-    const Field_SphericalCameraValues* angles) {
+void LiveSetCameraPositionFromAngles(const OrbitAngles* angles) {
   if (angles == nullptr) {
     RefuseNull("SetCameraPositionFromAngles");
     return;
   }
-  const OrbitAngles orbit = AnglesOf(*angles);
+  const OrbitAngles orbit = *angles;
   RunLive([&orbit](CameraHost&, FieldCameraState& state) {
     SetCameraPositionFromAngles(state, orbit);
   });
 }
 
-void LiveSetCameraLookAtFromAngles(const Field_SphericalCameraValues* angles) {
+void LiveSetCameraLookAtFromAngles(const OrbitAngles* angles) {
   if (angles == nullptr) {
     RefuseNull("SetCameraLookAtFromAngles");
     return;
   }
-  const OrbitAngles orbit = AnglesOf(*angles);
+  const OrbitAngles orbit = *angles;
   RunLive([&orbit](CameraHost&, FieldCameraState& state) {
     SetCameraLookAtFromAngles(state, orbit);
   });

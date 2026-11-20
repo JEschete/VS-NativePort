@@ -53,7 +53,6 @@
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.hpp"
 #include "Core/Log.hpp"
-#include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"

@@ -61,7 +61,7 @@ char VS::Field::legacyBackgroundTexturePage;
 // decomp: D_800F1DC9 (D_800F1DC9@BATTLE/BATTLE.PRG)
 u_char VS::Field::isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (D_800F1DCC@BATTLE/BATTLE.PRG)
-Field_BackgroundLayout* VS::Field::loadedBackgroundLayout;
+VS::Field::BackgroundLayoutRecord* VS::Field::loadedBackgroundLayout;
 // decomp: D_800F1DD0 (D_800F1DD0@BATTLE/BATTLE.PRG)
 u_long* VS::Field::legacyBackgroundTimBuffer;
 
@@ -97,8 +97,8 @@ static_assert(VS::Render::kSkyDomeVertexBytes ==
               kSkyDomeVertexWords * sizeof(unsigned int));
 static_assert(VS::Field::kSkyDomeVertexCount ==
               VS::Render::kSkyDomeVertexCount);
-static_assert(sizeof(Field_BackgroundLayout) == kLayoutHeaderBytes);
-static_assert(sizeof(Field_BackgroundTile) == kLayoutTileBytes);
+static_assert(sizeof(VS::Field::BackgroundLayoutRecord) == kLayoutHeaderBytes);
+static_assert(sizeof(VS::Field::BackgroundTileRecord) == kLayoutTileBytes);
 static_assert(sizeof(Field_MpdEnvironment) == kEnvironmentBytes);
 static_assert(offsetof(Field_MpdEnvironment, backgroundRotation) ==
               kEnvironmentRotationAt);
@@ -172,13 +172,13 @@ template <typename T, typename Id>
   return {.lba = disc.lba, .size = disc.size};
 }
 
-[[nodiscard]] BackgroundTile TileOf(const Field_BackgroundTile& tile) {
-  BackgroundTile result{.texture = {.x = tile.textureRect.x,
-                                    .y = tile.textureRect.y,
-                                    .width = tile.textureRect.w,
-                                    .height = tile.textureRect.h}};
+[[nodiscard]] BackgroundTile TileOf(const BackgroundTileRecord& tile) {
+  BackgroundTile result{.texture = {.x = tile.texture_rect.x,
+                                    .y = tile.texture_rect.y,
+                                    .width = tile.texture_rect.w,
+                                    .height = tile.texture_rect.h}};
   for (std::size_t corner = 0; corner < result.corners.size(); ++corner) {
-    const CVECTOR& color = tile.cornerColors[corner];
+    const CVECTOR& color = tile.corner_colors.at(corner);
     result.corners.at(corner) = {
         .red = color.r, .green = color.g, .blue = color.b, .code = color.cd};
   }
@@ -276,7 +276,7 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
       PointerOf<Content_DiscQueueSlot>(state.texture_read);
   backgroundLayoutDiscRequest =
       PointerOf<Content_DiscQueueSlot>(state.layout_read);
-  loadedBackgroundLayout = PointerOf<Field_BackgroundLayout>(state.layout);
+  loadedBackgroundLayout = PointerOf<BackgroundLayoutRecord>(state.layout);
   legacyBackgroundTimBuffer = PointerOf<u_long>(state.tim_buffer);
 }
 
@@ -399,25 +399,34 @@ CameraVector LiveBackgroundHost::ReferenceRotation() {
 
 std::optional<BackgroundLayout> LiveBackgroundHost::Layout(
     BackgroundBufferId layout) {
-  const auto* const record = PointerOf<const Field_BackgroundLayout>(layout);
-  const std::size_t capacity = Memory::LivePayloadCapacity(record).value_or(0);
-  if (capacity < sizeof(Field_BackgroundLayout)) return std::nullopt;
-  const std::size_t readable = (capacity - sizeof(Field_BackgroundLayout)) /
-                               sizeof(Field_BackgroundTile);
+  const auto* const payload = PointerOf<const std::byte>(layout);
+  const std::size_t capacity = Memory::LivePayloadCapacity(payload).value_or(0);
+  if (capacity < sizeof(BackgroundLayoutRecord)) return std::nullopt;
+  // The tile records follow the header (2842C.c:481); each is copied out of
+  // the payload rather than read through the original's trailing array.
+  const std::span bytes(payload, capacity);
+  BackgroundLayoutRecord header{};
+  std::memcpy(&header, bytes.data(), sizeof(header));
+  const std::size_t readable =
+      (capacity - sizeof(header)) / sizeof(BackgroundTileRecord);
   const auto side = [](std::int32_t value) {
     return static_cast<std::size_t>(std::max(value, 0));
   };
   const std::size_t count =
-      std::min(readable, side(record->width) * side(record->height));
-  const std::span cells(static_cast<const Field_BackgroundTile*>(record->tiles),
-                        count);
+      std::min(readable, side(header.width) * side(header.height));
   tiles_.clear();
   tiles_.reserve(count);
-  for (const Field_BackgroundTile& tile : cells) {
+  for (std::size_t index = 0; index < count; ++index) {
+    BackgroundTileRecord tile{};
+    std::memcpy(
+        &tile,
+        bytes.subspan(sizeof(header) + (index * sizeof(tile)), sizeof(tile))
+            .data(),
+        sizeof(tile));
     tiles_.push_back(TileOf(tile));
   }
   return BackgroundLayout{
-      .width = record->width, .height = record->height, .tiles = tiles_};
+      .width = header.width, .height = header.height, .tiles = tiles_};
 }
 
 std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {

@@ -24,7 +24,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Scratch.hpp"
-#include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
@@ -282,7 +281,7 @@ void LiveDrawSphere() {
 
 // decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:965).
 void* LiveBuildSphereCameraBasis() {
-  Field_SphericalCamera camera{};
+  VS::Field::SphericalCamera camera{};
   static_cast<void>(VS::Field::LiveSyncCameraAnglesFromPosition(&camera));
   const SphereCameraBasis basis = BuildSphereCameraBasis(camera.values.yaw);
   auto* matrix =

@@ -420,13 +420,13 @@ int TestAnimationEventUnwind(int scenario) {
 int Tests_ActionCameraRecovery(void) {
   Battle_ActionState state = {0};
   Battle_ActionState* saved_action = Battle_actionState;
-  const Field_SphericalCamera saved_camera = VS::Field::sphericalCamera;
+  const VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   const int saved_projection = VS::Render::projectionDistance;
   const int saved_ease = Battle_cameraEaseMode;
   const int saved_distance = Battle_settledCameraDistance;
   state.preferredCameraDistance = 2304;
   Battle_actionState = &state;
-  VS::Field::sphericalCamera.delta.mode = 1;
+  VS::Field::sphericalCamera.motion.zoom_mode = 1;
   VS::Field::sphericalCamera.values.distance = 1536;
   VS::Render::projectionDistance = 640;
   Battle_cameraEaseMode = 0;

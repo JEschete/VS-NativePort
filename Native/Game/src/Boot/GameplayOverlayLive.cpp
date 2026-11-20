@@ -147,15 +147,16 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Field::cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);
-    VS::Field::sphericalCamera.delta.pitch = defaults.camera_pitch_delta;
+    VS::Field::sphericalCamera.motion.target_yaw = defaults.camera_pitch_delta;
     VS::Field::sphericalCamera.values.yaw = defaults.camera_yaw;
     VS::Field::sphericalCamera.values.pitch = defaults.camera_pitch;
-    VS::Field::sphericalCamera.initialDistance = defaults.camera_distance;
+    VS::Field::sphericalCamera.preferred_distance = defaults.camera_distance;
     VS::Field::sphericalCamera.values.distance = defaults.camera_distance;
-    VS::Field::sphericalCamera.delta.yaw = defaults.camera_yaw_delta;
-    VS::Field::sphericalCamera.delta.distance = defaults.camera_distance_delta;
-    VS::Field::sphericalCamera.delta.mode = defaults.camera_delta_mode;
-    VS::Field::sphericalCamera.zoomVelocity = defaults.camera_zoom_velocity;
+    VS::Field::sphericalCamera.motion.turn = defaults.camera_yaw_delta;
+    VS::Field::sphericalCamera.motion.turn_speed =
+        defaults.camera_distance_delta;
+    VS::Field::sphericalCamera.motion.zoom_mode = defaults.camera_delta_mode;
+    VS::Field::sphericalCamera.zoom_velocity = defaults.camera_zoom_velocity;
   }
   void SetRoomActorScale(const VS::Core::Math::Vec3& scale) override {
     VECTOR legacy_scale{scale.x, scale.y, scale.z, 0};

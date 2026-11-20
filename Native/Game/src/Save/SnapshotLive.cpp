@@ -152,8 +152,9 @@ class LiveSnapshotHost final : public SnapshotHost {
     return StatsOf(*actor, *actor->stats);
   }
   CameraPose Camera() override {
-    return CameraPose{.pitch = VS::Field::sphericalCamera.delta.pitch,
-                      .distance = VS::Field::sphericalCamera.initialDistance};
+    return CameraPose{
+        .pitch = VS::Field::sphericalCamera.motion.target_yaw,
+        .distance = VS::Field::sphericalCamera.preferred_distance};
   }
   void StoreEntryDoor(const EntryDoor& door) override {
     std::ranges::copy(door, BytesOf(VS::State::savedEntryDoor).begin());

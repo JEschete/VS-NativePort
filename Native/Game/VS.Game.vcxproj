@@ -2251,9 +2251,7 @@
     <ClInclude Include="src\Event\Triggers.hpp" />
     <ClInclude Include="src\Event\WeaponModeOpcode.hpp" />
     <ClInclude Include="src\Event\Weather.hpp" />
-    <ClInclude Include="src\Field\Background.h" />
     <ClInclude Include="src\Field\BackgroundLiveState.hpp" />
-    <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\CameraLiveState.hpp" />
     <ClInclude Include="src\Field\ChestInteractionsLive.hpp" />
     <ClInclude Include="src\Field\Collision.h" />

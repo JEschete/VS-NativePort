@@ -95,7 +95,7 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   trigger.header.tileZ = 1;
   trigger.header.viewDirection = 4;
   trigger.header.effectCount = 1;
-  trigger.header.mode = VS::Field::sphericalCamera.initialDistance == 0x900;
+  trigger.header.mode = VS::Field::sphericalCamera.preferred_distance == 0x900;
   fixture.cells[4].occlusionAndFloorFlags = 1;
   fixture.geometry[1] = 0;
   Field_roomData.viewTriggers = &trigger.header;

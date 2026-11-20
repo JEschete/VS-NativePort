@@ -271,7 +271,7 @@ struct RuntimeFixture {
   int first_person = VS::Field::isFirstPersonViewEnabled;
   unsigned control_mode = VS::Field::controlMode;
   int interaction_paused = VS::Field::isInteractionPaused;
-  Field_CameraTransition* transition = VS::Field::cameraTransition;
+  VS::Field::CameraTransitionRecord* transition = VS::Field::cameraTransition;
   VS::Audio::DriverFlags audio_flags = VS::Audio::Driver::controlLatches;
   VS::Audio::LegacyCommandArguments audio_arguments =
       VS::Audio::Driver::commandArguments;
@@ -294,7 +294,7 @@ struct RuntimeFixture {
   Actors_ActorRecord enemy_model{};
   Battle_Ai_ActorAiState enemy_ai{};
   Field_MpdEnvironment environment{};
-  Field_CameraTransition camera_transition{};
+  VS::Field::CameraTransitionRecord camera_transition{};
   VS::Items::ContainerData storage{};
 
   RuntimeFixture() {
@@ -395,9 +395,9 @@ struct RuntimeFixture {
     VS::Field::sphericalCamera.values.yaw = 1027;
     VS::Field::sphericalCamera.values.pitch = -384;
     VS::Field::sphericalCamera.values.distance = 1536;
-    VS::Field::sphericalCamera.delta.pitch = 2050;
-    VS::Field::sphericalCamera.initialDistance = 1536;
-    VS::Field::sphericalCamera.delta.mode = 1;
+    VS::Field::sphericalCamera.motion.target_yaw = 2050;
+    VS::Field::sphericalCamera.preferred_distance = 1536;
+    VS::Field::sphericalCamera.motion.zoom_mode = 1;
     VS::Render::nearClip = 64;
     VS::Render::projectionDistance = 512;
     VS::Render::FrameScratchpad().camera = {};
@@ -944,14 +944,14 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 8) VS::Field::isFirstPersonViewEnabled = 1;
   if (defect == 9) VS::Field::sphericalCamera.values.distance = 2000;
   if (defect == 10) VS::Field::sphericalCamera.values.pitch = -768;
-  if (defect == 22) VS::Field::sphericalCamera.delta.mode = 2;
-  if (defect == 23) VS::Field::sphericalCamera.delta.yaw = 1;
+  if (defect == 22) VS::Field::sphericalCamera.motion.zoom_mode = 2;
+  if (defect == 23) VS::Field::sphericalCamera.motion.turn = 1;
   if (defect == 24) ++VS::Render::FrameScratchpad().camera.position.vx;
   if (defect == 25) VS::Render::FrameScratchpad().camera.angles.vz = 1;
   if (defect == 26) VS::Render::nearClip = 128;
   if (defect == 27) VS::Field::sphericalCamera.values.pitch = 1024;
   if (defect == 28) VS::Render::projectionDistance = 256;
-  if (defect == 29) VS::Field::sphericalCamera.delta.distance = 65;
+  if (defect == 29) VS::Field::sphericalCamera.motion.turn_speed = 65;
   if (defect == 30) VS::Field::cameraTransition = &fixture.camera_transition;
 }
 }  // namespace
@@ -1389,7 +1389,7 @@ void CheckRestoredClockCamera() {
   CHECK(VS::State::sceneTimer.time.seconds == 17);
   CHECK(VS::Field::sphericalCamera.values.yaw == 1027);
   CHECK(VS::Render::FrameScratchpad().camera.angles.vy == 1027);
-  CHECK(VS::Field::sphericalCamera.initialDistance == 1536);
+  CHECK(VS::Field::sphericalCamera.preferred_distance == 1536);
 }
 
 void CheckRestoredRandom(const Save::Snapshot& state) {
@@ -1438,12 +1438,12 @@ void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
   VS::Field::sphericalCamera.values.pitch = -768;
   VS::Field::sphericalCamera.values.distance = 2304;
   VS::Field::sphericalCamera.values.mode = 17;
-  VS::Field::sphericalCamera.delta.pitch = -512;
-  VS::Field::sphericalCamera.delta.distance = 32;
-  VS::Field::sphericalCamera.delta.mode = 3;
-  VS::Field::sphericalCamera.initialDistance = 2304;
-  VS::Field::sphericalCamera.zoomVelocity = 48;
-  VS::Field::sphericalCamera.speed = 24;
+  VS::Field::sphericalCamera.motion.target_yaw = -512;
+  VS::Field::sphericalCamera.motion.turn_speed = 32;
+  VS::Field::sphericalCamera.motion.zoom_mode = 3;
+  VS::Field::sphericalCamera.preferred_distance = 2304;
+  VS::Field::sphericalCamera.zoom_velocity = 48;
+  VS::Field::sphericalCamera.tracking_speed = 24;
   VS::Render::FrameScratchpad().camera.look_at = {111111, -333333, 222222, 0};
   VS::Render::FrameScratchpad().camera.angles = {-764, 1027, 0, 0};
   fixture.UpdateOrbitPosition();
@@ -1465,10 +1465,9 @@ void CheckStaticLayer(const RuntimeFixture& fixture,
   CHECK(saved.facing == 77);
 }
 
-void CheckOrbitRestored(const Field_SphericalCamera& expected,
+void CheckOrbitRestored(const VS::Field::SphericalCamera& expected,
                         const VS::Render::Camera& rendered) {
-  CHECK(std::memcmp(&VS::Field::sphericalCamera, &expected, sizeof(expected)) ==
-        0);
+  CHECK(VS::Field::sphericalCamera == expected);
   CHECK(VS::Render::FrameScratchpad().camera.position.vx ==
         rendered.position.vx);
   CHECK(VS::Render::FrameScratchpad().camera.position.vy ==

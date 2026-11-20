@@ -307,9 +307,9 @@ H0305,header,Native/Game/src/Event/Triggers.hpp,generated,no,pragma-once,0,0,0,0
 H0306,header,Native/Game/src/Event/WeaponModeOpcode.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,dropped Legacy/Psx.h; the opcode's command parameter is std::uint8_t* (#441)
 H0307,header,Native/Game/src/Event/Weather.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0308,header,Native/Game/src/Field/Actors.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Field_ActorPlacement (T00444/T00660) duplicated VS::Actors::SpawnPlacement (Actors/ActorSpawning.hpp) (#441)
-H0309,header,Native/Game/src/Field/Background.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0309,header,Native/Game/src/Field/Background.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,"deleted: the background tile and layout records moved to VS::Field::BackgroundTileRecord and BackgroundLayoutRecord in Field/BackgroundLiveState.hpp, without the zero-length tile array (#441)"
 H0310,header,Native/Game/src/Field/BackgroundLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0311,header,Native/Game/src/Field/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
+H0311,header,Native/Game/src/Field/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,"deleted: VS::Field::sphericalCamera is the typed SphericalCamera (Field/Camera.hpp), the transition record is VS::Field::CameraTransitionRecord in Field/CameraLiveState.hpp, and the unused position pair is gone (#441)"
 H0312,header,Native/Game/src/Field/CameraLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0313,header,Native/Game/src/Field/ChestInteractionsLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0314,header,Native/Game/src/Field/Collision.h,generated,yes,pragma-once,0,0,0,0,0,1,5,0,0,remaining,

@@ -226,7 +226,7 @@ std::uint32_t LeaveFirstPerson(FakeCameraHost& host,
 
 struct LiveCameraFixture {
   VS::Render::Camera saved_camera = VS::Render::FrameScratchpad().camera;
-  Field_SphericalCamera saved_spherical = VS::Field::sphericalCamera;
+  VS::Field::SphericalCamera saved_spherical = VS::Field::sphericalCamera;
   ~LiveCameraFixture() {
     VS::Render::FrameScratchpad().camera = saved_camera;
     VS::Field::sphericalCamera = saved_spherical;

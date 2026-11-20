@@ -114,7 +114,7 @@ class LiveWorld final : public ActionSequenceWorld {
   }
   void BeginRecovery(int mode) override { BeginLivePostActionRecovery(mode); }
   std::int32_t CameraMode() override {
-    return VS::Field::sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.motion.zoom_mode;
   }
   std::int32_t Projection() override { return VS::Render::projectionDistance; }
   void ApplyProjection(std::int32_t projection) override {

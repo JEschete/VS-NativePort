@@ -2004,9 +2004,6 @@
     <ClCompile Include="src\Field\Background.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Background.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\BackgroundLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2016,9 +2013,6 @@
     <ClCompile Include="src\Field\Camera.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Camera.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\CameraLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>

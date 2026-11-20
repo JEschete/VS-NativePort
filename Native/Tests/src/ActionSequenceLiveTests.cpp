@@ -195,7 +195,7 @@ TEST_CASE(
     "[action-sequence][F00195][camera-view]") {
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
-  VS::Field::sphericalCamera.delta.mode = 3;
+  VS::Field::sphericalCamera.motion.zoom_mode = 3;
   VS::Field::sphericalCamera.values.distance = -32600;
   fixture->state.preferredCameraDistance = -32768;
   Battle_settledCameraDistance = 12345;
@@ -212,7 +212,7 @@ TEST_CASE(
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
   Battle_actionState = nullptr;
-  VS::Field::sphericalCamera.delta.mode = 0;
+  VS::Field::sphericalCamera.motion.zoom_mode = 0;
   VS::Render::SetLiveCameraProjectionDistance(511);
   b::FinishLiveActionSequence();
   CHECK(Battle_actionState == nullptr);

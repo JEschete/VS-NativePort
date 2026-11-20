@@ -215,9 +215,9 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   Battle_actionState = nullptr;
   for (int mode : {0, 2, 4, -1}) {
-    VS::Field::sphericalCamera.delta.mode = mode;
+    VS::Field::sphericalCamera.motion.zoom_mode = mode;
     b::LiveUpdateActionCameraZoom();
-    CHECK(VS::Field::sphericalCamera.delta.mode == mode);
+    CHECK(VS::Field::sphericalCamera.motion.zoom_mode == mode);
   }
 }
 TEST_CASE(
@@ -227,15 +227,15 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.cameraZoomState = 1;
   VS::Field::sphericalCamera = {};
-  VS::Field::sphericalCamera.delta.mode = 1;
-  VS::Field::sphericalCamera.delta.yaw = 1;
+  VS::Field::sphericalCamera.motion.zoom_mode = 1;
+  VS::Field::sphericalCamera.motion.turn = 1;
   VS::Field::sphericalCamera.values.distance = 1600;
   VS::Render::SetLiveCameraProjectionDistance(704);
   b::LiveUpdateActionCameraZoom();
   CHECK(VS::Render::projectionDistance == 768);
   CHECK(VS::Field::sphericalCamera.values.distance == 1536);
-  CHECK(VS::Field::sphericalCamera.delta.yaw == 1);
-  CHECK(VS::Field::sphericalCamera.speed > 0);
+  CHECK(VS::Field::sphericalCamera.motion.turn == 1);
+  CHECK(VS::Field::sphericalCamera.tracking_speed > 0);
   CHECK((VS::Render::FrameScratchpad().camera.look_at.vx != 0 ||
          VS::Render::FrameScratchpad().camera.look_at.vz != 0));
   CHECK(fixture->state.queueIndex == 3);

@@ -378,9 +378,10 @@ VECTOR OrbitPosition(const Snapshot& state) {
   // arithmetic.
   VECTOR look_at{state.camera.look_at[0], state.camera.look_at[1],
                  state.camera.look_at[2], 0};
-  Field_SphericalCameraValues values{state.location.camera_yaw,
-                                     state.camera.pitch, state.camera.distance,
-                                     state.camera.mode};
+  const VS::Field::OrbitAngles values{.yaw = state.location.camera_yaw,
+                                      .pitch = state.camera.pitch,
+                                      .distance = state.camera.distance,
+                                      .mode = state.camera.mode};
   VECTOR position{};
   VS::Field::LiveComputeSphericalCameraPosition(&position, &look_at, &values);
   return position;
@@ -395,10 +396,10 @@ void CaptureCamera(Snapshot& state) {
   // Orbit input (146C.c:2641) retains the step and zoom velocity even after
   // settling; the next user input consumes them. Look-at also retains history
   // through the dead-zone tracker (146C.c:2597), so do not recenter it on load.
-  target.rotation_step = source.delta.distance;
-  target.zoom_mode = source.delta.mode;
-  target.zoom_velocity = source.zoomVelocity;
-  target.tracking_speed = source.speed;
+  target.rotation_step = source.motion.turn_speed;
+  target.zoom_mode = source.motion.zoom_mode;
+  target.zoom_velocity = source.zoom_velocity;
+  target.tracking_speed = source.tracking_speed;
   const auto& camera = VS::Render::FrameScratchpad().camera;
   target.look_at = {camera.look_at.vx, camera.look_at.vy, camera.look_at.vz};
   target.view_angles = {camera.angles.vx, camera.angles.vy, camera.angles.vz};
@@ -409,13 +410,13 @@ void RestoreCamera(const Snapshot& state) {
   const auto& camera = state.camera;
   target.values = {state.location.camera_yaw, camera.pitch, camera.distance,
                    camera.mode};
-  target.delta.yaw = 0;
-  target.delta.pitch = state.ashley.camera_pitch;
-  target.delta.distance = camera.rotation_step;
-  target.delta.mode = camera.zoom_mode;
-  target.initialDistance = state.ashley.camera_distance;
-  target.zoomVelocity = camera.zoom_velocity;
-  target.speed = camera.tracking_speed;
+  target.motion.turn = 0;
+  target.motion.target_yaw = state.ashley.camera_pitch;
+  target.motion.turn_speed = camera.rotation_step;
+  target.motion.zoom_mode = camera.zoom_mode;
+  target.preferred_distance = state.ashley.camera_distance;
+  target.zoom_velocity = camera.zoom_velocity;
+  target.tracking_speed = camera.tracking_speed;
   VS::Render::FrameScratchpad().camera.look_at =
       VECTOR{camera.look_at[0], camera.look_at[1], camera.look_at[2], 0};
   VS::Render::FrameScratchpad().camera.position = OrbitPosition(state);
@@ -1104,8 +1105,8 @@ void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
     }
   }
   target.weapon_drawn = character.weaponDrawn;
-  target.camera_pitch = VS::Field::sphericalCamera.delta.pitch;
-  target.camera_distance = VS::Field::sphericalCamera.initialDistance;
+  target.camera_pitch = VS::Field::sphericalCamera.motion.target_yaw;
+  target.camera_distance = VS::Field::sphericalCamera.preferred_distance;
 }
 
 void RestoreAshleyValues(const VS::State::AshleyStatsSnapshot& source,
@@ -1264,7 +1265,7 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
   }
   if (VS::Field::cameraTransition != nullptr ||
       VS::Field::isFirstPersonViewEnabled ||
-      VS::Field::sphericalCamera.delta.yaw != 0 ||
+      VS::Field::sphericalCamera.motion.turn != 0 ||
       VS::Render::nearClip != kFieldNearClip ||
       VS::Render::projectionDistance != kFieldProjection ||
       VS::Render::FrameScratchpad().camera.far_clip != ONE) {
