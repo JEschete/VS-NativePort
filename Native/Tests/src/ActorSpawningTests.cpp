@@ -13,8 +13,8 @@
 
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
-#include "Actors/CharacterInit.h"
-#include "Actors/RoomActorCache.h"
+#include "Actors/CharacterInit.hpp"
+#include "Actors/RoomActorCache.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -1491,27 +1491,26 @@ TEST_CASE("Ashley's spawn is refused without a blade or her slot",
 }
 
 namespace {
-// A character record whose signed char fields hold bytes above 0x7F.
-Actors_CharacterInit LegacyCharacterInit() {
-  Actors_CharacterInit init{};
-  init.subType = 0x1234;
-  init.characterKind = static_cast<char>(0xF3);
+// A character record whose byte fields hold values above 0x7F.
+VS::Actors::CharacterInit LegacyCharacterInit() {
+  VS::Actors::CharacterInit init{};
+  init.sub_type = 0x1234;
+  init.model_id = 0xF3;
   init.reach = 0x1F;
-  init.enemyClass = 5;
+  init.enemy_class = 5;
   init.name[0] = 'A';
   init.hp = 300;
   init.mp = 40;
-  init.strength = static_cast<char>(0xC8);
-  init.opaque23 = static_cast<char>(0x85);
+  init.strength = 0xC8;
+  init.recovery_delay_bonus = 0x85;
   init.material = 4;
-  init.walkSpeed = static_cast<char>(0x90);
-  init.opaque26 = 7;
-  init.runSpeed = static_cast<char>(0xA0);
-  init.opaque28 = -1;
-  init.opaque2C = 0x01020304;
-  init.opaque30 = 1;
-  init.opaque31 = static_cast<char>(0xFE);
-  init.opaque32 = 3;
+  init.walk_speed = 0x90;
+  init.gait_class = 7;
+  init.run_speed = 0xA0;
+  init.status_immunities = -1;
+  init.template_word = 0x01020304;
+  init.mobility_limbs = {1, 0xFE};
+  init.default_target_limb = 3;
   init.weapon.blade.weapon_model_id = -2;
   init.weapon.blade.category = 6;
   init.weapon.material = static_cast<char>(0x81);
@@ -1520,11 +1519,11 @@ Actors_CharacterInit LegacyCharacterInit() {
   init.limbs[2].hp = 77;
   init.limbs[2].types[1] = -4;
   init.limbs[2].affinities[7] = 9;
-  init.limbs[2].actions[1].actionId = 0x55;
-  init.limbs[2].actions[1].opaque2 = static_cast<char>(0x9A);
+  init.limbs[2].actions[1].action_id = 0x55;
+  init.limbs[2].actions[1].effect_model = 0x9A;
   init.limbs[2].actions[1].index = 0x0B;
-  init.limbs[2].dpSplash[5] = static_cast<char>(0xEE);
-  init.zudIndex = 9;
+  init.limbs[2].dp_splash[5] = 0xEE;
+  init.zud_index = 9;
   return init;
 }
 
@@ -1613,21 +1612,21 @@ void CheckDecodedRoomSpawn(const actors::RoomSpawn& room) {
   CHECK(room.combat_pose == 9);
 }
 
-Actors_RoomActorRecord LegacyRoomRecord() {
-  Actors_RoomActorRecord record{};
-  record.aiFlags = -2;
-  record.currentHp = 10;
-  record.maxHp = 20;
-  record.currentMp = 3;
-  record.maxMp = 4;
+VS::Actors::RoomActorRecord LegacyRoomRecord() {
+  VS::Actors::RoomActorRecord record{};
+  record.ai_flags = -2;
+  record.current_hp = 10;
+  record.max_hp = 20;
+  record.current_mp = 3;
+  record.max_mp = 4;
   record.strength = 5;
   record.intelligence = 6;
   record.agility = 7;
-  record.limbHp[5] = 66;
+  record.limb_hp[5] = 66;
   record.statuses = 0x1000;
-  record.tileX = 8;
+  record.tile_x = 8;
   record.direction = 1;
-  record.tileZ = 9;
+  record.tile_z = 9;
   record.height = 10;
   return record;
 }

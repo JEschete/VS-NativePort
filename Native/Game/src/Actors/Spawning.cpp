@@ -1,30 +1,27 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's
 // decomp line.
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 
-#include "Actors/CharacterInit.h"
-#include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
-
+namespace VS::Actors {
 // decomp: D_800FAB18 (D_800FAB18@src/BATTLE/INITBTL.PRG/18.c)
-Actors_CharacterInit
-    Actors_ashleyInitialLoadout =
+CharacterInit
+    ashleyInitialLoadout =
         {
-            .subType = 174,
+            .sub_type = 174,
             .reach = 7,
-            .name = "\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7",
+            .name = {"\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7"},
             .hp = 250,
             .mp = 50,
             .strength = 100,
             .intelligence = 100,
             .agility = 100,
-            .opaque23 = 1,
+            .recovery_delay_bonus = 1,
             .material = 2,
-            .walkSpeed = 10,
-            .opaque26 = 4,
-            .runSpeed = 20,
-            .opaque30 = 4,
-            .opaque32 = 3,
+            .walk_speed = 10,
+            .gait_class = 4,
+            .run_speed = 20,
+            .mobility_limbs = {4},
+            .default_target_limb = 3,
             .weapon =
                 {
                     .blade =
@@ -62,7 +59,7 @@ Actors_CharacterInit
                             .types = {0, 0, 4, 1},
                         },
                     .material = 3,
-                    .name = "\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7",
+                    .name = {"\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7"},
                 },
             .accessory =
                 {
@@ -77,16 +74,16 @@ Actors_CharacterInit
                         },
                 },
             .limbs =
-                {
+                {{
                     {
                         .hp = 200,
                         .actions =
-                            {
-                                {.actionId = 1},
+                            {{
+                                {.action_id = 1},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                         .armor =
                             {
                                 .equipment =
@@ -105,17 +102,17 @@ Actors_CharacterInit
                                 .material = 2,
                                 .opaque32 = 1,
                             },
-                        .dpSplash = {100, 0, 0, 5, 0, 0},
+                        .dp_splash = {100, 0, 0, 5, 0, 0},
                     },
                     {
                         .hp = 200,
                         .actions =
-                            {
-                                {.actionId = 1},
+                            {{
+                                {.action_id = 1},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                         .armor =
                             {
                                 .equipment =
@@ -134,17 +131,17 @@ Actors_CharacterInit
                                 .material = 2,
                                 .opaque32 = 1,
                             },
-                        .dpSplash = {0, 100, 0, 5, 0, 0},
+                        .dp_splash = {0, 100, 0, 5, 0, 0},
                     },
                     {
                         .hp = 200,
                         .actions =
-                            {
+                            {{
                                 {0},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                         .armor =
                             {
                                 .equipment =
@@ -162,17 +159,17 @@ Actors_CharacterInit
                                 .material = 2,
                                 .opaque32 = 1,
                             },
-                        .dpSplash = {0, 0, 100, 10, 0, 0},
+                        .dp_splash = {0, 0, 100, 10, 0, 0},
                     },
                     {
                         .hp = 200,
                         .actions =
-                            {
+                            {{
                                 {0},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                         .armor =
                             {
                                 .equipment =
@@ -191,17 +188,17 @@ Actors_CharacterInit
                                 .material = 2,
                                 .opaque32 = 1,
                             },
-                        .dpSplash = {5, 5, 5, 100, 5, 0},
+                        .dp_splash = {5, 5, 5, 100, 5, 0},
                     },
                     {
                         .hp = 200,
                         .actions =
-                            {
+                            {{
                                 {0},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                         .armor =
                             {
                                 .equipment =
@@ -219,23 +216,24 @@ Actors_CharacterInit
                                 .material = 2,
                                 .opaque32 = 1,
                             },
-                        .dpSplash = {0, 0, 0, 5, 100, 0},
+                        .dp_splash = {0, 0, 0, 5, 100, 0},
                     },
                     {
                         .actions =
-                            {
+                            {{
                                 {0},
                                 {.index = 1},
                                 {.index = 2},
                                 {.index = 3},
-                            },
+                            }},
                     },
-                },
+                }},
 };
 
 // decomp: D_8004FDD0 (D_8004FDD0@SLUS_010.40)
-char Actors_placeholderActorName[20]; /* contents: module image (ModuleData.cpp) */
+std::array<char, kPlaceholderActorNameBytes> placeholderActorName; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_8004FE88 (D_8004FE88@SLUS_010.40)
-u_char Actors_usesSecondaryBodyModel[256]; /* contents: module image (ModuleData.cpp) */
+std::array<std::uint8_t, kBodyModelIds> usesSecondaryBodyModel; /* contents: module image (ModuleData.cpp) */
+}  // namespace VS::Actors
 

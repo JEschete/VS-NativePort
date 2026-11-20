@@ -15,7 +15,6 @@
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/AbilityState.h"

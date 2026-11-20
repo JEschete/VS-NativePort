@@ -12,7 +12,7 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.hpp"
@@ -43,8 +43,8 @@ using BoneTagKind = VS::Actors::BoneTagKind;
 // The far perception range (AI state 0xAC) within reservedA0 (0xA0).
 constexpr std::size_t kFarRangeOffset = 12;
 // Model word 0x16C follows an auxiliary actor core's eight matrices.
-constexpr std::size_t kCoreModel = offsetof(Actors_ActorCore, model);
-constexpr std::size_t kCoreObject = offsetof(Actors_ActorCore, reserved16C);
+constexpr std::size_t kCoreModel = offsetof(Actors::ActorCore, model);
+constexpr std::size_t kCoreObject = offsetof(Actors::ActorCore, object_word);
 constexpr std::size_t kModelObjectWordOffset = kCoreObject - kCoreModel;
 // The command flags bits creation keeps (bits 0-3 are cleared).
 constexpr std::uint8_t kKeptCommandFlags = 0xF0;

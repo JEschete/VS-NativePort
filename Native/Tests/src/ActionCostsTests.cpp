@@ -14,7 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/CharacterInit.h"
+#include "Actors/CharacterInit.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCosts.hpp"
 #include "Battle/ActionCostsLive.hpp"
@@ -180,13 +180,14 @@ T ReadRecord(const std::vector<std::uint8_t>& bytes, std::size_t offset) {
   std::memcpy(&record, bytes.data() + offset, sizeof(T));
   return record;
 }
-Actors_CharacterInit ZoneNineActor(std::size_t index) {
+VS::Actors::CharacterInit ZoneNineActor(std::size_t index) {
   const auto zone = ReadAsset("MAP/ZONE009.ZND");
   const auto section = ReadRecord<std::uint32_t>(zone, 8);
   const auto count = ReadRecord<std::uint32_t>(zone, section);
   REQUIRE(index < count);
-  return ReadRecord<Actors_CharacterInit>(
-      zone, section + 4 + count * 8 + index * sizeof(Actors_CharacterInit));
+  return ReadRecord<VS::Actors::CharacterInit>(
+      zone,
+      section + 4 + count * 8 + index * sizeof(VS::Actors::CharacterInit));
 }
 }  // namespace
 
@@ -565,7 +566,7 @@ TEST_CASE(
   LiveFixture fixture;
   const auto natural = ZoneNineActor(2);
   const auto main = ReadAsset("SLUS_010.40");
-  const auto action = natural.limbs[0].actions[0].actionId;
+  const auto action = natural.limbs[0].actions[0].action_id;
   REQUIRE(action == 1);
   Battle_actionDefinitions[action] = ReadRecord<Battle_ActionDefinition>(
       main, 0x3C1DC + action * sizeof(Battle_ActionDefinition));

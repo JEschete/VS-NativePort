@@ -32,7 +32,7 @@ inline constexpr int kZoneCount = 256;
 inline constexpr std::size_t kZoneHeaderBytes = 0x1C;
 // A room file table entry: the room file's sector and byte size.
 inline constexpr std::size_t kRoomFileEntryBytes = 8;
-// An enemy template (ZoneEnemyTemplate, an Actors_CharacterInit).
+// An enemy template (ZoneEnemyTemplate, an VS::Actors::CharacterInit).
 inline constexpr std::size_t kZoneEnemyTemplateBytes = 0x464;
 
 // The zone file header as stored: the room file table, enemy section and
@@ -50,7 +50,7 @@ struct ZoneFileHeader {
 static_assert(sizeof(ZoneFileHeader) == kZoneHeaderBytes);
 
 // One enemy template as the zone file stores it; the spawn decodes it as an
-// Actors_CharacterInit. decomp: ZndEnemy (src/BATTLE/BATTLE.PRG/zone.h:7)
+// VS::Actors::CharacterInit. decomp: ZndEnemy (src/BATTLE/BATTLE.PRG/zone.h:7)
 struct ZoneEnemyTemplate {
   std::array<std::uint8_t, kZoneEnemyTemplateBytes> bytes;
 };

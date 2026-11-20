@@ -363,22 +363,22 @@ void Fields(VS::State::ScoreData& r, V&& v) {
 }
 
 template <class V>
-void Fields(Actors_RoomActorRecord& r, V&& v) {
-  v("spawn_slot", r.spawnSlot);
-  v("hidden", r.isHidden);
-  v("ai_flags", r.aiFlags);
-  v("hp", r.currentHp);
-  v("maximum_hp", r.maxHp);
-  v("mp", r.currentMp);
-  v("maximum_mp", r.maxMp);
+void Fields(VS::Actors::RoomActorRecord& r, V&& v) {
+  v("spawn_slot", r.spawn_slot);
+  v("hidden", r.hidden);
+  v("ai_flags", r.ai_flags);
+  v("hp", r.current_hp);
+  v("maximum_hp", r.max_hp);
+  v("mp", r.current_mp);
+  v("maximum_mp", r.max_mp);
   v("strength", r.strength);
   v("intelligence", r.intelligence);
   v("agility", r.agility);
-  v("limb_hp", r.limbHp);
+  v("limb_hp", r.limb_hp);
   v("statuses", r.statuses);
-  v("tile_x", r.tileX);
+  v("tile_x", r.tile_x);
   v("direction", r.direction);
-  v("tile_z", r.tileZ);
+  v("tile_z", r.tile_z);
   v("height", r.height);
 }
 

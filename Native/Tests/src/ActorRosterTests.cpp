@@ -17,11 +17,11 @@
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/RoomActorCache.h"
+#include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
@@ -494,8 +494,8 @@ RoomBytes SavedRoomBytes() {
   return bytes;
 }
 
-Actors_RoomActorRecord SavedRecord(std::size_t room, std::size_t slot) {
-  Actors_RoomActorRecord record{};
+VS::Actors::RoomActorRecord SavedRecord(std::size_t room, std::size_t slot) {
+  VS::Actors::RoomActorRecord record{};
   std::memcpy(&record,
               VS::State::recentRoomEnemyStates[room].actor_states[slot],
               sizeof record);
@@ -537,31 +537,31 @@ struct LiveEnemy {
 };
 
 // The saved record StoreLiveRoomActorState writes for a hidden LiveEnemy.
-Actors_RoomActorRecord StoredLiveEnemy() {
-  Actors_RoomActorRecord record{};
-  record.spawnSlot = 6;
-  record.isHidden = 1;
-  record.aiFlags = -1;  // No AI state.
-  record.currentHp = 40;
-  record.maxHp = 90;
-  record.currentMp = 11;
-  record.maxMp = 20;
+VS::Actors::RoomActorRecord StoredLiveEnemy() {
+  VS::Actors::RoomActorRecord record{};
+  record.spawn_slot = 6;
+  record.hidden = 1;
+  record.ai_flags = -1;  // No AI state.
+  record.current_hp = 40;
+  record.max_hp = 90;
+  record.current_mp = 11;
+  record.max_mp = 20;
   record.strength = 33;
   record.intelligence = 44;
   record.agility = 55;
   for (std::size_t limb = 0; limb < 6; ++limb) {
-    record.limbHp[limb] = static_cast<std::int16_t>(10 + limb);
+    record.limb_hp[limb] = static_cast<std::int16_t>(10 + limb);
   }
   record.statuses = 0x12345;
-  record.tileX = 7;
+  record.tile_x = 7;
   record.direction = 10;
-  record.tileZ = 3;
+  record.tile_z = 3;
   record.height = 0x34;
   return record;
 }
 
-bool SameRecord(const Actors_RoomActorRecord& first,
-                const Actors_RoomActorRecord& second) {
+bool SameRecord(const VS::Actors::RoomActorRecord& first,
+                const VS::Actors::RoomActorRecord& second) {
   return std::memcmp(&first, &second, sizeof first) == 0;
 }
 
@@ -580,8 +580,8 @@ void CheckLiveRoomForgotten(const VS::State::RoomEnemyStates& before,
 }
 
 // Copying the remembered spawn 5 gives its saved record; spawn 4 has none.
-void CheckLiveRememberedCopy(const Actors_RoomActorRecord& saved) {
-  Actors_RoomActorRecord copy{};
+void CheckLiveRememberedCopy(const VS::Actors::RoomActorRecord& saved) {
+  VS::Actors::RoomActorRecord copy{};
   CHECK(VS::Actors::CopyLiveRememberedEnemy(5, &copy) == &copy);
   CHECK(SameRecord(copy, saved));
   CHECK(VS::Actors::CopyLiveRememberedEnemy(4, &copy) == nullptr);
@@ -595,7 +595,7 @@ void CheckLiveRememberedHidden() {
   CHECK(VS::Actors::LiveRememberedEnemyHidden(5, 9) == 1);
   CHECK(VS::Actors::LiveRememberedEnemyHidden(4, 9) == 9);
   VS::Actors::SetLiveRememberedEnemyHidden(4, 1);
-  CHECK(SavedRecord(1, 1).spawnSlot == 0);
+  CHECK(SavedRecord(1, 1).spawn_slot == 0);
 }
 }  // namespace
 
@@ -642,9 +642,9 @@ TEST_CASE("Storing a live enemy remembers it in the current saved room",
   // A fading enemy keeps 1 HP and reuses its record.
   enemy.record->instance.actionAnimationState = 2;
   VS::Actors::StoreLiveRoomActorState(3, 0);
-  Actors_RoomActorRecord faded = StoredLiveEnemy();
-  faded.isHidden = 0;
-  faded.currentHp = 1;
+  VS::Actors::RoomActorRecord faded = StoredLiveEnemy();
+  faded.hidden = 0;
+  faded.current_hp = 1;
   CHECK(SameRecord(SavedRecord(1, 0), faded));
   CHECK(VS::State::recentRoomEnemyStates[1].next_slot == 1);
 
@@ -674,7 +674,7 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
   VS::State::currentRoomStateSlot = 4;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   CHECK_FALSE(VS::Actors::IsLiveRememberedRoom(0, 0));
-  Actors_RoomActorRecord copy{};
+  VS::Actors::RoomActorRecord copy{};
   CHECK(VS::Actors::CopyLiveRememberedEnemy(5, &copy) == nullptr);
   CHECK(VS::Actors::CopyLiveRememberedEnemy(5, nullptr) == nullptr);
   VS::State::currentRoomStateSlot = 0;
@@ -759,8 +759,9 @@ void CheckLivePlaceholderStats(const Battle_ActorStats& stats) {
   CHECK(stats.statuses == 0);
   CHECK(stats.cancelsHitResults == 1);
   CHECK(stats.actorId == actors::kNoRoomSpawn);
-  constexpr std::size_t kNameBytes = sizeof Actors_placeholderActorName;
-  CHECK(std::memcmp(stats.name, Actors_placeholderActorName, kNameBytes) == 0);
+  constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
+  CHECK(std::memcmp(stats.name, VS::Actors::placeholderActorName.data(),
+                    kNameBytes) == 0);
   CHECK(std::memcmp(stats.name + kNameBytes, Battle_breakArtPointRequirements,
                     actors::kActorNameBytes - kNameBytes) == 0);
 }

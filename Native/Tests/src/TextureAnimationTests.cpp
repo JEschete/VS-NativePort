@@ -19,7 +19,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimation.hpp"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
@@ -140,10 +140,10 @@ struct LiveTextureState {
       std::to_array(Actors_actorRecords);
   u_char saved_bank = Actors_sharedSequenceBankIndex;
   std::array<u_char, 4> saved_pages{};
-  decltype(std::to_array(Actors_textureSlotOrigins)) saved_origins =
-      std::to_array(Actors_textureSlotOrigins);
-  decltype(std::to_array(Actors_textureSlotRowOffsets)) saved_rows =
-      std::to_array(Actors_textureSlotRowOffsets);
+  decltype(VS::Actors::textureSlotOrigins) saved_origins =
+      VS::Actors::textureSlotOrigins;
+  decltype(VS::Actors::textureSlotRowOffsets) saved_rows =
+      VS::Actors::textureSlotRowOffsets;
   decltype(std::to_array(
       Actors_sheathedWeaponAnimationBases)) saved_channel0_keys =
       std::to_array(Actors_sheathedWeaponAnimationBases);
@@ -161,8 +161,8 @@ struct LiveTextureState {
     Actors_sharedSequenceBankIndex = 0;
     Actors_sharedSequenceBankTexturePages[0] = 0x1A;
     const std::array<u_char, 4> origin{4, 0, 0, 0};
-    std::ranges::copy(origin, std::begin(Actors_textureSlotOrigins));
-    Actors_textureSlotRowOffsets[0] = 1;
+    std::ranges::copy(origin, std::begin(VS::Actors::textureSlotOrigins));
+    VS::Actors::textureSlotRowOffsets[0] = 1;
   }
   LiveTextureState(const LiveTextureState&) = delete;
   LiveTextureState& operator=(const LiveTextureState&) = delete;
@@ -173,8 +173,10 @@ struct LiveTextureState {
     Actors_sharedSequenceBankIndex = saved_bank;
     std::ranges::copy(saved_pages,
                       std::begin(Actors_sharedSequenceBankTexturePages));
-    std::ranges::copy(saved_origins, std::begin(Actors_textureSlotOrigins));
-    std::ranges::copy(saved_rows, std::begin(Actors_textureSlotRowOffsets));
+    std::ranges::copy(saved_origins,
+                      std::begin(VS::Actors::textureSlotOrigins));
+    std::ranges::copy(saved_rows,
+                      std::begin(VS::Actors::textureSlotRowOffsets));
     std::ranges::copy(saved_channel0_keys,
                       std::begin(Actors_sheathedWeaponAnimationBases));
     std::ranges::copy(saved_channel1_keys,

@@ -46,7 +46,7 @@ static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTic
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Render/Palette.hpp"

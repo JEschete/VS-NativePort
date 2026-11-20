@@ -6,7 +6,7 @@
 namespace VS::State {
 inline constexpr std::size_t kRecentRoomCount = 4;
 inline constexpr std::size_t kRoomActorStateSlots = 8;
-// One Actors_RoomActorRecord.
+// One VS::Actors::RoomActorRecord.
 inline constexpr std::size_t kRoomActorStateBytes = 0x28;
 inline constexpr std::size_t kRoomEnemyStatesBytes = 0x148;
 

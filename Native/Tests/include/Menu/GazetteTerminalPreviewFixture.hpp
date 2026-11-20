@@ -18,7 +18,7 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
@@ -144,8 +144,8 @@ class PreviewFixture : public TerminalFixture {
                                              VS::Content::ModuleSymbols())) {
       throw std::runtime_error("terminal native sound command import failed");
     }
-    ImportTable(Actors_textureSlotOrigins);
-    ImportTable(Actors_textureSlotRowOffsets);
+    ImportTable(VS::Actors::textureSlotOrigins);
+    ImportTable(VS::Actors::textureSlotRowOffsets);
     ImportTable(Actors_sheathedWeaponAnimationBases);
     ImportTable(Actors_drawnWeaponAnimationBases);
     ImportTable(Actors_animationEventLengths);

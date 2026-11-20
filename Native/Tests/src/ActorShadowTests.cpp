@@ -41,8 +41,8 @@ namespace {
 struct ActorShadowFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
-  Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
-  Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
+  VS::Actors::ModelRenderContext saved_context = VS::Actors::modelRenderContext;
+  VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Field_RoomRecord saved_room = Field_roomData;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -88,8 +88,8 @@ struct ActorShadowFixture {
     actor.instance.scaleX = actor.instance.scaleY = actor.instance.scaleZ =
         actor.scale = 4096;
     actor.shadowRadius = 64;
-    actor.shadowBlend.radiusExpandRate = actor.shadowBlend.radiusShrinkRate =
-        8192;
+    actor.shadowBlend.radius_expand_rate =
+        actor.shadowBlend.radius_shrink_rate = 8192;
     actor.blendPose.scaleKeys[0] = {64, 64, 64, 0};
     actor.modelDataSize = sizeof model_bytes;
     auto* model = reinterpret_cast<Actors_ShpModel*>(model_bytes.data());
@@ -258,8 +258,8 @@ void CheckScaleCase(ActorShadowFixture& fixture, const ShadowScaleCase& input) {
   fixture.ResetPackets();
   fixture.actor.shadowRadius = static_cast<u_short>(input.radius);
   fixture.actor.instance.scaleX = fixture.actor.instance.scaleY = input.model;
-  fixture.actor.shadowBlend.radiusExpandRate =
-      fixture.actor.shadowBlend.radiusShrinkRate = input.blend;
+  fixture.actor.shadowBlend.radius_expand_rate =
+      fixture.actor.shadowBlend.radius_shrink_rate = input.blend;
   VS::Render::ModelWorkspace()->root_offset.vy =
       static_cast<std::int16_t>(input.height);
   fixture.Draw();
@@ -312,7 +312,7 @@ TEST_CASE(
     "Actor shadow packets retain subtractive mode bands and nearest depth",
     "[render][actor-shadow]") {
   ActorShadowFixture fixture;
-  fixture.actor.shadowBlend.reserved0 = 0x808080;
+  fixture.actor.shadowBlend.color = 0x808080;
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
   CheckShadowBands(fixture, 192);
@@ -341,7 +341,7 @@ TEST_CASE(
        {0u, 0x808080u, 0xFFFFFFu, 0x01204060u, 0xFF0A0B0Cu}) {
     for (unsigned fade = 0; fade <= UINT8_MAX; ++fade) {
       fixture.ResetPackets();
-      fixture.actor.shadowBlend.reserved0 = std::bit_cast<std::int32_t>(rgb);
+      fixture.actor.shadowBlend.color = std::bit_cast<std::int32_t>(rgb);
       fixture.actor.fadeRed = static_cast<u_char>(fade);
       const int signed_fade =
           fade < 128 ? static_cast<int>(fade) : static_cast<int>(fade) - 256;

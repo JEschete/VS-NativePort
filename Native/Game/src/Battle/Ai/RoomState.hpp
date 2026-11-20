@@ -1,11 +1,10 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"

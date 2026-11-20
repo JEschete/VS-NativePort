@@ -750,19 +750,19 @@ void CheckCapturedProgress(const Save::Snapshot& state) {
 
 void CheckCapturedCache(const Save::Snapshot& state) {
   const auto& actor = state.room_cache[0].actors[7];
-  CHECK(actor.spawnSlot == 1);
-  CHECK(actor.currentHp == 43);
+  CHECK(actor.spawn_slot == 1);
+  CHECK(actor.current_hp == 43);
   CHECK(actor.strength == 123);
-  CHECK(actor.limbHp[5] == 32);
-  CHECK(actor.tileX == 2);
+  CHECK(actor.limb_hp[5] == 32);
+  CHECK(actor.tile_x == 2);
   CHECK(actor.direction == 1);
-  CHECK(actor.tileZ == 3);
+  CHECK(actor.tile_z == 3);
   CHECK(actor.height == 179);
 }
 
 void CheckCapturedRandom(const Save::Snapshot& state) {
   const auto& actor = state.room_cache[0].actors[7];
-  CHECK(actor.aiFlags == (1 | 6 | 16 | 32 | (77 << 6)));
+  CHECK(actor.ai_flags == (1 | 6 | 16 | 32 | (77 << 6)));
   CHECK(state.random.bios_state == 0x12345678);
   CHECK(state.random.movement_state == 0xFEDCBA98);
 }
@@ -996,7 +996,7 @@ void InvalidateSnapshot(Save::Snapshot& state, int defect) {
   if (defect == 12) state.storage.misc[255].id = 512;
   if (defect == 13) state.inventory.armor[1].limb = 1;
   if (defect == 14) state.inventory.blades[0].material = 8;
-  if (defect == 15) state.room_cache[0].actors[0].spawnSlot = 9;
+  if (defect == 15) state.room_cache[0].actors[0].spawn_slot = 9;
   if (defect == 16) state.inventory_order.gems[0] = 0;
   if (defect == 17) state.room_cache_slot = 1;
   if (defect == 18) state.room_cache[1] = state.room_cache[0];

@@ -660,7 +660,7 @@ actors::ActorStateRecord Busy(int slot) {
   record.platform_offset_z = 25;
   record.animation_locked = true;
   record.shadow = {.level_frames = 1, .level = 2, .radius_expand_rate = 3};
-  record.shadow_extras = {.reserved0 = 26, .reserved6 = 27, .reserved7 = 28};
+  record.shadow_extras = {.color = 26, .reserved6 = 27, .reserved7 = 28};
   record.shadow_expand_rate = 0x30;
   record.shadow_shrink_rate = 0x31;
   record.request_extras = {.reserved = {1, 2, 3},

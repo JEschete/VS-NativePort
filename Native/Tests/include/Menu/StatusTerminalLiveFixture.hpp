@@ -21,7 +21,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
@@ -150,10 +150,10 @@ struct AssetStateRestore {
       weapon_textures{VS::Render::legacyWeaponTextureSlots};
   ValueRestore<VS::Render::TexturePageTable> texture_pages{
       VS::Render::LiveTexturePages()};
-  ArrayRestore<u_char, std::size(Actors_textureSlotOrigins)> texture_origins{
-      Actors_textureSlotOrigins};
-  ArrayRestore<u_char, std::size(Actors_textureSlotRowOffsets)> texture_rows{
-      Actors_textureSlotRowOffsets};
+  ArrayRestore<u_char, VS::Actors::kTextureSlotOriginBytes> texture_origins{
+      VS::Actors::textureSlotOrigins.data()};
+  ArrayRestore<u_char, VS::Actors::kTextureSlotRowOffsetBytes> texture_rows{
+      VS::Actors::textureSlotRowOffsets.data()};
   ArrayRestore<Actors_WeaponModelData*,
                std::size(VS::Content::legacyWeaponModelBuffers)>
       weapon_buffers{VS::Content::legacyWeaponModelBuffers.data()};
@@ -273,11 +273,11 @@ struct Fixture {
       saved_weapons{VS::Actors::weaponModels};
   ValueRestore<void*> saved_primary_sequence{Actors_primarySequenceBuffer};
   ValueRestore<VECTOR> saved_scale{VS::Actors::roomActorScale};
-  ValueRestore<Actors_SkeletonPose> saved_pose{VS::Actors::skeletonPose};
+  ValueRestore<VS::Actors::SkeletonPose> saved_pose{VS::Actors::skeletonPose};
   ValueRestore<MATRIX> saved_root_matrix{VS::Actors::skeletonRootMatrix};
   ValueRestore<MATRIX> saved_bone_camera{VS::Actors::boneMatrixScratch};
   ValueRestore<MATRIX> saved_camera_basis{VS::Render::cameraBasisMatrix};
-  ValueRestore<Actors_ModelRenderContext> saved_model_context{
+  ValueRestore<VS::Actors::ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
   ValueRestore<char> saved_sequence_index{Actors_lastResolvedSequenceIndex};
   ValueRestore<std::remove_reference_t<decltype(*VS::Render::ModelWorkspace())>>
@@ -378,8 +378,9 @@ struct Fixture {
   static void LoadTextureOrigins() {
     const auto image = ReadOriginal(R"(Native\data\disc\BATTLE\BATTLE.PRG)");
     const auto entries = VS::Content::ModuleDataEntries();
-    for (void* target : {static_cast<void*>(Actors_textureSlotOrigins),
-                         static_cast<void*>(Actors_textureSlotRowOffsets)}) {
+    for (void* target :
+         {static_cast<void*>(VS::Actors::textureSlotOrigins.data()),
+          static_cast<void*>(VS::Actors::textureSlotRowOffsets.data())}) {
       const auto entry = std::ranges::find(
           entries, target, &VS::Content::ModuleDataEntry::target);
       if (entry == entries.end() ||

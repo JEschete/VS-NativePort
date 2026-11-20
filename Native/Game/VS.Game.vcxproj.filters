@@ -171,7 +171,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Actors\ActorAllocation.h">
+    <ClInclude Include="src\Actors\ActorAllocation.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\ActorCommands.cpp">
@@ -267,13 +267,13 @@
     <ClCompile Include="src\Actors\BattleActorState.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\CharacterInit.h">
+    <ClInclude Include="src\Actors\CharacterInit.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\Location.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClInclude Include="src\Actors\ModelDraw.h">
+    <ClInclude Include="src\Actors\ModelDraw.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\ModelDrawing.cpp">
@@ -312,10 +312,7 @@
     <ClCompile Include="src\Actors\MovementCommands.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Palette.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Actors\RoomActorCache.h">
+    <ClInclude Include="src\Actors\RoomActorCache.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\RoomEnemyMemory.cpp">
@@ -330,7 +327,7 @@
     <ClCompile Include="src\Actors\SequencePlaybackLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Shadow.h">
+    <ClInclude Include="src\Actors\Shadow.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\Skeleton.cpp">
@@ -354,13 +351,10 @@
     <ClInclude Include="src\Actors\SoundTransitionBinding.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClInclude Include="src\Actors\Spawn.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClCompile Include="src\Actors\Spawning.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Spawning.h">
+    <ClInclude Include="src\Actors\Spawning.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\TextureAnimation.cpp">
@@ -375,7 +369,7 @@
     <ClCompile Include="src\Actors\Textures.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Textures.h">
+    <ClInclude Include="src\Actors\Textures.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\WeaponModel.h">

@@ -16,16 +16,14 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/ModelDraw.h"
+#include "Actors/ModelDraw.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Palette.h"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -271,10 +269,10 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       } else {
         VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, matrix);
         VS::Core::Math::ApplyPremultiplyRotationMatrix(
-            skeletonPose.boneMatrices[parent], matrix);
+            skeletonPose.bone_matrices[parent], matrix);
       }
     }
-    skeletonPose.boneMatrices[bone] = matrix;
+    skeletonPose.bone_matrices[bone] = matrix;
     const SVECTOR* local_scale = &actor->blendPose.scaleKeys[bone];
     const int components[3] = {local_scale->vx, local_scale->vy,
                                local_scale->vz};
@@ -328,7 +326,7 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
       geometry->instance.baseColor.b = AdjustModelColorChannel(
           actor->instance.tint.blue, geometry->fadeBlue);
       unsigned char* shadow_color =
-          reinterpret_cast<unsigned char*>(&geometry->shadowBlend.reserved0);
+          reinterpret_cast<unsigned char*>(&geometry->shadowBlend.color);
       shadow_color[0] = actor->instance.tint.red;
       shadow_color[1] = actor->instance.tint.green;
       shadow_color[2] = actor->instance.tint.blue;
@@ -342,7 +340,7 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
     VS::Field::SampleLiveRoomLighting(
         packed, VS::Render::RoomLightLayer::kFloor, &ground);
     unsigned char* shadow_color =
-        reinterpret_cast<unsigned char*>(&actor->shadowBlend.reserved0);
+        reinterpret_cast<unsigned char*>(&actor->shadowBlend.color);
     shadow_color[0] = GroundShadowChannel(ground.red);
     shadow_color[1] = GroundShadowChannel(ground.green);
     shadow_color[2] = GroundShadowChannel(ground.blue);

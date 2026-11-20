@@ -396,15 +396,15 @@ TEST_CASE("Live gimmick and weapon projection refuse unrecorded models",
   Field_GimmickInstance object{};
   std::memcpy(&object, &kTriangleCounts, sizeof kTriangleCounts);
   object.model = reinterpret_cast<Actors_ShpModel*>(model.data());
-  VS::Actors::modelRenderContext.projectedVertexCount = 7;
+  VS::Actors::modelRenderContext.projected_vertex_count = 7;
   CHECK_FALSE(Render::ProjectLiveGimmickModel(object));
-  CHECK(VS::Actors::modelRenderContext.projectedVertexCount == 0);
+  CHECK(VS::Actors::modelRenderContext.projected_vertex_count == 0);
 
   Actors_WeaponModel weapon{};
   std::memcpy(&weapon, &kTriangleCounts, sizeof kTriangleCounts);
   weapon.sectionOffsets =
       reinterpret_cast<Actors_WeaponModelData*>(model.data());
-  VS::Actors::modelRenderContext.projectedVertexCount = 7;
+  VS::Actors::modelRenderContext.projected_vertex_count = 7;
   CHECK_FALSE(Render::ProjectLiveWeaponModel(weapon));
-  CHECK(VS::Actors::modelRenderContext.projectedVertexCount == 0);
+  CHECK(VS::Actors::modelRenderContext.projected_vertex_count == 0);
 }

@@ -18,7 +18,7 @@
 // template, the equipment model requests and Ashley's spawn from the
 // inventory and the saved snapshot. The rules see actors as SpawnedActor
 // handles and typed records the host lends them, so they reach no
-// Battle_Actor, Actors_CharacterInit or ZUD layout and no PS1 address.
+// Battle_Actor, VS::Actors::CharacterInit or ZUD layout and no PS1 address.
 // ActorSpawningLive binds Battle_actors, the actor allocations, the zone
 // context, the room enemy memory, Ashley's snapshot and the inventory.
 namespace VS::Actors {
@@ -26,7 +26,8 @@ namespace VS::Actors {
 enum class SpawnedActor : std::uintptr_t { kNone = 0 };
 
 // The host's handle to a template's equipment parts, which the Items
-// builders read (Actors_CharacterInit.weapon, shield, accessory and armor).
+// builders read (VS::Actors::CharacterInit.weapon, shield, accessory and
+// armor).
 enum class TemplateEquipment : std::uintptr_t { kNone = 0 };
 
 // The slots room actors, scripted actors and gimmicks use.
@@ -191,7 +192,8 @@ enum class SpawnRefusal : std::uint8_t {
 
 [[nodiscard]] const char* SpawnRefusalText(SpawnRefusal refusal);
 
-// --- Character templates (Actors_CharacterInit) -----------------------------
+// --- Character templates (VS::Actors::CharacterInit)
+// -----------------------------
 
 struct LimbActionTemplate {
   std::uint16_t action_id = 0;
@@ -456,7 +458,7 @@ struct SpawnDetails {
   friend bool operator==(const SpawnDetails&, const SpawnDetails&) = default;
 };
 
-// A room enemy's remembered state (Actors_RoomActorRecord).
+// A room enemy's remembered state (VS::Actors::RoomActorRecord).
 struct RememberedSpawn {
   std::int16_t ai_flags = 0;
   std::int16_t current_hp = 0;

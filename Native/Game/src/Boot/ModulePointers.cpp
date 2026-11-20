@@ -7,11 +7,10 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/Control/SoundControl.hpp"
 #include "Audio/Cutscene/Stream.hpp"
@@ -403,8 +402,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8EFCu, 44u, (void*)&VS::Content::legacyMaterialModelSequenceSectorCounts, sizeof VS::Content::legacyMaterialModelSequenceSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F28u, 4u, (void*)&VS::Content::objectDataLoadStep, sizeof VS::Content::objectDataLoadStep, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&Actors_sharedSequenceBankIndex, sizeof Actors_sharedSequenceBankIndex, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)&Actors_textureSlotOrigins, sizeof Actors_textureSlotOrigins, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)&Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)VS::Actors::textureSlotOrigins.data(), sizeof VS::Actors::textureSlotOrigins, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)VS::Actors::textureSlotRowOffsets.data(), sizeof VS::Actors::textureSlotRowOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FA8u, 12u, (void*)&Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates, 4u, sizeof Field_gimmickModelTemplates[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides, 1u, 1u},

@@ -868,7 +868,7 @@ void ApplyLiveLockedBoneTransform(Actors_ActorRecord* actor,
   const Transform3 transform = ApplyLockedBoneTransform(
       Core::Math::TransformOf(*parent), Core::Math::TransformOf(locked));
   Core::Math::StoreTransform(locked, transform);
-  skeletonPose.boneMatrices[bone] = locked;
+  skeletonPose.bone_matrices[bone] = locked;
   actor->boneMatrices[bone] = locked;
 }
 }  // namespace VS::Actors

@@ -39,7 +39,7 @@
 #include "Render/UiPrimitives.hpp"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
-Actors_SkeletonPose VS::Actors::skeletonPose;
+VS::Actors::SkeletonPose VS::Actors::skeletonPose;
 
 // decomp: D_800F3C78 (D_800F3C78@BATTLE/BATTLE.PRG)
 MATRIX VS::Actors::skeletonRootMatrix;

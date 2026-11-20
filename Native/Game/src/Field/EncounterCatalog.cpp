@@ -12,8 +12,8 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/CharacterInit.h"
-#include "Actors/Spawning.h"
+#include "Actors/CharacterInit.hpp"
+#include "Actors/Spawning.hpp"
 #include "Audio/SoundState.hpp"
 #include "Battle/Encounter.hpp"
 #include "Content/DataStore.hpp"
@@ -225,29 +225,29 @@ EncounterZone ReadZone(const Content::DataStore& store,
   const std::uint64_t records_offset =
       sizeof(count) + count * std::uint64_t{kFileRecordBytes};
   Section(enemies, records_offset,
-          count * std::uint64_t{sizeof(Actors_CharacterInit)});
+          count * std::uint64_t{sizeof(VS::Actors::CharacterInit)});
   for (std::uint32_t index = 0; index < count; ++index) {
-    const auto definition = Read<Actors_CharacterInit>(
+    const auto definition = Read<VS::Actors::CharacterInit>(
         enemies, static_cast<std::size_t>(records_offset) +
-                     index * sizeof(Actors_CharacterInit));
+                     index * sizeof(VS::Actors::CharacterInit));
     EncounterEnemy enemy;
     enemy.index = static_cast<int>(index);
     enemy.name = EnemyName(definition.name);
     enemy.hp = definition.hp;
     enemy.mp = definition.mp;
-    const auto kind = static_cast<unsigned char>(definition.characterKind);
+    const auto kind = definition.model_id;
     if (index >= EncounterLimits::kEnemyIdEnd || definition.hp <= 0) {
       enemy.unavailable_reason = "not a supported combat actor definition";
     } else {
-      enemy.secondary_model = Actors_usesSecondaryBodyModel[kind] != 0;
+      enemy.secondary_model = VS::Actors::usesSecondaryBodyModel[kind] != 0;
     }
     const auto* asset = store.FindBySector(
         Read<std::uint32_t>(enemies, sizeof(count) + index * kFileRecordBytes));
     if (asset == nullptr || !asset->path.ends_with(".ZUD")) {
       enemy.unavailable_reason = "enemy model archive is missing";
     }
-    if (definition.zudIndex < 0 ||
-        static_cast<std::uint32_t>(definition.zudIndex) >= count) {
+    if (definition.zud_index < 0 ||
+        static_cast<std::uint32_t>(definition.zud_index) >= count) {
       enemy.unavailable_reason = "enemy model index is outside its zone";
     }
     const auto profile = std::ranges::find_if(profiles, [index](const auto& p) {
@@ -265,8 +265,8 @@ EncounterZone ReadZone(const Content::DataStore& store,
     // orbit state, whose initialization is not implemented by the native port.
     constexpr std::uint16_t kFirstOrbitingSubtype = 172;
     constexpr std::uint16_t kLastOrbitingSubtype = 173;
-    if (definition.subType >= kFirstOrbitingSubtype &&
-        definition.subType <= kLastOrbitingSubtype) {
+    if (definition.sub_type >= kFirstOrbitingSubtype &&
+        definition.sub_type <= kLastOrbitingSubtype) {
       enemy.unavailable_reason = "requires unsupported orbiting boss arena";
     }
     zone.enemies.push_back(std::move(enemy));
@@ -496,10 +496,11 @@ std::expected<VS::Items::WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
     const auto count = Read<std::uint32_t>(enemies);
     constexpr std::uint64_t kFileRecordBytes = 8;
     const auto offset = sizeof(count) + count * kFileRecordBytes;
-    const auto records = Section(
-        enemies, offset, count * std::uint64_t{sizeof(Actors_CharacterInit)});
-    auto result = Read<Actors_CharacterInit>(
-                      records, source.actor * sizeof(Actors_CharacterInit))
+    const auto records =
+        Section(enemies, offset,
+                count * std::uint64_t{sizeof(VS::Actors::CharacterInit)});
+    auto result = Read<VS::Actors::CharacterInit>(
+                      records, source.actor * sizeof(VS::Actors::CharacterInit))
                       .weapon;
     constexpr unsigned kDamageTypes = 4, kCostTypes = 8, kMaterials = 8;
     if (result.blade.category != static_cast<int>(weapon) ||

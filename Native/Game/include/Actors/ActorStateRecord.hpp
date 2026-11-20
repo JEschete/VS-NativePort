@@ -64,7 +64,7 @@ struct MovementRequestExtras {
 // The shadow-blend bytes ShadowBlend does not hold; the motion reset clears
 // the whole blend.
 struct ShadowBlendExtras {
-  std::int32_t reserved0 = 0;
+  std::int32_t color = 0;
   std::uint8_t reserved6 = 0;
   std::uint8_t reserved7 = 0;
 

@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
@@ -399,7 +399,7 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
   const int index = GENERATE(0, 1);
   const bool clear = GENERATE(false, true);
   struct GuardedAllocation {
-    Actors_ActorAllocation actor;
+    VS::Actors::ActorAllocation actor;
     std::array<unsigned char, 64> guard;
   } allocation{};
   std::ranges::fill(std::as_writable_bytes(std::span(&allocation, 1)),
@@ -413,10 +413,10 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
     model.boneCount = 1;
     model.reserved5E4 = 0x12345678;
   }
-  const auto offset = offsetof(Actors_ActorAllocation, modelSlots) +
+  const auto offset = offsetof(VS::Actors::ActorAllocation, model_slots) +
                       index * sizeof(VS::Actors::ActorModelSlot);
   std::memcpy(expected.data() + offset, &model, sizeof model);
-  auto* slot = &allocation.actor.modelSlots[index];
+  auto* slot = &allocation.actor.model_slots[index];
   if (clear) {
     VS::Core::Memory::ZeroLiveAlignedWords(slot, sizeof model);
   } else {

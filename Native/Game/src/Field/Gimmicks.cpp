@@ -4,7 +4,6 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"

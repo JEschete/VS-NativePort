@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
@@ -634,8 +634,8 @@ int CheckDefaultLoadoutNames(void) {
       0x0F, 0x24, 0x31,
       0x27, 0x24, 0x31,
       0x2A, 0x32, VS::Core::TextCode::kTerminator};
-  return memcmp(Actors_ashleyInitialLoadout.name, actor_name,
+  return memcmp(VS::Actors::ashleyInitialLoadout.name.data(), actor_name,
                 sizeof actor_name) == 0 &&
-         memcmp(Actors_ashleyInitialLoadout.weapon.name.data(), weapon_name,
-                sizeof weapon_name) == 0;
+         memcmp(VS::Actors::ashleyInitialLoadout.weapon.name.data(),
+                weapon_name, sizeof weapon_name) == 0;
 }

@@ -12,11 +12,11 @@
 #include <vector>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelDraw.h"
+#include "Actors/ModelDraw.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
@@ -48,8 +48,9 @@ constexpr std::size_t kWeaponPaletteColumn = 2;
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(sizeof(ModelCounts) == sizeof(std::uint64_t) &&
               std::is_trivially_copyable_v<ModelCounts>);
-static_assert(std::is_same_v<
-              decltype(Actors_ModelRenderContext::projectedVertices[0]), int&>);
+static_assert(std::is_same_v<decltype(VS::Actors::ModelRenderContext::
+                                          projected_vertices)::value_type,
+                             int>);
 
 struct ModelExtent {
   std::uintptr_t begin = 0;
@@ -193,11 +194,13 @@ class LiveShadowGround final : public ShadowGround {
 }
 
 [[nodiscard]] ModelProjectionView ProjectedVertices() {
-  const Actors_ModelRenderContext& context = VS::Actors::modelRenderContext;
+  const VS::Actors::ModelRenderContext& context =
+      VS::Actors::modelRenderContext;
   const std::size_t count = std::min<std::size_t>(
-      context.projectedVertexCount, std::size(context.projectedVertices));
-  return {std::span<const std::int32_t>(context.projectedVertices).first(count),
-          std::span<const std::int32_t>(context.vertexDepths).first(count)};
+      context.projected_vertex_count, std::size(context.projected_vertices));
+  return {
+      std::span<const std::int32_t>(context.projected_vertices).first(count),
+      std::span<const std::int32_t>(context.vertex_depths).first(count)};
 }
 
 [[nodiscard]] std::span<const std::byte> ActorModelBytes(
@@ -224,14 +227,14 @@ class LiveShadowGround final : public ShadowGround {
 
 bool ProjectLive(const ModelCounts& counts, std::span<const std::byte> model,
                  std::span<const MATRIX> matrices) {
-  Actors_ModelRenderContext& context = VS::Actors::modelRenderContext;
-  context.projectedVertexCount = 0;
+  VS::Actors::ModelRenderContext& context = VS::Actors::modelRenderContext;
+  context.projected_vertex_count = 0;
   LiveModelTransformer transformer(matrices);
   const ModelProjectionResult result =
       ProjectModelVertices(counts, model, matrices.size(), transformer,
-                           std::span<std::int32_t>(context.projectedVertices),
-                           std::span<std::int32_t>(context.vertexDepths));
-  context.projectedVertexCount = result.vertex_count;
+                           std::span<std::int32_t>(context.projected_vertices),
+                           std::span<std::int32_t>(context.vertex_depths));
+  context.projected_vertex_count = result.vertex_count;
   return result.combined_depth != 0;
 }
 
@@ -414,9 +417,9 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
       .scale_y = instance.scaleY,
       .scale_z = instance.scaleZ,
       .blend_level = actor.shadowBlend.level,
-      .radius_shrink_rate = actor.shadowBlend.radiusShrinkRate,
-      .radius_expand_rate = actor.shadowBlend.radiusExpandRate,
-      .blend_color = static_cast<std::uint32_t>(actor.shadowBlend.reserved0),
+      .radius_shrink_rate = actor.shadowBlend.radius_shrink_rate,
+      .radius_expand_rate = actor.shadowBlend.radius_expand_rate,
+      .blend_color = static_cast<std::uint32_t>(actor.shadowBlend.color),
       .fade_red = static_cast<std::int8_t>(actor.fadeRed)};
   LiveShadowGround ground(actor.instance.position);
   LiveModelTransformer transformer;

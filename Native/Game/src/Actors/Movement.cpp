@@ -4,7 +4,6 @@
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Render/Palette.hpp"

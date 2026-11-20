@@ -12,7 +12,7 @@
 #include <optional>
 #include <span>
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
@@ -21,12 +21,12 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/CharacterInit.h"
+#include "Actors/CharacterInit.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/RoomActorCache.h"
+#include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -69,7 +69,7 @@ constexpr int kSecondaryBodyAllocation = 2;
 // A room enemy whose second body takes the weapon model slot keeps an actor
 // record there, not a weapon model (146C.c:6597).
 constexpr std::size_t SecondaryBodyBytes() {
-  return offsetof(Actors_ActorAllocation, modelSlots) +
+  return offsetof(VS::Actors::ActorAllocation, model_slots) +
          sizeof(Actors_ActorRecord);
 }
 // The ZND record byte holding the zone enemy's body model.
@@ -80,11 +80,11 @@ constexpr int kNibbleRange = 0x10;
 
 static_assert(std::size(Battle_actors) == kBattleActorSlots);
 static_assert(sizeof Battle_ActorStats{}.name == kActorNameBytes);
-static_assert(sizeof Actors_CharacterInit{}.name == kActorNameBytes);
+static_assert(sizeof VS::Actors::CharacterInit{}.name == kActorNameBytes);
 static_assert(std::size(Battle_ActorStats{}.limbs) == kActorLimbs);
-static_assert(std::size(Actors_CharacterInit{}.limbs) == kActorLimbs);
+static_assert(std::size(VS::Actors::CharacterInit{}.limbs) == kActorLimbs);
 static_assert(std::size(Battle_ActorStats{}.statusTimers) == kStatusTimers);
-static_assert(std::size(Actors_usesSecondaryBodyModel) >
+static_assert(std::size(VS::Actors::usesSecondaryBodyModel) >
               std::numeric_limits<std::uint8_t>::max());
 static_assert(std::size(VS::Items::weaponCategoryUpperIds) >=
               kWeaponCategoryBounds);
@@ -94,7 +94,7 @@ static_assert(std::size(VS::Items::inventory.shields) == kInventoryShields);
 static_assert(std::size(VS::Items::inventory.armor) == kInventoryArmor);
 static_assert(std::size(VS::State::ashleySnapshot.stats.limbs) == kActorLimbs);
 static_assert(sizeof Field_MpdEnemySpawn{}.settings == kSpawnSettingsBytes);
-static_assert(std::size(Actors_RoomActorRecord{}.limbHp) == kActorLimbs);
+static_assert(std::size(VS::Actors::RoomActorRecord{}.limb_hp) == kActorLimbs);
 
 template <typename Id, typename T>
 [[nodiscard]] Id IdOf(T* pointer) {
@@ -211,8 +211,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   [[nodiscard]] SpawnedActor Allocate(ActorShape shape) override {
     switch (shape) {
       case ActorShape::kAuxiliary: {
-        auto* core = static_cast<Actors_ActorCore*>(
-            ZeroedBlock(sizeof(Actors_ActorCore)));
+        auto* core = static_cast<VS::Actors::ActorCore*>(
+            ZeroedBlock(sizeof(VS::Actors::ActorCore)));
         if (core == nullptr) {
           return SpawnedActor::kNone;
         }
@@ -223,21 +223,21 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         return IdOf<SpawnedActor>(&actor);
       }
       case ActorShape::kEquipped: {
-        auto* allocation = static_cast<Actors_ActorAllocation*>(
-            ZeroedBlock(sizeof(Actors_ActorAllocation)));
+        auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
+            ZeroedBlock(sizeof(VS::Actors::ActorAllocation)));
         if (allocation == nullptr) {
           return SpawnedActor::kNone;
         }
         Battle_Actor& actor = allocation->core.actor.actor;
         actor.stats = &allocation->core.actor.stats;
         actor.model = &allocation->core.model;
-        actor.equipmentModels[0] = &allocation->modelSlots[0];
-        actor.equipmentModels[1] = &allocation->modelSlots[1];
+        actor.equipmentModels[0] = &allocation->model_slots[0];
+        actor.equipmentModels[1] = &allocation->model_slots[1];
         actor.allocationKind = kEquippedAllocation;
         return IdOf<SpawnedActor>(&actor);
       }
       case ActorShape::kSecondaryBody: {
-        auto* allocation = static_cast<Actors_ActorAllocation*>(
+        auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
             ZeroedBlock(SecondaryBodyBytes()));
         if (allocation == nullptr) {
           return SpawnedActor::kNone;
@@ -245,7 +245,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         Battle_Actor& actor = allocation->core.actor.actor;
         actor.stats = &allocation->core.actor.stats;
         actor.model = &allocation->core.model;
-        actor.equipmentModels[0] = &allocation->modelSlots[0];
+        actor.equipmentModels[0] = &allocation->model_slots[0];
         actor.allocationKind = kSecondaryBodyAllocation;
         return IdOf<SpawnedActor>(&actor);
       }
@@ -406,7 +406,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   [[nodiscard]] WeaponRange BuildTemplateEquipment(
       std::size_t slot, TemplateEquipment equipment) override {
     Battle_ActorStats* stats = SlotStats(slot);
-    const auto* init = PointerOf<const Actors_CharacterInit>(equipment);
+    const auto* init = PointerOf<const VS::Actors::CharacterInit>(equipment);
     if (stats == nullptr || init == nullptr) {
       return {};
     }
@@ -605,7 +605,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   // --- The zone
   [[nodiscard]] bool UsesSecondaryBodyModel(
       std::uint8_t model_id) const override {
-    return Actors_usesSecondaryBodyModel[model_id] != 0;
+    return VS::Actors::usesSecondaryBodyModel[model_id] != 0;
   }
 
   // Both the ZND records and the ZUD files have zone_enemy_count entries
@@ -631,7 +631,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
                               VS::Field::zoneContext.room_id)) {
       return std::nullopt;
     }
-    Actors_RoomActorRecord record{};
+    VS::Actors::RoomActorRecord record{};
     if (CopyLiveRememberedEnemy(spawn_index, &record) == nullptr) {
       return std::nullopt;
     }
@@ -868,7 +868,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] CharacterTemplate AshleyTemplate() const override {
-    return DecodeCharacterTemplate(Actors_ashleyInitialLoadout);
+    return DecodeCharacterTemplate(VS::Actors::ashleyInitialLoadout);
   }
 
   [[nodiscard]] WeaponRange LoadAshleyWeapon(
@@ -918,45 +918,44 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   const char* operation_;
 };
 
-LimbTemplate DecodeLimb(const Actors_LimbInit& limb) {
+LimbTemplate DecodeLimb(const VS::Actors::LimbInit& limb) {
   LimbTemplate decoded{.hp = limb.hp,
-                       .agility_defense_bonus = Byte(limb.agilityDefenseBonus),
-                       .chain_evasion = Byte(limb.chainEvasion)};
+                       .agility_defense_bonus = limb.agility_defense_bonus,
+                       .chain_evasion = limb.chain_evasion};
   std::ranges::copy(limb.types, decoded.types.begin());
   std::ranges::copy(limb.affinities, decoded.affinities.begin());
   for (std::size_t action = 0; action < kLimbActions; ++action) {
-    const Actors_LimbActionInit& source = limb.actions[action];
-    decoded.actions.at(action) = {.action_id = source.actionId,
-                                  .effect_model = Byte(source.opaque2),
-                                  .index = Byte(source.index)};
+    const VS::Actors::LimbActionInit& source = limb.actions[action];
+    decoded.actions.at(action) = {.action_id = source.action_id,
+                                  .effect_model = source.effect_model,
+                                  .index = source.index};
   }
-  for (std::size_t i = 0; i < kDpSplashTargets; ++i) {
-    decoded.dp_splash.at(i) = Byte(limb.dpSplash[i]);
-  }
+  decoded.dp_splash = limb.dp_splash;
   return decoded;
 }
 }  // namespace
 
-CharacterTemplate DecodeCharacterTemplate(const Actors_CharacterInit& init) {
+CharacterTemplate DecodeCharacterTemplate(
+    const VS::Actors::CharacterInit& init) {
   CharacterTemplate decoded{
-      .sub_type = init.subType,
-      .model_id = Byte(init.characterKind),
+      .sub_type = init.sub_type,
+      .model_id = init.model_id,
       .reach = init.reach,
-      .enemy_class = init.enemyClass,
+      .enemy_class = init.enemy_class,
       .hp = init.hp,
       .mp = init.mp,
-      .strength = Byte(init.strength),
-      .intelligence = Byte(init.intelligence),
-      .agility = Byte(init.agility),
-      .recovery_delay_bonus = Byte(init.opaque23),
-      .material = Byte(init.material),
-      .walk_speed = Byte(init.walkSpeed),
-      .gait_class = Byte(init.opaque26),
-      .run_speed = Byte(init.runSpeed),
-      .status_immunities = init.opaque28,
-      .template_word = init.opaque2C,
-      .mobility_limbs = {Byte(init.opaque30), Byte(init.opaque31)},
-      .default_target_limb = Byte(init.opaque32),
+      .strength = init.strength,
+      .intelligence = init.intelligence,
+      .agility = init.agility,
+      .recovery_delay_bonus = init.recovery_delay_bonus,
+      .material = init.material,
+      .walk_speed = init.walk_speed,
+      .gait_class = init.gait_class,
+      .run_speed = init.run_speed,
+      .status_immunities = init.status_immunities,
+      .template_word = init.template_word,
+      .mobility_limbs = init.mobility_limbs,
+      .default_target_limb = init.default_target_limb,
       .blade_model =
           static_cast<std::uint8_t>(init.weapon.blade.weapon_model_id),
       .blade_category = init.weapon.blade.category,
@@ -964,7 +963,7 @@ CharacterTemplate DecodeCharacterTemplate(const Actors_CharacterInit& init) {
       .shield_model =
           static_cast<std::uint8_t>(init.shield.base.weapon_model_id),
       .shield_material = init.shield.material,
-      .zud_index = init.zudIndex,
+      .zud_index = init.zud_index,
       .equipment = IdOf<TemplateEquipment>(&init)};
   for (std::size_t i = 0; i < kActorNameBytes; ++i) {
     decoded.name.at(i) = Byte(init.name[i]);
@@ -992,21 +991,21 @@ RoomSpawn DecodeRoomSpawn(const Field_MpdEnemySpawn& spawn) {
   return decoded;
 }
 
-RememberedSpawn DecodeRemembered(const Actors_RoomActorRecord& record) {
-  RememberedSpawn decoded{.ai_flags = record.aiFlags,
-                          .current_hp = record.currentHp,
-                          .max_hp = record.maxHp,
-                          .current_mp = record.currentMp,
-                          .max_mp = record.maxMp,
+RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
+  RememberedSpawn decoded{.ai_flags = record.ai_flags,
+                          .current_hp = record.current_hp,
+                          .max_hp = record.max_hp,
+                          .current_mp = record.current_mp,
+                          .max_mp = record.max_mp,
                           .strength = record.strength,
                           .intelligence = record.intelligence,
                           .agility = record.agility,
                           .statuses = record.statuses,
-                          .placement = {.tile_x = record.tileX,
+                          .placement = {.tile_x = record.tile_x,
                                         .direction = record.direction,
-                                        .tile_z = record.tileZ,
+                                        .tile_z = record.tile_z,
                                         .height = record.height}};
-  std::ranges::copy(record.limbHp, decoded.limb_hp.begin());
+  std::ranges::copy(record.limb_hp, decoded.limb_hp.begin());
   return decoded;
 }
 
@@ -1044,7 +1043,7 @@ Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
 
 // decomp: BATTLE.PRG func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6578)
 Battle_Actor* SpawnLiveRoomEnemy(int actor_id, Field_MpdEnemySpawn* spawn,
-                                 Actors_CharacterInit* init, int flags) {
+                                 VS::Actors::CharacterInit* init, int flags) {
   constexpr const char* kOperation = "SpawnRoomEnemy";
   if (spawn == nullptr || init == nullptr) {
     WarnActorRefused(kOperation, "no spawn record or template");

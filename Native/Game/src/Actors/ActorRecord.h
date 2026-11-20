@@ -8,7 +8,7 @@ struct Actors_CompanionOffset;
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Render/Palette.hpp"
 
@@ -173,7 +173,7 @@ struct Actors_ActorRecord {
     u_char reserved1861;
     u_char reserved1862;
     u_char reserved1863;
-    Actors_ShadowBlend shadowBlend;
+    VS::Actors::ShadowBlendRecord shadowBlend;
     int savedPlacement;
     intptr_t animationHeader;
     u_char jointSlots[0x10];

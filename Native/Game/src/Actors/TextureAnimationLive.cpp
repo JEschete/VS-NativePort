@@ -17,7 +17,7 @@
 #include "Actors/Movement.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimation.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Timers.hpp"
@@ -30,9 +30,9 @@ static_assert(sizeof(Actors_ActorRecord::textureRowOffsets) == kTextureBanks);
 constexpr std::size_t kSlotOriginBytes = 4;
 constexpr unsigned kByteBits = 8;
 constexpr std::size_t kTextureSlots = 38;
-static_assert(sizeof Actors_textureSlotOrigins ==
+static_assert(sizeof VS::Actors::textureSlotOrigins ==
               kTextureSlots * kSlotOriginBytes);
-static_assert(sizeof Actors_textureSlotRowOffsets >= kTextureSlots);
+static_assert(sizeof VS::Actors::textureSlotRowOffsets >= kTextureSlots);
 constexpr unsigned kSheetPageMask = 0xF;
 // BATTLE.PRG 40564.c D_800E909C[][28] (this port's
 // Actors_sheathedWeaponAnimationBases) holds channel 0's timelines and
@@ -112,8 +112,8 @@ void StoreSlot(const TextureAnimationSlot& slot,
                                               std::size_t half) {
   const std::size_t byte = (slot * kSlotOriginBytes) + (half * 2);
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(
-      Actors_textureSlotOrigins[byte] |
-      (Actors_textureSlotOrigins[byte + 1] << kByteBits)));
+      VS::Actors::textureSlotOrigins[byte] |
+      (VS::Actors::textureSlotOrigins[byte + 1] << kByteBits)));
 }
 
 // Where the actor's drawn texture lives, or none for a slot past the tables.
@@ -124,12 +124,12 @@ void StoreSlot(const TextureAnimationSlot& slot,
   if (slot >= kTextureSlots) return std::nullopt;
   // The original tested bit 27 of the word eight bytes before sequenceFlags:
   // this flag. It marks the 8-bit textures.
-  return ActorTextureLayout{.depth = actor.textureHeaderBit != 0
-                                         ? TextureDepth::k8Bit
-                                         : TextureDepth::k4Bit,
-                            .slot_x = SlotOriginHalfword(slot, 0),
-                            .slot_y = SlotOriginHalfword(slot, 1),
-                            .slot_row = Actors_textureSlotRowOffsets[slot]};
+  return ActorTextureLayout{
+      .depth = actor.textureHeaderBit != 0 ? TextureDepth::k8Bit
+                                           : TextureDepth::k4Bit,
+      .slot_x = SlotOriginHalfword(slot, 0),
+      .slot_y = SlotOriginHalfword(slot, 1),
+      .slot_row = VS::Actors::textureSlotRowOffsets[slot]};
 }
 
 void WarnSlotRefused(const Actors_ActorRecord& actor, const char* operation) {

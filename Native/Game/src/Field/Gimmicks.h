@@ -14,7 +14,7 @@ struct Field_MpdLockTrigger;
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Render/Palette.hpp"
 
 // decomp: D_800E8FB4_t (src/BATTLE/BATTLE.PRG/30DB0.c:36)
@@ -232,7 +232,7 @@ struct Field_GimmickInstance {
     u_short reserved184E;
     u_int reserved1850;
     u_char reserved1854[0x10];
-    Actors_ShadowBlend shadowBlend;
+    VS::Actors::ShadowBlendRecord shadowBlend;
     int savedPlacement;
     int reserved187C;
 };

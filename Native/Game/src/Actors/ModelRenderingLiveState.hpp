@@ -3,13 +3,13 @@
 // The model render context as the copied code reads it. ModelRenderingLive.cpp
 // defines it.
 
-#include "Actors/ModelDraw.h"
+#include "Actors/ModelDraw.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Actors {
 
 // decomp: D_800F2458 (BATTLE/BATTLE.PRG 30DB0.c): the projected vertices of
 // the model being drawn and the model scale.
-extern Actors_ModelRenderContext modelRenderContext;
+extern ModelRenderContext modelRenderContext;
 
 }  // namespace VS::Actors

@@ -8,7 +8,7 @@
 #include <string>
 #include <string_view>
 
-#include "Actors/RoomActorCache.h"
+#include "Actors/RoomActorCache.hpp"
 #include "Field/Mpd.h"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
@@ -71,7 +71,7 @@ struct RoomCache {
   std::uint8_t zone = 0;
   std::uint16_t map = 0;
   std::uint32_t next_slot = 0;
-  std::array<Actors_RoomActorRecord, kCachedRoomActors> actors{};
+  std::array<VS::Actors::RoomActorRecord, kCachedRoomActors> actors{};
 };
 
 struct RandomState {

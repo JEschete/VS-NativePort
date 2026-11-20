@@ -3,7 +3,7 @@
 // The skeleton pose, the weapon model table and the bone camera as the copied
 // code reads them. SkeletonLive.cpp defines them.
 
-#include "Actors/ModelDraw.h"
+#include "Actors/ModelDraw.hpp"
 #include "Actors/WeaponModel.h"
 #include "Legacy/Psx.h"
 
@@ -11,7 +11,7 @@ namespace VS::Actors {
 
 // decomp: D_800F3C58 (BATTLE/BATTLE.PRG 44F14.c): the bone matrices of the
 // skeleton being drawn and its scale.
-extern Actors_SkeletonPose skeletonPose;
+extern SkeletonPose skeletonPose;
 // decomp: D_800F3C78 (BATTLE/BATTLE.PRG 49268.c): the placed gimmick model's
 // root matrix. The original address is boneMatrices[1] of D_800F3C58; the
 // native keeps it apart, as nothing reads it and the actor pose writes its own

@@ -22,7 +22,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
-#include "Actors/ModelDraw.h"
+#include "Actors/ModelDraw.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.hpp"
@@ -33,7 +33,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -54,7 +54,7 @@
 #include "State/Timers.hpp"
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
-Actors_ModelRenderContext VS::Actors::modelRenderContext;
+VS::Actors::ModelRenderContext VS::Actors::modelRenderContext;
 
 namespace VS::Actors {
 namespace {
@@ -82,7 +82,7 @@ static_assert(std::extent_v<decltype(Actors_WeaponModel::boneWorldMatrices)> ==
               kWeaponBoneLimit);
 static_assert(std::extent_v<decltype(Actors_WeaponModel::bones)> ==
               kWeaponBoneLimit);
-static_assert(std::size(skeletonPose.boneMatrices) >= kWeaponBoneLimit);
+static_assert(std::size(skeletonPose.bone_matrices) >= kWeaponBoneLimit);
 
 // The root key is the last key of the blended pose.
 using PoseKeys = decltype(Actors_AnimationPose::boneKeys);
@@ -421,7 +421,7 @@ void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
   workspace.position.vx = 0;
   workspace.position.vy = 0;
   for (std::size_t bone = 0; bone < chain.size(); ++bone) {
-    StoreTransform(skeletonPose.boneMatrices[bone], chain[bone]);
+    StoreTransform(skeletonPose.bone_matrices[bone], chain[bone]);
     StoreTransform(weapon.boneWorldMatrices[bone], chain[bone]);
   }
   StoreTransform(workspace.matrix, chain.back());
@@ -484,8 +484,8 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
   constexpr unsigned kByteBits = 8;
   const std::size_t byte = (slot * kSlotOriginBytes) + (half * 2);
   return static_cast<std::int16_t>(
-      Actors_textureSlotOrigins[byte] |
-      (Actors_textureSlotOrigins[byte + 1] << kByteBits));
+      VS::Actors::textureSlotOrigins[byte] |
+      (VS::Actors::textureSlotOrigins[byte + 1] << kByteBits));
 }
 
 void StoreSlotIds(VS::Render::TextureSlot& slot, const TextureSlotIds& ids) {
@@ -501,8 +501,8 @@ void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
     WarnActorRefused("PrepareActorRootTransform", "no actor record");
     return;
   }
-  std::fill(std::begin(modelRenderContext.modelScale),
-            std::end(modelRenderContext.modelScale), kUnitModelScale);
+  std::fill(std::begin(modelRenderContext.model_scale),
+            std::end(modelRenderContext.model_scale), kUnitModelScale);
   VS::Render::ModelScratchpad& workspace = Workspace();
   StoreVector(workspace.root_offset,
               ActorRootOffset(VectorOf(actor->blendPose.boneKeys[kRootKey]),
@@ -561,7 +561,7 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
   }
   if (placed.scale) StoreVector(workspace.scale, *placed.scale);
   StoreTransform(workspace.matrix, placed.model);
-  StoreTransform(skeletonPose.boneMatrices[0], placed.model);
+  StoreTransform(skeletonPose.bone_matrices[0], placed.model);
   StoreTransform(object->matrices[kModelMatrix], placed.model);
   StoreTransform(skeletonRootMatrix, placed.model);
   StoreTransform(object->matrices[kRootMatrix], placed.model);

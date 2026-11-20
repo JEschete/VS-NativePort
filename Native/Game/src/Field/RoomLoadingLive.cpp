@@ -18,11 +18,11 @@
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/CharacterInit.h"
+#include "Actors/CharacterInit.hpp"
 #include "Actors/Location.h"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Audio/MusicLive.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
@@ -114,7 +114,7 @@ constexpr std::size_t kOrderingEntryBytes = 4;
 }  // namespace
 
 static_assert(sizeof(Field_MpdEnemySpawn) == VS::Field::kRoomPlacementBytes);
-static_assert(sizeof(Actors_CharacterInit) ==
+static_assert(sizeof(VS::Actors::CharacterInit) ==
               VS::Field::kZoneEnemyTemplateBytes);
 static_assert(sizeof(Content_DiscFile) == VS::Field::kRoomFileEntryBytes);
 static_assert(sizeof(Field_roomData.header) ==
@@ -131,7 +131,7 @@ constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 // (146C.c:15150).
 constexpr int kEntranceDropHeight = -0x800;
 constexpr int kEntranceMovementClass = 2;
-// The zone template byte naming the enemy's model (Actors_CharacterInit).
+// The zone template byte naming the enemy's model (VS::Actors::CharacterInit).
 constexpr std::size_t kTemplateModelAt = 2;
 // The camera looks 90 units above Ashley's feet (146C.c:15440).
 constexpr int kCameraTargetLift = 90;
@@ -658,7 +658,8 @@ class LiveSpawning : public Host {
       return false;
     }
     const ZoneEnemyTemplate& record = zoneContext.zone_enemies[enemy_id];
-    return Actors_usesSecondaryBodyModel[record.bytes[kTemplateModelAt]] != 0;
+    return VS::Actors::usesSecondaryBodyModel[record.bytes[kTemplateModelAt]] !=
+           0;
   }
 
   // The template is copied: the spawn decodes it and keeps no pointer.
@@ -669,7 +670,7 @@ class LiveSpawning : public Host {
       this->Refuse(RoomLoadRefusal::kEnemyTemplate, enemy_id);
       return;
     }
-    Actors_CharacterInit init{};
+    VS::Actors::CharacterInit init{};
     std::memcpy(&init, &zoneContext.zone_enemies[enemy_id], sizeof init);
     static_cast<void>(Actors::SpawnLiveRoomEnemy(
         slot, &zoneContext.room_enemies[placement_index], &init, flags));

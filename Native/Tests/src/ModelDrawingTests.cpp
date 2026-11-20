@@ -389,8 +389,8 @@ struct BorrowedGeometryFixture {
   static constexpr int kGeometrySlot = 5;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
-  Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
+  VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
+  VS::Actors::ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   std::array<unsigned, 32> model_bytes{};
   Actors_ActorRecord actor{};
@@ -441,7 +441,7 @@ struct BorrowedGeometryFixture {
     return record.instance.baseColor.r == 0 &&
            record.instance.baseColor.g == 0 &&
            record.instance.baseColor.b == 0 &&
-           (record.shadowBlend.reserved0 & 0xFFFFFF) == 0;
+           (record.shadowBlend.color & 0xFFFFFF) == 0;
   }
   // The flat pass's colour: the actor's tint {100, 70, 20} adjusted by the
   // geometry's fades {255, 50, 246}, and the tint itself as the shadow.
@@ -449,12 +449,11 @@ struct BorrowedGeometryFixture {
     return record.instance.baseColor.r == 96 &&
            record.instance.baseColor.g == 255 &&
            record.instance.baseColor.b == 0 &&
-           (record.shadowBlend.reserved0 & 0xFFFFFF) == 0x144664;
+           (record.shadowBlend.color & 0xFFFFFF) == 0x144664;
   }
   // The Gouraud pass's ground shadow is never darker than 64 per channel.
   [[nodiscard]] static bool GroundShaded(const Actors_ActorRecord& record) {
-    const auto shadow =
-        static_cast<std::uint32_t>(record.shadowBlend.reserved0);
+    const auto shadow = static_cast<std::uint32_t>(record.shadowBlend.color);
     return (shadow & 0xFF) >= 64 && ((shadow >> 8) & 0xFF) >= 64 &&
            ((shadow >> 16) & 0xFF) >= 64;
   }

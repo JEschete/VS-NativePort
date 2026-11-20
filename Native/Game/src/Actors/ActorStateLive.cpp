@@ -33,7 +33,7 @@
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
@@ -185,7 +185,7 @@ void LoadRecordFields(const Actors_ActorRecord& live,
       .step = LiveMotionVector(request.step)};
   record.reserved_1860 = live.opaque1860;
   record.shadow = LoadLiveShadowBlend(live.shadowBlend);
-  record.shadow_extras = {.reserved0 = live.shadowBlend.reserved0,
+  record.shadow_extras = {.color = live.shadowBlend.color,
                           .reserved6 = live.shadowBlend.reserved6,
                           .reserved7 = live.shadowBlend.reserved7};
   record.shadow_expand_rate = live.shadowRadiusExpandRate;
@@ -219,7 +219,7 @@ void StoreRecordFields(const ActorStateRecord& record,
   request.step = LiveSvector(record.request_extras.step);
   live.opaque1860 = record.reserved_1860;
   StoreLiveShadowBlend(record.shadow, live.shadowBlend);
-  live.shadowBlend.reserved0 = record.shadow_extras.reserved0;
+  live.shadowBlend.color = record.shadow_extras.color;
   live.shadowBlend.reserved6 = record.shadow_extras.reserved6;
   live.shadowBlend.reserved7 = record.shadow_extras.reserved7;
   live.pendingTargetX = record.pending_target_x;

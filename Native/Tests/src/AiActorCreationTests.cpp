@@ -18,7 +18,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
@@ -747,8 +747,8 @@ TEST_CASE("Live AI creation builds Ashley's state from her actor record",
 TEST_CASE("Live AI creation registers an auxiliary special actor",
           "[ai][actor-creation][creation-live]") {
   LiveCreationFixture fixture;
-  Actors_ActorCore core{};
-  core.reserved16C = static_cast<int>(0xFFFFFF04u);
+  VS::Actors::ActorCore core{};
+  core.object_word = static_cast<int>(0xFFFFFF04u);
   Battle_Actor holder{};
   fixture.room.specialActors[0] = &holder;
   fixture.actor.id = 6;

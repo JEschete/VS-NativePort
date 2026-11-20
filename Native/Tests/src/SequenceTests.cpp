@@ -26,7 +26,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionExecution.hpp"
@@ -579,7 +579,7 @@ int Tests_GimmickRoomScale(void) {
   enum { kGimmickCameraMatrix = 4 };
   const VS::Render::ModelScratchpad saved_workspace =
       *VS::Render::ModelWorkspace();
-  const Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
+  const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   const MATRIX saved_root = VS::Actors::skeletonRootMatrix;
   const VECTOR saved_scale = VS::Actors::roomActorScale;
   Field_GimmickInstance object = {0};
@@ -653,11 +653,12 @@ int Tests_FacialTextureBankHandoff(void) {
   void* saved_primitives =
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   const unsigned char saved_bank = Actors_sharedSequenceBankIndex;
-  const unsigned char saved_row = Actors_textureSlotRowOffsets[0];
+  const unsigned char saved_row = VS::Actors::textureSlotRowOffsets[0];
   Actors_ActorRecord* saved_actors[17];
   std::ranges::copy(Actors_actorRecords, saved_actors);
   unsigned char saved_origins[4];
-  memcpy(saved_origins, Actors_textureSlotOrigins, sizeof saved_origins);
+  memcpy(saved_origins, VS::Actors::textureSlotOrigins.data(),
+         sizeof saved_origins);
   const Actors_TextureAnimationKey saved_key =
       Actors_secondarySlotSequences[1][0];
   // The loaded read is a queue slot, as the loader's own reads are.
@@ -689,8 +690,8 @@ int Tests_FacialTextureBankHandoff(void) {
   Actors_secondarySlotSequences[1][0] = (Actors_TextureAnimationKey){2, 5};
   Actors_sharedSequenceBankIndex = 0;
   const int16_t origin[2] = {4, 0};
-  memcpy(Actors_textureSlotOrigins, origin, sizeof origin);
-  Actors_textureSlotRowOffsets[0] = 1;
+  memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
+  VS::Actors::textureSlotRowOffsets[0] = 1;
   u_long ordering[0x822];
   DR_MOVE packet = {0};
   // The texture move is bounded to the frame's primitive buffer.
@@ -763,9 +764,10 @@ int Tests_FacialTextureBankHandoff(void) {
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
       saved_primitives;
   Actors_sharedSequenceBankIndex = saved_bank;
-  Actors_textureSlotRowOffsets[0] = saved_row;
+  VS::Actors::textureSlotRowOffsets[0] = saved_row;
   std::ranges::copy(saved_actors, Actors_actorRecords);
-  memcpy(Actors_textureSlotOrigins, saved_origins, sizeof saved_origins);
+  memcpy(VS::Actors::textureSlotOrigins.data(), saved_origins,
+         sizeof saved_origins);
   Actors_secondarySlotSequences[1][0] = saved_key;
   return passed;
 }
@@ -779,8 +781,9 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   void* saved_primitives =
       VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1];
   unsigned char saved_origins[4];
-  memcpy(saved_origins, Actors_textureSlotOrigins, sizeof saved_origins);
-  const unsigned char saved_row = Actors_textureSlotRowOffsets[0];
+  memcpy(saved_origins, VS::Actors::textureSlotOrigins.data(),
+         sizeof saved_origins);
+  const unsigned char saved_row = VS::Actors::textureSlotRowOffsets[0];
   const unsigned char saved_bank = Actors_sharedSequenceBankIndex;
   const unsigned char saved_page = Actors_sharedSequenceBankTexturePages[0];
   struct {
@@ -799,8 +802,8 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   Actors_sharedSequenceBankIndex = 0;
   Actors_sharedSequenceBankTexturePages[0] = 0x1A;
   const int16_t origin[2] = {4, 0};
-  memcpy(Actors_textureSlotOrigins, origin, sizeof origin);
-  Actors_textureSlotRowOffsets[0] = 1;
+  memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
+  VS::Actors::textureSlotRowOffsets[0] = 1;
   actor.textureHeaderBit = wide;
   actor.textureSlot = 0;
   actor.textureRowOffsets[0] = 7;
@@ -833,8 +836,9 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   VS::Render::legacyCurrentOrderingTable = saved_ordering;
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] =
       saved_primitives;
-  memcpy(Actors_textureSlotOrigins, saved_origins, sizeof saved_origins);
-  Actors_textureSlotRowOffsets[0] = saved_row;
+  memcpy(VS::Actors::textureSlotOrigins.data(), saved_origins,
+         sizeof saved_origins);
+  VS::Actors::textureSlotRowOffsets[0] = saved_row;
   Actors_sharedSequenceBankIndex = saved_bank;
   Actors_sharedSequenceBankTexturePages[0] = saved_page;
   return passed;
@@ -1221,8 +1225,8 @@ int Tests_ActorPoseHierarchy(void) {
   unsigned file[32] = {0};
   Actors_ActorRecord actor = {0};
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(file);
-  const Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
-  const Actors_ModelRenderContext saved_context =
+  const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
+  const VS::Actors::ModelRenderContext saved_context =
       VS::Actors::modelRenderContext;
   const VS::Render::ModelScratchpad saved_workspace =
       *VS::Render::ModelWorkspace();
@@ -1246,7 +1250,7 @@ int Tests_ActorPoseHierarchy(void) {
                actor.boneMatrices[1].t[0] == -28 &&
                actor.boneMatrices[1].t[1] == 200 &&
                actor.boneMatrices[1].m[0][0] == 2048 &&
-               VS::Actors::skeletonPose.boneMatrices[1].m[0][0] == 4096;
+               VS::Actors::skeletonPose.bone_matrices[1].m[0][0] == 4096;
   actor.instance.isVisible = 1;
   actor.instance.wasDrawn = 1;
   actor.customTint = 1;
@@ -1267,11 +1271,11 @@ int Tests_ActorPoseHierarchy(void) {
   Core_Gte_SetGeomScreen(256);
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
   passed = passed && actor.instance.wasDrawn &&
-           VS::Actors::modelRenderContext.projectedVertexCount == 1;
+           VS::Actors::modelRenderContext.projected_vertex_count == 1;
   passed = passed && actor.instance.baseColor.r == 96 &&
            actor.instance.baseColor.g == 255 &&
            actor.instance.baseColor.b == 0 &&
-           (actor.shadowBlend.reserved0 & 0xFFFFFF) == 0x144664;
+           (actor.shadowBlend.color & 0xFFFFFF) == 0x144664;
   actor.customTint = 0;
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
   passed = passed && actor.instance.baseColor.r == 124 &&
@@ -1334,9 +1338,9 @@ static void BuildModelPacketFixture(Actors_ShpModel* model,
     polygon[15] = 40;
   }
   if (options->split != 0) {
-    VS::Actors::modelRenderContext.projectedVertexCount = 4;
-    VS::Actors::modelRenderContext.projectedVertices[3] = (160 << 16) | 160;
-    VS::Actors::modelRenderContext.vertexDepths[3] =
+    VS::Actors::modelRenderContext.projected_vertex_count = 4;
+    VS::Actors::modelRenderContext.projected_vertices[3] = (160 << 16) | 160;
+    VS::Actors::modelRenderContext.vertex_depths[3] =
         1024 + options->split * 128;
     instance->triangleCount = 0;
     instance->otherPolygonCount = 1;
@@ -1437,7 +1441,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(modelWords);
   Actors_ModelInstance instance = {0};
   const ModelPacketOptions options = {colored, split, limb, pulse_mask};
-  const Actors_ModelRenderContext saved_context =
+  const VS::Actors::ModelRenderContext saved_context =
       VS::Actors::modelRenderContext;
   VS::Render::FrameScratch* frame =
       reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
@@ -1460,12 +1464,12 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   VS::Render::ModelWorkspace()->texture_page = 0x15;
   memset(&VS::Actors::modelRenderContext, 0,
          sizeof VS::Actors::modelRenderContext);
-  VS::Actors::modelRenderContext.projectedVertexCount = 3;
-  VS::Actors::modelRenderContext.projectedVertices[0] = (80 << 16) | 80;
-  VS::Actors::modelRenderContext.projectedVertices[1] = (80 << 16) | 160;
-  VS::Actors::modelRenderContext.projectedVertices[2] = (160 << 16) | 80;
+  VS::Actors::modelRenderContext.projected_vertex_count = 3;
+  VS::Actors::modelRenderContext.projected_vertices[0] = (80 << 16) | 80;
+  VS::Actors::modelRenderContext.projected_vertices[1] = (80 << 16) | 160;
+  VS::Actors::modelRenderContext.projected_vertices[2] = (160 << 16) | 80;
   for (int index = 0; index < kTriangleCorners; ++index) {
-    VS::Actors::modelRenderContext.vertexDepths[index] = kVertexDepth;
+    VS::Actors::modelRenderContext.vertex_depths[index] = kVertexDepth;
   }
   BuildModelPacketFixture(model, &instance, &options);
   instance.actionAnimationState = appearance;
@@ -1509,7 +1513,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   passed = passed && ModelPacketColorsMatch(packet, colored, blend, &tint);
   if (split != 0) {
     const u_long* second = packet + 8;
-    const auto& projected = VS::Actors::modelRenderContext.projectedVertices;
+    const auto& projected = VS::Actors::modelRenderContext.projected_vertices;
     passed = frame->primitive_cursor == memory + 72 &&
              (packet[1] >> 24) == (0x24 | command_bit) &&
              (second[1] >> 24) == (0x24 | command_bit) &&
@@ -1560,7 +1564,7 @@ int Tests_ModelProjectionGroups(void) {
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(file);
   Actors_ModelInstance instance = {0};
   MATRIX matrices[2] = {0};
-  const Actors_ModelRenderContext saved = VS::Actors::modelRenderContext;
+  const VS::Actors::ModelRenderContext saved = VS::Actors::modelRenderContext;
   model->groupSection = 96;
   model->vertexSection = 104;
   model->polygonSection = 128;
@@ -1591,17 +1595,17 @@ int Tests_ModelProjectionGroups(void) {
   actor.modelDataSize = sizeof file;
   int passed =
       VS::Render::ProjectLiveActorModel(actor, matrices) &&
-      VS::Actors::modelRenderContext.projectedVertexCount == 3 &&
+      VS::Actors::modelRenderContext.projected_vertex_count == 3 &&
       static_cast<int16_t>(
-          VS::Actors::modelRenderContext.projectedVertices[0]) == 144 &&
+          VS::Actors::modelRenderContext.projected_vertices[0]) == 144 &&
       static_cast<int16_t>(
-          VS::Actors::modelRenderContext.projectedVertices[1]) == 192 &&
+          VS::Actors::modelRenderContext.projected_vertices[1]) == 192 &&
       static_cast<int16_t>(
-          VS::Actors::modelRenderContext.projectedVertices[2]) == 208 &&
-      VS::Actors::modelRenderContext.vertexDepths[2] == 1024;
+          VS::Actors::modelRenderContext.projected_vertices[2]) == 208 &&
+      VS::Actors::modelRenderContext.vertex_depths[2] == 1024;
   groups[2] = 2;
   passed = passed && !VS::Render::ProjectLiveActorModel(actor, matrices) &&
-           VS::Actors::modelRenderContext.projectedVertexCount == 0;
+           VS::Actors::modelRenderContext.projected_vertex_count == 0;
   groups[2] = 1;
   groups[3] = 769;
   passed = passed && !VS::Render::ProjectLiveActorModel(actor, matrices);

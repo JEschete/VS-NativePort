@@ -14,7 +14,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Location.h"
-#include "Actors/RoomActorCache.h"
+#include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -32,50 +32,51 @@ static_assert(std::size(VS::State::recentRoomEnemyStates) == kRememberedRooms);
 static_assert(std::size(VS::State::recentRoomEnemyStates[0].actor_states) ==
               kRememberedEnemiesPerRoom);
 static_assert(sizeof VS::State::recentRoomEnemyStates[0].actor_states[0] ==
-              sizeof(Actors_RoomActorRecord));
-static_assert(std::size(Actors_RoomActorRecord{}.limbHp) == kRememberedLimbs);
+              sizeof(VS::Actors::RoomActorRecord));
+static_assert(std::size(VS::Actors::RoomActorRecord{}.limb_hp) ==
+              kRememberedLimbs);
 static_assert(std::size(Battle_ActorStats{}.limbs) == kRememberedLimbs);
 
-RememberedEnemy Decode(const Actors_RoomActorRecord& record) {
+RememberedEnemy Decode(const VS::Actors::RoomActorRecord& record) {
   RememberedEnemy enemy;
-  enemy.spawn_tag = record.spawnSlot;
-  enemy.hidden = record.isHidden;
-  enemy.ai_flags = record.aiFlags;
-  enemy.current_hp = record.currentHp;
-  enemy.max_hp = record.maxHp;
-  enemy.current_mp = record.currentMp;
-  enemy.max_mp = record.maxMp;
+  enemy.spawn_tag = record.spawn_slot;
+  enemy.hidden = record.hidden;
+  enemy.ai_flags = record.ai_flags;
+  enemy.current_hp = record.current_hp;
+  enemy.max_hp = record.max_hp;
+  enemy.current_mp = record.current_mp;
+  enemy.max_mp = record.max_mp;
   enemy.strength = record.strength;
   enemy.intelligence = record.intelligence;
   enemy.agility = record.agility;
-  std::ranges::copy(record.limbHp, enemy.limb_hp.begin());
-  enemy.reserved = record.reserved1E;
+  std::ranges::copy(record.limb_hp, enemy.limb_hp.begin());
+  enemy.reserved = record.reserved_1e;
   enemy.statuses = record.statuses;
-  enemy.placement = {.tile_x = record.tileX,
+  enemy.placement = {.tile_x = record.tile_x,
                      .tile_layer = record.direction,
-                     .tile_z = record.tileZ,
+                     .tile_z = record.tile_z,
                      .facing = record.height};
   return enemy;
 }
 
-Actors_RoomActorRecord Encode(const RememberedEnemy& enemy) {
-  Actors_RoomActorRecord record{};
-  record.spawnSlot = enemy.spawn_tag;
-  record.isHidden = enemy.hidden;
-  record.aiFlags = enemy.ai_flags;
-  record.currentHp = enemy.current_hp;
-  record.maxHp = enemy.max_hp;
-  record.currentMp = enemy.current_mp;
-  record.maxMp = enemy.max_mp;
+VS::Actors::RoomActorRecord Encode(const RememberedEnemy& enemy) {
+  VS::Actors::RoomActorRecord record{};
+  record.spawn_slot = enemy.spawn_tag;
+  record.hidden = enemy.hidden;
+  record.ai_flags = enemy.ai_flags;
+  record.current_hp = enemy.current_hp;
+  record.max_hp = enemy.max_hp;
+  record.current_mp = enemy.current_mp;
+  record.max_mp = enemy.max_mp;
   record.strength = enemy.strength;
   record.intelligence = enemy.intelligence;
   record.agility = enemy.agility;
-  std::ranges::copy(enemy.limb_hp, std::begin(record.limbHp));
-  record.reserved1E = enemy.reserved;
+  std::ranges::copy(enemy.limb_hp, std::begin(record.limb_hp));
+  record.reserved_1e = enemy.reserved;
   record.statuses = enemy.statuses;
-  record.tileX = enemy.placement.tile_x;
+  record.tile_x = enemy.placement.tile_x;
   record.direction = enemy.placement.tile_layer;
-  record.tileZ = enemy.placement.tile_z;
+  record.tile_z = enemy.placement.tile_z;
   record.height = enemy.placement.facing;
   return record;
 }
@@ -94,7 +95,7 @@ RoomEnemyMemory LoadLiveRoomEnemyMemory() {
     room.map = saved.map_id;
     room.next_slot = saved.next_slot;
     for (std::size_t slot = 0; slot < room.enemies.size(); ++slot) {
-      Actors_RoomActorRecord record{};
+      VS::Actors::RoomActorRecord record{};
       std::memcpy(&record, saved.actor_states[slot], sizeof record);
       room.enemies[slot] = Decode(record);
     }
@@ -112,7 +113,7 @@ void StoreLiveRoomEnemyMemory(const RoomEnemyMemory& memory) {
     saved.map_id = room.map;
     saved.next_slot = room.next_slot;
     for (std::size_t slot = 0; slot < room.enemies.size(); ++slot) {
-      const Actors_RoomActorRecord record = Encode(room.enemies[slot]);
+      const VS::Actors::RoomActorRecord record = Encode(room.enemies[slot]);
       std::memcpy(saved.actor_states[slot], &record, sizeof record);
     }
   }
@@ -216,8 +217,8 @@ bool IsLiveRememberedRoom(int zone, int map) {
   return IsCurrentRememberedRoom(memory, zone, map);
 }
 
-Actors_RoomActorRecord* CopyLiveRememberedEnemy(int spawn_index,
-                                                Actors_RoomActorRecord* out) {
+VS::Actors::RoomActorRecord* CopyLiveRememberedEnemy(
+    int spawn_index, VS::Actors::RoomActorRecord* out) {
   constexpr const char* kOperation = "CopyLiveRememberedEnemy";
   if (out == nullptr) {
     WarnActorRefused(kOperation, "no output record");

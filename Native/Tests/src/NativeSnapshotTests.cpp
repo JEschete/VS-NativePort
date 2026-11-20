@@ -97,10 +97,10 @@ void SetProgress(Save::Snapshot& state) {
   state.room_cache[3].zone = 9;
   state.room_cache[3].map = 20;
   state.room_cache[3].next_slot = 7;
-  state.room_cache[3].actors[7].spawnSlot = 32;
-  state.room_cache[3].actors[7].currentHp = 123;
-  state.room_cache[3].actors[7].tileX = 31;
-  state.room_cache[3].actors[7].tileZ = 30;
+  state.room_cache[3].actors[7].spawn_slot = 32;
+  state.room_cache[3].actors[7].current_hp = 123;
+  state.room_cache[3].actors[7].tile_x = 31;
+  state.room_cache[3].actors[7].tile_z = 30;
   state.play_ticks = std::uint64_t{60} * 60 * 60;
   state.scene_timer.mode = 2;
   state.scene_timer.time.frames = 59;
@@ -202,7 +202,7 @@ void CheckProgress(const Save::Snapshot& state,
   CHECK(state.location.position == original.location.position);
   CHECK(state.location.scene == original.location.scene);
   CHECK(state.random.shuffle == original.random.shuffle);
-  CHECK(state.room_cache[3].actors[7].currentHp == 123);
+  CHECK(state.room_cache[3].actors[7].current_hp == 123);
 }
 
 void CheckCameraAndPlacement(const Save::Snapshot& state,

@@ -361,8 +361,8 @@ TEST_CASE("Live palette fade and shadow blend bind the actor record",
   actor.shadowRadiusShrinkRate = 80;
   actor.shadowBlend.level = 12;
   actors::BeginLiveActorShadowBlend(&actor, 0);
-  CHECK(actor.shadowBlend.radiusExpandRate == 70);
-  CHECK(actor.shadowBlend.radiusShrinkRate == 80);
+  CHECK(actor.shadowBlend.radius_expand_rate == 70);
+  CHECK(actor.shadowBlend.radius_shrink_rate == 80);
   CHECK(actor.shadowBlend.level == 0);
 }
 

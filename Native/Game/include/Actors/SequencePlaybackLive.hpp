@@ -11,11 +11,12 @@
 
 struct Actors_ActorRecord;
 struct Actors_AnimationPose;
-struct Actors_ShadowBlend;
 
 // Bindings from actor records to the typed skeletal playback
 // (SequencePlayback.cpp), and the extents of the SEQ banks they play.
 namespace VS::Actors {
+struct ShadowBlendRecord;
+
 // Records that `bytes` bytes of SEQ bank start at `bank`. The loader calls
 // this for every bank it copies, clones or binds in place; registrations it
 // overlaps are dropped, since that memory was reused.
@@ -61,6 +62,6 @@ void BlendLiveActorPose(Actors_AnimationPose& destination,
                         Actors_AnimationPose& source, int bones, int frame,
                         int frames);
 // The actor record's shadow blend as the typed ShadowBlend, and its store.
-[[nodiscard]] ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live);
-void StoreLiveShadowBlend(const ShadowBlend& shadow, Actors_ShadowBlend& live);
+[[nodiscard]] ShadowBlend LoadLiveShadowBlend(const ShadowBlendRecord& live);
+void StoreLiveShadowBlend(const ShadowBlend& shadow, ShadowBlendRecord& live);
 }  // namespace VS::Actors

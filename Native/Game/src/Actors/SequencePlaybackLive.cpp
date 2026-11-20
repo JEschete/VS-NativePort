@@ -16,7 +16,7 @@
 #include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/Shadow.h"
+#include "Actors/Shadow.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
@@ -336,26 +336,26 @@ void StoreLiveSkeletalPose(const SkeletalPose& typed,
   StoreKeys(typed.scale_deltas, pose.trackStates);
 }
 
-ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live) {
-  return {.level_frames = live.levelFrames,
-          .radius_frames = live.radiusFrames,
+ShadowBlend LoadLiveShadowBlend(const ShadowBlendRecord& live) {
+  return {.level_frames = live.level_frames,
+          .radius_frames = live.radius_frames,
           .level = live.level,
-          .level_delta = live.levelDelta,
-          .radius_expand_rate = live.radiusExpandRate,
-          .radius_shrink_rate = live.radiusShrinkRate,
-          .radius_expand_delta = live.radiusExpandDelta,
-          .radius_shrink_delta = live.radiusShrinkDelta};
+          .level_delta = live.level_delta,
+          .radius_expand_rate = live.radius_expand_rate,
+          .radius_shrink_rate = live.radius_shrink_rate,
+          .radius_expand_delta = live.radius_expand_delta,
+          .radius_shrink_delta = live.radius_shrink_delta};
 }
 
-void StoreLiveShadowBlend(const ShadowBlend& shadow, Actors_ShadowBlend& live) {
-  live.levelFrames = shadow.level_frames;
-  live.radiusFrames = shadow.radius_frames;
+void StoreLiveShadowBlend(const ShadowBlend& shadow, ShadowBlendRecord& live) {
+  live.level_frames = shadow.level_frames;
+  live.radius_frames = shadow.radius_frames;
   live.level = shadow.level;
-  live.levelDelta = shadow.level_delta;
-  live.radiusExpandRate = shadow.radius_expand_rate;
-  live.radiusShrinkRate = shadow.radius_shrink_rate;
-  live.radiusExpandDelta = shadow.radius_expand_delta;
-  live.radiusShrinkDelta = shadow.radius_shrink_delta;
+  live.level_delta = shadow.level_delta;
+  live.radius_expand_rate = shadow.radius_expand_rate;
+  live.radius_shrink_rate = shadow.radius_shrink_rate;
+  live.radius_expand_delta = shadow.radius_expand_delta;
+  live.radius_shrink_delta = shadow.radius_shrink_delta;
 }
 
 void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {

@@ -16,7 +16,7 @@
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/BattleActorState.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -115,13 +115,14 @@ class LiveDisplayFlagsHost final : public DisplayFlagsHost {
 // Battle_breakArtPointRequirements (D_8004FDE4). The name ends at its fifth
 // byte (0xE7), so the copied tail is never shown; it is kept byte for byte.
 std::array<std::uint8_t, kActorNameBytes> PlaceholderName() {
-  constexpr std::size_t kNameBytes = sizeof Actors_placeholderActorName;
+  constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
   static_assert(kNameBytes < kActorNameBytes);
   static_assert(sizeof Battle_breakArtPointRequirements >=
                 kActorNameBytes - kNameBytes);
   std::array<std::uint8_t, kActorNameBytes> name{};
   const std::span<std::uint8_t> bytes(name);
-  std::memcpy(bytes.data(), Actors_placeholderActorName, kNameBytes);
+  std::memcpy(bytes.data(), VS::Actors::placeholderActorName.data(),
+              kNameBytes);
   std::memcpy(bytes.subspan(kNameBytes).data(),
               Battle_breakArtPointRequirements, kActorNameBytes - kNameBytes);
   return name;

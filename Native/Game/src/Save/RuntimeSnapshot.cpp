@@ -1172,39 +1172,39 @@ Result CaptureActors(Snapshot& state) {
     }
     const auto spawn = static_cast<unsigned>(actor->roomSpawnIndex) + 1;
     auto found = std::ranges::find(cache.actors, spawn,
-                                   &Actors_RoomActorRecord::spawnSlot);
+                                   &VS::Actors::RoomActorRecord::spawn_slot);
     if (found == cache.actors.end()) {
       found = cache.actors.begin() + cache.next_slot;
       cache.next_slot = (cache.next_slot + 1) % cache.actors.size();
     }
     const auto& stats = *actor->stats;
-    found->spawnSlot = static_cast<unsigned char>(spawn);
-    found->isHidden = 0;
-    found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);
+    found->spawn_slot = static_cast<unsigned char>(spawn);
+    found->hidden = 0;
+    found->ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);
     // The action animation test of StateFlag::kActionAnimating
     // (ActorFlags.cpp), read directly so the snapshot does not compose the
     // weapon and model state.
     const auto animation =
         Actors_actorRecords[slot]->instance.actionAnimationState;
-    found->currentHp =
+    found->current_hp =
         animation != 0 && animation < kActiveAnimationEnd ? 1 : stats.currentHp;
-    found->maxHp = stats.maxHp;
-    found->currentMp = stats.currentMp;
-    found->maxMp = stats.maxMp;
+    found->max_hp = stats.maxHp;
+    found->current_mp = stats.currentMp;
+    found->max_mp = stats.maxMp;
     found->strength = std::bit_cast<std::int16_t>(stats.totalStrength);
     found->intelligence = std::bit_cast<std::int16_t>(stats.totalIntelligence);
     found->agility = std::bit_cast<std::int16_t>(stats.totalAgility);
     for (std::size_t limb = 0; limb < std::size(stats.limbs); ++limb) {
-      found->limbHp[limb] = stats.limbs[limb].hp;
+      found->limb_hp[limb] = stats.limbs[limb].hp;
     }
     found->statuses = stats.statuses;
     Actors_ActorLocationQuery placement{};
     VS::Actors::LiveActorSavedPlacement(slot, stats.movementClass, &placement);
-    found->tileX =
+    found->tile_x =
         static_cast<unsigned char>(placement.location.packedTile.target.tileX);
     found->direction = static_cast<unsigned char>(
         placement.location.packedTile.target.tileLayer);
-    found->tileZ =
+    found->tile_z =
         static_cast<unsigned char>(placement.location.packedTile.target.tileZ);
     found->height =
         static_cast<unsigned char>(placement.location.packedTile.target.facing);
@@ -1322,7 +1322,7 @@ Result ValidateContentImpl(const Snapshot& state,
     }
     if (cache.recency == 0) {
       if (std::ranges::any_of(cache.actors, [](const auto& actor) {
-            return actor.spawnSlot != 0;
+            return actor.spawn_slot != 0;
           })) {
         return std::unexpected("inactive room cache contains actor references");
       }
@@ -1337,11 +1337,11 @@ Result ValidateContentImpl(const Snapshot& state,
     }
     std::set<unsigned> spawns;
     for (const auto& actor : cache.actors) {
-      if (actor.spawnSlot == 0) continue;
-      if (actor.spawnSlot > cached_room->spawn_count ||
-          !spawns.insert(actor.spawnSlot).second ||
-          actor.tileX >= cached_room->collision.width ||
-          actor.tileZ >= cached_room->collision.height) {
+      if (actor.spawn_slot == 0) continue;
+      if (actor.spawn_slot > cached_room->spawn_count ||
+          !spawns.insert(actor.spawn_slot).second ||
+          actor.tile_x >= cached_room->collision.width ||
+          actor.tile_z >= cached_room->collision.height) {
         return std::unexpected(
             "room cache contains an invalid actor reference");
       }

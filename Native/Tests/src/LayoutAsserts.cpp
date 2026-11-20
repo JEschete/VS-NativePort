@@ -7,7 +7,7 @@
 
 #include <type_traits>
 
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Audio/SoundBanksLive.hpp"
@@ -37,7 +37,7 @@
 #include "Legacy/Psx.h"
 
 static_assert(
-    sizeof(Actors_ActorCore) - offsetof(Actors_ActorCore, model) >=
+    sizeof(VS::Actors::ActorCore) - offsetof(VS::Actors::ActorCore, model) >=
         offsetof(Field_GimmickInstance, reserved178),
     "The auxiliary actor allocation must own the native gimmick prefix");
 
@@ -130,18 +130,18 @@ static_assert(sizeof(VS::Actors::ActorModelSlot) >= sizeof(Actors_WeaponModel),
 static_assert(_Alignof(VS::Actors::ActorModelSlot) >=
                   _Alignof(Actors_WeaponModel),
               "equipment slot must align a native weapon model");
-static_assert(offsetof(Actors_ActorAllocation, modelSlots) %
+static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) %
                       _Alignof(Actors_ActorRecord) ==
                   0,
               "secondary body record must be aligned");
-static_assert(offsetof(Actors_ActorAllocation, modelSlots) -
-                      offsetof(Actors_ActorAllocation, core.model) >=
+static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) -
+                      offsetof(VS::Actors::ActorAllocation, core.model) >=
                   sizeof(Actors_ActorRecord),
               "the actor record overlaps the weapon model slots");
 
 // VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
 // block of an allocation as `actor + 1`.
-static_assert(offsetof(Actors_ActorAllocation, core.actor.stats) ==
+static_assert(offsetof(VS::Actors::ActorAllocation, core.actor.stats) ==
                   sizeof(Battle_Actor),
               "stats do not follow the Battle_Actor");
 

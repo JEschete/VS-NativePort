@@ -2,9 +2,9 @@
 // decomp line.
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
-#include "Actors/Spawning.h"
+#include "Actors/Spawning.hpp"
 #include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Legacy.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
@@ -315,12 +315,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x8072D, sizeof VS::Content::legacyEtmLoadPhase,
      &VS::Content::legacyEtmLoadPhase,
      sizeof VS::Content::legacyEtmLoadPhase},  // G00068 _loadEtmState
-    {"BATTLE/BATTLE.PRG", 0x80730, sizeof Actors_textureSlotOrigins,
-     &Actors_textureSlotOrigins,
-     sizeof Actors_textureSlotOrigins},  // G00069 D_800E8F30
-    {"BATTLE/BATTLE.PRG", 0x80790, sizeof Actors_textureSlotRowOffsets,
-     &Actors_textureSlotRowOffsets,
-     sizeof Actors_textureSlotRowOffsets},  // G00070 D_800E8F90
+    {"BATTLE/BATTLE.PRG", 0x80730, sizeof VS::Actors::textureSlotOrigins,
+     VS::Actors::textureSlotOrigins.data(),
+     sizeof VS::Actors::textureSlotOrigins},  // G00069 D_800E8F30
+    {"BATTLE/BATTLE.PRG", 0x80790, sizeof VS::Actors::textureSlotRowOffsets,
+     VS::Actors::textureSlotRowOffsets.data(),
+     sizeof VS::Actors::textureSlotRowOffsets},  // G00070 D_800E8F90
     {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters,
      &Field_gimmickPaletteParameters,
      sizeof Field_gimmickPaletteParameters},  // G00071 D_800E8FA8
@@ -1427,9 +1427,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x404CC, sizeof VS::Field::zoneMusicIds,
      &VS::Field::zoneMusicIds,
      sizeof VS::Field::zoneMusicIds},  // G01914 vs_main_zndMusicMap (D_8004FCCC)
-    {"SLUS_010.40", 0x405D0, sizeof Actors_placeholderActorName,
-     &Actors_placeholderActorName,
-     sizeof Actors_placeholderActorName},  // G01915 D_8004FDD0
+    {"SLUS_010.40", 0x405D0, sizeof VS::Actors::placeholderActorName,
+     VS::Actors::placeholderActorName.data(),
+     sizeof VS::Actors::placeholderActorName},  // G01915 D_8004FDD0
     {"SLUS_010.40", 0x405E4, sizeof Battle_breakArtPointRequirements,
      &Battle_breakArtPointRequirements,
      sizeof Battle_breakArtPointRequirements},  // G01916
@@ -1438,9 +1438,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &Battle_battleAbilityPointRequirements,
      sizeof Battle_battleAbilityPointRequirements},  // G01917
                                                      // vs_main_battleAbilitiesPointsRequirements
-    {"SLUS_010.40", 0x40688, sizeof Actors_usesSecondaryBodyModel,
-     &Actors_usesSecondaryBodyModel,
-     sizeof Actors_usesSecondaryBodyModel},  // G01918 D_8004FE88
+    {"SLUS_010.40", 0x40688, sizeof VS::Actors::usesSecondaryBodyModel,
+     VS::Actors::usesSecondaryBodyModel.data(),
+     sizeof VS::Actors::usesSecondaryBodyModel},  // G01918 D_8004FE88
     {"TITLE/TITLE.PRG", 0xA70C, sizeof VS::Title::publisherLogo,
      &VS::Title::publisherLogo,
      sizeof VS::Title::publisherLogo},  // G02143 publisher_clut

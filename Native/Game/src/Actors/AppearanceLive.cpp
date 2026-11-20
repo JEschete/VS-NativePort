@@ -16,7 +16,6 @@
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/Shadow.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.hpp"

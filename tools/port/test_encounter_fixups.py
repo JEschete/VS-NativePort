@@ -2162,7 +2162,7 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn(
-            "found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);",
+            "found->ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);",
             snapshot,
         )
         self.assertNotIn("relation.previous_classification <<", snapshot)
@@ -5049,7 +5049,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
 
     def test_equipment_slot_storage_is_owned_and_native_sized(self):
         root = Path(__file__).resolve().parents[2]
-        allocation = (root / "Native/Game/src/Actors/ActorAllocation.h").read_text()
+        allocation = (root / "Native/Game/src/Actors/ActorAllocation.hpp").read_text()
         slot = (root / "Native/Game/src/Actors/ActorModelSlot.hpp").read_text()
         self.assertIn('#include "Actors/ActorModelSlot.hpp"', allocation)
         self.assertNotIn("storage[0x5E8]", allocation)

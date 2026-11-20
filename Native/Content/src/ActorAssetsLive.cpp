@@ -33,7 +33,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/Textures.h"
+#include "Actors/Textures.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/SfxLive.hpp"
 #include "Content/ActorAssets.hpp"
@@ -936,11 +936,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   [[nodiscard]] std::span<const std::uint8_t> TextureSlotOrigins()
       const override {
-    return Actors_textureSlotOrigins;
+    return VS::Actors::textureSlotOrigins;
   }
   [[nodiscard]] std::span<const std::uint8_t> TextureSlotRowOffsets()
       const override {
-    return Actors_textureSlotRowOffsets;
+    return VS::Actors::textureSlotRowOffsets;
   }
   int ReserveTexturePages(std::uint32_t first, std::uint32_t count) override {
     return Render::ReserveLiveTexturePageRange(first, count, kLoaderPageOwner);

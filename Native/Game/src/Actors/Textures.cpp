@@ -1,10 +1,11 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Actors/Textures.h"
+// The actor texture slot tables (Textures.hpp).
+#include "Actors/Textures.hpp"
 
-// decomp: D_800E8F30 (D_800E8F30@BATTLE/BATTLE.PRG)
-u_char Actors_textureSlotOrigins[152]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E8F90 (D_800E8F90@BATTLE/BATTLE.PRG)
-u_char Actors_textureSlotRowOffsets[56]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Actors {
+// decomp: D_800E8F30 (D_800E8F30@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint8_t, kTextureSlotOriginBytes> textureSlotOrigins;
+// decomp: D_800E8F90 (D_800E8F90@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint8_t, kTextureSlotRowOffsetBytes> textureSlotRowOffsets;
+}  // namespace VS::Actors
