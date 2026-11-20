@@ -84,7 +84,6 @@
 #include "Field/RoomStateLive.hpp"
 #include "Field/RoomStateLiveState.hpp"
 #include "Field/TransitionsLiveState.hpp"
-#include "Field/Znd.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -115,8 +114,6 @@ constexpr std::size_t kOrderingEntryBytes = 4;
 }  // namespace
 
 static_assert(sizeof(Field_MpdEnemySpawn) == VS::Field::kRoomPlacementBytes);
-static_assert(sizeof(Field_ZndEnemyRecord) ==
-              VS::Field::kZoneEnemyTemplateBytes);
 static_assert(sizeof(Actors_CharacterInit) ==
               VS::Field::kZoneEnemyTemplateBytes);
 static_assert(sizeof(Content_DiscFile) == VS::Field::kRoomFileEntryBytes);
@@ -658,10 +655,8 @@ class LiveSpawning : public Host {
     if (enemy_id < 0 || enemy_id >= ZoneEnemyCount()) {
       return false;
     }
-    const Field_ZndEnemyRecord& record = zoneContext.zndEnemies[enemy_id];
-    return Actors_usesSecondaryBodyModel[record
-                                             .recordBytes[kTemplateModelAt]] !=
-           0;
+    const ZoneEnemyTemplate& record = zoneContext.zndEnemies[enemy_id];
+    return Actors_usesSecondaryBodyModel[record.bytes[kTemplateModelAt]] != 0;
   }
 
   // The template is copied: the spawn decodes it and keeps no pointer.
@@ -820,7 +815,7 @@ class LiveZoneLoadHost final
     std::ranges::transform(zud_files, files, ToDiscFile);
     std::ranges::copy(templates, records);
     zoneContext.zudFiles = files;
-    zoneContext.zndEnemies = reinterpret_cast<Field_ZndEnemyRecord*>(records);
+    zoneContext.zndEnemies = reinterpret_cast<ZoneEnemyTemplate*>(records);
   }
 
   void CopyPaletteRow(std::span<const std::byte> colors,

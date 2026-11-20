@@ -51,8 +51,8 @@
 #include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -165,9 +165,9 @@ struct ContentFixture {
     Put(battle, categories_offset, kBounds);
     Write(root / "disc" / categories_module, battle);
 
-    Field_ZndHeader zone{};
-    zone.mpdListOffset = sizeof(zone);
-    zone.mpdListSize = 8;
+    VS::Field::ZoneFileHeader zone{};
+    zone.room_files_offset = sizeof(zone);
+    zone.room_files_size = 8;
     std::vector<std::uint8_t> zone_bytes;
     Put(zone_bytes, 0, zone);
     Put(zone_bytes, sizeof(zone), std::uint32_t{200});
@@ -204,9 +204,9 @@ struct ContentFixture {
   void WriteRoom() { Write(root / "disc" / "MAP" / "MAP009.MPD", room); }
 
   void WriteZoneRequest(std::uint32_t sector, std::uint32_t bytes) {
-    Field_ZndHeader zone{};
-    zone.mpdListOffset = sizeof(zone);
-    zone.mpdListSize = 8;
+    VS::Field::ZoneFileHeader zone{};
+    zone.room_files_offset = sizeof(zone);
+    zone.room_files_size = 8;
     std::vector<std::uint8_t> data;
     Put(data, 0, zone);
     Put(data, sizeof(zone), sector);

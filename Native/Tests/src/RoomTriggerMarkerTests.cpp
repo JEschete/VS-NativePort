@@ -14,7 +14,7 @@
 #include "Field/Mpd.h"
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
-#include "Field/TriggerMarkers.h"
+#include "Field/TriggerMarkers.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -58,8 +58,8 @@ struct TriggerMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Field_RoomRecord saved_room = Field_roomData;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
-  RECT saved_texture = Field_triggerMarkerTextureSource;
-  RECT saved_palette = Field_triggerMarkerPaletteSource;
+  VS::Render::ScreenRect saved_texture = VS::Field::triggerMarkerTextureSource;
+  VS::Render::ScreenRect saved_palette = VS::Field::triggerMarkerPaletteSource;
   int saved_tick_speed = VS::State::tickSpeed;
   int saved_mode = VS::Field::roomGeometryDrawMode;
   int saved_framebuffer = VS::Render::frameBuf;
@@ -108,8 +108,8 @@ struct TriggerMarkerFixture {
     Field_roomAnimationTicks = 0;
     Field_triggerMarkerFrameTicks = 0;
     // No image transfers unless a test explicitly supplies a source rectangle.
-    Field_triggerMarkerTextureSource = {};
-    Field_triggerMarkerPaletteSource = {};
+    VS::Field::triggerMarkerTextureSource = {};
+    VS::Field::triggerMarkerPaletteSource = {};
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::FrameScratchpad() = {};
@@ -128,8 +128,8 @@ struct TriggerMarkerFixture {
                 sizeof saved_definition);
     Field_roomData = saved_room;
     VS::State::stateFlags = saved_flags;
-    Field_triggerMarkerTextureSource = saved_texture;
-    Field_triggerMarkerPaletteSource = saved_palette;
+    VS::Field::triggerMarkerTextureSource = saved_texture;
+    VS::Field::triggerMarkerPaletteSource = saved_palette;
     VS::State::tickSpeed = saved_tick_speed;
     VS::Field::roomGeometryDrawMode = saved_mode;
     Field_roomAnimationTicks = saved_animation;
@@ -210,8 +210,8 @@ struct AnimationPixels {
 
   void CheckAnimation(unsigned pending, int frame) const {
     CHECK(Field_triggerMarkerFrameTicks == pending);
-    CHECK(Field_triggerMarkerTextureSource.x == 72 + frame * 8);
-    CHECK(Field_triggerMarkerPaletteSource.x == 4 + frame * 4);
+    CHECK(VS::Field::triggerMarkerTextureSource.x == 72 + frame * 8);
+    CHECK(VS::Field::triggerMarkerPaletteSource.x == 4 + frame * 4);
     CHECK(VS::Render::GamePages().At(64, 384) == 0x1200 + frame * 2);
     CHECK(VS::Render::GamePages().At(0, 320) == 0x1201 + frame * 2);
   }
@@ -334,8 +334,8 @@ TEST_CASE("Visible room trigger markers share the original animation update",
           "[field][render][trigger-marker]") {
   TriggerMarkerFixture fixture;
   AnimationPixels pixels;
-  Field_triggerMarkerTextureSource = {0, 10, 1, 1};
-  Field_triggerMarkerPaletteSource = {0, 20, 1, 1};
+  VS::Field::triggerMarkerTextureSource = {0, 10, 1, 1};
+  VS::Field::triggerMarkerPaletteSource = {0, 20, 1, 1};
   Field_roomAnimationTicks = 24;
   Field_triggerMarkerFrameTicks = 7;
   VS::State::tickSpeed = 3;
@@ -395,8 +395,8 @@ TEST_CASE("Room trigger marker animation retains wrap and single-step timing",
           "[field][render][trigger-marker]") {
   TriggerMarkerFixture fixture;
   AnimationPixels pixels;
-  Field_triggerMarkerTextureSource = {0, 10, 1, 1};
-  Field_triggerMarkerPaletteSource = {0, 20, 1, 1};
+  VS::Field::triggerMarkerTextureSource = {0, 10, 1, 1};
+  VS::Field::triggerMarkerPaletteSource = {0, 20, 1, 1};
   fixture.triggers[1].activation = 1;
   Field_roomAnimationTicks = 40;
   VS::State::tickSpeed = 17;

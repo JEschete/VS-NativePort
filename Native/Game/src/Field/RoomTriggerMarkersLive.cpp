@@ -14,7 +14,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/RoomTriggerMarkers.hpp"
-#include "Field/TriggerMarkers.h"
+#include "Field/TriggerMarkers.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
@@ -27,6 +27,12 @@ constexpr std::size_t kMarkerQuadOffset = 76;
 constexpr int kMarkerTextureTargetX = 64;
 constexpr int kMarkerTextureTargetY = 384;
 constexpr int kMarkerPaletteTargetY = 320;
+
+RECT ToRect(const VS::Render::ScreenRect& area) {
+  RECT rect{};
+  setRECT(&rect, area.x, area.y, area.width, area.height);
+  return rect;
+}
 }  // namespace
 
 // Complete D_800E8548 definition from BATTLE.PRG:0x7FD48, loaded by Content.
@@ -65,11 +71,12 @@ class LiveTriggerMarkerRenderer final
 
   void ShowAnimationFrame(
       const VS::Field::TriggerMarkerAnimationFrame& frame) override {
-    Field_triggerMarkerTextureSource.x = frame.texture_x;
-    Field_triggerMarkerPaletteSource.x = frame.palette_x;
-    MoveImage(&Field_triggerMarkerTextureSource, kMarkerTextureTargetX,
-              kMarkerTextureTargetY);
-    MoveImage(&Field_triggerMarkerPaletteSource, 0, kMarkerPaletteTargetY);
+    VS::Field::triggerMarkerTextureSource.x = frame.texture_x;
+    VS::Field::triggerMarkerPaletteSource.x = frame.palette_x;
+    RECT texture = ToRect(VS::Field::triggerMarkerTextureSource);
+    RECT palette = ToRect(VS::Field::triggerMarkerPaletteSource);
+    MoveImage(&texture, kMarkerTextureTargetX, kMarkerTextureTargetY);
+    MoveImage(&palette, 0, kMarkerPaletteTargetY);
   }
 
   // The definition is copied per draw so the resident record stays pristine.

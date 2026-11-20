@@ -46,8 +46,8 @@
 #include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -234,10 +234,10 @@ std::expected<const Content::DataStore::Entry*, std::string> ResolveRoomEntry(
   if (zone_entry == nullptr) return std::unexpected("zone asset is missing");
   const auto zone_bytes = store.ReadAll(*zone_entry);
   if (!zone_bytes) return std::unexpected(zone_bytes.error());
-  const auto zone_header = Read<Field_ZndHeader>(*zone_bytes);
+  const auto zone_header = Read<VS::Field::ZoneFileHeader>(*zone_bytes);
   if (!zone_header) return std::unexpected(zone_header.error());
-  const auto rooms = Section(*zone_bytes, zone_header->mpdListOffset,
-                             zone_header->mpdListSize);
+  const auto rooms = Section(*zone_bytes, zone_header->room_files_offset,
+                             zone_header->room_files_size);
   if (!rooms) return std::unexpected(rooms.error());
   constexpr std::size_t kFileRecordSize = 8;
   if (rooms->size() % kFileRecordSize != 0 ||

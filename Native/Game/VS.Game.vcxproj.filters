@@ -2112,9 +2112,6 @@
     <ClInclude Include="src\Field\GimmickLookup.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
-    <ClInclude Include="src\Field\GimmickMotion.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\GimmickPlacement.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2298,16 +2295,13 @@
     <ClCompile Include="src\Field\TriggerMarkers.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\TriggerMarkers.h">
+    <ClInclude Include="src\Field\TriggerMarkers.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Weather.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClInclude Include="src\Field\Weather.hpp">
-      <Filter>src\Field</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Field\Znd.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClInclude Include="src\Field\Zone.h">

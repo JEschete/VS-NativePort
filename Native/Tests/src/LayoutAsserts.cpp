@@ -31,7 +31,6 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/Runtime.hpp"
-#include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 
@@ -189,14 +188,6 @@ SAME_FIELD(Field_GimmickPhysicsView, frame, Field_GimmickInstance,
            objectInfo.supportIndex);
 SAME_FIELD(Field_GimmickPhysicsView, carrier, Field_GimmickInstance,
            objectInfo.carrier);
-SAME_FIELD(Field_GimmickMotionView, nativePointer68, Field_GimmickInstance,
-           model);
-SAME_FIELD(Field_GimmickMotionView, frame, Field_GimmickInstance,
-           objectInfo.supportIndex);
-SAME_FIELD(Field_GimmickMotionView, state, Field_GimmickInstance,
-           pulsedPalette);
-SAME_FIELD(Field_GimmickMotionView, savedState, Field_GimmickInstance,
-           basePalette);
 static_assert(sizeof(Battle_Ai_AiCreationView) <=
                   sizeof(Battle_Ai_ActorAiState),
               "creation view exceeds storage");
@@ -543,20 +534,14 @@ int Tests_GimmickViewsRoundTrip(void) {
   Actors_ShpModel model = {0};
   Field_GimmickPhysicsView* physics =
       reinterpret_cast<Field_GimmickPhysicsView*>(&object);
-  Field_GimmickMotionView* motion =
-      reinterpret_cast<Field_GimmickMotionView*>(&object);
   object.model = &model;
   object.objectInfo.supportIndex = 13;
-  object.objectInfo.material = 5;
-  motion->y = -64;
-  int passed = physics->nativePointer68 == &model &&
-               motion->nativePointer68 == &model && physics->frame == 13 &&
-               motion->frame == 13 && motion->material == 5 &&
+  physics->position.vy = -64;
+  int passed = physics->nativePointer68 == &model && physics->frame == 13 &&
                object.positionY == -64;
   physics->frame = 14;
   physics->carrier = 3;
-  passed = passed && motion->frame == 14 &&
-           object.objectInfo.supportIndex == 14 &&
+  passed = passed && object.objectInfo.supportIndex == 14 &&
            object.objectInfo.carrier == 3 && object.model == &model;
   return passed;
 }

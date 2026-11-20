@@ -48,8 +48,8 @@
 #include "DiscQueue.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Mpd.h"
+#include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Znd.h"
 #include "Field/Zone.h"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -622,8 +622,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (zud < 0 || zud >= ZoneEnemyCount()) {
       return 0;
     }
-    return VS::Field::zoneContext.zndEnemies[zud]
-        .recordBytes[kZoneEnemyModelByte];
+    return VS::Field::zoneContext.zndEnemies[zud].bytes[kZoneEnemyModelByte];
   }
 
   [[nodiscard]] std::optional<RememberedSpawn> Remembered(

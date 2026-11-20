@@ -10,17 +10,10 @@
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
-
-// decomp: D_800E856C (D_800E856C@BATTLE/BATTLE.PRG)
-MATRIX Field_triggerMarkerMatrix; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E8594 (D_800E8594@BATTLE/BATTLE.PRG)
-Field_TriggerMarkerVertex Field_triggerMarkerVertex; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800E85A0 (D_800E85A0@BATTLE/BATTLE.PRG)
 char Field_triggerMarkerRecordTail[192]; /* contents: module image (ModuleData.cpp) */

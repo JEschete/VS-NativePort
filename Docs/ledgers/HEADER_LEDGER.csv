@@ -321,11 +321,11 @@ H0319,header,Native/Game/src/Field/GameModeLiveState.hpp,owned,no,pragma-once,0,
 H0320,header,Native/Game/src/Field/GimmickAnimationQueueLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0321,header,Native/Game/src/Field/GimmickDynamicsLive.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Game/include/Field/GimmickDynamicsLive.hpp (#441)
 H0322,header,Native/Game/src/Field/GimmickLookup.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0323,header,Native/Game/src/Field/GimmickMotion.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0323,header,Native/Game/src/Field/GimmickMotion.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Field_GimmickMotionView (T00566) aliased Field_GimmickInstance, which UpdateGimmickReactionAnimationEntry now takes directly (#441)"
 H0324,header,Native/Game/src/Field/GimmickPlacementLive.h,owned,no,pragma-once,0,0,0,0,0,0,13,0,0,retired,merged into Native/Game/include/Field/GimmickPlacementLive.hpp (#441)
 H0325,header,Native/Game/src/Field/GimmickReactionsLive.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Game/include/Field/GimmickReactionsLive.hpp (#441)
 H0326,header,Native/Game/src/Field/GimmickResourcesLive.h,owned,no,pragma-once,0,0,0,0,0,0,4,0,0,retired,merged into Native/Game/include/Field/GimmickResourcesLive.hpp (#441)
-H0327,header,Native/Game/src/Field/Gimmicks.h,generated,yes,pragma-once,0,0,0,0,0,0,42,0,0,remaining,
+H0327,header,Native/Game/src/Field/Gimmicks.h,generated,yes,pragma-once,0,0,0,0,0,0,40,0,0,remaining,
 H0328,header,Native/Game/src/Field/Input.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0329,header,Native/Game/src/Field/InteractionFocusLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0330,header,Native/Game/src/Field/InteractionTargetLive.h,owned,no,pragma-once,0,0,0,0,0,0,3,0,0,retired,merged into Native/Game/include/Field/InteractionTargetLive.hpp (#441)
@@ -345,9 +345,9 @@ H0343,header,Native/Game/src/Field/RoomRenderingLiveState.hpp,owned,no,pragma-on
 H0344,header,Native/Game/src/Field/RoomStateLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0345,header,Native/Game/src/Field/RoomSwitchesLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0346,header,Native/Game/src/Field/TransitionsLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0347,header,Native/Game/src/Field/TriggerMarkers.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
+H0347,header,Native/Game/src/Field/TriggerMarkers.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0348,header,Native/Game/src/Field/Weather.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0349,header,Native/Game/src/Field/Znd.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0349,header,Native/Game/src/Field/Znd.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/include/Field/RoomLoading.hpp as VS::Field::ZoneFileHeader and ZoneEnemyTemplate (#441)
 H0350,header,Native/Game/src/Field/Zone.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
 H0351,header,Native/Game/src/Items/Categories.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0352,header,Native/Game/src/Items/EquipmentInit.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: Items_ArmorInit and Items_AccessoryInit became VS::Items::ArmorInit and AccessoryInit in Items/ItemRecords.hpp; TYPE T00305 and T00301 re-pointed (#441)
@@ -852,7 +852,7 @@ S0415,source,Native/Game/src/Field/RoomTriggerMarkersLive.cpp,owned,no,,0,,,,,,,
 S0416,source,Native/Game/src/Field/SegmentCollisionLive.cpp,owned,no,,0,,,,,,,,,done,
 S0417,source,Native/Game/src/Field/TransitionsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0418,source,Native/Game/src/Field/TrapsLive.cpp,owned,no,,0,,,,,,,,,done,
-S0419,source,Native/Game/src/Field/TriggerMarkers.cpp,generated,yes,,0,,,,,,,,,done,
+S0419,source,Native/Game/src/Field/TriggerMarkers.cpp,generated,no,,0,,,,,,,,,done,
 S0420,source,Native/Game/src/Field/Weather.cpp,generated,no,,0,,,,,,,,,done,
 S0421,source,Native/Game/src/Items/Categories.cpp,generated,no,,0,,,,,,,,,done,
 S0422,source,Native/Game/src/Items/ContainerGemCountsLive.cpp,owned,no,,0,,,,,,,,,done,

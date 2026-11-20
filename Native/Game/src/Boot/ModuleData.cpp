@@ -108,7 +108,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/MapProgress.hpp"
-#include "Field/TriggerMarkers.h"
+#include "Field/TriggerMarkers.hpp"
 #include "Items/Categories.hpp"
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
@@ -235,21 +235,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FD08, sizeof VS::Field::countableRoomMask,
      &VS::Field::countableRoomMask,
      sizeof VS::Field::countableRoomMask},  // G00038 vs_battle_mapCompletionFlags
-    {"BATTLE/BATTLE.PRG", 0x7FD6C, sizeof Field_triggerMarkerMatrix,
-     &Field_triggerMarkerMatrix,
-     sizeof Field_triggerMarkerMatrix},  // G00039 D_800E856C
-    {"BATTLE/BATTLE.PRG", 0x7FD94, sizeof Field_triggerMarkerVertex,
-     &Field_triggerMarkerVertex,
-     sizeof Field_triggerMarkerVertex},  // G00040 D_800E8594
     {"BATTLE/BATTLE.PRG", 0x7FDA0, sizeof Field_triggerMarkerRecordTail,
      &Field_triggerMarkerRecordTail,
      sizeof Field_triggerMarkerRecordTail},  // G00041 D_800E85A0
-    {"BATTLE/BATTLE.PRG", 0x7FDBC, sizeof Field_triggerMarkerTextureSource,
-     &Field_triggerMarkerTextureSource,
-     sizeof Field_triggerMarkerTextureSource},  // G00042 D_800E85BC
-    {"BATTLE/BATTLE.PRG", 0x7FDC4, sizeof Field_triggerMarkerPaletteSource,
-     &Field_triggerMarkerPaletteSource,
-     sizeof Field_triggerMarkerPaletteSource},  // G00043 D_800E85C4
+    {"BATTLE/BATTLE.PRG", 0x7FDBC, sizeof VS::Field::triggerMarkerTextureSource,
+     &VS::Field::triggerMarkerTextureSource,
+     sizeof VS::Field::triggerMarkerTextureSource},  // G00042 D_800E85BC
+    {"BATTLE/BATTLE.PRG", 0x7FDC4, sizeof VS::Field::triggerMarkerPaletteSource,
+     &VS::Field::triggerMarkerPaletteSource,
+     sizeof VS::Field::triggerMarkerPaletteSource},  // G00043 D_800E85C4
     {"BATTLE/BATTLE.PRG", 0x7FE1C, sizeof Battle_valueCaptionRects,
      &Battle_valueCaptionRects,
      sizeof Battle_valueCaptionRects},  // G00046 D_800E861C

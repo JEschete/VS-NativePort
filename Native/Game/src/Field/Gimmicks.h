@@ -276,12 +276,9 @@ struct Field_GimmickPhysicsView;
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Items/ItemRecords.hpp"
 
-extern MATRIX Field_triggerMarkerMatrix;
-extern Field_TriggerMarkerVertex Field_triggerMarkerVertex;
 extern char Field_triggerMarkerRecordTail[192];
 extern u_char Field_gimmickPaletteParameters[32];
 extern void* Field_gimmickModelTemplates[5];

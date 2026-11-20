@@ -21,7 +21,7 @@
 #include "Field/MapProgress.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
-#include "Field/Znd.h"
+#include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Render/UiPackets.hpp"
@@ -206,13 +206,13 @@ std::expected<std::vector<std::uint8_t>, std::string> RoomAsset(
   const auto zone =
       ReadAsset(store, std::format("MAP/ZONE{:03}.ZND", location.zone));
   if (!zone) return std::unexpected(zone.error());
-  const auto zone_header = Record<Field_ZndHeader>(*zone);
+  const auto zone_header = Record<VS::Field::ZoneFileHeader>(*zone);
   if (!zone_header) return std::unexpected(zone_header.error());
-  if (zone_header->mpdListOffset < 0 || zone_header->mpdListSize < 0) {
+  if (zone_header->room_files_offset < 0 || zone_header->room_files_size < 0) {
     return std::unexpected("save summary: invalid zone room table");
   }
-  const auto rooms =
-      Slice(*zone, zone_header->mpdListOffset, zone_header->mpdListSize);
+  const auto rooms = Slice(*zone, zone_header->room_files_offset,
+                           zone_header->room_files_size);
   if (!rooms) return std::unexpected(rooms.error());
   using DiscFile = std::array<std::uint32_t, 2>;
   if (rooms->size() % sizeof(DiscFile) != 0) {

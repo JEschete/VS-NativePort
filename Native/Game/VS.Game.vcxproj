@@ -1545,13 +1545,7 @@
     <ClCompile Include="src\Field\TrapsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\TriggerMarkers.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\TriggerMarkers.cpp" />
     <ClCompile Include="src\Field\Weather.cpp" />
     <ClCompile Include="src\Items\Categories.cpp" />
     <ClCompile Include="src\Items\ContainerGemCounts.cpp" />
@@ -2270,7 +2264,6 @@
     <ClInclude Include="src\Field\GameModeLiveState.hpp" />
     <ClInclude Include="src\Field\GimmickAnimationQueueLive.hpp" />
     <ClInclude Include="src\Field\GimmickLookup.hpp" />
-    <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.hpp" />
     <ClInclude Include="src\Field\InteractionFocusLive.hpp" />
@@ -2287,9 +2280,8 @@
     <ClInclude Include="src\Field\RoomStateLiveState.hpp" />
     <ClInclude Include="src\Field\RoomSwitchesLive.hpp" />
     <ClInclude Include="src\Field\TransitionsLiveState.hpp" />
-    <ClInclude Include="src\Field\TriggerMarkers.h" />
+    <ClInclude Include="src\Field\TriggerMarkers.hpp" />
     <ClInclude Include="src\Field\Weather.hpp" />
-    <ClInclude Include="src\Field\Znd.h" />
     <ClInclude Include="src\Field\Zone.h" />
     <ClInclude Include="src\Items\Categories.hpp" />
     <ClInclude Include="src\Items\ContainerTables.hpp" />

@@ -5008,7 +5008,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         model = live.split("std::uint8_t ZoneEnemyModel(int zud) const override {", 1)[1].split("\n  }\n", 1)[0]
         self.assertIn("zud >= ZoneEnemyCount()", model)
         self.assertIn(
-            "VS::Field::zoneContext.zndEnemies[zud].recordBytes[kZoneEnemyModelByte]",
+            "VS::Field::zoneContext.zndEnemies[zud].bytes[kZoneEnemyModelByte]",
             "".join(model.split()),
         )
         for text in (core, live):

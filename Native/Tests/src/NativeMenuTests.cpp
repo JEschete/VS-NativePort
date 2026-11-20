@@ -28,7 +28,7 @@
 #include "Ending/EndingLive.hpp"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
-#include "Field/Znd.h"
+#include "Field/RoomLoading.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/InventoryLive.hpp"
@@ -178,7 +178,7 @@ struct MenuContentFixture {
     Add("MAP/MAP009.MPD", room, 200);
 
     std::vector<std::uint8_t> zone;
-    Put(zone, 0, Field_ZndHeader{28, 8, 0, 0, 0, 0, 0});
+    Put(zone, 0, VS::Field::ZoneFileHeader{28, 8, 0, 0, 0, 0, 0});
     Put(zone, 28, std::uint32_t{200});
     Put(zone, 32, static_cast<std::uint32_t>(room.size()));
     Add("MAP/ZONE009.ZND", zone, 100);

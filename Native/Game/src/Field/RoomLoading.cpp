@@ -21,12 +21,20 @@ using room_effects::Store;
 constexpr std::size_t kWordBytes = 4;
 constexpr std::size_t kHalfwordBytes = 2;
 
-// The zone file header (Field_ZndHeader).
+// The zone file header (ZoneFileHeader).
 constexpr std::size_t kZoneRoomFilesOffsetAt = 0x00;
 constexpr std::size_t kZoneRoomFilesSizeAt = 0x04;
 constexpr std::size_t kZoneEnemiesOffsetAt = 0x08;
 constexpr std::size_t kZoneTexturesOffsetAt = 0x10;
 constexpr std::size_t kZoneMusicIdAt = 0x18;
+static_assert(offsetof(ZoneFileHeader, room_files_offset) ==
+              kZoneRoomFilesOffsetAt);
+static_assert(offsetof(ZoneFileHeader, room_files_size) ==
+              kZoneRoomFilesSizeAt);
+static_assert(offsetof(ZoneFileHeader, enemies_offset) == kZoneEnemiesOffsetAt);
+static_assert(offsetof(ZoneFileHeader, textures_offset) ==
+              kZoneTexturesOffsetAt);
+static_assert(offsetof(ZoneFileHeader, music_id) == kZoneMusicIdAt);
 
 // The enemy section: the count, then the ZUD files.
 constexpr std::size_t kZoneEnemyFilesAt = 4;

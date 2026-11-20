@@ -32,8 +32,29 @@ inline constexpr int kZoneCount = 256;
 inline constexpr std::size_t kZoneHeaderBytes = 0x1C;
 // A room file table entry: the room file's sector and byte size.
 inline constexpr std::size_t kRoomFileEntryBytes = 8;
-// An enemy template (Field_ZndEnemyRecord, an Actors_CharacterInit).
+// An enemy template (ZoneEnemyTemplate, an Actors_CharacterInit).
 inline constexpr std::size_t kZoneEnemyTemplateBytes = 0x464;
+
+// The zone file header as stored: the room file table, enemy section and
+// texture section, each as byte offset and size, then the zone music id.
+// decomp: ZndHeader (src/BATTLE/BATTLE.PRG/146C.c:155)
+struct ZoneFileHeader {
+  std::int32_t room_files_offset;
+  std::int32_t room_files_size;
+  std::int32_t enemies_offset;
+  std::int32_t enemies_size;
+  std::int32_t textures_offset;
+  std::int32_t textures_size;
+  std::int32_t music_id;
+};
+static_assert(sizeof(ZoneFileHeader) == kZoneHeaderBytes);
+
+// One enemy template as the zone file stores it; the spawn decodes it as an
+// Actors_CharacterInit. decomp: ZndEnemy (src/BATTLE/BATTLE.PRG/zone.h:7)
+struct ZoneEnemyTemplate {
+  std::array<std::uint8_t, kZoneEnemyTemplateBytes> bytes;
+};
+static_assert(sizeof(ZoneEnemyTemplate) == kZoneEnemyTemplateBytes);
 // The room file header: the room, cleared, script, door, enemy and loot
 // sections, each as offset and size.
 inline constexpr std::size_t kRoomFileHeaderBytes = 0x30;

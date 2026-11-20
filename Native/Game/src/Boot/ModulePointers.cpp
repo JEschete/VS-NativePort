@@ -231,7 +231,7 @@
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/TrapsLive.hpp"
-#include "Field/TriggerMarkers.h"
+#include "Field/TriggerMarkers.hpp"
 #include "Field/Zone.h"
 #include "Input/Controllers.hpp"
 #include "Input/Vibration.hpp"
@@ -388,8 +388,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E84ACu, 92u, (void*)&Field_lockedDoorRoomPairs, sizeof Field_lockedDoorRoomPairs, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8508u, 64u, (void*)&VS::Field::countableRoomMask, sizeof VS::Field::countableRoomMask, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85A0u, 28u, (void*)&Field_triggerMarkerRecordTail, sizeof Field_triggerMarkerRecordTail, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E85BCu, 8u, (void*)&Field_triggerMarkerTextureSource, sizeof Field_triggerMarkerTextureSource, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E85C4u, 8u, (void*)&Field_triggerMarkerPaletteSource, sizeof Field_triggerMarkerPaletteSource, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E85BCu, 8u, (void*)&VS::Field::triggerMarkerTextureSource, sizeof VS::Field::triggerMarkerTextureSource, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E85C4u, 8u, (void*)&VS::Field::triggerMarkerPaletteSource, sizeof VS::Field::triggerMarkerPaletteSource, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E861Cu, 24u, (void*)&Battle_valueCaptionRects, sizeof Battle_valueCaptionRects, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8634u, 12u, (void*)&Battle_lockedLabelHalfHeights, sizeof Battle_lockedLabelHalfHeights, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8640u, 32u, (void*)&Battle_lockedLabelPieces, sizeof Battle_lockedLabelPieces, 1u, 1u},

@@ -6,9 +6,11 @@ struct Content_DiscFile;
 struct Content_DiscQueueSlot;
 struct Field_MpdEnemySpawn;
 struct Field_RoomLoadResetBlock;
-struct Field_ZndEnemyRecord;
 struct Field_ZoneBounds;
 struct Field_ZoneContext;
+namespace VS::Field {
+struct ZoneEnemyTemplate;
+}
 
 // decomp: D_800F18C8_t (src/BATTLE/BATTLE.PRG/146C.c:313)
 struct Field_RoomLoadResetBlock {
@@ -38,7 +40,7 @@ struct Field_ZoneContext {
     int zndId;
     Content_DiscFile* mpdFiles;
     int zndEnemyCount;
-    Field_ZndEnemyRecord* zndEnemies;
+    VS::Field::ZoneEnemyTemplate* zndEnemies;
     Content_DiscFile* zudFiles;
     int loadedZudIndexPlusOne;
     Content_DiscQueueSlot* zudDiscRequest;

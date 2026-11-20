@@ -21,7 +21,7 @@
 #include "Field/CollisionSampling.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/Mpd.h"
-#include "Field/Znd.h"
+#include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Game {
@@ -199,9 +199,10 @@ EncounterZone ReadZone(const Content::DataStore& store,
   std::vector<SpawnProfile> profiles;
   const auto bytes = store.ReadAll(entry);
   if (!bytes) throw std::runtime_error(bytes.error());
-  const auto header = Read<Field_ZndHeader>(*bytes);
-  zone.music = header.musicId;
-  const auto rooms = Section(*bytes, header.mpdListOffset, header.mpdListSize);
+  const auto header = Read<VS::Field::ZoneFileHeader>(*bytes);
+  zone.music = header.music_id;
+  const auto rooms =
+      Section(*bytes, header.room_files_offset, header.room_files_size);
   constexpr std::size_t kFileRecordBytes = 8;
   if (rooms.size() % kFileRecordBytes != 0) {
     throw std::runtime_error("invalid zone room table stride");
@@ -217,9 +218,9 @@ EncounterZone ReadZone(const Content::DataStore& store,
   std::stable_partition(profiles.begin(), profiles.end(), [](const auto& p) {
     return p.placement.actorStateByte == 0;
   });
-  if (header.enemiesSize == 0) return zone;
+  if (header.enemies_size == 0) return zone;
   const auto enemies =
-      Section(*bytes, header.enemiesOffset, header.enemiesSize);
+      Section(*bytes, header.enemies_offset, header.enemies_size);
   const auto count = Read<std::uint32_t>(enemies);
   const std::uint64_t records_offset =
       sizeof(count) + count * std::uint64_t{kFileRecordBytes};
@@ -489,9 +490,9 @@ std::expected<VS::Items::WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
   const auto bytes = store->ReadAll(*entry);
   if (!bytes) return std::unexpected(bytes.error());
   try {
-    const auto header = Read<Field_ZndHeader>(*bytes);
+    const auto header = Read<VS::Field::ZoneFileHeader>(*bytes);
     const auto enemies =
-        Section(*bytes, header.enemiesOffset, header.enemiesSize);
+        Section(*bytes, header.enemies_offset, header.enemies_size);
     const auto count = Read<std::uint32_t>(enemies);
     constexpr std::uint64_t kFileRecordBytes = 8;
     const auto offset = sizeof(count) + count * kFileRecordBytes;

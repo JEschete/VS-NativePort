@@ -20,7 +20,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
-#include "Field/Znd.h"
+#include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Save/MemoryCard/Resources.h"
@@ -81,7 +81,7 @@ struct ContentFixture {
     room_name.prev = -1;
     room_name.next = -1;
     Append(arm, room_name);
-    Append(zone, Field_ZndHeader{28, 48, 0, 0, 0, 0, 0});
+    Append(zone, VS::Field::ZoneFileHeader{28, 48, 0, 0, 0, 0, 0});
     for (int index = 0; index < 6; ++index) {
       Append(zone, std::uint32_t{300});
       Append(zone, std::uint32_t{0});
@@ -118,7 +118,7 @@ struct ContentFixture {
   }
 
   void Open() {
-    Replace(zone, sizeof(Field_ZndHeader) + 5ull * 8 + 4,
+    Replace(zone, sizeof(VS::Field::ZoneFileHeader) + 5ull * 8 + 4,
             static_cast<std::uint32_t>(mpd.size()));
     Write("SMALL/SCEN001.ARM", arm);
     Write("MAP/ZONE009.ZND", zone);

@@ -9,7 +9,6 @@
 #include <iterator>
 
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/GimmickMotion.h"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
@@ -21,17 +20,6 @@ constexpr std::size_t kTiltTableRows = 12;
 constexpr std::size_t kBounceTableRows = 4;
 constexpr std::uint8_t kBreakingMotionState = 12;
 using Record = Field_GimmickInstance;
-using MotionView = Field_GimmickMotionView;
-static_assert(offsetof(MotionView, objectId) == offsetof(Record, slot));
-static_assert(offsetof(MotionView, mode) == offsetof(Record, mode));
-static_assert(offsetof(MotionView, x) == offsetof(Record, positionX));
-static_assert(offsetof(MotionView, rotationX) == offsetof(Record, rotationX));
-static_assert(offsetof(MotionView, savedState) ==
-              offsetof(Record, basePalette));
-static_assert(offsetof(MotionView, state) == offsetof(Record, pulsedPalette));
-static_assert(offsetof(MotionView, frame) ==
-              offsetof(Record, objectInfo) +
-                  offsetof(Field_GimmickObjectInfo, supportIndex));
 
 std::int8_t SignedByte(std::uint8_t value) {
   return std::bit_cast<std::int8_t>(value);
@@ -165,8 +153,7 @@ GimmickReactionResult UpdateLiveGimmickReactionAnimation(
 }  // namespace VS::Field
 
 int VS::Field::UpdateGimmickReactionAnimationEntry(
-    Field_GimmickMotionView* record) {
-  const auto result = VS::Field::UpdateLiveGimmickReactionAnimation(
-      reinterpret_cast<Field_GimmickInstance*>(record));
+    Field_GimmickInstance* record) {
+  const auto result = VS::Field::UpdateLiveGimmickReactionAnimation(record);
   return result == VS::Field::GimmickReactionResult::kComplete ? 0 : 1;
 }
