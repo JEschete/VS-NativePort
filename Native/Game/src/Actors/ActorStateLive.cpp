@@ -46,10 +46,10 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -61,7 +61,7 @@
 namespace VS::Actors {
 namespace {
 static_assert(std::size(Actors_actorRecords) == kActorStateSlots);
-static_assert(std::size(Battle_actors) == kBattleActorSlots);
+static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> == kActorLimbs);
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(Render::ColorCode));
 
@@ -567,7 +567,7 @@ class LiveBattleActorHost final : public BattleActorHost {
 
  private:
   static Battle_Actor* LiveActor(int id) {
-    return IsBattleActorSlot(id) ? Battle_actors[id] : nullptr;
+    return IsBattleActorSlot(id) ? VS::Battle::actors[id] : nullptr;
   }
 
   Registry<BattleActorTraits> actors_;
@@ -584,7 +584,8 @@ class LiveModelToggleHost final : public ActorModelToggleHost {
     SetLiveActorDisplayFlags(static_cast<int>(slot), std::bit_cast<int>(flags));
   }
   bool HasBattleActor(std::size_t slot) override {
-    return slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr;
+    return slot < std::size(VS::Battle::actors) &&
+           VS::Battle::actors[slot] != nullptr;
   }
 };
 
@@ -662,10 +663,11 @@ int FindLiveActorByModelId(int model_id) {
 
 Battle_Actor* LiveActorAtSlot(int actor_id) {
   if (!IsBattleActorSlot(actor_id)) {
-    WarnActorRefused("ActorAtSlot", "the actor id is outside Battle_actors");
+    WarnActorRefused("ActorAtSlot",
+                     "the actor id is outside VS::Battle::actors");
     return nullptr;
   }
-  return Battle_actors[actor_id];
+  return VS::Battle::actors[actor_id];
 }
 
 int CountLiveActorsByDisposition(int actor_kind) {

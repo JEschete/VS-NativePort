@@ -12,6 +12,7 @@
 
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -21,7 +22,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -53,19 +54,19 @@ struct AiLifecycleFixture {
 struct HostilityFixture {
   unsigned saved_random = VS::Core::BiosRand().State();
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* saved_actor = Battle_actors[3];
+  Battle_Actor* saved_actor = VS::Battle::actors[3];
   VS::Battle::Ai::ActorAiState state{};
   Battle_Actor actor{};
 
   HostilityFixture() {
     state.actor_id = 3;
-    Battle_actors[3] = &actor;
+    VS::Battle::actors[3] = &actor;
   }
 
   ~HostilityFixture() {
     VS::Core::SeedBiosRand(saved_random);
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Battle_actors[3] = saved_actor;
+    VS::Battle::actors[3] = saved_actor;
   }
 
   void SetRelation(int target, std::uint32_t word) {
@@ -95,8 +96,8 @@ struct AshleyAllianceFixture {
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   unsigned saved_random = VS::Core::BiosRand().State();
-  Battle_Actor* saved_actor0 = Battle_actors[0];
-  Battle_Actor* saved_actor1 = Battle_actors[1];
+  Battle_Actor* saved_actor0 = VS::Battle::actors[0];
+  Battle_Actor* saved_actor1 = VS::Battle::actors[1];
   char saved_marker1 = VS::Battle::actorMarkers[1];
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActorAiState other_state{};
@@ -112,8 +113,8 @@ struct AshleyAllianceFixture {
     actors[1].id = 1;
     VS::Battle::Ai::actorAiStates[0] = &other_state;
     VS::Battle::Ai::actorAiStates[1] = &state;
-    Battle_actors[0] = &actors[0];
-    Battle_actors[1] = &actors[1];
+    VS::Battle::actors[0] = &actors[0];
+    VS::Battle::actors[1] = &actors[1];
   }
 
   ~AshleyAllianceFixture() {
@@ -121,8 +122,8 @@ struct AshleyAllianceFixture {
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Core::SeedBiosRand(saved_random);
-    Battle_actors[0] = saved_actor0;
-    Battle_actors[1] = saved_actor1;
+    VS::Battle::actors[0] = saved_actor0;
+    VS::Battle::actors[1] = saved_actor1;
     VS::Battle::actorMarkers[1] = saved_marker1;
   }
 
@@ -644,8 +645,8 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
           "[ai][relations][linked-actors]") {
   struct ListFixture {
     AiLifecycleFixture table;
-    Battle_Actor* saved_head = Battle_actors[0];
-    ~ListFixture() { Battle_actors[0] = saved_head; }
+    Battle_Actor* saved_head = VS::Battle::actors[0];
+    ~ListFixture() { VS::Battle::actors[0] = saved_head; }
   } fixture;
   constexpr std::array<int, 4> kIds{0, 2, 5, 9};
   std::array<Battle_Actor, kIds.size()> actors{};
@@ -671,7 +672,7 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
   auto expected = states;
   expected[1].linked_actor = 5;
   expected[2].linked_actor = 2;
-  Battle_actors[0] = actors.data();
+  VS::Battle::actors[0] = actors.data();
   VS::Battle::Ai::ResolveLiveAiLinkedActors();
   for (std::size_t index = 0; index < kIds.size(); ++index) {
     CHECK(StateBytes(states[index]) == StateBytes(expected[index]));
@@ -712,7 +713,7 @@ namespace {
 // linked groups so the trailing link resolution has work to do.
 struct ActorSettingsFixture {
   AiLifecycleFixture table;
-  Battle_Actor* saved_head = Battle_actors[0];
+  Battle_Actor* saved_head = VS::Battle::actors[0];
   void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
   void* saved_section6 = VS::Field::roomData.section6;
@@ -735,14 +736,14 @@ struct ActorSettingsFixture {
     actors[2].aiLinkedGroup = 3;
     states[1].linked_actor = 16;
     states[2].linked_actor = 16;
-    Battle_actors[0] = actors.data();
+    VS::Battle::actors[0] = actors.data();
     VS::Battle::Ai::roomHasWaypoints = nullptr;
     VS::Field::roomData.section6 = auxiliary.data();
     VS::Field::roomData.header.section6_length = auxiliary.size();
   }
 
   ~ActorSettingsFixture() {
-    Battle_actors[0] = saved_head;
+    VS::Battle::actors[0] = saved_head;
     VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
     VS::Field::roomData.section6 = saved_section6;

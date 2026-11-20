@@ -17,7 +17,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
@@ -32,8 +32,7 @@ namespace b = VS::Battle;
 struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   Battle_ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Battle::Ai::roomAiState) saved_room =
       VS::Battle::Ai::roomAiState;
@@ -61,7 +60,7 @@ struct LiveFixture {
   Battle_Actor actor{};
   LiveFixture() {
     std::ranges::fill(Actors_actorRecords, nullptr);
-    std::ranges::fill(Battle_actors, nullptr);
+    std::ranges::fill(VS::Battle::actors, nullptr);
     VS::Battle::actionState = &state;
     VS::Battle::Ai::roomAiState = &room;
     VS::Effects::secondaryInstances = nullptr;
@@ -71,7 +70,7 @@ struct LiveFixture {
   LiveFixture& operator=(const LiveFixture&) = delete;
   ~LiveFixture() {
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
-    std::ranges::copy(saved_actors, std::begin(Battle_actors));
+    std::ranges::copy(saved_actors, std::begin(VS::Battle::actors));
     VS::Battle::actionState = saved_state;
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Effects::secondaryInstances = saved_trails;
@@ -164,11 +163,11 @@ TEST_CASE("F00192 production planning release and trail phase use real helpers",
           "[action-sequence][F00192][ai-completed-plan][action-phases]") {
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.queueIndex = 0xFFFFFFFE;
-  fixture->state.queue[2].primaryTarget.targetsPosition = 1;
+  fixture->state.queue[2].primaryTarget.targets_position = 1;
   fixture->room.readiness_level = 19;
   fixture->actor.commandState = 0x80;
   fixture->actor.commandOpcode = 0x18;
-  Battle_actors[15] = &fixture->actor;
+  VS::Battle::actors[15] = &fixture->actor;
   b::WaitForLiveActionResolution();
   CHECK(fixture->room.readiness_level == 0);
   CHECK(fixture->actor.commandState == 8);

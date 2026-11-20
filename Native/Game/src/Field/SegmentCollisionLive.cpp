@@ -12,7 +12,7 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -42,7 +42,7 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
  public:
   [[nodiscard]] std::optional<ActorTraceBounds> ActorBounds(
       int slot) const override {
-    const auto* actor = Battle_actors[slot];
+    const auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr ||
         (static_cast<unsigned char>(actor->kind) & kExcludedKindMask) != 0) {
       return std::nullopt;

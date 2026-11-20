@@ -12,8 +12,8 @@
 #include "Battle/Actor.h"
 #include "Battle/ActorVitals.hpp"
 #include "Battle/ActorVitalsLive.hpp"
-#include "Battle/Damage.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Content/ModuleData.hpp"
 #include "State/Timers.hpp"
 
@@ -393,10 +393,10 @@ TEST_CASE(
   REQUIRE(defeat == battle::ResolveLiveActorDefeat);
   REQUIRE(update == battle::UpdateLiveActorVitals);
   REQUIRE(room == battle::UpdateLiveRoomActorVitals);
-  auto* saved = Battle_actors[41];
-  Battle_actors[41] = nullptr;
+  auto* saved = VS::Battle::actors[41];
+  VS::Battle::actors[41] = nullptr;
   CHECK(defeat(0, 41, 0) == 0);
-  Battle_actors[41] = saved;
+  VS::Battle::actors[41] = saved;
 }
 
 TEST_CASE(
@@ -409,25 +409,25 @@ TEST_CASE(
   REQUIRE(room == battle::UpdateLiveRoomActorVitals);
   std::array<Battle_Actor*, 16> saved{};
   for (std::size_t slot = 0; slot < saved.size(); ++slot) {
-    saved.at(slot) = Battle_actors[slot];
-    Battle_actors[slot] = nullptr;
+    saved.at(slot) = VS::Battle::actors[slot];
+    VS::Battle::actors[slot] = nullptr;
   }
-  const auto counter = Battle_vitalsTickCounter;
-  const auto limb = Battle_regeneratingLimb;
+  const auto counter = VS::Battle::vitalsTickCounter;
+  const auto limb = VS::Battle::regeneratingLimb;
   const auto ticks = VS::State::tickSpeed;
   const auto timer = VS::State::sceneTimer;
   VS::State::sceneTimer = {};
   VS::State::tickSpeed = 0;
-  Battle_vitalsTickCounter = 0;
-  Battle_regeneratingLimb = 5;
+  VS::Battle::vitalsTickCounter = 0;
+  VS::Battle::regeneratingLimb = 5;
   const auto result = room();
-  const auto updated_counter = Battle_vitalsTickCounter;
-  const auto updated_limb = Battle_regeneratingLimb;
+  const auto updated_counter = VS::Battle::vitalsTickCounter;
+  const auto updated_limb = VS::Battle::regeneratingLimb;
   for (std::size_t slot = 0; slot < saved.size(); ++slot) {
-    Battle_actors[slot] = saved.at(slot);
+    VS::Battle::actors[slot] = saved.at(slot);
   }
-  Battle_vitalsTickCounter = counter;
-  Battle_regeneratingLimb = limb;
+  VS::Battle::vitalsTickCounter = counter;
+  VS::Battle::regeneratingLimb = limb;
   VS::State::tickSpeed = ticks;
   VS::State::sceneTimer = timer;
   CHECK(result == 0);

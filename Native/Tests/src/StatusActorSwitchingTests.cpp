@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Status/ActorStatus.hpp"
@@ -334,17 +334,17 @@ namespace {
 struct LiveActorSlot {
   explicit LiveActorSlot(int slot)
       : slot(slot),
-        saved(Battle_actors[slot]),
+        saved(VS::Battle::actors[slot]),
         saved_selected(st::selectedActor) {
     actor->stats = stats.get();
-    Battle_actors[slot] = actor.get();
+    VS::Battle::actors[slot] = actor.get();
   }
   LiveActorSlot(const LiveActorSlot&) = delete;
   LiveActorSlot& operator=(const LiveActorSlot&) = delete;
   LiveActorSlot(LiveActorSlot&&) = delete;
   LiveActorSlot& operator=(LiveActorSlot&&) = delete;
   ~LiveActorSlot() {
-    Battle_actors[slot] = saved;
+    VS::Battle::actors[slot] = saved;
     st::selectedActor = saved_selected;
   }
 
@@ -396,7 +396,7 @@ TEST_CASE("Live limb and row counts read the actor's stats record",
   CHECK(st::LiveEquipmentRowCount() == 5);
   CHECK(st::LiveLimbCount(-1) == 0);
   CHECK(st::LiveLimbCount(42) == 0);
-  Battle_actors[3] = nullptr;
+  VS::Battle::actors[3] = nullptr;
   CHECK(st::LiveLimbCount(3) == 0);
   CHECK(st::LiveEquipmentRowCount() == 0);
 }
@@ -433,7 +433,7 @@ TEST_CASE("Live actor switch names only an actor with a record",
   VS::Menu::Framework::MenuRow& row = scene.rows[4];
   const LiveActorSlot named(1);
   const LiveActorSlot absent(2);
-  Battle_actors[2] = nullptr;
+  VS::Battle::actors[2] = nullptr;
 
   row.x = 7;
   CHECK(st::LiveAnimateActorSwitch(0x10) == 0);

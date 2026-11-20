@@ -28,7 +28,7 @@
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -291,10 +291,10 @@ class LiveAnimationHost final : public AnimationControlHost {
   }
   bool HasBattleActor(int index) override {
     if (index < 0 ||
-        static_cast<std::size_t>(index) >= std::size(Battle_actors)) {
+        static_cast<std::size_t>(index) >= std::size(VS::Battle::actors)) {
       return false;
     }
-    return Battle_actors[index] != nullptr;
+    return VS::Battle::actors[index] != nullptr;
   }
   int TickSpeed() override { return VS::State::tickSpeed; }
   int EventPlaybackState() override {

@@ -10,7 +10,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -56,7 +56,7 @@ class Roster final : public InspectableActorRoster {
     if (Stats(slot) == nullptr) {
       return std::nullopt;
     }
-    return Battle_actors[slot]->kind;
+    return VS::Battle::actors[slot]->kind;
   }
 };
 

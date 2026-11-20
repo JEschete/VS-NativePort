@@ -14,6 +14,7 @@
 
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -29,7 +30,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.hpp"
@@ -248,7 +249,7 @@ void StoreMovementState(const MovementState& state,
 std::optional<ActorRoster> LiveBattleActors() {
   ActorRoster roster;
   unsigned visited = 0;
-  for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
+  for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     if (actor->id < 0 || actor->id >= kMovementActorSlots) return std::nullopt;
     const unsigned bit = 1u << static_cast<unsigned>(actor->id);

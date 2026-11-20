@@ -9,7 +9,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -23,10 +23,10 @@ class LiveShortcut {
   Battle_Actor actor{};
 
   LiveShortcut()
-      : saved_character_(Battle_characterState),
+      : saved_character_(VS::Battle::characterState),
         saved_record_(Actors_actorRecords[0]) {
     Capture();
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     Actors_actorRecords[0] = &record;
     actor.stats = &stats;
     actor.model = &record.instance;
@@ -43,7 +43,7 @@ class LiveShortcut {
   ~LiveShortcut() {
     Restore();
     Actors_actorRecords[0] = saved_record_;
-    Battle_characterState = saved_character_;
+    VS::Battle::characterState = saved_character_;
   }
   LiveShortcut(const LiveShortcut&) = delete;
   LiveShortcut& operator=(const LiveShortcut&) = delete;

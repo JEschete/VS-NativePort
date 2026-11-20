@@ -4,7 +4,7 @@
 
 #include "Battle/BattleTypes.h"
 #include "Battle/SphereGeometry.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle {
@@ -14,7 +14,7 @@ namespace VS::Battle {
 // Reads and commits only the sphere's wire animation, vertex count and the
 // vertices written by the checked core. Table extents are supplied explicitly.
 [[nodiscard]] std::optional<SphereWireframeBuildResult>
-BuildLiveSphereWireframe(Battle_TargetSphereSetupView* sphere,
+BuildLiveSphereWireframe(VS::Battle::TargetSphereSetupView* sphere,
                          std::int32_t type,
                          const SphereGeometryTables& tables) noexcept;
 

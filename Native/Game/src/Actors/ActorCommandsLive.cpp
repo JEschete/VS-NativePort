@@ -21,13 +21,13 @@
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
@@ -253,10 +253,10 @@ class LiveCommandHost final : public ActorCommandHost {
  private:
   static Battle_Actor* Actor(int actor_id) {
     if (actor_id < 0 ||
-        static_cast<std::size_t>(actor_id) >= std::size(Battle_actors)) {
+        static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
       return nullptr;
     }
-    return Battle_actors[actor_id];
+    return VS::Battle::actors[actor_id];
   }
   static Battle_Actor& Required(int actor_id) {
     Battle_Actor* actor = Actor(actor_id);
@@ -277,7 +277,7 @@ class LiveAshleyHost final : public AshleyMovementHost {
     VS::Field::LiveUpdateCameraTileConstraint(0, &location.packed_tile.target);
   }
   [[nodiscard]] CommandActorGait PlayerGait() const override {
-    return GaitOf(*Battle_characterState->stats);
+    return GaitOf(*VS::Battle::characterState->stats);
   }
   [[nodiscard]] std::uint32_t PlayerStateFlags() const override {
     return LiveActorStateFlags(0);

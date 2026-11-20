@@ -97,9 +97,9 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   std::vector<std::byte> arena = std::vector<std::byte>(0x20000);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   TerminalSession session;
-  ValueRestore<decltype(Battle_characterState)> saved_actor{
-      Battle_characterState};
-  ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[kAshleyActor]};
+  ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
+      VS::Battle::characterState};
+  ValueRestore<Battle_Actor*> saved_ashley{VS::Battle::actors[kAshleyActor]};
   ValueRestore<int> saved_sound_group{VS::Audio::nextSfxChannelGroup7E};
   ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
       VS::State::stateFlags};
@@ -131,7 +131,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_titles{
       VS::Menu::menuStrings};
   std::array<int, framework::kRowTypeCount> row_types{};
-  std::remove_pointer_t<decltype(Battle_characterState)> actor{};
+  std::remove_pointer_t<decltype(VS::Battle::characterState)> actor{};
   std::remove_pointer_t<decltype(actor.stats)> stats{};
   std::array<std::uint32_t, kSoundSlots> sound_offsets{};
   std::array<std::uint16_t, kSoundSlots> sound_banks{};
@@ -143,8 +143,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   TerminalFixture() {
     framework::ResetLiveMainMenuStatics();
     BindInventory();
-    Battle_characterState = &actor;
-    Battle_actors[kAshleyActor] = &actor;
+    VS::Battle::characterState = &actor;
+    VS::Battle::actors[kAshleyActor] = &actor;
     actor.stats = &stats;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     VS::State::stateFlags.intro_state = 3;

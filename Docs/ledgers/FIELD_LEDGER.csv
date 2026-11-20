@@ -538,30 +538,30 @@ T00096.000,T00096,vs_battle_menuStates,0,menuStateMainMenu,0,,,0,,MainMenu,MenuS
 T00096.001,T00096,vs_battle_menuStates,1,menuStateNoneClosing,0,,,31,,kMenuClosing,MenuState NoneClosing,med,native:Framework.hpp kMenuClosing (#441);declaration-only;source:5BF94.h:70
 T00096.002,T00096,vs_battle_menuStates,2,menuStateNoneClosed,0,,,63,,kMenuClosed,MenuState NoneClosed,med,native:Framework.hpp kMenuClosed (#441);declaration-only;source:5BF94.h:71
 T00096.003,T00096,vs_battle_menuStates,3,menuStateOpenedFromMainMenu,0,,,64,,kOpenedFromMainMenu,MenuState OpenedFromMainMenu,med,native:Framework.hpp kOpenedFromMainMenu (#441);declaration-only;source:5BF94.h:72
-T00097.000,T00097,vs_battle_statuses,0,vsBattleStatusStrDown,0,,,1,,StrDown,StatusFlag StrDown,med,declaration-only;source:146C.h:486
-T00097.001,T00097,vs_battle_statuses,1,vsBattleStatusStrUp,0,,,2,,StrUp,StatusFlag StrUp,med,declaration-only;source:146C.h:487
-T00097.002,T00097,vs_battle_statuses,2,vsBattleStatusIntDown,0,,,4,,IntDown,StatusFlag IntDown,med,declaration-only;source:146C.h:488
-T00097.003,T00097,vs_battle_statuses,3,vsBattleStatusIntUp,0,,,8,,IntUp,StatusFlag IntUp,med,declaration-only;source:146C.h:489
-T00097.004,T00097,vs_battle_statuses,4,vsBattleStatusAgiDown,0,,,16,,AgiDown,StatusFlag AgiDown,med,declaration-only;source:146C.h:490
-T00097.005,T00097,vs_battle_statuses,5,vsBattleStatusAgiUp,0,,,32,,AgiUp,StatusFlag AgiUp,med,declaration-only;source:146C.h:491
-T00097.006,T00097,vs_battle_statuses,6,vsBattleStatusQuicken,0,,,64,,Quicken,StatusFlag Quicken,med,declaration-only;source:146C.h:492
-T00097.007,T00097,vs_battle_statuses,7,vsBattleStatusSilent,0,,,128,,Silent,StatusFlag Silent,med,declaration-only;source:146C.h:493
-T00097.008,T00097,vs_battle_statuses,8,vsBattleStatusParalysis,0,,,256,,Paralysis,StatusFlag Paralysis,med,declaration-only;source:146C.h:494
-T00097.009,T00097,vs_battle_statuses,9,vsBattleStatusPoison,0,,,512,,Poison,StatusFlag Poison,med,declaration-only;source:146C.h:495
-T00097.010,T00097,vs_battle_statuses,10,vsBattleStatusNumbness,0,,,1024,,Numbness,StatusFlag Numbness,med,declaration-only;source:146C.h:496
-T00097.011,T00097,vs_battle_statuses,11,vsBattleStatusCurse,0,,,2048,,Curse,StatusFlag Curse,med,declaration-only;source:146C.h:497
-T00097.012,T00097,vs_battle_statuses,12,vsBattleStatusRegen,0,,,4096,,Regen,StatusFlag Regen,med,declaration-only;source:146C.h:498
-T00097.013,T00097,vs_battle_statuses,13,vsBattleStatusWard,0,,,8192,,Ward,StatusFlag Ward,med,declaration-only;source:146C.h:499
-T00097.014,T00097,vs_battle_statuses,14,vsBattleStatusEquDown,0,,,16384,,EquDown,StatusFlag EquDown,med,declaration-only;source:146C.h:500
-T00097.015,T00097,vs_battle_statuses,15,vsBattleStatusEquUp,0,,,32768,,EquUp,StatusFlag EquUp,med,declaration-only;source:146C.h:501
-T00097.016,T00097,vs_battle_statuses,16,vsBattleStatusAirAtkUp,0,,,65536,,AirAtkUp,StatusFlag AirAtkUp,med,declaration-only;source:146C.h:502
-T00097.017,T00097,vs_battle_statuses,17,vsBattleStatusFireAtkUp,0,,,131072,,FireAtkUp,StatusFlag FireAtkUp,med,declaration-only;source:146C.h:503
-T00097.018,T00097,vs_battle_statuses,18,vsBattleStatusEarthAtkUp,0,,,262144,,EarthAtkUp,StatusFlag EarthAtkUp,med,declaration-only;source:146C.h:504
-T00097.019,T00097,vs_battle_statuses,19,vsBattleStatusWaterAtkUp,0,,,524288,,WaterAtkUp,StatusFlag WaterAtkUp,med,declaration-only;source:146C.h:505
-T00097.020,T00097,vs_battle_statuses,20,vsBattleStatusAirDefUp,0,,,1048576,,AirDefUp,StatusFlag AirDefUp,med,declaration-only;source:146C.h:506
-T00097.021,T00097,vs_battle_statuses,21,vsBattleStatusFireDefUp,0,,,2097152,,FireDefUp,StatusFlag FireDefUp,med,declaration-only;source:146C.h:507
-T00097.022,T00097,vs_battle_statuses,22,vsBattleStatusEarthDefUp,0,,,4194304,,EarthDefUp,StatusFlag EarthDefUp,med,declaration-only;source:146C.h:508
-T00097.023,T00097,vs_battle_statuses,23,vsBattleStatusWaterDefUp,0,,,8388608,,WaterDefUp,StatusFlag WaterDefUp,med,declaration-only;source:146C.h:509
+T00097.000,T00097,vs_battle_statuses,0,vsBattleStatusStrDown,0,,,1,,StrDown,StatusFlag StrDown,med,retired-by:nothing; no reader;declaration-only;source:146C.h:486
+T00097.001,T00097,vs_battle_statuses,1,vsBattleStatusStrUp,0,,,2,,StrUp,StatusFlag StrUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:487
+T00097.002,T00097,vs_battle_statuses,2,vsBattleStatusIntDown,0,,,4,,IntDown,StatusFlag IntDown,med,retired-by:nothing; no reader;declaration-only;source:146C.h:488
+T00097.003,T00097,vs_battle_statuses,3,vsBattleStatusIntUp,0,,,8,,IntUp,StatusFlag IntUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:489
+T00097.004,T00097,vs_battle_statuses,4,vsBattleStatusAgiDown,0,,,16,,AgiDown,StatusFlag AgiDown,med,retired-by:nothing; no reader;declaration-only;source:146C.h:490
+T00097.005,T00097,vs_battle_statuses,5,vsBattleStatusAgiUp,0,,,32,,AgiUp,StatusFlag AgiUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:491
+T00097.006,T00097,vs_battle_statuses,6,vsBattleStatusQuicken,0,,,64,,Quicken,StatusFlag Quicken,med,retired-by:nothing; no reader;declaration-only;source:146C.h:492
+T00097.007,T00097,vs_battle_statuses,7,vsBattleStatusSilent,0,,,128,,Silent,StatusFlag Silent,med,retired-by:nothing; no reader;declaration-only;source:146C.h:493
+T00097.008,T00097,vs_battle_statuses,8,vsBattleStatusParalysis,0,,,256,,Paralysis,StatusFlag Paralysis,med,retired-by:nothing; no reader;declaration-only;source:146C.h:494
+T00097.009,T00097,vs_battle_statuses,9,vsBattleStatusPoison,0,,,512,,Poison,StatusFlag Poison,med,retired-by:nothing; no reader;declaration-only;source:146C.h:495
+T00097.010,T00097,vs_battle_statuses,10,vsBattleStatusNumbness,0,,,1024,,Numbness,StatusFlag Numbness,med,retired-by:nothing; no reader;declaration-only;source:146C.h:496
+T00097.011,T00097,vs_battle_statuses,11,vsBattleStatusCurse,0,,,2048,,Curse,StatusFlag Curse,med,retired-by:nothing; no reader;declaration-only;source:146C.h:497
+T00097.012,T00097,vs_battle_statuses,12,vsBattleStatusRegen,0,,,4096,,Regen,StatusFlag Regen,med,retired-by:nothing; no reader;declaration-only;source:146C.h:498
+T00097.013,T00097,vs_battle_statuses,13,vsBattleStatusWard,0,,,8192,,Ward,StatusFlag Ward,med,retired-by:nothing; no reader;declaration-only;source:146C.h:499
+T00097.014,T00097,vs_battle_statuses,14,vsBattleStatusEquDown,0,,,16384,,EquDown,StatusFlag EquDown,med,retired-by:nothing; no reader;declaration-only;source:146C.h:500
+T00097.015,T00097,vs_battle_statuses,15,vsBattleStatusEquUp,0,,,32768,,EquUp,StatusFlag EquUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:501
+T00097.016,T00097,vs_battle_statuses,16,vsBattleStatusAirAtkUp,0,,,65536,,AirAtkUp,StatusFlag AirAtkUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:502
+T00097.017,T00097,vs_battle_statuses,17,vsBattleStatusFireAtkUp,0,,,131072,,FireAtkUp,StatusFlag FireAtkUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:503
+T00097.018,T00097,vs_battle_statuses,18,vsBattleStatusEarthAtkUp,0,,,262144,,EarthAtkUp,StatusFlag EarthAtkUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:504
+T00097.019,T00097,vs_battle_statuses,19,vsBattleStatusWaterAtkUp,0,,,524288,,WaterAtkUp,StatusFlag WaterAtkUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:505
+T00097.020,T00097,vs_battle_statuses,20,vsBattleStatusAirDefUp,0,,,1048576,,AirDefUp,StatusFlag AirDefUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:506
+T00097.021,T00097,vs_battle_statuses,21,vsBattleStatusFireDefUp,0,,,2097152,,FireDefUp,StatusFlag FireDefUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:507
+T00097.022,T00097,vs_battle_statuses,22,vsBattleStatusEarthDefUp,0,,,4194304,,EarthDefUp,StatusFlag EarthDefUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:508
+T00097.023,T00097,vs_battle_statuses,23,vsBattleStatusWaterDefUp,0,,,8388608,,WaterDefUp,StatusFlag WaterDefUp,med,retired-by:nothing; no reader;declaration-only;source:146C.h:509
 T00098.000,T00098,vs_battle_warlockSpellIds_e,0,vs_battle_spell_solidShock,0,,,97,,SolidShock,WarlockSpell SolidShock,med,declaration-only;source:5BF94.h:7
 T00098.001,T00098,vs_battle_warlockSpellIds_e,1,vs_battle_spell_lightningBolt,0,,,98,,LightningBolt,WarlockSpell LightningBolt,med,declaration-only;source:5BF94.h:8
 T00098.002,T00098,vs_battle_warlockSpellIds_e,2,vs_battle_spell_fireball,0,,,99,,Fireball,WarlockSpell Fireball,med,declaration-only;source:5BF94.h:9
@@ -1260,92 +1260,92 @@ T00213.003,T00213,D_800EB9B4_t,3,unk4,1,short,,,radialScale,radial_warp_scale,"R
 T00213.004,T00213,D_800EB9B4_t,4,unk6,1,short,,,radialGrowth,radial_warp_growth,Radial warp growth added to 1.0 for each step outward,low,native:ScreenEffectState.hpp LiveScreenEffectOverlay::radial_warp_growth (#441);source:GIM/SCREFF2.PRG/0.h:10
 T00213.005,T00213,D_800EB9B4_t,5,unk8,1,int,,,vignetteEnabled,vignette_enabled,Draws the vignette while set,high,native:ScreenEffectState.hpp LiveScreenEffectOverlay::vignette_enabled (#441);source:GIM/SCREFF2.PRG/0.h:11
 T00213.006,T00213,D_800EB9B4_t,6,slot,0,vs_main_CdQueueSlot *,,,,slot,Disc request that loads SCREFF2.PRG,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::slot (#441);source:GIM/SCREFF2.PRG/0.h:12
-T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,primaryVolume,Primary target volume,high,source:573B8.c:446
-T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,secondaryVolume,Secondary target volume,high,source:573B8.c:484
-T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depthAndYaw,Depth and camera yaw as one word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:31;source:58578.c:128;use cited by sanity pass;source:573B8.c:36
-T00214.003,T00214,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase,low,source:573B8.c:449
-T00214.004,T00214,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase,low,source:58578.c:905;use cited by sanity pass;source:573B8.c:38
-T00214.005,T00214,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase,low,source:573B8.c:450
-T00214.006,T00214,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index,med,source:573B8.c:462
-T00214.007,T00214,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,low,source:58578.c:456;use cited by sanity pass;source:573B8.c:41
-T00214.008,T00214,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; -1 after init,low,source:573B8.c:376
-T00214.009,T00214,D_800EB9B8_t,9,unk2E,1,u_char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
-T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:39;declaration-only;source:573B8.c:44
-T00214.011,T00214,D_800EB9B8_t,11,unk30,1,int,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
-T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,reserved34,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:41;declaration-only;source:573B8.c:46
-T00214.013,T00214,D_800EB9B8_t,13,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
-T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
-T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,targetList0,First target list; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:44;source:58578.c:457;use cited by sanity pass;source:573B8.c:49
-T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,targetList1,Second target list; set from a setup parameter; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\SphereLifecycleLive.cpp:176;source:573B8.c:468
-T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
-T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,reservedLabelArea,Label and terrain storage viewed through the canonical targeting sphere,high,source:58578.c:649;source:573B8.c:52;contains 24 native label pointers
-T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
-T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:97;source:58578.c:1045;use cited by sanity pass;source:573B8.c:54
+T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,primary_volume,Primary target volume,high,source:573B8.c:446
+T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,secondary_volume,Secondary target volume,high,source:573B8.c:484
+T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depth_and_yaw,Depth and camera yaw as one word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:59;source:58578.c:128;use cited by sanity pass;source:573B8.c:36
+T00214.003,T00214,D_800EB9B8_t,3,unk24,1,short,,,,wire_phase_a,Wireframe animation phase,low,source:573B8.c:449
+T00214.004,T00214,D_800EB9B8_t,4,unk26,1,short,,,,wire_phase_b,Wireframe animation phase,low,source:58578.c:905;use cited by sanity pass;source:573B8.c:38
+T00214.005,T00214,D_800EB9B8_t,5,unk28,1,short,,,,wire_phase_c,Wireframe animation phase,low,source:573B8.c:450
+T00214.006,T00214,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wire_shape,Wireframe shape index,med,source:573B8.c:462
+T00214.007,T00214,D_800EB9B8_t,7,unk2C,1,char,,,target count,target_count,Number of selectable targets,low,source:58578.c:456;use cited by sanity pass;source:573B8.c:41
+T00214.008,T00214,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selected_target,Selected target; -1 after init,low,source:573B8.c:376
+T00214.009,T00214,D_800EB9B8_t,9,unk2E,1,u_char,,,,sphere_mode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,highlighted_group,Highlighted target group (TargetSphereRecord::highlighted_group),med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:67;renamed from reserved2F (#441);declaration-only;source:573B8.c:44
+T00214.011,T00214,D_800EB9B8_t,11,unk30,1,int,,,,pulse_mode_and_vertex_count,"Highlighted pulse slot, target mode and wire vertex count as one word",low,read by SphereGeometryLive.cpp;renamed from reserved30 (#441);declaration-only;source:573B8.c:45
+T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,highlight_tint,Highlight tint colour code (TargetSphereRecord::highlight_tint),med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:70;renamed from reserved34 (#441);declaration-only;source:573B8.c:46
+T00214.013,T00214,D_800EB9B8_t,13,unk38,1,int,,,,cursor_xy,Cursor x and y halfwords; cleared on setup,low,read by SphereLifecycleLive.cpp;renamed from reserved38 (#441);source:573B8.c:460
+T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,cursor_z_and_input_locked,Cursor z and input-locked halfwords; cleared on setup,low,read by SphereLifecycleLive.cpp;renamed from reserved3C (#441);source:573B8.c:461
+T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,target_list0,First target list; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:73;source:58578.c:457;use cited by sanity pass;source:573B8.c:49
+T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,target_list1,Second target list; set from a setup parameter; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\SphereLifecycleLive.cpp:180;source:573B8.c:468
+T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wire_vertices,Wireframe vertices,high,source:573B8.c:501
+T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,labels,"Label slots (SphereTargetLabelRecord[24]), then reserved_b70: the record's reserved storage and terrain heights",high,source:58578.c:649;source:573B8.c:52;contains 24 native label pointers
+T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,wire_edges,Wireframe edge list,med,source:573B8.c:377
+T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrain_row_flags,Valid flags of the cached terrain; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:80;source:58578.c:1045;use cited by sanity pass;source:573B8.c:54
 T00215.000,T00215,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124
 T00215.001,T00215,D_800EB9B8_t,1,unk20,1,short,,,,depth,Average screen depth of the sphere,med,source:58578.c:128
-T00215.002,T00215,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
-T00215.003,T00215,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
-T00215.004,T00215,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
-T00215.005,T00215,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
-T00215.006,T00215,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
-T00215.007,T00215,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,med,source:58578.c:456
-T00215.008,T00215,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
-T00215.009,T00215,D_800EB9B8_t,9,unk2E,1,char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
-T00215.010,T00215,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not read,low,declaration-only;source:573B8.c:44
-T00215.011,T00215,D_800EB9B8_t,11,unk30,1,char,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
-T00215.012,T00215,D_800EB9B8_t,12,unk31,1,char,,,,targetMode,Mode passed when the targets are set,low,source:58578.c:465
-T00215.013,T00215,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertexCount,Wireframe vertices built,low,source:58578.c:962
-T00215.014,T00215,D_800EB9B8_t,14,unk34,1,int,,,,reserved34,Not read,low,declaration-only;source:573B8.c:46
-T00215.015,T00215,D_800EB9B8_t,15,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
-T00215.016,T00215,D_800EB9B8_t,16,unk3C,1,short,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
-T00215.017,T00215,D_800EB9B8_t,17,unk3E,1,short,,,,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
-T00215.018,T00215,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
-T00215.019,T00215,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00215.002,T00215,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,camera_yaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00215.003,T00215,D_800EB9B8_t,3,unk24,1,short,,,,wire_phase_a,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00215.004,T00215,D_800EB9B8_t,4,unk26,1,short,,,,wire_phase_b,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00215.005,T00215,D_800EB9B8_t,5,unk28,1,short,,,,wire_phase_c,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00215.006,T00215,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wire_shape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00215.007,T00215,D_800EB9B8_t,7,unk2C,1,char,,,target count,target_count,Number of selectable targets,med,source:58578.c:456
+T00215.008,T00215,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selected_target,Selected target; clamped to the count,low,source:573B8.c:376
+T00215.009,T00215,D_800EB9B8_t,9,unk2E,1,char,,,,sphere_mode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00215.010,T00215,D_800EB9B8_t,10,unk2F,1,char,,,,highlighted_group,Highlighted target group,low,read by TargetingLive.cpp;renamed from reserved2F (#441);declaration-only;source:573B8.c:44
+T00215.011,T00215,D_800EB9B8_t,11,unk30,1,char,,,,highlighted_pulse_slot,Highlighted target's pulse slot,low,read by TargetingLive.cpp;renamed from reserved30 (#441);declaration-only;source:573B8.c:45
+T00215.012,T00215,D_800EB9B8_t,12,unk31,1,char,,,,target_mode,Mode passed when the targets are set,low,source:58578.c:465
+T00215.013,T00215,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertex_count,Wireframe vertices built,low,source:58578.c:962
+T00215.014,T00215,D_800EB9B8_t,14,unk34,1,int,,,,highlight_tint,Highlight tint colour code,low,read by TargetingLive.cpp;renamed from reserved34 (#441);declaration-only;source:573B8.c:46
+T00215.015,T00215,D_800EB9B8_t,15,unk38,1,int,,,,cursor_xy,Cursor x and y halfwords; cleared on setup,low,read by TargetingLive.cpp;renamed from reserved38 (#441);source:573B8.c:460
+T00215.016,T00215,D_800EB9B8_t,16,unk3C,1,short,,,,cursor_z,Cursor z; cleared on setup,low,read by TargetingLive.cpp;renamed from reserved3C (#441);source:573B8.c:461
+T00215.017,T00215,D_800EB9B8_t,17,unk3E,1,short,,,,input_locked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00215.018,T00215,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,target_lists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00215.019,T00215,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wire_vertices,Wireframe vertices,high,source:573B8.c:501
 T00215.020,T00215,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,labels,Floating target labels,high,source:58578.c:649
-T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:136;declaration-only;source:58578.c:48
-T00215.022,T00215,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
-T00215.023,T00215,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
-T00215.024,T00215,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
+T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reserved_b70,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:107;declaration-only;source:58578.c:48
+T00215.022,T00215,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrain_heights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00215.023,T00215,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wire_edges,Wireframe edge list,med,source:573B8.c:377
+T00215.024,T00215,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrain_row_flags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
 T00216.000,T00216,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124
 T00216.001,T00216,D_800EB9B8_t,1,unk20,1,short,,,,depth,Average screen depth of the sphere,med,source:58578.c:128
-T00216.002,T00216,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
-T00216.003,T00216,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
-T00216.004,T00216,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
-T00216.005,T00216,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
-T00216.006,T00216,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
-T00216.007,T00216,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,med,source:58578.c:456
-T00216.008,T00216,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
-T00216.009,T00216,D_800EB9B8_t,9,unk2E,1,char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
-T00216.010,T00216,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not read,low,declaration-only;source:573B8.c:44
-T00216.011,T00216,D_800EB9B8_t,11,unk30,1,char,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
-T00216.012,T00216,D_800EB9B8_t,12,unk31,1,char,,,,targetMode,Mode passed when the targets are set,low,source:58578.c:465
-T00216.013,T00216,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertexCount,Wireframe vertices built,low,source:58578.c:962
-T00216.014,T00216,D_800EB9B8_t,14,unk34,1,int,,,,reserved34,Not read,low,declaration-only;source:573B8.c:46
-T00216.015,T00216,D_800EB9B8_t,15,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
-T00216.016,T00216,D_800EB9B8_t,16,unk3C,1,short,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
-T00216.017,T00216,D_800EB9B8_t,17,unk3E,1,short,,,,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
-T00216.018,T00216,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
-T00216.019,T00216,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00216.002,T00216,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,camera_yaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00216.003,T00216,D_800EB9B8_t,3,unk24,1,short,,,,wire_phase_a,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00216.004,T00216,D_800EB9B8_t,4,unk26,1,short,,,,wire_phase_b,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00216.005,T00216,D_800EB9B8_t,5,unk28,1,short,,,,wire_phase_c,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00216.006,T00216,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wire_shape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00216.007,T00216,D_800EB9B8_t,7,unk2C,1,char,,,target count,target_count,Number of selectable targets,med,source:58578.c:456
+T00216.008,T00216,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selected_target,Selected target; clamped to the count,low,source:573B8.c:376
+T00216.009,T00216,D_800EB9B8_t,9,unk2E,1,char,,,,sphere_mode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00216.010,T00216,D_800EB9B8_t,10,unk2F,1,char,,,,highlighted_group,Highlighted target group,low,read by TargetingLive.cpp;renamed from reserved2F (#441);declaration-only;source:573B8.c:44
+T00216.011,T00216,D_800EB9B8_t,11,unk30,1,char,,,,highlighted_pulse_slot,Highlighted target's pulse slot,low,read by TargetingLive.cpp;renamed from reserved30 (#441);declaration-only;source:573B8.c:45
+T00216.012,T00216,D_800EB9B8_t,12,unk31,1,char,,,,target_mode,Mode passed when the targets are set,low,source:58578.c:465
+T00216.013,T00216,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertex_count,Wireframe vertices built,low,source:58578.c:962
+T00216.014,T00216,D_800EB9B8_t,14,unk34,1,int,,,,highlight_tint,Highlight tint colour code,low,read by TargetingLive.cpp;renamed from reserved34 (#441);declaration-only;source:573B8.c:46
+T00216.015,T00216,D_800EB9B8_t,15,unk38,1,int,,,,cursor_xy,Cursor x and y halfwords; cleared on setup,low,read by TargetingLive.cpp;renamed from reserved38 (#441);source:573B8.c:460
+T00216.016,T00216,D_800EB9B8_t,16,unk3C,1,short,,,,cursor_z,Cursor z; cleared on setup,low,read by TargetingLive.cpp;renamed from reserved3C (#441);source:573B8.c:461
+T00216.017,T00216,D_800EB9B8_t,17,unk3E,1,short,,,,input_locked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00216.018,T00216,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,target_lists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00216.019,T00216,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wire_vertices,Wireframe vertices,high,source:573B8.c:501
 T00216.020,T00216,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,labels,Floating target labels,high,source:58578.c:649
-T00216.021,T00216,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not read by decompiled code,low,declaration-only;source:58578.c:48
-T00216.022,T00216,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
-T00216.023,T00216,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
-T00216.024,T00216,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
+T00216.021,T00216,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reserved_b70,Not read by decompiled code,low,declaration-only;source:58578.c:48
+T00216.022,T00216,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrain_heights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00216.023,T00216,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wire_edges,Wireframe edge list,med,source:573B8.c:377
+T00216.024,T00216,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrain_row_flags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
 T00217.000,T00217,D_800EB9B8_t2,0,unk0,1,u_char,,,,kind,Volume kind; bit 7 marks it active,med,source:573B8.c:454
-T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,reserved1,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:18;declaration-only;source:573B8.c:25
-T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,reserved2,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:19;declaration-only;source:573B8.c:26
-T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,reserved3,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:20;declaration-only;source:573B8.c:27
-T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,reserved4,Bits of Battle::TargetVolume.scale; not read through this view; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:21;source:58578.c:134;sanity pass 2026-10-17
-T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,reserved8,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:22;declaration-only;source:573B8.c:29
-T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,reservedC,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:23;declaration-only;source:573B8.c:30
+T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,reserved1,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:30;declaration-only;source:573B8.c:25
+T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,reserved2,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:31;declaration-only;source:573B8.c:26
+T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,reserved3,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:32;declaration-only;source:573B8.c:27
+T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,reserved4,Bits of Battle::TargetVolume.scale; not read through this view; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:33;source:58578.c:134;sanity pass 2026-10-17
+T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,reserved8,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:34;declaration-only;source:573B8.c:29
+T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,reserved_c,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.hpp:35;declaration-only;source:573B8.c:30
 T00218.000,T00218,D_800EB9B8_unk990,0,unk0,1,char,,,label animation state,state,"0 inactive, 2 sliding in; above 1 is not settled",med,source:58578.c:649
 T00218.001,T00218,D_800EB9B8_unk990,1,unk1,1,char,,,selected flag,depth,Ordering-table depth of the label,med,source:58578.c:659
 T00218.002,T00218,D_800EB9B8_unk990,2,unk2,1,char,,,,gradient,Gradient style,med,source:58578.c:658
-T00218.003,T00218,D_800EB9B8_unk990,3,unk3,1,char,,,,ringSize,Ring size passed to the ring draw,low,source:58578.c:736
-T00218.004,T00218,D_800EB9B8_unk990,4,unk4,1,short,,,screen x,screenX,Screen X; slides toward its row,med,source:58578.c:702
-T00218.005,T00218,D_800EB9B8_unk990,5,unk6,1,char,,,screen y,offsetY,Y offset added to the label row,med,source:58578.c:684
+T00218.003,T00218,D_800EB9B8_unk990,3,unk3,1,char,,,,ring_size,Ring size passed to the ring draw,low,source:58578.c:736
+T00218.004,T00218,D_800EB9B8_unk990,4,unk4,1,short,,,screen x,screen_x,Screen X; slides toward its row,med,source:58578.c:702
+T00218.005,T00218,D_800EB9B8_unk990,5,unk6,1,char,,,screen y,offset_y,Y offset added to the label row,med,source:58578.c:684
 T00218.006,T00218,D_800EB9B8_unk990,6,unk7,1,char,,,,fade,Color fade step,med,source:58578.c:674
-T00218.007,T00218,D_800EB9B8_unk990,7,unk8,1,SVECTOR,,,world anchor,worldPosition,World position projected for the label,high,source:58578.c:729
+T00218.007,T00218,D_800EB9B8_unk990,7,unk8,1,SVECTOR,,,world anchor,world_position,World position projected for the label,high,source:58578.c:729
 T00218.008,T00218,D_800EB9B8_unk990,8,unk10,1,char *,,,text pointer,text,Label text,high,source:58578.c:696
 T00219.000,T00219,D_800EB9BC_t,0,unk0_0,1,u_int,1,,,isVisible,Layer configured for drawing,high,source:5BF94.c:2384
 T00219.001,T00219,D_800EB9BC_t,1,unk0_1,1,u_int,1,,,isLoadPending,Image data still loading,high,source:5BF94.c:2560
@@ -1383,7 +1383,7 @@ T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,chainStep,
 T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,selection,Action being chosen,high,source:146C.c:4499
 T00225.003,T00225,D_800F19CC_t,3,unk854,1,D_800F19CC_t2[4],,,recent action ring,queue,Actions queued for execution,high,source:146C.c:743
 T00225.004,T00225,D_800F19CC_t,4,unk2984,1,int,,,player targeting interface enabled,isPlayerAction,"1 when Ashley chooses the action, 0 for other actors",med,source:146C.c:4505
-T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:475;source:146C.c:4187
+T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:479;source:146C.c:4187
 T00225.006,T00225,D_800F19CC_t,6,unk298C,1,u_char,,,selected target index,selectedPreview,Selected target preview; 0xFF none,med,source:146C.c:3783
 T00225.007,T00225,D_800F19CC_t,7,unk298D,1,u_char,,,,cameraPreview,Preview the camera follows; 0xFF none,med,source:146C.c:2809
 T00225.008,T00225,D_800F19CC_t,8,unk298E,1,char,,,,selectionFrames,Frames spent selecting,med,source:146C.c:6900
@@ -2671,58 +2671,58 @@ T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,row_index,Named in the fork;
 T00310.006,T00310,_gazetteRow,6,title,0,char *,,,,title,Named in the fork; see cited use,med,source:238.c:1738
 T00310.007,T00310,_gazetteRow,7,description,0,char *,,,,description,Named in the fork; see cited use,med,source:238.c:1739
 T00311.000,T00311,_hitEntity_t,0,unk0,1,func_8008631C_t2,,,,target,"Target actor and limb with HP, MP and hit chance",high,source:146C.c:4498
-T00311.001,T00311,_hitEntity_t,1,risk,0,short,,,,riskChange,Risk change,high,source:146C.c:12904
-T00311.002,T00311,_hitEntity_t,2,strength,0,short,,,,strengthChange,Strength change,high,source:146C.c:12722
-T00311.003,T00311,_hitEntity_t,3,intelligence,0,short,,,,intelligenceChange,Intelligence change,high,source:146C.c:12731
-T00311.004,T00311,_hitEntity_t,4,agility,0,short,,,,agilityChange,Agility change,high,source:146C.c:12740
-T00311.005,T00311,_hitEntity_t,5,maxHp,0,short,,,,maxHpChange,Maximum HP change,high,source:146C.c:12749
-T00311.006,T00311,_hitEntity_t,6,maxMp,0,short,,,,maxMpChange,Maximum MP change,high,source:146C.c:12758
-T00311.007,T00311,_hitEntity_t,7,removeStatuses,0,int,,,status additions,removeStatuses,Statuses removed,high,source:146C.c:11208
-T00311.008,T00311,_hitEntity_t,8,inflictStatuses,0,int,,,,inflictStatuses,Statuses inflicted,high,source:146C.c:11210
-T00311.009,T00311,_hitEntity_t,9,hpEffect,0,u_int,2,,,hpEffect,"HP effect: 1 damage, 2 restore, 3 other",med,source:146C.c:3468;use cited by sanity pass;source:146C.c:54
-T00311.010,T00311,_hitEntity_t,10,mpEffect,0,u_int,2,,,mpEffect,"MP effect: 1 drain, 2 restore",high,source:146C.c:12832
-T00311.011,T00311,_hitEntity_t,11,riskEffect,0,u_int,2,,,riskEffect,Risk effect direction,high,source:146C.c:12905
-T00311.012,T00311,_hitEntity_t,12,strengthEffect,0,u_int,2,,,strengthEffect,"Strength effect: 1 down, 2 up",high,source:146C.c:12723
-T00311.013,T00311,_hitEntity_t,13,intelligenceEffect,0,u_int,2,,,intelligenceEffect,"Intelligence effect: 1 down, 2 up",high,source:146C.c:12732
-T00311.014,T00311,_hitEntity_t,14,agilityEffect,0,u_int,2,,,agilityEffect,"Agility effect: 1 down, 2 up",high,source:146C.c:12741
-T00311.015,T00311,_hitEntity_t,15,maxHpEffect,0,u_int,2,,,maxHpEffect,Maximum HP effect direction,high,source:146C.c:12750
-T00311.016,T00311,_hitEntity_t,16,maxMpEffect,0,u_int,2,,,maxMpEffect,Maximum MP effect direction,high,source:146C.c:12759
-T00311.017,T00311,_hitEntity_t,17,unk1C_16,1,u_int,2,,status feedback direction (1 harmful,statStatusEffect,"Stat status change: 1 down, 2 up (Strength/Intelligence/Agility down/up)",med,source:146C.c:12278
-T00311.018,T00311,_hitEntity_t,18,weaponDpEffect,0,u_int,2,,,weaponDpEffect,Weapon DP effect direction,high,source:146C.c:12895
-T00311.019,T00311,_hitEntity_t,19,weaponPpEffect,0,u_int,2,,,weaponPpEffect,"Weapon PP effect: 1 drain, 2 restore",high,source:146C.c:12843
-T00311.020,T00311,_hitEntity_t,20,armorDpEffect,0,u_int,2,,,armorDpEffect,Armor DP effect direction,high,source:146C.c:12569
-T00311.021,T00311,_hitEntity_t,21,shieldPpEffect,0,u_int,2,,,shieldPpEffect,Shield PP effect direction,high,source:146C.c:12857
-T00311.022,T00311,_hitEntity_t,22,unk1C_26,1,u_int,2,,special source effect result,sourceResult,Set to 2 when the source action succeeds,low,source:146C.c:12551
-T00311.023,T00311,_hitEntity_t,23,unk1C_28,1,u_int,4,,,reservedBits28,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:36;declaration-only;source:146C.c:68
+T00311.001,T00311,_hitEntity_t,1,risk,0,short,,,,risk_change,Risk change,high,source:146C.c:12904
+T00311.002,T00311,_hitEntity_t,2,strength,0,short,,,,strength_change,Strength change,high,source:146C.c:12722
+T00311.003,T00311,_hitEntity_t,3,intelligence,0,short,,,,intelligence_change,Intelligence change,high,source:146C.c:12731
+T00311.004,T00311,_hitEntity_t,4,agility,0,short,,,,agility_change,Agility change,high,source:146C.c:12740
+T00311.005,T00311,_hitEntity_t,5,maxHp,0,short,,,,max_hp_change,Maximum HP change,high,source:146C.c:12749
+T00311.006,T00311,_hitEntity_t,6,maxMp,0,short,,,,max_mp_change,Maximum MP change,high,source:146C.c:12758
+T00311.007,T00311,_hitEntity_t,7,removeStatuses,0,int,,,status additions,remove_statuses,Statuses removed,high,source:146C.c:11208
+T00311.008,T00311,_hitEntity_t,8,inflictStatuses,0,int,,,,inflict_statuses,Statuses inflicted,high,source:146C.c:11210
+T00311.009,T00311,_hitEntity_t,9,hpEffect,0,u_int,2,,,hp_effect,"HP effect: 1 damage, 2 restore, 3 other",med,source:146C.c:3468;use cited by sanity pass;source:146C.c:54
+T00311.010,T00311,_hitEntity_t,10,mpEffect,0,u_int,2,,,mp_effect,"MP effect: 1 drain, 2 restore",high,source:146C.c:12832
+T00311.011,T00311,_hitEntity_t,11,riskEffect,0,u_int,2,,,risk_effect,Risk effect direction,high,source:146C.c:12905
+T00311.012,T00311,_hitEntity_t,12,strengthEffect,0,u_int,2,,,strength_effect,"Strength effect: 1 down, 2 up",high,source:146C.c:12723
+T00311.013,T00311,_hitEntity_t,13,intelligenceEffect,0,u_int,2,,,intelligence_effect,"Intelligence effect: 1 down, 2 up",high,source:146C.c:12732
+T00311.014,T00311,_hitEntity_t,14,agilityEffect,0,u_int,2,,,agility_effect,"Agility effect: 1 down, 2 up",high,source:146C.c:12741
+T00311.015,T00311,_hitEntity_t,15,maxHpEffect,0,u_int,2,,,max_hp_effect,Maximum HP effect direction,high,source:146C.c:12750
+T00311.016,T00311,_hitEntity_t,16,maxMpEffect,0,u_int,2,,,max_mp_effect,Maximum MP effect direction,high,source:146C.c:12759
+T00311.017,T00311,_hitEntity_t,17,unk1C_16,1,u_int,2,,status feedback direction (1 harmful,stat_status_effect,"Stat status change: 1 down, 2 up (Strength/Intelligence/Agility down/up)",med,source:146C.c:12278
+T00311.018,T00311,_hitEntity_t,18,weaponDpEffect,0,u_int,2,,,weapon_dp_effect,Weapon DP effect direction,high,source:146C.c:12895
+T00311.019,T00311,_hitEntity_t,19,weaponPpEffect,0,u_int,2,,,weapon_pp_effect,"Weapon PP effect: 1 drain, 2 restore",high,source:146C.c:12843
+T00311.020,T00311,_hitEntity_t,20,armorDpEffect,0,u_int,2,,,armor_dp_effect,Armor DP effect direction,high,source:146C.c:12569
+T00311.021,T00311,_hitEntity_t,21,shieldPpEffect,0,u_int,2,,,shield_pp_effect,Shield PP effect direction,high,source:146C.c:12857
+T00311.022,T00311,_hitEntity_t,22,unk1C_26,1,u_int,2,,special source effect result,source_result,Set to 2 when the source action succeeds,low,source:146C.c:12551
+T00311.023,T00311,_hitEntity_t,23,unk1C_28,1,u_int,4,,,reserved_bits28,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.hpp:50;declaration-only;source:146C.c:68
 T00311.024,T00311,_hitEntity_t,24,limbs,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5)[6],,,,limbs,Per-limb results,high,source:146C.c:10641
-T00311.025,T00311,_hitEntity_t,25,weaponDp,0,short,,,,weaponDpChange,Weapon DP change,high,source:146C.c:14265
-T00311.026,T00311,_hitEntity_t,26,weaponPp,0,short,,,,weaponPpChange,Weapon PP change,high,source:146C.c:12842
-T00311.027,T00311,_hitEntity_t,27,armorDp,0,short,,,,armorDpChange,Armor DP change,high,source:146C.c:12567
-T00311.028,T00311,_hitEntity_t,28,shieldPp,0,short,,,,shieldPpChange,Shield PP change,high,source:146C.c:12856
-T00311.029,T00311,_hitEntity_t,29,unk40,1,int,,,,targetsPosition,Nonzero when the target is a position rather than an actor,med,source:146C.c:1939
-T00312.000,T00312,_hitIntermediate,0,type,0,u_char,,,,type,Named in the fork; see cited use,med,source:146C.c:11290
-T00312.001,T00312,_hitIntermediate,1,sourceAffinity,0,u_char,,,,sourceAffinity,Named in the fork; see cited use,med,source:146C.c:11313
-T00312.002,T00312,_hitIntermediate,2,sourceClass,0,u_char,,,,sourceClass,Named in the fork; see cited use,med,source:146C.c:11286
-T00312.003,T00312,_hitIntermediate,3,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:53;declaration-only;source:146C.c:11249
-T00312.004,T00312,_hitIntermediate,4,typeValue,0,short,,,,typeValue,Named in the fork; see cited use,med,source:146C.c:11344
-T00312.005,T00312,_hitIntermediate,5,weaponAffinity,0,short,,,,weaponAffinity,Named in the fork; see cited use,med,source:146C.c:11345
-T00312.006,T00312,_hitIntermediate,6,weaponClass,0,short,,,,weaponClass,Named in the fork; see cited use,med,source:146C.c:11347
-T00312.007,T00312,_hitIntermediate,7,value,0,short,,,,attackStat,"Attacker's base stat: strength for physical hits, intelligence for spells",high,source:146C.c:11339;source:146C.c:11533
-T00312.008,T00312,_hitIntermediate,8,weaponDamage,0,short,,,,weaponDamage,Named in the fork; see cited use,med,source:146C.c:11349
-T00312.009,T00312,_hitIntermediate,9,unkE,1,short,,,,reservedE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:59;declaration-only;source:146C.c:11255
-T00312.010,T00312,_hitIntermediate,10,unk10,1,u_char,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:60;declaration-only;source:146C.c:11256
-T00312.011,T00312,_hitIntermediate,11,targetAffinity,0,u_char,,,,targetAffinity,Named in the fork; see cited use,med,source:146C.c:11338
-T00312.012,T00312,_hitIntermediate,12,targetClass,0,u_char,,,,targetClass,Named in the fork; see cited use,med,source:146C.c:11287
-T00312.013,T00312,_hitIntermediate,13,unk13,1,u_char,,,,reserved13,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:63;declaration-only;source:146C.c:11259
-T00312.014,T00312,_hitIntermediate,14,unk14,1,short,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:64;declaration-only;source:146C.c:11260
-T00312.015,T00312,_hitIntermediate,15,tempTargetAffinity,0,short,,,,tempTargetAffinity,Named in the fork; see cited use,med,source:146C.c:11323
-T00312.016,T00312,_hitIntermediate,16,unk18,1,short,,,,reserved18,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:66;declaration-only;source:146C.c:11262
-T00312.017,T00312,_hitIntermediate,17,mediatingStat,0,short,,,,mediatingStat,Named in the fork; see cited use,med,source:146C.c:11377
-T00312.018,T00312,_hitIntermediate,18,shieldStat,0,short,,,,shieldStat,Named in the fork; see cited use,med,source:146C.c:11379
-T00312.019,T00312,_hitIntermediate,19,armorStat,0,short,,,,armorStat,Named in the fork; see cited use,med,source:146C.c:11378
-T00312.020,T00312,_hitIntermediate,20,statFactor,0,short,,,,statFactor,Named in the fork; see cited use,med,source:146C.c:11382
-T00312.021,T00312,_hitIntermediate,21,shieldStatFactor,0,short,,,,shieldStatFactor,Named in the fork; see cited use,med,source:146C.c:11381
-T00312.022,T00312,_hitIntermediate,22,armorStatFactor,0,short,,,,armorStatFactor,Named in the fork; see cited use,med,source:146C.c:11380
+T00311.025,T00311,_hitEntity_t,25,weaponDp,0,short,,,,weapon_dp_change,Weapon DP change,high,source:146C.c:14265
+T00311.026,T00311,_hitEntity_t,26,weaponPp,0,short,,,,weapon_pp_change,Weapon PP change,high,source:146C.c:12842
+T00311.027,T00311,_hitEntity_t,27,armorDp,0,short,,,,armor_dp_change,Armor DP change,high,source:146C.c:12567
+T00311.028,T00311,_hitEntity_t,28,shieldPp,0,short,,,,shield_pp_change,Shield PP change,high,source:146C.c:12856
+T00311.029,T00311,_hitEntity_t,29,unk40,1,int,,,,targets_position,Nonzero when the target is a position rather than an actor,med,source:146C.c:1939
+T00312.000,T00312,_hitIntermediate,0,type,0,u_char,,,,type,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11290
+T00312.001,T00312,_hitIntermediate,1,sourceAffinity,0,u_char,,,,sourceAffinity,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11313
+T00312.002,T00312,_hitIntermediate,2,sourceClass,0,u_char,,,,sourceClass,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11286
+T00312.003,T00312,_hitIntermediate,3,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:53;declaration-only;source:146C.c:11249
+T00312.004,T00312,_hitIntermediate,4,typeValue,0,short,,,,typeValue,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11344
+T00312.005,T00312,_hitIntermediate,5,weaponAffinity,0,short,,,,weaponAffinity,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11345
+T00312.006,T00312,_hitIntermediate,6,weaponClass,0,short,,,,weaponClass,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11347
+T00312.007,T00312,_hitIntermediate,7,value,0,short,,,,attackStat,"Attacker's base stat: strength for physical hits, intelligence for spells",high,retired-by:nothing; no reader;source:146C.c:11339;source:146C.c:11533
+T00312.008,T00312,_hitIntermediate,8,weaponDamage,0,short,,,,weaponDamage,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11349
+T00312.009,T00312,_hitIntermediate,9,unkE,1,short,,,,reservedE,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:59;declaration-only;source:146C.c:11255
+T00312.010,T00312,_hitIntermediate,10,unk10,1,u_char,,,,reserved10,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:60;declaration-only;source:146C.c:11256
+T00312.011,T00312,_hitIntermediate,11,targetAffinity,0,u_char,,,,targetAffinity,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11338
+T00312.012,T00312,_hitIntermediate,12,targetClass,0,u_char,,,,targetClass,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11287
+T00312.013,T00312,_hitIntermediate,13,unk13,1,u_char,,,,reserved13,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:63;declaration-only;source:146C.c:11259
+T00312.014,T00312,_hitIntermediate,14,unk14,1,short,,,,reserved14,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:64;declaration-only;source:146C.c:11260
+T00312.015,T00312,_hitIntermediate,15,tempTargetAffinity,0,short,,,,tempTargetAffinity,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11323
+T00312.016,T00312,_hitIntermediate,16,unk18,1,short,,,,reserved18,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\Hit.h:66;declaration-only;source:146C.c:11262
+T00312.017,T00312,_hitIntermediate,17,mediatingStat,0,short,,,,mediatingStat,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11377
+T00312.018,T00312,_hitIntermediate,18,shieldStat,0,short,,,,shieldStat,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11379
+T00312.019,T00312,_hitIntermediate,19,armorStat,0,short,,,,armorStat,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11378
+T00312.020,T00312,_hitIntermediate,20,statFactor,0,short,,,,statFactor,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11382
+T00312.021,T00312,_hitIntermediate,21,shieldStatFactor,0,short,,,,shieldStatFactor,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11381
+T00312.022,T00312,_hitIntermediate,22,armorStatFactor,0,short,,,,armorStatFactor,Named in the fork; see cited use,med,retired-by:nothing; no reader;source:146C.c:11380
 T00313.000,T00313,_itemsText_t,0,name,0,u_short[14],,,,name,Named in the fork; see cited use,med,source:58EC.c:166
 T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,flags,Named in the fork; see cited use,med,source:58EC.c:120
 T00313.002,T00313,_itemsText_t,2,description,0,u_short[48],,,,description,Named in the fork; see cited use,med,source:58EC.c:134
@@ -4720,7 +4720,7 @@ T00532.063,T00532,func_800E78F4_t,63,unkB8,1,short,,,layout:upstream,body_height
 T00532.064,T00532,func_800E78F4_t,64,unkBA,1,u_short,,,layout:upstream,facing_delay,Frames before re-facing a target,low,source:upstream:6E644.c:3468
 T00532.065,T00532,func_800E78F4_t,65,unkBC,1,char[2],,,layout:upstream,reserved_bc,Not read through this view,low,declaration-only;source:upstream:6E644.c:234
 T00532.066,T00532,func_800E78F4_t,66,unkBE,1,short,,,,flight_height,Flight height above the ground,med,source:771A8.c:1312
-T00532.067,T00532,func_800E78F4_t,67,unkC0,1,u_short,,,,wander_phase,Wander phase counter; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\MovementBehaviorLive.cpp:184;source:upstream:6E644.c:3345;use cited by sanity pass;source:6F014.c:178
+T00532.067,T00532,func_800E78F4_t,67,unkC0,1,u_short,,,,wander_phase,Wander phase counter; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\MovementBehaviorLive.cpp:185;source:upstream:6E644.c:3345;use cited by sanity pass;source:6F014.c:178
 T00532.068,T00532,func_800E78F4_t,68,unkC2,1,u_short,,,layout:upstream,wander_timer,Wander timer,med,source:upstream:6E644.c:3307
 T00532.069,T00532,func_800E78F4_t,69,unkC4,1,int,,,layout:upstream,wander_range_squared,Squared wander radius,med,source:upstream:6E644.c:3349
 T00532.070,T00532,func_800E78F4_t,70,unkC8,1,char[8],,,layout:upstream,reserved_c8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.hpp:290;declaration-only;source:upstream:6E644.c:239
@@ -4730,8 +4730,8 @@ T00532.073,T00532,func_800E78F4_t,73,unkD4,1,u_short,,,layout:upstream,rest_peri
 T00532.074,T00532,func_800E78F4_t,74,unkD6,1,u_short,,,layout:upstream,move_period,Wander move period,med,source:upstream:6E644.c:3303
 T00532.075,T00532,func_800E78F4_t,75,unkD8,1,u_char,,,layout:upstream,wander_rate,Wander chance exponent,med,source:upstream:6E644.c:3301
 T00532.076,T00532,func_800E78F4_t,76,unkD9,1,char[14],,,layout:upstream,reserved_d9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.hpp:301;declaration-only;source:upstream:6E644.c:245
-T00532.077,T00532,func_800E78F4_t,77,unkE7,1,u_char,,,layout:upstream,opaque_e7,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\GroundNavigationLive.cpp:161;source:upstream:6E644.c:2685
-T00532.078,T00532,func_800E78F4_t,78,unkE8,1,u_char,,,layout:upstream,opaque_e8,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\GroundNavigationLive.cpp:162;source:upstream:6E644.c:2684
+T00532.077,T00532,func_800E78F4_t,77,unkE7,1,u_char,,,layout:upstream,opaque_e7,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\GroundNavigationLive.cpp:162;source:upstream:6E644.c:2685
+T00532.078,T00532,func_800E78F4_t,78,unkE8,1,u_char,,,layout:upstream,opaque_e8,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Battle\Ai\GroundNavigationLive.cpp:163;source:upstream:6E644.c:2684
 T00532.079,T00532,func_800E78F4_t,79,unkE9,1,u_char,,,layout:upstream,opaque_e9,"Used, but its meaning is not established",low,source:upstream:6E644.c:1277
 T00532.080,T00532,func_800E78F4_t,80,unkEA,1,char[16],,,layout:upstream,reserved_ea,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.hpp:305;declaration-only;source:upstream:6E644.c:249
 T00532.081,T00532,func_800E78F4_t,81,unkFA,1,u_char,,,layout:upstream,detour_step,Detour attempts at the current tile,med,source:upstream:6E644.c:1536
@@ -5467,12 +5467,12 @@ T00605.007,T00605,stats_t,7,mapCompletion,0,char,,,,map_completion,Named in the 
 T00605.008,T00605,stats_t,8,unk1B,1,char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Save\MemoryCard\SaveImage.hpp:64;declaration-only;source:MENU/MENU7.PRG/260.c:60;source-review:#148 Original stats_t.unk1B is the byte between mapCompletion and currentMP. Both packagers set the neighboring stats explicitly but do not assign this byte; image memset and whole-summary transfers preserve it. No stat meaning is supported. Preserve the char byte and offsets.
 T00605.009,T00605,stats_t,9,currentMP,0,u_short,,,,current_mp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:818
 T00605.010,T00605,stats_t,10,maxMP,0,u_short,,,,max_mp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:819
-T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:67;declaration-only;source:74088.c:1164
-T00607.000,T00607,statusEffectTick,0,mask,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:57;declaration-only;source:74088.c:1157
-T00607.001,T00607,statusEffectTick,1,unk4,1,u_short,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:58;declaration-only;source:74088.c:1158
-T00607.002,T00607,statusEffectTick,2,interval,0,u_short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:59;declaration-only;source:74088.c:1159
-T00607.003,T00607,statusEffectTick,3,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:60;declaration-only;source:74088.c:1160
-T00607.004,T00607,statusEffectTick,4,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:61;declaration-only;source:74088.c:1161
+T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,reserved0,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:67;declaration-only;source:74088.c:1164
+T00607.000,T00607,statusEffectTick,0,mask,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:57;declaration-only;source:74088.c:1157
+T00607.001,T00607,statusEffectTick,1,unk4,1,u_short,,,,reserved4,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:58;declaration-only;source:74088.c:1158
+T00607.002,T00607,statusEffectTick,2,interval,0,u_short,,,,reserved6,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:59;declaration-only;source:74088.c:1159
+T00607.003,T00607,statusEffectTick,3,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:60;declaration-only;source:74088.c:1160
+T00607.004,T00607,statusEffectTick,4,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader;native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:61;declaration-only;source:74088.c:1161
 T00608.000,T00608,stuckMovementState,0,unk0,1,char[2],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.hpp:1201;declaration-only;source:71618.c:1190
 T00608.001,T00608,stuckMovementState,1,stuck,0,u_char,,,,is_stuck,Set when the actor has not left its tile,med,source:71618.c:1224
 T00608.002,T00608,stuckMovementState,2,unk3,1,char[25],,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.hpp:1203;declaration-only;source:71618.c:1192
@@ -5713,9 +5713,9 @@ T00630.021,T00630,vs_battle_actor,21,unk2A,1,u_char,,,bladeModelId,bladeId,Blade
 T00630.022,T00630,vs_battle_actor,22,unk2B,1,u_char,,,shieldModelId,shieldId,Shield model id,med,source:146C.c:6301
 T00630.023,T00630,vs_battle_actor,23,unk2C,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),,,last trigger tile and movement mode,lastTriggerTile,Tile word last checked for floor triggers,med,source:146C.c:5541
 T00630.024,T00630,vs_battle_actor,24,unk30_0,1,u_short,4,,,aiGroup,AI group number other actors link to,med,source:7CD68.c:582
-T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:461;declaration-only;source:146C.h:594
+T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:463;declaration-only;source:146C.h:594
 T00630.026,T00630,vs_battle_actor,26,unk30_9,1,u_int,5,,,aiLinkedGroup,AI group this actor follows or guards,med,source:7CD68.c:582
-T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:463;declaration-only;source:146C.h:596
+T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:465;declaration-only;source:146C.h:596
 T00630.028,T00630,vs_battle_actor,28,unk34,1,int,,,,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:597
 T00630.029,T00630,vs_battle_actor,29,unk38,1,int,,,,templateWord2C,Word 0x2C of the actor template; not read afterwards,low,source:146C.c:6757
 T00630.030,T00630,vs_battle_actor,30,unk3C,1,vs_battle_actor2 *,,,combatStats,stats,Combat statistics,high,source:146C.c:6600
@@ -5783,9 +5783,9 @@ T00635.003,T00635,vs_battle_actor_dat2,3,unk16C,1,int,,,,object_word,Not read by
 T00635.004,T00635,vs_battle_actor_dat2,4,unk170,1,int,,,,reserved_170,Not used by native code; kept for the original layout,med,native-refs:none;native:ActorAllocation.hpp VS::Actors::ActorCore::reserved_170 (#441);source:native:Native\Game\src\Actors\ActorAllocation.h:21;declaration-only;source:146C.h:613
 T00635.005,T00635,vs_battle_actor_dat2,5,unk174,1,int,,,,reserved_174,Not used by native code; kept for the original layout,med,native-refs:none;native:ActorAllocation.hpp VS::Actors::ActorCore::reserved_174 (#441);source:native:Native\Game\src\Actors\ActorAllocation.h:22;declaration-only;source:146C.h:614
 T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,actionId,Action in the slot,high,source:146C.c:6260
-T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:181;source:146C.c:6261
+T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:183;source:146C.c:6261
 T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,effectModelId,Effect model shown when the action is presented,med,source:146C.c:6262
-T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:183;source:146C.c:6263
+T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:185;source:146C.c:6263
 T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,width,Tile columns,med,native:VS::Field::BackgroundLayoutRecord::width (#441);source:146C.c:17582;use cited by sanity pass;source:2842C.h:12
 T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,height,Tile rows,med,native:VS::Field::BackgroundLayoutRecord::height (#441);source:146C.c:17582;use cited by sanity pass;source:2842C.h:13
 T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,reserved08,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\BackgroundLiveState.hpp:33;declaration-only;native:VS::Field::BackgroundLayoutRecord::reserved08 (#441);source:2842C.h:14
@@ -6518,11 +6518,11 @@ T00708.000,T00708,vs_main_sfxContext,0,unk0,1,int,,,,reserved0,Not used by nativ
 T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Playback\SoundPlayback.hpp:11;declaration-only;source:25AC.h:6
 T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Playback\SoundPlayback.hpp:12;declaration-only;source:25AC.h:7
 T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,flags,Bit 7 requests playback tags,high,source:25AC.c:443
-T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,statusFlags,Status flags the effect sets,med,source:146C.c:11207
+T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,status_flags,Status flags the effect sets,med,source:146C.c:11207
 T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,duration,"Status timer duration; read only through byte aliases (G01907-G01909, G01912 = entries 5, 11, 13, 19)",med,declaration-only;source:main.h:111;address of G01907 is 0x8004EECC + 5 * 16 + 4
-T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
-T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
-T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
+T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tick_interval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
+T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelled_statuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
+T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blocking_statuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
 T00710.000,T00710,vs_main_stickPos,0,lStickX,0,int,,,,l_stick_x,Named in the fork; see cited use,med,source:4D8.c:611
 T00710.001,T00710,vs_main_stickPos,1,lStickY,0,int,,,,l_stick_y,Named in the fork; see cited use,med,source:4D8.c:612
 T00710.002,T00710,vs_main_stickPos,2,rStickX,0,int,,,,r_stick_x,Named in the fork; see cited use,med,source:5BF94.c:667
@@ -6742,7 +6742,7 @@ T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Wea
 T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,source:146C.c:7641
 T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct { char lowByte; char highByte; }[2],,,,ports,Pressed button byte pairs per port,med,source:main.h:487
 T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,effects,Effect values for the limb,high,source:146C.c:10641
-T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,packed,Both effect values as one word; summed across entities; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.h:39;source:146C.c:12942
+T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,packed,Both effect values as one word; summed across entities; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Hit.hpp:21;source:146C.c:12942
 T00748.000,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,native:Mpd.hpp VS::Field::PackedShortPair::halves (#441);declaration-only;source:146C.h:129
 T00748.001,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,native:Mpd.hpp VS::Field::PackedShortPair::word (#441);declaration-only;source:146C.h:130
 T00749.000,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509

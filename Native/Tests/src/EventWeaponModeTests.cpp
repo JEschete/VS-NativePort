@@ -15,9 +15,9 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/ModuleData.hpp"
 #include "Event/Actors.hpp"
@@ -41,8 +41,8 @@ auto RecordBytes(const Actors_ActorRecord& record) {
 
 struct WeaponModeFixture {
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
-  Battle_Actor* saved_actor = Battle_actors[0];
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
+  Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<VS::Actors::WeaponModel*, 2> saved_weapons{
       VS::Actors::weaponModels[0], VS::Actors::weaponModels[1]};
   decltype(std::to_array(VS::Event::weaponDrawStates)) saved_modes =
@@ -68,7 +68,7 @@ struct WeaponModeFixture {
 
   WeaponModeFixture() {
     Actors_actorRecords[0] = &record;
-    Battle_characterState = Battle_actors[0] = &actor;
+    VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     for (std::size_t index = 0; index < weapons.size(); ++index) {
       VS::Actors::weaponModels[index] = &weapons[index];
       weapons[index].attachment_bone = 1;
@@ -95,8 +95,8 @@ struct WeaponModeFixture {
 
   ~WeaponModeFixture() {
     Actors_actorRecords[0] = saved_record;
-    Battle_actors[0] = saved_actor;
-    Battle_characterState = saved_character;
+    VS::Battle::actors[0] = saved_actor;
+    VS::Battle::characterState = saved_character;
     std::copy(saved_weapons.begin(), saved_weapons.end(),
               VS::Actors::weaponModels);
     std::copy(saved_modes.begin(), saved_modes.end(),

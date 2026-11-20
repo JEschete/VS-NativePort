@@ -15,7 +15,7 @@
 #include "Battle/ActionPhases.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 
 namespace {
@@ -127,11 +127,11 @@ struct LiveStateReset {
 struct LiveActorsReset {
   std::array<Battle_Actor*, 42> actors{};
   LiveActorsReset() {
-    std::copy(std::begin(Battle_actors), std::end(Battle_actors),
+    std::copy(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               actors.begin());
   }
   ~LiveActorsReset() {
-    std::copy(actors.begin(), actors.end(), std::begin(Battle_actors));
+    std::copy(actors.begin(), actors.end(), std::begin(VS::Battle::actors));
   }
 };
 
@@ -175,13 +175,14 @@ TEST_CASE(
     "F00001 live release preserves native slots beyond the original roster",
     "[action-phases][F00001]") {
   const LiveActorsReset reset;
-  std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+  std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+            nullptr);
   Battle_Actor first{}, last{}, extra{};
   first.commandState = last.commandState = extra.commandState = 0x80;
   first.commandOpcode = last.commandOpcode = extra.commandOpcode = 0x18;
-  Battle_actors[0] = &first;
-  Battle_actors[15] = &last;
-  Battle_actors[16] = &extra;
+  VS::Battle::actors[0] = &first;
+  VS::Battle::actors[15] = &last;
+  VS::Battle::actors[16] = &extra;
   b::ReleaseLiveQueuedActorAttacks();
   CHECK(first.commandState == 8);
   CHECK(last.commandState == 8);

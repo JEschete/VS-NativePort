@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // Binds MapNavigation.hpp to the generated map menu: the ARM scene buffer
-// (Battle_unusedSceneBuffer, sized by kSceneArmFiles) or the room's
+// (VS::Battle::sceneBuffer, sized by kSceneArmFiles) or the room's
 // minimap scene, centerPoint, currentRoomIndex,
 // isCurrentScene and roomNamesTable. Each entry keeps the
 // original call shape. A scene that is neither buffer, a room record or vertex

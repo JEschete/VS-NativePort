@@ -25,7 +25,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -78,7 +78,7 @@ std::int16_t SignedHalf(int value) {
 class LiveActorProximity {
  public:
   explicit LiveActorProximity(const VS::Battle::Ai::ActorAiState& state) {
-    for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
+    for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       Require(count_ < actors_.size() && actor->id >= 0 &&
                   actor->id < kCandidateTargetSlots,
@@ -157,10 +157,10 @@ class LiveExecutionHost final : public ActionExecutionHost {
 const Battle_Actor& TargetActor(int action, int actor_id) {
   Require(action >= 0 && static_cast<unsigned>(action) < kActionDefinitionCount,
           "AI targeting flag requires an action in the action table");
-  Require(actor_id >= 0 &&
-              static_cast<std::size_t>(actor_id) < std::size(Battle_actors),
+  Require(actor_id >= 0 && static_cast<std::size_t>(actor_id) <
+                               std::size(VS::Battle::actors),
           "AI targeting flag requires an ID in the battle actor table");
-  const Battle_Actor* actor = Battle_actors[actor_id];
+  const Battle_Actor* actor = VS::Battle::actors[actor_id];
   Require(actor != nullptr && actor->stats != nullptr,
           "AI targeting flag requires the actor's stats");
   return *actor;

@@ -7,8 +7,9 @@
 #include <cstring>
 #include <iterator>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
@@ -67,8 +68,8 @@ bool ConfirmPressed() {
 class LiveProgress final : public UnlockProgress {
  public:
   int EquippedWeaponCategory() const override {
-    return Battle_characterState != nullptr
-               ? Battle_characterState->equippedWeaponCategory
+    return VS::Battle::characterState != nullptr
+               ? VS::Battle::characterState->equippedWeaponCategory
                : -1;
   }
   int ArtsLearned(int category) const override {
@@ -82,7 +83,7 @@ class LiveProgress final : public UnlockProgress {
     return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
   int BreakArtRequirement(int category, int tier) const override {
-    return Battle_breakArtPointRequirements[category][tier];
+    return VS::Battle::breakArtPointRequirements[category][tier];
   }
   int BattleAbilitiesUnlocked() const override {
     return VS::State::artsStatus.kills.battle_abilities_unlocked;
@@ -92,7 +93,7 @@ class LiveProgress final : public UnlockProgress {
         static_cast<std::uint16_t>(count);
   }
   int BattleAbilityRequirement(int tier) const override {
-    return Battle_battleAbilityPointRequirements[tier];
+    return VS::Battle::battleAbilityPointRequirements[tier];
   }
   int TotalKills() const override {
     return VS::State::artsStatus.kills.total_kills;

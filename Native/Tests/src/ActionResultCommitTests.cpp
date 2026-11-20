@@ -12,8 +12,8 @@
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
 
 namespace {
@@ -316,16 +316,16 @@ TEST_CASE(
     "Live action result module binding preserves HP wrap and unused fields",
     "[actor-vitals][action-result-commit][F00522][live]") {
   const auto symbols = VS::Content::ModuleSymbols();
-  const auto apply = reinterpret_cast<void (*)(Battle_HitResult*)>(
+  const auto apply = reinterpret_cast<void (*)(VS::Battle::HitResult*)>(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800875C8));
   REQUIRE(apply == battle::ApplyLiveActorActionResult);
   Battle_ActorStats stats{};
   Battle_Actor actor{};
-  Battle_HitResult hit{};
-  auto* saved = Battle_actors[41];
+  VS::Battle::HitResult hit{};
+  auto* saved = VS::Battle::actors[41];
   actor.stats = &stats;
-  Battle_actors[41] = &actor;
+  VS::Battle::actors[41] = &actor;
   stats.currentHp = 0;
   stats.currentMp = -123;
   stats.actionRecoveryTimer = 65535;
@@ -334,11 +334,11 @@ TEST_CASE(
   stats.weapon.max_dp = 100;
   hit.target.target_actor = 41;
   hit.target.target_limb = -1;
-  hit.weaponDpEffect = 2;
-  hit.weaponDpChange = 2;
-  hit.removeStatuses = std::bit_cast<int>(0x80000000U);
+  hit.weapon_dp_effect = 2;
+  hit.weapon_dp_change = 2;
+  hit.remove_statuses = std::bit_cast<int>(0x80000000U);
   apply(&hit);
-  Battle_actors[41] = saved;
+  VS::Battle::actors[41] = saved;
   CHECK(stats.weapon.current_dp == 1);
   CHECK(stats.currentMp == -123);
   CHECK(stats.actionRecoveryTimer == 65535);

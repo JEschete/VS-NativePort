@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
@@ -269,7 +269,7 @@ struct LiveMapState {
   LiveMapState()
       : minimap(VS::Field::roomData.minimap_scene),
         minimap_length(VS::Field::roomData.header.minimap_scene_length),
-        arm(Battle_unusedSceneBuffer),
+        arm(VS::Battle::sceneBuffer),
         scene(nav::currentScene),
         center(nav::centerPoint),
         room(nav::currentRoomIndex),
@@ -282,7 +282,7 @@ struct LiveMapState {
   ~LiveMapState() {
     VS::Field::roomData.minimap_scene = minimap;
     VS::Field::roomData.header.minimap_scene_length = minimap_length;
-    Battle_unusedSceneBuffer = arm;
+    VS::Battle::sceneBuffer = arm;
     nav::currentScene = scene;
     nav::centerPoint = center;
     nav::currentRoomIndex = room;
@@ -389,9 +389,9 @@ TEST_CASE("The live initial room matches the minimap scene's first room",
                                 {.visited = 1, .zone_id = 1, .map_id = 1},
                                 {.visited = 0, .zone_id = 7, .map_id = 9}},
                                {}, size);
-  Battle_unusedSceneBuffer = scene.bytes.data();
+  VS::Battle::sceneBuffer = scene.bytes.data();
   nav::currentScene = 1;
-  auto* data = static_cast<VS::Field::MapScene*>(Battle_unusedSceneBuffer);
+  auto* data = static_cast<VS::Field::MapScene*>(VS::Battle::sceneBuffer);
   CHECK(nav::LiveInitialRoomIndex(data) == 2);
   CHECK(nav::isCurrentScene == 2);
 
@@ -417,7 +417,7 @@ TEST_CASE("The live room step follows the ARM scene's name links",
                  {.previous = 0, .next = 2},
                  {.previous = 1, .next = 0}},
                 size);
-  Battle_unusedSceneBuffer = scene.bytes.data();
+  VS::Battle::sceneBuffer = scene.bytes.data();
   nav::currentScene = 1;
   nav::roomNamesTable = reinterpret_cast<VS::Field::MapRoomName*>(
       scene.bytes.data() + scene.names);

@@ -46,7 +46,7 @@ void RestoreLiveActorVitals(int actor_id);
 // decomp: BATTLE.PRG func_8007CF18 (src/BATTLE/BATTLE.PRG/146C.c:9127)
 int FindLiveActorByModelId(int model_id);
 // decomp: BATTLE.PRG func_8007CF64 (src/BATTLE/BATTLE.PRG/146C.c:9139)
-// Null for an empty slot or an id outside Battle_actors.
+// Null for an empty slot or an id outside VS::Battle::actors.
 Battle_Actor* LiveActorAtSlot(int actor_id);
 // decomp: BATTLE.PRG func_8007CF80 (src/BATTLE/BATTLE.PRG/146C.c:9141)
 int CountLiveActorsByDisposition(int actor_kind);

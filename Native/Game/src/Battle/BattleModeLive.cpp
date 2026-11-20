@@ -7,9 +7,9 @@
 #include <iterator>
 
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
@@ -19,10 +19,10 @@ namespace battle = VS::Battle;
 
 Battle_Actor* LiveActor(int actor_slot) {
   if (actor_slot < 0 ||
-      static_cast<std::size_t>(actor_slot) >= std::size(Battle_actors)) {
+      static_cast<std::size_t>(actor_slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  return Battle_actors[actor_slot];
+  return VS::Battle::actors[actor_slot];
 }
 
 class LiveBattleModeHost final : public battle::BattleModeHost {
@@ -51,8 +51,9 @@ class LiveBattleModeHost final : public battle::BattleModeHost {
                                         transition_mode);
   }
   [[nodiscard]] int CharacterWeaponDrawn() const override {
-    return Battle_characterState != nullptr ? Battle_characterState->weaponDrawn
-                                            : 0;
+    return VS::Battle::characterState != nullptr
+               ? VS::Battle::characterState->weaponDrawn
+               : 0;
   }
   void SetHudBattleMode(int weapon_drawn) override {
     VS::Battle::SetLiveHudBattleMode(weapon_drawn);
@@ -67,7 +68,7 @@ bool CanSetBattleMode(int actor_slot) {
                       "battle mode for absent actor slot={}", actor_slot);
     return false;
   }
-  if (actor_slot == 0 && Battle_characterState == nullptr) {
+  if (actor_slot == 0 && VS::Battle::characterState == nullptr) {
     VS::Core::LogWarn("battle.targeting",
                       "battle mode without a character state");
     return false;

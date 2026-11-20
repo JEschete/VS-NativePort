@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -75,7 +75,7 @@ inline auto MutableOwners() {
   return std::array{BytesOf(score::gazetteRows),
                     BytesOf(score::clearCount),
                     BytesOf(VS::State::scoreData),
-                    BytesOf(Battle_unusedMenu9CursorMemory),
+                    BytesOf(VS::Battle::menu9CursorMemory),
                     BytesOf(VS::Menu::Framework::menuItems),
                     BytesOf(VS::Menu::Framework::menuMemory),
                     BytesOf(VS::Menu::Framework::cursorColor),
@@ -272,7 +272,7 @@ class Fixture {
     VS::Menu::Framework::cursorColor = 0;
     VS::Menu::Framework::hideMenu = 0;
     VS::Menu::textBoxes[kInformationBox] = {};
-    Battle_unusedMenu9CursorMemory.gazette_page = 0;
+    VS::Battle::menu9CursorMemory.gazette_page = 0;
     std::ranges::fill(score::gazetteRows, score::ListRow{});
     for (auto& trial : VS::State::scoreData.boss_time_trial_scores) {
       for (auto& record : trial) {

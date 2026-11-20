@@ -16,7 +16,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
@@ -371,7 +371,7 @@ void WriteState(const GazetteState& state) {
 }
 
 GazetteCursorMemory ReadCursor() {
-  const auto& cursor = Battle_unusedMenu9CursorMemory;
+  const auto& cursor = VS::Battle::menu9CursorMemory;
   return {{cursor.title_page, cursor.title_row},
           {cursor.encyclopaedia_page, cursor.encyclopaedia_row},
           {cursor.record_time_page, cursor.record_time_row},
@@ -380,7 +380,7 @@ GazetteCursorMemory ReadCursor() {
 }
 
 void WriteCursor(const GazetteCursorMemory& cursor) {
-  auto& memory = Battle_unusedMenu9CursorMemory;
+  auto& memory = VS::Battle::menu9CursorMemory;
   memory.title_page = cursor.titles.first_row;
   memory.title_row = cursor.titles.selected_row;
   memory.encyclopaedia_page = cursor.enemies.first_row;

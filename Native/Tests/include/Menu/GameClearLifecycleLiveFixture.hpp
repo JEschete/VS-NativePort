@@ -30,9 +30,9 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/SoundState.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -45,6 +45,7 @@
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.hpp"
@@ -154,7 +155,7 @@ class Fixture {
       VS::Audio::Mixer::voiceOwners, VS::Audio::SoundEffects::channels,
       VS::Audio::Cutscene::streamState, VS::Audio::Samples::musicSampleBankIds,
       VS::State::scoreData, VS::State::stateFlags, VS::State::roomVisitProgress,
-      Battle_characterState, Battle_unusedSubmenuState,
+      VS::Battle::characterState, VS::Battle::submenuState,
       VS::Input::buttonsPressed, VS::Content::discRequestSlots,
       VS::Content::discRequestCounts, VS::Content::discDriveState,
       VS::Render::legacyDrawEnvironments, results::screenTimer,
@@ -192,13 +193,13 @@ class Fixture {
     content::InitializeLiveDiscQueue();
     render::InitializeLiveTexturePages();
     results::ResetLiveGameClearModuleData();
-    Battle_unusedSubmenuState = 0;
+    VS::Battle::submenuState = 0;
     VS::Input::buttonsPressed = 0;
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
     VS::State::roomVisitProgress = {};
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     InitializeMusic();
     BeginFrame();
   }

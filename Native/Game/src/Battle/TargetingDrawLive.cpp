@@ -12,7 +12,7 @@
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingDraw.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
@@ -25,7 +25,7 @@ namespace {
 namespace math = Core::Math;
 
 constexpr unsigned kCoordinateBits = 16;
-static_assert(std::size(Battle_TargetSphere{}.wireVertices) ==
+static_assert(std::size(VS::Battle::TargetSphereRecord{}.wire_vertices) ==
               kTargetWireVertices);
 
 class LiveWireCanvas final : public TargetWireCanvas {
@@ -65,26 +65,26 @@ class LiveWireCanvas final : public TargetWireCanvas {
 
 // decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
 void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
-  const auto* sphere =
-      reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
-  if (sphere == nullptr || shape == nullptr || sphere->vertexCount < 2) return;
-  const auto count = static_cast<std::size_t>(sphere->vertexCount);
+  const auto* sphere = reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
+  if (sphere == nullptr || shape == nullptr || sphere->vertex_count < 2) return;
+  const auto count = static_cast<std::size_t>(sphere->vertex_count);
   if (count > kTargetWireVertices) {
     VS::Core::LogError("targeting", "Invalid wireframe vertex count {}",
-                       sphere->vertexCount);
+                       sphere->vertex_count);
     std::abort();
   }
   std::array<TargetWireVertex, kTargetWireVertices> vertices{};
   for (std::size_t index = 0; index < count; ++index) {
-    const Battle_ShapeVertex& source = sphere->wireVertices[index];
+    const Battle_ShapeVertex& source = sphere->wire_vertices[index];
     vertices[index] = {
         .position = {source.xyz[0], source.xyz[1], source.xyz[2]},
         .segment = source.opaque6};
   }
-  const TargetWireState wire{.phase_a = sphere->wirePhaseA,
-                             .phase_b = sphere->wirePhaseB,
-                             .phase_c = sphere->wirePhaseC,
-                             .pulse = sphere->wireShape,
+  const TargetWireState wire{.phase_a = sphere->wire_phase_a,
+                             .phase_b = sphere->wire_phase_b,
+                             .phase_c = sphere->wire_phase_c,
+                             .pulse = sphere->wire_shape,
                              .depth = sphere->depth,
                              .vertices = std::span(vertices).first(count)};
   const TargetWireVolume volume{

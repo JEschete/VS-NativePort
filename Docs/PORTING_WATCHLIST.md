@@ -121,7 +121,7 @@ cancellation. Do not hide the stale pointer with a playback null/default guard.
 
 **Original NULL reads:** PS1 low RAM is readable, so an unchecked dereference in
 the original can run without faulting and then fault on x64. Gimmick actors have
-a `Battle_actors` entry but never an `Actors_actorRecords` entry, by design.
+a `VS::Battle::actors` entry but never an `Actors_actorRecords` entry, by design.
 F00818 reads through that NULL record when an indestructible block is struck
 (#251), so its owned caller skips the pose. A guard is right here because NULL is
 a valid state, unlike the stale pointer above. Check other record reads that a

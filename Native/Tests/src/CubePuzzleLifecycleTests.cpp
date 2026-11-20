@@ -14,7 +14,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -497,7 +497,7 @@ TEST_CASE("F03046 last step frees IQ.DIS, clears the screen and restarts",
 
 // Saves and restores the module state the Live initializers and updates use.
 struct LiveScreenFixture {
-  int saved_step = Battle_unusedSubmenuState;
+  int saved_step = VS::Battle::submenuState;
   int saved_timer = r::screenTimer;
   int saved_state = r::screenState;
   u_int saved_animation = r::elementAnimationState;
@@ -513,7 +513,7 @@ struct LiveScreenFixture {
   LiveScreenFixture() { r::ResetLiveCubePuzzleLifecycleStatics(); }
   ~LiveScreenFixture() {
     r::ResetLiveCubePuzzleLifecycleStatics();
-    Battle_unusedSubmenuState = saved_step;
+    VS::Battle::submenuState = saved_step;
     r::screenTimer = saved_timer;
     r::screenState = saved_state;
     r::elementAnimationState = saved_animation;
@@ -535,16 +535,16 @@ TEST_CASE(
     "F03046 live poll without a read keeps the default rating and finishes",
     "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
-  Battle_unusedSubmenuState = 1;
+  VS::Battle::submenuState = 1;
   r::puzzleParTime = 12;
   r::puzzleRankCap = 13;
   r::screenTimer = 44;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(r::puzzleParTime == 600);
   CHECK(r::puzzleRankCap == 1);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CHECK(r::screenTimer == 0);
 }
 
@@ -553,14 +553,14 @@ TEST_CASE("F03046 live start without heap room cancels the read",
   LiveScreenFixture fixture;
   alignas(16) std::array<std::byte, 4096> arena{};
   const VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   // No buffer, so no request: the next poll goes on without the asset.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   (void)render::RetireLiveTexturePageRange(r::kCubePuzzleFirstPage,
                                            r::kCubePuzzleStartPages,
                                            r::kCubePuzzlePageOwner);
@@ -655,7 +655,7 @@ struct LiveReadFixture {
 [[nodiscard]] VS::Content::DiscQueueSlot* StartLiveIqRead() {
   const VS::Content::DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   VS::Content::DiscQueueSlot* const request = LiveReadFixture::Pending();
   REQUIRE(request != nullptr);
   CHECK(request->file.lba == file.lba);
@@ -699,15 +699,15 @@ TEST_CASE("F03046 live start reads IQ.DIS and takes the minimap room's record",
   LiveScreenFixture screen;
   LiveReadFixture read;
   read.UseRoom(4, 12);
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   r::screenTimer = 7;
   VS::Content::DiscQueueSlot* const request = StartLiveIqRead();
   // Still reading.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   const std::vector<std::byte> asset = CompleteLiveIqRead(*request);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(request->state != VS::Content::DiscRequestState::kLoaded);
   CHECK(r::puzzleParTime == 45);
   CHECK(r::puzzleRankCap == 3);
@@ -722,21 +722,21 @@ TEST_CASE(
   LiveScreenFixture screen;
   LiveReadFixture read;
   read.UseRoom(4, 12);
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   r::screenTimer = 7;
   VS::Content::DiscQueueSlot* const request = StartLiveIqRead();
   void* const buffer = request->destination;
   (void)CompleteLiveIqRead(*request);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CHECK(r::screenTimer == 0);
   // The buffer was released: entering again reads into the same block.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   VS::Content::DiscQueueSlot* const again = LiveReadFixture::Pending();
   REQUIRE(again != nullptr);
   CHECK(again->destination == buffer);
-  Battle_unusedSubmenuState = 2;
+  VS::Battle::submenuState = 2;
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
 }
 
@@ -748,7 +748,7 @@ TEST_CASE(
   LiveReadFixture read;
   read.UseRoom(4, 12);
   read.scene[0] = 0;
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   VS::Content::DiscQueueSlot* const request = LiveReadFixture::Pending();
   REQUIRE(request != nullptr);
@@ -817,7 +817,7 @@ TEST_CASE("F03047 results apply the flag at every step", "[cube-lifecycle]") {
 TEST_CASE("F03047 live results write the maximum clock to the state flags",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
-  Battle_unusedSubmenuState = 2;
+  VS::Battle::submenuState = 2;
   VS::State::stateFlags.puzzle_timer_minutes = 1;
   VS::State::stateFlags.puzzle_timer_seconds = 2;
   VS::State::stateFlags.puzzle_timer_hundredths = 3;
@@ -827,7 +827,7 @@ TEST_CASE("F03047 live results write the maximum clock to the state flags",
   CHECK(VS::State::stateFlags.puzzle_timer_seconds == 59);
   CHECK(VS::State::stateFlags.puzzle_timer_hundredths == 99);
   CHECK(VS::State::stateFlags.puzzle_set_max_timer == 0);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
 }
 
 // ----- F03048 -----
@@ -918,13 +918,13 @@ TEST_CASE("F03048 quit last step frees ESC.DIS and clears the screen",
 TEST_CASE("F03048 live quit without a read leaves the rating",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
-  Battle_unusedSubmenuState = 1;
+  VS::Battle::submenuState = 1;
   r::puzzleParTime = 12;
   CHECK(r::LiveInitializeCubePuzzleQuit() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(r::puzzleParTime == 12);
   CHECK(r::LiveInitializeCubePuzzleQuit() == 1);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
 }
 
 // ----- F03049 -----

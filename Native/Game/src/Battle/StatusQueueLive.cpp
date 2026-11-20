@@ -11,16 +11,16 @@
 #include <span>
 
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusQueue.hpp"
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
 constexpr unsigned kExemptActorId = 128;
-static_assert(std::size(Battle_statusEffectParams) == kStatusRuleCount);
+static_assert(std::size(VS::Battle::statusEffectParams) == kStatusRuleCount);
 using StatusHandler = std::optional<StatusFeedback> (*)(
     std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
 
@@ -31,61 +31,62 @@ void Require(bool valid, const char* message) {
   }
 }
 
-Battle_HitResult& HitOf(Battle_HitResult* hit) {
+VS::Battle::HitResult& HitOf(VS::Battle::HitResult* hit) {
   Require(hit != nullptr, "Status queue requires a hit result");
   return *hit;
 }
 
-Battle_ActorStats& StatsOf(const Battle_HitResult& hit) {
+Battle_ActorStats& StatsOf(const VS::Battle::HitResult& hit) {
   const unsigned actor_id = hit.target.target_actor;
-  Require(actor_id < std::size(Battle_actors),
+  Require(actor_id < std::size(VS::Battle::actors),
           "Status queue target is outside the battle actor table");
-  const auto* actor = Battle_actors[actor_id];
+  const auto* actor = VS::Battle::actors[actor_id];
   Require(actor != nullptr && actor->stats != nullptr,
           "Status queue requires the target actor's stats");
   return *actor->stats;
 }
 
-StatusTarget TargetOf(const Battle_HitResult& hit) {
+StatusTarget TargetOf(const VS::Battle::HitResult& hit) {
   const auto& stats = StatsOf(hit);
   return {.active = std::bit_cast<std::uint32_t>(stats.statuses),
           .immunities = std::bit_cast<std::uint32_t>(stats.statusImmunities),
           .exempt = stats.actorId == kExemptActorId};
 }
 
-StatusRule RuleOf(const Battle_StatusEffectParams& params) {
-  return {.statuses = std::bit_cast<std::uint32_t>(params.statusFlags),
-          .cancelled = std::bit_cast<std::uint32_t>(params.cancelledStatuses),
-          .blocking = std::bit_cast<std::uint32_t>(params.blockingStatuses)};
+StatusRule RuleOf(const VS::Battle::StatusEffectParams& params) {
+  return {.statuses = std::bit_cast<std::uint32_t>(params.status_flags),
+          .cancelled = std::bit_cast<std::uint32_t>(params.cancelled_statuses),
+          .blocking = std::bit_cast<std::uint32_t>(params.blocking_statuses)};
 }
 
 StatusRule RuleAt(int index) {
   Require(index >= 0 && static_cast<std::size_t>(index) <
-                            std::size(Battle_statusEffectParams),
+                            std::size(VS::Battle::statusEffectParams),
           "Status queue rule is outside its table");
-  return RuleOf(Battle_statusEffectParams[index]);
+  return RuleOf(VS::Battle::statusEffectParams[index]);
 }
 
-QueuedStatuses Load(const Battle_HitResult& hit) {
-  // The legacy member names are reversed: removeStatuses adds statuses.
-  return {.added = std::bit_cast<std::uint32_t>(hit.removeStatuses),
-          .removed = std::bit_cast<std::uint32_t>(hit.inflictStatuses),
-          .feedback = static_cast<StatusFeedback>(hit.statStatusEffect)};
+QueuedStatuses Load(const VS::Battle::HitResult& hit) {
+  // The legacy member names are reversed: remove_statuses adds statuses.
+  return {.added = std::bit_cast<std::uint32_t>(hit.remove_statuses),
+          .removed = std::bit_cast<std::uint32_t>(hit.inflict_statuses),
+          .feedback = static_cast<StatusFeedback>(hit.stat_status_effect)};
 }
 
-void Store(const QueuedStatuses& queued, Battle_HitResult& hit) {
-  hit.removeStatuses = std::bit_cast<std::int32_t>(queued.added);
-  hit.inflictStatuses = std::bit_cast<std::int32_t>(queued.removed);
-  hit.statStatusEffect = static_cast<std::uint8_t>(queued.feedback);
+void Store(const QueuedStatuses& queued, VS::Battle::HitResult& hit) {
+  hit.remove_statuses = std::bit_cast<std::int32_t>(queued.added);
+  hit.inflict_statuses = std::bit_cast<std::int32_t>(queued.removed);
+  hit.stat_status_effect = static_cast<std::uint8_t>(queued.feedback);
 }
 
 template <typename Handler, typename... Args>
-auto ApplyHandler(Battle_HitResult* target, Handler handler, Args... args) {
+auto ApplyHandler(VS::Battle::HitResult* target, Handler handler,
+                  Args... args) {
   auto& hit = HitOf(target);
   const auto actor = TargetOf(hit);
   std::array<StatusRule, kStatusRuleCount> rules{};
   for (std::size_t index = 0; index < rules.size(); ++index) {
-    rules.at(index) = RuleOf(Battle_statusEffectParams[index]);
+    rules.at(index) = RuleOf(VS::Battle::statusEffectParams[index]);
   }
   auto queued = Load(hit);
   const auto result = handler(rules, actor, queued, args...);
@@ -97,12 +98,13 @@ auto ApplyHandler(Battle_HitResult* target, Handler handler, Args... args) {
   return result.value();
 }
 
-void QueueHandler(Battle_HitResult* target, StatusHandler handler) {
+void QueueHandler(VS::Battle::HitResult* target, StatusHandler handler) {
   ApplyHandler(target, handler);
 }
 }  // namespace
 
-int QueueLiveApplicableStatusChanges(int status_id, Battle_HitResult* target) {
+int QueueLiveApplicableStatusChanges(int status_id,
+                                     VS::Battle::HitResult* target) {
   auto& hit = HitOf(target);
   const auto rule = RuleAt(status_id);
   const auto actor = TargetOf(hit);
@@ -112,7 +114,7 @@ int QueueLiveApplicableStatusChanges(int status_id, Battle_HitResult* target) {
   return std::bit_cast<std::int32_t>(result);
 }
 
-int QueueLiveStatusRemovalMask(int status_id, Battle_HitResult* target) {
+int QueueLiveStatusRemovalMask(int status_id, VS::Battle::HitResult* target) {
   auto& hit = HitOf(target);
   const auto rule = RuleAt(status_id);
   const auto actor = TargetOf(hit);
@@ -122,149 +124,149 @@ int QueueLiveStatusRemovalMask(int status_id, Battle_HitResult* target) {
   return std::bit_cast<std::int32_t>(result);
 }
 
-void QueueLiveStrengthDown(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveStrengthDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueStrengthDown);
 }
-void QueueLiveIntelligenceDown(Battle_ActionDefinition*, Battle_HitResult*,
-                               Battle_HitResult* target, int, int) {
+void QueueLiveIntelligenceDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                               VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueIntelligenceDown);
 }
-void QueueLiveAgilityDown(Battle_ActionDefinition*, Battle_HitResult*,
-                          Battle_HitResult* target, int, int) {
+void QueueLiveAgilityDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                          VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueAgilityDown);
 }
-void QueueLiveEquipmentDown(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+void QueueLiveEquipmentDown(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueEquipmentDown);
 }
-void QueueLiveHalfMovement(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveHalfMovement(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueHalfMovement);
 }
-void QueueLiveStrengthUp(Battle_ActionDefinition*, Battle_HitResult*,
-                         Battle_HitResult* target, int, int) {
+void QueueLiveStrengthUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                         VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueStrengthUp);
 }
 
 // decomp: func_80083B78 (src/BATTLE/BATTLE.PRG/146C.c:12327).
-void QueueLiveIntelligenceUp(Battle_ActionDefinition*, Battle_HitResult*,
-                             Battle_HitResult* target, int, int) {
+void QueueLiveIntelligenceUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                             VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueIntelligenceUp);
 }
 // decomp: func_80083BC8 (src/BATTLE/BATTLE.PRG/146C.c:12336).
-void QueueLiveAgilityUp(Battle_ActionDefinition*, Battle_HitResult*,
-                        Battle_HitResult* target, int, int) {
+void QueueLiveAgilityUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                        VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueAgilityUp);
 }
 // decomp: func_80083C18 (src/BATTLE/BATTLE.PRG/146C.c:12345).
-void QueueLiveEquipmentUp(Battle_ActionDefinition*, Battle_HitResult*,
-                          Battle_HitResult* target, int, int) {
+void QueueLiveEquipmentUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                          VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueEquipmentUp);
 }
 // decomp: func_80083C68 (src/BATTLE/BATTLE.PRG/146C.c:12354).
-void QueueLiveQuicken(Battle_ActionDefinition*, Battle_HitResult*,
-                      Battle_HitResult* target, int, int) {
+void QueueLiveQuicken(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                      VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueQuicken);
 }
 // decomp: func_80083CB8 (src/BATTLE/BATTLE.PRG/146C.c:12363).
-void QueueLiveSilence(Battle_ActionDefinition*, Battle_HitResult*,
-                      Battle_HitResult* target, int, int) {
+void QueueLiveSilence(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                      VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueSilence);
 }
 // decomp: func_80083D08 (src/BATTLE/BATTLE.PRG/146C.c:12372).
-void QueueLiveMagicWard(Battle_ActionDefinition*, Battle_HitResult*,
-                        Battle_HitResult* target, int, int) {
+void QueueLiveMagicWard(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                        VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueMagicWard);
 }
 // decomp: func_80083D2C (src/BATTLE/BATTLE.PRG/146C.c:12380).
-void QueueLiveRegeneration(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveRegeneration(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueRegeneration);
 }
 // decomp: func_80083D7C (src/BATTLE/BATTLE.PRG/146C.c:12389).
-void QueueLiveBanish(Battle_ActionDefinition*, Battle_HitResult*,
-                     Battle_HitResult* target, int, int execute_action) {
+void QueueLiveBanish(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                     VS::Battle::HitResult* target, int, int execute_action) {
   const auto outcome = ApplyHandler(target, QueueBanish, execute_action != 0);
   if (outcome.analyze_requested) {
     StatsOf(HitOf(target)).isAnalyzed = 1;
   }
 }
-void QueueLiveParalysis(Battle_ActionDefinition*, Battle_HitResult*,
-                        Battle_HitResult* target, int, int) {
+void QueueLiveParalysis(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                        VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueParalysis);
 }
-void QueueLivePoison(Battle_ActionDefinition*, Battle_HitResult*,
-                     Battle_HitResult* target, int, int) {
+void QueueLivePoison(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                     VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueuePoison);
 }
-void QueueLiveNumbness(Battle_ActionDefinition*, Battle_HitResult*,
-                       Battle_HitResult* target, int, int) {
+void QueueLiveNumbness(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                       VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueNumbness);
 }
-void QueueLiveCurse(Battle_ActionDefinition*, Battle_HitResult*,
-                    Battle_HitResult* target, int, int) {
+void QueueLiveCurse(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                    VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueCurse);
 }
-void QueueLiveAirAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
-                          Battle_HitResult* target, int, int) {
+void QueueLiveAirAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                          VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueAirAttackUp);
 }
-void QueueLiveFireAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveFireAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueFireAttackUp);
 }
-void QueueLiveEarthAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+void QueueLiveEarthAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueEarthAttackUp);
 }
-void QueueLiveWaterAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+void QueueLiveWaterAttackUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueWaterAttackUp);
 }
 // decomp: func_80083FBC (src/BATTLE/BATTLE.PRG/146C.c:12463).
-void QueueLiveAirDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveAirDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueAirDefenseUp);
 }
 // decomp: func_80083FE0 (src/BATTLE/BATTLE.PRG/146C.c:12470).
-void QueueLiveFireDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+void QueueLiveFireDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueFireDefenseUp);
 }
 // decomp: func_80084004 (src/BATTLE/BATTLE.PRG/146C.c:12477).
-void QueueLiveEarthDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
-                             Battle_HitResult* target, int, int) {
+void QueueLiveEarthDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                             VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueEarthDefenseUp);
 }
 // decomp: func_80084028 (src/BATTLE/BATTLE.PRG/146C.c:12484).
-void QueueLiveWaterDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
-                             Battle_HitResult* target, int, int) {
+void QueueLiveWaterDefenseUp(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                             VS::Battle::HitResult* target, int, int) {
   ApplyHandler(target, QueueWaterDefenseUp);
 }
 // decomp: func_8008404C (src/BATTLE/BATTLE.PRG/146C.c:12491).
-void QueueLiveParalysisCure(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+void QueueLiveParalysisCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueParalysisCure);
 }
 // decomp: func_8008409C (src/BATTLE/BATTLE.PRG/146C.c:12500).
-void QueueLivePoisonCure(Battle_ActionDefinition*, Battle_HitResult*,
-                         Battle_HitResult* target, int, int) {
+void QueueLivePoisonCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                         VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueuePoisonCure);
 }
 // decomp: func_800840EC (src/BATTLE/BATTLE.PRG/146C.c:12509).
-void QueueLiveCurseCure(Battle_ActionDefinition*, Battle_HitResult*,
-                        Battle_HitResult* target, int, int) {
+void QueueLiveCurseCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                        VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueCurseCure);
 }
 // decomp: func_8008413C (src/BATTLE/BATTLE.PRG/146C.c:12518).
-void QueueLiveNumbnessCure(Battle_ActionDefinition*, Battle_HitResult*,
-                           Battle_HitResult* target, int, int) {
+void QueueLiveNumbnessCure(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                           VS::Battle::HitResult* target, int, int) {
   QueueHandler(target, QueueNumbnessCure);
 }
 // decomp: func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527).
-void QueueLiveDispel(Battle_ActionDefinition*, Battle_HitResult*,
-                     Battle_HitResult* target, int, int) {
+void QueueLiveDispel(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                     VS::Battle::HitResult* target, int, int) {
   auto& hit = HitOf(target);
   auto queued = Load(hit);
   QueueDispel(std::bit_cast<std::uint32_t>(StatsOf(hit).statuses), queued);
@@ -272,8 +274,9 @@ void QueueLiveDispel(Battle_ActionDefinition*, Battle_HitResult*,
 }
 
 // decomp: func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535).
-void QueueLiveNegativeStatusCure(Battle_ActionDefinition*, Battle_HitResult*,
-                                 Battle_HitResult* target, int, int) {
+void QueueLiveNegativeStatusCure(Battle_ActionDefinition*,
+                                 VS::Battle::HitResult*,
+                                 VS::Battle::HitResult* target, int, int) {
   auto& hit = HitOf(target);
   auto queued = Load(hit);
   QueueNegativeStatusCure(std::bit_cast<std::uint32_t>(StatsOf(hit).statuses),

@@ -17,7 +17,7 @@
 #include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -31,10 +31,10 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Effects/Runtime.hpp"
@@ -75,7 +75,8 @@ bool InRange(const Array& array, int index) {
 }
 
 Battle_Actor* LiveActor(int actor) {
-  return InRange(Battle_actors, actor) ? Battle_actors[actor] : nullptr;
+  return InRange(VS::Battle::actors, actor) ? VS::Battle::actors[actor]
+                                            : nullptr;
 }
 
 const Battle_ActorStats* LiveStats(int actor) {
@@ -87,10 +88,10 @@ battle::ActionRequestView View(const Battle_ActionRequest& request) {
   battle::ActionRequestView view;
   view.action_id = request.actionId;
   view.primary_actor = request.primaryTarget.target.target_actor;
-  view.primary_targets_position = request.primaryTarget.targetsPosition != 0;
+  view.primary_targets_position = request.primaryTarget.targets_position != 0;
   view.target_count = request.targetCount;
   view.first_target_actor = request.targets[0].target.target_actor;
-  view.first_target_targets_position = request.targets[0].targetsPosition != 0;
+  view.first_target_targets_position = request.targets[0].targets_position != 0;
   return view;
 }
 
@@ -252,7 +253,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
   }
 
   Battle_ActionState* state_;
-  Battle_HitResult saved_primary_{};
+  VS::Battle::HitResult saved_primary_{};
 };
 
 int LiveAbilityHost::Field(AbilityField field) const {
@@ -314,11 +315,11 @@ battle::SelectionTargetView LiveAbilityHost::SelectionTarget(int index) const {
                       "selection target index={} out of range", index);
     return view;
   }
-  const Battle_HitResult& target = state_->selection.targets[index];
+  const VS::Battle::HitResult& target = state_->selection.targets[index];
   view.actor = target.target.target_actor;
   view.hp = target.target.hp;
   view.mp = target.target.mp;
-  view.has_vital_effect = target.hpEffect != 0 || target.mpEffect != 0;
+  view.has_vital_effect = target.hp_effect != 0 || target.mp_effect != 0;
   return view;
 }
 
@@ -353,15 +354,15 @@ int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
 }
 
 bool LiveAbilityHost::ActionAvailable(int action_id) const {
-  if (Battle_characterState == nullptr ||
-      Battle_characterState->stats == nullptr) {
+  if (VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState->stats == nullptr) {
     VS::Core::LogWarn("battle.ability",
                       "action {} cost without character stats", action_id);
     return false;
   }
   const auto availability =
       static_cast<std::uint32_t>(battle::LiveActionCostAndAvailability(
-          static_cast<u_int>(action_id), Battle_characterState->stats, 0));
+          static_cast<u_int>(action_id), VS::Battle::characterState->stats, 0));
   return (availability & kActionAvailableMask) != 0;
 }
 
@@ -444,12 +445,12 @@ int LiveAbilityHost::AbilityActionId(AbilityKind kind, int index) const {
 }
 
 int LiveAbilityHost::EquippedWeaponCategory() const {
-  if (Battle_characterState == nullptr) {
+  if (VS::Battle::characterState == nullptr) {
     VS::Core::LogWarn("battle.ability",
                       "weapon category without character state");
     return 0;
   }
-  return Battle_characterState->equippedWeaponCategory;
+  return VS::Battle::characterState->equippedWeaponCategory;
 }
 
 int LiveAbilityHost::ArtsLearned(int category) const {
@@ -471,23 +472,23 @@ int LiveAbilityHost::WeaponCategoryKills(int category) const {
 }
 
 int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {
-  if (!InRange(Battle_breakArtPointRequirements, category) ||
-      !InRange(Battle_breakArtPointRequirements[0], tier)) {
+  if (!InRange(VS::Battle::breakArtPointRequirements, category) ||
+      !InRange(VS::Battle::breakArtPointRequirements[0], tier)) {
     VS::Core::LogWarn("battle.ability",
                       "break art requirement {}/{} out of range", category,
                       tier);
     return 0;
   }
-  return Battle_breakArtPointRequirements[category][tier];
+  return VS::Battle::breakArtPointRequirements[category][tier];
 }
 
 int LiveAbilityHost::BattleAbilityRequirement(int index) const {
-  if (!InRange(Battle_battleAbilityPointRequirements, index)) {
+  if (!InRange(VS::Battle::battleAbilityPointRequirements, index)) {
     VS::Core::LogWarn("battle.ability", "ability requirement {} out of range",
                       index);
     return 0;
   }
-  return Battle_battleAbilityPointRequirements[index];
+  return VS::Battle::battleAbilityPointRequirements[index];
 }
 
 bool HasActionState(const char* caller) {
@@ -497,7 +498,7 @@ bool HasActionState(const char* caller) {
 }
 
 bool HasCharacterState(const char* caller) {
-  if (Battle_characterState != nullptr) return true;
+  if (VS::Battle::characterState != nullptr) return true;
   VS::Core::LogWarn("battle.ability", "{} without a character state", caller);
   return false;
 }

@@ -73,12 +73,12 @@ struct ResidentState {
   std::vector<std::byte> cursor;
 
   explicit ResidentState(const Fixture& fixture) : rows(fixture.Observe()) {
-    const auto bytes = shared::BytesOf(Battle_unusedMenu9CursorMemory);
+    const auto bytes = shared::BytesOf(VS::Battle::menu9CursorMemory);
     cursor.assign(bytes.begin(), bytes.end());
   }
 
   void Check() const {
-    CHECK(std::ranges::equal(shared::BytesOf(Battle_unusedMenu9CursorMemory),
+    CHECK(std::ranges::equal(shared::BytesOf(VS::Battle::menu9CursorMemory),
                              cursor));
     CHECK(VS::State::scoreData.titles == -1);
     CHECK(VS::State::scoreData.completion_time_minutes == 60);

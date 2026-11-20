@@ -197,7 +197,7 @@ struct LiveItemsState {
   VS::Items::InventoryIndices saved_indices = VS::Items::inventoryIndices;
   unsigned char saved_invoked = VS::Items::miscItemInvoked;
   VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<u_int, 8> saved_upper_ids{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -213,7 +213,7 @@ struct LiveItemsState {
     VS::Items::miscItemInvoked = 0;
     VS::Field::roomData = {};
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
   }
   LiveItemsState(const LiveItemsState&) = delete;
   LiveItemsState& operator=(const LiveItemsState&) = delete;
@@ -224,7 +224,7 @@ struct LiveItemsState {
     VS::Items::inventoryIndices = saved_indices;
     VS::Items::miscItemInvoked = saved_invoked;
     VS::Field::roomData = saved_room;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     std::copy(saved_upper_ids.begin(), saved_upper_ids.end(),
               std::begin(VS::Items::itemCategoryUpperIds));
   }
@@ -2689,13 +2689,13 @@ TEST_CASE("Ashley's live loadouts are refused without her battle actor",
   VS::Items::InventoryArmor record{};
   record = MakeInventoryArmor(0x21);
   ItemsWarnings warnings;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   inv::UnequipLiveWeapon();
   inv::UnequipLiveShield();
   inv::StoreLiveEquippedStats();
   items::EquipLiveAshleyArmor(2, &record);
   state.actor.stats = nullptr;
-  Battle_characterState = &state.actor;
+  VS::Battle::characterState = &state.actor;
   items::EquipLiveAshleyAccessory(&record);
   constexpr std::string_view kActor = "actor outside the battle actor table";
   CHECK(warnings.messages == std::vector<std::string>{
@@ -2878,7 +2878,7 @@ TEST_CASE("Items native bindings retire the module entries they replace",
     INFO("address " << address);
     CHECK(resolve(address) == nullptr);
   }
-  // Battle_statCalculators[15] still stores the item recovery entry.
+  // VS::Battle::statCalculators[15] still stores the item recovery entry.
   CHECK(resolve(0x80083430u) ==
         reinterpret_cast<void*>(&items::CalculateLiveItemRecovery));
   CHECK(resolve(0x800F1900u) == static_cast<void*>(&VS::Items::lootListHead));

@@ -177,8 +177,8 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
                           VS::Items::inventory.armor);
         const auto armor = Referenced(VS::Items::inventory.armor, slot);
         if (armor.limb >= 1 && armor.limb <= Items::kLimbCount &&
-            (Battle_characterState == nullptr ||
-             Battle_characterState->stats == nullptr)) {
+            (VS::Battle::characterState == nullptr ||
+             VS::Battle::characterState->stats == nullptr)) {
           Refuse("missing equipped limb armor statistics");
         }
       }

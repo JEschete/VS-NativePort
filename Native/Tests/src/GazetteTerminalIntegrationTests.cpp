@@ -84,7 +84,7 @@ struct ForeignOwner {
   std::uint64_t generation = 0;
 
   ForeignOwner() {
-    const auto bytes = live::BytesOf(Battle_unusedMenu9CursorMemory);
+    const auto bytes = live::BytesOf(VS::Battle::menu9CursorMemory);
     cursor.assign(bytes.begin(), bytes.end());
     const VS::Content::DiscFile file{score::kMonBinFile.lba, 2048};
     request = content::AllocateLiveDiscRequest(&file);
@@ -108,7 +108,7 @@ struct ForeignOwner {
     CHECK(content::LiveDiscRequestGeneration(request) == generation);
     CHECK(memory::LivePayloadCapacity(allocation).has_value());
     CHECK(Actors_actorRecords[0] == actor);
-    CHECK(std::ranges::equal(live::BytesOf(Battle_unusedMenu9CursorMemory),
+    CHECK(std::ranges::equal(live::BytesOf(VS::Battle::menu9CursorMemory),
                              cursor));
     CHECK(VS::Content::discRequestCounts.reading == 0);
     CHECK(VS::Content::discRequestCounts.waiting == 0);

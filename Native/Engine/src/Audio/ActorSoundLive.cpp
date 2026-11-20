@@ -20,7 +20,7 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/SurfaceSounds.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Field/Collision.hpp"
@@ -51,7 +51,7 @@ constexpr std::size_t kSoundSectionBytes = 4;
 
 // The record tables and the fields the original reads (lbu, lh) as typed.
 static_assert(std::size(Actors_actorRecords) == kActorRecordCount);
-static_assert(std::size(Battle_actors) == kBattleActorCount);
+static_assert(std::size(VS::Battle::actors) == kBattleActorCount);
 static_assert(std::size(VS::Field::gimmickInstances) == kGimmickCount);
 static_assert(std::size(VS::Audio::objectSurfaceSoundIds) ==
               kObjectSurfaceSoundBytes);
@@ -128,7 +128,7 @@ Battle_Actor* BattleActor(std::int32_t actor) {
   if (actor < 0 || static_cast<std::size_t>(actor) >= kBattleActorCount) {
     return nullptr;
   }
-  return Battle_actors[actor];
+  return VS::Battle::actors[actor];
 }
 
 class LiveActorSoundHost final : public ActorSoundHost {

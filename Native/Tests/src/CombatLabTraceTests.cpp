@@ -16,14 +16,14 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/GameLoop.hpp"
 #include "CombatLab/Trace.hpp"
@@ -826,8 +826,7 @@ struct GameplayInspectionFixture {
   int saved_results_reel = VS::Menu::Results::buffReelIndex;
   u_int saved_results_selection = VS::Menu::Results::buffReelSelection;
   unsigned saved_random = VS::Core::BiosRand().State();
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(VS::Event::isTextBoxAwaitingClose)) saved_waits =
@@ -850,7 +849,7 @@ struct GameplayInspectionFixture {
     VS::Menu::Framework::menuState.control.current_menu =
         VS::Menu::Framework::kMenuClosed;
     VS::Event::isMenuTransitionActive = 0;
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     model.modelId = 58;
     model.pose.frame = 7;
@@ -886,7 +885,8 @@ struct GameplayInspectionFixture {
     VS::Menu::Results::buffReelIndex = saved_results_reel;
     VS::Menu::Results::buffReelSelection = saved_results_selection;
     VS::Core::SeedBiosRand(saved_random);
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_waits.begin(), saved_waits.end(),
               VS::Event::isTextBoxAwaitingClose);
@@ -1049,7 +1049,8 @@ TEST_CASE(
 namespace {
 struct ReactionInspectionFixture : GameplayInspectionFixture {
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
-  decltype(Battle_characterState) saved_character = Battle_characterState;
+  decltype(VS::Battle::characterState) saved_character =
+      VS::Battle::characterState;
   decltype(VS::Battle::actionFlowMode) saved_phase = VS::Battle::actionFlowMode;
   int saved_tick_speed = VS::State::tickSpeed;
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
@@ -1082,8 +1083,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     player_stats.currentRangeZ = 10;
     player_stats.currentAttackShape = 1;
     enemy_stats.currentHp = enemy_stats.maxHp = 73;
-    Battle_actors[0] = Battle_characterState = &player;
-    Battle_actors[2] = &enemy;
+    VS::Battle::actors[0] = VS::Battle::characterState = &player;
+    VS::Battle::actors[2] = &enemy;
     player_model.modelId = 0;
     Actors_actorRecords[0] = &player_model;
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
@@ -1114,7 +1115,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
 
   ~ReactionInspectionFixture() {
     VS::Input::settings = saved_settings;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     VS::Battle::actionFlowMode = saved_phase;
     VS::State::tickSpeed = saved_tick_speed;
     std::copy(saved_ai.begin(), saved_ai.end(),
@@ -1420,10 +1421,10 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
   incoming.primaryTarget.target.target_actor = 2;
   incoming.targetCount = 2;
   incoming.targets[0].target.target_actor = 0;
-  incoming.targets[0].hpEffect = 1;
+  incoming.targets[0].hp_effect = 1;
   incoming.targets[0].target.hp = 16;
   incoming.targets[1].target.target_actor = 0;
-  incoming.targets[1].hpEffect = 2;
+  incoming.targets[1].hp_effect = 2;
   incoming.targets[1].target.hp = 80;
   const auto timing =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())

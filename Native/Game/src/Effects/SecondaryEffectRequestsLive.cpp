@@ -13,7 +13,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Core/Log.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -33,14 +33,14 @@ void Refuse(const char* what) {
   }
 }
 
-[[nodiscard]] ImpactTarget LiveImpactTarget(const Battle_HitResult& hit) {
+[[nodiscard]] ImpactTarget LiveImpactTarget(const VS::Battle::HitResult& hit) {
   return {.actor = hit.target.target_actor,
           .limb = hit.target.target_limb,
           .threshold = hit.target.hit_threshold,
           .impact = hit.target.impact_kind,
           .hp = hit.target.hp,
           .mp = hit.target.mp,
-          .at_position = hit.targetsPosition != 0};
+          .at_position = hit.targets_position != 0};
 }
 
 [[nodiscard]] LiveActionEffectTarget LiveEndpoint(
@@ -123,7 +123,7 @@ class LiveWorld final : public ActionImpactWorld {
 }  // namespace
 
 // decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
-void LiveQueueActionHitEffect(int effect_id, Battle_HitResult* hit_result,
+void LiveQueueActionHitEffect(int effect_id, VS::Battle::HitResult* hit_result,
                               int target_limb) {
   if (hit_result == nullptr) {
     Refuse("null hit");

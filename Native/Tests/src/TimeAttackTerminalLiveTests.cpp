@@ -9,9 +9,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
@@ -145,7 +145,7 @@ TEST_CASE(
     CHECK(status.owns_buffer);
     CHECK(status.owns_pages);
     CHECK(content::LiveDiscRequestGeneration(&request) == generation);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
   }
 }
 
@@ -154,7 +154,7 @@ TEST_CASE(
     "data",
     "[time-attack-terminal-live][F03011][reload]") {
   LiveFixture fixture;
-  Battle_unusedSubmenuState = 2;
+  VS::Battle::submenuState = 2;
   VS::State::scoreData.boss_time_trial_scores[7][2].time = 123456;
   r::screenTimer = 97;
   r::screenState = 2;
@@ -167,7 +167,7 @@ TEST_CASE(
   CHECK(std::ranges::all_of(r::clutBuf, [](auto color) { return color == 0; }));
   CHECK(r::screenTimer == 97);
   CHECK(r::screenState == 2);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(VS::State::scoreData.boss_time_trial_scores[7][2].time == 123456);
 }
 
@@ -206,7 +206,7 @@ TEST_CASE(
     REQUIRE(foreign == &request);
     const auto generation = content::LiveDiscRequestGeneration(foreign);
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(r::CleanupLiveTimeAttackOwnedState());
     CHECK(content::LiveDiscRequestGeneration(foreign) == generation);
     CHECK(foreign->state == VS::Content::DiscRequestState::kAllocated);
@@ -254,15 +254,15 @@ TEST_CASE(
     "[time-attack-terminal-live][F03011][F03012]") {
   for (const auto asset : kAssets) {
     LiveFixture fixture;
-    Battle_unusedSubmenuState = 1;
+    VS::Battle::submenuState = 1;
     CHECK(Initialize(asset) == 0);
     CHECK_FALSE(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
-    Battle_unusedSubmenuState = 0;
+    VS::Battle::submenuState = 0;
     REQUIRE(Initialize(asset) == 0);
     RequestFor(asset).state = VS::Content::DiscRequestState::kError;
     CHECK(Initialize(asset) == 0);
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_request);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
   }
@@ -278,14 +278,14 @@ TEST_CASE(
     const auto generation = content::LiveDiscRequestGeneration(&request);
     r::ResetLiveTimeAttackModuleData();
     CHECK(Initialize(asset) == 0);
-    Battle_unusedSubmenuState = 0;
+    VS::Battle::submenuState = 0;
     CHECK(Initialize(asset) == 0);
     CHECK(content::LiveDiscRequestGeneration(&request) == generation);
     CHECK(r::CleanupLiveTimeAttackOwnedState());
     render::AdvanceLiveTexturePageRetirements();
     render::AdvanceLiveTexturePageRetirements();
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(content::LiveDiscRequestGeneration(&request) != generation);
   }
 }
@@ -317,7 +317,7 @@ TEST_CASE("F03012 Live parses two TIMs without overwriting the results palette",
   CHECK(Word(bytes, r::kGameClearTimStride + kImageBlock + 4) == 0x01000380);
   CHECK(r::clutBuf[0] == 0x1234);
   CHECK(r::clutBuf[159] == 0x1234);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
 }
 
 TEST_CASE(
@@ -329,12 +329,12 @@ TEST_CASE(
     const auto bytes = InjectLoaded(asset);
     PutWord(bytes, 16, 0x00010001);
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_request);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
     PutWord(bytes, 8, 0xFFFFFFFF);
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
   }
 }
 
@@ -346,7 +346,7 @@ TEST_CASE("F03011 Live validates the course before freeing or writing records",
   VS::State::scoreData.boss_time_trial_scores[0][0].time = 99;
   r::timeTrialTime = 1234;
   CHECK(r::LiveInitializeTimeAttackResults() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(r::timeTrialTime == 1234);
   CHECK(VS::State::scoreData.boss_time_trial_scores[0][0].time == 99);
   CHECK(r::InspectLiveTimeAttackLoad(Asset::kResults).owns_buffer);
@@ -392,7 +392,7 @@ TEST_CASE("F03012 Live explicit initialization preserves unrelated counters",
   CHECK(r::buffReelSelection == 0);
   CHECK(r::incrementingScore == 77);
   CHECK(r::timeTrialTime == 88);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CheckTextureStorageFreed(Asset::kStart);
 }
 
@@ -405,7 +405,7 @@ TEST_CASE(
       std::array<std::byte, 256> tiny{};
       memory::ScopedLiveGameHeap exhausted(tiny);
       CHECK(Initialize(asset) == 0);
-      CHECK(Battle_unusedSubmenuState == 0);
+      CHECK(VS::Battle::submenuState == 0);
       CHECK_FALSE(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
       CHECK(r::InspectLiveTimeAttackLoad(asset).owns_pages);
       CHECK(r::CleanupLiveTimeAttackOwnedState());
@@ -514,7 +514,7 @@ TEST_CASE("F03008 Live drives all three real start initializer stages",
   CHECK(outer.front() == 1);
   static_cast<void>(InjectLoaded(Asset::kStart));
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 0);
   CHECK(outer.front() == 2);
   CHECK(outer.back() == 0xAA);
@@ -592,7 +592,7 @@ TEST_CASE("Time-attack Live queue exhaustion cannot release unrelated requests",
     const auto refused_records = content::LiveRefusedDiscRecordsInUse();
     const auto generations = FillForeignRequestSlots();
     CHECK(Initialize(asset) == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
     CHECK(r::InspectLiveTimeAttackLoad(asset).owns_request);
     CHECK(content::LiveRefusedDiscRecordsInUse() == refused_records + 1);
@@ -664,7 +664,7 @@ TEST_CASE("Time-attack production fixture restores its caller resources",
     REQUIRE(render::HasLiveFramebufferEffectPackets());
   }
   CheckRestoredTerminalState(settings);
-  CHECK(Battle_characterState == &outer.actor);
+  CHECK(VS::Battle::characterState == &outer.actor);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         outer.frame.storage.data());
   CHECK(memory::LivePayloadCapacity(allocation).has_value());

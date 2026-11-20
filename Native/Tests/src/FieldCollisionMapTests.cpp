@@ -18,8 +18,8 @@
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -273,14 +273,14 @@ struct LiveRoom {
 // Battle actor 0 with PanelTarget's stats on limb 1, a room of trap level 2
 // and an action whose second hit is kPanelHit; the globals come back after.
 struct LiveTrap {
-  SavedGlobal saved_actors{Battle_actors};
+  SavedGlobal saved_actors{VS::Battle::actors};
   SavedGlobal saved_room{VS::Field::roomData};
   std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
   std::unique_ptr<Battle_ActorStats> stats =
       std::make_unique<Battle_ActorStats>();
   VS::Field::MpdEnvironment environment{};
   Battle_ActionDefinition action{};
-  Battle_HitResult struck{};
+  VS::Battle::HitResult struck{};
 
   LiveTrap() {
     stats->maxHp = 300;
@@ -288,8 +288,8 @@ struct LiveTrap {
     stats->strength = 40;
     stats->limbs[1].armor.attributes.current_strength = 10;
     actor->stats = stats.get();
-    std::memset(static_cast<void*>(Battle_actors), 0, sizeof Battle_actors);
-    Battle_actors[0] = actor.get();
+    VS::Battle::actors.fill(nullptr);
+    VS::Battle::actors[0] = actor.get();
     environment.trap_level = 2;
     VS::Field::roomData.environment = &environment;
     VS::Field::roomData.header.environment_length = sizeof environment;

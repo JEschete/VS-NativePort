@@ -28,15 +28,17 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
+#include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionExecution.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionSequenceLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DiscQueue.hpp"
@@ -469,24 +471,24 @@ int Tests_SparseIdlePoseReset(void) {
 }
 
 int Tests_TargetLabelStride(void) {
-  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
-  Battle_TargetSphere sphere = {0};
+  VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
+  VS::Battle::TargetSphereRecord sphere = {0};
   char text[] = "Target";
   for (unsigned index = 0; index < 24; ++index) {
     sphere.labels[index].state = 3;
-    sphere.labels[index].screenX = 3000;
+    sphere.labels[index].screen_x = 3000;
     sphere.labels[index].text = text;
-    sphere.labels[index].worldPosition = (SVECTOR){10, 20, 30, 0};
+    sphere.labels[index].world_position = (SVECTOR){10, 20, 30, 0};
   }
   VS::Battle::targetSphere =
-      reinterpret_cast<Battle_TargetSphereSetupView*>(&sphere);
+      reinterpret_cast<VS::Battle::TargetSphereSetupView*>(&sphere);
   VS::Battle::UpdateSphereTargetLabelsEntry();
   int passed = VS::Battle::AreTargetLabelsSettledEntry() == 1;
   for (unsigned index = 0; index < 24; ++index) {
-    passed = passed && sphere.labels[index].screenX == 3032 &&
+    passed = passed && sphere.labels[index].screen_x == 3032 &&
              sphere.labels[index].state == 0 &&
              sphere.labels[index].text == text &&
-             sphere.labels[index].worldPosition.vy == 20;
+             sphere.labels[index].world_position.vy == 20;
   }
   VS::Battle::targetSphere = saved_sphere;
   return passed;
@@ -498,8 +500,8 @@ int Tests_TargetSphereWireframe(void) {
   const VS::Render::FrameScratch saved_frame = *frame;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   const int saved_frame_buffer = VS::Render::frameBuf;
-  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
-  Battle_TargetSphere sphere = {0};
+  VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
+  VS::Battle::TargetSphereRecord sphere = {0};
   Battle_TargetVolume volume = {0};
   u_long ordering[0x822];
   u_long packets[12];
@@ -520,11 +522,11 @@ int Tests_TargetSphereWireframe(void) {
   frame->ordering_table = ordering;
   frame->primitive_cursor = packets + 1;
   VS::Battle::targetSphere =
-      reinterpret_cast<Battle_TargetSphereSetupView*>(&sphere);
+      reinterpret_cast<VS::Battle::TargetSphereSetupView*>(&sphere);
   sphere.depth = 128;
-  sphere.vertexCount = 2;
-  sphere.wireVertices[1].xyz[0] = 4096;
-  sphere.wireVertices[1].opaque6 = 1;
+  sphere.vertex_count = 2;
+  sphere.wire_vertices[1].xyz[0] = 4096;
+  sphere.wire_vertices[1].opaque6 = 1;
   volume.kind = 1;
   volume.scale.extents[0] = volume.scale.extents[1] = volume.scale.extents[2] =
       4;
@@ -534,11 +536,11 @@ int Tests_TargetSphereWireframe(void) {
                (packets[1] >> 24) == 4 && packets[3] == 0x42208020u &&
                packets[5] == 0x007800A0u && packets[0] == 0xA5A5A5A5u &&
                packets[6] == 0xA5A5A5A5u;
-  sphere.wireVertices[1].opaque6 = 2;
+  sphere.wire_vertices[1].opaque6 = 2;
   VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitive_cursor == packets + 11 &&
            packets[8] == 0x40208020u && packets[11] == 0xA5A5A5A5u;
-  sphere.vertexCount = 0;
+  sphere.vertex_count = 0;
   VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitive_cursor == packets + 11;
   VS::Battle::targetSphere = saved_sphere;
@@ -1042,10 +1044,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   u_char request_after[sizeof VS::Effects::actionRequest];
   memcpy(request_before, &VS::Effects::actionRequest, sizeof request_before);
   for (int i = 0; i < kSlots; ++i) {
-    saved_battle[i] = Battle_actors[i];
+    saved_battle[i] = VS::Battle::actors[i];
     saved_actor[i] = Actors_actorRecords[i];
     saved_object[i] = VS::Field::gimmickInstances[i];
-    Battle_actors[i] = nullptr;
+    VS::Battle::actors[i] = nullptr;
     Actors_actorRecords[i] = nullptr;
     VS::Field::gimmickInstances[i] = nullptr;
   }
@@ -1057,7 +1059,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
                        ? 1
                        : kScriptedEffectSlot;
   if (present || scenario == 6) {
-    Battle_actors[slot] = &battle_actor;
+    VS::Battle::actors[slot] = &battle_actor;
     battle_actor.modelId =
         scenario == 6 ? kScriptedEffectModel + 1 : kScriptedEffectModel;
     if (scenario == 2) {
@@ -1087,7 +1089,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
               VS::Effects::actionRequest.targets[0].type == 4 &&
               VS::Effects::actionRequest.targets[0].Actor().actor == slot;
     if (empty) {
-      passed &= Battle_actors[slot] == nullptr &&
+      passed &= VS::Battle::actors[slot] == nullptr &&
                 Actors_actorRecords[slot] == nullptr &&
                 VS::Field::gimmickInstances[slot] == nullptr;
       // The started effect's emit_to readers must leave defaults untouched.
@@ -1114,7 +1116,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
     }
   }
   for (int i = 0; i < kSlots; ++i) {
-    Battle_actors[i] = saved_battle[i];
+    VS::Battle::actors[i] = saved_battle[i];
     Actors_actorRecords[i] = saved_actor[i];
     VS::Field::gimmickInstances[i] = saved_object[i];
   }

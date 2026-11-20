@@ -15,10 +15,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -133,8 +133,8 @@ struct BreakArtMenuFixture {
   std::array<std::uint16_t, VS::Menu::break_arts::kMenuStringHalfwords>
       saved_strings = std::to_array(VS::Menu::break_arts::strings);
   std::array<Battle_ActionDefinition, 4> saved_actions{};
-  Battle_Actor* saved_character = Battle_characterState;
-  Battle_Actor* saved_actor = Battle_actors[0];
+  Battle_Actor* saved_character = VS::Battle::characterState;
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
   decltype(VS::Menu::Framework::shortcutInvoked) saved_shortcut =
       VS::Menu::Framework::shortcutInvoked;
   decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
@@ -158,7 +158,7 @@ struct BreakArtMenuFixture {
     VS::Menu::break_arts::strings[menu1_strings::offset::kViewArts] = 0;
     VS::Menu::break_arts::strings[menu1_strings::offset::kViewArtsDesc] = 0;
     VS::State::artsStatus.arts_learned[category % 10] = 4;
-    Battle_characterState = Battle_actors[0] = &actor;
+    VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
     actor.equippedWeaponCategory = static_cast<u_char>(category);
     actor.weaponDrawn = 1;
@@ -182,8 +182,8 @@ struct BreakArtMenuFixture {
               VS::Menu::break_arts::strings);
     std::copy(saved_actions.begin(), saved_actions.end(),
               &Battle_actionDefinitions[first_action]);
-    Battle_characterState = saved_character;
-    Battle_actors[0] = saved_actor;
+    VS::Battle::characterState = saved_character;
+    VS::Battle::actors[0] = saved_actor;
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
     VS::Menu::Framework::displayActionCost = saved_cost;
@@ -219,7 +219,7 @@ struct EquipmentGateFixture {
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) saved_indices =
       VS::Items::inventoryIndices;
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_character = VS::Battle::characterState;
   decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
       VS::Menu::Framework::actionRestrictions;
   Battle_Actor actor{};
@@ -232,7 +232,7 @@ struct EquipmentGateFixture {
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
   }
 
   ~EquipmentGateFixture() {
@@ -242,7 +242,7 @@ struct EquipmentGateFixture {
     VS::State::stateFlags = saved_flags;
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
   }
 };
@@ -446,8 +446,8 @@ struct WorkshopRepairFixture {
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   int saved_repeat = VS::Input::buttonRepeat;
   VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
-  Battle_Actor* saved_character = Battle_characterState;
-  Battle_Actor* saved_actor = Battle_actors[0];
+  Battle_Actor* saved_character = VS::Battle::characterState;
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   std::array<u_int, 0x180> sfx_offsets{};
@@ -488,8 +488,8 @@ struct WorkshopRepairFixture {
     VS::Input::buttonsPressed = saved_pressed;
     VS::Input::buttonRepeat = saved_repeat;
     VS::Menu::textBoxes[7] = saved_box;
-    Battle_characterState = saved_character;
-    Battle_actors[0] = saved_actor;
+    VS::Battle::characterState = saved_character;
+    VS::Battle::actors[0] = saved_actor;
   }
 
   int Tick() {
@@ -502,7 +502,7 @@ struct WorkshopRepairFixture {
 
   void Equip() {
     auto& inventory = VS::Items::inventory;
-    Battle_characterState = Battle_actors[0] = &actor;
+    VS::Battle::characterState = VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
     inventory.weapons[0].index = 1;
     inventory.weapons[0].blade = inventory.weapons[0].grip = 1;

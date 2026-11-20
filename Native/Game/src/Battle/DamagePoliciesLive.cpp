@@ -8,9 +8,9 @@
 
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/DamagePolicies.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Items/ItemRecords.hpp"
 
 namespace VS::Battle {
@@ -24,20 +24,21 @@ void Require(bool valid) {
     std::abort();
   }
 }
-const Battle_ActorStats* StatsOf(const Battle_HitResult* hit) {
+const Battle_ActorStats* StatsOf(const VS::Battle::HitResult* hit) {
   Require(hit != nullptr);
   const auto slot = hit->target.target_actor;
-  Require(slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr);
-  return Battle_actors[slot]->stats;
+  Require(slot < std::size(VS::Battle::actors) &&
+          VS::Battle::actors[slot] != nullptr);
+  return VS::Battle::actors[slot]->stats;
 }
-auto HitAmounts(const Battle_HitResult& hit) {
+auto HitAmounts(const VS::Battle::HitResult& hit) {
   std::array<std::int16_t, Items::kLimbCount> result{};
   for (std::size_t i = 0; i < result.size(); ++i) {
     result[i] = hit.limbs[i].effects.opaque0;
   }
   return result;
 }
-void CommitAmounts(Battle_HitResult& hit, HitLimbAmounts amounts) {
+void CommitAmounts(VS::Battle::HitResult& hit, HitLimbAmounts amounts) {
   for (std::size_t i = 0; i < amounts.size(); ++i) {
     hit.limbs[i].effects.opaque0 = amounts[i];
   }
@@ -68,9 +69,10 @@ std::int16_t LiveApplyDamageGemMultiplier(Battle_ActionDefinition* action,
 
 // decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10612).
 void LiveDistributeHitLimbDamage(Battle_ActionDefinition* action,
-                                 Battle_HitResult* hit, std::int16_t amount) {
+                                 VS::Battle::HitResult* hit,
+                                 std::int16_t amount) {
   // The original clears before resolving any required actor/action input.
-  ClearHitLimbArmorLoss(Battle_limbArmorDpLoss);
+  ClearHitLimbArmorLoss(VS::Battle::limbArmorDpLoss);
   Require(action != nullptr);
   const auto* stats = StatsOf(hit);
   const auto category = static_cast<std::uint8_t>(action->category);
@@ -97,47 +99,49 @@ void LiveDistributeHitLimbDamage(Battle_ActionDefinition* action,
   auto amounts = HitAmounts(*hit);
   Require(DistributeHitLimbDamage(category, hit->target.target_limb, amount,
                                   used_vitals, used_splash, amounts,
-                                  Battle_limbArmorDpLoss));
+                                  VS::Battle::limbArmorDpLoss));
   CommitAmounts(*hit, amounts);
 }
 
 // decomp: func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10664).
-void LiveDistributeLimbRecovery(Battle_ActionDefinition*, Battle_HitResult* hit,
+void LiveDistributeLimbRecovery(Battle_ActionDefinition*,
+                                VS::Battle::HitResult* hit,
                                 std::int16_t amount) {
   const auto* stats = StatsOf(hit);
   Require(stats != nullptr);
   const auto vitals = Vitals(*stats);
   auto amounts = HitAmounts(*hit);
-  DistributeLimbRecovery(amount, vitals, amounts, Battle_limbArmorDpLoss);
+  DistributeLimbRecovery(amount, vitals, amounts, VS::Battle::limbArmorDpLoss);
   CommitAmounts(*hit, amounts);
 }
 // decomp: _getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11237).
 std::int16_t LiveLastActionStatValue(Battle_ActionDefinition*,
-                                     Battle_HitResult*, Battle_HitResult*, int,
-                                     int) {
-  return LastActionStatValue(Battle_lastActionStatValue);
+                                     VS::Battle::HitResult*,
+                                     VS::Battle::HitResult*, int, int) {
+  return LastActionStatValue(VS::Battle::lastActionStatValue);
 }
 // decomp: _factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12228).
 std::int16_t LiveScaleLastActionStatValue(Battle_ActionDefinition* action,
-                                          Battle_HitResult*, Battle_HitResult*,
-                                          int hit, int) {
+                                          VS::Battle::HitResult*,
+                                          VS::Battle::HitResult*, int hit,
+                                          int) {
   Require(action != nullptr && hit >= 0 &&
           static_cast<std::size_t>(hit) < std::size(action->hits));
   return ScaleLastActionStatValue(
-      Battle_lastActionStatValue,
+      VS::Battle::lastActionStatValue,
       static_cast<std::uint8_t>(action->hits[hit].statFactor));
 }
 // decomp: _getRisk (src/BATTLE/BATTLE.PRG/146C.c:12241).
-std::int16_t LiveTargetRisk(Battle_ActionDefinition*, Battle_HitResult*,
-                            Battle_HitResult* target, int, int) {
+std::int16_t LiveTargetRisk(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                            VS::Battle::HitResult* target, int, int) {
   const auto* stats = StatsOf(target);
   Require(stats != nullptr);
   return TargetRisk(stats->risk);
 }
-static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+static_assert(std::is_same_v<decltype(VS::Battle::statCalculators[0]),
                              decltype(&LiveLastActionStatValue)&>);
-static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+static_assert(std::is_same_v<decltype(VS::Battle::statCalculators[0]),
                              decltype(&LiveScaleLastActionStatValue)&>);
-static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+static_assert(std::is_same_v<decltype(VS::Battle::statCalculators[0]),
                              decltype(&LiveTargetRisk)&>);
 }  // namespace VS::Battle

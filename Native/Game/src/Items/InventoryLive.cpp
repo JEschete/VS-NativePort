@@ -88,7 +88,7 @@ namespace VS::Items::Inventory {
 void UnequipLiveWeapon() {
   auto* stats = Live::AshleyStats("UnequipWeapon");
   if (stats == nullptr) return;
-  auto& actor = *Battle_characterState;
+  auto& actor = *VS::Battle::characterState;
   auto ashley = Live::ToAshleyWeapon(*stats, actor);
   Live::LiveEquipStatusHost host(
       *stats, [&] { Live::CommitAshleyWeapon(*stats, actor, ashley); });

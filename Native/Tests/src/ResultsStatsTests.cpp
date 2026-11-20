@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Menu/Results/ResultsStats.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
@@ -138,11 +138,11 @@ class LiveCharacter {
   Battle_ActorStats stats{};
   Battle_Actor actor{};
 
-  LiveCharacter() : saved_(Battle_characterState) {
+  LiveCharacter() : saved_(VS::Battle::characterState) {
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
   }
-  ~LiveCharacter() { Battle_characterState = saved_; }
+  ~LiveCharacter() { VS::Battle::characterState = saved_; }
   LiveCharacter(const LiveCharacter&) = delete;
   LiveCharacter& operator=(const LiveCharacter&) = delete;
   LiveCharacter(LiveCharacter&&) = delete;
@@ -269,7 +269,7 @@ TEST_CASE("Live results stats refuse a missing character or record",
   r::ApplyLiveStrengthBonus(10);
   CHECK(live.stats.totalStrength == 50);
   CHECK_FALSE(r::ReadLiveAshleyResultStats().has_value());
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(r::AshleyLiveTotalAgility() == 0);
   r::ApplyLiveHpBonus(10);
   r::WriteLiveAshleyResultStats(r::AshleyResultStats{});

@@ -16,9 +16,9 @@
 #include <string_view>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecords.hpp"
@@ -117,8 +117,9 @@ bool LoadStatusViewTables() noexcept {
 
 // Ashley's statistics; null before they are loaded.
 [[nodiscard]] Battle_ActorStats* AshleyStats() {
-  return Battle_characterState == nullptr ? nullptr
-                                          : Battle_characterState->stats;
+  return VS::Battle::characterState == nullptr
+             ? nullptr
+             : VS::Battle::characterState->stats;
 }
 
 class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
@@ -161,10 +162,11 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
 
   std::optional<ActorComparisonStats> ActorStats(int actor) override {
     if (actor < 0 ||
-        static_cast<std::size_t>(actor) >= std::size(Battle_actors)) {
+        static_cast<std::size_t>(actor) >= std::size(VS::Battle::actors)) {
       return std::nullopt;
     }
-    const Battle_Actor* record = Battle_actors[static_cast<std::size_t>(actor)];
+    const Battle_Actor* record =
+        VS::Battle::actors[static_cast<std::size_t>(actor)];
     if (record == nullptr || record->stats == nullptr) {
       return std::nullopt;
     }

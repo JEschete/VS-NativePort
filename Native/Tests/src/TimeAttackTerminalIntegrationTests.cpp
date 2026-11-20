@@ -94,8 +94,8 @@ struct ReloadFixture : tests::Fixture {
   }
 
   void CheckResident() const {
-    CHECK(Battle_unusedSubmenuState == 1);
-    CHECK(Battle_characterState == &actor);
+    CHECK(VS::Battle::submenuState == 1);
+    CHECK(VS::Battle::characterState == &actor);
     CHECK(stats.strength == 77);
     CHECK(VS::State::scoreData.boss_time_trial_scores[7][2].time == 123456);
   }
@@ -103,7 +103,7 @@ struct ReloadFixture : tests::Fixture {
   static void Reenter(Asset asset) {
     render::AdvanceLiveTexturePageRetirements();
     render::AdvanceLiveTexturePageRetirements();
-    Battle_unusedSubmenuState = 0;
+    VS::Battle::submenuState = 0;
     REQUIRE(tests::Initialize(asset) == 0);
     CHECK(results::InspectLiveTimeAttackLoad(asset).request_bound);
     CHECK(results::InspectLiveTimeAttackLoad(asset).buffer_bound);
@@ -155,7 +155,7 @@ void InitializeThroughModule(Asset asset, tests::Fixture& fixture) {
   REQUIRE(initialize() == 0);
   if (asset == Asset::kResults) fixture.CompleteMusicLoad();
   REQUIRE(initialize() == 1);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CHECK_FALSE(results::InspectLiveTimeAttackLoad(asset).owns_buffer);
   CHECK_FALSE(results::InspectLiveTimeAttackLoad(asset).owns_request);
   if (asset == Asset::kResults) {
@@ -296,7 +296,7 @@ TEST_CASE("Heap replacement cancels time-attack destinations before reuse",
     VS::Boot::ResetLiveSessionHeap();
     CheckReleased(asset);
     CHECK(memory::GameHeap().Empty());
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     // Keep a failing producer's retained owner cleanable by the fixture.
     if (results::InspectLiveTimeAttackLoad(asset).owns_buffer) {
       memory::GameHeap() = previous_heap;

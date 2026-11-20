@@ -77,7 +77,7 @@ struct ReloadFixture : Fixture {
     CHECK(VS::Menu::Framework::itemNames == text);
     CHECK(memory::LivePayloadCapacity(workspace).has_value());
     CHECK(memory::LivePayloadCapacity(text).has_value());
-    CHECK(Battle_actors[0] == &actor);
+    CHECK(VS::Battle::actors[0] == &actor);
     CHECK(actor.stats == &stats);
     CHECK(VS::Menu::Framework::menuMemory.selected_equipment == 5);
     CHECK(VS::Battle::stringContext.strings[0] ==

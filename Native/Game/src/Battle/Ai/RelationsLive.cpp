@@ -26,7 +26,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 
@@ -39,7 +39,7 @@ constexpr unsigned kPreservedRelationFlag = 8;
 class RoomActorList {
  public:
   RoomActorList() {
-    for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
+    for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       Require(count_ < ids_.size() && actor->id >= 0 &&
                   actor->id < kRelationActorSlots,
@@ -188,7 +188,7 @@ class LiveSavedRelationActors final : public SavedRelationActors {
 class LiveLinkedActorTable final : public LinkedActorTable {
  public:
   LiveLinkedActorTable() {
-    const Battle_Actor* head = Battle_actors[0];
+    const Battle_Actor* head = VS::Battle::actors[0];
     Require(head != nullptr,
             "AI linked actors require Ashley at the battle actor list head");
     for (const Battle_Actor* actor = head->next; actor != nullptr;
@@ -321,11 +321,11 @@ class LiveActorReaction final : public ActorReactionHost {
   VS::Battle::Ai::ReactionView& state_;
 };
 
-ReactionHit ReadHit(const Battle_HitResult& hit) {
+ReactionHit ReadHit(const VS::Battle::HitResult& hit) {
   return {.actor = hit.target.target_actor,
           .hp_change = hit.target.hp,
-          .hp_effect = hit.hpEffect,
-          .skipped = hit.targetsPosition != 0};
+          .hp_effect = hit.hp_effect,
+          .skipped = hit.targets_position != 0};
 }
 
 // The completed action as the reaction policy reads it.

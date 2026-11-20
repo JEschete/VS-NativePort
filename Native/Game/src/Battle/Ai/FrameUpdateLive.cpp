@@ -29,7 +29,7 @@
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RoomState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Room.hpp"
@@ -80,7 +80,7 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
   }
   [[nodiscard]] bool HasRoomAndActors() const override {
     return VS::Battle::Ai::roomAiState != nullptr &&
-           Battle_actors[0] != nullptr;
+           VS::Battle::actors[0] != nullptr;
   }
   void CacheWorkingState() override {
     VS::Battle::Ai::CacheLiveActorAiWorkingState();

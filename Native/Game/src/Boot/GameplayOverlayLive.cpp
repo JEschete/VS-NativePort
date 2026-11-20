@@ -6,12 +6,12 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/SystemResourcesLive.hpp"
@@ -163,7 +163,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Actors::SetLiveRoomActorScale(&legacy_scale);
   }
   void ClearActorSlots(std::size_t slot_count) override {
-    constexpr std::size_t kActorCapacity = std::size(Battle_actors);
+    constexpr std::size_t kActorCapacity = std::size(VS::Battle::actors);
     if (slot_count > kActorCapacity) {
       VS::Core::Errorf("boot",
                        "gameplay actor slot count %u exceeds capacity %u",
@@ -172,7 +172,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
       std::abort();
     }
     for (std::size_t i = 0; i < slot_count; ++i) {
-      Battle_actors[i] = nullptr;
+      VS::Battle::actors[i] = nullptr;
     }
   }
   void SpawnAshleyWithEquipment() override {

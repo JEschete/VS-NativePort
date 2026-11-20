@@ -226,7 +226,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
 };
 
 struct EquippedFixture : DialogLiveFixture {
-  equipment::ValueRestore<Battle_Actor*> saved_actor{Battle_characterState};
+  equipment::ValueRestore<Battle_Actor*> saved_actor{
+      VS::Battle::characterState};
   equipment::ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> row_types{};
   Battle_Actor actor{};
@@ -234,7 +235,7 @@ struct EquippedFixture : DialogLiveFixture {
 
   EquippedFixture() {
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     VS::Menu::Framework::rowTypeBuf = row_types.data();
     AddWeapon();
     const auto module = ReadData(R"(Native\data\disc\MENU\MENU3.PRG)");

@@ -12,7 +12,7 @@
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.hpp"
@@ -27,7 +27,7 @@ namespace {
 void IgnoreAudio(VS::Audio::CommandParams*) {}
 
 struct RouletteFixture {
-  Battle_Actor* saved_actor = Battle_characterState;
+  Battle_Actor* saved_actor = VS::Battle::characterState;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   unsigned saved_random = VS::Core::BiosRand().State();
@@ -65,7 +65,7 @@ struct RouletteFixture {
     REQUIRE(VS::Menu::Results::InspectLiveGameClear().state_timer == 0);
     std::memset(&stats, 0, sizeof stats);
     actor.stats = &stats;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     selectors.fill(0x8000);
     std::fill(std::begin(VS::Audio::Mixer::kCommandHandlers),
               std::end(VS::Audio::Mixer::kCommandHandlers), IgnoreAudio);
@@ -76,7 +76,7 @@ struct RouletteFixture {
 
   ~RouletteFixture() {
     VS::Menu::Results::ResetLiveGameClearModuleData();
-    Battle_characterState = saved_actor;
+    VS::Battle::characterState = saved_actor;
     VS::Core::SeedBiosRand(saved_random);
     VS::Input::buttonsPressed = saved_input;
     VS::Menu::Results::screenState = saved_state;

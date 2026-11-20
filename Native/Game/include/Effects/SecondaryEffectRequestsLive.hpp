@@ -6,7 +6,9 @@
 namespace VS::Actors {
 struct ActorLocation;
 }
-struct Battle_HitResult;
+namespace VS::Battle {
+struct HitResult;
+}  // namespace VS::Battle
 
 // Live binding for the secondary hit and spatial effect requests
 // (SecondaryEffectRequests.hpp) over VS::Battle::actionState, the action
@@ -18,7 +20,7 @@ struct Battle_HitResult;
 // array.
 namespace VS::Effects {
 // func_8006C4C4 (146C.c:1927).
-void LiveQueueActionHitEffect(int effect_id, Battle_HitResult* hit_result,
+void LiveQueueActionHitEffect(int effect_id, VS::Battle::HitResult* hit_result,
                               int target_limb);
 // func_8006C84C (146C.c:2044): returns 1.
 int LiveQueueActionImpactEffects(int attacker_index);

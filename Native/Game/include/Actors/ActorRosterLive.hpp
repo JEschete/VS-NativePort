@@ -3,7 +3,7 @@
 
 struct Battle_Actor;
 
-// Bindings from Battle_actors and the actor records to the typed roster
+// Bindings from VS::Battle::actors and the actor records to the typed roster
 // (ActorRoster.cpp). Refusals are reported on the "actors" channel.
 namespace VS::Actors {
 // _insertActor (146C.c:884): 1 when `actor` joined the list after Ashley.
@@ -19,7 +19,7 @@ void FreezeLiveActorAnimations();
 // func_8006C2A0 (146C.c:1854).
 void UnfreezeLiveActorAnimations();
 // func_8007647C (146C.c:6028): resets the stats of actor slot `actor_id` to
-// a placeholder. Refused for an id outside Battle_actors or an actor without
-// stats.
+// a placeholder. Refused for an id outside VS::Battle::actors or an actor
+// without stats.
 void InitializeLivePlaceholderActor(int actor_id, int auxiliary);
 }  // namespace VS::Actors

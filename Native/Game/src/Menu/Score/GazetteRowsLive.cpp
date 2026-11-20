@@ -14,7 +14,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -145,7 +145,7 @@ class LiveGazetteMenu final : public GazetteMenuHost {
     text_ = listed_.data();
   }
   std::uint8_t GazetteRow() override {
-    return Battle_unusedMenu9CursorMemory.gazette_row;
+    return VS::Battle::menu9CursorMemory.gazette_row;
   }
   void SetTopMenuCursor(TopMenuCursor cursor) override {
     VS::Menu::Framework::menuMemory.cursor_memories[kTopMenuCursorRow] =

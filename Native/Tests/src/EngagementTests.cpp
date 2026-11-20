@@ -7,11 +7,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Legacy/Psx.h"
 
@@ -19,8 +20,7 @@ namespace {
 struct EngagementFixture {
   decltype(VS::Battle::Ai::roomAiState) saved_room =
       VS::Battle::Ai::roomAiState;
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
@@ -35,7 +35,7 @@ struct EngagementFixture {
     room.engagement_limit = 1;
     VS::Battle::Ai::StoreEngagedMask(room, 0);
     room.engaged_count = 0;
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     const std::array<int, 3> ids{0, 2, 5};
@@ -46,7 +46,7 @@ struct EngagementFixture {
       states[index].actor =
           reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
       states[index].engagement_request = 7;
-      Battle_actors[ids[index]] = &actors[index];
+      VS::Battle::actors[ids[index]] = &actors[index];
       VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
     }
     std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(),
@@ -56,7 +56,8 @@ struct EngagementFixture {
   ~EngagementFixture() {
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_markers.begin(), saved_markers.end(),

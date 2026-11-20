@@ -31,15 +31,15 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Sphere.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Boot/PlayerSettings.hpp"
 #include "Boot/SessionLive.hpp"
@@ -298,9 +298,9 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   }
   // BATTLE.PRG func_800C4794 positioning mode (sphere +0x3E): D-pad moves the
   // area cursor; a second Circle confirms it.
-  const auto* sphere =
-      reinterpret_cast<const Battle_TargetSphere*>(VS::Battle::targetSphere);
-  state.area_positioning = sphere != nullptr && sphere->inputLocked != 0;
+  const auto* sphere = reinterpret_cast<const VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
+  state.area_positioning = sphere != nullptr && sphere->input_locked != 0;
   if (sphere != nullptr) {
     constexpr int kExtentUnits = 32;
     for (const auto& volume : sphere->volumes) {
@@ -434,21 +434,21 @@ std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
   }
   const auto parameter =
       kAdjustments[static_cast<std::size_t>(adjustment)].status_parameter;
-  if (Battle_statusEffectParams[parameter].statusFlags == 0) {
+  if (VS::Battle::statusEffectParams[parameter].status_flags == 0) {
     return std::unexpected("STATUS DEFINITIONS NOT LOADED");
   }
-  Battle_HitResult hit{};
+  VS::Battle::HitResult hit{};
   hit.target.target_actor = 0;
   if (VS::Battle::QueueLiveApplicableStatusChanges(parameter, &hit) == 0) {
     return std::unexpected("STATUS ALREADY ACTIVE, BLOCKED OR IMMUNE");
   }
-  // These original hit-result names are inverted: inflictStatuses cures;
-  // removeStatuses applies. Use the same order as production hit resolution.
-  if (hit.inflictStatuses != 0) {
-    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
+  // These original hit-result names are inverted: inflict_statuses cures;
+  // remove_statuses applies. Use the same order as production hit resolution.
+  if (hit.inflict_statuses != 0) {
+    VS::Battle::RemoveLiveActorStatuses(hit.inflict_statuses, &stats);
   }
-  if (hit.removeStatuses != 0) {
-    VS::Battle::InflictLiveActorStatuses(hit.removeStatuses, &stats);
+  if (hit.remove_statuses != 0) {
+    VS::Battle::InflictLiveActorStatuses(hit.remove_statuses, &stats);
   }
   return {};
 }
@@ -713,7 +713,7 @@ void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
     throw std::runtime_error("Ashley stat overrides must be in 1..999");
   }
   if (overrides == EncounterStatOverrides{}) return;
-  auto* actor = Battle_actors[0];
+  auto* actor = VS::Battle::actors[0];
   if (actor == nullptr || actor->stats == nullptr) {
     throw std::runtime_error("Ashley is unavailable for encounter stat setup");
   }
@@ -790,7 +790,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
           VS::Menu::Framework::kMenuClosed) {
     return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
   }
-  auto* actor = Battle_actors[0];
+  auto* actor = VS::Battle::actors[0];
   if (actor == nullptr || actor->stats == nullptr || actor->defeated ||
       actor->stats->currentHp <= 0 || VS::State::stateFlags.game_over) {
     return reject("ASHLEY IS NOT ALIVE AND READY");
@@ -898,7 +898,7 @@ EncounterState InspectGameplay() {
     InspectTargeting(state, *VS::Battle::actionState);
   }
   for (int slot = 0; slot < EncounterLimits::kActorSlots; ++slot) {
-    const auto* actor = Battle_actors[slot];
+    const auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr || actor->stats == nullptr) continue;
     state.actors.push_back(InspectActor(slot, *actor));
   }

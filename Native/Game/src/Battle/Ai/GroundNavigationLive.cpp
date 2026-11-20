@@ -14,6 +14,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -28,7 +29,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
@@ -334,7 +335,7 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     Frame().blocker_actor[direction] = actor;
   }
 
-  void RewindCollisionActors() override { cursor_ = Battle_actors[0]; }
+  void RewindCollisionActors() override { cursor_ = VS::Battle::actors[0]; }
   [[nodiscard]] std::optional<int> NextCollisionActor() override {
     if (cursor_ == nullptr) return std::nullopt;
     const int id = cursor_->id;

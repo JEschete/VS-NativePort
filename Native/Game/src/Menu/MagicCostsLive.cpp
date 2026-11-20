@@ -12,7 +12,7 @@
 #include <string>
 #include <string_view>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
@@ -87,7 +87,7 @@ class LiveHost final : public Host {
     return std::nullopt;
   }
   std::optional<std::uint32_t> ActionRestrictionFlags(int action_id) override {
-    if (ValidAction(action_id) && Battle_characterState != nullptr) {
+    if (ValidAction(action_id) && VS::Battle::characterState != nullptr) {
       // The spell's restriction bits for the player (actor slot 0).
       return static_cast<std::uint32_t>(
           VS::Battle::LiveActorActionRestrictionFlags(0, action_id));
@@ -108,11 +108,11 @@ class LiveHost final : public Host {
             std::size(VS::State::stateFlags.save_point_states)};
   }
   std::optional<std::int16_t> CurrentMp() override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       return std::nullopt;
     }
-    return Battle_characterState->stats->currentMp;
+    return VS::Battle::characterState->stats->currentMp;
   }
   std::span<const std::uint16_t> TeleportationStrings() override {
     return teleportationStrings;

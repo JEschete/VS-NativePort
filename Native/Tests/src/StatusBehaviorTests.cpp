@@ -12,9 +12,9 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -22,7 +22,7 @@
 
 namespace {
 struct ConditionFixture {
-  Battle_Actor* saved_actor = Battle_actors[0];
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_ActionState* saved_action = VS::Battle::actionState;
@@ -30,8 +30,8 @@ struct ConditionFixture {
       VS::Battle::floatingLabels;
   decltype(VS::Battle::floatingLabelCount) saved_label_count =
       VS::Battle::floatingLabelCount;
-  decltype(std::to_array(Battle_statusEffectParams)) saved_params =
-      std::to_array(Battle_statusEffectParams);
+  decltype(VS::Battle::statusEffectParams) saved_params =
+      VS::Battle::statusEffectParams;
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(VS::Core::randomShuffleTable)) saved_random =
@@ -45,7 +45,7 @@ struct ConditionFixture {
   VS::Battle::FloatingLabelSlots labels{};
 
   ConditionFixture() {
-    Battle_actors[0] = &actor;
+    VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
     actor.weaponDrawn = 1;
     Actors_actorRecords[0] = &record;
@@ -60,14 +60,14 @@ struct ConditionFixture {
   }
 
   ~ConditionFixture() {
-    Battle_actors[0] = saved_actor;
+    VS::Battle::actors[0] = saved_actor;
     Actors_actorRecords[0] = saved_record;
     VS::Battle::Ai::actorAiStates[0] = saved_ai;
     VS::Battle::actionState = saved_action;
     VS::Battle::floatingLabels = saved_labels;
     VS::Battle::floatingLabelCount = saved_label_count;
     std::copy(saved_params.begin(), saved_params.end(),
-              Battle_statusEffectParams);
+              VS::Battle::statusEffectParams.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     std::copy(saved_random.begin(), saved_random.end(),
@@ -97,36 +97,36 @@ struct ConditionFixture {
 
   void InitializePolicies() {
     // Resident status parameters, G01906 (SLUS file offset 0x3F6CC).
-    std::fill_n(Battle_statusEffectParams, saved_params.size(),
-                Battle_StatusEffectParams{});
-    Battle_statusEffectParams[4] = {0x10, 0, 0, 0x800, 0};
+    std::fill_n(VS::Battle::statusEffectParams.begin(), saved_params.size(),
+                VS::Battle::StatusEffectParams{});
+    VS::Battle::statusEffectParams[4] = {0x10, 0, 0, 0x800, 0};
     for (int id = 5; id <= 10; ++id) {
-      Battle_statusEffectParams[id] = {1 << id, 15, 0, 0x7E0, 0x10000};
+      VS::Battle::statusEffectParams[id] = {1 << id, 15, 0, 0x7E0, 0x10000};
     }
-    Battle_statusEffectParams[11] = {0x800, 20, 0, 0x800, 0x8010};
-    Battle_statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
-    Battle_statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
-    Battle_statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
-    Battle_statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
-    Battle_statusEffectParams[16] = {0x10000, 0, 0, 0x7E0, 0x10000};
-    Battle_statusEffectParams[17] = {0x20000, 0, 5, 0, 0x4000};
-    Battle_statusEffectParams[19] = {0x80000, 15, 0, 0x1FF80000, 0};
+    VS::Battle::statusEffectParams[11] = {0x800, 20, 0, 0x800, 0x8010};
+    VS::Battle::statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
+    VS::Battle::statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
+    VS::Battle::statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
+    VS::Battle::statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
+    VS::Battle::statusEffectParams[16] = {0x10000, 0, 0, 0x7E0, 0x10000};
+    VS::Battle::statusEffectParams[17] = {0x20000, 0, 5, 0, 0x4000};
+    VS::Battle::statusEffectParams[19] = {0x80000, 15, 0, 0x1FF80000, 0};
   }
 
   bool Apply(int effect) {
-    Battle_HitResult hit{};
+    VS::Battle::HitResult hit{};
     if (VS::Battle::QueueLiveApplicableStatusChanges(effect, &hit) == 0) {
       return false;
     }
-    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
-    VS::Battle::InflictLiveActorStatuses(hit.removeStatuses, &stats);
+    VS::Battle::RemoveLiveActorStatuses(hit.inflict_statuses, &stats);
+    VS::Battle::InflictLiveActorStatuses(hit.remove_statuses, &stats);
     return true;
   }
 
   void Cure(int effect) {
-    Battle_HitResult hit{};
+    VS::Battle::HitResult hit{};
     REQUIRE(VS::Battle::QueueLiveStatusRemovalMask(effect, &hit) != 0);
-    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
+    VS::Battle::RemoveLiveActorStatuses(hit.inflict_statuses, &stats);
   }
 
   void Tick(int count) {

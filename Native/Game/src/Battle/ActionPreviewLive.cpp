@@ -23,7 +23,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/AttackPrerequisitesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
@@ -32,7 +32,7 @@
 
 namespace VS::Battle {
 namespace {
-static_assert(sizeof(ActionHit) == sizeof(Battle_HitResult));
+static_assert(sizeof(ActionHit) == sizeof(VS::Battle::HitResult));
 static_assert(sizeof(ActionRequest) == sizeof(Battle_ActionRequest));
 static_assert(offsetof(ActionRequest, targets) ==
               offsetof(Battle_ActionRequest, targets));
@@ -51,8 +51,9 @@ T Checked(std::optional<T> value) {
   return value.value();
 }
 Battle_Actor* ActorAt(int slot) {
-  return slot >= 0 && static_cast<std::size_t>(slot) < std::size(Battle_actors)
-             ? Battle_actors[slot]
+  return slot >= 0 &&
+                 static_cast<std::size_t>(slot) < std::size(VS::Battle::actors)
+             ? VS::Battle::actors[slot]
              : nullptr;
 }
 struct LiveActor final : ResolutionActor {
@@ -188,7 +189,7 @@ class LiveWorld final : public ActionPreviewWorld {
                : std::nullopt;
   }
   void ResetHitState() override {
-    Battle_lastActionStatValue = 0;
+    VS::Battle::lastActionStatValue = 0;
     VS::Battle::previousHitResult = 0;
     VS::Battle::hitPrerequisiteResult = 0;
   }
@@ -280,7 +281,7 @@ class LiveWorld final : public ActionPreviewWorld {
       *source_ = std::bit_cast<ActionRequest>(*live_source_);
     }
   }
-  Battle_HitResult* LiveHit(ActionHit& hit) {
+  VS::Battle::HitResult* LiveHit(ActionHit& hit) {
     if (result_ == nullptr) Refuse();
     if (&hit == &result_->primary) return &live_result_->primaryTarget;
     for (std::size_t i = 0; i < result_->targets.size(); ++i) {
@@ -305,11 +306,11 @@ void ClearLiveActionRequest(void* request) {
   std::memcpy(request, &value, sizeof value);
 }
 // decomp: func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060).
-void InitializeLiveActionHit(Battle_HitResult* hit) {
+void InitializeLiveActionHit(VS::Battle::HitResult* hit) {
   if (hit == nullptr) Refuse();
   ActionHit value;
   InitializeActionHit(value);
-  *hit = std::bit_cast<Battle_HitResult>(value);
+  *hit = std::bit_cast<VS::Battle::HitResult>(value);
 }
 // decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186).
 void FinalizeLiveActionHit(Battle_HitStatusView* hit) {

@@ -160,7 +160,7 @@ class EquipmentModelHost {
   [[nodiscard]] virtual std::uint8_t PreviewSequenceModel() = 0;
   [[nodiscard]] virtual std::uint8_t PreviewAnimation() = 0;
   [[nodiscard]] virtual bool HasWeaponModel(int slot) = 0;
-  // Battle_characterState->equipmentModels[index]; nullopt without one.
+  // VS::Battle::characterState->equipmentModels[index]; nullopt without one.
   [[nodiscard]] virtual std::optional<Content::AssetAddress> EquipmentModelSlot(
       int index) = 0;
   virtual void ReleaseWeaponModel(int slot) = 0;

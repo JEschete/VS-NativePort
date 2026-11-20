@@ -15,7 +15,7 @@
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Effects/Runtime.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -27,8 +27,7 @@ struct Model {
   std::array<VS::Actors::ShpBone, 6> bones{};
 };
 struct LivePresentation {
-  decltype(std::to_array(Battle_actors)) saved_battle =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_battle = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
       std::to_array(Actors_actorRecords);
   Battle_ActionDefinition saved_definition = Battle_actionDefinitions[60];
@@ -43,7 +42,7 @@ struct LivePresentation {
     std::uint32_t after = 0x87654321;
   } output;
   LivePresentation() {
-    std::ranges::fill(Battle_actors, nullptr);
+    std::ranges::fill(VS::Battle::actors, nullptr);
     std::ranges::fill(Actors_actorRecords, nullptr);
     for (std::size_t i = 0; i < model.bones.size(); ++i) {
       model.bones.at(i).limb_ids = static_cast<unsigned char>(i + 1);
@@ -56,7 +55,7 @@ struct LivePresentation {
       actors.at(i).instance.model = &model.header;
       actors.at(i).instance.boneCount = 6;
       actors.at(i).modelDataSize = sizeof(model);
-      Battle_actors[i] = &battle.at(i);
+      VS::Battle::actors[i] = &battle.at(i);
       Actors_actorRecords[i] = &actors.at(i);
     }
     action.actionId = 60;
@@ -67,19 +66,19 @@ struct LivePresentation {
   LivePresentation& operator=(const LivePresentation&) = delete;
   ~LivePresentation() {
     VS::Render::ForgetLiveModelExtent(&model);
-    std::ranges::copy(saved_battle, std::begin(Battle_actors));
+    std::ranges::copy(saved_battle, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
     Battle_actionDefinitions[60] = saved_definition;
   }
   void ActorHit(std::size_t index, int slot, int limb) {
     auto& hit = action.targets[index];
-    hit.targetsPosition = 0;
+    hit.targets_position = 0;
     hit.target.target_actor = static_cast<unsigned char>(slot);
     hit.target.target_limb = static_cast<signed char>(limb);
   }
   void WorldHit(std::size_t index) {
     auto& hit = action.targets[index];
-    hit.targetsPosition = 1;
+    hit.targets_position = 1;
     constexpr std::array<std::int16_t, 4> kPoint{2, -3, 17, -99};
     hit.target = std::bit_cast<decltype(hit.target)>(kPoint);
   }

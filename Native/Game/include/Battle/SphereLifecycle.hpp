@@ -22,7 +22,7 @@ struct SphereLifecycleState {
   std::int8_t selected_target = 0;
   std::uint8_t sphere_mode = 0;
   std::uint32_t reserved_38 = 0;
-  // The upper halfword is inputLocked in the native sphere view.
+  // The upper halfword is input_locked in the native sphere view.
   std::uint32_t reserved_3c_and_input_locked = 0;
 
   friend bool operator==(const SphereLifecycleState&,

@@ -16,7 +16,7 @@
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -68,7 +68,7 @@ class LiveEngagementHost final : public EngagementBuildupHost {
   }
   void UnlinkEngagedActor() override { UnlinkLiveEngagedActor(&state_); }
   [[nodiscard]] std::optional<bool> HasSingleOpponent() const override {
-    const Battle_Actor* first = Battle_actors[0];
+    const Battle_Actor* first = VS::Battle::actors[0];
     if (first == nullptr) return std::nullopt;
     return first->next != nullptr && first->next->next == nullptr;
   }

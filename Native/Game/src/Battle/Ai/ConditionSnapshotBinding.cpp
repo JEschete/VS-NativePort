@@ -12,7 +12,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
@@ -65,9 +65,9 @@ std::optional<ActorCondition> ReadCondition(const Battle_ActorStats* stats) {
 
 void CaptureBattleActorConditions(
     std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows) {
-  std::array<ActorConditionReading, std::size(Battle_actors)> readings{};
+  std::array<ActorConditionReading, std::size(VS::Battle::actors)> readings{};
   std::size_t count = 0;
-  for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
+  for (const Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     if (count == readings.size()) {
       VS::Core::Errorf("ai", "Battle actor list holds more than %zu actors",

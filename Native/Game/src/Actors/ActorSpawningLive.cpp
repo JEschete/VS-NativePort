@@ -27,15 +27,15 @@
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/Spawning.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCreationLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -78,7 +78,7 @@ constexpr int kNibbleMask = 0xF;
 constexpr int kNibbleSignBit = 0x8;
 constexpr int kNibbleRange = 0x10;
 
-static_assert(std::size(Battle_actors) == kBattleActorSlots);
+static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
 static_assert(sizeof Battle_ActorStats{}.name == kActorNameBytes);
 static_assert(sizeof VS::Actors::CharacterInit{}.name == kActorNameBytes);
 static_assert(std::size(Battle_ActorStats{}.limbs) == kActorLimbs);
@@ -125,7 +125,8 @@ template <typename T, typename Id>
 }
 
 [[nodiscard]] Battle_Actor* SlotActor(std::size_t slot) {
-  return slot < std::size(Battle_actors) ? Battle_actors[slot] : nullptr;
+  return slot < std::size(VS::Battle::actors) ? VS::Battle::actors[slot]
+                                              : nullptr;
 }
 
 [[nodiscard]] Battle_ActorStats* SlotStats(std::size_t slot) {
@@ -134,8 +135,9 @@ template <typename T, typename Id>
 }
 
 [[nodiscard]] Battle_ActorStats* CharacterStats() {
-  return Battle_characterState != nullptr ? Battle_characterState->stats
-                                          : nullptr;
+  return VS::Battle::characterState != nullptr
+             ? VS::Battle::characterState->stats
+             : nullptr;
 }
 
 [[nodiscard]] WeaponRange RangeOf(const VS::Items::WeaponRange& range) {
@@ -255,8 +257,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void Install(std::size_t slot, SpawnedActor actor) override {
-    if (slot < std::size(Battle_actors)) {
-      Battle_actors[slot] = PointerOf<Battle_Actor>(actor);
+    if (slot < std::size(VS::Battle::actors)) {
+      VS::Battle::actors[slot] = PointerOf<Battle_Actor>(actor);
     }
   }
 
@@ -510,7 +512,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void LinkAfterLeader(std::size_t slot) override {
     Battle_Actor* actor = SlotActor(slot);
-    Battle_Actor* leader = Battle_actors[kAshleySlot];
+    Battle_Actor* leader = VS::Battle::actors[kAshleySlot];
     if (actor == nullptr || leader == nullptr || actor == leader) {
       return;
     }
@@ -772,12 +774,12 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   [[nodiscard]] SpawnedActor Character() const override {
     return CharacterStats() != nullptr
-               ? IdOf<SpawnedActor>(Battle_characterState)
+               ? IdOf<SpawnedActor>(VS::Battle::characterState)
                : SpawnedActor::kNone;
   }
 
   void SetCharacter(SpawnedActor actor) override {
-    Battle_characterState = PointerOf<Battle_Actor>(actor);
+    VS::Battle::characterState = PointerOf<Battle_Actor>(actor);
   }
 
   void RestoreAshleyVitals(const AshleySnapshot& snapshot) override {
@@ -828,8 +830,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void SetCharacterWeaponDrawn(std::int32_t weapon_drawn) override {
-    if (Battle_characterState != nullptr) {
-      Battle_characterState->weaponDrawn = weapon_drawn;
+    if (VS::Battle::characterState != nullptr) {
+      VS::Battle::characterState->weaponDrawn = weapon_drawn;
     }
   }
 
@@ -1067,11 +1069,11 @@ int QueueLiveAshleyModelLoad(int model_id) {
 int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
                                 const SpawnPlacement* placement) {
   constexpr const char* kOperation = "QueueScriptedActorSpawn";
-  VS::Core::Debugf(
-      "actors", "script spawn actor=%u model=%d existing=%p", actor_id,
-      model_id,
-      static_cast<void*>(actor_id < kSpawnActorSlots ? Battle_actors[actor_id]
-                                                     : nullptr));
+  VS::Core::Debugf("actors", "script spawn actor=%u model=%d existing=%p",
+                   actor_id, model_id,
+                   static_cast<void*>(actor_id < kSpawnActorSlots
+                                          ? VS::Battle::actors[actor_id]
+                                          : nullptr));
   if (placement == nullptr) {
     WarnActorRefused(kOperation, "no placement");
     return 0;

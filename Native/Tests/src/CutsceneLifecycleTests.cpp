@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -21,7 +21,7 @@ namespace {
 namespace event = VS::Event;
 
 struct NativeCutsceneScope {
-  decltype(Battle_characterState) player = Battle_characterState;
+  decltype(VS::Battle::characterState) player = VS::Battle::characterState;
   decltype(VS::Field::controlMode) control = VS::Field::controlMode;
   decltype(VS::Battle::actionFlowMode) action = VS::Battle::actionFlowMode;
   decltype(event::eventSource) source = event::eventSource;
@@ -30,7 +30,7 @@ struct NativeCutsceneScope {
   decltype(event::isStartConfirmed) confirmed = event::isStartConfirmed;
 
   NativeCutsceneScope() {
-    Battle_characterState = nullptr;
+    VS::Battle::characterState = nullptr;
     VS::Field::controlMode = 2;
     VS::Battle::actionFlowMode = 7;
     event::eventSource = 0;
@@ -39,7 +39,7 @@ struct NativeCutsceneScope {
     event::isStartConfirmed = 0;
   }
   ~NativeCutsceneScope() {
-    Battle_characterState = player;
+    VS::Battle::characterState = player;
     VS::Field::controlMode = control;
     VS::Battle::actionFlowMode = action;
     event::eventSource = source;

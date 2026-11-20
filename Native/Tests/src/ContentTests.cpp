@@ -24,7 +24,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Audio/Seq/Sequencer.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
@@ -670,8 +670,8 @@ TEST_CASE("Generated module extents stop before the next source symbol",
   const auto symbols = VS::Content::ModuleSymbols();
   CHECK(Content::ResolveModuleAddress(
             symbols, kBattle,
-            kArmorLoss + (kLastLimb * sizeof Battle_limbArmorDpLoss[0])) ==
-        &Battle_limbArmorDpLoss[kLastLimb]);
+            kArmorLoss + (kLastLimb * sizeof VS::Battle::limbArmorDpLoss[0])) ==
+        &VS::Battle::limbArmorDpLoss[kLastLimb]);
   CHECK(Content::ResolveModuleAddress(symbols, kBattle, kNextAfterArmorLoss) ==
         nullptr);
   CHECK(Content::ResolveModuleAddress(

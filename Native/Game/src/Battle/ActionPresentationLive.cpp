@@ -14,7 +14,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -27,7 +27,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -74,9 +74,9 @@ Battle_ActionState& State() {
 }
 Battle_Actor& Actor(int slot) {
   Require(slot >= 0 &&
-          static_cast<std::size_t>(slot) < std::size(Battle_actors) &&
-          Battle_actors[slot] != nullptr);
-  return *Battle_actors[slot];
+          static_cast<std::size_t>(slot) < std::size(VS::Battle::actors) &&
+          VS::Battle::actors[slot] != nullptr);
+  return *VS::Battle::actors[slot];
 }
 Battle_ActorStats& Stats(int slot) {
   auto* stats = Actor(slot).stats;
@@ -177,9 +177,10 @@ class LiveWorld final : public ActionPresentationWorld {
     return static_cast<std::uint8_t>(Definition(action).opaqueDBit4);
   }
   std::uint32_t PlayerStatuses() override {
-    Require(Battle_characterState != nullptr &&
-            Battle_characterState->stats != nullptr);
-    return static_cast<std::uint32_t>(Battle_characterState->stats->statuses);
+    Require(VS::Battle::characterState != nullptr &&
+            VS::Battle::characterState->stats != nullptr);
+    return static_cast<std::uint32_t>(
+        VS::Battle::characterState->stats->statuses);
   }
   void SetFlag(int flag) override { State::SetLiveScriptFlag(flag, 1); }
   void Animate(ActionPose pose, int actor, int parameter,
@@ -232,8 +233,8 @@ class LiveWorld final : public ActionPresentationWorld {
   }
   std::uint8_t Spawn(int actor) override { return Actor(actor).roomSpawnIndex; }
   std::uint8_t WeaponCategory() override {
-    Require(Battle_characterState != nullptr);
-    return Battle_characterState->equippedWeaponCategory;
+    Require(VS::Battle::characterState != nullptr);
+    return VS::Battle::characterState->equippedWeaponCategory;
   }
   std::uint16_t WeaponAttacks(std::size_t category) override {
     Require(category < std::size(VS::State::scoreData.weapon_attacks));
@@ -282,7 +283,7 @@ class LiveWorld final : public ActionPresentationWorld {
     return Stats(actor).defaultTargetLimb;
   }
   bool EligibleBystander(int actor) const override {
-    const auto* value = Battle_actors[actor];
+    const auto* value = VS::Battle::actors[actor];
     return value != nullptr &&
            (value->allocationKind == 1 || value->allocationKind == 2);
   }

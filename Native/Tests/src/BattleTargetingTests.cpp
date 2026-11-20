@@ -18,7 +18,7 @@
 
 #include "Battle/Abilities.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
@@ -29,11 +29,11 @@
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BattleMode.hpp"
 #include "Battle/BattleModeLive.hpp"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Battle/Sphere.hpp"
-#include "Battle/StatusEffects.h"
-#include "Battle/TargetVolume.h"
+#include "Battle/StatusEffects.hpp"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -400,12 +400,13 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
           "[battle][battle-targeting]") {
   LiveActor live;
   live.stats->enemyClass = battle::kUndeadEnemyClass;
-  const ScopedOverride<Battle_Actor*> slot(Battle_actors[5], live.actor.get());
-  Battle_StatusEffectParams params{};
-  params.statusFlags = 0x40;
-  params.blockingStatuses = 0x8;
-  const ScopedOverride<Battle_StatusEffectParams> strength(
-      Battle_statusEffectParams[5], params);
+  const ScopedOverride<Battle_Actor*> slot(VS::Battle::actors[5],
+                                           live.actor.get());
+  VS::Battle::StatusEffectParams params{};
+  params.status_flags = 0x40;
+  params.blocking_statuses = 0x8;
+  const ScopedOverride<VS::Battle::StatusEffectParams> strength(
+      VS::Battle::statusEffectParams[5], params);
   std::array<u_char, 4> bytes{5, 0, 0, 0};
   CHECK(VS::Battle::IsAttackTargetUndeadSlot(nullptr, bytes.data()) == 1);
   CHECK(VS::Battle::IsAttackTargetLivingSlot(nullptr, bytes.data()) == 0);
@@ -420,7 +421,8 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
 TEST_CASE("Attack prerequisite slots read the live target's equipment",
           "[battle][battle-targeting]") {
   LiveActor live;
-  const ScopedOverride<Battle_Actor*> slot(Battle_actors[5], live.actor.get());
+  const ScopedOverride<Battle_Actor*> slot(VS::Battle::actors[5],
+                                           live.actor.get());
   std::array<u_char, 4> bytes{5, 0, 0, 0};
   CHECK(VS::Battle::CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 0);
   live.stats->weapon.blade.id = 3;
@@ -437,7 +439,7 @@ TEST_CASE("Attack prerequisite slots read the live target's equipment",
 TEST_CASE("Attack prerequisite slots refuse an absent target actor",
           "[battle][battle-targeting]") {
   const BattleLog log;
-  const ScopedOverride<Battle_Actor*> slot(Battle_actors[7], nullptr);
+  const ScopedOverride<Battle_Actor*> slot(VS::Battle::actors[7], nullptr);
   std::array<u_char, 4> bytes{7, 0, 0, 0};
   CHECK(VS::Battle::CanApplyPoisonSlot(nullptr, bytes.data()) == 0);
   CHECK(log.Saw("attack prerequisite for absent target actor=7"));
@@ -450,7 +452,8 @@ TEST_CASE("Attack prerequisite slots refuse an absent target actor",
 TEST_CASE("Live hit prerequisite reads the action hit and impact byte",
           "[battle][battle-targeting]") {
   LiveActor live;
-  const ScopedOverride<Battle_Actor*> slot(Battle_actors[3], live.actor.get());
+  const ScopedOverride<Battle_Actor*> slot(VS::Battle::actors[3],
+                                           live.actor.get());
   Battle_ActionDefinition action{};
   action.id = 77;
   action.hits[0].prerequisiteFunctionId = 4;
@@ -562,7 +565,7 @@ TEST_CASE("Live battle mode switches an enemy's weapon kind",
   LiveActor live;
   live.actor->kind = 8;
   live.actor->weaponDrawn = 3;
-  const ScopedOverride<Battle_Actor*> enemy(Battle_actors[17],
+  const ScopedOverride<Battle_Actor*> enemy(VS::Battle::actors[17],
                                             live.actor.get());
   CHECK(battle::LiveIsActorWeaponDrawn(17));
   VS::Battle::LiveSetActorBattleMode(17, battle::kDrawWeapon);
@@ -573,7 +576,7 @@ TEST_CASE("Live battle mode switches an enemy's weapon kind",
 
 TEST_CASE("Live battle mode refuses absent actors and character state",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_Actor*> absent(Battle_actors[18], nullptr);
+  const ScopedOverride<Battle_Actor*> absent(VS::Battle::actors[18], nullptr);
   const BattleLog log;
   CHECK_FALSE(battle::LiveIsActorWeaponDrawn(18));
   CHECK(log.Saw("weapon state of absent actor slot=18"));
@@ -583,9 +586,10 @@ TEST_CASE("Live battle mode refuses absent actors and character state",
   CHECK(log.Saw("battle mode for absent actor slot=-1"));
   LiveActor player;
   player.actor->weaponDrawn = 0;
-  const ScopedOverride<Battle_Actor*> slot0(Battle_actors[0],
+  const ScopedOverride<Battle_Actor*> slot0(VS::Battle::actors[0],
                                             player.actor.get());
-  const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
+  const ScopedOverride<Battle_Actor*> character(VS::Battle::characterState,
+                                                nullptr);
   VS::Battle::LiveSetActorBattleMode(0, battle::kDrawWeapon);
   CHECK(log.Saw("battle mode without a character state"));
   CHECK(player.actor->weaponDrawn == 0);
@@ -1339,7 +1343,8 @@ TEST_CASE("Live ability bindings refuse a missing character state",
           "[battle][battle-targeting]") {
   const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
                                                   nullptr);
-  const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
+  const ScopedOverride<Battle_Actor*> character(VS::Battle::characterState,
+                                                nullptr);
   const BattleLog log;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == 0);
   CHECK(log.Saw("pending ability unlocks without a character state"));
@@ -1351,7 +1356,8 @@ TEST_CASE("Live ability rewards refuse a missing action state",
           "[battle][battle-targeting]") {
   const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
                                                   nullptr);
-  const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
+  const ScopedOverride<Battle_Actor*> character(VS::Battle::characterState,
+                                                nullptr);
   const BattleLog log;
   battle::LiveArmDefenseAbilityTimingWindow(0);
   CHECK(log.Saw("arm defense window without an action state"));
@@ -1365,7 +1371,8 @@ TEST_CASE("Live ability sequence refuses a missing action state",
           "[battle][battle-targeting]") {
   const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
                                                   nullptr);
-  const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
+  const ScopedOverride<Battle_Actor*> character(VS::Battle::characterState,
+                                                nullptr);
   const BattleLog log;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
   CHECK(log.Saw("advance ability sequence without an action state"));
@@ -3710,7 +3717,7 @@ TEST_CASE("Live action targeting refuses without an action state",
 
 TEST_CASE("Live sphere cursor refuses without a target or a sphere",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_TargetSphereSetupView*> sphere(
+  const ScopedOverride<VS::Battle::TargetSphereSetupView*> sphere(
       VS::Battle::targetSphere, nullptr);
   const BattleLog log;
   CHECK(battle::LiveUpdateSphereTargetPosition(nullptr) == 0);
@@ -3722,7 +3729,7 @@ TEST_CASE("Live sphere cursor refuses without a target or a sphere",
 
 TEST_CASE("Live target selection refuses without a sphere",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_TargetSphereSetupView*> sphere(
+  const ScopedOverride<VS::Battle::TargetSphereSetupView*> sphere(
       VS::Battle::targetSphere, nullptr);
   const BattleLog log;
   u_char target = 0;
@@ -3739,21 +3746,21 @@ TEST_CASE("Live target selection refuses without a sphere",
 
 TEST_CASE("Live selection highlight records the selected position group",
           "[battle][battle-targeting]") {
-  auto sphere = std::make_unique<Battle_TargetSphere>();
+  auto sphere = std::make_unique<VS::Battle::TargetSphereRecord>();
   std::vector<VS::Battle::TargetPreview> previews(
       static_cast<std::size_t>(battle::kTargetPreviewCapacity));
   previews[1].actor_id = 0x30;
   previews[1].limb = 2;
-  sphere->targetLists[0] = previews.data();
-  sphere->selectedTarget = 1;
-  sphere->reserved2F = 0x20;
-  const ScopedOverride<Battle_TargetSphereSetupView*> live(
+  sphere->target_lists[0] = previews.data();
+  sphere->selected_target = 1;
+  sphere->highlighted_group = 0x20;
+  const ScopedOverride<VS::Battle::TargetSphereSetupView*> live(
       VS::Battle::targetSphere,
-      reinterpret_cast<Battle_TargetSphereSetupView*>(sphere.get()));
+      reinterpret_cast<VS::Battle::TargetSphereSetupView*>(sphere.get()));
   const BattleLog log;
   VS::Battle::LiveUpdateTargetSelectionHighlight(3);
-  CHECK(sphere->reserved2F == 0x30);
-  CHECK(sphere->reserved30 == 2);
+  CHECK(sphere->highlighted_group == 0x30);
+  CHECK(sphere->highlighted_pulse_slot == 2);
   CHECK(log.messages.empty());
 }
 
@@ -3773,10 +3780,10 @@ TEST_CASE("Live single target carries a position group's id in the pad",
   const ScopedOverride<Battle_ActionState*> live(VS::Battle::actionState,
                                                  state.get());
   const Battle_ActionRequest& selection = state->selection;
-  const Battle_HitResult& hit = selection.targets[0];
+  const VS::Battle::HitResult& hit = selection.targets[0];
   battle::LiveSetSingleActionTarget();
   CHECK(selection.targetCount == 1);
-  CHECK(hit.targetsPosition == 4);
+  CHECK(hit.targets_position == 4);
   const auto point = std::bit_cast<SVECTOR>(hit.target);
   CHECK(point.vx == 10);
   CHECK(point.vy == -20);
@@ -3804,11 +3811,11 @@ TEST_CASE("Live single target writes an actor's limb and focus",
   const ScopedOverride<Battle_ActionState*> live(VS::Battle::actionState,
                                                  state.get());
   const Battle_ActionRequest& selection = state->selection;
-  const Battle_HitResult& hit = selection.targets[0];
+  const VS::Battle::HitResult& hit = selection.targets[0];
   state->selectedPreview = 1;
   battle::LiveSetSingleActionTarget();
   CHECK(selection.targetCount == 1);
-  CHECK(hit.targetsPosition == 0);
+  CHECK(hit.targets_position == 0);
   CHECK(hit.target.target_actor == 3);
   CHECK(hit.target.target_limb == 2);
   CHECK(selection.focusPosition.vx == 40);

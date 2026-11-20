@@ -31,13 +31,14 @@
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
@@ -248,7 +249,7 @@ struct RuntimeFixture {
       std::to_array(VS::State::learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) actions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Battle_actors)) actors = std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) models =
       std::to_array(Actors_actorRecords);
   decltype(VS::Battle::Ai::actorAiStates) ai = VS::Battle::Ai::actorAiStates;
@@ -256,7 +257,7 @@ struct RuntimeFixture {
       std::to_array(VS::Core::randomShuffleTable);
   decltype(std::to_array(VS::Items::itemCategoryUpperIds)) bounds =
       std::to_array(VS::Items::itemCategoryUpperIds);
-  Battle_Actor* character = Battle_characterState;
+  Battle_Actor* character = VS::Battle::characterState;
   unsigned bios = VS::Core::BiosRand().State();
   unsigned interface_random = VS::Core::interfaceRandomState;
   int shuffle_index = VS::Core::randomShuffleIndex;
@@ -299,11 +300,11 @@ struct RuntimeFixture {
   RuntimeFixture() {
     REQUIRE_FALSE(Save::ResumePending());
     std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
-    std::fill_n(Battle_actors, actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, models.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), ai.size(), nullptr);
-    Battle_characterState = &player;
-    Battle_actors[0] = &player;
+    VS::Battle::characterState = &player;
+    VS::Battle::actors[0] = &player;
     Actors_actorRecords[0] = &player_model;
     // The three-byte textureRowOffsets union member does not initialize the
     // high byte of momentumDistance. Match VS::Actors::PlaceActorInRoom's
@@ -541,7 +542,7 @@ struct RuntimeFixture {
   }
 
   void AddEnemy() {
-    Battle_actors[2] = &enemy;
+    VS::Battle::actors[2] = &enemy;
     Actors_actorRecords[2] = &enemy_model;
     VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
     enemy.roomSpawnIndex = 0;
@@ -622,12 +623,12 @@ struct RuntimeFixture {
     std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), VS::State::learnedActionFlags);
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
-    std::copy(actors.begin(), actors.end(), Battle_actors);
+    std::copy(actors.begin(), actors.end(), VS::Battle::actors.begin());
     std::copy(models.begin(), models.end(), Actors_actorRecords);
     std::copy(ai.begin(), ai.end(), VS::Battle::Ai::actorAiStates.begin());
     std::copy(shuffle.begin(), shuffle.end(), VS::Core::randomShuffleTable);
     std::copy(bounds.begin(), bounds.end(), VS::Items::itemCategoryUpperIds);
-    Battle_characterState = character;
+    VS::Battle::characterState = character;
     VS::Core::SeedBiosRand(bios);
     VS::Core::interfaceRandomState = interface_random;
     VS::Core::randomShuffleIndex = shuffle_index;
@@ -1609,8 +1610,8 @@ TEST_CASE("Ending component capture preserves carryover without live actors",
   const auto document = fixture.ClearGame();
   CheckClearProgress(document);
   CheckClearCarryover(document);
-  Battle_characterState = nullptr;
-  Battle_actors[0] = nullptr;
+  VS::Battle::characterState = nullptr;
+  VS::Battle::actors[0] = nullptr;
   Actors_actorRecords[0] = nullptr;
   VS::Field::roomData = {};
   const auto before = LiveFingerprint(fixture);

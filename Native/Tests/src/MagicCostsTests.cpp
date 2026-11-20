@@ -12,7 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -599,7 +599,7 @@ struct TeleportLiveFixture {
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
   char saved_display_cost = VS::Menu::Framework::displayActionCost;
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<char, 48> saved_states{};
   std::array<std::uint16_t, magic::kTeleportationStringWords> saved_strings{};
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -621,7 +621,7 @@ struct TeleportLiveFixture {
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Input::settings.menu_flags = 0x3FF;
     VS::Input::settings.cursor_memory = 0;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     actor.stats = &stats;
     stats.currentMp = 500;
     VS::Menu::Magic::ResetTeleportMenuLiveState();
@@ -643,7 +643,7 @@ struct TeleportLiveFixture {
     VS::Menu::Framework::selectedRow = saved_selected;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
     VS::Menu::Framework::displayActionCost = saved_display_cost;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
   }
 
   TeleportLiveFixture(const TeleportLiveFixture&) = delete;
@@ -658,15 +658,15 @@ struct TeleportLiveFixture {
 TEST_CASE("Magic SetSpellMpCostLive refuses invalid ids without cost text",
           "[magic-costs-live]") {
   const char saved = VS::Menu::Framework::displayActionCost;
-  Battle_Actor* const saved_character = Battle_characterState;
+  Battle_Actor* const saved_character = VS::Battle::characterState;
   VS::Menu::Framework::displayActionCost = 0;
   magic::SetSpellMpCostLive(std::numeric_limits<int>::min());
   magic::SetSpellMpCostLive(256);
   magic::SetSpellMpCostLive(-256);
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   magic::SetSpellMpCostLive(1);
   CHECK(VS::Menu::Framework::displayActionCost == 0);
-  Battle_characterState = saved_character;
+  VS::Battle::characterState = saved_character;
   VS::Menu::Framework::displayActionCost = saved;
 }
 

@@ -78,7 +78,7 @@ TEST_CASE("F00743 Live re-entry never changes the marker visibility command",
 TEST_CASE("F01361 Live hidden panel needs no actor or render target",
           "[hud-orchestration-live][F01361]") {
   f::LiveState fixture;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   fixture.frame.Disconnect();
   VS::Battle::shortcutHudAnimationStep = 11;
   VS::Battle::shortcutHudRequested = static_cast<char>(255);

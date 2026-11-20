@@ -142,13 +142,7 @@
     <ClCompile Include="src\Battle\AbilitiesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\AbilityState.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\AbilityState.cpp" />
     <ClCompile Include="src\Battle\ActionAnimation.cpp" />
     <ClCompile Include="src\Battle\ActionAnimations.cpp" />
     <ClCompile Include="src\Battle\ActionAnimationsLive.cpp">
@@ -353,13 +347,7 @@
     <ClCompile Include="src\Battle\BattleModeLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Damage.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Damage.cpp" />
     <ClCompile Include="src\Battle\DamageCalculations.cpp" />
     <ClCompile Include="src\Battle\DamageCalculationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -450,13 +438,7 @@
     <ClCompile Include="src\Battle\StatFactorsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\StatusEffects.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\StatusEffects.cpp" />
     <ClCompile Include="src\Battle\StatusHelpers.cpp" />
     <ClCompile Include="src\Battle\StatusHelpersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1960,7 +1942,7 @@
     <ClInclude Include="src\Actors\TextureAnimationRecords.hpp" />
     <ClInclude Include="src\Actors\Textures.hpp" />
     <ClInclude Include="src\Actors\WeaponModel.hpp" />
-    <ClInclude Include="src\Battle\AbilityState.h" />
+    <ClInclude Include="src\Battle\AbilityState.hpp" />
     <ClInclude Include="src\Battle\ActionAnimation.hpp" />
     <ClInclude Include="src\Battle\ActionExecution.hpp" />
     <ClInclude Include="src\Battle\ActionFlow.hpp" />
@@ -1983,17 +1965,17 @@
     <ClInclude Include="src\Battle\Ai\RoomState.hpp" />
     <ClInclude Include="src\Battle\AttackPrerequisiteTable.hpp" />
     <ClInclude Include="src\Battle\BattleTypes.h" />
-    <ClInclude Include="src\Battle\Damage.h" />
+    <ClInclude Include="src\Battle\Damage.hpp" />
     <ClInclude Include="src\Battle\EncounterHooks.hpp" />
     <ClInclude Include="src\Battle\Feedback.hpp" />
-    <ClInclude Include="src\Battle\Hit.h" />
+    <ClInclude Include="src\Battle\Hit.hpp" />
     <ClInclude Include="src\Battle\HitChance.hpp" />
     <ClInclude Include="src\Battle\Hud.hpp" />
     <ClInclude Include="src\Battle\Rewards.hpp" />
     <ClInclude Include="src\Battle\Sphere.hpp" />
-    <ClInclude Include="src\Battle\StatusEffects.h" />
+    <ClInclude Include="src\Battle\StatusEffects.hpp" />
     <ClInclude Include="src\Battle\TargetingState.hpp" />
-    <ClInclude Include="src\Battle\TargetVolume.h" />
+    <ClInclude Include="src\Battle\TargetVolume.hpp" />
     <ClInclude Include="src\Battle\TextBoxes.hpp" />
     <ClInclude Include="src\Battle\ValueLabels.hpp" />
     <ClInclude Include="src\Boot\GameLoop.hpp" />

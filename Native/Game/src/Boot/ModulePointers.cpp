@@ -34,7 +34,7 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/StreamFormat.hpp"
 #include "Audio/SurfaceSounds.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -89,7 +89,7 @@
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
@@ -98,7 +98,7 @@
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -116,11 +116,11 @@
 #include "Battle/SphereReleaseLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Battle/ValueLabels.hpp"
@@ -299,6 +299,7 @@
 #include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/Status/DetailTransitionsLive.hpp"
@@ -368,16 +369,16 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E81D4u, 16u, (void*)&VS::Battle::categoryTargetActorMasks, sizeof VS::Battle::categoryTargetActorMasks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81E4u, 28u, (void*)&VS::Items::weaponCategoryUpperIds, sizeof VS::Items::weaponCategoryUpperIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8200u, 4u, (void*)&VS::Battle::limbInjuryStatusIds, sizeof VS::Battle::limbInjuryStatusIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8204u, 16u, (void*)&Battle_limbStatusFlags, sizeof Battle_limbStatusFlags, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8204u, 16u, (void*)&VS::Battle::limbStatusFlags, sizeof VS::Battle::limbStatusFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8214u, 32u, (void*)&VS::Items::itemCategoryUpperIds, sizeof VS::Items::itemCategoryUpperIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8234u, 32u, (void*)&VS::Battle::hitFunctions, sizeof VS::Battle::hitFunctions, 4u, sizeof VS::Battle::hitFunctions[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8254u, 160u, (void*)&VS::Battle::attackPrerequisiteFunctions, sizeof VS::Battle::attackPrerequisiteFunctions, 4u, sizeof VS::Battle::attackPrerequisiteFunctions[0]},
-    {"BATTLE/BATTLE.PRG", 0x800E82F4u, 24u, (void*)&Battle_bladePpDamageBonuses, sizeof Battle_bladePpDamageBonuses, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E830Cu, 108u, (void*)&Battle_statCalculators, sizeof Battle_statCalculators, 4u, sizeof Battle_statCalculators[0]},
+    {"BATTLE/BATTLE.PRG", 0x800E82F4u, 24u, (void*)&VS::Battle::bladePpDamageBonuses, sizeof VS::Battle::bladePpDamageBonuses, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E830Cu, 108u, (void*)&VS::Battle::statCalculators, sizeof VS::Battle::statCalculators, 4u, sizeof VS::Battle::statCalculators[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8378u, 280u, (void*)&VS::Battle::actionEffectMediators, sizeof VS::Battle::actionEffectMediators, 4u, sizeof VS::Battle::actionEffectMediators[0]},
-    {"BATTLE/BATTLE.PRG", 0x800E8490u, 4u, (void*)&Battle_vitalsTickCounter, sizeof Battle_vitalsTickCounter, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8494u, 4u, (void*)&Battle_regeneratingLimb, sizeof Battle_regeneratingLimb, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8498u, 4u, (void*)&Battle_targetingRiskTimer, sizeof Battle_targetingRiskTimer, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8490u, 4u, (void*)&VS::Battle::vitalsTickCounter, sizeof VS::Battle::vitalsTickCounter, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8494u, 4u, (void*)&VS::Battle::regeneratingLimb, sizeof VS::Battle::regeneratingLimb, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8498u, 4u, (void*)&VS::Battle::targetingRiskTimer, sizeof VS::Battle::targetingRiskTimer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E849Cu, 16u, (void*)&VS::Field::lockedDoorIndexRanges, sizeof VS::Field::lockedDoorIndexRanges, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E84ACu, 92u, (void*)&VS::Field::lockedDoorRoomPairs, sizeof VS::Field::lockedDoorRoomPairs, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8508u, 64u, (void*)&VS::Field::countableRoomMask, sizeof VS::Field::countableRoomMask, 1u, 1u},
@@ -550,7 +551,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1904u, 4u, (void*)&VS::Field::cameraTransition, sizeof VS::Field::cameraTransition, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F190Cu, 4u, (void*)&VS::Field::isFieldRenderingEnabled, sizeof VS::Field::isFieldRenderingEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1910u, 20u, (void*)&VS::Field::interactionFocus, sizeof VS::Field::interactionFocus, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1928u, 4u, (void*)&Battle_actors, sizeof Battle_actors, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1928u, 4u, (void*)&VS::Battle::actors, sizeof VS::Battle::actors, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1968u, 4u, (void*)&VS::Field::isInteractionPaused, sizeof VS::Field::isInteractionPaused, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F196Cu, 4u, (void*)&VS::Field::controlMode, sizeof VS::Field::controlMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1970u, 24u, (void*)&VS::Render::legacyMaskBitOffPackets, sizeof VS::Render::legacyMaskBitOffPackets, 1u, 1u},
@@ -561,12 +562,12 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F19D0u, 4u, (void*)&VS::Field::sphericalCamera, sizeof VS::Field::sphericalCamera, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19D8u, 4u, (void*)&VS::Battle::settledCameraDistance, sizeof VS::Battle::settledCameraDistance, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F19ECu, 4u, (void*)&VS::Battle::cameraEaseMode, sizeof VS::Battle::cameraEaseMode, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F19FCu, 4u, (void*)&Battle_characterState, sizeof Battle_characterState, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F19FCu, 4u, (void*)&VS::Battle::characterState, sizeof VS::Battle::characterState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1A00u, 4u, (void*)&VS::Battle::hitPrerequisiteResult, sizeof VS::Battle::hitPrerequisiteResult, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1A04u, 4u, (void*)&VS::Battle::previousHitResult, sizeof VS::Battle::previousHitResult, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1A08u, 4u, (void*)&Battle_lastActionStatValue, sizeof Battle_lastActionStatValue, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1A0Cu, 4u, (void*)&Battle_criticalHitOccurred, sizeof Battle_criticalHitOccurred, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1A10u, 16u, (void*)&Battle_limbArmorDpLoss, sizeof Battle_limbArmorDpLoss, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1A08u, 4u, (void*)&VS::Battle::lastActionStatValue, sizeof VS::Battle::lastActionStatValue, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1A0Cu, 4u, (void*)&VS::Battle::criticalHitOccurred, sizeof VS::Battle::criticalHitOccurred, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1A10u, 16u, (void*)&VS::Battle::limbArmorDpLoss, sizeof VS::Battle::limbArmorDpLoss, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1A48u, 4u, (void*)&VS::Field::screenTransitionStep, sizeof VS::Field::screenTransitionStep, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1A50u, 24u, (void*)&VS::Actors::ashleyMoveInput, sizeof VS::Actors::ashleyMoveInput, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1A80u, 24u, (void*)&VS::Render::legacyTransitionDrawModes, sizeof VS::Render::legacyTransitionDrawModes, 1u, 1u},
@@ -584,15 +585,15 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1BACu, 4u, (void*)&VS::Battle::floatingLabels, sizeof VS::Battle::floatingLabels, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB0u, 8u, (void*)&VS::Field::roomTint, sizeof VS::Field::roomTint, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB8u, 4u, (void*)&VS::Field::roomPrimitiveRangeEnd, sizeof VS::Field::roomPrimitiveRangeEnd, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BC0u, 4u, (void*)&Battle_unusedSceneBuffer, sizeof Battle_unusedSceneBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BC0u, 4u, (void*)&VS::Battle::sceneBuffer, sizeof VS::Battle::sceneBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC8u, 36u, (void*)&VS::Field::manualDisplayState, sizeof VS::Field::manualDisplayState, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BF0u, 8u, (void*)&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BF0u, 8u, (void*)&VS::Battle::menu9CursorMemory, sizeof VS::Battle::menu9CursorMemory, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BF8u, 196u, (void*)&VS::Field::roomData, sizeof VS::Field::roomData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CBCu, 4u, (void*)&VS::Battle::placedLabelPositions, sizeof VS::Battle::placedLabelPositions, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CC0u, 4u, (void*)&VS::Field::roomPrimitiveRangeStart, sizeof VS::Field::roomPrimitiveRangeStart, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CC8u, 12u, (void*)&VS::Field::entranceDoorRecord, sizeof VS::Field::entranceDoorRecord, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CD4u, 4u, (void*)&VS::Field::minimapSlideFrame, sizeof VS::Field::minimapSlideFrame, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1CD8u, 4u, (void*)&Battle_unusedSubmenuState, sizeof Battle_unusedSubmenuState, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1CD8u, 4u, (void*)&VS::Battle::submenuState, sizeof VS::Battle::submenuState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&VS::Field::roomAnimationTicks, sizeof VS::Field::roomAnimationTicks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CE0u, 32u, (void*)&VS::Field::backgroundReferenceVectors, sizeof VS::Field::backgroundReferenceVectors, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D08u, 4u, (void*)&VS::Field::matchingDoorRecords, sizeof VS::Field::matchingDoorRecords, 0u, 0u},
@@ -654,8 +655,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F457Cu, 4u, (void*)&VS::Content::lastLoadPhaseSnapshot, sizeof VS::Content::lastLoadPhaseSnapshot, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4580u, 4u, (void*)&VS::Content::assetQueueFrameTicks, sizeof VS::Content::assetQueueFrameTicks, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4588u, 4u, (void*)&VS::Actors::weaponModels, sizeof VS::Actors::weaponModels, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4590u, 4u, (void*)&Battle_unusedGlobal1, sizeof Battle_unusedGlobal1, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4594u, 4u, (void*)&Battle_unusedGlobal2, sizeof Battle_unusedGlobal2, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4590u, 4u, (void*)&VS::Battle::previewWeaponModelAliases, sizeof VS::Battle::previewWeaponModelAliases, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4594u, 4u, (void*)&VS::Battle::previewShieldModelAlias, sizeof VS::Battle::previewShieldModelAlias, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F45D8u, 4u, (void*)&VS::Content::lastAssetRequestType, sizeof VS::Content::lastAssetRequestType, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F45E0u, 64u, (void*)&VS::Field::gimmickInstances, sizeof VS::Field::gimmickInstances, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4620u, 4u, (void*)&VS::Content::legacyWeaponModelBuffers, sizeof VS::Content::legacyWeaponModelBuffers, 0u, 0u},
@@ -872,12 +873,12 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004B1B0u, 200u, (void*)&VS::Audio::waveBankFileMap, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 1u, 1u},
     {"SLUS_010.40", 0x8004EDDCu, 240u, (void*)&VS::Items::materialModifiers, sizeof VS::Items::materialModifiers, 1u, 1u},
-    {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&Battle_statusEffectParams, sizeof Battle_statusEffectParams, 1u, 1u},
+    {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&VS::Battle::statusEffectParams, sizeof VS::Battle::statusEffectParams, 1u, 1u},
     {"SLUS_010.40", 0x8004F0CCu, 1024u, (void*)&VS::Field::locationDestinations, sizeof VS::Field::locationDestinations, 1u, 1u},
     {"SLUS_010.40", 0x8004F4CCu, 2048u, (void*)&VS::Field::legacyZoneDiscFiles, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004FCCCu, 256u, (void*)&VS::Field::zoneMusicIds, sizeof VS::Field::zoneMusicIds, 1u, 1u},
-    {"SLUS_010.40", 0x8004FDE4u, 120u, (void*)&Battle_breakArtPointRequirements, sizeof Battle_breakArtPointRequirements, 1u, 1u},
-    {"SLUS_010.40", 0x8004FE5Cu, 300u, (void*)&Battle_battleAbilityPointRequirements, sizeof Battle_battleAbilityPointRequirements, 1u, 1u},
+    {"SLUS_010.40", 0x8004FDE4u, 120u, (void*)&VS::Battle::breakArtPointRequirements, sizeof VS::Battle::breakArtPointRequirements, 1u, 1u},
+    {"SLUS_010.40", 0x8004FE5Cu, 300u, (void*)&VS::Battle::battleAbilityPointRequirements, sizeof VS::Battle::battleAbilityPointRequirements, 1u, 1u},
     {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&VS::Core::randomShuffleTable, sizeof VS::Core::randomShuffleTable, 1u, 1u},
     {"SLUS_010.40", 0x8005010Cu, 4u, (void*)&VS::Core::randomShuffleIndex, sizeof VS::Core::randomShuffleIndex, 1u, 1u},
     {"SLUS_010.40", 0x80050110u, 4u, (void*)&VS::Content::legacyDiscReadBuffer, sizeof VS::Content::legacyDiscReadBuffer, 0u, 0u},
@@ -2391,7 +2392,7 @@ const unsigned VS::Content::kModuleSymbolCount = sizeof VS::Content::kModuleSymb
 const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)VS::Battle::hitFunctions.data(), sizeof VS::Battle::hitFunctions / sizeof VS::Battle::hitFunctions[0], NULL}, // G00028 _hitFunctions
     {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)VS::Battle::attackPrerequisiteFunctions.data(), sizeof VS::Battle::attackPrerequisiteFunctions / sizeof VS::Battle::attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
-    {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
+    {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)VS::Battle::statCalculators.data(), sizeof VS::Battle::statCalculators / sizeof VS::Battle::statCalculators[0], NULL}, // G00031 _statCalculators
     {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)VS::Battle::actionEffectMediators.data(), sizeof VS::Battle::actionEffectMediators / sizeof VS::Battle::actionEffectMediators[0], NULL}, // G00032 _actionEffectMediators
     {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)VS::Field::gimmickModelTemplates.data(), sizeof VS::Field::gimmickModelTemplates / sizeof VS::Field::gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4
     {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)VS::Event::opcodeHandlers, sizeof VS::Event::opcodeHandlers / sizeof VS::Event::opcodeHandlers[0], NULL}, // G00133 _opcodeFunctionTable

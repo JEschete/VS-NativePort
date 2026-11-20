@@ -11,7 +11,7 @@
 
 #include "Audio/MusicLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
@@ -135,7 +135,7 @@ bool RetirePages(LoadOwner& owner, const TexturePageLoan& loan) {
 }
 
 TimeAttackState LoadState() {
-  return {.init_phase = Battle_unusedSubmenuState,
+  return {.init_phase = VS::Battle::submenuState,
           .timer = screenTimer,
           .phase = screenState,
           .animation = elementAnimationState,
@@ -147,7 +147,7 @@ TimeAttackState LoadState() {
 }
 
 void StoreState(const TimeAttackState& state) {
-  Battle_unusedSubmenuState = state.init_phase;
+  VS::Battle::submenuState = state.init_phase;
   screenTimer = state.timer;
   screenState = state.phase;
   elementAnimationState = state.animation;

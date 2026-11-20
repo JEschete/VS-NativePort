@@ -15,9 +15,9 @@
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/CharacterInit.hpp"
 #include "Actors/RoomActorCache.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Field/Mpd.hpp"
@@ -1665,8 +1665,8 @@ TEST_CASE("Live spawn codecs decode room spawns, placements and memories",
 
 TEST_CASE("Live spawn adapters report their refusals on the actors channel",
           "[actors][actors-spawning]") {
-  Battle_Actor* const saved_actor = Battle_actors[10];
-  Battle_Actor* const saved_character = Battle_characterState;
+  Battle_Actor* const saved_actor = VS::Battle::actors[10];
+  Battle_Actor* const saved_character = VS::Battle::characterState;
   Battle_Actor actor{};
   {
     ChannelWarnings warnings("actors");
@@ -1676,9 +1676,9 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
     CHECK(actors::SpawnLiveRoomEnemy(3, nullptr, nullptr, 0) == nullptr);
     actors::LoadLiveActorEquipmentModels(-1, 1, 1);
     actors::RefreshLiveActorEquipmentModels(42);
-    Battle_characterState = nullptr;
+    VS::Battle::characterState = nullptr;
     actors::RestoreLiveAshleyRuntimeState();
-    Battle_actors[10] = &actor;
+    VS::Battle::actors[10] = &actor;
     actors::LoadLiveActorEquipmentModels(10, actors::kUnchangedEquipment, 5);
     CHECK(warnings.messages ==
           std::vector<std::string>{
@@ -1695,6 +1695,6 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
                       "equipment model slot outside the weapon model "
                       "table")});
   }
-  Battle_actors[10] = saved_actor;
-  Battle_characterState = saved_character;
+  VS::Battle::actors[10] = saved_actor;
+  VS::Battle::characterState = saved_character;
 }

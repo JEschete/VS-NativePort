@@ -49,8 +49,8 @@ Battle_ActionState& State() {
   Require(VS::Battle::actionState != nullptr);
   return *VS::Battle::actionState;
 }
-ActionTargetHit Hit(const Battle_HitResult& hit) {
-  return {.targets_position = hit.targetsPosition != 0,
+ActionTargetHit Hit(const VS::Battle::HitResult& hit) {
+  return {.targets_position = hit.targets_position != 0,
           .target_actor = hit.target.target_actor,
           .impact_kind = static_cast<std::uint8_t>(hit.target.impact_kind)};
 }

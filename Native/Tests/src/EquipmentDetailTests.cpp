@@ -14,9 +14,9 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -42,7 +42,7 @@ namespace {
 static_assert(sizeof VS::Menu::Framework::comparisonStatTotals == 8);
 
 struct ComparisonFixture {
-  Battle_Actor* saved_actor = Battle_actors[0];
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   std::array<int16_t, 4> saved_deltas{};
@@ -69,11 +69,11 @@ struct ComparisonFixture {
     stats.totalStrength = stats.totalIntelligence = stats.totalAgility = 100;
     stats.accessory.current_intelligence = 1;
     actor.stats = &stats;
-    Battle_actors[0] = &actor;
+    VS::Battle::actors[0] = &actor;
   }
 
   ~ComparisonFixture() {
-    Battle_actors[0] = saved_actor;
+    VS::Battle::actors[0] = saved_actor;
     std::copy(saved_deltas.begin(), saved_deltas.end(),
               VS::Menu::Framework::comparisonStatDeltas);
     std::memcpy(VS::Menu::Framework::comparisonStatTotals, saved_totals.data(),
@@ -235,7 +235,7 @@ struct EquipmentReloadFixture {
   decltype(VS::Event::playbackPhase) saved_event_phase =
       VS::Event::playbackPhase;
   std::uint8_t saved_reload = VS::Content::objectDataLoadStep;
-  int saved_alias = Battle_unusedGlobal2;
+  int saved_alias = VS::Battle::previewShieldModelAlias;
   Actors_ActorRecord preview{};
   VS::Actors::WeaponModel shield{};
   VS::Actors::WeaponModel preview_shield{};
@@ -250,7 +250,7 @@ struct EquipmentReloadFixture {
     VS::Render::legacyWeaponTextureSlots[0].reference_count = 2;
     VS::Event::playbackPhase = 0;
     VS::Content::objectDataLoadStep = 0;
-    Battle_unusedGlobal2 = unused_alias;
+    VS::Battle::previewShieldModelAlias = unused_alias;
   }
 
   ~EquipmentReloadFixture() {
@@ -260,7 +260,7 @@ struct EquipmentReloadFixture {
     VS::Render::legacyWeaponTextureSlots[0] = saved_texture;
     VS::Event::playbackPhase = saved_event_phase;
     VS::Content::objectDataLoadStep = saved_reload;
-    Battle_unusedGlobal2 = saved_alias;
+    VS::Battle::previewShieldModelAlias = saved_alias;
   }
 };
 }  // namespace

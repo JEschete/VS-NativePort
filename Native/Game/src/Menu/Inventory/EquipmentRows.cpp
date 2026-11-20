@@ -89,7 +89,7 @@ constexpr std::uint8_t kReloadWait = 1;
 constexpr std::uint8_t kReloadPose = 2;
 constexpr std::uint8_t kReloadSettle = 3;
 
-// Battle_characterState->equipmentModels' slot a model loads into.
+// VS::Battle::characterState->equipmentModels' slot a model loads into.
 [[nodiscard]] int ModelIndex(std::int32_t model_id) {
   return model_id < kFirstShieldModel ? 0 : 1;
 }

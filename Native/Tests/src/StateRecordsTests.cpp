@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
@@ -163,7 +163,7 @@ struct LiveTimerExpiry {
 struct LiveScoreState {
   VS::State::ScoreData saved_score = VS::State::scoreData;
   Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_player = Battle_characterState;
+  Battle_Actor* saved_player = VS::Battle::characterState;
 
   LiveScoreState() = default;
   LiveScoreState(const LiveScoreState&) = delete;
@@ -173,7 +173,7 @@ struct LiveScoreState {
   ~LiveScoreState() {
     VS::State::scoreData = saved_score;
     VS::Battle::actionState = saved_action;
-    Battle_characterState = saved_player;
+    VS::Battle::characterState = saved_player;
   }
 };
 }  // namespace
@@ -738,7 +738,7 @@ TEST_CASE("The live weapon kill streak reads the action and the player",
   VS::State::UpdateLiveWeaponKillStreak(0);
   Battle_ActionState action{};
   VS::Battle::actionState = &action;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   action.selection.actionId = 50;
   VS::State::UpdateLiveWeaponKillStreak(0);
   CHECK(warnings.messages == std::vector<std::string>{Refused(
@@ -750,7 +750,7 @@ TEST_CASE("The live weapon kill streak reads the action and the player",
   stats.weapon.blade.category = 2;
   Battle_Actor player{};
   player.stats = &stats;
-  Battle_characterState = &player;
+  VS::Battle::characterState = &player;
   VS::State::UpdateLiveWeaponKillStreak(0);
   VS::State::UpdateLiveWeaponKillStreak(0);
   const KillScore score = VS::State::LiveKillScore();
@@ -785,7 +785,7 @@ TEST_CASE("Committing a spell ends the live weapon kill streak only",
   stats.weapon.blade.category = 2;
   Battle_Actor player{};
   player.stats = &stats;
-  Battle_characterState = &player;
+  VS::Battle::characterState = &player;
   VS::State::UpdateLiveWeaponKillStreak(0);
   CHECK(VS::State::LiveKillScore().weapon_kill_streak == 1);
   CHECK(warnings.messages.empty());

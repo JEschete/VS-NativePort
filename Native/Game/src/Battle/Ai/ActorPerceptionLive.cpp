@@ -26,7 +26,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -39,7 +39,7 @@ using AiState = VS::Battle::Ai::ActorAiState;
 using ObserverView = VS::Battle::Ai::PerceptionView;
 using UpdateView = VS::Battle::Ai::PerceptionUpdateView;
 
-constexpr int kBattleActorSlots = static_cast<int>(std::size(Battle_actors));
+constexpr int kBattleActorSlots = static_cast<int>(std::size(Battle::actors));
 constexpr std::uint16_t kMarkedTileFlag = 0x2000;
 constexpr std::uint8_t kCommandFlagBits = 3;
 constexpr int kByteShift = 8;
@@ -114,7 +114,7 @@ std::uint32_t PreviousTileWord(const Actors_ModelInstance& instance) {
 template <typename Visit>
 void WalkBattleActors(Visit visit) {
   int walked = 0;
-  for (Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
+  for (Battle_Actor* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     Require(++walked <= kBattleActorSlots,
             "AI perception found a battle actor list longer than its table");
@@ -166,7 +166,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   explicit LiveTargetPerceptionWorld(const ObserverView& view) : view_(view) {}
 
   [[nodiscard]] std::optional<PerceivedModel> Model(int target) const override {
-    const Battle_Actor* actor = Battle_actors[target];
+    const Battle_Actor* actor = VS::Battle::actors[target];
     if (actor == nullptr || actor->model == nullptr) return std::nullopt;
     const Actors_ModelInstance& model = *actor->model;
     return PerceivedModel{.position = Core::Math::PositionOf(model.position),

@@ -20,7 +20,7 @@
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -195,7 +195,7 @@ TEST_CASE("Hit initialization clears all effects and sets neutral impact",
   b::ActionHit expected{};
   expected.impact = 6;
   CHECK(hit == expected);
-  auto live = std::bit_cast<Battle_HitResult>(poison);
+  auto live = std::bit_cast<VS::Battle::HitResult>(poison);
   b::InitializeLiveActionHit(&live);
   CHECK(std::bit_cast<b::ActionHit>(live) == expected);
 }
@@ -498,28 +498,28 @@ TEST_CASE("Preview category is reread after building the cached volume",
 
 namespace {
 struct PreviewFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
   decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
-  decltype(std::to_array(Battle_statCalculators)) saved_stats =
-      std::to_array(Battle_statCalculators);
+  decltype(VS::Battle::statCalculators) saved_stats =
+      VS::Battle::statCalculators;
   decltype(VS::Battle::actionEffectMediators) saved_effects =
       VS::Battle::actionEffectMediators;
   Battle_ActionState* saved_state = VS::Battle::actionState;
-  std::uint32_t saved_last = Battle_lastActionStatValue;
+  std::uint32_t saved_last = VS::Battle::lastActionStatValue;
   std::uint32_t saved_prerequisite = VS::Battle::hitPrerequisiteResult;
   std::uint32_t saved_previous = VS::Battle::previousHitResult;
   Battle_ActionState state{};
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_ActorStats, 2> stats{};
   PreviewFixture() {
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
     VS::Battle::actionState = &state;
     state.chainStep = 1;
     for (std::size_t i = 0; i < actors.size(); ++i) {
-      Battle_actors[i] = &actors.at(i);
+      VS::Battle::actors[i] = &actors.at(i);
       actors.at(i).stats = &stats.at(i);
       stats.at(i).actorId = static_cast<std::uint8_t>(i);
       stats.at(i).maxHp = stats.at(i).currentHp = 100;
@@ -528,16 +528,18 @@ struct PreviewFixture {
     }
   }
   ~PreviewFixture() {
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     std::copy(saved_hits.begin(), saved_hits.end(),
               VS::Battle::hitFunctions.begin());
-    std::copy(saved_stats.begin(), saved_stats.end(), Battle_statCalculators);
+    std::copy(saved_stats.begin(), saved_stats.end(),
+              VS::Battle::statCalculators.begin());
     std::copy(saved_effects.begin(), saved_effects.end(),
               VS::Battle::actionEffectMediators.begin());
     VS::Battle::actionState = saved_state;
-    Battle_lastActionStatValue = saved_last;
+    VS::Battle::lastActionStatValue = saved_last;
     VS::Battle::hitPrerequisiteResult = saved_prerequisite;
     VS::Battle::previousHitResult = saved_previous;
   }
@@ -562,7 +564,8 @@ struct PreviewFixture {
                 sizeof(Battle_actionDefinitions));
     const auto battle = Module("Native\\data\\disc\\BATTLE\\BATTLE.PRG");
     Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), battle);
-    Relocate(reinterpret_cast<void**>(Battle_statCalculators), battle);
+    Relocate(reinterpret_cast<void**>(VS::Battle::statCalculators.data()),
+             battle);
     Relocate(reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
              battle);
   }
@@ -613,12 +616,12 @@ TEST_CASE("Actual trap definitions support world sources without origin union",
   const int action =
       GENERATE(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
   Battle_ActionRequest source{}, result{};
-  source.primaryTarget.targetsPosition = 3;
+  source.primaryTarget.targets_position = 3;
   source.primaryTarget.target.hp = 123;
   source.targetCount = 1;
   source.targets[0].target.target_actor = 1;
   b::ResolveLiveActionTargets(action, &result, &source, 0);
-  CHECK(result.primaryTarget.targetsPosition == 3);
+  CHECK(result.primaryTarget.targets_position == 3);
   CHECK(result.primaryTarget.target.hp == 0);
   CHECK(result.targetCount == 1);
 }
@@ -634,12 +637,12 @@ TEST_CASE(
   definition.hits[0].effectId = 1;
   VS::Battle::hitFunctions[7] = &b::LiveChainHitChance;
   VS::Battle::actionEffectMediators[1] =
-      +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult* target,
-          int, int) {
+      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
+          VS::Battle::HitResult* target, int, int) {
         target->target.target_actor = 0;
         target->target.target_limb = 5;
         target->target.hp = 10;
-        Battle_actors[1]->stats = Battle_actors[0]->stats;
+        VS::Battle::actors[1]->stats = VS::Battle::actors[0]->stats;
         VS::Battle::actionState->queueIndex = 0;
         VS::Battle::actionState->queue[0].targetCount = 1;
         VS::Battle::actionState->queue[0].targets[254].target.hp = 321;

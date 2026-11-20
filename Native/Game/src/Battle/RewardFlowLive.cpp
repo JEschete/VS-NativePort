@@ -69,7 +69,7 @@ class LiveWorld final : public RewardDispatchWorld {
     const auto& state = CurrentAction();
     return {.action_id = state.selection.actionId,
             .targets_position = static_cast<std::uint32_t>(
-                state.selection.primaryTarget.targetsPosition),
+                state.selection.primaryTarget.targets_position),
             .continued = static_cast<std::uint8_t>(state.chainContinued),
             .primary_actor = state.selection.primaryTarget.target.target_actor};
   }

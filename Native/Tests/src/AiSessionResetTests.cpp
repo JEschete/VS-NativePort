@@ -15,7 +15,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RoomState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -27,8 +27,7 @@ Pointer InvalidatedBinding() {
 }
 
 struct SessionBindingSnapshot {
-  decltype(std::to_array(Battle_actors)) battle_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) battle_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) actors =
       VS::Battle::Ai::actorAiStates;
   decltype(VS::Battle::Ai::decisionCallbacks) callbacks =
@@ -62,7 +61,8 @@ struct SessionBindingSnapshot {
   int engaged = VS::Battle::Ai::candidateEngagedThisUpdate;
 
   ~SessionBindingSnapshot() {
-    std::copy(battle_actors.begin(), battle_actors.end(), Battle_actors);
+    std::copy(battle_actors.begin(), battle_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(actors.begin(), actors.end(),
               VS::Battle::Ai::actorAiStates.begin());
     std::copy(callbacks.begin(), callbacks.end(),
@@ -186,8 +186,8 @@ TEST_CASE(
   Battle_ActorStats stats{};
   actor.id = 1;
   actor.stats = &stats;
-  std::fill_n(Battle_actors, saved.battle_actors.size(), nullptr);
-  Battle_actors[0] = &actor;
+  std::fill_n(VS::Battle::actors.begin(), saved.battle_actors.size(), nullptr);
+  VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   VS::Core::Memory::InitializeLiveHeapAt(

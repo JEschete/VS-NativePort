@@ -14,9 +14,9 @@
 
 #include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusQueue.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Content/DataStore.hpp"
@@ -158,33 +158,33 @@ void CheckInactiveCure(Handler handler, std::size_t rule_id) {
 }
 
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_statusEffectParams)) saved_rules =
-      std::to_array(Battle_statusEffectParams);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+  decltype(VS::Battle::statusEffectParams) saved_rules =
+      VS::Battle::statusEffectParams;
   decltype(VS::Battle::actionEffectMediators) saved_mediators =
       VS::Battle::actionEffectMediators;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
-  Battle_HitResult hit{};
+  VS::Battle::HitResult hit{};
 
   LiveFixture() {
-    std::ranges::fill(Battle_actors, nullptr);
-    std::ranges::fill(Battle_statusEffectParams, Battle_StatusEffectParams{});
+    std::ranges::fill(VS::Battle::actors, nullptr);
+    std::ranges::fill(VS::Battle::statusEffectParams,
+                      VS::Battle::StatusEffectParams{});
     actor.stats = &stats;
-    Battle_actors[41] = &actor;
+    VS::Battle::actors[41] = &actor;
     stats.actorId = 255;
     hit.target.target_actor = 41;
-    hit.hpEffect = 3;
-    hit.statStatusEffect = 3;
-    hit.weaponDpEffect = 2;
-    hit.reservedBits28 = 10;
+    hit.hp_effect = 3;
+    hit.stat_status_effect = 3;
+    hit.weapon_dp_effect = 2;
+    hit.reserved_bits28 = 10;
     hit.limbs[5].packed = 0xAABBCCDD;
-    hit.targetsPosition = 0x12345678;
+    hit.targets_position = 0x12345678;
   }
   ~LiveFixture() {
-    std::ranges::copy(saved_actors, Battle_actors);
-    std::ranges::copy(saved_rules, Battle_statusEffectParams);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
+    std::ranges::copy(saved_rules, VS::Battle::statusEffectParams.begin());
     std::ranges::copy(saved_mediators,
                       VS::Battle::actionEffectMediators.begin());
   }
@@ -201,23 +201,23 @@ void CheckRelocatedMediator(LiveHandler handler, int rule_id, unsigned feedback,
   const auto mediator =
       std::ranges::find(VS::Battle::actionEffectMediators, handler);
   REQUIRE(mediator != std::end(VS::Battle::actionEffectMediators));
-  auto& rule = Battle_statusEffectParams[rule_id];
-  rule.statusFlags = std::bit_cast<std::int32_t>(kHighStatus);
-  rule.cancelledStatuses = 1;
-  rule.blockingStatuses = removal ? -1 : 0;
+  auto& rule = VS::Battle::statusEffectParams[rule_id];
+  rule.status_flags = std::bit_cast<std::int32_t>(kHighStatus);
+  rule.cancelled_statuses = 1;
+  rule.blocking_statuses = removal ? -1 : 0;
   fixture.stats.statuses =
       removal ? std::bit_cast<std::int32_t>(kHighStatus | 1) : 1;
   fixture.stats.statusImmunities = removal ? -1 : 0;
   fixture.stats.actionRecoveryTimer = kRecoveryTimer;
   fixture.stats.recoveryDelayBonus = kRecoveryBonus;
-  fixture.hit.removeStatuses = 2;
-  fixture.hit.inflictStatuses = 4;
+  fixture.hit.remove_statuses = 2;
+  fixture.hit.inflict_statuses = 4;
   auto expected_hit = fixture.hit;
-  expected_hit.removeStatuses =
+  expected_hit.remove_statuses =
       std::bit_cast<std::int32_t>(removal ? 2 : kHighStatus | 2);
-  expected_hit.inflictStatuses =
+  expected_hit.inflict_statuses =
       std::bit_cast<std::int32_t>(removal ? kHighStatus | 4 : 5);
-  expected_hit.statStatusEffect = feedback;
+  expected_hit.stat_status_effect = feedback;
   auto expected_stats = fixture.stats;
   expected_stats.isAnalyzed = rule_id == kBanishRule;
   (*mediator)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
@@ -480,15 +480,15 @@ TEST_CASE(
     "neighbors",
     "[status-queue][live]") {
   LiveFixture fixture;
-  Battle_statusEffectParams[0].statusFlags =
+  VS::Battle::statusEffectParams[0].status_flags =
       std::numeric_limits<std::int32_t>::min();
   auto expected = fixture.hit;
-  expected.removeStatuses = std::numeric_limits<std::int32_t>::min();
+  expected.remove_statuses = std::numeric_limits<std::int32_t>::min();
   CHECK(battle::QueueLiveApplicableStatusChanges(0, &fixture.hit) ==
         std::numeric_limits<std::int32_t>::min());
   CHECK(Bytes(fixture.hit) == Bytes(expected));
   fixture.stats.statuses = std::numeric_limits<std::int32_t>::min();
-  expected.inflictStatuses = std::numeric_limits<std::int32_t>::min();
+  expected.inflict_statuses = std::numeric_limits<std::int32_t>::min();
   CHECK(battle::QueueLiveStatusRemovalMask(0, &fixture.hit) ==
         std::numeric_limits<std::int32_t>::min());
   CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -505,10 +505,10 @@ TEST_CASE(
   const std::array<int, 6> rules{5, 7, 9, 19, 4, 6};
   for (std::size_t index = 0; index < handlers.size(); ++index) {
     LiveFixture fixture;
-    Battle_statusEffectParams[rules.at(index)].statusFlags = 0x40000000;
+    VS::Battle::statusEffectParams[rules.at(index)].status_flags = 0x40000000;
     auto expected = fixture.hit;
-    expected.removeStatuses = 0x40000000;
-    expected.statStatusEffect = index == 5 ? 2 : 1;
+    expected.remove_statuses = 0x40000000;
+    expected.stat_status_effect = index == 5 ? 2 : 1;
     handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, 23);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
     fixture.stats.actorId = 128;
@@ -556,14 +556,14 @@ TEST_CASE("New status callbacks preserve all hit and stats neighbors",
     fixture.stats.actionRecoveryTimer = kRecoveryTimer;
     fixture.stats.recoveryDelayBonus = kRecoveryBonus;
     const auto before_stats = Bytes(fixture.stats);
-    Battle_statusEffectParams[rules.at(index)].statusFlags = 0x40000000;
+    VS::Battle::statusEffectParams[rules.at(index)].status_flags = 0x40000000;
     auto expected = fixture.hit;
-    expected.removeStatuses = 0x40000000;
-    expected.statStatusEffect = index == kSilenceIndex ? 1 : 2;
+    expected.remove_statuses = 0x40000000;
+    expected.stat_status_effect = index == kSilenceIndex ? 1 : 2;
     handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
     CHECK(Bytes(fixture.stats) == before_stats);
-    Battle_statusEffectParams[rules.at(index)].blockingStatuses = 1;
+    VS::Battle::statusEffectParams[rules.at(index)].blocking_statuses = 1;
     fixture.stats.statuses = 1;
     handlers.at(index)(nullptr, nullptr, &fixture.hit, 0, 0);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -576,11 +576,11 @@ TEST_CASE("Live magic ward preserves feedback and the complete stats record",
   fixture.stats.actionRecoveryTimer = kRecoveryTimer;
   fixture.stats.cancelsHitResults = 1;
   fixture.stats.recoveryDelayBonus = kRecoveryBonus;
-  Battle_statusEffectParams[kWardRule].statusFlags =
+  VS::Battle::statusEffectParams[kWardRule].status_flags =
       std::bit_cast<std::int32_t>(kHighStatus);
   const auto before_stats = Bytes(fixture.stats);
   auto expected = fixture.hit;
-  expected.removeStatuses = std::bit_cast<std::int32_t>(kHighStatus);
+  expected.remove_statuses = std::bit_cast<std::int32_t>(kHighStatus);
   battle::QueueLiveMagicWard(nullptr, nullptr, &fixture.hit, -1,
                              kNegativeExecute);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -599,11 +599,11 @@ TEST_CASE("Live Banish preview queues status changes without analyzing",
     fixture.stats.actionRecoveryTimer = kRecoveryTimer;
     fixture.stats.cancelsHitResults = 1;
     fixture.stats.recoveryDelayBonus = kRecoveryBonus;
-    Battle_statusEffectParams[kBanishRule].statusFlags =
+    VS::Battle::statusEffectParams[kBanishRule].status_flags =
         std::bit_cast<std::int32_t>(kHighStatus);
     const auto before_stats = Bytes(fixture.stats);
     auto expected = fixture.hit;
-    expected.removeStatuses = std::bit_cast<std::int32_t>(kHighStatus);
+    expected.remove_statuses = std::bit_cast<std::int32_t>(kHighStatus);
     battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, -1, 0);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
     CHECK(Bytes(fixture.stats) == before_stats);
@@ -637,7 +637,7 @@ TEST_CASE(
     "slots",
     "[status-queue][F00450][live]") {
   LiveFixture fixture;
-  Battle_statusEffectParams[kBanishRule].statusFlags = 2;
+  VS::Battle::statusEffectParams[kBanishRule].status_flags = 2;
   fixture.stats.actorId = kExemptActor;
   const auto before_hit = Bytes(fixture.hit);
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 1);
@@ -646,15 +646,15 @@ TEST_CASE(
   fixture.stats.actorId = 1;
   fixture.stats.isAnalyzed = 0;
   fixture.stats.statuses = 4;
-  Battle_statusEffectParams[kBanishRule].blockingStatuses = 4;
+  VS::Battle::statusEffectParams[kBanishRule].blocking_statuses = 4;
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, kNegativeExecute);
   CHECK(Bytes(fixture.hit) == before_hit);
   CHECK(fixture.stats.isAnalyzed == 1);
-  Battle_actors[0] = &fixture.actor;
+  VS::Battle::actors[0] = &fixture.actor;
   fixture.hit.target.target_actor = 0;
   fixture.stats.statuses = 0;
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 0);
-  CHECK(fixture.hit.removeStatuses == 2);
+  CHECK(fixture.hit.remove_statuses == 2);
 }
 
 TEST_CASE("New status module entries resolve to their checked native callbacks",
@@ -741,12 +741,12 @@ TEST_CASE(
     fixture.stats.actorId = kExemptActor;
     fixture.stats.statuses = -1;
     fixture.stats.statusImmunities = -1;
-    fixture.hit.removeStatuses = 4;
-    fixture.hit.inflictStatuses = 1;
-    fixture.hit.statStatusEffect = 3;
+    fixture.hit.remove_statuses = 4;
+    fixture.hit.inflict_statuses = 1;
+    fixture.hit.stat_status_effect = 3;
     auto expected = fixture.hit;
-    expected.inflictStatuses = static_cast<std::int32_t>(kMasks.at(index) | 1);
-    if (index == 1) expected.statStatusEffect = 2;
+    expected.inflict_statuses = static_cast<std::int32_t>(kMasks.at(index) | 1);
+    if (index == 1) expected.stat_status_effect = 2;
     const auto before_stats = Bytes(fixture.stats);
     (*mediator)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
     CHECK(Bytes(fixture.hit) == Bytes(expected));

@@ -13,7 +13,7 @@
 // and status effects through the host, so they reach no Battle_Actor layout
 // or PS1 address.
 namespace VS::Actors {
-// Battle_actors: the room actors, then the effect and target placeholders.
+// VS::Battle::actors: the room actors, then the effect and target placeholders.
 inline constexpr int kBattleActorSlots = 42;
 // The room actors the scans cover.
 inline constexpr int kBattleActorScanSlots = 16;

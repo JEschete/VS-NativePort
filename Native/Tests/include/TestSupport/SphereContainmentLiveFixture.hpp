@@ -10,7 +10,7 @@
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 
 namespace VS::test_support::sphere_containment {
 using Point = std::array<std::uint16_t, 3>;
@@ -49,12 +49,13 @@ class State {
 
   void Select(std::size_t owner) {
     VS::Battle::targetSphere =
-        reinterpret_cast<Battle_TargetSphereSetupView*>(&spheres.at(owner));
+        reinterpret_cast<VS::Battle::TargetSphereSetupView*>(
+            &spheres.at(owner));
   }
 
-  std::array<Battle_TargetSphere, 2> spheres{};
+  std::array<VS::Battle::TargetSphereRecord, 2> spheres{};
 
  private:
-  Battle_TargetSphereSetupView* saved_;
+  VS::Battle::TargetSphereSetupView* saved_;
 };
 }  // namespace VS::test_support::sphere_containment

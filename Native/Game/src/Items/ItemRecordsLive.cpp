@@ -37,10 +37,10 @@ ItemAction ToItemAction(const Battle_ActionDefinition& action) {
 
 Battle_Actor* BattleActor(std::int32_t actor_id) {
   if (actor_id < 0 ||
-      static_cast<std::size_t>(actor_id) >= std::size(Battle_actors)) {
+      static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  return Battle_actors[actor_id];
+  return VS::Battle::actors[actor_id];
 }
 
 DefenderEquipment ToDefender(const Battle_ActorStats& stats) {
@@ -68,12 +68,12 @@ void CommitDefender(Battle_ActorStats& stats,
 }
 
 Battle_ActorStats* AshleyStats(const char* operation) {
-  if (Battle_characterState == nullptr ||
-      Battle_characterState->stats == nullptr) {
+  if (VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState->stats == nullptr) {
     WarnRefusal(operation, ItemsStatus::kActorOutOfRange);
     return nullptr;
   }
-  return Battle_characterState->stats;
+  return VS::Battle::characterState->stats;
 }
 
 AshleyWeaponState ToAshleyWeapon(const Battle_ActorStats& stats,

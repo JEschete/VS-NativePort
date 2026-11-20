@@ -14,7 +14,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -51,10 +51,10 @@ void PlayLiveRouteAnimation(int actor_id, int animation) {
 }
 std::uint8_t* LiveBattleCommandState(int actor_id) {
   if (actor_id < 0 ||
-      static_cast<std::size_t>(actor_id) >= std::size(Battle_actors)) {
+      static_cast<std::size_t>(actor_id) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  Battle_Actor* actor = Battle_actors[actor_id];
+  Battle_Actor* actor = VS::Battle::actors[actor_id];
   return actor != nullptr ? &actor->commandState : nullptr;
 }
 // End of the cross-slice calls.

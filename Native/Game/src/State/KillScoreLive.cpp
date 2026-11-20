@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
@@ -99,7 +99,7 @@ void UpdateLiveWeaponKillStreak(int /*unused*/) {
   }
   const std::uint16_t action_id = VS::Battle::actionState->selection.actionId;
   if (!ExtendsWeaponKillStreak(action_id)) return;
-  const Battle_Actor* player = Battle_characterState;
+  const Battle_Actor* player = VS::Battle::characterState;
   if (player == nullptr || player->stats == nullptr) {
     VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no player stats");
     return;

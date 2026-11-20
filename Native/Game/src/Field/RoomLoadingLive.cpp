@@ -27,13 +27,13 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Encounter.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.hpp"
@@ -42,7 +42,7 @@
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
@@ -633,11 +633,11 @@ class LiveSpawning : public Host {
   }
 
   [[nodiscard]] int AshleyCurrentHp() const override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       return 0;
     }
-    return Battle_characterState->stats->currentHp;
+    return VS::Battle::characterState->stats->currentHp;
   }
 
   [[nodiscard]] std::span<const std::byte> PlacementRecords() const override {
@@ -650,8 +650,8 @@ class LiveSpawning : public Host {
 
   [[nodiscard]] bool ActorSlotOccupied(int slot) const override {
     return slot >= 0 &&
-           static_cast<std::size_t>(slot) < std::size(Battle_actors) &&
-           Battle_actors[slot] != nullptr;
+           static_cast<std::size_t>(slot) < std::size(VS::Battle::actors) &&
+           VS::Battle::actors[slot] != nullptr;
   }
 
   [[nodiscard]] int ZoneEnemyCount() const override {
@@ -1074,12 +1074,12 @@ class LiveRoomLoadHost final
   void SnapActorsToSupport() override { SnapLiveRoomActorsToSupport(); }
 
   void ClearAshleyStatuses(int statuses) override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       RefuseCall("ClearAshleyStatuses", "Ashley has no stats");
       return;
     }
-    Battle_ActorStats* stats = Battle_characterState->stats;
+    Battle_ActorStats* stats = VS::Battle::characterState->stats;
     static_cast<void>(VS::Battle::LiveQueueActorStatusLabels(
         0, 0, stats->statuses & statuses, 1));
     VS::Battle::RemoveLiveActorStatuses(statuses, stats);
@@ -1245,8 +1245,8 @@ class LiveRoomUnloadHost final
   }
 
   void FreeScriptedActorAi() override {
-    if (Battle_actors[1] != nullptr) {
-      Battle::Ai::FreeLiveActorAiState(Battle_actors[1]);
+    if (VS::Battle::actors[1] != nullptr) {
+      Battle::Ai::FreeLiveActorAiState(VS::Battle::actors[1]);
     }
   }
 

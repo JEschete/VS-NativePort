@@ -8,6 +8,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -21,7 +22,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -33,8 +34,7 @@ struct GroundFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   decltype(VS::Battle::Ai::roomAiState) saved_room =
@@ -73,14 +73,14 @@ struct GroundFixture {
     ClearCache();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
       frame.actors[index] = &states[index];
       VS::Battle::Ai::actorAiStates[index] = &states[index];
       Actors_actorRecords[index] = &models[index];
-      Battle_actors[index] = &actors[index];
+      VS::Battle::actors[index] = &actors[index];
       actors[index].id = static_cast<int>(index);
       states[index].actor_id = static_cast<u_char>(index);
       states[index].actor =
@@ -110,7 +110,8 @@ struct GroundFixture {
   ~GroundFixture() {
     VS::Battle::Ai::LiveFrameContext() = saved;
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::roomAiState = saved_room;
@@ -669,12 +670,12 @@ TEST_CASE(
 TEST_CASE("Actor contact release preserves source no-state and no-room gates",
           "[ai][contact-release]") {
   GroundFixture fixture;
-  Battle_actors[1] = nullptr;
+  VS::Battle::actors[1] = nullptr;
   VS::Battle::Ai::actorAiStates[1] = nullptr;
   fixture.room.reserved_e_prefix[0] = 0xA5;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reserved_e_prefix[0] == 0xA5);
-  Battle_actors[1] = &fixture.actors[1];
+  VS::Battle::actors[1] = &fixture.actors[1];
   VS::Battle::Ai::actorAiStates[1] = &fixture.states[1];
   fixture.actors[1].commandOpcode = 11;
   fixture.states[1].next_tile.word = 0x200;

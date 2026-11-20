@@ -9,7 +9,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
@@ -76,10 +76,10 @@ TEST_CASE("The planner-row binding writes only listed actors' rows",
              VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   std::memset(rows.data(), 0xA5, sizeof rows);
-  Battle_Actor* saved = Battle_actors[0];
-  Battle_actors[0] = &actor;
+  Battle_Actor* saved = VS::Battle::actors[0];
+  VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::CaptureBattleActorConditions(rows);
-  Battle_actors[0] = saved;
+  VS::Battle::actors[0] = saved;
   const VS::Battle::Ai::ActionTiming& row = rows.back();
   CHECK(row.opaque0_bit0 == 15u);
   CHECK(row.reserved0_bit4 == 0u);

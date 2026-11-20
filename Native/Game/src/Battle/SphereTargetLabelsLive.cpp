@@ -15,7 +15,7 @@
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereTargetLabels.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Gte.h"
@@ -39,7 +39,7 @@ constexpr int kNoPulseFlags = 0;
 constexpr int kLinkOverlaySlot = 0;
 constexpr std::size_t kPointAxes = 3;
 
-static_assert(std::size(Battle_TargetSphere{}.labels) ==
+static_assert(std::size(VS::Battle::TargetSphereRecord{}.labels) ==
               kSphereTargetLabelCount);
 static_assert(std::size(VS::Menu::Framework::rowAnimationSteps) >=
               kTargetLabelSlideStepCount);
@@ -53,9 +53,9 @@ std::uint64_t unordered_labels = 0;
   std::abort();
 }
 
-Battle_TargetSphere& RequiredSphere(const char* operation) {
-  auto* sphere =
-      reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
+VS::Battle::TargetSphereRecord& RequiredSphere(const char* operation) {
+  auto* sphere = reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
   if (sphere == nullptr) Refuse(operation, "missing sphere workspace");
   return *sphere;
 }
@@ -72,24 +72,25 @@ int PackPoint(LabelScreenPoint point) noexcept {
       (static_cast<std::uint32_t>(point.y) << kCoordinateBits));
 }
 
-SphereTargetLabel ReadLabel(const Battle_SphereTargetLabel& label) noexcept {
+SphereTargetLabel ReadLabel(
+    const VS::Battle::SphereTargetLabelRecord& label) noexcept {
   return {.state = static_cast<std::uint8_t>(label.state),
           .depth = static_cast<std::uint8_t>(label.depth),
           .gradient = static_cast<std::uint8_t>(label.gradient),
-          .ring_size = static_cast<std::uint8_t>(label.ringSize),
-          .screen_x = label.screenX,
-          .offset_y = label.offsetY,
+          .ring_size = static_cast<std::uint8_t>(label.ring_size),
+          .screen_x = label.screen_x,
+          .offset_y = label.offset_y,
           .fade = static_cast<std::uint8_t>(label.fade),
-          .world_position = {label.worldPosition.vx, label.worldPosition.vy,
-                             label.worldPosition.vz}};
+          .world_position = {label.world_position.vx, label.world_position.vy,
+                             label.world_position.vz}};
 }
 
 // The labels change only their state, highlight fade and screen x.
 void WriteLabel(const SphereTargetLabel& value,
-                Battle_SphereTargetLabel& label) noexcept {
+                VS::Battle::SphereTargetLabelRecord& label) noexcept {
   label.state = static_cast<char>(value.state);
   label.gradient = static_cast<char>(value.gradient);
-  label.screenX = value.screen_x;
+  label.screen_x = value.screen_x;
 }
 
 // Entry `slot` of the frame's overlay ordering table, or null (reported, at
@@ -163,7 +164,7 @@ class LiveTargetLabelCanvas final : public SphereTargetLabelCanvas {
   const char* text_;
 };
 
-void DrawLiveLabel(Battle_SphereTargetLabel& live) {
+void DrawLiveLabel(VS::Battle::SphereTargetLabelRecord& live) {
   SphereTargetLabel label = ReadLabel(live);
   LiveTargetLabelCanvas canvas(live.text);
   DrawSphereTargetLabel(label, VS::Battle::targetColumnTopOffset, canvas);
@@ -175,7 +176,9 @@ void DrawLiveLabel(Battle_SphereTargetLabel& live) {
 class LiveTargetLabelDrawer final : public SphereTargetLabelDrawer {
  public:
   explicit LiveTargetLabelDrawer(
-      std::span<const Battle_SphereTargetLabel, kSphereTargetLabelCount> labels)
+      std::span<const VS::Battle::SphereTargetLabelRecord,
+                kSphereTargetLabelCount>
+          labels)
       : labels_(labels) {}
 
   void DrawLabel(std::size_t index, SphereTargetLabel& label) override {
@@ -184,7 +187,8 @@ class LiveTargetLabelDrawer final : public SphereTargetLabelDrawer {
   }
 
  private:
-  std::span<const Battle_SphereTargetLabel, kSphereTargetLabelCount> labels_;
+  std::span<const VS::Battle::SphereTargetLabelRecord, kSphereTargetLabelCount>
+      labels_;
 };
 
 class LiveHighlightHost final : public SphereTargetHighlightHost {
@@ -239,7 +243,7 @@ void DrawLeftTargetLabelLinkEntry(int anchor_xy, int ring_xy, int pulse_head) {
 // decomp: BATTLE.PRG func_800C1D84 (src/BATTLE/BATTLE.PRG/58578.c:645),
 // F01300.
 int AreTargetLabelsSettledEntry() {
-  const Battle_TargetSphere& sphere =
+  const VS::Battle::TargetSphereRecord& sphere =
       RequiredSphere("AreTargetLabelsSettledEntry");
   std::array<SphereTargetLabel, kSphereTargetLabelCount> labels{};
   std::ranges::transform(sphere.labels, labels.begin(), ReadLabel);
@@ -248,7 +252,7 @@ int AreTargetLabelsSettledEntry() {
 
 // decomp: BATTLE.PRG func_800C1DC4 (src/BATTLE/BATTLE.PRG/58578.c:656),
 // F01301.
-void DrawSphereTargetLabelEntry(Battle_SphereTargetLabel* label) {
+void DrawSphereTargetLabelEntry(VS::Battle::SphereTargetLabelRecord* label) {
   if (label == nullptr) Refuse("DrawSphereTargetLabelEntry", "missing label");
   DrawLiveLabel(*label);
 }
@@ -256,9 +260,10 @@ void DrawSphereTargetLabelEntry(Battle_SphereTargetLabel* label) {
 // decomp: BATTLE.PRG func_800C20B4 (src/BATTLE/BATTLE.PRG/58578.c:750),
 // F01302.
 void UpdateSphereTargetLabelsEntry() {
-  Battle_TargetSphere& sphere = RequiredSphere("UpdateSphereTargetLabelsEntry");
-  const std::span<Battle_SphereTargetLabel, kSphereTargetLabelCount> live(
-      sphere.labels);
+  VS::Battle::TargetSphereRecord& sphere =
+      RequiredSphere("UpdateSphereTargetLabelsEntry");
+  const std::span<VS::Battle::SphereTargetLabelRecord, kSphereTargetLabelCount>
+      live(sphere.labels);
   std::array<SphereTargetLabel, kSphereTargetLabelCount> labels{};
   std::ranges::transform(live, labels.begin(), ReadLabel);
   // The original reads the steps unsigned (lbu).

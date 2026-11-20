@@ -22,10 +22,10 @@
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Spawning.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Legacy/Psx.h"
 #include "State/RoomCache.hpp"
@@ -445,8 +445,7 @@ namespace {
 // Saves the live tables the roster and room enemy memory bindings touch and
 // restores them afterwards.
 struct LiveRosterFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
@@ -459,7 +458,7 @@ struct LiveRosterFixture {
   int saved_room_slot = VS::State::currentRoomStateSlot;
 
   LiveRosterFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
                 nullptr);
@@ -474,7 +473,7 @@ struct LiveRosterFixture {
   LiveRosterFixture(LiveRosterFixture&&) = delete;
   LiveRosterFixture& operator=(LiveRosterFixture&&) = delete;
   ~LiveRosterFixture() {
-    std::ranges::copy(saved_actors, Battle_actors);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_records, Actors_actorRecords);
     std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
@@ -530,7 +529,7 @@ struct LiveEnemy {
     record->instance.attachParent = 0xFF;
     record->instance.facing = 0x340;
     record->savedPlacement = 0x00030A07;
-    Battle_actors[3] = &actor;
+    VS::Battle::actors[3] = &actor;
     Actors_actorRecords[3] = record.get();
   }
 };
@@ -730,7 +729,7 @@ TEST_CASE("Live actors join and leave the list after Ashley",
   for (std::size_t index = 0; index < roster.size(); ++index) {
     roster[index].id = static_cast<int>(index);
     roster[index].kind = 1;
-    Battle_actors[index] = &roster[index];
+    VS::Battle::actors[index] = &roster[index];
   }
   roster[3].kind = 0x10;  // A gimmick never joins.
   ChannelWarnings warnings("actors");
@@ -739,7 +738,7 @@ TEST_CASE("Live actors join and leave the list after Ashley",
   CheckLiveUnlinks(roster);
   CHECK(warnings.messages.empty());
 
-  Battle_actors[0] = nullptr;
+  VS::Battle::actors[0] = nullptr;
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[1]) == 0);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(nullptr) == 0);
   CHECK(VS::Actors::UnlinkLiveActorFromRoomList(nullptr) == 0);
@@ -761,7 +760,8 @@ void CheckLivePlaceholderStats(const Battle_ActorStats& stats) {
   constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
   CHECK(std::memcmp(stats.name, VS::Actors::placeholderActorName.data(),
                     kNameBytes) == 0);
-  CHECK(std::memcmp(stats.name + kNameBytes, Battle_breakArtPointRequirements,
+  CHECK(std::memcmp(stats.name + kNameBytes,
+                    VS::Battle::breakArtPointRequirements.data(),
                     actors::kActorNameBytes - kNameBytes) == 0);
 }
 }  // namespace
@@ -776,7 +776,7 @@ TEST_CASE("A live placeholder actor gets the placeholder stats",
   actor.roomSpawnIndex = 2;
   actor.killCounted = 1;
   actor.defeated = 1;
-  Battle_actors[5] = &actor;
+  VS::Battle::actors[5] = &actor;
   VS::Battle::actorMarkers[5] = static_cast<char>(0x83);
   ChannelWarnings warnings("actors");
 
@@ -802,6 +802,6 @@ TEST_CASE("A live placeholder actor gets the placeholder stats",
   const std::string no_stats = "the actor slot has no actor stats";
   CHECK(warnings.messages ==
         std::vector<std::string>{
-            Refused(operation, "the actor id is outside Battle_actors"),
+            Refused(operation, "the actor id is outside VS::Battle::actors"),
             Refused(operation, no_stats), Refused(operation, no_stats)});
 }

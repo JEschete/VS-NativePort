@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Hud.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
@@ -451,7 +451,7 @@ TEST_CASE("The scene map waits for its read then prepares the rooms",
 
 struct LiveLoadingState {
   LiveLoadingState()
-      : arm(Battle_unusedSceneBuffer),
+      : arm(VS::Battle::sceneBuffer),
         slot(map::sceneCdQueueSlot),
         scene(map::currentScene),
         scene_row(map::currentSceneRow),
@@ -464,7 +464,7 @@ struct LiveLoadingState {
   LiveLoadingState(LiveLoadingState&&) = delete;
   LiveLoadingState& operator=(LiveLoadingState&&) = delete;
   ~LiveLoadingState() {
-    Battle_unusedSceneBuffer = arm;
+    VS::Battle::sceneBuffer = arm;
     map::sceneCdQueueSlot = slot;
     map::currentScene = scene;
     map::currentSceneRow = scene_row;
@@ -513,7 +513,7 @@ TEST_CASE("The live scene map refuses a missing read or scene",
           "[map-loading-live]") {
   const LiveLoadingState saved;
   std::array<std::byte, 16> buffer{};
-  Battle_unusedSceneBuffer = buffer.data();
+  VS::Battle::sceneBuffer = buffer.data();
   map::currentRoomIndex = 3;
   map::currentScene = 40;
   CHECK(map::LiveLoadSceneMap() == 0);

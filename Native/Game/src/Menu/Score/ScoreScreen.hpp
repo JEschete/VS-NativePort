@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.h"
+#include "Core/Gte.h"
 
 namespace VS::Content {
 struct DiscFile;

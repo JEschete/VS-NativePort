@@ -13,9 +13,9 @@
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
+#include "Battle/StatusEffects.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -230,21 +230,22 @@ TEST_CASE("F00507 tail gates never read character progress prematurely",
 }
 
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_statusEffectParams)) rules =
-      std::to_array(Battle_statusEffectParams);
+  decltype(VS::Battle::actors) saved = VS::Battle::actors;
+  decltype(VS::Battle::statusEffectParams) rules =
+      VS::Battle::statusEffectParams;
   decltype(VS::Battle::limbInjuryStatusIds) ids =
       VS::Battle::limbInjuryStatusIds;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Battle_HitResult hit{};
+  VS::Battle::HitResult hit{};
   LiveFixture() {
     actor.stats = &stats;
-    Battle_actors[0] = Battle_actors[41] = &actor;
+    VS::Battle::actors[0] = VS::Battle::actors[41] = &actor;
   }
   ~LiveFixture() {
-    std::copy(saved.begin(), saved.end(), Battle_actors);
-    std::copy(rules.begin(), rules.end(), Battle_statusEffectParams);
+    std::copy(saved.begin(), saved.end(), VS::Battle::actors.begin());
+    std::copy(rules.begin(), rules.end(),
+              VS::Battle::statusEffectParams.begin());
     std::copy(ids.begin(), ids.end(), VS::Battle::limbInjuryStatusIds.begin());
   }
 };
@@ -253,17 +254,17 @@ TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
   LiveFixture fixture;
   fixture.stats.mobilityLimb0 = 4;
   fixture.stats.mobilityLimb1 = 5;
-  Battle_statusEffectParams[4].statusFlags = 0x10;
+  VS::Battle::statusEffectParams[4].status_flags = 0x10;
   fixture.hit.target.target_actor = 41;
-  fixture.hit.hpEffect = 2;
+  fixture.hit.hp_effect = 2;
   for (auto& limb : fixture.hit.limbs) limb.effects.opaque2 = -1;
   battle::DeriveLiveLimbInjuryStatuses(&fixture.hit);
-  CHECK(fixture.hit.removeStatuses == 0x10);
+  CHECK(fixture.hit.remove_statuses == 0x10);
   CHECK(fixture.stats.statuses == 0);
   fixture.stats.statuses = 0x10;
   fixture.stats.limbs[5].hp = 2;
   battle::DeriveLiveLimbInjuryStatuses(&fixture.hit);
-  CHECK(fixture.hit.inflictStatuses == 0x10);
+  CHECK(fixture.hit.inflict_statuses == 0x10);
 }
 TEST_CASE("F00507 live exemption ignores genuinely unused action and source",
           "[resource-dispatch][F00507]") {
@@ -271,9 +272,9 @@ TEST_CASE("F00507 live exemption ignores genuinely unused action and source",
   fixture.stats.actorId = 128;
   fixture.hit.target.target_actor = 41;
   fixture.hit.target.hp = 32767;
-  fixture.hit.hpEffect = 3;
+  fixture.hit.hp_effect = 3;
   battle::ApplyLiveActionHitEffect(nullptr, nullptr, &fixture.hit, 0, -1);
   CHECK(fixture.hit.target.hp == -31770);
-  CHECK(fixture.hit.hpEffect == 1);
+  CHECK(fixture.hit.hp_effect == 1);
 }
 }  // namespace

@@ -31,26 +31,28 @@ constexpr std::size_t kWirePhaseAOffset = 0x24;
 constexpr std::size_t kWirePhaseBOffset = 0x26;
 constexpr std::size_t kWirePhaseCOffset = 0x28;
 constexpr std::size_t kWireShapeOffset = 0x2A;
-constexpr std::size_t kReserved30Offset = 0x30;
+constexpr std::size_t kPulseModeAndVertexCountOffset = 0x30;
 constexpr std::size_t kWireVerticesOffset = 0x50;
 constexpr std::size_t kTargetVolumeScaleOffset = 0x4;
 constexpr std::size_t kShapeVertexOpaqueOffset = 6;
 
-static_assert(offsetof(Battle_TargetSphereSetupView, wirePhaseA) ==
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_phase_a) ==
               kWirePhaseAOffset);
-static_assert(offsetof(Battle_TargetSphereSetupView, wirePhaseB) ==
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_phase_b) ==
               kWirePhaseBOffset);
-static_assert(offsetof(Battle_TargetSphereSetupView, wirePhaseC) ==
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_phase_c) ==
               kWirePhaseCOffset);
-static_assert(offsetof(Battle_TargetSphereSetupView, wireShape) ==
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_shape) ==
               kWireShapeOffset);
-static_assert(offsetof(Battle_TargetSphereSetupView, reserved30) ==
-              kReserved30Offset);
-static_assert(offsetof(Battle_TargetSphereSetupView, wireVertices) ==
+static_assert(offsetof(VS::Battle::TargetSphereSetupView,
+                       pulse_mode_and_vertex_count) ==
+              kPulseModeAndVertexCountOffset);
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_vertices) ==
               kWireVerticesOffset);
-static_assert(sizeof(Battle_TargetSphereSetupView{}.wireVertices) /
-                  sizeof(Battle_TargetSphereSetupView{}.wireVertices[0]) ==
-              kTargetWireVertices);
+static_assert(
+    sizeof(VS::Battle::TargetSphereSetupView{}.wire_vertices) /
+        sizeof(VS::Battle::TargetSphereSetupView{}.wire_vertices[0]) ==
+    kTargetWireVertices);
 static_assert(offsetof(Battle_TargetVolume, scale) == kTargetVolumeScaleOffset);
 static_assert(sizeof(Battle_TargetVolume{}.scale.extents) ==
               kTargetVolumeExtents);
@@ -86,14 +88,14 @@ SphereArcBasis ReadBasis(const std::int16_t* values, std::size_t stride) {
   return basis;
 }
 
-Battle_TargetSphereSetupView& RequiredSphere(const char* operation) {
+VS::Battle::TargetSphereSetupView& RequiredSphere(const char* operation) {
   if (VS::Battle::targetSphere == nullptr) {
     Refuse(operation, "missing sphere workspace");
   }
   return *VS::Battle::targetSphere;
 }
 
-void WriteVertices(Battle_TargetSphereSetupView& sphere,
+void WriteVertices(VS::Battle::TargetSphereSetupView& sphere,
                    std::span<const TargetWireVertex> vertices,
                    std::size_t first, std::size_t end) {
   if (first > end || end > vertices.size() || end > kTargetWireVertices) {
@@ -101,7 +103,7 @@ void WriteVertices(Battle_TargetSphereSetupView& sphere,
   }
   for (std::size_t index = first; index < end; ++index) {
     const auto& source = vertices[index];
-    auto& destination = sphere.wireVertices[index];
+    auto& destination = sphere.wire_vertices[index];
     for (std::size_t component = 0; component < source.position.size();
          ++component) {
       destination.xyz[component] = source.position[component];
@@ -123,37 +125,38 @@ std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
 
 // decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:887).
 std::optional<SphereWireframeBuildResult> BuildLiveSphereWireframe(
-    Battle_TargetSphereSetupView* sphere, std::int32_t type,
+    VS::Battle::TargetSphereSetupView* sphere, std::int32_t type,
     const SphereGeometryTables& tables) noexcept {
   if (sphere == nullptr) return std::nullopt;
 
   std::array<TargetWireVertex, kTargetWireVertices> generated{};
-  const SphereWireframeState state{.phase_a = sphere->wirePhaseA,
-                                   .phase_b = sphere->wirePhaseB,
-                                   .phase_c = sphere->wirePhaseC,
-                                   .shape = sphere->wireShape};
+  const SphereWireframeState state{.phase_a = sphere->wire_phase_a,
+                                   .phase_b = sphere->wire_phase_b,
+                                   .phase_c = sphere->wire_phase_c,
+                                   .shape = sphere->wire_shape};
   const auto result = BuildSphereWireframe(type, state, tables, generated);
   if (!result) return std::nullopt;
 
   for (std::size_t index = 0; index < result->vertex_count; ++index) {
     const auto& source = generated[index];
-    auto& destination = sphere->wireVertices[index];
+    auto& destination = sphere->wire_vertices[index];
     destination.xyz[0] = source.position[0];
     destination.xyz[1] = source.position[1];
     destination.xyz[2] = source.position[2];
     destination.opaque6 = source.segment;
   }
-  sphere->wirePhaseA = result->state.phase_a;
-  sphere->wirePhaseB = result->state.phase_b;
-  sphere->wirePhaseC = result->state.phase_c;
-  sphere->wireShape = result->state.shape;
+  sphere->wire_phase_a = result->state.phase_a;
+  sphere->wire_phase_b = result->state.phase_b;
+  sphere->wire_phase_c = result->state.phase_c;
+  sphere->wire_shape = result->state.shape;
   const auto vertex_count = static_cast<std::uint16_t>(result->vertex_count);
-  static_assert(sizeof(sphere->reserved30) == sizeof(std::uint32_t));
+  static_assert(sizeof(sphere->pulse_mode_and_vertex_count) ==
+                sizeof(std::uint32_t));
   const auto packed_fields =
-      (std::bit_cast<std::uint32_t>(sphere->reserved30) &
+      (std::bit_cast<std::uint32_t>(sphere->pulse_mode_and_vertex_count) &
        kWireVertexCountMask) |
       (static_cast<std::uint32_t>(vertex_count) << kWireVertexCountShift);
-  sphere->reserved30 = std::bit_cast<int>(packed_fields);
+  sphere->pulse_mode_and_vertex_count = std::bit_cast<int>(packed_fields);
   return result;
 }
 

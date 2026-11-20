@@ -91,9 +91,9 @@ void LoadStatisticsLabels() {
 }
 
 void CheckResidentState(const live::ObservableState& before) {
-  CHECK(Battle_unusedMenu9CursorMemory.gazette_page == 0);
-  CHECK(Battle_unusedMenu9CursorMemory.record_time_page == 5);
-  CHECK(Battle_unusedMenu9CursorMemory.record_time_row == 2);
+  CHECK(VS::Battle::menu9CursorMemory.gazette_page == 0);
+  CHECK(VS::Battle::menu9CursorMemory.record_time_page == 5);
+  CHECK(VS::Battle::menu9CursorMemory.record_time_row == 2);
   CHECK(VS::State::scoreData.boss_time_trial_scores[0][0].time == 0x010203);
   CHECK(score::clearCount == 3);
   for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
@@ -134,8 +134,8 @@ TEST_CASE("Production statistics caller supplies the remaining time text span",
   score::clearCount = 1;
   VS::State::scoreData.clear_count = 127;
   VS::State::scoreData.completion_time_minutes = 6000;
-  Battle_unusedMenu9CursorMemory.record_time_page = 0;
-  Battle_unusedMenu9CursorMemory.record_time_row = 0;
+  VS::Battle::menu9CursorMemory.record_time_page = 0;
+  VS::Battle::menu9CursorMemory.record_time_row = 0;
   score::CreateLiveStatisticRows();
   const auto refusals = score::LiveTimeTrialRefusals();
   score::RenderLiveStatistics(7);
@@ -156,8 +156,8 @@ TEST_CASE("Completed MENU9 resets only the time cursor before fresh rendering",
           "[gazette-times-integration][gazette-times-reload][F02831]") {
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor();
-  Battle_unusedMenu9CursorMemory.record_time_page = 5;
-  Battle_unusedMenu9CursorMemory.record_time_row = 2;
+  VS::Battle::menu9CursorMemory.record_time_page = 5;
+  VS::Battle::menu9CursorMemory.record_time_row = 2;
   score::clearCount = 3;
   const auto before = fixture.Observe();
   {
@@ -187,8 +187,8 @@ TEST_CASE("Actual cold session resets the time cursor without replacing rows",
       saved_ui;
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor();
-  Battle_unusedMenu9CursorMemory.record_time_page = 5;
-  Battle_unusedMenu9CursorMemory.record_time_row = 2;
+  VS::Battle::menu9CursorMemory.record_time_page = 5;
+  VS::Battle::menu9CursorMemory.record_time_row = 2;
   score::clearCount = 3;
   const auto before = fixture.Observe();
   void* const foreign = memory::AllocateLiveFromLowEnd(64);

@@ -14,7 +14,7 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
@@ -138,7 +138,7 @@ bool RetirePageLoan(const TexturePageLoan& loan) {
 
 GameClearState LoadState() {
   return {
-      .init_phase = Battle_unusedSubmenuState,
+      .init_phase = VS::Battle::submenuState,
       .screen = {.timer = screenTimer,
                  .phase = screenState,
                  .state_timer = state_timer,
@@ -163,7 +163,7 @@ void StoreReadouts(const GameClearReadouts& readouts) {
 }
 
 void StoreState(const GameClearState& game) {
-  Battle_unusedSubmenuState = game.init_phase;
+  VS::Battle::submenuState = game.init_phase;
   const auto& screen = game.screen;
   screenTimer = screen.timer;
   screenState = screen.phase;
@@ -598,7 +598,7 @@ void LiveApplyHealingScoreBonus() {
 
 void ResetLiveGameClearModuleData() {
   GameClearState initial;
-  initial.init_phase = Battle_unusedSubmenuState;
+  initial.init_phase = VS::Battle::submenuState;
   StoreState(initial);
   request_bound = false;
   buffer_bound = false;

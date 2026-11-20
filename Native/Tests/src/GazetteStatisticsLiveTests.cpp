@@ -205,7 +205,7 @@ void CheckSummaryGlyphs(const live::StatisticsFixture& fixture) {
 void CheckWeaponPage(live::StatisticsFixture& fixture, std::uint8_t page,
                      std::size_t first_weapon) {
   fixture.ResetFrame();
-  Battle_unusedMenu9CursorMemory.record_time_page = page;
+  VS::Battle::menu9CursorMemory.record_time_page = page;
   score::RenderLiveStatistics(8);
   for (std::size_t index = 0; index < 6; ++index) {
     CHECK(ValueGlyphs(fixture, 72 + static_cast<int>(index) * 16) ==
@@ -232,8 +232,8 @@ TEST_CASE("F02814 Live title creation borrows original tables and bit 31",
           (unlocked ? LabelPointer(score::titleDescriptions, index)
                     : LabelPointer(score::miscInfo, 1)));
   }
-  Battle_unusedMenu9CursorMemory.title_page = 24;
-  Battle_unusedMenu9CursorMemory.title_row = 7;
+  VS::Battle::menu9CursorMemory.title_page = 24;
+  VS::Battle::menu9CursorMemory.title_row = 7;
   score::RenderLiveTitles(8);
   CHECK(shared::Fixture::InformationText() ==
         shared::Label(score::titleDescriptions, 31));
@@ -262,8 +262,8 @@ TEST_CASE(
   live::StatisticsFixture fixture;
   VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
-  Battle_unusedMenu9CursorMemory.title_page = 24;
-  Battle_unusedMenu9CursorMemory.title_row = 7;
+  VS::Battle::menu9CursorMemory.title_page = 24;
+  VS::Battle::menu9CursorMemory.title_row = 7;
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveTitles(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused);
@@ -287,8 +287,8 @@ TEST_CASE("F02815 Live refuses an out-of-owner visible title before drawing",
   score::CreateLiveTitleRows();
   std::array<std::uint8_t, 2> outside{1, 0xE7};
   score::gazetteRows[0].title = outside.data();
-  Battle_unusedMenu9CursorMemory.title_page = 0;
-  Battle_unusedMenu9CursorMemory.title_row = 0;
+  VS::Battle::menu9CursorMemory.title_page = 0;
+  VS::Battle::menu9CursorMemory.title_row = 0;
   const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveTitles(8);
@@ -358,8 +358,8 @@ TEST_CASE(
   CHECK(SameRows(std::span(score::gazetteRows).subspan(23),
                  std::span(before).subspan(23)));
   Progress();
-  Battle_unusedMenu9CursorMemory.record_time_page = 0;
-  Battle_unusedMenu9CursorMemory.record_time_row = 0;
+  VS::Battle::menu9CursorMemory.record_time_page = 0;
+  VS::Battle::menu9CursorMemory.record_time_row = 0;
   score::RenderLiveStatistics(8);
   CHECK(shared::Fixture::InformationText() ==
         shared::Label(score::statDescriptions, 0));
@@ -388,8 +388,8 @@ TEST_CASE(
   Progress();
   score::CreateLiveStatisticRows();
   VS::Render::variableFontGlyphWidths[3] = 12;
-  Battle_unusedMenu9CursorMemory.record_time_page = 0;
-  Battle_unusedMenu9CursorMemory.record_time_row = 0;
+  VS::Battle::menu9CursorMemory.record_time_page = 0;
+  VS::Battle::menu9CursorMemory.record_time_row = 0;
   const auto refused = score::LiveGazetteStatisticsRefusals();
   score::RenderLiveStatistics(8);
   CHECK(score::LiveGazetteStatisticsRefusals() == refused);
@@ -406,8 +406,8 @@ TEST_CASE("F02825 Live enemy and weapon fields reach genuine rendered glyphs",
   live::StatisticsFixture fixture;
   Progress();
   score::CreateLiveStatisticRows();
-  Battle_unusedMenu9CursorMemory.record_time_page = 6;
-  Battle_unusedMenu9CursorMemory.record_time_row = 3;
+  VS::Battle::menu9CursorMemory.record_time_page = 6;
+  VS::Battle::menu9CursorMemory.record_time_row = 3;
   score::RenderLiveStatistics(8);
   for (std::size_t index = 0; index < 6; ++index) {
     CHECK(ValueGlyphs(fixture, 72 + static_cast<int>(index) * 16) ==
@@ -417,7 +417,7 @@ TEST_CASE("F02825 Live enemy and weapon fields reach genuine rendered glyphs",
   CHECK(shared::Fixture::InformationText() ==
         shared::Label(score::statDescriptions, 9));
   CheckWeaponPage(fixture, 12, 1);
-  Battle_unusedMenu9CursorMemory.record_time_row = 7;
+  VS::Battle::menu9CursorMemory.record_time_row = 7;
   CheckWeaponPage(fixture, 15, 4);
   CHECK(ValueGlyphs(fixture, 168) == Text{1, 0, 0, 0});
   CHECK(shared::Fixture::Row(0).is_scrollable == 0);
@@ -430,8 +430,8 @@ TEST_CASE("F02825 Live no-clear text and invalid page retain bounded owners",
   Progress();
   score::clearCount = 0;
   score::CreateLiveStatisticRows();
-  Battle_unusedMenu9CursorMemory.record_time_page = 0;
-  Battle_unusedMenu9CursorMemory.record_time_row = 1;
+  VS::Battle::menu9CursorMemory.record_time_page = 0;
+  VS::Battle::menu9CursorMemory.record_time_row = 1;
   score::RenderLiveStatistics(8);
   const auto no_clear = shared::Label(score::miscInfo, 0);
   Text expected;
@@ -440,7 +440,7 @@ TEST_CASE("F02825 Live no-clear text and invalid page retain bounded owners",
   }
   CHECK(ValueGlyphs(fixture, 72) == expected);
   fixture.ResetFrame();
-  Battle_unusedMenu9CursorMemory.record_time_page = 16;
+  VS::Battle::menu9CursorMemory.record_time_page = 16;
   const auto before = std::to_array(score::gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
   const auto information = shared::Fixture::InformationText();
@@ -459,13 +459,13 @@ TEST_CASE("Gazette statistics Live fixture restores all borrowed owners",
     Progress();
     VS::State::scoreData.titles = -1;
     score::CreateLiveTitleRows();
-    Battle_unusedMenu9CursorMemory.title_page = 1;
-    Battle_unusedMenu9CursorMemory.title_row = 0;
+    VS::Battle::menu9CursorMemory.title_page = 1;
+    VS::Battle::menu9CursorMemory.title_row = 0;
     score::RenderLiveTitles(8);
     score::DrawLiveTitleNumber(0, 0, 99, 1);
     score::CreateLiveStatisticRows();
-    Battle_unusedMenu9CursorMemory.record_time_page = 1;
-    Battle_unusedMenu9CursorMemory.record_time_row = 0;
+    VS::Battle::menu9CursorMemory.record_time_page = 1;
+    VS::Battle::menu9CursorMemory.record_time_row = 0;
     score::RenderLiveStatistics(8);
     CHECK(fixture.GuardsIntact());
     CHECK_FALSE(fixture.Packets().empty());

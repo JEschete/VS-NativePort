@@ -12,6 +12,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -20,7 +21,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -42,7 +43,7 @@ struct CommandFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
-  Battle_Actor* saved_actor = Battle_actors[2];
+  Battle_Actor* saved_actor = VS::Battle::actors[2];
   Actors_ActorRecord* saved_target = Actors_actorRecords[3];
   Battle_Actor actor{};
   Actors_ModelInstance model{};
@@ -53,7 +54,7 @@ struct CommandFixture {
   u_short flags[32][32]{};
 
   CommandFixture() {
-    Battle_actors[2] = &actor;
+    VS::Battle::actors[2] = &actor;
     Actors_actorRecords[3] = &target;
     actor.id = state.actor_id = 2;
     actor.model = &model;
@@ -99,7 +100,7 @@ struct CommandFixture {
   ~CommandFixture() {
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Battle::Ai::tileFlagMap = saved_flags;
-    Battle_actors[2] = saved_actor;
+    VS::Battle::actors[2] = saved_actor;
     Actors_actorRecords[3] = saved_target;
   }
 };
@@ -226,8 +227,7 @@ TEST_CASE(
 
 namespace {
 struct RoomCommandFixture : CommandFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
@@ -250,10 +250,10 @@ struct RoomCommandFixture : CommandFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 
   RoomCommandFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
-    Battle_actors[2] = &actor;
+    VS::Battle::actors[2] = &actor;
     VS::Battle::Ai::roomAiState = nullptr;
     VS::Battle::Ai::tileFlagMap = nullptr;
     VS::Battle::Ai::specialTerrainHeights = nullptr;
@@ -270,7 +270,8 @@ struct RoomCommandFixture : CommandFixture {
 
   ~RoomCommandFixture() {
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::roomAiState = saved_room;

@@ -11,7 +11,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
@@ -49,14 +49,15 @@ void Refuse(std::string_view call, std::string_view reason) {
   }
 }
 
-// The stats record of Battle_actors[slot], or null outside the table or
+// The stats record of VS::Battle::actors[slot], or null outside the table or
 // without an actor or record.
 [[nodiscard]] const Battle_ActorStats* StatsOf(std::int32_t slot) {
-  if (slot < 0 || static_cast<std::size_t>(slot) >= std::size(Battle_actors)) {
+  if (slot < 0 ||
+      static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
   const Battle_Actor* const actor =
-      Battle_actors[static_cast<std::size_t>(slot)];
+      VS::Battle::actors[static_cast<std::size_t>(slot)];
   return actor != nullptr ? actor->stats : nullptr;
 }
 
@@ -123,11 +124,11 @@ class LiveRoster final : public InspectableActorRoster {
   }
   std::optional<std::uint16_t> Kind(std::int32_t slot) override {
     if (slot < 0 ||
-        static_cast<std::size_t>(slot) >= std::size(Battle_actors)) {
+        static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
       return std::nullopt;
     }
     const Battle_Actor* const actor =
-        Battle_actors[static_cast<std::size_t>(slot)];
+        VS::Battle::actors[static_cast<std::size_t>(slot)];
     if (actor == nullptr) return std::nullopt;
     return actor->kind;
   }

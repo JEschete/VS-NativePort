@@ -9,12 +9,12 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Core/Log.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -33,12 +33,13 @@ constexpr std::size_t kLimbCount = std::extent_v<LimbTable>;
 
 // Cross-slice calls: retarget when those rows are promoted.
 Battle_ActorStats* PlayerStats() {
-  return Battle_characterState != nullptr ? Battle_characterState->stats
-                                          : nullptr;
+  return VS::Battle::characterState != nullptr
+             ? VS::Battle::characterState->stats
+             : nullptr;
 }
 
 Battle_Actor* BattleActor(std::size_t index) {
-  const std::span actors(Battle_actors);
+  const std::span actors(VS::Battle::actors);
   return index < actors.size() ? actors[index] : nullptr;
 }
 
@@ -102,7 +103,7 @@ TrapPanelTarget ToPanelTarget(const Battle_ActorStats& stats,
 }
 
 // The panel hit and the struck actor the original reads through
-// Battle_actors[hit->target.target_actor] and its limb, or empty (with a
+// VS::Battle::actors[hit->target.target_actor] and its limb, or empty (with a
 // diagnostic) where the original would read outside a table or through null.
 struct PanelInputs {
   TrapPanelHit hit;
@@ -111,7 +112,7 @@ struct PanelInputs {
 
 std::optional<PanelInputs> ReadPanelInputs(
     const char* rule, const Battle_ActionDefinition* action,
-    const Battle_HitResult* target_result, int hit_index) {
+    const VS::Battle::HitResult* target_result, int hit_index) {
   if (action == nullptr || target_result == nullptr) {
     WarnRefusal(rule, "null record");
     return std::nullopt;
@@ -153,8 +154,8 @@ using PanelRule = std::optional<std::int16_t> (*)(const TrapPanelHit&,
 
 std::int16_t RunPanelRule(const char* rule, PanelRule calculate,
                           const Battle_ActionDefinition* action,
-                          const Battle_HitResult* target_result, int hit_index,
-                          int add_random_variation) {
+                          const VS::Battle::HitResult* target_result,
+                          int hit_index, int add_random_variation) {
   const auto inputs = ReadPanelInputs(rule, action, target_result, hit_index);
   if (!inputs.has_value()) return 0;
   VS::Items::Live::LiveItemRandom random;
@@ -179,18 +180,18 @@ int RollLiveRiskLockBreak() {
   return RollRiskLockBreak(stats->risk, random) ? 1 : 0;
 }
 
-std::int16_t CalculateLiveTrapPanelDamage(Battle_ActionDefinition* action,
-                                          Battle_HitResult* /*attacker_result*/,
-                                          Battle_HitResult* target_result,
-                                          int hit_index,
-                                          int add_random_variation) {
+std::int16_t CalculateLiveTrapPanelDamage(
+    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    VS::Battle::HitResult* target_result, int hit_index,
+    int add_random_variation) {
   return RunPanelRule("CalculateTrapPanelDamage", &CalculateTrapPanelDamage,
                       action, target_result, hit_index, add_random_variation);
 }
 
 std::int16_t CalculateLiveHealingPanelRecovery(
-    Battle_ActionDefinition* action, Battle_HitResult* /*attacker_result*/,
-    Battle_HitResult* target_result, int hit_index, int add_random_variation) {
+    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    VS::Battle::HitResult* target_result, int hit_index,
+    int add_random_variation) {
   return RunPanelRule("CalculateHealingPanelRecovery",
                       &CalculateHealingPanelRecovery, action, target_result,
                       hit_index, add_random_variation);

@@ -79,7 +79,7 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
   fixture->action.queueIndex = 0xFFFFFFFFU;
   auto& queued = fixture->action.queue[3];
   queued.targetCount = 1;
-  queued.targets[0].targetsPosition = 1;
+  queued.targets[0].targets_position = 1;
   auto* unused = reinterpret_cast<SVECTOR*>(std::uintptr_t{1});
   VS::Battle::PlayLiveDefenseAbilityAnimation(16, unused,
                                               std::numeric_limits<int>::min());

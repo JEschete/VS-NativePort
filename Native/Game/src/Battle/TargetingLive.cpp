@@ -22,7 +22,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
@@ -33,9 +33,9 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -46,10 +46,10 @@
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Core/Log.hpp"
@@ -97,7 +97,7 @@ constexpr int kNoTargetsFrameShape = 1;
 // Battle_CollectEnvironmentActionTargets collected moving platform points into
 // a stack buffer of this many points.
 constexpr std::size_t kPlatformPointLimit = 4;
-// The sphere's area preview list (targetLists[1]).
+// The sphere's area preview list (target_lists[1]).
 constexpr int kAreaTargetList = 1;
 // The halfwords of a point and the extent bytes of a volume.
 constexpr std::size_t kPointHalfwords = 4;
@@ -121,20 +121,22 @@ static_assert(offsetof(VS::Battle::TargetPreview, actor_id) ==
 static_assert(offsetof(VS::Battle::TargetPreview, limb) ==
               offsetof(Battle_TargetLabelLine, opaqueA));
 // A sphere spec is a targeting volume in the action state's byte order.
-static_assert(sizeof(Battle_TargetSphereSpec) == sizeof(Battle_TargetVolume));
+static_assert(sizeof(VS::Battle::TargetSphereSpec) ==
+              sizeof(Battle_TargetVolume));
 // The label and text views share the sphere allocation.
-static_assert(offsetof(Battle_TargetSphere, labels) ==
+static_assert(offsetof(VS::Battle::TargetSphereRecord, labels) ==
               offsetof(Battle_TargetSphereLabelView, opaque990));
 static_assert(offsetof(Battle_TargetSphereLabelView, textBuffer) +
                   sizeof(Battle_TargetSphereLabelView::textBuffer) <=
-              sizeof(Battle_TargetSphereSetupView));
-static_assert(sizeof(Battle_TargetSphere) <=
-              sizeof(Battle_TargetSphereSetupView));
+              sizeof(VS::Battle::TargetSphereSetupView));
+static_assert(sizeof(VS::Battle::TargetSphereRecord) <=
+              sizeof(VS::Battle::TargetSphereSetupView));
 // The sphere's highlight tint word is a colour code; its cursor word holds x
 // and y.
 static_assert(sizeof(VS::Render::ColorCode) ==
-              sizeof(Battle_TargetSphere::reserved34));
-static_assert(sizeof(HalfwordPair) == sizeof(Battle_TargetSphere::reserved38));
+              sizeof(VS::Battle::TargetSphereRecord::highlight_tint));
+static_assert(sizeof(HalfwordPair) ==
+              sizeof(VS::Battle::TargetSphereRecord::cursor_xy));
 static_assert(sizeof(HalfwordPair) == sizeof(Battle_Actor::commandArg2));
 static_assert(sizeof(SVECTOR) == sizeof(VS::Battle::HitTargetWord));
 
@@ -159,11 +161,13 @@ TargetPoint PositionOf(const Battle_TargetVolume& volume) {
 }
 
 Battle_Actor* LiveActor(int actor) {
-  return InRange(Battle_actors, actor) ? Battle_actors[actor] : nullptr;
+  return InRange(VS::Battle::actors, actor) ? VS::Battle::actors[actor]
+                                            : nullptr;
 }
 
-Battle_TargetSphere* LiveSphere() {
-  return reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
+VS::Battle::TargetSphereRecord* LiveSphere() {
+  return reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
 }
 
 ActionTargetPreview ReadPreview(const VS::Battle::TargetPreview& raw) {
@@ -260,8 +264,8 @@ Battle_TargetVolume RawVolume(const TargetingVolume& volume) {
   return raw;
 }
 
-Battle_TargetSphereSpec SphereSpec(const TargetingVolume& volume) {
-  return std::bit_cast<Battle_TargetSphereSpec>(RawVolume(volume));
+VS::Battle::TargetSphereSpec SphereSpec(const TargetingVolume& volume) {
+  return std::bit_cast<VS::Battle::TargetSphereSpec>(RawVolume(volume));
 }
 
 battle::RangeShape RangeOf(const VS::Battle::Ai::ActionRangeShape& shape) {
@@ -424,7 +428,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   void ResetSelection(int source_actor, int action_id) override {
     state_.selection = {};
-    state_.selection.primaryTarget.targetsPosition = 0;
+    state_.selection.primaryTarget.targets_position = 0;
     state_.selection.primaryTarget.target.target_actor =
         static_cast<std::uint8_t>(source_actor);
     state_.selection.actionId = static_cast<std::uint16_t>(action_id);
@@ -433,7 +437,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     return state_.selection.primaryTarget.target.target_actor;
   }
   [[nodiscard]] bool PrimaryTargetsPosition() const override {
-    return state_.selection.primaryTarget.targetsPosition != 0;
+    return state_.selection.primaryTarget.targets_position != 0;
   }
   [[nodiscard]] int SelectionTargetCount() const override {
     return state_.selection.targetCount;
@@ -442,21 +446,21 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     state_.selection.targetCount = static_cast<std::uint16_t>(count);
   }
   void SetSelectionActorTarget(int index, ActorLimbTarget target) override {
-    Battle_HitResult* hit = SelectionTarget(index);
+    VS::Battle::HitResult* hit = SelectionTarget(index);
     if (hit == nullptr) {
       return;
     }
-    hit->targetsPosition = 0;
+    hit->targets_position = 0;
     hit->target.target_actor = static_cast<std::uint8_t>(target.actor);
     hit->target.target_limb = static_cast<std::int8_t>(target.limb);
   }
   void SetSelectionPositionTarget(int index, int mode,
                                   TargetPoint point) override {
-    Battle_HitResult* target = SelectionTarget(index);
+    VS::Battle::HitResult* target = SelectionTarget(index);
     if (target == nullptr) {
       return;
     }
-    target->targetsPosition = mode;
+    target->targets_position = mode;
     target->target = std::bit_cast<VS::Battle::HitTargetWord>(ToSvector(point));
   }
   [[nodiscard]] TargetPoint FocusPosition() const override {
@@ -543,7 +547,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     Battle_ActionRequest result{};
     VS::Battle::PreviewLiveActionAgainstLimb(action_id, source_actor,
                                              target_actor, limb, &result);
-    const Battle_HitResult& hit = result.targets[0];
+    const VS::Battle::HitResult& hit = result.targets[0];
     return {.action_id = result.actionId,
             .damage_type = result.damageType,
             .effect_variant = result.effectVariant,
@@ -551,7 +555,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
             .target_hp = hit.target.hp,
             .target_mp = hit.target.mp,
             .hit_threshold = hit.target.hit_threshold,
-            .remove_statuses = static_cast<std::uint32_t>(hit.removeStatuses)};
+            .remove_statuses = static_cast<std::uint32_t>(hit.remove_statuses)};
   }
 
   [[nodiscard]] std::optional<battle::TargetingActor> Actor(
@@ -664,13 +668,13 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     if (!SphereReady("range volume")) {
       return;
     }
-    Battle_TargetSphereSpec range =
+    VS::Battle::TargetSphereSpec range =
         SphereSpec(Volume(TargetingVolumeSlot::kRange));
     if (!with_area) {
       VS::Battle::SetSphereVolumesEntry(&range, nullptr, 0, nullptr);
       return;
     }
-    Battle_TargetSphereSpec area =
+    VS::Battle::TargetSphereSpec area =
         SphereSpec(Volume(TargetingVolumeSlot::kArea));
     VS::Battle::SetSphereVolumesEntry(&range, &area,
                                       static_cast<std::uint8_t>(preview_count),
@@ -680,7 +684,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     if (!SphereReady("area volume")) {
       return;
     }
-    Battle_TargetSphereSpec area =
+    VS::Battle::TargetSphereSpec area =
         SphereSpec(Volume(TargetingVolumeSlot::kArea));
     VS::Battle::SetSecondarySphereVolumeEntry(&area);
   }
@@ -696,12 +700,12 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     VS::Battle::actionFlowMode = static_cast<std::uint32_t>(mode);
   }
   [[nodiscard]] bool WeaponDrawn() const override {
-    if (Battle_characterState == nullptr) {
+    if (VS::Battle::characterState == nullptr) {
       VS::Core::LogError("battle.targeting",
                          "no character state; weapon sheathed");
       return false;
     }
-    return (Battle_characterState->weaponDrawn & 1) != 0;
+    return (VS::Battle::characterState->weaponDrawn & 1) != 0;
   }
   void SetHudBattleMode(int mode) override {
     VS::Battle::SetLiveHudBattleMode(mode);
@@ -750,7 +754,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
 
  private:
-  [[nodiscard]] Battle_HitResult* SelectionTarget(int index) const {
+  [[nodiscard]] VS::Battle::HitResult* SelectionTarget(int index) const {
     if (!InRange(state_.selection.targets, index)) {
       VS::Core::LogError("battle.targeting",
                          "hit target {} is outside the request", index);
@@ -865,7 +869,7 @@ char* LiveTargetText(battle::TargetText text) {
 
 class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
  public:
-  explicit LiveTargetSelectionHost(Battle_TargetSphere& sphere)
+  explicit LiveTargetSelectionHost(VS::Battle::TargetSphereRecord& sphere)
       : sphere_(sphere) {}
 
   [[nodiscard]] battle::SphereVolume Volume(int index) const override {
@@ -898,53 +902,53 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     std::ranges::copy(position, std::begin(raw.position));
   }
   [[nodiscard]] battle::SphereCursor Cursor() const override {
-    const auto across = std::bit_cast<HalfwordPair>(sphere_.reserved38);
-    return {across[0], across[1], sphere_.reserved3C, sphere_.inputLocked};
+    const auto across = std::bit_cast<HalfwordPair>(sphere_.cursor_xy);
+    return {across[0], across[1], sphere_.cursor_z, sphere_.input_locked};
   }
   void SetCursor(const battle::SphereCursor& cursor) override {
-    sphere_.reserved38 =
+    sphere_.cursor_xy =
         std::bit_cast<int>(HalfwordPair{static_cast<std::int16_t>(cursor.x),
                                         static_cast<std::int16_t>(cursor.y)});
-    sphere_.reserved3C = static_cast<std::int16_t>(cursor.z);
-    sphere_.inputLocked = static_cast<std::int16_t>(cursor.locked);
+    sphere_.cursor_z = static_cast<std::int16_t>(cursor.z);
+    sphere_.input_locked = static_cast<std::int16_t>(cursor.locked);
   }
-  [[nodiscard]] int WireShape() const override { return sphere_.wireShape; }
-  [[nodiscard]] int CameraYaw() const override { return sphere_.cameraYaw; }
+  [[nodiscard]] int WireShape() const override { return sphere_.wire_shape; }
+  [[nodiscard]] int CameraYaw() const override { return sphere_.camera_yaw; }
   [[nodiscard]] int TargetCount() const override {
-    return Byte(sphere_.targetCount);
+    return Byte(sphere_.target_count);
   }
   [[nodiscard]] int SecondaryTargetCount() const override {
-    return Byte(sphere_.sphereMode);
+    return Byte(sphere_.sphere_mode);
   }
   [[nodiscard]] int SelectedTarget() const override {
-    return Byte(sphere_.selectedTarget);
+    return Byte(sphere_.selected_target);
   }
   void SetSelectedTarget(int index) override {
-    sphere_.selectedTarget = static_cast<char>(index);
+    sphere_.selected_target = static_cast<char>(index);
   }
   [[nodiscard]] bool AllTargetsMode() const override {
-    return sphere_.targetMode != 0;
+    return sphere_.target_mode != 0;
   }
   [[nodiscard]] battle::HighlightedTarget Highlighted() const override {
-    return {Byte(sphere_.reserved2F),
-            static_cast<std::int8_t>(sphere_.reserved30)};
+    return {Byte(sphere_.highlighted_group),
+            static_cast<std::int8_t>(sphere_.highlighted_pulse_slot)};
   }
   void SetHighlighted(battle::HighlightedTarget target) override {
-    sphere_.reserved2F = static_cast<char>(target.group);
-    sphere_.reserved30 = static_cast<char>(target.pulse_slot);
+    sphere_.highlighted_group = static_cast<char>(target.group);
+    sphere_.highlighted_pulse_slot = static_cast<char>(target.pulse_slot);
   }
-  void SetHighlightTint(int rgb) override { sphere_.reserved34 = rgb; }
+  void SetHighlightTint(int rgb) override { sphere_.highlight_tint = rgb; }
   [[nodiscard]] ActionTargetPreview SphereTarget(int list,
                                                  int index) const override {
-    if (!InRange(sphere_.targetLists, list) ||
-        sphere_.targetLists[list] == nullptr || index < 0 ||
+    if (!InRange(sphere_.target_lists, list) ||
+        sphere_.target_lists[list] == nullptr || index < 0 ||
         index >= battle::kTargetPreviewCapacity) {
       VS::Core::LogError("battle.targeting",
                          "sphere target {} of list {} is absent", index, list);
       return {};
     }
     const std::span targets(
-        sphere_.targetLists[list],
+        sphere_.target_lists[list],
         static_cast<std::size_t>(battle::kTargetPreviewCapacity));
     return ReadPreview(targets[static_cast<std::size_t>(index)]);
   }
@@ -971,8 +975,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                                           static_cast<std::uint32_t>(row));
   }
   void UpdateTargetHighlights() override {
-    const int count = Byte(sphere_.sphereMode);
-    VS::Battle::TargetPreview* list = sphere_.targetLists[kAreaTargetList];
+    const int count = Byte(sphere_.sphere_mode);
+    VS::Battle::TargetPreview* list = sphere_.target_lists[kAreaTargetList];
     if (list == nullptr && count > 0) {
       VS::Core::LogError("battle.targeting", "{} area targets without a list",
                          count);
@@ -1015,7 +1019,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
       VS::Actors::SetLiveActorTint(actor, nullptr);
       return;
     }
-    const auto tint = std::bit_cast<VS::Render::ColorCode>(sphere_.reserved34);
+    const auto tint =
+        std::bit_cast<VS::Render::ColorCode>(sphere_.highlight_tint);
     VS::Actors::SetLiveActorTint(actor, &tint);
   }
   [[nodiscard]] std::optional<int> ActorKind(int actor) const override {
@@ -1068,15 +1073,15 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                          index);
       return {};
     }
-    const Battle_SphereTargetLabel& label = sphere_.labels[index];
+    const VS::Battle::SphereTargetLabelRecord& label = sphere_.labels[index];
     return {.state = Byte(label.state),
             .depth = Byte(label.depth),
             .gradient = Byte(label.gradient),
-            .ring_size = Byte(label.ringSize),
-            .screen_x = label.screenX,
-            .offset_y = label.offsetY,
+            .ring_size = Byte(label.ring_size),
+            .screen_x = label.screen_x,
+            .offset_y = label.offset_y,
             .fade = Byte(label.fade),
-            .world_position = ToPoint(label.worldPosition)};
+            .world_position = ToPoint(label.world_position)};
   }
   void SetLabel(int index, const battle::TargetSelectionLabel& label) override {
     if (!InRange(sphere_.labels, index)) {
@@ -1084,15 +1089,15 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                          index);
       return;
     }
-    Battle_SphereTargetLabel& raw = sphere_.labels[index];
+    VS::Battle::SphereTargetLabelRecord& raw = sphere_.labels[index];
     raw.state = static_cast<char>(label.state);
     raw.depth = static_cast<char>(label.depth);
     raw.gradient = static_cast<char>(label.gradient);
-    raw.ringSize = static_cast<char>(label.ring_size);
-    raw.screenX = static_cast<std::int16_t>(label.screen_x);
-    raw.offsetY = static_cast<std::uint8_t>(label.offset_y);
+    raw.ring_size = static_cast<char>(label.ring_size);
+    raw.screen_x = static_cast<std::int16_t>(label.screen_x);
+    raw.offset_y = static_cast<std::uint8_t>(label.offset_y);
     raw.fade = static_cast<char>(label.fade);
-    raw.worldPosition = ToSvector(label.world_position);
+    raw.world_position = ToSvector(label.world_position);
   }
   void SetLabelText(int index, battle::TargetLabelText text) override {
     if (!InRange(sphere_.labels, index) ||
@@ -1158,7 +1163,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
 
  private:
-  Battle_TargetSphere& sphere_;
+  VS::Battle::TargetSphereRecord& sphere_;
   // The volume transform built this frame (Battle_BuildSphereVolumeTransform
   // returns scratch memory).
   std::optional<MATRIX> transform_;
@@ -1175,8 +1180,8 @@ void WithActionHost(std::string_view operation, Operation&& run) {
   std::forward<Operation>(run)(host);
 }
 
-Battle_TargetSphere* SphereFor(std::string_view operation) {
-  Battle_TargetSphere* sphere = LiveSphere();
+VS::Battle::TargetSphereRecord* SphereFor(std::string_view operation) {
+  VS::Battle::TargetSphereRecord* sphere = LiveSphere();
   if (sphere == nullptr) {
     VS::Core::LogError("battle.targeting", "{} refused: no targeting sphere",
                        operation);
@@ -1235,7 +1240,7 @@ int LiveUpdateSphereTargetPosition(SVECTOR* target_position) {
     VS::Core::LogError("battle.targeting", "sphere cursor refused: no target");
     return 0;
   }
-  Battle_TargetSphere* sphere = SphereFor("sphere cursor");
+  VS::Battle::TargetSphereRecord* sphere = SphereFor("sphere cursor");
   if (sphere == nullptr) {
     return 0;
   }
@@ -1253,7 +1258,7 @@ int LiveUpdateTargetSelectionMenu(std::uint8_t* target) {
     return 0;
   }
   *target = static_cast<std::uint8_t>(kNoPreviewSelected);
-  Battle_TargetSphere* sphere = SphereFor("target list");
+  VS::Battle::TargetSphereRecord* sphere = SphereFor("target list");
   if (sphere == nullptr) {
     // Closes the list with no target, which the action flow takes as a
     // cancel.
@@ -1289,7 +1294,7 @@ int LiveCalculateActorActionRangeSquared(const Battle_ActorStats* stats,
 }
 
 void LiveUpdateTargetSelectionHighlight(int mode) {
-  Battle_TargetSphere* sphere = SphereFor("target highlight");
+  VS::Battle::TargetSphereRecord* sphere = SphereFor("target highlight");
   if (sphere == nullptr) {
     return;
   }

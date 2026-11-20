@@ -17,7 +17,7 @@
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -32,7 +32,7 @@
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
@@ -41,7 +41,7 @@
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -129,8 +129,9 @@ struct AbilityFixture {
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
   Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_character = Battle_characterState;
-  std::array<Battle_Actor*, 2> saved_actors{Battle_actors[0], Battle_actors[1]};
+  Battle_Actor* saved_character = VS::Battle::characterState;
+  std::array<Battle_Actor*, 2> saved_actors{VS::Battle::actors[0],
+                                            VS::Battle::actors[1]};
   std::array<Actors_ActorRecord*, 2> saved_records{Actors_actorRecords[0],
                                                    Actors_actorRecords[1]};
   VS::Input::Settings saved_settings = VS::Input::settings;
@@ -150,9 +151,9 @@ struct AbilityFixture {
 
   AbilityFixture() {
     VS::Battle::actionState = &action;
-    Battle_characterState = &actors[0];
+    VS::Battle::characterState = &actors[0];
     for (int index = 0; index < 2; ++index) {
-      Battle_actors[index] = &actors[index];
+      VS::Battle::actors[index] = &actors[index];
       Actors_actorRecords[index] = &records[index];
       actors[index].id = index;
       actors[index].stats = &stats[index];
@@ -192,9 +193,9 @@ struct AbilityFixture {
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     VS::Battle::actionState = saved_action;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     for (int index = 0; index < 2; ++index) {
-      Battle_actors[index] = saved_actors[index];
+      VS::Battle::actors[index] = saved_actors[index];
       Actors_actorRecords[index] = saved_records[index];
     }
     VS::Input::settings = saved_settings;
@@ -234,10 +235,10 @@ struct AbilityFixture {
       auto& other_actor = request.targets[0];
       other_actor.target.target_actor = 0;
       other_actor.target.hp = 50;
-      other_actor.hpEffect = 1;
+      other_actor.hp_effect = 1;
       auto& world_point = request.targets[1];
       world_point = other_actor;
-      world_point.targetsPosition = 1;
+      world_point.targets_position = 1;
       world_point.target.target_actor = 1;
     }
     for (int limb = 0; limb < limb_count; ++limb) {
@@ -246,7 +247,7 @@ struct AbilityFixture {
       hit.target.target_actor = 1;
       hit.target.target_limb = static_cast<char>(limb);
       hit.target.hp = hit.target.mp = amount;
-      hit.hpEffect = hit.mpEffect = 1;
+      hit.hp_effect = hit.mp_effect = 1;
       hit.limbs[limb].effects.opaque0 = amount;
     }
   }
@@ -274,24 +275,24 @@ struct AbilityHit {
 };
 
 struct AbilityEffectFixture : AbilityFixture {
-  decltype(std::to_array(Battle_statCalculators)) saved_calculators =
-      std::to_array(Battle_statCalculators);
-  decltype(std::to_array(Battle_limbArmorDpLoss)) saved_limb_damage =
-      std::to_array(Battle_limbArmorDpLoss);
-  decltype(std::to_array(Battle_statusEffectParams)) saved_status_params =
-      std::to_array(Battle_statusEffectParams);
+  decltype(VS::Battle::statCalculators) saved_calculators =
+      VS::Battle::statCalculators;
+  decltype(VS::Battle::limbArmorDpLoss) saved_limb_damage =
+      VS::Battle::limbArmorDpLoss;
+  decltype(VS::Battle::statusEffectParams) saved_status_params =
+      VS::Battle::statusEffectParams;
   std::array<VS::Battle::Ai::ActorAiState*, 2> saved_ai{
       VS::Battle::Ai::actorAiStates[0], VS::Battle::Ai::actorAiStates[1]};
-  u_int saved_last_value = Battle_lastActionStatValue;
-  int saved_critical = Battle_criticalHitOccurred;
+  u_int saved_last_value = VS::Battle::lastActionStatValue;
+  int saved_critical = VS::Battle::criticalHitOccurred;
   VS::Battle::Ai::ActorAiState ai[2]{};
-  Battle_HitResult source{};
-  Battle_HitResult target{};
+  VS::Battle::HitResult source{};
+  VS::Battle::HitResult target{};
 
   AbilityEffectFixture() {
     action.queueIndex = 3;
     action.selection.actionId = 99;
-    action.selection.primaryTarget.hpEffect = 1;
+    action.selection.primaryTarget.hp_effect = 1;
     action.selection.primaryTarget.target.hp = 101;
     action.selection.primaryTarget.target.mp = 9;
     action.selection.targets[0].target.hp = 83;
@@ -326,21 +327,21 @@ struct AbilityEffectFixture : AbilityFixture {
       }
     }
     BindCalculators();
-    Battle_statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
-    Battle_statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
-    Battle_statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
-    Battle_statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
+    VS::Battle::statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
+    VS::Battle::statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
+    VS::Battle::statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
+    VS::Battle::statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
   }
 
   ~AbilityEffectFixture() {
     std::copy(saved_calculators.begin(), saved_calculators.end(),
-              Battle_statCalculators);
+              VS::Battle::statCalculators.begin());
     std::copy(saved_limb_damage.begin(), saved_limb_damage.end(),
-              Battle_limbArmorDpLoss);
+              VS::Battle::limbArmorDpLoss.begin());
     std::copy(saved_status_params.begin(), saved_status_params.end(),
-              Battle_statusEffectParams);
-    Battle_lastActionStatValue = saved_last_value;
-    Battle_criticalHitOccurred = saved_critical;
+              VS::Battle::statusEffectParams.begin());
+    VS::Battle::lastActionStatValue = saved_last_value;
+    VS::Battle::criticalHitOccurred = saved_critical;
     for (int index = 0; index < 2; ++index) {
       VS::Battle::Ai::actorAiStates[index] = saved_ai[index];
     }
@@ -348,20 +349,22 @@ struct AbilityEffectFixture : AbilityFixture {
 
   static void BindCalculators() {
     // BATTLE.PRG _statCalculators, original pointer table at file 0x7FB0C.
-    Battle_statCalculators[1] = VS::Battle::LiveLastActionStatValue;
-    Battle_statCalculators[4] = VS::Battle::LiveScalePreviousTargetHit;
-    Battle_statCalculators[5] = VS::Battle::LiveScaleSourceMissingHp;
-    Battle_statCalculators[6] = VS::Battle::LiveScaleTargetCurrentHp;
-    Battle_statCalculators[8] = VS::Battle::LiveWeaponPpWithChainOffset;
-    Battle_statCalculators[9] = VS::Battle::LiveScaleIncomingSpellDamage;
-    Battle_statCalculators[10] = VS::Battle::LiveScaleIncomingPhysicalDamage;
-    Battle_statCalculators[11] = VS::Battle::LiveScaleSourceMissingMp;
-    Battle_statCalculators[18] = VS::Battle::LiveScalePreviousTargetHit;
-    Battle_statCalculators[19] = VS::Battle::LiveScaleIncomingSpellDamage;
-    Battle_statCalculators[20] = VS::Battle::LiveScaleIncomingPhysicalDamage;
-    Battle_statCalculators[21] = VS::Battle::LiveScaleIncomingSpellCost;
-    Battle_statCalculators[22] = VS::Battle::LiveScaleIncomingDamage;
-    Battle_statCalculators[23] = VS::Battle::LiveSourceShieldPp;
+    VS::Battle::statCalculators[1] = VS::Battle::LiveLastActionStatValue;
+    VS::Battle::statCalculators[4] = VS::Battle::LiveScalePreviousTargetHit;
+    VS::Battle::statCalculators[5] = VS::Battle::LiveScaleSourceMissingHp;
+    VS::Battle::statCalculators[6] = VS::Battle::LiveScaleTargetCurrentHp;
+    VS::Battle::statCalculators[8] = VS::Battle::LiveWeaponPpWithChainOffset;
+    VS::Battle::statCalculators[9] = VS::Battle::LiveScaleIncomingSpellDamage;
+    VS::Battle::statCalculators[10] =
+        VS::Battle::LiveScaleIncomingPhysicalDamage;
+    VS::Battle::statCalculators[11] = VS::Battle::LiveScaleSourceMissingMp;
+    VS::Battle::statCalculators[18] = VS::Battle::LiveScalePreviousTargetHit;
+    VS::Battle::statCalculators[19] = VS::Battle::LiveScaleIncomingSpellDamage;
+    VS::Battle::statCalculators[20] =
+        VS::Battle::LiveScaleIncomingPhysicalDamage;
+    VS::Battle::statCalculators[21] = VS::Battle::LiveScaleIncomingSpellCost;
+    VS::Battle::statCalculators[22] = VS::Battle::LiveScaleIncomingDamage;
+    VS::Battle::statCalculators[23] = VS::Battle::LiveSourceShieldPp;
   }
 
   void Queue(int id, int hit, const AbilityHit& contract) {
@@ -427,7 +430,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
         VS::Battle::AcceptAttackPrerequisiteSlot;
     VS::Battle::actionEffectMediators[58] =
         VS::Battle::QueueLiveHitDamageAndEquipmentWear;
-    Battle_statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
+    VS::Battle::statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
     stats[0].agility = 200;
     stats[0].strength = 150;
     stats[1].strength = 80;
@@ -464,7 +467,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     const auto resolved = Resolve(id);
     REQUIRE(resolved.targetCount == 1);
     CHECK(resolved.targets[0].target.hp == damage);
-    CHECK(resolved.targets[0].hpEffect == 1);
+    CHECK(resolved.targets[0].hp_effect == 1);
     stats[1].cancelsHitResults = 1;
     actors[1].roomSpawnIndex = 0x80;
     const auto cancelled = Resolve(id);
@@ -598,7 +601,7 @@ struct EnemyLootFixture : LootInventoryFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Items::LootListNode* saved_head = VS::Items::lootListHead;
-  Battle_Actor* saved_actor = Battle_actors[1];
+  Battle_Actor* saved_actor = VS::Battle::actors[1];
   VS::Items::InventoryContents* saved_staging = VS::Menu::Loot::stagedInventory;
   VS::Items::BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
   VS::Menu::Loot::LootRow* saved_rows = VS::Menu::Loot::lootList;
@@ -615,7 +618,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     enemy.id = 1;
     enemy.roomSpawnIndex = 1;
     enemy.stats = &stats;
-    Battle_actors[1] = &enemy;
+    VS::Battle::actors[1] = &enemy;
     VS::Items::inventory = {};
     source = {};
     VS::Menu::Loot::stagedInventory = &source;
@@ -630,7 +633,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   ~EnemyLootFixture() {
     VS::Items::ClearLiveRoomLootList();
     VS::Items::lootListHead = saved_head;
-    Battle_actors[1] = saved_actor;
+    VS::Battle::actors[1] = saved_actor;
     VS::Menu::Loot::stagedInventory = saved_staging;
     VS::Menu::Framework::lootEntry = saved_entry;
     VS::Menu::Loot::lootList = saved_rows;
@@ -1411,34 +1414,34 @@ struct LootPresentationFixture : EnemyLootFixture {
 
 struct AbilityUnlockFixture : AbilityFixture {
   VS::State::ArtsStatus saved_progress = VS::State::artsStatus;
-  decltype(std::to_array(Battle_battleAbilityPointRequirements)) saved_points =
-      std::to_array(Battle_battleAbilityPointRequirements);
+  decltype(VS::Battle::battleAbilityPointRequirements) saved_points =
+      VS::Battle::battleAbilityPointRequirements;
   decltype(kBreakArtThresholds)::value_type saved_art_points[10]{};
 
   AbilityUnlockFixture() {
     VS::State::artsStatus = {};
     std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
     std::copy(kAbilityThresholds.begin(), kAbilityThresholds.end(),
-              Battle_battleAbilityPointRequirements);
+              VS::Battle::battleAbilityPointRequirements.begin());
     for (unsigned category = 0; category < kBreakArtThresholds.size();
          ++category) {
       saved_art_points[category] =
-          std::to_array(Battle_breakArtPointRequirements[category]);
+          VS::Battle::breakArtPointRequirements[category];
       std::copy(kBreakArtThresholds[category].begin(),
                 kBreakArtThresholds[category].end(),
-                Battle_breakArtPointRequirements[category]);
+                VS::Battle::breakArtPointRequirements[category].begin());
     }
   }
 
   ~AbilityUnlockFixture() {
     VS::State::artsStatus = saved_progress;
     std::copy(saved_points.begin(), saved_points.end(),
-              Battle_battleAbilityPointRequirements);
+              VS::Battle::battleAbilityPointRequirements.begin());
     for (unsigned category = 0; category < kBreakArtThresholds.size();
          ++category) {
       std::copy(saved_art_points[category].begin(),
                 saved_art_points[category].end(),
-                Battle_breakArtPointRequirements[category]);
+                VS::Battle::breakArtPointRequirements[category].begin());
     }
   }
 };
@@ -1491,8 +1494,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   decltype(VS::Battle::actionEffectMediators) saved_effects =
       VS::Battle::actionEffectMediators;
   std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
-  Battle_HitResult source{};
-  Battle_HitResult target{};
+  VS::Battle::HitResult source{};
+  VS::Battle::HitResult target{};
   unsigned counter;
   int action_id = 184;
   int apply = 1;
@@ -1510,9 +1513,9 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
     target.target.hp = stats[1].currentHp;
     Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;
     Battle_actionDefinitions[160].type = Battle_ActionType_Item;
-    VS::Battle::actionEffectMediators[0] = [](Battle_ActionDefinition*,
-                                              Battle_HitResult*,
-                                              Battle_HitResult*, int, int) {};
+    VS::Battle::actionEffectMediators[0] =
+        [](Battle_ActionDefinition*, VS::Battle::HitResult*,
+           VS::Battle::HitResult*, int, int) {};
   }
 
   ~BreakArtKillFixture() {
@@ -1527,13 +1530,13 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         apply = 0;
         break;
       case KillGate::kPositionSource:
-        source.targetsPosition = 1;
+        source.targets_position = 1;
         break;
       case KillGate::kEnemySource:
         source.target.target_actor = 1;
         break;
       case KillGate::kPositionTarget:
-        target.targetsPosition = 1;
+        target.targets_position = 1;
         break;
       case KillGate::kDummy:
         stats[1].actorId = 0x80;
@@ -1945,11 +1948,11 @@ TEST_CASE("Ability eligibility requires real non-dummy actor targets",
   AbilityFixture fixture;
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   SECTION("source is a position") {
-    fixture.Request().primaryTarget.targetsPosition = 1;
+    fixture.Request().primaryTarget.targets_position = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("target is a position") {
-    fixture.Request().targets[0].targetsPosition = 1;
+    fixture.Request().targets[0].targets_position = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no target") {
@@ -2186,7 +2189,7 @@ TEST_CASE("Reflect abilities return damage only for the matching action type",
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
   fixture.action.selection.actionId = spell ? 99 : 1;
-  fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
+  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
   fixture.Queue(
       id, 0,
       {id == 42 ? 9 : 10, 4, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
@@ -2203,7 +2206,7 @@ TEST_CASE("Absorb abilities recover damage only for the matching action type",
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
   fixture.action.selection.actionId = spell ? 99 : 1;
-  fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
+  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
   fixture.Queue(id, 0,
                 {id == 44 ? 19 : 20, 2,
                  id == 44 ? VS::Battle::QueueLiveSpellTriggeredRecovery
@@ -2230,7 +2233,7 @@ TEST_CASE("All seven affinity defenses recover only matching damage",
   const int incoming_effect = GENERATE(1, 2, 3);
   AbilityEffectFixture fixture;
   fixture.action.selection.effectVariant = static_cast<char>(incoming);
-  fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
+  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
   fixture.Queue(46 + affinity, 0, {22, 5, kEffects[affinity], true});
   fixture.Commit();
   const bool applies = affinity == incoming && incoming_effect != 2;
@@ -2241,7 +2244,7 @@ TEST_CASE("Phantom Shield converts shield PP to recovery only after damage",
           "[combat][abilities][ability-effects]") {
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
+  fixture.action.selection.primaryTarget.hp_effect = incoming_effect;
   fixture.Queue(53, 0,
                 {23, 0, VS::Battle::QueueLiveDamageTriggeredRecovery, true});
   fixture.Queue(53, 1, {1, 0, VS::Battle::QueueLiveShieldPpDrain, true});
@@ -2268,8 +2271,8 @@ TEST_CASE("Offensive status abilities queue and apply their original ailments",
     CAPTURE(example.id);
     AbilityEffectFixture fixture;
     fixture.Queue(example.id, 0, {0, 0, example.apply});
-    CHECK(fixture.target.removeStatuses == example.mask);
-    VS::Battle::InflictLiveActorStatuses(fixture.target.removeStatuses,
+    CHECK(fixture.target.remove_statuses == example.mask);
+    VS::Battle::InflictLiveActorStatuses(fixture.target.remove_statuses,
                                          &fixture.stats[1]);
     CHECK(fixture.stats[1].statuses == example.mask);
     CHECK(fixture.stats[0].statuses == 0);
@@ -2283,8 +2286,8 @@ TEST_CASE("Ward removes paralysis and numbness without curing poison",
   VS::Battle::InflictLiveActorStatuses(0xE000, &fixture.stats[0]);
   fixture.Queue(40, 0, {0, 0, VS::Battle::QueueLiveParalysisCure, true});
   fixture.Queue(40, 1, {0, 0, VS::Battle::QueueLiveNumbnessCure, true});
-  CHECK(fixture.source.inflictStatuses == 0xA000);
-  VS::Battle::RemoveLiveActorStatuses(fixture.source.inflictStatuses,
+  CHECK(fixture.source.inflict_statuses == 0xA000);
+  VS::Battle::RemoveLiveActorStatuses(fixture.source.inflict_statuses,
                                       &fixture.stats[0]);
   CHECK(fixture.stats[0].statuses == 0x4000);
   CHECK(fixture.stats[0].walkSpeed == 8);
@@ -2333,7 +2336,7 @@ TEST_CASE("MP damage abilities cannot drain more MP than the target has",
       {id == 24 ? 4 : 11, id == 24 ? 3 : 2, VS::Battle::QueueLiveMpDrain});
   const int damage = std::min(mp, id == 24 ? 32 : 42);
   CHECK(fixture.target.target.mp == damage);
-  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(damage));
+  CHECK(VS::Battle::lastActionStatValue == static_cast<std::uint32_t>(damage));
   fixture.Commit();
   fixture.CheckResources(600, 100, 800, mp - damage);
 }
@@ -2390,9 +2393,9 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
   fixture.target.target.target_limb =
       static_cast<decltype(fixture.target.target.target_limb)>(limb);
   fixture.target.target.hp = 20;
-  fixture.target.hpEffect = 1;
+  fixture.target.hp_effect = 1;
   fixture.Queue(id, 1, {0, 0, VS::Battle::QueueLiveDamageBasedArmorWear});
-  CHECK(fixture.target.armorDpChange == 40);
+  CHECK(fixture.target.armor_dp_change == 40);
   CHECK(fixture.target.limbs[limb].effects.opaque2 == 40);
   fixture.Commit();
   CHECK(armor_dp == std::max(0, dp - 80));

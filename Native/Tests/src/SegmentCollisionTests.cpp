@@ -21,7 +21,7 @@
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacement.hpp"
@@ -42,8 +42,7 @@ static_assert(
 
 namespace {
 struct SegmentFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   decltype(VS::Field::gimmickInstances) saved_gimmicks =
@@ -57,13 +56,13 @@ struct SegmentFixture {
   SegmentFixture() {
     std::copy_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
                 saved_bounce.begin());
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
     VS::Field::roomData = {};
     for (unsigned index = 0; index < actors.size(); ++index) {
-      Battle_actors[index] = &actors[index];
+      VS::Battle::actors[index] = &actors[index];
       Actors_actorRecords[index] = &models[index];
       actors[index].id = static_cast<int>(index);
       actors[index].stats = &stats[index];
@@ -78,7 +77,8 @@ struct SegmentFixture {
   ~SegmentFixture() {
     std::copy(saved_bounce.begin(), saved_bounce.end(),
               VS::Field::platformBounceFrames.begin());
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());
@@ -100,7 +100,7 @@ struct ActionTraceFixture : SegmentFixture {
   VS::Render::ModelScratchpad workspace = *VS::Render::ModelWorkspace();
   u_int previous_hit = VS::Battle::previousHitResult;
   u_int prerequisite = VS::Battle::hitPrerequisiteResult;
-  u_int last_stat = Battle_lastActionStatValue;
+  u_int last_stat = VS::Battle::lastActionStatValue;
   Battle_ActionState* action_state = VS::Battle::actionState;
   std::unique_ptr<Battle_ActionState> owned_state =
       std::make_unique<Battle_ActionState>();
@@ -125,7 +125,7 @@ struct ActionTraceFixture : SegmentFixture {
     *VS::Render::ModelWorkspace() = workspace;
     VS::Battle::previousHitResult = previous_hit;
     VS::Battle::hitPrerequisiteResult = prerequisite;
-    Battle_lastActionStatValue = last_stat;
+    VS::Battle::lastActionStatValue = last_stat;
     Core_Gte_Reset();
   }
 };
@@ -191,7 +191,7 @@ TEST_CASE("Segment tracing respects reactions animation lock and ignored actor",
   SVECTOR output{};
   CHECK(TraceHorizontal(output) == nullptr);
   fixture.models[1].animationLocked = 0;
-  Battle_actors[0] = nullptr;
+  VS::Battle::actors[0] = nullptr;
   CHECK(TraceHorizontal(output, 1) == nullptr);
 }
 
@@ -271,7 +271,7 @@ TEST_CASE(
 TEST_CASE("Segment tracing uses bounded native platform contact storage",
           "[field][segment-collision]") {
   const SegmentFixture fixture;
-  Battle_actors[1] = nullptr;
+  VS::Battle::actors[1] = nullptr;
   std::array<VS::Field::MpdMovingPlatform, 5> platforms{};
   for (auto& platform : platforms) platform.is_hidden = 1;
   platforms.back().is_hidden = 0;
@@ -294,7 +294,7 @@ TEST_CASE("Segment tracing uses bounded native platform contact storage",
 TEST_CASE("Terrain segment hits preserve floor equality and aliased output",
           "[field][segment-collision]") {
   const SegmentFixture fixture;
-  Battle_actors[1] = nullptr;
+  VS::Battle::actors[1] = nullptr;
   SVECTOR from{32767, 0, 128, 77};
   const SVECTOR to{-32768, 0, 128, 88};
   CHECK(VS::Field::TraceLiveActorAndTerrainCollision(&from, &to, &from, 0) ==
@@ -339,13 +339,13 @@ TEST_CASE(
   auto input = std::make_unique<Battle_ActionRequest>();
   auto result = std::make_unique<Battle_ActionRequest>();
   input->targetCount = 1;
-  input->targets[0].targetsPosition = 1;
+  input->targets[0].targets_position = 1;
   const SVECTOR target{256, 0, 96, 0};
   std::memcpy(&input->targets[0].target, &target, sizeof target);
   VS::Battle::ResolveLiveActionTargets(ActionTraceFixture::kAction,
                                        result.get(), input.get(), 1);
   CHECK(result->targetCount == 1);
-  CHECK(result->targets[0].targetsPosition == 1);
+  CHECK(result->targets[0].targets_position == 1);
   CHECK(result->targets[0].target.mp == 0x80);
   CHECK(result->animationParameter == 1);
   SVECTOR impact{};

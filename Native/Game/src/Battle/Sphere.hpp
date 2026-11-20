@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Battle_TargetSphereSetupView;
-
 namespace VS::Battle {
+
+struct TargetSphereSetupView;
 
 // The tables' capacities; ModulePointers.cpp records the module image span
 // of each.
@@ -57,6 +57,6 @@ extern std::uint8_t positionCursorBlinkFrame;
 // decomp: D_800EB9AC (src/BATTLE/BATTLE.PRG/5BF94Private.h:146)
 extern std::uint8_t reuseSphereVolumes;
 // decomp: D_800EB9B8 (src/BATTLE/BATTLE.PRG/58578.h:43)
-extern Battle_TargetSphereSetupView* targetSphere;
+extern TargetSphereSetupView* targetSphere;
 
 }  // namespace VS::Battle

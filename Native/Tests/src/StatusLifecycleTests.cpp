@@ -8,11 +8,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycle.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -114,18 +114,22 @@ State Actor() {
 }
 
 struct LiveFixture {
-  Battle_Actor* saved_player = Battle_characterState;
+  Battle_Actor* saved_player = VS::Battle::characterState;
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
-  Battle_StatusEffectParams saved_attribute = Battle_statusEffectParams[5];
-  Battle_StatusEffectParams saved_movement = Battle_statusEffectParams[11];
-  Battle_StatusEffectParams saved_poison = Battle_statusEffectParams[14];
-  Battle_StatusEffectParams saved_regeneration = Battle_statusEffectParams[17];
+  VS::Battle::StatusEffectParams saved_attribute =
+      VS::Battle::statusEffectParams[5];
+  VS::Battle::StatusEffectParams saved_movement =
+      VS::Battle::statusEffectParams[11];
+  VS::Battle::StatusEffectParams saved_poison =
+      VS::Battle::statusEffectParams[14];
+  VS::Battle::StatusEffectParams saved_regeneration =
+      VS::Battle::statusEffectParams[17];
   Battle_Actor player{};
   Battle_ActorStats stats{};
   VS::Battle::Ai::ActorAiState ai{};
   LiveFixture() {
     player.stats = &stats;
-    Battle_characterState = &player;
+    VS::Battle::characterState = &player;
     VS::Battle::Ai::actorAiStates[0] = &ai;
     stats.currentHp = -32768;
     stats.currentMp = -123;
@@ -136,18 +140,18 @@ struct LiveFixture {
     stats.baseWalkSpeed = std::bit_cast<char>(std::uint8_t{205});
     stats.baseRunSpeed = std::bit_cast<char>(std::uint8_t{255});
     stats.totalStrength = 65535;
-    Battle_statusEffectParams[5].duration = 0x12FF;
-    Battle_statusEffectParams[11].duration = 0x3401;
-    Battle_statusEffectParams[14].tickInterval = 0x5602;
-    Battle_statusEffectParams[17].tickInterval = 0x7805;
+    VS::Battle::statusEffectParams[5].duration = 0x12FF;
+    VS::Battle::statusEffectParams[11].duration = 0x3401;
+    VS::Battle::statusEffectParams[14].tick_interval = 0x5602;
+    VS::Battle::statusEffectParams[17].tick_interval = 0x7805;
   }
   ~LiveFixture() {
-    Battle_characterState = saved_player;
+    VS::Battle::characterState = saved_player;
     VS::Battle::Ai::actorAiStates[0] = saved_ai;
-    Battle_statusEffectParams[5] = saved_attribute;
-    Battle_statusEffectParams[11] = saved_movement;
-    Battle_statusEffectParams[14] = saved_poison;
-    Battle_statusEffectParams[17] = saved_regeneration;
+    VS::Battle::statusEffectParams[5] = saved_attribute;
+    VS::Battle::statusEffectParams[11] = saved_movement;
+    VS::Battle::statusEffectParams[14] = saved_poison;
+    VS::Battle::statusEffectParams[17] = saved_regeneration;
   }
 };
 }  // namespace
@@ -416,7 +420,7 @@ TEST_CASE("Player limb recovery uses a nonzero mobility byte only as a guard",
 
 TEST_CASE("Live preservation resolves Ashley rather than the actor table",
           "[status-lifecycle][F00254]") {
-  auto* saved_player = Battle_characterState;
+  auto* saved_player = VS::Battle::characterState;
   Battle_ActorStats stats{};
   Battle_Actor player{};
   player.stats = &stats;
@@ -428,9 +432,9 @@ TEST_CASE("Live preservation resolves Ashley rather than the actor table",
   stats.statusTimers[7] = 255;
   const auto before =
       std::bit_cast<std::array<std::byte, sizeof(stats)>>(stats);
-  Battle_characterState = &player;
+  VS::Battle::characterState = &player;
   battle::PreserveLiveAshleyStatuses();
-  Battle_characterState = saved_player;
+  VS::Battle::characterState = saved_player;
   CHECK(std::bit_cast<std::array<std::byte, sizeof(stats)>>(stats) == before);
 }
 

@@ -12,7 +12,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
@@ -86,10 +86,11 @@ class LiveCostDefinition final : public ActionCostDefinition {
   Battle_ActionDefinition& definition_;
 };
 Battle_Actor* ActorAt(int slot) {
-  if (slot < 0 || static_cast<std::size_t>(slot) >= std::size(Battle_actors)) {
+  if (slot < 0 ||
+      static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
-  return Battle_actors[slot];
+  return VS::Battle::actors[slot];
 }
 class LiveCostWorld final : public ActionCostWorld {
  public:

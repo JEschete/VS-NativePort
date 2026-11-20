@@ -33,7 +33,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -593,8 +593,7 @@ static_assert(offsetof(CreationTestModel, bones) ==
 // The battle actor, actor record and AI tables a live creation uses, saved
 // and restored around one test, with a private heap.
 struct LiveCreationFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
@@ -616,7 +615,7 @@ struct LiveCreationFixture {
   CreationTestModel model{};
 
   LiveCreationFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
@@ -634,7 +633,7 @@ struct LiveCreationFixture {
   LiveCreationFixture& operator=(LiveCreationFixture&&) = delete;
   ~LiveCreationFixture() {
     VS::Render::ForgetLiveModelExtent(&model);
-    std::ranges::copy(saved_actors, std::begin(Battle_actors));
+    std::ranges::copy(saved_actors, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_states, std::begin(VS::Battle::Ai::actorAiStates));
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
     VS::Battle::Ai::roomAiState = saved_room;
@@ -672,7 +671,7 @@ struct LiveCreationFixture {
     record.collisionRadius = 20;
     record.collisionHeight = 0x90;
     Actors_actorRecords[0] = &record;
-    Battle_actors[0] = &actor;
+    VS::Battle::actors[0] = &actor;
   }
 };
 
@@ -808,7 +807,7 @@ TEST_CASE("Planning invariant termination child",
   VS::Battle::Ai::RoomAiState room{};
   actor.id = 0;
   VS::Battle::Ai::roomAiState = &room;
-  Battle_actors[0] = &actor;
+  VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::actorAiStates[0] = nullptr;
   try {
     VS::Battle::Ai::RebuildLiveActorActionPlans(nullptr);

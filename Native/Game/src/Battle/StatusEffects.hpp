@@ -1,0 +1,61 @@
+#pragma once
+// The status effect definitions and the battle's status and vitals timers,
+// with the BATTLE.PRG menu globals declared beside them. StatusEffects.cpp
+// defines them; the module images fill the tables at start-up.
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
+namespace VS::Actors {
+struct WeaponModel;
+}  // namespace VS::Actors
+
+namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
+struct CursorMemory;
+}  // namespace VS::Menu::Score
+
+namespace VS::Battle {
+
+inline constexpr std::size_t kStatusEffectParamsBytes = 0x10;
+
+// decomp: vs_main_statusEffectParams_t, upstream vs_StatusEffectParams
+// (src/SLUS_010.40/modifiers.h:11)
+struct StatusEffectParams {
+  std::int32_t status_flags;
+  std::uint16_t duration;
+  std::uint16_t tick_interval;
+  std::int32_t cancelled_statuses;
+  std::int32_t blocking_statuses;
+};
+static_assert(sizeof(StatusEffectParams) == kStatusEffectParamsBytes,
+              "StatusEffectParams must keep its PS1 layout");
+
+inline constexpr std::size_t kStatusEffectCount = 32;
+inline constexpr std::size_t kStatusLimbCount = 4;
+
+// decomp: D_800E8204 (src/BATTLE/BATTLE.PRG/146C.c:298)
+extern std::array<std::int32_t, kStatusLimbCount> limbStatusFlags;
+// decomp: D_800E8490 (src/BATTLE/BATTLE.PRG/146C.c:304)
+extern std::int32_t vitalsTickCounter;
+// decomp: D_800E8494 (src/BATTLE/BATTLE.PRG/146C.c:305)
+extern std::int32_t regeneratingLimb;
+// decomp: D_800E8498 (src/BATTLE/BATTLE.PRG/146C.c:306)
+extern std::int32_t targetingRiskTimer;
+// decomp: vs_battle_sceneBuffer (src/BATTLE/BATTLE.PRG/mpd.h:257)
+extern void* sceneBuffer;
+// decomp: vs_battle_menu9CursorMemory (src/BATTLE/BATTLE.PRG/menuState.h:39)
+extern VS::Menu::Score::CursorMemory menu9CursorMemory;
+// decomp: vs_battle_submenuState (src/BATTLE/BATTLE.PRG/menuState.h:40)
+extern std::int32_t submenuState;
+// decomp: D_800F4590 (src/BATTLE/BATTLE.PRG/battleUnk.h:34): the original's
+// alias of the preview weapon model slots; its D_800F4590_t is a partial view
+// of the weapon model it points at.
+extern std::array<Actors::WeaponModel*, 1> previewWeaponModelAliases;
+// decomp: D_800F4594 (src/BATTLE/BATTLE.PRG/battleUnk.h:35): the original's
+// alias of the preview shield model slot.
+extern std::int32_t previewShieldModelAlias;
+// decomp: vs_main_statusEffectParams (src/SLUS_010.40/modifiers.h:40)
+extern std::array<StatusEffectParams, kStatusEffectCount> statusEffectParams;
+
+}  // namespace VS::Battle

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
@@ -22,7 +22,8 @@ class LiveHost final : public ScriptedEffectTriggerHost {
                                                     variant_argument));
   }
   bool ActorLoaded(std::size_t slot) override {
-    return slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr;
+    return slot < std::size(VS::Battle::actors) &&
+           VS::Battle::actors[slot] != nullptr;
   }
   void StartEffectTrack(std::int32_t track) override {
     static_cast<void>(LiveStartEffectTrack(track));

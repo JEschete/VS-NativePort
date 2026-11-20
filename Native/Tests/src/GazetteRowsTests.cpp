@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -456,7 +456,7 @@ struct LiveMenuFixture {
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
   VS::Input::Settings saved_settings = VS::Input::settings;
-  score::CursorMemory saved_cursor = Battle_unusedMenu9CursorMemory;
+  score::CursorMemory saved_cursor = VS::Battle::menu9CursorMemory;
   std::array<u_short, std::size(score::menuText)> saved_text{};
   score::TopMenuState saved_top_menu = score::LiveTopMenuState();
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -486,7 +486,7 @@ struct LiveMenuFixture {
     VS::Menu::Framework::menuItems = saved_rows;
     VS::Menu::Framework::menuMemory = saved_memory;
     VS::Input::settings = saved_settings;
-    Battle_unusedMenu9CursorMemory = saved_cursor;
+    VS::Battle::menu9CursorMemory = saved_cursor;
     score::LiveTopMenuState() = saved_top_menu;
   }
   LiveMenuFixture(const LiveMenuFixture&) = delete;
@@ -519,7 +519,7 @@ TEST_CASE("RestoreLiveTopMenuCursor refuses missing text and bad counts",
 TEST_CASE("UpdateLiveTopMenu shows the choices and returns the chosen row",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  Battle_unusedMenu9CursorMemory.gazette_row = 3;
+  VS::Battle::menu9CursorMemory.gazette_row = 3;
   CHECK(score::UpdateLiveTopMenu(1) == score::kTopMenuPending);
   CHECK(score::LiveTopMenuState() == score::TopMenuState{1, 0});
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[2] == 3);

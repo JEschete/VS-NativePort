@@ -4,18 +4,19 @@
 // and write by name, and the battle action, actor and diagnostic helpers.
 // Only the *Live.cpp files and the tests include it.
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Items/EquipmentAffinity.hpp"
@@ -61,8 +62,10 @@ static_assert(std::extent_v<decltype(Battle_ActionDefinition::hits)> ==
               kActionHitCount);
 // The battle actor table's length (decomp: vs_battle_actors).
 inline constexpr std::size_t kBattleActorSlots = 42;
-static_assert(std::extent_v<decltype(Battle_actors)> == kBattleActorSlots);
-static_assert(std::extent_v<decltype(Battle_limbArmorDpLoss)> >= kLimbCount);
+static_assert(std::tuple_size_v<decltype(VS::Battle::actors)> ==
+              kBattleActorSlots);
+static_assert(std::tuple_size_v<decltype(VS::Battle::limbArmorDpLoss)> >=
+              kLimbCount);
 
 // Reports a refusal the typed core returned; kOk reports nothing.
 void WarnRefusal(const char* operation, ItemsStatus status);

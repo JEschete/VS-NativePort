@@ -10,8 +10,8 @@
 // The room actor roster (BATTLE.PRG 146C.c:884-946, 1842-1864, 6028 and
 // 74088.c:1001): the list of room actors chained after Ashley (slot 0),
 // removing an actor from its slot, freezing every actor's animation and the
-// stats of a placeholder actor. ActorRosterLive binds Battle_actors and the
-// actor records.
+// stats of a placeholder actor. ActorRosterLive binds VS::Battle::actors and
+// the actor records.
 namespace VS::Actors {
 // The actor slots the roster walks: Ashley, the room actors and gimmicks.
 inline constexpr std::size_t kRosterSlots = 16;

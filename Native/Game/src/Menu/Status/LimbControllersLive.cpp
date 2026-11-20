@@ -11,7 +11,7 @@
 
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -61,17 +61,18 @@ void Report(std::string_view call, const LimbControllerResult& result) {
 }
 
 [[nodiscard]] Battle_ActorStats* StatsOf(std::int32_t slot) {
-  if (slot < 0 || static_cast<std::size_t>(slot) >= std::size(Battle_actors)) {
+  if (slot < 0 ||
+      static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
     return nullptr;
   }
   const Battle_Actor* const actor =
-      Battle_actors[static_cast<std::size_t>(slot)];
+      VS::Battle::actors[static_cast<std::size_t>(slot)];
   return actor == nullptr ? nullptr : actor->stats;
 }
 [[nodiscard]] std::optional<std::int32_t> SlotOf(
     const Battle_ActorStats* stats) {
   if (stats == nullptr) return std::nullopt;
-  for (std::size_t slot = 0; slot < std::size(Battle_actors); ++slot) {
+  for (std::size_t slot = 0; slot < std::size(VS::Battle::actors); ++slot) {
     if (StatsOf(static_cast<std::int32_t>(slot)) == stats) {
       return static_cast<std::int32_t>(slot);
     }

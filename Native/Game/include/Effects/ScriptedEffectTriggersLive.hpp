@@ -4,8 +4,8 @@
 #include "Effects/ScriptedEffectTriggers.hpp"
 
 // Live binding for the scripted actor effect trigger lifecycle
-// (ScriptedEffectTriggers.hpp) over Battle_actors, LiveBeginActionEffect and
-// the effect runtime's track and phase services. The entries keep the
+// (ScriptedEffectTriggers.hpp) over VS::Battle::actors, LiveBeginActionEffect
+// and the effect runtime's track and phase services. The entries keep the
 // original signatures for the event script's effect commands and the
 // module's function pointers.
 namespace VS::Effects {

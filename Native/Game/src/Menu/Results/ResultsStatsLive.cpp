@@ -1,12 +1,12 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed results stat award (ResultsStats.cpp) to
-// Battle_characterState->stats.
+// VS::Battle::characterState->stats.
 #include "Menu/Results/ResultsStatsLive.hpp"
 
 #include <cstdint>
 #include <optional>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "Menu/Results/ResultsStats.hpp"
@@ -14,16 +14,16 @@
 namespace VS::Menu::Results {
 namespace {
 Battle_ActorStats* LiveStats(const char* entry) {
-  if (Battle_characterState == nullptr) {
+  if (VS::Battle::characterState == nullptr) {
     VS::Core::Warnf("menu.results", "%s refused: no character state", entry);
     return nullptr;
   }
-  if (Battle_characterState->stats == nullptr) {
+  if (VS::Battle::characterState->stats == nullptr) {
     VS::Core::Warnf("menu.results", "%s refused: character has no stat record",
                     entry);
     return nullptr;
   }
-  return Battle_characterState->stats;
+  return VS::Battle::characterState->stats;
 }
 
 class LiveAshleyStatHost final : public AshleyStatHost {

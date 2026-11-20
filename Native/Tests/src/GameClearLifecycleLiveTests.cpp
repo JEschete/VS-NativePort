@@ -8,9 +8,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -95,7 +95,7 @@ void QueueGameClearMusic() {
 }
 
 void CheckCommittedScore() {
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CHECK(results::buffReelIndex == 0);
   CHECK(VS::State::scoreData.misc_score == 90100);
   CHECK(VS::State::scoreData.heal_count == 0);
@@ -129,7 +129,7 @@ void CheckRealReelFrame(LiveFixture& fixture) {
 struct SavedServiceViews {
   decltype(VS::Render::FrameScratchpad()) frame = VS::Render::FrameScratchpad();
   decltype(VS::Audio::soundState) audio = VS::Audio::soundState;
-  Battle_Actor* actor = Battle_characterState;
+  Battle_Actor* actor = VS::Battle::characterState;
   unsigned random = VS::Core::BiosRand().State();
 
   void CheckRestored() const {
@@ -139,7 +139,7 @@ struct SavedServiceViews {
     CHECK(VS::Render::FrameScratchpad().ordering_table == frame.ordering_table);
     CHECK(VS::Render::FrameScratchpad().overlay_ordering_table ==
           frame.overlay_ordering_table);
-    CHECK(Battle_characterState == actor);
+    CHECK(VS::Battle::characterState == actor);
     CHECK(VS::Audio::soundState.current_music_data == audio.current_music_data);
     CHECK(VS::Audio::soundState.current_music_slot == audio.current_music_slot);
   }
@@ -174,7 +174,7 @@ RankRead StartFailedRankRead(std::array<unsigned char, 1>& outer) {
   constexpr int kQueueUpdates = 2;
   constexpr int kUnmappedSector = 0x7FFF'0000;
   REQUIRE(results::LiveUpdateResultsScreen(outer.data()) == 0);
-  REQUIRE(Battle_unusedSubmenuState == 1);
+  REQUIRE(VS::Battle::submenuState == 1);
   auto& request = VS::Content::discRequestSlots[0];
   REQUIRE(request.state == VS::Content::DiscRequestState::kEnqueued);
   const RankRead rank{
@@ -191,7 +191,7 @@ RankRead StartFailedRankRead(std::array<unsigned char, 1>& outer) {
 }
 
 void CheckFailedRequestKept(const RankRead& rank) {
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(rank.request->state == VS::Content::DiscRequestState::kError);
   CHECK(content::LiveDiscRequestGeneration(rank.request) == rank.generation);
   CHECK(rank.request->destination == rank.buffer);
@@ -232,7 +232,7 @@ TEST_CASE("Game-clear Live ordinary MENUF reload resets file-backed counters",
 TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
           "[game-clear-live][F03010][reload]") {
   LiveFixture fixture;
-  Battle_unusedSubmenuState = 7;
+  VS::Battle::submenuState = 7;
   fixture.stats.strength = 77;
   VS::State::scoreData.misc_score = 12345;
   results::mapCompletion = 89;
@@ -240,7 +240,7 @@ TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
   results::clearCount = 8;
   results::incrementingMapCompletion = 9;
   results::ResetLiveGameClearModuleData();
-  CHECK(Battle_unusedSubmenuState == 7);
+  CHECK(VS::Battle::submenuState == 7);
   CHECK(fixture.stats.strength == 77);
   CHECK(VS::State::scoreData.misc_score == 12345);
   CHECK(results::mapCompletion == 0);
@@ -347,9 +347,9 @@ TEST_CASE("Game-clear Live interrupted load requires cleanup before restart",
   REQUIRE(results::LiveInitializeGameClear() == 0);
   void* const buffer = VS::Content::discRequestSlots[0].destination;
   results::ResetLiveGameClearModuleData();
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   CHECK(results::LiveInitializeGameClear() == 0);
-  CHECK(Battle_unusedSubmenuState == 0);
+  CHECK(VS::Battle::submenuState == 0);
   CHECK(VS::Content::discRequestSlots[0].destination == buffer);
   CHECK(memory::GameHeap().AllocatedBlocks().size() == 1);
   CHECK(results::CleanupLiveGameClearOwnedState());
@@ -358,17 +358,17 @@ TEST_CASE("Game-clear Live interrupted load requires cleanup before restart",
 TEST_CASE("Game-clear Live missing slot and queue Error remain pending",
           "[game-clear-live][F03010]") {
   LiveFixture fixture;
-  Battle_unusedSubmenuState = 1;
+  VS::Battle::submenuState = 1;
   CHECK(results::LiveInitializeGameClear() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(memory::GameHeap().Empty());
-  Battle_unusedSubmenuState = 0;
+  VS::Battle::submenuState = 0;
   REQUIRE(results::LiveInitializeGameClear() == 0);
   VS::Content::discRequestSlots[0].state =
       VS::Content::DiscRequestState::kError;
   VS::Content::discRequestCounts.waiting = 0;
   CHECK(results::LiveInitializeGameClear() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(results::InspectLiveGameClear().owns_buffer);
 }
 
@@ -410,7 +410,7 @@ TEST_CASE(
   const auto bytes = InjectLoadedRank();
   REQUIRE_FALSE(bytes.empty());
   CHECK(results::LiveInitializeGameClear() == 0);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
   CHECK_FALSE(results::InspectLiveGameClear().owns_request);
   const auto palette_word = [&](std::size_t index) {
     std::uint32_t word = 0;
@@ -432,7 +432,7 @@ TEST_CASE(
   REQUIRE_FALSE(bytes.empty());
   PutWord(bytes, 8, 0);
   CHECK(results::LiveInitializeGameClear() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(results::InspectLiveGameClear().owns_request);
   CHECK(results::InspectLiveGameClear().owns_buffer);
 }
@@ -445,10 +445,10 @@ TEST_CASE(
   REQUIRE_FALSE(InjectLoadedRank().empty());
   REQUIRE(results::LiveInitializeGameClear() == 0);
   fixture.CompleteMusicLoad();
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(results::LiveInitializeGameClear() == 0);
   CHECK(results::InspectLiveGameClear().owns_buffer);
-  CHECK(Battle_unusedSubmenuState == 2);
+  CHECK(VS::Battle::submenuState == 2);
 }
 
 TEST_CASE("Game-clear Live initialization commits the real resident score",
@@ -478,13 +478,13 @@ TEST_CASE("Game-clear Live missing actor cannot complete a reward",
           "[game-clear-live][F03015]") {
   LiveFixture fixture;
   PrimeClosing(fixture);
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(results::LiveUpdateGameClear() == 0);
   CHECK(fixture.stats.strength == 100);
   CHECK(results::InspectLiveGameClear().state_timer == 8);
   CHECK(render::LiveTexturePages()[29].state ==
         render::TexturePageState::kOwned);
-  Battle_characterState = &fixture.actor;
+  VS::Battle::characterState = &fixture.actor;
   CHECK(results::LiveUpdateGameClear() == 1);
   CHECK(fixture.stats.strength == 103);
   CHECK(render::LiveTexturePages()[29].state ==

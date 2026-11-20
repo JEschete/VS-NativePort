@@ -8,7 +8,7 @@
 #include <span>
 
 #include "Battle/Feedback.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -30,6 +30,7 @@
 #include "Field/Zone.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapTerminalLive.hpp"
+#include "Menu/Score/ScoreScreen.hpp"
 #include "State/Progress.hpp"
 
 // decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
@@ -137,8 +138,8 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
                                      sizeof VS::Field::entranceDoorRecord);
         return;
       case RoomRecord::kUnusedMenuCursorMemory:
-        Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory,
-                                     sizeof Battle_unusedMenu9CursorMemory);
+        Memory::ZeroLiveAlignedWords(&VS::Battle::menu9CursorMemory,
+                                     sizeof VS::Battle::menu9CursorMemory);
         return;
       case RoomRecord::kManualDisplay:
         Memory::ZeroLiveAlignedWords(&manualDisplayState,
@@ -172,8 +173,8 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
         static_cast<u_short>(defaults.room_updates_paused ? 1 : 0);
     roomTint.is_active =
         static_cast<std::int16_t>(defaults.room_tint_active ? 1 : 0);
-    Battle_unusedSubmenuState = 0;
-    Battle_unusedSceneBuffer = nullptr;
+    VS::Battle::submenuState = 0;
+    VS::Battle::sceneBuffer = nullptr;
     isMinimapVisible =
         static_cast<std::uint8_t>(defaults.minimap_visible ? 1 : 0);
     minimapSlideFrame = static_cast<std::int16_t>(defaults.minimap_slide_frame);

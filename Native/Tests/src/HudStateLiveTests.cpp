@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -24,7 +24,7 @@ struct LiveHudFixture {
   u_short saved_wobble = VS::Battle::battleModeIndicatorWobble;
   u_char saved_animation = VS::Battle::shortcutHudAnimationStep;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_character = VS::Battle::characterState;
   std::array<u_short, 10> saved_mapping = VS::Battle::upperStatusIconFlags;
 
   LiveHudFixture() {
@@ -38,7 +38,7 @@ struct LiveHudFixture {
     VS::Battle::shortcutHudAnimationStep = 0xD3;
     VS::Battle::lowerScreenUiState = static_cast<char>(0xFF);
     VS::Field::isMinimapVisible = 0xAB;
-    Battle_characterState = nullptr;
+    VS::Battle::characterState = nullptr;
   }
   ~LiveHudFixture() {
     VS::Battle::hudHidden = static_cast<char>(saved.visibility.value);
@@ -51,7 +51,7 @@ struct LiveHudFixture {
     VS::Battle::battleModeIndicatorWobble = saved_wobble;
     VS::Battle::shortcutHudAnimationStep = saved_animation;
     VS::Field::isMinimapVisible = saved_minimap;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     std::ranges::copy(saved_mapping,
                       std::span(VS::Battle::upperStatusIconFlags).begin());
   }

@@ -17,7 +17,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -28,9 +28,9 @@
 #include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/EncounterHooks.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Text/TextCode.hpp"
@@ -81,7 +81,7 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
   PlayerActorObservation snapshot;
   static_cast<EncounterActorState&>(snapshot) = base;
   const int slot = base.slot;
-  const auto* actor = Battle_actors[slot];
+  const auto* actor = VS::Battle::actors[slot];
   if (actor == nullptr || actor->stats == nullptr) {
     throw std::runtime_error("diagnostic actor vanished within a frame");
   }
@@ -164,7 +164,7 @@ int WarlockSpellRankCount(int action) {
 }
 
 void InspectActionOptions(PlayerObservationState& state) {
-  const auto* player = Battle_actors[0];
+  const auto* player = VS::Battle::actors[0];
   if (player == nullptr || player->stats == nullptr ||
       VS::Battle::actionState == nullptr) {
     return;
@@ -205,7 +205,7 @@ void InspectActionOptions(PlayerObservationState& state) {
 }
 
 void InspectItemOptions(PlayerObservationState& state) {
-  const auto* player = Battle_actors[0];
+  const auto* player = VS::Battle::actors[0];
   if (player == nullptr || player->stats == nullptr) return;
   constexpr int kFirstItem = 323;
   constexpr unsigned kFirstRankedSpell = 106, kRankedSpellCount = 28;
@@ -358,29 +358,29 @@ void InspectIncomingEffect(const Battle_ActionState& action,
   }
   for (unsigned index = 0; index < queued.targetCount; ++index) {
     const auto& hit = queued.targets[index];
-    if (hit.targetsPosition != 0 || hit.target.target_actor != 0) continue;
-    if (hit.hpEffect == kHpDamage || hit.hpEffect == kCombinedDamage) {
+    if (hit.targets_position != 0 || hit.target.target_actor != 0) continue;
+    if (hit.hp_effect == kHpDamage || hit.hp_effect == kCombinedDamage) {
       snapshot.incoming_hp_damage +=
           std::max(0, static_cast<int>(hit.target.hp));
     }
-    if (hit.mpEffect == kHpDamage || hit.mpEffect == kCombinedDamage) {
+    if (hit.mp_effect == kHpDamage || hit.mp_effect == kCombinedDamage) {
       snapshot.incoming_mp_damage +=
           std::max(0, static_cast<int>(hit.target.mp));
     }
     snapshot.incoming_statuses |=
-        static_cast<std::uint32_t>(hit.removeStatuses);
+        static_cast<std::uint32_t>(hit.remove_statuses);
   }
 }
 
 void InspectReactionEligibility(EncounterReactionTimingState& snapshot) {
   const auto present = [](int slot) {
     return slot >= 0 && slot < EncounterLimits::kActorSlots &&
-           Battle_actors[slot] != nullptr &&
-           Battle_actors[slot]->stats != nullptr;
+           VS::Battle::actors[slot] != nullptr &&
+           VS::Battle::actors[slot]->stats != nullptr;
   };
   if (!present(snapshot.source_actor) || !present(snapshot.target_actor) ||
-      Battle_characterState == nullptr ||
-      Battle_characterState->stats == nullptr) {
+      VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState->stats == nullptr) {
     snapshot.eligibility_status = "actor_state_unavailable";
     return;
   }
@@ -429,8 +429,8 @@ EncounterReactionTimingState InspectReactionTiming(
   const auto& queued = action.queue[action.queueIndex & kQueueIndexMask];
   snapshot.action = queued.actionId;
   InspectIncomingEffect(action, queued, snapshot);
-  if (queued.primaryTarget.targetsPosition != 0 || queued.targetCount == 0 ||
-      queued.targets[0].targetsPosition != 0) {
+  if (queued.primaryTarget.targets_position != 0 || queued.targetCount == 0 ||
+      queued.targets[0].targets_position != 0) {
     if (snapshot.active) snapshot.eligibility_status = "not_actor_targeted";
     return snapshot;
   }
@@ -890,7 +890,7 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
   state.reaction_timing = InspectReactionTiming(base);
   for (std::size_t index = 0; index < state.status_masks.size(); ++index) {
     state.status_masks[index] = static_cast<std::uint32_t>(
-        Battle_statusEffectParams[index].statusFlags);
+        VS::Battle::statusEffectParams[index].status_flags);
   }
   InspectActionOptions(state);
   InspectItemOptions(state);

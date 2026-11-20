@@ -12,7 +12,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -172,7 +172,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
             .material = static_cast<std::uint8_t>(shield->base.material)};
   }
   std::optional<HeldBlade> HeldWeapon() override {
-    const Battle_Actor* actor = Battle_characterState;
+    const Battle_Actor* actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr) {
       return std::nullopt;
     }

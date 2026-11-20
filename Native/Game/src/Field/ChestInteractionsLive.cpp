@@ -26,7 +26,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
@@ -96,7 +96,7 @@ constexpr std::int32_t kActorFallEventRequest = 0xC;
 constexpr std::size_t kTriggerModeByte = 3;
 
 Battle_Actor* TileTriggerActor(std::size_t index) {
-  const std::span actors(Battle_actors);
+  const std::span actors(VS::Battle::actors);
   return index < actors.size() ? actors[index] : nullptr;
 }
 
@@ -485,8 +485,9 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
  public:
   bool HasActionState(const VS::Field::TrapActionInput& input) const override {
     return VS::Battle::actionState != nullptr && input.actor >= 0 &&
-           input.actor < kActorSlots && Battle_actors[input.actor] != nullptr &&
-           Battle_actors[input.actor]->stats != nullptr;
+           input.actor < kActorSlots &&
+           VS::Battle::actors[input.actor] != nullptr &&
+           VS::Battle::actors[input.actor]->stats != nullptr;
   }
   std::optional<std::int16_t> Kind(
       VS::Field::TrapTarget target) const override {
@@ -498,9 +499,10 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
       return false;
     }
     auto& action = *VS::Battle::actionState;
-    action.selection.primaryTarget.targetsPosition = kTrapPrimaryTargetPosition;
+    action.selection.primaryTarget.targets_position =
+        kTrapPrimaryTargetPosition;
     action.selection.targetCount = 1;
-    action.selection.targets[0].targetsPosition = 0;
+    action.selection.targets[0].targets_position = 0;
     action.selection.targets[0].target.target_actor =
         static_cast<std::uint8_t>(input.actor);
     action.selection.targets[0].target.target_limb =
@@ -815,8 +817,9 @@ class LiveInteractionDispatchHost final
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
     const int actor = VS::Field::interactionFocus.actor_query.actor_index;
     if (trap == nullptr || actor < 0 || actor >= kActorSlots ||
-        VS::Battle::actionState == nullptr || Battle_actors[actor] == nullptr ||
-        Battle_actors[actor]->stats == nullptr) {
+        VS::Battle::actionState == nullptr ||
+        VS::Battle::actors[actor] == nullptr ||
+        VS::Battle::actors[actor]->stats == nullptr) {
       return false;
     }
     const auto& point =
@@ -1070,8 +1073,8 @@ bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
   if (!host.HasActionState(input)) {
     return false;
   }
-  input.default_limb =
-      static_cast<std::uint8_t>(Battle_actors[actor]->stats->defaultTargetLimb);
+  input.default_limb = static_cast<std::uint8_t>(
+      VS::Battle::actors[actor]->stats->defaultTargetLimb);
   return TriggerActorTrap(target, input, host);
 }
 }  // namespace VS::Field

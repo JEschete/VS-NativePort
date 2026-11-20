@@ -23,7 +23,7 @@
 #include "Battle/Actor.h"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"

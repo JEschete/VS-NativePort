@@ -7,7 +7,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Content/StringTables.hpp"
@@ -270,11 +270,12 @@ class LivePointsHost final : public UnlockPointsHost {
     return VS::State::artsStatus.kills.total_kills;
   }
   std::optional<std::uint16_t> Requirement(int count) const override {
-    if (count < 0 || static_cast<std::size_t>(count) >=
-                         std::size(Battle_battleAbilityPointRequirements)) {
+    if (count < 0 ||
+        static_cast<std::size_t>(count) >=
+            std::size(VS::Battle::battleAbilityPointRequirements)) {
       return std::nullopt;
     }
-    return Battle_battleAbilityPointRequirements[count];
+    return VS::Battle::battleAbilityPointRequirements[count];
   }
   void DrawCompactText(std::string_view text, std::uint32_t position) override {
     std::array<char, kRiskTextCapacity> terminated{};

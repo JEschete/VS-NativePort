@@ -15,7 +15,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -145,7 +145,7 @@ class LiveSnapshotHost final : public SnapshotHost {
     return definitions[action].unlocked != 0;
   }
   std::optional<AshleyCombatStats> AshleyStats() override {
-    const Battle_Actor* actor = Battle_characterState;
+    const Battle_Actor* actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr) {
       return std::nullopt;
     }

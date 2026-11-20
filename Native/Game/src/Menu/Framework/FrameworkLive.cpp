@@ -25,7 +25,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -780,7 +780,7 @@ class LiveHost final : public Host {
   int CurrentSceneId() override { return VS::Field::LiveCurrentSceneId(); }
 
   std::optional<RestrictionInputs> Restrictions() override {
-    const Battle_Actor* const actor = Battle_characterState;
+    const Battle_Actor* const actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr ||
         actor->model == nullptr) {
       Refuse("action restrictions without Ashley");
@@ -822,11 +822,11 @@ class LiveHost final : public Host {
   }
 
   std::span<const std::uint8_t> AshleyName() override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       return {};
     }
-    return BytesOf(Battle_characterState->stats->name);
+    return BytesOf(VS::Battle::characterState->stats->name);
   }
 
   const char* LimbName(int limb) override {

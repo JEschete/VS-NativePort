@@ -14,7 +14,7 @@
 #include "Battle/ActionPhases.hpp"
 #include "Battle/Actor.h"
 #include "Battle/BattleModeLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -40,8 +40,8 @@ Battle_ActionState& State() {
 }
 Battle_Actor* Actor(int slot) {
   Require(slot >= 0 &&
-          static_cast<std::size_t>(slot) < std::size(Battle_actors));
-  return Battle_actors[slot];
+          static_cast<std::size_t>(slot) < std::size(VS::Battle::actors));
+  return VS::Battle::actors[slot];
 }
 struct LiveSource final : ActionPhaseSource {
   explicit LiveSource(Battle_ActionRequest& action) : action_(action) {}

@@ -3,7 +3,7 @@
 // Binds MapLoading.hpp to the generated map menu: the area chooser over
 // VS::State::roomVisitProgress.area_flags, sceneRowIdMap, currentMapRow,
 // mapNames and the framework's menu rows; the background over its own disc
-// request and image; and the ARM scene map over Battle_unusedSceneBuffer,
+// request and image; and the ARM scene map over VS::Battle::sceneBuffer,
 // sceneCdQueueSlot and the map view statics (Menu/Map.hpp), through
 // MapNavigationLive.hpp's room rules. Each entry keeps the original call shape.
 // Missing menu text or names, a name offset or scene outside its table, a

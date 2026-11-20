@@ -85,8 +85,8 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
   }
 
   void CheckResidentOwners() const {
-    CHECK(Battle_unusedSubmenuState == 1);
-    CHECK(Battle_characterState == &actor);
+    CHECK(VS::Battle::submenuState == 1);
+    CHECK(VS::Battle::characterState == &actor);
     CHECK(stats.strength == 77);
     CHECK(VS::State::scoreData.misc_score == 12345);
   }
@@ -94,9 +94,9 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
   static void Reenter() {
     render::AdvanceLiveTexturePageRetirements();
     render::AdvanceLiveTexturePageRetirements();
-    Battle_unusedSubmenuState = 0;
+    VS::Battle::submenuState = 0;
     REQUIRE(results::LiveInitializeGameClear() == 0);
-    CHECK(Battle_unusedSubmenuState == 1);
+    CHECK(VS::Battle::submenuState == 1);
     CHECK(results::InspectLiveGameClear().request_bound);
     CHECK(results::InspectLiveGameClear().buffer_bound);
   }
@@ -115,7 +115,7 @@ void CheckReleasedOwner() {
 }
 
 void CheckFallbackRequest(std::size_t records) {
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(results::InspectLiveGameClear().owns_request);
   CHECK(results::InspectLiveGameClear().request_bound);
   CHECK(content::LiveRefusedDiscRecordsInUse() == records);
@@ -160,7 +160,7 @@ TEST_CASE("Game-clear module entries use actual controller and score owners",
           "[F03064]") {
   game_clear_live_tests::Fixture fixture;
   REQUIRE(ModuleEntry(0x80102D10, &results::LiveInitializeGameClear)() == 0);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   CHECK(results::InspectLiveGameClear().request_bound);
   results::screenState = 2;
   results::screenTimer = -1000;
@@ -266,7 +266,7 @@ TEST_CASE("Production heap replacement cancels results ownership first",
   CheckReleasedOwner();
   CHECK(memory::GameHeap().Empty());
   CHECK(memory::RefusedLiveHeapRequestCount() == refused);
-  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(VS::Battle::submenuState == 1);
   ReloadFixture::Reenter();
 }
 

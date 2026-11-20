@@ -20,11 +20,11 @@
 #include "Battle/Actor.h"
 #include "Battle/BasicActionEffects.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/RandomLive.hpp"
@@ -48,35 +48,35 @@ auto Bytes(const T& value) {
   return std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
 }
 
-Battle_HitResult SeedHit() {
-  std::array<std::uint32_t, sizeof(Battle_HitResult) / 4> words{};
+VS::Battle::HitResult SeedHit() {
+  std::array<std::uint32_t, sizeof(VS::Battle::HitResult) / 4> words{};
   words.fill(0xD6A593EF);
-  return std::bit_cast<Battle_HitResult>(words);
+  return std::bit_cast<VS::Battle::HitResult>(words);
 }
 
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_statusEffectParams)) saved_rules =
-      std::to_array(Battle_statusEffectParams);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+  decltype(VS::Battle::statusEffectParams) saved_rules =
+      VS::Battle::statusEffectParams;
   decltype(VS::Battle::actionEffectMediators) saved_mediators =
       VS::Battle::actionEffectMediators;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
-  Battle_HitResult hit = SeedHit();
+  VS::Battle::HitResult hit = SeedHit();
 
   LiveFixture() {
-    std::ranges::fill(Battle_actors, nullptr);
-    std::ranges::fill(Battle_statusEffectParams, Battle_StatusEffectParams{});
+    std::ranges::fill(VS::Battle::actors, nullptr);
+    std::ranges::fill(VS::Battle::statusEffectParams,
+                      VS::Battle::StatusEffectParams{});
     actor.stats = &stats;
-    Battle_actors[41] = &actor;
+    VS::Battle::actors[41] = &actor;
     hit.target.target_actor = 41;
     hit.target.target_limb = 5;
     stats.actorId = 255;
   }
   ~LiveFixture() {
-    std::ranges::copy(saved_actors, Battle_actors);
-    std::ranges::copy(saved_rules, Battle_statusEffectParams);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
+    std::ranges::copy(saved_rules, VS::Battle::statusEffectParams.begin());
     std::ranges::copy(saved_mediators,
                       VS::Battle::actionEffectMediators.begin());
   }
@@ -84,15 +84,15 @@ struct LiveFixture {
 
 void CheckSourceSuccess() {
   LiveFixture fixture;
-  std::ranges::fill(Battle_actors, nullptr);
+  std::ranges::fill(VS::Battle::actors, nullptr);
   for (unsigned old = 0; old < 4; ++old) {
     auto outcome = static_cast<battle::SourceActionOutcome>(old);
     battle::MarkSourceActionSuccess(outcome);
     CHECK(outcome == battle::SourceActionOutcome::kSuccess);
-    fixture.hit.sourceResult = old;
-    auto expected =
-        std::bit_cast<std::array<std::uint32_t, sizeof(Battle_HitResult) / 4>>(
-            fixture.hit);
+    fixture.hit.source_result = old;
+    auto expected = std::bit_cast<
+        std::array<std::uint32_t, sizeof(VS::Battle::HitResult) / 4>>(
+        fixture.hit);
     expected.at(7) = (expected.at(7) & ~kSourceMask) | kSourceSuccess;
     battle::MarkLiveSourceActionSuccess(nullptr, &fixture.hit, nullptr,
                                         kUnusedIndex, -1);
@@ -185,15 +185,15 @@ TEST_CASE("Live instant death preserves all other hit and stats fields",
           std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp));
       fixture.stats.statuses = 0x11;
       fixture.stats.statusImmunities = -1;
-      Battle_statusEffectParams[kInstantDeathRule].statusFlags = 0x10;
-      Battle_statusEffectParams[kInstantDeathRule].blockingStatuses = -1;
+      VS::Battle::statusEffectParams[kInstantDeathRule].status_flags = 0x10;
+      VS::Battle::statusEffectParams[kInstantDeathRule].blocking_statuses = -1;
       const auto stats = Bytes(fixture.stats);
       auto expected = fixture.hit;
       expected.target.hp =
           std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp));
-      expected.hpEffect = 1;
+      expected.hp_effect = 1;
       if (identity != 128) {
-        expected.inflictStatuses |= 0x10;
+        expected.inflict_statuses |= 0x10;
       }
       battle::QueueLiveInstantDeath(nullptr, nullptr, &fixture.hit,
                                     kUnusedIndex, 0);
@@ -242,7 +242,7 @@ TEST_CASE("Armor wear refuses invalid signed limbs without partial writes",
 TEST_CASE("Live armor wear changes only selected DP and its two effect bits",
           "[basic-action-effects][F00471]") {
   LiveFixture fixture;
-  std::ranges::fill(Battle_actors, nullptr);
+  std::ranges::fill(VS::Battle::actors, nullptr);
   fixture.hit.target.target_actor = 255;
   for (std::int8_t limb = 0; limb < 6; ++limb) {
     for (const auto hp : {-32768, -16385, -7, 0, 16384, 32767}) {
@@ -251,9 +251,9 @@ TEST_CASE("Live armor wear changes only selected DP and its two effect bits",
       auto expected = fixture.hit;
       const auto doubled =
           std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp * 2));
-      expected.armorDpChange = doubled;
+      expected.armor_dp_change = doubled;
       expected.limbs[limb].effects.opaque2 = doubled;
-      expected.armorDpEffect = 1;
+      expected.armor_dp_effect = 1;
       battle::QueueLiveDamageBasedArmorWear(nullptr, nullptr, &fixture.hit,
                                             kUnusedIndex, -1);
       CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -390,7 +390,7 @@ Handler Relocated(std::uint32_t address, Handler expected) {
 void CheckRelocatedSource(std::uint32_t address) {
   LiveFixture fixture;
   auto expected = fixture.hit;
-  expected.sourceResult = 2;
+  expected.source_result = 2;
   Relocated(address, battle::MarkLiveSourceActionSuccess)(
       nullptr, &fixture.hit, nullptr, kUnusedIndex, 0);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -424,7 +424,7 @@ TEST_CASE("Armor wear original void mediator invokes the native policy",
   fixture.hit.target.hp = -7;
   Relocated(0x800842AC, battle::QueueLiveDamageBasedArmorWear)(
       nullptr, nullptr, &fixture.hit, kUnusedIndex, 0);
-  CHECK(fixture.hit.armorDpChange == -14);
+  CHECK(fixture.hit.armor_dp_change == -14);
   CHECK(fixture.hit.limbs[5].effects.opaque2 == -14);
 }
 TEST_CASE("Flag sixty four original void mediator invokes the native policy",
@@ -567,17 +567,15 @@ struct RandomStateFixture {
   }
 };
 
-void SetPending(Battle_HitResult& hit, const RandomEffect& effect, int amount,
-                unsigned mode) {
-  auto halves =
-      std::bit_cast<std::array<std::uint16_t, sizeof(Battle_HitResult) / 2>>(
-          hit);
+void SetPending(VS::Battle::HitResult& hit, const RandomEffect& effect,
+                int amount, unsigned mode) {
+  auto halves = std::bit_cast<
+      std::array<std::uint16_t, sizeof(VS::Battle::HitResult) / 2>>(hit);
   halves.at(effect.offset / 2) = static_cast<std::uint16_t>(amount);
-  auto words =
-      std::bit_cast<std::array<std::uint32_t, sizeof(Battle_HitResult) / 4>>(
-          halves);
+  auto words = std::bit_cast<
+      std::array<std::uint32_t, sizeof(VS::Battle::HitResult) / 4>>(halves);
   words.at(7) = (words.at(7) & ~(3U << effect.shift)) | (mode << effect.shift);
-  hit = std::bit_cast<Battle_HitResult>(words);
+  hit = std::bit_cast<VS::Battle::HitResult>(words);
 }
 
 void CheckLiveRandomSample(Handler handler, const RandomEffect& effect,
@@ -609,7 +607,7 @@ void CheckLiveRandom(const RandomEffect& effect) {
   LiveFixture fixture;
   RandomStateFixture saved;
   const auto handler = Relocated(effect.address, effect.live);
-  std::ranges::fill(Battle_actors, nullptr);
+  std::ranges::fill(VS::Battle::actors, nullptr);
   for (int draw = 0; draw < 4; ++draw) {
     for (const auto pending : kPendingAmounts) {
       for (std::uint8_t mode = 0; mode < 4; ++mode) {
@@ -847,17 +845,16 @@ struct RecoveryFixture : LiveFixture {
   Battle_ActionState state{};
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Battle_statCalculators)) calculators =
-      std::to_array(Battle_statCalculators);
-  decltype(std::to_array(Battle_limbArmorDpLoss)) armor =
-      std::to_array(Battle_limbArmorDpLoss);
-  std::uint32_t last = Battle_lastActionStatValue;
+  decltype(VS::Battle::statCalculators) calculators =
+      VS::Battle::statCalculators;
+  decltype(VS::Battle::limbArmorDpLoss) armor = VS::Battle::limbArmorDpLoss;
+  std::uint32_t last = VS::Battle::lastActionStatValue;
   Battle_ActionDefinition input{};
   Battle_ActorStats replacement_stats{};
   Battle_Actor replacement{};
-  Battle_HitResult source = SeedHit();
-  Battle_HitResult changed = SeedHit();
-  Battle_HitResult* expected_source{};
+  VS::Battle::HitResult source = SeedHit();
+  VS::Battle::HitResult changed = SeedHit();
+  VS::Battle::HitResult* expected_source{};
   std::int16_t amount{};
   int index{}, execute{}, calls{};
   bool arguments_match{};
@@ -878,10 +875,10 @@ struct RecoveryFixture : LiveFixture {
   ~RecoveryFixture() {
     g_recovery = nullptr;
     VS::Battle::actionState = saved_state;
-    Battle_lastActionStatValue = last;
+    VS::Battle::lastActionStatValue = last;
     std::ranges::copy(definitions, Battle_actionDefinitions);
-    std::ranges::copy(calculators, Battle_statCalculators);
-    std::ranges::copy(armor, Battle_limbArmorDpLoss);
+    std::ranges::copy(calculators, VS::Battle::statCalculators.begin());
+    std::ranges::copy(armor, VS::Battle::limbArmorDpLoss.begin());
   }
   void Select(std::size_t function) {
     state.selection.actionId = function < 2 ? 255 : 65535;
@@ -892,20 +889,20 @@ struct RecoveryFixture : LiveFixture {
     Select(function);
     amount = RecoveryHalf(value);
     changed.target.hp = RecoveryHalf(pending);
-    changed.hpEffect = static_cast<unsigned>(pending) & 3U;
+    changed.hp_effect = static_cast<unsigned>(pending) & 3U;
     hit = SeedHit();
     hit.target.target_actor = 41;
-    hit.targetsPosition = pending & 1;
+    hit.targets_position = pending & 1;
     expected_source = index == 0 ? &source : &hit;
     calls = 0;
-    Battle_actors[41] = &actor;
-    std::ranges::fill(Battle_limbArmorDpLoss, 71);
+    VS::Battle::actors[41] = &actor;
+    std::ranges::fill(VS::Battle::limbArmorDpLoss, 71);
   }
 };
 
 std::int16_t RecoveryCalculator(Battle_ActionDefinition* action,
-                                Battle_HitResult* source,
-                                Battle_HitResult* target, int index,
+                                VS::Battle::HitResult* source,
+                                VS::Battle::HitResult* target, int index,
                                 int execute) {
   auto& fixture = *g_recovery;
   ++fixture.calls;
@@ -914,7 +911,7 @@ std::int16_t RecoveryCalculator(Battle_ActionDefinition* action,
                             target == &fixture.hit && index == fixture.index &&
                             execute == fixture.execute;
   *target = fixture.changed;
-  Battle_actors[41] = &fixture.replacement;
+  VS::Battle::actors[41] = &fixture.replacement;
   fixture.state.selection.actionId = 65535;
   fixture.state.selection.effectVariant = 127;
   return fixture.amount;
@@ -925,10 +922,10 @@ void CheckLiveRecoverySample(RecoveryFixture& fixture, Handler handler,
   fixture.Prepare(function, amount, pending);
   auto expected = fixture.changed;
   expected.target.hp = RecoveryHalf(pending + amount);
-  expected.hpEffect = 2;
+  expected.hp_effect = 2;
   expected.limbs[5].effects.opaque0 =
       RecoveryHalf(expected.limbs[5].effects.opaque0 + amount * 2);
-  auto expected_armor = std::to_array(Battle_limbArmorDpLoss);
+  auto expected_armor = VS::Battle::limbArmorDpLoss;
   expected_armor.at(5) = RecoveryHalf(amount);
   const auto source = Bytes(fixture.source);
   handler(&fixture.input, fixture.expected_source, &fixture.hit, fixture.index,
@@ -937,8 +934,8 @@ void CheckLiveRecoverySample(RecoveryFixture& fixture, Handler handler,
   CHECK(fixture.calls == 1);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
   CHECK(Bytes(fixture.source) == source);
-  CHECK(std::to_array(Battle_limbArmorDpLoss) == expected_armor);
-  CHECK(Battle_lastActionStatValue ==
+  CHECK(VS::Battle::limbArmorDpLoss == expected_armor);
+  CHECK(VS::Battle::lastActionStatValue ==
         static_cast<std::uint32_t>(static_cast<std::int32_t>(fixture.amount)));
   CHECK(fixture.stats.currentHp == 123);
   CHECK(fixture.replacement_stats.currentHp == 321);
@@ -946,7 +943,7 @@ void CheckLiveRecoverySample(RecoveryFixture& fixture, Handler handler,
 
 void CheckLiveRecovery(std::size_t function) {
   RecoveryFixture fixture;
-  Battle_statCalculators[1] = RecoveryCalculator;
+  VS::Battle::statCalculators[1] = RecoveryCalculator;
   const auto& effect = kRecoveryEffects.at(function);
   const auto handler = Relocated(effect.address, effect.live);
   for (const auto execute : {0, 1, -1}) {
@@ -964,8 +961,8 @@ void CheckLiveRecovery(std::size_t function) {
 
 void CheckLiveRecoveryMiss(std::size_t function) {
   RecoveryFixture fixture;
-  Battle_statCalculators[1] = RecoveryCalculator;
-  std::ranges::fill(Battle_actors, nullptr);
+  VS::Battle::statCalculators[1] = RecoveryCalculator;
+  std::ranges::fill(VS::Battle::actors, nullptr);
   for (unsigned selected = 0; selected < 256; ++selected) {
     fixture.Select(function);
     const auto type = selected % 8;
@@ -975,7 +972,7 @@ void CheckLiveRecoveryMiss(std::size_t function) {
     kRecoveryEffects.at(function).live(nullptr, nullptr, nullptr,
                                        std::numeric_limits<int>::min(), -1);
     CHECK(fixture.calls == 0);
-    CHECK(Battle_lastActionStatValue == fixture.last);
+    CHECK(VS::Battle::lastActionStatValue == fixture.last);
   }
 }
 
@@ -1115,7 +1112,7 @@ TEST_CASE("F00485 primary damage mode gates independently of input identity",
       CHECK(queue.events == std::vector<int>{3, 4, 5, 6});
     } else {
       CHECK(queue.target == before);
-      fixture.state.selection.primaryTarget.hpEffect = mode;
+      fixture.state.selection.primaryTarget.hp_effect = mode;
       battle::QueueLiveDamageTriggeredRecovery(nullptr, nullptr, nullptr, -99,
                                                -1);
       CHECK(fixture.calls == 0);
@@ -1125,12 +1122,12 @@ TEST_CASE("F00485 primary damage mode gates independently of input identity",
 TEST_CASE("F00485 original mediator recovers through real dispatch and limbs",
           "[damage-recovery][F00485]") {
   RecoveryFixture fixture;
-  Battle_statCalculators[1] = RecoveryCalculator;
+  VS::Battle::statCalculators[1] = RecoveryCalculator;
   const auto handler =
       Relocated(0x80084870, battle::QueueLiveDamageTriggeredRecovery);
   for (const auto mode : {1U, 3U}) {
     for (const auto amount : {-32768, 0, 32767}) {
-      fixture.state.selection.primaryTarget.hpEffect = mode;
+      fixture.state.selection.primaryTarget.hp_effect = mode;
       fixture.index = 1;
       fixture.execute = -1;
       CheckLiveRecoverySample(fixture, handler, 8, amount, 32767);
@@ -1141,19 +1138,19 @@ TEST_CASE("F00485 original mediator recovers through real dispatch and limbs",
 struct DamageFixture;
 DamageFixture* g_damage{};
 struct DamageFixture : RecoveryFixture {
-  int critical_before = Battle_criticalHitOccurred;
+  int critical_before = VS::Battle::criticalHitOccurred;
   int critical_seen{};
   bool mutate_owner = true;
   DamageFixture() {
     g_damage = this;
     source.target.target_actor = 41;
     hit.target.target_actor = 41;
-    hit.targetsPosition = 0;
+    hit.targets_position = 0;
     changed.target.target_actor = 40;
-    changed.targetsPosition = 0;
+    changed.targets_position = 0;
     changed.target.target_limb = 5;
-    changed.inflictStatuses = 0x10;
-    Battle_actors[40] = &replacement;
+    changed.inflict_statuses = 0x10;
+    VS::Battle::actors[40] = &replacement;
     stats.actorId = 41;
     replacement_stats.actorId = 40;
     input.category = 1;
@@ -1168,20 +1165,21 @@ struct DamageFixture : RecoveryFixture {
     amount = 30;
   }
   ~DamageFixture() {
-    Battle_criticalHitOccurred = critical_before;
+    VS::Battle::criticalHitOccurred = critical_before;
     g_damage = nullptr;
   }
 };
 std::int16_t DamageCalculator(Battle_ActionDefinition* action,
-                              Battle_HitResult* source,
-                              Battle_HitResult* target, int hit, int execute) {
+                              VS::Battle::HitResult* source,
+                              VS::Battle::HitResult* target, int hit,
+                              int execute) {
   auto& fixture = *g_damage;
   ++fixture.calls;
   fixture.arguments_match =
       action == &fixture.input && source == &fixture.source &&
       target == &fixture.hit && hit == 1 && execute == fixture.execute;
-  fixture.critical_seen = Battle_criticalHitOccurred;
-  Battle_criticalHitOccurred = -7;
+  fixture.critical_seen = VS::Battle::criticalHitOccurred;
+  VS::Battle::criticalHitOccurred = -7;
   *target = fixture.changed;
   if (fixture.mutate_owner) fixture.actor.stats = &fixture.replacement_stats;
   fixture.stats.currentMp = -19;
@@ -1191,8 +1189,8 @@ std::int16_t DamageCalculator(Battle_ActionDefinition* action,
 TEST_CASE("F00494 caches stats owners but distributes to the current hit actor",
           "[damage-recovery][F00494]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
-  Battle_criticalHitOccurred = 123;
+  VS::Battle::statCalculators[1] = DamageCalculator;
+  VS::Battle::criticalHitOccurred = 123;
   fixture.execute = -1;
   fixture.changed.target.hp = 32767;
   Relocated(0x80084B70, battle::QueueLiveHitDamageAndEquipmentWear)(
@@ -1200,8 +1198,8 @@ TEST_CASE("F00494 caches stats owners but distributes to the current hit actor",
   CHECK(fixture.arguments_match);
   CHECK(fixture.critical_seen == 0);
   CHECK(fixture.hit.target.hp == RecoveryHalf(32767 + 30));
-  CHECK(fixture.hit.hpEffect == 3);
-  CHECK(fixture.hit.inflictStatuses == 0x8010);
+  CHECK(fixture.hit.hp_effect == 3);
+  CHECK(fixture.hit.inflict_statuses == 0x8010);
   CHECK(fixture.stats.weapon.current_dp == 70);
   CHECK(fixture.stats.weapon.current_pp == 13);
   CHECK(fixture.stats.shield.current_dp == 70);
@@ -1210,7 +1208,7 @@ TEST_CASE("F00494 caches stats owners but distributes to the current hit actor",
 TEST_CASE("F00494 preview removes damage status without consuming equipment",
           "[damage-recovery][F00494]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
+  VS::Battle::statCalculators[1] = DamageCalculator;
   fixture.execute = 0;
   fixture.actor.stats = nullptr;
   fixture.source.target.target_actor = 41;
@@ -1218,45 +1216,45 @@ TEST_CASE("F00494 preview removes damage status without consuming equipment",
   fixture.replacement_stats.statuses = 0x8000;
   battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
                                              &fixture.hit, 1, 0);
-  CHECK(fixture.hit.inflictStatuses == 0x8010);
+  CHECK(fixture.hit.inflict_statuses == 0x8010);
   CHECK(fixture.stats.weapon.current_dp == 100);
   CHECK(fixture.stats.currentHp == 123);
 }
 TEST_CASE("F00494 position damage permits unused null stats owners",
           "[damage-recovery][F00494]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
+  VS::Battle::statCalculators[1] = DamageCalculator;
   fixture.actor.stats = nullptr;
-  fixture.hit.targetsPosition = 1;
-  fixture.changed.targetsPosition = -1;
+  fixture.hit.targets_position = 1;
+  fixture.changed.targets_position = -1;
   battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
                                              &fixture.hit, 1, 0);
-  CHECK(fixture.hit.hpEffect == 3);
-  CHECK(fixture.hit.inflictStatuses == 0x10);
+  CHECK(fixture.hit.hp_effect == 3);
+  CHECK(fixture.hit.inflict_statuses == 0x10);
   CHECK(fixture.calls == 1);
 }
 TEST_CASE("F00495 caps against current MP of the cached owner without flooring",
           "[damage-recovery][F00495]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
+  VS::Battle::statCalculators[1] = DamageCalculator;
   fixture.changed.target.mp = -32768;
   Relocated(0x80084CAC, battle::QueueLiveMpDrain)(
       &fixture.input, &fixture.source, &fixture.hit, 1, 0);
   CHECK(fixture.hit.target.mp == 32749);
-  CHECK(fixture.hit.mpEffect == 1);
-  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(-19));
+  CHECK(fixture.hit.mp_effect == 1);
+  CHECK(VS::Battle::lastActionStatValue == static_cast<std::uint32_t>(-19));
   CHECK(fixture.stats.currentMp == -19);
   CHECK(fixture.replacement_stats.currentMp == 0);
 }
 TEST_CASE("F00495 uncapped negative amount leaves the calculator last value",
           "[damage-recovery][F00495]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
+  VS::Battle::statCalculators[1] = DamageCalculator;
   fixture.amount = -30;
   fixture.changed.target.mp = 7;
   battle::QueueLiveMpDrain(&fixture.input, &fixture.source, &fixture.hit, 1, 0);
   CHECK(fixture.hit.target.mp == -23);
-  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(-30));
+  CHECK(VS::Battle::lastActionStatValue == static_cast<std::uint32_t>(-30));
 }
 TEST_CASE(
     "F00496 queues unsigned current weapon PP and preserves no-blade state",
@@ -1269,8 +1267,8 @@ TEST_CASE(
   fixture.stats.weapon.blade.id = 65535;
   fixture.stats.weapon.current_pp = 65535;
   auto expected = fixture.hit;
-  expected.weaponPpChange = RecoveryHalf(expected.weaponPpChange - 1);
-  expected.weaponPpEffect = 1;
+  expected.weapon_pp_change = RecoveryHalf(expected.weapon_pp_change - 1);
+  expected.weapon_pp_effect = 1;
   handler(nullptr, nullptr, &fixture.hit, -99, -1);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
 }
@@ -1282,44 +1280,44 @@ TEST_CASE(
   const auto before = Bytes(fixture.hit);
   fixture.actor.stats = nullptr;
   for (auto mode : {0U, 2U}) {
-    fixture.state.selection.primaryTarget.hpEffect = mode;
+    fixture.state.selection.primaryTarget.hp_effect = mode;
     handler(nullptr, nullptr, &fixture.hit, -99, 0);
     CHECK(Bytes(fixture.hit) == before);
   }
   fixture.actor.stats = &fixture.stats;
-  fixture.state.selection.primaryTarget.hpEffect = 3;
+  fixture.state.selection.primaryTarget.hp_effect = 3;
   handler(nullptr, nullptr, &fixture.hit, -99, -1);
   CHECK(Bytes(fixture.hit) == before);
   fixture.stats.shield.base.id = 1;
   fixture.stats.shield.current_pp = 65535;
   auto expected = fixture.hit;
-  expected.shieldPpChange = RecoveryHalf(expected.shieldPpChange - 1);
-  expected.shieldPpEffect = 1;
+  expected.shield_pp_change = RecoveryHalf(expected.shield_pp_change - 1);
+  expected.shield_pp_effect = 1;
   handler(nullptr, nullptr, &fixture.hit, -99, 0);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
 }
 TEST_CASE("F00498 post-calculation position controls real limb recovery",
           "[damage-recovery][F00498]") {
   RecoveryFixture fixture;
-  Battle_statCalculators[1] = RecoveryCalculator;
+  VS::Battle::statCalculators[1] = RecoveryCalculator;
   const auto handler = Relocated(0x80084E28, battle::QueueLiveHpRecovery);
-  fixture.changed.targetsPosition = 0;
+  fixture.changed.targets_position = 0;
   CheckLiveRecoverySample(fixture, handler, 8, 30, 32767);
   fixture.Prepare(8, 0, -1);
-  fixture.changed.targetsPosition = -1;
+  fixture.changed.targets_position = -1;
   const auto limbs = fixture.changed.limbs[5].effects.opaque0;
   handler(&fixture.input, &fixture.source, &fixture.hit, 0, 0);
   CHECK(fixture.hit.limbs[5].effects.opaque0 == limbs);
-  CHECK(fixture.hit.hpEffect == 2);
+  CHECK(fixture.hit.hp_effect == 2);
 }
 TEST_CASE("F00499 MP recovery wraps current queue and preserves neighbors",
           "[damage-recovery][F00499]") {
   DamageFixture fixture;
-  Battle_statCalculators[1] = DamageCalculator;
+  VS::Battle::statCalculators[1] = DamageCalculator;
   fixture.changed.target.mp = 32767;
   auto expected = fixture.changed;
   expected.target.mp = RecoveryHalf(32767 + 30);
-  expected.mpEffect = 2;
+  expected.mp_effect = 2;
   Relocated(0x80084EA0, battle::QueueLiveMpRecovery)(
       &fixture.input, &fixture.source, &fixture.hit, 1, 0);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
@@ -1330,20 +1328,20 @@ void CheckResourceRecoverySample(RecoveryFixture& fixture, Handler handler,
                                  unsigned resource, int amount, int pending) {
   constexpr std::size_t kUnusedSelection = 8;
   fixture.Prepare(kUnusedSelection, amount, pending);
-  fixture.changed.weaponPpChange = RecoveryHalf(pending);
-  fixture.changed.weaponDpChange = RecoveryHalf(pending);
-  fixture.changed.riskChange = RecoveryHalf(pending);
+  fixture.changed.weapon_pp_change = RecoveryHalf(pending);
+  fixture.changed.weapon_dp_change = RecoveryHalf(pending);
+  fixture.changed.risk_change = RecoveryHalf(pending);
   auto expected = fixture.changed;
   const auto value = RecoveryHalf(pending + amount);
   if (resource == 0) {
-    expected.weaponPpChange = value;
-    expected.weaponPpEffect = 2;
+    expected.weapon_pp_change = value;
+    expected.weapon_pp_effect = 2;
   } else if (resource == 1) {
-    expected.weaponDpChange = value;
-    expected.weaponDpEffect = 2;
+    expected.weapon_dp_change = value;
+    expected.weapon_dp_effect = 2;
   } else if (amount != 0) {
-    expected.riskChange = value;
-    expected.riskEffect = 2;
+    expected.risk_change = value;
+    expected.risk_effect = 2;
   }
   handler(&fixture.input, fixture.expected_source, &fixture.hit, 1,
           fixture.execute);
@@ -1354,7 +1352,7 @@ void CheckResourceRecoverySample(RecoveryFixture& fixture, Handler handler,
 
 void CheckResourceRecovery(unsigned resource) {
   RecoveryFixture fixture;
-  Battle_statCalculators[1] = RecoveryCalculator;
+  VS::Battle::statCalculators[1] = RecoveryCalculator;
   constexpr std::array<Handler, 3> kHandlers{battle::QueueLiveWeaponPpRecovery,
                                              battle::QueueLiveWeaponDpRecovery,
                                              battle::QueueLiveRiskRecovery};

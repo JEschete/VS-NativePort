@@ -9,7 +9,7 @@
 
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
@@ -62,8 +62,8 @@ class LiveProgressHost final : public ProgressHost {
   }
   void ClearCursorMemory() override {
     Core::Memory::ZeroLiveAlignedWords(
-        &Battle_unusedMenu9CursorMemory,
-        static_cast<std::int32_t>(sizeof Battle_unusedMenu9CursorMemory));
+        &VS::Battle::menu9CursorMemory,
+        static_cast<std::int32_t>(sizeof VS::Battle::menu9CursorMemory));
   }
   void BackupCamera() override {
     auto* scratch = static_cast<VS::Render::FrameScratch*>(Core::ScratchBase());

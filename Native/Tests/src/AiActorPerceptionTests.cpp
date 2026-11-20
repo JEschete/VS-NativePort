@@ -18,7 +18,7 @@
 #include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
 
@@ -1321,8 +1321,7 @@ TEST_CASE("Actor perception pass refuses a remembered record past its end",
 
 namespace {
 struct LivePerceptionFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::roomAiState) saved_room =
       VS::Battle::Ai::roomAiState;
@@ -1333,14 +1332,15 @@ struct LivePerceptionFixture {
   VS::Battle::Ai::ActorAiState state{};
 
   LivePerceptionFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     auto& frame = VS::Battle::Ai::LiveFrameContext();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     VS::Battle::Ai::roomAiState = &room;
   }
 
   ~LivePerceptionFixture() {
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::candidateEngagedThisUpdate = saved_engaged;
@@ -1374,7 +1374,7 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
   fixture.actor.commandFlags = 0xFF;
   fixture.actor.stats = &fixture.stats;
   fixture.stats.actionRecoveryTimer = 77;
-  Battle_actors[0] = &fixture.actor;
+  VS::Battle::actors[0] = &fixture.actor;
   VS::Battle::Ai::LiveFrameContext().actors[kTarget] = &state;
   const VS::Battle::Ai::ActorAiState before = state;
 

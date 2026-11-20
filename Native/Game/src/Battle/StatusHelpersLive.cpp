@@ -10,13 +10,13 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpers.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/Interactions.hpp"
@@ -38,17 +38,18 @@ Battle_ActorStats& StatsOf(Battle_ActorStats* stats) {
 }
 
 bool ValidActor(int slot) {
-  return slot >= 0 && static_cast<std::size_t>(slot) < std::size(Battle_actors);
+  return slot >= 0 &&
+         static_cast<std::size_t>(slot) < std::size(VS::Battle::actors);
 }
 
 class LiveStatNumberWorld final : public StatNumberWorld {
  public:
   [[nodiscard]] std::optional<std::uint8_t> RoomSpawnIndex(
       int slot) const override {
-    if (!ValidActor(slot) || Battle_actors[slot] == nullptr) {
+    if (!ValidActor(slot) || VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return Battle_actors[slot]->roomSpawnIndex;
+    return VS::Battle::actors[slot]->roomSpawnIndex;
   }
   void QueueValueLabel(const StatNumberRequest& request) override {
     LiveQueueActorValueLabel(request.actor_slot, request.limb_tag,
@@ -73,25 +74,25 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
     const auto& target = VS::Battle::actionState->selection.primaryTarget;
     const int slot = target.target.target_actor;
     if (!ValidActor(slot)) return std::nullopt;
-    const auto* actor = Battle_actors[slot];
+    const auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr || actor->stats == nullptr) return std::nullopt;
     return TargetingRiskTarget{
         .actor_slot = slot,
         .statuses = std::bit_cast<std::uint32_t>(actor->stats->statuses),
-        .targets_position = target.targetsPosition != 0};
+        .targets_position = target.targets_position != 0};
   }
   [[nodiscard]] std::optional<std::uint16_t> PlayerRisk() const override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       return std::nullopt;
     }
-    return Battle_characterState->stats->risk;
+    return VS::Battle::characterState->stats->risk;
   }
   void SetPlayerRisk(std::uint16_t risk) override {
-    Require(Battle_characterState != nullptr &&
-                Battle_characterState->stats != nullptr,
+    Require(VS::Battle::characterState != nullptr &&
+                VS::Battle::characterState->stats != nullptr,
             "Targeting risk requires the player owner");
-    Battle_characterState->stats->risk = risk;
+    VS::Battle::characterState->stats->risk = risk;
   }
 };
 }  // namespace
@@ -150,12 +151,12 @@ void QueueLiveActorStatChangeNumber(int actor_slot, int limb_tag,
 // decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14745).
 void UpdateLiveTargetingRiskPenalty() {
   LiveTargetingRiskWorld world;
-  Require(UpdateTargetingRiskPenalty(Battle_targetingRiskTimer, world),
+  Require(UpdateTargetingRiskPenalty(VS::Battle::targetingRiskTimer, world),
           "Targeting risk refused its required state");
 }
 
 // decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14764).
 void ResetLiveTargetingRiskPenaltyTimer() {
-  ResetTargetingRiskPenaltyTimer(Battle_targetingRiskTimer);
+  ResetTargetingRiskPenaltyTimer(VS::Battle::targetingRiskTimer);
 }
 }  // namespace VS::Battle

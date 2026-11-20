@@ -539,8 +539,8 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     return actions[action].unlocked != 0;
   }
   std::int32_t ActionFlags(std::uint8_t action) override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       Refuse("action flags without Ashley or a valid action");
     }
     return Call(
@@ -550,11 +550,11 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     return VS::State::stateFlags.intro_state;
   }
   bool EquipmentTarnished() override {
-    if (Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       Refuse("Manage menu without Ashley's equipment state");
     }
-    return (Battle_characterState->stats->statuses & kTarnished) != 0;
+    return (VS::Battle::characterState->stats->statuses & kTarnished) != 0;
   }
   void BeginRows() override {
     if (storage_) Refuse("native row workspace already in use");

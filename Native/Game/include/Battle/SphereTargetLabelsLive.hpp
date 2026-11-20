@@ -1,6 +1,8 @@
 #pragma once
 
-struct Battle_SphereTargetLabel;
+namespace VS::Battle {
+struct SphereTargetLabelRecord;
+}  // namespace VS::Battle
 struct Battle_TargetLabelLine;
 
 // The ABI-compatible entries of the sphere's target labels
@@ -13,7 +15,7 @@ void DrawRightTargetLabelLinkEntry(int anchor_xy, int ring_xy, int pulse_head);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void DrawLeftTargetLabelLinkEntry(int anchor_xy, int ring_xy, int pulse_head);
 [[nodiscard]] int AreTargetLabelsSettledEntry();
-void DrawSphereTargetLabelEntry(Battle_SphereTargetLabel* label);
+void DrawSphereTargetLabelEntry(VS::Battle::SphereTargetLabelRecord* label);
 void UpdateSphereTargetLabelsEntry();
 void UpdateSphereTargetHighlightsEntry(Battle_TargetLabelLine* targets,
                                        int count);

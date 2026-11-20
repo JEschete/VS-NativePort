@@ -19,7 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Random.hpp"
@@ -35,8 +35,7 @@ struct DecisionFixture {
   int saved_count = VS::Battle::Ai::fallbackCandidateCount;
   int saved_mask = VS::Battle::Ai::unusedPlanCounter;
   Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   std::array<Actors_ActorRecord*, 17> saved_records =
       std::to_array(Actors_actorRecords);
   std::array<VS::Field::GimmickInstance*, 16> saved_gimmicks =
@@ -52,7 +51,7 @@ struct DecisionFixture {
   std::array<VS::Battle::Ai::CandidateEntryView, 16> fallback{};
 
   DecisionFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
                 nullptr);
@@ -62,7 +61,7 @@ struct DecisionFixture {
       actors[index].stats = &stats[index];
       actors[index].next =
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
-      Battle_actors[id] = &actors[index];
+      VS::Battle::actors[id] = &actors[index];
       Actors_actorRecords[id] = &records[index];
     }
     VS::Battle::Ai::roomAiState = &room;
@@ -87,7 +86,8 @@ struct DecisionFixture {
     VS::Battle::Ai::fallbackCandidateCount = saved_count;
     VS::Battle::Ai::unusedPlanCounter = saved_mask;
     Battle_actionDefinitions[42] = saved_action;
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               VS::Field::gimmickInstances.begin());

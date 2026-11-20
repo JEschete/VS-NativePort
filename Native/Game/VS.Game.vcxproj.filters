@@ -384,7 +384,7 @@
     <ClCompile Include="src\Battle\AbilityState.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\AbilityState.h">
+    <ClInclude Include="src\Battle\AbilityState.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionAnimation.cpp">
@@ -768,7 +768,7 @@
     <ClCompile Include="src\Battle\Damage.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Damage.h">
+    <ClInclude Include="src\Battle\Damage.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\DamageCalculations.cpp">
@@ -822,7 +822,7 @@
     <ClCompile Include="src\Battle\FloatingLabelRenderingLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Hit.h">
+    <ClInclude Include="src\Battle\Hit.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\HitCalculations.cpp">
@@ -933,7 +933,7 @@
     <ClCompile Include="src\Battle\StatusEffects.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\StatusEffects.h">
+    <ClInclude Include="src\Battle\StatusEffects.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\StatusHelpers.cpp">
@@ -978,7 +978,7 @@
     <ClCompile Include="src\Battle\TargetPagesLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\TargetVolume.h">
+    <ClInclude Include="src\Battle\TargetVolume.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\TextBoxes.cpp">

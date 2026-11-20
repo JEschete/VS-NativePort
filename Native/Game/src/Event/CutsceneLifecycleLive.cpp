@@ -6,13 +6,13 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/MusicLive.hpp"
 #include "Audio/SoundState.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -67,12 +67,13 @@ class LiveCutsceneHost final : public CutsceneHost {
     }
   }
   std::optional<CutscenePreferences> Preferences() override {
-    if (Battle_characterState == nullptr) {
+    if (VS::Battle::characterState == nullptr) {
       return std::nullopt;
     }
-    return CutscenePreferences{(Battle_characterState->weaponDrawn & 1) != 0,
-                               VS::Field::sphericalCamera.motion.target_yaw,
-                               VS::Field::sphericalCamera.preferred_distance};
+    return CutscenePreferences{
+        (VS::Battle::characterState->weaponDrawn & 1) != 0,
+        VS::Field::sphericalCamera.motion.target_yaw,
+        VS::Field::sphericalCamera.preferred_distance};
   }
   void SetPreparation(CutscenePreparation preparation) override {
     VS::Field::controlMode = kFieldCutsceneMode;
@@ -84,17 +85,17 @@ class LiveCutsceneHost final : public CutsceneHost {
     State::SetLiveScriptFlag(flag, value);
   }
   std::optional<std::uint8_t> ActorCommand(int actor) override {
-    if (Battle_actors[actor] == nullptr) {
+    if (VS::Battle::actors[actor] == nullptr) {
       return std::nullopt;
     }
-    return Battle_actors[actor]->commandState;
+    return VS::Battle::actors[actor]->commandState;
   }
   void SetActorCommand(int actor, std::uint8_t command) override {
-    if (Battle_actors[actor] == nullptr) {
+    if (VS::Battle::actors[actor] == nullptr) {
       Refuse(CutsceneRefusal::kMissingActor, actor);
       return;
     }
-    Battle_actors[actor]->commandState = command;
+    VS::Battle::actors[actor]->commandState = command;
   }
   void ResetActorHeadTracking(int actor) override {
     Actors::SetLiveActorHeadTracking(actor, -2, nullptr, -1);

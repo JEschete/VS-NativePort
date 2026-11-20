@@ -10,7 +10,7 @@
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereTargetLabels.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/Targeting.hpp"
 #include "Menu/Framework/Menus.hpp"
 
@@ -195,7 +195,7 @@ struct SpherePointerRestorer {
                       std::begin(VS::Menu::Framework::rowAnimationSteps));
   }
 
-  Battle_TargetSphereSetupView* saved = VS::Battle::targetSphere;
+  VS::Battle::TargetSphereSetupView* saved = VS::Battle::targetSphere;
   std::array<std::uint8_t, std::size(VS::Menu::Framework::rowAnimationSteps)>
       steps = std::to_array(VS::Menu::Framework::rowAnimationSteps);
 };
@@ -574,8 +574,8 @@ TEST_CASE("Sphere target highlights do nothing without targets",
 TEST_CASE("Live target label settled entry reads the sphere labels",
           "[battle][sphere][labels]") {
   const SpherePointerRestorer restore;
-  Battle_TargetSphereSetupView storage{};
-  auto& sphere = reinterpret_cast<Battle_TargetSphere&>(storage);
+  VS::Battle::TargetSphereSetupView storage{};
+  auto& sphere = reinterpret_cast<VS::Battle::TargetSphereRecord&>(storage);
   VS::Battle::targetSphere = &storage;
   CHECK(battle::AreTargetLabelsSettledEntry() == 1);
   sphere.labels[23].state = battle::kTargetLabelSlidingRight;
@@ -587,8 +587,8 @@ TEST_CASE("Live target label settled entry reads the sphere labels",
 TEST_CASE("Live target label update reads unsigned slide steps",
           "[battle][sphere][labels]") {
   const SpherePointerRestorer restore;
-  Battle_TargetSphereSetupView storage{};
-  auto& sphere = reinterpret_cast<Battle_TargetSphere&>(storage);
+  VS::Battle::TargetSphereSetupView storage{};
+  auto& sphere = reinterpret_cast<VS::Battle::TargetSphereRecord&>(storage);
   VS::Battle::targetSphere = &storage;
 
   // Steps above 0x7F are unsigned; read signed, this label would land on
@@ -596,21 +596,21 @@ TEST_CASE("Live target label update reads unsigned slide steps",
   std::fill_n(std::begin(VS::Menu::Framework::rowAnimationSteps),
               battle::kTargetLabelSlideStepCount, static_cast<char>(0xC8));
   sphere.labels[0].state = battle::kTargetLabelSlidingLeft;
-  sphere.labels[0].screenX = 32752;
+  sphere.labels[0].screen_x = 32752;
   sphere.labels[0].gradient = 5;
   sphere.labels[1].state = battle::kTargetLabelSlidingRight;
-  sphere.labels[1].screenX = 300;
+  sphere.labels[1].screen_x = 300;
   sphere.labels[2].state = battle::kTargetLabelSlidingLeft;
-  sphere.labels[2].screenX = -100;
-  sphere.labels[3].screenX = 77;
+  sphere.labels[2].screen_x = -100;
+  sphere.labels[3].screen_x = 77;
 
   battle::UpdateSphereTargetLabelsEntry();
-  CHECK(sphere.labels[0].screenX == 448);
+  CHECK(sphere.labels[0].screen_x == 448);
   CHECK(sphere.labels[0].state == battle::kTargetLabelHidden);
   CHECK(sphere.labels[0].gradient == 5);
-  CHECK(sphere.labels[1].screenX == 332);
-  CHECK(sphere.labels[2].screenX == -132);
-  CHECK(sphere.labels[3].screenX == 77);
+  CHECK(sphere.labels[1].screen_x == 332);
+  CHECK(sphere.labels[2].screen_x == -132);
+  CHECK(sphere.labels[3].screen_x == 77);
   CHECK(battle::AreTargetLabelsSettledEntry() == 1);
 }
 

@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
@@ -224,16 +224,16 @@ class LiveBackground final : public BackgroundLoadHost {
 
 class LiveSceneMap final : public SceneMapHost {
  public:
-  bool HasSceneBuffer() override { return Battle_unusedSceneBuffer != nullptr; }
+  bool HasSceneBuffer() override { return VS::Battle::sceneBuffer != nullptr; }
   std::uint16_t CameraYaw() override {
     return static_cast<std::uint16_t>(
         VS::Render::FrameScratchpad().camera.angles.vy);
   }
   std::int32_t CurrentSceneId() override { return Field::LiveCurrentSceneId(); }
   void AllocateSceneBuffer(std::int32_t bytes) override {
-    Battle_unusedSceneBuffer =
+    VS::Battle::sceneBuffer =
         Core::Memory::AllocateLiveFromHighEnd(static_cast<std::size_t>(bytes));
-    BindLiveMapScene(Battle_unusedSceneBuffer, static_cast<std::size_t>(bytes));
+    BindLiveMapScene(VS::Battle::sceneBuffer, static_cast<std::size_t>(bytes));
   }
   void AllocateSceneRead(std::int32_t scene) override {
     file_ = &kSceneArmFiles[scene];
@@ -242,15 +242,15 @@ class LiveSceneMap final : public SceneMapHost {
   void EnqueueSceneRead() override {
     if (sceneCdQueueSlot != nullptr) {
       Content::EnqueueLiveDiscRequest(sceneCdQueueSlot,
-                                      Battle_unusedSceneBuffer);
+                                      VS::Battle::sceneBuffer);
     } else {
       sceneCdQueueSlot = Content::CompleteLiveRefusedDiscRequest(
-          file_, Battle_unusedSceneBuffer);
+          file_, VS::Battle::sceneBuffer);
     }
     initial_scene_request = sceneCdQueueSlot;
     initial_scene_generation =
         Content::LiveDiscRequestGeneration(initial_scene_request);
-    initial_scene_destination = Battle_unusedSceneBuffer;
+    initial_scene_destination = VS::Battle::sceneBuffer;
     initial_scene_bytes = static_cast<std::size_t>(file_->size);
   }
   std::int32_t SceneReadState() override {
@@ -274,10 +274,10 @@ class LiveSceneMap final : public SceneMapHost {
   }
   void ResolveRoomNames() override {
     roomNamesTable =
-        Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, SceneBytes());
+        Field::ResolveLiveSceneRoomData(VS::Battle::sceneBuffer, SceneBytes());
   }
   void RestoreRoomVisits() override {
-    Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, SceneBytes());
+    Field::RestoreLiveSceneRoomVisits(VS::Battle::sceneBuffer, SceneBytes());
   }
   void ScaleRooms(std::int32_t factor) override {
     LiveScaleRoomVertices(Scene(), factor);
@@ -301,7 +301,7 @@ class LiveSceneMap final : public SceneMapHost {
 
  private:
   [[nodiscard]] static Field::MapScene* Scene() {
-    return static_cast<Field::MapScene*>(Battle_unusedSceneBuffer);
+    return static_cast<Field::MapScene*>(VS::Battle::sceneBuffer);
   }
   // The loaded scene's ARM file size (currentScene is checked
   // before the read is polled).
@@ -423,7 +423,7 @@ int LiveLoadBackground(int begin_background_load) {
 
 // decomp: MENU5.PRG _loadArmFile (4D8.c:448).
 int LiveLoadSceneMap() {
-  if (Battle_unusedSceneBuffer != nullptr &&
+  if (VS::Battle::sceneBuffer != nullptr &&
       (currentScene < 0 || currentScene >= kSceneCount)) {
     Refuse("LoadSceneMap", "scene outside the ARM files");
     return 0;
@@ -512,8 +512,8 @@ bool DrainMapLoadingLive() {
   }
   if (initial_scene_destination != nullptr) {
     ForgetLiveMapScene(initial_scene_destination);
-    if (Battle_unusedSceneBuffer == initial_scene_destination) {
-      Battle_unusedSceneBuffer = nullptr;
+    if (VS::Battle::sceneBuffer == initial_scene_destination) {
+      VS::Battle::sceneBuffer = nullptr;
       roomNamesTable = nullptr;
     }
     Core::Memory::FreeLiveFromHighEnd(initial_scene_destination);

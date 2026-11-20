@@ -20,12 +20,12 @@
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -1271,7 +1271,8 @@ struct RoomObjectRecordFixture {
 
 struct UnlockEffectLiveFixture {
   RoomObjectRecordFixture room;
-  decltype(Battle_characterState) saved_character = Battle_characterState;
+  decltype(VS::Battle::characterState) saved_character =
+      VS::Battle::characterState;
   decltype(VS::Battle::floatingLabels) saved_labels =
       VS::Battle::floatingLabels;
   decltype(VS::Battle::floatingLabelCount) saved_count =
@@ -1288,7 +1289,7 @@ struct UnlockEffectLiveFixture {
 
   UnlockEffectLiveFixture() {
     std::ranges::copy(VS::Core::randomShuffleTable, saved_shuffle.begin());
-    Battle_characterState = &character;
+    VS::Battle::characterState = &character;
     character.stats = &stats;
     stats.risk = std::numeric_limits<decltype(stats.risk)>::max();
     VS::Battle::floatingLabels = &labels;
@@ -1300,7 +1301,7 @@ struct UnlockEffectLiveFixture {
     chests[0].lock_level = 3;
   }
   ~UnlockEffectLiveFixture() {
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     VS::Battle::floatingLabels = saved_labels;
     VS::Battle::floatingLabelCount = saved_count;
     VS::State::stateFlags = saved_flags;
@@ -1372,7 +1373,7 @@ struct SnapshotFixture {
 };
 
 struct ActorTileTriggerLiveFixture {
-  Battle_Actor* saved_actor = Battle_actors[2];
+  Battle_Actor* saved_actor = VS::Battle::actors[2];
   Actors_ActorRecord* saved_record = Actors_actorRecords[2];
   decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
@@ -1381,13 +1382,13 @@ struct ActorTileTriggerLiveFixture {
       std::make_unique<Actors_ActorRecord>();
 
   ActorTileTriggerLiveFixture() {
-    Battle_actors[2] = actor.get();
+    VS::Battle::actors[2] = actor.get();
     Actors_actorRecords[2] = record.get();
     VS::Field::roomData = {};
     VS::Field::controlMode = 3;
   }
   ~ActorTileTriggerLiveFixture() {
-    Battle_actors[2] = saved_actor;
+    VS::Battle::actors[2] = saved_actor;
     Actors_actorRecords[2] = saved_record;
     VS::Field::roomData = saved_room;
     VS::Field::controlMode = saved_control;
@@ -1399,7 +1400,7 @@ struct ScriptedFallDoorFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Battle_Actor*, std::size(Battle_actors)> saved_actors{};
+  std::array<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{};
   std::array<Actors_ActorRecord*, std::size(Actors_actorRecords)>
       saved_records{};
   VS::Field::RoomTransitionState saved_transition =
@@ -1414,11 +1415,11 @@ struct ScriptedFallDoorFixture {
   ScriptedFallDoorFixture() {
     REQUIRE(saved_zone.zone_data == nullptr);
     REQUIRE(saved_zone.zone_disc_request == nullptr);
-    std::ranges::copy(Battle_actors, saved_actors.begin());
+    std::ranges::copy(VS::Battle::actors, saved_actors.begin());
     std::ranges::copy(Actors_actorRecords, saved_records.begin());
-    std::ranges::fill(Battle_actors, nullptr);
+    std::ranges::fill(VS::Battle::actors, nullptr);
     std::ranges::fill(Actors_actorRecords, nullptr);
-    Battle_actors[2] = actors.actor.get();
+    VS::Battle::actors[2] = actors.actor.get();
     Actors_actorRecords[2] = actors.record.get();
     VS::Field::StoreLiveRoomTransition({});
     VS::Field::zoneContext = {};
@@ -1445,7 +1446,7 @@ struct ScriptedFallDoorFixture {
     VS::Field::entranceDoorRecord = saved_entrance;
     VS::Field::zoneContext = saved_zone;
     VS::Field::roomData = actors.saved_room;
-    std::ranges::copy(saved_actors, Battle_actors);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_records, Actors_actorRecords);
   }
 };
@@ -2860,7 +2861,7 @@ TEST_CASE("Actor native tile trigger stores packed location and computed mode",
   CHECK(std::bit_cast<std::uint32_t>(location.packed_tile.word) == 0xFF040203);
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
   CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
-  Battle_actors[2] = nullptr;
+  VS::Battle::actors[2] = nullptr;
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
 }
 

@@ -10,7 +10,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
@@ -98,11 +98,11 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
  public:
   explicit LiveHudOrchestrationWorld(bool capture_actor) {
     if (capture_actor) {
-      if (Battle_characterState == nullptr ||
-          Battle_characterState->stats == nullptr) {
+      if (VS::Battle::characterState == nullptr ||
+          VS::Battle::characterState->stats == nullptr) {
         Refuse("Battle HUD requires its current actor and stats");
       }
-      stats_ = Battle_characterState->stats;
+      stats_ = VS::Battle::characterState->stats;
       limb_chain_ = Render::LiveFrameOrderingEntry(
           Render::LiveOrderingBase::kScene, kLimbLayer);
       count_chain_ = Render::LiveFrameOrderingEntry(
@@ -267,7 +267,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   }
   std::optional<HudLimbCondition> CurrentLimbCondition(
       std::size_t limb) override {
-    auto* const actor = Battle_characterState;
+    auto* const actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr ||
         limb >= std::size(actor->stats->limbs)) {
       return std::nullopt;

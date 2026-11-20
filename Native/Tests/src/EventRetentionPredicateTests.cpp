@@ -6,7 +6,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Encounter.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -23,7 +23,7 @@ constexpr int kActorSlot = 2;
 constexpr unsigned kTriggerOffset = 32;
 
 struct RetentionPredicateFixture {
-  Battle_Actor* saved_actor = Battle_actors[kActorSlot];
+  Battle_Actor* saved_actor = VS::Battle::actors[kActorSlot];
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   decltype(VS::Event::playbackPhase) saved_phase = VS::Event::playbackPhase;
   decltype(VS::Event::eventId) saved_id = VS::Event::eventId;
@@ -58,14 +58,14 @@ struct RetentionPredicateFixture {
     VS::Event::eventId = 0;
     VS::Event::eventSource = 0;
     VS::Event::isDirectEventRequest = 0;
-    Battle_actors[kActorSlot] = nullptr;
+    VS::Battle::actors[kActorSlot] = nullptr;
     actor.stats = &stats;
     stats.maxHp = 100;
   }
 
   ~RetentionPredicateFixture() {
     VS::Event::PublishLiveRoomScriptSections(saved_room);
-    Battle_actors[kActorSlot] = saved_actor;
+    VS::Battle::actors[kActorSlot] = saved_actor;
     VS::Event::playbackPhase = saved_phase;
     VS::Event::eventId = saved_id;
     VS::Event::eventSource = saved_source;
@@ -89,7 +89,7 @@ TEST_CASE("Room death predicates reject absent and nonretained actors",
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   }
   SECTION("Existing actor without retention") {
-    Battle_actors[kActorSlot] = &fixture.actor;
+    VS::Battle::actors[kActorSlot] = &fixture.actor;
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   }
   CHECK(VS::Event::playbackPhase == 0);
@@ -99,7 +99,7 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
           "[events][retention-predicate]") {
   RetentionPredicateFixture fixture(true);
   fixture.actor.retainAfterDefeat = 1;
-  Battle_actors[kActorSlot] = &fixture.actor;
+  VS::Battle::actors[kActorSlot] = &fixture.actor;
   SECTION("Retained dead actor activates the original local event") {
     CHECK(VS::Event::EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 1);
     CHECK(VS::Event::playbackPhase == 1);

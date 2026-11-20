@@ -1248,7 +1248,7 @@ constexpr std::size_t kBytesPerPixel = 2;
 }
 
 // VS::Actors::LiveActorStateFlags(0) and Ashley's statuses
-// (Battle_StatusFlag_*).
+// (the status flags of src/BATTLE/BATTLE.PRG/146C.h:486).
 constexpr std::uint32_t kStateLocked = 0x80000;
 constexpr std::uint32_t kStateLimitMask = 0x40100000;
 constexpr std::uint32_t kStateLimited = 0x100000;

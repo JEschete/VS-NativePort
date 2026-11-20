@@ -65,8 +65,8 @@ inline constexpr std::uint16_t kImpactKindOneEffect = 0x27;
 inline constexpr std::uint32_t kTrapEffectBusyBit = 2;
 
 // The hit word of a target (VS::Battle::HitTargetWord) and whether the hit
-// names a position rather than an actor (Battle_HitResult.targetsPosition !=
-// 0).
+// names a position rather than an actor (VS::Battle::HitResult.targets_position
+// != 0).
 struct ImpactTarget {
   std::uint8_t actor{};
   std::int8_t limb{};

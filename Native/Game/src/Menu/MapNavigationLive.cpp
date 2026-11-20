@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Field/Gimmicks.hpp"
@@ -75,14 +75,14 @@ void Write(std::span<std::byte> bytes, std::size_t offset, T value) {
 [[nodiscard]] std::optional<std::span<std::byte>> SceneBytes(
     const void* scene) {
   if (scene == nullptr) return std::nullopt;
-  if (scene == Battle_unusedSceneBuffer) {
+  if (scene == VS::Battle::sceneBuffer) {
     if (const auto loaded = BoundLiveMapScene(scene)) return loaded;
     if (currentScene < 0 || currentScene >= kSceneCount) {
       return std::nullopt;
     }
     const int size = kSceneArmFiles[currentScene].size;
     if (size < 0) return std::nullopt;
-    return std::span{static_cast<std::byte*>(Battle_unusedSceneBuffer),
+    return std::span{static_cast<std::byte*>(VS::Battle::sceneBuffer),
                      static_cast<std::size_t>(size)};
   }
   if (scene == VS::Field::roomData.minimap_scene) {
@@ -339,7 +339,7 @@ int LiveInitialRoomIndex(Field::MapScene* scene) {
 // decomp: MENU5.PRG _updateRoomIndex (4D8.c:1862).
 void LiveSelectAdjacentVisitedRoom(int search_forward) {
   constexpr std::string_view kCall = "SelectAdjacentVisitedRoom";
-  const auto live = LiveSceneOf(kCall, Battle_unusedSceneBuffer);
+  const auto live = LiveSceneOf(kCall, VS::Battle::sceneBuffer);
   if (!live.has_value()) return;
   const auto* names = reinterpret_cast<const std::byte*>(roomNamesTable);
   const std::byte* scene_begin = live->bytes.data();

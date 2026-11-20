@@ -18,7 +18,7 @@
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "State/Progress.hpp"
 
@@ -26,7 +26,7 @@ namespace {
 namespace b = VS::Battle;
 struct LiveReset {
   Battle_ActionState* state = VS::Battle::actionState;
-  decltype(std::to_array(Battle_actors)) actors = std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) records =
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
@@ -35,7 +35,7 @@ struct LiveReset {
       std::to_array(VS::State::learnedActionFlags);
   ~LiveReset() {
     VS::Battle::actionState = state;
-    std::ranges::copy(actors, std::begin(Battle_actors));
+    std::ranges::copy(actors, std::begin(VS::Battle::actors));
     std::ranges::copy(records, std::begin(Actors_actorRecords));
     std::ranges::copy(definitions, std::begin(Battle_actionDefinitions));
     std::ranges::copy(learned, std::begin(VS::State::learnedActionFlags));
@@ -49,7 +49,7 @@ TEST_CASE("F00048 live native room slots retain their full target index",
   const LiveReset reset;
   Battle_Actor actor{};
   actor.roomSpawnIndex = 0x80;
-  Battle_actors[41] = &actor;
+  VS::Battle::actors[41] = &actor;
   b::ResolveLiveEnemyDefeat(-256, 41, -1);
   CHECK(actor.stats == nullptr);
   CHECK(actor.defeated == 0);
@@ -110,14 +110,14 @@ TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   actor.stats = &stats;
-  Battle_actors[15] = &actor;
+  VS::Battle::actors[15] = &actor;
   VS::Battle::actionState = state.get();
   state->queueIndex = 0xFFFFFFFE;
   auto& hit = state->queue[2].primaryTarget;
   hit.target.target_actor = 15;
   hit.target.impact_kind = 2;
-  hit.weaponDpChange = 2;
-  hit.weaponDpEffect = 2;
+  hit.weapon_dp_change = 2;
+  hit.weapon_dp_effect = 2;
   stats.weapon.current_dp = 65535;
   stats.weapon.max_dp = 100;
   stats.currentHp = -7;
@@ -126,7 +126,7 @@ TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
   CHECK(stats.weapon.current_dp == 1);
   CHECK(stats.currentHp == -7);
   CHECK(stats.actionRecoveryTimer == 65535);
-  CHECK(state->queue[0].primaryTarget.weaponDpEffect == 0);
+  CHECK(state->queue[0].primaryTarget.weapon_dp_effect == 0);
 }
 TEST_CASE("F00061 live unused argument and signed early gate do not read state",
           "[action-outcomes][F00061]") {
@@ -144,14 +144,14 @@ TEST_CASE("F00156 live refresh and living path require no unused action state",
   const auto hp = GENERATE(-32768, -1, 1, 32767);
   const LiveReset reset;
   VS::Battle::actionState = nullptr;
-  Battle_actors[1] = nullptr;
+  VS::Battle::actors[1] = nullptr;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   actor.stats = &stats;
   actor.commandState = 77;
   stats.currentHp = static_cast<std::int16_t>(hp);
-  Battle_actors[1] = &actor;
+  VS::Battle::actors[1] = &actor;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
   CHECK(actor.commandState == 0);
   CHECK(VS::Battle::actionState == nullptr);

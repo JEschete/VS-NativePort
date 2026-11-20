@@ -16,7 +16,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -24,7 +24,7 @@ namespace {
 
 // The completed-plan reconcile and relationship update read the request's
 // header as func_800DEEA4_t; its target list starts where that header ends.
-static_assert(sizeof(Battle_HitResult) ==
+static_assert(sizeof(VS::Battle::HitResult) ==
               sizeof(VS::Battle::Ai::EngagementActor));
 static_assert(offsetof(Battle_ActionRequest, targets) ==
               sizeof(VS::Battle::Ai::ReactionRecord));
@@ -68,7 +68,7 @@ VS::Battle::Ai::ActorAiState& AiStateOf(int slot) {
 }
 
 Battle_Actor& ActorOf(const PlanningActor& actor) {
-  for (Battle_Actor* live = Battle_actors[0]; live != nullptr;
+  for (Battle_Actor* live = VS::Battle::actors[0]; live != nullptr;
        live = live->next) {
     if (live->id == actor.slot) {
       return *live;
@@ -104,7 +104,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
   [[nodiscard]] std::vector<PlanningActor> Actors() const override {
     std::vector<PlanningActor> actors;
-    for (const Battle_Actor* live = Battle_actors[0]; live != nullptr;
+    for (const Battle_Actor* live = VS::Battle::actors[0]; live != nullptr;
          live = live->next) {
       actors.push_back(
           {live->id, AiStateOf(live->id).actor_id, StatsOf(*live).currentHp});
@@ -163,7 +163,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
 PlanningRequest PlanningRequestOf(const Battle_ActionRequest& request) {
   return {request.primaryTarget.target.target_actor,
-          request.primaryTarget.targetsPosition};
+          request.primaryTarget.targets_position};
 }
 
 int RebuildLiveActorActionPlans(Battle_ActionRequest* request) {

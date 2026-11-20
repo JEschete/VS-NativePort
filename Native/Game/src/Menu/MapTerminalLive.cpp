@@ -15,7 +15,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
@@ -141,8 +141,8 @@ std::span<std::byte> Payload(void* pointer) {
 }
 
 std::optional<std::span<std::byte>> LoadedScene() {
-  const auto bound = BoundLiveMapScene(Battle_unusedSceneBuffer);
-  const auto capacity = Payload(Battle_unusedSceneBuffer);
+  const auto bound = BoundLiveMapScene(VS::Battle::sceneBuffer);
+  const auto capacity = Payload(VS::Battle::sceneBuffer);
   if (!bound || bound->empty() || bound->size() > capacity.size()) {
     return std::nullopt;
   }
@@ -150,15 +150,15 @@ std::optional<std::span<std::byte>> LoadedScene() {
 }
 
 bool ReleaseScene() {
-  if (Battle_unusedSceneBuffer == nullptr) return true;
+  if (VS::Battle::sceneBuffer == nullptr) return true;
   if (!LoadedScene()) return false;
-  const auto bytes = Payload(Battle_unusedSceneBuffer);
+  const auto bytes = Payload(VS::Battle::sceneBuffer);
   ClearLiveMapTextBorrow(bytes);
   if (!Content::CancelLiveDiscWrites(bytes)) return false;
   roomNamesTable = nullptr;
-  ForgetLiveMapScene(Battle_unusedSceneBuffer);
-  memory::FreeLiveFromHighEnd(Battle_unusedSceneBuffer);
-  Battle_unusedSceneBuffer = nullptr;
+  ForgetLiveMapScene(VS::Battle::sceneBuffer);
+  memory::FreeLiveFromHighEnd(VS::Battle::sceneBuffer);
+  VS::Battle::sceneBuffer = nullptr;
   return true;
 }
 
@@ -270,7 +270,7 @@ class LiveFrame final : public MapFrameHost {
   void DrawRooms() override {
     if (LoadedScene()) {
       LiveDrawVisitedRooms(
-          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(VS::Battle::sceneBuffer));
     } else {
       Refuse("DrawRooms", "no owned loaded scene");
     }
@@ -382,7 +382,7 @@ class LiveMapMenu final : public MapMenuHost {
     memory::FreeLiveFromHighEnd(pending_scene.destination);
     pending_scene = {};
     armFileBuff = nullptr;
-    Battle_unusedSceneBuffer = destination;
+    VS::Battle::sceneBuffer = destination;
     BindLiveMapScene(destination, static_cast<std::size_t>(file.bytes));
     roomNamesTable = Field::ResolveLiveSceneRoomData(
         destination, static_cast<std::size_t>(file.bytes));
@@ -399,13 +399,13 @@ class LiveMapMenu final : public MapMenuHost {
     int room = 0;
     Call([&] {
       room = LiveInitialRoomIndex(
-          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(VS::Battle::sceneBuffer));
     });
     return room;
   }
   void CenterOnRoom(std::int32_t room) override {
     Call([&] {
-      LiveCenterOnRoom(static_cast<Field::MapScene*>(Battle_unusedSceneBuffer),
+      LiveCenterOnRoom(static_cast<Field::MapScene*>(VS::Battle::sceneBuffer),
                        room);
     });
   }
@@ -418,7 +418,7 @@ class LiveMapMenu final : public MapMenuHost {
   void SetCenterTarget(std::int32_t room) override {
     Call([&] {
       LiveSetRoomCenterTarget(
-          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer), room);
+          static_cast<Field::MapScene*>(VS::Battle::sceneBuffer), room);
     });
   }
   void DrawFrame() override {
@@ -427,7 +427,7 @@ class LiveMapMenu final : public MapMenuHost {
   void AnimateCentering() override {
     Call([] {
       LiveAnimateCentering(
-          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(VS::Battle::sceneBuffer));
     });
   }
 
@@ -663,11 +663,11 @@ std::span<const std::uint8_t> LiveMapPalingText() {
 }
 
 bool DrainMapTerminalLive() {
-  if (Battle_unusedSceneBuffer != nullptr && !LoadedScene()) {
+  if (VS::Battle::sceneBuffer != nullptr && !LoadedScene()) {
     Refuse("Drain", "scene alias does not identify the bound allocation");
     return false;
   }
-  ClearLiveMapTextBorrow(Payload(Battle_unusedSceneBuffer));
+  ClearLiveMapTextBorrow(Payload(VS::Battle::sceneBuffer));
   if (!DrainMapLoadingLive() || !DrainPendingScene() || !ReleaseScene()) {
     Refuse("Drain", "cancel writes before releasing their destination");
     return false;

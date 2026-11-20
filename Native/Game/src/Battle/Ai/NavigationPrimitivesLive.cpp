@@ -15,6 +15,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -30,7 +31,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -198,7 +199,7 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
     return state.actor_id == actor_id && state.actor != nullptr &&
            static_cast<void*>(state.actor) ==
                static_cast<void*>(
-                   Battle_actors[static_cast<std::size_t>(actor_id)]) &&
+                   VS::Battle::actors[static_cast<std::size_t>(actor_id)]) &&
            VS::Battle::Ai::roomAiState != nullptr;
   }
   void ReleaseEngagement(int actor_id) override {
@@ -307,7 +308,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
     actor_ = nullptr;
   }
   [[nodiscard]] std::optional<ScriptedRouteActor> NextActor() override {
-    actor_ = started_ ? actor_->next : Battle_actors[0];
+    actor_ = started_ ? actor_->next : VS::Battle::actors[0];
     started_ = true;
     if (actor_ == nullptr) return std::nullopt;
     return ScriptedRouteActor{

@@ -13,10 +13,11 @@
 #include <string>
 #include <string_view>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -91,7 +92,7 @@ class LiveHost final : public Host {
     return Battle_actionDefinitions[action_id].cost;
   }
   std::optional<std::uint32_t> ActionRestrictionFlags(int action_id) override {
-    if (!ValidAction(action_id) || Battle_characterState == nullptr) {
+    if (!ValidAction(action_id) || VS::Battle::characterState == nullptr) {
       return std::nullopt;
     }
     return static_cast<std::uint32_t>(
@@ -111,10 +112,10 @@ class LiveHost final : public Host {
                        kActionNameBytes) != nullptr;
   }
   std::optional<int> EquippedWeaponCategory() override {
-    if (Battle_characterState == nullptr) {
+    if (VS::Battle::characterState == nullptr) {
       return std::nullopt;
     }
-    return Battle_characterState->equippedWeaponCategory;
+    return VS::Battle::characterState->equippedWeaponCategory;
   }
   std::optional<int> ArtsLearned(int category) override {
     if (category < 0 || static_cast<std::size_t>(category) >=
@@ -135,11 +136,11 @@ class LiveHost final : public Host {
     if (category < 0 ||
         static_cast<std::size_t>(category) >= kPointRequirementCategoryCount ||
         art_index < 0 ||
-        art_index >=
-            static_cast<int>(std::size(Battle_breakArtPointRequirements[0]))) {
+        art_index >= static_cast<int>(
+                         std::size(VS::Battle::breakArtPointRequirements[0]))) {
       return std::nullopt;
     }
-    return Battle_breakArtPointRequirements[category][art_index];
+    return VS::Battle::breakArtPointRequirements[category][art_index];
   }
 
   std::uint8_t CursorMemory() override {

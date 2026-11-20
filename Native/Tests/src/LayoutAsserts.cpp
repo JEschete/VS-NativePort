@@ -24,8 +24,8 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
-#include "Battle/Damage.h"
-#include "Battle/TargetVolume.h"
+#include "Battle/Damage.hpp"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -115,17 +115,17 @@ static_assert(offsetof(Battle_ActionDefinition, hits) == 20,
               "action hit definitions offset");
 static_assert(offsetof(Battle_ActionDefinition, name) == 28,
               "action name offset");
-static_assert(sizeof(Battle_TargetSphereSetupView) >=
-                  sizeof(Battle_TargetSphere),
+static_assert(sizeof(VS::Battle::TargetSphereSetupView) >=
+                  sizeof(VS::Battle::TargetSphereRecord),
               "sphere allocation extent");
-static_assert(offsetof(Battle_TargetSphereSetupView, wireVertices) ==
-                  offsetof(Battle_TargetSphere, wireVertices),
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_vertices) ==
+                  offsetof(VS::Battle::TargetSphereRecord, wire_vertices),
               "sphere vertex view offset");
-static_assert(offsetof(Battle_TargetSphereSetupView, wireEdges) ==
-                  offsetof(Battle_TargetSphere, wireEdges),
+static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_edges) ==
+                  offsetof(VS::Battle::TargetSphereRecord, wire_edges),
               "sphere edge view offset");
 static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
-                  offsetof(Battle_TargetSphere, labels),
+                  offsetof(VS::Battle::TargetSphereRecord, labels),
               "sphere label view offset");
 
 // An actor record placed at core.model (VS::Content::ParseActorModel) must
@@ -239,7 +239,7 @@ int Tests_AiRelations(void) {
   Battle_Actor actors[3] = {{nullptr}};
   VS::Battle::Ai::ActorAiState states[3] = {{0}};
   const unsigned ids[3] = {0, 2, 5};
-  Battle_Actor* savedHead = Battle_actors[0];
+  Battle_Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_states[3];
   for (unsigned index = 0; index < 3; ++index) {
     saved_states[index] = VS::Battle::Ai::actorAiStates[ids[index]];
@@ -253,7 +253,7 @@ int Tests_AiRelations(void) {
   states[1].settings_bits21 = 0;
   states[2].settings_bits21 = 2;
   states[1].relations[5].visible = 1;
-  Battle_actors[0] = actors;
+  VS::Battle::actors[0] = actors;
   VS::Battle::Ai::InitializeLiveActorAiRelations(
       reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&states[1]));
   int passed = states[1].relations[0].classification == 3 &&
@@ -277,7 +277,7 @@ int Tests_AiRelations(void) {
       states[1].relations[0].visible == 1 &&
       states[1].relations[0].counter == 37 &&
       states[0].relations[2].classification == 3;
-  Battle_actors[0] = savedHead;
+  VS::Battle::actors[0] = saved_head;
   for (unsigned index = 0; index < 3; ++index) {
     VS::Battle::Ai::actorAiStates[ids[index]] = saved_states[index];
   }
@@ -321,28 +321,29 @@ int Tests_AiMovementSetup(void) {
 }
 
 int Tests_TargetSphereViews(void) {
-  Battle_TargetSphereSetupView setup = {0};
-  Battle_TargetSphere* sphere = reinterpret_cast<Battle_TargetSphere*>(&setup);
+  VS::Battle::TargetSphereSetupView setup = {0};
+  VS::Battle::TargetSphereRecord* sphere =
+      reinterpret_cast<VS::Battle::TargetSphereRecord*>(&setup);
   Battle_TargetSphereLabelView* labels =
       reinterpret_cast<Battle_TargetSphereLabelView*>(&setup);
   VS::Battle::TargetPreview targets[2] = {{0}};
   char text[] = "limb";
-  setup.targetList0 = &targets[0];
-  setup.targetList1 = &targets[1];
+  setup.target_list0 = &targets[0];
+  setup.target_list1 = &targets[1];
   sphere->labels[23].text = text;
-  setup.wireEdges[769] = 0x1234;
-  return sphere->targetLists[0] == &targets[0] &&
-         sphere->targetLists[1] == &targets[1] &&
+  setup.wire_edges[769] = 0x1234;
+  return sphere->target_lists[0] == &targets[0] &&
+         sphere->target_lists[1] == &targets[1] &&
          labels->opaque40 == reinterpret_cast<void*>(&targets[0]) &&
          labels->opaque44 == reinterpret_cast<void*>(&targets[1]) &&
          labels->opaque990[23].limbName == text &&
-         (reinterpret_cast<int16_t*>(sphere->wireEdges))[769] == 0x1234;
+         (reinterpret_cast<int16_t*>(sphere->wire_edges))[769] == 0x1234;
 }
 
 int Tests_AiFrameStages(void) {
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* savedActor = Battle_actors[0];
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
@@ -360,7 +361,7 @@ int Tests_AiFrameStages(void) {
   actor.stats = &stats;
   view->actor = reinterpret_cast<Battle_Actor*>(&actor);
   view->model = reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&model);
-  Battle_actors[0] = &actor;
+  VS::Battle::actors[0] = &actor;
   VS::Battle::Ai::actorAiStates[0] = &state;
   VS::Battle::Ai::roomAiState = &room;
   VS::Battle::Ai::tileFlagMap = nullptr;
@@ -383,7 +384,7 @@ int Tests_AiFrameStages(void) {
            VS::Battle::Ai::savedMovementRandomState == 0x12345678 &&
            view->opaque14 == 1;
   VS::Battle::Ai::LiveFrameContext() = savedFrame;
-  Battle_actors[0] = savedActor;
+  VS::Battle::actors[0] = saved_actor;
   VS::Battle::Ai::actorAiStates[0] = saved_state;
   VS::Battle::Ai::roomAiState = saved_room;
   VS::Battle::Ai::tileFlagMap = saved_flags;
@@ -493,7 +494,7 @@ int Tests_ActorConditionSnapshot(void) {
   Battle_Actor first = {nullptr}, second = {nullptr};
   Battle_ActorStats firstStats = {0}, secondStats = {0};
   VS::Battle::Ai::ActorAiState first_ai = {0}, second_ai = {0};
-  Battle_Actor* savedHead = Battle_actors[0];
+  Battle_Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
   VS::Battle::Ai::ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
   struct {
@@ -519,7 +520,7 @@ int Tests_ActorConditionSnapshot(void) {
   secondStats.maxHp = 120;
   secondStats.statuses = (1 << 0) | (1 << 12);
   second_ai.action_cost_enabled = 1;
-  Battle_actors[0] = &first;
+  VS::Battle::actors[0] = &first;
   VS::Battle::Ai::actorAiStates[2] = &first_ai;
   VS::Battle::Ai::actorAiStates[5] = &second_ai;
   VS::Battle::Ai::CaptureBattleActorConditions(output.rows);
@@ -533,7 +534,7 @@ int Tests_ActorConditionSnapshot(void) {
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[5]) == -314 &&
       output.before == 0xA5A5A5A5u && output.after == 0xA5A5A5A5u &&
       output.rows[1].opaque_c == 0xA5A5A5A5u;
-  Battle_actors[0] = savedHead;
+  VS::Battle::actors[0] = saved_head;
   VS::Battle::Ai::actorAiStates[2] = saved_first;
   VS::Battle::Ai::actorAiStates[5] = saved_second;
   return passed;

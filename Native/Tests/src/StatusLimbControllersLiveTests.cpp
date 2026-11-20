@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -38,8 +38,8 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 }
 
 struct LiveLimbFixture {
-  ValueRestore<Battle_Actor*> saved_actor{Battle_actors[0]};
-  ValueRestore<Battle_Actor*> saved_second_actor{Battle_actors[1]};
+  ValueRestore<Battle_Actor*> saved_actor{VS::Battle::actors[0]};
+  ValueRestore<Battle_Actor*> saved_second_actor{VS::Battle::actors[1]};
   ValueRestore<std::int32_t> saved_selected{status::selectedActor};
   ValueRestore<std::uint8_t> saved_element{status::selectedElement};
   ValueRestore<std::int32_t> saved_x{status::screenXPos};
@@ -74,8 +74,8 @@ struct LiveLimbFixture {
   LiveLimbFixture() {
     status::ResetLiveLimbControllersModuleData();
     actor.stats = &stats;
-    Battle_actors[0] = &actor;
-    Battle_actors[1] = &actor;
+    VS::Battle::actors[0] = &actor;
+    VS::Battle::actors[1] = &actor;
     status::selectedActor = 1;
     VS::Menu::Framework::stringBuf = output.data();
     output.fill(static_cast<char>(0xAA));
@@ -120,7 +120,7 @@ struct LiveLimbFixture {
     CHECK(VS::Menu::Framework::stringBuf == workspace);
     CHECK(VS::Core::Memory::LivePayloadCapacity(workspace).has_value());
     CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == heap_refusals);
-    CHECK(Battle_actors[1] == &actor);
+    CHECK(VS::Battle::actors[1] == &actor);
     CHECK(actor.stats == &stats);
     CHECK(status::statusStrings[74] == 0xE741);
     CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
@@ -210,7 +210,7 @@ TEST_CASE("F02668 owner hook forgets actor identity without freeing its owner",
   CHECK(status::LiveLimbPanelControllerState().actor_slot == 1);
   status::ResetLiveLimbControllersModuleData();
   CHECK(status::LiveLimbPanelControllerState().actor_slot == 0);
-  CHECK(Battle_actors[1] == &fixture.actor);
+  CHECK(VS::Battle::actors[1] == &fixture.actor);
   CHECK(fixture.actor.stats == &fixture.stats);
 }
 

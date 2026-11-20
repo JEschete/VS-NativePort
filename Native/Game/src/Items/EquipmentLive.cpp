@@ -12,11 +12,11 @@
 #include <span>
 #include <utility>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Hit.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
@@ -57,7 +57,7 @@ class LiveGrowthHost final : public EquipmentGrowthHost {
 std::array<std::int16_t, kLimbCount> LimbArmorDpLoss() {
   std::array<std::int16_t, kLimbCount> loss{};
   for (std::size_t i = 0; i < kLimbCount; ++i) {
-    loss[i] = Battle_limbArmorDpLoss[i];
+    loss[i] = VS::Battle::limbArmorDpLoss[i];
   }
   return loss;
 }
@@ -215,7 +215,7 @@ void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
 void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon) {
   auto* stats = AshleyStats("EquipAshleyWeapon");
   if (stats == nullptr) return;
-  auto& actor = *Battle_characterState;
+  auto& actor = *VS::Battle::characterState;
   auto ashley = Live::ToAshleyWeapon(*stats, actor);
   LiveEquipStatusHost host(
       *stats, [&] { Live::CommitAshleyWeapon(*stats, actor, ashley); });
@@ -465,11 +465,10 @@ void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
 }
 
 // decomp: BATTLE.PRG _itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12109)
-std::int16_t CalculateLiveItemRecovery(Battle_ActionDefinition* action,
-                                       Battle_HitResult* /*attacker_result*/,
-                                       Battle_HitResult* /*target_result*/,
-                                       int hit_index,
-                                       int add_random_variation) {
+std::int16_t CalculateLiveItemRecovery(
+    Battle_ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
+    VS::Battle::HitResult* /*target_result*/, int hit_index,
+    int add_random_variation) {
   if (action == nullptr) {
     WarnNullRecord("CalculateItemRecovery");
     return 0;

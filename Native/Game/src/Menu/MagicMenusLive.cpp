@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
@@ -111,8 +111,8 @@ class LiveHost final : public MenuHost {
     return Battle_actionDefinitions[action].unlocked != 0;
   }
   std::optional<std::uint32_t> SpellRestrictions(int action) override {
-    if (!ValidAction(action) || Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+    if (!ValidAction(action) || VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       return std::nullopt;
     }
     return static_cast<std::uint32_t>(
@@ -169,8 +169,8 @@ class LiveHost final : public MenuHost {
   bool SpellCost(int action) override {
     const auto id = action < 0 ? -static_cast<std::int64_t>(action) : action;
     if (id >= static_cast<std::int64_t>(std::size(Battle_actionDefinitions)) ||
-        Battle_characterState == nullptr ||
-        Battle_characterState->stats == nullptr) {
+        VS::Battle::characterState == nullptr ||
+        VS::Battle::characterState->stats == nullptr) {
       Refuse("Magic MP cost action or player is unavailable");
       return false;
     }

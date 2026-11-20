@@ -607,14 +607,14 @@ TEST_CASE("The live request reads the primary target, not padded offsets",
   Battle_ActionRequest request;
   std::memset(&request, 0, sizeof request);
   request.primaryTarget.target.target_actor = 7;
-  request.primaryTarget.riskChange = 3;
-  request.primaryTarget.targetsPosition = 0;
+  request.primaryTarget.risk_change = 3;
+  request.primaryTarget.targets_position = 0;
   std::memset(&request.targets[0], 0x5A, sizeof request.targets[0]);
   PlanningRequest decoded = VS::Battle::Ai::PlanningRequestOf(request);
   CHECK(decoded.primary_target == 7);
   CHECK(decoded.targets_position == 0);
 
-  request.primaryTarget.targetsPosition = 0x12;
+  request.primaryTarget.targets_position = 0x12;
   decoded = VS::Battle::Ai::PlanningRequestOf(request);
   CHECK(decoded.targets_position == 0x12);
 }

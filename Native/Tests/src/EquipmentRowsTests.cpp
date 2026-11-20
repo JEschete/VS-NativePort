@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -1019,7 +1019,7 @@ TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
 struct LiveModelFixture {
   Restore<Actors_ActorRecord*> saved_actor{Actors_actorRecords[1]};
   Restore<std::uint8_t> saved_step{VS::Content::objectDataLoadStep};
-  Restore<Battle_Actor*> saved_character{Battle_characterState};
+  Restore<Battle_Actor*> saved_character{VS::Battle::characterState};
   std::unique_ptr<Actors_ActorRecord> actor =
       std::make_unique<Actors_ActorRecord>();
 };
@@ -1045,7 +1045,7 @@ TEST_CASE("ReloadLiveEquipmentModels refuses without a preview actor",
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   Actors_actorRecords[1] = fixture.actor.get();
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 2);
   CHECK(VS::Content::objectDataLoadStep == 0);
@@ -1054,7 +1054,7 @@ TEST_CASE("ReloadLiveEquipmentModels refuses without a preview actor",
 TEST_CASE("QueueLiveEquipmentModel refuses without Ashley's model slots",
           "[equipment-rows-live]") {
   LiveModelFixture fixture;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   inv::QueueLiveEquipmentModel(0, 1);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before);

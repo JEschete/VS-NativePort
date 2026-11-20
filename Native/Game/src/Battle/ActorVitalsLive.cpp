@@ -15,10 +15,10 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -57,10 +57,10 @@ class LiveVitalsActor final : public VitalsActor {
 class LiveVitalsWorld final : public ActorVitalsWorld {
  public:
   VitalsActor* ActorAt(int slot) override {
-    Require(
-        slot >= 0 && static_cast<std::size_t>(slot) < std::size(Battle_actors),
-        "Vitals requires a valid actor slot");
-    auto* actor = Battle_actors[slot];
+    Require(slot >= 0 &&
+                static_cast<std::size_t>(slot) < std::size(VS::Battle::actors),
+            "Vitals requires a valid actor slot");
+    auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr) return nullptr;
     actors_.emplace_back(*actor);
     return &actors_.back();
@@ -94,14 +94,16 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
     auto& owner = static_cast<LiveActorVitalsAccess&>(stats).Owner();
     UpdateLiveActorStatusTimers(&owner);
   }
-  std::int32_t Counter() override { return Battle_vitalsTickCounter; }
+  std::int32_t Counter() override { return VS::Battle::vitalsTickCounter; }
   void SetCounter(std::int32_t value) override {
-    Battle_vitalsTickCounter = value;
+    VS::Battle::vitalsTickCounter = value;
   }
   std::int32_t Ticks() override { return VS::State::tickSpeed; }
-  std::int32_t RegeneratingLimb() override { return Battle_regeneratingLimb; }
+  std::int32_t RegeneratingLimb() override {
+    return VS::Battle::regeneratingLimb;
+  }
   void SetRegeneratingLimb(std::int32_t value) override {
-    Battle_regeneratingLimb = value;
+    VS::Battle::regeneratingLimb = value;
   }
   int SceneTimer() override { return State::UpdateLiveSceneTimer(); }
 

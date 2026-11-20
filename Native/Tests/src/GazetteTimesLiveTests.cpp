@@ -198,7 +198,7 @@ TEST_CASE(
   const auto refusals = score::LiveTimeTrialRefusals();
   live::Fixture::SetScore(2, 0, 0xFFFFFF, 127, true);
   live::Fixture::SetScore(2, 1, 0x000102, 0);
-  Battle_unusedMenu9CursorMemory.gazette_page = 2;
+  VS::Battle::menu9CursorMemory.gazette_page = 2;
   score::CreateLiveTimeTrialRows();
   fixture.SettleEntrance();
   fixture.ResetFrame();

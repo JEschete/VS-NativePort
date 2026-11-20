@@ -14,8 +14,8 @@
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/AttackPrerequisiteTable.hpp"
-#include "Battle/Damage.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Log.hpp"
 #include "Items/ItemRecords.hpp"
 
@@ -34,10 +34,11 @@ constexpr std::size_t kImpactKindByte = 3;
 const Battle_ActorStats* TargetStats(const u_char* target_result_bytes) {
   if (target_result_bytes == nullptr) return nullptr;
   const std::size_t actor = target_result_bytes[0];
-  if (actor >= std::size(Battle_actors) || Battle_actors[actor] == nullptr) {
+  if (actor >= std::size(VS::Battle::actors) ||
+      VS::Battle::actors[actor] == nullptr) {
     return nullptr;
   }
-  return Battle_actors[actor]->stats;
+  return VS::Battle::actors[actor]->stats;
 }
 
 class LivePrerequisiteTarget final : public battle::PrerequisiteTarget {
@@ -58,12 +59,13 @@ class LivePrerequisiteTarget final : public battle::PrerequisiteTarget {
   }
   [[nodiscard]] battle::StatusEffectRule EffectRule(int effect) const override {
     if (effect < 0 || static_cast<std::size_t>(effect) >=
-                          std::size(Battle_statusEffectParams)) {
+                          std::size(VS::Battle::statusEffectParams)) {
       return {};
     }
-    const Battle_StatusEffectParams& params = Battle_statusEffectParams[effect];
-    return {static_cast<std::uint32_t>(params.statusFlags),
-            static_cast<std::uint32_t>(params.blockingStatuses)};
+    const VS::Battle::StatusEffectParams& params =
+        VS::Battle::statusEffectParams[effect];
+    return {static_cast<std::uint32_t>(params.status_flags),
+            static_cast<std::uint32_t>(params.blocking_statuses)};
   }
   [[nodiscard]] std::uint32_t StatusImmunities() const override {
     return stats_ != nullptr

@@ -9,7 +9,7 @@
 
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereTerrain.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
@@ -77,20 +77,20 @@ void DrawLiveSphereTerrainIntersection(const SVECTOR& position,
     VS::Core::LogError("sphere", "{}", kMessage);
     throw std::runtime_error(kMessage);
   }
-  static_assert(offsetof(Battle_TargetSphere, wireEdges) ==
-                offsetof(Battle_TargetSphereSetupView, wireEdges));
-  const auto& sphere =
-      *reinterpret_cast<const Battle_TargetSphere*>(VS::Battle::targetSphere);
-  static_assert(sizeof sphere.wireEdges >=
+  static_assert(offsetof(VS::Battle::TargetSphereRecord, wire_edges) ==
+                offsetof(VS::Battle::TargetSphereSetupView, wire_edges));
+  const auto& sphere = *reinterpret_cast<const VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
+  static_assert(sizeof sphere.wire_edges >=
                 kSphereWireEdges * sizeof(std::uint16_t));
   std::array<std::uint16_t, kSphereWireEdges> wire_edges{};
-  std::memcpy(wire_edges.data(), sphere.wireEdges, sizeof wire_edges);
+  std::memcpy(wire_edges.data(), sphere.wire_edges, sizeof wire_edges);
   const SphereTerrainTables tables{
-      std::span<const int, kSphereTerrainCells>(sphere.terrainHeights),
+      std::span<const int, kSphereTerrainCells>(sphere.terrain_heights),
       wire_edges,
       std::span<const std::uint8_t, kSphereTerrainCells>(
-          sphere.terrainRowFlags),
-      sphere.cameraYaw};
+          sphere.terrain_row_flags),
+      sphere.camera_yaw};
   LiveCanvas canvas;
   DrawSphereTerrainIntersection(
       {position.vx, position.vy, position.vz},

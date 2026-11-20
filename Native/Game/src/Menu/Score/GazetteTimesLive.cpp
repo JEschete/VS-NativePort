@@ -10,7 +10,7 @@
 #include <string>
 #include <string_view>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/String/GameText.hpp"
@@ -217,7 +217,7 @@ void RenderLiveTimeTrialRecords(std::int32_t presentation_step) {
   LiveTimeTrialHost host;
   if (RenderTimeTrialRecords(
           rows, Scores(),
-          static_cast<TimeTrialId>(Battle_unusedMenu9CursorMemory.gazette_page),
+          static_cast<TimeTrialId>(VS::Battle::menu9CursorMemory.gazette_page),
           presentation_step, live_animation, host)) {
     StoreAnimation(rows);
   }

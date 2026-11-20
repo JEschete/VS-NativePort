@@ -19,7 +19,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Interactions.hpp"
@@ -773,15 +773,15 @@ class LiveActorTables {
  public:
   LiveActorTables()
       : records_(std::to_array(Actors_actorRecords)),
-        battle_actors_(std::to_array(Battle_actors)),
+        battle_actors_(VS::Battle::actors),
         control_mode_(VS::Field::controlMode) {
     std::ranges::fill(Actors_actorRecords, nullptr);
-    std::ranges::fill(Battle_actors, nullptr);
+    std::ranges::fill(VS::Battle::actors, nullptr);
     VS::Field::controlMode = 0;
   }
   ~LiveActorTables() {
     std::ranges::copy(records_, std::begin(Actors_actorRecords));
-    std::ranges::copy(battle_actors_, std::begin(Battle_actors));
+    std::ranges::copy(battle_actors_, std::begin(VS::Battle::actors));
     VS::Field::controlMode = control_mode_;
   }
   LiveActorTables(const LiveActorTables&) = delete;
@@ -789,7 +789,7 @@ class LiveActorTables {
 
  private:
   decltype(std::to_array(Actors_actorRecords)) records_;
-  decltype(std::to_array(Battle_actors)) battle_actors_;
+  decltype(VS::Battle::actors) battle_actors_;
   u_int control_mode_;
 };
 }  // namespace
@@ -809,7 +809,7 @@ TEST_CASE("The live executor steps a waiting ground offset in the actor tables",
   battle_actor->commandArg0 = 0x9000;
   battle_actor->commandArg1.word = -0x3000;
   battle_actor->commandArg2 = 0x2000;
-  Battle_actors[0] = battle_actor.get();
+  VS::Battle::actors[0] = battle_actor.get();
 
   CHECK(actors::ExecuteLiveQueuedActorCommands() == 0);
   CHECK(FieldsOf(*battle_actor) ==

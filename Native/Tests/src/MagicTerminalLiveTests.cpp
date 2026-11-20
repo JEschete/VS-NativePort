@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Boot/SessionLive.hpp"
@@ -60,9 +60,9 @@ constexpr std::size_t kExpectedGlyphs = 10;
 struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   std::vector<std::byte> arena = std::vector<std::byte>(0x20000);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  ValueRestore<decltype(Battle_characterState)> saved_actor{
-      Battle_characterState};
-  ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[0]};
+  ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
+      VS::Battle::characterState};
+  ValueRestore<Battle_Actor*> saved_ashley{VS::Battle::actors[0]};
   ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
       VS::State::stateFlags};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
@@ -105,8 +105,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     framework::ResetLiveMainMenuStatics();
     magic::ResetMagicMenusLiveState();
     magic::ResetTeleportMenuLiveState();
-    Battle_characterState = &actor;
-    Battle_actors[0] = &actor;
+    VS::Battle::characterState = &actor;
+    VS::Battle::actors[0] = &actor;
     actor.stats = &stats;
     stats.currentMp = 500;
     VS::State::stateFlags = {};

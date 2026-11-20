@@ -13,7 +13,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -122,14 +122,14 @@ void StoreCompassBounds(const CompassCorners& corners) {
 [[nodiscard]] std::optional<std::span<const std::byte>> SceneBytes(
     const void* scene) {
   if (scene == nullptr) return std::nullopt;
-  if (scene == Battle_unusedSceneBuffer) {
+  if (scene == VS::Battle::sceneBuffer) {
     if (const auto loaded = BoundLiveMapScene(scene)) return *loaded;
     if (currentScene < 0 || currentScene >= kSceneCount) {
       return std::nullopt;
     }
     const int size = kSceneArmFiles[currentScene].size;
     if (size < 0) return std::nullopt;
-    return std::span{static_cast<const std::byte*>(Battle_unusedSceneBuffer),
+    return std::span{static_cast<const std::byte*>(VS::Battle::sceneBuffer),
                      static_cast<std::size_t>(size)};
   }
   if (scene == VS::Field::roomData.minimap_scene) {
@@ -145,7 +145,7 @@ void StoreCompassBounds(const CompassCorners& corners) {
 [[nodiscard]] std::optional<std::span<const std::byte>> RoomBytes(
     const void* data) {
   for (const void* scene :
-       {static_cast<const void*>(Battle_unusedSceneBuffer),
+       {static_cast<const void*>(VS::Battle::sceneBuffer),
         static_cast<const void*>(VS::Field::roomData.minimap_scene)}) {
     const auto bytes = SceneBytes(scene);
     if (!bytes || bytes->empty()) continue;

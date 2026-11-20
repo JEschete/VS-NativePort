@@ -7,14 +7,14 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionEffectDispatch.hpp"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Items/ItemRecords.hpp"
@@ -31,16 +31,17 @@ void Require(bool valid) {
     std::abort();
   }
 }
-Battle_HitResult& HitOf(Battle_HitResult* hit) {
+VS::Battle::HitResult& HitOf(VS::Battle::HitResult* hit) {
   Require(hit != nullptr);
   return *hit;
 }
-Battle_Actor& ActorOf(const Battle_HitResult& hit) {
+Battle_Actor& ActorOf(const VS::Battle::HitResult& hit) {
   const auto slot = hit.target.target_actor;
-  Require(slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr);
-  return *Battle_actors[slot];
+  Require(slot < std::size(VS::Battle::actors) &&
+          VS::Battle::actors[slot] != nullptr);
+  return *VS::Battle::actors[slot];
 }
-Battle_ActorStats& StatsOf(const Battle_HitResult& hit) {
+Battle_ActorStats& StatsOf(const VS::Battle::HitResult& hit) {
   auto* stats = ActorOf(hit).stats;
   Require(stats != nullptr);
   return *stats;
@@ -48,7 +49,7 @@ Battle_ActorStats& StatsOf(const Battle_HitResult& hit) {
 
 class LiveInjuryQueue final : public LimbInjuryQueue {
  public:
-  explicit LiveInjuryQueue(Battle_HitResult& hit)
+  explicit LiveInjuryQueue(VS::Battle::HitResult& hit)
       : hit_(hit), stats_(StatsOf(hit)) {}
   std::uint8_t MobilityLimb(std::size_t index) override {
     return index == 0 ? stats_.mobilityLimb0 : stats_.mobilityLimb1;
@@ -60,7 +61,7 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
   ActionResultChange PendingHp(std::uint8_t limb) override {
     Require(limb < std::size(hit_.limbs));
     return {hit_.limbs[limb].effects.opaque0,
-            static_cast<std::uint8_t>(hit_.hpEffect)};
+            static_cast<std::uint8_t>(hit_.hp_effect)};
   }
   std::uint32_t ActiveStatuses() override {
     return std::bit_cast<std::uint32_t>(stats_.statuses);
@@ -71,9 +72,9 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
     return VS::Battle::limbInjuryStatusIds[limb];
   }
   std::uint32_t RuleMask(std::uint8_t rule) override {
-    Require(rule < std::size(Battle_statusEffectParams));
+    Require(rule < std::size(VS::Battle::statusEffectParams));
     return std::bit_cast<std::uint32_t>(
-        Battle_statusEffectParams[rule].statusFlags);
+        VS::Battle::statusEffectParams[rule].status_flags);
   }
   void QueueStatus(std::uint8_t rule, bool remove) override {
     if (remove) {
@@ -84,16 +85,16 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
   }
 
  private:
-  Battle_HitResult& hit_;
+  VS::Battle::HitResult& hit_;
   Battle_ActorStats& stats_;
 };
 
 class LiveEffectWorld final : public ActionEffectWorld {
  public:
-  LiveEffectWorld(Battle_ActionDefinition* action, Battle_HitResult* source,
-                  Battle_HitResult& target)
+  LiveEffectWorld(Battle_ActionDefinition* action,
+                  VS::Battle::HitResult* source, VS::Battle::HitResult& target)
       : action_(action), source_(source), target_(target) {}
-  bool TargetPosition() override { return target_.targetsPosition != 0; }
+  bool TargetPosition() override { return target_.targets_position != 0; }
   std::uint8_t TargetActorId() override { return StatsOf(target_).actorId; }
   std::uint32_t TargetStatuses() override {
     return std::bit_cast<std::uint32_t>(StatsOf(target_).statuses);
@@ -104,11 +105,11 @@ class LiveEffectWorld final : public ActionEffectWorld {
   }
   void QueueExemptDamage() override {
     constexpr int kExemptDamage = 999;
-    target_.hpEffect = 1;
+    target_.hp_effect = 1;
     target_.target.hp = std::bit_cast<std::int16_t>(
         static_cast<std::uint16_t>(target_.target.hp + kExemptDamage));
   }
-  void ClearLastValue() override { Battle_lastActionStatValue = 0; }
+  void ClearLastValue() override { VS::Battle::lastActionStatValue = 0; }
   void Dispatch(int hit, int execute) override {
     Require(action_ != nullptr && hit >= 0 &&
             static_cast<std::size_t>(hit) < std::size(action_->hits));
@@ -119,10 +120,12 @@ class LiveEffectWorld final : public ActionEffectWorld {
     mediator(action_, source_, &target_, hit, execute);
   }
   void QueueStatusRemoval(std::uint32_t mask) override {
-    target_.inflictStatuses = std::bit_cast<std::int32_t>(
-        std::bit_cast<std::uint32_t>(target_.inflictStatuses) | mask);
+    target_.inflict_statuses = std::bit_cast<std::int32_t>(
+        std::bit_cast<std::uint32_t>(target_.inflict_statuses) | mask);
   }
-  bool SourcePosition() override { return HitOf(source_).targetsPosition != 0; }
+  bool SourcePosition() override {
+    return HitOf(source_).targets_position != 0;
+  }
   std::uint8_t SourceSlot() override {
     return HitOf(source_).target.target_actor;
   }
@@ -132,8 +135,8 @@ class LiveEffectWorld final : public ActionEffectWorld {
   bool KillCounted() override { return ActorOf(target_).killCounted != 0; }
   void MarkKillCounted() override { ActorOf(target_).killCounted = 1; }
   std::uint8_t WeaponCategory() override {
-    Require(Battle_characterState != nullptr);
-    return Battle_characterState->equippedWeaponCategory;
+    Require(VS::Battle::characterState != nullptr);
+    return VS::Battle::characterState->equippedWeaponCategory;
   }
   std::uint32_t ProgressFlag() override {
     constexpr int kWeaponArtProgressFlag = 0x82;
@@ -147,7 +150,7 @@ class LiveEffectWorld final : public ActionEffectWorld {
   }
   std::uint16_t RequiredKills(std::uint8_t category,
                               std::uint8_t learned) override {
-    return Battle_breakArtPointRequirements[category][learned];
+    return VS::Battle::breakArtPointRequirements[category][learned];
   }
   void SetWeaponKills(std::uint8_t category, std::uint16_t kills) override {
     VS::State::artsStatus.kills.weapon_category_kills[category] = kills;
@@ -155,22 +158,23 @@ class LiveEffectWorld final : public ActionEffectWorld {
 
  private:
   Battle_ActionDefinition* action_;
-  Battle_HitResult* source_;
-  Battle_HitResult& target_;
+  VS::Battle::HitResult* source_;
+  VS::Battle::HitResult& target_;
 };
 using Mediator = VS::Battle::ActionEffectMediator;
 static_assert(std::is_same_v<decltype(&ApplyLiveActionHitEffect), Mediator>);
 }  // namespace
 
 // decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12930).
-void DeriveLiveLimbInjuryStatuses(Battle_HitResult* hit) {
+void DeriveLiveLimbInjuryStatuses(VS::Battle::HitResult* hit) {
   LiveInjuryQueue queue(HitOf(hit));
   DeriveLimbInjuryStatuses(queue);
 }
 // decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:13012).
 void ApplyLiveActionHitEffect(Battle_ActionDefinition* action,
-                              Battle_HitResult* source,
-                              Battle_HitResult* target, int execute, int hit) {
+                              VS::Battle::HitResult* source,
+                              VS::Battle::HitResult* target, int execute,
+                              int hit) {
   LiveEffectWorld world(action, source, HitOf(target));
   ApplyActionHitEffect(world, execute, hit);
 }

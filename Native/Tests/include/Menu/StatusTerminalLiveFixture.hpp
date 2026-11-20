@@ -27,7 +27,7 @@
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Hud.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -269,8 +269,8 @@ struct Fixture {
       VS::Battle::stringContext};
   ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{
       VS::Menu::Framework::submenuStates};
-  ArrayRestore<Battle_Actor*, std::size(Battle_actors)> saved_actors{
-      Battle_actors};
+  ArrayRestore<Battle_Actor*, std::size(VS::Battle::actors)> saved_actors{
+      VS::Battle::actors.data()};
   ArrayRestore<Actors_ActorRecord*, std::size(Actors_actorRecords)>
       saved_models{Actors_actorRecords};
   ArrayRestore<VS::Actors::WeaponModel*, std::size(VS::Actors::weaponModels)>
@@ -316,7 +316,7 @@ struct Fixture {
     actor.kind = 1;
     std::ranges::fill(stats.name, static_cast<char>(0xE7));
     stats.name[0] = 0x51;
-    Battle_actors[0] = &actor;
+    VS::Battle::actors[0] = &actor;
     for (auto& limb : stats.limbs) {
       limb.nameIndex = 1;
       limb.hp = limb.maxHp = 100;

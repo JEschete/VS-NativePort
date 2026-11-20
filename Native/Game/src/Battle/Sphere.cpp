@@ -23,5 +23,5 @@ std::uint8_t positionCursorBlinkFrame;
 std::uint8_t reuseSphereVolumes;
 // decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG); allocated when the
 // sphere opens
-Battle_TargetSphereSetupView* targetSphere;
+VS::Battle::TargetSphereSetupView* targetSphere;
 }  // namespace VS::Battle

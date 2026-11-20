@@ -6,7 +6,9 @@
 
 struct Battle_ActionDefinition;
 struct Battle_ActorStats;
-struct Battle_HitResult;
+namespace VS::Battle {
+struct HitResult;
+}  // namespace VS::Battle
 
 // Bindings from the battle actor records, Ashley's battle actor and the
 // inventory (VS::Items::inventory) to the typed equipment statistics,
@@ -43,7 +45,7 @@ void LoadLiveInventoryArmorStats(VS::Items::ArmorLoadout* target,
 void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::InventoryArmor* source);
 
-// Equip Ashley (Battle_characterState) from her inventory.
+// Equip Ashley (VS::Battle::characterState) from her inventory.
 void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon);
 void EquipLiveAshleyShield(const VS::Items::InventoryShield* shield);
 void EquipLiveAshleyArmor(int body_part,
@@ -72,8 +74,8 @@ void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
 void RebuildLiveShieldClassAffinity(Battle_ActorStats* actor_stats);
 void RebuildLiveWeaponClassAffinity(Battle_ActorStats* actor_stats);
 
-// The defender's weapon-drawn state comes from Battle_actors and each limb's
-// armour loss from Battle_limbArmorDpLoss.
+// The defender's weapon-drawn state comes from VS::Battle::actors and each
+// limb's armour loss from VS::Battle::limbArmorDpLoss.
 void ConsumeLiveHitEquipmentDp(const Battle_ActionDefinition* action,
                                Battle_ActorStats* source,
                                Battle_ActorStats* target, int amount);
@@ -92,10 +94,10 @@ void GrowLiveAttackerWeaponRatings(const Battle_ActionDefinition* action,
                                    int defender_affinity_id);
 
 // BATTLE.PRG stores this address in its stat calculator table
-// (Battle_statCalculators[15]), so it keeps the table's signature. A hit index
-// outside the action's hits recovers nothing.
+// (VS::Battle::statCalculators[15]), so it keeps the table's signature. A hit
+// index outside the action's hits recovers nothing.
 std::int16_t CalculateLiveItemRecovery(Battle_ActionDefinition* action,
-                                       Battle_HitResult* attacker_result,
-                                       Battle_HitResult* target_result,
+                                       VS::Battle::HitResult* attacker_result,
+                                       VS::Battle::HitResult* target_result,
                                        int hit_index, int add_random_variation);
 }  // namespace VS::Items

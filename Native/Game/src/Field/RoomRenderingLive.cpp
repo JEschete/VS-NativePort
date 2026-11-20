@@ -8,7 +8,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.hpp"
@@ -302,8 +302,8 @@ class LiveSceneHost final : public RoomSceneHost {
   int DisplayClipX() override { return DrawnEnvironment().clip.x; }
   void DrawMinimap(const MinimapLayout& layout) override;
   bool WeaponDrawn() override {
-    return Battle_characterState != nullptr &&
-           Battle_characterState->weaponDrawn == 1;
+    return VS::Battle::characterState != nullptr &&
+           VS::Battle::characterState->weaponDrawn == 1;
   }
   int BorderPulsePhase() override { return minimapBorderPulsePhase; }
   void SetBorderPulsePhase(int phase) override {

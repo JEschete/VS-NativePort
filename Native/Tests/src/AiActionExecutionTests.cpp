@@ -22,7 +22,7 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 
 namespace {
@@ -179,7 +179,7 @@ class Decisions final : public ai::DecisionUpdateWorld {
 
 struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
-  Battle_Actor* old_head = Battle_actors[0];
+  Battle_Actor* old_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
   Actors_ActorRecord* old_record = Actors_actorRecords[0];
   int old_budget = VS::Battle::Ai::frameTickBudget;
@@ -193,7 +193,7 @@ struct LiveDecisionFixture {
     actor.id = 1;
     state.reserved14[0] = 1;
     state.reserved_1d[0] = 1;
-    Battle_actors[0] = &head;
+    VS::Battle::actors[0] = &head;
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     VS::Battle::Ai::actorAiStates[0] = &player;
     Actors_actorRecords[0] = &record;
@@ -201,7 +201,7 @@ struct LiveDecisionFixture {
   }
   ~LiveDecisionFixture() {
     VS::Battle::Ai::LiveFrameContext() = old_frame;
-    Battle_actors[0] = old_head;
+    VS::Battle::actors[0] = old_head;
     VS::Battle::Ai::actorAiStates[0] = old_player;
     Actors_actorRecords[0] = old_record;
     VS::Battle::Ai::frameTickBudget = old_budget;
@@ -514,6 +514,6 @@ TEST_CASE("Live decisions diagnose missing listed states and player records",
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
   fixture.actor.id = 16;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
-  Battle_actors[0] = nullptr;
+  VS::Battle::actors[0] = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
 }

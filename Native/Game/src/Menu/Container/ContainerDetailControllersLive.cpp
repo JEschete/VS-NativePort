@@ -112,8 +112,8 @@ void RequireBound(const Record* bound, Table& current) {
 }
 
 void RequireAshleyStats() {
-  if (Battle_characterState == nullptr ||
-      Battle_characterState->stats == nullptr) {
+  if (VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState->stats == nullptr) {
     Refuse("missing current equipped actor statistics");
   }
 }

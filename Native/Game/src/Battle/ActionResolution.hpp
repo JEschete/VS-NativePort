@@ -9,9 +9,10 @@
 #include <cstdint>
 
 struct Battle_ActionDefinition;
-struct Battle_HitResult;
 
 namespace VS::Battle {
+
+struct HitResult;
 
 // decomp: func_8008631C_t2 (src/BATTLE/BATTLE.PRG/hitEntity.h:5-12)
 struct HitTargetWord {
@@ -28,9 +29,8 @@ static_assert(sizeof(HitTargetWord) == kHitTargetWordBytes,
 
 // The table's entries return void, as upstream declares it, even where the
 // decomp's handlers declare int; a promoted mediator must match this type.
-using ActionEffectMediator = void (*)(Battle_ActionDefinition*,
-                                      Battle_HitResult*, Battle_HitResult*, int,
-                                      int);
+using ActionEffectMediator = void (*)(Battle_ActionDefinition*, HitResult*,
+                                      HitResult*, int, int);
 
 inline constexpr std::size_t kLimbInjuryStatusBytes = 20;
 inline constexpr std::size_t kActionEffectMediatorCount = 70;

@@ -35,8 +35,8 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
-#include "Battle/Damage.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -80,7 +80,7 @@ static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
               kTargetPreviewCapacity);
 static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
 static_assert(sizeof(VS::Battle::Ai::EngagementActor) ==
-              sizeof(Battle_HitResult));
+              sizeof(VS::Battle::HitResult));
 // func_800DEB10 reads the completed request through func_800DEEA4_t and the
 // performer's command argument as two halves (lhu +0x0C, lhu +0x0E).
 static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque4) ==
@@ -88,7 +88,7 @@ static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque4) ==
 static_assert(offsetof(VS::Battle::Ai::ReactionRecord, opaque_4a) ==
               offsetof(Battle_ActionRequest, targetCount));
 static_assert(offsetof(VS::Battle::Ai::EngagementActor, opaque40) ==
-              offsetof(Battle_HitResult, targetsPosition));
+              offsetof(VS::Battle::HitResult, targets_position));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_c) ==
               offsetof(Battle_Actor, commandArg0));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_e) ==
@@ -192,7 +192,7 @@ bool RefusePlanning(const char* message) {
 std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
     std::array<PlanningActorStats, kBattleActorSlotCount>& rows) {
   std::size_t count = 0;
-  for (const auto* actor = Battle_actors[0]; actor != nullptr;
+  for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
        actor = actor->next) {
     if (count >= rows.size() || !ReadablePlanningRecord(actor) ||
         actor->id < 0 || actor->id >= kBattleActorSlotCount ||
@@ -283,15 +283,15 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
 
  private:
   bool Ready(const ActionCandidate& candidate) const {
-    if (state_.actor_id >= std::size(Battle_actors) ||
-        candidate.TargetId() >= std::size(Battle_actors) ||
+    if (state_.actor_id >= std::size(VS::Battle::actors) ||
+        candidate.TargetId() >= std::size(VS::Battle::actors) ||
         !ReadablePlanningBytes(VS::Battle::Ai::planningWorkspace,
                                sizeof(Battle_ActionRequest),
                                alignof(Battle_ActionRequest))) {
       return false;
     }
-    const auto* source = Battle_actors[state_.actor_id];
-    const auto* target = Battle_actors[candidate.TargetId()];
+    const auto* source = VS::Battle::actors[state_.actor_id];
+    const auto* target = VS::Battle::actors[candidate.TargetId()];
     return ReadablePlanningRecord(source) && ReadablePlanningRecord(target) &&
            ReadablePlanningRecord(source->stats) &&
            ReadablePlanningRecord(target->stats);
@@ -331,7 +331,7 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
   }
   std::optional<std::span<const CandidateCondition>> Conditions() override {
     std::size_t count = 0;
-    for (const auto* actor = Battle_actors[0]; actor != nullptr;
+    for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       if (count >= conditions_.size() || !ReadablePlanningRecord(actor) ||
           actor->id >= kBattleActorSlotCount) {
@@ -455,7 +455,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
     for (int row = 0; row < kLimbActionRows; ++row) {
       for (int column = 0; column < kLimbActionColumns; ++column) {
         std::size_t visited = 0;
-        for (auto* actor = Battle_actors[0]; actor != nullptr;
+        for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
              actor = actor->next) {
           if (++visited > kBattleActorSlotCount ||
               !ReadablePlanningRecord(actor) || actor->id < 0 ||
@@ -654,14 +654,15 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
       std::size_t index) const override {
     if (request_ == nullptr || index >= std::size(request_->targets) ||
         !ReadablePlanningBytes(
-            request_, kTargetOffset + (index + 1) * sizeof(Battle_HitResult),
+            request_,
+            kTargetOffset + (index + 1) * sizeof(VS::Battle::HitResult),
             alignof(Battle_ActionRequest))) {
       return std::nullopt;
     }
     const auto& target = std::span(request_->targets)[index];
     return CompletedActionTarget{
         .slot = target.target.target_actor,
-        .targets_position = target.targetsPosition != 0};
+        .targets_position = target.targets_position != 0};
   }
   std::optional<CompletedTargetObject> TargetObject(
       unsigned slot) const override {
@@ -850,7 +851,7 @@ class LivePlanningSimulation final : public PlanningSimulationHost {
  public:
   explicit LivePlanningSimulation(VS::Battle::Ai::RoomAiState& room)
       : room_(room) {
-    for (auto* actor = Battle_actors[0]; actor != nullptr;
+    for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       Require(count_ < actors_.size() && ReadablePlanningRecord(actor) &&
                   actor->id >= 0 && actor->id < kBattleActorSlotCount,
@@ -937,7 +938,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     return slot;
   }
   void BeginTargets() override {
-    head_ = Battle_actors[0];
+    head_ = VS::Battle::actors[0];
     current_ = nullptr;
     started_ = false;
     visited_ = 0;
@@ -1033,7 +1034,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
 
  private:
   void RequireTargetStats(unsigned id) const {
-    const auto* actor = Battle_actors[id];
+    const auto* actor = VS::Battle::actors[id];
     Require(
         ReadablePlanningRecord(actor) && ReadablePlanningRecord(actor->stats),
         "AI enumeration requires complete targeting actor stats");
@@ -1122,7 +1123,7 @@ class LiveCandidateReadiness final : public CandidateReadinessHost {
     if (!Valid()) return std::nullopt;
     std::array<const Battle_Actor*, kCandidateTargetSlots> visited{};
     std::size_t count = 0;
-    for (const auto* actor = Battle_actors[0]; actor != nullptr;
+    for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       if (!ReadablePlanningRecord(actor) || actor->id < 0 ||
           actor->id >= kCandidateTargetSlots || count == visited.size() ||
@@ -1465,7 +1466,7 @@ void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request) {
         CompletedAction{.action_id = request->actionId,
                         .performer = request->primaryTarget.target.target_actor,
                         .performer_targets_position =
-                            request->primaryTarget.targetsPosition != 0};
+                            request->primaryTarget.targets_position != 0};
   }
   LiveCompletedActionPlan host(request);
   Require(ReconcileCompletedActionPlan(action, host),
@@ -1488,9 +1489,10 @@ void AdvanceLivePlanningSimulation(std::int32_t time_step) {
   LivePlanningSimulation host(*VS::Battle::Ai::roomAiState);
   PlanningSimulationRules rules{
       .poison_interval =
-          Battle_statusEffectParams[kPoisonStatusIndex].tickInterval,
+          VS::Battle::statusEffectParams[kPoisonStatusIndex].tick_interval,
       .regeneration_interval =
-          Battle_statusEffectParams[kRegenerationStatusIndex].tickInterval};
+          VS::Battle::statusEffectParams[kRegenerationStatusIndex]
+              .tick_interval};
   std::copy_n(std::begin(VS::Battle::Ai::kTimedStatusFlags),
               rules.timed_status_masks.size(),
               rules.timed_status_masks.begin());

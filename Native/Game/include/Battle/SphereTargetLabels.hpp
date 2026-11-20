@@ -39,7 +39,7 @@ inline constexpr std::int16_t kTargetLabelHeight = 8;
 inline constexpr std::uint32_t kTargetLabelLinkCommand = 0x42000000;
 inline constexpr std::uint32_t kTargetLabelLinkDrawMode = 0xE1000020;
 
-// One label of Battle_SphereTargetLabel without its text pointer.
+// One label of VS::Battle::SphereTargetLabelRecord without its text pointer.
 struct SphereTargetLabel {
   std::uint8_t state = kTargetLabelHidden;
   // Nonzero for the selected label, which is fully lit and linked to its

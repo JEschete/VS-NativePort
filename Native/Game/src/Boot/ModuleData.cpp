@@ -11,7 +11,7 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SurfaceSounds.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionMenu.hpp"
@@ -22,11 +22,11 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/Sphere.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -205,24 +205,24 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FA00, sizeof VS::Battle::limbInjuryStatusIds,
      &VS::Battle::limbInjuryStatusIds,
      sizeof VS::Battle::limbInjuryStatusIds},  // G00025 D_800E8200
-    {"BATTLE/BATTLE.PRG", 0x7FA04, sizeof Battle_limbStatusFlags,
-     &Battle_limbStatusFlags,
-     sizeof Battle_limbStatusFlags},  // G00026 D_800E8204
+    {"BATTLE/BATTLE.PRG", 0x7FA04, sizeof VS::Battle::limbStatusFlags,
+     &VS::Battle::limbStatusFlags,
+     sizeof VS::Battle::limbStatusFlags},  // G00026 D_800E8204
     {"BATTLE/BATTLE.PRG", 0x7FA14, sizeof VS::Items::itemCategoryUpperIds,
      &VS::Items::itemCategoryUpperIds,
      sizeof VS::Items::itemCategoryUpperIds},  // G00027 _itemCategorySizes
-    {"BATTLE/BATTLE.PRG", 0x7FAF4, sizeof Battle_bladePpDamageBonuses,
-     &Battle_bladePpDamageBonuses,
-     sizeof Battle_bladePpDamageBonuses},  // G00030 D_800E82F4
-    {"BATTLE/BATTLE.PRG", 0x7FC90, sizeof Battle_vitalsTickCounter,
-     &Battle_vitalsTickCounter,
-     sizeof Battle_vitalsTickCounter},  // G00033 D_800E8490
-    {"BATTLE/BATTLE.PRG", 0x7FC94, sizeof Battle_regeneratingLimb,
-     &Battle_regeneratingLimb,
-     sizeof Battle_regeneratingLimb},  // G00034 D_800E8494
-    {"BATTLE/BATTLE.PRG", 0x7FC98, sizeof Battle_targetingRiskTimer,
-     &Battle_targetingRiskTimer,
-     sizeof Battle_targetingRiskTimer},  // G00035 D_800E8498
+    {"BATTLE/BATTLE.PRG", 0x7FAF4, sizeof VS::Battle::bladePpDamageBonuses,
+     &VS::Battle::bladePpDamageBonuses,
+     sizeof VS::Battle::bladePpDamageBonuses},  // G00030 D_800E82F4
+    {"BATTLE/BATTLE.PRG", 0x7FC90, sizeof VS::Battle::vitalsTickCounter,
+     &VS::Battle::vitalsTickCounter,
+     sizeof VS::Battle::vitalsTickCounter},  // G00033 D_800E8490
+    {"BATTLE/BATTLE.PRG", 0x7FC94, sizeof VS::Battle::regeneratingLimb,
+     &VS::Battle::regeneratingLimb,
+     sizeof VS::Battle::regeneratingLimb},  // G00034 D_800E8494
+    {"BATTLE/BATTLE.PRG", 0x7FC98, sizeof VS::Battle::targetingRiskTimer,
+     &VS::Battle::targetingRiskTimer,
+     sizeof VS::Battle::targetingRiskTimer},  // G00035 D_800E8498
     {"BATTLE/BATTLE.PRG", 0x7FC9C, sizeof VS::Field::lockedDoorIndexRanges,
      &VS::Field::lockedDoorIndexRanges,
      sizeof VS::Field::lockedDoorIndexRanges},  // G00036 D_800E849C
@@ -1417,9 +1417,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x3F5DC, sizeof VS::Items::materialModifiers,
      &VS::Items::materialModifiers,
      sizeof VS::Items::materialModifiers},  // G01905 vs_main_materialModifiers
-    {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams,
-     &Battle_statusEffectParams,
-     sizeof Battle_statusEffectParams},  // G01906 vs_main_statusEffectParams
+    {"SLUS_010.40", 0x3F6CC, sizeof VS::Battle::statusEffectParams,
+     &VS::Battle::statusEffectParams,
+     sizeof VS::Battle::statusEffectParams},  // G01906 vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof VS::Field::locationDestinations,
      &VS::Field::locationDestinations,
      sizeof VS::Field::locationDestinations},  // G01913 vs_main_locationZoneMapIds
@@ -1429,13 +1429,13 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x405D0, sizeof VS::Actors::placeholderActorName,
      VS::Actors::placeholderActorName.data(),
      sizeof VS::Actors::placeholderActorName},  // G01915 D_8004FDD0
-    {"SLUS_010.40", 0x405E4, sizeof Battle_breakArtPointRequirements,
-     &Battle_breakArtPointRequirements,
-     sizeof Battle_breakArtPointRequirements},  // G01916
+    {"SLUS_010.40", 0x405E4, sizeof VS::Battle::breakArtPointRequirements,
+     &VS::Battle::breakArtPointRequirements,
+     sizeof VS::Battle::breakArtPointRequirements},  // G01916
                                                 // vs_main_artsPointsRequirements
-    {"SLUS_010.40", 0x4065C, sizeof Battle_battleAbilityPointRequirements,
-     &Battle_battleAbilityPointRequirements,
-     sizeof Battle_battleAbilityPointRequirements},  // G01917
+    {"SLUS_010.40", 0x4065C, sizeof VS::Battle::battleAbilityPointRequirements,
+     &VS::Battle::battleAbilityPointRequirements,
+     sizeof VS::Battle::battleAbilityPointRequirements},  // G01917
                                                      // vs_main_battleAbilitiesPointsRequirements
     {"SLUS_010.40", 0x40688, sizeof VS::Actors::usesSecondaryBodyModel,
      VS::Actors::usesSecondaryBodyModel.data(),

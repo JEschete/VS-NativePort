@@ -202,8 +202,8 @@ TEST_CASE(
   fixture.BorrowMon();
   live::Fixture::UnlockAll();
   fw::InitializeLiveInformationBox();
-  Battle_unusedMenu9CursorMemory.encyclopaedia_page = 0;
-  Battle_unusedMenu9CursorMemory.encyclopaedia_row = 0;
+  VS::Battle::menu9CursorMemory.encyclopaedia_page = 0;
+  VS::Battle::menu9CursorMemory.encyclopaedia_row = 0;
   const auto refusals = score::LiveGazetteTerminalRefusals();
   score::RenderLiveEnemyList(8);
   REQUIRE(fixture.UsedWords() > 240);

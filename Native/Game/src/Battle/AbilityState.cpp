@@ -1,23 +1,27 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/AbilityState.h"
+// The player's battle actor and the Break Art and Battle Ability point
+// requirements declared in AbilityState.hpp.
+#include "Battle/AbilityState.hpp"
 
-#include "Actors/ActorModelSlot.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/ShpModel.hpp"
-#include "Battle/Actor.h"
-#include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
-#include "Render/Palette.hpp"
+#include <array>
+#include <cstdint>
 
-// decomp: vs_battle_characterState (vs_battle_characterState@BATTLE/BATTLE.PRG)
-Battle_Actor* Battle_characterState;
+namespace VS::Battle {
 
-// decomp: vs_main_artsPointsRequirements (vs_main_artsPointsRequirements@SLUS_010.40)
-u_short Battle_breakArtPointRequirements[15][4]; /* contents: module image (ModuleData.cpp) */
+// decomp: vs_battle_characterState
+// (vs_battle_characterState@BATTLE/BATTLE.PRG)
+Battle_Actor* characterState;
 
-// decomp: vs_main_battleAbilitiesPointsRequirements (vs_main_battleAbilitiesPointsRequirements@SLUS_010.40)
-u_short Battle_battleAbilityPointRequirements[150]; /* contents: module image (ModuleData.cpp) */
+// decomp: vs_main_artsPointsRequirements
+// (vs_main_artsPointsRequirements@SLUS_010.40)
+// Contents: module image (ModuleData.cpp).
+BreakArtPointTable breakArtPointRequirements;
+
+// decomp: vs_main_battleAbilitiesPointsRequirements
+// (vs_main_battleAbilitiesPointsRequirements@SLUS_010.40)
+// Contents: module image (ModuleData.cpp).
+AbilityPointTable battleAbilityPointRequirements;
+
+}  // namespace VS::Battle
 
 // D_8005FFB0 was vs_main_scoredata.chainStreak (+0x110), not a separate global
 // (#448; Battle/Abilities.cpp JudgeTimedInput).
-

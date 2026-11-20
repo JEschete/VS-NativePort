@@ -17,7 +17,7 @@
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingDraw.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Core/Gte.h"
@@ -59,9 +59,9 @@ constexpr unsigned kHalfwordBits = 16;
 constexpr std::size_t kTargetVolumeBytes = 16;
 static_assert(sizeof(Battle_TargetVolume) == kTargetVolumeBytes);
 static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
-static_assert(std::size(Battle_TargetSphere{}.terrainHeights) ==
+static_assert(std::size(VS::Battle::TargetSphereRecord{}.terrain_heights) ==
               kSphereTerrainRows * kSphereTerrainColumns);
-static_assert(std::size(Battle_TargetSphere{}.terrainRowFlags) ==
+static_assert(std::size(VS::Battle::TargetSphereRecord{}.terrain_row_flags) ==
               kSphereTerrainRows * kSphereTerrainColumns);
 
 std::uint64_t refusals = 0;
@@ -78,8 +78,9 @@ void Refuse(const char* what) {
   return static_cast<std::byte*>(VS::Core::ScratchBase()) + offset;
 }
 
-[[nodiscard]] Battle_TargetSphere* LiveSphere() {
-  return reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
+[[nodiscard]] VS::Battle::TargetSphereRecord* LiveSphere() {
+  return reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
 }
 
 [[nodiscard]] SphereDrawVolume VolumeOf(const Battle_TargetVolume& source) {
@@ -114,7 +115,8 @@ void Refuse(const char* what) {
 
 class LiveSphereDrawPort final : public SphereDrawPort {
  public:
-  explicit LiveSphereDrawPort(Battle_TargetSphere& sphere) : sphere_(sphere) {}
+  explicit LiveSphereDrawPort(VS::Battle::TargetSphereRecord& sphere)
+      : sphere_(sphere) {}
 
   void StoreSineSamples(
       std::span<const std::int16_t, kSphereSineSamples> samples) override {
@@ -141,7 +143,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
   void StoreCenterDepth(std::int32_t depth) override {
     const auto word = static_cast<std::uint32_t>(depth);
     sphere_.depth = math::WrapSigned16(word);
-    sphere_.cameraYaw = math::WrapSigned16(word >> kHalfwordBits);
+    sphere_.camera_yaw = math::WrapSigned16(word >> kHalfwordBits);
   }
 
   math::Mat3 VolumeTransform(const TargetVolumeExtents& extents,
@@ -168,7 +170,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
   void DrawTargetPageHint() override { VS::Battle::DrawTargetPageHint(); }
 
  private:
-  Battle_TargetSphere& sphere_;
+  VS::Battle::TargetSphereRecord& sphere_;
 };
 
 [[nodiscard]] SphereCursorTables LiveCursorTables() {
@@ -270,7 +272,7 @@ void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color,
 
 // decomp: BATTLE.PRG func_800C0D78 (src/BATTLE/BATTLE.PRG/58578.c:104).
 void LiveDrawSphere() {
-  Battle_TargetSphere* sphere = LiveSphere();
+  VS::Battle::TargetSphereRecord* sphere = LiveSphere();
   if (sphere == nullptr) {
     return;
   }
@@ -292,8 +294,8 @@ void* LiveBuildSphereCameraBasis() {
   entries[kBasisSine] = basis.sine;
   entries[kBasisNegatedSine] = basis.negated_sine;
   entries[kBasisCosineAgain] = basis.cosine;
-  if (Battle_TargetSphere* sphere = LiveSphere()) {
-    sphere->cameraYaw = basis.yaw;
+  if (VS::Battle::TargetSphereRecord* sphere = LiveSphere()) {
+    sphere->camera_yaw = basis.yaw;
   } else {
     Refuse("camera yaw without a target sphere");
   }
@@ -351,7 +353,7 @@ void LiveCacheSphereTerrainRow(SVECTOR* position, u_int row) {
   if (row >= kSphereTerrainRows) {
     return;
   }
-  Battle_TargetSphere* sphere = LiveSphere();
+  VS::Battle::TargetSphereRecord* sphere = LiveSphere();
   if (position == nullptr || sphere == nullptr) {
     Refuse("terrain row without a position or target sphere");
     return;
@@ -368,10 +370,10 @@ void LiveCacheSphereTerrainRow(SVECTOR* position, u_int row) {
   }
   const std::size_t first = row * kSphereTerrainColumns;
   std::copy(cached.heights.begin(), cached.heights.end(),
-            std::next(std::begin(sphere->terrainHeights),
+            std::next(std::begin(sphere->terrain_heights),
                       static_cast<std::ptrdiff_t>(first)));
   std::copy(cached.flags.begin(), cached.flags.end(),
-            std::next(std::begin(sphere->terrainRowFlags),
+            std::next(std::begin(sphere->terrain_row_flags),
                       static_cast<std::ptrdiff_t>(first)));
 }
 }  // namespace VS::Battle

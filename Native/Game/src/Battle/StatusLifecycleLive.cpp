@@ -15,7 +15,7 @@
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
 #include "Core/Diagnostics.hpp"
@@ -104,16 +104,18 @@ StatusDurations Durations() {
   constexpr std::size_t kParalysis = 13;
   constexpr std::size_t kPoison = 14;
   constexpr std::size_t kRegeneration = 17;
-  return {
-      static_cast<std::uint8_t>(
-          Battle_statusEffectParams[kAttributes].duration),
-      static_cast<std::uint8_t>(Battle_statusEffectParams[kMovement].duration),
-      static_cast<std::uint8_t>(Battle_statusEffectParams[kEquipment].duration),
-      static_cast<std::uint8_t>(Battle_statusEffectParams[kParalysis].duration),
-      static_cast<std::uint8_t>(
-          Battle_statusEffectParams[kPoison].tickInterval),
-      static_cast<std::uint8_t>(
-          Battle_statusEffectParams[kRegeneration].tickInterval)};
+  return {static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kAttributes].duration),
+          static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kMovement].duration),
+          static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kEquipment].duration),
+          static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kParalysis].duration),
+          static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kPoison].tick_interval),
+          static_cast<std::uint8_t>(
+              VS::Battle::statusEffectParams[kRegeneration].tick_interval)};
 }
 
 class LiveStatusWorld final : public StatusLifecycleWorld {
@@ -222,9 +224,9 @@ void WriteLiveStatusState(const StatusLifecycleState& state,
 
 // decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736).
 void PreserveLiveAshleyStatuses() {
-  Require(Battle_characterState != nullptr,
+  Require(VS::Battle::characterState != nullptr,
           "Preserving statuses requires Ashley");
-  Apply(Battle_characterState->stats, PreserveAshleyStatuses);
+  Apply(VS::Battle::characterState->stats, PreserveAshleyStatuses);
 }
 
 // decomp: func_80086754 (src/BATTLE/BATTLE.PRG/146C.c:13532).
@@ -249,7 +251,7 @@ void UpdateLiveActorStatusTimers(Battle_ActorStats* stats) {
   LimbStatusMasks flags{};
   for (std::size_t index = 0; index < flags.size(); ++index) {
     flags.at(index) =
-        std::bit_cast<std::uint32_t>(Battle_limbStatusFlags[index]);
+        std::bit_cast<std::uint32_t>(VS::Battle::limbStatusFlags[index]);
   }
   Apply(stats, [&](auto& state, auto& world) {
     return UpdateActorStatusTimers(state, Durations(), flags, world);

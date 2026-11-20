@@ -8,7 +8,7 @@ union Battle_ActionHitParamsWord;
 struct Battle_ActionRequest;
 struct Battle_ActionState;
 
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Battle/TargetingState.hpp"
 
 // decomp: actionTypes (src/SLUS_010.40/main.h:51)
@@ -51,10 +51,10 @@ struct Battle_ActionRequest {
     u_short actionId;
     char effectVariant;
     char damageType;
-    Battle_HitResult primaryTarget;
+    VS::Battle::HitResult primaryTarget;
     u_short animationParameter;
     u_short targetCount;
-    Battle_HitResult targets[255];
+    VS::Battle::HitResult targets[255];
     SVECTOR focusPosition;
 };
 

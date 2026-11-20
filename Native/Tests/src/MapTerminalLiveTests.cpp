@@ -17,7 +17,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -106,7 +106,7 @@ struct HeapBlocker {
 
 struct LiveWorld {
   RestoreMapView saved_view;
-  ValueRestore<void*> saved_scene{Battle_unusedSceneBuffer};
+  ValueRestore<void*> saved_scene{VS::Battle::sceneBuffer};
   ValueRestore<void*> saved_staging{map::armFileBuff};
   ValueRestore<VS::Content::DiscQueueSlot*> saved_scene_slot{
       map::sceneCdQueueSlot};
@@ -173,7 +173,7 @@ struct LiveWorld {
        .program_data = {}}};
 
   explicit LiveWorld(bool data = false) {
-    REQUIRE(Battle_unusedSceneBuffer == nullptr);
+    REQUIRE(VS::Battle::sceneBuffer == nullptr);
     if (data && !content::DataStore::Open(R"(Native\data)")) {
       throw std::runtime_error(
           "Map terminal Live integration needs extracted data");
@@ -267,7 +267,7 @@ struct LiveWorld {
     std::memcpy(buffer, file.data(), file.size());
     REQUIRE(VS::Field::IsValidMapScene(
         {static_cast<const std::byte*>(buffer), length}));
-    Battle_unusedSceneBuffer = buffer;
+    VS::Battle::sceneBuffer = buffer;
     map::BindLiveMapScene(buffer, length);
     map::roomNamesTable = VS::Field::ResolveLiveSceneRoomData(buffer, length);
     REQUIRE(map::roomNamesTable != nullptr);
@@ -332,7 +332,7 @@ void CheckNoPendingRead() {
 }
 
 void CheckNoSceneOwners() {
-  CHECK(Battle_unusedSceneBuffer == nullptr);
+  CHECK(VS::Battle::sceneBuffer == nullptr);
   CHECK(map::roomNamesTable == nullptr);
   CheckNoPendingRead();
   CHECK(VS::Menu::ReadLiveTextBox(0).text == nullptr);
@@ -463,7 +463,7 @@ void CheckSceneExtent(void* scene, std::size_t bytes) {
 
 void CheckPendingExtent(void* old, int initial) {
   CHECK(map::currentScene == (initial == 1 ? 11 : 1));
-  CHECK(Battle_unusedSceneBuffer == old);
+  CHECK(VS::Battle::sceneBuffer == old);
   CheckSceneExtent(old,
                    static_cast<std::size_t>(map::kSceneArmFiles[initial].size));
 }
@@ -503,10 +503,10 @@ void CheckDrainedRead(void* old, void* staging,
 
 void FailSwapAllocation(LiveWorld& world, void* staging) {
   const auto refusals = memory::RefusedLiveHeapRequestCount();
-  for (int tick = 0; tick < 8 && Battle_unusedSceneBuffer != nullptr; ++tick) {
+  for (int tick = 0; tick < 8 && VS::Battle::sceneBuffer != nullptr; ++tick) {
     REQUIRE(world.Tick() == 0);
   }
-  REQUIRE(Battle_unusedSceneBuffer == nullptr);
+  REQUIRE(VS::Battle::sceneBuffer == nullptr);
   CHECK(map::menuState == 4);
   CHECK(map::armFileBuff == staging);
   CHECK(map::sceneCdQueueSlot == nullptr);
@@ -648,7 +648,7 @@ TEST_CASE(
     "[map-terminal][map-terminal-live][F04151]") {
   LiveWorld world(true);
   world.LoadScene(1);
-  auto* scene = Battle_unusedSceneBuffer;
+  auto* scene = VS::Battle::sceneBuffer;
   REQUIRE(world.Tick(0x100) == 0);
   REQUIRE(world.OpenChooser());
   CHECK(std::pair<int, int>{VS::Menu::Framework::hideMenu,
@@ -660,7 +660,7 @@ TEST_CASE(
   }
   CHECK(map::menuState == (triangle ? 3 : 1));
   CHECK(map::quitState == (triangle ? 2 : 1));
-  CHECK(Battle_unusedSceneBuffer == scene);
+  CHECK(VS::Battle::sceneBuffer == scene);
   CheckNoPendingRead();
 }
 
@@ -670,11 +670,11 @@ TEST_CASE(
     "[map-terminal][map-terminal-live][F04149][F04151]") {
   LiveWorld world(true);
   REQUIRE(map::LiveLoadSceneMap() == 0);
-  REQUIRE(Battle_unusedSceneBuffer != nullptr);
+  REQUIRE(VS::Battle::sceneBuffer != nullptr);
   auto* request = map::sceneCdQueueSlot;
   REQUIRE(request != nullptr);
   const auto generation = content::LiveDiscRequestGeneration(request);
-  auto* buffer = Battle_unusedSceneBuffer;
+  auto* buffer = VS::Battle::sceneBuffer;
   VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
   VS::Menu::SetLiveTextBoxText(0, static_cast<char*>(buffer));
   const auto names = std::to_array(map::mapNames);
@@ -714,7 +714,7 @@ TEST_CASE(
   LiveWorld world(true);
   const int initial = GENERATE(1, 11);
   world.LoadScene(initial);
-  auto* old = Battle_unusedSceneBuffer;
+  auto* old = VS::Battle::sceneBuffer;
   const auto old_size =
       static_cast<std::size_t>(map::kSceneArmFiles[initial].size);
   REQUIRE(world.ChooseOtherScene());
@@ -768,7 +768,7 @@ TEST_CASE(
   REQUIRE(std::pair<int, int>{map::menuState, map::currentScene} ==
           std::pair{1, 1});
   CheckNoPendingRead();
-  CheckSceneExtent(Battle_unusedSceneBuffer, 8192);
+  CheckSceneExtent(VS::Battle::sceneBuffer, 8192);
   CHECK(VS::Menu::ReadLiveTextBox(0).text != nullptr);
   CHECK_FALSE(memory::LivePayloadCapacity(staging));
   CHECK(map::geomOffsetX == 0);
@@ -795,7 +795,7 @@ TEST_CASE(
     blocker.Release();
     REQUIRE(world.Tick() == 0);
     CHECK(map::menuState == 5);
-    CheckSceneExtent(Battle_unusedSceneBuffer, 8192);
+    CheckSceneExtent(VS::Battle::sceneBuffer, 8192);
   } else {
     REQUIRE(map::DrainMapTerminalLive());
     CheckNoSceneOwners();
@@ -807,7 +807,7 @@ TEST_CASE("Map refuses a foreign scene and does not report completed quit",
           "[map-terminal][map-terminal-live][F04151]") {
   LiveWorld world;
   std::array<std::byte, 64> foreign{};
-  Battle_unusedSceneBuffer = foreign.data();
+  VS::Battle::sceneBuffer = foreign.data();
   map::BindLiveMapScene(foreign.data(), foreign.size());
   map::currentScene = 1;
   map::menuState = 3;
@@ -816,10 +816,10 @@ TEST_CASE("Map refuses a foreign scene and does not report completed quit",
   const auto refusals = map::MapTerminalLiveRefusalCount();
   CHECK(map::LiveUpdateMapMenu() == 0);
   CHECK(map::MapTerminalLiveRefusalCount() > refusals);
-  CHECK(Battle_unusedSceneBuffer == foreign.data());
+  CHECK(VS::Battle::sceneBuffer == foreign.data());
   CHECK_FALSE(map::ResetMapTerminalModuleData());
   map::ForgetLiveMapScene(foreign.data());
-  Battle_unusedSceneBuffer = nullptr;
+  VS::Battle::sceneBuffer = nullptr;
 }
 
 namespace {
@@ -841,9 +841,9 @@ struct InitialRead {
 
   static InitialRead Begin() {
     REQUIRE(map::LiveLoadSceneMap() == 0);
-    REQUIRE(Battle_unusedSceneBuffer != nullptr);
+    REQUIRE(VS::Battle::sceneBuffer != nullptr);
     REQUIRE(map::sceneCdQueueSlot != nullptr);
-    return {Battle_unusedSceneBuffer, map::sceneCdQueueSlot,
+    return {VS::Battle::sceneBuffer, map::sceneCdQueueSlot,
             content::LiveDiscRequestGeneration(map::sceneCdQueueSlot)};
   }
   void CheckReleased() const {
@@ -857,7 +857,7 @@ void BeginVisibleMapSwap(LiveWorld& world) {
   REQUIRE(map::LiveUpdateScreen(&phase) == 0);
   REQUIRE(world.ReachInput(phase));
   REQUIRE(world.ChooseOtherScene());
-  REQUIRE(Battle_unusedSceneBuffer != nullptr);
+  REQUIRE(VS::Battle::sceneBuffer != nullptr);
   REQUIRE(map::armFileBuff != nullptr);
   REQUIRE(map::sceneCdQueueSlot != nullptr);
 }
@@ -895,11 +895,11 @@ struct FullDiscQueue {
 struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
       VS::Field::backgroundReferenceVectors, VS::Field::entranceDoorRecord,
-      Battle_unusedMenu9CursorMemory, VS::Field::manualDisplayState,
+      VS::Battle::menu9CursorMemory, VS::Field::manualDisplayState,
       VS::Field::roomPalettes, VS::Battle::floatingLabels,
       VS::Battle::placedLabelPositions, VS::Field::enteredDoorId,
       VS::Field::areRoomUpdatesPaused, VS::Field::roomTint,
-      Battle_unusedSubmenuState, VS::Field::isMinimapVisible,
+      VS::Battle::submenuState, VS::Field::isMinimapVisible,
       VS::Field::minimapSlideFrame, VS::Field::gimmickAnimationQueue,
       VS::Field::pendingGimmickAnimationCount>
       saved;
@@ -1056,17 +1056,17 @@ TEST_CASE(
     "[map-terminal-integration][map-terminal-ownership][F04151]") {
   LiveWorld world(true);
   world.LoadScene(1);
-  auto* owner = Battle_unusedSceneBuffer;
+  auto* owner = VS::Battle::sceneBuffer;
   auto* foreign = memory::AllocateLiveFromLowEnd(64);
   REQUIRE(foreign != nullptr);
-  Battle_unusedSceneBuffer = foreign;
+  VS::Battle::sceneBuffer = foreign;
   VS::Menu::SetLiveTextBoxText(0, static_cast<char*>(foreign));
   CHECK_FALSE(map::DrainMapTerminalLive());
   CHECK(memory::LivePayloadCapacity(foreign).has_value());
   CHECK(memory::LivePayloadCapacity(owner).has_value());
   CHECK(VS::Menu::ReadLiveTextBox(0).text == static_cast<char*>(foreign));
   // Preserve a failed pre-hook observation while allowing safe fixture cleanup.
-  Battle_unusedSceneBuffer = owner;
+  VS::Battle::sceneBuffer = owner;
   REQUIRE(map::DrainMapTerminalLive());
   VS::Menu::SetLiveTextBoxText(0, nullptr);
   if (memory::LivePayloadCapacity(foreign)) {
@@ -1079,7 +1079,7 @@ TEST_CASE("Map initial-read cleanup clears its borrow even after alias loss",
   LiveWorld world(true);
   const auto owner = InitialRead::Begin();
   VS::Menu::SetLiveTextBoxText(0, static_cast<char*>(owner.buffer));
-  Battle_unusedSceneBuffer = nullptr;
+  VS::Battle::sceneBuffer = nullptr;
   REQUIRE(map::DrainMapTerminalLive());
   owner.CheckReleased();
 }
@@ -1088,7 +1088,7 @@ TEST_CASE("Map completed-scene release cancels writes into its storage",
           "[map-terminal-integration][map-terminal-ownership][F04151]") {
   LiveWorld world(true);
   world.LoadScene(1);
-  auto* owner = Battle_unusedSceneBuffer;
+  auto* owner = VS::Battle::sceneBuffer;
   auto* request = content::AllocateLiveDiscRequest(&map::kSceneArmFiles[1]);
   REQUIRE(request != nullptr);
   const auto generation = content::LiveDiscRequestGeneration(request);
@@ -1128,7 +1128,7 @@ TEST_CASE("Full production queue still completes both map size transitions",
     CHECK(map::menuState == 1);
     CHECK(map::currentScene == destination);
     CHECK(content::LiveDiscRequestGeneration(request) == 0);
-    CheckSceneExtent(Battle_unusedSceneBuffer, destination == 1 ? 8192 : 2048);
+    CheckSceneExtent(VS::Battle::sceneBuffer, destination == 1 ? 8192 : 2048);
     busy.CheckPreserved();
   }
 }
@@ -1139,7 +1139,7 @@ TEST_CASE("Actual heap replacement drains a visible map and its pending swap",
   LiveWorld world(true);
   SetFieldView();
   BeginVisibleMapSwap(world);
-  auto* scene = Battle_unusedSceneBuffer;
+  auto* scene = VS::Battle::sceneBuffer;
   auto* staging = map::armFileBuff;
   auto* request = map::sceneCdQueueSlot;
   const auto refusals = memory::RefusedLiveHeapRequestCount();
@@ -1160,7 +1160,7 @@ TEST_CASE(
   const RestoreRoomRuntime saved_room;
   REQUIRE(VS::Field::pendingGimmickAnimationCount == 0);
   world.LoadScene(1);
-  auto* scene = Battle_unusedSceneBuffer;
+  auto* scene = VS::Battle::sceneBuffer;
   VS::Menu::SetLiveTextBoxText(0, reinterpret_cast<char*>(map::roomNamesTable));
   VS::Field::LiveInitializeRoomRuntimeState();
   CheckNoSceneOwners();

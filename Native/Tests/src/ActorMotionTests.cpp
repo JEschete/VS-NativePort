@@ -15,7 +15,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -182,15 +182,15 @@ struct FakeScriptedPath final : actors::ScriptedPathHost {
 struct LiveMotionState {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_actors)) saved_battle_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_battle_actors = VS::Battle::actors;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
   std::vector<std::unique_ptr<Battle_Actor>> battle_actors;
 
   LiveMotionState() {
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
   }
   LiveMotionState(const LiveMotionState&) = delete;
   LiveMotionState& operator=(const LiveMotionState&) = delete;
@@ -198,7 +198,7 @@ struct LiveMotionState {
   LiveMotionState& operator=(LiveMotionState&&) = delete;
   ~LiveMotionState() {
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
-    std::ranges::copy(saved_battle_actors, std::begin(Battle_actors));
+    std::ranges::copy(saved_battle_actors, std::begin(VS::Battle::actors));
   }
 
   Actors_ActorRecord& AddActor(int actor_id) {
@@ -211,7 +211,7 @@ struct LiveMotionState {
 
   Battle_Actor& AddBattleActor(int actor_id) {
     battle_actors.push_back(std::make_unique<Battle_Actor>());
-    Battle_actors[actor_id] = battle_actors.back().get();
+    VS::Battle::actors[actor_id] = battle_actors.back().get();
     return *battle_actors.back();
   }
 };

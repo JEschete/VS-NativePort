@@ -18,8 +18,8 @@
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Battle/HitCalculations.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitChance.hpp"
@@ -139,23 +139,23 @@ struct DispatchWorld final : battle::ActionCalculationWorld {
   }
 };
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved = VS::Battle::actors;
   decltype(VS::Battle::hitFunctions) hits = VS::Battle::hitFunctions;
-  decltype(std::to_array(Battle_statCalculators)) stats =
-      std::to_array(Battle_statCalculators);
+  decltype(VS::Battle::statCalculators) stats = VS::Battle::statCalculators;
   decltype(VS::Battle::actionEffectMediators) effects =
       VS::Battle::actionEffectMediators;
-  std::uint32_t last = Battle_lastActionStatValue;
+  std::uint32_t last = VS::Battle::lastActionStatValue;
   std::uint32_t prerequisite = VS::Battle::hitPrerequisiteResult;
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_ActorStats, 2> owners{};
   Battle_ActionDefinition action{};
-  Battle_HitResult source{};
-  Battle_HitResult target{};
+  VS::Battle::HitResult source{};
+  VS::Battle::HitResult target{};
   LiveFixture() {
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
     for (unsigned i = 0; i < actors.size(); ++i) {
-      Battle_actors[i] = &actors.at(i);
+      VS::Battle::actors[i] = &actors.at(i);
       actors.at(i).stats = &owners.at(i);
       owners.at(i).actorId = static_cast<std::uint8_t>(i);
       owners.at(i).maxHp = 1;
@@ -164,12 +164,12 @@ struct LiveFixture {
     VS::Battle::hitPrerequisiteResult = 1;
   }
   ~LiveFixture() {
-    std::copy(saved.begin(), saved.end(), Battle_actors);
+    std::copy(saved.begin(), saved.end(), VS::Battle::actors.begin());
     std::copy(hits.begin(), hits.end(), VS::Battle::hitFunctions.begin());
-    std::copy(stats.begin(), stats.end(), Battle_statCalculators);
+    std::copy(stats.begin(), stats.end(), VS::Battle::statCalculators.begin());
     std::copy(effects.begin(), effects.end(),
               VS::Battle::actionEffectMediators.begin());
-    Battle_lastActionStatValue = last;
+    VS::Battle::lastActionStatValue = last;
     VS::Battle::hitPrerequisiteResult = prerequisite;
   }
 };
@@ -523,11 +523,11 @@ TEST_CASE("Original tables relocate active calculators and distinct sentinels",
   LiveFixture f;
   const auto image = ReadModule("BATTLE/BATTLE.PRG");
   Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), image);
-  Relocate(reinterpret_cast<void**>(Battle_statCalculators), image);
+  Relocate(reinterpret_cast<void**>(VS::Battle::statCalculators.data()), image);
   Relocate(reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
            image);
   CHECK(VS::Battle::hitFunctions[0] == &battle::RejectLiveHitSelector);
-  CHECK(Battle_statCalculators[0] == &battle::RejectLiveStatSelector);
+  CHECK(VS::Battle::statCalculators[0] == &battle::RejectLiveStatSelector);
   CHECK(VS::Battle::actionEffectMediators[0] ==
         &battle::RejectLiveEffectSelector);
   CHECK(VS::Battle::hitFunctions[3] == &battle::LiveAgilityHitChance);
@@ -538,16 +538,16 @@ TEST_CASE("Original tables relocate active calculators and distinct sentinels",
 TEST_CASE("Live stat dispatch invokes actual short table ABI",
           "[hit-calculations][F00435][battle][action][typed]") {
   LiveFixture f;
-  Battle_statCalculators[26] =
-      +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*,
-          int hit, int execute) -> std::int16_t {
-    Battle_lastActionStatValue = 123;
+  VS::Battle::statCalculators[26] =
+      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
+          VS::Battle::HitResult*, int hit, int execute) -> std::int16_t {
+    VS::Battle::lastActionStatValue = 123;
     return static_cast<std::int16_t>(hit + execute);
   };
   f.action.hits[1].statCalculatorId = 26;
   CHECK(battle::LiveCalculateActionStatChange(&f.action, nullptr, &f.target, 1,
                                               -32769) == -32768);
-  CHECK(Battle_lastActionStatValue == 0xFFFF8000U);
+  CHECK(VS::Battle::lastActionStatValue == 0xFFFF8000U);
   f.owners.at(1).actorId = 128;
   CHECK(battle::LiveCalculateActionStatChange(nullptr, nullptr, &f.target, -1,
                                               -1) == 999);
@@ -556,8 +556,8 @@ TEST_CASE("Live roll invokes actual int table ABI and lazy exemption",
           "[hit-calculations][F00349][battle][action][typed]") {
   LiveFixture f;
   VS::Battle::hitFunctions[7] =
-      +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int,
-          int) -> int { return 255; };
+      +[](Battle_ActionDefinition*, VS::Battle::HitResult*,
+          VS::Battle::HitResult*, int, int) -> int { return 255; };
   f.action.hits[0].hitFunctionId = 7;
   CHECK(battle::LiveRollActionHit(&f.action, nullptr, &f.target, 0, 0) == 0);
   CHECK(f.target.target.hit_threshold == 255);

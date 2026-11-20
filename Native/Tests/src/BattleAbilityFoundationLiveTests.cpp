@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -57,8 +57,8 @@ bool IsBound(unsigned address, Entry entry) {
 struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   std::vector<std::byte> arena = std::vector<std::byte>(0x20000);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  ValueRestore<decltype(Battle_characterState)> saved_actor{
-      Battle_characterState};
+  ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
+      VS::Battle::characterState};
   ValueRestore<decltype(VS::State::artsStatus)> saved_progress{
       VS::State::artsStatus};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
@@ -89,7 +89,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
 
   LiveFoundationFixture() {
     abilities::ResetLiveAbilityFoundationState();
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     actor.equippedWeaponCategory = 1;
     VS::State::artsStatus = {};
     VS::State::artsStatus.kills.weapon_category_kills[1] = 65535;

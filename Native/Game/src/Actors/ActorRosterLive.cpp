@@ -17,10 +17,10 @@
 #include "Actors/BattleActorState.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/Spawning.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -35,14 +35,14 @@ constexpr u_short kLinkableKindMask = 0x7;
 constexpr u_short kGimmickKind = 0x10;
 constexpr int kSecondModelAllocation = 2;
 
-static_assert(std::size(Battle_actors) >= kRosterSlots);
-static_assert(std::size(Battle_actors) == kBattleActorSlots);
+static_assert(std::size(VS::Battle::actors) >= kRosterSlots);
+static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
 static_assert(sizeof Battle_ActorStats{}.name == kActorNameBytes);
 
 RosterView ViewFrom(const Battle_Actor* actor) {
   RosterView view{};
   for (std::size_t slot = 0; slot < view.size(); ++slot) {
-    const Battle_Actor* occupant = Battle_actors[slot];
+    const Battle_Actor* occupant = VS::Battle::actors[slot];
     view[slot] = {
         .occupied = occupant != nullptr,
         .links_to_actor = occupant != nullptr && occupant->next == actor};
@@ -89,11 +89,11 @@ class LiveRemovalHost final : public ActorRemovalHost {
     return ViewFrom(actor_);
   }
   void Bypass(std::size_t predecessor, std::size_t /*slot*/) override {
-    Battle_actors[predecessor]->next = actor_->next;
+    VS::Battle::actors[predecessor]->next = actor_->next;
   }
   void Free(std::size_t slot) override {
     VS::Core::Memory::FreeLiveFromLowEnd(actor_);
-    Battle_actors[slot] = nullptr;
+    VS::Battle::actors[slot] = nullptr;
   }
 
  private:
@@ -112,19 +112,21 @@ class LiveDisplayFlagsHost final : public DisplayFlagsHost {
 
 // The original copied 24 name bytes from the 20-byte placeholder name
 // (D_8004FDD0), reading the first four bytes of the table after it,
-// Battle_breakArtPointRequirements (D_8004FDE4). The name ends at its fifth
-// byte (0xE7), so the copied tail is never shown; it is kept byte for byte.
+// VS::Battle::breakArtPointRequirements (D_8004FDE4). The name ends at its
+// fifth byte (0xE7), so the copied tail is never shown; it is kept byte for
+// byte.
 std::array<std::uint8_t, kActorNameBytes> PlaceholderName() {
   constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
   static_assert(kNameBytes < kActorNameBytes);
-  static_assert(sizeof Battle_breakArtPointRequirements >=
+  static_assert(sizeof VS::Battle::breakArtPointRequirements >=
                 kActorNameBytes - kNameBytes);
   std::array<std::uint8_t, kActorNameBytes> name{};
   const std::span<std::uint8_t> bytes(name);
   std::memcpy(bytes.data(), VS::Actors::placeholderActorName.data(),
               kNameBytes);
   std::memcpy(bytes.subspan(kNameBytes).data(),
-              Battle_breakArtPointRequirements, kActorNameBytes - kNameBytes);
+              VS::Battle::breakArtPointRequirements.data(),
+              kActorNameBytes - kNameBytes);
   return name;
 }
 }  // namespace
@@ -144,7 +146,7 @@ int LinkLiveActorAfterAshley(Battle_Actor* actor) {
   if (decision.edit != RosterEdit::kInsertAfterLeader) {
     return 0;
   }
-  Battle_Actor* leader = Battle_actors[decision.slot];
+  Battle_Actor* leader = VS::Battle::actors[decision.slot];
   actor->next = leader->next;
   leader->next = actor;
   return 1;
@@ -160,13 +162,14 @@ int UnlinkLiveActorFromRoomList(Battle_Actor* actor) {
   if (decision.edit != RosterEdit::kBypass) {
     return 0;
   }
-  Battle_actors[decision.slot]->next = actor->next;
+  VS::Battle::actors[decision.slot]->next = actor->next;
   actor->next = nullptr;
   return 1;
 }
 
 int RemoveLiveActorAtSlot(unsigned index, int hidden) {
-  LiveRemovalHost host(index < kRosterSlots ? Battle_actors[index] : nullptr);
+  LiveRemovalHost host(index < kRosterSlots ? VS::Battle::actors[index]
+                                            : nullptr);
   return RemoveActorAtSlot(host, index, hidden) == RemovalResult::kOutOfRange
              ? 0
              : 1;
@@ -185,10 +188,10 @@ void UnfreezeLiveActorAnimations() {
 void InitializeLivePlaceholderActor(int actor_id, int auxiliary) {
   constexpr const char* kOperation = "InitializeLivePlaceholderActor";
   if (!IsBattleActorSlot(actor_id)) {
-    WarnActorRefused(kOperation, "the actor id is outside Battle_actors");
+    WarnActorRefused(kOperation, "the actor id is outside VS::Battle::actors");
     return;
   }
-  Battle_Actor* actor = Battle_actors[actor_id];
+  Battle_Actor* actor = VS::Battle::actors[actor_id];
   if (actor == nullptr || actor->stats == nullptr) {
     WarnActorRefused(kOperation, "the actor slot has no actor stats");
     return;

@@ -7,7 +7,7 @@
 
 namespace VS::Battle {
 namespace {
-// Battle_statusEffectParams indices of the effects the rules check.
+// VS::Battle::statusEffectParams indices of the effects the rules check.
 enum class Effect : std::uint8_t {
   kHalfMovement = 4,
   kStrengthDown = 5,

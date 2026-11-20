@@ -10,7 +10,7 @@
 
 #include "Battle/SphereGeometry.hpp"
 #include "Battle/SphereGeometryLive.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -315,19 +315,19 @@ TEST_CASE("F01305 live mapping commits animation state and vertex count",
   const std::array<std::uint16_t, 1> commands{0x8000};
   const auto tables = Tables({}, mirrored, starts, commands, {});
 
-  auto sphere = std::make_unique<Battle_TargetSphereSetupView>();
-  sphere->wirePhaseA = 10;
-  sphere->wirePhaseB = 20;
-  sphere->wirePhaseC = 30;
-  sphere->wireShape = 0;
-  sphere->reserved30 = 0x12345678;
-  sphere->wireVertices[4].xyz[0] = -99;
+  auto sphere = std::make_unique<VS::Battle::TargetSphereSetupView>();
+  sphere->wire_phase_a = 10;
+  sphere->wire_phase_b = 20;
+  sphere->wire_phase_c = 30;
+  sphere->wire_shape = 0;
+  sphere->pulse_mode_and_vertex_count = 0x12345678;
+  sphere->wire_vertices[4].xyz[0] = -99;
   const auto built = battle::BuildLiveSphereWireframe(sphere.get(), 0, tables);
   CHECK(Required(built).vertex_count == 4);
-  CHECK(sphere->wirePhaseA == 13);
-  CHECK(sphere->wirePhaseB == 27);
-  CHECK(sphere->wirePhaseC == 41);
-  CHECK(sphere->reserved30 == 0x00045678);
+  CHECK(sphere->wire_phase_a == 13);
+  CHECK(sphere->wire_phase_b == 27);
+  CHECK(sphere->wire_phase_c == 41);
+  CHECK(sphere->pulse_mode_and_vertex_count == 0x00045678);
 }
 
 TEST_CASE("F01305 live mapping writes vertices and preserves the suffix",
@@ -336,16 +336,16 @@ TEST_CASE("F01305 live mapping writes vertices and preserves the suffix",
   const std::array<std::uint8_t, 2> starts{0, 1};
   const std::array<std::uint16_t, 1> commands{0x8000};
   const auto tables = Tables({}, mirrored, starts, commands, {});
-  auto sphere = std::make_unique<Battle_TargetSphereSetupView>();
-  sphere->wireShape = 0;
-  sphere->reserved30 = 0x12345678;
-  sphere->wireVertices[4].xyz[0] = -99;
+  auto sphere = std::make_unique<VS::Battle::TargetSphereSetupView>();
+  sphere->wire_shape = 0;
+  sphere->pulse_mode_and_vertex_count = 0x12345678;
+  sphere->wire_vertices[4].xyz[0] = -99;
   const auto built = battle::BuildLiveSphereWireframe(sphere.get(), 0, tables);
   CHECK(Required(built).vertex_count == 4);
-  CHECK(sphere->wireVertices[0].xyz[0] == 1);
-  CHECK(sphere->wireVertices[0].opaque6 == 0);
-  CHECK(sphere->wireVertices[1].xyz[0] == 4);
-  CHECK(sphere->wireVertices[2].xyz[0] == -1);
-  CHECK(sphere->wireVertices[3].xyz[2] == -6);
-  CHECK(sphere->wireVertices[4].xyz[0] == -99);
+  CHECK(sphere->wire_vertices[0].xyz[0] == 1);
+  CHECK(sphere->wire_vertices[0].opaque6 == 0);
+  CHECK(sphere->wire_vertices[1].xyz[0] == 4);
+  CHECK(sphere->wire_vertices[2].xyz[0] == -1);
+  CHECK(sphere->wire_vertices[3].xyz[2] == -6);
+  CHECK(sphere->wire_vertices[4].xyz[0] == -99);
 }

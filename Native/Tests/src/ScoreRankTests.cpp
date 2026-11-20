@@ -10,7 +10,7 @@
 
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -106,7 +106,7 @@ class LiveGlobals {
         flags_(VS::State::stateFlags),
         rooms_(VS::State::roomVisitProgress),
         settings_(VS::Input::settings),
-        cursor_(Battle_unusedMenu9CursorMemory),
+        cursor_(VS::Battle::menu9CursorMemory),
         position_(s::cameraPositionBackup),
         angles_(s::cameraAnglesBackup) {
     masks_ = VS::Field::countableRoomMask;
@@ -134,7 +134,7 @@ class LiveGlobals {
     VS::State::stateFlags = flags_;
     VS::State::roomVisitProgress = rooms_;
     VS::Input::settings = settings_;
-    Battle_unusedMenu9CursorMemory = cursor_;
+    VS::Battle::menu9CursorMemory = cursor_;
     s::cameraPositionBackup = position_;
     s::cameraAnglesBackup = angles_;
     VS::Field::countableRoomMask = masks_;
@@ -453,17 +453,17 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
   SetLiveProgressInputs();
   VS::Input::settings.cursor_memory = 0;
   constexpr std::uint8_t kStaleCursor = 0xA5;
-  Battle_unusedMenu9CursorMemory = {kStaleCursor, kStaleCursor, kStaleCursor,
-                                    kStaleCursor, kStaleCursor, kStaleCursor,
-                                    kStaleCursor, kStaleCursor};
+  VS::Battle::menu9CursorMemory = {kStaleCursor, kStaleCursor, kStaleCursor,
+                                   kStaleCursor, kStaleCursor, kStaleCursor,
+                                   kStaleCursor, kStaleCursor};
   auto* scratch =
       static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   scratch->camera.position.vy = 1234;
   scratch->camera.angles.vz = -56;
   CHECK(VS::Menu::Score::CalculateLiveProgress() == 1);
   CheckProgressStatics();
-  CHECK(Battle_unusedMenu9CursorMemory.title_page == 0);
-  CHECK(Battle_unusedMenu9CursorMemory.gazette_row == 0);
+  CHECK(VS::Battle::menu9CursorMemory.title_page == 0);
+  CHECK(VS::Battle::menu9CursorMemory.gazette_row == 0);
   CHECK(s::cameraPositionBackup.vy == 1234);
   CHECK(s::cameraAnglesBackup.vz == -56);
   CHECK(s::score == 200000);

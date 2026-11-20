@@ -34,8 +34,8 @@ namespace {
 constexpr u_long kGuard = 0xA1B2C3D4;
 
 struct SliceFixture {
-  Battle_TargetSphereSetupView storage{};
-  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
+  VS::Battle::TargetSphereSetupView storage{};
+  VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   u_int saved_control = VS::Field::controlMode;
   u_int saved_action_mode = VS::Battle::actionFlowMode;
@@ -47,7 +47,7 @@ struct SliceFixture {
   SliceFixture() {
     VS::Battle::targetSphere = &storage;
     VS::Battle::InitializeSphereEntry();
-    for (int& value : Sphere().terrainHeights) value = Terrain(0, -1024);
+    for (int& value : Sphere().terrain_heights) value = Terrain(0, -1024);
     Camera(0);
   }
 
@@ -68,8 +68,8 @@ struct SliceFixture {
     return result;
   }
 
-  Battle_TargetSphere& Sphere() {
-    return *reinterpret_cast<Battle_TargetSphere*>(&storage);
+  VS::Battle::TargetSphereRecord& Sphere() {
+    return *reinterpret_cast<VS::Battle::TargetSphereRecord*>(&storage);
   }
 
   void Camera(int yaw) {
@@ -82,7 +82,7 @@ struct SliceFixture {
     Core_Gte_SetTransMatrix(&camera);
     Core_Gte_SetGeomOffset(160, 112);
     Core_Gte_SetGeomScreen(256);
-    Sphere().cameraYaw = static_cast<std::int16_t>(yaw);
+    Sphere().camera_yaw = static_cast<std::int16_t>(yaw);
   }
 
   std::vector<u_long> Draw(int scale = 4096) {
@@ -187,10 +187,10 @@ struct SphereLabelFixture {
       auto& label = slice.Sphere().labels[index];
       label.state = 1;
       label.depth = 1;
-      label.screenX = static_cast<int16_t>(index % 2 ? 248 : -4);
-      label.offsetY = static_cast<char>(index % 8 * 11);
-      label.ringSize = 20;
-      label.worldPosition = {1083, -650, 2008, 0};
+      label.screen_x = static_cast<int16_t>(index % 2 ? 248 : -4);
+      label.offset_y = static_cast<char>(index % 8 * 11);
+      label.ring_size = 20;
+      label.world_position = {1083, -650, 2008, 0};
       label.text = text;
     }
   }
@@ -239,12 +239,12 @@ TEST_CASE("Extended target pages retain complete actors and absolute indices",
   CHECK(first.pages == 2);
   CHECK(first.visible == 20);
   CHECK(VS::Battle::MapTargetPageIndex(19) == 19);
-  fixture.Sphere().selectedTarget = -1;
+  fixture.Sphere().selected_target = -1;
   REQUIRE(VS::Battle::AdvanceTargetPage(1) == 1);
   const auto second = VS::Battle::GetTargetPageInfo();
   CHECK(second.first == 20);
   CHECK(second.visible == 20);
-  CHECK(fixture.Sphere().targetLists[0] == fixture.entries.data() + 20);
+  CHECK(fixture.Sphere().target_lists[0] == fixture.entries.data() + 20);
 }
 
 TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
@@ -289,7 +289,7 @@ TEST_CASE(
   CHECK(VS::Battle::MapTargetPageIndex(0) == 20);
   CHECK(VS::Battle::MapTargetPageIndex(19) == 39);
   CHECK(VS::Battle::MapTargetPageIndex(255) == 255);
-  fixture.Sphere().selectedTarget = -1;
+  fixture.Sphere().selected_target = -1;
   REQUIRE(VS::Battle::AdvanceTargetPage(-1) == 1);
   CHECK(VS::Battle::GetTargetPageInfo().first == 0);
 }
@@ -451,20 +451,20 @@ TEST_CASE("Spell elevation slice respects terrain and diagonal corners",
     CAPTURE(yaw);
     fixture.Camera(yaw);
     const auto full = fixture.Draw();
-    fixture.Sphere().terrainHeights[40] = SliceFixture::Terrain(-128, -1024);
+    fixture.Sphere().terrain_heights[40] = SliceFixture::Terrain(-128, -1024);
     const auto occluded = fixture.Draw();
     REQUIRE(Coverage(occluded) < Coverage(full));
-    fixture.Sphere().terrainHeights[40] = SliceFixture::Terrain(0, -1024);
+    fixture.Sphere().terrain_heights[40] = SliceFixture::Terrain(0, -1024);
     REQUIRE(fixture.Draw() == full);
     for (unsigned char direction : {6, 12, 18, 24}) {
       CAPTURE(direction);
-      fixture.Sphere().terrainRowFlags[40] = direction;
+      fixture.Sphere().terrain_row_flags[40] = direction;
       REQUIRE(Coverage(fixture.Draw()) < Coverage(full));
     }
-    fixture.Sphere().terrainRowFlags[40] = 0;
+    fixture.Sphere().terrain_row_flags[40] = 0;
     REQUIRE(fixture.Draw() == full);
   }
-  for (int& value : fixture.Sphere().terrainHeights) {
+  for (int& value : fixture.Sphere().terrain_heights) {
     value = SliceFixture::Terrain(-128, -1024);
   }
   REQUIRE(fixture.Draw().empty());
@@ -495,9 +495,9 @@ TEST_CASE("Spell elevation clipping handles stepped terrain across camera yaw",
           "[render][sphere][terrain]") {
   SliceFixture fixture;
   for (int index = 0; index < 81; ++index) {
-    fixture.Sphere().terrainHeights[index] =
+    fixture.Sphere().terrain_heights[index] =
         SliceFixture::Terrain(index % 3 == 0 ? -128 : 0, -1024);
-    fixture.Sphere().terrainRowFlags[index] =
+    fixture.Sphere().terrain_row_flags[index] =
         index % 7 == 0 ? static_cast<unsigned char>((index % 4 + 1) * 6) : 0;
   }
   for (int yaw = 0; yaw < 4096; yaw += 128) {
@@ -548,18 +548,18 @@ TEST_CASE("NPC area filtering does not require a player targeting sphere",
 TEST_CASE("Player secondary sphere updates preserve complete volume state",
           "[battle][sphere][area-target]") {
   SliceFixture sphere;
-  Battle_TargetSphereSpec volume{2, 3, 4, 5, 128, -64, 256};
-  sphere.storage.primaryVolume.kind = 7;
-  sphere.storage.wireShape = 15;
+  VS::Battle::TargetSphereSpec volume{2, 3, 4, 5, 128, -64, 256};
+  sphere.storage.primary_volume.kind = 7;
+  sphere.storage.wire_shape = 15;
   VS::Battle::SetSecondarySphereVolumeEntry(&volume);
-  const auto& actual = sphere.storage.secondaryVolume;
+  const auto& actual = sphere.storage.secondary_volume;
   CHECK(actual.kind == 2);
   CHECK(actual.reserved1 == 3);
   CHECK(actual.reserved2 == 4);
   CHECK(actual.reserved3 == 5);
   CHECK(actual.reserved4 == 128);
   CHECK(actual.reserved8 == -64);
-  CHECK(actual.reservedC == 256);
-  CHECK(sphere.storage.wireShape == 0);
-  CHECK(sphere.storage.primaryVolume.kind == 7);
+  CHECK(actual.reserved_c == 256);
+  CHECK(sphere.storage.wire_shape == 0);
+  CHECK(sphere.storage.primary_volume.kind == 7);
 }

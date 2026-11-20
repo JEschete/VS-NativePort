@@ -14,7 +14,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.hpp"
@@ -26,7 +26,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
@@ -36,7 +36,7 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -165,13 +165,14 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return actor != nullptr ? actor->interactionFlags : 0;
   }
   [[nodiscard]] int AshleyActionRecoveryTimer() const override {
-    return Battle_characterState->stats->actionRecoveryTimer;
+    return VS::Battle::characterState->stats->actionRecoveryTimer;
   }
   [[nodiscard]] std::uint32_t AshleyStatuses() const override {
-    return static_cast<std::uint32_t>(Battle_characterState->stats->statuses);
+    return static_cast<std::uint32_t>(
+        VS::Battle::characterState->stats->statuses);
   }
   [[nodiscard]] bool IsAshleyWeaponDrawn() const override {
-    return (Battle_characterState->weaponDrawn & 1) != 0;
+    return (VS::Battle::characterState->weaponDrawn & 1) != 0;
   }
   [[nodiscard]] int CameraYawDelta() const override {
     return VS::Field::sphericalCamera.motion.turn;
@@ -535,10 +536,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
  private:
   [[nodiscard]] static Battle_Actor* BattleActor(int slot) {
     if (slot < 0 ||
-        static_cast<std::size_t>(slot) >= std::size(Battle_actors)) {
+        static_cast<std::size_t>(slot) >= std::size(VS::Battle::actors)) {
       return nullptr;
     }
-    return Battle_actors[slot];
+    return VS::Battle::actors[slot];
   }
 
   u_long* ordering_table_ = nullptr;

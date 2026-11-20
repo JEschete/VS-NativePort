@@ -15,8 +15,8 @@
 
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -56,19 +56,20 @@ auto Bytes(const T& value) {
 }
 
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved = VS::Battle::actors;
   decltype(VS::Battle::hitFunctions) callbacks = VS::Battle::hitFunctions;
   std::uint32_t previous = VS::Battle::previousHitResult;
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 2> stats{};
   Battle_ActionDefinition action{};
-  Battle_HitResult source{};
-  Battle_HitResult target{};
+  VS::Battle::HitResult source{};
+  VS::Battle::HitResult target{};
   LiveFixture() {
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
-    Battle_actors[0] = &actors.at(0);
-    Battle_actors[1] = &actors.at(1);
-    Battle_actors[41] = &actors.at(2);
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
+    VS::Battle::actors[0] = &actors.at(0);
+    VS::Battle::actors[1] = &actors.at(1);
+    VS::Battle::actors[41] = &actors.at(2);
     actors.at(0).stats = &stats.at(0);
     actors.at(1).stats = &stats.at(1);
     actors.at(2).weaponDrawn = 1;
@@ -78,7 +79,7 @@ struct LiveFixture {
     target.target.target_actor = 1;
   }
   ~LiveFixture() {
-    std::copy(saved.begin(), saved.end(), Battle_actors);
+    std::copy(saved.begin(), saved.end(), VS::Battle::actors.begin());
     std::copy(callbacks.begin(), callbacks.end(),
               VS::Battle::hitFunctions.begin());
     VS::Battle::previousHitResult = previous;
@@ -403,7 +404,7 @@ TEST_CASE("Live gem chance preserves aliased state and ignores inactive actors",
   CHECK(battle::LiveGemHitChance(&f.action, &f.source, &f.source, 0, -1) == 80);
   CHECK(Bytes(f.stats) == before);
   f.target.target.target_actor = 255;
-  f.target.targetsPosition = -1;
+  f.target.targets_position = -1;
   CHECK(battle::LiveGemHitChance(nullptr, &f.target, &f.target, -1, 0) == 100);
 }
 
@@ -412,7 +413,7 @@ TEST_CASE("Live risk uses hit slot rather than stats actor identity",
   LiveFixture f;
   constexpr std::array<unsigned, 7> kRisk{0, 502, 503, 504, 505, 506, 65535};
   constexpr std::array<int, 7> kRates{58, 254, 254, 254, 254, 256, 25658};
-  f.source.targetsPosition = 1;
+  f.source.targets_position = 1;
   for (std::size_t i = 0; i < kRisk.size(); ++i) {
     f.stats.at(0).risk = static_cast<std::uint16_t>(kRisk.at(i));
     CHECK(battle::LiveRiskHitChance(nullptr, &f.source, nullptr, -1, -1) ==
@@ -424,7 +425,7 @@ TEST_CASE("Live chain reads unsigned byte independently of char signedness",
           "[hit-modifiers][F00348][live]") {
   LiveFixture f;
   f.target.target.target_limb = 5;
-  f.target.targetsPosition = -1;
+  f.target.targets_position = -1;
   for (unsigned evasion = 0; evasion < 256; ++evasion) {
     f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(evasion);
     CHECK(battle::LiveChainHitChance(nullptr, nullptr, &f.target, -1, -1) ==

@@ -17,7 +17,7 @@
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Content/DataAccess.hpp"
@@ -100,7 +100,7 @@ struct ProfileFixture {
 };
 
 struct StatFixture {
-  Battle_Actor* previous = Battle_actors[0];
+  Battle_Actor* previous = VS::Battle::actors[0];
   Battle_ActorStats stats{};
   Battle_Actor actor{};
 
@@ -114,9 +114,9 @@ struct StatFixture {
     stats.agility = stats.totalAgility = 102;
     stats.risk = 7;
     actor.stats = &stats;
-    Battle_actors[0] = &actor;
+    VS::Battle::actors[0] = &actor;
   }
-  ~StatFixture() { Battle_actors[0] = previous; }
+  ~StatFixture() { VS::Battle::actors[0] = previous; }
 };
 
 void CheckBaseAttributes(const Battle_ActorStats& stats) {
@@ -550,7 +550,7 @@ TEST_CASE("Ashley startup overrides reject invalid data before mutation",
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerStats(overrides));
   CHECK(std::memcmp(&before_invalid, &fixture.stats, sizeof(before_invalid)) ==
         0);
-  Battle_actors[0] = nullptr;
+  VS::Battle::actors[0] = nullptr;
   CHECK_NOTHROW(VS::Game::InitializeEncounterPlayerStats({}));
   overrides.max_hp = 1;
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerStats(overrides));

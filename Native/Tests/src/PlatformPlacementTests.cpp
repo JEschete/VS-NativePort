@@ -15,7 +15,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -262,8 +262,7 @@ struct PlatformPlacementFixture {
 };
 
 struct PlatformMotionLiveFixture : PlatformPlacementFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   decltype(VS::State::tickSpeed) saved_tick_speed = VS::State::tickSpeed;
@@ -271,7 +270,7 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
       VS::Field::areRoomUpdatesPaused;
   decltype(VS::Render::frameBuf) saved_frame_buffer = VS::Render::frameBuf;
   PlatformMotionLiveFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     VS::Field::areRoomUpdatesPaused = 0;
     VS::Field::areMovingPlatformsPaused = 0;
@@ -282,7 +281,8 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
     platforms[1].scene_object_id = 99;
   }
   ~PlatformMotionLiveFixture() {
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     VS::State::tickSpeed = saved_tick_speed;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;

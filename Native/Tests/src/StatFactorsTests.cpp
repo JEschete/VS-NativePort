@@ -16,8 +16,8 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatFactors.hpp"
 #include "Battle/StatFactorsLive.hpp"
@@ -102,31 +102,31 @@ struct World final : battle::StatFactorWorld {
   }
 };
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) actors_saved =
-      std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_statCalculators)) callbacks_saved =
-      std::to_array(Battle_statCalculators);
+  decltype(VS::Battle::actors) actors_saved = VS::Battle::actors;
+  decltype(VS::Battle::statCalculators) callbacks_saved =
+      VS::Battle::statCalculators;
   Battle_ActionState* saved_state = VS::Battle::actionState;
   Battle_ActionDefinition saved_selected = Battle_actionDefinitions[255];
-  std::uint32_t saved_last = Battle_lastActionStatValue;
+  std::uint32_t saved_last = VS::Battle::lastActionStatValue;
   std::unique_ptr<Battle_ActionState> state =
       std::make_unique<Battle_ActionState>();
   Battle_ActionDefinition action{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Battle_HitResult source{};
-  Battle_HitResult target{};
+  VS::Battle::HitResult source{};
+  VS::Battle::HitResult target{};
   LiveFixture() {
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
     VS::Battle::actionState = state.get();
-    Battle_actors[40] = &actor;
+    VS::Battle::actors[40] = &actor;
     actor.stats = &stats;
     source.target.target_actor = 40;
     target.target.target_actor = 40;
     stats.actorId = 255;
     state->queueIndex = 0xABCD0001;
     state->selection.actionId = 255;
-    state->selection.primaryTarget.hpEffect = 1;
+    state->selection.primaryTarget.hp_effect = 1;
     state->selection.primaryTarget.target.hp = -101;
     state->selection.primaryTarget.target.mp = 50;
     state->selection.targets[0].target.hp = -101;
@@ -136,12 +136,13 @@ struct LiveFixture {
     Battle_actionDefinitions[255].type = 1;
   }
   ~LiveFixture() {
-    std::copy(actors_saved.begin(), actors_saved.end(), Battle_actors);
+    std::copy(actors_saved.begin(), actors_saved.end(),
+              VS::Battle::actors.begin());
     std::copy(callbacks_saved.begin(), callbacks_saved.end(),
-              Battle_statCalculators);
+              VS::Battle::statCalculators.begin());
     VS::Battle::actionState = saved_state;
     Battle_actionDefinitions[255] = saved_selected;
-    Battle_lastActionStatValue = saved_last;
+    VS::Battle::lastActionStatValue = saved_last;
   }
 };
 void CheckPrevious() {
@@ -420,7 +421,7 @@ TEST_CASE("Live spell selected and input actions are independent owners",
   CHECK(battle::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, -1,
                                              -1) == 0);
   Battle_actionDefinitions[255].type = 1;
-  fixture.state->selection.primaryTarget.hpEffect = 2;
+  fixture.state->selection.primaryTarget.hp_effect = 2;
   CHECK(battle::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, 2,
                                              -1) == 0);
 }
@@ -438,7 +439,7 @@ void RelocateStatTable() {
   REQUIRE(image.has_value());
   const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
-      tables, reinterpret_cast<void**>(Battle_statCalculators),
+      tables, reinterpret_cast<void**>(VS::Battle::statCalculators.data()),
       &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
@@ -462,7 +463,7 @@ TEST_CASE("Original SHORT table relocates and dispatches all eight factors",
   CHECK(battle::LiveCalculateActionStatChange(&fixture.action, &fixture.source,
                                               &fixture.target, 1,
                                               -1) == kExpected.at(selector));
-  CHECK(Battle_lastActionStatValue ==
+  CHECK(VS::Battle::lastActionStatValue ==
         static_cast<std::uint32_t>(kExpected.at(selector)));
 }
 
@@ -540,7 +541,7 @@ void CheckIncomingLive(LiveCalculator calculator, IncomingGate gate,
   if (gate == IncomingGate::kAny) fixture.state->selection.actionId = 65535;
   CHECK(calculator(&fixture.action, nullptr, nullptr, 0, -1) == -15);
   CHECK(calculator(&fixture.action, nullptr, nullptr, 1, 0) == -158);
-  fixture.state->selection.primaryTarget.hpEffect = 2;
+  fixture.state->selection.primaryTarget.hp_effect = 2;
   CHECK(calculator(nullptr, nullptr, nullptr, -1, -1) == 0);
   CHECK(calculator(nullptr, nullptr, nullptr, 2, 0) == 0);
 }
@@ -572,7 +573,7 @@ void CheckTargetLive(LiveCalculator calculator) {
   fixture.stats.maxHp = 100;
   fixture.stats.currentMp = 302;
   fixture.stats.maxMp = 200;
-  fixture.target.targetsPosition = GENERATE(0, 1);
+  fixture.target.targets_position = GENERATE(0, 1);
   fixture.state->selection.actionId = 65535;
   VS::Battle::actionState = nullptr;
   const auto hit = GENERATE(-1, 0, 1, 2);
@@ -715,7 +716,7 @@ TEST_CASE("F00429 live cost and factor have different action owners",
   Battle_actionDefinitions[255].hits[1].statFactor = 0;
   fixture.action.type = 7;
   fixture.action.cost = 0;
-  fixture.state->selection.primaryTarget.hpEffect = GENERATE(0, 1, 2, 3);
+  fixture.state->selection.primaryTarget.hp_effect = GENERATE(0, 1, 2, 3);
   CHECK(battle::LiveScaleIncomingSpellCost(&fixture.action, nullptr, nullptr, 0,
                                            -1) == 76);
   CHECK(battle::LiveScaleIncomingSpellCost(&fixture.action, nullptr, nullptr, 1,
@@ -740,7 +741,7 @@ TEST_CASE("F00431 live shield PP ignores equipment and position flags",
           "[stat-factors][stat-factors-b8][F00431]") {
   LiveFixture fixture;
   VS::Battle::actionState = nullptr;
-  fixture.source.targetsPosition = GENERATE(0, 1);
+  fixture.source.targets_position = GENERATE(0, 1);
   const auto pp = GENERATE(0, 32767, 32768, 65535);
   fixture.stats.shield.current_pp = static_cast<std::uint16_t>(pp);
   fixture.stats.weapon.current_pp = 123;
@@ -768,5 +769,6 @@ TEST_CASE("Original SHORT table relocates and dispatches all B8 factors",
   CHECK(battle::LiveCalculateActionStatChange(&fixture.action, &fixture.source,
                                               &fixture.target, 1,
                                               -1) == expected);
-  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(expected));
+  CHECK(VS::Battle::lastActionStatValue ==
+        static_cast<std::uint32_t>(expected));
 }

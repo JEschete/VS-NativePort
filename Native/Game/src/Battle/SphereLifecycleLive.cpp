@@ -29,13 +29,15 @@ constexpr std::size_t kPositionZIndex = 2;
 constexpr std::size_t kPositionPadIndex = 3;
 constexpr std::uint32_t kSphereOverrideButtonMask = 0x80;
 
-static_assert(sizeof(Battle_TargetSphereSpec) == sizeof(Battle_TargetVolume));
-static_assert(sizeof(Battle_TargetSphere) <=
-              sizeof(Battle_TargetSphereSetupView));
-static_assert(std::size(Battle_TargetSphereSetupView{}.wireEdges) ==
+static_assert(sizeof(VS::Battle::TargetSphereSpec) ==
+              sizeof(Battle_TargetVolume));
+static_assert(sizeof(VS::Battle::TargetSphereRecord) <=
+              sizeof(VS::Battle::TargetSphereSetupView));
+static_assert(std::size(VS::Battle::TargetSphereSetupView{}.wire_edges) ==
               kSphereWireEdgeCapacity);
-static_assert(offsetof(Battle_TargetSphere, inputLocked) ==
-              offsetof(Battle_TargetSphereSetupView, reserved3C) +
+static_assert(offsetof(VS::Battle::TargetSphereRecord, input_locked) ==
+              offsetof(VS::Battle::TargetSphereSetupView,
+                       cursor_z_and_input_locked) +
                   sizeof(std::int16_t));
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
@@ -43,19 +45,19 @@ static_assert(offsetof(Battle_TargetSphere, inputLocked) ==
   std::abort();
 }
 
-Battle_TargetSphereSetupView& RequiredSphere(
-    Battle_TargetSphereSetupView* sphere, const char* operation) {
+VS::Battle::TargetSphereSetupView& RequiredSphere(
+    VS::Battle::TargetSphereSetupView* sphere, const char* operation) {
   if (sphere == nullptr) Refuse(operation, "missing sphere workspace");
   return *sphere;
 }
 
-const Battle_TargetSphereSpec& RequiredVolume(
-    const Battle_TargetSphereSpec* volume, const char* operation) {
+const VS::Battle::TargetSphereSpec& RequiredVolume(
+    const VS::Battle::TargetSphereSpec* volume, const char* operation) {
   if (volume == nullptr) Refuse(operation, "missing required volume");
   return *volume;
 }
 
-SphereVolume ReadVolume(const Battle_TargetSphereSpec& spec) {
+SphereVolume ReadVolume(const VS::Battle::TargetSphereSpec& spec) {
   const Battle_TargetVolume volume = std::bit_cast<Battle_TargetVolume>(spec);
   TargetVolumeExtents extents{};
   for (std::size_t index = 0; index < extents.size(); ++index) {
@@ -71,7 +73,7 @@ SphereVolume ReadVolume(const Battle_TargetSphereSpec& spec) {
                        volume.position[kPositionPadIndex]}};
 }
 
-Battle_TargetSphereSpec WriteVolume(const SphereVolume& value) {
+VS::Battle::TargetSphereSpec WriteVolume(const SphereVolume& value) {
   Battle_TargetVolume volume{};
   volume.kind = static_cast<u_char>(value.kind);
   volume.opaque1 = static_cast<u_char>(value.range_kind);
@@ -83,44 +85,46 @@ Battle_TargetSphereSpec WriteVolume(const SphereVolume& value) {
   volume.position[kPositionYIndex] = value.position.y;
   volume.position[kPositionZIndex] = value.position.z;
   volume.position[kPositionPadIndex] = value.position.pad;
-  return std::bit_cast<Battle_TargetSphereSpec>(volume);
+  return std::bit_cast<VS::Battle::TargetSphereSpec>(volume);
 }
 
-SphereLifecycleState ReadState(const Battle_TargetSphereSetupView& sphere) {
-  return {.primary_volume = ReadVolume(sphere.primaryVolume),
-          .secondary_volume = ReadVolume(sphere.secondaryVolume),
-          .wire_phase_a = sphere.wirePhaseA,
-          .wire_phase_b = sphere.wirePhaseB,
-          .wire_phase_c = sphere.wirePhaseC,
-          .wire_shape = sphere.wireShape,
+SphereLifecycleState ReadState(
+    const VS::Battle::TargetSphereSetupView& sphere) {
+  return {.primary_volume = ReadVolume(sphere.primary_volume),
+          .secondary_volume = ReadVolume(sphere.secondary_volume),
+          .wire_phase_a = sphere.wire_phase_a,
+          .wire_phase_b = sphere.wire_phase_b,
+          .wire_phase_c = sphere.wire_phase_c,
+          .wire_shape = sphere.wire_shape,
           .target_count = std::bit_cast<std::int8_t>(
-              static_cast<std::uint8_t>(sphere.targetCount)),
+              static_cast<std::uint8_t>(sphere.target_count)),
           .selected_target = std::bit_cast<std::int8_t>(
-              static_cast<std::uint8_t>(sphere.selectedTarget)),
-          .sphere_mode = sphere.sphereMode,
-          .reserved_38 = std::bit_cast<std::uint32_t>(sphere.reserved38),
+              static_cast<std::uint8_t>(sphere.selected_target)),
+          .sphere_mode = sphere.sphere_mode,
+          .reserved_38 = std::bit_cast<std::uint32_t>(sphere.cursor_xy),
           .reserved_3c_and_input_locked =
-              std::bit_cast<std::uint32_t>(sphere.reserved3C)};
+              std::bit_cast<std::uint32_t>(sphere.cursor_z_and_input_locked)};
 }
 
-void WriteState(Battle_TargetSphereSetupView& sphere,
+void WriteState(VS::Battle::TargetSphereSetupView& sphere,
                 const SphereLifecycleState& state) {
-  sphere.primaryVolume = WriteVolume(state.primary_volume);
-  sphere.secondaryVolume = WriteVolume(state.secondary_volume);
-  sphere.wirePhaseA = state.wire_phase_a;
-  sphere.wirePhaseB = state.wire_phase_b;
-  sphere.wirePhaseC = state.wire_phase_c;
-  sphere.wireShape = state.wire_shape;
-  sphere.targetCount = std::bit_cast<char>(state.target_count);
-  sphere.selectedTarget = std::bit_cast<char>(state.selected_target);
-  sphere.sphereMode = state.sphere_mode;
-  sphere.reserved38 = std::bit_cast<int>(state.reserved_38);
-  sphere.reserved3C = std::bit_cast<int>(state.reserved_3c_and_input_locked);
+  sphere.primary_volume = WriteVolume(state.primary_volume);
+  sphere.secondary_volume = WriteVolume(state.secondary_volume);
+  sphere.wire_phase_a = state.wire_phase_a;
+  sphere.wire_phase_b = state.wire_phase_b;
+  sphere.wire_phase_c = state.wire_phase_c;
+  sphere.wire_shape = state.wire_shape;
+  sphere.target_count = std::bit_cast<char>(state.target_count);
+  sphere.selected_target = std::bit_cast<char>(state.selected_target);
+  sphere.sphere_mode = state.sphere_mode;
+  sphere.cursor_xy = std::bit_cast<int>(state.reserved_38);
+  sphere.cursor_z_and_input_locked =
+      std::bit_cast<int>(state.reserved_3c_and_input_locked);
 }
 }  // namespace
 
 // decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
-void InitializeLiveSphere(Battle_TargetSphereSetupView* sphere) {
+void InitializeLiveSphere(VS::Battle::TargetSphereSetupView* sphere) {
   auto& legacy = RequiredSphere(sphere, "sphere initialization");
   SphereLifecycleState state = ReadState(legacy);
   InitializeSphereState(state);
@@ -131,12 +135,12 @@ void InitializeLiveSphere(Battle_TargetSphereSetupView* sphere) {
     Refuse("sphere initialization", "wire edge capacity is too small");
   }
   for (std::size_t index = 0; index < kSphereWireEdgeCount; ++index) {
-    legacy.wireEdges[index] = std::bit_cast<std::int16_t>(edges[index]);
+    legacy.wire_edges[index] = std::bit_cast<std::int16_t>(edges[index]);
   }
 }
 
 // decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/573B8.c:436).
-void FreeLiveSphere(Battle_TargetSphereSetupView*& sphere,
+void FreeLiveSphere(VS::Battle::TargetSphereSetupView*& sphere,
                     SphereReleaseFunction release) {
   if (sphere == nullptr) return;
   if (release == nullptr) Refuse("sphere release", "missing release callback");
@@ -145,9 +149,9 @@ void FreeLiveSphere(Battle_TargetSphereSetupView*& sphere,
 }
 
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
-void SetLiveSphereVolumes(Battle_TargetSphereSetupView* sphere,
-                          const Battle_TargetSphereSpec* primary,
-                          const Battle_TargetSphereSpec* secondary,
+void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
+                          const VS::Battle::TargetSphereSpec* primary,
+                          const VS::Battle::TargetSphereSpec* secondary,
                           std::uint8_t sphere_mode,
                           VS::Battle::TargetPreview* target_previews,
                           std::uint8_t& reuse_volumes) {
@@ -173,12 +177,12 @@ void SetLiveSphereVolumes(Battle_TargetSphereSetupView* sphere,
   WriteState(legacy, state);
   reuse_volumes = reuse_state ? 1 : 0;
   if (*result == SphereVolumeSetResult::kSecondarySet) {
-    legacy.targetList1 = target_previews;
+    legacy.target_list1 = target_previews;
   }
 }
 
 // decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475).
-void ClearLivePrimarySphereVolume(Battle_TargetSphereSetupView* sphere) {
+void ClearLivePrimarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
   ClearPrimarySphereVolume(state);
@@ -186,8 +190,9 @@ void ClearLivePrimarySphereVolume(Battle_TargetSphereSetupView* sphere) {
 }
 
 // decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
-void SetLiveSecondarySphereVolume(Battle_TargetSphereSetupView* sphere,
-                                  const Battle_TargetSphereSpec* secondary) {
+void SetLiveSecondarySphereVolume(
+    VS::Battle::TargetSphereSetupView* sphere,
+    const VS::Battle::TargetSphereSpec* secondary) {
   auto& legacy = RequiredSphere(sphere, "secondary sphere volume update");
   const auto& required_secondary =
       RequiredVolume(secondary, "secondary sphere volume update");
@@ -197,7 +202,7 @@ void SetLiveSecondarySphereVolume(Battle_TargetSphereSetupView* sphere,
 }
 
 // decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488).
-void ClearLiveSecondarySphereVolume(Battle_TargetSphereSetupView* sphere) {
+void ClearLiveSecondarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
   ClearSecondarySphereVolume(state);
@@ -205,7 +210,7 @@ void ClearLiveSecondarySphereVolume(Battle_TargetSphereSetupView* sphere) {
 }
 
 // decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
-void ClearLiveSphereTargets(Battle_TargetSphereSetupView* sphere) {
+void ClearLiveSphereTargets(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
   ClearSphereTargetCount(state);
@@ -213,7 +218,7 @@ void ClearLiveSphereTargets(Battle_TargetSphereSetupView* sphere) {
 }
 
 // decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93).
-int LiveSphereInteractionMode(const Battle_TargetSphereSetupView* sphere,
+int LiveSphereInteractionMode(const VS::Battle::TargetSphereSetupView* sphere,
                               bool override_button) {
   if (sphere == nullptr) return 0;
   const auto state = ReadState(*sphere);
@@ -224,7 +229,7 @@ int LiveSphereInteractionMode(const Battle_TargetSphereSetupView* sphere,
 void InitializeSphereEntry() {
   ResetTargetPages();
   if (VS::Battle::targetSphere == nullptr) {
-    auto* allocated = static_cast<Battle_TargetSphereSetupView*>(
+    auto* allocated = static_cast<VS::Battle::TargetSphereSetupView*>(
         VS::Core::Memory::AllocateLiveFromLowEnd(
             sizeof(*VS::Battle::targetSphere),
             std::source_location::current()));
@@ -240,8 +245,8 @@ void InitializeSphereEntry() {
 }
 
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
-void SetSphereVolumesEntry(Battle_TargetSphereSpec* primary,
-                           Battle_TargetSphereSpec* secondary,
+void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
+                           VS::Battle::TargetSphereSpec* secondary,
                            u_char sphere_mode,
                            VS::Battle::TargetPreview* target_previews) {
   SetLiveSphereVolumes(VS::Battle::targetSphere, primary, secondary,
@@ -255,7 +260,7 @@ void ClearPrimarySphereVolumeEntry() {
 }
 
 // decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
-void SetSecondarySphereVolumeEntry(Battle_TargetSphereSpec* secondary) {
+void SetSecondarySphereVolumeEntry(VS::Battle::TargetSphereSpec* secondary) {
   SetLiveSecondarySphereVolume(VS::Battle::targetSphere, secondary);
 }
 

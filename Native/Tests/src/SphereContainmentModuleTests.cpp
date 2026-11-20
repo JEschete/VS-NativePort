@@ -115,9 +115,9 @@ TEST_CASE(
   state.spheres[1].volumes[1] = f::Volume(0);
   const std::array<VS::Content::ModuleSymbol, 2> owners{{
       {"BATTLE/BATTLE.PRG", 0x80200000, 1, &state.spheres[0],
-       sizeof(Battle_TargetSphere), 1, 1},
+       sizeof(VS::Battle::TargetSphereRecord), 1, 1},
       {"BATTLE/BATTLE.PRG", 0x80210000, 1, &state.spheres[1],
-       sizeof(Battle_TargetSphere), 1, 1},
+       sizeof(VS::Battle::TargetSphereRecord), 1, 1},
   }};
   const VS::Content::ModulePointerTable table{
       "BATTLE/BATTLE.PRG",

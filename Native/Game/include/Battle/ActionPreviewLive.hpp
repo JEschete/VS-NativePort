@@ -3,12 +3,14 @@
 #include "Legacy/Psx.h"
 
 struct Battle_ActionRequest;
-struct Battle_HitResult;
+namespace VS::Battle {
+struct HitResult;
+}  // namespace VS::Battle
 struct Battle_HitStatusView;
 
 namespace VS::Battle {
 void ClearLiveActionRequest(void* request);
-void InitializeLiveActionHit(Battle_HitResult* hit);
+void InitializeLiveActionHit(VS::Battle::HitResult* hit);
 void FinalizeLiveActionHit(Battle_HitStatusView* hit);
 void ResolveLiveActionTargets(int action, Battle_ActionRequest* result,
                               Battle_ActionRequest* source, int execute);

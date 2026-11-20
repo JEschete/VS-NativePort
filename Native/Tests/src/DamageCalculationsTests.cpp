@@ -15,10 +15,10 @@
 
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/DamageCalculations.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
-#include "Battle/Hit.h"
+#include "Battle/Hit.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 
@@ -109,21 +109,22 @@ struct World final : b::DamageWorld {
 };
 struct LiveFixture {
   std::array<Battle_Actor*, 42> saved{};
-  std::array<std::remove_reference_t<decltype(Battle_statCalculators[0])>, 27>
+  std::array<std::remove_reference_t<decltype(VS::Battle::statCalculators[0])>,
+             27>
       saved_calculators{};
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_ActorStats, 2> stats{};
   Battle_ActionDefinition action{};
-  Battle_HitResult source{}, target{};
+  VS::Battle::HitResult source{}, target{};
   LiveFixture() {
-    std::copy(std::begin(Battle_actors), std::end(Battle_actors),
+    std::copy(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               saved.begin());
-    std::copy(std::begin(Battle_statCalculators),
-              std::end(Battle_statCalculators), saved_calculators.begin());
+    std::copy(std::begin(VS::Battle::statCalculators),
+              std::end(VS::Battle::statCalculators), saved_calculators.begin());
     for (std::size_t i = 0; i < actors.size(); ++i) {
       actors.at(i).stats = &stats.at(i);
       stats.at(i).actorId = static_cast<std::uint8_t>(i);
-      Battle_actors[i] = &actors.at(i);
+      VS::Battle::actors[i] = &actors.at(i);
     }
     target.target.target_actor = 1;
     stats.at(0).strength = stats.at(0).intelligence = 100;
@@ -131,9 +132,9 @@ struct LiveFixture {
     action.hits[0].affinity = action.hits[1].affinity = 6;
   }
   ~LiveFixture() {
-    std::copy(saved.begin(), saved.end(), std::begin(Battle_actors));
+    std::copy(saved.begin(), saved.end(), std::begin(VS::Battle::actors));
     std::copy(saved_calculators.begin(), saved_calculators.end(),
-              std::begin(Battle_statCalculators));
+              std::begin(VS::Battle::statCalculators));
   }
 };
 std::vector<std::uint8_t> Module(const char* name) {
@@ -543,7 +544,7 @@ TEST_CASE(
   LiveFixture f;
   const auto image = Module("BATTLE/BATTLE.PRG");
   const auto tables = VS::Content::ModulePointerTables();
-  auto* target = reinterpret_cast<void**>(Battle_statCalculators);
+  auto* target = reinterpret_cast<void**>(VS::Battle::statCalculators.data());
   const auto table = std::ranges::find(
       tables, target, &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
@@ -553,7 +554,7 @@ TEST_CASE(
       b::LivePhysicalDamageWithoutDebuffs, b::LiveCalculateSpellHitDamage,
       b::LiveCalculateSpellHealing, b::LivePhysicalDamageWithDebuffs};
   for (const auto callback : callbacks) {
-    CHECK(std::ranges::count(Battle_statCalculators, callback) == 1);
+    CHECK(std::ranges::count(VS::Battle::statCalculators, callback) == 1);
     CHECK(callback(&f.action, &f.source, &f.target, 0, 0) == 100);
   }
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

@@ -14,6 +14,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -24,7 +25,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
@@ -119,7 +120,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
       const override {
     return Field::CollectLiveMovingPlatformPositions();
   }
-  void RewindActors() override { cursor_ = Battle_actors[0]; }
+  void RewindActors() override { cursor_ = VS::Battle::actors[0]; }
   [[nodiscard]] std::optional<int> NextActor() override {
     if (cursor_ == nullptr) return std::nullopt;
     const int id = cursor_->id;

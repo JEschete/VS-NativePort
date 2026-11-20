@@ -9,11 +9,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
+#include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/StatusEffects.h"
+#include "Battle/Damage.hpp"
+#include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpers.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -72,13 +73,13 @@ auto Bytes(const T& value) {
 }
 
 struct LiveRiskFixture {
-  Battle_Actor* saved_actor = Battle_actors[0];
-  Battle_Actor* saved_player = Battle_characterState;
+  Battle_Actor* saved_actor = VS::Battle::actors[0];
+  Battle_Actor* saved_player = VS::Battle::characterState;
   Battle_ActionState* saved_action = VS::Battle::actionState;
   std::uint32_t saved_control = VS::Field::controlMode;
   std::uint32_t saved_flow = VS::Battle::actionFlowMode;
   int saved_ticks = VS::State::tickSpeed;
-  int saved_timer = Battle_targetingRiskTimer;
+  int saved_timer = VS::Battle::targetingRiskTimer;
   Battle_Actor target_actor{};
   Battle_Actor player_actor{};
   Battle_ActorStats target_stats{};
@@ -91,22 +92,22 @@ struct LiveRiskFixture {
     target_stats.statuses = 8;
     target_stats.risk = 55;
     player_stats.risk = 99;
-    Battle_actors[0] = &target_actor;
-    Battle_characterState = &player_actor;
+    VS::Battle::actors[0] = &target_actor;
+    VS::Battle::characterState = &player_actor;
     VS::Battle::actionState = &action;
     VS::Field::controlMode = 2;
     VS::Battle::actionFlowMode = 1;
     VS::State::tickSpeed = 1;
-    Battle_targetingRiskTimer = 0;
+    VS::Battle::targetingRiskTimer = 0;
   }
   ~LiveRiskFixture() {
-    Battle_actors[0] = saved_actor;
-    Battle_characterState = saved_player;
+    VS::Battle::actors[0] = saved_actor;
+    VS::Battle::characterState = saved_player;
     VS::Battle::actionState = saved_action;
     VS::Field::controlMode = saved_control;
     VS::Battle::actionFlowMode = saved_flow;
     VS::State::tickSpeed = saved_ticks;
-    Battle_targetingRiskTimer = saved_timer;
+    VS::Battle::targetingRiskTimer = saved_timer;
   }
 };
 }  // namespace
@@ -367,9 +368,9 @@ TEST_CASE("Live targeting risk keeps selection and player ownership separate",
   battle::UpdateLiveTargetingRiskPenalty();
   CHECK(Bytes(fixture.target_stats) == selected_before);
   CHECK(Bytes(fixture.player_stats) == Bytes(player_expected));
-  CHECK(Battle_targetingRiskTimer == 1);
+  CHECK(VS::Battle::targetingRiskTimer == 1);
   battle::ResetLiveTargetingRiskPenaltyTimer();
-  CHECK(Battle_targetingRiskTimer == 0);
+  CHECK(VS::Battle::targetingRiskTimer == 0);
 }
 
 TEST_CASE(
@@ -377,16 +378,16 @@ TEST_CASE(
     "[status-helpers][live]") {
   LiveRiskFixture fixture;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
-  Battle_actors[0] = nullptr;
+  VS::Battle::characterState = nullptr;
+  VS::Battle::actors[0] = nullptr;
   VS::Battle::actionFlowMode = 0xFFFFFFFF;
   battle::UpdateLiveTargetingRiskPenalty();
-  CHECK(Battle_targetingRiskTimer == 0);
+  CHECK(VS::Battle::targetingRiskTimer == 0);
   VS::Battle::actionFlowMode = 2;
-  Battle_targetingRiskTimer = 29;
+  VS::Battle::targetingRiskTimer = 29;
   VS::State::tickSpeed = 2;
   battle::UpdateLiveTargetingRiskPenalty();
-  CHECK(Battle_targetingRiskTimer == 1);
+  CHECK(VS::Battle::targetingRiskTimer == 1);
 }
 
 TEST_CASE("Status helper module addresses retain their checked live contracts",

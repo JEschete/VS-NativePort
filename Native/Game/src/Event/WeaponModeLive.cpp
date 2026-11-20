@@ -12,9 +12,9 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/Movement.h"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/BattleModeLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Event/Actors.hpp"
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -57,8 +57,8 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
   void SetBattleMode(int mode) override {
     Require(static_cast<std::size_t>(mode) < std::size(event::weaponDrawStates),
             "Script weapon-mode table index is out of bounds");
-    Require(Battle_actors[kAshley] != nullptr &&
-                Battle_characterState != nullptr &&
+    Require(VS::Battle::actors[kAshley] != nullptr &&
+                VS::Battle::characterState != nullptr &&
                 Actors_actorRecords[kAshley] != nullptr,
             "Script weapon mode requires Ashley's battle and model state");
     VS::Battle::LiveSetActorBattleMode(kAshley, event::weaponDrawStates[mode]);

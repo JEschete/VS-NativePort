@@ -207,7 +207,7 @@ Battle_ActorStats* Stats(int slot) {
   if (slot < 0 || slot >= kInspectableActorSlots) {
     return nullptr;
   }
-  auto* actor = Battle_actors[slot];
+  auto* actor = VS::Battle::actors[slot];
   return actor == nullptr ? nullptr : actor->stats;
 }
 std::optional<TerminalActor> ActorView(int slot) {

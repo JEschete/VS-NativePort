@@ -29,7 +29,7 @@
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -198,7 +198,7 @@ class LiveCandidateMovementWorld final
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
     ActorRoster roster;
     std::array<bool, kCandidateTargetSlots> seen{};
-    for (auto* actor = Battle_actors[0]; actor != nullptr;
+    for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
          actor = actor->next) {
       if (!ValidTarget(actor->id) || seen.at(actor->id)) return std::nullopt;
       seen.at(actor->id) = true;

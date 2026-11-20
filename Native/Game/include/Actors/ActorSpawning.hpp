@@ -19,7 +19,7 @@
 // inventory and the saved snapshot. The rules see actors as SpawnedActor
 // handles and typed records the host lends them, so they reach no
 // Battle_Actor, VS::Actors::CharacterInit or ZUD layout and no PS1 address.
-// ActorSpawningLive binds Battle_actors, the actor allocations, the zone
+// ActorSpawningLive binds VS::Battle::actors, the actor allocations, the zone
 // context, the room enemy memory, Ashley's snapshot and the inventory.
 namespace VS::Actors {
 // An actor allocation the host owns, before and after it joins its slot.
@@ -161,7 +161,7 @@ enum class ActorShape : std::uint8_t {
 enum class EquipmentHand : std::uint8_t { kWeapon = 0, kShield = 1 };
 
 enum class SpawnRefusal : std::uint8_t {
-  // An actor id outside Battle_actors.
+  // An actor id outside VS::Battle::actors.
   kActorSlot,
   // No actor where the original dereferenced one.
   kNoActor,
@@ -661,7 +661,7 @@ struct EquippedModels {
 // ------------------------------------------------------------------------
 
 // The live actor table, asset queue, zone and Ashley state the spawn rules
-// edit. Slots are Battle_actors indices; the rules check them first.
+// edit. Slots are VS::Battle::actors indices; the rules check them first.
 class ActorSpawnHost {
  public:
   ActorSpawnHost() = default;

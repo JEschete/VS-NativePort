@@ -12,7 +12,7 @@
 
 #include "Actors/ActorTableLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -209,7 +209,7 @@ void CheckSpellReadiness(int spell_class) {
 class LiveHudShortcutWorld final : public HudShortcutWorld {
  public:
   std::optional<std::uint32_t> ActionRestrictions() override {
-    const auto* actor = Battle_characterState;
+    const auto* actor = VS::Battle::characterState;
     if (actor == nullptr || actor->stats == nullptr ||
         actor->model == nullptr ||
         Actors::LiveActorRecord(0, "ShortcutIconBrightness") == nullptr) {
@@ -234,7 +234,7 @@ class LiveHudShortcutWorld final : public HudShortcutWorld {
                                                                       : 0) != 0;
   }
   std::optional<bool> HasWeaponBreakArt() override {
-    const auto* actor = Battle_characterState;
+    const auto* actor = VS::Battle::characterState;
     if (actor == nullptr) Refuse("Break-art shortcut has no current actor");
     const int first =
         kFirstWeaponBreakArt +

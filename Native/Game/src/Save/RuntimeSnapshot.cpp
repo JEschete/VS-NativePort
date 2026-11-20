@@ -24,7 +24,7 @@
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -32,7 +32,7 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
@@ -1167,7 +1167,7 @@ Result CaptureActors(Snapshot& state) {
   // projections, but acquire records ONLY in the owned staging cache.
   for (int slot = 0; std::cmp_less(slot, VS::Battle::Ai::kFrameActorSlots);
        ++slot) {
-    const auto* actor = Battle_actors[slot];
+    const auto* actor = VS::Battle::actors[slot];
     if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) continue;
     if (actor->stats == nullptr || Actors_actorRecords[slot] == nullptr ||
         actor->roomSpawnIndex == kLastLocation) {
@@ -1434,9 +1434,9 @@ std::expected<Document, std::string> CaptureClearGame() {
 std::expected<Snapshot, std::string> Capture(
     const VS::Items::ContainerData& storage) {
   if (pending || !VS::Boot::isGameplayActive ||
-      Battle_characterState == nullptr ||
-      Battle_characterState != Battle_actors[0] ||
-      Battle_characterState->stats == nullptr ||
+      VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState != VS::Battle::actors[0] ||
+      VS::Battle::characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.room_disc_request != nullptr ||
@@ -1456,8 +1456,8 @@ std::expected<Snapshot, std::string> Capture(
   Snapshot state;
   CapturePersistent(state);
   state.storage = storage;
-  CaptureAshley(state, *Battle_characterState);
-  auto valid = OverlayEquipped(state, *Battle_characterState->stats);
+  CaptureAshley(state, *VS::Battle::characterState);
+  auto valid = OverlayEquipped(state, *VS::Battle::characterState->stats);
   if (!valid) return std::unexpected(valid.error());
   valid = CaptureInventoryOrder(state);
   if (!valid) return std::unexpected(valid.error());
@@ -1609,9 +1609,9 @@ std::expected<void, std::string> FinishResume() {
   const auto audio = ValidateAudioConsumer();
   if (!audio) return audio;
   const auto& state = pending->state;
-  if (!VS::Boot::isGameplayActive || Battle_characterState == nullptr ||
-      Battle_characterState != Battle_actors[0] ||
-      Battle_characterState->stats == nullptr ||
+  if (!VS::Boot::isGameplayActive || VS::Battle::characterState == nullptr ||
+      VS::Battle::characterState != VS::Battle::actors[0] ||
+      VS::Battle::characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.zone_id != state.location.zone ||
@@ -1631,7 +1631,7 @@ std::expected<void, std::string> FinishResume() {
   }
   auto& actor = *Actors_actorRecords[0];
   auto& model = actor.instance;
-  RestoreAshleyValues(state.ashley, *Battle_characterState);
+  RestoreAshleyValues(state.ashley, *VS::Battle::characterState);
   model.position.vx = static_cast<std::int16_t>(state.location.position[0]);
   model.position.vy = static_cast<std::int16_t>(state.location.position[1]);
   model.position.vz = static_cast<std::int16_t>(state.location.position[2]);

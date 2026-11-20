@@ -21,7 +21,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -120,7 +120,7 @@ struct World final : battle::ActionCostWorld {
   }
 };
 struct LiveFixture {
-  decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved = VS::Battle::actors;
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
   Battle_ActionState* saved_state = VS::Battle::actionState;
@@ -128,9 +128,10 @@ struct LiveFixture {
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   LiveFixture() {
-    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
-    Battle_actors[0] = &actor;
-    Battle_actors[41] = &actor;
+    std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
+              nullptr);
+    VS::Battle::actors[0] = &actor;
+    VS::Battle::actors[41] = &actor;
     actor.stats = &stats;
     actor.weaponDrawn = 2;
     VS::Battle::actionState = &state;
@@ -139,7 +140,7 @@ struct LiveFixture {
     Battle_actionDefinitions[22].unlocked = 1;
   }
   ~LiveFixture() {
-    std::copy(saved.begin(), saved.end(), std::begin(Battle_actors));
+    std::copy(saved.begin(), saved.end(), std::begin(VS::Battle::actors));
     std::copy(definitions.begin(), definitions.end(),
               std::begin(Battle_actionDefinitions));
     VS::Battle::actionState = saved_state;

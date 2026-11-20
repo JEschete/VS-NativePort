@@ -31,7 +31,7 @@ class PrerequisiteTarget {
   virtual ~PrerequisiteTarget() = default;
   // False when the target is not an actor; a rule that reads it then fails.
   [[nodiscard]] virtual bool Valid() const = 0;
-  // The parameters of a status effect (Battle_statusEffectParams).
+  // The parameters of a status effect (VS::Battle::statusEffectParams).
   [[nodiscard]] virtual StatusEffectRule EffectRule(int effect) const = 0;
   [[nodiscard]] virtual std::uint32_t StatusImmunities() const = 0;
   [[nodiscard]] virtual std::uint32_t Statuses() const = 0;

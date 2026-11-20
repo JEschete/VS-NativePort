@@ -10,13 +10,14 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/TerrainHeight.hpp"
 
@@ -180,9 +181,9 @@ void StoreBack(const ActorCommandState& snapshot,
 void IssueLiveActorCommand(VS::Battle::Ai::ActorAiState* state, int action) {
   Require(state != nullptr && action >= 0 && action < kCommandIntentCount,
           "AI actor command intent is out of bounds");
-  Require(state->actor_id < std::size(Battle_actors),
+  Require(state->actor_id < std::size(VS::Battle::actors),
           "AI actor command ID is out of bounds");
-  auto* actor = Battle_actors[state->actor_id];
+  auto* actor = VS::Battle::actors[state->actor_id];
   Require(actor != nullptr &&
               static_cast<void*>(actor) == static_cast<void*>(state->actor),
           "AI actor command identity does not match the actor table");

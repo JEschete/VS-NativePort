@@ -13,7 +13,7 @@
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
@@ -23,8 +23,7 @@ namespace {
 struct PursuitFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Field::roomData.moving_platforms) saved_platforms =
       VS::Field::roomData.moving_platforms;
@@ -39,12 +38,12 @@ struct PursuitFixture {
 
   PursuitFixture() {
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::LiveFrameContext().actors,
                 VS::Battle::Ai::kFrameActorSlots, nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
       Actors_actorRecords[index] = &models[index];
-      Battle_actors[index] = &actors[index];
+      VS::Battle::actors[index] = &actors[index];
       VS::Battle::Ai::LiveFrameContext().actors[index] = &states[index];
       actors[index].id = static_cast<int>(index);
       states[index].actor_id = static_cast<u_char>(index);
@@ -72,7 +71,8 @@ struct PursuitFixture {
 
   ~PursuitFixture() {
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
-    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_actors.begin(), saved_actors.end(),
+              VS::Battle::actors.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     VS::Field::roomData.moving_platforms = saved_platforms;
     VS::Field::roomData.header.moving_platforms_length = saved_platform_bytes;

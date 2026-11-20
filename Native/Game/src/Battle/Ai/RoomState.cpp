@@ -29,7 +29,7 @@
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -199,7 +199,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   }
 
   void FreeActorAiStates() override {
-    for (Battle_Actor* actor : Battle_actors) {
+    for (Battle_Actor* actor : VS::Battle::actors) {
       if (actor != nullptr) VS::Battle::Ai::FreeLiveActorAiState(actor);
     }
   }

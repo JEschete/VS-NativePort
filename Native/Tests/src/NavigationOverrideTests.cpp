@@ -14,6 +14,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
@@ -22,7 +23,7 @@
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -98,8 +99,7 @@ struct NavigationOverrideFixture {
 };
 
 struct ScriptedOverrideFixture : NavigationOverrideFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
@@ -118,9 +118,9 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   u_short heights[32][32]{};
 
   ScriptedOverrideFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    Battle_actors[0] = &actors[0];
-    Battle_actors[1] = &actors[1];
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
+    VS::Battle::actors[0] = &actors[0];
+    VS::Battle::actors[1] = &actors[1];
     actors[0].next = &actors[1];
     actors[0].commandState = 0xC0;
     actors[0].model = &ashley_model.instance;
@@ -165,7 +165,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     if (source.native_pointer_18c != nullptr) {
       VS::Core::Memory::FreeLiveFromHighEnd(source.native_pointer_18c);
     }
-    std::ranges::copy(saved_actors, Battle_actors);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
     std::ranges::copy(saved_directions,
                       VS::Battle::Ai::directionDeltas.begin());
@@ -1003,7 +1003,7 @@ TEST_CASE("Scripted path requests reject mismatched actor ownership",
           "[.override-actor-identity]") {
   VS::Platform::InstallCrashHandler();
   ScriptedOverrideFixture fixture;
-  Battle_actors[1] = nullptr;
+  VS::Battle::actors[1] = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   FAIL("Mismatched path-request identity was accepted");
 }

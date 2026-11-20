@@ -6,11 +6,11 @@
 
 // Live binding for the status screen's actor switching and vitals
 // (ActorSwitching.hpp) over the copied MENU4.PRG globals
-// (Menu/Status/ActorStatus.hpp), Battle_actors and their stats records, the
-// HUD's slide offset and label tables, the actor preview, the menu rows and
+// (Menu/Status/ActorStatus.hpp), VS::Battle::actors and their stats records,
+// the HUD's slide offset and label tables, the actor preview, the menu rows and
 // the UI packets. The entries keep the original call shapes (MENU4.PRG
-// 120.c:528-843 and 1114-1142). A slot outside Battle_actors, a missing actor
-// or stats record, and a search that would never stop are refused with a
+// 120.c:528-843 and 1114-1142). A slot outside VS::Battle::actors, a missing
+// actor or stats record, and a search that would never stop are refused with a
 // diagnostic instead of being read through.
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {

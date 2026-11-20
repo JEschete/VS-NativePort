@@ -14,7 +14,7 @@
 #include <string_view>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
@@ -240,7 +240,7 @@ class LiveCubePuzzleScreen final : public CubePuzzleScreenHost {
 };
 
 [[nodiscard]] CubePuzzleScreen LiveScreen() {
-  return {.load_step = Battle_unusedSubmenuState,
+  return {.load_step = VS::Battle::submenuState,
           .timer = screenTimer,
           .screen_state = screenState,
           .animation = elementAnimationState,
@@ -250,7 +250,7 @@ class LiveCubePuzzleScreen final : public CubePuzzleScreenHost {
 }
 
 void StoreScreen(const CubePuzzleScreen& screen) {
-  Battle_unusedSubmenuState = screen.load_step;
+  VS::Battle::submenuState = screen.load_step;
   screenTimer = screen.timer;
   screenState = screen.screen_state;
   elementAnimationState = screen.animation;

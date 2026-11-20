@@ -141,18 +141,18 @@ TEST_CASE(
   auto& queue = fixture->state.queue[3];
   CHECK(b::LiveActionTargetDistance() == 0);
   queue.targetCount = 65535;
-  queue.targets[0].targetsPosition = -1;
+  queue.targets[0].targets_position = -1;
   queue.targets[0].target =
       std::bit_cast<decltype(queue.targets[0].target)>(Point{2, -1, 9, 71});
   CHECK(b::LiveActionTargetDistance() == 5);
-  queue.targets[0].targetsPosition = 0;
+  queue.targets[0].targets_position = 0;
   queue.targets[0].target.target_actor = 0;
   queue.targets[0].target.target_limb = -1;
   CHECK(b::LiveActionTargetDistance() == 0);
   fixture->actor.boneMatrices[0].t[0] = -2426;
   fixture->actor.boneMatrices[0].t[1] = 7487;
   fixture->actor.boneMatrices[0].t[2] = 1009;
-  queue.targets[0].targetsPosition = 1;
+  queue.targets[0].targets_position = 1;
   queue.targets[0].target = std::bit_cast<decltype(queue.targets[0].target)>(
       Point{-892, 4966, -6156, 4966});
   CHECK(b::LiveActionTargetDistance() == 7731);

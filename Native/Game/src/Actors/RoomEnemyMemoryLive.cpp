@@ -18,7 +18,7 @@
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
 
@@ -186,7 +186,7 @@ void StoreLiveRoomActorState(int actor_id, int hidden) {
                      "the actor id is outside the actor record table");
     return;
   }
-  const Battle_Actor* actor = Battle_actors[actor_id];
+  const Battle_Actor* actor = VS::Battle::actors[actor_id];
   if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) {
     return;
   }

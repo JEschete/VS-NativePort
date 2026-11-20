@@ -13,13 +13,13 @@
 // rules build the request; the host owns the actor table and the effect
 // runtime.
 namespace VS::Effects {
-// Battle_actors slots the request scans for the other actors.
+// VS::Battle::actors slots the request scans for the other actors.
 inline constexpr std::size_t kScriptedEffectActorSlots = 16;
 
 // The services the trigger lifecycle uses.
 class ScriptedEffectTriggerHost : public PrimaryEffectSink {
  public:
-  // Battle_actors[slot] != NULL, for slot < kScriptedEffectActorSlots.
+  // VS::Battle::actors[slot] != NULL, for slot < kScriptedEffectActorSlots.
   [[nodiscard]] virtual bool ActorLoaded(std::size_t slot) = 0;
   // func_800CEF74.
   virtual void StartEffectTrack(std::int32_t track) = 0;

@@ -8,7 +8,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/StatusEffects.h"
+#include "Battle/StatusEffects.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -193,8 +193,8 @@ void RenderLiveTitles(std::int32_t presentation_step) {
   auto rows = Rows();
   LiveRecordHost host;
   if (RenderTitles(rows,
-                   {Battle_unusedMenu9CursorMemory.title_page,
-                    Battle_unusedMenu9CursorMemory.title_row},
+                   {VS::Battle::menu9CursorMemory.title_page,
+                    VS::Battle::menu9CursorMemory.title_row},
                    presentation_step, title_animation, host)) {
     StoreRows(rows, false);
   }
@@ -232,8 +232,8 @@ void RenderLiveStatistics(std::int32_t presentation_step) {
       .no_clear = Label(miscInfo, menu9_misc_info::index::kNoneClear)};
   LiveRecordHost host;
   if (RenderStatistics(rows, values,
-                       {Battle_unusedMenu9CursorMemory.record_time_page,
-                        Battle_unusedMenu9CursorMemory.record_time_row},
+                       {VS::Battle::menu9CursorMemory.record_time_page,
+                        VS::Battle::menu9CursorMemory.record_time_row},
                        presentation_step, statistic_animation, host)) {
     StoreRows(std::span(rows).first(kGazetteStatisticCount), false);
   }

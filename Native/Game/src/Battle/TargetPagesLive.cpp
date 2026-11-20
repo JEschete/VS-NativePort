@@ -13,7 +13,7 @@
 #include "Battle/Feedback.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Log.hpp"
@@ -30,7 +30,8 @@ using VS::Legacy::kPadR1;
 namespace {
 constexpr auto kSlots = std::extent_v<decltype(Battle_ActionState::previews)>;
 using ResultBuffer = decltype(Battle_ActionRequest::targets);
-constexpr auto kPageSize = std::extent_v<decltype(Battle_TargetSphere::labels)>;
+using SphereRecord = VS::Battle::TargetSphereRecord;
+constexpr auto kPageSize = std::extent_v<decltype(SphereRecord::labels)>;
 constexpr unsigned char kNoTarget = std::numeric_limits<unsigned char>::max();
 constexpr u_int kChooseDirectTarget = 1;
 constexpr u_int kChooseAreaTarget = 3;
@@ -46,18 +47,19 @@ static_assert(kSlots == VS::Battle::kMaxSphereTargets);
 std::span<VS::Battle::TargetPreview> targets;
 VS::Battle::TargetPageBook book;
 
-Battle_TargetSphere* Sphere() {
-  return reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
+VS::Battle::TargetSphereRecord* Sphere() {
+  return reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
 }
 
 void ApplyPage(VS::Battle::TargetPage page, bool reset) {
   auto* sphere = Sphere();
-  sphere->targetCount = static_cast<char>(page.count);
-  sphere->targetLists[0] =
+  sphere->target_count = static_cast<char>(page.count);
+  sphere->target_lists[0] =
       targets.data() == nullptr ? nullptr : targets.subspan(page.first).data();
   if (reset ||
-      static_cast<unsigned char>(sphere->selectedTarget) >= page.count) {
-    sphere->selectedTarget = static_cast<char>(page.count == 0 ? -1 : 0);
+      static_cast<unsigned char>(sphere->selected_target) >= page.count) {
+    sphere->selected_target = static_cast<char>(page.count == 0 ? -1 : 0);
   }
   VS::Battle::LiveUpdateTargetSelectionMenu(nullptr);
 }
@@ -74,7 +76,7 @@ class LiveSphere final : public VS::Battle::TargetSphere {
 
   void ShowPage(VS::Battle::TargetPage page, int mode) override {
     targets = entries_;
-    Sphere()->targetMode = static_cast<char>(mode);
+    Sphere()->target_mode = static_cast<char>(mode);
     ApplyPage(page, false);
   }
 
@@ -132,7 +134,7 @@ int VS::Battle::AdvanceTargetPage(int direction) {
     book.current = book.current == 0 ? book.pages.size() - 1 : book.current - 1;
   }
   std::fill(std::begin(Sphere()->labels), std::end(Sphere()->labels),
-            Battle_SphereTargetLabel{});
+            VS::Battle::SphereTargetLabelRecord{});
   ApplyPage(book.pages[book.current], true);
   const auto info = VS::Battle::GetTargetPageInfo();
   VS::Core::LogInfo("targeting.page", "page={}/{} first={} visible={} total={}",
@@ -152,7 +154,7 @@ int VS::Battle::HandleTargetPageButtons(void) {
 
 int VS::Battle::TargetPagesUseShoulders(void) {
   return book.pages.size() > 1 && Sphere() != nullptr &&
-         Sphere()->targetCount > 0 && VS::Field::controlMode == 2 &&
+         Sphere()->target_count > 0 && VS::Field::controlMode == 2 &&
          (VS::Battle::actionFlowMode == kChooseDirectTarget ||
           VS::Battle::actionFlowMode == kChooseAreaTarget);
 }
@@ -189,7 +191,7 @@ VS::Battle::TargetPageInfo VS::Battle::GetTargetPageInfo(void) {
   info.pages = static_cast<int>(book.pages.size());
   info.first = static_cast<int>(page.first);
   info.visible = static_cast<int>(page.count);
-  const auto selected = static_cast<unsigned char>(Sphere()->selectedTarget);
+  const auto selected = static_cast<unsigned char>(Sphere()->selected_target);
   if (selected < info.visible) info.selected = info.first + selected;
   return info;
 }

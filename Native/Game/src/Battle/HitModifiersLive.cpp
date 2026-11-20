@@ -11,8 +11,8 @@
 
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
+#include "Battle/Damage.hpp"
+#include "Battle/Hit.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Core/Diagnostics.hpp"
@@ -39,17 +39,19 @@ class LiveHitModifierWorld final : public HitModifierWorld {
   explicit LiveHitModifierWorld(Battle_ActionDefinition* action = nullptr)
       : action_(action) {}
   std::optional<HitModifierStats> Stats(std::uint8_t slot) override {
-    if (slot >= std::size(Battle_actors) || Battle_actors[slot] == nullptr ||
-        Battle_actors[slot]->stats == nullptr) {
+    if (slot >= std::size(VS::Battle::actors) ||
+        VS::Battle::actors[slot] == nullptr ||
+        VS::Battle::actors[slot]->stats == nullptr) {
       return std::nullopt;
     }
-    return ReadStats(*Battle_actors[slot]->stats);
+    return ReadStats(*VS::Battle::actors[slot]->stats);
   }
   std::optional<std::uint32_t> WeaponDrawn(std::uint8_t slot) override {
-    if (slot >= std::size(Battle_actors) || Battle_actors[slot] == nullptr) {
+    if (slot >= std::size(VS::Battle::actors) ||
+        VS::Battle::actors[slot] == nullptr) {
       return std::nullopt;
     }
-    return std::bit_cast<std::uint32_t>(Battle_actors[slot]->weaponDrawn);
+    return std::bit_cast<std::uint32_t>(VS::Battle::actors[slot]->weaponDrawn);
   }
   std::optional<HitModifierAction> Action() override {
     if (action_ == nullptr) return std::nullopt;
@@ -64,12 +66,12 @@ class LiveHitModifierWorld final : public HitModifierWorld {
   Battle_ActionDefinition* action_;
 };
 
-std::optional<HitModifierTarget> ReadHit(const Battle_HitResult* hit) {
+std::optional<HitModifierTarget> ReadHit(const VS::Battle::HitResult* hit) {
   if (hit == nullptr) return std::nullopt;
   return HitModifierTarget{hit->target.target_actor,
                            std::bit_cast<std::int8_t>(static_cast<std::uint8_t>(
                                hit->target.target_limb)),
-                           hit->targetsPosition};
+                           hit->targets_position};
 }
 
 template <typename T>
@@ -106,15 +108,17 @@ std::int16_t DefenseLiveGemHitBonus(Battle_ActionDefinition* action,
 }
 
 // decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867).
-int PreviousLiveHitSuccessThreshold(Battle_ActionDefinition*, Battle_HitResult*,
-                                    Battle_HitResult*, int, int) {
+int PreviousLiveHitSuccessThreshold(Battle_ActionDefinition*,
+                                    VS::Battle::HitResult*,
+                                    VS::Battle::HitResult*, int, int) {
   return PreviousHitSuccessThreshold(
       std::bit_cast<std::int32_t>(VS::Battle::previousHitResult));
 }
 
 // decomp: _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875).
-int LiveGemHitChance(Battle_ActionDefinition* action, Battle_HitResult* source,
-                     Battle_HitResult* target, int hit, int) {
+int LiveGemHitChance(Battle_ActionDefinition* action,
+                     VS::Battle::HitResult* source,
+                     VS::Battle::HitResult* target, int hit, int) {
   LiveHitModifierWorld world(action);
   const auto from = ReadHit(source);
   const auto to = ReadHit(target);
@@ -122,16 +126,16 @@ int LiveGemHitChance(Battle_ActionDefinition* action, Battle_HitResult* source,
 }
 
 // decomp: _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045).
-int LiveRiskHitChance(Battle_ActionDefinition*, Battle_HitResult* source,
-                      Battle_HitResult*, int, int) {
+int LiveRiskHitChance(Battle_ActionDefinition*, VS::Battle::HitResult* source,
+                      VS::Battle::HitResult*, int, int) {
   LiveHitModifierWorld world;
   const auto from = ReadHit(source);
   return Checked(RiskHitChance(Pointer(from), world));
 }
 
 // decomp: _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057).
-int LiveChainHitChance(Battle_ActionDefinition*, Battle_HitResult*,
-                       Battle_HitResult* target, int, int) {
+int LiveChainHitChance(Battle_ActionDefinition*, VS::Battle::HitResult*,
+                       VS::Battle::HitResult* target, int, int) {
   LiveHitModifierWorld world;
   const auto to = ReadHit(target);
   return Checked(ChainHitChance(Pointer(to), world));

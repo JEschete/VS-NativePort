@@ -10,7 +10,7 @@
 
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.hpp"
-#include "Battle/TargetVolume.h"
+#include "Battle/TargetVolume.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -141,14 +141,15 @@ int IsLivePointInCurrentSphereVolume(int volume_index,
                        "Containment volume index {} is invalid", volume_index);
     std::abort();
   }
-  auto* sphere =
-      reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
+  auto* sphere = reinterpret_cast<VS::Battle::TargetSphereRecord*>(
+      VS::Battle::targetSphere);
   if (sphere == nullptr) {
     VS::Core::LogError("battle.sphere",
                        "Containment requires the current sphere");
     std::abort();
   }
-  static_assert(std::size(Battle_TargetSphere{}.volumes) == kSphereVolumes);
+  static_assert(std::size(VS::Battle::TargetSphereRecord{}.volumes) ==
+                kSphereVolumes);
   return IsLivePointInTargetVolume(
       &sphere->volumes[static_cast<std::size_t>(volume_index)], point);
 }

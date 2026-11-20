@@ -357,7 +357,8 @@ struct TargetListRow {
   int index = 0;
 };
 
-// One label row of the target list (Battle_SphereTargetLabel without text).
+// One label row of the target list (VS::Battle::SphereTargetLabelRecord without
+// text).
 struct TargetSelectionLabel {
   int state = 0;
   int depth = 0;

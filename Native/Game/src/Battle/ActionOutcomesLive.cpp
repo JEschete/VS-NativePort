@@ -20,7 +20,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -45,16 +45,16 @@ Battle_ActionState& State() {
 }
 Battle_Actor* ActorAt(int slot) {
   Require(slot >= 0 &&
-          static_cast<std::size_t>(slot) < std::size(Battle_actors));
-  return Battle_actors[slot];
+          static_cast<std::size_t>(slot) < std::size(VS::Battle::actors));
+  return VS::Battle::actors[slot];
 }
 Battle_Actor& Actor(int slot) {
   auto* actor = ActorAt(slot);
   Require(actor != nullptr);
   return *actor;
 }
-ActionTargetHit Hit(const Battle_HitResult& hit) {
-  return {.targets_position = hit.targetsPosition != 0,
+ActionTargetHit Hit(const VS::Battle::HitResult& hit) {
+  return {.targets_position = hit.targets_position != 0,
           .target_actor = hit.target.target_actor,
           .impact_kind = static_cast<std::uint8_t>(hit.target.impact_kind)};
 }

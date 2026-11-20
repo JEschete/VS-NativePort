@@ -1,33 +1,30 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/Damage.h"
+// The battle actor slots and damage calculation state declared in Damage.hpp.
+#include "Battle/Damage.hpp"
 
-#include "Actors/ActorModelSlot.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/ShpModel.hpp"
-#include "Battle/Action.h"
-#include "Battle/ActionResolution.hpp"
-#include "Battle/Actor.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
-#include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
-#include "Render/Palette.hpp"
+#include <array>
+#include <cstdint>
+
+namespace VS::Battle {
 
 // decomp: D_800E82F4 (D_800E82F4@BATTLE/BATTLE.PRG)
-u_short Battle_bladePpDamageBonuses[12]; /* contents: module image (ModuleData.cpp) */
+// Contents: module image (ModuleData.cpp).
+std::array<std::uint16_t, kBladeCategoryCount> bladePpDamageBonuses;
 
 // decomp: _statCalculators (_statCalculators@BATTLE/BATTLE.PRG)
-short (*Battle_statCalculators[27])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.cpp) */
+// Contents: module image, relocated (ModulePointers.cpp).
+std::array<StatCalculator, kStatCalculatorCount> statCalculators;
 
 // decomp: vs_battle_actors (vs_battle_actors@BATTLE/BATTLE.PRG)
-Battle_Actor* Battle_actors[42];
+std::array<Battle_Actor*, kBattleActorSlotCount> actors;
 
 // decomp: _lastValue (_lastValue@BATTLE/BATTLE.PRG)
-u_int Battle_lastActionStatValue;
+std::uint32_t lastActionStatValue;
 
 // decomp: D_800F1A0C (D_800F1A0C@BATTLE/BATTLE.PRG)
-int Battle_criticalHitOccurred;
+std::int32_t criticalHitOccurred;
 
-// decomp: _armorDpAdjustmentAmounts (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
-short Battle_limbArmorDpLoss[8];
+// decomp: _armorDpAdjustmentAmounts
+// (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
+std::array<std::int16_t, kArmorDpLossSlotCount> limbArmorDpLoss;
 
+}  // namespace VS::Battle

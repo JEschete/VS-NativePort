@@ -1662,7 +1662,7 @@ int func_800F9800(void) {
         binding = (ai / "ActionExecutionLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Core::Math::SquaredDistanceWithHeightOffsets(", execution)
         self.assertIn("state.position, position.value(), state.point_height, height", execution)
-        self.assertIn("Core::Math::PositionOf(Battle_actors[0]->model->position)", binding)
+        self.assertIn("Core::Math::PositionOf(VS::Battle::actors[0]->model->position)", binding)
         self.assertNotIn("(short*)", execution)
         # Navigation.cpp's distance users (F01710, F01740), Movement.cpp's
         # (F01748, F01749) and OrbitingBoss.cpp's (F01848) moved to typed cores.
@@ -3448,7 +3448,7 @@ int func_800F9800(void) {
         world = live[live.index("class LiveTargetPerceptionWorld"):]
         model = world[world.index("std::optional<PerceivedModel> Model("):]
         model = model[:model.index("\n  }\n")]
-        self.assertIn("Battle_actors[target]", model)
+        self.assertIn("VS::Battle::actors[target]", model)
         self.assertIn("*actor->model", model)
         self.assertIn("Core::Math::PositionOf(model.position)", model)
         listed = world[world.index("std::vector<ListedPerceptionActor> ListedActors()"):]
@@ -3747,7 +3747,7 @@ int func_800F9800(void) {
             map_loading_live,
         )
         self.assertIn(
-            "sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
+            "sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,VS::Battle::sceneBuffer);",
             map_loading_live,
         )
         map_terminal_live = "".join(
@@ -4576,7 +4576,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         root = Path(__file__).resolve().parents[2]
         action = (root / "Native/Game/include/Battle/Action.h").read_text()
         self.assertIn("VS::Battle::TargetPreview previews[255];", action)
-        self.assertIn("Battle_HitResult targets[255];", action)
+        self.assertIn("VS::Battle::HitResult targets[255];", action)
         boot = (root / "Native/Game/src/Boot/GameplayOverlayLive.cpp").read_text()
         self.assertIn("AllocateLiveFromHighEnd(sizeof(Battle_ActionState))", boot)
         self.assertNotIn("0x2C10", boot)
@@ -5033,7 +5033,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         live = (root / "Native/Game/src/Menu/Framework/ActorPreviewLive.cpp").read_text()
         self.assertIn("return VS::Actors::weaponModels[slot];", live)
         self.assertIn("model->shown = 1;", live)
-        self.assertNotIn("Battle_unusedGlobal1", preview + live)
+        self.assertNotIn("VS::Battle::previewWeaponModelAliases", preview + live)
         # #276 row 47 B47-01 promoted func_801090C4 (F02637) to the owned EquipmentRows.cpp
         # ReloadEquipmentModels; its Live host clears the flag on weapon model slots 2 and 3.
         self.assertEqual(self.owned_items()["F02637"]["path"], r"Native\Game\src\Menu\Inventory\EquipmentRows.cpp")

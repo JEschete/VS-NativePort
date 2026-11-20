@@ -157,7 +157,7 @@ class TimeAttackFixture : public game_clear_live_tests::Fixture {
     REQUIRE(Initialize(asset) == 0);
     static_cast<void>(InjectLoaded(asset));
     REQUIRE(Initialize(asset) == 0);
-    REQUIRE(Battle_unusedSubmenuState == 2);
+    REQUIRE(VS::Battle::submenuState == 2);
   }
 };
 using Fixture = TimeAttackFixture;

@@ -12,7 +12,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Battle/AbilityState.h"
+#include "Battle/AbilityState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
@@ -59,10 +59,10 @@ struct LiveFixture {
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
   u_char saved_platform_pause = VS::Field::areMovingPlatformsPaused;
   Battle_ActionState* saved_action = VS::Battle::actionState;
-  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_character = VS::Battle::characterState;
   VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
   decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
-  u_short saved_requirement = Battle_battleAbilityPointRequirements[0];
+  u_short saved_requirement = VS::Battle::battleAbilityPointRequirements[0];
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
   std::uint8_t saved_b6 = VS::State::LiveScriptFlag(0xB6);
   Battle_ActionState action{};
@@ -83,13 +83,13 @@ struct LiveFixture {
     VS::Field::isMinimapVisible = 1;
     VS::Field::areMovingPlatformsPaused = 0;
     VS::Battle::actionState = &action;
-    Battle_characterState = &actor;
+    VS::Battle::characterState = &actor;
     actor.stats = &stats;
     actor.model = &model;
     actor.equippedWeaponCategory = 1;
     VS::State::artsStatus = {};
     std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
-    Battle_battleAbilityPointRequirements[0] = 1;
+    VS::Battle::battleAbilityPointRequirements[0] = 1;
     VS::State::artsStatus.kills.total_kills = 1;
     VS::State::SetLiveScriptFlag(0xAB, 0);
     VS::State::SetLiveScriptFlag(0xB6, 0);
@@ -109,10 +109,10 @@ struct LiveFixture {
     VS::Field::isMinimapVisible = saved_minimap;
     VS::Field::areMovingPlatformsPaused = saved_platform_pause;
     VS::Battle::actionState = saved_action;
-    Battle_characterState = saved_character;
+    VS::Battle::characterState = saved_character;
     VS::Items::lootListHead = saved_loot;
     VS::State::artsStatus = saved_progress;
-    Battle_battleAbilityPointRequirements[0] = saved_requirement;
+    VS::Battle::battleAbilityPointRequirements[0] = saved_requirement;
     VS::State::SetLiveScriptFlag(0xAB, saved_ab);
     VS::State::SetLiveScriptFlag(0xB6, saved_b6);
   }
@@ -199,7 +199,7 @@ TEST_CASE("F04123 live pause drives the production room and palette services",
           "[reward-flow][reward-live][F04123]") {
   LiveFixture fixture;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   b::BeginLiveRewardPause();
   CHECK(VS::Field::isInteractionPaused == 1);
   CHECK(VS::Field::areRoomUpdatesPaused == 1);
@@ -228,7 +228,7 @@ TEST_CASE("F04125 live resume requires no unused action or actor owner",
           "[reward-flow][reward-live][F04125]") {
   LiveFixture fixture;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   b::ResumeLiveAfterRewards();
   CHECK(VS::Battle::actionFlowMode == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
@@ -343,7 +343,7 @@ TEST_CASE("F00197 live busy delay needs no unused action or character owner",
   LiveDialogFixture fixture;
   VS::Effects::effectBusyFlags = GENERATE(1, 2, 3, -1);
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   b::UpdateLiveAbilityUnlockDelay();
   CHECK(VS::Battle::actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
@@ -410,7 +410,7 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   VS::Battle::lootMenuOpened = INT32_MIN;
   VS::Battle::rewardsFollowAction = 0x10000;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   VS::Field::isMinimapVisible = 0;
   VS::Field::areMovingPlatformsPaused = 1;
   b::UpdateLivePendingLootDialog();
@@ -472,7 +472,7 @@ TEST_CASE("F00225 live busy mask does not require action or ability owners",
   LiveDialogFixture fixture;
   VS::Effects::effectBusyFlags = GENERATE(1, 2, 3, INT32_MIN + 2);
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   b::WaitForLiveRewardUnlockEffects();
   CHECK(VS::Battle::actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
@@ -534,7 +534,7 @@ TEST_CASE("F00227 live event start resets full flags before challenge results",
   VS::Battle::lootMenuOpened = INT32_MIN;
   VS::Battle::rewardsFollowAction = 0x10000;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   VS::State::SetLiveScriptFlag(0xAB, 3);
   b::BeginLiveEventRewardResults();
   CHECK(VS::Battle::lootMenuOpened == 0);
@@ -554,7 +554,7 @@ TEST_CASE(
   VS::Battle::lootMenuOpened = INT32_MIN;
   VS::Battle::rewardsFollowAction = INT32_MIN;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   VS::State::SetLiveScriptFlag(0xAB, 3);
   b::BeginLivePostActionRewards();
   CHECK(VS::Battle::lootMenuOpened == 0);
@@ -572,7 +572,7 @@ TEST_CASE("F00229 live unknown full phases are not narrowed or booleanized",
                                0x10006U, 0x80000003U, 0xFFFFFFFFU);
   VS::Battle::actionFlowMode = phase;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 0);
   CHECK(VS::Battle::actionFlowMode == phase);
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 0);
@@ -587,7 +587,7 @@ TEST_CASE("F00229 live handled waiting phases preserve the original int result",
   VS::Menu::Framework::actionSelection.menu_status = 1;
   VS::Effects::effectBusyFlags = 2;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 1);
   CHECK(VS::Battle::actionFlowMode == phase);
   CHECK(VS::Field::isInteractionPaused == 77);
@@ -601,7 +601,7 @@ TEST_CASE("F00229 live completed handler returns one before next idle dispatch",
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
   VS::Battle::actionState = nullptr;
-  Battle_characterState = nullptr;
+  VS::Battle::characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 1);
   CHECK(VS::Battle::actionFlowMode == 2);
   CHECK(b::UpdateLiveRewardSequence() == 0);

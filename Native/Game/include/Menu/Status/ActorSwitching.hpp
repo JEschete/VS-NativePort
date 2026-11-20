@@ -17,7 +17,8 @@
 // ActorSwitchingLive.hpp binds them to the copied MENU4.PRG globals.
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
-// Battle_actors slots the status screen cycles through (the original's % 15).
+// VS::Battle::actors slots the status screen cycles through (the original's %
+// 15).
 inline constexpr int kInspectableActorSlots = 15;
 // Limbs a battle actor's stats record holds (vs_battle_actor2::limbs).
 inline constexpr std::size_t kStatusLimbSlots = 6;
@@ -150,7 +151,7 @@ class InspectableActorRoster {
 
 // decomp: MENU4.PRG _getNextValidActor (120.c:548).
 // Steps `current` by `step` modulo 15 until it reaches an inspectable actor.
-// Absent where the original would read before Battle_actors (a negative
+// Absent where the original would read before VS::Battle::actors (a negative
 // remainder) or loop forever (no inspectable actor on the cycle).
 [[nodiscard]] std::optional<std::int32_t> FindNextInspectableActor(
     InspectableActorRoster& roster, std::int32_t current, std::int32_t step);
@@ -202,7 +203,7 @@ class ActorSwitchHost {
 
   // vs_battle_playSfx10.
   virtual void PlaySwitchSound() = 0;
-  // The menu row with Battle_actors[`slot`]'s name.
+  // The menu row with VS::Battle::actors[`slot`]'s name.
   virtual void ShowActorName(std::int32_t slot, const ActorNameRow& row) = 0;
   // func_800F9E0C.
   virtual void ReleaseActorPreview() = 0;

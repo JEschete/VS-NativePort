@@ -25,7 +25,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Field/Gimmicks.hpp"
@@ -168,10 +168,11 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
                           .body_height = ai->body_height};
   }
   std::optional<Core::Math::Position3> PlayerBattlePosition() const override {
-    if (Battle_actors[0] == nullptr || Battle_actors[0]->model == nullptr) {
+    if (VS::Battle::actors[0] == nullptr ||
+        VS::Battle::actors[0]->model == nullptr) {
       return std::nullopt;
     }
-    return Core::Math::PositionOf(Battle_actors[0]->model->position);
+    return Core::Math::PositionOf(VS::Battle::actors[0]->model->position);
   }
   void StorePlayerDistance(std::uint32_t distance) override {
     state_->distances_squared[0] = distance;
@@ -214,7 +215,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
 }
 
 std::size_t LiveDecisionListHead() {
-  return reinterpret_cast<std::size_t>(Battle_actors[0]);
+  return reinterpret_cast<std::size_t>(VS::Battle::actors[0]);
 }
 
 std::optional<int> LiveDecisionListId(std::size_t node) {

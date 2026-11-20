@@ -25,7 +25,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -33,7 +33,7 @@
 namespace VS::Battle::Ai {
 namespace {
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kCleanupActorSlots);
-static_assert(std::size(Battle_actors) >= kCleanupActorSlots);
+static_assert(std::size(VS::Battle::actors) >= kCleanupActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kCleanupActorSlots);
 static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kCleanupActorSlots);
@@ -168,7 +168,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<std::uint8_t> CommandOpcode(
       int actor_id) const override {
-    const Battle_Actor* actor = Battle_actors[actor_id];
+    const Battle_Actor* actor = VS::Battle::actors[actor_id];
     if (actor == nullptr) return std::nullopt;
     return actor->commandOpcode;
   }
@@ -210,7 +210,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     VS::Battle::Ai::attributeActorMask = static_cast<int>(mask);
   }
   [[nodiscard]] int BattleActorSlots() const override {
-    return static_cast<int>(std::size(Battle_actors));
+    return static_cast<int>(std::size(VS::Battle::actors));
   }
   [[nodiscard]] bool HasNavigationOverride(int actor_id) const override {
     return StateAt(actor_id)->native_pointer_18c != nullptr;
@@ -277,7 +277,7 @@ class LiveReactionDelay final : public ReactionDelayHost {
   void SetCommandFlags(std::uint8_t flags) override {
     Require(state_.actor_id < kCleanupActorSlots,
             "AI reaction request actor ID is outside the AI slots");
-    Battle_Actor* actor = Battle_actors[state_.actor_id];
+    Battle_Actor* actor = VS::Battle::actors[state_.actor_id];
     Require(actor != nullptr, "AI reaction request requires an actor");
     actor->commandFlags = flags;
   }

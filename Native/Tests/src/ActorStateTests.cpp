@@ -28,7 +28,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Damage.h"
+#include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
@@ -1266,8 +1266,7 @@ namespace {
 // Saves the live tables the actor state bindings touch and clears them for
 // the test.
 struct LiveStateFixture {
-  decltype(std::to_array(Battle_actors)) saved_actors =
-      std::to_array(Battle_actors);
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
@@ -1277,7 +1276,7 @@ struct LiveStateFixture {
   decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
 
   LiveStateFixture() {
-    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
@@ -1289,7 +1288,7 @@ struct LiveStateFixture {
   LiveStateFixture(LiveStateFixture&&) = delete;
   LiveStateFixture& operator=(LiveStateFixture&&) = delete;
   ~LiveStateFixture() {
-    std::ranges::copy(saved_actors, Battle_actors);
+    std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_records, Actors_actorRecords);
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_gimmicks, VS::Field::gimmickInstances.begin());
@@ -1326,7 +1325,7 @@ void PlaceLiveBattleActor(Battle_Actor& actor, Battle_ActorStats& stats) {
   actor.kind = actors::kHostileActorKind;
   actor.modelId = 0x44;
   actor.retainAfterDefeat = 1;
-  Battle_actors[3] = &actor;
+  VS::Battle::actors[3] = &actor;
 }
 
 // A battle actor's command state and kind.
@@ -1368,7 +1367,7 @@ TEST_CASE("Live model switches need a battle actor and a slot",
   const LiveStateFixture fixture;
   const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(2);
   Battle_Actor actor{};
-  Battle_actors[2] = &actor;
+  VS::Battle::actors[2] = &actor;
   VS::Actors::DisableLiveActorModel(2);
   CHECK(record->instance.isSkipped != 0);
   VS::Actors::EnableAllLiveActorModels();
@@ -1457,8 +1456,8 @@ TEST_CASE("Live battle actors answer the state queries", "[actors-state]") {
   const ChannelWarnings warnings("actors");
   CHECK(VS::Actors::LiveActorAtSlot(42) == nullptr);
   CHECK(warnings.messages ==
-        std::vector<std::string>{
-            Refused("ActorAtSlot", "the actor id is outside Battle_actors")});
+        std::vector<std::string>{Refused(
+            "ActorAtSlot", "the actor id is outside VS::Battle::actors")});
 }
 
 TEST_CASE("Live battle actors switch their logic and hostility",
