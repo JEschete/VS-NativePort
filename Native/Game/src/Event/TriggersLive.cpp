@@ -11,7 +11,7 @@
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
@@ -28,19 +28,17 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
                     static_cast<int>(reason), location);
   }
   PlaybackPhase Phase() override { return LiveScriptVm().Phase(); }
-  bool DirectRequest() override { return Event_isDirectEventRequest != 0; }
-  bool RoomEntryPending() override {
-    return (Event_hasRoomEntryScript & 1) != 0;
-  }
+  bool DirectRequest() override { return isDirectEventRequest != 0; }
+  bool RoomEntryPending() override { return (hasRoomEntryScript & 1) != 0; }
   std::int16_t CurrentEventId() override { return LiveScriptVm().EventId(); }
-  void ConsumeRoomEntry() override { Event_hasRoomEntryScript = 0; }
+  void ConsumeRoomEntry() override { hasRoomEntryScript = 0; }
   void QueueEvent(EventSource source, std::int16_t event_id,
                   bool direct) override {
     auto& vm = LiveScriptVm();
     vm.SetEventId(event_id);
     vm.SetSource(source);
     vm.SetPhase(PlaybackPhase::kRequested);
-    Event_isDirectEventRequest = static_cast<char>(direct);
+    isDirectEventRequest = static_cast<char>(direct);
   }
   std::uint8_t Flag(int flag) override { return State::LiveScriptFlag(flag); }
   void SetFlag(int flag, std::int16_t value) override {
@@ -152,7 +150,7 @@ class LiveRoomSectionHost final : public RoomEventSectionHost {
     LiveScriptVm().SetStartConfirmed(confirmed);
   }
   void SetRoomEntryPending(bool pending) override {
-    Event_hasRoomEntryScript = static_cast<std::int16_t>(pending);
+    hasRoomEntryScript = static_cast<std::int16_t>(pending);
   }
   void SetFlag(int flag, std::int16_t value) override {
     State::SetLiveScriptFlag(flag, value);

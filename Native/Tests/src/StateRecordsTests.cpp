@@ -16,7 +16,7 @@
 #include "Core/RandomLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "State/GameClock.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/KillScore.hpp"
@@ -98,10 +98,9 @@ struct LiveTimerState {
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = VS::Core::BiosRand().State();
-  void* saved_triggers = Event_roomEventTriggers;
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   char saved_phase = Event_playbackPhase;
-  char saved_direct = Event_isDirectEventRequest;
+  char saved_direct = VS::Event::isDirectEventRequest;
   std::int16_t saved_event = Event_eventId;
   std::uint16_t saved_source = Event_eventSource;
 
@@ -116,10 +115,9 @@ struct LiveTimerState {
     VS::State::stateFlags = saved_flags;
     Battle_lowerScreenUiState = saved_hud;
     VS::Core::SeedBiosRand(saved_random);
-    Event_roomEventTriggers = saved_triggers;
     VS::Event::PublishLiveRoomScriptSections(saved_room);
     Event_playbackPhase = saved_phase;
-    Event_isDirectEventRequest = saved_direct;
+    VS::Event::isDirectEventRequest = saved_direct;
     Event_eventId = saved_event;
     Event_eventSource = saved_source;
   }
@@ -149,9 +147,8 @@ struct LiveTimerExpiry {
                       bytes.size()}});
     REQUIRE(room);
     VS::Event::PublishLiveRoomScriptSections(*room);
-    Event_roomEventTriggers = &table;
     Event_playbackPhase = 0;
-    Event_isDirectEventRequest = 0;
+    VS::Event::isDirectEventRequest = 0;
     Event_eventId = 0;
   }
 
@@ -661,7 +658,7 @@ TEST_CASE("A busy event player does not consume timer expiry", "[state-boot]") {
   test.Start(4);
   REQUIRE(VS::State::UpdateLiveSceneTimer() == 0);
   REQUIRE(VS::State::UpdateLiveSceneTimer() == 1);
-  Event_isDirectEventRequest = 1;
+  VS::Event::isDirectEventRequest = 1;
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
   CHECK(Event_eventId == LiveTimerExpiry::kExpiryEvent);
 }

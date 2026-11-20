@@ -30,21 +30,21 @@
 #include "Core/Runtime.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Event/Actors.h"
+#include "Event/Actors.hpp"
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraFrameLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/EventScreenTweensLive.hpp"
-#include "Event/Playback.h"
-#include "Event/Script.h"
+#include "Event/Script.hpp"
+#include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
-#include "Event/ScriptActors.h"
-#include "Event/ScriptAudio.h"
+#include "Event/ScriptActors.hpp"
+#include "Event/ScriptAudio.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
-#include "Event/ScriptEffects.h"
+#include "Event/ScriptEffects.hpp"
 #include "Event/ScriptField.hpp"
 #include "Event/ScriptRoomCommands.hpp"
 #include "Event/ScriptScreen.hpp"
@@ -337,7 +337,7 @@ class LiveVmHost final : public ScriptVmHost {
     Event_isMenuTransitionActive = static_cast<char>(value);
   }
   void SetAmbientSoundSuspended(bool value) override {
-    Event_isAmbientSoundSuspended = static_cast<char>(value);
+    isAmbientSoundSuspended = static_cast<char>(value);
   }
   ScriptLocation ThreadCursor(int thread) const override {
     return cursors.at(static_cast<std::size_t>(thread));
@@ -366,10 +366,10 @@ class LiveVmHost final : public ScriptVmHost {
     Event_cachedFlagValue = value;
   }
   CutsceneSkip SkipState() const override {
-    return static_cast<CutsceneSkip>(Event_skipState);
+    return static_cast<CutsceneSkip>(skipState);
   }
   void SetSkipState(CutsceneSkip state) override {
-    Event_skipState = static_cast<char>(state);
+    skipState = static_cast<char>(state);
   }
   bool SkipForced() const override { return Event_isSkipForced != 0; }
   void SetSkipForced(bool value) override {
@@ -404,7 +404,7 @@ class LiveVmHost final : public ScriptVmHost {
     Event_isTextSelectionActive = static_cast<char>(value);
   }
   void SetEffectWaitPending(bool value) override {
-    Event_isEffectWaitPending = value;
+    isEffectWaitPending = value;
   }
   void CancelImageTweens() override {
     weatherTween.duration_frames = 0;
@@ -413,13 +413,13 @@ class LiveVmHost final : public ScriptVmHost {
     }
   }
   void CaptureEventMusicSlot() override {
-    Event_musicSlot = static_cast<char>(Audio::LiveCurrentMusicSlot());
+    musicSlot = static_cast<char>(Audio::LiveCurrentMusicSlot());
   }
   bool ScriptControlledActor(int actor) const override {
-    return Event_scriptControlledActors[actor] != 0;
+    return scriptControlledActors[actor] != 0;
   }
   void ClearScriptControlledActors() override {
-    std::fill_n(Event_scriptControlledActors, kScriptControlledActorCount, 0);
+    std::fill_n(scriptControlledActors, kScriptControlledActorCount, 0);
   }
   bool BindRoomDoorSource() override {
     const auto mounted = sources.MountRoom(ScriptRegion::kDoorEvents, room);
@@ -618,10 +618,10 @@ class LiveVmHost final : public ScriptVmHost {
   // func_8007B0FC and func_8007B104 (146C.c:8237-8239) are both empty.
   void RunPaletteHook(PaletteHook /*hook*/) override { Core::NoOperation(); }
   void BeginScriptActorSelection(std::uint16_t selector) override {
-    BuildLiveScriptActorSelection(selector, &actor_selection_);
+    BuildLiveScriptActorSelection(selector, actor_selection_);
   }
   std::uint16_t NextScriptSelectedActor() override {
-    return NextLiveScriptSelectedActor(&actor_selection_);
+    return NextLiveScriptSelectedActor(actor_selection_);
   }
   void TransformActorColors(const PaletteTransform& transform,
                             int actor) override {
@@ -685,13 +685,13 @@ class LiveVmHost final : public ScriptVmHost {
     StoreLiveWeatherTween(tween);
   }
   bool AmbientSoundSuspended() const override {
-    return Event_isAmbientSoundSuspended != 0;
+    return isAmbientSoundSuspended != 0;
   }
   std::int16_t SuspendedAmbientSound() const override {
-    return Event_suspendedAmbientSoundId;
+    return suspendedAmbientSoundId;
   }
   void SetSuspendedAmbientSound(std::int16_t sound) override {
-    Event_suspendedAmbientSoundId = sound;
+    suspendedAmbientSoundId = sound;
   }
   bool RoomAmbientSequenceAbsent() override {
     return Field::LiveIsRoomAudioSequenceAbsent() != 0;
@@ -715,7 +715,7 @@ class LiveVmHost final : public ScriptVmHost {
  private:
   // Opcode 0x70's actor selection (func_800B9C58's sp18), rebuilt by each
   // BeginScriptActorSelection.
-  Event_ActorSelection actor_selection_{};
+  ActorSelection actor_selection_{};
 
   void BindData(ScriptDataLease& binding, ScriptLocation location) {
     if (!location.Present()) {
@@ -939,8 +939,7 @@ void LiveVmHost::DiscardChainedEventBuffer() {
 bool LiveVmHost::AllocateEventBuffers() {
   try {
     const auto main = std::make_shared<Buffer>(kEventScriptBytes);
-    const auto* subroutine =
-        reinterpret_cast<const std::uint8_t*>(&Event_specialSubroutineScript);
+    const std::uint8_t* subroutine = specialSubroutineScript;
     const auto sub = std::make_shared<Buffer>(
         subroutine, subroutine + kSubroutineScriptBytes);
     auto main_source = sources.PrepareBuffer(ScriptRegion::kEventScript, main);

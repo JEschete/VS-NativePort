@@ -19,11 +19,11 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/Script.h"
-#include "Event/ScriptActors.h"
-#include "Event/ScriptAudio.h"
+#include "Event/Script.hpp"
+#include "Event/ScriptActors.hpp"
+#include "Event/ScriptAudio.hpp"
 #include "Event/ScriptCamera.h"
-#include "Event/ScriptEffects.h"
+#include "Event/ScriptEffects.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
@@ -47,13 +47,9 @@ struct EventSessionFixture {
   decltype(Event_isMainThreadFinished) saved_finished =
       Event_isMainThreadFinished;
   decltype(Event_roomChangeState) saved_room = Event_roomChangeState;
-  decltype(Event_isAmbientSoundSuspended) saved_ambient =
-      Event_isAmbientSoundSuspended;
+  decltype(VS::Event::isAmbientSoundSuspended) saved_ambient =
+      VS::Event::isAmbientSoundSuspended;
   decltype(Event_scriptBuffer) saved_script = Event_scriptBuffer;
-  decltype(Event_vibrationPatternBuffer) saved_vibration =
-      Event_vibrationPatternBuffer;
-  decltype(Event_legacySkipHandlerCopy) saved_dispatch =
-      Event_legacySkipHandlerCopy;
   decltype(std::to_array(Event_threadCursors)) saved_threads =
       std::to_array(Event_threadCursors);
   decltype(std::to_array(Event_threadWaitFrames)) saved_waits =
@@ -62,23 +58,21 @@ struct EventSessionFixture {
       std::to_array(Event_kOpcodeHandlers);
   decltype(std::to_array(Event_kOpcodeSizes)) saved_sizes =
       std::to_array(Event_kOpcodeSizes);
-  char saved_skip = Event_skipState;
+  char saved_skip = VS::Event::skipState;
 
   ~EventSessionFixture() {
     Event_playbackPhase = saved_phase;
     Event_isStartConfirmed = saved_start;
     Event_isMainThreadFinished = saved_finished;
     Event_roomChangeState = saved_room;
-    Event_isAmbientSoundSuspended = saved_ambient;
+    VS::Event::isAmbientSoundSuspended = saved_ambient;
     Event_scriptBuffer = saved_script;
-    Event_vibrationPatternBuffer = saved_vibration;
-    Event_legacySkipHandlerCopy = saved_dispatch;
     std::copy(saved_threads.begin(), saved_threads.end(), Event_threadCursors);
     std::copy(saved_waits.begin(), saved_waits.end(), Event_threadWaitFrames);
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Event_kOpcodeHandlers);
     std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
-    Event_skipState = saved_skip;
+    VS::Event::skipState = saved_skip;
   }
 };
 
@@ -416,7 +410,7 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
   const UiSessionFixture ui_fixture;
   script_title_entries = 0;
   script_fallthrough = 0;
-  Event_skipState = 0;
+  VS::Event::skipState = 0;
   Event_kOpcodeHandlers[0xFE] = SessionTransferOpcode;
   Event_kOpcodeSizes[0xFE] = 1;
   CHECK(VS::Boot::RunLiveSessionLoop(EnterScriptTitle, EnterScriptTitle) == 41);

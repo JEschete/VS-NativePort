@@ -43,9 +43,9 @@
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
-#include "Event/ScriptEffects.h"
+#include "Event/ScriptEffects.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -194,7 +194,7 @@ static void BeginMorphBindings(MorphBindingScope* scope) {
   scope->page = Actors_sharedSequenceBankTexturePages[2];
   scope->data = Actors_sharedSequenceData[2];
   scope->resolved = Actors_lastResolvedSequenceIndex;
-  scope->skip = Event_skipState;
+  scope->skip = VS::Event::skipState;
   for (int i = 0; i < 17; ++i) {
     scope->actors[i] = Actors_actorRecords[i];
     Actors_actorRecords[i] = nullptr;
@@ -203,7 +203,7 @@ static void BeginMorphBindings(MorphBindingScope* scope) {
   Actors_animationEventLengths[36] = 3;
   Actors_sharedSequenceBankTexturePages[2] = 0;
   Actors_sharedSequenceData[2] = nullptr;
-  Event_skipState = 0;
+  VS::Event::skipState = 0;
 }
 
 static void EndMorphBindings(const MorphBindingScope* scope) {
@@ -215,7 +215,7 @@ static void EndMorphBindings(const MorphBindingScope* scope) {
   Actors_sharedSequenceBankTexturePages[2] = scope->page;
   Actors_sharedSequenceData[2] = scope->data;
   Actors_lastResolvedSequenceIndex = scope->resolved;
-  Event_skipState = scope->skip;
+  VS::Event::skipState = scope->skip;
 }
 
 static int MorphIsRetired(const MorphAnimationFixture* fixture) {
@@ -957,18 +957,18 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   enum { kSlot = 4, kDefaultRate = 3 };
   Actors_ActorRecord actor = {0};
   Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
-  const char saved_control = Event_scriptControlledActors[kSlot];
-  const char saved_skip = Event_skipState;
+  const char saved_control = VS::Event::scriptControlledActors[kSlot];
+  const char saved_skip = VS::Event::skipState;
   u_char instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
   instruction[9] = static_cast<u_char>(rate);
   Actors_actorRecords[kSlot] = present ? &actor : nullptr;
   actor.moveRate = kDefaultRate;
   actor.instance.position = (SVECTOR){100, 200, 300, 0};
-  Event_skipState = skip ? 2 : 0;
-  Event_scriptControlledActors[kSlot] = 0;
+  VS::Event::skipState = skip ? 2 : 0;
+  VS::Event::scriptControlledActors[kSlot] = 0;
   const intptr_t status =
       VS::Event::ScriptSlideActorToWorldPosOpcode(instruction, 0);
-  int passed = status == 0 && Event_scriptControlledActors[kSlot] == 1;
+  int passed = status == 0 && VS::Event::scriptControlledActors[kSlot] == 1;
   if (present) {
     passed &= actor.moveRate == kDefaultRate;
     passed &= actor.instance.rootMotion.vx == 17 &&
@@ -986,8 +986,8 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
     }
   }
   Actors_actorRecords[kSlot] = saved_actor;
-  Event_scriptControlledActors[kSlot] = saved_control;
-  Event_skipState = saved_skip;
+  VS::Event::scriptControlledActors[kSlot] = saved_control;
+  VS::Event::skipState = saved_skip;
   return passed;
 }
 

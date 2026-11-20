@@ -11,7 +11,7 @@
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Legacy/Psx.h"
 
 static_assert(
@@ -24,13 +24,12 @@ constexpr unsigned kTriggerOffset = 32;
 
 struct RetentionPredicateFixture {
   Battle_Actor* saved_actor = Battle_actors[kActorSlot];
-  decltype(Event_roomEventTriggers) saved_triggers = Event_roomEventTriggers;
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   decltype(Event_playbackPhase) saved_phase = Event_playbackPhase;
   decltype(Event_eventId) saved_id = Event_eventId;
   decltype(Event_eventSource) saved_source = Event_eventSource;
-  decltype(Event_isDirectEventRequest) saved_direct =
-      Event_isDirectEventRequest;
+  decltype(VS::Event::isDirectEventRequest) saved_direct =
+      VS::Event::isDirectEventRequest;
   std::array<u_char, 64> triggers{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -55,11 +54,10 @@ struct RetentionPredicateFixture {
         VS::Event::RoomEventSections::Copy({.triggers = triggers});
     REQUIRE(room);
     VS::Event::PublishLiveRoomScriptSections(*room);
-    Event_roomEventTriggers = triggers.data();
     Event_playbackPhase = 0;
     Event_eventId = 0;
     Event_eventSource = 0;
-    Event_isDirectEventRequest = 0;
+    VS::Event::isDirectEventRequest = 0;
     Battle_actors[kActorSlot] = nullptr;
     actor.stats = &stats;
     stats.maxHp = 100;
@@ -68,11 +66,10 @@ struct RetentionPredicateFixture {
   ~RetentionPredicateFixture() {
     VS::Event::PublishLiveRoomScriptSections(saved_room);
     Battle_actors[kActorSlot] = saved_actor;
-    Event_roomEventTriggers = saved_triggers;
     Event_playbackPhase = saved_phase;
     Event_eventId = saved_id;
     Event_eventSource = saved_source;
-    Event_isDirectEventRequest = saved_direct;
+    VS::Event::isDirectEventRequest = saved_direct;
   }
 };
 }  // namespace
@@ -120,9 +117,9 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
 TEST_CASE("Room-entry scenes keep the event id; Lab entry restores boot value",
           "[events][retention-predicate][lab-reentry]") {
   RetentionPredicateFixture fixture;
-  const auto saved_entry = Event_hasRoomEntryScript;
+  const auto saved_entry = VS::Event::hasRoomEntryScript;
   Event_eventId = 8;
-  Event_hasRoomEntryScript = 1;
+  VS::Event::hasRoomEntryScript = 1;
   CHECK(VS::Event::EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1);
   CHECK(Event_eventSource == 1);
   CHECK(Event_eventId == 8);
@@ -130,5 +127,5 @@ TEST_CASE("Room-entry scenes keep the event id; Lab entry restores boot value",
   CHECK(Event_eventId == 0);
   CHECK(Event_eventSource == 1);
   CHECK(Event_playbackPhase == 1);
-  Event_hasRoomEntryScript = saved_entry;
+  VS::Event::hasRoomEntryScript = saved_entry;
 }

@@ -22,7 +22,7 @@
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"

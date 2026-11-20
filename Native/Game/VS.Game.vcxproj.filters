@@ -1794,7 +1794,7 @@
     <ClCompile Include="src\Event\Actors.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Actors.h">
+    <ClInclude Include="src\Event\Actors.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Event\Camera.hpp">
@@ -1854,12 +1854,6 @@
     <ClInclude Include="src\Event\InterpolationCurveLive.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
-    <ClCompile Include="src\Event\Playback.cpp">
-      <Filter>src\Event</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Event\Playback.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
     <ClCompile Include="src\Event\RoomTriggerEntryLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1875,7 +1869,7 @@
     <ClCompile Include="src\Event\Script.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Script.h">
+    <ClInclude Include="src\Event\Script.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptActorCommands.cpp">
@@ -1890,13 +1884,13 @@
     <ClCompile Include="src\Event\ScriptActors.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptActors.h">
+    <ClInclude Include="src\Event\ScriptActors.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptAudio.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptAudio.h">
+    <ClInclude Include="src\Event\ScriptAudio.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptAudioCommands.cpp">
@@ -1941,7 +1935,7 @@
     <ClCompile Include="src\Event\ScriptEffects.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptEffects.h">
+    <ClInclude Include="src\Event\ScriptEffects.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptField.cpp">
@@ -1983,7 +1977,7 @@
     <ClCompile Include="src\Event\Triggers.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Triggers.h">
+    <ClInclude Include="src\Event\Triggers.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\TriggersLive.cpp">

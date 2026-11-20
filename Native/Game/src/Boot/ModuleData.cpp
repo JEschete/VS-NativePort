@@ -99,8 +99,8 @@
 #include "Ending/Credits.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
 #include "Ending/Results.hpp"
-#include "Event/Actors.h"
-#include "Event/Script.h"
+#include "Event/Actors.hpp"
+#include "Event/Script.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
@@ -451,15 +451,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x81228, sizeof Actors_animationEventPoints,
      &Actors_animationEventPoints,
      sizeof Actors_animationEventPoints},  // G00114 D_800E9A28
-    {"BATTLE/BATTLE.PRG", 0x8134C, sizeof Event_weaponDrawStates,
-     &Event_weaponDrawStates,
-     sizeof Event_weaponDrawStates},  // G00116 D_800E9B4C
-    {"BATTLE/BATTLE.PRG", 0x81358, sizeof Event_animationBankBases,
-     &Event_animationBankBases,
-     sizeof Event_animationBankBases},  // G00117 D_800E9B58
-    {"BATTLE/BATTLE.PRG", 0x8135C, sizeof Event_specialSubroutineScript,
-     &Event_specialSubroutineScript,
-     sizeof Event_specialSubroutineScript},  // G00118 D_800E9B5C
+    {"BATTLE/BATTLE.PRG", 0x8134C, sizeof VS::Event::weaponDrawStates,
+     &VS::Event::weaponDrawStates,
+     sizeof VS::Event::weaponDrawStates},  // G00116 D_800E9B4C
+    {"BATTLE/BATTLE.PRG", 0x81358, sizeof VS::Event::animationBankBases,
+     &VS::Event::animationBankBases,
+     sizeof VS::Event::animationBankBases},  // G00117 D_800E9B58
+    {"BATTLE/BATTLE.PRG", 0x8135C, sizeof VS::Event::specialSubroutineScript,
+     &VS::Event::specialSubroutineScript,
+     sizeof VS::Event::specialSubroutineScript},  // G00118 D_800E9B5C
     {"BATTLE/BATTLE.PRG", 0x813E0, sizeof Event_skipPaletteResetCommand,
      &Event_skipPaletteResetCommand,
      sizeof Event_skipPaletteResetCommand},  // G00119 D_800E9BE0

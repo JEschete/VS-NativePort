@@ -26,10 +26,10 @@
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Event/InterpolationCurveLive.hpp"
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
-#include "Event/ScriptEffects.h"
+#include "Event/ScriptEffects.hpp"
 #include "Event/ScriptField.hpp"
 #include "Event/ScriptScreen.hpp"
 #include "Event/ScriptVm.h"
@@ -98,7 +98,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     return VS::Event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
-    return Event_skipState == kSkipActive;
+    return event::skipState == kSkipActive;
   }
   // The core checks the actor against kEffectActorSlots first.
   [[nodiscard]] event::EffectActorSlot ActorSlot(int actor) const override {
@@ -144,10 +144,10 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     return VS::Effects::LiveIsScriptedEffectTriggerReady() == 1;
   }
   [[nodiscard]] bool EffectWaitPending() const override {
-    return Event_isEffectWaitPending != 0;
+    return event::isEffectWaitPending != 0;
   }
   void SetEffectWaitPending(bool pending) override {
-    Event_isEffectWaitPending = pending ? 1 : 0;
+    event::isEffectWaitPending = pending ? 1 : 0;
   }
 
   [[nodiscard]] bool VibrationPatternLoaded(int pattern) const override {
@@ -325,9 +325,9 @@ namespace VS::Event {
 
 void DrawLiveScanlineOverlay() {
   LiveScanlineCanvas canvas;
-  Event_scanlineOverlayFrame = DrawEventScanlineOverlay(
-      Event_scanlineOverlayFrame, VS::Render::viewportWidth,
-      VS::Render::viewportHeight, canvas);
+  scanlineOverlayFrame =
+      DrawEventScanlineOverlay(scanlineOverlayFrame, VS::Render::viewportWidth,
+                               VS::Render::viewportHeight, canvas);
 }
 
 void UpdateLiveImageTweens() {

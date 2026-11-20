@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // Binding from the room enemy memory, the gameplay HUD, the script flags, the
-// reward flow, the menu framework, the event music slot (Event_musicSlot),
+// reward flow, the menu framework, the event music slot (VS::Event::musicSlot),
 // the zone music switch and the scripted room and zone transitions to the
 // typed scene handoff opcodes (EventSceneTransition.hpp). The opcode handlers
 // keep the original signature and are declared with the other typed opcodes

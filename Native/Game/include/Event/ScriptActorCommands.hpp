@@ -74,7 +74,9 @@ inline constexpr std::size_t kStoreActorDistanceLength = 7;
 // Actor slots the selection and activity commands scan; the script-control
 // marks cover the same slots.
 inline constexpr int kScriptActorSlots = 17;
-// The selection's id capacity (Event_ActorSelection.actorIds).
+// The selection's id capacity, from the copied 24-byte record; upstream's
+// ActorList (src/BATTLE/BATTLE.PRG/4DEA8.c:198) declares 17 ids, and a group
+// fills at most kScriptActorSlots.
 inline constexpr std::size_t kSelectionCapacity = 22;
 // What NextScriptSelectedActor returns once the selection is spent. Actor 1
 // is also a valid id, so a selection that reaches it stops there, as the

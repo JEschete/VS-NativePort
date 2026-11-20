@@ -59,7 +59,7 @@
 #include "Event/RoomTriggers.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/Actors.h"
 #include "Field/BackgroundLive.hpp"

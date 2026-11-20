@@ -21,7 +21,7 @@ struct EncounterLimits {
   static constexpr int kEnemyIdEnd = 127;
   static constexpr int kLastZone = 255;
   static constexpr int kLastExternalEvent = 9999;
-  // MPD local event table: 16 short offsets (Event_roomDoorEventData).
+  // MPD local event table: 16 short offsets (RoomEventSections' doors).
   static constexpr int kLastRoomLocalEvent = 15;
   // Last index of the original 200-entry music -> wave bank map.
   static constexpr int kLastMusic = 199;

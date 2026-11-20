@@ -1,16 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Event/Triggers.h"
+// The room event trigger state (Triggers.hpp).
+#include "Event/Triggers.hpp"
 
+namespace VS::Event {
 // decomp: D_800F4BA8 (D_800F4BA8@BATTLE/BATTLE.PRG)
-char Event_isDirectEventRequest;
+char isDirectEventRequest;
 
-// decomp: _mpdClearedSection (_mpdClearedSection@BATTLE/BATTLE.PRG)
-void* Event_roomEventTriggers;
-
-// decomp: _mpdRoomDoorSection (_mpdRoomDoorSection@BATTLE/BATTLE.PRG)
-void* Event_roomDoorEventData;
-
-// decomp: _mpdScriptSection (_mpdScriptSection@BATTLE/BATTLE.PRG)
-short Event_hasRoomEntryScript;
-
+// decomp: mpdScriptSection (_mpdScriptSection@BATTLE/BATTLE.PRG)
+std::int16_t hasRoomEntryScript;
+}  // namespace VS::Event

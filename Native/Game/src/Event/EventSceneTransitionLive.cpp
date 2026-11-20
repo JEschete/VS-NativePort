@@ -11,7 +11,7 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Core/Log.hpp"
 #include "Event/EventSceneTransition.hpp"
-#include "Event/ScriptAudio.h"
+#include "Event/ScriptAudio.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptStep.hpp"
@@ -73,7 +73,7 @@ class LiveSceneTransitionServices final : public SceneTransitionHost {
     return Battle::UpdateLiveRewardSequence() != 0;
   }
   void SetMusicSlot(std::uint8_t slot) override {
-    Event_musicSlot = static_cast<char>(slot);
+    musicSlot = static_cast<char>(slot);
   }
 
   void OpenGameMenu(std::uint8_t menu, int mode) override {

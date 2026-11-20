@@ -56,7 +56,7 @@
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"

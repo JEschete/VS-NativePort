@@ -54,10 +54,10 @@
 #include "Ending/Credits/StaffRoll.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
@@ -989,7 +989,7 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
       {"phase", Event_playbackPhase},
       {"script_buffer",
        script ? reinterpret_cast<std::uintptr_t>(script->Bytes().data()) : 0},
-      {"skip_state", Event_skipState},
+      {"skip_state", VS::Event::skipState},
       {"forced_skip", Event_isSkipForced != 0},
       {"main_thread_finished", Event_isMainThreadFinished != 0},
       {"threads", InspectThreads()}};
@@ -1204,7 +1204,7 @@ void VS::Boot::EncounterPollStop() {
         Event_eventId = static_cast<int16_t>(selector);
         Event_eventSource = 2;
         Event_playbackPhase = 1;
-        Event_isDirectEventRequest = 0;
+        VS::Event::isDirectEventRequest = 0;
         VS::Game::room_local_event_started = true;
         VS::Core::LogInfo("encounter.event",
                           "Starting room-local event {} in zone {} room {}; "

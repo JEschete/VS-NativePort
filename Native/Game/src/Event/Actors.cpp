@@ -1,10 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Event/Actors.h"
+// The event script actor tables (Actors.hpp).
+#include "Event/Actors.hpp"
 
-// decomp: D_800E9B4C (D_800E9B4C@BATTLE/BATTLE.PRG)
-int Event_weaponDrawStates[121]; /* contents: module image (ModuleData.cpp) */
+namespace VS::Event {
+// decomp: weaponDrawnModes (D_800E9B4C@BATTLE/BATTLE.PRG)
+// Contents: the module image (ModuleData.cpp).
+int weaponDrawStates[kWeaponDrawStateExtent];
 
-// decomp: D_800E9B58 (D_800E9B58@BATTLE/BATTLE.PRG)
-char Event_animationBankBases[472]; /* contents: module image (ModuleData.cpp) */
-
+// decomp: animationBankBase (D_800E9B58@BATTLE/BATTLE.PRG)
+// Contents: the module image (ModuleData.cpp).
+std::uint8_t animationBankBases[kAnimationBankBaseExtent];
+}  // namespace VS::Event

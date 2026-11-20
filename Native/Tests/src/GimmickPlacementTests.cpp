@@ -35,7 +35,7 @@
 #include "Effects/Runtime.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/ChestInteractions.hpp"
@@ -1444,21 +1444,21 @@ struct TriggerFixture {
   VS::Event::PlaybackPhase phase = VS::Event::LiveScriptVm().Phase();
   VS::Event::EventSource source = VS::Event::LiveScriptVm().Source();
   std::int16_t event_id = VS::Event::LiveScriptVm().EventId();
-  std::int16_t entry = Event_hasRoomEntryScript;
-  char direct = Event_isDirectEventRequest;
+  std::int16_t entry = VS::Event::hasRoomEntryScript;
+  char direct = VS::Event::isDirectEventRequest;
 
   TriggerFixture() {
     VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
-    Event_isDirectEventRequest = 0;
-    Event_hasRoomEntryScript = 0;
+    VS::Event::isDirectEventRequest = 0;
+    VS::Event::hasRoomEntryScript = 0;
   }
   ~TriggerFixture() {
     VS::Event::PublishLiveRoomScriptSections(room);
     VS::Event::LiveScriptVm().SetPhase(phase);
     VS::Event::LiveScriptVm().SetSource(source);
     VS::Event::LiveScriptVm().SetEventId(event_id);
-    Event_hasRoomEntryScript = entry;
-    Event_isDirectEventRequest = direct;
+    VS::Event::hasRoomEntryScript = entry;
+    VS::Event::isDirectEventRequest = direct;
   }
 };
 
@@ -4830,10 +4830,10 @@ TEST_CASE("Facing event entry dispatches adjacent tile through native triggers",
   CHECK(VS::Event::LiveScriptVm().Phase() ==
         VS::Event::PlaybackPhase::kRequested);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kRunning);
-  Event_isDirectEventRequest = 1;
+  VS::Event::isDirectEventRequest = 1;
   CHECK(VS::Field::TryTriggerFacingTileEventEntry(0) == 0);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
-  Event_isDirectEventRequest = 0;
+  VS::Event::isDirectEventRequest = 0;
   object.tileZ = 11;
   CHECK(VS::Field::TryTriggerFacingTileEventEntry(0) == 0);
   CHECK(VS::Event::LiveScriptVm().Phase() == VS::Event::PlaybackPhase::kIdle);

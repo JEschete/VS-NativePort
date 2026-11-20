@@ -41,8 +41,8 @@
 #include "DiscQueue.h"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.hpp"
-#include "Event/Script.h"
-#include "Event/ScriptActors.h"
+#include "Event/Script.hpp"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/CollisionSampling.hpp"
@@ -813,10 +813,6 @@ static_assert(_Generic(Event_kSkipOpcodeHandlers[0],
                   TestOpcodeHandler: 1,
                   default: 0),
               "skip opcode ABI");
-static_assert(_Generic(Event_legacySkipHandlerCopy[0],
-                  TestOpcodeHandler: 1,
-                  default: 0),
-              "copied skip opcode ABI");
 static_assert(sizeof(Event_kSkipOpcodeHandlers) ==
                   256 * sizeof(TestOpcodeHandler),
               "complete skip table");
@@ -828,9 +824,8 @@ int Tests_EventScriptNativeBranches(int skip) {
   std::array<u_char, 4> saved_sizes{};
   constexpr std::array<u_char, 4> kOpcodeSizes{3, 1, 1, 1};
   TestOpcodeHandler skipCopy[256];
-  TestOpcodeHandler* savedSkipCopy = Event_legacySkipHandlerCopy;
   uintptr_t savedReturn = Event_subroutineReturnCursor;
-  char savedSkip = Event_skipState;
+  char saved_skip = VS::Event::skipState;
   const auto script =
       VS::test_support::MountLiveEventScript({0, 4, 0, 0, 1, 0, 0, 0, 2, 3});
   auto& host = VS::Event::LiveScriptVm();
@@ -842,16 +837,15 @@ int Tests_EventScriptNativeBranches(int skip) {
   VS::Core::Memory::CopyLiveAlignedWords(skipCopy, Event_kSkipOpcodeHandlers,
                                          sizeof skipCopy);
   passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
-  skipCopy[0] = Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
+  Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
       VS::Event::ScriptJumpForwardOpcode;
-  skipCopy[1] = Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
+  Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
       VS::Event::ScriptReturnToSavedAddressOpcode;
-  skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
+  Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
       VS::Event::ScriptYieldFrameOpcode;
-  skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
+  Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
       VS::Event::CommandStopScriptContextOpcode;
-  Event_legacySkipHandlerCopy = skipCopy;
-  Event_skipState = skip ? 2 : 0;
+  VS::Event::skipState = skip ? 2 : 0;
   host.SetSubroutineReturn({script.region, 8, script.generation});
   host.SetThreadCursor(1, script);
   std::copy(kOpcodeSizes.begin(), kOpcodeSizes.end(), Event_kOpcodeSizes);
@@ -867,15 +861,14 @@ int Tests_EventScriptNativeBranches(int skip) {
             Event_kSkipOpcodeHandlers);
   std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
   Event_subroutineReturnCursor = savedReturn;
-  Event_skipState = savedSkip;
-  Event_legacySkipHandlerCopy = savedSkipCopy;
+  VS::Event::skipState = saved_skip;
   return passed;
 }
 
 int Tests_EventScriptBranchHandlers(void) {
   const VS::test_support::LiveScriptRuntimeScope runtime;
   char savedFlag = Event_cachedFlagValue;
-  const char saved_skip = Event_skipState;
+  const char saved_skip = VS::Event::skipState;
   std::array<TestOpcodeHandler, 2> saved_handlers{};
   std::array<u_char, 2> saved_sizes{};
   std::copy_n(Event_kOpcodeHandlers + 0xE0, saved_handlers.size(),
@@ -898,7 +891,7 @@ int Tests_EventScriptBranchHandlers(void) {
                                     host) == VS::Event::ScriptFlow::JumpBy(-4);
   const auto context =
       VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
-  Event_skipState = 0;
+  VS::Event::skipState = 0;
   Event_kOpcodeHandlers[0xE0] = VS::Event::CommandStartScriptContextOpcode;
   Event_kOpcodeHandlers[0xE1] = VS::Event::CommandWaitScriptContextOpcode;
   Event_kOpcodeSizes[0xE0] = 4;
@@ -912,7 +905,7 @@ int Tests_EventScriptBranchHandlers(void) {
   std::copy(saved_handlers.begin(), saved_handlers.end(),
             Event_kOpcodeHandlers + 0xE0);
   std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes + 0xE0);
-  Event_skipState = saved_skip;
+  VS::Event::skipState = saved_skip;
   Event_cachedFlagValue = savedFlag;
   return passed;
 }

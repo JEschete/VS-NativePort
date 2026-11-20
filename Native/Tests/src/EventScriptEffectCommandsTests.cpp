@@ -13,10 +13,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
-#include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
@@ -188,17 +187,15 @@ class LinearTweenHost final : public event::ImageTweenHost {
 
 struct LiveVibrationFixture {
   char* saved_pattern = Event_vibrationPatterns[0];
-  void* saved_buffer = Event_vibrationPatternBuffer;
-  char saved_skip = Event_skipState;
+  char saved_skip = event::skipState;
   VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
+  // A readable tail keeps an unterminated pattern's scan deterministic
+  // without a bad access.
   alignas(std::uint32_t) std::array<std::uint8_t, 4104> source{};
-  // Readable tail makes the old over-scan deterministic without a bad access.
-  alignas(std::uint32_t) std::array<std::uint8_t, 4104> destination{};
 
   LiveVibrationFixture() {
     Event_vibrationPatterns[0] = reinterpret_cast<char*>(source.data());
-    Event_vibrationPatternBuffer = destination.data();
-    Event_skipState = 0;
+    event::skipState = 0;
     VS::Input::LiveVibrationState() = {};
   }
   LiveVibrationFixture(const LiveVibrationFixture&) = delete;
@@ -207,8 +204,7 @@ struct LiveVibrationFixture {
   LiveVibrationFixture& operator=(LiveVibrationFixture&&) = delete;
   ~LiveVibrationFixture() {
     Event_vibrationPatterns[0] = saved_pattern;
-    Event_vibrationPatternBuffer = saved_buffer;
-    Event_skipState = saved_skip;
+    event::skipState = saved_skip;
     VS::Input::LiveVibrationState() = saved_vibration;
   }
 };
@@ -341,18 +337,16 @@ TEST_CASE("Live buffered script vibration accepts a final complete step",
   CHECK(slot.active);
   CHECK(slot.pattern.Bytes().size() == 120);
   CHECK(slot.pattern.Bytes().data() !=
-        reinterpret_cast<const std::byte*>(fixture.destination.data() + 8));
+        reinterpret_cast<const std::byte*>(fixture.source.data() + 8));
   CHECK(std::ranges::equal(
       slot.pattern.Bytes(),
       std::as_bytes(std::span(fixture.source).subspan(8, 120))));
-  CHECK(fixture.destination.front() == 0);
 }
 
 TEST_CASE("Live unbuffered script vibration still borrows its original source",
           "[event-script-effects][input-controller]") {
   LiveVibrationFixture fixture;
   fixture.source[8] = 3;
-  fixture.destination.fill(0x7F);
   std::array<std::uint8_t, 2> command{0xA7, 0x00};
   CHECK(VS::Event::CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
   const auto& slot = VS::Input::LiveVibrationState().slots[0];
@@ -360,7 +354,6 @@ TEST_CASE("Live unbuffered script vibration still borrows its original source",
   CHECK(slot.pattern.Bytes().size() == 5);
   CHECK(slot.pattern.Bytes().data() ==
         reinterpret_cast<const std::byte*>(fixture.source.data() + 8));
-  CHECK(fixture.destination.front() == 0x7F);
 }
 
 TEST_CASE("Live buffered vibration patterns do not overwrite each other",
@@ -378,7 +371,6 @@ TEST_CASE("Live buffered vibration patterns do not overwrite each other",
   const auto& slots = VS::Input::LiveVibrationState().slots;
   CHECK(slots[0].pattern.Bytes().data() != slots[1].pattern.Bytes().data());
   fixture.source.fill(0x7F);
-  fixture.destination.fill(0x7F);
   CHECK(slots[0].pattern.Bytes()[2] == std::byte{0x20});
   CHECK(slots[1].pattern.Bytes()[2] == std::byte{0x60});
 }

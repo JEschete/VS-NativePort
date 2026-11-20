@@ -14,7 +14,8 @@
 
 #include "Event/RoomTriggers.hpp"
 #include "Event/ScriptVm.h"
-#include "Event/Triggers.h"
+#include "Event/ScriptVmLive.hpp"
+#include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -26,15 +27,13 @@ using Bytes = std::vector<std::uint8_t>;
 
 struct LiveRoomImportFixture {
   std::int16_t transition = Event_roomChangeState;
-  void* triggers = Event_roomEventTriggers;
-  void* doors = Event_roomDoorEventData;
+  event::RoomEventLease room = event::LiveRoomScriptSections();
   int load_flag = VS::State::LiveScriptFlag(0xA9);
 
   LiveRoomImportFixture() { Event_roomChangeState = 0; }
   ~LiveRoomImportFixture() {
     Event_roomChangeState = transition;
-    Event_roomEventTriggers = triggers;
-    Event_roomDoorEventData = doors;
+    event::PublishLiveRoomScriptSections(room);
     VS::State::SetLiveScriptFlag(0xA9, load_flag);
   }
   LiveRoomImportFixture(const LiveRoomImportFixture&) = delete;
@@ -712,8 +711,7 @@ TEST_CASE("Live room import refuses oversized sections before narrowing",
     REQUIRE_FALSE(loaded);
     CHECK(loaded.error() ==
           event::RoomEventLoadError{reasons[index], oversized.size()});
-    CHECK(Event_roomEventTriggers == fixture.triggers);
-    CHECK(Event_roomDoorEventData == fixture.doors);
+    CHECK(event::LiveRoomScriptSections() == fixture.room);
     CHECK(VS::State::LiveScriptFlag(0xA9) == fixture.load_flag);
     CHECK(Event_roomChangeState == 0);
   }
@@ -729,8 +727,7 @@ TEST_CASE("Live room import refuses entry data beyond the VM buffer",
   CHECK(loaded.error() ==
         event::RoomEventLoadError{event::RoomEventRefusal::kEntryScriptExtent,
                                   oversized.size()});
-  CHECK(Event_roomEventTriggers == fixture.triggers);
-  CHECK(Event_roomDoorEventData == fixture.doors);
+  CHECK(event::LiveRoomScriptSections() == fixture.room);
 }
 
 TEST_CASE("Live continuation does not narrow or consume unused entry data",

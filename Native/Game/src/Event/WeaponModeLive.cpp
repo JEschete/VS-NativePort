@@ -15,8 +15,8 @@
 #include "Battle/AbilityState.h"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
-#include "Event/Actors.h"
-#include "Event/ScriptActors.h"
+#include "Event/Actors.hpp"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponMode.hpp"
 #include "Event/WeaponModeOpcode.hpp"
@@ -49,19 +49,19 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
     Event_weaponTransitionPending = pending ? 1 : 0;
   }
   [[nodiscard]] bool SkipActive() const override {
-    return Event_skipState == kSkipActive;
+    return event::skipState == kSkipActive;
   }
   [[nodiscard]] bool WeaponModeGateOpen() const override {
     return VS::State::LiveScriptFlag(kWeaponModeGate) != 0;
   }
   void SetBattleMode(int mode) override {
-    Require(static_cast<std::size_t>(mode) < std::size(Event_weaponDrawStates),
+    Require(static_cast<std::size_t>(mode) < std::size(event::weaponDrawStates),
             "Script weapon-mode table index is out of bounds");
     Require(Battle_actors[kAshley] != nullptr &&
                 Battle_characterState != nullptr &&
                 Actors_actorRecords[kAshley] != nullptr,
             "Script weapon mode requires Ashley's battle and model state");
-    VS::Battle::LiveSetActorBattleMode(kAshley, Event_weaponDrawStates[mode]);
+    VS::Battle::LiveSetActorBattleMode(kAshley, event::weaponDrawStates[mode]);
   }
   void PlayAnimation(int animation) override {
     Require(VS::Actors::PlayLiveActorAnimation(kAshley, animation, 0,

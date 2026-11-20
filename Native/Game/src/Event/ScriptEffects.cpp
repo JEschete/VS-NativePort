@@ -1,13 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Event/ScriptEffects.h"
+// The event script VM's effect state (ScriptEffects.hpp).
+#include "Event/ScriptEffects.hpp"
 
+namespace VS::Event {
 // decomp: D_800F4B20 (D_800F4B20@BATTLE/BATTLE.PRG)
-u_short Event_scanlineOverlayFrame;
+std::uint16_t scanlineOverlayFrame;
 
 // decomp: D_800F4BB9 (D_800F4BB9@BATTLE/BATTLE.PRG)
-u_char Event_isEffectWaitPending;
-
-// decomp: D_800F4C48 (D_800F4C48@BATTLE/BATTLE.PRG)
-void* Event_vibrationPatternBuffer;
-
+std::uint8_t isEffectWaitPending;
+}  // namespace VS::Event

@@ -1,13 +1,13 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Event/ScriptAudio.h"
+// The event script VM's audio state (ScriptAudio.hpp).
+#include "Event/ScriptAudio.hpp"
 
+namespace VS::Event {
 // decomp: D_800F4C08 (D_800F4C08@BATTLE/BATTLE.PRG)
-char Event_isAmbientSoundSuspended;
+char isAmbientSoundSuspended;
 
 // decomp: D_800F4C4C (D_800F4C4C@BATTLE/BATTLE.PRG)
-short Event_suspendedAmbientSoundId;
+std::int16_t suspendedAmbientSoundId;
 
-// decomp: D_800F4C69 (D_800F4C69@BATTLE/BATTLE.PRG)
-char Event_musicSlot;
-
+// decomp: scriptMusicSlot (D_800F4C69@BATTLE/BATTLE.PRG)
+char musicSlot;
+}  // namespace VS::Event

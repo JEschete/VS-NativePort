@@ -86,7 +86,8 @@ class SceneTransitionHost {
   virtual void BeginEventRewardResults() = 0;
   virtual void BeginPostActionRewards() = 0;
   [[nodiscard]] virtual bool UpdateRewardSequence() = 0;
-  // Event_musicSlot (D_800F4C69), the slot the music commands address.
+  // VS::Event::musicSlot (scriptMusicSlot, D_800F4C69), the slot the music
+  // commands address.
   virtual void SetMusicSlot(std::uint8_t slot) = 0;
 
   // The menu framework: func_800CACD0, func_800C97BC, the action selection's

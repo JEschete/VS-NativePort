@@ -2008,7 +2008,7 @@ T00255.182,T00255,D_800F45E0_t,182,unk1868,1,int,,,,savedPlacement,Placement wor
 T00255.183,T00255,D_800F45E0_t,183,unk187C,1,int,,,,reserved187C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:237;declaration-only;source:3A1A0.h:632
 T00256.000,T00256,D_800F4B28_t,0,curve,0,u_char,,,curve family,curveFamily,Linear or trigonometric interpolation curve family,high,source:573B8.c:211
 T00256.001,T00256,D_800F4B28_t,1,power,0,signed char,,,signed power shaping,power,Signed repeated-squaring count for easing shape,high,source:573B8.c:190
-T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Splash.hpp:11;native:Splash.hpp VS::Event::SplashTweenRecord::reserved00 (#441);source:4A0A8.c:148;no consumer identified
+T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Splash.hpp:12;native:Splash.hpp VS::Event::SplashTweenRecord::reserved00 (#441);source:4A0A8.c:148;no consumer identified
 T00257.001,T00257,D_800F4B30_t,1,unk1,1,char,,,,easing_mode,Interpolation curve selector,high,native:Splash.hpp VS::Event::SplashTweenRecord::easing_mode (#441);source:4A0A8.c:901
 T00257.002,T00257,D_800F4B30_t,2,unk2,1,char,,,elapsed frames | elapsed ticks,elapsed_frames,Elapsed logical tween frames,high,native:Splash.hpp VS::Event::SplashTweenRecord::elapsed_frames (#441);source:4A0A8.c:2980
 T00257.003,T00257,D_800F4B30_t,3,unk3,1,char,,,duration,duration_frames,Tween duration or zero when inactive,high,native:Splash.hpp VS::Event::SplashTweenRecord::duration_frames (#441);source:4A0A8.c:2989
@@ -2020,8 +2020,8 @@ T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,start_scale_fixed12,Initial lay
 T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,delta_scale_fixed12,Target minus initial layer scale,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_scale_fixed12 (#441);source:4A0A8.c:897
 T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,start_brightness,Initial layer brightness,high,native:Splash.hpp VS::Event::SplashTweenRecord::start_brightness (#441);source:4A0A8.c:898;byte 3 of the layer record
 T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,delta_brightness,Target minus initial layer brightness,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_brightness (#441);source:4A0A8.c:898
-T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:11;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved00 (#441);declaration-only;source:4A0A8.c:159
-T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:12;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved01 (#441);declaration-only;source:4A0A8.c:160
+T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:12;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved00 (#441);declaration-only;source:4A0A8.c:159
+T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:13;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved01 (#441);declaration-only;source:4A0A8.c:160
 T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,elapsed_frames,Elapsed tween frames,high,native:Weather.hpp VS::Event::WeatherTweenRecord::elapsed_frames (#441);source:4A0A8.c:2998
 T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,duration_frames,Tween duration or zero when inactive,med,"native:Weather.hpp VS::Event::WeatherTweenRecord::duration_frames (#441);G00442 aliased this byte (retired, #441);source:4A0A8.c:2205;use cited by sanity pass;source:4A0A8.c:162"
 T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,wind_direction,Current wind direction angle in 4096 units,high,native:Weather.hpp VS::Event::WeatherTweenRecord::wind_direction (#441);source:4A0A8.c:2999
@@ -4186,9 +4186,9 @@ T00473.001,T00473,func_800ACF54_t,1,unk4,1,int,,,,high,Second word,med,declarati
 T00474.000,T00474,func_800AD494_t,0,unk0,1,u_char *,,,,animationData,Base of the bank's animation data,high,source:40564.c:2649
 T00474.001,T00474,func_800AD494_t,1,unk4,1,u_char *,,,,animationMap,Maps an animation id to its header index,high,source:40564.c:2778
 T00474.002,T00474,func_800AD494_t,2,unk8,1,u_short[0],,,,headers,Per-animation headers of (bones * 4 + 10) bytes,high,source:40564.c:2784
-T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,med,source:4A0A8.c:2884;use cited by sanity pass;source:4A0A8.c:179
-T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,med,source:4A0A8.c:2885;use cited by sanity pass;source:4A0A8.c:180
-T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,med,source:4A0A8.c:2898;use cited by sanity pass;source:4A0A8.c:181
+T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,med,"retired-by:VS::Event::ActorSelection::remaining (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2884;use cited by sanity pass;source:4A0A8.c:179"
+T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,med,"retired-by:VS::Event::ActorSelection::cursor (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2885;use cited by sanity pass;source:4A0A8.c:180"
+T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,med,"retired-by:VS::Event::ActorSelection::ids (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2898;use cited by sanity pass;source:4A0A8.c:181"
 T00476.000,T00476,func_800BD57C_t,0,unk0,1,char,,,,hasChanged,Value updated since last application,high,source:4A0A8.c:3647
 T00476.001,T00476,func_800BD57C_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3647
 T00476.002,T00476,func_800BD57C_t,2,unk2,1,short,,,value,angle,Current angle in 4096 units,high,source:4A0A8.c:3647
@@ -5432,8 +5432,8 @@ T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,slotHeader,Slot sta
 T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,cipherHeader,Cipher key and slot header,high,source:260.c:786
 T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,summary,Summary statistics shown in the file menu,high,source:260.c:810
 T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,blockChecksums,XOR checksum of each 256-byte block,high,source:260.c:842
-T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:231
-T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:232
+T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,"retired with T00602, which had no users (#441);source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:231"
+T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,"retired with T00602, which had no users (#441);source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:232"
 T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,current_music_slot,Music slot playing,high,source:main.c:9506
 T00603.001,T00603,soundData_t,1,unk4,1,u_int,,,currentMusicHandle,playing_music_handle,Handle of the music playing; 0xFFFF when none,med,source:main.c:9509
 T00603.002,T00603,soundData_t,2,unk8,1,u_int,,,currentMusicFileId,current_music_id,Id of the music in the current slot,med,source:main.c:9538

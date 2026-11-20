@@ -8,7 +8,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
-#include "Event/Triggers.h"
+#include "Event/Triggers.hpp"
 #include "State/SceneTimer.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"

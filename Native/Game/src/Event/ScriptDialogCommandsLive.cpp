@@ -16,7 +16,7 @@
 #include "Battle/TextBoxes.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogOpcodes.hpp"
 #include "Event/ScriptVm.h"
@@ -140,7 +140,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     return VS::Event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
-    return Event_skipState == kSkipActive;
+    return event::skipState == kSkipActive;
   }
   [[nodiscard]] event::DialogOrigin ActorDialogOrigin(int actor) override {
     SVECTOR anchor{};

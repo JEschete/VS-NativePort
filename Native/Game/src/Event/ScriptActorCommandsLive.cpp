@@ -28,10 +28,10 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
-#include "Event/Actors.h"
+#include "Event/Actors.hpp"
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
-#include "Event/ScriptActors.h"
+#include "Event/ScriptActors.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Actors.h"
@@ -48,10 +48,8 @@ namespace event = VS::Event;
 using VS::Actors::MotionVector;
 using VS::Actors::PackedTile;
 
-static_assert(std::size(Event_scriptControlledActors) ==
+static_assert(std::size(event::scriptControlledActors) ==
               static_cast<std::size_t>(event::kScriptActorSlots));
-static_assert(std::extent_v<decltype(Event_ActorSelection::actorIds)> ==
-              event::kSelectionCapacity);
 static_assert(sizeof(VS::Render::ColorCode) == sizeof(VS::Render::ColorCode));
 
 constexpr char kSkipActive = 2;
@@ -98,23 +96,6 @@ VS::Render::ColorCode ToLiveColor(const VS::Render::ColorCode& color) {
   return {color.red, color.green, color.blue, color.code};
 }
 
-event::ActorSelection LoadLiveSelection(const Event_ActorSelection& live) {
-  event::ActorSelection selection;
-  selection.remaining = static_cast<std::uint8_t>(live.remainingCount);
-  selection.cursor = static_cast<std::uint8_t>(live.cursor);
-  std::ranges::transform(live.actorIds, selection.ids.begin(),
-                         [](char id) { return static_cast<std::uint8_t>(id); });
-  return selection;
-}
-
-void StoreLiveSelection(const event::ActorSelection& selection,
-                        Event_ActorSelection& live) {
-  live.remainingCount = static_cast<char>(selection.remaining);
-  live.cursor = static_cast<char>(selection.cursor);
-  std::ranges::transform(selection.ids, std::begin(live.actorIds),
-                         [](std::uint8_t id) { return static_cast<char>(id); });
-}
-
 class LiveScriptActorHost final : public event::ScriptActorHost {
  public:
   void Refuse(event::ScriptActorRefusal refusal, int value) override {
@@ -126,12 +107,12 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     return event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
-    return Event_skipState == kSkipActive;
+    return event::skipState == kSkipActive;
   }
   void MarkScriptControlled(int actor) override {
     Require(actor >= 0 && actor < event::kScriptActorSlots,
             "Script-controlled actor is outside its slots");
-    Event_scriptControlledActors[actor] = 1;
+    event::scriptControlledActors[actor] = 1;
   }
   [[nodiscard]] std::optional<int> PresentActorKind(int actor) const override {
     const Battle_Actor* present = VS::Actors::LiveActorAtSlot(actor);
@@ -216,14 +197,13 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   }
 
   [[nodiscard]] std::uint8_t AnimationBankBase(int bank) const override {
-    if (bank < 0 ||
-        static_cast<std::size_t>(bank) >= std::size(Event_animationBankBases)) {
+    if (bank < 0 || static_cast<std::size_t>(bank) >=
+                        std::size(event::animationBankBases)) {
       VS::Core::Warnf("event", "Script animation bank %d is past its table",
                       bank);
       return 0;
     }
-    // The PS1 read these with lbu; a plain char may be signed here.
-    return static_cast<std::uint8_t>(Event_animationBankBases[bank]);
+    return event::animationBankBases[bank];
   }
   void PlayAnimation(int actor, event::AnimationRequest request) override {
     VS::Actors::PlayLiveActorAnimation(actor, request.animation, 0,
@@ -358,10 +338,10 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   }
   [[nodiscard]] std::optional<int> WeaponDrawState(int index) const override {
     if (index < 0 ||
-        static_cast<std::size_t>(index) >= std::size(Event_weaponDrawStates)) {
+        static_cast<std::size_t>(index) >= std::size(event::weaponDrawStates)) {
       return std::nullopt;
     }
-    return Event_weaponDrawStates[index];
+    return event::weaponDrawStates[index];
   }
   void SetBattleMode(int actor, int mode) override {
     VS::Battle::LiveSetActorBattleMode(actor, mode);
@@ -435,26 +415,14 @@ void SetLiveEventActorActivity(std::int16_t activity_enabled) {
 }
 
 void BuildLiveScriptActorSelection(std::uint16_t actor_selector,
-                                   Event_ActorSelection* selection) {
-  if (selection == nullptr) {
-    VS::Core::Warnf("event", "Script actor selection is missing");
-    return;
-  }
+                                   ActorSelection& selection) {
   LiveScriptActorHost host;
-  StoreLiveSelection(BuildScriptActorSelection(host, actor_selector),
-                     *selection);
+  selection = BuildScriptActorSelection(host, actor_selector);
 }
 
-std::uint16_t NextLiveScriptSelectedActor(Event_ActorSelection* selection) {
-  if (selection == nullptr) {
-    VS::Core::Warnf("event", "Script actor selection is missing");
-    return kSelectionEnd;
-  }
+std::uint16_t NextLiveScriptSelectedActor(ActorSelection& selection) {
   LiveScriptActorHost host;
-  ActorSelection typed = LoadLiveSelection(*selection);
-  const int actor = NextScriptSelectedActor(host, typed);
-  StoreLiveSelection(typed, *selection);
-  return static_cast<std::uint16_t>(actor);
+  return static_cast<std::uint16_t>(NextScriptSelectedActor(host, selection));
 }
 
 int LiveActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor) {

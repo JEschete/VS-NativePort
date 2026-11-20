@@ -11,8 +11,8 @@
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Event/ScriptActors.h"
-#include "Event/ScriptAudio.h"
+#include "Event/ScriptActors.hpp"
+#include "Event/ScriptAudio.hpp"
 #include "Event/ScriptAudioCommands.hpp"
 #include "Event/ScriptAudioOpcodes.hpp"
 #include "Event/ScriptVm.h"
@@ -57,20 +57,20 @@ class LiveScriptAudioHost final : public event::ScriptAudioHost {
     return VS::Event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
-    return Event_skipState == kSkipActive;
+    return event::skipState == kSkipActive;
   }
 
   [[nodiscard]] std::uint8_t MusicSlot() const override {
-    return static_cast<std::uint8_t>(Event_musicSlot);
+    return static_cast<std::uint8_t>(event::musicSlot);
   }
   void SetMusicSlot(std::uint8_t slot) override {
-    Event_musicSlot = static_cast<char>(slot);
+    event::musicSlot = static_cast<char>(slot);
   }
   [[nodiscard]] bool AmbientSoundSuspended() const override {
-    return Event_isAmbientSoundSuspended != 0;
+    return event::isAmbientSoundSuspended != 0;
   }
   void SetSuspendedAmbientSound(std::int16_t sound) override {
-    Event_suspendedAmbientSoundId = sound;
+    event::suspendedAmbientSoundId = sound;
   }
 
   void PlaySfx(std::uint32_t group, int effect, int pan, int volume) override {
