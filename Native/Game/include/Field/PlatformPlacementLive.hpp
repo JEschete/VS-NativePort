@@ -16,7 +16,7 @@ std::optional<MovingPlatformWaypoint> LiveMovingPlatformTargetWaypoint(
     int index);
 bool UpdateLiveMovingPlatforms();
 std::vector<PlatformContact> CollectLiveMovingPlatformPositions();
-bool SetLiveMovingPlatformActor(int platform_index, std::int32_t control);
+bool SetLiveMovingPlatformActor(int platform_index, std::int32_t rider);
 bool ResetLiveMovingPlatformWaypoint(int platform_index, std::int32_t waypoint);
 void SetLiveMovingPlatformsPaused(std::int32_t paused);
 bool FreezeLiveMovingPlatforms(std::int32_t freeze_frames);
@@ -38,7 +38,7 @@ void* MovingPlatformTargetWaypointEntry(int index);
 int UpdateMovingPlatformsEntry();
 // Writes the visible contacts; the original takes an SVECTOR array.
 int CollectMovingPlatformPositionsEntry(PlatformContact output_contacts[]);
-int SetMovingPlatformActorEntry(int platform_index, int control);
+int SetMovingPlatformActorEntry(int platform_index, int rider);
 void ResetMovingPlatformWaypointEntry(int platform_index, int waypoint);
 void SetMovingPlatformsPausedEntry(int paused);
 void FreezeMovingPlatformsEntry(int freeze_frames);

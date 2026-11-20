@@ -55,7 +55,7 @@ void CheckWaypointResetFlags(
     const VS::Field::MovingPlatformWaypointState& state) {
   CHECK_FALSE(state.hidden);
   CHECK_FALSE(state.waiting);
-  CHECK(state.control_state == 0);
+  CHECK(state.rider_actor == 0);
   CHECK(state.motion_ticks == 0);
 }
 
@@ -805,7 +805,7 @@ TEST_CASE("Looping detached platforms skip motion but still place geometry",
   RecordingPlatformUpdateHost host;
   std::array<VS::Field::MovingPlatformMotionRecord, 1> platforms{
       VS::Field::MovingPlatformMotionRecord{
-          .state = {.waypoint = {.control_state = 127, .x = 4096},
+          .state = {.waypoint = {.rider_actor = 127, .x = 4096},
                     .bounce_frame = 7,
                     .needs_rider = true},
           .waypoints = {},
@@ -1243,19 +1243,19 @@ TEST_CASE("Target waypoint retains its original module address",
 TEST_CASE("Platform control retains seven bits and conditional bounce reset",
           "[platform-control-core][field]") {
   for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
-    const auto control =
+    const auto rider =
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
-    VS::Field::MovingPlatformControlState state{.control_state = 9,
+    VS::Field::MovingPlatformControlState state{.rider_actor = 9,
                                                 .bounce_frame = 7,
                                                 .waiting = true,
                                                 .motion_ticks = 123};
-    VS::Field::SetMovingPlatformActor(state, control, 0);
-    CHECK(state.control_state == (bits & 127));
-    CHECK(state.bounce_frame == (control >= 0 ? 0 : 7));
+    VS::Field::SetMovingPlatformActor(state, rider, 0);
+    CHECK(state.rider_actor == (bits & 127));
+    CHECK(state.bounce_frame == (rider >= 0 ? 0 : 7));
     CHECK(state.waiting);
     CHECK(state.motion_ticks == 123);
     state.bounce_frame = 7;
-    VS::Field::SetMovingPlatformActor(state, control, -1);
+    VS::Field::SetMovingPlatformActor(state, rider, -1);
     CHECK(state.bounce_frame == 7);
   }
 }
@@ -1388,17 +1388,17 @@ TEST_CASE(
   fixture.platforms[0].is_waiting = 1;
   fixture.platforms[0].terminal_waypoint = 3;
   VS::Field::platformFreezeFrames = 0;
-  for (const auto control : std::array<std::int32_t, 8>{
+  for (const auto rider : std::array<std::int32_t, 8>{
            -1, 0, 1, 127, 128, 65535, std::numeric_limits<std::int32_t>::min(),
            std::numeric_limits<std::int32_t>::max()}) {
     VS::Field::platformBounceFrames[0] = 7;
     auto expected = fixture.platforms[0];
-    expected.control_state = static_cast<std::uint32_t>(control) & 127;
-    REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, control) == 1);
+    expected.rider_actor = static_cast<std::uint32_t>(rider) & 127;
+    REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, rider) == 1);
     using Bytes = std::array<std::byte, sizeof(expected)>;
     CHECK(std::bit_cast<Bytes>(fixture.platforms[0]) ==
           std::bit_cast<Bytes>(expected));
-    CHECK(VS::Field::platformBounceFrames[0] == (control >= 0 ? 0 : 7));
+    CHECK(VS::Field::platformBounceFrames[0] == (rider >= 0 ? 0 : 7));
   }
   VS::Field::platformFreezeFrames = -1;
   VS::Field::platformBounceFrames[0] = 7;
@@ -1575,7 +1575,7 @@ TEST_CASE(
     for (std::uint8_t end = 0; end < 4; ++end) {
       VS::Field::MovingPlatformWaypointState state{.hidden = true,
                                                    .waiting = true,
-                                                   .control_state = 127,
+                                                   .rider_actor = 127,
                                                    .end_waypoint = end,
                                                    .motion_ticks = 65535};
       REQUIRE(VS::Field::ResetMovingPlatformWaypoint(state, points, selected));
@@ -1597,7 +1597,7 @@ TEST_CASE(
     CHECK(state.start_waypoint == terminal);
   }
   VS::Field::MovingPlatformWaypointState state{
-      .hidden = true, .control_state = 127, .motion_ticks = 123};
+      .hidden = true, .rider_actor = 127, .motion_ticks = 123};
   const auto saved = state;
   CHECK_FALSE(VS::Field::ResetMovingPlatformWaypoint(state, points, -2));
   CHECK(state == saved);
@@ -1623,7 +1623,7 @@ TEST_CASE(
   PlatformPlacementFixture fixture;
   auto& platform = fixture.platforms[0];
   platform.scene_object_id = 0;
-  platform.control_state = 127;
+  platform.rider_actor = 127;
   platform.motion_ticks = 65535;
   platform.is_waiting = 1;
   platform.end_waypoint = 1;
@@ -1637,7 +1637,7 @@ TEST_CASE(
   expected.is_hidden = 0;
   expected.is_waiting = 0;
   expected.is_moving_forward = 1;
-  expected.control_state = 0;
+  expected.rider_actor = 0;
   expected.start_waypoint = 2;
   expected.current_waypoint = 3;
   expected.current_segment = 2;

@@ -226,13 +226,13 @@ bool SetPlatformFreezeAppearance(
   return host.StoreTint(state.tint);
 }
 
-// decomp: BATTLE.PRG func_8008C49C (146C.c:16475),31MIPS control7bits then
+// decomp: BATTLE.PRG func_8008C49C (146C.c:16475),31MIPS rider 7 bits then
 // bounce.
 void SetMovingPlatformActor(MovingPlatformControlState& state,
-                            std::int32_t control, std::int16_t freeze_frames) {
-  constexpr std::uint8_t kControlMask = 0x7F;
-  state.control_state = static_cast<std::uint8_t>(control & kControlMask);
-  if (control >= 0 && freeze_frames == 0) state.bounce_frame = 0;
+                            std::int32_t rider, std::int16_t freeze_frames) {
+  constexpr std::uint8_t kRiderMask = 0x7F;
+  state.rider_actor = static_cast<std::uint8_t>(rider & kRiderMask);
+  if (rider >= 0 && freeze_frames == 0) state.bounce_frame = 0;
 }
 
 // decomp: BATTLE.PRG func_8008D594 (146C.c:16855), original SB input low byte.
@@ -305,7 +305,7 @@ bool ResetMovingPlatformWaypoint(
   const auto& point = waypoints[index];
   state.hidden = false;
   state.waiting = false;
-  state.control_state = 0;
+  state.rider_actor = 0;
   state.start_waypoint = static_cast<std::uint8_t>(index);
   state.current_segment = static_cast<std::uint8_t>(selected & kSegmentMask);
   state.motion_ticks = 0;
@@ -386,7 +386,7 @@ bool UpdateMovingPlatforms(MovingPlatformUpdateState& state,
                            std::span<const std::int16_t> bounce_offsets,
                            MovingPlatformUpdateHost& host) {
   constexpr std::int16_t kFreezeFlashThreshold = 30;
-  constexpr std::uint8_t kDetachedLoopControl = 127;
+  constexpr std::uint8_t kNoRider = 127;
   if (state.room_updates_paused || !state.platform_section_present ||
       state.runtime.paused != 0) {
     return true;
@@ -411,8 +411,8 @@ bool UpdateMovingPlatforms(MovingPlatformUpdateState& state,
     auto& platform = platforms[index];
     auto& motion = platform.state;
     const bool hidden = motion.waypoint.hidden;
-    if (!hidden && !(motion.needs_rider &&
-                     motion.waypoint.control_state == kDetachedLoopControl)) {
+    if (!hidden &&
+        !(motion.needs_rider && motion.waypoint.rider_actor == kNoRider)) {
       for (std::int32_t tick = 0; tick < (state.tick_speed >> 1); ++tick) {
         if (!AdvanceMovingPlatformMotion(motion, platform.waypoints,
                                          platform.velocities,

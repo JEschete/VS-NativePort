@@ -81,7 +81,7 @@ void DrawMovingPlatformShadows(std::span<const MovingPlatformPose> platforms,
                                MovingPlatformShadowHost& host);
 
 struct MovingPlatformControlState {
-  std::uint8_t control_state = 0;
+  std::uint8_t rider_actor = 0;
   std::uint8_t bounce_frame = 0;
   bool waiting = false;
   std::uint16_t motion_ticks = 0;
@@ -159,7 +159,7 @@ struct MovingPlatformWaypointState {
   bool hidden = false;
   bool waiting = false;
   bool moving_forward = false;
-  std::uint8_t control_state = 0;
+  std::uint8_t rider_actor = 0;
   std::uint8_t start_waypoint = 0;
   std::uint8_t current_waypoint = 0;
   std::uint8_t current_segment = 0;
@@ -240,7 +240,7 @@ class MovingPlatformFreezeHost {
 };
 
 void SetMovingPlatformActor(MovingPlatformControlState& state,
-                            std::int32_t control, std::int16_t freeze_frames);
+                            std::int32_t rider, std::int16_t freeze_frames);
 void SetMovingPlatformsPaused(MovingPlatformRuntimeState& state,
                               std::int32_t paused);
 bool FreezeMovingPlatforms(MovingPlatformRuntimeState& state,

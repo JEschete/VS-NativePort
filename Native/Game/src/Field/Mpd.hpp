@@ -201,7 +201,7 @@ struct MpdMovingPlatform {
   std::uint32_t current_waypoint : 2;
   std::uint32_t current_segment : 3;
   std::uint32_t is_waiting : 1;
-  std::uint32_t control_state : 7;
+  std::uint32_t rider_actor : 7;
   std::uint32_t terminal_waypoint : 2;
   std::uint32_t reserved04_bits10 : 6;
   std::uint32_t motion_ticks : 16;

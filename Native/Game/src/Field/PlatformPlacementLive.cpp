@@ -291,7 +291,7 @@ VS::Field::MovingPlatformWaypointState WaypointStateOf(
       .hidden = record.is_hidden != 0,
       .waiting = record.is_waiting != 0,
       .moving_forward = record.is_moving_forward != 0,
-      .control_state = static_cast<std::uint8_t>(record.control_state),
+      .rider_actor = static_cast<std::uint8_t>(record.rider_actor),
       .start_waypoint = static_cast<std::uint8_t>(record.start_waypoint),
       .current_waypoint = static_cast<std::uint8_t>(record.current_waypoint),
       .current_segment = static_cast<std::uint8_t>(record.current_segment),
@@ -308,7 +308,7 @@ void StoreWaypointState(VS::Field::MpdMovingPlatform& record,
   record.is_hidden = state.hidden;
   record.is_waiting = state.waiting;
   record.is_moving_forward = state.moving_forward;
-  record.control_state = state.control_state;
+  record.rider_actor = state.rider_actor;
   record.start_waypoint = state.start_waypoint;
   record.current_waypoint = state.current_waypoint;
   record.current_segment = state.current_segment;
@@ -579,17 +579,17 @@ std::optional<MovingPlatformWaypoint> LiveMovingPlatformTargetWaypoint(
                    : std::nullopt;
 }
 
-bool SetLiveMovingPlatformActor(int platform_index, std::int32_t control) {
+bool SetLiveMovingPlatformActor(int platform_index, std::int32_t rider) {
   auto* record = PlatformRecord(platform_index);
   if (record == nullptr) return false;
   const auto index = static_cast<std::size_t>(platform_index);
   MovingPlatformControlState state{
-      .control_state = static_cast<std::uint8_t>(record->control_state),
+      .rider_actor = static_cast<std::uint8_t>(record->rider_actor),
       .bounce_frame = VS::Field::platformBounceFrames[index],
       .waiting = record->is_waiting != 0,
       .motion_ticks = static_cast<std::uint16_t>(record->motion_ticks)};
-  SetMovingPlatformActor(state, control, VS::Field::platformFreezeFrames);
-  record->control_state = state.control_state;
+  SetMovingPlatformActor(state, rider, VS::Field::platformFreezeFrames);
+  record->rider_actor = state.rider_actor;
   VS::Field::platformBounceFrames[index] = state.bounce_frame;
   return true;
 }
@@ -702,8 +702,8 @@ int VS::Field::CollectMovingPlatformPositionsEntry(
   std::ranges::copy(contacts, output_contacts);
   return static_cast<int>(contacts.size());
 }
-int VS::Field::SetMovingPlatformActorEntry(int platform_index, int control) {
-  return VS::Field::SetLiveMovingPlatformActor(platform_index, control);
+int VS::Field::SetMovingPlatformActorEntry(int platform_index, int rider) {
+  return VS::Field::SetLiveMovingPlatformActor(platform_index, rider);
 }
 void VS::Field::ResetMovingPlatformWaypointEntry(int platform_index,
                                                  int waypoint) {
