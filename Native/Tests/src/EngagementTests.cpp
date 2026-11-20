@@ -12,7 +12,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -23,8 +23,7 @@ struct EngagementFixture {
       std::to_array(Battle_actors);
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Battle_actorMarkers)) saved_markers =
-      std::to_array(Battle_actorMarkers);
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   int saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
   VS::Battle::Ai::RoomAiState room{};
   std::array<Battle_Actor, 3> actors{};
@@ -50,7 +49,7 @@ struct EngagementFixture {
       Battle_actors[ids[index]] = &actors[index];
       VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
     }
-    std::fill_n(Battle_actorMarkers, saved_markers.size(),
+    std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(),
                 std::bit_cast<char>(uint8_t{0x80}));
   }
 
@@ -60,7 +59,8 @@ struct EngagementFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
-    std::copy(saved_markers.begin(), saved_markers.end(), Battle_actorMarkers);
+    std::copy(saved_markers.begin(), saved_markers.end(),
+              VS::Battle::actorMarkers.begin());
   }
 
   uint16_t Mask() const {
@@ -158,7 +158,7 @@ TEST_CASE("AI existing buildup consumer advances a real join to readiness",
   CHECK_FALSE(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
   VS::Battle::Ai::UpdateLiveEngagementBuildup(&fixture.states[1]);
   CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x84);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x84);
 }
 
 TEST_CASE(
@@ -173,7 +173,7 @@ TEST_CASE(
   CHECK(fixture.states[1].engagement_cooldown_frames == (two_actors ? 0 : 48));
   CHECK(fixture.states[1].reengagement_grace_frames == 90);
   fixture.CheckEmpty();
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x80);
   VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
   fixture.CheckEmpty();
 }
@@ -206,15 +206,15 @@ TEST_CASE("AI disengagement by ID ignores IDs outside the AI state table",
 TEST_CASE("AI marker wrappers never reset every actor through Ashley's index",
           "[ai][engagement]") {
   EngagementFixture fixture;
-  const auto before = std::to_array(Battle_actorMarkers);
+  const auto before = VS::Battle::actorMarkers;
   VS::Battle::Ai::SetLiveActorAwarenessIndicator(0, 0);
-  CHECK(std::to_array(Battle_actorMarkers) == before);
+  CHECK(VS::Battle::actorMarkers == before);
   VS::Battle::Ai::SetLiveActorAwarenessIndicator(2, 5);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x85);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x85);
   VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
       reinterpret_cast<VS::Battle::Ai::PlanEvaluationView*>(
           &fixture.states[1]));
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0);
 }
 
 TEST_CASE(
@@ -226,10 +226,10 @@ TEST_CASE(
   auto* view = reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awareness_frames_remaining == 1);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x87);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x87);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awareness_frames_remaining == 0);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x80);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awareness_marker == 7);
 }
@@ -250,5 +250,5 @@ TEST_CASE("AI temporary awareness keeps the stored widths of marker and frames",
   VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator(&state, 0x10007, 0x128);
   CHECK(state.awareness_marker == 7);
   CHECK(state.awareness_frames_remaining == 0x28);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[2]) == 0x80);
 }

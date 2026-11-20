@@ -11,7 +11,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/ActorMarkersLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"

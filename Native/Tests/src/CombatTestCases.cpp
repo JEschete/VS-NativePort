@@ -20,10 +20,10 @@
 #include "Battle/AbilityState.h"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -36,7 +36,7 @@
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -44,7 +44,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
@@ -128,7 +128,7 @@ constexpr std::array<u_short, 22> kAbilityThresholds{{
 struct AbilityFixture {
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
-  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<Battle_Actor*, 2> saved_actors{Battle_actors[0], Battle_actors[1]};
   std::array<Actors_ActorRecord*, 2> saved_records{Actors_actorRecords[0],
@@ -136,19 +136,20 @@ struct AbilityFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::State::scoreData) saved_score = VS::State::scoreData;
-  decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
-  decltype(Battle_floatingLabelCount) saved_label_count =
-      Battle_floatingLabelCount;
+  decltype(VS::Battle::floatingLabels) saved_labels =
+      VS::Battle::floatingLabels;
+  decltype(VS::Battle::floatingLabelCount) saved_label_count =
+      VS::Battle::floatingLabelCount;
   int saved_tick_speed = VS::State::tickSpeed;
   std::uint8_t saved_difficulty = VS::State::LiveScriptFlag(1);
   Battle_ActionState action{};
   Battle_Actor actors[2]{};
   Battle_ActorStats stats[2]{};
   Actors_ActorRecord records[2]{};
-  Battle_FloatingLabel labels[32]{};
+  VS::Battle::FloatingLabelSlots labels{};
 
   AbilityFixture() {
-    Battle_actionState = &action;
+    VS::Battle::actionState = &action;
     Battle_characterState = &actors[0];
     for (int index = 0; index < 2; ++index) {
       Battle_actors[index] = &actors[index];
@@ -180,8 +181,8 @@ struct AbilityFixture {
           static_cast<char>(40 + index);
     }
     VS::Input::buttonsPressed = kPadRright;
-    Battle_floatingLabels = &labels;
-    Battle_floatingLabelCount = 0;
+    VS::Battle::floatingLabels = &labels;
+    VS::Battle::floatingLabelCount = 0;
     VS::State::tickSpeed = 2;
     VS::State::SetLiveScriptFlag(1, 0);
     Prepare();
@@ -190,7 +191,7 @@ struct AbilityFixture {
   ~AbilityFixture() {
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
-    Battle_actionState = saved_action;
+    VS::Battle::actionState = saved_action;
     Battle_characterState = saved_character;
     for (int index = 0; index < 2; ++index) {
       Battle_actors[index] = saved_actors[index];
@@ -199,8 +200,8 @@ struct AbilityFixture {
     VS::Input::settings = saved_settings;
     VS::Input::buttonsPressed = saved_pressed;
     VS::State::scoreData = saved_score;
-    Battle_floatingLabels = saved_labels;
-    Battle_floatingLabelCount = saved_label_count;
+    VS::Battle::floatingLabels = saved_labels;
+    VS::Battle::floatingLabelCount = saved_label_count;
     VS::State::tickSpeed = saved_tick_speed;
     VS::State::SetLiveScriptFlag(1, saved_difficulty);
   }
@@ -210,9 +211,9 @@ struct AbilityFixture {
     action.queueIndex = index;
     auto& request = Request();
     request.actionId = action_id;
-    request.primaryTarget.target.targetActor = defense ? 1 : 0;
+    request.primaryTarget.target.target_actor = defense ? 1 : 0;
     request.targetCount = 1;
-    request.targets[0].target.targetActor = defense ? 0 : 1;
+    request.targets[0].target.target_actor = defense ? 0 : 1;
     action.abilityWindow = 100;
   }
 
@@ -231,19 +232,19 @@ struct AbilityFixture {
     request.targetCount = first_limb + limb_count;
     if (filtered_entries) {
       auto& other_actor = request.targets[0];
-      other_actor.target.targetActor = 0;
+      other_actor.target.target_actor = 0;
       other_actor.target.hp = 50;
       other_actor.hpEffect = 1;
       auto& world_point = request.targets[1];
       world_point = other_actor;
       world_point.targetsPosition = 1;
-      world_point.target.targetActor = 1;
+      world_point.target.target_actor = 1;
     }
     for (int limb = 0; limb < limb_count; ++limb) {
       auto& hit = request.targets[first_limb + limb];
       const auto amount = static_cast<std::int16_t>(limb + 1);
-      hit.target.targetActor = 1;
-      hit.target.targetLimb = static_cast<char>(limb);
+      hit.target.target_actor = 1;
+      hit.target.target_limb = static_cast<char>(limb);
       hit.target.hp = hit.target.mp = amount;
       hit.hpEffect = hit.mpEffect = 1;
       hit.limbs[limb].effects.opaque0 = amount;
@@ -261,8 +262,8 @@ struct AbilityFixture {
   }
 };
 
-using MediatorTable = decltype(Battle_actionEffectMediators);
-using NativeAbilityEffect = std::remove_extent_t<MediatorTable>;
+using MediatorTable = decltype(VS::Battle::actionEffectMediators);
+using NativeAbilityEffect = MediatorTable::value_type;
 using AbilityEffect = NativeAbilityEffect;
 
 struct AbilityHit {
@@ -300,7 +301,7 @@ struct AbilityEffectFixture : AbilityFixture {
     Battle_actionDefinitions[99].unlocked = 1;
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
-    target.target.targetActor = 1;
+    target.target.target_actor = 1;
     for (int index = 0; index < 2; ++index) {
       VS::Battle::Ai::actorAiStates[index] = &ai[index];
       auto& actor = stats[index];
@@ -411,10 +412,10 @@ struct ArtResolutionFixture : AbilityEffectFixture {
   decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
   decltype(VS::Battle::attackPrerequisiteFunctions) saved_prerequisites =
       VS::Battle::attackPrerequisiteFunctions;
-  decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
-      std::to_array(Battle_actionEffectMediators);
-  std::uint32_t saved_previous_hit = Battle_previousHitResult;
-  std::uint32_t saved_prerequisite_result = Battle_hitPrerequisiteResult;
+  decltype(VS::Battle::actionEffectMediators) saved_effects =
+      VS::Battle::actionEffectMediators;
+  std::uint32_t saved_previous_hit = VS::Battle::previousHitResult;
+  std::uint32_t saved_prerequisite_result = VS::Battle::hitPrerequisiteResult;
 
   ArtResolutionFixture() {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
@@ -424,7 +425,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
         VS::Battle::AcceptAttackPrerequisiteSlot;
     VS::Battle::attackPrerequisiteFunctions[2] =
         VS::Battle::AcceptAttackPrerequisiteSlot;
-    Battle_actionEffectMediators[58] =
+    VS::Battle::actionEffectMediators[58] =
         VS::Battle::QueueLiveHitDamageAndEquipmentWear;
     Battle_statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
     stats[0].agility = 200;
@@ -445,16 +446,16 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     std::copy(saved_prerequisites.begin(), saved_prerequisites.end(),
               VS::Battle::attackPrerequisiteFunctions.begin());
     std::copy(saved_effects.begin(), saved_effects.end(),
-              Battle_actionEffectMediators);
-    Battle_previousHitResult = saved_previous_hit;
-    Battle_hitPrerequisiteResult = saved_prerequisite_result;
+              VS::Battle::actionEffectMediators.begin());
+    VS::Battle::previousHitResult = saved_previous_hit;
+    VS::Battle::hitPrerequisiteResult = saved_prerequisite_result;
   }
 
   Battle_ActionRequest Resolve(int id) {
     Battle_ActionRequest input{};
     Battle_ActionRequest result{};
     input.targetCount = 1;
-    input.targets[0].target.targetActor = 1;
+    input.targets[0].target.target_actor = 1;
     VS::Battle::ResolveLiveActionTargets(id, &result, &input, 0);
     return result;
   }
@@ -468,7 +469,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     actors[1].roomSpawnIndex = 0x80;
     const auto cancelled = Resolve(id);
     CHECK(cancelled.targets[0].target.hp == 0);
-    CHECK(cancelled.targets[0].target.impactKind == 4);
+    CHECK(cancelled.targets[0].target.impact_kind == 4);
     target = resolved.targets[0];
   }
 };
@@ -1116,7 +1117,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
       VS::Menu::Framework::menuItems;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
-  decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
+  decltype(VS::Battle::stringContext) saved_string_context =
+      VS::Battle::stringContext;
   VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -1175,7 +1177,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Input::buttonRepeat = saved_repeat;
     VS::Menu::Framework::menuItems = saved_menu_rows;
     VS::Menu::Framework::itemNames = saved_names;
-    Battle_stringContext = saved_string_context;
+    VS::Battle::stringContext = saved_string_context;
     VS::Menu::textBoxes[7] = saved_box;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
@@ -1381,7 +1383,7 @@ struct EquipmentLootFixture : LootInventoryFixture {
 struct LootPresentationFixture : EnemyLootFixture {
   std::uint8_t saved_intro = VS::State::LiveScriptFlag(0xAB);
   u_int saved_control = VS::Field::controlMode;
-  u_int saved_flow = Battle_actionFlowMode;
+  u_int saved_flow = VS::Battle::actionFlowMode;
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
   VS::Items::LootListNode* saved_menu_list = VS::Menu::Framework::lootLists;
   VS::Items::BattleLoot* saved_menu_entry = VS::Menu::Framework::lootEntry;
@@ -1394,13 +1396,13 @@ struct LootPresentationFixture : EnemyLootFixture {
     VS::Menu::Framework::lootLists = nullptr;
     VS::Menu::Framework::lootEntry = nullptr;
     VS::Field::controlMode = 1;
-    Battle_actionFlowMode = 11;
+    VS::Battle::actionFlowMode = 11;
   }
 
   ~LootPresentationFixture() {
     VS::State::SetLiveScriptFlag(0xAB, saved_intro);
     VS::Field::controlMode = saved_control;
-    Battle_actionFlowMode = saved_flow;
+    VS::Battle::actionFlowMode = saved_flow;
     Actors_actorRecords[0] = saved_player;
     VS::Menu::Framework::lootLists = saved_menu_list;
     VS::Menu::Framework::lootEntry = saved_menu_entry;
@@ -1443,9 +1445,9 @@ struct AbilityUnlockFixture : AbilityFixture {
 
 struct ChainCreditFixture : AbilityUnlockFixture {
   std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
-  u_int saved_flow = Battle_actionFlowMode;
+  u_int saved_flow = VS::Battle::actionFlowMode;
   u_int saved_control = VS::Field::controlMode;
-  int saved_reward = Battle_recoveryRewardMode;
+  int saved_reward = VS::Battle::recoveryRewardMode;
 
   ChainCreditFixture() {
     VS::State::SetLiveScriptFlag(0x82, 10);
@@ -1457,13 +1459,13 @@ struct ChainCreditFixture : AbilityUnlockFixture {
 
   ~ChainCreditFixture() {
     VS::State::SetLiveScriptFlag(0x82, saved_story);
-    Battle_actionFlowMode = saved_flow;
+    VS::Battle::actionFlowMode = saved_flow;
     VS::Field::controlMode = saved_control;
-    Battle_recoveryRewardMode = saved_reward;
+    VS::Battle::recoveryRewardMode = saved_reward;
   }
 
   void CheckTerminated() const {
-    CHECK(Battle_actionFlowMode == 9);
+    CHECK(VS::Battle::actionFlowMode == 9);
     CHECK(action.queueIndex == 0);
     CHECK(action.chainStep == 0);
   }
@@ -1486,8 +1488,8 @@ enum class KillGate {
 };
 
 struct BreakArtKillFixture : AbilityUnlockFixture {
-  decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
-      std::to_array(Battle_actionEffectMediators);
+  decltype(VS::Battle::actionEffectMediators) saved_effects =
+      VS::Battle::actionEffectMediators;
   std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
   Battle_HitResult source{};
   Battle_HitResult target{};
@@ -1504,18 +1506,18 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
-    target.target.targetActor = 1;
+    target.target.target_actor = 1;
     target.target.hp = stats[1].currentHp;
     Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;
     Battle_actionDefinitions[160].type = Battle_ActionType_Item;
-    Battle_actionEffectMediators[0] = [](Battle_ActionDefinition*,
-                                         Battle_HitResult*, Battle_HitResult*,
-                                         int, int) {};
+    VS::Battle::actionEffectMediators[0] = [](Battle_ActionDefinition*,
+                                              Battle_HitResult*,
+                                              Battle_HitResult*, int, int) {};
   }
 
   ~BreakArtKillFixture() {
     std::copy(saved_effects.begin(), saved_effects.end(),
-              Battle_actionEffectMediators);
+              VS::Battle::actionEffectMediators.begin());
     VS::State::SetLiveScriptFlag(0x82, saved_story);
   }
 
@@ -1528,7 +1530,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         source.targetsPosition = 1;
         break;
       case KillGate::kEnemySource:
-        source.target.targetActor = 1;
+        source.target.target_actor = 1;
         break;
       case KillGate::kPositionTarget:
         target.targetsPosition = 1;
@@ -1546,7 +1548,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         --target.target.hp;
         break;
       case KillGate::kAshleyTarget:
-        target.target.targetActor = 0;
+        target.target.target_actor = 0;
         break;
       case KillGate::kAlreadyCounted:
         actors[1].killCounted = 1;
@@ -1614,7 +1616,7 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
           "[combat][sandbox][gimmick]") {
   AbilityFixture fixture;
   auto& hit = fixture.Request().targets[0];
-  hit.target.impactKind = 4;
+  hit.target.impact_kind = 4;
   fixture.actors[1].roomSpawnIndex = 0x80;
   auto& target = fixture.stats[1];
   target.actorId = 0x80;
@@ -1626,13 +1628,13 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
   CHECK(target.currentHp == 1);
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
 }
 
 TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
           "[combat][sandbox][gimmick]") {
   AbilityFixture fixture;
-  fixture.Request().targets[0].target.impactKind = 4;
+  fixture.Request().targets[0].target.impact_kind = 4;
   auto& instance = fixture.records[1].instance;
   instance.movementMode = 1;
   instance.jumpCountdown = 5;
@@ -1725,12 +1727,12 @@ TEST_CASE("Pending ability rewards do not discard later chain credit",
 TEST_CASE("Pending chain credit alone does not trigger ability learning",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
-  Battle_recoveryRewardMode = GENERATE(0, 1);
+  VS::Battle::recoveryRewardMode = GENERATE(0, 1);
   VS::State::artsStatus.kills.total_kills = kAbilityThresholds[0];
   const auto before = VS::State::artsStatus;
   REQUIRE(VS::Battle::LivePendingBattleAbilityUnlocks() == 1);
   VS::Battle::LiveBeginPendingAbilityReward();
-  CHECK(Battle_actionFlowMode == 0);
+  CHECK(VS::Battle::actionFlowMode == 0);
   CheckAbilityProgress(before);
 }
 
@@ -1965,12 +1967,12 @@ TEST_CASE("Ability eligibility requires an appropriate combat relationship",
   AbilityFixture fixture;
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   SECTION("self target") {
-    fixture.Request().targets[0].target.targetActor = 0;
+    fixture.Request().targets[0].target.target_actor = 0;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("enemy action does not target Ashley") {
     fixture.Prepare(true);
-    fixture.Request().targets[0].target.targetActor = 1;
+    fixture.Request().targets[0].target.target_actor = 1;
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("Ashley cannot chain from magic") {
@@ -2018,7 +2020,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
                        : delta <= margin     ? 2
                        : delta <= 2 * margin ? 3
                                              : 4;
-    REQUIRE(Battle_floatingLabelCount == 1);
+    REQUIRE(VS::Battle::floatingLabelCount == 1);
     CHECK(fixture.labels[0].value == result);
     CHECK(fixture.action.abilityInputAttempted == 1);
     fixture.CheckInputResult(success ? (defense ? 2 : 1) : 0,
@@ -2038,14 +2040,14 @@ TEST_CASE("Unarmed windows and repeated buttons cannot start an ability",
     fixture.action.abilityWindow = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 1);
-    REQUIRE(Battle_floatingLabelCount == 1);
+    REQUIRE(VS::Battle::floatingLabelCount == 1);
     CHECK(fixture.labels[0].value == 1);
   }
   SECTION("repeat previous chain button") {
     fixture.action.previousChainInput = 1;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 1);
-    CHECK(Battle_floatingLabelCount == 0);
+    CHECK(VS::Battle::floatingLabelCount == 0);
   }
   CHECK(fixture.action.abilityInputSucceeded == 0);
   CHECK(fixture.action.chainAbilitySlot == 0);
@@ -2059,13 +2061,13 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
     VS::Input::settings.mapped_chain_abilities[0] = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
-    CHECK(Battle_floatingLabelCount == 0);
+    CHECK(VS::Battle::floatingLabelCount == 0);
   }
   SECTION("no button") {
     VS::Input::buttonsPressed = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
-    CHECK(Battle_floatingLabelCount == 0);
+    CHECK(VS::Battle::floatingLabelCount == 0);
   }
   CHECK(fixture.action.abilityInputSucceeded == 0);
   CHECK(fixture.action.chainAbilitySlot == 0);
@@ -2385,8 +2387,8 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
   auto& armor_dp = fixture.stats[1].limbs[limb].armor.current_dp;
   auto& shield_dp = fixture.stats[1].shield.current_dp;
   armor_dp = shield_dp = static_cast<std::uint16_t>(dp);
-  fixture.target.target.targetLimb =
-      static_cast<decltype(fixture.target.target.targetLimb)>(limb);
+  fixture.target.target.target_limb =
+      static_cast<decltype(fixture.target.target.target_limb)>(limb);
   fixture.target.target.hp = 20;
   fixture.target.hpEffect = 1;
   fixture.Queue(id, 1, {0, 0, VS::Battle::QueueLiveDamageBasedArmorWear});
@@ -2661,7 +2663,7 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   auto* const queued = VS::Items::lootListHead;
   VS::Items::OpenLivePendingEnemyLoot();
   CHECK(VS::Field::controlMode == 12);
-  CHECK(Battle_actionFlowMode == 0);
+  CHECK(VS::Battle::actionFlowMode == 0);
   CHECK(VS::Menu::Framework::lootLists == nullptr);
   CHECK(VS::Menu::Framework::lootEntry == nullptr);
   CHECK(VS::Items::lootListHead == queued);

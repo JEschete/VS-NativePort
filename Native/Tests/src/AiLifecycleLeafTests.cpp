@@ -22,7 +22,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
@@ -97,7 +97,7 @@ struct AshleyAllianceFixture {
   unsigned saved_random = VS::Core::BiosRand().State();
   Battle_Actor* saved_actor0 = Battle_actors[0];
   Battle_Actor* saved_actor1 = Battle_actors[1];
-  char saved_marker1 = Battle_actorMarkers[1];
+  char saved_marker1 = VS::Battle::actorMarkers[1];
   VS::Battle::Ai::ActorAiState state{};
   VS::Battle::Ai::ActorAiState other_state{};
   Battle_Actor actors[2]{};
@@ -123,7 +123,7 @@ struct AshleyAllianceFixture {
     VS::Core::SeedBiosRand(saved_random);
     Battle_actors[0] = saved_actor0;
     Battle_actors[1] = saved_actor1;
-    Battle_actorMarkers[1] = saved_marker1;
+    VS::Battle::actorMarkers[1] = saved_marker1;
   }
 
   VS::Battle::Ai::ReactionView* Reaction() {
@@ -148,7 +148,7 @@ struct AshleyAllianceFixture {
     CHECK(Settings()->saved_decision_callback == saved_callback);
     CHECK(Settings()->decision_callback ==
           VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
-    CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
+    CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[1]) == 0x85);
   }
 
   void CheckRecovery(int settings_bit, int busy, unsigned random) {
@@ -163,7 +163,7 @@ struct AshleyAllianceFixture {
   }
 
   void CheckDeferredRecovery() {
-    CHECK(Battle_actorMarkers[1] == 0x05);
+    CHECK(VS::Battle::actorMarkers[1] == 0x05);
     CHECK(state.relations[0].classification == 3);
     CHECK(state.awareness_marker == 6);
     CHECK(state.awareness_frames_remaining == 0x28);
@@ -214,9 +214,9 @@ struct AshleyActionFixture : AshleyAllianceFixture {
     other_state.saved_relation_options = -1;
     Settings()->decision_callback = AshleyAllianceTestCallback;
     request.actionId = 42;
-    request.primaryTarget.target.targetActor = 0;
+    request.primaryTarget.target.target_actor = 0;
     request.targetCount = 1;
-    request.targets[0].target.targetActor = 1;
+    request.targets[0].target.target_actor = 1;
   }
 
   ~AshleyActionFixture() { Battle_actionDefinitions[42] = saved_action; }
@@ -413,7 +413,7 @@ TEST_CASE(
   fixture.state.settings_bit25 = 0;
   fixture.state.decision_delay = 1;
   fixture.state.relations[0].classification = 1;
-  Battle_actorMarkers[1] = 0x05;
+  VS::Battle::actorMarkers[1] = 0x05;
 
   const auto [seed, after_first, after_second] = TwoFavorableAllianceRolls();
   VS::Core::SeedBiosRand(seed);
@@ -444,7 +444,7 @@ TEST_CASE(
   auto* settings = fixture.Settings();
   settings->decision_callback = AshleyAllianceTestCallback;
   fixture.Reaction()->alliance_reaction_count = 1;
-  Battle_actorMarkers[1] = 0x05;
+  VS::Battle::actorMarkers[1] = 0x05;
 
   unsigned seed = 0;
   unsigned after_roll = 0;
@@ -466,7 +466,7 @@ TEST_CASE(
   CHECK(fixture.Reaction()->temporary_ashley_alliance == 0);
   CHECK(settings->decision_callback == AshleyAllianceTestCallback);
   CHECK(settings->saved_decision_callback == nullptr);
-  CHECK(Battle_actorMarkers[1] == 0x05);
+  CHECK(VS::Battle::actorMarkers[1] == 0x05);
   CHECK(VS::Core::BiosRand().State() == after_roll);
 }
 
@@ -476,11 +476,11 @@ TEST_CASE(
     "[ai][ashley-alliance]") {
   AshleyAllianceFixture fixture;
   fixture.Reaction()->alliance_reaction_count = 9;
-  Battle_actorMarkers[1] = 0x05;
+  VS::Battle::actorMarkers[1] = 0x05;
 
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(nullptr);
-  CHECK(Battle_actorMarkers[1] == 0x05);
+  CHECK(VS::Battle::actorMarkers[1] == 0x05);
 
   fixture.state.settings_bit25 = 1;
   const unsigned random_before = VS::Core::BiosRand().State();
@@ -490,7 +490,7 @@ TEST_CASE(
 
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
-  CHECK(Battle_actorMarkers[1] == 0x05);
+  CHECK(VS::Battle::actorMarkers[1] == 0x05);
 }
 
 TEST_CASE("AI Ashley alliance compares before truncating the reaction count",
@@ -521,7 +521,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
       fixture.Reaction()->alliance_reaction_count =
           static_cast<u_char>(counter);
       fixture.state.actor_id = 1;
-      Battle_actorMarkers[1] = 0x05;
+      VS::Battle::actorMarkers[1] = 0x05;
       VS::Core::SeedBiosRand(seeds[roll]);
       VS::Core::Rand15 expected_random(seeds[roll]);
       REQUIRE((expected_random.Next() & 0x7F) == static_cast<int>(roll));
@@ -536,7 +536,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
                      : AshleyAllianceTestCallback));
       CHECK(settings->saved_decision_callback ==
             (entered ? AshleyAllianceTestCallback : nullptr));
-      CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) ==
+      CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[1]) ==
             (entered ? 0x85 : 0x05));
       CHECK(VS::Core::BiosRand().State() == expected_random.State());
     }
@@ -591,7 +591,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
   fixture.Settings()->decision_callback = AshleyAllianceTestCallback;
   fixture.Settings()->saved_decision_callback =
       VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
-  Battle_actorMarkers[1] = static_cast<char>(0xA5);
+  VS::Battle::actorMarkers[1] = static_cast<char>(0xA5);
   const auto random = VS::Core::BiosRand().State();
   const auto frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   for (unsigned count = 0; count < 256; ++count) {
@@ -601,7 +601,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
         ->alliance_reaction_count = 0;
     VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
     CHECK(StateBytes(fixture.state) == StateBytes(expected));
-    CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0xA5);
+    CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[1]) == 0xA5);
     CHECK(VS::Core::BiosRand().State() == random);
     CHECK(VS::Battle::Ai::LiveFrameContext().randomState == frame_random);
   }
@@ -625,7 +625,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   fixture.state.awareness_frames_remaining = 0x72;
   fixture.Reaction()->temporary_ashley_alliance = 1;
   fixture.Reaction()->alliance_reaction_count = 9;
-  Battle_actorMarkers[1] = static_cast<char>(0xA5);
+  VS::Battle::actorMarkers[1] = static_cast<char>(0xA5);
   fixture.actors[1].commandFlags = 0x5A;
   const auto random = VS::Core::BiosRand().State();
   auto& frame = VS::Battle::Ai::LiveFrameContext();
@@ -635,7 +635,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   fixture.CheckRestored(
       saved_callback ? AshleyAllianceTestCallback
                      : VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x25);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[1]) == 0x25);
   CHECK(fixture.state.relations[0].classification == 3);
   fixture.CheckRecovery(settings_bit, busy, random);
 }

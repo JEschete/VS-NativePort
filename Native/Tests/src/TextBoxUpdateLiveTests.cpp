@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
@@ -54,7 +54,7 @@ struct LiveUpdateFixture {
     VS::Render::FrameScratchpad().ordering_table =
         ordering.data() + kSceneEntry;
     VS::State::tickSpeed = 2;
-    Battle_lowerScreenUiState = 0;
+    VS::Battle::lowerScreenUiState = 0;
     VS::Core::interfaceRandomState = kRandomSeed;
     VS::Effects::screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};

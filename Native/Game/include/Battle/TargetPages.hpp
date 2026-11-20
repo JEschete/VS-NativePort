@@ -5,12 +5,11 @@
 #include <span>
 #include <vector>
 
-struct Battle_TargetPreview;
-
 // Native target pages. The original sphere shows one bounded list of target
 // candidates; native pages keep every candidate and split them into pages of
 // whole actor groups that fit the sphere's visible labels.
 namespace VS::Battle {
+struct TargetPreview;
 // The most candidates one action can preview, and so bind to the sphere.
 inline constexpr std::size_t kMaxSphereTargets = 255;
 
@@ -55,12 +54,13 @@ void SetSphereTargets(TargetPageBook& book,
 // Applies SetSphereTargets to the active battle sphere. The pages view entries
 // without owning them: entries must stay valid until the next binding or
 // ResetTargetPages.
-void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode);
+void SetLiveSphereTargets(std::span<VS::Battle::TargetPreview> entries,
+                          int mode);
 
 // The first count of the action previews; aborts when count is negative or
 // exceeds them.
-[[nodiscard]] std::span<Battle_TargetPreview> CheckedTargetPreviews(
-    std::span<Battle_TargetPreview> previews, int count);
+[[nodiscard]] std::span<VS::Battle::TargetPreview> CheckedTargetPreviews(
+    std::span<VS::Battle::TargetPreview> previews, int count);
 
 // The live sphere's paging state, for the page hint and the encounter log.
 struct TargetPageInfo {

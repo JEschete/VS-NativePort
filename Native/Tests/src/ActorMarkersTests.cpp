@@ -15,7 +15,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkers.hpp"
 #include "Battle/ActorMarkersLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Core/Gte.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -428,11 +428,12 @@ struct LiveMarkerFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_sides = Battle_actorMarkerSides;
-  decltype(Battle_actorMarkersHidden) saved_hidden = Battle_actorMarkersHidden;
-  decltype(Battle_abilityTimingCueFrames) saved_frames =
-      Battle_abilityTimingCueFrames;
-  SVECTOR saved_cue = Battle_abilityTimingCuePosition;
+  int saved_sides = VS::Battle::actorMarkerSides;
+  decltype(VS::Battle::actorMarkersHidden) saved_hidden =
+      VS::Battle::actorMarkersHidden;
+  decltype(VS::Battle::abilityTimingCueFrames) saved_frames =
+      VS::Battle::abilityTimingCueFrames;
+  SVECTOR saved_cue = VS::Battle::abilityTimingCuePosition;
   std::array<char, 40> saved_markers{};
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   Actors_ActorRecord player{};
@@ -441,8 +442,8 @@ struct LiveMarkerFixture {
   std::array<u_long, kLiveOrderingWords> ordering{};
 
   LiveMarkerFixture() {
-    std::ranges::copy(Battle_actorMarkers, saved_markers.begin());
-    std::ranges::fill(Battle_actorMarkers, char{0});
+    std::ranges::copy(VS::Battle::actorMarkers, saved_markers.begin());
+    std::ranges::fill(VS::Battle::actorMarkers, char{0});
     Actors_actorRecords[0] = &player;
     Actors_actorRecords[2] = &enemy;
     player.instance.position.vx = -256;
@@ -462,22 +463,22 @@ struct LiveMarkerFixture {
         ordering.data() + kLiveSceneHead;
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
-    Battle_actorMarkerSides = 0;
-    Battle_actorMarkersHidden = 0;
+    VS::Battle::actorMarkerSides = 0;
+    VS::Battle::actorMarkersHidden = 0;
   }
 
   ~LiveMarkerFixture() {
-    std::ranges::copy(saved_markers, std::begin(Battle_actorMarkers));
+    std::ranges::copy(saved_markers, std::begin(VS::Battle::actorMarkers));
     Actors_actorRecords[0] = saved_player;
     Actors_actorRecords[2] = saved_enemy;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Battle_actorMarkerSides = saved_sides;
-    Battle_actorMarkersHidden = saved_hidden;
-    Battle_abilityTimingCueFrames = saved_frames;
-    Battle_abilityTimingCuePosition = saved_cue;
+    VS::Battle::actorMarkerSides = saved_sides;
+    VS::Battle::actorMarkersHidden = saved_hidden;
+    VS::Battle::abilityTimingCueFrames = saved_frames;
+    VS::Battle::abilityTimingCuePosition = saved_cue;
     VS::Input::settings = saved_settings;
     Core_Gte_Reset();
   }
@@ -518,7 +519,7 @@ TEST_CASE("Live actor marker links its dot then its frame at the depth slot",
   CHECK(sprite[3] == xy);
   CHECK(sprite[4] == 0x373E125AU);
   CHECK(frame[1] == 0x2C808080U);
-  CHECK(Battle_actorMarkerSides == 0);
+  CHECK(VS::Battle::actorMarkerSides == 0);
 }
 
 TEST_CASE("Live off-screen arrow links in front of the scene head",
@@ -540,11 +541,11 @@ TEST_CASE("Live off-screen arrow links in front of the scene head",
 TEST_CASE("Live marker sweep honours the hidden switch",
           "[actor-markers-live]") {
   LiveMarkerFixture fixture;
-  Battle_actorMarkers[2] = 6;
-  Battle_actorMarkersHidden = 1;
+  VS::Battle::actorMarkers[2] = 6;
+  VS::Battle::actorMarkersHidden = 1;
   VS::Battle::LiveDrawActorMarkers();
   CHECK(fixture.UsedWords() == 0);
-  Battle_actorMarkersHidden = 0;
+  VS::Battle::actorMarkersHidden = 0;
   VS::Battle::LiveDrawActorMarkers();
   CHECK(fixture.UsedWords() == 10);
   CHECK(nextPrim(&fixture.ordering[kLiveSceneHead + 368]) ==
@@ -554,18 +555,18 @@ TEST_CASE("Live marker sweep honours the hidden switch",
 TEST_CASE("Live ability timing cue follows the display setting",
           "[actor-markers-live]") {
   LiveMarkerFixture fixture;
-  Battle_abilityTimingCueFrames = 7;
-  Battle_abilityTimingCuePosition = {.vx = 1, .vy = 2, .vz = 3, .pad = 99};
+  VS::Battle::abilityTimingCueFrames = 7;
+  VS::Battle::abilityTimingCuePosition = {.vx = 1, .vy = 2, .vz = 3, .pad = 99};
   VS::Input::settings.ability_timing_display = 0;
   VS::Battle::LiveShowAbilityTimingCue(30);
-  CHECK(Battle_abilityTimingCueFrames == 7);
+  CHECK(VS::Battle::abilityTimingCueFrames == 7);
   VS::Input::settings.ability_timing_display = 1;
   const SVECTOR player = LiveAnchor(0);
   REQUIRE(player.vy >= 40);
   VS::Battle::LiveShowAbilityTimingCue(30);
-  CHECK(Battle_abilityTimingCueFrames == 37);
-  CHECK(Battle_abilityTimingCuePosition.vx == player.vx);
-  CHECK(Battle_abilityTimingCuePosition.vy == player.vy);
-  CHECK(Battle_abilityTimingCuePosition.vz == player.vz);
-  CHECK(Battle_abilityTimingCuePosition.pad == 99);
+  CHECK(VS::Battle::abilityTimingCueFrames == 37);
+  CHECK(VS::Battle::abilityTimingCuePosition.vx == player.vx);
+  CHECK(VS::Battle::abilityTimingCuePosition.vy == player.vy);
+  CHECK(VS::Battle::abilityTimingCuePosition.vz == player.vz);
+  CHECK(VS::Battle::abilityTimingCuePosition.pad == 99);
 }

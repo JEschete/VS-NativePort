@@ -11,7 +11,7 @@
 #include <source_location>
 #include <span>
 
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/Text/VariableFont.hpp"
@@ -26,9 +26,9 @@ std::uint64_t RefusedLiveEncodedTextCount() noexcept { return refused_text; }
 EncodedTextArguments LiveEncodedTextArguments() {
   EncodedTextArguments arguments;
   for (std::size_t index = 0; index < kEncodedTextArgumentCount; ++index) {
-    arguments.integers.at(index) = Battle_stringContext.integers[index];
-    arguments.strings.at(index) =
-        encoded_text_live::TrustedText(Battle_stringContext.strings[index]);
+    arguments.integers.at(index) = VS::Battle::stringContext.integers[index];
+    arguments.strings.at(index) = encoded_text_live::TrustedText(
+        VS::Battle::stringContext.strings[index]);
   }
   return arguments;
 }

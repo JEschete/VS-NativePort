@@ -20,7 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
@@ -909,7 +909,7 @@ struct LiveManualFixture {
   std::array<VS::Content::DiscQueueSlot, 32> saved_requests =
       VS::Content::discRequestSlots;
   std::array<fw::MenuRow, 40> rows{};
-  int saved_hud_slide = Battle_hudSlideOffset;
+  int saved_hud_slide = VS::Battle::hudSlideOffset;
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
   int saved_selected = VS::Menu::Framework::selectedRow;
@@ -932,8 +932,8 @@ struct LiveManualFixture {
   VS::Field::ManualDisplayState saved_display = VS::Field::manualDisplayState;
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
-  char saved_hud_hidden = Battle_hudHidden;
-  char saved_lower_screen = Battle_lowerScreenUiState;
+  char saved_hud_hidden = VS::Battle::hudHidden;
+  char saved_lower_screen = VS::Battle::lowerScreenUiState;
   char saved_hide_menu = VS::Menu::Framework::hideMenu;
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
 
@@ -973,9 +973,9 @@ struct LiveManualFixture {
   LiveManualFixture& operator=(LiveManualFixture&&) = delete;
   ~LiveManualFixture() {
     fw::ResetLiveMainMenuStatics();
-    Battle_hudHidden = saved_hud_hidden;
-    Battle_hudSlideOffset = saved_hud_slide;
-    Battle_lowerScreenUiState = saved_lower_screen;
+    VS::Battle::hudHidden = saved_hud_hidden;
+    VS::Battle::hudSlideOffset = saved_hud_slide;
+    VS::Battle::lowerScreenUiState = saved_lower_screen;
     VS::Field::isFieldRenderingEnabled = saved_field_rendering;
     VS::Menu::Framework::hideMenu = saved_hide_menu;
     VS::Menu::Framework::menuState = saved_menu_state;
@@ -1059,8 +1059,8 @@ struct LiveHud {
 };
 
 LiveHud CurrentHud() {
-  return {.hidden = Battle_hudHidden,
-          .slide = Battle_hudSlideOffset,
+  return {.hidden = VS::Battle::hudHidden,
+          .slide = VS::Battle::hudSlideOffset,
           .field_rendering = VS::Field::isFieldRenderingEnabled};
 }
 
@@ -1162,7 +1162,7 @@ TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
   LiveManualFixture fixture;
   VS::Input::settings.cursor_memory = 1;
   manual::showMenuState = 5;
-  Battle_hudHidden = 0;
+  VS::Battle::hudHidden = 0;
   VS::Field::isFieldRenderingEnabled = 1;
   u_char step = manual::kScreenInitialize;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
@@ -1181,8 +1181,8 @@ TEST_CASE("F04161 LiveUpdateScreen leaves the help for the game",
   LiveManualFixture fixture;
   REQUIRE(VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5) == 0x1D);
   manual::showMenuState = manual::kHelpLeaveToGame;
-  Battle_hudHidden = 1;
-  Battle_hudSlideOffset = manual::kHudSlideHidden;
+  VS::Battle::hudHidden = 1;
+  VS::Battle::hudSlideOffset = manual::kHudSlideHidden;
   VS::Field::isFieldRenderingEnabled = 0;
   u_char step = manual::kScreenShow;
   CHECK(manual::LiveUpdateScreen(&step) == 0);

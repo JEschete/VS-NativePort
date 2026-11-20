@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Legacy/Psx.h"
@@ -103,16 +103,15 @@ struct PuzzleTimerFixture {
       std::to_array(VS::Render::compactGlyphWidths);
   decltype(std::to_array(VS::Render::compactGlyphIndices)) saved_indices =
       std::to_array(VS::Render::compactGlyphIndices);
-  decltype(std::to_array(Battle_puzzleTimerText)) saved_text =
-      std::to_array(Battle_puzzleTimerText);
-  char* saved_pointer = Battle_puzzleTimerTextPointer;
-  char saved_visible = Battle_lowerScreenUiState;
+  decltype(VS::Battle::puzzleTimerText) saved_text =
+      VS::Battle::puzzleTimerText;
+  char* saved_pointer = VS::Battle::puzzleTimerTextPointer;
+  char saved_visible = VS::Battle::lowerScreenUiState;
   std::uint8_t saved_hundredths = VS::State::stateFlags.puzzle_timer_hundredths;
   std::uint8_t saved_seconds = VS::State::stateFlags.puzzle_timer_seconds;
   std::uint8_t saved_minutes = VS::State::stateFlags.puzzle_timer_minutes;
   std::uint8_t saved_hours = VS::State::stateFlags.puzzle_set_max_timer;
   VS::State::SceneTimer saved_timer = VS::State::sceneTimer;
-  int saved_packed_timer = Battle_puzzleTimer;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
@@ -120,7 +119,7 @@ struct PuzzleTimerFixture {
   std::array<u_long, 16> ordering{};
 
   PuzzleTimerFixture() {
-    Battle_puzzleTimerTextPointer = nullptr;
+    VS::Battle::puzzleTimerTextPointer = nullptr;
     std::fill_n(VS::Render::compactGlyphWidths + 8, 6, 0x66);
     for (int glyph = 0; glyph < 11; ++glyph) {
       VS::Render::compactGlyphIndices[16 + glyph] =
@@ -134,15 +133,15 @@ struct PuzzleTimerFixture {
               VS::Render::compactGlyphWidths);
     std::copy(saved_indices.begin(), saved_indices.end(),
               VS::Render::compactGlyphIndices);
-    std::copy(saved_text.begin(), saved_text.end(), Battle_puzzleTimerText);
-    Battle_puzzleTimerTextPointer = saved_pointer;
-    Battle_lowerScreenUiState = saved_visible;
+    std::copy(saved_text.begin(), saved_text.end(),
+              VS::Battle::puzzleTimerText.begin());
+    VS::Battle::puzzleTimerTextPointer = saved_pointer;
+    VS::Battle::lowerScreenUiState = saved_visible;
     VS::State::stateFlags.puzzle_timer_hundredths = saved_hundredths;
     VS::State::stateFlags.puzzle_timer_seconds = saved_seconds;
     VS::State::stateFlags.puzzle_timer_minutes = saved_minutes;
     VS::State::stateFlags.puzzle_set_max_timer = saved_hours;
     VS::State::sceneTimer = saved_timer;
-    Battle_puzzleTimer = saved_packed_timer;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering_table;
     VS::Render::frameBuf = saved_framebuffer;
@@ -187,12 +186,12 @@ struct PuzzleTimerFixture {
   void CheckGuards() const {
     CHECK(storage.front() == 0xC0FFEE00);
     CHECK(storage.back() == 0xC0FFEE00);
-    CHECK(Battle_puzzleTimerTextPointer == nullptr);
-    CHECK(Battle_puzzleTimerText[8] == '\0');
+    CHECK(VS::Battle::puzzleTimerTextPointer == nullptr);
+    CHECK(VS::Battle::puzzleTimerText[8] == '\0');
   }
 
   void CheckRendering(std::string_view expected) const {
-    CHECK(std::string_view(Battle_puzzleTimerText, 8) == expected);
+    CHECK(std::string_view(VS::Battle::puzzleTimerText.data(), 8) == expected);
     // The draw mode and eight glyphs; the chain, not the buffer, orders them.
     CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
           storage.data() + 43);
@@ -215,7 +214,7 @@ struct PuzzleTimerFixture {
 
   void CheckClockState(const ClockState& expected) const {
     CHECK(VS::State::sceneTimer.mode == expected.mode);
-    CHECK(Battle_lowerScreenUiState == expected.visible);
+    CHECK(VS::Battle::lowerScreenUiState == expected.visible);
     CHECK(VS::State::sceneTimer.time.minutes == expected.minutes);
     CHECK(VS::State::sceneTimer.time.seconds == expected.seconds);
   }
@@ -225,8 +224,8 @@ struct PuzzleTimerFixture {
 TEST_CASE("Puzzle timer owns a complete writable native text buffer",
           "[render][puzzle-timer]") {
   CHECK_FALSE(
-      std::is_const_v<std::remove_extent_t<decltype(Battle_puzzleTimerText)>>);
-  CHECK(std::extent_v<decltype(Battle_puzzleTimerText)> == 9);
+      std::is_const_v<decltype(VS::Battle::puzzleTimerText)::value_type>);
+  CHECK(VS::Battle::puzzleTimerText.size() == 9);
 }
 
 TEST_CASE(
@@ -248,11 +247,11 @@ TEST_CASE("Puzzle timer hide and show preserve repeatable native rendering",
   PuzzleTimerFixture fixture;
   for (int repeat = 0; repeat < 2; ++repeat) {
     VS::Battle::ShowLivePuzzleTimer();
-    CHECK(Battle_lowerScreenUiState == 1);
+    CHECK(VS::Battle::lowerScreenUiState == 1);
     fixture.Draw(0, 12);
     fixture.CheckRendering("00:00:12");
     VS::Battle::HideLivePuzzleTimer();
-    CHECK(Battle_lowerScreenUiState == 0);
+    CHECK(VS::Battle::lowerScreenUiState == 0);
   }
 }
 
@@ -262,10 +261,8 @@ TEST_CASE("Puzzle HUD reads the authoritative clock without copying its alias",
   VS::State::sceneTimer = {};
   VS::State::sceneTimer.time.minutes = 12;
   VS::State::sceneTimer.time.seconds = 34;
-  Battle_puzzleTimer = 0;
   fixture.DrawCurrent(56);
   fixture.CheckRendering("12:34:56");
-  CHECK(Battle_puzzleTimer == 0);
 }
 
 TEST_CASE("Scene timer pause and reset preserve HUD visibility and clock state",

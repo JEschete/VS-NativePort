@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereTargetLabels.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/TargetVolume.h"
@@ -190,12 +190,12 @@ struct SpherePointerRestorer {
   SpherePointerRestorer(SpherePointerRestorer&&) = delete;
   SpherePointerRestorer& operator=(SpherePointerRestorer&&) = delete;
   ~SpherePointerRestorer() {
-    Battle_targetSphere = saved;
+    VS::Battle::targetSphere = saved;
     std::ranges::copy(steps,
                       std::begin(VS::Menu::Framework::rowAnimationSteps));
   }
 
-  Battle_TargetSphereSetupView* saved = Battle_targetSphere;
+  Battle_TargetSphereSetupView* saved = VS::Battle::targetSphere;
   std::array<std::uint8_t, std::size(VS::Menu::Framework::rowAnimationSteps)>
       steps = std::to_array(VS::Menu::Framework::rowAnimationSteps);
 };
@@ -576,7 +576,7 @@ TEST_CASE("Live target label settled entry reads the sphere labels",
   const SpherePointerRestorer restore;
   Battle_TargetSphereSetupView storage{};
   auto& sphere = reinterpret_cast<Battle_TargetSphere&>(storage);
-  Battle_targetSphere = &storage;
+  VS::Battle::targetSphere = &storage;
   CHECK(battle::AreTargetLabelsSettledEntry() == 1);
   sphere.labels[23].state = battle::kTargetLabelSlidingRight;
   CHECK(battle::AreTargetLabelsSettledEntry() == 0);
@@ -589,7 +589,7 @@ TEST_CASE("Live target label update reads unsigned slide steps",
   const SpherePointerRestorer restore;
   Battle_TargetSphereSetupView storage{};
   auto& sphere = reinterpret_cast<Battle_TargetSphere&>(storage);
-  Battle_targetSphere = &storage;
+  VS::Battle::targetSphere = &storage;
 
   // Steps above 0x7F are unsigned; read signed, this label would land on
   // screen instead of moving past it.
@@ -617,7 +617,7 @@ TEST_CASE("Live target label update reads unsigned slide steps",
 TEST_CASE("Live sphere target highlights ignore an empty or missing list",
           "[battle][sphere][labels]") {
   const SpherePointerRestorer restore;
-  Battle_targetSphere = nullptr;
+  VS::Battle::targetSphere = nullptr;
   battle::UpdateSphereTargetHighlightsEntry(nullptr, 0);
   battle::UpdateSphereTargetHighlightsEntry(nullptr, 3);
   std::array<Battle_TargetLabelLine, 2> lines{};
@@ -626,5 +626,5 @@ TEST_CASE("Live sphere target highlights ignore an empty or missing list",
   battle::UpdateSphereTargetHighlightsEntry(lines.data(),
                                             static_cast<int>(lines.size()));
   battle::UpdateSphereTargetHighlightsEntry(lines.data(), -1);
-  CHECK(Battle_targetSphere == nullptr);
+  CHECK(VS::Battle::targetSphere == nullptr);
 }

@@ -14,9 +14,9 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimations.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -155,16 +155,16 @@ class LiveWorld final : public ActionReactionWorld {
   }
   std::uint8_t ChainGroup(int ability) override {
     Require(ability >= 0 && ability < kChainAnimationAbilities);
-    return Battle_chainAbilityAnimationGroups[ability];
+    return VS::Battle::chainAbilityAnimationGroups[ability];
   }
   std::uint32_t ChainSide() override {
-    return std::bit_cast<std::uint32_t>(Battle_chainAbilityAnimationSide);
+    return std::bit_cast<std::uint32_t>(VS::Battle::chainAbilityAnimationSide);
   }
   void SetChainSide(std::uint32_t side) override {
-    Battle_chainAbilityAnimationSide = std::bit_cast<int>(side);
+    VS::Battle::chainAbilityAnimationSide = std::bit_cast<int>(side);
   }
   void SetSpecialPitch(std::uint8_t pitch) override {
-    Battle_specialActionPitch = static_cast<char>(pitch);
+    VS::Battle::specialActionPitch = static_cast<char>(pitch);
   }
   void Play(int slot, std::int32_t animation, int blend) override {
     Actors::PlayLiveActorAnimation(slot, animation, 0, blend);
@@ -180,7 +180,7 @@ class LiveWorld final : public ActionReactionWorld {
     Actors::TurnLiveActorToAtRate(slot, facing, rate);
   }
   void QueueImpactEffects(int slot) override {
-    Require(Battle_actionState != nullptr);
+    Require(VS::Battle::actionState != nullptr);
     static_cast<void>(VS::Effects::LiveQueueActionImpactEffects(slot));
   }
   void ReleaseMovingPlatformActor(int platform) override {

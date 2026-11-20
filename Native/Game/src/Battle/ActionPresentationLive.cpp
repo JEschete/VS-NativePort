@@ -16,10 +16,10 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentation.hpp"
 #include "Battle/ActionPreviewLive.hpp"
@@ -28,11 +28,11 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -69,8 +69,8 @@ void Require(bool valid) {
   }
 }
 Battle_ActionState& State() {
-  Require(Battle_actionState != nullptr);
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr);
+  return *VS::Battle::actionState;
 }
 Battle_Actor& Actor(int slot) {
   Require(slot >= 0 &&
@@ -88,8 +88,8 @@ Battle_ActionDefinition& Definition(std::uint16_t action) {
   return Battle_actionDefinitions[action];
 }
 Menu::Framework::ActionSelection& MenuSelection() {
-  Require(Battle_actionSelection != nullptr);
-  return *Battle_actionSelection;
+  Require(VS::Battle::actionSelection != nullptr);
+  return *VS::Battle::actionSelection;
 }
 struct LiveAction final : PresentationAction {
   explicit LiveAction(Battle_ActionRequest& value) : record(value) {}
@@ -190,7 +190,7 @@ class LiveWorld final : public ActionPresentationWorld {
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetPhase(int phase) override {
-    Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
+    VS::Battle::actionFlowMode = static_cast<std::uint32_t>(phase);
   }
   void StopSound(int sound) override {
     constexpr int kBattleBank = 0x7E;

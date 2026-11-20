@@ -41,7 +41,7 @@ inline constexpr int kTargetLabelCount = 24;
 inline constexpr int kTargetColumnCapacity = 16;
 inline constexpr int kTargetColumnGroupCapacity = 8;
 inline constexpr int kTargetGroupCount = 16;
-// The limb names a target label can show (Battle_limbNames).
+// The limb names a target label can show (VS::Battle::limbNames).
 inline constexpr int kTargetLimbNameCount = 20;
 
 // A position with its fourth halfword (SVECTOR order).
@@ -63,8 +63,8 @@ struct ActorLimbTarget {
                          const ActorLimbTarget&) = default;
 };
 
-// One target candidate (Battle_TargetPreview): what the list shows and what
-// the hit list is built from. Fields keep the original byte widths.
+// One target candidate (VS::Battle::TargetPreview): what the list shows and
+// what the hit list is built from. Fields keep the original byte widths.
 struct ActionTargetPreview {
   TargetPoint position{};
   std::uint8_t kind = 0;
@@ -402,15 +402,15 @@ struct TargetColumns {
 
 // Where a string of the target information comes from.
 enum class TargetTextSource : std::uint8_t {
-  // Battle_statusStrings through its index table.
+  // VS::Battle::statusStrings through its index table.
   kStatusIndex,
-  // Battle_statusStrings at a halfword offset.
+  // VS::Battle::statusStrings at a halfword offset.
   kStatusOffset,
   // The actor's name.
   kActorName,
-  // Battle_emptyStatusString.
+  // VS::Battle::emptyStatusString.
   kEmptyStatus,
-  // Battle_targetStatusLineTemplate.
+  // VS::Battle::targetStatusLineTemplate.
   kStatusLineTemplate,
 };
 struct TargetText {

@@ -748,9 +748,9 @@ T00127.000,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00127.001,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,native:ActorAllocation.hpp VS::Actors::ActorAndStats::stats (#441);source:146C.c:6088
 T00822.000,T00822,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),0,state,0,char,,,,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
 T00822.001,T00822,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),1,unk1,1,char,,,,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
-T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,count,Number of label sprites; 0 for none,high,source:2842C.c:2220
-T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,labels,Label sprite indices,high,source:2842C.c:2257
-T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,spacing,Read as the width offset between sprites,low,source:2842C.c:2266
+T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,count,Number of label sprites; 0 for none,high,native:FloatingLabelPlacement.hpp StatusLabelLayout::count (#441);source:2842C.c:2220
+T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,captions,Indices into kLabelCaptionRects (Feedback.hpp) of up to two caption sprites,high,native:FloatingLabelPlacement.hpp StatusLabelLayout::captions (#441);source:2842C.c:2257
+T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,color,kStatusLabelColors index (Feedback.hpp) the label is drawn with,low,native:FloatingLabelPlacement.hpp StatusLabelLayout::color (#441);source:2842C.c:2266
 T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,x,Tile x of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::x (#471);declaration-only;source:3A1A0.c:732
 T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,layer,Tile y of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::layer (#471);declaration-only;source:3A1A0.c:733
 T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,z,Tile z of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::z (#471);declaration-only;source:3A1A0.c:734
@@ -1262,7 +1262,7 @@ T00213.005,T00213,D_800EB9B4_t,5,unk8,1,int,,,vignetteEnabled,vignette_enabled,D
 T00213.006,T00213,D_800EB9B4_t,6,slot,0,vs_main_CdQueueSlot *,,,,slot,Disc request that loads SCREFF2.PRG,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::slot (#441);source:GIM/SCREFF2.PRG/0.h:12
 T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,primaryVolume,Primary target volume,high,source:573B8.c:446
 T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,secondaryVolume,Secondary target volume,high,source:573B8.c:484
-T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depthAndYaw,Depth and camera yaw as one word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:29;source:58578.c:128;use cited by sanity pass;source:573B8.c:36
+T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depthAndYaw,Depth and camera yaw as one word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:31;source:58578.c:128;use cited by sanity pass;source:573B8.c:36
 T00214.003,T00214,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase,low,source:573B8.c:449
 T00214.004,T00214,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase,low,source:58578.c:905;use cited by sanity pass;source:573B8.c:38
 T00214.005,T00214,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase,low,source:573B8.c:450
@@ -1270,17 +1270,17 @@ T00214.006,T00214,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wir
 T00214.007,T00214,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,low,source:58578.c:456;use cited by sanity pass;source:573B8.c:41
 T00214.008,T00214,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; -1 after init,low,source:573B8.c:376
 T00214.009,T00214,D_800EB9B8_t,9,unk2E,1,u_char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
-T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:37;declaration-only;source:573B8.c:44
+T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:39;declaration-only;source:573B8.c:44
 T00214.011,T00214,D_800EB9B8_t,11,unk30,1,int,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
-T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,reserved34,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:39;declaration-only;source:573B8.c:46
+T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,reserved34,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:41;declaration-only;source:573B8.c:46
 T00214.013,T00214,D_800EB9B8_t,13,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
 T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
-T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,targetList0,First target list; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:42;source:58578.c:457;use cited by sanity pass;source:573B8.c:49
+T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,targetList0,First target list; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:44;source:58578.c:457;use cited by sanity pass;source:573B8.c:49
 T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,targetList1,Second target list; set from a setup parameter; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\SphereLifecycleLive.cpp:176;source:573B8.c:468
 T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
 T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,reservedLabelArea,Label and terrain storage viewed through the canonical targeting sphere,high,source:58578.c:649;source:573B8.c:52;contains 24 native label pointers
 T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
-T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:95;source:58578.c:1045;use cited by sanity pass;source:573B8.c:54
+T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:97;source:58578.c:1045;use cited by sanity pass;source:573B8.c:54
 T00215.000,T00215,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124
 T00215.001,T00215,D_800EB9B8_t,1,unk20,1,short,,,,depth,Average screen depth of the sphere,med,source:58578.c:128
 T00215.002,T00215,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
@@ -1302,7 +1302,7 @@ T00215.017,T00215,D_800EB9B8_t,17,unk3E,1,short,,,,inputLocked,Nonzero blocks sp
 T00215.018,T00215,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
 T00215.019,T00215,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
 T00215.020,T00215,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,labels,Floating target labels,high,source:58578.c:649
-T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:134;declaration-only;source:58578.c:48
+T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:136;declaration-only;source:58578.c:48
 T00215.022,T00215,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
 T00215.023,T00215,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
 T00215.024,T00215,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
@@ -1332,12 +1332,12 @@ T00216.022,T00216,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and 
 T00216.023,T00216,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
 T00216.024,T00216,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
 T00217.000,T00217,D_800EB9B8_t2,0,unk0,1,u_char,,,,kind,Volume kind; bit 7 marks it active,med,source:573B8.c:454
-T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,reserved1,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:16;declaration-only;source:573B8.c:25
-T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,reserved2,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:17;declaration-only;source:573B8.c:26
-T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,reserved3,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:18;declaration-only;source:573B8.c:27
-T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,reserved4,Bits of Battle::TargetVolume.scale; not read through this view; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:19;source:58578.c:134;sanity pass 2026-10-17
-T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,reserved8,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:20;declaration-only;source:573B8.c:29
-T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,reservedC,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:21;declaration-only;source:573B8.c:30
+T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,reserved1,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:18;declaration-only;source:573B8.c:25
+T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,reserved2,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:19;declaration-only;source:573B8.c:26
+T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,reserved3,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:20;declaration-only;source:573B8.c:27
+T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,reserved4,Bits of Battle::TargetVolume.scale; not read through this view; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:21;source:58578.c:134;sanity pass 2026-10-17
+T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,reserved8,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:22;declaration-only;source:573B8.c:29
+T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,reservedC,Copied with the volume; not read by decompiled code; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:23;declaration-only;source:573B8.c:30
 T00218.000,T00218,D_800EB9B8_unk990,0,unk0,1,char,,,label animation state,state,"0 inactive, 2 sliding in; above 1 is not settled",med,source:58578.c:649
 T00218.001,T00218,D_800EB9B8_unk990,1,unk1,1,char,,,selected flag,depth,Ordering-table depth of the label,med,source:58578.c:659
 T00218.002,T00218,D_800EB9B8_unk990,2,unk2,1,char,,,,gradient,Gradient style,med,source:58578.c:658
@@ -1383,7 +1383,7 @@ T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,chainStep,
 T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,selection,Action being chosen,high,source:146C.c:4499
 T00225.003,T00225,D_800F19CC_t,3,unk854,1,D_800F19CC_t2[4],,,recent action ring,queue,Actions queued for execution,high,source:146C.c:743
 T00225.004,T00225,D_800F19CC_t,4,unk2984,1,int,,,player targeting interface enabled,isPlayerAction,"1 when Ashley chooses the action, 0 for other actors",med,source:146C.c:4505
-T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:474;source:146C.c:4187
+T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:475;source:146C.c:4187
 T00225.006,T00225,D_800F19CC_t,6,unk298C,1,u_char,,,selected target index,selectedPreview,Selected target preview; 0xFF none,med,source:146C.c:3783
 T00225.007,T00225,D_800F19CC_t,7,unk298D,1,u_char,,,,cameraPreview,Preview the camera follows; 0xFF none,med,source:146C.c:2809
 T00225.008,T00225,D_800F19CC_t,8,unk298E,1,char,,,,selectionFrames,Frames spent selecting,med,source:146C.c:6900
@@ -1432,18 +1432,18 @@ T00226.004,T00226,D_800F19CC_t2,4,unk48,1,u_short,,,,animationParameter,Paramete
 T00226.005,T00226,D_800F19CC_t2,5,unk4A,1,u_short,,,target count,targetCount,Number of targets,high,source:146C.c:3699
 T00226.006,T00226,D_800F19CC_t2,6,unk4C,1,_hitEntity_t[30],,,,targets,Targets and their hit results,high,source:146C.c:3705
 T00226.007,T00226,D_800F19CC_t2,7,unk844,1,SVECTOR,,,,focusPosition,Position the action and camera focus on,med,source:146C.c:3724
-T00227.000,T00227,D_800F19CC_t5,0,unk0,1,SVECTOR,,,,position,World position of the target,high,source:146C.c:4266
-T00227.001,T00227,D_800F19CC_t5,1,unk8,1,u_char,,,,kind,Target kind; 16 for chests,low,source:146C.c:4276
-T00227.002,T00227,D_800F19CC_t5,2,unk9,1,u_char,,,actor or environment target id,actorId,Actor id; chest index | 0x20 for chests,med,source:146C.c:3702
-T00227.003,T00227,D_800F19CC_t5,3,unkA,1,signed char,,,limb index,limb,Target limb,high,source:146C.c:3705
-T00227.004,T00227,D_800F19CC_t5,4,effect,0,char,,,,effect,Previewed hit effect,high,source:146C.c:3244
-T00227.005,T00227,D_800F19CC_t5,5,unkC,1,short,,,effect value,previewAmount,Current HP or MP shown by the preview,med,source:146C.c:3245
-T00227.006,T00227,D_800F19CC_t5,6,unkE,1,short,,,hit chance,hitChance,Hit chance; for chests a risk-based trap chance,med,source:146C.c:3262
-T00227.007,T00227,D_800F19CC_t5,7,unk10,1,int,,,,removedStatuses,Statuses the action removes,high,source:146C.c:3263
-T00227.008,T00227,D_800F19CC_t5,8,unk14,1,char,,,,actionKind,Kind byte of the action,med,source:146C.c:3264
-T00227.009,T00227,D_800F19CC_t5,9,unk15,1,char,,,,opaque15,Copied from the action request; meaning not established,low,source:146C.c:3265
-T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,opaque16,Copied from the action request; meaning not established,low,source:146C.c:3266
-T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,enemyClass,Enemy class of the target,high,source:146C.c:3267
+T00227.000,T00227,D_800F19CC_t5,0,unk0,1,SVECTOR,,,,position,World position of the target,high,native:TargetingState.hpp TargetPreview::position (#441);source:146C.c:4266
+T00227.001,T00227,D_800F19CC_t5,1,unk8,1,u_char,,,,kind,Target kind; 16 for chests,low,native:TargetingState.hpp TargetPreview::kind (#441);source:146C.c:4276
+T00227.002,T00227,D_800F19CC_t5,2,unk9,1,u_char,,,actor or environment target id,actor_id,Actor id; chest index | 0x20 for chests,med,native:TargetingState.hpp TargetPreview::actor_id (#441);source:146C.c:3702
+T00227.003,T00227,D_800F19CC_t5,3,unkA,1,signed char,,,limb index,limb,Target limb,high,native:TargetingState.hpp TargetPreview::limb (#441);source:146C.c:3705
+T00227.004,T00227,D_800F19CC_t5,4,effect,0,char,,,,effect,Previewed hit effect,high,native:TargetingState.hpp TargetPreview::effect (#441);source:146C.c:3244
+T00227.005,T00227,D_800F19CC_t5,5,unkC,1,short,,,effect value,preview_amount,Current HP or MP shown by the preview,med,native:TargetingState.hpp TargetPreview::preview_amount (#441);source:146C.c:3245
+T00227.006,T00227,D_800F19CC_t5,6,unkE,1,short,,,hit chance,hit_chance,Hit chance; for chests a risk-based trap chance,med,native:TargetingState.hpp TargetPreview::hit_chance (#441);source:146C.c:3262
+T00227.007,T00227,D_800F19CC_t5,7,unk10,1,int,,,,removed_statuses,Statuses the action removes,high,native:TargetingState.hpp TargetPreview::removed_statuses (#441);source:146C.c:3263
+T00227.008,T00227,D_800F19CC_t5,8,unk14,1,char,,,,action_kind,Kind byte of the action,med,native:TargetingState.hpp TargetPreview::action_kind (#441);source:146C.c:3264
+T00227.009,T00227,D_800F19CC_t5,9,unk15,1,char,,,,opaque15,Copied from the action request; meaning not established,low,native:TargetingState.hpp TargetPreview::opaque15 (#441);source:146C.c:3265
+T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,opaque16,Copied from the action request; meaning not established,low,native:TargetingState.hpp TargetPreview::opaque16 (#441);source:146C.c:3266
+T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,enemy_class,Enemy class of the target,high,native:TargetingState.hpp TargetPreview::enemy_class (#441);source:146C.c:3267
 T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
 T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
 T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved08,Cleared with the effect and never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Engine\src\Render\ScreenOverlayLive.cpp:374;source:146C.c:9273
@@ -1451,16 +1451,16 @@ T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reserved0c,Written but never read
 T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
 T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
 T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392
-T00230.000,T00230,D_800F1BAC_t,0,unk0,1,SVECTOR,,,,position,World position; pad is the remaining lifetime,med,source:2842C.c:1778
-T00230.001,T00230,D_800F1BAC_t,1,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),,,label kind and actor index,key,Label kind and actor,high,source:2842C.c:1571
-T00230.002,T00230,D_800F1BAC_t,2,unkA,1,u_char,,,,limb,Limb or sprite index,med,source:2842C.c:1750
-T00230.003,T00230,D_800F1BAC_t,3,unkB,1,u_char,,,animation tick,frame,Animation frame,med,source:2842C.c:1572
-T00230.004,T00230,D_800F1BAC_t,4,unkC,1,u_short,,,signed magnitude or message value,value,Displayed value; bit 15 marks healing,med,source:2842C.c:1632
-T00230.005,T00230,D_800F1BAC_t,5,unkE,1,u_char,,,label presentation style,colorFlags,Color and flags; bit 7 is cleared once shown,low,source:2842C.c:1628
-T00230.006,T00230,D_800F1BAC_t,6,displayTextLen,0,u_char,,,,textLength,Length of the text,high,source:2842C.c:1638
-T00230.007,T00230,D_800F1BAC_t,7,unk10,1,short,,,horizontal separation,scaleX,Horizontal scale (ONE = 1.0),med,source:2842C.c:1620
-T00230.008,T00230,D_800F1BAC_t,8,unk12,1,short,,,vertical separation,scaleY,Vertical scale; grows by 10 per frame while rising,med,source:2842C.c:1781
-T00230.009,T00230,D_800F1BAC_t,9,displayText,0,signed char[4],,,,text,Text drawn as digit sprites,high,source:2842C.c:1637
+T00230.000,T00230,D_800F1BAC_t,0,unk0,1,SVECTOR,,,,position,World position; pad is the remaining lifetime,med,native:ValueLabels.hpp FloatingLabel::position (#441);source:2842C.c:1778
+T00230.001,T00230,D_800F1BAC_t,1,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),,,label kind and actor index,key,Label kind and actor,high,native:ValueLabels.hpp FloatingLabel::key (#441);source:2842C.c:1571
+T00230.002,T00230,D_800F1BAC_t,2,unkA,1,u_char,,,,limb,Limb or sprite index,med,native:ValueLabels.hpp FloatingLabel::limb (#441);source:2842C.c:1750
+T00230.003,T00230,D_800F1BAC_t,3,unkB,1,u_char,,,animation tick,frame,Animation frame,med,native:ValueLabels.hpp FloatingLabel::frame (#441);source:2842C.c:1572
+T00230.004,T00230,D_800F1BAC_t,4,unkC,1,u_short,,,signed magnitude or message value,value,Displayed value; bit 15 marks healing,med,native:ValueLabels.hpp FloatingLabel::value (#441);source:2842C.c:1632
+T00230.005,T00230,D_800F1BAC_t,5,unkE,1,u_char,,,label presentation style,color_flags,Color and flags; bit 7 is cleared once shown,low,native:ValueLabels.hpp FloatingLabel::color_flags (#441);source:2842C.c:1628
+T00230.006,T00230,D_800F1BAC_t,6,displayTextLen,0,u_char,,,,text_length,Length of the text,high,native:ValueLabels.hpp FloatingLabel::text_length (#441);source:2842C.c:1638
+T00230.007,T00230,D_800F1BAC_t,7,unk10,1,short,,,horizontal separation,scale_x,Horizontal scale (ONE = 1.0),med,native:ValueLabels.hpp FloatingLabel::scale_x (#441);source:2842C.c:1620
+T00230.008,T00230,D_800F1BAC_t,8,unk12,1,short,,,vertical separation,scale_y,Vertical scale; grows by 10 per frame while rising,med,native:ValueLabels.hpp FloatingLabel::scale_y (#441);source:2842C.c:1781
+T00230.009,T00230,D_800F1BAC_t,9,displayText,0,signed char[4],,,,text,Text drawn as digit sprites,high,native:ValueLabels.hpp FloatingLabel::text (#441);source:2842C.c:1637
 T00231.000,T00231,D_800F1BB0_t,0,unk0,1,signed char,,,red tint,red,Red offset,med,declaration-only;source:146C.c:162
 T00231.001,T00231,D_800F1BB0_t,1,unk1,1,signed char,,,green tint,green,Green offset,med,source:146C.c:17596;use cited by sanity pass;source:146C.c:163
 T00231.002,T00231,D_800F1BB0_t,2,unk2,1,signed char,,,blue tint,blue,Blue offset,med,source:146C.c:17597;use cited by sanity pass;source:146C.c:164
@@ -3999,12 +3999,12 @@ T00442.009,T00442,func_80085A34_t,9,unk18,1,int,,,,opaque18,Not used by native c
 T00442.010,T00442,func_80085A34_t,10,unk1C,1,int,,,packed stat effect modes,opaque1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:104;source:146C.c:13196
 T00442.011,T00442,func_80085A34_t,11,unk20,1,int[8],,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:105;declaration-only;source:146C.c:225
 T00442.012,T00442,func_80085A34_t,12,unk40,1,int,,,,opaque40,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:106;source:146C.c:13191
-T00443.000,T00443,func_8008631C_t2,0,targetActor,0,u_char,,,,targetActor,Named in the fork; see cited use,med,source:146C.c:745
-T00443.001,T00443,func_8008631C_t2,1,targetLimb,0,signed char,,,,targetLimb,Named in the fork; see cited use,med,source:146C.c:1944
-T00443.002,T00443,func_8008631C_t2,2,hitThreshold,0,u_char,,,,hitThreshold,Named in the fork; see cited use,med,source:146C.c:3262
-T00443.003,T00443,func_8008631C_t2,3,unk3,1,u_char,,,,impactKind,Selects the hit sounds and impact effects,med,source:146C.c:1973
-T00443.004,T00443,func_8008631C_t2,4,hp,0,short,,,,hp,Named in the fork; see cited use,med,source:146C.c:3243
-T00443.005,T00443,func_8008631C_t2,5,mp,0,short,,,,mp,Named in the fork; see cited use,med,source:146C.c:3248
+T00443.000,T00443,func_8008631C_t2,0,targetActor,0,u_char,,,,target_actor,Named in the fork; see cited use,med,native:ActionResolution.hpp HitTargetWord::target_actor (#441);source:146C.c:745
+T00443.001,T00443,func_8008631C_t2,1,targetLimb,0,signed char,,,,target_limb,Named in the fork; see cited use,med,native:ActionResolution.hpp HitTargetWord::target_limb (#441);source:146C.c:1944
+T00443.002,T00443,func_8008631C_t2,2,hitThreshold,0,u_char,,,,hit_threshold,Named in the fork; see cited use,med,native:ActionResolution.hpp HitTargetWord::hit_threshold (#441);source:146C.c:3262
+T00443.003,T00443,func_8008631C_t2,3,unk3,1,u_char,,,,impact_kind,Selects the hit sounds and impact effects,med,native:ActionResolution.hpp HitTargetWord::impact_kind (#441);source:146C.c:1973
+T00443.004,T00443,func_8008631C_t2,4,hp,0,short,,,,hp,Named in the fork; see cited use,med,native:ActionResolution.hpp HitTargetWord::hp (#441);source:146C.c:3243
+T00443.005,T00443,func_8008631C_t2,5,mp,0,short,,,,mp,Named in the fork; see cited use,med,native:ActionResolution.hpp HitTargetWord::mp (#441);source:146C.c:3248
 T00444.000,T00444,func_80089888_t,0,unk0_0,1,char,,,,tileX,Tile X,med,"retired-by:VS::Actors::SpawnPlacement::tile_x (Actors/ActorSpawning.hpp, #441);source:146C.c:15149;use cited by sanity pass;source:3A1A0.h:5"
 T00444.001,T00444,func_80089888_t,1,unk0_8,1,char,,,,direction,Facing direction,med,"retired-by:VS::Actors::SpawnPlacement::direction (Actors/ActorSpawning.hpp, #441);source:146C.c:15151;use cited by sanity pass;source:3A1A0.h:6"
 T00444.002,T00444,func_80089888_t,2,unk0_16,1,char,,,,tileZ,Tile Z,med,"retired-by:VS::Actors::SpawnPlacement::tile_z (Actors/ActorSpawning.hpp, #441);source:146C.c:15150;use cited by sanity pass;source:3A1A0.h:7"
@@ -6230,7 +6230,7 @@ T00690.001,T00690,vs_main_CdFile,1,size,0,int,,,,size,Named in the fork; see cit
 T00691.000,T00691,vs_main_CdQueueSlot,0,state,0,short,,,,state,Named in the fork; see cited use,med,source:146C.c:6637
 T00691.001,T00691,vs_main_CdQueueSlot,1,priority,0,short,,,,priority,Named in the fork; see cited use,med,source:main.c:9439
 T00691.002,T00691,vs_main_CdQueueSlot,2,cdFile,0,vs_main_CdFile,,,,file,Named in the fork; see cited use,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::file (#441);source:main.c:9418
-T00691.003,T00691,vs_main_CdQueueSlot,3,unkC,1,int,,,,reserved,Only copied into members native code never reads; kept for the original layout,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::reserved (#441);native-refs:copy-only;source:native:Native\Content\src\CdDriveLive.cpp:130;source:main.c:9438
+T00691.003,T00691,vs_main_CdQueueSlot,3,unkC,1,int,,,,reserved,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\CdDriveLive.cpp:127;native:DiscQueue.hpp VS::Content::DiscQueueSlot::reserved (#441);source:main.c:9438
 T00691.004,T00691,vs_main_CdQueueSlot,4,vram,0,void *,,,,destination,Named in the fork; see cited use,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::destination (#441);source:main.c:9437
 T00692.000,T00692,vs_main_HeapHeader,0,prev,0,struct vs_main_HeapHeader *,,,,prev,Previous block,high,source:main.c:8988
 T00692.001,T00692,vs_main_HeapHeader,1,next,0,struct vs_main_HeapHeader *,,,,next,Next block,high,source:main.c:8987
@@ -6239,7 +6239,7 @@ T00692.003,T00692,vs_main_HeapHeader,3,unkC,1,int,,,,reservedC,No access found,l
 T00693.000,T00693,vs_main_artsStatus_t,0,artsLearned,0,u_char[12],,,,arts_learned,Named in the fork; see cited use,med,source:146C.c:3279
 T00693.001,T00693,vs_main_artsStatus_t,1,kills,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),,,,kills,Named in the fork; see cited use,med,source:146C.c:3283
 T00694.000,T00694,vs_main_disk_t,0,state,0,char,,,,state,Drive state,high,source:main.c:9037
-T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,xa_mode_marker,Set to 0 when XA streaming starts and 128 when it stops; never read; written but never read by native code; kept for the original layout,med,native:DiscQueue.hpp VS::Content::DiscDrive::xa_mode_marker (#441);native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:139;source:main.c:9176;source:main.c:9292
+T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,xa_mode_marker,Set to 0 when XA streaming starts and 128 when it stops; never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:139;native:DiscQueue.hpp VS::Content::DiscDrive::xa_mode_marker (#441);source:main.c:9176;source:main.c:9292
 T00694.002,T00694,vs_main_disk_t,2,unk2,1,char,,,,reserved2,Cleared on reset; never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:145;source:main.c:9392
 T00694.003,T00694,vs_main_disk_t,3,unk3,1,char,,,retryCount,failure_count,Failed command count,high,native:DiscQueue.hpp VS::Content::DiscDrive::failure_count (#441);source:main.c:9151;source:main.c:9200
 T00694.004,T00694,vs_main_disk_t,4,unk4,1,u_int,,,sectorsReceived,sectors_received,Sectors delivered by the drive; ends the read at sectorCount,high,native:DiscQueue.hpp VS::Content::DiscDrive::sectors_received (#441);source:main.c:9068
@@ -6750,8 +6750,8 @@ T00749.001,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00749.002,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
 T00750.000,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
 T00750.001,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
-T00751.000,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
-T00751.001,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00751.000,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,native:ValueLabels.hpp ValueLabelKey::bytes (#441);source:2842C.c:1571
+T00751.001,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,native:ValueLabels.hpp ValueLabelKey::halfword (#441);source:2842C.c:1650
 T00752.000,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
 T00752.001,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
 T00753.000,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),0,u16,0,u_short[2],,,,unsignedHalves,Unsigned halves of the effect operand,med,declaration-only;source:2842C.c:28
@@ -6761,8 +6761,8 @@ T00754.000,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00754.001,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),1,s16,0,short,,,,count,Remaining shake count,med,source:4A0A8.c:4007
 T00755.000,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),0,flags,0,func_800C1564_flags,,,,flags,Shape flags,med,source:58578.c:413
 T00755.001,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),1,values,0,u_char[4],,,,extents,Size along each axis; byte 0 is the action's X range,med,source:146C.c:13460
-T00756.000,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),0,s32,0,int,,,,word,All bytes; 0xFFFFFF clears the highlight,med,source:5BF94.c:3500
-T00756.001,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),1,u8,0,u_char[4],,,,bytes,Byte 1 is the highlighted entry,low,source:5BF94.c:3388
+T00756.000,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),0,s32,0,int,,,,word,All bytes; 0xFFFFFF clears the highlight,med,native:Hud.hpp HudHighlightWord::word (#441);source:5BF94.c:3500
+T00756.001,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),1,u8,0,u_char[4],,,,bytes,Byte 1 is the highlighted entry,low,native:Hud.hpp HudHighlightWord::bytes (#441);source:5BF94.c:3388
 T00839.000,T00839,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9),0,cursor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:130:13),,,,position,Row and page,med,declaration-only;source:5BF94.h:133
 T00839.001,T00839,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9),1,value,0,u_short,,,,word,Both bytes as one word,med,declaration-only;source:5BF94.h:134
 T00757.000,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),,,,bits,Packed ability fields,med,source:146C.c:4705
@@ -6791,8 +6791,8 @@ T00767.001,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00767.002,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
 T00768.000,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
 T00768.001,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
-T00769.000,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
-T00769.001,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00769.000,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,native:ValueLabels.hpp ValueLabelKey::bytes (#441);source:2842C.c:1571
+T00769.001,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,native:ValueLabels.hpp ValueLabelKey::halfword (#441);source:2842C.c:1650
 T00770.000,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
 T00770.001,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
 T00840.000,T00840,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:129:9),0,cursor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:130:13),,,,position,Row and page,med,declaration-only;source:5BF94.h:133
@@ -6815,8 +6815,8 @@ T00777.001,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00777.002,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
 T00778.000,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
 T00778.001,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
-T00779.000,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
-T00779.001,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00779.000,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,native:ValueLabels.hpp ValueLabelKey::bytes (#441);source:2842C.c:1571
+T00779.001,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,native:ValueLabels.hpp ValueLabelKey::halfword (#441);source:2842C.c:1650
 T00780.000,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
 T00780.001,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
 T00841.000,T00841,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:129:9),0,cursor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:130:13),,,,position,Row and page,med,declaration-only;source:5BF94.h:133
@@ -6846,8 +6846,8 @@ T00788.001,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00788.002,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
 T00789.000,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
 T00789.001,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
-T00790.000,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
-T00790.001,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00790.000,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,native:ValueLabels.hpp ValueLabelKey::bytes (#441);source:2842C.c:1571
+T00790.001,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,native:ValueLabels.hpp ValueLabelKey::halfword (#441);source:2842C.c:1650
 T00791.000,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
 T00791.001,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
 T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,native:Location.hpp VS::Actors::PackedTileTarget::target (#441);source:146C.c:2804

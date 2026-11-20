@@ -20,9 +20,9 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionMenu.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionMenu.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionRecords.hpp"
@@ -32,7 +32,7 @@
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -167,7 +167,7 @@ int WarlockSpellRankCount(int action) {
 void InspectActionOptions(PlayerObservationState& state) {
   const auto* player = Battle_actors[0];
   if (player == nullptr || player->stats == nullptr ||
-      Battle_actionState == nullptr) {
+      VS::Battle::actionState == nullptr) {
     return;
   }
   const auto append = [&](const auto& ids, std::size_t count,
@@ -201,8 +201,8 @@ void InspectActionOptions(PlayerObservationState& state) {
   append(VS::Menu::Magic::shamanSpellIds, kShamanRows, "shaman");
   append(VS::Menu::Magic::sorcererSpellIds, kSorcererRows, "sorcerer");
   append(VS::Menu::Magic::enchanterSpellIds, kEnchanterRows, "enchanter");
-  append(Battle_chainAbilityActionIds, kBattleAbilityRows, "chain");
-  append(Battle_defenseAbilityActionIds, kBattleAbilityRows, "defense");
+  append(VS::Battle::chainAbilityActionIds, kBattleAbilityRows, "chain");
+  append(VS::Battle::defenseAbilityActionIds, kBattleAbilityRows, "defense");
 }
 
 void InspectItemOptions(PlayerObservationState& state) {
@@ -359,7 +359,7 @@ void InspectIncomingEffect(const Battle_ActionState& action,
   }
   for (unsigned index = 0; index < queued.targetCount; ++index) {
     const auto& hit = queued.targets[index];
-    if (hit.targetsPosition != 0 || hit.target.targetActor != 0) continue;
+    if (hit.targetsPosition != 0 || hit.target.target_actor != 0) continue;
     if (hit.hpEffect == kHpDamage || hit.hpEffect == kCombinedDamage) {
       snapshot.incoming_hp_damage +=
           std::max(0, static_cast<int>(hit.target.hp));
@@ -413,8 +413,8 @@ EncounterReactionTimingState InspectReactionTiming(
         VS::Input::settings.mapped_defense_abilities[slot]);
   }
   constexpr unsigned kAbilityTimingPhase = 7, kQueueIndexMask = 3;
-  if (Battle_actionState == nullptr) return snapshot;
-  const auto& action = *Battle_actionState;
+  if (VS::Battle::actionState == nullptr) return snapshot;
+  const auto& action = *VS::Battle::actionState;
   snapshot.active =
       state.control_mode == 2 && state.action_phase == kAbilityTimingPhase;
   snapshot.queue_index = action.queueIndex;
@@ -435,8 +435,8 @@ EncounterReactionTimingState InspectReactionTiming(
     if (snapshot.active) snapshot.eligibility_status = "not_actor_targeted";
     return snapshot;
   }
-  snapshot.source_actor = queued.primaryTarget.target.targetActor;
-  snapshot.target_actor = queued.targets[0].target.targetActor;
+  snapshot.source_actor = queued.primaryTarget.target.target_actor;
+  snapshot.target_actor = queued.targets[0].target.target_actor;
   if (!snapshot.active) return snapshot;
   InspectReactionEligibility(snapshot);
   return snapshot;
@@ -896,7 +896,7 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
   InspectRoomDoors(state);
   InspectRoomChests(state);
   state.navigation = InspectNavigation();
-  state.target_selection_step = Battle_targetSelectionStep;
+  state.target_selection_step = VS::Battle::targetSelectionStep;
   for (const auto& actor : base.actors) {
     state.player_actors.push_back(InspectPlayerActor(actor));
   }
@@ -907,7 +907,7 @@ namespace {
 nlohmann::json EncodeTargetForecasts(const EncounterState& base) {
   auto forecasts = nlohmann::json::array();
   if (!base.ready || base.target_previews.empty()) return forecasts;
-  const auto* action = Battle_actionState;
+  const auto* action = VS::Battle::actionState;
   if (action == nullptr ||
       base.target_previews.size() != action->previewCount ||
       action->previewCount > std::size(action->previews)) {
@@ -918,19 +918,19 @@ nlohmann::json EncodeTargetForecasts(const EncounterState& base) {
   for (std::size_t index = 0; index < base.target_previews.size(); ++index) {
     const auto& target = action->previews[index];
     const auto& observed = base.target_previews[index];
-    if (target.actorId != observed.actor || target.limb != observed.limb) {
+    if (target.actor_id != observed.actor || target.limb != observed.limb) {
       throw std::runtime_error(
           "native target forecast identity changed within a frame");
     }
     // Original 146C.c:3235 copies these cached values without another roll.
     const int effect = static_cast<std::uint8_t>(target.effect);
-    nlohmann::json forecast = {{"actor", target.actorId},
+    nlohmann::json forecast = {{"actor", target.actor_id},
                                {"limb", target.limb},
                                {"effect_id", effect},
-                               {"hit_threshold", target.hitChance},
+                               {"hit_threshold", target.hit_chance},
                                {"amount", nullptr}};
     if (std::ranges::find(kAmountEffects, effect) != kAmountEffects.end()) {
-      forecast["amount"] = std::bit_cast<std::uint16_t>(target.previewAmount);
+      forecast["amount"] = std::bit_cast<std::uint16_t>(target.preview_amount);
     }
     forecasts.push_back(std::move(forecast));
   }

@@ -21,7 +21,7 @@
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.h"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Random.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"

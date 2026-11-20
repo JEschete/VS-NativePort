@@ -37,42 +37,42 @@ int CheckTimerGlyph(const u_long* packet, char character, int x) {
 TEST_CASE("F00729 Live retains the signed command without changing cue frames",
           "[hud-orchestration-live][F00729]") {
   f::LiveState fixture;
-  const auto cue = Battle_abilityTimingCueFrames;
+  const auto cue = VS::Battle::abilityTimingCueFrames;
   b::SetLiveActorMarkersHidden(0x12348001);
-  CHECK(Battle_actorMarkersHidden == -32767);
-  CHECK(Battle_abilityTimingCueFrames == cue);
+  CHECK(VS::Battle::actorMarkersHidden == -32767);
+  CHECK(VS::Battle::abilityTimingCueFrames == cue);
   b::SetLiveActorMarkersHidden(0x10000);
-  CHECK(Battle_actorMarkersHidden == 0);
+  CHECK(VS::Battle::actorMarkersHidden == 0);
 }
 
 TEST_CASE("F00730 Live bulk fill does not consume neighboring native records",
           "[hud-orchestration-live][F00730]") {
   f::LiveState fixture;
-  Battle_actorMarkersHidden = -123;
-  Battle_ashleyStatusLabelsSuppressed = -234;
-  Battle_actorMarkers[16] = 77;
+  VS::Battle::actorMarkersHidden = -123;
+  VS::Battle::ashleyStatusLabelsSuppressed = -234;
+  VS::Battle::actorMarkers[16] = 77;
   b::SetLiveActorMarker(0, 0x1234ABC0);
   CHECK(std::ranges::all_of(
-      std::span(Battle_actorMarkers).first<16>(),
+      std::span(VS::Battle::actorMarkers).first<16>(),
       [](char value) { return static_cast<unsigned char>(value) == 0xC0; }));
-  CHECK(Battle_actorMarkers[16] == 77);
-  CHECK(Battle_actorMarkersHidden == -123);
-  CHECK(Battle_ashleyStatusLabelsSuppressed == -234);
+  CHECK(VS::Battle::actorMarkers[16] == 77);
+  CHECK(VS::Battle::actorMarkersHidden == -123);
+  CHECK(VS::Battle::ashleyStatusLabelsSuppressed == -234);
   b::SetLiveActorMarker(15, 0x40);
   b::SetLiveActorMarker(15, 0x80);
   b::SetLiveActorMarker(15, 7);
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[15]) == 0x87);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[15]) == 0x87);
 }
 
 TEST_CASE("F00743 Live re-entry never changes the marker visibility command",
           "[hud-orchestration-live][F00743]") {
   f::LiveState fixture;
-  Battle_actorMarkersHidden = -456;
-  Battle_ashleyStatusLabelsSuppressed = -1;
+  VS::Battle::actorMarkersHidden = -456;
+  VS::Battle::ashleyStatusLabelsSuppressed = -1;
   b::SuppressLiveAshleyStatusLabels();
   b::SuppressLiveAshleyStatusLabels();
-  CHECK(Battle_ashleyStatusLabelsSuppressed == 1);
-  CHECK(Battle_actorMarkersHidden == -456);
+  CHECK(VS::Battle::ashleyStatusLabelsSuppressed == 1);
+  CHECK(VS::Battle::actorMarkersHidden == -456);
 }
 
 TEST_CASE("F01361 Live hidden panel needs no actor or render target",
@@ -80,22 +80,22 @@ TEST_CASE("F01361 Live hidden panel needs no actor or render target",
   f::LiveState fixture;
   Battle_characterState = nullptr;
   fixture.frame.Disconnect();
-  Battle_shortcutHudAnimationStep = 11;
-  Battle_shortcutHudRequested = static_cast<char>(255);
+  VS::Battle::shortcutHudAnimationStep = 11;
+  VS::Battle::shortcutHudRequested = static_cast<char>(255);
   b::DrawLiveShortcutHud();
-  CHECK(Battle_shortcutHudAnimationStep == 10);
-  CHECK(Battle_shortcutHudRequested == 0);
+  CHECK(VS::Battle::shortcutHudAnimationStep == 10);
+  CHECK(VS::Battle::shortcutHudRequested == 0);
   CHECK(fixture.frame.UsedWords() == 0);
 }
 
 TEST_CASE("F01361 Live emits both actual sprite rows and reverse digit owners",
           "[hud-orchestration-live][F01361]") {
   f::LiveState fixture;
-  Battle_shortcutHudRequested = 1;
-  Battle_shortcutHudAnimationStep = 0;
+  VS::Battle::shortcutHudRequested = 1;
+  VS::Battle::shortcutHudAnimationStep = 0;
   b::DrawLiveShortcutHud();
   CHECK(fixture.frame.UsedWords() == 42);
-  CHECK(Battle_shortcutHudRequested == 0);
+  CHECK(VS::Battle::shortcutHudRequested == 0);
   const auto* digit = NextPacket(static_cast<const u_long*>(
       VS::Render::FrameScratchpad().overlay_ordering_table));
   REQUIRE(digit != nullptr);
@@ -107,11 +107,11 @@ TEST_CASE("F01362 Live invisible state does not require unused render state",
           "[hud-orchestration-live][F01362]") {
   f::LiveState fixture;
   fixture.frame.Disconnect();
-  Battle_hudHidden = static_cast<char>(255);
-  Battle_hudSlideOffset = 0x200000;
+  VS::Battle::hudHidden = static_cast<char>(255);
+  VS::Battle::hudSlideOffset = 0x200000;
   b::DrawLiveBattleHud();
   CHECK(fixture.frame.UsedWords() == 0);
-  CHECK(Battle_hudSlideOffset == 0x200000);
+  CHECK(VS::Battle::hudSlideOffset == 0x200000);
 }
 
 TEST_CASE("F01362 Live uses real limb colors and compact zero-risk font",
@@ -120,8 +120,9 @@ TEST_CASE("F01362 Live uses real limb colors and compact zero-risk font",
   fixture.actor.stats.limbs[0].hp = 0;
   b::DrawLiveBattleHud();
   CHECK(fixture.frame.primitives[2] ==
-        (Battle_limbStatusColors[0] | 0x64000000U));
-  CHECK(fixture.frame.primitives[4] == Battle_limbDisplaySpriteTexCoords[0]);
+        (VS::Battle::limbStatusColors[0] | 0x64000000U));
+  CHECK(fixture.frame.primitives[4] ==
+        VS::Battle::limbDisplaySpriteTexCoords[0]);
   // Five six-word limb sprites, the real compact text and its draw mode.
   CHECK(fixture.frame.UsedWords() == 82);
   const auto* head = NextPacket(fixture.frame.ordering.data() + 1);
@@ -139,16 +140,16 @@ TEST_CASE("F01362 Live uses real limb colors and compact zero-risk font",
 TEST_CASE("F01362 Live indicator modulates color rather than screen position",
           "[hud-orchestration-live][F01362]") {
   f::LiveState fixture;
-  Battle_hudHidden = 1;
-  Battle_hudSlideOffset = 0x200000;
-  Battle_hudBattleMode = 2;
-  Battle_battleModeIndicatorStep = 4;
-  Battle_battleModeIndicatorWobble = 1024;
+  VS::Battle::hudHidden = 1;
+  VS::Battle::hudSlideOffset = 0x200000;
+  VS::Battle::hudBattleMode = 2;
+  VS::Battle::battleModeIndicatorStep = 4;
+  VS::Battle::battleModeIndicatorWobble = 1024;
   b::DrawLiveBattleHud();
   CHECK(fixture.frame.UsedWords() == 6);
   CHECK(fixture.frame.primitives[2] == 0x664040C0);
   CHECK(fixture.frame.primitives[3] == 0xFFE500EC);
-  CHECK(Battle_battleModeIndicatorWobble == 1152);
+  CHECK(VS::Battle::battleModeIndicatorWobble == 1152);
 }
 
 TEST_CASE(
@@ -159,10 +160,10 @@ TEST_CASE(
   timer.time.minutes = 12;
   timer.time.seconds = 34;
   VS::State::stateFlags.puzzle_timer_hundredths = 56;
-  Battle_puzzleTimerTextPointer = nullptr;
+  VS::Battle::puzzleTimerTextPointer = nullptr;
   b::DrawLivePuzzleTimer(&timer);
-  CHECK(std::string_view(Battle_puzzleTimerText) == "12:34:56");
-  CHECK(Battle_puzzleTimerTextPointer == nullptr);
+  CHECK(std::string_view(VS::Battle::puzzleTimerText.data()) == "12:34:56");
+  CHECK(VS::Battle::puzzleTimerTextPointer == nullptr);
   CHECK(fixture.frame.UsedWords() == 42);
   auto* packet = NextPacket(fixture.frame.ordering.data() + 3);
   REQUIRE(packet != nullptr);
@@ -184,10 +185,10 @@ TEST_CASE("F01384 Live saturation and repeat entry consume only timer values",
   timer.time.hours = -128;
   VS::State::stateFlags.puzzle_timer_hundredths = -1;
   b::DrawLivePuzzleTimer(&timer);
-  CHECK(std::string_view(Battle_puzzleTimerText) == "59:59:99");
+  CHECK(std::string_view(VS::Battle::puzzleTimerText.data()) == "59:59:99");
   timer = {};
   VS::State::stateFlags.puzzle_timer_hundredths = 0;
   b::DrawLivePuzzleTimer(&timer);
-  CHECK(std::string_view(Battle_puzzleTimerText) == "00:00:00");
+  CHECK(std::string_view(VS::Battle::puzzleTimerText.data()) == "00:00:00");
   CHECK(fixture.frame.UsedWords() == 84);
 }

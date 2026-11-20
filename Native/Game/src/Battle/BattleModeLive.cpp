@@ -10,7 +10,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
 

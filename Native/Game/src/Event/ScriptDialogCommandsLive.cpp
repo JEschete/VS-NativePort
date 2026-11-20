@@ -12,7 +12,7 @@
 #include <iterator>
 #include <string>
 
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
@@ -35,7 +35,7 @@ static_assert(std::size(VS::Menu::textBoxes) ==
               static_cast<std::size_t>(event::kTextBoxCount));
 static_assert(std::size(event::isTextBoxAwaitingClose) >=
               static_cast<std::size_t>(event::kTextBoxCount));
-static_assert(std::size(Battle_stringContext.integers) ==
+static_assert(std::size(VS::Battle::stringContext.integers) ==
               static_cast<std::size_t>(event::kDialogIntegerCount));
 
 constexpr char kSkipActive = 2;
@@ -245,7 +245,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     VS::State::SetLiveScriptFlag(id, value);
   }
   void SetDialogInteger(int slot, int value) override {
-    Battle_stringContext.integers[slot] = value;
+    VS::Battle::stringContext.integers[slot] = value;
   }
 };
 

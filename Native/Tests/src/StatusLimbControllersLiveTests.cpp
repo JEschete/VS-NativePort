@@ -49,7 +49,8 @@ struct LiveLimbFixture {
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
   ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
-  ValueRestore<VS::Menu::StringContext> saved_context{Battle_stringContext};
+  ValueRestore<VS::Menu::StringContext> saved_context{
+      VS::Battle::stringContext};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
   ArrayRestore<int16_t, fw::kPrimaryStatCount> saved_primary{
@@ -64,8 +65,8 @@ struct LiveLimbFixture {
       saved_boxes{VS::Menu::textBoxes};
   ArrayRestore<std::uint16_t, std::size(status::statusStrings)>
       saved_status_text{status::statusStrings};
-  ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{
-      Battle_statusStrings};
+  ArrayRestore<u_short, std::size(VS::Battle::statusStrings)> saved_battle_text{
+      VS::Battle::statusStrings.data()};
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   std::array<char, fw::kStringBufferBytes> output{};
@@ -144,9 +145,9 @@ struct LiveLimbFixture {
 
   static void BuildText() {
     std::ranges::fill(status::statusStrings, u_short{0});
-    std::ranges::fill(Battle_statusStrings, u_short{0});
-    Battle_statusStrings[1] = 64;
-    Battle_statusStrings[64] = 0xE710;
+    std::ranges::fill(VS::Battle::statusStrings, u_short{0});
+    VS::Battle::statusStrings[1] = 64;
+    VS::Battle::statusStrings[64] = 0xE710;
     for (std::size_t index = 0; index < status::kLimbConditionCount; ++index) {
       status::statusStrings[13 + index] = 70;
     }
@@ -238,9 +239,9 @@ TEST_CASE(
   CHECK(static_cast<std::uint8_t>(fixture.output[2]) == 0x30);
   CHECK(static_cast<std::uint8_t>(fixture.output[3]) == 0xE7);
   CHECK(static_cast<std::uint8_t>(fixture.output[4]) == 0xAA);
-  CHECK(Battle_stringContext.strings[0] ==
-        reinterpret_cast<char*>(&Battle_statusStrings[64]));
-  CHECK(Battle_stringContext.strings[1] ==
+  CHECK(VS::Battle::stringContext.strings[0] ==
+        reinterpret_cast<char*>(&VS::Battle::statusStrings[64]));
+  CHECK(VS::Battle::stringContext.strings[1] ==
         reinterpret_cast<char*>(&status::statusStrings[70]));
   CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 2);
 }
@@ -267,12 +268,12 @@ TEST_CASE(
     "F02680 Live refuses a missing MAINMENU workspace without changing peers",
     "[status-limbs][status-limbs-live][F02680]") {
   LiveLimbFixture fixture;
-  Battle_stringContext.strings[0] = fixture.output.data();
+  VS::Battle::stringContext.strings[0] = fixture.output.data();
   VS::Menu::Framework::stringBuf = nullptr;
   const auto refused = status::RefusedLiveLimbControllerCount();
   status::LiveShowSelectedLimbCondition();
   CHECK(status::RefusedLiveLimbControllerCount() == refused + 1);
-  CHECK(Battle_stringContext.strings[0] == fixture.output.data());
+  CHECK(VS::Battle::stringContext.strings[0] == fixture.output.data());
   CHECK(static_cast<std::uint8_t>(fixture.output[0]) == 0xAA);
 }
 
@@ -341,7 +342,7 @@ TEST_CASE(
   status::selectedElement = 6;
   status::LivePopulateSelectedLimbDefense();
   status::selectedElement = 0;
-  Battle_statusStrings[1] = 0xFFFF;
+  VS::Battle::statusStrings[1] = 0xFFFF;
   status::LiveShowSelectedLimbCondition();
   status::selectedActor = 0;
   status::LiveShowSelectedLimbCondition();

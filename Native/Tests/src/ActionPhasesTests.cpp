@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhases.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/Actor.h"
@@ -117,11 +117,11 @@ struct World final : b::ActionPhaseWorld {
 };
 
 struct LiveStateReset {
-  std::uint32_t phase = Battle_actionFlowMode;
-  Battle_ActionState* state = Battle_actionState;
+  std::uint32_t phase = VS::Battle::actionFlowMode;
+  Battle_ActionState* state = VS::Battle::actionState;
   ~LiveStateReset() {
-    Battle_actionFlowMode = phase;
-    Battle_actionState = state;
+    VS::Battle::actionFlowMode = phase;
+    VS::Battle::actionState = state;
   }
 };
 struct LiveActorsReset {
@@ -260,21 +260,21 @@ TEST_CASE(
 TEST_CASE("F00098 live completion does not require an action-state record",
           "[action-phases][F00098]") {
   const LiveStateReset reset;
-  Battle_actionState = nullptr;
-  Battle_actionFlowMode = 0xFFFFFFFF;
+  VS::Battle::actionState = nullptr;
+  VS::Battle::actionFlowMode = 0xFFFFFFFF;
   b::FinishLiveBattleAbilitySequence();
-  CHECK(Battle_actionFlowMode == 9);
-  CHECK(Battle_actionState == nullptr);
+  CHECK(VS::Battle::actionFlowMode == 9);
+  CHECK(VS::Battle::actionState == nullptr);
 }
 
 TEST_CASE("F00114 live reset leaves the unused action-state owner untouched",
           "[action-phases][F00114]") {
   const LiveStateReset reset;
-  Battle_actionState = nullptr;
-  Battle_actionFlowMode = 0xFFFFFFFF;
+  VS::Battle::actionState = nullptr;
+  VS::Battle::actionFlowMode = 0xFFFFFFFF;
   b::ResetLiveActionPhase();
-  CHECK(Battle_actionFlowMode == 0);
-  CHECK(Battle_actionState == nullptr);
+  CHECK(VS::Battle::actionFlowMode == 0);
+  CHECK(VS::Battle::actionState == nullptr);
 }
 
 TEST_CASE("F00121 settles every actor before toggling and selecting field mode",

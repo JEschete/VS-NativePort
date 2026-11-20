@@ -642,7 +642,8 @@ std::optional<std::int32_t> QueueEquipmentStatChange(
     EquipmentStatChangeQueue& queue) {
   const bool weapon = equipment_kind == kWeaponStatChange;
   if (!(settings.weapon && weapon) && !(settings.armor && !weapon)) return 0;
-  // The equipment kind's first-word caption (Battle_kStatChangeFirstWordRects).
+  // The equipment kind's first-word caption
+  // (VS::Battle::kStatChangeFirstWordRects).
   constexpr std::array<std::pair<std::int32_t, std::int32_t>, 7> kFirstWord{
       {{1, 4}, {2, 2}, {3, 3}, {4, 6}, {6, 5}, {241, 1}, {240, 0}}};
   auto first_word = equipment_kind;

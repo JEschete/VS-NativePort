@@ -1,24 +1,16 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's
-// decomp line.
-#include "Battle/ActionFlow.h"
+// The action flow's state (ActionFlow.hpp).
+#include "Battle/ActionFlow.hpp"
 
-#include "Battle/Action.h"
-#include "Battle/Hit.h"
-#include "Battle/TargetingState.h"
-#include "Legacy/Psx.h"
-
+namespace VS::Battle {
 // decomp: D_800F18EC (D_800F18EC@BATTLE/BATTLE.PRG)
-VS::Menu::Framework::ActionSelection* Battle_actionSelection;
-
+VS::Menu::Framework::ActionSelection* actionSelection;
 // decomp: _cameraMode (_cameraMode@BATTLE/BATTLE.PRG)
-u_int Battle_actionFlowMode;
-
+std::uint32_t actionFlowMode;
 // decomp: D_800F18FC (D_800F18FC@BATTLE/BATTLE.PRG)
-int Battle_recoveryRewardMode;
-
+std::int32_t recoveryRewardMode;
 // decomp: D_800F19CC (D_800F19CC@BATTLE/BATTLE.PRG)
-Battle_ActionState* Battle_actionState;
+Battle_ActionState* actionState;
+}  // namespace VS::Battle
 
 // D_8005FFAF was vs_main_scoredata.weaponKillStreak (+0x10F), not a separate
 // global (#448; State/KillScoreLive.cpp ResetLiveWeaponKillStreak).
-

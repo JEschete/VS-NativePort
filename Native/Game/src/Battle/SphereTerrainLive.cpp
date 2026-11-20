@@ -7,8 +7,9 @@
 #include <cstring>
 #include <stdexcept>
 
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereTerrain.hpp"
+#include "Battle/TargetVolume.h"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
@@ -68,7 +69,7 @@ class LiveCanvas final : public VS::Battle::SphereTerrainCanvas {
 namespace VS::Battle {
 void DrawLiveSphereTerrainIntersection(const SVECTOR& position,
                                        const MATRIX& shape, int scale) {
-  if (Battle_targetSphere == nullptr ||
+  if (VS::Battle::targetSphere == nullptr ||
       VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
       VS::Render::FrameScratchpad().ordering_table == nullptr) {
     constexpr const char* kMessage =
@@ -79,7 +80,7 @@ void DrawLiveSphereTerrainIntersection(const SVECTOR& position,
   static_assert(offsetof(Battle_TargetSphere, wireEdges) ==
                 offsetof(Battle_TargetSphereSetupView, wireEdges));
   const auto& sphere =
-      *reinterpret_cast<const Battle_TargetSphere*>(Battle_targetSphere);
+      *reinterpret_cast<const Battle_TargetSphere*>(VS::Battle::targetSphere);
   static_assert(sizeof sphere.wireEdges >=
                 kSphereWireEdges * sizeof(std::uint16_t));
   std::array<std::uint16_t, kSphereWireEdges> wire_edges{};

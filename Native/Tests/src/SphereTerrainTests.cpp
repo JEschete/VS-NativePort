@@ -9,17 +9,17 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -35,17 +35,17 @@ constexpr u_long kGuard = 0xA1B2C3D4;
 
 struct SliceFixture {
   Battle_TargetSphereSetupView storage{};
-  Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
+  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   u_int saved_control = VS::Field::controlMode;
-  u_int saved_action_mode = Battle_actionFlowMode;
+  u_int saved_action_mode = VS::Battle::actionFlowMode;
   std::array<u_long, 2050> ordering{};
   std::vector<u_long> packets = std::vector<u_long>(65538, kGuard);
   SVECTOR center{64, -64, 64, 0};
   MATRIX shape{{{256, 0, 0}, {0, 256, 0}, {0, 0, 256}}, {0, 0, 0}};
 
   SliceFixture() {
-    Battle_targetSphere = &storage;
+    VS::Battle::targetSphere = &storage;
     VS::Battle::InitializeSphereEntry();
     for (int& value : Sphere().terrainHeights) value = Terrain(0, -1024);
     Camera(0);
@@ -53,10 +53,10 @@ struct SliceFixture {
 
   ~SliceFixture() {
     VS::Battle::ResetTargetPages();
-    Battle_targetSphere = saved_sphere;
+    VS::Battle::targetSphere = saved_sphere;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Field::controlMode = saved_control;
-    Battle_actionFlowMode = saved_action_mode;
+    VS::Battle::actionFlowMode = saved_action_mode;
     Core_Gte_Reset();
   }
 
@@ -197,11 +197,11 @@ struct SphereLabelFixture {
 };
 
 struct ExtendedPageFixture : SliceFixture {
-  std::array<Battle_TargetPreview, 40> entries{};
+  std::array<VS::Battle::TargetPreview, 40> entries{};
 
   ExtendedPageFixture() {
     for (std::size_t index = 0; index < entries.size(); ++index) {
-      entries[index].actorId = static_cast<char>(2 + index / 5);
+      entries[index].actor_id = static_cast<char>(2 + index / 5);
       entries[index].limb = static_cast<char>(index % 5);
     }
     VS::Battle::SetLiveSphereTargets(entries, 0);
@@ -266,9 +266,9 @@ TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
 TEST_CASE("Six-part target groups retain every candidate beyond one page",
           "[combat][targeting][pages]") {
   SliceFixture fixture;
-  std::array<Battle_TargetPreview, 36> entries{};
+  std::array<VS::Battle::TargetPreview, 36> entries{};
   for (std::size_t index = 0; index < entries.size(); ++index) {
-    entries[index].actorId = static_cast<char>(2 + index / 6);
+    entries[index].actor_id = static_cast<char>(2 + index / 6);
     entries[index].limb = static_cast<char>(index % 6);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
@@ -333,9 +333,9 @@ TEST_CASE("AI planning result clearing preserves every adjacent native buffer",
 TEST_CASE("Small target lists preserve the original single visible page",
           "[combat][targeting][pages]") {
   SliceFixture fixture;
-  std::array<Battle_TargetPreview, 24> entries{};
+  std::array<VS::Battle::TargetPreview, 24> entries{};
   for (std::size_t index = 0; index < entries.size(); ++index) {
-    entries[index].actorId = static_cast<char>(index / 6);
+    entries[index].actor_id = static_cast<char>(index / 6);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
   CHECK(VS::Battle::GetTargetPageInfo().pages == 1);
@@ -350,17 +350,17 @@ TEST_CASE("Small target lists preserve the original single visible page",
 TEST_CASE("Paged target lists own shoulders only during target selection",
           "[combat][targeting][pages]") {
   SliceFixture fixture;
-  std::array<Battle_TargetPreview, 40> entries{};
+  std::array<VS::Battle::TargetPreview, 40> entries{};
   for (std::size_t index = 0; index < entries.size(); ++index) {
-    entries[index].actorId = static_cast<char>(index / 5);
+    entries[index].actor_id = static_cast<char>(index / 5);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
   VS::Field::controlMode = 2;
-  Battle_actionFlowMode = 1;
+  VS::Battle::actionFlowMode = 1;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
-  Battle_actionFlowMode = 2;
+  VS::Battle::actionFlowMode = 2;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
-  Battle_actionFlowMode = 3;
+  VS::Battle::actionFlowMode = 3;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
   VS::Field::controlMode = 1;
   CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
@@ -395,11 +395,11 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
 TEST_CASE("Live sphere position cursor links both pitch quads",
           "[render][sphere][sphere-draw]") {
   SphereLabelFixture fixture;
-  const u_char saved_blink = Battle_positionCursorBlinkFrame;
-  Battle_positionCursorBlinkFrame = 0;
+  const u_char saved_blink = VS::Battle::positionCursorBlinkFrame;
+  VS::Battle::positionCursorBlinkFrame = 0;
   SVECTOR position = fixture.slice.center;
   VS::Battle::LiveDrawSpherePositionCursor(&position, 0);
-  Battle_positionCursorBlinkFrame = saved_blink;
+  VS::Battle::positionCursorBlinkFrame = saved_blink;
   const auto* cursor = static_cast<const u_long*>(
       VS::Render::FrameScratchpad().primitive_cursor);
   const u_long* const next_slot = &fixture.ordering[62];
@@ -513,10 +513,10 @@ TEST_CASE("Spell elevation clipping handles stepped terrain across camera yaw",
 namespace {
 struct AreaActionFixture {
   Battle_ActionState storage{};
-  Battle_ActionState* saved = Battle_actionState;
+  Battle_ActionState* saved = VS::Battle::actionState;
 
-  AreaActionFixture() { Battle_actionState = &storage; }
-  ~AreaActionFixture() { Battle_actionState = saved; }
+  AreaActionFixture() { VS::Battle::actionState = &storage; }
+  ~AreaActionFixture() { VS::Battle::actionState = saved; }
 };
 }  // namespace
 
@@ -524,7 +524,7 @@ TEST_CASE("NPC area filtering does not require a player targeting sphere",
           "[battle][sphere][area-target]") {
   SliceFixture sphere;
   AreaActionFixture action;
-  Battle_targetSphere = nullptr;
+  VS::Battle::targetSphere = nullptr;
   action.storage.areaCenter = {64, -32, 96, 0};
   action.storage.areaShape = 2;
   action.storage.areaKind = 3;
@@ -532,9 +532,9 @@ TEST_CASE("NPC area filtering does not require a player targeting sphere",
   action.storage.areaY = 6;
   action.storage.areaZ = 8;
   VS::Battle::LiveFilterAreaActionTargets();
-  CHECK(Battle_targetSphere == nullptr);
+  CHECK(VS::Battle::targetSphere == nullptr);
   CHECK(action.storage.previewCount == 0);
-  CHECK(Battle_actionFlowMode == 3);
+  CHECK(VS::Battle::actionFlowMode == 3);
   const auto& origin = action.storage.areaOrigin;
   const std::array<int, 3> position{origin.vx, origin.vy, origin.vz};
   CHECK(position == std::array{64, -32, 96});

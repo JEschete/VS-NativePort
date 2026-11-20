@@ -1,68 +1,49 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/TargetingState.h"
+// Battle targeting's state (TargetingState.hpp).
+#include "Battle/TargetingState.hpp"
 
-#include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.hpp"
-
+namespace VS::Battle {
+// The tables below hold module image contents (ModuleData.cpp).
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
-char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.cpp) */
-
+CategoryNeedsTargetSelectionTable categoryNeedsTargetSelection;
 // decomp: D_800E8194 (D_800E8194@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIsAreaTarget[80]; /* contents: module image (ModuleData.cpp) */
-
+CategoryIsAreaTargetTable categoryIsAreaTarget;
 // decomp: D_800E81B4 (D_800E81B4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIncludesActingActor[48]; /* contents: module image (ModuleData.cpp) */
-
+CategoryIncludesActingActorTable categoryIncludesActingActor;
 // decomp: D_800E81C4 (D_800E81C4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetsBodyParts[32]; /* contents: module image (ModuleData.cpp) */
-
+CategoryTargetsBodyPartTable categoryTargetsBodyParts;
 // decomp: D_800E81D4 (D_800E81D4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetActorMasks[16]; /* contents: module image (ModuleData.cpp) */
-
+CategoryTargetActorMaskTable categoryTargetActorMasks;
 // decomp: vs_battle_statusStrings (vs_battle_statusStrings@BATTLE/BATTLE.PRG)
-u_short Battle_statusStrings[1712]; /* contents: module image (ModuleData.cpp) */
-
+std::array<std::uint16_t, kStatusStringHalfwords> statusStrings;
 // decomp: D_800EA984 (D_800EA984@BATTLE/BATTLE.PRG)
-char Battle_targetInfoTemplate[3140]; /* contents: module image (ModuleData.cpp) */
-
+std::array<char, kTargetInfoTemplateBytes> targetInfoTemplate;
 // decomp: D_800EA9B6 (D_800EA9B6@BATTLE/BATTLE.PRG)
-char Battle_targetStatusLineTemplate[3090]; /* contents: module image (ModuleData.cpp) */
-
+TargetStatusLineTemplateTable targetStatusLineTemplate;
 // decomp: D_800EAA54 (D_800EAA54@BATTLE/BATTLE.PRG)
-char Battle_emptyStatusString[2932]; /* contents: module image (ModuleData.cpp) */
-
+std::array<char, kEmptyStatusStringBytes> emptyStatusString;
 // decomp: D_800EABAA (D_800EABAA@BATTLE/BATTLE.PRG)
-u_char Battle_targetSelectionStep; /* contents: module image (ModuleData.cpp) */
+std::uint8_t targetSelectionStep;
 
 // decomp: D_800F4C70 (D_800F4C70@BATTLE/BATTLE.PRG)
-u_char Battle_targetColumnEntries[2][16];
-
+TargetColumnEntryTable targetColumnEntries;
 // decomp: D_800F4C90 (D_800F4C90@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroups[8];
-
+TargetColumnGroupBytes secondColumnGroups;
 // decomp: D_800F4C98 (D_800F4C98@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroups[8];
-
+TargetColumnGroupBytes firstColumnGroups;
 // decomp: D_800F4CA0 (D_800F4CA0@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroupFirstTargets[8];
-
+TargetColumnGroupBytes secondColumnGroupFirstTargets;
 // decomp: D_800F4CA8 (D_800F4CA8@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroupFirstTargets[8];
-
+TargetColumnGroupBytes firstColumnGroupFirstTargets;
 // decomp: D_800F4CB0 (D_800F4CB0@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnEntryCount;
-
+std::uint8_t secondColumnEntryCount;
 // decomp: D_800F4CB1 (D_800F4CB1@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnEntryCount;
-
+std::uint8_t firstColumnEntryCount;
 // decomp: D_800F4CB2 (D_800F4CB2@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroupCount;
-
+std::uint8_t secondColumnGroupCount;
 // decomp: D_800F4CB3 (D_800F4CB3@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroupCount;
-
+std::uint8_t firstColumnGroupCount;
 // decomp: D_800F4CB4 (D_800F4CB4@BATTLE/BATTLE.PRG)
-u_char Battle_targetColumnTopOffset;
-
+std::uint8_t targetColumnTopOffset;
 // decomp: vs_battle_stringContext (vs_battle_stringContext@BATTLE/BATTLE.PRG)
-VS::Menu::StringContext Battle_stringContext;
+VS::Menu::StringContext stringContext;
+}  // namespace VS::Battle

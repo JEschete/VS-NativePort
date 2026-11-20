@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetVolume.h"
@@ -66,7 +66,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
 // decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
 void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   const auto* sphere =
-      reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
+      reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
   if (sphere == nullptr || shape == nullptr || sphere->vertexCount < 2) return;
   const auto count = static_cast<std::size_t>(sphere->vertexCount);
   if (count > kTargetWireVertices) {

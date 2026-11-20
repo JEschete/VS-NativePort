@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -139,7 +139,7 @@ struct UiSessionFixture {
   std::array<VS::Menu::TextBoxState, 8> saved_boxes =
       std::to_array(VS::Menu::textBoxes);
   VS::Menu::TextBoxSelectorState saved_selector = VS::Menu::textBoxSelector;
-  VS::Menu::StringContext saved_context = Battle_stringContext;
+  VS::Menu::StringContext saved_context = VS::Battle::stringContext;
   decltype(std::to_array(VS::Event::isTextBoxAwaitingClose)) saved_waits =
       std::to_array(VS::Event::isTextBoxAwaitingClose);
   int* saved_notification = VS::Menu::sceneNotificationBuffer;
@@ -152,7 +152,7 @@ struct UiSessionFixture {
     if (!VS::Menu::CleanupLiveSceneNotificationOwnedState()) std::terminate();
     std::copy(saved_boxes.begin(), saved_boxes.end(), VS::Menu::textBoxes);
     VS::Menu::textBoxSelector = saved_selector;
-    Battle_stringContext = saved_context;
+    VS::Battle::stringContext = saved_context;
     std::copy(saved_waits.begin(), saved_waits.end(),
               VS::Event::isTextBoxAwaitingClose);
     VS::Menu::sceneNotificationBuffer = saved_notification;
@@ -175,7 +175,7 @@ void BorrowSessionUiText() {
   }
   VS::Menu::textBoxSelector.count = 2;
   VS::Menu::textBoxSelector.selected_index = 1;
-  std::fill_n(Battle_stringContext.strings, 10, std::begin(text));
+  std::fill_n(VS::Battle::stringContext.strings, 10, std::begin(text));
   std::ranges::fill(VS::Event::isTextBoxAwaitingClose, 1);
   VS::Menu::sceneNotificationBuffer = notification;
   VS::Menu::sceneNotificationTimer = 17;
@@ -192,8 +192,8 @@ bool SessionUiIsClear() {
                      }) &&
          VS::Menu::textBoxSelector.count == 0 &&
          VS::Menu::textBoxSelector.selected_index == 0 &&
-         std::all_of(std::begin(Battle_stringContext.strings),
-                     std::end(Battle_stringContext.strings),
+         std::all_of(std::begin(VS::Battle::stringContext.strings),
+                     std::end(VS::Battle::stringContext.strings),
                      [](const auto* text) { return text == nullptr; }) &&
          std::all_of(std::begin(VS::Event::isTextBoxAwaitingClose),
                      std::end(VS::Event::isTextBoxAwaitingClose),

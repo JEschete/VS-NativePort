@@ -7,7 +7,7 @@
 #include <iterator>
 #include <span>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudRendering.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -31,7 +31,7 @@ class LiveFrame {
         saved_frame_(VS::Render::frameBuf),
         saved_ordering_(VS::Render::legacyOrderingTables[0]),
         saved_primitives_(VS::Render::legacyPrimitiveBuffers[0]),
-        saved_slide_(Battle_hudSlideOffset) {
+        saved_slide_(VS::Battle::hudSlideOffset) {
     CaptureLayout();
     ordering.fill(kEndLink);
     VS::Render::frameBuf = 0;
@@ -42,12 +42,12 @@ class LiveFrame {
         ordering.data() + kHudSceneHead;
     VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kHudOverlayHead;
-    Battle_hudSlideOffset = 0;
+    VS::Battle::hudSlideOffset = 0;
     SeedLayout();
   }
   ~LiveFrame() {
     RestoreLayout();
-    Battle_hudSlideOffset = saved_slide_;
+    VS::Battle::hudSlideOffset = saved_slide_;
     VS::Render::FrameScratchpad() = saved_scratch_;
     VS::Render::frameBuf = saved_frame_;
     VS::Render::legacyOrderingTables[0] = saved_ordering_;
@@ -84,10 +84,10 @@ class LiveFrame {
   std::array<u_short, VS::Battle::kHudStatusIconCount> icons_{};
 
   static void SeedLayout() {
-    auto positions = std::span(Battle_hudGaugePositions);
-    auto labels = std::span(Battle_hudGaugeLabelPositions);
-    auto widths = std::span(Battle_hudGaugeLabelWidths);
-    auto textures = std::span(Battle_hudGaugeLabelTexU);
+    auto positions = std::span(VS::Battle::hudGaugePositions);
+    auto labels = std::span(VS::Battle::hudGaugeLabelPositions);
+    auto widths = std::span(VS::Battle::hudGaugeLabelWidths);
+    auto textures = std::span(VS::Battle::hudGaugeLabelTexU);
     auto palette = std::span(VS::Render::kStatGaugeColors);
     for (std::size_t index = 0; index < VS::Battle::kHudGaugeCount; ++index) {
       positions[index] = 0x0012000A;
@@ -96,26 +96,26 @@ class LiveFrame {
       textures[index] = static_cast<char>(0xE1);
       palette[index] = 0x00123456;
     }
-    std::ranges::fill(Battle_statusIconTexOffsets, u_short{0x1080});
+    std::ranges::fill(VS::Battle::statusIconTexOffsets, u_short{0x1080});
   }
 
   void CaptureLayout() {
-    std::ranges::copy(Battle_hudGaugePositions, positions_.begin());
-    std::ranges::copy(Battle_hudGaugeLabelPositions, labels_.begin());
+    std::ranges::copy(VS::Battle::hudGaugePositions, positions_.begin());
+    std::ranges::copy(VS::Battle::hudGaugeLabelPositions, labels_.begin());
     std::ranges::copy(VS::Render::kStatGaugeColors, palette_.begin());
-    std::ranges::copy(Battle_hudGaugeLabelWidths, widths_.begin());
-    std::ranges::copy(
-        std::span(Battle_hudGaugeLabelTexU).first<VS::Battle::kHudGaugeCount>(),
-        textures_.begin());
-    std::ranges::copy(Battle_statusIconTexOffsets, icons_.begin());
+    std::ranges::copy(VS::Battle::hudGaugeLabelWidths, widths_.begin());
+    std::ranges::copy(std::span(VS::Battle::hudGaugeLabelTexU)
+                          .first<VS::Battle::kHudGaugeCount>(),
+                      textures_.begin());
+    std::ranges::copy(VS::Battle::statusIconTexOffsets, icons_.begin());
   }
   void RestoreLayout() {
-    std::ranges::copy(positions_, std::begin(Battle_hudGaugePositions));
-    std::ranges::copy(labels_, std::begin(Battle_hudGaugeLabelPositions));
+    std::ranges::copy(positions_, std::begin(VS::Battle::hudGaugePositions));
+    std::ranges::copy(labels_, std::begin(VS::Battle::hudGaugeLabelPositions));
     std::ranges::copy(palette_, std::begin(VS::Render::kStatGaugeColors));
-    std::ranges::copy(widths_, std::begin(Battle_hudGaugeLabelWidths));
-    std::ranges::copy(textures_, std::begin(Battle_hudGaugeLabelTexU));
-    std::ranges::copy(icons_, std::begin(Battle_statusIconTexOffsets));
+    std::ranges::copy(widths_, std::begin(VS::Battle::hudGaugeLabelWidths));
+    std::ranges::copy(textures_, std::begin(VS::Battle::hudGaugeLabelTexU));
+    std::ranges::copy(icons_, std::begin(VS::Battle::statusIconTexOffsets));
   }
 };
 }  // namespace hud_rendering_fixture

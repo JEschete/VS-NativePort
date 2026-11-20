@@ -11,7 +11,7 @@
 
 #include "Battle/ActionEffectDispatch.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -233,8 +233,8 @@ struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
   decltype(std::to_array(Battle_statusEffectParams)) rules =
       std::to_array(Battle_statusEffectParams);
-  decltype(std::to_array(Battle_limbInjuryStatusIds)) ids =
-      std::to_array(Battle_limbInjuryStatusIds);
+  decltype(VS::Battle::limbInjuryStatusIds) ids =
+      VS::Battle::limbInjuryStatusIds;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   Battle_HitResult hit{};
@@ -245,7 +245,7 @@ struct LiveFixture {
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), Battle_actors);
     std::copy(rules.begin(), rules.end(), Battle_statusEffectParams);
-    std::copy(ids.begin(), ids.end(), Battle_limbInjuryStatusIds);
+    std::copy(ids.begin(), ids.end(), VS::Battle::limbInjuryStatusIds.begin());
   }
 };
 TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
@@ -254,7 +254,7 @@ TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
   fixture.stats.mobilityLimb0 = 4;
   fixture.stats.mobilityLimb1 = 5;
   Battle_statusEffectParams[4].statusFlags = 0x10;
-  fixture.hit.target.targetActor = 41;
+  fixture.hit.target.target_actor = 41;
   fixture.hit.hpEffect = 2;
   for (auto& limb : fixture.hit.limbs) limb.effects.opaque2 = -1;
   battle::DeriveLiveLimbInjuryStatuses(&fixture.hit);
@@ -269,7 +269,7 @@ TEST_CASE("F00507 live exemption ignores genuinely unused action and source",
           "[resource-dispatch][F00507]") {
   LiveFixture fixture;
   fixture.stats.actorId = 128;
-  fixture.hit.target.targetActor = 41;
+  fixture.hit.target.target_actor = 41;
   fixture.hit.target.hp = 32767;
   fixture.hit.hpEffect = 3;
   battle::ApplyLiveActionHitEffect(nullptr, nullptr, &fixture.hit, 0, -1);

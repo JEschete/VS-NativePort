@@ -9,7 +9,7 @@
 #include <source_location>
 #include <span>
 
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycle.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Log.hpp"
@@ -149,7 +149,7 @@ void SetLiveSphereVolumes(Battle_TargetSphereSetupView* sphere,
                           const Battle_TargetSphereSpec* primary,
                           const Battle_TargetSphereSpec* secondary,
                           std::uint8_t sphere_mode,
-                          Battle_TargetPreview* target_previews,
+                          VS::Battle::TargetPreview* target_previews,
                           std::uint8_t& reuse_volumes) {
   auto& legacy = RequiredSphere(sphere, "sphere volume update");
   const auto& required_primary =
@@ -223,55 +223,57 @@ int LiveSphereInteractionMode(const Battle_TargetSphereSetupView* sphere,
 // decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
 void InitializeSphereEntry() {
   ResetTargetPages();
-  if (Battle_targetSphere == nullptr) {
+  if (VS::Battle::targetSphere == nullptr) {
     auto* allocated = static_cast<Battle_TargetSphereSetupView*>(
         VS::Core::Memory::AllocateLiveFromLowEnd(
-            sizeof(*Battle_targetSphere), std::source_location::current()));
+            sizeof(*VS::Battle::targetSphere),
+            std::source_location::current()));
     if (allocated == nullptr) {
       Refuse("sphere initialization", "workspace allocation failed");
     }
-    Battle_targetSphere = allocated;
+    VS::Battle::targetSphere = allocated;
   }
   VS::Core::Memory::ZeroLiveWordsBackward(
-      Battle_targetSphere,
-      static_cast<std::int32_t>(sizeof(*Battle_targetSphere)));
-  InitializeLiveSphere(Battle_targetSphere);
+      VS::Battle::targetSphere,
+      static_cast<std::int32_t>(sizeof(*VS::Battle::targetSphere)));
+  InitializeLiveSphere(VS::Battle::targetSphere);
 }
 
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
 void SetSphereVolumesEntry(Battle_TargetSphereSpec* primary,
                            Battle_TargetSphereSpec* secondary,
                            u_char sphere_mode,
-                           Battle_TargetPreview* target_previews) {
-  SetLiveSphereVolumes(Battle_targetSphere, primary, secondary, sphere_mode,
-                       target_previews, Battle_reuseSphereVolumes);
+                           VS::Battle::TargetPreview* target_previews) {
+  SetLiveSphereVolumes(VS::Battle::targetSphere, primary, secondary,
+                       sphere_mode, target_previews,
+                       VS::Battle::reuseSphereVolumes);
 }
 
 // decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475).
 void ClearPrimarySphereVolumeEntry() {
-  ClearLivePrimarySphereVolume(Battle_targetSphere);
+  ClearLivePrimarySphereVolume(VS::Battle::targetSphere);
 }
 
 // decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
 void SetSecondarySphereVolumeEntry(Battle_TargetSphereSpec* secondary) {
-  SetLiveSecondarySphereVolume(Battle_targetSphere, secondary);
+  SetLiveSecondarySphereVolume(VS::Battle::targetSphere, secondary);
 }
 
 // decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488).
 void ClearSecondarySphereVolumeEntry() {
-  ClearLiveSecondarySphereVolume(Battle_targetSphere);
+  ClearLiveSecondarySphereVolume(VS::Battle::targetSphere);
 }
 
 // decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
 void ClearSphereTargetsEntry() {
   ResetTargetPages();
-  ClearLiveSphereTargets(Battle_targetSphere);
+  ClearLiveSphereTargets(VS::Battle::targetSphere);
 }
 
 // decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93).
 int SphereInteractionModeEntry() {
   return LiveSphereInteractionMode(
-      Battle_targetSphere,
+      VS::Battle::targetSphere,
       (VS::Input::buttonsState & kSphereOverrideButtonMask) != 0);
 }
 }  // namespace VS::Battle

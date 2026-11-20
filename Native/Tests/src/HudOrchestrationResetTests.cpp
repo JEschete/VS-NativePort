@@ -16,21 +16,21 @@ namespace f = hud_orchestration_live_fixture;
 TEST_CASE("HUD feedback entry reset clears commands but preserves marker BSS",
           "[hud-orchestration-reset][F00729][F00730][F00743]") {
   f::LiveState fixture;
-  f::SavedValue<Battle_floatingLabels> saved_owner;
-  Battle_FloatingLabel labels[1][32]{};
-  Battle_floatingLabels = labels;
-  std::ranges::fill(std::span(Battle_actorMarkers).first<16>(), char{7});
+  f::SavedValue<VS::Battle::floatingLabels> saved_owner;
+  std::array<VS::Battle::FloatingLabelSlots, 1> labels{};
+  VS::Battle::floatingLabels = labels.data();
+  std::ranges::fill(std::span(VS::Battle::actorMarkers).first<16>(), char{7});
   b::SetLiveActorMarkersHidden(0xFFFF);
   b::SuppressLiveAshleyStatusLabels();
   b::ResetLiveFloatingLabels();
-  CHECK(Battle_actorMarkersHidden == 0);
-  CHECK(Battle_ashleyStatusLabelsSuppressed == 0);
-  CHECK(std::ranges::all_of(std::span(Battle_actorMarkers).first<16>(),
+  CHECK(VS::Battle::actorMarkersHidden == 0);
+  CHECK(VS::Battle::ashleyStatusLabelsSuppressed == 0);
+  CHECK(std::ranges::all_of(std::span(VS::Battle::actorMarkers).first<16>(),
                             [](char marker) { return marker == 7; }));
   b::SetLiveActorMarkersHidden(2);
   b::SuppressLiveAshleyStatusLabels();
-  CHECK(Battle_actorMarkersHidden == 2);
-  CHECK(Battle_ashleyStatusLabelsSuppressed == 1);
+  CHECK(VS::Battle::actorMarkersHidden == 2);
+  CHECK(VS::Battle::ashleyStatusLabelsSuppressed == 1);
 }
 
 TEST_CASE("Data rebinds do not invent a feedback BSS reset hook",
@@ -39,6 +39,6 @@ TEST_CASE("Data rebinds do not invent a feedback BSS reset hook",
   b::SetLiveActorMarkersHidden(-123);
   b::SuppressLiveAshleyStatusLabels();
   f::ProductionTables rebound;
-  CHECK(Battle_actorMarkersHidden == -123);
-  CHECK(Battle_ashleyStatusLabelsSuppressed == 1);
+  CHECK(VS::Battle::actorMarkersHidden == -123);
+  CHECK(VS::Battle::ashleyStatusLabelsSuppressed == 1);
 }

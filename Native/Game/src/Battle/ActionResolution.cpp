@@ -1,20 +1,15 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
+// Action resolution's shared state (ActionResolution.hpp).
+#include "Battle/ActionResolution.hpp"
 
-// decomp: D_800E8200 (D_800E8200@BATTLE/BATTLE.PRG)
-u_char Battle_limbInjuryStatusIds[20]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: _actionEffectMediators (_actionEffectMediators@BATTLE/BATTLE.PRG)
-void (*Battle_actionEffectMediators[70])(
-    Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.cpp) */
-
+namespace VS::Battle {
+// decomp: D_800E8200 (D_800E8200@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint8_t, kLimbInjuryStatusBytes> limbInjuryStatusIds;
+// decomp: _actionEffectMediators (_actionEffectMediators@BATTLE/BATTLE.PRG);
+// contents: module image, relocated (ModulePointers.cpp)
+ActionEffectMediatorTable actionEffectMediators;
 // decomp: D_800F1A00 (D_800F1A00@BATTLE/BATTLE.PRG)
-u_int Battle_hitPrerequisiteResult;
-
+std::uint32_t hitPrerequisiteResult;
 // decomp: D_800F1A04 (D_800F1A04@BATTLE/BATTLE.PRG)
-u_int Battle_previousHitResult;
-
+std::uint32_t previousHitResult;
+}  // namespace VS::Battle

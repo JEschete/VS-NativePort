@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -115,7 +115,7 @@ struct LiveVmFixture {
   std::uint8_t forced = event::isSkipForced;
   std::uint8_t stops_music = event::stopsMusicOnSkip;
   VS::State::SceneTimer timer = VS::State::sceneTimer;
-  char timer_hud = Battle_lowerScreenUiState;
+  char timer_hud = VS::Battle::lowerScreenUiState;
   std::int16_t event_id = event::eventId;
   std::uint16_t event_source = event::eventSource;
   char direct_event = event::isDirectEventRequest;
@@ -156,7 +156,7 @@ struct LiveVmFixture {
     event::isSkipForced = forced;
     event::stopsMusicOnSkip = stops_music;
     VS::State::sceneTimer = timer;
-    Battle_lowerScreenUiState = timer_hud;
+    VS::Battle::lowerScreenUiState = timer_hud;
     event::eventId = event_id;
     event::eventSource = event_source;
     event::isDirectEventRequest = direct_event;
@@ -896,7 +896,7 @@ void CheckLiveSpecialTimer(bool guarded, int skip) {
       .paused_mode = 0,
       .reset_scope = 3,
       .time = {.frames = 12, .seconds = 3, .minutes = 4, .hours = 5}};
-  Battle_lowerScreenUiState = 1;
+  VS::Battle::lowerScreenUiState = 1;
   auto& host = event::LiveScriptVm();
   host.SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -904,7 +904,7 @@ void CheckLiveSpecialTimer(bool guarded, int skip) {
   CHECK(VS::State::sceneTimer.mode == 2);
   CHECK(VS::State::sceneTimer.paused_mode == 2);
   CHECK(VS::State::sceneTimer.time.seconds == 3);
-  CHECK(Battle_lowerScreenUiState == 1);
+  CHECK(VS::Battle::lowerScreenUiState == 1);
 }
 
 void CheckLiveSpecialDiscard(bool guarded, int skip) {
@@ -1081,7 +1081,7 @@ void CheckLiveTimerConfiguration(TimerConfigScenario scenario) {
       .paused_mode = 1,
       .reset_scope = 0x1234,
       .time = {.frames = 12, .seconds = 3, .minutes = 4, .hours = 5}};
-  Battle_lowerScreenUiState = 1;
+  VS::Battle::lowerScreenUiState = 1;
   auto& host = event::LiveScriptVm();
   const bool valid = scenario.mode < host.SceneTimerModes().size() &&
                      scenario.scope < host.SceneTimerScopes().size();
@@ -1090,7 +1090,7 @@ void CheckLiveTimerConfiguration(TimerConfigScenario scenario) {
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
   CHECK_FALSE(host.ThreadCursor(0).Present());
   CHECK(VS::State::sceneTimer == expected);
-  CHECK(Battle_lowerScreenUiState == (scenario.reset ? 0 : 1));
+  CHECK(VS::Battle::lowerScreenUiState == (scenario.reset ? 0 : 1));
   if (scenario.reset || valid) {
     CheckTimerFlags(host, expected.time);
   }

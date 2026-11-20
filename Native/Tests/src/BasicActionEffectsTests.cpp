@@ -14,8 +14,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/BasicActionEffects.hpp"
@@ -33,7 +33,7 @@
 
 namespace {
 namespace battle = VS::Battle;
-using Handler = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
+using Handler = VS::Battle::ActionEffectMediator;
 using Field = battle::ActionResultField;
 constexpr auto kHp = static_cast<std::size_t>(Field::kHp);
 constexpr auto kArmor = static_cast<std::size_t>(Field::kArmorDp);
@@ -59,8 +59,8 @@ struct LiveFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_statusEffectParams)) saved_rules =
       std::to_array(Battle_statusEffectParams);
-  decltype(std::to_array(Battle_actionEffectMediators)) saved_mediators =
-      std::to_array(Battle_actionEffectMediators);
+  decltype(VS::Battle::actionEffectMediators) saved_mediators =
+      VS::Battle::actionEffectMediators;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   Battle_HitResult hit = SeedHit();
@@ -70,14 +70,15 @@ struct LiveFixture {
     std::ranges::fill(Battle_statusEffectParams, Battle_StatusEffectParams{});
     actor.stats = &stats;
     Battle_actors[41] = &actor;
-    hit.target.targetActor = 41;
-    hit.target.targetLimb = 5;
+    hit.target.target_actor = 41;
+    hit.target.target_limb = 5;
     stats.actorId = 255;
   }
   ~LiveFixture() {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_rules, Battle_statusEffectParams);
-    std::ranges::copy(saved_mediators, Battle_actionEffectMediators);
+    std::ranges::copy(saved_mediators,
+                      VS::Battle::actionEffectMediators.begin());
   }
 };
 
@@ -242,10 +243,10 @@ TEST_CASE("Live armor wear changes only selected DP and its two effect bits",
           "[basic-action-effects][F00471]") {
   LiveFixture fixture;
   std::ranges::fill(Battle_actors, nullptr);
-  fixture.hit.target.targetActor = 255;
+  fixture.hit.target.target_actor = 255;
   for (std::int8_t limb = 0; limb < 6; ++limb) {
     for (const auto hp : {-32768, -16385, -7, 0, 16384, 32767}) {
-      fixture.hit.target.targetLimb = limb;
+      fixture.hit.target.target_limb = limb;
       fixture.hit.target.hp = static_cast<std::int16_t>(hp);
       auto expected = fixture.hit;
       const auto doubled =
@@ -365,20 +366,21 @@ Handler Relocated(std::uint32_t address, Handler expected) {
   const auto image = ReadOriginalModule();
   const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
-      tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
+      tables,
+      reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
       &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
       *table, image, VS::Content::ModuleSymbols()));
-  for (std::size_t index = 0; index < std::size(Battle_actionEffectMediators);
-       ++index) {
+  for (std::size_t index = 0;
+       index < std::size(VS::Battle::actionEffectMediators); ++index) {
     std::array<std::uint8_t, 4> bytes{};
     std::copy_n(image.begin() + static_cast<std::ptrdiff_t>(
                                     kMediatorOffset + index * bytes.size()),
                 bytes.size(), bytes.begin());
     if (std::bit_cast<std::uint32_t>(bytes) == address) {
-      REQUIRE(Battle_actionEffectMediators[index] == expected);
-      return Battle_actionEffectMediators[index];
+      REQUIRE(VS::Battle::actionEffectMediators[index] == expected);
+      return VS::Battle::actionEffectMediators[index];
     }
   }
   FAIL("Original mediator address not found");
@@ -841,7 +843,7 @@ void CheckRecoveryCallback(std::size_t function) {
 struct RecoveryFixture;
 RecoveryFixture* g_recovery{};
 struct RecoveryFixture : LiveFixture {
-  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   Battle_ActionState state{};
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
@@ -861,21 +863,21 @@ struct RecoveryFixture : LiveFixture {
   bool arguments_match{};
 
   RecoveryFixture() {
-    Battle_actionState = &state;
+    VS::Battle::actionState = &state;
     g_recovery = this;
     replacement.stats = &replacement_stats;
     replacement_stats.limbs[5].maxHp = 100;
     replacement_stats.currentHp = 321;
     stats.limbs[0].maxHp = 100;
     stats.currentHp = 123;
-    changed.target.targetActor = 41;
+    changed.target.target_actor = 41;
     input.type = 6;
     input.hits[0].statCalculatorId = 1;
     input.hits[1].statCalculatorId = 1;
   }
   ~RecoveryFixture() {
     g_recovery = nullptr;
-    Battle_actionState = saved_state;
+    VS::Battle::actionState = saved_state;
     Battle_lastActionStatValue = last;
     std::ranges::copy(definitions, Battle_actionDefinitions);
     std::ranges::copy(calculators, Battle_statCalculators);
@@ -892,7 +894,7 @@ struct RecoveryFixture : LiveFixture {
     changed.target.hp = RecoveryHalf(pending);
     changed.hpEffect = static_cast<unsigned>(pending) & 3U;
     hit = SeedHit();
-    hit.target.targetActor = 41;
+    hit.target.target_actor = 41;
     hit.targetsPosition = pending & 1;
     expected_source = index == 0 ? &source : &hit;
     calls = 0;
@@ -1144,12 +1146,12 @@ struct DamageFixture : RecoveryFixture {
   bool mutate_owner = true;
   DamageFixture() {
     g_damage = this;
-    source.target.targetActor = 41;
-    hit.target.targetActor = 41;
+    source.target.target_actor = 41;
+    hit.target.target_actor = 41;
     hit.targetsPosition = 0;
-    changed.target.targetActor = 40;
+    changed.target.target_actor = 40;
     changed.targetsPosition = 0;
-    changed.target.targetLimb = 5;
+    changed.target.target_limb = 5;
     changed.inflictStatuses = 0x10;
     Battle_actors[40] = &replacement;
     stats.actorId = 41;
@@ -1211,8 +1213,8 @@ TEST_CASE("F00494 preview removes damage status without consuming equipment",
   Battle_statCalculators[1] = DamageCalculator;
   fixture.execute = 0;
   fixture.actor.stats = nullptr;
-  fixture.source.target.targetActor = 41;
-  fixture.hit.target.targetActor = 40;
+  fixture.source.target.target_actor = 41;
+  fixture.hit.target.target_actor = 40;
   fixture.replacement_stats.statuses = 0x8000;
   battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
                                              &fixture.hit, 1, 0);

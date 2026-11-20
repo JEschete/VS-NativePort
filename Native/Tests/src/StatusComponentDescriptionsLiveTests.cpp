@@ -48,7 +48,7 @@ struct LiveFixture : equipment_detail_tests::LiveFixture {
     std::memcpy(help.data(), text.help.data(), text.help.size());
     std::memcpy(names.data(), text.names.data(), text.names.size());
     std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
-    Battle_stringContext = {};
+    VS::Battle::stringContext = {};
   }
   char* HelpEntry(std::size_t index) {
     return reinterpret_cast<char*>(&help[help[index]]);
@@ -90,11 +90,11 @@ TEST_CASE("Status part module entries preserve name and row outputs",
   CHECK(row_type == 0x1234);
   CHECK(output[1][0] == fixture.HelpEntry(help_indices[kind])[0]);
   if (kind == 0) {
-    CHECK(Battle_stringContext.strings[kMaterialArgument] ==
+    CHECK(VS::Battle::stringContext.strings[kMaterialArgument] ==
           fixture.names[parts[kind].material + fw::item_text::kWoodName - 1]
               .data());
   } else if (kind == 1) {
-    CHECK(Battle_stringContext.strings[kGripArgument] ==
+    CHECK(VS::Battle::stringContext.strings[kGripArgument] ==
           fixture.HelpEntry(parts[kind].category + fw::item_text::kShortGrip -
                             1));
   } else {
@@ -151,15 +151,15 @@ TEST_CASE("Empty live accessory refuses without buffer context or row writes",
   LiveFixture fixture;
   VS::Items::AccessorySpawnLoadout accessory{};
   fixture.description.fill('Q');
-  Battle_stringContext.strings[0] = fixture.description.data();
+  VS::Battle::stringContext.strings[0] = fixture.description.data();
   const auto buffer = fixture.description;
-  const auto arguments = Battle_stringContext;
+  const auto arguments = VS::Battle::stringContext;
   const auto rows =
       std::bit_cast<std::array<std::byte, sizeof(fixture.rows)>>(fixture.rows);
   CHECK(status::LiveAccessoryDescription(&accessory) == nullptr);
   CHECK(fixture.description == buffer);
   CHECK(std::equal(std::begin(arguments.strings), std::end(arguments.strings),
-                   std::begin(Battle_stringContext.strings)));
+                   std::begin(VS::Battle::stringContext.strings)));
   CHECK((std::bit_cast<std::array<std::byte, sizeof(fixture.rows)>>(
              fixture.rows) == rows));
 }

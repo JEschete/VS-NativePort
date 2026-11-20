@@ -12,7 +12,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"

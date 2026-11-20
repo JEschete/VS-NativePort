@@ -3,7 +3,9 @@
 #include "Legacy/Psx.h"
 
 struct Battle_SphereTargetLabel;
-struct Battle_TargetPreview;
+namespace VS::Battle {
+struct TargetPreview;
+}  // namespace VS::Battle
 struct Battle_TargetSphere;
 struct Battle_TargetSphereSetupView;
 struct Battle_TargetSphereSpec;
@@ -39,8 +41,8 @@ struct Battle_TargetSphereSetupView {
     int reserved34;
     int reserved38;
     int reserved3C;
-    Battle_TargetPreview* targetList0;
-    Battle_TargetPreview* targetList1;
+    VS::Battle::TargetPreview* targetList0;
+    VS::Battle::TargetPreview* targetList1;
     Battle_ShapeVertex wireVertices[297];
     char reservedLabelArea_990[16];
     void* nativePointer9A0; /* PS1 pointer slot 0x9A0 */
@@ -128,7 +130,7 @@ struct Battle_TargetSphere {
     int reserved38;
     short reserved3C;
     short inputLocked;
-    Battle_TargetPreview* targetLists[2];
+    VS::Battle::TargetPreview* targetLists[2];
     Battle_ShapeVertex wireVertices[297];
     Battle_SphereTargetLabel labels[24];
     char reservedB70[0x3800];

@@ -18,7 +18,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/ModuleData.hpp"
 #include "Event/Actors.hpp"
 #include "Event/Script.hpp"
@@ -59,7 +59,7 @@ struct WeaponModeFixture {
   std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::uint8_t saved_gate = VS::State::LiveScriptFlag(0xAC);
   char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
-  decltype(Battle_hudBattleMode) saved_hud = Battle_hudBattleMode;
+  decltype(VS::Battle::hudBattleMode) saved_hud = VS::Battle::hudBattleMode;
   Actors_ActorRecord record{};
   Battle_Actor actor{};
   std::array<VS::Actors::WeaponModel, 2> weapons{};
@@ -111,7 +111,7 @@ struct WeaponModeFixture {
     VS::Event::playbackPhase = saved_phase;
     VS::State::SetLiveScriptFlag(0xAC, saved_gate);
     VS::Actors::lastResolvedSequenceIndex = saved_sequence;
-    Battle_hudBattleMode = saved_hud;
+    VS::Battle::hudBattleMode = saved_hud;
     VS::Actors::ForgetSequenceBanks(common.data(), sizeof common);
     VS::Actors::ForgetSequenceBanks(battle.data(), sizeof battle);
   }
@@ -148,7 +148,7 @@ struct WeaponModeFixture {
     CHECK((actor.weaponDrawn & 1) == mode);
     CHECK((actor.weaponDrawn & 0xFE) == 0xA4);
     CHECK(record.instance.weaponDrawn == mode);
-    CHECK(Battle_hudBattleMode == mode);
+    CHECK(VS::Battle::hudBattleMode == mode);
     CheckVisibility(mode);
   }
 
@@ -360,6 +360,6 @@ TEST_CASE(
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weaponDrawn & 1) == 0);
   CHECK(fixture.record.instance.weaponDrawn == 0);
-  CHECK(Battle_hudBattleMode == 0);
+  CHECK(VS::Battle::hudBattleMode == 0);
   fixture.CheckVisibility(1);
 }

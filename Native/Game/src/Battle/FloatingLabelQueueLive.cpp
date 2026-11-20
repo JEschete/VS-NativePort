@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <span>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Core/Diagnostics.hpp"
 
@@ -15,8 +15,8 @@ namespace VS::Battle {
 namespace {
 constexpr char kWorldLockedLabel = 3;
 constexpr std::size_t kLegacyFloatingLabelBytes = 24;
-static_assert(sizeof(Battle_FloatingLabel) == kLegacyFloatingLabelBytes);
-static_assert(sizeof *Battle_floatingLabels ==
+static_assert(sizeof(VS::Battle::FloatingLabel) == kLegacyFloatingLabelBytes);
+static_assert(sizeof *VS::Battle::floatingLabels ==
               kFloatingLabelCapacity * kLegacyFloatingLabelBytes);
 
 [[noreturn]] void Refuse(const char* message) {
@@ -24,19 +24,19 @@ static_assert(sizeof *Battle_floatingLabels ==
   std::abort();
 }
 
-Battle_FloatingLabel& CurrentLabel(FloatingLabelSlot slot) {
+VS::Battle::FloatingLabel& CurrentLabel(FloatingLabelSlot slot) {
   if (slot.index < 0 || slot.index >= kFloatingLabelCapacity) {
     Refuse("Floating-label slot is outside its 32-record owner");
   }
-  if (Battle_floatingLabels == nullptr) {
+  if (VS::Battle::floatingLabels == nullptr) {
     Refuse("Floating-label queue has no record owner");
   }
-  return (*Battle_floatingLabels)[slot.index];
+  return (*VS::Battle::floatingLabels)[slot.index];
 }
 
 class LiveFloatingLabelView final : public FloatingLabelView {
  public:
-  void Bind(Battle_FloatingLabel& label) { label_ = &label; }
+  void Bind(VS::Battle::FloatingLabel& label) { label_ = &label; }
   [[nodiscard]] bool Inactive() const override {
     return label_->key.bytes[0] == 0;
   }
@@ -54,16 +54,16 @@ class LiveFloatingLabelView final : public FloatingLabelView {
   }
 
  private:
-  Battle_FloatingLabel* label_ = nullptr;
+  VS::Battle::FloatingLabel* label_ = nullptr;
 };
 
 class LiveFloatingLabelQueue final : public FloatingLabelQueueView {
  public:
   [[nodiscard]] std::int16_t Count() const override {
-    return Battle_floatingLabelCount;
+    return VS::Battle::floatingLabelCount;
   }
   void SetCount(std::int16_t count) override {
-    Battle_floatingLabelCount = count;
+    VS::Battle::floatingLabelCount = count;
   }
   FloatingLabelView* Label(FloatingLabelSlot slot) override {
     auto& label = CurrentLabel(slot);
@@ -83,10 +83,10 @@ class LiveFloatingLabelQueue final : public FloatingLabelQueueView {
     return true;
   }
   bool ClearAllLabels() override {
-    if (Battle_floatingLabels == nullptr) {
+    if (VS::Battle::floatingLabels == nullptr) {
       Refuse("Floating-label reset has no 32-record owner");
     }
-    for (auto& label : *Battle_floatingLabels) label = {};
+    for (auto& label : *VS::Battle::floatingLabels) label = {};
     return true;
   }
 
@@ -98,10 +98,10 @@ class LiveFloatingLabelQueue final : public FloatingLabelQueueView {
 // decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1465).
 void ResetLiveFloatingLabels() {
   LiveFloatingLabelQueue queue;
-  if (!ResetFloatingLabels(
-          queue,
-          {Battle_actorMarkersHidden, Battle_abilityTimingCueFrames,
-           Battle_statusLabelStepTimer, Battle_ashleyStatusLabelsSuppressed})) {
+  if (!ResetFloatingLabels(queue, {VS::Battle::actorMarkersHidden,
+                                   VS::Battle::abilityTimingCueFrames,
+                                   VS::Battle::statusLabelStepTimer,
+                                   VS::Battle::ashleyStatusLabelsSuppressed})) {
     Refuse("Floating-label reset requires its record owner");
   }
 }
@@ -124,7 +124,7 @@ int QueueLiveWorldLockedLabelEntry(std::uint16_t* position) {
 }
 
 // decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067).
-void AdvanceLiveFloatingLabelQueue(Battle_FloatingLabel* label) {
+void AdvanceLiveFloatingLabelQueue(VS::Battle::FloatingLabel* label) {
   if (label == nullptr) {
     Refuse("Floating-label advance has no label owner");
   }
@@ -132,7 +132,7 @@ void AdvanceLiveFloatingLabelQueue(Battle_FloatingLabel* label) {
 }
 
 // decomp: F00734 func_800962E4 (src/BATTLE/BATTLE.PRG/2842C.c:2595).
-Battle_FloatingLabel* ReserveLiveFloatingLabel() {
+VS::Battle::FloatingLabel* ReserveLiveFloatingLabel() {
   static_cast<void>(LiveFloatingLabelCount());
   LiveFloatingLabelQueue queue;
   const auto slot = ReserveFloatingLabel(queue);
@@ -157,13 +157,13 @@ void RemoveLiveFloatingLabel(int label_index) {
   }
 }
 
-void CommitLiveFloatingLabel(const Battle_FloatingLabel* label) {
+void CommitLiveFloatingLabel(const VS::Battle::FloatingLabel* label) {
   static_cast<void>(LiveFloatingLabelCount());
-  if (Battle_floatingLabels == nullptr || label == nullptr) {
+  if (VS::Battle::floatingLabels == nullptr || label == nullptr) {
     Refuse("Floating-label publication has no current record owner");
   }
   LiveFloatingLabelQueue queue;
-  const auto records = std::span(*Battle_floatingLabels);
+  const auto records = std::span(*VS::Battle::floatingLabels);
   for (std::size_t index = 0; index < records.size(); ++index) {
     if (&records[index] != label) continue;
     if (!CommitFloatingLabel(queue, {static_cast<std::int32_t>(index)})) {
@@ -175,11 +175,11 @@ void CommitLiveFloatingLabel(const Battle_FloatingLabel* label) {
 }
 
 std::int16_t LiveFloatingLabelCount() {
-  const auto count = Battle_floatingLabelCount;
+  const auto count = VS::Battle::floatingLabelCount;
   if (count > kFloatingLabelCapacity) {
     Refuse("Floating-label traversal count exceeds its 32-record owner");
   }
-  if (count > 0 && Battle_floatingLabels == nullptr) {
+  if (count > 0 && VS::Battle::floatingLabels == nullptr) {
     Refuse("Floating-label traversal has no current record owner");
   }
   return count;

@@ -53,7 +53,7 @@ struct AnimationBankLimits {
   std::uint8_t common_entries = 0;
   std::uint8_t battle_entries = 0;
   std::uint8_t special_entries = 0;
-  // The special action's pitch (Battle_specialActionPitch).
+  // The special action's pitch (VS::Battle::specialActionPitch).
   std::uint8_t special_pitch = 0;
   // The selected shared bank (VS::Actors::sharedSequenceBankIndex).
   std::uint8_t shared_slot = 0;

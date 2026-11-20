@@ -13,7 +13,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Text/TextCode.hpp"

@@ -26,7 +26,7 @@ void Require(bool valid) {
 }
 const Battle_ActorStats* StatsOf(const Battle_HitResult* hit) {
   Require(hit != nullptr);
-  const auto slot = hit->target.targetActor;
+  const auto slot = hit->target.target_actor;
   Require(slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr);
   return Battle_actors[slot]->stats;
 }
@@ -87,7 +87,7 @@ void LiveDistributeHitLimbDamage(Battle_ActionDefinition* action,
     used_vitals = vitals;
   } else if (kind == LimbDistribution::kSplash) {
     Require(stats != nullptr);
-    const auto limb = hit->target.targetLimb;
+    const auto limb = hit->target.target_limb;
     Require(limb >= 0 && static_cast<std::size_t>(limb) < splash.size());
     for (std::size_t i = 0; i < splash.size(); ++i) {
       splash[i] = static_cast<std::uint8_t>(stats->dpSplash[limb][i]);
@@ -95,7 +95,7 @@ void LiveDistributeHitLimbDamage(Battle_ActionDefinition* action,
     used_splash = splash;
   }
   auto amounts = HitAmounts(*hit);
-  Require(DistributeHitLimbDamage(category, hit->target.targetLimb, amount,
+  Require(DistributeHitLimbDamage(category, hit->target.target_limb, amount,
                                   used_vitals, used_splash, amounts,
                                   Battle_limbArmorDpLoss));
   CommitAmounts(*hit, amounts);

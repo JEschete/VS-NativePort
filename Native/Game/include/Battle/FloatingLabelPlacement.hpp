@@ -13,40 +13,44 @@
 
 // The floating label updater, the actor value and status label leaves and the
 // equipment stat-change feedback (BATTLE.PRG 2842C.c:1757-2310, 2694-2890).
-// The updater walks Battle_floatingLabels once per frame: it anchors value and
-// status labels to their actor, places value labels apart from each other,
+// The updater walks VS::Battle::floatingLabels once per frame: it anchors value
+// and status labels to their actor, places value labels apart from each other,
 // dispatches each kind's leaf draw and ages and removes the labels. The
 // equipment producer queues one stat-change record per changed stat; the
 // updater shows the queued records as a stack after they are committed.
 namespace VS::Battle {
 
-// Battle_floatingLabels kinds the updater and the equipment feedback own
+// VS::Battle::floatingLabels kinds the updater and the equipment feedback own
 // beyond the producers' FloatingLabelKind.
 inline constexpr std::uint8_t kEquipmentStatChangeKind = 6;
 inline constexpr std::uint8_t kPendingEquipmentStatChangeKind = 7;
 // The actor byte of an equipment stat-change record.
 inline constexpr std::uint8_t kEquipmentStatChangeActor = 0x7F;
-// The Battle_placedLabelPositions owner: 32 DVECTORs (0x80 bytes).
+// The VS::Battle::placedLabelPositions owner: 32 DVECTORs (0x80 bytes).
 inline constexpr std::int32_t kPlacedLabelCapacity = 32;
-// Battle_StatusLabelLayout.labels.
+// StatusLabelLayout.captions.
 inline constexpr std::size_t kStatusLabelCaptions = 2;
 // The equipment kind the weapon stat-change setting covers.
 inline constexpr std::int32_t kWeaponStatChange = 240;
 
-// One Battle_StatusLabelLayout (D_800690B4): up to two caption rectangles of
-// Battle_kLabelCaptionRects and the Battle_kStatusLabelColors index.
+// One kStatusLabelLayouts entry (Feedback.hpp): up to two caption rectangles
+// of kLabelCaptionRects and the kStatusLabelColors index.
+// decomp: D_800690B4's element (src/BATTLE/BATTLE.PRG/2842C.c:1505-1509)
 struct StatusLabelLayout {
   std::uint8_t count{};
   std::array<std::uint8_t, kStatusLabelCaptions> captions{};
   std::uint8_t color{};
 };
+inline constexpr std::size_t kStatusLabelLayoutBytes = 0x4;
+static_assert(sizeof(StatusLabelLayout) == kStatusLabelLayoutBytes,
+              "StatusLabelLayout must keep its PS1 layout");
 
-// Battle_floatingLabels' published records. Label() is nullopt and
+// VS::Battle::floatingLabels' published records. Label() is nullopt and
 // WriteLabel() false for a record outside the queue's owner.
 class FloatingLabelRecords {
  public:
   virtual ~FloatingLabelRecords() = default;
-  // Battle_floatingLabelCount.
+  // VS::Battle::floatingLabelCount.
   [[nodiscard]] virtual std::int16_t LabelCount() = 0;
   [[nodiscard]] virtual std::optional<FloatingLabelRecord> Label(
       std::int32_t index) = 0;
@@ -59,11 +63,11 @@ class EquipmentStatChangeQueue : public FloatingLabelRecords {
  public:
   // func_800962E4: the reserved record's index, nullopt when refused.
   [[nodiscard]] virtual std::optional<std::int32_t> ReserveLabel() = 0;
-  // Publishes the reserved record (++Battle_floatingLabelCount).
+  // Publishes the reserved record (++VS::Battle::floatingLabelCount).
   virtual bool CommitLabel(std::int32_t index) = 0;
 };
 
-// Battle_placedLabelPositions and Battle_placedLabelCount.
+// VS::Battle::placedLabelPositions and VS::Battle::placedLabelCount.
 class PlacedLabelPositions {
  public:
   virtual ~PlacedLabelPositions() = default;
@@ -80,16 +84,16 @@ class PlacedLabelPositions {
 // (ot + 8 bytes). Each table lookup is nullopt outside its table.
 class FloatingLabelFeedbackWorld : public FloatingLabelRenderWorld {
  public:
-  // Battle_kStatusLabelLayouts (D_800690B4).
+  // VS::Battle::kStatusLabelLayouts (D_800690B4).
   virtual std::optional<StatusLabelLayout> StatusLayout(
       std::uint16_t status) = 0;
-  // Battle_kLabelCaptionRects (D_80068FAC).
+  // VS::Battle::kLabelCaptionRects (D_80068FAC).
   virtual std::optional<FloatingLabelAtlasRect> CaptionRect(
       std::uint8_t caption) = 0;
-  // Battle_kStatusLabelColors (D_80069134).
+  // VS::Battle::kStatusLabelColors (D_80069134).
   virtual std::optional<Render::QuadColor> StatusColor(std::uint8_t color) = 0;
-  // Battle_kStatChangeFirstWordRects (D_80069144) and
-  // Battle_kStatChangeSecondWordRects (D_8006917C).
+  // VS::Battle::kStatChangeFirstWordRects (D_80069144) and
+  // VS::Battle::kStatChangeSecondWordRects (D_8006917C).
   virtual std::optional<FloatingLabelAtlasRect> StatChangeFirstWord(
       std::uint8_t word) = 0;
   virtual std::optional<FloatingLabelAtlasRect> StatChangeSecondWord(

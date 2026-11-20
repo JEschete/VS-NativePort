@@ -1,6 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -11,10 +12,10 @@
 #include "Render/EncodedText.hpp"
 
 // Live binding for EncodedText.hpp: the arguments are the battle string
-// context (Battle_stringContext) and the widths are the variable-width font's
-// (VS::Render::variableFontGlyphWidths). An array argument is bounded by its
-// declared extent; a pointer destination is trusted for the bytes the request
-// writes, and a pointer source or argument string is read up to
+// context (VS::Battle::stringContext) and the widths are the variable-width
+// font's (VS::Render::variableFontGlyphWidths). An array argument is bounded by
+// its declared extent; a pointer destination is trusted for the bytes the
+// request writes, and a pointer source or argument string is read up to
 // kTrustedEncodedTextBytes looking for its terminator. A refused request
 // leaves an empty text and is reported (EncodedTextLive.cpp).
 namespace VS::Render {
@@ -31,6 +32,11 @@ inline constexpr bool kBounded = std::is_array_v<T> && std::extent_v<T> > 1;
     return {};
   }
   return {static_cast<const std::uint8_t*>(text), kTrustedEncodedTextBytes};
+}
+
+template <typename T, std::size_t N>
+[[nodiscard]] std::span<const std::uint8_t> Text(std::array<T, N>& text) {
+  return {reinterpret_cast<const std::uint8_t*>(text.data()), sizeof text};
 }
 
 template <typename T>

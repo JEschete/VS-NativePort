@@ -17,7 +17,7 @@
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -109,9 +109,10 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       VS::Menu::Framework::menuState};
   ValueRestore<decltype(VS::Menu::Framework::actionSelection)> saved_action{
       VS::Menu::Framework::actionSelection};
-  ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
-  ValueRestore<decltype(Battle_hudSlideOffset)> saved_hud_offset{
-      Battle_hudSlideOffset};
+  ValueRestore<decltype(VS::Battle::hudHidden)> saved_hud{
+      VS::Battle::hudHidden};
+  ValueRestore<decltype(VS::Battle::hudSlideOffset)> saved_hud_offset{
+      VS::Battle::hudSlideOffset};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
   ValueRestore<int> saved_background{VS::Menu::Framework::backgroundFadeStep};
@@ -293,7 +294,7 @@ struct LootFixture : TextLoadingFixture {
     CHECK(loot::inventoryBackup == nullptr);
     CHECK(loot::lootList == nullptr);
     CHECK(loot::lootListWorkingCopy == nullptr);
-    CHECK(Battle_stringContext.strings[0] == nullptr);
+    CHECK(VS::Battle::stringContext.strings[0] == nullptr);
   }
   static void SeedConsolidation() {
     auto& staged = *loot::stagedInventory;
@@ -519,7 +520,7 @@ TEST_CASE(
   const auto refusals = loot::LootTerminalLiveRefusalCount();
   for (int visit = 0; visit < 2; ++visit) {
     fixture.OpenAndLoad();
-    Battle_stringContext.strings[0] =
+    VS::Battle::stringContext.strings[0] =
         loot::stagedInventory->weapons[0].name.data();
     if (cold) {
       const auto entry = +[] { return 0; };

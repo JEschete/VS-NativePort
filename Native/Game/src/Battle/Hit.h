@@ -5,12 +5,12 @@
 struct Battle_DamageCalculation;
 struct Battle_HitResult;
 
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/BattleTypes.h"
 
 // decomp: _hitEntity_t (src/BATTLE/BATTLE.PRG/146C.c:78)
 struct Battle_HitResult {
-    Battle_HitTargetWord target;
+    VS::Battle::HitTargetWord target;
     short riskChange;
     short strengthChange;
     short intelligenceChange;

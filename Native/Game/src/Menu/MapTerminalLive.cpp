@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
@@ -474,7 +474,7 @@ class LiveScreen final : public MapScreenHost {
     Battle::SetLiveHudHidden(hidden ? 1 : 0);
   }
   void SetHudSlide(std::int32_t offset) override {
-    Battle_hudSlideOffset = offset;
+    VS::Battle::hudSlideOffset = offset;
   }
   std::int32_t MenuRowsIdle() override {
     return Framework::AreLiveMenuRowsIdle();

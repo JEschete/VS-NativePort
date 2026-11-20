@@ -14,15 +14,15 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -317,10 +317,12 @@ std::uint32_t LiveCameraHost::ControlMode() { return controlMode; }
 
 void LiveCameraHost::SetControlMode(std::uint32_t mode) { controlMode = mode; }
 
-std::uint32_t LiveCameraHost::ActionFlowMode() { return Battle_actionFlowMode; }
+std::uint32_t LiveCameraHost::ActionFlowMode() {
+  return VS::Battle::actionFlowMode;
+}
 
 void LiveCameraHost::SetActionFlowMode(std::uint32_t mode) {
-  Battle_actionFlowMode = mode;
+  VS::Battle::actionFlowMode = mode;
 }
 
 bool LiveCameraHost::TargetPagesUseShoulders() {
@@ -333,7 +335,7 @@ int LiveCameraHost::SphereInteractionMode() {
 
 // The core reports a missing action itself.
 std::optional<ActionCameraTargets> LiveCameraHost::ActionTargets() {
-  const Battle_ActionState* const action = Battle_actionState;
+  const Battle_ActionState* const action = VS::Battle::actionState;
   if (action == nullptr) return std::nullopt;
   ActionCameraTargets targets{.preview = std::nullopt,
                               .area_center = MotionOf(action->areaCenter)};
@@ -346,7 +348,7 @@ std::optional<ActionCameraTargets> LiveCameraHost::ActionTargets() {
 }
 
 void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
-  if (Battle_actionState == nullptr) {
+  if (VS::Battle::actionState == nullptr) {
     if (ShouldReport(refused_calls)) {
       VS::Core::LogWarn(
           kChannel, "no battle action to keep the preferred camera distance {}",
@@ -354,7 +356,7 @@ void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
     }
     return;
   }
-  Battle_actionState->preferredCameraDistance =
+  VS::Battle::actionState->preferredCameraDistance =
       static_cast<std::int16_t>(distance);
 }
 

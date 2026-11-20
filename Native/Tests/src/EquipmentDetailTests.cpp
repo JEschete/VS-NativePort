@@ -15,7 +15,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/StringTables.hpp"

@@ -9,7 +9,7 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "State/KillScore.hpp"
@@ -93,11 +93,11 @@ void RecordLiveEnemyKillScore(Battle_Actor* enemy) {
 }
 
 void UpdateLiveWeaponKillStreak(int /*unused*/) {
-  if (Battle_actionState == nullptr) {
+  if (VS::Battle::actionState == nullptr) {
     VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no action state");
     return;
   }
-  const std::uint16_t action_id = Battle_actionState->selection.actionId;
+  const std::uint16_t action_id = VS::Battle::actionState->selection.actionId;
   if (!ExtendsWeaponKillStreak(action_id)) return;
   const Battle_Actor* player = Battle_characterState;
   if (player == nullptr || player->stats == nullptr) {

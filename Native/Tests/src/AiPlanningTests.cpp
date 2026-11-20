@@ -354,9 +354,9 @@ struct CompletedPlanFixture {
     state.candidate_order[1] = &second;
     Actors_actorRecords[5] = &model;
     request.actionId = 42;
-    request.primaryTarget.target.targetActor = 2;
+    request.primaryTarget.target.target_actor = 2;
     request.targetCount = 1;
-    request.targets[0].target.targetActor = 4;
+    request.targets[0].target.target_actor = 4;
     Field_gimmickInstances[4] = &object;
   }
 
@@ -1006,7 +1006,7 @@ TEST_CASE(
 TEST_CASE("Completed action reconciliation skips position targets",
           "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
-  fixture.request.targets[0].target.targetActor = 200;
+  fixture.request.targets[0].target.target_actor = 200;
   fixture.request.targets[0].targetsPosition = 1;
   fixture.Reconcile();
   CHECK(fixture.state.opaque_fb == 5);

@@ -162,7 +162,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 }  // namespace
 
 PlanningRequest PlanningRequestOf(const Battle_ActionRequest& request) {
-  return {request.primaryTarget.target.targetActor,
+  return {request.primaryTarget.target.target_actor,
           request.primaryTarget.targetsPosition};
 }
 

@@ -136,8 +136,8 @@ Capture Run(f::LiveFrame& frame, const std::function<void()>& draw) {
           frame.Traversal(kEquipmentBucket), frame.UsedWords()};
 }
 
-void SetDigits(Battle_FloatingLabel& label, std::string_view digits) {
-  label.textLength = static_cast<u_char>(digits.size());
+void SetDigits(VS::Battle::FloatingLabel& label, std::string_view digits) {
+  label.text_length = static_cast<u_char>(digits.size());
   for (std::size_t index = 0; index < digits.size(); ++index) {
     std::span(label.text)[index] = static_cast<signed char>(digits[index]);
   }
@@ -148,8 +148,8 @@ class SavedState {
  public:
   SavedState() = default;
   ~SavedState() {
-    Battle_placedLabelPositions = positions_;
-    Battle_ashleyStatusLabelsSuppressed = suppressed_;
+    VS::Battle::placedLabelPositions = positions_;
+    VS::Battle::ashleyStatusLabelsSuppressed = suppressed_;
     VS::Field::areRoomUpdatesPaused = paused_;
     VS::State::tickSpeed = tick_;
     VS::Input::settings = settings_;
@@ -158,14 +158,14 @@ class SavedState {
   SavedState& operator=(const SavedState&) = delete;
 
  private:
-  DVECTOR* positions_ = Battle_placedLabelPositions;
-  std::int16_t suppressed_ = Battle_ashleyStatusLabelsSuppressed;
+  DVECTOR* positions_ = VS::Battle::placedLabelPositions;
+  std::int16_t suppressed_ = VS::Battle::ashleyStatusLabelsSuppressed;
   u_short paused_ = VS::Field::areRoomUpdatesPaused;
   int tick_ = VS::State::tickSpeed;
   VS::Input::Settings settings_ = VS::Input::settings;
 };
 
-using LabelDraw = void (*)(int, int, Battle_FloatingLabel*);
+using LabelDraw = void (*)(int, int, VS::Battle::FloatingLabel*);
 
 // Draws the frame's first record and checks the leaf left the record as it
 // was.
@@ -190,7 +190,7 @@ std::uint64_t ValueDigitsDigest(LabelDraw draw) {
       for (const auto x : kColumns) {
         label.value = value;
         label.frame = elapsed;
-        label.colorFlags = static_cast<u_char>(elapsed & 1U);
+        label.color_flags = static_cast<u_char>(elapsed & 1U);
         digest.Add(RunLeaf(frame, draw, x));
       }
     }
@@ -209,7 +209,7 @@ std::uint64_t StatusCaptionsDigest(LabelDraw draw) {
       for (const u_char removal : {u_char{0}, u_char{1}}) {
         label.value = layout;
         label.frame = elapsed;
-        label.colorFlags = removal;
+        label.color_flags = removal;
         digest.Add(RunLeaf(frame, draw, kX));
       }
     }
@@ -226,11 +226,11 @@ std::uint64_t StatChangeRowsDigest(LabelDraw draw) {
   f::LiveFrame frame;
   auto& label = frame.labels.front();
   SetDigits(label, "315");
-  label.scaleY = kLift;
+  label.scale_y = kLift;
   Digest digest;
   for (u_char first = 0; first < kFirstWords; ++first) {
     for (u_char second = 0; second < kSecondWords; ++second) {
-      label.colorFlags = first;
+      label.color_flags = first;
       label.limb = second;
       label.value = (second & 1U) != 0 ? kLowered : 1;
       digest.Add(RunLeaf(frame, draw, kStackX));
@@ -239,21 +239,21 @@ std::uint64_t StatChangeRowsDigest(LabelDraw draw) {
   return digest.Value();
 }
 
-using PlaceEntry = void (*)(std::int16_t*, Battle_FloatingLabel*);
+using PlaceEntry = void (*)(std::int16_t*, VS::Battle::FloatingLabel*);
 
 // Places the frame's first record, which the Live entry requires to be owned.
 Placement Place(f::LiveFrame& frame, PlaceEntry place,
-                const Battle_FloatingLabel& label,
+                const VS::Battle::FloatingLabel& label,
                 std::array<std::int16_t, 2> position,
                 const std::array<DVECTOR, kPlacedCapacity>& placed,
                 std::int16_t count) {
   Placement result{placed, position, count, {}};
   auto& owned = frame.labels.front();
   owned = label;
-  Battle_placedLabelPositions = result.placed.data();
-  Battle_placedLabelCount = count;
+  VS::Battle::placedLabelPositions = result.placed.data();
+  VS::Battle::placedLabelCount = count;
   place(result.position.data(), &owned);
-  result.count = Battle_placedLabelCount;
+  result.count = VS::Battle::placedLabelCount;
   result.label = f::Words(owned);
   return result;
 }
@@ -271,13 +271,13 @@ std::uint64_t PlacementDigest(PlaceEntry place) {
   placed[1] = {100, 80};
   placed[2] = {84, 88};
   placed[3] = {300, 40};
-  Battle_FloatingLabel label{};
-  label.scaleY = kUnitScale;
+  VS::Battle::FloatingLabel label{};
+  label.scale_y = kUnitScale;
   Digest digest;
   for (const auto& anchor : kAnchors) {
     for (std::int16_t count = 0; count <= kLastCount; ++count) {
       for (const std::int16_t scale : {kUnitScale, kOffsetScale}) {
-        label.scaleX = scale;
+        label.scale_x = scale;
         digest.Add(Place(frame, place, label, anchor, placed, count));
       }
     }
@@ -286,7 +286,7 @@ std::uint64_t PlacementDigest(PlaceEntry place) {
 }
 
 QueueState Snapshot(const f::LiveFrame& frame) {
-  QueueState state{.count = Battle_floatingLabelCount};
+  QueueState state{.count = VS::Battle::floatingLabelCount};
   for (std::size_t index = 0; index < f::kLabelCapacity; ++index) {
     state.labels[index] = f::Words(frame.labels[index]);
   }
@@ -295,14 +295,14 @@ QueueState Snapshot(const f::LiveFrame& frame) {
 
 void SeedQueue(f::LiveFrame& frame) {
   constexpr std::array<std::uint8_t, 4> kKinds{6, 1, 7, 2};
-  std::ranges::fill(frame.labels, Battle_FloatingLabel{});
+  std::ranges::fill(frame.labels, VS::Battle::FloatingLabel{});
   for (std::size_t index = 0; index < kKinds.size(); ++index) {
     frame.labels[index].key.bytes[0] = static_cast<char>(kKinds[index]);
   }
   constexpr std::size_t kSpare = 5;
   SetDigits(frame.labels[kSpare], "ZZZZ");
-  frame.labels[kSpare].scaleX = 0x1000;
-  Battle_floatingLabelCount = static_cast<std::int16_t>(kKinds.size());
+  frame.labels[kSpare].scale_x = 0x1000;
+  VS::Battle::floatingLabelCount = static_cast<std::int16_t>(kKinds.size());
 }
 
 using EquipmentQueue = int (*)(int, int, int);
@@ -342,7 +342,7 @@ void SeedUpdate(f::LiveFrame& frame) {
   constexpr std::array<std::uint8_t, 6> kKinds{6, 6, 0, 4, 5, 6};
   constexpr std::array<std::int16_t, 6> kWaiting{2, 0, 0, 0, 0, -1};
   constexpr std::array<std::uint8_t, 6> kFrames{0, 3, 0, 45, 4, 60};
-  std::ranges::fill(frame.labels, Battle_FloatingLabel{});
+  std::ranges::fill(frame.labels, VS::Battle::FloatingLabel{});
   for (std::size_t index = 0; index < kKinds.size(); ++index) {
     auto& label = frame.labels[index];
     label.key.bytes[0] = static_cast<char>(kKinds[index]);
@@ -350,12 +350,12 @@ void SeedUpdate(f::LiveFrame& frame) {
     label.frame = kFrames[index];
     SetDigits(label, "12");
     label.limb = static_cast<u_char>(index);
-    label.colorFlags = static_cast<u_char>(index);
+    label.color_flags = static_cast<u_char>(index);
   }
-  Battle_floatingLabelCount = static_cast<std::int16_t>(kKinds.size());
-  Battle_abilityTimingCueFrames = 0;
-  Battle_statusLabelStepTimer = 20;
-  Battle_placedLabelCount = 0;
+  VS::Battle::floatingLabelCount = static_cast<std::int16_t>(kKinds.size());
+  VS::Battle::abilityTimingCueFrames = 0;
+  VS::Battle::statusLabelStepTimer = 20;
+  VS::Battle::placedLabelCount = 0;
 }
 
 std::uint64_t UpdateDigest(Commit update) {
@@ -370,8 +370,9 @@ std::uint64_t UpdateDigest(Commit update) {
   result.draws = Run(frame, update);
   result.draws.used = frame.UsedWords();
   result.queue = Snapshot(frame);
-  result.timers = {Battle_abilityTimingCueFrames, Battle_statusLabelStepTimer,
-                   Battle_placedLabelCount};
+  result.timers = {VS::Battle::abilityTimingCueFrames,
+                   VS::Battle::statusLabelStepTimer,
+                   VS::Battle::placedLabelCount};
   CHECK_FALSE(result.draws.equipment.empty());
   CHECK_FALSE(result.draws.text.empty());
   CHECK(result.queue.count == kSeededLabels - 2);
@@ -418,7 +419,7 @@ TEST_CASE("F00719 Live matches the generated stack update digest",
 TEST_CASE("Floating placement Live refuses foreign records without drawing",
           "[floating-placement-live][F00722][F00739]") {
   f::LiveFrame frame;
-  Battle_FloatingLabel foreign{};
+  VS::Battle::FloatingLabel foreign{};
   SetDigits(foreign, "1");
   const auto foreign_draw = Run(frame, [&] {
     b::LiveDrawActorValueLabel(kX, kY, &foreign);
@@ -426,7 +427,7 @@ TEST_CASE("Floating placement Live refuses foreign records without drawing",
   });
   CHECK(foreign_draw.used == 0);
   auto& label = frame.labels.front();
-  label.textLength = kOversizedText;
+  label.text_length = kOversizedText;
   const auto long_text =
       Run(frame, [&] { b::LiveDrawActorValueLabel(kX, kY, &label); });
   CHECK(long_text.used == 0);

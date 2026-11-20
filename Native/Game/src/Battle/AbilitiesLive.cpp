@@ -20,11 +20,11 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/ActorMarkersLive.hpp"
@@ -32,7 +32,7 @@
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/Hit.h"
 #include "Content/ActorAssetsLive.hpp"
@@ -86,10 +86,10 @@ const Battle_ActorStats* LiveStats(int actor) {
 battle::ActionRequestView View(const Battle_ActionRequest& request) {
   battle::ActionRequestView view;
   view.action_id = request.actionId;
-  view.primary_actor = request.primaryTarget.target.targetActor;
+  view.primary_actor = request.primaryTarget.target.target_actor;
   view.primary_targets_position = request.primaryTarget.targetsPosition != 0;
   view.target_count = request.targetCount;
-  view.first_target_actor = request.targets[0].target.targetActor;
+  view.first_target_actor = request.targets[0].target.target_actor;
   view.first_target_targets_position = request.targets[0].targetsPosition != 0;
   return view;
 }
@@ -121,10 +121,10 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetActionFlowMode(int mode) override {
-    Battle_actionFlowMode = static_cast<u_int>(mode);
+    VS::Battle::actionFlowMode = static_cast<u_int>(mode);
   }
   [[nodiscard]] int RecoveryRewardMode() const override {
-    return Battle_recoveryRewardMode;
+    return VS::Battle::recoveryRewardMode;
   }
 
   [[nodiscard]] battle::SelectionTargetView SelectionTarget(
@@ -139,7 +139,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
   }
   void RestoreSavedTargetAsFirst(int limb) override {
     state_->selection.targets[0] = saved_primary_;
-    state_->selection.targets[0].target.targetLimb =
+    state_->selection.targets[0].target.target_limb =
         static_cast<signed char>(limb);
   }
   void SetSelectionTargetCount(int count) override {
@@ -315,7 +315,7 @@ battle::SelectionTargetView LiveAbilityHost::SelectionTarget(int index) const {
     return view;
   }
   const Battle_HitResult& target = state_->selection.targets[index];
-  view.actor = target.target.targetActor;
+  view.actor = target.target.target_actor;
   view.hp = target.target.hp;
   view.mp = target.target.mp;
   view.has_vital_effect = target.hpEffect != 0 || target.mpEffect != 0;
@@ -412,28 +412,28 @@ int LiveAbilityHost::ActorDefaultTargetLimb(int actor) const {
 }
 
 int LiveAbilityHost::SpellClassCount(int spell_class) const {
-  if (!InRange(Battle_spellClassCounts, spell_class)) {
+  if (!InRange(VS::Battle::spellClassCounts, spell_class)) {
     VS::Core::LogWarn("battle.ability", "spell class {} out of range",
                       spell_class);
     return 0;
   }
-  return Battle_spellClassCounts[spell_class];
+  return VS::Battle::spellClassCounts[spell_class];
 }
 
 int LiveAbilityHost::SpellClassSpellId(int spell_class, int index) const {
-  if (!InRange(Battle_spellClassSpellIds, spell_class) ||
-      Battle_spellClassSpellIds[spell_class] == nullptr || index < 0) {
+  if (!InRange(VS::Battle::spellClassSpellIds, spell_class) ||
+      VS::Battle::spellClassSpellIds[spell_class] == nullptr || index < 0) {
     VS::Core::LogWarn("battle.ability", "spell class {} entry {} unavailable",
                       spell_class, index);
     return -1;
   }
-  return Battle_spellClassSpellIds[spell_class][index];
+  return VS::Battle::spellClassSpellIds[spell_class][index];
 }
 
 int LiveAbilityHost::AbilityActionId(AbilityKind kind, int index) const {
   const auto& ids = kind == AbilityKind::kChain
-                        ? Battle_chainAbilityActionIds
-                        : Battle_defenseAbilityActionIds;
+                        ? VS::Battle::chainAbilityActionIds
+                        : VS::Battle::defenseAbilityActionIds;
   if (!InRange(ids, index)) {
     VS::Core::LogWarn("battle.ability", "ability action index={} out of range",
                       index);
@@ -491,7 +491,7 @@ int LiveAbilityHost::BattleAbilityRequirement(int index) const {
 }
 
 bool HasActionState(const char* caller) {
-  if (Battle_actionState != nullptr) return true;
+  if (VS::Battle::actionState != nullptr) return true;
   VS::Core::LogWarn("battle.ability", "{} without an action state", caller);
   return false;
 }
@@ -512,7 +512,7 @@ int PackPendingUnlocks(battle::PendingAbilityUnlocks pending) {
 void TraceAbilityTiming(const Battle_ActionState& state) {
   const Battle_ActionRequest& queued =
       state.queue[state.queueIndex & kQueueSlotMask];
-  const int actor = queued.primaryTarget.target.targetActor;
+  const int actor = queued.primaryTarget.target.target_actor;
   const Actors_ActorRecord* record = InRange(Actors_actorRecords, actor)
                                          ? Actors_actorRecords[actor]
                                          : nullptr;
@@ -535,70 +535,70 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
 namespace VS::Battle {
 void LiveArmDefenseAbilityTimingWindow(int target_actor_slot) {
   if (!HasActionState("arm defense window")) return;
-  LiveAbilityHost host(Battle_actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   ArmDefenseAbilityTimingWindow(target_actor_slot, host);
 }
 
 int LivePendingBattleAbilityUnlocks() {
   if (!HasCharacterState("pending ability unlocks")) return 0;
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return PackPendingUnlocks(PendingBattleAbilityUnlocks(host));
 }
 
 void LiveBeginPendingAbilityReward() {
   if (!HasActionState("pending ability reward")) return;
-  LiveAbilityHost host(Battle_actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   BeginPendingAbilityReward(host);
 }
 
 void LiveGrantPendingAbilityUnlock() {
   if (!HasActionState("grant ability unlock")) return;
-  LiveAbilityHost host(Battle_actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   GrantPendingAbilityUnlock(host);
 }
 
 int LiveIsActionUnlocked(unsigned action_id) {
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return IsActionUnlocked(action_id, host) ? 1 : 0;
 }
 
 void LiveUnlockAction(unsigned action_id) {
-  LiveAbilityHost host(Battle_actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   UnlockAction(action_id, host);
 }
 
 int LiveHasUnlockedSpellClass(int spell_class) {
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return HasUnlockedSpellClass(spell_class, host) ? 1 : 0;
 }
 
 int LiveHasUnlockedWeaponBreakArt() {
   if (!HasCharacterState("break art unlocks")) return 0;
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return HasUnlockedWeaponBreakArt(host) ? 1 : 0;
 }
 
 int LiveHasUnlockedBattleAbility(int defense) {
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return HasUnlockedBattleAbility(defense, host) ? 1 : 0;
 }
 
 void LiveAdvanceBattleAbilitySequence() {
   if (!HasActionState("advance ability sequence")) return;
-  LiveAbilityHost host(Battle_actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   AdvanceBattleAbilitySequence(host);
 }
 
 int LiveCanTriggerBattleAbility(int ability_input_slot) {
   if (!HasActionState("ability trigger check")) return 0;
-  const LiveAbilityHost host(Battle_actionState);
+  const LiveAbilityHost host(VS::Battle::actionState);
   return CanTriggerBattleAbility(ability_input_slot, host) ? 1 : 0;
 }
 
 void LiveUpdateBattleAbilityTiming() {
   if (!HasActionState("ability timing")) return;
-  TraceAbilityTiming(*Battle_actionState);
-  LiveAbilityHost host(Battle_actionState);
+  TraceAbilityTiming(*VS::Battle::actionState);
+  LiveAbilityHost host(VS::Battle::actionState);
   UpdateBattleAbilityTiming(host);
 }
 }  // namespace VS::Battle

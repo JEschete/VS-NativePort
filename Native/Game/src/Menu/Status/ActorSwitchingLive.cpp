@@ -12,7 +12,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
@@ -193,11 +193,11 @@ void StoreSwitchState(const ActorSwitchState& state) {
 [[nodiscard]] VitalsLabelLayout LiveLabelLayout() {
   VitalsLabelLayout labels;
   for (std::size_t label = 0; label < kVitalsLabels; ++label) {
-    labels.positions[label] = Battle_hudGaugeLabelPositions[label];
+    labels.positions[label] = VS::Battle::hudGaugeLabelPositions[label];
     labels.widths[label] =
-        static_cast<std::uint8_t>(Battle_hudGaugeLabelWidths[label]);
+        static_cast<std::uint8_t>(VS::Battle::hudGaugeLabelWidths[label]);
     labels.texture_u[label] =
-        static_cast<std::uint8_t>(Battle_hudGaugeLabelTexU[label]);
+        static_cast<std::uint8_t>(VS::Battle::hudGaugeLabelTexU[label]);
   }
   return labels;
 }
@@ -256,7 +256,7 @@ void LiveDrawVitals() {
   const VitalsFrame frame{.selected = VitalsOf(SelectedSlot()),
                           .previous = VitalsOf(static_cast<std::int32_t>(
                               static_cast<std::uint32_t>(previousActor) - 1U)),
-                          .hud_slide_offset = Battle_hudSlideOffset,
+                          .hud_slide_offset = VS::Battle::hudSlideOffset,
                           .labels = LiveLabelLayout()};
   LiveVitalsHost host(VitalsChain());
   const bool drawn = DrawVitals(state, frame, host);

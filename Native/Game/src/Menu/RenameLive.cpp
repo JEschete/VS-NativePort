@@ -13,7 +13,7 @@
 #include <type_traits>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/DiscLayout.h"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -147,7 +147,7 @@ class LiveHost final : public Host {
     g_prompt_name.fill(Render::kTextTerminator);
     std::memcpy(g_prompt_name.data(), name.data(),
                 std::min(name.size(), kNameBytes));
-    Battle_stringContext.strings[0] =
+    VS::Battle::stringContext.strings[0] =
         reinterpret_cast<char*>(g_prompt_name.data());
     if (VS::Menu::Framework::stringBuf == nullptr) {
       Refuse("rename prompt without the menu's string buffer");

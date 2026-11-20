@@ -15,8 +15,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/StatusEffects.h"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
@@ -143,8 +143,9 @@ struct LiveWorld {
       VS::Menu::Framework::menuItems};
   ValueRestore<char> saved_hide{VS::Menu::Framework::hideMenu};
   ValueRestore<int> saved_fade{VS::Menu::Framework::backgroundFadeStep};
-  ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
-  ValueRestore<int> saved_hud_slide{Battle_hudSlideOffset};
+  ValueRestore<decltype(VS::Battle::hudHidden)> saved_hud{
+      VS::Battle::hudHidden};
+  ValueRestore<int> saved_hud_slide{VS::Battle::hudSlideOffset};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
   RestorePages saved_pages;
@@ -185,8 +186,8 @@ struct LiveWorld {
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::backgroundFadeStep = 0;
     VS::Menu::Framework::hideMenu = 0;
-    Battle_hudHidden = 0;
-    Battle_hudSlideOffset = 0;
+    VS::Battle::hudHidden = 0;
+    VS::Battle::hudSlideOffset = 0;
     VS::Field::isFieldRenderingEnabled = 1;
     VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
@@ -368,8 +369,8 @@ void ExitScreen(LiveWorld& world, std::uint8_t& step) {
 
 void CheckRestoredDisplay() {
   CHECK(VS::Field::isFieldRenderingEnabled == 1);
-  CHECK(Battle_hudHidden == 0);
-  CHECK(Battle_hudSlideOffset == 0);
+  CHECK(VS::Battle::hudHidden == 0);
+  CHECK(VS::Battle::hudSlideOffset == 0);
   CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
@@ -632,8 +633,8 @@ TEST_CASE(
   REQUIRE(map::LiveUpdateScreen(&step) == 0);
   REQUIRE(world.ReachInput(step));
   CHECK(VS::Field::isFieldRenderingEnabled == 0);
-  CHECK(Battle_hudHidden == 1);
-  CHECK(Battle_hudSlideOffset == 0x200000);
+  CHECK(VS::Battle::hudHidden == 1);
+  CHECK(VS::Battle::hudSlideOffset == 0x200000);
   VS::Render::GamePages().Fill({640, 256, 160, 240}, 255, 0, 0);
   ExitScreen(world, step);
   CHECK(VS::Menu::Framework::menuState.control.current_menu == 6);
@@ -895,8 +896,8 @@ struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
       VS::Field::backgroundReferenceVectors, Field_entranceDoorRecord,
       Battle_unusedMenu9CursorMemory, VS::Field::manualDisplayState,
-      VS::Field::roomPalettes, Battle_floatingLabels,
-      Battle_placedLabelPositions, Field_enteredDoorId,
+      VS::Field::roomPalettes, VS::Battle::floatingLabels,
+      VS::Battle::placedLabelPositions, Field_enteredDoorId,
       VS::Field::areRoomUpdatesPaused, VS::Field::roomTint,
       Battle_unusedSubmenuState, VS::Field::isMinimapVisible,
       VS::Field::minimapSlideFrame, Field_gimmickAnimationQueue,
@@ -1145,7 +1146,7 @@ TEST_CASE("Actual heap replacement drains a visible map and its pending swap",
   VS::Boot::ResetLiveSessionHeap();
   CheckDrainedRead(scene, staging, request, 2048, refusals);
   CHECK(VS::Field::isFieldRenderingEnabled == 1);
-  CHECK(Battle_hudHidden == 0);
+  CHECK(VS::Battle::hudHidden == 0);
   const auto projection = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(std::pair<int, int>{projection.x, projection.y} == std::pair{171, 93});
   CHECK(TransformOrigin() == std::array{77, 88, 99});
@@ -1167,11 +1168,11 @@ TEST_CASE(
   CHECK_FALSE(memory::LivePayloadCapacity(scene));
   CHECK(Field_roomData.minimapScene == nullptr);
   CHECK(VS::Field::roomPalettes != nullptr);
-  CHECK(Battle_floatingLabels != nullptr);
-  CHECK(Battle_placedLabelPositions != nullptr);
+  CHECK(VS::Battle::floatingLabels != nullptr);
+  CHECK(VS::Battle::placedLabelPositions != nullptr);
   memory::FreeLiveFromLowEnd(VS::Field::roomPalettes);
-  memory::FreeLiveFromLowEnd(Battle_floatingLabels);
-  memory::FreeLiveFromLowEnd(Battle_placedLabelPositions);
+  memory::FreeLiveFromLowEnd(VS::Battle::floatingLabels);
+  memory::FreeLiveFromLowEnd(VS::Battle::placedLabelPositions);
 }
 
 TEST_CASE("Original map caption survives module reset but not a cold session",

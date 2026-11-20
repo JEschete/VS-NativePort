@@ -5,7 +5,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/ShpModel.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"

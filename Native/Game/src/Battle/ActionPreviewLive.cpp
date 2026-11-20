@@ -17,15 +17,15 @@
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreview.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -189,18 +189,19 @@ class LiveWorld final : public ActionPreviewWorld {
   }
   void ResetHitState() override {
     Battle_lastActionStatValue = 0;
-    Battle_previousHitResult = 0;
-    Battle_hitPrerequisiteResult = 0;
+    VS::Battle::previousHitResult = 0;
+    VS::Battle::hitPrerequisiteResult = 0;
   }
   void Prerequisite(std::uint32_t value) override {
-    Battle_hitPrerequisiteResult = value;
+    VS::Battle::hitPrerequisiteResult = value;
   }
   void PreviousHit(std::uint32_t value) override {
-    Battle_previousHitResult = value;
+    VS::Battle::previousHitResult = value;
   }
   std::optional<std::uint32_t> QueueIndex() override {
-    return Battle_actionState ? std::optional{Battle_actionState->queueIndex}
-                              : std::nullopt;
+    return VS::Battle::actionState
+               ? std::optional{VS::Battle::actionState->queueIndex}
+               : std::nullopt;
   }
   std::uint32_t Check(ResolutionDefinition& definition, ActionHit& target,
                       int hit) override {

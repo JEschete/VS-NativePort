@@ -10,7 +10,7 @@
 #include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Hit.h"
@@ -34,10 +34,10 @@ void Refuse(const char* what) {
 }
 
 [[nodiscard]] ImpactTarget LiveImpactTarget(const Battle_HitResult& hit) {
-  return {.actor = hit.target.targetActor,
-          .limb = hit.target.targetLimb,
-          .threshold = hit.target.hitThreshold,
-          .impact = hit.target.impactKind,
+  return {.actor = hit.target.target_actor,
+          .limb = hit.target.target_limb,
+          .threshold = hit.target.hit_threshold,
+          .impact = hit.target.impact_kind,
           .hp = hit.target.hp,
           .mp = hit.target.mp,
           .at_position = hit.targetsPosition != 0};
@@ -84,7 +84,7 @@ class LiveWorld final : public ActionImpactWorld {
     return QueuedEffectAction{
         .action_id = queued->actionId,
         .effect_variant = static_cast<std::uint8_t>(queued->effectVariant),
-        .source_actor = queued->primaryTarget.target.targetActor,
+        .source_actor = queued->primaryTarget.target.target_actor,
         .target_count = queued->targetCount};
   }
   std::optional<ImpactTarget> QueuedTarget(std::size_t index) override {
@@ -111,13 +111,13 @@ class LiveWorld final : public ActionImpactWorld {
 
  private:
   static const Battle_ActionRequest* Queued() {
-    if (Battle_actionState == nullptr) {
+    if (VS::Battle::actionState == nullptr) {
       Refuse("no action state");
       return nullptr;
     }
     constexpr std::uint32_t kQueueMask = 3;
-    return &Battle_actionState
-                ->queue[Battle_actionState->queueIndex & kQueueMask];
+    return &VS::Battle::actionState
+                ->queue[VS::Battle::actionState->queueIndex & kQueueMask];
   }
 };
 }  // namespace

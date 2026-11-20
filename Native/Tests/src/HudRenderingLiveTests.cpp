@@ -38,7 +38,7 @@ TEST_CASE("F01354 Live zero maximum needs no render target",
   b::DrawLiveHudStatGauge(3, -1, 0);
   CHECK(frame.UsedWords() == 0);
   CHECK(frame.ordering[1] == f::kEndLink);
-  CHECK(Battle_hudGaugeLabelTexU[3] == static_cast<char>(0xE1));
+  CHECK(VS::Battle::hudGaugeLabelTexU[3] == static_cast<char>(0xE1));
 }
 
 TEST_CASE("F01354 Live fixed-point risk rounds only its numeric presentation",
@@ -73,7 +73,7 @@ TEST_CASE("F01355 Live skips sentinel and panel-hidden invalid icons",
   f::LiveFrame frame;
   frame.Disconnect();
   b::DrawLiveSlidingStatusIcon(255, -1, -1);
-  Battle_hudSlideOffset = 1;
+  VS::Battle::hudSlideOffset = 1;
   b::DrawLiveSlidingStatusIcon(-1, -1, -1);
   CHECK(frame.UsedWords() == 0);
   CHECK(frame.ordering[3] == f::kEndLink);

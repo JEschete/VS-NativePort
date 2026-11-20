@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacement.hpp"
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
@@ -26,18 +26,11 @@
 
 namespace VS::Battle {
 namespace {
-static_assert(sizeof(FloatingLabelRecord) == sizeof(Battle_FloatingLabel));
-static_assert(std::is_trivially_copyable_v<Battle_FloatingLabel>);
+static_assert(sizeof(FloatingLabelRecord) == sizeof(VS::Battle::FloatingLabel));
+static_assert(std::is_trivially_copyable_v<VS::Battle::FloatingLabel>);
 static_assert(sizeof(LabelPoint) == sizeof(SVECTOR));
 static_assert(sizeof(LabelScreenPoint) == sizeof(DVECTOR));
 
-// The generated BATTLE.PRG tables' extents (D_80068FAC, D_800690B4,
-// D_80069134, D_80069144 and D_8006917C).
-constexpr std::size_t kCaptionRects = 33;
-constexpr std::size_t kStatusLayouts = 32;
-constexpr std::size_t kStatusColors = 4;
-constexpr std::size_t kFirstWords = 7;
-constexpr std::size_t kSecondWords = 13;
 // The equipment stat-change layer: ot + 8 bytes (two entries past the head).
 constexpr int kEquipmentLayer = 2;
 constexpr std::uint32_t kHalfMask = 0xFFFF;
@@ -53,11 +46,10 @@ void Refuse(std::string_view what) {
   }
 }
 
-std::optional<FloatingLabelAtlasRect> Atlas(const RECT* table,
-                                            std::size_t count,
+std::optional<FloatingLabelAtlasRect> Atlas(std::span<const RECT> table,
                                             std::size_t index) {
-  if (index >= count) return std::nullopt;
-  const auto& rect = std::span(table, count)[index];
+  if (index >= table.size()) return std::nullopt;
+  const auto& rect = table[index];
   return FloatingLabelAtlasRect{rect.x, rect.y, rect.w, rect.h};
 }
 
@@ -82,30 +74,25 @@ class LiveFeedbackWorld final : public FloatingLabelFeedbackWorld {
     return renderer_.DrawText(text, origin, color);
   }
   std::optional<StatusLabelLayout> StatusLayout(std::uint16_t status) override {
-    if (status >= kStatusLayouts) return std::nullopt;
-    const auto& layout =
-        std::span(Battle_kStatusLabelLayouts, kStatusLayouts)[status];
-    return StatusLabelLayout{.count = layout.count,
-                             .captions = {layout.labels[0], layout.labels[1]},
-                             .color = layout.spacing};
+    if (status >= kStatusLabelLayouts.size()) return std::nullopt;
+    return std::span(kStatusLabelLayouts)[status];
   }
   std::optional<FloatingLabelAtlasRect> CaptionRect(
       std::uint8_t caption) override {
-    return Atlas(Battle_kLabelCaptionRects, kCaptionRects, caption);
+    return Atlas(kLabelCaptionRects, caption);
   }
   std::optional<Render::QuadColor> StatusColor(std::uint8_t color) override {
-    if (color >= kStatusColors) return std::nullopt;
-    const auto& entry =
-        std::span(Battle_kStatusLabelColors, kStatusColors)[color];
+    if (color >= kStatusLabelColors.size()) return std::nullopt;
+    const auto& entry = std::span(kStatusLabelColors)[color];
     return Render::QuadColor{entry.r, entry.g, entry.b};
   }
   std::optional<FloatingLabelAtlasRect> StatChangeFirstWord(
       std::uint8_t word) override {
-    return Atlas(Battle_kStatChangeFirstWordRects, kFirstWords, word);
+    return Atlas(kStatChangeFirstWordRects, word);
   }
   std::optional<FloatingLabelAtlasRect> StatChangeSecondWord(
       std::uint8_t word) override {
-    return Atlas(Battle_kStatChangeSecondWordRects, kSecondWords, word);
+    return Atlas(kStatChangeSecondWordRects, word);
   }
   bool DrawEquipmentQuad(const FloatingLabelQuad& quad) override {
     return DrawLiveFloatingLabelQuad(quad, kEquipmentLayer);
@@ -115,19 +102,19 @@ class LiveFeedbackWorld final : public FloatingLabelFeedbackWorld {
   FloatingLabelRenderWorld& renderer_ = LiveFloatingLabelRenderer();
 };
 
-Battle_FloatingLabel* LiveLabel(std::int32_t index) {
-  if (Battle_floatingLabels == nullptr || index < 0 ||
+VS::Battle::FloatingLabel* LiveLabel(std::int32_t index) {
+  if (VS::Battle::floatingLabels == nullptr || index < 0 ||
       index >= kFloatingLabelCapacity) {
     return nullptr;
   }
-  return &(*Battle_floatingLabels)[index];
+  return &(*VS::Battle::floatingLabels)[index];
 }
 
 // The record a leaf entry was given, when it is one of the current owner's.
 std::optional<FloatingLabelRecord> OwnedRecord(
-    const Battle_FloatingLabel* label) {
-  if (Battle_floatingLabels != nullptr && label != nullptr) {
-    for (const auto& current : *Battle_floatingLabels) {
+    const VS::Battle::FloatingLabel* label) {
+  if (VS::Battle::floatingLabels != nullptr && label != nullptr) {
+    for (const auto& current : *VS::Battle::floatingLabels) {
       if (&current == label) return std::bit_cast<FloatingLabelRecord>(current);
     }
   }
@@ -152,7 +139,7 @@ class LiveLabelRecords : public EquipmentStatChangeQueue {
       Refuse("label write outside the 32-record owner");
       return false;
     }
-    *label = std::bit_cast<Battle_FloatingLabel>(record);
+    *label = std::bit_cast<VS::Battle::FloatingLabel>(record);
     return true;
   }
   std::optional<std::int32_t> ReserveLabel() override {
@@ -176,9 +163,9 @@ class LiveLabelRecords : public EquipmentStatChangeQueue {
 
 class LivePlacedPositions final : public PlacedLabelPositions {
  public:
-  std::int16_t Count() override { return Battle_placedLabelCount; }
+  std::int16_t Count() override { return VS::Battle::placedLabelCount; }
   void SetCount(std::int16_t count) override {
-    Battle_placedLabelCount = count;
+    VS::Battle::placedLabelCount = count;
   }
   std::optional<LabelScreenPoint> Position(std::int32_t index) override {
     const auto* placed = Slot(index);
@@ -195,12 +182,12 @@ class LivePlacedPositions final : public PlacedLabelPositions {
 
  private:
   static DVECTOR* Slot(std::int32_t index) {
-    if (Battle_placedLabelPositions == nullptr || index < 0 ||
+    if (VS::Battle::placedLabelPositions == nullptr || index < 0 ||
         index >= kPlacedLabelCapacity) {
       Refuse("placed position outside the 32-position owner");
       return nullptr;
     }
-    return &std::span(Battle_placedLabelPositions,
+    return &std::span(VS::Battle::placedLabelPositions,
                       kPlacedLabelCapacity)[static_cast<std::size_t>(index)];
   }
 };
@@ -287,7 +274,8 @@ class LiveUpdateWorld final : public FloatingLabelUpdateWorld {
 };
 
 void DrawLeafEntry(FloatingLabelLeaf leaf, int x, int y,
-                   const Battle_FloatingLabel* label, std::string_view what) {
+                   const VS::Battle::FloatingLabel* label,
+                   std::string_view what) {
   const auto record = OwnedRecord(label);
   if (!record) {
     Refuse("leaf record outside the 32-record owner");
@@ -301,11 +289,12 @@ void DrawLeafEntry(FloatingLabelLeaf leaf, int x, int y,
 void LiveUpdateAndDrawFloatingLabels() {
   LiveUpdateWorld world;
   const FloatingLabelUpdateState state{
-      .ability_cue_frames = Battle_abilityTimingCueFrames,
-      .status_step_timer = Battle_statusLabelStepTimer,
+      .ability_cue_frames = VS::Battle::abilityTimingCueFrames,
+      .status_step_timer = VS::Battle::statusLabelStepTimer,
       .tick_speed = VS::State::tickSpeed,
       .room_updates_paused = VS::Field::areRoomUpdatesPaused != 0,
-      .ashley_status_labels_hidden = Battle_ashleyStatusLabelsSuppressed != 0};
+      .ashley_status_labels_hidden =
+          VS::Battle::ashleyStatusLabelsSuppressed != 0};
   if (!UpdateAndDrawFloatingLabels(world, state)) {
     Refuse("floating label update");
   }
@@ -313,7 +302,7 @@ void LiveUpdateAndDrawFloatingLabels() {
 
 // decomp: F00720 func_80094844 (src/BATTLE/BATTLE.PRG/2842C.c:1971).
 void LivePlaceActorValueLabel(std::int16_t* position,
-                              Battle_FloatingLabel* label) {
+                              VS::Battle::FloatingLabel* label) {
   auto record = OwnedRecord(label);
   if (position == nullptr || !record) {
     Refuse("value label placement without its position or record");
@@ -328,17 +317,17 @@ void LivePlaceActorValueLabel(std::int16_t* position,
   }
   point[0] = screen.x;
   point[1] = screen.y;
-  *label = std::bit_cast<Battle_FloatingLabel>(record.value());
+  *label = std::bit_cast<VS::Battle::FloatingLabel>(record.value());
 }
 
 // decomp: F00722 func_80094B0C (src/BATTLE/BATTLE.PRG/2842C.c:2073).
-void LiveDrawActorValueLabel(int x, int y, Battle_FloatingLabel* label) {
+void LiveDrawActorValueLabel(int x, int y, VS::Battle::FloatingLabel* label) {
   DrawLeafEntry(FloatingLabelLeaf::kActorValue, x, y, label,
                 "actor value label");
 }
 
 // decomp: F00725 func_80095258 (src/BATTLE/BATTLE.PRG/2842C.c:2210).
-void LiveDrawActorStatusLabel(int x, int y, Battle_FloatingLabel* label) {
+void LiveDrawActorStatusLabel(int x, int y, VS::Battle::FloatingLabel* label) {
   DrawLeafEntry(FloatingLabelLeaf::kActorStatus, x, y, label,
                 "actor status label");
 }
@@ -361,7 +350,8 @@ int LiveQueueEquipmentStatChange(int equipment_kind, int stat_label_kind,
 }
 
 // decomp: F00739 func_8009695C (src/BATTLE/BATTLE.PRG/2842C.c:2765).
-void LiveDrawEquipmentStatChange(int x, int y, Battle_FloatingLabel* label) {
+void LiveDrawEquipmentStatChange(int x, int y,
+                                 VS::Battle::FloatingLabel* label) {
   DrawLeafEntry(FloatingLabelLeaf::kEquipmentStatChange, x, y, label,
                 "equipment stat change label");
 }

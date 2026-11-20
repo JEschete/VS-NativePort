@@ -58,7 +58,7 @@ auto Bytes(const T& value) {
 struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
   decltype(VS::Battle::hitFunctions) callbacks = VS::Battle::hitFunctions;
-  std::uint32_t previous = Battle_previousHitResult;
+  std::uint32_t previous = VS::Battle::previousHitResult;
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 2> stats{};
   Battle_ActionDefinition action{};
@@ -74,14 +74,14 @@ struct LiveFixture {
     actors.at(2).weaponDrawn = 1;
     stats.at(0).actorId = 41;
     stats.at(1).actorId = 41;
-    source.target.targetActor = 0;
-    target.target.targetActor = 1;
+    source.target.target_actor = 0;
+    target.target.target_actor = 1;
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), Battle_actors);
     std::copy(callbacks.begin(), callbacks.end(),
               VS::Battle::hitFunctions.begin());
-    Battle_previousHitResult = previous;
+    VS::Battle::previousHitResult = previous;
   }
 };
 
@@ -385,11 +385,11 @@ TEST_CASE(
 TEST_CASE("Live previous hit threshold ignores every callback argument",
           "[hit-modifiers][F00342][live]") {
   LiveFixture f;
-  Battle_previousHitResult =
+  VS::Battle::previousHitResult =
       GENERATE(0, 1, -1, std::numeric_limits<int>::min());
   CHECK(battle::PreviousLiveHitSuccessThreshold(nullptr, nullptr, nullptr, -1,
                                                 -1) ==
-        (Battle_previousHitResult == 0 ? 255 : 100));
+        (VS::Battle::previousHitResult == 0 ? 255 : 100));
 }
 
 TEST_CASE("Live gem chance preserves aliased state and ignores inactive actors",
@@ -402,7 +402,7 @@ TEST_CASE("Live gem chance preserves aliased state and ignores inactive actors",
   const auto before = Bytes(f.stats);
   CHECK(battle::LiveGemHitChance(&f.action, &f.source, &f.source, 0, -1) == 80);
   CHECK(Bytes(f.stats) == before);
-  f.target.target.targetActor = 255;
+  f.target.target.target_actor = 255;
   f.target.targetsPosition = -1;
   CHECK(battle::LiveGemHitChance(nullptr, &f.target, &f.target, -1, 0) == 100);
 }
@@ -423,7 +423,7 @@ TEST_CASE("Live risk uses hit slot rather than stats actor identity",
 TEST_CASE("Live chain reads unsigned byte independently of char signedness",
           "[hit-modifiers][F00348][live]") {
   LiveFixture f;
-  f.target.target.targetLimb = 5;
+  f.target.target.target_limb = 5;
   f.target.targetsPosition = -1;
   for (unsigned evasion = 0; evasion < 256; ++evasion) {
     f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(evasion);
@@ -438,12 +438,12 @@ TEST_CASE("Original hit table dispatches all four typed callbacks",
   const auto image = ReadOriginalBattleModule();
   LiveFixture f;
   RelocateHits(image);
-  Battle_previousHitResult = -1;
+  VS::Battle::previousHitResult = -1;
   f.stats.at(0).weapon.gems[0].gem_effects = 1;
   f.stats.at(1).shield.gems[0].gem_effects = 5;
   f.stats.at(0).risk = 506;
   f.stats.at(1).limbs[5].chainEvasion = static_cast<char>(128);
-  f.target.target.targetLimb = 5;
+  f.target.target.target_limb = 5;
   CHECK(VS::Battle::hitFunctions[1] ==
         &battle::PreviousLiveHitSuccessThreshold);
   CHECK(VS::Battle::hitFunctions[2] == &battle::LiveGemHitChance);

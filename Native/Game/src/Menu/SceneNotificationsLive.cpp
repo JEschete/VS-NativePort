@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Battle/ActionTable.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
@@ -141,7 +141,7 @@ class LiveHost final : public SceneNotificationHost {
   }
   void BindSubject(SceneNotificationText subject) override {
     subject_ = subject;
-    Battle_stringContext.strings[0] =
+    VS::Battle::stringContext.strings[0] =
         reinterpret_cast<char*>(const_cast<std::uint8_t*>(subject.data()));
   }
   void ClearFrameShape() override {

@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -177,8 +177,8 @@ struct LiveFixture {
   ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
       VS::Menu::Framework::itemNames};
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
-  ValueRestore<decltype(Battle_stringContext)> saved_arguments{
-      Battle_stringContext};
+  ValueRestore<decltype(VS::Battle::stringContext)> saved_arguments{
+      VS::Battle::stringContext};
   ArrayRestore<VS::Menu::TextBoxState, std::size(VS::Menu::textBoxes)>
       saved_text_boxes{VS::Menu::textBoxes};
   ValueRestore<VS::Render::FrameScratch> saved_frame{

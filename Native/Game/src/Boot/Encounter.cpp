@@ -24,8 +24,8 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -33,8 +33,8 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
-#include "Battle/Feedback.h"
-#include "Battle/Sphere.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Sphere.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
@@ -262,7 +262,7 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.spawn_index = actor.roomSpawnIndex;
   snapshot.defeated = actor.defeated != 0;
   snapshot.awareness_marker =
-      static_cast<unsigned char>(Battle_actorMarkers[slot]);
+      static_cast<unsigned char>(VS::Battle::actorMarkers[slot]);
   const auto* ai = VS::Battle::Ai::actorAiStates[slot];
   if (ai != nullptr) {
     snapshot.ai_present = true;
@@ -280,7 +280,7 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
 
 void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.action = action.selection.actionId;
-  state.source_actor = action.selection.primaryTarget.target.targetActor;
+  state.source_actor = action.selection.primaryTarget.target.target_actor;
   state.target_count = action.selection.targetCount;
   const auto page = VS::Battle::GetTargetPageInfo();
   state.target_page = {page.total, page.page,    page.pages,
@@ -300,7 +300,7 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   // BATTLE.PRG func_800C4794 positioning mode (sphere +0x3E): D-pad moves the
   // area cursor; a second Circle confirms it.
   const auto* sphere =
-      reinterpret_cast<const Battle_TargetSphere*>(Battle_targetSphere);
+      reinterpret_cast<const Battle_TargetSphere*>(VS::Battle::targetSphere);
   state.area_positioning = sphere != nullptr && sphere->inputLocked != 0;
   if (sphere != nullptr) {
     constexpr int kExtentUnits = 32;
@@ -316,7 +316,7 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   for (unsigned index = 0; index < action.previewCount; ++index) {
     const auto& target = action.previews[index];
     state.target_previews.push_back(
-        {target.actorId,
+        {target.actor_id,
          target.limb,
          {target.position.vx, target.position.vy, target.position.vz}});
   }
@@ -439,7 +439,7 @@ std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
     return std::unexpected("STATUS DEFINITIONS NOT LOADED");
   }
   Battle_HitResult hit{};
-  hit.target.targetActor = 0;
+  hit.target.target_actor = 0;
   if (VS::Battle::QueueLiveApplicableStatusChanges(parameter, &hit) == 0) {
     return std::unexpected("STATUS ALREADY ACTIVE, BLOCKED OR IMMUNE");
   }
@@ -463,9 +463,9 @@ void LearnProfileBattleAbilities(bool all_abilities) {
   const unsigned count = all_abilities ? kAbilityCount : kMappedAbilities;
   for (unsigned slot = 0; slot < count; ++slot) {
     const auto chain =
-        static_cast<unsigned char>(Battle_chainAbilityActionIds[slot]);
+        static_cast<unsigned char>(VS::Battle::chainAbilityActionIds[slot]);
     const auto defense =
-        static_cast<unsigned char>(Battle_defenseAbilityActionIds[slot]);
+        static_cast<unsigned char>(VS::Battle::defenseAbilityActionIds[slot]);
     if (chain < kFirstChainAbility || chain >= kFirstDefenseAbility ||
         defense < kFirstDefenseAbility || defense >= kAfterLastDefenseAbility) {
       throw std::runtime_error(
@@ -484,15 +484,16 @@ void LearnProfileBattleAbilities(bool all_abilities) {
 
 void LearnProfileSpells(bool all_spells) {
   for (unsigned spell_class = 0;
-       spell_class < std::size(Battle_spellClassCounts); ++spell_class) {
-    if (Battle_spellClassCounts[spell_class] == 0 ||
-        Battle_spellClassSpellIds[spell_class] == nullptr) {
+       spell_class < std::size(VS::Battle::spellClassCounts); ++spell_class) {
+    if (VS::Battle::spellClassCounts[spell_class] == 0 ||
+        VS::Battle::spellClassSpellIds[spell_class] == nullptr) {
       throw std::runtime_error("encounter profile spell table is unavailable");
     }
     const unsigned count =
-        all_spells ? Battle_spellClassCounts[spell_class] : 1;
+        all_spells ? VS::Battle::spellClassCounts[spell_class] : 1;
     for (unsigned index = 0; index < count; ++index) {
-      const unsigned action = Battle_spellClassSpellIds[spell_class][index];
+      const unsigned action =
+          VS::Battle::spellClassSpellIds[spell_class][index];
       LearnAction(action);
       // MAINMENU/2D10.c and MENU0/84.c use four consecutive action IDs per
       // rank.
@@ -784,7 +785,8 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
     return reject("NO READY COMBAT LAB ENCOUNTER");
   }
   constexpr int kFieldControl = 1;
-  if (VS::Field::controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
+  if (VS::Field::controlMode != kFieldControl ||
+      VS::Battle::actionFlowMode != 0 ||
       VS::Menu::Framework::menuState.control.current_menu !=
           VS::Menu::Framework::kMenuClosed) {
     return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
@@ -887,14 +889,14 @@ EncounterState InspectGameplay() {
   state.transition = VS::Field::screenTransitionStep;
   state.native_buttons = VS::Input::buttonsState;
   state.native_pressed = VS::Input::buttonsPressed;
-  state.action_phase = Battle_actionFlowMode;
+  state.action_phase = VS::Battle::actionFlowMode;
   InspectLearnedActions(state);
   constexpr int kLootFlag = 0xAB;
   constexpr int kLootAvailable = 3;
   state.rewards_available =
       VS::State::LiveScriptFlag(kLootFlag) >= kLootAvailable;
-  if (Battle_actionState != nullptr) {
-    InspectTargeting(state, *Battle_actionState);
+  if (VS::Battle::actionState != nullptr) {
+    InspectTargeting(state, *VS::Battle::actionState);
   }
   for (int slot = 0; slot < EncounterLimits::kActorSlots; ++slot) {
     const auto* actor = Battle_actors[slot];

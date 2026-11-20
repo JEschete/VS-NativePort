@@ -12,7 +12,7 @@
 #include "Actors/Movement.h"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
@@ -23,29 +23,29 @@
 namespace VS::test_support::live_floating_labels {
 using LabelWords = std::array<std::uint32_t, 6>;
 
-inline LabelWords Words(const Battle_FloatingLabel& label) {
+inline LabelWords Words(const VS::Battle::FloatingLabel& label) {
   return std::bit_cast<LabelWords>(label);
 }
 
 class State {
  public:
-  Battle_FloatingLabel labels[1][32]{};
-  Battle_FloatingLabel canary{};
+  std::array<VS::Battle::FloatingLabelSlots, 1> labels{};
+  VS::Battle::FloatingLabel canary{};
   State() {
-    Battle_floatingLabels = labels;
-    Battle_floatingLabelCount = 0;
+    VS::Battle::floatingLabels = labels.data();
+    VS::Battle::floatingLabelCount = 0;
   }
   ~State() {
-    Battle_floatingLabels = saved_owner_;
-    Battle_floatingLabelCount = saved_commands_[0];
-    Battle_actorMarkersHidden = saved_commands_[1];
-    Battle_abilityTimingCueFrames = saved_commands_[2];
-    Battle_statusLabelStepTimer = saved_commands_[3];
-    Battle_ashleyStatusLabelsSuppressed = saved_commands_[4];
-    Battle_placedLabelCount = saved_commands_[5];
-    Battle_actorMarkerSides = saved_sides_;
-    Battle_abilityTimingCuePosition = saved_cue_position_;
-    std::ranges::copy(saved_markers_, Battle_actorMarkers);
+    VS::Battle::floatingLabels = saved_owner_;
+    VS::Battle::floatingLabelCount = saved_commands_[0];
+    VS::Battle::actorMarkersHidden = saved_commands_[1];
+    VS::Battle::abilityTimingCueFrames = saved_commands_[2];
+    VS::Battle::statusLabelStepTimer = saved_commands_[3];
+    VS::Battle::ashleyStatusLabelsSuppressed = saved_commands_[4];
+    VS::Battle::placedLabelCount = saved_commands_[5];
+    VS::Battle::actorMarkerSides = saved_sides_;
+    VS::Battle::abilityTimingCuePosition = saved_cue_position_;
+    std::ranges::copy(saved_markers_, VS::Battle::actorMarkers.begin());
     VS::Core::SeedBiosRand(saved_random_state_);
   }
   State(const State&) = delete;
@@ -59,26 +59,30 @@ class State {
       label.limb = 251;
       label.frame = 17;
       label.value = static_cast<std::uint16_t>(index + 500);
-      label.colorFlags = 128;
-      label.textLength = 3;
-      label.scaleX = -19;
-      label.scaleY = 20;
+      label.color_flags = 128;
+      label.text_length = 3;
+      label.scale_x = -19;
+      label.scale_y = 20;
       std::ranges::fill(label.text, static_cast<signed char>('7'));
     }
   }
-  [[nodiscard]] std::span<Battle_FloatingLabel, 32> Labels() {
+  [[nodiscard]] std::span<VS::Battle::FloatingLabel, 32> Labels() {
     return labels[0];
   }
 
  private:
-  decltype(Battle_floatingLabels) saved_owner_ = Battle_floatingLabels;
+  decltype(VS::Battle::floatingLabels) saved_owner_ =
+      VS::Battle::floatingLabels;
   std::array<std::int16_t, 6> saved_commands_{
-      Battle_floatingLabelCount,           Battle_actorMarkersHidden,
-      Battle_abilityTimingCueFrames,       Battle_statusLabelStepTimer,
-      Battle_ashleyStatusLabelsSuppressed, Battle_placedLabelCount};
-  int saved_sides_ = Battle_actorMarkerSides;
-  SVECTOR saved_cue_position_ = Battle_abilityTimingCuePosition;
-  std::array<char, 40> saved_markers_ = std::to_array(Battle_actorMarkers);
+      VS::Battle::floatingLabelCount,
+      VS::Battle::actorMarkersHidden,
+      VS::Battle::abilityTimingCueFrames,
+      VS::Battle::statusLabelStepTimer,
+      VS::Battle::ashleyStatusLabelsSuppressed,
+      VS::Battle::placedLabelCount};
+  int saved_sides_ = VS::Battle::actorMarkerSides;
+  SVECTOR saved_cue_position_ = VS::Battle::abilityTimingCuePosition;
+  decltype(VS::Battle::actorMarkers) saved_markers_ = VS::Battle::actorMarkers;
   unsigned saved_random_state_ = VS::Core::BiosRand().State();
 };
 

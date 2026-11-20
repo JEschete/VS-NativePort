@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -351,7 +351,7 @@ class LivePromptHost final : public PromptHost {
       Refuse("a kept item outside vs_mainMenu_itemNames");
       return;
     }
-    Battle_stringContext.strings[0] = Framework::itemNames[item_id];
+    VS::Battle::stringContext.strings[0] = Framework::itemNames[item_id];
   }
 };
 

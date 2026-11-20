@@ -9,7 +9,7 @@
 
 #include "Battle/Action.h"
 #include "Battle/ActionCosts.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -106,8 +106,9 @@ class LiveCostWorld final : public ActionCostWorld {
     return &actor_.emplace(actor->stats);
   }
   std::optional<std::uint32_t> ChainStep() override {
-    return Battle_actionState ? std::optional{Battle_actionState->chainStep}
-                              : std::nullopt;
+    return VS::Battle::actionState
+               ? std::optional{VS::Battle::actionState->chainStep}
+               : std::nullopt;
   }
   std::optional<std::uint32_t> WeaponDrawn(int slot) override {
     auto* actor = ActorAt(slot);

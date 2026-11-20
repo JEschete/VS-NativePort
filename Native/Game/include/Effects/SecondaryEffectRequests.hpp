@@ -64,8 +64,9 @@ inline constexpr std::uint16_t kImpactKindOneEffect = 0x27;
 // secondary instances' busy bit, SecondaryBusyBits).
 inline constexpr std::uint32_t kTrapEffectBusyBit = 2;
 
-// The hit word of a target (Battle_HitTargetWord) and whether the hit names a
-// position rather than an actor (Battle_HitResult.targetsPosition != 0).
+// The hit word of a target (VS::Battle::HitTargetWord) and whether the hit
+// names a position rather than an actor (Battle_HitResult.targetsPosition !=
+// 0).
 struct ImpactTarget {
   std::uint8_t actor{};
   std::int8_t limb{};
@@ -74,11 +75,11 @@ struct ImpactTarget {
   bool at_position{};
 };
 
-// The current queued action (Battle_actionState->queue[queueIndex & 3]).
+// The current queued action (VS::Battle::actionState->queue[queueIndex & 3]).
 struct QueuedEffectAction {
   std::uint16_t action_id{};
   std::uint8_t effect_variant{};
-  // primaryTarget.target.targetActor: the request's source actor.
+  // primaryTarget.target.target_actor: the request's source actor.
   std::uint8_t source_actor{};
   std::uint16_t target_count{};
 };

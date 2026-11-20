@@ -9,7 +9,7 @@ struct Battle_ActionRequest;
 struct Battle_ActionState;
 
 #include "Battle/Hit.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 
 // decomp: actionTypes (src/SLUS_010.40/main.h:51)
 enum Battle_ActionType {
@@ -88,7 +88,7 @@ struct Battle_ActionState {
     char areaZ;
     char areaAngle;
     SVECTOR areaOrigin;
-    Battle_TargetPreview previews[255];
+    VS::Battle::TargetPreview previews[255];
     int reserved2BE8;
     int reserved2BEC;
     int reserved2BF0;

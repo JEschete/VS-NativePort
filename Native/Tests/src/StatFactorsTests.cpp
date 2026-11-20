@@ -13,7 +13,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -106,7 +106,7 @@ struct LiveFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_statCalculators)) callbacks_saved =
       std::to_array(Battle_statCalculators);
-  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   Battle_ActionDefinition saved_selected = Battle_actionDefinitions[255];
   std::uint32_t saved_last = Battle_lastActionStatValue;
   std::unique_ptr<Battle_ActionState> state =
@@ -118,11 +118,11 @@ struct LiveFixture {
   Battle_HitResult target{};
   LiveFixture() {
     std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
-    Battle_actionState = state.get();
+    VS::Battle::actionState = state.get();
     Battle_actors[40] = &actor;
     actor.stats = &stats;
-    source.target.targetActor = 40;
-    target.target.targetActor = 40;
+    source.target.target_actor = 40;
+    target.target.target_actor = 40;
     stats.actorId = 255;
     state->queueIndex = 0xABCD0001;
     state->selection.actionId = 255;
@@ -139,7 +139,7 @@ struct LiveFixture {
     std::copy(actors_saved.begin(), actors_saved.end(), Battle_actors);
     std::copy(callbacks_saved.begin(), callbacks_saved.end(),
               Battle_statCalculators);
-    Battle_actionState = saved_state;
+    VS::Battle::actionState = saved_state;
     Battle_actionDefinitions[255] = saved_selected;
     Battle_lastActionStatValue = saved_last;
   }
@@ -574,7 +574,7 @@ void CheckTargetLive(LiveCalculator calculator) {
   fixture.stats.maxMp = 200;
   fixture.target.targetsPosition = GENERATE(0, 1);
   fixture.state->selection.actionId = 65535;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   const auto hit = GENERATE(-1, 0, 1, 2);
   CHECK(calculator(nullptr, nullptr, &fixture.target, hit, -1) ==
         (calculator == battle::LiveTargetMissingHp ? -101 : -102));
@@ -739,7 +739,7 @@ TEST_CASE("F00431 shield PP preserves signed return and reads nothing else",
 TEST_CASE("F00431 live shield PP ignores equipment and position flags",
           "[stat-factors][stat-factors-b8][F00431]") {
   LiveFixture fixture;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   fixture.source.targetsPosition = GENERATE(0, 1);
   const auto pp = GENERATE(0, 32767, 32768, 65535);
   fixture.stats.shield.current_pp = static_cast<std::uint16_t>(pp);

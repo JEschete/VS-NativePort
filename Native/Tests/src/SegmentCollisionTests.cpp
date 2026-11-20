@@ -16,9 +16,9 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -97,15 +97,15 @@ struct ActionTraceFixture : SegmentFixture {
   Battle_ActionDefinition definition = Battle_actionDefinitions[kAction];
   MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
   VS::Render::ModelScratchpad workspace = *VS::Render::ModelWorkspace();
-  u_int previous_hit = Battle_previousHitResult;
-  u_int prerequisite = Battle_hitPrerequisiteResult;
+  u_int previous_hit = VS::Battle::previousHitResult;
+  u_int prerequisite = VS::Battle::hitPrerequisiteResult;
   u_int last_stat = Battle_lastActionStatValue;
-  Battle_ActionState* action_state = Battle_actionState;
+  Battle_ActionState* action_state = VS::Battle::actionState;
   std::unique_ptr<Battle_ActionState> owned_state =
       std::make_unique<Battle_ActionState>();
 
   ActionTraceFixture() {
-    Battle_actionState = owned_state.get();
+    VS::Battle::actionState = owned_state.get();
     Battle_actionDefinitions[kAction] = {};
     Battle_actionDefinitions[kAction].resetsHitResults = 1;
     Battle_actionDefinitions[kAction].hits[0].prerequisiteFunctionId = 1;
@@ -118,12 +118,12 @@ struct ActionTraceFixture : SegmentFixture {
   }
 
   ~ActionTraceFixture() {
-    Battle_actionState = action_state;
+    VS::Battle::actionState = action_state;
     Battle_actionDefinitions[kAction] = definition;
     VS::Actors::boneMatrixScratch = bone_matrix;
     *VS::Render::ModelWorkspace() = workspace;
-    Battle_previousHitResult = previous_hit;
-    Battle_hitPrerequisiteResult = prerequisite;
+    VS::Battle::previousHitResult = previous_hit;
+    VS::Battle::hitPrerequisiteResult = prerequisite;
     Battle_lastActionStatValue = last_stat;
     Core_Gte_Reset();
   }

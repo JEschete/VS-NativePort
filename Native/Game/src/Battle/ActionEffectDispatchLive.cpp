@@ -10,7 +10,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionEffectDispatch.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -36,7 +36,7 @@ Battle_HitResult& HitOf(Battle_HitResult* hit) {
   return *hit;
 }
 Battle_Actor& ActorOf(const Battle_HitResult& hit) {
-  const auto slot = hit.target.targetActor;
+  const auto slot = hit.target.target_actor;
   Require(slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr);
   return *Battle_actors[slot];
 }
@@ -65,10 +65,10 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
   std::uint32_t ActiveStatuses() override {
     return std::bit_cast<std::uint32_t>(stats_.statuses);
   }
-  bool PlayerTarget() override { return hit_.target.targetActor == 0; }
+  bool PlayerTarget() override { return hit_.target.target_actor == 0; }
   std::uint8_t InjuryRule(std::size_t limb) override {
-    Require(limb < std::size(Battle_limbInjuryStatusIds));
-    return Battle_limbInjuryStatusIds[limb];
+    Require(limb < std::size(VS::Battle::limbInjuryStatusIds));
+    return VS::Battle::limbInjuryStatusIds[limb];
   }
   std::uint32_t RuleMask(std::uint8_t rule) override {
     Require(rule < std::size(Battle_statusEffectParams));
@@ -113,8 +113,8 @@ class LiveEffectWorld final : public ActionEffectWorld {
     Require(action_ != nullptr && hit >= 0 &&
             static_cast<std::size_t>(hit) < std::size(action_->hits));
     const auto effect = action_->hits[hit].effectId;
-    Require(effect < std::size(Battle_actionEffectMediators));
-    const auto mediator = Battle_actionEffectMediators[effect];
+    Require(effect < std::size(VS::Battle::actionEffectMediators));
+    const auto mediator = VS::Battle::actionEffectMediators[effect];
     Require(mediator != nullptr);
     mediator(action_, source_, &target_, hit, execute);
   }
@@ -124,11 +124,11 @@ class LiveEffectWorld final : public ActionEffectWorld {
   }
   bool SourcePosition() override { return HitOf(source_).targetsPosition != 0; }
   std::uint8_t SourceSlot() override {
-    return HitOf(source_).target.targetActor;
+    return HitOf(source_).target.target_actor;
   }
   std::int16_t TargetHp() override { return StatsOf(target_).currentHp; }
   std::int16_t PendingHp() override { return target_.target.hp; }
-  std::uint8_t TargetSlot() override { return target_.target.targetActor; }
+  std::uint8_t TargetSlot() override { return target_.target.target_actor; }
   bool KillCounted() override { return ActorOf(target_).killCounted != 0; }
   void MarkKillCounted() override { ActorOf(target_).killCounted = 1; }
   std::uint8_t WeaponCategory() override {
@@ -158,7 +158,7 @@ class LiveEffectWorld final : public ActionEffectWorld {
   Battle_HitResult* source_;
   Battle_HitResult& target_;
 };
-using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
+using Mediator = VS::Battle::ActionEffectMediator;
 static_assert(std::is_same_v<decltype(&ApplyLiveActionHitEffect), Mediator>);
 }  // namespace
 

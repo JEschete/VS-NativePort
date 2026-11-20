@@ -12,16 +12,16 @@
 #include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomes.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Items/LootLive.hpp"
@@ -40,8 +40,8 @@ void Require(bool valid) {
   }
 }
 Battle_ActionState& State() {
-  Require(Battle_actionState != nullptr);
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr);
+  return *VS::Battle::actionState;
 }
 Battle_Actor* ActorAt(int slot) {
   Require(slot >= 0 &&
@@ -55,8 +55,8 @@ Battle_Actor& Actor(int slot) {
 }
 ActionTargetHit Hit(const Battle_HitResult& hit) {
   return {.targets_position = hit.targetsPosition != 0,
-          .target_actor = hit.target.targetActor,
-          .impact_kind = static_cast<std::uint8_t>(hit.target.impactKind)};
+          .target_actor = hit.target.target_actor,
+          .impact_kind = static_cast<std::uint8_t>(hit.target.impact_kind)};
 }
 class LiveEnemy final : public EnemyDefeatRecord {
  public:

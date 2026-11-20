@@ -390,7 +390,7 @@
     <ClCompile Include="src\Battle\ActionAnimation.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionAnimation.h">
+    <ClInclude Include="src\Battle\ActionAnimation.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionAnimations.cpp">
@@ -426,13 +426,13 @@
     <ClCompile Include="src\Battle\ActionFlow.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionFlow.h">
+    <ClInclude Include="src\Battle\ActionFlow.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionMenu.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionMenu.h">
+    <ClInclude Include="src\Battle\ActionMenu.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionOutcomes.cpp">
@@ -462,7 +462,7 @@
     <ClCompile Include="src\Battle\ActionResolution.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionResolution.h">
+    <ClInclude Include="src\Battle\ActionResolution.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionResults.cpp">
@@ -795,7 +795,7 @@
     <ClCompile Include="src\Battle\Feedback.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Feedback.h">
+    <ClInclude Include="src\Battle\Feedback.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\FloatingLabelPlacement.cpp">
@@ -846,7 +846,7 @@
     <ClCompile Include="src\Battle\Hud.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Hud.h">
+    <ClInclude Include="src\Battle\Hud.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\HudOrchestration.cpp">
@@ -882,7 +882,7 @@
     <ClCompile Include="src\Battle\Sphere.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Sphere.h">
+    <ClInclude Include="src\Battle\Sphere.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\SphereContainment.cpp">
@@ -969,7 +969,7 @@
     <ClCompile Include="src\Battle\TargetingState.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\TargetingState.h">
+    <ClInclude Include="src\Battle\TargetingState.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\TargetPages.cpp">
@@ -987,7 +987,7 @@
     <ClInclude Include="src\Battle\TextBoxes.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
-    <ClInclude Include="src\Battle\ValueLabels.h">
+    <ClInclude Include="src\Battle\ValueLabels.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\Encounter.cpp">

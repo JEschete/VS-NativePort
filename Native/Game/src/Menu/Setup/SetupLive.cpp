@@ -17,7 +17,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Audio/SfxLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -438,11 +438,11 @@ class LiveHost final : public Host {
     return rows_;
   }
   void SetTextInteger(std::size_t slot, int value) override {
-    if (slot >= std::size(Battle_stringContext.integers)) {
+    if (slot >= std::size(VS::Battle::stringContext.integers)) {
       Refuse("workshop text integer outside the string context");
       return;
     }
-    Battle_stringContext.integers[slot] = value;
+    VS::Battle::stringContext.integers[slot] = value;
   }
 
   Items::InventoryContents& Inventory() override { return inventory_; }

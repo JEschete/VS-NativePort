@@ -15,9 +15,9 @@
 #include <utility>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -142,8 +142,8 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
   runtime.claimed = lootClaimed;
   runtime.information_shown =
       static_cast<std::uint8_t>(VS::Input::settings.information);
-  runtime.hud_hidden = static_cast<std::uint8_t>(Battle_hudHidden);
-  runtime.hud_slide_offset = Battle_hudSlideOffset;
+  runtime.hud_hidden = static_cast<std::uint8_t>(VS::Battle::hudHidden);
+  runtime.hud_slide_offset = VS::Battle::hudSlideOffset;
   runtime.result_kind = VS::Menu::Framework::actionSelection.selection_kind;
 }
 void WriteRuntime(const LootTerminalRuntime& runtime) {
@@ -177,15 +177,15 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   lootClaimed = runtime.claimed;
   VS::Input::settings.information =
       static_cast<char>(runtime.information_shown);
-  Battle_hudHidden = static_cast<char>(runtime.hud_hidden);
-  Battle_hudSlideOffset = runtime.hud_slide_offset;
+  VS::Battle::hudHidden = static_cast<char>(runtime.hud_hidden);
+  VS::Battle::hudSlideOffset = runtime.hud_slide_offset;
   VS::Menu::Framework::actionSelection.selection_kind = runtime.result_kind;
 }
 void InvalidateWorkspace() {
   if (g_workspace) {
     for (auto& weapon : g_workspace->inventory.weapons) {
-      if (Battle_stringContext.strings[0] == weapon.name.data()) {
-        Battle_stringContext.strings[0] = nullptr;
+      if (VS::Battle::stringContext.strings[0] == weapon.name.data()) {
+        VS::Battle::stringContext.strings[0] = nullptr;
       }
     }
   }
@@ -375,7 +375,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       Refuse("weapon name outside staged inventory");
     }
     Publish();
-    Battle_stringContext.strings[0] =
+    VS::Battle::stringContext.strings[0] =
         stagedInventory->weapons[slot].name.data();
   }
   void SetItemName(std::uint16_t id) override {
@@ -384,7 +384,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     if (VS::Menu::Framework::itemNames == nullptr || id >= kItemNameCount) {
       Refuse("loot item name outside its loaded table");
     }
-    Battle_stringContext.strings[0] = VS::Menu::Framework::itemNames[id];
+    VS::Battle::stringContext.strings[0] = VS::Menu::Framework::itemNames[id];
   }
   void InitializeInformation(bool caution) override {
     Call([&] {

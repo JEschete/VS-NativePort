@@ -20,7 +20,7 @@ void SetLiveSphereVolumes(Battle_TargetSphereSetupView* sphere,
                           const Battle_TargetSphereSpec* primary,
                           const Battle_TargetSphereSpec* secondary,
                           std::uint8_t sphere_mode,
-                          Battle_TargetPreview* target_previews,
+                          VS::Battle::TargetPreview* target_previews,
                           std::uint8_t& reuse_volumes);
 void ClearLivePrimarySphereVolume(Battle_TargetSphereSetupView* sphere);
 void SetLiveSecondarySphereVolume(Battle_TargetSphereSetupView* sphere,
@@ -34,7 +34,7 @@ void InitializeSphereEntry();
 void SetSphereVolumesEntry(Battle_TargetSphereSpec* primary,
                            Battle_TargetSphereSpec* secondary,
                            u_char sphere_mode,
-                           Battle_TargetPreview* target_previews);
+                           VS::Battle::TargetPreview* target_previews);
 void ClearPrimarySphereVolumeEntry();
 void SetSecondarySphereVolumeEntry(Battle_TargetSphereSpec* secondary);
 void ClearSecondarySphereVolumeEntry();

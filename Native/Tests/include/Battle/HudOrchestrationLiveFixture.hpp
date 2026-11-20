@@ -7,12 +7,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+#include <ranges>
 #include <span>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLiveFixture.hpp"
 #include "Battle/HudShortcutLiveFixture.hpp"
@@ -30,7 +31,7 @@ namespace b = VS::Battle;
 template <auto& Owner>
 class SavedArray {
  public:
-  SavedArray() : saved_(std::to_array(Owner)) {}
+  SavedArray() { std::ranges::copy(Owner, std::begin(saved_)); }
   ~SavedArray() { std::ranges::copy(saved_, std::begin(Owner)); }
   SavedArray(const SavedArray&) = delete;
   SavedArray& operator=(const SavedArray&) = delete;
@@ -47,7 +48,8 @@ class SavedArray {
   }
 
  private:
-  decltype(std::to_array(Owner)) saved_;
+  std::array<std::ranges::range_value_t<decltype(Owner)>, std::size(Owner)>
+      saved_{};
 };
 
 template <auto& Owner>
@@ -86,25 +88,25 @@ class ProductionTables {
   SavedArray<VS::Render::compactGlyphIndices> indices_;
   SavedArray<VS::Menu::Framework::animationIndices> animation_;
   SavedArray<VS::Menu::Framework::rowAnimationSteps> steps_;
-  SavedArray<Battle_secondShortcutMarkerPositions> ability_markers_;
-  SavedArray<Battle_secondShortcutIconPositions> ability_icons_;
-  SavedArray<Battle_secondShortcutIconSizes> ability_sizes_;
-  SavedArray<Battle_secondShortcutIconTexCoords> ability_textures_;
-  SavedArray<Battle_firstShortcutMarkerPositions> spell_markers_;
-  SavedArray<Battle_firstShortcutIconPositions> spell_icons_;
-  SavedArray<Battle_firstShortcutIconSizes> spell_sizes_;
-  SavedArray<Battle_firstShortcutIconTexCoords> spell_textures_;
-  SavedArray<Battle_firstShortcutDigitOffsets> digits_;
-  SavedArray<Battle_limbDisplaySpriteOffsets> limb_positions_;
-  SavedArray<Battle_limbDisplaySpriteSizes> limb_sizes_;
-  SavedArray<Battle_limbDisplaySpriteTexCoords> limb_textures_;
-  SavedArray<Battle_limbStatusColors> limb_colors_;
-  SavedArray<Battle_hudGaugePositions> gauge_positions_;
-  SavedArray<Battle_hudGaugeLabelPositions> gauge_labels_;
-  SavedArray<Battle_hudGaugeLabelWidths> gauge_widths_;
-  SavedArray<Battle_hudGaugeLabelTexU> gauge_textures_;
-  SavedArray<Battle_statusIconTexOffsets> status_textures_;
-  SavedArray<Battle_upperStatusIconFlags> upper_status_;
+  SavedArray<VS::Battle::secondShortcutMarkerPositions> ability_markers_;
+  SavedArray<VS::Battle::secondShortcutIconPositions> ability_icons_;
+  SavedArray<VS::Battle::secondShortcutIconSizes> ability_sizes_;
+  SavedArray<VS::Battle::secondShortcutIconTexCoords> ability_textures_;
+  SavedArray<VS::Battle::firstShortcutMarkerPositions> spell_markers_;
+  SavedArray<VS::Battle::firstShortcutIconPositions> spell_icons_;
+  SavedArray<VS::Battle::firstShortcutIconSizes> spell_sizes_;
+  SavedArray<VS::Battle::firstShortcutIconTexCoords> spell_textures_;
+  SavedArray<VS::Battle::firstShortcutDigitOffsets> digits_;
+  SavedArray<VS::Battle::limbDisplaySpriteOffsets> limb_positions_;
+  SavedArray<VS::Battle::limbDisplaySpriteSizes> limb_sizes_;
+  SavedArray<VS::Battle::limbDisplaySpriteTexCoords> limb_textures_;
+  SavedArray<VS::Battle::limbStatusColors> limb_colors_;
+  SavedArray<VS::Battle::hudGaugePositions> gauge_positions_;
+  SavedArray<VS::Battle::hudGaugeLabelPositions> gauge_labels_;
+  SavedArray<VS::Battle::hudGaugeLabelWidths> gauge_widths_;
+  SavedArray<VS::Battle::hudGaugeLabelTexU> gauge_textures_;
+  SavedArray<VS::Battle::statusIconTexOffsets> status_textures_;
+  SavedArray<VS::Battle::upperStatusIconFlags> upper_status_;
   SavedArray<VS::Render::kStatGaugeColors> gauge_colors_;
 
   void LoadFontsAndAnimation(std::span<const unsigned char> image) {
@@ -147,18 +149,18 @@ class LiveState {
   ProductionTables production;
 
   LiveState() {
-    Battle_hudHidden = 0;
-    Battle_hudBattleMode = 0;
-    Battle_hudStatusIconsHidden = 0;
-    Battle_shortcutHudRequested = 0;
-    Battle_shortcutHudAnimationStep = 10;
-    Battle_battleModeIndicatorStep = 0;
-    Battle_battleModeIndicatorWobble = 0;
-    Battle_lowerScreenUiState = 0;
-    Battle_statusIconCarousel.bytes[0] = 255;
-    Battle_statusIconCarousel.bytes[1] = 255;
-    Battle_statusIconCarousel.bytes[2] = 255;
-    Battle_statusIconCarousel.bytes[3] = 0;
+    VS::Battle::hudHidden = 0;
+    VS::Battle::hudBattleMode = 0;
+    VS::Battle::hudStatusIconsHidden = 0;
+    VS::Battle::shortcutHudRequested = 0;
+    VS::Battle::shortcutHudAnimationStep = 10;
+    VS::Battle::battleModeIndicatorStep = 0;
+    VS::Battle::battleModeIndicatorWobble = 0;
+    VS::Battle::lowerScreenUiState = 0;
+    VS::Battle::statusIconCarousel.bytes[0] = 255;
+    VS::Battle::statusIconCarousel.bytes[1] = 255;
+    VS::Battle::statusIconCarousel.bytes[2] = 255;
+    VS::Battle::statusIconCarousel.bytes[3] = 0;
     VS::State::tickSpeed = 2;
     actor.stats = {};
     for (auto& limb : actor.stats.limbs) {
@@ -169,25 +171,25 @@ class LiveState {
   }
 
  private:
-  SavedValue<Battle_hudHidden> hidden_;
-  SavedValue<Battle_hudBattleMode> mode_;
-  SavedValue<Battle_hudStatusIconsHidden> status_hidden_;
-  SavedValue<Battle_shortcutHudRequested> shortcut_request_;
-  SavedValue<Battle_shortcutHudAnimationStep> shortcut_step_;
-  SavedValue<Battle_battleModeIndicatorStep> indicator_step_;
-  SavedValue<Battle_battleModeIndicatorWobble> indicator_phase_;
-  SavedValue<Battle_lowerScreenUiState> lower_;
-  SavedValue<Battle_statusIconCarousel> carousel_;
-  SavedValue<Battle_actorMarkersHidden> marker_hidden_;
-  SavedValue<Battle_ashleyStatusLabelsSuppressed> labels_;
-  SavedValue<Battle_abilityTimingCueFrames> cue_;
-  SavedValue<Battle_floatingLabelCount> label_count_;
-  SavedValue<Battle_statusLabelStepTimer> label_step_;
-  SavedValue<Battle_puzzleTimerTextPointer> timer_alias_;
+  SavedValue<VS::Battle::hudHidden> hidden_;
+  SavedValue<VS::Battle::hudBattleMode> mode_;
+  SavedValue<VS::Battle::hudStatusIconsHidden> status_hidden_;
+  SavedValue<VS::Battle::shortcutHudRequested> shortcut_request_;
+  SavedValue<VS::Battle::shortcutHudAnimationStep> shortcut_step_;
+  SavedValue<VS::Battle::battleModeIndicatorStep> indicator_step_;
+  SavedValue<VS::Battle::battleModeIndicatorWobble> indicator_phase_;
+  SavedValue<VS::Battle::lowerScreenUiState> lower_;
+  SavedValue<VS::Battle::statusIconCarousel> carousel_;
+  SavedValue<VS::Battle::actorMarkersHidden> marker_hidden_;
+  SavedValue<VS::Battle::ashleyStatusLabelsSuppressed> labels_;
+  SavedValue<VS::Battle::abilityTimingCueFrames> cue_;
+  SavedValue<VS::Battle::floatingLabelCount> label_count_;
+  SavedValue<VS::Battle::statusLabelStepTimer> label_step_;
+  SavedValue<VS::Battle::puzzleTimerTextPointer> timer_alias_;
   SavedValue<VS::State::stateFlags> flags_;
   SavedValue<VS::State::tickSpeed> speed_;
-  SavedArray<Battle_actorMarkers> markers_;
-  SavedArray<Battle_puzzleTimerText> timer_text_;
+  SavedArray<VS::Battle::actorMarkers> markers_;
+  SavedArray<VS::Battle::puzzleTimerText> timer_text_;
   SavedArray<VS::Menu::textBoxes> boxes_;
 };
 }  // namespace hud_orchestration_live_fixture

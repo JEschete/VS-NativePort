@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "Battle/AbilityState.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"

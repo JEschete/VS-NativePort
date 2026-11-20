@@ -11,7 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/ActionTable.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
@@ -64,7 +64,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     menu::sceneNotificationBuffer = nullptr;
     menu::sceneNotificationTimer = 77;
     menu::sceneNotificationTimed = 0;
-    Battle_stringContext = {};
+    VS::Battle::stringContext = {};
     std::ranges::fill(menu::textBoxes, menu::TextBoxState{});
     std::ranges::fill(VS::Battle::doorStrings, std::uint16_t{0});
     std::ranges::fill(VS::Menu::menuStrings, std::uint16_t{0});
@@ -87,7 +87,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     ClearOTag(menu::activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
     VS::State::tickSpeed = 2;
-    Battle_lowerScreenUiState = 0;
+    VS::Battle::lowerScreenUiState = 0;
     VS::Effects::screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};
   }
@@ -135,7 +135,8 @@ TEST_CASE("Live item notices do not index the smaller action table",
   const auto bytes = fixture.Buffer();
   const std::array<std::uint8_t, 4> expected{7, 8, 0xE7, 4};
   CHECK(std::ranges::equal(bytes.first(expected.size()), expected));
-  CHECK(Battle_stringContext.strings[0] == menu::kNotificationItemNames[0]);
+  CHECK(VS::Battle::stringContext.strings[0] ==
+        menu::kNotificationItemNames[0]);
   CHECK(menu::sceneNotificationTimed == 0);
   CHECK(menu::sceneNotificationTimer == 77);
 }

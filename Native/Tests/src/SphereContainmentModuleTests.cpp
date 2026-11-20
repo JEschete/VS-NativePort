@@ -123,12 +123,12 @@ TEST_CASE(
       "BATTLE/BATTLE.PRG",
       0,
       1,
-      reinterpret_cast<void**>(&Battle_targetSphere),
+      reinterpret_cast<void**>(&VS::Battle::targetSphere),
       1,
       nullptr};
   const std::array<unsigned char, 4> cleared{};
   REQUIRE(VS::Content::RelocateModulePointerTable(table, cleared, owners));
-  CHECK(Battle_targetSphere == nullptr);
+  CHECK(VS::Battle::targetSphere == nullptr);
   const auto owner_b =
       std::bit_cast<std::array<unsigned char, 4>>(std::uint32_t{0x80210000});
   REQUIRE(VS::Content::RelocateModulePointerTable(table, owner_b, owners));

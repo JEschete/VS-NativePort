@@ -11,10 +11,10 @@
 #include <type_traits>
 
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpers.hpp"
@@ -62,16 +62,16 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
     return VS::Field::controlMode;
   }
   [[nodiscard]] std::uint32_t ActionFlowMode() const override {
-    return Battle_actionFlowMode;
+    return VS::Battle::actionFlowMode;
   }
   [[nodiscard]] std::int32_t TickSpeed() const override {
     return VS::State::tickSpeed;
   }
   [[nodiscard]] std::optional<TargetingRiskTarget> SelectedTarget()
       const override {
-    if (Battle_actionState == nullptr) return std::nullopt;
-    const auto& target = Battle_actionState->selection.primaryTarget;
-    const int slot = target.target.targetActor;
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
+    const auto& target = VS::Battle::actionState->selection.primaryTarget;
+    const int slot = target.target.target_actor;
     if (!ValidActor(slot)) return std::nullopt;
     const auto* actor = Battle_actors[slot];
     if (actor == nullptr || actor->stats == nullptr) return std::nullopt;

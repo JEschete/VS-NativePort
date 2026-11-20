@@ -17,7 +17,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionSequenceLive.hpp"
@@ -28,18 +28,18 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Boot/GameplayLoop.hpp"
 #include "Boot/SessionLive.hpp"
@@ -134,7 +134,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::controlMode = static_cast<std::uint32_t>(mode);
   }
   [[nodiscard]] std::int32_t ActionFlowMode() const override {
-    return static_cast<std::int32_t>(Battle_actionFlowMode);
+    return static_cast<std::int32_t>(VS::Battle::actionFlowMode);
   }
   [[nodiscard]] ScreenTransitionStep TransitionStep() const override {
     return static_cast<ScreenTransitionStep>(VS::Field::screenTransitionStep);
@@ -245,7 +245,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return static_cast<RoomActorOutcome>(Battle::UpdateLiveRoomActorVitals());
   }
   void SetRecoveryRewardMode(int recovery_reward_mode) override {
-    Battle_recoveryRewardMode = recovery_reward_mode;
+    VS::Battle::recoveryRewardMode = recovery_reward_mode;
   }
   void OpenPendingEnemyLoot() override {
     VS::Items::OpenLivePendingEnemyLoot();
@@ -321,7 +321,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   int SelectActionMenu() override {
     action_menu_ = VS::Menu::Framework::LiveActionSelectionState();
-    Battle_actionSelection = action_menu_;
+    VS::Battle::actionSelection = action_menu_;
     return action_menu_->menu_status;
   }
   void DispatchActionMenuResult() override {
@@ -399,7 +399,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   void RebuildActorActionPlans() override {
     static_cast<void>(VS::Battle::Ai::RebuildLiveActorActionPlans(
-        &Battle_actionState->queue[0]));
+        &VS::Battle::actionState->queue[0]));
   }
   void BeginPostActionRecovery(int recovery_reward_mode) override {
     VS::Battle::BeginLivePostActionRecovery(recovery_reward_mode);

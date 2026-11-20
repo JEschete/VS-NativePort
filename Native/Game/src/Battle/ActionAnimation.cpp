@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/ActionAnimation.h"
+// The chain-ability animation tables (ActionAnimation.hpp).
+#include "Battle/ActionAnimation.hpp"
 
-// decomp: D_800E8E80 (D_800E8E80@BATTLE/BATTLE.PRG)
-u_char Battle_chainAbilityAnimationGroups[168]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle {
+// decomp: D_800E8E80 (D_800E8E80@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+ChainAbilityAnimationGroupTable chainAbilityAnimationGroups;
 // decomp: D_800F49D8 (D_800F49D8@BATTLE/BATTLE.PRG)
-int Battle_chainAbilityAnimationSide;
-
+std::int32_t chainAbilityAnimationSide;
 // decomp: D_800F49E4 (D_800F49E4@BATTLE/BATTLE.PRG)
-char Battle_specialActionPitch;
-
+std::int8_t specialActionPitch;
+}  // namespace VS::Battle

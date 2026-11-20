@@ -47,7 +47,7 @@
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"

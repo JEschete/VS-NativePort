@@ -9,14 +9,14 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionSequence.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -46,13 +46,13 @@ void Require(bool valid) {
   }
 }
 Battle_ActionState& State() {
-  Require(Battle_actionState != nullptr);
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr);
+  return *VS::Battle::actionState;
 }
 ActionTargetHit Hit(const Battle_HitResult& hit) {
   return {.targets_position = hit.targetsPosition != 0,
-          .target_actor = hit.target.targetActor,
-          .impact_kind = static_cast<std::uint8_t>(hit.target.impactKind)};
+          .target_actor = hit.target.target_actor,
+          .impact_kind = static_cast<std::uint8_t>(hit.target.impact_kind)};
 }
 class LiveAction final : public SequenceAction {
  public:
@@ -133,7 +133,7 @@ class LiveWorld final : public ActionSequenceWorld {
   void ResumeField() override { Field::LiveResumeFieldAfterMenu(); }
   void ShowHud() override { VS::Battle::SetLiveHudHidden(0); }
   std::uint8_t SelectedActor() override {
-    return State().selection.primaryTarget.target.targetActor;
+    return State().selection.primaryTarget.target.target_actor;
   }
   void RestoreIdle(int actor) override {
     Actors::RestoreLiveActorIdlePose(actor);

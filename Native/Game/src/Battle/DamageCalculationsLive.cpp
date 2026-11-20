@@ -119,9 +119,9 @@ class LiveDamageWorld final : public DamageWorld {
 };
 std::optional<DamageTarget> Target(const Battle_HitResult* hit) {
   if (hit == nullptr) return std::nullopt;
-  return DamageTarget{hit->target.targetActor,
+  return DamageTarget{hit->target.target_actor,
                       std::bit_cast<std::int8_t>(
-                          static_cast<std::uint8_t>(hit->target.targetLimb))};
+                          static_cast<std::uint8_t>(hit->target.target_limb))};
 }
 std::int16_t Checked(std::optional<std::int16_t> value) {
   if (!value) {

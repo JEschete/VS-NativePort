@@ -33,7 +33,7 @@ struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
     std::memcpy(help.data(), text.help.data(), text.help.size());
     std::memcpy(names.data(), text.names.data(), text.names.size());
     std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
-    Battle_stringContext = {};
+    VS::Battle::stringContext = {};
     std::fill_n(status::statusStrings, 48, u_short{74});
     status::statusStrings[74] = 0xE701;
   }

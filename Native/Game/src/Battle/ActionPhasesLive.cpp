@@ -10,12 +10,12 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhases.hpp"
 #include "Battle/Actor.h"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
@@ -35,8 +35,8 @@ void Require(bool valid) {
   }
 }
 Battle_ActionState& State() {
-  Require(Battle_actionState != nullptr);
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr);
+  return *VS::Battle::actionState;
 }
 Battle_Actor* Actor(int slot) {
   Require(slot >= 0 &&
@@ -46,7 +46,7 @@ Battle_Actor* Actor(int slot) {
 struct LiveSource final : ActionPhaseSource {
   explicit LiveSource(Battle_ActionRequest& action) : action_(action) {}
   std::uint8_t Actor() const override {
-    return action_.primaryTarget.target.targetActor;
+    return action_.primaryTarget.target.target_actor;
   }
 
  private:
@@ -66,7 +66,7 @@ class LiveWorld final : public ActionPhaseWorld {
     actor->commandState = state;
   }
   std::uint8_t PrimaryActor() override {
-    return State().selection.primaryTarget.target.targetActor;
+    return State().selection.primaryTarget.target.target_actor;
   }
   std::uint32_t ActorFlags(int slot) override {
     return Actors::LiveActorStateFlags(slot);
@@ -89,13 +89,13 @@ class LiveWorld final : public ActionPhaseWorld {
   }
   void ShowActorMarkers() override { VS::Battle::SetLiveActorMarkersHidden(0); }
   void SetRecoveryReward(std::int32_t mode) override {
-    Battle_recoveryRewardMode = mode;
+    VS::Battle::recoveryRewardMode = mode;
   }
   void SetTickSpeed(std::uint32_t speed) override {
     VS::State::tickSpeed = std::bit_cast<std::int32_t>(speed);
   }
   void SetPhase(ActionPhase phase) override {
-    Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
+    VS::Battle::actionFlowMode = static_cast<std::uint32_t>(phase);
   }
   void SetControlMode(Field::FieldControlMode mode) override {
     VS::Field::controlMode = static_cast<std::uint32_t>(mode);

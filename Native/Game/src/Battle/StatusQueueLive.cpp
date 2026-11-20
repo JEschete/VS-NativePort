@@ -37,7 +37,7 @@ Battle_HitResult& HitOf(Battle_HitResult* hit) {
 }
 
 Battle_ActorStats& StatsOf(const Battle_HitResult& hit) {
-  const unsigned actor_id = hit.target.targetActor;
+  const unsigned actor_id = hit.target.target_actor;
   Require(actor_id < std::size(Battle_actors),
           "Status queue target is outside the battle actor table");
   const auto* actor = Battle_actors[actor_id];

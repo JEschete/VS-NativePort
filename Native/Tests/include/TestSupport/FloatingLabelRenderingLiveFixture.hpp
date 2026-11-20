@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Render/Display.hpp"
@@ -42,7 +42,7 @@ inline constexpr std::size_t kTimerFields = 3;
 using LabelWords = std::array<std::uint32_t, kLabelWords>;
 using Packet = std::vector<std::uint32_t>;
 
-inline LabelWords Words(const Battle_FloatingLabel& label) {
+inline LabelWords Words(const VS::Battle::FloatingLabel& label) {
   return std::bit_cast<LabelWords>(label);
 }
 
@@ -94,12 +94,12 @@ class ProductionTables {
 
   void CaptureOwners() {
     const std::array expected{
-        ExpectedOwner{Battle_valueCaptionRects,
-                      sizeof(Battle_valueCaptionRects)},
-        ExpectedOwner{Battle_lockedLabelHalfHeights,
-                      sizeof(Battle_lockedLabelHalfHeights)},
-        ExpectedOwner{Battle_lockedLabelPieces,
-                      sizeof(Battle_lockedLabelPieces)},
+        ExpectedOwner{VS::Battle::valueCaptionRects.data(),
+                      sizeof(VS::Battle::valueCaptionRects)},
+        ExpectedOwner{VS::Battle::lockedLabelHalfHeights.data(),
+                      sizeof(VS::Battle::lockedLabelHalfHeights)},
+        ExpectedOwner{VS::Battle::lockedLabelPieces.data(),
+                      sizeof(VS::Battle::lockedLabelPieces)},
         ExpectedOwner{VS::Render::compactGlyphLeftTrim,
                       sizeof(VS::Render::compactGlyphLeftTrim)},
         ExpectedOwner{VS::Render::compactGlyphWidths,
@@ -126,10 +126,10 @@ class ProductionTables {
 
 class LiveFrame {
  private:
-  Battle_FloatingLabel storage_[1][kLabelCapacity]{};
+  std::array<VS::Battle::FloatingLabelSlots, 1> storage_{};
 
  public:
-  std::span<Battle_FloatingLabel, kLabelCapacity> labels{storage_[0]};
+  std::span<VS::Battle::FloatingLabel, kLabelCapacity> labels{storage_[0]};
   std::vector<u_long> primitives =
       std::vector<u_long>(kPrimitiveWords, kStorageSeed);
   std::array<u_long, kOrderingWords> ordering{};
@@ -143,21 +143,21 @@ class LiveFrame {
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + kSceneHead;
     VS::Render::FrameScratchpad().overlay_ordering_table =
         ordering.data() + kOverlayHead;
-    static_assert(sizeof(storage_) == sizeof(*Battle_floatingLabels));
-    Battle_floatingLabels = storage_;
-    Battle_floatingLabelCount = 1;
+    static_assert(sizeof(storage_) == sizeof(*VS::Battle::floatingLabels));
+    VS::Battle::floatingLabels = storage_.data();
+    VS::Battle::floatingLabelCount = 1;
   }
   ~LiveFrame() {
     VS::Render::FrameScratchpad() = saved_scratch_;
     VS::Render::frameBuf = saved_frame_;
     VS::Render::legacyOrderingTables[0] = saved_ordering_;
     VS::Render::legacyPrimitiveBuffers[0] = saved_primitives_;
-    Battle_floatingLabels = saved_labels_;
-    Battle_floatingLabelCount = saved_count_;
-    Battle_abilityTimingCuePosition = saved_cue_;
-    Battle_abilityTimingCueFrames = saved_timers_[0];
-    Battle_statusLabelStepTimer = saved_timers_[1];
-    Battle_placedLabelCount = saved_timers_[2];
+    VS::Battle::floatingLabels = saved_labels_;
+    VS::Battle::floatingLabelCount = saved_count_;
+    VS::Battle::abilityTimingCuePosition = saved_cue_;
+    VS::Battle::abilityTimingCueFrames = saved_timers_[0];
+    VS::Battle::statusLabelStepTimer = saved_timers_[1];
+    VS::Battle::placedLabelCount = saved_timers_[2];
   }
   LiveFrame(const LiveFrame&) = delete;
   LiveFrame& operator=(const LiveFrame&) = delete;
@@ -222,11 +222,12 @@ class LiveFrame {
   int saved_frame_ = VS::Render::frameBuf;
   void* saved_ordering_ = VS::Render::legacyOrderingTables[0];
   void* saved_primitives_ = VS::Render::legacyPrimitiveBuffers[0];
-  decltype(Battle_floatingLabels) saved_labels_ = Battle_floatingLabels;
-  std::int16_t saved_count_ = Battle_floatingLabelCount;
-  SVECTOR saved_cue_ = Battle_abilityTimingCuePosition;
+  decltype(VS::Battle::floatingLabels) saved_labels_ =
+      VS::Battle::floatingLabels;
+  std::int16_t saved_count_ = VS::Battle::floatingLabelCount;
+  SVECTOR saved_cue_ = VS::Battle::abilityTimingCuePosition;
   std::array<std::int16_t, kTimerFields> saved_timers_{
-      Battle_abilityTimingCueFrames, Battle_statusLabelStepTimer,
-      Battle_placedLabelCount};
+      VS::Battle::abilityTimingCueFrames, VS::Battle::statusLabelStepTimer,
+      VS::Battle::placedLabelCount};
 };
 }  // namespace VS::test_support::floating_label_rendering

@@ -12,7 +12,7 @@
 #include <span>
 
 #include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereDraw.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
@@ -79,7 +79,7 @@ void Refuse(const char* what) {
 }
 
 [[nodiscard]] Battle_TargetSphere* LiveSphere() {
-  return reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
+  return reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
 }
 
 [[nodiscard]] SphereDrawVolume VolumeOf(const Battle_TargetVolume& source) {
@@ -173,11 +173,11 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
 [[nodiscard]] SphereCursorTables LiveCursorTables() {
   SphereCursorTables tables;
-  std::copy_n(std::begin(Battle_positionCursorSpriteOffsets),
+  std::copy_n(std::begin(VS::Battle::positionCursorSpriteOffsets),
               kSphereCursorPoses, tables.offsets.begin());
-  std::copy_n(std::begin(Battle_positionCursorSpriteSizes), kSphereCursorPoses,
-              tables.sizes.begin());
-  std::copy_n(std::begin(Battle_positionCursorSpriteTexCoords),
+  std::copy_n(std::begin(VS::Battle::positionCursorSpriteSizes),
+              kSphereCursorPoses, tables.sizes.begin());
+  std::copy_n(std::begin(VS::Battle::positionCursorSpriteTexCoords),
               kSphereCursorPoses, tables.texcoords.begin());
   // D_800EC270 is read with lbu: the brightness bytes are unsigned.
   for (std::size_t frame = 0; frame < kSphereCursorBlinkFrames; ++frame) {
@@ -316,13 +316,13 @@ void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
   Core_Gte_StoreSxy2(&screen);
   const std::optional<SpherePositionCursorFrame> frame =
       DrawSpherePositionCursor(static_cast<std::uint32_t>(screen), lock_pitch,
-                               Battle_positionCursorBlinkFrame,
+                               VS::Battle::positionCursorBlinkFrame,
                                LiveCursorTables());
   if (!frame.has_value()) {
     Refuse("position cursor with an unknown pitch lock");
     return;
   }
-  Battle_positionCursorBlinkFrame = frame->blink;
+  VS::Battle::positionCursorBlinkFrame = frame->blink;
   // The cursor links in front of the ordering table's first slot.
   u_long* ot = std::prev(ordering);
   if (frame->pitch_quads.has_value()) {

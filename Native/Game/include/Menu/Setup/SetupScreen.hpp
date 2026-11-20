@@ -387,7 +387,7 @@ class Host {
   [[nodiscard]] virtual std::span<const std::uint8_t> Menu12() = 0;
   // The item rows (texts, tables, the string context).
   [[nodiscard]] virtual Framework::ItemRowsHost& ItemRows() = 0;
-  // Battle_stringContext.integers[slot].
+  // VS::Battle::stringContext.integers[slot].
   virtual void SetTextInteger(std::size_t slot, int value) = 0;
 
   // Ashley's inventory; changes reach the game before the next call that

@@ -12,8 +12,8 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestration.hpp"
 #include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -112,33 +112,35 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
 
   HudPresentationState Presentation() override {
     return {.commands = ReadLiveHudState(),
-            .slide = Battle_hudSlideOffset,
-            .shortcut_step = Battle_shortcutHudAnimationStep,
+            .slide = VS::Battle::hudSlideOffset,
+            .shortcut_step = VS::Battle::shortcutHudAnimationStep,
             .indicator_step =
-                static_cast<std::uint8_t>(Battle_battleModeIndicatorStep),
+                static_cast<std::uint8_t>(VS::Battle::battleModeIndicatorStep),
             .status_icons_hidden =
-                static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
-            .indicator_phase = Battle_battleModeIndicatorWobble,
-            .carousel = std::to_array(Battle_statusIconCarousel.bytes)};
+                static_cast<std::uint8_t>(VS::Battle::hudStatusIconsHidden),
+            .indicator_phase = VS::Battle::battleModeIndicatorWobble,
+            .carousel = VS::Battle::statusIconCarousel.bytes};
   }
   void SetShortcutRequest(std::uint8_t command) override {
-    Battle_shortcutHudRequested = static_cast<char>(command);
+    VS::Battle::shortcutHudRequested = static_cast<char>(command);
   }
   void SetShortcutStep(std::uint8_t step) override {
-    Battle_shortcutHudAnimationStep = step;
+    VS::Battle::shortcutHudAnimationStep = step;
   }
   void SetIndicatorStep(std::uint8_t step) override {
-    Battle_battleModeIndicatorStep = static_cast<char>(step);
+    VS::Battle::battleModeIndicatorStep = static_cast<char>(step);
   }
   void SetIndicatorPhase(std::uint16_t phase) override {
-    Battle_battleModeIndicatorWobble = phase;
+    VS::Battle::battleModeIndicatorWobble = phase;
   }
-  void SetSlide(std::int32_t slide) override { Battle_hudSlideOffset = slide; }
+  void SetSlide(std::int32_t slide) override {
+    VS::Battle::hudSlideOffset = slide;
+  }
   void SetCarousel(std::size_t slot, std::uint8_t icon) override {
-    if (slot >= std::size(Battle_statusIconCarousel.bytes)) {
+    if (slot >= std::size(VS::Battle::statusIconCarousel.bytes)) {
       Refuse("Status carousel slot is outside its owner");
     }
-    std::span(Battle_statusIconCarousel.bytes)[slot] = icon;
+    std::span(VS::Battle::statusIconCarousel.bytes)[slot] = icon;
   }
   std::optional<std::uint8_t> ClosingShortcutStep(std::uint8_t step) override {
     const auto steps = std::span(VS::Menu::Framework::animationIndices)
@@ -160,9 +162,9 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
     if (slot >= kHudShortcutRowSize) return std::nullopt;
     const std::span<const u_char> positions =
         row == HudShortcutRow::kAbilities
-            ? std::span(Battle_secondShortcutMarkerPositions)
+            ? std::span(VS::Battle::secondShortcutMarkerPositions)
                   .first<kHudShortcutRowSize * 2>()
-            : std::span(Battle_firstShortcutMarkerPositions)
+            : std::span(VS::Battle::firstShortcutMarkerPositions)
                   .first<kHudShortcutRowSize * 2>();
     return HudPoint{.x = positions[slot],
                     .y = positions[slot + kHudShortcutRowSize]};
@@ -172,15 +174,15 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
     if (slot >= kHudShortcutRowSize) return std::nullopt;
     const std::span<const u_char> positions =
         row == HudShortcutRow::kAbilities
-            ? std::span(Battle_secondShortcutIconPositions)
+            ? std::span(VS::Battle::secondShortcutIconPositions)
                   .first<kHudShortcutRowSize * 2>()
-            : std::span(Battle_firstShortcutIconPositions)
+            : std::span(VS::Battle::firstShortcutIconPositions)
                   .first<kHudShortcutRowSize * 2>();
     const std::span<const int> sizes =
         row == HudShortcutRow::kAbilities
-            ? std::span(Battle_secondShortcutIconSizes)
+            ? std::span(VS::Battle::secondShortcutIconSizes)
                   .first<kHudShortcutRowSize>()
-            : std::span(Battle_firstShortcutIconSizes)
+            : std::span(VS::Battle::firstShortcutIconSizes)
                   .first<kHudShortcutRowSize>();
     return HudElementGeometry{
         .position = positions[slot] |
@@ -191,15 +193,15 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
                                                    std::size_t slot) override {
     if (slot >= kHudShortcutRowSize) return std::nullopt;
     return row == HudShortcutRow::kAbilities
-               ? std::span(Battle_secondShortcutIconTexCoords)
+               ? std::span(VS::Battle::secondShortcutIconTexCoords)
                      .first<kHudShortcutRowSize>()[slot]
-               : std::span(Battle_firstShortcutIconTexCoords)
+               : std::span(VS::Battle::firstShortcutIconTexCoords)
                      .first<kHudShortcutRowSize>()[slot];
   }
   std::optional<std::int32_t> ShortcutDigitPosition(
       std::size_t digit) override {
     if (digit >= kHudShortcutRowSize) return std::nullopt;
-    return std::span(Battle_firstShortcutDigitOffsets)
+    return std::span(VS::Battle::firstShortcutDigitOffsets)
         .first<kHudShortcutRowSize>()[digit];
   }
   bool DrawShortcutMarker(std::int32_t position,
@@ -258,9 +260,9 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   std::optional<HudElementGeometry> LimbGeometry(std::size_t layout) override {
     if (layout >= kHudLimbLayouts) return std::nullopt;
     return HudElementGeometry{
-        .position = std::span(Battle_limbDisplaySpriteOffsets)
+        .position = std::span(VS::Battle::limbDisplaySpriteOffsets)
                         .first<kHudLimbLayouts>()[layout],
-        .size = std::span(Battle_limbDisplaySpriteSizes)
+        .size = std::span(VS::Battle::limbDisplaySpriteSizes)
                     .first<kHudLimbLayouts>()[layout]};
   }
   std::optional<HudLimbCondition> CurrentLimbCondition(
@@ -276,11 +278,12 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   std::optional<std::uint32_t> LimbColor(HudLimbCondition condition) override {
     const auto index = static_cast<std::size_t>(condition);
     if (index >= kHudLimbColors) return std::nullopt;
-    return std::span(Battle_limbStatusColors).first<kHudLimbColors>()[index];
+    return std::span(VS::Battle::limbStatusColors)
+        .first<kHudLimbColors>()[index];
   }
   std::optional<std::uint32_t> LimbTexture(std::size_t layout) override {
     if (layout >= kHudLimbLayouts) return std::nullopt;
-    return std::span(Battle_limbDisplaySpriteTexCoords)
+    return std::span(VS::Battle::limbDisplaySpriteTexCoords)
         .first<kHudLimbLayouts>()[layout];
   }
   bool DrawActorGauge(HudGaugeKind kind) override {
@@ -328,13 +331,13 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
 void SetLiveActorMarkersHidden(int command) {
   HudFeedbackState state;
   SetActorMarkersHidden(state, command);
-  Battle_actorMarkersHidden = state.marker_visibility_command;
+  VS::Battle::actorMarkersHidden = state.marker_visibility_command;
 }
 
 // decomp: F00730 func_80095B7C (src/BATTLE/BATTLE.PRG/2842C.c:2381).
 void SetLiveActorMarker(int actor_slot, int command) {
   auto markers = std::as_writable_bytes(
-      std::span(Battle_actorMarkers).first<kActorMarkerCount>());
+      std::span(VS::Battle::actorMarkers).first<kActorMarkerCount>());
   if (!SetActorMarker(markers, actor_slot, command)) {
     Refuse("Actor marker slot is outside its sixteen-byte owner");
   }
@@ -344,7 +347,7 @@ void SetLiveActorMarker(int actor_slot, int command) {
 void SuppressLiveAshleyStatusLabels() {
   HudFeedbackState state;
   SuppressAshleyStatusLabels(state);
-  Battle_ashleyStatusLabelsSuppressed = state.ashley_label_suppression;
+  VS::Battle::ashleyStatusLabelsSuppressed = state.ashley_label_suppression;
 }
 
 // decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249).
@@ -369,12 +372,13 @@ void DrawLivePuzzleTimer(const State::SceneTimer* timer) {
   const State::SceneTime& time = timer->time;
   const auto hundredths =
       static_cast<std::uint8_t>(State::stateFlags.puzzle_timer_hundredths);
-  FormatPuzzleTimer(time, hundredths, std::span(Battle_puzzleTimerText));
+  FormatPuzzleTimer(time, hundredths, std::span(VS::Battle::puzzleTimerText));
   VS::Core::Debugf("hud.timer",
                    "text=%s seconds=%d minutes=%d hours=%d frames=%d",
-                   Battle_puzzleTimerText, time.seconds, time.minutes,
-                   time.hours, time.frames);
-  DrawText(std::string_view(Battle_puzzleTimerText, kTimerCharacters),
-           kTimerPosition, kTimerLayer);
+                   VS::Battle::puzzleTimerText.data(), time.seconds,
+                   time.minutes, time.hours, time.frames);
+  DrawText(
+      std::string_view(VS::Battle::puzzleTimerText.data(), kTimerCharacters),
+      kTimerPosition, kTimerLayer);
 }
 }  // namespace VS::Battle

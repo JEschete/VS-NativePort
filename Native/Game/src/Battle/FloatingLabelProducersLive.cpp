@@ -7,7 +7,7 @@
 #include <type_traits>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
@@ -16,8 +16,8 @@
 
 namespace VS::Battle {
 namespace {
-static_assert(sizeof(FloatingLabelRecord) == sizeof(Battle_FloatingLabel));
-static_assert(std::is_trivially_copyable_v<Battle_FloatingLabel>);
+static_assert(sizeof(FloatingLabelRecord) == sizeof(VS::Battle::FloatingLabel));
+static_assert(std::is_trivially_copyable_v<VS::Battle::FloatingLabel>);
 static_assert(sizeof(LabelPoint) == sizeof(SVECTOR));
 
 std::uint64_t refusals = 0;
@@ -35,12 +35,13 @@ class LiveProducerWorld final : public FloatingLabelProducerWorld {
  public:
   std::int16_t LabelCount() override { return LiveFloatingLabelCount(); }
   std::optional<FloatingLabelRecord> Label(std::int32_t index) override {
-    if (Battle_floatingLabels == nullptr || index < 0 ||
+    if (VS::Battle::floatingLabels == nullptr || index < 0 ||
         index >= kFloatingLabelCapacity) {
       Refuse("label outside the 32-record owner");
       return std::nullopt;
     }
-    return std::bit_cast<FloatingLabelRecord>((*Battle_floatingLabels)[index]);
+    return std::bit_cast<FloatingLabelRecord>(
+        (*VS::Battle::floatingLabels)[index]);
   }
   bool RemoveLabel(std::int32_t index) override {
     RemoveLiveFloatingLabel(index);
@@ -57,7 +58,7 @@ class LiveProducerWorld final : public FloatingLabelProducerWorld {
       Refuse("write without a reserved label");
       return false;
     }
-    *reserved_ = std::bit_cast<Battle_FloatingLabel>(record);
+    *reserved_ = std::bit_cast<VS::Battle::FloatingLabel>(record);
     return true;
   }
   bool WriteReservedTextLength(std::uint8_t text_length) override {
@@ -65,7 +66,7 @@ class LiveProducerWorld final : public FloatingLabelProducerWorld {
       Refuse("text length without a reserved label");
       return false;
     }
-    reserved_->textLength = text_length;
+    reserved_->text_length = text_length;
     return true;
   }
   bool CommitReservedLabel() override {
@@ -105,7 +106,7 @@ class LiveProducerWorld final : public FloatingLabelProducerWorld {
   std::int32_t Random() override { return VS::Core::NextBiosRand(); }
 
  private:
-  Battle_FloatingLabel* reserved_ = nullptr;
+  VS::Battle::FloatingLabel* reserved_ = nullptr;
 };
 
 int Result(const std::optional<std::int32_t>& result, const char* what) {

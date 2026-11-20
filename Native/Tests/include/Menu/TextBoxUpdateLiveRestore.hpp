@@ -4,7 +4,7 @@
 
 #include <iterator>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -23,8 +23,8 @@ struct LiveUpdateRestore {
       VS::Menu::textBoxBufferIndex};
   equipment_detail_tests::ValueRestore<decltype(VS::State::tickSpeed)>
       saved_speed{VS::State::tickSpeed};
-  equipment_detail_tests::ValueRestore<decltype(Battle_lowerScreenUiState)>
-      saved_ui{Battle_lowerScreenUiState};
+  equipment_detail_tests::ValueRestore<decltype(VS::Battle::lowerScreenUiState)>
+      saved_ui{VS::Battle::lowerScreenUiState};
   equipment_detail_tests::ValueRestore<decltype(VS::Core::interfaceRandomState)>
       saved_random{VS::Core::interfaceRandomState};
   equipment_detail_tests::ValueRestore<

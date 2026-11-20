@@ -10,7 +10,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkersLive.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -25,7 +25,7 @@ struct MarkerFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_sides = Battle_actorMarkerSides;
+  int saved_sides = VS::Battle::actorMarkerSides;
   Actors_ActorRecord player{};
   Actors_ActorRecord enemy{};
   std::vector<u_long> storage = std::vector<u_long>(4098, 0xDEADBEEF);
@@ -50,7 +50,7 @@ struct MarkerFixture {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     Core_Gte_SetGeomOffset(160, 120);
     Core_Gte_SetGeomScreen(256);
-    Battle_actorMarkerSides = 0;
+    VS::Battle::actorMarkerSides = 0;
   }
 
   ~MarkerFixture() {
@@ -60,7 +60,7 @@ struct MarkerFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Battle_actorMarkerSides = saved_sides;
+    VS::Battle::actorMarkerSides = saved_sides;
     Core_Gte_Reset();
   }
 

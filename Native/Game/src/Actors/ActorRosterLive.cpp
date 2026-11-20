@@ -21,7 +21,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"

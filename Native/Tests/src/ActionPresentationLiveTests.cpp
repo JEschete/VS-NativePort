@@ -74,8 +74,8 @@ struct LivePresentation {
   void ActorHit(std::size_t index, int slot, int limb) {
     auto& hit = action.targets[index];
     hit.targetsPosition = 0;
-    hit.target.targetActor = static_cast<unsigned char>(slot);
-    hit.target.targetLimb = static_cast<signed char>(limb);
+    hit.target.target_actor = static_cast<unsigned char>(slot);
+    hit.target.target_limb = static_cast<signed char>(limb);
   }
   void WorldHit(std::size_t index) {
     auto& hit = action.targets[index];

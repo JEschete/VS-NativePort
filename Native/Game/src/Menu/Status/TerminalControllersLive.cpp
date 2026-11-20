@@ -10,7 +10,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -94,7 +94,7 @@ TerminalFrame LoadFrame() {
       .selected_equipment = VS::Menu::Framework::menuMemory.selected_equipment,
       .cursor_memory =
           static_cast<std::uint8_t>(VS::Input::settings.cursor_memory),
-      .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
+      .hud_hidden = static_cast<std::uint8_t>(VS::Battle::hudStatusIconsHidden),
       .current_menu = VS::Menu::Framework::menuState.control.current_menu,
       .pressed = VS::Input::buttonsPressed,
       .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
@@ -123,7 +123,7 @@ void StoreFrame(const TerminalFrame& frame) {
       static_cast<char>(frame.enabled_pages);
   VS::Menu::Framework::menuMemory.selected_equipment = frame.selected_equipment;
   VS::Input::settings.cursor_memory = static_cast<char>(frame.cursor_memory);
-  Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
+  VS::Battle::hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
   VS::Menu::Framework::menuState.control.current_menu = frame.current_menu;
 }
 TerminalView LoadView() {

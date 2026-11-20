@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Audio/SfxLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
@@ -671,13 +671,13 @@ class LiveGazetteHost final : public GazetteHost {
 };
 
 GazetteScreenEnvironment ReadScreenEnvironment() {
-  return {Battle_hudSlideOffset, VS::Menu::Framework::backgroundFadeStep,
+  return {VS::Battle::hudSlideOffset, VS::Menu::Framework::backgroundFadeStep,
           VS::Menu::Framework::menuState.control.current_menu,
           static_cast<std::uint8_t>(VS::Menu::Framework::hideMenu)};
 }
 
 void WriteScreenEnvironment(const GazetteScreenEnvironment& environment) {
-  Battle_hudSlideOffset = environment.hud_slide_offset;
+  VS::Battle::hudSlideOffset = environment.hud_slide_offset;
   VS::Menu::Framework::menuState.control.current_menu =
       environment.current_menu;
   VS::Menu::Framework::hideMenu = static_cast<char>(environment.hide_menu);

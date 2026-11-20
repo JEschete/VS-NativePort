@@ -1,36 +1,27 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetVolume.h"
+// The target sphere's tables and live sphere (Sphere.hpp).
+#include "Battle/Sphere.hpp"
 
-// decomp: D_800EA234 (D_800EA234@BATTLE/BATTLE.PRG)
-short Battle_sphereArcBases[502]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle {
+// decomp: D_800EA234 (D_800EA234@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp), as are the tables below
+std::array<std::int16_t, kSphereArcBaseCapacity> sphereArcBases;
 // decomp: D_800EA2C4 (D_800EA2C4@BATTLE/BATTLE.PRG)
-short Battle_sphereMirroredVertices[430]; /* contents: module image (ModuleData.cpp) */
-
+SphereMirroredVertexTable sphereMirroredVertices;
 // decomp: D_800EA438 (D_800EA438@BATTLE/BATTLE.PRG)
-u_char Battle_sphereShapeCommandStarts[488]; /* contents: module image (ModuleData.cpp) */
-
+SphereShapeCommandStartTable sphereShapeCommandStarts;
 // decomp: D_800EA46C (D_800EA46C@BATTLE/BATTLE.PRG)
-u_short Battle_sphereWireframeCommands[218]; /* contents: module image (ModuleData.cpp) */
-
+SphereWireframeCommandTable sphereWireframeCommands;
 // decomp: D_800EA670 (D_800EA670@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteOffsets[126]; /* contents: module image (ModuleData.cpp) */
-
+PositionCursorSpriteOffsetTable positionCursorSpriteOffsets;
 // decomp: D_800EA684 (D_800EA684@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteSizes[121]; /* contents: module image (ModuleData.cpp) */
-
+PositionCursorSpriteSizeTable positionCursorSpriteSizes;
 // decomp: D_800EA698 (D_800EA698@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteTexCoords[116]; /* contents: module image (ModuleData.cpp) */
-
+PositionCursorSpriteTexCoordTable positionCursorSpriteTexCoords;
 // decomp: D_800EA6AC (D_800EA6AC@BATTLE/BATTLE.PRG)
-u_char Battle_positionCursorBlinkFrame; /* contents: module image (ModuleData.cpp) */
-
+std::uint8_t positionCursorBlinkFrame;
 // decomp: D_800EB9AC (D_800EB9AC@BATTLE/BATTLE.PRG)
-u_char Battle_reuseSphereVolumes; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG)
-Battle_TargetSphereSetupView* Battle_targetSphere; /* data: contents loaded in Step 5 */
-
+std::uint8_t reuseSphereVolumes;
+// decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG); allocated when the
+// sphere opens
+Battle_TargetSphereSetupView* targetSphere;
+}  // namespace VS::Battle

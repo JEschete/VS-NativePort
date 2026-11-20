@@ -12,7 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -32,8 +32,8 @@ constexpr int kNegativeExecute = -17;
 constexpr unsigned kExemptActor = 128;
 constexpr unsigned kRecoveryTimer = 0xABCD;
 constexpr unsigned kRecoveryBonus = 43;
-using LiveTable = decltype(Battle_actionEffectMediators);
-using LiveHandler = std::remove_extent_t<LiveTable>;
+using LiveTable = decltype(VS::Battle::actionEffectMediators);
+using LiveHandler = LiveTable::value_type;
 using Handler = std::optional<Feedback> (*)(std::span<const battle::StatusRule>,
                                             const battle::StatusTarget&,
                                             battle::QueuedStatuses&);
@@ -162,8 +162,8 @@ struct LiveFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_statusEffectParams)) saved_rules =
       std::to_array(Battle_statusEffectParams);
-  decltype(std::to_array(Battle_actionEffectMediators)) saved_mediators =
-      std::to_array(Battle_actionEffectMediators);
+  decltype(VS::Battle::actionEffectMediators) saved_mediators =
+      VS::Battle::actionEffectMediators;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   Battle_HitResult hit{};
@@ -174,7 +174,7 @@ struct LiveFixture {
     actor.stats = &stats;
     Battle_actors[41] = &actor;
     stats.actorId = 255;
-    hit.target.targetActor = 41;
+    hit.target.target_actor = 41;
     hit.hpEffect = 3;
     hit.statStatusEffect = 3;
     hit.weaponDpEffect = 2;
@@ -185,7 +185,8 @@ struct LiveFixture {
   ~LiveFixture() {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_rules, Battle_statusEffectParams);
-    std::ranges::copy(saved_mediators, Battle_actionEffectMediators);
+    std::ranges::copy(saved_mediators,
+                      VS::Battle::actionEffectMediators.begin());
   }
 };
 
@@ -198,8 +199,8 @@ void CheckRelocatedMediator(LiveHandler handler, int rule_id, unsigned feedback,
                             bool removal) {
   LiveFixture fixture;
   const auto mediator =
-      std::ranges::find(Battle_actionEffectMediators, handler);
-  REQUIRE(mediator != std::end(Battle_actionEffectMediators));
+      std::ranges::find(VS::Battle::actionEffectMediators, handler);
+  REQUIRE(mediator != std::end(VS::Battle::actionEffectMediators));
   auto& rule = Battle_statusEffectParams[rule_id];
   rule.statusFlags = std::bit_cast<std::int32_t>(kHighStatus);
   rule.cancelledStatuses = 1;
@@ -247,7 +248,8 @@ void CheckUnchangedHandler(Handler handler, std::size_t rule_id) {
 void RelocateMediators(std::span<const std::uint8_t> image) {
   const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
-      tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
+      tables,
+      reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
       &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
@@ -649,7 +651,7 @@ TEST_CASE(
   CHECK(Bytes(fixture.hit) == before_hit);
   CHECK(fixture.stats.isAnalyzed == 1);
   Battle_actors[0] = &fixture.actor;
-  fixture.hit.target.targetActor = 0;
+  fixture.hit.target.target_actor = 0;
   fixture.stats.statuses = 0;
   battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 0);
   CHECK(fixture.hit.removeStatuses == 2);
@@ -733,9 +735,9 @@ TEST_CASE(
                                             "BATTLE/BATTLE.PRG",
                                             kAddresses.at(index)) ==
           reinterpret_cast<void*>(kHandlers.at(index)));
-    const auto mediator =
-        std::ranges::find(Battle_actionEffectMediators, kHandlers.at(index));
-    REQUIRE(mediator != std::end(Battle_actionEffectMediators));
+    const auto mediator = std::ranges::find(VS::Battle::actionEffectMediators,
+                                            kHandlers.at(index));
+    REQUIRE(mediator != std::end(VS::Battle::actionEffectMediators));
     fixture.stats.actorId = kExemptActor;
     fixture.stats.statuses = -1;
     fixture.stats.statusImmunities = -1;

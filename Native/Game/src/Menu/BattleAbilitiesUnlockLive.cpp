@@ -9,7 +9,7 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -114,9 +114,10 @@ class LiveBreakArtHost final : public BreakArtUnlockHost {
     InitLiveInformationTextBox(InformationHeader::kCheck);
   }
   void SetBreakArtMessage(int weapon, std::uint8_t action) override {
-    Battle_stringContext.strings[0] =
+    VS::Battle::stringContext.strings[0] =
         MenuText(battleAbilityMenuStrings[weapon]);
-    Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
+    VS::Battle::stringContext.strings[1] =
+        Battle_actionDefinitions[action].name;
     Framework::SetLiveInformationMessage(
         MenuText(menu2_battle_abilities_menu::offset::kBreakArtUnlock));
   }
@@ -207,7 +208,8 @@ class LiveAbilityHost final : public AbilityUnlockHost {
   }
   void SetAbilityMessage(bool all_unlocked, std::uint8_t action) override {
     if (!all_unlocked) {
-      Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
+      VS::Battle::stringContext.strings[1] =
+          Battle_actionDefinitions[action].name;
     }
     Framework::SetLiveInformationMessage(MenuText(
         all_unlocked

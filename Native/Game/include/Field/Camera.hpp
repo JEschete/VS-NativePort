@@ -32,7 +32,7 @@ inline constexpr std::uint32_t kPadLeft = 1U << 15;
 inline constexpr std::uint32_t kControlModeAction = 2;
 inline constexpr std::uint32_t kControlModeLocked = 3;
 inline constexpr std::uint32_t kControlModeFirstPerson = 7;
-// Battle_actionFlowMode values in the action control mode...
+// VS::Battle::actionFlowMode values in the action control mode...
 inline constexpr std::uint32_t kFlowChooseDirectTarget = 1;
 inline constexpr std::uint32_t kFlowPlaceArea = 2;
 inline constexpr std::uint32_t kFlowChooseAreaTarget = 3;

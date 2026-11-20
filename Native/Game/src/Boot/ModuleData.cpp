@@ -13,9 +13,9 @@
 #include "Audio/SurfaceSounds.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
-#include "Battle/ActionMenu.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionAnimation.hpp"
+#include "Battle/ActionMenu.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -23,11 +23,11 @@
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
-#include "Battle/Sphere.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
+#include "Battle/Sphere.hpp"
 #include "Battle/StatusEffects.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/FixedPoint.hpp"
@@ -184,27 +184,27 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x2C7FC, sizeof VS::Audio::legacyUnreferencedWord,
      &VS::Audio::legacyUnreferencedWord,
      sizeof VS::Audio::legacyUnreferencedWord},  // G00018 D_80094FFC
-    {"BATTLE/BATTLE.PRG", 0x7F984, sizeof Battle_categoryNeedsTargetSelection,
-     &Battle_categoryNeedsTargetSelection,
-     sizeof Battle_categoryNeedsTargetSelection},  // G00019 D_800E8184
-    {"BATTLE/BATTLE.PRG", 0x7F994, sizeof Battle_categoryIsAreaTarget,
-     &Battle_categoryIsAreaTarget,
-     sizeof Battle_categoryIsAreaTarget},  // G00020 D_800E8194
-    {"BATTLE/BATTLE.PRG", 0x7F9B4, sizeof Battle_categoryIncludesActingActor,
-     &Battle_categoryIncludesActingActor,
-     sizeof Battle_categoryIncludesActingActor},  // G00021 D_800E81B4
-    {"BATTLE/BATTLE.PRG", 0x7F9C4, sizeof Battle_categoryTargetsBodyParts,
-     &Battle_categoryTargetsBodyParts,
-     sizeof Battle_categoryTargetsBodyParts},  // G00022 D_800E81C4
-    {"BATTLE/BATTLE.PRG", 0x7F9D4, sizeof Battle_categoryTargetActorMasks,
-     &Battle_categoryTargetActorMasks,
-     sizeof Battle_categoryTargetActorMasks},  // G00023 D_800E81D4
+    {"BATTLE/BATTLE.PRG", 0x7F984, sizeof VS::Battle::categoryNeedsTargetSelection,
+     &VS::Battle::categoryNeedsTargetSelection,
+     sizeof VS::Battle::categoryNeedsTargetSelection},  // G00019 D_800E8184
+    {"BATTLE/BATTLE.PRG", 0x7F994, sizeof VS::Battle::categoryIsAreaTarget,
+     &VS::Battle::categoryIsAreaTarget,
+     sizeof VS::Battle::categoryIsAreaTarget},  // G00020 D_800E8194
+    {"BATTLE/BATTLE.PRG", 0x7F9B4, sizeof VS::Battle::categoryIncludesActingActor,
+     &VS::Battle::categoryIncludesActingActor,
+     sizeof VS::Battle::categoryIncludesActingActor},  // G00021 D_800E81B4
+    {"BATTLE/BATTLE.PRG", 0x7F9C4, sizeof VS::Battle::categoryTargetsBodyParts,
+     &VS::Battle::categoryTargetsBodyParts,
+     sizeof VS::Battle::categoryTargetsBodyParts},  // G00022 D_800E81C4
+    {"BATTLE/BATTLE.PRG", 0x7F9D4, sizeof VS::Battle::categoryTargetActorMasks,
+     &VS::Battle::categoryTargetActorMasks,
+     sizeof VS::Battle::categoryTargetActorMasks},  // G00023 D_800E81D4
     {"BATTLE/BATTLE.PRG", 0x7F9E4, sizeof VS::Items::weaponCategoryUpperIds,
      &VS::Items::weaponCategoryUpperIds,
      sizeof VS::Items::weaponCategoryUpperIds},  // G00024 _wepIdCategories
-    {"BATTLE/BATTLE.PRG", 0x7FA00, sizeof Battle_limbInjuryStatusIds,
-     &Battle_limbInjuryStatusIds,
-     sizeof Battle_limbInjuryStatusIds},  // G00025 D_800E8200
+    {"BATTLE/BATTLE.PRG", 0x7FA00, sizeof VS::Battle::limbInjuryStatusIds,
+     &VS::Battle::limbInjuryStatusIds,
+     sizeof VS::Battle::limbInjuryStatusIds},  // G00025 D_800E8200
     {"BATTLE/BATTLE.PRG", 0x7FA04, sizeof Battle_limbStatusFlags,
      &Battle_limbStatusFlags,
      sizeof Battle_limbStatusFlags},  // G00026 D_800E8204
@@ -241,15 +241,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FDC4, sizeof VS::Field::triggerMarkerPaletteSource,
      &VS::Field::triggerMarkerPaletteSource,
      sizeof VS::Field::triggerMarkerPaletteSource},  // G00043 D_800E85C4
-    {"BATTLE/BATTLE.PRG", 0x7FE1C, sizeof Battle_valueCaptionRects,
-     &Battle_valueCaptionRects,
-     sizeof Battle_valueCaptionRects},  // G00046 D_800E861C
-    {"BATTLE/BATTLE.PRG", 0x7FE34, sizeof Battle_lockedLabelHalfHeights,
-     &Battle_lockedLabelHalfHeights,
-     sizeof Battle_lockedLabelHalfHeights},  // G00047 D_800E8634
-    {"BATTLE/BATTLE.PRG", 0x7FE40, sizeof Battle_lockedLabelPieces,
-     &Battle_lockedLabelPieces,
-     sizeof Battle_lockedLabelPieces},  // G00048 D_800E8640
+    {"BATTLE/BATTLE.PRG", 0x7FE1C, sizeof VS::Battle::valueCaptionRects,
+     &VS::Battle::valueCaptionRects,
+     sizeof VS::Battle::valueCaptionRects},  // G00046 D_800E861C
+    {"BATTLE/BATTLE.PRG", 0x7FE34, sizeof VS::Battle::lockedLabelHalfHeights,
+     &VS::Battle::lockedLabelHalfHeights,
+     sizeof VS::Battle::lockedLabelHalfHeights},  // G00047 D_800E8634
+    {"BATTLE/BATTLE.PRG", 0x7FE40, sizeof VS::Battle::lockedLabelPieces,
+     &VS::Battle::lockedLabelPieces,
+     sizeof VS::Battle::lockedLabelPieces},  // G00048 D_800E8640
     {"BATTLE/BATTLE.PRG", 0x7FE60, sizeof VS::Content::legacyShpDiscOffsets,
      &VS::Content::legacyShpDiscOffsets,
      sizeof VS::Content::legacyShpDiscOffsets},  // G00049 _shpLbaOffsets
@@ -277,9 +277,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80600, sizeof VS::Content::legacyWepSectorCounts,
      &VS::Content::legacyWepSectorCounts,
      sizeof VS::Content::legacyWepSectorCounts},  // G00057 _wepFileSectorOffsets
-    {"BATTLE/BATTLE.PRG", 0x80680, sizeof Battle_chainAbilityAnimationGroups,
-     &Battle_chainAbilityAnimationGroups,
-     sizeof Battle_chainAbilityAnimationGroups},  // G00058 D_800E8E80
+    {"BATTLE/BATTLE.PRG", 0x80680, sizeof VS::Battle::chainAbilityAnimationGroups,
+     &VS::Battle::chainAbilityAnimationGroups,
+     sizeof VS::Battle::chainAbilityAnimationGroups},  // G00058 D_800E8E80
     {"BATTLE/BATTLE.PRG", 0x8068E,
      sizeof VS::Content::legacyMaterialSequenceDiscOffsets,
      &VS::Content::legacyMaterialSequenceDiscOffsets,
@@ -453,45 +453,45 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Event::specialSubroutineScript},  // G00118 D_800E9B5C
     {"BATTLE/BATTLE.PRG", 0x81430, sizeof VS::Event::opcodeSizes,
      &VS::Event::opcodeSizes, sizeof VS::Event::opcodeSizes},  // G00132 D_800E9C30
-    {"BATTLE/BATTLE.PRG", 0x81A34, sizeof Battle_sphereArcBases,
-     &Battle_sphereArcBases,
-     sizeof Battle_sphereArcBases},  // G00134 D_800EA234
-    {"BATTLE/BATTLE.PRG", 0x81AC4, sizeof Battle_sphereMirroredVertices,
-     &Battle_sphereMirroredVertices,
-     sizeof Battle_sphereMirroredVertices},  // G00135 D_800EA2C4
-    {"BATTLE/BATTLE.PRG", 0x81C38, sizeof Battle_sphereShapeCommandStarts,
-     &Battle_sphereShapeCommandStarts,
-     sizeof Battle_sphereShapeCommandStarts},  // G00136 D_800EA438
-    {"BATTLE/BATTLE.PRG", 0x81C6C, sizeof Battle_sphereWireframeCommands,
-     &Battle_sphereWireframeCommands,
-     sizeof Battle_sphereWireframeCommands},  // G00137 D_800EA46C
-    {"BATTLE/BATTLE.PRG", 0x81E70, sizeof Battle_positionCursorSpriteOffsets,
-     &Battle_positionCursorSpriteOffsets,
-     sizeof Battle_positionCursorSpriteOffsets},  // G00139 D_800EA670
-    {"BATTLE/BATTLE.PRG", 0x81E84, sizeof Battle_positionCursorSpriteSizes,
-     &Battle_positionCursorSpriteSizes,
-     sizeof Battle_positionCursorSpriteSizes},  // G00140 D_800EA684
-    {"BATTLE/BATTLE.PRG", 0x81E98, sizeof Battle_positionCursorSpriteTexCoords,
-     &Battle_positionCursorSpriteTexCoords,
-     sizeof Battle_positionCursorSpriteTexCoords},  // G00141 D_800EA698
-    {"BATTLE/BATTLE.PRG", 0x81EAC, sizeof Battle_positionCursorBlinkFrame,
-     &Battle_positionCursorBlinkFrame,
-     sizeof Battle_positionCursorBlinkFrame},  // G00142 D_800EA6AC
-    {"BATTLE/BATTLE.PRG", 0x82068, sizeof Battle_statusStrings,
-     &Battle_statusStrings,
-     sizeof Battle_statusStrings},  // G00143 vs_battle_statusStrings
-    {"BATTLE/BATTLE.PRG", 0x82184, sizeof Battle_targetInfoTemplate,
-     &Battle_targetInfoTemplate,
-     sizeof Battle_targetInfoTemplate},  // G00144 D_800EA984
-    {"BATTLE/BATTLE.PRG", 0x821B6, sizeof Battle_targetStatusLineTemplate,
-     &Battle_targetStatusLineTemplate,
-     sizeof Battle_targetStatusLineTemplate},  // G00145 D_800EA9B6
-    {"BATTLE/BATTLE.PRG", 0x82254, sizeof Battle_emptyStatusString,
-     &Battle_emptyStatusString,
-     sizeof Battle_emptyStatusString},  // G00146 D_800EAA54
-    {"BATTLE/BATTLE.PRG", 0x823AA, sizeof Battle_targetSelectionStep,
-     &Battle_targetSelectionStep,
-     sizeof Battle_targetSelectionStep},  // G00147 D_800EABAA
+    {"BATTLE/BATTLE.PRG", 0x81A34, sizeof VS::Battle::sphereArcBases,
+     &VS::Battle::sphereArcBases,
+     sizeof VS::Battle::sphereArcBases},  // G00134 D_800EA234
+    {"BATTLE/BATTLE.PRG", 0x81AC4, sizeof VS::Battle::sphereMirroredVertices,
+     &VS::Battle::sphereMirroredVertices,
+     sizeof VS::Battle::sphereMirroredVertices},  // G00135 D_800EA2C4
+    {"BATTLE/BATTLE.PRG", 0x81C38, sizeof VS::Battle::sphereShapeCommandStarts,
+     &VS::Battle::sphereShapeCommandStarts,
+     sizeof VS::Battle::sphereShapeCommandStarts},  // G00136 D_800EA438
+    {"BATTLE/BATTLE.PRG", 0x81C6C, sizeof VS::Battle::sphereWireframeCommands,
+     &VS::Battle::sphereWireframeCommands,
+     sizeof VS::Battle::sphereWireframeCommands},  // G00137 D_800EA46C
+    {"BATTLE/BATTLE.PRG", 0x81E70, sizeof VS::Battle::positionCursorSpriteOffsets,
+     &VS::Battle::positionCursorSpriteOffsets,
+     sizeof VS::Battle::positionCursorSpriteOffsets},  // G00139 D_800EA670
+    {"BATTLE/BATTLE.PRG", 0x81E84, sizeof VS::Battle::positionCursorSpriteSizes,
+     &VS::Battle::positionCursorSpriteSizes,
+     sizeof VS::Battle::positionCursorSpriteSizes},  // G00140 D_800EA684
+    {"BATTLE/BATTLE.PRG", 0x81E98, sizeof VS::Battle::positionCursorSpriteTexCoords,
+     &VS::Battle::positionCursorSpriteTexCoords,
+     sizeof VS::Battle::positionCursorSpriteTexCoords},  // G00141 D_800EA698
+    {"BATTLE/BATTLE.PRG", 0x81EAC, sizeof VS::Battle::positionCursorBlinkFrame,
+     &VS::Battle::positionCursorBlinkFrame,
+     sizeof VS::Battle::positionCursorBlinkFrame},  // G00142 D_800EA6AC
+    {"BATTLE/BATTLE.PRG", 0x82068, sizeof VS::Battle::statusStrings,
+     &VS::Battle::statusStrings,
+     sizeof VS::Battle::statusStrings},  // G00143 vs_battle_statusStrings
+    {"BATTLE/BATTLE.PRG", 0x82184, sizeof VS::Battle::targetInfoTemplate,
+     &VS::Battle::targetInfoTemplate,
+     sizeof VS::Battle::targetInfoTemplate},  // G00144 D_800EA984
+    {"BATTLE/BATTLE.PRG", 0x821B6, sizeof VS::Battle::targetStatusLineTemplate,
+     &VS::Battle::targetStatusLineTemplate,
+     sizeof VS::Battle::targetStatusLineTemplate},  // G00145 D_800EA9B6
+    {"BATTLE/BATTLE.PRG", 0x82254, sizeof VS::Battle::emptyStatusString,
+     &VS::Battle::emptyStatusString,
+     sizeof VS::Battle::emptyStatusString},  // G00146 D_800EAA54
+    {"BATTLE/BATTLE.PRG", 0x823AA, sizeof VS::Battle::targetSelectionStep,
+     &VS::Battle::targetSelectionStep,
+     sizeof VS::Battle::targetSelectionStep},  // G00147 D_800EABAA
     {"BATTLE/BATTLE.PRG", 0x82F08, sizeof VS::Render::compactGlyphLeftTrim,
      &VS::Render::compactGlyphLeftTrim,
      sizeof VS::Render::compactGlyphLeftTrim},  // G00149 D_800EB708
@@ -508,22 +508,22 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x8318C, sizeof VS::Render::kGlyphPixelExpansion,
      &VS::Render::kGlyphPixelExpansion,
      sizeof VS::Render::kGlyphPixelExpansion},  // G00153 D_800EB98C
-    {"BATTLE/BATTLE.PRG", 0x831AC, sizeof Battle_reuseSphereVolumes,
-     &Battle_reuseSphereVolumes,
-     sizeof Battle_reuseSphereVolumes},  // G00154 D_800EB9AC
-    {"BATTLE/BATTLE.PRG", 0x831AE, sizeof Battle_hudStatusIconsHidden,
-     &Battle_hudStatusIconsHidden,
-     sizeof Battle_hudStatusIconsHidden},  // G00156 D_800EB9AE
-    {"BATTLE/BATTLE.PRG", 0x831AF, sizeof Battle_hudHidden, &Battle_hudHidden,
-     sizeof Battle_hudHidden},  // G00157 D_800EB9AF
-    {"BATTLE/BATTLE.PRG", 0x831B0, sizeof Battle_hudSlideOffset,
-     &Battle_hudSlideOffset,
-     sizeof Battle_hudSlideOffset},  // G00158 D_800EB9B0
-    {"BATTLE/BATTLE.PRG", 0x831CC, sizeof Battle_hudBattleMode,
-     &Battle_hudBattleMode, sizeof Battle_hudBattleMode},  // G00165 D_800EB9CC
-    {"BATTLE/BATTLE.PRG", 0x831CD, sizeof Battle_battleModeIndicatorStep,
-     &Battle_battleModeIndicatorStep,
-     sizeof Battle_battleModeIndicatorStep},  // G00166 D_800EB9CD
+    {"BATTLE/BATTLE.PRG", 0x831AC, sizeof VS::Battle::reuseSphereVolumes,
+     &VS::Battle::reuseSphereVolumes,
+     sizeof VS::Battle::reuseSphereVolumes},  // G00154 D_800EB9AC
+    {"BATTLE/BATTLE.PRG", 0x831AE, sizeof VS::Battle::hudStatusIconsHidden,
+     &VS::Battle::hudStatusIconsHidden,
+     sizeof VS::Battle::hudStatusIconsHidden},  // G00156 D_800EB9AE
+    {"BATTLE/BATTLE.PRG", 0x831AF, sizeof VS::Battle::hudHidden, &VS::Battle::hudHidden,
+     sizeof VS::Battle::hudHidden},  // G00157 D_800EB9AF
+    {"BATTLE/BATTLE.PRG", 0x831B0, sizeof VS::Battle::hudSlideOffset,
+     &VS::Battle::hudSlideOffset,
+     sizeof VS::Battle::hudSlideOffset},  // G00158 D_800EB9B0
+    {"BATTLE/BATTLE.PRG", 0x831CC, sizeof VS::Battle::hudBattleMode,
+     &VS::Battle::hudBattleMode, sizeof VS::Battle::hudBattleMode},  // G00165 D_800EB9CC
+    {"BATTLE/BATTLE.PRG", 0x831CD, sizeof VS::Battle::battleModeIndicatorStep,
+     &VS::Battle::battleModeIndicatorStep,
+     sizeof VS::Battle::battleModeIndicatorStep},  // G00166 D_800EB9CD
     {"BATTLE/BATTLE.PRG", 0x831DC, sizeof VS::Menu::menuStrings,
      &VS::Menu::menuStrings,
      sizeof VS::Menu::menuStrings},  // G00171 vs_battle_menuStrings
@@ -540,80 +540,80 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Menu::Framework::rowAnimationSteps,
      sizeof VS::Menu::Framework::
          rowAnimationSteps},  // G00175 vs_battle_rowAnimationSteps
-    {"BATTLE/BATTLE.PRG", 0x833DC, sizeof Battle_hudGaugePositions,
-     &Battle_hudGaugePositions,
-     sizeof Battle_hudGaugePositions},  // G00176 D_800EBBDC
-    {"BATTLE/BATTLE.PRG", 0x833EC, sizeof Battle_hudGaugeLabelPositions,
-     &Battle_hudGaugeLabelPositions,
-     sizeof Battle_hudGaugeLabelPositions},  // G00177 D_800EBBEC
-    {"BATTLE/BATTLE.PRG", 0x833FC, sizeof Battle_hudGaugeLabelWidths,
-     &Battle_hudGaugeLabelWidths,
-     sizeof Battle_hudGaugeLabelWidths},  // G00178 D_800EBBFC
-    {"BATTLE/BATTLE.PRG", 0x83400, sizeof Battle_hudGaugeLabelTexU,
-     &Battle_hudGaugeLabelTexU,
-     sizeof Battle_hudGaugeLabelTexU},  // G00179 D_800EBC00
+    {"BATTLE/BATTLE.PRG", 0x833DC, sizeof VS::Battle::hudGaugePositions,
+     &VS::Battle::hudGaugePositions,
+     sizeof VS::Battle::hudGaugePositions},  // G00176 D_800EBBDC
+    {"BATTLE/BATTLE.PRG", 0x833EC, sizeof VS::Battle::hudGaugeLabelPositions,
+     &VS::Battle::hudGaugeLabelPositions,
+     sizeof VS::Battle::hudGaugeLabelPositions},  // G00177 D_800EBBEC
+    {"BATTLE/BATTLE.PRG", 0x833FC, sizeof VS::Battle::hudGaugeLabelWidths,
+     &VS::Battle::hudGaugeLabelWidths,
+     sizeof VS::Battle::hudGaugeLabelWidths},  // G00178 D_800EBBFC
+    {"BATTLE/BATTLE.PRG", 0x83400, sizeof VS::Battle::hudGaugeLabelTexU,
+     &VS::Battle::hudGaugeLabelTexU,
+     sizeof VS::Battle::hudGaugeLabelTexU},  // G00179 D_800EBC00
     {"BATTLE/BATTLE.PRG", 0x83404, sizeof VS::Render::kStatGaugeColors,
      &VS::Render::kStatGaugeColors,
      sizeof VS::Render::kStatGaugeColors},  // G00180 D_800EBC04
-    {"BATTLE/BATTLE.PRG", 0x83414, sizeof Battle_statusIconTexOffsets,
-     &Battle_statusIconTexOffsets,
-     sizeof Battle_statusIconTexOffsets},  // G00181
+    {"BATTLE/BATTLE.PRG", 0x83414, sizeof VS::Battle::statusIconTexOffsets,
+     &VS::Battle::statusIconTexOffsets,
+     sizeof VS::Battle::statusIconTexOffsets},  // G00181
                                            // vs_battle_statusIconTexOffsets
-    {"BATTLE/BATTLE.PRG", 0x83454, sizeof Battle_limbStatusColors,
-     &Battle_limbStatusColors,
-     sizeof Battle_limbStatusColors},  // G00182 D_800EBC54
-    {"BATTLE/BATTLE.PRG", 0x83468, sizeof Battle_upperStatusIconFlags,
-     &Battle_upperStatusIconFlags,
-     sizeof Battle_upperStatusIconFlags},  // G00183 D_800EBC68
-    {"BATTLE/BATTLE.PRG", 0x83478, sizeof Battle_shortcutHudRequested,
-     &Battle_shortcutHudRequested,
-     sizeof Battle_shortcutHudRequested},  // G00184 D_800EBC78
+    {"BATTLE/BATTLE.PRG", 0x83454, sizeof VS::Battle::limbStatusColors,
+     &VS::Battle::limbStatusColors,
+     sizeof VS::Battle::limbStatusColors},  // G00182 D_800EBC54
+    {"BATTLE/BATTLE.PRG", 0x83468, sizeof VS::Battle::upperStatusIconFlags,
+     &VS::Battle::upperStatusIconFlags,
+     sizeof VS::Battle::upperStatusIconFlags},  // G00183 D_800EBC68
+    {"BATTLE/BATTLE.PRG", 0x83478, sizeof VS::Battle::shortcutHudRequested,
+     &VS::Battle::shortcutHudRequested,
+     sizeof VS::Battle::shortcutHudRequested},  // G00184 D_800EBC78
     {"BATTLE/BATTLE.PRG", 0x8347C, sizeof VS::Menu::Framework::animationIndices,
      &VS::Menu::Framework::animationIndices,
      sizeof VS::Menu::Framework::
          animationIndices},  // G00185 vs_battle_animationIndices
-    {"BATTLE/BATTLE.PRG", 0x83488, sizeof Battle_firstShortcutDigitOffsets,
-     &Battle_firstShortcutDigitOffsets,
-     sizeof Battle_firstShortcutDigitOffsets},  // G00186 D_800EBC88
-    {"BATTLE/BATTLE.PRG", 0x83498, sizeof Battle_secondShortcutMarkerPositions,
-     &Battle_secondShortcutMarkerPositions,
-     sizeof Battle_secondShortcutMarkerPositions},  // G00187 D_800EBC98
-    {"BATTLE/BATTLE.PRG", 0x834A0, sizeof Battle_secondShortcutIconPositions,
-     &Battle_secondShortcutIconPositions,
-     sizeof Battle_secondShortcutIconPositions},  // G00188 D_800EBCA0
-    {"BATTLE/BATTLE.PRG", 0x834A8, sizeof Battle_secondShortcutIconSizes,
-     &Battle_secondShortcutIconSizes,
-     sizeof Battle_secondShortcutIconSizes},  // G00189 D_800EBCA8
-    {"BATTLE/BATTLE.PRG", 0x834B8, sizeof Battle_secondShortcutIconTexCoords,
-     &Battle_secondShortcutIconTexCoords,
-     sizeof Battle_secondShortcutIconTexCoords},  // G00190 D_800EBCB8
-    {"BATTLE/BATTLE.PRG", 0x834C0, sizeof Battle_firstShortcutMarkerPositions,
-     &Battle_firstShortcutMarkerPositions,
-     sizeof Battle_firstShortcutMarkerPositions},  // G00191 D_800EBCC0
-    {"BATTLE/BATTLE.PRG", 0x834C8, sizeof Battle_firstShortcutIconPositions,
-     &Battle_firstShortcutIconPositions,
-     sizeof Battle_firstShortcutIconPositions},  // G00192 D_800EBCC8
-    {"BATTLE/BATTLE.PRG", 0x834D0, sizeof Battle_firstShortcutIconSizes,
-     &Battle_firstShortcutIconSizes,
-     sizeof Battle_firstShortcutIconSizes},  // G00193 D_800EBCD0
-    {"BATTLE/BATTLE.PRG", 0x834E0, sizeof Battle_firstShortcutIconTexCoords,
-     &Battle_firstShortcutIconTexCoords,
-     sizeof Battle_firstShortcutIconTexCoords},  // G00194 D_800EBCE0
-    {"BATTLE/BATTLE.PRG", 0x834E8, sizeof Battle_shortcutHudAnimationStep,
-     &Battle_shortcutHudAnimationStep,
-     sizeof Battle_shortcutHudAnimationStep},  // G00195 D_800EBCE8
-    {"BATTLE/BATTLE.PRG", 0x834EC, sizeof Battle_limbDisplaySpriteOffsets,
-     &Battle_limbDisplaySpriteOffsets,
-     sizeof Battle_limbDisplaySpriteOffsets},  // G00196 D_800EBCEC
-    {"BATTLE/BATTLE.PRG", 0x83514, sizeof Battle_limbDisplaySpriteSizes,
-     &Battle_limbDisplaySpriteSizes,
-     sizeof Battle_limbDisplaySpriteSizes},  // G00197 D_800EBD14
-    {"BATTLE/BATTLE.PRG", 0x8353C, sizeof Battle_limbDisplaySpriteTexCoords,
-     &Battle_limbDisplaySpriteTexCoords,
-     sizeof Battle_limbDisplaySpriteTexCoords},  // G00198 D_800EBD3C
-    {"BATTLE/BATTLE.PRG", 0x83564, sizeof Battle_battleModeIndicatorWobble,
-     &Battle_battleModeIndicatorWobble,
-     sizeof Battle_battleModeIndicatorWobble},  // G00199 D_800EBD64
+    {"BATTLE/BATTLE.PRG", 0x83488, sizeof VS::Battle::firstShortcutDigitOffsets,
+     &VS::Battle::firstShortcutDigitOffsets,
+     sizeof VS::Battle::firstShortcutDigitOffsets},  // G00186 D_800EBC88
+    {"BATTLE/BATTLE.PRG", 0x83498, sizeof VS::Battle::secondShortcutMarkerPositions,
+     &VS::Battle::secondShortcutMarkerPositions,
+     sizeof VS::Battle::secondShortcutMarkerPositions},  // G00187 D_800EBC98
+    {"BATTLE/BATTLE.PRG", 0x834A0, sizeof VS::Battle::secondShortcutIconPositions,
+     &VS::Battle::secondShortcutIconPositions,
+     sizeof VS::Battle::secondShortcutIconPositions},  // G00188 D_800EBCA0
+    {"BATTLE/BATTLE.PRG", 0x834A8, sizeof VS::Battle::secondShortcutIconSizes,
+     &VS::Battle::secondShortcutIconSizes,
+     sizeof VS::Battle::secondShortcutIconSizes},  // G00189 D_800EBCA8
+    {"BATTLE/BATTLE.PRG", 0x834B8, sizeof VS::Battle::secondShortcutIconTexCoords,
+     &VS::Battle::secondShortcutIconTexCoords,
+     sizeof VS::Battle::secondShortcutIconTexCoords},  // G00190 D_800EBCB8
+    {"BATTLE/BATTLE.PRG", 0x834C0, sizeof VS::Battle::firstShortcutMarkerPositions,
+     &VS::Battle::firstShortcutMarkerPositions,
+     sizeof VS::Battle::firstShortcutMarkerPositions},  // G00191 D_800EBCC0
+    {"BATTLE/BATTLE.PRG", 0x834C8, sizeof VS::Battle::firstShortcutIconPositions,
+     &VS::Battle::firstShortcutIconPositions,
+     sizeof VS::Battle::firstShortcutIconPositions},  // G00192 D_800EBCC8
+    {"BATTLE/BATTLE.PRG", 0x834D0, sizeof VS::Battle::firstShortcutIconSizes,
+     &VS::Battle::firstShortcutIconSizes,
+     sizeof VS::Battle::firstShortcutIconSizes},  // G00193 D_800EBCD0
+    {"BATTLE/BATTLE.PRG", 0x834E0, sizeof VS::Battle::firstShortcutIconTexCoords,
+     &VS::Battle::firstShortcutIconTexCoords,
+     sizeof VS::Battle::firstShortcutIconTexCoords},  // G00194 D_800EBCE0
+    {"BATTLE/BATTLE.PRG", 0x834E8, sizeof VS::Battle::shortcutHudAnimationStep,
+     &VS::Battle::shortcutHudAnimationStep,
+     sizeof VS::Battle::shortcutHudAnimationStep},  // G00195 D_800EBCE8
+    {"BATTLE/BATTLE.PRG", 0x834EC, sizeof VS::Battle::limbDisplaySpriteOffsets,
+     &VS::Battle::limbDisplaySpriteOffsets,
+     sizeof VS::Battle::limbDisplaySpriteOffsets},  // G00196 D_800EBCEC
+    {"BATTLE/BATTLE.PRG", 0x83514, sizeof VS::Battle::limbDisplaySpriteSizes,
+     &VS::Battle::limbDisplaySpriteSizes,
+     sizeof VS::Battle::limbDisplaySpriteSizes},  // G00197 D_800EBD14
+    {"BATTLE/BATTLE.PRG", 0x8353C, sizeof VS::Battle::limbDisplaySpriteTexCoords,
+     &VS::Battle::limbDisplaySpriteTexCoords,
+     sizeof VS::Battle::limbDisplaySpriteTexCoords},  // G00198 D_800EBD3C
+    {"BATTLE/BATTLE.PRG", 0x83564, sizeof VS::Battle::battleModeIndicatorWobble,
+     &VS::Battle::battleModeIndicatorWobble,
+     sizeof VS::Battle::battleModeIndicatorWobble},  // G00199 D_800EBD64
     {"BATTLE/BATTLE.PRG", 0x83568,
      sizeof VS::Menu::Framework::abilityGroupActionRanges,
      &VS::Menu::Framework::abilityGroupActionRanges,
@@ -635,16 +635,16 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Menu::Magic::enchanterSpellIds,
      sizeof VS::Menu::Magic::enchanterSpellIds},  // G00204
                                                   // vs_battle_enchanterSpellIds
-    {"BATTLE/BATTLE.PRG", 0x835A8, sizeof Battle_spellClassCounts,
-     &Battle_spellClassCounts,
-     sizeof Battle_spellClassCounts},  // G00205 _spellClassCounts
-    {"BATTLE/BATTLE.PRG", 0x835BC, sizeof Battle_chainAbilityActionIds,
-     &Battle_chainAbilityActionIds,
-     sizeof Battle_chainAbilityActionIds},  // G00207
+    {"BATTLE/BATTLE.PRG", 0x835A8, sizeof VS::Battle::spellClassCounts,
+     &VS::Battle::spellClassCounts,
+     sizeof VS::Battle::spellClassCounts},  // G00205 _spellClassCounts
+    {"BATTLE/BATTLE.PRG", 0x835BC, sizeof VS::Battle::chainAbilityActionIds,
+     &VS::Battle::chainAbilityActionIds,
+     sizeof VS::Battle::chainAbilityActionIds},  // G00207
                                             // vs_battle_chainAbilityOffsets
-    {"BATTLE/BATTLE.PRG", 0x835CC, sizeof Battle_defenseAbilityActionIds,
-     &Battle_defenseAbilityActionIds,
-     sizeof Battle_defenseAbilityActionIds},  // G00208
+    {"BATTLE/BATTLE.PRG", 0x835CC, sizeof VS::Battle::defenseAbilityActionIds,
+     &VS::Battle::defenseAbilityActionIds,
+     sizeof VS::Battle::defenseAbilityActionIds},  // G00208
                                               // vs_battle_defenseAbilityOffsets
     {"BATTLE/BATTLE.PRG", 0x835DC, sizeof VS::Battle::doorStrings,
      &VS::Battle::doorStrings,

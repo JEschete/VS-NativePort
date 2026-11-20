@@ -181,7 +181,7 @@ TEST_CASE("Actual cold session resets the time cursor without replacing rows",
           "[gazette-times-integration][gazette-times-reload][F02831]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      VS::Menu::textBoxSelector, Battle_stringContext,
+      VS::Menu::textBoxSelector, VS::Battle::stringContext,
       VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;

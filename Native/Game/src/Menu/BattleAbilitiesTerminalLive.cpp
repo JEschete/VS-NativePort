@@ -8,7 +8,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
@@ -215,8 +215,8 @@ class LiveListHost final : public AbilityListHost {
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   std::span<const std::uint8_t> ActionOrder(AbilityKind kind) const override {
     const auto actions = kind == AbilityKind::kChain
-                             ? std::span(Battle_chainAbilityActionIds)
-                             : std::span(Battle_defenseAbilityActionIds);
+                             ? std::span(VS::Battle::chainAbilityActionIds)
+                             : std::span(VS::Battle::defenseAbilityActionIds);
     return {reinterpret_cast<const std::uint8_t*>(actions.data()),
             actions.size()};
   }

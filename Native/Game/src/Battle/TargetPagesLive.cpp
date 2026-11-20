@@ -9,12 +9,13 @@
 #include <type_traits>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/Feedback.h"
-#include "Battle/Sphere.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/Feedback.hpp"
+#include "Battle/Sphere.hpp"
 #include "Battle/TargetPages.hpp"
+#include "Battle/TargetVolume.h"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Log.hpp"
 #include "Field/Interactions.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -42,11 +43,11 @@ static_assert(kSlots == std::extent_v<ResultBuffer>);
 static_assert(kSlots == VS::Battle::kMaxSphereTargets);
 
 // The bound candidates and their pages. The candidates are viewed, not owned.
-std::span<Battle_TargetPreview> targets;
+std::span<VS::Battle::TargetPreview> targets;
 VS::Battle::TargetPageBook book;
 
 Battle_TargetSphere* Sphere() {
-  return reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
+  return reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
 }
 
 void ApplyPage(VS::Battle::TargetPage page, bool reset) {
@@ -64,7 +65,7 @@ void ApplyPage(VS::Battle::TargetPage page, bool reset) {
 // The active battle sphere, showing pages of entries.
 class LiveSphere final : public VS::Battle::TargetSphere {
  public:
-  explicit LiveSphere(std::span<Battle_TargetPreview> entries)
+  explicit LiveSphere(std::span<VS::Battle::TargetPreview> entries)
       : entries_(entries) {}
 
   [[nodiscard]] bool Active() const override { return Sphere() != nullptr; }
@@ -78,7 +79,7 @@ class LiveSphere final : public VS::Battle::TargetSphere {
   }
 
  private:
-  std::span<Battle_TargetPreview> entries_;
+  std::span<VS::Battle::TargetPreview> entries_;
 };
 }  // namespace
 
@@ -88,7 +89,8 @@ void VS::Battle::ResetTargetPages(void) {
 }
 
 namespace VS::Battle {
-void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode) {
+void SetLiveSphereTargets(std::span<VS::Battle::TargetPreview> entries,
+                          int mode) {
   ResetTargetPages();
   if (entries.size() > kMaxSphereTargets) {
     VS::Core::LogError("targeting.page", "invalid targets count={}",
@@ -97,16 +99,16 @@ void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode) {
   }
   std::array<std::uint8_t, kMaxSphereTargets> actor_ids{};
   std::transform(entries.begin(), entries.end(), actor_ids.begin(),
-                 [](const Battle_TargetPreview& entry) {
-                   return static_cast<std::uint8_t>(entry.actorId);
+                 [](const VS::Battle::TargetPreview& entry) {
+                   return static_cast<std::uint8_t>(entry.actor_id);
                  });
   LiveSphere sphere(entries);
   SetSphereTargets(book, std::span(actor_ids).first(entries.size()), mode,
                    sphere);
 }
 
-std::span<Battle_TargetPreview> CheckedTargetPreviews(
-    std::span<Battle_TargetPreview> previews, int count) {
+std::span<VS::Battle::TargetPreview> CheckedTargetPreviews(
+    std::span<VS::Battle::TargetPreview> previews, int count) {
   if (count < 0 || static_cast<std::size_t>(count) > previews.size()) {
     VS::Core::LogError("targeting.page", "invalid target preview count={}",
                        count);
@@ -151,8 +153,8 @@ int VS::Battle::HandleTargetPageButtons(void) {
 int VS::Battle::TargetPagesUseShoulders(void) {
   return book.pages.size() > 1 && Sphere() != nullptr &&
          Sphere()->targetCount > 0 && VS::Field::controlMode == 2 &&
-         (Battle_actionFlowMode == kChooseDirectTarget ||
-          Battle_actionFlowMode == kChooseAreaTarget);
+         (VS::Battle::actionFlowMode == kChooseDirectTarget ||
+          VS::Battle::actionFlowMode == kChooseAreaTarget);
 }
 
 unsigned char VS::Battle::MapTargetPageIndex(unsigned char index) {

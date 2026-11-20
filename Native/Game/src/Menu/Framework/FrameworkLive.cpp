@@ -26,12 +26,12 @@
 #include "Actors/Movement.h"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetingState.h"
+#include "Battle/Hud.hpp"
+#include "Battle/Sphere.hpp"
+#include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
@@ -225,14 +225,14 @@ constexpr int kMenuTexturePageOwner = 6;
 constexpr u_int kBackgroundClutRow = 3;
 constexpr u_int kClutColors = 256;
 constexpr std::size_t kBackgroundClutBytes = kClutColors * sizeof(u_short);
-// Battle_statusIconCarousel with no icon highlighted.
+// VS::Battle::statusIconCarousel with no icon highlighted.
 constexpr int kStatusIconCarouselIdle = 0xFFFFFF;
 // The text boxes' ordering table tags ClearOTag sets.
 constexpr int kTextBoxOrderingTags = 0x22;
 // The information box and its portrait.
 constexpr int kInformationBox = 7;
 constexpr u_int kInformationPortrait = 32;
-// Battle_lowerScreenUiState: the raised background bit and the bit kept.
+// VS::Battle::lowerScreenUiState: the raised background bit and the bit kept.
 constexpr int kLowerScreenBackgroundRaised = 2;
 constexpr int kLowerScreenKept = 1;
 // The Ashley preview camera.
@@ -773,7 +773,8 @@ class LiveHost final : public Host {
   }
 
   void SetStringArgument(std::span<const std::uint8_t> text) override {
-    Battle_stringContext.strings[0] = text.empty() ? nullptr : Mutable(text);
+    VS::Battle::stringContext.strings[0] =
+        text.empty() ? nullptr : Mutable(text);
   }
 
   int CurrentSceneId() override { return VS::Field::LiveCurrentSceneId(); }
@@ -830,11 +831,11 @@ class LiveHost final : public Host {
 
   const char* LimbName(int limb) override {
     if (limb < 0 ||
-        static_cast<std::size_t>(limb) >= std::size(Battle_limbNames)) {
+        static_cast<std::size_t>(limb) >= std::size(VS::Battle::limbNames)) {
       Refuse("limb outside the limb names");
       return nullptr;
     }
-    return Battle_limbNames[limb];
+    return VS::Battle::limbNames[limb];
   }
 
   void BeginOverlayLoad(int sub_menu, bool main_menu_program) override {
@@ -1041,30 +1042,30 @@ class LiveHost final : public Host {
   // func_800CA9C0's resets outside the menu (BATTLE.PRG 5BF94.c:3484).
   void ResetBattleInterface() override {
     const CallOutScope scope;
-    Battle_reuseSphereVolumes = 0;
-    Battle_hudStatusIconsHidden = 0;
-    Battle_hudSlideOffset = 0;
+    VS::Battle::reuseSphereVolumes = 0;
+    VS::Battle::hudStatusIconsHidden = 0;
+    VS::Battle::hudSlideOffset = 0;
     VS::Effects::screenEffectOverlay = nullptr;
-    Battle_targetSphere = nullptr;
+    VS::Battle::targetSphere = nullptr;
     VS::Render::ForgetLiveGimImages();
     VS::Menu::textBoxBufferIndex = 0;
-    Battle_lowerScreenUiState = 0;
-    Battle_hudHidden = 0;
-    Battle_hudBattleMode = 0;
-    Battle_battleModeIndicatorStep = 0;
-    Battle_statusIconCarousel.word = kStatusIconCarouselIdle;
+    VS::Battle::lowerScreenUiState = 0;
+    VS::Battle::hudHidden = 0;
+    VS::Battle::hudBattleMode = 0;
+    VS::Battle::battleModeIndicatorStep = 0;
+    VS::Battle::statusIconCarousel.word = kStatusIconCarouselIdle;
     sceneNotificationBuffer = nullptr;
     VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
-    Battle_actionSelection = &actionSelection;
+    VS::Battle::actionSelection = &actionSelection;
     textBoxes[0] = TextBoxState{};
     activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(activeTextBoxOrderingTable, kTextBoxOrderingTags);
   }
 
   void SetBackgroundRaised(bool raised) override {
-    Battle_lowerScreenUiState = static_cast<char>(
-        raised ? (Battle_lowerScreenUiState | kLowerScreenBackgroundRaised)
-               : (Battle_lowerScreenUiState & kLowerScreenKept));
+    VS::Battle::lowerScreenUiState = static_cast<char>(
+        raised ? (VS::Battle::lowerScreenUiState | kLowerScreenBackgroundRaised)
+               : (VS::Battle::lowerScreenUiState & kLowerScreenKept));
   }
 
   Render::PacketQueue& Queue(Layer layer) override {

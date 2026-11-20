@@ -13,10 +13,10 @@
 #include "Actors/ActorTableLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudRendering.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -88,9 +88,9 @@ u_long* QueueSprite(const Render::SpriteRequest& sprite, u_long* chain) {
 class LiveHudGaugeWorld final : public HudGaugeWorld {
  public:
   std::optional<std::int32_t> GaugePosition(HudGaugeKind kind) override {
-    return std::span(Battle_hudGaugePositions)[GaugeIndex(kind)];
+    return std::span(VS::Battle::hudGaugePositions)[GaugeIndex(kind)];
   }
-  std::int32_t SlideOffset() override { return Battle_hudSlideOffset; }
+  std::int32_t SlideOffset() override { return VS::Battle::hudSlideOffset; }
 
   bool DrawGauge(const Render::StatGaugeRequest& gauge) override {
     gauge_chain_ = Chain(Render::LiveOrderingBase::kScene, kGaugeLayer);
@@ -127,9 +127,9 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
       HudGaugeKind kind) override {
     const auto index = GaugeIndex(kind);
     return HudGaugeLabelGeometry{
-        .position = std::span(Battle_hudGaugeLabelPositions)[index],
+        .position = std::span(VS::Battle::hudGaugeLabelPositions)[index],
         .width = static_cast<std::uint8_t>(
-            std::span(Battle_hudGaugeLabelWidths)[index])};
+            std::span(VS::Battle::hudGaugeLabelWidths)[index])};
   }
 
   bool DrawLabel(HudGaugeKind kind,
@@ -138,7 +138,7 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
     u_long* const packet = QueueSprite(sprite, gauge_chain_);
     packet[Render::kSpriteTextureWord] =
         static_cast<std::uint8_t>(
-            std::span(Battle_hudGaugeLabelTexU)[GaugeIndex(kind)]) |
+            std::span(VS::Battle::hudGaugeLabelTexU)[GaugeIndex(kind)]) |
         kGaugeLabelClut;
     return true;
   }
@@ -150,10 +150,10 @@ class LiveHudGaugeWorld final : public HudGaugeWorld {
 
 class LiveHudIconWorld final : public HudStatusIconWorld {
  public:
-  std::int32_t SlideOffset() override { return Battle_hudSlideOffset; }
+  std::int32_t SlideOffset() override { return VS::Battle::hudSlideOffset; }
   std::optional<std::uint16_t> StatusIconTexture(std::size_t icon) override {
     if (icon >= kHudStatusIconCount) return std::nullopt;
-    return std::span(Battle_statusIconTexOffsets)[icon];
+    return std::span(VS::Battle::statusIconTexOffsets)[icon];
   }
   bool DrawSprite(HudSpriteLayer layer, const HudSprite& sprite) override {
     const bool status = layer == HudSpriteLayer::kStatus;
@@ -191,12 +191,13 @@ std::span<const std::uint8_t> SpellOwner(const std::uint8_t* ids) {
 
 void CheckSpellReadiness(int spell_class) {
   const auto index = static_cast<std::size_t>(spell_class);
-  if (index >= std::size(Battle_spellClassCounts)) {
+  if (index >= std::size(VS::Battle::spellClassCounts)) {
     Refuse("Shortcut spell class is outside its table");
   }
-  const auto count = std::span(Battle_spellClassCounts)[index];
+  const auto count = std::span(VS::Battle::spellClassCounts)[index];
   if (count == 0) return;
-  const auto owner = SpellOwner(std::span(Battle_spellClassSpellIds)[index]);
+  const auto owner =
+      SpellOwner(std::span(VS::Battle::spellClassSpellIds)[index]);
   for (std::size_t spell = 0; spell < count; ++spell) {
     if (spell >= owner.size()) {
       Refuse("Used shortcut spell entry is outside its bounded owner");
@@ -224,8 +225,8 @@ class LiveHudShortcutWorld final : public HudShortcutWorld {
   }
   std::optional<bool> HasBattleAbility(AbilityKind kind) override {
     const auto ids = kind == AbilityKind::kChain
-                         ? std::span(Battle_chainAbilityActionIds)
-                         : std::span(Battle_defenseAbilityActionIds);
+                         ? std::span(VS::Battle::chainAbilityActionIds)
+                         : std::span(VS::Battle::defenseAbilityActionIds);
     for (const char id : ids.first<kQueriedBattleAbilities>()) {
       if (ActionUnlocked(static_cast<std::uint8_t>(id))) break;
     }

@@ -18,7 +18,7 @@
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/ActionTable.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
@@ -126,8 +126,8 @@ inline auto ControlOwners() {
                     BytesOf(VS::Menu::Framework::actionMenuState),
                     BytesOf(VS::Menu::Framework::displayActionCost),
                     BytesOf(VS::Menu::textBoxSelector),
-                    BytesOf(Battle_hudHidden),
-                    BytesOf(Battle_hudSlideOffset),
+                    BytesOf(VS::Battle::hudHidden),
+                    BytesOf(VS::Battle::hudSlideOffset),
                     BytesOf(VS::Field::isFieldRenderingEnabled),
                     BytesOf(VS::State::tickSpeed),
                     BytesOf(VS::State::roomVisitProgress),

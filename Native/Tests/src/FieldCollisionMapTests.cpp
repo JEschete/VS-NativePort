@@ -295,7 +295,7 @@ struct LiveTrap {
     Field_roomData.header.environmentLength = sizeof environment;
     action.hits[1].statFactor = 4;
     action.hits[1].affinity = 1;
-    struck.target.targetLimb = 1;
+    struck.target.target_limb = 1;
   }
 };
 }  // namespace
@@ -852,11 +852,11 @@ TEST_CASE("The live trap binding refuses actions, hits, limbs and actors",
                                                 1, 0) == 0);
   CHECK(VS::Field::CalculateLiveTrapPanelDamage(&trap.action, nullptr,
                                                 &trap.struck, 2, 0) == 0);
-  trap.struck.target.targetLimb = 6;
+  trap.struck.target.target_limb = 6;
   CHECK(VS::Field::CalculateLiveTrapPanelDamage(&trap.action, nullptr,
                                                 &trap.struck, 1, 0) == 0);
-  trap.struck.target.targetLimb = 1;
-  trap.struck.target.targetActor = 3;
+  trap.struck.target.target_limb = 1;
+  trap.struck.target.target_actor = 3;
   CHECK(VS::Field::CalculateLiveHealingPanelRecovery(&trap.action, nullptr,
                                                      &trap.struck, 1, 0) == 0);
 }

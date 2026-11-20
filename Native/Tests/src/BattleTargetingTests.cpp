@@ -20,7 +20,7 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionRecords.hpp"
@@ -31,12 +31,12 @@
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -1337,7 +1337,8 @@ TEST_CASE("Defense step collapses the selection onto the attacker",
 
 TEST_CASE("Live ability bindings refuse a missing character state",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_ActionState*> state(Battle_actionState, nullptr);
+  const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
+                                                  nullptr);
   const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
   const BattleLog log;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == 0);
@@ -1348,7 +1349,8 @@ TEST_CASE("Live ability bindings refuse a missing character state",
 
 TEST_CASE("Live ability rewards refuse a missing action state",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_ActionState*> state(Battle_actionState, nullptr);
+  const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
+                                                  nullptr);
   const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
   const BattleLog log;
   battle::LiveArmDefenseAbilityTimingWindow(0);
@@ -1361,7 +1363,8 @@ TEST_CASE("Live ability rewards refuse a missing action state",
 
 TEST_CASE("Live ability sequence refuses a missing action state",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_ActionState*> state(Battle_actionState, nullptr);
+  const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
+                                                  nullptr);
   const ScopedOverride<Battle_Actor*> character(Battle_characterState, nullptr);
   const BattleLog log;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
@@ -3686,7 +3689,8 @@ TEST_CASE("Action range squared trims its margin and borrows the weapon's",
 
 TEST_CASE("Live action targeting refuses without an action state",
           "[battle][battle-targeting]") {
-  const ScopedOverride<Battle_ActionState*> state(Battle_actionState, nullptr);
+  const ScopedOverride<Battle_ActionState*> state(VS::Battle::actionState,
+                                                  nullptr);
   const BattleLog log;
   battle::LiveReturnToBattleActionMenu();
   VS::Battle::LiveFilterAreaActionTargets();
@@ -3707,7 +3711,7 @@ TEST_CASE("Live action targeting refuses without an action state",
 TEST_CASE("Live sphere cursor refuses without a target or a sphere",
           "[battle][battle-targeting]") {
   const ScopedOverride<Battle_TargetSphereSetupView*> sphere(
-      Battle_targetSphere, nullptr);
+      VS::Battle::targetSphere, nullptr);
   const BattleLog log;
   CHECK(battle::LiveUpdateSphereTargetPosition(nullptr) == 0);
   CHECK(log.Saw("sphere cursor refused: no target"));
@@ -3719,7 +3723,7 @@ TEST_CASE("Live sphere cursor refuses without a target or a sphere",
 TEST_CASE("Live target selection refuses without a sphere",
           "[battle][battle-targeting]") {
   const ScopedOverride<Battle_TargetSphereSetupView*> sphere(
-      Battle_targetSphere, nullptr);
+      VS::Battle::targetSphere, nullptr);
   const BattleLog log;
   u_char target = 0;
   CHECK(VS::Battle::LiveUpdateTargetSelectionMenu(&target) == 1);
@@ -3728,23 +3732,23 @@ TEST_CASE("Live target selection refuses without a sphere",
   VS::Battle::LiveUpdateTargetSelectionHighlight(3);
   CHECK(log.Saw("target highlight refused: no targeting sphere"));
   // A null target only resets the list.
-  const ScopedOverride<u_char> step(Battle_targetSelectionStep, 7);
+  const ScopedOverride<u_char> step(VS::Battle::targetSelectionStep, 7);
   CHECK(battle::LiveUpdateTargetSelectionMenu(nullptr) == 0);
-  CHECK(Battle_targetSelectionStep == 0);
+  CHECK(VS::Battle::targetSelectionStep == 0);
 }
 
 TEST_CASE("Live selection highlight records the selected position group",
           "[battle][battle-targeting]") {
   auto sphere = std::make_unique<Battle_TargetSphere>();
-  std::vector<Battle_TargetPreview> previews(
+  std::vector<VS::Battle::TargetPreview> previews(
       static_cast<std::size_t>(battle::kTargetPreviewCapacity));
-  previews[1].actorId = 0x30;
+  previews[1].actor_id = 0x30;
   previews[1].limb = 2;
   sphere->targetLists[0] = previews.data();
   sphere->selectedTarget = 1;
   sphere->reserved2F = 0x20;
   const ScopedOverride<Battle_TargetSphereSetupView*> live(
-      Battle_targetSphere,
+      VS::Battle::targetSphere,
       reinterpret_cast<Battle_TargetSphereSetupView*>(sphere.get()));
   const BattleLog log;
   VS::Battle::LiveUpdateTargetSelectionHighlight(3);
@@ -3755,9 +3759,9 @@ TEST_CASE("Live selection highlight records the selected position group",
 
 // A position group 0x30 preview, then actor 3's limb 2.
 void SetUpSingleTargetPreviews(Battle_ActionState& state) {
-  state.previews[0].actorId = 0x30;
+  state.previews[0].actor_id = 0x30;
   state.previews[0].position = SVECTOR{10, -20, 30, 0};
-  state.previews[1].actorId = 3;
+  state.previews[1].actor_id = 3;
   state.previews[1].limb = 2;
   state.previews[1].position = SVECTOR{40, -50, 60, 0};
 }
@@ -3766,7 +3770,7 @@ TEST_CASE("Live single target carries a position group's id in the pad",
           "[battle][battle-targeting]") {
   auto state = std::make_unique<Battle_ActionState>();
   SetUpSingleTargetPreviews(*state);
-  const ScopedOverride<Battle_ActionState*> live(Battle_actionState,
+  const ScopedOverride<Battle_ActionState*> live(VS::Battle::actionState,
                                                  state.get());
   const Battle_ActionRequest& selection = state->selection;
   const Battle_HitResult& hit = selection.targets[0];
@@ -3784,7 +3788,7 @@ TEST_CASE("Live single target focuses on a position group's point",
           "[battle][battle-targeting]") {
   auto state = std::make_unique<Battle_ActionState>();
   SetUpSingleTargetPreviews(*state);
-  const ScopedOverride<Battle_ActionState*> live(Battle_actionState,
+  const ScopedOverride<Battle_ActionState*> live(VS::Battle::actionState,
                                                  state.get());
   const Battle_ActionRequest& selection = state->selection;
   battle::LiveSetSingleActionTarget();
@@ -3797,7 +3801,7 @@ TEST_CASE("Live single target writes an actor's limb and focus",
           "[battle][battle-targeting]") {
   auto state = std::make_unique<Battle_ActionState>();
   SetUpSingleTargetPreviews(*state);
-  const ScopedOverride<Battle_ActionState*> live(Battle_actionState,
+  const ScopedOverride<Battle_ActionState*> live(VS::Battle::actionState,
                                                  state.get());
   const Battle_ActionRequest& selection = state->selection;
   const Battle_HitResult& hit = selection.targets[0];
@@ -3805,8 +3809,8 @@ TEST_CASE("Live single target writes an actor's limb and focus",
   battle::LiveSetSingleActionTarget();
   CHECK(selection.targetCount == 1);
   CHECK(hit.targetsPosition == 0);
-  CHECK(hit.target.targetActor == 3);
-  CHECK(hit.target.targetLimb == 2);
+  CHECK(hit.target.target_actor == 3);
+  CHECK(hit.target.target_limb == 2);
   CHECK(selection.focusPosition.vx == 40);
   CHECK(selection.focusPosition.vy == -50);
 }

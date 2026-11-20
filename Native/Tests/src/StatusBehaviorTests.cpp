@@ -6,14 +6,14 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
@@ -25,10 +25,10 @@ struct ConditionFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
-  Battle_ActionState* saved_action = Battle_actionState;
-  decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
-  decltype(Battle_floatingLabelCount) saved_label_count =
-      Battle_floatingLabelCount;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
+  decltype(VS::Battle::floatingLabels) saved_labels = VS::Battle::floatingLabels;
+  decltype(VS::Battle::floatingLabelCount) saved_label_count =
+      VS::Battle::floatingLabelCount;
   decltype(std::to_array(Battle_statusEffectParams)) saved_params =
       std::to_array(Battle_statusEffectParams);
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
@@ -41,7 +41,7 @@ struct ConditionFixture {
   Actors_ActorRecord record{};
   VS::Battle::Ai::ActorAiState ai{};
   Battle_ActionState action{};
-  Battle_FloatingLabel labels[32]{};
+  VS::Battle::FloatingLabelSlots labels{};
 
   ConditionFixture() {
     Battle_actors[0] = &actor;
@@ -49,9 +49,9 @@ struct ConditionFixture {
     actor.weaponDrawn = 1;
     Actors_actorRecords[0] = &record;
     VS::Battle::Ai::actorAiStates[0] = &ai;
-    Battle_actionState = &action;
-    Battle_floatingLabels = &labels;
-    Battle_floatingLabelCount = 0;
+    VS::Battle::actionState = &action;
+    VS::Battle::floatingLabels = &labels;
+    VS::Battle::floatingLabelCount = 0;
     std::fill_n(VS::Core::randomShuffleTable, saved_random.size(), 0);
     VS::Core::randomShuffleIndex = 0;
     InitializeStats();
@@ -62,9 +62,9 @@ struct ConditionFixture {
     Battle_actors[0] = saved_actor;
     Actors_actorRecords[0] = saved_record;
     VS::Battle::Ai::actorAiStates[0] = saved_ai;
-    Battle_actionState = saved_action;
-    Battle_floatingLabels = saved_labels;
-    Battle_floatingLabelCount = saved_label_count;
+    VS::Battle::actionState = saved_action;
+    VS::Battle::floatingLabels = saved_labels;
+    VS::Battle::floatingLabelCount = saved_label_count;
     std::copy(saved_params.begin(), saved_params.end(),
               Battle_statusEffectParams);
     std::copy(saved_definitions.begin(), saved_definitions.end(),

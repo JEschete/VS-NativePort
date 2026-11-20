@@ -15,7 +15,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
@@ -1543,14 +1543,14 @@ template <typename Setup, typename Steps>
       VS::Menu::Inventory::selectedItemRow};
   detail::ValueRestore<std::uint8_t> saved_row_count{
       VS::Menu::Inventory::menuRowCount};
-  detail::ArrayRestore<char*, std::size(Battle_limbNames)> saved_limb_names{
-      Battle_limbNames};
+  detail::ArrayRestore<char*, std::size(VS::Battle::limbNames)>
+      saved_limb_names{VS::Battle::limbNames.data()};
   VS::Menu::Inventory::itemCategoryIconsEnabled = 0;
   VS::Menu::Inventory::statusCommandState = 0;
   VS::Menu::Inventory::equippedItem = 0;
   VS::Menu::Inventory::selectedItemRow = 0;
   VS::Menu::Inventory::menuRowCount = 0;
-  std::ranges::fill(Battle_limbNames, nullptr);
+  std::ranges::fill(VS::Battle::limbNames, nullptr);
   setup(fixture);
   Script script(fixture, entry);
   steps(script);

@@ -28,7 +28,7 @@ enum class FieldControlMode : std::int32_t {
   kGimmickMotion = 12,          // Battle_WaitForPostActionMovement
 };
 
-// Battle_actionFlowMode values the field modes select.
+// VS::Battle::actionFlowMode values the field modes select.
 inline constexpr int kActionFlowIdle = 0;
 inline constexpr int kActionFlowInitialTargetSelection = 1;
 

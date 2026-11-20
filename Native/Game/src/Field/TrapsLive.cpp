@@ -11,7 +11,7 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -102,7 +102,7 @@ TrapPanelTarget ToPanelTarget(const Battle_ActorStats& stats,
 }
 
 // The panel hit and the struck actor the original reads through
-// Battle_actors[hit->target.targetActor] and its limb, or empty (with a
+// Battle_actors[hit->target.target_actor] and its limb, or empty (with a
 // diagnostic) where the original would read outside a table or through null.
 struct PanelInputs {
   TrapPanelHit hit;
@@ -120,10 +120,11 @@ std::optional<PanelInputs> ReadPanelInputs(
     WarnRefusal(rule, "hit index outside the action's hits");
     return std::nullopt;
   }
-  const Battle_Actor* struck = BattleActor(target_result->target.targetActor);
+  const Battle_Actor* struck = BattleActor(target_result->target.target_actor);
   // The original loads the limb signed (lb at 0x800825B8); reading the byte
   // unsigned refuses the same values, since only 0..5 name a limb.
-  const auto limb = static_cast<std::uint8_t>(target_result->target.targetLimb);
+  const auto limb =
+      static_cast<std::uint8_t>(target_result->target.target_limb);
   if (struck == nullptr || struck->stats == nullptr || limb >= kLimbCount) {
     WarnRefusal(rule, "target outside the actor table or its limbs");
     return std::nullopt;

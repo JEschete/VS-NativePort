@@ -21,12 +21,12 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -1267,8 +1267,10 @@ struct RoomObjectRecordFixture {
 struct UnlockEffectLiveFixture {
   RoomObjectRecordFixture room;
   decltype(Battle_characterState) saved_character = Battle_characterState;
-  decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
-  decltype(Battle_floatingLabelCount) saved_count = Battle_floatingLabelCount;
+  decltype(VS::Battle::floatingLabels) saved_labels =
+      VS::Battle::floatingLabels;
+  decltype(VS::Battle::floatingLabelCount) saved_count =
+      VS::Battle::floatingLabelCount;
   decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
   VS::Core::Rand15 saved_rand = VS::Core::BiosRand();
   std::array<std::int32_t, VS::Core::Random::TableSize> saved_shuffle{};
@@ -1277,15 +1279,15 @@ struct UnlockEffectLiveFixture {
   Battle_Actor character{};
   Battle_ActorStats stats{};
   std::array<VS::Items::TreasureChest, 1> chests{};
-  std::remove_pointer_t<decltype(Battle_floatingLabels)> labels{};
+  std::remove_pointer_t<decltype(VS::Battle::floatingLabels)> labels{};
 
   UnlockEffectLiveFixture() {
     std::ranges::copy(VS::Core::randomShuffleTable, saved_shuffle.begin());
     Battle_characterState = &character;
     character.stats = &stats;
     stats.risk = std::numeric_limits<decltype(stats.risk)>::max();
-    Battle_floatingLabels = &labels;
-    Battle_floatingLabelCount = 0;
+    VS::Battle::floatingLabels = &labels;
+    VS::Battle::floatingLabelCount = 0;
     Field_roomData.containers = chests.data();
     Field_roomData.header.containersLength = sizeof chests;
     std::memset(&VS::State::stateFlags, 0, sizeof(VS::State::stateFlags));
@@ -1294,8 +1296,8 @@ struct UnlockEffectLiveFixture {
   }
   ~UnlockEffectLiveFixture() {
     Battle_characterState = saved_character;
-    Battle_floatingLabels = saved_labels;
-    Battle_floatingLabelCount = saved_count;
+    VS::Battle::floatingLabels = saved_labels;
+    VS::Battle::floatingLabelCount = saved_count;
     VS::State::stateFlags = saved_flags;
     VS::Core::BiosRand() = saved_rand;
     std::ranges::copy(saved_shuffle, std::begin(VS::Core::randomShuffleTable));
@@ -1700,7 +1702,7 @@ struct AnimationQueueFixture {
 struct ChestTargetFixture {
   Field_RoomRecord saved = Field_roomData;
   std::uint32_t control_mode = VS::Field::controlMode;
-  decltype(Battle_actionFlowMode) action_flow = Battle_actionFlowMode;
+  decltype(VS::Battle::actionFlowMode) action_flow = VS::Battle::actionFlowMode;
   VS::Actors::ActorLocationQuery actor_query =
       VS::Field::interactionFocus.actor_query;
   AnimationQueueFixture queue;
@@ -1719,7 +1721,7 @@ struct ChestTargetFixture {
     Field_roomData = saved;
     VS::Field::InvalidateLiveInteractionTargets();
     VS::Field::controlMode = control_mode;
-    Battle_actionFlowMode = action_flow;
+    VS::Battle::actionFlowMode = action_flow;
     VS::Field::interactionFocus.actor_query = actor_query;
   }
 };
@@ -3973,7 +3975,7 @@ TEST_CASE("Native unlock effect clears eligible doors and both chest tags",
       std::bit_cast<std::array<std::byte, sizeof(point)>>(point);
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 0);
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
   CHECK(std::bit_cast<std::array<std::byte, sizeof(point)>>(point) == original);
   point.pad = 0x20;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
@@ -3990,12 +3992,12 @@ TEST_CASE("Native unlock effect invalid indices label without reading a record",
   SVECTOR point{.vx = -1, .vy = -2, .vz = 3, .pad = 0x1F};
   const auto saved_risk = VS::Core::randomShuffleIndex;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
-  CHECK(Battle_floatingLabelCount == 1);
+  CHECK(VS::Battle::floatingLabelCount == 1);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 2);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
   point.pad = 0x2F;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
-  CHECK(Battle_floatingLabelCount == 2);
+  CHECK(VS::Battle::floatingLabelCount == 2);
   CHECK(fixture.chests[0].lock_level == 3);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
 }
@@ -4007,7 +4009,7 @@ TEST_CASE("Native unlock effect unknown and null targets remain no ops",
   const auto saved_risk = VS::Core::randomShuffleIndex;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(nullptr);
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 2);
   CHECK(fixture.chests[0].lock_level == 3);
@@ -4022,7 +4024,7 @@ TEST_CASE("Native opened chest unlock effect skips risk and preserves its lock",
   SVECTOR point{.vx = 1, .vy = -2, .vz = 3, .pad = 0x20};
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.chests[0].lock_level == 3);
-  CHECK(Battle_floatingLabelCount == 1);
+  CHECK(VS::Battle::floatingLabelCount == 1);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
 }
 

@@ -18,8 +18,8 @@ TEST_CASE("F01358 Live permits unused null spell rows but hides their classes",
   CHECK(b::LiveShortcutIconBrightness(0) == 0);
   state.stats.currentMp = 0;
   CHECK(b::LiveShortcutIconBrightness(4) == 0x180);
-  CHECK(Battle_spellClassSpellIds[1] == nullptr);
-  CHECK(Battle_spellClassCounts[1] == 0);
+  CHECK(VS::Battle::spellClassSpellIds[1] == nullptr);
+  CHECK(VS::Battle::spellClassCounts[1] == 0);
 }
 
 TEST_CASE(
@@ -33,25 +33,25 @@ TEST_CASE(
   CHECK(b::LiveShortcutIconBrightness(0) == 0x180);
   state.stats.currentMp = 0;
   CHECK(b::LiveShortcutIconBrightness(0) == 0x140);
-  CHECK(Battle_spellClassSpellIds[0] == nullptr);
-  CHECK(Battle_spellClassCounts[1] == 2);
+  CHECK(VS::Battle::spellClassSpellIds[0] == nullptr);
+  CHECK(VS::Battle::spellClassCounts[1] == 2);
 }
 
 TEST_CASE(
     "F01358 Live distinguishes chain and defense and ignores padding entries",
     "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
-  std::ranges::fill(Battle_chainAbilityActionIds, char{100});
-  std::ranges::fill(Battle_defenseAbilityActionIds, char{101});
+  std::ranges::fill(VS::Battle::chainAbilityActionIds, char{100});
+  std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{101});
   Battle_actionDefinitions[202].unlocked = 1;
-  Battle_chainAbilityActionIds[14] = static_cast<char>(202);
-  Battle_defenseAbilityActionIds[13] = static_cast<char>(202);
+  VS::Battle::chainAbilityActionIds[14] = static_cast<char>(202);
+  VS::Battle::defenseAbilityActionIds[13] = static_cast<char>(202);
   state.stats.currentMp = 0;
   CHECK(b::LiveShortcutIconBrightness(6) == 0);
   CHECK(b::LiveShortcutIconBrightness(5) == 0x180);
-  Battle_chainAbilityActionIds[13] = static_cast<char>(202);
+  VS::Battle::chainAbilityActionIds[13] = static_cast<char>(202);
   CHECK(b::LiveShortcutIconBrightness(6) == 0x180);
-  CHECK(Battle_chainAbilityActionIds[14] == static_cast<char>(202));
+  CHECK(VS::Battle::chainAbilityActionIds[14] == static_cast<char>(202));
 }
 
 TEST_CASE("F01358 Live resamples the current weapon class on repeated queries",
@@ -71,10 +71,10 @@ TEST_CASE(
     "F01358 Live defaults still sample restrictions but not unused unlocks",
     "[hud-rendering-live][F01358]") {
   f::LiveShortcut state;
-  Battle_spellClassCounts[0] = 255;
+  VS::Battle::spellClassCounts[0] = 255;
   state.stats.currentHp = 0;
   CHECK(b::LiveShortcutIconBrightness(-1) == 0x180);
   CHECK(b::LiveShortcutIconBrightness(8) == 0x180);
-  CHECK(Battle_spellClassSpellIds[0] == nullptr);
-  CHECK(Battle_spellClassCounts[0] == 255);
+  CHECK(VS::Battle::spellClassSpellIds[0] == nullptr);
+  CHECK(VS::Battle::spellClassCounts[0] == 255);
 }

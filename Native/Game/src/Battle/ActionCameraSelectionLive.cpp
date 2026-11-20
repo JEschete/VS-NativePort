@@ -10,13 +10,13 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelection.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -37,14 +37,14 @@ void Require(bool valid) {
   if (!valid) Refuse();
 }
 Battle_ActionState& State() {
-  Require(Battle_actionState != nullptr);
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr);
+  return *VS::Battle::actionState;
 }
 struct LiveQueue final : ActionCameraRequest {
   explicit LiveQueue(Battle_ActionRequest& value) : record(value) {}
   Battle_ActionRequest& record;
   std::uint8_t PrimaryActor() const override {
-    return record.primaryTarget.target.targetActor;
+    return record.primaryTarget.target.target_actor;
   }
   ActionHit FirstTarget() const override {
     return std::bit_cast<ActionHit>(record.targets[0]);
@@ -131,7 +131,7 @@ struct LiveSelection final : ActionSelectionState {
   Battle_ActionState& state;
   bool Selecting() const override { return state.isPlayerAction != 0; }
   std::uint8_t SourceActor() const override {
-    return state.selection.primaryTarget.target.targetActor;
+    return state.selection.primaryTarget.target.target_actor;
   }
   std::uint8_t Frames() const override {
     return static_cast<std::uint8_t>(state.selectionFrames);
@@ -167,7 +167,7 @@ class LiveSelectionWorld final : public ActionSelectionWorld {
     Require(action < std::size(Battle_actionDefinitions));
     const auto category = Battle_actionDefinitions[action].category;
     return static_cast<std::uint8_t>(
-               Battle_categoryNeedsTargetSelection[category]) != 0;
+               VS::Battle::categoryNeedsTargetSelection[category]) != 0;
   }
   void InitializeTargeting(std::uint16_t action) override {
     LiveInitializeActionTargeting(action);

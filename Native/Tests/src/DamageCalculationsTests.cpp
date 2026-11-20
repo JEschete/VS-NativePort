@@ -125,7 +125,7 @@ struct LiveFixture {
       stats.at(i).actorId = static_cast<std::uint8_t>(i);
       Battle_actors[i] = &actors.at(i);
     }
-    target.target.targetActor = 1;
+    target.target.target_actor = 1;
     stats.at(0).strength = stats.at(0).intelligence = 100;
     stats.at(1).strength = stats.at(1).intelligence = 20;
     action.hits[0].affinity = action.hits[1].affinity = 6;

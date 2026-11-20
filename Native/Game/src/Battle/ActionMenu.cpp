@@ -1,16 +1,19 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/ActionMenu.h"
+// The action menu's tables (ActionMenu.hpp).
+#include "Battle/ActionMenu.hpp"
 
-// decomp: _spellClassCounts (_spellClassCounts@BATTLE/BATTLE.PRG)
-u_char Battle_spellClassCounts[4]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: _spellIds (_spellIds@BATTLE/BATTLE.PRG)
-u_char* Battle_spellClassSpellIds[4]; /* contents: module image, relocated (ModulePointers.cpp) */
-
-// decomp: vs_battle_chainAbilityOffsets (vs_battle_chainAbilityOffsets@BATTLE/BATTLE.PRG)
-char Battle_chainAbilityActionIds[16]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: vs_battle_defenseAbilityOffsets (vs_battle_defenseAbilityOffsets@BATTLE/BATTLE.PRG)
-char Battle_defenseAbilityActionIds[16]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle {
+// decomp: _spellClassCounts (_spellClassCounts@BATTLE/BATTLE.PRG); contents:
+// module image (ModuleData.cpp)
+std::array<std::uint8_t, kSpellClassCount> spellClassCounts;
+// decomp: _spellIds (_spellIds@BATTLE/BATTLE.PRG); contents: module image,
+// relocated (ModulePointers.cpp)
+std::array<std::uint8_t*, kSpellClassCount> spellClassSpellIds;
+// decomp: vs_battle_chainAbilityOffsets
+// (vs_battle_chainAbilityOffsets@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::int8_t, kAbilityActionIdBytes> chainAbilityActionIds;
+// decomp: vs_battle_defenseAbilityOffsets
+// (vs_battle_defenseAbilityOffsets@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::int8_t, kAbilityActionIdBytes> defenseAbilityActionIds;
+}  // namespace VS::Battle

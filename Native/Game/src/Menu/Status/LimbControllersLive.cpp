@@ -12,9 +12,9 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -132,13 +132,14 @@ class LiveIcons final : public StatusIconHost {
   }
   LiveIcons host;
   return DrawStatusEffectIcons(host, Battle::LiveStatusIconFlags(actor), slide,
-                               std::span(Battle_statusIconTexOffsets));
+                               std::span(VS::Battle::statusIconTexOffsets));
 }
 [[nodiscard]] LimbControllerResult DrawLiveIndicator(
     const LimbIndicatorRequest& request) {
   Render::LivePacketQueue queue(
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, 0));
-  return DrawLimbConditionIndicator(queue, Battle_limbStatusColors, request);
+  return DrawLimbConditionIndicator(queue, VS::Battle::limbStatusColors,
+                                    request);
 }
 [[nodiscard]] LimbControllerResult DrawLiveLeader(
     const LimbLeaderRequest& request) {
@@ -177,11 +178,11 @@ class LivePanel final : public LimbPanelHost {
   }
   bool DrawName(std::uint8_t name, std::int32_t position,
                 std::optional<std::uint32_t> color) override {
-    if (name >= std::size(Battle_limbNames) ||
-        Battle_limbNames[name] == nullptr) {
+    if (name >= std::size(VS::Battle::limbNames) ||
+        VS::Battle::limbNames[name] == nullptr) {
       return false;
     }
-    DrawLabel(Battle_limbNames[name], position, color);
+    DrawLabel(VS::Battle::limbNames[name], position, color);
     return true;
   }
   std::optional<std::uint8_t> Condition(std::uint8_t actor_slot,
@@ -272,7 +273,7 @@ class LiveSelection final : public SelectedLimbHost {
     for (std::size_t index = 0; index < 2; ++index) {
       // These views borrow immutable module tables; the legacy context does
       // not own or modify them, but its ABI still has mutable char pointers.
-      Battle_stringContext.strings[index] = reinterpret_cast<char*>(
+      VS::Battle::stringContext.strings[index] = reinterpret_cast<char*>(
           const_cast<std::uint8_t*>(arguments_->strings[index].data()));
     }
     Framework::SetLiveInformationMessageText(text);
@@ -377,7 +378,7 @@ void LiveShowSelectedLimbCondition() {
     return;
   }
   const SelectedLimbText text{
-      .name = IndexedText(Battle_statusStrings, limb->nameIndex),
+      .name = IndexedText(VS::Battle::statusStrings, limb->nameIndex),
       .condition =
           IndexedText(statusStrings,
                       static_cast<std::size_t>(menu4_status::index::kCritical) +

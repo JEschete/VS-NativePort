@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/TargetPages.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
@@ -100,7 +100,7 @@ TEST_CASE("Sphere targets bind nothing without an active sphere",
 
 TEST_CASE("Checked target previews keep the bound storage",
           "[combat][targeting][pages]") {
-  std::array<Battle_TargetPreview, 8> previews{};
+  std::array<VS::Battle::TargetPreview, 8> previews{};
   const auto bound = VS::Battle::CheckedTargetPreviews(previews, 3);
   CHECK(bound.data() == previews.data());
   CHECK(bound.size() == 3);

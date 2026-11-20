@@ -16,8 +16,8 @@ constexpr unsigned kByteBits = 8;
       static_cast<std::uint16_t>(low | (unsigned{high} << kByteBits)));
 }
 
-// The hit word of a position hit read as the position (Battle_HitTargetWord
-// copied over an SVECTOR).
+// The hit word of a position hit read as the position
+// (VS::Battle::HitTargetWord copied over an SVECTOR).
 [[nodiscard]] EffectPoint HitWordPosition(const ImpactTarget& target) {
   return {
       .x = ByteHalfword(target.actor, static_cast<std::uint8_t>(target.limb)),

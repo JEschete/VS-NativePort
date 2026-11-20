@@ -4,7 +4,7 @@
 // sequence and the room triggers.
 #include "State/SceneTimerLive.hpp"
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"

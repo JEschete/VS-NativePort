@@ -26,7 +26,7 @@
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -325,7 +325,7 @@ int Tests_TargetSphereViews(void) {
   Battle_TargetSphere* sphere = reinterpret_cast<Battle_TargetSphere*>(&setup);
   Battle_TargetSphereLabelView* labels =
       reinterpret_cast<Battle_TargetSphereLabelView*>(&setup);
-  Battle_TargetPreview targets[2] = {{0}};
+  VS::Battle::TargetPreview targets[2] = {{0}};
   char text[] = "limb";
   setup.targetList0 = &targets[0];
   setup.targetList1 = &targets[1];
@@ -485,8 +485,8 @@ int Tests_ActionDefinitionsLoaded(void) {
          basic->hits[0].prerequisiteFunctionId == 2 &&
          basic->hits[0].hitFunctionId == 3 &&
          basic->hits[0].statCalculatorId == 25 &&
-         Battle_categoryNeedsTargetSelection[basic->category] != 0 &&
-         Battle_categoryTargetsBodyParts[basic->category] != 0;
+         VS::Battle::categoryNeedsTargetSelection[basic->category] != 0 &&
+         VS::Battle::categoryTargetsBodyParts[basic->category] != 0;
 }
 
 int Tests_ActorConditionSnapshot(void) {

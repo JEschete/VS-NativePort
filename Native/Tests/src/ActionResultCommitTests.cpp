@@ -332,8 +332,8 @@ TEST_CASE(
   stats.isAnalyzed = 1;
   stats.weapon.current_dp = 65535;
   stats.weapon.max_dp = 100;
-  hit.target.targetActor = 41;
-  hit.target.targetLimb = -1;
+  hit.target.target_actor = 41;
+  hit.target.target_limb = -1;
   hit.weaponDpEffect = 2;
   hit.weaponDpChange = 2;
   hit.removeStatuses = std::bit_cast<int>(0x80000000U);

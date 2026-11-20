@@ -31,9 +31,9 @@ static_assert(
 static_assert(std::is_same_v<decltype(&b::QueueLiveWorldLockedLabelEntry),
                              int (*)(std::uint16_t*)>);
 static_assert(std::is_same_v<decltype(&b::AdvanceLiveFloatingLabelQueue),
-                             void (*)(Battle_FloatingLabel*)>);
+                             void (*)(VS::Battle::FloatingLabel*)>);
 static_assert(std::is_same_v<decltype(&b::ReserveLiveFloatingLabel),
-                             Battle_FloatingLabel* (*)()>);
+                             VS::Battle::FloatingLabel* (*)()>);
 static_assert(
     std::is_same_v<decltype(&b::CompactLiveFloatingLabels), void (*)(int)>);
 static_assert(
@@ -47,9 +47,9 @@ TEST_CASE(
   if (reset == nullptr) return;
   f::State state;
   state.Populate();
-  Battle_floatingLabelCount = 31;
+  VS::Battle::floatingLabelCount = 31;
   reset();
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
   CHECK(f::Words(state.labels[0][31]) == f::LabelWords{});
 }
 
@@ -60,7 +60,7 @@ TEST_CASE("F00713 production module entry preserves its original zero result",
   f::State state;
   std::array<std::uint16_t, 3> position{11, 22, 33};
   CHECK(queue(position.data()) == 0);
-  CHECK(Battle_floatingLabelCount == 1);
+  CHECK(VS::Battle::floatingLabelCount == 1);
   CHECK(state.labels[0][0].position.vz == 33);
 }
 
@@ -79,9 +79,9 @@ TEST_CASE("F00734 production module entry returns its real reserved slot",
   const auto reserve = Entry(0x800962E4, &b::ReserveLiveFloatingLabel);
   if (reserve == nullptr) return;
   f::State state;
-  Battle_floatingLabelCount = 31;
+  VS::Battle::floatingLabelCount = 31;
   CHECK(reserve() == &state.labels[0][31]);
-  CHECK(Battle_floatingLabelCount == 31);
+  CHECK(VS::Battle::floatingLabelCount == 31);
 }
 
 TEST_CASE("F00735 production module entry rescans shifted inactive slots",
@@ -89,9 +89,9 @@ TEST_CASE("F00735 production module entry rescans shifted inactive slots",
   const auto compact = Entry(0x8009639C, &b::CompactLiveFloatingLabels);
   if (compact == nullptr) return;
   f::State state;
-  Battle_floatingLabelCount = 2;
+  VS::Battle::floatingLabelCount = 2;
   compact(2);
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
 }
 
 TEST_CASE("F00736 production module entry clears its vacated tail",
@@ -100,9 +100,9 @@ TEST_CASE("F00736 production module entry clears its vacated tail",
   if (remove == nullptr) return;
   f::State state;
   state.Populate();
-  Battle_floatingLabelCount = 1;
+  VS::Battle::floatingLabelCount = 1;
   remove(0);
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
   CHECK(f::Words(state.labels[0][0]) == f::LabelWords{});
 }
 
@@ -110,8 +110,8 @@ TEST_CASE("Ordinary module-data copying does not invent a label queue reset",
           "[floating-label-queue-module][F00712]") {
   f::State state;
   state.Populate();
-  Battle_floatingLabelCount = 2;
-  Battle_actorMarkersHidden = 123;
+  VS::Battle::floatingLabelCount = 2;
+  VS::Battle::actorMarkersHidden = 123;
   const auto before = f::Words(state.labels[0][0]);
   std::array<unsigned char, 4> source{1, 2, 3, 4};
   std::array<unsigned char, 4> target{};
@@ -119,8 +119,8 @@ TEST_CASE("Ordinary module-data copying does not invent a label queue reset",
                                            target.data(), 4};
   REQUIRE(VS::Content::CopyModuleDataEntry(entry, source));
   CHECK(target == source);
-  CHECK(Battle_floatingLabelCount == 2);
-  CHECK(Battle_actorMarkersHidden == 123);
+  CHECK(VS::Battle::floatingLabelCount == 2);
+  CHECK(VS::Battle::actorMarkersHidden == 123);
   CHECK(f::Words(state.labels[0][0]) == before);
 }
 
@@ -134,10 +134,10 @@ TEST_CASE("Production module saturation retains32 then explicit reset reopens",
     std::array<std::uint16_t, 3> position{value, 22, 33};
     REQUIRE(queue(position.data()) == 0);
   }
-  CHECK(Battle_floatingLabelCount == 32);
+  CHECK(VS::Battle::floatingLabelCount == 32);
   CHECK(state.labels[0][0].position.vx == 16);
   CHECK(state.labels[0][31].position.vx == 47);
   reset();
-  CHECK(Battle_floatingLabelCount == 0);
+  CHECK(VS::Battle::floatingLabelCount == 0);
   CHECK(f::Words(state.labels[0][31]) == f::LabelWords{});
 }

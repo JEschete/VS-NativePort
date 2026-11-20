@@ -18,7 +18,7 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/StringTables.hpp"
@@ -185,7 +185,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
       static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   runtime.freeze_tabs = VS::Menu::Inventory::freezeTabArrows;
   runtime.restrictions = VS::Menu::Framework::actionRestrictions;
-  runtime.hud_slide_offset = Battle_hudSlideOffset;
+  runtime.hud_slide_offset = VS::Battle::hudSlideOffset;
 }
 void WriteRuntime(const TerminalRuntime& runtime) {
   VS::Menu::Framework::menuMemory.inventory_cursors = runtime.cursor;
@@ -219,7 +219,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
       static_cast<char>(runtime.cursor_memory_enabled);
   VS::Menu::Inventory::freezeTabArrows = runtime.freeze_tabs;
   VS::Menu::Framework::actionRestrictions = runtime.restrictions;
-  Battle_hudSlideOffset = runtime.hud_slide_offset;
+  VS::Battle::hudSlideOffset = runtime.hud_slide_offset;
 }
 
 class CallGuard {

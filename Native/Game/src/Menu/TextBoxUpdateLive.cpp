@@ -7,7 +7,7 @@
 #include <iterator>
 #include <span>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
@@ -84,7 +84,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
               static_cast<int>(kTextBoxOrderingTags));
   }
   bool TimerVisible() const override {
-    return Battle_lowerScreenUiState == kTimerVisible;
+    return VS::Battle::lowerScreenUiState == kTimerVisible;
   }
   void DrawTimer() override {
     Battle::DrawLivePuzzleTimer(&VS::State::sceneTimer);

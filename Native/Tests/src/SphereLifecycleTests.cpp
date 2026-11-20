@@ -5,10 +5,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycle.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
 namespace {
@@ -314,23 +314,23 @@ TEST_CASE("Sphere release entry frees the workspace and clears its pointer",
   std::array<std::byte, 65536> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   struct SpherePointerRestorer {
-    Battle_TargetSphereSetupView* saved = Battle_targetSphere;
-    ~SpherePointerRestorer() { Battle_targetSphere = saved; }
+    Battle_TargetSphereSetupView* saved = VS::Battle::targetSphere;
+    ~SpherePointerRestorer() { VS::Battle::targetSphere = saved; }
   } restore;
   auto* sphere = static_cast<Battle_TargetSphereSetupView*>(
       VS::Core::Memory::AllocateLiveFromLowEnd(
           sizeof(Battle_TargetSphereSetupView)));
   REQUIRE(sphere != nullptr);
-  Battle_targetSphere = sphere;
+  VS::Battle::targetSphere = sphere;
   VS::Battle::FreeSphereEntry();
-  CHECK(Battle_targetSphere == nullptr);
+  CHECK(VS::Battle::targetSphere == nullptr);
   CHECK(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(*sphere)) == sphere);
 }
 
 TEST_CASE("Live sphere volume binding preserves pointer and reuse asymmetries",
           "[battle][sphere][lifecycle]") {
   Battle_TargetSphereSetupView sphere{};
-  Battle_TargetPreview previews[2]{};
+  VS::Battle::TargetPreview previews[2]{};
   auto primary = LegacySpec(kPrimary);
   sphere.targetList1 = previews;
   sphere.secondaryVolume = LegacySpec(kPrimary);
@@ -350,7 +350,7 @@ TEST_CASE("Live sphere volume binding preserves pointer and reuse asymmetries",
 TEST_CASE("Live sphere binding updates the secondary preview only on set",
           "[battle][sphere][lifecycle]") {
   Battle_TargetSphereSetupView sphere{};
-  Battle_TargetPreview previews[2]{};
+  VS::Battle::TargetPreview previews[2]{};
   auto primary = LegacySpec(kPrimary);
   auto secondary = LegacySpec(kSecondary);
   std::uint8_t reuse = 0;
@@ -365,7 +365,7 @@ TEST_CASE("Live sphere binding updates the secondary preview only on set",
 TEST_CASE("Live sphere volume reuse leaves mode and preview pointer unchanged",
           "[battle][sphere][lifecycle]") {
   Battle_TargetSphereSetupView sphere{};
-  Battle_TargetPreview previews[2]{};
+  VS::Battle::TargetPreview previews[2]{};
   auto primary = LegacySpec(kPrimary);
   auto secondary = LegacySpec(kSecondary);
   sphere.targetList1 = previews;
@@ -417,7 +417,7 @@ TEST_CASE("Live sphere interaction query honors lock, override and transition",
 TEST_CASE("Live sphere volume binding preserves null secondary bytes",
           "[battle][sphere][lifecycle]") {
   Battle_TargetSphereSetupView sphere{};
-  Battle_TargetPreview previous{};
+  VS::Battle::TargetPreview previous{};
   auto primary = LegacySpec(kPrimary);
   auto secondary = LegacySpec(kSecondary);
   sphere.targetList1 = &previous;

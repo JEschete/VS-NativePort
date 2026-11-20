@@ -133,7 +133,7 @@ TEST_CASE("F01295 shape aliases observe the temporary wrapped pitch byte",
 TEST_CASE("F01295 unused point and sphere owners remain lazy",
           "[sphere-containment-live][F01295]") {
   f::State state;
-  Battle_targetSphere = nullptr;
+  VS::Battle::targetSphere = nullptr;
   auto volume = f::Volume(129);
   const auto saved = f::Bytes(volume);
   CHECK(b::IsLivePointInTargetVolume(&volume, {}) == 0);

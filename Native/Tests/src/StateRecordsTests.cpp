@@ -10,9 +10,9 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Core/RandomLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -96,7 +96,7 @@ struct LiveTimerState {
   VS::State::SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_tick_speed = VS::State::tickSpeed;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
-  char saved_hud = Battle_lowerScreenUiState;
+  char saved_hud = VS::Battle::lowerScreenUiState;
   unsigned saved_random = VS::Core::BiosRand().State();
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   std::uint8_t saved_phase = VS::Event::playbackPhase;
@@ -113,7 +113,7 @@ struct LiveTimerState {
     VS::State::sceneTimer = saved_timer;
     VS::State::tickSpeed = saved_tick_speed;
     VS::State::stateFlags = saved_flags;
-    Battle_lowerScreenUiState = saved_hud;
+    VS::Battle::lowerScreenUiState = saved_hud;
     VS::Core::SeedBiosRand(saved_random);
     VS::Event::PublishLiveRoomScriptSections(saved_room);
     VS::Event::playbackPhase = saved_phase;
@@ -162,7 +162,7 @@ struct LiveTimerExpiry {
 // test.
 struct LiveScoreState {
   VS::State::ScoreData saved_score = VS::State::scoreData;
-  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
   Battle_Actor* saved_player = Battle_characterState;
 
   LiveScoreState() = default;
@@ -172,7 +172,7 @@ struct LiveScoreState {
   LiveScoreState& operator=(LiveScoreState&&) = delete;
   ~LiveScoreState() {
     VS::State::scoreData = saved_score;
-    Battle_actionState = saved_action;
+    VS::Battle::actionState = saved_action;
     Battle_characterState = saved_player;
   }
 };
@@ -586,14 +586,14 @@ TEST_CASE("Live script flags read and write the flag record by halfword id",
 TEST_CASE("Starting a live scene timer updates its record and HUD",
           "[state-boot]") {
   LiveTimerState saved;
-  Battle_lowerScreenUiState = 0;
+  VS::Battle::lowerScreenUiState = 0;
   VS::State::StartLiveSceneTimer(kCountDown, 3, 0x0104);
   CHECK(VS::State::sceneTimer.mode == kCountDown);
   CHECK(VS::State::sceneTimer.reset_scope == 3);
   CHECK(VS::State::sceneTimer.time.frames == 4);
   CHECK(VS::State::sceneTimer.time.seconds == 1);
   CHECK(VS::State::LiveScriptFlag(state::kSceneTimerSecondsFlag) == 1);
-  CHECK(Battle_lowerScreenUiState == 1);
+  CHECK(VS::Battle::lowerScreenUiState == 1);
 
   CHECK(VS::State::SetLiveTickSpeed(state::kNormalTickSpeed) ==
         state::kNormalTickSpeed);
@@ -609,11 +609,11 @@ TEST_CASE("Pausing a live scene timer stores its mode and resume restores it",
       .paused_mode = kCountDown,
       .reset_scope = 3,
       .time = {.frames = 4, .seconds = 1, .minutes = 0, .hours = 0}};
-  Battle_lowerScreenUiState = 1;
+  VS::Battle::lowerScreenUiState = 1;
   VS::State::SetLiveSceneTimerPaused(1);
   CHECK(VS::State::sceneTimer.mode == state::kSceneTimerStopped);
   CHECK(VS::State::sceneTimer.paused_mode == kCountDown);
-  CHECK(Battle_lowerScreenUiState == 0);
+  CHECK(VS::Battle::lowerScreenUiState == 0);
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
   CHECK(VS::State::sceneTimer.time.frames == 4);
   VS::State::SetLiveSceneTimerPaused(0);
@@ -628,14 +628,14 @@ TEST_CASE("Resetting a live timer clears time and keeps pause state",
       .paused_mode = kCountDown,
       .reset_scope = 3,
       .time = {.frames = 4, .seconds = 1, .minutes = 0, .hours = 0}};
-  Battle_lowerScreenUiState = 1;
+  VS::Battle::lowerScreenUiState = 1;
   VS::State::ResetLiveSceneTimer();
   CHECK(VS::State::sceneTimer.mode == state::kSceneTimerStopped);
   CHECK(VS::State::sceneTimer.paused_mode == kCountDown);
   CHECK(VS::State::sceneTimer.reset_scope == 3);
   CHECK(VS::State::sceneTimer.time.frames == 0);
   CHECK(VS::State::sceneTimer.time.seconds == 0);
-  CHECK(Battle_lowerScreenUiState == 0);
+  CHECK(VS::Battle::lowerScreenUiState == 0);
 }
 
 TEST_CASE("An ended live countdown evaluates the room expiry triggers",
@@ -734,10 +734,10 @@ TEST_CASE("The live weapon kill streak reads the action and the player",
   ChannelWarnings warnings("state");
   VS::State::StoreLiveKillScore(KillScore{});
 
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   VS::State::UpdateLiveWeaponKillStreak(0);
   Battle_ActionState action{};
-  Battle_actionState = &action;
+  VS::Battle::actionState = &action;
   Battle_characterState = nullptr;
   action.selection.actionId = 50;
   VS::State::UpdateLiveWeaponKillStreak(0);
@@ -780,7 +780,7 @@ TEST_CASE("Committing a spell ends the live weapon kill streak only",
   // The kept blade category lets the next weapon kill extend from zero.
   Battle_ActionState action{};
   action.selection.actionId = 5;
-  Battle_actionState = &action;
+  VS::Battle::actionState = &action;
   Battle_ActorStats stats{};
   stats.weapon.blade.category = 2;
   Battle_Actor player{};

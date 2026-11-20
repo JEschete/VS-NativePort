@@ -28,7 +28,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
@@ -40,8 +40,7 @@ struct CleanupFixture {
       std::to_array(Battle_actors);
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Battle_actorMarkers)) saved_markers =
-      std::to_array(Battle_actorMarkers);
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
@@ -85,7 +84,8 @@ struct CleanupFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
-    std::copy(saved_markers.begin(), saved_markers.end(), Battle_actorMarkers);
+    std::copy(saved_markers.begin(), saved_markers.end(),
+              VS::Battle::actorMarkers.begin());
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Battle::Ai::arenaOrbit = saved_orbit;
@@ -267,12 +267,12 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(1);
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(state));
-  Battle_actorMarkers[2] = 0x47;
+  VS::Battle::actorMarkers[2] = 0x47;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(fixture.room.engaged_count == 0);
   CHECK(fixture.room.engaged_head == nullptr);
   CHECK(fixture.room.engaged_tail == nullptr);
-  CHECK(Battle_actorMarkers[2] == 0);
+  CHECK(VS::Battle::actorMarkers[2] == 0);
   CHECK(fixture.actors[1].commandFlags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(VS::Core::Memory::GameHeap().Empty());

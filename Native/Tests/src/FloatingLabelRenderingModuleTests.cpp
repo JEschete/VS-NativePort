@@ -36,8 +36,8 @@ Function Resolve(std::uint32_t address, Function expected) {
   return matches ? reinterpret_cast<Function>(target) : nullptr;
 }
 
-using LabelDraw = void (*)(int, int, Battle_FloatingLabel*);
-using CaptionDraw = int (*)(int, int, Battle_FloatingLabel*);
+using LabelDraw = void (*)(int, int, VS::Battle::FloatingLabel*);
+using CaptionDraw = int (*)(int, int, VS::Battle::FloatingLabel*);
 using MarkerDraw = void (*)(int, int, int);
 static_assert(
     std::is_same_v<decltype(&b::DrawLiveValueLabelCaption), CaptionDraw>);
@@ -57,7 +57,7 @@ TEST_CASE("F00723 module callback retains the integer caption-width ABI",
   constexpr int kCaptionWidth = 14;
   f::ProductionTables tables;
   f::LiveFrame frame;
-  frame.labels.front().colorFlags = kCaptionMode;
+  frame.labels.front().color_flags = kCaptionMode;
   const auto entry = Resolve(kCaptionEntry, &b::DrawLiveValueLabelCaption);
   if (entry == nullptr) return;
   CHECK(entry(kX, kY, &frame.labels.front()) == kCaptionWidth);
@@ -139,6 +139,6 @@ TEST_CASE(
   b::DrawLiveAbilityTimingResult(kX, kY, &label);
   CHECK(frame.Traversal(f::kTextBucket) == baseline);
   CHECK(f::Words(label) == before);
-  CHECK(Battle_floatingLabelCount == 1);
+  CHECK(VS::Battle::floatingLabelCount == 1);
   CHECK(tables.OwnerCount() == kFontAndAtlasOwners);
 }

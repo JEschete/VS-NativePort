@@ -14,10 +14,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -505,18 +505,18 @@ struct PreviewFixture {
   decltype(VS::Battle::hitFunctions) saved_hits = VS::Battle::hitFunctions;
   decltype(std::to_array(Battle_statCalculators)) saved_stats =
       std::to_array(Battle_statCalculators);
-  decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
-      std::to_array(Battle_actionEffectMediators);
-  Battle_ActionState* saved_state = Battle_actionState;
+  decltype(VS::Battle::actionEffectMediators) saved_effects =
+      VS::Battle::actionEffectMediators;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   std::uint32_t saved_last = Battle_lastActionStatValue;
-  std::uint32_t saved_prerequisite = Battle_hitPrerequisiteResult;
-  std::uint32_t saved_previous = Battle_previousHitResult;
+  std::uint32_t saved_prerequisite = VS::Battle::hitPrerequisiteResult;
+  std::uint32_t saved_previous = VS::Battle::previousHitResult;
   Battle_ActionState state{};
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_ActorStats, 2> stats{};
   PreviewFixture() {
     std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
-    Battle_actionState = &state;
+    VS::Battle::actionState = &state;
     state.chainStep = 1;
     for (std::size_t i = 0; i < actors.size(); ++i) {
       Battle_actors[i] = &actors.at(i);
@@ -535,11 +535,11 @@ struct PreviewFixture {
               VS::Battle::hitFunctions.begin());
     std::copy(saved_stats.begin(), saved_stats.end(), Battle_statCalculators);
     std::copy(saved_effects.begin(), saved_effects.end(),
-              Battle_actionEffectMediators);
-    Battle_actionState = saved_state;
+              VS::Battle::actionEffectMediators.begin());
+    VS::Battle::actionState = saved_state;
     Battle_lastActionStatValue = saved_last;
-    Battle_hitPrerequisiteResult = saved_prerequisite;
-    Battle_previousHitResult = saved_previous;
+    VS::Battle::hitPrerequisiteResult = saved_prerequisite;
+    VS::Battle::previousHitResult = saved_previous;
   }
   static std::vector<std::uint8_t> Module(const char* path) {
     std::ifstream stream(path, std::ios::binary);
@@ -563,7 +563,8 @@ struct PreviewFixture {
     const auto battle = Module("Native\\data\\disc\\BATTLE\\BATTLE.PRG");
     Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), battle);
     Relocate(reinterpret_cast<void**>(Battle_statCalculators), battle);
-    Relocate(reinterpret_cast<void**>(Battle_actionEffectMediators), battle);
+    Relocate(reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
+             battle);
   }
   void SelfRoute(int action) {
     stats[0].limbs[0].chainEvasion = 51;
@@ -591,8 +592,8 @@ TEST_CASE(
                                                nullptr, &output)
             : b::PreviewLiveActionAgainstLimb(action, 0, 1, 4, &output);
   CHECK(affordable == 0x01000000);
-  CHECK(output.primaryTarget.target.targetLimb == 0);
-  CHECK(output.primaryTarget.target.hitThreshold == 80);
+  CHECK(output.primaryTarget.target.target_limb == 0);
+  CHECK(output.primaryTarget.target.hit_threshold == 80);
   CHECK(std::bit_cast<b::ActionPoint>(output.focusPosition) ==
         b::ActionPoint{});
   CHECK(output.targetCount == (actor ? 0 : 1));
@@ -615,7 +616,7 @@ TEST_CASE("Actual trap definitions support world sources without origin union",
   source.primaryTarget.targetsPosition = 3;
   source.primaryTarget.target.hp = 123;
   source.targetCount = 1;
-  source.targets[0].target.targetActor = 1;
+  source.targets[0].target.target_actor = 1;
   b::ResolveLiveActionTargets(action, &result, &source, 0);
   CHECK(result.primaryTarget.targetsPosition == 3);
   CHECK(result.primaryTarget.target.hp == 0);
@@ -632,29 +633,29 @@ TEST_CASE(
   definition.hits[0].hitFunctionId = 7;
   definition.hits[0].effectId = 1;
   VS::Battle::hitFunctions[7] = &b::LiveChainHitChance;
-  Battle_actionEffectMediators[1] =
+  VS::Battle::actionEffectMediators[1] =
       +[](Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult* target,
           int, int) {
-        target->target.targetActor = 0;
-        target->target.targetLimb = 5;
+        target->target.target_actor = 0;
+        target->target.target_limb = 5;
         target->target.hp = 10;
         Battle_actors[1]->stats = Battle_actors[0]->stats;
-        Battle_actionState->queueIndex = 0;
-        Battle_actionState->queue[0].targetCount = 1;
-        Battle_actionState->queue[0].targets[254].target.hp = 321;
+        VS::Battle::actionState->queueIndex = 0;
+        VS::Battle::actionState->queue[0].targetCount = 1;
+        VS::Battle::actionState->queue[0].targets[254].target.hp = 321;
       };
   f.stats[1].cancelsHitResults = 1;
   f.actors[0].roomSpawnIndex = 128;
   auto& source = f.state.selection;
   auto& result = f.state.queue[0];
   source.targetCount = 2;
-  source.targets[0].target.targetActor = 1;
+  source.targets[0].target.target_actor = 1;
   b::ResolveLiveActionTargets(kAction, &result, &source, 1);
   CHECK(result.targetCount == 1);
-  CHECK(result.targets[0].target.targetActor == 0);
-  CHECK(result.targets[0].target.targetLimb == 5);
+  CHECK(result.targets[0].target.target_actor == 0);
+  CHECK(result.targets[0].target.target_limb == 5);
   CHECK(result.targets[0].target.hp == 0);
-  CHECK(result.targets[0].target.impactKind == 4);
+  CHECK(result.targets[0].target.impact_kind == 4);
   CHECK(result.targets[254].target.hp == 321);
   CHECK(std::bit_cast<b::ActionRequest>(source) ==
         std::bit_cast<b::ActionRequest>(result));

@@ -17,9 +17,9 @@
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Content/ModuleData.hpp"
 #include "Render/ModelGeometryLive.hpp"
 namespace {
@@ -38,12 +38,12 @@ struct LiveFixture {
       std::to_array(Actors_actorRecords);
   MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   void* saved_work_bank = VS::Actors::sequenceWorkBuffer;
-  int saved_side = Battle_chainAbilityAnimationSide;
-  char saved_pitch = Battle_specialActionPitch;
+  int saved_side = VS::Battle::chainAbilityAnimationSide;
+  char saved_pitch = VS::Battle::specialActionPitch;
   char saved_clip = VS::Actors::lastResolvedSequenceIndex;
-  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
   Battle_ActionState action{};
-  u_char saved_group = Battle_chainAbilityAnimationGroups[kAbility];
+  u_char saved_group = VS::Battle::chainAbilityAnimationGroups[kAbility];
   Model model{};
   std::array<std::uint32_t, 1024> sequence{};
   Actors_ActorRecord actor{};
@@ -87,10 +87,10 @@ struct LiveFixture {
       VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
       actor.boneMatrices[0].m[axis][axis] = 4096;
     }
-    Battle_chainAbilityAnimationGroups[kAbility] = 2;
-    Battle_chainAbilityAnimationSide = 0;
-    Battle_specialActionPitch = 2;
-    Battle_actionState = &action;
+    VS::Battle::chainAbilityAnimationGroups[kAbility] = 2;
+    VS::Battle::chainAbilityAnimationSide = 0;
+    VS::Battle::specialActionPitch = 2;
+    VS::Battle::actionState = &action;
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
@@ -101,10 +101,10 @@ struct LiveFixture {
     VS::Actors::boneMatrixScratch = saved_bone_camera;
     VS::Actors::sequenceWorkBuffer = saved_work_bank;
     VS::Actors::lastResolvedSequenceIndex = saved_clip;
-    Battle_chainAbilityAnimationGroups[kAbility] = saved_group;
-    Battle_chainAbilityAnimationSide = saved_side;
-    Battle_specialActionPitch = saved_pitch;
-    Battle_actionState = saved_action;
+    VS::Battle::chainAbilityAnimationGroups[kAbility] = saved_group;
+    VS::Battle::chainAbilityAnimationSide = saved_side;
+    VS::Battle::specialActionPitch = saved_pitch;
+    VS::Battle::actionState = saved_action;
   }
   VS::Actors::SeqAnimationBank* Bank() {
     return reinterpret_cast<VS::Actors::SeqAnimationBank*>(sequence.data());
@@ -244,10 +244,10 @@ TEST_CASE(
     "head",
     "[action-animations][F00831][actors-animation]") {
   auto fixture = std::make_unique<LiveFixture>();
-  Battle_chainAbilityAnimationSide = -2;
+  VS::Battle::chainAbilityAnimationSide = -2;
   SVECTOR point{1024, 0, 0, 77};
   b::PlayLiveChainAbilityAnimation(kSlot, &point, kAbility, 0x10001);
-  CHECK(Battle_chainAbilityAnimationSide == -1);
+  CHECK(VS::Battle::chainAbilityAnimationSide == -1);
   CHECK(fixture->actor.animationId == 215);
   CHECK(fixture->actor.instance.facingDelta == -1024);
   CHECK(fixture->actor.instance.turnFrames == 10);
@@ -277,7 +277,7 @@ TEST_CASE(
   fixture->actor.boneMatrices[0].t[1] = 800;
   SVECTOR point{1024, 400, 0, 77};
   b::PlayLiveSpecialActionAnimation(kSlot, &point, 1);
-  CHECK(Battle_specialActionPitch == 0);
+  CHECK(VS::Battle::specialActionPitch == 0);
   CHECK(fixture->actor.animationId == 0xFF);
   CHECK(fixture->actor.instance.turnFrames == 777);
   CHECK(fixture->actor.instance.facingDelta == 333);
@@ -297,7 +297,7 @@ TEST_CASE(
   CHECK(fixture->actor.animationId == 0x4A);
   CHECK(fixture->actor.instance.turnFrames == 20);
   CHECK(fixture->actor.headTracking.pad == 20);
-  CHECK(Battle_specialActionPitch == 2);
+  CHECK(VS::Battle::specialActionPitch == 2);
   CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 

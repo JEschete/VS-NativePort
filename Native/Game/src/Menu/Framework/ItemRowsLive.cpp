@@ -11,7 +11,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
@@ -302,11 +302,11 @@ Render::EncodedTextArguments LiveItemRowsHost::TextArguments() {
 
 void LiveItemRowsHost::SetStringArgument(std::size_t slot,
                                          std::span<const std::uint8_t> text) {
-  if (slot >= std::size(Battle_stringContext.strings)) {
+  if (slot >= std::size(VS::Battle::stringContext.strings)) {
     Warn("item rows: a string argument past the string context");
     return;
   }
-  Battle_stringContext.strings[slot] =
+  VS::Battle::stringContext.strings[slot] =
       reinterpret_cast<char*>(const_cast<std::uint8_t*>(text.data()));
 }
 

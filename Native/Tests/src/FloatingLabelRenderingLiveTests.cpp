@@ -44,8 +44,8 @@ TEST_CASE("F00723 Live reads its original atlas and preserves untouched words",
   f::ProductionTables tables;
   f::LiveFrame frame;
   auto& label = frame.labels.front();
-  label.colorFlags = kCaptionMode;
-  label.textLength = kDigits;
+  label.color_flags = kCaptionMode;
+  label.text_length = kDigits;
   const auto before = f::Words(label);
   CHECK(b::DrawLiveValueLabelCaption(kX, kY, &label) == kWidth);
   const auto packets = frame.Traversal(f::kQuadBucket);
@@ -149,9 +149,9 @@ TEST_CASE("F00741 Live cue is modulated opaque geometry with no timer mutation",
   constexpr std::uint32_t kCueOrigin = 0x00440059;
   constexpr std::uint32_t kCueUv = 0x377C00C0;
   f::LiveFrame frame;
-  Battle_abilityTimingCuePosition = {kX, kY, -1, -2};
+  VS::Battle::abilityTimingCuePosition = {kX, kY, -1, -2};
   const auto cue = std::bit_cast<std::array<std::uint32_t, 2>>(
-      Battle_abilityTimingCuePosition);
+      VS::Battle::abilityTimingCuePosition);
   b::DrawLiveAbilityTimingCue();
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == 1);
@@ -159,7 +159,7 @@ TEST_CASE("F00741 Live cue is modulated opaque geometry with no timer mutation",
   CHECK(packets.front().at(kPositionWord) == kCueOrigin);
   CHECK(packets.front().at(kTextureWord) == kCueUv);
   CHECK(std::bit_cast<std::array<std::uint32_t, 2>>(
-            Battle_abilityTimingCuePosition) == cue);
+            VS::Battle::abilityTimingCuePosition) == cue);
 }
 
 TEST_CASE("Real renderer consumes the timing-cue packet into actual pixels",
@@ -178,7 +178,7 @@ TEST_CASE("Real renderer consumes the timing-cue packet into actual pixels",
   pages.Upload(kTexels, texels.data());
   pages.Upload(kPalette, palette.data());
   f::LiveFrame frame;
-  Battle_abilityTimingCuePosition = {kX, kY, 0, 0};
+  VS::Battle::abilityTimingCuePosition = {kX, kY, 0, 0};
   b::DrawLiveAbilityTimingCue();
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == 1);
@@ -197,8 +197,8 @@ TEST_CASE("F00722 dependency draws digits after the promoted F00723 caption",
   f::ProductionTables tables;
   f::LiveFrame frame;
   auto& label = frame.labels.front();
-  label.colorFlags = kCaptionMode;
-  label.textLength = 1;
+  label.color_flags = kCaptionMode;
+  label.text_length = 1;
   label.text[0] = kOne;
   const auto before = f::Words(label);
   b::LiveDrawActorValueLabel(kX, kY, &label);
@@ -216,7 +216,7 @@ TEST_CASE("F00725 dependency submits removal marker before its status caption",
   f::ProductionTables tables;
   f::LiveFrame frame;
   auto& label = frame.labels.front();
-  label.colorFlags = 1;
+  label.color_flags = 1;
   label.frame = kMarkerFrame;
   const auto before = f::Words(label);
   b::LiveDrawActorStatusLabel(kX, kY, &label);
@@ -231,12 +231,12 @@ TEST_CASE("F00719 dependency decrements cue timing before the F00741 leaf",
           "[floating-label-rendering-live][F00741]") {
   constexpr std::uint32_t kCueCommand = 0x2C2040F0;
   f::LiveFrame frame;
-  Battle_floatingLabelCount = 0;
-  Battle_abilityTimingCueFrames = 1;
+  VS::Battle::floatingLabelCount = 0;
+  VS::Battle::abilityTimingCueFrames = 1;
   b::LiveUpdateAndDrawFloatingLabels();
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == 1);
-  CHECK(Battle_abilityTimingCueFrames == 0);
+  CHECK(VS::Battle::abilityTimingCueFrames == 0);
   CHECK(Command(packets.front()) == kCueCommand);
 }
 

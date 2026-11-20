@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <span>
 
 #include "Actors/ActorMotionLive.hpp"
@@ -27,13 +28,13 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionExecution.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingDrawLive.hpp"
@@ -81,7 +82,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   Actors_ActorRecord actor = {0};
   Actors_ActorRecord* saved_actor = Actors_actorRecords[kActorId];
   const char saved_index = VS::Actors::lastResolvedSequenceIndex;
-  const char saved_pitch = Battle_specialActionPitch;
+  const std::int8_t saved_pitch = VS::Battle::specialActionPitch;
   bank->animation_map = kMapOffset;
   memset(reinterpret_cast<u_char*>(file) + kMapOffset, available ? 0 : 0xFF,
          kMapEntries);
@@ -96,7 +97,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   actor.sharedSequences[3] = bank;
   actor.animationId = 0xC6;
   Actors_actorRecords[kActorId] = &actor;
-  Battle_specialActionPitch = 2;
+  VS::Battle::specialActionPitch = 2;
   VS::Actors::RegisterSequenceBank(bank, sizeof file);
   if (consumer == 0) {
     VS::Battle::PlayLiveSpecialActionAnimation(kActorId, nullptr, mode);
@@ -110,7 +111,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   int passed = actor.animationLocked == 1 && actor.animationId == 0xC6;
   if (consumer < 2) {
     const int executing = mode == 1 && available;
-    passed &= Battle_specialActionPitch == (executing ? 1 : 2);
+    passed &= VS::Battle::specialActionPitch == (executing ? 1 : 2);
     passed &= actor.headTracking.pad == (executing ? 0 : 30);
     passed &= actor.instance.turnFrames == (executing ? 0 : 10);
     passed &= actor.queuedAnimation ==
@@ -121,7 +122,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   }
   Actors_actorRecords[kActorId] = saved_actor;
   VS::Actors::lastResolvedSequenceIndex = saved_index;
-  Battle_specialActionPitch = saved_pitch;
+  VS::Battle::specialActionPitch = saved_pitch;
   VS::Actors::ForgetSequenceBanks(bank, sizeof file);
   return passed;
 }
@@ -419,13 +420,13 @@ int TestAnimationEventUnwind(int scenario) {
 
 int Tests_ActionCameraRecovery(void) {
   Battle_ActionState state = {0};
-  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
   const VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   const int saved_projection = VS::Render::projectionDistance;
   const int saved_ease = VS::Battle::cameraEaseMode;
   const int saved_distance = VS::Battle::settledCameraDistance;
   state.preferredCameraDistance = 2304;
-  Battle_actionState = &state;
+  VS::Battle::actionState = &state;
   VS::Field::sphericalCamera.motion.zoom_mode = 1;
   VS::Field::sphericalCamera.values.distance = 1536;
   VS::Render::projectionDistance = 640;
@@ -434,7 +435,7 @@ int Tests_ActionCameraRecovery(void) {
   VS::Battle::FinishLiveActionSequence();
   const int passed = VS::Render::projectionDistance == 576 &&
                      VS::Field::sphericalCamera.values.distance == 1728;
-  Battle_actionState = saved_action;
+  VS::Battle::actionState = saved_action;
   VS::Field::sphericalCamera = saved_camera;
   VS::Render::projectionDistance = saved_projection;
   VS::Battle::cameraEaseMode = saved_ease;
@@ -468,7 +469,7 @@ int Tests_SparseIdlePoseReset(void) {
 }
 
 int Tests_TargetLabelStride(void) {
-  Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
+  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   Battle_TargetSphere sphere = {0};
   char text[] = "Target";
   for (unsigned index = 0; index < 24; ++index) {
@@ -477,7 +478,7 @@ int Tests_TargetLabelStride(void) {
     sphere.labels[index].text = text;
     sphere.labels[index].worldPosition = (SVECTOR){10, 20, 30, 0};
   }
-  Battle_targetSphere =
+  VS::Battle::targetSphere =
       reinterpret_cast<Battle_TargetSphereSetupView*>(&sphere);
   VS::Battle::UpdateSphereTargetLabelsEntry();
   int passed = VS::Battle::AreTargetLabelsSettledEntry() == 1;
@@ -487,7 +488,7 @@ int Tests_TargetLabelStride(void) {
              sphere.labels[index].text == text &&
              sphere.labels[index].worldPosition.vy == 20;
   }
-  Battle_targetSphere = saved_sphere;
+  VS::Battle::targetSphere = saved_sphere;
   return passed;
 }
 
@@ -497,7 +498,7 @@ int Tests_TargetSphereWireframe(void) {
   const VS::Render::FrameScratch saved_frame = *frame;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   const int saved_frame_buffer = VS::Render::frameBuf;
-  Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
+  Battle_TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
   Battle_TargetSphere sphere = {0};
   Battle_TargetVolume volume = {0};
   u_long ordering[0x822];
@@ -518,7 +519,7 @@ int Tests_TargetSphereWireframe(void) {
   ClearOTagR(ordering, 0x822);
   frame->ordering_table = ordering;
   frame->primitive_cursor = packets + 1;
-  Battle_targetSphere =
+  VS::Battle::targetSphere =
       reinterpret_cast<Battle_TargetSphereSetupView*>(&sphere);
   sphere.depth = 128;
   sphere.vertexCount = 2;
@@ -540,7 +541,7 @@ int Tests_TargetSphereWireframe(void) {
   sphere.vertexCount = 0;
   VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitive_cursor == packets + 11;
-  Battle_targetSphere = saved_sphere;
+  VS::Battle::targetSphere = saved_sphere;
   VS::Render::legacyPrimitiveBuffers[0] = saved_primitives;
   VS::Render::frameBuf = saved_frame_buffer;
   *frame = saved_frame;

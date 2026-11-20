@@ -279,7 +279,7 @@ TEST_CASE("Status label restarts its frame lead past the limit",
 // labels before the producers ran.
 std::array<live::LabelWords, 32> ReplaceSharedLabels(live::State& state) {
   state.Populate();
-  Battle_floatingLabelCount = 30;
+  VS::Battle::floatingLabelCount = 30;
   state.labels[0][4].key.bytes[0] = static_cast<char>(kChainKind);
   state.labels[0][4].key.bytes[1] = 0;
   state.labels[0][7].key.bytes[0] = static_cast<char>(kTimingKind);
@@ -289,7 +289,7 @@ std::array<live::LabelWords, 32> ReplaceSharedLabels(live::State& state) {
   CHECK(b::LiveQueueChainCount(1500) == 0);
   CHECK(b::LiveQueueAbilityTimingResult(3) == 0);
   CHECK(b::LiveQueueAbilityTimingResult(4) == 0);
-  CHECK(Battle_floatingLabelCount == 30);
+  CHECK(VS::Battle::floatingLabelCount == 30);
   return before;
 }
 
@@ -310,27 +310,27 @@ TEST_CASE("Live chain and timing producers publish into the cleared tail",
   static_cast<void>(ReplaceSharedLabels(state));
   // Each removal clears the vacated tail record, which the replacement then
   // reserves, so only the producer's own fields are set.
-  Battle_FloatingLabel chain{};
+  VS::Battle::FloatingLabel chain{};
   chain.key.bytes[0] = static_cast<char>(kChainKind);
   chain.value = b::kMaxLabelValue;
   CHECK(live::Words(state.labels[0][28]) == live::Words(chain));
   const auto& timing_label = state.labels[0][29];
-  CHECK(timing_label.textLength <= b::kTimingJitterMask);
-  Battle_FloatingLabel timing{};
+  CHECK(timing_label.text_length <= b::kTimingJitterMask);
+  VS::Battle::FloatingLabel timing{};
   timing.key.bytes[0] = static_cast<char>(kTimingKind);
   timing.value = 4;
-  timing.textLength = timing_label.textLength;
+  timing.text_length = timing_label.text_length;
   CHECK(live::Words(timing_label) == live::Words(timing));
 }
 
 // A value label for actor 1, its status labels 0 and 4, then status label 6,
 // over a queue of two empty labels.
 void QueueActorLabels() {
-  Battle_floatingLabelCount = 2;
+  VS::Battle::floatingLabelCount = 2;
   CHECK(b::LiveQueueActorValueLabel(1, -1, 0x80000505U, 3) == 0);
   CHECK(b::LiveQueueActorStatusLabels(1, 0, 0x11, 2) == 0);
   CHECK(b::LiveQueueActorStatusLabel(1, 251, 6, 1) == 0);
-  CHECK(Battle_floatingLabelCount == 6);
+  CHECK(VS::Battle::floatingLabelCount == 6);
 }
 
 TEST_CASE("Live actor value producer clamps and prints its amount",
@@ -339,7 +339,7 @@ TEST_CASE("Live actor value producer clamps and prints its amount",
   live::Producers producers;
   QueueActorLabels();
   const auto& value = state.labels[0][2];
-  Battle_FloatingLabel expected{};
+  VS::Battle::FloatingLabel expected{};
   // The bone-relative position is covered by the F00714 differential.
   expected.position = value.position;
   expected.position.pad = 0;
@@ -348,10 +348,10 @@ TEST_CASE("Live actor value producer clamps and prints its amount",
   expected.limb = static_cast<std::uint8_t>(b::kTargetPointSelector);
   expected.value =
       static_cast<std::uint16_t>(b::kMaxLabelValue | b::kLabelNegativeBit);
-  expected.colorFlags = 3;
-  expected.textLength = 3;
-  expected.scaleX = b::kLabelUnitScale;
-  expected.scaleY = b::kLabelUnitScale;
+  expected.color_flags = 3;
+  expected.text_length = 3;
+  expected.scale_x = b::kLabelUnitScale;
+  expected.scale_y = b::kLabelUnitScale;
   constexpr std::array<signed char, 4> kText{'9', '9', '9', 0};
   std::ranges::copy(kText, std::begin(expected.text));
   CHECK(live::Words(value) == live::Words(expected));
@@ -364,14 +364,14 @@ struct StatusRow {
   std::uint16_t status;
 };
 
-Battle_FloatingLabel StatusLabel(const StatusRow& row) {
-  Battle_FloatingLabel label{};
+VS::Battle::FloatingLabel StatusLabel(const StatusRow& row) {
+  VS::Battle::FloatingLabel label{};
   label.position.pad = row.order;
   label.key.bytes[0] = static_cast<char>(kStatusKind);
   label.key.bytes[1] = 1;
   label.limb = static_cast<std::uint8_t>(b::kLabelAnchorTag);
-  label.colorFlags = row.color;
-  label.textLength = row.follow;
+  label.color_flags = row.color;
+  label.text_length = row.follow;
   label.value = row.status;
   return label;
 }

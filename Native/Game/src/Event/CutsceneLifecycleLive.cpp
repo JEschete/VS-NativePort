@@ -7,14 +7,14 @@
 #include "Audio/MusicLive.hpp"
 #include "Audio/SoundState.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -76,9 +76,9 @@ class LiveCutsceneHost final : public CutsceneHost {
   }
   void SetPreparation(CutscenePreparation preparation) override {
     VS::Field::controlMode = kFieldCutsceneMode;
-    Battle_actionFlowMode = preparation == CutscenePreparation::kPreparing
-                                ? kPreparingActionFlow
-                                : kWaitingActionFlow;
+    VS::Battle::actionFlowMode = preparation == CutscenePreparation::kPreparing
+                                     ? kPreparingActionFlow
+                                     : kWaitingActionFlow;
   }
   void SetFlag(int flag, std::uint8_t value) override {
     State::SetLiveScriptFlag(flag, value);

@@ -8,7 +8,7 @@
 #include <span>
 
 #include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/TargetVolume.h"
 
@@ -40,15 +40,15 @@ inline std::span<const std::uint16_t> FlagsPoint(
 
 class State {
  public:
-  State() : saved_(Battle_targetSphere) { Select(0); }
+  State() : saved_(VS::Battle::targetSphere) { Select(0); }
   State(const State&) = delete;
   State& operator=(const State&) = delete;
   State(State&&) = delete;
   State& operator=(State&&) = delete;
-  ~State() { Battle_targetSphere = saved_; }
+  ~State() { VS::Battle::targetSphere = saved_; }
 
   void Select(std::size_t owner) {
-    Battle_targetSphere =
+    VS::Battle::targetSphere =
         reinterpret_cast<Battle_TargetSphereSetupView*>(&spheres.at(owner));
   }
 

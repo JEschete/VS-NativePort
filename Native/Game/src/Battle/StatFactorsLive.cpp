@@ -6,7 +6,7 @@
 #include <type_traits>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -27,7 +27,7 @@ std::int16_t Checked(std::optional<std::int16_t> result) {
 }
 const Battle_ActorStats* StatsOf(const Battle_HitResult* hit) {
   if (hit == nullptr) return nullptr;
-  const auto slot = hit->target.targetActor;
+  const auto slot = hit->target.target_actor;
   if (slot >= std::size(Battle_actors) || Battle_actors[slot] == nullptr) {
     return nullptr;
   }
@@ -43,8 +43,8 @@ class LiveStatFactorWorld final : public StatFactorWorld {
                       const Battle_HitResult* target)
       : action_(action), source_(source), target_(target) {}
   std::optional<std::uint16_t> QueueIndex() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
-    return static_cast<std::uint16_t>(Battle_actionState->queueIndex);
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
+    return static_cast<std::uint16_t>(VS::Battle::actionState->queueIndex);
   }
   std::optional<std::uint8_t> Factor(int hit) override {
     if (action_ == nullptr || hit < 0 ||
@@ -54,9 +54,9 @@ class LiveStatFactorWorld final : public StatFactorWorld {
     return static_cast<std::uint8_t>(action_->hits[hit].statFactor);
   }
   std::optional<StatFactorHit> PreviousTarget() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
     // This fixed slot remains readable even when targetCount is zero.
-    return Amounts(Battle_actionState->selection.targets[0]);
+    return Amounts(VS::Battle::actionState->selection.targets[0]);
   }
   std::optional<StatFactorVital> SourceVital(
       StatFactorResource resource) override {
@@ -89,25 +89,25 @@ class LiveStatFactorWorld final : public StatFactorWorld {
     return stats ? std::optional{stats->shield.current_pp} : std::nullopt;
   }
   std::optional<std::uint8_t> SelectedActionCost() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
-    const auto id = Battle_actionState->selection.actionId;
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
+    const auto id = VS::Battle::actionState->selection.actionId;
     if (id >= std::size(Battle_actionDefinitions)) return std::nullopt;
     return Battle_actionDefinitions[id].cost;
   }
   std::optional<std::uint8_t> SelectedActionType() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
-    const auto id = Battle_actionState->selection.actionId;
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
+    const auto id = VS::Battle::actionState->selection.actionId;
     if (id >= std::size(Battle_actionDefinitions)) return std::nullopt;
     return static_cast<std::uint8_t>(Battle_actionDefinitions[id].type);
   }
   std::optional<std::uint8_t> PrimaryHpEffect() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
     return static_cast<std::uint8_t>(
-        Battle_actionState->selection.primaryTarget.hpEffect);
+        VS::Battle::actionState->selection.primaryTarget.hpEffect);
   }
   std::optional<StatFactorHit> PrimaryHit() override {
-    if (Battle_actionState == nullptr) return std::nullopt;
-    return Amounts(Battle_actionState->selection.primaryTarget);
+    if (VS::Battle::actionState == nullptr) return std::nullopt;
+    return Amounts(VS::Battle::actionState->selection.primaryTarget);
   }
 
  private:

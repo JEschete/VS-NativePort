@@ -29,7 +29,7 @@
 #include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
@@ -709,16 +709,16 @@ class LiveBlendHost final : public AnimationBlendHost {
 }  // namespace
 
 AnimationBankLimits LiveAnimationBankLimits(const Actors_ActorRecord& actor) {
-  return {
-      .bones = actor.instance.boneCount,
-      .slot = actor.instance.slot,
-      .model_id = actor.modelId,
-      .sequence_model_id = actor.sequenceModelId,
-      .common_entries = actor.sequenceFlags,
-      .battle_entries = actor.commonAnimationCount,
-      .special_entries = actor.battleAnimationCount,
-      .special_pitch = std::bit_cast<std::uint8_t>(Battle_specialActionPitch),
-      .shared_slot = VS::Actors::sharedSequenceBankIndex};
+  return {.bones = actor.instance.boneCount,
+          .slot = actor.instance.slot,
+          .model_id = actor.modelId,
+          .sequence_model_id = actor.sequenceModelId,
+          .common_entries = actor.sequenceFlags,
+          .battle_entries = actor.commonAnimationCount,
+          .special_entries = actor.battleAnimationCount,
+          .special_pitch =
+              std::bit_cast<std::uint8_t>(VS::Battle::specialActionPitch),
+          .shared_slot = VS::Actors::sharedSequenceBankIndex};
 }
 
 AnimationHeader FindLiveAnimationHeader(const Actors_ActorRecord& actor,

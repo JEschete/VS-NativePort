@@ -149,13 +149,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionAnimation.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\ActionAnimation.cpp" />
     <ClCompile Include="src\Battle\ActionAnimations.cpp" />
     <ClCompile Include="src\Battle\ActionAnimationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -173,20 +167,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\ActionExecution.cpp" />
-    <ClCompile Include="src\Battle\ActionFlow.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Battle\ActionMenu.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\ActionFlow.cpp" />
+    <ClCompile Include="src\Battle\ActionMenu.cpp" />
     <ClCompile Include="src\Battle\ActionOutcomes.cpp" />
     <ClCompile Include="src\Battle\ActionOutcomesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -203,13 +185,7 @@
     <ClCompile Include="src\Battle\ActionPreviewLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionResolution.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\ActionResolution.cpp" />
     <ClCompile Include="src\Battle\ActionResults.cpp" />
     <ClCompile Include="src\Battle\ActionResultsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -397,11 +373,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Feedback.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\FloatingLabelPlacement.cpp" />
     <ClCompile Include="src\Battle\FloatingLabelPlacementLive.cpp">
@@ -428,13 +400,7 @@
     <ClCompile Include="src\Battle\HitModifiersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Hud.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Hud.cpp" />
     <ClCompile Include="src\Battle\HudOrchestration.cpp" />
     <ClCompile Include="src\Battle\HudOrchestrationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -452,13 +418,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Rewards.cpp" />
-    <ClCompile Include="src\Battle\Sphere.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Sphere.cpp" />
     <ClCompile Include="src\Battle\SphereContainment.cpp" />
     <ClCompile Include="src\Battle\SphereContainmentLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -517,13 +477,7 @@
     <ClCompile Include="src\Battle\TargetingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\TargetingState.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\TargetingState.cpp" />
     <ClCompile Include="src\Battle\TargetPages.cpp" />
     <ClCompile Include="src\Battle\TargetPagesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2021,11 +1975,11 @@
     <ClInclude Include="src\Actors\Textures.hpp" />
     <ClInclude Include="src\Actors\WeaponModel.hpp" />
     <ClInclude Include="src\Battle\AbilityState.h" />
-    <ClInclude Include="src\Battle\ActionAnimation.h" />
+    <ClInclude Include="src\Battle\ActionAnimation.hpp" />
     <ClInclude Include="src\Battle\ActionExecution.hpp" />
-    <ClInclude Include="src\Battle\ActionFlow.h" />
-    <ClInclude Include="src\Battle\ActionMenu.h" />
-    <ClInclude Include="src\Battle\ActionResolution.h" />
+    <ClInclude Include="src\Battle\ActionFlow.hpp" />
+    <ClInclude Include="src\Battle\ActionMenu.hpp" />
+    <ClInclude Include="src\Battle\ActionResolution.hpp" />
     <ClInclude Include="src\Battle\ActionTable.h" />
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.hpp" />
@@ -2045,17 +1999,17 @@
     <ClInclude Include="src\Battle\BattleTypes.h" />
     <ClInclude Include="src\Battle\Damage.h" />
     <ClInclude Include="src\Battle\EncounterHooks.hpp" />
-    <ClInclude Include="src\Battle\Feedback.h" />
+    <ClInclude Include="src\Battle\Feedback.hpp" />
     <ClInclude Include="src\Battle\Hit.h" />
     <ClInclude Include="src\Battle\HitChance.hpp" />
-    <ClInclude Include="src\Battle\Hud.h" />
+    <ClInclude Include="src\Battle\Hud.hpp" />
     <ClInclude Include="src\Battle\Rewards.hpp" />
-    <ClInclude Include="src\Battle\Sphere.h" />
+    <ClInclude Include="src\Battle\Sphere.hpp" />
     <ClInclude Include="src\Battle\StatusEffects.h" />
-    <ClInclude Include="src\Battle\TargetingState.h" />
+    <ClInclude Include="src\Battle\TargetingState.hpp" />
     <ClInclude Include="src\Battle\TargetVolume.h" />
     <ClInclude Include="src\Battle\TextBoxes.hpp" />
-    <ClInclude Include="src\Battle\ValueLabels.h" />
+    <ClInclude Include="src\Battle\ValueLabels.hpp" />
     <ClInclude Include="src\Boot\GameLoop.hpp" />
     <ClInclude Include="src\Boot\OverlayReset.hpp" />
     <ClInclude Include="src\Boot\PlayerSettings.hpp" />

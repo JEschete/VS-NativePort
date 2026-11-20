@@ -12,7 +12,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
@@ -22,7 +22,7 @@ struct ImpactFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{256} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_ActionState* previous_action = Battle_actionState;
+  Battle_ActionState* previous_action = VS::Battle::actionState;
   Actors_ActorRecord* previous_actor = Actors_actorRecords[16];
   VS::Effects::LiveEffectPackage* previous_package = VS::Effects::package;
   VS::Effects::LiveEffectPackage* previous_saved = VS::Effects::savedPackage;
@@ -44,7 +44,7 @@ struct ImpactFixture {
   std::array<char, 256> script{};
 
   ImpactFixture() {
-    Battle_actionState = &action;
+    VS::Battle::actionState = &action;
     Actors_actorRecords[16] = &actor;
     VS::Effects::secondaryPackage = {};
     VS::Effects::secondaryPackage.programs = script.data();
@@ -56,7 +56,7 @@ struct ImpactFixture {
   ImpactFixture(const ImpactFixture&) = delete;
   ImpactFixture& operator=(const ImpactFixture&) = delete;
   ~ImpactFixture() {
-    Battle_actionState = previous_action;
+    VS::Battle::actionState = previous_action;
     Actors_actorRecords[16] = previous_actor;
     VS::Effects::package = previous_package;
     VS::Effects::savedPackage = previous_saved;

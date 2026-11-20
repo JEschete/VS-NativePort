@@ -8,7 +8,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
@@ -186,7 +186,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     }
     VS::Core::Memory::ZeroLiveAlignedWords(
         action_state, static_cast<std::int32_t>(sizeof *action_state));
-    Battle_actionState = action_state;
+    VS::Battle::actionState = action_state;
   }
   void SetFieldRenderingEnabled(bool enabled) override {
     VS::Field::LiveSetFieldRenderingEnabled(enabled ? 1 : 0);

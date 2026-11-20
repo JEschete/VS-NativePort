@@ -8,7 +8,7 @@
 #include <span>
 
 #include "Battle/Actor.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/MapLive.hpp"
 
@@ -32,12 +32,12 @@ class LiveGameplayHudWorld final : public GameplayHudWorld {
 
 HudState ReadLiveHudState() {
   return {
-      .visibility =
-          HudVisibilityCommand{static_cast<std::uint8_t>(Battle_hudHidden)},
-      .battle_mode =
-          HudBattleModeCommand{static_cast<std::uint8_t>(Battle_hudBattleMode)},
-      .lower_screen = static_cast<std::uint8_t>(Battle_lowerScreenUiState),
-      .shortcut = static_cast<std::uint8_t>(Battle_shortcutHudRequested),
+      .visibility = HudVisibilityCommand{static_cast<std::uint8_t>(
+          VS::Battle::hudHidden)},
+      .battle_mode = HudBattleModeCommand{static_cast<std::uint8_t>(
+          VS::Battle::hudBattleMode)},
+      .lower_screen = static_cast<std::uint8_t>(VS::Battle::lowerScreenUiState),
+      .shortcut = static_cast<std::uint8_t>(VS::Battle::shortcutHudRequested),
   };
 }
 
@@ -51,11 +51,11 @@ int SetLiveGameplayHudHidden(int command) {
 int LiveStatusIconFlags(Battle_ActorStats* stats) {
   if (stats == nullptr) Refuse("Status icon flags require actor stats");
   const HudStatusView status{std::bit_cast<std::uint32_t>(stats->statuses)};
-  static_assert(std::size(Battle_upperStatusIconFlags) >=
+  static_assert(std::size(VS::Battle::upperStatusIconFlags) >=
                 kHudMappedStatusCount);
-  const auto icons = StatusIconFlags(
-      status,
-      std::span(Battle_upperStatusIconFlags).first<kHudMappedStatusCount>());
+  const auto icons =
+      StatusIconFlags(status, std::span(VS::Battle::upperStatusIconFlags)
+                                  .first<kHudMappedStatusCount>());
   if (!icons.has_value()) {
     Refuse("Status icon flags require their used mapping");
   }
@@ -73,28 +73,28 @@ int LiveLimbCondition(Battle_LimbStats* limb) {
 void ShowLiveShortcutHud() {
   HudState state;
   ShowShortcutHud(state);
-  Battle_shortcutHudRequested = static_cast<char>(state.shortcut);
+  VS::Battle::shortcutHudRequested = static_cast<char>(state.shortcut);
 }
 
 // decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3838).
 void ShowLivePuzzleTimer() {
   HudState state;
   ShowPuzzleTimer(state);
-  Battle_lowerScreenUiState = static_cast<char>(state.lower_screen);
+  VS::Battle::lowerScreenUiState = static_cast<char>(state.lower_screen);
 }
 
 // decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3840).
 void HideLivePuzzleTimer() {
   HudState state;
   HidePuzzleTimer(state);
-  Battle_lowerScreenUiState = static_cast<char>(state.lower_screen);
+  VS::Battle::lowerScreenUiState = static_cast<char>(state.lower_screen);
 }
 
 // decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867).
 void SetLiveHudHidden(int command) {
   HudState state;
   SetHudHidden(state, HudVisibilityCommand{static_cast<std::uint8_t>(command)});
-  Battle_hudHidden = static_cast<char>(state.visibility.value);
+  VS::Battle::hudHidden = static_cast<char>(state.visibility.value);
 }
 
 // decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869).
@@ -102,6 +102,6 @@ void SetLiveHudBattleMode(int command) {
   HudState state;
   SetHudBattleMode(state,
                    HudBattleModeCommand{static_cast<std::uint8_t>(command)});
-  Battle_hudBattleMode = static_cast<char>(state.battle_mode.value);
+  VS::Battle::hudBattleMode = static_cast<char>(state.battle_mode.value);
 }
 }  // namespace VS::Battle

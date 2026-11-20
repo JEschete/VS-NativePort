@@ -29,7 +29,7 @@
 #include "Actors/WeaponModel.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -1274,15 +1274,14 @@ struct LiveStateFixture {
       std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  decltype(std::to_array(Battle_actorMarkers)) saved_markers =
-      std::to_array(Battle_actorMarkers);
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
 
   LiveStateFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
-    std::fill_n(Battle_actorMarkers, saved_markers.size(), 0);
+    std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(), 0);
   }
   LiveStateFixture(const LiveStateFixture&) = delete;
   LiveStateFixture& operator=(const LiveStateFixture&) = delete;
@@ -1293,7 +1292,7 @@ struct LiveStateFixture {
     std::ranges::copy(saved_records, Actors_actorRecords);
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
-    std::ranges::copy(saved_markers, Battle_actorMarkers);
+    std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
   }
 };
 
@@ -1468,11 +1467,11 @@ TEST_CASE("Live battle actors switch their logic and hostility",
   Battle_Actor actor{};
   PlaceLiveBattleActor(actor, stats);
 
-  Battle_actorMarkers[3] = static_cast<char>(0x85);
+  VS::Battle::actorMarkers[3] = static_cast<char>(0x85);
   CHECK(VS::Actors::SetLiveActorLogicEnabled(3, 0) == 0);
   CHECK(LogicState(actor) ==
         std::array<int, 2>{actors::kLogicDisabledCommand, 0x8004});
-  CHECK(Battle_actorMarkers[3] == 0);
+  CHECK(VS::Battle::actorMarkers[3] == 0);
   CHECK(VS::Actors::SetLiveActorLogicEnabled(3, 1) == 1);
   CHECK(LogicState(actor) == std::array<int, 2>{0, actors::kHostileActorKind});
   VS::Actors::SetLiveActorHostile(3, 0);

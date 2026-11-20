@@ -10,7 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -23,7 +23,7 @@ namespace event = VS::Event;
 struct NativeCutsceneScope {
   decltype(Battle_characterState) player = Battle_characterState;
   decltype(VS::Field::controlMode) control = VS::Field::controlMode;
-  decltype(Battle_actionFlowMode) action = Battle_actionFlowMode;
+  decltype(VS::Battle::actionFlowMode) action = VS::Battle::actionFlowMode;
   decltype(event::eventSource) source = event::eventSource;
   decltype(event::eventId) event_id = event::eventId;
   decltype(event::playbackPhase) phase = event::playbackPhase;
@@ -32,7 +32,7 @@ struct NativeCutsceneScope {
   NativeCutsceneScope() {
     Battle_characterState = nullptr;
     VS::Field::controlMode = 2;
-    Battle_actionFlowMode = 7;
+    VS::Battle::actionFlowMode = 7;
     event::eventSource = 0;
     event::eventId = 0;
     event::playbackPhase = 1;
@@ -41,7 +41,7 @@ struct NativeCutsceneScope {
   ~NativeCutsceneScope() {
     Battle_characterState = player;
     VS::Field::controlMode = control;
-    Battle_actionFlowMode = action;
+    VS::Battle::actionFlowMode = action;
     event::eventSource = source;
     event::eventId = event_id;
     event::playbackPhase = phase;
@@ -423,7 +423,7 @@ TEST_CASE("Live cutscene preparation refuses an absent player and logs once",
   CHECK(warnings.messages ==
         std::vector<std::string>{"Preparation refused: missing player"});
   CHECK(VS::Field::controlMode == 2);
-  CHECK(Battle_actionFlowMode == 7);
+  CHECK(VS::Battle::actionFlowMode == 7);
   CHECK(event::isStartConfirmed == 0);
 }
 
@@ -434,7 +434,7 @@ TEST_CASE("Live cutscene waits for signed high-bit selectors without starting",
   event::eventId = GENERATE(-32768, -1, 1);
   REQUIRE(event::BeginLiveQueuedCutscene());
   CHECK(VS::Field::controlMode == 3);
-  CHECK(Battle_actionFlowMode == 1);
+  CHECK(VS::Battle::actionFlowMode == 1);
   CHECK(event::isStartConfirmed == 0);
   CHECK(warnings.messages.empty());
 }
@@ -445,6 +445,6 @@ TEST_CASE("Live cutscene selector includes a nonzero source with event zero",
   event::eventSource = GENERATE(1, 2);
   REQUIRE(event::BeginLiveQueuedCutscene());
   CHECK(VS::Field::controlMode == 3);
-  CHECK(Battle_actionFlowMode == 1);
+  CHECK(VS::Battle::actionFlowMode == 1);
   CHECK(event::isStartConfirmed == 0);
 }

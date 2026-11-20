@@ -8,8 +8,8 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/BasicActionEffects.hpp"
@@ -74,9 +74,9 @@ class LiveTriggeredRecoveryQueue final : public TriggeredRecoveryQueue {
 
  private:
   static const Battle_ActionRequest& Selection() {
-    Require(Battle_actionState != nullptr,
+    Require(VS::Battle::actionState != nullptr,
             "Triggered recovery requires selected action state");
-    return Battle_actionState->selection;
+    return VS::Battle::actionState->selection;
   }
   Battle_ActionDefinition* action_;
   Battle_HitResult* source_;
@@ -92,7 +92,7 @@ class LiveInstantDeathQueue final : public InstantDeathQueue {
     QueueLiveStatusRemovalMask(static_cast<int>(rule), &hit_);
   }
   std::uint16_t CurrentHp() override {
-    const unsigned slot = hit_.target.targetActor;
+    const unsigned slot = hit_.target.target_actor;
     Require(slot < std::size(Battle_actors),
             "Instant death target is outside the battle actor table");
     const auto* actor = Battle_actors[slot];
@@ -174,7 +174,7 @@ class LiveRandomStatQueue final : public RandomStatQueue {
   Battle_HitResult& hit_;
 };
 
-using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
+using Mediator = VS::Battle::ActionEffectMediator;
 static_assert(
     std::is_same_v<decltype(&QueueLiveDarkAffinityRecovery), Mediator>);
 static_assert(
@@ -232,12 +232,12 @@ void QueueLiveDamageTriggeredRecovery(Battle_ActionDefinition* action,
                                       Battle_HitResult* source,
                                       Battle_HitResult* target, int hit,
                                       int execute) {
-  Require(Battle_actionState != nullptr,
+  Require(VS::Battle::actionState != nullptr,
           "Damage-triggered recovery requires selected action state");
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueDamageTriggeredRecovery(
       static_cast<std::uint8_t>(
-          Battle_actionState->selection.primaryTarget.hpEffect),
+          VS::Battle::actionState->selection.primaryTarget.hpEffect),
       queue);
 }
 
@@ -389,7 +389,7 @@ void QueueLiveDamageBasedArmorWear(Battle_ActionDefinition*, Battle_HitResult*,
                                    Battle_HitResult* target, int, int) {
   auto& hit = HitOf(target);
   ActorActionResult queued{};
-  queued.limb = std::bit_cast<std::int8_t>(hit.target.targetLimb);
+  queued.limb = std::bit_cast<std::int8_t>(hit.target.target_limb);
   queued.changes.at(static_cast<std::size_t>(ActionResultField::kHp)).amount =
       hit.target.hp;
   Require(QueueDamageBasedArmorWear(queued),

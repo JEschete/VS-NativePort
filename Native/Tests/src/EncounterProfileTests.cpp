@@ -14,7 +14,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -48,14 +48,14 @@ struct ProfileFixture {
       std::to_array(VS::State::learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) saved_actions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Battle_chainAbilityActionIds)) saved_chain =
-      std::to_array(Battle_chainAbilityActionIds);
-  decltype(std::to_array(Battle_defenseAbilityActionIds)) saved_defense =
-      std::to_array(Battle_defenseAbilityActionIds);
-  decltype(std::to_array(Battle_spellClassCounts)) saved_counts =
-      std::to_array(Battle_spellClassCounts);
-  decltype(std::to_array(Battle_spellClassSpellIds)) saved_spells =
-      std::to_array(Battle_spellClassSpellIds);
+  decltype(VS::Battle::chainAbilityActionIds) saved_chain =
+      VS::Battle::chainAbilityActionIds;
+  decltype(VS::Battle::defenseAbilityActionIds) saved_defense =
+      VS::Battle::defenseAbilityActionIds;
+  decltype(VS::Battle::spellClassCounts) saved_counts =
+      VS::Battle::spellClassCounts;
+  decltype(VS::Battle::spellClassSpellIds) saved_spells =
+      VS::Battle::spellClassSpellIds;
   std::array<u_char, 4> spells{97, 54, 60, 84};
 
   ProfileFixture() {
@@ -68,11 +68,13 @@ struct ProfileFixture {
     VS::Items::inventory.blades[0].category = 3;
     std::fill_n(VS::State::learnedActionFlags, saved_learned.size(), 0);
     const std::array<char, 3> chain{22, 23, 24}, defense{40, 41, 42};
-    std::copy(chain.begin(), chain.end(), Battle_chainAbilityActionIds);
-    std::copy(defense.begin(), defense.end(), Battle_defenseAbilityActionIds);
+    std::copy(chain.begin(), chain.end(),
+              VS::Battle::chainAbilityActionIds.begin());
+    std::copy(defense.begin(), defense.end(),
+              VS::Battle::defenseAbilityActionIds.begin());
     for (std::size_t index = 0; index < spells.size(); ++index) {
-      Battle_spellClassCounts[index] = 1;
-      Battle_spellClassSpellIds[index] = &spells[index];
+      VS::Battle::spellClassCounts[index] = 1;
+      VS::Battle::spellClassSpellIds[index] = &spells[index];
     }
   }
 
@@ -87,13 +89,13 @@ struct ProfileFixture {
     std::copy(saved_actions.begin(), saved_actions.end(),
               Battle_actionDefinitions);
     std::copy(saved_chain.begin(), saved_chain.end(),
-              Battle_chainAbilityActionIds);
+              VS::Battle::chainAbilityActionIds.begin());
     std::copy(saved_defense.begin(), saved_defense.end(),
-              Battle_defenseAbilityActionIds);
+              VS::Battle::defenseAbilityActionIds.begin());
     std::copy(saved_counts.begin(), saved_counts.end(),
-              Battle_spellClassCounts);
+              VS::Battle::spellClassCounts.begin());
     std::copy(saved_spells.begin(), saved_spells.end(),
-              Battle_spellClassSpellIds);
+              VS::Battle::spellClassSpellIds.begin());
   }
 };
 
@@ -159,8 +161,8 @@ std::set<unsigned> BindFullSpellClasses(
   const std::array<u_char, 4> counts{18, 6, 18, 8};
   std::set<unsigned> expected;
   for (std::size_t index = 0; index < classes.size(); ++index) {
-    Battle_spellClassCounts[index] = counts[index];
-    Battle_spellClassSpellIds[index] = classes[index].data();
+    VS::Battle::spellClassCounts[index] = counts[index];
+    VS::Battle::spellClassSpellIds[index] = classes[index].data();
     expected.insert(classes[index].begin(),
                     classes[index].begin() + counts[index]);
   }
@@ -173,8 +175,10 @@ std::set<unsigned> BindFullBattleAbilities() {
                                     30, 31, 32, 34, 35, 37, 97, 98};
   const std::array<char, 16> defenses{40, 41, 42, 43, 44, 45, 46, 47,
                                       48, 49, 50, 51, 52, 53, 96, 60};
-  std::copy(chains.begin(), chains.end(), Battle_chainAbilityActionIds);
-  std::copy(defenses.begin(), defenses.end(), Battle_defenseAbilityActionIds);
+  std::copy(chains.begin(), chains.end(),
+            VS::Battle::chainAbilityActionIds.begin());
+  std::copy(defenses.begin(), defenses.end(),
+            VS::Battle::defenseAbilityActionIds.begin());
   std::set<unsigned> expected(chains.begin(), chains.begin() + 14);
   expected.insert(defenses.begin(), defenses.begin() + 14);
   return expected;
@@ -296,8 +300,8 @@ TEST_CASE("All-spells profile supports repeat entry and saved presets",
 TEST_CASE("All-spells profile rejects missing production spell tables",
           "[combat][profile][spells]") {
   ProfileFixture fixture;
-  SECTION("empty class") { Battle_spellClassCounts[0] = 0; }
-  SECTION("unbound class") { Battle_spellClassSpellIds[0] = nullptr; }
+  SECTION("empty class") { VS::Battle::spellClassCounts[0] = 0; }
+  SECTION("unbound class") { VS::Battle::spellClassSpellIds[0] = nullptr; }
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells));
 }
@@ -317,9 +321,9 @@ TEST_CASE("All-abilities profile grants the original 28 abilities only",
   }
   for (unsigned slot = 0; slot < 3; ++slot) {
     CHECK(VS::Input::settings.mapped_chain_abilities[slot] ==
-          static_cast<std::uint8_t>(Battle_chainAbilityActionIds[slot]));
+          static_cast<std::uint8_t>(VS::Battle::chainAbilityActionIds[slot]));
     CHECK(VS::Input::settings.mapped_defense_abilities[slot] ==
-          static_cast<std::uint8_t>(Battle_defenseAbilityActionIds[slot]));
+          static_cast<std::uint8_t>(VS::Battle::defenseAbilityActionIds[slot]));
   }
 }
 
@@ -375,8 +379,8 @@ TEST_CASE("All-abilities profile rejects missing production ability tables",
           "[combat][profile][abilities]") {
   ProfileFixture fixture;
   BindFullBattleAbilities();
-  SECTION("chain table") { Battle_chainAbilityActionIds[0] = 0; }
-  SECTION("defense table") { Battle_defenseAbilityActionIds[0] = 0; }
+  SECTION("chain table") { VS::Battle::chainAbilityActionIds[0] = 0; }
+  SECTION("defense table") { VS::Battle::defenseAbilityActionIds[0] = 0; }
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllAbilities));
 }

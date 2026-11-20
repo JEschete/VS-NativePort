@@ -16,7 +16,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -143,10 +143,10 @@ struct LiveFixture {
   decltype(VS::Battle::hitFunctions) hits = VS::Battle::hitFunctions;
   decltype(std::to_array(Battle_statCalculators)) stats =
       std::to_array(Battle_statCalculators);
-  decltype(std::to_array(Battle_actionEffectMediators)) effects =
-      std::to_array(Battle_actionEffectMediators);
+  decltype(VS::Battle::actionEffectMediators) effects =
+      VS::Battle::actionEffectMediators;
   std::uint32_t last = Battle_lastActionStatValue;
-  std::uint32_t prerequisite = Battle_hitPrerequisiteResult;
+  std::uint32_t prerequisite = VS::Battle::hitPrerequisiteResult;
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_ActorStats, 2> owners{};
   Battle_ActionDefinition action{};
@@ -160,16 +160,17 @@ struct LiveFixture {
       owners.at(i).actorId = static_cast<std::uint8_t>(i);
       owners.at(i).maxHp = 1;
     }
-    target.target.targetActor = 1;
-    Battle_hitPrerequisiteResult = 1;
+    target.target.target_actor = 1;
+    VS::Battle::hitPrerequisiteResult = 1;
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), Battle_actors);
     std::copy(hits.begin(), hits.end(), VS::Battle::hitFunctions.begin());
     std::copy(stats.begin(), stats.end(), Battle_statCalculators);
-    std::copy(effects.begin(), effects.end(), Battle_actionEffectMediators);
+    std::copy(effects.begin(), effects.end(),
+              VS::Battle::actionEffectMediators.begin());
     Battle_lastActionStatValue = last;
-    Battle_hitPrerequisiteResult = prerequisite;
+    VS::Battle::hitPrerequisiteResult = prerequisite;
   }
 };
 std::vector<std::uint8_t> ReadModule(const char* name) {
@@ -523,10 +524,12 @@ TEST_CASE("Original tables relocate active calculators and distinct sentinels",
   const auto image = ReadModule("BATTLE/BATTLE.PRG");
   Relocate(reinterpret_cast<void**>(VS::Battle::hitFunctions.data()), image);
   Relocate(reinterpret_cast<void**>(Battle_statCalculators), image);
-  Relocate(reinterpret_cast<void**>(Battle_actionEffectMediators), image);
+  Relocate(reinterpret_cast<void**>(VS::Battle::actionEffectMediators.data()),
+           image);
   CHECK(VS::Battle::hitFunctions[0] == &battle::RejectLiveHitSelector);
   CHECK(Battle_statCalculators[0] == &battle::RejectLiveStatSelector);
-  CHECK(Battle_actionEffectMediators[0] == &battle::RejectLiveEffectSelector);
+  CHECK(VS::Battle::actionEffectMediators[0] ==
+        &battle::RejectLiveEffectSelector);
   CHECK(VS::Battle::hitFunctions[3] == &battle::LiveAgilityHitChance);
   CHECK(VS::Battle::hitFunctions[4] == &battle::LiveIntelligenceHitChance);
   CHECK(VS::Battle::hitFunctions[5] ==
@@ -557,7 +560,7 @@ TEST_CASE("Live roll invokes actual int table ABI and lazy exemption",
           int) -> int { return 255; };
   f.action.hits[0].hitFunctionId = 7;
   CHECK(battle::LiveRollActionHit(&f.action, nullptr, &f.target, 0, 0) == 0);
-  CHECK(f.target.target.hitThreshold == 255);
+  CHECK(f.target.target.hit_threshold == 255);
   f.owners.at(1).actorId = 128;
   CHECK(battle::LiveRollActionHit(nullptr, &f.source, &f.target, -1, -1) == 1);
 }

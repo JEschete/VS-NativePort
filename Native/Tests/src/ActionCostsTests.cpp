@@ -18,7 +18,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionCosts.hpp"
 #include "Battle/ActionCostsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -123,7 +123,7 @@ struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved = std::to_array(Battle_actors);
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
-  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   Battle_ActionState state{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -133,7 +133,7 @@ struct LiveFixture {
     Battle_actors[41] = &actor;
     actor.stats = &stats;
     actor.weaponDrawn = 2;
-    Battle_actionState = &state;
+    VS::Battle::actionState = &state;
     Battle_actionDefinitions[22] = {};
     Battle_actionDefinitions[22].type = 6;
     Battle_actionDefinitions[22].unlocked = 1;
@@ -142,7 +142,7 @@ struct LiveFixture {
     std::copy(saved.begin(), saved.end(), std::begin(Battle_actors));
     std::copy(definitions.begin(), definitions.end(),
               std::begin(Battle_actionDefinitions));
-    Battle_actionState = saved_state;
+    VS::Battle::actionState = saved_state;
   }
 };
 struct EquipHost final : VS::Items::EquipStatusHost {
@@ -498,7 +498,7 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
   REQUIRE(VS::Items::LoadInventoryWeaponStats(weapon, nullptr, inventory) ==
           VS::Items::ItemsStatus::kOk);
   fixture.stats.weapon = weapon;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01000000);
   VS::Items::WeaponSpawnLoadout natural{};
@@ -508,7 +508,7 @@ TEST_CASE("Actual Items empty and weapon transitions feed live cost queries",
   natural.blade.cost_type = 2;
   natural.blade.cost = 1;
   VS::Items::BuildLiveWeaponStatsFromParts(&fixture.stats.weapon, &natural);
-  Battle_actionState = &fixture.state;
+  VS::Battle::actionState = &fixture.state;
   CHECK(battle::LiveActionCostAndAvailability(22, &fixture.stats, 1) ==
         0x01020001);
   CHECK(fixture.stats.risk == 1);
@@ -575,7 +575,7 @@ TEST_CASE(
   fixture.stats.currentHp = natural.hp;
   fixture.stats.currentMp = natural.mp;
   const auto before = Bytes(fixture.stats);
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   CHECK(battle::LiveActionCostAndAvailability(action, &fixture.stats, 0) ==
         0x01000000);
   CHECK(battle::LiveActionCostAndAvailability(action, &fixture.stats, 1) ==

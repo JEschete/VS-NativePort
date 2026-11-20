@@ -13,7 +13,7 @@
 // whatever the reserved record held, as in the original.
 namespace VS::Battle {
 
-// Battle_FloatingLabel.key.bytes[0] of the labels these producers write.
+// VS::Battle::FloatingLabel.key.bytes[0] of the labels these producers write.
 enum class FloatingLabelKind : std::uint8_t {
   kInactive = 0,
   kActorValue = 1,
@@ -33,7 +33,7 @@ struct LabelPoint {
 // The text bytes a label record carries (a printed amount and its NUL).
 inline constexpr std::size_t kLabelTextBytes = 4;
 
-// One Battle_FloatingLabel record (24 bytes, original field order).
+// One VS::Battle::FloatingLabel record (24 bytes, original field order).
 struct FloatingLabelRecord {
   // position.w is the label's stacking order (status and value labels) or
   // its waiting steps (the queue's advance).
@@ -92,7 +92,7 @@ inline constexpr std::int16_t kLabelUnitScale = 0x1000;
 class FloatingLabelProducerWorld {
  public:
   virtual ~FloatingLabelProducerWorld() = default;
-  // Battle_floatingLabelCount.
+  // VS::Battle::floatingLabelCount.
   [[nodiscard]] virtual std::int16_t LabelCount() = 0;
   // The published record `index`; nullopt outside the queue's records.
   [[nodiscard]] virtual std::optional<FloatingLabelRecord> Label(
@@ -104,7 +104,7 @@ class FloatingLabelProducerWorld {
   // Stores the whole reserved record, or only its text length.
   virtual bool WriteReservedLabel(const FloatingLabelRecord& record) = 0;
   virtual bool WriteReservedTextLength(std::uint8_t text_length) = 0;
-  // Publishes the reserved record (++Battle_floatingLabelCount).
+  // Publishes the reserved record (++VS::Battle::floatingLabelCount).
   virtual bool CommitReservedLabel() = 0;
   // func_800A152C: the bone whose label of `kind` is `tag`, or negative.
   [[nodiscard]] virtual std::int32_t FindBoneTag(std::int32_t actor,

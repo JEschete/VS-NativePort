@@ -19,7 +19,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -317,7 +317,7 @@ struct WorkshopChoicesFixture {
   WorkshopGateFixture setup{6, 0, false};
   decltype(VS::Items::inventoryIndices) saved_indices =
       VS::Items::inventoryIndices;
-  decltype(Battle_stringContext) saved_context = Battle_stringContext;
+  decltype(VS::Battle::stringContext) saved_context = VS::Battle::stringContext;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
   u_short* saved_help = VS::Menu::Framework::itemHelp;
@@ -353,7 +353,7 @@ struct WorkshopChoicesFixture {
 
   ~WorkshopChoicesFixture() {
     VS::Items::inventoryIndices = saved_indices;
-    Battle_stringContext = saved_context;
+    VS::Battle::stringContext = saved_context;
     VS::Menu::Framework::itemNames = saved_names;
     VS::Menu::Framework::itemHelp = saved_help;
     VS::Menu::Framework::shields = saved_shields;

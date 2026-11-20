@@ -15,7 +15,7 @@
 
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.hpp"
@@ -47,8 +47,8 @@ using Live::WarnRefusal;
 constexpr std::int16_t kRewardStageFlag = 0xAB;
 // VS::Field::controlMode while a menu has the pad.
 constexpr std::uint32_t kMenuControlMode = 2;
-// Battle_actionFlowMode while the enemy loot list, and the scripted one, is
-// open.
+// VS::Battle::actionFlowMode while the enemy loot list, and the scripted one,
+// is open.
 constexpr std::uint32_t kEnemyLootFlowMode = 12;
 constexpr std::uint32_t kScriptedLootFlowMode = 4;
 
@@ -124,7 +124,7 @@ class LiveLootFlowHost final : public LootFlowHost {
   void OpenEnemyLootList() override {
     VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
     VS::Field::controlMode = kMenuControlMode;
-    Battle_actionFlowMode = kEnemyLootFlowMode;
+    VS::Battle::actionFlowMode = kEnemyLootFlowMode;
     VS::Field::LivePauseFieldForMenu();
   }
   void BeginPendingAbilityReward() override {
@@ -136,7 +136,7 @@ class LiveLootFlowHost final : public LootFlowHost {
   void OpenScriptedLootList() override {
     VS::Battle::lootMenuOpened = 1;
     VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
-    Battle_actionFlowMode = kScriptedLootFlowMode;
+    VS::Battle::actionFlowMode = kScriptedLootFlowMode;
     VS::Battle::BeginLiveRewardPause();
   }
   void ResumeAfterRewards() override { VS::Battle::ResumeLiveAfterRewards(); }

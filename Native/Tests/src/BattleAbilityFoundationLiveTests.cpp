@@ -14,7 +14,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/AbilityState.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Boot/OverlayReset.hpp"
@@ -135,10 +135,10 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
 };
 
 struct LiveTerminalFixture : LiveFoundationFixture {
-  ArrayRestore<char, std::size(Battle_chainAbilityActionIds)> saved_chain_order{
-      Battle_chainAbilityActionIds};
-  ArrayRestore<char, std::size(Battle_defenseAbilityActionIds)>
-      saved_defense_order{Battle_defenseAbilityActionIds};
+  ArrayRestore<std::int8_t, std::size(VS::Battle::chainAbilityActionIds)>
+      saved_chain_order{VS::Battle::chainAbilityActionIds.data()};
+  ArrayRestore<std::int8_t, std::size(VS::Battle::defenseAbilityActionIds)>
+      saved_defense_order{VS::Battle::defenseAbilityActionIds.data()};
   ValueRestore<decltype(VS::Menu::Framework::shortcutInvoked)> saved_shortcut{
       VS::Menu::Framework::shortcutInvoked};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
@@ -148,10 +148,10 @@ struct LiveTerminalFixture : LiveFoundationFixture {
     framework::ResetLiveMainMenuStatics();
     abilities::ResetLiveAbilityTerminalColdState();
     VS::Menu::Framework::shortcutInvoked = 1;
-    std::ranges::fill(Battle_chainAbilityActionIds, char{0});
-    std::ranges::fill(Battle_defenseAbilityActionIds, char{0});
-    Battle_chainAbilityActionIds[0] = kAction;
-    Battle_defenseAbilityActionIds[0] = kDefenseAction;
+    std::ranges::fill(VS::Battle::chainAbilityActionIds, char{0});
+    std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{0});
+    VS::Battle::chainAbilityActionIds[0] = kAction;
+    VS::Battle::defenseAbilityActionIds[0] = kDefenseAction;
     Battle_actionDefinitions[kAction].unlocked = 1;
     Battle_actionDefinitions[kDefenseAction].unlocked = 1;
     std::ranges::fill(Battle_actionDefinitions[kDefenseAction].name,

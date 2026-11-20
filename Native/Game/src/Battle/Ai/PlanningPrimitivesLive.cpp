@@ -23,7 +23,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
@@ -660,7 +660,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     }
     const auto& target = std::span(request_->targets)[index];
     return CompletedActionTarget{
-        .slot = target.target.targetActor,
+        .slot = target.target.target_actor,
         .targets_position = target.targetsPosition != 0};
   }
   std::optional<CompletedTargetObject> TargetObject(
@@ -1463,7 +1463,7 @@ void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request) {
             "Completed action reconciliation requires a complete request");
     action =
         CompletedAction{.action_id = request->actionId,
-                        .performer = request->primaryTarget.target.targetActor,
+                        .performer = request->primaryTarget.target.target_actor,
                         .performer_targets_position =
                             request->primaryTarget.targetsPosition != 0};
   }

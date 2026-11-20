@@ -28,7 +28,7 @@
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -246,8 +246,10 @@ struct Fixture {
   ValueRestore<void*> saved_current_ordering{
       VS::Render::legacyCurrentOrderingTable};
   ValueRestore<char> saved_owner{VS::Content::overlayWorkspaceOwner};
-  ValueRestore<char> saved_hud{Battle_hudHidden};
-  ValueRestore<char> saved_lower_ui{Battle_lowerScreenUiState};
+  ValueRestore<decltype(VS::Battle::hudHidden)> saved_hud{
+      VS::Battle::hudHidden};
+  ValueRestore<decltype(VS::Battle::lowerScreenUiState)> saved_lower_ui{
+      VS::Battle::lowerScreenUiState};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
   ValueRestore<VS::Menu::Framework::LiveMenuControl> saved_control{
@@ -262,7 +264,8 @@ struct Fixture {
   ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
   ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
-  ValueRestore<VS::Menu::StringContext> saved_context{Battle_stringContext};
+  ValueRestore<VS::Menu::StringContext> saved_context{
+      VS::Battle::stringContext};
   ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{
       VS::Menu::Framework::submenuStates};
   ArrayRestore<Battle_Actor*, std::size(Battle_actors)> saved_actors{
@@ -287,8 +290,8 @@ struct Fixture {
   AudioRestore saved_audio;
   ArrayRestore<std::uint16_t, std::size(st::statusStrings)> saved_status_text{
       st::statusStrings};
-  ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{
-      Battle_statusStrings};
+  ArrayRestore<u_short, std::size(VS::Battle::statusStrings)> saved_battle_text{
+      VS::Battle::statusStrings.data()};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
   ArrayRestore<std::uint8_t, std::size(VS::Menu::Framework::animationIndices)>
@@ -460,9 +463,9 @@ struct Fixture {
     st::statusStrings[253] = 0x00FF;
     st::statusStrings[254] = 0xFF8F;
     st::statusStrings[255] = 0xE701;
-    std::ranges::fill(Battle_statusStrings, u_short{0xE7E7});
-    Battle_statusStrings[1] = 400;
-    Battle_statusStrings[400] = 0xE731;
+    std::ranges::fill(VS::Battle::statusStrings, u_short{0xE7E7});
+    VS::Battle::statusStrings[1] = 400;
+    VS::Battle::statusStrings[400] = 0xE731;
     std::ranges::fill(VS::Menu::Framework::animationIndices, std::uint8_t{10});
   }
   void BindFrame() {

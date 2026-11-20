@@ -9,7 +9,7 @@ struct ActorLocation;
 struct Battle_HitResult;
 
 // Live binding for the secondary hit and spatial effect requests
-// (SecondaryEffectRequests.hpp) over Battle_actionState, the action
+// (SecondaryEffectRequests.hpp) over VS::Battle::actionState, the action
 // definitions, VS::Effects::effectBusyFlags, the skeleton's bone tags, the
 // weapon hit sounds and LiveBeginSecondaryEffects. The entries keep the
 // original signatures for the generated callers and the module's function

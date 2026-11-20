@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
@@ -74,9 +74,9 @@ auto Bytes(const T& value) {
 struct LiveRiskFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
   Battle_Actor* saved_player = Battle_characterState;
-  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState* saved_action = VS::Battle::actionState;
   std::uint32_t saved_control = VS::Field::controlMode;
-  std::uint32_t saved_flow = Battle_actionFlowMode;
+  std::uint32_t saved_flow = VS::Battle::actionFlowMode;
   int saved_ticks = VS::State::tickSpeed;
   int saved_timer = Battle_targetingRiskTimer;
   Battle_Actor target_actor{};
@@ -93,18 +93,18 @@ struct LiveRiskFixture {
     player_stats.risk = 99;
     Battle_actors[0] = &target_actor;
     Battle_characterState = &player_actor;
-    Battle_actionState = &action;
+    VS::Battle::actionState = &action;
     VS::Field::controlMode = 2;
-    Battle_actionFlowMode = 1;
+    VS::Battle::actionFlowMode = 1;
     VS::State::tickSpeed = 1;
     Battle_targetingRiskTimer = 0;
   }
   ~LiveRiskFixture() {
     Battle_actors[0] = saved_actor;
     Battle_characterState = saved_player;
-    Battle_actionState = saved_action;
+    VS::Battle::actionState = saved_action;
     VS::Field::controlMode = saved_control;
-    Battle_actionFlowMode = saved_flow;
+    VS::Battle::actionFlowMode = saved_flow;
     VS::State::tickSpeed = saved_ticks;
     Battle_targetingRiskTimer = saved_timer;
   }
@@ -376,13 +376,13 @@ TEST_CASE(
     "Live targeting risk inactive and nonzero-clock paths need no selection",
     "[status-helpers][live]") {
   LiveRiskFixture fixture;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   Battle_characterState = nullptr;
   Battle_actors[0] = nullptr;
-  Battle_actionFlowMode = 0xFFFFFFFF;
+  VS::Battle::actionFlowMode = 0xFFFFFFFF;
   battle::UpdateLiveTargetingRiskPenalty();
   CHECK(Battle_targetingRiskTimer == 0);
-  Battle_actionFlowMode = 2;
+  VS::Battle::actionFlowMode = 2;
   Battle_targetingRiskTimer = 29;
   VS::State::tickSpeed = 2;
   battle::UpdateLiveTargetingRiskPenalty();

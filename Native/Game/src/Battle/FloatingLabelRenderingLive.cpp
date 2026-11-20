@@ -9,7 +9,7 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Content/ModuleData.hpp"
@@ -31,7 +31,6 @@ constexpr int kQuadLayer = -5;
 constexpr int kTextLayer = -4;
 constexpr std::uint8_t kFirstValueCaption = 3;
 constexpr std::size_t kValueCaptionCount = 6;
-constexpr std::size_t kCaptionRects = 33;
 constexpr std::size_t kLockedHeightSteps = 5;
 constexpr std::size_t kLockedPieceCount = 4;
 constexpr std::size_t kCompactCharacterCount = 60;
@@ -40,7 +39,7 @@ constexpr std::size_t kTrimsPerByte = 4;
 constexpr auto kCompactPairs = kCompactCapitalCount * kCompactCapitalCount;
 constexpr auto kCompactTrimBytes = kCompactPairs / kTrimsPerByte;
 constexpr std::string_view kBattleModule = "BATTLE/BATTLE.PRG";
-static_assert(sizeof(Battle_FloatingLabel) == kLabelBytes);
+static_assert(sizeof(VS::Battle::FloatingLabel) == kLabelBytes);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 [[noreturn]] void Refuse(const char* reason) {
@@ -61,23 +60,23 @@ void RequireDataOwner(const void* owner, std::size_t bytes) {
 
 void RequireCaptionOwner() {
   for (const auto& entry : VS::Content::ModuleSymbols()) {
-    if (entry.target == Battle_kLabelCaptionRects && entry.module != nullptr &&
+    if (entry.target == kLabelCaptionRects.data() && entry.module != nullptr &&
         entry.module == kBattleModule &&
-        entry.size >= kCaptionRects * sizeof(RECT)) {
+        entry.size >= sizeof(kLabelCaptionRects)) {
       return;
     }
   }
   Refuse("Floating-label caption atlas has no current bounded symbol owner");
 }
 
-FloatingLabelAppearance Appearance(const Battle_FloatingLabel* label) {
-  if (Battle_floatingLabels != nullptr && label != nullptr) {
-    for (const auto& current : *Battle_floatingLabels) {
+FloatingLabelAppearance Appearance(const VS::Battle::FloatingLabel* label) {
+  if (VS::Battle::floatingLabels != nullptr && label != nullptr) {
+    for (const auto& current : *VS::Battle::floatingLabels) {
       if (&current == label) {
         return {.elapsed_frames = current.frame,
                 .value = current.value,
-                .raw_mode = current.colorFlags,
-                .text_length = current.textLength};
+                .raw_mode = current.color_flags,
+                .text_length = current.text_length};
       }
     }
   }
@@ -142,32 +141,33 @@ class LiveLabelRenderWorld final : public FloatingLabelRenderWorld {
     const auto index =
         static_cast<std::uint32_t>(raw_mode) - kFirstValueCaption;
     if (index >= kValueCaptionCount) return std::nullopt;
-    RequireDataOwner(Battle_valueCaptionRects,
+    RequireDataOwner(VS::Battle::valueCaptionRects.data(),
                      kValueCaptionCount * sizeof(int));
-    const auto rectangle = std::span(Battle_valueCaptionRects)[index];
-    if (rectangle < 0 || static_cast<std::size_t>(rectangle) >= kCaptionRects) {
+    const auto rectangle = std::span(VS::Battle::valueCaptionRects)[index];
+    if (rectangle < 0 ||
+        static_cast<std::size_t>(rectangle) >= kLabelCaptionRects.size()) {
       return std::nullopt;
     }
     RequireCaptionOwner();
-    return Atlas(std::span(Battle_kLabelCaptionRects,
-                           kCaptionRects)[static_cast<std::size_t>(rectangle)]);
+    return Atlas(
+        std::span(kLabelCaptionRects)[static_cast<std::size_t>(rectangle)]);
   }
   std::optional<std::int16_t> LockedHalfHeight(std::int32_t step) override {
     if (step < 0 || static_cast<std::size_t>(step) >= kLockedHeightSteps) {
       return std::nullopt;
     }
     RequireDataOwner(
-        Battle_lockedLabelHalfHeights,
-        kLockedHeightSteps * sizeof(Battle_lockedLabelHalfHeights[0]));
+        VS::Battle::lockedLabelHalfHeights.data(),
+        kLockedHeightSteps * sizeof(VS::Battle::lockedLabelHalfHeights[0]));
     return std::span(
-        Battle_lockedLabelHalfHeights)[static_cast<std::size_t>(step)];
+        VS::Battle::lockedLabelHalfHeights)[static_cast<std::size_t>(step)];
   }
   std::optional<FloatingLabelAtlasRect> LockedPiece(
       std::size_t piece) override {
     if (piece >= kLockedPieceCount) return std::nullopt;
-    RequireDataOwner(Battle_lockedLabelPieces,
+    RequireDataOwner(VS::Battle::lockedLabelPieces.data(),
                      kLockedPieceCount * sizeof(RECT));
-    return Atlas(std::span(Battle_lockedLabelPieces)[piece]);
+    return Atlas(std::span(VS::Battle::lockedLabelPieces)[piece]);
   }
   bool DrawQuad(const FloatingLabelQuad& quad) override {
     return DrawLiveFloatingLabelQuad(quad, kQuadLayer);
@@ -207,7 +207,7 @@ FloatingLabelRenderWorld& LiveFloatingLabelRenderer() {
 }
 
 // decomp: F00723 func_80094E18 (src/BATTLE/BATTLE.PRG/2842C.c:2138).
-int DrawLiveValueLabelCaption(int x, int y, Battle_FloatingLabel* label) {
+int DrawLiveValueLabelCaption(int x, int y, VS::Battle::FloatingLabel* label) {
   const auto appearance = Appearance(label);
   LiveLabelRenderWorld world;
   const auto width = DrawValueLabelCaption(world, {x, y}, appearance);
@@ -218,7 +218,8 @@ int DrawLiveValueLabelCaption(int x, int y, Battle_FloatingLabel* label) {
 }
 
 // decomp: F00724 func_8009506C (src/BATTLE/BATTLE.PRG/2842C.c:2167).
-void DrawLiveLockedFloatingLabel(int x, int y, Battle_FloatingLabel* label) {
+void DrawLiveLockedFloatingLabel(int x, int y,
+                                 VS::Battle::FloatingLabel* label) {
   const auto appearance = Appearance(label);
   LiveLabelRenderWorld world;
   if (!DrawLockedFloatingLabel(world, {x, y}, appearance)) {
@@ -235,7 +236,8 @@ void DrawLiveStatusRemovalMarker(int x, int y, int animation_step) {
 }
 
 // decomp: F00727 func_800958A4 (src/BATTLE/BATTLE.PRG/2842C.c:2332).
-void DrawLiveAbilityTimingResult(int x, int y, Battle_FloatingLabel* label) {
+void DrawLiveAbilityTimingResult(int x, int y,
+                                 VS::Battle::FloatingLabel* label) {
   const auto appearance = Appearance(label);
   LiveLabelRenderWorld world;
   if (!DrawAbilityTimingResult(world, {x, y}, appearance)) {
@@ -244,7 +246,7 @@ void DrawLiveAbilityTimingResult(int x, int y, Battle_FloatingLabel* label) {
 }
 
 // decomp: F00728 func_80095A4C (src/BATTLE/BATTLE.PRG/2842C.c:2359).
-void DrawLiveChainCount(int x, int y, Battle_FloatingLabel* label) {
+void DrawLiveChainCount(int x, int y, VS::Battle::FloatingLabel* label) {
   const auto appearance = Appearance(label);
   LiveLabelRenderWorld world;
   if (!DrawChainCount(world, {x, y}, appearance)) {
@@ -254,8 +256,9 @@ void DrawLiveChainCount(int x, int y, Battle_FloatingLabel* label) {
 
 // decomp: F00741 func_800970BC (src/BATTLE/BATTLE.PRG/2842C.c:2864).
 void DrawLiveAbilityTimingCue() {
-  const FloatingLabelScreenPoint origin{Battle_abilityTimingCuePosition.vx,
-                                        Battle_abilityTimingCuePosition.vy};
+  const FloatingLabelScreenPoint origin{
+      VS::Battle::abilityTimingCuePosition.vx,
+      VS::Battle::abilityTimingCuePosition.vy};
   LiveLabelRenderWorld world;
   if (!DrawAbilityTimingCue(world, origin)) {
     Refuse("Ability timing cue could not reach its render target");

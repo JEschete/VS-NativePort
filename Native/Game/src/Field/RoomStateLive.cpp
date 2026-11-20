@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <span>
 
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -152,11 +152,13 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
             Memory::AllocateLiveFromLowEnd(kRoomPaletteBytes));
         return;
       case RoomBuffer::kFloatingLabels:
-        Battle_floatingLabels = static_cast<decltype(Battle_floatingLabels)>(
-            Memory::AllocateLiveFromLowEnd(sizeof *Battle_floatingLabels));
+        VS::Battle::floatingLabels =
+            static_cast<decltype(VS::Battle::floatingLabels)>(
+                Memory::AllocateLiveFromLowEnd(
+                    sizeof *VS::Battle::floatingLabels));
         return;
       case RoomBuffer::kPlacedLabelPositions:
-        Battle_placedLabelPositions = static_cast<DVECTOR*>(
+        VS::Battle::placedLabelPositions = static_cast<DVECTOR*>(
             Memory::AllocateLiveFromLowEnd(kPlacedLabelPositionBytes));
         return;
     }

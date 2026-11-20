@@ -158,7 +158,7 @@ TEST_CASE("Cold session restores both statistics cursors with foreign owners",
   const auto page = GENERATE(Page::kTitles, Page::kStatistics);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      VS::Menu::textBoxSelector, Battle_stringContext,
+      VS::Menu::textBoxSelector, VS::Battle::stringContext,
       VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;

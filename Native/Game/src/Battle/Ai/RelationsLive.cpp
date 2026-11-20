@@ -322,7 +322,7 @@ class LiveActorReaction final : public ActorReactionHost {
 };
 
 ReactionHit ReadHit(const Battle_HitResult& hit) {
-  return {.actor = hit.target.targetActor,
+  return {.actor = hit.target.target_actor,
           .hp_change = hit.target.hp,
           .hp_effect = hit.hpEffect,
           .skipped = hit.targetsPosition != 0};

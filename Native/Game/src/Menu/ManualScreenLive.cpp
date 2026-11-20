@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "Audio/SfxLive.hpp"
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
@@ -85,7 +85,7 @@ class LiveScreenHost final : public ScreenHost {
     VS::Battle::SetLiveHudHidden(hidden);
   }
   void SetHudSlideOffset(std::int32_t offset) override {
-    Battle_hudSlideOffset = offset;
+    VS::Battle::hudSlideOffset = offset;
   }
   void SetBackgroundPriority(std::int32_t layer,
                              std::int32_t brightness) override {

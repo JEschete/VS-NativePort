@@ -9,14 +9,14 @@
 #include "Actors/Location.hpp"
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
+#include "Battle/Feedback.hpp"
+#include "Battle/Hud.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLiveState.hpp"
@@ -54,7 +54,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     controlMode = static_cast<std::uint32_t>(mode);
   }
   void SetActionFlowMode(int mode) override {
-    Battle_actionFlowMode = static_cast<u_int>(mode);
+    VS::Battle::actionFlowMode = static_cast<u_int>(mode);
   }
   void SetInteractionPaused(bool paused) override {
     isInteractionPaused = Flag(paused);

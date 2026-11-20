@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -25,7 +25,7 @@
 namespace {
 namespace b = VS::Battle;
 struct LiveReset {
-  Battle_ActionState* state = Battle_actionState;
+  Battle_ActionState* state = VS::Battle::actionState;
   decltype(std::to_array(Battle_actors)) actors = std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) records =
       std::to_array(Actors_actorRecords);
@@ -34,7 +34,7 @@ struct LiveReset {
   decltype(std::to_array(VS::State::learnedActionFlags)) learned =
       std::to_array(VS::State::learnedActionFlags);
   ~LiveReset() {
-    Battle_actionState = state;
+    VS::Battle::actionState = state;
     std::ranges::copy(actors, std::begin(Battle_actors));
     std::ranges::copy(records, std::begin(Actors_actorRecords));
     std::ranges::copy(definitions, std::begin(Battle_actionDefinitions));
@@ -89,13 +89,13 @@ TEST_CASE("F00059 live full native target count uses real placement services",
   actor.instance.position = {-32768, 32767, -9, 77};
   actor.instance.facing = 0x340;
   Actors_actorRecords[15] = &actor;
-  Battle_actionState = state.get();
+  VS::Battle::actionState = state.get();
   state->queueIndex = 0xFFFFFFFF;
   auto& action = state->queue[3];
   action.targetCount = 255;
   for (auto& hit : action.targets) {
-    hit.target.targetActor = 15;
-    hit.target.impactKind = 5;
+    hit.target.target_actor = 15;
+    hit.target.impact_kind = 5;
   }
   CHECK(b::PlayLiveWeaponHitSounds(-1000) == 1);
   CHECK(action.targetCount == 255);
@@ -111,11 +111,11 @@ TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
   Battle_ActorStats stats{};
   actor.stats = &stats;
   Battle_actors[15] = &actor;
-  Battle_actionState = state.get();
+  VS::Battle::actionState = state.get();
   state->queueIndex = 0xFFFFFFFE;
   auto& hit = state->queue[2].primaryTarget;
-  hit.target.targetActor = 15;
-  hit.target.impactKind = 2;
+  hit.target.target_actor = 15;
+  hit.target.impact_kind = 2;
   hit.weaponDpChange = 2;
   hit.weaponDpEffect = 2;
   stats.weapon.current_dp = 65535;
@@ -131,19 +131,19 @@ TEST_CASE("F00061 live applies real result equipment changes to its queued hit",
 TEST_CASE("F00061 live unused argument and signed early gate do not read state",
           "[action-outcomes][F00061]") {
   const LiveReset reset;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   SVECTOR unused{11, -22, 33, -44};
   b::ApplyLiveActionSourceEffects(16, &unused);
   b::ApplyLiveActionSourceEffects(256, nullptr);
   CHECK(std::bit_cast<std::array<std::int16_t, 4>>(unused) ==
         std::array<std::int16_t, 4>{11, -22, 33, -44});
-  CHECK(Battle_actionState == nullptr);
+  CHECK(VS::Battle::actionState == nullptr);
 }
 TEST_CASE("F00156 live refresh and living path require no unused action state",
           "[action-outcomes][F00156][actor-cleanup]") {
   const auto hp = GENERATE(-32768, -1, 1, 32767);
   const LiveReset reset;
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   Battle_actors[1] = nullptr;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
   Battle_Actor actor{};
@@ -154,7 +154,7 @@ TEST_CASE("F00156 live refresh and living path require no unused action state",
   Battle_actors[1] = &actor;
   CHECK(b::BeginLiveActorDefeatAnimation(1) == 0);
   CHECK(actor.commandState == 0);
-  CHECK(Battle_actionState == nullptr);
+  CHECK(VS::Battle::actionState == nullptr);
 }
 TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
           "[action-outcomes][F01851]") {

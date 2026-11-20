@@ -15,7 +15,7 @@
 
 #include "Actors/TextureAnimationLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -111,8 +111,8 @@ char* PageStart(const VS::Menu::TextBoxState& box, const TextPosition& page) {
   if (page.source == kTextBoxString) {
     text = box.text;
   } else if (page.source >= 0 && page.source < kPrintedIntegerText) {
-    text = std::span(
-        Battle_stringContext.strings)[static_cast<std::size_t>(page.source)];
+    text = std::span(VS::Battle::stringContext
+                         .strings)[static_cast<std::size_t>(page.source)];
   }
   return text != nullptr ? text + page.offset : nullptr;
 }

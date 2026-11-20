@@ -279,7 +279,7 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   const auto limb = st::LiveLimbPanelControllerState();
   st::selectedElement = 4;
   VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
-  Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
+  VS::Battle::stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentDetailControllerState() == st::EquipmentDetailState{});
   CHECK(st::LiveLimbPanelControllerState().phase == limb.phase);
@@ -293,9 +293,9 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
 TEST_CASE("Terminal reload retains the actual allocations and text arguments",
           "[status-terminal][status-terminal-live]") {
   Fixture fixture;
-  Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
+  VS::Battle::stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(memory::LivePayloadCapacity(fixture.workspace).has_value());
   CHECK(memory::LivePayloadCapacity(fixture.text).has_value());
-  CHECK(Battle_stringContext.strings[0] == VS::Menu::Framework::stringBuf);
+  CHECK(VS::Battle::stringContext.strings[0] == VS::Menu::Framework::stringBuf);
 }

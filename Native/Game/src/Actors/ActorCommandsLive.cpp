@@ -23,13 +23,13 @@
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetingLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Runtime.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
@@ -247,7 +247,7 @@ class LiveCommandHost final : public ActorCommandHost {
   }
   bool BeginActionSelection(int actor_id, std::uint16_t action) override {
     VS::Battle::LiveBeginActorActionSelection(Required(actor_id).id, action);
-    return Battle_actionState->selectedPreview == kNoPreviewSelected;
+    return VS::Battle::actionState->selectedPreview == kNoPreviewSelected;
   }
 
  private:

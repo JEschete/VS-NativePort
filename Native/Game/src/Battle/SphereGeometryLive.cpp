@@ -9,7 +9,7 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Core/Log.hpp"
 #include "Core/Scratch.hpp"
 
@@ -87,10 +87,10 @@ SphereArcBasis ReadBasis(const std::int16_t* values, std::size_t stride) {
 }
 
 Battle_TargetSphereSetupView& RequiredSphere(const char* operation) {
-  if (Battle_targetSphere == nullptr) {
+  if (VS::Battle::targetSphere == nullptr) {
     Refuse(operation, "missing sphere workspace");
   }
-  return *Battle_targetSphere;
+  return *VS::Battle::targetSphere;
 }
 
 void WriteVertices(Battle_TargetSphereSetupView& sphere,
@@ -227,15 +227,16 @@ int AppendSphereConeVerticesEntry(int step, int radius, int index) {
 void BuildSphereWireframeEntry(int type) {
   auto* sine = ScratchShorts(kSineScratchOffset);
   const SphereGeometryTables tables{
-      .arc_bases = {Battle_sphereArcBases, kSphereArcBaseCount},
-      .mirrored_vertices = {Battle_sphereMirroredVertices,
+      .arc_bases = {VS::Battle::sphereArcBases.data(), kSphereArcBaseCount},
+      .mirrored_vertices = {VS::Battle::sphereMirroredVertices.data(),
                             kSphereMirroredVertexCount},
-      .shape_command_starts = {Battle_sphereShapeCommandStarts,
+      .shape_command_starts = {VS::Battle::sphereShapeCommandStarts.data(),
                                kSphereShapeStartCount},
-      .commands = {Battle_sphereWireframeCommands, kSphereCommandCount},
+      .commands = {VS::Battle::sphereWireframeCommands.data(),
+                   kSphereCommandCount},
       .sine_samples = {sine, kSphereSineSampleCount},
   };
-  if (!BuildLiveSphereWireframe(Battle_targetSphere, type, tables)) {
+  if (!BuildLiveSphereWireframe(VS::Battle::targetSphere, type, tables)) {
     Refuse("sphere wireframe build", "invalid geometry state or tables");
   }
 }

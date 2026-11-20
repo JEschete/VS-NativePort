@@ -13,15 +13,15 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
@@ -29,7 +29,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
@@ -71,12 +71,12 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   ActionTargetHit Hit(std::size_t index) override {
     const Battle_HitResult& hit = action_->targets[index];
     return {.targets_position = hit.targetsPosition != 0,
-            .target_actor = hit.target.targetActor,
-            .impact_kind = static_cast<std::uint8_t>(hit.target.impactKind)};
+            .target_actor = hit.target.target_actor,
+            .impact_kind = static_cast<std::uint8_t>(hit.target.impact_kind)};
   }
 
   bool IsAreaAction() override {
-    return Battle_categoryIsAreaTarget
+    return VS::Battle::categoryIsAreaTarget
                [Battle_actionDefinitions[action_->actionId].category] != 0;
   }
 
@@ -85,16 +85,16 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
     VS::Core::Debugf("combat.result",
                      "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
                      "hp_effect=%u mp_effect=%u",
-                     action_->actionId, actor_id_, hit->target.targetLimb,
-                     hit->target.impactKind, hit->target.hp, hit->target.mp,
+                     action_->actionId, actor_id_, hit->target.target_limb,
+                     hit->target.impact_kind, hit->target.hp, hit->target.mp,
                      hit->hpEffect, hit->mpEffect);
     ApplyLiveActorActionResult(hit);
   }
 
   void PlayDamageReaction(int actor_id,
                           std::size_t visited_hit_count) override {
-    PlayLiveTargetDamageReaction(actor_id, &Battle_actionState->rangeOrigin,
-                                 visited_hit_count);
+    PlayLiveTargetDamageReaction(
+        actor_id, &VS::Battle::actionState->rangeOrigin, visited_hit_count);
   }
 
   bool HasActorRecord(int actor_id) override {
@@ -102,7 +102,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   void PlayDefense(int actor_id) override {
-    PlayLiveDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
+    PlayLiveDefenseAnimation(actor_id, &VS::Battle::actionState->rangeOrigin);
   }
 
   void PlayRecoveryPose() override {
@@ -117,10 +117,10 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
 ActorActionResult ReadResult(const Battle_HitResult& hit) {
   ActorActionResult result{
-      .target = static_cast<std::uint8_t>(hit.target.targetActor),
+      .target = static_cast<std::uint8_t>(hit.target.target_actor),
       .limb = std::bit_cast<std::int8_t>(
-          static_cast<std::uint8_t>(hit.target.targetLimb)),
-      .impact = static_cast<std::uint8_t>(hit.target.impactKind),
+          static_cast<std::uint8_t>(hit.target.target_limb)),
+      .impact = static_cast<std::uint8_t>(hit.target.impact_kind),
       .changes = {{
           {hit.target.hp, static_cast<std::uint8_t>(hit.hpEffect)},
           {hit.target.mp, static_cast<std::uint8_t>(hit.mpEffect)},
@@ -188,14 +188,15 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
     ApplyActionTargetEffects(actor_id, effects);
     return;
   }
-  if (actor_id < 0 || Battle_actionState == nullptr) {
+  if (actor_id < 0 || VS::Battle::actionState == nullptr) {
     VS::Core::LogError(
         "combat", "Invalid action target {} or missing action state", actor_id);
     std::abort();
   }
-  const std::size_t queue_mask = std::size(Battle_actionState->queue) - 1;
+  const std::size_t queue_mask = std::size(VS::Battle::actionState->queue) - 1;
   Battle_ActionRequest& action =
-      Battle_actionState->queue[Battle_actionState->queueIndex & queue_mask];
+      VS::Battle::actionState
+          ->queue[VS::Battle::actionState->queueIndex & queue_mask];
   if (action.targetCount > std::size(action.targets) ||
       action.actionId >= std::size(Battle_actionDefinitions)) {
     VS::Core::LogError("combat", "Invalid action {} with {} targets",

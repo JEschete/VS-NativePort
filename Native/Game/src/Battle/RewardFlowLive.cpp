@@ -9,11 +9,11 @@
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/RewardFlow.hpp"
 #include "Battle/Rewards.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
@@ -40,8 +40,8 @@ void Require(bool valid, const char* reason) {
 }
 
 Battle_ActionState& CurrentAction() {
-  Require(Battle_actionState != nullptr, "missing action state");
-  return *Battle_actionState;
+  Require(VS::Battle::actionState != nullptr, "missing action state");
+  return *VS::Battle::actionState;
 }
 
 Battle_ActionDefinition& Definition(std::uint16_t action) {
@@ -53,7 +53,7 @@ Battle_ActionDefinition& Definition(std::uint16_t action) {
 class LiveWorld final : public RewardDispatchWorld {
  public:
   void SetPhase(RewardPhase phase) override {
-    Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
+    VS::Battle::actionFlowMode = static_cast<std::uint32_t>(phase);
   }
   void SetInteractionPaused(bool paused) override {
     VS::Field::isInteractionPaused = paused ? 1 : 0;
@@ -71,7 +71,7 @@ class LiveWorld final : public RewardDispatchWorld {
             .targets_position = static_cast<std::uint32_t>(
                 state.selection.primaryTarget.targetsPosition),
             .continued = static_cast<std::uint8_t>(state.chainContinued),
-            .primary_actor = state.selection.primaryTarget.target.targetActor};
+            .primary_actor = state.selection.primaryTarget.target.target_actor};
   }
   bool DefinitionUnlocked(std::uint16_t action) override {
     return Definition(action).unlocked != 0;
@@ -152,7 +152,7 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   void BeginPendingAbilityReward() override { LiveBeginPendingAbilityReward(); }
   void GrantPendingAbilityUnlock() override { LiveGrantPendingAbilityUnlock(); }
-  std::uint32_t CurrentPhase() override { return Battle_actionFlowMode; }
+  std::uint32_t CurrentPhase() override { return VS::Battle::actionFlowMode; }
   void SetLootMenuOpened(std::int32_t value) override {
     lootMenuOpened = value;
   }

@@ -17,7 +17,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
 

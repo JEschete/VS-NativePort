@@ -7,8 +7,8 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.hpp"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/DamagePoliciesLive.hpp"
@@ -34,7 +34,7 @@ Battle_HitResult& HitOf(Battle_HitResult* hit) {
   return *hit;
 }
 Battle_ActorStats* CaptureStats(Battle_HitResult* hit) {
-  const auto slot = HitOf(hit).target.targetActor;
+  const auto slot = HitOf(hit).target.target_actor;
   Require(slot < std::size(Battle_actors) && Battle_actors[slot] != nullptr);
   return Battle_actors[slot]->stats;
 }
@@ -167,9 +167,9 @@ class LiveQueue final : public DamageRecoveryQueue {
     return StatsOf(target_stats_).shield.current_pp;
   }
   std::uint8_t SelectedPrimaryHpMode() override {
-    Require(Battle_actionState != nullptr);
+    Require(VS::Battle::actionState != nullptr);
     return static_cast<std::uint8_t>(
-        Battle_actionState->selection.primaryTarget.hpEffect);
+        VS::Battle::actionState->selection.primaryTarget.hpEffect);
   }
 
  private:
@@ -182,7 +182,7 @@ class LiveQueue final : public DamageRecoveryQueue {
   Battle_ActorStats* target_stats_{};
 };
 
-using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
+using Mediator = VS::Battle::ActionEffectMediator;
 static_assert(
     std::is_same_v<decltype(&QueueLiveHitDamageAndEquipmentWear), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveMpDrain), Mediator>);

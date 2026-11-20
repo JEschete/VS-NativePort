@@ -23,7 +23,7 @@
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -100,8 +100,7 @@ struct NavigationOverrideFixture {
 struct ScriptedOverrideFixture : NavigationOverrideFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_actorMarkers)) saved_markers =
-      std::to_array(Battle_actorMarkers);
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
@@ -167,7 +166,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
       VS::Core::Memory::FreeLiveFromHighEnd(source.native_pointer_18c);
     }
     std::ranges::copy(saved_actors, Battle_actors);
-    std::ranges::copy(saved_markers, Battle_actorMarkers);
+    std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
     std::ranges::copy(saved_directions,
                       VS::Battle::Ai::directionDeltas.begin());
     VS::Battle::Ai::roomAiState = saved_room;
@@ -217,7 +216,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     CHECK(room.engaged_head == nullptr);
     CHECK(room.engaged_tail == nullptr);
     CHECK(room.engaged_count == 0);
-    CHECK(Battle_actorMarkers[1] == 0);
+    CHECK(VS::Battle::actorMarkers[1] == 0);
   }
 
   void CheckCopiedCoordinates() {
@@ -819,7 +818,7 @@ TEST_CASE(
   const auto engaged = VS::Battle::Ai::TryEngageLiveActor(&fixture.source);
   VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
   REQUIRE(engaged);
-  Battle_actorMarkers[1] = static_cast<char>(0x85);
+  VS::Battle::actorMarkers[1] = static_cast<char>(0x85);
   fixture.source.current_candidate = &fixture.source.candidates[0];
   const u_int preserved = 0x11223344;
   std::memcpy(fixture.source.reserved160.data() + 4, &preserved,
@@ -877,7 +876,7 @@ TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
 TEST_CASE("Scripted path requests retain missing map and AI-state gates",
           "[ai][scripted-override]") {
   ScriptedOverrideFixture fixture;
-  Battle_actorMarkers[1] = static_cast<char>(0x85);
+  VS::Battle::actorMarkers[1] = static_cast<char>(0x85);
   VS::Battle::Ai::tileFlagMap = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.native_pointer_18c == nullptr);
@@ -886,7 +885,7 @@ TEST_CASE("Scripted path requests retain missing map and AI-state gates",
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(VS::Core::Memory::GameHeap().Empty());
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[1]) == 0x85);
 }
 
 TEST_CASE("Scripted route updates preserve strict source arrival boundaries",

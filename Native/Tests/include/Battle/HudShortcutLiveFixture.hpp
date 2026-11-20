@@ -10,7 +10,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/AbilityState.h"
-#include "Battle/ActionMenu.h"
+#include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Menu/Magic.hpp"
@@ -34,10 +34,10 @@ class LiveShortcut {
     record.instance.weaponDrawn = 1;
     stats.currentHp = 1;
     stats.currentMp = 1;
-    std::ranges::fill(Battle_spellClassCounts, u_char{0});
-    std::ranges::fill(Battle_spellClassSpellIds, nullptr);
-    std::ranges::fill(Battle_chainAbilityActionIds, char{0});
-    std::ranges::fill(Battle_defenseAbilityActionIds, char{0});
+    std::ranges::fill(VS::Battle::spellClassCounts, u_char{0});
+    std::ranges::fill(VS::Battle::spellClassSpellIds, nullptr);
+    std::ranges::fill(VS::Battle::chainAbilityActionIds, char{0});
+    std::ranges::fill(VS::Battle::defenseAbilityActionIds, char{0});
     for (auto& action : Battle_actionDefinitions) action.unlocked = 0;
   }
   ~LiveShortcut() {
@@ -52,8 +52,8 @@ class LiveShortcut {
 
   static void SpellClass(std::size_t spell_class, std::uint8_t* first,
                          std::uint8_t count) {
-    auto counts = std::span(Battle_spellClassCounts);
-    auto ids = std::span(Battle_spellClassSpellIds);
+    auto counts = std::span(VS::Battle::spellClassCounts);
+    auto ids = std::span(VS::Battle::spellClassSpellIds);
     counts[spell_class] = count;
     ids[spell_class] = first;
   }
@@ -69,10 +69,10 @@ class LiveShortcut {
   std::array<std::uint8_t, 256> unlocked_{};
 
   void Capture() {
-    std::ranges::copy(Battle_spellClassCounts, counts_.begin());
-    std::ranges::copy(Battle_spellClassSpellIds, ids_.begin());
-    std::ranges::copy(Battle_chainAbilityActionIds, chain_.begin());
-    std::ranges::copy(Battle_defenseAbilityActionIds, defense_.begin());
+    std::ranges::copy(VS::Battle::spellClassCounts, counts_.begin());
+    std::ranges::copy(VS::Battle::spellClassSpellIds, ids_.begin());
+    std::ranges::copy(VS::Battle::chainAbilityActionIds, chain_.begin());
+    std::ranges::copy(VS::Battle::defenseAbilityActionIds, defense_.begin());
     std::ranges::copy(VS::Menu::Magic::warlockSpellIds, warlock_.begin());
     std::ranges::copy(VS::Menu::Magic::sorcererSpellIds, sorcerer_.begin());
     std::ranges::copy(VS::Menu::Magic::shamanSpellIds, shaman_.begin());
@@ -83,10 +83,11 @@ class LiveShortcut {
     }
   }
   void Restore() {
-    std::ranges::copy(counts_, std::begin(Battle_spellClassCounts));
-    std::ranges::copy(ids_, std::begin(Battle_spellClassSpellIds));
-    std::ranges::copy(chain_, std::begin(Battle_chainAbilityActionIds));
-    std::ranges::copy(defense_, std::begin(Battle_defenseAbilityActionIds));
+    std::ranges::copy(counts_, std::begin(VS::Battle::spellClassCounts));
+    std::ranges::copy(ids_, std::begin(VS::Battle::spellClassSpellIds));
+    std::ranges::copy(chain_, std::begin(VS::Battle::chainAbilityActionIds));
+    std::ranges::copy(defense_,
+                      std::begin(VS::Battle::defenseAbilityActionIds));
     std::ranges::copy(warlock_, std::begin(VS::Menu::Magic::warlockSpellIds));
     std::ranges::copy(sorcerer_, std::begin(VS::Menu::Magic::sorcererSpellIds));
     std::ranges::copy(shaman_, std::begin(VS::Menu::Magic::shamanSpellIds));

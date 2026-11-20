@@ -147,7 +147,7 @@ int func_800F9800(void) {
         with (root / r"tools\port\owned.csv").open(newline="", encoding="utf-8") as table:
             owned = {row["id"]: row for row in csv.DictReader(table)}
         generated = (root / r"Native\Game\src\Battle\ActionAnimation.cpp").read_text(encoding="utf-8")
-        header = (root / r"Native\Game\src\Battle\ActionAnimation.h").read_text(encoding="utf-8")
+        header = (root / r"Native\Game\src\Battle\ActionAnimation.hpp").read_text(encoding="utf-8")
         for identifier, (live, old, address) in names.items():
             binding = f"VS::Battle::{live}"
             with self.subTest(identifier=identifier):
@@ -158,9 +158,10 @@ int func_800F9800(void) {
                                  r"Native\Game\include\Battle\ActionAnimationsLive.hpp")
                 self.assertNotIn(f"Battle_{old}(", generated)
                 self.assertNotIn(f"Battle_{old}(", header)
-        for declaration in ("u_char Battle_chainAbilityAnimationGroups[168];",
-                            "int Battle_chainAbilityAnimationSide;",
-                            "char Battle_specialActionPitch;"):
+        self.assertIn("kChainAbilityAnimationGroupBytes = 168;", header)
+        for declaration in (" chainAbilityAnimationGroups;",
+                            "std::int32_t chainAbilityAnimationSide;",
+                            "std::int8_t specialActionPitch;"):
             self.assertIn(declaration, generated)
 
     def test_action_sequence_preserves_data_and_binds_five_owned_entries(self):
@@ -236,8 +237,9 @@ int func_800F9800(void) {
                                  r"Native\Game\include\Battle\ActionOutcomesLive.hpp")
         generated = (Path(__file__).resolve().parents[2] / r"Native\Game\src\Battle\ActionFlow.cpp").read_text(
             encoding="utf-8")
-        for symbol in ("Battle_actionState", "Battle_actionFlowMode", "Battle_recoveryRewardMode",
-                       "Battle_actionSelection"):
+        for symbol in ("Battle_ActionState* actionState;", "std::uint32_t actionFlowMode;",
+                       "std::int32_t recoveryRewardMode;",
+                       "VS::Menu::Framework::ActionSelection* actionSelection;"):
             self.assertIn(symbol, generated)
         # D_8005FFAF aliased vs_main_scoredata.weaponKillStreak (#448).
         self.assertNotIn("Battle_spellCommitFlag", generated)
@@ -3087,13 +3089,13 @@ int func_800F9800(void) {
         core = root.joinpath(
             "Native", "Game", "src", "Battle", "HudOrchestration.cpp"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("Battle_puzzleTimerTextPointer", source)
+        self.assertNotIn("VS::Battle::puzzleTimerTextPointer", source)
         self.assertIn("FormatPuzzleTimer(time,", source)
-        self.assertIn("std::span(Battle_puzzleTimerText)", source)
+        self.assertIn("std::span(VS::Battle::puzzleTimerText)", source)
         self.assertIn("std::span<char, kPuzzleTimerTextBytes> text", core)
         self.assertLess(
             source.index('VS::Core::Debugf("hud.timer"'),
-            source.index("DrawText(std::string_view(Battle_puzzleTimerText"),
+            source.index("std::string_view(VS::Battle::puzzleTimerText.data()"),
         )
         self.assertIn("const State::SceneTimer* timer", source)
         for field in ("seconds", "minutes", "hours"):
@@ -4572,7 +4574,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
     def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
         root = Path(__file__).resolve().parents[2]
         action = (root / "Native/Game/include/Battle/Action.h").read_text()
-        self.assertIn("Battle_TargetPreview previews[255];", action)
+        self.assertIn("VS::Battle::TargetPreview previews[255];", action)
         self.assertIn("Battle_HitResult targets[255];", action)
         boot = (root / "Native/Game/src/Boot/GameplayOverlayLive.cpp").read_text()
         self.assertIn("AllocateLiveFromHighEnd(sizeof(Battle_ActionState))", boot)
@@ -4694,7 +4696,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertIn('#include "Battle/ActionResultsLive.hpp"', live)
         core = (root / "Native/Game/src/Battle/ActionResults.cpp").read_text(encoding="utf-8")
         self.assertNotIn("Legacy/", core)
-        self.assertNotIn("Battle_actionState", core)
+        self.assertNotIn("VS::Battle::actionState", core)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x8006CB04u", table)
 
@@ -4994,7 +4996,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         source = (root / "Native/Game/src/Boot/Encounter.cpp").read_text()
         inspect = source.split("void InspectTargeting(", 1)[1].split("\n}", 1)[0]
         self.assertIn(
-            "state.source_actor = action.selection.primaryTarget.target.targetActor;",
+            "state.source_actor = action.selection.primaryTarget.target.target_actor;",
             inspect,
         )
         self.assertNotIn("state.source_actor = action.sourceActorId;", inspect)

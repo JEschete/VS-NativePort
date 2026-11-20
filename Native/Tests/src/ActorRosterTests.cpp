@@ -26,7 +26,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Legacy/Psx.h"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
@@ -453,8 +453,7 @@ struct LiveRosterFixture {
       VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
-  decltype(std::to_array(Battle_actorMarkers)) saved_markers =
-      std::to_array(Battle_actorMarkers);
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
   decltype(std::to_array(VS::State::recentRoomEnemyStates)) saved_rooms =
       std::to_array(VS::State::recentRoomEnemyStates);
   int saved_room_slot = VS::State::currentRoomStateSlot;
@@ -465,7 +464,7 @@ struct LiveRosterFixture {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
                 nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
-    std::fill_n(Battle_actorMarkers, saved_markers.size(), 0);
+    std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(), 0);
     std::fill_n(VS::State::recentRoomEnemyStates, saved_rooms.size(),
                 VS::State::RoomEnemyStates{});
     VS::State::currentRoomStateSlot = 0;
@@ -479,7 +478,7 @@ struct LiveRosterFixture {
     std::ranges::copy(saved_records, Actors_actorRecords);
     std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
-    std::ranges::copy(saved_markers, Battle_actorMarkers);
+    std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
     std::ranges::copy(saved_rooms, VS::State::recentRoomEnemyStates);
     VS::State::currentRoomStateSlot = saved_room_slot;
   }
@@ -778,7 +777,7 @@ TEST_CASE("A live placeholder actor gets the placeholder stats",
   actor.killCounted = 1;
   actor.defeated = 1;
   Battle_actors[5] = &actor;
-  Battle_actorMarkers[5] = static_cast<char>(0x83);
+  VS::Battle::actorMarkers[5] = static_cast<char>(0x83);
   ChannelWarnings warnings("actors");
 
   VS::Actors::InitializeLivePlaceholderActor(5, 0x101);
@@ -787,12 +786,12 @@ TEST_CASE("A live placeholder actor gets the placeholder stats",
   CHECK(std::to_array<int>(
             {actor.roomSpawnIndex, actor.killCounted, actor.defeated}) ==
         std::array<int, 3>{actors::kNoRoomSpawn, 0, 0});
-  CHECK(static_cast<unsigned char>(Battle_actorMarkers[5]) == 0x88);
+  CHECK(static_cast<unsigned char>(VS::Battle::actorMarkers[5]) == 0x88);
 
-  Battle_actorMarkers[5] = 0;
+  VS::Battle::actorMarkers[5] = 0;
   VS::Actors::InitializeLivePlaceholderActor(5, 2);
   CHECK(stats->cancelsHitResults == 0);
-  CHECK(Battle_actorMarkers[5] == 0);
+  CHECK(VS::Battle::actorMarkers[5] == 0);
   CHECK(warnings.messages.empty());
 
   VS::Actors::InitializeLivePlaceholderActor(42, 1);

@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <span>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Diagnostics.hpp"
@@ -132,7 +132,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void OpenFilePicker() override {
     VS::Field::LiveSetFieldRenderingEnabled(0);
     VS::Battle::SetLiveHudHidden(1);
-    Battle_hudSlideOffset = kContainerHiddenHudOffset;
+    VS::Battle::hudSlideOffset = kContainerHiddenHudOffset;
     VS::Menu::Framework::SetLiveBackgroundPriority(kContainerBackgroundPriority,
                                                    kContainerBackgroundAlpha);
     VS::Menu::Files::ResetLiveElements();
@@ -201,7 +201,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void CloseFilePicker() override {
     VS::Field::LiveSetFieldRenderingEnabled(1);
     VS::Battle::SetLiveHudHidden(0);
-    Battle_hudSlideOffset = 0;
+    VS::Battle::hudSlideOffset = 0;
     VS::Menu::Framework::ClearLiveMenuExcept(VS::Menu::Framework::kNoRow);
     VS::Menu::Framework::SetLiveBackgroundPriority(kContainerRestorePriority,
                                                    kContainerBackgroundAlpha);

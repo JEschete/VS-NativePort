@@ -16,7 +16,7 @@
 #include "Audio/VoiceOutputLive.hpp"
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/EncounterHooks.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -126,7 +126,8 @@ class LiveSessionHost final : public SessionHost {
     std::memset(VS::Menu::textBoxes, 0, sizeof VS::Menu::textBoxes);
     std::memset(&VS::Menu::textBoxSelector, 0,
                 sizeof VS::Menu::textBoxSelector);
-    std::memset(&Battle_stringContext, 0, sizeof Battle_stringContext);
+    std::memset(&VS::Battle::stringContext, 0,
+                sizeof VS::Battle::stringContext);
     std::memset(VS::Event::isTextBoxAwaitingClose, 0,
                 sizeof VS::Event::isTextBoxAwaitingClose);
     VS::Menu::sceneNotificationBuffer = nullptr;

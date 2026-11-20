@@ -15,7 +15,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Field/CameraLiveState.hpp"
@@ -34,7 +34,7 @@ struct Model {
 struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
       std::to_array(Actors_actorRecords);
-  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
   decltype(VS::Field::cameraTransition) saved_transition =
@@ -76,7 +76,7 @@ struct LiveFixture {
     VS::Render::FrameScratchpad().camera = {};
     VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext.bounds = {-100, -100, 100, 100};
-    Battle_actionState = &state;
+    VS::Battle::actionState = &state;
     state.queueIndex = 3;
     state.queue[3].focusPosition = {-4, -2, 2, 71};
   }
@@ -84,7 +84,7 @@ struct LiveFixture {
   LiveFixture& operator=(const LiveFixture&) = delete;
   ~LiveFixture() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
-    Battle_actionState = saved_state;
+    VS::Battle::actionState = saved_state;
     VS::Field::sphericalCamera = saved_camera;
     VS::Field::cameraTransition = saved_transition;
     VS::Field::zoneContext.bounds = saved_bounds;
@@ -146,8 +146,8 @@ TEST_CASE(
       std::bit_cast<decltype(queue.targets[0].target)>(Point{2, -1, 9, 71});
   CHECK(b::LiveActionTargetDistance() == 5);
   queue.targets[0].targetsPosition = 0;
-  queue.targets[0].target.targetActor = 0;
-  queue.targets[0].target.targetLimb = -1;
+  queue.targets[0].target.target_actor = 0;
+  queue.targets[0].target.target_limb = -1;
   CHECK(b::LiveActionTargetDistance() == 0);
   fixture->actor.boneMatrices[0].t[0] = -2426;
   fixture->actor.boneMatrices[0].t[1] = 7487;
@@ -169,7 +169,7 @@ TEST_CASE("F00182 production dry step still queries the live skeleton",
           "[camera-selection][F00182][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.queue[3].targetCount = 1;
-  fixture->state.queue[3].targets[0].target.targetLimb = -1;
+  fixture->state.queue[3].targets[0].target.target_limb = -1;
   b::LiveStepCameraTowardActionMidpoint(0);
   CHECK(fixture->state.queue[3].targetCount == 1);
   CHECK(fixture->state.queueIndex == 3);
@@ -178,7 +178,7 @@ TEST_CASE("F00183 production enemy wait has no actor record dependency",
           "[camera-selection][F00183][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.isPlayerAction = -1;
-  fixture->state.selection.primaryTarget.target.targetActor = 255;
+  fixture->state.selection.primaryTarget.target.target_actor = 255;
   fixture->state.selectionFrames = static_cast<char>(255);
   fixture->state.selectedPreview = 77;
   b::LiveUpdateInitialTargetSelection();
@@ -189,7 +189,7 @@ TEST_CASE("F00184 production area wait wraps unsigned frames before readiness",
           "[camera-selection][F00184][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.isPlayerAction = 0x10000;
-  fixture->state.selection.primaryTarget.target.targetActor = 255;
+  fixture->state.selection.primaryTarget.target.target_actor = 255;
   fixture->state.selectionFrames = static_cast<char>(255);
   fixture->state.areaCenter = {1, 2, 3, 4};
   b::LiveUpdateActionAreaSelection();
@@ -201,7 +201,7 @@ TEST_CASE(
     "[camera-selection][F00185][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.isPlayerAction = 1;
-  fixture->state.selection.primaryTarget.target.targetActor = 255;
+  fixture->state.selection.primaryTarget.target.target_actor = 255;
   fixture->state.selection.actionId = 65535;
   fixture->state.selectionFrames = static_cast<char>(255);
   fixture->state.selectedPreview = 255;
@@ -213,7 +213,7 @@ TEST_CASE(
     "F00186 production inactive diagnostics do not read missing action state",
     "[camera-selection][F00186][redirect-binding]") {
   auto fixture = std::make_unique<LiveFixture>();
-  Battle_actionState = nullptr;
+  VS::Battle::actionState = nullptr;
   for (int mode : {0, 2, 4, -1}) {
     VS::Field::sphericalCamera.motion.zoom_mode = mode;
     b::LiveUpdateActionCameraZoom();

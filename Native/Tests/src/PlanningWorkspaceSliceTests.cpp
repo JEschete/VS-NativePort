@@ -606,7 +606,7 @@ TEST_CASE("The live request reads the primary target, not padded offsets",
           "[combat][ai][planning]") {
   Battle_ActionRequest request;
   std::memset(&request, 0, sizeof request);
-  request.primaryTarget.target.targetActor = 7;
+  request.primaryTarget.target.target_actor = 7;
   request.primaryTarget.riskChange = 3;
   request.primaryTarget.targetsPosition = 0;
   std::memset(&request.targets[0], 0x5A, sizeof request.targets[0]);

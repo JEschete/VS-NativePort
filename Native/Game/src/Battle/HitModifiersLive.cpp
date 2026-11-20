@@ -66,9 +66,9 @@ class LiveHitModifierWorld final : public HitModifierWorld {
 
 std::optional<HitModifierTarget> ReadHit(const Battle_HitResult* hit) {
   if (hit == nullptr) return std::nullopt;
-  return HitModifierTarget{hit->target.targetActor,
+  return HitModifierTarget{hit->target.target_actor,
                            std::bit_cast<std::int8_t>(static_cast<std::uint8_t>(
-                               hit->target.targetLimb)),
+                               hit->target.target_limb)),
                            hit->targetsPosition};
 }
 
@@ -109,7 +109,7 @@ std::int16_t DefenseLiveGemHitBonus(Battle_ActionDefinition* action,
 int PreviousLiveHitSuccessThreshold(Battle_ActionDefinition*, Battle_HitResult*,
                                     Battle_HitResult*, int, int) {
   return PreviousHitSuccessThreshold(
-      std::bit_cast<std::int32_t>(Battle_previousHitResult));
+      std::bit_cast<std::int32_t>(VS::Battle::previousHitResult));
 }
 
 // decomp: _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875).

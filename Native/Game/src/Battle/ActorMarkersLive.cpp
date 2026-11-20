@@ -11,7 +11,7 @@
 
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkers.hpp"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -144,21 +144,23 @@ class LiveActorMarkerWorld final : public ActorMarkerWorld {
 
 ActorMarkerState ReadMarkers() {
   ActorMarkerState state;
-  const auto kinds = std::span(Battle_actorMarkers).first<kActorMarkerCount>();
+  const auto kinds =
+      std::span(VS::Battle::actorMarkers).first<kActorMarkerCount>();
   std::ranges::transform(kinds, state.kinds.begin(), [](char kind) {
     return static_cast<std::uint8_t>(kind);
   });
-  state.sides = static_cast<std::uint32_t>(Battle_actorMarkerSides);
-  state.hidden = Battle_actorMarkersHidden;
+  state.sides = static_cast<std::uint32_t>(VS::Battle::actorMarkerSides);
+  state.hidden = VS::Battle::actorMarkersHidden;
   return state;
 }
 
 void WriteMarkers(const ActorMarkerState& state) {
-  const auto kinds = std::span(Battle_actorMarkers).first<kActorMarkerCount>();
+  const auto kinds =
+      std::span(VS::Battle::actorMarkers).first<kActorMarkerCount>();
   std::ranges::transform(state.kinds, kinds.begin(), [](std::uint8_t kind) {
     return static_cast<char>(kind);
   });
-  Battle_actorMarkerSides = static_cast<int>(state.sides);
+  VS::Battle::actorMarkerSides = static_cast<int>(state.sides);
 }
 }  // namespace
 
@@ -198,16 +200,16 @@ void LiveDrawOffscreenActorArrow(SVECTOR* position, int direction) {
 // decomp: F00740 func_80096FF0 (src/BATTLE/BATTLE.PRG/2842C.c:2838).
 void LiveShowAbilityTimingCue(int cue_duration_frames) {
   LiveActorMarkerWorld world;
-  SVECTOR& position = Battle_abilityTimingCuePosition;
+  SVECTOR& position = VS::Battle::abilityTimingCuePosition;
   AbilityTimingCue cue{
       .anchor = {.screen = {.x = position.vx, .y = position.vy},
                  .depth = position.vz},
-      .frames = Battle_abilityTimingCueFrames};
+      .frames = VS::Battle::abilityTimingCueFrames};
   ShowAbilityTimingCue(world, VS::Input::settings.ability_timing_display != 0,
                        cue, cue_duration_frames);
   position.vx = cue.anchor.screen.x;
   position.vy = cue.anchor.screen.y;
   position.vz = cue.anchor.depth;
-  Battle_abilityTimingCueFrames = cue.frames;
+  VS::Battle::abilityTimingCueFrames = cue.frames;
 }
 }  // namespace VS::Battle

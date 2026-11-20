@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Event/EventSceneTransition.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
@@ -394,16 +394,16 @@ TEST_CASE(
     "the rewards end",
     "[event][scene-transition]") {
   const std::uint8_t saved_active = event::isMenuTransitionActive;
-  const auto saved_phase = Battle_actionFlowMode;
+  const auto saved_phase = VS::Battle::actionFlowMode;
   // No reward phase runs, so the sequence has ended.
-  Battle_actionFlowMode = 0;
+  VS::Battle::actionFlowMode = 0;
   event::isMenuTransitionActive = 5;
   std::array<std::uint8_t, event::kRunMenuTransitionLength> bytes =
       MenuCommand(event::kTimeAttackStartMode);
   CHECK(VS::Event::ScriptRunMenuTransitionOpcode(bytes.data(), 0) == 4);
   CHECK(event::isMenuTransitionActive == 0);
   event::isMenuTransitionActive = saved_active;
-  Battle_actionFlowMode = saved_phase;
+  VS::Battle::actionFlowMode = saved_phase;
 }
 
 // --- F01120 func_800B98C0 ScriptChangeRoom ---

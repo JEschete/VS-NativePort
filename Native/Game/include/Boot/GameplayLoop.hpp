@@ -17,7 +17,7 @@ namespace VS::Boot {
 using FieldControlMode = Field::FieldControlMode;
 using ScreenTransitionStep = Field::TransitionStep;
 
-// Battle_actionFlowMode while the control mode is kBattleAction.
+// VS::Battle::actionFlowMode while the control mode is kBattleAction.
 enum class BattleActionFlow : std::int32_t {
   kIdle = 0,
   kInitialTargetSelection = 1,
@@ -36,14 +36,14 @@ enum class BattleActionFlow : std::int32_t {
   kAbilityUnlockResults = 14,
 };
 
-// Battle_actionFlowMode while the control mode is kFirstPersonView.
+// VS::Battle::actionFlowMode while the control mode is kFirstPersonView.
 enum class FirstPersonViewFlow : std::int32_t {
   kEntering = 0,
   kActive = 1,
   kExiting = 2,
 };
 
-// Battle_actionFlowMode while a trap or chest interaction runs.
+// VS::Battle::actionFlowMode while a trap or chest interaction runs.
 enum class InteractionFlow : std::int32_t {
   kCameraFocus = 1,
   kTrapEffectOrChestOpening = 2,
@@ -51,9 +51,9 @@ enum class InteractionFlow : std::int32_t {
   kReturnCamera = 4,
 };
 
-// Battle_actionFlowMode in kCutscene: actors still moving into place.
+// VS::Battle::actionFlowMode in kCutscene: actors still moving into place.
 inline constexpr std::int32_t kCutscenePreparingFlow = 1;
-// Battle_actionFlowMode in kActionMenu: the menu is open.
+// VS::Battle::actionFlowMode in kActionMenu: the menu is open.
 inline constexpr std::int32_t kActionMenuOpenFlow = 1;
 
 // VS::Actors::LiveActorStateFlags bits the loop tests (ActorFlags.hpp).
@@ -94,7 +94,7 @@ enum class RoomActorOutcome : std::int32_t {
   kOpenEnemyLoot = 2,
 };
 
-// Battle_recoveryRewardMode: no reward, so recovery waits for post-action
+// VS::Battle::recoveryRewardMode: no reward, so recovery waits for post-action
 // movement (VS::Battle::LiveBeginPendingAbilityReward).
 inline constexpr int kNoRecoveryReward = 0;
 

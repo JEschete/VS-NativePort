@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -109,9 +109,9 @@ class LiveAttributeWorld final : public HitAttributeWorld {
 };
 std::optional<HitModifierTarget> AttributeHit(const Battle_HitResult* hit) {
   if (hit == nullptr) return std::nullopt;
-  return HitModifierTarget{hit->target.targetActor,
+  return HitModifierTarget{hit->target.target_actor,
                            std::bit_cast<std::int8_t>(static_cast<std::uint8_t>(
-                               hit->target.targetLimb)),
+                               hit->target.target_limb)),
                            hit->targetsPosition};
 }
 using AttributeCalculator = decltype(&AgilityHitChance);
@@ -128,8 +128,8 @@ int CalculateAttributes(AttributeCalculator calculate,
 
 std::optional<CalculationTarget> ReadTarget(const Battle_HitResult* hit) {
   if (hit == nullptr) return std::nullopt;
-  return CalculationTarget{hit->target.targetActor, hit->targetsPosition,
-                           hit->target.hitThreshold};
+  return CalculationTarget{hit->target.target_actor, hit->targetsPosition,
+                           hit->target.hit_threshold};
 }
 class LiveCalculationWorld final : public ActionCalculationWorld {
  public:
@@ -170,9 +170,11 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
     return Battle_statCalculators[selector](action_, source_, target_, hit,
                                             execute);
   }
-  std::uint32_t Prerequisite() override { return Battle_hitPrerequisiteResult; }
+  std::uint32_t Prerequisite() override {
+    return VS::Battle::hitPrerequisiteResult;
+  }
   void StoreThreshold(std::uint8_t threshold) override {
-    target_->target.hitThreshold = threshold;
+    target_->target.hit_threshold = threshold;
   }
   void StoreLastValue(std::uint32_t value) override {
     Battle_lastActionStatValue = value;
@@ -255,6 +257,6 @@ static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&RejectLiveStatSelector)&>);
 static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&LiveCalculateActionStatChange)&>);
-static_assert(std::is_same_v<decltype(Battle_actionEffectMediators[0]),
+static_assert(std::is_same_v<decltype(VS::Battle::actionEffectMediators[0]),
                              decltype(&RejectLiveEffectSelector)&>);
 }  // namespace VS::Battle

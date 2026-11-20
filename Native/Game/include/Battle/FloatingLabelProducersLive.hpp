@@ -2,12 +2,12 @@
 // Hand-maintained (tools/port/owned.csv).
 
 // Live binding for the floating label producers (FloatingLabelProducers.hpp)
-// over Battle_floatingLabels, the floating label queue's live reserve, remove
-// and commit (FloatingLabelQueueLive.hpp), the actor skeleton's bone services
-// (SkeletonLive.hpp) and the BIOS rand(). The entries keep the generated
-// Battle_* signatures for the callers and the module's function pointers. A
-// record outside the 32-record owner is refused with a diagnostic; queue
-// count and slot corruption stay with the queue binding, which aborts.
+// over VS::Battle::floatingLabels, the floating label queue's live reserve,
+// remove and commit (FloatingLabelQueueLive.hpp), the actor skeleton's bone
+// services (SkeletonLive.hpp) and the BIOS rand(). The entries keep the
+// generated Battle_* signatures for the callers and the module's function
+// pointers. A record outside the 32-record owner is refused with a diagnostic;
+// queue count and slot corruption stay with the queue binding, which aborts.
 namespace VS::Battle {
 // func_80093B68 (2842C.c:1544).
 int LiveQueueActorValueLabel(int actor_slot, int limb_tag,

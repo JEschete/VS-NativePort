@@ -12,12 +12,12 @@
 
 #include "Actors/AppearanceLive.hpp"
 #include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
+#include "Battle/Sphere.hpp"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereTargetLabels.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -43,7 +43,8 @@ static_assert(std::size(Battle_TargetSphere{}.labels) ==
               kSphereTargetLabelCount);
 static_assert(std::size(VS::Menu::Framework::rowAnimationSteps) >=
               kTargetLabelSlideStepCount);
-static_assert(sizeof(Battle_TargetLabelLine) == sizeof(Battle_TargetPreview));
+static_assert(sizeof(Battle_TargetLabelLine) ==
+              sizeof(VS::Battle::TargetPreview));
 
 std::uint64_t unordered_labels = 0;
 
@@ -53,7 +54,8 @@ std::uint64_t unordered_labels = 0;
 }
 
 Battle_TargetSphere& RequiredSphere(const char* operation) {
-  auto* sphere = reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
+  auto* sphere =
+      reinterpret_cast<Battle_TargetSphere*>(VS::Battle::targetSphere);
   if (sphere == nullptr) Refuse(operation, "missing sphere workspace");
   return *sphere;
 }
@@ -164,7 +166,7 @@ class LiveTargetLabelCanvas final : public SphereTargetLabelCanvas {
 void DrawLiveLabel(Battle_SphereTargetLabel& live) {
   SphereTargetLabel label = ReadLabel(live);
   LiveTargetLabelCanvas canvas(live.text);
-  DrawSphereTargetLabel(label, Battle_targetColumnTopOffset, canvas);
+  DrawSphereTargetLabel(label, VS::Battle::targetColumnTopOffset, canvas);
   WriteLabel(label, live);
 }
 
@@ -178,7 +180,7 @@ class LiveTargetLabelDrawer final : public SphereTargetLabelDrawer {
 
   void DrawLabel(std::size_t index, SphereTargetLabel& label) override {
     LiveTargetLabelCanvas canvas(labels_[index].text);
-    DrawSphereTargetLabel(label, Battle_targetColumnTopOffset, canvas);
+    DrawSphereTargetLabel(label, VS::Battle::targetColumnTopOffset, canvas);
   }
 
  private:
@@ -204,15 +206,16 @@ class LiveHighlightHost final : public SphereTargetHighlightHost {
   }
 };
 
-// func_800C4650 reads its records as target previews (Battle_TargetPreview).
+// func_800C4650 reads its records as target previews
+// (VS::Battle::TargetPreview).
 ActionTargetPreview ReadTarget(const Battle_TargetLabelLine& line) noexcept {
-  const auto target = std::bit_cast<Battle_TargetPreview>(line);
+  const auto target = std::bit_cast<VS::Battle::TargetPreview>(line);
   return {.position = {.x = target.position.vx,
                        .y = target.position.vy,
                        .z = target.position.vz,
                        .pad = target.position.pad},
           .kind = target.kind,
-          .actor_id = target.actorId,
+          .actor_id = target.actor_id,
           .limb = target.limb};
 }
 }  // namespace

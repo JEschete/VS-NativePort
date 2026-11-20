@@ -51,7 +51,7 @@ struct ReloadFixture : Fixture {
     VS::Render::FrameScratchpad().camera.position.vx = 1234;
     VS::Render::FrameScratchpad().camera.angles.pad = 77;
     VS::Menu::Framework::menuMemory.selected_equipment = 5;
-    Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
+    VS::Battle::stringContext.strings[0] = VS::Menu::Framework::stringBuf;
     *State() = 7;
   }
 
@@ -80,7 +80,7 @@ struct ReloadFixture : Fixture {
     CHECK(Battle_actors[0] == &actor);
     CHECK(actor.stats == &stats);
     CHECK(VS::Menu::Framework::menuMemory.selected_equipment == 5);
-    CHECK(Battle_stringContext.strings[0] ==
+    CHECK(VS::Battle::stringContext.strings[0] ==
           (cold ? nullptr : VS::Menu::Framework::stringBuf));
   }
 

@@ -11,7 +11,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/DamagePolicies.hpp"
@@ -36,7 +36,7 @@ struct Fixture {
   decltype(std::to_array(Battle_statCalculators)) saved_callbacks =
       std::to_array(Battle_statCalculators);
   std::uint32_t saved_last = Battle_lastActionStatValue;
-  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState* saved_state = VS::Battle::actionState;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   Battle_ActionDefinition action{};
@@ -46,9 +46,9 @@ struct Fixture {
     Battle_actors[40] = &actor;
     actor.stats = &stats;
     stats.actorId = 255;
-    hit.target.targetActor = 40;
+    hit.target.target_actor = 40;
     hit.targetsPosition = 1;
-    Battle_actionState = nullptr;
+    VS::Battle::actionState = nullptr;
     for (int i = 0; i < 8; ++i) {
       Battle_limbArmorDpLoss[i] = static_cast<std::int16_t>(200 + i);
     }
@@ -60,7 +60,7 @@ struct Fixture {
     std::copy(saved_callbacks.begin(), saved_callbacks.end(),
               Battle_statCalculators);
     Battle_lastActionStatValue = saved_last;
-    Battle_actionState = saved_state;
+    VS::Battle::actionState = saved_state;
   }
 };
 void CheckBinding(std::uint32_t address, void* function) {
@@ -208,7 +208,7 @@ TEST_CASE("F00396 live unused stats stay null and neighboring DP stays intact",
   f.actor.stats = nullptr;
   const bool selected =
       category == 6 || category == 8 || category == 11 || category == 12;
-  f.hit.target.targetLimb = selected ? 5 : -128;
+  f.hit.target.target_limb = selected ? 5 : -128;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 2);
   for (int i = 0; i < 6; ++i) {
     CHECK(f.hit.limbs[i].packed ==
@@ -225,7 +225,7 @@ TEST_CASE("F00396 live splash selects each unsigned row ignoring position",
   Fixture f;
   const auto limb = GENERATE(0, 1, 2, 3, 4, 5);
   f.action.category = 14;
-  f.hit.target.targetLimb = static_cast<signed char>(limb);
+  f.hit.target.target_limb = static_cast<signed char>(limb);
   f.stats.dpSplash[limb][2] = static_cast<char>(255);
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 32767);
   CHECK(Battle_limbArmorDpLoss[2] == 18019);
@@ -236,7 +236,7 @@ TEST_CASE("F00396 live even shares count signed maxima and ignore limb",
           "[damage-policies][F00396]") {
   Fixture f;
   f.action.category = 4;
-  f.hit.target.targetLimb = -128;
+  f.hit.target.target_limb = -128;
   f.stats.limbs[0].maxHp = -100;
   f.stats.limbs[4].maxHp = 100;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 101);
@@ -295,7 +295,7 @@ TEST_CASE("F00397 narrows large signed quotient before doubled HP addition",
 TEST_CASE("F00397 live ignores action and preserves inactive hit neighbors",
           "[damage-policies][F00397]") {
   Fixture f;
-  f.hit.target.targetLimb = -128;
+  f.hit.target.target_limb = -128;
   f.stats.limbs[2].maxHp = 100;
   f.stats.limbs[2].hp = 50;
   b::LiveDistributeLimbRecovery(nullptr, &f.hit, 32767);
@@ -316,7 +316,7 @@ TEST_CASE("F00396 equipment wear consumes only the current first six DP losses",
   f.stats.shield.current_dp = 500;
   for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
   f.action.category = 6;
-  f.hit.target.targetLimb = 2;
+  f.hit.target.target_limb = 2;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 100);
   VS::Items::ConsumeLiveHitEquipmentDp(&f.action, &f.stats, &f.stats, 100);
   CHECK(f.stats.weapon.current_dp == 900);
@@ -333,7 +333,7 @@ TEST_CASE(
   f.actor.weaponDrawn = 1;
   for (auto& limb : f.stats.limbs) limb.armor.current_dp = 500;
   f.action.category = 6;
-  f.hit.target.targetLimb = 2;
+  f.hit.target.target_limb = 2;
   b::LiveDistributeHitLimbDamage(&f.action, &f.hit, 100);
   f.stats.limbs[0].maxHp = 100;
   b::LiveDistributeLimbRecovery(nullptr, &f.hit, 25);
@@ -388,9 +388,9 @@ TEST_CASE("F00434 risk uses target slot and signed half without caps or gates",
   Fixture f;
   const auto risk = GENERATE(0, 100, 255, 256, 32767, 32768, 65535);
   f.stats.risk = static_cast<std::uint16_t>(risk);
-  f.hit.target.targetLimb = -128;
+  f.hit.target.target_limb = -128;
   Battle_HitResult source{};
-  source.target.targetActor = 255;
+  source.target.target_actor = 255;
   CHECK(b::TargetRisk(risk) == LowHalf(risk));
   CHECK(b::LiveTargetRisk(nullptr, &source, &f.hit, -1, -1) == LowHalf(risk));
   CheckBinding(0x800838BC, reinterpret_cast<void*>(b::LiveTargetRisk));

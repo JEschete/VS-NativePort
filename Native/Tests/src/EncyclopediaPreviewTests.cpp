@@ -15,7 +15,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -846,7 +846,7 @@ TEST_CASE("Actual cold session drains the pending enemy preview owner",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      VS::Menu::textBoxSelector, Battle_stringContext,
+      VS::Menu::textBoxSelector, VS::Battle::stringContext,
       VS::Event::isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
       VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;

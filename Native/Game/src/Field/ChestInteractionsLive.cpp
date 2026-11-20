@@ -17,17 +17,17 @@
 #include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
-#include "Battle/ActionResolution.h"
+#include "Battle/ActionResolution.hpp"
 #include "Battle/Actor.h"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
+#include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -479,7 +479,7 @@ class LiveInteractionCameraHost final
 class LiveTrapActionHost final : public VS::Field::TrapActionHost {
  public:
   bool HasActionState(const VS::Field::TrapActionInput& input) const override {
-    return Battle_actionState != nullptr && input.actor >= 0 &&
+    return VS::Battle::actionState != nullptr && input.actor >= 0 &&
            input.actor < kActorSlots && Battle_actors[input.actor] != nullptr &&
            Battle_actors[input.actor]->stats != nullptr;
   }
@@ -492,13 +492,13 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
     if (!HasActionState(input)) {
       return false;
     }
-    auto& action = *Battle_actionState;
+    auto& action = *VS::Battle::actionState;
     action.selection.primaryTarget.targetsPosition = kTrapPrimaryTargetPosition;
     action.selection.targetCount = 1;
     action.selection.targets[0].targetsPosition = 0;
-    action.selection.targets[0].target.targetActor =
+    action.selection.targets[0].target.target_actor =
         static_cast<std::uint8_t>(input.actor);
-    action.selection.targets[0].target.targetLimb =
+    action.selection.targets[0].target.target_limb =
         std::bit_cast<std::int8_t>(input.default_limb);
     action.chainStep = 1;
     action.queueIndex = 0;
@@ -508,10 +508,10 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
     return true;
   }
   bool ResolveAction(std::uint16_t action_id) override {
-    if (Battle_actionState == nullptr) {
+    if (VS::Battle::actionState == nullptr) {
       return false;
     }
-    auto& action = *Battle_actionState;
+    auto& action = *VS::Battle::actionState;
     VS::Battle::ResolveLiveActionTargets(action_id, &action.queue[0],
                                          &action.selection, 1);
     return true;
@@ -734,11 +734,11 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
   }
   void BeginChestFlow() override {
     VS::Field::controlMode = kChestControlMode;
-    Battle_actionFlowMode = 1;
+    VS::Battle::actionFlowMode = 1;
     VS::Field::LiveStorePreferredActionCameraDistance();
   }
   void FinishChestFlow() override {
-    Battle_actionFlowMode = kFinishedActionFlow;
+    VS::Battle::actionFlowMode = kFinishedActionFlow;
     VS::State::tickSpeed = 2;
   }
   void RestoreIdlePoses() override {
@@ -747,27 +747,27 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     }
   }
   void ResetActionSelection() override {
-    if (Battle_actionState != nullptr) {
-      Battle_actionState->chainStep = 0;
-      Battle_actionState->selection.actionId = 0;
+    if (VS::Battle::actionState != nullptr) {
+      VS::Battle::actionState->chainStep = 0;
+      VS::Battle::actionState->selection.actionId = 0;
     }
   }
   void ReleaseNotification() override {
     VS::Menu::ReleaseLiveSceneNotification();
   }
   void ShowLocked(std::int32_t notification, std::int16_t item) override {
-    Battle_actionFlowMode = kContentsActionFlow;
+    VS::Battle::actionFlowMode = kContentsActionFlow;
     VS::Menu::ShowLiveSceneNotification(notification, item, 1);
   }
   void OpenChestLoot(VS::Field::ChestTarget target) override {
     auto* chest = VS::Field::ResolveLiveChestTarget(target);
     if (chest != nullptr) {
-      Battle_actionFlowMode = kContentsActionFlow;
+      VS::Battle::actionFlowMode = kContentsActionFlow;
       VS::Menu::Framework::OpenLiveLootEntryMenu(&chest->loot);
     }
   }
   void OpenChestStorage(std::int32_t storage) override {
-    Battle_actionFlowMode = kContentsActionFlow;
+    VS::Battle::actionFlowMode = kContentsActionFlow;
     VS::Menu::Framework::OpenLiveChestStorageMenu(storage);
   }
   void PauseForDialog() override {
@@ -802,7 +802,7 @@ class LiveInteractionDispatchHost final
   bool TrapMode() const override {
     return VS::Field::controlMode == kTrapControlMode;
   }
-  void BeginDispatch() override { Battle_actionFlowMode = 2; }
+  void BeginDispatch() override { VS::Battle::actionFlowMode = 2; }
   bool DispatchChest(VS::Field::ChestTarget target) override {
     return VS::Field::TryOpenLiveChest(target);
   }
@@ -810,7 +810,7 @@ class LiveInteractionDispatchHost final
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
     const int actor = VS::Field::interactionFocus.actor_query.actor_index;
     if (trap == nullptr || actor < 0 || actor >= kActorSlots ||
-        Battle_actionState == nullptr || Battle_actors[actor] == nullptr ||
+        VS::Battle::actionState == nullptr || Battle_actors[actor] == nullptr ||
         Battle_actors[actor]->stats == nullptr) {
       return false;
     }
@@ -839,7 +839,7 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
     return true;
   }
   void FinishFlow() override {
-    Battle_actionFlowMode = kFinishedActionFlow;
+    VS::Battle::actionFlowMode = kFinishedActionFlow;
     VS::State::tickSpeed = 2;
   }
   void ReleaseNotification() override {
@@ -860,7 +860,7 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   }
   void BeginFlow() override {
     VS::Field::controlMode = kTrapControlMode;
-    Battle_actionFlowMode = 1;
+    VS::Battle::actionFlowMode = 1;
     VS::Field::LiveStorePreferredActionCameraDistance();
   }
   void Select(VS::Field::TrapTarget target, std::int32_t actor) override {
@@ -880,9 +880,9 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
     }
   }
   void ResetActionSelection() override {
-    if (Battle_actionState != nullptr) {
-      Battle_actionState->chainStep = 0;
-      Battle_actionState->selection.actionId = 0;
+    if (VS::Battle::actionState != nullptr) {
+      VS::Battle::actionState->chainStep = 0;
+      VS::Battle::actionState->selection.actionId = 0;
     }
   }
 

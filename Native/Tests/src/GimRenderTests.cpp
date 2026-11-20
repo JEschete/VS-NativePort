@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Actors/Spawning.hpp"
-#include "Battle/TargetingState.h"
+#include "Battle/TargetingState.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
@@ -48,7 +48,7 @@ static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
               "three textbox ordering buffers");
 
 int Tests_EncodedTextFormatting(void) {
-  const VS::Menu::StringContext saved = Battle_stringContext;
+  const VS::Menu::StringContext saved = VS::Battle::stringContext;
   char nested[] = {10, 0, VS::Core::TextCode::kPrintDecimal, 1,
                    VS::Core::TextCode::kTerminator};
   char format[] = {
@@ -60,10 +60,10 @@ int Tests_EncodedTextFormatting(void) {
       0xA7, 1, 0, 5, 0x8F, 10, 0, 7, 0x8F, 0, VS::Core::TextCode::kTerminator};
   char output[64];
   memset(output, 0x55, sizeof output);
-  Battle_stringContext.integers[0] = -105;
-  Battle_stringContext.integers[1] = 7;
-  Battle_stringContext.integers[2] = 0;
-  Battle_stringContext.strings[0] = nested;
+  VS::Battle::stringContext.integers[0] = -105;
+  VS::Battle::stringContext.integers[1] = 7;
+  VS::Battle::stringContext.integers[2] = 0;
+  VS::Battle::stringContext.strings[0] = nested;
   char* end = VS::Render::FormatLiveEncodedText(output + 1, format);
   int passed = end == output + sizeof expected &&
                memcmp(output + 1, expected, sizeof expected) == 0 &&
@@ -78,7 +78,7 @@ int Tests_EncodedTextFormatting(void) {
       static_cast<unsigned char>(small[0]) == VS::Core::TextCode::kTerminator &&
       small[1] == 0x55 &&
       VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
-  Battle_stringContext = saved;
+  VS::Battle::stringContext = saved;
   return passed;
 }
 

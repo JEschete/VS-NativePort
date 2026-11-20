@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Hud.h"
+#include "Battle/Hud.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -529,7 +529,7 @@ TEST_CASE("The live scene map refuses a missing read or scene",
 struct LiveBackgroundState {
   LiveBackgroundState()
       : counts(VS::Content::discRequestCounts),
-        lower_screen(Battle_lowerScreenUiState) {
+        lower_screen(VS::Battle::lowerScreenUiState) {
     std::memcpy(slots.data(), VS::Content::discRequestSlots.data(),
                 sizeof VS::Content::discRequestSlots);
     std::memset(VS::Content::discRequestSlots.data(), 0,
@@ -544,7 +544,7 @@ struct LiveBackgroundState {
     std::memcpy(VS::Content::discRequestSlots.data(), slots.data(),
                 sizeof VS::Content::discRequestSlots);
     VS::Content::discRequestCounts = counts;
-    Battle_lowerScreenUiState = lower_screen;
+    VS::Battle::lowerScreenUiState = lower_screen;
   }
 
   std::array<VS::Content::DiscQueueSlot, 32> slots{};

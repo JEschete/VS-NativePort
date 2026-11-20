@@ -18,7 +18,7 @@
 #include "Actors/ShpModel.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
+#include "Battle/ActionFlow.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
@@ -800,7 +800,7 @@ namespace {
 struct GameplayInspectionFixture {
   int saved_gameplay = VS::Boot::isGameplayActive;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
-  decltype(Battle_actionState) saved_action = Battle_actionState;
+  decltype(VS::Battle::actionState) saved_action = VS::Battle::actionState;
   decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
   decltype(Field_roomData.floorTriggers) saved_triggers =
       Field_roomData.floorTriggers;
@@ -838,7 +838,7 @@ struct GameplayInspectionFixture {
     VS::Boot::ResetGameplayInspection();
     VS::Boot::isGameplayActive = 1;
     VS::Field::controlMode = 1;
-    Battle_actionState = nullptr;
+    VS::Battle::actionState = nullptr;
     VS::Items::lootListHead = nullptr;
     Field_roomData.floorTriggers = nullptr;
     Field_roomData.doors = nullptr;
@@ -867,7 +867,7 @@ struct GameplayInspectionFixture {
     VS::Boot::ResetGameplayInspection();
     VS::Boot::isGameplayActive = saved_gameplay;
     VS::Field::controlMode = saved_control;
-    Battle_actionState = saved_action;
+    VS::Battle::actionState = saved_action;
     VS::Items::lootListHead = saved_loot;
     Field_roomData.floorTriggers = saved_triggers;
     Field_roomData.doors = saved_doors;
@@ -1050,7 +1050,7 @@ namespace {
 struct ReactionInspectionFixture : GameplayInspectionFixture {
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   decltype(Battle_characterState) saved_character = Battle_characterState;
-  decltype(Battle_actionFlowMode) saved_phase = Battle_actionFlowMode;
+  decltype(VS::Battle::actionFlowMode) saved_phase = VS::Battle::actionFlowMode;
   int saved_tick_speed = VS::State::tickSpeed;
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
       VS::Battle::Ai::actorAiStates;
@@ -1069,9 +1069,9 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
 
   ReactionInspectionFixture() {
     VS::Field::controlMode = 2;
-    Battle_actionFlowMode = 7;
+    VS::Battle::actionFlowMode = 7;
     VS::State::tickSpeed = 2;
-    Battle_actionState = action.get();
+    VS::Battle::actionState = action.get();
     player.stats = &player_stats;
     enemy.stats = &enemy_stats;
     player_stats.currentHp = player_stats.maxHp = 250;
@@ -1095,9 +1095,9 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     action->abilityTimer = 42;
     action->abilityWindow = 40;
     action->previousChainInput = 1;
-    action->queue[0].primaryTarget.target.targetActor = 0;
+    action->queue[0].primaryTarget.target.target_actor = 0;
     action->queue[0].targetCount = 1;
-    action->queue[0].targets[0].target.targetActor = 2;
+    action->queue[0].targets[0].target.target_actor = 2;
     for (std::size_t slot = 0;
          slot < VS::Game::EncounterReactionTimingState::kSlots; ++slot) {
       VS::Input::settings.mapped_chain_abilities[slot] =
@@ -1115,7 +1115,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   ~ReactionInspectionFixture() {
     VS::Input::settings = saved_settings;
     Battle_characterState = saved_character;
-    Battle_actionFlowMode = saved_phase;
+    VS::Battle::actionFlowMode = saved_phase;
     VS::State::tickSpeed = saved_tick_speed;
     std::copy(saved_ai.begin(), saved_ai.end(),
               VS::Battle::Ai::actorAiStates.begin());
@@ -1301,41 +1301,41 @@ TEST_CASE("Player timing observations use production eligibility without costs",
 TEST_CASE("Opt-in player target forecasts mirror native cached values",
           "[player][diagnostics][target-forecast]") {
   ReactionInspectionFixture fixture;
-  Battle_actionFlowMode = 1;
+  VS::Battle::actionFlowMode = 1;
   fixture.action->previewCount = 2;
   auto& head = fixture.action->previews[0];
-  head.actorId = 2;
+  head.actor_id = 2;
   head.limb = 0;
   head.effect = 58;
-  head.previewAmount = 3;
-  head.hitChance = 25;
+  head.preview_amount = 3;
+  head.hit_chance = 25;
   auto& limb = fixture.action->previews[1];
-  limb.actorId = 2;
+  limb.actor_id = 2;
   limb.limb = 3;
   limb.effect = 58;
-  limb.previewAmount = 18;
-  limb.hitChance = 90;
+  limb.preview_amount = 18;
+  limb.hit_chance = 90;
   const auto random = VS::Core::BiosRand().State();
   const auto state = VS::Game::InspectGameplay();
   TraceScope scope;
   const auto data = FlushedFrame(scope, state, true).at("data");
   CheckCachedTargetForecasts(data);
   CHECK(VS::Core::BiosRand().State() == random);
-  CHECK(head.previewAmount == 3);
-  CHECK(limb.previewAmount == 18);
+  CHECK(head.preview_amount == 3);
+  CHECK(limb.preview_amount == 18);
 }
 
 TEST_CASE("Unknown native target effects do not expose stale amounts",
           "[player][diagnostics][target-forecast]") {
   ReactionInspectionFixture fixture;
-  Battle_actionFlowMode = 1;
+  VS::Battle::actionFlowMode = 1;
   fixture.action->previewCount = 1;
   auto& preview = fixture.action->previews[0];
-  preview.actorId = 2;
+  preview.actor_id = 2;
   preview.limb = 0;
   preview.effect = 0;
-  preview.previewAmount = 999;
-  preview.hitChance = 255;
+  preview.preview_amount = 999;
+  preview.hit_chance = 255;
   TraceScope scope;
   const auto data =
       FlushedFrame(scope, VS::Game::InspectGameplay(), true).at("data");
@@ -1355,8 +1355,8 @@ TEST_CASE("Ordinary traces do not collect player target forecasts",
 TEST_CASE("Player timing keeps acknowledgments after the active input phase",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
-  fixture.action->queue[0].primaryTarget.target.targetActor = 2;
-  fixture.action->queue[0].targets[0].target.targetActor = 0;
+  fixture.action->queue[0].primaryTarget.target.target_actor = 2;
+  fixture.action->queue[0].targets[0].target.target_actor = 0;
   fixture.action->queue[0].actionId = 54;
   fixture.action->previousChainInput = 2;
   const auto defense =
@@ -1369,7 +1369,7 @@ TEST_CASE("Player timing keeps acknowledgments after the active input phase",
   fixture.action->abilityInputAttempted = 1;
   fixture.action->abilityInputSucceeded = 2;
   fixture.action->previousChainInput = 3;
-  Battle_actionFlowMode = 8;
+  VS::Battle::actionFlowMode = 8;
   const auto acknowledged =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
           .reaction_timing;
@@ -1417,12 +1417,12 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
   auto& incoming = fixture.action->queue[0];
   fixture.action->selection.actionId = 1;
   Battle_actionDefinitions[1].type = Battle_ActionType_BaseAttack;
-  incoming.primaryTarget.target.targetActor = 2;
+  incoming.primaryTarget.target.target_actor = 2;
   incoming.targetCount = 2;
-  incoming.targets[0].target.targetActor = 0;
+  incoming.targets[0].target.target_actor = 0;
   incoming.targets[0].hpEffect = 1;
   incoming.targets[0].target.hp = 16;
-  incoming.targets[1].target.targetActor = 0;
+  incoming.targets[1].target.target_actor = 0;
   incoming.targets[1].hpEffect = 2;
   incoming.targets[1].target.hp = 80;
   const auto timing =
@@ -1561,14 +1561,14 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.control.current_menu = 3;
-  Battle_actionFlowMode = 14;
+  VS::Battle::actionFlowMode = 14;
   const auto reward =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(reward.menu.available);
   CHECK(reward.menu.selected_menu == 3);
   CHECK(VS::Field::controlMode == 2);
-  CHECK(Battle_actionFlowMode == 14);
-  Battle_actionFlowMode = 7;
+  CHECK(VS::Battle::actionFlowMode == 14);
+  VS::Battle::actionFlowMode = 7;
   CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
                   .menu.available);
 }
@@ -1680,7 +1680,7 @@ TEST_CASE("Loot input readiness is observed without claiming the drop",
   std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.control.current_menu = 12;
-  Battle_actionFlowMode = 12;
+  VS::Battle::actionFlowMode = 12;
   VS::Menu::Loot::controlsEnabled = 1;
   VS::Menu::Loot::lootListCount = 1;
   const auto state =
@@ -1699,7 +1699,7 @@ TEST_CASE(
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.control.current_menu = 12;
   VS::Field::controlMode = 3;
-  Battle_actionFlowMode = 4;
+  VS::Battle::actionFlowMode = 4;
   VS::Event::isMenuTransitionActive = 1;
   VS::Menu::Loot::controlsEnabled = 1;
   VS::Menu::Loot::lootListCount = 2;
@@ -1710,6 +1710,6 @@ TEST_CASE(
   CHECK(data.at("menu").at("event_owned") == true);
   CHECK(data.at("menu").at("loot_input_ready") == true);
   CHECK(VS::Field::controlMode == 3);
-  CHECK(Battle_actionFlowMode == 4);
+  CHECK(VS::Battle::actionFlowMode == 4);
   CHECK(VS::Menu::Loot::lootListCount == 2);
 }
