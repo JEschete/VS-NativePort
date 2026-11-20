@@ -461,6 +461,60 @@ class LedgerTests(unittest.TestCase):
         hazards.sync(self.workspace)
         self.assertEqual((self.rows()[0]["status"], self.rows()[0]["notes"]), ("false-positive", "always loaded here"))
 
+    def guard_null_rows(self) -> None:
+        rows = self.rows()
+        for row in rows:
+            if row["class"] == "NULL-TABLE":
+                row.update(status="guarded", notes="the caller checks the slot")
+        hazards.write_ledger(self.workspace, rows)
+
+    def rename_table(self) -> None:
+        self.fixture.files[HEADER] = self.fixture.files[HEADER].replace("Actors_actorRecords", "actorRecords")
+        self.source(self.fixture.files[SOURCE].replace("Actors_actorRecords", "actorRecords"))
+
+    def test_a_rename_carries_triage_to_the_renamed_site(self) -> None:
+        hazards.sync(self.workspace)
+        self.guard_null_rows()
+        self.rename_table()
+        result = hazards.sync(self.workspace)
+        null = [row for row in self.rows() if row["class"] == "NULL-TABLE"]
+        self.assertEqual([(row["detail"], row["status"], row["notes"]) for row in null],
+                         [("actorRecords[id]", "guarded", "the caller checks the slot")])
+        self.assertEqual([(old["detail"], new["detail"]) for old, new in result.carried],
+                         [("Actors_actorRecords[id]", "actorRecords[id]")])
+        self.assertEqual(result.dropped, [])
+
+    def test_a_renamed_function_carries_triage_through_its_catalog_id(self) -> None:
+        hazards.sync(self.workspace)
+        self.guard_null_rows()
+        self.source(self.fixture.files[SOURCE].replace("Battle_Hit", "func_1"))
+        result = hazards.sync(self.workspace)
+        null = [row for row in self.rows() if row["class"] == "NULL-TABLE"]
+        self.assertEqual([(row["symbol"], row["function"], row["status"]) for row in null],
+                         [("func_1", "F00001", "guarded")])
+        self.assertEqual(len(result.carried), 1)
+
+    def test_an_ambiguous_rename_is_reported_not_guessed(self) -> None:
+        self.source("int Battle_Hit(int id) {\n"
+                    "  return Actors_actorRecords[id]->flags + Actors_actorRecords[0]->flags;\n}\n")
+        hazards.sync(self.workspace)
+        self.guard_null_rows()
+        self.rename_table()
+        result = hazards.sync(self.workspace)
+        self.assertEqual({row["status"] for row in self.rows() if row["class"] == "NULL-TABLE"}, {"open"})
+        self.assertEqual(result.carried, [])
+        self.assertEqual(sorted(row["detail"] for row in result.dropped),
+                         ["Actors_actorRecords[0]", "Actors_actorRecords[id]"])
+
+    def test_a_triaged_site_whose_code_is_deleted_is_reported(self) -> None:
+        hazards.sync(self.workspace)
+        self.guard_null_rows()
+        self.source("int Battle_Hit(int id) { return id; }\n")
+        result = hazards.sync(self.workspace)
+        self.assertEqual([row for row in self.rows() if row["class"] == "NULL-TABLE"], [])
+        self.assertEqual([(row["detail"], row["status"]) for row in result.dropped],
+                         [("Actors_actorRecords[id]", "guarded")])
+
     def test_an_unknown_status_is_rejected(self) -> None:
         hazards.sync(self.workspace)
         self.set_row(status="whatever")
@@ -484,13 +538,13 @@ class LedgerTests(unittest.TestCase):
         warning = (rf"{self.fixture.root}\Native\Game\src\Battle\Sample.cpp({{line}},10): warning : variable "
                    r"'{name}' is uninitialized when used here [-Wuninitialized]")
         both = "\n".join((warning.format(line=4, name="x"), warning.format(line=5, name="y")))
-        self.assertEqual(hazards.sync(self.workspace, both), {"kept": 0, "added": 2, "dropped": 0})
+        self.assertEqual(hazards.sync(self.workspace, both).compiler, {"kept": 0, "added": 2, "dropped": 0})
         rows = self.rows()
         triaged = next(row for row in rows if "'x'" in row["detail"])
         triaged.update(status="false-positive", notes="set before use")
         hazards.write_ledger(self.workspace, rows)
         self.source("\n" + self.fixture.files[SOURCE])
-        changes = hazards.sync(self.workspace, warning.format(line=5, name="x"))
+        changes = hazards.sync(self.workspace, warning.format(line=5, name="x")).compiler
         self.assertEqual(changes, {"kept": 1, "added": 0, "dropped": 1})
         compiler = [row for row in self.rows() if row["evidence"] == "compiler"]
         self.assertEqual([(row["line"], row["status"], row["notes"]) for row in compiler],

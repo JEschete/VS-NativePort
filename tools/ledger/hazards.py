@@ -7,8 +7,9 @@
 
 Docs\\ledgers\\HAZARD_LEDGER.csv has one row per candidate site; Docs\\PLATFORM_HAZARDS.md explains each class and its
 modern C++ replacement. A pattern row is a candidate from reading source, not a proven defect: only `status` and `notes`
-are written by hand, and a row closed without a reason is rejected. Compiler rows come from a real build log, so --check
-cannot re-measure them without building and leaves them alone.
+are written by hand, and a row closed without a reason is rejected. A rename changes a site's key; --sync carries the
+triage across it when the pairing is unambiguous and prints every triaged row it drops (#482). Compiler rows come from
+a real build log, so --check cannot re-measure them without building and leaves them alone.
 """
 from __future__ import annotations
 
@@ -651,10 +652,56 @@ def write_tracker(workspace: HazardWorkspace, rows: list[dict[str, str]]) -> Non
     gates.write_tracker_block(workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
-def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> Counter[str]:
+@dataclass
+class SyncResult:
+    compiler: Counter[str]
+    carried: list[tuple[dict[str, str], dict[str, str]]]
+    dropped: list[dict[str, str]]
+
+
+def triaged(row: dict[str, str]) -> bool:
+    return row["status"] != "open" or bool(row["notes"].strip())
+
+
+def carry_triage(previous: dict[str, dict[str, str]],
+                 merged: dict[str, dict[str, str]]) -> tuple[list[tuple[dict[str, str], dict[str, str]]],
+                                                             list[dict[str, str]]]:
+    """A rename changes a site's key (#482). Carry a triaged row's status and notes to its renamed site only when that
+    is unambiguous: within the same evidence, class and path, the one row gone and the one row new that share the
+    containing symbol (a renamed table or member) or, failing that, the catalog function (a renamed function). Every
+    other triaged row that left is returned to be reported, never guessed, so a site nobody reviewed cannot inherit
+    a `guarded` or `false-positive` status."""
+    gone = [row for key, row in previous.items() if key not in merged]
+    new = [row for key, row in merged.items() if key not in previous]
+
+    def group(rows: list[dict[str, str]], row: dict[str, str], field: str) -> list[dict[str, str]]:
+        return [other for other in rows if other["evidence"] == row["evidence"] and other["class"] == row["class"]
+                and other["path"] == row["path"] and other[field] == row[field]]
+
+    carried, dropped = [], []
+    claimed: set[str] = set()
+    for row in gone:
+        if not triaged(row):
+            continue
+        target = None
+        for field in ("symbol", "function"):
+            targets = group(new, row, field)
+            if row[field] and len(group(gone, row, field)) == 1 and len(targets) == 1:
+                target = targets[0]
+                break
+        if target is None or target["key"] in claimed:
+            dropped.append(row)
+            continue
+        claimed.add(target["key"])
+        target.update(status=row["status"], notes=row["notes"])
+        carried.append((row, target))
+    return carried, dropped
+
+
+def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> SyncResult:
     """Rescan the patterns, and with `compiler_log` replace the compiler rows by its warnings: the log must come from
-    a full build (#469). Triage survives for every key still present. Returns the compiler rows kept, added and
-    dropped by the log."""
+    a full build (#469). Triage survives for every key still present, and across an unambiguous rename (#482).
+    Returns the compiler rows kept, added and dropped by the log, the triage carried, and the triaged rows dropped."""
     previous = {row["key"]: row for row in read_csv(workspace.ledger)}
     rows = keyed(scan(workspace))
     changes: Counter[str] = Counter()
@@ -670,10 +717,11 @@ def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> Counter
     for row in rows:
         old_row = previous.get(row["key"])
         merged[row["key"]] = {**row, "status": old_row["status"], "notes": old_row["notes"]} if old_row else row
+    carried, dropped = carry_triage(previous, merged)
     ordered = sorted(merged.values(), key=lambda row: (row["class"], row["path"], int(row["line"]), row["key"]))
     write_ledger(workspace, ordered)
     write_tracker(workspace, ordered)
-    return changes
+    return SyncResult(changes, carried, dropped)
 
 
 def check(workspace: HazardWorkspace) -> list[Issue]:
@@ -713,10 +761,17 @@ def main() -> int:
         log = None
         if arguments.compiler_log:
             log = arguments.compiler_log.read_bytes().decode("utf-8", errors="replace").replace("\x00", "")
-        changes = sync(workspace, log)
+        result = sync(workspace, log)
+        changes = result.compiler
         if log is not None:
             print(f"compiler rows: {changes['kept']:,} kept with their triage, {changes['added']:,} added, "
                   f"{changes['dropped']:,} dropped")
+        for old, new in result.carried:
+            print(f"triage carried: {old['key']} -> {new['key']} {new['class']} {new['path']} "
+                  f"{old['detail']} -> {new['detail']} ({new['status']})")
+        for old in result.dropped:
+            print(f"triage dropped: {old['key']} {old['class']} {old['path']} {old['detail']} ({old['status']}: "
+                  f"{old['notes']}); re-triage its site if it still exists")
     issues = check(workspace)
     for found in issues[:50]:
         print(f"{found.rule}: {found.subject}: {found.message}")
