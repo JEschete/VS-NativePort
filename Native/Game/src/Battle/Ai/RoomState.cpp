@@ -40,7 +40,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Mpd.h"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"

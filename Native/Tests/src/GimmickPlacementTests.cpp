@@ -8164,8 +8164,7 @@ TEST_CASE(
   request.destination = &fixture.instances[1];
   request.subKind = 3;
   request.variant = std::bit_cast<char>(std::uint8_t{255});
-  const std::uint32_t placement = 0x77FE00FF;
-  std::memcpy(&request.placement, &placement, sizeof(placement));
+  request.placement = 0x77FE00FF;
   CHECK(VS::Field::LiveSampleSupportHeightAt(32704, 0, 32576, 0, 0, 1) ==
         VS::Field::kNoSupportHeight);
   REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);

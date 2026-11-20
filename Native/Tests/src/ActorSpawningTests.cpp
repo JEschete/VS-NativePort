@@ -20,7 +20,6 @@
 #include "Battle/Damage.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
-#include "Field/Actors.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -1649,14 +1648,11 @@ TEST_CASE("Live spawn codecs decode room spawns, placements and memories",
           "[actors][actors-spawning]") {
   CheckDecodedRoomSpawn(actors::DecodeRoomSpawn(LegacyRoomSpawn()));
 
-  Field_ActorPlacement placement{};
-  placement.tileX = 0xF1;
-  placement.direction = 2;
-  placement.tileZ = 0xF3;
-  placement.height = 0x80;
-  CHECK(actors::DecodePlacement(placement) ==
-        actors::SpawnPlacement{
-            .tile_x = 0xF1, .direction = 2, .tile_z = 0xF3, .height = 0x80});
+  constexpr std::uint32_t kPlacementWord = 0x80F302F1;
+  constexpr actors::SpawnPlacement kPlacement{
+      .tile_x = 0xF1, .direction = 2, .tile_z = 0xF3, .height = 0x80};
+  CHECK(actors::UnpackPlacement(kPlacementWord) == kPlacement);
+  CHECK(actors::PackPlacement(kPlacement) == kPlacementWord);
 
   const actors::RememberedSpawn remembered =
       actors::DecodeRemembered(LegacyRoomRecord());

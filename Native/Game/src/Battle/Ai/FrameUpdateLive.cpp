@@ -35,7 +35,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"

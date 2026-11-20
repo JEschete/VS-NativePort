@@ -25,7 +25,7 @@
 #include "Content/ModuleData.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Field/Platforms.h"
+#include "Field/PlatformPlacement.hpp"
 #include "Field/Room.h"
 #include "Field/SegmentCollision.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -38,7 +38,7 @@ static_assert(std::is_same_v<
               SVECTOR* (*)(const SVECTOR*, const SVECTOR*, SVECTOR*, int)>);
 static_assert(
     std::is_same_v<decltype(&VS::Field::IsLivePointOutsideSolidVolumes),
-                   int (*)(const VECTOR*, const Field_PlatformContactPoint*,
+                   int (*)(const VECTOR*, const VS::Field::PlatformContact*,
                            size_t)>);
 
 namespace {
@@ -130,7 +130,7 @@ struct ActionTraceFixture : SegmentFixture {
   }
 };
 
-void CheckVolumePoint(const Field_PlatformContactPoint& volume,
+void CheckVolumePoint(const VS::Field::PlatformContact& volume,
                       const std::array<int, 3>& delta) {
   const VECTOR point{128 + delta[0], -64 + delta[1], 128 + delta[2], 0};
   const bool inside = delta[0] > -64 && delta[0] < 64 && delta[1] > -32 &&
@@ -252,7 +252,7 @@ TEST_CASE(
     "Solid-volume predicates retain strict extents and source coordinate "
     "widths",
     "[field][segment-collision]") {
-  const Field_PlatformContactPoint volume{128, -96, 128, 0};
+  const VS::Field::PlatformContact volume{128, -96, 128, 0};
   for (const int x : {-65, -64, -63, 0, 63, 64, 65}) {
     for (const int y : {-33, -32, -31, 0, 31, 32, 33}) {
       for (const int z : {-65, -64, -63, 0, 63, 64, 65}) {
@@ -260,7 +260,7 @@ TEST_CASE(
       }
     }
   }
-  const Field_PlatformContactPoint negative{-1, -96, -1, 0};
+  const VS::Field::PlatformContact negative{-1, -96, -1, 0};
   VECTOR point{-1, -64, -1, 0};
   CHECK(VS::Field::IsLivePointOutsideSolidVolumes(&point, &negative, 1) == 1);
   point.vx = 65535;
@@ -324,7 +324,7 @@ TEST_CASE("Native segment and volume entries retain original typed bindings",
                                               0x800E6BA0u);
   REQUIRE(address != nullptr);
   using VolumePredicate =
-      int (*)(const VECTOR*, const Field_PlatformContactPoint*, size_t);
+      int (*)(const VECTOR*, const VS::Field::PlatformContact*, size_t);
   const auto outside = reinterpret_cast<VolumePredicate>(address);
   CHECK(outside == VS::Field::IsLivePointOutsideSolidVolumes);
   const VECTOR point{};

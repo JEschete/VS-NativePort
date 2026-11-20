@@ -104,10 +104,7 @@ std::vector<PlatformContact> LiveVisiblePlatforms() {
     const auto contact = VS::Field::FindLiveMovingPlatformById(
         static_cast<int>(index) + VS::Field::kPlatformCollisionLayer);
     if (contact) {
-      contacts.push_back({.x = contact->x,
-                          .height = contact->height,
-                          .z = contact->z,
-                          .platform_index = contact->platformIndex});
+      contacts.push_back(*contact);
     }
   }
   return contacts;
@@ -404,11 +401,6 @@ PlatformContactHeight LiveMovingPlatformContact(PlatformProbe probe,
 }
 
 std::optional<PlatformContact> LiveVisiblePlatform(int support_layer) {
-  const auto contact = FindLiveMovingPlatformById(support_layer);
-  if (!contact) return std::nullopt;
-  return PlatformContact{.x = contact->x,
-                         .height = contact->height,
-                         .z = contact->z,
-                         .platform_index = contact->platformIndex};
+  return FindLiveMovingPlatformById(support_layer);
 }
 }  // namespace VS::Field

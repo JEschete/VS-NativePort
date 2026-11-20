@@ -387,7 +387,7 @@ int VS::Field::CreateGimmickInstanceEntry(Content_ActorAssetRequest* request) {
       .destination = std::bit_cast<VS::Content::AssetAddress>(
           reinterpret_cast<std::uintptr_t>(input.destination)),
       .data = std::bit_cast<VS::Content::AssetAddress>(input.dataAddress),
-      .placement = std::bit_cast<std::uint32_t>(input.placement),
+      .placement = input.placement,
       .sub_kind = static_cast<std::uint8_t>(input.subKind),
       .texture_slot = static_cast<std::uint8_t>(input.textureSlot),
       .material = static_cast<std::uint8_t>(input.material),

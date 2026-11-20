@@ -2001,9 +2001,6 @@
     <ClCompile Include="src\Field\ActorCollisionLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Actors.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\Background.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2214,9 +2211,6 @@
     <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Platforms.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\Room.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>

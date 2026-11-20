@@ -1154,7 +1154,7 @@ T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus curren
 T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
-T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:401;declaration-only;source:30DB0.h:31
+T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:400;declaration-only;source:30DB0.h:31
 T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
 T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
 T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
@@ -1383,7 +1383,7 @@ T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,chainStep,
 T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,selection,Action being chosen,high,source:146C.c:4499
 T00225.003,T00225,D_800F19CC_t,3,unk854,1,D_800F19CC_t2[4],,,recent action ring,queue,Actions queued for execution,high,source:146C.c:743
 T00225.004,T00225,D_800F19CC_t,4,unk2984,1,int,,,player targeting interface enabled,isPlayerAction,"1 when Ashley chooses the action, 0 for other actors",med,source:146C.c:4505
-T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:475;source:146C.c:4187
+T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\TargetingLive.cpp:474;source:146C.c:4187
 T00225.006,T00225,D_800F19CC_t,6,unk298C,1,u_char,,,selected target index,selectedPreview,Selected target preview; 0xFF none,med,source:146C.c:3783
 T00225.007,T00225,D_800F19CC_t,7,unk298D,1,u_char,,,,cameraPreview,Preview the camera follows; 0xFF none,med,source:146C.c:2809
 T00225.008,T00225,D_800F19CC_t,8,unk298E,1,char,,,,selectionFrames,Frames spent selecting,med,source:146C.c:6900
@@ -1592,7 +1592,7 @@ T00239.086,T00239,D_800F4538_t,86,spSeqLbas,0,u_int[4],,,,specialSequenceLbas,Di
 T00239.087,T00239,D_800F4538_t,87,unk6BC,1,int[4],,,,reserved6BC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:114;declaration-only;source:3A1A0.h:333
 T00239.088,T00239,D_800F4538_t,88,spSeqSizes,0,u_short[4],,,,specialSequenceSizes,Byte sizes of the special-attack sequences,high,source:30DB0.c:1572
 T00239.089,T00239,D_800F4538_t,89,unk6D4,1,int[2],,,,reserved6D4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:116;declaration-only;source:3A1A0.h:335
-T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:514;source:30DB0.c:1360
+T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:501;source:30DB0.c:1360
 T00239.091,T00239,D_800F4538_t,91,unk6E0,1,u_char,,,queued animation | queuedAnimationId,queuedAnimation,Animation queued to play next; 0 when none,high,source:30DB0.c:3718
 T00239.092,T00239,D_800F4538_t,92,unk6E1,1,u_char,,,queued blend frames,queuedParameterA,First parameter of the queued animation,low,source:30DB0.c:3719
 T00239.093,T00239,D_800F4538_t,93,unk6E2,1,u_char,,,queued starting-frame parameter,queuedParameterB,Second parameter of the queued animation,low,source:30DB0.c:3720
@@ -1601,7 +1601,7 @@ T00239.095,T00239,D_800F4538_t,95,unk6E4,1,u_char,,,,contactKind,Kind of surface
 T00239.096,T00239,D_800F4538_t,96,unk6E5,1,u_char,,,idle animation | travelAnimationId,travelAnimation,Animation played while travelling,high,source:30DB0.c:1350
 T00239.097,T00239,D_800F4538_t,97,unk6E6,1,u_short,,,,modelId,Model id,high,source:30DB0.c:1097
 T00239.098,T00239,D_800F4538_t,98,unk6E8,1,short,,,,clutA,First palette slot,low,source:30DB0.c:1333
-T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:517;source:30DB0.c:1334
+T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:504;source:30DB0.c:1334
 T00239.100,T00239,D_800F4538_t,100,unk6EC,1,short,,,,ledgeHeight,Height compared when hanging from a ledge,low,source:3A1A0.c:1966
 T00239.101,T00239,D_800F4538_t,101,unk6EE,1,signed char,,,,platformOffsetX,X offset from the platform anchor,med,source:3A1A0.c:1121
 T00239.102,T00239,D_800F4538_t,102,unk6EF,1,signed char,,,,platformOffsetZ,Z offset from the platform anchor,med,source:3A1A0.c:1122
@@ -1642,7 +1642,7 @@ T00239.136,T00239,D_800F4538_t,136,unk1844,1,short,,,,reserved1844,Not used by n
 T00239.137,T00239,D_800F4538_t,137,unk1846,1,u_char,,,,runFrames,Frames spent running,low,source:3A1A0.c:1497
 T00239.138,T00239,D_800F4538_t,138,unk1847,1,u_char,,,,runTurns,Turns made while running,low,source:3A1A0.c:1497
 T00239.139,T00239,D_800F4538_t,139,unk1848,1,D_800F4538_unk1848,,,navigation request,turnState,Turn and step state,med,source:30DB0.c:2143
-T00239.140,T00239,D_800F4538_t,140,unk1860,1,u_char,,,,opaque1860,Cleared by motion resets; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:187;source:30DB0.c:2117
+T00239.140,T00239,D_800F4538_t,140,unk1860,1,u_char,,,,opaque1860,Cleared by motion resets; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:186;source:30DB0.c:2117
 T00239.141,T00239,D_800F4538_t,141,unk1861,1,u_char,,,,reserved1861,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:173;declaration-only;source:3A1A0.h:387
 T00239.142,T00239,D_800F4538_t,142,unk1862,1,u_char,,,,reserved1862,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:174;declaration-only;source:3A1A0.h:388
 T00239.143,T00239,D_800F4538_t,143,unk1863,1,u_char,,,,reserved1863,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:175;declaration-only;source:3A1A0.h:389
@@ -1709,7 +1709,7 @@ T00241.037,T00241,D_800F4538_unk0,37,position,0,SVECTOR,,,,position,World positi
 T00241.038,T00241,D_800F4538_unk0,38,unk24,1,short,,,,rotationX,X rotation,high,source:40564.c:1209
 T00241.039,T00241,D_800F4538_unk0,39,facing,0,short,,,,facing,Facing (Y rotation),high,source:30DB0.c:2506
 T00241.040,T00241,D_800F4538_unk0,40,unk28,1,short,,,,rotationZ,Z rotation,high,source:40564.c:1211
-T00241.041,T00241,D_800F4538_unk0,41,unk2A,1,short,,,,reserved2A,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:103;declaration-only;source:3A1A0.h:164
+T00241.041,T00241,D_800F4538_unk0,41,unk2A,1,short,,,,reserved2A,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:102;declaration-only;source:3A1A0.h:164
 T00241.042,T00241,D_800F4538_unk0,42,unk2C,1,short,,,scale X,scaleX,X scale (ONE = 1.0),high,source:40564.c:1252
 T00241.043,T00241,D_800F4538_unk0,43,unk2E,1,short,,,scale Y,scaleY,Y scale (ONE = 1.0),high,source:40564.c:1253
 T00241.044,T00241,D_800F4538_unk0,44,unk30,1,short,,,scale Z,scaleZ,Z scale (ONE = 1.0),high,source:40564.c:1254
@@ -1755,13 +1755,13 @@ T00244.003,T00244,D_800F4538_unk1848,3,unk3,1,u_char,,,,reserved3,Not read,low,d
 T00244.004,T00244,D_800F4538_unk1848,4,unk4,1,short,,,,direction,Movement direction,med,source:3A1A0.c:1085
 T00244.005,T00244,D_800F4538_unk1848,5,unk6,1,short,,,,facing,Facing to turn to,med,source:38C1C.c:690
 T00244.006,T00244,D_800F4538_unk1848,6,unk8,1,u_int,,,,distance,Distance or speed of the move,med,source:3A1A0.c:1086
-T00244.007,T00244,D_800F4538_unk1848,7,unkC,1,int,,,,reservedC,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:185;declaration-only;source:3A1A0.h:109
+T00244.007,T00244,D_800F4538_unk1848,7,unkC,1,int,,,,reservedC,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:184;declaration-only;source:3A1A0.h:109
 T00244.008,T00244,D_800F4538_unk1848,8,unk10,1,SVECTOR,,,,step,Movement vector added to the position,high,source:38C1C.c:714
 T00245.000,T00245,D_800F4538_unk1864,0,unk0,1,int,,,,reserved0,Not read,low,declaration-only;source:3A1A0.h:41
 T00245.001,T00245,D_800F4538_unk1864,1,unk4,1,u_char,,,angle interpolation ticks,levelFrames,Frames left in the level blend,med,source:44F14.c:1233
 T00245.002,T00245,D_800F4538_unk1864,2,unk5,1,u_char,,,offset interpolation ticks,radiusFrames,Frames left in the radius-rate blend,med,source:44F14.c:1242
-T00245.003,T00245,D_800F4538_unk1864,3,unk6,1,u_char,,,,reserved6,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:190;declaration-only;source:3A1A0.h:44
-T00245.004,T00245,D_800F4538_unk1864,4,unk7,1,u_char,,,,reserved7,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:191;declaration-only;source:3A1A0.h:45
+T00245.003,T00245,D_800F4538_unk1864,3,unk6,1,u_char,,,,reserved6,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:189;declaration-only;source:3A1A0.h:44
+T00245.004,T00245,D_800F4538_unk1864,4,unk7,1,u_char,,,,reserved7,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Actors\ActorStateLive.cpp:190;declaration-only;source:3A1A0.h:45
 T00245.005,T00245,D_800F4538_unk1864,5,unk8,1,u_short,,,shadow yaw offset,level,Shadow level being blended,low,source:44F14.c:1235
 T00245.006,T00245,D_800F4538_unk1864,6,unkA,1,short,,,,levelDelta,Level change still to apply,med,source:30DB0.c:3888
 T00245.007,T00245,D_800F4538_unk1864,7,unkC,1,u_short,,,shadow scale factor,radiusExpandRate,Current shadow radius expand rate,high,source:30DB0.c:3882
@@ -3096,9 +3096,9 @@ T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone lo
 T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,tileColumns,Collision map columns,high,source:146C.c:15331
 T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,tileRows,Collision map rows,high,source:146C.c:15332
 T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,bounds,Map tile bounds,med,source:146C.c:2435;use cited by sanity pass;source:146C.h:709
-T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1042;declaration-only;source:146C.h:710
+T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1028;declaration-only;source:146C.h:710
 T00348.019,T00348,_zoneContext_t,19,unk4C,1,int,,,,reserved4C,Unreferenced word,low,declaration-only;source:146C.h:711
-T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1045;declaration-only;source:146C.h:712
+T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1031;declaration-only;source:146C.h:712
 T00348.021,T00348,_zoneContext_t,21,unk54,1,int,,,,reserved54,Unreferenced word,low,declaration-only;source:146C.h:713
 T00348.022,T00348,_zoneContext_t,22,mpdCdFile,0,vs_main_CdQueueSlot *,,,,mpdDiscRequest,Disc request loading the room file,med,source:146C.c:15261;use cited by sanity pass;source:146C.h:714
 T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,mpdData,Loaded room file data,med,source:146C.c:15265;use cited by sanity pass;source:146C.h:715
@@ -4005,18 +4005,18 @@ T00443.002,T00443,func_8008631C_t2,2,hitThreshold,0,u_char,,,,hitThreshold,Named
 T00443.003,T00443,func_8008631C_t2,3,unk3,1,u_char,,,,impactKind,Selects the hit sounds and impact effects,med,source:146C.c:1973
 T00443.004,T00443,func_8008631C_t2,4,hp,0,short,,,,hp,Named in the fork; see cited use,med,source:146C.c:3243
 T00443.005,T00443,func_8008631C_t2,5,mp,0,short,,,,mp,Named in the fork; see cited use,med,source:146C.c:3248
-T00444.000,T00444,func_80089888_t,0,unk0_0,1,char,,,,tileX,Tile X,med,source:146C.c:15149;use cited by sanity pass;source:3A1A0.h:5
-T00444.001,T00444,func_80089888_t,1,unk0_8,1,char,,,,direction,Facing direction,med,source:146C.c:15151;use cited by sanity pass;source:3A1A0.h:6
-T00444.002,T00444,func_80089888_t,2,unk0_16,1,char,,,,tileZ,Tile Z,med,source:146C.c:15150;use cited by sanity pass;source:3A1A0.h:7
-T00444.003,T00444,func_80089888_t,3,unk0_24,1,u_int,8,,,height,Height in units of 64,med,source:146C.c:15152;use cited by sanity pass;source:3A1A0.h:8
-T00445.000,T00445,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,source:146C.c:16782;use cited by sanity pass;source:146C.c:252
-T00445.001,T00445,func_8008D2C0_t,1,unk1,1,short,,,,height,Contact height,med,source:146C.c:3764;use cited by sanity pass;source:146C.c:253
-T00445.002,T00445,func_8008D2C0_t,2,unk2,1,short,,,,z,Contact Z,med,source:146C.c:16785;use cited by sanity pass;source:146C.c:254
-T00445.003,T00445,func_8008D2C0_t,3,unk3,1,short,,,,platformIndex,Moving platform index,med,source:146C.c:16786;use cited by sanity pass;source:146C.c:255
-T00446.000,T00446,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,source:146C.c:16782;use cited by sanity pass;source:3A1A0.c:16
-T00446.001,T00446,func_8008D2C0_t,1,unk2,1,short,,,,height,Contact height,med,source:146C.c:16785;use cited by sanity pass;source:3A1A0.c:17
-T00446.002,T00446,func_8008D2C0_t,2,unk4,1,short,,,,z,Contact Z,med,source:3A1A0.c:1122;use cited by sanity pass;source:3A1A0.c:18
-T00446.003,T00446,func_8008D2C0_t,3,unk6,1,short,,,platform index,platformIndex,Moving platform index,med,source:3A1A0.c:1099;use cited by sanity pass;source:3A1A0.c:19
+T00444.000,T00444,func_80089888_t,0,unk0_0,1,char,,,,tileX,Tile X,med,"retired-by:VS::Actors::SpawnPlacement::tile_x (Actors/ActorSpawning.hpp, #441);source:146C.c:15149;use cited by sanity pass;source:3A1A0.h:5"
+T00444.001,T00444,func_80089888_t,1,unk0_8,1,char,,,,direction,Facing direction,med,"retired-by:VS::Actors::SpawnPlacement::direction (Actors/ActorSpawning.hpp, #441);source:146C.c:15151;use cited by sanity pass;source:3A1A0.h:6"
+T00444.002,T00444,func_80089888_t,2,unk0_16,1,char,,,,tileZ,Tile Z,med,"retired-by:VS::Actors::SpawnPlacement::tile_z (Actors/ActorSpawning.hpp, #441);source:146C.c:15150;use cited by sanity pass;source:3A1A0.h:7"
+T00444.003,T00444,func_80089888_t,3,unk0_24,1,u_int,8,,,height,Height in units of 64,med,"retired-by:VS::Actors::SpawnPlacement::height (Actors/ActorSpawning.hpp, #441);source:146C.c:15152;use cited by sanity pass;source:3A1A0.h:8"
+T00445.000,T00445,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,"retired-by:VS::Field::PlatformContact::x (Field/PlatformPlacement.hpp, #441);source:146C.c:16782;use cited by sanity pass;source:146C.c:252"
+T00445.001,T00445,func_8008D2C0_t,1,unk1,1,short,,,,height,Contact height,med,"retired-by:VS::Field::PlatformContact::height (Field/PlatformPlacement.hpp, #441);source:146C.c:3764;use cited by sanity pass;source:146C.c:253"
+T00445.002,T00445,func_8008D2C0_t,2,unk2,1,short,,,,z,Contact Z,med,"retired-by:VS::Field::PlatformContact::z (Field/PlatformPlacement.hpp, #441);source:146C.c:16785;use cited by sanity pass;source:146C.c:254"
+T00445.003,T00445,func_8008D2C0_t,3,unk3,1,short,,,,platformIndex,Moving platform index,med,"retired-by:VS::Field::PlatformContact::platform_index (Field/PlatformPlacement.hpp, #441);source:146C.c:16786;use cited by sanity pass;source:146C.c:255"
+T00446.000,T00446,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,"retired-by:VS::Field::PlatformContact::x (Field/PlatformPlacement.hpp, #441);source:146C.c:16782;use cited by sanity pass;source:3A1A0.c:16"
+T00446.001,T00446,func_8008D2C0_t,1,unk2,1,short,,,,height,Contact height,med,"retired-by:VS::Field::PlatformContact::height (Field/PlatformPlacement.hpp, #441);source:146C.c:16785;use cited by sanity pass;source:3A1A0.c:17"
+T00446.002,T00446,func_8008D2C0_t,2,unk4,1,short,,,,z,Contact Z,med,"retired-by:VS::Field::PlatformContact::z (Field/PlatformPlacement.hpp, #441);source:3A1A0.c:1122;use cited by sanity pass;source:3A1A0.c:18"
+T00446.003,T00446,func_8008D2C0_t,3,unk6,1,short,,,platform index,platformIndex,Moving platform index,med,"retired-by:VS::Field::PlatformContact::platform_index (Field/PlatformPlacement.hpp, #441);source:3A1A0.c:1099;use cited by sanity pass;source:3A1A0.c:19"
 T00447.000,T00447,func_80091C6C_t,0,geometryOffset,0,int,,,,geometryOffset,Offset of the animated polygon,med,source:2842C.c:658;use cited by sanity pass;source:2842C.c:120
 T00447.001,T00447,func_80091C6C_t,1,unk4,1,char[3],,,,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:121
 T00447.002,T00447,func_80091C6C_t,2,delay,0,u_char,,,,delay,Ticks per frame,med,source:2842C.c:645;use cited by sanity pass;source:2842C.c:122
@@ -5713,9 +5713,9 @@ T00630.021,T00630,vs_battle_actor,21,unk2A,1,u_char,,,bladeModelId,bladeId,Blade
 T00630.022,T00630,vs_battle_actor,22,unk2B,1,u_char,,,shieldModelId,shieldId,Shield model id,med,source:146C.c:6301
 T00630.023,T00630,vs_battle_actor,23,unk2C,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),,,last trigger tile and movement mode,lastTriggerTile,Tile word last checked for floor triggers,med,source:146C.c:5541
 T00630.024,T00630,vs_battle_actor,24,unk30_0,1,u_short,4,,,aiGroup,AI group number other actors link to,med,source:7CD68.c:582
-T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:461;declaration-only;source:146C.h:594
+T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:460;declaration-only;source:146C.h:594
 T00630.026,T00630,vs_battle_actor,26,unk30_9,1,u_int,5,,,aiLinkedGroup,AI group this actor follows or guards,med,source:7CD68.c:582
-T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:463;declaration-only;source:146C.h:596
+T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:462;declaration-only;source:146C.h:596
 T00630.028,T00630,vs_battle_actor,28,unk34,1,int,,,,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:597
 T00630.029,T00630,vs_battle_actor,29,unk38,1,int,,,,templateWord2C,Word 0x2C of the actor template; not read afterwards,low,source:146C.c:6757
 T00630.030,T00630,vs_battle_actor,30,unk3C,1,vs_battle_actor2 *,,,combatStats,stats,Combat statistics,high,source:146C.c:6600
@@ -5783,9 +5783,9 @@ T00635.003,T00635,vs_battle_actor_dat2,3,unk16C,1,int,,,,reserved16C,Not read by
 T00635.004,T00635,vs_battle_actor_dat2,4,unk170,1,int,,,,reserved170,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorAllocation.h:21;declaration-only;source:146C.h:613
 T00635.005,T00635,vs_battle_actor_dat2,5,unk174,1,int,,,,reserved174,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorAllocation.h:22;declaration-only;source:146C.h:614
 T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,actionId,Action in the slot,high,source:146C.c:6260
-T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:181;source:146C.c:6261
+T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:180;source:146C.c:6261
 T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,effectModelId,Effect model shown when the action is presented,med,source:146C.c:6262
-T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:183;source:146C.c:6263
+T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ActorSpawningLive.cpp:182;source:146C.c:6263
 T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,width,Tile columns,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:12
 T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,height,Tile rows,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:13
 T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,reserved08,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Background.h:19;declaration-only;source:2842C.h:14
@@ -5946,15 +5946,15 @@ T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,targetSlot,Actor
 T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,modelId,Model identifier,high,source:30DB0.c:1095
 T00659.003,T00659,vs_battle_objectData,3,unk4,1,void *,,,decodedModelBuffer,destination,Storage that receives the asset,high,source:30DB0.c:1085;source:30DB0.c:621
 T00659.004,T00659,vs_battle_objectData,4,dataAddr,0,u_long,,,,dataAddress,Address of the asset data or a small table index,high,source:146C.c:6648
-T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,placement,Placement word copied into the new actor,high,source:30DB0.c:1116
+T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,placement,Placement word copied into the new actor,high,native:Content_ActorAssetRequest::placement is std::uint32_t (Content/ActorAssets.h); Actors::UnpackPlacement gives the VS::Actors::SpawnPlacement (#441);source:30DB0.c:1116
 T00659.006,T00659,vs_battle_objectData,6,actorId,0,u_char,,,,subKind,Per-kind selector such as the sequence kind; 0xFF for none,med,source:30DB0.c:1724;source:30DB0.c:1413
 T00659.007,T00659,vs_battle_objectData,7,unk11,1,char,,,,textureSlot,Palette or texture slot used by the asset,med,source:30DB0.c:669;source:30DB0.c:2057
 T00659.008,T00659,vs_battle_objectData,8,material,0,u_char,,,,material,Weapon or armor material,high,source:146C.c:4071
 T00659.009,T00659,vs_battle_objectData,9,variant,0,u_char,,,,variant,Asset variant,high,source:146C.c:6108
-T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,tileX,Tile X,high,source:146C.c:15084
-T00660.001,T00660,vs_battle_objectData_flags,1,unk0_8,1,u_int,8,,,direction,Facing direction,high,source:146C.c:15086
-T00660.002,T00660,vs_battle_objectData_flags,2,unk0_16,1,u_int,8,,,tileZ,Tile Z,high,source:146C.c:15085
-T00660.003,T00660,vs_battle_objectData_flags,3,unk0_24,1,u_int,8,,,height,Height in units of 64,high,source:146C.c:15087
+T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,tileX,Tile X,high,"retired-by:VS::Actors::SpawnPlacement::tile_x (Actors/ActorSpawning.hpp, #441);source:146C.c:15084"
+T00660.001,T00660,vs_battle_objectData_flags,1,unk0_8,1,u_int,8,,,direction,Facing direction,high,"retired-by:VS::Actors::SpawnPlacement::direction (Actors/ActorSpawning.hpp, #441);source:146C.c:15086"
+T00660.002,T00660,vs_battle_objectData_flags,2,unk0_16,1,u_int,8,,,tileZ,Tile Z,high,"retired-by:VS::Actors::SpawnPlacement::tile_z (Actors/ActorSpawning.hpp, #441);source:146C.c:15085"
+T00660.003,T00660,vs_battle_objectData_flags,3,unk0_24,1,u_int,8,,,height,Height in units of 64,high,"retired-by:VS::Actors::SpawnPlacement::height (Actors/ActorSpawning.hpp, #441);source:146C.c:15087"
 T00661.000,T00661,vs_battle_prim,0,p0,0,char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:19;declaration-only;source:146C.h:631
 T00661.001,T00661,vs_battle_prim,1,p1,0,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:20;declaration-only;source:146C.h:632
 T00661.002,T00661,vs_battle_prim,2,p2,0,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:21;declaration-only;source:146C.h:633

@@ -4,14 +4,13 @@
 
 #include "Legacy/Psx.h"
 
-struct Field_PlatformContactPoint;
-
 namespace VS::Field {
+struct PlatformContact;
 
 // Live binding for the original BATTLE.PRG entry 0x800E6BA0: adapts guest
 // platform contacts to the typed predicate; returns 1 when outside.
 int IsLivePointOutsideSolidVolumes(const VECTOR* point,
-                                   const Field_PlatformContactPoint* volumes,
+                                   const PlatformContact* volumes,
                                    std::size_t count);
 
 // Live binding for the original BATTLE.PRG entry 0x800E6C34: traces against

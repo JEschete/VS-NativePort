@@ -9,7 +9,6 @@
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Battle_Actor;
-struct Field_ActorPlacement;
 namespace VS::Render {
 struct ColorCode;
 }  // namespace VS::Render
@@ -23,6 +22,8 @@ struct SVECTOR;
 // with a warning on the "actors" channel and does nothing (or reports
 // nothing), where the originals read past the table.
 namespace VS::Actors {
+struct SpawnPlacement;
+
 // decomp: BATTLE.PRG func_8007BF6C (src/BATTLE/BATTLE.PRG/146C.c:8623)
 void EnableLiveActorModel(int actor_id);
 // decomp: BATTLE.PRG func_8007BFC0 (src/BATTLE/BATTLE.PRG/146C.c:8630)
@@ -97,7 +98,7 @@ int LiveActorPlacement(int actor_id, Actors_ActorLocationQuery* placement_out);
 // decomp: BATTLE.PRG func_800A30A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:274)
 // `placement` is the tile, its layer and the facing in sixteenths.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void PlaceLiveActorInRoom(int actor_id, const Field_ActorPlacement* placement,
+void PlaceLiveActorInRoom(int actor_id, const SpawnPlacement* placement,
                           int drop_height, int movement_class);
 // decomp: BATTLE.PRG func_800A3310 (src/BATTLE/BATTLE.PRG/3A1A0.c:350)
 // The flyer's slot, or 0 when none is there.

@@ -46,7 +46,6 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "DiscQueue.h"
-#include "Field/Actors.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -994,13 +993,6 @@ RoomSpawn DecodeRoomSpawn(const Field_MpdEnemySpawn& spawn) {
   return decoded;
 }
 
-SpawnPlacement DecodePlacement(const Field_ActorPlacement& placement) {
-  return {.tile_x = static_cast<std::uint8_t>(placement.tileX),
-          .direction = static_cast<std::uint8_t>(placement.direction),
-          .tile_z = static_cast<std::uint8_t>(placement.tileZ),
-          .height = static_cast<std::uint8_t>(placement.height)};
-}
-
 RememberedSpawn DecodeRemembered(const Actors_RoomActorRecord& record) {
   RememberedSpawn decoded{.ai_flags = record.aiFlags,
                           .current_hp = record.currentHp,
@@ -1021,7 +1013,7 @@ RememberedSpawn DecodeRemembered(const Actors_RoomActorRecord& record) {
 
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:6064)
 Battle_Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
-                                       Field_ActorPlacement* placement,
+                                       const SpawnPlacement* placement,
                                        int material, int /*unused*/) {
   constexpr const char* kOperation = "CreateAuxiliaryActor";
   if (placement == nullptr) {
@@ -1029,8 +1021,8 @@ Battle_Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<Battle_Actor>(CreateAuxiliaryActor(
-      host, index, actor_id, DecodePlacement(*placement), material));
+  return PointerOf<Battle_Actor>(
+      CreateAuxiliaryActor(host, index, actor_id, *placement, material));
 }
 
 // decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
@@ -1038,7 +1030,7 @@ Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
                                            int blade_model, int blade_material,
                                            int shield_model,
                                            int shield_material,
-                                           Field_ActorPlacement* placement,
+                                           const SpawnPlacement* placement,
                                            int flags) {
   constexpr const char* kOperation = "CreateActorWithEquipment";
   if (placement == nullptr) {
@@ -1048,7 +1040,7 @@ Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
   LiveActorSpawnHost host(kOperation);
   return PointerOf<Battle_Actor>(CreateActorWithEquipment(
       host, actor_id, model_id, blade_model, blade_material, shield_model,
-      shield_material, DecodePlacement(*placement), flags));
+      shield_material, *placement, flags));
 }
 
 // decomp: BATTLE.PRG func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6578)
@@ -1073,7 +1065,7 @@ int QueueLiveAshleyModelLoad(int model_id) {
 
 // decomp: BATTLE.PRG func_8007C928 (src/BATTLE/BATTLE.PRG/146C.c:8936)
 int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
-                                Field_ActorPlacement* placement) {
+                                const SpawnPlacement* placement) {
   constexpr const char* kOperation = "QueueScriptedActorSpawn";
   VS::Core::Debugf(
       "actors", "script spawn actor=%u model=%d existing=%p", actor_id,
@@ -1085,8 +1077,7 @@ int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
     return 0;
   }
   LiveActorSpawnHost host(kOperation);
-  return QueueScriptedActorSpawn(host, actor_id, model_id,
-                                 DecodePlacement(*placement));
+  return QueueScriptedActorSpawn(host, actor_id, model_id, *placement);
 }
 
 // decomp: BATTLE.PRG func_8007CA20 (src/BATTLE/BATTLE.PRG/146C.c:8962)

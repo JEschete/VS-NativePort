@@ -197,7 +197,6 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Event/WeaponModeOpcode.hpp"
-#include "Field/Actors.h"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"

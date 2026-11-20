@@ -60,7 +60,6 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.hpp"
 #include "Event/TriggersLive.hpp"
-#include "Field/Actors.h"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -225,16 +224,6 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
 
 [[nodiscard]] RECT ToRect(const Render::ScreenRect& area) {
   return {area.x, area.y, area.width, area.height};
-}
-
-[[nodiscard]] Field_ActorPlacement ToActorPlacement(
-    const Actors::SpawnPlacement& at) {
-  Field_ActorPlacement placement{};
-  placement.tileX = at.tile_x;
-  placement.direction = at.direction;
-  placement.tileZ = at.tile_z;
-  placement.height = at.height;
-  return placement;
 }
 
 [[nodiscard]] Content_DiscFile ToDiscFile(Content::DiscFileExtent extent) {
@@ -691,16 +680,14 @@ class LiveSpawning : public Host {
 
   void SpawnUntemplatedEnemy(int slot, const Actors::SpawnPlacement& placement,
                              int flags) override {
-    Field_ActorPlacement at = ToActorPlacement(placement);
     static_cast<void>(Actors::CreateLiveActorWithEquipment(
-        slot, kUntemplatedEnemyId, 0, 0, 0, 0, &at, flags));
+        slot, kUntemplatedEnemyId, 0, 0, 0, 0, &placement, flags));
   }
 
   void SpawnObject(int slot, int model, const Actors::SpawnPlacement& placement,
                    int material) override {
-    Field_ActorPlacement at = ToActorPlacement(placement);
     static_cast<void>(
-        Actors::CreateLiveAuxiliaryActor(slot, model, &at, material, 0));
+        Actors::CreateLiveAuxiliaryActor(slot, model, &placement, material, 0));
   }
 
   void RememberHidden(int spawn_index, std::uint8_t hidden) override {
@@ -730,8 +717,7 @@ class LiveEntrance : public Host {
   }
 
   void PlaceAshley(const Actors::SpawnPlacement& placement) override {
-    const Field_ActorPlacement at = ToActorPlacement(placement);
-    Actors::PlaceLiveActorInRoom(0, &at, kEntranceDropHeight,
+    Actors::PlaceLiveActorInRoom(0, &placement, kEntranceDropHeight,
                                  kEntranceMovementClass);
   }
 

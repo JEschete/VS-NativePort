@@ -34,7 +34,6 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Field/Actors.h"
 #include "Field/Doors.h"
 #include "Field/MinimapSceneLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -315,13 +314,8 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
 
   void QueueScriptedSpawn(int actor, int model,
                           VS::Actors::SpawnPlacement placement) override {
-    Field_ActorPlacement live{};
-    live.tileX = placement.tile_x;
-    live.direction = placement.direction;
-    live.tileZ = placement.tile_z;
-    live.height = placement.height;
     VS::Actors::QueueLiveScriptedActorSpawn(static_cast<unsigned>(actor), model,
-                                            &live);
+                                            &placement);
   }
   void RemoveScriptedActor(int actor) override {
     VS::Actors::RemoveLiveScriptedActor(actor);

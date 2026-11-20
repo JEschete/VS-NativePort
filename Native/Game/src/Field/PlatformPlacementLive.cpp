@@ -427,17 +427,14 @@ std::span<const MovingPlatformPose> LivePlatforms(
 }
 
 template <typename Lookup>
-std::optional<Field_PlatformContactPoint> LiveContact(int support_layer,
+std::optional<VS::Field::PlatformContact> LiveContact(int support_layer,
                                                       Lookup lookup) {
   Poses poses{};
   const VS::Field::MovingPlatformRoom room{
       .platforms = LivePlatforms(poses),
       .bounce_offsets = std::span<const std::int16_t>(
           Field_kPlatformBounceOffsets, kBounceOffsetCount)};
-  const auto contact = lookup(room, support_layer);
-  if (!contact) return std::nullopt;
-  return Field_PlatformContactPoint{contact->x, contact->height, contact->z,
-                                    contact->platform_index};
+  return lookup(room, support_layer);
 }
 }  // namespace
 
@@ -636,14 +633,12 @@ std::optional<std::uint16_t> LiveMovingPlatformDwellTicks(int platform_index) {
       .motion_ticks = static_cast<std::uint16_t>(record->motionTicks)});
 }
 
-std::optional<Field_PlatformContactPoint> LiveMovingPlatformPlacement(
-    int support_layer) {
+std::optional<PlatformContact> LiveMovingPlatformPlacement(int support_layer) {
   return LiveContact(support_layer, MovingPlatformPlacement);
 }
 
 // decomp: BATTLE.PRG func_800A4A24 (src/BATTLE/BATTLE.PRG/3A1A0.c:1089).
-std::optional<Field_PlatformContactPoint> FindLiveMovingPlatformById(
-    int support_layer) {
+std::optional<PlatformContact> FindLiveMovingPlatformById(int support_layer) {
   return LiveContact(support_layer, FindMovingPlatformById);
 }
 }  // namespace VS::Field
@@ -667,16 +662,15 @@ int VS::Field::UpdateMovingPlatformsEntry(void) {
   static_cast<void>(VS::Field::UpdateLiveMovingPlatforms());
   return 0;
 }
+// decomp: BATTLE.PRG func_8008D2C0 (src/BATTLE/BATTLE.PRG/146C.c:16637)
+// Its callers pass SVECTOR arrays: x, height, z and the platform index.
+static_assert(sizeof(VS::Field::PlatformContact) == sizeof(SVECTOR));
 int VS::Field::CollectMovingPlatformPositionsEntry(
-    Field_PlatformContactPoint output_contacts[]) {
+    PlatformContact output_contacts[]) {
   if (output_contacts == nullptr) return 0;
   const auto contacts = VS::Field::CollectLiveMovingPlatformPositions();
   if (contacts.size() > VS::Field::kMovingPlatformCapacity) return 0;
-  for (std::size_t index = 0; index < contacts.size(); ++index) {
-    const auto& contact = contacts[index];
-    output_contacts[index] = {contact.x, contact.height, contact.z,
-                              contact.platform_index};
-  }
+  std::ranges::copy(contacts, output_contacts);
   return static_cast<int>(contacts.size());
 }
 int VS::Field::SetMovingPlatformActorEntry(int platform_index, int control) {

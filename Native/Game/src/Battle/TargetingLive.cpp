@@ -63,7 +63,6 @@
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"

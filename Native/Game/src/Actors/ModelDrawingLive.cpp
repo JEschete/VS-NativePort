@@ -31,7 +31,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVmLive.hpp"
-#include "Field/Actors.h"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomLightingLive.hpp"

@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
+#include <cstdint>
+
 #include "Legacy/Psx.h"
 
 struct Content_ActorAssetRequest;
 struct Content_SequenceBuffer;
-
-#include "Field/Actors.h"
 
 // decomp: func_8009C378_t (src/BATTLE/BATTLE.PRG/30DB0.h:9)
 struct Content_SequenceBuffer {
@@ -22,7 +22,7 @@ struct Content_ActorAssetRequest {
     short modelId;
     void* destination;
     uintptr_t dataAddress;
-    Field_ActorPlacement placement;
+    std::uint32_t placement; /* func_80089888_t: Actors::PackPlacement */
     u_char subKind;
     char textureSlot;
     char material;

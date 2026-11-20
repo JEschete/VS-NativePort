@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -805,7 +804,7 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   const Content_ActorAssetRequest& body = Content_legacyActorAssetRequests[0];
   CHECK(body.destination == buffer);
   CHECK(body.dataAddress == reinterpret_cast<std::uintptr_t>(file + 0x30));
-  CHECK(std::bit_cast<u_int>(body.placement) == 0);
+  CHECK(body.placement == 0);
   CheckAttachmentStrides(companion, buffer);
 }
 

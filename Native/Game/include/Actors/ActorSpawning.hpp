@@ -110,7 +110,9 @@ inline constexpr std::int32_t kMaxInitialStat = 999;
 inline constexpr int kStatRollRange = 21;
 inline constexpr int kStatRollBias = 10;
 
-// Field_ActorPlacement: four bytes the asset queue carries.
+// The placement an asset request carries: tile X, direction (tile layer),
+// tile Z and height (facing). decomp: func_80089888_t
+// (src/BATTLE/BATTLE.PRG/3A1A0.h:7), the four bytes of the request word.
 struct SpawnPlacement {
   std::uint8_t tile_x = 0;
   std::uint8_t direction = 0;
@@ -121,16 +123,29 @@ struct SpawnPlacement {
                          const SpawnPlacement&) = default;
 };
 
+inline constexpr unsigned kPlacementDirectionShift = 8;
+inline constexpr unsigned kPlacementTileZShift = 16;
+inline constexpr unsigned kPlacementHeightShift = 24;
+
 // The placement word of an asset request: tile X, direction, tile Z and
 // height, low byte first.
 [[nodiscard]] constexpr std::uint32_t PackPlacement(SpawnPlacement placement) {
-  constexpr unsigned kDirectionShift = 8;
-  constexpr unsigned kTileZShift = 16;
-  constexpr unsigned kHeightShift = 24;
   return static_cast<std::uint32_t>(placement.tile_x) |
-         (static_cast<std::uint32_t>(placement.direction) << kDirectionShift) |
-         (static_cast<std::uint32_t>(placement.tile_z) << kTileZShift) |
-         (static_cast<std::uint32_t>(placement.height) << kHeightShift);
+         (static_cast<std::uint32_t>(placement.direction)
+          << kPlacementDirectionShift) |
+         (static_cast<std::uint32_t>(placement.tile_z)
+          << kPlacementTileZShift) |
+         (static_cast<std::uint32_t>(placement.height)
+          << kPlacementHeightShift);
+}
+
+// The inverse of PackPlacement.
+[[nodiscard]] constexpr SpawnPlacement UnpackPlacement(std::uint32_t word) {
+  return {
+      .tile_x = static_cast<std::uint8_t>(word),
+      .direction = static_cast<std::uint8_t>(word >> kPlacementDirectionShift),
+      .tile_z = static_cast<std::uint8_t>(word >> kPlacementTileZShift),
+      .height = static_cast<std::uint8_t>(word >> kPlacementHeightShift)};
 }
 
 enum class ActorShape : std::uint8_t {

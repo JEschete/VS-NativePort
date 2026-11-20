@@ -20,6 +20,7 @@
 #include "Actors/ActorPlacement.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorRosterLive.hpp"
+#include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.h"
@@ -51,12 +52,10 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
-#include "Field/Actors.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Platforms.h"
 #include "Render/Palette.hpp"
 
 namespace VS::Actors {
@@ -486,16 +485,8 @@ class LiveActorStateHost final : public ActorStateHost {
   }
   std::optional<Field::PlatformContact> MovingPlatformContact(
       int support_layer) override {
-    std::optional<Field_PlatformContactPoint> contact;
-    {
-      const Synced synced(*this);
-      contact = Field::LiveMovingPlatformPlacement(support_layer);
-    }
-    if (!contact.has_value()) return std::nullopt;
-    return Field::PlatformContact{.x = contact->x,
-                                  .height = contact->height,
-                                  .z = contact->z,
-                                  .platform_index = contact->platformIndex};
+    const Synced synced(*this);
+    return Field::LiveMovingPlatformPlacement(support_layer);
   }
   void SaveGroundedTransform(int id) override {
     Actors_ActorRecord* record = LiveActorRecord(id, operation_);
@@ -782,18 +773,17 @@ int LiveActorPlacement(int actor_id, Actors_ActorLocationQuery* placement_out) {
       actor_id, placement_out != nullptr ? &placement_out->location : nullptr);
 }
 
-void PlaceLiveActorInRoom(int actor_id, const Field_ActorPlacement* placement,
+void PlaceLiveActorInRoom(int actor_id, const SpawnPlacement* placement,
                           int drop_height, int movement_class) {
   if (placement == nullptr) {
     WarnActorRefused("PlaceActorInRoom", "no placement");
     return;
   }
   // The placement's second and fourth bytes are the tile layer and facing.
-  const PackedTile tile{
-      .x = static_cast<std::uint8_t>(placement->tileX),
-      .layer = static_cast<std::uint8_t>(placement->direction),
-      .z = static_cast<std::uint8_t>(placement->tileZ),
-      .spare = static_cast<std::uint8_t>(placement->height)};
+  const PackedTile tile{.x = placement->tile_x,
+                        .layer = placement->direction,
+                        .z = placement->tile_z,
+                        .spare = placement->height};
   LiveActorStateHost host("PlaceActorInRoom");
   PlaceActorInRoom(host, actor_id, tile, drop_height, movement_class);
 }

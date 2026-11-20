@@ -6,7 +6,6 @@
 struct Actors_CharacterInit;
 struct Actors_RoomActorRecord;
 struct Battle_Actor;
-struct Field_ActorPlacement;
 struct Field_MpdEnemySpawn;
 
 // Bindings from Battle_actors, the actor allocations, VS::Field::zoneContext,
@@ -21,21 +20,19 @@ namespace VS::Actors {
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(
     const Actors_CharacterInit& init);
 [[nodiscard]] RoomSpawn DecodeRoomSpawn(const Field_MpdEnemySpawn& spawn);
-[[nodiscard]] SpawnPlacement DecodePlacement(
-    const Field_ActorPlacement& placement);
 [[nodiscard]] RememberedSpawn DecodeRemembered(
     const Actors_RoomActorRecord& record);
 
 // func_800765B0 (146C.c:6064). `unused` is unused, as in the original.
 Battle_Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
-                                       Field_ActorPlacement* placement,
+                                       const SpawnPlacement* placement,
                                        int material, int unused);
 // func_800774FC (146C.c:6562).
 Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
                                            int blade_model, int blade_material,
                                            int shield_model,
                                            int shield_material,
-                                           Field_ActorPlacement* placement,
+                                           const SpawnPlacement* placement,
                                            int flags);
 // func_800775C0 (146C.c:6578).
 Battle_Actor* SpawnLiveRoomEnemy(int actor_id, Field_MpdEnemySpawn* spawn,
@@ -44,7 +41,7 @@ Battle_Actor* SpawnLiveRoomEnemy(int actor_id, Field_MpdEnemySpawn* spawn,
 int QueueLiveAshleyModelLoad(int model_id);
 // func_8007C928 (146C.c:8936): the queue index plus one, or 0.
 int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
-                                Field_ActorPlacement* placement);
+                                const SpawnPlacement* placement);
 // func_8007CA20 (146C.c:8962).
 void LoadLiveActorEquipmentModels(int actor_id, int blade_model,
                                   int shield_model);

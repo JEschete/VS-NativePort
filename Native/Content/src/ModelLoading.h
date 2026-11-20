@@ -6,7 +6,6 @@
 #include "ActorAssets.h"
 #include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
-#include "Field/Actors.h"
 
 extern u_char Content_legacyModelLoadPhase;
 extern u_char Content_legacySequenceParsePhase;

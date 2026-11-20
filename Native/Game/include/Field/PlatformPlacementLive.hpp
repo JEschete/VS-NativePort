@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "Field/PlatformPlacement.hpp"
-#include "Field/Platforms.h"
 
 // Binding from the current room's moving platforms to the typed contact
 // lookup. Contacts are returned by value; nothing is borrowed.
@@ -27,20 +26,18 @@ bool SetLiveMovingPlatformVisibility(int platform_index,
 std::optional<std::uint16_t> LiveMovingPlatformDwellTicks(int platform_index);
 
 // The current room's authored platform on `support_layer`, hidden or not.
-std::optional<Field_PlatformContactPoint> LiveMovingPlatformPlacement(
-    int support_layer);
+std::optional<PlatformContact> LiveMovingPlatformPlacement(int support_layer);
 
 // The current room's visible platform on `support_layer` (func_800A4A24).
-std::optional<Field_PlatformContactPoint> FindLiveMovingPlatformById(
-    int support_layer);
+std::optional<PlatformContact> FindLiveMovingPlatformById(int support_layer);
 
 void InitializeMovingPlatformsEntry();
 void DrawMovingPlatformShadowsEntry();
 void SetPlatformFreezeAppearanceEntry(int requested);
 void* MovingPlatformTargetWaypointEntry(int index);
 int UpdateMovingPlatformsEntry();
-int CollectMovingPlatformPositionsEntry(
-    Field_PlatformContactPoint output_contacts[]);
+// Writes the visible contacts; the original takes an SVECTOR array.
+int CollectMovingPlatformPositionsEntry(PlatformContact output_contacts[]);
 int SetMovingPlatformActorEntry(int platform_index, int control);
 void ResetMovingPlatformWaypointEntry(int platform_index, int waypoint);
 void SetMovingPlatformsPausedEntry(int paused);

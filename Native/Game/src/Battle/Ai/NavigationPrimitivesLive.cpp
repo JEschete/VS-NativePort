@@ -35,7 +35,6 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 

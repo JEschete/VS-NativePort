@@ -3,7 +3,6 @@
 #include "ActorAssets.h"
 #include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
-#include "Field/Actors.h"
 #include "ModelLoading.h"
 
 // decomp: _loadShpState (_loadShpState@BATTLE/BATTLE.PRG)

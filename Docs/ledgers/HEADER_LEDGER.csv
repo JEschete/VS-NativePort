@@ -306,7 +306,7 @@ H0304,header,Native/Game/src/Event/Splash.hpp,generated,no,pragma-once,0,0,0,0,0
 H0305,header,Native/Game/src/Event/Triggers.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0306,header,Native/Game/src/Event/WeaponModeOpcode.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,dropped Legacy/Psx.h; the opcode's command parameter is std::uint8_t* (#441)
 H0307,header,Native/Game/src/Event/Weather.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0308,header,Native/Game/src/Field/Actors.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0308,header,Native/Game/src/Field/Actors.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Field_ActorPlacement (T00444/T00660) duplicated VS::Actors::SpawnPlacement (Actors/ActorSpawning.hpp) (#441)
 H0309,header,Native/Game/src/Field/Background.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0310,header,Native/Game/src/Field/BackgroundLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0311,header,Native/Game/src/Field/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
@@ -338,7 +338,7 @@ H0336,header,Native/Game/src/Field/Minimap.hpp,generated,no,pragma-once,0,0,0,0,
 H0337,header,Native/Game/src/Field/MinimapSceneLive.h,owned,no,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/include/Field/MinimapSceneLive.hpp (#441)
 H0338,header,Native/Game/src/Field/Mpd.h,generated,yes,pragma-once,0,0,0,0,0,0,19,0,0,remaining,
 H0339,header,Native/Game/src/Field/PlatformPlacementLive.h,owned,no,pragma-once,0,0,0,0,0,0,13,0,0,retired,merged into Native/Game/include/Field/PlatformPlacementLive.hpp (#441)
-H0340,header,Native/Game/src/Field/Platforms.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0340,header,Native/Game/src/Field/Platforms.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Field_PlatformContactPoint (T00445/T00446) duplicated VS::Field::PlatformContact (Field/PlatformPlacement.hpp) (#441)
 H0341,header,Native/Game/src/Field/Room.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
 H0342,header,Native/Game/src/Field/RoomLoadingLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0343,header,Native/Game/src/Field/RoomRenderingLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

@@ -19,7 +19,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/SegmentCollision.hpp"
 
@@ -34,10 +33,6 @@ static_assert(sizeof(Field_MpdMovingPlatform) == kSourcePlatformBytes);
 [[noreturn]] void InvalidTrace(const char* reason) {
   VS::Core::LogError("field.collision", "segment trace: {}", reason);
   std::abort();
-}
-
-SolidVolume ToSolidVolume(const Field_PlatformContactPoint& contact) {
-  return {static_cast<std::uint16_t>(contact.x), contact.height, contact.z};
 }
 
 SolidVolume ToSolidVolume(const PlatformContact& contact) {
@@ -108,8 +103,10 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
 };
 }  // namespace
 
+// The original entry reads 8-byte SVECTOR contacts.
+static_assert(sizeof(PlatformContact) == sizeof(SVECTOR));
 int IsLivePointOutsideSolidVolumes(const VECTOR* point,
-                                   const Field_PlatformContactPoint* volumes,
+                                   const PlatformContact* volumes,
                                    std::size_t count) {
   if (point == nullptr || (count != 0 && volumes == nullptr)) {
     InvalidTrace("solid-volume predicate requires a point and valid span");

@@ -386,11 +386,11 @@ struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
 }  // namespace
 
 namespace {
-void CheckAuthoredPlacement(const Field_PlatformContactPoint& contact) {
+void CheckAuthoredPlacement(const VS::Field::PlatformContact& contact) {
   CHECK(contact.x == 1216);
   CHECK(contact.height == -768);
   CHECK(contact.z == 448);
-  CHECK(contact.platformIndex == 1);
+  CHECK(contact.platform_index == 1);
 }
 }  // namespace
 
@@ -559,12 +559,12 @@ TEST_CASE("Native platform collection preserves unused output and records",
   PlatformPlacementFixture fixture;
   fixture.platforms[1].isHidden = 0;
   const auto saved = fixture.platforms;
-  std::array<Field_PlatformContactPoint, 3> contacts{
-      Field_PlatformContactPoint{7, 8, 9, 10}, {7, 8, 9, 10}, {7, 8, 9, 10}};
+  std::array<VS::Field::PlatformContact, 3> contacts{
+      VS::Field::PlatformContact{7, 8, 9, 10}, {7, 8, 9, 10}, {7, 8, 9, 10}};
   CHECK(VS::Field::CollectMovingPlatformPositionsEntry(contacts.data()) == 1);
   using ContactBytes = std::array<std::byte, sizeof(contacts)>;
   const decltype(contacts) expected{
-      Field_PlatformContactPoint{1216, -768, 448, 1},
+      VS::Field::PlatformContact{1216, -768, 448, 1},
       {7, 8, 9, 10},
       {7, 8, 9, 10}};
   CHECK(std::bit_cast<ContactBytes>(contacts) ==
@@ -603,7 +603,7 @@ TEST_CASE("Typed collection supports five records without legacy buffer writes",
   Field_roomData.movingPlatforms = platforms.data();
   Field_roomData.header.movingPlatformsLength = sizeof platforms;
   CHECK(VS::Field::CollectLiveMovingPlatformPositions().size() == 5);
-  std::array<Field_PlatformContactPoint, 4> output{};
+  std::array<VS::Field::PlatformContact, 4> output{};
   const auto saved = output;
   CHECK(VS::Field::CollectMovingPlatformPositionsEntry(output.data()) == 0);
   using Bytes = std::array<std::byte, sizeof(output)>;
@@ -1670,7 +1670,7 @@ TEST_CASE(
   CheckAuthoredPlacement(*contact);
   CHECK(fixture.platforms[0].isHidden == 1);
   CHECK(fixture.platforms[1].isHidden == 1);
-  std::array<Field_PlatformContactPoint, 4> visible{};
+  std::array<VS::Field::PlatformContact, 4> visible{};
   CHECK(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) == 0);
   CHECK_FALSE(VS::Field::FindLiveMovingPlatformById(3).has_value());
 }
@@ -1682,7 +1682,7 @@ TEST_CASE(
   fixture.platforms[1].isHidden = 0;
   for (int frame = 0; frame < 7; ++frame) {
     Field_platformBounceFrames[1] = static_cast<char>(frame);
-    std::array<Field_PlatformContactPoint, 4> visible{};
+    std::array<VS::Field::PlatformContact, 4> visible{};
     REQUIRE(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) ==
             1);
     const auto placement = VS::Field::LiveMovingPlatformPlacement(3);
@@ -1693,7 +1693,7 @@ TEST_CASE(
       CHECK(contact.x == visible[0].x);
       CHECK(contact.height == visible[0].height);
       CHECK(contact.z == visible[0].z);
-      CHECK(contact.platformIndex == visible[0].platformIndex);
+      CHECK(contact.platform_index == visible[0].platform_index);
     }
   }
 }

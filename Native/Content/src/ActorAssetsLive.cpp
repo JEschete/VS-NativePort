@@ -21,6 +21,7 @@
 
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLive.hpp"
@@ -42,7 +43,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Actors.h"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Items/Materials.hpp"
@@ -91,10 +91,9 @@ static_assert(std::extent_v<decltype(Actors_sharedSequenceAnimationData), 1> ==
 static_assert(offsetof(Content_ActorAssetRequest, assetKind) == 0);
 static_assert(offsetof(Content_ActorAssetRequest, targetSlot) == 1);
 static_assert(offsetof(Content_ActorAssetRequest, modelId) == 2);
-static_assert(sizeof(Field_ActorPlacement) == sizeof(std::uint32_t));
 static_assert(offsetof(Content_ActorAssetRequest, subKind) ==
               offsetof(Content_ActorAssetRequest, placement) +
-                  sizeof(Field_ActorPlacement));
+                  sizeof(std::uint32_t));
 static_assert(offsetof(Content_ActorAssetRequest, textureSlot) ==
               offsetof(Content_ActorAssetRequest, subKind) + 1);
 static_assert(offsetof(Content_ActorAssetRequest, material) ==
@@ -235,18 +234,6 @@ std::uint8_t ByteOf(const Record& record, std::size_t at) {
   return reinterpret_cast<const std::uint8_t*>(&record)[at];
 }
 
-std::uint32_t PlacementWord(const Field_ActorPlacement& placement) {
-  std::uint32_t value = 0;
-  std::memcpy(&value, &placement, sizeof value);
-  return value;
-}
-
-Field_ActorPlacement Placement(std::uint32_t value) {
-  Field_ActorPlacement placement;
-  std::memcpy(&placement, &value, sizeof value);
-  return placement;
-}
-
 bool InRange(int index, int count) { return index >= 0 && index < count; }
 
 Actors_WeaponModel* WeaponAt(int slot) {
@@ -267,7 +254,7 @@ ActorAssetRequest LoadRequest(const Content_ActorAssetRequest& in) {
       .model_id = in.modelId,
       .destination = Address(in.destination),
       .data = static_cast<AssetAddress>(in.dataAddress),
-      .placement = PlacementWord(in.placement),
+      .placement = in.placement,
       .sub_kind = in.subKind,
       .texture_slot = static_cast<std::uint8_t>(in.textureSlot),
       .material = static_cast<std::uint8_t>(in.material),
@@ -282,7 +269,7 @@ void StoreRequestFields(const ActorAssetRequest& in,
   out.modelId = in.model_id;
   out.destination = Pointer(in.destination);
   out.dataAddress = static_cast<std::uintptr_t>(in.data);
-  out.placement = Placement(in.placement);
+  out.placement = in.placement;
   out.subKind = in.sub_kind;
   out.textureSlot = static_cast<char>(in.texture_slot);
   out.material = static_cast<char>(in.material);
@@ -1053,7 +1040,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     VS::Actors::SetLiveActorPaletteFade(slot, 0);
   }
   void PlaceActorInRoom(int slot, std::uint32_t placement, int mode) override {
-    Field_ActorPlacement value = Placement(placement);
+    const VS::Actors::SpawnPlacement value =
+        VS::Actors::UnpackPlacement(placement);
     VS::Actors::PlaceLiveActorInRoom(slot, &value, 0, mode);
   }
   void AttachActorToParentBone(int slot, int parent, int bone) override {
