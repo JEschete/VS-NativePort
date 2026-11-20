@@ -22,9 +22,9 @@
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.hpp"
@@ -99,14 +99,14 @@ static_assert(VS::Field::kSkyDomeVertexCount ==
               VS::Render::kSkyDomeVertexCount);
 static_assert(sizeof(VS::Field::BackgroundLayoutRecord) == kLayoutHeaderBytes);
 static_assert(sizeof(VS::Field::BackgroundTileRecord) == kLayoutTileBytes);
-static_assert(sizeof(Field_MpdEnvironment) == kEnvironmentBytes);
-static_assert(offsetof(Field_MpdEnvironment, backgroundRotation) ==
+static_assert(sizeof(VS::Field::MpdEnvironment) == kEnvironmentBytes);
+static_assert(offsetof(VS::Field::MpdEnvironment, background_rotation) ==
               kEnvironmentRotationAt);
-static_assert(offsetof(Field_MpdEnvironment, weatherKind) ==
+static_assert(offsetof(VS::Field::MpdEnvironment, weather_kind) ==
               kEnvironmentWeatherKindAt);
-static_assert(offsetof(Field_MpdEnvironment, windStrength) ==
+static_assert(offsetof(VS::Field::MpdEnvironment, wind_strength) ==
               kEnvironmentWindStrengthAt);
-static_assert(offsetof(Field_MpdEnvironment, weatherArea) ==
+static_assert(offsetof(VS::Field::MpdEnvironment, weather_area) ==
               kEnvironmentWeatherAreaAt);
 static_assert(sizeof(VS::Content::DiscFile) == kDiscFileBytes);
 static_assert(sizeof(POLY_FT4) % sizeof(u_long) == 0);
@@ -281,24 +281,25 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
 }
 
 std::optional<RoomEnvironment> LiveRoomEnvironment() {
-  const Field_MpdEnvironment* const record = Field_roomData.environment;
+  const VS::Field::MpdEnvironment* const record =
+      VS::Field::roomData.environment;
   if (record == nullptr) return std::nullopt;
   RoomEnvironment environment{
-      .background_rotation = Math::VectorOf(record->backgroundRotation),
-      .wind_direction = record->windDirection,
-      .wind_direction_limit = record->windDirectionLimit,
-      .wind_direction_interval = record->windDirectionInterval,
-      .weather_intensity = record->weatherIntensity,
-      .weather_intensity_limit = record->weatherIntensityLimit,
-      .weather_intensity_interval = record->weatherIntensityInterval,
-      .wind_strength = record->windStrength,
-      .wind_strength_limit = record->windStrengthLimit,
-      .wind_strength_interval = record->windStrengthInterval,
-      .weather_area = {.origin_x = record->weatherArea[0].halves[0],
-                       .origin_z = record->weatherArea[0].halves[1],
-                       .extent_x = record->weatherArea[1].halves[0],
-                       .extent_z = record->weatherArea[1].halves[1]}};
-  std::ranges::copy(record->backgroundColors,
+      .background_rotation = Math::VectorOf(record->background_rotation),
+      .wind_direction = record->wind_direction,
+      .wind_direction_limit = record->wind_direction_limit,
+      .wind_direction_interval = record->wind_direction_interval,
+      .weather_intensity = record->weather_intensity,
+      .weather_intensity_limit = record->weather_intensity_limit,
+      .weather_intensity_interval = record->weather_intensity_interval,
+      .wind_strength = record->wind_strength,
+      .wind_strength_limit = record->wind_strength_limit,
+      .wind_strength_interval = record->wind_strength_interval,
+      .weather_area = {.origin_x = record->weather_area[0].halves[0],
+                       .origin_z = record->weather_area[0].halves[1],
+                       .extent_x = record->weather_area[1].halves[0],
+                       .extent_z = record->weather_area[1].halves[1]}};
+  std::ranges::copy(record->background_colors,
                     environment.background_colors.begin());
   return environment;
 }
@@ -308,16 +309,17 @@ std::optional<RoomEnvironment> LiveBackgroundHost::Environment() {
 }
 
 void LiveBackgroundHost::StoreWeatherArea(const WeatherArea& area) {
-  Field_MpdEnvironment* const record = Field_roomData.environment;
+  VS::Field::MpdEnvironment* const record = VS::Field::roomData.environment;
   if (record == nullptr) return;
-  record->weatherArea[0].halves[0] = area.origin_x;
-  record->weatherArea[0].halves[1] = area.origin_z;
-  record->weatherArea[1].halves[0] = area.extent_x;
-  record->weatherArea[1].halves[1] = area.extent_z;
+  record->weather_area[0].halves[0] = area.origin_x;
+  record->weather_area[0].halves[1] = area.origin_z;
+  record->weather_area[1].halves[0] = area.extent_x;
+  record->weather_area[1].halves[1] = area.extent_z;
 }
 
 std::optional<CollisionMapExtent> LiveBackgroundHost::CollisionMapSize() {
-  const Field_MpdCollisionHeader* const map = Field_roomData.collisionMap;
+  const VS::Field::MpdCollisionHeader* const map =
+      VS::Field::roomData.collision_map;
   if (map == nullptr) return std::nullopt;
   return CollisionMapExtent{.width = map->width, .height = map->height};
 }
@@ -430,9 +432,9 @@ std::optional<BackgroundLayout> LiveBackgroundHost::Layout(
 }
 
 std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
-  const u_short* const words = Field_roomData.tiledBackground;
+  const u_short* const words = VS::Field::roomData.tiled_background;
   if (words == nullptr) return std::nullopt;
-  const std::size_t bytes = Field_roomData.header.tiledBackgroundLength;
+  const std::size_t bytes = VS::Field::roomData.header.tiled_background_length;
   if (bytes < kTiledSectionBytes) {
     if (ShouldReport(refused_sections)) {
       VS::Core::LogWarn(

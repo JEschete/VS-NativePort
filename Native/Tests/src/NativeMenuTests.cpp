@@ -27,7 +27,7 @@
 #include "Core/Log.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
@@ -168,19 +168,19 @@ struct MenuContentFixture {
 
   void AddMaps() {
     std::vector<std::uint8_t> room;
-    Field_MpdHeader header{};
-    header.roomSectionOffset = sizeof(header);
+    VS::Field::MpdHeader header{};
+    header.room_section_offset = sizeof(header);
     std::array<std::uint32_t, 24> lengths{};
-    lengths[1] = sizeof(Field_MpdCollisionHeader) + 4 + 16;
-    lengths[10] = sizeof(Field_MpdEnvironment);
+    lengths[1] = sizeof(VS::Field::MpdCollisionHeader) + 4 + 16;
+    lengths[10] = sizeof(VS::Field::MpdEnvironment);
     Put(room, sizeof(header), lengths);
     const std::size_t collision = sizeof(header) + sizeof(lengths);
-    Put(room, collision, Field_MpdCollisionHeader{1, 1, 0, 1});
+    Put(room, collision, VS::Field::MpdCollisionHeader{1, 1, 0, 1});
     room.resize(collision + lengths[1]);
-    Field_MpdEnvironment environment{};
-    environment.sceneId = 1;
+    VS::Field::MpdEnvironment environment{};
+    environment.scene_id = 1;
     Put(room, room.size(), environment);
-    header.enemySectionOffset = static_cast<int>(room.size());
+    header.enemy_section_offset = static_cast<int>(room.size());
     Put(room, 0, header);
     Add("MAP/MAP009.MPD", room, 200);
 
@@ -190,13 +190,14 @@ struct MenuContentFixture {
     Put(zone, 32, static_cast<std::uint32_t>(room.size()));
     Add("MAP/ZONE009.ZND", zone, 100);
     std::vector<std::uint8_t> start;
-    lengths[1] = sizeof(Field_MpdCollisionHeader) + std::size_t{8} * 8 * 4 + 16;
+    lengths[1] =
+        sizeof(VS::Field::MpdCollisionHeader) + std::size_t{8} * 8 * 4 + 16;
     Put(start, sizeof(header), lengths);
-    Put(start, collision, Field_MpdCollisionHeader{8, 8, 0, 1});
+    Put(start, collision, VS::Field::MpdCollisionHeader{8, 8, 0, 1});
     start.resize(collision + lengths[1]);
-    environment.sceneId = 0;
+    environment.scene_id = 0;
     Put(start, start.size(), environment);
-    header.enemySectionOffset = static_cast<int>(start.size());
+    header.enemy_section_offset = static_cast<int>(start.size());
     Put(start, 0, header);
     Add("MAP/MAP001.MPD", start, 201);
     Put(zone, 28, std::uint32_t{201});
@@ -606,7 +607,7 @@ struct ClearInputsFixture {
   decltype(VS::Items::inventory) inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
   VS::State::AshleySnapshot ashley = VS::State::ashleySnapshot;
-  Field_MpdDoorRecord entry = VS::State::savedEntryDoor;
+  VS::Field::MpdDoorRecord entry = VS::State::savedEntryDoor;
   VS::State::RoomVisitFlags visits = VS::State::roomVisitProgress;
   VS::State::ScoreData score = VS::State::scoreData;
   decltype(VS::State::playTime) time = VS::State::playTime;
@@ -627,8 +628,8 @@ struct ClearInputsFixture {
     VS::State::ashleySnapshot.stats =
         MenuContentFixture::Document().state.ashley;
     VS::State::savedEntryDoor = {};
-    VS::State::savedEntryDoor.entryTileX = 4;
-    VS::State::savedEntryDoor.entryTileZ = 2;
+    VS::State::savedEntryDoor.entry_tile_x = 4;
+    VS::State::savedEntryDoor.entry_tile_z = 2;
     VS::State::roomVisitProgress = {};
     VS::State::scoreData = {};
     VS::State::playTime = {.frames = 0, .seconds = 0, .minutes = 0, .hours = 1};

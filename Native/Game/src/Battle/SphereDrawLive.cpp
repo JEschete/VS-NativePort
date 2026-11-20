@@ -28,8 +28,8 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Menus.hpp"
 #include "Render/Render.hpp"
@@ -58,7 +58,7 @@ constexpr unsigned kHalfwordBits = 16;
 
 constexpr std::size_t kTargetVolumeBytes = 16;
 static_assert(sizeof(Battle_TargetVolume) == kTargetVolumeBytes);
-static_assert(sizeof(Field_MpdTileCell) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
 static_assert(std::size(Battle_TargetSphere{}.terrainHeights) ==
               kSphereTerrainRows * kSphereTerrainColumns);
 static_assert(std::size(Battle_TargetSphere{}.terrainRowFlags) ==
@@ -208,12 +208,13 @@ class LiveTerrainSource final : public SphereTerrainSource {
 
   std::optional<std::uint8_t> TopGimmickObject(std::int32_t tile_x,
                                                std::int32_t tile_z) override {
-    const Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(
-        VS::Field::FindTopGimmickAtTileEntry(tile_x, tile_z, 0));
+    const VS::Field::GimmickInstance* gimmick =
+        VS::Field::FindGimmickForActorSlot(
+            VS::Field::FindTopGimmickAtTileEntry(tile_x, tile_z, 0));
     if (gimmick == nullptr) {
       return std::nullopt;
     }
-    return static_cast<std::uint8_t>(gimmick->objectInfo.objectId);
+    return static_cast<std::uint8_t>(gimmick->object_info.object_id);
   }
 
   std::int32_t FloorAndCeiling(std::int32_t world_x,

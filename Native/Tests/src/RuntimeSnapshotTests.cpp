@@ -45,12 +45,12 @@
 #include "Ending/EndingLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -130,24 +130,24 @@ struct ContentFixture {
   void BuildRoom() {
     std::array<std::uint32_t, 24> lengths{};
     constexpr std::size_t kSide = 4;
-    lengths[1] = sizeof(Field_MpdCollisionHeader) + kSide * kSide * 4 + 16;
+    lengths[1] = sizeof(VS::Field::MpdCollisionHeader) + kSide * kSide * 4 + 16;
     // A short region table is valid, independent of collision grid area.
     lengths[2] = 3;
-    lengths[10] = sizeof(Field_MpdEnvironment);
-    Field_MpdHeader header{};
-    header.roomSectionOffset = sizeof(header);
+    lengths[10] = sizeof(VS::Field::MpdEnvironment);
+    VS::Field::MpdHeader header{};
+    header.room_section_offset = sizeof(header);
     Put(room, sizeof(header), lengths);
     collision_offset = sizeof(header) + sizeof(lengths);
-    Field_MpdCollisionHeader collision{kSide, kSide, 0, 1};
+    VS::Field::MpdCollisionHeader collision{kSide, kSide, 0, 1};
     Put(room, collision_offset, collision);
     room.resize(collision_offset + lengths[1] + lengths[2], 0);
     environment_offset = room.size();
-    Field_MpdEnvironment environment{};
-    environment.sceneId = 37;
+    VS::Field::MpdEnvironment environment{};
+    environment.scene_id = 37;
     Put(room, environment_offset, environment);
-    header.enemySectionOffset = static_cast<int>(room.size());
-    header.enemySectionSize = 8 * sizeof(Field_MpdEnemySpawn);
-    room.resize(room.size() + header.enemySectionSize);
+    header.enemy_section_offset = static_cast<int>(room.size());
+    header.enemy_section_size = 8 * sizeof(VS::Field::MpdEnemySpawn);
+    room.resize(room.size() + header.enemy_section_size);
     Put(room, 0, header);
     if (room.size() < minimum_room_bytes) room.resize(minimum_room_bytes);
     WriteRoom();
@@ -233,12 +233,12 @@ struct RuntimeFixture {
   decltype(VS::State::scoreData) score = VS::State::scoreData;
   decltype(VS::State::ashleySnapshot) ashley = VS::State::ashleySnapshot;
   decltype(VS::State::savedEntryDoor) entry = VS::State::savedEntryDoor;
-  decltype(Field_snapshotDoorFlagSource) detached_scene =
-      Field_snapshotDoorFlagSource;
+  decltype(VS::Field::snapshotDoorFlagSource) detached_scene =
+      VS::Field::snapshotDoorFlagSource;
   decltype(VS::State::playTime) time = VS::State::playTime;
   decltype(VS::State::sceneTimer) timer = VS::State::sceneTimer;
   decltype(VS::Field::zoneContext) zone = VS::Field::zoneContext;
-  decltype(Field_roomData) room = Field_roomData;
+  decltype(VS::Field::roomData) room = VS::Field::roomData;
   decltype(VS::Field::sphericalCamera) camera = VS::Field::sphericalCamera;
   decltype(VS::Render::FrameScratchpad().camera) rendered_camera =
       VS::Render::FrameScratchpad().camera;
@@ -292,7 +292,7 @@ struct RuntimeFixture {
   Actors_ActorRecord player_model{};
   Actors_ActorRecord enemy_model{};
   VS::Battle::Ai::ActorAiState enemy_ai{};
-  Field_MpdEnvironment environment{};
+  VS::Field::MpdEnvironment environment{};
   VS::Field::CameraTransitionRecord camera_transition{};
   VS::Items::ContainerData storage{};
 
@@ -385,11 +385,11 @@ struct RuntimeFixture {
     VS::Field::zoneContext.room_id = 0;
     VS::Field::zoneContext.scene_id = 37;
     VS::Field::zoneContext.bounds = {0, 0, 4, 4};
-    environment.sceneId = 37;
-    Field_roomData = {};
-    Field_roomData.isLoaded = 1;
-    Field_roomData.environment = &environment;
-    Field_roomData.header.environmentLength = sizeof environment;
+    environment.scene_id = 37;
+    VS::Field::roomData = {};
+    VS::Field::roomData.is_loaded = 1;
+    VS::Field::roomData.environment = &environment;
+    VS::Field::roomData.header.environment_length = sizeof environment;
     VS::Field::sphericalCamera = {};
     VS::Field::sphericalCamera.values.yaw = 1027;
     VS::Field::sphericalCamera.values.pitch = -384;
@@ -582,11 +582,11 @@ struct RuntimeFixture {
     const auto state = Capture();
     VS::State::ashleySnapshot.stats = state.ashley;
     VS::State::savedEntryDoor = {};
-    VS::State::savedEntryDoor.entryTileX = 3;
-    VS::State::savedEntryDoor.entryTileZ = 2;
-    VS::State::savedEntryDoor.entryElevation = 1;
-    VS::State::savedEntryDoor.tileLocation.entryDirection = 1;
-    VS::State::savedEntryDoor.requiredFlagId = 37;
+    VS::State::savedEntryDoor.entry_tile_x = 3;
+    VS::State::savedEntryDoor.entry_tile_z = 2;
+    VS::State::savedEntryDoor.entry_elevation = 1;
+    VS::State::savedEntryDoor.tile_location.entry_direction = 1;
+    VS::State::savedEntryDoor.required_flag_id = 37;
     VS::Input::settings.current_game_save_count = 7;
     VS::Input::settings.cumulative_save_count = 19;
     VS::Input::settings.menu_flags = 0xFFFF;
@@ -612,11 +612,11 @@ struct RuntimeFixture {
     VS::State::scoreData = score;
     VS::State::ashleySnapshot = ashley;
     VS::State::savedEntryDoor = entry;
-    Field_snapshotDoorFlagSource = detached_scene;
+    VS::Field::snapshotDoorFlagSource = detached_scene;
     VS::State::playTime = time;
     VS::State::sceneTimer = timer;
     VS::Field::zoneContext = zone;
-    Field_roomData = room;
+    VS::Field::roomData = room;
     VS::Field::sphericalCamera = camera;
     VS::Render::FrameScratchpad().camera = rendered_camera;
     std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
@@ -680,7 +680,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::Field::sphericalCamera);
   Append(bytes, VS::Render::FrameScratchpad().camera);
   Append(bytes, VS::Field::zoneContext);
-  Append(bytes, Field_roomData);
+  Append(bytes, VS::Field::roomData);
   Append(bytes, VS::Field::isFirstPersonViewEnabled);
   Append(bytes, VS::Field::controlMode);
   Append(bytes, VS::Field::isInteractionPaused);
@@ -772,7 +772,7 @@ TEST_CASE("Runtime capture reads canonical gameplay without modifying it",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   fixture.AddEnemy();
-  Field_snapshotDoorFlagSource.requiredFlagId = 999;
+  VS::Field::snapshotDoorFlagSource.required_flag_id = 999;
   const auto before = LiveFingerprint(fixture);
   const auto state = fixture.Capture();
   CHECK(LiveFingerprint(fixture) == before);
@@ -904,7 +904,7 @@ TEST_CASE(
   if (invalid == 3) fixture.content.WriteZoneRequest(201, 2048);
   if (invalid == 4) {
     Put(fixture.content.room,
-        sizeof(Field_MpdHeader) + 23 * sizeof(std::uint32_t),
+        sizeof(VS::Field::MpdHeader) + 23 * sizeof(std::uint32_t),
         std::uint32_t{1024});
     fixture.content.WriteRoom();
   }
@@ -937,7 +937,7 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 2) fixture.player_stats.weapon.index = 9;
   if (defect == 3) VS::Items::inventory.weapons[0].grip = 255;
   if (defect == 4) VS::State::currentRoomStateSlot = 4;
-  if (defect == 5) Field_roomData.environment = nullptr;
+  if (defect == 5) VS::Field::roomData.environment = nullptr;
   if (defect == 6) fixture.player_model.instance.currentTileLayer = 2;
   if (defect == 7) fixture.player_model.instance.supportLayer = 2;
   if (defect == 8) VS::Field::isFirstPersonViewEnabled = 1;
@@ -1007,10 +1007,10 @@ void InvalidateSnapshot(Save::Snapshot& state, int defect) {
 void CheckStagedInputs() {
   CHECK(Save::ResumePending());
   CHECK(static_cast<unsigned char>(VS::State::LiveScriptFlag(64)) == 177);
-  CHECK(VS::State::savedEntryDoor.requiredFlagId == 37);
-  CHECK(VS::State::savedEntryDoor.destinationZoneId == 9);
-  CHECK(VS::State::savedEntryDoor.entryTileX == 1);
-  CHECK(VS::State::savedEntryDoor.entryTileZ == 2);
+  CHECK(VS::State::savedEntryDoor.required_flag_id == 37);
+  CHECK(VS::State::savedEntryDoor.destination_zone_id == 9);
+  CHECK(VS::State::savedEntryDoor.entry_tile_x == 1);
+  CHECK(VS::State::savedEntryDoor.entry_tile_z == 2);
   CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
   CHECK(static_cast<unsigned char>(VS::State::learnedActionFlags[12]) == 0x40);
   CHECK(VS::State::learnedActionFlags[0] == 0);
@@ -1040,7 +1040,7 @@ TEST_CASE("Runtime validation checks content extents without mutating globals",
   const auto state = fixture.Capture();
   const auto defect = GENERATE(0, 1, 2, 3);
   if (defect == 0) {
-    Put(fixture.content.room, sizeof(Field_MpdHeader) + 4,
+    Put(fixture.content.room, sizeof(VS::Field::MpdHeader) + 4,
         std::uint32_t{0xFFFFFFFF});
   }
   if (defect == 1) {
@@ -1051,7 +1051,7 @@ TEST_CASE("Runtime validation checks content extents without mutating globals",
     std::filesystem::remove(fixture.content.root / "disc" / "OBJ" / "01.WEP");
   }
   if (defect == 3) {
-    auto collision = Field_MpdCollisionHeader{33, 4, 0, 1};
+    auto collision = VS::Field::MpdCollisionHeader{33, 4, 0, 1};
     Put(fixture.content.room, fixture.content.collision_offset, collision);
   }
   fixture.content.WriteRoom();
@@ -1484,7 +1484,7 @@ void CheckCanceledStaticResume(const RuntimeFixture& fixture,
                                const Save::Document& document,
                                const std::vector<std::uint8_t>& before) {
   REQUIRE(Save::PrepareResume(document).has_value());
-  CHECK(VS::State::savedEntryDoor.tileLocation.entryDirection ==
+  CHECK(VS::State::savedEntryDoor.tile_location.entry_direction ==
         document.state.location.floor_layer);
   Save::CancelResume();
   CHECK(LiveFingerprint(fixture) == before);
@@ -1557,7 +1557,7 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   if (defect == 0) VS::State::ashleySnapshot.stats.is_pending = 1;
   if (defect == 1) VS::Field::zoneContext.room_id = 1;
   if (defect == 2) VS::Field::zoneContext.scene_id = 38;
-  if (defect == 3) Field_roomData.isLoaded = 0;
+  if (defect == 3) VS::Field::roomData.is_loaded = 0;
   if (defect == 4) VS::Boot::isGameplayActive = 0;
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::FinishResume().has_value());
@@ -1594,11 +1594,11 @@ void CheckClearCarryover(const Save::Document& document) {
 }
 
 void CheckResumeStaged() {
-  CHECK(VS::State::savedEntryDoor.destinationZoneId == 1);
-  CHECK(VS::State::savedEntryDoor.entryTileX == 3);
-  CHECK(VS::State::savedEntryDoor.entryTileZ == 2);
-  CHECK(VS::State::savedEntryDoor.tileLocation.entryDirection == 1);
-  CHECK(VS::State::savedEntryDoor.requiredFlagId == 37);
+  CHECK(VS::State::savedEntryDoor.destination_zone_id == 1);
+  CHECK(VS::State::savedEntryDoor.entry_tile_x == 3);
+  CHECK(VS::State::savedEntryDoor.entry_tile_z == 2);
+  CHECK(VS::State::savedEntryDoor.tile_location.entry_direction == 1);
+  CHECK(VS::State::savedEntryDoor.required_flag_id == 37);
   CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
 }
 }  // namespace
@@ -1612,7 +1612,7 @@ TEST_CASE("Ending component capture preserves carryover without live actors",
   Battle_characterState = nullptr;
   Battle_actors[0] = nullptr;
   Actors_actorRecords[0] = nullptr;
-  Field_roomData = {};
+  VS::Field::roomData = {};
   const auto before = LiveFingerprint(fixture);
   const auto captured = Save::CaptureClearGame();
   REQUIRE(captured);
@@ -1710,15 +1710,15 @@ TEST_CASE("Clear-game validation rejects unreset state and missing content",
   if (defect == 2) document.state.settings.current_game_save_count = 1;
   if (defect == 3) document.state.play_ticks = 1;
   if (defect == 4) document.state.inventory.misc[0].id = 308;
-  if (defect == 5) Engaged(document.new_game_entry).destinationZoneId = 9;
+  if (defect == 5) Engaged(document.new_game_entry).destination_zone_id = 9;
   if (defect == 6) document.state.visits.room_flags[0] = 1;
   if (defect == 7) {
     REQUIRE(std::filesystem::remove(fixture.content.root / "disc" / "MAP" /
                                     "ZONE001.ZND"));
   }
-  if (defect == 8) Engaged(document.new_game_entry).entryTileX = 31;
+  if (defect == 8) Engaged(document.new_game_entry).entry_tile_x = 31;
   if (defect == 9) {
-    Engaged(document.new_game_entry).tileLocation.entryDirection = 2;
+    Engaged(document.new_game_entry).tile_location.entry_direction = 2;
   }
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::ValidateContent(document));

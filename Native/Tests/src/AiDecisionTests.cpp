@@ -23,7 +23,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Random.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -39,22 +39,23 @@ struct DecisionFixture {
       std::to_array(Battle_actors);
   std::array<Actors_ActorRecord*, 17> saved_records =
       std::to_array(Actors_actorRecords);
-  std::array<Field_GimmickInstance*, 16> saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  std::array<VS::Field::GimmickInstance*, 16> saved_gimmicks =
+      VS::Field::gimmickInstances;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   VS::Battle::Ai::RoomAiState room{};
   VS::Battle::Ai::ActorAiState state{};
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 3> stats{};
   std::array<Actors_ActorRecord, 3> records{};
-  Field_GimmickInstance gimmick{};
+  VS::Field::GimmickInstance gimmick{};
   VS::Battle::Ai::ActionCandidateRecord candidate{};
   std::array<VS::Battle::Ai::CandidateEntryView, 16> fallback{};
 
   DecisionFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
     for (std::size_t index = 0; index < actors.size(); ++index) {
       const int id = index == 0 ? 0 : static_cast<int>(index + 1);
       actors[index].id = id;
@@ -89,7 +90,7 @@ struct DecisionFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
   }
 };
@@ -108,7 +109,8 @@ TEST_CASE(
   fixture.state.min_action_delay = static_cast<u_char>(timer);
   std::memcpy(fixture.state.reserved90.data(), &gate, sizeof(gate));
   fixture.candidate.opaque10.opaque0_bit4 = target_flag;
-  Field_gimmickInstances[3] = has_gimmick != 0 ? &fixture.gimmick : nullptr;
+  VS::Field::gimmickInstances[3] =
+      has_gimmick != 0 ? &fixture.gimmick : nullptr;
   const bool required = busy != 0 || (target_flag != 0 && has_gimmick == 0);
   CHECK(VS::Battle::Ai::DoesLiveActionRequireCooldown(
             &fixture.state, &fixture.candidate) == required);
@@ -323,9 +325,9 @@ TEST_CASE(
   const auto x_offset = GENERATE(0, 1, 2);
   const auto z_offset = GENERATE(0, 1, 2);
   DecisionFixture fixture;
-  Field_gimmickInstances[3] = &fixture.gimmick;
-  fixture.gimmick.tileX = fixture.gimmick.tileZ = 10;
-  fixture.gimmick.tileLayer = 3;
+  VS::Field::gimmickInstances[3] = &fixture.gimmick;
+  fixture.gimmick.tile_x = fixture.gimmick.tile_z = 10;
+  fixture.gimmick.tile_layer = 3;
   fixture.records[0].instance.currentTileX = 10 + x_offset;
   fixture.records[0].instance.currentTileZ = 10 + z_offset;
   fixture.records[0].instance.currentTileLayer = 200;
@@ -341,8 +343,8 @@ TEST_CASE(
     "[ai][decisions]") {
   const auto relation = GENERATE(0, 1, 2, 3);
   DecisionFixture fixture;
-  Field_gimmickInstances[3] = &fixture.gimmick;
-  fixture.gimmick.tileX = fixture.gimmick.tileZ =
+  VS::Field::gimmickInstances[3] = &fixture.gimmick;
+  fixture.gimmick.tile_x = fixture.gimmick.tile_z =
       std::bit_cast<char>(uint8_t{255});
   fixture.records[0].instance.currentTileX =
       fixture.records[0].instance.currentTileZ = 255;

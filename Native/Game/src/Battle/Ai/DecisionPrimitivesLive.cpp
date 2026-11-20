@@ -28,7 +28,7 @@
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -36,7 +36,7 @@ static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
               sizeof(ActionCandidate::Words));
 static_assert(sizeof(VS::Battle::Ai::CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
-static_assert(std::size(Field_gimmickInstances) == kCandidateTargetSlots);
+static_assert(std::size(VS::Field::gimmickInstances) == kCandidateTargetSlots);
 static_assert(std::size(Battle_actionDefinitions) == kActionDefinitionCount);
 static_assert(std::tuple_size_v<
                   decltype(VS::Battle::Ai::ActorAiState::distances_squared)> ==
@@ -67,7 +67,7 @@ ActionCooldown CooldownOf(const VS::Battle::Ai::ActorAiState& state) {
 }
 
 bool HasGimmick(unsigned target) {
-  return Field_gimmickInstances[target] != nullptr;
+  return VS::Field::gimmickInstances[target] != nullptr;
 }
 
 std::int16_t SignedHalf(int value) {
@@ -104,12 +104,13 @@ class LiveActorProximity {
 
 std::optional<bool> HostileNear(const VS::Battle::Ai::ActorAiState& state,
                                 unsigned target) {
-  const Field_GimmickInstance* gimmick = Field_gimmickInstances[target];
+  const VS::Field::GimmickInstance* gimmick =
+      VS::Field::gimmickInstances[target];
   Require(gimmick != nullptr, "AI proximity check requires a target gimmick");
   const LiveActorProximity actors(state);
   return HasNearbyEnemy(
-      GridTile{.x = static_cast<std::uint8_t>(gimmick->tileX),
-               .z = static_cast<std::uint8_t>(gimmick->tileZ)},
+      GridTile{.x = static_cast<std::uint8_t>(gimmick->tile_x),
+               .z = static_cast<std::uint8_t>(gimmick->tile_z)},
       actors.Actors());
 }
 

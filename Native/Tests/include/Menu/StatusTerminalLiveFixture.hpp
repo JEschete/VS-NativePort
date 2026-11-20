@@ -33,7 +33,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -157,8 +157,9 @@ struct AssetStateRestore {
   ArrayRestore<VS::Actors::WeaponModelData*,
                std::size(VS::Content::legacyWeaponModelBuffers)>
       weapon_buffers{VS::Content::legacyWeaponModelBuffers.data()};
-  ArrayRestore<Field_GimmickInstance*, std::size(Field_gimmickInstances)>
-      gimmicks{Field_gimmickInstances};
+  ArrayRestore<VS::Field::GimmickInstance*,
+               std::size(VS::Field::gimmickInstances)>
+      gimmicks{VS::Field::gimmickInstances.data()};
   ValueRestore<decltype(VS::Actors::sharedSequenceBankTexturePages)> bank_pages{
       VS::Actors::sharedSequenceBankTexturePages};
   ValueRestore<decltype(VS::Actors::sharedSequenceData)> shared_sequences{

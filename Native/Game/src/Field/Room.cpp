@@ -1,10 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Field/Room.h"
+// The room primitive range globals (Room.hpp).
+#include "Field/Room.hpp"
 
+namespace VS::Field {
 // decomp: D_800F1BB8 (D_800F1BB8@BATTLE/BATTLE.PRG)
-void* Field_roomPrimitiveRangeEnd;
+void* roomPrimitiveRangeEnd;
 
 // decomp: D_800F1CC0 (D_800F1CC0@BATTLE/BATTLE.PRG)
-void* Field_roomPrimitiveRangeStart;
-
+void* roomPrimitiveRangeStart;
+}  // namespace VS::Field

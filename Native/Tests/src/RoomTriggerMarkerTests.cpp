@@ -10,8 +10,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Field/CameraLiveState.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Field/TriggerMarkers.hpp"
@@ -33,7 +33,7 @@ struct MarkerDefinition {
   std::array<std::byte, VS::Render::kRoomGroupRecordBytes> group{};
   unsigned triangle_count = 0;
   unsigned quad_count = 1;
-  Field_MpdQuad quad{};
+  VS::Field::MpdQuad quad{};
 };
 static_assert(sizeof(MarkerDefinition) == 116);
 static_assert(offsetof(MarkerDefinition, triangle_count) == 68);
@@ -56,7 +56,7 @@ void EditGroup(MarkerDefinition& definition, Edit edit) {
 
 struct TriggerMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
   VS::Render::ScreenRect saved_texture = VS::Field::triggerMarkerTextureSource;
   VS::Render::ScreenRect saved_palette = VS::Field::triggerMarkerPaletteSource;
@@ -64,14 +64,14 @@ struct TriggerMarkerFixture {
   int saved_mode = VS::Field::roomGeometryDrawMode;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
-  u_short saved_animation = Field_roomAnimationTicks;
-  u_short saved_marker_ticks = Field_triggerMarkerFrameTicks;
+  u_short saved_animation = VS::Field::roomAnimationTicks;
+  u_short saved_marker_ticks = VS::Field::triggerMarkerFrameTicks;
   std::array<unsigned int, 29> saved_definition{};
   std::array<unsigned int, 29> expected_definition{};
   std::vector<u_long> storage =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
   std::array<u_long, 2048> ordering{};
-  std::array<Field_MpdFloorTrigger, 2> triggers{};
+  std::array<VS::Field::MpdFloorTrigger, 2> triggers{};
   MarkerDefinition definition;
 
   TriggerMarkerFixture() {
@@ -82,11 +82,11 @@ struct TriggerMarkerFixture {
       group.polygon_offset = offsetof(MarkerDefinition, triangle_count);
       group.view.translation.x = 12345;
     });
-    definition.quad.vertex2OffsetZ = -64;
-    definition.quad.vertex3OffsetX = -64;
-    definition.quad.vertex4OffsetX = -64;
-    definition.quad.vertex4OffsetZ = -64;
-    definition.quad.polygonType = 0x3F;
+    definition.quad.vertex2_offset_z = -64;
+    definition.quad.vertex3_offset_x = -64;
+    definition.quad.vertex4_offset_x = -64;
+    definition.quad.vertex4_offset_z = -64;
+    definition.quad.polygon_type = 0x3F;
     definition.quad.u1 = 10;
     definition.quad.v1 = 20;
     definition.quad.u2 = 30;
@@ -95,18 +95,18 @@ struct TriggerMarkerFixture {
     definition.quad.v3 = 60;
     definition.quad.u4 = 70;
     definition.quad.v4 = 80;
-    definition.quad.texelMask = 0x1234;
-    definition.quad.textureId = 0x15;
+    definition.quad.texel_mask = 0x1234;
+    definition.quad.texture_id = 0x15;
     StoreDefinition();
-    Field_roomData = {};
-    Field_roomData.floorTriggers = triggers.data();
-    Field_roomData.header.floorTriggersLength = sizeof triggers;
+    VS::Field::roomData = {};
+    VS::Field::roomData.floor_triggers = triggers.data();
+    VS::Field::roomData.header.floor_triggers_length = sizeof triggers;
     for (auto& trigger : triggers) trigger.kind = 3;
     VS::State::stateFlags = {};
     VS::State::tickSpeed = 1;
     VS::Field::roomGeometryDrawMode = 0;
-    Field_roomAnimationTicks = 0;
-    Field_triggerMarkerFrameTicks = 0;
+    VS::Field::roomAnimationTicks = 0;
+    VS::Field::triggerMarkerFrameTicks = 0;
     // No image transfers unless a test explicitly supplies a source rectangle.
     VS::Field::triggerMarkerTextureSource = {};
     VS::Field::triggerMarkerPaletteSource = {};
@@ -126,14 +126,14 @@ struct TriggerMarkerFixture {
   ~TriggerMarkerFixture() {
     std::memcpy(Content_battleTriggerMarkerBytes, saved_definition.data(),
                 sizeof saved_definition);
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     VS::State::stateFlags = saved_flags;
     VS::Field::triggerMarkerTextureSource = saved_texture;
     VS::Field::triggerMarkerPaletteSource = saved_palette;
     VS::State::tickSpeed = saved_tick_speed;
     VS::Field::roomGeometryDrawMode = saved_mode;
-    Field_roomAnimationTicks = saved_animation;
-    Field_triggerMarkerFrameTicks = saved_marker_ticks;
+    VS::Field::roomAnimationTicks = saved_animation;
+    VS::Field::triggerMarkerFrameTicks = saved_marker_ticks;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
@@ -209,7 +209,7 @@ struct AnimationPixels {
   }
 
   void CheckAnimation(unsigned pending, int frame) const {
-    CHECK(Field_triggerMarkerFrameTicks == pending);
+    CHECK(VS::Field::triggerMarkerFrameTicks == pending);
     CHECK(VS::Field::triggerMarkerTextureSource.x == 72 + frame * 8);
     CHECK(VS::Field::triggerMarkerPaletteSource.x == 4 + frame * 4);
     CHECK(VS::Render::GamePages().At(64, 384) == 0x1200 + frame * 2);
@@ -299,13 +299,13 @@ TEST_CASE(
   auto& trigger = fixture.triggers[0];
   trigger.kind = 16;
   trigger.activation = static_cast<char>(sample.active);
-  trigger.markerFade = static_cast<char>(sample.initial);
+  trigger.marker_fade = static_cast<char>(sample.initial);
   VS::State::tickSpeed = sample.ticks;
   VS::State::stateFlags.opaque_20 = static_cast<char>(sample.gate20);
   VS::State::stateFlags.opaque_40 = static_cast<char>(sample.gate40);
   VS::Field::DrawLiveRoomTriggerMarkers();
-  CHECK(static_cast<unsigned char>(trigger.markerFade) == sample.expected);
-  CHECK(Field_triggerMarkerFrameTicks == 0);
+  CHECK(static_cast<unsigned char>(trigger.marker_fade) == sample.expected);
+  CHECK(VS::Field::triggerMarkerFrameTicks == 0);
   fixture.CheckPackets(0);
 }
 
@@ -316,17 +316,19 @@ TEST_CASE("Room trigger marker iteration ignores absent and partial records",
     trigger.activation = 1;
     trigger.kind = 16;
   }
-  Field_roomData.floorTriggers = nullptr;
+  VS::Field::roomData.floor_triggers = nullptr;
   VS::Field::DrawLiveRoomTriggerMarkers();
-  CHECK(fixture.triggers[0].markerFade == 0);
-  Field_roomData.floorTriggers = fixture.triggers.data();
-  Field_roomData.header.floorTriggersLength = sizeof(Field_MpdFloorTrigger) - 1;
+  CHECK(fixture.triggers[0].marker_fade == 0);
+  VS::Field::roomData.floor_triggers = fixture.triggers.data();
+  VS::Field::roomData.header.floor_triggers_length =
+      sizeof(VS::Field::MpdFloorTrigger) - 1;
   VS::Field::DrawLiveRoomTriggerMarkers();
-  CHECK(fixture.triggers[0].markerFade == 0);
-  Field_roomData.header.floorTriggersLength = sizeof fixture.triggers - 1;
+  CHECK(fixture.triggers[0].marker_fade == 0);
+  VS::Field::roomData.header.floor_triggers_length =
+      sizeof fixture.triggers - 1;
   VS::Field::DrawLiveRoomTriggerMarkers();
-  CHECK(fixture.triggers[0].markerFade == 2);
-  CHECK(fixture.triggers[1].markerFade == 0);
+  CHECK(fixture.triggers[0].marker_fade == 2);
+  CHECK(fixture.triggers[1].marker_fade == 0);
   fixture.CheckPackets(0);
 }
 
@@ -336,14 +338,14 @@ TEST_CASE("Visible room trigger markers share the original animation update",
   AnimationPixels pixels;
   VS::Field::triggerMarkerTextureSource = {0, 10, 1, 1};
   VS::Field::triggerMarkerPaletteSource = {0, 20, 1, 1};
-  Field_roomAnimationTicks = 24;
-  Field_triggerMarkerFrameTicks = 7;
+  VS::Field::roomAnimationTicks = 24;
+  VS::Field::triggerMarkerFrameTicks = 7;
   VS::State::tickSpeed = 3;
   for (auto& trigger : fixture.triggers) trigger.activation = 1;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(2);
   pixels.CheckAnimation(2, 3);
-  Field_roomAnimationTicks = 32;
+  VS::Field::roomAnimationTicks = 32;
   fixture.ResetPackets();
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(2);
@@ -366,16 +368,16 @@ TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
     CHECK((packet[1 + vertex * 3] & 0xFFFFFF) == 0x070707);
   }
   fixture.ResetPackets();
-  Field_roomData.floorTriggers = nullptr;
+  VS::Field::roomData.floor_triggers = nullptr;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(0);
-  Field_roomData.floorTriggers = fixture.triggers.data();
-  Field_triggerMarkerFrameTicks = 0;
+  VS::Field::roomData.floor_triggers = fixture.triggers.data();
+  VS::Field::triggerMarkerFrameTicks = 0;
   fixture.triggers[0].activation = 1;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
-  CHECK(fixture.triggers[0].markerFade == 2);
-  CHECK(Field_triggerMarkerFrameTicks == 1);
+  CHECK(fixture.triggers[0].marker_fade == 2);
+  CHECK(VS::Field::triggerMarkerFrameTicks == 1);
   for (unsigned vertex = 0; vertex < 4; ++vertex) {
     CHECK((fixture.Packet()[1 + vertex * 3] & 0xFFFFFF) == 0x020202);
   }
@@ -398,14 +400,14 @@ TEST_CASE("Room trigger marker animation retains wrap and single-step timing",
   VS::Field::triggerMarkerTextureSource = {0, 10, 1, 1};
   VS::Field::triggerMarkerPaletteSource = {0, 20, 1, 1};
   fixture.triggers[1].activation = 1;
-  Field_roomAnimationTicks = 40;
+  VS::Field::roomAnimationTicks = 40;
   VS::State::tickSpeed = 17;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
   pixels.CheckAnimation(9, 0);
-  Field_triggerMarkerFrameTicks = UINT16_MAX;
+  VS::Field::triggerMarkerFrameTicks = UINT16_MAX;
   VS::State::tickSpeed = 1;
-  Field_roomAnimationTicks = 32;
+  VS::Field::roomAnimationTicks = 32;
   fixture.ResetPackets();
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);

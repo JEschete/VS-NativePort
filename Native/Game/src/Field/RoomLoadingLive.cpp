@@ -64,19 +64,19 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Locations.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -113,13 +113,15 @@ namespace {
 constexpr std::size_t kOrderingEntryBytes = 4;
 }  // namespace
 
-static_assert(sizeof(Field_MpdEnemySpawn) == VS::Field::kRoomPlacementBytes);
+static_assert(sizeof(VS::Field::MpdEnemySpawn) ==
+              VS::Field::kRoomPlacementBytes);
 static_assert(sizeof(VS::Actors::CharacterInit) ==
               VS::Field::kZoneEnemyTemplateBytes);
 static_assert(sizeof(VS::Content::DiscFile) == VS::Field::kRoomFileEntryBytes);
-static_assert(sizeof(Field_roomData.header) ==
+static_assert(sizeof(VS::Field::roomData.header) ==
               VS::Field::kRoomSectionHeaderBytes);
-static_assert(sizeof(Field_MpdEnvironment) == VS::Field::kRoomEnvironmentBytes);
+static_assert(sizeof(VS::Field::MpdEnvironment) ==
+              VS::Field::kRoomEnvironmentBytes);
 static_assert(sizeof(u_long) == kOrderingEntryBytes);
 
 namespace VS::Field {
@@ -297,18 +299,18 @@ void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
   return {static_cast<const std::byte*>(data), bytes};
 }
 
-// --- The room record's sections (Field_roomData)
+// --- The room record's sections (VS::Field::roomData)
 
 template <typename Visit>
 void VisitSectionPointer(RoomSectionId section, Visit&& visit) {
-  Field_RoomRecord& room = Field_roomData;
+  VS::Field::RoomDataRecord& room = VS::Field::roomData;
   switch (section) {
     case RoomSectionId::kGeometry:
       return visit(room.geometry);
     case RoomSectionId::kCollisionMap:
-      return visit(room.collisionMap);
+      return visit(room.collision_map);
     case RoomSectionId::kTileCells:
-      return visit(room.tileCells);
+      return visit(room.tile_cells);
     case RoomSectionId::kDoors:
       return visit(room.doors);
     case RoomSectionId::kLighting:
@@ -320,29 +322,29 @@ void VisitSectionPointer(RoomSectionId section, Visit&& visit) {
     case RoomSectionId::kSection8:
       return visit(room.section8);
     case RoomSectionId::kFloorTriggers:
-      return visit(room.floorTriggers);
+      return visit(room.floor_triggers);
     case RoomSectionId::kLockTriggers:
-      return visit(room.lockTriggers);
+      return visit(room.lock_triggers);
     case RoomSectionId::kEnvironment:
       return visit(room.environment);
     case RoomSectionId::kTextureEffects:
-      return visit(room.textureEffects);
+      return visit(room.texture_effects);
     case RoomSectionId::kEffectScripts:
-      return visit(room.effectScripts);
+      return visit(room.effect_scripts);
     case RoomSectionId::kSectionE:
-      return visit(room.sectionE);
+      return visit(room.section_e);
     case RoomSectionId::kMinimapScene:
-      return visit(room.minimapScene);
+      return visit(room.minimap_scene);
     case RoomSectionId::kTiledBackground:
-      return visit(room.tiledBackground);
+      return visit(room.tiled_background);
     case RoomSectionId::kViewTriggers:
-      return visit(room.viewTriggers);
+      return visit(room.view_triggers);
     case RoomSectionId::kMovingPlatforms:
-      return visit(room.movingPlatforms);
+      return visit(room.moving_platforms);
     case RoomSectionId::kContainers:
       return visit(room.containers);
     case RoomSectionId::kSoundData:
-      return visit(room.soundData);
+      return visit(room.sound_data);
     case RoomSectionId::kSection15:
       return visit(room.section15);
     case RoomSectionId::kSection16:
@@ -350,7 +352,7 @@ void VisitSectionPointer(RoomSectionId section, Visit&& visit) {
     case RoomSectionId::kSection17:
       return visit(room.section17);
     case RoomSectionId::kZoneBounds:
-      return visit(room.zoneBounds);
+      return visit(room.zone_bounds);
   }
 }
 
@@ -368,7 +370,7 @@ void SetSectionData(RoomSectionId section, std::byte* data) {
 
 [[nodiscard]] std::array<std::uint32_t, kRoomSectionCount> SectionLengths() {
   std::array<std::uint32_t, kRoomSectionCount> lengths{};
-  std::memcpy(lengths.data(), &Field_roomData.header, sizeof lengths);
+  std::memcpy(lengths.data(), &VS::Field::roomData.header, sizeof lengths);
   return lengths;
 }
 
@@ -522,7 +524,7 @@ class LiveSections : public Host {
       return false;
     }
     InvalidateLiveInteractionTargets();
-    std::memcpy(&Field_roomData.header, layout.lengths.data(),
+    std::memcpy(&VS::Field::roomData.header, layout.lengths.data(),
                 sizeof layout.lengths);
     std::ranges::copy(
         sections.first(std::min(sections.size(), layout.total_bytes)), block);
@@ -532,9 +534,10 @@ class LiveSections : public Host {
                          ? block + layout.offsets.at(index)
                          : nullptr);
     }
-    Field_roomData.isLoaded = 1;
-    Field_roomData.displayFlag = 0;
-    Field_roomData.roomIndex = static_cast<std::int16_t>(owner_room_index);
+    VS::Field::roomData.is_loaded = 1;
+    VS::Field::roomData.display_flag = 0;
+    VS::Field::roomData.room_index =
+        static_cast<std::int16_t>(owner_room_index);
     return true;
   }
 
@@ -544,7 +547,8 @@ class LiveSections : public Host {
   }
 
   void OffsetRoomTextureIds() override {
-    LiveOffsetRoomTextureIds(kRoomTextureIdOffset, Field_roomData.geometry);
+    LiveOffsetRoomTextureIds(kRoomTextureIdOffset,
+                             VS::Field::roomData.geometry);
   }
 
   // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15726-15729)
@@ -567,7 +571,7 @@ class LiveSections : public Host {
   }
 
   [[nodiscard]] int EnteredDoorId() const override {
-    return Field_enteredDoorId;
+    return VS::Field::enteredDoorId;
   }
 
   void MarkEntranceDoor(int door) override {
@@ -590,9 +594,9 @@ class LiveSections : public Host {
   void WaitForOverlayReady() override { Boot::WaitForOverlayReadyLive(); }
 
   [[nodiscard]] RoomDisplay LoadedRoom() const override {
-    return {.loaded = Field_roomData.isLoaded == 1,
-            .displayed = Field_roomData.displayFlag != 0,
-            .owner_room_index = Field_roomData.roomIndex};
+    return {.loaded = VS::Field::roomData.is_loaded == 1,
+            .displayed = VS::Field::roomData.display_flag != 0,
+            .owner_room_index = VS::Field::roomData.room_index};
   }
 
   void ReleaseRoomResources() override {
@@ -617,7 +621,7 @@ class LiveSections : public Host {
       }
       break;
     }
-    Field_roomData = Field_RoomRecord{};
+    VS::Field::roomData = VS::Field::RoomDataRecord{};
   }
 };
 
@@ -640,7 +644,7 @@ class LiveSpawning : public Host {
     if (zoneContext.room_enemies == nullptr) {
       return {};
     }
-    return std::as_bytes(std::span<const Field_MpdEnemySpawn>(
+    return std::as_bytes(std::span<const VS::Field::MpdEnemySpawn>(
         zoneContext.room_enemies, zoneContext.room_enemy_count));
   }
 
@@ -707,13 +711,13 @@ template <typename Host>
 class LiveEntrance : public Host {
  public:
   [[nodiscard]] RoomEntrance PendingEntrance() const override {
-    const Field_MpdDoorRecord& door = Field_pendingDestinationDoor;
-    return {.tile_x = static_cast<std::uint8_t>(door.entryTileX),
-            .tile_z = static_cast<std::uint8_t>(door.entryTileZ),
+    const VS::Field::MpdDoorRecord& door = VS::Field::pendingDestinationDoor;
+    return {.tile_x = static_cast<std::uint8_t>(door.entry_tile_x),
+            .tile_z = static_cast<std::uint8_t>(door.entry_tile_z),
             .direction =
-                static_cast<std::uint8_t>(door.tileLocation.entryDirection),
-            .elevation = static_cast<std::uint8_t>(door.entryElevation),
-            .has_entry_step = door.hasEntryStep != 0};
+                static_cast<std::uint8_t>(door.tile_location.entry_direction),
+            .elevation = static_cast<std::uint8_t>(door.entry_elevation),
+            .has_entry_step = door.has_entry_step != 0};
   }
 
   void PlaceAshley(const Actors::SpawnPlacement& placement) override {
@@ -767,7 +771,8 @@ class LivePlacements : public Host {
       return;
     }
     std::ranges::copy(records, block);
-    zoneContext.room_enemies = reinterpret_cast<Field_MpdEnemySpawn*>(block);
+    zoneContext.room_enemies =
+        reinterpret_cast<VS::Field::MpdEnemySpawn*>(block);
     zoneContext.room_enemy_count =
         static_cast<u_int>(records.size() / kRoomPlacementBytes);
   }
@@ -960,8 +965,8 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] CurrentRoom PendingDestination() const override {
-    return {.zone_id = Field_pendingDestinationDoor.destinationZoneId,
-            .room_id = Field_pendingDestinationDoor.destinationRoomId};
+    return {.zone_id = VS::Field::pendingDestinationDoor.destination_zone_id,
+            .room_id = VS::Field::pendingDestinationDoor.destination_room_id};
   }
 
   void SetCurrentRoom(const CurrentRoom& room) override {
@@ -991,7 +996,7 @@ class LiveRoomLoadHost final
                           std::uint8_t hidden) override {
     if (zoneContext.room_enemies != nullptr &&
         placement_index < zoneContext.room_enemy_count) {
-      zoneContext.room_enemies[placement_index].isHidden = hidden;
+      zoneContext.room_enemies[placement_index].is_hidden = hidden;
     }
   }
 

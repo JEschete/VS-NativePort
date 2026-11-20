@@ -322,31 +322,31 @@ auto& Engaged(Optional& optional) {
 }
 
 void FillClearEntry(auto& entry) {
-  entry.destinationZoneId = 1;
-  entry.tileLocation.tileX = 31;
-  entry.tileLocation.floorLayer = 7;
-  entry.tileLocation.entryDirection = 7;
-  entry.entryTileX = 4;
-  entry.entryTileZ = 2;
-  entry.entryElevation = 2;
-  entry.hasEntryStep = 1;
-  entry.requiredFlagId = 1023;
-  entry.requiredFlagValue = 255;
-  entry.doorId = 255;
-  entry.reserved06Bit15 = 1;
-  entry.reserved0B = 255;
+  entry.destination_zone_id = 1;
+  entry.tile_location.tile_x = 31;
+  entry.tile_location.floor_layer = 7;
+  entry.tile_location.entry_direction = 7;
+  entry.entry_tile_x = 4;
+  entry.entry_tile_z = 2;
+  entry.entry_elevation = 2;
+  entry.has_entry_step = 1;
+  entry.required_flag_id = 1023;
+  entry.required_flag_value = 255;
+  entry.door_id = 255;
+  entry.reserved06_bit15 = 1;
+  entry.reserved0b = 255;
 }
 
 void CheckClearEntryIdentity(const Save::Document& document,
                              const Save::Document& decoded) {
   const auto& entry = Engaged(decoded.new_game_entry);
-  CHECK(entry.requiredFlagId == 1023);
-  CHECK(entry.entryTileX == 4);
-  CHECK(entry.tileLocation.floorLayer == 7);
-  CHECK(entry.reserved0B == 255);
+  CHECK(entry.required_flag_id == 1023);
+  CHECK(entry.entry_tile_x == 4);
+  CHECK(entry.tile_location.floor_layer == 7);
+  CHECK(entry.reserved0b == 255);
   CHECK(Save::SameDocument(document, decoded) == true);
   auto changed = decoded;
-  ++Engaged(changed.new_game_entry).entryTileX;
+  ++Engaged(changed.new_game_entry).entry_tile_x;
   CHECK(Save::SameDocument(document, changed) == false);
   changed.new_game_entry.reset();
   CHECK(Save::SameDocument(document, changed) == false);

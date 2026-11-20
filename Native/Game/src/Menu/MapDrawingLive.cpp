@@ -17,10 +17,10 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
@@ -132,10 +132,11 @@ void StoreCompassBounds(const CompassCorners& corners) {
     return std::span{static_cast<const std::byte*>(Battle_unusedSceneBuffer),
                      static_cast<std::size_t>(size)};
   }
-  if (scene == Field_roomData.minimapScene) {
+  if (scene == VS::Field::roomData.minimap_scene) {
     return std::span{
-        reinterpret_cast<const std::byte*>(Field_roomData.minimapScene),
-        static_cast<std::size_t>(Field_roomData.header.minimapSceneLength)};
+        reinterpret_cast<const std::byte*>(VS::Field::roomData.minimap_scene),
+        static_cast<std::size_t>(
+            VS::Field::roomData.header.minimap_scene_length)};
   }
   return std::nullopt;
 }
@@ -145,7 +146,7 @@ void StoreCompassBounds(const CompassCorners& corners) {
     const void* data) {
   for (const void* scene :
        {static_cast<const void*>(Battle_unusedSceneBuffer),
-        static_cast<const void*>(Field_roomData.minimapScene)}) {
+        static_cast<const void*>(VS::Field::roomData.minimap_scene)}) {
     const auto bytes = SceneBytes(scene);
     if (!bytes || bytes->empty()) continue;
     const std::less_equal<const void*> not_after;
@@ -274,7 +275,7 @@ class LiveRoomHost final : public RoomDrawHost {
   const RoomContext context{.room_index = room_index,
                             .current_room = currentRoomIndex,
                             .scene_room = isCurrentScene,
-                            .entered_door = Field_enteredDoorId,
+                            .entered_door = VS::Field::enteredDoorId,
                             .frame_counter = menuFramesCounter,
                             .zone_id = zone_id,
                             .map_id = map_id,

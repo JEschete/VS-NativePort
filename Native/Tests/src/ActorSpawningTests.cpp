@@ -20,7 +20,7 @@
 #include "Battle/Damage.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -1576,21 +1576,21 @@ TEST_CASE("Live spawn codecs read the legacy records as unsigned bytes",
 }
 
 namespace {
-Field_MpdEnemySpawn LegacyRoomSpawn() {
-  Field_MpdEnemySpawn spawn{};
+VS::Field::MpdEnemySpawn LegacyRoomSpawn() {
+  VS::Field::MpdEnemySpawn spawn{};
   spawn.index = 6;
-  spawn.tileX = 1;
+  spawn.tile_x = 1;
   spawn.direction = 0x81;
-  spawn.tileZ = 3;
+  spawn.tile_z = 3;
   spawn.height = 4;
   spawn.settings[0] = 0xAB;
   spawn.settings[7] = 0x92;
-  spawn.itemId = 0x101;
-  spawn.itemCount = 2;
-  spawn.item2Id = 0x102;
-  spawn.item2Count = 3;
-  spawn.item3Id = 0x103;
-  spawn.item3Count = 40;
+  spawn.item_id = 0x101;
+  spawn.item_count = 2;
+  spawn.item2_id = 0x102;
+  spawn.item2_count = 3;
+  spawn.item3_id = 0x103;
+  spawn.item3_count = 40;
   spawn.facing = 5;
   spawn.variant = 7;
   spawn.reserved26 = 9;

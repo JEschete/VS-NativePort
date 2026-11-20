@@ -14,9 +14,9 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Damage.h"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -26,15 +26,15 @@ struct PursuitFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  decltype(Field_roomData.movingPlatforms) saved_platforms =
-      Field_roomData.movingPlatforms;
-  decltype(Field_roomData.header.movingPlatformsLength) saved_platform_bytes =
-      Field_roomData.header.movingPlatformsLength;
+  decltype(VS::Field::roomData.moving_platforms) saved_platforms =
+      VS::Field::roomData.moving_platforms;
+  decltype(VS::Field::roomData.header.moving_platforms_length)
+      saved_platform_bytes = VS::Field::roomData.header.moving_platforms_length;
   decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
   std::array<Actors_ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 2> states{};
-  std::array<Field_MpdMovingPlatform, 4> platforms{};
+  std::array<VS::Field::MpdMovingPlatform, 4> platforms{};
   std::array<VS::Battle::Ai::RouteGateEndRecord, 16> gates{};
 
   PursuitFixture() {
@@ -53,8 +53,8 @@ struct PursuitFixture {
       states[index].model = reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(
           &models[index].instance);
     }
-    Field_roomData.movingPlatforms = platforms.data();
-    Field_roomData.header.movingPlatformsLength = sizeof platforms;
+    VS::Field::roomData.moving_platforms = platforms.data();
+    VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
     VS::Battle::Ai::routeGates = gates.data();
     auto& model = models[1].instance;
     model.currentTileX = 4;
@@ -74,8 +74,8 @@ struct PursuitFixture {
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Field_roomData.movingPlatforms = saved_platforms;
-    Field_roomData.header.movingPlatformsLength = saved_platform_bytes;
+    VS::Field::roomData.moving_platforms = saved_platforms;
+    VS::Field::roomData.header.moving_platforms_length = saved_platform_bytes;
     VS::Battle::Ai::routeGates = saved_gates;
   }
 
@@ -89,7 +89,7 @@ struct PursuitFixture {
   }
 
   void SetPlatform(unsigned group) {
-    platforms[group].currentWaypoint = 3;
+    platforms[group].current_waypoint = 3;
     platforms[group].waypoints[3].vx = 4 << 19;
     platforms[group].waypoints[3].vz = 6 << 19;
     gates[group * 4 + 3].tile_x = 4;

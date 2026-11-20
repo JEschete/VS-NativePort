@@ -23,7 +23,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/MapLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Items/InventoryLive.hpp"

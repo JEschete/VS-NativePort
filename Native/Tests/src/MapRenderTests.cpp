@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Menu/Map.hpp"
@@ -41,8 +41,8 @@ struct MapFixture {
                                      VS::Render::legacyPrimitiveBuffers[1]};
   std::array<void*, 2> saved_tables{VS::Render::legacyOrderingTables[0],
                                     VS::Render::legacyOrderingTables[1]};
-  VS::Field::MapScene* saved_minimap = Field_roomData.minimapScene;
-  u_int saved_minimap_length = Field_roomData.header.minimapSceneLength;
+  VS::Field::MapScene* saved_minimap = VS::Field::roomData.minimap_scene;
+  u_int saved_minimap_length = VS::Field::roomData.header.minimap_scene_length;
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_room = VS::Menu::map::currentRoomIndex;
   std::vector<u_long> storage =
@@ -77,8 +77,8 @@ struct MapFixture {
     VS::Render::legacyPrimitiveBuffers[1] = saved_buffers[1];
     VS::Render::legacyOrderingTables[0] = saved_tables[0];
     VS::Render::legacyOrderingTables[1] = saved_tables[1];
-    Field_roomData.minimapScene = saved_minimap;
-    Field_roomData.header.minimapSceneLength = saved_minimap_length;
+    VS::Field::roomData.minimap_scene = saved_minimap;
+    VS::Field::roomData.header.minimap_scene_length = saved_minimap_length;
     VS::Menu::map::ResetMapDrawingLive();
     VS::Render::frameBuf = saved_framebuffer;
     VS::Menu::map::currentRoomIndex = saved_room;
@@ -87,9 +87,9 @@ struct MapFixture {
 
   // Loads scene as the room's minimap scene, the buffer room data must lie in.
   static void LoadMinimap(std::vector<u_long>& scene) {
-    Field_roomData.minimapScene =
+    VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(scene.data());
-    Field_roomData.header.minimapSceneLength =
+    VS::Field::roomData.header.minimap_scene_length =
         static_cast<u_int>(scene.size() * sizeof(u_long));
   }
 

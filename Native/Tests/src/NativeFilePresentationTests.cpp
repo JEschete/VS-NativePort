@@ -19,7 +19,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -86,13 +86,13 @@ struct ContentFixture {
       Append(zone, std::uint32_t{300});
       Append(zone, std::uint32_t{0});
     }
-    Field_MpdHeader header{};
-    header.roomSectionOffset = sizeof(header);
+    VS::Field::MpdHeader header{};
+    header.room_section_offset = sizeof(header);
     Append(mpd, header);
     std::array<std::uint32_t, 24> lengths{};
-    lengths[8] = sizeof(Field_MpdFloorTrigger);
+    lengths[8] = sizeof(VS::Field::MpdFloorTrigger);
     Append(mpd, lengths);
-    Field_MpdFloorTrigger trigger{};
+    VS::Field::MpdFloorTrigger trigger{};
     trigger.kind = 16;
     trigger.activation = 2;
     Append(mpd, trigger);
@@ -165,10 +165,10 @@ TEST_CASE("Native file summary owns original ARM glyph bytes and artwork",
 TEST_CASE("Native file summary does not invent artwork for arbitrary rooms",
           "[save-presentation]") {
   ContentFixture fixture;
-  Field_MpdFloorTrigger trigger{};
+  VS::Field::MpdFloorTrigger trigger{};
   trigger.kind = 2;
   trigger.activation = 2;
-  Replace(fixture.mpd, sizeof(Field_MpdHeader) + 24ull * 4, trigger);
+  Replace(fixture.mpd, sizeof(VS::Field::MpdHeader) + 24ull * 4, trigger);
   fixture.Open();
   const auto described = Save::DescribeNativeFile(fixture.document);
   INFO("DescribeNativeFile: " << (described ? "success" : described.error()));
@@ -216,12 +216,12 @@ TEST_CASE("Native file summary bounds original artwork content tables",
     Replace(fixture.zone, 4, std::int32_t{47});
   }
   SECTION("MPD sections stay within the file") {
-    Replace(fixture.mpd, sizeof(Field_MpdHeader) + 8ull * 4,
+    Replace(fixture.mpd, sizeof(VS::Field::MpdHeader) + 8ull * 4,
             std::uint32_t{0xFFFFFFFF});
   }
   SECTION("Floor-trigger arrays require complete records") {
-    Replace(fixture.mpd, sizeof(Field_MpdHeader) + 8ull * 4,
-            std::uint32_t{sizeof(Field_MpdFloorTrigger) - 1});
+    Replace(fixture.mpd, sizeof(VS::Field::MpdHeader) + 8ull * 4,
+            std::uint32_t{sizeof(VS::Field::MpdFloorTrigger) - 1});
   }
   fixture.Open();
   const auto described = Save::DescribeNativeFile(fixture.document);

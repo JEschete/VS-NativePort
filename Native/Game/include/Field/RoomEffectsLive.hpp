@@ -7,7 +7,7 @@
 // gimmick, door, event script and cutscene callers keep the original call
 // shapes (2842C.c:550-1456). Each adapter runs the typed room effects over
 // the one RoomEffectState below and binds RoomEffectHost to the loaded
-// room's sections (Field_roomData and its header lengths), its sound bank,
+// room's sections (VS::Field::roomData and its header lengths), its sound bank,
 // MoveImage, the low-end game heap, the collision floor query and the skip
 // state's fast-forward flag.
 namespace VS::Field {

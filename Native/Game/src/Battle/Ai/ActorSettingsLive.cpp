@@ -25,8 +25,8 @@
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -151,8 +151,8 @@ std::optional<RoomWaypoints> LiveRoomWaypoints() {
   const auto* auxiliary =
       static_cast<const unsigned char*>(VS::Battle::Ai::roomHasWaypoints);
   Require(
-      auxiliary == Field_roomData.section6 &&
-          Field_roomData.header.section6Length >= kWaypointsEnd &&
+      auxiliary == VS::Field::roomData.section6 &&
+          VS::Field::roomData.header.section6_length >= kWaypointsEnd &&
           reinterpret_cast<const unsigned char*>(
               VS::Battle::Ai::roomWaypoints) == auxiliary + kWaypointsOffset,
       "AI settings: room waypoints do not belong to the active room "

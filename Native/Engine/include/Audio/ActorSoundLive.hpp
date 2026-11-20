@@ -7,7 +7,9 @@
 
 struct Actors_ActorRecord;
 struct Actors_ModelInstance;
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickInstance;
+}  // namespace VS::Field
 
 // Live bindings for ActorSound.hpp over the battle overlay's actor records
 // (D_800F4538), battle actors (vs_battle_actors), gimmicks (D_800F45E0), the
@@ -27,7 +29,7 @@ void LivePlayActorModelSound(const Actors_ModelInstance* model_instance,
 void LivePlayActorModelSoundVariant(int actor_index, int variant_index);
 void LivePlayActorSoundPair(const Actors_ActorRecord* source_actor,
                             int first_effect_id, int second_effect_id);
-void LivePlayGimmickSoundPair(const Field_GimmickInstance* gimmick,
+void LivePlayGimmickSoundPair(const VS::Field::GimmickInstance* gimmick,
                               int first_effect_id, int second_effect_id);
 void LivePlayActorSurfaceContactSound(int actor_index,
                                       const Actors_ActorRecord* actor,

@@ -1622,7 +1622,7 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
   target.actorId = 0x80;
   target.cancelsHitResults = 1;
   target.currentHp = target.maxHp = 1;
-  // Field_CreateGimmickInstance registers Field_gimmickInstances only.
+  // Field_CreateGimmickInstance registers VS::Field::gimmickInstances only.
   Actors_actorRecords[1] = nullptr;
 
   VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);

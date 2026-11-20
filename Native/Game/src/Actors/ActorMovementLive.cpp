@@ -27,7 +27,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickLookup.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "State/Timers.hpp"
 
@@ -50,6 +50,14 @@ void CopyTable(const u_char (&source)[SourceSize],
   std::transform(std::begin(source), std::begin(source) + TargetSize,
                  target.begin(),
                  [](u_char value) { return static_cast<Target>(value); });
+}
+
+template <std::size_t SourceSize, typename Target, std::size_t TargetSize>
+void CopyTable(const std::array<std::uint8_t, SourceSize>& source,
+               std::array<Target, TargetSize>& target) {
+  static_assert(SourceSize >= TargetSize);
+  std::transform(source.begin(), source.begin() + TargetSize, target.begin(),
+                 [](std::uint8_t value) { return static_cast<Target>(value); });
 }
 
 // The actors one rule run touches, loaded on first use. Every legacy call
@@ -157,15 +165,15 @@ class LiveMovementTerrain final : public MotionTerrainHost {
   MovementRegistry& registry_;
 };
 
-MovementGimmick GimmickOf(const Field_GimmickInstance& gimmick) {
+MovementGimmick GimmickOf(const VS::Field::GimmickInstance& gimmick) {
   return {.mode = gimmick.mode,
-          .position_y = gimmick.positionY,
-          .support_index = gimmick.objectInfo.supportIndex,
-          .bone_count = static_cast<std::uint8_t>(gimmick.boneCount)};
+          .position_y = gimmick.position_y,
+          .support_index = gimmick.object_info.support_index,
+          .bone_count = static_cast<std::uint8_t>(gimmick.bone_count)};
 }
 
 std::optional<MovementGimmick> OptionalGimmick(
-    const Field_GimmickInstance* gimmick) {
+    const VS::Field::GimmickInstance* gimmick) {
   if (gimmick == nullptr) return std::nullopt;
   return GimmickOf(*gimmick);
 }
@@ -276,12 +284,12 @@ class LiveMovementHost final : public MovementHost {
   int PlatformBounceFrame(int platform) override {
     if (platform < 0 || platform >= MovingPlatformCount() ||
         static_cast<std::size_t>(platform) >=
-            std::size(Field_platformBounceFrames)) {
+            std::size(VS::Field::platformBounceFrames)) {
       VS::Core::LogWarn(
           "actors", "Platform bounce frame refused for platform {}", platform);
       return 0;
     }
-    return Field_platformBounceFrames[platform];
+    return VS::Field::platformBounceFrames[platform];
   }
   void SetPlatformRider(int platform, int rider) override {
     VS::Field::SetMovingPlatformActorEntry(platform, rider);
@@ -346,17 +354,18 @@ class LiveMovementHost final : public MovementHost {
   }
 
   std::optional<MovementGimmick> Gimmick(int index) override {
-    if (index < 0 ||
-        static_cast<std::size_t>(index) >= std::size(Field_gimmickInstances)) {
+    if (index < 0 || static_cast<std::size_t>(index) >=
+                         std::size(VS::Field::gimmickInstances)) {
       return std::nullopt;
     }
-    return OptionalGimmick(Field_gimmickInstances[index]);
+    return OptionalGimmick(VS::Field::gimmickInstances[index]);
   }
   std::optional<MovementGimmick> GimmickForActorSlot(int slot) override {
     return OptionalGimmick(VS::Field::FindGimmickForActorSlot(slot));
   }
   void UpdateGimmickMotion(int slot, int) override {
-    Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(slot);
+    VS::Field::GimmickInstance* gimmick =
+        VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) return;
     const Synced synced(registry_);
     static_cast<void>(VS::Field::UpdateLiveGimmickMotion(gimmick));
@@ -519,7 +528,7 @@ MovementTables LiveMovementTables() {
   CopyTable(Actors_kSoftLandingAnimations, tables.soft_landing);
   CopyTable(Actors_kHardLandingAnimations, tables.hard_landing);
   CopyTable(Actors_kLandingRecoveryAnimations, tables.landing_recovery);
-  CopyTable(Field_kGimmickSpinHeightSteps, tables.gimmick_spin_steps);
+  CopyTable(VS::Field::kGimmickSpinHeightSteps, tables.gimmick_spin_steps);
   return tables;
 }
 

@@ -14,8 +14,8 @@
 
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
 #include "Field/RoomEffectsLive.hpp"
@@ -1569,7 +1569,7 @@ std::uint32_t Length(const Bytes& bytes) {
 // Points the loaded room at a StandardRoom's sections over a scratch game
 // heap, and restores the room and the live effect state afterwards.
 struct LiveRoom {
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   fx::RoomEffectState saved_state = fx::LiveRoomEffectState();
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 64> arena{};
@@ -1579,28 +1579,31 @@ struct LiveRoom {
 
   LiveRoom() {
     fx::LiveRoomEffectState() = fx::RoomEffectState{};
-    Field_roomData = Field_RoomRecord{};
-    Field_roomData.geometry = reinterpret_cast<int*>(room.host.geometry.data());
-    Field_roomData.header.geometryLength = Length(room.host.geometry);
-    Field_roomData.textureEffects = room.host.textures.data();
-    Field_roomData.header.textureEffectsLength = Length(room.host.textures);
-    Field_roomData.effectScripts = room.host.scripts.data();
-    Field_roomData.header.effectScriptsLength = Length(room.host.scripts);
+    VS::Field::roomData = VS::Field::RoomDataRecord{};
+    VS::Field::roomData.geometry =
+        reinterpret_cast<int*>(room.host.geometry.data());
+    VS::Field::roomData.header.geometry_length = Length(room.host.geometry);
+    VS::Field::roomData.texture_effects = room.host.textures.data();
+    VS::Field::roomData.header.texture_effects_length =
+        Length(room.host.textures);
+    VS::Field::roomData.effect_scripts = room.host.scripts.data();
+    VS::Field::roomData.header.effect_scripts_length =
+        Length(room.host.scripts);
   }
   LiveRoom(const LiveRoom&) = delete;
   LiveRoom& operator=(const LiveRoom&) = delete;
   LiveRoom(LiveRoom&&) = delete;
   LiveRoom& operator=(LiveRoom&&) = delete;
   ~LiveRoom() {
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     fx::LiveRoomEffectState() = std::move(saved_state);
   }
 
   void SetSectionE(std::size_t bytes) {
     section_e.assign(bytes, std::byte{0});
-    Field_roomData.sectionE =
-        reinterpret_cast<Field_MpdSectionE*>(section_e.data());
-    Field_roomData.header.sectionELength = Length(section_e);
+    VS::Field::roomData.section_e =
+        reinterpret_cast<VS::Field::MpdSectionE*>(section_e.data());
+    VS::Field::roomData.header.section_e_length = Length(section_e);
   }
 };
 }  // namespace
@@ -1614,7 +1617,7 @@ TEST_CASE("Live room effects set up over the loaded room's sections and heap",
   CHECK(state.script_count == 2);
   CHECK(VS::Core::Memory::GameHeap().AllocatedBlocks().size() == 1);
   CHECK(fx::LiveFindRoomGeometryGroup(1) ==
-        Field_roomData.geometry + (Group(1) / sizeof(int)));
+        VS::Field::roomData.geometry + (Group(1) / sizeof(int)));
   CHECK(fx::LiveHideRoomGeometryGroup(1) == 1);
   CHECK(GroupWord(live.room.host.geometry, 1, 0) == 0x100);
   CHECK(fx::LiveReleaseRoomEffects() == 1);
@@ -1639,10 +1642,10 @@ TEST_CASE("Live room effects refuse empty sections and unbound entry points",
   CHECK(fx::LiveCallRoomEntryPoint() == 0);
   live.SetSectionE(0x18);
   CHECK(fx::LiveCallRoomEntryPoint() == 0);
-  Field_roomData.header.geometryLength = 0xFFFFFFFFU;
+  VS::Field::roomData.header.geometry_length = 0xFFFFFFFFU;
   CHECK(fx::LiveFindRoomGeometryGroup(0) == nullptr);
-  Field_roomData.header.geometryLength = Length(live.room.host.geometry);
-  Field_roomData.geometry = nullptr;
+  VS::Field::roomData.header.geometry_length = Length(live.room.host.geometry);
+  VS::Field::roomData.geometry = nullptr;
   CHECK(fx::LiveShowRoomGeometryGroup(0) == 0);
   CHECK(warnings.messages ==
         Messages{"Room entry point refused: section E has 0 bytes and no code",

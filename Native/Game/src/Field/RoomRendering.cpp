@@ -27,7 +27,7 @@ constexpr std::uint32_t kViewDirectionBias = 0x900;
 // 146C.c:15791: the facing eighth and its two neighbours.
 constexpr std::array<std::uint32_t, 3> kFacingBiases{0x9C0, 0x840, 0x900};
 
-// Field_MpdViewTrigger: a packed position word, the effect count, then one
+// VS::Field::MpdViewTrigger: a packed position word, the effect count, then one
 // signed geometry group id per effect padded to four bytes.
 constexpr std::size_t kViewTriggerHeaderBytes = 4;
 constexpr std::size_t kViewTriggerCountOffset = 2;

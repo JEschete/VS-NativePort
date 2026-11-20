@@ -32,7 +32,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Render/CameraViewLive.hpp"

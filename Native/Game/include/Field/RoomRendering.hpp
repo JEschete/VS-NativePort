@@ -101,8 +101,8 @@ class RoomPaletteHost {
 bool UploadRoomPalettes(std::span<std::uint16_t> palettes,
                         RoomPaletteHost& host);
 
-// The texture id each room polygon carries (Field_MpdTriangle and
-// Field_MpdQuad +0x1E).
+// The texture id each room polygon carries (VS::Field::MpdTriangle and
+// VS::Field::MpdQuad +0x1E).
 inline constexpr std::size_t kRoomPolygonTextureIdOffset = 0x1E;
 // The room loader's texture page offset (146C.c:15663 passes 11).
 inline constexpr int kRoomTextureIdOffset = 11;

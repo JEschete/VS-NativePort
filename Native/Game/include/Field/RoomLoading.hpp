@@ -58,7 +58,8 @@ static_assert(sizeof(ZoneEnemyTemplate) == kZoneEnemyTemplateBytes);
 // The room file header: the room, cleared, script, door, enemy and loot
 // sections, each as offset and size.
 inline constexpr std::size_t kRoomFileHeaderBytes = 0x30;
-// A room placement record (Field_MpdEnemySpawn or Field_MpdObjectSpawn).
+// A room placement record (VS::Field::MpdEnemySpawn or
+// VS::Field::MpdObjectSpawn).
 inline constexpr std::size_t kRoomPlacementBytes = 0x28;
 // The room sections: a header of 24 byte lengths, then the sections.
 inline constexpr std::size_t kRoomSectionCount = 24;
@@ -315,7 +316,7 @@ void ReleaseZoneData(ZoneReleaseHost& host);
 
 // --- Room placements
 
-// An enemy placement (Field_MpdEnemySpawn).
+// An enemy placement (VS::Field::MpdEnemySpawn).
 struct EnemyPlacement {
   std::uint8_t enemy_id = 0;
   // 0 takes the first free enemy slot.
@@ -333,7 +334,7 @@ struct EnemyPlacement {
                          const EnemyPlacement&) = default;
 };
 
-// An object placement (Field_MpdObjectSpawn).
+// An object placement (VS::Field::MpdObjectSpawn).
 struct ObjectPlacement {
   std::uint16_t flag = 0;
   std::uint8_t flag_min = 0;
@@ -429,7 +430,7 @@ void SpawnRoomActors(RoomActorSpawnHost& host);
 
 // --- Ashley's entrance
 
-// The pending door's entrance (Field_pendingDestinationDoor).
+// The pending door's entrance (VS::Field::pendingDestinationDoor).
 struct RoomEntrance {
   std::uint8_t tile_x = 0;
   std::uint8_t tile_z = 0;
@@ -617,7 +618,7 @@ inline constexpr std::size_t kSupplementalRecordBytes = 8;
 // decomp: BATTLE.PRG func_8008E470 (146C.c:17321)
 [[nodiscard]] bool IsRoomAudioSequenceAbsent(const RoomSections& sections);
 
-// The room environment section's fields (Field_MpdEnvironment).
+// The room environment section's fields (VS::Field::MpdEnvironment).
 inline constexpr std::size_t kRoomEnvironmentBytes = 0x58;
 
 struct RoomEnvironmentProperties {

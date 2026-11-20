@@ -23,13 +23,13 @@
 #include "Content/ModuleData.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Map.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/Minimap.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/Traps.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Legacy/Psx.h"
@@ -250,23 +250,23 @@ std::uint32_t VisitWord(const std::vector<std::byte>& scene, std::size_t room) {
 // The live room record pointed at a GridMap, two tile cells (tile 1 half
 // closed) and camera bounds; the previous record comes back afterwards.
 struct LiveRoom {
-  SavedGlobal saved_room{Field_roomData};
+  SavedGlobal saved_room{VS::Field::roomData};
   GridMap map;
   std::array<std::uint32_t, 2> cells{0, PassabilityWord(1)};
   std::array<std::int16_t, 4> bounds{-10, 20, 300, 400};
 
   LiveRoom() {
-    Field_roomData.collisionMap =
-        reinterpret_cast<Field_MpdCollisionHeader*>(map.bytes.data());
-    Field_roomData.header.collisionMapLength = sizeof map.bytes;
-    Field_roomData.tileCells =
-        reinterpret_cast<Field_MpdTileCell*>(cells.data());
-    Field_roomData.header.tileCellsLength = sizeof cells;
-    Field_roomData.movingPlatforms = nullptr;
-    Field_roomData.header.movingPlatformsLength = 0;
-    Field_roomData.zoneBounds =
+    VS::Field::roomData.collision_map =
+        reinterpret_cast<VS::Field::MpdCollisionHeader*>(map.bytes.data());
+    VS::Field::roomData.header.collision_map_length = sizeof map.bytes;
+    VS::Field::roomData.tile_cells =
+        reinterpret_cast<VS::Field::MpdTileCell*>(cells.data());
+    VS::Field::roomData.header.tile_cells_length = sizeof cells;
+    VS::Field::roomData.moving_platforms = nullptr;
+    VS::Field::roomData.header.moving_platforms_length = 0;
+    VS::Field::roomData.zone_bounds =
         reinterpret_cast<VS::Field::CameraBounds*>(bounds.data());
-    Field_roomData.header.zoneBoundsLength = sizeof bounds;
+    VS::Field::roomData.header.zone_bounds_length = sizeof bounds;
   }
 };
 
@@ -274,11 +274,11 @@ struct LiveRoom {
 // and an action whose second hit is kPanelHit; the globals come back after.
 struct LiveTrap {
   SavedGlobal saved_actors{Battle_actors};
-  SavedGlobal saved_room{Field_roomData};
+  SavedGlobal saved_room{VS::Field::roomData};
   std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
   std::unique_ptr<Battle_ActorStats> stats =
       std::make_unique<Battle_ActorStats>();
-  Field_MpdEnvironment environment{};
+  VS::Field::MpdEnvironment environment{};
   Battle_ActionDefinition action{};
   Battle_HitResult struck{};
 
@@ -290,9 +290,9 @@ struct LiveTrap {
     actor->stats = stats.get();
     std::memset(static_cast<void*>(Battle_actors), 0, sizeof Battle_actors);
     Battle_actors[0] = actor.get();
-    environment.trapLevel = 2;
-    Field_roomData.environment = &environment;
-    Field_roomData.header.environmentLength = sizeof environment;
+    environment.trap_level = 2;
+    VS::Field::roomData.environment = &environment;
+    VS::Field::roomData.header.environment_length = sizeof environment;
     action.hits[1].statFactor = 4;
     action.hits[1].affinity = 1;
     struck.target.target_limb = 1;
@@ -725,7 +725,7 @@ TEST_CASE("A raised shield's type bytes add as unsigned ratings",
 TEST_CASE("The live collision binding reads the current room's sections",
           "[field-collision-map][field]") {
   const LiveRoom room;
-  CHECK(VS::Field::LiveRoomCollisionCells() == Field_roomData.tileCells);
+  CHECK(VS::Field::LiveRoomCollisionCells() == VS::Field::roomData.tile_cells);
   CHECK(VS::Field::LiveCollisionMapDimensions(0) == ((1 << 20) | 32));
   const std::optional<VS::Field::CameraBounds> live_bounds =
       VS::Field::LiveRoomCameraBounds();
@@ -737,7 +737,7 @@ TEST_CASE("The live collision binding reads cells inside the room's table",
           "[field-collision-map][field]") {
   const LiveRoom room;
   CHECK(VS::Field::LiveCollisionCellAt(1, 0, 0) ==
-        Field_roomData.tileCells + 1);
+        VS::Field::roomData.tile_cells + 1);
   CHECK(VS::Field::LiveCollisionCellAt(0, 1, 0) == nullptr);
   CHECK(VS::Field::LiveCollisionCellAt(0, 0, 2) == nullptr);
 }
@@ -746,19 +746,19 @@ TEST_CASE("Unchecked cell readers see a missing cell as the absent word",
           "[field-collision-map][field][issue-288]") {
   const LiveRoom room;
   CHECK(VS::Field::LiveCollisionCellOrAbsent(1, 0, 0) ==
-        Field_roomData.tileCells + 1);
-  const Field_MpdTileCell* off_grid =
+        VS::Field::roomData.tile_cells + 1);
+  const VS::Field::MpdTileCell* off_grid =
       VS::Field::LiveCollisionCellOrAbsent(0, 1, 0);
   REQUIRE(off_grid != nullptr);
   CHECK(VS::Field::LiveCollisionCellOrAbsent(0, 0, 2) == off_grid);
   std::uint32_t word = 0;
   std::memcpy(&word, off_grid, sizeof word);
   CHECK(word == VS::Field::kAbsentCellWord);
-  CHECK(off_grid->surfaceKind == 3);
+  CHECK(off_grid->surface_kind == 3);
   const bool any_flag =
-      off_grid->isPit || off_grid->hasEventTrigger ||
-      off_grid->hasRoomTrigger || off_grid->blocksSphereTerrain ||
-      off_grid->passability != 0 || off_grid->occlusionAndFloorFlags != 0;
+      off_grid->is_pit || off_grid->has_event_trigger ||
+      off_grid->has_room_trigger || off_grid->blocks_sphere_terrain ||
+      off_grid->passability != 0 || off_grid->occlusion_and_floor_flags != 0;
   CHECK_FALSE(any_flag);
 }
 
@@ -770,7 +770,7 @@ TEST_CASE("The live collision binding blocks and finds the room's cells",
   CHECK(VS::Field::SetLiveCollisionCellBlocked(0, 0, 1, 1) == 0);
   const SVECTOR position{.vx = 200, .vy = 0, .vz = 10, .pad = 0};
   CHECK(VS::Field::FindLiveCollisionCellAtPosition(&position, 0) ==
-        Field_roomData.tileCells + 1);
+        VS::Field::roomData.tile_cells + 1);
   CHECK(VS::Field::FindLiveCollisionCellAtPosition(nullptr, 0) == nullptr);
 }
 

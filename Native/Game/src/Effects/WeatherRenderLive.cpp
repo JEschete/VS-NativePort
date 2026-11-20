@@ -21,7 +21,7 @@
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLiveState.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/Weather.hpp"
 #include "Legacy/Psx.h"
@@ -113,11 +113,11 @@ class LiveRenderHost final : public WeatherRenderHost {
 
   std::optional<std::uint8_t> CollisionSurface(std::int32_t tile_x,
                                                std::int32_t tile_z) override {
-    const Field_MpdTileCell* const cell = Field::LiveCollisionCellAt(
+    const VS::Field::MpdTileCell* const cell = Field::LiveCollisionCellAt(
         static_cast<unsigned int>(tile_x), static_cast<unsigned int>(tile_z),
         kCollisionLayer);
     if (cell == nullptr) return std::nullopt;
-    return static_cast<std::uint8_t>(cell->surfaceKind);
+    return static_cast<std::uint8_t>(cell->surface_kind);
   }
 
   std::int32_t FloorHeight(std::int16_t x, std::int16_t z) override {

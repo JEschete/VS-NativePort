@@ -56,7 +56,7 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoadingLive.hpp"

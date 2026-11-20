@@ -4,7 +4,9 @@
 #include "Actors/AppearanceTransition.hpp"
 
 struct Actors_ActorRecord;
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickInstance;
+}  // namespace VS::Field
 
 // Bindings from actor records and field gimmicks to the typed palette pulse
 // and appearance transitions (AppearanceTransition.cpp). Each reads the
@@ -12,7 +14,7 @@ struct Field_GimmickInstance;
 // equipment palettes; actors outside the equipment table have no equipment.
 namespace VS::Actors {
 void UpdateLiveActorPalettePulse(Actors_ActorRecord& actor);
-void UpdateLiveGimmickPalettePulse(Field_GimmickInstance& object);
+void UpdateLiveGimmickPalettePulse(VS::Field::GimmickInstance& object);
 void UpdateLiveActorAppearanceTransition(Actors_ActorRecord& actor);
-void UpdateLiveGimmickAppearanceTransition(Field_GimmickInstance& object);
+void UpdateLiveGimmickAppearanceTransition(VS::Field::GimmickInstance& object);
 }  // namespace VS::Actors

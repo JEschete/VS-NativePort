@@ -20,7 +20,7 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -930,12 +930,12 @@ struct LiveCollisionFixture {
   CollisionSamples saved_samples = VS::Field::LiveCollisionSamples();
   SVECTOR saved_position = VS::Field::collisionProbePosition;
   u_char saved_direction = VS::Field::collisionProbeDirection;
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
 
   LiveCollisionFixture() {
-    Field_roomData = {};
+    VS::Field::roomData = {};
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
   }
@@ -944,7 +944,7 @@ struct LiveCollisionFixture {
     VS::Field::LiveCollisionSamples() = saved_samples;
     VS::Field::collisionProbePosition = saved_position;
     VS::Field::collisionProbeDirection = saved_direction;
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     std::copy(saved_records.begin(), saved_records.end(),
               std::begin(Actors_actorRecords));
   }

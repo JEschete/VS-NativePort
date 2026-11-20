@@ -32,7 +32,7 @@
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 
 namespace VS::Battle::Ai {

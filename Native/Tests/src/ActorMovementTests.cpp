@@ -18,7 +18,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Content/ModuleData.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -639,7 +639,7 @@ TEST_CASE("Live movement tables copy the module tables",
   for (std::size_t step = 0; step < actors::kGimmickSpinSteps; ++step) {
     CAPTURE(step);
     CHECK(tables.gimmick_spin_steps.at(step) ==
-          static_cast<std::int8_t>(Field_kGimmickSpinHeightSteps[step]));
+          static_cast<std::int8_t>(VS::Field::kGimmickSpinHeightSteps[step]));
   }
 }
 

@@ -2,4 +2,4 @@
 #include "State/Location.hpp"
 
 // decomp: D_80061068 (D_80061068@SLUS_010.40)
-Field_MpdDoorRecord VS::State::savedEntryDoor;
+VS::Field::MpdDoorRecord VS::State::savedEntryDoor;

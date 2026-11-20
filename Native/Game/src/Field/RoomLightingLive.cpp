@@ -5,19 +5,20 @@
 #include <cstdint>
 #include <span>
 
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Render/Palette.hpp"
 #include "Render/RoomLighting.hpp"
 
 namespace VS::Field {
 
 std::span<const std::byte> LiveRoomLightingSection() {
-  if (!Field_roomData.isLoaded || Field_roomData.lighting == nullptr) {
+  if (!VS::Field::roomData.is_loaded ||
+      VS::Field::roomData.lighting == nullptr) {
     return {};
   }
-  return {static_cast<const std::byte*>(Field_roomData.lighting),
-          static_cast<std::size_t>(Field_roomData.header.lightingLength)};
+  return {static_cast<const std::byte*>(VS::Field::roomData.lighting),
+          static_cast<std::size_t>(VS::Field::roomData.header.lighting_length)};
 }
 
 void SampleLiveRoomLighting(std::uint32_t packed_position,

@@ -128,7 +128,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Field::zoneContext.music_fade_enabled =
         defaults.zone_music_fade_enabled ? 1 : 0;
     VS::Field::zoneContext.loaded_zud_index_plus_one = 0;
-    Field_pendingDestinationDoor = VS::State::savedEntryDoor;
+    VS::Field::pendingDestinationDoor = VS::State::savedEntryDoor;
     VS::Field::screenTransitionEffect = defaults.transition_effect;
     VS::Field::screenTransitionStep = defaults.transition_step;
     VS::Field::screenTransitionSpeed = defaults.transition_speed;
@@ -142,7 +142,8 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Render::SetLiveCameraNearClip(defaults.near_clip);
     VS::State::sceneTimer.mode = VS::State::kSceneTimerStopped;
     VS::State::sceneTimer.time = {};
-    VS::Field::zoneContext.scene_id = VS::State::savedEntryDoor.requiredFlagId;
+    VS::Field::zoneContext.scene_id =
+        VS::State::savedEntryDoor.required_flag_id;
     VS::Field::cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);

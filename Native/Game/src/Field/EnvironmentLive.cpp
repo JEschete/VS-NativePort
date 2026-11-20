@@ -14,7 +14,7 @@
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/EnvironmentLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomRenderingLive.hpp"
 
 // decomp: D_800F1D98 (D_800F1D98@BATTLE/BATTLE.PRG)
@@ -139,7 +139,7 @@ bool LiveWeatherHost::AreRoomUpdatesPaused() {
 }
 
 std::uint16_t LiveWeatherHost::RoomAnimationTicks() {
-  return Field_roomAnimationTicks;
+  return VS::Field::roomAnimationTicks;
 }
 
 std::int32_t LiveWeatherHost::Random() { return VS::Core::NextBiosRand(); }

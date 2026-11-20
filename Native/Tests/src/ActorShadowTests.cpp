@@ -18,8 +18,8 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
@@ -43,15 +43,15 @@ struct ActorShadowFixture {
   VS::Render::ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   VS::Actors::ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   int saved_framebuffer = VS::Render::frameBuf;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   u_short saved_platform = Actors_supportingPlatformLayer;
   VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   decltype(Actors_supportingGimmickIndex) saved_gimmick_index =
       Actors_supportingGimmickIndex;
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   std::array<unsigned int, 18> saved_vertices{};
   std::array<unsigned int, 24> saved_faces{};
   std::vector<u_long> storage =
@@ -60,8 +60,9 @@ struct ActorShadowFixture {
   std::array<unsigned int, 32> model_bytes{};
   Actors_ActorRecord actor{};
   MATRIX camera{};
-  alignas(Field_MpdCollisionHeader) std::array<unsigned char, 188> terrain{};
-  std::array<Field_MpdTileCell, 9> cells{};
+  alignas(
+      VS::Field::MpdCollisionHeader) std::array<unsigned char, 188> terrain{};
+  std::array<VS::Field::MpdTileCell, 9> cells{};
 
   ActorShadowFixture() {
     std::copy_n(Content_battleShadowVertices, saved_vertices.size(),
@@ -69,7 +70,7 @@ struct ActorShadowFixture {
     std::copy_n(Content_battleShadowFaces, saved_faces.size(),
                 saved_faces.begin());
     SetMesh();
-    Field_roomData = {};
+    VS::Field::roomData = {};
     Actors_supportingPlatformLayer = 0;
     VS::Render::frameBuf = 0;
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
@@ -111,12 +112,12 @@ struct ActorShadowFixture {
               Content_battleShadowVertices);
     std::copy(saved_faces.begin(), saved_faces.end(),
               Content_battleShadowFaces);
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     Actors_supportingPlatformLayer = saved_platform;
     Actors_supportingGimmickIndex = saved_gimmick_index;
     VS::Field::LiveCollisionProbe() = saved_probe;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     VS::Render::FrameScratchpad() = saved_frame;
     *VS::Render::ModelWorkspace() = saved_workspace;
     VS::Actors::modelRenderContext = saved_context;
@@ -175,7 +176,7 @@ struct ActorShadowFixture {
   }
 
   void SetTerrain(bool along_z, bool steep) {
-    const Field_MpdCollisionHeader header{
+    const VS::Field::MpdCollisionHeader header{
         3, 3, static_cast<std::int16_t>(steep ? 64 : 32), 9};
     std::memcpy(terrain.data(), &header, sizeof header);
     for (unsigned tile = 0; tile < 9; ++tile) {
@@ -193,12 +194,13 @@ struct ActorShadowFixture {
         }
       }
     }
-    Field_roomData.collisionMap =
-        reinterpret_cast<Field_MpdCollisionHeader*>(terrain.data());
-    Field_roomData.tileCells = cells.data();
-    Field_roomData.header.collisionMapLength = terrain.size();
-    Field_roomData.header.tileCellsLength = sizeof cells;
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    VS::Field::roomData.collision_map =
+        reinterpret_cast<VS::Field::MpdCollisionHeader*>(terrain.data());
+    VS::Field::roomData.tile_cells = cells.data();
+    VS::Field::roomData.header.collision_map_length = terrain.size();
+    VS::Field::roomData.header.tile_cells_length = sizeof cells;
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
     const std::int16_t coordinate = steep ? 176 : 160;
     actor.instance.position = {coordinate, 0, coordinate, 0};
     actor.shadowRadius = steep ? 32 : 64;

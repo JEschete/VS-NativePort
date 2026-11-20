@@ -34,7 +34,6 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Field/Doors.h"
 #include "Field/MinimapSceneLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"

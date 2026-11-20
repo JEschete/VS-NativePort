@@ -32,9 +32,9 @@
 #include "Diagnostics/SceneTrace.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLiveState.hpp"
@@ -802,12 +802,12 @@ struct GameplayInspectionFixture {
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
   decltype(VS::Battle::actionState) saved_action = VS::Battle::actionState;
   decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
-  decltype(Field_roomData.floorTriggers) saved_triggers =
-      Field_roomData.floorTriggers;
-  decltype(Field_roomData.doors) saved_doors = Field_roomData.doors;
-  decltype(Field_roomData.header.doorsLength) saved_door_length =
-      Field_roomData.header.doorsLength;
-  decltype(Field_roomData) saved_room = Field_roomData;
+  decltype(VS::Field::roomData.floor_triggers) saved_triggers =
+      VS::Field::roomData.floor_triggers;
+  decltype(VS::Field::roomData.doors) saved_doors = VS::Field::roomData.doors;
+  decltype(VS::Field::roomData.header.doors_length) saved_door_length =
+      VS::Field::roomData.header.doors_length;
+  decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
   decltype(VS::Menu::Framework::menuItems) saved_menu_items =
       VS::Menu::Framework::menuItems;
   decltype(VS::Menu::Framework::itemsText) saved_text =
@@ -840,11 +840,11 @@ struct GameplayInspectionFixture {
     VS::Field::controlMode = 1;
     VS::Battle::actionState = nullptr;
     VS::Items::lootListHead = nullptr;
-    Field_roomData.floorTriggers = nullptr;
-    Field_roomData.doors = nullptr;
-    Field_roomData.header.doorsLength = 0;
-    Field_roomData.collisionMap = nullptr;
-    Field_roomData.tileCells = nullptr;
+    VS::Field::roomData.floor_triggers = nullptr;
+    VS::Field::roomData.doors = nullptr;
+    VS::Field::roomData.header.doors_length = 0;
+    VS::Field::roomData.collision_map = nullptr;
+    VS::Field::roomData.tile_cells = nullptr;
     VS::Menu::Framework::menuItems = nullptr;
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuState.control.current_menu =
@@ -869,10 +869,10 @@ struct GameplayInspectionFixture {
     VS::Field::controlMode = saved_control;
     VS::Battle::actionState = saved_action;
     VS::Items::lootListHead = saved_loot;
-    Field_roomData.floorTriggers = saved_triggers;
-    Field_roomData.doors = saved_doors;
-    Field_roomData.header.doorsLength = saved_door_length;
-    Field_roomData = saved_room;
+    VS::Field::roomData.floor_triggers = saved_triggers;
+    VS::Field::roomData.doors = saved_doors;
+    VS::Field::roomData.header.doors_length = saved_door_length;
+    VS::Field::roomData = saved_room;
     VS::Menu::Framework::menuItems = saved_menu_items;
     VS::Menu::Framework::itemsText = saved_text;
     VS::Menu::Framework::menuState = saved_menu;
@@ -1219,10 +1219,10 @@ TEST_CASE("Player observations expose original room chests and opened flags",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   struct RoomGuard {
-    decltype(Field_roomData) room = Field_roomData;
+    decltype(VS::Field::roomData) room = VS::Field::roomData;
     int flag = VS::State::LiveScriptFlag(0x3C6);
     ~RoomGuard() {
-      Field_roomData = room;
+      VS::Field::roomData = room;
       VS::State::SetLiveScriptFlag(0x3C6, static_cast<char>(flag));
     }
   } guard;
@@ -1236,8 +1236,8 @@ TEST_CASE("Player observations expose original room chests and opened flags",
   chests[1].tile_x = 9;
   chests[1].lock_level = 3;
   chests[1].opened_flag = 6;
-  Field_roomData.containers = chests.data();
-  Field_roomData.header.containersLength = sizeof(chests);
+  VS::Field::roomData.containers = chests.data();
+  VS::Field::roomData.header.containers_length = sizeof(chests);
   VS::State::SetLiveScriptFlag(0x3C6, 1);
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
@@ -1437,13 +1437,13 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
 TEST_CASE("Observed door contracts preserve the current authored flags",
           "[player][diagnostics][inspection]") {
   GameplayInspectionFixture fixture;
-  Field_MpdDoorRecord door{};
-  door.destinationZoneId = 9;
-  door.destinationRoomId = 1;
-  door.tileLocation.tileX = 3;
-  door.tileLocation.tileZ = 14;
-  Field_roomData.doors = &door;
-  Field_roomData.header.doorsLength = sizeof(door);
+  VS::Field::MpdDoorRecord door{};
+  door.destination_zone_id = 9;
+  door.destination_room_id = 1;
+  door.tile_location.tile_x = 3;
+  door.tile_location.tile_z = 14;
+  VS::Field::roomData.doors = &door;
+  VS::Field::roomData.header.doors_length = sizeof(door);
   VS::Boot::EncounterPollStop();
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
@@ -1478,30 +1478,31 @@ void CheckOrdinaryTraceSkipsPlayerInspection() {
 
 namespace {
 struct NavigationInspectionFixture : ReactionInspectionFixture {
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   struct Samples {
-    Field_MpdCollisionHeader header{3, 3, 0, 9};
+    VS::Field::MpdCollisionHeader header{3, 3, 0, 9};
     std::array<std::uint16_t, 18> descriptors{};
     std::array<unsigned char, 32> patterns{};
   } samples;
-  std::array<Field_MpdTileCell, 9> cells{};
+  std::array<VS::Field::MpdTileCell, 9> cells{};
   NavigationInspectionFixture() {
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
     std::fill(samples.descriptors.begin() + 9, samples.descriptors.end(), 1);
     std::fill(samples.patterns.begin() + 16, samples.patterns.end(), 127);
     cells[1].passability = 5;
-    cells[2].isPit = 1;
-    Field_roomData.collisionMap = &samples.header;
-    Field_roomData.tileCells = cells.data();
-    Field_roomData.header.collisionMapLength = sizeof(samples);
-    Field_roomData.header.tileCellsLength = sizeof(cells);
+    cells[2].is_pit = 1;
+    VS::Field::roomData.collision_map = &samples.header;
+    VS::Field::roomData.tile_cells = cells.data();
+    VS::Field::roomData.header.collision_map_length = sizeof(samples);
+    VS::Field::roomData.header.tile_cells_length = sizeof(cells);
     player_model.collisionHeight = 128;
     player_model.collisionRadius = 48;
   }
   ~NavigationInspectionFixture() {
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
   }
 };
 }  // namespace
@@ -1527,10 +1528,10 @@ TEST_CASE("Navigation observes bounded runtime terrain without changing it",
 TEST_CASE("Ordinary traces never collect opt-in player geometry",
           "[player][diagnostics][inspection]") {
   NavigationInspectionFixture fixture;
-  Field_roomData.header.tileCellsLength = 0;
+  VS::Field::roomData.header.tile_cells_length = 0;
   CheckOrdinaryTraceSkipsPlayerInspection();
   CHECK_THROWS(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay()));
-  Field_roomData.collisionMap = nullptr;
+  VS::Field::roomData.collision_map = nullptr;
   CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
                   .navigation.available);
 }
@@ -1538,18 +1539,18 @@ TEST_CASE("Ordinary traces never collect opt-in player geometry",
 TEST_CASE("Navigation observes stacked support without mutating contact state",
           "[player][diagnostics][inspection]") {
   NavigationInspectionFixture fixture;
-  Field_GimmickInstance lower{};
-  Field_GimmickInstance upper{};
-  lower.tileX = upper.tileX = lower.tileZ = upper.tileZ = 1;
-  upper.positionY = -128;
-  Field_gimmickInstances[0] = &lower;
-  Field_gimmickInstances[1] = &upper;
+  VS::Field::GimmickInstance lower{};
+  VS::Field::GimmickInstance upper{};
+  lower.tile_x = upper.tile_x = lower.tile_z = upper.tile_z = 1;
+  upper.position_y = -128;
+  VS::Field::gimmickInstances[0] = &lower;
+  VS::Field::gimmickInstances[1] = &upper;
   const auto contact = Actors_supportingGimmickIndex;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(state.navigation.samples[21] == std::array<int, 3>{32512, 30736, 5});
   CHECK(Actors_supportingGimmickIndex == contact);
-  upper.motionState = 1;
+  upper.motion_state = 1;
   const auto moving =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(moving.navigation.samples[21][0] == 32640);

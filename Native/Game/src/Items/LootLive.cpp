@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the loot rules (Loot.hpp): the battle loot list
 // (VS::Items::lootListHead, nodes on the game heap), the battle flow around the
-// loot menu and the treasure chests of the loaded room (Field_roomData).
+// loot menu and the treasure chests of the loaded room (VS::Field::roomData).
 #include "Items/LootLive.hpp"
 
 #include <array>
@@ -22,10 +22,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -179,9 +179,9 @@ std::optional<EnemyDrops> ToEnemyDrops(const Battle_Actor* enemy) {
 
 // The room's chest records; none without a loot section.
 std::span<TreasureChest> LiveRoomChestRecords() {
-  if (Field_roomData.containers == nullptr) return {};
-  return {Field_roomData.containers,
-          RoomTreasureChests(Field_roomData.header.containersLength)};
+  if (VS::Field::roomData.containers == nullptr) return {};
+  return {VS::Field::roomData.containers,
+          RoomTreasureChests(VS::Field::roomData.header.containers_length)};
 }
 }  // namespace
 
@@ -262,7 +262,7 @@ void LoadLiveRoomChestLoot(const void* loot_section) {
   if (status != ItemsStatus::kOk) {
     // A room without a chest section ignores the loot, as the original did;
     // one too short for a chest refuses it.
-    if (Field_roomData.containers != nullptr) {
+    if (VS::Field::roomData.containers != nullptr) {
       WarnRefusal("LoadRoomChestLoot", status);
     }
   }

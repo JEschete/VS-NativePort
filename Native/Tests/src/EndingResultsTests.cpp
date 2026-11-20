@@ -941,7 +941,7 @@ class LiveClearRecords {
   VS::State::StateFlags flags_ = VS::State::stateFlags;
   VS::State::PlayTime play_time_ = VS::State::playTime;
   VS::State::RoomVisitFlags rooms_ = VS::State::roomVisitProgress;
-  Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
+  VS::Field::MpdDoorRecord door_ = VS::State::savedEntryDoor;
   VS::Input::Settings settings_ = VS::Input::settings;
   decltype(std::to_array(Battle_actionDefinitions)) actions_ =
       std::to_array(Battle_actionDefinitions);
@@ -962,7 +962,7 @@ void CommitLiveClear() {
   flags.chests_opened[0] = 1;
   VS::State::roomVisitProgress.room_flags[0] = 0xF;
   VS::Ending::countableRoomBits[0] = 0x3;
-  VS::State::savedEntryDoor.destinationZoneId = 9;
+  VS::State::savedEntryDoor.destination_zone_id = 9;
   VS::Ending::LiveCommitClearProgress();
 }
 }  // namespace
@@ -991,8 +991,8 @@ TEST_CASE("LiveCommitClearProgress resets the game's playthrough records",
   CHECK((flags.magic_used == 0 && flags.asura_defeated == 0));
   CHECK(flags.chests_opened[0] == 0);
   CHECK(VS::State::roomVisitProgress.room_flags[0] == 0);
-  CHECK(VS::State::savedEntryDoor.destinationZoneId == 1);
-  CHECK(VS::State::savedEntryDoor.destinationRoomId == 0);
+  CHECK(VS::State::savedEntryDoor.destination_zone_id == 1);
+  CHECK(VS::State::savedEntryDoor.destination_room_id == 0);
 }
 
 TEST_CASE("Promoted clear results functions leave no module address bindings",

@@ -27,7 +27,7 @@
 #include "Core/Log.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"

@@ -19,7 +19,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -239,16 +239,16 @@ std::expected<int, std::string> LocationArtwork(const Content::DataStore& store,
                                                 const Location& location) {
   const auto mpd = RoomAsset(store, location);
   if (!mpd) return std::unexpected(mpd.error());
-  const auto header = Record<Field_MpdHeader>(*mpd);
+  const auto header = Record<VS::Field::MpdHeader>(*mpd);
   if (!header) return std::unexpected(header.error());
-  if (header->roomSectionOffset < 0) {
+  if (header->room_section_offset < 0) {
     return std::unexpected("save summary: invalid MPD room section");
   }
   using Lengths = std::array<std::uint32_t, kRoomSectionCount>;
-  const auto lengths = Record<Lengths>(*mpd, header->roomSectionOffset);
+  const auto lengths = Record<Lengths>(*mpd, header->room_section_offset);
   if (!lengths) return std::unexpected(lengths.error());
   std::size_t cursor =
-      static_cast<std::size_t>(header->roomSectionOffset) + sizeof(Lengths);
+      static_cast<std::size_t>(header->room_section_offset) + sizeof(Lengths);
   Bytes triggers;
   for (std::size_t section = 0; section < lengths->size(); ++section) {
     const auto data = Slice(*mpd, cursor, (*lengths)[section]);
@@ -256,7 +256,7 @@ std::expected<int, std::string> LocationArtwork(const Content::DataStore& store,
     if (section == kFloorTriggerSection) triggers = *data;
     cursor += data->size();
   }
-  if (triggers.size() % sizeof(Field_MpdFloorTrigger) != 0) {
+  if (triggers.size() % sizeof(VS::Field::MpdFloorTrigger) != 0) {
     return std::unexpected("save summary: invalid floor-trigger stride");
   }
   int artwork = -1;
@@ -264,8 +264,8 @@ std::expected<int, std::string> LocationArtwork(const Content::DataStore& store,
   // the original saveLocations/artwork ID. F02756/F03623 subtract one; chest
   // IDs and arbitrary rooms have no image.
   for (std::size_t offset = 0; offset < triggers.size();
-       offset += sizeof(Field_MpdFloorTrigger)) {
-    const auto trigger = Record<Field_MpdFloorTrigger>(triggers, offset);
+       offset += sizeof(VS::Field::MpdFloorTrigger)) {
+    const auto trigger = Record<VS::Field::MpdFloorTrigger>(triggers, offset);
     if (!trigger) return std::unexpected(trigger.error());
     if (trigger->kind != kSavePointKind) continue;
     const auto id = static_cast<unsigned char>(trigger->activation);

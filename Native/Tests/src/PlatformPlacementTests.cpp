@@ -20,11 +20,12 @@
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -222,40 +223,41 @@ struct RecordingPlatformUpdateHost final : VS::Field::MovingPlatformUpdateHost {
 };
 
 struct PlatformPlacementFixture {
-  Field_RoomRecord saved_room = Field_roomData;
-  decltype(Field_platformFreezeFrames) saved_freeze =
-      Field_platformFreezeFrames;
-  decltype(Field_areMovingPlatformsPaused) saved_pause =
-      Field_areMovingPlatformsPaused;
-  decltype(Field_isPlatformFreezeTintActive) saved_tint =
-      Field_isPlatformFreezeTintActive;
-  decltype(Field_entranceDoorPlatformFlags) saved_entrance =
-      Field_entranceDoorPlatformFlags;
-  decltype(std::to_array(Field_platformBounceFrames)) saved_bounce =
-      std::to_array(Field_platformBounceFrames);
-  std::array<Field_MpdMovingPlatform, 2> platforms{};
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
+  decltype(VS::Field::platformFreezeFrames) saved_freeze =
+      VS::Field::platformFreezeFrames;
+  decltype(VS::Field::areMovingPlatformsPaused) saved_pause =
+      VS::Field::areMovingPlatformsPaused;
+  decltype(VS::Field::isPlatformFreezeTintActive) saved_tint =
+      VS::Field::isPlatformFreezeTintActive;
+  VS::Field::DoorTileLocation saved_entrance =
+      VS::Field::entranceDoorRecord.tile_location;
+  decltype(VS::Field::platformBounceFrames) saved_bounce =
+      VS::Field::platformBounceFrames;
+  std::array<VS::Field::MpdMovingPlatform, 2> platforms{};
 
   PlatformPlacementFixture() {
-    Field_roomData = {};
-    Field_roomData.movingPlatforms = platforms.data();
-    Field_roomData.header.movingPlatformsLength = sizeof(platforms);
-    std::fill_n(Field_platformBounceFrames, saved_bounce.size(), 7);
+    VS::Field::roomData = {};
+    VS::Field::roomData.moving_platforms = platforms.data();
+    VS::Field::roomData.header.moving_platforms_length = sizeof(platforms);
+    std::fill_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
+                7);
     for (auto& platform : platforms) {
-      platform.positionX = 1216 * ONE;
-      platform.positionY = 768 * ONE;
-      platform.positionZ = 448 * ONE;
-      platform.isHidden = 1;
+      platform.position_x = 1216 * ONE;
+      platform.position_y = 768 * ONE;
+      platform.position_z = 448 * ONE;
+      platform.is_hidden = 1;
     }
   }
 
   ~PlatformPlacementFixture() {
-    Field_roomData = saved_room;
-    Field_platformFreezeFrames = saved_freeze;
-    Field_areMovingPlatformsPaused = saved_pause;
-    Field_isPlatformFreezeTintActive = saved_tint;
-    Field_entranceDoorPlatformFlags = saved_entrance;
+    VS::Field::roomData = saved_room;
+    VS::Field::platformFreezeFrames = saved_freeze;
+    VS::Field::areMovingPlatformsPaused = saved_pause;
+    VS::Field::isPlatformFreezeTintActive = saved_tint;
+    VS::Field::entranceDoorRecord.tile_location = saved_entrance;
     std::copy(saved_bounce.begin(), saved_bounce.end(),
-              Field_platformBounceFrames);
+              VS::Field::platformBounceFrames.begin());
   }
 };
 
@@ -272,12 +274,12 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     VS::Field::areRoomUpdatesPaused = 0;
-    Field_areMovingPlatformsPaused = 0;
-    Field_platformFreezeFrames = 0;
-    Field_isPlatformFreezeTintActive = 0;
+    VS::Field::areMovingPlatformsPaused = 0;
+    VS::Field::platformFreezeFrames = 0;
+    VS::Field::isPlatformFreezeTintActive = 0;
     VS::State::tickSpeed = 2;
     VS::Render::frameBuf = 0;
-    platforms[1].sceneObjectId = 99;
+    platforms[1].scene_object_id = 99;
   }
   ~PlatformMotionLiveFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
@@ -312,13 +314,13 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
     VS::Core::Math::BuildLiveRotationXyz(
         &angles, &VS::Render::FrameScratchpad().view_matrix);
     VS::Render::FrameScratchpad().view_matrix.t[2] = 512;
-    platforms[0].isHidden = 0;
-    platforms[0].positionX = platforms[0].positionZ = 0;
-    platforms[0].positionY = 100 * ONE;
-    platforms[0].sceneObjectId = 0;
-    platforms[1].sceneObjectId = 99;
-    Field_roomData.geometry = geometry.data();
-    Field_roomData.header.geometryLength = sizeof geometry;
+    platforms[0].is_hidden = 0;
+    platforms[0].position_x = platforms[0].position_z = 0;
+    platforms[0].position_y = 100 * ONE;
+    platforms[0].scene_object_id = 0;
+    platforms[1].scene_object_id = 99;
+    VS::Field::roomData.geometry = geometry.data();
+    VS::Field::roomData.header.geometry_length = sizeof geometry;
   }
   std::int64_t ProjectedArea() const {
     const auto x = [](u_long word) {
@@ -349,7 +351,7 @@ struct PlatformAppearanceGeometry {
   std::array<std::byte, VS::Render::kRoomGroupRecordBytes> group{};
   std::uint32_t triangles = 0;
   std::uint32_t quads = 1;
-  Field_MpdQuad quad{};
+  VS::Field::MpdQuad quad{};
 };
 
 struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
@@ -369,12 +371,12 @@ struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
     geometry.quad.blue1 = 0x56;
     palettes.fill(0x1234);
     VS::Field::roomPalettes = palettes.data();
-    Field_roomData.geometry = reinterpret_cast<int*>(&geometry);
-    Field_roomData.header.geometryLength = sizeof geometry;
-    platforms[0].sceneObjectId = 0;
-    platforms[0].swapsColorsWhenFrozen = 3;
-    platforms[1].sceneObjectId = 99;
-    Field_isPlatformFreezeTintActive = 0;
+    VS::Field::roomData.geometry = reinterpret_cast<int*>(&geometry);
+    VS::Field::roomData.header.geometry_length = sizeof geometry;
+    platforms[0].scene_object_id = 0;
+    platforms[0].swaps_colors_when_frozen = 3;
+    platforms[1].scene_object_id = 99;
+    VS::Field::isPlatformFreezeTintActive = 0;
   }
   ~PlatformAppearanceLiveFixture() {
     const_cast<VS::Render::PaletteAnimation&>(
@@ -449,33 +451,34 @@ TEST_CASE("Platform initialization retains every entrance layer flag",
 TEST_CASE("Native platform initialization resets only its four bounce slots",
           "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_entranceDoorPlatformFlags = 0;
-  Field_areMovingPlatformsPaused = 255;
-  Field_platformFreezeFrames = -1;
-  Field_isPlatformFreezeTintActive = 1;
-  std::fill_n(Field_platformBounceFrames, VS::Field::kMovingPlatformCapacity,
-              3);
-  Field_platformBounceFrames[VS::Field::kMovingPlatformCapacity] = 19;
-  Field_roomData.movingPlatforms = nullptr;
+  VS::Field::entranceDoorRecord.tile_location = {};
+  VS::Field::areMovingPlatformsPaused = 255;
+  VS::Field::platformFreezeFrames = -1;
+  VS::Field::isPlatformFreezeTintActive = 1;
+  std::fill_n(VS::Field::platformBounceFrames.begin(),
+              VS::Field::kMovingPlatformCapacity, 3);
+  VS::Field::platformBounceFrames[VS::Field::kMovingPlatformCapacity] = 19;
+  VS::Field::roomData.moving_platforms = nullptr;
   VS::Field::InitializeMovingPlatformsEntry();
-  CHECK(Field_areMovingPlatformsPaused == 0);
-  CHECK(Field_platformFreezeFrames == 0);
-  CHECK(Field_isPlatformFreezeTintActive == 0);
-  CHECK(std::ranges::all_of(std::span(Field_platformBounceFrames)
+  CHECK(VS::Field::areMovingPlatformsPaused == 0);
+  CHECK(VS::Field::platformFreezeFrames == 0);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 0);
+  CHECK(std::ranges::all_of(std::span(VS::Field::platformBounceFrames)
                                 .first(VS::Field::kMovingPlatformCapacity),
                             [](auto frame) { return frame == 7; }));
-  CHECK(Field_platformBounceFrames[VS::Field::kMovingPlatformCapacity] == 19);
+  CHECK(VS::Field::platformBounceFrames[VS::Field::kMovingPlatformCapacity] ==
+        19);
 }
 
 TEST_CASE("Native platform initialization preserves packed records and flags",
           "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_entranceDoorPlatformFlags = 0;
-  fixture.platforms[0].sceneObjectId = 0;
-  fixture.platforms[1].sceneObjectId = 99;
+  VS::Field::entranceDoorRecord.tile_location = {};
+  fixture.platforms[0].scene_object_id = 0;
+  fixture.platforms[1].scene_object_id = 99;
   GeometryWords geometry{1, 0x12345678, 0, 0, 0, 7, 8, 9, 10};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   const auto saved = fixture.platforms;
   VS::Field::InitializeMovingPlatformsEntry();
   using Bytes = std::array<std::byte, sizeof(saved)>;
@@ -486,19 +489,20 @@ TEST_CASE("Native platform initialization preserves packed records and flags",
 TEST_CASE("Native platform initialization resets its entrance waypoint last",
           "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_entranceDoorPlatformFlags = 2 << 13;
+  VS::Field::entranceDoorRecord.tile_location = {};
+  VS::Field::entranceDoorRecord.tile_location.entry_direction = 2;
   auto& platform = fixture.platforms[0];
-  platform.terminalWaypoint = 2;
+  platform.terminal_waypoint = 2;
   platform.waypoints[2] =
       VECTOR{.vx = -4097, .vy = -8191, .vz = 8193, .pad = 0};
   GeometryWords geometry{1, 0x100, 0, 0, 0};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   VS::Field::InitializeMovingPlatformsEntry();
-  CHECK(platform.positionX == -4097);
-  CHECK(platform.positionY == -8191);
-  CHECK(platform.positionZ == 8193);
-  CHECK(platform.isHidden == 0);
+  CHECK(platform.position_x == -4097);
+  CHECK(platform.position_y == -8191);
+  CHECK(platform.position_z == 8193);
+  CHECK(platform.is_hidden == 0);
   CHECK(geometry == GeometryWords{1, 0x100, -1, 1, 2});
 }
 
@@ -556,7 +560,7 @@ TEST_CASE("Platform collection refuses bad bounce and retains five records",
 TEST_CASE("Native platform collection preserves unused output and records",
           "[platform-collection-live][field]") {
   PlatformPlacementFixture fixture;
-  fixture.platforms[1].isHidden = 0;
+  fixture.platforms[1].is_hidden = 0;
   const auto saved = fixture.platforms;
   std::array<VS::Field::PlatformContact, 3> contacts{
       VS::Field::PlatformContact{7, 8, 9, 10}, {7, 8, 9, 10}, {7, 8, 9, 10}};
@@ -577,12 +581,14 @@ TEST_CASE("Native platform collection preserves unused output and records",
 TEST_CASE("Native platform collection refuses partial and misaligned records",
           "[platform-collection-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms) - 1;
   CHECK(VS::Field::CollectLiveMovingPlatformPositions().empty());
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms);
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms);
   auto* bytes = reinterpret_cast<std::byte*>(fixture.platforms.data());
-  Field_roomData.movingPlatforms =
-      reinterpret_cast<Field_MpdMovingPlatform*>(bytes + 1);
+  VS::Field::roomData.moving_platforms =
+      reinterpret_cast<VS::Field::MpdMovingPlatform*>(bytes + 1);
   CHECK(VS::Field::CollectLiveMovingPlatformPositions().empty());
 }
 
@@ -598,9 +604,9 @@ TEST_CASE("Platform collection retains its original module address",
 TEST_CASE("Typed collection supports five records without legacy buffer writes",
           "[platform-collection-live][field]") {
   PlatformPlacementFixture fixture;
-  std::array<Field_MpdMovingPlatform, 5> platforms{};
-  Field_roomData.movingPlatforms = platforms.data();
-  Field_roomData.header.movingPlatformsLength = sizeof platforms;
+  std::array<VS::Field::MpdMovingPlatform, 5> platforms{};
+  VS::Field::roomData.moving_platforms = platforms.data();
+  VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
   CHECK(VS::Field::CollectLiveMovingPlatformPositions().size() == 5);
   std::array<VS::Field::PlatformContact, 4> output{};
   const auto saved = output;
@@ -613,39 +619,40 @@ TEST_CASE(
     "Initialization positions a fifth platform without clearing its bounce",
     "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
-  std::array<Field_MpdMovingPlatform, 5> platforms{};
-  for (auto& platform : platforms) platform.sceneObjectId = 99;
-  platforms.back().sceneObjectId = 0;
-  platforms.back().positionX = 8193;
-  Field_platformBounceFrames[4] = 19;
-  Field_entranceDoorPlatformFlags = 0;
-  Field_roomData.movingPlatforms = platforms.data();
-  Field_roomData.header.movingPlatformsLength = sizeof platforms;
+  std::array<VS::Field::MpdMovingPlatform, 5> platforms{};
+  for (auto& platform : platforms) platform.scene_object_id = 99;
+  platforms.back().scene_object_id = 0;
+  platforms.back().position_x = 8193;
+  VS::Field::platformBounceFrames[4] = 19;
+  VS::Field::entranceDoorRecord.tile_location = {};
+  VS::Field::roomData.moving_platforms = platforms.data();
+  VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
   GeometryWords geometry{1};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   VS::Field::InitializeMovingPlatformsEntry();
   CHECK(geometry == GeometryWords{1, 0, 2});
-  CHECK(Field_platformBounceFrames[4] == 19);
+  CHECK(VS::Field::platformBounceFrames[4] == 19);
 }
 
 TEST_CASE("Entrance initialization resets the sixth platform terminal waypoint",
           "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
-  std::array<Field_MpdMovingPlatform, 6> platforms{};
-  Field_entranceDoorPlatformFlags = 7 << 13;
+  std::array<VS::Field::MpdMovingPlatform, 6> platforms{};
+  VS::Field::entranceDoorRecord.tile_location = {};
+  VS::Field::entranceDoorRecord.tile_location.entry_direction = 7;
   auto& platform = platforms.back();
-  platform.isHidden = 1;
-  platform.terminalWaypoint = 2;
+  platform.is_hidden = 1;
+  platform.terminal_waypoint = 2;
   platform.waypoints[2] = VECTOR{.vx = -4097, .vy = 0, .vz = 0, .pad = 0};
-  Field_roomData.movingPlatforms = platforms.data();
-  Field_roomData.header.movingPlatformsLength = sizeof platforms;
+  VS::Field::roomData.moving_platforms = platforms.data();
+  VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
   GeometryWords geometry{1};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   VS::Field::InitializeMovingPlatformsEntry();
-  CHECK(platform.positionX == -4097);
-  CHECK(platform.isHidden == 0);
+  CHECK(platform.position_x == -4097);
+  CHECK(platform.is_hidden == 0);
   CHECK(geometry == GeometryWords{1, 0x100, -1});
 }
 
@@ -824,34 +831,34 @@ TEST_CASE("Native platform motion preserves packed data and bounce geometry",
           "[platform-motion-live][field]") {
   PlatformMotionLiveFixture fixture;
   VS::State::tickSpeed = 4;
-  Field_platformBounceFrames[0] = 0;
+  VS::Field::platformBounceFrames[0] = 0;
   auto& platform = fixture.platforms[0];
-  platform.isHidden = 0;
-  platform.segmentVelocities[0] =
+  platform.is_hidden = 0;
+  platform.segment_velocities[0] =
       VECTOR{.vx = 4096, .vy = 0, .vz = 0, .pad = 10};
   auto expected = platform;
-  expected.positionX += 8192;
-  expected.motionTicks = 2;
+  expected.position_x += 8192;
+  expected.motion_ticks = 2;
   GeometryWords geometry{1, 0x100, 0, 0, 0, 7, 8, 9, 10};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   REQUIRE(VS::Field::UpdateLiveMovingPlatforms());
   using Bytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<Bytes>(platform) == std::bit_cast<Bytes>(expected));
-  CHECK(Field_platformBounceFrames[0] == 4);
+  CHECK(VS::Field::platformBounceFrames[0] == 4);
   CHECK(geometry == GeometryWords{1, 0, 1218,
-                                  Field_kPlatformBounceOffsets[4] - 768, 448, 7,
-                                  8, 9, 10});
+                                  VS::Field::kPlatformBounceOffsets[4] - 768,
+                                  448, 7, 8, 9, 10});
 }
 
 TEST_CASE("Native platform freeze expires before any motion substep",
           "[platform-motion-live][field]") {
   PlatformMotionLiveFixture fixture;
-  fixture.platforms[0].isHidden = 0;
-  Field_platformFreezeFrames = 1;
+  fixture.platforms[0].is_hidden = 0;
+  VS::Field::platformFreezeFrames = 1;
   const auto saved = fixture.platforms;
   REQUIRE(VS::Field::UpdateLiveMovingPlatforms());
-  CHECK(Field_platformFreezeFrames == 0);
+  CHECK(VS::Field::platformFreezeFrames == 0);
   using Bytes = std::array<std::byte, sizeof(saved)>;
   CHECK(std::bit_cast<Bytes>(fixture.platforms) == std::bit_cast<Bytes>(saved));
 }
@@ -860,7 +867,8 @@ TEST_CASE("Native platform motion refuses partial tables without state writes",
           "[platform-motion-live][field]") {
   PlatformMotionLiveFixture fixture;
   const auto saved = fixture.platforms;
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms) - 1;
   CHECK_FALSE(VS::Field::UpdateLiveMovingPlatforms());
   using Bytes = std::array<std::byte, sizeof(saved)>;
   CHECK(std::bit_cast<Bytes>(fixture.platforms) == std::bit_cast<Bytes>(saved));
@@ -964,7 +972,7 @@ TEST_CASE("Native platform shadows emit translucent quad then subtractive mode",
 TEST_CASE("Native platform shadows skip hidden records without packet writes",
           "[platform-shadow-live][field]") {
   PlatformShadowLiveFixture fixture;
-  fixture.platforms[0].isHidden = 1;
+  fixture.platforms[0].is_hidden = 1;
   VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data());
@@ -1087,7 +1095,7 @@ TEST_CASE(
   CHECK(fixture.geometry.quad.red1 == 0x34);
   CHECK(fixture.geometry.quad.green1 == 0x12);
   CHECK(fixture.geometry.quad.blue1 == 0x56);
-  CHECK(Field_isPlatformFreezeTintActive == 1);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 1);
   using Bytes = std::array<std::byte, sizeof(saved)>;
   CHECK(std::bit_cast<Bytes>(fixture.platforms) == std::bit_cast<Bytes>(saved));
 }
@@ -1100,16 +1108,17 @@ TEST_CASE("Native freeze appearance restores room palette and group colors",
   CHECK(VS::Render::LivePaletteAnimation().colors[2][0x30] == 0x1234);
   CHECK(fixture.geometry.quad.red1 == 0x12);
   CHECK(fixture.geometry.quad.green1 == 0x34);
-  CHECK(Field_isPlatformFreezeTintActive == 0);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 0);
 }
 
 TEST_CASE("Native freeze appearance equality skips all malformed room data",
           "[platform-appearance-live][field]") {
   PlatformAppearanceLiveFixture fixture;
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms) - 1;
   VS::Field::roomPalettes = nullptr;
   REQUIRE(VS::Field::SetLivePlatformFreezeAppearance(0));
-  CHECK(Field_isPlatformFreezeTintActive == 0);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 0);
   CHECK(fixture.geometry.quad.red1 == 0x12);
 }
 
@@ -1117,26 +1126,28 @@ TEST_CASE(
     "Native freeze appearance refuses malformed table and missing palette",
     "[platform-appearance-live][field]") {
   PlatformAppearanceLiveFixture fixture;
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms) - 1;
   CHECK_FALSE(VS::Field::SetLivePlatformFreezeAppearance(1));
-  CHECK(Field_isPlatformFreezeTintActive == 0);
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms);
-  Field_isPlatformFreezeTintActive = 1;
+  CHECK(VS::Field::isPlatformFreezeTintActive == 0);
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms);
+  VS::Field::isPlatformFreezeTintActive = 1;
   VS::Field::roomPalettes = nullptr;
   CHECK_FALSE(VS::Field::SetLivePlatformFreezeAppearance(0));
-  CHECK(Field_isPlatformFreezeTintActive == 1);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 1);
 }
 
 TEST_CASE("Native freeze appearance refuses a truncated environment field",
           "[platform-appearance-live][field]") {
   PlatformAppearanceLiveFixture fixture;
-  Field_MpdEnvironment environment{};
-  environment.freezeEffectId = -1;
-  Field_roomData.environment = &environment;
-  Field_roomData.header.environmentLength =
-      offsetof(Field_MpdEnvironment, freezeEffectId);
+  VS::Field::MpdEnvironment environment{};
+  environment.freeze_effect_id = -1;
+  VS::Field::roomData.environment = &environment;
+  VS::Field::roomData.header.environment_length =
+      offsetof(VS::Field::MpdEnvironment, freeze_effect_id);
   CHECK_FALSE(VS::Field::SetLivePlatformFreezeAppearance(1));
-  CHECK(Field_isPlatformFreezeTintActive == 0);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 0);
 }
 
 TEST_CASE("Freeze appearance retains its original module address",
@@ -1176,7 +1187,7 @@ TEST_CASE(
     "Native target waypoint returns hidden platform data by detached value",
     "[platform-target-waypoint-live][field]") {
   PlatformPlacementFixture fixture;
-  fixture.platforms[0].currentWaypoint = 2;
+  fixture.platforms[0].current_waypoint = 2;
   fixture.platforms[0].waypoints[2] =
       VECTOR{.vx = -4097, .vy = 8193, .vz = 12288, .pad = 17};
   const auto point = VS::Field::LiveMovingPlatformTargetWaypoint(0);
@@ -1194,7 +1205,8 @@ TEST_CASE("Native target waypoint refuses invalid indices and partial tables",
   PlatformPlacementFixture fixture;
   CHECK_FALSE(VS::Field::LiveMovingPlatformTargetWaypoint(-1).has_value());
   CHECK(VS::Field::MovingPlatformTargetWaypointEntry(2) == nullptr);
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms) - 1;
   CHECK_FALSE(VS::Field::LiveMovingPlatformTargetWaypoint(0).has_value());
   CHECK(VS::Field::MovingPlatformTargetWaypointEntry(0) == nullptr);
 }
@@ -1203,7 +1215,7 @@ TEST_CASE("Target waypoint preserves each original C record address",
           "[platform-target-waypoint-live][field]") {
   PlatformPlacementFixture fixture;
   for (std::uint8_t current = 0; current < 4; ++current) {
-    fixture.platforms[1].currentWaypoint = current;
+    fixture.platforms[1].current_waypoint = current;
     CHECK(VS::Field::MovingPlatformTargetWaypointEntry(1) ==
           &fixture.platforms[1].waypoints[current]);
   }
@@ -1362,26 +1374,26 @@ TEST_CASE(
     "byte",
     "[platform-control-live][field]") {
   PlatformPlacementFixture fixture;
-  fixture.platforms[0].motionTicks = 65535;
-  fixture.platforms[0].isWaiting = 1;
-  fixture.platforms[0].terminalWaypoint = 3;
-  Field_platformFreezeFrames = 0;
+  fixture.platforms[0].motion_ticks = 65535;
+  fixture.platforms[0].is_waiting = 1;
+  fixture.platforms[0].terminal_waypoint = 3;
+  VS::Field::platformFreezeFrames = 0;
   for (const auto control : std::array<std::int32_t, 8>{
            -1, 0, 1, 127, 128, 65535, std::numeric_limits<std::int32_t>::min(),
            std::numeric_limits<std::int32_t>::max()}) {
-    Field_platformBounceFrames[0] = 7;
+    VS::Field::platformBounceFrames[0] = 7;
     auto expected = fixture.platforms[0];
-    expected.controlState = static_cast<std::uint32_t>(control) & 127;
+    expected.control_state = static_cast<std::uint32_t>(control) & 127;
     REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, control) == 1);
     using Bytes = std::array<std::byte, sizeof(expected)>;
     CHECK(std::bit_cast<Bytes>(fixture.platforms[0]) ==
           std::bit_cast<Bytes>(expected));
-    CHECK(Field_platformBounceFrames[0] == (control >= 0 ? 0 : 7));
+    CHECK(VS::Field::platformBounceFrames[0] == (control >= 0 ? 0 : 7));
   }
-  Field_platformFreezeFrames = -1;
-  Field_platformBounceFrames[0] = 7;
+  VS::Field::platformFreezeFrames = -1;
+  VS::Field::platformBounceFrames[0] = 7;
   REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, 1) == 1);
-  CHECK(Field_platformBounceFrames[0] == 7);
+  CHECK(VS::Field::platformBounceFrames[0] == 7);
 }
 
 TEST_CASE("Native platform control and dwell refuse invalid record spans",
@@ -1390,14 +1402,16 @@ TEST_CASE("Native platform control and dwell refuse invalid record spans",
   CHECK(VS::Field::SetMovingPlatformActorEntry(-1, 1) == 0);
   CHECK(VS::Field::SetMovingPlatformActorEntry(2, 1) == 0);
   CHECK(VS::Field::MovingPlatformDwellTicksEntry(-1) == UINT32_MAX);
-  Field_roomData.header.movingPlatformsLength = sizeof fixture.platforms - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof fixture.platforms - 1;
   CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
   CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
-  Field_roomData.header.movingPlatformsLength = sizeof fixture.platforms;
-  Field_roomData.movingPlatforms = reinterpret_cast<Field_MpdMovingPlatform*>(
-      reinterpret_cast<std::byte*>(fixture.platforms.data()) + 1);
+  VS::Field::roomData.header.moving_platforms_length = sizeof fixture.platforms;
+  VS::Field::roomData.moving_platforms =
+      reinterpret_cast<VS::Field::MpdMovingPlatform*>(
+          reinterpret_cast<std::byte*>(fixture.platforms.data()) + 1);
   CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
-  Field_roomData.movingPlatforms = nullptr;
+  VS::Field::roomData.moving_platforms = nullptr;
   CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
 }
 
@@ -1406,14 +1420,14 @@ TEST_CASE(
     "halfword",
     "[platform-control-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_platformFreezeFrames = 47;
+  VS::Field::platformFreezeFrames = 47;
   VS::Field::SetMovingPlatformsPausedEntry(65535);
-  CHECK(Field_areMovingPlatformsPaused == 255);
-  CHECK(Field_platformFreezeFrames == 47);
-  fixture.platforms[0].motionTicks = 65535;
-  fixture.platforms[0].isWaiting = 1;
+  CHECK(VS::Field::areMovingPlatformsPaused == 255);
+  CHECK(VS::Field::platformFreezeFrames == 47);
+  fixture.platforms[0].motion_ticks = 65535;
+  fixture.platforms[0].is_waiting = 1;
   CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == 65535);
-  fixture.platforms[0].isWaiting = 0;
+  fixture.platforms[0].is_waiting = 0;
   CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
 }
 
@@ -1421,37 +1435,37 @@ TEST_CASE(
     "Native platform freeze uses full nonzero input then halfword duration",
     "[platform-control-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_isPlatformFreezeTintActive = 1;
-  Field_platformFreezeFrames = 47;
+  VS::Field::isPlatformFreezeTintActive = 1;
+  VS::Field::platformFreezeFrames = 47;
   REQUIRE(VS::Field::FreezeLiveMovingPlatforms(65536));
-  CHECK(Field_platformFreezeFrames == 0);
-  CHECK(Field_isPlatformFreezeTintActive == 1);
+  CHECK(VS::Field::platformFreezeFrames == 0);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 1);
   REQUIRE(VS::Field::FreezeLiveMovingPlatforms(-1));
-  CHECK(Field_platformFreezeFrames == -1);
-  Field_roomData.header.movingPlatformsLength = 0;
+  CHECK(VS::Field::platformFreezeFrames == -1);
+  VS::Field::roomData.header.moving_platforms_length = 0;
   VS::Field::FreezeMovingPlatformsEntry(180);
-  CHECK(Field_platformFreezeFrames == -1);
+  CHECK(VS::Field::platformFreezeFrames == -1);
 }
 
 TEST_CASE("Temporary room freeze native entry preserves packed platform data",
           "[platform-temporary-freeze-live][field]") {
   PlatformPlacementFixture fixture;
-  Field_isPlatformFreezeTintActive = 1;
-  Field_areMovingPlatformsPaused = 128;
-  Field_platformFreezeFrames = 47;
+  VS::Field::isPlatformFreezeTintActive = 1;
+  VS::Field::areMovingPlatformsPaused = 128;
+  VS::Field::platformFreezeFrames = 47;
   const auto before = fixture.platforms;
   VS::Field::FreezeRoomGimmicksTemporarilyEntry();
-  CHECK(Field_platformFreezeFrames == 180);
-  CHECK(Field_isPlatformFreezeTintActive == 1);
-  CHECK(Field_areMovingPlatformsPaused == 128);
+  CHECK(VS::Field::platformFreezeFrames == 180);
+  CHECK(VS::Field::isPlatformFreezeTintActive == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 128);
   using Bytes = std::array<std::byte, sizeof(fixture.platforms)>;
   CHECK(std::bit_cast<Bytes>(fixture.platforms) ==
         std::bit_cast<Bytes>(before));
-  Field_roomData.header.movingPlatformsLength = 0;
-  Field_platformFreezeFrames = 47;
+  VS::Field::roomData.header.moving_platforms_length = 0;
+  VS::Field::platformFreezeFrames = 47;
   CHECK_FALSE(VS::Field::FreezeLiveRoomGimmicksTemporarily());
   VS::Field::FreezeRoomGimmicksTemporarilyEntry();
-  CHECK(Field_platformFreezeFrames == 47);
+  CHECK(VS::Field::platformFreezeFrames == 47);
 }
 
 TEST_CASE("Temporary room freeze retains its original module address",
@@ -1467,13 +1481,13 @@ TEST_CASE("Native platform visibility changes only record and geometry bits",
           "[platform-visibility-live][field]") {
   PlatformPlacementFixture fixture;
   GeometryWords geometry{1, 0x12345678, 7, 8, 9};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   using Bytes = std::array<std::byte, sizeof(fixture.platforms)>;
   for (const auto value : {INT32_MIN, INT32_MAX, -1, 0, 1, 2, 65536}) {
     auto expected = fixture.platforms;
     const bool hidden = (static_cast<std::uint32_t>(value) & 1) == 0;
-    expected[0].isHidden = hidden;
+    expected[0].is_hidden = hidden;
     auto expected_geometry = geometry;
     expected_geometry[1] = hidden ? geometry[1] | 0x100 : geometry[1] & ~0x100;
     REQUIRE(VS::Field::SetLiveMovingPlatformVisibility(0, value));
@@ -1487,26 +1501,27 @@ TEST_CASE("Native platform visibility retains missing geometry and bounds",
           "[platform-visibility-live][field]") {
   PlatformPlacementFixture fixture;
   REQUIRE(VS::Field::SetLiveMovingPlatformVisibility(0, 1));
-  CHECK(fixture.platforms[0].isHidden == 0);
+  CHECK(fixture.platforms[0].is_hidden == 0);
   CHECK_FALSE(VS::Field::SetLiveMovingPlatformVisibility(-1, 0));
   CHECK_FALSE(VS::Field::SetLiveMovingPlatformVisibility(2, 0));
-  Field_roomData.header.movingPlatformsLength = sizeof fixture.platforms - 1;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof fixture.platforms - 1;
   CHECK_FALSE(VS::Field::SetLiveMovingPlatformVisibility(0, 0));
-  CHECK(fixture.platforms[0].isHidden == 0);
-  Field_roomData.movingPlatforms = nullptr;
+  CHECK(fixture.platforms[0].is_hidden == 0);
+  VS::Field::roomData.moving_platforms = nullptr;
   VS::Field::SetMovingPlatformVisibilityEntry(0, 0);
-  CHECK(fixture.platforms[0].isHidden == 0);
+  CHECK(fixture.platforms[0].is_hidden == 0);
 }
 
 TEST_CASE("Native platform visibility supports the fifth bounded record",
           "[platform-visibility-live][field]") {
   PlatformPlacementFixture fixture;
-  std::array<Field_MpdMovingPlatform, 5> platforms{};
-  Field_roomData.movingPlatforms = platforms.data();
-  Field_roomData.header.movingPlatformsLength = sizeof platforms;
+  std::array<VS::Field::MpdMovingPlatform, 5> platforms{};
+  VS::Field::roomData.moving_platforms = platforms.data();
+  VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
   REQUIRE(VS::Field::SetLiveMovingPlatformVisibility(4, 0));
-  CHECK(platforms[4].isHidden == 1);
-  CHECK(platforms[0].isHidden == 0);
+  CHECK(platforms[4].is_hidden == 1);
+  CHECK(platforms[0].is_hidden == 0);
 }
 
 TEST_CASE("Platform visibility retains its original module address",
@@ -1597,29 +1612,29 @@ TEST_CASE(
     "[platform-waypoint-live][field]") {
   PlatformPlacementFixture fixture;
   auto& platform = fixture.platforms[0];
-  platform.sceneObjectId = 0;
-  platform.controlState = 127;
-  platform.motionTicks = 65535;
-  platform.isWaiting = 1;
-  platform.endWaypoint = 1;
-  platform.terminalWaypoint = 2;
+  platform.scene_object_id = 0;
+  platform.control_state = 127;
+  platform.motion_ticks = 65535;
+  platform.is_waiting = 1;
+  platform.end_waypoint = 1;
+  platform.terminal_waypoint = 2;
   platform.waypoints[2] =
       VECTOR{.vx = -4097, .vy = -8191, .vz = 8193, .pad = 17};
   GeometryWords geometry{1, 0x12345678, 0, 0, 0, 7, 8, 9, 10};
-  Field_roomData.geometry = geometry.data();
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.geometry = geometry.data();
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   auto expected = platform;
-  expected.isHidden = 0;
-  expected.isWaiting = 0;
-  expected.isMovingForward = 1;
-  expected.controlState = 0;
-  expected.startWaypoint = 2;
-  expected.currentWaypoint = 3;
-  expected.currentSegment = 2;
-  expected.motionTicks = 0;
-  expected.positionX = -4097;
-  expected.positionY = -8191;
-  expected.positionZ = 8193;
+  expected.is_hidden = 0;
+  expected.is_waiting = 0;
+  expected.is_moving_forward = 1;
+  expected.control_state = 0;
+  expected.start_waypoint = 2;
+  expected.current_waypoint = 3;
+  expected.current_segment = 2;
+  expected.motion_ticks = 0;
+  expected.position_x = -4097;
+  expected.position_y = -8191;
+  expected.position_z = 8193;
   REQUIRE(VS::Field::ResetLiveMovingPlatformWaypoint(0, -1));
   using Bytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<Bytes>(platform) == std::bit_cast<Bytes>(expected));
@@ -1667,8 +1682,8 @@ TEST_CASE(
   const auto contact = VS::Field::LiveMovingPlatformPlacement(3);
   REQUIRE(contact.has_value());
   CheckAuthoredPlacement(*contact);
-  CHECK(fixture.platforms[0].isHidden == 1);
-  CHECK(fixture.platforms[1].isHidden == 1);
+  CHECK(fixture.platforms[0].is_hidden == 1);
+  CHECK(fixture.platforms[1].is_hidden == 1);
   std::array<VS::Field::PlatformContact, 4> visible{};
   CHECK(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) == 0);
   CHECK_FALSE(VS::Field::FindLiveMovingPlatformById(3).has_value());
@@ -1678,9 +1693,9 @@ TEST_CASE(
     "Visible platform placement preserves the original contact and bounce",
     "[field][platform-placement]") {
   PlatformPlacementFixture fixture;
-  fixture.platforms[1].isHidden = 0;
+  fixture.platforms[1].is_hidden = 0;
   for (int frame = 0; frame < 7; ++frame) {
-    Field_platformBounceFrames[1] = static_cast<char>(frame);
+    VS::Field::platformBounceFrames[1] = static_cast<char>(frame);
     std::array<VS::Field::PlatformContact, 4> visible{};
     REQUIRE(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) ==
             1);
@@ -1700,11 +1715,11 @@ TEST_CASE(
 TEST_CASE("Visible-platform lookup returns its contact by value",
           "[field][platform-placement]") {
   PlatformPlacementFixture fixture;
-  fixture.platforms[1].isHidden = 0;
+  fixture.platforms[1].is_hidden = 0;
   const auto contact = VS::Field::FindLiveMovingPlatformById(3);
   REQUIRE(contact.has_value());
   REQUIRE(VS::Field::LiveMovingPlatformPlacement(2).has_value());
-  fixture.platforms[1].positionX += 64 * ONE;
+  fixture.platforms[1].position_x += 64 * ONE;
   CheckAuthoredPlacement(*contact);
 }
 
@@ -1713,10 +1728,11 @@ TEST_CASE("Invalid platform placement reports no contact",
   PlatformPlacementFixture fixture;
   CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(1).has_value());
   CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(4).has_value());
-  Field_roomData.header.movingPlatformsLength = 1;
+  VS::Field::roomData.header.moving_platforms_length = 1;
   CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(3).has_value());
-  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms);
-  Field_platformBounceFrames[1] = 8;
+  VS::Field::roomData.header.moving_platforms_length =
+      sizeof(fixture.platforms);
+  VS::Field::platformBounceFrames[1] = 8;
   CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(3).has_value());
 }
 
@@ -1841,7 +1857,7 @@ TEST_CASE("Jump to a visible platform targets its contact position",
           "[field][platform-placement][issue-257]") {
   PlatformPlacementFixture fixture;
   PlatformErrorLog log;
-  fixture.platforms[1].isHidden = 0;
+  fixture.platforms[1].is_hidden = 0;
   auto actor = OnPlatform();
   actor.instance.position.vy = -600;  // the platform top is 168 above
   auto* saved = Actors_actorRecords[0];
@@ -1871,7 +1887,7 @@ TEST_CASE("Platform contact update follows and anchors a visible platform",
           "[field][platform-placement][issue-257]") {
   PlatformPlacementFixture fixture;
   PlatformErrorLog log;
-  fixture.platforms[1].isHidden = 0;
+  fixture.platforms[1].is_hidden = 0;
   auto actor = OnPlatform();
   actor.platformAnchor = {1210, -768, 440, 0};
   VS::Actors::UpdateLiveActorPlatformContact(&actor, 0);

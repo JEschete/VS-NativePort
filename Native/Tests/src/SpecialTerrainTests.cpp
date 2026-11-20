@@ -12,9 +12,9 @@
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/GameFiber.hpp"
 
@@ -30,20 +30,21 @@ struct SpecialTerrainFixture {
       VS::Battle::Ai::specialTerrainHeights;
   decltype(VS::Battle::Ai::directionDeltas) saved_directions =
       VS::Battle::Ai::directionDeltas;
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   u_short flags[32][32]{};
   u_short heights[32][32]{};
-  alignas(Field_MpdCollisionHeader) std::array<unsigned char, 4120> collision{};
+  alignas(VS::Field::MpdCollisionHeader)
+      std::array<unsigned char, 4120> collision{};
 
   SpecialTerrainFixture() {
     VS::Battle::Ai::tileFlagMap = flags;
     VS::Battle::Ai::specialTerrainHeights = heights;
-    Field_roomData = {};
-    const Field_MpdCollisionHeader header{32, 32, 16, 1024};
+    VS::Field::roomData = {};
+    const VS::Field::MpdCollisionHeader header{32, 32, 16, 1024};
     std::memcpy(collision.data(), &header, sizeof header);
-    Field_roomData.collisionMap =
-        reinterpret_cast<Field_MpdCollisionHeader*>(collision.data());
-    Field_roomData.header.collisionMapLength = collision.size();
+    VS::Field::roomData.collision_map =
+        reinterpret_cast<VS::Field::MpdCollisionHeader*>(collision.data());
+    VS::Field::roomData.header.collision_map_length = collision.size();
     constexpr std::array<int, 8> kX{0, 1, 1, 1, 0, -1, -1, -1};
     constexpr std::array<int, 8> kZ{-1, -1, 0, 1, 1, 1, 0, -1};
     for (unsigned index = 0; index < 8; ++index) {
@@ -64,7 +65,7 @@ struct SpecialTerrainFixture {
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
     std::copy(saved_directions.begin(), saved_directions.end(),
               VS::Battle::Ai::directionDeltas.begin());
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
   }
 };
 }  // namespace

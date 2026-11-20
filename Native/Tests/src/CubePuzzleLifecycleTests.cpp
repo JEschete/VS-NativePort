@@ -18,9 +18,9 @@
 #include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
@@ -586,8 +586,8 @@ struct LiveReadFixture {
       VS::Content::discRequestSlots;
   VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
   VS::Content::DiscDrive saved_drive = VS::Content::discDriveState;
-  VS::Field::MapScene* saved_scene = Field_roomData.minimapScene;
-  u_int saved_scene_length = Field_roomData.header.minimapSceneLength;
+  VS::Field::MapScene* saved_scene = VS::Field::roomData.minimap_scene;
+  u_int saved_scene_length = VS::Field::roomData.header.minimap_scene_length;
   RECT images{r::kCubePuzzleImageX, r::kCubePuzzleImageY, kImageAreaWidth,
               r::kCubePuzzleImageRows};
   std::vector<std::uint16_t> saved_vram =
@@ -605,8 +605,8 @@ struct LiveReadFixture {
   }
   ~LiveReadFixture() {
     LoadImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
-    Field_roomData.minimapScene = saved_scene;
-    Field_roomData.header.minimapSceneLength = saved_scene_length;
+    VS::Field::roomData.minimap_scene = saved_scene;
+    VS::Field::roomData.header.minimap_scene_length = saved_scene_length;
     std::ranges::copy(saved_slots, std::begin(VS::Content::discRequestSlots));
     VS::Content::discRequestCounts = saved_counts;
     VS::Content::discDriveState = saved_drive;
@@ -620,9 +620,9 @@ struct LiveReadFixture {
   void UseRoom(std::int16_t zone_id, std::int16_t map_id) {
     scene[3] = static_cast<std::uint16_t>(zone_id) |
                (std::uint32_t{static_cast<std::uint16_t>(map_id)} << 16);
-    Field_roomData.minimapScene =
+    VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(scene.data());
-    Field_roomData.header.minimapSceneLength = sizeof scene;
+    VS::Field::roomData.header.minimap_scene_length = sizeof scene;
   }
   // The one request the initializer queued.
   [[nodiscard]] static VS::Content::DiscQueueSlot* Pending() {

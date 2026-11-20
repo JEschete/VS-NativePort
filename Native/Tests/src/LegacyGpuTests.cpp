@@ -11,7 +11,7 @@
 
 #include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Render/LibGpu.h"
@@ -284,33 +284,33 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   VS::Render::SetRoomPolygonNearClip(room_clip, 8);
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
-  const auto saved_room = Field_roomData;
+  const auto saved_room = VS::Field::roomData;
   const auto saved_tint = VS::Field::roomTint;
   const auto saved_mode = VS::Field::roomGeometryDrawMode;
-  const auto saved_start = Field_roomPrimitiveRangeStart;
-  const auto saved_end = Field_roomPrimitiveRangeEnd;
+  const auto saved_start = VS::Field::roomPrimitiveRangeStart;
+  const auto saved_end = VS::Field::roomPrimitiveRangeEnd;
   const auto saved_field_view = frame->view_matrix;
   for (int axis = 0; axis < 3; ++axis) {
     frame->view_matrix.m[axis][axis] = 4096;
   }
   frame->view_matrix.t[2] = 1024;
-  Field_roomData.header.geometryLength = sizeof geometry;
+  VS::Field::roomData.header.geometry_length = sizeof geometry;
   VS::Field::roomGeometryDrawMode = 0;
   VS::Render::ColorCode tint{1, 2, 3, 0};
   VS::Field::LiveSetRoomTint(&tint, 0);
   StoreGroup(geometry, 0, group);
   VS::Field::LiveDrawRoomGeometry(&geometry);
   auto* tinted = reinterpret_cast<POLY_GT3*>(buffer);
-  CHECK(Field_roomPrimitiveRangeStart == buffer);
-  CHECK(Field_roomPrimitiveRangeEnd == buffer + sizeof(POLY_GT3));
+  CHECK(VS::Field::roomPrimitiveRangeStart == buffer);
+  CHECK(VS::Field::roomPrimitiveRangeEnd == buffer + sizeof(POLY_GT3));
   CHECK(tinted->r0 == 132);
   CHECK(tinted->g1 == 136);
   CHECK(tinted->b2 == 140);
-  Field_roomData = saved_room;
+  VS::Field::roomData = saved_room;
   VS::Field::roomTint = saved_tint;
   VS::Field::roomGeometryDrawMode = saved_mode;
-  Field_roomPrimitiveRangeStart = saved_start;
-  Field_roomPrimitiveRangeEnd = saved_end;
+  VS::Field::roomPrimitiveRangeStart = saved_start;
+  VS::Field::roomPrimitiveRangeEnd = saved_end;
   frame->view_matrix = saved_field_view;
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   frame->primitive_cursor = buffer;

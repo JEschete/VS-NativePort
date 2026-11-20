@@ -11,7 +11,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 
 namespace {
@@ -19,7 +19,7 @@ constexpr std::size_t kLongTableRows = 16;
 constexpr std::size_t kTiltTableRows = 12;
 constexpr std::size_t kBounceTableRows = 4;
 constexpr std::uint8_t kBreakingMotionState = 12;
-using Record = Field_GimmickInstance;
+using Record = VS::Field::GimmickInstance;
 
 std::int8_t SignedByte(std::uint8_t value) {
   return std::bit_cast<std::int8_t>(value);
@@ -33,24 +33,25 @@ struct LiveReactionTables {
   std::array<VS::Field::GimmickSquashFrame, kLongTableRows> squash{};
   LiveReactionTables() {
     for (std::size_t frame = 0; frame < kLongTableRows; ++frame) {
-      spin[frame] = {SignedByte(Field_kGimmickSpinHeightSteps[frame]),
-                     SignedByte(Field_kGimmickSpinPitchSteps[frame]),
-                     SignedByte(Field_kGimmickSpinYawSteps[frame]),
-                     SignedByte(Field_kGimmickSpinRollSteps[frame])};
-      roll[frame] = {SignedByte(Field_kGimmickRollHeightSteps[frame]),
-                     SignedByte(Field_kGimmickRollDisplacementSteps[frame]),
-                     Field_kGimmickRollAngleSteps[frame]};
-      squash[frame] = {SignedByte(Field_kGimmickSquashHeightSteps[frame]),
-                       {SignedByte(Field_kGimmickSquashScaleX[frame]),
-                        SignedByte(Field_kGimmickSquashScaleY[frame]),
-                        SignedByte(Field_kGimmickSquashScaleZ[frame])}};
+      spin[frame] = {SignedByte(VS::Field::kGimmickSpinHeightSteps[frame]),
+                     SignedByte(VS::Field::kGimmickSpinPitchSteps[frame]),
+                     SignedByte(VS::Field::kGimmickSpinYawSteps[frame]),
+                     SignedByte(VS::Field::kGimmickSpinRollSteps[frame])};
+      roll[frame] = {
+          SignedByte(VS::Field::kGimmickRollHeightSteps[frame]),
+          SignedByte(VS::Field::kGimmickRollDisplacementSteps[frame]),
+          VS::Field::kGimmickRollAngleSteps[frame]};
+      squash[frame] = {SignedByte(VS::Field::kGimmickSquashHeightSteps[frame]),
+                       {SignedByte(VS::Field::kGimmickSquashScaleX[frame]),
+                        SignedByte(VS::Field::kGimmickSquashScaleY[frame]),
+                        SignedByte(VS::Field::kGimmickSquashScaleZ[frame])}};
     }
     for (std::size_t frame = 0; frame < kTiltTableRows; ++frame) {
-      tilt[frame] = {SignedByte(Field_kGimmickTiltDepthSteps[frame]),
-                     SignedByte(Field_kGimmickTiltAngleSteps[frame])};
+      tilt[frame] = {SignedByte(VS::Field::kGimmickTiltDepthSteps[frame]),
+                     SignedByte(VS::Field::kGimmickTiltAngleSteps[frame])};
     }
     for (std::size_t frame = 0; frame < kBounceTableRows; ++frame) {
-      bounce[frame] = SignedByte(Field_kGimmickBounceHeightSteps[frame]);
+      bounce[frame] = SignedByte(VS::Field::kGimmickBounceHeightSteps[frame]);
     }
   }
   VS::Field::GimmickReactionTables View() const {
@@ -63,9 +64,9 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   explicit LiveReactionHost(Record* record)
       : record_(record),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    for (std::size_t slot = 0; slot < std::size(Field_gimmickInstances);
+    for (std::size_t slot = 0; slot < std::size(VS::Field::gimmickInstances);
          ++slot) {
-      if (Field_gimmickInstances[slot] == record_) {
+      if (VS::Field::gimmickInstances[slot] == record_) {
         table_slot_ = slot;
         break;
       }
@@ -74,31 +75,31 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   std::optional<VS::Field::GimmickReactionState> State() override {
     if (!Valid()) return std::nullopt;
     return VS::Field::GimmickReactionState{
-        record_->objectInfo.supportIndex,
+        record_->object_info.support_index,
         record_->slot,
-        record_->objectInfo.material,
+        record_->object_info.material,
         record_->mode,
         record_->orientation,
-        {record_->positionX, record_->positionY, record_->positionZ},
-        {record_->rotationX, VS::Core::Math::WrapSigned16(record_->rotationY),
-         VS::Core::Math::WrapSigned16(record_->rotationZ)},
-        {record_->scaleX, record_->scaleY, record_->scaleZ},
-        record_->velocityY};
+        {record_->position_x, record_->position_y, record_->position_z},
+        {record_->rotation_x, VS::Core::Math::WrapSigned16(record_->rotation_y),
+         VS::Core::Math::WrapSigned16(record_->rotation_z)},
+        {record_->scale_x, record_->scale_y, record_->scale_z},
+        record_->velocity_y};
   }
   bool Store(const VS::Field::GimmickReactionState& state) override {
     if (!Valid()) return false;
-    record_->objectInfo.supportIndex = state.frame;
+    record_->object_info.support_index = state.frame;
     record_->mode = state.mode;
-    record_->positionX = state.position[0];
-    record_->positionY = state.position[1];
-    record_->positionZ = state.position[2];
-    record_->rotationX = state.rotation[0];
-    record_->rotationY = static_cast<std::uint16_t>(state.rotation[1]);
-    record_->rotationZ = static_cast<std::uint16_t>(state.rotation[2]);
-    record_->scaleX = state.scale[0];
-    record_->scaleY = state.scale[1];
-    record_->scaleZ = state.scale[2];
-    record_->velocityY = state.vertical_delta;
+    record_->position_x = state.position[0];
+    record_->position_y = state.position[1];
+    record_->position_z = state.position[2];
+    record_->rotation_x = state.rotation[0];
+    record_->rotation_y = static_cast<std::uint16_t>(state.rotation[1]);
+    record_->rotation_z = static_cast<std::uint16_t>(state.rotation[2]);
+    record_->scale_x = state.scale[0];
+    record_->scale_y = state.scale[1];
+    record_->scale_z = state.scale[2];
+    record_->velocity_y = state.vertical_delta;
     return true;
   }
   bool ResetOrientation(std::uint8_t slot, std::uint8_t material) override {
@@ -108,11 +109,11 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   }
   bool BeginBreaking() override {
     if (!Valid()) return false;
-    static_assert(sizeof(record_->basePalette) ==
-                  sizeof(record_->pulsedPalette));
-    std::memcpy(record_->pulsedPalette, record_->basePalette,
-                sizeof(record_->pulsedPalette));
-    record_->motionState = kBreakingMotionState;
+    static_assert(sizeof(record_->base_palette) ==
+                  sizeof(record_->pulsed_palette));
+    std::memcpy(record_->pulsed_palette.data(), record_->base_palette.data(),
+                sizeof(record_->pulsed_palette));
+    record_->motion_state = kBreakingMotionState;
     return true;
   }
   bool Release(std::uint8_t slot) override {
@@ -121,8 +122,8 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
     if (!SameRoom() || !VS::Field::IsLiveGimmickPrefixReadable(record_)) {
       return false;
     }
-    if (table_slot_ && Field_gimmickInstances[*table_slot_] != nullptr &&
-        Field_gimmickInstances[*table_slot_] != record_) {
+    if (table_slot_ && VS::Field::gimmickInstances[*table_slot_] != nullptr &&
+        VS::Field::gimmickInstances[*table_slot_] != record_) {
       return false;
     }
     record_->mode = 0;
@@ -135,7 +136,8 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
   }
   bool Valid() const {
     return SameRoom() && VS::Field::IsLiveGimmickPrefixReadable(record_) &&
-           (!table_slot_ || Field_gimmickInstances[*table_slot_] == record_);
+           (!table_slot_ ||
+            VS::Field::gimmickInstances[*table_slot_] == record_);
   }
   Record* record_;
   std::uint64_t generation_;
@@ -145,7 +147,7 @@ class LiveReactionHost final : public VS::Field::GimmickReactionHost {
 
 namespace VS::Field {
 GimmickReactionResult UpdateLiveGimmickReactionAnimation(
-    Field_GimmickInstance* record) {
+    VS::Field::GimmickInstance* record) {
   LiveReactionTables tables;
   LiveReactionHost host(record);
   return UpdateGimmickReactionAnimation(tables.View(), host);
@@ -153,7 +155,7 @@ GimmickReactionResult UpdateLiveGimmickReactionAnimation(
 }  // namespace VS::Field
 
 int VS::Field::UpdateGimmickReactionAnimationEntry(
-    Field_GimmickInstance* record) {
+    VS::Field::GimmickInstance* record) {
   const auto result = VS::Field::UpdateLiveGimmickReactionAnimation(record);
   return result == VS::Field::GimmickReactionResult::kComplete ? 0 : 1;
 }

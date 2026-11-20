@@ -84,7 +84,7 @@ void MarkCurrentRoomVisited(RoomVisitState& state, RoomVisitHost& host);
 // decomp: BATTLE.PRG func_8007C4D4 (146C.c:8803)
 void CancelPendingRoomVisit(RoomVisitState& state);
 
-// The loaded room's display (Field_roomData isLoaded, displayFlag and
+// The loaded room's display (VS::Field::roomData isLoaded, displayFlag and
 // roomIndex).
 inline constexpr int kPrimaryRoomOwner = 0;
 

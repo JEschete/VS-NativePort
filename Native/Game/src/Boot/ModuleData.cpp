@@ -103,8 +103,8 @@
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/Collision.hpp"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
 #include "Field/Locations.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/TriggerMarkers.hpp"
@@ -223,18 +223,18 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FC98, sizeof Battle_targetingRiskTimer,
      &Battle_targetingRiskTimer,
      sizeof Battle_targetingRiskTimer},  // G00035 D_800E8498
-    {"BATTLE/BATTLE.PRG", 0x7FC9C, sizeof Field_lockedDoorIndexRanges,
-     &Field_lockedDoorIndexRanges,
-     sizeof Field_lockedDoorIndexRanges},  // G00036 D_800E849C
-    {"BATTLE/BATTLE.PRG", 0x7FCAC, sizeof Field_lockedDoorRoomPairs,
-     &Field_lockedDoorRoomPairs,
-     sizeof Field_lockedDoorRoomPairs},  // G00037 D_800E84AC
+    {"BATTLE/BATTLE.PRG", 0x7FC9C, sizeof VS::Field::lockedDoorIndexRanges,
+     &VS::Field::lockedDoorIndexRanges,
+     sizeof VS::Field::lockedDoorIndexRanges},  // G00036 D_800E849C
+    {"BATTLE/BATTLE.PRG", 0x7FCAC, sizeof VS::Field::lockedDoorRoomPairs,
+     &VS::Field::lockedDoorRoomPairs,
+     sizeof VS::Field::lockedDoorRoomPairs},  // G00037 D_800E84AC
     {"BATTLE/BATTLE.PRG", 0x7FD08, sizeof VS::Field::countableRoomMask,
      &VS::Field::countableRoomMask,
      sizeof VS::Field::countableRoomMask},  // G00038 vs_battle_mapCompletionFlags
-    {"BATTLE/BATTLE.PRG", 0x7FDA0, sizeof Field_triggerMarkerRecordTail,
-     &Field_triggerMarkerRecordTail,
-     sizeof Field_triggerMarkerRecordTail},  // G00041 D_800E85A0
+    {"BATTLE/BATTLE.PRG", 0x7FDA0, sizeof VS::Field::triggerMarkerRecordTail,
+     &VS::Field::triggerMarkerRecordTail,
+     sizeof VS::Field::triggerMarkerRecordTail},  // G00041 D_800E85A0
     {"BATTLE/BATTLE.PRG", 0x7FDBC, sizeof VS::Field::triggerMarkerTextureSource,
      &VS::Field::triggerMarkerTextureSource,
      sizeof VS::Field::triggerMarkerTextureSource},  // G00042 D_800E85BC
@@ -320,9 +320,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80790, sizeof VS::Actors::textureSlotRowOffsets,
      VS::Actors::textureSlotRowOffsets.data(),
      sizeof VS::Actors::textureSlotRowOffsets},  // G00070 D_800E8F90
-    {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters,
-     &Field_gimmickPaletteParameters,
-     sizeof Field_gimmickPaletteParameters},  // G00071 D_800E8FA8
+    {"BATTLE/BATTLE.PRG", 0x807A8, sizeof VS::Field::gimmickPaletteParameters,
+     &VS::Field::gimmickPaletteParameters,
+     sizeof VS::Field::gimmickPaletteParameters},  // G00071 D_800E8FA8
     {"BATTLE/BATTLE.PRG", 0x807C0, sizeof VS::Actors::forcedModelOverrides,
      &VS::Actors::forcedModelOverrides,
      sizeof VS::Actors::forcedModelOverrides},  // G00073 D_800E8FC0
@@ -331,21 +331,21 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Items::weaponMaterialPaletteIndices,
      sizeof VS::Items::
          weaponMaterialPaletteIndices},  // G00075 _weaponMaterialPaletteMap
-    {"BATTLE/BATTLE.PRG", 0x807D0, sizeof Field_kGimmickRollOrientations,
-     &Field_kGimmickRollOrientations,
-     sizeof Field_kGimmickRollOrientations},  // G00076 D_800E8FD0
-    {"BATTLE/BATTLE.PRG", 0x80830, sizeof Field_kGimmickOrientationRotations,
-     &Field_kGimmickOrientationRotations,
-     sizeof Field_kGimmickOrientationRotations},  // G00077 D_800E9030
+    {"BATTLE/BATTLE.PRG", 0x807D0, sizeof VS::Field::kGimmickRollOrientations,
+     &VS::Field::kGimmickRollOrientations,
+     sizeof VS::Field::kGimmickRollOrientations},  // G00076 D_800E8FD0
+    {"BATTLE/BATTLE.PRG", 0x80830, sizeof VS::Field::kGimmickOrientationRotations,
+     &VS::Field::kGimmickOrientationRotations,
+     sizeof VS::Field::kGimmickOrientationRotations},  // G00077 D_800E9030
     {"BATTLE/BATTLE.PRG", 0x80890, sizeof VS::Actors::drawnWeaponAnimationBases,
      &VS::Actors::drawnWeaponAnimationBases,
      sizeof VS::Actors::drawnWeaponAnimationBases},  // G00078 D_800E9090
     {"BATTLE/BATTLE.PRG", 0x8089C, sizeof VS::Actors::sheathedWeaponAnimationBases,
      &VS::Actors::sheathedWeaponAnimationBases,
      sizeof VS::Actors::sheathedWeaponAnimationBases},  // G00079 D_800E909C
-    {"BATTLE/BATTLE.PRG", 0x808A8, sizeof Field_interactingGimmickId,
-     &Field_interactingGimmickId,
-     sizeof Field_interactingGimmickId},  // G00080 D_800E90A8
+    {"BATTLE/BATTLE.PRG", 0x808A8, sizeof VS::Field::interactingGimmickId,
+     &VS::Field::interactingGimmickId,
+     sizeof VS::Field::interactingGimmickId},  // G00080 D_800E90A8
     {"BATTLE/BATTLE.PRG", 0x808AC, sizeof Actors_kJumpHangFrames,
      &Actors_kJumpHangFrames,
      sizeof Actors_kJumpHangFrames},  // G00081 D_800E90AC
@@ -370,54 +370,54 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x8096C, sizeof VS::Actors::secondarySlotSequences,
      &VS::Actors::secondarySlotSequences,
      sizeof VS::Actors::secondarySlotSequences},  // G00089 D_800E916C
-    {"BATTLE/BATTLE.PRG", 0x8099C, sizeof Field_gimmickTemplateIndices,
-     &Field_gimmickTemplateIndices,
-     sizeof Field_gimmickTemplateIndices},  // G00090 D_800E919C
+    {"BATTLE/BATTLE.PRG", 0x8099C, sizeof VS::Field::gimmickTemplateIndices,
+     &VS::Field::gimmickTemplateIndices,
+     sizeof VS::Field::gimmickTemplateIndices},  // G00090 D_800E919C
     {"BATTLE/BATTLE.PRG", 0x809A4, sizeof VS::Audio::objectSurfaceSoundIds,
      &VS::Audio::objectSurfaceSoundIds,
      sizeof VS::Audio::objectSurfaceSoundIds},  // G00091 D_800E91A4
-    {"BATTLE/BATTLE.PRG", 0x809AC, sizeof Field_kGimmickSpinHeightSteps,
-     &Field_kGimmickSpinHeightSteps,
-     sizeof Field_kGimmickSpinHeightSteps},  // G00092 D_800E91AC
-    {"BATTLE/BATTLE.PRG", 0x809BC, sizeof Field_kGimmickSpinPitchSteps,
-     &Field_kGimmickSpinPitchSteps,
-     sizeof Field_kGimmickSpinPitchSteps},  // G00093 D_800E91BC
-    {"BATTLE/BATTLE.PRG", 0x809CC, sizeof Field_kGimmickSpinYawSteps,
-     &Field_kGimmickSpinYawSteps,
-     sizeof Field_kGimmickSpinYawSteps},  // G00094 D_800E91CC
-    {"BATTLE/BATTLE.PRG", 0x809DC, sizeof Field_kGimmickSpinRollSteps,
-     &Field_kGimmickSpinRollSteps,
-     sizeof Field_kGimmickSpinRollSteps},  // G00095 D_800E91DC
-    {"BATTLE/BATTLE.PRG", 0x809EC, sizeof Field_kGimmickBounceHeightSteps,
-     &Field_kGimmickBounceHeightSteps,
-     sizeof Field_kGimmickBounceHeightSteps},  // G00096 D_800E91EC
-    {"BATTLE/BATTLE.PRG", 0x809F0, sizeof Field_kGimmickTiltDepthSteps,
-     &Field_kGimmickTiltDepthSteps,
-     sizeof Field_kGimmickTiltDepthSteps},  // G00097 D_800E91F0
-    {"BATTLE/BATTLE.PRG", 0x809FC, sizeof Field_kGimmickTiltAngleSteps,
-     &Field_kGimmickTiltAngleSteps,
-     sizeof Field_kGimmickTiltAngleSteps},  // G00098 D_800E91FC
-    {"BATTLE/BATTLE.PRG", 0x80A08, sizeof Field_kGimmickRollHeightSteps,
-     &Field_kGimmickRollHeightSteps,
-     sizeof Field_kGimmickRollHeightSteps},  // G00099 D_800E9208
-    {"BATTLE/BATTLE.PRG", 0x80A18, sizeof Field_kGimmickRollDisplacementSteps,
-     &Field_kGimmickRollDisplacementSteps,
-     sizeof Field_kGimmickRollDisplacementSteps},  // G00100 D_800E9218
-    {"BATTLE/BATTLE.PRG", 0x80A28, sizeof Field_kGimmickRollAngleSteps,
-     &Field_kGimmickRollAngleSteps,
-     sizeof Field_kGimmickRollAngleSteps},  // G00101 D_800E9228
-    {"BATTLE/BATTLE.PRG", 0x80A38, sizeof Field_kGimmickSquashHeightSteps,
-     &Field_kGimmickSquashHeightSteps,
-     sizeof Field_kGimmickSquashHeightSteps},  // G00102 D_800E9238
-    {"BATTLE/BATTLE.PRG", 0x80A48, sizeof Field_kGimmickSquashScaleX,
-     &Field_kGimmickSquashScaleX,
-     sizeof Field_kGimmickSquashScaleX},  // G00103 D_800E9248
-    {"BATTLE/BATTLE.PRG", 0x80A58, sizeof Field_kGimmickSquashScaleY,
-     &Field_kGimmickSquashScaleY,
-     sizeof Field_kGimmickSquashScaleY},  // G00104 D_800E9258
-    {"BATTLE/BATTLE.PRG", 0x80A68, sizeof Field_kGimmickSquashScaleZ,
-     &Field_kGimmickSquashScaleZ,
-     sizeof Field_kGimmickSquashScaleZ},  // G00105 D_800E9268
+    {"BATTLE/BATTLE.PRG", 0x809AC, sizeof VS::Field::kGimmickSpinHeightSteps,
+     &VS::Field::kGimmickSpinHeightSteps,
+     sizeof VS::Field::kGimmickSpinHeightSteps},  // G00092 D_800E91AC
+    {"BATTLE/BATTLE.PRG", 0x809BC, sizeof VS::Field::kGimmickSpinPitchSteps,
+     &VS::Field::kGimmickSpinPitchSteps,
+     sizeof VS::Field::kGimmickSpinPitchSteps},  // G00093 D_800E91BC
+    {"BATTLE/BATTLE.PRG", 0x809CC, sizeof VS::Field::kGimmickSpinYawSteps,
+     &VS::Field::kGimmickSpinYawSteps,
+     sizeof VS::Field::kGimmickSpinYawSteps},  // G00094 D_800E91CC
+    {"BATTLE/BATTLE.PRG", 0x809DC, sizeof VS::Field::kGimmickSpinRollSteps,
+     &VS::Field::kGimmickSpinRollSteps,
+     sizeof VS::Field::kGimmickSpinRollSteps},  // G00095 D_800E91DC
+    {"BATTLE/BATTLE.PRG", 0x809EC, sizeof VS::Field::kGimmickBounceHeightSteps,
+     &VS::Field::kGimmickBounceHeightSteps,
+     sizeof VS::Field::kGimmickBounceHeightSteps},  // G00096 D_800E91EC
+    {"BATTLE/BATTLE.PRG", 0x809F0, sizeof VS::Field::kGimmickTiltDepthSteps,
+     &VS::Field::kGimmickTiltDepthSteps,
+     sizeof VS::Field::kGimmickTiltDepthSteps},  // G00097 D_800E91F0
+    {"BATTLE/BATTLE.PRG", 0x809FC, sizeof VS::Field::kGimmickTiltAngleSteps,
+     &VS::Field::kGimmickTiltAngleSteps,
+     sizeof VS::Field::kGimmickTiltAngleSteps},  // G00098 D_800E91FC
+    {"BATTLE/BATTLE.PRG", 0x80A08, sizeof VS::Field::kGimmickRollHeightSteps,
+     &VS::Field::kGimmickRollHeightSteps,
+     sizeof VS::Field::kGimmickRollHeightSteps},  // G00099 D_800E9208
+    {"BATTLE/BATTLE.PRG", 0x80A18, sizeof VS::Field::kGimmickRollDisplacementSteps,
+     &VS::Field::kGimmickRollDisplacementSteps,
+     sizeof VS::Field::kGimmickRollDisplacementSteps},  // G00100 D_800E9218
+    {"BATTLE/BATTLE.PRG", 0x80A28, sizeof VS::Field::kGimmickRollAngleSteps,
+     &VS::Field::kGimmickRollAngleSteps,
+     sizeof VS::Field::kGimmickRollAngleSteps},  // G00101 D_800E9228
+    {"BATTLE/BATTLE.PRG", 0x80A38, sizeof VS::Field::kGimmickSquashHeightSteps,
+     &VS::Field::kGimmickSquashHeightSteps,
+     sizeof VS::Field::kGimmickSquashHeightSteps},  // G00102 D_800E9238
+    {"BATTLE/BATTLE.PRG", 0x80A48, sizeof VS::Field::kGimmickSquashScaleX,
+     &VS::Field::kGimmickSquashScaleX,
+     sizeof VS::Field::kGimmickSquashScaleX},  // G00103 D_800E9248
+    {"BATTLE/BATTLE.PRG", 0x80A58, sizeof VS::Field::kGimmickSquashScaleY,
+     &VS::Field::kGimmickSquashScaleY,
+     sizeof VS::Field::kGimmickSquashScaleY},  // G00104 D_800E9258
+    {"BATTLE/BATTLE.PRG", 0x80A68, sizeof VS::Field::kGimmickSquashScaleZ,
+     &VS::Field::kGimmickSquashScaleZ,
+     sizeof VS::Field::kGimmickSquashScaleZ},  // G00105 D_800E9268
     {"BATTLE/BATTLE.PRG", 0x80A78, sizeof VS::Field::tileSurfaceIds,
      &VS::Field::tileSurfaceIds,
      sizeof VS::Field::tileSurfaceIds},  // G00106 D_800E9278

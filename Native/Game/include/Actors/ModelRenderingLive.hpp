@@ -8,7 +8,9 @@ struct Actors_ActorRecord;
 namespace VS::Actors {
 struct WeaponModel;
 }
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickInstance;
+}
 
 // Live binding for the room model pass and the model transforms
 // (ModelRendering.cpp): the actor, weapon and gimmick tables, the model
@@ -30,7 +32,7 @@ void UpdateAndDrawLiveRoomActors(MATRIX* camera);
 void TransformLiveActorRootOffset(Actors_ActorRecord* actor);
 // func_800B1A68: places the gimmick centered at the workspace rootOffset and
 // draws it. A held gimmick whose holder slot is empty is refused.
-void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera);
+void DrawLiveGimmickModel(VS::Field::GimmickInstance* object, MATRIX* camera);
 // func_800B217C: fades the weapon, builds its bone chain from `source` and
 // draws it.
 void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source);

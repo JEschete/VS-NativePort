@@ -30,7 +30,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -1272,15 +1272,16 @@ struct LiveStateFixture {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
 
   LiveStateFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
     std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(), 0);
   }
   LiveStateFixture(const LiveStateFixture&) = delete;
@@ -1291,7 +1292,7 @@ struct LiveStateFixture {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_records, Actors_actorRecords);
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
-    std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
+    std::ranges::copy(saved_gimmicks, VS::Field::gimmickInstances.begin());
     std::ranges::copy(saved_markers, VS::Battle::actorMarkers.begin());
   }
 };
@@ -1408,14 +1409,14 @@ TEST_CASE("Live placement writes the tile, position and facing",
 
 TEST_CASE("Live placement falls back to a slot gimmick", "[actors-state]") {
   const LiveStateFixture fixture;
-  Field_GimmickInstance gimmick{};
-  gimmick.tileX = 1;
-  gimmick.tileZ = 2;
-  gimmick.positionX = 4;
-  gimmick.positionY = 5;
-  gimmick.positionZ = 6;
-  gimmick.rotationY = 0x100;
-  Field_gimmickInstances[4] = &gimmick;
+  VS::Field::GimmickInstance gimmick{};
+  gimmick.tile_x = 1;
+  gimmick.tile_z = 2;
+  gimmick.position_x = 4;
+  gimmick.position_y = 5;
+  gimmick.position_z = 6;
+  gimmick.rotation_y = 0x100;
+  VS::Field::gimmickInstances[4] = &gimmick;
   VS::Actors::ActorLocation location{};
   CHECK(VS::Actors::LiveActorPlacement(4, &location) == 0);
   CHECK(location.packed_tile.word == 0x00020001);

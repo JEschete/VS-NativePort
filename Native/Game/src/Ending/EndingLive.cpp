@@ -34,8 +34,7 @@
 #include "Ending/Credits/StaffRoll.hpp"
 #include "Ending/Credits/StaffRollCore.hpp"
 #include "Ending/Results.hpp"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -509,8 +508,8 @@ ClearProgress LoadProgress() {
       .score = LoadScore(),
       .flags = LoadFlags(),
       .save_count = VS::Input::settings.current_game_save_count,
-      .entry_zone = VS::State::savedEntryDoor.destinationZoneId,
-      .entry_room = VS::State::savedEntryDoor.destinationRoomId};
+      .entry_zone = VS::State::savedEntryDoor.destination_zone_id,
+      .entry_room = VS::State::savedEntryDoor.destination_room_id};
   static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
                 kRoomFlagWords);
   std::ranges::transform(
@@ -539,8 +538,8 @@ void StoreProgress(const ClearProgress& progress) {
   flags.difficulty = static_cast<char>(progress.flags.difficulty);
   flags.normal_mode_cleared =
       static_cast<char>(progress.flags.normal_mode_cleared);
-  VS::State::savedEntryDoor.destinationZoneId = progress.entry_zone;
-  VS::State::savedEntryDoor.destinationRoomId = progress.entry_room;
+  VS::State::savedEntryDoor.destination_zone_id = progress.entry_zone;
+  VS::State::savedEntryDoor.destination_room_id = progress.entry_room;
 }
 
 class LiveProgressHost final : public ProgressHost {

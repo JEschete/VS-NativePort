@@ -551,7 +551,7 @@ int func_800F9800(void) {
             "host.StartActorEffect(effect, actor);\n  return ScriptStep::kAdvance;"))
         live = (root / r"Native\Game\src\Event\ScriptEffectCommandsLive.cpp").read_text(encoding="utf-8")
         self.assertRegex(live, r"\.occupied = Actors_actorRecords\[actor\] != nullptr \|\|\s+"
-                               r"Field_gimmickInstances\[actor\] != nullptr")
+                               r"VS::Field::gimmickInstances\[actor\] != nullptr")
         self.assertNotIn("Deferred", handler + live)
         self.assertNotIn("Deferred", "".join(copy_fixups.NATIVE_HELPER_HEADERS))
 
@@ -584,13 +584,13 @@ int func_800F9800(void) {
         self.assertNotIn("F00668", copy_fixups.OWNED_CALL_BINDINGS)
 
     def test_scripted_fall_door_initializes_unassigned_fields(self):
-        source = "    Field_MpdDoorRecord destination;\n"
+        source = "    VS::Field::MpdDoorRecord destination;\n"
         edits = [edit for edit in copy_fixups.FIXES["F00158"] if "#323" in edit[2]]
         self.assertEqual(len(edits), 1)
         for old, new, _ in edits:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertEqual(source, "    Field_MpdDoorRecord destination{};\n")
+        self.assertEqual(source, "    VS::Field::MpdDoorRecord destination{};\n")
 
     def test_trap_tile_effect_is_owned_instead_of_patched(self):
         # #324's zero-initialization FIX retired when row 39 moved F00086 to the typed
@@ -604,14 +604,14 @@ int func_800F9800(void) {
             r"Native\Game\include\Field\CollisionMapLive.hpp",
         )
         sources = {
-            "F00158": "    Field_MpdTileCell* tile;\n"
+            "F00158": "    VS::Field::MpdTileCell* tile;\n"
                       "        tile = VS::Field::LiveCollisionCellAt(0, 0, floorOverride >> 16);\n"
                       "        tile = VS::Field::LiveCollisionCellAt(position[0],\n",
-            "F00159": "    Field_MpdTileCell* temp_s4;\n"
+            "F00159": "    VS::Field::MpdTileCell* temp_s4;\n"
                       "        temp_s4 = VS::Field::LiveCollisionCellAt(0, 0, temp_a2 >> 0x10);\n"
                       "        temp_s4 = VS::Field::LiveCollisionCellAt(arg1->packedTile.target.tileX,\n",
             "F00547": "    if ((VS::Field::LiveCollisionCellAt(var_a0, var_a1, var_a2)->hasRoomTrigger & 1)\n",
-            "F00596": "        Field_MpdTileCell* cell;\n"
+            "F00596": "        VS::Field::MpdTileCell* cell;\n"
                       "        cell = VS::Field::LiveCollisionCellAt(object->positionX / (ONE * 128), "
                       "object->positionZ / (ONE * 128), 0);\n",
         }
@@ -625,7 +625,7 @@ int func_800F9800(void) {
                     source = source.replace(old, new)
                 self.assertNotIn("LiveCollisionCellAt(", source)
                 self.assertIn("VS::Field::LiveCollisionCellOrAbsent(", source)
-                self.assertNotRegex(source, r"(?<!const )Field_MpdTileCell\*")
+                self.assertNotRegex(source, r"(?<!const )VS::Field::MpdTileCell\*")
 
     def test_action_plan_selection_counts_start_at_zero(self):
         source = (copy_to_native.REPO / r"Native\Game\src\Battle\Ai\PlanningWorkspace.cpp").read_text(
@@ -647,15 +647,15 @@ int func_800F9800(void) {
 
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
-            "Field_gimmickInstances[i] = NULL;\n"
-            "value = Field_gimmickInstances[actor_id];\n"
-            "if (Field_gimmickInstances[actor_id] == NULL) return -1;"
+            "VS::Field::gimmickInstances[i] = NULL;\n"
+            "value = VS::Field::gimmickInstances[actor_id];\n"
+            "if (VS::Field::gimmickInstances[actor_id] == NULL) return -1;"
         )
         matches = [(pattern, replacement) for _, pattern, replacement, _ in copy_fixups.REGEX_FIXES
                    if "Field_FindGimmickForActorSlot" in replacement]
         self.assertEqual(len(matches), 1)
         actual = re.sub(*matches[0], source)
-        self.assertIn("Field_gimmickInstances[i] = NULL;", actual)
+        self.assertIn("VS::Field::gimmickInstances[i] = NULL;", actual)
         self.assertIn("value = Field_FindGimmickForActorSlot(actor_id);", actual)
         self.assertIn("if (Field_FindGimmickForActorSlot(actor_id) == NULL)", actual)
 
@@ -1177,14 +1177,14 @@ int func_800F9800(void) {
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
         self.assertIn("kOriginalPlatformCapacity = 13", source)
-        self.assertIn("auxiliary == Field_roomData.section6", source)
-        self.assertIn("Field_roomData.header.section6Length >= kRouteAuxiliaryBytes", source)
+        self.assertIn("auxiliary == VS::Field::roomData.section6", source)
+        self.assertIn("VS::Field::roomData.header.section6_length >= kRouteAuxiliaryBytes", source)
         self.assertIn("std::memcpy(location, &word, sizeof word)", source)
 
     def test_gimmick_physics_occupancy_calls_cross_the_explicit_native_view_boundary(self):
         old, new, reason = copy_fixups.FIXES["F01013"][0]
         self.assertEqual(old, "VS::Battle::Ai::AddAiTileOccupant(object);")
-        self.assertIn("(const Field_GimmickInstance*)object", new)
+        self.assertIn("(const VS::Field::GimmickInstance*)object", new)
         self.assertIn("native owning Gimmick", reason)
 
     def test_occupancy_entries_use_typed_native_grids_and_shared_contact_helper(self):
@@ -1227,7 +1227,7 @@ int func_800F9800(void) {
         live = (
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
-        self.assertIn("const Field_GimmickInstance* gimmick", live)
+        self.assertIn("const VS::Field::GimmickInstance* gimmick", live)
         cleanup = (root / r"Native\Game\src\Battle\Ai\ActorCleanup.cpp").read_text(
             encoding="utf-8"
         )
@@ -1951,7 +1951,7 @@ int func_800F9800(void) {
         live = (root / r"Native\Engine\src\Render\ModelGeometryLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("return {object.palettePulse.kind, object.motionState};", live)
+        self.assertIn("return {object.palette_pulse.kind, object.motion_state};", live)
         self.assertIn("PolygonKind::kGouraudOverrides, CountsOf(object)", flat(live))
         self.assertIn("ModelAppearanceMaterial(overrides.appearance_state)", source)
 
@@ -1965,8 +1965,8 @@ int func_800F9800(void) {
         self.assertEqual(core.count("TintRoomPrimitiveColor("), 2)
         self.assertIn("tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),", flat(core))
         self.assertIn("return RoomTintStatus::kTruncated;", core)
-        self.assertNotIn("Field_RoomTint", core)
-        self.assertIn("const Field_RoomTint& tint", flat(live))
+        self.assertNotIn("VS::Field::RoomTintRecord", core)
+        self.assertIn("const VS::Field::RoomTintRecord& tint", flat(live))
         root = Path(__file__).resolve().parents[2]
         self.assertFalse((root / r"Native\Engine\src\Render\RoomDraw.h").exists())
 
@@ -2710,7 +2710,8 @@ int func_800F9800(void) {
         fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
                  if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat
                  and "TransitionDoorsAtTile" not in pat and "FindMovingPlatformById" not in pat
-                 and "DrawRoomTriggerMarkers" not in pat]
+                 and "DrawRoomTriggerMarkers" not in pat
+                 and "gimmickInstances" not in pat]
         self.assertEqual(len(fixes), 3)
         self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
         text = "\n".join((
@@ -2860,7 +2861,7 @@ int func_800F9800(void) {
         self.assertEqual(owned["F00988"]["header"], r"Native\Game\include\Actors\ActorMovement.hpp")
         core = (Path(__file__).resolve().parents[2] / owned["F00988"]["path"]).read_text(encoding="utf-8")
         self.assertIn("SaveActorGroundedTransform(", core)
-        self.assertNotIn("Field_GimmickInstance", core)
+        self.assertNotIn("VS::Field::GimmickInstance", core)
         # #276 slice 20c: the motion update is owned; its Live host saves through the same grounded history API
         # under the original motion-state guard.
         self.assertNotIn("F04130", copy_fixups.FIXES)
@@ -3399,12 +3400,12 @@ int func_800F9800(void) {
         source = """    UpdateRemainingMembers();
     i = 0;
 
-    while ((temp_v0_2 = func_800A3C00(Field_gimmickInstances[temp_s4], i))) {}
+    while ((temp_v0_2 = func_800A3C00(VS::Field::gimmickInstances[temp_s4], i))) {}
 """
         for old, new, _ in copy_fixups.FIXES["F00836"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        guard = source.index("if (Field_gimmickInstances[temp_s4] == NULL)")
+        guard = source.index("if (VS::Field::gimmickInstances[temp_s4] == NULL)")
         self.assertLess(source.index("UpdateRemainingMembers"), guard)
         self.assertLess(guard, source.index("while ("))
         self.assertIn("no eligible stack top", source)
@@ -3500,7 +3501,7 @@ int func_800F9800(void) {
         )
         self.assertIn("VS::Field::FindGimmickForActorSlot(actor_id)", live)
         self.assertNotIn("(Actors_ActorRecord*)", live)
-        self.assertNotIn("Field_gimmickInstances[", live)
+        self.assertNotIn("VS::Field::gimmickInstances[", live)
 
     def test_room_lifetimes_revoke_diagnostic_readiness(self):
         # #276 slice 25c: both room lifetimes revoke the inspection first, through their typed hosts.
@@ -4485,7 +4486,7 @@ int arg01 = arg0;'''
 
     def test_gimmick_copy_uses_only_the_native_owned_runtime_prefix(self):
         source = """memset(s1, 0, 0x178);
-VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
+VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAddress], 0x178);
 """
         for old, new, _ in copy_fixups.FIXES["F00782"]:
             if "0x178" not in old:
@@ -4493,14 +4494,14 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertEqual(
-            source.count("offsetof(Field_GimmickInstance, reserved178)"), 2
+            source.count("offsetof(VS::Field::GimmickInstance, reserved178)"), 2
         )
-        self.assertNotIn("sizeof(Field_GimmickInstance)", source)
+        self.assertNotIn("sizeof(VS::Field::GimmickInstance)", source)
         self.assertNotIn("0x178", source)
 
     def test_gimmick_actor_above_alias_callers_use_original_scalar_loads(self):
         cases = {
-            "F00836": "Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i)",
+            "F00836": "Field_FindActorAboveGimmick(VS::Field::gimmickInstances[temp_s4], i)",
             "F00908": "func_800A3C00(object, 1)",
         }
         for identity, source in cases.items():
@@ -4732,15 +4733,15 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertIn("std::span(matches->records, count)", caller)
         self.assertRegex(
             caller,
-            r"count\s*>\s*Field_roomData\.header\.doorsLength\s*/\s*sizeof\(Field_MpdDoorRecord\)",
+            r"count\s*>\s*VS::Field::roomData\.header\.doors_length\s*/\s*sizeof\(VS::Field::MpdDoorRecord\)",
         )
         core = (root / "Native/Game/src/Field/DoorMatches.cpp").read_text()
         self.assertNotIn("Legacy/", core)
-        self.assertNotIn("Field_roomData", core)
+        self.assertNotIn("VS::Field::roomData", core)
         self.assertNotRegex(source, r"DoorMatchList\s+(VS::Field::)?matchingDoorRecords\s*;")
         self.assertNotIn("Field_TransitionDoorsAtTile(int", source)
         owned_header = (root / "Native/Game/src/Field/DoorMatchList.hpp").read_text()
-        self.assertIn("Field_MpdDoorRecord** records;", owned_header)
+        self.assertIn("VS::Field::MpdDoorRecord** records;", owned_header)
         self.assertNotIn("records[0]", owned_header)
 
     def test_weapon_naming_draw_links_use_native_handles(self):

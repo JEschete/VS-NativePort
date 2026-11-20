@@ -19,9 +19,9 @@
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/EnvironmentLiveState.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/Weather.hpp"
 
 namespace VS::Effects {
@@ -158,12 +158,13 @@ bool InBuffer(const VS::Field::WeatherParticleRecord* particle) {
 }
 
 std::optional<Field::WeatherArea> Area() {
-  const Field_MpdEnvironment* const record = Field_roomData.environment;
+  const VS::Field::MpdEnvironment* const record =
+      VS::Field::roomData.environment;
   if (record == nullptr) return std::nullopt;
-  return Field::WeatherArea{.origin_x = record->weatherArea[0].halves[0],
-                            .origin_z = record->weatherArea[0].halves[1],
-                            .extent_x = record->weatherArea[1].halves[0],
-                            .extent_z = record->weatherArea[1].halves[1]};
+  return Field::WeatherArea{.origin_x = record->weather_area[0].halves[0],
+                            .origin_z = record->weather_area[0].halves[1],
+                            .extent_x = record->weather_area[1].halves[0],
+                            .extent_z = record->weather_area[1].halves[1]};
 }
 
 WeatherPoolState LoadState() {
@@ -190,9 +191,10 @@ void LiveAllocateWeatherParticles() {
 
 // decomp: BATTLE.PRG func_8008EA90 (146C.c:17500).
 int LiveInitializeRoomWeather(int suppress_rain) {
-  const Field_MpdEnvironment* const record = Field_roomData.environment;
+  const VS::Field::MpdEnvironment* const record =
+      VS::Field::roomData.environment;
   const std::optional<std::int16_t> kind =
-      record != nullptr ? std::optional<std::int16_t>(record->weatherKind)
+      record != nullptr ? std::optional<std::int16_t>(record->weather_kind)
                         : std::nullopt;
   weather_live::PoolHost host;
   return InitializeRoomWeather(host, kind, suppress_rain) ? 1 : 0;

@@ -43,7 +43,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -73,7 +73,7 @@ constexpr const char* kWeaponDraw = "DrawActorWeaponModel";
 
 static_assert(std::size(Actors_actorRecords) == kRoomActorSlots);
 static_assert(std::size(weaponModels) == kRoomWeaponSlots);
-static_assert(std::size(Field_gimmickInstances) == kRoomGimmickSlots);
+static_assert(std::size(VS::Field::gimmickInstances) == kRoomGimmickSlots);
 static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
 static_assert(std::size(VS::Render::legacyActorTextureSlots) >=
@@ -91,8 +91,9 @@ constexpr std::size_t kRootKey = std::extent_v<PoseKeys> - 1;
 constexpr std::size_t kPlacementMatrix = 4;
 constexpr std::size_t kModelMatrix = 0;
 constexpr std::size_t kRootMatrix = 1;
-static_assert(std::extent_v<decltype(Field_GimmickInstance::matrices)> >
-              kPlacementMatrix);
+static_assert(
+    std::tuple_size_v<decltype(VS::Field::GimmickInstance::matrices)> >
+    kPlacementMatrix);
 // The holder's two tagged anchor bones, read as bone endpoints.
 constexpr int kFirstAnchorTag = 0xF0;
 constexpr int kSecondAnchorTag = 0xF1;
@@ -148,7 +149,7 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t),
 // The model's height: its bone 1 length (the int at model + 0x50), or 0 for a
 // model no loader recorded that far.
 [[nodiscard]] std::int32_t GimmickModelHeight(
-    const Field_GimmickInstance& object) {
+    const VS::Field::GimmickInstance& object) {
   const std::span<const std::byte> model = Render::LiveModelBytes(object.model);
   constexpr std::size_t kOffset =
       sizeof(VS::Actors::ShpModel) +
@@ -297,11 +298,12 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   [[nodiscard]] std::optional<RoomGimmickState> Gimmick(
       std::size_t index) const override {
-    const Field_GimmickInstance* object = Field_gimmickInstances[index];
+    const VS::Field::GimmickInstance* object =
+        VS::Field::gimmickInstances[index];
     if (object == nullptr) return std::nullopt;
-    return RoomGimmickState{.has_bones = object->boneCount != 0,
-                            .pulsing = object->palettePulse.kind != 0,
-                            .motion_state = object->motionState,
+    return RoomGimmickState{.has_bones = object->bone_count != 0,
+                            .pulsing = object->palette_pulse.kind != 0,
+                            .motion_state = object->motion_state,
                             .mode = object->mode};
   }
 
@@ -313,35 +315,39 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
 
   void UpdateGimmickMotion(std::size_t index) override {
-    Field_GimmickInstance* object = Field_gimmickInstances[index];
+    VS::Field::GimmickInstance* object = VS::Field::gimmickInstances[index];
     if (object == nullptr) return;
     static_cast<void>(VS::Field::UpdateLiveGimmickMotion(object));
   }
 
   // decomp: 44F14.c:1108-1113.
   void CenterGimmick(std::size_t index) override {
-    const Field_GimmickInstance* object = Field_gimmickInstances[index];
+    const VS::Field::GimmickInstance* object =
+        VS::Field::gimmickInstances[index];
     if (object == nullptr) return;
     StoreVector(Workspace().root_offset,
-                GimmickCenter(Vec3{object->positionX, object->positionY,
-                                   object->positionZ},
+                GimmickCenter(Vec3{object->position_x, object->position_y,
+                                   object->position_z},
                               GimmickModelHeight(*object)));
   }
 
   void UpdateGimmickPalettePulse(std::size_t index) override {
-    if (Field_GimmickInstance* object = Field_gimmickInstances[index]) {
+    if (VS::Field::GimmickInstance* object =
+            VS::Field::gimmickInstances[index]) {
       UpdateLiveGimmickPalettePulse(*object);
     }
   }
 
   void UpdateGimmickAppearanceTransition(std::size_t index) override {
-    if (Field_GimmickInstance* object = Field_gimmickInstances[index]) {
+    if (VS::Field::GimmickInstance* object =
+            VS::Field::gimmickInstances[index]) {
       UpdateLiveGimmickAppearanceTransition(*object);
     }
   }
 
   void DrawGimmick(std::size_t index) override {
-    if (Field_GimmickInstance* object = Field_gimmickInstances[index]) {
+    if (VS::Field::GimmickInstance* object =
+            VS::Field::gimmickInstances[index]) {
       DrawLiveGimmickModel(object, camera_);
     }
   }
@@ -355,13 +361,13 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 // What DrawLiveGimmickModel reads of the gimmick, or none when a held
 // gimmick's holder slot is empty.
 [[nodiscard]] std::optional<GimmickPose> LiveGimmickPose(
-    const Field_GimmickInstance& object, GimmickPlacement placement) {
+    const VS::Field::GimmickInstance& object, GimmickPlacement placement) {
   GimmickPose pose;
-  pose.rotation =
-      Core::Math::Angles3{object.rotationX, object.rotationY, object.rotationZ};
-  pose.rotation_offset = AnglesOf(object.rotationOffset);
+  pose.rotation = Core::Math::Angles3{object.rotation_x, object.rotation_y,
+                                      object.rotation_z};
+  pose.rotation_offset = AnglesOf(object.rotation_offset);
   pose.placement = MatrixOf(object.matrices[kPlacementMatrix]);
-  pose.scale = Vec3{object.scaleX, object.scaleY, object.scaleZ};
+  pose.scale = Vec3{object.scale_x, object.scale_y, object.scale_z};
   if (placement != GimmickPlacement::kHeld) return pose;
   const Actors_ActorRecord* holder =
       LiveActorRecord(object.parent, kGimmickDraw);
@@ -541,13 +547,13 @@ void TransformLiveActorRootOffset(Actors_ActorRecord* actor) {
 }
 
 // decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48)
-void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
+void DrawLiveGimmickModel(VS::Field::GimmickInstance* object, MATRIX* camera) {
   if (object == nullptr || camera == nullptr) {
     WarnActorRefused(kGimmickDraw, "no gimmick or camera matrix");
     return;
   }
   const GimmickPlacement placement = ClassifyGimmickPlacement(
-      object->objectInfo.objectId, object->parent, object->mode);
+      object->object_info.object_id, object->parent, object->mode);
   const std::optional<GimmickPose> pose = LiveGimmickPose(*object, placement);
   if (!pose) return;
   VS::Render::ModelScratchpad& workspace = Workspace();
@@ -567,13 +573,13 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
   StoreTransform(object->matrices[kModelMatrix], placed.model);
   StoreTransform(skeletonRootMatrix, placed.model);
   StoreTransform(object->matrices[kRootMatrix], placed.model);
-  if (object->isVisible == 0 || !Render::ProjectLiveGimmickModel(*object)) {
+  if (object->is_visible == 0 || !Render::ProjectLiveGimmickModel(*object)) {
     return;
   }
   workspace.texture_page = GimmickTexturePage();
   workspace.palette = GimmickPalette(
-      object->slot, object->palettePulse.kind != 0, object->motionState);
-  if (GimmickDrawsWithOverrides(object->motionState)) {
+      object->slot, object->palette_pulse.kind != 0, object->motion_state);
+  if (GimmickDrawsWithOverrides(object->motion_state)) {
     Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);
   } else {
     Render::DrawLiveGimmickGouraudPolygons(*object);
@@ -653,8 +659,8 @@ void InitializeLiveActorModelResources() {
             Core::Memory::AllocateLiveFromLowEnd(
                 sizeof(VS::Actors::WeaponModelData)));
   }
-  std::fill(std::begin(Field_gimmickInstances),
-            std::end(Field_gimmickInstances), nullptr);
+  std::fill(std::begin(VS::Field::gimmickInstances),
+            std::end(VS::Field::gimmickInstances), nullptr);
   constexpr std::size_t kClearedBankPages = 3;
   constexpr std::size_t kClearedSequenceBanks = 3;
   std::fill_n(std::begin(VS::Actors::sharedSequenceBankTexturePages),

@@ -10,8 +10,8 @@
 
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Field/TriggerMarkers.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -46,7 +46,7 @@ struct RoomTriggerMarkerGeometry {
   std::array<std::byte, VS::Render::kRoomGroupRecordBytes> group;
   unsigned triangle_count;
   unsigned quad_count;
-  Field_MpdQuad quad;
+  VS::Field::MpdQuad quad;
 };
 
 static_assert(sizeof(RoomTriggerMarkerGeometry) == kMarkerRecordBytes,
@@ -92,9 +92,9 @@ class LiveTriggerMarkerRenderer final
     }
     // G00039/G00040/G00041 were aliases inside this record, not native storage.
     VS::Render::WriteRoomGroupView(bytes, 0, VS::Render::LiveRoomCamera().view);
-    marker.quad.vertex1X = placement.corner_x;
-    marker.quad.vertex1Y = placement.corner_y;
-    marker.quad.vertex1Z = placement.corner_z;
+    marker.quad.vertex1_x = placement.corner_x;
+    marker.quad.vertex1_y = placement.corner_y;
+    marker.quad.vertex1_z = placement.corner_z;
     const auto shade = static_cast<char>(placement.shade);
     marker.quad.red1 = marker.quad.green1 = marker.quad.blue1 = shade;
     marker.quad.red2 = marker.quad.green2 = marker.quad.blue2 = shade;
@@ -108,27 +108,27 @@ class LiveTriggerMarkerRenderer final
 
 namespace VS::Field {
 void DrawLiveRoomTriggerMarkers() {
-  if (Field_roomData.floorTriggers == nullptr) return;
-  const std::span records(Field_roomData.floorTriggers,
-                          Field_roomData.header.floorTriggersLength /
-                              sizeof *Field_roomData.floorTriggers);
+  if (VS::Field::roomData.floor_triggers == nullptr) return;
+  const std::span records(VS::Field::roomData.floor_triggers,
+                          VS::Field::roomData.header.floor_triggers_length /
+                              sizeof *VS::Field::roomData.floor_triggers);
   std::vector<FloorTriggerMarker> triggers;
   triggers.reserve(records.size());
   for (const auto& record : records) {
     triggers.push_back(FloorTriggerMarker{
-        record.tileX, record.tileZ, record.kind, record.activation != 0,
-        static_cast<std::uint8_t>(record.markerFade)});
+        record.tile_x, record.tile_z, record.kind, record.activation != 0,
+        static_cast<std::uint8_t>(record.marker_fade)});
   }
   const TriggerMarkerFrame frame{VS::State::tickSpeed,
                                  VS::State::stateFlags.opaque_20 != 0 ||
                                      VS::State::stateFlags.opaque_40 != 0,
-                                 Field_roomAnimationTicks};
-  TriggerMarkerAnimation animation{Field_triggerMarkerFrameTicks};
+                                 VS::Field::roomAnimationTicks};
+  TriggerMarkerAnimation animation{VS::Field::triggerMarkerFrameTicks};
   LiveTriggerMarkerRenderer renderer;
   DrawRoomTriggerMarkers(triggers, frame, animation, renderer);
-  Field_triggerMarkerFrameTicks = animation.pending_ticks;
+  VS::Field::triggerMarkerFrameTicks = animation.pending_ticks;
   for (std::size_t index = 0; index < records.size(); ++index) {
-    records[index].markerFade = static_cast<char>(triggers[index].fade);
+    records[index].marker_fade = static_cast<char>(triggers[index].fade);
   }
 }
 

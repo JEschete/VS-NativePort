@@ -15,10 +15,10 @@
 #include "Battle/Damage.h"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/SegmentCollision.hpp"
 
 namespace VS::Field {
@@ -27,7 +27,7 @@ constexpr unsigned kExcludedKindMask = 0xEA;
 constexpr int kGimmickRadius = 63;
 constexpr int kGimmickHalfHeight = 64;
 constexpr std::size_t kSourcePlatformBytes = 184;
-static_assert(sizeof(Field_MpdMovingPlatform) == kSourcePlatformBytes);
+static_assert(sizeof(VS::Field::MpdMovingPlatform) == kSourcePlatformBytes);
 
 [[noreturn]] void InvalidTrace(const char* reason) {
   VS::Core::LogError("field.collision", "segment trace: {}", reason);
@@ -47,14 +47,15 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
         (static_cast<unsigned char>(actor->kind) & kExcludedKindMask) != 0) {
       return std::nullopt;
     }
-    if (const auto* object = Field_gimmickInstances[slot]; object != nullptr) {
+    if (const auto* object = VS::Field::gimmickInstances[slot];
+        object != nullptr) {
       if (object->parent == 0 ||
           static_cast<unsigned char>(object->mode) != 0) {
         return std::nullopt;
       }
-      return ActorTraceBounds{object->positionX,
-                              object->positionY - kGimmickHalfHeight,
-                              static_cast<std::uint16_t>(object->positionZ),
+      return ActorTraceBounds{object->position_x,
+                              object->position_y - kGimmickHalfHeight,
+                              static_cast<std::uint16_t>(object->position_z),
                               kGimmickRadius, kGimmickHalfHeight};
     }
     const auto* model = Actors_actorRecords[slot];
@@ -71,16 +72,16 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
   }
 
   [[nodiscard]] std::vector<SolidVolume> CollectSolidVolumes() override {
-    const auto bytes = Field_roomData.header.movingPlatformsLength;
-    if (Field_roomData.movingPlatforms == nullptr) {
+    const auto bytes = VS::Field::roomData.header.moving_platforms_length;
+    if (VS::Field::roomData.moving_platforms == nullptr) {
       if (bytes != 0) InvalidTrace("platform section is missing");
       return {};
     }
-    if (bytes % sizeof(Field_MpdMovingPlatform) != 0) {
+    if (bytes % sizeof(VS::Field::MpdMovingPlatform) != 0) {
       InvalidTrace("platform section contains a partial record");
     }
-    const auto count = bytes / sizeof(Field_MpdMovingPlatform);
-    if (count > std::size(Field_platformBounceFrames)) {
+    const auto count = bytes / sizeof(VS::Field::MpdMovingPlatform);
+    if (count > std::size(VS::Field::platformBounceFrames)) {
       InvalidTrace("platform count exceeds native animation storage");
     }
     const auto contacts = CollectLiveMovingPlatformPositions();

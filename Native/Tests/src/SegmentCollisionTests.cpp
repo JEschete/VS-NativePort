@@ -23,9 +23,9 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacement.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/SegmentCollision.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Legacy/Psx.h"
@@ -46,21 +46,22 @@ struct SegmentFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
-  Field_RoomRecord saved_room = Field_roomData;
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   std::array<Battle_Actor, 2> actors{};
   std::array<Actors_ActorRecord, 2> models{};
   std::array<Battle_ActorStats, 2> stats{};
   std::array<u_char, 1304> saved_bounce{};
 
   SegmentFixture() {
-    std::copy_n(Field_platformBounceFrames, saved_bounce.size(),
+    std::copy_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
                 saved_bounce.begin());
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
-    Field_roomData = {};
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
+    VS::Field::roomData = {};
     for (unsigned index = 0; index < actors.size(); ++index) {
       Battle_actors[index] = &actors[index];
       Actors_actorRecords[index] = &models[index];
@@ -76,12 +77,12 @@ struct SegmentFixture {
 
   ~SegmentFixture() {
     std::copy(saved_bounce.begin(), saved_bounce.end(),
-              Field_platformBounceFrames);
+              VS::Field::platformBounceFrames.begin());
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
-    Field_roomData = saved_room;
+              VS::Field::gimmickInstances.begin());
+    VS::Field::roomData = saved_room;
   }
 };
 
@@ -197,10 +198,10 @@ TEST_CASE("Segment tracing respects reactions animation lock and ignored actor",
 TEST_CASE("Segment tracing preserves Gimmick priority and source mode byte",
           "[field][segment-collision]") {
   const SegmentFixture fixture;
-  Field_GimmickInstance object{};
+  VS::Field::GimmickInstance object{};
   object.parent = 1;
-  object.positionX = object.positionZ = 128;
-  Field_gimmickInstances[1] = &object;
+  object.position_x = object.position_z = 128;
+  VS::Field::gimmickInstances[1] = &object;
   SVECTOR output{};
   const int mode = GENERATE(0, 1, 256, -256);
   object.mode = static_cast<std::int16_t>(mode);
@@ -271,21 +272,22 @@ TEST_CASE("Segment tracing uses bounded native platform contact storage",
           "[field][segment-collision]") {
   const SegmentFixture fixture;
   Battle_actors[1] = nullptr;
-  std::array<Field_MpdMovingPlatform, 5> platforms{};
-  for (auto& platform : platforms) platform.isHidden = 1;
-  platforms.back().isHidden = 0;
-  platforms.back().positionX = platforms.back().positionZ = 128 * 4096;
-  platforms.back().positionY = (Field_kPlatformBounceOffsets[0] + 96) * 4096;
-  std::fill_n(Field_platformBounceFrames, platforms.size(), 0);
-  Field_roomData.movingPlatforms = platforms.data();
-  Field_roomData.header.movingPlatformsLength = sizeof platforms;
+  std::array<VS::Field::MpdMovingPlatform, 5> platforms{};
+  for (auto& platform : platforms) platform.is_hidden = 1;
+  platforms.back().is_hidden = 0;
+  platforms.back().position_x = platforms.back().position_z = 128 * 4096;
+  platforms.back().position_y =
+      (VS::Field::kPlatformBounceOffsets[0] + 96) * 4096;
+  std::fill_n(VS::Field::platformBounceFrames.begin(), platforms.size(), 0);
+  VS::Field::roomData.moving_platforms = platforms.data();
+  VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
   SVECTOR output{};
   CHECK(TraceHorizontal(output) == &output);
   CHECK(output.vx == 72);
   CHECK(output.vy == -64);
   CHECK(output.vz == 128);
   CHECK(output.pad == 0);
-  platforms.back().isHidden = 1;
+  platforms.back().is_hidden = 1;
   CHECK(TraceHorizontal(output) == nullptr);
 }
 

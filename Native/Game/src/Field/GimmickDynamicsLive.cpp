@@ -16,12 +16,12 @@
 #include "Field/GimmickDynamics.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactionsLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 
 namespace {
-using Record = Field_GimmickInstance;
-using PhysicsView = Field_GimmickPhysicsView;
+using Record = VS::Field::GimmickInstance;
+using PhysicsView = VS::Field::GimmickPhysicsView;
 constexpr unsigned kOccupancyCellBytes = 2;
 constexpr unsigned kLayerShift = 2;
 constexpr unsigned kOccupancySide = VS::Battle::Ai::kNavigationGridSide;
@@ -30,40 +30,40 @@ constexpr unsigned kOccupancyBytes = kOccupancyRowBytes * kOccupancySide;
 constexpr int kLandingSoundGroup = 0x7E;
 static_assert(offsetof(PhysicsView, delay) == offsetof(Record, delay));
 static_assert(offsetof(PhysicsView, mode) == offsetof(Record, mode));
-static_assert(offsetof(PhysicsView, position) == offsetof(Record, positionX));
-static_assert(offsetof(PhysicsView, rotationRemainingX) ==
-              offsetof(Record, rotationDeltaX));
-static_assert(offsetof(PhysicsView, tileX) == offsetof(Record, tileX));
-static_assert(offsetof(PhysicsView, nativePointer68) ==
+static_assert(offsetof(PhysicsView, position) == offsetof(Record, position_x));
+static_assert(offsetof(PhysicsView, rotation_remaining_x) ==
+              offsetof(Record, rotation_delta_x));
+static_assert(offsetof(PhysicsView, tile_x) == offsetof(Record, tile_x));
+static_assert(offsetof(PhysicsView, native_pointer68) ==
               offsetof(Record, model));
-static_assert(offsetof(PhysicsView, material) == offsetof(Record, objectInfo));
+static_assert(offsetof(PhysicsView, material) == offsetof(Record, object_info));
 
 VS::Field::GimmickDynamicsState LoadState(const Record& record) {
   return {
-      .reaction = {record.objectInfo.supportIndex,
+      .reaction = {record.object_info.support_index,
                    record.slot,
-                   record.objectInfo.material,
+                   record.object_info.material,
                    record.mode,
                    record.orientation,
-                   {record.positionX, record.positionY, record.positionZ},
-                   {record.rotationX,
-                    VS::Core::Math::WrapSigned16(record.rotationY),
-                    VS::Core::Math::WrapSigned16(record.rotationZ)},
-                   {record.scaleX, record.scaleY, record.scaleZ},
-                   record.velocityY},
+                   {record.position_x, record.position_y, record.position_z},
+                   {record.rotation_x,
+                    VS::Core::Math::WrapSigned16(record.rotation_y),
+                    VS::Core::Math::WrapSigned16(record.rotation_z)},
+                   {record.scale_x, record.scale_y, record.scale_z},
+                   record.velocity_y},
       .delay = static_cast<std::uint8_t>(record.delay),
-      .rotation_ticks = record.rotationTicks,
-      .rotation_remaining = {record.rotationDeltaX, record.rotationDeltaY,
-                             record.rotationDeltaZ},
-      .slide = {record.slideX, record.slideZ},
-      .tile_x = static_cast<std::uint8_t>(record.tileX),
-      .tile_z = static_cast<std::uint8_t>(record.tileZ),
+      .rotation_ticks = record.rotation_ticks,
+      .rotation_remaining = {record.rotation_delta_x, record.rotation_delta_y,
+                             record.rotation_delta_z},
+      .slide = {record.slide_x, record.slide_z},
+      .tile_x = static_cast<std::uint8_t>(record.tile_x),
+      .tile_z = static_cast<std::uint8_t>(record.tile_z),
       .parent = record.parent,
-      .carrier = record.objectInfo.carrier,
-      .kind = static_cast<std::uint8_t>(record.objectInfo.objectId),
-      .durability = record.objectInfo.subtype,
-      .interaction = static_cast<std::uint8_t>(record.objectInfo.interaction),
-      .skipped = record.isSkipped != 0};
+      .carrier = record.object_info.carrier,
+      .kind = static_cast<std::uint8_t>(record.object_info.object_id),
+      .durability = record.object_info.subtype,
+      .interaction = static_cast<std::uint8_t>(record.object_info.interaction),
+      .skipped = record.is_skipped != 0};
 }
 
 class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
@@ -71,7 +71,8 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
   explicit LiveDynamicsHost(Record* record)
       : record_(record),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    std::copy_n(Field_gimmickInstances, records_.size(), records_.begin());
+    std::copy_n(VS::Field::gimmickInstances.begin(), records_.size(),
+                records_.begin());
     for (std::size_t slot = 0; slot < records_.size(); ++slot) {
       if (records_[slot] == record_) {
         table_slot_ = slot;
@@ -87,30 +88,32 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
   bool Store(const VS::Field::GimmickDynamicsState& state) override {
     if (!Valid()) return false;
     record_->delay = std::bit_cast<std::int8_t>(state.delay);
-    record_->rotationTicks = state.rotation_ticks;
-    record_->rotationDeltaX = state.rotation_remaining[0];
-    record_->rotationDeltaY = state.rotation_remaining[1];
-    record_->rotationDeltaZ = state.rotation_remaining[2];
+    record_->rotation_ticks = state.rotation_ticks;
+    record_->rotation_delta_x = state.rotation_remaining[0];
+    record_->rotation_delta_y = state.rotation_remaining[1];
+    record_->rotation_delta_z = state.rotation_remaining[2];
     record_->mode = state.reaction.mode;
-    record_->positionX = state.reaction.position[0];
-    record_->positionY = state.reaction.position[1];
-    record_->positionZ = state.reaction.position[2];
-    record_->rotationX = state.reaction.rotation[0];
-    record_->rotationY = static_cast<std::uint16_t>(state.reaction.rotation[1]);
-    record_->rotationZ = static_cast<std::uint16_t>(state.reaction.rotation[2]);
-    record_->scaleX = state.reaction.scale[0];
-    record_->scaleY = state.reaction.scale[1];
-    record_->scaleZ = state.reaction.scale[2];
-    record_->slideX = state.slide[0];
-    record_->slideZ = state.slide[1];
-    record_->velocityY = state.reaction.vertical_delta;
-    record_->tileX = std::bit_cast<char>(state.tile_x);
-    record_->tileZ = std::bit_cast<char>(state.tile_z);
+    record_->position_x = state.reaction.position[0];
+    record_->position_y = state.reaction.position[1];
+    record_->position_z = state.reaction.position[2];
+    record_->rotation_x = state.reaction.rotation[0];
+    record_->rotation_y =
+        static_cast<std::uint16_t>(state.reaction.rotation[1]);
+    record_->rotation_z =
+        static_cast<std::uint16_t>(state.reaction.rotation[2]);
+    record_->scale_x = state.reaction.scale[0];
+    record_->scale_y = state.reaction.scale[1];
+    record_->scale_z = state.reaction.scale[2];
+    record_->slide_x = state.slide[0];
+    record_->slide_z = state.slide[1];
+    record_->velocity_y = state.reaction.vertical_delta;
+    record_->tile_x = std::bit_cast<char>(state.tile_x);
+    record_->tile_z = std::bit_cast<char>(state.tile_z);
     record_->parent = state.parent;
-    record_->objectInfo.carrier = state.carrier;
-    record_->objectInfo.subtype = state.durability;
-    record_->objectInfo.interaction = state.interaction;
-    record_->objectInfo.supportIndex = state.reaction.frame;
+    record_->object_info.carrier = state.carrier;
+    record_->object_info.subtype = state.durability;
+    record_->object_info.interaction = state.interaction;
+    record_->object_info.support_index = state.reaction.frame;
     return true;
   }
   VS::Field::GimmickReactionResult React() override {
@@ -139,7 +142,7 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
     if (!Valid() || !slot || *slot == 0 || !ValidChild(*slot)) {
       return std::nullopt;
     }
-    return static_cast<std::uint8_t>(records_[*slot]->objectInfo.objectId);
+    return static_cast<std::uint8_t>(records_[*slot]->object_info.object_id);
   }
   bool AddOccupant() override {
     if (!Valid() || !ValidOccupancy()) return false;
@@ -179,8 +182,8 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
   bool StoreChild(std::size_t slot, std::int16_t height,
                   std::uint8_t carrier) override {
     if (!Valid() || !ValidChild(slot)) return false;
-    records_[slot]->positionY = height;
-    records_[slot]->objectInfo.carrier = carrier;
+    records_[slot]->position_y = height;
+    records_[slot]->object_info.carrier = carrier;
     return Valid();
   }
 
@@ -190,21 +193,22 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
   }
   bool Valid() const {
     return SameRoom() && VS::Field::IsLiveGimmickPrefixReadable(record_) &&
-           (!table_slot_ || Field_gimmickInstances[*table_slot_] == record_);
+           (!table_slot_ ||
+            VS::Field::gimmickInstances[*table_slot_] == record_);
   }
   bool ValidChild(std::size_t slot) const {
     return SameRoom() && slot < records_.size() &&
-           Field_gimmickInstances[slot] == records_[slot] &&
+           VS::Field::gimmickInstances[slot] == records_[slot] &&
            VS::Field::IsLiveGimmickPrefixReadable(records_[slot]);
   }
   bool ValidOccupancy() const {
     if (VS::Battle::Ai::tileFlagMap == nullptr) return true;
     if (VS::Battle::Ai::specialTerrainHeights == nullptr) return false;
     const auto offset =
-        static_cast<unsigned>(static_cast<std::uint8_t>(record_->tileX)) *
+        static_cast<unsigned>(static_cast<std::uint8_t>(record_->tile_x)) *
             kOccupancyCellBytes +
-        (static_cast<std::uint8_t>(record_->tileLayer) >> kLayerShift) +
-        static_cast<unsigned>(static_cast<std::uint8_t>(record_->tileZ)) *
+        (static_cast<std::uint8_t>(record_->tile_layer) >> kLayerShift) +
+        static_cast<unsigned>(static_cast<std::uint8_t>(record_->tile_z)) *
             kOccupancyRowBytes;
     return offset <= kOccupancyBytes - kOccupancyCellBytes &&
            offset % kOccupancyCellBytes == 0;
@@ -217,14 +221,14 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
 }  // namespace
 
 namespace VS::Field {
-bool UpdateLiveGimmickMotion(Field_GimmickInstance* record) {
+bool UpdateLiveGimmickMotion(VS::Field::GimmickInstance* record) {
   LiveDynamicsHost host(record);
   return UpdateGimmickMotion(host);
 }
 }  // namespace VS::Field
 
-void VS::Field::UpdateGimmickMotionEntry(Field_GimmickPhysicsView* record,
+void VS::Field::UpdateGimmickMotionEntry(VS::Field::GimmickPhysicsView* record,
                                          int) {
   static_cast<void>(VS::Field::UpdateLiveGimmickMotion(
-      reinterpret_cast<Field_GimmickInstance*>(record)));
+      reinterpret_cast<VS::Field::GimmickInstance*>(record)));
 }

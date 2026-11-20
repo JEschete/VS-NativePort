@@ -9,7 +9,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -224,7 +224,8 @@ RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes) {
 }
 
 bool TintLiveRoomGeometryPrimitives(void* start, void* end,
-                                    const Field_RoomTint& tint, int flags) {
+                                    const VS::Field::RoomTintRecord& tint,
+                                    int flags) {
   if (start == end) {
     return true;
   }

@@ -26,7 +26,7 @@
 #include "Field/EnvironmentLiveState.hpp"
 #include "Field/GameMode.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/RoomEffectsLive.hpp"
@@ -57,7 +57,7 @@ struct LiveFixture {
   int saved_pause = VS::Field::isInteractionPaused;
   u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
   std::uint8_t saved_minimap = VS::Field::isMinimapVisible;
-  u_char saved_platform_pause = Field_areMovingPlatformsPaused;
+  u_char saved_platform_pause = VS::Field::areMovingPlatformsPaused;
   Battle_ActionState* saved_action = VS::Battle::actionState;
   Battle_Actor* saved_character = Battle_characterState;
   VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
@@ -81,7 +81,7 @@ struct LiveFixture {
     VS::Field::isInteractionPaused = 77;
     VS::Field::areRoomUpdatesPaused = 0;
     VS::Field::isMinimapVisible = 1;
-    Field_areMovingPlatformsPaused = 0;
+    VS::Field::areMovingPlatformsPaused = 0;
     VS::Battle::actionState = &action;
     Battle_characterState = &actor;
     actor.stats = &stats;
@@ -107,7 +107,7 @@ struct LiveFixture {
     VS::Field::isInteractionPaused = saved_pause;
     VS::Field::areRoomUpdatesPaused = saved_room_pause;
     VS::Field::isMinimapVisible = saved_minimap;
-    Field_areMovingPlatformsPaused = saved_platform_pause;
+    VS::Field::areMovingPlatformsPaused = saved_platform_pause;
     VS::Battle::actionState = saved_action;
     Battle_characterState = saved_character;
     VS::Items::lootListHead = saved_loot;
@@ -242,7 +242,7 @@ TEST_CASE("F04126 live pending acquisition bypasses action and actor stats",
   fixture.actor.stats = nullptr;
   b::CheckLiveRewardUnlocks();
   CHECK(VS::Battle::actionFlowMode == 5);
-  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
   CHECK(VS::State::artsStatus.kills.total_kills == 1);
   CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 0);
@@ -312,12 +312,12 @@ TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
   VS::Field::isMinimapVisible = 0;
-  Field_areMovingPlatformsPaused = 1;
+  VS::Field::areMovingPlatformsPaused = 1;
   b::UpdateLiveLootResults();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::areRoomUpdatesPaused == 0);
-  CHECK(Field_areMovingPlatformsPaused == 0);
+  CHECK(VS::Field::areMovingPlatformsPaused == 0);
   CHECK(VS::Field::isMinimapVisible == 1);
   CHECK(VS::Battle::actionFlowMode == 0);
   CHECK(VS::Field::controlMode ==
@@ -331,7 +331,7 @@ TEST_CASE("F00197 live delay uses older ability grant not reward phase six",
   b::UpdateLiveAbilityUnlockDelay();
   CHECK(VS::Battle::actionFlowMode == 14);
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 1);
   CHECK(VS::Menu::Framework::menuState.control.current_menu == 3);
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 1);
   CHECK(VS::Menu::Framework::unlockedBreakArt == 0);
@@ -412,13 +412,13 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   VS::Battle::actionState = nullptr;
   Battle_characterState = nullptr;
   VS::Field::isMinimapVisible = 0;
-  Field_areMovingPlatformsPaused = 1;
+  VS::Field::areMovingPlatformsPaused = 1;
   b::UpdateLivePendingLootDialog();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(VS::Battle::actionFlowMode == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::isMinimapVisible == 0);
-  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 1);
   CHECK(VS::Battle::lootMenuOpened == INT32_MIN);
 }
 
@@ -433,7 +433,7 @@ TEST_CASE("F00224 live empty loot selects actual pending unlock policy lazily",
   b::UpdateLivePendingLootDialog();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
   CHECK(VS::Battle::actionFlowMode == 5);
-  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
   CHECK(VS::Battle::lootMenuOpened == 0);
 }
@@ -522,7 +522,7 @@ TEST_CASE(
   LiveDialogFixture fixture;
   PrepareClosedUnlock();
   b::UpdateLiveRewardUnlockDialog();
-  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(VS::Field::areMovingPlatformsPaused == 1);
   CHECK(VS::Field::controlMode == 0x89ABCDEF);
   CHECK(VS::Field::isMinimapVisible == 0);
   CHECK(render::LivePaletteAnimation().enabled);

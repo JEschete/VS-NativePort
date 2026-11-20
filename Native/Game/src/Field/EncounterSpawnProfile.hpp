@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Battle/Encounter.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 
@@ -15,7 +15,7 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
     std::span<const std::uint8_t> collision,
     std::span<const std::uint8_t> tile_cells);
 
-bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source);
+bool IsEncounterHostileSpawn(const VS::Field::MpdEnemySpawn& source);
 
 bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
                                        int room,
@@ -23,14 +23,14 @@ bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
 bool UsesEncounterRoomEvents(const EncounterSetup& setup,
                              bool external_event_started);
 
-std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
+std::expected<VS::Field::MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
 
 std::expected<VS::Items::WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
     EncounterWeapon weapon);
 
-std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
-    const Field_MpdEnemySpawn& source, const EncounterSpawn& instance,
+std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
+    const VS::Field::MpdEnemySpawn& source, const EncounterSpawn& instance,
     std::size_t index);
 
 }  // namespace VS::Game

@@ -13,9 +13,9 @@
 
 // The byte layouts of the room's geometry, texture effect and effect script
 // sections as the room effects read them (decomp 2842C.c:23-194 and
-// Field_MpdPolygonUvView/Field_MpdTriangleColorView), with bounds-checked
-// little-endian codecs. RoomEffects.cpp decodes every record through these;
-// RoomEffectsLive.cpp pins the offsets legacy code still shares.
+// VS::Field::MpdPolygonUvView/VS::Field::MpdTriangleColorView), with
+// bounds-checked little-endian codecs. RoomEffects.cpp decodes every record
+// through these; RoomEffectsLive.cpp pins the offsets legacy code still shares.
 namespace VS::Field::room_effects {
 static_assert(std::endian::native == std::endian::little,
               "the MPD sections are little-endian");
@@ -35,7 +35,7 @@ inline constexpr std::uint32_t kGroupHiddenFlag = 0x100;
 inline constexpr std::uint32_t kGroupDisabledFlag = 0x1000;
 inline constexpr std::uint32_t kGroupSwingRotationFlags = 0x6000;
 
-// Field_MpdPolygonUvView: a triangle when (type & 0x3C) == 0x34.
+// VS::Field::MpdPolygonUvView: a triangle when (type & 0x3C) == 0x34.
 inline constexpr std::size_t kPolygonTypeOffset = 0xF;
 inline constexpr std::uint8_t kPolygonShapeMask = 0x3C;
 inline constexpr std::uint8_t kPolygonTriangleShape = 0x34;
@@ -47,8 +47,8 @@ inline constexpr CornerOffsets kPolygonVOffsets{0x19, 0x1D, 0x17, 0x27};
 inline constexpr std::size_t kTriangleUvExtent = 0x1E;
 inline constexpr std::size_t kQuadUvExtent = 0x28;
 
-// Field_MpdTriangleColorView and Field_MpdQuadColorView: each red byte
-// with its green byte after it. Triangles use the first three pairs. The
+// VS::Field::MpdTriangleColorView and VS::Field::MpdQuadColorView: each red
+// byte with its green byte after it. Triangles use the first three pairs. The
 // views are Render::kRoomTriangleRecordBytes and kRoomQuadRecordBytes long.
 inline constexpr CornerOffsets kPolygonRedOffsets{0xC, 0x10, 0x14, 0x24};
 // The triangle and quad counts ahead of a polygon block.
@@ -83,7 +83,8 @@ inline constexpr std::size_t kScriptHeaderBytes = 4;
 inline constexpr std::size_t kScriptActiveOffset = 2;
 inline constexpr std::size_t kCommandOpcodeOffset = 2;
 
-// Section E (Field_MpdSectionE): a header, then the room's entry point code.
+// Section E (VS::Field::MpdSectionE): a header, then the room's entry point
+// code.
 inline constexpr std::size_t kEntryPointHeaderBytes = 0x14;
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): a range check over

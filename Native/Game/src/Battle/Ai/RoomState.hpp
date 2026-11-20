@@ -10,7 +10,7 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Perception.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"

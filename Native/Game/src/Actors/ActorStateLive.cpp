@@ -54,7 +54,7 @@
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Render/Palette.hpp"
 
@@ -383,40 +383,40 @@ class LiveActorStateHost final : public ActorStateHost {
     return record != nullptr ? &records_.Attach(*record) : nullptr;
   }
   std::optional<GimmickView> Gimmick(int id) override {
-    const Field_GimmickInstance* gimmick =
+    const VS::Field::GimmickInstance* gimmick =
         VS::Field::FindGimmickForActorSlot(id);
     if (gimmick == nullptr) return std::nullopt;
     return GimmickView{
-        .skipped = gimmick->isSkipped != 0,
-        .visible = gimmick->isVisible != 0,
-        .tile = {.x = static_cast<std::uint8_t>(gimmick->tileX),
-                 .layer = static_cast<std::uint8_t>(gimmick->tileLayer),
-                 .z = static_cast<std::uint8_t>(gimmick->tileZ),
-                 .spare = static_cast<std::uint8_t>(gimmick->reserved5F)},
-        .position = {.x = gimmick->positionX,
-                     .y = gimmick->positionY,
-                     .z = gimmick->positionZ,
+        .skipped = gimmick->is_skipped != 0,
+        .visible = gimmick->is_visible != 0,
+        .tile = {.x = static_cast<std::uint8_t>(gimmick->tile_x),
+                 .layer = static_cast<std::uint8_t>(gimmick->tile_layer),
+                 .z = static_cast<std::uint8_t>(gimmick->tile_z),
+                 .spare = static_cast<std::uint8_t>(gimmick->reserved5f)},
+        .position = {.x = gimmick->position_x,
+                     .y = gimmick->position_y,
+                     .z = gimmick->position_z,
                      .w = gimmick->reserved22},
-        .facing = gimmick->rotationY};
+        .facing = gimmick->rotation_y};
   }
   void SetGimmickDisplay(int id, bool skipped, bool visible) override {
-    if (Field_GimmickInstance* gimmick = KnownGimmick(id)) {
-      gimmick->isSkipped = SignedBit(skipped);
-      gimmick->isVisible = SignedBit(visible);
+    if (VS::Field::GimmickInstance* gimmick = KnownGimmick(id)) {
+      gimmick->is_skipped = SignedBit(skipped);
+      gimmick->is_visible = SignedBit(visible);
     }
   }
   void SetGimmickMode(int id, std::int16_t mode) override {
-    if (Field_GimmickInstance* gimmick = KnownGimmick(id)) {
+    if (VS::Field::GimmickInstance* gimmick = KnownGimmick(id)) {
       gimmick->mode = mode;
     }
   }
   void ClearGimmickSupport(int id) override {
-    if (Field_GimmickInstance* gimmick = KnownGimmick(id)) {
-      gimmick->objectInfo.supportIndex = 0;
+    if (VS::Field::GimmickInstance* gimmick = KnownGimmick(id)) {
+      gimmick->object_info.support_index = 0;
     }
   }
   void PlayGimmickSound(int id, int sound, int variant) override {
-    const Field_GimmickInstance* gimmick = KnownGimmick(id);
+    const VS::Field::GimmickInstance* gimmick = KnownGimmick(id);
     if (gimmick == nullptr) return;
     const Synced synced(*this);
     Audio::LivePlayGimmickSoundPair(gimmick, sound, variant);
@@ -496,8 +496,9 @@ class LiveActorStateHost final : public ActorStateHost {
   }
 
  private:
-  Field_GimmickInstance* KnownGimmick(int id) const {
-    Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(id);
+  VS::Field::GimmickInstance* KnownGimmick(int id) const {
+    VS::Field::GimmickInstance* gimmick =
+        VS::Field::FindGimmickForActorSlot(id);
     if (gimmick == nullptr) {
       WarnActorRefused(operation_, "no gimmick stands in the actor slot");
     }

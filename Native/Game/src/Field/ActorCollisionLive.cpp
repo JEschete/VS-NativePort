@@ -18,7 +18,7 @@
 #include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacement.hpp"
 #include "Legacy/Psx.h"
 
@@ -217,11 +217,12 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
   }
   [[nodiscard]] std::optional<GimmickTile> SupportGimmickTile(
       std::uint8_t slot) const override {
-    if (slot >= std::size(Field_gimmickInstances)) return std::nullopt;
-    const Field_GimmickInstance* gimmick = Field_gimmickInstances[slot];
+    if (slot >= std::size(VS::Field::gimmickInstances)) return std::nullopt;
+    const VS::Field::GimmickInstance* gimmick =
+        VS::Field::gimmickInstances[slot];
     if (gimmick == nullptr) return std::nullopt;
-    return GimmickTile{.x = static_cast<std::int8_t>(gimmick->tileX),
-                       .z = static_cast<std::int8_t>(gimmick->tileZ)};
+    return GimmickTile{.x = static_cast<std::int8_t>(gimmick->tile_x),
+                       .z = static_cast<std::int8_t>(gimmick->tile_z)};
   }
   // Actor movement (row 21).
   void UpdatePlatformContact(std::int32_t actor_index,

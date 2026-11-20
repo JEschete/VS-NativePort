@@ -23,7 +23,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -91,11 +91,11 @@ struct LiveSkeletonState {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
-  std::vector<std::unique_ptr<Field_GimmickInstance>> gimmicks;
+  std::vector<std::unique_ptr<VS::Field::GimmickInstance>> gimmicks;
   std::vector<std::unique_ptr<VS::Actors::WeaponModel>> weapons;
   std::vector<std::unique_ptr<TestModel>> models;
 
@@ -104,8 +104,8 @@ struct LiveSkeletonState {
               nullptr);
     std::fill(std::begin(VS::Actors::weaponModels),
               std::end(VS::Actors::weaponModels), nullptr);
-    std::fill(std::begin(Field_gimmickInstances),
-              std::end(Field_gimmickInstances), nullptr);
+    std::fill(std::begin(VS::Field::gimmickInstances),
+              std::end(VS::Field::gimmickInstances), nullptr);
     VS::Actors::boneMatrixScratch = TranslationMatrix({10, 20, 30});
   }
   LiveSkeletonState(const LiveSkeletonState&) = delete;
@@ -115,7 +115,7 @@ struct LiveSkeletonState {
   ~LiveSkeletonState() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
     std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
-    std::ranges::copy(saved_gimmicks, std::begin(Field_gimmickInstances));
+    std::ranges::copy(saved_gimmicks, std::begin(VS::Field::gimmickInstances));
     VS::Actors::boneMatrixScratch = saved_camera;
     for (const auto& model : models) {
       VS::Render::ForgetLiveModelExtent(model.get());
@@ -147,12 +147,12 @@ struct LiveSkeletonState {
     return actor;
   }
 
-  Field_GimmickInstance& AddGimmick(int actor_id, TestModel& model) {
-    gimmicks.push_back(std::make_unique<Field_GimmickInstance>());
-    Field_GimmickInstance& gimmick = *gimmicks.back();
+  VS::Field::GimmickInstance& AddGimmick(int actor_id, TestModel& model) {
+    gimmicks.push_back(std::make_unique<VS::Field::GimmickInstance>());
+    VS::Field::GimmickInstance& gimmick = *gimmicks.back();
     gimmick.model = &model.header;
-    gimmick.boneCount = static_cast<char>(kTestBones);
-    Field_gimmickInstances[actor_id] = &gimmick;
+    gimmick.bone_count = static_cast<char>(kTestBones);
+    VS::Field::gimmickInstances[actor_id] = &gimmick;
     return gimmick;
   }
 
@@ -548,7 +548,7 @@ TEST_CASE("Live bone positions read a gimmick's bone matrices",
           "[actors-animation-skeleton][actors][redirect-binding]") {
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
-  Field_GimmickInstance& gimmick = state.AddGimmick(4, model);
+  VS::Field::GimmickInstance& gimmick = state.AddGimmick(4, model);
   gimmick.matrices[1] = TranslationMatrix({10, 20, 230});
   VS::test_support::ChannelWarnings warnings{"actors"};
 
@@ -621,10 +621,10 @@ TEST_CASE("Live gimmick target points and the ground anchor matrix",
   TestModel& model = state.AddModel();
   Actors_ActorRecord& actor = state.AddActor(2, model);
   actor.instance.position = {100, -50, 300, 9};
-  Field_GimmickInstance& gimmick = state.AddGimmick(4, model);
-  gimmick.positionX = 5;
-  gimmick.positionY = 6;
-  gimmick.positionZ = 7;
+  VS::Field::GimmickInstance& gimmick = state.AddGimmick(4, model);
+  gimmick.position_x = 5;
+  gimmick.position_y = 6;
+  gimmick.position_z = 7;
   gimmick.reserved22 = 0x55;
   VS::test_support::ChannelWarnings warnings{"actors"};
 

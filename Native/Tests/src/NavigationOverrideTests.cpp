@@ -29,9 +29,9 @@
 #include "Core/RandomLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 
@@ -45,14 +45,14 @@ static_assert(std::is_same_v<
               decltype(&VS::Battle::Ai::CopyLiveActorNavigationOverrideState),
               void (*)(int, VS::Battle::Ai::ActorAiState*)>);
 static_assert(std::is_same_v<decltype(&VS::Battle::Ai::AddLiveAiTileOccupant),
-                             void (*)(const Field_GimmickInstance*)>);
+                             void (*)(const VS::Field::GimmickInstance*)>);
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::RemoveLiveAiTileOccupant),
-                   void (*)(const Field_GimmickInstance*)>);
-static_assert(offsetof(Field_GimmickPhysicsView, tileX) ==
-              offsetof(Field_GimmickInstance, tileX));
-static_assert(offsetof(Field_GimmickPhysicsView, tileZ) ==
-              offsetof(Field_GimmickInstance, tileZ));
+                   void (*)(const VS::Field::GimmickInstance*)>);
+static_assert(offsetof(VS::Field::GimmickPhysicsView, tile_x) ==
+              offsetof(VS::Field::GimmickInstance, tile_x));
+static_assert(offsetof(VS::Field::GimmickPhysicsView, tile_z) ==
+              offsetof(VS::Field::GimmickInstance, tile_z));
 
 namespace {
 struct NavigationOverrideFixture {
@@ -234,48 +234,50 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
 struct GimmickOccupancyFixture : NavigationOverrideFixture {
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
       VS::Battle::Ai::specialTerrainHeights;
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   u_short heights[32][32]{};
-  Field_GimmickInstance gimmick{};
-  Field_GimmickInstance sibling{};
+  VS::Field::GimmickInstance gimmick{};
+  VS::Field::GimmickInstance sibling{};
 
   GimmickOccupancyFixture() {
     VS::Battle::Ai::specialTerrainHeights = heights;
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
-    gimmick.tileX = 13;
-    gimmick.tileZ = 7;
-    gimmick.boneCount = 1;
-    gimmick.objectInfo.objectId = 1;
-    sibling.objectInfo.objectId = 1;
-    Field_gimmickInstances[0] = &gimmick;
-    Field_gimmickInstances[1] = &sibling;
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
+    gimmick.tile_x = 13;
+    gimmick.tile_z = 7;
+    gimmick.bone_count = 1;
+    gimmick.object_info.object_id = 1;
+    sibling.object_info.object_id = 1;
+    VS::Field::gimmickInstances[0] = &gimmick;
+    VS::Field::gimmickInstances[1] = &sibling;
   }
 
   ~GimmickOccupancyFixture() {
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
-    std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
+    std::ranges::copy(saved_gimmicks, VS::Field::gimmickInstances.begin());
   }
 };
 
 struct RouteAvailabilityFixture {
   void* saved_auxiliary = VS::Battle::Ai::roomHasWaypoints;
   VS::Battle::Ai::RouteGateEndRecord* saved_gates = VS::Battle::Ai::routeGates;
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   std::array<u_char, 13> saved_bounce{};
   alignas(u_int) std::array<u_char, 0x498> auxiliary{};
-  std::array<Field_MpdMovingPlatform, 13> platforms{};
+  std::array<VS::Field::MpdMovingPlatform, 13> platforms{};
 
   RouteAvailabilityFixture() {
     std::ranges::copy(
-        std::span(Field_platformBounceFrames, saved_bounce.size()),
+        std::span(VS::Field::platformBounceFrames.data(), saved_bounce.size()),
         saved_bounce.begin());
-    std::fill_n(Field_platformBounceFrames, saved_bounce.size(), 0);
-    Field_roomData = {};
-    Field_roomData.section6 = auxiliary.data();
-    Field_roomData.header.section6Length = auxiliary.size();
-    Field_roomData.movingPlatforms = platforms.data();
-    Field_roomData.header.movingPlatformsLength = sizeof platforms;
+    std::fill_n(VS::Field::platformBounceFrames.begin(), saved_bounce.size(),
+                0);
+    VS::Field::roomData = {};
+    VS::Field::roomData.section6 = auxiliary.data();
+    VS::Field::roomData.header.section6_length = auxiliary.size();
+    VS::Field::roomData.moving_platforms = platforms.data();
+    VS::Field::roomData.header.moving_platforms_length = sizeof platforms;
     VS::Battle::Ai::roomHasWaypoints = auxiliary.data();
     VS::Battle::Ai::routeGates =
         reinterpret_cast<VS::Battle::Ai::RouteGateEndRecord*>(auxiliary.data() +
@@ -284,8 +286,8 @@ struct RouteAvailabilityFixture {
   }
 
   ~RouteAvailabilityFixture() {
-    std::ranges::copy(saved_bounce, Field_platformBounceFrames);
-    Field_roomData = saved_room;
+    std::ranges::copy(saved_bounce, VS::Field::platformBounceFrames.begin());
+    VS::Field::roomData = saved_room;
     VS::Battle::Ai::roomHasWaypoints = saved_auxiliary;
     VS::Battle::Ai::routeGates = saved_gates;
   }
@@ -299,7 +301,7 @@ struct RouteAvailabilityFixture {
 
   void SetVisible(unsigned mask) {
     for (std::size_t index = 0; index < platforms.size(); ++index) {
-      platforms[index].isHidden = (mask & (1u << index)) == 0;
+      platforms[index].is_hidden = (mask & (1u << index)) == 0;
     }
   }
 
@@ -534,10 +536,10 @@ TEST_CASE("Gimmick placement retains original layer bits and native row carry",
       const unsigned placement = 0xFF030000u | (layer << 8) | x;
       const unsigned offset = (placement & 255) * 2 + ((placement << 8) >> 18);
       const auto index = offset / sizeof(u_short);
-      fixture.gimmick.tileX = static_cast<char>(x);
-      fixture.gimmick.tileZ = 3;
-      fixture.gimmick.tileLayer = static_cast<char>(layer);
-      fixture.gimmick.reserved5F = static_cast<char>(0xFF);
+      fixture.gimmick.tile_x = static_cast<char>(x);
+      fixture.gimmick.tile_z = 3;
+      fixture.gimmick.tile_layer = static_cast<char>(layer);
+      fixture.gimmick.reserved5f = static_cast<char>(0xFF);
       auto& cell = fixture.heights[index / 32][index % 32];
       cell = 0xA15A;
       VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
@@ -571,9 +573,9 @@ TEST_CASE("Gimmick occupancy reaches every cell of the bounded native map",
   GimmickOccupancyFixture fixture;
   for (int z = 0; z < 32; ++z) {
     for (int x = 0; x < 32; ++x) {
-      fixture.gimmick.tileX = static_cast<char>(x);
-      fixture.gimmick.tileZ = static_cast<char>(z);
-      fixture.gimmick.tileLayer = 3;
+      fixture.gimmick.tile_x = static_cast<char>(x);
+      fixture.gimmick.tile_z = static_cast<char>(z);
+      fixture.gimmick.tile_layer = 3;
       fixture.heights[z][x] = 0x123;
       VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
       REQUIRE(fixture.heights[z][x] == 0x523);
@@ -591,13 +593,13 @@ TEST_CASE("Production gimmick release balances one occupancy contribution",
   GimmickOccupancyFixture fixture;
   fixture.heights[7][13] = 0x88;
   for (int cycle = 0; cycle < 2; ++cycle) {
-    Field_gimmickInstances[0] = &fixture.gimmick;
+    VS::Field::gimmickInstances[0] = &fixture.gimmick;
     VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == 0x488);
     CHECK(VS::Field::ReleaseLiveGimmickInstance(0) == 0);
-    CHECK(Field_gimmickInstances[0] == nullptr);
+    CHECK(VS::Field::gimmickInstances[0] == nullptr);
     CHECK(fixture.heights[7][13] == 0x88);
-    CHECK(Field_gimmickInstances[1] == &fixture.sibling);
+    CHECK(VS::Field::gimmickInstances[1] == &fixture.sibling);
   }
 }
 
@@ -620,7 +622,7 @@ TEST_CASE("Gimmick occupancy rejects an unaligned source halfword",
           "[.occupancy-unaligned]") {
   VS::Platform::InstallCrashHandler();
   GimmickOccupancyFixture fixture;
-  fixture.gimmick.tileLayer = 4;
+  fixture.gimmick.tile_layer = 4;
   VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   FAIL("Unaligned occupancy placement was accepted");
 }
@@ -629,8 +631,8 @@ TEST_CASE("Gimmick occupancy rejects the first byte beyond its map",
           "[.occupancy-bounds]") {
   VS::Platform::InstallCrashHandler();
   GimmickOccupancyFixture fixture;
-  fixture.gimmick.tileX = fixture.gimmick.tileZ = 31;
-  fixture.gimmick.tileLayer = 8;
+  fixture.gimmick.tile_x = fixture.gimmick.tile_z = 31;
+  fixture.gimmick.tile_layer = 8;
   VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   FAIL("Out-of-bounds occupancy placement was accepted");
 }
@@ -764,7 +766,7 @@ TEST_CASE("Route availability rejects a truncated room auxiliary section",
           "[.routegate-room-bound]") {
   VS::Platform::InstallCrashHandler();
   RouteAvailabilityFixture fixture;
-  Field_roomData.header.section6Length = 0x497;
+  VS::Field::roomData.header.section6_length = 0x497;
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Truncated room route table was accepted");
 }
@@ -773,8 +775,8 @@ TEST_CASE("Route availability rejects excess moving-platform output capacity",
           "[.routegate-platform-bound]") {
   VS::Platform::InstallCrashHandler();
   RouteAvailabilityFixture fixture;
-  Field_roomData.header.movingPlatformsLength =
-      14 * sizeof(Field_MpdMovingPlatform);
+  VS::Field::roomData.header.moving_platforms_length =
+      14 * sizeof(VS::Field::MpdMovingPlatform);
   VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Moving-platform output beyond the original buffer was accepted");
 }

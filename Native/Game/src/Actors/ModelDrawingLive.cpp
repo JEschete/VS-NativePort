@@ -30,7 +30,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickLookup.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
@@ -480,10 +480,10 @@ class LiveBoneProjection final : public BoneProjectionHost {
       matrix_ = &actor->boneMatrices[bone];
       return {BoneLookup::kFound, actor->instance.model->bones[bone].length};
     }
-    const Field_GimmickInstance* object =
+    const VS::Field::GimmickInstance* object =
         VS::Field::FindGimmickForActorSlot(slot);
     if (object == nullptr) return {};
-    if (bone < 0 || bone >= object->boneCount ||
+    if (bone < 0 || bone >= object->bone_count ||
         static_cast<size_t>(bone) >=
             sizeof object->matrices / sizeof object->matrices[0]) {
       return {BoneLookup::kInvalidBone, 0};

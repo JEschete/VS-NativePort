@@ -6,7 +6,9 @@
 #include "Legacy/Psx.h"
 #include "Render/RoomDraw.hpp"
 
-struct Field_RoomTint;
+namespace VS::Field {
+struct RoomTintRecord;
+}  // namespace VS::Field
 namespace VS::Render {
 struct ScreenOffset;
 }  // namespace VS::Render
@@ -40,7 +42,8 @@ RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes);
 // in the current frame buffer; false (and logged) when the range is refused
 // or truncated.
 bool TintLiveRoomGeometryPrimitives(void* start, void* end,
-                                    const Field_RoomTint& tint, int flags);
+                                    const VS::Field::RoomTintRecord& tint,
+                                    int flags);
 [[nodiscard]] VS::Render::ScreenOffset GetLiveProjectionScreenOffset();
 void SetLiveProjectionScreenOffset(const VS::Render::ScreenOffset& offset);
 }  // namespace VS::Render

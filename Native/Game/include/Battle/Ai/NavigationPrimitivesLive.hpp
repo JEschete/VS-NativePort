@@ -6,7 +6,9 @@
 namespace VS::Battle::Ai {
 struct ActorAiState;
 }  // namespace VS::Battle::Ai
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickInstance;
+}
 
 // Bindings from the room's AI tile maps, route table, AI state table and
 // battle actor list to the typed navigation primitives
@@ -15,8 +17,8 @@ struct Field_GimmickInstance;
 namespace VS::Battle::Ai {
 void ReserveLiveAiDestinationTile(int x, int z);
 void MarkLiveAiTileDynamicObstacle(int x, int z);
-void AddLiveAiTileOccupant(const Field_GimmickInstance* gimmick);
-void RemoveLiveAiTileOccupant(const Field_GimmickInstance* gimmick);
+void AddLiveAiTileOccupant(const VS::Field::GimmickInstance* gimmick);
+void RemoveLiveAiTileOccupant(const VS::Field::GimmickInstance* gimmick);
 // Packed tile: x in bits 0-7, z in bits 16-23.
 int IsLiveAdjacentTileStepBlocked(unsigned int tile, int direction);
 void BuildLiveAiTerrainHeightsWithWorkspace();

@@ -15,8 +15,8 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -196,7 +196,7 @@ struct LiveItemsState {
   VS::Items::InventoryContents saved_inventory = VS::Items::inventory;
   VS::Items::InventoryIndices saved_indices = VS::Items::inventoryIndices;
   unsigned char saved_invoked = VS::Items::miscItemInvoked;
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<u_int, 8> saved_upper_ids{};
   Battle_Actor actor{};
@@ -211,7 +211,7 @@ struct LiveItemsState {
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     VS::Items::miscItemInvoked = 0;
-    Field_roomData = {};
+    VS::Field::roomData = {};
     actor.stats = &stats;
     Battle_characterState = &actor;
   }
@@ -223,7 +223,7 @@ struct LiveItemsState {
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;
     VS::Items::miscItemInvoked = saved_invoked;
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     Battle_characterState = saved_character;
     std::copy(saved_upper_ids.begin(), saved_upper_ids.end(),
               std::begin(VS::Items::itemCategoryUpperIds));
@@ -2792,8 +2792,8 @@ struct LiveRoomChests {
     for (std::size_t i = 0; i < legacy.size(); ++i) {
       legacy[i] = typed[i];
     }
-    Field_roomData.containers = legacy.data();
-    Field_roomData.header.containersLength =
+    VS::Field::roomData.containers = legacy.data();
+    VS::Field::roomData.header.containers_length =
         static_cast<u_int>(sizeof(VS::Items::TreasureChest) * 2 + 5);
     loot.misc[0] = {0x150, items::kLootDropped, 2};
     section = loot;
@@ -2829,13 +2829,13 @@ TEST_CASE("A live room without a whole chest record refuses chest loot",
   int count = -1;
 
   // A section shorter than one chest refuses the loot.
-  Field_roomData.header.containersLength =
+  VS::Field::roomData.header.containers_length =
       static_cast<u_int>(sizeof(VS::Items::TreasureChest) - 1);
   CHECK(items::LiveRoomTreasureChests(&count) == room.legacy.data());
   CHECK(count == 0);
   items::LoadLiveRoomChestLoot(&section);
   // A room without a chest section ignores it.
-  Field_roomData.containers = nullptr;
+  VS::Field::roomData.containers = nullptr;
   CHECK(items::LiveRoomTreasureChests(&count) == nullptr);
   CHECK(count == 0);
   CHECK(items::FindLiveTreasureChestAtTile(1, 2, 0) == nullptr);

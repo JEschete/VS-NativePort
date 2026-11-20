@@ -40,7 +40,7 @@
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"

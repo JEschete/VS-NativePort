@@ -30,7 +30,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -319,8 +319,8 @@ bool CopiedStatByte(std::size_t offset) {
 struct CompletedPlanFixture {
   std::array<VS::Battle::Ai::ActorAiState*, 16> saved_states =
       VS::Battle::Ai::actorAiStates;
-  decltype(std::to_array(Field_gimmickInstances)) saved_objects =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_objects =
+      VS::Field::gimmickInstances;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   VS::Battle::Ai::ActorAiState state{};
@@ -328,7 +328,7 @@ struct CompletedPlanFixture {
   VS::Battle::Ai::ActionCandidateRecord first{};
   VS::Battle::Ai::ActionCandidateRecord second{};
   Actors_ActorRecord model{};
-  Field_GimmickInstance object{};
+  VS::Field::GimmickInstance object{};
   Battle_ActionRequest request{};
 
   static constexpr int kRememberedTile = 5 << 24;
@@ -336,7 +336,7 @@ struct CompletedPlanFixture {
 
   CompletedPlanFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
-    std::fill_n(Field_gimmickInstances, 16, nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), 16, nullptr);
     VS::Battle::Ai::actorAiStates[2] = &state;
     state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actor);
     state.previous_tile = kUntouchedTile;
@@ -357,14 +357,14 @@ struct CompletedPlanFixture {
     request.primaryTarget.target.target_actor = 2;
     request.targetCount = 1;
     request.targets[0].target.target_actor = 4;
-    Field_gimmickInstances[4] = &object;
+    VS::Field::gimmickInstances[4] = &object;
   }
 
   ~CompletedPlanFixture() {
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_objects.begin(), saved_objects.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
   }
 
@@ -981,7 +981,7 @@ TEST_CASE(
     "target",
     "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
-  fixture.object.objectInfo.objectId = GENERATE(0, 1, 3, 5, 6, 7);
+  fixture.object.object_info.object_id = GENERATE(0, 1, 3, 5, 6, 7);
   fixture.Reconcile();
   CHECK(fixture.state.opaque_fb == 5);
   CHECK(fixture.state.previous_tile == CompletedPlanFixture::kRememberedTile);
@@ -994,9 +994,9 @@ TEST_CASE(
   CompletedPlanFixture fixture;
   const int kind = GENERATE(-1, 2, 4);
   if (kind < 0) {
-    Field_gimmickInstances[4] = nullptr;
+    VS::Field::gimmickInstances[4] = nullptr;
   } else {
-    fixture.object.objectInfo.objectId = kind;
+    fixture.object.object_info.object_id = kind;
   }
   fixture.Reconcile();
   CHECK(fixture.state.opaque_fb == 5);
@@ -1023,7 +1023,7 @@ TEST_CASE(
   }
   SECTION("another column") { fixture.actor.commandArg0 = 3; }
   SECTION("a wider row half") { fixture.actor.commandArg0 = (1 << 16) | 11; }
-  Field_gimmickInstances[4] = nullptr;
+  VS::Field::gimmickInstances[4] = nullptr;
   fixture.Reconcile();
   CHECK(fixture.state.opaque_fb == 0);
   CHECK(fixture.state.previous_tile == CompletedPlanFixture::kRememberedTile);

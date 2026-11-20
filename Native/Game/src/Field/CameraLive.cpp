@@ -32,10 +32,10 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -281,11 +281,11 @@ CameraBounds LiveCameraHost::ZoneBounds() {
 std::optional<std::uint8_t> LiveCameraHost::CollisionCellFlags(int tile_x,
                                                                int tile_z,
                                                                int layer) {
-  const Field_MpdTileCell* const cell =
+  const VS::Field::MpdTileCell* const cell =
       LiveCollisionCellAt(static_cast<unsigned int>(tile_x),
                           static_cast<unsigned int>(tile_z), layer);
   if (cell == nullptr) return std::nullopt;
-  return static_cast<std::uint8_t>(cell->occlusionAndFloorFlags);
+  return static_cast<std::uint8_t>(cell->occlusion_and_floor_flags);
 }
 
 void LiveCameraHost::ApplyGeometryOcclusion(int tile_x, int tile_z, int layer,

@@ -18,11 +18,11 @@
 
 #include "Content/ModuleData.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/Transitions.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -124,23 +124,24 @@ std::filesystem::path ExtractedRoot() {
 }
 
 struct SceneDoorFixture {
-  decltype(Field_roomData) saved_room = Field_roomData;
-  decltype(Field_enteredDoorId) saved_id = Field_enteredDoorId;
-  decltype(Field_entranceDoorRecord) saved_entrance = Field_entranceDoorRecord;
+  decltype(VS::Field::roomData) saved_room = VS::Field::roomData;
+  decltype(VS::Field::enteredDoorId) saved_id = VS::Field::enteredDoorId;
+  decltype(VS::Field::entranceDoorRecord) saved_entrance =
+      VS::Field::entranceDoorRecord;
   std::vector<u_long> words = Scene();
 
   SceneDoorFixture() {
-    Field_roomData = {};
-    Field_roomData.minimapScene =
+    VS::Field::roomData = {};
+    VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(words.data());
-    Field_roomData.header.minimapSceneLength =
+    VS::Field::roomData.header.minimap_scene_length =
         static_cast<std::uint32_t>(words.size() * sizeof(u_long));
   }
 
   ~SceneDoorFixture() {
-    Field_roomData = saved_room;
-    Field_enteredDoorId = saved_id;
-    Field_entranceDoorRecord = saved_entrance;
+    VS::Field::roomData = saved_room;
+    VS::Field::enteredDoorId = saved_id;
+    VS::Field::entranceDoorRecord = saved_entrance;
   }
 };
 
@@ -159,7 +160,7 @@ struct RenderFixture {
   std::array<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers[0],
                                      VS::Render::legacyPrimitiveBuffers[1]};
   int saved_framebuffer = VS::Render::frameBuf;
-  u_short saved_ticks = Field_roomAnimationTicks;
+  u_short saved_ticks = VS::Field::roomAnimationTicks;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
   std::vector<u_long> packets =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 1);
@@ -173,7 +174,7 @@ struct RenderFixture {
     VS::Render::legacyPrimitiveBuffers[framebuffer] = packets.data();
     VS::Render::FrameScratchpad().primitive_cursor = packets.data();
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
-    Field_roomAnimationTicks = 0;
+    VS::Field::roomAnimationTicks = 0;
     std::memset(&VS::State::stateFlags, 0, sizeof VS::State::stateFlags);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     packets.back() = 0xDEADBEEF;
@@ -184,7 +185,7 @@ struct RenderFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffers[0];
     VS::Render::legacyPrimitiveBuffers[1] = saved_buffers[1];
     VS::Render::frameBuf = saved_framebuffer;
-    Field_roomAnimationTicks = saved_ticks;
+    VS::Field::roomAnimationTicks = saved_ticks;
     VS::State::stateFlags = saved_flags;
     Core_Gte_Reset();
   }
@@ -429,17 +430,17 @@ TEST_CASE("Native entrance lookup accepts bounded scene index 128",
   fixture.words[4] = 1;
   fixture.words[11] = 129;
   fixture.words[140] = 0xFE00;
-  Field_roomData.minimapScene =
+  VS::Field::roomData.minimap_scene =
       reinterpret_cast<VS::Field::MapScene*>(fixture.words.data());
-  Field_roomData.header.minimapSceneLength =
+  VS::Field::roomData.header.minimap_scene_length =
       static_cast<std::uint32_t>(fixture.words.size() * sizeof(u_long));
   CHECK(VS::Field::IsValidMapScene(std::as_bytes(std::span(fixture.words))));
   CHECK(VS::Field::SceneDoorIdEntry(128) == 254);
-  Field_MpdDoorRecord door{};
-  door.doorId = 128;
+  VS::Field::MpdDoorRecord door{};
+  door.door_id = 128;
   VS::Field::SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
-  CHECK(Field_enteredDoorId == 254);
-  CHECK(Field_entranceDoorRecord.doorId == 128);
+  CHECK(VS::Field::enteredDoorId == 254);
+  CHECK(VS::Field::entranceDoorRecord.door_id == 128);
   CHECK(VS::Field::SceneDoorIdEntry(129) == -1);
 }
 
@@ -447,24 +448,24 @@ TEST_CASE("Typed entrance live lookup keeps order upper layers and byte bounds",
           "[entrance-door-live][field]") {
   SceneDoorFixture fixture;
   fixture.words[25] = 0xFE00;
-  std::array<Field_MpdDoorRecord, 2> doors{};
-  doors[0].tileLocation.tileX = 2;
-  doors[0].tileLocation.tileZ = 3;
-  doors[1].tileLocation.tileX = 7;
-  doors[1].tileLocation.tileZ = 7;
-  doors[1].tileLocation.floorLayer = 2;
-  Field_roomData.doors = doors.data();
-  Field_roomData.header.doorsLength = sizeof doors;
+  std::array<VS::Field::MpdDoorRecord, 2> doors{};
+  doors[0].tile_location.tile_x = 2;
+  doors[0].tile_location.tile_z = 3;
+  doors[1].tile_location.tile_x = 7;
+  doors[1].tile_location.tile_z = 7;
+  doors[1].tile_location.floor_layer = 2;
+  VS::Field::roomData.doors = doors.data();
+  VS::Field::roomData.header.doors_length = sizeof doors;
   VS::Field::FindEntranceDoorNearTileEntry(3, 3, 0);
-  CHECK(Field_enteredDoorId == 254);
-  CHECK(Field_entranceDoorRecord.tileLocation.tileX == 2);
+  CHECK(VS::Field::enteredDoorId == 254);
+  CHECK(VS::Field::entranceDoorRecord.tile_location.tile_x == 2);
   VS::Field::FindEntranceDoorNearTileEntry(50, 50, 2);
-  CHECK(Field_enteredDoorId == 254);
-  CHECK(Field_entranceDoorRecord.tileLocation.tileX == 7);
-  Field_roomData.header.doorsLength = sizeof doors - 1;
+  CHECK(VS::Field::enteredDoorId == 254);
+  CHECK(VS::Field::entranceDoorRecord.tile_location.tile_x == 7);
+  VS::Field::roomData.header.doors_length = sizeof doors - 1;
   VS::Field::FindEntranceDoorNearTileEntry(3, 3, 0);
-  CHECK(Field_enteredDoorId == -1);
-  CHECK(Field_entranceDoorRecord.doorId == 0);
+  CHECK(VS::Field::enteredDoorId == -1);
+  CHECK(VS::Field::entranceDoorRecord.door_id == 0);
 }
 
 TEST_CASE("Reload door native store writes only its packed state byte",
@@ -476,14 +477,14 @@ TEST_CASE("Reload door native store writes only its packed state byte",
     ~RestoreFlags() { VS::State::stateFlags = value; }
   } restore{saved};
   auto expected = saved;
-  Field_enteredDoorId = 254;
+  VS::Field::enteredDoorId = 254;
   expected.door_entered = std::bit_cast<char>(std::uint8_t{255});
   VS::Field::StoreEntranceDoorForReloadEntry();
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
         std::bit_cast<FlagBytes>(expected));
-  CHECK(Field_enteredDoorId == 254);
-  Field_enteredDoorId = -1;
+  CHECK(VS::Field::enteredDoorId == 254);
+  VS::Field::enteredDoorId = -1;
   VS::Field::StoreEntranceDoorForReloadEntry();
   CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.door_entered) == 0);
 }
@@ -519,23 +520,23 @@ TEST_CASE("Scene door native entries retain original module addresses",
 TEST_CASE("Native entrance lookup uses bounded unsigned scene bytes",
           "[scene-door-live][minimap]") {
   SceneDoorFixture fixture;
-  Field_MpdDoorRecord door{};
-  door.requiredFlagId = 321;
+  VS::Field::MpdDoorRecord door{};
+  door.required_flag_id = 321;
   for (std::uint32_t id = 0; id <= UINT8_MAX; ++id) {
     fixture.words[25] = id << 8;
     CHECK(VS::Field::SceneDoorIdEntry(0) == id);
     VS::Field::SetEntranceDoorRecordEntry(
         reinterpret_cast<char (*)[12]>(&door));
-    CHECK(Field_enteredDoorId == id);
-    CHECK(Field_entranceDoorRecord.requiredFlagId == 321);
+    CHECK(VS::Field::enteredDoorId == id);
+    CHECK(VS::Field::entranceDoorRecord.required_flag_id == 321);
   }
-  Field_roomData.header.minimapSceneLength = 26 * sizeof(u_long) - 1;
+  VS::Field::roomData.header.minimap_scene_length = 26 * sizeof(u_long) - 1;
   CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
   VS::Field::SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
-  CHECK(Field_enteredDoorId == -1);
+  CHECK(VS::Field::enteredDoorId == -1);
   VS::Field::SetEntranceDoorRecordEntry(nullptr);
-  CHECK(Field_enteredDoorId == -1);
-  CHECK(Field_entranceDoorRecord.requiredFlagId == 0);
+  CHECK(VS::Field::enteredDoorId == -1);
+  CHECK(VS::Field::entranceDoorRecord.required_flag_id == 0);
 }
 
 TEST_CASE("Scene native marking preserves scene and halfword store semantics",
@@ -545,17 +546,17 @@ TEST_CASE("Scene native marking preserves scene and halfword store semantics",
   auto expected = fixture.words;
   expected[25] |= 0x00100000;
   VS::Field::MarkEntranceDoorOnSceneMapEntry(0);
-  CHECK(Field_enteredDoorId == 0);
+  CHECK(VS::Field::enteredDoorId == 0);
   CHECK(fixture.words == expected);
   VS::Field::MarkEntranceDoorOnSceneMapEntry(-1);
-  CHECK(Field_enteredDoorId == -1);
+  CHECK(VS::Field::enteredDoorId == -1);
   CHECK(fixture.words == expected);
-  Field_roomData.minimapScene = nullptr;
+  VS::Field::roomData.minimap_scene = nullptr;
   CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
   for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
     VS::Field::MarkEntranceDoorOnSceneMapEntry(static_cast<std::int32_t>(bits));
-    CHECK(std::bit_cast<std::uint16_t>(Field_enteredDoorId) == bits);
-    CHECK(VS::Field::EnteredDoorReloadByte(Field_enteredDoorId) ==
+    CHECK(std::bit_cast<std::uint16_t>(VS::Field::enteredDoorId) == bits);
+    CHECK(VS::Field::EnteredDoorReloadByte(VS::Field::enteredDoorId) ==
           static_cast<std::uint8_t>((bits & UINT8_MAX) + 1));
   }
   CHECK(fixture.words == expected);
@@ -597,7 +598,7 @@ TEST_CASE(
   auto bytes = Scene();
   bytes[4] = 0;
   bytes[25] = door;
-  Field_roomAnimationTicks = ticks;
+  VS::Field::roomAnimationTicks = ticks;
   VS::State::stateFlags.opaque_33f[1] = gate;
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
                                       bytes.size() * sizeof(u_long));

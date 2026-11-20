@@ -59,15 +59,15 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Input.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/InteractionsLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -114,11 +114,11 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   void FinishPendingZoneLoad() override {
     VS::Field::LiveFinishZoneLoad(
-        Field_pendingDestinationDoor.destinationZoneId);
+        VS::Field::pendingDestinationDoor.destination_zone_id);
   }
   bool FinishPendingRoomLoad() override {
     return VS::Field::LiveFinishRoomLoad(
-        Field_pendingDestinationDoor.destinationRoomId);
+        VS::Field::pendingDestinationDoor.destination_room_id);
   }
   void UnloadCurrentRoom() override { VS::Field::LiveUnloadCurrentRoom(); }
   void ReleaseZoneData() override { VS::Field::LiveReleaseZoneData(); }

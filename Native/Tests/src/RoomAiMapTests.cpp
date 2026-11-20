@@ -13,9 +13,9 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/TileHeightSampling.hpp"
 #include "Core/Math/Distance.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 
 namespace {
 using VS::Battle::Ai::BuildRoomAiMap;
@@ -234,14 +234,14 @@ TEST_CASE("Room navigation entry builds and publishes the room AI map",
 
 TEST_CASE("The battle runtime reads the current room as a bounded source",
           "[ai][room]") {
-  const Field_RoomRecord saved = Field_roomData;
-  Field_roomData = {};
-  Field_MpdCollisionHeader dimensions = {2, 3, 0, 6};
+  const VS::Field::RoomDataRecord saved = VS::Field::roomData;
+  VS::Field::roomData = {};
+  VS::Field::MpdCollisionHeader dimensions = {2, 3, 0, 6};
   std::array<std::byte, VS::Battle::Ai::kRoomAuxiliaryHeaderBytes + 6>
       auxiliary{};
-  Field_roomData.collisionMap = &dimensions;
-  Field_roomData.section6 = auxiliary.data();
-  Field_roomData.header.section6Length = 0x497;
+  VS::Field::roomData.collision_map = &dimensions;
+  VS::Field::roomData.section6 = auxiliary.data();
+  VS::Field::roomData.header.section6_length = 0x497;
   const RoomAiSource source =
       VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom();
   const VS::Battle::Ai::RoomCollisionExtent& extent =
@@ -253,5 +253,5 @@ TEST_CASE("The battle runtime reads the current room as a bounded source",
   CHECK(room_auxiliary.size() == 0x497);
   CHECK_FALSE(source.environment_parameter);
   CHECK_FALSE(BuildRoomAiMap(source));
-  Field_roomData = saved;
+  VS::Field::roomData = saved;
 }

@@ -30,7 +30,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "State/Timers.hpp"
 
@@ -364,8 +364,8 @@ struct AppearanceFixture {
   int saved_speed = VS::State::tickSpeed;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Field_gimmickInstances)) saved_objects =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_objects =
+      VS::Field::gimmickInstances;
   RECT palette_region{768, 224, 256, 32};
   alignas(u_long) std::array<u_char, 16384> saved_cluts{};
   Actors_ActorRecord actor{};
@@ -374,7 +374,8 @@ struct AppearanceFixture {
     StoreImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    std::fill_n(Field_gimmickInstances, saved_objects.size(), nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_objects.size(),
+                nullptr);
     VS::State::tickSpeed = 2;
     actor.instance.isParsed = -1;
     actor.instance.baseColor = {128, 128, 128, 0};
@@ -387,7 +388,7 @@ struct AppearanceFixture {
               VS::Actors::weaponModels);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_objects.begin(), saved_objects.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     LoadImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
     VS::State::tickSpeed = saved_speed;
   }
@@ -425,12 +426,12 @@ std::array<u_char, sizeof(Record)> ObjectBytes(const Record& record) {
   return bytes;
 }
 
-void CheckPulseCycle(Field_GimmickInstance& object,
+void CheckPulseCycle(VS::Field::GimmickInstance& object,
                      std::array<u_short, 256>& expected_row) {
   const int slot = object.slot;
   REQUIRE(VS::Actors::EnableLiveModelPalettePulse(slot, 0, 0) == 0);
-  CHECK(object.palettePulse.kind == 128);
-  CHECK(object.palettePulse.level == 0);
+  CHECK(object.palette_pulse.kind == 128);
+  CHECK(object.palette_pulse.level == 0);
   CHECK(PulseClut<16>(31, slot * 16) == kPulseColors);
   VS::Actors::UpdateLiveGimmickPalettePulse(object);
   const auto offset = static_cast<std::size_t>(slot) * kPulseColors.size();
@@ -440,9 +441,9 @@ void CheckPulseCycle(Field_GimmickInstance& object,
   }
   CHECK(PulseClut<256>(31, 0) == expected_row);
   REQUIRE(VS::Actors::DisableLiveModelPalettePulse(slot, 0) == 0);
-  CHECK(object.palettePulse.kind == 0);
-  CHECK(
-      std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));
+  CHECK(object.palette_pulse.kind == 0);
+  CHECK(std::equal(kPulseColors.begin(), kPulseColors.end(),
+                   object.base_palette.begin()));
 }
 }  // namespace
 
@@ -508,29 +509,30 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
 TEST_CASE("Gimmick palette fades stay on their own typed path",
           "[actors][appearance][gimmick]") {
   STATIC_REQUIRE(
-      std::extent_v<decltype(Field_GimmickInstance::pulsedPalette)> == 16);
-  STATIC_REQUIRE(sizeof(Field_GimmickInstance::pulsedPalette) == 32);
+      std::tuple_size_v<decltype(VS::Field::GimmickInstance::pulsed_palette)> ==
+      16);
+  STATIC_REQUIRE(sizeof(VS::Field::GimmickInstance::pulsed_palette) == 32);
   AppearanceFixture fixture;
-  Field_GimmickInstance object{};
-  object.motionState = GENERATE(2, 3);
-  std::fill_n(object.basePalette, 16, 0x1234);
-  std::fill_n(object.pulsedPalette, 16, 0x7FFF);
+  VS::Field::GimmickInstance object{};
+  object.motion_state = GENERATE(2, 3);
+  std::fill_n(object.base_palette.begin(), 16, 0x1234);
+  std::fill_n(object.pulsed_palette.begin(), 16, 0x7FFF);
   std::array<u_short, 16> expected;
   expected.fill(0x7FFF);
-  const int speed = object.motionState == 2 ? 2 : 1;
-  const int mode = object.motionState == 2 ? 0 : 1;
+  const int speed = object.motion_state == 2 ? 2 : 1;
+  const int mode = object.motion_state == 2 ? 0 : 1;
   const bool changed = VS::Actors::ApplyPaletteTransition(
-      expected, object.basePalette,
+      expected, object.base_palette,
       static_cast<VS::Actors::PaletteTransition>(mode), speed);
-  if (object.motionState == 3 && !changed) {
-    VS::Actors::ApplyPaletteTransition(expected, object.basePalette,
+  if (object.motion_state == 3 && !changed) {
+    VS::Actors::ApplyPaletteTransition(expected, object.base_palette,
                                        VS::Actors::PaletteTransition::kWhite,
                                        speed);
   }
   VS::Actors::UpdateLiveGimmickAppearanceTransition(object);
   for (int index = 0; index < 16; ++index) {
-    CHECK(object.pulsedPalette[index] == expected[index]);
-    CHECK(object.basePalette[index] == 0x1234);
+    CHECK(object.pulsed_palette[index] == expected[index]);
+    CHECK(object.base_palette[index] == 0x1234);
   }
 }
 
@@ -541,34 +543,36 @@ TEST_CASE("Gimmick targeting pulses preserve native ownership and CLUT indices",
   const int prefix = GENERATE(0, 0x65);
   AppearanceFixture fixture;
   VS::State::tickSpeed = speed;
-  Field_GimmickInstance object{};
+  VS::Field::GimmickInstance object{};
   object.slot = 3;
-  std::fill_n(object.reserved114, sizeof object.reserved114, prefix);
-  std::copy(kPulseColors.begin(), kPulseColors.end(), object.basePalette);
-  std::fill_n(object.pulsedPalette, 16, 0x5A5A);
+  std::fill_n(object.reserved114.begin(), sizeof object.reserved114, prefix);
+  std::copy(kPulseColors.begin(), kPulseColors.end(),
+            object.base_palette.begin());
+  std::fill_n(object.pulsed_palette.begin(), 16, 0x5A5A);
   const std::array levels{0, 14, 16, 2};
   const std::array slow{2, 16, 14, 0};
   const std::array fast{4, 14, 12, 2};
   const std::array directions{0, 2, 2, 0};
-  object.palettePulse.kind = 128;
-  object.palettePulse.level = static_cast<u_char>(levels[phase]);
-  object.palettePulse.flags = phase >= 2 ? 3 : 1;
-  Field_GimmickInstance expected;
+  object.palette_pulse.kind = 128;
+  object.palette_pulse.level = static_cast<u_char>(levels[phase]);
+  object.palette_pulse.flags = phase >= 2 ? 3 : 1;
+  VS::Field::GimmickInstance expected;
   std::memcpy(&expected, &object, sizeof object);
   const int level = speed == 4 ? fast[phase] : slow[phase];
-  expected.palettePulse.level = static_cast<u_char>(level);
-  expected.palettePulse.flags = static_cast<u_char>(directions[phase] | 1);
+  expected.palette_pulse.level = static_cast<u_char>(level);
+  expected.palette_pulse.flags = static_cast<u_char>(directions[phase] | 1);
   for (std::size_t i = 0; i < kPulseColors.size(); ++i) {
     if (kPulseColors[i] != 0) {
-      expected.pulsedPalette[i] = PulseColor(kPulseColors[i], level);
+      expected.pulsed_palette[i] = PulseColor(kPulseColors[i], level);
     }
   }
   VS::Actors::UpdateLiveGimmickPalettePulse(object);
   CHECK(ObjectBytes(object) == ObjectBytes(expected));
-  CHECK(
-      std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));
+  CHECK(std::equal(kPulseColors.begin(), kPulseColors.end(),
+                   object.base_palette.begin()));
   const auto uploaded = PulseClut<16>(31, object.slot * 16);
-  CHECK(std::equal(uploaded.begin(), uploaded.end(), expected.pulsedPalette));
+  CHECK(std::equal(uploaded.begin(), uploaded.end(),
+                   expected.pulsed_palette.begin()));
 }
 
 TEST_CASE(
@@ -607,10 +611,11 @@ TEST_CASE(
     "[actors][appearance][gimmick][palette-pulse]") {
   const int slot = GENERATE(0, 15);
   AppearanceFixture fixture;
-  Field_GimmickInstance object{};
+  VS::Field::GimmickInstance object{};
   object.slot = static_cast<u_char>(slot);
-  std::copy(kPulseColors.begin(), kPulseColors.end(), object.basePalette);
-  Field_gimmickInstances[slot] = &object;
+  std::copy(kPulseColors.begin(), kPulseColors.end(),
+            object.base_palette.begin());
+  VS::Field::gimmickInstances[slot] = &object;
   auto expected_row = PulseClut<256>(31, 0);
   for (int entry = 0; entry < 3; ++entry) {
     CheckPulseCycle(object, expected_row);

@@ -22,9 +22,9 @@
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -268,11 +268,13 @@ struct WorkshopGateFixture {
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   u_short* saved_text = VS::Menu::Framework::menu12Text;
   int* saved_types = VS::Menu::Framework::rowTypeBuf;
-  Field_MpdEnvironment* saved_environment = Field_roomData.environment;
-  u_int saved_environment_length = Field_roomData.header.environmentLength;
+  VS::Field::MpdEnvironment* saved_environment =
+      VS::Field::roomData.environment;
+  u_int saved_environment_length =
+      VS::Field::roomData.header.environment_length;
   setup::State saved_state = setup::LiveSetupState();
   std::array<u_short, 1024> strings{};
-  Field_MpdEnvironment environment{};
+  VS::Field::MpdEnvironment environment{};
 
   WorkshopGateFixture(int workshop, int weapon_count, bool cursor_memory) {
     setup::LiveSetupState() = {};
@@ -280,10 +282,10 @@ struct WorkshopGateFixture {
     std::fill_n(strings.begin(), 16, 32);
     VS::Menu::Framework::menu12Text = strings.data();
     VS::Menu::Framework::rowTypeBuf = rows.row_types.data();
-    Field_roomData.environment = &environment;
-    Field_roomData.header.environmentLength = sizeof environment;
+    VS::Field::roomData.environment = &environment;
+    VS::Field::roomData.header.environment_length = sizeof environment;
     VS::Items::inventory = {};
-    environment.isWorkshop = static_cast<char>(workshop);
+    environment.is_workshop = static_cast<char>(workshop);
     VS::Input::settings.cursor_memory = static_cast<char>(cursor_memory);
     for (int index = 0; index < weapon_count; ++index) {
       VS::Items::inventory.weapons[index].index = static_cast<char>(index + 1);
@@ -297,8 +299,8 @@ struct WorkshopGateFixture {
     VS::Items::inventory = saved_inventory;
     VS::Menu::Framework::menu12Text = saved_text;
     VS::Menu::Framework::rowTypeBuf = saved_types;
-    Field_roomData.environment = saved_environment;
-    Field_roomData.header.environmentLength = saved_environment_length;
+    VS::Field::roomData.environment = saved_environment;
+    VS::Field::roomData.header.environment_length = saved_environment_length;
   }
 
   const VS::Menu::Framework::ItemText* Open() {

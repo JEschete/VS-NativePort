@@ -13,7 +13,7 @@
 #include "Event/Triggers.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Items/InventoryLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -83,17 +83,18 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
     return Items::CountLiveInventoryItem(item);
   }
   std::optional<TriggerPlacement> GimmickPlacement(int gimmick) override {
-    Field_GimmickSnapshot snapshot{};
+    VS::Field::GimmickSnapshot snapshot{};
     if (VS::Field::GimmickPlacementEntry(gimmick, &snapshot) < 0) {
       return std::nullopt;
     }
     constexpr unsigned kHalfwordBits = 16;
-    const auto word = std::bit_cast<std::uint32_t>(snapshot.positionXY);
+    const auto word = std::bit_cast<std::uint32_t>(snapshot.position_xy);
     const auto world_y = std::bit_cast<std::int16_t>(
         static_cast<std::uint16_t>(word >> kHalfwordBits));
-    return TriggerPlacement{{snapshot.placementByte0, snapshot.placementByte2},
-                            world_y,
-                            snapshot.orientation};
+    return TriggerPlacement{
+        {snapshot.placement_byte0, snapshot.placement_byte2},
+        world_y,
+        snapshot.orientation};
   }
   int GimmickSupportHeight(TriggerTile tile) override {
     return Field::LiveGimmickSupportHeight(tile.x, tile.z);

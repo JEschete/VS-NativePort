@@ -21,8 +21,8 @@
 #include "Battle/Actor.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
+#include "Field/Doors.hpp"
+#include "Field/Mpd.hpp"
 #include "Legacy/Psx.h"
 #include "Save/Snapshot.hpp"
 #include "State/Ashley.hpp"
@@ -32,7 +32,7 @@
 namespace VS::Save {
 namespace {
 // The door and snapshot records the core addresses as bytes.
-static_assert(sizeof(Field_MpdDoorRecord) == kEntryDoorBytes);
+static_assert(sizeof(VS::Field::MpdDoorRecord) == kEntryDoorBytes);
 static_assert(sizeof(VS::State::savedEntryDoor) == kEntryDoorBytes);
 static_assert(sizeof(VS::State::AshleySnapshot) == kAshleySnapshotBytes);
 static_assert(offsetof(VS::State::AshleySnapshot, stats) == 0);
@@ -121,11 +121,11 @@ class LiveSnapshotHost final : public SnapshotHost {
  public:
   EntryDoor PendingDestinationDoor() override {
     EntryDoor door{};
-    std::ranges::copy(BytesOf(Field_pendingDestinationDoor), door.begin());
+    std::ranges::copy(BytesOf(VS::Field::pendingDestinationDoor), door.begin());
     return door;
   }
   std::uint16_t SnapshotDoorFlagId() override {
-    return Field_snapshotDoorFlagSource.requiredFlagId;
+    return VS::Field::snapshotDoorFlagSource.required_flag_id;
   }
   TilePlacement AshleyPlacement() override {
     VS::Actors::ActorLocationQuery query{};

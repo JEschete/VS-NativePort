@@ -25,7 +25,7 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Input.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/PlatformPlacementLive.hpp"

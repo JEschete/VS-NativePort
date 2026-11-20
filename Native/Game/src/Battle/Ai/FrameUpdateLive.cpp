@@ -31,8 +31,8 @@
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
@@ -123,7 +123,7 @@ int CacheLiveActorAiWorkingState() {
   frame_context.roomData = VS::Battle::Ai::roomHasWaypoints;
   WorkingStateSource source;
   source.has_room_data = frame_context.roomData != nullptr;
-  source.auxiliary_bytes = Field_roomData.header.section6Length;
+  source.auxiliary_bytes = VS::Field::roomData.header.section6_length;
   if (frame_context.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
     static_assert(sizeof frame_context.room->reserved4 == extent.size());

@@ -18,7 +18,7 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
 #include "Content/ModuleData.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -32,8 +32,8 @@ struct LiveAppearanceState {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   VECTOR saved_scale = VS::Actors::roomActorScale;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
 
@@ -42,8 +42,8 @@ struct LiveAppearanceState {
               nullptr);
     std::fill(std::begin(VS::Actors::weaponModels),
               std::end(VS::Actors::weaponModels), nullptr);
-    std::fill(std::begin(Field_gimmickInstances),
-              std::end(Field_gimmickInstances), nullptr);
+    std::fill(std::begin(VS::Field::gimmickInstances),
+              std::end(VS::Field::gimmickInstances), nullptr);
   }
   LiveAppearanceState(const LiveAppearanceState&) = delete;
   LiveAppearanceState& operator=(const LiveAppearanceState&) = delete;
@@ -52,7 +52,7 @@ struct LiveAppearanceState {
   ~LiveAppearanceState() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
     std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
-    std::ranges::copy(saved_gimmicks, std::begin(Field_gimmickInstances));
+    std::ranges::copy(saved_gimmicks, std::begin(VS::Field::gimmickInstances));
     VS::Actors::roomActorScale = saved_scale;
   }
 

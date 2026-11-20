@@ -6,7 +6,9 @@
 #include "Field/CollisionMap.hpp"
 #include "Field/PlatformPlacement.hpp"
 
-struct Field_MpdTileCell;
+namespace VS::Field {
+struct MpdTileCell;
+}  // namespace VS::Field
 struct SVECTOR;
 
 // Binds the typed room collision map rules (CollisionMap.hpp) to the loaded
@@ -15,22 +17,22 @@ struct SVECTOR;
 // tables so callers can change them; a missing cell is null.
 namespace VS::Field {
 // The room's cell table; null when the room has none.
-Field_MpdTileCell* LiveRoomCollisionCells();
+VS::Field::MpdTileCell* LiveRoomCollisionCells();
 int LiveCollisionMapDimensions(int unused);
 // The room's camera bounds record; nullopt when the room has none or its
 // section is too short.
 std::optional<CameraBounds> LiveRoomCameraBounds();
-Field_MpdTileCell* LiveCollisionCellAt(unsigned int tile_x, unsigned int tile_z,
-                                       int layer);
+VS::Field::MpdTileCell* LiveCollisionCellAt(unsigned int tile_x,
+                                            unsigned int tile_z, int layer);
 // For the readers the original let dereference a missed lookup: never null,
 // a missing cell reads as a shared kAbsentCellWord cell (#288).
-const Field_MpdTileCell* LiveCollisionCellOrAbsent(unsigned int tile_x,
-                                                   unsigned int tile_z,
-                                                   int layer);
+const VS::Field::MpdTileCell* LiveCollisionCellOrAbsent(unsigned int tile_x,
+                                                        unsigned int tile_z,
+                                                        int layer);
 // Returns 1 when a cell was changed; a cell outside the tables is refused.
 int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer, int blocked);
-Field_MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
-                                                   int layer);
+VS::Field::MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
+                                                        int layer);
 
 std::int16_t LiveInterpolatedFloorHeight(int world_x, int world_z);
 std::int16_t LiveFloorHeightAt(int world_x, int world_z);

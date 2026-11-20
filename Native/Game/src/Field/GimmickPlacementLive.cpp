@@ -24,13 +24,13 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacement.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 
 namespace {
 
 constexpr std::uint8_t kNoParent = 0xFF;
-using GimmickInstance = Field_GimmickInstance;
+using GimmickInstance = VS::Field::GimmickInstance;
 using QueryStateValue = VS::Field::GimmickQueryState;
 using QueryStates = std::array<QueryStateValue, VS::Field::kGimmickQuerySlots>;
 constexpr auto kQueryPrefixBytes = offsetof(GimmickInstance, reserved178);
@@ -52,9 +52,9 @@ constexpr std::int16_t kGimmickCarryMode = 8;
 constexpr std::int32_t kGimmickTileUnit = 128;
 constexpr std::int32_t kGimmickTileCenter = 64;
 
-bool ReadableQueryRecord(const Field_GimmickInstance* record) {
+bool ReadableQueryRecord(const VS::Field::GimmickInstance* record) {
   if (record == nullptr || reinterpret_cast<std::uintptr_t>(record) %
-                                   alignof(Field_GimmickInstance) !=
+                                   alignof(VS::Field::GimmickInstance) !=
                                0) {
     return false;
   }
@@ -68,27 +68,28 @@ bool ReadableQueryRecord(const Field_GimmickInstance* record) {
          kQueryPrefixBytes <= allocation->size() - (at - start);
 }
 
-VS::Field::GimmickQueryState QueryState(const Field_GimmickInstance& record) {
+VS::Field::GimmickQueryState QueryState(
+    const VS::Field::GimmickInstance& record) {
   const auto tile_word =
-      static_cast<std::uint8_t>(record.tileX) |
-      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tileLayer))
+      static_cast<std::uint8_t>(record.tile_x) |
+      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tile_layer))
        << kTileByteBits) |
-      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tileZ))
+      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.tile_z))
        << kTileZShift) |
-      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.reserved5F))
+      (static_cast<std::uint32_t>(static_cast<std::uint8_t>(record.reserved5f))
        << kTileReservedShift);
   return {.present = true,
-          .skipped = record.isSkipped != 0,
-          .falling = record.objectInfo.isFalling != 0,
+          .skipped = record.is_skipped != 0,
+          .falling = record.object_info.is_falling != 0,
           .movement_mode = record.mode,
           .parent = record.parent,
-          .carrier = record.objectInfo.carrier,
+          .carrier = record.object_info.carrier,
           .tile_word = tile_word,
-          .position_y = record.positionY,
-          .object_id = record.objectInfo.objectId,
-          .subtype = record.objectInfo.subtype,
-          .motion_state = record.motionState,
-          .interaction = record.objectInfo.interaction};
+          .position_y = record.position_y,
+          .object_id = record.object_info.object_id,
+          .subtype = record.object_info.subtype,
+          .motion_state = record.motion_state,
+          .interaction = record.object_info.interaction};
 }
 
 QueryStates SnapshotQueryStates() {
@@ -106,15 +107,15 @@ class LiveGimmickOrientationHost final
  public:
   explicit LiveGimmickOrientationHost(std::size_t slot)
       : slot_(slot),
-        record_(Field_gimmickInstances[slot]),
+        record_(VS::Field::gimmickInstances[slot]),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {}
   std::optional<std::uint8_t> ObjectKind() const override {
     if (!Valid()) return std::nullopt;
-    return static_cast<std::uint8_t>(record_->objectInfo.objectId);
+    return static_cast<std::uint8_t>(record_->object_info.object_id);
   }
   bool StoreMaterial(std::uint8_t material) override {
     if (!Valid()) return false;
-    record_->objectInfo.material = material;
+    record_->object_info.material = material;
     return true;
   }
   bool StoreRotation(const VS::Core::Math::Mat3& rotation) override {
@@ -125,11 +126,11 @@ class LiveGimmickOrientationHost final
   }
   bool ResetRotation() override {
     if (!Valid()) return false;
-    record_->rotationTicks = 0;
-    record_->rotationX = 0;
-    record_->rotationY = 0;
-    record_->rotationZ = 0;
-    record_->reserved2A = 0;
+    record_->rotation_ticks = 0;
+    record_->rotation_x = 0;
+    record_->rotation_y = 0;
+    record_->rotation_z = 0;
+    record_->reserved2a = 0;
     return true;
   }
 
@@ -137,10 +138,10 @@ class LiveGimmickOrientationHost final
   bool Valid() const {
     return VS::Field::IsLiveGimmickPrefixReadable(record_) &&
            generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
-           Field_gimmickInstances[slot_] == record_;
+           VS::Field::gimmickInstances[slot_] == record_;
   }
   std::size_t slot_;
-  Field_GimmickInstance* record_;
+  VS::Field::GimmickInstance* record_;
   std::uint64_t generation_;
 };
 
@@ -176,23 +177,24 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
  public:
   LiveGimmickStackDropHost()
       : generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    std::copy_n(Field_gimmickInstances, gimmicks_.size(), gimmicks_.begin());
+    std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
+                gimmicks_.begin());
     std::copy_n(Actors_actorRecords, actors_.size(), actors_.begin());
   }
   std::optional<VS::Field::GimmickStackState> Gimmick(
       std::size_t slot) override {
     if (!ValidGimmick(slot)) return std::nullopt;
     return VS::Field::GimmickStackState{QueryState(*gimmicks_[slot]),
-                                        gimmicks_[slot]->velocityY};
+                                        gimmicks_[slot]->velocity_y};
   }
   bool StoreGimmick(std::size_t slot,
                     const VS::Field::GimmickStackState& state) override {
     if (!ValidGimmick(slot)) return false;
     auto& record = *gimmicks_[slot];
-    record.objectInfo.isFalling = state.query.falling;
+    record.object_info.is_falling = state.query.falling;
     record.mode = state.query.movement_mode;
-    record.objectInfo.carrier = state.query.carrier;
-    record.velocityY = state.velocity_y;
+    record.object_info.carrier = state.query.carrier;
+    record.velocity_y = state.velocity_y;
     return true;
   }
   bool SameGimmick(std::size_t first, std::size_t second) const override {
@@ -237,42 +239,44 @@ class LiveGimmickStackDropHost final : public VS::Field::GimmickStackDropHost {
   }
   bool ValidGimmick(std::size_t slot) const {
     return Valid() && slot < gimmicks_.size() &&
-           Field_gimmickInstances[slot] == gimmicks_[slot] &&
+           VS::Field::gimmickInstances[slot] == gimmicks_[slot] &&
            ReadableQueryRecord(gimmicks_[slot]);
   }
   std::uint64_t generation_;
-  std::array<Field_GimmickInstance*, VS::Field::kGimmickQuerySlots> gimmicks_{};
+  std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
+      gimmicks_{};
   decltype(std::to_array(Actors_actorRecords)) actors_{};
 };
 
 class LiveGimmickPlacementHost final : public VS::Field::GimmickPlacementHost {
  public:
   std::size_t GimmickSlots() const override {
-    return std::size(Field_gimmickInstances);
+    return std::size(VS::Field::gimmickInstances);
   }
 
   std::optional<VS::Field::GimmickPlacementState> Gimmick(
       std::size_t slot) const override {
-    if (slot >= GimmickSlots() || Field_gimmickInstances[slot] == nullptr) {
+    if (slot >= GimmickSlots() ||
+        VS::Field::gimmickInstances[slot] == nullptr) {
       return std::nullopt;
     }
-    const auto& gimmick = *Field_gimmickInstances[slot];
+    const auto& gimmick = *VS::Field::gimmickInstances[slot];
     if (gimmick.parent != kNoParent) {
       return VS::Field::GimmickPlacementState{.attached = true};
     }
-    if (gimmick.objectInfo.isFalling != 0) {
+    if (gimmick.object_info.is_falling != 0) {
       return VS::Field::GimmickPlacementState{.falling = true};
     }
     if (gimmick.mode != 0) {
       return VS::Field::GimmickPlacementState{.movement_mode = gimmick.mode};
     }
     return VS::Field::GimmickPlacementState{
-        .tile_x = static_cast<std::uint8_t>(gimmick.tileX),
-        .tile_z = static_cast<std::uint8_t>(gimmick.tileZ),
-        .orientation = static_cast<std::uint8_t>(gimmick.objectInfo.material),
-        .position_x = gimmick.positionX,
-        .position_y = gimmick.positionY,
-        .position_z = gimmick.positionZ,
+        .tile_x = static_cast<std::uint8_t>(gimmick.tile_x),
+        .tile_z = static_cast<std::uint8_t>(gimmick.tile_z),
+        .orientation = static_cast<std::uint8_t>(gimmick.object_info.material),
+        .position_x = gimmick.position_x,
+        .position_y = gimmick.position_y,
+        .position_z = gimmick.position_z,
         .position_tail = gimmick.reserved22};
   }
 
@@ -290,7 +294,8 @@ class LiveGimmickInteractionQueryHost final
       : actor_slot_(actor_slot),
         actor_(Actors_actorRecords[actor_slot]),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    std::copy_n(Field_gimmickInstances, gimmicks_.size(), gimmicks_.begin());
+    std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
+                gimmicks_.begin());
   }
   bool Valid() const {
     return actor_ != nullptr && Actors_actorRecords[actor_slot_] == actor_ &&
@@ -304,13 +309,13 @@ class LiveGimmickInteractionQueryHost final
   }
   bool StoreDirection(std::uint8_t direction) override {
     if (!Valid()) return false;
-    Field_gimmickInteractionDirection = direction;
+    VS::Field::gimmickInteractionDirection = direction;
     return true;
   }
   std::optional<VS::Field::GimmickQueryState> Gimmick(
       std::size_t slot) override {
     if (!Valid() || slot >= gimmicks_.size() ||
-        Field_gimmickInstances[slot] != gimmicks_[slot] ||
+        VS::Field::gimmickInstances[slot] != gimmicks_[slot] ||
         !ReadableQueryRecord(gimmicks_[slot])) {
       return std::nullopt;
     }
@@ -346,7 +351,8 @@ class LiveGimmickInteractionQueryHost final
   std::size_t actor_slot_;
   Actors_ActorRecord* actor_;
   std::uint64_t generation_;
-  std::array<Field_GimmickInstance*, VS::Field::kGimmickQuerySlots> gimmicks_{};
+  std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
+      gimmicks_{};
 };
 
 class LiveGimmickInteractionStartHost final
@@ -356,7 +362,8 @@ class LiveGimmickInteractionStartHost final
       : actor_slot_(actor_slot),
         actor_(Actors_actorRecords[actor_slot]),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    std::copy_n(Field_gimmickInstances, gimmicks_.size(), gimmicks_.begin());
+    std::copy_n(VS::Field::gimmickInstances.begin(), gimmicks_.size(),
+                gimmicks_.begin());
   }
   std::optional<VS::Actors::MovementActor> Actor(std::int32_t slot) override {
     if (!ValidActor(slot)) return std::nullopt;
@@ -370,17 +377,17 @@ class LiveGimmickInteractionStartHost final
     return selected;
   }
   std::optional<std::int32_t> Direction() override {
-    return Valid()
-               ? std::optional<std::int32_t>{Field_gimmickInteractionDirection}
-               : std::nullopt;
+    return Valid() ? std::optional<
+                         std::int32_t>{VS::Field::gimmickInteractionDirection}
+                   : std::nullopt;
   }
   std::optional<VS::Field::GimmickInteractionObject> Object(
       std::size_t slot) override {
     if (!ValidObject(slot)) return std::nullopt;
     const auto& object = *gimmicks_[slot];
     return VS::Field::GimmickInteractionObject{
-        QueryState(object), object.positionX, object.positionZ, object.slideX,
-        object.slideZ};
+        QueryState(object), object.position_x, object.position_z,
+        object.slide_x, object.slide_z};
   }
   bool StoreOrientation(std::size_t slot, std::uint16_t direction) override {
     if (!ValidObject(slot)) return false;
@@ -389,36 +396,37 @@ class LiveGimmickInteractionStartHost final
   }
   bool PublishSelected(std::size_t slot) override {
     if (!ValidObject(slot)) return false;
-    Field_interactingGimmickId = static_cast<int>(slot);
+    VS::Field::interactingGimmickId = static_cast<int>(slot);
     return true;
   }
   bool ClearSlide(std::size_t slot) override {
     if (!ValidObject(slot)) return false;
-    gimmicks_[slot]->slideX = 0;
-    gimmicks_[slot]->slideZ = 0;
+    gimmicks_[slot]->slide_x = 0;
+    gimmicks_[slot]->slide_z = 0;
     return true;
   }
   std::optional<std::uint8_t> Material(std::size_t slot) override {
     if (!ValidObject(slot)) return std::nullopt;
-    return static_cast<std::uint8_t>(gimmicks_[slot]->objectInfo.material);
+    return static_cast<std::uint8_t>(gimmicks_[slot]->object_info.material);
   }
   std::span<const std::uint8_t> RollOrientations() override {
-    static_assert(kGimmickRollBytes <= sizeof(Field_kGimmickRollOrientations));
-    return Valid() ? std::span(Field_kGimmickRollOrientations)
+    static_assert(kGimmickRollBytes <=
+                  sizeof(VS::Field::kGimmickRollOrientations));
+    return Valid() ? std::span(VS::Field::kGimmickRollOrientations)
                          .first(kGimmickRollBytes)
                    : std::span<const std::uint8_t>{};
   }
   bool StoreMaterial(std::size_t slot, std::uint8_t material) override {
     if (!ValidObject(slot)) return false;
-    gimmicks_[slot]->objectInfo.material = material;
+    gimmicks_[slot]->object_info.material = material;
     return true;
   }
   bool StartSlide(std::size_t slot, std::int16_t x, std::int16_t z) override {
     if (!ValidObject(slot)) return false;
     auto& object = *gimmicks_[slot];
-    object.slideX = x;
-    object.slideZ = z;
-    object.velocityY = 0;
+    object.slide_x = x;
+    object.slide_z = z;
+    object.velocity_y = 0;
     return true;
   }
   bool PlaySounds(std::int32_t actor_slot, std::uint16_t first,
@@ -478,7 +486,7 @@ class LiveGimmickInteractionStartHost final
   }
   bool ValidCapturedObject(std::size_t slot) const {
     return slot < gimmicks_.size() &&
-           Field_gimmickInstances[slot] == gimmicks_[slot] &&
+           VS::Field::gimmickInstances[slot] == gimmicks_[slot] &&
            ReadableQueryRecord(gimmicks_[slot]);
   }
   bool ValidObject(std::size_t slot) const {
@@ -491,7 +499,8 @@ class LiveGimmickInteractionStartHost final
   Actors_ActorRecord* actor_;
   std::uint64_t generation_;
   std::optional<std::size_t> selected_;
-  std::array<Field_GimmickInstance*, VS::Field::kGimmickQuerySlots> gimmicks_{};
+  std::array<VS::Field::GimmickInstance*, VS::Field::kGimmickQuerySlots>
+      gimmicks_{};
 };
 class LiveGimmickInteractionCommandHost final
     : public VS::Field::GimmickInteractionCommandHost {
@@ -499,11 +508,11 @@ class LiveGimmickInteractionCommandHost final
   explicit LiveGimmickInteractionCommandHost(Actors_ActorRecord* actor)
       : actor_(actor),
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {
-    const auto selected = Field_interactingGimmickId;
+    const auto selected = VS::Field::interactingGimmickId;
     if (selected >= 0 &&
         static_cast<std::size_t>(selected) < VS::Field::kGimmickQuerySlots) {
       object_slot_ = static_cast<std::size_t>(selected);
-      object_ = Field_gimmickInstances[*object_slot_];
+      object_ = VS::Field::gimmickInstances[*object_slot_];
     }
     for (std::size_t index = 0;
          actor_ != nullptr && index < std::size(Actors_actorRecords); ++index) {
@@ -520,19 +529,20 @@ class LiveGimmickInteractionCommandHost final
   std::optional<VS::Field::GimmickCommandObject> Object() override {
     if (!ValidObject()) return std::nullopt;
     return VS::Field::GimmickCommandObject{
-        {QueryState(*object_), object_->positionX, object_->positionZ,
-         object_->slideX, object_->slideZ},
-        static_cast<std::uint16_t>(object_->rotationY)};
+        {QueryState(*object_), object_->position_x, object_->position_z,
+         object_->slide_x, object_->slide_z},
+        static_cast<std::uint16_t>(object_->rotation_y)};
   }
   std::optional<std::int32_t> Direction() override {
     return ValidDomain()
-               ? std::optional<std::int32_t>{Field_gimmickInteractionDirection}
+               ? std::optional<
+                     std::int32_t>{VS::Field::gimmickInteractionDirection}
                : std::nullopt;
   }
   bool PreparePush(std::optional<std::int16_t> mode) override {
     if (!ValidObject()) return false;
     if (mode) object_->mode = *mode;
-    object_->objectInfo.supportIndex = 0;
+    object_->object_info.support_index = 0;
     return true;
   }
   bool RemoveOccupant() override {
@@ -553,13 +563,13 @@ class LiveGimmickInteractionCommandHost final
   bool StoreDropPlacement(const VS::Field::GimmickTileQuery& tile,
                           std::uint16_t yaw) override {
     if (!ValidObject()) return false;
-    object_->positionX = VS::Core::Math::WrapSigned16(
+    object_->position_x = VS::Core::Math::WrapSigned16(
         tile.tile_x * kGimmickTileUnit + kGimmickTileCenter);
-    object_->positionZ = VS::Core::Math::WrapSigned16(
+    object_->position_z = VS::Core::Math::WrapSigned16(
         tile.tile_z * kGimmickTileUnit + kGimmickTileCenter);
-    object_->tileX = static_cast<char>(static_cast<std::uint8_t>(tile.tile_x));
-    object_->tileZ = static_cast<char>(static_cast<std::uint8_t>(tile.tile_z));
-    object_->rotationY = VS::Core::Math::WrapSigned16(yaw);
+    object_->tile_x = static_cast<char>(static_cast<std::uint8_t>(tile.tile_x));
+    object_->tile_z = static_cast<char>(static_cast<std::uint8_t>(tile.tile_z));
+    object_->rotation_y = VS::Core::Math::WrapSigned16(yaw);
     return true;
   }
   std::optional<std::int16_t> ParentBoneHeight(std::uint8_t tag) override {
@@ -574,34 +584,34 @@ class LiveGimmickInteractionCommandHost final
   bool FinishDrop(std::int16_t height) override {
     if (!ValidObject()) return false;
     object_->mode = kGimmickDropMode;
-    object_->velocityY = kGimmickDropVelocity;
+    object_->velocity_y = kGimmickDropVelocity;
     object_->parent = kNoParent;
-    object_->positionY = height;
+    object_->position_y = height;
     return true;
   }
   bool SetCarrying(bool carrying) override {
     if (!ValidActor()) return false;
     if (carrying) {
       actor_->instance.attachBone =
-          static_cast<std::uint8_t>(Field_interactingGimmickId);
+          static_cast<std::uint8_t>(VS::Field::interactingGimmickId);
     }
     actor_->actionPoseActive = carrying;
     return true;
   }
   bool StoreSlide(std::int16_t x, std::int16_t z) override {
     if (!ValidObject()) return false;
-    object_->slideX = x;
-    object_->slideZ = z;
+    object_->slide_x = x;
+    object_->slide_z = z;
     return true;
   }
   bool StoreYaw(std::uint16_t yaw) override {
     if (!ValidObject()) return false;
-    object_->rotationY = VS::Core::Math::WrapSigned16(yaw);
+    object_->rotation_y = VS::Core::Math::WrapSigned16(yaw);
     return true;
   }
   bool AttachObject(std::uint8_t actor_slot) override {
     if (!ValidObject()) return false;
-    object_->tileX = static_cast<char>(kNoParent);
+    object_->tile_x = static_cast<char>(kNoParent);
     object_->mode = kGimmickCarryMode;
     object_->parent = actor_slot;
     return true;
@@ -637,14 +647,14 @@ class LiveGimmickInteractionCommandHost final
   }
   bool ValidObject() const {
     return ValidDomain() && object_slot_ &&
-           Field_gimmickInstances[*object_slot_] == object_ &&
+           VS::Field::gimmickInstances[*object_slot_] == object_ &&
            ReadableQueryRecord(object_);
   }
   Actors_ActorRecord* actor_;
   std::uint64_t generation_;
   std::optional<std::size_t> actor_slot_;
   std::optional<std::size_t> object_slot_;
-  Field_GimmickInstance* object_ = nullptr;
+  VS::Field::GimmickInstance* object_ = nullptr;
 };
 }  // namespace
 
@@ -691,8 +701,10 @@ bool SetLiveGimmickOrientation(std::int32_t slot, std::int32_t orientation) {
     return false;
   }
   OrientationRows rows{};
-  static_assert(sizeof(rows) <= sizeof(Field_kGimmickOrientationRotations));
-  std::memcpy(rows.data(), Field_kGimmickOrientationRotations, sizeof(rows));
+  static_assert(sizeof(rows) <=
+                sizeof(VS::Field::kGimmickOrientationRotations));
+  std::memcpy(rows.data(), VS::Field::kGimmickOrientationRotations.data(),
+              sizeof(rows));
   LiveGimmickOrientationHost host(static_cast<std::size_t>(slot));
   return SetGimmickOrientation(orientation, rows, host);
 }
@@ -701,16 +713,16 @@ bool AreLiveGimmicksMoving() {
   return AreGimmicksMoving(SnapshotQueryStates());
 }
 
-bool IsLiveGimmickPrefixReadable(const Field_GimmickInstance* record) {
+bool IsLiveGimmickPrefixReadable(const VS::Field::GimmickInstance* record) {
   return ReadableQueryRecord(record);
 }
 
 std::optional<GimmickQueryState> LiveGimmickQueryState(std::size_t slot) {
   if (slot >= kGimmickQuerySlots ||
-      !ReadableQueryRecord(Field_gimmickInstances[slot])) {
+      !ReadableQueryRecord(VS::Field::gimmickInstances[slot])) {
     return std::nullopt;
   }
-  return QueryState(*Field_gimmickInstances[slot]);
+  return QueryState(*VS::Field::gimmickInstances[slot]);
 }
 
 std::optional<std::size_t> FindLiveTopGimmickAtTile(
@@ -719,7 +731,8 @@ std::optional<std::size_t> FindLiveTopGimmickAtTile(
 }
 }  // namespace VS::Field
 
-int VS::Field::FindGimmickBelowEntry(const Field_GimmickInstance* reference) {
+int VS::Field::FindGimmickBelowEntry(
+    const VS::Field::GimmickInstance* reference) {
   if (!ReadableQueryRecord(reference)) return -1;
   const auto index = VS::Field::FindGimmickBelow(SnapshotQueryStates(),
                                                  QueryState(*reference));
@@ -788,11 +801,11 @@ void VS::Field::ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor,
 
 // decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654).
 // Original 800A0034 tests inherited s0 before the slot load at 800A004C.
-int VS::Field::GimmickPlacementEntry(int gimmick_slot,
-                                     Field_GimmickSnapshot* output_snapshot) {
+int VS::Field::GimmickPlacementEntry(
+    int gimmick_slot, VS::Field::GimmickSnapshot* output_snapshot) {
   if (output_snapshot == nullptr || gimmick_slot < 0 ||
       static_cast<std::size_t>(gimmick_slot) >=
-          std::size(Field_gimmickInstances)) {
+          std::size(VS::Field::gimmickInstances)) {
     VS::Core::Warnf("field", "Gimmick snapshot refused: slot=%d output=%p",
                     gimmick_slot, static_cast<void*>(output_snapshot));
     return -1;

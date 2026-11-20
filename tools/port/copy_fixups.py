@@ -5634,7 +5634,7 @@ MODULE_FUNCTION_ENTRIES: tuple[tuple[str, int, str], ...] = ()
 FIXES: dict[str, list[tuple[str, str, str]]] = {
     "F01013": [
         ("VS::Battle::Ai::AddAiTileOccupant(object);",
-         "VS::Battle::Ai::AddAiTileOccupant((const Field_GimmickInstance*)object);",
+         "VS::Battle::Ai::AddAiTileOccupant((const VS::Field::GimmickInstance*)object);",
          "the rebased physics view aliases the native owning Gimmick; pass its checked tile prefix explicitly"),
     ],
     "F00298": [
@@ -5644,11 +5644,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     ],
     "F00782": [
         ("memset(s1, 0, 0x178);",
-         "memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));",
+         "memset(s1, 0, offsetof(VS::Field::GimmickInstance, reserved178));",
          "Clear the native runtime prefix, not the PS1 prefix or the larger actor-compatibility view"),
-        ("VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);",
-         "VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
-         "offsetof(Field_GimmickInstance, reserved178));",
+        ("VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAddress], 0x178);",
+         "VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAddress], "
+         "offsetof(VS::Field::GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
     ],
     "G00864": [
@@ -5758,7 +5758,7 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     ],
     "F00836": [
         ("    i = 0;\n\n    while ((temp_v0_2 = func_800A3C00",
-         "    if (Field_gimmickInstances[temp_s4] == NULL) {\n"
+         "    if (VS::Field::gimmickInstances[temp_s4] == NULL) {\n"
          '        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", arg0);\n'
          "        return;\n    }\n\n    i = 0;\n\n"
          "    while ((temp_v0_2 = Field_FindActorAboveGimmick",
@@ -6005,11 +6005,11 @@ FIXES.setdefault("F00912", []).append(
      f"if (({_PROBE_CELL_WORD} >> 20) & 1) {{",
      "3A1A0.c:708 reads bit 20 of the cell the last support sample found"))
 FIXES.setdefault("F00836", []).append(
-    ("Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i)",
+    ("Field_FindActorAboveGimmick(VS::Field::gimmickInstances[temp_s4], i)",
      "VS::Field::LiveFindActorOccupyingTile("
-     "(u_char)Field_gimmickInstances[temp_s4]->tileX, "
-     "(u_char)Field_gimmickInstances[temp_s4]->tileZ, "
-     "Field_gimmickInstances[temp_s4]->positionY, i)",
+     "(u_char)VS::Field::gimmickInstances[temp_s4]->tileX, "
+     "(u_char)VS::Field::gimmickInstances[temp_s4]->tileZ, "
+     "VS::Field::gimmickInstances[temp_s4]->positionY, i)",
      "F00910 forwarding alias retirement: original LBU X/Z and LH support height at caller"))
 FIXES.setdefault("F00908", []).append(
     ("func_800A3C00(object, 1)",
@@ -6038,20 +6038,20 @@ FIXES.setdefault("F00853", []).append(
      "30DB0.c:3680 samples from the gimmick's three position halfwords through a short* prototype"))
 
 FIXES.setdefault("F00158", []).append(
-    ("    Field_MpdDoorRecord destination;\n",
-     "    Field_MpdDoorRecord destination{};\n",
+    ("    VS::Field::MpdDoorRecord destination;\n",
+     "    VS::Field::MpdDoorRecord destination{};\n",
      "#323: the scripted-fall producer leaves unlock/id/reserved fields unassigned, but DoorRecordOf copies them"))
 
 # #288: these readers dereference func_8008B764's result unchecked, so off the grid, without a cell table or on a
 # missing platform layer the original reads PS1 RAM word 0. They read a never-null cell that is kAbsentCellWord then.
 _CELL_OR_ABSENT = ("VS::Field::LiveCollisionCellAt(", "VS::Field::LiveCollisionCellOrAbsent(")
 for _row, _decl, _where in (
-        ("F00158", ("    Field_MpdTileCell* tile;\n", "    const Field_MpdTileCell* tile;\n"),
+        ("F00158", ("    VS::Field::MpdTileCell* tile;\n", "    const VS::Field::MpdTileCell* tile;\n"),
          "146C.c:5390 reads hasEventTrigger and hasRoomTrigger"),
-        ("F00159", ("    Field_MpdTileCell* temp_s4;\n", "    const Field_MpdTileCell* temp_s4;\n"),
+        ("F00159", ("    VS::Field::MpdTileCell* temp_s4;\n", "    const VS::Field::MpdTileCell* temp_s4;\n"),
          "146C.c:5531 reads hasRoomTrigger"),
         ("F00547", None, "146C.c:15556 reads hasRoomTrigger"),
-        ("F00596", ("        Field_MpdTileCell* cell;\n", "        const Field_MpdTileCell* cell;\n"),
+        ("F00596", ("        VS::Field::MpdTileCell* cell;\n", "        const VS::Field::MpdTileCell* cell;\n"),
          "146C.c:16717 reads isPit and surfaceKind")):
     _evidence = f"#288: {_where} of the cell lookup without a NULL check"
     FIXES.setdefault(_row, []).extend(
@@ -6225,11 +6225,11 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Render::QueueSprite\(", r"VS::Render::QueueLiveSprite(",
      "F04192 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Render::UpdateRoomGroupTransforms\((\w+)\)",
-     r"VS::Render::UpdateLiveRoomGroupTransforms(\1, Field_roomData.header.geometryLength)",
+     r"VS::Render::UpdateLiveRoomGroupTransforms(\1, VS::Field::roomData.header.geometryLength)",
      "F00758 #46 typed promotion: the room binding rebuilds group views inside the geometry section's recorded "
      "length from the frame camera"),
     (r"", r"\bVS::Render::DrawRoomGeometry\((\w+), ",
-     r"VS::Render::DrawLiveRoomGeometry(\1, Field_roomData.header.geometryLength, ",
+     r"VS::Render::DrawLiveRoomGeometry(\1, VS::Field::roomData.header.geometryLength, ",
      "F00744 #46 typed promotion: the room binding draws inside the geometry section's recorded length and a "
      "64 KiB frame-buffer batch"),
     (r"", r"\bVS::Render::TintRoomGeometryPrimitives\(([^,;]+), ([^,;]+), &(\w+), ",
@@ -6568,7 +6568,7 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"^Menu::Results::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"VS::Render::DrawLiveTexture\1(Menu_Results_disMap, ",
      "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
-    (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
+    (r"^Actors::", r"\bVS::Field::gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
      "must preserve the existing no-owner query result instead of reading gimmick16"),

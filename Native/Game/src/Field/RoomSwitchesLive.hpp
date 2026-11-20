@@ -3,20 +3,22 @@
 #include "Field/InteractionTarget.hpp"
 #include "Field/RoomSwitches.hpp"
 
-struct Field_MpdLockTrigger;
+namespace VS::Field {
+struct MpdLockTrigger;
+}  // namespace VS::Field
 
 namespace VS::Field {
-Field_MpdLockTrigger* InteractiveDoorAtTileEntry(int tile_x, int tile_z,
-                                                 int floor_layer);
+VS::Field::MpdLockTrigger* InteractiveDoorAtTileEntry(int tile_x, int tile_z,
+                                                      int floor_layer);
 void MarkSigilDoorUnlockedEntry(int sigil_index);
-void ToggleDoorCollisionEntry(Field_MpdLockTrigger* door);
-int BeginDoorToggleEntry(Field_MpdLockTrigger* door);
-int StartDoorAnimationEntry(Field_MpdLockTrigger* door);
-int FinishDoorAnimationEntry(Field_MpdLockTrigger* door);
+void ToggleDoorCollisionEntry(VS::Field::MpdLockTrigger* door);
+int BeginDoorToggleEntry(VS::Field::MpdLockTrigger* door);
+int StartDoorAnimationEntry(VS::Field::MpdLockTrigger* door);
+int FinishDoorAnimationEntry(VS::Field::MpdLockTrigger* door);
 int IsRoomSigilDoorUnlockedEntry(int zone_id, int map_id,
                                  unsigned int sigil_index);
-void ToggleRoomSwitchEntry(Field_MpdLockTrigger* switch_trigger);
-void BeginSwitchToggleEntry(Field_MpdLockTrigger* switch_trigger);
+void ToggleRoomSwitchEntry(VS::Field::MpdLockTrigger* switch_trigger);
+void BeginSwitchToggleEntry(VS::Field::MpdLockTrigger* switch_trigger);
 std::optional<RoomObjectTarget> FindLiveInteractiveDoorAtTile(
     const RoomDoorTileQuery& query);
 bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index);

@@ -989,7 +989,7 @@ Flow Blocked(MoveContext& ctx) {
   return Reject(ctx);
 }
 
-// Field_gimmickInstances[gimmick]: a spinning gimmick raises the ledge by
+// VS::Field::gimmickInstances[gimmick]: a spinning gimmick raises the ledge by
 // the spin steps still to come.
 void AddGimmickSpin(MoveContext& ctx) {
   MovementActor& actor = ctx.actor;

@@ -63,11 +63,10 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/DoorRecordLive.hpp"
-#include "Field/Doors.h"
 #include "Field/EncounterSpawnProfile.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -97,7 +96,7 @@
 namespace VS::Game {
 namespace {
 EncounterSetup configuration;
-std::array<Field_MpdEnemySpawn, EncounterLimits::kEnemies> placements{};
+std::array<VS::Field::MpdEnemySpawn, EncounterLimits::kEnemies> placements{};
 std::atomic<bool> stop_requested{false};
 bool configured = false;
 bool active = false;
@@ -146,12 +145,12 @@ int EnterOrFinishEncounter() {
   // applied here without its publisher screens or audio setup.
   VS::State::stateFlags.difficulty = 1;
   VS::State::stateFlags.puzzle_mode = 1;
-  VS::State::savedEntryDoor.destinationZoneId = configuration.zone;
-  VS::State::savedEntryDoor.destinationRoomId = configuration.room;
-  VS::State::savedEntryDoor.entryTileX = configuration.player.x;
-  VS::State::savedEntryDoor.entryTileZ = configuration.player.z;
-  VS::State::savedEntryDoor.entryElevation = configuration.player.elevation;
-  VS::State::savedEntryDoor.tileLocation.entryDirection =
+  VS::State::savedEntryDoor.destination_zone_id = configuration.zone;
+  VS::State::savedEntryDoor.destination_room_id = configuration.room;
+  VS::State::savedEntryDoor.entry_tile_x = configuration.player.x;
+  VS::State::savedEntryDoor.entry_tile_z = configuration.player.z;
+  VS::State::savedEntryDoor.entry_elevation = configuration.player.elevation;
+  VS::State::savedEntryDoor.tile_location.entry_direction =
       configuration.player.direction;
   VS::Boot::gameEntryMode = 0;
   RestoreBootEventSelector();
@@ -679,7 +678,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     const auto weapon = ReadEncounterWeapon(setup.weapon);
     if (!weapon) return std::unexpected(weapon.error());
   }
-  std::array<Field_MpdEnemySpawn, placements.size()> staged_placements{};
+  std::array<VS::Field::MpdEnemySpawn, placements.size()> staged_placements{};
   for (std::size_t index = 0; index < setup.enemies.size(); ++index) {
     const auto& spawn = setup.enemies[index];
     const auto definition =
@@ -694,7 +693,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
         "instance={} definition={} source={} row={} "
         "source_retains_after_defeat={} isolated_retains_after_defeat={}",
         index, spawn.enemy, definition->spawn_asset, definition->spawn_index,
-        source->actorStateByte != 0, placement->actorStateByte != 0);
+        source->actor_state_byte != 0, placement->actor_state_byte != 0);
   }
   configuration = setup;
   placements = staged_placements;
@@ -852,14 +851,14 @@ void InspectPendingLoot(EncounterState& state) {
 }
 
 void InspectFloorTriggers(EncounterState& state) {
-  if (Field_roomData.floorTriggers == nullptr) return;
-  const auto count = Field_roomData.header.floorTriggersLength /
-                     sizeof(*Field_roomData.floorTriggers);
+  if (VS::Field::roomData.floor_triggers == nullptr) return;
+  const auto count = VS::Field::roomData.header.floor_triggers_length /
+                     sizeof(*VS::Field::roomData.floor_triggers);
   for (std::size_t i = 0; i < count; ++i) {
-    const auto& trigger = Field_roomData.floorTriggers[i];
+    const auto& trigger = VS::Field::roomData.floor_triggers[i];
     state.floor_triggers.push_back(
-        {trigger.kind, trigger.tileX, trigger.tileZ, trigger.activation,
-         static_cast<unsigned char>(trigger.markerFade)});
+        {trigger.kind, trigger.tile_x, trigger.tile_z, trigger.activation,
+         static_cast<unsigned char>(trigger.marker_fade)});
   }
 }
 }  // namespace
@@ -1040,21 +1039,23 @@ EncounterDoorRequest CheckDoorRequest(int index) {
     return {EncounterDoorRequestStatus::kBusy,
             "source event/transition still active"};
   }
-  if (Field_roomData.header.doorsLength % sizeof(Field_MpdDoorRecord) != 0 ||
-      Field_roomData.doors == nullptr || index < 0 ||
-      static_cast<unsigned>(index) >=
-          Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord)) {
+  if (VS::Field::roomData.header.doors_length %
+              sizeof(VS::Field::MpdDoorRecord) !=
+          0 ||
+      VS::Field::roomData.doors == nullptr || index < 0 ||
+      static_cast<unsigned>(index) >= VS::Field::roomData.header.doors_length /
+                                          sizeof(VS::Field::MpdDoorRecord)) {
     return {EncounterDoorRequestStatus::kInvalid,
             "door index/storage does not match inventory"};
   }
-  auto& door = Field_roomData.doors[index];
+  auto& door = VS::Field::roomData.doors[index];
   const auto value = static_cast<unsigned char>(VS::State::LiveScriptFlag(
-      static_cast<std::int16_t>(door.requiredFlagId)));
-  if (value < door.requiredFlagValue) {
+      static_cast<std::int16_t>(door.required_flag_id)));
+  if (value < door.required_flag_value) {
     return {EncounterDoorRequestStatus::kBlocked,
             std::format("flag {} is {} but requires {}",
-                        static_cast<unsigned>(door.requiredFlagId), value,
-                        static_cast<unsigned>(door.requiredFlagValue))};
+                        static_cast<unsigned>(door.required_flag_id), value,
+                        static_cast<unsigned>(door.required_flag_value))};
   }
   return {EncounterDoorRequestStatus::kAccepted, {}};
 }
@@ -1077,14 +1078,14 @@ void ApplyPendingDoorRequest() {
                       checked.reason);
     return;
   }
-  auto& door = Field_roomData.doors[index];
+  auto& door = VS::Field::roomData.doors[index];
   VS::Core::LogInfo("field.door-test",
                     "begin source={}/{} door={} destination={}/{}",
                     pending_door_zone, pending_door_room, index,
-                    door.destinationZoneId, door.destinationRoomId);
+                    door.destination_zone_id, door.destination_room_id);
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
-  if (door.destinationZoneId == VS::Field::zoneContext.zone_id) {
+  if (door.destination_zone_id == VS::Field::zoneContext.zone_id) {
     VS::Field::LiveBeginRoomTransition(&door, 0, kTransitionSpeed);
   } else {
     VS::Field::LiveBeginZoneTransition(&door, 0, kTransitionSpeed);
@@ -1120,7 +1121,7 @@ void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
   }
   *data = VS::Game::placements.data();
   *size = static_cast<unsigned int>(VS::Game::configuration.enemies.size() *
-                                    sizeof(Field_MpdEnemySpawn));
+                                    sizeof(VS::Field::MpdEnemySpawn));
   VS::Core::LogDebug("encounter.spawn", "installing {} room placements",
                      VS::Game::configuration.enemies.size());
 }

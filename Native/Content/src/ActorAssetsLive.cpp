@@ -43,7 +43,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
 #include "Render/ModelGeometryLive.hpp"

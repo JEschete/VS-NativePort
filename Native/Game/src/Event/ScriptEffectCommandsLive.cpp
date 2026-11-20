@@ -37,7 +37,7 @@
 #include "Event/Splash.hpp"
 #include "Event/Weather.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
@@ -52,7 +52,7 @@ namespace event = VS::Event;
 
 static_assert(std::size(Actors_actorRecords) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
-static_assert(std::size(Field_gimmickInstances) >=
+static_assert(std::size(VS::Field::gimmickInstances) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
 static_assert(event::kSplashTweenExtent >= event::kImageTweenCount);
 // The original advanced the cursor past a texture page packet to the first
@@ -104,7 +104,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
             .model_id = target != nullptr ? target->modelId
                                           : static_cast<std::uint16_t>(0),
             .occupied = Actors_actorRecords[actor] != nullptr ||
-                        Field_gimmickInstances[actor] != nullptr};
+                        VS::Field::gimmickInstances[actor] != nullptr};
   }
 
   void ReportUnavailableActor(int effect, std::uint16_t selector,

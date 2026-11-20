@@ -36,9 +36,9 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 
@@ -286,10 +286,10 @@ class LiveAshleyHost final : public AshleyMovementHost {
     return VS::Field::screenTransitionStep;
   }
   [[nodiscard]] std::optional<int> DoorEntryElevation() const override {
-    if (Field_pendingDestinationDoor.reserved06Bit15 == 0) {
+    if (VS::Field::pendingDestinationDoor.reserved06_bit15 == 0) {
       return std::nullopt;
     }
-    return static_cast<int>(Field_pendingDestinationDoor.entryElevation);
+    return static_cast<int>(VS::Field::pendingDestinationDoor.entry_elevation);
   }
   void UpdateCameraOrbit() override { VS::Field::LiveUpdateCameraOrbitInput(); }
   [[nodiscard]] AshleyControls Controls() const override {

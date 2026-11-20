@@ -27,7 +27,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 
 namespace VS::Actors {
 namespace {

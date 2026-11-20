@@ -18,7 +18,7 @@
 #include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -727,8 +727,8 @@ TEST_CASE("A held gimmick whose holder slot is empty is not drawn",
   constexpr std::size_t kHolder = 6;
   Actors_ActorRecord* const saved = Actors_actorRecords[kHolder];
   Actors_actorRecords[kHolder] = nullptr;
-  Field_GimmickInstance object{};
-  object.objectInfo.objectId = 4;
+  VS::Field::GimmickInstance object{};
+  object.object_info.object_id = 4;
   object.parent = static_cast<u_char>(kHolder);
   object.slot = 3;
   MATRIX camera{};

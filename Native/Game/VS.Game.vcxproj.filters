@@ -2052,7 +2052,7 @@
     <ClCompile Include="src\Field\Doors.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Doors.h">
+    <ClInclude Include="src\Field\Doors.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\EncounterCatalog.cpp">
@@ -2118,7 +2118,7 @@
     <ClCompile Include="src\Field\Gimmicks.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Gimmicks.h">
+    <ClInclude Include="src\Field\Gimmicks.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Input.cpp">
@@ -2181,7 +2181,7 @@
     <ClCompile Include="src\Field\MinimapSceneLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Mpd.h">
+    <ClInclude Include="src\Field\Mpd.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\PlatformPlacement.cpp">
@@ -2193,7 +2193,7 @@
     <ClCompile Include="src\Field\Room.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Room.h">
+    <ClInclude Include="src\Field\Room.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomEffects.cpp">

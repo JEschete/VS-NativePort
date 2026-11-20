@@ -9,9 +9,9 @@
 
 #include "Content/ModuleData.hpp"
 #include "Field/CollisionSampling.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -50,18 +50,18 @@ TEST_CASE("Collision samples decode floor and ceiling patterns from bytes",
 TEST_CASE("The live room binding exposes the room's collision bytes",
           "[collision][room][collision-sampling]") {
   OneTileMap map;
-  auto* saved_map = Field_roomData.collisionMap;
-  const auto saved_length = Field_roomData.header.collisionMapLength;
-  Field_roomData.collisionMap = nullptr;
+  auto* saved_map = VS::Field::roomData.collision_map;
+  const auto saved_length = VS::Field::roomData.header.collision_map_length;
+  VS::Field::roomData.collision_map = nullptr;
   CHECK(VS::Field::LiveRoomCollisionMap().empty());
-  Field_roomData.collisionMap =
-      reinterpret_cast<Field_MpdCollisionHeader*>(map.bytes.data());
-  Field_roomData.header.collisionMapLength = sizeof map.bytes;
+  VS::Field::roomData.collision_map =
+      reinterpret_cast<VS::Field::MpdCollisionHeader*>(map.bytes.data());
+  VS::Field::roomData.header.collision_map_length = sizeof map.bytes;
   const auto live = VS::Field::LiveRoomCollisionMap();
   CHECK(live.data() == map.bytes.data());
   CHECK(live.size() == map.bytes.size());
-  Field_roomData.collisionMap = saved_map;
-  Field_roomData.header.collisionMapLength = saved_length;
+  VS::Field::roomData.collision_map = saved_map;
+  VS::Field::roomData.header.collision_map_length = saved_length;
 }
 
 TEST_CASE("The promoted collision sampler has no original module address",

@@ -9,7 +9,7 @@
 
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/WeaponModel.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/ModelGeometry.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
@@ -393,7 +393,7 @@ TEST_CASE("Live model extents follow loads, copies and releases",
 TEST_CASE("Live gimmick and weapon projection refuse unrecorded models",
           "[render][model-geometry][live]") {
   auto model = FlatTriangleModel();
-  Field_GimmickInstance object{};
+  VS::Field::GimmickInstance object{};
   std::memcpy(&object, &kTriangleCounts, sizeof kTriangleCounts);
   object.model = reinterpret_cast<VS::Actors::ShpModel*>(model.data());
   VS::Actors::modelRenderContext.projected_vertex_count = 7;

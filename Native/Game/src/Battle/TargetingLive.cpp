@@ -56,13 +56,13 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -106,7 +106,7 @@ constexpr std::size_t kSourcePlatformBytes = 184;
 
 using HalfwordPair = std::array<std::int16_t, 2>;
 
-static_assert(sizeof(Field_MpdMovingPlatform) == kSourcePlatformBytes);
+static_assert(sizeof(VS::Field::MpdMovingPlatform) == kSourcePlatformBytes);
 // The native action state holds every preview and hit target the typed
 // collectors can produce; the PS1 0x2C10 allocation is not a limit here.
 static_assert(std::extent_v<decltype(Battle_ActionState::previews)> ==
@@ -348,21 +348,21 @@ battle::TargetingActor ActorView(const Battle_Actor& actor,
 }
 
 std::vector<battle::PlatformPoint> CollectPlatformPoints() {
-  const auto bytes = Field_roomData.header.movingPlatformsLength;
-  if (Field_roomData.movingPlatforms == nullptr) {
+  const auto bytes = VS::Field::roomData.header.moving_platforms_length;
+  if (VS::Field::roomData.moving_platforms == nullptr) {
     if (bytes != 0) {
       VS::Core::LogError("battle.targeting",
                          "moving platform section is missing");
     }
     return {};
   }
-  if (bytes % sizeof(Field_MpdMovingPlatform) != 0) {
+  if (bytes % sizeof(VS::Field::MpdMovingPlatform) != 0) {
     VS::Core::LogError("battle.targeting",
                        "moving platform section is partial");
     return {};
   }
-  const std::size_t capacity = bytes / sizeof(Field_MpdMovingPlatform);
-  if (capacity > std::size(Field_platformBounceFrames)) {
+  const std::size_t capacity = bytes / sizeof(VS::Field::MpdMovingPlatform);
+  if (capacity > std::size(VS::Field::platformBounceFrames)) {
     VS::Core::LogError("battle.targeting",
                        "{} moving platforms exceed the room", capacity);
     return {};

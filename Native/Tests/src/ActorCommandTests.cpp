@@ -22,7 +22,7 @@
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Legacy/Psx.h"
 
@@ -241,10 +241,10 @@ struct RoomCommandFixture : CommandFixture {
       VS::Battle::Ai::roomWaypoints;
   decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
   int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  Field_RoomRecord saved_data = Field_roomData;
+  VS::Field::RoomDataRecord saved_data = VS::Field::roomData;
   decltype(VS::Battle::Ai::directionDeltas) saved_directions =
       VS::Battle::Ai::directionDeltas;
-  Field_MpdCollisionHeader dimensions{2, 2, 0, 4};
+  VS::Field::MpdCollisionHeader dimensions{2, 2, 0, 4};
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -261,8 +261,8 @@ struct RoomCommandFixture : CommandFixture {
     VS::Battle::Ai::patrolRoutes = nullptr;
     VS::Battle::Ai::roomWaypoints = nullptr;
     VS::Battle::Ai::routeGates = nullptr;
-    Field_roomData = {};
-    Field_roomData.collisionMap = &dimensions;
+    VS::Field::roomData = {};
+    VS::Field::roomData.collision_map = &dimensions;
     VS::Battle::Ai::LiveFrameContext() = {};
     state.next_tile.word = 0x00010001;
     VS::Battle::Ai::savedMovementRandomState = 0x12345678;
@@ -280,7 +280,7 @@ struct RoomCommandFixture : CommandFixture {
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
     VS::Battle::Ai::routeGates = saved_gates;
     VS::Battle::Ai::savedMovementRandomState = saved_random;
-    Field_roomData = saved_data;
+    VS::Field::roomData = saved_data;
     std::copy(saved_directions.begin(), saved_directions.end(),
               VS::Battle::Ai::directionDeltas.begin());
   }
@@ -291,16 +291,17 @@ TEST_CASE(
     "Room entry prepares special heights before actor commands and reentry",
     "[ai][special-terrain][room-context][room-navigation]") {
   RoomCommandFixture fixture;
-  alignas(Field_MpdCollisionHeader) std::array<unsigned char, 40> collision{};
-  const Field_MpdCollisionHeader header{2, 2, 16, 4};
+  alignas(VS::Field::MpdCollisionHeader) std::array<unsigned char, 40>
+      collision{};
+  const VS::Field::MpdCollisionHeader header{2, 2, 16, 4};
   std::memcpy(collision.data(), &header, sizeof header);
-  std::array<Field_MpdTileCell, 4> cells{};
-  cells[3].isPit = 1;
-  Field_roomData.collisionMap =
-      reinterpret_cast<Field_MpdCollisionHeader*>(collision.data());
-  Field_roomData.header.collisionMapLength = collision.size();
-  Field_roomData.tileCells = cells.data();
-  Field_roomData.header.tileCellsLength = sizeof cells;
+  std::array<VS::Field::MpdTileCell, 4> cells{};
+  cells[3].is_pit = 1;
+  VS::Field::roomData.collision_map =
+      reinterpret_cast<VS::Field::MpdCollisionHeader*>(collision.data());
+  VS::Field::roomData.header.collision_map_length = collision.size();
+  VS::Field::roomData.tile_cells = cells.data();
+  VS::Field::roomData.header.tile_cells_length = sizeof cells;
   constexpr std::array<int, 4> kX{0, 1, 0, -1};
   constexpr std::array<int, 4> kZ{-1, 0, 1, 0};
   for (std::size_t index = 0; index < kX.size(); ++index) {
@@ -375,8 +376,8 @@ TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
   std::array<std::uint8_t, 0x498 + 308> auxiliary{};
   auxiliary[0x494] = 17;
   auxiliary[0x495] = 16;
-  Field_roomData.section6 = auxiliary.data();
-  Field_roomData.header.section6Length = auxiliary.size();
+  VS::Field::roomData.section6 = auxiliary.data();
+  VS::Field::roomData.header.section6_length = auxiliary.size();
   const auto original = auxiliary;
   const auto grid = VS::Battle::Ai::BuildRoomAiMap(
       VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom());

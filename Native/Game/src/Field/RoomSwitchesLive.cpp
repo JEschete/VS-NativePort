@@ -9,13 +9,13 @@
 #include "Audio/SfxLive.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Items/ItemRecords.hpp"
@@ -27,7 +27,7 @@ constexpr int kSwitchSoundGroup = 0x7E;
 constexpr unsigned kMarkerByteShift = 8;
 // Original800E849C-800E84AB: seven groups and their terminating boundary.
 constexpr std::size_t kSigilRangeWords = 8;
-static_assert(std::size(Field_lockedDoorIndexRanges) >= kSigilRangeWords);
+static_assert(std::size(VS::Field::lockedDoorIndexRanges) >= kSigilRangeWords);
 enum SigilPairByte : std::size_t {
   kFirstZone,
   kFirstMap,
@@ -35,20 +35,21 @@ enum SigilPairByte : std::size_t {
   kSecondMap
 };
 
-std::span<Field_MpdLockTrigger> RoomDoorRecords() {
-  const auto bytes = Field_roomData.header.lockTriggersLength;
-  if (Field_roomData.lockTriggers == nullptr ||
-      bytes % sizeof(Field_MpdLockTrigger) != 0 ||
-      reinterpret_cast<std::uintptr_t>(Field_roomData.lockTriggers) %
-              alignof(Field_MpdLockTrigger) !=
+std::span<VS::Field::MpdLockTrigger> RoomDoorRecords() {
+  const auto bytes = VS::Field::roomData.header.lock_triggers_length;
+  if (VS::Field::roomData.lock_triggers == nullptr ||
+      bytes % sizeof(VS::Field::MpdLockTrigger) != 0 ||
+      reinterpret_cast<std::uintptr_t>(VS::Field::roomData.lock_triggers) %
+              alignof(VS::Field::MpdLockTrigger) !=
           0) {
     return {};
   }
-  return {Field_roomData.lockTriggers, bytes / sizeof(Field_MpdLockTrigger)};
+  return {VS::Field::roomData.lock_triggers,
+          bytes / sizeof(VS::Field::MpdLockTrigger)};
 }
 
 std::optional<VS::Field::RoomObjectTarget> RoomDoorTarget(
-    const Field_MpdLockTrigger* record) {
+    const VS::Field::MpdLockTrigger* record) {
   const auto records = RoomDoorRecords();
   for (std::size_t index = 0; index < records.size(); ++index) {
     if (&records[index] == record) {
@@ -60,7 +61,7 @@ std::optional<VS::Field::RoomObjectTarget> RoomDoorTarget(
   return std::nullopt;
 }
 
-Field_MpdLockTrigger* ResolveRoomDoor(VS::Field::RoomObjectTarget target) {
+VS::Field::MpdLockTrigger* ResolveRoomDoor(VS::Field::RoomObjectTarget target) {
   const auto records = RoomDoorRecords();
   if (target.generation !=
           VS::Field::LiveInteractionTargetDomain().generation ||
@@ -79,9 +80,9 @@ class LiveDoorCollisionHost final : public VS::Field::RoomDoorCollisionHost {
     if (record == nullptr) return std::nullopt;
     const auto& trigger = record->trigger;
     return VS::Field::RoomDoorPlacement{
-        .tile_x = trigger.tileX,
-        .tile_z = trigger.tileZ,
-        .floor_layer = trigger.floorLayer,
+        .tile_x = trigger.tile_x,
+        .tile_z = trigger.tile_z,
+        .floor_layer = trigger.floor_layer,
         .kind = trigger.kind,
         .activation = static_cast<std::uint8_t>(trigger.activation)};
   }
@@ -106,25 +107,25 @@ class LiveDoorAnimationHost final : public VS::Field::RoomDoorAnimationHost {
     if (record == nullptr) return std::nullopt;
     const auto& trigger = record->trigger;
     return VS::Field::RoomDoorAnimationState{
-        .placement = {.tile_x = trigger.tileX,
-                      .tile_z = trigger.tileZ,
-                      .floor_layer = trigger.floorLayer,
+        .placement = {.tile_x = trigger.tile_x,
+                      .tile_z = trigger.tile_z,
+                      .floor_layer = trigger.floor_layer,
                       .kind = trigger.kind,
                       .activation =
                           static_cast<std::uint8_t>(trigger.activation)},
-        .key_or_sigil = std::bit_cast<std::uint16_t>(record->keyOrSigil),
-        .open_value = record->isOpen,
-        .linked_index = record->linkedLockIndex,
+        .key_or_sigil = std::bit_cast<std::uint16_t>(record->key_or_sigil),
+        .open_value = record->is_open,
+        .linked_index = record->linked_lock_index,
         .effect =
-            std::bit_cast<std::uint8_t>(trigger.lockState.lock.roomEffect),
-        .busy = std::bit_cast<std::uint8_t>(record->isTriggered),
-        .delay = std::bit_cast<std::uint8_t>(record->delayFrames)};
+            std::bit_cast<std::uint8_t>(trigger.lock_state.lock.room_effect),
+        .busy = std::bit_cast<std::uint8_t>(record->is_triggered),
+        .delay = std::bit_cast<std::uint8_t>(record->delay_frames)};
   }
   bool QueueAvailable() const override {
     return ResolveRoomDoor(target_) != nullptr &&
            std::ranges::any_of(
-               Field_gimmickAnimationQueue,
-               [](const auto& job) { return job.jobKind == 0; });
+               VS::Field::gimmickAnimationQueue,
+               [](const auto& job) { return job.job_kind == 0; });
   }
   void PlaySound(std::int32_t sound) override {
     VS::Audio::LivePlaySfxCentered(kSwitchSoundGroup, sound);
@@ -142,21 +143,21 @@ class LiveDoorAnimationHost final : public VS::Field::RoomDoorAnimationHost {
   bool StoreBusy(VS::Field::DoorMember member, std::uint8_t busy) override {
     auto* record = Record(member);
     if (record == nullptr) return false;
-    record->isTriggered = std::bit_cast<char>(busy);
+    record->is_triggered = std::bit_cast<char>(busy);
     return true;
   }
   bool StoreDelay(std::uint8_t delay) override {
     auto* record = ResolveRoomDoor(target_);
     if (record == nullptr) return false;
-    record->delayFrames = std::bit_cast<char>(delay);
+    record->delay_frames = std::bit_cast<char>(delay);
     return true;
   }
   bool StoreOpen(VS::Field::DoorMember member, std::int16_t value,
                  std::uint8_t busy) override {
     auto* record = Record(member);
     if (record == nullptr) return false;
-    record->isTriggered = std::bit_cast<char>(busy);
-    record->isOpen = value;
+    record->is_triggered = std::bit_cast<char>(busy);
+    record->is_open = value;
     return true;
   }
   bool Queue(VS::Field::GimmickAnimationKind kind) override {
@@ -173,14 +174,14 @@ class LiveDoorAnimationHost final : public VS::Field::RoomDoorAnimationHost {
     const auto* primary = ResolveRoomDoor(target_);
     if (primary == nullptr) return std::nullopt;
     if (member == VS::Field::DoorMember::kPrimary) return target_;
-    if (primary->linkedLockIndex < 0) return std::nullopt;
+    if (primary->linked_lock_index < 0) return std::nullopt;
     const VS::Field::RoomObjectTarget linked{
-        static_cast<std::uint32_t>(primary->linkedLockIndex),
+        static_cast<std::uint32_t>(primary->linked_lock_index),
         target_.generation};
     return ResolveRoomDoor(linked) != nullptr ? std::optional{linked}
                                               : std::nullopt;
   }
-  Field_MpdLockTrigger* Record(VS::Field::DoorMember member) const {
+  VS::Field::MpdLockTrigger* Record(VS::Field::DoorMember member) const {
     const auto target = Target(member);
     return target ? ResolveRoomDoor(*target) : nullptr;
   }
@@ -188,12 +189,12 @@ class LiveDoorAnimationHost final : public VS::Field::RoomDoorAnimationHost {
 };
 
 using RoomPair = VS::Field::SigilDoorRoomPair;
-using SigilPairs = std::array<RoomPair, std::size(Field_lockedDoorRoomPairs)>;
+using SigilPairs = std::array<RoomPair, VS::Field::kLockedDoorPairCount>;
 
 SigilPairs LiveSigilPairs() {
   SigilPairs pairs{};
   for (std::size_t index = 0; index < pairs.size(); ++index) {
-    const auto& original = Field_lockedDoorRoomPairs[index];
+    const auto& original = VS::Field::lockedDoorRoomPairs[index];
     pairs[index] = {
         .first = {std::bit_cast<std::uint8_t>(original[kFirstZone]),
                   std::bit_cast<std::uint8_t>(original[kFirstMap])},
@@ -205,7 +206,7 @@ SigilPairs LiveSigilPairs() {
 
 class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
  public:
-  explicit LiveRoomSwitchHost(Field_MpdLockTrigger* trigger)
+  explicit LiveRoomSwitchHost(VS::Field::MpdLockTrigger* trigger)
       : trigger_(trigger) {}
 
   std::optional<VS::Field::RoomSwitchState> State() const override {
@@ -215,12 +216,12 @@ class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
     const auto& trigger = trigger_->trigger;
     return VS::Field::RoomSwitchState{
         .switch_value =
-            static_cast<std::uint16_t>(trigger.lockState.switchValue),
-        .marker_fade = static_cast<std::uint8_t>(trigger.markerFade),
+            static_cast<std::uint16_t>(trigger.lock_state.switch_value),
+        .marker_fade = static_cast<std::uint8_t>(trigger.marker_fade),
         .effect_kind = trigger.kind,
-        .tile_x = trigger.tileX,
-        .tile_z = trigger.tileZ,
-        .floor_layer = trigger.floorLayer};
+        .tile_x = trigger.tile_x,
+        .tile_z = trigger.tile_z,
+        .floor_layer = trigger.floor_layer};
   }
   void PlaySound(std::int32_t sound) override {
     VS::Audio::LivePlaySfxCentered(kSwitchSoundGroup, sound);
@@ -229,10 +230,10 @@ class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
     VS::Field::LiveStartRoomEffect(kind);
   }
   void StoreSwitch(std::uint16_t value, std::uint8_t marker_fade) override {
-    trigger_->trigger.markerFade =
-        static_cast<decltype(trigger_->trigger.markerFade)>(marker_fade);
-    trigger_->trigger.lockState.switchValue =
-        static_cast<decltype(trigger_->trigger.lockState.switchValue)>(value);
+    trigger_->trigger.marker_fade =
+        static_cast<decltype(trigger_->trigger.marker_fade)>(marker_fade);
+    trigger_->trigger.lock_state.switch_value =
+        static_cast<decltype(trigger_->trigger.lock_state.switch_value)>(value);
   }
   void SetCellPassability(const VS::Field::RoomSwitchState& state,
                           std::uint8_t passability) override {
@@ -244,31 +245,31 @@ class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
   }
 
  private:
-  Field_MpdLockTrigger* trigger_ = nullptr;
+  VS::Field::MpdLockTrigger* trigger_ = nullptr;
 };
 
 class LiveRoomSwitchStartHost final : public VS::Field::RoomSwitchStartHost {
  public:
-  explicit LiveRoomSwitchStartHost(Field_MpdLockTrigger* trigger)
+  explicit LiveRoomSwitchStartHost(VS::Field::MpdLockTrigger* trigger)
       : trigger_(trigger) {}
   std::optional<VS::Field::RoomSwitchState> State() const override {
     if (trigger_ == nullptr || reinterpret_cast<std::uintptr_t>(trigger_) %
-                                       alignof(Field_MpdLockTrigger) !=
+                                       alignof(VS::Field::MpdLockTrigger) !=
                                    0) {
       return std::nullopt;
     }
     return VS::Field::RoomSwitchState{
-        .switch_value =
-            static_cast<std::uint16_t>(trigger_->trigger.lockState.switchValue),
-        .marker_fade = static_cast<std::uint8_t>(trigger_->trigger.markerFade),
+        .switch_value = static_cast<std::uint16_t>(
+            trigger_->trigger.lock_state.switch_value),
+        .marker_fade = static_cast<std::uint8_t>(trigger_->trigger.marker_fade),
         .activation = static_cast<std::uint8_t>(trigger_->trigger.activation)};
   }
   bool StoreStartState(std::uint8_t marker, std::uint8_t activation) override {
     if (!State()) {
       return false;
     }
-    trigger_->trigger.markerFade =
-        static_cast<decltype(trigger_->trigger.markerFade)>(marker);
+    trigger_->trigger.marker_fade =
+        static_cast<decltype(trigger_->trigger.marker_fade)>(marker);
     trigger_->trigger.activation =
         static_cast<decltype(trigger_->trigger.activation)>(activation);
     return true;
@@ -285,7 +286,7 @@ class LiveRoomSwitchStartHost final : public VS::Field::RoomSwitchStartHost {
   }
 
  private:
-  Field_MpdLockTrigger* trigger_ = nullptr;
+  VS::Field::MpdLockTrigger* trigger_ = nullptr;
 };
 
 class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
@@ -380,9 +381,9 @@ std::optional<RoomObjectTarget> FindLiveInteractiveDoorAtTile(
   for (const auto& record : records) {
     const auto& trigger = record.trigger;
     doors.push_back(
-        {.tile_x = trigger.tileX,
-         .tile_z = trigger.tileZ,
-         .floor_layer = trigger.floorLayer,
+        {.tile_x = trigger.tile_x,
+         .tile_z = trigger.tile_z,
+         .floor_layer = trigger.floor_layer,
          .kind = trigger.kind,
          .activation = static_cast<std::uint8_t>(trigger.activation)});
   }
@@ -394,15 +395,16 @@ std::optional<RoomObjectTarget> FindLiveInteractiveDoorAtTile(
 }
 
 bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index) {
-  if (Field_roomData.minimapScene == nullptr) return false;
+  if (VS::Field::roomData.minimap_scene == nullptr) return false;
   const auto* scene =
-      reinterpret_cast<const std::byte*>(Field_roomData.minimapScene);
+      reinterpret_cast<const std::byte*>(VS::Field::roomData.minimap_scene);
   const auto room = CurrentSceneRoomAddress(
-      {scene, Field_roomData.header.minimapSceneLength});
+      {scene, VS::Field::roomData.header.minimap_scene_length});
   if (!room) return false;
   const auto pairs = LiveSigilPairs();
   const SigilDoorTables tables{
-      std::span(Field_lockedDoorIndexRanges).first(kSigilRangeWords), pairs};
+      std::span(VS::Field::lockedDoorIndexRanges).first(kSigilRangeWords),
+      pairs};
   return MarkSigilDoorUnlocked(
       tables,
       {.zone_id = room->zone_id,
@@ -414,7 +416,8 @@ bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index) {
 std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
   const auto pairs = LiveSigilPairs();
   const SigilDoorTables tables{
-      std::span(Field_lockedDoorIndexRanges).first(kSigilRangeWords), pairs};
+      std::span(VS::Field::lockedDoorIndexRanges).first(kSigilRangeWords),
+      pairs};
   return RoomSigilDoorUnlockByte(
       tables, query,
       std::as_bytes(std::span(VS::State::stateFlags.opaque_186)));
@@ -430,27 +433,26 @@ bool ToggleLiveChestSwitch(ChestTarget target) {
 }
 }  // namespace VS::Field
 
-void VS::Field::ToggleDoorCollisionEntry(Field_MpdLockTrigger* door) {
+void VS::Field::ToggleDoorCollisionEntry(VS::Field::MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   if (target) static_cast<void>(VS::Field::ToggleLiveDoorCollision(*target));
 }
-int VS::Field::BeginDoorToggleEntry(Field_MpdLockTrigger* door) {
+int VS::Field::BeginDoorToggleEntry(VS::Field::MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::BeginLiveDoorToggle(*target);
 }
-int VS::Field::StartDoorAnimationEntry(Field_MpdLockTrigger* door) {
+int VS::Field::StartDoorAnimationEntry(VS::Field::MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::StartLiveDoorAnimation(*target);
 }
-int VS::Field::FinishDoorAnimationEntry(Field_MpdLockTrigger* door) {
+int VS::Field::FinishDoorAnimationEntry(VS::Field::MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::FinishLiveDoorAnimation(*target);
 }
 
 // decomp: BATTLE.PRG func_8008BC04 (146C.c:16215).
-Field_MpdLockTrigger* VS::Field::InteractiveDoorAtTileEntry(int tile_x,
-                                                            int tile_z,
-                                                            int floor_layer) {
+VS::Field::MpdLockTrigger* VS::Field::InteractiveDoorAtTileEntry(
+    int tile_x, int tile_z, int floor_layer) {
   const auto target = VS::Field::FindLiveInteractiveDoorAtTile(
       {.tile_x = tile_x, .tile_z = tile_z, .floor_layer = floor_layer});
   return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
@@ -470,13 +472,15 @@ int VS::Field::IsRoomSigilDoorUnlockedEntry(int zone_id, int map_id,
 }
 
 // decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883).
-void VS::Field::ToggleRoomSwitchEntry(Field_MpdLockTrigger* switch_trigger) {
+void VS::Field::ToggleRoomSwitchEntry(
+    VS::Field::MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchHost host(switch_trigger);
   static_cast<void>(VS::Field::ToggleRoomSwitch(host));
 }
 
 // decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870).
-void VS::Field::BeginSwitchToggleEntry(Field_MpdLockTrigger* switch_trigger) {
+void VS::Field::BeginSwitchToggleEntry(
+    VS::Field::MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchStartHost host(switch_trigger);
   static_cast<void>(VS::Field::BeginSwitchToggle(host));
 }

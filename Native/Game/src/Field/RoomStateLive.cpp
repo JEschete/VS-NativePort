@@ -15,14 +15,14 @@
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Locations.hpp"
 #include "Field/Manual.hpp"
 #include "Field/Minimap.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
@@ -97,15 +97,16 @@ class LiveRoomVisitHost final : public RoomVisitHost {
 };
 
 RoomDisplay LoadRoomDisplay() {
-  return RoomDisplay{.loaded = Field_roomData.isLoaded == 1,
-                     .displayed = Field_roomData.displayFlag != 0,
-                     .owner_room_index = Field_roomData.roomIndex};
+  return RoomDisplay{.loaded = VS::Field::roomData.is_loaded == 1,
+                     .displayed = VS::Field::roomData.display_flag != 0,
+                     .owner_room_index = VS::Field::roomData.room_index};
 }
 
 // The display flag is written only when the owner check passed (146C.c:15756
 // stores 1 or 0 then); the room keeps its load state and owner.
 void StoreRoomDisplayed(const RoomDisplay& display) {
-  Field_roomData.displayFlag = static_cast<char>(display.displayed ? 1 : 0);
+  VS::Field::roomData.display_flag =
+      static_cast<char>(display.displayed ? 1 : 0);
 }
 
 template <typename Rule>
@@ -128,11 +129,12 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
                                      sizeof backgroundReferenceVectors);
         return;
       case RoomRecord::kRoomData:
-        Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof Field_roomData);
+        Memory::ZeroLiveAlignedWords(&VS::Field::roomData,
+                                     sizeof VS::Field::roomData);
         return;
       case RoomRecord::kEntranceDoor:
-        Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord,
-                                     sizeof Field_entranceDoorRecord);
+        Memory::ZeroLiveAlignedWords(&VS::Field::entranceDoorRecord,
+                                     sizeof VS::Field::entranceDoorRecord);
         return;
       case RoomRecord::kUnusedMenuCursorMemory:
         Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory,
@@ -164,10 +166,11 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
     }
   }
   void ApplyDefaults(const RoomRuntimeDefaults& defaults) override {
-    Field_enteredDoorId = static_cast<std::int16_t>(defaults.entered_door_id);
+    VS::Field::enteredDoorId =
+        static_cast<std::int16_t>(defaults.entered_door_id);
     areRoomUpdatesPaused =
         static_cast<u_short>(defaults.room_updates_paused ? 1 : 0);
-    roomTint.isActive =
+    roomTint.is_active =
         static_cast<std::int16_t>(defaults.room_tint_active ? 1 : 0);
     Battle_unusedSubmenuState = 0;
     Battle_unusedSceneBuffer = nullptr;

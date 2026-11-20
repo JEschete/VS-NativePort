@@ -42,7 +42,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -93,7 +93,7 @@ static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_c) ==
               offsetof(Battle_Actor, commandArg0));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_e) ==
               offsetof(Battle_Actor, commandArg0) + sizeof(std::uint16_t));
-static_assert(std::size(Field_gimmickInstances) == kCandidateTargetSlots);
+static_assert(std::size(VS::Field::gimmickInstances) == kCandidateTargetSlots);
 
 static_assert(sizeof(VS::Battle::Ai::CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
@@ -665,12 +665,12 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
   }
   std::optional<CompletedTargetObject> TargetObject(
       unsigned slot) const override {
-    if (slot >= std::size(Field_gimmickInstances)) return std::nullopt;
-    const auto* object = std::span(Field_gimmickInstances)[slot];
+    if (slot >= std::size(VS::Field::gimmickInstances)) return std::nullopt;
+    const auto* object = std::span(VS::Field::gimmickInstances)[slot];
     if (object == nullptr) return CompletedTargetObject{};
     if (!Field::IsLiveGimmickPrefixReadable(object)) return std::nullopt;
     return CompletedTargetObject{.present = true,
-                                 .kind = object->objectInfo.objectId};
+                                 .kind = object->object_info.object_id};
   }
   void ForgetTarget() override { ForgetLiveAiActionTarget(&State()); }
   void RememberTarget() override { RememberLiveAiActionTarget(&State()); }

@@ -13,8 +13,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
@@ -114,18 +114,18 @@ std::vector<std::byte> LightingBlock(
 }
 
 struct LiveLightingFixture {
-  Field_RoomRecord saved = Field_roomData;
+  VS::Field::RoomDataRecord saved = VS::Field::roomData;
   std::vector<std::byte> image;
 
   explicit LiveLightingFixture(std::vector<std::byte> block)
       : image(std::move(block)) {
-    Field_roomData.isLoaded = 1;
-    Field_roomData.lighting = image.data();
-    Field_roomData.header.lightingLength =
+    VS::Field::roomData.is_loaded = 1;
+    VS::Field::roomData.lighting = image.data();
+    VS::Field::roomData.header.lighting_length =
         static_cast<std::uint32_t>(image.size());
   }
 
-  ~LiveLightingFixture() { Field_roomData = saved; }
+  ~LiveLightingFixture() { VS::Field::roomData = saved; }
 };
 }  // namespace
 
@@ -290,7 +290,7 @@ TEST_CASE("Live room lighting ignores unloaded rooms and null colours",
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   CHECK((color.red == 127 && color.green == 63 && color.blue == 63 &&
          color.code == 0xA5));
-  Field_roomData.isLoaded = 0;
+  VS::Field::roomData.is_loaded = 0;
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   CHECK((color.red == 128 && color.green == 128 && color.blue == 128 &&
          color.code == 0));

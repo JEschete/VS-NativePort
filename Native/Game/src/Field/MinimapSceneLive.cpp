@@ -9,10 +9,10 @@
 #include <stdexcept>
 
 #include "Core/Log.hpp"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
@@ -208,25 +208,26 @@ void DrawLiveMinimapScene(const void* data, std::size_t size) {
   }
   LiveMinimapRenderer renderer;
   DrawMinimapScene({static_cast<const std::byte*>(data), size},
-                   (Field_roomAnimationTicks & kDoorPulseMask) != 0, renderer);
+                   (VS::Field::roomAnimationTicks & kDoorPulseMask) != 0,
+                   renderer);
 }
 
 }  // namespace VS::Field
 
 int VS::Field::SceneDoorIdEntry(int door_index) {
-  if (Field_roomData.minimapScene == nullptr) return -1;
+  if (VS::Field::roomData.minimap_scene == nullptr) return -1;
   const auto* data =
-      reinterpret_cast<const std::byte*>(Field_roomData.minimapScene);
+      reinterpret_cast<const std::byte*>(VS::Field::roomData.minimap_scene);
   const auto id = VS::Field::SceneDoorId(
-      {data, Field_roomData.header.minimapSceneLength}, door_index);
+      {data, VS::Field::roomData.header.minimap_scene_length}, door_index);
   return id ? static_cast<int>(*id) : -1;
 }
 
 void VS::Field::MarkEntranceDoorOnSceneMapEntry(int door_index) {
-  Field_enteredDoorId =
+  VS::Field::enteredDoorId =
       std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(door_index));
-  if (Field_roomData.minimapScene == nullptr) return;
-  auto* data = reinterpret_cast<std::byte*>(Field_roomData.minimapScene);
+  if (VS::Field::roomData.minimap_scene == nullptr) return;
+  auto* data = reinterpret_cast<std::byte*>(VS::Field::roomData.minimap_scene);
   static_cast<void>(VS::Field::MarkEntranceDoorOnSceneMap(
-      {data, Field_roomData.header.minimapSceneLength}, door_index));
+      {data, VS::Field::roomData.header.minimap_scene_length}, door_index));
 }

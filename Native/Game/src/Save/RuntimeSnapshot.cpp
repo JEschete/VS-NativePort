@@ -42,10 +42,10 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -129,7 +129,7 @@ Result ItemError(std::string_view scope, std::string_view category,
 struct PersistentInputs {
   Snapshot state;
   VS::State::AshleySnapshot ashley;
-  Field_MpdDoorRecord entry;
+  VS::Field::MpdDoorRecord entry;
   std::array<char, std::size(VS::State::learnedActionFlags)> learned;
   decltype(Snapshot::learned_actions) unlocked;
   std::uint32_t mix_behavior = 0;
@@ -191,13 +191,13 @@ struct RoomContent {
   std::vector<std::uint8_t> bytes;
   std::array<std::uint32_t, kSectionCount> lengths{};
   std::array<std::size_t, kSectionCount> offsets{};
-  Field_MpdCollisionHeader collision{};
-  Field_MpdEnvironment environment{};
+  VS::Field::MpdCollisionHeader collision{};
+  VS::Field::MpdEnvironment environment{};
   std::size_t spawn_count = 0;
 };
 
 Result ValidateCollision(Bytes bytes,
-                         const Field_MpdCollisionHeader& collision) {
+                         const VS::Field::MpdCollisionHeader& collision) {
   // _loadMpdRoomSection (146C.c:15663) replaces cellCount with width*height.
   // section2 is a compact region/direction table, NOT width*height cells
   // (MAP212 and MAP214 deliberately have fewer region bytes).
@@ -278,16 +278,17 @@ std::expected<RoomContent, std::string> ReadRoom(
   if (!entry) return std::unexpected(entry.error());
   auto bytes = store.ReadAll(**entry);
   if (!bytes) return std::unexpected(bytes.error());
-  const auto header = Read<Field_MpdHeader>(*bytes);
+  const auto header = Read<VS::Field::MpdHeader>(*bytes);
   if (!header) return std::unexpected(header.error());
   const auto lengths = Read<std::array<std::uint32_t, kSectionCount>>(
-      *bytes, static_cast<std::size_t>(header->roomSectionOffset));
+      *bytes, static_cast<std::size_t>(header->room_section_offset));
   if (!lengths) return std::unexpected(lengths.error());
   RoomContent result;
   result.bytes = std::move(*bytes);
   result.lengths = *lengths;
   std::uint64_t offset =
-      static_cast<std::uint64_t>(header->roomSectionOffset) + sizeof(*lengths);
+      static_cast<std::uint64_t>(header->room_section_offset) +
+      sizeof(*lengths);
   for (std::size_t index = 0; index < kSectionCount; ++index) {
     const auto section = Section(result.bytes, offset, (*lengths)[index]);
     if (!section) return std::unexpected(section.error());
@@ -301,8 +302,10 @@ std::expected<RoomContent, std::string> ReadRoom(
   if (!collision_section || !environment_section) {
     return std::unexpected("room collision or environment section is missing");
   }
-  const auto collision = Read<Field_MpdCollisionHeader>(*collision_section);
-  const auto environment = Read<Field_MpdEnvironment>(*environment_section);
+  const auto collision =
+      Read<VS::Field::MpdCollisionHeader>(*collision_section);
+  const auto environment =
+      Read<VS::Field::MpdEnvironment>(*environment_section);
   if (!collision || !environment) {
     return std::unexpected("room collision or environment header is truncated");
   }
@@ -311,17 +314,17 @@ std::expected<RoomContent, std::string> ReadRoom(
   const auto valid_collision =
       ValidateCollision(*collision_section, *collision);
   if (!valid_collision) return std::unexpected(valid_collision.error());
-  const auto spawns = Section(result.bytes, header->enemySectionOffset,
-                              header->enemySectionSize);
-  if (!spawns || spawns->size() % sizeof(Field_MpdEnemySpawn) != 0) {
+  const auto spawns = Section(result.bytes, header->enemy_section_offset,
+                              header->enemy_section_size);
+  if (!spawns || spawns->size() % sizeof(VS::Field::MpdEnemySpawn) != 0) {
     return std::unexpected("invalid room actor placement table");
   }
-  result.spawn_count = spawns->size() / sizeof(Field_MpdEnemySpawn);
+  result.spawn_count = spawns->size() / sizeof(VS::Field::MpdEnemySpawn);
   return result;
 }
 
 Result ValidateLocation(const Location& location, const RoomContent& room) {
-  if (location.scene != room.environment.sceneId) {
+  if (location.scene != room.environment.scene_id) {
     return std::unexpected("location.scene does not match the MPD actor area");
   }
   const auto& position = location.position;
@@ -1279,7 +1282,7 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
 
 namespace {
 Result ValidateContentImpl(const Snapshot& state,
-                           const Field_MpdDoorRecord* new_game = nullptr) {
+                           const VS::Field::MpdDoorRecord* new_game = nullptr) {
   auto valid = ValidateRuntimeValues(state);
   if (!valid) return valid;
   if (!new_game) {
@@ -1298,9 +1301,9 @@ Result ValidateContentImpl(const Snapshot& state,
   if (!valid) return valid;
   const auto room = ReadRoom(*store, state.location.zone, state.location.room);
   if (!room) return std::unexpected(room.error());
-  if (new_game && (new_game->entryTileX >= room->collision.width ||
-                   new_game->entryTileZ >= room->collision.height ||
-                   new_game->tileLocation.entryDirection > 1)) {
+  if (new_game && (new_game->entry_tile_x >= room->collision.width ||
+                   new_game->entry_tile_z >= room->collision.height ||
+                   new_game->tile_location.entry_direction > 1)) {
     return std::unexpected(
         "clear-game entry requires an in-bounds static starting-room tile");
   }
@@ -1369,7 +1372,7 @@ std::expected<void, std::string> ValidateContent(const Document& document) {
       (state.settings.menu_flags & kClearMenuFlag) != 0 ||
       state.script_flags[kPuzzleMode] !=
           ((~(state.settings.mode_flags >> kPuzzleSettingShift)) & 1) ||
-      entry.destinationZoneId != 1 || entry.destinationRoomId != 0 ||
+      entry.destination_zone_id != 1 || entry.destination_room_id != 0 ||
       state.location.zone != 1 || state.location.room != 0) {
     return std::unexpected("invalid original clear-game restart state");
   }
@@ -1397,8 +1400,8 @@ std::expected<void, std::string> ValidateContent(const Document& document) {
 
 std::expected<Document, std::string> CaptureClearGame() {
   if (pending || VS::Boot::isGameplayActive || !VS::Boot::isClearSavePending ||
-      VS::State::savedEntryDoor.destinationZoneId != 1 ||
-      VS::State::savedEntryDoor.destinationRoomId != 0 ||
+      VS::State::savedEntryDoor.destination_zone_id != 1 ||
+      VS::State::savedEntryDoor.destination_room_id != 0 ||
       VS::State::stateFlags.clear_count <= 0) {
     return std::unexpected("no original ending clear-save inputs are pending");
   }
@@ -1434,8 +1437,8 @@ std::expected<Snapshot, std::string> Capture(
       Battle_characterState == nullptr ||
       Battle_characterState != Battle_actors[0] ||
       Battle_characterState->stats == nullptr ||
-      Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
-      Field_roomData.environment == nullptr ||
+      Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
+      VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.room_disc_request != nullptr ||
       VS::Field::zoneContext.zone_disc_request != nullptr) {
     return std::unexpected("gameplay is not ready for a semantic capture");
@@ -1537,7 +1540,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
                                staged.state.location.room);
     if (!room) return std::unexpected(room.error());
     staged.state.location.scene =
-        static_cast<std::uint16_t>(room->environment.sceneId);
+        static_cast<std::uint16_t>(room->environment.scene_id);
   }
   CapturePersistent(staged.previous.state);
   staged.previous.ashley = VS::State::ashleySnapshot;
@@ -1559,18 +1562,18 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
     return {};
   }
   VS::State::savedEntryDoor = {};
-  VS::State::savedEntryDoor.destinationZoneId =
+  VS::State::savedEntryDoor.destination_zone_id =
       static_cast<unsigned char>(pending->state.location.zone);
-  VS::State::savedEntryDoor.destinationRoomId =
+  VS::State::savedEntryDoor.destination_room_id =
       static_cast<unsigned char>(pending->state.location.room);
-  VS::State::savedEntryDoor.requiredFlagId = pending->state.location.scene;
-  VS::State::savedEntryDoor.tileLocation.entryDirection =
+  VS::State::savedEntryDoor.required_flag_id = pending->state.location.scene;
+  VS::State::savedEntryDoor.tile_location.entry_direction =
       pending->state.location.floor_layer;
-  VS::State::savedEntryDoor.entryTileX =
+  VS::State::savedEntryDoor.entry_tile_x =
       static_cast<unsigned>(pending->state.location.position[0] / kTileUnits);
-  VS::State::savedEntryDoor.entryTileZ =
+  VS::State::savedEntryDoor.entry_tile_z =
       static_cast<unsigned>(pending->state.location.position[2] / kTileUnits);
-  VS::State::savedEntryDoor.entryElevation =
+  VS::State::savedEntryDoor.entry_elevation =
       static_cast<unsigned>(pending->state.location.facing / kQuarterTurn);
   SyncMonoOutput(pending->state.settings.mono_sound == 1);
   return {};
@@ -1609,12 +1612,12 @@ std::expected<void, std::string> FinishResume() {
   if (!VS::Boot::isGameplayActive || Battle_characterState == nullptr ||
       Battle_characterState != Battle_actors[0] ||
       Battle_characterState->stats == nullptr ||
-      Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
-      Field_roomData.environment == nullptr ||
+      Actors_actorRecords[0] == nullptr || !VS::Field::roomData.is_loaded ||
+      VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.zone_id != state.location.zone ||
       VS::Field::zoneContext.room_id != state.location.room ||
       VS::Field::zoneContext.scene_id != state.location.scene ||
-      Field_roomData.environment->sceneId != state.location.scene ||
+      VS::Field::roomData.environment->scene_id != state.location.scene ||
       VS::Field::zoneContext.room_disc_request != nullptr ||
       VS::Field::zoneContext.zone_disc_request != nullptr ||
       VS::State::ashleySnapshot.stats.is_pending != 0) {

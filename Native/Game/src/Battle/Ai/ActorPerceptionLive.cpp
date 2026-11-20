@@ -30,7 +30,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/TerrainHeight.hpp"
 
 namespace VS::Battle::Ai {
@@ -48,7 +48,7 @@ constexpr int kTopByteShift = 24;
 constexpr std::uint32_t kHalfMask = 0xFFFF;
 
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kPerceptionSlots);
-static_assert(std::size(Field_gimmickInstances) == kPerceptionSlots);
+static_assert(std::size(VS::Field::gimmickInstances) == kPerceptionSlots);
 static_assert(kFrameActorSlots == kPerceptionSlots);
 static_assert(std::size(Actors_actorRecords) == kPerceptionRecordSlots);
 
@@ -195,7 +195,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
     return ShapeOf(*state);
   }
   [[nodiscard]] bool HasGimmick(int target) const override {
-    return Field_gimmickInstances[target] != nullptr;
+    return VS::Field::gimmickInstances[target] != nullptr;
   }
   [[nodiscard]] std::optional<bool> IsMarkedTile(
       Core::Math::TileCoordinate tile) const override {

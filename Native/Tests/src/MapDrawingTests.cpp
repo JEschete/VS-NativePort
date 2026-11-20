@@ -13,10 +13,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Gte.h"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Doors.hpp"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Map.hpp"
 #include "Menu/MapDrawing.hpp"
@@ -880,7 +880,7 @@ class LiveMap {
     map::menuCommandsState = 0;
     map::triggerHideUi = 0;
     map::currentScene = 0;
-    Field_enteredDoorId = -1;
+    VS::Field::enteredDoorId = -1;
     map::ResetMapDrawingLive();
   }
   LiveMap(const LiveMap&) = delete;
@@ -966,9 +966,10 @@ class LiveMap {
   Restore<int> geom_x_{map::geomOffsetX};
   Restore<int> geom_y_{map::geomOffsetY};
   Restore<SVECTOR> angles_{map::cameraAngles};
-  Restore<std::int16_t> door_{Field_enteredDoorId};
-  Restore<VS::Field::MapScene*> minimap_{Field_roomData.minimapScene};
-  Restore<u_int> minimap_length_{Field_roomData.header.minimapSceneLength};
+  Restore<std::int16_t> door_{VS::Field::enteredDoorId};
+  Restore<VS::Field::MapScene*> minimap_{VS::Field::roomData.minimap_scene};
+  Restore<u_int> minimap_length_{
+      VS::Field::roomData.header.minimap_scene_length};
   VS::State::StateFlags saved_flags_{};
   std::array<map::CompassPoint, 4> saved_bounds_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
@@ -995,9 +996,9 @@ std::vector<u_long> OneRoomScene(std::int32_t visited) {
 }
 
 void LoadMinimap(std::vector<u_long>& scene) {
-  Field_roomData.minimapScene =
+  VS::Field::roomData.minimap_scene =
       reinterpret_cast<VS::Field::MapScene*>(scene.data());
-  Field_roomData.header.minimapSceneLength =
+  VS::Field::roomData.header.minimap_scene_length =
       static_cast<u_int>(scene.size() * sizeof(u_long));
 }
 
@@ -1282,7 +1283,7 @@ TEST_CASE("The live room refuses data outside the loaded scene",
   CHECK(map::LiveDrawRoom(0, stray.data() + 4, 1, 2) == 0);
   CHECK(map::LiveDrawRoom(0, nullptr, 1, 2) == 0);
   // The marker table reaches past the scene's end.
-  Field_roomData.header.minimapSceneLength -= 4;
+  VS::Field::roomData.header.minimap_scene_length -= 4;
   CHECK(map::LiveDrawRoom(0, scene.data() + 4, 1, 2) == 0);
   CHECK(frame.UsedWords() == 0);
 }
@@ -1318,7 +1319,7 @@ TEST_CASE("Live visited rooms refuse a scene the menu did not load",
           "[map-drawing-live]") {
   LiveMap frame;
   auto scene = OneRoomScene(1);
-  Field_roomData.minimapScene = nullptr;
+  VS::Field::roomData.minimap_scene = nullptr;
   map::mapLabelCount = 5;
   map::LiveDrawVisitedRooms(
       reinterpret_cast<VS::Field::MapScene*>(scene.data()));

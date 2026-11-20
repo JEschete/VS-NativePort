@@ -20,7 +20,7 @@
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLiveState.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"

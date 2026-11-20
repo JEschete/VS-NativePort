@@ -48,9 +48,9 @@
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/CollisionSampling.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -684,10 +684,10 @@ int Tests_RoomLightingSamples(void) {
                  {{0, 0, 128, 128},
                   {{0, 0}, {0, 128}, {128, 0}},
                   {0x806040, 0x806040, 0x806040}}}};
-  const Field_RoomRecord saved = Field_roomData;
-  Field_roomData.isLoaded = 1;
-  Field_roomData.lighting = &lighting;
-  Field_roomData.header.lightingLength = sizeof lighting;
+  const VS::Field::RoomDataRecord saved = VS::Field::roomData;
+  VS::Field::roomData.is_loaded = 1;
+  VS::Field::roomData.lighting = &lighting;
+  VS::Field::roomData.header.lighting_length = sizeof lighting;
   VS::Render::ColorCode color = {0, 0, 0, 0x5A};
   VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   int passed = color.red == 127 && color.green == 63 && color.blue == 63 &&
@@ -697,17 +697,17 @@ int Tests_RoomLightingSamples(void) {
   VS::Field::SampleLiveRoomLighting((200 << 16) | 200, 0, &color);
   passed = passed && color.red == 17 && color.green == 34 && color.blue == 51 &&
            color.code == 0;
-  Field_roomData.lighting = nullptr;
+  VS::Field::roomData.lighting = nullptr;
   VS::Field::SampleLiveRoomLighting(0, 0, &color);
   passed =
       passed && color.red == 128 && color.green == 128 && color.blue == 128;
-  Field_roomData = saved;
+  VS::Field::roomData = saved;
   return passed;
 }
 
 int Tests_CollisionHeightPatterns(void) {
   struct {
-    Field_MpdCollisionHeader header;
+    VS::Field::MpdCollisionHeader header;
     uint16_t floor[2];
     uint16_t ceiling[2];
     signed char patterns[2][16];
@@ -717,10 +717,10 @@ int Tests_CollisionHeightPatterns(void) {
   collision.patterns[0][4] = 7;
   collision.patterns[1][0] = 8;
   collision.patterns[1][15] = -16;
-  const Field_RoomRecord saved = Field_roomData;
-  memset(&Field_roomData, 0, sizeof Field_roomData);
-  Field_roomData.collisionMap = &collision.header;
-  Field_roomData.header.collisionMapLength = sizeof collision;
+  const VS::Field::RoomDataRecord saved = VS::Field::roomData;
+  memset(&VS::Field::roomData, 0, sizeof VS::Field::roomData);
+  VS::Field::roomData.collision_map = &collision.header;
+  VS::Field::roomData.header.collision_map_length = sizeof collision;
   const auto sample = [](uint32_t x, int z, int layer) {
     return VS::Field::SampleCollisionHeightCode(
         VS::Field::LiveRoomCollisionMap(), x, z, layer);
@@ -731,9 +731,9 @@ int Tests_CollisionHeightPatterns(void) {
                sample(4, 0, 1) == 0xFA && sample(8, 0, 0) == 0x80 &&
                sample(0, 4, 0) == 0x80 && sample(0, -1, 0) == 0x80 &&
                sample(0, 0, 2) == 0x80;
-  Field_roomData.header.collisionMapLength--;
+  VS::Field::roomData.header.collision_map_length--;
   passed = passed && sample(7, 3, 0) == 0x80;
-  Field_roomData = saved;
+  VS::Field::roomData = saved;
   return passed;
 }
 

@@ -1,23 +1,26 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
+// The room door globals (Doors.hpp).
+#include "Field/Doors.hpp"
 
-// decomp: D_800E849C (D_800E849C@BATTLE/BATTLE.PRG)
-short Field_lockedDoorIndexRanges[54]; /* contents: module image (ModuleData.cpp) */
+#include "Field/Mpd.hpp"
 
-// decomp: D_800E84AC (D_800E84AC@BATTLE/BATTLE.PRG)
-char Field_lockedDoorRoomPairs[23][4]; /* contents: module image (ModuleData.cpp) */
+namespace VS::Field {
+// decomp: D_800E849C (D_800E849C@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+LockedDoorRanges lockedDoorIndexRanges;
+
+// decomp: D_800E84AC (D_800E84AC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+LockedDoorPairs lockedDoorRoomPairs;
 
 // decomp: D_800F18E8 (D_800F18E8@BATTLE/BATTLE.PRG)
-Field_DoorFlagIdWord Field_snapshotDoorFlagSource;
+DoorFlagIdWord snapshotDoorFlagSource;
 
 // decomp: D_800F1AB0 (D_800F1AB0@BATTLE/BATTLE.PRG)
-Field_MpdDoorRecord Field_pendingDestinationDoor;
+VS::Field::MpdDoorRecord pendingDestinationDoor;
 
 // decomp: vs_battle_doorEntered (vs_battle_doorEntered@BATTLE/BATTLE.PRG)
-short Field_enteredDoorId;
+std::int16_t enteredDoorId;
 
 // decomp: D_800F1CC8 (D_800F1CC8@BATTLE/BATTLE.PRG)
-Field_MpdDoorRecord Field_entranceDoorRecord;
-
+VS::Field::MpdDoorRecord entranceDoorRecord;
+}  // namespace VS::Field

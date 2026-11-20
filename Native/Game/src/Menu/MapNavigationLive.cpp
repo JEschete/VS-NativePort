@@ -16,9 +16,9 @@
 #include "Battle/StatusEffects.h"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
@@ -85,10 +85,11 @@ void Write(std::span<std::byte> bytes, std::size_t offset, T value) {
     return std::span{static_cast<std::byte*>(Battle_unusedSceneBuffer),
                      static_cast<std::size_t>(size)};
   }
-  if (scene == Field_roomData.minimapScene) {
+  if (scene == VS::Field::roomData.minimap_scene) {
     return std::span{
-        reinterpret_cast<std::byte*>(Field_roomData.minimapScene),
-        static_cast<std::size_t>(Field_roomData.header.minimapSceneLength)};
+        reinterpret_cast<std::byte*>(VS::Field::roomData.minimap_scene),
+        static_cast<std::size_t>(
+            VS::Field::roomData.header.minimap_scene_length)};
   }
   return std::nullopt;
 }
@@ -321,12 +322,12 @@ int LiveInitialRoomIndex(Field::MapScene* scene) {
   const auto live = LiveSceneOf(kCall, scene);
   if (!live.has_value()) return 0;
   std::optional<Field::SceneRoomAddress> current;
-  if (Field_roomData.minimapScene == nullptr) {
+  if (VS::Field::roomData.minimap_scene == nullptr) {
     Refuse(kCall, "no minimap scene");
   } else {
     current = Field::CurrentSceneRoomAddress(
-        {reinterpret_cast<const std::byte*>(Field_roomData.minimapScene),
-         Field_roomData.header.minimapSceneLength});
+        {reinterpret_cast<const std::byte*>(VS::Field::roomData.minimap_scene),
+         VS::Field::roomData.header.minimap_scene_length});
     if (!current.has_value()) Refuse(kCall, "empty minimap scene");
   }
   const InitialRoom initial =

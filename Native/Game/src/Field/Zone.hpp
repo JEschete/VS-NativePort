@@ -12,7 +12,9 @@ namespace VS::Content {
 struct DiscFile;
 struct DiscQueueSlot;
 }  // namespace VS::Content
-struct Field_MpdEnemySpawn;
+namespace VS::Field {
+struct MpdEnemySpawn;
+}
 
 namespace VS::Field {
 
@@ -48,7 +50,7 @@ struct ZoneContext {
   VS::Content::DiscQueueSlot* room_disc_request = nullptr;
   void* room_data = nullptr;
   std::uint32_t room_enemy_count = 0;
-  Field_MpdEnemySpawn* room_enemies = nullptr;
+  VS::Field::MpdEnemySpawn* room_enemies = nullptr;
   std::int32_t scene_id = 0;
 };
 static_assert(std::is_trivially_copyable_v<ZoneContext>);

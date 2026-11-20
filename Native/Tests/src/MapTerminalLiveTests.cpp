@@ -30,15 +30,15 @@
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Manual.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -126,7 +126,7 @@ struct LiveWorld {
   ArrayRestore<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers};
   ArrayRestore<void*, 2> saved_tables{VS::Render::legacyOrderingTables};
   ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
-  ValueRestore<decltype(Field_roomData)> saved_room{Field_roomData};
+  ValueRestore<decltype(VS::Field::roomData)> saved_room{VS::Field::roomData};
   ValueRestore<decltype(VS::State::stateFlags)> saved_progress{
       VS::State::stateFlags};
   ValueRestore<decltype(VS::State::roomVisitProgress)> saved_visits{
@@ -164,7 +164,7 @@ struct LiveWorld {
   std::array<u_long, 2084> ordering{};
   std::array<VS::Menu::Framework::MenuRow, framework::kRowCount> rows{};
   std::vector<std::uint8_t> minimap;
-  Field_MpdEnvironment environment{};
+  VS::Field::MpdEnvironment environment{};
   std::array<std::uint32_t, 0x180> sound_offsets{};
   std::array<std::uint16_t, 0x180> sound_banks{};
   VS::Audio::Playback::ScopedLiveEffectTables sounds{
@@ -216,13 +216,13 @@ struct LiveWorld {
           {reinterpret_cast<std::uint8_t*>(map::mapNames),
            sizeof(map::mapNames)}));
       minimap = SceneFile(1);
-      Field_roomData.minimapScene =
+      VS::Field::roomData.minimap_scene =
           reinterpret_cast<VS::Field::MapScene*>(minimap.data());
-      Field_roomData.header.minimapSceneLength =
+      VS::Field::roomData.header.minimap_scene_length =
           static_cast<u_int>(minimap.size());
-      environment.sceneId = 1;
-      Field_roomData.environment = &environment;
-      Field_roomData.header.environmentLength = sizeof(environment);
+      environment.scene_id = 1;
+      VS::Field::roomData.environment = &environment;
+      VS::Field::roomData.header.environment_length = sizeof(environment);
     }
   }
 
@@ -894,14 +894,14 @@ struct FullDiscQueue {
 
 struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
-      VS::Field::backgroundReferenceVectors, Field_entranceDoorRecord,
+      VS::Field::backgroundReferenceVectors, VS::Field::entranceDoorRecord,
       Battle_unusedMenu9CursorMemory, VS::Field::manualDisplayState,
       VS::Field::roomPalettes, VS::Battle::floatingLabels,
-      VS::Battle::placedLabelPositions, Field_enteredDoorId,
+      VS::Battle::placedLabelPositions, VS::Field::enteredDoorId,
       VS::Field::areRoomUpdatesPaused, VS::Field::roomTint,
       Battle_unusedSubmenuState, VS::Field::isMinimapVisible,
-      VS::Field::minimapSlideFrame, Field_gimmickAnimationQueue,
-      Field_pendingGimmickAnimationCount>
+      VS::Field::minimapSlideFrame, VS::Field::gimmickAnimationQueue,
+      VS::Field::pendingGimmickAnimationCount>
       saved;
   VS::Field::RoomBackgroundState background =
       VS::Field::LoadLiveRoomBackgroundState();
@@ -1158,7 +1158,7 @@ TEST_CASE(
   const game_clear_live_tests::SavedModuleData saved_module;
   LiveWorld world(true);
   const RestoreRoomRuntime saved_room;
-  REQUIRE(Field_pendingGimmickAnimationCount == 0);
+  REQUIRE(VS::Field::pendingGimmickAnimationCount == 0);
   world.LoadScene(1);
   auto* scene = Battle_unusedSceneBuffer;
   VS::Menu::SetLiveTextBoxText(0, reinterpret_cast<char*>(map::roomNamesTable));
@@ -1166,7 +1166,7 @@ TEST_CASE(
   CheckNoSceneOwners();
   CHECK_FALSE(map::BoundLiveMapScene(scene));
   CHECK_FALSE(memory::LivePayloadCapacity(scene));
-  CHECK(Field_roomData.minimapScene == nullptr);
+  CHECK(VS::Field::roomData.minimap_scene == nullptr);
   CHECK(VS::Field::roomPalettes != nullptr);
   CHECK(VS::Battle::floatingLabels != nullptr);
   CHECK(VS::Battle::placedLabelPositions != nullptr);
@@ -1202,8 +1202,8 @@ TEST_CASE("Original map caption survives module reset but not a cold session",
 TEST_CASE("Normal map exit leaves the stored view for the next field draw",
           "[map-terminal-integration][map-terminal-field][F02690][F04149]") {
   LiveWorld world(true);
-  const game_clear_live_tests::SavedGlobals<Field_roomPrimitiveRangeStart,
-                                            Field_roomPrimitiveRangeEnd>
+  const game_clear_live_tests::SavedGlobals<VS::Field::roomPrimitiveRangeStart,
+                                            VS::Field::roomPrimitiveRangeEnd>
       saved_ranges;
   SetFieldView();
   std::uint8_t phase = 3;
@@ -1212,7 +1212,7 @@ TEST_CASE("Normal map exit leaves the stored view for the next field draw",
   ExitScreen(world, phase);
   CHECK(VS::Field::isFieldRenderingEnabled == 1);
   std::uint32_t empty_geometry = 0;
-  Field_roomData.header.geometryLength = sizeof(empty_geometry);
+  VS::Field::roomData.header.geometry_length = sizeof(empty_geometry);
   world.ResetFrame();
   REQUIRE(VS::Render::ValidateLiveRoomGeometry(&empty_geometry,
                                                sizeof(empty_geometry)));

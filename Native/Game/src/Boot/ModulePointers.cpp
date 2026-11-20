@@ -199,7 +199,7 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Collision.hpp"
 #include "Field/DoorMatchList.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/EnvironmentLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
@@ -207,7 +207,7 @@
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Input.hpp"
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
@@ -217,9 +217,9 @@
 #include "Field/MapProgress.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLiveState.hpp"
@@ -346,7 +346,7 @@ extern short Content_residentLfoSamples[167936];
 static const VS::Content::ModuleSymbol Content_residentLfoSamplesSource = {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 2u, 2u};
 
 const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
-    {"BATTLE/BATTLE.PRG", 0x80068BECu, 14u, (void*)&Field_kPlatformBounceOffsets, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80068BECu, 14u, (void*)&VS::Field::kPlatformBounceOffsets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80068F04u, 96u, (void*)&VS::Battle::kMarkerFrameCorners, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80068F64u, 48u, (void*)&VS::Battle::kMarkerFrameTexCoords, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80068F94u, 24u, (void*)&VS::Battle::kMarkerIconOffsets, 0u, 0u, 0u},
@@ -378,10 +378,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8490u, 4u, (void*)&Battle_vitalsTickCounter, sizeof Battle_vitalsTickCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8494u, 4u, (void*)&Battle_regeneratingLimb, sizeof Battle_regeneratingLimb, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8498u, 4u, (void*)&Battle_targetingRiskTimer, sizeof Battle_targetingRiskTimer, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E849Cu, 16u, (void*)&Field_lockedDoorIndexRanges, sizeof Field_lockedDoorIndexRanges, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E84ACu, 92u, (void*)&Field_lockedDoorRoomPairs, sizeof Field_lockedDoorRoomPairs, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E849Cu, 16u, (void*)&VS::Field::lockedDoorIndexRanges, sizeof VS::Field::lockedDoorIndexRanges, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E84ACu, 92u, (void*)&VS::Field::lockedDoorRoomPairs, sizeof VS::Field::lockedDoorRoomPairs, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8508u, 64u, (void*)&VS::Field::countableRoomMask, sizeof VS::Field::countableRoomMask, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E85A0u, 28u, (void*)&Field_triggerMarkerRecordTail, sizeof Field_triggerMarkerRecordTail, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E85A0u, 28u, (void*)&VS::Field::triggerMarkerRecordTail, sizeof VS::Field::triggerMarkerRecordTail, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85BCu, 8u, (void*)&VS::Field::triggerMarkerTextureSource, sizeof VS::Field::triggerMarkerTextureSource, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E85C4u, 8u, (void*)&VS::Field::triggerMarkerPaletteSource, sizeof VS::Field::triggerMarkerPaletteSource, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E861Cu, 24u, (void*)&VS::Battle::valueCaptionRects, sizeof VS::Battle::valueCaptionRects, 1u, 1u},
@@ -403,38 +403,38 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&VS::Actors::sharedSequenceBankIndex, sizeof VS::Actors::sharedSequenceBankIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)VS::Actors::textureSlotOrigins.data(), sizeof VS::Actors::textureSlotOrigins, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)VS::Actors::textureSlotRowOffsets.data(), sizeof VS::Actors::textureSlotRowOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8FA8u, 12u, (void*)&Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates, 4u, sizeof Field_gimmickModelTemplates[0]},
+    {"BATTLE/BATTLE.PRG", 0x800E8FA8u, 12u, (void*)&VS::Field::gimmickPaletteParameters, sizeof VS::Field::gimmickPaletteParameters, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&VS::Field::gimmickModelTemplates, sizeof VS::Field::gimmickModelTemplates, 4u, sizeof VS::Field::gimmickModelTemplates[0]},
     {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&VS::Actors::forcedModelOverrides, sizeof VS::Actors::forcedModelOverrides, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC4u, 4u, (void*)&VS::Content::assetQueuePeakUsage, sizeof VS::Content::assetQueuePeakUsage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC8u, 8u, (void*)&VS::Items::weaponMaterialPaletteIndices, sizeof VS::Items::weaponMaterialPaletteIndices, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8FD0u, 96u, (void*)&Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9030u, 96u, (void*)&Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8FD0u, 96u, (void*)&VS::Field::kGimmickRollOrientations, sizeof VS::Field::kGimmickRollOrientations, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9030u, 96u, (void*)&VS::Field::kGimmickOrientationRotations, sizeof VS::Field::kGimmickOrientationRotations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9090u, 12u, (void*)&VS::Actors::drawnWeaponAnimationBases, sizeof VS::Actors::drawnWeaponAnimationBases, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E909Cu, 12u, (void*)&VS::Actors::sheathedWeaponAnimationBases, sizeof VS::Actors::sheathedWeaponAnimationBases, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E90A8u, 4u, (void*)&Field_interactingGimmickId, sizeof Field_interactingGimmickId, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E90A8u, 4u, (void*)&VS::Field::interactingGimmickId, sizeof VS::Field::interactingGimmickId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90ACu, 8u, (void*)&Actors_kJumpHangFrames, sizeof Actors_kJumpHangFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90B4u, 8u, (void*)&Actors_kJumpHeightAdjustments, sizeof Actors_kJumpHeightAdjustments, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90C4u, 4u, (void*)&Actors_kMotionResultOneAnimationId, sizeof Actors_kMotionResultOneAnimationId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90CCu, 4u, (void*)&Actors_kSlowQuadrantMoveAnimations, sizeof Actors_kSlowQuadrantMoveAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90D0u, 156u, (void*)&Actors_kFastQuadrantMoveAnimations, sizeof Actors_kFastQuadrantMoveAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E916Cu, 48u, (void*)&VS::Actors::secondarySlotSequences, sizeof VS::Actors::secondarySlotSequences, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E919Cu, 8u, (void*)&Field_gimmickTemplateIndices, sizeof Field_gimmickTemplateIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E919Cu, 8u, (void*)&VS::Field::gimmickTemplateIndices, sizeof VS::Field::gimmickTemplateIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91A4u, 8u, (void*)&VS::Audio::objectSurfaceSoundIds, sizeof VS::Audio::objectSurfaceSoundIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91ACu, 16u, (void*)&Field_kGimmickSpinHeightSteps, sizeof Field_kGimmickSpinHeightSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91BCu, 16u, (void*)&Field_kGimmickSpinPitchSteps, sizeof Field_kGimmickSpinPitchSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91CCu, 16u, (void*)&Field_kGimmickSpinYawSteps, sizeof Field_kGimmickSpinYawSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91DCu, 16u, (void*)&Field_kGimmickSpinRollSteps, sizeof Field_kGimmickSpinRollSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91ECu, 4u, (void*)&Field_kGimmickBounceHeightSteps, sizeof Field_kGimmickBounceHeightSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91F0u, 12u, (void*)&Field_kGimmickTiltDepthSteps, sizeof Field_kGimmickTiltDepthSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91FCu, 12u, (void*)&Field_kGimmickTiltAngleSteps, sizeof Field_kGimmickTiltAngleSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9208u, 16u, (void*)&Field_kGimmickRollHeightSteps, sizeof Field_kGimmickRollHeightSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9218u, 16u, (void*)&Field_kGimmickRollDisplacementSteps, sizeof Field_kGimmickRollDisplacementSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9228u, 16u, (void*)&Field_kGimmickRollAngleSteps, sizeof Field_kGimmickRollAngleSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9238u, 16u, (void*)&Field_kGimmickSquashHeightSteps, sizeof Field_kGimmickSquashHeightSteps, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9248u, 16u, (void*)&Field_kGimmickSquashScaleX, sizeof Field_kGimmickSquashScaleX, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9258u, 16u, (void*)&Field_kGimmickSquashScaleY, sizeof Field_kGimmickSquashScaleY, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9268u, 16u, (void*)&Field_kGimmickSquashScaleZ, sizeof Field_kGimmickSquashScaleZ, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91ACu, 16u, (void*)&VS::Field::kGimmickSpinHeightSteps, sizeof VS::Field::kGimmickSpinHeightSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91BCu, 16u, (void*)&VS::Field::kGimmickSpinPitchSteps, sizeof VS::Field::kGimmickSpinPitchSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91CCu, 16u, (void*)&VS::Field::kGimmickSpinYawSteps, sizeof VS::Field::kGimmickSpinYawSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91DCu, 16u, (void*)&VS::Field::kGimmickSpinRollSteps, sizeof VS::Field::kGimmickSpinRollSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91ECu, 4u, (void*)&VS::Field::kGimmickBounceHeightSteps, sizeof VS::Field::kGimmickBounceHeightSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91F0u, 12u, (void*)&VS::Field::kGimmickTiltDepthSteps, sizeof VS::Field::kGimmickTiltDepthSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91FCu, 12u, (void*)&VS::Field::kGimmickTiltAngleSteps, sizeof VS::Field::kGimmickTiltAngleSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9208u, 16u, (void*)&VS::Field::kGimmickRollHeightSteps, sizeof VS::Field::kGimmickRollHeightSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9218u, 16u, (void*)&VS::Field::kGimmickRollDisplacementSteps, sizeof VS::Field::kGimmickRollDisplacementSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9228u, 16u, (void*)&VS::Field::kGimmickRollAngleSteps, sizeof VS::Field::kGimmickRollAngleSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9238u, 16u, (void*)&VS::Field::kGimmickSquashHeightSteps, sizeof VS::Field::kGimmickSquashHeightSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9248u, 16u, (void*)&VS::Field::kGimmickSquashScaleX, sizeof VS::Field::kGimmickSquashScaleX, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9258u, 16u, (void*)&VS::Field::kGimmickSquashScaleY, sizeof VS::Field::kGimmickSquashScaleY, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9268u, 16u, (void*)&VS::Field::kGimmickSquashScaleZ, sizeof VS::Field::kGimmickSquashScaleZ, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9278u, 32u, (void*)&VS::Field::tileSurfaceIds, sizeof VS::Field::tileSurfaceIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9298u, 68u, (void*)&VS::Actors::animationEventLengths, sizeof VS::Actors::animationEventLengths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92DCu, 12u, (void*)&VS::Actors::drawnWeaponSoundIds, sizeof VS::Actors::drawnWeaponSoundIds, 1u, 1u},
@@ -574,7 +574,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1AA0u, 4u, (void*)&VS::Field::screenTransitionAlpha, sizeof VS::Field::screenTransitionAlpha, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1AA4u, 4u, (void*)&VS::Field::screenTransitionWipeAngle, sizeof VS::Field::screenTransitionWipeAngle, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1AA8u, 4u, (void*)&VS::Field::screenTransitionSpeed, sizeof VS::Field::screenTransitionSpeed, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1AB0u, 12u, (void*)&Field_pendingDestinationDoor, sizeof Field_pendingDestinationDoor, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1AB0u, 12u, (void*)&VS::Field::pendingDestinationDoor, sizeof VS::Field::pendingDestinationDoor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1AC0u, 96u, (void*)&VS::Render::legacyTransitionWipePackets, sizeof VS::Render::legacyTransitionWipePackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1B20u, 72u, (void*)&VS::Render::legacyTransitionEdgePackets, sizeof VS::Render::legacyTransitionEdgePackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1B68u, 48u, (void*)&VS::Render::legacyTransitionFadePackets, sizeof VS::Render::legacyTransitionFadePackets, 1u, 1u},
@@ -583,23 +583,23 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1BA8u, 4u, (void*)&VS::Field::roomPalettes, sizeof VS::Field::roomPalettes, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BACu, 4u, (void*)&VS::Battle::floatingLabels, sizeof VS::Battle::floatingLabels, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB0u, 8u, (void*)&VS::Field::roomTint, sizeof VS::Field::roomTint, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BB8u, 4u, (void*)&Field_roomPrimitiveRangeEnd, sizeof Field_roomPrimitiveRangeEnd, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BB8u, 4u, (void*)&VS::Field::roomPrimitiveRangeEnd, sizeof VS::Field::roomPrimitiveRangeEnd, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC0u, 4u, (void*)&Battle_unusedSceneBuffer, sizeof Battle_unusedSceneBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC8u, 36u, (void*)&VS::Field::manualDisplayState, sizeof VS::Field::manualDisplayState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BF0u, 8u, (void*)&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BF8u, 196u, (void*)&Field_roomData, sizeof Field_roomData, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1BF8u, 196u, (void*)&VS::Field::roomData, sizeof VS::Field::roomData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1CBCu, 4u, (void*)&VS::Battle::placedLabelPositions, sizeof VS::Battle::placedLabelPositions, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1CC0u, 4u, (void*)&Field_roomPrimitiveRangeStart, sizeof Field_roomPrimitiveRangeStart, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1CC8u, 12u, (void*)&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1CC0u, 4u, (void*)&VS::Field::roomPrimitiveRangeStart, sizeof VS::Field::roomPrimitiveRangeStart, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1CC8u, 12u, (void*)&VS::Field::entranceDoorRecord, sizeof VS::Field::entranceDoorRecord, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CD4u, 4u, (void*)&VS::Field::minimapSlideFrame, sizeof VS::Field::minimapSlideFrame, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CD8u, 4u, (void*)&Battle_unusedSubmenuState, sizeof Battle_unusedSubmenuState, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&Field_roomAnimationTicks, sizeof Field_roomAnimationTicks, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&VS::Field::roomAnimationTicks, sizeof VS::Field::roomAnimationTicks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CE0u, 32u, (void*)&VS::Field::backgroundReferenceVectors, sizeof VS::Field::backgroundReferenceVectors, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D08u, 4u, (void*)&VS::Field::matchingDoorRecords, sizeof VS::Field::matchingDoorRecords, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1D28u, 64u, (void*)&Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1D68u, 4u, (void*)&Field_platformFreezeFrames, sizeof Field_platformFreezeFrames, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1D6Cu, 4u, (void*)&Field_triggerMarkerFrameTicks, sizeof Field_triggerMarkerFrameTicks, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1D70u, 8u, (void*)&Field_platformBounceFrames, sizeof Field_platformBounceFrames, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1D28u, 64u, (void*)&VS::Field::gimmickAnimationQueue, sizeof VS::Field::gimmickAnimationQueue, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1D68u, 4u, (void*)&VS::Field::platformFreezeFrames, sizeof VS::Field::platformFreezeFrames, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1D6Cu, 4u, (void*)&VS::Field::triggerMarkerFrameTicks, sizeof VS::Field::triggerMarkerFrameTicks, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1D70u, 8u, (void*)&VS::Field::platformBounceFrames, sizeof VS::Field::platformBounceFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1D78u, 20u, (void*)&VS::Field::backgroundGradientColors, sizeof VS::Field::backgroundGradientColors, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D98u, 12u, (void*)&VS::Field::weatherParameters, sizeof VS::Field::weatherParameters, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1DA4u, 4u, (void*)&VS::Field::weatherIntensityScale, sizeof VS::Field::weatherIntensityScale, 0u, 0u},
@@ -648,7 +648,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&VS::Actors::skeletonPose, sizeof VS::Actors::skeletonPose, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C78u, 32u, (void*)&VS::Actors::skeletonRootMatrix, sizeof VS::Actors::skeletonRootMatrix, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&VS::Actors::roomActorScale, sizeof VS::Actors::roomActorScale, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4448u, 224u, (void*)&Field_gimmickPaletteColors, sizeof Field_gimmickPaletteColors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4448u, 224u, (void*)&VS::Field::gimmickPaletteColors, sizeof VS::Field::gimmickPaletteColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4528u, 16u, (void*)&VS::Actors::sharedSequenceData, sizeof VS::Actors::sharedSequenceData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4538u, 68u, (void*)&Actors_actorRecords, sizeof Actors_actorRecords, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F457Cu, 4u, (void*)&VS::Content::lastLoadPhaseSnapshot, sizeof VS::Content::lastLoadPhaseSnapshot, 0u, 0u},
@@ -657,7 +657,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4590u, 4u, (void*)&Battle_unusedGlobal1, sizeof Battle_unusedGlobal1, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4594u, 4u, (void*)&Battle_unusedGlobal2, sizeof Battle_unusedGlobal2, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F45D8u, 4u, (void*)&VS::Content::lastAssetRequestType, sizeof VS::Content::lastAssetRequestType, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F45E0u, 64u, (void*)&Field_gimmickInstances, sizeof Field_gimmickInstances, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F45E0u, 64u, (void*)&VS::Field::gimmickInstances, sizeof VS::Field::gimmickInstances, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4620u, 4u, (void*)&VS::Content::legacyWeaponModelBuffers, sizeof VS::Content::legacyWeaponModelBuffers, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4628u, 128u, (void*)&VS::Actors::sharedSequenceAnimationIds, sizeof VS::Actors::sharedSequenceAnimationIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F46A8u, 192u, (void*)&VS::Render::legacyActorTextureSlots, sizeof VS::Render::legacyActorTextureSlots, 1u, 1u},
@@ -670,7 +670,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F49D8u, 4u, (void*)&VS::Battle::chainAbilityAnimationSide, sizeof VS::Battle::chainAbilityAnimationSide, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49DCu, 4u, (void*)&VS::Actors::lastResolvedSequenceIndex, sizeof VS::Actors::lastResolvedSequenceIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49E4u, 4u, (void*)&VS::Battle::specialActionPitch, sizeof VS::Battle::specialActionPitch, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F49E8u, 4u, (void*)&Field_gimmickInteractionDirection, sizeof Field_gimmickInteractionDirection, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F49E8u, 4u, (void*)&VS::Field::gimmickInteractionDirection, sizeof VS::Field::gimmickInteractionDirection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49F4u, 4u, (void*)&Actors_supportingPlatformLayer, sizeof Actors_supportingPlatformLayer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49F8u, 4u, (void*)&Actors_supportingGimmickIndex, sizeof Actors_supportingGimmickIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B00u, 4u, (void*)&VS::Field::platformContactSearchDepth, sizeof VS::Field::platformContactSearchDepth, 1u, 1u},
@@ -2393,7 +2393,7 @@ const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)VS::Battle::attackPrerequisiteFunctions.data(), sizeof VS::Battle::attackPrerequisiteFunctions / sizeof VS::Battle::attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
     {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
     {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)VS::Battle::actionEffectMediators.data(), sizeof VS::Battle::actionEffectMediators / sizeof VS::Battle::actionEffectMediators[0], NULL}, // G00032 _actionEffectMediators
-    {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates / sizeof Field_gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4
+    {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)VS::Field::gimmickModelTemplates.data(), sizeof VS::Field::gimmickModelTemplates / sizeof VS::Field::gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4
     {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)VS::Event::opcodeHandlers, sizeof VS::Event::opcodeHandlers / sizeof VS::Event::opcodeHandlers[0], NULL}, // G00133 _opcodeFunctionTable
     {"BATTLE/BATTLE.PRG", 0x81E20, 20u, (void**)VS::Battle::limbNames.data(), sizeof VS::Battle::limbNames / sizeof VS::Battle::limbNames[0], NULL}, // G00138 vs_battle_limbNames
     {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)VS::Event::textBoxFrameStyles, sizeof VS::Event::textBoxFrameStyles / sizeof VS::Event::textBoxFrameStyles[0], NULL}, // G00148 D_800EB588

@@ -19,9 +19,9 @@
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Content/CdDrive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -243,7 +243,7 @@ class SectionStore : public Base {
   return block;
 }
 
-// The environment section's offsets (Field_MpdEnvironment).
+// The environment section's offsets (VS::Field::MpdEnvironment).
 constexpr std::size_t kWorkshopAt = 0x30;
 constexpr std::size_t kEnvironmentFlagsAt = 0x31;
 constexpr std::size_t kTrapLevelAt = 0x32;
@@ -258,7 +258,7 @@ constexpr std::size_t kParameterAt = 0x56;
   return environment;
 }
 
-// A placement record's bytes (Field_MpdEnemySpawn).
+// A placement record's bytes (VS::Field::MpdEnemySpawn).
 void PutEnemy(Bytes& records, std::size_t index, const EnemyPlacement& enemy,
               std::uint8_t hidden = 0) {
   const std::size_t at = index * kRoomPlacementBytes;
@@ -277,7 +277,7 @@ void PutEnemy(Bytes& records, std::size_t index, const EnemyPlacement& enemy,
   Put(records, at + 0x27, enemy.scene_test);
 }
 
-// A placement record's bytes (Field_MpdObjectSpawn).
+// A placement record's bytes (VS::Field::MpdObjectSpawn).
 void PutObject(Bytes& records, std::size_t index,
                const ObjectPlacement& object) {
   const std::size_t at = index * kRoomPlacementBytes;
@@ -1637,11 +1637,11 @@ TEST_CASE("A room's fall destination packs its zone and room",
 
 TEST_CASE("The live environment reads nothing without a loaded section",
           "[field][field-room-loading]") {
-  SavedGlobal saved_room{Field_roomData};
-  Field_roomData.environment = nullptr;
-  Field_roomData.header.environmentLength = 0;
-  Field_roomData.soundData = nullptr;
-  Field_roomData.header.soundDataLength = 0;
+  SavedGlobal saved_room{VS::Field::roomData};
+  VS::Field::roomData.environment = nullptr;
+  VS::Field::roomData.header.environment_length = 0;
+  VS::Field::roomData.sound_data = nullptr;
+  VS::Field::roomData.header.sound_data_length = 0;
   CHECK(LiveIsCurrentRoomWorkshop() == 0);
   CHECK(LiveCurrentSceneId() == 0);
   CHECK(LiveRoomFallDestination() == 0);
@@ -1652,26 +1652,27 @@ TEST_CASE("The live environment reads nothing without a loaded section",
 
 TEST_CASE("The live environment reads the loaded room's whole section",
           "[field][field-room-loading]") {
-  SavedGlobal saved_room{Field_roomData};
+  SavedGlobal saved_room{VS::Field::roomData};
   Bytes environment = FilledEnvironment(4);
-  Field_roomData.environment =
-      reinterpret_cast<Field_MpdEnvironment*>(environment.data());
-  Field_roomData.header.environmentLength =
+  VS::Field::roomData.environment =
+      reinterpret_cast<VS::Field::MpdEnvironment*>(environment.data());
+  VS::Field::roomData.header.environment_length =
       static_cast<u_int>(kRoomEnvironmentBytes);
-  Field_roomData.soundData = nullptr;
-  Field_roomData.header.soundDataLength = 0;
+  VS::Field::roomData.sound_data = nullptr;
+  VS::Field::roomData.header.sound_data_length = 0;
   CHECK(LiveIsCurrentRoomWorkshop() == 2);
   CHECK(LiveCurrentSceneId() == 17);
   CHECK(LiveRoomFallDestination() == 0x90004);
   CHECK(LiveRoomEnvironmentParameter() == -5);
   CHECK(LiveRoomTrapLevel() == 3);
-  Field_roomData.header.environmentLength = 0x40;
+  VS::Field::roomData.header.environment_length = 0x40;
   CHECK(LiveCurrentSceneId() == 0);
   CHECK(LiveRoomTrapLevel() == 0);
 
   std::array<u_int, 1> sound{};
-  Field_roomData.soundData = sound.data();
-  Field_roomData.header.soundDataLength = static_cast<u_int>(sizeof sound);
+  VS::Field::roomData.sound_data = sound.data();
+  VS::Field::roomData.header.sound_data_length =
+      static_cast<u_int>(sizeof sound);
   CHECK(LiveIsRoomAudioSequenceAbsent() == 0);
 }
 

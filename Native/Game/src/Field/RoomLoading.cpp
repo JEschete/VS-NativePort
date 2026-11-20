@@ -45,8 +45,8 @@ constexpr std::size_t kFileEntrySizeAt = 4;
 constexpr std::size_t kTextureTableCount = 4;
 constexpr std::size_t kTextureTablesAt = kTextureTableCount * kWordBytes;
 
-// The room file header (Field_MpdHeader): word offsets, then halfword sizes
-// for the first four sections and word sizes for the last two.
+// The room file header (VS::Field::MpdHeader): word offsets, then halfword
+// sizes for the first four sections and word sizes for the last two.
 constexpr std::size_t kRoomSectionsOffsetAt = 0x00;
 constexpr std::size_t kClearedOffsetAt = 0x08;
 constexpr std::size_t kClearedSizeAt = 0x0C;
@@ -59,7 +59,7 @@ constexpr std::size_t kEnemySizeAt = 0x24;
 constexpr std::size_t kLootOffsetAt = 0x28;
 constexpr std::size_t kLootSizeAt = 0x2C;
 
-// A placement record (Field_MpdEnemySpawn and Field_MpdObjectSpawn).
+// A placement record (VS::Field::MpdEnemySpawn and VS::Field::MpdObjectSpawn).
 constexpr std::size_t kPlacementKindAt = 0x00;
 constexpr std::size_t kPlacementHiddenAt = 0x02;
 constexpr std::size_t kEnemyIdAt = 0x04;
@@ -123,16 +123,16 @@ constexpr int kObjectModelLowMask = 0xF00;
 constexpr int kObjectMaterialShift = 3;
 constexpr int kObjectMaterialMask = 0x1C;
 
-// The collision map header (Field_MpdCollisionHeader).
+// The collision map header (VS::Field::MpdCollisionHeader).
 constexpr std::size_t kCollisionWidthAt = 0;
 constexpr std::size_t kCollisionHeightAt = 2;
 constexpr std::size_t kCollisionCellCountAt = 6;
-// Section E (Field_MpdSectionE).
+// Section E (VS::Field::MpdSectionE).
 constexpr std::size_t kSecondArrayOffsetAt = 4;
 constexpr std::size_t kHasSecondArrayAt = 8;
 constexpr std::size_t kFirstArrayAt = 0x0C;
 constexpr std::size_t kSecondArrayAt = 0x10;
-// The environment section (Field_MpdEnvironment).
+// The environment section (VS::Field::MpdEnvironment).
 constexpr std::size_t kWorkshopAt = 0x30;
 constexpr std::size_t kEnvironmentFlagsAt = 0x31;
 constexpr std::size_t kTrapLevelAt = 0x32;

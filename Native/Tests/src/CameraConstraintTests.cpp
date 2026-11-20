@@ -12,32 +12,32 @@
 #include "Core/Log.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
 namespace {
 struct CameraConstraintFixture {
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   Actors_ActorRecord* saved_actor = Actors_actorRecords[0];
   VS::Core::LogObserver saved_observer = VS::Core::SetLogObserver({});
   Actors_ActorRecord actor{};
-  Field_MpdCollisionHeader header{3, 3, 0, 9};
-  std::array<Field_MpdTileCell, 9> cells{};
+  VS::Field::MpdCollisionHeader header{3, 3, 0, 9};
+  std::array<VS::Field::MpdTileCell, 9> cells{};
   std::array<int, 17> geometry{};
   std::vector<std::string> warnings;
 
   CameraConstraintFixture() {
-    Field_roomData = {};
-    Field_roomData.collisionMap = &header;
-    Field_roomData.tileCells = cells.data();
-    Field_roomData.header.collisionMapLength = sizeof header;
-    Field_roomData.header.tileCellsLength = sizeof cells;
-    Field_roomData.geometry = geometry.data();
-    Field_roomData.header.geometryLength = sizeof geometry;
+    VS::Field::roomData = {};
+    VS::Field::roomData.collision_map = &header;
+    VS::Field::roomData.tile_cells = cells.data();
+    VS::Field::roomData.header.collision_map_length = sizeof header;
+    VS::Field::roomData.header.tile_cells_length = sizeof cells;
+    VS::Field::roomData.geometry = geometry.data();
+    VS::Field::roomData.header.geometry_length = sizeof geometry;
     geometry[0] = 1;
     geometry[1] = 0x1000;
     Actors_actorRecords[0] = &actor;
@@ -49,7 +49,7 @@ struct CameraConstraintFixture {
     });
   }
   ~CameraConstraintFixture() {
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     Actors_actorRecords[0] = saved_actor;
     VS::Core::SetLogObserver(std::move(saved_observer));
   }
@@ -88,18 +88,18 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   const auto saved_yaw = VS::Render::FrameScratchpad().camera.angles.vy;
   VS::Render::FrameScratchpad().camera.angles.vy = 0;
   struct ViewTrigger {
-    Field_MpdViewTrigger header;
+    VS::Field::MpdViewTrigger header;
     std::array<char, 4> group_ids{};
   } trigger{};
-  trigger.header.tileX = 1;
-  trigger.header.tileZ = 1;
-  trigger.header.viewDirection = 4;
-  trigger.header.effectCount = 1;
+  trigger.header.tile_x = 1;
+  trigger.header.tile_z = 1;
+  trigger.header.view_direction = 4;
+  trigger.header.effect_count = 1;
   trigger.header.mode = VS::Field::sphericalCamera.preferred_distance == 0x900;
-  fixture.cells[4].occlusionAndFloorFlags = 1;
+  fixture.cells[4].occlusion_and_floor_flags = 1;
   fixture.geometry[1] = 0;
-  Field_roomData.viewTriggers = &trigger.header;
-  Field_roomData.header.viewTriggersLength = sizeof trigger;
+  VS::Field::roomData.view_triggers = &trigger.header;
+  VS::Field::roomData.header.view_triggers_length = sizeof trigger;
   VS::Actors::TileTarget target{};
   target.tile_x = 1;
   target.tile_z = 1;

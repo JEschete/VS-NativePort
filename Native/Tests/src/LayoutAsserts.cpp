@@ -33,12 +33,12 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/Runtime.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
 static_assert(
     sizeof(VS::Actors::ActorCore) - offsetof(VS::Actors::ActorCore, model) >=
-        offsetof(Field_GimmickInstance, reserved178),
+        offsetof(VS::Field::GimmickInstance, reserved178),
     "The auxiliary actor allocation must own the native gimmick prefix");
 
 static_assert(
@@ -195,12 +195,12 @@ SAME_FIELD(VS::Battle::Ai::CandidateReadinessView, candidate_order,
            VS::Battle::Ai::ActorAiState, candidate_order);
 SAME_FIELD(VS::Battle::Ai::CandidateReadinessView, candidate_count,
            VS::Battle::Ai::ActorAiState, candidate_count);
-SAME_FIELD(Field_GimmickPhysicsView, nativePointer68, Field_GimmickInstance,
-           model);
-SAME_FIELD(Field_GimmickPhysicsView, frame, Field_GimmickInstance,
-           objectInfo.supportIndex);
-SAME_FIELD(Field_GimmickPhysicsView, carrier, Field_GimmickInstance,
-           objectInfo.carrier);
+SAME_FIELD(VS::Field::GimmickPhysicsView, native_pointer68,
+           VS::Field::GimmickInstance, model);
+SAME_FIELD(VS::Field::GimmickPhysicsView, frame, VS::Field::GimmickInstance,
+           object_info.support_index);
+SAME_FIELD(VS::Field::GimmickPhysicsView, carrier, VS::Field::GimmickInstance,
+           object_info.carrier);
 static_assert(sizeof(VS::Battle::Ai::AiCreationView) <=
                   sizeof(VS::Battle::Ai::ActorAiState),
               "creation view exceeds storage");
@@ -402,7 +402,7 @@ int Tests_AiFrameCache(void) {
   u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   u_short(*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
   void* saved_data = VS::Battle::Ai::roomHasWaypoints;
-  const unsigned saved_aux_length = Field_roomData.header.section6Length;
+  const unsigned saved_aux_length = VS::Field::roomData.header.section6_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
   u_char savedScratch[132];
   u_char* scratch = reinterpret_cast<u_char*>(VS::Core::ScratchBase()) + 0x37C;
@@ -423,7 +423,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::specialTerrainHeights = heights;
   VS::Battle::Ai::roomHasWaypoints = auxiliary;
-  Field_roomData.header.section6Length = sizeof auxiliary;
+  VS::Field::roomData.header.section6_length = sizeof auxiliary;
   VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   const int returned = VS::Battle::Ai::CacheLiveActorAiWorkingState();
   const VS::Battle::Ai::FrameContext* frame =
@@ -446,7 +446,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::specialTerrainHeights = saved_heights;
   VS::Battle::Ai::roomHasWaypoints = saved_data;
-  Field_roomData.header.section6Length = saved_aux_length;
+  VS::Field::roomData.header.section6_length = saved_aux_length;
   VS::Battle::Ai::savedMovementRandomState = saved_random;
   memcpy(scratch, savedScratch, sizeof savedScratch);
   return passed;
@@ -540,19 +540,19 @@ int Tests_ActorConditionSnapshot(void) {
 }
 
 int Tests_GimmickViewsRoundTrip(void) {
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {0};
   VS::Actors::ShpModel model = {0};
-  Field_GimmickPhysicsView* physics =
-      reinterpret_cast<Field_GimmickPhysicsView*>(&object);
+  VS::Field::GimmickPhysicsView* physics =
+      reinterpret_cast<VS::Field::GimmickPhysicsView*>(&object);
   object.model = &model;
-  object.objectInfo.supportIndex = 13;
+  object.object_info.support_index = 13;
   physics->position.vy = -64;
-  int passed = physics->nativePointer68 == &model && physics->frame == 13 &&
-               object.positionY == -64;
+  int passed = physics->native_pointer68 == &model && physics->frame == 13 &&
+               object.position_y == -64;
   physics->frame = 14;
   physics->carrier = 3;
-  passed = passed && object.objectInfo.supportIndex == 14 &&
-           object.objectInfo.carrier == 3 && object.model == &model;
+  passed = passed && object.object_info.support_index == 14 &&
+           object.object_info.carrier == 3 && object.model == &model;
   return passed;
 }
 

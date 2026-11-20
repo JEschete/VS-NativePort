@@ -18,11 +18,11 @@
 #include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionSampling.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -44,38 +44,39 @@ constexpr std::size_t kPlatformCellOffset = 0xB4;
 constexpr std::size_t kActorSlotCount = std::extent_v<ActorRecordTable>;
 constexpr std::size_t kFirstRoomActor = 2;
 
-static_assert(sizeof(Field_MpdTileCell) == sizeof(std::uint32_t));
-static_assert(sizeof(Field_MpdMovingPlatform) == kPlatformRecordBytes);
-static_assert(offsetof(Field_MpdMovingPlatform, tileCell) ==
+static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Field::MpdMovingPlatform) == kPlatformRecordBytes);
+static_assert(offsetof(VS::Field::MpdMovingPlatform, tile_cell) ==
               kPlatformCellOffset);
-static_assert(std::extent_v<decltype(Field_gimmickInstances)> ==
+static_assert(std::tuple_size_v<decltype(VS::Field::gimmickInstances)> ==
               kGimmickSlotCount);
 
 // The authored platform records, or none when the section is malformed.
-std::span<Field_MpdMovingPlatform> LivePlatformRecords() {
-  const std::size_t bytes = Field_roomData.header.movingPlatformsLength;
-  if (Field_roomData.movingPlatforms == nullptr) return {};
+std::span<VS::Field::MpdMovingPlatform> LivePlatformRecords() {
+  const std::size_t bytes = VS::Field::roomData.header.moving_platforms_length;
+  if (VS::Field::roomData.moving_platforms == nullptr) return {};
   if (bytes % kPlatformRecordBytes != 0 ||
       bytes / kPlatformRecordBytes > kMovingPlatformCapacity) {
     VS::Core::LogWarn("field.collision",
                       "Moving platform section of {} bytes refused", bytes);
     return {};
   }
-  return {Field_roomData.movingPlatforms, bytes / kPlatformRecordBytes};
+  return {VS::Field::roomData.moving_platforms, bytes / kPlatformRecordBytes};
 }
 
-// The tile cell words are read in place; Field_MpdTileCell is one word.
-std::span<Field_MpdTileCell> LiveRoomCells() {
-  if (Field_roomData.tileCells == nullptr) return {};
-  return {Field_roomData.tileCells,
-          Field_roomData.header.tileCellsLength / sizeof(Field_MpdTileCell)};
+// The tile cell words are read in place; VS::Field::MpdTileCell is one word.
+std::span<VS::Field::MpdTileCell> LiveRoomCells() {
+  if (VS::Field::roomData.tile_cells == nullptr) return {};
+  return {VS::Field::roomData.tile_cells,
+          VS::Field::roomData.header.tile_cells_length /
+              sizeof(VS::Field::MpdTileCell)};
 }
 
 CollisionCells LiveCells(PlatformWords& platform_words) {
   const auto room = LiveRoomCells();
   const auto platforms = LivePlatformRecords();
   for (std::size_t index = 0; index < platforms.size(); ++index) {
-    std::memcpy(&platform_words.at(index), &platforms[index].tileCell,
+    std::memcpy(&platform_words.at(index), &platforms[index].tile_cell,
                 sizeof(std::uint32_t));
   }
   return CollisionCells{
@@ -87,12 +88,12 @@ CollisionCells LiveCells(PlatformWords& platform_words) {
                        .first(platforms.size())};
 }
 
-Field_MpdTileCell* CellPointer(std::optional<CollisionCellRef> cell) {
+VS::Field::MpdTileCell* CellPointer(std::optional<CollisionCellRef> cell) {
   if (!cell) return nullptr;
   if (cell->source == CollisionCellSource::kRoom) {
     return &LiveRoomCells()[cell->index];
   }
-  return &LivePlatformRecords()[cell->index].tileCell;
+  return &LivePlatformRecords()[cell->index].tile_cell;
 }
 
 std::vector<PlatformContact> LiveVisiblePlatforms() {
@@ -111,18 +112,19 @@ std::vector<PlatformContact> LiveVisiblePlatforms() {
 GimmickStates LiveGimmicks() {
   GimmickStates states{};
   for (std::size_t slot = 0; slot < kGimmickSlotCount; ++slot) {
-    const Field_GimmickInstance* gimmick = Field_gimmickInstances[slot];
+    const VS::Field::GimmickInstance* gimmick =
+        VS::Field::gimmickInstances[slot];
     if (gimmick == nullptr) continue;
-    states.at(slot) =
-        GimmickSupportState{.skipped = gimmick->isSkipped != 0,
-                            .falling = gimmick->objectInfo.isFalling != 0,
-                            .motion_state = gimmick->motionState,
-                            .tile_x = static_cast<std::uint8_t>(gimmick->tileX),
-                            .tile_z = static_cast<std::uint8_t>(gimmick->tileZ),
-                            .mode = gimmick->mode,
-                            .x = gimmick->positionX,
-                            .y = gimmick->positionY,
-                            .z = gimmick->positionZ};
+    states.at(slot) = GimmickSupportState{
+        .skipped = gimmick->is_skipped != 0,
+        .falling = gimmick->object_info.is_falling != 0,
+        .motion_state = gimmick->motion_state,
+        .tile_x = static_cast<std::uint8_t>(gimmick->tile_x),
+        .tile_z = static_cast<std::uint8_t>(gimmick->tile_z),
+        .mode = gimmick->mode,
+        .x = gimmick->position_x,
+        .y = gimmick->position_y,
+        .z = gimmick->position_z};
   }
   return states;
 }
@@ -173,10 +175,10 @@ void RecordSupportingGimmick(std::uint8_t slot) {
 }  // namespace
 
 namespace VS::Field {
-Field_MpdTileCell* LiveRoomCollisionCells() {
+VS::Field::MpdTileCell* LiveRoomCollisionCells() {
   PlatformWords words{};
   if (RoomCollisionCells(LiveCells(words)).empty()) return nullptr;
-  return Field_roomData.tileCells;
+  return VS::Field::roomData.tile_cells;
 }
 
 int LiveCollisionMapDimensions(int /*unused*/) {
@@ -184,33 +186,34 @@ int LiveCollisionMapDimensions(int /*unused*/) {
 }
 
 std::optional<CameraBounds> LiveRoomCameraBounds() {
-  if (Field_roomData.zoneBounds == nullptr) return std::nullopt;
+  if (VS::Field::roomData.zone_bounds == nullptr) return std::nullopt;
   const auto decoded = RoomCameraBounds(
-      {reinterpret_cast<const std::byte*>(Field_roomData.zoneBounds),
-       Field_roomData.header.zoneBoundsLength});
+      {reinterpret_cast<const std::byte*>(VS::Field::roomData.zone_bounds),
+       VS::Field::roomData.header.zone_bounds_length});
   if (!decoded) {
     VS::Core::LogWarn("field.collision",
                       "Camera bounds section of {} bytes refused",
-                      Field_roomData.header.zoneBoundsLength);
+                      VS::Field::roomData.header.zone_bounds_length);
   }
   return decoded;
 }
 
-Field_MpdTileCell* LiveCollisionCellAt(unsigned int tile_x, unsigned int tile_z,
-                                       int layer) {
+VS::Field::MpdTileCell* LiveCollisionCellAt(unsigned int tile_x,
+                                            unsigned int tile_z, int layer) {
   PlatformWords words{};
   return CellPointer(CollisionCellAt(LiveCells(words), tile_x, tile_z, layer));
 }
 
-const Field_MpdTileCell* LiveCollisionCellOrAbsent(unsigned int tile_x,
-                                                   unsigned int tile_z,
-                                                   int layer) {
-  static const Field_MpdTileCell absent = [] {
-    Field_MpdTileCell cell{};
+const VS::Field::MpdTileCell* LiveCollisionCellOrAbsent(unsigned int tile_x,
+                                                        unsigned int tile_z,
+                                                        int layer) {
+  static const VS::Field::MpdTileCell absent = [] {
+    VS::Field::MpdTileCell cell{};
     std::memcpy(&cell, &kAbsentCellWord, sizeof cell);
     return cell;
   }();
-  const Field_MpdTileCell* cell = LiveCollisionCellAt(tile_x, tile_z, layer);
+  const VS::Field::MpdTileCell* cell =
+      LiveCollisionCellAt(tile_x, tile_z, layer);
   return cell != nullptr ? cell : &absent;
 }
 
@@ -227,7 +230,7 @@ int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer,
         tile_z, layer);
     return 0;
   }
-  Field_MpdTileCell* cell = CellPointer(target);
+  VS::Field::MpdTileCell* cell = CellPointer(target);
   std::uint32_t word = 0;
   std::memcpy(&word, cell, sizeof word);
   word = BlockedCellWord(word, blocked);
@@ -235,8 +238,8 @@ int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer,
   return 1;
 }
 
-Field_MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
-                                                   int layer) {
+VS::Field::MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
+                                                        int layer) {
   if (position == nullptr) {
     VS::Core::LogWarn("field.collision",
                       "Cell lookup without a position refused");
@@ -360,14 +363,14 @@ std::optional<CollisionCellRef> LiveCollisionCellRefAtPosition(
 }
 
 std::optional<std::uint32_t> LiveCollisionCellWord(CollisionCellRef cell) {
-  const Field_MpdTileCell* source = nullptr;
+  const VS::Field::MpdTileCell* source = nullptr;
   if (cell.source == CollisionCellSource::kRoom) {
     const auto room = LiveRoomCells();
     if (cell.index < room.size()) source = &room[cell.index];
   } else {
     const auto platforms = LivePlatformRecords();
     if (cell.index < platforms.size()) {
-      source = &platforms[cell.index].tileCell;
+      source = &platforms[cell.index].tile_cell;
     }
   }
   if (source == nullptr) return std::nullopt;

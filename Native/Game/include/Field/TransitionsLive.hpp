@@ -3,12 +3,14 @@
 
 #include "Field/Transitions.hpp"
 
-struct Field_MpdDoorRecord;
+namespace VS::Field {
+struct MpdDoorRecord;
+}  // namespace VS::Field
 
 // Binding from the screen transition globals (TransitionsLiveState.hpp), the
-// pending door (Field_pendingDestinationDoor), the location table and Ashley
-// to the typed transition rules (Transitions.hpp). Each adapter keeps the
-// original argument order for the generated callers (copy_fixups.py
+// pending door (VS::Field::pendingDestinationDoor), the location table and
+// Ashley to the typed transition rules (Transitions.hpp). Each adapter keeps
+// the original argument order for the generated callers (copy_fixups.py
 // OWNED_CALL_BINDINGS).
 namespace VS::Field {
 // The transition and pending door as the globals hold them, and back.
@@ -27,16 +29,16 @@ void LiveBeginScreenFadeOut(int effect, int speed, int wipe_angle);
 void LiveBeginScreenFadeIn(int effect, int speed, int wipe_angle);
 // decomp: BATTLE.PRG func_8007C4E0 (src/BATTLE/BATTLE.PRG/146C.c:8805)
 // A null door is refused with a warning on the "field" channel; returns 0.
-int LiveBeginRoomTransition(const Field_MpdDoorRecord* door, int effect,
+int LiveBeginRoomTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed);
 // decomp: BATTLE.PRG func_8007C580 (src/BATTLE/BATTLE.PRG/146C.c:8820)
-void LiveBeginScriptedRoomTransition(const Field_MpdDoorRecord* door,
+void LiveBeginScriptedRoomTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed);
 // decomp: BATTLE.PRG func_8007C5C0 (src/BATTLE/BATTLE.PRG/146C.c:8830)
-int LiveBeginZoneTransition(const Field_MpdDoorRecord* door, int effect,
+int LiveBeginZoneTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed);
 // decomp: BATTLE.PRG func_8007C654 (src/BATTLE/BATTLE.PRG/146C.c:8843)
-void LiveBeginScriptedZoneTransition(const Field_MpdDoorRecord* door,
+void LiveBeginScriptedZoneTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed);
 // decomp: BATTLE.PRG func_8007C694 (src/BATTLE/BATTLE.PRG/146C.c:8853)
 // A location outside the table is refused with a warning; returns 0.

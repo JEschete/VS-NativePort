@@ -28,7 +28,7 @@
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -119,11 +119,12 @@ class LiveExecution final : public ActionExecutionWorld {
   }
   std::optional<bool> GimmickReady(int actor) const override {
     if (actor < 0 ||
-        static_cast<std::size_t>(actor) >= std::size(Field_gimmickInstances) ||
-        Field_gimmickInstances[actor] == nullptr) {
+        static_cast<std::size_t>(actor) >=
+            std::size(VS::Field::gimmickInstances) ||
+        VS::Field::gimmickInstances[actor] == nullptr) {
       return std::nullopt;
     }
-    const auto& gimmick = *Field_gimmickInstances[actor];
+    const auto& gimmick = *VS::Field::gimmickInstances[actor];
     return gimmick.parent != 0 && gimmick.mode == 0;
   }
 

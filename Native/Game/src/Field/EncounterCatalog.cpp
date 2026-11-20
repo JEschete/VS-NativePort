@@ -20,7 +20,7 @@
 #include "Core/Log.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
 
@@ -35,7 +35,7 @@ constexpr std::size_t kRoomSectionCount = 24;
 struct SpawnProfile {
   std::string asset;
   int index;
-  Field_MpdEnemySpawn placement;
+  VS::Field::MpdEnemySpawn placement;
 };
 
 template <typename Offset, typename Length>
@@ -99,26 +99,27 @@ std::vector<EncounterDoor> ReadRoomDoors(
   constexpr std::size_t kDoorsSection = 3;
   for (std::size_t i = 0; i < kDoorsSection; ++i) offset += sections[i];
   const auto data = Section(bytes, offset, sections[kDoorsSection]);
-  if (data.size() % sizeof(Field_MpdDoorRecord) != 0) {
+  if (data.size() % sizeof(VS::Field::MpdDoorRecord) != 0) {
     throw std::runtime_error("invalid room door table stride");
   }
   std::vector<EncounterDoor> doors;
-  for (std::size_t i = 0; i < data.size() / sizeof(Field_MpdDoorRecord); ++i) {
-    const auto record =
-        Read<Field_MpdDoorRecord>(data, i * sizeof(Field_MpdDoorRecord));
+  for (std::size_t i = 0; i < data.size() / sizeof(VS::Field::MpdDoorRecord);
+       ++i) {
+    const auto record = Read<VS::Field::MpdDoorRecord>(
+        data, i * sizeof(VS::Field::MpdDoorRecord));
     doors.push_back(
         {static_cast<int>(i),
-         record.destinationZoneId,
-         record.destinationRoomId,
-         record.tileLocation.tileX,
-         record.tileLocation.tileZ,
-         record.tileLocation.floorLayer,
-         {record.entryTileX, record.entryTileZ, record.entryElevation,
-          record.tileLocation.entryDirection},
-         record.requiredFlagId,
-         record.requiredFlagValue,
-         record.doorId,
-         record.hasEntryStep != 0});
+         record.destination_zone_id,
+         record.destination_room_id,
+         record.tile_location.tile_x,
+         record.tile_location.tile_z,
+         record.tile_location.floor_layer,
+         {record.entry_tile_x, record.entry_tile_z, record.entry_elevation,
+          record.tile_location.entry_direction},
+         record.required_flag_id,
+         record.required_flag_value,
+         record.door_id,
+         record.has_entry_step != 0});
   }
   return doors;
 }
@@ -142,19 +143,20 @@ EncounterRoom ReadRoom(const Content::DataStore& store, int index,
   }
   try {
     // _loadMpdRoomSection, 146C.c:15663: 24 lengths, then owned sections.
-    const auto header = Read<Field_MpdHeader>(*bytes);
+    const auto header = Read<VS::Field::MpdHeader>(*bytes);
     const auto sections = Read<std::array<std::uint32_t, kRoomSectionCount>>(
-        *bytes, header.roomSectionOffset);
+        *bytes, header.room_section_offset);
     std::uint64_t total = sizeof(sections);
     for (const auto length : sections) total += length;
-    Section(*bytes, header.roomSectionOffset, static_cast<std::int64_t>(total));
+    Section(*bytes, header.room_section_offset,
+            static_cast<std::int64_t>(total));
     room.doors = ReadRoomDoors(
-        *bytes, header.roomSectionOffset + sizeof(sections), sections);
-    if (sections[1] < sizeof(Field_MpdCollisionHeader)) {
+        *bytes, header.room_section_offset + sizeof(sections), sections);
+    if (sections[1] < sizeof(VS::Field::MpdCollisionHeader)) {
       throw std::runtime_error("room has no collision grid");
     }
-    const auto collision = Read<Field_MpdCollisionHeader>(
-        *bytes, header.roomSectionOffset + sizeof(sections) + sections[0]);
+    const auto collision = Read<VS::Field::MpdCollisionHeader>(
+        *bytes, header.room_section_offset + sizeof(sections) + sections[0]);
     room.width = collision.width;
     room.depth = collision.height;
     if (room.width <= 0 || room.depth <= 0 ||
@@ -165,23 +167,24 @@ EncounterRoom ReadRoom(const Content::DataStore& store, int index,
     room.entrance.x = room.width / 2;
     room.entrance.z = room.depth / 2;
     const auto collision_offset =
-        header.roomSectionOffset + sizeof(sections) + sections[0];
+        header.room_section_offset + sizeof(sections) + sections[0];
     const auto floor = ReadEncounterFloor(
         Section(*bytes, collision_offset, sections[1]),
         Section(*bytes, collision_offset + sections[1], sections[2]));
     if (!floor) throw std::runtime_error(floor.error());
     room.floor = *floor;
     const auto spawns =
-        Section(*bytes, header.enemySectionOffset, header.enemySectionSize);
-    if (spawns.size() % sizeof(Field_MpdEnemySpawn) != 0) {
+        Section(*bytes, header.enemy_section_offset, header.enemy_section_size);
+    if (spawns.size() % sizeof(VS::Field::MpdEnemySpawn) != 0) {
       throw std::runtime_error("invalid room enemy table stride");
     }
     for (std::size_t offset = 0; offset < spawns.size();
-         offset += sizeof(Field_MpdEnemySpawn)) {
-      const auto spawn = Read<Field_MpdEnemySpawn>(spawns, offset);
+         offset += sizeof(VS::Field::MpdEnemySpawn)) {
+      const auto spawn = Read<VS::Field::MpdEnemySpawn>(spawns, offset);
       if (IsEncounterHostileSpawn(spawn)) {
         profiles.push_back(
-            {room.asset, static_cast<int>(offset / sizeof(Field_MpdEnemySpawn)),
+            {room.asset,
+             static_cast<int>(offset / sizeof(VS::Field::MpdEnemySpawn)),
              spawn});
       }
     }
@@ -216,7 +219,7 @@ EncounterZone ReadZone(const Content::DataStore& store,
   // Preserve the profile choice for already supported enemies; retained boss
   // records are a fallback when no ordinary hostile placement exists.
   std::stable_partition(profiles.begin(), profiles.end(), [](const auto& p) {
-    return p.placement.actorStateByte == 0;
+    return p.placement.actor_state_byte == 0;
   });
   if (header.enemies_size == 0) return zone;
   const auto enemies =
@@ -251,7 +254,7 @@ EncounterZone ReadZone(const Content::DataStore& store,
       enemy.unavailable_reason = "enemy model index is outside its zone";
     }
     const auto profile = std::ranges::find_if(profiles, [index](const auto& p) {
-      return p.placement.enemyId == index;
+      return p.placement.enemy_id == index;
     });
     if (profile == profiles.end()) {
       if (enemy.unavailable_reason.empty()) {
@@ -274,14 +277,14 @@ EncounterZone ReadZone(const Content::DataStore& store,
   return zone;
 }
 
-EncounterFloor ClassifyFloor(Bytes collision, const Field_MpdTileCell& tile,
-                             int x, int z) {
+EncounterFloor ClassifyFloor(Bytes collision,
+                             const VS::Field::MpdTileCell& tile, int x, int z) {
   constexpr int kSamplesPerTile = 4;
   // func_800A8D64 (40564.c:139) checks passability; func_800A6EE8
   // (3A1A0.c:2175) handles pits. The lab conservatively requires full tiles,
   // excluding diagonal partial cells and dynamic platform/gimmick support.
   if (tile.passability != 0) return EncounterFloor::kBlocked;
-  if (tile.isPit != 0) return EncounterFloor::kPit;
+  if (tile.is_pit != 0) return EncounterFloor::kPit;
   for (int sample_z = 0; sample_z < kSamplesPerTile; ++sample_z) {
     for (int sample_x = 0; sample_x < kSamplesPerTile; ++sample_x) {
       const auto code = VS::Field::SampleCollisionHeightCode(
@@ -301,7 +304,7 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
     Bytes collision, Bytes tile_cells) {
   constexpr int kCollisionLayers = 2;
   try {
-    auto header = Read<Field_MpdCollisionHeader>(collision);
+    auto header = Read<VS::Field::MpdCollisionHeader>(collision);
     if (header.width <= 0 || header.height <= 0 ||
         header.width > EncounterLimits::kTiles ||
         header.height > EncounterLimits::kTiles) {
@@ -311,18 +314,18 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
                        static_cast<unsigned>(header.height);
     Section(collision, sizeof(header),
             count * kCollisionLayers * sizeof(std::uint16_t));
-    Section(tile_cells, 0, count * sizeof(Field_MpdTileCell));
+    Section(tile_cells, 0, count * sizeof(VS::Field::MpdTileCell));
     // _loadMpdRoomSection (146C.c:15663) replaces the on-disk profile count
     // with width*height before the production sampler reads descriptor tables.
     std::vector<std::uint8_t> samples(collision.begin(), collision.end());
-    header.cellCount = static_cast<std::int16_t>(count);
+    header.cell_count = static_cast<std::int16_t>(count);
     std::memcpy(samples.data(), &header, sizeof(header));
     std::vector<EncounterFloor> floor(count, EncounterFloor::kSupported);
     for (int z = 0; z < header.height; ++z) {
       for (int x = 0; x < header.width; ++x) {
         const auto index = static_cast<std::size_t>(z) * header.width + x;
-        const auto tile = Read<Field_MpdTileCell>(
-            tile_cells, index * sizeof(Field_MpdTileCell));
+        const auto tile = Read<VS::Field::MpdTileCell>(
+            tile_cells, index * sizeof(VS::Field::MpdTileCell));
         floor[index] = ClassifyFloor(samples, tile, x, z);
       }
     }
@@ -332,7 +335,7 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
   }
 }
 
-bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
+bool IsEncounterHostileSpawn(const VS::Field::MpdEnemySpawn& source) {
   // VS::Field::SpawnRoomActors (146C.c:14901): facing 2 selects hostile AI;
   // actorStateByte instead controls retention after defeat, not activation.
   return source.kind == 0 && source.facing == 2;
@@ -351,7 +354,7 @@ bool UsesEncounterRoomEvents(const EncounterSetup& setup,
          (setup.external_event && external_event_started);
 }
 
-std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
+std::expected<VS::Field::MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy) {
   const auto* store = Content::DataStore::Get();
   const auto* entry = store ? store->Find(enemy.spawn_asset) : nullptr;
@@ -361,16 +364,16 @@ std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
   const auto bytes = store->ReadAll(*entry);
   if (!bytes) return std::unexpected(bytes.error());
   try {
-    const auto header = Read<Field_MpdHeader>(*bytes);
+    const auto header = Read<VS::Field::MpdHeader>(*bytes);
     const auto spawns =
-        Section(*bytes, header.enemySectionOffset, header.enemySectionSize);
-    if (spawns.size() % sizeof(Field_MpdEnemySpawn) != 0) {
+        Section(*bytes, header.enemy_section_offset, header.enemy_section_size);
+    if (spawns.size() % sizeof(VS::Field::MpdEnemySpawn) != 0) {
       return std::unexpected("invalid room enemy table stride");
     }
-    auto spawn = Read<Field_MpdEnemySpawn>(
+    auto spawn = Read<VS::Field::MpdEnemySpawn>(
         spawns, static_cast<std::size_t>(enemy.spawn_index) *
-                    sizeof(Field_MpdEnemySpawn));
-    if (!IsEncounterHostileSpawn(spawn) || spawn.enemyId != enemy.index) {
+                    sizeof(VS::Field::MpdEnemySpawn));
+    if (!IsEncounterHostileSpawn(spawn) || spawn.enemy_id != enemy.index) {
       return std::unexpected("source spawn record changed or is not hostile");
     }
     return spawn;
@@ -379,13 +382,13 @@ std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
   }
 }
 
-std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
-    const Field_MpdEnemySpawn& source, const EncounterSpawn& instance,
+std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
+    const VS::Field::MpdEnemySpawn& source, const EncounterSpawn& instance,
     std::size_t index) {
   constexpr std::size_t kPrimaryCapacity = kEnemySlotEnd - kFirstEnemySlot;
   constexpr int kTileLimit = 32;
   constexpr int kElevationLimit = 4;
-  if (!IsEncounterHostileSpawn(source) || source.enemyId != instance.enemy ||
+  if (!IsEncounterHostileSpawn(source) || source.enemy_id != instance.enemy ||
       instance.enemy < 0 || instance.enemy >= EncounterLimits::kEnemyIdEnd ||
       index >= kPrimaryCapacity) {
     return std::unexpected("unsupported hostile spawn record");
@@ -399,8 +402,8 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   }
   auto placement = source;
   placement.index = static_cast<u_char>(index);
-  placement.tileX = static_cast<u_char>(position.x);
-  placement.tileZ = static_cast<u_char>(position.z);
+  placement.tile_x = static_cast<u_char>(position.x);
+  placement.tile_z = static_cast<u_char>(position.z);
   placement.height = static_cast<u_char>(position.elevation);
   placement.direction = static_cast<u_char>(position.direction);
   // VS::Field::SpawnRoomActors (146C.c:14901) allocates slots when slot is
@@ -408,14 +411,14 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   // Membership is explicit, not story-gated. AI, hostility, loot and variant
   // remain from the source record; no progression flags are modified.
   placement.slot = 0;
-  placement.isHidden = 0;
-  placement.flagTest = 0;
-  placement.statTest = 0;
-  placement.sceneTest = 0;
+  placement.is_hidden = 0;
+  placement.flag_test = 0;
+  placement.stat_test = 0;
+  placement.scene_test = 0;
   // func_80076F24 (146C.c:6367) maps this byte to retainAfterDefeat.
   // Isolated encounters have no story death event: use ordinary production
   // defeat/removal instead, without changing the original room or its actor.
-  placement.actorStateByte = 0;
+  placement.actor_state_byte = 0;
   return placement;
 }
 

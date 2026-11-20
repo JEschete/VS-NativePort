@@ -22,7 +22,7 @@
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/ModelDraw.hpp"
@@ -305,12 +305,13 @@ void DrawLive(PolygonKind kind, const ModelCounts& counts,
 }
 
 [[nodiscard]] ModelOverrides GimmickOverrides(
-    const Field_GimmickInstance& object) {
-  return {object.palettePulse.kind, object.motionState};
+    const VS::Field::GimmickInstance& object) {
+  return {object.palette_pulse.kind, object.motion_state};
 }
 
-[[nodiscard]] std::uint32_t GimmickTint(const Field_GimmickInstance& object) {
-  return static_cast<std::uint32_t>(object.baseColor);
+[[nodiscard]] std::uint32_t GimmickTint(
+    const VS::Field::GimmickInstance& object) {
+  return static_cast<std::uint32_t>(object.base_color);
 }
 }  // namespace
 
@@ -441,18 +442,18 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
   }
 }
 
-bool ProjectLiveGimmickModel(const Field_GimmickInstance& object) {
+bool ProjectLiveGimmickModel(const VS::Field::GimmickInstance& object) {
   return ProjectLive(CountsOf(object), RecordedModelBytes(object.model),
                      object.matrices);
 }
 
-void DrawLiveGimmickGouraudPolygons(const Field_GimmickInstance& object) {
+void DrawLiveGimmickGouraudPolygons(const VS::Field::GimmickInstance& object) {
   DrawLive(PolygonKind::kGouraud, CountsOf(object),
            LiveModelBytes(object.model), GimmickTint(object), {});
 }
 
 void DrawLiveGimmickGouraudPolygonsWithOverrides(
-    const Field_GimmickInstance& object) {
+    const VS::Field::GimmickInstance& object) {
   DrawLive(PolygonKind::kGouraudOverrides, CountsOf(object),
            LiveModelBytes(object.model), GimmickTint(object),
            GimmickOverrides(object));

@@ -1,116 +1,127 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Field/Gimmicks.h"
+// The room gimmick globals (Gimmicks.hpp).
+#include "Field/Gimmicks.hpp"
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.hpp"
-#include "Actors/ModelInstance.h"
-#include "Actors/ShpModel.hpp"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
-#include "Render/Palette.hpp"
+namespace VS::Field {
+// decomp: D_800E85A0 (D_800E85A0@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<char, kTriggerMarkerRecordTailBytes> triggerMarkerRecordTail;
 
-// decomp: D_800E85A0 (D_800E85A0@BATTLE/BATTLE.PRG)
-char Field_triggerMarkerRecordTail[192]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E8FA8 (D_800E8FA8@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kGimmickPaletteParametersBytes> gimmickPaletteParameters;
 
-// decomp: D_800E8FA8 (D_800E8FA8@BATTLE/BATTLE.PRG)
-u_char Field_gimmickPaletteParameters[32]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E8FB4 (D_800E8FB4@BATTLE/BATTLE.PRG); contents: module image,
+// relocated (ModulePointers.cpp)
+std::array<void*, kGimmickModelTemplateCount> gimmickModelTemplates;
 
-// decomp: D_800E8FB4 (D_800E8FB4@BATTLE/BATTLE.PRG)
-void* Field_gimmickModelTemplates[5]; /* contents: module image, relocated (ModulePointers.cpp) */
+// decomp: D_800E8FD0 (D_800E8FD0@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kGimmickRollOrientationsBytes> kGimmickRollOrientations;
 
-// decomp: D_800E8FD0 (D_800E8FD0@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollOrientations[3424]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9030 (D_800E9030@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kOrientationRotationsBytes> kGimmickOrientationRotations;
 
-// decomp: D_800E9030 (D_800E9030@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickOrientationRotations[3328]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E90A8 (D_800E90A8@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::int32_t interactingGimmickId;
 
-// decomp: D_800E90A8 (D_800E90A8@BATTLE/BATTLE.PRG)
-int Field_interactingGimmickId; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E919C (D_800E919C@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kGimmickTemplateIndicesBytes> gimmickTemplateIndices;
 
-// decomp: D_800E919C (D_800E919C@BATTLE/BATTLE.PRG)
-u_char Field_gimmickTemplateIndices[2964]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91AC (D_800E91AC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSpinHeightStepsBytes> kGimmickSpinHeightSteps;
 
-// decomp: D_800E91AC (D_800E91AC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinHeightSteps[2948]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91BC (D_800E91BC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSpinPitchStepsBytes> kGimmickSpinPitchSteps;
 
-// decomp: D_800E91BC (D_800E91BC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinPitchSteps[2932]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91CC (D_800E91CC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSpinYawStepsBytes> kGimmickSpinYawSteps;
 
-// decomp: D_800E91CC (D_800E91CC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinYawSteps[2916]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91DC (D_800E91DC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSpinRollStepsBytes> kGimmickSpinRollSteps;
 
-// decomp: D_800E91DC (D_800E91DC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinRollSteps[2900]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91EC (D_800E91EC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kBounceHeightStepsBytes> kGimmickBounceHeightSteps;
 
-// decomp: D_800E91EC (D_800E91EC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickBounceHeightSteps[2884]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91F0 (D_800E91F0@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kTiltDepthStepsBytes> kGimmickTiltDepthSteps;
 
-// decomp: D_800E91F0 (D_800E91F0@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickTiltDepthSteps[2880]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E91FC (D_800E91FC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kTiltAngleStepsBytes> kGimmickTiltAngleSteps;
 
-// decomp: D_800E91FC (D_800E91FC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickTiltAngleSteps[2868]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9208 (D_800E9208@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kRollHeightStepsBytes> kGimmickRollHeightSteps;
 
-// decomp: D_800E9208 (D_800E9208@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollHeightSteps[2856]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9218 (D_800E9218@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kRollDisplacementStepsBytes> kGimmickRollDisplacementSteps;
 
-// decomp: D_800E9218 (D_800E9218@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollDisplacementSteps[2840]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9228 (D_800E9228@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kRollAngleStepsBytes> kGimmickRollAngleSteps;
 
-// decomp: D_800E9228 (D_800E9228@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollAngleSteps[2824]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9238 (D_800E9238@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSquashHeightStepsBytes> kGimmickSquashHeightSteps;
 
-// decomp: D_800E9238 (D_800E9238@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashHeightSteps[2808]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9248 (D_800E9248@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSquashScaleXBytes> kGimmickSquashScaleX;
 
-// decomp: D_800E9248 (D_800E9248@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleX[2792]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9258 (D_800E9258@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSquashScaleYBytes> kGimmickSquashScaleY;
 
-// decomp: D_800E9258 (D_800E9258@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleY[2776]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800E9268 (D_800E9268@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleZ[2760]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E9268 (D_800E9268@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+GimmickBytes<kSquashScaleZBytes> kGimmickSquashScaleZ;
 
 // decomp: vs_battle_roomData (vs_battle_roomData@BATTLE/BATTLE.PRG)
-Field_RoomRecord Field_roomData;
+RoomDataRecord roomData;
 
 // decomp: D_800F1CDC (D_800F1CDC@BATTLE/BATTLE.PRG)
-u_short Field_roomAnimationTicks;
+std::uint16_t roomAnimationTicks;
 
 // decomp: D_800F1D28 (D_800F1D28@BATTLE/BATTLE.PRG)
-Field_GimmickAnimationJob Field_gimmickAnimationQueue[8];
+std::array<GimmickAnimationJob, kGimmickJobCount> gimmickAnimationQueue;
 
 // decomp: D_800F1D68 (D_800F1D68@BATTLE/BATTLE.PRG)
-short Field_platformFreezeFrames;
+std::int16_t platformFreezeFrames;
 
 // decomp: D_800F1D6A (D_800F1D6A@BATTLE/BATTLE.PRG)
-short Field_pendingGimmickAnimationCount;
+std::int16_t pendingGimmickAnimationCount;
 
 // decomp: D_800F1D6C (D_800F1D6C@BATTLE/BATTLE.PRG)
-u_short Field_triggerMarkerFrameTicks;
+std::uint16_t triggerMarkerFrameTicks;
 
 // decomp: D_800F1D6E (D_800F1D6E@BATTLE/BATTLE.PRG)
-u_char Field_areMovingPlatformsPaused;
+std::uint8_t areMovingPlatformsPaused;
 
 // decomp: D_800F1D6F (D_800F1D6F@BATTLE/BATTLE.PRG)
-char Field_isPlatformFreezeTintActive;
+char isPlatformFreezeTintActive;
 
 // decomp: D_800F1D70 (D_800F1D70@BATTLE/BATTLE.PRG)
-u_char Field_platformBounceFrames[1304];
+GimmickBytes<kPlatformBounceFramesBytes> platformBounceFrames;
 
 // decomp: D_800F4448 (D_800F4448@BATTLE/BATTLE.PRG)
-char Field_gimmickPaletteColors[240];
+std::array<char, kGimmickPaletteColorsBytes> gimmickPaletteColors;
 
 // decomp: D_800F45E0 (D_800F45E0@BATTLE/BATTLE.PRG)
-Field_GimmickInstance* Field_gimmickInstances[16];
+std::array<GimmickInstance*, kGimmickInstanceCount> gimmickInstances;
 
 // decomp: D_800F49E8 (D_800F49E8@BATTLE/BATTLE.PRG)
-int Field_gimmickInteractionDirection;
+std::int32_t gimmickInteractionDirection;
 
 // decomp: D_80068BEC (D_80068BEC@src/BATTLE/BATTLE.PRG/146C.c)
-short const Field_kPlatformBounceOffsets[] = { 8, 14, 16, 11, 7, 3, 1 };
-
+const BounceOffsetTable kPlatformBounceOffsets = {8, 14, 16, 11, 7, 3, 1};
+}  // namespace VS::Field

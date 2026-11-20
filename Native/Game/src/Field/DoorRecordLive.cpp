@@ -4,8 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 
 namespace {
 // main.h:446 _mpdRoomDoorSection_t: twelve bytes, the door tile halfword at
@@ -16,51 +15,53 @@ constexpr std::size_t kDoorTileOffset = 2;
 constexpr std::size_t kDoorIdOffset = 8;
 }  // namespace
 
-static_assert(sizeof(Field_MpdDoorRecord) == kDoorRecordBytes);
-static_assert(offsetof(Field_MpdDoorRecord, tileLocation) == kDoorTileOffset);
-static_assert(offsetof(Field_MpdDoorRecord, doorId) == kDoorIdOffset);
+static_assert(sizeof(VS::Field::MpdDoorRecord) == kDoorRecordBytes);
+static_assert(offsetof(VS::Field::MpdDoorRecord, tile_location) ==
+              kDoorTileOffset);
+static_assert(offsetof(VS::Field::MpdDoorRecord, door_id) == kDoorIdOffset);
 
 namespace VS::Field {
-DoorRecord DoorRecordOf(const Field_MpdDoorRecord& record) {
+DoorRecord DoorRecordOf(const VS::Field::MpdDoorRecord& record) {
   DoorRecord door;
-  door.destination_zone_id = record.destinationZoneId;
-  door.destination_room_id = record.destinationRoomId;
-  door.tile_x = static_cast<std::uint8_t>(record.tileLocation.tileX);
-  door.tile_z = static_cast<std::uint8_t>(record.tileLocation.tileZ);
-  door.floor_layer = static_cast<std::uint8_t>(record.tileLocation.floorLayer);
+  door.destination_zone_id = record.destination_zone_id;
+  door.destination_room_id = record.destination_room_id;
+  door.tile_x = static_cast<std::uint8_t>(record.tile_location.tile_x);
+  door.tile_z = static_cast<std::uint8_t>(record.tile_location.tile_z);
+  door.floor_layer =
+      static_cast<std::uint8_t>(record.tile_location.floor_layer);
   door.entry_direction =
-      static_cast<std::uint8_t>(record.tileLocation.entryDirection);
+      static_cast<std::uint8_t>(record.tile_location.entry_direction);
   door.required_flag_value =
-      static_cast<std::uint8_t>(record.requiredFlagValue);
-  door.entry_tile_x = static_cast<std::uint8_t>(record.entryTileX);
-  door.entry_elevation = static_cast<std::uint8_t>(record.entryElevation);
-  door.has_entry_step = record.hasEntryStep != 0;
-  door.required_flag_id = static_cast<std::uint16_t>(record.requiredFlagId);
-  door.entry_tile_z = static_cast<std::uint8_t>(record.entryTileZ);
-  door.reserved_entry_bit = record.reserved06Bit15 != 0;
-  door.door_id = record.doorId;
-  door.reserved = {record.reserved09, record.reserved0A, record.reserved0B};
+      static_cast<std::uint8_t>(record.required_flag_value);
+  door.entry_tile_x = static_cast<std::uint8_t>(record.entry_tile_x);
+  door.entry_elevation = static_cast<std::uint8_t>(record.entry_elevation);
+  door.has_entry_step = record.has_entry_step != 0;
+  door.required_flag_id = static_cast<std::uint16_t>(record.required_flag_id);
+  door.entry_tile_z = static_cast<std::uint8_t>(record.entry_tile_z);
+  door.reserved_entry_bit = record.reserved06_bit15 != 0;
+  door.door_id = record.door_id;
+  door.reserved = {record.reserved09, record.reserved0a, record.reserved0b};
   return door;
 }
 
-void StoreDoorRecord(const DoorRecord& door, Field_MpdDoorRecord& record) {
-  record.destinationZoneId = door.destination_zone_id;
-  record.destinationRoomId = door.destination_room_id;
-  record.tileLocation.tileX = door.tile_x & kDoorTileMask;
-  record.tileLocation.tileZ = door.tile_z & kDoorTileMask;
-  record.tileLocation.floorLayer = door.floor_layer & kDoorFloorLayerMask;
-  record.tileLocation.entryDirection =
+void StoreDoorRecord(const DoorRecord& door, VS::Field::MpdDoorRecord& record) {
+  record.destination_zone_id = door.destination_zone_id;
+  record.destination_room_id = door.destination_room_id;
+  record.tile_location.tile_x = door.tile_x & kDoorTileMask;
+  record.tile_location.tile_z = door.tile_z & kDoorTileMask;
+  record.tile_location.floor_layer = door.floor_layer & kDoorFloorLayerMask;
+  record.tile_location.entry_direction =
       door.entry_direction & kDoorEntryDirectionMask;
-  record.requiredFlagValue = door.required_flag_value;
-  record.entryTileX = door.entry_tile_x & kDoorTileMask;
-  record.entryElevation = door.entry_elevation & kDoorEntryElevationMask;
-  record.hasEntryStep = door.has_entry_step ? 1U : 0U;
-  record.requiredFlagId = door.required_flag_id & kDoorRequiredFlagIdMask;
-  record.entryTileZ = door.entry_tile_z & kDoorTileMask;
-  record.reserved06Bit15 = door.reserved_entry_bit ? 1U : 0U;
-  record.doorId = door.door_id;
+  record.required_flag_value = door.required_flag_value;
+  record.entry_tile_x = door.entry_tile_x & kDoorTileMask;
+  record.entry_elevation = door.entry_elevation & kDoorEntryElevationMask;
+  record.has_entry_step = door.has_entry_step ? 1U : 0U;
+  record.required_flag_id = door.required_flag_id & kDoorRequiredFlagIdMask;
+  record.entry_tile_z = door.entry_tile_z & kDoorTileMask;
+  record.reserved06_bit15 = door.reserved_entry_bit ? 1U : 0U;
+  record.door_id = door.door_id;
   record.reserved09 = door.reserved[0];
-  record.reserved0A = door.reserved[1];
-  record.reserved0B = door.reserved[2];
+  record.reserved0a = door.reserved[1];
+  record.reserved0b = door.reserved[2];
 }
 }  // namespace VS::Field

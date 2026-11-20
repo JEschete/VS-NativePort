@@ -21,7 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Save/MemoryCard/CardResources.hpp"
@@ -1639,34 +1639,34 @@ TEST_CASE("The title card probe looks for a save on each ready card",
 }
 
 namespace {
-static_assert(sizeof(Field_MpdDoorRecord) == Save::kEntryDoorBytes);
+static_assert(sizeof(VS::Field::MpdDoorRecord) == Save::kEntryDoorBytes);
 
-Field_MpdDoorRecord DoorRecordOf(const Save::EntryDoor& bytes) {
-  Field_MpdDoorRecord door{};
+VS::Field::MpdDoorRecord DoorRecordOf(const Save::EntryDoor& bytes) {
+  VS::Field::MpdDoorRecord door{};
   std::memcpy(&door, bytes.data(), sizeof(door));
   return door;
 }
 
 // The door fields a capture sets.
-std::array<int, 5> EntryFields(const Field_MpdDoorRecord& door) {
-  return {door.tileLocation.entryDirection, door.entryTileX,
-          door.entryElevation, door.requiredFlagId, door.entryTileZ};
+std::array<int, 5> EntryFields(const VS::Field::MpdDoorRecord& door) {
+  return {door.tile_location.entry_direction, door.entry_tile_x,
+          door.entry_elevation, door.required_flag_id, door.entry_tile_z};
 }
 
 // The door fields a capture keeps.
-std::array<int, 12> KeptFields(const Field_MpdDoorRecord& door) {
-  return {door.destinationZoneId,
-          door.destinationRoomId,
-          door.tileLocation.tileX,
-          door.tileLocation.tileZ,
-          door.tileLocation.floorLayer,
-          door.requiredFlagValue,
-          door.hasEntryStep,
-          door.reserved06Bit15,
-          door.doorId,
+std::array<int, 12> KeptFields(const VS::Field::MpdDoorRecord& door) {
+  return {door.destination_zone_id,
+          door.destination_room_id,
+          door.tile_location.tile_x,
+          door.tile_location.tile_z,
+          door.tile_location.floor_layer,
+          door.required_flag_value,
+          door.has_entry_step,
+          door.reserved06_bit15,
+          door.door_id,
           door.reserved09,
-          door.reserved0A,
-          door.reserved0B};
+          door.reserved0a,
+          door.reserved0b};
 }
 
 std::vector<std::string> CaptureLog(bool with_stats) {

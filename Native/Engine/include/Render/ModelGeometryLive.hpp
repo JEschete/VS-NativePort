@@ -11,7 +11,9 @@ struct Actors_ActorRecord;
 namespace VS::Actors {
 struct WeaponModel;
 }
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickInstance;
+}
 
 // Live binding for the SHP model packets (ModelGeometry.cpp): the GTE, the
 // model render context, the model workspace and the current frame's
@@ -58,10 +60,11 @@ void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
 void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                                const SVECTOR& root_offset);
 
-[[nodiscard]] bool ProjectLiveGimmickModel(const Field_GimmickInstance& object);
-void DrawLiveGimmickGouraudPolygons(const Field_GimmickInstance& object);
+[[nodiscard]] bool ProjectLiveGimmickModel(
+    const VS::Field::GimmickInstance& object);
+void DrawLiveGimmickGouraudPolygons(const VS::Field::GimmickInstance& object);
 void DrawLiveGimmickGouraudPolygonsWithOverrides(
-    const Field_GimmickInstance& object);
+    const VS::Field::GimmickInstance& object);
 
 [[nodiscard]] bool ProjectLiveWeaponModel(
     const VS::Actors::WeaponModel& weapon);

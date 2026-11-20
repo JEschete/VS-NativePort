@@ -12,9 +12,9 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
 #include "Legacy/Psx.h"
@@ -27,53 +27,53 @@ static_assert(offsetof(RECT, x) == offsetof(VS::Field::RoomImageRect, x));
 static_assert(offsetof(RECT, y) == offsetof(VS::Field::RoomImageRect, y));
 static_assert(offsetof(RECT, w) == offsetof(VS::Field::RoomImageRect, w));
 static_assert(offsetof(RECT, h) == offsetof(VS::Field::RoomImageRect, h));
-static_assert(offsetof(Field_MpdPolygonUvView, type) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, type) ==
               VS::Field::room_effects::kPolygonTypeOffset);
-static_assert(offsetof(Field_MpdPolygonUvView, u0) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, u0) ==
               VS::Field::room_effects::kPolygonUOffsets[0]);
-static_assert(offsetof(Field_MpdPolygonUvView, u1) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, u1) ==
               VS::Field::room_effects::kPolygonUOffsets[1]);
-static_assert(offsetof(Field_MpdPolygonUvView, u2) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, u2) ==
               VS::Field::room_effects::kPolygonUOffsets[2]);
-static_assert(offsetof(Field_MpdPolygonUvView, u3) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, u3) ==
               VS::Field::room_effects::kPolygonUOffsets.back());
-static_assert(offsetof(Field_MpdPolygonUvView, v0) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, v0) ==
               VS::Field::room_effects::kPolygonVOffsets[0]);
-static_assert(offsetof(Field_MpdPolygonUvView, v1) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, v1) ==
               VS::Field::room_effects::kPolygonVOffsets[1]);
-static_assert(offsetof(Field_MpdPolygonUvView, v2) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, v2) ==
               VS::Field::room_effects::kPolygonVOffsets[2]);
-static_assert(offsetof(Field_MpdPolygonUvView, v3) ==
+static_assert(offsetof(VS::Field::MpdPolygonUvView, v3) ==
               VS::Field::room_effects::kPolygonVOffsets.back());
-static_assert(sizeof(Field_MpdPolygonUvView) ==
+static_assert(sizeof(VS::Field::MpdPolygonUvView) ==
               VS::Field::room_effects::kQuadUvExtent);
-static_assert(sizeof(Field_MpdTriangleColorView) ==
+static_assert(sizeof(VS::Field::MpdTriangleColorView) ==
               VS::Render::kRoomTriangleRecordBytes);
-static_assert(sizeof(Field_MpdQuadColorView) ==
+static_assert(sizeof(VS::Field::MpdQuadColorView) ==
               VS::Render::kRoomQuadRecordBytes);
-static_assert(offsetof(Field_MpdTriangleColorView, red1) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, red1) ==
               VS::Field::room_effects::kPolygonRedOffsets[0]);
-static_assert(offsetof(Field_MpdTriangleColorView, green1) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, green1) ==
               VS::Field::room_effects::kPolygonRedOffsets[0] + 1);
-static_assert(offsetof(Field_MpdTriangleColorView, red2) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, red2) ==
               VS::Field::room_effects::kPolygonRedOffsets[1]);
-static_assert(offsetof(Field_MpdTriangleColorView, green2) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, green2) ==
               VS::Field::room_effects::kPolygonRedOffsets[1] + 1);
-static_assert(offsetof(Field_MpdTriangleColorView, red3) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, red3) ==
               VS::Field::room_effects::kPolygonRedOffsets[2]);
-static_assert(offsetof(Field_MpdTriangleColorView, green3) ==
+static_assert(offsetof(VS::Field::MpdTriangleColorView, green3) ==
               VS::Field::room_effects::kPolygonRedOffsets[2] + 1);
-static_assert(offsetof(Field_MpdQuadColorView, red1) ==
+static_assert(offsetof(VS::Field::MpdQuadColorView, red1) ==
               VS::Field::room_effects::kPolygonRedOffsets[0]);
-static_assert(offsetof(Field_MpdQuadColorView, red2) ==
+static_assert(offsetof(VS::Field::MpdQuadColorView, red2) ==
               VS::Field::room_effects::kPolygonRedOffsets[1]);
-static_assert(offsetof(Field_MpdQuadColorView, red3) ==
+static_assert(offsetof(VS::Field::MpdQuadColorView, red3) ==
               VS::Field::room_effects::kPolygonRedOffsets[2]);
-static_assert(offsetof(Field_MpdQuadColorView, red4) ==
+static_assert(offsetof(VS::Field::MpdQuadColorView, red4) ==
               VS::Field::room_effects::kPolygonRedOffsets.back());
-static_assert(offsetof(Field_MpdQuadColorView, green4) ==
+static_assert(offsetof(VS::Field::MpdQuadColorView, green4) ==
               VS::Field::room_effects::kPolygonRedOffsets.back() + 1);
-static_assert(sizeof(Field_MpdSectionE) ==
+static_assert(sizeof(VS::Field::MpdSectionE) ==
               VS::Field::room_effects::kEntryPointHeaderBytes);
 
 namespace VS::Field {
@@ -115,40 +115,47 @@ std::uint32_t Fnv1a(std::span<const std::byte> bytes) {
 class LiveHost final : public RoomEffectHost {
  public:
   std::span<std::byte> Geometry() override {
-    return Section<std::byte>(Field_roomData.geometry,
-                              Field_roomData.header.geometryLength);
+    return Section<std::byte>(VS::Field::roomData.geometry,
+                              VS::Field::roomData.header.geometry_length);
   }
   std::span<std::byte> TextureEffects() override {
-    return Section<std::byte>(Field_roomData.textureEffects,
-                              Field_roomData.header.textureEffectsLength);
+    return Section<std::byte>(
+        VS::Field::roomData.texture_effects,
+        VS::Field::roomData.header.texture_effects_length);
   }
   std::span<const std::byte> EffectScripts() override {
-    return Section<const std::byte>(Field_roomData.effectScripts,
-                                    Field_roomData.header.effectScriptsLength);
+    return Section<const std::byte>(
+        VS::Field::roomData.effect_scripts,
+        VS::Field::roomData.header.effect_scripts_length);
   }
   std::span<const std::byte> EntryPointSection() override {
-    return Section<const std::byte>(Field_roomData.sectionE,
-                                    Field_roomData.header.sectionELength);
+    return Section<const std::byte>(
+        VS::Field::roomData.section_e,
+        VS::Field::roomData.header.section_e_length);
   }
 
-  bool HasSoundBank() override { return Field_roomData.soundData != nullptr; }
+  bool HasSoundBank() override {
+    return VS::Field::roomData.sound_data != nullptr;
+  }
   void PlayCenteredSound(std::int32_t sound_index) override {
-    Audio::LivePlayBankSfxCentered(kRoomSoundGroup, Field_roomData.soundData,
+    Audio::LivePlayBankSfxCentered(kRoomSoundGroup,
+                                   VS::Field::roomData.sound_data,
                                    static_cast<unsigned>(sound_index));
   }
   void PlaySound(std::int32_t sound_index, std::int32_t pan,
                  std::int32_t volume) override {
-    Audio::LivePlayBankSfx(kRoomSoundGroup, Field_roomData.soundData,
+    Audio::LivePlayBankSfx(kRoomSoundGroup, VS::Field::roomData.sound_data,
                            static_cast<unsigned>(sound_index), pan, volume);
   }
   void StopSound(std::int32_t sound_index) override {
-    Audio::LiveStopBankSfx(kRoomSoundGroup, Field_roomData.soundData,
+    Audio::LiveStopBankSfx(kRoomSoundGroup, VS::Field::roomData.sound_data,
                            sound_index);
   }
   void FadeSound(std::int32_t sound_index, std::int32_t volume,
                  std::int32_t fade_ticks) override {
-    Audio::LiveFadeBankSfxVolume(kRoomSoundGroup, Field_roomData.soundData,
-                                 sound_index, volume, fade_ticks);
+    Audio::LiveFadeBankSfxVolume(kRoomSoundGroup,
+                                 VS::Field::roomData.sound_data, sound_index,
+                                 volume, fade_ticks);
   }
 
   void MoveImage(const RoomImageRect& source, std::int32_t x,

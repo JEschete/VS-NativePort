@@ -28,7 +28,7 @@
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Unported.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
 static_assert(
@@ -715,8 +715,8 @@ struct ActorSettingsFixture {
   Battle_Actor* saved_head = Battle_actors[0];
   void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
-  void* saved_section6 = Field_roomData.section6;
-  u_int saved_section6_length = Field_roomData.header.section6Length;
+  void* saved_section6 = VS::Field::roomData.section6;
+  u_int saved_section6_length = VS::Field::roomData.header.section6_length;
   std::array<Battle_Actor, 3> actors{};
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
@@ -737,16 +737,16 @@ struct ActorSettingsFixture {
     states[2].linked_actor = 16;
     Battle_actors[0] = actors.data();
     VS::Battle::Ai::roomHasWaypoints = nullptr;
-    Field_roomData.section6 = auxiliary.data();
-    Field_roomData.header.section6Length = auxiliary.size();
+    VS::Field::roomData.section6 = auxiliary.data();
+    VS::Field::roomData.header.section6_length = auxiliary.size();
   }
 
   ~ActorSettingsFixture() {
     Battle_actors[0] = saved_head;
     VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
-    Field_roomData.section6 = saved_section6;
-    Field_roomData.header.section6Length = saved_section6_length;
+    VS::Field::roomData.section6 = saved_section6;
+    VS::Field::roomData.header.section6_length = saved_section6_length;
   }
 
   // Waypoint 5 of the room's auxiliary section, active or not.

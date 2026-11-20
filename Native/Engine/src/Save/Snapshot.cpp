@@ -14,7 +14,7 @@ constexpr std::uint32_t kByteMask = 0xFF;
 // VS::State::AshleyStatsSnapshot.isPending, a little-endian int.
 constexpr std::size_t kPendingFlagBytes = 4;
 
-// A bit field of a Field_MpdDoorRecord halfword.
+// A bit field of a VS::Field::MpdDoorRecord halfword.
 struct DoorField {
   std::size_t offset = 0;
   unsigned shift = 0;

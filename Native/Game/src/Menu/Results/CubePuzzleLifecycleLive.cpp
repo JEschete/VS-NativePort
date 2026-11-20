@@ -19,9 +19,9 @@
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
@@ -139,15 +139,15 @@ class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
   }
   // The original read the scene's first room without checking the scene.
   std::optional<CubePuzzleRoom> CurrentRoom() override {
-    if (Field_roomData.minimapScene == nullptr) {
+    if (VS::Field::roomData.minimap_scene == nullptr) {
       return std::nullopt;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     const auto* const scene =
-        reinterpret_cast<const std::byte*>(Field_roomData.minimapScene);
+        reinterpret_cast<const std::byte*>(VS::Field::roomData.minimap_scene);
     const std::optional<Field::SceneRoomAddress> room =
         Field::CurrentSceneRoomAddress(
-            {scene, Field_roomData.header.minimapSceneLength});
+            {scene, VS::Field::roomData.header.minimap_scene_length});
     if (!room.has_value()) {
       return std::nullopt;
     }

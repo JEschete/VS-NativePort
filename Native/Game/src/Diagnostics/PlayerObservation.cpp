@@ -38,11 +38,10 @@
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
@@ -443,31 +442,33 @@ EncounterReactionTimingState InspectReactionTiming(
 }
 
 void InspectRoomDoors(PlayerObservationState& state) {
-  if (Field_roomData.doors == nullptr) return;
-  if (Field_roomData.header.doorsLength % sizeof(Field_MpdDoorRecord) != 0) {
+  if (VS::Field::roomData.doors == nullptr) return;
+  if (VS::Field::roomData.header.doors_length %
+          sizeof(VS::Field::MpdDoorRecord) !=
+      0) {
     throw std::runtime_error(
         "observed room door storage has an incomplete record");
   }
-  const auto count =
-      Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord);
+  const auto count = VS::Field::roomData.header.doors_length /
+                     sizeof(VS::Field::MpdDoorRecord);
   for (unsigned index = 0; index < count; ++index) {
-    const auto& door = Field_roomData.doors[index];
-    state.doors.push_back(
-        {static_cast<int>(index),
-         door.destinationZoneId,
-         door.destinationRoomId,
-         static_cast<int>(door.tileLocation.tileX),
-         static_cast<int>(door.tileLocation.tileZ),
-         static_cast<int>(door.tileLocation.floorLayer),
-         {static_cast<int>(door.entryTileX), static_cast<int>(door.entryTileZ),
-          static_cast<int>(door.entryElevation), 0},
-         static_cast<int>(door.requiredFlagId),
-         static_cast<int>(door.requiredFlagValue),
-         door.doorId,
-         door.hasEntryStep != 0});
+    const auto& door = VS::Field::roomData.doors[index];
+    state.doors.push_back({static_cast<int>(index),
+                           door.destination_zone_id,
+                           door.destination_room_id,
+                           static_cast<int>(door.tile_location.tile_x),
+                           static_cast<int>(door.tile_location.tile_z),
+                           static_cast<int>(door.tile_location.floor_layer),
+                           {static_cast<int>(door.entry_tile_x),
+                            static_cast<int>(door.entry_tile_z),
+                            static_cast<int>(door.entry_elevation), 0},
+                           static_cast<int>(door.required_flag_id),
+                           static_cast<int>(door.required_flag_value),
+                           door.door_id,
+                           door.has_entry_step != 0});
     state.door_flag_values.push_back(
         static_cast<unsigned char>(VS::State::LiveScriptFlag(
-            static_cast<std::int16_t>(door.requiredFlagId))));
+            static_cast<std::int16_t>(door.required_flag_id))));
   }
 }
 
@@ -477,7 +478,7 @@ void InspectRoomChests(PlayerObservationState& state) {
   int count = 0;
   const auto* chests = VS::Items::LiveRoomTreasureChests(&count);
   if (chests == nullptr) return;
-  if (Field_roomData.header.containersLength %
+  if (VS::Field::roomData.header.containers_length %
           sizeof(VS::Items::TreasureChest) !=
       0) {
     throw std::runtime_error(
@@ -515,11 +516,11 @@ int NavigationSupportHeight(int x, int z) {
   int support = kNoSupport;
   // VS::Field::LiveGimmickSupportHeight, original 40564.c:317. Do not call that
   // gameplay query here: it writes Actors_supportingGimmickIndex.
-  for (const auto* object : Field_gimmickInstances) {
-    if (object != nullptr && !object->isSkipped && !object->motionState &&
-        object->mode != kInactiveMode && object->tileX == x / kTileSize &&
-        object->tileZ == z / kTileSize) {
-      support = std::min(support, static_cast<int>(object->positionY));
+  for (const auto* object : VS::Field::gimmickInstances) {
+    if (object != nullptr && !object->is_skipped && !object->motion_state &&
+        object->mode != kInactiveMode && object->tile_x == x / kTileSize &&
+        object->tile_z == z / kTileSize) {
+      support = std::min(support, static_cast<int>(object->position_y));
     }
   }
   support -= kTileSize;
@@ -527,7 +528,7 @@ int NavigationSupportHeight(int x, int z) {
 }
 
 bool NavigationPointClear(int x, int z, int floor_height, int body_height) {
-  const auto* map = Field_roomData.collisionMap;
+  const auto* map = VS::Field::roomData.collision_map;
   constexpr int kTileSize = 128, kHeightSign = 0x4000, kHeightMask = 0x7FFF;
   if (x < 0 || z < 0 || x >= map->width * kTileSize ||
       z >= map->height * kTileSize) {
@@ -536,7 +537,7 @@ bool NavigationPointClear(int x, int z, int floor_height, int body_height) {
   const auto* cell =
       VS::Field::LiveCollisionCellAt(x / kTileSize, z / kTileSize, 0);
   if (cell == nullptr || cell->passability > kFullyBlockedPassability ||
-      cell->isPit) {
+      cell->is_pit) {
     return false;
   }
   SVECTOR point{static_cast<std::int16_t>(x), 0, static_cast<std::int16_t>(z),
@@ -582,10 +583,10 @@ bool NavigationFootprintClear(int x, int z, int radius, int body_height) {
 
 EncounterNavigationState InspectNavigation() {
   EncounterNavigationState result;
-  const auto* map = Field_roomData.collisionMap;
+  const auto* map = VS::Field::roomData.collision_map;
   const auto* player = Actors_actorRecords[0];
   if (map == nullptr || player == nullptr ||
-      Field_roomData.tileCells == nullptr) {
+      VS::Field::roomData.tile_cells == nullptr) {
     return result;
   }
   constexpr int kPatchSide = 13, kHalfPatch = kPatchSide / 2;
@@ -594,10 +595,10 @@ EncounterNavigationState InspectNavigation() {
   if (map->width <= 0 || map->height <= 0 ||
       map->width > EncounterLimits::kTiles ||
       map->height > EncounterLimits::kTiles ||
-      Field_roomData.header.collisionMapLength < sizeof(*map) ||
-      map->cellCount != cells ||
-      Field_roomData.header.tileCellsLength <
-          cells * sizeof(Field_MpdTileCell)) {
+      VS::Field::roomData.header.collision_map_length < sizeof(*map) ||
+      map->cell_count != cells ||
+      VS::Field::roomData.header.tile_cells_length <
+          cells * sizeof(VS::Field::MpdTileCell)) {
     throw std::runtime_error("invalid runtime navigation storage");
   }
   VS::Actors::ActorLocationQuery placement{};
@@ -634,7 +635,7 @@ EncounterNavigationState InspectNavigation() {
       const bool passable =
           cell != nullptr && cell->passability <= kFullyBlockedPassability &&
           VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
-      const bool pit = cell != nullptr && cell->isPit;
+      const bool pit = cell != nullptr && cell->is_pit;
       result.samples.push_back(
           {NavigationSupportHeight(world_x, world_z),
            VS::Field::LiveCeilingHeightAt(world_x, world_z),
@@ -732,8 +733,8 @@ nlohmann::json EncodePlayerDoors(const PlayerObservationState& state) {
 nlohmann::json EncodeRoomTiles() {
   static const void* last_map = nullptr;
   static unsigned calls = 0;
-  const auto* map = Field_roomData.collisionMap;
-  if (map == nullptr || Field_roomData.tileCells == nullptr ||
+  const auto* map = VS::Field::roomData.collision_map;
+  if (map == nullptr || VS::Field::roomData.tile_cells == nullptr ||
       map->width <= 0 || map->height <= 0 ||
       map->width > EncounterLimits::kTiles ||
       map->height > EncounterLimits::kTiles) {
@@ -758,7 +759,7 @@ nlohmann::json EncodeRoomTiles() {
       const bool passable =
           cell != nullptr && cell->passability <= kFullyBlockedPassability &&
           VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
-      const bool pit = cell != nullptr && cell->isPit;
+      const bool pit = cell != nullptr && cell->is_pit;
       floors.push_back(VS::Field::LiveFloorHeightAt(world_x, world_z));
       ceilings.push_back(VS::Field::LiveCeilingHeightAt(world_x, world_z));
       flags.push_back((passable ? 1 : 0) | (pit ? 2 : 0));
@@ -771,8 +772,8 @@ nlohmann::json EncodeRoomTiles() {
           {"flags", std::move(flags)}};
 }
 
-// Live Field_gimmickInstances (D_800F45E0). Reads fields only: the gameplay
-// queries Field_FindInteractableGimmickAhead (func_800A39F8) and
+// Live VS::Field::gimmickInstances (D_800F45E0). Reads fields only: the
+// gameplay queries Field_FindInteractableGimmickAhead (func_800A39F8) and
 // VS::Field::LiveGimmickSupportHeight write interaction/support globals.
 nlohmann::json EncodePlayerGimmicks() {
   auto gimmicks = nlohmann::json::array();
@@ -780,25 +781,26 @@ nlohmann::json EncodePlayerGimmicks() {
   const int carried = ashley != nullptr && ashley->actionPoseActive
                           ? ashley->instance.attachBone
                           : -1;
-  for (int slot = 0; slot < static_cast<int>(std::size(Field_gimmickInstances));
+  for (int slot = 0;
+       slot < static_cast<int>(std::size(VS::Field::gimmickInstances));
        ++slot) {
-    const auto* object = Field_gimmickInstances[slot];
+    const auto* object = VS::Field::gimmickInstances[slot];
     if (object == nullptr) continue;
     gimmicks.push_back(
         {{"slot", slot},
-         {"object_id", object->objectInfo.objectId},
-         {"interaction", object->objectInfo.interaction},
-         {"falling", object->objectInfo.isFalling != 0},
-         {"tile_x", static_cast<int>(object->tileX)},
-         {"tile_z", static_cast<int>(object->tileZ)},
+         {"object_id", object->object_info.object_id},
+         {"interaction", object->object_info.interaction},
+         {"falling", object->object_info.is_falling != 0},
+         {"tile_x", static_cast<int>(object->tile_x)},
+         {"tile_z", static_cast<int>(object->tile_z)},
          {"position",
-          {object->positionX, object->positionY, object->positionZ}},
+          {object->position_x, object->position_y, object->position_z}},
          {"mode", object->mode},
-         {"motion_state", object->motionState},
-         {"skipped", object->isSkipped != 0},
-         {"visible", object->isVisible != 0},
+         {"motion_state", object->motion_state},
+         {"skipped", object->is_skipped != 0},
+         {"visible", object->is_visible != 0},
          {"parent", object->parent},
-         {"carrier", object->objectInfo.carrier},
+         {"carrier", object->object_info.carrier},
          {"carried", slot == carried}});
   }
   return gimmicks;

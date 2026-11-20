@@ -16,7 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Render/Display.hpp"
@@ -628,8 +628,8 @@ class PresetLiveExit {
     VS::State::stateFlags.opaque_c = kFlag;
     VS::State::stateFlags.opaque_d = kFlag;
     VS::State::stateFlags.opaque_e = kFlag;
-    VS::State::savedEntryDoor.destinationZoneId = kDestination;
-    VS::State::savedEntryDoor.destinationRoomId = kDestination;
+    VS::State::savedEntryDoor.destination_zone_id = kDestination;
+    VS::State::savedEntryDoor.destination_room_id = kDestination;
   }
   PresetLiveExit(const PresetLiveExit&) = delete;
   PresetLiveExit& operator=(const PresetLiveExit&) = delete;
@@ -642,7 +642,7 @@ class PresetLiveExit {
 
  private:
   VS::State::StateFlags flags_ = VS::State::stateFlags;
-  Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
+  VS::Field::MpdDoorRecord door_ = VS::State::savedEntryDoor;
 };
 
 // Restores the settings, visits and display environments the live host
@@ -1646,7 +1646,7 @@ TEST_CASE("Title live exit keeps the state for a loaded game",
   CHECK(flags.opaque_c == 0);
   CHECK(flags.opaque_d == 0);
   CHECK(flags.opaque_e == PresetLiveExit::kFlag);
-  CHECK(VS::State::savedEntryDoor.destinationZoneId ==
+  CHECK(VS::State::savedEntryDoor.destination_zone_id ==
         PresetLiveExit::kDestination);
 }
 
@@ -1654,27 +1654,27 @@ TEST_CASE("Title live exit writes the state flags and entry door",
           "[title][title-menu]") {
   const PresetLiveExit preset;
   const VS::State::StateFlags& flags = VS::State::stateFlags;
-  const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
+  const VS::Field::MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
   CHECK(flags.opaque_d == 1);
   CHECK(flags.opaque_e == 1);
-  CHECK(door.destinationZoneId == 2);
-  CHECK(door.destinationRoomId == 1);
+  CHECK(door.destination_zone_id == 2);
+  CHECK(door.destination_room_id == 1);
 }
 
 TEST_CASE("Title live exit sends a new game to its first room",
           "[title][title-menu]") {
   const PresetLiveExit preset;
   const VS::State::StateFlags& flags = VS::State::stateFlags;
-  const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
+  const VS::Field::MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
   title::PrepareLiveExit(0);
   CHECK(flags.opaque_d == 0);
   CHECK(flags.opaque_e == 1);
-  CHECK(door.destinationZoneId == 1);
-  CHECK(door.destinationRoomId == 0);
+  CHECK(door.destination_zone_id == 1);
+  CHECK(door.destination_room_id == 0);
 }
 
 TEST_CASE("Title live host binds settings and visits", "[title][title-menu]") {

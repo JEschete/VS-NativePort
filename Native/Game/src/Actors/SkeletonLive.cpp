@@ -31,7 +31,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -78,7 +78,7 @@ static_assert(kWeaponTableSize % kWeaponsPerActor == 0);
 // slot.
 struct LiveSkeleton {
   Actors_ActorRecord* actor = nullptr;
-  Field_GimmickInstance* gimmick = nullptr;
+  VS::Field::GimmickInstance* gimmick = nullptr;
 
   [[nodiscard]] bool Present() const {
     return actor != nullptr || gimmick != nullptr;
@@ -98,7 +98,7 @@ struct LiveSkeleton {
   [[nodiscard]] std::size_t BoneCount() const {
     if (actor != nullptr) return actor->instance.boneCount;
     if (gimmick == nullptr) return 0;
-    return static_cast<std::uint8_t>(gimmick->boneCount);
+    return static_cast<std::uint8_t>(gimmick->bone_count);
   }
 
   [[nodiscard]] std::span<const MATRIX> Matrices() const {
@@ -221,8 +221,8 @@ struct BoneLabelTable {
   return {instance.rotationX, instance.facing, instance.rotationZ};
 }
 
-[[nodiscard]] Vec3 GimmickPosition(const Field_GimmickInstance& gimmick) {
-  return {gimmick.positionX, gimmick.positionY, gimmick.positionZ};
+[[nodiscard]] Vec3 GimmickPosition(const VS::Field::GimmickInstance& gimmick) {
+  return {gimmick.position_x, gimmick.position_y, gimmick.position_z};
 }
 
 // func_800A1DE8 over the live tables.

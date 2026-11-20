@@ -23,8 +23,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
@@ -433,10 +432,10 @@ class LiveHost final : public Host {
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetEntryDoor(const EntryDoor& door) override {
-    VS::State::savedEntryDoor.entryTileX = door.tile_x;
-    VS::State::savedEntryDoor.entryTileZ = door.tile_z;
-    VS::State::savedEntryDoor.tileLocation.entryDirection = door.direction;
-    VS::State::savedEntryDoor.entryElevation = door.elevation;
+    VS::State::savedEntryDoor.entry_tile_x = door.tile_x;
+    VS::State::savedEntryDoor.entry_tile_z = door.tile_z;
+    VS::State::savedEntryDoor.tile_location.entry_direction = door.direction;
+    VS::State::savedEntryDoor.entry_elevation = door.elevation;
   }
   void ClearInventoryIndices() override { VS::Items::inventoryIndices = {}; }
   void SetGameModes(const GameModes& modes) override {
@@ -450,8 +449,8 @@ class LiveHost final : public Host {
       VS::State::stateFlags.opaque_e = static_cast<char>(*plan.state_flag_0e);
     }
     if (plan.destination.has_value()) {
-      VS::State::savedEntryDoor.destinationZoneId = plan.destination->zone;
-      VS::State::savedEntryDoor.destinationRoomId = plan.destination->room;
+      VS::State::savedEntryDoor.destination_zone_id = plan.destination->zone;
+      VS::State::savedEntryDoor.destination_room_id = plan.destination->room;
     }
   }
 };

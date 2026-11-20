@@ -21,7 +21,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 
@@ -95,11 +95,11 @@ void StorePulse(const PalettePulseRequest& request,
 // names, and the upload of its base palettes.
 struct LivePulseModel {
   Actors_ActorRecord* actor = nullptr;
-  Field_GimmickInstance* gimmick = nullptr;
+  VS::Field::GimmickInstance* gimmick = nullptr;
 
   [[nodiscard]] Actors_ModelEffectSlot* Slot() const {
     if (actor != nullptr) return &actor->instance.palettePulse;
-    return gimmick != nullptr ? &gimmick->palettePulse : nullptr;
+    return gimmick != nullptr ? &gimmick->palette_pulse : nullptr;
   }
 
   void ReloadBasePalettes() const {
@@ -108,7 +108,7 @@ struct LivePulseModel {
                                  actor->instance.slot + kActorClutRowBase, 0,
                                  kActorPaletteColors);
     } else {
-      Render::LoadLiveClutColors(gimmick->basePalette, kGimmickClutRow,
+      Render::LoadLiveClutColors(gimmick->base_palette.data(), kGimmickClutRow,
                                  gimmick->slot * kSmallPaletteColors,
                                  kSmallPaletteColors);
     }

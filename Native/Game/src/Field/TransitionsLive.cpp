@@ -13,9 +13,9 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorRecordLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/Locations.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
@@ -121,7 +121,7 @@ void RunScreenTransition(Rule&& rule) {
   StoreLiveRoomTransition(state);
 }
 
-bool RefuseMissingDoor(const Field_MpdDoorRecord* door, const char* what) {
+bool RefuseMissingDoor(const VS::Field::MpdDoorRecord* door, const char* what) {
   if (door != nullptr) {
     return false;
   }
@@ -198,7 +198,7 @@ RoomTransitionState LoadLiveRoomTransition() {
               .wipe_angle = screenTransitionWipeAngle,
               .speed = screenTransitionSpeed,
           },
-      .pending_door = DoorRecordOf(Field_pendingDestinationDoor),
+      .pending_door = DoorRecordOf(VS::Field::pendingDestinationDoor),
   };
 }
 
@@ -208,7 +208,7 @@ void StoreLiveRoomTransition(const RoomTransitionState& state) {
   screenTransitionEffect = state.screen.effect;
   screenTransitionWipeAngle = state.screen.wipe_angle;
   screenTransitionSpeed = state.screen.speed;
-  StoreDoorRecord(state.pending_door, Field_pendingDestinationDoor);
+  StoreDoorRecord(state.pending_door, VS::Field::pendingDestinationDoor);
 }
 
 int LiveScreenTransitionPhase() {
@@ -243,7 +243,7 @@ void LiveBeginScreenFadeIn(int effect, int speed, int wipe_angle) {
   });
 }
 
-int LiveBeginRoomTransition(const Field_MpdDoorRecord* door, int effect,
+int LiveBeginRoomTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed) {
   if (RefuseMissingDoor(door, "room transition")) {
     return 0;
@@ -255,7 +255,7 @@ int LiveBeginRoomTransition(const Field_MpdDoorRecord* door, int effect,
   return 1;
 }
 
-void LiveBeginScriptedRoomTransition(const Field_MpdDoorRecord* door,
+void LiveBeginScriptedRoomTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed) {
   if (RefuseMissingDoor(door, "scripted room transition")) {
     return;
@@ -266,7 +266,7 @@ void LiveBeginScriptedRoomTransition(const Field_MpdDoorRecord* door,
   });
 }
 
-int LiveBeginZoneTransition(const Field_MpdDoorRecord* door, int effect,
+int LiveBeginZoneTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed) {
   if (RefuseMissingDoor(door, "zone transition")) {
     return 0;
@@ -278,7 +278,7 @@ int LiveBeginZoneTransition(const Field_MpdDoorRecord* door, int effect,
   return 1;
 }
 
-void LiveBeginScriptedZoneTransition(const Field_MpdDoorRecord* door,
+void LiveBeginScriptedZoneTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed) {
   if (RefuseMissingDoor(door, "scripted zone transition")) {
     return;

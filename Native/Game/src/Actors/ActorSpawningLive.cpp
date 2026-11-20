@@ -47,7 +47,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Zone.hpp"
@@ -93,7 +93,8 @@ static_assert(std::size(VS::Items::inventory.blades) == kInventoryBlades);
 static_assert(std::size(VS::Items::inventory.shields) == kInventoryShields);
 static_assert(std::size(VS::Items::inventory.armor) == kInventoryArmor);
 static_assert(std::size(VS::State::ashleySnapshot.stats.limbs) == kActorLimbs);
-static_assert(sizeof Field_MpdEnemySpawn{}.settings == kSpawnSettingsBytes);
+static_assert(sizeof VS::Field::MpdEnemySpawn{}.settings ==
+              kSpawnSettingsBytes);
 static_assert(std::size(VS::Actors::RoomActorRecord{}.limb_hp) == kActorLimbs);
 
 template <typename Id, typename T>
@@ -975,16 +976,16 @@ CharacterTemplate DecodeCharacterTemplate(
   return decoded;
 }
 
-RoomSpawn DecodeRoomSpawn(const Field_MpdEnemySpawn& spawn) {
+RoomSpawn DecodeRoomSpawn(const VS::Field::MpdEnemySpawn& spawn) {
   RoomSpawn decoded{
       .index = spawn.index,
-      .placement = {.tile_x = spawn.tileX,
+      .placement = {.tile_x = spawn.tile_x,
                     .direction = spawn.direction,
-                    .tile_z = spawn.tileZ,
+                    .tile_z = spawn.tile_z,
                     .height = spawn.height},
-      .drop = {.id = spawn.itemId, .count = spawn.itemCount},
-      .second_drop = {.id = spawn.item2Id, .count = spawn.item2Count},
-      .random_drop = {.id = spawn.item3Id, .count = spawn.item3Count},
+      .drop = {.id = spawn.item_id, .count = spawn.item_count},
+      .second_drop = {.id = spawn.item2_id, .count = spawn.item2_count},
+      .random_drop = {.id = spawn.item3_id, .count = spawn.item3_count},
       .facing = spawn.facing,
       .variant = spawn.variant,
       .combat_pose = spawn.reserved26};
@@ -1043,7 +1044,7 @@ Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
 }
 
 // decomp: BATTLE.PRG func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6578)
-Battle_Actor* SpawnLiveRoomEnemy(int actor_id, Field_MpdEnemySpawn* spawn,
+Battle_Actor* SpawnLiveRoomEnemy(int actor_id, VS::Field::MpdEnemySpawn* spawn,
                                  VS::Actors::CharacterInit* init, int flags) {
   constexpr const char* kOperation = "SpawnRoomEnemy";
   if (spawn == nullptr || init == nullptr) {

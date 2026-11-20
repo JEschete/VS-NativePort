@@ -27,7 +27,7 @@ inline constexpr std::size_t kSnapshotStatusTimerCount = 8;
 // The room actors whose state the capture stores (VS::Actors::RememberEnemy).
 inline constexpr std::int32_t kSnapshotRoomActorCount = 16;
 
-// A Field_MpdDoorRecord's bytes.
+// A VS::Field::MpdDoorRecord's bytes.
 using EntryDoor = std::array<std::byte, kEntryDoorBytes>;
 // VS::State::learnedActionFlags: action 8n+k is bit 7-k of byte n.
 using LearnedActions = std::array<std::uint8_t, kLearnedActionBytes>;
@@ -84,9 +84,9 @@ struct AshleySnapshot {
 class SnapshotHost {
  public:
   virtual ~SnapshotHost() = default;
-  // Field_pendingDestinationDoor.
+  // VS::Field::pendingDestinationDoor.
   virtual EntryDoor PendingDestinationDoor() = 0;
-  // Field_snapshotDoorFlagSource.requiredFlagId.
+  // VS::Field::snapshotDoorFlagSource.required_flag_id.
   virtual std::uint16_t SnapshotDoorFlagId() = 0;
   virtual TilePlacement AshleyPlacement() = 0;
   virtual bool ActionUnlocked(std::size_t action) = 0;

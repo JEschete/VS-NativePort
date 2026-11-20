@@ -314,7 +314,7 @@ H0312,header,Native/Game/src/Field/CameraLiveState.hpp,owned,no,pragma-once,0,0,
 H0313,header,Native/Game/src/Field/ChestInteractionsLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0314,header,Native/Game/src/Field/Collision.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0315,header,Native/Game/src/Field/DoorMatchList.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0316,header,Native/Game/src/Field/Doors.h,generated,yes,pragma-once,0,0,0,0,0,1,8,0,0,remaining,
+H0316,header,Native/Game/src/Field/Doors.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0317,header,Native/Game/src/Field/EncounterSpawnProfile.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0318,header,Native/Game/src/Field/EnvironmentLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0319,header,Native/Game/src/Field/GameModeLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -325,7 +325,7 @@ H0323,header,Native/Game/src/Field/GimmickMotion.h,generated,yes,pragma-once,0,0
 H0324,header,Native/Game/src/Field/GimmickPlacementLive.h,owned,no,pragma-once,0,0,0,0,0,0,13,0,0,retired,merged into Native/Game/include/Field/GimmickPlacementLive.hpp (#441)
 H0325,header,Native/Game/src/Field/GimmickReactionsLive.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Game/include/Field/GimmickReactionsLive.hpp (#441)
 H0326,header,Native/Game/src/Field/GimmickResourcesLive.h,owned,no,pragma-once,0,0,0,0,0,0,4,0,0,retired,merged into Native/Game/include/Field/GimmickResourcesLive.hpp (#441)
-H0327,header,Native/Game/src/Field/Gimmicks.h,generated,yes,pragma-once,0,0,0,0,0,0,40,0,0,remaining,
+H0327,header,Native/Game/src/Field/Gimmicks.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0328,header,Native/Game/src/Field/Input.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0329,header,Native/Game/src/Field/InteractionFocusLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0330,header,Native/Game/src/Field/InteractionTargetLive.h,owned,no,pragma-once,0,0,0,0,0,0,3,0,0,retired,merged into Native/Game/include/Field/InteractionTargetLive.hpp (#441)
@@ -336,10 +336,10 @@ H0334,header,Native/Game/src/Field/Map.h,generated,yes,pragma-once,0,0,0,0,0,0,4
 H0335,header,Native/Game/src/Field/MapProgress.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0336,header,Native/Game/src/Field/Minimap.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0337,header,Native/Game/src/Field/MinimapSceneLive.h,owned,no,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/include/Field/MinimapSceneLive.hpp (#441)
-H0338,header,Native/Game/src/Field/Mpd.h,generated,yes,pragma-once,0,0,0,0,0,0,19,0,0,remaining,
+H0338,header,Native/Game/src/Field/Mpd.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0339,header,Native/Game/src/Field/PlatformPlacementLive.h,owned,no,pragma-once,0,0,0,0,0,0,13,0,0,retired,merged into Native/Game/include/Field/PlatformPlacementLive.hpp (#441)
 H0340,header,Native/Game/src/Field/Platforms.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Field_PlatformContactPoint (T00445/T00446) duplicated VS::Field::PlatformContact (Field/PlatformPlacement.hpp) (#441)
-H0341,header,Native/Game/src/Field/Room.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
+H0341,header,Native/Game/src/Field/Room.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0342,header,Native/Game/src/Field/RoomLoadingLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0343,header,Native/Game/src/Field/RoomRenderingLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0344,header,Native/Game/src/Field/RoomStateLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -821,7 +821,7 @@ S0384,source,Native/Game/src/Field/CollisionMapLive.cpp,owned,no,,0,,,,,,,,,done
 S0385,source,Native/Game/src/Field/CollisionSamplingBinding.cpp,owned,no,,0,,,,,,,,,done,
 S0386,source,Native/Game/src/Field/DoorMatchesLive.cpp,owned,no,,0,,,,,,,,,done,
 S0387,source,Native/Game/src/Field/DoorRecordLive.cpp,owned,no,,0,,,,,,,,,done,
-S0388,source,Native/Game/src/Field/Doors.cpp,generated,yes,,0,,,,,,,,,done,
+S0388,source,Native/Game/src/Field/Doors.cpp,generated,no,,0,,,,,,,,,done,
 S0389,source,Native/Game/src/Field/EncounterCatalog.cpp,owned,no,,0,,,,,,,,,done,
 S0390,source,Native/Game/src/Field/EnvironmentLive.cpp,owned,no,,0,,,,,,,,,done,
 S0391,source,Native/Game/src/Field/GameModeLive.cpp,owned,no,,0,,,,,,,,,done,
@@ -830,7 +830,7 @@ S0393,source,Native/Game/src/Field/GimmickDynamicsLive.cpp,owned,no,,0,,,,,,,,,d
 S0394,source,Native/Game/src/Field/GimmickPlacementLive.cpp,owned,no,,0,,,,,,,,,done,
 S0395,source,Native/Game/src/Field/GimmickReactionsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0396,source,Native/Game/src/Field/GimmickResourcesLive.cpp,owned,no,,0,,,,,,,,,done,
-S0397,source,Native/Game/src/Field/Gimmicks.cpp,generated,yes,,0,,,,,,,,,done,
+S0397,source,Native/Game/src/Field/Gimmicks.cpp,generated,no,,0,,,,,,,,,done,
 S0398,source,Native/Game/src/Field/Input.cpp,generated,no,,0,,,,,,,,,done,
 S0399,source,Native/Game/src/Field/InteractionTargetLive.cpp,owned,no,,0,,,,,,,,,done,
 S0400,source,Native/Game/src/Field/Interactions.cpp,generated,no,,0,,,,,,,,,done,
@@ -841,7 +841,7 @@ S0404,source,Native/Game/src/Field/MapProgress.cpp,generated,no,,0,,,,,,,,,done,
 S0405,source,Native/Game/src/Field/Minimap.cpp,generated,no,,0,,,,,,,,,done,
 S0406,source,Native/Game/src/Field/MinimapSceneLive.cpp,owned,no,,0,,,,,,,,,done,
 S0407,source,Native/Game/src/Field/PlatformPlacementLive.cpp,owned,no,,0,,,,,,,,,done,
-S0408,source,Native/Game/src/Field/Room.cpp,generated,yes,,0,,,,,,,,,done,
+S0408,source,Native/Game/src/Field/Room.cpp,generated,no,,0,,,,,,,,,done,
 S0409,source,Native/Game/src/Field/RoomEffectsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0410,source,Native/Game/src/Field/RoomLightingLive.cpp,owned,no,,0,,,,,,,,,done,
 S0411,source,Native/Game/src/Field/RoomLoadingLive.cpp,owned,no,,0,,,,,,,,,done,

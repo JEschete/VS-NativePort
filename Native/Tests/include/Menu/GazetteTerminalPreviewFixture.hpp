@@ -24,7 +24,7 @@
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
@@ -54,7 +54,7 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Audio::SoundEffects::channels),
                     BytesOf(Actors_actorRecords),
                     BytesOf(VS::Actors::weaponModels),
-                    BytesOf(Field_gimmickInstances),
+                    BytesOf(VS::Field::gimmickInstances),
                     BytesOf(VS::Actors::primarySequenceBuffer),
                     BytesOf(VS::Actors::sequenceWorkBuffer),
                     BytesOf(VS::Actors::forcedModelOverrides),

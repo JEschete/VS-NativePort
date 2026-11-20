@@ -19,13 +19,13 @@
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
@@ -47,20 +47,20 @@ u_short VS::Field::areRoomUpdatesPaused;
 // decomp: D_800F1BA8 (D_800F1BA8@BATTLE/BATTLE.PRG)
 u_short* VS::Field::roomPalettes;
 // decomp: D_800F1BB0 (D_800F1BB0@BATTLE/BATTLE.PRG)
-Field_RoomTint VS::Field::roomTint;
+VS::Field::RoomTintRecord VS::Field::roomTint;
 
 namespace {
-// The original's layouts (146C.c:168, Mpd.h and 146C.c:15966).
+// The original's layouts (146C.c:168, Mpd.hpp and 146C.c:15966).
 constexpr std::size_t kRoomTintBytes = 8;
 constexpr std::size_t kViewTriggerHeaderBytes = 4;
 }  // namespace
 
-static_assert(sizeof(Field_RoomTint) == kRoomTintBytes);
-static_assert(offsetof(Field_MpdTriangle, textureId) ==
+static_assert(sizeof(VS::Field::RoomTintRecord) == kRoomTintBytes);
+static_assert(offsetof(VS::Field::MpdTriangle, texture_id) ==
               VS::Field::kRoomPolygonTextureIdOffset);
-static_assert(offsetof(Field_MpdQuad, textureId) ==
+static_assert(offsetof(VS::Field::MpdQuad, texture_id) ==
               VS::Field::kRoomPolygonTextureIdOffset);
-static_assert(sizeof(Field_MpdViewTrigger) == kViewTriggerHeaderBytes);
+static_assert(sizeof(VS::Field::MpdViewTrigger) == kViewTriggerHeaderBytes);
 
 namespace VS::Field {
 namespace {
@@ -111,13 +111,14 @@ template <typename Byte>
 }
 
 [[nodiscard]] std::span<std::byte> RoomGeometry() {
-  return Section<std::byte>(Field_roomData.geometry,
-                            Field_roomData.header.geometryLength);
+  return Section<std::byte>(VS::Field::roomData.geometry,
+                            VS::Field::roomData.header.geometry_length);
 }
 
 [[nodiscard]] std::span<const std::byte> RoomViewTriggers() {
-  return Section<const std::byte>(Field_roomData.viewTriggers,
-                                  Field_roomData.header.viewTriggersLength);
+  return Section<const std::byte>(
+      VS::Field::roomData.view_triggers,
+      VS::Field::roomData.header.view_triggers_length);
 }
 
 // The 1024 colours RoomStateLive.cpp allocates, or none before a session.
@@ -133,7 +134,7 @@ template <typename Byte>
                                       .green = roomTint.green,
                                       .blue = roomTint.blue,
                                       .strength = roomTint.strength},
-                       .active = roomTint.isActive != 0};
+                       .active = roomTint.is_active != 0};
 }
 
 void StoreTint(const RoomTintState& tint) {
@@ -141,7 +142,7 @@ void StoreTint(const RoomTintState& tint) {
   roomTint.green = tint.parameters.green;
   roomTint.blue = tint.parameters.blue;
   roomTint.strength = tint.parameters.strength;
-  roomTint.isActive = static_cast<std::int16_t>(tint.active ? 1 : 0);
+  roomTint.is_active = static_cast<std::int16_t>(tint.active ? 1 : 0);
 }
 
 void LoadViewTransform() {
@@ -231,25 +232,26 @@ class LiveGeometryHost final : public RoomGeometryHost {
     Render::UpdateLiveRoomGroupTransforms(geometry_, Bytes());
   }
   void DrawGroups() override {
-    Field_roomPrimitiveRangeStart = Scratch().primitive_cursor;
+    VS::Field::roomPrimitiveRangeStart = Scratch().primitive_cursor;
     Render::DrawLiveRoomGeometry(geometry_, Bytes(), roomGeometryDrawMode);
-    Field_roomPrimitiveRangeEnd = Scratch().primitive_cursor;
+    VS::Field::roomPrimitiveRangeEnd = Scratch().primitive_cursor;
   }
   void TintDrawnPrimitives(const Render::RoomTint& tint) override {
-    const Field_RoomTint packed{.red = tint.red,
-                                .green = tint.green,
-                                .blue = tint.blue,
-                                .reserved03 = 0,
-                                .strength = tint.strength,
-                                .isActive = 1};
-    Render::TintLiveRoomGeometryPrimitives(
-        Field_roomPrimitiveRangeStart, Field_roomPrimitiveRangeEnd, packed, 0);
+    const VS::Field::RoomTintRecord packed{.red = tint.red,
+                                           .green = tint.green,
+                                           .blue = tint.blue,
+                                           .reserved03 = 0,
+                                           .strength = tint.strength,
+                                           .is_active = 1};
+    Render::TintLiveRoomGeometryPrimitives(VS::Field::roomPrimitiveRangeStart,
+                                           VS::Field::roomPrimitiveRangeEnd,
+                                           packed, 0);
   }
 
  private:
   // 146C.c:15926 bounds any geometry by the loaded room's extent.
   [[nodiscard]] static std::size_t Bytes() {
-    return Field_roomData.header.geometryLength;
+    return VS::Field::roomData.header.geometry_length;
   }
 
   void* geometry_;
@@ -270,9 +272,12 @@ class LiveSceneHost final : public RoomSceneHost {
   void UpdateWeather() override { LiveUpdateRoomWeather(); }
   // 146C.c:15791 compares isLoaded and displayFlag as one halfword to 0x101.
   bool RoomShown() override {
-    return Field_roomData.isLoaded == 1 && Field_roomData.displayFlag == 1;
+    return VS::Field::roomData.is_loaded == 1 &&
+           VS::Field::roomData.display_flag == 1;
   }
-  bool HasGeometry() override { return Field_roomData.geometry != nullptr; }
+  bool HasGeometry() override {
+    return VS::Field::roomData.geometry != nullptr;
+  }
   int CameraYaw() override {
     return static_cast<int>(Scratch().camera.angles.vy);
   }
@@ -281,12 +286,13 @@ class LiveSceneHost final : public RoomSceneHost {
     facing = (facing & ~kViewFacingMask) | mask;
   }
   void DrawGeometry() override {
-    LiveDrawRoomGeometry(Field_roomData.geometry);
+    LiveDrawRoomGeometry(VS::Field::roomData.geometry);
   }
   MinimapSettings Minimap() override {
-    return MinimapSettings{.shown = (VS::Input::settings.simple_map & 1) != 0,
-                           .framed = (VS::Input::settings.simple_map & 2) != 0,
-                           .has_scene = Field_roomData.minimapScene != nullptr};
+    return MinimapSettings{
+        .shown = (VS::Input::settings.simple_map & 1) != 0,
+        .framed = (VS::Input::settings.simple_map & 2) != 0,
+        .has_scene = VS::Field::roomData.minimap_scene != nullptr};
   }
   bool MinimapVisible() override { return isMinimapVisible != 0; }
   std::int16_t MinimapSlideFrame() override { return minimapSlideFrame; }
@@ -336,8 +342,8 @@ void LiveSceneHost::DrawMinimap(const MinimapLayout& layout) {
   {
     const ProjectionOffsetScope scope(
         VS::Render::ScreenOffset{.x = layout.offset_x, .y = layout.offset_y});
-    DrawLiveMinimapScene(Field_roomData.minimapScene,
-                         Field_roomData.header.minimapSceneLength);
+    DrawLiveMinimapScene(VS::Field::roomData.minimap_scene,
+                         VS::Field::roomData.header.minimap_scene_length);
   }
   Field::LoadViewTransform();
   LinkDrawArea(RECT{.x = layout.area.x,
@@ -383,17 +389,18 @@ void LiveDrawRoomGeometry(void* geometry) {
 }
 
 void LiveAdvanceRoomAnimationClock() {
-  Field_roomAnimationTicks =
-      AdvanceRoomAnimationClock(areRoomUpdatesPaused != 0,
-                                Field_roomAnimationTicks, VS::State::tickSpeed);
+  VS::Field::roomAnimationTicks = AdvanceRoomAnimationClock(
+      areRoomUpdatesPaused != 0, VS::Field::roomAnimationTicks,
+      VS::State::tickSpeed);
 }
 
 void LiveSetRoomRenderingEnabled(int enabled) {
-  RoomDisplay display{.loaded = Field_roomData.isLoaded != 0,
-                      .displayed = Field_roomData.displayFlag != 0,
-                      .owner_room_index = Field_roomData.roomIndex};
+  RoomDisplay display{.loaded = VS::Field::roomData.is_loaded != 0,
+                      .displayed = VS::Field::roomData.display_flag != 0,
+                      .owner_room_index = VS::Field::roomData.room_index};
   if (SetRoomRenderingEnabled(display, enabled != 0)) {
-    Field_roomData.displayFlag = static_cast<char>(display.displayed ? 1 : 0);
+    VS::Field::roomData.display_flag =
+        static_cast<char>(display.displayed ? 1 : 0);
   }
 }
 
@@ -423,7 +430,7 @@ void LiveUploadRoomPalettes() {
 }
 
 void LiveOffsetRoomTextureIds(int offset, int* geometry) {
-  if (geometry == nullptr || geometry != Field_roomData.geometry) {
+  if (geometry == nullptr || geometry != VS::Field::roomData.geometry) {
     RefuseCall("Texture id offset", "geometry is not the loaded room's");
     return;
   }

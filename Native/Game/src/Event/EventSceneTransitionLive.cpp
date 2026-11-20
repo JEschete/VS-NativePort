@@ -18,7 +18,7 @@
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/DoorRecord.hpp"
 #include "Field/DoorRecordLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -37,8 +37,8 @@ ScriptCommand RequiredCommand(const std::uint8_t* instruction,
   return ScriptCommand{instruction, length};
 }
 
-Field_MpdDoorRecord PackedDoor(const Field::DoorRecord& door) {
-  Field_MpdDoorRecord record{};
+VS::Field::MpdDoorRecord PackedDoor(const Field::DoorRecord& door) {
+  VS::Field::MpdDoorRecord record{};
   Field::StoreDoorRecord(door, record);
   return record;
 }
@@ -98,13 +98,13 @@ class LiveSceneTransitionServices final : public SceneTransitionHost {
   void BeginScriptedRoomTransition(const Field::DoorRecord& door,
                                    std::uint8_t effect,
                                    std::uint8_t speed) override {
-    const Field_MpdDoorRecord record = PackedDoor(door);
+    const VS::Field::MpdDoorRecord record = PackedDoor(door);
     Field::LiveBeginScriptedRoomTransition(&record, effect, speed);
   }
   void BeginScriptedZoneTransition(const Field::DoorRecord& door,
                                    std::uint8_t effect,
                                    std::uint8_t speed) override {
-    const Field_MpdDoorRecord record = PackedDoor(door);
+    const VS::Field::MpdDoorRecord record = PackedDoor(door);
     Field::LiveBeginScriptedZoneTransition(&record, effect, speed);
   }
 };

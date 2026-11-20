@@ -10,9 +10,9 @@
 
 #include "Battle/StatusEffects.h"
 #include "Content/DiscQueue.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
@@ -267,8 +267,8 @@ MapVertex VertexAt(const SceneImage& image, std::size_t offset) {
 // restores the map globals.
 struct LiveMapState {
   LiveMapState()
-      : minimap(Field_roomData.minimapScene),
-        minimap_length(Field_roomData.header.minimapSceneLength),
+      : minimap(VS::Field::roomData.minimap_scene),
+        minimap_length(VS::Field::roomData.header.minimap_scene_length),
         arm(Battle_unusedSceneBuffer),
         scene(nav::currentScene),
         center(nav::centerPoint),
@@ -280,8 +280,8 @@ struct LiveMapState {
   LiveMapState(LiveMapState&&) = delete;
   LiveMapState& operator=(LiveMapState&&) = delete;
   ~LiveMapState() {
-    Field_roomData.minimapScene = minimap;
-    Field_roomData.header.minimapSceneLength = minimap_length;
+    VS::Field::roomData.minimap_scene = minimap;
+    VS::Field::roomData.header.minimap_scene_length = minimap_length;
     Battle_unusedSceneBuffer = arm;
     nav::currentScene = scene;
     nav::centerPoint = center;
@@ -290,9 +290,9 @@ struct LiveMapState {
     nav::roomNamesTable = names;
   }
   static void UseMinimap(SceneImage& image) {
-    Field_roomData.minimapScene =
+    VS::Field::roomData.minimap_scene =
         reinterpret_cast<VS::Field::MapScene*>(image.bytes.data());
-    Field_roomData.header.minimapSceneLength =
+    VS::Field::roomData.header.minimap_scene_length =
         static_cast<u_int>(image.bytes.size());
   }
 
@@ -321,7 +321,7 @@ TEST_CASE("The live map centers on a minimap scene room",
   LiveMapState state;
   SceneImage image = TwoRoomScene();
   LiveMapState::UseMinimap(image);
-  auto* scene = Field_roomData.minimapScene;
+  auto* scene = VS::Field::roomData.minimap_scene;
 
   nav::LiveSetRoomCenterTarget(scene, 1);
   CHECK(nav::centerPoint.vx == 100);
@@ -339,7 +339,7 @@ TEST_CASE("The live map eases scales and marks a minimap scene",
   LiveMapState state;
   SceneImage image = TwoRoomScene();
   LiveMapState::UseMinimap(image);
-  auto* scene = Field_roomData.minimapScene;
+  auto* scene = VS::Field::roomData.minimap_scene;
 
   nav::centerPoint = {.vx = 15, .vy = 0, .vz = 0, .pad = 0};
   nav::LiveAnimateCentering(scene);
@@ -364,14 +364,14 @@ TEST_CASE("The live map refuses unknown scenes rooms and blocks",
 
   nav::LiveCenterOnRoom(
       reinterpret_cast<VS::Field::MapScene*>(other.bytes.data()), 0);
-  nav::LiveCenterOnRoom(Field_roomData.minimapScene, 1);
-  nav::LiveSetRoomCenterTarget(Field_roomData.minimapScene, -1);
+  nav::LiveCenterOnRoom(VS::Field::roomData.minimap_scene, 1);
+  nav::LiveSetRoomCenterTarget(VS::Field::roomData.minimap_scene, -1);
   CHECK(nav::centerPoint.vx == 1);
   CHECK(nav::centerPoint.vz == 3);
 
   // The vertex block's count runs past the scene.
   Put(image.bytes, 4 + kRecord, std::int32_t{0x100});
-  nav::LiveScaleRoomVertices(Field_roomData.minimapScene, 2);
+  nav::LiveScaleRoomVertices(VS::Field::roomData.minimap_scene, 2);
   CHECK(VertexAt(image, 4 + kRecord + 4) ==
         MapVertex{.x = 10, .y = 4, .z = -6});
 }
@@ -400,7 +400,7 @@ TEST_CASE("The live initial room matches the minimap scene's first room",
   CHECK(nav::LiveInitialRoomIndex(data) == 1);
   CHECK(nav::isCurrentScene == -1);
 
-  Field_roomData.minimapScene = nullptr;
+  VS::Field::roomData.minimap_scene = nullptr;
   nav::isCurrentScene = 5;
   CHECK(nav::LiveInitialRoomIndex(data) == 1);
   CHECK(nav::isCurrentScene == -1);

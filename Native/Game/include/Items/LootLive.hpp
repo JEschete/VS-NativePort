@@ -7,7 +7,7 @@ struct Battle_Actor;
 // Binds the loot rules (Loot.hpp) to the battle loot list
 // (VS::Items::lootListHead, whose nodes live on the game heap), the battle flow
 // around the loot menu and the treasure chests of the loaded room
-// (Field_roomData), in the shapes the copied callers use.
+// (VS::Field::roomData), in the shapes the copied callers use.
 namespace VS::Items {
 // Rolls the drops of a defeated enemy (its battle actor statistics) into a
 // new loot list entry.

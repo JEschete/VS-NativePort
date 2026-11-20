@@ -404,7 +404,7 @@ struct SpawnedState {
   friend bool operator==(const SpawnedState&, const SpawnedState&) = default;
 };
 
-// The eight settings bytes of a room spawn (Field_MpdEnemySpawn.settings):
+// The eight settings bytes of a room spawn (VS::Field::MpdEnemySpawn.settings):
 // the AI group word and the word after it, little-endian.
 struct SpawnSettings {
   std::uint8_t ai_group = 0;
@@ -426,7 +426,7 @@ struct ItemDrop {
   friend bool operator==(const ItemDrop&, const ItemDrop&) = default;
 };
 
-// Field_MpdEnemySpawn: the room's spawn record of an enemy.
+// VS::Field::MpdEnemySpawn: the room's spawn record of an enemy.
 struct RoomSpawn {
   std::uint8_t index = 0;
   SpawnPlacement placement;

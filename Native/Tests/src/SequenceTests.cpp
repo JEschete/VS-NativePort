@@ -48,7 +48,7 @@
 #include "Event/ScriptEffects.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Zone.hpp"
@@ -446,14 +446,14 @@ int Tests_ActionCameraRecovery(void) {
 
 int Tests_SparseIdlePoseReset(void) {
   Actors_ActorRecord* saved_actor = Actors_actorRecords[4];
-  Field_GimmickInstance* saved_object = Field_gimmickInstances[4];
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance* saved_object = VS::Field::gimmickInstances[4];
+  VS::Field::GimmickInstance object = {0};
   Actors_ActorRecord actor = {0};
   Actors_actorRecords[4] = nullptr;
-  Field_gimmickInstances[4] = nullptr;
+  VS::Field::gimmickInstances[4] = nullptr;
   VS::Actors::RestoreLiveActorIdlePose(4);
   object.mode = 0xF9;
-  Field_gimmickInstances[4] = &object;
+  VS::Field::gimmickInstances[4] = &object;
   VS::Actors::RestoreLiveActorIdlePose(4);
   int passed = object.mode == 0;
   actor.animationId = 0x63;
@@ -464,7 +464,7 @@ int Tests_SparseIdlePoseReset(void) {
   VS::Actors::RestoreLiveActorIdlePose(4);
   passed = passed && actor.animationId == 0xC7;
   Actors_actorRecords[4] = saved_actor;
-  Field_gimmickInstances[4] = saved_object;
+  VS::Field::gimmickInstances[4] = saved_object;
   return passed;
 }
 
@@ -585,7 +585,7 @@ int Tests_GimmickRoomScale(void) {
   const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   const MATRIX saved_root = VS::Actors::skeletonRootMatrix;
   const VECTOR saved_scale = VS::Actors::roomActorScale;
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {0};
   VS::Actors::ShpModel model = {0};
   MATRIX camera = {0};
   for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
@@ -593,7 +593,7 @@ int Tests_GimmickRoomScale(void) {
     object.matrices[kGimmickCameraMatrix].m[axis][axis] = kFixedPointOne;
   }
   object.model = &model;
-  object.scaleX = object.scaleY = object.scaleZ = 64;
+  object.scale_x = object.scale_y = object.scale_z = 64;
   VS::Render::ModelWorkspace()->root_offset = (SVECTOR){10, 20, 30, 0};
   VS::Actors::skeletonPose.scale = (VECTOR){0};
   VS::Actors::roomActorScale = (VECTOR){2048, 4096, 4096, 0};
@@ -868,10 +868,10 @@ int Tests_RoomSpawnCountGuard(void) {
 int TestGimmickStackTop(int scenario) {
   enum { kActorSlots = 17, kGimmickSlots = 16, kRoot = 3, kMember = 4 };
   Actors_ActorRecord* saved_actors[kActorSlots];
-  Field_GimmickInstance* saved_objects[kGimmickSlots];
+  VS::Field::GimmickInstance* saved_objects[kGimmickSlots];
   Actors_ActorRecord actor = {0};
-  Field_GimmickInstance root = {0};
-  Field_GimmickInstance member = {0};
+  VS::Field::GimmickInstance root = {0};
+  VS::Field::GimmickInstance member = {0};
   const int skipped = scenario == 0;
   const int has_actor = scenario != 0;
   const int has_member = scenario == 2;
@@ -880,19 +880,19 @@ int TestGimmickStackTop(int scenario) {
     Actors_actorRecords[i] = nullptr;
   }
   for (int i = 0; i < kGimmickSlots; ++i) {
-    saved_objects[i] = Field_gimmickInstances[i];
-    Field_gimmickInstances[i] = nullptr;
+    saved_objects[i] = VS::Field::gimmickInstances[i];
+    VS::Field::gimmickInstances[i] = nullptr;
   }
-  root.tileX = root.tileZ = member.tileX = member.tileZ = 2;
-  root.parent = root.objectInfo.carrier = 0xFF;
-  member.parent = member.objectInfo.carrier = 0xFF;
-  root.isSkipped = skipped;
+  root.tile_x = root.tile_z = member.tile_x = member.tile_z = 2;
+  root.parent = root.object_info.carrier = 0xFF;
+  member.parent = member.object_info.carrier = 0xFF;
+  root.is_skipped = skipped;
   root.slot = kRoot;
   member.slot = kMember;
-  member.positionY = -128;
-  member.velocityY = 77;
-  Field_gimmickInstances[kRoot] = &root;
-  if (has_member) Field_gimmickInstances[kMember] = &member;
+  member.position_y = -128;
+  member.velocity_y = 77;
+  VS::Field::gimmickInstances[kRoot] = &root;
+  if (has_member) VS::Field::gimmickInstances[kMember] = &member;
   if (has_actor) {
     actor.instance.slot = 2;
     actor.instance.currentTileX = actor.instance.currentTileZ = 2;
@@ -901,7 +901,7 @@ int TestGimmickStackTop(int scenario) {
     Actors_actorRecords[2] = &actor;
   }
   VS::Field::DropUnsupportedGimmickStackEntry(kRoot);
-  int passed = root.objectInfo.isFalling == 1;
+  int passed = root.object_info.is_falling == 1;
   if (has_actor) {
     passed &= actor.instance.movementMode == 3 &&
               actor.instance.jumpCountdown == 4 && actor.destinationMode == 1 &&
@@ -910,12 +910,12 @@ int TestGimmickStackTop(int scenario) {
               actor.instance.rootMotion.vy == 0 &&
               actor.instance.rootMotion.vz == 0 && actor.supportGimmick == 0;
   }
-  if (has_member) passed &= member.mode == 0xFC && member.velocityY == 0;
+  if (has_member) passed &= member.mode == 0xFC && member.velocity_y == 0;
   for (int i = 0; i < kActorSlots; ++i) {
     Actors_actorRecords[i] = saved_actors[i];
   }
   for (int i = 0; i < kGimmickSlots; ++i) {
-    Field_gimmickInstances[i] = saved_objects[i];
+    VS::Field::gimmickInstances[i] = saved_objects[i];
   }
   return passed;
 }
@@ -1024,11 +1024,11 @@ static u_short ScriptedEffectSelector(int scenario) {
 int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
   Actors_ActorRecord actor = {0};
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {0};
   Battle_Actor battle_actor = {nullptr};
   Battle_Actor* saved_battle[kSlots];
   Actors_ActorRecord* saved_actor[kSlots];
-  Field_GimmickInstance* saved_object[kSlots];
+  VS::Field::GimmickInstance* saved_object[kSlots];
   const VS::Effects::LiveActionEffectRequest saved_request =
       VS::Effects::actionRequest;
   const VS::Effects::LiveEffectCamera saved_camera = VS::Effects::effectCamera;
@@ -1044,10 +1044,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   for (int i = 0; i < kSlots; ++i) {
     saved_battle[i] = Battle_actors[i];
     saved_actor[i] = Actors_actorRecords[i];
-    saved_object[i] = Field_gimmickInstances[i];
+    saved_object[i] = VS::Field::gimmickInstances[i];
     Battle_actors[i] = nullptr;
     Actors_actorRecords[i] = nullptr;
-    Field_gimmickInstances[i] = nullptr;
+    VS::Field::gimmickInstances[i] = nullptr;
   }
   memcpy(saved_bitmaps, VS::Effects::tokenBitmaps, sizeof saved_bitmaps);
   memset(VS::Effects::tokenBitmaps, 0, sizeof saved_bitmaps);
@@ -1061,7 +1061,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
     battle_actor.modelId =
         scenario == 6 ? kScriptedEffectModel + 1 : kScriptedEffectModel;
     if (scenario == 2) {
-      Field_gimmickInstances[slot] = &object;
+      VS::Field::gimmickInstances[slot] = &object;
     } else {
       Actors_actorRecords[slot] = &actor;
     }
@@ -1089,7 +1089,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
     if (empty) {
       passed &= Battle_actors[slot] == nullptr &&
                 Actors_actorRecords[slot] == nullptr &&
-                Field_gimmickInstances[slot] == nullptr;
+                VS::Field::gimmickInstances[slot] == nullptr;
       // The started effect's emit_to readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
       VS::Actors::ActorLocation placement{};
@@ -1116,7 +1116,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   for (int i = 0; i < kSlots; ++i) {
     Battle_actors[i] = saved_battle[i];
     Actors_actorRecords[i] = saved_actor[i];
-    Field_gimmickInstances[i] = saved_object[i];
+    VS::Field::gimmickInstances[i] = saved_object[i];
   }
   memcpy(VS::Effects::tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
   VS::Effects::actionRequest = saved_request;
@@ -1131,26 +1131,26 @@ int TestScriptedEffectTargetBinding(int scenario) {
 int TestBoneEndpointOwner(int owner, int endpoint) {
   enum { kModelWords = 20, kBoneLength = 128 };
   const int slot = owner >= 4 ? 16 : 3;
-  const int has_gimmick_slot =
-      slot < sizeof Field_gimmickInstances / sizeof Field_gimmickInstances[0];
+  const int has_gimmick_slot = slot < std::ssize(VS::Field::gimmickInstances);
   Actors_ActorRecord actor = {0};
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {0};
   unsigned model_bytes[kModelWords] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(model_bytes);
   Actors_ActorRecord* saved_actor = Actors_actorRecords[slot];
-  Field_GimmickInstance* saved_object =
-      has_gimmick_slot ? Field_gimmickInstances[slot] : nullptr;
+  VS::Field::GimmickInstance* saved_object =
+      has_gimmick_slot ? VS::Field::gimmickInstances[slot] : nullptr;
   const MATRIX saved_matrix = VS::Actors::boneMatrixScratch;
   const VS::Render::ModelScratchpad saved_workspace =
       *VS::Render::ModelWorkspace();
   Actors_actorRecords[slot] =
       owner == 0 || owner == 2 || owner == 5 ? &actor : nullptr;
   if (has_gimmick_slot) {
-    Field_gimmickInstances[slot] = owner == 1 || owner == 2 ? &object : nullptr;
+    VS::Field::gimmickInstances[slot] =
+        owner == 1 || owner == 2 ? &object : nullptr;
   }
   actor.instance.model = object.model = model;
-  actor.instance.boneCount = object.boneCount = 1;
+  actor.instance.boneCount = object.bone_count = 1;
   actor.modelDataSize = sizeof model_bytes;
   VS::Render::RecordLiveModelExtent(model, sizeof model_bytes);
   model->bones[0].length = kBoneLength;
@@ -1190,7 +1190,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
               bone_length == 777;
   }
   Actors_actorRecords[slot] = saved_actor;
-  if (has_gimmick_slot) Field_gimmickInstances[slot] = saved_object;
+  if (has_gimmick_slot) VS::Field::gimmickInstances[slot] = saved_object;
   VS::Render::ForgetLiveModelExtent(model);
   VS::Actors::boneMatrixScratch = saved_matrix;
   *VS::Render::ModelWorkspace() = saved_workspace;
@@ -1389,13 +1389,13 @@ static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
                                        VS::Actors::ShpModel* model,
                                        unsigned appearance,
                                        unsigned pulse_mask) {
-  Field_GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {0};
   enum { kSharedRendererHeaderBytes = 8 };
   memcpy(&object, instance, kSharedRendererHeaderBytes);
-  object.motionState = appearance;
-  object.palettePulse.kind = pulse_mask;
+  object.motion_state = appearance;
+  object.palette_pulse.kind = pulse_mask;
   object.model = model;
-  memcpy(&object.baseColor, tint, sizeof object.baseColor);
+  memcpy(&object.base_color, tint, sizeof object.base_color);
   VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(object);
 }
 

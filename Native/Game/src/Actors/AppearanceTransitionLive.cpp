@@ -24,7 +24,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.hpp"
@@ -197,22 +197,22 @@ class LiveActorAppearance final : public ActorAppearance {
     if (!actor_.actionPoseActive) {
       return;
     }
-    Field_GimmickInstance* object =
-        Field_gimmickInstances[actor_.supportGimmick];
+    VS::Field::GimmickInstance* object =
+        VS::Field::gimmickInstances[actor_.supportGimmick];
     Require(object != nullptr, "carrying actor has no carried gimmick");
     SVECTOR first;
     SVECTOR second;
     LiveActorTaggedBonePosition(object->parent, kCarryFirstBone, &first, 1);
     LiveActorTaggedBonePosition(object->parent, kCarrySecondBone, &second, 1);
-    object->positionX = actor_.instance.position.vx;
-    object->positionZ = actor_.instance.position.vz;
-    object->positionY = VS::Core::Math::WrapSigned16(
+    object->position_x = actor_.instance.position.vx;
+    object->position_z = actor_.instance.position.vz;
+    object->position_y = VS::Core::Math::WrapSigned16(
         (first.vy + second.vy) / 2 + kReleasedGimmickHeight);
     object->mode = kReleasedGimmickMode;
-    object->slideX = object->velocityY = 0;
+    object->slide_x = object->velocity_y = 0;
     object->parent = kDetachedParent;
-    object->rotationY = static_cast<u_short>(
-        (object->rotationY + static_cast<u_short>(actor_.instance.facing)) &
+    object->rotation_y = static_cast<u_short>(
+        (object->rotation_y + static_cast<u_short>(actor_.instance.facing)) &
         kFacingMask);
     actor_.actionPoseActive = 0;
     Actors_pushedGimmickIndex = actor_.supportGimmick;
@@ -259,22 +259,22 @@ class LiveActorAppearance final : public ActorAppearance {
 
 class LiveGimmickAppearance final : public AppearanceSubject {
  public:
-  explicit LiveGimmickAppearance(Field_GimmickInstance& object)
+  explicit LiveGimmickAppearance(VS::Field::GimmickInstance& object)
       : object_(object) {}
 
   bool ApplyPalettes(PaletteTransition mode, int speed) override {
-    return ApplyTransition(object_.pulsedPalette, object_.basePalette, mode,
+    return ApplyTransition(object_.pulsed_palette, object_.base_palette, mode,
                            speed);
   }
   void UploadPalettes(int /*state*/) override {
-    UploadClut(object_.pulsedPalette, kGimmickClutRow,
+    UploadClut(object_.pulsed_palette, kGimmickClutRow,
                object_.slot * kSmallPaletteColors);
   }
   void PublishState(int /*state*/) override {}
   void ReleaseCarriedGimmick() override {}
 
  private:
-  Field_GimmickInstance& object_;
+  VS::Field::GimmickInstance& object_;
 };
 }  // namespace
 
@@ -295,13 +295,13 @@ void UpdateLiveActorPalettePulse(Actors_ActorRecord& actor) {
 }
 
 // func_800AB788 (BATTLE.PRG 40564.c:1651) for a gimmick's 16-color palette.
-void UpdateLiveGimmickPalettePulse(Field_GimmickInstance& object) {
-  PalettePulse pulse{object.palettePulse.level, object.palettePulse.flags};
-  (void)UpdatePalettePulse(pulse, VS::State::tickSpeed, object.basePalette,
-                           object.pulsedPalette);
-  object.palettePulse.level = pulse.level;
-  object.palettePulse.flags = pulse.flags;
-  UploadClut(object.pulsedPalette, kGimmickClutRow,
+void UpdateLiveGimmickPalettePulse(VS::Field::GimmickInstance& object) {
+  PalettePulse pulse{object.palette_pulse.level, object.palette_pulse.flags};
+  (void)UpdatePalettePulse(pulse, VS::State::tickSpeed, object.base_palette,
+                           object.pulsed_palette);
+  object.palette_pulse.level = pulse.level;
+  object.palette_pulse.flags = pulse.flags;
+  UploadClut(object.pulsed_palette, kGimmickClutRow,
              object.slot * kSmallPaletteColors);
 }
 
@@ -315,22 +315,22 @@ void UpdateLiveActorAppearanceTransition(Actors_ActorRecord& actor) {
 
 // Gimmicks keep their own state and palettes; the death fade runs at double
 // speed.
-void UpdateLiveGimmickAppearanceTransition(Field_GimmickInstance& object) {
+void UpdateLiveGimmickAppearanceTransition(VS::Field::GimmickInstance& object) {
   ColorBytes color{};
-  static_assert(sizeof object.baseColor == color.size());
-  std::memcpy(color.data(), &object.baseColor, color.size());
+  static_assert(sizeof object.base_color == color.size());
+  std::memcpy(color.data(), &object.base_color, color.size());
   AppearanceTransition transition{
-      .state = object.motionState,
+      .state = object.motion_state,
       .speed = TransitionSpeed(),
       .colors =
-          ColorsFrom(color, object.fadeRed, object.fadeGreen, object.tint)};
+          ColorsFrom(color, object.fade_red, object.fade_green, object.tint)};
   if (transition.state == kAppearanceDeathFade) {
     transition.speed *= 2;
   }
   LiveGimmickAppearance subject(object);
   AdvanceAppearanceTransition(transition, subject);
-  ColorsTo(transition.colors, color, object.fadeRed);
-  std::memcpy(&object.baseColor, color.data(), color.size());
-  object.motionState = StateBits(transition.state);
+  ColorsTo(transition.colors, color, object.fade_red);
+  std::memcpy(&object.base_color, color.data(), color.size());
+  object.motion_state = StateBits(transition.state);
 }
 }  // namespace VS::Actors

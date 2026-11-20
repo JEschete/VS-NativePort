@@ -1,6 +1,8 @@
 #pragma once
 
-struct Field_MpdDoorRecord;
+namespace VS::Field {
+struct MpdDoorRecord;
+}  // namespace VS::Field
 
 namespace VS::Field {
 
@@ -8,7 +10,7 @@ namespace VS::Field {
 // Records are borrowed from the current room until the next query/room unload.
 struct DoorMatchList {
   int count;
-  Field_MpdDoorRecord** records;
+  VS::Field::MpdDoorRecord** records;
 };
 
 // Filled by VS::Field::TransitionLiveDoorsAtTile (Field/DoorMatchesLive.hpp).

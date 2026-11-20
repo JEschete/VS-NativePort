@@ -4,7 +4,9 @@
 #include "Field/InteractionTarget.hpp"
 #include "Items/ItemRecords.hpp"
 
-struct Field_MpdLockTrigger;
+namespace VS::Field {
+struct MpdLockTrigger;
+}
 namespace VS::Actors {
 struct ActorLocation;
 }
@@ -29,7 +31,7 @@ void FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);
 int CheckAshleyTileTriggersEntry(int actor, unsigned char* location);
 int CheckActorTrapAndFallTriggersEntry(int actor,
                                        VS::Actors::ActorLocation* location);
-Field_MpdLockTrigger* FindFacingRoomObjectEntry(int actor);
+VS::Field::MpdLockTrigger* FindFacingRoomObjectEntry(int actor);
 VS::Items::TreasureChest* FindFacingUnlootedChestEntry(int actor);
 int TryTriggerFacingTileEventEntry(int actor);
 int TileInFrontOfActorEntry(VS::Actors::ActorLocationQuery* actor,
@@ -38,19 +40,19 @@ int WaitForChestCameraFocusEntry();
 int StepTrapCameraFocusEntry();
 int IsChestAnimationReadyEntry();
 int TrackInteractionCameraToAshleyEntry();
-void TriggerActorTrapEntry(Field_MpdLockTrigger* address,
+void TriggerActorTrapEntry(VS::Field::MpdLockTrigger* address,
                            VS::Actors::ActorLocationQuery* location, int actor);
 void BeginObjectInteractionWaitEntry();
 void EndObjectInteractionWaitEntry();
-int InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address);
-void TryOpenChestEntry(Field_MpdLockTrigger* address, int actor);
-void BeginChestInteractionEntry(Field_MpdLockTrigger* address, int actor);
+int InteractWithLockedRoomObjectEntry(VS::Field::MpdLockTrigger* address);
+void TryOpenChestEntry(VS::Field::MpdLockTrigger* address, int actor);
+void BeginChestInteractionEntry(VS::Field::MpdLockTrigger* address, int actor);
 void FinishChestInteractionEntry();
 void OpenChestContentsEntry();
 int UpdateChestContentsSelectionEntry();
 void DispatchTrapOrChestInteractionEntry();
 void FinishTrapInteractionEntry();
-void BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
+void BeginTrapInteractionEntry(VS::Field::MpdLockTrigger* address,
                                VS::Actors::ActorLocation* location, int actor);
 std::uint8_t LiveCurrentSavePointId();
 bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record);
@@ -72,6 +74,6 @@ Effects::LiveActionEffectRequest LiveTrapEffectRecord(
     const TrapEffectRequest& effect);
 std::optional<RoomObjectTarget> FindLiveFacingRoomObject(std::int32_t actor);
 std::optional<ChestTarget> FindLiveFacingUnlootedChest(std::int32_t actor);
-Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target);
+VS::Field::MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target);
 RoomObjectInteractionResult InteractLiveRoomObject(RoomObjectTarget target);
 }  // namespace VS::Field

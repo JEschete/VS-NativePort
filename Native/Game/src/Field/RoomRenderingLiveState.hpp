@@ -5,7 +5,7 @@
 // defines them and mirrors them into the typed RoomRenderState
 // (Field/RoomRendering.hpp) around each call.
 
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Field {
@@ -21,6 +21,6 @@ extern u_short areRoomUpdatesPaused;
 extern u_short* roomPalettes;
 // decomp: D_800F1BB0 (BATTLE/BATTLE.PRG 146C.c:15995): the room tint's
 // channel offsets, strength and on switch.
-extern Field_RoomTint roomTint;
+extern VS::Field::RoomTintRecord roomTint;
 
 }  // namespace VS::Field

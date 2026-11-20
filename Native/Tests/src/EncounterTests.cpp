@@ -19,8 +19,8 @@
 #include "Field/CollisionSampling.hpp"
 #include "Field/DoorMatchesLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Room.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "State/StateFlags.hpp"
 
@@ -76,20 +76,20 @@ void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
 }
 
 struct DoorQueryFixture {
-  Field_RoomRecord saved_room = Field_roomData;
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
   std::uint8_t saved_random = VS::State::stateFlags.opaque_ac[7];
-  std::array<Field_MpdDoorRecord, 40> doors{};
+  std::array<VS::Field::MpdDoorRecord, 40> doors{};
 
   DoorQueryFixture() {
-    Field_roomData = {};
-    Field_roomData.doors = doors.data();
-    Field_roomData.header.doorsLength = sizeof(doors);
+    VS::Field::roomData = {};
+    VS::Field::roomData.doors = doors.data();
+    VS::Field::roomData.header.doors_length = sizeof(doors);
   }
 
   ~DoorQueryFixture() {
-    Field_roomData.doors = nullptr;
+    VS::Field::roomData.doors = nullptr;
     VS::Field::TransitionLiveDoorsAtTile(0, 0, 0);
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     VS::State::stateFlags.opaque_ac[7] = saved_random;
     VS::Core::SeedBiosRand(1);
   }
@@ -133,7 +133,7 @@ TEST_CASE("Configured enemy placements belong only to their source room",
 
 TEST_CASE("Inactive encounter hooks preserve original room placements",
           "[combat][encounter][placements]") {
-  std::array<Field_MpdEnemySpawn, 2> original{};
+  std::array<VS::Field::MpdEnemySpawn, 2> original{};
   void* data = original.data();
   unsigned int size = sizeof(original);
   VS::Boot::EncounterRoomPlacements(&data, &size);
@@ -150,18 +150,20 @@ TEST_CASE("Door query results have actual native pointer-list storage",
           "[field][doors][storage]") {
   CHECK(std::is_pointer_v<decltype(VS::Field::DoorMatchList::records)>);
   CHECK(sizeof(VS::Field::DoorMatchList) >=
-        sizeof(int) + sizeof(Field_MpdDoorRecord*));
+        sizeof(int) + sizeof(VS::Field::MpdDoorRecord*));
 }
 
 TEST_CASE("Door queries preserve ordered tile and platform matches on repeat",
           "[field][doors][storage]") {
   DoorQueryFixture fixture;
-  fixture.doors[0].tileLocation.tileX = fixture.doors[1].tileLocation.tileX = 4;
-  fixture.doors[0].tileLocation.tileZ = fixture.doors[1].tileLocation.tileZ = 7;
-  fixture.doors[2].tileLocation.tileX = 8;
-  fixture.doors[2].tileLocation.tileZ = 9;
-  fixture.doors[3].tileLocation = fixture.doors[0].tileLocation;
-  fixture.doors[3].tileLocation.floorLayer = 1;
+  fixture.doors[0].tile_location.tile_x =
+      fixture.doors[1].tile_location.tile_x = 4;
+  fixture.doors[0].tile_location.tile_z =
+      fixture.doors[1].tile_location.tile_z = 7;
+  fixture.doors[2].tile_location.tile_x = 8;
+  fixture.doors[2].tile_location.tile_z = 9;
+  fixture.doors[3].tile_location = fixture.doors[0].tile_location;
+  fixture.doors[3].tile_location.floor_layer = 1;
   for (int repeat = 0; repeat < 2; ++repeat) {
     fixture.Check(4, 7, 0, std::array{0, 1});
     fixture.Check(8, 9, 0, std::array{2});
@@ -170,10 +172,10 @@ TEST_CASE("Door queries preserve ordered tile and platform matches on repeat",
   }
   std::array<int, 40> expected{};
   for (std::size_t index = 0; index < fixture.doors.size(); ++index) {
-    auto& tile = fixture.doors[index].tileLocation;
-    tile.tileX = static_cast<u_short>(index % 32);
-    tile.tileZ = static_cast<u_short>(index / 32);
-    tile.floorLayer = 2;
+    auto& tile = fixture.doors[index].tile_location;
+    tile.tile_x = static_cast<u_short>(index % 32);
+    tile.tile_z = static_cast<u_short>(index / 32);
+    tile.floor_layer = 2;
     expected[index] = static_cast<int>(index);
   }
   fixture.Check(-1, -1, 2, expected);
@@ -192,12 +194,12 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
           static_cast<unsigned char>(expected.Next()));
   }
   SECTION("absent room consumes no raw draw") {
-    Field_roomData.doors = nullptr;
+    VS::Field::roomData.doors = nullptr;
     CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
     CHECK(VS::Field::matchingDoorRecords.count == 0);
   }
   SECTION("partial record bytes are rejected before traversal") {
-    --Field_roomData.header.doorsLength;
+    --VS::Field::roomData.header.doors_length;
     CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
     CHECK(VS::Field::matchingDoorRecords.count == 0);
   }
@@ -418,33 +420,33 @@ TEST_CASE("Independent encounter definitions retain per-instance positions",
 
 TEST_CASE("Encounter placement preserves source behavior and loot",
           "[combat][encounter]") {
-  Field_MpdEnemySpawn source{};
-  source.enemyId = 3;
+  VS::Field::MpdEnemySpawn source{};
+  source.enemy_id = 3;
   source.facing = 2;
   source.settings[0] = 0x10;
   source.settings[1] = 0x20;
   source.settings[2] = 0x3F;
   source.settings[5] = 0x1D;
-  source.itemId = 10;
-  source.item2Id = 20;
-  source.item3Id = 30;
-  source.itemCount = 1;
-  source.item2Count = 2;
-  source.item3Count = 3;
+  source.item_id = 10;
+  source.item2_id = 20;
+  source.item3_id = 30;
+  source.item_count = 1;
+  source.item2_count = 2;
+  source.item3_count = 3;
   source.variant = 7;
   source.reserved26 = 8;
-  source.flagValue = 9;
-  source.statValue = 10;
+  source.flag_value = 9;
+  source.stat_value = 10;
   source.slot = 3;
-  source.isHidden = 1;
-  source.flagTest = 2;
-  source.statTest = 3;
-  source.sceneTest = 1;
+  source.is_hidden = 1;
+  source.flag_test = 2;
+  source.stat_test = 3;
+  source.scene_test = 1;
   SECTION("ordinary enemy") {}
   SECTION("boss retained for a story defeat event") {
-    source.actorStateByte = 1;
+    source.actor_state_byte = 1;
   }
-  SECTION("any nonzero retention byte") { source.actorStateByte = 255; }
+  SECTION("any nonzero retention byte") { source.actor_state_byte = 255; }
   const auto original = source;
   CHECK(VS::Game::IsEncounterHostileSpawn(source));
   const auto prepared =
@@ -452,23 +454,23 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   REQUIRE(prepared.has_value());
   auto expected = source;
   expected.index = 4;
-  expected.tileX = 11;
-  expected.tileZ = 12;
+  expected.tile_x = 11;
+  expected.tile_z = 12;
   expected.height = 2;
   expected.direction = 1;
   expected.slot = 0;
-  expected.isHidden = 0;
-  expected.flagTest = 0;
-  expected.statTest = 0;
-  expected.sceneTest = 0;
-  expected.actorStateByte = 0;
+  expected.is_hidden = 0;
+  expected.flag_test = 0;
+  expected.stat_test = 0;
+  expected.scene_test = 0;
+  expected.actor_state_byte = 0;
   CHECK(std::memcmp(&*prepared, &expected, sizeof(expected)) == 0);
   CHECK(std::memcmp(&source, &original, sizeof(source)) == 0);
 }
 
 TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
           "[combat][encounter]") {
-  Field_MpdEnemySpawn source{};
+  VS::Field::MpdEnemySpawn source{};
   source.facing = 2;
   VS::Game::EncounterSpawn spawn{0, {1, 2, 0, 0}};
   std::size_t index = 0;
@@ -476,7 +478,7 @@ TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
   SECTION("neutral profile") { source.facing = 0; }
   SECTION("friendly profile") { source.facing = 1; }
   SECTION("script-only profile") { source.facing = 3; }
-  SECTION("wrong enemy") { source.enemyId = 1; }
+  SECTION("wrong enemy") { source.enemy_id = 1; }
   SECTION("negative coordinate") { spawn.position.x = -1; }
   SECTION("coordinate overflow") { spawn.position.z = 256; }
   SECTION("elevation overflow") { spawn.position.elevation = 4; }
@@ -487,8 +489,8 @@ TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
 
 TEST_CASE("Encounter catalog hostility is independent of defeat retention",
           "[combat][encounter]") {
-  Field_MpdEnemySpawn source{};
-  source.actorStateByte = 1;
+  VS::Field::MpdEnemySpawn source{};
+  source.actor_state_byte = 1;
   SECTION("neutral") { source.facing = 0; }
   SECTION("friendly") { source.facing = 1; }
   SECTION("script-only") { source.facing = 3; }
@@ -520,11 +522,11 @@ struct FloorFixture {
   static constexpr std::size_t kPatterns = 8 + 4 * 2 * 2;
   std::vector<std::uint8_t> collision =
       std::vector<std::uint8_t>(kPatterns + std::size_t{2} * 16);
-  std::array<Field_MpdTileCell, 4> cells{};
+  std::array<VS::Field::MpdTileCell, 4> cells{};
 
   FloorFixture() {
     // The disc header contains a profile count, not the live cell count.
-    const Field_MpdCollisionHeader header{2, 2, 0, 2};
+    const VS::Field::MpdCollisionHeader header{2, 2, 0, 2};
     std::memcpy(collision.data(), &header, sizeof(header));
     std::fill(collision.begin() + kPatterns + 16, collision.end(), 0x80);
   }
@@ -563,7 +565,7 @@ TEST_CASE("Encounter floor rejects blocked partial pit and invalid samples",
   SECTION("partial") { fixture.cells[0].passability = 1; }
   SECTION("unsupported collision code") { fixture.cells[0].passability = 7; }
   SECTION("pit") {
-    fixture.cells[0].isPit = 1;
+    fixture.cells[0].is_pit = 1;
     expected = VS::Game::EncounterFloor::kPit;
   }
   SECTION("invalid floor pattern") {

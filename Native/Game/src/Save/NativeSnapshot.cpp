@@ -452,31 +452,31 @@ void Fields(VS::State::SceneTimer& r, V&& v) {
 }
 
 template <class V>
-void Fields(Field_MpdDoorRecord& r, V&& v) {
+void Fields(VS::Field::MpdDoorRecord& r, V&& v) {
 #define VS_SAVE_DOOR_BITS(key, field, mask)          \
   {                                                  \
     Bits bits{static_cast<unsigned>(r.field), mask}; \
     v(key, bits);                                    \
     r.field = static_cast<u_short>(bits.value);      \
   }
-  v("zone", r.destinationZoneId);
-  v("room", r.destinationRoomId);
-  VS_SAVE_DOOR_BITS("tile_x", tileLocation.tileX, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("tile_z", tileLocation.tileZ, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("floor_layer", tileLocation.floorLayer, kThreeBitMask);
-  VS_SAVE_DOOR_BITS("entry_direction", tileLocation.entryDirection,
+  v("zone", r.destination_zone_id);
+  v("room", r.destination_room_id);
+  VS_SAVE_DOOR_BITS("tile_x", tile_location.tile_x, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("tile_z", tile_location.tile_z, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("floor_layer", tile_location.floor_layer, kThreeBitMask);
+  VS_SAVE_DOOR_BITS("entry_direction", tile_location.entry_direction,
                     kThreeBitMask);
-  VS_SAVE_DOOR_BITS("required_flag_value", requiredFlagValue, 255);
-  VS_SAVE_DOOR_BITS("entry_tile_x", entryTileX, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("entry_elevation", entryElevation, kTwoBitMask);
-  VS_SAVE_DOOR_BITS("has_entry_step", hasEntryStep, 1);
-  VS_SAVE_DOOR_BITS("required_flag_id", requiredFlagId, kMaximumSceneId);
-  VS_SAVE_DOOR_BITS("entry_tile_z", entryTileZ, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("reserved_bit", reserved06Bit15, 1);
-  v("door_id", r.doorId);
+  VS_SAVE_DOOR_BITS("required_flag_value", required_flag_value, 255);
+  VS_SAVE_DOOR_BITS("entry_tile_x", entry_tile_x, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("entry_elevation", entry_elevation, kTwoBitMask);
+  VS_SAVE_DOOR_BITS("has_entry_step", has_entry_step, 1);
+  VS_SAVE_DOOR_BITS("required_flag_id", required_flag_id, kMaximumSceneId);
+  VS_SAVE_DOOR_BITS("entry_tile_z", entry_tile_z, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("reserved_bit", reserved06_bit15, 1);
+  v("door_id", r.door_id);
   v("reserved_09", r.reserved09);
-  v("reserved_0a", r.reserved0A);
-  v("reserved_0b", r.reserved0B);
+  v("reserved_0a", r.reserved0a);
+  v("reserved_0b", r.reserved0b);
 #undef VS_SAVE_DOOR_BITS
 }
 
@@ -750,8 +750,8 @@ std::expected<void, std::string> ValidateModel(const Document& document) {
     return std::unexpected("/saved_unix_ms: timestamp is beyond year 9999");
   }
   if (document.new_game_entry &&
-      (document.new_game_entry->destinationZoneId != 1 ||
-       document.new_game_entry->destinationRoomId != 0)) {
+      (document.new_game_entry->destination_zone_id != 1 ||
+       document.new_game_entry->destination_room_id != 0)) {
     return std::unexpected("/new_game_entry: expected the original start room");
   }
   if (state.location.zone == 0 || state.location.zone > kMaximumLocationId ||

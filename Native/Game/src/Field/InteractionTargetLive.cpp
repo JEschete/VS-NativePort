@@ -8,9 +8,9 @@
 
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Items/ItemRecords.hpp"
 #include "State/StateFlags.hpp"
 
@@ -22,26 +22,28 @@ std::uint64_t room_generation = 1;
 constexpr std::size_t kOriginalFloorRecordBytes = 12;
 constexpr std::size_t kOriginalChestRecordBytes = 0x234;
 
-std::span<Field_MpdFloorTrigger> TrapRecords() {
-  if (Field_roomData.floorTriggers == nullptr ||
-      Field_roomData.header.floorTriggersLength % kOriginalFloorRecordBytes !=
+std::span<VS::Field::MpdFloorTrigger> TrapRecords() {
+  if (VS::Field::roomData.floor_triggers == nullptr ||
+      VS::Field::roomData.header.floor_triggers_length %
+              kOriginalFloorRecordBytes !=
           0 ||
-      reinterpret_cast<std::uintptr_t>(Field_roomData.floorTriggers) %
-              alignof(Field_MpdFloorTrigger) !=
+      reinterpret_cast<std::uintptr_t>(VS::Field::roomData.floor_triggers) %
+              alignof(VS::Field::MpdFloorTrigger) !=
           0) {
     return {};
   }
-  return {
-      Field_roomData.floorTriggers,
-      Field_roomData.header.floorTriggersLength / kOriginalFloorRecordBytes};
+  return {VS::Field::roomData.floor_triggers,
+          VS::Field::roomData.header.floor_triggers_length /
+              kOriginalFloorRecordBytes};
 }
 
 std::span<VS::Items::TreasureChest> ChestRecords() {
-  if (Field_roomData.containers == nullptr) {
+  if (VS::Field::roomData.containers == nullptr) {
     return {};
   }
-  return {Field_roomData.containers,
-          Field_roomData.header.containersLength / kOriginalChestRecordBytes};
+  return {
+      VS::Field::roomData.containers,
+      VS::Field::roomData.header.containers_length / kOriginalChestRecordBytes};
 }
 
 template <class Record>
@@ -60,15 +62,15 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
   LiveRoomTriggerActivationHost()
       : records_(TrapRecords()),
         generation_(room_generation),
-        pointer_(Field_roomData.floorTriggers),
-        length_(Field_roomData.header.floorTriggersLength) {}
+        pointer_(VS::Field::roomData.floor_triggers),
+        length_(VS::Field::roomData.header.floor_triggers_length) {}
   InteractionTargetDomain Domain() override {
     return {generation_, records_.size(), 0};
   }
   bool StoreActivation(TrapTarget target, std::uint8_t activation) override {
     if (generation_ != room_generation ||
-        pointer_ != Field_roomData.floorTriggers ||
-        length_ != Field_roomData.header.floorTriggersLength) {
+        pointer_ != VS::Field::roomData.floor_triggers ||
+        length_ != VS::Field::roomData.header.floor_triggers_length) {
       return false;
     }
     const auto index = ResolveTrapTarget(target, Domain());
@@ -85,7 +87,7 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
     const auto index = ResolveTrapTarget(target, Domain());
     if (!index) return std::nullopt;
     const auto& record = records_[*index];
-    return RoomTriggerTile{record.tileX, record.tileZ, record.floorLayer};
+    return RoomTriggerTile{record.tile_x, record.tile_z, record.floor_layer};
   }
   bool MarkObstacle(const RoomTriggerTile& tile) override {
     constexpr auto kGridSide = VS::Battle::Ai::kNavigationGridSide;
@@ -101,12 +103,12 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
  private:
   bool Valid() const {
     return generation_ == room_generation &&
-           pointer_ == Field_roomData.floorTriggers &&
-           length_ == Field_roomData.header.floorTriggersLength;
+           pointer_ == VS::Field::roomData.floor_triggers &&
+           length_ == VS::Field::roomData.header.floor_triggers_length;
   }
-  std::span<Field_MpdFloorTrigger> records_;
+  std::span<VS::Field::MpdFloorTrigger> records_;
   std::uint64_t generation_;
-  Field_MpdFloorTrigger* pointer_;
+  VS::Field::MpdFloorTrigger* pointer_;
   std::uint32_t length_;
 };
 
@@ -125,9 +127,9 @@ std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo() {
     result.push_back(
         {.target = {static_cast<std::uint32_t>(index), room_generation},
          .kind = record.kind,
-         .tile_x = record.tileX,
-         .tile_z = record.tileZ,
-         .floor_layer = record.floorLayer});
+         .tile_x = record.tile_x,
+         .tile_z = record.tile_z,
+         .floor_layer = record.floor_layer});
   }
   return result;
 }
@@ -141,9 +143,9 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
     const auto& record = records[index];
     values.push_back({{static_cast<std::uint32_t>(index), room_generation},
                       record.kind,
-                      record.tileX,
-                      record.tileZ,
-                      record.floorLayer});
+                      record.tile_x,
+                      record.tile_z,
+                      record.floor_layer});
   }
   return FindRoomTriggerAtTile(values, tile,
                                VS::State::stateFlags.opaque_20 != 0 ||
@@ -152,8 +154,8 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
 
 bool SetLiveRoomTriggerEnabled(std::optional<TrapTarget> target,
                                std::int32_t activation) {
-  if (Field_roomData.floorTriggers != nullptr && TrapRecords().empty() &&
-      Field_roomData.header.floorTriggersLength != 0) {
+  if (VS::Field::roomData.floor_triggers != nullptr && TrapRecords().empty() &&
+      VS::Field::roomData.header.floor_triggers_length != 0) {
     return false;
   }
   LiveRoomTriggerActivationHost host;
@@ -166,7 +168,7 @@ bool DisableLiveTrapAtPosition(TrapWorldPosition position) {
 }
 
 std::optional<TrapTarget> FindLiveTrapTarget(
-    const Field_MpdFloorTrigger* record) {
+    const VS::Field::MpdFloorTrigger* record) {
   const auto index = RecordIndex(TrapRecords(), record);
   return index ? std::optional{TrapTarget{*index, room_generation}}
                : std::nullopt;
@@ -199,7 +201,7 @@ std::optional<ChestTarget> FindLiveChestTargetAddress(const void* address) {
   return std::nullopt;
 }
 
-Field_MpdFloorTrigger* ResolveLiveTrapTarget(TrapTarget target) {
+VS::Field::MpdFloorTrigger* ResolveLiveTrapTarget(TrapTarget target) {
   const auto records = TrapRecords();
   const auto index = ResolveTrapTarget(target, LiveInteractionTargetDomain());
   return index ? &records[*index] : nullptr;
@@ -227,13 +229,13 @@ void InvalidateLiveInteractionTargets() {
 
 }  // namespace VS::Field
 
-Field_MpdFloorTrigger* VS::Field::RoomTriggerAtTileEntry(int x, int z,
-                                                         int layer) {
+VS::Field::MpdFloorTrigger* VS::Field::RoomTriggerAtTileEntry(int x, int z,
+                                                              int layer) {
   const auto target = VS::Field::FindLiveRoomTriggerAtTile({x, z, layer});
   return target ? VS::Field::ResolveLiveTrapTarget(*target) : nullptr;
 }
 
-void VS::Field::SetRoomTriggerEnabledEntry(Field_MpdFloorTrigger* selected,
+void VS::Field::SetRoomTriggerEnabledEntry(VS::Field::MpdFloorTrigger* selected,
                                            int activation) {
   if (selected == nullptr) {
     static_cast<void>(

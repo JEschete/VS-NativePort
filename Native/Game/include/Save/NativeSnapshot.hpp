@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "Actors/RoomActorCache.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
@@ -108,7 +108,7 @@ struct Document {
   Snapshot state{};
   // TITLE clear saves restart through the original door/spawn contract, not
   // a captured field position. Schema3 checkpoints have no such entry.
-  std::optional<Field_MpdDoorRecord> new_game_entry{};
+  std::optional<VS::Field::MpdDoorRecord> new_game_entry{};
 };
 
 std::expected<std::string, std::string> Encode(const Document& document);

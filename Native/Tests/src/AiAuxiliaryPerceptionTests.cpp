@@ -14,12 +14,12 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
 static_assert(offsetof(Actors_ModelInstance, position) ==
-              offsetof(Field_GimmickInstance, positionX));
+              offsetof(VS::Field::GimmickInstance, position_x));
 static_assert(offsetof(VS::Battle::Ai::PerceivedObjectView, position) ==
               offsetof(Actors_ModelInstance, position));
 
@@ -28,8 +28,8 @@ struct AuxiliaryPerceptionFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
@@ -37,14 +37,15 @@ struct AuxiliaryPerceptionFixture {
   std::array<Battle_Actor, 3> actors{};
   VS::Battle::Ai::ActorAiState owner{};
   VS::Battle::Ai::ActorAiState target{};
-  Field_GimmickInstance auxiliary{};
+  VS::Field::GimmickInstance auxiliary{};
   u_short flags[32][32]{};
 
   explicit AuxiliaryPerceptionFixture(bool auxiliary_target,
                                       bool target_ai = true) {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     auto& frame = VS::Battle::Ai::LiveFrameContext();
@@ -86,7 +87,7 @@ struct AuxiliaryPerceptionFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     std::copy(saved_states.begin(), saved_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
@@ -101,10 +102,10 @@ struct AuxiliaryPerceptionFixture {
   }
   void SetAuxiliary(int id, SVECTOR position) {
     auxiliary.slot = static_cast<u_char>(id);
-    auxiliary.positionX = position.vx;
-    auxiliary.positionY = position.vy;
-    auxiliary.positionZ = position.vz;
-    Field_gimmickInstances[id] = &auxiliary;
+    auxiliary.position_x = position.vx;
+    auxiliary.position_y = position.vy;
+    auxiliary.position_z = position.vz;
+    VS::Field::gimmickInstances[id] = &auxiliary;
   }
   void AddAuxiliaryBlocker(bool blocking) {
     SetAuxiliary(3, {static_cast<std::int16_t>(blocking ? 16 : 112), 0, 64, 0});
@@ -128,7 +129,7 @@ TEST_CASE(
     REQUIRE(Battle_actors[2]->model != nullptr);
     fixture.Update();
     CHECK(fixture.View().distances_squared[2] == (with_ai ? 13312 : 10240));
-    CHECK(Field_gimmickInstances[2] == &fixture.auxiliary);
+    CHECK(VS::Field::gimmickInstances[2] == &fixture.auxiliary);
     CHECK((VS::Battle::Ai::actorAiStates[2] != nullptr) == with_ai);
   }
 }

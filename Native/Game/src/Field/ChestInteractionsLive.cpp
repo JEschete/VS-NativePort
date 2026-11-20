@@ -42,14 +42,14 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
 #include "Field/DoorRecordLive.hpp"
-#include "Field/Doors.h"
+#include "Field/Doors.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomSwitchesLive.hpp"
@@ -82,7 +82,7 @@ constexpr std::int32_t kTrapTickSpeed = 4;
 constexpr std::size_t kPoseWords = 4;
 constexpr std::size_t kWorldLabelCoordinates = 3;
 constexpr std::size_t kOriginalLockRecordBytes = 0x14;
-constexpr std::size_t kOriginalDoorRecordBytes = sizeof(Field_MpdDoorRecord);
+constexpr std::size_t kOriginalDoorRecordBytes = VS::Field::kMpdDoorRecordBytes;
 constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
 constexpr std::int32_t kTrapPrimaryTargetPosition = 3;
 constexpr std::uint16_t kTrapSourcePointType = 5;
@@ -136,7 +136,7 @@ class LiveSavePointQueryHost final : public VS::Field::SavePointQueryHost {
     if (!Valid()) return false;
     const auto* cell =
         VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
-    return Valid() && (cell->hasRoomTrigger & 1) != 0;
+    return Valid() && (cell->has_room_trigger & 1) != 0;
   }
   std::optional<VS::Field::SavePointTriggerState> Trigger(
       const VS::Actors::PackedTile& tile) override {
@@ -153,23 +153,27 @@ class LiveSavePointQueryHost final : public VS::Field::SavePointQueryHost {
  private:
   bool Valid() const {
     return generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
-           collision_ == Field_roomData.collisionMap &&
-           collision_bytes_ == Field_roomData.header.collisionMapLength &&
-           cells_ == Field_roomData.tileCells &&
-           cell_bytes_ == Field_roomData.header.tileCellsLength &&
-           triggers_ == Field_roomData.floorTriggers &&
-           trigger_bytes_ == Field_roomData.header.floorTriggersLength;
+           collision_ == VS::Field::roomData.collision_map &&
+           collision_bytes_ ==
+               VS::Field::roomData.header.collision_map_length &&
+           cells_ == VS::Field::roomData.tile_cells &&
+           cell_bytes_ == VS::Field::roomData.header.tile_cells_length &&
+           triggers_ == VS::Field::roomData.floor_triggers &&
+           trigger_bytes_ == VS::Field::roomData.header.floor_triggers_length;
   }
   std::uint64_t generation_ =
       VS::Field::LiveInteractionTargetDomain().generation;
-  decltype(Field_roomData.collisionMap) collision_ =
-      Field_roomData.collisionMap;
-  std::uint32_t collision_bytes_ = Field_roomData.header.collisionMapLength;
-  decltype(Field_roomData.tileCells) cells_ = Field_roomData.tileCells;
-  std::uint32_t cell_bytes_ = Field_roomData.header.tileCellsLength;
-  decltype(Field_roomData.floorTriggers) triggers_ =
-      Field_roomData.floorTriggers;
-  std::uint32_t trigger_bytes_ = Field_roomData.header.floorTriggersLength;
+  decltype(VS::Field::roomData.collision_map) collision_ =
+      VS::Field::roomData.collision_map;
+  std::uint32_t collision_bytes_ =
+      VS::Field::roomData.header.collision_map_length;
+  decltype(VS::Field::roomData.tile_cells) cells_ =
+      VS::Field::roomData.tile_cells;
+  std::uint32_t cell_bytes_ = VS::Field::roomData.header.tile_cells_length;
+  decltype(VS::Field::roomData.floor_triggers) triggers_ =
+      VS::Field::roomData.floor_triggers;
+  std::uint32_t trigger_bytes_ =
+      VS::Field::roomData.header.floor_triggers_length;
 };
 
 class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
@@ -181,7 +185,8 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
       const VS::Actors::PackedTile& tile) override {
     const auto* cell =
         VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
-    return {.room_trigger = cell->hasRoomTrigger != 0, .pit = cell->isPit != 0};
+    return {.room_trigger = cell->has_room_trigger != 0,
+            .pit = cell->is_pit != 0};
   }
   bool TransitionInProgress() override {
     return VS::Field::screenTransitionStep != 0;
@@ -292,7 +297,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
   }
   void BeginTransition(const VS::Field::DoorRecord& door,
                        VS::Field::AshleyTransitionRoute route) override {
-    Field_MpdDoorRecord record{};
+    VS::Field::MpdDoorRecord record{};
     VS::Field::StoreDoorRecord(door, record);
     constexpr std::int32_t kFallTransitionSpeed = 8;
     if (route == VS::Field::AshleyTransitionRoute::kRoom) {
@@ -318,10 +323,10 @@ class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
       const VS::Actors::PackedTile& tile) override {
     const auto* cell =
         VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
-    return {.actor = {.room_trigger = cell->hasRoomTrigger != 0,
-                      .pit = cell->isPit != 0},
-            .event_trigger = cell->hasEventTrigger != 0,
-            .docked_door = cell->isPlatformDocked != 0};
+    return {.actor = {.room_trigger = cell->has_room_trigger != 0,
+                      .pit = cell->is_pit != 0},
+            .event_trigger = cell->has_event_trigger != 0,
+            .docked_door = cell->is_platform_docked != 0};
   }
   bool TransitionInProgress() override { return actor_.TransitionInProgress(); }
   std::optional<VS::Actors::PackedTile> LastTriggerTile(
@@ -371,8 +376,8 @@ class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
       return doors;
     }
     const auto count = static_cast<std::size_t>(matches->count);
-    if (count >
-        Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord)) {
+    if (count > VS::Field::roomData.header.doors_length /
+                    sizeof(VS::Field::MpdDoorRecord)) {
       return doors;
     }
     for (const auto* record : std::span(matches->records, count)) {
@@ -534,7 +539,7 @@ class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
       const auto* record = VS::Field::ResolveLiveRoomObjectTarget(*door);
       return record ? std::optional{VS::Field::UnlockEffectState{
                           .lock_level = std::bit_cast<std::uint8_t>(
-                              record->trigger.lockState.lock.state)}}
+                              record->trigger.lock_state.lock.state)}}
                     : std::nullopt;
     }
     const auto* record = VS::Field::ResolveLiveChestTarget(
@@ -555,7 +560,7 @@ class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
     if (const auto* door = std::get_if<VS::Field::RoomObjectTarget>(&target)) {
       auto* record = VS::Field::ResolveLiveRoomObjectTarget(*door);
       if (record == nullptr) return false;
-      record->trigger.lockState.lock.state = 0;
+      record->trigger.lock_state.lock.state = 0;
       return true;
     }
     auto* record = VS::Field::ResolveLiveChestTarget(
@@ -595,13 +600,13 @@ class LiveRoomObjectInteractionHost final
       return std::nullopt;
     }
     return VS::Field::RoomObjectLockState{
-        .tile_x = record->trigger.tileX,
-        .tile_z = record->trigger.tileZ,
-        .required_item = record->keyOrSigil,
+        .tile_x = record->trigger.tile_x,
+        .tile_z = record->trigger.tile_z,
+        .required_item = record->key_or_sigil,
         .lock_state =
-            static_cast<std::uint8_t>(record->trigger.lockState.lock.state),
-        .is_open = record->isOpen != 0,
-        .is_triggered = record->isTriggered != 0};
+            static_cast<std::uint8_t>(record->trigger.lock_state.lock.state),
+        .is_open = record->is_open != 0,
+        .is_triggered = record->is_triggered != 0};
   }
   bool HasItem(std::int16_t item) override {
     return VS::Items::CountLiveInventoryItem(item) != 0;
@@ -620,7 +625,7 @@ class LiveRoomObjectInteractionHost final
     if (record == nullptr) {
       return false;
     }
-    record->trigger.lockState.lock.state = 0;
+    record->trigger.lock_state.lock.state = 0;
     return true;
   }
   void ShowNotification(std::int32_t kind, std::int16_t item) override {
@@ -649,16 +654,16 @@ class LiveRoomObjectInteractionHost final
   }
 
  private:
-  std::span<Field_MpdLockTrigger> Records() const {
+  std::span<VS::Field::MpdLockTrigger> Records() const {
     if (generation_ != VS::Field::LiveInteractionTargetDomain().generation ||
-        Field_roomData.lockTriggers == nullptr) {
+        VS::Field::roomData.lock_triggers == nullptr) {
       return {};
     }
-    return {
-        Field_roomData.lockTriggers,
-        Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes};
+    return {VS::Field::roomData.lock_triggers,
+            VS::Field::roomData.header.lock_triggers_length /
+                kOriginalLockRecordBytes};
   }
-  Field_MpdLockTrigger* Record() const {
+  VS::Field::MpdLockTrigger* Record() const {
     const auto records = Records();
     return index_ && *index_ < records.size() ? &records[*index_] : nullptr;
   }
@@ -835,7 +840,7 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
     if (trap == nullptr) {
       return false;
     }
-    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(trap->tileX, trap->tileZ);
+    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(trap->tile_x, trap->tile_z);
     return true;
   }
   void FinishFlow() override {
@@ -950,22 +955,22 @@ void SetLiveEntranceDoor(const std::optional<DoorRecord>& door) {
   EntranceDoorState state;
   LiveEntranceDoorHost host;
   SetEntranceDoorRecord(state, door, host);
-  StoreDoorRecord(state.door, Field_entranceDoorRecord);
-  Field_enteredDoorId = state.entered_door_id;
+  StoreDoorRecord(state.door, VS::Field::entranceDoorRecord);
+  VS::Field::enteredDoorId = state.entered_door_id;
 }
 
 void FindLiveEntranceDoorNearTile(std::int32_t tile_x, std::int32_t tile_z,
                                   std::int32_t layer) {
   std::vector<DoorRecord> doors;
-  if (Field_roomData.doors != nullptr) {
-    const auto bytes = Field_roomData.header.doorsLength;
+  if (VS::Field::roomData.doors != nullptr) {
+    const auto bytes = VS::Field::roomData.header.doors_length;
     if (bytes % kOriginalDoorRecordBytes != 0) {
       SetLiveEntranceDoor(std::nullopt);
       return;
     }
     const auto count =
         static_cast<std::size_t>(bytes / kOriginalDoorRecordBytes);
-    for (const auto& record : std::span(Field_roomData.doors, count)) {
+    for (const auto& record : std::span(VS::Field::roomData.doors, count)) {
       doors.push_back(DoorRecordOf(record));
     }
   }
@@ -984,19 +989,21 @@ ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
   return CheckActorTrapAndFallTriggers(actor, placement, host);
 }
 
-Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target) {
+VS::Field::MpdLockTrigger* ResolveLiveRoomObjectTarget(
+    RoomObjectTarget target) {
   if (target.generation != LiveInteractionTargetDomain().generation ||
-      Field_roomData.lockTriggers == nullptr ||
-      Field_roomData.header.lockTriggersLength % kOriginalLockRecordBytes !=
+      VS::Field::roomData.lock_triggers == nullptr ||
+      VS::Field::roomData.header.lock_triggers_length %
+              kOriginalLockRecordBytes !=
           0 ||
-      reinterpret_cast<std::uintptr_t>(Field_roomData.lockTriggers) %
-              alignof(Field_MpdLockTrigger) !=
+      reinterpret_cast<std::uintptr_t>(VS::Field::roomData.lock_triggers) %
+              alignof(VS::Field::MpdLockTrigger) !=
           0 ||
-      target.index >=
-          Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes) {
+      target.index >= VS::Field::roomData.header.lock_triggers_length /
+                          kOriginalLockRecordBytes) {
     return nullptr;
   }
-  return &Field_roomData.lockTriggers[target.index];
+  return &VS::Field::roomData.lock_triggers[target.index];
 }
 
 std::optional<RoomObjectTarget> FindLiveFacingRoomObject(std::int32_t actor) {
@@ -1070,7 +1077,7 @@ bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
 }  // namespace VS::Field
 
 // decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935).
-void VS::Field::TryOpenChestEntry(Field_MpdLockTrigger* address, int) {
+void VS::Field::TryOpenChestEntry(VS::Field::MpdLockTrigger* address, int) {
   const auto target = VS::Field::FindLiveChestTargetAddress(address);
   if (target) {
     static_cast<void>(VS::Field::TryOpenLiveChest(*target));
@@ -1078,7 +1085,7 @@ void VS::Field::TryOpenChestEntry(Field_MpdLockTrigger* address, int) {
 }
 
 // decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4993).
-void VS::Field::BeginChestInteractionEntry(Field_MpdLockTrigger* address,
+void VS::Field::BeginChestInteractionEntry(VS::Field::MpdLockTrigger* address,
                                            int actor) {
   const auto target = VS::Field::FindLiveChestTargetAddress(address);
   if (target) {
@@ -1112,8 +1119,8 @@ void VS::Field::DispatchTrapOrChestInteractionEntry() {
 
 // decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973).
 void VS::Field::BeginTrapInteractionEntry(
-    Field_MpdLockTrigger* address, VS::Actors::ActorLocation* victim_location,
-    int actor) {
+    VS::Field::MpdLockTrigger* address,
+    VS::Actors::ActorLocation* victim_location, int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
   if (target) {
     LiveTrapSelectionHost host(victim_location);
@@ -1141,7 +1148,7 @@ void VS::Field::EndObjectInteractionWaitEntry() {
 
 // decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836).
 int VS::Field::InteractWithLockedRoomObjectEntry(
-    Field_MpdLockTrigger* address) {
+    VS::Field::MpdLockTrigger* address) {
   LiveRoomObjectInteractionHost host(address);
   return VS::Field::InteractWithLockedRoomObject(host) ==
                  VS::Field::RoomObjectInteractionResult::kWait
@@ -1150,7 +1157,7 @@ int VS::Field::InteractWithLockedRoomObjectEntry(
 }
 
 // decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
-void VS::Field::TriggerActorTrapEntry(Field_MpdLockTrigger* address,
+void VS::Field::TriggerActorTrapEntry(VS::Field::MpdLockTrigger* address,
                                       VS::Actors::ActorLocationQuery* location,
                                       int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
@@ -1246,7 +1253,8 @@ void VS::Field::ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
 }
 
 void VS::Field::StoreEntranceDoorForReloadEntry(void) {
-  const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
+  const auto encoded =
+      VS::Field::EnteredDoorReloadByte(VS::Field::enteredDoorId);
   VS::State::stateFlags.door_entered = std::bit_cast<char>(encoded);
 }
 
@@ -1256,7 +1264,7 @@ void VS::Field::SetEntranceDoorRecordEntry(
     VS::Field::SetLiveEntranceDoor(std::nullopt);
     return;
   }
-  Field_MpdDoorRecord record{};
+  VS::Field::MpdDoorRecord record{};
   std::memcpy(&record, input, sizeof record);
   VS::Field::SetLiveEntranceDoor(VS::Field::DoorRecordOf(record));
 }
@@ -1304,7 +1312,7 @@ int VS::Field::TryTriggerFacingTileEventEntry(int actor) {
 }
 
 // decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271).
-Field_MpdLockTrigger* VS::Field::FindFacingRoomObjectEntry(int actor) {
+VS::Field::MpdLockTrigger* VS::Field::FindFacingRoomObjectEntry(int actor) {
   const auto target = VS::Field::FindLiveFacingRoomObject(actor);
   return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
 }

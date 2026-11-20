@@ -16,7 +16,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -1305,7 +1305,7 @@ TEST_CASE("Live room tint is bounded by the current frame buffer",
   LiveFrame frame;
   TintPackets packets(0);
   std::ranges::copy(packets.words, frame.Buffer());
-  const Field_RoomTint tint{-1, 1, 2, 0, 0, 1};
+  const VS::Field::RoomTintRecord tint{-1, 1, 2, 0, 0, 1};
   CHECK(Render::TintLiveRoomGeometryPrimitives(
       frame.Buffer() + 1, frame.Buffer() + packets.end, tint, 0));
   CHECK(std::ranges::equal(packets.Expected(),

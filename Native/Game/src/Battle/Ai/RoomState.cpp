@@ -34,10 +34,10 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Items/ItemRecords.hpp"
@@ -77,7 +77,7 @@ void ClearRoomAiBindings() {
 }
 
 std::optional<std::uint32_t> CollisionCell(TileCoordinate tile) {
-  const Field_MpdTileCell* cell = VS::Field::LiveCollisionCellAt(
+  const VS::Field::MpdTileCell* cell = VS::Field::LiveCollisionCellAt(
       static_cast<u_int>(tile.x), static_cast<u_int>(tile.z), 0);
   if (cell == nullptr) return std::nullopt;
   std::uint32_t bits = 0;
@@ -93,16 +93,17 @@ std::optional<VS::Battle::Ai::RoomFloorTrigger> FloorTrigger(
   if (trigger == nullptr) return std::nullopt;
   return VS::Battle::Ai::RoomFloorTrigger{
       static_cast<std::uint16_t>(trigger->kind),
-      static_cast<std::uint16_t>(trigger->lockState.switchValue)};
+      static_cast<std::uint16_t>(trigger->lock_state.switch_value)};
 }
 
-// The battle runtime: Field_roomData is the source and the AI frame bindings
-// publish the map to the generated AI code that still reads them.
+// The battle runtime: VS::Field::roomData is the source and the AI frame
+// bindings publish the map to the generated AI code that still reads them.
 class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
  public:
   [[nodiscard]] RoomAiSource CurrentRoom() const override {
     RoomAiSource source;
-    if (const Field_MpdCollisionHeader* extent = Field_roomData.collisionMap) {
+    if (const VS::Field::MpdCollisionHeader* extent =
+            VS::Field::roomData.collision_map) {
       source.collision_extent =
           VS::Battle::Ai::RoomCollisionExtent{extent->width, extent->height};
     }
@@ -111,13 +112,13 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
       return static_cast<int>(VS::Field::LiveFloorHeightAt(world_x, world_z));
     };
     source.floor_trigger = FloorTrigger;
-    if (Field_roomData.environment != nullptr) {
+    if (VS::Field::roomData.environment != nullptr) {
       source.environment_parameter = VS::Field::LiveRoomEnvironmentParameter();
     }
-    if (Field_roomData.section6 != nullptr) {
+    if (VS::Field::roomData.section6 != nullptr) {
       source.auxiliary = std::span<const std::byte>(
-          static_cast<const std::byte*>(Field_roomData.section6),
-          Field_roomData.header.section6Length);
+          static_cast<const std::byte*>(VS::Field::roomData.section6),
+          VS::Field::roomData.header.section6_length);
     }
     // std::function keeps its small target inline; NRVO or the move rebinds it.
     // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
@@ -154,7 +155,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     VS::Battle::Ai::roomAiState = &storage->state;
     VS::Battle::Ai::tileFlagMap = storage->flags;
     VS::Battle::Ai::specialTerrainHeights = storage->heights;
-    auto* auxiliary = static_cast<unsigned char*>(Field_roomData.section6);
+    auto* auxiliary = static_cast<unsigned char*>(VS::Field::roomData.section6);
     VS::Battle::Ai::roomHasWaypoints = auxiliary;
     VS::Battle::Ai::patrolRoutes =
         auxiliary != nullptr

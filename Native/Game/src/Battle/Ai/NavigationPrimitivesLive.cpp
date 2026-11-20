@@ -34,9 +34,9 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Gimmicks.h"
+#include "Field/Gimmicks.hpp"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Field/Room.h"
+#include "Field/Room.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
@@ -93,22 +93,22 @@ class LiveSpecialTerrainBuilder final : public SpecialTerrainBuilder {
   }
 };
 
-TileOccupantPlacement PlacementOf(const Field_GimmickInstance* gimmick) {
+TileOccupantPlacement PlacementOf(const VS::Field::GimmickInstance* gimmick) {
   Require(gimmick != nullptr, "Gimmick occupancy requires an instance");
-  return {.x = static_cast<std::uint8_t>(gimmick->tileX),
-          .layer = static_cast<std::uint8_t>(gimmick->tileLayer),
-          .z = static_cast<std::uint8_t>(gimmick->tileZ)};
+  return {.x = static_cast<std::uint8_t>(gimmick->tile_x),
+          .layer = static_cast<std::uint8_t>(gimmick->tile_layer),
+          .z = static_cast<std::uint8_t>(gimmick->tile_z)};
 }
 
 std::uint32_t LiveVisiblePlatformMask() {
   constexpr std::size_t kOriginalPlatformCapacity = 13;
-  if (Field_roomData.movingPlatforms == nullptr) return 0;
-  const auto bytes = Field_roomData.header.movingPlatformsLength;
-  Require(
-      bytes % sizeof(Field_MpdMovingPlatform) == 0 &&
-          bytes / sizeof(Field_MpdMovingPlatform) <= kOriginalPlatformCapacity,
-      "Route availability: moving-platform count exceeds the original "
-      "bounded buffer");
+  if (VS::Field::roomData.moving_platforms == nullptr) return 0;
+  const auto bytes = VS::Field::roomData.header.moving_platforms_length;
+  Require(bytes % sizeof(VS::Field::MpdMovingPlatform) == 0 &&
+              bytes / sizeof(VS::Field::MpdMovingPlatform) <=
+                  kOriginalPlatformCapacity,
+          "Route availability: moving-platform count exceeds the original "
+          "bounded buffer");
   const auto points = VS::Field::CollectLiveMovingPlatformPositions();
   Require(points.size() <= kOriginalPlatformCapacity,
           "Route availability: moving-platform producer returned an invalid "
@@ -394,13 +394,13 @@ void MarkLiveAiTileDynamicObstacle(int x, int z) {
           "AI dynamic obstacle is outside the grid");
 }
 
-void AddLiveAiTileOccupant(const Field_GimmickInstance* gimmick) {
+void AddLiveAiTileOccupant(const VS::Field::GimmickInstance* gimmick) {
   LiveNavigationGrid grid;
   Require(AddAiTileOccupant(grid, PlacementOf(gimmick)),
           "Gimmick occupancy placement is invalid");
 }
 
-void RemoveLiveAiTileOccupant(const Field_GimmickInstance* gimmick) {
+void RemoveLiveAiTileOccupant(const VS::Field::GimmickInstance* gimmick) {
   LiveNavigationGrid grid;
   Require(RemoveAiTileOccupant(grid, PlacementOf(gimmick)),
           "Gimmick occupancy placement is invalid");
@@ -428,12 +428,13 @@ void UpdateLiveRouteGateAvailability() {
   const auto active = LiveVisiblePlatformMask();
   if (VS::Battle::Ai::roomHasWaypoints == nullptr) return;
   auto* auxiliary = static_cast<u_char*>(VS::Battle::Ai::roomHasWaypoints);
-  Require(auxiliary == Field_roomData.section6 &&
-              Field_roomData.header.section6Length >= kRouteAuxiliaryBytes &&
-              reinterpret_cast<const u_char*>(VS::Battle::Ai::routeGates) ==
-                  auxiliary + kRouteEndOffset,
-          "Route availability: route table does not belong to the active "
-          "room auxiliary section");
+  Require(
+      auxiliary == VS::Field::roomData.section6 &&
+          VS::Field::roomData.header.section6_length >= kRouteAuxiliaryBytes &&
+          reinterpret_cast<const u_char*>(VS::Battle::Ai::routeGates) ==
+              auxiliary + kRouteEndOffset,
+      "Route availability: route table does not belong to the active "
+      "room auxiliary section");
   std::array<std::uint32_t, kRouteWordCount> routes{};
   for (std::size_t index = 0; index < kRouteWordCount; ++index) {
     u_int word;

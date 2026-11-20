@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Field/Mpd.h"
+#include "Field/Mpd.hpp"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
@@ -113,7 +113,7 @@ struct GameSaveImage {
   VS::State::AshleySnapshot ashley_snapshot;
   VS::Items::InventoryContents inventory;
   VS::Items::InventoryIndices inventory_indices;
-  Field_MpdDoorRecord entry_door;
+  VS::Field::MpdDoorRecord entry_door;
   VS::State::ScoreData score_data;
   std::int32_t room_state_slot;
   char recent_room_enemy_states[kRecentRoomEnemyStateBytes];

@@ -5,12 +5,14 @@
 
 #include "Field/GimmickPlacement.hpp"
 
-struct Field_GimmickSnapshot;
-struct Field_GimmickInstance;
+namespace VS::Field {
+struct GimmickSnapshot;
+struct GimmickInstance;
+}  // namespace VS::Field
 struct Actors_ActorRecord;
 
 namespace VS::Field {
-bool IsLiveGimmickPrefixReadable(const Field_GimmickInstance* record);
+bool IsLiveGimmickPrefixReadable(const VS::Field::GimmickInstance* record);
 std::optional<GimmickQueryState> LiveGimmickQueryState(std::size_t slot);
 std::optional<std::size_t> FindLiveTopGimmickAtTile(
     const GimmickTileQuery& query, bool require_idle_mode);
@@ -25,8 +27,8 @@ bool ApplyLiveGimmickInteractionCommand(Actors_ActorRecord* actor,
                                         std::int32_t mode);
 
 int GimmickPlacementEntry(int gimmick_slot,
-                          Field_GimmickSnapshot* output_snapshot);
-int FindGimmickBelowEntry(const Field_GimmickInstance* reference);
+                          VS::Field::GimmickSnapshot* output_snapshot);
+int FindGimmickBelowEntry(const VS::Field::GimmickInstance* reference);
 int FindTopGimmickAtTileEntry(int tile_x, int tile_z, int require_idle_mode);
 int GimmickSubtypeEntry(int slot);
 int AreGimmicksMovingEntry();

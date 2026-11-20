@@ -4,7 +4,9 @@
 #include "Actors/ActorSpawning.hpp"
 
 struct Battle_Actor;
-struct Field_MpdEnemySpawn;
+namespace VS::Field {
+struct MpdEnemySpawn;
+}  // namespace VS::Field
 
 // Bindings from Battle_actors, the actor allocations, VS::Field::zoneContext,
 // the room enemy memory, Ashley's snapshot (VS::State::ashleySnapshot) and the
@@ -19,7 +21,7 @@ struct RoomActorRecord;
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(
     const CharacterInit& init);
-[[nodiscard]] RoomSpawn DecodeRoomSpawn(const Field_MpdEnemySpawn& spawn);
+[[nodiscard]] RoomSpawn DecodeRoomSpawn(const VS::Field::MpdEnemySpawn& spawn);
 [[nodiscard]] RememberedSpawn DecodeRemembered(const RoomActorRecord& record);
 
 // func_800765B0 (146C.c:6064). `unused` is unused, as in the original.
@@ -34,7 +36,7 @@ Battle_Actor* CreateLiveActorWithEquipment(int actor_id, int model_id,
                                            const SpawnPlacement* placement,
                                            int flags);
 // func_800775C0 (146C.c:6578).
-Battle_Actor* SpawnLiveRoomEnemy(int actor_id, Field_MpdEnemySpawn* spawn,
+Battle_Actor* SpawnLiveRoomEnemy(int actor_id, VS::Field::MpdEnemySpawn* spawn,
                                  CharacterInit* init, int flags);
 // func_8007C8F8 (146C.c:8926): the queue index plus one.
 int QueueLiveAshleyModelLoad(int model_id);

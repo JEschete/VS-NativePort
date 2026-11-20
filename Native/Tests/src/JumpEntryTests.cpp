@@ -22,9 +22,9 @@
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
+#include "Field/Room.hpp"
 
 namespace {
 using JumpEntry = void (*)(int, int*, int, int);
@@ -88,16 +88,16 @@ void CheckGroundedSnapshot(Actors_ActorRecord& actor) {
 
 struct JumpFixture {
   Actors_ActorRecord* saved_actor = Actors_actorRecords[0];
-  Field_RoomRecord saved_room = Field_roomData;
-  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
-      std::to_array(Field_gimmickInstances);
+  VS::Field::RoomDataRecord saved_room = VS::Field::roomData;
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
   char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
   std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::array<u_char, 6> saved_hang{};
   std::array<u_char, 6> saved_height{};
   Actors_ActorRecord actor{};
   struct {
-    Field_MpdCollisionHeader header{32, 32, 0, 1024};
+    VS::Field::MpdCollisionHeader header{32, 32, 0, 1024};
     std::array<std::uint16_t, 2048> descriptors{};
     std::array<u_char, 16> samples{};
   } collision;
@@ -110,9 +110,10 @@ struct JumpFixture {
                 saved_height.begin());
     std::fill_n(Actors_kJumpHangFrames, saved_hang.size(), 2);
     std::fill_n(Actors_kJumpHeightAdjustments, saved_height.size(), 0);
-    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
-    Field_roomData.collisionMap = &collision.header;
-    Field_roomData.header.collisionMapLength = sizeof(collision);
+    std::fill_n(VS::Field::gimmickInstances.begin(), saved_gimmicks.size(),
+                nullptr);
+    VS::Field::roomData.collision_map = &collision.header;
+    VS::Field::roomData.header.collision_map_length = sizeof(collision);
     VS::Event::playbackPhase = 0;
     actor.instance.position = {960, 128, 1216, 0x1234};
     actor.instance.rootMotion = {5, -6, 7, 0x5678};
@@ -137,9 +138,9 @@ struct JumpFixture {
   ~JumpFixture() {
     VS::Actors::ForgetSequenceBanks(sequence.data(), sizeof sequence);
     Actors_actorRecords[0] = saved_actor;
-    Field_roomData = saved_room;
+    VS::Field::roomData = saved_room;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
-              Field_gimmickInstances);
+              VS::Field::gimmickInstances.begin());
     VS::Actors::lastResolvedSequenceIndex = saved_sequence;
     VS::Event::playbackPhase = saved_phase;
     std::copy(saved_hang.begin(), saved_hang.end(), Actors_kJumpHangFrames);

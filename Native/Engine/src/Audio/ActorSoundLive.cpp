@@ -26,8 +26,8 @@
 #include "Field/Collision.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
+#include "Field/Gimmicks.hpp"
+#include "Field/Mpd.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio {
@@ -52,7 +52,7 @@ constexpr std::size_t kSoundSectionBytes = 4;
 // The record tables and the fields the original reads (lbu, lh) as typed.
 static_assert(std::size(Actors_actorRecords) == kActorRecordCount);
 static_assert(std::size(Battle_actors) == kBattleActorCount);
-static_assert(std::size(Field_gimmickInstances) == kGimmickCount);
+static_assert(std::size(VS::Field::gimmickInstances) == kGimmickCount);
 static_assert(std::size(VS::Audio::objectSurfaceSoundIds) ==
               kObjectSurfaceSoundBytes);
 static_assert(std::size(VS::Field::tileSurfaceIds) == kTileSurfaceSoundBytes);
@@ -73,11 +73,11 @@ static_assert(offsetof(VS::Actors::ShpModel, sound_section) ==
               sizeof(VS::Actors::ShpModel::header));
 static_assert(sizeof(VS::Actors::ShpModel::sound_section) ==
               kSoundSectionBytes);
-static_assert(offsetof(Field_GimmickInstance, positionX) ==
+static_assert(offsetof(VS::Field::GimmickInstance, position_x) ==
               kGimmickPositionOffset);
-static_assert(offsetof(Field_GimmickInstance, positionY) ==
+static_assert(offsetof(VS::Field::GimmickInstance, position_y) ==
               kGimmickPositionOffset + sizeof(std::int16_t));
-static_assert(offsetof(Field_GimmickInstance, positionZ) ==
+static_assert(offsetof(VS::Field::GimmickInstance, position_z) ==
               kGimmickPositionOffset + 2 * sizeof(std::int16_t));
 
 const char* RefusalReason(ActorSoundStatus status) {
@@ -194,10 +194,10 @@ class LiveActorSoundHost final : public ActorSoundHost {
   std::optional<std::uint8_t> TileSurfaceKind(std::uint8_t tile_x,
                                               std::uint8_t tile_z,
                                               std::uint8_t layer) override {
-    const Field_MpdTileCell* cell =
+    const VS::Field::MpdTileCell* cell =
         Field::LiveCollisionCellAt(tile_x, tile_z, layer);
     if (cell == nullptr) return std::nullopt;
-    return static_cast<std::uint8_t>(cell->surfaceKind);
+    return static_cast<std::uint8_t>(cell->surface_kind);
   }
 
   std::span<const std::uint8_t> ObjectSurfaceSounds() override {
@@ -293,7 +293,7 @@ void LivePlayActorSoundPair(const Actors_ActorRecord* source_actor,
 }
 
 // decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:728)
-void LivePlayGimmickSoundPair(const Field_GimmickInstance* gimmick,
+void LivePlayGimmickSoundPair(const VS::Field::GimmickInstance* gimmick,
                               int first_effect_id, int second_effect_id) {
   if (gimmick == nullptr) {
     Seq::ReportRefusal("PlayGimmickSoundPair", "no gimmick");
@@ -301,9 +301,9 @@ void LivePlayGimmickSoundPair(const Field_GimmickInstance* gimmick,
   }
   LiveActorSoundHost host;
   PlayGimmickSoundPair(host,
-                       {.x = gimmick->positionX,
-                        .y = gimmick->positionY,
-                        .z = gimmick->positionZ},
+                       {.x = gimmick->position_x,
+                        .y = gimmick->position_y,
+                        .z = gimmick->position_z},
                        {.first = first_effect_id, .second = second_effect_id});
 }
 
