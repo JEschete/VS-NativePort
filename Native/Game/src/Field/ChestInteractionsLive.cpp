@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -341,11 +341,11 @@ class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
   }
   void SpawnTrapTileEffect(
       const VS::Actors::ActorPlacementView& placement) override {
-    Actors_ActorLocation location{};
-    location.packedTile.target.tileX = placement.tile.x;
-    location.packedTile.target.tileLayer = placement.tile.layer;
-    location.packedTile.target.tileZ = placement.tile.z;
-    location.packedTile.target.facing = placement.tile.spare;
+    VS::Actors::ActorLocation location{};
+    location.packed_tile.target.tile_x = placement.tile.x;
+    location.packed_tile.target.tile_layer = placement.tile.layer;
+    location.packed_tile.target.tile_z = placement.tile.z;
+    location.packed_tile.target.facing = placement.tile.spare;
     location.position.vx = placement.position.x;
     location.position.vy = placement.position.y;
     location.position.vz = placement.position.z;
@@ -723,7 +723,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     VS::Field::LiveInteractionTargetState().Select(target);
     VS::Actors::LiveActorPlacement(actor,
                                    &VS::Field::interactionFocus.actor_query);
-    VS::Field::interactionFocus.actor_query.actorIndex =
+    VS::Field::interactionFocus.actor_query.actor_index =
         static_cast<std::int16_t>(actor);
     return true;
   }
@@ -808,7 +808,7 @@ class LiveInteractionDispatchHost final
   }
   bool DispatchTrap(VS::Field::TrapTarget target) override {
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
-    const int actor = VS::Field::interactionFocus.actor_query.actorIndex;
+    const int actor = VS::Field::interactionFocus.actor_query.actor_index;
     if (trap == nullptr || actor < 0 || actor >= kActorSlots ||
         Battle_actionState == nullptr || Battle_actors[actor] == nullptr ||
         Battle_actors[actor]->stats == nullptr) {
@@ -852,7 +852,7 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
 
 class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
  public:
-  explicit LiveTrapSelectionHost(Actors_ActorLocation* location)
+  explicit LiveTrapSelectionHost(VS::Actors::ActorLocation* location)
       : location_(location) {}
   bool Valid(VS::Field::TrapTarget target, std::int32_t actor) const override {
     return location_ != nullptr && actor >= 0 && actor < kActorSlots &&
@@ -866,7 +866,7 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   void Select(VS::Field::TrapTarget target, std::int32_t actor) override {
     VS::Field::LiveInteractionTargetState().Select(target);
     VS::Field::interactionFocus.actor_query.location = *location_;
-    VS::Field::interactionFocus.actor_query.actorIndex =
+    VS::Field::interactionFocus.actor_query.actor_index =
         static_cast<std::int16_t>(actor);
   }
   void RestoreIdle(std::int32_t actor) override {
@@ -887,7 +887,7 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   }
 
  private:
-  Actors_ActorLocation* location_ = nullptr;
+  VS::Actors::ActorLocation* location_ = nullptr;
 };
 
 class LiveObjectInteractionWaitHost final
@@ -1044,11 +1044,11 @@ bool BeginLiveChestInteraction(ChestTarget target, std::int32_t actor) {
 bool BeginLiveTrapInteraction(TrapTarget target,
                               const Actors::ActorPlacementView& placement,
                               std::int32_t actor) {
-  Actors_ActorLocation location{};
-  location.packedTile.target.tileX = placement.tile.x;
-  location.packedTile.target.tileLayer = placement.tile.layer;
-  location.packedTile.target.tileZ = placement.tile.z;
-  location.packedTile.target.facing = placement.tile.spare;
+  VS::Actors::ActorLocation location{};
+  location.packed_tile.target.tile_x = placement.tile.x;
+  location.packed_tile.target.tile_layer = placement.tile.layer;
+  location.packed_tile.target.tile_z = placement.tile.z;
+  location.packed_tile.target.facing = placement.tile.spare;
   location.position = {.vx = placement.position.x,
                        .vy = placement.position.y,
                        .vz = placement.position.z,
@@ -1111,9 +1111,9 @@ void VS::Field::DispatchTrapOrChestInteractionEntry() {
 }
 
 // decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973).
-void VS::Field::BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
-                                          Actors_ActorLocation* victim_location,
-                                          int actor) {
+void VS::Field::BeginTrapInteractionEntry(
+    Field_MpdLockTrigger* address, VS::Actors::ActorLocation* victim_location,
+    int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
   if (target) {
     LiveTrapSelectionHost host(victim_location);
@@ -1151,7 +1151,7 @@ int VS::Field::InteractWithLockedRoomObjectEntry(
 
 // decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
 void VS::Field::TriggerActorTrapEntry(Field_MpdLockTrigger* address,
-                                      Actors_ActorLocationQuery* location,
+                                      VS::Actors::ActorLocationQuery* location,
                                       int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
   if (target && location != nullptr) {
@@ -1194,18 +1194,18 @@ void VS::Field::RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record) {
   static_cast<void>(VS::Field::RefreshLiveAshleyInteractionTile(record));
 }
 
-int VS::Field::TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
+int VS::Field::TileInFrontOfActorEntry(VS::Actors::ActorLocationQuery* actor,
                                        unsigned char* output) {
   if (actor == nullptr || output == nullptr) {
     return -1;
   }
   VS::Actors::ActorPlacementView view{};
   view.tile.x =
-      static_cast<std::uint8_t>(actor->location.packedTile.target.tileX);
+      static_cast<std::uint8_t>(actor->location.packed_tile.target.tile_x);
   view.tile.z =
-      static_cast<std::uint8_t>(actor->location.packedTile.target.tileZ);
+      static_cast<std::uint8_t>(actor->location.packed_tile.target.tile_z);
   view.tile.layer =
-      static_cast<std::uint8_t>(actor->location.packedTile.target.tileLayer);
+      static_cast<std::uint8_t>(actor->location.packed_tile.target.tile_layer);
   view.position.w = actor->location.position.pad;
   const auto tile = VS::Field::TileInFrontOfActor(view);
   output[0] = tile.x;
@@ -1268,13 +1268,13 @@ void VS::Field::FindEntranceDoorNearTileEntry(int tile_x, int tile_z,
 
 int VS::Field::CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
   if (input == nullptr) return 0;
-  Actors_ActorLocation location{};
+  VS::Actors::ActorLocation location{};
   std::memcpy(&location, input, sizeof location);
   const VS::Actors::ActorPlacementView placement{
-      .tile = {.x = location.packedTile.target.tileX,
-               .layer = location.packedTile.target.tileLayer,
-               .z = location.packedTile.target.tileZ,
-               .spare = location.packedTile.target.facing},
+      .tile = {.x = location.packed_tile.target.tile_x,
+               .layer = location.packed_tile.target.tile_layer,
+               .z = location.packed_tile.target.tile_z,
+               .spare = location.packed_tile.target.facing},
       .position = {.x = location.position.vx,
                    .y = location.position.vy,
                    .z = location.position.vz,
@@ -1283,13 +1283,13 @@ int VS::Field::CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
 }
 
 int VS::Field::CheckActorTrapAndFallTriggersEntry(
-    int actor, Actors_ActorLocation* location) {
+    int actor, VS::Actors::ActorLocation* location) {
   if (location == nullptr) return 0;
   const VS::Actors::ActorPlacementView placement{
-      .tile = {.x = location->packedTile.target.tileX,
-               .layer = location->packedTile.target.tileLayer,
-               .z = location->packedTile.target.tileZ,
-               .spare = location->packedTile.target.facing},
+      .tile = {.x = location->packed_tile.target.tile_x,
+               .layer = location->packed_tile.target.tile_layer,
+               .z = location->packed_tile.target.tile_z,
+               .spare = location->packed_tile.target.facing},
       .position = {.x = location->position.vx,
                    .y = location->position.vy,
                    .z = location->position.vz,

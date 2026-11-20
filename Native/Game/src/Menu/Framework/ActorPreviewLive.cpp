@@ -15,7 +15,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
@@ -25,7 +25,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -75,7 +75,7 @@ T* Pointer(AssetAddress address) {
     case PreviewAllocation::kActorRecord:
       return sizeof(Actors_ActorRecord);
     case PreviewAllocation::kWeaponModel:
-      return sizeof(Actors_WeaponModel);
+      return sizeof(VS::Actors::WeaponModel);
     case PreviewAllocation::kBattleSequence:
       return kBattleSequenceBytes;
   }
@@ -108,12 +108,12 @@ T* Pointer(AssetAddress address) {
           .weapon_drawn = instance.weaponDrawn != 0};
 }
 
-[[nodiscard]] PreviewWeapon PreviewOf(const Actors_WeaponModel& model) {
-  return {.model_id = model.modelId,
-          .attachment_slot = model.attachmentSlot,
+[[nodiscard]] PreviewWeapon PreviewOf(const VS::Actors::WeaponModel& model) {
+  return {.model_id = model.model_id,
+          .attachment_slot = model.attachment_slot,
           .material = model.material,
-          .attachment_bone = model.attachmentBone,
-          .attached = model.reserved08Bit4 != 0};
+          .attachment_bone = model.attachment_bone,
+          .attached = model.shown != 0};
 }
 
 class LiveActorPreviewHost final : public ActorPreviewHost {
@@ -127,7 +127,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   }
 
   [[nodiscard]] std::optional<PreviewWeapon> Weapon(int slot) const override {
-    const Actors_WeaponModel* model = Model(slot);
+    const VS::Actors::WeaponModel* model = Model(slot);
     if (model == nullptr) return std::nullopt;
     return PreviewOf(*model);
   }
@@ -191,14 +191,14 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   }
 
   void SetWeaponAttached(int weapon_slot) override {
-    if (Actors_WeaponModel* model = Model(weapon_slot)) {
-      model->reserved08Bit4 = 1;
+    if (VS::Actors::WeaponModel* model = Model(weapon_slot)) {
+      model->shown = 1;
     }
   }
 
   void SetWeaponPose(int weapon_slot, std::uint8_t pose) override {
-    if (Actors_WeaponModel* model = Model(weapon_slot)) {
-      model->reserved11 = pose;
+    if (VS::Actors::WeaponModel* model = Model(weapon_slot)) {
+      model->blend_level = pose;
     }
   }
 
@@ -267,7 +267,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     record->animationHeader =
         Actors::FindLiveActorAnimationHeader(record, animation, &length);
     record->animationSet =
-        static_cast<u_char>(Actors_lastResolvedSequenceIndex);
+        static_cast<u_char>(VS::Actors::lastResolvedSequenceIndex);
     // The original read the clip length through the header unchecked
     // (224.c:340).
     if (length == nullptr) {
@@ -375,7 +375,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   // decomp: MAINMENU.PRG func_800F9EB8 (src/MENU/MAINMENU.PRG/224.c:243-254)
   void DrawWeapon(int weapon_slot, int slot, std::uint8_t bone,
                   const Actors::CompanionOffset& offset) override {
-    Actors_WeaponModel* model = Model(weapon_slot);
+    VS::Actors::WeaponModel* model = Model(weapon_slot);
     Actors_ActorRecord* record = Record(slot);
     if (model == nullptr || record == nullptr) return;
     if (bone >= kActorBoneMatrices) {
@@ -403,7 +403,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     return Actors_actorRecords[slot];
   }
 
-  [[nodiscard]] static Actors_WeaponModel* Model(int slot) {
+  [[nodiscard]] static VS::Actors::WeaponModel* Model(int slot) {
     if (slot < 0 || slot >= kWeaponModelSlots) {
       Warn("weapon slot past the weapon models");
       return nullptr;

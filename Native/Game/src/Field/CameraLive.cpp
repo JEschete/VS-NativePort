@@ -12,7 +12,7 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Feedback.h"
@@ -581,15 +581,15 @@ void LiveUpdateFirstPersonViewExit() {
 }
 
 void LiveUpdateCameraTileConstraint(int actor_index,
-                                    const Actors_TileTarget* actor_tile) {
+                                    const VS::Actors::TileTarget* actor_tile) {
   if (actor_tile == nullptr) {
     RefuseNull("UpdateCameraTileConstraint");
     return;
   }
   const Actors::PackedTile tile{
-      .x = static_cast<std::uint8_t>(actor_tile->tileX),
-      .layer = static_cast<std::uint8_t>(actor_tile->tileLayer),
-      .z = static_cast<std::uint8_t>(actor_tile->tileZ),
+      .x = static_cast<std::uint8_t>(actor_tile->tile_x),
+      .layer = static_cast<std::uint8_t>(actor_tile->tile_layer),
+      .z = static_cast<std::uint8_t>(actor_tile->tile_z),
       .spare = static_cast<std::uint8_t>(actor_tile->facing)};
   RunLive([actor_index, &tile](CameraHost& host, FieldCameraState& state) {
     UpdateCameraTileConstraint(host, state, actor_index, tile);

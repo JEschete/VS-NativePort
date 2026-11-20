@@ -12,7 +12,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Core/Diagnostics.hpp"

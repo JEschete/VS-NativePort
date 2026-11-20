@@ -10,7 +10,9 @@
 #include "Actors/SequencePlayback.hpp"
 
 struct Actors_ActorRecord;
-struct Actors_AnimationPose;
+namespace VS::Actors {
+struct AnimationPose;
+}
 
 // Bindings from actor records to the typed skeletal playback
 // (SequencePlayback.cpp), and the extents of the SEQ banks they play.
@@ -50,16 +52,16 @@ void ReportLiveAnimationHeader(const void* bank, int animation,
                                AnimationHeaderStatus status);
 
 // The pose's keys as the typed PoseKeys and SkeletalPose, and their stores.
-[[nodiscard]] PoseKeys LoadLivePoseKeys(const Actors_AnimationPose& pose);
-void StoreLivePoseKeys(const PoseKeys& keys, Actors_AnimationPose& pose);
+[[nodiscard]] PoseKeys LoadLivePoseKeys(const VS::Actors::AnimationPose& pose);
+void StoreLivePoseKeys(const PoseKeys& keys, VS::Actors::AnimationPose& pose);
 [[nodiscard]] SkeletalPose LoadLiveSkeletalPose(
-    const Actors_AnimationPose& pose);
+    const VS::Actors::AnimationPose& pose);
 void StoreLiveSkeletalPose(const SkeletalPose& typed,
-                           Actors_AnimationPose& pose);
+                           VS::Actors::AnimationPose& pose);
 
 void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode);
-void BlendLiveActorPose(Actors_AnimationPose& destination,
-                        Actors_AnimationPose& source, int bones, int frame,
+void BlendLiveActorPose(VS::Actors::AnimationPose& destination,
+                        VS::Actors::AnimationPose& source, int bones, int frame,
                         int frames);
 // The actor record's shadow blend as the typed ShadowBlend, and its store.
 [[nodiscard]] ShadowBlend LoadLiveShadowBlend(const ShadowBlendRecord& live);

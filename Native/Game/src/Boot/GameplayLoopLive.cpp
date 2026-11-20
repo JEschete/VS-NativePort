@@ -6,9 +6,9 @@
 #include "Actors/ActorCommandsLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
@@ -542,7 +542,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
 
   u_long* ordering_table_ = nullptr;
-  Actors_ActorLocationQuery ashley_placement_{};
+  VS::Actors::ActorLocationQuery ashley_placement_{};
   std::optional<VS::Field::RoomObjectTarget> facing_room_object_;
   std::optional<VS::Field::ChestTarget> facing_chest_;
   VS::Menu::Framework::ActionSelection* action_menu_ = nullptr;

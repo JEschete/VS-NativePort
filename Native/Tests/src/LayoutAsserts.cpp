@@ -125,10 +125,11 @@ static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
 
 // An actor record placed at core.model (VS::Content::ParseActorModel) must
 // end before the weapon model slots.
-static_assert(sizeof(VS::Actors::ActorModelSlot) >= sizeof(Actors_WeaponModel),
+static_assert(sizeof(VS::Actors::ActorModelSlot) >=
+                  sizeof(VS::Actors::WeaponModel),
               "equipment slot must fit a native weapon model");
 static_assert(_Alignof(VS::Actors::ActorModelSlot) >=
-                  _Alignof(Actors_WeaponModel),
+                  _Alignof(VS::Actors::WeaponModel),
               "equipment slot must align a native weapon model");
 static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) %
                       _Alignof(Actors_ActorRecord) ==
@@ -147,9 +148,9 @@ static_assert(offsetof(VS::Actors::ActorAllocation, core.actor.stats) ==
 
 // On-disc structs keep the file layout (ONDISC_OFFSETS): the SHP header is 64
 // bytes, the bones follow.
-static_assert(sizeof(Actors_ShpModel) == 64, "SHP header layout");
-static_assert(offsetof(Actors_ShpModel, bones) == 64, "SHP bones offset");
-static_assert(offsetof(Actors_SeqAnimationBank, headers) == 8,
+static_assert(sizeof(VS::Actors::ShpModel) == 64, "SHP header layout");
+static_assert(offsetof(VS::Actors::ShpModel, bones) == 64, "SHP bones offset");
+static_assert(offsetof(VS::Actors::SeqAnimationBank, headers) == 8,
               "SEQ bank header layout");
 static_assert(
     sizeof((static_cast<Actors_ActorRecord*>(nullptr))->animationHeader) ==
@@ -530,7 +531,7 @@ int Tests_ActorConditionSnapshot(void) {
 
 int Tests_GimmickViewsRoundTrip(void) {
   Field_GimmickInstance object = {0};
-  Actors_ShpModel model = {0};
+  VS::Actors::ShpModel model = {0};
   Field_GimmickPhysicsView* physics =
       reinterpret_cast<Field_GimmickPhysicsView*>(&object);
   object.model = &model;

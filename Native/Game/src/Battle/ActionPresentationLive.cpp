@@ -11,7 +11,7 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.h"
@@ -265,7 +265,7 @@ class LiveWorld final : public ActionPresentationWorld {
     Field::LiveSetRoomAnimationsPaused(0);
   }
   ActionPoint Placement(int actor) override {
-    Actors_ActorLocationQuery placement{};
+    VS::Actors::ActorLocationQuery placement{};
     Require(Actors::LiveActorPlacement(actor, &placement) >= 0);
     return {placement.location.position.vx, placement.location.position.vy,
             placement.location.position.vz, 0};

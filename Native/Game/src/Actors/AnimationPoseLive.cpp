@@ -16,7 +16,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationEvents.hpp"
 #include "Actors/ModelInstance.h"
@@ -26,7 +26,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/ActionAnimation.h"
@@ -67,14 +67,13 @@ constexpr std::uint8_t kReinitializeSet = 0xFF;
 // of the drawn weapon sounds (D_800E92DC).
 constexpr std::size_t kAnimationEventOpcodes = 68;
 constexpr std::size_t kDrawnWeaponSounds = 12;
-static_assert(std::extent_v<decltype(Actors_animationEventLengths)> >=
+static_assert(std::size(VS::Actors::animationEventLengths) >=
               kAnimationEventOpcodes);
-static_assert(std::extent_v<decltype(Actors_drawnWeaponSoundIds)> >=
-              kDrawnWeaponSounds);
-static_assert(std::extent_v<decltype(Actors_animationEventPoints)> >=
+static_assert(std::size(VS::Actors::drawnWeaponSoundIds) >= kDrawnWeaponSounds);
+static_assert(std::size(VS::Actors::animationEventPoints) >=
               kAnimationEventPointCount);
 static_assert(std::tuple_size_v<ShadowPointWords> ==
-              std::extent_v<decltype(Actors_animationEventPoints), 1>);
+              std::size(VS::Actors::animationEventPoints[0]));
 
 // The event playback phase in which the events and head look always run.
 constexpr std::int16_t kEventPlaybackRunning = 4;
@@ -97,7 +96,7 @@ bool MatchesBoundSet(int clip, std::uint8_t bound_set) {
 }
 
 void SetLastResolvedClip(int clip) {
-  Actors_lastResolvedSequenceIndex =
+  VS::Actors::lastResolvedSequenceIndex =
       std::bit_cast<char>(static_cast<std::uint8_t>(clip));
 }
 
@@ -128,7 +127,7 @@ class LiveAnimationBanks final : public AnimationBankSource {
       case AnimationBank::kShared:
         return SharedBank(entry.shared_slot);
       case AnimationBank::kWork:
-        return Actors_sequenceWorkBuffer;
+        return VS::Actors::sequenceWorkBuffer;
     }
     return nullptr;
   }
@@ -310,18 +309,19 @@ class LiveEventTables {
  public:
   LiveEventTables() {
     for (std::size_t row = 0; row < kAnimationEventPointCount; ++row) {
-      std::ranges::copy(Actors_animationEventPoints[row], points_[row].begin());
+      std::ranges::copy(VS::Actors::animationEventPoints[row],
+                        points_[row].begin());
     }
   }
 
   [[nodiscard]] AnimationEventTables View() const {
-    return {
-        .lengths = std::span<const std::uint8_t>(Actors_animationEventLengths)
-                       .first(kAnimationEventOpcodes),
-        .weapon_sounds =
-            std::span<const std::uint8_t>(Actors_drawnWeaponSoundIds)
-                .first(kDrawnWeaponSounds),
-        .points = points_};
+    return {.lengths =
+                std::span<const std::uint8_t>(VS::Actors::animationEventLengths)
+                    .first(kAnimationEventOpcodes),
+            .weapon_sounds =
+                std::span<const std::uint8_t>(VS::Actors::drawnWeaponSoundIds)
+                    .first(kDrawnWeaponSounds),
+            .points = points_};
   }
 
  private:
@@ -338,7 +338,7 @@ bool EventPlaybackRunning() {
 // starts it in.
 class LiveEventHost final : public AnimationEventHost {
  public:
-  LiveEventHost(Actors_ActorRecord& actor, Actors_AnimationPose& pose,
+  LiveEventHost(Actors_ActorRecord& actor, VS::Actors::AnimationPose& pose,
                 u_char* bound_bank)
       : actor_(actor),
         pose_(pose),
@@ -346,7 +346,7 @@ class LiveEventHost final : public AnimationEventHost {
         id_(static_cast<int>(actor.instance.slot)) {}
 
   [[nodiscard]] std::optional<EventScriptPosition> Script() const override {
-    const auto location = LocateInSequenceBank(pose_.eventScript);
+    const auto location = LocateInSequenceBank(pose_.event_script);
     if (!location) {
       return std::nullopt;
     }
@@ -360,21 +360,21 @@ class LiveEventHost final : public AnimationEventHost {
       ReportEventProblem(AnimationEventStatus::kNoScript, 0);
       return;
     }
-    pose_.eventScript = bank + position.offset;
-    pose_.nextEventFrame = frame;
+    pose_.event_script = bank + position.offset;
+    pose_.next_event_frame = frame;
   }
   [[nodiscard]] std::uint16_t NextEventFrame() const override {
-    return pose_.nextEventFrame;
+    return pose_.next_event_frame;
   }
   void SetNextEventFrame(std::uint16_t frame) override {
-    pose_.nextEventFrame = frame;
+    pose_.next_event_frame = frame;
   }
   [[nodiscard]] std::int16_t Frame() const override { return pose_.frame; }
   void SetFrame(std::int16_t frame) override { pose_.frame = frame; }
   [[nodiscard]] std::uint8_t EventWait() const override {
-    return pose_.eventWait;
+    return pose_.event_wait;
   }
-  void SetEventWait(std::uint8_t wait) override { pose_.eventWait = wait; }
+  void SetEventWait(std::uint8_t wait) override { pose_.event_wait = wait; }
 
   [[nodiscard]] int AnimationId() const override { return actor_.animationId; }
   [[nodiscard]] std::uint16_t AnimationLength() const override {
@@ -456,17 +456,17 @@ class LiveEventHost final : public AnimationEventHost {
   }
 
   void FadeAttachedWeapons(const WeaponFade& fade, bool show) override {
-    for (Actors_WeaponModel* weapon : weaponModels) {
-      if (weapon == nullptr || weapon->boneCount == 0 ||
-          weapon->attachmentBone == 0 || weapon->actorId != id_) {
+    for (VS::Actors::WeaponModel* weapon : weaponModels) {
+      if (weapon == nullptr || weapon->bone_count == 0 ||
+          weapon->attachment_bone == 0 || weapon->actor_id != id_) {
         continue;
       }
       if (show) {
-        weapon->reserved08Bit4 = 1;
+        weapon->shown = 1;
       }
-      weapon->reserved11 = fade.scale;
-      weapon->reserved12 = fade.target;
-      weapon->reserved13 = fade.frames;
+      weapon->blend_level = fade.scale;
+      weapon->blend_target = fade.target;
+      weapon->blend_frames = fade.frames;
     }
   }
   void SetTextureCellSheet(int channel,
@@ -475,11 +475,11 @@ class LiveEventHost final : public AnimationEventHost {
                            std::size(actor_.textureAnimationFrames)) {
       return;
     }
-    Actors_TextureAnimationFrame& frame =
+    VS::Actors::TextureAnimationFrame& frame =
         actor_.textureAnimationFrames[channel];
-    frame.overlayIndex = sheet.overlay;
-    frame.sourceX = sheet.source_x;
-    frame.sourceY = sheet.source_y;
+    frame.overlay_index = sheet.overlay;
+    frame.source_x = sheet.source_x;
+    frame.source_y = sheet.source_y;
     frame.columns = sheet.columns;
   }
   void SetTextureAnimation(int channel, int timeline,
@@ -544,39 +544,39 @@ class LiveEventHost final : public AnimationEventHost {
     if (bound_bank_ != nullptr && bound_bank_ == bank.data()) {
       return bound_bank_;
     }
-    const auto location = LocateInSequenceBank(pose_.eventScript);
+    const auto location = LocateInSequenceBank(pose_.event_script);
     if (location && location->bank.data() == bank.data()) {
-      return pose_.eventScript - location->offset;
+      return pose_.event_script - location->offset;
     }
     return nullptr;
   }
 
   Actors_ActorRecord& actor_;
-  Actors_AnimationPose& pose_;
+  VS::Actors::AnimationPose& pose_;
   u_char* bound_bank_;
   int id_;
 };
 
-AnimationPoseState LoadPoseState(const Actors_AnimationPose& pose) {
+AnimationPoseState LoadPoseState(const VS::Actors::AnimationPose& pose) {
   return {.pose = LoadLiveSkeletalPose(pose),
           .frame = pose.frame,
-          .next_event_frame = pose.nextEventFrame,
+          .next_event_frame = pose.next_event_frame,
           .event_offset = std::nullopt,
-          .event_wait = pose.eventWait,
-          .holding_last_frame = pose.holdingLastFrame != 0,
-          .animation_id = pose.animationId};
+          .event_wait = pose.event_wait,
+          .holding_last_frame = pose.holding_last_frame != 0,
+          .animation_id = pose.animation_id};
 }
 
 void StorePoseState(const AnimationPoseState& state, u_char* bank,
-                    Actors_AnimationPose& pose) {
+                    VS::Actors::AnimationPose& pose) {
   StoreLiveSkeletalPose(state.pose, pose);
   pose.frame = state.frame;
-  pose.nextEventFrame = state.next_event_frame;
-  pose.eventWait = state.event_wait;
-  pose.holdingLastFrame = state.holding_last_frame ? -1 : 0;
-  pose.animationId = state.animation_id;
+  pose.next_event_frame = state.next_event_frame;
+  pose.event_wait = state.event_wait;
+  pose.holding_last_frame = state.holding_last_frame ? -1 : 0;
+  pose.animation_id = state.animation_id;
   if (state.event_offset && bank != nullptr) {
-    pose.eventScript = bank + *state.event_offset;
+    pose.event_script = bank + *state.event_offset;
   }
 }
 
@@ -593,7 +593,7 @@ class LiveMotionLookHost final : public MotionLookHost {
     StoreLiveActorMotion(motion, actor_);
   }
   [[nodiscard]] Vec3 RootKey() const override {
-    const SVECTOR& root = actor_.blendPose.boneKeys[kRootPoseKey];
+    const SVECTOR& root = actor_.blendPose.bone_keys[kRootPoseKey];
     return {root.vx, root.vy, root.vz};
   }
   [[nodiscard]] std::int32_t ActorScale() const override {
@@ -608,8 +608,8 @@ class LiveMotionLookHost final : public MotionLookHost {
     return actor_.previewPose != 0;
   }
   void CenterPreviewPose() override {
-    actor_.blendPose.boneKeys[0].vx = kPreviewFacing;
-    actor_.pose.boneKeys[0].vx = kPreviewFacing;
+    actor_.blendPose.bone_keys[0].vx = kPreviewFacing;
+    actor_.pose.bone_keys[0].vx = kPreviewFacing;
   }
   void FinishLocomotion() override { actor_.animationSet = kReinitializeSet; }
   void SettleOnTile(int tile_x, int tile_z) override {
@@ -697,8 +697,8 @@ class LiveBlendHost final : public AnimationBlendHost {
   void BlendTowardPose(BlendClock clock) override {
     BlendLiveActorPose(actor_.blendPose, actor_.pose, actor_.instance.boneCount,
                        clock.frame, clock.frames);
-    actor_.blendPose.holdingLastFrame = actor_.pose.holdingLastFrame;
-    actor_.blendPose.reachedEnd = actor_.pose.reachedEnd;
+    actor_.blendPose.holding_last_frame = actor_.pose.holding_last_frame;
+    actor_.blendPose.reached_end = actor_.pose.reached_end;
   }
   void CopyPoseToBlend() override { actor_.blendPose = actor_.pose; }
   void UpdateMotion() override { UpdateLiveMotion(actor_, false); }
@@ -718,7 +718,7 @@ AnimationBankLimits LiveAnimationBankLimits(const Actors_ActorRecord& actor) {
       .battle_entries = actor.commonAnimationCount,
       .special_entries = actor.battleAnimationCount,
       .special_pitch = std::bit_cast<std::uint8_t>(Battle_specialActionPitch),
-      .shared_slot = Actors_sharedSequenceBankIndex};
+      .shared_slot = VS::Actors::sharedSequenceBankIndex};
 }
 
 AnimationHeader FindLiveAnimationHeader(const Actors_ActorRecord& actor,
@@ -737,7 +737,7 @@ std::optional<AnimationClipRef> BoundLiveAnimationClip(
 
 // decomp: BATTLE.PRG func_800AD714 (src/BATTLE/BATTLE.PRG/44F14.c:168)
 int RunLiveAnimationEvents(Actors_ActorRecord& actor,
-                           Actors_AnimationPose& pose, int mode) {
+                           VS::Actors::AnimationPose& pose, int mode) {
   if (mode < 0 || mode > static_cast<int>(AnimationEventMode::kFindImpact)) {
     VS::Core::Errorf(kChannel, "actor=%u animation event mode %d refused",
                      static_cast<unsigned>(actor.instance.slot), mode);
@@ -805,7 +805,7 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
 
 // decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2623)
 void InitializeLiveActorAnimationPose(Actors_ActorRecord* actor,
-                                      Actors_AnimationPose* pose) {
+                                      VS::Actors::AnimationPose* pose) {
   if (actor == nullptr || pose == nullptr) {
     VS::Core::Errorf(kChannel, "Pose start requires an actor and a pose");
     return;

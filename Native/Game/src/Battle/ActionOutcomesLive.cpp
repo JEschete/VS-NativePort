@@ -9,7 +9,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -106,7 +106,7 @@ class LiveOutcomeWorld final : public ActionOutcomeWorld {
     return action_.value();
   }
   ActionPoint Placement(int actor) override {
-    Actors_ActorLocationQuery placement{};
+    VS::Actors::ActorLocationQuery placement{};
     Require(Actors::LiveActorPlacement(actor, &placement) == 0);
     const auto& point = placement.location.position;
     return {point.vx, point.vy, point.vz, 0};

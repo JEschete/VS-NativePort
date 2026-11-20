@@ -8,7 +8,9 @@
 #include "Legacy/Psx.h"
 
 struct Actors_ActorRecord;
-struct Actors_AnimationPose;
+namespace VS::Actors {
+struct AnimationPose;
+}
 
 // Bindings from actor records to the typed animation pose (AnimationPose.cpp)
 // and event script (AnimationEvents.cpp). Banks are read through the extents
@@ -22,7 +24,7 @@ namespace VS::Actors {
     const Actors_ActorRecord& actor);
 // decomp: BATTLE.PRG func_800AD494. The bank and clip header `animation_id`
 // names for the actor; bank problems are reported. A map read leaves the map
-// entry in Actors_lastResolvedSequenceIndex, as the original did.
+// entry in VS::Actors::lastResolvedSequenceIndex, as the original did.
 [[nodiscard]] AnimationHeader FindLiveAnimationHeader(
     const Actors_ActorRecord& actor, int animation_id);
 // The clip bound to the actor's displayed pose: the bank its animation
@@ -34,7 +36,7 @@ namespace VS::Actors {
 // (AnimationEventMode); returns the impact frame for kFindImpact, else 0. A
 // mode outside AnimationEventMode is refused.
 int RunLiveAnimationEvents(Actors_ActorRecord& actor,
-                           Actors_AnimationPose& pose, int mode);
+                           VS::Actors::AnimationPose& pose, int mode);
 // decomp: BATTLE.PRG func_800AE47C. Reverts the bound clip's vertex events
 // on the displayed pose; -1 when they cannot be reverted, else 0.
 int RestartLiveAnimationEvents(Actors_ActorRecord& actor);
@@ -46,7 +48,7 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
                                            u_short** header_out);
 // decomp: BATTLE.PRG func_800AD008. Starts `pose` at the actor's animation.
 void InitializeLiveActorAnimationPose(Actors_ActorRecord* actor,
-                                      Actors_AnimationPose* pose);
+                                      VS::Actors::AnimationPose* pose);
 // decomp: BATTLE.PRG func_800AF6E8.
 void UpdateLiveActorAnimationBlend(Actors_ActorRecord* actor);
 // decomp: BATTLE.PRG func_800B002C.

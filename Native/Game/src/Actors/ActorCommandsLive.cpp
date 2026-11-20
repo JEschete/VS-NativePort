@@ -13,9 +13,9 @@
 #include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
@@ -65,10 +65,10 @@ CommandActorGait GaitOf(const Battle_ActorStats& stats) {
           .run_speed = static_cast<std::uint8_t>(stats.runSpeed)};
 }
 
-PackedTile TileOf(const Actors_TileTarget& tile) {
-  return {.x = static_cast<std::uint8_t>(tile.tileX),
-          .layer = static_cast<std::uint8_t>(tile.tileLayer),
-          .z = static_cast<std::uint8_t>(tile.tileZ),
+PackedTile TileOf(const VS::Actors::TileTarget& tile) {
+  return {.x = static_cast<std::uint8_t>(tile.tile_x),
+          .layer = static_cast<std::uint8_t>(tile.tile_layer),
+          .z = static_cast<std::uint8_t>(tile.tile_z),
           .spare = static_cast<std::uint8_t>(tile.facing)};
 }
 
@@ -79,12 +79,12 @@ SVECTOR NativeVector(const MotionVector& value) {
 // func_800A1108 for any actor slot; a slot with no actor or gimmick leaves
 // the placement zeroed (the original left the caller's buffer unwritten).
 CommandPlacement PlacementOf(int actor_id) {
-  Actors_ActorLocation location{};
+  VS::Actors::ActorLocation location{};
   if (LiveActorPlacement(actor_id, &location) != 0) {
     VS::Core::Debugf("actors.commands", "Placement of empty actor slot %d",
                      actor_id);
   }
-  return {.tile = TileOf(location.packedTile.target),
+  return {.tile = TileOf(location.packed_tile.target),
           .position = {.x = location.position.vx,
                        .y = location.position.vy,
                        .z = location.position.vz,
@@ -265,9 +265,9 @@ class LiveCommandHost final : public ActorCommandHost {
 class LiveAshleyHost final : public AshleyMovementHost {
  public:
   void ConstrainCameraToPlayer() override {
-    Actors_ActorLocation location{};
+    VS::Actors::ActorLocation location{};
     static_cast<void>(LiveActorPlacement(0, &location));
-    VS::Field::LiveUpdateCameraTileConstraint(0, &location.packedTile.target);
+    VS::Field::LiveUpdateCameraTileConstraint(0, &location.packed_tile.target);
   }
   [[nodiscard]] CommandActorGait PlayerGait() const override {
     return GaitOf(*Battle_characterState->stats);

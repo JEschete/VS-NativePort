@@ -17,7 +17,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
@@ -28,13 +28,13 @@
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -78,14 +78,15 @@ static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
 static_assert(std::size(VS::Render::legacyActorTextureSlots) >=
               kInitializedActorTextureSlots);
-static_assert(std::extent_v<decltype(Actors_WeaponModel::boneWorldMatrices)> ==
-              kWeaponBoneLimit);
-static_assert(std::extent_v<decltype(Actors_WeaponModel::bones)> ==
+static_assert(
+    std::extent_v<decltype(VS::Actors::WeaponModel::bone_world_matrices)> ==
+    kWeaponBoneLimit);
+static_assert(std::extent_v<decltype(VS::Actors::WeaponModel::bones)> ==
               kWeaponBoneLimit);
 static_assert(std::size(skeletonPose.bone_matrices) >= kWeaponBoneLimit);
 
 // The root key is the last key of the blended pose.
-using PoseKeys = decltype(Actors_AnimationPose::boneKeys);
+using PoseKeys = decltype(VS::Actors::AnimationPose::bone_keys);
 constexpr std::size_t kRootKey = std::extent_v<PoseKeys> - 1;
 constexpr std::size_t kPlacementMatrix = 4;
 constexpr std::size_t kModelMatrix = 0;
@@ -150,7 +151,8 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t),
     const Field_GimmickInstance& object) {
   const std::span<const std::byte> model = Render::LiveModelBytes(object.model);
   constexpr std::size_t kOffset =
-      sizeof(Actors_ShpModel) + (kGimmickHeightBone * sizeof(Actors_ShpBone));
+      sizeof(VS::Actors::ShpModel) +
+      (kGimmickHeightBone * sizeof(VS::Actors::ShpBone));
   std::int32_t height = 0;
   if (model.size() < kOffset + sizeof height) return 0;
   std::memcpy(&height, model.data() + kOffset, sizeof height);
@@ -269,28 +271,28 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   [[nodiscard]] std::optional<RoomWeaponState> Weapon(
       std::size_t index) const override {
-    const Actors_WeaponModel* weapon = weaponModels[index];
+    const VS::Actors::WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return std::nullopt;
-    return RoomWeaponState{.shown = weapon->reserved08Bit4 != 0,
-                           .owner = weapon->actorId,
-                           .attachment_bone = weapon->attachmentBone};
+    return RoomWeaponState{.shown = weapon->shown != 0,
+                           .owner = weapon->actor_id,
+                           .attachment_bone = weapon->attachment_bone};
   }
 
   // decomp: 44F14.c:1056. The attachment bone indexes the owner's bone
   // matrices, which the original did not bound.
   void DrawWeapon(std::size_t index) override {
-    Actors_WeaponModel* weapon = weaponModels[index];
+    VS::Actors::WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return;
-    Actors_ActorRecord* owner = RoomActor(weapon->actorId);
+    Actors_ActorRecord* owner = RoomActor(weapon->actor_id);
     if (owner == nullptr) return;
-    if (weapon->attachmentBone >= std::size(owner->boneMatrices)) {
+    if (weapon->attachment_bone >= std::size(owner->boneMatrices)) {
       VS::Core::Warnf("actors", "%s refused: weapon %zu attaches to bone %u",
                       kRoomPass, index,
-                      static_cast<unsigned>(weapon->attachmentBone));
+                      static_cast<unsigned>(weapon->attachment_bone));
       return;
     }
     DrawLiveActorWeaponModel(weapon,
-                             &owner->boneMatrices[weapon->attachmentBone]);
+                             &owner->boneMatrices[weapon->attachment_bone]);
   }
 
   [[nodiscard]] std::optional<RoomGimmickState> Gimmick(
@@ -384,36 +386,37 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 // The SHP bone table of a weapon model, bounded by the bytes its loader
 // recorded; none when the table does not fit.
 [[nodiscard]] std::optional<std::array<WeaponBone, kWeaponBoneLimit>>
-LiveWeaponBones(const Actors_WeaponModel& weapon, std::size_t bone_count) {
+LiveWeaponBones(const VS::Actors::WeaponModel& weapon, std::size_t bone_count) {
   std::array<WeaponBone, kWeaponBoneLimit> bones{};
   // The original read the bone table only for bones past the root.
   if (bone_count < 2) return bones;
   const std::span<const std::byte> model =
-      Render::LiveModelBytes(weapon.sectionOffsets);
-  if (model.size() <
-      sizeof(Actors_ShpModel) + (bone_count * sizeof(Actors_ShpBone))) {
+      Render::LiveModelBytes(weapon.section_offsets);
+  if (model.size() < sizeof(VS::Actors::ShpModel) +
+                         (bone_count * sizeof(VS::Actors::ShpBone))) {
     return std::nullopt;
   }
   for (std::size_t bone = 0; bone < bone_count; ++bone) {
-    Actors_ShpBone stored;
+    VS::Actors::ShpBone stored;
     std::memcpy(&stored,
-                model.data() + sizeof(Actors_ShpModel) +
-                    (bone * sizeof(Actors_ShpBone)),
+                model.data() + sizeof(VS::Actors::ShpModel) +
+                    (bone * sizeof(VS::Actors::ShpBone)),
                 sizeof stored);
-    bones[bone] = WeaponBone{.parent = stored.parentIndex,
+    bones[bone] = WeaponBone{.parent = stored.parent_index,
                              .length = stored.length,
                              .rotation = AnglesOf(weapon.bones[bone])};
   }
   return bones;
 }
 
-void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
+void StoreWeaponPose(VS::Actors::WeaponModel& weapon,
+                     const WeaponFadeStep& fade,
                      std::span<const Transform3> chain,
                      std::span<const WeaponBone> bones) {
   VS::Render::ModelScratchpad& workspace = Workspace();
-  weapon.reserved11 = fade.fade.scale;
-  weapon.reserved13 = fade.fade.frames;
-  if (fade.hidden) weapon.reserved08Bit4 = 0;
+  weapon.blend_level = fade.fade.scale;
+  weapon.blend_frames = fade.fade.frames;
+  if (fade.hidden) weapon.shown = 0;
   if (const std::optional<Vec3> columns = ModelColumnScale(
           Vec3{fade.fade.scale, fade.fade.scale, fade.fade.scale})) {
     StoreVector(workspace.scale, *columns);
@@ -422,7 +425,7 @@ void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
   workspace.position.vy = 0;
   for (std::size_t bone = 0; bone < chain.size(); ++bone) {
     StoreTransform(skeletonPose.bone_matrices[bone], chain[bone]);
-    StoreTransform(weapon.boneWorldMatrices[bone], chain[bone]);
+    StoreTransform(weapon.bone_world_matrices[bone], chain[bone]);
   }
   StoreTransform(workspace.matrix, chain.back());
   if (bones.size() < 2) return;
@@ -439,7 +442,7 @@ void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
 }
 
 // decomp: 49268.c:203-245, after the bone chain.
-void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
+void DrawWeaponForOwner(const VS::Actors::WeaponModel& weapon,
                         const Actors_ActorRecord& owner) {
   const Actors_ModelInstance& instance = owner.instance;
   const bool visible = instance.isVisible != 0;
@@ -451,25 +454,24 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
           VS::Event::LiveScriptVm())) == kEventPlaybackActive;
   if (!OwnerShowsWeapon(visible, height, leader, event_playing)) return;
   if (!Render::ProjectLiveWeaponModel(weapon)) return;
-  if (weapon.textureSlot >= kWeaponTextureSlots ||
-      weapon.paletteSlotOffset >= kWeaponTextureSlots) {
+  if (weapon.texture_slot >= kWeaponTextureSlots ||
+      weapon.palette_slot_offset >= kWeaponTextureSlots) {
     VS::Core::Warnf(
         "actors",
         "%s refused: texture slot %u or palette slot %u is outside the "
         "weapon slot table",
-        kWeaponDraw, static_cast<unsigned>(weapon.textureSlot),
-        static_cast<unsigned>(weapon.paletteSlotOffset));
+        kWeaponDraw, static_cast<unsigned>(weapon.texture_slot),
+        static_cast<unsigned>(weapon.palette_slot_offset));
     return;
   }
   VS::Render::ModelScratchpad& workspace = Workspace();
   workspace.texture_page = static_cast<u_short>(
-      VS::Render::legacyWeaponTextureSlots[weapon.textureSlot].texture_page);
+      VS::Render::legacyWeaponTextureSlots[weapon.texture_slot].texture_page);
   workspace.palette = static_cast<u_short>(
-      VS::Render::legacyWeaponTextureSlots[weapon.paletteSlotOffset].palette);
+      VS::Render::legacyWeaponTextureSlots[weapon.palette_slot_offset].palette);
   CVECTOR color = instance.baseColor;
-  if (weapon.reserved08Bit6 != 0) {
-    color =
-        CVECTOR{weapon.reserved5C0, weapon.reserved5C0, weapon.reserved5C0, 0};
+  if (weapon.brightness_override != 0) {
+    color = CVECTOR{weapon.brightness, weapon.brightness, weapon.brightness, 0};
   }
   if (WeaponDrawsWithOverrides(instance.actionAnimationState)) {
     Render::DrawLiveWeaponFlatPolygonsWithOverrides(weapon, color);
@@ -505,7 +507,7 @@ void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
             std::end(modelRenderContext.model_scale), kUnitModelScale);
   VS::Render::ModelScratchpad& workspace = Workspace();
   StoreVector(workspace.root_offset,
-              ActorRootOffset(VectorOf(actor->blendPose.boneKeys[kRootKey]),
+              ActorRootOffset(VectorOf(actor->blendPose.bone_keys[kRootKey]),
                               InstanceScale(actor->instance), actor->scale));
   TransformLiveActorRootOffset(actor);
   workspace.angle_x = actor->instance.lookYaw;
@@ -581,12 +583,12 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
 // decomp: BATTLE.PRG func_800B217C (src/BATTLE/BATTLE.PRG/49268.c:155). The
 // original also left the weapon's model and each parent's bone matrix in the
 // model workspace; only this function read them.
-void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
+void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source) {
   if (weapon == nullptr || source == nullptr) {
     WarnActorRefused(kWeaponDraw, "no weapon or attachment matrix");
     return;
   }
-  const std::size_t bone_count = weapon->boneCount;
+  const std::size_t bone_count = weapon->bone_count;
   if (bone_count > kWeaponBoneLimit) {
     VS::Core::Warnf("actors", "%s refused: the weapon has %zu bones",
                     kWeaponDraw, bone_count);
@@ -599,8 +601,8 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
     return;
   }
   const std::span<const WeaponBone> used = std::span(*bones).first(bone_count);
-  const WeaponFadeStep fade = StepWeaponFade(
-      WeaponFade{weapon->reserved11, weapon->reserved12, weapon->reserved13});
+  const WeaponFadeStep fade = StepWeaponFade(WeaponFade{
+      weapon->blend_level, weapon->blend_target, weapon->blend_frames});
   const std::optional<std::array<Transform3, kWeaponBoneLimit>> chain =
       BuildWeaponBoneChain(
           WeaponRootTransform(TransformOf(*source), fade.fade.scale), used);
@@ -612,7 +614,7 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
                   std::span(*chain).first(std::max<std::size_t>(bone_count, 1)),
                   used);
   const Actors_ActorRecord* owner =
-      LiveActorRecord(weapon->actorId, kWeaponDraw);
+      LiveActorRecord(weapon->actor_id, kWeaponDraw);
   if (owner == nullptr) {
     WarnActorRefused(kWeaponDraw, "the weapon's owner slot is empty");
     return;
@@ -622,7 +624,7 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
 
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void InitializeLiveActorModelResources() {
-  Actors_forcedModelOverrides = 0;
+  VS::Actors::forcedModelOverrides = 0;
   for (VS::Content::LegacyActorAssetRequest& request :
        VS::Content::legacyActorAssetRequests) {
     request.asset_kind = 0;
@@ -636,9 +638,9 @@ void InitializeLiveActorModelResources() {
   }
   std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
             nullptr);
-  Actors_primarySequenceBuffer =
+  VS::Actors::primarySequenceBuffer =
       Core::Memory::AllocateLiveFromLowEnd(Content::kWeaponSequenceBytes);
-  Actors_sequenceWorkBuffer =
+  VS::Actors::sequenceWorkBuffer =
       Core::Memory::AllocateLiveFromLowEnd(Content::kSequenceWorkBufferBytes);
   for (std::size_t slot = 0; slot < kWeaponTextureSlots; ++slot) {
     StoreSlotIds(VS::Render::legacyWeaponTextureSlots[slot],
@@ -647,24 +649,24 @@ void InitializeLiveActorModelResources() {
   std::fill(std::begin(weaponModels), std::end(weaponModels), nullptr);
   for (std::size_t buffer = 0; buffer < 2; ++buffer) {
     VS::Content::legacyWeaponModelBuffers[buffer] =
-        static_cast<Actors_WeaponModelData*>(
+        static_cast<VS::Actors::WeaponModelData*>(
             Core::Memory::AllocateLiveFromLowEnd(
-                sizeof(Actors_WeaponModelData)));
+                sizeof(VS::Actors::WeaponModelData)));
   }
   std::fill(std::begin(Field_gimmickInstances),
             std::end(Field_gimmickInstances), nullptr);
   constexpr std::size_t kClearedBankPages = 3;
   constexpr std::size_t kClearedSequenceBanks = 3;
-  std::fill_n(std::begin(Actors_sharedSequenceBankTexturePages),
+  std::fill_n(std::begin(VS::Actors::sharedSequenceBankTexturePages),
               kClearedBankPages, u_char{0});
-  std::fill_n(std::begin(Actors_sharedSequenceData), kClearedSequenceBanks,
+  std::fill_n(std::begin(VS::Actors::sharedSequenceData), kClearedSequenceBanks,
               nullptr);
   VS::Content::legacySequenceParsePhase = 0;
   VS::Content::legacyEtmLoadPhase = 0;
   VS::Content::modelParseResetFlag = 0;
   VS::Content::objectDataLoadStep = 0;
   VS::Content::legacyModelLoadPhase = 0;
-  Actors_sharedSequenceBankIndex = 0;
+  VS::Actors::sharedSequenceBankIndex = 0;
   VECTOR unit_room_scale{};
   unit_room_scale.vx = kUnitActorScale;
   unit_room_scale.vy = kUnitActorScale;

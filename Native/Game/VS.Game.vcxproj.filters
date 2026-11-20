@@ -231,7 +231,7 @@
     <ClCompile Include="src\Actors\Animation.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Animation.h">
+    <ClInclude Include="src\Actors\Animation.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\AnimationControl.cpp">
@@ -270,7 +270,7 @@
     <ClInclude Include="src\Actors\CharacterInit.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClInclude Include="src\Actors\Location.h">
+    <ClInclude Include="src\Actors\Location.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\ModelDraw.hpp">
@@ -330,12 +330,12 @@
     <ClInclude Include="src\Actors\Shadow.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClInclude Include="src\Actors\ShpModel.hpp">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClCompile Include="src\Actors\Skeleton.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Skeleton.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClCompile Include="src\Actors\SkeletonLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -360,19 +360,19 @@
     <ClCompile Include="src\Actors\TextureAnimation.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\TextureAnimation.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClCompile Include="src\Actors\TextureAnimationLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
+    <ClInclude Include="src\Actors\TextureAnimationRecords.hpp">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClCompile Include="src\Actors\Textures.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
     <ClInclude Include="src\Actors\Textures.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClInclude Include="src\Actors\WeaponModel.h">
+    <ClInclude Include="src\Actors\WeaponModel.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Abilities.cpp">

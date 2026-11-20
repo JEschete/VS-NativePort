@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/SequencePlayback.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 
@@ -243,12 +243,12 @@ namespace {
 struct LivePlayback {
   std::array<std::uint32_t, 64> file{};
   Actors_ActorRecord actor{};
-  char saved_resolved = Actors_lastResolvedSequenceIndex;
+  char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
 
   LivePlayback() {
     auto* bank = Bank();
-    bank->animationData = 64;
-    bank->animationMap = 48;
+    bank->animation_data = 64;
+    bank->animation_map = 48;
     bank->headers[3] = 4;
     bank->headers[5] = 8;
     const std::uint8_t tracks[] = {0xE0, 1, 2, 3, 0xE0, 1, 1, 1};
@@ -265,11 +265,11 @@ struct LivePlayback {
 
   ~LivePlayback() {
     VS::Actors::ForgetSequenceBanks(file.data(), sizeof file);
-    Actors_lastResolvedSequenceIndex = saved_resolved;
+    VS::Actors::lastResolvedSequenceIndex = saved_resolved;
   }
 
-  Actors_SeqAnimationBank* Bank() {
-    return reinterpret_cast<Actors_SeqAnimationBank*>(file.data());
+  VS::Actors::SeqAnimationBank* Bank() {
+    return reinterpret_cast<VS::Actors::SeqAnimationBank*>(file.data());
   }
 };
 
@@ -281,9 +281,9 @@ TEST_CASE("Live playback decodes registered banks",
   VS::Actors::RegisterSequenceBank(playback.Bank(), sizeof playback.file);
   VS::Actors::AdvanceLiveSkeletalAnimation(playback.actor, 0);
   CHECK(playback.actor.pose.frame == 2);
-  CHECK(playback.actor.pose.boneKeys[kRootPoseKey].vx == 1);
-  CHECK(playback.actor.pose.boneKeys[kRootPoseKey].vz == 3);
-  CHECK(playback.actor.pose.boneKeys[0].vy == 1);
+  CHECK(playback.actor.pose.bone_keys[kRootPoseKey].vx == 1);
+  CHECK(playback.actor.pose.bone_keys[kRootPoseKey].vz == 3);
+  CHECK(playback.actor.pose.bone_keys[0].vy == 1);
 }
 
 TEST_CASE("Live playback skips banks it cannot bound",
@@ -298,23 +298,23 @@ TEST_CASE("Live playback skips banks it cannot bound",
   }
   VS::Actors::AdvanceLiveSkeletalAnimation(playback.actor, 0);
   CHECK(playback.actor.pose.frame == 2);
-  CHECK(playback.actor.pose.boneKeys[kRootPoseKey].vx == 0);
-  CHECK(playback.actor.pose.boneKeys[0].vy == 0);
+  CHECK(playback.actor.pose.bone_keys[kRootPoseKey].vx == 0);
+  CHECK(playback.actor.pose.bone_keys[0].vy == 0);
 }
 
 TEST_CASE("Live pose blends clamp bones and skip zero-length blends",
           "[actors][sequence][bounds]") {
-  Actors_AnimationPose destination{};
-  Actors_AnimationPose source{};
-  destination.boneKeys[0].vx = 10;
-  source.boneKeys[0].vx = 50;
+  VS::Actors::AnimationPose destination{};
+  VS::Actors::AnimationPose source{};
+  destination.bone_keys[0].vx = 10;
+  source.bone_keys[0].vx = 50;
   VS::Actors::BlendLiveActorPose(destination, source, 1, 5, 0);
-  CHECK(destination.boneKeys[0].vx == 10);
+  CHECK(destination.bone_keys[0].vx == 10);
   VS::Actors::BlendLiveActorPose(destination, source, 255, 1, 4);
-  CHECK(destination.boneKeys[0].vx == 20);
+  CHECK(destination.bone_keys[0].vx == 20);
   VS::Actors::BlendLiveActorPose(destination, source, 255, 4, 4);
-  CHECK(std::memcmp(destination.boneKeys, source.boneKeys,
-                    sizeof source.boneKeys) == 0);
-  CHECK(std::memcmp(destination.scaleKeys, source.scaleKeys,
-                    sizeof source.scaleKeys) == 0);
+  CHECK(std::memcmp(destination.bone_keys, source.bone_keys,
+                    sizeof source.bone_keys) == 0);
+  CHECK(std::memcmp(destination.scale_keys, source.scale_keys,
+                    sizeof source.scale_keys) == 0);
 }

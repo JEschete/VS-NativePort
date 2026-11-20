@@ -24,7 +24,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControlLive.hpp"
 #include "Audio/Mixer/MixControl.hpp"
@@ -319,9 +319,9 @@ struct RuntimeFixture {
     player_model.instance.previousTileX = 1;
     player_model.instance.previousTileZ = 2;
     player_model.instance.previousFacing = 2016;
-    Actors_TileTarget grounded{};
-    grounded.tileX = 1;
-    grounded.tileZ = 2;
+    VS::Actors::TileTarget grounded{};
+    grounded.tile_x = 1;
+    grounded.tile_z = 2;
     grounded.facing = 128;
     player_model.savedPlacement = std::bit_cast<int>(grounded);
     player_stats.currentHp = 123;
@@ -556,10 +556,10 @@ struct RuntimeFixture {
     enemy_stats.totalAgility = 345;
     enemy_stats.limbs[5].hp = 32;
     enemy_model.instance.facing = 2864;
-    Actors_TileTarget placement{};
-    placement.tileX = 2;
-    placement.tileLayer = 1;
-    placement.tileZ = 3;
+    VS::Actors::TileTarget placement{};
+    placement.tile_x = 2;
+    placement.tile_layer = 1;
+    placement.tile_z = 3;
     enemy_model.savedPlacement = std::bit_cast<int>(placement);
     enemy_ai.usesRoomActionDelay = 1;
     enemy_ai.behaviorMode = 0;
@@ -1428,10 +1428,10 @@ void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
   model.previousTileZ = 1;
   model.previousTileLayer = static_cast<unsigned char>(layer);
   model.previousFacing = -144;
-  Actors_TileTarget saved{};
-  saved.tileX = 2;
-  saved.tileZ = 3;
-  saved.tileLayer = layer;
+  VS::Actors::TileTarget saved{};
+  saved.tile_x = 2;
+  saved.tile_z = 3;
+  saved.tile_layer = layer;
   saved.facing = 77;
   fixture.player_model.savedPlacement = std::bit_cast<int>(saved);
   VS::Field::sphericalCamera.values.pitch = -768;
@@ -1456,11 +1456,11 @@ void CheckStaticLayer(const RuntimeFixture& fixture,
   CHECK(model.previousTileX == 0);
   CHECK(model.previousTileZ == 1);
   CHECK(model.previousFacing == -144);
-  const auto saved =
-      std::bit_cast<Actors_TileTarget>(fixture.player_model.savedPlacement);
-  CHECK(saved.tileX == 2);
-  CHECK(saved.tileZ == 3);
-  CHECK(saved.tileLayer == state.location.floor_layer);
+  const auto saved = std::bit_cast<VS::Actors::TileTarget>(
+      fixture.player_model.savedPlacement);
+  CHECK(saved.tile_x == 2);
+  CHECK(saved.tile_z == 3);
+  CHECK(saved.tile_layer == state.location.floor_layer);
   CHECK(saved.facing == 77);
 }
 

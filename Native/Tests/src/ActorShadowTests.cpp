@@ -14,7 +14,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -90,13 +90,13 @@ struct ActorShadowFixture {
     actor.shadowRadius = 64;
     actor.shadowBlend.radius_expand_rate =
         actor.shadowBlend.radius_shrink_rate = 8192;
-    actor.blendPose.scaleKeys[0] = {64, 64, 64, 0};
+    actor.blendPose.scale_keys[0] = {64, 64, 64, 0};
     actor.modelDataSize = sizeof model_bytes;
-    auto* model = reinterpret_cast<Actors_ShpModel*>(model_bytes.data());
+    auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
     actor.instance.model = model;
-    model->groupSection = 96;
-    model->vertexSection = 100;
-    model->polygonSection = 108;
+    model->group_section = 96;
+    model->vertex_section = 100;
+    model->polygon_section = 108;
     const std::array<std::uint16_t, 2> group{0, 1};
     std::memcpy(reinterpret_cast<unsigned char*>(model) + 96, group.data(),
                 sizeof group);

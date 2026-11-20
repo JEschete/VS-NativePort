@@ -10,11 +10,11 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -43,8 +43,8 @@ struct WeaponModeFixture {
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
   Battle_Actor* saved_actor = Battle_actors[0];
   Battle_Actor* saved_character = Battle_characterState;
-  std::array<Actors_WeaponModel*, 2> saved_weapons{VS::Actors::weaponModels[0],
-                                                   VS::Actors::weaponModels[1]};
+  std::array<VS::Actors::WeaponModel*, 2> saved_weapons{
+      VS::Actors::weaponModels[0], VS::Actors::weaponModels[1]};
   decltype(std::to_array(VS::Event::weaponDrawStates)) saved_modes =
       std::to_array(VS::Event::weaponDrawStates);
   decltype(std::to_array(VS::Event::opcodeHandlers)) saved_handlers =
@@ -58,11 +58,11 @@ struct WeaponModeFixture {
   char saved_skip = VS::Event::skipState;
   std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::uint8_t saved_gate = VS::State::LiveScriptFlag(0xAC);
-  char saved_sequence = Actors_lastResolvedSequenceIndex;
+  char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
   decltype(Battle_hudBattleMode) saved_hud = Battle_hudBattleMode;
   Actors_ActorRecord record{};
   Battle_Actor actor{};
-  std::array<Actors_WeaponModel, 2> weapons{};
+  std::array<VS::Actors::WeaponModel, 2> weapons{};
   std::array<std::uint32_t, 512> common{};
   std::array<std::uint32_t, 512> battle{};
 
@@ -71,7 +71,7 @@ struct WeaponModeFixture {
     Battle_characterState = Battle_actors[0] = &actor;
     for (std::size_t index = 0; index < weapons.size(); ++index) {
       VS::Actors::weaponModels[index] = &weapons[index];
-      weapons[index].attachmentBone = 1;
+      weapons[index].attachment_bone = 1;
     }
     VS::Event::weaponDrawStates[0] = 0;
     VS::Event::weaponDrawStates[1] = 1;
@@ -110,19 +110,20 @@ struct WeaponModeFixture {
     VS::Event::skipState = saved_skip;
     VS::Event::playbackPhase = saved_phase;
     VS::State::SetLiveScriptFlag(0xAC, saved_gate);
-    Actors_lastResolvedSequenceIndex = saved_sequence;
+    VS::Actors::lastResolvedSequenceIndex = saved_sequence;
     Battle_hudBattleMode = saved_hud;
     VS::Actors::ForgetSequenceBanks(common.data(), sizeof common);
     VS::Actors::ForgetSequenceBanks(battle.data(), sizeof battle);
   }
 
-  static Actors_SeqAnimationBank* MakeBank(
+  static VS::Actors::SeqAnimationBank* MakeBank(
       std::array<std::uint32_t, 512>& storage) {
-    auto* bank = reinterpret_cast<Actors_SeqAnimationBank*>(storage.data());
+    auto* bank =
+        reinterpret_cast<VS::Actors::SeqAnimationBank*>(storage.data());
     VS::Actors::RegisterSequenceBank(bank, sizeof storage);
-    bank->animationMap = 1536;
-    bank->animationData = 1792;
-    auto* map = reinterpret_cast<u_char*>(bank) + bank->animationMap;
+    bank->animation_map = 1536;
+    bank->animation_data = 1792;
+    auto* map = reinterpret_cast<u_char*>(bank) + bank->animation_map;
     for (std::size_t index = 0; index < 128; ++index) {
       map[index] = static_cast<u_char>(index);
       bank->headers[index * 5] = 4;
@@ -135,10 +136,10 @@ struct WeaponModeFixture {
     actor.weaponDrawn = static_cast<u_char>(0xA4 | (mode ^ 1));
     record.instance.weaponDrawn = mode ^ 1;
     for (auto& weapon : weapons) {
-      weapon.reserved08Bit4 = mode ^ 1;
-      weapon.reserved11 = 17;
-      weapon.reserved12 = 23;
-      weapon.reserved13 = 9;
+      weapon.shown = mode ^ 1;
+      weapon.blend_level = 17;
+      weapon.blend_target = 23;
+      weapon.blend_frames = 9;
     }
   }
 
@@ -153,10 +154,10 @@ struct WeaponModeFixture {
 
   void CheckVisibility(int mode) const {
     for (const auto& weapon : weapons) {
-      CHECK(weapon.reserved08Bit4 == mode);
-      CHECK(weapon.reserved11 == (mode ? 64 : 0));
-      CHECK(weapon.reserved12 == (mode ? 64 : 0));
-      CHECK(weapon.reserved13 == 0);
+      CHECK(weapon.shown == mode);
+      CHECK(weapon.blend_level == (mode ? 64 : 0));
+      CHECK(weapon.blend_target == (mode ? 64 : 0));
+      CHECK(weapon.blend_frames == 0);
     }
   }
 
@@ -169,18 +170,18 @@ struct WeaponModeFixture {
   void FinishAnimation(int count = 5) {
     REQUIRE(record.animationLength == 4);
     for (int frame = 0; frame < count; ++frame) {
-      CHECK(record.pose.holdingLastFrame == 0);
+      CHECK(record.pose.holding_last_frame == 0);
       VS::Actors::AdvanceLiveSkeletalAnimation(record, 0);
     }
     CAPTURE(record.animationId, record.queuedAnimation, record.pose.frame);
-    REQUIRE(record.pose.holdingLastFrame != 0);
+    REQUIRE(record.pose.holding_last_frame != 0);
   }
 
   void CheckAnimatedStart(int mode, int variant, int phase) const {
     CHECK(pending == 1);
     CHECK(record.animationId == (variant - 1) * 2 + (mode ^ 1) + 109);
     CHECK(record.animationLength == 4);
-    CHECK(record.pose.holdingLastFrame == 0);
+    CHECK(record.pose.holding_last_frame == 0);
     CHECK(record.queuedAnimation == (phase == 0 && variant == 2 ? 1 : 0));
   }
 
@@ -188,7 +189,7 @@ struct WeaponModeFixture {
     CHECK(pending == 0);
     CHECK(record.animationId == (mode ? 101 : 6));
     CHECK(record.pose.frame == (retained_idle ? 4 : 0));
-    CHECK((record.pose.holdingLastFrame != 0) == retained_idle);
+    CHECK((record.pose.holding_last_frame != 0) == retained_idle);
   }
 
   void CheckVmWait(VS::Event::ScriptLocation cursor,

@@ -19,7 +19,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionPreviewLive.hpp"
@@ -387,12 +387,12 @@ class LiveTargetMemory final : public TargetMemoryHost {
   [[nodiscard]] std::optional<std::uint32_t> TargetTile(
       unsigned target) const override {
     if (Actors_actorRecords[target] == nullptr) return std::nullopt;
-    Actors_ActorLocationQuery placement{};
+    VS::Actors::ActorLocationQuery placement{};
     if (VS::Actors::LiveActorPlacement(static_cast<int>(target), &placement) !=
         0) {
       return std::nullopt;
     }
-    return static_cast<std::uint32_t>(placement.location.packedTile.word);
+    return static_cast<std::uint32_t>(placement.location.packed_tile.word);
   }
   void Remember(const TargetMemory& memory) override {
     state_.previousTile = static_cast<int>(memory.previous_tile);

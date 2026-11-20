@@ -8,7 +8,9 @@
 
 #include "Core/Gte.h"
 
-struct Actors_ShpModel;
+namespace VS::Actors {
+struct ShpModel;
+}
 
 namespace VS::Render {
 namespace layout {
@@ -38,7 +40,7 @@ struct ModelScratchpad {
   MATRIX matrix;
   SVECTOR rotation;
   VECTOR scale;
-  Actors_ShpModel* model;
+  VS::Actors::ShpModel* model;
 };
 
 // decomp: actorTransformScratch (src/BATTLE/BATTLE.PRG/44F14.c:75)

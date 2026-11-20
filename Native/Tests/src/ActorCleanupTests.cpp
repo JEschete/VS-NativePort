@@ -16,7 +16,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -670,12 +670,12 @@ TEST_CASE("Actors past the equipment table fade without equipment",
           "[actors][appearance][equipment]") {
   const int slot = GENERATE(9, 10, 16);
   AppearanceFixture fixture;
-  auto weapons = std::make_unique<std::array<Actors_WeaponModel, 2>>();
+  auto weapons = std::make_unique<std::array<VS::Actors::WeaponModel, 2>>();
   for (auto& weapon : *weapons) {
-    weapon.paletteColorCount = 16;
-    weapon.ownerMotionState = 1;
-    std::fill_n(weapon.uploadPalette, 96, 0x7FFF);
-    std::fill_n(weapon.workingPalette, 96, 0x1234);
+    weapon.palette_color_count = 16;
+    weapon.owner_motion_state = 1;
+    std::fill_n(weapon.upload_palette, 96, 0x7FFF);
+    std::fill_n(weapon.working_palette, 96, 0x1234);
   }
   VS::Actors::weaponModels[18] = &(*weapons)[0];
   VS::Actors::weaponModels[19] = &(*weapons)[1];
@@ -686,29 +686,29 @@ TEST_CASE("Actors past the equipment table fade without equipment",
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   for (const auto& weapon : *weapons) {
     const bool owned = slot == 9;
-    CHECK((weapon.uploadPalette[0] != 0x7FFF) == owned);
-    CHECK((weapon.ownerMotionState == 2) == owned);
+    CHECK((weapon.upload_palette[0] != 0x7FFF) == owned);
+    CHECK((weapon.owner_motion_state == 2) == owned);
   }
 }
 
 TEST_CASE("Equipment palette counts stop at their palette storage",
           "[actors][appearance][equipment]") {
   AppearanceFixture fixture;
-  auto weapon = std::make_unique<Actors_WeaponModel>();
-  weapon->paletteColorCount = 200;
-  std::fill_n(weapon->uploadPalette, 96, 0x7FFF);
-  std::fill_n(weapon->workingPalette, 96, 0x1234);
-  weapon->reserved5C0 = 0xA5;
-  weapon->reserved5C1 = 0x5A;
-  weapon->reserved5C2 = 0xBEEF;
+  auto weapon = std::make_unique<VS::Actors::WeaponModel>();
+  weapon->palette_color_count = 200;
+  std::fill_n(weapon->upload_palette, 96, 0x7FFF);
+  std::fill_n(weapon->working_palette, 96, 0x1234);
+  weapon->brightness = 0xA5;
+  weapon->reserved5c1 = 0x5A;
+  weapon->reserved5c2 = 0xBEEF;
   VS::Actors::weaponModels[0] = weapon.get();
   auto& actor = fixture.actor;
   actor.instance.slot = 0;
   actor.instance.actionAnimationState = 2;
   std::fill_n(actor.basePalette, 320, 0x1234);
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
-  CHECK(weapon->uploadPalette[95] != 0x7FFF);
-  CHECK(weapon->reserved5C0 == 0xA5);
-  CHECK(weapon->reserved5C1 == 0x5A);
-  CHECK(weapon->reserved5C2 == 0xBEEF);
+  CHECK(weapon->upload_palette[95] != 0x7FFF);
+  CHECK(weapon->brightness == 0xA5);
+  CHECK(weapon->reserved5c1 == 0x5A);
+  CHECK(weapon->reserved5c2 == 0xBEEF);
 }

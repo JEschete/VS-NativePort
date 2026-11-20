@@ -13,7 +13,7 @@
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Battle/Actor.h"
@@ -131,10 +131,10 @@ RememberedEnemy* FindInCurrentRoom(RoomEnemyMemory& memory, int spawn_index,
   return FindRememberedEnemy(memory, spawn_index);
 }
 
-RememberedPlacement PlacementOf(const Actors_TileTarget& tile) {
-  return {.tile_x = static_cast<std::uint8_t>(tile.tileX),
-          .tile_layer = static_cast<std::uint8_t>(tile.tileLayer),
-          .tile_z = static_cast<std::uint8_t>(tile.tileZ),
+RememberedPlacement PlacementOf(const VS::Actors::TileTarget& tile) {
+  return {.tile_x = static_cast<std::uint8_t>(tile.tile_x),
+          .tile_layer = static_cast<std::uint8_t>(tile.tile_layer),
+          .tile_z = static_cast<std::uint8_t>(tile.tile_z),
           .facing = static_cast<std::uint8_t>(tile.facing)};
 }
 
@@ -158,11 +158,11 @@ EnemyStanding StandingOf(int actor_id, const Battle_Actor& actor,
   // The current tile (an actor or a gimmick), then the saved placement of an
   // actor record. Zero-initialized: the original left the stack word unset
   // when the slot had neither.
-  Actors_ActorLocationQuery query{};
+  VS::Actors::ActorLocationQuery query{};
   LiveActorPlacement(actor_id, &query);
   LiveActorSavedPlacement(actor_id, std::bit_cast<u_char>(stats.movementClass),
                           &query);
-  standing.placement = PlacementOf(query.location.packedTile.target);
+  standing.placement = PlacementOf(query.location.packed_tile.target);
   return standing;
 }
 }  // namespace

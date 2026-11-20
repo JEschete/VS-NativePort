@@ -8,9 +8,9 @@
 #include <iterator>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -19,7 +19,7 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 
-static_assert(sizeof(Actors_TileTarget) == sizeof(VS::Actors::PackedTile));
+static_assert(sizeof(VS::Actors::TileTarget) == sizeof(VS::Actors::PackedTile));
 static_assert(sizeof(SVECTOR) == sizeof(VS::Actors::MotionVector));
 
 namespace VS::Actors {
@@ -84,7 +84,7 @@ MotionVector VectorArgument(const SVECTOR* value) {
   return LiveMotionVector(Required(value, "Actor motion requires a vector"));
 }
 
-PackedTile TileArgument(const Actors_TileTarget* tile) {
+PackedTile TileArgument(const VS::Actors::TileTarget* tile) {
   return std::bit_cast<PackedTile>(
       Required(tile, "Actor motion requires a tile target"));
 }
@@ -419,7 +419,8 @@ int LiveActorJumpAnimationProfile(Actors_ActorRecord* actor) {
   return ActorJumpAnimationProfile(LoadLiveActorMotion(record));
 }
 
-void MoveLiveActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target,
+void MoveLiveActorToTileAtRate(int actor_id,
+                               VS::Actors::TileTarget* tile_target,
                                int move_steps_per_tile,
                                int turn_steps_per_revolution) {
   const PackedTile tile = TileArgument(tile_target);
@@ -449,7 +450,7 @@ void MoveLiveActorToPositionAtRate(int actor_id, SVECTOR* target,
 }
 
 void TranslateLiveActorToTileAtRate(int actor_id,
-                                    Actors_TileTarget* tile_target,
+                                    VS::Actors::TileTarget* tile_target,
                                     int move_steps_per_tile) {
   const PackedTile tile = TileArgument(tile_target);
   LiveMotionTerrain terrain;
@@ -458,7 +459,8 @@ void TranslateLiveActorToTileAtRate(int actor_id,
   });
 }
 
-void TurnLiveActorTowardTileAtRate(int actor_id, Actors_TileTarget* tile_target,
+void TurnLiveActorTowardTileAtRate(int actor_id,
+                                   VS::Actors::TileTarget* tile_target,
                                    int turn_steps_per_revolution) {
   const PackedTile tile = TileArgument(tile_target);
   WithActor(actor_id, [&](ActorMotion& motion) {
@@ -518,7 +520,8 @@ void RotateLiveActorToAtRate(int actor_id, SVECTOR* target_rotation,
       "RotateActorToAtRate");
 }
 
-void MoveLiveActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target,
+void MoveLiveActorToTileOverTime(int actor_id,
+                                 VS::Actors::TileTarget* tile_target,
                                  int move_steps, int turn_steps) {
   const PackedTile tile = TileArgument(tile_target);
   LiveMotionTerrain terrain;
@@ -528,7 +531,7 @@ void MoveLiveActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target,
 }
 
 void TranslateLiveActorToTileOverTime(int actor_id,
-                                      Actors_TileTarget* tile_target,
+                                      VS::Actors::TileTarget* tile_target,
                                       int move_steps) {
   const PackedTile tile = TileArgument(tile_target);
   LiveMotionTerrain terrain;
@@ -537,7 +540,8 @@ void TranslateLiveActorToTileOverTime(int actor_id,
   });
 }
 
-void SetLiveActorTileTranslation(int actor_id, Actors_TileTarget* tile_target,
+void SetLiveActorTileTranslation(int actor_id,
+                                 VS::Actors::TileTarget* tile_target,
                                  int move_steps, int move_steps_per_tile) {
   const PackedTile tile = TileArgument(tile_target);
   LiveMotionTerrain terrain;
@@ -548,7 +552,7 @@ void SetLiveActorTileTranslation(int actor_id, Actors_TileTarget* tile_target,
 }
 
 void TurnLiveActorTowardTileOverTime(int actor_id,
-                                     Actors_TileTarget* tile_target,
+                                     VS::Actors::TileTarget* tile_target,
                                      int turn_steps) {
   const PackedTile tile = TileArgument(tile_target);
   WithActor(
@@ -559,7 +563,7 @@ void TurnLiveActorTowardTileOverTime(int actor_id,
       "TurnActorTowardTileOverTime");
 }
 
-void SetLiveActorTileTurn(int actor_id, Actors_TileTarget* tile_target,
+void SetLiveActorTileTurn(int actor_id, VS::Actors::TileTarget* tile_target,
                           int turn_steps, int turn_steps_per_revolution) {
   const PackedTile tile = TileArgument(tile_target);
   WithActor(actor_id, [&](ActorMotion& motion) {

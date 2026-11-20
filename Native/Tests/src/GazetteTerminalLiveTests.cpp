@@ -727,11 +727,11 @@ TEST_CASE(
                       live::BytesOf(VS::Menu::menuStrings),
                       live::BytesOf(VS::Actors::textureSlotOrigins),
                       live::BytesOf(VS::Actors::textureSlotRowOffsets),
-                      live::BytesOf(Actors_sheathedWeaponAnimationBases),
-                      live::BytesOf(Actors_drawnWeaponAnimationBases),
-                      live::BytesOf(Actors_animationEventLengths),
-                      live::BytesOf(Actors_animationEventPoints),
-                      live::BytesOf(Actors_sharedSequenceIdsByKind)});
+                      live::BytesOf(VS::Actors::sheathedWeaponAnimationBases),
+                      live::BytesOf(VS::Actors::drawnWeaponAnimationBases),
+                      live::BytesOf(VS::Actors::animationEventLengths),
+                      live::BytesOf(VS::Actors::animationEventPoints),
+                      live::BytesOf(VS::Actors::sharedSequenceIdsByKind)});
     return result;
   };
   const auto before = snapshot();

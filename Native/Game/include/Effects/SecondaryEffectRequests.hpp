@@ -83,8 +83,8 @@ struct QueuedEffectAction {
   std::uint16_t target_count{};
 };
 
-// A tile a trap fires on (Actors_ActorLocation): its tile coordinates and the
-// height of the position on it.
+// A tile a trap fires on (VS::Actors::ActorLocation): its tile coordinates and
+// the height of the position on it.
 struct TrapTile {
   std::uint8_t tile_x{}, tile_z{};
   std::int16_t height{};

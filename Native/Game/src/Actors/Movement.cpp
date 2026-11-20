@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
+#include "Actors/ShpModel.hpp"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Render/Palette.hpp"
 
 // decomp: D_800E90AC (D_800E90AC@BATTLE/BATTLE.PRG)

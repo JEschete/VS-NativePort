@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Field/Gimmicks.h"
 #include "Render/ModelGeometry.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -395,15 +395,15 @@ TEST_CASE("Live gimmick and weapon projection refuse unrecorded models",
   auto model = FlatTriangleModel();
   Field_GimmickInstance object{};
   std::memcpy(&object, &kTriangleCounts, sizeof kTriangleCounts);
-  object.model = reinterpret_cast<Actors_ShpModel*>(model.data());
+  object.model = reinterpret_cast<VS::Actors::ShpModel*>(model.data());
   VS::Actors::modelRenderContext.projected_vertex_count = 7;
   CHECK_FALSE(Render::ProjectLiveGimmickModel(object));
   CHECK(VS::Actors::modelRenderContext.projected_vertex_count == 0);
 
-  Actors_WeaponModel weapon{};
+  VS::Actors::WeaponModel weapon{};
   std::memcpy(&weapon, &kTriangleCounts, sizeof kTriangleCounts);
-  weapon.sectionOffsets =
-      reinterpret_cast<Actors_WeaponModelData*>(model.data());
+  weapon.section_offsets =
+      reinterpret_cast<VS::Actors::WeaponModelData*>(model.data());
   VS::Actors::modelRenderContext.projected_vertex_count = 7;
   CHECK_FALSE(Render::ProjectLiveWeaponModel(weapon));
   CHECK(VS::Actors::modelRenderContext.projected_vertex_count == 0);

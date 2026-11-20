@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
@@ -22,7 +22,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
@@ -154,22 +154,22 @@ struct AssetStateRestore {
       VS::Actors::textureSlotOrigins.data()};
   ArrayRestore<u_char, VS::Actors::kTextureSlotRowOffsetBytes> texture_rows{
       VS::Actors::textureSlotRowOffsets.data()};
-  ArrayRestore<Actors_WeaponModelData*,
+  ArrayRestore<VS::Actors::WeaponModelData*,
                std::size(VS::Content::legacyWeaponModelBuffers)>
       weapon_buffers{VS::Content::legacyWeaponModelBuffers.data()};
   ArrayRestore<Field_GimmickInstance*, std::size(Field_gimmickInstances)>
       gimmicks{Field_gimmickInstances};
-  ArrayRestore<u_char, std::size(Actors_sharedSequenceBankTexturePages)>
-      bank_pages{Actors_sharedSequenceBankTexturePages};
-  ArrayRestore<void*, std::size(Actors_sharedSequenceData)> shared_sequences{
-      Actors_sharedSequenceData};
-  ValueRestore<char> forced_overrides{Actors_forcedModelOverrides};
-  ValueRestore<u_char> bank_index{Actors_sharedSequenceBankIndex};
+  ValueRestore<decltype(VS::Actors::sharedSequenceBankTexturePages)> bank_pages{
+      VS::Actors::sharedSequenceBankTexturePages};
+  ValueRestore<decltype(VS::Actors::sharedSequenceData)> shared_sequences{
+      VS::Actors::sharedSequenceData};
+  ValueRestore<char> forced_overrides{VS::Actors::forcedModelOverrides};
+  ValueRestore<u_char> bank_index{VS::Actors::sharedSequenceBankIndex};
   ValueRestore<char> update_complete{Actors_isActorUpdateComplete};
   ValueRestore<u_char> pushed_gimmick{Actors_pushedGimmickIndex};
   ValueRestore<decltype(VS::Content::objectDataLoadStep)> equipment_step{
       VS::Content::objectDataLoadStep};
-  ValueRestore<void*> sequence_work{Actors_sequenceWorkBuffer};
+  ValueRestore<void*> sequence_work{VS::Actors::sequenceWorkBuffer};
 };
 
 struct AudioRestore {
@@ -269,9 +269,9 @@ struct Fixture {
       Battle_actors};
   ArrayRestore<Actors_ActorRecord*, std::size(Actors_actorRecords)>
       saved_models{Actors_actorRecords};
-  ArrayRestore<Actors_WeaponModel*, std::size(VS::Actors::weaponModels)>
+  ArrayRestore<VS::Actors::WeaponModel*, std::size(VS::Actors::weaponModels)>
       saved_weapons{VS::Actors::weaponModels};
-  ValueRestore<void*> saved_primary_sequence{Actors_primarySequenceBuffer};
+  ValueRestore<void*> saved_primary_sequence{VS::Actors::primarySequenceBuffer};
   ValueRestore<VECTOR> saved_scale{VS::Actors::roomActorScale};
   ValueRestore<VS::Actors::SkeletonPose> saved_pose{VS::Actors::skeletonPose};
   ValueRestore<MATRIX> saved_root_matrix{VS::Actors::skeletonRootMatrix};
@@ -279,7 +279,8 @@ struct Fixture {
   ValueRestore<MATRIX> saved_camera_basis{VS::Render::cameraBasisMatrix};
   ValueRestore<VS::Actors::ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
-  ValueRestore<char> saved_sequence_index{Actors_lastResolvedSequenceIndex};
+  ValueRestore<char> saved_sequence_index{
+      VS::Actors::lastResolvedSequenceIndex};
   ValueRestore<std::remove_reference_t<decltype(*VS::Render::ModelWorkspace())>>
       saved_model_workspace{*VS::Render::ModelWorkspace()};
   AssetStateRestore saved_assets;
@@ -408,7 +409,7 @@ struct Fixture {
       throw std::runtime_error("source actor owner allocation failed");
     }
     *preview_owner.source = {};
-    if (Actors_primarySequenceBuffer == nullptr) {
+    if (VS::Actors::primarySequenceBuffer == nullptr) {
       throw std::runtime_error("source sequence owner allocation failed");
     }
     ParseAsset(R"(Native\data\disc\OBJ\01.SHP)",

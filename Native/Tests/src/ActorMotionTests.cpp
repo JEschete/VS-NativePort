@@ -12,7 +12,7 @@
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -833,7 +833,8 @@ TEST_CASE("Live turns and scales write the record's angles and scale",
 
   actor.instance.currentTileX = 1;
   actor.instance.currentTileZ = 1;
-  Actors_TileTarget tile{.tileX = 2, .tileLayer = 0, .tileZ = 1, .facing = 0};
+  VS::Actors::TileTarget tile{
+      .tile_x = 2, .tile_layer = 0, .tile_z = 1, .facing = 0};
   actors::TurnLiveActorTowardTileAtRate(kActor, &tile, 0);
   CHECK(actor.instance.facing == 0xC00);
 

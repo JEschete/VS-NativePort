@@ -28,7 +28,7 @@ int Battle_unusedSubmenuState;
 
 // decomp: D_800F4590 (D_800F4590@BATTLE/BATTLE.PRG); the decomp's D_800F4590_t
 // (BATTLE.PRG 30DB0.h:18) is a partial view of the weapon model it points at.
-Actors_WeaponModel* Battle_unusedGlobal1[1];
+VS::Actors::WeaponModel* Battle_unusedGlobal1[1];
 
 // decomp: D_800F4594 (D_800F4594@BATTLE/BATTLE.PRG)
 int Battle_unusedGlobal2;

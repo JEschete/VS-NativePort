@@ -14,7 +14,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
@@ -91,7 +91,7 @@ struct JumpFixture {
   Field_RoomRecord saved_room = Field_roomData;
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  char saved_sequence = Actors_lastResolvedSequenceIndex;
+  char saved_sequence = VS::Actors::lastResolvedSequenceIndex;
   std::uint8_t saved_phase = VS::Event::playbackPhase;
   std::array<u_char, 6> saved_hang{};
   std::array<u_char, 6> saved_height{};
@@ -140,7 +140,7 @@ struct JumpFixture {
     Field_roomData = saved_room;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
-    Actors_lastResolvedSequenceIndex = saved_sequence;
+    VS::Actors::lastResolvedSequenceIndex = saved_sequence;
     VS::Event::playbackPhase = saved_phase;
     std::copy(saved_hang.begin(), saved_hang.end(), Actors_kJumpHangFrames);
     std::copy(saved_height.begin(), saved_height.end(),
@@ -149,10 +149,11 @@ struct JumpFixture {
 
   void EnableAnimation() {
     // Synthetic four-header bank: navigation, rise, fall and ground jump.
-    auto* bank = reinterpret_cast<Actors_SeqAnimationBank*>(sequence.data());
-    bank->animationMap = 128;
-    bank->animationData = 384;
-    auto* map = reinterpret_cast<u_char*>(bank) + bank->animationMap;
+    auto* bank =
+        reinterpret_cast<VS::Actors::SeqAnimationBank*>(sequence.data());
+    bank->animation_map = 128;
+    bank->animation_data = 384;
+    auto* map = reinterpret_cast<u_char*>(bank) + bank->animation_map;
     map[31] = 0;
     map[33] = 1;
     map[35] = 2;
@@ -385,7 +386,7 @@ TEST_CASE(
   CheckConsumerArc(fixture.actor, speed);
   const int animation = entry == kTileJump ? 47 : (start_y < 0 ? 35 : 33);
   CHECK(fixture.actor.animationId == animation);
-  CHECK(fixture.actor.pose.animationId == fixture.actor.animationId);
+  CHECK(fixture.actor.pose.animation_id == fixture.actor.animationId);
   CHECK(fixture.actor.blendFrames == 4);
   CheckConsumerFacing(fixture.actor, facing);
   CHECK(std::memcmp(&fixture.actor.instance.position, &original_position,

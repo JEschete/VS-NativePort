@@ -15,17 +15,17 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/MatrixLive.hpp"
@@ -45,7 +45,8 @@ VS::Actors::SkeletonPose VS::Actors::skeletonPose;
 MATRIX VS::Actors::skeletonRootMatrix;
 
 // decomp: vs_battle_wepModels (vs_battle_wepModels@BATTLE/BATTLE.PRG)
-Actors_WeaponModel* VS::Actors::weaponModels[VS::Actors::kWeaponModelCount];
+VS::Actors::WeaponModel*
+    VS::Actors::weaponModels[VS::Actors::kWeaponModelCount];
 
 // decomp: D_800F49B8 (D_800F49B8@BATTLE/BATTLE.PRG)
 MATRIX VS::Actors::boneMatrixScratch;
@@ -59,8 +60,8 @@ using Core::Math::TransformOf;
 using Core::Math::Vec3;
 using Core::Math::VectorOf;
 
-using PoseKeys = decltype(Actors_AnimationPose::boneKeys);
-using WeaponBoneMatrices = decltype(Actors_WeaponModel::boneWorldMatrices);
+using PoseKeys = decltype(AnimationPose::bone_keys);
+using WeaponBoneMatrices = decltype(WeaponModel::bone_world_matrices);
 // The root key is the last key of the blended pose.
 constexpr std::size_t kRootKey = std::extent_v<PoseKeys> - 1;
 constexpr std::size_t kWeaponTableSize = std::size(weaponModels);
@@ -70,11 +71,8 @@ constexpr int kWeaponBoneCapacity = std::extent_v<WeaponBoneMatrices>;
 constexpr std::size_t kBoneLabelCapacity = 256;
 // The head bone carries this auxiliary tag.
 constexpr int kHeadAuxiliaryTag = 2;
-// The size of one SHP bone record.
-constexpr std::size_t kShpBoneBytes = 0x10;
 
 static_assert(kWeaponTableSize % kWeaponsPerActor == 0);
-static_assert(sizeof(Actors_ShpBone) == kShpBoneBytes);
 
 // The skeleton an id names: the actor in its slot, else the gimmick in that
 // slot.
@@ -118,20 +116,20 @@ struct LiveSkeleton {
           .gimmick = VS::Field::FindGimmickForActorSlot(actor_id)};
 }
 
-[[nodiscard]] std::optional<Actors_ShpBone> ReadBone(
+[[nodiscard]] std::optional<VS::Actors::ShpBone> ReadBone(
     std::span<const std::byte> model, std::size_t bone) {
   const std::size_t offset =
-      sizeof(Actors_ShpModel) + (bone * sizeof(Actors_ShpBone));
-  if (model.size() < offset + sizeof(Actors_ShpBone)) return std::nullopt;
-  Actors_ShpBone stored;
+      sizeof(VS::Actors::ShpModel) + (bone * sizeof(VS::Actors::ShpBone));
+  if (model.size() < offset + sizeof(VS::Actors::ShpBone)) return std::nullopt;
+  VS::Actors::ShpBone stored;
   std::memcpy(&stored, model.data() + offset, sizeof stored);
   return stored;
 }
 
-[[nodiscard]] BoneLabels LabelsOf(const Actors_ShpBone& bone) {
+[[nodiscard]] BoneLabels LabelsOf(const VS::Actors::ShpBone& bone) {
   return {.tag = bone.tag,
-          .limb_ids = bone.limbIds,
-          .auxiliary_tag = bone.auxiliaryTag};
+          .limb_ids = bone.limb_ids,
+          .auxiliary_tag = bone.auxiliary_tag};
 }
 
 struct BoneLabelTable {
@@ -151,7 +149,8 @@ struct BoneLabelTable {
   const std::span<const std::byte> model = skeleton.ModelBytes();
   const std::size_t bones = skeleton.BoneCount();
   for (; table.count < bones; ++table.count) {
-    const std::optional<Actors_ShpBone> bone = ReadBone(model, table.count);
+    const std::optional<VS::Actors::ShpBone> bone =
+        ReadBone(model, table.count);
     if (!bone) {
       VS::Core::Warnf(
           "actors", "%s refused: bone %u of %u lies past the loaded bone table",
@@ -166,7 +165,7 @@ struct BoneLabelTable {
 
 [[nodiscard]] std::optional<std::int32_t> StoredBoneLength(
     std::span<const std::byte> model, int bone, const char* operation) {
-  const std::optional<Actors_ShpBone> stored =
+  const std::optional<VS::Actors::ShpBone> stored =
       bone >= 0 ? ReadBone(model, static_cast<std::size_t>(bone))
                 : std::nullopt;
   if (!stored) {
@@ -192,8 +191,8 @@ struct BoneLabelTable {
 
 // The first weapon model of the actor's slot; none for an empty weapon slot
 // or an actor slot past the weapon table (which the original read past).
-[[nodiscard]] const Actors_WeaponModel* LiveFirstWeapon(int actor_id,
-                                                        const char* operation) {
+[[nodiscard]] const VS::Actors::WeaponModel* LiveFirstWeapon(
+    int actor_id, const char* operation) {
   if (actor_id < 0 || static_cast<std::size_t>(actor_id) >= kWeaponSlots) {
     VS::Core::Warnf("actors", "%s refused: actor %d has no weapon slot",
                     operation, actor_id);
@@ -202,9 +201,9 @@ struct BoneLabelTable {
   return weaponModels[static_cast<std::size_t>(actor_id) * kWeaponsPerActor];
 }
 
-[[nodiscard]] const MATRIX* WeaponBoneMatrix(const Actors_WeaponModel& weapon,
-                                             int selector,
-                                             const char* operation) {
+[[nodiscard]] const MATRIX* WeaponBoneMatrix(
+    const VS::Actors::WeaponModel& weapon, int selector,
+    const char* operation) {
   const int bone = WeaponBoneIndex(selector);
   if (bone < 0 || bone >= kWeaponBoneCapacity) {
     VS::Core::Warnf(
@@ -214,7 +213,7 @@ struct BoneLabelTable {
         operation, static_cast<unsigned>(selector), kWeaponBoneCapacity);
     return nullptr;
   }
-  return &weapon.boneWorldMatrices[bone];
+  return &weapon.bone_world_matrices[bone];
 }
 
 [[nodiscard]] Core::Math::Angles3 ActorAngles(
@@ -236,13 +235,14 @@ struct BoneLabelTable {
     if (skeleton.gimmick == nullptr) return std::nullopt;
     bone = StoredBoneMatrix(skeleton, selector, operation);
   } else if (IsWeaponBoneSelector(selector)) {
-    const Actors_WeaponModel* weapon = LiveFirstWeapon(actor_id, operation);
+    const VS::Actors::WeaponModel* weapon =
+        LiveFirstWeapon(actor_id, operation);
     if (weapon == nullptr) return std::nullopt;
     bone = WeaponBoneMatrix(*weapon, selector, operation);
   } else if (selector == kRootSelector) {
     const Actors_ActorRecord& actor = *skeleton.actor;
     return RootSelectorTransform(ActorAngles(actor.instance),
-                                 VectorOf(actor.blendPose.boneKeys[kRootKey]),
+                                 VectorOf(actor.blendPose.bone_keys[kRootKey]),
                                  actor.scale,
                                  VectorOf(actor.instance.position));
   } else {
@@ -260,9 +260,10 @@ struct BoneLabelTable {
   if (skeleton.actor != nullptr) {
     if (selector == kRootSelector) return 0;
     if (IsWeaponBoneSelector(selector)) {
-      const Actors_WeaponModel* weapon = LiveFirstWeapon(actor_id, operation);
+      const VS::Actors::WeaponModel* weapon =
+          LiveFirstWeapon(actor_id, operation);
       if (weapon == nullptr) return std::nullopt;
-      return StoredBoneLength(Render::LiveModelBytes(weapon->sectionOffsets),
+      return StoredBoneLength(Render::LiveModelBytes(weapon->section_offsets),
                               WeaponBoneIndex(selector), operation);
     }
   }
@@ -470,7 +471,7 @@ int LiveActorBoneTag(int actor_id, int bone, int kind) {
                     kOperation, kind);
     return kSkeletonNoOwner;
   }
-  const std::optional<Actors_ShpBone> stored =
+  const std::optional<VS::Actors::ShpBone> stored =
       bone >= 0
           ? ReadBone(skeleton.ModelBytes(), static_cast<std::size_t>(bone))
           : std::nullopt;

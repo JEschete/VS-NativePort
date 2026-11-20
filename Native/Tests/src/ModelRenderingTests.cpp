@@ -14,7 +14,7 @@
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -747,11 +747,11 @@ TEST_CASE("A held gimmick whose holder slot is empty is not drawn",
 
 TEST_CASE("A weapon with more bones than its chain holds is not drawn",
           "[actors-appearance-rendering]") {
-  Actors_WeaponModel weapon{};
-  weapon.boneCount = 5;
-  weapon.reserved11 = 64;
-  weapon.reserved12 = 0;
-  weapon.reserved13 = 4;
+  VS::Actors::WeaponModel weapon{};
+  weapon.bone_count = 5;
+  weapon.blend_level = 64;
+  weapon.blend_target = 0;
+  weapon.blend_frames = 4;
   MATRIX source{};
   ChannelWarnings warnings("actors");
   actors::DrawLiveActorWeaponModel(&weapon, &source);
@@ -759,7 +759,7 @@ TEST_CASE("A weapon with more bones than its chain holds is not drawn",
         std::vector<std::string>{
             Refused("DrawActorWeaponModel", "the weapon has 5 bones")});
   // The fade did not step.
-  CHECK(weapon.reserved11 == 64);
-  CHECK(weapon.reserved13 == 4);
+  CHECK(weapon.blend_level == 64);
+  CHECK(weapon.blend_frames == 4);
 }
 }  // namespace

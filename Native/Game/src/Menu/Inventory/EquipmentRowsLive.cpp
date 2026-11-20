@@ -17,7 +17,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
@@ -240,7 +240,7 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
   return static_cast<AssetAddress>(reinterpret_cast<std::uintptr_t>(pointer));
 }
 
-[[nodiscard]] Actors_WeaponModel* WeaponModel(int slot) {
+[[nodiscard]] VS::Actors::WeaponModel* WeaponModel(int slot) {
   if (slot < 0 || slot >= VS::Actors::kWeaponModelCount) {
     return nullptr;
   }
@@ -305,8 +305,8 @@ class LiveModelHost final : public EquipmentModelHost {
                                        sizeof actor_->blendPose);
   }
   void ClearWeaponModelFlag(int slot) override {
-    if (Actors_WeaponModel* model = WeaponModel(slot)) {
-      model->reserved11 = 0;
+    if (VS::Actors::WeaponModel* model = WeaponModel(slot)) {
+      model->blend_level = 0;
     }
   }
 

@@ -4,7 +4,9 @@
 #include "Field/Camera.hpp"
 #include "Legacy/Psx.h"
 
-struct Actors_TileTarget;
+namespace VS::Actors {
+struct TileTarget;
+}
 
 // Live binding for the field camera (Camera.hpp) over the copied camera
 // globals (CameraLiveState.hpp) and the frame scratch camera: each entry loads
@@ -130,7 +132,7 @@ void LiveCheckFirstPersonViewExit();
 void LiveUpdateFirstPersonViewExit();
 // func_80074B14 (146C.c:5339).
 void LiveUpdateCameraTileConstraint(int actor_index,
-                                    const Actors_TileTarget* actor_tile);
+                                    const VS::Actors::TileTarget* actor_tile);
 // _isLookAtAtDestination (146C.c:6788).
 [[nodiscard]] int LiveIsCameraLookAtOnAshley();
 // func_80077EC4 (146C.c:6811).

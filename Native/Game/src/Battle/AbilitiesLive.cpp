@@ -10,13 +10,13 @@
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
+#include "Actors/ShpModel.hpp"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
@@ -333,7 +333,7 @@ void LiveAbilityHost::CopySelectionTargetToPrimary(int index) {
 }
 
 void LiveAbilityHost::FocusSelectionOnActor(int actor) {
-  Actors_ActorLocationQuery position{};
+  VS::Actors::ActorLocationQuery position{};
   VS::Actors::LiveActorPlacement(actor, &position);
   state_->selection.focusPosition.vx = position.location.position.vx;
   state_->selection.focusPosition.vz = position.location.position.vz;
@@ -525,7 +525,7 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
       static_cast<unsigned>(record->animationId),
       static_cast<unsigned>(record->instance.actionAnimationState),
       static_cast<unsigned>(record->instance.currentAnimation),
-      static_cast<unsigned>(record->pose.holdingLastFrame),
+      static_cast<unsigned>(record->pose.holding_last_frame),
       static_cast<int>(state.abilityTimer),
       static_cast<unsigned>(state.abilityWindow),
       static_cast<unsigned>(VS::Effects::effectBusyFlags),

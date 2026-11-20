@@ -134,8 +134,8 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   Actors_actorRecords[15] = &fixture->record;
   fixture->record.instance.slot = 15;
-  fixture->record.pose.holdingLastFrame = -1;
-  fixture->record.pose.reachedEnd = -1;
+  fixture->record.pose.holding_last_frame = -1;
+  fixture->record.pose.reached_end = -1;
   fixture->state.queueIndex = 0xFFFFFFFF;
   fixture->state.queue[3].primaryTarget.target.targetActor = 15;
   VS::Content::legacyActorAssetRequests[0].asset_kind = 0;

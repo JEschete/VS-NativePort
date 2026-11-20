@@ -23,12 +23,12 @@
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/BattleActorState.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
@@ -36,9 +36,9 @@
 #include "Actors/Shadow.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/TextureAnimationRecords.hpp"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -146,8 +146,8 @@ void LoadRecordFlags(const Actors_ActorRecord& live, ActorStateRecord& record) {
   record.bypass_actor_collision = live.bypassActorCollision != 0;
   record.palette_fade_active = live.paletteFadeActive != 0;
   record.palette_fade_reverse = live.paletteFadeReverse != 0;
-  record.holding_last_frame = live.pose.holdingLastFrame != 0;
-  record.pose_reached_end = live.pose.reachedEnd != 0;
+  record.holding_last_frame = live.pose.holding_last_frame != 0;
+  record.pose_reached_end = live.pose.reached_end != 0;
   record.texture_timelines = {live.textureAnimationSlots[0].timeline,
                               live.textureAnimationSlots[1].timeline};
 }
@@ -366,7 +366,7 @@ class Synced {
   Host& host_;
 };
 
-Actors_WeaponModel* LiveWeaponModel(int index) {
+VS::Actors::WeaponModel* LiveWeaponModel(int index) {
   if (index < 0 || index >= kWeaponModelCount) return nullptr;
   return weaponModels[index];
 }
@@ -423,19 +423,19 @@ class LiveActorStateHost final : public ActorStateHost {
   }
 
   std::optional<bool> WeaponModelShown(int index) override {
-    const Actors_WeaponModel* model = LiveWeaponModel(index);
+    const VS::Actors::WeaponModel* model = LiveWeaponModel(index);
     if (model == nullptr) return std::nullopt;
-    return model->reserved08Bit4 != 0;
+    return model->shown != 0;
   }
   void SetWeaponModelShown(int index, bool shown) override {
-    if (Actors_WeaponModel* model = LiveWeaponModel(index)) {
-      model->reserved08Bit4 = Bit(shown);
+    if (VS::Actors::WeaponModel* model = LiveWeaponModel(index)) {
+      model->shown = Bit(shown);
     }
   }
 
   bool SharedBankHasTexturePages() override {
-    return Actors_sharedSequenceBankTexturePages
-               [Actors_sharedSequenceBankIndex] != 0;
+    return VS::Actors::sharedSequenceBankTexturePages
+               [VS::Actors::sharedSequenceBankIndex] != 0;
   }
   void ResetHeadTrackingSpeed(int id) override {
     Actors_ActorRecord* record = LiveActorRecord(id, operation_);
@@ -596,15 +596,15 @@ bool IsModelSlot(int actor_id, const char* operation) {
 }
 
 void WritePlacement(const ActorPlacementView& view,
-                    Actors_ActorLocation& placement) {
-  placement.packedTile.target.tileX = view.tile.x;
-  placement.packedTile.target.tileLayer = view.tile.layer;
-  placement.packedTile.target.tileZ = view.tile.z;
-  placement.packedTile.target.facing = view.tile.spare;
+                    VS::Actors::ActorLocation& placement) {
+  placement.packed_tile.target.tile_x = view.tile.x;
+  placement.packed_tile.target.tile_layer = view.tile.layer;
+  placement.packed_tile.target.tile_z = view.tile.z;
+  placement.packed_tile.target.facing = view.tile.spare;
   placement.position = LiveSvector(view.position);
 }
 
-int WriteLivePlacement(int actor_id, Actors_ActorLocation* placement_out) {
+int WriteLivePlacement(int actor_id, VS::Actors::ActorLocation* placement_out) {
   if (placement_out == nullptr) {
     WarnActorRefused("ActorPlacement", "no placement output");
     return -1;
@@ -764,11 +764,12 @@ std::optional<ActorPlacementView> LiveActorPlacementView(int actor_id) {
   return ActorPlacement(host, actor_id);
 }
 
-int LiveActorPlacement(int actor_id, Actors_ActorLocation* placement_out) {
+int LiveActorPlacement(int actor_id, VS::Actors::ActorLocation* placement_out) {
   return WriteLivePlacement(actor_id, placement_out);
 }
 
-int LiveActorPlacement(int actor_id, Actors_ActorLocationQuery* placement_out) {
+int LiveActorPlacement(int actor_id,
+                       VS::Actors::ActorLocationQuery* placement_out) {
   return WriteLivePlacement(
       actor_id, placement_out != nullptr ? &placement_out->location : nullptr);
 }
@@ -812,7 +813,7 @@ void SeparateLiveActorFlightPlacement(int actor_id, SVECTOR* position) {
 }
 
 void LiveActorSavedPlacement(int actor_id, int movement_class,
-                             Actors_ActorLocationQuery* placement_out) {
+                             VS::Actors::ActorLocationQuery* placement_out) {
   if (placement_out == nullptr) {
     WarnActorRefused("ActorSavedPlacement", "no placement output");
     return;
@@ -823,10 +824,10 @@ void LiveActorSavedPlacement(int actor_id, int movement_class,
     tile = ActorSavedPlacement(host, actor_id, movement_class);
   }
   if (!tile.has_value()) return;
-  Actors_TileTarget& target = placement_out->location.packedTile.target;
-  target.tileX = tile->x;
-  target.tileLayer = tile->layer;
-  target.tileZ = tile->z;
+  VS::Actors::TileTarget& target = placement_out->location.packed_tile.target;
+  target.tile_x = tile->x;
+  target.tile_layer = tile->layer;
+  target.tile_z = tile->z;
   target.facing = tile->spare;
 }
 

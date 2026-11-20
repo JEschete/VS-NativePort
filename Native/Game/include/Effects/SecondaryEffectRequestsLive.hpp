@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Actors_ActorLocation;
+namespace VS::Actors {
+struct ActorLocation;
+}
 struct Battle_HitResult;
 
 // Live binding for the secondary hit and spatial effect requests
@@ -23,7 +25,7 @@ int LiveQueueActionImpactEffects(int attacker_index);
 // func_8006F450 (146C.c:3171): the x and z of an SVECTOR's halfwords 0 and 2.
 void LiveSpawnGroundPlaneImpactEffect(std::uint16_t* world_position_components);
 // func_8006F4B0 (146C.c:3187).
-void LiveSpawnTrapTileEffect(Actors_ActorLocation* actor_location);
+void LiveSpawnTrapTileEffect(VS::Actors::ActorLocation* actor_location);
 // func_8006F848 (146C.c:3298).
 void LiveSpawnAbilityLearnedEffect();
 }  // namespace VS::Effects

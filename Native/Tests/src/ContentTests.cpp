@@ -20,7 +20,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Audio/Seq/Sequencer.hpp"
@@ -1249,17 +1249,18 @@ struct ActorAssetState {
       std::to_array(Actors_actorRecords);
   decltype(VS::Content::legacyActorAssetRequests) saved_requests =
       VS::Content::legacyActorAssetRequests;
-  decltype(std::to_array(Actors_sharedSequenceData)) saved_banks =
-      std::to_array(Actors_sharedSequenceData);
+  decltype(VS::Actors::sharedSequenceData) saved_banks =
+      VS::Actors::sharedSequenceData;
   std::array<unsigned char, 3> saved_pages{};
   std::array<Actors_ActorRecord, 4> records{};
   VS::Content::SequenceBuffer sequence{};
 
   ActorAssetState() {
-    std::copy_n(Actors_sharedSequenceBankTexturePages, saved_pages.size(),
-                saved_pages.begin());
-    std::fill_n(Actors_sharedSequenceBankTexturePages, saved_pages.size(), 0);
-    std::fill_n(Actors_sharedSequenceData, saved_banks.size(), nullptr);
+    std::copy_n(VS::Actors::sharedSequenceBankTexturePages.begin(),
+                saved_pages.size(), saved_pages.begin());
+    std::fill_n(VS::Actors::sharedSequenceBankTexturePages.begin(),
+                saved_pages.size(), 0);
+    VS::Actors::sharedSequenceData.fill(nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     VS::Content::legacyActorAssetRequests.fill({});
     for (std::size_t index = 0; index < records.size(); ++index) {
@@ -1271,10 +1272,9 @@ struct ActorAssetState {
   ~ActorAssetState() {
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
     VS::Content::legacyActorAssetRequests = saved_requests;
-    std::copy(saved_banks.begin(), saved_banks.end(),
-              Actors_sharedSequenceData);
+    VS::Actors::sharedSequenceData = saved_banks;
     std::copy(saved_pages.begin(), saved_pages.end(),
-              Actors_sharedSequenceBankTexturePages);
+              VS::Actors::sharedSequenceBankTexturePages.begin());
   }
 };
 

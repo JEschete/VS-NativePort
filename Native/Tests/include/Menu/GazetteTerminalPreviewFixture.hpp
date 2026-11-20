@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
@@ -55,19 +55,19 @@ inline auto PreviewOwners() {
                     BytesOf(Actors_actorRecords),
                     BytesOf(VS::Actors::weaponModels),
                     BytesOf(Field_gimmickInstances),
-                    BytesOf(Actors_primarySequenceBuffer),
-                    BytesOf(Actors_sequenceWorkBuffer),
-                    BytesOf(Actors_forcedModelOverrides),
+                    BytesOf(VS::Actors::primarySequenceBuffer),
+                    BytesOf(VS::Actors::sequenceWorkBuffer),
+                    BytesOf(VS::Actors::forcedModelOverrides),
                     BytesOf(VS::Content::legacyWeaponModelBuffers),
                     BytesOf(VS::Render::legacyActorTextureSlots),
                     BytesOf(VS::Render::legacyWeaponTextureSlots),
-                    BytesOf(Actors_sharedSequenceBankTexturePages),
-                    BytesOf(Actors_sharedSequenceData),
-                    BytesOf(Actors_sharedSequenceAnimationIds),
-                    BytesOf(Actors_sharedSequenceEntryParams),
-                    BytesOf(Actors_sharedSequenceAnimationData),
-                    BytesOf(Actors_sharedSequenceBankIndex),
-                    BytesOf(Actors_lastResolvedSequenceIndex),
+                    BytesOf(VS::Actors::sharedSequenceBankTexturePages),
+                    BytesOf(VS::Actors::sharedSequenceData),
+                    BytesOf(VS::Actors::sharedSequenceAnimationIds),
+                    BytesOf(VS::Actors::sharedSequenceEntryParams),
+                    BytesOf(VS::Actors::sharedSequenceAnimationData),
+                    BytesOf(VS::Actors::sharedSequenceBankIndex),
+                    BytesOf(VS::Actors::lastResolvedSequenceIndex),
                     BytesOf(VS::Actors::roomActorScale),
                     BytesOf(Actors_pushedGimmickIndex),
                     BytesOf(Actors_isActorUpdateComplete),
@@ -146,11 +146,11 @@ class PreviewFixture : public TerminalFixture {
     }
     ImportTable(VS::Actors::textureSlotOrigins);
     ImportTable(VS::Actors::textureSlotRowOffsets);
-    ImportTable(Actors_sheathedWeaponAnimationBases);
-    ImportTable(Actors_drawnWeaponAnimationBases);
-    ImportTable(Actors_animationEventLengths);
-    ImportTable(Actors_animationEventPoints);
-    ImportTable(Actors_sharedSequenceIdsByKind);
+    ImportTable(VS::Actors::sheathedWeaponAnimationBases);
+    ImportTable(VS::Actors::drawnWeaponAnimationBases);
+    ImportTable(VS::Actors::animationEventLengths);
+    ImportTable(VS::Actors::animationEventPoints);
+    ImportTable(VS::Actors::sharedSequenceIdsByKind);
     VS::Actors::InitializeLiveActorModelResources();
     score::ResetLiveEnemyPreview();
   }
@@ -171,7 +171,7 @@ class PreviewFixture : public TerminalFixture {
     static_cast<void>(content::ReleaseLiveActorModel(0));
     for (void* allocation :
          {source_record_, static_cast<void*>(source_file_),
-          Actors_primarySequenceBuffer, Actors_sequenceWorkBuffer,
+          VS::Actors::primarySequenceBuffer, VS::Actors::sequenceWorkBuffer,
           static_cast<void*>(VS::Content::legacyWeaponModelBuffers[0]),
           static_cast<void*>(VS::Content::legacyWeaponModelBuffers[1])}) {
       if (allocation != nullptr && memory::LivePayloadCapacity(allocation)) {

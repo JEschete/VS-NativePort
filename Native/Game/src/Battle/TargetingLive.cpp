@@ -20,7 +20,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -568,7 +568,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   [[nodiscard]] std::optional<TargetPoint> ActorPlacement(
       int slot) const override {
-    Actors_ActorLocation location{};
+    VS::Actors::ActorLocation location{};
     if (VS::Actors::LiveActorPlacement(slot, &location) < 0) {
       return std::nullopt;
     }

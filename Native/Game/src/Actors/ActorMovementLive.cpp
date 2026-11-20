@@ -13,7 +13,7 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
@@ -450,7 +450,7 @@ MovementActor LoadLiveMovementActor(const Actors_ActorRecord& live) {
   actor.ledge_height = live.ledgeHeight;
   actor.platform_offset_x = live.platformOffsetX;
   actor.platform_offset_z = live.platformOffsetZ;
-  actor.pose_reached_end = live.pose.reachedEnd != 0;
+  actor.pose_reached_end = live.pose.reached_end != 0;
   actor.platform_anchor = LiveMotionVector(live.platformAnchor);
   actor.companion_slot = live.companionSlot;
   actor.ledge_attempts = live.opaque17FF;

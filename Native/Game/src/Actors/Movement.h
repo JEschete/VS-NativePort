@@ -44,11 +44,11 @@ struct Actors_AirborneTickAccumulator {
 static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTickAccumulator must keep its PS1 layout");
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.hpp"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
+#include "Actors/ShpModel.hpp"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Render/Palette.hpp"
 
 extern u_char Actors_kJumpHangFrames[3204];

@@ -10,7 +10,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSound.hpp"
 #include "Audio/SeqRecordsLive.hpp"
@@ -69,9 +69,10 @@ static_assert(offsetof(Actors_ModelInstance, currentTileLayer) ==
 static_assert(offsetof(Actors_ModelInstance, currentTileZ) ==
               offsetof(Actors_ModelInstance, currentTileX) + 2);
 static_assert(sizeof(SVECTOR) == kPositionVectorBytes);
-static_assert(offsetof(Actors_ShpModel, soundSection) ==
-              sizeof(Actors_ShpModel::header));
-static_assert(sizeof(Actors_ShpModel::soundSection) == kSoundSectionBytes);
+static_assert(offsetof(VS::Actors::ShpModel, sound_section) ==
+              sizeof(VS::Actors::ShpModel::header));
+static_assert(sizeof(VS::Actors::ShpModel::sound_section) ==
+              kSoundSectionBytes);
 static_assert(offsetof(Field_GimmickInstance, positionX) ==
               kGimmickPositionOffset);
 static_assert(offsetof(Field_GimmickInstance, positionY) ==
@@ -103,11 +104,11 @@ void Report(const char* operation, ActorSoundStatus status) {
   }
 }
 
-// The SHP's sound section (VS_ONDISC(model, soundSection, void*)).
-BankBuffer SoundBank(const Actors_ShpModel* shp) {
+// The SHP's sound section (VS_ONDISC(model, sound_section, void*)).
+BankBuffer SoundBank(const VS::Actors::ShpModel* shp) {
   if (shp == nullptr) return BankBuffer::kNone;
   return LiveBankBuffer(reinterpret_cast<const std::byte*>(shp) +
-                        shp->soundSection);
+                        shp->sound_section);
 }
 
 ActorModelSound ModelSound(const Actors_ModelInstance& instance) {

@@ -7,7 +7,9 @@
 
 struct Actors_ActorRecord;
 struct Actors_FallDirection;
-struct Actors_TileTarget;
+namespace VS::Actors {
+struct TileTarget;
+}
 struct SVECTOR;
 
 // Binding from the actor table and the original arguments to the typed actor
@@ -50,7 +52,8 @@ void ClearLiveActorMovementRequest(Actors_ActorRecord* actor);
 int LiveActorJumpAnimationProfile(Actors_ActorRecord* actor);
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void MoveLiveActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target,
+void MoveLiveActorToTileAtRate(int actor_id,
+                               VS::Actors::TileTarget* tile_target,
                                int move_steps_per_tile,
                                int turn_steps_per_revolution);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
@@ -58,9 +61,10 @@ void MoveLiveActorToPositionAtRate(int actor_id, SVECTOR* target,
                                    int move_steps_per_tile,
                                    int turn_steps_per_revolution);
 void TranslateLiveActorToTileAtRate(int actor_id,
-                                    Actors_TileTarget* tile_target,
+                                    VS::Actors::TileTarget* tile_target,
                                     int move_steps_per_tile);
-void TurnLiveActorTowardTileAtRate(int actor_id, Actors_TileTarget* tile_target,
+void TurnLiveActorTowardTileAtRate(int actor_id,
+                                   VS::Actors::TileTarget* tile_target,
                                    int turn_steps_per_revolution);
 void TranslateLiveActorByAtRate(int actor_id, SVECTOR* translation,
                                 int move_steps_per_tile);
@@ -75,19 +79,21 @@ void RotateLiveActorByAtRate(int actor_id, SVECTOR* rotation_delta,
 void RotateLiveActorToAtRate(int actor_id, SVECTOR* target_rotation,
                              int turn_steps_per_revolution);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void MoveLiveActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target,
+void MoveLiveActorToTileOverTime(int actor_id,
+                                 VS::Actors::TileTarget* tile_target,
                                  int move_steps, int turn_steps);
 void TranslateLiveActorToTileOverTime(int actor_id,
-                                      Actors_TileTarget* tile_target,
+                                      VS::Actors::TileTarget* tile_target,
                                       int move_steps);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void SetLiveActorTileTranslation(int actor_id, Actors_TileTarget* tile_target,
+void SetLiveActorTileTranslation(int actor_id,
+                                 VS::Actors::TileTarget* tile_target,
                                  int move_steps, int move_steps_per_tile);
 void TurnLiveActorTowardTileOverTime(int actor_id,
-                                     Actors_TileTarget* tile_target,
+                                     VS::Actors::TileTarget* tile_target,
                                      int turn_steps);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
-void SetLiveActorTileTurn(int actor_id, Actors_TileTarget* tile_target,
+void SetLiveActorTileTurn(int actor_id, VS::Actors::TileTarget* tile_target,
                           int turn_steps, int turn_steps_per_revolution);
 void SetLiveActorMotion(int actor_id, SVECTOR* translation, int move_steps);
 void TranslateLiveActorToOverTime(int actor_id, SVECTOR* target_position,

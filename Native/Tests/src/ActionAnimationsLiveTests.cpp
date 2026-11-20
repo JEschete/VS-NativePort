@@ -11,10 +11,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -29,18 +29,18 @@ constexpr int kSlot = 16;
 constexpr int kAbility = 17;
 
 struct Model {
-  Actors_ShpModel header{};
-  Actors_ShpBone bone{};
+  VS::Actors::ShpModel header{};
+  VS::Actors::ShpBone bone{};
 };
 
 struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
   MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
-  void* saved_work_bank = Actors_sequenceWorkBuffer;
+  void* saved_work_bank = VS::Actors::sequenceWorkBuffer;
   int saved_side = Battle_chainAbilityAnimationSide;
   char saved_pitch = Battle_specialActionPitch;
-  char saved_clip = Actors_lastResolvedSequenceIndex;
+  char saved_clip = VS::Actors::lastResolvedSequenceIndex;
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_ActionState action{};
   u_char saved_group = Battle_chainAbilityAnimationGroups[kAbility];
@@ -73,15 +73,15 @@ struct LiveFixture {
     actor.ownedSequence = Bank();
     actor.sharedSequences[3] = Bank();
     auto* bank = Bank();
-    bank->animationMap = 1024;
-    bank->animationData = 1536;
+    bank->animation_map = 1024;
+    bank->animation_data = 1536;
     bank->headers[0] = 24;
     bank->headers[1] = 0xFF;
-    auto* motion = reinterpret_cast<u_char*>(bank) + bank->animationData;
+    auto* motion = reinterpret_cast<u_char*>(bank) + bank->animation_data;
     const std::array<u_char, 6> rotation{0, 16, 0, 32, 0, 48};
     std::ranges::copy(rotation, motion);
     a::RegisterSequenceBank(bank, sizeof(sequence));
-    Actors_sequenceWorkBuffer = bank;
+    VS::Actors::sequenceWorkBuffer = bank;
     VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
       VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
@@ -99,19 +99,19 @@ struct LiveFixture {
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
     VS::Actors::boneMatrixScratch = saved_bone_camera;
-    Actors_sequenceWorkBuffer = saved_work_bank;
-    Actors_lastResolvedSequenceIndex = saved_clip;
+    VS::Actors::sequenceWorkBuffer = saved_work_bank;
+    VS::Actors::lastResolvedSequenceIndex = saved_clip;
     Battle_chainAbilityAnimationGroups[kAbility] = saved_group;
     Battle_chainAbilityAnimationSide = saved_side;
     Battle_specialActionPitch = saved_pitch;
     Battle_actionState = saved_action;
   }
-  Actors_SeqAnimationBank* Bank() {
-    return reinterpret_cast<Actors_SeqAnimationBank*>(sequence.data());
+  VS::Actors::SeqAnimationBank* Bank() {
+    return reinterpret_cast<VS::Actors::SeqAnimationBank*>(sequence.data());
   }
   void Missing(int index) {
     auto* bytes = reinterpret_cast<u_char*>(sequence.data());
-    bytes[Bank()->animationMap + index] = 0xFF;
+    bytes[Bank()->animation_map + index] = 0xFF;
   }
 };
 
@@ -171,7 +171,7 @@ TEST_CASE(
   CHECK(actor.instance.turnFrames == 20);
   CHECK(actor.headTracking.pad == 20);
   CHECK(actor.blendFrames == 12);
-  CHECK(actor.pose.boneKeys[0].vx == 32);
+  CHECK(actor.pose.bone_keys[0].vx == 32);
   CHECK(actor.animationLength == 24);
 }
 
@@ -222,7 +222,7 @@ TEST_CASE("F00823 actual missing bank-map entry selects the initial fallback",
   CHECK(fixture->actor.animationId == 0x57);
   CHECK(fixture->actor.instance.facingDelta == -1024);
   CHECK(fixture->actor.instance.turnFrames == 10);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
   CHECK(fixture->actor.headTracking.pad == 30);
 }
 
@@ -235,7 +235,7 @@ TEST_CASE("F00823 drawn phase one queries the real battle bank without turning",
   CHECK(fixture->actor.animationId == 0x59 + 100);
   CHECK(fixture->actor.instance.facingDelta == 333);
   CHECK(fixture->actor.instance.turnFrames == 777);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
   CHECK(fixture->actor.animationLength == 24);
 }
 
@@ -252,7 +252,7 @@ TEST_CASE(
   CHECK(fixture->actor.instance.facingDelta == -1024);
   CHECK(fixture->actor.instance.turnFrames == 10);
   CHECK(fixture->actor.headTracking.pad == 71);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 
 TEST_CASE(
@@ -267,7 +267,7 @@ TEST_CASE(
   CHECK(fixture->actor.instance.turnFrames == 20);
   CHECK(fixture->actor.instance.facingDelta == 0);
   CHECK(fixture->actor.headTracking.pad == 30);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 
 TEST_CASE(
@@ -282,7 +282,7 @@ TEST_CASE(
   CHECK(fixture->actor.instance.turnFrames == 777);
   CHECK(fixture->actor.instance.facingDelta == 333);
   CHECK(fixture->actor.headTracking.pad == 71);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 
 TEST_CASE(
@@ -298,7 +298,7 @@ TEST_CASE(
   CHECK(fixture->actor.instance.turnFrames == 20);
   CHECK(fixture->actor.headTracking.pad == 20);
   CHECK(Battle_specialActionPitch == 2);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 
 TEST_CASE("F00834 actual special playback precedes real FE queue fields",
@@ -310,7 +310,7 @@ TEST_CASE("F00834 actual special playback precedes real FE queue fields",
   CHECK(fixture->actor.queuedParameterA == 8);
   CHECK(fixture->actor.queuedParameterB == 0);
   CHECK(fixture->actor.headTracking.pad == 71);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
 }
 
 TEST_CASE("F00834 production mode zero never queues the available FE clip",
@@ -347,20 +347,20 @@ TEST_CASE(
   auto& actor = fixture->actor;
   std::ranges::fill(std::as_writable_bytes(std::span(&actor.pose, 1)),
                     std::byte{0x5A});
-  actor.pose.eventScript = nullptr;
-  actor.pose.nextEventFrame = 0;
-  actor.pose.eventWait = 0;
+  actor.pose.event_script = nullptr;
+  actor.pose.next_event_frame = 0;
+  actor.pose.event_wait = 0;
   actor.pose.frame = 0;
-  actor.pose.holdingLastFrame = 0;
-  actor.pose.reachedEnd = 0;
-  using PoseBytes = std::array<std::byte, sizeof(Actors_AnimationPose)>;
+  actor.pose.holding_last_frame = 0;
+  actor.pose.reached_end = 0;
+  using PoseBytes = std::array<std::byte, sizeof(VS::Actors::AnimationPose)>;
   b::SetLiveEnemyCombatPose(kSlot, 1);
   CHECK(actor.animationId == 0xC6);
-  CHECK(actor.pose.boneKeys[0].vx == 32);
+  CHECK(actor.pose.bone_keys[0].vx == 32);
   CHECK(std::bit_cast<PoseBytes>(actor.blendPose) ==
         std::bit_cast<PoseBytes>(actor.pose));
-  CHECK(actor.pose.reserved54C == 0x5A5A5A5A);
-  CHECK(actor.pose.reserved2A0[41].pad == 0);
+  CHECK(actor.pose.reserved54c == 0x5A5A5A5A);
+  CHECK(actor.pose.rotation_deltas[41].pad == 0);
 }
 
 TEST_CASE("F00819 real missing finish header falls back to the idle clip",
@@ -370,7 +370,7 @@ TEST_CASE("F00819 real missing finish header falls back to the idle clip",
   fixture->Missing(0xC7 - 100);
   b::SetLiveEnemyCombatPose(kSlot, 3);
   CHECK(fixture->actor.animationId == 6);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
   CHECK(fixture->actor.blendFrames == 16);
   CHECK(fixture->actor.instance.turnFrames == 777);
 }
@@ -383,7 +383,7 @@ TEST_CASE(
   SVECTOR point{1024, 0, 0, 77};
   b::PlayLiveDefenseAbilityAnimation(kSlot, &point, 0x10000);
   CHECK(fixture->actor.animationId == 0x50 + 100);
-  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.pose.bone_keys[0].vx == 32);
   CHECK(fixture->actor.instance.turnFrames == 4);
   CHECK(fixture->actor.headTracking.pad == 30);
   CHECK(fixture->actor.instance.jumpCountdown == 99);
@@ -404,7 +404,7 @@ TEST_CASE(
   CHECK(actor.instance.turnFrames == 2);
   CHECK(actor.turnRate == 99);
   CHECK(actor.animationId == 0xC9);
-  CHECK(actor.pose.boneKeys[0].vx == 32);
+  CHECK(actor.pose.bone_keys[0].vx == 32);
   CHECK(actor.instance.poseState == 6);
   CHECK(actor.instance.wasDrawn == 1);
   CHECK(actor.instance.reactionState == 13);

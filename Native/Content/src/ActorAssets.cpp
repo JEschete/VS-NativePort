@@ -59,7 +59,7 @@ constexpr std::size_t kUvPairBytes = 2;
 // The model header word holding the polygon and sound section offsets.
 constexpr std::size_t kPolygonSectionAt = 0x3C;
 constexpr std::size_t kSoundSectionAt = 0x30;
-// sizeof(Actors_ShpModel): the header before the bones.
+// sizeof(VS::Actors::ShpModel): the header before the bones.
 constexpr std::int32_t kShpModelHeaderBytes = 0x40;
 constexpr std::size_t kShpBoneBytes = 16;
 constexpr std::size_t kShpBoneTagAt = 8;

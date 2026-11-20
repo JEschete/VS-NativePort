@@ -22,7 +22,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCreation.hpp"
@@ -584,10 +584,11 @@ constexpr std::int16_t kOne = 4096;
 
 // An SHP model header and two bones; bone 1 carries auxiliary tag 2.
 struct CreationTestModel {
-  Actors_ShpModel header{};
-  std::array<Actors_ShpBone, 2> bones{};
+  VS::Actors::ShpModel header{};
+  std::array<VS::Actors::ShpBone, 2> bones{};
 };
-static_assert(offsetof(CreationTestModel, bones) == sizeof(Actors_ShpModel));
+static_assert(offsetof(CreationTestModel, bones) ==
+              sizeof(VS::Actors::ShpModel));
 
 // The battle actor, actor record and AI tables a live creation uses, saved
 // and restored around one test, with a private heap.
@@ -624,7 +625,7 @@ struct LiveCreationFixture {
     VS::Battle::Ai::tileFlagMap = flags;
     VS::Battle::Ai::roomHasWaypoints = nullptr;
     VS::Battle::Ai::attributeActorMask = 0;
-    model.bones[1].auxiliaryTag = 2;
+    model.bones[1].auxiliary_tag = 2;
     VS::Render::RecordLiveModelExtent(&model, sizeof model);
   }
   LiveCreationFixture(const LiveCreationFixture&) = delete;

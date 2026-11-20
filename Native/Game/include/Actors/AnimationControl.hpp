@@ -23,7 +23,8 @@ enum class SequenceHandle : std::uintptr_t { kNone = 0 };
 // A position in an animation event script or none.
 enum class EventScriptHandle : std::uintptr_t { kNone = 0 };
 
-// A pose's event cursor (Actors_AnimationPose eventScript, nextEventFrame).
+// A pose's event cursor (VS::Actors::AnimationPose event_script,
+// next_event_frame).
 struct PoseEventCursor {
   EventScriptHandle script = EventScriptHandle::kNone;
   std::uint16_t next_event_frame = 0;

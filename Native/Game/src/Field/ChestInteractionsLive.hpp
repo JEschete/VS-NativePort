@@ -5,8 +5,12 @@
 #include "Items/ItemRecords.hpp"
 
 struct Field_MpdLockTrigger;
-struct Actors_ActorLocation;
-struct Actors_ActorLocationQuery;
+namespace VS::Actors {
+struct ActorLocation;
+}
+namespace VS::Actors {
+struct ActorLocationQuery;
+}
 struct Actors_ActorRecord;
 struct SVECTOR;
 
@@ -24,18 +28,18 @@ void SetEntranceDoorRecordEntry(char (*record)[kEntranceRecordBytes]);
 void FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);
 int CheckAshleyTileTriggersEntry(int actor, unsigned char* location);
 int CheckActorTrapAndFallTriggersEntry(int actor,
-                                       Actors_ActorLocation* location);
+                                       VS::Actors::ActorLocation* location);
 Field_MpdLockTrigger* FindFacingRoomObjectEntry(int actor);
 VS::Items::TreasureChest* FindFacingUnlootedChestEntry(int actor);
 int TryTriggerFacingTileEventEntry(int actor);
-int TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
+int TileInFrontOfActorEntry(VS::Actors::ActorLocationQuery* actor,
                             unsigned char* output);
 int WaitForChestCameraFocusEntry();
 int StepTrapCameraFocusEntry();
 int IsChestAnimationReadyEntry();
 int TrackInteractionCameraToAshleyEntry();
 void TriggerActorTrapEntry(Field_MpdLockTrigger* address,
-                           Actors_ActorLocationQuery* location, int actor);
+                           VS::Actors::ActorLocationQuery* location, int actor);
 void BeginObjectInteractionWaitEntry();
 void EndObjectInteractionWaitEntry();
 int InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address);
@@ -47,7 +51,7 @@ int UpdateChestContentsSelectionEntry();
 void DispatchTrapOrChestInteractionEntry();
 void FinishTrapInteractionEntry();
 void BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
-                               Actors_ActorLocation* location, int actor);
+                               VS::Actors::ActorLocation* location, int actor);
 std::uint8_t LiveCurrentSavePointId();
 bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record);
 void SetLiveEntranceDoor(const std::optional<DoorRecord>& door);

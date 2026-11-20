@@ -17,7 +17,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
@@ -82,11 +82,11 @@ const char* RefusalText(event::ScriptActorRefusal refusal) {
   return "an unknown request";
 }
 
-Actors_TileTarget ToLiveTile(PackedTile tile) {
-  Actors_TileTarget live{};
-  live.tileX = tile.x;
-  live.tileLayer = tile.layer;
-  live.tileZ = tile.z;
+VS::Actors::TileTarget ToLiveTile(PackedTile tile) {
+  VS::Actors::TileTarget live{};
+  live.tile_x = tile.x;
+  live.tile_layer = tile.layer;
+  live.tile_z = tile.z;
   live.facing = tile.spare;
   return live;
 }
@@ -144,7 +144,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   }
   void MoveToTile(int actor, PackedTile tile, int move_rate,
                   int turn_rate) override {
-    Actors_TileTarget live = ToLiveTile(tile);
+    VS::Actors::TileTarget live = ToLiveTile(tile);
     VS::Actors::MoveLiveActorToTileAtRate(actor, &live, move_rate, turn_rate);
   }
   void MoveToPosition(int actor, const MotionVector& target, int move_rate,
@@ -154,7 +154,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
                                               turn_rate);
   }
   void TranslateToTile(int actor, PackedTile tile, int move_rate) override {
-    Actors_TileTarget live = ToLiveTile(tile);
+    VS::Actors::TileTarget live = ToLiveTile(tile);
     VS::Actors::TranslateLiveActorToTileAtRate(actor, &live, move_rate);
   }
   void TranslateTo(int actor, const MotionVector& target,
@@ -169,7 +169,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     VS::Actors::TurnLiveActorToAtRate(actor, yaw, turn_rate);
   }
   void TurnTowardTile(int actor, PackedTile tile, int turn_rate) override {
-    Actors_TileTarget live = ToLiveTile(tile);
+    VS::Actors::TileTarget live = ToLiveTile(tile);
     VS::Actors::TurnLiveActorTowardTileAtRate(actor, &live, turn_rate);
   }
   void RotateBy(int actor, const MotionVector& delta, int turn_rate) override {

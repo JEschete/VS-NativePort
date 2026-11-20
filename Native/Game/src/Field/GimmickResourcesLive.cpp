@@ -8,7 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -136,7 +136,7 @@ bool CreateModel(Field_GimmickInstance& record, std::uint8_t kind,
   std::memcpy(&header, source.data(), sizeof(header));
   std::memcpy(&record.boneCount, &header.instanceFlags, kTemplateFlagBytes);
   record.reserved4 = header.instanceWord4;
-  if (header.modelDataSize < static_cast<int>(sizeof(Actors_ShpModel)) ||
+  if (header.modelDataSize < static_cast<int>(sizeof(VS::Actors::ShpModel)) ||
       header.recolorCount < 0 ||
       static_cast<std::size_t>(header.modelDataSize) >
           source.size() - sizeof(header)) {
@@ -144,15 +144,15 @@ bool CreateModel(Field_GimmickInstance& record, std::uint8_t kind,
   }
   auto* const geometry = const_cast<std::byte*>(source.data() + sizeof(header));
   record.model =
-      static_cast<Actors_ShpModel*>(VS::Content::CopyLiveModelGeometry(
+      static_cast<VS::Actors::ShpModel*>(VS::Content::CopyLiveModelGeometry(
           nullptr, geometry, header.modelDataSize));
   if (record.model == nullptr) return false;
   const auto model_bytes = static_cast<std::size_t>(header.modelDataSize);
   VS::Render::RecordLiveModelExtent(record.model, model_bytes);
-  if (record.model->polygonSection > model_bytes) return false;
+  if (record.model->polygon_section > model_bytes) return false;
   const auto polygons =
       std::span{reinterpret_cast<std::byte*>(record.model), model_bytes}
-          .subspan(record.model->polygonSection);
+          .subspan(record.model->polygon_section);
   const auto uv = static_cast<std::size_t>(uv_kind) * kUvPairBytes;
   if (uv + 1 >= std::size(Field_gimmickPaletteParameters)) return false;
   return VS::Content::OffsetModelTextureCoordinates(

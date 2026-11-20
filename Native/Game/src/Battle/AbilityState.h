@@ -2,7 +2,7 @@
 #pragma once
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Actor.h"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"

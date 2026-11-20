@@ -2,9 +2,9 @@
 #include "Field/Gimmicks.h"
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"

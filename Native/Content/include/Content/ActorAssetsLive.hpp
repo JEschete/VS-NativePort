@@ -8,7 +8,9 @@
 
 #include "Content/ActorAssets.hpp"
 
-struct Actors_WeaponModelData;
+namespace VS::Actors {
+struct WeaponModelData;
+}
 struct Content_DiscFile;
 struct Content_DiscQueueSlot;
 
@@ -186,7 +188,7 @@ inline constexpr std::size_t kMaterialModels = 4;
 inline constexpr std::size_t kWeaponModelBuffers = 84;
 
 using Requests = std::array<LegacyActorAssetRequest, kActorAssetRequestCount>;
-using WeaponModels = std::array<Actors_WeaponModelData*, kWeaponModelBuffers>;
+using WeaponModels = std::array<Actors::WeaponModelData*, kWeaponModelBuffers>;
 using ShpOffsets = std::array<std::uint16_t, kShpOffsets>;
 using ShpSectors = std::array<std::uint8_t, kShpSectors>;
 using SequenceOffsets = std::array<std::uint16_t, kSequenceOffsets>;

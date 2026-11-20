@@ -14,7 +14,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -426,11 +426,12 @@ void CheckTrapTileTarget(const VS::Effects::LiveActionEffectTarget& target) {
 TEST_CASE("Trap tile producer initializes copied actor endpoint and busy gate",
           "[trap-tile-initialization][effects]") {
   TrapTileProducerScope fixture;
-  Actors_ActorLocation location{};
-  location.packedTile.target = {
-      .tileX = 2, .tileLayer = 0, .tileZ = 3, .facing = 0};
+  VS::Actors::ActorLocation location{};
+  location.packed_tile.target = {
+      .tile_x = 2, .tile_layer = 0, .tile_z = 3, .facing = 0};
   location.position.vy = -12;
-  using LocationBytes = std::array<std::byte, sizeof(Actors_ActorLocation)>;
+  using LocationBytes =
+      std::array<std::byte, sizeof(VS::Actors::ActorLocation)>;
   const auto before = std::bit_cast<LocationBytes>(location);
   VS::Effects::LiveSpawnTrapTileEffect(&location);
   CheckTrapTileRequestHeader(VS::Effects::secondaryRequest);

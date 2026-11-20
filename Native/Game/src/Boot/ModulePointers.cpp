@@ -2,16 +2,16 @@
 #include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/TextureAnimation.h"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/Control/SoundControl.hpp"
 #include "Audio/Cutscene/Stream.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
@@ -390,7 +390,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8640u, 32u, (void*)&Battle_lockedLabelPieces, sizeof Battle_lockedLabelPieces, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8660u, 512u, (void*)&VS::Content::legacyShpDiscOffsets, sizeof VS::Content::legacyShpDiscOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8860u, 256u, (void*)&VS::Content::legacyShpSectorCounts, sizeof VS::Content::legacyShpSectorCounts, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8960u, 256u, (void*)&Actors_sharedSequenceIdsByKind, sizeof Actors_sharedSequenceIdsByKind, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8960u, 256u, (void*)&VS::Actors::sharedSequenceIdsByKind, sizeof VS::Actors::sharedSequenceIdsByKind, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8A60u, 224u, (void*)&VS::Content::legacySequenceDiscOffsets, sizeof VS::Content::legacySequenceDiscOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8B40u, 112u, (void*)&VS::Content::legacySequenceSectorCounts, sizeof VS::Content::legacySequenceSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8BB0u, 224u, (void*)&VS::Content::legacyEtmDiscOffsets, sizeof VS::Content::legacyEtmDiscOffsets, 1u, 1u},
@@ -401,25 +401,25 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8EA8u, 84u, (void*)&VS::Content::legacyMaterialModelSequenceDiscOffsets, sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8EFCu, 44u, (void*)&VS::Content::legacyMaterialModelSequenceSectorCounts, sizeof VS::Content::legacyMaterialModelSequenceSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F28u, 4u, (void*)&VS::Content::objectDataLoadStep, sizeof VS::Content::objectDataLoadStep, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&Actors_sharedSequenceBankIndex, sizeof Actors_sharedSequenceBankIndex, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&VS::Actors::sharedSequenceBankIndex, sizeof VS::Actors::sharedSequenceBankIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)VS::Actors::textureSlotOrigins.data(), sizeof VS::Actors::textureSlotOrigins, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)VS::Actors::textureSlotRowOffsets.data(), sizeof VS::Actors::textureSlotRowOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FA8u, 12u, (void*)&Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates, 4u, sizeof Field_gimmickModelTemplates[0]},
-    {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&VS::Actors::forcedModelOverrides, sizeof VS::Actors::forcedModelOverrides, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC4u, 4u, (void*)&VS::Content::assetQueuePeakUsage, sizeof VS::Content::assetQueuePeakUsage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC8u, 8u, (void*)&VS::Items::weaponMaterialPaletteIndices, sizeof VS::Items::weaponMaterialPaletteIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FD0u, 96u, (void*)&Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9030u, 96u, (void*)&Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9090u, 12u, (void*)&Actors_drawnWeaponAnimationBases, sizeof Actors_drawnWeaponAnimationBases, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E909Cu, 12u, (void*)&Actors_sheathedWeaponAnimationBases, sizeof Actors_sheathedWeaponAnimationBases, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9090u, 12u, (void*)&VS::Actors::drawnWeaponAnimationBases, sizeof VS::Actors::drawnWeaponAnimationBases, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E909Cu, 12u, (void*)&VS::Actors::sheathedWeaponAnimationBases, sizeof VS::Actors::sheathedWeaponAnimationBases, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90A8u, 4u, (void*)&Field_interactingGimmickId, sizeof Field_interactingGimmickId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90ACu, 8u, (void*)&Actors_kJumpHangFrames, sizeof Actors_kJumpHangFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90B4u, 8u, (void*)&Actors_kJumpHeightAdjustments, sizeof Actors_kJumpHeightAdjustments, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90C4u, 4u, (void*)&Actors_kMotionResultOneAnimationId, sizeof Actors_kMotionResultOneAnimationId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90CCu, 4u, (void*)&Actors_kSlowQuadrantMoveAnimations, sizeof Actors_kSlowQuadrantMoveAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90D0u, 156u, (void*)&Actors_kFastQuadrantMoveAnimations, sizeof Actors_kFastQuadrantMoveAnimations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E916Cu, 48u, (void*)&Actors_secondarySlotSequences, sizeof Actors_secondarySlotSequences, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E916Cu, 48u, (void*)&VS::Actors::secondarySlotSequences, sizeof VS::Actors::secondarySlotSequences, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E919Cu, 8u, (void*)&Field_gimmickTemplateIndices, sizeof Field_gimmickTemplateIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91A4u, 8u, (void*)&VS::Audio::objectSurfaceSoundIds, sizeof VS::Audio::objectSurfaceSoundIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91ACu, 16u, (void*)&Field_kGimmickSpinHeightSteps, sizeof Field_kGimmickSpinHeightSteps, 1u, 1u},
@@ -437,13 +437,13 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E9258u, 16u, (void*)&Field_kGimmickSquashScaleY, sizeof Field_kGimmickSquashScaleY, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9268u, 16u, (void*)&Field_kGimmickSquashScaleZ, sizeof Field_kGimmickSquashScaleZ, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9278u, 32u, (void*)&VS::Field::tileSurfaceIds, sizeof VS::Field::tileSurfaceIds, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9298u, 68u, (void*)&Actors_animationEventLengths, sizeof Actors_animationEventLengths, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E92DCu, 12u, (void*)&Actors_drawnWeaponSoundIds, sizeof Actors_drawnWeaponSoundIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9298u, 68u, (void*)&VS::Actors::animationEventLengths, sizeof VS::Actors::animationEventLengths, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E92DCu, 12u, (void*)&VS::Actors::drawnWeaponSoundIds, sizeof VS::Actors::drawnWeaponSoundIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92E8u, 8u, (void*)&Actors_kAirTimerEndAnimations, sizeof Actors_kAirTimerEndAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92F0u, 8u, (void*)&Actors_kSoftLandingAnimations, sizeof Actors_kSoftLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92F8u, 8u, (void*)&Actors_kHardLandingAnimations, sizeof Actors_kHardLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9300u, 8u, (void*)&Actors_kLandingRecoveryAnimations, sizeof Actors_kLandingRecoveryAnimations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9A28u, 64u, (void*)&Actors_animationEventPoints, sizeof Actors_animationEventPoints, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9A28u, 64u, (void*)&VS::Actors::animationEventPoints, sizeof VS::Actors::animationEventPoints, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B4Cu, 12u, (void*)&VS::Event::weaponDrawStates, sizeof VS::Event::weaponDrawStates, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B58u, 4u, (void*)&VS::Event::animationBankBases, sizeof VS::Event::animationBankBases, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B5Cu, 132u, (void*)&VS::Event::specialSubroutineScript, sizeof VS::Event::specialSubroutineScript, 1u, 1u},
@@ -644,13 +644,13 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F2300u, 8u, (void*)&VS::Content::legacyEtmFileLocation, sizeof VS::Content::legacyEtmFileLocation, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F2308u, 4u, (void*)&VS::Content::legacyEtmDiscRequest, sizeof VS::Content::legacyEtmDiscRequest, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2310u, 320u, (void*)&VS::Content::legacyActorAssetRequests, sizeof VS::Content::legacyActorAssetRequests, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F2450u, 8u, (void*)&Actors_sharedSequenceBankTexturePages, sizeof Actors_sharedSequenceBankTexturePages, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F2450u, 8u, (void*)&VS::Actors::sharedSequenceBankTexturePages, sizeof VS::Actors::sharedSequenceBankTexturePages, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&VS::Actors::modelRenderContext, sizeof VS::Actors::modelRenderContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&VS::Actors::skeletonPose, sizeof VS::Actors::skeletonPose, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C78u, 32u, (void*)&VS::Actors::skeletonRootMatrix, sizeof VS::Actors::skeletonRootMatrix, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&VS::Actors::roomActorScale, sizeof VS::Actors::roomActorScale, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4448u, 224u, (void*)&Field_gimmickPaletteColors, sizeof Field_gimmickPaletteColors, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4528u, 16u, (void*)&Actors_sharedSequenceData, sizeof Actors_sharedSequenceData, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4528u, 16u, (void*)&VS::Actors::sharedSequenceData, sizeof VS::Actors::sharedSequenceData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4538u, 68u, (void*)&Actors_actorRecords, sizeof Actors_actorRecords, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F457Cu, 4u, (void*)&VS::Content::lastLoadPhaseSnapshot, sizeof VS::Content::lastLoadPhaseSnapshot, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4580u, 4u, (void*)&VS::Content::assetQueueFrameTicks, sizeof VS::Content::assetQueueFrameTicks, 0u, 0u},
@@ -660,16 +660,16 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F45D8u, 4u, (void*)&VS::Content::lastAssetRequestType, sizeof VS::Content::lastAssetRequestType, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F45E0u, 64u, (void*)&Field_gimmickInstances, sizeof Field_gimmickInstances, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4620u, 4u, (void*)&VS::Content::legacyWeaponModelBuffers, sizeof VS::Content::legacyWeaponModelBuffers, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4628u, 128u, (void*)&Actors_sharedSequenceAnimationIds, sizeof Actors_sharedSequenceAnimationIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4628u, 128u, (void*)&VS::Actors::sharedSequenceAnimationIds, sizeof VS::Actors::sharedSequenceAnimationIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F46A8u, 192u, (void*)&VS::Render::legacyActorTextureSlots, sizeof VS::Render::legacyActorTextureSlots, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4768u, 4u, (void*)&Actors_sequenceWorkBuffer, sizeof Actors_sequenceWorkBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4768u, 4u, (void*)&VS::Actors::sequenceWorkBuffer, sizeof VS::Actors::sequenceWorkBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4770u, 160u, (void*)&VS::Render::legacyWeaponTextureSlots, sizeof VS::Render::legacyWeaponTextureSlots, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4810u, 256u, (void*)&Actors_sharedSequenceAnimationData, sizeof Actors_sharedSequenceAnimationData, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4930u, 4u, (void*)&Actors_primarySequenceBuffer, sizeof Actors_primarySequenceBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4938u, 128u, (void*)&Actors_sharedSequenceEntryParams, sizeof Actors_sharedSequenceEntryParams, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4810u, 256u, (void*)&VS::Actors::sharedSequenceAnimationData, sizeof VS::Actors::sharedSequenceAnimationData, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4930u, 4u, (void*)&VS::Actors::primarySequenceBuffer, sizeof VS::Actors::primarySequenceBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4938u, 128u, (void*)&VS::Actors::sharedSequenceEntryParams, sizeof VS::Actors::sharedSequenceEntryParams, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49B8u, 32u, (void*)&VS::Actors::boneMatrixScratch, sizeof VS::Actors::boneMatrixScratch, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F49D8u, 4u, (void*)&Battle_chainAbilityAnimationSide, sizeof Battle_chainAbilityAnimationSide, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F49DCu, 4u, (void*)&Actors_lastResolvedSequenceIndex, sizeof Actors_lastResolvedSequenceIndex, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F49DCu, 4u, (void*)&VS::Actors::lastResolvedSequenceIndex, sizeof VS::Actors::lastResolvedSequenceIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49E4u, 4u, (void*)&Battle_specialActionPitch, sizeof Battle_specialActionPitch, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49E8u, 4u, (void*)&Field_gimmickInteractionDirection, sizeof Field_gimmickInteractionDirection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49F4u, 4u, (void*)&Actors_supportingPlatformLayer, sizeof Actors_supportingPlatformLayer, 1u, 1u},

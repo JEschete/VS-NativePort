@@ -16,7 +16,7 @@
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.h"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -313,37 +313,37 @@ TEST_CASE("Live weapon requests bind the actor's weapon records",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   state.AddActor(3);
-  Actors_WeaponModel weapon{};
-  Actors_WeaponModel shield{};
-  weapon.attachmentBone = 1;
-  weapon.reserved08Bit4 = 1;
-  weapon.reserved11 = 9;
-  weapon.reserved13 = 4;
+  VS::Actors::WeaponModel weapon{};
+  VS::Actors::WeaponModel shield{};
+  weapon.attachment_bone = 1;
+  weapon.shown = 1;
+  weapon.blend_level = 9;
+  weapon.blend_frames = 4;
   VS::Actors::weaponModels[6] = &weapon;
   VS::Actors::weaponModels[7] = &shield;
-  shield.reserved11 = 33;
+  shield.blend_level = 33;
 
   actors::ResetLiveActorWeaponVisibilityBlend(3);
-  CHECK(weapon.reserved11 == actors::kWeaponBlendShown);
-  CHECK(weapon.reserved12 == actors::kWeaponBlendShown);
-  CHECK(weapon.reserved13 == 0);
-  CHECK(shield.reserved11 == 33);
+  CHECK(weapon.blend_level == actors::kWeaponBlendShown);
+  CHECK(weapon.blend_target == actors::kWeaponBlendShown);
+  CHECK(weapon.blend_frames == 0);
+  CHECK(shield.blend_level == 33);
 }
 
 TEST_CASE("Live weapon brightness keeps the low flag bit and level byte",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   state.AddActor(3);
-  Actors_WeaponModel weapon{};
-  weapon.reserved08Bit4 = 1;
+  VS::Actors::WeaponModel weapon{};
+  weapon.shown = 1;
   VS::Actors::weaponModels[6] = &weapon;
   actors::SetLiveWeaponBrightnessOverride(3, 3, 0x1FF);
-  CHECK(weapon.reserved08Bit6 == 1);
-  CHECK(weapon.reserved5C0 == 0xFF);
-  CHECK(weapon.reserved08Bit4 == 1);
+  CHECK(weapon.brightness_override == 1);
+  CHECK(weapon.brightness == 0xFF);
+  CHECK(weapon.shown == 1);
   actors::SetLiveWeaponBrightnessOverride(3, 2, 7);
-  CHECK(weapon.reserved08Bit6 == 0);
-  CHECK(weapon.reserved5C0 == 7);
+  CHECK(weapon.brightness_override == 0);
+  CHECK(weapon.brightness == 7);
 }
 
 TEST_CASE("Live palette fade and shadow blend bind the actor record",

@@ -18,7 +18,7 @@
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -37,7 +37,7 @@ static_assert(kEnemyPreviewActorSlot < std::size(Actors_actorRecords));
 // The model buffer's parts (592C.c:197-199, 229-253): the enemy's record,
 // then a companion record or the weapon and shield models.
 constexpr std::size_t kRecordBytes = sizeof(Actors_ActorRecord);
-constexpr std::size_t kWeaponBytes = sizeof(Actors_WeaponModel);
+constexpr std::size_t kWeaponBytes = sizeof(VS::Actors::WeaponModel);
 constexpr std::size_t kAttachmentOffset = kRecordBytes;
 constexpr std::size_t kShieldOffset = kRecordBytes + kWeaponBytes;
 constexpr std::size_t kCompanionBufferBytes = 2 * kRecordBytes;
@@ -84,7 +84,7 @@ T* Pointer(AssetAddress address) {
       return sizeof(Actors_ActorRecord);
     case EnemyPreviewPart::kWeapon:
     case EnemyPreviewPart::kShield:
-      return sizeof(Actors_WeaponModel);
+      return sizeof(VS::Actors::WeaponModel);
   }
   return 0;
 }

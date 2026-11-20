@@ -2,7 +2,7 @@
 #pragma once
 #include "Legacy/Psx.h"
 
-struct Actors_ShpModel;
+namespace VS::Actors { struct ShpModel; }
 struct Field_GimmickAnimationJob;
 struct Field_GimmickInstance;
 struct Field_GimmickObjectInfo;
@@ -12,7 +12,7 @@ struct Field_GimmickTemplate;
 struct Field_MpdLockTrigger;
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.hpp"
 #include "Render/Palette.hpp"
@@ -118,7 +118,7 @@ struct Field_GimmickInstance {
     char reserved5F;
     int savedTile;
     Actors_ModelEffectSlot palettePulse;
-    Actors_ShpModel* model;
+    VS::Actors::ShpModel* model;
     MATRIX matrices[5];
     SVECTOR rotationOffset;
     u_char reserved114[0x18];
@@ -206,8 +206,8 @@ struct Field_GimmickInstance {
     VS::Render::ColorCode reserved6F8;
     int reserved6FC;
     int reserved700;
-    Actors_AnimationPose reserved704;
-    Actors_AnimationPose reservedC54;
+    VS::Actors::AnimationPose reserved704;
+    VS::Actors::AnimationPose reservedC54;
     u_char reserved11A4[0x280];
     u_short basePaletteRows[0xA0];
     u_short transitionPalette[0xA0];

@@ -12,7 +12,7 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
@@ -451,7 +451,7 @@ class LiveGimmickInteractionStartHost final
   bool TurnToward(std::int32_t actor_slot,
                   const VS::Actors::PackedTile& tile) override {
     if (!ValidActor(actor_slot)) return false;
-    Actors_TileTarget target{tile.x, tile.layer, tile.z, tile.spare};
+    VS::Actors::TileTarget target{tile.x, tile.layer, tile.z, tile.spare};
     VS::Actors::TurnLiveActorTowardTileOverTime(actor_slot, &target,
                                                 kGimmickInteractionFrames);
     return Valid();

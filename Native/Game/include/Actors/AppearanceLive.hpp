@@ -5,7 +5,9 @@
 #include "Legacy/Psx.h"
 
 struct Actors_ActorRecord;
-struct Actors_WeaponModel;
+namespace VS::Actors {
+struct WeaponModel;
+}
 namespace VS::Render {
 struct ColorCode;
 }  // namespace VS::Render
@@ -18,9 +20,9 @@ struct ColorCode;
 namespace VS::Actors {
 // The weapon state the appearance requests use, and its store.
 [[nodiscard]] WeaponAppearance LoadLiveWeaponAppearance(
-    const Actors_WeaponModel& weapon);
+    const VS::Actors::WeaponModel& weapon);
 void StoreLiveWeaponAppearance(const WeaponAppearance& appearance,
-                               Actors_WeaponModel& weapon);
+                               VS::Actors::WeaponModel& weapon);
 
 void SetLiveActorPaletteFade(int actor_id, int fade_parameter);
 void ResetLiveActorWeaponVisibilityBlend(int actor_id);

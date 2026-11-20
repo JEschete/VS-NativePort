@@ -4,7 +4,7 @@
 
 struct Actors_ModelEffectSlot;
 struct Actors_ModelInstance;
-struct Actors_ShpModel;
+namespace VS::Actors { struct ShpModel; }
 
 #include "Render/Palette.hpp"
 
@@ -85,5 +85,5 @@ struct Actors_ModelInstance {
     u_char previousTileZ;
     u_char reserved63;
     Actors_ModelEffectSlot palettePulse;
-    Actors_ShpModel* model;
+    VS::Actors::ShpModel* model;
 };

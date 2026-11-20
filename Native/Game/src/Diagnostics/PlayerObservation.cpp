@@ -14,7 +14,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
@@ -599,7 +599,7 @@ EncounterNavigationState InspectNavigation() {
           cells * sizeof(Field_MpdTileCell)) {
     throw std::runtime_error("invalid runtime navigation storage");
   }
-  Actors_ActorLocationQuery placement{};
+  VS::Actors::ActorLocationQuery placement{};
   VS::Actors::LiveActorPlacement(0, &placement);
   constexpr std::size_t kFacingTileBytes = 4;
   std::array<u_char, kFacingTileBytes> facing{};

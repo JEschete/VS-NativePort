@@ -11,7 +11,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
@@ -28,8 +28,8 @@
 namespace {
 namespace b = VS::Battle;
 struct Model {
-  Actors_ShpModel header{};
-  std::array<Actors_ShpBone, 2> bones{};
+  VS::Actors::ShpModel header{};
+  std::array<VS::Actors::ShpBone, 2> bones{};
 };
 struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
@@ -50,7 +50,7 @@ struct LiveFixture {
   LiveFixture() {
     std::ranges::fill(Actors_actorRecords, nullptr);
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
-    model.bones[1].limbIds = 0x02;
+    model.bones[1].limb_ids = 0x02;
     actor.instance.model = &model.header;
     actor.instance.boneCount = 2;
     actor.modelDataSize = sizeof(model);

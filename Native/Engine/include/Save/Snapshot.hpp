@@ -32,7 +32,7 @@ using EntryDoor = std::array<std::byte, kEntryDoorBytes>;
 // VS::State::learnedActionFlags: action 8n+k is bit 7-k of byte n.
 using LearnedActions = std::array<std::uint8_t, kLearnedActionBytes>;
 
-// Actors_TileTarget: where Ashley stands.
+// VS::Actors::TileTarget: where Ashley stands.
 struct TilePlacement {
   std::uint8_t tile_x = 0;
   std::uint8_t tile_layer = 0;

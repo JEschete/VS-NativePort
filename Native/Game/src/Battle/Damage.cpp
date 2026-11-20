@@ -3,7 +3,7 @@
 
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"

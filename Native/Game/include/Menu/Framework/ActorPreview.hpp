@@ -68,13 +68,13 @@ struct PreviewActor {
   friend bool operator==(const PreviewActor&, const PreviewActor&) = default;
 };
 
-// The weapon model fields the preview reads (Actors_WeaponModel).
+// The weapon model fields the preview reads (VS::Actors::WeaponModel).
 struct PreviewWeapon {
   std::uint8_t model_id = 0;
   std::uint8_t attachment_slot = 0;
   std::uint8_t material = 0;
   std::uint8_t attachment_bone = 0;
-  // reserved08Bit4: the model draws with its owner.
+  // shown: the model draws with its owner.
   bool attached = false;
 
   friend bool operator==(const PreviewWeapon&, const PreviewWeapon&) = default;

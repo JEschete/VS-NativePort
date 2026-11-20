@@ -17,7 +17,7 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
@@ -292,15 +292,16 @@ void DrawLive(PolygonKind kind, const ModelCounts& counts,
   }
 }
 
-[[nodiscard]] ModelOverrides WeaponOverrides(const Actors_WeaponModel& weapon) {
+[[nodiscard]] ModelOverrides WeaponOverrides(
+    const VS::Actors::WeaponModel& weapon) {
   // Original 3A1A0.h places unk20[2].m[0][2] at byte 0x64; the low byte of
   // that matrix element is the pulse mask.
   return {static_cast<std::uint32_t>(
               static_cast<std::uint16_t>(
-                  weapon.boneWorldMatrices[kWeaponPaletteMatrix]
+                  weapon.bone_world_matrices[kWeaponPaletteMatrix]
                       .m[0][kWeaponPaletteColumn]) &
               UINT8_MAX),
-          weapon.ownerMotionState};
+          weapon.owner_motion_state};
 }
 
 [[nodiscard]] ModelOverrides GimmickOverrides(
@@ -457,22 +458,22 @@ void DrawLiveGimmickGouraudPolygonsWithOverrides(
            GimmickOverrides(object));
 }
 
-bool ProjectLiveWeaponModel(const Actors_WeaponModel& weapon) {
+bool ProjectLiveWeaponModel(const VS::Actors::WeaponModel& weapon) {
   return ProjectLive(CountsOf(weapon),
-                     RecordedModelBytes(weapon.sectionOffsets),
-                     weapon.boneWorldMatrices);
+                     RecordedModelBytes(weapon.section_offsets),
+                     weapon.bone_world_matrices);
 }
 
-void DrawLiveWeaponFlatPolygons(const Actors_WeaponModel& weapon,
+void DrawLiveWeaponFlatPolygons(const VS::Actors::WeaponModel& weapon,
                                 const CVECTOR& tint) {
   DrawLive(PolygonKind::kFlat, CountsOf(weapon),
-           LiveModelBytes(weapon.sectionOffsets), TintOf(tint), {});
+           LiveModelBytes(weapon.section_offsets), TintOf(tint), {});
 }
 
-void DrawLiveWeaponFlatPolygonsWithOverrides(const Actors_WeaponModel& weapon,
-                                             const CVECTOR& tint) {
+void DrawLiveWeaponFlatPolygonsWithOverrides(
+    const VS::Actors::WeaponModel& weapon, const CVECTOR& tint) {
   DrawLive(PolygonKind::kFlatOverrides, CountsOf(weapon),
-           LiveModelBytes(weapon.sectionOffsets), TintOf(tint),
+           LiveModelBytes(weapon.section_offsets), TintOf(tint),
            WeaponOverrides(weapon));
 }
 }  // namespace VS::Render

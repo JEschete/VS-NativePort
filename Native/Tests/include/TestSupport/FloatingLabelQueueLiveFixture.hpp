@@ -10,7 +10,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
@@ -94,10 +94,12 @@ class Producers {
  public:
   Actors_ActorRecord actor{};
   Producers() {
-    Actors_ShpBone bone{};
+    VS::Actors::ShpBone bone{};
     bone.length = 64;
-    std::memcpy(model_.data() + sizeof(Actors_ShpModel), &bone, sizeof bone);
-    actor.instance.model = reinterpret_cast<Actors_ShpModel*>(model_.data());
+    std::memcpy(model_.data() + sizeof(VS::Actors::ShpModel), &bone,
+                sizeof bone);
+    actor.instance.model =
+        reinterpret_cast<VS::Actors::ShpModel*>(model_.data());
     actor.instance.boneCount = 1;
     actor.modelDataSize = static_cast<unsigned>(model_.size());
     actor.instance.position = {32, -64, 96, 0};
@@ -146,7 +148,8 @@ class Producers {
   decltype(VS::Input::settings) saved_settings_ = VS::Input::settings;
   decltype(VS::Field::areRoomUpdatesPaused) saved_pause_ =
       VS::Field::areRoomUpdatesPaused;
-  alignas(Actors_ShpModel) std::array<
-      std::byte, sizeof(Actors_ShpModel) + sizeof(Actors_ShpBone)> model_{};
+  alignas(VS::Actors::ShpModel)
+      std::array<std::byte, sizeof(VS::Actors::ShpModel) +
+                                sizeof(VS::Actors::ShpBone)> model_{};
 };
 }  // namespace VS::test_support::live_floating_labels

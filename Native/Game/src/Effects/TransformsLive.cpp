@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"

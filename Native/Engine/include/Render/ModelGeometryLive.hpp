@@ -8,7 +8,9 @@
 #include "Render/ModelGeometry.hpp"
 
 struct Actors_ActorRecord;
-struct Actors_WeaponModel;
+namespace VS::Actors {
+struct WeaponModel;
+}
 struct Field_GimmickInstance;
 
 // Live binding for the SHP model packets (ModelGeometry.cpp): the GTE, the
@@ -61,9 +63,10 @@ void DrawLiveGimmickGouraudPolygons(const Field_GimmickInstance& object);
 void DrawLiveGimmickGouraudPolygonsWithOverrides(
     const Field_GimmickInstance& object);
 
-[[nodiscard]] bool ProjectLiveWeaponModel(const Actors_WeaponModel& weapon);
-void DrawLiveWeaponFlatPolygons(const Actors_WeaponModel& weapon,
+[[nodiscard]] bool ProjectLiveWeaponModel(
+    const VS::Actors::WeaponModel& weapon);
+void DrawLiveWeaponFlatPolygons(const VS::Actors::WeaponModel& weapon,
                                 const CVECTOR& tint);
-void DrawLiveWeaponFlatPolygonsWithOverrides(const Actors_WeaponModel& weapon,
-                                             const CVECTOR& tint);
+void DrawLiveWeaponFlatPolygonsWithOverrides(
+    const VS::Actors::WeaponModel& weapon, const CVECTOR& tint);
 }  // namespace VS::Render

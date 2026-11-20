@@ -19,7 +19,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/CharacterInit.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/Spawning.hpp"
@@ -728,7 +728,7 @@ class LiveEntrance : public Host {
 
   // decomp: BATTLE.PRG func_80089888 (146C.c:15184-15188)
   void SettleAshley() override {
-    Actors_ActorLocationQuery location{};
+    VS::Actors::ActorLocationQuery location{};
     static_cast<void>(Actors::LiveActorPlacement(0, &location));
     Actors::RestoreLiveActorIdlePose(0);
     Actors::BuildLiveActorPoseAtMatrix(0, &Scratch().view_matrix);
@@ -1126,7 +1126,7 @@ class LiveRoomLoadHost final
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15437-15449)
   void FrameCameraOnAshley() override {
-    Actors_ActorLocationQuery ashley{};
+    VS::Actors::ActorLocationQuery ashley{};
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
     const SVECTOR& feet = ashley.location.position;
     const VECTOR target{.vx = feet.vx * ONE,
@@ -1140,7 +1140,7 @@ class LiveRoomLoadHost final
     scratch.camera.angles.vy = sphericalCamera.values.yaw;
     LiveSetCameraPositionFromAngles(&sphericalCamera.values);
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
-    LiveUpdateCameraTileConstraint(0, &ashley.location.packedTile.target);
+    LiveUpdateCameraTileConstraint(0, &ashley.location.packed_tile.target);
     Render::ResetLiveFramebufferEffect();
     Render::CommitLiveClutRows();
     Render::ConfigureLiveFieldDisplay(kFieldFrameWidth, kFieldFrameHeight,

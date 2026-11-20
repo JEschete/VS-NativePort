@@ -26,7 +26,7 @@ constexpr DoorField kEntryTileX = {.offset = 4, .shift = 8, .width = 5};
 constexpr DoorField kEntryElevation = {.offset = 4, .shift = 13, .width = 2};
 constexpr DoorField kRequiredFlagId = {.offset = 6, .shift = 0, .width = 10};
 constexpr DoorField kEntryTileZ = {.offset = 6, .shift = 10, .width = 5};
-// Actors_TileTarget.facing keeps the elevation in its top two bits.
+// VS::Actors::TileTarget.facing keeps the elevation in its top two bits.
 constexpr unsigned kFacingElevationShift = 6;
 
 void SetDoorField(EntryDoor& door, DoorField field, unsigned value) {

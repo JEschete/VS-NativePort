@@ -6,8 +6,12 @@
 
 #include "Actors/ActorPlacement.hpp"
 
-struct Actors_ActorLocation;
-struct Actors_ActorLocationQuery;
+namespace VS::Actors {
+struct ActorLocation;
+}
+namespace VS::Actors {
+struct ActorLocationQuery;
+}
 struct Battle_Actor;
 namespace VS::Render {
 struct ColorCode;
@@ -93,8 +97,9 @@ std::uint32_t LiveActorStateFlags(int actor_id);
 // The original call shape: writes the packed tile and the position, with the
 // facing in the position's pad; -1 (nothing written) for a slot with neither
 // an actor nor a gimmick, else 0. The query overload leaves actorIndex.
-int LiveActorPlacement(int actor_id, Actors_ActorLocation* placement_out);
-int LiveActorPlacement(int actor_id, Actors_ActorLocationQuery* placement_out);
+int LiveActorPlacement(int actor_id, VS::Actors::ActorLocation* placement_out);
+int LiveActorPlacement(int actor_id,
+                       VS::Actors::ActorLocationQuery* placement_out);
 // decomp: BATTLE.PRG func_800A30A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:274)
 // `placement` is the tile, its layer and the facing in sixteenths.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
@@ -110,7 +115,7 @@ void SeparateLiveActorFlightPlacement(int actor_id, SVECTOR* position);
 // Writes only the packed tile, and only for an actor with a record.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveActorSavedPlacement(int actor_id, int movement_class,
-                             Actors_ActorLocationQuery* placement_out);
+                             VS::Actors::ActorLocationQuery* placement_out);
 // decomp: BATTLE.PRG func_800A3760 (src/BATTLE/BATTLE.PRG/3A1A0.c:460)
 // The nearest actor's slot, or -1.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

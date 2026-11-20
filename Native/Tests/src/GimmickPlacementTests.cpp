@@ -17,7 +17,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/AbilityState.h"
@@ -376,7 +376,7 @@ TEST_CASE(
   void* model = VS::Core::Memory::AllocateLiveFromLowEnd(128);
   REQUIRE(model != nullptr);
   auto& record = fixture.instances[0];
-  record.model = static_cast<Actors_ShpModel*>(model);
+  record.model = static_cast<VS::Actors::ShpModel*>(model);
   record.mode = 248;
   record.objectInfo.supportIndex = 40;
   Field_gimmickInstances[5] = nullptr;
@@ -430,7 +430,7 @@ TEST_CASE(
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   void* model = VS::Core::Memory::AllocateLiveFromLowEnd(128);
   REQUIRE(model != nullptr);
-  fixture.instances[0].model = static_cast<Actors_ShpModel*>(model);
+  fixture.instances[0].model = static_cast<VS::Actors::ShpModel*>(model);
   Field_gimmickInstances[5] = nullptr;
   VS::Render::RecordLiveModelExtent(model, 128);
   REQUIRE(VS::Field::ReleaseLiveGimmickInstance(1) == 0);
@@ -448,7 +448,7 @@ TEST_CASE(
   void* model = VS::Core::Memory::AllocateLiveFromLowEnd(128);
   REQUIRE(model != nullptr);
   fixture.instances[0].model = fixture.instances[1].model =
-      static_cast<Actors_ShpModel*>(model);
+      static_cast<VS::Actors::ShpModel*>(model);
   fixture.instances[1].boneCount = 1;
   VS::Render::RecordLiveModelExtent(model, 128);
   REQUIRE(VS::Field::ReleaseLiveGimmickInstance(1) == 0);
@@ -1701,7 +1701,7 @@ struct ChestTargetFixture {
   Field_RoomRecord saved = Field_roomData;
   std::uint32_t control_mode = VS::Field::controlMode;
   decltype(Battle_actionFlowMode) action_flow = Battle_actionFlowMode;
-  Actors_ActorLocationQuery actor_query =
+  VS::Actors::ActorLocationQuery actor_query =
       VS::Field::interactionFocus.actor_query;
   AnimationQueueFixture queue;
   std::array<VS::Items::TreasureChest, 1> chests{};
@@ -2314,10 +2314,10 @@ TEST_CASE("Facing tile preserves original byte wrapping at room boundaries",
 
 TEST_CASE("Facing tile entry preserves X layer Z and untouched fourth byte",
           "[facing-tile-live][field]") {
-  Actors_ActorLocationQuery actor{};
-  actor.location.packedTile.target.tileX = 17;
-  actor.location.packedTile.target.tileZ = 23;
-  actor.location.packedTile.target.tileLayer = 2;
+  VS::Actors::ActorLocationQuery actor{};
+  actor.location.packed_tile.target.tile_x = 17;
+  actor.location.packed_tile.target.tile_z = 23;
+  actor.location.packed_tile.target.tile_layer = 2;
   actor.location.position.pad = 1024;
   std::array<std::uint8_t, 4> output{0xA1, 0xA2, 0xA3, 0xA4};
   CHECK(VS::Field::TileInFrontOfActorEntry(&actor, output.data()) == 1);
@@ -2664,8 +2664,8 @@ TEST_CASE("Scripted fall producer initializes the complete transition door",
   REQUIRE(VS::Field::LiveRoomFallDestination() ==
           static_cast<int>(destination_zone) * 65536 + 3);
   REQUIRE(VS::Field::LiveCollisionCellOrAbsent(1, 1, 0)->isPit == 1);
-  Actors_ActorLocation location{};
-  location.packedTile.word =
+  VS::Actors::ActorLocation location{};
+  location.packed_tile.word =
       std::bit_cast<std::int32_t>(std::uint32_t{0xC0010001});
   location.position.vy = 17;
   CHECK(VS::Field::CheckAshleyTileTriggersEntry(
@@ -2825,7 +2825,7 @@ TEST_CASE("Actor disabled tile trigger refuses before actor cache access",
 TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",
           "[actor-tile-trigger-live][field]") {
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, nullptr) == 0);
-  Actors_ActorLocation location{};
+  VS::Actors::ActorLocation location{};
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(-1, &location) == 0);
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(17, &location) == 0);
   const auto symbols = VS::Content::ModuleSymbols();
@@ -2839,12 +2839,12 @@ TEST_CASE("Actor native tile trigger stores packed location and computed mode",
           "[actor-tile-trigger-live][field]") {
   ActorTileTriggerLiveFixture fixture;
   fixture.actor->lastTriggerTile.word = 0x01070809;
-  Actors_ActorLocation location{};
-  location.packedTile.target = {
-      .tileX = 3, .tileLayer = 2, .tileZ = 4, .facing = 255};
+  VS::Actors::ActorLocation location{};
+  location.packed_tile.target = {
+      .tile_x = 3, .tile_layer = 2, .tile_z = 4, .facing = 255};
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
   CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
-  CHECK(std::bit_cast<std::uint32_t>(location.packedTile.word) == 0xFF040203);
+  CHECK(std::bit_cast<std::uint32_t>(location.packed_tile.word) == 0xFF040203);
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
   CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
   Battle_actors[2] = nullptr;
@@ -7271,11 +7271,11 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
   std::array<HeightRow, 32> heights{};
   MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   struct Model {
-    Actors_ShpModel header{};
-    std::array<Actors_ShpBone, 2> bones{};
+    VS::Actors::ShpModel header{};
+    std::array<VS::Actors::ShpBone, 2> bones{};
   } model;
   GimmickCommandLiveFixture() {
-    static_assert(offsetof(Model, bones) == sizeof(Actors_ShpModel));
+    static_assert(offsetof(Model, bones) == sizeof(VS::Actors::ShpModel));
     VS::Battle::Ai::specialTerrainHeights = heights.data();
     heights[1][0] = 0x800;
     flags[1][0] = 0x480;
@@ -7978,8 +7978,8 @@ struct GimmickCreationLiveFixture : GimmickReleaseLiveFixture {
     Field_GimmickTemplate header{0x03020101, 0x1234, 1, kModelBytes};
     std::memcpy(bytes, &header, sizeof(header));
     std::memset(bytes + sizeof(header), 0, kModelBytes);
-    Actors_ShpModel model{};
-    model.polygonSection = sizeof(model);
+    VS::Actors::ShpModel model{};
+    model.polygon_section = sizeof(model);
     std::memcpy(bytes + sizeof(header), &model, sizeof(model));
     auto* polygons = bytes + sizeof(header) + sizeof(model);
     polygons[11] = std::byte{0x3C};
@@ -7991,7 +7991,7 @@ struct GimmickCreationLiveFixture : GimmickReleaseLiveFixture {
     Field_gimmickPaletteParameters[0] = 10;
     Field_gimmickPaletteParameters[1] = 249;
   }
-  void CheckModelUvs(const Actors_ShpModel* model) {
+  void CheckModelUvs(const VS::Actors::ShpModel* model) {
     const auto bytes = VS::Render::LiveModelBytes(model);
     if (bytes.size() != 96) {
       FAIL("Created model must retain its complete extent");

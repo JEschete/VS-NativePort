@@ -15,7 +15,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"

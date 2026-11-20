@@ -237,14 +237,14 @@ struct EquipmentReloadFixture {
   std::uint8_t saved_reload = VS::Content::objectDataLoadStep;
   int saved_alias = Battle_unusedGlobal2;
   Actors_ActorRecord preview{};
-  Actors_WeaponModel shield{};
-  Actors_WeaponModel preview_shield{};
+  VS::Actors::WeaponModel shield{};
+  VS::Actors::WeaponModel preview_shield{};
 
   EquipmentReloadFixture(int category, bool has_preview, int unused_alias) {
     Actors_actorRecords[1] = &preview;
     preview.sequenceModelId = static_cast<u_char>(category);
     std::fill_n(VS::Actors::weaponModels, saved_models.size(), nullptr);
-    shield.boneCount = 1;
+    shield.bone_count = 1;
     VS::Actors::weaponModels[1] = &shield;
     VS::Actors::weaponModels[3] = has_preview ? &preview_shield : nullptr;
     VS::Render::legacyWeaponTextureSlots[0].reference_count = 2;
@@ -390,10 +390,11 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
 
 TEST_CASE("Actor equipment slots contain complete aligned native models",
           "[menu][equipment][model-storage]") {
-  CHECK(sizeof(VS::Actors::ActorModelSlot) >= sizeof(Actors_WeaponModel));
-  CHECK(alignof(VS::Actors::ActorModelSlot) >= alignof(Actors_WeaponModel));
-  if (sizeof(VS::Actors::ActorModelSlot) < sizeof(Actors_WeaponModel) ||
-      alignof(VS::Actors::ActorModelSlot) < alignof(Actors_WeaponModel)) {
+  CHECK(sizeof(VS::Actors::ActorModelSlot) >= sizeof(VS::Actors::WeaponModel));
+  CHECK(alignof(VS::Actors::ActorModelSlot) >=
+        alignof(VS::Actors::WeaponModel));
+  if (sizeof(VS::Actors::ActorModelSlot) < sizeof(VS::Actors::WeaponModel) ||
+      alignof(VS::Actors::ActorModelSlot) < alignof(VS::Actors::WeaponModel)) {
     return;
   }
   const int index = GENERATE(0, 1);
@@ -406,12 +407,12 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
                     std::byte{0xA5});
   std::array<unsigned char, sizeof allocation> expected{};
   std::memcpy(expected.data(), &allocation, sizeof allocation);
-  Actors_WeaponModel model{};
+  VS::Actors::WeaponModel model{};
   if (!clear) {
-    model.modelId = 101;
+    model.model_id = 101;
     model.material = 5;
-    model.boneCount = 1;
-    model.reserved5E4 = 0x12345678;
+    model.bone_count = 1;
+    model.reserved5e4 = 0x12345678;
   }
   const auto offset = offsetof(VS::Actors::ActorAllocation, model_slots) +
                       index * sizeof(VS::Actors::ActorModelSlot);

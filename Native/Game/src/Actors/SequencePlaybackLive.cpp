@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Shadow.hpp"
@@ -25,14 +25,16 @@ namespace VS::Actors {
 namespace {
 using VS::Core::Math::WrapSigned16;
 
-static_assert(std::extent_v<decltype(Actors_AnimationPose::boneKeys)> ==
+static_assert(std::extent_v<decltype(VS::Actors::AnimationPose::bone_keys)> ==
               kPoseKeyCount);
-static_assert(std::extent_v<decltype(Actors_AnimationPose::scaleKeys)> ==
+static_assert(std::extent_v<decltype(VS::Actors::AnimationPose::scale_keys)> ==
               kPoseKeyCount);
-static_assert(std::extent_v<decltype(Actors_AnimationPose::reserved2A0)> ==
-              kPoseKeyCount);
-static_assert(std::extent_v<decltype(Actors_AnimationPose::trackStates)> ==
-              kPoseKeyCount);
+static_assert(
+    std::extent_v<decltype(VS::Actors::AnimationPose::rotation_deltas)> ==
+    kPoseKeyCount);
+static_assert(
+    std::extent_v<decltype(VS::Actors::AnimationPose::track_states)> ==
+    kPoseKeyCount);
 
 constexpr const char* kChannel = "actors.sequence";
 
@@ -133,8 +135,8 @@ bool ResolveClip(const Actors_ActorRecord& actor, AnimationClip& clip,
   return true;
 }
 
-void ApplyLivePoseTracks(Actors_ActorRecord& actor, Actors_AnimationPose& pose,
-                         TrackFrames frames) {
+void ApplyLivePoseTracks(Actors_ActorRecord& actor,
+                         VS::Actors::AnimationPose& pose, TrackFrames frames) {
   AnimationClip clip;
   const void* bank = nullptr;
   if (!ResolveClip(actor, clip, bank)) {
@@ -177,7 +179,7 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
     StoreLiveShadowBlend(shadow, actor_.shadowBlend);
   }
   void SetReachedEnd(bool reached) override {
-    actor_.pose.reachedEnd = reached ? -1 : 0;
+    actor_.pose.reached_end = reached ? -1 : 0;
   }
   bool PlayQueuedAnimation() override {
     if (actor_.queuedAnimation == 0) {
@@ -191,16 +193,16 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
   }
   bool EventsDue() const override {
     return actor_.instance.isFrozen &&
-           actor_.pose.nextEventFrame == actor_.pose.frame;
+           actor_.pose.next_event_frame == actor_.pose.frame;
   }
   void RunEvents() override {
     static_cast<void>(RunLiveAnimationEvents(actor_, actor_.pose, mode_));
   }
   bool HoldingLastFrame() const override {
-    return actor_.pose.holdingLastFrame != 0;
+    return actor_.pose.holding_last_frame != 0;
   }
-  void HoldLastFrame() override { actor_.pose.holdingLastFrame = -1; }
-  bool WaitingForEvent() const override { return actor_.pose.eventWait != 0; }
+  void HoldLastFrame() override { actor_.pose.holding_last_frame = -1; }
+  bool WaitingForEvent() const override { return actor_.pose.event_wait != 0; }
   void ApplyPoseTracks(TrackFrames frames) override {
     ApplyLivePoseTracks(actor_, actor_.pose, frames);
   }
@@ -309,31 +311,31 @@ void ReportLiveAnimationHeader(const void* bank, int animation,
   }
 }
 
-PoseKeys LoadLivePoseKeys(const Actors_AnimationPose& pose) {
+PoseKeys LoadLivePoseKeys(const VS::Actors::AnimationPose& pose) {
   PoseKeys keys;
-  LoadKeys(pose.boneKeys, keys.rotations);
-  LoadKeys(pose.scaleKeys, keys.scales);
+  LoadKeys(pose.bone_keys, keys.rotations);
+  LoadKeys(pose.scale_keys, keys.scales);
   return keys;
 }
 
-void StoreLivePoseKeys(const PoseKeys& keys, Actors_AnimationPose& pose) {
-  StoreKeys(keys.rotations, pose.boneKeys);
-  StoreKeys(keys.scales, pose.scaleKeys);
+void StoreLivePoseKeys(const PoseKeys& keys, VS::Actors::AnimationPose& pose) {
+  StoreKeys(keys.rotations, pose.bone_keys);
+  StoreKeys(keys.scales, pose.scale_keys);
 }
 
-SkeletalPose LoadLiveSkeletalPose(const Actors_AnimationPose& pose) {
+SkeletalPose LoadLiveSkeletalPose(const VS::Actors::AnimationPose& pose) {
   SkeletalPose typed;
   typed.keys = LoadLivePoseKeys(pose);
-  LoadKeys(pose.reserved2A0, typed.rotation_deltas);
-  LoadKeys(pose.trackStates, typed.scale_deltas);
+  LoadKeys(pose.rotation_deltas, typed.rotation_deltas);
+  LoadKeys(pose.track_states, typed.scale_deltas);
   return typed;
 }
 
 void StoreLiveSkeletalPose(const SkeletalPose& typed,
-                           Actors_AnimationPose& pose) {
+                           VS::Actors::AnimationPose& pose) {
   StoreLivePoseKeys(typed.keys, pose);
-  StoreKeys(typed.rotation_deltas, pose.reserved2A0);
-  StoreKeys(typed.scale_deltas, pose.trackStates);
+  StoreKeys(typed.rotation_deltas, pose.rotation_deltas);
+  StoreKeys(typed.scale_deltas, pose.track_states);
 }
 
 ShadowBlend LoadLiveShadowBlend(const ShadowBlendRecord& live) {
@@ -363,8 +365,8 @@ void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {
   AdvanceSkeletalAnimation(host);
 }
 
-void BlendLiveActorPose(Actors_AnimationPose& destination,
-                        Actors_AnimationPose& source, int bones, int frame,
+void BlendLiveActorPose(VS::Actors::AnimationPose& destination,
+                        VS::Actors::AnimationPose& source, int bones, int frame,
                         int frames) {
   PoseKeys keys = LoadLivePoseKeys(destination);
   const PoseKeys from = LoadLivePoseKeys(source);

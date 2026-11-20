@@ -7,7 +7,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Core/Log.hpp"
 #include "Field/CameraLive.hpp"
@@ -60,23 +60,23 @@ TEST_CASE("Camera queries outside authored collision have no tile occlusion",
           "[field][camera][camera-constraint]") {
   CameraConstraintFixture fixture;
   const auto coordinate = GENERATE(3U, 31U, 255U);
-  Actors_TileTarget target{};
-  target.tileX = 1;
-  target.tileZ = coordinate;
+  VS::Actors::TileTarget target{};
+  target.tile_x = 1;
+  target.tile_z = coordinate;
   VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) == 0);
   REQUIRE(fixture.warnings.size() == 1);
   CHECK(fixture.warnings[0].find("collision") != std::string::npos);
-  CHECK(target.tileX == 1);
-  CHECK(target.tileZ == coordinate);
+  CHECK(target.tile_x == 1);
+  CHECK(target.tile_z == coordinate);
 }
 
 TEST_CASE("Valid camera cells without authored occlusion retain clearing",
           "[field][camera][camera-constraint]") {
   CameraConstraintFixture fixture;
-  Actors_TileTarget target{};
-  target.tileX = 1;
-  target.tileZ = 1;
+  VS::Actors::TileTarget target{};
+  target.tile_x = 1;
+  target.tile_z = 1;
   VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) == 0);
   CHECK(fixture.warnings.empty());
@@ -100,9 +100,9 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   fixture.geometry[1] = 0;
   Field_roomData.viewTriggers = &trigger.header;
   Field_roomData.header.viewTriggersLength = sizeof trigger;
-  Actors_TileTarget target{};
-  target.tileX = 1;
-  target.tileZ = 1;
+  VS::Actors::TileTarget target{};
+  target.tile_x = 1;
+  target.tile_z = 1;
   VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) != 0);
   CHECK(fixture.warnings.empty());

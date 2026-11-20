@@ -570,7 +570,7 @@ void SetReadFields(const MovementActor& actor, Actors_ActorRecord& record) {
   record.blendFrame = static_cast<char>(actor.blend_frame);
   record.collisionRadius = actor.collision_radius;
   record.collisionHeight = actor.collision_height;
-  record.pose.reachedEnd = actor.pose_reached_end ? -1 : 0;
+  record.pose.reached_end = actor.pose_reached_end ? -1 : 0;
   record.companionSlot = actor.companion_slot;
   record.turnState.step = {.vx = actor.request_step.x,
                            .vy = actor.request_step.y,

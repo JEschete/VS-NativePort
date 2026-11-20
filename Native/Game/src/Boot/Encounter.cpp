@@ -17,9 +17,9 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundState.hpp"
@@ -254,7 +254,7 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
       static_cast<unsigned char>(stats.shield.weapon_model_id);
   snapshot.actor_flags = VS::Actors::LiveActorStateFlags(slot);
   snapshot.recovery = stats.actionRecoveryTimer;
-  Actors_ActorLocationQuery location{};
+  VS::Actors::ActorLocationQuery location{};
   VS::Actors::LiveActorPlacement(slot, &location);
   snapshot.x = location.location.position.vx;
   snapshot.y = location.location.position.vy;
@@ -953,7 +953,7 @@ nlohmann::json InspectModels() {
          {"frame", actor->pose.frame},
          {"length", actor->animationLength},
          {"queued_animation", actor->queuedAnimation},
-         {"holding_last_frame", actor->pose.holdingLastFrame != 0},
+         {"holding_last_frame", actor->pose.holding_last_frame != 0},
          {"animation_locked", actor->animationLocked != 0},
          {"attached", actor->instance.isAttached != 0},
          {"attachment_parent",

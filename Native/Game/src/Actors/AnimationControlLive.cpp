@@ -14,17 +14,17 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControl.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -43,7 +43,8 @@ constexpr std::size_t kActorSlots = std::size(Actors_actorRecords);
 // Every table slot plus one record a caller names outside the table.
 constexpr std::size_t kRegistryCapacity = kActorSlots + 1;
 constexpr int kQuadrants = 4;
-// The weapon models' draw state (Actors_WeaponModel reserved11, reserved12).
+// The weapon models' draw state (VS::Actors::WeaponModel reserved11,
+// reserved12).
 constexpr u_char kDrawnWeaponModel = 0x40;
 // The battle-window mode of the animation event runner.
 constexpr int kBattleWindowEvents = 3;
@@ -76,14 +77,15 @@ void StoreSlot(const SoundEffectSlot& slot, Actors_ModelEffectSlot& live) {
   live.parameter = slot.parameter;
 }
 
-PoseEventCursor LoadCursor(const Actors_AnimationPose& pose) {
-  return {.script = HandleOf<EventScriptHandle>(pose.eventScript),
-          .next_event_frame = pose.nextEventFrame};
+PoseEventCursor LoadCursor(const VS::Actors::AnimationPose& pose) {
+  return {.script = HandleOf<EventScriptHandle>(pose.event_script),
+          .next_event_frame = pose.next_event_frame};
 }
 
-void StoreCursor(const PoseEventCursor& cursor, Actors_AnimationPose& pose) {
-  pose.eventScript = PointerOf<u_char>(cursor.script);
-  pose.nextEventFrame = cursor.next_event_frame;
+void StoreCursor(const PoseEventCursor& cursor,
+                 VS::Actors::AnimationPose& pose) {
+  pose.event_script = PointerOf<u_char>(cursor.script);
+  pose.next_event_frame = cursor.next_event_frame;
 }
 
 u_char Bit(bool value) { return value ? 1 : 0; }
@@ -123,9 +125,9 @@ AnimationActor LoadLiveAnimationActor(const Actors_ActorRecord& live) {
   for (std::size_t channel = 0; channel < kTextureAnimationChannels;
        ++channel) {
     actor.texture_overlay_index.at(channel) =
-        live.textureAnimationFrames[channel].overlayIndex;
+        live.textureAnimationFrames[channel].overlay_index;
     actor.texture_current_frame.at(channel) =
-        live.textureAnimationSlots[channel].currentFrame;
+        live.textureAnimationSlots[channel].current_frame;
   }
   for (std::size_t bank = 0; bank < kSharedSequenceBanks; ++bank) {
     // textureRowOffsets[2] aliases the low byte of momentumDistance.
@@ -140,7 +142,7 @@ AnimationActor LoadLiveAnimationActor(const Actors_ActorRecord& live) {
   }
   actor.pose = LoadCursor(live.pose);
   actor.blend_pose = LoadCursor(live.blendPose);
-  actor.holding_last_frame = live.pose.holdingLastFrame != 0;
+  actor.holding_last_frame = live.pose.holding_last_frame != 0;
   return actor;
 }
 
@@ -171,7 +173,7 @@ void StoreLiveAnimationActor(const AnimationActor& actor,
   live.framesPerStep = actor.frames_per_step;
   for (std::size_t channel = 0; channel < kTextureAnimationChannels;
        ++channel) {
-    live.textureAnimationFrames[channel].overlayIndex =
+    live.textureAnimationFrames[channel].overlay_index =
         actor.texture_overlay_index.at(channel);
   }
   StoreSlot(actor.sound_effect, live.soundEffect);
@@ -264,7 +266,8 @@ class Synced {
 };
 
 template <std::size_t Size>
-int TableByte(const u_char (&table)[Size], int index, const char* what) {
+int TableByte(const std::array<std::uint8_t, Size>& table, int index,
+              const char* what) {
   if (index < 0 || static_cast<std::size_t>(index) >= Size) {
     VS::Core::LogWarn("actors", "{} refused index {}", what, index);
     return 0;
@@ -317,11 +320,11 @@ class LiveAnimationHost final : public AnimationControlHost {
   }
 
   int DrawnWeaponSoundBase(int sequence_model) override {
-    return TableByte(Actors_drawnWeaponAnimationBases, sequence_model,
+    return TableByte(VS::Actors::drawnWeaponAnimationBases, sequence_model,
                      "Drawn weapon sound");
   }
   int SheathedWeaponSoundBase(int sequence_model) override {
-    return TableByte(Actors_sheathedWeaponAnimationBases, sequence_model,
+    return TableByte(VS::Actors::sheathedWeaponAnimationBases, sequence_model,
                      "Sheathed weapon sound");
   }
   int QuadrantMoveAnimation(bool fast, int quadrant) override {
@@ -335,13 +338,13 @@ class LiveAnimationHost final : public AnimationControlHost {
   }
 
   int SharedSequenceBankIndex() override {
-    return Actors_sharedSequenceBankIndex;
+    return VS::Actors::sharedSequenceBankIndex;
   }
   void SetSharedSequenceBankIndex(int index) override {
-    Actors_sharedSequenceBankIndex = static_cast<u_char>(index);
+    VS::Actors::sharedSequenceBankIndex = static_cast<u_char>(index);
   }
   void SetTransitionControl(int control) override {
-    Actors_forcedModelOverrides = static_cast<char>(control);
+    VS::Actors::forcedModelOverrides = static_cast<char>(control);
   }
   void QueueSequenceAsset(const Content::ActorAssetRequest& request) override {
     static_cast<void>(Content::QueueLiveActorAsset(request));
@@ -367,12 +370,12 @@ class LiveAnimationHost final : public AnimationControlHost {
                           id);
         return;
       }
-      Actors_WeaponModel* model = weaponModels[index];
+      VS::Actors::WeaponModel* model = weaponModels[index];
       if (model == nullptr) continue;
       const u_char state = drawn ? kDrawnWeaponModel : 0;
-      model->reserved11 = state;
-      model->reserved12 = state;
-      model->reserved08Bit4 = Bit(drawn);
+      model->blend_level = state;
+      model->blend_target = state;
+      model->shown = Bit(drawn);
     }
   }
   void PlaySoundPair(AnimationActor& actor, int first, int second) override {
@@ -424,8 +427,8 @@ class LiveAnimationHost final : public AnimationControlHost {
                              : SequenceHandle{},
             .has_entry = found,
             .length = static_cast<std::int16_t>(length),
-            .resolved_set =
-                static_cast<std::uint8_t>(Actors_lastResolvedSequenceIndex)};
+            .resolved_set = static_cast<std::uint8_t>(
+                VS::Actors::lastResolvedSequenceIndex)};
   }
   bool CanUnwindBoundAnimation(AnimationActor& actor) override {
     Actors_ActorRecord& record = registry_.RecordOf(actor);
@@ -476,12 +479,12 @@ class LiveAnimationHost final : public AnimationControlHost {
   void SetBonePoseLockSlot(AnimationActor& actor, int bone,
                            int lock_slot) override {
     Actors_ActorRecord& record = registry_.RecordOf(actor);
-    Actors_ShpModel* model = record.instance.model;
+    VS::Actors::ShpModel* model = record.instance.model;
     if (model == nullptr || bone < 0) {
       VS::Core::LogWarn("actors", "Bone pose lock refused bone {}", bone);
       return;
     }
-    model->bones[bone].poseLockSlot = static_cast<u_char>(lock_slot);
+    model->bones[bone].pose_lock_slot = static_cast<u_char>(lock_slot);
   }
 
  private:

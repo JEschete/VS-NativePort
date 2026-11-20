@@ -214,7 +214,7 @@ struct RoomActorState {
 };
 
 struct RoomWeaponState {
-  // reserved08Bit4: the weapon is drawn in the room.
+  // shown: the weapon is drawn in the room.
   bool shown = false;
   std::uint8_t owner = 0;
   std::uint8_t attachment_bone = 0;

@@ -22,19 +22,19 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
@@ -163,14 +163,15 @@ static_assert(std::size(VS::Render::legacyActorTextureSlots) ==
               kActorTextureSlots);
 static_assert(std::size(VS::Render::legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
-static_assert(std::size(Actors_sharedSequenceData) == kSharedSequenceBanks);
-static_assert(std::size(Actors_sharedSequenceAnimationIds) ==
+static_assert(std::size(VS::Actors::sharedSequenceData) ==
               kSharedSequenceBanks);
-static_assert(std::extent_v<decltype(Actors_sharedSequenceAnimationIds), 1> ==
+static_assert(std::size(VS::Actors::sharedSequenceAnimationIds) ==
+              kSharedSequenceBanks);
+static_assert(std::size(VS::Actors::sharedSequenceAnimationIds[0]) ==
               kSharedSequenceEntries);
-static_assert(std::extent_v<decltype(Actors_sharedSequenceEntryParams), 1> ==
+static_assert(std::size(VS::Actors::sharedSequenceEntryParams[0]) ==
               kSharedSequenceEntries);
-static_assert(std::extent_v<decltype(Actors_sharedSequenceAnimationData), 1> ==
+static_assert(std::size(VS::Actors::sharedSequenceAnimationData[0]) ==
               kSharedSequenceEntries);
 
 static_assert(offsetof(LegacyActorAssetRequest, asset_kind) == 0);
@@ -241,13 +242,13 @@ static_assert(std::extent_v<decltype(Actors_ActorRecord::textureScroll)> ==
 static_assert(offsetof(Actors_ActorRecord, textureOverlays) +
                   kActorTextureLayoutBytes <=
               sizeof(Actors_ActorRecord));
-static_assert(sizeof(Actors_WeaponModel::bones) ==
+static_assert(sizeof(VS::Actors::WeaponModel::bones) ==
               kWeaponModelBones * sizeof(SVECTOR));
-static_assert(sizeof(Actors_WeaponModel::palettes) ==
+static_assert(sizeof(VS::Actors::WeaponModel::palettes) ==
               sizeof(WeaponAssetRecord::palettes));
-static_assert(sizeof(Actors_WeaponModel::workingPalette) ==
+static_assert(sizeof(VS::Actors::WeaponModel::working_palette) ==
               sizeof(WeaponAssetRecord::working_palette));
-static_assert(sizeof(Actors_WeaponModel::uploadPalette) ==
+static_assert(sizeof(VS::Actors::WeaponModel::upload_palette) ==
               sizeof(WeaponAssetRecord::upload_palette));
 static_assert(std::is_same_v<u_short, std::uint16_t>);
 // The original's 8-byte texture slot entries.
@@ -321,7 +322,7 @@ std::uint8_t ByteOf(const Record& record, std::size_t at) {
 
 bool InRange(int index, int count) { return index >= 0 && index < count; }
 
-Actors_WeaponModel* WeaponAt(int slot) {
+VS::Actors::WeaponModel* WeaponAt(int slot) {
   return InRange(slot, kWeaponModelSlots) ? VS::Actors::weaponModels[slot]
                                           : nullptr;
 }
@@ -423,68 +424,69 @@ void StoreStats(const ActorAssetQueueStats& stats) {
 
 // --- Weapon records ----------------------------------------------------------
 
-WeaponAssetRecord LoadWeaponRecord(const Actors_WeaponModel& in) {
+WeaponAssetRecord LoadWeaponRecord(const VS::Actors::WeaponModel& in) {
   WeaponAssetRecord out;
-  out.bone_count = in.boneCount;
-  out.vertex_group_count = in.vertexGroupCount;
-  out.triangle_count = in.triangleCount;
-  out.quad_count = in.quadCount;
-  out.other_primitive_count = in.otherPrimitiveCount;
-  out.actor_id = in.actorId;
-  out.reserved08_bit4 = in.reserved08Bit4 != 0;
-  out.wide_texture = in.isWideTexture != 0;
-  out.reserved08_bit6 = in.reserved08Bit6 != 0;
-  out.double_clut = in.isDoubleClut != 0;
+  out.bone_count = in.bone_count;
+  out.vertex_group_count = in.vertex_group_count;
+  out.triangle_count = in.triangle_count;
+  out.quad_count = in.quad_count;
+  out.other_primitive_count = in.other_primitive_count;
+  out.actor_id = in.actor_id;
+  out.reserved08_bit4 = in.shown != 0;
+  out.wide_texture = in.is_wide_texture != 0;
+  out.reserved08_bit6 = in.brightness_override != 0;
+  out.double_clut = in.is_double_clut != 0;
   out.material = in.material;
-  out.palette_color_count = in.paletteColorCount;
-  out.attachment_slot = in.attachmentSlot;
-  out.attachment_bone = in.attachmentBone;
-  out.model_id = in.modelId;
-  out.texture_slot = in.textureSlot;
-  out.palette_slot_offset = in.paletteSlotOffset;
-  out.reserved11 = in.reserved11;
-  out.reserved13 = in.reserved13;
-  out.geometry = Address(in.sectionOffsets);
+  out.palette_color_count = in.palette_color_count;
+  out.attachment_slot = in.attachment_slot;
+  out.attachment_bone = in.attachment_bone;
+  out.model_id = in.model_id;
+  out.texture_slot = in.texture_slot;
+  out.palette_slot_offset = in.palette_slot_offset;
+  out.reserved11 = in.blend_level;
+  out.reserved13 = in.blend_frames;
+  out.geometry = Address(in.section_offsets);
   for (std::size_t i = 0; i < out.palettes.size(); ++i) {
     std::copy(std::begin(in.palettes[i]), std::end(in.palettes[i]),
               out.palettes[i].begin());
   }
-  std::copy(std::begin(in.workingPalette), std::end(in.workingPalette),
+  std::copy(std::begin(in.working_palette), std::end(in.working_palette),
             out.working_palette.begin());
-  std::copy(std::begin(in.uploadPalette), std::end(in.uploadPalette),
+  std::copy(std::begin(in.upload_palette), std::end(in.upload_palette),
             out.upload_palette.begin());
   return out;
 }
 
-void StoreWeaponRecord(const WeaponAssetRecord& in, Actors_WeaponModel& out) {
-  out.boneCount = in.bone_count;
-  out.vertexGroupCount = in.vertex_group_count;
-  out.triangleCount = in.triangle_count;
-  out.quadCount = in.quad_count;
-  out.otherPrimitiveCount = in.other_primitive_count;
-  out.actorId = static_cast<u_char>(in.actor_id & kNibbleMask);
-  out.reserved08Bit4 = in.reserved08_bit4 ? 1 : 0;
-  out.isWideTexture = in.wide_texture ? 1 : 0;
-  out.reserved08Bit6 = in.reserved08_bit6 ? 1 : 0;
-  out.isDoubleClut = in.double_clut ? 1 : 0;
+void StoreWeaponRecord(const WeaponAssetRecord& in,
+                       VS::Actors::WeaponModel& out) {
+  out.bone_count = in.bone_count;
+  out.vertex_group_count = in.vertex_group_count;
+  out.triangle_count = in.triangle_count;
+  out.quad_count = in.quad_count;
+  out.other_primitive_count = in.other_primitive_count;
+  out.actor_id = static_cast<u_char>(in.actor_id & kNibbleMask);
+  out.shown = in.reserved08_bit4 ? 1 : 0;
+  out.is_wide_texture = in.wide_texture ? 1 : 0;
+  out.brightness_override = in.reserved08_bit6 ? 1 : 0;
+  out.is_double_clut = in.double_clut ? 1 : 0;
   out.material = static_cast<u_char>(in.material & kNibbleMask);
-  out.paletteColorCount = in.palette_color_count;
-  out.attachmentSlot = in.attachment_slot;
-  out.attachmentBone = in.attachment_bone;
-  out.modelId = in.model_id;
-  out.textureSlot = in.texture_slot;
-  out.paletteSlotOffset = in.palette_slot_offset;
-  out.reserved11 = in.reserved11;
-  out.reserved13 = in.reserved13;
-  out.sectionOffsets = Pointer<Actors_WeaponModelData>(in.geometry);
+  out.palette_color_count = in.palette_color_count;
+  out.attachment_slot = in.attachment_slot;
+  out.attachment_bone = in.attachment_bone;
+  out.model_id = in.model_id;
+  out.texture_slot = in.texture_slot;
+  out.palette_slot_offset = in.palette_slot_offset;
+  out.blend_level = in.reserved11;
+  out.blend_frames = in.reserved13;
+  out.section_offsets = Pointer<VS::Actors::WeaponModelData>(in.geometry);
   for (std::size_t i = 0; i < in.palettes.size(); ++i) {
     std::copy(in.palettes[i].begin(), in.palettes[i].end(),
               std::begin(out.palettes[i]));
   }
   std::copy(in.working_palette.begin(), in.working_palette.end(),
-            std::begin(out.workingPalette));
+            std::begin(out.working_palette));
   std::copy(in.upload_palette.begin(), in.upload_palette.end(),
-            std::begin(out.uploadPalette));
+            std::begin(out.upload_palette));
 }
 
 // --- Actor records -----------------------------------------------------------
@@ -554,7 +556,7 @@ void StoreInstance(const ActorAssetRecord& in, Actors_ModelInstance& out) {
   SetWordAt(out, offsetof(Actors_ModelInstance, baseColor), in.base_color);
   SetWordAt(out, offsetof(Actors_ModelInstance, tint), in.tint);
   SetWordAt(out, offsetof(Actors_ModelInstance, currentTileX), in.placement);
-  out.model = Pointer<Actors_ShpModel>(in.model);
+  out.model = Pointer<VS::Actors::ShpModel>(in.model);
 }
 
 void LoadActorFields(const Actors_ActorRecord& in, ActorAssetRecord& out) {
@@ -645,19 +647,20 @@ void StoreActorFields(const ActorAssetRecord& in, Actors_ActorRecord& out) {
 
 void LoadActorTables(const Actors_ActorRecord& in, ActorAssetRecord& out) {
   for (std::size_t i = 0; i < out.texture_scroll_bounds.size(); ++i) {
-    const Actors_TextureScrollBounds& bounds = in.textureScrollBounds[i];
+    const VS::Actors::TextureScrollBoundsRecord& bounds =
+        in.textureScrollBounds[i];
     out.texture_scroll_bounds[i] = {.x = bounds.x,
                                     .y = bounds.y,
-                                    .initial_step_x = bounds.initialStepX,
-                                    .initial_step_y = bounds.initialStepY,
+                                    .initial_step_x = bounds.initial_step_x,
+                                    .initial_step_y = bounds.initial_step_y,
                                     .interval = bounds.interval};
   }
   for (std::size_t i = 0; i < out.texture_scroll.size(); ++i) {
-    const Actors_TextureScrollState& scroll = in.textureScroll[i];
+    const VS::Actors::TextureScrollStateRecord& scroll = in.textureScroll[i];
     out.texture_scroll[i] = {.x = scroll.x,
                              .y = scroll.y,
-                             .step_x = scroll.stepX,
-                             .step_y = scroll.stepY,
+                             .step_x = scroll.step_x,
+                             .step_y = scroll.step_y,
                              .interval = scroll.interval,
                              .timer = scroll.timer};
   }
@@ -675,19 +678,19 @@ void LoadActorTables(const Actors_ActorRecord& in, ActorAssetRecord& out) {
 
 void StoreActorTables(const ActorAssetRecord& in, Actors_ActorRecord& out) {
   for (std::size_t i = 0; i < in.texture_scroll_bounds.size(); ++i) {
-    Actors_TextureScrollBounds& bounds = out.textureScrollBounds[i];
+    VS::Actors::TextureScrollBoundsRecord& bounds = out.textureScrollBounds[i];
     bounds.x = in.texture_scroll_bounds[i].x;
     bounds.y = in.texture_scroll_bounds[i].y;
-    bounds.initialStepX = in.texture_scroll_bounds[i].initial_step_x;
-    bounds.initialStepY = in.texture_scroll_bounds[i].initial_step_y;
+    bounds.initial_step_x = in.texture_scroll_bounds[i].initial_step_x;
+    bounds.initial_step_y = in.texture_scroll_bounds[i].initial_step_y;
     bounds.interval = in.texture_scroll_bounds[i].interval;
   }
   for (std::size_t i = 0; i < in.texture_scroll.size(); ++i) {
-    Actors_TextureScrollState& scroll = out.textureScroll[i];
+    VS::Actors::TextureScrollStateRecord& scroll = out.textureScroll[i];
     scroll.x = in.texture_scroll[i].x;
     scroll.y = in.texture_scroll[i].y;
-    scroll.stepX = in.texture_scroll[i].step_x;
-    scroll.stepY = in.texture_scroll[i].step_y;
+    scroll.step_x = in.texture_scroll[i].step_x;
+    scroll.step_y = in.texture_scroll[i].step_y;
     scroll.interval = in.texture_scroll[i].interval;
     scroll.timer = in.texture_scroll[i].timer;
   }
@@ -966,27 +969,27 @@ class LiveActorAssetHost final : public ActorAssetHost {
 
   // Weapon records.
   [[nodiscard]] WeaponAssetSummary WeaponSummary(int slot) const override {
-    const Actors_WeaponModel* model = WeaponAt(slot);
+    const VS::Actors::WeaponModel* model = WeaponAt(slot);
     if (model == nullptr) {
       return {};
     }
     return {.present = true,
-            .actor_id = model->actorId,
-            .model_id = model->modelId,
-            .bone_count = model->boneCount};
+            .actor_id = model->actor_id,
+            .model_id = model->model_id,
+            .bone_count = model->bone_count};
   }
   bool BindWeaponRecord(int slot, AssetAddress destination) override {
-    auto* model = BindRecord<Actors_WeaponModel>(
+    auto* model = BindRecord<VS::Actors::WeaponModel>(
         slot, kWeaponModelSlots, destination, "weapon record destination");
     if (model == nullptr) {
       return false;
     }
     VS::Actors::weaponModels[slot] = model;
-    model->textureSlot = kNoAssetTextureSlot;
+    model->texture_slot = kNoAssetTextureSlot;
     return true;
   }
   [[nodiscard]] WeaponAssetRecord LoadWeapon(int slot) const override {
-    const Actors_WeaponModel* model = WeaponAt(slot);
+    const VS::Actors::WeaponModel* model = WeaponAt(slot);
     if (model == nullptr) {
       CountRefusal("weapon record read", slot);
       return {};
@@ -994,7 +997,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return LoadWeaponRecord(*model);
   }
   void StoreWeapon(int slot, const WeaponAssetRecord& record) override {
-    Actors_WeaponModel* model = WeaponAt(slot);
+    VS::Actors::WeaponModel* model = WeaponAt(slot);
     if (model == nullptr) {
       CountRefusal("weapon record write", slot);
       return;
@@ -1002,8 +1005,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     StoreWeaponRecord(record, *model);
   }
   void CopyWeaponRecord(int target, int source) override {
-    Actors_WeaponModel* to = WeaponAt(target);
-    const Actors_WeaponModel* from = WeaponAt(source);
+    VS::Actors::WeaponModel* to = WeaponAt(target);
+    const VS::Actors::WeaponModel* from = WeaponAt(source);
     if (to == nullptr || from == nullptr) {
       CountRefusal("weapon record copy", source);
       return;
@@ -1011,7 +1014,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     std::memmove(to, from, sizeof *to);
   }
   void WriteWeaponBones(int slot, std::span<const std::byte> bones) override {
-    Actors_WeaponModel* model = WeaponAt(slot);
+    VS::Actors::WeaponModel* model = WeaponAt(slot);
     if (model == nullptr) {
       CountRefusal("weapon bones", slot);
       return;
@@ -1140,12 +1143,12 @@ class LiveActorAssetHost final : public ActorAssetHost {
       return {};
     }
     SharedSequenceBank value;
-    value.data = Address(Actors_sharedSequenceData[bank]);
+    value.data = Address(VS::Actors::sharedSequenceData[bank]);
     for (std::size_t i = 0; i < kSharedSequenceEntries; ++i) {
-      value.animation_ids[i] = Actors_sharedSequenceAnimationIds[bank][i];
-      value.entry_params[i] = Actors_sharedSequenceEntryParams[bank][i];
+      value.animation_ids[i] = VS::Actors::sharedSequenceAnimationIds[bank][i];
+      value.entry_params[i] = VS::Actors::sharedSequenceEntryParams[bank][i];
       value.animation_data[i] =
-          Address(Actors_sharedSequenceAnimationData[bank][i]);
+          Address(VS::Actors::sharedSequenceAnimationData[bank][i]);
     }
     return value;
   }
@@ -1154,11 +1157,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
       CountRefusal("sequence bank write", bank);
       return;
     }
-    Actors_sharedSequenceData[bank] = Pointer(value.data);
+    VS::Actors::sharedSequenceData[bank] = Pointer(value.data);
     for (std::size_t i = 0; i < kSharedSequenceEntries; ++i) {
-      Actors_sharedSequenceAnimationIds[bank][i] = value.animation_ids[i];
-      Actors_sharedSequenceEntryParams[bank][i] = value.entry_params[i];
-      Actors_sharedSequenceAnimationData[bank][i] =
+      VS::Actors::sharedSequenceAnimationIds[bank][i] = value.animation_ids[i];
+      VS::Actors::sharedSequenceEntryParams[bank][i] = value.entry_params[i];
+      VS::Actors::sharedSequenceAnimationData[bank][i] =
           Pointer<char>(value.animation_data[i]);
     }
   }
@@ -1167,24 +1170,24 @@ class LiveActorAssetHost final : public ActorAssetHost {
       CountRefusal("sequence bank page read", bank);
       return 0;
     }
-    return Actors_sharedSequenceBankTexturePages[bank];
+    return VS::Actors::sharedSequenceBankTexturePages[bank];
   }
   void SetBankTexturePage(int bank, std::uint8_t page) override {
     if (!InRange(bank, kSharedSequenceBanks)) {
       CountRefusal("sequence bank page write", bank);
       return;
     }
-    Actors_sharedSequenceBankTexturePages[bank] = page;
+    VS::Actors::sharedSequenceBankTexturePages[bank] = page;
   }
   [[nodiscard]] std::span<const std::uint8_t> SharedSequenceIdsByKind()
       const override {
-    return Actors_sharedSequenceIdsByKind;
+    return VS::Actors::sharedSequenceIdsByKind;
   }
   [[nodiscard]] AssetAddress PrimarySequenceBuffer() const override {
-    return Address(Actors_primarySequenceBuffer);
+    return Address(VS::Actors::primarySequenceBuffer);
   }
   [[nodiscard]] AssetAddress SequenceWorkBuffer() const override {
-    return Address(Actors_sequenceWorkBuffer);
+    return Address(VS::Actors::sequenceWorkBuffer);
   }
   [[nodiscard]] std::optional<std::size_t> SequenceBankSize(
       AssetAddress bank) const override {

@@ -5,11 +5,11 @@
 struct Actors_ActorRecord;
 struct Actors_CompanionOffset;
 
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.hpp"
-#include "Actors/TextureAnimation.h"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Render/Palette.hpp"
 
 // decomp: D_800F4538_unk58 (src/BATTLE/BATTLE.PRG/3A1A0.h:31)
@@ -86,9 +86,9 @@ struct Actors_ActorRecord {
     void* battleSequence;
     void* sharedSequences[4];
     SVECTOR routeTarget;
-    Actors_TextureOverlayRect textureOverlays[8];
-    Actors_TextureCellOrigin textureCellOrigins[2];
-    Actors_TextureScrollBounds textureScrollBounds[4];
+    VS::Actors::TextureOverlayRect textureOverlays[8];
+    VS::Actors::TextureCellOriginRecord textureCellOrigins[2];
+    VS::Actors::TextureScrollBoundsRecord textureScrollBounds[4];
     u_short collisionRadius;
     u_short collisionHeight;
     u_short occupancyRadius;
@@ -134,8 +134,8 @@ struct Actors_ActorRecord {
     Actors_CompanionOffset companionState;
     VS::Render::ColorCode companionColor;
     SVECTOR soundPosition;
-    Actors_AnimationPose blendPose;
-    Actors_AnimationPose pose;
+    VS::Actors::AnimationPose blendPose;
+    VS::Actors::AnimationPose pose;
     u_char palettes[0x280];
     u_short basePalette[0x140];
     u_short currentPalette[0xA0];
@@ -149,13 +149,13 @@ struct Actors_ActorRecord {
     u_char opaque17FF;
     u_short moveFacing;
     u_char paletteFadeState[2];
-    Actors_TextureAnimationFrame textureAnimationFrames[2];
-    Actors_TextureAnimationSlot textureAnimationSlots[2];
+    VS::Actors::TextureAnimationFrame textureAnimationFrames[2];
+    VS::Actors::TextureAnimationSlotRecord textureAnimationSlots[2];
     short destinationX;
     short jumpFrames;
     short destinationZ;
     short destinationMode;
-    Actors_TextureScrollState textureScroll[4];
+    VS::Actors::TextureScrollStateRecord textureScroll[4];
     short scale;
     union {
         u_char textureRowOffsets[3];

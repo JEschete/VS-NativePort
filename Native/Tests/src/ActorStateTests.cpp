@@ -23,10 +23,10 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/BattleActorState.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -1340,11 +1340,11 @@ TEST_CASE("Live display flags round-trip the record and weapon bits",
   const LiveStateFixture fixture;
   const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
   record->instance.isFrozen = -1;
-  Actors_WeaponModel first{};
-  Actors_WeaponModel second{};
+  VS::Actors::WeaponModel first{};
+  VS::Actors::WeaponModel second{};
   VS::Actors::weaponModels[6] = &first;
   VS::Actors::weaponModels[7] = &second;
-  second.reserved08Bit4 = 1;
+  second.shown = 1;
 
   VS::Actors::SetLiveActorDisplayFlags(
       3, static_cast<int>(StateFlag::kShown | StateFlag::kVisible |
@@ -1354,8 +1354,7 @@ TEST_CASE("Live display flags round-trip the record and weapon bits",
   CHECK(record->instance.isVisible != 0);
   CHECK(record->instance.isFrozen == 0);
   CHECK(record->instance.soundEnabled == 1);
-  CHECK(std::array<int, 2>{first.reserved08Bit4, second.reserved08Bit4} ==
-        std::array{1, 0});
+  CHECK(std::array<int, 2>{first.shown, second.shown} == std::array{1, 0});
   CHECK(VS::Actors::LiveActorStateFlags(3) ==
         (StateFlag::kActorRecord | StateFlag::kShown | StateFlag::kVisible |
          StateFlag::kSoundEnabled | StateFlag::kFirstWeaponShown));
@@ -1394,16 +1393,16 @@ TEST_CASE("Live placement writes the tile, position and facing",
   record->instance.reserved5F = 4;
   record->instance.position = {10, -20, 30, 99};
   record->instance.facing = 0x340;
-  Actors_ActorLocationQuery query{};
-  query.actorIndex = 11;
+  VS::Actors::ActorLocationQuery query{};
+  query.actor_index = 11;
   CHECK(VS::Actors::LiveActorPlacement(3, &query) == 0);
-  CHECK(query.location.packedTile.word == 0x04090207);
+  CHECK(query.location.packed_tile.word == 0x04090207);
   CHECK(Position(query.location.position) == std::array{10, -20, 30, 0x340});
-  CHECK(query.actorIndex == 11);
+  CHECK(query.actor_index == 11);
 
   const ChannelWarnings warnings("actors");
   CHECK(VS::Actors::LiveActorPlacement(
-            3, static_cast<Actors_ActorLocation*>(nullptr)) == -1);
+            3, static_cast<VS::Actors::ActorLocation*>(nullptr)) == -1);
   CHECK(warnings.messages == std::vector<std::string>{Refused(
                                  "ActorPlacement", "no placement output")});
 }
@@ -1418,9 +1417,9 @@ TEST_CASE("Live placement falls back to a slot gimmick", "[actors-state]") {
   gimmick.positionZ = 6;
   gimmick.rotationY = 0x100;
   Field_gimmickInstances[4] = &gimmick;
-  Actors_ActorLocation location{};
+  VS::Actors::ActorLocation location{};
   CHECK(VS::Actors::LiveActorPlacement(4, &location) == 0);
-  CHECK(location.packedTile.word == 0x00020001);
+  CHECK(location.packed_tile.word == 0x00020001);
   CHECK(Position(location.position) == std::array{4, 5, 6, 0x100});
   CHECK(VS::Actors::LiveActorPlacement(5, &location) == -1);
 }
@@ -1431,14 +1430,14 @@ TEST_CASE("Live saved placement writes only the packed tile",
   const std::unique_ptr<Actors_ActorRecord> record = LiveRecord(3);
   record->savedPlacement = 0x00030A07;
   record->instance.facing = 0x340;
-  Actors_ActorLocationQuery query{};
+  VS::Actors::ActorLocationQuery query{};
   query.location.position.vx = 77;
   VS::Actors::LiveActorSavedPlacement(3, 0, &query);
-  CHECK(query.location.packedTile.word == 0x34030A07);
+  CHECK(query.location.packed_tile.word == 0x34030A07);
   CHECK(query.location.position.vx == 77);
-  query.location.packedTile.word = 5;
+  query.location.packed_tile.word = 5;
   VS::Actors::LiveActorSavedPlacement(4, 0, &query);
-  CHECK(query.location.packedTile.word == 5);
+  CHECK(query.location.packed_tile.word == 5);
 }
 
 TEST_CASE("Live battle actors answer the state queries", "[actors-state]") {

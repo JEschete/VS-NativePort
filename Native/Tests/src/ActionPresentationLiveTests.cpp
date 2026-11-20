@@ -10,7 +10,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.h"
@@ -23,8 +23,8 @@
 namespace {
 namespace b = VS::Battle;
 struct Model {
-  Actors_ShpModel header{};
-  std::array<Actors_ShpBone, 6> bones{};
+  VS::Actors::ShpModel header{};
+  std::array<VS::Actors::ShpBone, 6> bones{};
 };
 struct LivePresentation {
   decltype(std::to_array(Battle_actors)) saved_battle =
@@ -46,7 +46,7 @@ struct LivePresentation {
     std::ranges::fill(Battle_actors, nullptr);
     std::ranges::fill(Actors_actorRecords, nullptr);
     for (std::size_t i = 0; i < model.bones.size(); ++i) {
-      model.bones.at(i).limbIds = static_cast<unsigned char>(i + 1);
+      model.bones.at(i).limb_ids = static_cast<unsigned char>(i + 1);
     }
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
     for (std::size_t i = 0; i < battle.size(); ++i) {

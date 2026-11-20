@@ -15,11 +15,11 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Appearance.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -44,10 +44,10 @@ constexpr int kAuxiliaryKind = static_cast<int>(BoneTagKind::kAuxiliary);
 
 // An SHP model header followed by its bone table, as the loaders place it.
 struct TestModel {
-  Actors_ShpModel header{};
-  std::array<Actors_ShpBone, kTestBones> bones{};
+  VS::Actors::ShpModel header{};
+  std::array<VS::Actors::ShpBone, kTestBones> bones{};
 };
-static_assert(offsetof(TestModel, bones) == sizeof(Actors_ShpModel));
+static_assert(offsetof(TestModel, bones) == sizeof(VS::Actors::ShpModel));
 
 // Bone 0 is the root; bone 1 the head (auxiliary tag 2) in limb groups 1 and
 // 0; bone 2 has tag 7 in limb groups 0 and 1; bone 3 repeats tag 5.
@@ -96,7 +96,7 @@ struct LiveSkeletonState {
   MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
   std::vector<std::unique_ptr<Field_GimmickInstance>> gimmicks;
-  std::vector<std::unique_ptr<Actors_WeaponModel>> weapons;
+  std::vector<std::unique_ptr<VS::Actors::WeaponModel>> weapons;
   std::vector<std::unique_ptr<TestModel>> models;
 
   LiveSkeletonState() {
@@ -128,8 +128,8 @@ struct LiveSkeletonState {
     TestModel& model = *models.back();
     for (std::size_t bone = 0; bone < kTestBones; ++bone) {
       model.bones.at(bone).tag = kLabels.at(bone).tag;
-      model.bones.at(bone).limbIds = kLabels.at(bone).limb_ids;
-      model.bones.at(bone).auxiliaryTag = kLabels.at(bone).auxiliary_tag;
+      model.bones.at(bone).limb_ids = kLabels.at(bone).limb_ids;
+      model.bones.at(bone).auxiliary_tag = kLabels.at(bone).auxiliary_tag;
     }
     VS::Render::RecordLiveModelExtent(&model, sizeof model);
     return model;
@@ -156,10 +156,11 @@ struct LiveSkeletonState {
     return gimmick;
   }
 
-  Actors_WeaponModel& AddFirstWeapon(int actor_id, TestModel& model) {
-    weapons.push_back(std::make_unique<Actors_WeaponModel>());
-    Actors_WeaponModel& weapon = *weapons.back();
-    weapon.sectionOffsets = reinterpret_cast<Actors_WeaponModelData*>(&model);
+  VS::Actors::WeaponModel& AddFirstWeapon(int actor_id, TestModel& model) {
+    weapons.push_back(std::make_unique<VS::Actors::WeaponModel>());
+    VS::Actors::WeaponModel& weapon = *weapons.back();
+    weapon.section_offsets =
+        reinterpret_cast<VS::Actors::WeaponModelData*>(&model);
     VS::Actors::weaponModels[static_cast<std::size_t>(actor_id) *
                              actors::kWeaponsPerActor] = &weapon;
     return weapon;
@@ -416,7 +417,7 @@ TEST_CASE("Live head tracking resets its step and needs a head bone",
   CHECK(actor.headTracking.pad == 30);
 
   const SVECTOR aim{7, 8, 9, 10};
-  model.bones[1].auxiliaryTag = 0;
+  model.bones[1].auxiliary_tag = 0;
   CHECK(actors::SetLiveActorHeadTracking(2, 3, &aim, 12) ==
         actors::kSkeletonNoHeadBone);
   CHECK(PointOf(actor.headTracking) == Vec3{11, 22, 33});
@@ -506,8 +507,8 @@ TEST_CASE("Live bone positions read the actor root at its position",
   LiveSkeletonState state;
   TestModel& model = state.AddModel();
   Actors_ActorRecord& actor = state.AddActor(1, model);
-  actor.blendPose.boneKeys[std::size(actor.blendPose.boneKeys) - 1] = {100, 200,
-                                                                       300, 0};
+  actor.blendPose.bone_keys[std::size(actor.blendPose.bone_keys) - 1] = {
+      100, 200, 300, 0};
   actor.instance.position = {1000, 2000, 3000, 0};
   VS::test_support::ChannelWarnings warnings{"actors"};
 
@@ -530,8 +531,8 @@ TEST_CASE("Live bone positions read the actor's first weapon",
   TestModel& model = state.AddModel();
   TestModel& weapon_model = state.AddModel();
   state.AddActor(1, model);
-  Actors_WeaponModel& weapon = state.AddFirstWeapon(1, weapon_model);
-  weapon.boneWorldMatrices[1] = TranslationMatrix({10, 20, 80});
+  VS::Actors::WeaponModel& weapon = state.AddFirstWeapon(1, weapon_model);
+  weapon.bone_world_matrices[1] = TranslationMatrix({10, 20, 80});
   weapon_model.bones[1].length = 40;
   VS::test_support::ChannelWarnings warnings{"actors"};
 

@@ -563,8 +563,8 @@ void CheckAttachmentStrides(bool companion, const u_char* buffer) {
   if (!companion) {
     const VS::Content::LegacyActorAssetRequest& shield =
         VS::Content::legacyActorAssetRequests[2];
-    CHECK(shield.destination ==
-          buffer + sizeof(Actors_ActorRecord) + sizeof(Actors_WeaponModel));
+    CHECK(shield.destination == buffer + sizeof(Actors_ActorRecord) +
+                                    sizeof(VS::Actors::WeaponModel));
     CHECK(shield.target_slot == 3);
   }
 }

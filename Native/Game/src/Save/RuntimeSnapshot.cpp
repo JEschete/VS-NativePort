@@ -19,7 +19,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/Channel.hpp"
@@ -1198,16 +1198,16 @@ Result CaptureActors(Snapshot& state) {
       found->limb_hp[limb] = stats.limbs[limb].hp;
     }
     found->statuses = stats.statuses;
-    Actors_ActorLocationQuery placement{};
+    VS::Actors::ActorLocationQuery placement{};
     VS::Actors::LiveActorSavedPlacement(slot, stats.movementClass, &placement);
-    found->tile_x =
-        static_cast<unsigned char>(placement.location.packedTile.target.tileX);
+    found->tile_x = static_cast<unsigned char>(
+        placement.location.packed_tile.target.tile_x);
     found->direction = static_cast<unsigned char>(
-        placement.location.packedTile.target.tileLayer);
-    found->tile_z =
-        static_cast<unsigned char>(placement.location.packedTile.target.tileZ);
-    found->height =
-        static_cast<unsigned char>(placement.location.packedTile.target.facing);
+        placement.location.packed_tile.target.tile_layer);
+    found->tile_z = static_cast<unsigned char>(
+        placement.location.packed_tile.target.tile_z);
+    found->height = static_cast<unsigned char>(
+        placement.location.packed_tile.target.facing);
   }
   return {};
 }
@@ -1474,12 +1474,12 @@ std::expected<Snapshot, std::string> Capture(
   state.location.previous_tile = {model.previousTileX, model.previousTileZ,
                                   model.previousTileLayer};
   state.location.previous_facing = model.previousFacing;
-  const auto saved =
-      std::bit_cast<Actors_TileTarget>(Actors_actorRecords[0]->savedPlacement);
+  const auto saved = std::bit_cast<VS::Actors::TileTarget>(
+      Actors_actorRecords[0]->savedPlacement);
   state.location.saved_placement = {
-      {static_cast<std::uint8_t>(saved.tileX),
-       static_cast<std::uint8_t>(saved.tileZ),
-       static_cast<std::uint8_t>(saved.tileLayer)},
+      {static_cast<std::uint8_t>(saved.tile_x),
+       static_cast<std::uint8_t>(saved.tile_z),
+       static_cast<std::uint8_t>(saved.tile_layer)},
       static_cast<std::uint8_t>(saved.facing)};
   CaptureCamera(state);
   valid = ValidateOrbitCamera(state);
@@ -1644,11 +1644,11 @@ std::expected<void, std::string> FinishResume() {
   model.previousTileLayer = state.location.previous_tile.layer;
   model.supportLayer = 0;
   model.placementLayer = 0;
-  Actors_TileTarget saved_placement{};
+  VS::Actors::TileTarget saved_placement{};
   const auto& saved = state.location.saved_placement;
-  saved_placement.tileX = saved.tile.x;
-  saved_placement.tileLayer = saved.tile.layer;
-  saved_placement.tileZ = saved.tile.z;
+  saved_placement.tile_x = saved.tile.x;
+  saved_placement.tile_layer = saved.tile.layer;
+  saved_placement.tile_z = saved.tile.z;
   saved_placement.facing = saved.facing;
   actor.savedPlacement = std::bit_cast<int>(saved_placement);
   RestoreCamera(state);

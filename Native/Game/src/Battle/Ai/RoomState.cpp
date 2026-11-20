@@ -12,9 +12,9 @@
 
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"

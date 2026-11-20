@@ -4,7 +4,7 @@
 // code reads them. SkeletonLive.cpp defines them.
 
 #include "Actors/ModelDraw.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Actors {
@@ -20,7 +20,7 @@ extern MATRIX skeletonRootMatrix;
 // decomp: vs_battle_wepModels (BATTLE/BATTLE.PRG 3A1A0.h): two weapon model
 // slots per actor slot, for the first ten actor slots.
 inline constexpr int kWeaponModelCount = 20;
-extern Actors_WeaponModel* weaponModels[kWeaponModelCount];
+extern VS::Actors::WeaponModel* weaponModels[kWeaponModelCount];
 // decomp: D_800F49B8 (BATTLE/BATTLE.PRG 38C1C.c): the camera the bone queries
 // view the bones from; the room pass and the pose builder prepare it.
 extern MATRIX boneMatrixScratch;

@@ -14,17 +14,17 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/ModelDraw.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.hpp"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/TextureAnimation.h"
-#include "Actors/WeaponModel.h"
+#include "Actors/TextureAnimationRecords.hpp"
+#include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -66,7 +66,7 @@ constexpr unsigned kPoseBoneCapacity = std::extent_v<PoseMatrices>;
 // The model's header and bone table lie within its loaded data.
 bool ModelHoldsBones(const Actors_ActorRecord& actor, unsigned bones) {
   return actor.modelDataSize >=
-         sizeof(Actors_ShpModel) + (bones * sizeof(Actors_ShpBone));
+         sizeof(VS::Actors::ShpModel) + (bones * sizeof(VS::Actors::ShpBone));
 }
 }  // namespace
 
@@ -210,20 +210,20 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       !ModelHoldsBones(*actor, actor->instance.boneCount)) {
     return 0;
   }
-  Actors_ShpModel* model = actor->instance.model;
+  VS::Actors::ShpModel* model = actor->instance.model;
   for (unsigned bone = 1; bone < actor->instance.boneCount; ++bone) {
-    if (model->bones[bone].parentIndex >= bone ||
-        model->bones[bone].poseLockSlot > 2) {
+    if (model->bones[bone].parent_index >= bone ||
+        model->bones[bone].pose_lock_slot > 2) {
       return 0;
     }
   }
   const VS::Render::ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   SVECTOR rotation = {
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vx >> 1) +
+      static_cast<int16_t>((actor->blendPose.bone_keys[0].vx >> 1) +
                            actor->instance.rotationX),
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vy >> 1) +
+      static_cast<int16_t>((actor->blendPose.bone_keys[0].vy >> 1) +
                            actor->instance.facing),
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vz >> 1) +
+      static_cast<int16_t>((actor->blendPose.bone_keys[0].vz >> 1) +
                            actor->instance.rotationZ),
       0};
   if (actor->paletteFadeActive) {
@@ -239,29 +239,29 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
   VECTOR scale{};
   int cumulative[kPoseBoneCount][kSpatialDimensions] = {};
   for (unsigned bone = 0; bone < actor->instance.boneCount; ++bone) {
-    const Actors_ShpBone* joint = &model->bones[bone];
+    const VS::Actors::ShpBone* joint = &model->bones[bone];
     MATRIX matrix = root;
-    if (bone != 0 && joint->poseLockSlot != 0) {
+    if (bone != 0 && joint->pose_lock_slot != 0) {
       VS::Actors::ApplyLiveLockedBoneTransform(
-          actor, camera, static_cast<int>(bone), joint->poseLockSlot);
+          actor, camera, static_cast<int>(bone), joint->pose_lock_slot);
       cumulative[bone][0] = cumulative[bone][1] = cumulative[bone][2] =
           kPoseScaleOne;
       continue;
     }
-    const unsigned parent = bone == 0 ? 0 : joint->parentIndex;
+    const unsigned parent = bone == 0 ? 0 : joint->parent_index;
     if (bone != 0) {
       const SVECTOR local = {static_cast<int16_t>(-model->bones[parent].length),
                              0, 0, 0};
       TransformBonePosition(&actor->boneMatrices[parent], &local, &matrix);
       rotation.vx =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vx >> 1);
+          static_cast<int16_t>(actor->blendPose.bone_keys[bone].vx >> 1);
       rotation.vy =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vy >> 1);
+          static_cast<int16_t>(actor->blendPose.bone_keys[bone].vy >> 1);
       rotation.vz =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vz >> 1);
-      AdjustBoneRotation(actor, joint->auxiliaryTag, &rotation);
-      if (joint->auxiliaryTag >= kFirstCameraFacingTag &&
-          joint->auxiliaryTag <= kLastCameraFacingTag) {
+          static_cast<int16_t>(actor->blendPose.bone_keys[bone].vz >> 1);
+      AdjustBoneRotation(actor, joint->auxiliary_tag, &rotation);
+      if (joint->auxiliary_tag >= kFirstCameraFacingTag &&
+          joint->auxiliary_tag <= kLastCameraFacingTag) {
         VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, matrix);
         VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, matrix);
         scale.vx = scale.vy = scale.vz = actor->scale;
@@ -273,7 +273,7 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       }
     }
     skeletonPose.bone_matrices[bone] = matrix;
-    const SVECTOR* local_scale = &actor->blendPose.scaleKeys[bone];
+    const SVECTOR* local_scale = &actor->blendPose.scale_keys[bone];
     const int components[3] = {local_scale->vx, local_scale->vy,
                                local_scale->vz};
     for (size_t axis = 0; axis < sizeof components / sizeof components[0];
@@ -410,7 +410,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     return actor_.instance.uvLayout != 0;
   }
   bool ModelOverridesForced() const override {
-    return Actors_forcedModelOverrides != 0;
+    return VS::Actors::forcedModelOverrides != 0;
   }
   ModelAppearance GeometryAppearance() const override {
     return AppearanceOf(*geometry_);

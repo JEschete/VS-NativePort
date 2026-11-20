@@ -8,7 +8,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/Movement.h"

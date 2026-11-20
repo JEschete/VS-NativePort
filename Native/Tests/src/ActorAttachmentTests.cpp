@@ -8,7 +8,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
@@ -21,7 +21,7 @@ struct AttachmentFixture {
       VS::Core::SetConsoleLogLevel(VS::Core::LogLevel::Off);
   Actors_ActorRecord parent{};
   Actors_ActorRecord child{};
-  Actors_ShpModel model{};
+  VS::Actors::ShpModel model{};
 
   AttachmentFixture() {
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),

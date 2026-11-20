@@ -1930,8 +1930,8 @@ int func_800F9800(void) {
         source = (root / r"Native\Engine\src\Render\ModelGeometryLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("weapon.boneWorldMatrices[kWeaponPaletteMatrix]", source)
-        self.assertIn("weapon.ownerMotionState};", source)
+        self.assertIn("weapon.bone_world_matrices[kWeaponPaletteMatrix]", source)
+        self.assertIn("weapon.owner_motion_state};", source)
         core = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
             encoding="utf-8"
         )
@@ -3627,7 +3627,7 @@ int func_800F9800(void) {
         self.assertIn("ActorAssetRequest request{};", core)
         live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
         self.assertIn("constexpr std::size_t kRecordBytes = sizeof(Actors_ActorRecord);", live)
-        self.assertIn("constexpr std::size_t kWeaponBytes = sizeof(Actors_WeaponModel);", live)
+        self.assertIn("constexpr std::size_t kWeaponBytes = sizeof(VS::Actors::WeaponModel);", live)
         self.assertIn("constexpr std::size_t kCompanionBufferBytes = 2 * kRecordBytes;", live)
         self.assertIn("constexpr std::size_t kEquippedBufferBytes = kRecordBytes + (2 * kWeaponBytes);", live)
         self.assertNotIn("0x1900", live)
@@ -5028,7 +5028,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertIn("host.SetWeaponAttached(slot);", reset)
         live = (root / "Native/Game/src/Menu/Framework/ActorPreviewLive.cpp").read_text()
         self.assertIn("return VS::Actors::weaponModels[slot];", live)
-        self.assertIn("model->reserved08Bit4 = 1;", live)
+        self.assertIn("model->shown = 1;", live)
         self.assertNotIn("Battle_unusedGlobal1", preview + live)
         # #276 row 47 B47-01 promoted func_801090C4 (F02637) to the owned EquipmentRows.cpp
         # ReloadEquipmentModels; its Live host clears the flag on weapon model slots 2 and 3.
@@ -5042,7 +5042,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         )
         rows_live = (root / "Native/Game/src/Menu/Inventory/EquipmentRowsLive.cpp").read_text()
         self.assertIn("return VS::Actors::weaponModels[slot];", rows_live)
-        self.assertIn("model->reserved11 = 0;", rows_live)
+        self.assertIn("model->blend_level = 0;", rows_live)
         self.assertNotIn("Battle_unusedGlobal", rows + rows_live)
         inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         self.assertNotIn("Battle_unusedGlobal", inventory)
@@ -5053,7 +5053,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         slot = (root / "Native/Game/src/Actors/ActorModelSlot.hpp").read_text()
         self.assertIn('#include "Actors/ActorModelSlot.hpp"', allocation)
         self.assertNotIn("storage[0x5E8]", allocation)
-        self.assertIn("Actors_WeaponModel weapon;", slot)
+        self.assertIn("VS::Actors::WeaponModel weapon;", slot)
         registry = (root / "tools/port/owned.csv").read_text()
         self.assertIn("T00633,type,VS::Actors::ActorModelSlot,", registry)
 

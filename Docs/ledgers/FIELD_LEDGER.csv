@@ -1151,17 +1151,17 @@ T00197.003,T00197,ColorInfo,3,a,0,char,,,,maskBit,Semi-transparency bit written 
 T00197.004,T00197,ColorInfo,4,rindex,0,u_char,,,,redStepRow,Target minus current red plus 31; selects the fade step table row,high,source:main.c:10531;source:main.c:11373
 T00197.005,T00197,ColorInfo,5,gindex,0,u_char,,,,greenStepRow,Target minus current green plus 31; selects the fade step table row,high,source:main.c:10532;source:main.c:11374
 T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus current blue plus 31; selects the fade step table row,high,source:main.c:10533;source:main.c:11375
-T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
+T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:29;declaration-only;source:30DB0.h:28
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
 T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:397;declaration-only;source:30DB0.h:31
 T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
 T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
-T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
+T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:35;declaration-only;source:30DB0.h:34
 T00198.007,T00198,D_1F80035C_t,7,position,0,SVECTOR,,,,position,World position of the model,med,source:49268.c:57
 T00198.008,T00198,D_1F80035C_t,8,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:44F14.c:836
 T00198.009,T00198,D_1F80035C_t,9,parent,0,MATRIX *,,,,parent_bone_matrix,Matrix of the parent bone,high,source:49268.c:194
-T00198.010,T00198,D_1F80035C_t,10,unk60,1,int,,,,reserved60,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:37;declaration-only;source:30DB0.h:38
+T00198.010,T00198,D_1F80035C_t,10,unk60,1,int,,,,reserved60,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:39;declaration-only;source:30DB0.h:38
 T00198.011,T00198,D_1F80035C_t,11,matrix,0,MATRIX,,,,matrix,Working model matrix,high,source:44F14.c:861
 T00198.012,T00198,D_1F80035C_t,12,rotation,0,SVECTOR,,,,rotation,Rotation angles,high,source:30DB0.c:3700
 T00198.013,T00198,D_1F80035C_t,13,scale,0,VECTOR,,,,scale,Scale applied to the working matrix,high,source:44F14.c:871
@@ -1176,10 +1176,10 @@ T00199.006,T00199,D_1F8003BC_t,6,attributes,0,u_char[8],,,,attributes,Sampled ti
 T00199.007,T00199,D_1F8003BC_t,7,centerAttribute,0,u_char,,,,centerAttribute,Tile attribute under the actor,med,source:3A1A0.c:2286;use cited by sanity pass;source:3A1A0.h:643
 T00199.008,T00199,D_1F8003BC_t,8,pad3D,1,u_char[3],,,,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
 T00199.009,T00199,D_1F8003BC_t,9,unk40,1,int,,,,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
-T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Animation.h:11;declaration-only;source:44F14.c:14
-T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,firstFrame,First frame decoded,high,source:44F14.c:1383
-T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,lastFrame,Last frame decoded,high,source:44F14.c:1383
-T00200.003,T00200,D_1F8003EC_t,3,data,0,u_char **,,,,trackData,Track data being decoded,med,source:44F14.c:1381
+T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,reserved0,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Animation.h:11;declaration-only;source:44F14.c:14"
+T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,firstFrame,First frame decoded,high,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1383"
+T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,lastFrame,Last frame decoded,high,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1383"
+T00200.003,T00200,D_1F8003EC_t,3,data,0,u_char **,,,,trackData,Track data being decoded,med,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1381"
 T00201.000,T00201,D_80036770_t,0,unk0,1,int,,,baseMusicBankId,bank_id,Sample bank loaded for music,med,source:25AC.c:258
 T00201.001,T00201,D_80036770_t,1,unk4,1,int,,,alternateMusicBankId,alternate_bank_id,Alternate sample bank; a matching sequence selects it,med,source:25AC.c:2418
 T00201.002,T00201,D_80036770_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Samples\SampleBanks.hpp:15;declaration-only;source:25AC.c:20
@@ -1592,7 +1592,7 @@ T00239.086,T00239,D_800F4538_t,86,spSeqLbas,0,u_int[4],,,,specialSequenceLbas,Di
 T00239.087,T00239,D_800F4538_t,87,unk6BC,1,int[4],,,,reserved6BC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:114;declaration-only;source:3A1A0.h:333
 T00239.088,T00239,D_800F4538_t,88,spSeqSizes,0,u_short[4],,,,specialSequenceSizes,Byte sizes of the special-attack sequences,high,source:30DB0.c:1572
 T00239.089,T00239,D_800F4538_t,89,unk6D4,1,int[2],,,,reserved6D4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:116;declaration-only;source:3A1A0.h:335
-T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:586;source:30DB0.c:1360
+T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:588;source:30DB0.c:1360
 T00239.091,T00239,D_800F4538_t,91,unk6E0,1,u_char,,,queued animation | queuedAnimationId,queuedAnimation,Animation queued to play next; 0 when none,high,source:30DB0.c:3718
 T00239.092,T00239,D_800F4538_t,92,unk6E1,1,u_char,,,queued blend frames,queuedParameterA,First parameter of the queued animation,low,source:30DB0.c:3719
 T00239.093,T00239,D_800F4538_t,93,unk6E2,1,u_char,,,queued starting-frame parameter,queuedParameterB,Second parameter of the queued animation,low,source:30DB0.c:3720
@@ -1601,7 +1601,7 @@ T00239.095,T00239,D_800F4538_t,95,unk6E4,1,u_char,,,,contactKind,Kind of surface
 T00239.096,T00239,D_800F4538_t,96,unk6E5,1,u_char,,,idle animation | travelAnimationId,travelAnimation,Animation played while travelling,high,source:30DB0.c:1350
 T00239.097,T00239,D_800F4538_t,97,unk6E6,1,u_short,,,,modelId,Model id,high,source:30DB0.c:1097
 T00239.098,T00239,D_800F4538_t,98,unk6E8,1,short,,,,clutA,First palette slot,low,source:30DB0.c:1333
-T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:589;source:30DB0.c:1334
+T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:591;source:30DB0.c:1334
 T00239.100,T00239,D_800F4538_t,100,unk6EC,1,short,,,,ledgeHeight,Height compared when hanging from a ledge,low,source:3A1A0.c:1966
 T00239.101,T00239,D_800F4538_t,101,unk6EE,1,signed char,,,,platformOffsetX,X offset from the platform anchor,med,source:3A1A0.c:1121
 T00239.102,T00239,D_800F4538_t,102,unk6EF,1,signed char,,,,platformOffsetZ,Z offset from the platform anchor,med,source:3A1A0.c:1122
@@ -1735,19 +1735,19 @@ T00241.063,T00241,D_800F4538_unk0,63,lastTouchedTileZ,0,u_char,,,,previousTileZ,
 T00241.064,T00241,D_800F4538_unk0,64,unk63,1,u_char,,,,reserved63,Not read,low,declaration-only;source:3A1A0.h:187
 T00241.065,T00241,D_800F4538_unk0,65,unk64,1,D_800F4538_unk64,,,,palettePulse,Palette pulse state,high,source:44F14.c:953
 T00241.066,T00241,D_800F4538_unk0,66,unk68,1,D_800F4538_unk68 *,,,,model,SHP model,high,source:30DB0.c:1150
-T00242.000,T00242,D_800F4538_unk180C,0,unk0_0,1,u_char,4,,texture animation ID,timeline,Timeline played; 0 when idle,high,source:40564.c:1385
-T00242.001,T00242,D_800F4538_unk180C,1,unk0_4,1,u_char,4,,track mode,mode,"0 plays once, 1 loops, 2 is paused",med,source:40564.c:1339
-T00242.002,T00242,D_800F4538_unk180C,2,unk1,1,u_char,,,,currentFrame,Overlay frame + 1 being shown,high,source:40564.c:1407
-T00242.003,T00242,D_800F4538_unk180C,3,unk2,1,u_char,,,timeline entry,keyIndex,Key of the timeline being shown,high,source:40564.c:1394
-T00242.004,T00242,D_800F4538_unk180C,4,unk3,1,u_char,,,frame timer,ticks,Ticks the current key has been shown,high,source:40564.c:1390
-T00243.000,T00243,D_800F4538_unk181C,0,x,0,u_char,,,,x,Current horizontal source position,high,source:30DB0.c:1392;source:40564.c:1598
-T00243.001,T00243,D_800F4538_unk181C,1,y,0,u_char,,,,y,Current vertical source position,high,source:30DB0.c:1393;source:40564.c:1600
-T00243.002,T00243,D_800F4538_unk181C,2,dx,0,signed char,,,,stepX,Horizontal step; negated when bouncing,high,source:40564.c:1599;source:40564.c:1612
-T00243.003,T00243,D_800F4538_unk181C,3,dy,0,signed char,,,,stepY,Vertical step; negated when bouncing,high,source:40564.c:1601;source:40564.c:1621
-T00243.004,T00243,D_800F4538_unk181C,4,interval,0,u_char,,,,interval,Ticks between steps,high,source:40564.c:1585
-T00243.005,T00243,D_800F4538_unk181C,5,timer,0,u_char,,,,timer,Ticks since the last step,high,source:40564.c:1583
-T00243.006,T00243,D_800F4538_unk181C,6,unk6,1,u_char,,,,pad6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:32;declaration-only;source:3A1A0.h:240
-T00243.007,T00243,D_800F4538_unk181C,7,unk7,1,u_char,,,,pad7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:33;declaration-only;source:3A1A0.h:241
+T00242.000,T00242,D_800F4538_unk180C,0,unk0_0,1,u_char,4,,texture animation ID,timeline,Timeline played; 0 when idle,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationSlotRecord::timeline (#441);source:40564.c:1385
+T00242.001,T00242,D_800F4538_unk180C,1,unk0_4,1,u_char,4,,track mode,mode,"0 plays once, 1 loops, 2 is paused",med,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationSlotRecord::mode (#441);source:40564.c:1339
+T00242.002,T00242,D_800F4538_unk180C,2,unk1,1,u_char,,,,current_frame,Overlay frame + 1 being shown,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationSlotRecord::current_frame (#441);source:40564.c:1407
+T00242.003,T00242,D_800F4538_unk180C,3,unk2,1,u_char,,,timeline entry,key_index,Key of the timeline being shown,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationSlotRecord::key_index (#441);source:40564.c:1394
+T00242.004,T00242,D_800F4538_unk180C,4,unk3,1,u_char,,,frame timer,ticks,Ticks the current key has been shown,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationSlotRecord::ticks (#441);source:40564.c:1390
+T00243.000,T00243,D_800F4538_unk181C,0,x,0,u_char,,,,x,Current horizontal source position,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::x (#441);source:30DB0.c:1392;source:40564.c:1598
+T00243.001,T00243,D_800F4538_unk181C,1,y,0,u_char,,,,y,Current vertical source position,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::y (#441);source:30DB0.c:1393;source:40564.c:1600
+T00243.002,T00243,D_800F4538_unk181C,2,dx,0,signed char,,,,step_x,Horizontal step; negated when bouncing,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::step_x (#441);source:40564.c:1599;source:40564.c:1612
+T00243.003,T00243,D_800F4538_unk181C,3,dy,0,signed char,,,,step_y,Vertical step; negated when bouncing,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::step_y (#441);source:40564.c:1601;source:40564.c:1621
+T00243.004,T00243,D_800F4538_unk181C,4,interval,0,u_char,,,,interval,Ticks between steps,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::interval (#441);source:40564.c:1585
+T00243.005,T00243,D_800F4538_unk181C,5,timer,0,u_char,,,,timer,Ticks since the last step,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::timer (#441);source:40564.c:1583
+T00243.006,T00243,D_800F4538_unk181C,6,unk6,1,u_char,,,,pad6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimationRecords.hpp:33;native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::pad6 (#441);declaration-only;source:3A1A0.h:240
+T00243.007,T00243,D_800F4538_unk181C,7,unk7,1,u_char,,,,pad7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimationRecords.hpp:34;native:TextureAnimationRecords.hpp VS::Actors::TextureScrollStateRecord::pad7 (#441);declaration-only;source:3A1A0.h:241
 T00244.000,T00244,D_800F4538_unk1848,0,unk0,1,u_char,,,,mode,"Movement mode (0 none, 1, 2, 6 turn, 7 jump)",med,source:3A1A0.c:1084
 T00244.001,T00244,D_800F4538_unk1848,1,unk1,1,u_char,,,,reserved1,Not read,low,declaration-only;source:3A1A0.h:103
 T00244.002,T00244,D_800F4538_unk1848,2,unk2,1,u_char,,,,reserved2,Not read,low,declaration-only;source:3A1A0.h:104
@@ -1780,48 +1780,48 @@ T00248.000,T00248,D_800F4538_unk58_3,0,unk0_0,1,u_int,8,,,opaque0Bit0,Not used b
 T00248.001,T00248,D_800F4538_unk58_3,1,unk0_8,1,u_int,8,,,opaque1Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:11;source:224.c:129
 T00248.002,T00248,D_800F4538_unk58_3,2,unk0_16,1,u_int,8,,,opaque2Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:12;source:224.c:130
 T00248.003,T00248,D_800F4538_unk58_3,3,unk0_24,1,u_int,8,,,opaque3Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:13;source:224.c:131
-T00249.000,T00249,D_800F4538_unk614,0,x,0,u_char,,,,x,Cell X,high,source:40564.c:1442
-T00249.001,T00249,D_800F4538_unk614,1,y,0,u_char,,,,y,Cell Y,high,source:40564.c:1443
-T00249.002,T00249,D_800F4538_unk614,2,columns,0,u_char,,,,columns,Cells per row,high,source:40564.c:1444
-T00249.003,T00249,D_800F4538_unk614,3,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:42;declaration-only;source:3A1A0.h:211
-T00250.000,T00250,D_800F4538_unk61C,0,x,0,u_char,,,,x,Window left edge,high,source:40564.c:1602
-T00250.001,T00250,D_800F4538_unk61C,1,y,0,u_char,,,,y,Window top edge,high,source:40564.c:1607
-T00250.002,T00250,D_800F4538_unk61C,2,w,0,u_char,,,,width,Window width; zero disables the scroll,high,source:40564.c:1578;source:40564.c:1606
-T00250.003,T00250,D_800F4538_unk61C,3,h,0,u_char,,,,height,Window height,high,source:40564.c:1607
-T00250.004,T00250,D_800F4538_unk61C,4,unk4,1,u_char,,,,initialStepX,Horizontal step copied into the scroll state,high,source:30DB0.c:1394
-T00250.005,T00250,D_800F4538_unk61C,5,unk5,1,u_char,,,,initialStepY,Vertical step copied into the scroll state,high,source:30DB0.c:1395
-T00250.006,T00250,D_800F4538_unk61C,6,unk6_0,1,u_char,1,,ping-pong scrolling,bounces,Reverses direction at an edge instead of wrapping to the start,high,source:40564.c:1610
-T00250.007,T00250,D_800F4538_unk61C,7,unk6_1,1,u_char,7,,,reservedBits1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:55;declaration-only;source:3A1A0.h:229
-T00250.008,T00250,D_800F4538_unk61C,8,unk7,1,u_char,,,,interval,Ticks between steps copied into the scroll state,high,source:30DB0.c:1396
+T00249.000,T00249,D_800F4538_unk614,0,x,0,u_char,,,,x,Cell X,high,native:TextureAnimationRecords.hpp VS::Actors::TextureCellOriginRecord::x (#441);source:40564.c:1442
+T00249.001,T00249,D_800F4538_unk614,1,y,0,u_char,,,,y,Cell Y,high,native:TextureAnimationRecords.hpp VS::Actors::TextureCellOriginRecord::y (#441);source:40564.c:1443
+T00249.002,T00249,D_800F4538_unk614,2,columns,0,u_char,,,,columns,Cells per row,high,native:TextureAnimationRecords.hpp VS::Actors::TextureCellOriginRecord::columns (#441);source:40564.c:1444
+T00249.003,T00249,D_800F4538_unk614,3,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimationRecords.hpp:46;native:TextureAnimationRecords.hpp VS::Actors::TextureCellOriginRecord::reserved3 (#441);declaration-only;source:3A1A0.h:211
+T00250.000,T00250,D_800F4538_unk61C,0,x,0,u_char,,,,x,Window left edge,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::x (#441);source:40564.c:1602
+T00250.001,T00250,D_800F4538_unk61C,1,y,0,u_char,,,,y,Window top edge,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::y (#441);source:40564.c:1607
+T00250.002,T00250,D_800F4538_unk61C,2,w,0,u_char,,,,width,Window width; zero disables the scroll,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::width (#441);source:40564.c:1578;source:40564.c:1606
+T00250.003,T00250,D_800F4538_unk61C,3,h,0,u_char,,,,height,Window height,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::height (#441);source:40564.c:1607
+T00250.004,T00250,D_800F4538_unk61C,4,unk4,1,u_char,,,,initial_step_x,Horizontal step copied into the scroll state,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::initial_step_x (#441);source:30DB0.c:1394
+T00250.005,T00250,D_800F4538_unk61C,5,unk5,1,u_char,,,,initial_step_y,Vertical step copied into the scroll state,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::initial_step_y (#441);source:30DB0.c:1395
+T00250.006,T00250,D_800F4538_unk61C,6,unk6_0,1,u_char,1,,ping-pong scrolling,bounces,Reverses direction at an edge instead of wrapping to the start,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::bounces (#441);source:40564.c:1610
+T00250.007,T00250,D_800F4538_unk61C,7,unk6_1,1,u_char,7,,,reserved_bits1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimationRecords.hpp:61;native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::reserved_bits1 (#441);declaration-only;source:3A1A0.h:229
+T00250.008,T00250,D_800F4538_unk61C,8,unk7,1,u_char,,,,interval,Ticks between steps copied into the scroll state,high,native:TextureAnimationRecords.hpp VS::Actors::TextureScrollBoundsRecord::interval (#441);source:30DB0.c:1396
 T00251.000,T00251,D_800F4538_unk64,0,unk0,1,u_char,,,highlighted polygon-group bitmask,kind,Effect kind; 0 when inactive,med,source:44F14.c:961
 T00251.001,T00251,D_800F4538_unk64,1,unk1,1,u_char,,,palette pulse intensity,level,Effect level,med,source:40564.c:1672
 T00251.002,T00251,D_800F4538_unk64,2,unk2,1,u_char,,,palette pulse direction flags,flags,"Effect flags; bit 0 direction, bit 1 hold",low,source:40564.c:1675
 T00251.003,T00251,D_800F4538_unk64,3,unk3,1,u_char,,,,parameter,Effect parameter,low,source:44F14.c:961
-T00252.000,T00252,D_800F4538_unk68,0,unk0,1,u_char[48],,,,header,SHP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:86
-T00252.001,T00252,D_800F4538_unk68,1,akaoOffset,0,void *,,,,soundSection,AKAO sound section; relocated on load,high,source:30DB0.c:1146
-T00252.002,T00252,D_800F4538_unk68,2,groupOffset,0,void *,,,bone vertex-group descriptors,groupSection,Vertex group section; relocated on load,high,source:30DB0.c:1147
-T00252.003,T00252,D_800F4538_unk68,3,vertexOffset,0,void *,,,model vertices,vertexSection,Vertex section; relocated on load,high,source:30DB0.c:1148
-T00252.004,T00252,D_800F4538_unk68,4,polyOffset,0,void *,,,,polygonSection,Polygon section; relocated on load,high,source:30DB0.c:1149
-T00252.005,T00252,D_800F4538_unk68,5,armatures,0,_armature_t[0],,,,bones,Bone table,high,source:30DB0.c:1381
-T00253.000,T00253,D_800F4538_unkC54,0,unk0,1,SVECTOR[42],,,bone rotation tracks and root translation,boneKeys,Current rotation key of each bone; entry 41 is the root translation,high,source:upstream:40564.c:2105;source:upstream:40564.c:2111
-T00253.001,T00253,D_800F4538_unkC54,1,unk150,1,SVECTOR[42],,,bone scale tracks,scaleKeys,Per-bone scale keys (0x40 = 1.0); entry 41 is the optional root track,high,source:40564.c:2711
-T00253.002,T00253,D_800F4538_unkC54,2,unk2A0,1,SVECTOR[42],,,,reserved2A0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:57
-T00253.003,T00253,D_800F4538_unkC54,3,unk3F0,1,SVECTOR[42],,,,trackStates,"Per-bone track state bytes, cleared on load",low,source:40564.c:2707
-T00253.004,T00253,D_800F4538_unkC54,4,unk540,1,short,,,,frame,Frame counter compared with the animation length,high,source:44F14.c:1292
-T00253.005,T00253,D_800F4538_unkC54,5,unk542,1,u_short,,,event delay,nextEventFrame,Frame of the next event; 0xFFFF when none,high,source:40564.c:2647
-T00253.006,T00253,D_800F4538_unkC54,6,unk544,1,u_char *,,,event stream cursor,eventScript,Next byte of the animation event stream,high,source:40564.c:2659
-T00253.007,T00253,D_800F4538_unkC54,7,animationId,0,u_char,,,,animationId,Animation loaded into the pose,high,source:upstream:40564.c:2090
-T00253.008,T00253,D_800F4538_unkC54,8,unk549,1,u_char,,,,eventWait,Frames left in an event-script wait,high,source:44F14.c:243
-T00253.009,T00253,D_800F4538_unkC54,9,unk548_16,1,int,1,,,holdingLastFrame,Set while the pose holds the last frame,med,source:44F14.c:1309
-T00253.010,T00253,D_800F4538_unkC54,10,unk548_17,1,int,1,,,reachedEnd,Set when the frame counter reaches the animation length,med,source:44F14.c:1293
-T00253.011,T00253,D_800F4538_unkC54,11,unk548_18,1,int,14,,,reservedBits,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Animation.h:30;declaration-only;source:3A1A0.h:66
-T00253.012,T00253,D_800F4538_unkC54,12,unk54C,1,int,,,,reserved54C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Animation.h:31;declaration-only;source:3A1A0.h:67
+T00252.000,T00252,D_800F4538_unk68,0,unk0,1,u_char[48],,,,header,SHP header bytes before the section offsets,med,native:ShpModel.hpp VS::Actors::ShpModel::header (#441);declaration-only;source:3A1A0.h:86
+T00252.001,T00252,D_800F4538_unk68,1,akaoOffset,0,void *,,,,sound_section,AKAO sound section; relocated on load,high,native:ShpModel.hpp VS::Actors::ShpModel::sound_section (#441);source:30DB0.c:1146
+T00252.002,T00252,D_800F4538_unk68,2,groupOffset,0,void *,,,bone vertex-group descriptors,group_section,Vertex group section; relocated on load,high,native:ShpModel.hpp VS::Actors::ShpModel::group_section (#441);source:30DB0.c:1147
+T00252.003,T00252,D_800F4538_unk68,3,vertexOffset,0,void *,,,model vertices,vertex_section,Vertex section; relocated on load,high,native:ShpModel.hpp VS::Actors::ShpModel::vertex_section (#441);source:30DB0.c:1148
+T00252.004,T00252,D_800F4538_unk68,4,polyOffset,0,void *,,,,polygon_section,Polygon section; relocated on load,high,native:ShpModel.hpp VS::Actors::ShpModel::polygon_section (#441);source:30DB0.c:1149
+T00252.005,T00252,D_800F4538_unk68,5,armatures,0,_armature_t[0],,,,bones,Bone table,high,native:ShpModel.hpp VS::Actors::ShpModel::bones (#441);source:30DB0.c:1381
+T00253.000,T00253,D_800F4538_unkC54,0,unk0,1,SVECTOR[42],,,bone rotation tracks and root translation,bone_keys,Current rotation key of each bone; entry 41 is the root translation,high,native:Animation.hpp VS::Actors::AnimationPose::bone_keys (#441);source:upstream:40564.c:2105;source:upstream:40564.c:2111
+T00253.001,T00253,D_800F4538_unkC54,1,unk150,1,SVECTOR[42],,,bone scale tracks,scale_keys,Per-bone scale keys (0x40 = 1.0); entry 41 is the optional root track,high,native:Animation.hpp VS::Actors::AnimationPose::scale_keys (#441);source:40564.c:2711
+T00253.002,T00253,D_800F4538_unkC54,2,unk2A0,1,SVECTOR[42],,,,rotation_deltas,Per-bone rotation deltas applied by native sequence playback,low,native:Animation.hpp VS::Actors::AnimationPose::rotation_deltas (#441);read and written as per-bone rotation deltas by SequencePlaybackLive.cpp (40564.c:2707 track loop);declaration-only;source:3A1A0.h:57
+T00253.003,T00253,D_800F4538_unkC54,3,unk3F0,1,SVECTOR[42],,,,track_states,"Per-bone track state bytes, cleared on load",low,native:Animation.hpp VS::Actors::AnimationPose::track_states (#441);source:40564.c:2707
+T00253.004,T00253,D_800F4538_unkC54,4,unk540,1,short,,,,frame,Frame counter compared with the animation length,high,native:Animation.hpp VS::Actors::AnimationPose::frame (#441);source:44F14.c:1292
+T00253.005,T00253,D_800F4538_unkC54,5,unk542,1,u_short,,,event delay,next_event_frame,Frame of the next event; 0xFFFF when none,high,native:Animation.hpp VS::Actors::AnimationPose::next_event_frame (#441);source:40564.c:2647
+T00253.006,T00253,D_800F4538_unkC54,6,unk544,1,u_char *,,,event stream cursor,event_script,Next byte of the animation event stream,high,native:Animation.hpp VS::Actors::AnimationPose::event_script (#441);source:40564.c:2659
+T00253.007,T00253,D_800F4538_unkC54,7,animationId,0,u_char,,,,animation_id,Animation loaded into the pose,high,native:Animation.hpp VS::Actors::AnimationPose::animation_id (#441);source:upstream:40564.c:2090
+T00253.008,T00253,D_800F4538_unkC54,8,unk549,1,u_char,,,,event_wait,Frames left in an event-script wait,high,native:Animation.hpp VS::Actors::AnimationPose::event_wait (#441);source:44F14.c:243
+T00253.009,T00253,D_800F4538_unkC54,9,unk548_16,1,int,1,,,holding_last_frame,Set while the pose holds the last frame,med,native:Animation.hpp VS::Actors::AnimationPose::holding_last_frame (#441);source:44F14.c:1309
+T00253.010,T00253,D_800F4538_unkC54,10,unk548_17,1,int,1,,,reached_end,Set when the frame counter reaches the animation length,med,native:Animation.hpp VS::Actors::AnimationPose::reached_end (#441);source:44F14.c:1293
+T00253.011,T00253,D_800F4538_unkC54,11,unk548_18,1,int,14,,,reserved_bits,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Animation.hpp:32;native:Animation.hpp VS::Actors::AnimationPose::reserved_bits (#441);declaration-only;source:3A1A0.h:66
+T00253.012,T00253,D_800F4538_unkC54,12,unk54C,1,int,,,,reserved54c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Animation.hpp:33;native:Animation.hpp VS::Actors::AnimationPose::reserved54c (#441);declaration-only;source:3A1A0.h:67
 T00254.000,T00254,D_800F4590_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:19;source:224.c:118
 T00254.001,T00254,D_800F4590_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:20;declaration-only;source:30DB0.h:13
-T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,opaque8,Partial weapon-model flags view; bit4 enables preview weapon drawing.,high,source:224.c:112;G00409 aliases vs_battle_wepModels[2];native F02465 uses Actors_WeaponModel.reserved08Bit4;issue116
+T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,opaque8,Partial weapon-model flags view; bit4 enables preview weapon drawing.,high,source:224.c:112;G00409 aliases vs_battle_wepModels[2];native F02465 uses VS::Actors::WeaponModel::shown;issue116
 T00254.003,T00254,D_800F4590_t,3,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:22;declaration-only;source:30DB0.h:15
 T00254.004,T00254,D_800F4590_t,4,unk10,1,char,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\ActorPreview.h:23;declaration-only;source:30DB0.h:16
-T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,opaque11,Weapon fade-start value reset during preview equipment replacement.,high,source:68C4.c:67;G00409 aliases vs_battle_wepModels[2];native F02637 uses Actors_WeaponModel.reserved11;issue116
+T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,opaque11,Weapon fade-start value reset during preview equipment replacement.,high,source:68C4.c:67;G00409 aliases vs_battle_wepModels[2];native F02637 uses VS::Actors::WeaponModel::blend_level;issue116
 T00255.000,T00255,D_800F45E0_t,0,unk0,1,char,,,,boneCount,SHP bone count; zero for a free slot,med,source:30DB0.c:416
 T00255.001,T00255,D_800F45E0_t,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:55;declaration-only;source:3A1A0.h:453
 T00255.002,T00255,D_800F45E0_t,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:56;declaration-only;source:3A1A0.h:454
@@ -2601,18 +2601,18 @@ T00301.004,T00301,_accessoryIntermediate,4,unk33,1,char,,,,reserved33,Not used b
 T00302.000,T00302,_actions,0,id,0,u_short,,,,action_id,Action,high,native:CharacterInit.hpp VS::Actors::LimbActionInit::action_id (#441);source:146C.c:6260
 T00302.001,T00302,_actions,1,unk2,1,char,,,,effect_model,Copied into the actor action slot; meaning not established,low,native:CharacterInit.hpp VS::Actors::LimbActionInit::effect_model (#441);source:146C.c:6262
 T00302.002,T00302,_actions,2,index,0,char,,,,index,Index copied into the actor action slot,med,native:CharacterInit.hpp VS::Actors::LimbActionInit::index (#441);source:146C.c:6261
-T00303.000,T00303,_armature_t,0,unk0,1,int,,,boneLength,length,Bone length,high,source:30DB0.c:4221
-T00303.001,T00303,_armature_t,1,unk4,1,u_char,,,,parentIndex,Index of the parent bone,high,source:49268.c:192
-T00303.002,T00303,_armature_t,2,unk5,1,u_char,,,,reserved5,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Skeleton.h:12;declaration-only;source:3A1A0.h:73
-T00303.003,T00303,_armature_t,3,unk6,1,u_char,,,semanticBoneTag,tag,Bone tag searched by tag lookups,high,source:38C1C.c:132
-T00303.004,T00303,_armature_t,4,unk7,1,u_char,,,,limbIds,High nibble: limb group + 1; low nibble: limb index + 1,high,source:38C1C.c:138;source:38C1C.c:145
-T00303.005,T00303,_armature_t,5,unk8,1,u_char,,,,auxiliaryTag,Second lookup tag; 3 to 6 select an actor joint slot,high,source:38C1C.c:151;source:30DB0.c:1382
-T00303.006,T00303,_armature_t,6,unk9,1,u_char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Skeleton.h:16;declaration-only;source:3A1A0.h:77
-T00303.007,T00303,_armature_t,7,unkA,1,u_short,,,,jointInitValue,Initial value of the joint slot chosen by auxiliaryTag,med,source:30DB0.c:1385
-T00303.008,T00303,_armature_t,8,unkC,1,u_char,,,pose lock slot,poseLockSlot,Locked-pose slot (1 or 2) holding this bone's saved transform; 0 when unlocked,high,source:40564.c:2214;source:40564.c:2229;sanity pass 2026-10-17
-T00303.009,T00303,_armature_t,9,unkD,1,u_char,,,,reservedD,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Skeleton.h:19;declaration-only;source:3A1A0.h:80
-T00303.010,T00303,_armature_t,10,unkE,1,u_char,,,,reservedE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Skeleton.h:20;declaration-only;source:3A1A0.h:81
-T00303.011,T00303,_armature_t,11,unkF,1,u_char,,,,reservedF,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Skeleton.h:21;declaration-only;source:3A1A0.h:82
+T00303.000,T00303,_armature_t,0,unk0,1,int,,,boneLength,length,Bone length,high,native:ShpModel.hpp VS::Actors::ShpBone::length (#441);source:30DB0.c:4221
+T00303.001,T00303,_armature_t,1,unk4,1,u_char,,,,parent_index,Index of the parent bone,high,native:ShpModel.hpp VS::Actors::ShpBone::parent_index (#441);source:49268.c:192
+T00303.002,T00303,_armature_t,2,unk5,1,u_char,,,,reserved5,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ShpModel.hpp:15;native:ShpModel.hpp VS::Actors::ShpBone::reserved5 (#441);declaration-only;source:3A1A0.h:73
+T00303.003,T00303,_armature_t,3,unk6,1,u_char,,,semanticBoneTag,tag,Bone tag searched by tag lookups,high,native:ShpModel.hpp VS::Actors::ShpBone::tag (#441);source:38C1C.c:132
+T00303.004,T00303,_armature_t,4,unk7,1,u_char,,,,limb_ids,High nibble: limb group + 1; low nibble: limb index + 1,high,native:ShpModel.hpp VS::Actors::ShpBone::limb_ids (#441);source:38C1C.c:138;source:38C1C.c:145
+T00303.005,T00303,_armature_t,5,unk8,1,u_char,,,,auxiliary_tag,Second lookup tag; 3 to 6 select an actor joint slot,high,native:ShpModel.hpp VS::Actors::ShpBone::auxiliary_tag (#441);source:38C1C.c:151;source:30DB0.c:1382
+T00303.006,T00303,_armature_t,6,unk9,1,u_char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ShpModel.hpp:19;native:ShpModel.hpp VS::Actors::ShpBone::reserved9 (#441);declaration-only;source:3A1A0.h:77
+T00303.007,T00303,_armature_t,7,unkA,1,u_short,,,,joint_init_value,Initial value of the joint slot chosen by auxiliaryTag,med,native:ShpModel.hpp VS::Actors::ShpBone::joint_init_value (#441);source:30DB0.c:1385
+T00303.008,T00303,_armature_t,8,unkC,1,u_char,,,pose lock slot,pose_lock_slot,Locked-pose slot (1 or 2) holding this bone's saved transform; 0 when unlocked,high,native:ShpModel.hpp VS::Actors::ShpBone::pose_lock_slot (#441);source:40564.c:2214;source:40564.c:2229;sanity pass 2026-10-17
+T00303.009,T00303,_armature_t,9,unkD,1,u_char,,,,reserved0d,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ShpModel.hpp:22;native:ShpModel.hpp VS::Actors::ShpBone::reserved0d (#441);declaration-only;source:3A1A0.h:80
+T00303.010,T00303,_armature_t,10,unkE,1,u_char,,,,reserved0e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ShpModel.hpp:23;native:ShpModel.hpp VS::Actors::ShpBone::reserved0e (#441);declaration-only;source:3A1A0.h:81
+T00303.011,T00303,_armature_t,11,unkF,1,u_char,,,,reserved0f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ShpModel.hpp:24;native:ShpModel.hpp VS::Actors::ShpBone::reserved0f (#441);declaration-only;source:3A1A0.h:82
 T00304.000,T00304,_armorInfo,0,subId,0,char,,,,reserved0,Not read by decompiled code,low,source:168.c:5074
 T00304.001,T00304,_armorInfo,1,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:168.c:5027
 T00304.002,T00304,_armorInfo,2,category,0,char,,,,category,Named in the fork; see cited use,med,source:168.c:5028
@@ -3060,12 +3060,12 @@ T00343.005,T00343,_trail,5,splineSamples,0,SVECTOR[5],,,,spline_samples,Ring of 
 T00343.006,T00343,_trail,6,splineProgress,0,int,,,,spline_progress,Position along the spline; (spline_progress >> 12) - 0x1000 is the interpolation parameter,med,native:Trails.hpp LiveTrail::spline_progress (#441);source:EFFECT/trailEffect.h:36
 T00343.007,T00343,_trail,7,speed,0,int,,,,speed,"Progress added per tick, eased toward the target",med,"native:Trails.hpp LiveTrail::speed (#441);source:EFFECT/trailEffect.h:37;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution spline_progress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
 T00343.008,T00343,_trail,8,unk,1,int,,,,first_step,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",low,native:Trails.hpp LiveTrail::first_step (#441);source:EFFECT/trailEffect.h:38
-T00344.000,T00344,_wepModelOffsets,0,unk0,1,u_char[48],,,,header,WEP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:114
-T00344.001,T00344,_wepModelOffsets,1,texturesOffset,0,int,,,,textureSection,Texture section; file offset relocated to an address,high,source:30DB0.c:663
-T00344.002,T00344,_wepModelOffsets,2,vertexGroupsOffset,0,int,,,,vertexGroupSection,Vertex group section; relocated on load,high,source:30DB0.c:664
-T00344.003,T00344,_wepModelOffsets,3,verticesOffset,0,int,,,,vertexSection,Vertex section; relocated on load,high,source:30DB0.c:665
-T00344.004,T00344,_wepModelOffsets,4,polygonsOffset,0,int,,,,polygonSection,Polygon section; relocated on load,high,source:30DB0.c:666
-T00344.005,T00344,_wepModelOffsets,5,unk40,1,u_char[1984],,,,fileBody,Remaining WEP file bytes; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:15;declaration-only;source:3A1A0.h:119
+T00344.000,T00344,_wepModelOffsets,0,unk0,1,u_char[48],,,,header,WEP header bytes before the section offsets,med,native:WeaponModel.hpp VS::Actors::WeaponModelData::header (#441);declaration-only;source:3A1A0.h:114
+T00344.001,T00344,_wepModelOffsets,1,texturesOffset,0,int,,,,texture_section,Texture section; file offset relocated to an address,high,native:WeaponModel.hpp VS::Actors::WeaponModelData::texture_section (#441);source:30DB0.c:663
+T00344.002,T00344,_wepModelOffsets,2,vertexGroupsOffset,0,int,,,,vertex_group_section,Vertex group section; relocated on load,high,native:WeaponModel.hpp VS::Actors::WeaponModelData::vertex_group_section (#441);source:30DB0.c:664
+T00344.003,T00344,_wepModelOffsets,3,verticesOffset,0,int,,,,vertex_section,Vertex section; relocated on load,high,native:WeaponModel.hpp VS::Actors::WeaponModelData::vertex_section (#441);source:30DB0.c:665
+T00344.004,T00344,_wepModelOffsets,4,polygonsOffset,0,int,,,,polygon_section,Polygon section; relocated on load,high,native:WeaponModel.hpp VS::Actors::WeaponModelData::polygon_section (#441);source:30DB0.c:666
+T00344.005,T00344,_wepModelOffsets,5,unk40,1,u_char[1984],,,,file_body,Remaining WEP file bytes; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:22;native:WeaponModel.hpp VS::Actors::WeaponModelData::file_body (#441);declaration-only;source:3A1A0.h:119
 T00345.000,T00345,_zndEnemy,0,unk0,1,u_char[1124],,,,bytes,Raw enemy record bytes,med,native:RoomLoading.hpp VS::Field::ZoneEnemyTemplate::bytes (#441);source:146C.c:6649;use cited by sanity pass;source:146C.h:658
 T00346.000,T00346,_zndHeader,0,mpdOffset,0,long,,,,room_files_offset,Mpd list offset of the ZND header,med,native:RoomLoading.hpp VS::Field::ZoneFileHeader::room_files_offset (#441);source:146C.c:14852;use cited by sanity pass;source:146C.c:283
 T00346.001,T00346,_zndHeader,1,mpdLen,0,int,,,,room_files_size,Mpd list size of the ZND header,med,native:RoomLoading.hpp VS::Field::ZoneFileHeader::room_files_size (#441);source:146C.c:14852;use cited by sanity pass;source:146C.c:284
@@ -3591,12 +3591,12 @@ T00394.011,T00394,actorTimerState,11,direction,0,signed char,,,,direction,Named 
 T00394.012,T00394,actorTimerState,12,pad131,1,char[111],,,,reserved131,Not read through this view,low,declaration-only;source:73700.c:459
 T00394.013,T00394,actorTimerState,13,next,0,struct actorTimerState *,,,,nextEngaged,Next actor in the engagement list,med,source:73700.c:524
 T00394.014,T00394,actorTimerState,14,targetFlags,0,unsigned char,,,,targetFlags,Named in the fork view; see cited use,med,source:73700.c:509
-T00395.000,T00395,actorTransformScratch,0,prefix,0,char[58],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:46;declaration-only;source:44F14.c:68
+T00395.000,T00395,actorTransformScratch,0,prefix,0,char[58],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:48;declaration-only;source:44F14.c:68
 T00395.001,T00395,actorTransformScratch,1,angleX,0,u_short,,,,angle_x,Actor X angle staged for the transform,high,source:44F14.c:1683
 T00395.002,T00395,actorTransformScratch,2,angleY,0,u_short,,,,angle_y,Actor Y angle staged for the transform,high,source:44F14.c:1684
-T00395.003,T00395,actorTransformScratch,3,padding,0,char[22],,,,reserved3e,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:49;declaration-only;source:44F14.c:70
+T00395.003,T00395,actorTransformScratch,3,padding,0,char[22],,,,reserved3e,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:51;declaration-only;source:44F14.c:70
 T00395.004,T00395,actorTransformScratch,4,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:44F14.c:1126
-T00395.005,T00395,actorTransformScratch,5,padding2,0,char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:51;declaration-only;source:44F14.c:72
+T00395.005,T00395,actorTransformScratch,5,padding2,0,char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:53;declaration-only;source:44F14.c:72
 T00395.006,T00395,actorTransformScratch,6,matrix,0,MATRIX,,,,matrix,Working model matrix,med,declaration-only;source:44F14.c:73
 T00395.007,T00395,actorTransformScratch,7,rotation,0,SVECTOR,,,,rotation,Rotation angles,high,source:44F14.c:1776
 T00396.000,T00396,actorUpdateActor,0,next,0,struct actorUpdateActor *,,,,next,Named in the fork; see cited use,med,source:6FC00.c:1010
@@ -3677,10 +3677,10 @@ T00400.000,T00400,actorUpdateStats,0,unk0,1,char[24],,,,reserved0,Not used by na
 T00400.001,T00400,actorUpdateStats,1,hp,0,actorUpdateHp,,,,hp,Named in the fork; see cited use,med,source:6FC00.c:1136
 T00400.002,T00400,actorUpdateStats,2,current,0,int,,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:466;source:6FC00.c:1137
 T00400.003,T00400,actorUpdateStats,3,max,0,int,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:467;source:6FC00.c:1138
-T00401.000,T00401,animationFrameScratch,0,prefix,0,char[8],,,,reserved0,Not read,low,declaration-only;source:44F14.c:14
-T00401.001,T00401,animationFrameScratch,1,first,0,int,,,,firstFrame,First frame decoded,high,source:44F14.c:1383
-T00401.002,T00401,animationFrameScratch,2,last,0,int,,,,lastFrame,Last frame decoded,high,source:44F14.c:1383
-T00401.003,T00401,animationFrameScratch,3,data,0,u_char **,,,,trackData,Track data being decoded,med,source:44F14.c:1381
+T00401.000,T00401,animationFrameScratch,0,prefix,0,char[8],,,,reserved0,Not read,low,"retired-by:nothing; no reader, deleted with its type (#441);declaration-only;source:44F14.c:14"
+T00401.001,T00401,animationFrameScratch,1,first,0,int,,,,firstFrame,First frame decoded,high,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1383"
+T00401.002,T00401,animationFrameScratch,2,last,0,int,,,,lastFrame,Last frame decoded,high,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1383"
+T00401.003,T00401,animationFrameScratch,3,data,0,u_char **,,,,trackData,Track data being decoded,med,"retired-by:nothing; no reader, deleted with its type (#441);source:44F14.c:1381"
 T00402.000,T00402,cameraMotionScratch,0,distance,0,int,,,,distance,Remaining distance to the candidate,med,scratchpad overlay;source:4A0A8.c:3517;use cited by sanity pass;source:4A0A8.c:213
 T00402.001,T00402,cameraMotionScratch,1,steps,0,int,,,,steps,Number of terrain motion steps,med,scratchpad overlay;source:4A0A8.c:3518;use cited by sanity pass;source:4A0A8.c:214
 T00402.002,T00402,cameraMotionScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:215
@@ -3704,10 +3704,10 @@ T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,pad00,Leading scratch 
 T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,eyeShake,Summed eye shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:225
 T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,lookAtShake,Summed look-at shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:226
 T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,axisShake,Current oscillator offset by axis,med,scratchpad overlay;source:4A0A8.c:3995;use cited by sanity pass;source:4A0A8.c:227
-T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:58;declaration-only;source:44F14.c:78
-T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:59;declaration-only;source:44F14.c:79
-T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:60;declaration-only;source:44F14.c:80
-T00405.003,T00405,cameraTransformScratch,3,scale,0,VECTOR,,,,reserved8c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:61;declaration-only;source:44F14.c:81
+T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:60;declaration-only;source:44F14.c:78
+T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:61;declaration-only;source:44F14.c:79
+T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:62;declaration-only;source:44F14.c:80
+T00405.003,T00405,cameraTransformScratch,3,scale,0,VECTOR,,,,reserved8c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:63;declaration-only;source:44F14.c:81
 T00406.000,T00406,candidateMovementState,0,pad0,1,char[1],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:602;declaration-only;source:71618.c:481
 T00406.001,T00406,candidateMovementState,1,f1,0,unsigned char,,,,opaque1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:603;source:71618.c:591
 T00406.002,T00406,candidateMovementState,2,pad2,1,char[74],,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:604;declaration-only;source:71618.c:483
@@ -3894,7 +3894,7 @@ T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,h,Named in the fork; see ci
 T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,text,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1480
 T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexed_pixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
 T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
-T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:66;declaration-only;source:44F14.c:138
+T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:68;declaration-only;source:44F14.c:138
 T00427.001,T00427,frameScratch,1,depth,0,int,,,,depth,Ordering-table depth offset,high,source:44F14.c:1065
 T00428.000,T00428,func_800172D4_t,0,index,0,int,,,,index,Sound-effect slot index,med,declaration-only;source:25AC.c:51
 T00428.001,T00428,func_800172D4_t,1,unk4,1,int,,,,reserved04,Unidentified word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SfxChannelGroups.hpp:11;declaration-only;source:25AC.c:52
@@ -3970,17 +3970,17 @@ T00434.010,T00434,func_8006C4C4_t,10,unk10,1,short,,,,opaque10,Not used by nativ
 T00434.011,T00434,func_8006C4C4_t,11,unk12,1,short,,,,opaque12,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:181;source:146C.c:1950
 T00434.012,T00434,func_8006C4C4_t,12,unk14,1,func_8008631C_t2,,,,opaque14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:182;source:146C.c:1941
 T00434.013,T00434,func_8006C4C4_t,13,unk18,1,int[50],,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:183;declaration-only;source:146C.c:243
-T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,location,Actor tile and position,high,source:146C.c:1969
-T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,actorIndex,Actor that triggered the trap or opens the chest,high,source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
+T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,location,Actor tile and position,high,native:Location.hpp VS::Actors::ActorLocationQuery::location (#441);source:146C.c:1969
+T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,actor_index,Actor that triggered the trap or opens the chest,high,native:Location.hpp VS::Actors::ActorLocationQuery::actor_index (#441);source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
 T00436.000,T00436,func_8006EBF8_t2,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader; deleted with Actors/Spawn.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Spawn.h:14;declaration-only;source:146C.c:171
 T00436.001,T00436,func_8006EBF8_t2,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader; deleted with Actors/Spawn.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Spawn.h:15;declaration-only;source:146C.c:172
 T00436.002,T00436,func_8006EBF8_t2,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader; deleted with Actors/Spawn.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Spawn.h:16;declaration-only;source:146C.c:173
-T00437.000,T00437,func_8006EBF8_t3,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),,,,packedTile,Packed tile coordinates,high,source:146C.c:3197
-T00437.001,T00437,func_8006EBF8_t3,1,unk4,1,SVECTOR,,,,position,World position,high,source:146C.c:1969
-T00438.000,T00438,func_8006EBF8_t_fields,0,unk0_0,1,u_int,8,,,tileX,Tile X,high,source:146C.c:5352
-T00438.001,T00438,func_8006EBF8_t_fields,1,unk0_8,1,u_int,8,,,tileLayer,Third tile coordinate passed with X and Z to tile lookups,low,source:146C.c:5354
-T00438.002,T00438,func_8006EBF8_t_fields,2,unk0_16,1,u_int,8,,,tileZ,Tile Z,high,source:146C.c:5353
-T00438.003,T00438,func_8006EBF8_t_fields,3,unk0_24,1,u_int,8,,,facing,Target facing in 1/256 turns; 0xFF keeps the current facing,med,source:40564.c:563;source:40564.c:532
+T00437.000,T00437,func_8006EBF8_t3,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),,,,packed_tile,Packed tile coordinates,high,native:Location.hpp VS::Actors::ActorLocation::packed_tile (#441);source:146C.c:3197
+T00437.001,T00437,func_8006EBF8_t3,1,unk4,1,SVECTOR,,,,position,World position,high,native:Location.hpp VS::Actors::ActorLocation::position (#441);source:146C.c:1969
+T00438.000,T00438,func_8006EBF8_t_fields,0,unk0_0,1,u_int,8,,,tile_x,Tile X,high,native:Location.hpp VS::Actors::TileTarget::tile_x (#441);source:146C.c:5352
+T00438.001,T00438,func_8006EBF8_t_fields,1,unk0_8,1,u_int,8,,,tile_layer,Third tile coordinate passed with X and Z to tile lookups,low,native:Location.hpp VS::Actors::TileTarget::tile_layer (#441);source:146C.c:5354
+T00438.002,T00438,func_8006EBF8_t_fields,2,unk0_16,1,u_int,8,,,tile_z,Tile Z,high,native:Location.hpp VS::Actors::TileTarget::tile_z (#441);source:146C.c:5353
+T00438.003,T00438,func_8006EBF8_t_fields,3,unk0_24,1,u_int,8,,,facing,Target facing in 1/256 turns; 0xFF keeps the current facing,med,native:Location.hpp VS::Actors::TileTarget::facing (#441);source:40564.c:563;source:40564.c:532
 T00439.000,T00439,func_80077DF0_t,0,position,0,VECTOR,,,,position,Position of the camera pair,med,retired-by:nothing; no reader (#441);source:146C.c:2602;use cited by sanity pass;source:146C.c:209
 T00439.001,T00439,func_80077DF0_t,1,lookAt,0,VECTOR,,,,lookAt,Look at of the camera pair,med,retired-by:nothing; no reader (#441);declaration-only;source:146C.c:210
 T00440.000,T00440,func_80077DF0_t2,0,unk0,1,int[4],,,,reserved0,Not used by native code; kept for the original layout,med,retired-by:nothing; no reader; deleted with Actors/Spawn.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Spawn.h:22;declaration-only;source:146C.c:200
@@ -4141,19 +4141,19 @@ T00461.002,T00461,func_800A0024_t,2,unk2,1,u_char,,,,placementByte2,Third copied
 T00461.003,T00461,func_800A0024_t,3,unk3,1,u_char,,,,orientation,Gimmick orientation,high,source:30DB0.c:3679
 T00461.004,T00461,func_800A0024_t,4,unk4,1,int,,,,positionXY,Position X and Y words,med,source:30DB0.c:3685
 T00461.005,T00461,func_800A0024_t,5,unk8,1,int,,,,positionZ,Position Z word,med,source:30DB0.c:3686
-T00462.000,T00462,func_800A1108_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:36;declaration-only;source:146C.c:331
-T00462.001,T00462,func_800A1108_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:37;declaration-only;source:146C.c:332
-T00462.002,T00462,func_800A1108_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:38;declaration-only;source:146C.c:333
-T00462.003,T00462,func_800A1108_t,3,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:39;declaration-only;source:146C.c:334
-T00462.004,T00462,func_800A1108_t,4,unk10,1,int,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:40;declaration-only;source:146C.c:335
-T00462.005,T00462,func_800A1108_t,5,unk14,1,int,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:41;declaration-only;source:146C.c:336
-T00462.006,T00462,func_800A1108_t,6,unk18,1,int,,,,reserved18,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:42;declaration-only;source:146C.c:337
-T00462.007,T00462,func_800A1108_t,7,unk1C,1,int,,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:43;declaration-only;source:146C.c:338
-T00462.008,T00462,func_800A1108_t,8,unk20,1,int,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Location.h:44;declaration-only;source:146C.c:339
-T00463.000,T00463,func_800A1DE8_t,0,unk0,1,u_char[76],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:72;declaration-only;source:38C1C.c:11
+T00462.000,T00462,func_800A1108_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:36;declaration-only;source:146C.c:331"
+T00462.001,T00462,func_800A1108_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:37;declaration-only;source:146C.c:332"
+T00462.002,T00462,func_800A1108_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:38;declaration-only;source:146C.c:333"
+T00462.003,T00462,func_800A1108_t,3,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:39;declaration-only;source:146C.c:334"
+T00462.004,T00462,func_800A1108_t,4,unk10,1,int,,,,reserved10,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:40;declaration-only;source:146C.c:335"
+T00462.005,T00462,func_800A1108_t,5,unk14,1,int,,,,reserved14,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:41;declaration-only;source:146C.c:336"
+T00462.006,T00462,func_800A1108_t,6,unk18,1,int,,,,reserved18,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:42;declaration-only;source:146C.c:337"
+T00462.007,T00462,func_800A1108_t,7,unk1C,1,int,,,,reserved1C,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:43;declaration-only;source:146C.c:338"
+T00462.008,T00462,func_800A1108_t,8,unk20,1,int,,,,reserved20,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\Location.h:44;declaration-only;source:146C.c:339"
+T00463.000,T00463,func_800A1DE8_t,0,unk0,1,u_char[76],,,,reserved0,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:74;declaration-only;source:38C1C.c:11
 T00463.001,T00463,func_800A1DE8_t,1,position,0,SVECTOR,,,,position,Bone position relative to the camera,high,source:38C1C.c:444
 T00463.002,T00463,func_800A1DE8_t,2,offset,0,SVECTOR,,,,root_offset,Root offset of the animated model,high,source:38C1C.c:424
-T00463.003,T00463,func_800A1DE8_t,3,unk5C,1,u_char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:75;declaration-only;source:38C1C.c:14
+T00463.003,T00463,func_800A1DE8_t,3,unk5C,1,u_char[8],,,,reserved5c,Bytes covered by other views; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:77;declaration-only;source:38C1C.c:14
 T00463.004,T00463,func_800A1DE8_t,4,matrix,0,MATRIX,,,,matrix,Bone matrix being converted,high,source:38C1C.c:414
 T00464.000,T00464,func_800A3054_t,0,unk0,1,short,,,,directionX,X direction; its sign picks the step,high,source:3A1A0.c:263
 T00464.001,T00464,func_800A3054_t,1,unk2,1,short,,,,reserved2,Y component; not read; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Movement.h:27;declaration-only;source:3A1A0.c:11
@@ -4161,12 +4161,12 @@ T00464.002,T00464,func_800A3054_t,2,unk4,1,short,,,,directionZ,Z direction; its 
 T00465.000,T00465,func_800A6660_t,0,unk0,1,char[6],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Movement.h:34;declaration-only;source:3A1A0.c:23
 T00465.001,T00465,func_800A6660_t,1,unk6,1,short,,,,restartTurn,Nonzero restarts a 12-frame turn; zero adjusts the current one,med,source:3A1A0.c:1928
 T00466.000,T00466,func_800A6798_t,0,words,0,int[2],,,,words,Words of the saved position,med,retired-by:VS::Field::MotionVector; the ledge check copies the typed position (#441);declaration-only;source:3A1A0.c:28
-T00467.000,T00467,func_800AAE9C_t,0,unk0,1,u_char,,,,frame,Overlay frame + 1; 0 ends the timeline,high,source:40564.c:1397
-T00467.001,T00467,func_800AAE9C_t,1,unk1,1,u_char,,,,duration,Ticks the frame is held,high,source:40564.c:1392
-T00468.000,T00468,func_800AB358_t,0,unk0,1,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:69;declaration-only;source:40564.c:28
-T00468.001,T00468,func_800AB358_t,1,overlay,0,u_char,,,,overlayIndex,Texture overlay that receives the copy,high,source:40564.c:1525
-T00468.002,T00468,func_800AB358_t,2,x,0,u_char,,,,sourceX,Source X,high,source:40564.c:1522
-T00468.003,T00468,func_800AB358_t,3,y,0,u_char,,,,sourceY,Source Y,high,source:40564.c:1523
+T00467.000,T00467,func_800AAE9C_t,0,unk0,1,u_char,,,,frame,Overlay frame + 1; 0 ends the timeline,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationKeyRecord::frame (#441);source:40564.c:1397
+T00467.001,T00467,func_800AAE9C_t,1,unk1,1,u_char,,,,duration,Ticks the frame is held,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationKeyRecord::duration (#441);source:40564.c:1392
+T00468.000,T00468,func_800AB358_t,0,unk0,1,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with its type (#441);native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:69;declaration-only;source:40564.c:28"
+T00468.001,T00468,func_800AB358_t,1,overlay,0,u_char,,,,overlayIndex,Texture overlay that receives the copy,high,"retired-by:nothing; no reader, deleted with its type (#441);source:40564.c:1525"
+T00468.002,T00468,func_800AB358_t,2,x,0,u_char,,,,sourceX,Source X,high,"retired-by:nothing; no reader, deleted with its type (#441);source:40564.c:1522"
+T00468.003,T00468,func_800AB358_t,3,y,0,u_char,,,,sourceY,Source Y,high,"retired-by:nothing; no reader, deleted with its type (#441);source:40564.c:1523"
 T00469.000,T00469,func_800AB788_t,0,unk0,1,u_char[15],,,,reserved0,Covered by the gimmick record; not used by native code; kept for the original layout,med,"retired-by:Field_GimmickInstance palettePulse/basePalette/pulsedPalette, which UpdateLiveGimmickPalettePulse (Field/AppearanceTransitionLive.cpp) reads; the copied Actors_PalettePulseView had no reader and is deleted with Actors/Palette.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Palette.h:11;declaration-only;source:40564.c:35"
 T00469.001,T00469,func_800AB788_t,1,unkF,1,u_char,,,,slot,Gimmick slot; selects its palette row,med,"retired-by:Field_GimmickInstance palettePulse/basePalette/pulsedPalette, which UpdateLiveGimmickPalettePulse (Field/AppearanceTransitionLive.cpp) reads; the copied Actors_PalettePulseView had no reader and is deleted with Actors/Palette.h (#441);source:40564.c:1763"
 T00469.002,T00469,func_800AB788_t,2,unk10,1,u_char[84],,,,reserved10,Covered by the gimmick record; not used by native code; kept for the original layout,med,"retired-by:Field_GimmickInstance palettePulse/basePalette/pulsedPalette, which UpdateLiveGimmickPalettePulse (Field/AppearanceTransitionLive.cpp) reads; the copied Actors_PalettePulseView had no reader and is deleted with Actors/Palette.h (#441);native-refs:none;source:native:Native\Game\src\Actors\Palette.h:13;declaration-only;source:40564.c:37"
@@ -4183,9 +4183,9 @@ T00472.000,T00472,func_800AC690_timer_t,0,unk0,1,u_int,24,,,reserved0,Lower byte
 T00472.001,T00472,func_800AC690_timer_t,1,timer,0,u_int,8,,,tickRemainder,Fractional ticks carried between frames,med,source:40564.c:2354
 T00473.000,T00473,func_800ACF54_t,0,unk0,1,int,,,,low,First word,med,declaration-only;source:40564.c:2544
 T00473.001,T00473,func_800ACF54_t,1,unk4,1,int,,,,high,Second word,med,declaration-only;source:40564.c:2545
-T00474.000,T00474,func_800AD494_t,0,unk0,1,u_char *,,,,animationData,Base of the bank's animation data,high,source:40564.c:2649
-T00474.001,T00474,func_800AD494_t,1,unk4,1,u_char *,,,,animationMap,Maps an animation id to its header index,high,source:40564.c:2778
-T00474.002,T00474,func_800AD494_t,2,unk8,1,u_short[0],,,,headers,Per-animation headers of (bones * 4 + 10) bytes,high,source:40564.c:2784
+T00474.000,T00474,func_800AD494_t,0,unk0,1,u_char *,,,,animation_data,Base of the bank's animation data,high,native:Animation.hpp VS::Actors::SeqAnimationBank::animation_data (#441);source:40564.c:2649
+T00474.001,T00474,func_800AD494_t,1,unk4,1,u_char *,,,,animation_map,Maps an animation id to its header index,high,native:Animation.hpp VS::Actors::SeqAnimationBank::animation_map (#441);source:40564.c:2778
+T00474.002,T00474,func_800AD494_t,2,unk8,1,u_short[0],,,,headers,Per-animation headers of (bones * 4 + 10) bytes,high,native:Animation.hpp VS::Actors::SeqAnimationBank::headers (#441);source:40564.c:2784
 T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,med,"retired-by:VS::Event::ActorSelection::remaining (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2884;use cited by sanity pass;source:4A0A8.c:179"
 T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,med,"retired-by:VS::Event::ActorSelection::cursor (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2885;use cited by sanity pass;source:4A0A8.c:180"
 T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,med,"retired-by:VS::Event::ActorSelection::ids (Event/ScriptActorCommands.hpp, #441);source:4A0A8.c:2898;use cited by sanity pass;source:4A0A8.c:181"
@@ -5592,14 +5592,14 @@ T00615.018,T00615,terrainMovementState,18,targetX,0,int,,,,moveX,Target X in 20.
 T00615.019,T00615,terrainMovementState,19,targetZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1526
 T00615.020,T00615,terrainMovementState,20,pad184,1,char[4],,,,reserved184,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:1578;declaration-only;source:771A8.c:1506
 T00615.021,T00615,terrainMovementState,21,angle,0,short,,,,angle,Named in the fork view; see cited use,med,source:771A8.c:1534
-T00616.000,T00616,texMapAnimation_t,0,overlay,0,u_char,,,,overlayIndex,Texture overlay that receives the cell,high,source:40564.c:1441
-T00616.001,T00616,texMapAnimation_t,1,x,0,u_char,,,,sourceX,Source X of the cell,high,source:40564.c:1453
-T00616.002,T00616,texMapAnimation_t,2,y,0,u_char,,,,sourceY,Source Y of the cell,high,source:40564.c:1454
-T00616.003,T00616,texMapAnimation_t,3,columns,0,u_char,,,,columns,Cells per row; 0 falls back to the actor's default,high,source:40564.c:1440
-T00617.000,T00617,texMapOverlay_t,0,x,0,u_char,,,,x,Overlay X,high,source:40564.c:1456
-T00617.001,T00617,texMapOverlay_t,1,y,0,u_char,,,,y,Overlay Y,high,source:40564.c:1477
-T00617.002,T00617,texMapOverlay_t,2,w,0,u_char,,,,width,Overlay width,high,source:40564.c:1457
-T00617.003,T00617,texMapOverlay_t,3,h,0,u_char,,,,height,Overlay height,high,source:40564.c:1458
+T00616.000,T00616,texMapAnimation_t,0,overlay,0,u_char,,,,overlay_index,Texture overlay that receives the cell,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationFrame::overlay_index (#441);source:40564.c:1441
+T00616.001,T00616,texMapAnimation_t,1,x,0,u_char,,,,source_x,Source X of the cell,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationFrame::source_x (#441);source:40564.c:1453
+T00616.002,T00616,texMapAnimation_t,2,y,0,u_char,,,,source_y,Source Y of the cell,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationFrame::source_y (#441);source:40564.c:1454
+T00616.003,T00616,texMapAnimation_t,3,columns,0,u_char,,,,columns,Cells per row; 0 falls back to the actor's default,high,native:TextureAnimationRecords.hpp VS::Actors::TextureAnimationFrame::columns (#441);source:40564.c:1440
+T00617.000,T00617,texMapOverlay_t,0,x,0,u_char,,,,x,Overlay X,high,native:TextureAnimationRecords.hpp VS::Actors::TextureOverlayRect::x (#441);source:40564.c:1456
+T00617.001,T00617,texMapOverlay_t,1,y,0,u_char,,,,y,Overlay Y,high,native:TextureAnimationRecords.hpp VS::Actors::TextureOverlayRect::y (#441);source:40564.c:1477
+T00617.002,T00617,texMapOverlay_t,2,w,0,u_char,,,,width,Overlay width,high,native:TextureAnimationRecords.hpp VS::Actors::TextureOverlayRect::width (#441);source:40564.c:1457
+T00617.003,T00617,texMapOverlay_t,3,h,0,u_char,,,,height,Overlay height,high,native:TextureAnimationRecords.hpp VS::Actors::TextureOverlayRect::height (#441);source:40564.c:1458
 T00618.000,T00618,textHeader_t,0,text,0,char[14],,,,text,Named in the fork; see cited use,med,"native:Framework.hpp TextHeader::text is std::array<std::uint8_t, 14> (#441);source:58EC.c:690"
 T00618.001,T00618,textHeader_t,1,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::disabled (#441);source:58EC.c:658
 T00618.002,T00618,textHeader_t,2,x,0,char,,,,x,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::x (#441);source:58EC.c:659
@@ -6141,52 +6141,52 @@ T00682.003,T00682,vs_battle_weaponIntermediate,3,material,0,char,,,,material,Bla
 T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:769
 T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:770
 T00682.006,T00682,vs_battle_weaponIntermediate,6,name,0,char[24],,,,name,Weapon name in game text encoding,med,declaration-only;source:146C.h:771
-T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,boneCount,Number of bones,med,source:30DB0.c:632;use cited by sanity pass;source:3A1A0.h:403
-T00683.001,T00683,vs_battle_wepModels_t,1,nVertexGroups,0,u_char,,,,vertexGroupCount,Number of vertex groups,med,declaration-only;source:3A1A0.h:404
-T00683.002,T00683,vs_battle_wepModels_t,2,nTriangles,0,u_short,,,,triangleCount,Number of triangles,med,source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:405
-T00683.003,T00683,vs_battle_wepModels_t,3,nQuads,0,u_short,,,,quadCount,Number of quads,med,source:30DB0.c:712;use cited by sanity pass;source:3A1A0.h:406
-T00683.004,T00683,vs_battle_wepModels_t,4,nOther,0,u_short,,,,otherPrimitiveCount,Number of other primitives,med,source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:407
-T00683.005,T00683,vs_battle_wepModels_t,5,actorId,0,u_char,4,,,actorId,Owning actor slot,med,source:30DB0.c:497;use cited by sanity pass;source:3A1A0.h:408
-T00683.006,T00683,vs_battle_wepModels_t,6,unk8_4,1,u_char,1,,,reserved08Bit4,Flag that toggles bytes 0x11 and 0x12 between 0 and 0x40,low,source:30DB0.c:2207
-T00683.007,T00683,vs_battle_wepModels_t,7,isWideTexture,0,u_char,1,,,isWideTexture,Texture uses the wide layout,med,source:30DB0.c:643;use cited by sanity pass;source:3A1A0.h:410
-T00683.008,T00683,vs_battle_wepModels_t,8,unk8_6,1,u_char,1,,,reserved08Bit6,Flag set together with byte 0x5C0,low,source:30DB0.c:3369
-T00683.009,T00683,vs_battle_wepModels_t,9,isDoubleClut,0,u_char,1,,,isDoubleClut,Uses two palettes,med,source:30DB0.c:787;use cited by sanity pass;source:3A1A0.h:412
-T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,ownerMotionState,Copy of the owner's motion/appearance state during appearance transitions,med,source:40564.c:1876;sanity pass 2026-10-17
-T00683.011,T00683,vs_battle_wepModels_t,11,material,0,u_char,4,,,material,Weapon material,med,source:30DB0.c:866;use cited by sanity pass;source:3A1A0.h:414
-T00683.012,T00683,vs_battle_wepModels_t,12,unkA_0,1,u_char,7,,,reserved0ABits0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:33;declaration-only;source:3A1A0.h:415
-T00683.013,T00683,vs_battle_wepModels_t,13,unkA_7,1,u_char,1,,,reserved0ABit7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:34;declaration-only;source:3A1A0.h:416
-T00683.014,T00683,vs_battle_wepModels_t,14,nClutColors,0,u_char,,,,paletteColorCount,Colors per palette,med,source:30DB0.c:788;use cited by sanity pass;source:3A1A0.h:417
-T00683.015,T00683,vs_battle_wepModels_t,15,unkC,1,u_char,,,,attachmentSlot,Attachment slot code such as blade or shield,med,source:30DB0.c:678
-T00683.016,T00683,vs_battle_wepModels_t,16,unkD,1,u_char,,,,attachmentBone,Actor bone the model attaches to,med,source:30DB0.c:679
-T00683.017,T00683,vs_battle_wepModels_t,17,modelId,0,u_char,,,,modelId,Weapon model identifier,med,declaration-only;source:3A1A0.h:420
-T00683.018,T00683,vs_battle_wepModels_t,18,texSlot,0,u_char,,,,textureSlot,Texture slot,med,source:30DB0.c:629;use cited by sanity pass;source:3A1A0.h:421
-T00683.019,T00683,vs_battle_wepModels_t,19,clutSlotOffset,0,u_char,,,,paletteSlotOffset,Palette slot offset,med,source:30DB0.c:669;use cited by sanity pass;source:3A1A0.h:422
-T00683.020,T00683,vs_battle_wepModels_t,20,unk11,1,u_char,,,,reserved11,Byte set to 0 or 0x40,low,source:30DB0.c:2208
-T00683.021,T00683,vs_battle_wepModels_t,21,unk12,1,u_char,,,,reserved12,Byte set to 0 or 0x40 and tested with 0x1A,low,source:71618.c:1119
-T00683.022,T00683,vs_battle_wepModels_t,22,unk13,1,u_char,,,,reserved13,Byte cleared on load,low,source:30DB0.c:676;use cited by sanity pass;source:3A1A0.h:425
-T00683.023,T00683,vs_battle_wepModels_t,23,unk14,1,int,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:44;declaration-only;source:3A1A0.h:426
-T00683.024,T00683,vs_battle_wepModels_t,24,unk18,1,short,,,,reserved18,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:45;declaration-only;source:3A1A0.h:427
-T00683.025,T00683,vs_battle_wepModels_t,25,unk1A,1,short,,,,reserved1A,Short tested with byte 0x12; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:46;source:71618.c:1119
-T00683.026,T00683,vs_battle_wepModels_t,26,offsets,0,_wepModelOffsets *,,,,sectionOffsets,Offsets of model data sections,med,source:30DB0.c:649;use cited by sanity pass;source:3A1A0.h:429
-T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,boneWorldMatrices,World matrix of each weapon bone,high,source:49268.c:209;source:49268.c:194;sanity pass 2026-10-17
-T00683.028,T00683,vs_battle_wepModels_t,28,unkBoneInfo,0,SVECTOR[4],,,,bones,Bone records copied from model data,high,source:30DB0.c:840
-T00683.029,T00683,vs_battle_wepModels_t,29,palettes,0,u_short[7][64],,,,palettes,Source palettes,med,source:30DB0.c:801;use cited by sanity pass;source:3A1A0.h:432
-T00683.030,T00683,vs_battle_wepModels_t,30,unk440,1,u_short[96],,,,workingPalette,Palette assembled from source palette ranges,high,source:30DB0.c:876
-T00683.031,T00683,vs_battle_wepModels_t,31,unk500,1,u_short[96],,,,uploadPalette,Palette copy uploaded to the CLUT,high,source:30DB0.c:877
-T00683.032,T00683,vs_battle_wepModels_t,32,unk5C0,1,u_char,,,,reserved5C0,Byte set with bit 0x08.6,low,source:30DB0.c:3368
-T00683.033,T00683,vs_battle_wepModels_t,33,unk5C1,1,u_char,,,,reserved5C1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:54;declaration-only;source:3A1A0.h:436
-T00683.034,T00683,vs_battle_wepModels_t,34,unk5C2,1,u_short,,,,reserved5C2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:55;declaration-only;source:3A1A0.h:437
-T00683.035,T00683,vs_battle_wepModels_t,35,unk5C4,1,int,,,,reserved5C4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:56;declaration-only;source:3A1A0.h:438
-T00683.036,T00683,vs_battle_wepModels_t,36,unk5C8,1,int,,,,reserved5C8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:57;declaration-only;source:3A1A0.h:439
-T00683.037,T00683,vs_battle_wepModels_t,37,unk5CC,1,char,,,,reserved5CC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:58;declaration-only;source:3A1A0.h:440
-T00683.038,T00683,vs_battle_wepModels_t,38,unk5CD,1,char,,,,reserved5CD,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:59;declaration-only;source:3A1A0.h:441
-T00683.039,T00683,vs_battle_wepModels_t,39,unk5CE,1,short,,,,reserved5CE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:60;declaration-only;source:3A1A0.h:442
-T00683.040,T00683,vs_battle_wepModels_t,40,unk5D0,1,int,,,,reserved5D0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:61;declaration-only;source:3A1A0.h:443
-T00683.041,T00683,vs_battle_wepModels_t,41,unk5D4,1,int,,,,reserved5D4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:62;declaration-only;source:3A1A0.h:444
-T00683.042,T00683,vs_battle_wepModels_t,42,unk5D8,1,void *,,,,reserved5D8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:63;declaration-only;source:3A1A0.h:445
-T00683.043,T00683,vs_battle_wepModels_t,43,unk5DC,1,int,,,,reserved5DC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:64;declaration-only;source:3A1A0.h:446
-T00683.044,T00683,vs_battle_wepModels_t,44,unk5E0,1,int,,,,reserved5E0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:65;declaration-only;source:3A1A0.h:447
-T00683.045,T00683,vs_battle_wepModels_t,45,unk5E4,1,int,,,,reserved5E4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.h:66;declaration-only;source:3A1A0.h:448
+T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,bone_count,Number of bones,med,native:WeaponModel.hpp VS::Actors::WeaponModel::bone_count (#441);source:30DB0.c:632;use cited by sanity pass;source:3A1A0.h:403
+T00683.001,T00683,vs_battle_wepModels_t,1,nVertexGroups,0,u_char,,,,vertex_group_count,Number of vertex groups,med,native:WeaponModel.hpp VS::Actors::WeaponModel::vertex_group_count (#441);declaration-only;source:3A1A0.h:404
+T00683.002,T00683,vs_battle_wepModels_t,2,nTriangles,0,u_short,,,,triangle_count,Number of triangles,med,native:WeaponModel.hpp VS::Actors::WeaponModel::triangle_count (#441);source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:405
+T00683.003,T00683,vs_battle_wepModels_t,3,nQuads,0,u_short,,,,quad_count,Number of quads,med,native:WeaponModel.hpp VS::Actors::WeaponModel::quad_count (#441);source:30DB0.c:712;use cited by sanity pass;source:3A1A0.h:406
+T00683.004,T00683,vs_battle_wepModels_t,4,nOther,0,u_short,,,,other_primitive_count,Number of other primitives,med,native:WeaponModel.hpp VS::Actors::WeaponModel::other_primitive_count (#441);source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:407
+T00683.005,T00683,vs_battle_wepModels_t,5,actorId,0,u_char,4,,,actor_id,Owning actor slot,med,native:WeaponModel.hpp VS::Actors::WeaponModel::actor_id (#441);source:30DB0.c:497;use cited by sanity pass;source:3A1A0.h:408
+T00683.006,T00683,vs_battle_wepModels_t,6,unk8_4,1,u_char,1,,,shown,Flag that toggles bytes 0x11 and 0x12 between 0 and 0x40,low,native:WeaponModel.hpp VS::Actors::WeaponModel::shown (#441);visibility bit (30DB0.c:2207);source:30DB0.c:2207
+T00683.007,T00683,vs_battle_wepModels_t,7,isWideTexture,0,u_char,1,,,is_wide_texture,Texture uses the wide layout,med,native:WeaponModel.hpp VS::Actors::WeaponModel::is_wide_texture (#441);source:30DB0.c:643;use cited by sanity pass;source:3A1A0.h:410
+T00683.008,T00683,vs_battle_wepModels_t,8,unk8_6,1,u_char,1,,,brightness_override,Flag set together with byte 0x5C0,low,native:WeaponModel.hpp VS::Actors::WeaponModel::brightness_override (#441);selects the brightness byte override (30DB0.c:3369);source:30DB0.c:3369
+T00683.009,T00683,vs_battle_wepModels_t,9,isDoubleClut,0,u_char,1,,,is_double_clut,Uses two palettes,med,native:WeaponModel.hpp VS::Actors::WeaponModel::is_double_clut (#441);source:30DB0.c:787;use cited by sanity pass;source:3A1A0.h:412
+T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,owner_motion_state,Copy of the owner's motion/appearance state during appearance transitions,med,native:WeaponModel.hpp VS::Actors::WeaponModel::owner_motion_state (#441);source:40564.c:1876;sanity pass 2026-10-17
+T00683.011,T00683,vs_battle_wepModels_t,11,material,0,u_char,4,,,material,Weapon material,med,native:WeaponModel.hpp VS::Actors::WeaponModel::material (#441);source:30DB0.c:866;use cited by sanity pass;source:3A1A0.h:414
+T00683.012,T00683,vs_battle_wepModels_t,12,unkA_0,1,u_char,7,,,reserved0a_bits0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:49;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved0a_bits0 (#441);declaration-only;source:3A1A0.h:415
+T00683.013,T00683,vs_battle_wepModels_t,13,unkA_7,1,u_char,1,,,reserved0a_bit7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:50;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved0a_bit7 (#441);declaration-only;source:3A1A0.h:416
+T00683.014,T00683,vs_battle_wepModels_t,14,nClutColors,0,u_char,,,,palette_color_count,Colors per palette,med,native:WeaponModel.hpp VS::Actors::WeaponModel::palette_color_count (#441);source:30DB0.c:788;use cited by sanity pass;source:3A1A0.h:417
+T00683.015,T00683,vs_battle_wepModels_t,15,unkC,1,u_char,,,,attachment_slot,Attachment slot code such as blade or shield,med,native:WeaponModel.hpp VS::Actors::WeaponModel::attachment_slot (#441);source:30DB0.c:678
+T00683.016,T00683,vs_battle_wepModels_t,16,unkD,1,u_char,,,,attachment_bone,Actor bone the model attaches to,med,native:WeaponModel.hpp VS::Actors::WeaponModel::attachment_bone (#441);source:30DB0.c:679
+T00683.017,T00683,vs_battle_wepModels_t,17,modelId,0,u_char,,,,model_id,Weapon model identifier,med,native:WeaponModel.hpp VS::Actors::WeaponModel::model_id (#441);declaration-only;source:3A1A0.h:420
+T00683.018,T00683,vs_battle_wepModels_t,18,texSlot,0,u_char,,,,texture_slot,Texture slot,med,native:WeaponModel.hpp VS::Actors::WeaponModel::texture_slot (#441);source:30DB0.c:629;use cited by sanity pass;source:3A1A0.h:421
+T00683.019,T00683,vs_battle_wepModels_t,19,clutSlotOffset,0,u_char,,,,palette_slot_offset,Palette slot offset,med,native:WeaponModel.hpp VS::Actors::WeaponModel::palette_slot_offset (#441);source:30DB0.c:669;use cited by sanity pass;source:3A1A0.h:422
+T00683.020,T00683,vs_battle_wepModels_t,20,unk11,1,u_char,,,,blend_level,Byte set to 0 or 0x40,low,native:WeaponModel.hpp VS::Actors::WeaponModel::blend_level (#441);current fade/blend level (30DB0.c:2208);source:30DB0.c:2208
+T00683.021,T00683,vs_battle_wepModels_t,21,unk12,1,u_char,,,,blend_target,Byte set to 0 or 0x40 and tested with 0x1A,low,native:WeaponModel.hpp VS::Actors::WeaponModel::blend_target (#441);fade/blend target level (71618.c:1119);source:71618.c:1119
+T00683.022,T00683,vs_battle_wepModels_t,22,unk13,1,u_char,,,,blend_frames,Byte cleared on load,low,native:WeaponModel.hpp VS::Actors::WeaponModel::blend_frames (#441);fade/blend frame count (30DB0.c:676);source:30DB0.c:676;use cited by sanity pass;source:3A1A0.h:425
+T00683.023,T00683,vs_battle_wepModels_t,23,unk14,1,int,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:62;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved14 (#441);declaration-only;source:3A1A0.h:426
+T00683.024,T00683,vs_battle_wepModels_t,24,unk18,1,short,,,,reserved18,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:63;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved18 (#441);declaration-only;source:3A1A0.h:427
+T00683.025,T00683,vs_battle_wepModels_t,25,unk1A,1,short,,,,reserved1a,Short tested with byte 0x12; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:64;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved1a (#441);source:71618.c:1119
+T00683.026,T00683,vs_battle_wepModels_t,26,offsets,0,_wepModelOffsets *,,,,section_offsets,Offsets of model data sections,med,native:WeaponModel.hpp VS::Actors::WeaponModel::section_offsets (#441);source:30DB0.c:649;use cited by sanity pass;source:3A1A0.h:429
+T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,bone_world_matrices,World matrix of each weapon bone,high,native:WeaponModel.hpp VS::Actors::WeaponModel::bone_world_matrices (#441);source:49268.c:209;source:49268.c:194;sanity pass 2026-10-17
+T00683.028,T00683,vs_battle_wepModels_t,28,unkBoneInfo,0,SVECTOR[4],,,,bones,Bone records copied from model data,high,native:WeaponModel.hpp VS::Actors::WeaponModel::bones (#441);source:30DB0.c:840
+T00683.029,T00683,vs_battle_wepModels_t,29,palettes,0,u_short[7][64],,,,palettes,Source palettes,med,native:WeaponModel.hpp VS::Actors::WeaponModel::palettes (#441);source:30DB0.c:801;use cited by sanity pass;source:3A1A0.h:432
+T00683.030,T00683,vs_battle_wepModels_t,30,unk440,1,u_short[96],,,,working_palette,Palette assembled from source palette ranges,high,native:WeaponModel.hpp VS::Actors::WeaponModel::working_palette (#441);source:30DB0.c:876
+T00683.031,T00683,vs_battle_wepModels_t,31,unk500,1,u_short[96],,,,upload_palette,Palette copy uploaded to the CLUT,high,native:WeaponModel.hpp VS::Actors::WeaponModel::upload_palette (#441);source:30DB0.c:877
+T00683.032,T00683,vs_battle_wepModels_t,32,unk5C0,1,u_char,,,,brightness,Byte set with bit 0x08.6,low,native:WeaponModel.hpp VS::Actors::WeaponModel::brightness (#441);brightness byte used when the override bit is set (30DB0.c:3368);source:30DB0.c:3368
+T00683.033,T00683,vs_battle_wepModels_t,33,unk5C1,1,u_char,,,,reserved5c1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:73;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5c1 (#441);declaration-only;source:3A1A0.h:436
+T00683.034,T00683,vs_battle_wepModels_t,34,unk5C2,1,u_short,,,,reserved5c2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:74;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5c2 (#441);declaration-only;source:3A1A0.h:437
+T00683.035,T00683,vs_battle_wepModels_t,35,unk5C4,1,int,,,,reserved5c4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:75;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5c4 (#441);declaration-only;source:3A1A0.h:438
+T00683.036,T00683,vs_battle_wepModels_t,36,unk5C8,1,int,,,,reserved5c8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:76;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5c8 (#441);declaration-only;source:3A1A0.h:439
+T00683.037,T00683,vs_battle_wepModels_t,37,unk5CC,1,char,,,,reserved5cc,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:77;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5cc (#441);declaration-only;source:3A1A0.h:440
+T00683.038,T00683,vs_battle_wepModels_t,38,unk5CD,1,char,,,,reserved5cd,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:78;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5cd (#441);declaration-only;source:3A1A0.h:441
+T00683.039,T00683,vs_battle_wepModels_t,39,unk5CE,1,short,,,,reserved5ce,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:79;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5ce (#441);declaration-only;source:3A1A0.h:442
+T00683.040,T00683,vs_battle_wepModels_t,40,unk5D0,1,int,,,,reserved5d0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:80;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5d0 (#441);declaration-only;source:3A1A0.h:443
+T00683.041,T00683,vs_battle_wepModels_t,41,unk5D4,1,int,,,,reserved5d4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:81;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5d4 (#441);declaration-only;source:3A1A0.h:444
+T00683.042,T00683,vs_battle_wepModels_t,42,unk5D8,1,void *,,,,reserved5d8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:82;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5d8 (#441);declaration-only;source:3A1A0.h:445
+T00683.043,T00683,vs_battle_wepModels_t,43,unk5DC,1,int,,,,reserved5dc,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:83;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5dc (#441);declaration-only;source:3A1A0.h:446
+T00683.044,T00683,vs_battle_wepModels_t,44,unk5E0,1,int,,,,reserved5e0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:84;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5e0 (#441);declaration-only;source:3A1A0.h:447
+T00683.045,T00683,vs_battle_wepModels_t,45,unk5E4,1,int,,,,reserved5e4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\WeaponModel.hpp:85;native:WeaponModel.hpp VS::Actors::WeaponModel::reserved5e4 (#441);declaration-only;source:3A1A0.h:448
 T00684.000,T00684,vs_camera_t,0,position,0,VECTOR,,,,position,Named in the fork; see cited use,med,source:146C.c:3038
 T00684.001,T00684,vs_camera_t,1,lookAt,0,VECTOR,,,,look_at,Named in the fork; see cited use,med,source:146C.c:2468
 T00684.002,T00684,vs_camera_t,2,angles,0,VECTOR,,,,angles,Named in the fork; see cited use,med,source:146C.c:6816
@@ -6780,8 +6780,8 @@ T00762.000,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00762.001,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:925:5),1,w,0,int[2],,,,words,Samples compared as two words,high,source:6FC00.c:962
 T00763.000,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),0,raw,0,unsigned int,,,,word,Whole settings word; bit 14 selects a range table,low,source:7CD68.c:743
 T00763.001,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:612:9),,,,bits,Settings fields,low,declaration-only;source:7CD68.c:614
-T00764.000,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
-T00764.001,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
+T00764.000,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,native:Location.hpp VS::Actors::PackedTileTarget::target (#441);source:146C.c:2804
+T00764.001,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,native:Location.hpp VS::Actors::PackedTileTarget::word (#441);source:146C.c:881
 T00765.000,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00765.001,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00766.000,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
@@ -6802,8 +6802,8 @@ T00771.001,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00771.002,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,word,Whole command word,med,source:146C.c:4699
 T00772.000,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:13:9),,,,actor,Actor and part,high,source:146C.c:3179
 T00772.001,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
-T00773.000,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
-T00773.001,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
+T00773.000,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,native:Location.hpp VS::Actors::PackedTileTarget::target (#441);source:146C.c:2804
+T00773.001,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,native:Location.hpp VS::Actors::PackedTileTarget::word (#441);source:146C.c:881
 T00774.000,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00774.001,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00775.000,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
@@ -6826,8 +6826,8 @@ T00781.001,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00781.002,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,word,Whole command word,med,source:146C.c:4699
 T00782.000,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),,,,actor,Actor and part,high,source:146C.c:3179
 T00782.001,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
-T00783.000,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
-T00783.001,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
+T00783.000,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,native:Location.hpp VS::Actors::PackedTileTarget::target (#441);source:146C.c:2804
+T00783.001,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,native:Location.hpp VS::Actors::PackedTileTarget::word (#441);source:146C.c:881
 T00784.000,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),0,sprt,0,VS_SPRT,,,,sprt,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
 T00784.001,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,tileTpage,Tile with a texture page command,med,source:MENU/MENU7.PRG/260.c:140
 T00784.002,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),2,tile,0,VS_TILE,,,,tile,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:2043
@@ -6850,8 +6850,8 @@ T00790.000,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00790.001,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
 T00791.000,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
 T00791.001,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
-T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
-T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
+T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,native:Location.hpp VS::Actors::PackedTileTarget::target (#441);source:146C.c:2804
+T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,native:Location.hpp VS::Actors::PackedTileTarget::word (#441);source:146C.c:881
 T00793.000,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00793.001,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00794.000,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:1065

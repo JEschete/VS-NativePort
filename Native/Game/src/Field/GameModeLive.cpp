@@ -6,7 +6,7 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
@@ -114,7 +114,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     VS::Battle::LiveBeginActorActionSelection(actor_id, action_id);
   }
   void SpawnTrapTileEffectAtAshley() override {
-    Actors_ActorLocationQuery placement{};
+    VS::Actors::ActorLocationQuery placement{};
     static_cast<void>(Actors::LiveActorPlacement(kAshley, &placement));
     VS::Effects::LiveSpawnTrapTileEffect(&placement.location);
   }

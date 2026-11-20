@@ -13,7 +13,7 @@
 #include <type_traits>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -128,13 +128,13 @@ class LiveSnapshotHost final : public SnapshotHost {
     return Field_snapshotDoorFlagSource.requiredFlagId;
   }
   TilePlacement AshleyPlacement() override {
-    Actors_ActorLocationQuery query{};
+    VS::Actors::ActorLocationQuery query{};
     VS::Actors::LiveActorPlacement(0, &query);
-    const Actors_TileTarget& target = query.location.packedTile.target;
+    const VS::Actors::TileTarget& target = query.location.packed_tile.target;
     return TilePlacement{
-        .tile_x = static_cast<std::uint8_t>(target.tileX),
-        .tile_layer = static_cast<std::uint8_t>(target.tileLayer),
-        .tile_z = static_cast<std::uint8_t>(target.tileZ),
+        .tile_x = static_cast<std::uint8_t>(target.tile_x),
+        .tile_layer = static_cast<std::uint8_t>(target.tile_layer),
+        .tile_z = static_cast<std::uint8_t>(target.tile_z),
         .facing = static_cast<std::uint8_t>(target.facing)};
   }
   bool ActionUnlocked(std::size_t action) override {

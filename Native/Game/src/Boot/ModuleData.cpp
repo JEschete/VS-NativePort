@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's
 // decomp line.
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Spawning.hpp"
-#include "Actors/TextureAnimation.h"
+#include "Actors/TextureAnimationRecords.hpp"
 #include "Actors/Textures.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Legacy.hpp"
@@ -257,9 +257,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80060, sizeof VS::Content::legacyShpSectorCounts,
      &VS::Content::legacyShpSectorCounts,
      sizeof VS::Content::legacyShpSectorCounts},  // G00050 _shpFileSectorSizes
-    {"BATTLE/BATTLE.PRG", 0x80160, sizeof Actors_sharedSequenceIdsByKind,
-     &Actors_sharedSequenceIdsByKind,
-     sizeof Actors_sharedSequenceIdsByKind},  // G00051 D_800E8960
+    {"BATTLE/BATTLE.PRG", 0x80160, sizeof VS::Actors::sharedSequenceIdsByKind,
+     &VS::Actors::sharedSequenceIdsByKind,
+     sizeof VS::Actors::sharedSequenceIdsByKind},  // G00051 D_800E8960
     {"BATTLE/BATTLE.PRG", 0x80260, sizeof VS::Content::legacySequenceDiscOffsets,
      &VS::Content::legacySequenceDiscOffsets,
      sizeof VS::Content::legacySequenceDiscOffsets},  // G00052 D_800E8A60
@@ -309,9 +309,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x8072B, sizeof VS::Content::legacySequenceParsePhase,
      &VS::Content::legacySequenceParsePhase,
      sizeof VS::Content::legacySequenceParsePhase},  // G00066 D_800E8F2B
-    {"BATTLE/BATTLE.PRG", 0x8072C, sizeof Actors_sharedSequenceBankIndex,
-     &Actors_sharedSequenceBankIndex,
-     sizeof Actors_sharedSequenceBankIndex},  // G00067 D_800E8F2C
+    {"BATTLE/BATTLE.PRG", 0x8072C, sizeof VS::Actors::sharedSequenceBankIndex,
+     &VS::Actors::sharedSequenceBankIndex,
+     sizeof VS::Actors::sharedSequenceBankIndex},  // G00067 D_800E8F2C
     {"BATTLE/BATTLE.PRG", 0x8072D, sizeof VS::Content::legacyEtmLoadPhase,
      &VS::Content::legacyEtmLoadPhase,
      sizeof VS::Content::legacyEtmLoadPhase},  // G00068 _loadEtmState
@@ -324,9 +324,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters,
      &Field_gimmickPaletteParameters,
      sizeof Field_gimmickPaletteParameters},  // G00071 D_800E8FA8
-    {"BATTLE/BATTLE.PRG", 0x807C0, sizeof Actors_forcedModelOverrides,
-     &Actors_forcedModelOverrides,
-     sizeof Actors_forcedModelOverrides},  // G00073 D_800E8FC0
+    {"BATTLE/BATTLE.PRG", 0x807C0, sizeof VS::Actors::forcedModelOverrides,
+     &VS::Actors::forcedModelOverrides,
+     sizeof VS::Actors::forcedModelOverrides},  // G00073 D_800E8FC0
     {"BATTLE/BATTLE.PRG", 0x807C8,
      sizeof VS::Items::weaponMaterialPaletteIndices,
      &VS::Items::weaponMaterialPaletteIndices,
@@ -338,12 +338,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80830, sizeof Field_kGimmickOrientationRotations,
      &Field_kGimmickOrientationRotations,
      sizeof Field_kGimmickOrientationRotations},  // G00077 D_800E9030
-    {"BATTLE/BATTLE.PRG", 0x80890, sizeof Actors_drawnWeaponAnimationBases,
-     &Actors_drawnWeaponAnimationBases,
-     sizeof Actors_drawnWeaponAnimationBases},  // G00078 D_800E9090
-    {"BATTLE/BATTLE.PRG", 0x8089C, sizeof Actors_sheathedWeaponAnimationBases,
-     &Actors_sheathedWeaponAnimationBases,
-     sizeof Actors_sheathedWeaponAnimationBases},  // G00079 D_800E909C
+    {"BATTLE/BATTLE.PRG", 0x80890, sizeof VS::Actors::drawnWeaponAnimationBases,
+     &VS::Actors::drawnWeaponAnimationBases,
+     sizeof VS::Actors::drawnWeaponAnimationBases},  // G00078 D_800E9090
+    {"BATTLE/BATTLE.PRG", 0x8089C, sizeof VS::Actors::sheathedWeaponAnimationBases,
+     &VS::Actors::sheathedWeaponAnimationBases,
+     sizeof VS::Actors::sheathedWeaponAnimationBases},  // G00079 D_800E909C
     {"BATTLE/BATTLE.PRG", 0x808A8, sizeof Field_interactingGimmickId,
      &Field_interactingGimmickId,
      sizeof Field_interactingGimmickId},  // G00080 D_800E90A8
@@ -368,9 +368,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x808D0, sizeof Actors_kFastQuadrantMoveAnimations,
      &Actors_kFastQuadrantMoveAnimations,
      sizeof Actors_kFastQuadrantMoveAnimations},  // G00088 D_800E90D0
-    {"BATTLE/BATTLE.PRG", 0x8096C, sizeof Actors_secondarySlotSequences,
-     &Actors_secondarySlotSequences,
-     sizeof Actors_secondarySlotSequences},  // G00089 D_800E916C
+    {"BATTLE/BATTLE.PRG", 0x8096C, sizeof VS::Actors::secondarySlotSequences,
+     &VS::Actors::secondarySlotSequences,
+     sizeof VS::Actors::secondarySlotSequences},  // G00089 D_800E916C
     {"BATTLE/BATTLE.PRG", 0x8099C, sizeof Field_gimmickTemplateIndices,
      &Field_gimmickTemplateIndices,
      sizeof Field_gimmickTemplateIndices},  // G00090 D_800E919C
@@ -422,12 +422,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80A78, sizeof VS::Field::tileSurfaceIds,
      &VS::Field::tileSurfaceIds,
      sizeof VS::Field::tileSurfaceIds},  // G00106 D_800E9278
-    {"BATTLE/BATTLE.PRG", 0x80A98, sizeof Actors_animationEventLengths,
-     &Actors_animationEventLengths,
-     sizeof Actors_animationEventLengths},  // G00107 D_800E9298
-    {"BATTLE/BATTLE.PRG", 0x80ADC, sizeof Actors_drawnWeaponSoundIds,
-     &Actors_drawnWeaponSoundIds,
-     sizeof Actors_drawnWeaponSoundIds},  // G00108 D_800E92DC
+    {"BATTLE/BATTLE.PRG", 0x80A98, sizeof VS::Actors::animationEventLengths,
+     &VS::Actors::animationEventLengths,
+     sizeof VS::Actors::animationEventLengths},  // G00107 D_800E9298
+    {"BATTLE/BATTLE.PRG", 0x80ADC, sizeof VS::Actors::drawnWeaponSoundIds,
+     &VS::Actors::drawnWeaponSoundIds,
+     sizeof VS::Actors::drawnWeaponSoundIds},  // G00108 D_800E92DC
     {"BATTLE/BATTLE.PRG", 0x80AE8, sizeof Actors_kAirTimerEndAnimations,
      &Actors_kAirTimerEndAnimations,
      sizeof Actors_kAirTimerEndAnimations},  // G00109 D_800E92E8
@@ -440,9 +440,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80B00, sizeof Actors_kLandingRecoveryAnimations,
      &Actors_kLandingRecoveryAnimations,
      sizeof Actors_kLandingRecoveryAnimations},  // G00112 D_800E9300
-    {"BATTLE/BATTLE.PRG", 0x81228, sizeof Actors_animationEventPoints,
-     &Actors_animationEventPoints,
-     sizeof Actors_animationEventPoints},  // G00114 D_800E9A28
+    {"BATTLE/BATTLE.PRG", 0x81228, sizeof VS::Actors::animationEventPoints,
+     &VS::Actors::animationEventPoints,
+     sizeof VS::Actors::animationEventPoints},  // G00114 D_800E9A28
     {"BATTLE/BATTLE.PRG", 0x8134C, sizeof VS::Event::weaponDrawStates,
      &VS::Event::weaponDrawStates,
      sizeof VS::Event::weaponDrawStates},  // G00116 D_800E9B4C

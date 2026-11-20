@@ -3,12 +3,13 @@
 #include "Field/ChestInteractionsLive.hpp"
 
 namespace VS::Field {
-bool CheckAshleyTileTriggersLive(int actor_id, Actors_ActorLocation& location) {
+bool CheckAshleyTileTriggersLive(int actor_id,
+                                 VS::Actors::ActorLocation& location) {
   const Actors::ActorPlacementView placement{
-      .tile = {.x = location.packedTile.target.tileX,
-               .layer = location.packedTile.target.tileLayer,
-               .z = location.packedTile.target.tileZ,
-               .spare = location.packedTile.target.facing},
+      .tile = {.x = location.packed_tile.target.tile_x,
+               .layer = location.packed_tile.target.tile_layer,
+               .z = location.packed_tile.target.tile_z,
+               .spare = location.packed_tile.target.facing},
       .position = {.x = location.position.vx,
                    .y = location.position.vy,
                    .z = location.position.vz,

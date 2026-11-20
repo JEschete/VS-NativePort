@@ -14,13 +14,13 @@
 
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -60,7 +60,7 @@ void Require(bool valid, const char* message) {
   }
 }
 
-using Equipment = std::array<Actors_WeaponModel*, kEquipmentPerActor>;
+using Equipment = std::array<VS::Actors::WeaponModel*, kEquipmentPerActor>;
 
 // The actor's weapon and shield models; slots past the 20-entry table (actor
 // slots 10 to 16) have none (#260).
@@ -79,9 +79,9 @@ Equipment EquipmentFor(int slot) {
 
 // An equipment palette clamped to its storage (#260).
 std::span<u_short> EquipmentPalette(std::span<u_short> palette,
-                                    const Actors_WeaponModel& weapon) {
+                                    const VS::Actors::WeaponModel& weapon) {
   return palette.first(
-      std::min<std::size_t>(weapon.paletteColorCount, palette.size()));
+      std::min<std::size_t>(weapon.palette_color_count, palette.size()));
 }
 
 bool ApplyTransition(std::span<u_short> colors, std::span<u_short> reference,
@@ -156,11 +156,11 @@ class LiveActorAppearance final : public ActorAppearance {
     bool changed = ApplyTransition(
         palette.subspan(kActorPaletteColors + skip, count - skip),
         palette.subspan(skip, count - skip), mode, speed);
-    for (Actors_WeaponModel* weapon : EquipmentFor(actor_.instance.slot)) {
+    for (VS::Actors::WeaponModel* weapon : EquipmentFor(actor_.instance.slot)) {
       if (weapon != nullptr) {
         changed |= ApplyTransition(
-            EquipmentPalette(weapon->uploadPalette, *weapon),
-            EquipmentPalette(weapon->workingPalette, *weapon), mode, speed);
+            EquipmentPalette(weapon->upload_palette, *weapon),
+            EquipmentPalette(weapon->working_palette, *weapon), mode, speed);
       }
     }
     return changed;
@@ -173,10 +173,10 @@ class LiveActorAppearance final : public ActorAppearance {
                row, 0);
     const Equipment equipment = EquipmentFor(actor_.instance.slot);
     for (std::size_t index = 0; index < equipment.size(); ++index) {
-      Actors_WeaponModel* weapon = equipment[index];
+      VS::Actors::WeaponModel* weapon = equipment[index];
       if (weapon != nullptr) {
-        weapon->ownerMotionState = StateBits(state);
-        UploadClut(EquipmentPalette(weapon->uploadPalette, *weapon), row,
+        weapon->owner_motion_state = StateBits(state);
+        UploadClut(EquipmentPalette(weapon->upload_palette, *weapon), row,
                    kActorPaletteColors +
                        kEquipmentClutStride * static_cast<int>(index));
       }
@@ -184,9 +184,9 @@ class LiveActorAppearance final : public ActorAppearance {
   }
 
   void PublishState(int state) override {
-    for (Actors_WeaponModel* weapon : EquipmentFor(actor_.instance.slot)) {
+    for (VS::Actors::WeaponModel* weapon : EquipmentFor(actor_.instance.slot)) {
       if (weapon != nullptr) {
-        weapon->ownerMotionState = StateBits(state);
+        weapon->owner_motion_state = StateBits(state);
       }
     }
   }

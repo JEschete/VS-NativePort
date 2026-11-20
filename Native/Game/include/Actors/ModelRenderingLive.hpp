@@ -5,7 +5,9 @@
 #include "Legacy/Psx.h"
 
 struct Actors_ActorRecord;
-struct Actors_WeaponModel;
+namespace VS::Actors {
+struct WeaponModel;
+}
 struct Field_GimmickInstance;
 
 // Live binding for the room model pass and the model transforms
@@ -31,7 +33,7 @@ void TransformLiveActorRootOffset(Actors_ActorRecord* actor);
 void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera);
 // func_800B217C: fades the weapon, builds its bone chain from `source` and
 // draws it.
-void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source);
+void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source);
 // INITBTL.PRG func_800FA7B0: the texture slots, the model tables and the
 // sequence buffers a battle starts from.
 void InitializeLiveActorModelResources();

@@ -16,7 +16,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Core/Gte.h"
 #include "Legacy/Psx.h"
@@ -351,7 +351,7 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
   const auto saved = std::to_array(Actors_actorRecords);
   Actors_ActorRecord actor{};
   std::array<unsigned, 256> model_bytes{};
-  auto* model = reinterpret_cast<Actors_ShpModel*>(model_bytes.data());
+  auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
   Actors_actorRecords[0] = &actor;
   actor.instance.model = model;
   Core_Gte_Reset();
@@ -367,7 +367,8 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, 42, output, 0) ==
         VS::Actors::kBoneProjectionInvalidBone);
   // #263: a bone past the loaded bone table is rejected; two bones fit here.
-  actor.modelDataSize = sizeof(Actors_ShpModel) + (2 * sizeof(Actors_ShpBone));
+  actor.modelDataSize =
+      sizeof(VS::Actors::ShpModel) + (2 * sizeof(VS::Actors::ShpBone));
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, 2, output, 0) ==
         VS::Actors::kBoneProjectionInvalidBone);
   CHECK(VS::Actors::ProjectLiveActorBoneEndpoint(0, -1, output, 0) ==
@@ -398,10 +399,10 @@ struct BorrowedGeometryFixture {
   MATRIX camera{};
 
   BorrowedGeometryFixture() {
-    auto* model = reinterpret_cast<Actors_ShpModel*>(model_bytes.data());
-    model->groupSection = 96;
-    model->vertexSection = 100;
-    model->polygonSection = 108;
+    auto* model = reinterpret_cast<VS::Actors::ShpModel*>(model_bytes.data());
+    model->group_section = 96;
+    model->vertex_section = 100;
+    model->polygon_section = 108;
     const std::array<std::uint16_t, 2> group{0, 1};
     std::memcpy(model_bytes.data() + 24, group.data(), sizeof group);
     for (Actors_ActorRecord* record : {&actor, &geometry}) {
@@ -412,7 +413,7 @@ struct BorrowedGeometryFixture {
       record->instance.isVisible = -1;
       record->instance.scaleX = record->instance.scaleY =
           record->instance.scaleZ = record->scale = 4096;
-      record->blendPose.scaleKeys[0] = {64, 64, 64, 0};
+      record->blendPose.scale_keys[0] = {64, 64, 64, 0};
     }
     actor.customTint = 1;
     actor.instance.tint = {100, 70, 20, 0};

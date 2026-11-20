@@ -7,7 +7,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/Location.h"
+#include "Actors/Location.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -156,7 +156,7 @@ void LiveSpawnGroundPlaneImpactEffect(
 }
 
 // decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
-void LiveSpawnTrapTileEffect(Actors_ActorLocation* actor_location) {
+void LiveSpawnTrapTileEffect(VS::Actors::ActorLocation* actor_location) {
   if (actor_location == nullptr) {
     Refuse("null trap location");
     return;
@@ -164,9 +164,9 @@ void LiveSpawnTrapTileEffect(Actors_ActorLocation* actor_location) {
   LiveWorld sink;
   static_cast<void>(SpawnTrapTileEffect(
       {.tile_x =
-           static_cast<std::uint8_t>(actor_location->packedTile.target.tileX),
+           static_cast<std::uint8_t>(actor_location->packed_tile.target.tile_x),
        .tile_z =
-           static_cast<std::uint8_t>(actor_location->packedTile.target.tileZ),
+           static_cast<std::uint8_t>(actor_location->packed_tile.target.tile_z),
        .height = actor_location->position.vy},
       sink));
 }

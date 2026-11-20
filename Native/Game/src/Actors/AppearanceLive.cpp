@@ -17,7 +17,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Actors/WeaponModel.h"
+#include "Actors/WeaponModel.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
@@ -45,8 +45,8 @@ constexpr unsigned kWeaponTableSize = std::size(weaponModels);
 constexpr unsigned kWeaponSlots = kWeaponTableSize / kWeaponsPerActor;
 constexpr int kNoActorStatus = static_cast<int>(AppearanceStatus::kNoModel);
 
-[[nodiscard]] Actors_WeaponModel** LiveWeaponPair(unsigned slot,
-                                                  const char* operation) {
+[[nodiscard]] VS::Actors::WeaponModel** LiveWeaponPair(unsigned slot,
+                                                       const char* operation) {
   if (slot >= kWeaponSlots) {
     VS::Core::Warnf("actors", "%s refused: weapon slot %u is outside the table",
                     operation, slot);
@@ -138,24 +138,25 @@ class LiveTransitionActors final : public AppearanceTransitionActors {
 };
 }  // namespace
 
-WeaponAppearance LoadLiveWeaponAppearance(const Actors_WeaponModel& weapon) {
-  return {.attached = weapon.attachmentBone != 0,
-          .shown = weapon.reserved08Bit4 != 0,
-          .brightness_override = weapon.reserved08Bit6 != 0,
-          .brightness = weapon.reserved5C0,
-          .blend_level = weapon.reserved11,
-          .blend_target = weapon.reserved12,
-          .blend_frames = weapon.reserved13};
+WeaponAppearance LoadLiveWeaponAppearance(
+    const VS::Actors::WeaponModel& weapon) {
+  return {.attached = weapon.attachment_bone != 0,
+          .shown = weapon.shown != 0,
+          .brightness_override = weapon.brightness_override != 0,
+          .brightness = weapon.brightness,
+          .blend_level = weapon.blend_level,
+          .blend_target = weapon.blend_target,
+          .blend_frames = weapon.blend_frames};
 }
 
 void StoreLiveWeaponAppearance(const WeaponAppearance& appearance,
-                               Actors_WeaponModel& weapon) {
-  weapon.reserved08Bit4 = appearance.shown ? 1 : 0;
-  weapon.reserved08Bit6 = appearance.brightness_override ? 1 : 0;
-  weapon.reserved5C0 = appearance.brightness;
-  weapon.reserved11 = appearance.blend_level;
-  weapon.reserved12 = appearance.blend_target;
-  weapon.reserved13 = appearance.blend_frames;
+                               VS::Actors::WeaponModel& weapon) {
+  weapon.shown = appearance.shown ? 1 : 0;
+  weapon.brightness_override = appearance.brightness_override ? 1 : 0;
+  weapon.brightness = appearance.brightness;
+  weapon.blend_level = appearance.blend_level;
+  weapon.blend_target = appearance.blend_target;
+  weapon.blend_frames = appearance.blend_frames;
 }
 
 void SetLiveActorPaletteFade(int actor_id, int fade_parameter) {
@@ -176,7 +177,8 @@ void ResetLiveActorWeaponVisibilityBlend(int actor_id) {
   constexpr const char* kOperation = "ResetActorWeaponVisibilityBlend";
   const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return;
-  Actors_WeaponModel** pair = LiveWeaponPair(actor->instance.slot, kOperation);
+  VS::Actors::WeaponModel** pair =
+      LiveWeaponPair(actor->instance.slot, kOperation);
   if (pair == nullptr) return;
   std::array<std::optional<WeaponAppearance>, kWeaponsPerActor> weapons{};
   for (std::size_t i = 0; i < kWeaponsPerActor; ++i) {
@@ -190,8 +192,8 @@ void ResetLiveActorWeaponVisibilityBlend(int actor_id) {
 
 void SetLiveWeaponBrightnessOverride(int actor_id, int override_enabled,
                                      int brightness) {
-  Actors_WeaponModel** pair = LiveWeaponPair(static_cast<unsigned>(actor_id),
-                                             "SetWeaponBrightnessOverride");
+  VS::Actors::WeaponModel** pair = LiveWeaponPair(
+      static_cast<unsigned>(actor_id), "SetWeaponBrightnessOverride");
   if (pair == nullptr || pair[0] == nullptr) return;
   WeaponAppearance weapon = LoadLiveWeaponAppearance(*pair[0]);
   // The original stored both into a bit and a byte, keeping the low bits.
