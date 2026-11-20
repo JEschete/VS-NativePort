@@ -146,7 +146,8 @@ class Fixture:
         write_csv(self.root / "Docs/ledgers/CPP_PROMOTION.csv", gates.PROMOTION_FIELDS, self.promotion)
         write_csv(self.root / "Docs/ledgers/VERIFY_LEDGER.csv", gates.VERIFY_FIELDS, self.verify)
         write_csv(self.root / "Docs/ledgers/GATE_SLICES.csv", gates.SLICE_FIELDS, self.slices)
-        write_csv(self.root / "Docs/ledgers/DATA_LEDGER.csv", ["id", "copied", "notes"], self.data)
+        write_csv(self.root / "Docs/ledgers/DATA_LEDGER.csv", ["id", "copied", "final_name", "final_location", "notes"],
+                  self.data)
         write_csv(self.root / "Docs/ledgers/TYPE_LEDGER.csv", ["id", "copied", "final_location", "notes"], self.types)
         write_csv(self.root / "Docs/ledgers/FIELD_LEDGER.csv", ["id", "type_id", "notes"], self.fields)
         write_csv(self.root / "Docs/ledgers/EC_BRIDGES.csv", gates.BRIDGE_FIELDS, self.bridges)
@@ -289,6 +290,22 @@ class OwnershipGateTests(GateTestCase):
         self.assertNotIn("type-location-missing", self.rules("ownership"))
         self.fixture.types[1]["final_location"] = r"Native\Game\src\Sys\Thing.h"
         self.assertIn("type-location-missing", self.rules("ownership"))
+
+    def test_copied_global_must_be_defined_in_its_final_location(self) -> None:
+        header = "Native/Game/src/Sys/Thing.hpp"
+        self.fixture.files[header] += "namespace VS::Sys {\ninline int counter = 0;\n}\n"
+        self.fixture.data.append({"id": "G00002", "copied": "x", "final_name": "Sys::counter",
+                                  "final_location": r"Native\Game\src\Sys\Thing.hpp", "notes": ""})
+        self.assertNotIn("data-global-missing", self.rules("ownership"))
+        for location in (r"Native\Game\src\Sys\Gone.cpp", r"Native\Game\src\Sys\OwnedC.cpp"):
+            with self.subTest(location=location):
+                self.fixture.data[-1]["final_location"] = location
+                self.assertIn("data-global-missing", self.rules("ownership"))
+        self.fixture.data[-1]["final_location"] = r"Native\Game\src\Sys\Thing.hpp"
+        self.fixture.files[header] = "#pragma once\n// VS::Sys::counter moved to the menu state.\n"
+        self.assertIn("data-global-missing", self.rules("ownership"))
+        self.fixture.data[-1].update(copied="retired", notes="retired-by:VS::Sys::Thing")
+        self.assertNotIn("data-global-missing", self.rules("ownership"))
 
     def test_native_citation_must_lead_a_live_row(self) -> None:
         self.assertNotIn("native-citation-not-leading", self.rules("ownership"))

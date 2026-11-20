@@ -186,6 +186,17 @@ def c_symbol(final_name: str) -> str:
     return final_name.replace("::", "_")
 
 
+def defines_global(code: str, final_name: str) -> bool:
+    """Whether comment-free `code` still spells the global `final_name` (#466): fully qualified, as its C symbol, or
+    as its last name inside the namespace that owns it."""
+    if not final_name:
+        return False
+    if f"VS::{final_name}" in code or re.search(rf"\b{re.escape(c_symbol(final_name))}\b", code):
+        return True
+    space, _, leaf = final_name.rpartition("::")
+    return bool(space) and f"namespace VS::{space}" in code and re.search(rf"\b{re.escape(leaf)}\b", code) is not None
+
+
 def strip_source(text: str, *, keep_strings: bool = False) -> str:
     """Remove comments (and optionally string/character contents) so braces and identifiers can be trusted."""
     def replace(match: re.Match[str]) -> str:
@@ -587,8 +598,9 @@ class Gates:
             report.status_counts[column] = dict(sorted(Counter(row.get(column, "") for row in self.catalog).items()))
 
     def ledger_references(self, data_rows: list[dict[str, str]], type_rows: list[dict[str, str]]) -> None:
-        """A live type row names an existing file, and a native finding leads its row's notes (#471). Retired rows
-        keep the location and evidence they were retired with."""
+        """A live type row names an existing file, a copied global is still defined where its row says (#466), and a
+        native finding leads its row's notes (#471). Retired rows keep the location and evidence they were retired
+        with."""
         report = self.report
         retired_types = {row["id"] for row in type_rows if row.get("copied") == "retired"}
         for row in type_rows:
@@ -596,6 +608,17 @@ class Gates:
             if row.get("copied") != "retired" and location and not (self.workspace.root / slash(location)).is_file():
                 report.add("ownership", "type-location-missing", row["id"],
                            f"final_location {location!r} does not exist; point the row at its native type or retire it")
+        for row in data_rows:
+            if row.get("copied") != "x":
+                continue
+            location, name = row.get("final_location", ""), row.get("final_name", "")
+            code = self.sources.code.get(slash(location))
+            if code is None:
+                report.add("ownership", "data-global-missing", row["id"],
+                           f"final_location {location!r} is not a native source; correct it or retire the row")
+            elif not defines_global(code, name):
+                report.add("ownership", "data-global-missing", row["id"],
+                           f"{name!r} is not defined in {location!r}; correct the location or retire the row")
         cited = [(row, row.get("type_id") in retired_types) for row in read_csv(self.workspace.field_ledger)]
         cited += [(row, row.get("copied") == "retired") for row in data_rows]
         for row, retired in cited:
