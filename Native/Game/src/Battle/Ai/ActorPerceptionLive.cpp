@@ -66,10 +66,10 @@ static_assert(offsetof(ObserverView, relations) ==
 static_assert(offsetof(ObserverView, distances_squared) ==
               offsetof(AiState, distances_squared));
 static_assert(offsetof(UpdateView, opaque8) == offsetof(AiState, opaque8));
-static_assert(offsetof(UpdateView, opaque_e) == offsetof(AiState, opaque_e));
+static_assert(offsetof(UpdateView, opaque_e) == offsetof(AiState, should_flee));
 static_assert(offsetof(UpdateView, alerted) == offsetof(AiState, opaque18));
 static_assert(offsetof(UpdateView, holds_stall_tile) ==
-              offsetof(AiState, opaque_1c));
+              offsetof(AiState, holds_stall_tile));
 static_assert(offsetof(UpdateView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(UpdateView, previous_tile) ==
               offsetof(AiState, previous_tile));
@@ -84,7 +84,7 @@ static_assert(offsetof(UpdateView, status_flags) ==
               offsetof(AiState, action_delay));
 static_assert(offsetof(UpdateView, detour_step) ==
               offsetof(AiState, detour_step));
-static_assert(offsetof(UpdateView, opaque_fb) == offsetof(AiState, opaque_fb));
+static_assert(offsetof(UpdateView, opaque_fb) == offsetof(AiState, detour_target));
 static_assert(offsetof(UpdateView, awareness_frames_remaining) ==
               offsetof(AiState, awareness_frames_remaining));
 static_assert(offsetof(UpdateView, action_status) ==
@@ -92,7 +92,7 @@ static_assert(offsetof(UpdateView, action_status) ==
 static_assert(offsetof(UpdateView, awareness_marker) ==
               offsetof(AiState, awareness_marker));
 static_assert(offsetof(UpdateView, recovery_frames) ==
-              offsetof(AiState, opaque_19a));
+              offsetof(AiState, recovery_frames));
 static_assert(offsetof(UpdateView, relations) == offsetof(AiState, relations));
 
 std::uint32_t CurrentTileWord(const VS::Actors::ModelInstance& instance) {

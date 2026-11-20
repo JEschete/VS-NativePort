@@ -147,7 +147,7 @@ static_assert(offsetof(CreationView, move_distance) ==
 static_assert(offsetof(CreationView, body_height) ==
               offsetof(AiState, body_height));
 static_assert(offsetof(CreationView, ground_clearance) ==
-              offsetof(AiState, reserved_bc));
+              offsetof(AiState, ground_clearance));
 static_assert(offsetof(CreationView, flight_height) ==
               offsetof(AiState, flight_height));
 static_assert(offsetof(CreationView, opaque103) ==
@@ -159,7 +159,7 @@ static_assert(offsetof(CreationView, opaque124) ==
 static_assert(offsetof(CreationView, behavior_mode) ==
               offsetof(AiState, behavior_mode));
 static_assert(offsetof(CreationView, step_height) ==
-              offsetof(AiState, opaque_13c));
+              offsetof(AiState, default_turn_step));
 static_assert(offsetof(CreationView, movement_flags) ==
               offsetof(AiState, movement_flags));
 static_assert(offsetof(CreationView, next_tile) ==
@@ -237,14 +237,14 @@ void Store(const CreatedAiState& created, AiState& state) {
   state.max_range = created.max_range;
   state.move_distance = created.move_distance;
   state.body_height = created.body_height;
-  WriteBytes(state.reserved_bc, created.ground_clearance);
+  state.ground_clearance = created.ground_clearance;
   state.flight_height = created.flight_height;
   state.patrol_direction = created.patrol_direction;
   state.flee_tile.word = created.flee_tile;
   state.reserved124 = created.observed_command_opcode;
   state.locomotion_mode = created.locomotion_mode;
   state.behavior_mode = created.behavior_mode;
-  state.opaque_13c = created.step_height;
+  state.default_turn_step = created.step_height;
   state.movement_flags = created.movement_flags;
   state.next_tile.word = created.next_tile;
   state.move_y = created.move_y;
@@ -274,14 +274,14 @@ CreatedAiState Load(const AiState& state) {
   created.max_range = state.max_range;
   created.move_distance = state.move_distance;
   created.body_height = state.body_height;
-  created.ground_clearance = ReadBytes<std::int16_t>(state.reserved_bc);
+  created.ground_clearance = state.ground_clearance;
   created.flight_height = state.flight_height;
   created.patrol_direction = state.patrol_direction;
   created.flee_tile = state.flee_tile.word;
   created.observed_command_opcode = state.reserved124;
   created.locomotion_mode = state.locomotion_mode;
   created.behavior_mode = state.behavior_mode;
-  created.step_height = state.opaque_13c;
+  created.step_height = state.default_turn_step;
   created.movement_flags = state.movement_flags;
   created.next_tile = state.next_tile.word;
   created.move_y = state.move_y;

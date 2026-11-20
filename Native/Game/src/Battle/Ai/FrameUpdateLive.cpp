@@ -125,8 +125,8 @@ int CacheLiveActorAiWorkingState() {
   source.auxiliary_bytes = VS::Field::roomData.header.section6_length;
   if (frameContext.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
-    static_assert(sizeof frameContext.room->reserved4 == extent.size());
-    memcpy(extent.data(), frameContext.room->reserved4.data(), extent.size());
+    static_assert(sizeof frameContext.room->collision_extent == extent.size());
+    memcpy(extent.data(), frameContext.room->collision_extent.data(), extent.size());
     source.room_extent = extent;
   }
   const std::optional<WorkingStateWindow> window =

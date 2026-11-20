@@ -93,7 +93,7 @@ static_assert(offsetof(VS::Battle::Ai::ReactionRecord, primary_target) ==
               offsetof(ActionRequestRecord, primary_target));
 static_assert(offsetof(VS::Battle::Ai::ReactionRecord, target_count) ==
               offsetof(ActionRequestRecord, target_count));
-static_assert(offsetof(VS::Battle::Ai::EngagementActor, opaque40) ==
+static_assert(offsetof(VS::Battle::Ai::EngagementActor, targets_position) ==
               offsetof(VS::Battle::HitResult, targets_position));
 static_assert(offsetof(VS::Battle::Ai::EngagementData, opaque_c) ==
               offsetof(VS::Battle::Actor, command_arg0));
@@ -146,17 +146,17 @@ bool OverlappingPlanningBytes(const void* left, std::size_t left_bytes,
 SimulatedActorEffect SimulationEffectOf(
     const VS::Battle::Ai::EngagementActor& entry) {
   return {
-      .actor_id = entry.opaque0,
-      .ignored = entry.opaque40 != 0,
-      .hp = {entry.opaque4, static_cast<std::uint8_t>(entry.opaque_1c_bit0)},
-      .mp = {entry.opaque6, static_cast<std::uint8_t>(entry.opaque_1c_bit2)},
-      .weapon_dp = {entry.opaque38,
-                    static_cast<std::uint8_t>(entry.opaque_1e_bit2)},
-      .shield_dp = {entry.opaque_3c,
-                    static_cast<std::uint8_t>(entry.opaque_1e_bit6)},
-      .statuses_set = entry.opaque14,
-      .statuses_clear = entry.opaque18,
-      .hit_threshold = entry.opaque2};
+      .actor_id = entry.target_actor,
+      .ignored = entry.targets_position != 0,
+      .hp = {entry.hp, static_cast<std::uint8_t>(entry.hp_effect)},
+      .mp = {entry.mp, static_cast<std::uint8_t>(entry.mp_effect)},
+      .weapon_dp = {entry.weapon_dp_change,
+                    static_cast<std::uint8_t>(entry.weapon_dp_effect)},
+      .shield_dp = {entry.armor_dp_change,
+                    static_cast<std::uint8_t>(entry.armor_dp_effect)},
+      .statuses_set = entry.added_statuses,
+      .statuses_clear = entry.removed_statuses,
+      .hit_threshold = entry.hit_threshold};
 }
 
 struct SimulationSnapshot {
@@ -327,7 +327,7 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
     CaptureBattleActorConditions(rows_);
     return true;
   }
-  bool SpecialMode() const override { return state_.settings_mode_low != 0; }
+  bool SpecialMode() const override { return state_.scores_special_actions != 0; }
   bool Simulate(ActionCandidate& candidate,
                 CandidateSimulationMode mode) override {
     candidate_ = RecordOf(candidate);
@@ -358,7 +358,7 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
       const auto* ai_state = VS::Battle::Ai::actorAiStates[row.actor_id];
       if (!ReadablePlanningRecord(ai_state)) return std::nullopt;
       condition.condition = SimulationConditionOf(row);
-      condition.action_cost_enabled = ai_state->action_cost_enabled != 0;
+      condition.action_cost_enabled = ai_state->max_spell_cost != 0;
     }
     return std::span<const CandidateCondition>(conditions_).first(count);
   }
@@ -398,7 +398,7 @@ class LiveTargetMemory final : public TargetMemoryHost {
     return state_.candidate_count;
   }
   [[nodiscard]] bool MemoryDisabled() const override {
-    return state_.settings_constant19 != 0;
+    return state_.target_memory_disabled != 0;
   }
   [[nodiscard]] std::optional<unsigned> FirstRankedTarget() const override {
     const VS::Battle::Ai::ActionCandidateRecord* first =
@@ -662,7 +662,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     return CandidateOf(record);
   }
   void SetDetourTarget(std::uint8_t target) override {
-    State().opaque_fb = target;
+    State().detour_target = target;
   }
   int TargetCount() const override {
     return request_ == nullptr ? 0 : request_->target_count;
@@ -817,10 +817,10 @@ class LiveActionMetadata final : public ActionMetadataHost {
     entry.range_squared = slot.range_squared;
   }
   [[nodiscard]] std::uint8_t ActionCostThreshold() const override {
-    return state_.action_cost_enabled;
+    return state_.max_spell_cost;
   }
   void SetActionCostThreshold(std::uint8_t threshold) override {
-    state_.action_cost_enabled = threshold;
+    state_.max_spell_cost = threshold;
   }
 
  private:
@@ -1189,7 +1189,7 @@ bool ApplyLiveSimulatedActionResults(
     return false;
   }
   ActionCost cost{};
-  if (header.primary_target.opaque40 == 0) {
+  if (header.primary_target.targets_position == 0) {
     if (header.action_id >= std::size(VS::Battle::actionDefinitions)) {
       return false;
     }
@@ -1294,7 +1294,7 @@ int LiveActorStatusConditionScore(const VS::Battle::Ai::ActionTiming* row) {
   Require(state != nullptr,
           "AI actor status score requires the actor's AI state");
   return ActorStatusConditionScore(SimulationConditionOf(*row),
-                                   state->action_cost_enabled != 0);
+                                   state->max_spell_cost != 0);
 }
 
 int LiveActorHpRatio(const VS::Battle::Ai::ActionTiming* rows, int id) {
@@ -1552,7 +1552,7 @@ bool RefreshLiveAiActionUsability(VS::Battle::Ai::ActorAiState* state, int row,
 void RefreshLiveAiResourceRestrictions(VS::Battle::Ai::ActorAiState* state) {
   Require(state != nullptr, "AI resource restrictions require a state");
   const ActorResourceConditions conditions = RefreshAiResourceRestrictions(
-      ResourcesOf(StatsOf(*state)), state->action_cost_enabled);
+      ResourcesOf(StatsOf(*state)), state->max_spell_cost);
   state->resource_status_restricted = conditions.status_restricted ? 1 : 0;
   state->low_mp = conditions.low_mp ? 1 : 0;
   state->low_hp = conditions.low_hp ? 1 : 0;

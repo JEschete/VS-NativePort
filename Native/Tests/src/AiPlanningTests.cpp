@@ -228,7 +228,7 @@ struct EnumerationFixture : ReadinessFixture {
     VS::Battle::Ai::fallbackSlotMask = 0;
     VS::Core::SeedBiosRand(1);
     state.candidate_count = 0;
-    state.settings_mode_low = 1;
+    state.scores_special_actions = 1;
     state.point_height = -4321;
     state.relations[1].classification = 2;
     target_stats = stats;
@@ -729,16 +729,16 @@ TEST_CASE(
   candidate.threshold = 54321;
   candidate.opaque0 = -123456;
   fixture.workspace->target_count = 4;
-  fixture.workspace->targets[0].opaque0 = 3;
-  fixture.workspace->targets[0].opaque40 = 1;
-  fixture.workspace->targets[0].opaque2 = 128;
-  fixture.workspace->targets[1].opaque0 = 2;
-  fixture.workspace->targets[1].opaque2 = 128;
-  fixture.workspace->targets[2].opaque0 = 3;
-  fixture.workspace->targets[3].opaque0 = 3;
-  fixture.workspace->targets[3].opaque2 = 99;
+  fixture.workspace->targets[0].target_actor = 3;
+  fixture.workspace->targets[0].targets_position = 1;
+  fixture.workspace->targets[0].hit_threshold = 128;
+  fixture.workspace->targets[1].target_actor = 2;
+  fixture.workspace->targets[1].hit_threshold = 128;
+  fixture.workspace->targets[2].target_actor = 3;
+  fixture.workspace->targets[3].target_actor = 3;
+  fixture.workspace->targets[3].hit_threshold = 99;
   for (unsigned threshold = 0; threshold < 256; ++threshold) {
-    fixture.workspace->targets[2].opaque2 =
+    fixture.workspace->targets[2].hit_threshold =
         static_cast<unsigned char>(threshold);
     auto expected = candidate;
     expected.weight = (threshold + threshold / 4 + threshold / 32) & 255;
@@ -805,7 +805,7 @@ TEST_CASE(
         std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
   CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
   std::memcpy(scratch_rows, scratch.data(), scratch.size());
-  fixture.state.settings_mode_low = 1;
+  fixture.state.scores_special_actions = 1;
   VS::Battle::actionDefinitions[42].ai_flags.opaque0_bit4 = 1;
   VS::Battle::Ai::EvaluateActionCandidateEntry(
       &fixture.state, &candidate, 3, &VS::Battle::actionDefinitions[42]);
@@ -994,7 +994,7 @@ TEST_CASE(
   CompletedPlanFixture fixture;
   fixture.object.object_info.object_id = GENERATE(0, 1, 3, 5, 6, 7);
   fixture.Reconcile();
-  CHECK(fixture.state.opaque_fb == 5);
+  CHECK(fixture.state.detour_target == 5);
   CHECK(fixture.state.previous_tile == CompletedPlanFixture::kRememberedTile);
 }
 
@@ -1010,7 +1010,7 @@ TEST_CASE(
     fixture.object.object_info.object_id = kind;
   }
   fixture.Reconcile();
-  CHECK(fixture.state.opaque_fb == 5);
+  CHECK(fixture.state.detour_target == 5);
   CHECK(fixture.state.previous_tile == -1);
 }
 
@@ -1020,7 +1020,7 @@ TEST_CASE("Completed action reconciliation skips position targets",
   fixture.request.targets[0].target.target_actor = 200;
   fixture.request.targets[0].targets_position = 1;
   fixture.Reconcile();
-  CHECK(fixture.state.opaque_fb == 5);
+  CHECK(fixture.state.detour_target == 5);
   CHECK(fixture.state.previous_tile == CompletedPlanFixture::kRememberedTile);
 }
 
@@ -1036,7 +1036,7 @@ TEST_CASE(
   SECTION("a wider row half") { fixture.actor.command_arg0 = (1 << 16) | 11; }
   VS::Field::gimmickInstances[4] = nullptr;
   fixture.Reconcile();
-  CHECK(fixture.state.opaque_fb == 0);
+  CHECK(fixture.state.detour_target == 0);
   CHECK(fixture.state.previous_tile == CompletedPlanFixture::kRememberedTile);
 }
 
@@ -1153,17 +1153,17 @@ TEST_CASE(
   SimulationResultsFixture fixture;
   VS::Battle::actionDefinitions[42].type = 3;
   VS::Battle::actionDefinitions[42].cost = 55;
-  fixture.workspace->primary_target.opaque4 = 7;
-  fixture.workspace->primary_target.opaque_1c_bit0 = 2;
-  fixture.workspace->primary_target.opaque14 = 3;
-  fixture.workspace->primary_target.opaque18 = 1;
+  fixture.workspace->primary_target.hp = 7;
+  fixture.workspace->primary_target.hp_effect = 2;
+  fixture.workspace->primary_target.added_statuses = 3;
+  fixture.workspace->primary_target.removed_statuses = 1;
   fixture.workspace->target_count = 2;
-  fixture.workspace->targets[0].opaque0 = 0;
-  fixture.workspace->targets[0].opaque4 = 30;
-  fixture.workspace->targets[0].opaque_1c_bit0 = 2;
-  fixture.workspace->targets[1].opaque0 = 0;
-  fixture.workspace->targets[1].opaque4 = 10;
-  fixture.workspace->targets[1].opaque18 = 2;
+  fixture.workspace->targets[0].target_actor = 0;
+  fixture.workspace->targets[0].hp = 30;
+  fixture.workspace->targets[0].hp_effect = 2;
+  fixture.workspace->targets[1].target_actor = 0;
+  fixture.workspace->targets[1].hp = 10;
+  fixture.workspace->targets[1].removed_statuses = 2;
   auto expected = fixture.rows;
   expected[0].hp = 27;
   expected[0].statuses = 0x80000000;
@@ -1180,22 +1180,22 @@ TEST_CASE("Native simulated results decode all signed resource operations",
     VS::Battle::actionDefinitions[42].type = type;
     VS::Battle::actionDefinitions[42].cost = 5;
     auto& performer = fixture.workspace->primary_target;
-    performer.opaque4 = 7;
-    performer.opaque_1c_bit0 = 2;
-    performer.opaque6 = -9;
-    performer.opaque38 = 9;
-    performer.opaque_1e_bit2 = 2;
-    performer.opaque_3c = -8;
-    performer.opaque_1e_bit6 = 3;
-    performer.opaque14 = 5;
-    performer.opaque18 = 1;
+    performer.hp = 7;
+    performer.hp_effect = 2;
+    performer.mp = -9;
+    performer.weapon_dp_change = 9;
+    performer.weapon_dp_effect = 2;
+    performer.armor_dp_change = -8;
+    performer.armor_dp_effect = 3;
+    performer.added_statuses = 5;
+    performer.removed_statuses = 1;
     fixture.workspace->target_count = 1;
     auto& target = fixture.workspace->targets[0];
-    target.opaque0 = 1;
-    target.opaque6 = INT16_MAX;
-    target.opaque38 = 5;
-    target.opaque_1e_bit2 = 2;
-    target.opaque_3c = INT16_MIN;
+    target.target_actor = 1;
+    target.mp = INT16_MAX;
+    target.weapon_dp_change = 5;
+    target.weapon_dp_effect = 2;
+    target.armor_dp_change = INT16_MIN;
     auto expected = fixture.rows;
     expected[0].hp = type == 3 ? 52 : 57;
     expected[0].mp = type == 1 ? 44 : 49;
@@ -1215,7 +1215,7 @@ TEST_CASE("Native simulated results decode all signed resource operations",
 TEST_CASE("Native simulated results accept the complete native target capacity",
           "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;
-  fixture.workspace->primary_target.opaque40 = 1;
+  fixture.workspace->primary_target.targets_position = 1;
   fixture.workspace->target_count =
       static_cast<std::uint16_t>(std::size(fixture.request->targets));
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
@@ -1229,11 +1229,11 @@ TEST_CASE(
     "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;
   fixture.workspace->action_id = UINT16_MAX;
-  fixture.workspace->primary_target.opaque40 = -1;
-  fixture.workspace->primary_target.opaque0 = 255;
+  fixture.workspace->primary_target.targets_position = -1;
+  fixture.workspace->primary_target.target_actor = 255;
   fixture.workspace->target_count = 1;
-  fixture.workspace->targets[0].opaque40 = 1;
-  fixture.workspace->targets[0].opaque0 = 255;
+  fixture.workspace->targets[0].targets_position = 1;
+  fixture.workspace->targets[0].target_actor = 255;
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
   VS::Battle::Ai::ApplySimulatedActionResultsEntry(fixture.rows.data());
@@ -1257,7 +1257,7 @@ TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
   fixture.workspace->target_count = 256;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   fixture.workspace->target_count = 0;
-  fixture.workspace->primary_target.opaque0 = 16;
+  fixture.workspace->primary_target.target_actor = 16;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   auto* short_workspace = static_cast<VS::Battle::Ai::ReactionRecord*>(
       VS::Core::Memory::AllocateLiveFromLowEnd(
@@ -1284,12 +1284,12 @@ TEST_CASE("Native condition status score reads the row's own AI state",
   row.hp = 100;
   row.max_hp = 100;
   row.statuses = (1u << 6) | (1u << 12);
-  fixture.state.action_cost_enabled = 1;
-  fixture.peer.action_cost_enabled = 0;
+  fixture.state.max_spell_cost = 1;
+  fixture.peer.max_spell_cost = 0;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50);
-  fixture.peer.action_cost_enabled = 1;
+  fixture.peer.max_spell_cost = 1;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50 - 51);
-  fixture.peer.action_cost_enabled = 2;
+  fixture.peer.max_spell_cost = 2;
   row.hp = 0;
   CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) ==
         50 - 51 - 128 - 84);
@@ -1480,7 +1480,7 @@ TEST_CASE("AI target memory leaves empty and negative candidate sets untouched",
 TEST_CASE("AI target memory preserves the original nonzero settings guard",
           "[ai][planning][target-memory]") {
   TargetMemoryFixture fixture(15);
-  fixture.state.settings_constant19 = static_cast<char>(GENERATE(1, 255));
+  fixture.state.target_memory_disabled = static_cast<char>(GENERATE(1, 255));
   fixture.state.candidate_count = GENERATE(1, 16);
   fixture.state.candidate_order[0] = nullptr;
   const auto expected = fixture.Bytes();
@@ -1525,7 +1525,7 @@ TEST_CASE("AI target forgetting keeps the remembered destination and lifetime",
 static_assert(offsetof(VS::Battle::Ai::BlockedRecoveryView, is_stuck) ==
               offsetof(VS::Battle::Ai::ActorAiState, is_stuck));
 static_assert(offsetof(VS::Battle::Ai::BlockedRecoveryView, opaque_1c) ==
-              offsetof(VS::Battle::Ai::ActorAiState, opaque_1c));
+              offsetof(VS::Battle::Ai::ActorAiState, holds_stall_tile));
 static_assert(offsetof(VS::Battle::Ai::BlockedRecoveryView, tile) ==
               offsetof(VS::Battle::Ai::ActorAiState, tile));
 static_assert(offsetof(VS::Battle::Ai::BlockedRecoveryView, previous_tile) ==
@@ -1551,7 +1551,7 @@ TEST_CASE("Blocked movement forgets its target after exhausting detours",
   std::array<std::byte, sizeof(state)> expected{};
   std::memcpy(expected.data(), &state, expected.size());
   expected[offsetof(VS::Battle::Ai::ActorAiState, is_stuck)] = std::byte{1};
-  expected[offsetof(VS::Battle::Ai::ActorAiState, opaque_1c)] = std::byte{0};
+  expected[offsetof(VS::Battle::Ai::ActorAiState, holds_stall_tile)] = std::byte{0};
   expected[offsetof(VS::Battle::Ai::ActorAiState, detour_step)] = std::byte{0};
   std::memset(
       expected.data() + offsetof(VS::Battle::Ai::ActorAiState, previous_tile),
@@ -1607,7 +1607,7 @@ TEST_CASE("AI action metadata writes the typed slot fields and keeps the rest",
   DefineMetadataAction(type);
   std::memset(&fixture.state.action_slots, fill,
               sizeof(fixture.state.action_slots));
-  fixture.state.action_cost_enabled = 10;
+  fixture.state.max_spell_cost = 10;
   VS::Battle::Ai::ActorAiState expected = fixture.state;
   for (auto& row : expected.action_slots) {
     for (auto& slot : row) {
@@ -1621,7 +1621,7 @@ TEST_CASE("AI action metadata writes the typed slot fields and keeps the rest",
   }
   VS::Battle::Ai::BuildLiveAiActionMetadata(&fixture.state);
   CHECK(SlotBytesOf(fixture.state) == SlotBytesOf(expected));
-  CHECK(fixture.state.action_cost_enabled == (type == 1 ? 30 : 10));
+  CHECK(fixture.state.max_spell_cost == (type == 1 ? 30 : 10));
   const auto& slot = fixture.state.action_slots[3][2];
   CHECK(slot.reserved0_bit0 == (fill & 1u));
   CHECK(slot.ignores_obstruction == ((fill >> 2) & 1u));
@@ -1652,7 +1652,7 @@ TEST_CASE("AI action metadata only sets the player's threshold",
   state.stats = nullptr;
   const SlotBytes slots = SlotBytesOf(state);
   VS::Battle::Ai::BuildLiveAiActionMetadata(&state);
-  CHECK(state.action_cost_enabled == 1);
+  CHECK(state.max_spell_cost == 1);
   CHECK(SlotBytesOf(state) == slots);
 }
 
@@ -1887,7 +1887,7 @@ TEST_CASE(
     "AI resource conditions use unsigned halves and the actual status mask",
     "[ai][planning]") {
   PlanningFixture fixture;
-  fixture.state.action_cost_enabled = 10;
+  fixture.state.max_spell_cost = 10;
   fixture.stats.current_hp = 49;
   fixture.stats.current_mp = 9;
   fixture.stats.statuses = 0x90000;
@@ -1902,7 +1902,7 @@ TEST_CASE(
   CHECK(fixture.state.reserved10[0] == 1);
   CHECK(fixture.state.reserved10[1] == 0);
   CHECK(fixture.state.reserved10[2] == 0);
-  fixture.state.action_cost_enabled = 0;
+  fixture.state.max_spell_cost = 0;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 0);
 }
@@ -1931,7 +1931,7 @@ TEST_CASE(
                                                          &candidate, 3));
   fixture.state.relations[3].classification = 2;
   fixture.peer.actor = &fixture.actor;
-  fixture.peer.action_cost_enabled = 10;
+  fixture.peer.max_spell_cost = 10;
   fixture.stats.current_mp = 9;
   VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
   VS::Battle::actionDefinitions[42].ai_flags =

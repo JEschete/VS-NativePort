@@ -297,7 +297,7 @@ TEST_CASE("Ground walk respects area exceptions and higher terrain layers",
           "[ai][ground-query]") {
   GroundFixture fixture;
   fixture.flags[8][9] = 1;
-  fixture.states[0].settings_bit14 = 1;
+  fixture.states[0].routes_by_area = 1;
   CHECK(fixture.Walk(6) == 0);
   fixture.states[0].reserved154_area = 1;
   fixture.ClearCache();
@@ -313,10 +313,10 @@ TEST_CASE("Tile steps enforce configured gaps, slopes and movement disable",
           "[ai][ground-query]") {
   GroundFixture fixture;
   CHECK(fixture.Step(Tile(9, 8), 6) == 1);
-  fixture.states[0].movement_disabled = 1;
+  fixture.states[0].ground_moves_disabled = 1;
   CHECK(fixture.Step(Tile(9, 8), 6) == 0);
-  fixture.states[0].movement_disabled = 0;
-  fixture.states[0].opaque3 = 1;
+  fixture.states[0].ground_moves_disabled = 0;
+  fixture.states[0].limits_climbs = 1;
   fixture.heights[8][9] = 3;
   fixture.ClearCache();
   CHECK(fixture.Step(Tile(9, 8), 6) == 0);
@@ -332,7 +332,7 @@ TEST_CASE("Tile steps use typed target positions for the approach radius",
       &fixture.states[0]);
   approach.target_id = 1;
   approach.range = 160;
-  fixture.states[0].opaque5 = 1;
+  fixture.states[0].approach_only_edges = 1;
   fixture.states[0].requested_movement_mode = 1;
   fixture.states[0].destination.word = Tile(10, 8);
   fixture.models[1].instance.position.vx = 1216;
@@ -382,7 +382,7 @@ TEST_CASE("Detour progress detects five repeated tiles and preserves RNG order",
   CHECK(VS::Battle::Ai::RefreshLiveDetourProgress(&fixture.states[0],
                                                   0x12345678) ==
         ((0x12345678u & 0xFFFFF01Fu) | (126u << 5)));
-  CHECK(fixture.states[0].opaque_19a == 120);
+  CHECK(fixture.states[0].recovery_frames == 120);
   CHECK(fixture.states[0].detour_repeats == 0);
   CHECK(fixture.states[0].movement_wait == 0);
   CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 40);
@@ -418,7 +418,7 @@ TEST_CASE("Cardinal passability visits exactly four ordered callbacks",
 TEST_CASE("Existing detour initialization does not consume random draws",
           "[ai][ground-motion]") {
   GroundFixture fixture;
-  fixture.states[0].opaque1 = 1;
+  fixture.states[0].run_requested = 1;
   auto passable = [](VS::Battle::Ai::MovementPathView*, int) { return 1; };
   CHECK(VS::Battle::Ai::InitializeLiveObstacleDetour(
             &fixture.states[0], 0x20, passable) == (0x20u | (15u << 18)));
@@ -438,7 +438,7 @@ TEST_CASE("Hesitation only draws for a fresh non-poll request",
   CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 128, 1,
                                                  6) == 1);
   CHECK(fixture.states[0].movement_mode_counters[12] == 1);
-  CHECK(fixture.states[0].reaction_pending == 69);
+  CHECK(fixture.states[0].facing_hesitation_count == 69);
 }
 
 TEST_CASE("Hesitation phase thresholds execute the actual timed-turn consumer",
@@ -455,14 +455,14 @@ TEST_CASE("Hesitation phase thresholds execute the actual timed-turn consumer",
                                       : count >= 18 ? -0x320
                                                     : 0));
   CHECK(fixture.actors[0].command_opcode == 6);
-  CHECK(fixture.states[0].opaque_13a == 64);
+  CHECK(fixture.states[0].turn_step == 64);
 }
 
 TEST_CASE("Vertical gait selection retains source priorities and output widths",
           "[ai][ground-motion]") {
   const int running = GENERATE(0, 1);
   GroundFixture fixture;
-  fixture.states[0].opaque1 = static_cast<std::uint8_t>(running);
+  fixture.states[0].run_requested = static_cast<std::uint8_t>(running);
   fixture.states[0].locomotion_flags = 0x3010;
   fixture.states[0].walk_step = 17;
   fixture.states[0].run_step = 93;
@@ -586,7 +586,7 @@ TEST_CASE(
 TEST_CASE("Creation-time null action contexts still propagate relationships",
           "[ai][behavior-continuation]") {
   GroundFixture fixture;
-  fixture.states[1].uses_room_action_delay = 1;
+  fixture.states[1].temporary_ashley_alliance = 1;
   VS::Battle::Ai::ApplyLiveActionRelationshipChanges(nullptr);
   CHECK(fixture.states[1].relations[0].classification == 2);
   CHECK(fixture.states[1].relations[1].classification == 2);
@@ -724,7 +724,7 @@ TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
   fixture.flags[8][8] = 1;
   fixture.flags[8][10] = stuck ? 2 : 1;
   state.destination.word = Tile(10, 8);
-  state.opaque4 = 5;
+  state.allows_detours = 5;
   state.move_x = 1344;
   state.move_z = 1088;
   auto& frame = VS::Battle::Ai::LiveFrameContext();
@@ -734,8 +734,8 @@ TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
   frame.reserved_cache = 0x5A;
   VS::Battle::Ai::UpdateLiveNavigationAreaMovement(
       reinterpret_cast<VS::Battle::Ai::TerrainMoveView*>(&state));
-  CHECK(state.opaque4 == 0);
-  CHECK(state.opaque5 == 1);
+  CHECK(state.allows_detours == 0);
+  CHECK(state.approach_only_edges == 1);
   CHECK(frame.blocker_valid == 0xFF);
   CHECK(frame.reserved_cache == 0x5A);
   CHECK((frame.walk_valid == 0xFF) == !stuck);

@@ -21,7 +21,7 @@ struct ActorAiState;
 struct EngagementData;
 struct ModelStatePrefix;
 
-inline constexpr std::size_t kRoomAiStateReserved4Bytes = 4;
+inline constexpr std::size_t kRoomAiStateCollisionExtentBytes = 4;
 inline constexpr std::size_t kRoomAiStateReservedBBytes = 9;
 inline constexpr std::size_t kRoomAiStateSpecialActorsCount = 4;
 
@@ -31,7 +31,8 @@ struct RoomAiState {
   /* 0x01 */ std::uint8_t max_tile_z;
   /* 0x02 */ std::uint8_t min_tile_x;
   /* 0x03 */ std::uint8_t min_tile_z;
-  /* 0x04 */ std::array<std::uint8_t, kRoomAiStateReserved4Bytes> reserved4;
+  /* 0x04 */ std::array<std::uint8_t, kRoomAiStateCollisionExtentBytes>
+      collision_extent;
   /* 0x08 */ std::uint8_t default_action_delay;
   /* 0x09 */ union {
     std::uint8_t reserved9;
@@ -55,7 +56,7 @@ struct RoomAiState {
   /* 0x18 */ std::uint16_t readiness_level;
   /* 0x1A */ std::array<std::uint8_t, 2> reserved_1a;
   /* 0x1C */ ActorAiState* engaged_head;
-  /* 0x20 */ ActorAiState* engaged_tail;
+  /* 0x20 */ ActorAiState* engaged_cursor;
   /* 0x24 */ std::int32_t approach_moves;
   /* 0x28 */ std::array<VS::Battle::Actor*, kRoomAiStateSpecialActorsCount>
       special_actors;
@@ -159,23 +160,29 @@ inline constexpr std::size_t kActorAiStateMovementModeCountersBytes = 13;
 
 // decomp: func_800E78F4_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:149)
 struct ActorAiState {
-  /* 0x00 */ std::uint8_t reserved0;
-  /* 0x01 */ std::uint8_t opaque1;
+  /* 0x00 */ std::uint8_t close_approach;
+  /* 0x01 */ std::uint8_t run_requested;
   /* 0x02 */ std::uint8_t is_stuck;
-  /* 0x03 */ std::uint8_t opaque3;
-  /* 0x04 */ std::uint8_t opaque4;
-  /* 0x05 */ std::uint8_t opaque5;
+  /* 0x03 */ std::uint8_t limits_climbs;
+  /* 0x04 */ std::uint8_t allows_detours;
+  /* 0x05 */ std::uint8_t approach_only_edges;
   /* 0x06 */ union {
     std::uint8_t reserved6;
     std::uint8_t ignore_floor_mask;
   };
-  /* 0x07 */ std::uint8_t movement_disabled;
+  /* 0x07 */ std::uint8_t ground_moves_disabled;
   /* 0x08 */ std::uint8_t opaque8;
-  /* 0x09 */ std::uint8_t opaque9;
-  /* 0x0A */ std::array<std::uint8_t, kActorAiStateReservedABytes> reserved_a;
-  /* 0x0D */ std::uint8_t opaque_d;
-  /* 0x0E */ std::uint8_t opaque_e;
-  /* 0x0F */ std::uint8_t opaque_f;
+  /* 0x09 */ std::uint8_t targets_point;
+  /* 0x0A */ union {
+    std::array<std::uint8_t, kActorAiStateReservedABytes> reserved_a;
+    struct {
+      std::array<std::uint8_t, 2> reserved_a_prefix;
+      std::uint8_t skips_backstep_hesitation;
+    };
+  };
+  /* 0x0D */ std::uint8_t approaches_directly;
+  /* 0x0E */ std::uint8_t should_flee;
+  /* 0x0F */ std::uint8_t guarding;
   /* 0x10 */ union {
     std::array<std::uint8_t, kActorAiStateReserved10Bytes> reserved10;
     struct {
@@ -184,16 +191,28 @@ struct ActorAiState {
       std::uint8_t low_hp;
     };
   };
-  /* 0x13 */ std::uint8_t uses_room_action_delay;
-  /* 0x14 */ std::array<std::uint8_t, 2> reserved14;
+  /* 0x13 */ std::uint8_t temporary_ashley_alliance;
+  /* 0x14 */ union {
+    std::array<std::uint8_t, 2> reserved14;
+    struct {
+      std::uint8_t perception_skipped;
+      std::uint8_t reserved15;
+    };
+  };
   /* 0x16 */ std::int8_t linked_actor;
-  /* 0x17 */ std::uint8_t action_cost_enabled;
+  /* 0x17 */ std::uint8_t max_spell_cost;
   /* 0x18 */ std::uint8_t opaque18;
-  /* 0x19 */ std::uint8_t settings_constant19;
-  /* 0x1A */ std::uint8_t opaque_1a;
+  /* 0x19 */ std::uint8_t target_memory_disabled;
+  /* 0x1A */ std::uint8_t on_moving_platform;
   /* 0x1B */ std::uint8_t is_dead;
-  /* 0x1C */ std::uint8_t opaque_1c;
-  /* 0x1D */ std::array<std::uint8_t, kActorAiStateReserved1dBytes> reserved_1d;
+  /* 0x1C */ std::uint8_t holds_stall_tile;
+  /* 0x1D */ union {
+    std::array<std::uint8_t, kActorAiStateReserved1dBytes> reserved_1d;
+    struct {
+      std::uint8_t partial_perception;
+      std::array<std::uint8_t, 2> reserved_1e;
+    };
+  };
   /* 0x20 */ std::uint8_t settings_bit26;
   /* 0x21 */ std::uint8_t settings_byte3_bit0;
   /* 0x22 */ union {
@@ -207,10 +226,10 @@ struct ActorAiState {
   /* 0x26 */ std::uint8_t allow_fallback_action;
   /* 0x27 */ std::uint8_t settings_bit27;
   /* 0x28 */ std::uint8_t reserved28;
-  /* 0x29 */ std::uint8_t settings_bit14;
+  /* 0x29 */ std::uint8_t routes_by_area;
   /* 0x2A */ std::uint8_t has_tagged_bone3;
-  /* 0x2B */ std::uint8_t settings_mode_low;
-  /* 0x2C */ std::uint8_t settings_bits21;
+  /* 0x2B */ std::uint8_t scores_special_actions;
+  /* 0x2C */ std::uint8_t relation_category;
   /* 0x2D */ std::array<std::uint8_t, kActorAiStateReserved2dBytes> reserved_2d;
   /* 0x30 */ std::uint8_t settings_bit25;
   /* 0x31 */ union {
@@ -231,7 +250,7 @@ struct ActorAiState {
       std::int16_t saved_relation_options;
     };
   };
-  /* 0x44 */ std::uint8_t opaque44;
+  /* 0x44 */ std::uint8_t guard_delay;
   /* 0x45 */ std::array<std::uint8_t, kActorAiStateReserved45Bytes> reserved45;
   /* 0x48 */ TilePosition saved_destination;
   /* 0x4C */ VS::Core::Gte::SVECTOR position;
@@ -282,8 +301,8 @@ struct ActorAiState {
   /* 0xB3 */ std::uint8_t max_range;
   /* 0xB4 */ std::int32_t move_distance;
   /* 0xB8 */ std::int16_t body_height;
-  /* 0xBA */ std::uint16_t facing_delay;
-  /* 0xBC */ std::array<std::uint8_t, 2> reserved_bc;
+  /* 0xBA */ std::uint16_t facing_turn_step;
+  /* 0xBC */ std::int16_t ground_clearance;
   /* 0xBE */ std::int16_t flight_height;
   /* 0xC0 */ std::uint16_t wander_phase;
   /* 0xC2 */ std::uint16_t wander_timer;
@@ -303,10 +322,10 @@ struct ActorAiState {
   /* 0xD9 */ std::array<std::uint8_t, kActorAiStateReservedD9Bytes> reserved_d9;
   /* 0xE7 */ std::uint8_t opaque_e7;
   /* 0xE8 */ std::uint8_t opaque_e8;
-  /* 0xE9 */ std::uint8_t opaque_e9;
+  /* 0xE9 */ std::uint8_t range_band;
   /* 0xEA */ std::array<std::uint8_t, kActorAiStateReservedEaBytes> reserved_ea;
   /* 0xFA */ std::uint8_t detour_step;
-  /* 0xFB */ std::uint8_t opaque_fb;
+  /* 0xFB */ std::uint8_t detour_target;
   /* 0xFC */ union {
     std::array<std::uint8_t, kActorAiStateReservedFcBytes> reserved_fc;
     struct {
@@ -352,15 +371,15 @@ struct ActorAiState {
   };
   /* 0x12D */ std::uint8_t behavior_mode;
   /* 0x12E */ std::uint8_t plan_mode;
-  /* 0x12F */ std::int8_t opaque_12f;
-  /* 0x130 */ std::int8_t opaque130;
+  /* 0x12F */ std::int8_t engagement_phase;
+  /* 0x130 */ std::int8_t engagement_phase_step;
   /* 0x131 */ std::uint8_t action_status;
   /* 0x132 */ std::uint8_t ground_area;
   /* 0x133 */ std::uint8_t reserved133;
   /* 0x134 */ TilePosition planned_tile;
   /* 0x138 */ std::uint16_t awareness_marker;
-  /* 0x13A */ std::uint16_t opaque_13a;
-  /* 0x13C */ std::uint16_t opaque_13c;
+  /* 0x13A */ std::uint16_t turn_step;
+  /* 0x13C */ std::uint16_t default_turn_step;
   /* 0x13E */ std::uint8_t reserved_13e;
   /* 0x13F */ std::uint8_t min_action_delay;
   /* 0x140 */ ActionCandidateRecord current_choice;
@@ -407,7 +426,7 @@ struct ActorAiState {
       std::uint8_t detour_run;
     };
   };
-  /* 0x19A */ std::uint8_t opaque_19a;
+  /* 0x19A */ std::uint8_t recovery_frames;
   /* 0x19B */ union {
     std::array<std::uint8_t, kActorAiStateReserved19bBytes> reserved_19b;
     struct {
@@ -444,7 +463,7 @@ struct ActorAiState {
     std::array<std::uint8_t, kActorAiStateMovementModeCountersBytes>
         movement_mode_counters;
   };
-  /* 0x481 */ std::uint8_t reaction_pending;
+  /* 0x481 */ std::uint8_t facing_hesitation_count;
 };
 
 inline constexpr std::size_t kEngagementDataReserved04Bytes = 4;

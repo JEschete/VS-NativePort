@@ -118,7 +118,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
     auto& plan = AiStateOf(actor.slot);
     plan.opaque_e8 = 0;
     plan.opaque_e7 = 0;
-    plan.opaque_19a = 0;
+    plan.recovery_frames = 0;
     // The original loads both speeds with lbu.
     const auto& stats = StatsOf(ActorOf(actor));
     VS::Battle::Ai::SetLiveActorVerticalMovementSteps(
@@ -138,7 +138,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   [[nodiscard]] bool BuildActorPlan(const PlanningActor& actor) override {
     auto& plan = AiStateOf(actor.slot);
     BuildLiveActorActionPlan(&plan);
-    return plan.uses_room_action_delay != 0;
+    return plan.temporary_ashley_alliance != 0;
   }
 
   [[nodiscard]] bool SuppressesAwarenessIndicator(

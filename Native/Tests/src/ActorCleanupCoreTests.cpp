@@ -778,7 +778,7 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
   room.min_tile_x = 4;
   room.min_tile_z = 6;
   auto state = std::make_unique<VS::Battle::Ai::ActorAiState>();
-  state->opaque_1a = 1;
+  state->on_moving_platform = 1;
   state->next_tile.word = static_cast<std::uint32_t>(x | (z << 16));
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::roomAiState = &room;
@@ -786,13 +786,13 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::roomAiState = saved_room;
   CHECK(flags[z][x] == (released ? 0xFF7F : 0xFFFF));
-  CHECK(state->opaque_1a == 0);
+  CHECK(state->on_moving_platform == 0);
 }
 
 TEST_CASE("Live persistence flags read the AI state table", "[ai][cleanup]") {
   VS::Battle::Ai::ActorAiState* const saved = VS::Battle::Ai::actorAiStates[4];
   auto state = std::make_unique<VS::Battle::Ai::ActorAiState>();
-  state->uses_room_action_delay = 1;
+  state->temporary_ashley_alliance = 1;
   state->behavior_mode = 0;
   const std::uint32_t relation = 0x37F00080u;
   std::memcpy(&state->relations[0], &relation, sizeof(relation));

@@ -73,7 +73,7 @@ class LiveRelationTable final : public ActorRelationTable {
     return actors_.Ids();
   }
   [[nodiscard]] std::uint8_t Category(int actor) const override {
-    return State(actor).settings_bits21;
+    return State(actor).relation_category;
   }
   [[nodiscard]] unsigned Classification(int source, int target) const override {
     return State(source).relations[target].classification;
@@ -311,7 +311,7 @@ class LiveActorReaction final : public ActorReactionHost {
   }
   void StopArenaOrbit() override {
     if (VS::Battle::Ai::arenaOrbit != nullptr) {
-      VS::Battle::Ai::arenaOrbit->is_orbiting = 0;
+      VS::Battle::Ai::arenaOrbit->attacks_after_retreat = 0;
     }
   }
 

@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <iterator>
 #include <optional>
 #include <utility>
@@ -36,7 +35,6 @@ using AiState = VS::Battle::Ai::ActorAiState;
 
 static_assert(kNavigationDirections == kFlightDirectionCount);
 static_assert(sizeof(FrameContext::blocker_actor) == kFlightDirectionCount);
-static_assert(sizeof(AiState{}.reserved_bc) == sizeof(std::int16_t));
 // The approach target (0xE5) lies in the state's reserved bytes, which the
 // target approach view names.
 constexpr std::size_t kActorIdOffset = 0x88;
@@ -51,11 +49,8 @@ FlightMover Load(const AiState& state) {
   const auto* model = state.model;
   const auto& approach =
       *reinterpret_cast<const VS::Battle::Ai::TargetApproachView*>(&state);
-  std::int16_t ground_clearance = 0;
-  std::memcpy(&ground_clearance, state.reserved_bc.data(),
-              sizeof(ground_clearance));
-  return {.close_approach = static_cast<std::uint8_t>(state.reserved0),
-          .movement_disabled = state.movement_disabled,
+  return {.close_approach = static_cast<std::uint8_t>(state.close_approach),
+          .movement_disabled = state.ground_moves_disabled,
           .tile = state.tile.word,
           .previous_tile = static_cast<std::uint32_t>(state.previous_tile),
           .x = state.position.vx,
@@ -67,7 +62,7 @@ FlightMover Load(const AiState& state) {
           .radius = state.radius,
           .max_range = state.max_range,
           .body_height = state.body_height,
-          .ground_clearance = ground_clearance,
+          .ground_clearance = state.ground_clearance,
           .flight_height = state.flight_height,
           .approach_target = approach.target_id,
           .movement_flags = state.movement_flags,
@@ -81,7 +76,7 @@ FlightMover Load(const AiState& state) {
 
 // Flight movement writes only these fields; the rest are read.
 void Store(const FlightMover& mover, AiState& state) {
-  state.movement_disabled = mover.movement_disabled;
+  state.ground_moves_disabled = mover.movement_disabled;
   state.move_x = mover.move_x;
   state.move_z = mover.move_z;
   state.move_y = mover.move_y;

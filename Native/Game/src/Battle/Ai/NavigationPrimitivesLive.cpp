@@ -162,8 +162,8 @@ class LiveNavigationOverrideCopy final : public NavigationOverrideCopy {
                 sizeof(settings.step_height));
     destination_->reserved_b2 = settings.tile_step_limit;
     destination_->navigation_flags = settings.navigation_flags;
-    destination_->opaque_19a = settings.repeat_wait;
-    destination_->settings_bit14 = settings.area_settings;
+    destination_->recovery_frames = settings.repeat_wait;
+    destination_->routes_by_area = settings.area_settings;
     destination_->movement_enabled = settings.movement_enabled;
   }
 
@@ -248,11 +248,11 @@ ScriptedRoute LoadRoute(const VS::Battle::Ai::ActorAiState& state) {
           .movement_wait = state.movement_wait,
           .navigation_flags = state.navigation_flags,
           .ignore_floor = state.ignore_floor_mask,
-          .gait = state.opaque1,
+          .gait = state.run_requested,
           .movement_target = state.movement_target,
           .is_stuck = state.is_stuck,
-          .height_filter = state.opaque3,
-          .repeat_wait = state.opaque_19a,
+          .height_filter = state.limits_climbs,
+          .repeat_wait = state.recovery_frames,
           .tile = state.tile.word,
           .x = state.position.vx,
           .y = state.position.vy,
@@ -278,11 +278,11 @@ void StoreRouteRecord(const ScriptedRoute& route,
   state.movement_wait = route.movement_wait;
   state.navigation_flags = route.navigation_flags;
   state.ignore_floor_mask = route.ignore_floor;
-  state.opaque1 = route.gait;
+  state.run_requested = route.gait;
   state.movement_target = route.movement_target;
   state.is_stuck = route.is_stuck;
-  state.opaque3 = route.height_filter;
-  state.opaque_19a = route.repeat_wait;
+  state.limits_climbs = route.height_filter;
+  state.recovery_frames = route.repeat_wait;
   state.tile.word = route.tile;
   state.position.vx = route.x;
   state.position.vy = route.y;

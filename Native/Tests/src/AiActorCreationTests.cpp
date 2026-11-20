@@ -696,7 +696,7 @@ void CheckLiveStateBody(const VS::Battle::Ai::ActorAiState& state) {
   CHECK(state.has_tagged_bone3 == 1);
   CHECK(state.radius == 40);
   CHECK(state.collision_radius == 40);
-  CHECK(state.opaque_13c == 128);
+  CHECK(state.default_turn_step == 128);
   CHECK(state.body_height == 0x90);
   CHECK(state.flight_height == -128);
 }

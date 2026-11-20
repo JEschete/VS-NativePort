@@ -270,13 +270,13 @@ TEST_CASE("AI persistence packs every original bit without mutating live state",
   AiLifecycleFixture fixture;
   VS::Battle::Ai::actorAiStates[slot] = &fixture.state;
   fixture.state.actor_id = 7;
-  fixture.state.opaque_1a = 0xA5;
+  fixture.state.on_moving_platform = 0xA5;
   for (unsigned expected = 0; expected < 8192; ++expected) {
     const std::uint32_t relation = noise | (((expected >> 1) & 3) << 6) |
                                    (((expected >> 3) & 3) << 28) |
                                    (((expected >> 6) & 127) << 20);
     std::memcpy(&fixture.state.relations[0], &relation, sizeof(relation));
-    fixture.state.uses_room_action_delay =
+    fixture.state.temporary_ashley_alliance =
         static_cast<std::uint8_t>(expected & 1);
     fixture.state.behavior_mode = (expected & 32) ? 0 : 0xA5;
     const auto before = StateBytes(fixture.state);
@@ -292,7 +292,7 @@ TEST_CASE("AI persistence preserves the complete original delay byte",
   VS::Battle::Ai::actorAiStates[4] = &fixture.state;
   fixture.state.behavior_mode = 1;
   for (unsigned delay = 0; delay < 256; ++delay) {
-    fixture.state.uses_room_action_delay = static_cast<std::uint8_t>(delay);
+    fixture.state.temporary_ashley_alliance = static_cast<std::uint8_t>(delay);
     CHECK(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(4) ==
           static_cast<int>(delay));
   }
@@ -303,7 +303,7 @@ TEST_CASE(
     "gap",
     "[ai][lifecycle-leaves]") {
   AiLifecycleFixture fixture;
-  fixture.state.opaque_1a = 0xA5;
+  fixture.state.on_moving_platform = 0xA5;
   VS::Battle::Ai::actorAiStates[3] = &fixture.state;
   const auto state = StateBytes(fixture.state);
   const auto hits = ExtensionHookHits();
@@ -319,13 +319,13 @@ TEST_CASE("AI navigation reset clears only the original hold byte",
   const bool present = GENERATE(false, true);
   AiLifecycleFixture fixture;
   for (int slot = 0; slot < 16; ++slot) {
-    fixture.state.opaque_1a = 0xA5;
+    fixture.state.on_moving_platform = 0xA5;
     fixture.state.actor_id = 7;
     fixture.state.behavior_mode = 0x5A;
     VS::Battle::Ai::actorAiStates[slot] = present ? &fixture.state : nullptr;
     auto expected = StateBytes(fixture.state);
     if (present) {
-      expected[offsetof(VS::Battle::Ai::ActorAiState, opaque_1a)] =
+      expected[offsetof(VS::Battle::Ai::ActorAiState, on_moving_platform)] =
           std::byte{0};
     }
     VS::Battle::Ai::ClearLiveActorAiNavigationReset(slot);
@@ -842,7 +842,7 @@ void ExpectLiveSettings(VS::Battle::Ai::ActorAiState& expected, int waypoints,
       behaviour < 9 ? VS::Battle::Ai::decisionCallbacks[behaviour] : nullptr;
   want.linked_actor = 16;
   // Ashley's action metadata only sets her action cost threshold.
-  expected.action_cost_enabled = 1;
+  expected.max_spell_cost = 1;
 }
 }  // namespace
 

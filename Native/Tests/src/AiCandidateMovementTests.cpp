@@ -798,16 +798,16 @@ TEST_CASE(
     "state",
     "[candidate-movement][live]") {
   VS::Battle::Ai::ActorAiState state{};
-  state.opaque1 = 8;
-  state.opaque_f = 9;
-  state.opaque44 = 10;
+  state.run_requested = 8;
+  state.guarding = 9;
+  state.guard_delay = 10;
   state.movement_target = 7;
   CHECK(ai::MoveLiveForActionCandidate(
             reinterpret_cast<VS::Battle::Ai::CandidateMovementView*>(&state),
             nullptr) == 0);
-  CHECK(state.opaque1 == 8);
-  CHECK(state.opaque_f == 9);
-  CHECK(state.opaque44 == 10);
+  CHECK(state.run_requested == 8);
+  CHECK(state.guarding == 9);
+  CHECK(state.guard_delay == 10);
   CHECK(state.movement_target == 7);
 }
 

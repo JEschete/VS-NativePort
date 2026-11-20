@@ -220,7 +220,7 @@ static int TestDecision(VS::Battle::Ai::ActorAiState* state) {
 }
 
 static int TestMovementDecision(VS::Battle::Ai::ActorAiState* state) {
-  ++state->opaque44;
+  ++state->guard_delay;
   return 1;
 }
 
@@ -232,7 +232,7 @@ int Tests_AiMovementDispatch(void) {
   settings->decision_callback = TestMovementDecision;
   VS::Battle::Ai::DispatchLiveMovementBehavior(
       reinterpret_cast<VS::Battle::Ai::DecisionDispatchView*>(&state));
-  const int passed = state.opaque44 == 1 && state.detour_step == 0;
+  const int passed = state.guard_delay == 1 && state.detour_step == 0;
   VS::Battle::Ai::UpdateLiveActorLocomotionMode(
       reinterpret_cast<VS::Battle::Ai::DecisionDispatchView*>(&state));
   return passed && state.behavior_mode == 0;
@@ -252,9 +252,9 @@ int Tests_AiRelations(void) {
     states[index].saved_relation_options = -1;
     VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
   }
-  states[0].settings_bits21 = 3;
-  states[1].settings_bits21 = 0;
-  states[2].settings_bits21 = 2;
+  states[0].relation_category = 3;
+  states[1].relation_category = 0;
+  states[2].relation_category = 2;
   states[1].relations[5].visible = 1;
   VS::Battle::actors[0] = actors;
   VS::Battle::Ai::InitializeLiveActorAiRelations(
@@ -421,7 +421,7 @@ int Tests_AiFrameCache(void) {
   std::uint16_t heights[32][32] = {{0}};
   std::uint8_t auxiliary[0x898] = {0};
   const std::uint32_t bounds = 0x01021F1Eu;
-  memcpy(room.reserved4.data(), &bounds, sizeof bounds);
+  memcpy(room.collision_extent.data(), &bounds, sizeof bounds);
   VS::Battle::Ai::actorAiStates.fill(nullptr);
   VS::Battle::Ai::actorAiStates[15] = &actor;
   VS::Battle::Ai::roomAiState = &room;
@@ -523,7 +523,7 @@ int Tests_ActorConditionSnapshot(void) {
   first_stats.shield.max_dp = 60;
   second_stats.max_hp = 120;
   second_stats.statuses = (1 << 0) | (1 << 12);
-  second_ai.action_cost_enabled = 1;
+  second_ai.max_spell_cost = 1;
   VS::Battle::actors[0] = &first;
   VS::Battle::Ai::actorAiStates[2] = &first_ai;
   VS::Battle::Ai::actorAiStates[5] = &second_ai;

@@ -52,7 +52,7 @@ static_assert(sizeof(VS::Battle::Ai::ActorAiState{}.route_exit_bytes) ==
 static_assert(sizeof(VS::Battle::Ai::TilePosition) == sizeof(std::uint32_t));
 // The movement views alias the actor AI state they are handed.
 static_assert(offsetof(VS::Battle::Ai::MoveTargetView, movement_disabled) ==
-              offsetof(VS::Battle::Ai::ActorAiState, movement_disabled));
+              offsetof(VS::Battle::Ai::ActorAiState, ground_moves_disabled));
 static_assert(offsetof(VS::Battle::Ai::MoveTargetView, tile) ==
               offsetof(VS::Battle::Ai::ActorAiState, tile));
 static_assert(offsetof(VS::Battle::Ai::MoveTargetView, destination) ==
@@ -100,7 +100,7 @@ static_assert(offsetof(VS::Battle::Ai::MovementPathView, opaque_e4) ==
               offsetof(VS::Battle::Ai::TargetApproachView,
                        chasing_lost_target));
 static_assert(offsetof(VS::Battle::Ai::MovementPathView, wait_timer) ==
-              offsetof(VS::Battle::Ai::ActorAiState, opaque_19a));
+              offsetof(VS::Battle::Ai::ActorAiState, recovery_frames));
 static_assert(offsetof(VS::Battle::Ai::MovementPathView, opaque199) ==
               offsetof(VS::Battle::Ai::ActorAiState, detour_run));
 
@@ -118,18 +118,18 @@ std::uint32_t Word(const std::uint8_t* bytes) {
 void LoadFlags(const VS::Battle::Ai::ActorAiState& state,
                GroundNavigator& nav) {
   nav.actor_id = state.actor_id;
-  nav.gait = state.opaque1;
+  nav.gait = state.run_requested;
   nav.is_stuck = state.is_stuck;
-  nav.height_filter = state.opaque3;
-  nav.near_target_detour = state.opaque4;
-  nav.target_distance_filter = state.opaque5;
+  nav.height_filter = state.limits_climbs;
+  nav.near_target_detour = state.allows_detours;
+  nav.target_distance_filter = state.approach_only_edges;
   nav.ignore_floor = state.ignore_floor_mask;
-  nav.movement_disabled = state.movement_disabled;
-  nav.toward_point = state.opaque9;
-  nav.facing_locked = static_cast<std::uint8_t>(state.reserved_a[2]);
-  nav.height_filtered_movement = state.opaque_1a;
+  nav.movement_disabled = state.ground_moves_disabled;
+  nav.toward_point = state.targets_point;
+  nav.facing_locked = state.skips_backstep_hesitation;
+  nav.height_filtered_movement = state.on_moving_platform;
   nav.movement_enabled = state.movement_enabled;
-  nav.area_lock = state.settings_bit14;
+  nav.area_lock = state.routes_by_area;
   nav.terrain_reject_mask = state.terrain_reject_mask;
   nav.requested_movement_mode = state.requested_movement_mode;
   nav.locomotion_mode = state.locomotion_mode;
@@ -139,7 +139,7 @@ void LoadFlags(const VS::Battle::Ai::ActorAiState& state,
   nav.locomotion_flags = state.locomotion_flags;
   nav.walk_step = state.walk_step;
   nav.run_step = state.run_step;
-  nav.reaction_pending = state.reaction_pending;
+  nav.reaction_pending = state.facing_hesitation_count;
 }
 
 void LoadPlacement(const VS::Battle::Ai::ActorAiState& state,
@@ -168,7 +168,7 @@ void LoadPlacement(const VS::Battle::Ai::ActorAiState& state,
 
 void LoadMovement(const VS::Battle::Ai::ActorAiState& state,
                   GroundNavigator& nav) {
-  nav.turn_timer = state.opaque_13a;
+  nav.turn_timer = state.turn_step;
   nav.movement_wait = state.movement_wait;
   nav.target_x = state.target_x;
   nav.target_z = state.target_z;
@@ -182,7 +182,7 @@ void LoadMovement(const VS::Battle::Ai::ActorAiState& state,
   nav.detour_tile = Word(state.detour_tile_bytes.data());
   nav.detour_repeats = state.detour_repeats;
   nav.detour_run = state.detour_run;
-  nav.repeat_wait = state.opaque_19a;
+  nav.repeat_wait = state.recovery_frames;
   nav.route_gate = state.route_gate;
   nav.route_exit = Word(state.route_exit_bytes.data());
   nav.stall_counter = state.stall_counter;
@@ -201,18 +201,18 @@ GroundNavigator Load(const VS::Battle::Ai::ActorAiState& state) {
 void StoreFlags(const GroundNavigator& nav,
                 VS::Battle::Ai::ActorAiState& state) {
   state.actor_id = nav.actor_id;
-  state.opaque1 = nav.gait;
+  state.run_requested = nav.gait;
   state.is_stuck = nav.is_stuck;
-  state.opaque3 = nav.height_filter;
-  state.opaque4 = nav.near_target_detour;
-  state.opaque5 = nav.target_distance_filter;
+  state.limits_climbs = nav.height_filter;
+  state.allows_detours = nav.near_target_detour;
+  state.approach_only_edges = nav.target_distance_filter;
   state.ignore_floor_mask = nav.ignore_floor;
-  state.movement_disabled = nav.movement_disabled;
-  state.opaque9 = nav.toward_point;
-  state.reserved_a[2] = static_cast<char>(nav.facing_locked);
-  state.opaque_1a = nav.height_filtered_movement;
+  state.ground_moves_disabled = nav.movement_disabled;
+  state.targets_point = nav.toward_point;
+  state.skips_backstep_hesitation = nav.facing_locked;
+  state.on_moving_platform = nav.height_filtered_movement;
   state.movement_enabled = nav.movement_enabled;
-  state.settings_bit14 = nav.area_lock;
+  state.routes_by_area = nav.area_lock;
   state.terrain_reject_mask = nav.terrain_reject_mask;
   state.requested_movement_mode = nav.requested_movement_mode;
   state.locomotion_mode = nav.locomotion_mode;
@@ -222,7 +222,7 @@ void StoreFlags(const GroundNavigator& nav,
   state.locomotion_flags = nav.locomotion_flags;
   state.walk_step = nav.walk_step;
   state.run_step = nav.run_step;
-  state.reaction_pending = nav.reaction_pending;
+  state.facing_hesitation_count = nav.reaction_pending;
 }
 
 void StorePlacement(const GroundNavigator& nav,
@@ -248,7 +248,7 @@ void StorePlacement(const GroundNavigator& nav,
 
 void StoreMovement(const GroundNavigator& nav,
                    VS::Battle::Ai::ActorAiState& state) {
-  state.opaque_13a = nav.turn_timer;
+  state.turn_step = nav.turn_timer;
   state.movement_wait = nav.movement_wait;
   state.target_x = nav.target_x;
   state.target_z = nav.target_z;
@@ -263,7 +263,7 @@ void StoreMovement(const GroundNavigator& nav,
               sizeof(nav.detour_tile));
   state.detour_repeats = nav.detour_repeats;
   state.detour_run = nav.detour_run;
-  state.opaque_19a = nav.repeat_wait;
+  state.recovery_frames = nav.repeat_wait;
   state.route_gate = nav.route_gate;
   std::memcpy(state.route_exit_bytes.data(), &nav.route_exit,
               sizeof(nav.route_exit));
@@ -387,12 +387,12 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     const auto* other = OtherState(actor_id);
     if (other == nullptr) return std::nullopt;
     return ActorDetourWait{.movement_flags = other->movement_flags,
-                           .repeat_wait = other->opaque_19a};
+                           .repeat_wait = other->recovery_frames};
   }
   void SetOtherActorRepeatWait(int actor_id, std::uint8_t wait) override {
     auto* other = OtherState(actor_id);
     Require(other != nullptr, "AI detour nudge requires the actor's AI state");
-    other->opaque_19a = wait;
+    other->recovery_frames = wait;
   }
 
   int NextRandomMasked(int range) override {

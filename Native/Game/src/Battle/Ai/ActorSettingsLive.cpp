@@ -56,7 +56,7 @@ using AiState = VS::Battle::Ai::ActorAiState;
 static_assert(offsetof(SettingsView, linked_actor) ==
               offsetof(AiState, linked_actor));
 static_assert(offsetof(SettingsView, settings_constant19) ==
-              offsetof(AiState, settings_constant19));
+              offsetof(AiState, target_memory_disabled));
 static_assert(offsetof(SettingsView, settings_bit26) ==
               offsetof(AiState, settings_bit26));
 static_assert(offsetof(SettingsView, settings_byte3_bit0) ==
@@ -68,11 +68,11 @@ static_assert(offsetof(SettingsView, allow_fallback_action) ==
 static_assert(offsetof(SettingsView, settings_bit27) ==
               offsetof(AiState, settings_bit27));
 static_assert(offsetof(SettingsView, settings_bit14) ==
-              offsetof(AiState, settings_bit14));
+              offsetof(AiState, routes_by_area));
 static_assert(offsetof(SettingsView, settings_mode_low) ==
-              offsetof(AiState, settings_mode_low));
+              offsetof(AiState, scores_special_actions));
 static_assert(offsetof(SettingsView, settings_bits21) ==
-              offsetof(AiState, settings_bits21));
+              offsetof(AiState, relation_category));
 static_assert(offsetof(SettingsView, settings_bit25) ==
               offsetof(AiState, settings_bit25));
 static_assert(offsetof(SettingsView, settings_bits30_value) ==
@@ -83,7 +83,7 @@ static_assert(offsetof(SettingsView, collision_radius) ==
 static_assert(offsetof(SettingsView, opaque_b0) ==
               offsetof(AiState, step_height_bytes));
 static_assert(offsetof(SettingsView, facing_delay) ==
-              offsetof(AiState, facing_delay));
+              offsetof(AiState, facing_turn_step));
 static_assert(offsetof(SettingsView, opaque_c8) ==
               offsetof(AiState, wander_center_radius));
 static_assert(offsetof(SettingsView, opaque_cc) ==

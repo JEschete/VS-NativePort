@@ -143,8 +143,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     state.max_tile_z = settings.max_tile_z;
     state.min_tile_x = settings.min_tile_x;
     state.min_tile_z = settings.min_tile_z;
-    state.reserved4[0] = static_cast<char>(settings.collision_extent[0]);
-    state.reserved4[1] = static_cast<char>(settings.collision_extent[1]);
+    state.collision_extent[0] = static_cast<char>(settings.collision_extent[0]);
+    state.collision_extent[1] = static_cast<char>(settings.collision_extent[1]);
     state.default_action_delay = settings.default_action_delay;
     state.allows_non_spell_actions = settings.allows_non_spell_actions ? 1 : 0;
     state.engagement_limit = settings.engagement_limit;
@@ -186,8 +186,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     settings.min_tile_x = state->min_tile_x;
     settings.min_tile_z = state->min_tile_z;
     settings.collision_extent = {
-        static_cast<std::uint8_t>(state->reserved4[0]),
-        static_cast<std::uint8_t>(state->reserved4[1])};
+        static_cast<std::uint8_t>(state->collision_extent[0]),
+        static_cast<std::uint8_t>(state->collision_extent[1])};
     settings.default_action_delay = state->default_action_delay;
     settings.allows_non_spell_actions = state->allows_non_spell_actions != 0;
     settings.engagement_limit = state->engagement_limit;

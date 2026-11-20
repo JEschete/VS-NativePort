@@ -42,14 +42,14 @@ static_assert(sizeof(VS::Battle::Ai::ApproachRelationBits) ==
 
 // The approach view names the actor state's unnamed bytes; both alias it.
 static_assert(offsetof(Approach, close_approach) ==
-              offsetof(AiState, reserved0));
-static_assert(offsetof(Approach, gait) == offsetof(AiState, opaque1));
-static_assert(offsetof(Approach, height_filter) == offsetof(AiState, opaque3));
+              offsetof(AiState, close_approach));
+static_assert(offsetof(Approach, gait) == offsetof(AiState, run_requested));
+static_assert(offsetof(Approach, height_filter) == offsetof(AiState, limits_climbs));
 static_assert(offsetof(Approach, near_target_detour) ==
-              offsetof(AiState, opaque4));
-static_assert(offsetof(Approach, toward_point) == offsetof(AiState, opaque9));
+              offsetof(AiState, allows_detours));
+static_assert(offsetof(Approach, toward_point) == offsetof(AiState, targets_point));
 static_assert(offsetof(Approach, approach_directly) ==
-              offsetof(AiState, opaque_d));
+              offsetof(AiState, approaches_directly));
 static_assert(offsetof(Approach, chases_lost_target) ==
               offsetof(AiState, reserved24));
 static_assert(offsetof(Approach, approaches_target_point) ==
@@ -64,7 +64,7 @@ static_assert(offsetof(Approach, actor_id) == offsetof(AiState, actor_id));
 static_assert(offsetof(Approach, recover_in_range) ==
               offsetof(AiState, opaque_e7));
 static_assert(offsetof(Approach, walked_close) == offsetof(AiState, opaque_e8));
-static_assert(offsetof(Approach, range_mode) == offsetof(AiState, opaque_e9));
+static_assert(offsetof(Approach, range_mode) == offsetof(AiState, range_band));
 static_assert(offsetof(Approach, target_x) == offsetof(AiState, target_x));
 static_assert(offsetof(Approach, movement_target) ==
               offsetof(AiState, movement_target));
@@ -81,18 +81,18 @@ static_assert(offsetof(Decision, x) == offsetof(AiState, position));
 static_assert(offsetof(Decision, model) == offsetof(AiState, model));
 static_assert(offsetof(Decision, actor_id) == offsetof(AiState, actor_id));
 static_assert(offsetof(Decision, facing_delay) ==
-              offsetof(AiState, facing_delay));
+              offsetof(AiState, facing_turn_step));
 static_assert(offsetof(Decision, previous_facing_tile) ==
               offsetof(AiState, previous_facing_tile));
 static_assert(offsetof(Decision, facing_pending) ==
               offsetof(AiState, facing_pending));
-static_assert(offsetof(Decision, opaque_13a) == offsetof(AiState, opaque_13a));
+static_assert(offsetof(Decision, opaque_13a) == offsetof(AiState, turn_step));
 static_assert(offsetof(Decision, destination) ==
               offsetof(AiState, destination));
 static_assert(offsetof(Decision, move_x) == offsetof(AiState, move_x));
 static_assert(offsetof(Decision, target_flags) == offsetof(AiState, relations));
 static_assert(offsetof(Decision, reaction_pending) ==
-              offsetof(AiState, reaction_pending));
+              offsetof(AiState, facing_hesitation_count));
 
 Approach& ApproachOf(AiState& state) {
   return *reinterpret_cast<Approach*>(&state);
@@ -131,7 +131,7 @@ TargetApproacher Load(const AiState& state) {
       .model_facing = model_record != nullptr ? model_record->instance.facing
                                               : static_cast<std::int16_t>(0),
       .actor_id = view.actor_id,
-      .facing_delay = state.facing_delay,
+      .facing_delay = state.facing_turn_step,
       .range = view.range,
       .previous_range = view.previous_range,
       .chasing_lost_target = view.chasing_lost_target,
@@ -148,7 +148,7 @@ TargetApproacher Load(const AiState& state) {
       .retarget_timer = view.retarget_timer,
       .previous_facing_tile = state.previous_facing_tile.word,
       .facing_pending = state.facing_pending,
-      .turn_timer = state.opaque_13a,
+      .turn_timer = state.turn_step,
       .target_x = view.target_x,
       .target_z = view.target_z,
       .movement_target = view.movement_target,
@@ -157,7 +157,7 @@ TargetApproacher Load(const AiState& state) {
       .move_x = view.move_x,
       .move_z = view.move_z,
       .angle = static_cast<std::int16_t>(state.angle),
-      .reaction_pending = state.reaction_pending};
+      .reaction_pending = state.facing_hesitation_count};
   for (std::size_t id = 0; id < approacher.relations.size(); ++id) {
     approacher.relations.at(id) =
         std::bit_cast<std::uint32_t>(state.relations[id]);
@@ -181,7 +181,7 @@ void Store(const TargetApproacher& approacher, AiState& state) {
   view.saved_destination.word = approacher.saved_destination;
   view.x = approacher.x;
   view.z = approacher.z;
-  state.facing_delay = approacher.facing_delay;
+  state.facing_turn_step = approacher.facing_delay;
   view.range = approacher.range;
   view.previous_range = approacher.previous_range;
   view.chasing_lost_target = approacher.chasing_lost_target;
@@ -198,7 +198,7 @@ void Store(const TargetApproacher& approacher, AiState& state) {
   view.retarget_timer = approacher.retarget_timer;
   state.previous_facing_tile.word = approacher.previous_facing_tile;
   state.facing_pending = approacher.facing_pending;
-  state.opaque_13a = approacher.turn_timer;
+  state.turn_step = approacher.turn_timer;
   view.target_x = approacher.target_x;
   view.target_z = approacher.target_z;
   view.movement_target = approacher.movement_target;
@@ -207,7 +207,7 @@ void Store(const TargetApproacher& approacher, AiState& state) {
   view.move_x = approacher.move_x;
   view.move_z = approacher.move_z;
   state.angle = approacher.angle;
-  state.reaction_pending = approacher.reaction_pending;
+  state.facing_hesitation_count = approacher.reaction_pending;
 }
 
 // The actor models, the battle actor and the actor's movement code. Each call

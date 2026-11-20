@@ -16,12 +16,12 @@ struct ArenaOrbitState {
   /* 0x03 */ std::uint8_t distance_cached;
   /* 0x04 */ std::int32_t distance_squared;
   /* 0x08 */ std::array<std::int8_t, 2> reserved8;
-  /* 0x0A */ std::uint8_t is_orbiting;
+  /* 0x0A */ std::uint8_t attacks_after_retreat;
   /* 0x0B */ std::uint8_t path_step;
   /* 0x0C */ std::int16_t cooldown;
-  /* 0x0E */ std::int16_t requested;
+  /* 0x0E */ std::int16_t move_requested;
   /* 0x10 */ std::int16_t orbit_angle;
-  /* 0x12 */ std::int16_t saved_height;
+  /* 0x12 */ std::int16_t orbit_height;
   /* 0x14 */ std::uint8_t health_phase;
   /* 0x15 */ std::int8_t reserved15;
   /* 0x16 */ std::uint8_t plan_saved;

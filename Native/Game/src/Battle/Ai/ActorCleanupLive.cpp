@@ -99,7 +99,7 @@ VS::Battle::Actor* ActorOf(BattleActorHandle actor) {
 }
 
 ReservationState LoadReservations(const VS::Battle::Ai::ActorAiState& state) {
-  return {.navigation_reset = state.opaque_1a,
+  return {.navigation_reset = state.on_moving_platform,
           .next_tile = state.next_tile.word,
           .holds_route_gate = state.route_gate != 0};
 }
@@ -149,7 +149,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     return LoadReservations(*state);
   }
   void StoreReservations(int actor_id, const ReservationState& state) override {
-    StateAt(actor_id)->opaque_1a = state.navigation_reset;
+    StateAt(actor_id)->on_moving_platform = state.navigation_reset;
   }
   [[nodiscard]] std::optional<CleanupRoom> Room() const override {
     if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
@@ -200,7 +200,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr) return std::nullopt;
     return PersistenceFields{
-        .uses_room_action_delay = state->uses_room_action_delay,
+        .uses_room_action_delay = state->temporary_ashley_alliance,
         .relation_to_ashley = std::bit_cast<std::uint32_t>(state->relations[0]),
         .behavior_mode = state->behavior_mode};
   }
@@ -354,7 +354,7 @@ void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state) {
   Require(ReleaseActorAiReservations(reservations, room, LiveTileFlags()),
           "AI reservation release requires a room range inside the tile "
           "grid");
-  state->opaque_1a = reservations.navigation_reset;
+  state->on_moving_platform = reservations.navigation_reset;
   StoreRoomFields(room, *VS::Battle::Ai::roomAiState);
 }
 

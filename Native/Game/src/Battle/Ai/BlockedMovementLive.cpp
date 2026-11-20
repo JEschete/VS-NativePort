@@ -32,7 +32,7 @@ using RecoveryView = VS::Battle::Ai::BlockedRecoveryView;
 // The recovery view aliases the actor AI state it is handed.
 static_assert(offsetof(RecoveryView, is_stuck) == offsetof(AiState, is_stuck));
 static_assert(offsetof(RecoveryView, opaque_1c) ==
-              offsetof(AiState, opaque_1c));
+              offsetof(AiState, holds_stall_tile));
 static_assert(offsetof(RecoveryView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(RecoveryView, previous_tile) ==
               offsetof(AiState, previous_tile));
@@ -42,7 +42,7 @@ static_assert(offsetof(RecoveryView, z) ==
 static_assert(offsetof(RecoveryView, detour_step) ==
               offsetof(AiState, detour_step));
 static_assert(offsetof(RecoveryView, opaque_fb) ==
-              offsetof(AiState, opaque_fb));
+              offsetof(AiState, detour_target));
 static_assert(offsetof(RecoveryView, detour_directions) ==
               offsetof(AiState, detour_directions));
 static_assert(offsetof(RecoveryView, movement_target) ==
@@ -60,13 +60,13 @@ VS::Battle::Ai::MoveTargetView* MoveTarget(AiState& state) {
 BlockedMover Load(const AiState& state) {
   BlockedMover mover{
       .is_stuck = state.is_stuck,
-      .holds_stall_tile = state.opaque_1c,
+      .holds_stall_tile = state.holds_stall_tile,
       .tile = state.tile.word,
       .previous_tile = static_cast<std::uint32_t>(state.previous_tile),
       .x = state.position.vx,
       .z = state.position.vz,
       .detour_step = state.detour_step,
-      .detour_target = state.opaque_fb,
+      .detour_target = state.detour_target,
       .detour_directions = {},
       .movement_target = state.movement_target,
       .destination = state.destination.word};
@@ -76,13 +76,13 @@ BlockedMover Load(const AiState& state) {
 
 void Store(const BlockedMover& mover, AiState& state) {
   state.is_stuck = mover.is_stuck;
-  state.opaque_1c = mover.holds_stall_tile;
+  state.holds_stall_tile = mover.holds_stall_tile;
   state.tile.word = mover.tile;
   state.previous_tile = static_cast<int>(mover.previous_tile);
   state.position.vx = mover.x;
   state.position.vz = mover.z;
   state.detour_step = mover.detour_step;
-  state.opaque_fb = mover.detour_target;
+  state.detour_target = mover.detour_target;
   std::ranges::copy(mover.detour_directions,
                     std::begin(state.detour_directions));
   state.movement_target = mover.movement_target;

@@ -45,7 +45,7 @@ static_assert(std::tuple_size_v<decltype(State::candidate_order)> ==
 static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
               kCandidateTargetSlots);
 static_assert(kFrameActorSlots == kCandidateTargetSlots);
-static_assert(offsetof(Movement, opaque1) == offsetof(State, opaque1));
+static_assert(offsetof(Movement, opaque1) == offsetof(State, run_requested));
 static_assert(offsetof(Movement, position) == offsetof(State, position));
 static_assert(offsetof(Movement, point_height) ==
               offsetof(State, point_height));
@@ -63,14 +63,14 @@ static_assert(offsetof(Movement, distances_squared) ==
               offsetof(State, distances_squared));
 static_assert(offsetof(Movement, candidate_count) ==
               offsetof(State, candidate_count));
-static_assert(offsetof(Escort, opaque_e) == offsetof(State, opaque_e));
-static_assert(offsetof(Escort, opaque_f) == offsetof(State, opaque_f));
+static_assert(offsetof(Escort, opaque_e) == offsetof(State, should_flee));
+static_assert(offsetof(Escort, opaque_f) == offsetof(State, guarding));
 static_assert(offsetof(Escort, linked_actor) == offsetof(State, linked_actor));
 static_assert(offsetof(Escort, opaque18) == offsetof(State, opaque18));
-static_assert(offsetof(Escort, opaque44) == offsetof(State, opaque44));
+static_assert(offsetof(Escort, opaque44) == offsetof(State, guard_delay));
 static_assert(offsetof(Escort, x) == offsetof(State, position));
 static_assert(offsetof(Escort, actor_id) == offsetof(State, actor_id));
-static_assert(offsetof(Escort, opaque_e9) == offsetof(State, opaque_e9));
+static_assert(offsetof(Escort, opaque_e9) == offsetof(State, range_band));
 static_assert(offsetof(Escort, action_status) ==
               offsetof(State, action_status));
 static_assert(offsetof(Escort, movement_target) ==
@@ -98,17 +98,17 @@ bool ValidTarget(int target) {
 }
 
 CandidateMover Load(const State& state) {
-  CandidateMover mover{.gait = state.opaque1,
-                       .fleeing = state.opaque_e,
-                       .guarding = state.opaque_f,
+  CandidateMover mover{.gait = state.run_requested,
+                       .fleeing = state.should_flee,
+                       .guarding = state.guarding,
                        .linked_actor = state.linked_actor,
                        .alerted = state.opaque18,
-                       .guard_delay = state.opaque44,
+                       .guard_delay = state.guard_delay,
                        .position = Core::Math::PositionOf(state.position),
                        .point_height = state.point_height,
                        .actor_id = state.actor_id,
                        .max_range = state.max_range,
-                       .range_mode = state.opaque_e9,
+                       .range_mode = state.range_band,
                        .plan_mode = state.plan_mode,
                        .action_status = state.action_status,
                        .planned_tile = state.planned_tile.word,
@@ -124,10 +124,10 @@ CandidateMover Load(const State& state) {
 }
 
 void Store(const CandidateMover& mover, State& state) {
-  state.opaque1 = mover.gait;
-  state.opaque_f = mover.guarding;
+  state.run_requested = mover.gait;
+  state.guarding = mover.guarding;
   state.opaque18 = mover.alerted;
-  state.opaque44 = mover.guard_delay;
+  state.guard_delay = mover.guard_delay;
   state.movement_target = mover.movement_target;
   for (int id = 0; id < kCandidateTargetSlots; ++id) {
     state.relations[id] =

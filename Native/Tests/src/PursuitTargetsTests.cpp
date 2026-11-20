@@ -208,7 +208,7 @@ TEST_CASE("Approach platform selection preserves the original other tile bytes",
   fixture.models[1].instance.movement_mode = branch == 1 ? 0 : 1;
   fixture.models[1].instance.previous_tile_layer = 2;
   fixture.models[1].instance.support_layer = 2;
-  fixture.states[0].settings_bit14 = branch == 1 ? 1 : 0;
+  fixture.states[0].routes_by_area = branch == 1 ? 1 : 0;
   fixture.states[0].movement_flags = branch == 2 ? 8 : 0;
   fixture.states[0].destination.word = 0xAABBCCDD;
   CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 1, 640, 1) == 0);

@@ -190,8 +190,8 @@ struct LiveDecisionFixture {
     head.next = &actor;
     head.model = &model;
     actor.id = 1;
-    state.reserved14[0] = 1;
-    state.reserved_1d[0] = 1;
+    state.perception_skipped = 1;
+    state.partial_perception = 1;
     VS::Battle::actors[0] = &head;
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     VS::Battle::Ai::actorAiStates[0] = &player;
@@ -442,10 +442,10 @@ TEST_CASE("Decision lists reject missing states invalid IDs and cycles",
 TEST_CASE("Live movement reset preserves all bytes outside original stores",
           "[action-execution][F01659]") {
   VS::Battle::Ai::ActorAiState state{};
-  state.opaque1 = 7;
-  state.opaque_d = 9;
-  state.opaque_e = 11;
-  state.opaque_f = 13;
+  state.run_requested = 7;
+  state.approaches_directly = 9;
+  state.should_flee = 11;
+  state.guarding = 13;
   state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&state);
   state.current_candidate = &state.current_choice;
   state.decision_delay = 99;

@@ -156,7 +156,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     VS::Battle::Ai::savedMovementRandomState = 0x1234;
     room.max_tile_x = room.min_tile_x = 31;
     const std::uint32_t dimensions = 0x2020;
-    std::memcpy(room.reserved4.data(), &dimensions, sizeof dimensions);
+    std::memcpy(room.collision_extent.data(), &dimensions, sizeof dimensions);
     const std::array<std::uint8_t, 8> directions{0x30, 0x33, 0x03, 0x13,
                                                  0x10, 0x11, 0x01, 0x31};
     std::memcpy(VS::Battle::Ai::directionDeltas.data(), directions.data(),
@@ -199,7 +199,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     REQUIRE(record != nullptr);
     CHECK(record->movement_wait == 65534);
     CHECK(record->navigation_flags == 0xABCDFFDD);
-    CHECK(record->opaque_19a == 0);
+    CHECK(record->recovery_frames == 0);
     CHECK(record->ground_area == 0xB);
     CHECK(record->reserved154_area == 0xB);
   }
@@ -208,15 +208,15 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     const auto* record = ActiveRoute();
     REQUIRE(record != nullptr);
     CHECK(record->ignore_floor_mask == 1);
-    CHECK(record->opaque1 == 0);
+    CHECK(record->run_requested == 0);
     CHECK(record->is_stuck == 0);
-    CHECK(record->opaque3 == 0);
+    CHECK(record->limits_climbs == 0);
     CHECK(record->movement_target == 16);
   }
 
   void CheckEngagementReleased() const {
     CHECK(room.engaged_head == nullptr);
-    CHECK(room.engaged_tail == nullptr);
+    CHECK(room.engaged_cursor == nullptr);
     CHECK(room.engaged_count == 0);
     CHECK(VS::Battle::actorMarkers[1] == 0);
   }
@@ -324,9 +324,9 @@ auto Snapshot(const VS::Battle::Ai::ActorAiState& state) {
 }
 
 void SeedCopyState(VS::Battle::Ai::ActorAiState& state) {
-  state.reserved0 = 0x12;
+  state.close_approach = 0x12;
   state.movement_enabled = -1;
-  state.settings_bit14 = 0xAB;
+  state.routes_by_area = 0xAB;
   state.actor_id = 99;
   state.reserved_9c[19] = 0x34;
   state.step_height_bytes[0] = 0xA5;
@@ -335,13 +335,13 @@ void SeedCopyState(VS::Battle::Ai::ActorAiState& state) {
   state.max_range = 0xCD;
   state.destination.word = 0xFEDCBA98;
   state.navigation_flags = 0xFFFFFFFF;
-  state.opaque_19a = 0xAB;
+  state.recovery_frames = 0xAB;
   state.reserved_19b[0] = 0x5A;
   state.candidate_count = 16;
   state.candidates[15].target_id = 7;
   state.candidate_order[15] = &state.candidates[15];
   state.current_candidate = &state.candidates[0];
-  state.reaction_pending = 0xEF;
+  state.facing_hesitation_count = 0xEF;
 }
 
 void SetExpectedOverrideFields(VS::Battle::Ai::ActorAiState& state,
@@ -351,8 +351,8 @@ void SetExpectedOverrideFields(VS::Battle::Ai::ActorAiState& state,
   state.step_height_bytes[1] = 1;
   state.reserved_b2 = 3;
   state.navigation_flags = 0;
-  state.opaque_19a = 0;
-  state.settings_bit14 = 3;
+  state.recovery_frames = 0;
+  state.routes_by_area = 3;
   state.movement_enabled = 1;
 }
 }  // namespace
@@ -428,7 +428,7 @@ TEST_CASE(
   SeedCopyState(fixture.source);
   VS::Battle::Ai::CopyLiveActorNavigationOverrideState(4, &fixture.route);
   fixture.route.navigation_flags = 0xFFFFFFFF;
-  fixture.route.opaque_19a = 0xFF;
+  fixture.route.recovery_frames = 0xFF;
   fixture.source.destination.word = 0x12345678;
   fixture.source.candidate_count = 2;
   auto expected = fixture.source;
@@ -853,7 +853,7 @@ TEST_CASE(
   CHECK(fixture.ActiveRoute() == first);
   CHECK(first->scripted_target_xz == (1200u | (1300u << 16)));
   CHECK(fixture.source.scripted_target_xz == (1400u | (1500u << 16)));
-  CHECK(fixture.source.settings_bit14 == 3);
+  CHECK(fixture.source.routes_by_area == 3);
   CHECK(VS::Core::Memory::GameHeap().FreeUnits() == units);
 }
 
@@ -921,8 +921,8 @@ TEST_CASE(
   auto* record = fixture.ActiveRoute();
   record->movement_wait = 65535;
   record->navigation_flags = 0xABCDFFFD;
-  record->opaque_19a = record->opaque1 = record->is_stuck = record->opaque3 =
-      0xA5;
+  record->recovery_frames = record->run_requested = record->is_stuck =
+      record->limits_climbs = 0xA5;
   record->route_gate = 1;
   fixture.model.instance.current_tile_layer = 1;
   fixture.grid[8][8] = 0xAB;

@@ -33,8 +33,8 @@ RadialMover Load(const AiState& state) {
   const auto* model_record =
       model != nullptr ? reinterpret_cast<const VS::Actors::ActorRecord*>(model)
                        : nullptr;
-  return {.toward_point = state.opaque9,
-          .approach_directly = state.opaque_d,
+  return {.toward_point = state.targets_point,
+          .approach_directly = state.approaches_directly,
           .tile = state.tile.word,
           .saved_destination = state.saved_destination.word,
           .x = state.position.vx,
@@ -49,8 +49,8 @@ RadialMover Load(const AiState& state) {
                               : static_cast<std::int16_t>(0),
           .move_attempts = state.move_attempts,
           .move_distance = state.move_distance,
-          .turn_timer = state.opaque_13a,
-          .turn_period = state.opaque_13c,
+          .turn_timer = state.turn_step,
+          .turn_period = state.default_turn_step,
           .target_x = state.target_x,
           .target_z = state.target_z,
           .movement_target = state.movement_target,
@@ -66,16 +66,16 @@ RadialMover Load(const AiState& state) {
 
 // The model's fields are the model's; they are not written back.
 void Store(const RadialMover& mover, AiState& state) {
-  state.opaque9 = mover.toward_point;
-  state.opaque_d = mover.approach_directly;
+  state.targets_point = mover.toward_point;
+  state.approaches_directly = mover.approach_directly;
   state.tile.word = mover.tile;
   state.saved_destination.word = mover.saved_destination;
   state.position.vx = mover.x;
   state.position.vz = mover.z;
   state.move_attempts = mover.move_attempts;
   state.move_distance = mover.move_distance;
-  state.opaque_13a = mover.turn_timer;
-  state.opaque_13c = mover.turn_period;
+  state.turn_step = mover.turn_timer;
+  state.default_turn_step = mover.turn_period;
   state.target_x = mover.target_x;
   state.target_z = mover.target_z;
   state.movement_target = mover.movement_target;

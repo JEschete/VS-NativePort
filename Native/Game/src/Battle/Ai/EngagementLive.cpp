@@ -62,7 +62,7 @@ class LiveEngagementHost final : public EngagementBuildupHost {
   void ClearEngagementRequest() override { state_.engagement_request = 0; }
   void LinkEngagedActor() override {
     Require(room_ != nullptr, "AI engagement requires room state");
-    if (room_->engaged_head == nullptr) room_->engaged_tail = &state_;
+    if (room_->engaged_head == nullptr) room_->engaged_cursor = &state_;
     state_.next_engaged = room_->engaged_head;
     room_->engaged_head = &state_;
   }
@@ -93,10 +93,10 @@ class LiveEngagedList final : public EngagedList {
     room_.engaged_head = StateOrNull(actor_id);
   }
   [[nodiscard]] std::optional<int> Tail() const override {
-    return IdOf(room_.engaged_tail);
+    return IdOf(room_.engaged_cursor);
   }
   void SetTail(std::optional<int> actor_id) override {
-    room_.engaged_tail = StateOrNull(actor_id);
+    room_.engaged_cursor = StateOrNull(actor_id);
   }
   [[nodiscard]] std::optional<int> Next(int actor_id) const override {
     return IdOf(At(actor_id).next_engaged);
@@ -106,12 +106,13 @@ class LiveEngagedList final : public EngagedList {
   }
   [[nodiscard]] EngagementPhase Phase(int actor_id) const override {
     const VS::Battle::Ai::ActorAiState& state = At(actor_id);
-    return {.phase = state.opaque_12f, .step = state.opaque130};
+    return {.phase = state.engagement_phase,
+            .step = state.engagement_phase_step};
   }
   void SetPhase(int actor_id, EngagementPhase phase) override {
     VS::Battle::Ai::ActorAiState& state = At(actor_id);
-    state.opaque_12f = phase.phase;
-    state.opaque130 = phase.step;
+    state.engagement_phase = phase.phase;
+    state.engagement_phase_step = phase.step;
   }
   void SetPose(int actor_id, unsigned pose) override {
     VS::Battle::Ai::ActorAiState& state = At(actor_id);

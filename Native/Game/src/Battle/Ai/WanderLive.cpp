@@ -31,7 +31,7 @@ constexpr std::uint32_t kModelFlies = 0x200000;
 
 // The wander view aliases the actor AI state it is handed.
 static_assert(offsetof(View, is_stuck) == offsetof(AiState, is_stuck));
-static_assert(offsetof(View, opaque3) == offsetof(AiState, opaque3));
+static_assert(offsetof(View, opaque3) == offsetof(AiState, limits_climbs));
 static_assert(offsetof(View, stayed_on_tile) == offsetof(AiState, opaque8));
 static_assert(offsetof(View, tile) == offsetof(AiState, tile));
 static_assert(offsetof(View, saved_destination) ==

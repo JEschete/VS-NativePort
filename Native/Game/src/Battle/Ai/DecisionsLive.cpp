@@ -46,7 +46,9 @@ class LiveDecisionActor final : public DecisionActor {
       : state_(state),
         settings_(*reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state)) {}
 
-  [[nodiscard]] bool Fleeing() const override { return state_.opaque_e != 0; }
+  [[nodiscard]] bool Fleeing() const override {
+    return state_.should_flee != 0;
+  }
   [[nodiscard]] unsigned ActionStatus() const override {
     return state_.action_status;
   }

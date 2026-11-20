@@ -38,14 +38,16 @@ constexpr unsigned kHalfwordShift = 16;
 constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 
 // The routing view aliases the actor AI state it is handed.
-static_assert(offsetof(RouteView, opaque5) == offsetof(AiState, opaque5));
+static_assert(offsetof(RouteView, opaque5) ==
+              offsetof(AiState, approach_only_edges));
 static_assert(offsetof(RouteView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(RouteView, x) == offsetof(AiState, position));
 static_assert(offsetof(RouteView, native_pointer60) ==
               offsetof(AiState, native_pointer60));
 static_assert(offsetof(RouteView, actor_id) == offsetof(AiState, actor_id));
-static_assert(offsetof(RouteView, cooldown) == offsetof(AiState, opaque_13a));
-static_assert(offsetof(RouteView, period) == offsetof(AiState, opaque_13c));
+static_assert(offsetof(RouteView, cooldown) == offsetof(AiState, turn_step));
+static_assert(offsetof(RouteView, period) ==
+              offsetof(AiState, default_turn_step));
 static_assert(offsetof(RouteView, area) == offsetof(AiState, reserved154_area));
 static_assert(offsetof(RouteView, movement_target) ==
               offsetof(AiState, movement_target));
@@ -64,11 +66,13 @@ static_assert(sizeof(VS::Battle::Ai::RouteGateTile) == kRouteGateTileBytes);
 // So does the area movement view.
 using MoveView = VS::Battle::Ai::TerrainMoveView;
 static_assert(offsetof(MoveView, is_stuck) == offsetof(AiState, is_stuck));
-static_assert(offsetof(MoveView, opaque4) == offsetof(AiState, opaque4));
-static_assert(offsetof(MoveView, opaque5) == offsetof(AiState, opaque5));
-static_assert(offsetof(MoveView, opaque_1a) == offsetof(AiState, opaque_1a));
+static_assert(offsetof(MoveView, opaque4) == offsetof(AiState, allows_detours));
+static_assert(offsetof(MoveView, opaque5) ==
+              offsetof(AiState, approach_only_edges));
+static_assert(offsetof(MoveView, opaque_1a) ==
+              offsetof(AiState, on_moving_platform));
 static_assert(offsetof(MoveView, settings_bit14) ==
-              offsetof(AiState, settings_bit14));
+              offsetof(AiState, routes_by_area));
 static_assert(offsetof(MoveView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(MoveView, position) == offsetof(AiState, position));
 static_assert(offsetof(MoveView, destination) ==
@@ -95,13 +99,13 @@ std::optional<std::array<RouteGateEnd, kRouteGateEndCount>> LiveGateEnds() {
 AreaRouteActor Load(const AiState& state) {
   std::uint32_t exit = 0;
   std::memcpy(&exit, state.route_exit_bytes.data(), sizeof(exit));
-  return {.target_distance_filter = state.opaque5,
+  return {.target_distance_filter = state.approach_only_edges,
           .tile = state.tile.word,
           .x = state.position.vx,
           .z = state.position.vz,
           .actor_id = state.actor_id,
-          .turn_timer = state.opaque_13a,
-          .turn_period = state.opaque_13c,
+          .turn_timer = state.turn_step,
+          .turn_period = state.default_turn_step,
           .area = state.reserved154_area,
           .movement_target = state.movement_target,
           .destination = state.destination.word,
@@ -115,13 +119,13 @@ AreaRouteActor Load(const AiState& state) {
 }
 
 void Store(const AreaRouteActor& actor, AiState& state) {
-  state.opaque5 = actor.target_distance_filter;
+  state.approach_only_edges = actor.target_distance_filter;
   state.tile.word = actor.tile;
   state.position.vx = actor.x;
   state.position.vz = actor.z;
   state.actor_id = actor.actor_id;
-  state.opaque_13a = actor.turn_timer;
-  state.opaque_13c = actor.turn_period;
+  state.turn_step = actor.turn_timer;
+  state.default_turn_step = actor.turn_period;
   state.reserved154_area = actor.area;
   state.movement_target = actor.movement_target;
   state.destination.word = actor.destination;
@@ -314,13 +318,13 @@ void UpdateLiveNavigationAreaMovement(VS::Battle::Ai::TerrainMoveView* view) {
   LiveAreaRouteWorld world(state);
   AreaMovementActor actor{.route = Load(state),
                           .is_stuck = state.is_stuck,
-                          .near_target_detour = state.opaque4,
-                          .height_filtered_movement = state.opaque_1a,
-                          .area_lock = state.settings_bit14};
+                          .near_target_detour = state.allows_detours,
+                          .height_filtered_movement = state.on_moving_platform,
+                          .area_lock = state.routes_by_area};
   const auto step = UpdateNavigationAreaMovement(world, actor);
   Store(actor.route, state);
   state.is_stuck = actor.is_stuck;
-  state.opaque4 = actor.near_target_detour;
+  state.allows_detours = actor.near_target_detour;
   const auto movement =
       Required(step, "AI area movement refused its room or actor");
   switch (movement.action) {

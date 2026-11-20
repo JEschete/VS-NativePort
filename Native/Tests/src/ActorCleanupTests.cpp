@@ -231,12 +231,12 @@ TEST_CASE(
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(1);
   fixture.flags[7][4] = 0xFFFF;
-  state->opaque_1a = 7;
+  state->on_moving_platform = 7;
   VS::Battle::Ai::ReleaseLiveActorAiReservations(state);
-  CHECK(state->opaque_1a == 0);
+  CHECK(state->on_moving_platform == 0);
   CHECK(fixture.flags[7][4] == 0xFF7F);
   VS::Battle::Ai::ForceReleaseLiveActorAiReservations(2);
-  CHECK(state->opaque_1a == 1);
+  CHECK(state->on_moving_platform == 1);
   fixture.room.max_tile_z = 5;
   fixture.flags[7][4] = 0xFFFF;
   VS::Battle::Ai::ReleaseLiveActorAiReservations(state);
@@ -276,7 +276,7 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(fixture.room.engaged_count == 0);
   CHECK(fixture.room.engaged_head == nullptr);
-  CHECK(fixture.room.engaged_tail == nullptr);
+  CHECK(fixture.room.engaged_cursor == nullptr);
   CHECK(VS::Battle::actorMarkers[2] == 0);
   CHECK(fixture.actors[1].command_flags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
@@ -338,7 +338,7 @@ TEST_CASE("AI settings allocate the orbit state for orbiting boss sub-types",
         VS::Battle::Ai::UpdateLiveOrbitingBossBehavior);
   CHECK(view->settings_constant19 == 1);
   CHECK(state->linked_actor == 16);
-  CHECK(state->action_cost_enabled == 1);
+  CHECK(state->max_spell_cost == 1);
   REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
   CHECK(VS::Battle::Ai::arenaOrbit->cooldown == 900);
   ReleaseSubTypeSettings(fixture, state);

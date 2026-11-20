@@ -164,7 +164,7 @@ MovementState LoadMovementState(const VS::Battle::Ai::ActorAiState& source) {
   state.tile = source.tile.word;
   state.position = Core::Math::PositionOf(source.position);
   state.movement_enabled = source.movement_enabled != 0;
-  state.follows_platform_targets = source.settings_bit14 != 0;
+  state.follows_platform_targets = source.routes_by_area != 0;
   state.movement_flags = source.movement_flags;
   state.requested_mode = source.requested_movement_mode;
   state.current_mode = source.current_movement_mode;
@@ -198,7 +198,7 @@ MovementState LoadMovementState(const VS::Battle::Ai::ActorAiState& source) {
   state.facing_pending = source.facing_pending;
   state.flee_tile = source.flee_tile.word;
   state.flee_timer = source.flee_timer;
-  state.arrive_when_near = source.opaque4;
+  state.arrive_when_near = source.allows_detours;
   state.destination = source.destination.word;
   state.move_x = source.move_x;
   state.move_z = source.move_z;
@@ -242,7 +242,7 @@ void StoreMovementState(const MovementState& state,
   target.facing_pending = state.facing_pending;
   target.flee_tile.word = state.flee_tile;
   target.flee_timer = state.flee_timer;
-  target.opaque4 = state.arrive_when_near;
+  target.allows_detours = state.arrive_when_near;
   target.destination.word = state.destination;
   target.move_x = state.move_x;
   target.move_z = state.move_z;

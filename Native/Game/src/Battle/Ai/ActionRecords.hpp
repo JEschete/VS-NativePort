@@ -60,28 +60,28 @@ inline constexpr std::size_t kEngagementActorReserved20Bytes = 0x18;
 
 // decomp: func_800DEB10_t (src/BATTLE/BATTLE.PRG/6F014.c:278)
 struct EngagementActor {
-  std::uint8_t opaque0;
+  std::uint8_t target_actor;
   std::uint8_t reserved1;
-  std::uint8_t opaque2;
+  std::uint8_t hit_threshold;
   std::uint8_t reserved3;
-  std::int16_t opaque4;
-  std::int16_t opaque6;
+  std::int16_t hp;
+  std::int16_t mp;
   std::array<std::uint8_t, kEngagementActorReserved8Bytes> reserved8;
-  std::uint32_t opaque14;
-  std::uint32_t opaque18;
-  std::uint32_t opaque_1c_bit0 : 2;
-  std::uint32_t opaque_1c_bit2 : 2;
+  std::uint32_t added_statuses;
+  std::uint32_t removed_statuses;
+  std::uint32_t hp_effect : 2;
+  std::uint32_t mp_effect : 2;
   std::uint32_t reserved_1c_bit4 : 14;
-  std::uint32_t opaque_1e_bit2 : 2;
+  std::uint32_t weapon_dp_effect : 2;
   std::uint32_t reserved_1e_bit4 : 2;
-  std::uint32_t opaque_1e_bit6 : 2;
+  std::uint32_t armor_dp_effect : 2;
   std::uint32_t reserved_1f_bit0 : 8;
   std::array<std::uint8_t, kEngagementActorReserved20Bytes> reserved20;
-  std::int16_t opaque38;
+  std::int16_t weapon_dp_change;
   std::array<std::uint8_t, 2> reserved_3a;
-  std::int16_t opaque_3c;
+  std::int16_t armor_dp_change;
   std::array<std::uint8_t, 2> reserved_3e;
-  std::int32_t opaque40;
+  std::int32_t targets_position;
 };
 inline constexpr std::size_t kEngagementActorBytes = 0x44;
 static_assert(sizeof(EngagementActor) == kEngagementActorBytes,

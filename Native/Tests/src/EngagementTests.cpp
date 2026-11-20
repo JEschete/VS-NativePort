@@ -74,7 +74,7 @@ struct EngagementFixture {
     CHECK(room.engaged_count == 1);
     CHECK(Mask() == (1u << states[index].actor_id));
     CHECK(room.engaged_head == &states[index]);
-    CHECK(room.engaged_tail == &states[index]);
+    CHECK(room.engaged_cursor == &states[index]);
   }
 
   void CheckPair() const {
@@ -82,14 +82,14 @@ struct EngagementFixture {
     CHECK(Mask() == 0x24);
     CHECK(room.engaged_head == &states[2]);
     CHECK(states[2].next_engaged == &states[1]);
-    CHECK(room.engaged_tail == &states[1]);
+    CHECK(room.engaged_cursor == &states[1]);
   }
 
   void CheckEmpty() const {
     CHECK(room.engaged_count == 0);
     CHECK(Mask() == 0);
     CHECK(room.engaged_head == nullptr);
-    CHECK(room.engaged_tail == nullptr);
+    CHECK(room.engaged_cursor == nullptr);
   }
 };
 }  // namespace
@@ -186,7 +186,7 @@ TEST_CASE("AI leaving the list head preserves the remaining encounter",
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   VS::Battle::Ai::DisengageLiveActorById(5);
   CHECK(fixture.room.engaged_head == &fixture.states[1]);
-  CHECK(fixture.room.engaged_tail == &fixture.states[1]);
+  CHECK(fixture.room.engaged_cursor == &fixture.states[1]);
   CHECK(fixture.room.engaged_count == 1);
   CHECK(fixture.Mask() == 4);
   VS::Battle::Ai::DisengageLiveActorById(0);

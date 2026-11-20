@@ -70,8 +70,8 @@ struct CommandFixture {
     state.locomotion_flags = 0x42;
     state.walk_step = 8;
     state.run_step = 12;
-    state.opaque_13a = 32;
-    state.facing_delay = 7;
+    state.turn_step = 32;
+    state.facing_turn_step = 7;
     state.flight_height = 16;
     state.move_x = 1234;
     state.move_z = 2345;

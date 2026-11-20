@@ -108,7 +108,7 @@ TEST_CASE(
   const auto timer = GENERATE(0, 1, 30);
   const uint16_t gate = GENERATE(0, 1, 65535);
   DecisionFixture fixture;
-  fixture.state.uses_room_action_delay = static_cast<std::uint8_t>(busy);
+  fixture.state.temporary_ashley_alliance = static_cast<std::uint8_t>(busy);
   fixture.state.min_action_delay = static_cast<std::uint8_t>(timer);
   std::memcpy(fixture.state.reserved90.data(), &gate, sizeof(gate));
   fixture.candidate.options.opaque0_bit4 = target_flag;

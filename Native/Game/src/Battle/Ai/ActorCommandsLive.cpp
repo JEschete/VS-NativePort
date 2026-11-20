@@ -143,15 +143,15 @@ ActorCommandState Snapshot(const VS::Battle::Ai::ActorAiState& state,
   snapshot.radius = state.radius;
   snapshot.heading = state.heading;
   snapshot.angle = static_cast<std::int16_t>(state.angle);
-  snapshot.facing_delay = state.facing_delay;
-  snapshot.turn_rate = state.opaque_13a;
+  snapshot.facing_delay = state.facing_turn_step;
+  snapshot.turn_rate = state.turn_step;
   // PS1 `char` is unsigned; bit 0 marks a model whose upper body turns alone.
   snapshot.looks_with_upper_body =
       (static_cast<unsigned char>(state.has_tagged_bone3) & 1u) != 0;
   snapshot.move_x = state.move_x;
   snapshot.move_y = state.move_y;
   snapshot.move_z = state.move_z;
-  snapshot.may_run = state.opaque1 != 0;
+  snapshot.may_run = state.run_requested != 0;
   snapshot.locomotion_flags = state.locomotion_flags;
   snapshot.walk_step = state.walk_step;
   snapshot.run_step = state.run_step;

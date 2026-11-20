@@ -63,7 +63,7 @@ ActionCandidate CandidateOf(
 }
 
 ActionCooldown CooldownOf(const VS::Battle::Ai::ActorAiState& state) {
-  return {.uses_room_action_delay = state.uses_room_action_delay != 0,
+  return {.uses_room_action_delay = state.temporary_ashley_alliance != 0,
           .action_delay = state.action_delay,
           .minimum_action_delay = state.min_action_delay};
 }

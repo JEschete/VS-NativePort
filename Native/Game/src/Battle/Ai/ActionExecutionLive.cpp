@@ -35,7 +35,7 @@ using State = VS::Battle::Ai::ActorAiState;
 constexpr std::size_t kClearedHeaderBytes = 14;
 static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
               sizeof(ActionCandidate::Words));
-static_assert(offsetof(State, opaque_e) == kClearedHeaderBytes);
+static_assert(offsetof(State, should_flee) == kClearedHeaderBytes);
 static_assert(std::is_same_v<decltype(State::current_candidate),
                              VS::Battle::Ai::ActionCandidateRecord*>);
 static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
@@ -96,7 +96,7 @@ class LiveExecution final : public ActionExecutionWorld {
     return DoesLiveActionRequireCooldown(&state_, candidates_.at(handle));
   }
   bool UsesRoomDelay() const override {
-    return state_.uses_room_action_delay == 0;
+    return state_.temporary_ashley_alliance == 0;
   }
   std::optional<std::uint8_t> RoomDelay() const override {
     if (!HasRoom()) return std::nullopt;
@@ -140,8 +140,8 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
     return state_ != nullptr;
   }
   DecisionDispatchState State() const override {
-    return {.restricted = state_->reserved14[0] != 0,
-            .partial = state_->reserved_1d[0] != 0,
+    return {.restricted = state_->perception_skipped != 0,
+            .partial = state_->partial_perception != 0,
             .tile_x = state_->tile.tile.tile_x,
             .tile_z = state_->tile.tile.tile_z,
             .position = Core::Math::PositionOf(state_->position),

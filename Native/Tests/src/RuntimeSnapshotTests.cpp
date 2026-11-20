@@ -563,7 +563,7 @@ struct RuntimeFixture {
     placement.tile_layer = 1;
     placement.tile_z = 3;
     enemy_model.saved_placement = std::bit_cast<int>(placement);
-    enemy_ai.uses_room_action_delay = 1;
+    enemy_ai.temporary_ashley_alliance = 1;
     enemy_ai.behavior_mode = 0;
     enemy_ai.relations[0].classification = 3;
     enemy_ai.relations[0].previous_classification = 2;
