@@ -26,7 +26,8 @@ struct ConditionFixture {
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_ActionState* saved_action = VS::Battle::actionState;
-  decltype(VS::Battle::floatingLabels) saved_labels = VS::Battle::floatingLabels;
+  decltype(VS::Battle::floatingLabels) saved_labels =
+      VS::Battle::floatingLabels;
   decltype(VS::Battle::floatingLabelCount) saved_label_count =
       VS::Battle::floatingLabelCount;
   decltype(std::to_array(Battle_statusEffectParams)) saved_params =
