@@ -325,10 +325,10 @@ void FillClearEntry(auto& entry) {
   entry.destination_zone_id = 1;
   entry.tile_location.tile_x = 31;
   entry.tile_location.floor_layer = 7;
-  entry.tile_location.entry_direction = 7;
+  entry.tile_location.entry_surface = 7;
   entry.entry_tile_x = 4;
   entry.entry_tile_z = 2;
-  entry.entry_elevation = 2;
+  entry.entry_facing = 2;
   entry.has_entry_step = 1;
   entry.required_flag_id = 1023;
   entry.required_flag_value = 255;

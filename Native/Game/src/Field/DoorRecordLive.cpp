@@ -29,12 +29,12 @@ DoorRecord DoorRecordOf(const VS::Field::MpdDoorRecord& record) {
   door.tile_z = static_cast<std::uint8_t>(record.tile_location.tile_z);
   door.floor_layer =
       static_cast<std::uint8_t>(record.tile_location.floor_layer);
-  door.entry_direction =
-      static_cast<std::uint8_t>(record.tile_location.entry_direction);
+  door.entry_surface =
+      static_cast<std::uint8_t>(record.tile_location.entry_surface);
   door.required_flag_value =
       static_cast<std::uint8_t>(record.required_flag_value);
   door.entry_tile_x = static_cast<std::uint8_t>(record.entry_tile_x);
-  door.entry_elevation = static_cast<std::uint8_t>(record.entry_elevation);
+  door.entry_facing = static_cast<std::uint8_t>(record.entry_facing);
   door.has_entry_step = record.has_entry_step != 0;
   door.required_flag_id = static_cast<std::uint16_t>(record.required_flag_id);
   door.entry_tile_z = static_cast<std::uint8_t>(record.entry_tile_z);
@@ -50,11 +50,11 @@ void StoreDoorRecord(const DoorRecord& door, VS::Field::MpdDoorRecord& record) {
   record.tile_location.tile_x = door.tile_x & kDoorTileMask;
   record.tile_location.tile_z = door.tile_z & kDoorTileMask;
   record.tile_location.floor_layer = door.floor_layer & kDoorFloorLayerMask;
-  record.tile_location.entry_direction =
-      door.entry_direction & kDoorEntryDirectionMask;
+  record.tile_location.entry_surface =
+      door.entry_surface & kDoorEntrySurfaceMask;
   record.required_flag_value = door.required_flag_value;
   record.entry_tile_x = door.entry_tile_x & kDoorTileMask;
-  record.entry_elevation = door.entry_elevation & kDoorEntryElevationMask;
+  record.entry_facing = door.entry_facing & kDoorEntryFacingMask;
   record.has_entry_step = door.has_entry_step ? 1U : 0U;
   record.required_flag_id = door.required_flag_id & kDoorRequiredFlagIdMask;
   record.entry_tile_z = door.entry_tile_z & kDoorTileMask;

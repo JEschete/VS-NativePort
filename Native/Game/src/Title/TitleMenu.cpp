@@ -382,8 +382,8 @@ constexpr int kNewGameTickSpeed = 2;
 constexpr EntryDoor kNewGameDoor{
     .tile_x = 4,
     .tile_z = 2,
-    .direction = 0,
-    .elevation = 2,
+    .surface = 0,
+    .facing = 2,
 };
 
 // _playNewGameSfx's three effects.

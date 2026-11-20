@@ -500,9 +500,9 @@ names, locations and collisions; it does not prove semantics or close migration 
   `reserved<Off>`). Native code should give gimmicks a header plus their own fields, not a cast of the actor record.
   `Actors::RoomActorRecordWrite` (T00431) is the write-side view of `Actors::RoomActorRecord` (T00597), and
   `Battle::Ai::AiActorView` (T00383) is a fork-only view of `vs_battle_actor` (T00630, upstream callers pass
-  `vs_battle_actor*`): fold views into their canonical types when copying. Placement word byte 1 (applied as
-  `direction`) only keeps bit 0 at spawn and feeds tile lookups as a layer (`Actors::TileTarget.tileLayer`,
-  `ModelInstance.currentTileLayer`); revisit T00444's name when Field rows are next revised.
+  `vs_battle_actor*`): fold views into their canonical types when copying. Placement word byte 1 (the collision
+  `surface`, #485) only keeps bit 0 at spawn and feeds tile lookups as a layer (`Actors::TileTarget.tileLayer`,
+  `ModelInstance.currentTileLayer`); T00444 names it `surface` since #485.
   346 of the 771 fields are `low` (239 `reserved`, 13 `opaque`); most actor-record flag bits are only reset and
   tested, and need behavior tracing before their names can be raised.
 - Game_Battle_01 (2026-10-17): 41 of its 92 types are per-overlay copies of anonymous header types

@@ -378,9 +378,9 @@ ScriptStep ScriptSpawnActor(ScriptCommand command, ScriptActorHost& host) {
   const int model = operands.Half();
   Actors::SpawnPlacement placement;
   placement.tile_x = operands.Byte();
-  placement.direction = operands.Byte();
+  placement.surface = operands.Byte();
   placement.tile_z = operands.Byte();
-  placement.height = operands.Byte();
+  placement.facing = operands.Byte();
   host.QueueScriptedSpawn(host.ResolveActor(reference), model, placement);
   return ScriptStep::kAdvance;
 }

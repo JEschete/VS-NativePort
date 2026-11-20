@@ -506,8 +506,8 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   expected.index = 4;
   expected.tile_x = 11;
   expected.tile_z = 12;
-  expected.height = 2;
-  expected.direction = 1;
+  expected.facing_quadrant = 2;
+  expected.surface = 1;
   expected.slot = 0;
   expected.is_hidden = 0;
   expected.flag_test = 0;

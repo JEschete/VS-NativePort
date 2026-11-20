@@ -69,9 +69,9 @@ constexpr std::size_t kEnemyStatTestAt = 0x07;
 constexpr std::size_t kEnemyFlagValueAt = 0x08;
 constexpr std::size_t kEnemyStatValueAt = 0x0A;
 constexpr std::size_t kEnemyTileXAt = 0x0C;
-constexpr std::size_t kEnemyDirectionAt = 0x0D;
+constexpr std::size_t kEnemySurfaceAt = 0x0D;
 constexpr std::size_t kEnemyTileZAt = 0x0E;
-constexpr std::size_t kEnemyHeightAt = 0x0F;
+constexpr std::size_t kEnemyFacingQuadrantAt = 0x0F;
 constexpr std::size_t kEnemyFacingAt = 0x23;
 constexpr std::size_t kEnemyRetainAfterDefeatAt = 0x24;
 constexpr std::size_t kEnemySceneTestAt = 0x27;
@@ -81,8 +81,8 @@ constexpr std::size_t kObjectFlagMaxAt = 0x07;
 constexpr std::size_t kObjectSlotAt = 0x08;
 constexpr std::size_t kObjectTileXAt = 0x0A;
 constexpr std::size_t kObjectTileZAt = 0x0B;
-constexpr std::size_t kObjectHeightAt = 0x0C;
-constexpr std::size_t kObjectDirectionAt = 0x0D;
+constexpr std::size_t kObjectSurfaceAt = 0x0C;
+constexpr std::size_t kObjectFacingQuadrantAt = 0x0D;
 constexpr std::size_t kObjectModelAt = 0x0E;
 
 // The placement tests (146C.c:14936-15016): the scene test reads script
@@ -152,9 +152,9 @@ constexpr int kDimensionRowsUnit = 0x100000;
 constexpr std::uint32_t kWordAlignMask = ~std::uint32_t{kWordBytes - 1};
 // The room record the field loads its room into.
 constexpr int kCurrentRoomOwner = 0;
-// The entrance elevations that take a step (0-3): even ones step along x,
-// odd ones along z.
-constexpr std::uint8_t kSteppingElevations = 4;
+// The entrance facing quadrants that take a step (0-3): even ones step along
+// x, odd ones along z.
+constexpr std::uint8_t kFacingQuadrants = 4;
 
 // The room enemy memory's most recent room.
 constexpr std::uint8_t kMostRecentRoom = 4;
@@ -488,9 +488,9 @@ namespace {
       .flag_value = LoadHalfword(record, kEnemyFlagValueAt),
       .stat_value = LoadHalfword(record, kEnemyStatValueAt),
       .placement = {.tile_x = LoadByte(record, kEnemyTileXAt),
-                    .direction = LoadByte(record, kEnemyDirectionAt),
+                    .surface = LoadByte(record, kEnemySurfaceAt),
                     .tile_z = LoadByte(record, kEnemyTileZAt),
-                    .height = LoadByte(record, kEnemyHeightAt)},
+                    .facing = LoadByte(record, kEnemyFacingQuadrantAt)},
       .facing = LoadByte(record, kEnemyFacingAt),
       .retain_after_defeat = LoadByte(record, kEnemyRetainAfterDefeatAt) != 0,
       .scene_test = LoadByte(record, kEnemySceneTestAt)};
@@ -504,8 +504,8 @@ namespace {
           .slot = LoadByte(record, kObjectSlotAt),
           .tile_x = LoadByte(record, kObjectTileXAt),
           .tile_z = LoadByte(record, kObjectTileZAt),
-          .height = LoadByte(record, kObjectHeightAt),
-          .direction = LoadByte(record, kObjectDirectionAt),
+          .surface = LoadByte(record, kObjectSurfaceAt),
+          .facing = LoadByte(record, kObjectFacingQuadrantAt),
           .model = LoadHalfword(record, kObjectModelAt)};
 }
 
@@ -648,9 +648,9 @@ bool SpawnEnemyPlacement(RoomActorSpawnHost& host, ReservedSlots& reserved,
   host.SpawnUntemplatedEnemy(
       slot.slot,
       {.tile_x = at.tile_x,
-       .direction = at.direction,
+       .surface = at.surface,
        .tile_z = at.tile_z,
-       .height = static_cast<std::uint8_t>(at.height * kElevationHeightUnits)},
+       .facing = static_cast<std::uint8_t>(at.facing * kFacingQuadrantUnits)},
       flags);
   return true;
 }
@@ -679,19 +679,19 @@ bool SpawnObjectPlacement(RoomActorSpawnHost& host,
     host.Refuse(RoomLoadRefusal::kActorSlot, slot);
     return true;
   }
-  // The object's height and direction swap places in its placement.
-  const Actors::SpawnPlacement at{
-      .tile_x = object.tile_x,
-      .direction = object.height,
-      .tile_z = object.tile_z,
-      .height =
-          static_cast<std::uint8_t>(object.direction * kElevationHeightUnits)};
+  // The object's surface and facing quadrant fill the placement's surface and
+  // facing bytes (146C.c:14969-14970).
+  const Actors::SpawnPlacement at{.tile_x = object.tile_x,
+                                  .surface = object.surface,
+                                  .tile_z = object.tile_z,
+                                  .facing = static_cast<std::uint8_t>(
+                                      object.facing * kFacingQuadrantUnits)};
   const int model = object.model;
   host.SpawnObject(
       slot, (model >> kObjectModelHighShift) | (model & kObjectModelLowMask),
       at,
       ((model >> kObjectMaterialShift) & kObjectMaterialMask) |
-          (at.height / kElevationHeightUnits));
+          (at.facing / kFacingQuadrantUnits));
   return true;
 }
 
@@ -777,10 +777,10 @@ void SpawnRoomActors(RoomActorSpawnHost& host) {
 // --- Ashley's entrance
 
 EntryStep EntranceStep(const RoomEntrance& entrance) {
-  if (entrance.elevation >= kSteppingElevations) {
+  if (entrance.facing >= kFacingQuadrants) {
     return {};
   }
-  if (entrance.elevation % 2 == 0) {
+  if (entrance.facing % 2 == 0) {
     return {.x = kEntryStepDistance, .z = 0};
   }
   return {.x = 0, .z = kEntryStepDistance};
@@ -789,10 +789,10 @@ EntryStep EntranceStep(const RoomEntrance& entrance) {
 void PlaceAshleyAtRoomEntrance(RoomEntranceHost& host) {
   const RoomEntrance entrance = host.PendingEntrance();
   host.PlaceAshley({.tile_x = entrance.tile_x,
-                    .direction = entrance.direction,
+                    .surface = entrance.surface,
                     .tile_z = entrance.tile_z,
-                    .height = static_cast<std::uint8_t>(
-                        entrance.elevation * kElevationHeightUnits)});
+                    .facing = static_cast<std::uint8_t>(entrance.facing *
+                                                        kFacingQuadrantUnits)});
   if (entrance.has_entry_step) {
     host.StepAshley(EntranceStep(entrance));
   }

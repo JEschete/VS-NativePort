@@ -115,7 +115,7 @@ struct ActorAssetRequest {
   std::int16_t model_id = 0;
   AssetAddress destination = AssetAddress::kNone;
   AssetAddress data = AssetAddress::kNone;
-  // The four placement bytes (tile X, direction, tile Z, height).
+  // The four placement bytes (tile X, surface, tile Z, facing).
   std::uint32_t placement = 0;
   std::uint8_t sub_kind = 0;
   std::uint8_t texture_slot = 0;

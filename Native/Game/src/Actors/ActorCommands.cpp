@@ -551,10 +551,11 @@ void UpdateAshleyMovementInput(AshleyMovementHost& host) {
   const std::uint32_t state_flags = host.PlayerStateFlags();
   const unsigned step = host.ScreenTransitionStep();
   if (std::ranges::find(kDoorWalkSteps, step) != kDoorWalkSteps.end()) {
-    const std::optional<int> elevation = host.DoorEntryElevation();
-    if (elevation) {
-      constexpr int kElevationShift = 10;
-      host.SetDirectMovement(*elevation << kElevationShift,
+    const std::optional<int> facing = host.DoorEntryFacing();
+    if (facing) {
+      // A quadrant in the 4096-unit direction circle.
+      constexpr int kQuadrantShift = 10;
+      host.SetDirectMovement(*facing << kQuadrantShift,
                              gait.walk_speed * kQ12One / 2);
     } else {
       host.SetDirectMovement(0, 0);

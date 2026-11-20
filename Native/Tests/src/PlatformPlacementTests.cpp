@@ -500,7 +500,7 @@ TEST_CASE("Native platform initialization resets its entrance waypoint last",
           "[platform-initialization-live][field]") {
   PlatformPlacementFixture fixture;
   VS::Field::entranceDoorRecord.tile_location = {};
-  VS::Field::entranceDoorRecord.tile_location.entry_direction = 2;
+  VS::Field::entranceDoorRecord.tile_location.entry_surface = 2;
   auto& platform = fixture.platforms[0];
   platform.terminal_waypoint = 2;
   platform.waypoints[2] =
@@ -650,7 +650,7 @@ TEST_CASE("Entrance initialization resets the sixth platform terminal waypoint",
   PlatformPlacementFixture fixture;
   std::array<VS::Field::MpdMovingPlatform, 6> platforms{};
   VS::Field::entranceDoorRecord.tile_location = {};
-  VS::Field::entranceDoorRecord.tile_location.entry_direction = 7;
+  VS::Field::entranceDoorRecord.tile_location.entry_surface = 7;
   auto& platform = platforms.back();
   platform.is_hidden = 1;
   platform.terminal_waypoint = 2;

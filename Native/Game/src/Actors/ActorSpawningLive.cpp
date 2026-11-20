@@ -990,9 +990,9 @@ RoomSpawn DecodeRoomSpawn(const VS::Field::MpdEnemySpawn& spawn) {
   RoomSpawn decoded{
       .index = spawn.index,
       .placement = {.tile_x = spawn.tile_x,
-                    .direction = spawn.direction,
+                    .surface = spawn.surface,
                     .tile_z = spawn.tile_z,
-                    .height = spawn.height},
+                    .facing = spawn.facing_quadrant},
       .drop = {.id = spawn.item_id, .count = spawn.item_count},
       .second_drop = {.id = spawn.item2_id, .count = spawn.item2_count},
       .random_drop = {.id = spawn.item3_id, .count = spawn.item3_count},
@@ -1014,9 +1014,9 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
                           .agility = record.agility,
                           .statuses = record.statuses,
                           .placement = {.tile_x = record.tile_x,
-                                        .direction = record.direction,
+                                        .surface = record.direction,
                                         .tile_z = record.tile_z,
-                                        .height = record.height}};
+                                        .facing = record.height}};
   std::ranges::copy(record.limb_hp, decoded.limb_hp.begin());
   return decoded;
 }

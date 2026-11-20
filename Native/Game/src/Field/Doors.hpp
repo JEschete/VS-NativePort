@@ -24,7 +24,8 @@ struct DoorTileLocation {
   std::uint16_t tile_x : 5;
   std::uint16_t tile_z : 5;
   std::uint16_t floor_layer : 3;
-  std::uint16_t entry_direction : 3;
+  // Upstream arrivalSurface: the collision surface Ashley arrives on.
+  std::uint16_t entry_surface : 3;
 };
 static_assert(sizeof(DoorTileLocation) == 0x2);
 

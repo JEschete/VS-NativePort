@@ -325,6 +325,8 @@ struct EnemyPlacement {
   std::uint8_t stat_test = 0;
   std::uint16_t flag_value = 0;
   std::uint16_t stat_value = 0;
+  // The record's tile bytes; its facing is still the quadrant (0..3), which
+  // spawning scales by kFacingQuadrantUnits.
   Actors::SpawnPlacement placement{};
   std::uint8_t facing = 0;
   bool retain_after_defeat = false;
@@ -343,8 +345,9 @@ struct ObjectPlacement {
   std::uint8_t slot = 0;
   std::uint8_t tile_x = 0;
   std::uint8_t tile_z = 0;
-  std::uint8_t height = 0;
-  std::uint8_t direction = 0;
+  std::uint8_t surface = 0;
+  // The facing quadrant (0..3), scaled by kFacingQuadrantUnits on spawning.
+  std::uint8_t facing = 0;
   std::uint16_t model = 0;
 
   friend bool operator==(const ObjectPlacement&,
@@ -434,8 +437,9 @@ void SpawnRoomActors(RoomActorSpawnHost& host);
 struct RoomEntrance {
   std::uint8_t tile_x = 0;
   std::uint8_t tile_z = 0;
-  std::uint8_t direction = 0;
-  std::uint8_t elevation = 0;
+  std::uint8_t surface = 0;
+  // The facing quadrant (0..3).
+  std::uint8_t facing = 0;
   bool has_entry_step = false;
 };
 
@@ -448,10 +452,11 @@ struct EntryStep {
 };
 
 inline constexpr int kEntryStepDistance = 0x40;
-inline constexpr int kElevationHeightUnits = 64;
+// A facing quadrant in placement facing units (1/256 turn).
+inline constexpr int kFacingQuadrantUnits = 64;
 
-// The step an entrance takes into the room (146C.c:15158-15183). An
-// elevation past 3, whose step the original left unset, takes none.
+// The step an entrance takes into the room (146C.c:15158-15183). A facing
+// past 3, whose step the original left unset, takes none.
 [[nodiscard]] EntryStep EntranceStep(const RoomEntrance& entrance);
 
 class RoomEntranceHost {

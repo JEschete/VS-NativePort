@@ -720,12 +720,12 @@ class LiveEntrance : public Host {
  public:
   [[nodiscard]] RoomEntrance PendingEntrance() const override {
     const VS::Field::MpdDoorRecord& door = VS::Field::pendingDestinationDoor;
-    return {.tile_x = static_cast<std::uint8_t>(door.entry_tile_x),
-            .tile_z = static_cast<std::uint8_t>(door.entry_tile_z),
-            .direction =
-                static_cast<std::uint8_t>(door.tile_location.entry_direction),
-            .elevation = static_cast<std::uint8_t>(door.entry_elevation),
-            .has_entry_step = door.has_entry_step != 0};
+    return {
+        .tile_x = static_cast<std::uint8_t>(door.entry_tile_x),
+        .tile_z = static_cast<std::uint8_t>(door.entry_tile_z),
+        .surface = static_cast<std::uint8_t>(door.tile_location.entry_surface),
+        .facing = static_cast<std::uint8_t>(door.entry_facing),
+        .has_entry_step = door.has_entry_step != 0};
   }
 
   void PlaceAshley(const Actors::SpawnPlacement& placement) override {

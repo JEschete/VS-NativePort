@@ -478,7 +478,7 @@ void InspectRoomDoors(PlayerObservationState& state) {
                            static_cast<int>(door.tile_location.floor_layer),
                            {static_cast<int>(door.entry_tile_x),
                             static_cast<int>(door.entry_tile_z),
-                            static_cast<int>(door.entry_elevation), 0},
+                            static_cast<int>(door.entry_facing), 0},
                            static_cast<int>(door.required_flag_id),
                            static_cast<int>(door.required_flag_value),
                            door.door_id,

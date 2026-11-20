@@ -7,7 +7,7 @@
 namespace VS::Field {
 namespace {
 // TeleportToLocation's facing quadrant: the facing is rounded by an eighth
-// turn, wrapped to one turn and its quarter kept in the entry elevation bits
+// turn, wrapped to one turn and its quarter kept in the entry facing bits
 // (146C.c:8853, `ONE` and `>> 10`).
 constexpr int kFacingRounding = 0x200;
 constexpr int kFullTurn = 0x1000;
@@ -45,7 +45,7 @@ std::uint8_t FacingQuadrant(std::int16_t facing) {
     wrapped += kNegativeWrapBias;
   }
   return static_cast<std::uint8_t>((wrapped >> kQuadrantShift) &
-                                   kDoorEntryElevationMask);
+                                   kDoorEntryFacingMask);
 }
 }  // namespace
 
@@ -179,13 +179,13 @@ bool TeleportToLocation(RoomTransitionState& state, TransitionHost& host,
   DoorRecord& door = state.pending_door;
   door.entry_tile_x = static_cast<std::uint8_t>(request.tile_x & kDoorTileMask);
   door.entry_tile_z = static_cast<std::uint8_t>(request.tile_z & kDoorTileMask);
-  door.entry_direction = 0;
+  door.entry_surface = 0;
   const Actors::ActorPlacementView placement =
       host.AshleyPlacement().value_or(Actors::ActorPlacementView{});
   StartExit(state.screen, TransitionStep::kRoomExit, request.effect,
             request.speed);
-  // The original keeps Ashley's facing quadrant in the entry elevation bits.
-  door.entry_elevation = FacingQuadrant(placement.position.w);
+  // The original keeps Ashley's facing quadrant in the entry facing bits.
+  door.entry_facing = FacingQuadrant(placement.position.w);
   door.walks_in = false;
   if (location->zone_id != door.destination_zone_id) {
     state.screen.step = StepValue(TransitionStep::kZoneExit);

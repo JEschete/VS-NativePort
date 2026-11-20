@@ -2626,10 +2626,10 @@ TEST_CASE("Scripted fall door values preserve original packed field widths",
                                       .tile_x = 31,
                                       .tile_z = 30,
                                       .floor_layer = 7,
-                                      .entry_direction = 7,
+                                      .entry_surface = 7,
                                       .entry_tile_x = 31,
                                       .entry_tile_z = 30,
-                                      .entry_elevation = 3});
+                                      .entry_facing = 3});
 }
 
 TEST_CASE("Scripted fall entry masks every input byte to original field widths",
@@ -2645,7 +2645,7 @@ TEST_CASE("Scripted fall entry masks every input byte to original field widths",
     CHECK(door.tile_z == ((UINT8_MAX - value) & 31));
     CHECK(door.entry_tile_z == ((UINT8_MAX - value) & 31));
     CHECK(door.floor_layer == (value & 7));
-    CHECK(door.entry_elevation == ((UINT8_MAX - value) >> 6));
+    CHECK(door.entry_facing == ((UINT8_MAX - value) >> 6));
     CHECK_FALSE(door.has_entry_step);
     CHECK_FALSE(door.walks_in);
   }
@@ -2694,10 +2694,10 @@ TEST_CASE("Scripted fall producer initializes the complete transition door",
                               .destination_room_id = 3,
                               .tile_x = 1,
                               .tile_z = 1,
-                              .entry_direction = 7,
+                              .entry_surface = 7,
                               .entry_tile_x = 1,
                               .entry_tile_z = 1,
-                              .entry_elevation = 3});
+                              .entry_facing = 3});
 }
 
 TEST_CASE("Actor tile triggers preserve collision before transition refusal",

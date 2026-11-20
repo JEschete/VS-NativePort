@@ -1649,8 +1649,8 @@ VS::Field::MpdDoorRecord DoorRecordOf(const Save::EntryDoor& bytes) {
 
 // The door fields a capture sets.
 std::array<int, 5> EntryFields(const VS::Field::MpdDoorRecord& door) {
-  return {door.tile_location.entry_direction, door.entry_tile_x,
-          door.entry_elevation, door.required_flag_id, door.entry_tile_z};
+  return {door.tile_location.entry_surface, door.entry_tile_x,
+          door.entry_facing, door.required_flag_id, door.entry_tile_z};
 }
 
 // The door fields a capture keeps.
@@ -1686,7 +1686,7 @@ std::span<std::byte> IncomingOf(std::vector<char>& workspace) {
 }
 }  // namespace
 
-TEST_CASE("The entry door takes Ashley's tile, layer, elevation and flag",
+TEST_CASE("The entry door takes Ashley's tile, surface, facing and flag",
           "[save][save-memory-card]") {
   Save::EntryDoor pending{};
   for (std::size_t index = 0; index < pending.size(); ++index) {
@@ -1696,7 +1696,7 @@ TEST_CASE("The entry door takes Ashley's tile, layer, elevation and flag",
       pending,
       {.tile_x = 0x3D, .tile_layer = 6, .tile_z = 0x2B, .facing = 0x95},
       0x1ABC);
-  // Each field keeps only its width: x 0x1D, elevation 2, flag 0x2BC, z 0xB.
+  // Each field keeps only its width: x 0x1D, facing 2, flag 0x2BC, z 0xB.
   CHECK(EntryFields(DoorRecordOf(door)) == std::array{6, 0x1D, 2, 0x2BC, 0x0B});
   CHECK(KeptFields(DoorRecordOf(door)) == KeptFields(DoorRecordOf(pending)));
 }

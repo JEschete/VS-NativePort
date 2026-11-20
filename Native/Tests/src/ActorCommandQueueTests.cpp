@@ -843,7 +843,7 @@ class FakeAshleyHost final : public actors::AshleyMovementHost {
       .walk_speed = 5, .gait_class = 0, .run_speed = 9};
   std::uint32_t state_flags = 0;
   unsigned transition_step = 0;
-  std::optional<int> door_elevation;
+  std::optional<int> door_facing;
   actors::AshleyControls controls{};
   int camera_distance = 2000;
   int camera_yaw = 0x0900;
@@ -862,8 +862,8 @@ class FakeAshleyHost final : public actors::AshleyMovementHost {
   [[nodiscard]] unsigned ScreenTransitionStep() const override {
     return transition_step;
   }
-  [[nodiscard]] std::optional<int> DoorEntryElevation() const override {
-    return door_elevation;
+  [[nodiscard]] std::optional<int> DoorEntryFacing() const override {
+    return door_facing;
   }
   void UpdateCameraOrbit() override { calls.emplace_back("orbit"); }
   [[nodiscard]] actors::AshleyControls Controls() const override {
@@ -923,7 +923,7 @@ TEST_CASE("Ashley walks in from a door during the screen transition",
   for (const unsigned step : {1U, 2U, 4U}) {
     FakeAshleyHost host;
     host.transition_step = step;
-    host.door_elevation = 3;
+    host.door_facing = 3;
     host.controls.jump_pressed = true;
     actors::UpdateAshleyMovementInput(host);
     CHECK(host.calls == std::vector<std::string>{"constrain"});
@@ -931,14 +931,14 @@ TEST_CASE("Ashley walks in from a door during the screen transition",
     CHECK_FALSE(host.move_input.has_value());
 
     host.moves.clear();
-    host.door_elevation = std::nullopt;
+    host.door_facing = std::nullopt;
     actors::UpdateAshleyMovementInput(host);
     CHECK(host.moves == std::vector<DirectMove>{{false, 0, 0}});
   }
 
   FakeAshleyHost host;
   host.transition_step = 3;
-  host.door_elevation = 3;
+  host.door_facing = 3;
   host.camera_distance = 4000;
   actors::UpdateAshleyMovementInput(host);
   CHECK(host.calls == std::vector<std::string>{"constrain", "orbit"});

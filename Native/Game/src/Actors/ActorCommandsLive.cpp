@@ -287,11 +287,11 @@ class LiveAshleyHost final : public AshleyMovementHost {
   [[nodiscard]] unsigned ScreenTransitionStep() const override {
     return VS::Field::screenTransitionStep;
   }
-  [[nodiscard]] std::optional<int> DoorEntryElevation() const override {
+  [[nodiscard]] std::optional<int> DoorEntryFacing() const override {
     if (VS::Field::pendingDestinationDoor.walks_in == 0) {
       return std::nullopt;
     }
-    return static_cast<int>(VS::Field::pendingDestinationDoor.entry_elevation);
+    return static_cast<int>(VS::Field::pendingDestinationDoor.entry_facing);
   }
   void UpdateCameraOrbit() override { VS::Field::LiveUpdateCameraOrbitInput(); }
   [[nodiscard]] AshleyControls Controls() const override {

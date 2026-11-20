@@ -111,42 +111,42 @@ inline constexpr std::int32_t kMaxInitialStat = 999;
 inline constexpr int kStatRollRange = 21;
 inline constexpr int kStatRollBias = 10;
 
-// The placement an asset request carries: tile X, direction (tile layer),
-// tile Z and height (facing). decomp: func_80089888_t
-// (src/BATTLE/BATTLE.PRG/3A1A0.h:7), the four bytes of the request word.
+// The placement an asset request carries: tile X, collision surface, tile Z
+// and facing (1/256 turn), the vs_TilePosition bytes x, surface, z and extra.
+// decomp: func_80089888_t (src/BATTLE/BATTLE.PRG/3A1A0.h:7), the four bytes of
+// the request word.
 struct SpawnPlacement {
   std::uint8_t tile_x = 0;
-  std::uint8_t direction = 0;
+  std::uint8_t surface = 0;
   std::uint8_t tile_z = 0;
-  std::uint8_t height = 0;
+  std::uint8_t facing = 0;
 
   friend bool operator==(const SpawnPlacement&,
                          const SpawnPlacement&) = default;
 };
 
-inline constexpr unsigned kPlacementDirectionShift = 8;
+inline constexpr unsigned kPlacementSurfaceShift = 8;
 inline constexpr unsigned kPlacementTileZShift = 16;
-inline constexpr unsigned kPlacementHeightShift = 24;
+inline constexpr unsigned kPlacementFacingShift = 24;
 
-// The placement word of an asset request: tile X, direction, tile Z and
-// height, low byte first.
+// The placement word of an asset request: tile X, surface, tile Z and facing,
+// low byte first.
 [[nodiscard]] constexpr std::uint32_t PackPlacement(SpawnPlacement placement) {
   return static_cast<std::uint32_t>(placement.tile_x) |
-         (static_cast<std::uint32_t>(placement.direction)
-          << kPlacementDirectionShift) |
+         (static_cast<std::uint32_t>(placement.surface)
+          << kPlacementSurfaceShift) |
          (static_cast<std::uint32_t>(placement.tile_z)
           << kPlacementTileZShift) |
-         (static_cast<std::uint32_t>(placement.height)
-          << kPlacementHeightShift);
+         (static_cast<std::uint32_t>(placement.facing)
+          << kPlacementFacingShift);
 }
 
 // The inverse of PackPlacement.
 [[nodiscard]] constexpr SpawnPlacement UnpackPlacement(std::uint32_t word) {
-  return {
-      .tile_x = static_cast<std::uint8_t>(word),
-      .direction = static_cast<std::uint8_t>(word >> kPlacementDirectionShift),
-      .tile_z = static_cast<std::uint8_t>(word >> kPlacementTileZShift),
-      .height = static_cast<std::uint8_t>(word >> kPlacementHeightShift)};
+  return {.tile_x = static_cast<std::uint8_t>(word),
+          .surface = static_cast<std::uint8_t>(word >> kPlacementSurfaceShift),
+          .tile_z = static_cast<std::uint8_t>(word >> kPlacementTileZShift),
+          .facing = static_cast<std::uint8_t>(word >> kPlacementFacingShift)};
 }
 
 enum class ActorShape : std::uint8_t {
@@ -597,9 +597,9 @@ struct AshleyEquipment {
 // Ashley's spawn placement (18.c:373).
 inline constexpr SpawnPlacement kAshleyPlacement{
     .tile_x = 4,
-    .direction = 0,
+    .surface = 0,
     .tile_z = 2,
-    .height = 128,
+    .facing = 128,
 };
 // The blade and spawn flags Ashley's template is applied with (18.c:410).
 inline constexpr int kAshleyTemplateBlade = 0x10;
@@ -647,8 +647,8 @@ struct EquippedModels {
 // rounded toward zero (146C.c:6100).
 [[nodiscard]] std::uint8_t AuxiliaryTextureSlot(int actor_id);
 // The placement a room enemy is loaded at: the remembered one when the room
-// remembers it, else the spawn's with its height in 64-unit steps, as the
-// original's 8-bit height field kept them. Only the low direction bit is
+// remembers it, else the spawn's with its facing quadrant in 64-unit steps, as
+// the original's 8-bit facing byte kept them. Only the low surface bit is
 // kept.
 [[nodiscard]] SpawnPlacement RoomEnemyPlacement(
     const RoomSpawn& spawn, const std::optional<RememberedSpawn>& remembered);

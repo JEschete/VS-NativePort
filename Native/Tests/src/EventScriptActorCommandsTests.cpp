@@ -247,8 +247,8 @@ class RecordingHost final : public event::ScriptActorHost {
 
   void QueueScriptedSpawn(int actor, int model,
                           actors::SpawnPlacement placement) override {
-    Log("Spawn", actor, model, placement.tile_x, placement.direction,
-        placement.tile_z, placement.height);
+    Log("Spawn", actor, model, placement.tile_x, placement.surface,
+        placement.tile_z, placement.facing);
   }
   void RemoveScriptedActor(int actor) override { Log("Remove", actor); }
   void RefreshEquipmentModels(int actor) override { Log("Refresh", actor); }

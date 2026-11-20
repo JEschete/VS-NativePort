@@ -33,9 +33,11 @@ constexpr unsigned kOverrideTextureShift = 12;
 constexpr int kOverrideNibble = 0xF;
 // A refused model load, like a full queue.
 constexpr int kRefusedModelLoad = -1;
-constexpr std::uint8_t kDirectionMask = 1;
+constexpr std::uint8_t kSurfaceMask = 1;
+// The surface byte's high nibble carries a gimmick's model variant
+// (146C.c:5921).
 constexpr unsigned kVariantShift = 4;
-constexpr unsigned kSpawnHeightShift = 6;
+constexpr unsigned kFacingQuadrantShift = 6;
 constexpr std::uint8_t kRecoveryDelayBonusMask = 0x3F;
 constexpr std::uint8_t kLimbActionFieldMask = 0xF;
 constexpr std::uint8_t kScriptedSpawnFlags = 6;
@@ -534,17 +536,17 @@ SpawnPlacement RoomEnemyPlacement(
     const RoomSpawn& spawn, const std::optional<RememberedSpawn>& remembered) {
   if (remembered) {
     return {.tile_x = remembered->placement.tile_x,
-            .direction = static_cast<std::uint8_t>(
-                remembered->placement.direction & kDirectionMask),
+            .surface = static_cast<std::uint8_t>(remembered->placement.surface &
+                                                 kSurfaceMask),
             .tile_z = remembered->placement.tile_z,
-            .height = remembered->placement.height};
+            .facing = remembered->placement.facing};
   }
   return {.tile_x = spawn.placement.tile_x,
-          .direction = static_cast<std::uint8_t>(spawn.placement.direction &
-                                                 kDirectionMask),
+          .surface =
+              static_cast<std::uint8_t>(spawn.placement.surface & kSurfaceMask),
           .tile_z = spawn.placement.tile_z,
-          .height = static_cast<std::uint8_t>(spawn.placement.height
-                                              << kSpawnHeightShift)};
+          .facing = static_cast<std::uint8_t>(spawn.placement.facing
+                                              << kFacingQuadrantShift)};
 }
 
 std::optional<AshleyEquipment> ChooseAshleyEquipment(
@@ -605,7 +607,7 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   host.WriteAuxiliaryIdentity(actor, {.id = index});
 
   SpawnPlacement queued = placement;
-  queued.direction &= kDirectionMask;
+  queued.surface &= kSurfaceMask;
   ActorAssetRequest request{};
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kGimmick);
   request.target_slot = static_cast<std::int8_t>(index);
@@ -615,7 +617,7 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   request.texture_slot = AuxiliaryTextureSlot(actor_id);
   request.material = static_cast<std::uint8_t>(material);
   request.variant =
-      static_cast<std::uint8_t>(placement.direction >> kVariantShift);
+      static_cast<std::uint8_t>(placement.surface >> kVariantShift);
   static_cast<void>(host.QueueAsset(request));
   DrainAssetQueue(host);
 

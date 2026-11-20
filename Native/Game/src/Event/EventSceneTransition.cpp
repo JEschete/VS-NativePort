@@ -22,9 +22,9 @@ constexpr std::size_t kMenuModeOperand = 1;
 constexpr std::size_t kZoneOperand = 1;
 constexpr std::size_t kRoomOperand = 2;
 constexpr std::size_t kEntryTileXOperand = 3;
-constexpr std::size_t kEntryDirectionOperand = 4;
+constexpr std::size_t kEntrySurfaceOperand = 4;
 constexpr std::size_t kEntryTileZOperand = 5;
-constexpr std::size_t kEntryElevationOperand = 6;
+constexpr std::size_t kEntryFacingOperand = 6;
 constexpr std::size_t kOptionsOperand = 7;
 constexpr std::size_t kEffectOperand = 8;
 constexpr std::size_t kSpeedOperand = 9;
@@ -138,16 +138,16 @@ Field::DoorRecord ScriptedDoor(ScriptCommand command) {
   return Field::DoorRecord{
       .destination_zone_id = OperandByte(command, kZoneOperand),
       .destination_room_id = OperandByte(command, kRoomOperand),
-      .entry_direction = static_cast<std::uint8_t>(
-          OperandByte(command, kEntryDirectionOperand) &
-          Field::kDoorEntryDirectionMask),
+      .entry_surface =
+          static_cast<std::uint8_t>(OperandByte(command, kEntrySurfaceOperand) &
+                                    Field::kDoorEntrySurfaceMask),
       .entry_tile_x = static_cast<std::uint8_t>(
           OperandByte(command, kEntryTileXOperand) & Field::kDoorTileMask),
       .entry_tile_z = static_cast<std::uint8_t>(
           OperandByte(command, kEntryTileZOperand) & Field::kDoorTileMask),
-      .entry_elevation = static_cast<std::uint8_t>(
-          OperandByte(command, kEntryElevationOperand) &
-          Field::kDoorEntryElevationMask),
+      .entry_facing =
+          static_cast<std::uint8_t>(OperandByte(command, kEntryFacingOperand) &
+                                    Field::kDoorEntryFacingMask),
       .has_entry_step = (options & kEntryStepBit) != 0,
       .walks_in = (options & kWalksInBit) != 0,
   };

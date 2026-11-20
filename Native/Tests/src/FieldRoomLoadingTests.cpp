@@ -289,8 +289,8 @@ void PutObject(Bytes& records, std::size_t index,
   Put(records, at + 0x08, object.slot);
   Put(records, at + 0x0A, object.tile_x);
   Put(records, at + 0x0B, object.tile_z);
-  Put(records, at + 0x0C, object.height);
-  Put(records, at + 0x0D, object.direction);
+  Put(records, at + 0x0C, object.surface);
+  Put(records, at + 0x0D, object.facing);
   Put(records, at + 0x0E, object.model);
 }
 
@@ -882,7 +882,7 @@ TEST_CASE("Room placement records decode their enemy and object fields",
       .stat_test = 2,
       .flag_value = 0x1234,
       .stat_value = 0x5678,
-      .placement = {.tile_x = 9, .direction = 10, .tile_z = 11, .height = 12},
+      .placement = {.tile_x = 9, .surface = 10, .tile_z = 11, .facing = 12},
       .facing = 2,
       .retain_after_defeat = true,
       .scene_test = 3};
@@ -892,8 +892,8 @@ TEST_CASE("Room placement records decode their enemy and object fields",
                                .slot = kAnyObjectSlot,
                                .tile_x = 5,
                                .tile_z = 6,
-                               .height = 7,
-                               .direction = 8,
+                               .surface = 7,
+                               .facing = 8,
                                .model = 0x3A60};
   Bytes records;
   PutEnemy(records, 0, enemy, 1);
@@ -1114,32 +1114,32 @@ TEST_CASE("Room actors spawn into named and free slots",
             {.slot = kAnyObjectSlot,
              .tile_x = 7,
              .tile_z = 8,
-             .height = 5,
-             .direction = 1,
+             .surface = 5,
+             .facing = 1,
              .model = 0x3A60});
   PutEnemy(
       host.records, 3,
       {.enemy_id = kUntemplatedEnemyId,
-       .placement = {.tile_x = 4, .direction = 2, .tile_z = 6, .height = 2}});
+       .placement = {.tile_x = 4, .surface = 2, .tile_z = 6, .facing = 2}});
   SpawnRoomActors(host);
 
   CHECK(host.enemies ==
         std::vector<SpawnedEnemy>{
             {.slot = 4, .placement_index = 0, .enemy_id = 1, .flags = 0x80},
             {.slot = 3, .placement_index = 1, .enemy_id = 0, .flags = 6}});
-  CHECK(host.objects == std::vector<SpawnedActor>{{.slot = 5,
-                                                   .placement = {.tile_x = 7,
-                                                                 .direction = 5,
-                                                                 .tile_z = 8,
-                                                                 .height = 64},
-                                                   .flags = 0x0D,
-                                                   .model = 0xA03}});
-  CHECK(host.plain == std::vector<SpawnedActor>{{.slot = 6,
-                                                 .placement = {.tile_x = 4,
-                                                               .direction = 2,
-                                                               .tile_z = 6,
-                                                               .height = 128},
-                                                 .flags = 6}});
+  CHECK(
+      host.objects ==
+      std::vector<SpawnedActor>{
+          {.slot = 5,
+           .placement = {.tile_x = 7, .surface = 5, .tile_z = 8, .facing = 64},
+           .flags = 0x0D,
+           .model = 0xA03}});
+  CHECK(
+      host.plain ==
+      std::vector<SpawnedActor>{
+          {.slot = 6,
+           .placement = {.tile_x = 4, .surface = 2, .tile_z = 6, .facing = 128},
+           .flags = 6}});
   CHECK(host.remembered == std::vector<RememberedFlag>{{.spawn_index = 0},
                                                        {.spawn_index = 1},
                                                        {.spawn_index = 2},
@@ -1267,13 +1267,13 @@ class EntranceRecorder : public RoomEntranceHost {
   int settles = 0;
 };
 
-TEST_CASE("Ashley's entry step follows the door's elevation",
+TEST_CASE("Ashley's entry step follows the door's facing quadrant",
           "[field][field-room-loading]") {
-  CHECK(EntranceStep({.elevation = 0}) == EntryStep{.x = 64, .z = 0});
-  CHECK(EntranceStep({.elevation = 1}) == EntryStep{.x = 0, .z = 64});
-  CHECK(EntranceStep({.elevation = 2}) == EntryStep{.x = 64, .z = 0});
-  CHECK(EntranceStep({.elevation = 3}) == EntryStep{.x = 0, .z = 64});
-  CHECK(EntranceStep({.elevation = 4}) == EntryStep{});
+  CHECK(EntranceStep({.facing = 0}) == EntryStep{.x = 64, .z = 0});
+  CHECK(EntranceStep({.facing = 1}) == EntryStep{.x = 0, .z = 64});
+  CHECK(EntranceStep({.facing = 2}) == EntryStep{.x = 64, .z = 0});
+  CHECK(EntranceStep({.facing = 3}) == EntryStep{.x = 0, .z = 64});
+  CHECK(EntranceStep({.facing = 4}) == EntryStep{});
 }
 
 TEST_CASE("Ashley enters at the pending door and steps in",
@@ -1281,20 +1281,20 @@ TEST_CASE("Ashley enters at the pending door and steps in",
   EntranceRecorder host;
   host.entrance = {.tile_x = 3,
                    .tile_z = 4,
-                   .direction = 2,
-                   .elevation = 1,
+                   .surface = 2,
+                   .facing = 1,
                    .has_entry_step = true};
   PlaceAshleyAtRoomEntrance(host);
   CHECK(host.placed ==
         Actors::SpawnPlacement{
-            .tile_x = 3, .direction = 2, .tile_z = 4, .height = 64});
+            .tile_x = 3, .surface = 2, .tile_z = 4, .facing = 64});
   CHECK(host.stepped == EntryStep{.x = 0, .z = 64});
   CHECK(host.settles == 1);
 
   EntranceRecorder no_step;
-  no_step.entrance = {.elevation = 2};
+  no_step.entrance = {.facing = 2};
   PlaceAshleyAtRoomEntrance(no_step);
-  CHECK(no_step.placed == Actors::SpawnPlacement{.height = 128});
+  CHECK(no_step.placed == Actors::SpawnPlacement{.facing = 128});
   CHECK_FALSE(no_step.stepped.has_value());
   CHECK(no_step.settles == 1);
 }

@@ -26,9 +26,11 @@ struct MpdEnemySpawn {
   std::uint16_t flag_value;
   std::uint16_t stat_value;
   std::uint8_t tile_x;
-  std::uint8_t direction;
+  // Upstream's direction and height: the collision surface and the facing
+  // quadrant the spawn scales by 64 into its placement (146C.c:14954-14955).
+  std::uint8_t surface;
   std::uint8_t tile_z;
-  std::uint8_t height;
+  std::uint8_t facing_quadrant;
   std::array<std::uint8_t, kMpdEnemySettingsBytes> settings;
   std::array<std::uint8_t, 2> reserved18;
   std::uint16_t item_id;
@@ -119,7 +121,7 @@ struct MpdDoorRecord {
   DoorTileLocation tile_location;
   std::uint16_t required_flag_value : 8;
   std::uint16_t entry_tile_x : 5;
-  std::uint16_t entry_elevation : 2;
+  std::uint16_t entry_facing : 2;
   std::uint16_t has_entry_step : 1;
   std::uint16_t required_flag_id : 10;
   std::uint16_t entry_tile_z : 5;
@@ -387,8 +389,10 @@ struct MpdObjectSpawn {
   std::uint8_t reserved09;
   std::uint8_t tile_x;
   std::uint8_t tile_z;
-  std::uint8_t height;
-  std::uint8_t direction;
+  // Upstream's y and direction: the collision surface and the facing quadrant
+  // the spawn scales by 64 into its placement (146C.c:14969-14970).
+  std::uint8_t surface;
+  std::uint8_t facing_quadrant;
   std::uint16_t model;
   std::array<std::uint8_t, kMpdObjectSpawnTailBytes> reserved10;
 };

@@ -223,8 +223,8 @@ class AshleyMovementHost {
   [[nodiscard]] virtual CommandActorGait PlayerGait() const = 0;
   [[nodiscard]] virtual std::uint32_t PlayerStateFlags() const = 0;
   [[nodiscard]] virtual unsigned ScreenTransitionStep() const = 0;
-  // The destination door's entry elevation while it sets the entry walk.
-  [[nodiscard]] virtual std::optional<int> DoorEntryElevation() const = 0;
+  // The destination door's entry facing quadrant while it sets the entry walk.
+  [[nodiscard]] virtual std::optional<int> DoorEntryFacing() const = 0;
   virtual void UpdateCameraOrbit() = 0;
   [[nodiscard]] virtual AshleyControls Controls() const = 0;
   [[nodiscard]] virtual int CameraDistance() const = 0;
@@ -236,7 +236,7 @@ class AshleyMovementHost {
 };
 
 // decomp: BATTLE.PRG func_8006E7F0 (src/BATTLE/BATTLE.PRG/146C.c:2837)
-// During a door transition Ashley walks in at the door's entry elevation (or
+// During a door transition Ashley walks in along the door's entry facing (or
 // stands); otherwise the stick or direction pad moves her relative to the
 // camera, R2 or the walk-only state slows her and Square jumps.
 void UpdateAshleyMovementInput(AshleyMovementHost& host);

@@ -1311,7 +1311,7 @@ Result ValidateContentImpl(const Snapshot& state,
   if (!room) return std::unexpected(room.error());
   if (new_game && (new_game->entry_tile_x >= room->collision.width ||
                    new_game->entry_tile_z >= room->collision.height ||
-                   new_game->tile_location.entry_direction > 1)) {
+                   new_game->tile_location.entry_surface > 1)) {
     return std::unexpected(
         "clear-game entry requires an in-bounds static starting-room tile");
   }
@@ -1576,13 +1576,13 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   VS::State::savedEntryDoor.destination_room_id =
       static_cast<unsigned char>(pending->state.location.room);
   VS::State::savedEntryDoor.required_flag_id = pending->state.location.scene;
-  VS::State::savedEntryDoor.tile_location.entry_direction =
+  VS::State::savedEntryDoor.tile_location.entry_surface =
       pending->state.location.floor_layer;
   VS::State::savedEntryDoor.entry_tile_x =
       static_cast<unsigned>(pending->state.location.position[0] / kTileUnits);
   VS::State::savedEntryDoor.entry_tile_z =
       static_cast<unsigned>(pending->state.location.position[2] / kTileUnits);
-  VS::State::savedEntryDoor.entry_elevation =
+  VS::State::savedEntryDoor.entry_facing =
       static_cast<unsigned>(pending->state.location.facing / kQuarterTurn);
   SyncMonoOutput(pending->state.settings.mono_sound == 1);
   return {};

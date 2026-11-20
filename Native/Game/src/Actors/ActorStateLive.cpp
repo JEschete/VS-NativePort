@@ -792,9 +792,9 @@ void PlaceLiveActorInRoom(int actor_id, const SpawnPlacement* placement,
   }
   // The placement's second and fourth bytes are the tile layer and facing.
   const PackedTile tile{.x = placement->tile_x,
-                        .layer = placement->direction,
+                        .layer = placement->surface,
                         .z = placement->tile_z,
-                        .spare = placement->height};
+                        .spare = placement->facing};
   LiveActorStateHost host("PlaceActorInRoom");
   PlaceActorInRoom(host, actor_id, tile, drop_height, movement_class);
 }

@@ -107,19 +107,18 @@ std::vector<EncounterDoor> ReadRoomDoors(
        ++i) {
     const auto record = Read<VS::Field::MpdDoorRecord>(
         data, i * sizeof(VS::Field::MpdDoorRecord));
-    doors.push_back(
-        {static_cast<int>(i),
-         record.destination_zone_id,
-         record.destination_room_id,
-         record.tile_location.tile_x,
-         record.tile_location.tile_z,
-         record.tile_location.floor_layer,
-         {record.entry_tile_x, record.entry_tile_z, record.entry_elevation,
-          record.tile_location.entry_direction},
-         record.required_flag_id,
-         record.required_flag_value,
-         record.door_id,
-         record.has_entry_step != 0});
+    doors.push_back({static_cast<int>(i),
+                     record.destination_zone_id,
+                     record.destination_room_id,
+                     record.tile_location.tile_x,
+                     record.tile_location.tile_z,
+                     record.tile_location.floor_layer,
+                     {record.entry_tile_x, record.entry_tile_z,
+                      record.entry_facing, record.tile_location.entry_surface},
+                     record.required_flag_id,
+                     record.required_flag_value,
+                     record.door_id,
+                     record.has_entry_step != 0});
   }
   return doors;
 }
@@ -404,8 +403,8 @@ std::expected<VS::Field::MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   placement.index = static_cast<std::uint8_t>(index);
   placement.tile_x = static_cast<std::uint8_t>(position.x);
   placement.tile_z = static_cast<std::uint8_t>(position.z);
-  placement.height = static_cast<std::uint8_t>(position.facing);
-  placement.direction = static_cast<std::uint8_t>(position.surface);
+  placement.facing_quadrant = static_cast<std::uint8_t>(position.facing);
+  placement.surface = static_cast<std::uint8_t>(position.surface);
   // VS::Field::SpawnRoomActors (146C.c:14901) allocates slots when slot is
   // zero.
   // Membership is explicit, not story-gated. AI, hostility, loot and variant

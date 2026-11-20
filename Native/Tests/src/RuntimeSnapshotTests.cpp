@@ -586,8 +586,8 @@ struct RuntimeFixture {
     VS::State::savedEntryDoor = {};
     VS::State::savedEntryDoor.entry_tile_x = 3;
     VS::State::savedEntryDoor.entry_tile_z = 2;
-    VS::State::savedEntryDoor.entry_elevation = 1;
-    VS::State::savedEntryDoor.tile_location.entry_direction = 1;
+    VS::State::savedEntryDoor.entry_facing = 1;
+    VS::State::savedEntryDoor.tile_location.entry_surface = 1;
     VS::State::savedEntryDoor.required_flag_id = 37;
     VS::Input::settings.current_game_save_count = 7;
     VS::Input::settings.cumulative_save_count = 19;
@@ -1487,7 +1487,7 @@ void CheckCanceledStaticResume(const RuntimeFixture& fixture,
                                const Save::Document& document,
                                const std::vector<std::uint8_t>& before) {
   REQUIRE(Save::PrepareResume(document).has_value());
-  CHECK(VS::State::savedEntryDoor.tile_location.entry_direction ==
+  CHECK(VS::State::savedEntryDoor.tile_location.entry_surface ==
         document.state.location.floor_layer);
   Save::CancelResume();
   CHECK(LiveFingerprint(fixture) == before);
@@ -1600,7 +1600,7 @@ void CheckResumeStaged() {
   CHECK(VS::State::savedEntryDoor.destination_zone_id == 1);
   CHECK(VS::State::savedEntryDoor.entry_tile_x == 3);
   CHECK(VS::State::savedEntryDoor.entry_tile_z == 2);
-  CHECK(VS::State::savedEntryDoor.tile_location.entry_direction == 1);
+  CHECK(VS::State::savedEntryDoor.tile_location.entry_surface == 1);
   CHECK(VS::State::savedEntryDoor.required_flag_id == 37);
   CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
 }
@@ -1721,7 +1721,7 @@ TEST_CASE("Clear-game validation rejects unreset state and missing content",
   }
   if (defect == 8) Engaged(document.new_game_entry).entry_tile_x = 31;
   if (defect == 9) {
-    Engaged(document.new_game_entry).tile_location.entry_direction = 2;
+    Engaged(document.new_game_entry).tile_location.entry_surface = 2;
   }
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::ValidateContent(document));

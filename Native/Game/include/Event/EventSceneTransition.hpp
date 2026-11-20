@@ -137,10 +137,10 @@ ScriptStep ScriptRunMenuTransition(ScriptCommand command,
 // decomp: BATTLE.PRG func_800B98C0 (F01120, 4A0A8.c:2018)
 // Opcode 0x68: with no change in progress, starts the scripted transition to
 // room byte 2 of zone byte 1 (0 keeps the zone) entering on tile (byte 3,
-// byte 5) facing byte 4 at elevation byte 6, with effect byte 8 and speed
-// byte 9. Byte 7 holds the entry step (bit 0), the reserved entry bit (bit 1),
-// whether the event keeps running in the new room (bit 2) and, for a zone,
-// the zone music switch (bit 3). Holds until the room loader reports the
+// byte 5) on surface byte 4 with facing quadrant byte 6, with effect byte 8
+// and speed byte 9. Byte 7 holds the entry step (bit 0), the reserved entry bit
+// (bit 1), whether the event keeps running in the new room (bit 2) and, for a
+// zone, the zone music switch (bit 3). Holds until the room loader reports the
 // arrival, then clears `room_change_state` and advances.
 ScriptStep ScriptChangeRoom(ScriptCommand command,
                             std::int16_t& room_change_state,

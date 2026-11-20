@@ -423,10 +423,10 @@ TEST_CASE("ScriptChangeRoom starts a room transition within the zone",
   const VS::Field::DoorRecord expected{
       .destination_zone_id = 0,
       .destination_room_id = 23,
-      .entry_direction = 3,
+      .entry_surface = 3,
       .entry_tile_x = 4,
       .entry_tile_z = 17,
-      .entry_elevation = 1,
+      .entry_facing = 1,
       .has_entry_step = true,
   };
   CHECK(transition->door == expected);
@@ -470,10 +470,10 @@ TEST_CASE("ScriptChangeRoom masks the door fields and zeroes the unset ones",
   if (!transition.has_value()) return;
   const VS::Field::DoorRecord expected{
       .destination_room_id = 0xFF,
-      .entry_direction = VS::Field::kDoorEntryDirectionMask,
+      .entry_surface = VS::Field::kDoorEntrySurfaceMask,
       .entry_tile_x = VS::Field::kDoorTileMask,
       .entry_tile_z = VS::Field::kDoorTileMask,
-      .entry_elevation = VS::Field::kDoorEntryElevationMask,
+      .entry_facing = VS::Field::kDoorEntryFacingMask,
       .has_entry_step = true,
       .walks_in = true,
   };

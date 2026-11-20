@@ -21,13 +21,13 @@ struct DoorField {
   unsigned width = 0;
 };
 
-constexpr DoorField kEntryDirection = {.offset = 2, .shift = 13, .width = 3};
+constexpr DoorField kEntrySurface = {.offset = 2, .shift = 13, .width = 3};
 constexpr DoorField kEntryTileX = {.offset = 4, .shift = 8, .width = 5};
-constexpr DoorField kEntryElevation = {.offset = 4, .shift = 13, .width = 2};
+constexpr DoorField kEntryFacing = {.offset = 4, .shift = 13, .width = 2};
 constexpr DoorField kRequiredFlagId = {.offset = 6, .shift = 0, .width = 10};
 constexpr DoorField kEntryTileZ = {.offset = 6, .shift = 10, .width = 5};
-// VS::Actors::TileTarget.facing keeps the elevation in its top two bits.
-constexpr unsigned kFacingElevationShift = 6;
+// VS::Actors::TileTarget.facing keeps the facing quadrant in its top two bits.
+constexpr unsigned kFacingQuadrantShift = 6;
 
 void SetDoorField(EntryDoor& door, DoorField field, unsigned value) {
   const unsigned low = std::to_integer<unsigned>(door.at(field.offset));
@@ -49,10 +49,9 @@ EntryDoor PlaceEntryDoor(const EntryDoor& pending, TilePlacement placement,
   EntryDoor door = pending;
   SetDoorField(door, kEntryTileX, placement.tile_x);
   SetDoorField(door, kEntryTileZ, placement.tile_z);
-  SetDoorField(door, kEntryDirection, placement.tile_layer);
-  SetDoorField(
-      door, kEntryElevation,
-      static_cast<unsigned>(placement.facing) >> kFacingElevationShift);
+  SetDoorField(door, kEntrySurface, placement.tile_layer);
+  SetDoorField(door, kEntryFacing,
+               static_cast<unsigned>(placement.facing) >> kFacingQuadrantShift);
   SetDoorField(door, kRequiredFlagId, flag_id);
   return door;
 }

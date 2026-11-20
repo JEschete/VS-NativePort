@@ -445,8 +445,8 @@ class LiveHost final : public Host {
   void SetEntryDoor(const EntryDoor& door) override {
     VS::State::savedEntryDoor.entry_tile_x = door.tile_x;
     VS::State::savedEntryDoor.entry_tile_z = door.tile_z;
-    VS::State::savedEntryDoor.tile_location.entry_direction = door.direction;
-    VS::State::savedEntryDoor.entry_elevation = door.elevation;
+    VS::State::savedEntryDoor.tile_location.entry_surface = door.surface;
+    VS::State::savedEntryDoor.entry_facing = door.facing;
   }
   void ClearInventoryIndices() override { VS::Items::inventoryIndices = {}; }
   void SetGameModes(const GameModes& modes) override {

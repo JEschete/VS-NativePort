@@ -14,8 +14,8 @@ namespace VS::Field {
 // record's bitfields would keep them.
 inline constexpr std::uint8_t kDoorTileMask = 0x1F;
 inline constexpr std::uint8_t kDoorFloorLayerMask = 0x07;
-inline constexpr std::uint8_t kDoorEntryDirectionMask = 0x07;
-inline constexpr std::uint8_t kDoorEntryElevationMask = 0x03;
+inline constexpr std::uint8_t kDoorEntrySurfaceMask = 0x07;
+inline constexpr std::uint8_t kDoorEntryFacingMask = 0x03;
 inline constexpr std::uint16_t kDoorRequiredFlagIdMask = 0x3FF;
 // The record's three trailing bytes, kept so a door survives a round trip.
 inline constexpr std::size_t kDoorReservedBytes = 3;
@@ -23,18 +23,19 @@ inline constexpr std::size_t kDoorReservedBytes = 3;
 struct DoorRecord {
   std::uint8_t destination_zone_id = 0;
   std::uint8_t destination_room_id = 0;
-  // The door's own tile, floor layer and the facing it gives on entry.
+  // The door's own tile and floor layer, and the collision surface Ashley
+  // arrives on.
   std::uint8_t tile_x = 0;
   std::uint8_t tile_z = 0;
   std::uint8_t floor_layer = 0;
-  std::uint8_t entry_direction = 0;
+  std::uint8_t entry_surface = 0;
   // The script flag and value that unlock the door.
   std::uint8_t required_flag_value = 0;
   std::uint16_t required_flag_id = 0;
-  // The tile, height step and stairs entry in the destination room.
+  // The tile, facing quadrant (0..3) and entry step in the destination room.
   std::uint8_t entry_tile_x = 0;
   std::uint8_t entry_tile_z = 0;
-  std::uint8_t entry_elevation = 0;
+  std::uint8_t entry_facing = 0;
   bool has_entry_step = false;
   // Bit 15 of the record's third halfword (upstream faceCamera): Ashley walks
   // in along the entry facing at half walk speed. Scripts copy their step

@@ -445,7 +445,7 @@ actors::CharacterTemplate EnemyTemplate() {
 actors::RoomSpawn EnemySpawn() {
   actors::RoomSpawn spawn;
   spawn.index = 7;
-  spawn.placement = {.tile_x = 5, .direction = 3, .tile_z = 6, .height = 2};
+  spawn.placement = {.tile_x = 5, .surface = 3, .tile_z = 6, .facing = 2};
   spawn.settings = {0xAB, 0xCD, 0xEF, 0x12, 0x78, 0x56, 0x34, 0x92};
   spawn.drop = {.id = 0x101, .count = 1};
   spawn.second_drop = {.id = 0x102, .count = 2};
@@ -565,18 +565,18 @@ TEST_CASE("Gimmick texture slots and room enemy placements follow the original",
   }
 
   actors::RoomSpawn spawn;
-  spawn.placement = {.tile_x = 1, .direction = 3, .tile_z = 2, .height = 5};
+  spawn.placement = {.tile_x = 1, .surface = 3, .tile_z = 2, .facing = 5};
   CHECK(actors::RoomEnemyPlacement(spawn, std::nullopt) ==
         actors::SpawnPlacement{
-            .tile_x = 1, .direction = 1, .tile_z = 2, .height = 0x40});
+            .tile_x = 1, .surface = 1, .tile_z = 2, .facing = 0x40});
   actors::RememberedSpawn remembered;
   remembered.placement = {
-      .tile_x = 9, .direction = 0xFE, .tile_z = 8, .height = 77};
+      .tile_x = 9, .surface = 0xFE, .tile_z = 8, .facing = 77};
   CHECK(actors::RoomEnemyPlacement(spawn, remembered) ==
         actors::SpawnPlacement{
-            .tile_x = 9, .direction = 0, .tile_z = 8, .height = 77});
+            .tile_x = 9, .surface = 0, .tile_z = 8, .facing = 77});
   CHECK(actors::PackPlacement(
-            {.tile_x = 1, .direction = 2, .tile_z = 3, .height = 4}) ==
+            {.tile_x = 1, .surface = 2, .tile_z = 3, .facing = 4}) ==
         0x04030201U);
 }
 
@@ -657,7 +657,7 @@ TEST_CASE("A gimmick actor takes the first free slot and queues its model",
   host.table.at(2) = Handle(0x20);
   const SpawnedActor actor = actors::CreateAuxiliaryActor(
       host, actors::kAnyAuxiliarySlot, 0x1234,
-      {.tile_x = 1, .direction = 0x53, .tile_z = 2, .height = 3}, 7);
+      {.tile_x = 1, .surface = 0x53, .tile_z = 2, .facing = 3}, 7);
   REQUIRE(actor == Handle(kFirstHandle));
   CHECK(host.table.at(3) == actor);
   CHECK(host.auxiliary == actors::AuxiliaryIdentity{.id = 3});
@@ -665,7 +665,7 @@ TEST_CASE("A gimmick actor takes the first free slot and queues its model",
   expected.kind = Kind(ActorAssetKind::kGimmick);
   expected.target_slot = 3;
   expected.placement = actors::PackPlacement(
-      {.tile_x = 1, .direction = 1, .tile_z = 2, .height = 3});
+      {.tile_x = 1, .surface = 1, .tile_z = 2, .facing = 3});
   expected.destination = At(kFirstHandle + kModelOffset);
   expected.sub_kind = 0x34;
   expected.texture_slot = 0x12;
@@ -724,7 +724,7 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
   FakeSpawnHost host;
   host.table.at(actors::kAshleySlot) = Handle(0x10);
   const actors::SpawnPlacement placement{
-      .tile_x = 4, .direction = 1, .tile_z = 5, .height = 6};
+      .tile_x = 4, .surface = 1, .tile_z = 5, .facing = 6};
   const SpawnedActor actor = actors::CreateActorWithEquipment(
       host, 3, 0x22, 15, 2, 6, 1, placement, 1);
   REQUIRE(actor == Handle(kFirstHandle));
@@ -924,7 +924,7 @@ std::vector<ActorAssetRequest> ExpectedRoomEnemyRequests() {
   body.data = At(kZudBase + 0x30);
   body.model_id = 0x21;
   body.placement = actors::PackPlacement(
-      {.tile_x = 5, .direction = 1, .tile_z = 6, .height = 0x80});
+      {.tile_x = 5, .surface = 1, .tile_z = 6, .facing = 0x80});
   body.destination = At(kFirstHandle + kModelOffset);
   body.sub_kind = actors::kDefaultSubKind;
   body.variant = 1;
@@ -1019,8 +1019,7 @@ TEST_CASE("A remembered room enemy restores its state and AI flags",
   actors::RememberedSpawn remembered;
   remembered.ai_flags = 0x21;
   remembered.statuses = 0x400;
-  remembered.placement = {
-      .tile_x = 8, .direction = 3, .tile_z = 9, .height = 10};
+  remembered.placement = {.tile_x = 8, .surface = 3, .tile_z = 9, .facing = 10};
   host.remembered = remembered;
   host.ai_result = 1;
   REQUIRE(actors::SpawnRoomEnemy(host, 3, EnemySpawn(), EnemyTemplate(), 2) !=
@@ -1028,7 +1027,7 @@ TEST_CASE("A remembered room enemy restores its state and AI flags",
   CHECK(host.restored == remembered);
   CHECK(host.requests.at(0).placement ==
         actors::PackPlacement(
-            {.tile_x = 8, .direction = 1, .tile_z = 9, .height = 10}));
+            {.tile_x = 8, .surface = 1, .tile_z = 9, .facing = 10}));
   const std::vector<std::string> tail(host.log.end() - 4, host.log.end());
   CHECK(tail == std::vector<std::string>{"RestoreRemembered 3",
                                          "InflictStatuses 3 0x400",
@@ -1317,7 +1316,7 @@ TEST_CASE("A scripted actor spawns into a free slot below 16",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;
   const actors::SpawnPlacement placement{
-      .tile_x = 2, .direction = 1, .tile_z = 3, .height = 4};
+      .tile_x = 2, .surface = 1, .tile_z = 3, .facing = 4};
   CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, placement) ==
         host.queue_index + 1);
   CHECK(host.table.at(9) == Handle(kFirstHandle));
@@ -1577,9 +1576,9 @@ VS::Field::MpdEnemySpawn LegacyRoomSpawn() {
   VS::Field::MpdEnemySpawn spawn{};
   spawn.index = 6;
   spawn.tile_x = 1;
-  spawn.direction = 0x81;
+  spawn.surface = 0x81;
   spawn.tile_z = 3;
-  spawn.height = 4;
+  spawn.facing_quadrant = 4;
   spawn.settings[0] = 0xAB;
   spawn.settings[7] = 0x92;
   spawn.item_id = 0x101;
@@ -1598,7 +1597,7 @@ void CheckDecodedRoomSpawn(const actors::RoomSpawn& room) {
   CHECK(room.index == 6);
   CHECK(room.placement ==
         actors::SpawnPlacement{
-            .tile_x = 1, .direction = 0x81, .tile_z = 3, .height = 4});
+            .tile_x = 1, .surface = 0x81, .tile_z = 3, .facing = 4});
   CHECK(room.settings == std::array<std::uint8_t, actors::kSpawnSettingsBytes>{
                              0xAB, 0, 0, 0, 0, 0, 0, 0x92});
   CHECK(room.drop == actors::ItemDrop{.id = 0x101, .count = 2});
@@ -1646,7 +1645,7 @@ TEST_CASE("Live spawn codecs decode room spawns, placements and memories",
 
   constexpr std::uint32_t kPlacementWord = 0x80F302F1;
   constexpr actors::SpawnPlacement kPlacement{
-      .tile_x = 0xF1, .direction = 2, .tile_z = 0xF3, .height = 0x80};
+      .tile_x = 0xF1, .surface = 2, .tile_z = 0xF3, .facing = 0x80};
   CHECK(actors::UnpackPlacement(kPlacementWord) == kPlacement);
   CHECK(actors::PackPlacement(kPlacement) == kPlacementWord);
 
@@ -1657,7 +1656,7 @@ TEST_CASE("Live spawn codecs decode room spawns, placements and memories",
   CHECK(remembered.statuses == 0x1000);
   CHECK(remembered.placement ==
         actors::SpawnPlacement{
-            .tile_x = 8, .direction = 1, .tile_z = 9, .height = 10});
+            .tile_x = 8, .surface = 1, .tile_z = 9, .facing = 10});
 }
 
 TEST_CASE("Live spawn adapters report their refusals on the actors channel",

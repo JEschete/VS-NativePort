@@ -101,8 +101,8 @@ class SnapshotHost {
   virtual void StoreEntranceDoorForReload() = 0;
 };
 
-// The pending door with Ashley's tile, layer, elevation and the snapshot
-// flag folded into its entry fields.
+// The pending door with Ashley's tile, surface, facing quadrant and the
+// snapshot flag folded into its entry fields.
 [[nodiscard]] EntryDoor PlaceEntryDoor(const EntryDoor& pending,
                                        TilePlacement placement,
                                        std::uint16_t flag_id);

@@ -464,11 +464,14 @@ void Fields(VS::Field::MpdDoorRecord& r, V&& v) {
   VS_SAVE_DOOR_BITS("tile_x", tile_location.tile_x, kFiveBitMask);
   VS_SAVE_DOOR_BITS("tile_z", tile_location.tile_z, kFiveBitMask);
   VS_SAVE_DOOR_BITS("floor_layer", tile_location.floor_layer, kThreeBitMask);
-  VS_SAVE_DOOR_BITS("entry_direction", tile_location.entry_direction,
+  // The "entry_direction" and "entry_elevation" keys predate the surface and
+  // facing names; they hold the arrival surface and the facing quadrant. The
+  // keys stay so existing snapshots still load.
+  VS_SAVE_DOOR_BITS("entry_direction", tile_location.entry_surface,
                     kThreeBitMask);
   VS_SAVE_DOOR_BITS("required_flag_value", required_flag_value, 255);
   VS_SAVE_DOOR_BITS("entry_tile_x", entry_tile_x, kFiveBitMask);
-  VS_SAVE_DOOR_BITS("entry_elevation", entry_elevation, kTwoBitMask);
+  VS_SAVE_DOOR_BITS("entry_elevation", entry_facing, kTwoBitMask);
   VS_SAVE_DOOR_BITS("has_entry_step", has_entry_step, 1);
   VS_SAVE_DOOR_BITS("required_flag_id", required_flag_id, kMaximumSceneId);
   VS_SAVE_DOOR_BITS("entry_tile_z", entry_tile_z, kFiveBitMask);

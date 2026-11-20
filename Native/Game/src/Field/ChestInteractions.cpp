@@ -119,19 +119,19 @@ bool RefreshAshleyInteractionTile(const AshleyInteractionTileState& state,
 // decomp: scripted-fall door in BATTLE.PRG func_80074BAC (146C.c:5365).
 DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
                                  const Actors::PackedTile& tile) {
-  constexpr unsigned kFallElevationShift = 6;
-  constexpr std::uint8_t kFallEntryDirection = 7;
+  constexpr unsigned kFallFacingShift = 6;
+  constexpr std::uint8_t kFallEntrySurface = 7;
   return {.destination_zone_id = destination.zone_id,
           .destination_room_id = destination.room_id,
           .tile_x = static_cast<std::uint8_t>(tile.x & kDoorTileMask),
           .tile_z = static_cast<std::uint8_t>(tile.z & kDoorTileMask),
           .floor_layer =
               static_cast<std::uint8_t>(tile.layer & kDoorFloorLayerMask),
-          .entry_direction = kFallEntryDirection,
+          .entry_surface = kFallEntrySurface,
           .entry_tile_x = static_cast<std::uint8_t>(tile.x & kDoorTileMask),
           .entry_tile_z = static_cast<std::uint8_t>(tile.z & kDoorTileMask),
-          .entry_elevation =
-              static_cast<std::uint8_t>(tile.spare >> kFallElevationShift)};
+          .entry_facing =
+              static_cast<std::uint8_t>(tile.spare >> kFallFacingShift)};
 }
 
 // decomp: fall tail of BATTLE.PRG func_80074BAC (146C.c:5365), 800750CC-75184.

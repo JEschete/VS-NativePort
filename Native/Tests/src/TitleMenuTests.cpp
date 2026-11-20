@@ -823,8 +823,7 @@ TEST_CASE("Title new game data resets the game state", "[title][title-menu]") {
   CHECK(host.ashley_bytes == 0x50);
   CHECK(host.tick_speed == 2);
   CHECK(host.door ==
-        title::EntryDoor{
-            .tile_x = 4, .tile_z = 2, .direction = 0, .elevation = 2});
+        title::EntryDoor{.tile_x = 4, .tile_z = 2, .surface = 0, .facing = 2});
 }
 
 TEST_CASE("Title settings start from the logos on the first visit",

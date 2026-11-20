@@ -63,7 +63,7 @@ fx::DoorRecord SampleDoor() {
                         .tile_x = 3,
                         .tile_z = 5,
                         .floor_layer = 1,
-                        .entry_direction = 2,
+                        .entry_surface = 2,
                         .entry_tile_x = 6,
                         .entry_tile_z = 7,
                         .door_id = 11};
@@ -209,7 +209,7 @@ fx::DoorRecord TeleportEntry(std::int16_t facing) {
   host.ashley = AshleyAt(1, 1, 0, facing);
   fx::RoomTransitionState state;
   state.pending_door = SampleDoor();
-  state.pending_door.entry_direction = 5;
+  state.pending_door.entry_surface = 5;
   state.pending_door.walks_in = true;
   REQUIRE(fx::TeleportToLocation(
       state, host, {.location_id = 30, .tile_x = 0x25, .tile_z = 0x3F}));
@@ -222,17 +222,17 @@ TEST_CASE("A teleport enters at the clamped tile facing ahead",
   const fx::DoorRecord door = TeleportEntry(0x300);
   CHECK(door.entry_tile_x == 5);
   CHECK(door.entry_tile_z == 0x1F);
-  CHECK(door.entry_direction == 0);
+  CHECK(door.entry_surface == 0);
   CHECK_FALSE(door.walks_in);
-  CHECK(door.entry_elevation == 1);
+  CHECK(door.entry_facing == 1);
 }
 
 TEST_CASE("A teleport keeps Ashley's facing quadrant", "[field-rooms]") {
-  CHECK(TeleportEntry(0x0E00).entry_elevation == 0);
-  CHECK(TeleportEntry(0x0A00).entry_elevation == 3);
+  CHECK(TeleportEntry(0x0E00).entry_facing == 0);
+  CHECK(TeleportEntry(0x0A00).entry_facing == 3);
   // A negative facing wraps as the original's signed remainder did.
-  CHECK(TeleportEntry(-0x0800).entry_elevation == 3);
-  CHECK(TeleportEntry(-0x0100).entry_elevation == 0);
+  CHECK(TeleportEntry(-0x0800).entry_facing == 3);
+  CHECK(TeleportEntry(-0x0100).entry_facing == 0);
 }
 
 TEST_CASE("Transition packets start covered in the original style",

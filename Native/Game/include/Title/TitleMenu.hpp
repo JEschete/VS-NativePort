@@ -138,12 +138,13 @@ struct TimeTrialScore {
                          const TimeTrialScore&) = default;
 };
 
-// The saved entry door's tile, facing and elevation a new game starts from.
+// The saved entry door's tile, surface and facing quadrant a new game starts
+// from.
 struct EntryDoor {
   std::uint8_t tile_x = 0;
   std::uint8_t tile_z = 0;
-  std::uint8_t direction = 0;
-  std::uint8_t elevation = 0;
+  std::uint8_t surface = 0;
+  std::uint8_t facing = 0;
 
   friend bool operator==(const EntryDoor&, const EntryDoor&) = default;
 };
