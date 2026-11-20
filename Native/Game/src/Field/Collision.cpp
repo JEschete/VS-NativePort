@@ -1,16 +1,15 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Field/Collision.h"
+// The collision probe, the platform contact depth and the tile surface table
+// (Collision.hpp).
+#include "Field/Collision.hpp"
 
-// decomp: D_800E9278 (D_800E9278@BATTLE/BATTLE.PRG)
-u_char Field_kTileSurfaceIds[2744]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Field {
+// decomp: D_800E9278 (D_800E9278@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint8_t, kTileSurfaceIdBytes> tileSurfaceIds;
 // decomp: D_800F49F9 (D_800F49F9@BATTLE/BATTLE.PRG)
-u_char Field_collisionProbeDirection;
-
+std::uint8_t collisionProbeDirection;
 // decomp: D_800F4B00 (D_800F4B00@BATTLE/BATTLE.PRG)
-short Field_platformContactSearchDepth;
-
+std::int16_t platformContactSearchDepth;
 // decomp: D_800F4B08 (D_800F4B08@BATTLE/BATTLE.PRG)
-SVECTOR Field_collisionProbePosition;
-
+SVECTOR collisionProbePosition;
+}  // namespace VS::Field

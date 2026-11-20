@@ -18,7 +18,6 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Content/ModuleData.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"

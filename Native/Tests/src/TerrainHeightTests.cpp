@@ -14,7 +14,6 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
-#include "Field/Collision.h"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
 

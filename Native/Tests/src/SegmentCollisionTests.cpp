@@ -23,7 +23,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacement.hpp"
 #include "Field/Room.h"

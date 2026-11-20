@@ -4160,7 +4160,7 @@ T00464.001,T00464,func_800A3054_t,1,unk2,1,short,,,,reserved2,Y component; not r
 T00464.002,T00464,func_800A3054_t,2,unk4,1,short,,,,directionZ,Z direction; its sign picks the step,high,source:3A1A0.c:266
 T00465.000,T00465,func_800A6660_t,0,unk0,1,char[6],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Movement.h:34;declaration-only;source:3A1A0.c:23
 T00465.001,T00465,func_800A6660_t,1,unk6,1,short,,,,restartTurn,Nonzero restarts a 12-frame turn; zero adjusts the current one,med,source:3A1A0.c:1928
-T00466.000,T00466,func_800A6798_t,0,words,0,int[2],,,,words,Words of the saved position,med,declaration-only;source:3A1A0.c:28
+T00466.000,T00466,func_800A6798_t,0,words,0,int[2],,,,words,Words of the saved position,med,retired-by:VS::Field::MotionVector; the ledge check copies the typed position (#441);declaration-only;source:3A1A0.c:28
 T00467.000,T00467,func_800AAE9C_t,0,unk0,1,u_char,,,,frame,Overlay frame + 1; 0 ends the timeline,high,source:40564.c:1397
 T00467.001,T00467,func_800AAE9C_t,1,unk1,1,u_char,,,,duration,Ticks the frame is held,high,source:40564.c:1392
 T00468.000,T00468,func_800AB358_t,0,unk0,1,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\TextureAnimation.h:69;declaration-only;source:40564.c:28
@@ -5840,10 +5840,10 @@ T00641.000,T00641,vs_battle_classAffinityBaseline,0,class,0,short[8],,,,classes,
 T00641.001,T00641,vs_battle_classAffinityBaseline,1,affinity,0,u_short[8],,,,affinities,Affinity values,med,source:146C.c:1015
 T00642.000,T00642,vs_battle_classAffinityCurrent,0,class,0,short[2][8],,,,classes,Class values per set (renamed: class is a C++ keyword),med,source:146C.c:1008
 T00642.001,T00642,vs_battle_classAffinityCurrent,1,affinity,0,short[2][8],,,,affinities,Affinity values per set,med,source:146C.c:1016
-T00643.000,T00643,vs_battle_door,0,id,0,char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:10;declaration-only;source:146C.h:624
-T00643.001,T00643,vs_battle_door,1,exit,0,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:11;declaration-only;source:146C.h:625
-T00643.002,T00643,vs_battle_door,2,flags,0,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:12;declaration-only;source:146C.h:626
-T00643.003,T00643,vs_battle_door,3,lock,0,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:13;declaration-only;source:146C.h:627
+T00643.000,T00643,vs_battle_door,0,id,0,char,,,,reserved0,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:10;declaration-only;source:146C.h:624"
+T00643.001,T00643,vs_battle_door,1,exit,0,char,,,,reserved1,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:11;declaration-only;source:146C.h:625"
+T00643.002,T00643,vs_battle_door,2,flags,0,char,,,,reserved2,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:12;declaration-only;source:146C.h:626"
+T00643.003,T00643,vs_battle_door,3,lock,0,char,,,,reserved3,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:13;declaration-only;source:146C.h:627"
 T00644.000,T00644,vs_battle_geomOffset,0,x,0,int,,,,x,Named in the fork; see cited use,med,source:146C.c:15863
 T00644.001,T00644,vs_battle_geomOffset,1,y,0,int,,,,y,Named in the fork; see cited use,med,source:4D8.c:1091;use cited by sanity pass;source:2EA3C.h:6
 T00645.000,T00645,vs_battle_loot,0,weapon,0,vs_battle_lootedWeapon,,,,weapon,Named in the fork; see cited use,med,source:146C.c:1732
@@ -5955,10 +5955,10 @@ T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,tileX,Tile X,h
 T00660.001,T00660,vs_battle_objectData_flags,1,unk0_8,1,u_int,8,,,direction,Facing direction,high,"retired-by:VS::Actors::SpawnPlacement::direction (Actors/ActorSpawning.hpp, #441);source:146C.c:15086"
 T00660.002,T00660,vs_battle_objectData_flags,2,unk0_16,1,u_int,8,,,tileZ,Tile Z,high,"retired-by:VS::Actors::SpawnPlacement::tile_z (Actors/ActorSpawning.hpp, #441);source:146C.c:15085"
 T00660.003,T00660,vs_battle_objectData_flags,3,unk0_24,1,u_int,8,,,height,Height in units of 64,high,"retired-by:VS::Actors::SpawnPlacement::height (Actors/ActorSpawning.hpp, #441);source:146C.c:15087"
-T00661.000,T00661,vs_battle_prim,0,p0,0,char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:19;declaration-only;source:146C.h:631
-T00661.001,T00661,vs_battle_prim,1,p1,0,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:20;declaration-only;source:146C.h:632
-T00661.002,T00661,vs_battle_prim,2,p2,0,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:21;declaration-only;source:146C.h:633
-T00661.003,T00661,vs_battle_prim,3,p3,0,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Room.h:22;declaration-only;source:146C.h:634
+T00661.000,T00661,vs_battle_prim,0,p0,0,char,,,,reserved0,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:19;declaration-only;source:146C.h:631"
+T00661.001,T00661,vs_battle_prim,1,p1,0,char,,,,reserved1,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:20;declaration-only;source:146C.h:632"
+T00661.002,T00661,vs_battle_prim,2,p2,0,char,,,,reserved2,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:21;declaration-only;source:146C.h:633"
+T00661.003,T00661,vs_battle_prim,3,p3,0,char,,,,reserved3,Not used by native code; kept for the original layout,med,"retired-by:nothing; no reader, deleted with Battle/Room.h (#441);native-refs:none;source:native:Native\Game\src\Battle\Room.h:22;declaration-only;source:146C.h:634"
 T00662.000,T00662,vs_battle_range_t,0,range,0,char,,,,range,Primary range,high,source:146C.c:1401
 T00662.001,T00662,vs_battle_range_t,1,unk1,1,char,,,,second_range,"Second range, extended by reach",low,source:146C.c:1402
 T00662.002,T00662,vs_battle_range_t,2,unk2,1,char,,,,third_range,"Third range, extended by reach",low,source:146C.c:1403
@@ -6727,18 +6727,18 @@ T00740.031,T00740,wanderState,31,count,0,unsigned char,,,,count,Named in the for
 T00740.032,T00740,wanderState,32,flags,0,unsigned short,,,,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:1654
 T00740.033,T00740,wanderState,33,pad160,1,char[8],,,,reserved160,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:1638;declaration-only;source:771A8.c:1623
 T00740.034,T00740,wanderState,34,dest,0,vs_battle_movementPosition,,,,destination,Destination tile,high,source:771A8.c:1814
-T00741.000,T00741,zudHeader,0,unk0,1,int,,,,characterIds,Character weapon category and material identifiers,high,DataCrystal $00-$03
-T00741.001,T00741,zudHeader,1,unk4,1,int,,,,shieldIds,Shield and shield-material identifiers then padding,high,DataCrystal $04-$07
-T00741.002,T00741,zudHeader,2,model,0,int,,,,characterShapeOffset,Character SHP section offset,med,source:146C.c:6648;use cited by sanity pass;source:146C.c:265
-T00741.003,T00741,zudHeader,3,unkC,1,int,,,,characterShapeSize,Character SHP section length,med,declaration-only;source:146C.c:266
-T00741.004,T00741,zudHeader,4,blade,0,int,,,,weaponOffset,Weapon WEP section offset,med,declaration-only;source:146C.c:267
-T00741.005,T00741,zudHeader,5,unk14,1,int,,,,weaponSize,Weapon WEP section length,med,declaration-only;source:146C.c:268
-T00741.006,T00741,zudHeader,6,shield,0,int,,,,shieldOffset,Shield WEP section offset,med,declaration-only;source:146C.c:269
-T00741.007,T00741,zudHeader,7,unk1C,1,int,,,,shieldSize,Shield WEP section length,med,declaration-only;source:146C.c:270
-T00741.008,T00741,zudHeader,8,effect,0,int,,,,commonAnimationOffset,Common unarmed SEQ offset,med,loaded as animation data at 146C.c:6714;source:146C.c:6717;use cited by sanity pass;source:146C.c:271
-T00741.009,T00741,zudHeader,9,effectSize,0,int,,,,commonAnimationSize,Common unarmed SEQ length,med,source:146C.c:6714;use cited by sanity pass;source:146C.c:272
-T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,battleAnimationOffset,Weapon-category battle SEQ offset,med,loaded with weapon category at 146C.c:6706;source:146C.c:6709;use cited by sanity pass;source:146C.c:273
-T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Weapon-category battle SEQ length,med,source:146C.c:6706;use cited by sanity pass;source:146C.c:274
+T00741.000,T00741,zudHeader,0,unk0,1,int,,,,characterIds,Character weapon category and material identifiers,high,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);DataCrystal $00-$03
+T00741.001,T00741,zudHeader,1,unk4,1,int,,,,shieldIds,Shield and shield-material identifiers then padding,high,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);DataCrystal $04-$07
+T00741.002,T00741,zudHeader,2,model,0,int,,,,characterShapeOffset,Character SHP section offset,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);source:146C.c:6648;use cited by sanity pass;source:146C.c:265
+T00741.003,T00741,zudHeader,3,unkC,1,int,,,,characterShapeSize,Character SHP section length,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);declaration-only;source:146C.c:266
+T00741.004,T00741,zudHeader,4,blade,0,int,,,,weaponOffset,Weapon WEP section offset,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);declaration-only;source:146C.c:267
+T00741.005,T00741,zudHeader,5,unk14,1,int,,,,weaponSize,Weapon WEP section length,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);declaration-only;source:146C.c:268
+T00741.006,T00741,zudHeader,6,shield,0,int,,,,shieldOffset,Shield WEP section offset,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);declaration-only;source:146C.c:269
+T00741.007,T00741,zudHeader,7,unk1C,1,int,,,,shieldSize,Shield WEP section length,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);declaration-only;source:146C.c:270
+T00741.008,T00741,zudHeader,8,effect,0,int,,,,commonAnimationOffset,Common unarmed SEQ offset,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);loaded as animation data at 146C.c:6714;source:146C.c:6717;use cited by sanity pass;source:146C.c:271
+T00741.009,T00741,zudHeader,9,effectSize,0,int,,,,commonAnimationSize,Common unarmed SEQ length,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);source:146C.c:6714;use cited by sanity pass;source:146C.c:272
+T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,battleAnimationOffset,Weapon-category battle SEQ offset,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);loaded with weapon category at 146C.c:6706;source:146C.c:6709;use cited by sanity pass;source:146C.c:273
+T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Weapon-category battle SEQ length,med,retired-by:VS::Actors::ParseZudHeader; the word is read from the file bytes into ZudLayout (#441);source:146C.c:6706;use cited by sanity pass;source:146C.c:274
 T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,source:146C.c:7641
 T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct { char lowByte; char highByte; }[2],,,,ports,Pressed button byte pairs per port,med,source:main.h:487
 T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,effects,Effect values for the limb,high,source:146C.c:10641

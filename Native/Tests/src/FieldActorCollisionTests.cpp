@@ -18,7 +18,7 @@
 #include "Content/ModuleData.hpp"
 #include "Field/ActorCollision.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
@@ -928,8 +928,8 @@ namespace {
 struct LiveCollisionFixture {
   CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   CollisionSamples saved_samples = VS::Field::LiveCollisionSamples();
-  SVECTOR saved_position = Field_collisionProbePosition;
-  u_char saved_direction = Field_collisionProbeDirection;
+  SVECTOR saved_position = VS::Field::collisionProbePosition;
+  u_char saved_direction = VS::Field::collisionProbeDirection;
   Field_RoomRecord saved_room = Field_roomData;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
@@ -942,8 +942,8 @@ struct LiveCollisionFixture {
   ~LiveCollisionFixture() {
     VS::Field::LiveCollisionProbe() = saved_probe;
     VS::Field::LiveCollisionSamples() = saved_samples;
-    Field_collisionProbePosition = saved_position;
-    Field_collisionProbeDirection = saved_direction;
+    VS::Field::collisionProbePosition = saved_position;
+    VS::Field::collisionProbeDirection = saved_direction;
     Field_roomData = saved_room;
     std::copy(saved_records.begin(), saved_records.end(),
               std::begin(Actors_actorRecords));
@@ -958,8 +958,8 @@ struct LiveCollisionFixture {
 TEST_CASE("Collision bindings load the probe from the movement globals",
           "[field-actor-collision][field][live-binding]") {
   const LiveCollisionFixture fixture;
-  Field_collisionProbePosition = SVECTOR{11, 22, 33, 44};
-  Field_collisionProbeDirection = 5;
+  VS::Field::collisionProbePosition = SVECTOR{11, 22, 33, 44};
+  VS::Field::collisionProbeDirection = 5;
   VS::Field::LiveCollisionProbe().position = {.x = 1, .y = 1, .z = 1};
   VS::Field::LiveCollisionProbe().cell = Room(1, 2);
 
@@ -969,9 +969,9 @@ TEST_CASE("Collision bindings load the probe from the movement globals",
         MotionVector{.x = 11, .y = 22, .z = 33, .w = 44});
   CHECK(VS::Field::LiveCollisionProbe().direction == 5);
   CHECK(VS::Field::LiveCollisionProbe().cell == Room(1, 2));
-  CHECK(Field_collisionProbePosition.vx == 11);
-  CHECK(Field_collisionProbePosition.pad == 44);
-  CHECK(Field_collisionProbeDirection == 5);
+  CHECK(VS::Field::collisionProbePosition.vx == 11);
+  CHECK(VS::Field::collisionProbePosition.pad == 44);
+  CHECK(VS::Field::collisionProbeDirection == 5);
 }
 
 TEST_CASE("The probe cell word reads a missing or stale cell as absent",

@@ -35,7 +35,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"

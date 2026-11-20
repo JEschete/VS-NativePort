@@ -152,7 +152,7 @@ H0150,header,Native/Game/src/Actors/Spawning.h,generated,yes,pragma-once,0,0,0,0
 H0151,header,Native/Game/src/Actors/TextureAnimation.h,generated,yes,pragma-once,0,0,0,0,0,0,8,0,0,remaining,
 H0152,header,Native/Game/src/Actors/Textures.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0153,header,Native/Game/src/Actors/WeaponModel.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
-H0154,header,Native/Game/src/Actors/Zud.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0154,header,Native/Game/src/Actors/Zud.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted; its unused ZUD header record is retired by VS::Actors::ZudLayout and ParseZudHeader in Actors/ActorSpawning.hpp (#441)
 H0155,header,Native/Game/src/Battle/AbilityState.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
 H0156,header,Native/Game/src/Battle/ActionAnimation.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
 H0157,header,Native/Game/src/Battle/ActionEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted; its only record Battle_SoundEventTargets had no reader (T00604) (#441)
@@ -186,7 +186,7 @@ H0184,header,Native/Game/src/Battle/Hud.h,generated,yes,pragma-once,0,0,0,0,0,0,
 H0185,header,Native/Game/src/Battle/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: its globals G00530 and G00531 were unread overlays of Effects_actionRequest's source endpoint (#441)
 H0186,header,Native/Game/src/Battle/Recovery.h,generated,yes,split,0,0,0,0,0,0,1,3,0,retired,deleted: G00517 is write-only (#347)
 H0187,header,Native/Game/src/Battle/Rewards.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
-H0188,header,Native/Game/src/Battle/Room.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0188,header,Native/Game/src/Battle/Room.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted; its door and primitive records had no reader and upstream no longer declares them (#441)
 H0189,header,Native/Game/src/Battle/Sphere.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
 H0190,header,Native/Game/src/Battle/StatusEffects.h,generated,yes,pragma-once,0,0,0,0,0,6,14,0,0,remaining,
 H0191,header,Native/Game/src/Battle/TargetVolume.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
@@ -312,7 +312,7 @@ H0310,header,Native/Game/src/Field/BackgroundLiveState.hpp,owned,no,pragma-once,
 H0311,header,Native/Game/src/Field/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,"deleted: VS::Field::sphericalCamera is the typed SphericalCamera (Field/Camera.hpp), the transition record is VS::Field::CameraTransitionRecord in Field/CameraLiveState.hpp, and the unused position pair is gone (#441)"
 H0312,header,Native/Game/src/Field/CameraLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0313,header,Native/Game/src/Field/ChestInteractionsLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0314,header,Native/Game/src/Field/Collision.h,generated,yes,pragma-once,0,0,0,0,0,1,5,0,0,remaining,
+H0314,header,Native/Game/src/Field/Collision.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0315,header,Native/Game/src/Field/DoorMatchList.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0316,header,Native/Game/src/Field/Doors.h,generated,yes,pragma-once,0,0,0,0,0,1,8,0,0,remaining,
 H0317,header,Native/Game/src/Field/EncounterSpawnProfile.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -816,7 +816,7 @@ S0379,source,Native/Game/src/Field/ActorCollisionLive.cpp,owned,no,,0,,,,,,,,,do
 S0380,source,Native/Game/src/Field/BackgroundLive.cpp,owned,no,,0,,,,,,,,,done,
 S0381,source,Native/Game/src/Field/CameraLive.cpp,owned,no,,0,,,,,,,,,done,
 S0382,source,Native/Game/src/Field/ChestInteractionsLive.cpp,owned,no,,0,,,,,,,,,done,
-S0383,source,Native/Game/src/Field/Collision.cpp,generated,yes,,0,,,,,,,,,done,
+S0383,source,Native/Game/src/Field/Collision.cpp,generated,no,,0,,,,,,,,,done,
 S0384,source,Native/Game/src/Field/CollisionMapLive.cpp,owned,no,,0,,,,,,,,,done,
 S0385,source,Native/Game/src/Field/CollisionSamplingBinding.cpp,owned,no,,0,,,,,,,,,done,
 S0386,source,Native/Game/src/Field/DoorMatchesLive.cpp,owned,no,,0,,,,,,,,,done,

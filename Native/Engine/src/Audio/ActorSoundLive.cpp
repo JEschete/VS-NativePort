@@ -23,7 +23,7 @@
 #include "Battle/Damage.h"
 #include "Core/RandomLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
@@ -55,7 +55,7 @@ static_assert(std::size(Battle_actors) == kBattleActorCount);
 static_assert(std::size(Field_gimmickInstances) == kGimmickCount);
 static_assert(std::size(VS::Audio::objectSurfaceSoundIds) ==
               kObjectSurfaceSoundBytes);
-static_assert(std::size(Field_kTileSurfaceIds) == kTileSurfaceSoundBytes);
+static_assert(std::size(VS::Field::tileSurfaceIds) == kTileSurfaceSoundBytes);
 static_assert(sizeof(Actors_ModelEffectSlot) == kModelEffectSlotBytes);
 static_assert(offsetof(Actors_ModelEffectSlot, kind) == 0);
 static_assert(offsetof(Actors_ModelEffectSlot, level) == 1);
@@ -204,7 +204,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
   }
 
   std::span<const std::uint8_t> TileSurfaceSounds() override {
-    return Field_kTileSurfaceIds;
+    return VS::Field::tileSurfaceIds;
   }
 
   RoomWeather Weather() override {

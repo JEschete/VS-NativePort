@@ -474,7 +474,7 @@ struct RememberedSpawn {
                          const RememberedSpawn&) = default;
 };
 
-// --- ZUD files (Actors_ZudHeader) -------------------------------------------
+// --- ZUD files (upstream ZudHeader, 146C.c:128) ------------------------------
 
 struct ZudSection {
   std::int32_t offset = 0;

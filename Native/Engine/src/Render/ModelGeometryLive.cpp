@@ -22,7 +22,6 @@
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"

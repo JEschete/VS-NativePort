@@ -24,7 +24,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"

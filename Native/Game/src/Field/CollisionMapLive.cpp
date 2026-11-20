@@ -15,7 +15,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Core/Log.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/Gimmicks.h"
@@ -387,7 +387,7 @@ PlatformContactHeight LiveMovingPlatformContact(PlatformProbe probe,
                                                 int search_mode) {
   const auto platforms = LiveVisiblePlatforms();
   const PlatformContactHeight contact = MovingPlatformContactHeight(
-      platforms, probe, search_mode, Field_platformContactSearchDepth);
+      platforms, probe, search_mode, platformContactSearchDepth);
   RecordSupportingPlatformLayer(contact.supporting_layer);
   return contact;
 }

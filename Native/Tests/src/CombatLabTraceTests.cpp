@@ -30,7 +30,7 @@
 #include "Diagnostics/PlayerObservation.hpp"
 #include "Diagnostics/SceneTrace.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.hpp"
 #include "Field/Mpd.h"
@@ -1507,13 +1507,13 @@ TEST_CASE("Navigation observes bounded runtime terrain without changing it",
           "[player][diagnostics][inspection]") {
   NavigationInspectionFixture fixture;
   const auto random = VS::Core::BiosRand().State();
-  const auto probe = Field_collisionProbePosition;
+  const auto probe = VS::Field::collisionProbePosition;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CheckNavigationGeometry(state);
   CHECK(VS::Core::BiosRand().State() == random);
-  CHECK(Field_collisionProbePosition.vx == probe.vx);
-  CHECK(Field_collisionProbePosition.vz == probe.vz);
+  CHECK(VS::Field::collisionProbePosition.vx == probe.vx);
+  CHECK(VS::Field::collisionProbePosition.vz == probe.vz);
   TraceScope scope;
   const auto data =
       FlushedFrame(scope, state, true).at("data").at("navigation");

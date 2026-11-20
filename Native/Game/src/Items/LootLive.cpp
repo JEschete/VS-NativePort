@@ -20,7 +20,6 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"

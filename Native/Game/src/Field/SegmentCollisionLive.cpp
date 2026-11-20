@@ -14,7 +14,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/Log.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"

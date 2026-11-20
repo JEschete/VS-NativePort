@@ -23,7 +23,7 @@
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickLookup.hpp"
@@ -253,7 +253,7 @@ class LiveMovementHost final : public MovementHost {
   }
   void ClearSupportLayer() override { Actors_supportingPlatformLayer = 0; }
   void SetContactSearchDepth(int depth) override {
-    Field_platformContactSearchDepth = static_cast<std::int16_t>(depth);
+    VS::Field::platformContactSearchDepth = static_cast<std::int16_t>(depth);
   }
   int CeilingHeight(int x, int z) override {
     return VS::Field::LiveCeilingHeightAt(x, z);
@@ -287,11 +287,11 @@ class LiveMovementHost final : public MovementHost {
     VS::Field::SetMovingPlatformActorEntry(platform, rider);
   }
   int TileSurfaceId(int index) override {
-    if (index < 0 ||
-        static_cast<std::size_t>(index) >= std::size(Field_kTileSurfaceIds)) {
+    if (index < 0 || static_cast<std::size_t>(index) >=
+                         std::size(VS::Field::tileSurfaceIds)) {
       return 0;
     }
-    return Field_kTileSurfaceIds[index];
+    return VS::Field::tileSurfaceIds[index];
   }
 
   TerrainResolve ResolveTerrainMotion(MovementActor& actor,
@@ -309,8 +309,8 @@ class LiveMovementHost final : public MovementHost {
     return resolve;
   }
   MovementProbe Probe() override {
-    return {.position = LiveMotionVector(Field_collisionProbePosition),
-            .direction = Field_collisionProbeDirection,
+    return {.position = LiveMotionVector(VS::Field::collisionProbePosition),
+            .direction = VS::Field::collisionProbeDirection,
             .cell_word = VS::Field::LiveCollisionProbeCellWord()};
   }
   bool CanHangFromLedge(MovementActor& actor, MotionVector& offset,

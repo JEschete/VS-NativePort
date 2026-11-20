@@ -20,7 +20,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacement.hpp"

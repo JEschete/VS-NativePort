@@ -381,9 +381,6 @@
     <ClInclude Include="src\Actors\WeaponModel.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClInclude Include="src\Actors\Zud.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\Abilities.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -883,9 +880,6 @@
       <Filter>src\Battle</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Rewards.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Battle\Room.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Sphere.cpp">
@@ -2031,7 +2025,7 @@
     <ClCompile Include="src\Field\Collision.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Collision.h">
+    <ClInclude Include="src\Field\Collision.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\CollisionMap.cpp">

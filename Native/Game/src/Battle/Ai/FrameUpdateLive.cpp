@@ -33,7 +33,6 @@
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Items/ItemRecords.hpp"

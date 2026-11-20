@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "Field/CameraLiveState.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"

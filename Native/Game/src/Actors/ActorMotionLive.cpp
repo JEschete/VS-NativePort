@@ -17,7 +17,6 @@
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 
 static_assert(sizeof(Actors_TileTarget) == sizeof(VS::Actors::PackedTile));

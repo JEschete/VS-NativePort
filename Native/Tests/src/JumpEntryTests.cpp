@@ -21,7 +21,6 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"

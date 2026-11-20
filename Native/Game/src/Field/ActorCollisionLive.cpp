@@ -15,7 +15,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollision.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -142,8 +142,8 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
  public:
   LiveActorCollisionHost() {
     CollisionProbe& probe = LiveCollisionProbe();
-    probe.position = LiveMotionVector(Field_collisionProbePosition);
-    probe.direction = Field_collisionProbeDirection;
+    probe.position = LiveMotionVector(collisionProbePosition);
+    probe.direction = collisionProbeDirection;
   }
   LiveActorCollisionHost(const LiveActorCollisionHost&) = delete;
   LiveActorCollisionHost& operator=(const LiveActorCollisionHost&) = delete;
@@ -151,8 +151,8 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
   LiveActorCollisionHost& operator=(LiveActorCollisionHost&&) = delete;
   ~LiveActorCollisionHost() override {
     const CollisionProbe& probe = LiveCollisionProbe();
-    Field_collisionProbePosition = LiveSvector(probe.position);
-    Field_collisionProbeDirection = probe.direction;
+    collisionProbePosition = LiveSvector(probe.position);
+    collisionProbeDirection = probe.direction;
   }
 
   [[nodiscard]] std::optional<CollisionCellRef> CellAt(
@@ -194,8 +194,8 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
   }
   [[nodiscard]] std::uint8_t TileSurfaceId(
       std::uint32_t surface) const override {
-    if (surface >= std::size(Field_kTileSurfaceIds)) return 0;
-    return Field_kTileSurfaceIds[surface];
+    if (surface >= std::size(tileSurfaceIds)) return 0;
+    return tileSurfaceIds[surface];
   }
 
   [[nodiscard]] std::optional<CollisionActor> Actor(

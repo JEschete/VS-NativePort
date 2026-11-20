@@ -398,13 +398,11 @@ T00140,type,3,Battle::Ai::TargetRelationBytes,(unnamed at D:\Dev\NativePort\VS-N
 T00139,type,3,Battle::Ai::TargetRelationReactionView,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views the per-target relation word as the reaction code uses it.,,,State
 T00739,type,3,Battle::Ai::WanderRecordView,wanderObject,size 0xC,Views an actor record's flags while wandering.,,,State
 T00533,type,3,Battle::Ai::WordPair,func_800E78F4_t2,size 0x8,Holds two words; not read.,,,State
-T00643,type,3,Battle::DoorRecord,vs_battle_door,size 0x4,"Declares a door record: id, exit, flags and lock; not read.",,,State
 T00541,type,3,Battle::EffectParameterBytes,func_80103080_t,size 0x8,Holds effect parameter bytes; not read.,,,State
 T00496,type,3,Battle::EffectRendererState,func_800D0C60_t,size 0xC0,Holds an effect renderer's state; not read.,,,State
 T00491,type,3,Battle::EffectScriptWord,func_800CFE1C_t,size 0x4,Holds an effect script word; not read.,,,State
 T00492,type,3,Battle::EffectTransformDefinition,func_800D0548_arg0,size 0x14,Gives an effect transform definition; not read through this view.,,,State
 T00756,type,3,Battle::HudHighlightWord,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Selects which HUD entry is highlighted; reset to 0xFFFFFF for none.,,Battle::statusIconCarousel=0x800EB9D0,State
-T00661,type,3,Battle::PrimitiveBytes,vs_battle_prim,size 0x4,Declares four primitive bytes; not read.,,,State
 T00607,type,3,Battle::StatusEffectTick,statusEffectTick,size 0x10,Declares one status effect tick: mask and interval; not read.,,,State
 T00606,type,3,Battle::StatusEffectTickTable,statusEffectTable,size 0x10,Declares a table of status effect ticks; not read.,,,State
 T00214,type,3,Battle::TargetSphereSetupView,D_800EB9B8_t,size 0x4B1C,"Views Battle::TargetSphere while its volumes are set up, with the two volumes as separate members.",,Battle::targetSphere=0x800EB9B8,State

@@ -200,7 +200,7 @@
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/DoorMatchList.hpp"
 #include "Field/Doors.h"
 #include "Field/EnvironmentLiveState.hpp"
@@ -440,7 +440,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E9248u, 16u, (void*)&Field_kGimmickSquashScaleX, sizeof Field_kGimmickSquashScaleX, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9258u, 16u, (void*)&Field_kGimmickSquashScaleY, sizeof Field_kGimmickSquashScaleY, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9268u, 16u, (void*)&Field_kGimmickSquashScaleZ, sizeof Field_kGimmickSquashScaleZ, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9278u, 32u, (void*)&Field_kTileSurfaceIds, sizeof Field_kTileSurfaceIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9278u, 32u, (void*)&VS::Field::tileSurfaceIds, sizeof VS::Field::tileSurfaceIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9298u, 68u, (void*)&Actors_animationEventLengths, sizeof Actors_animationEventLengths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92DCu, 12u, (void*)&Actors_drawnWeaponSoundIds, sizeof Actors_drawnWeaponSoundIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92E8u, 8u, (void*)&Actors_kAirTimerEndAnimations, sizeof Actors_kAirTimerEndAnimations, 1u, 1u},
@@ -678,8 +678,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F49E8u, 4u, (void*)&Field_gimmickInteractionDirection, sizeof Field_gimmickInteractionDirection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49F4u, 4u, (void*)&Actors_supportingPlatformLayer, sizeof Actors_supportingPlatformLayer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49F8u, 4u, (void*)&Actors_supportingGimmickIndex, sizeof Actors_supportingGimmickIndex, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4B00u, 4u, (void*)&Field_platformContactSearchDepth, sizeof Field_platformContactSearchDepth, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4B08u, 8u, (void*)&Field_collisionProbePosition, sizeof Field_collisionProbePosition, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4B00u, 4u, (void*)&VS::Field::platformContactSearchDepth, sizeof VS::Field::platformContactSearchDepth, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4B08u, 8u, (void*)&VS::Field::collisionProbePosition, sizeof VS::Field::collisionProbePosition, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B18u, 4u, (void*)&Actors_isActorUpdateComplete, sizeof Actors_isActorUpdateComplete, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B20u, 4u, (void*)&VS::Event::scanlineOverlayFrame, sizeof VS::Event::scanlineOverlayFrame, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B30u, 64u, (void*)&VS::Event::splashTweens, sizeof VS::Event::splashTweens, 1u, 1u},

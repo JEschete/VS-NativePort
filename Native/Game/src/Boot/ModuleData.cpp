@@ -103,7 +103,7 @@
 #include "Event/Script.hpp"
 #include "Event/ScriptCamera.hpp"
 #include "Event/ScriptVmLiveState.hpp"
-#include "Field/Collision.h"
+#include "Field/Collision.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.hpp"
@@ -421,9 +421,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80A68, sizeof Field_kGimmickSquashScaleZ,
      &Field_kGimmickSquashScaleZ,
      sizeof Field_kGimmickSquashScaleZ},  // G00105 D_800E9268
-    {"BATTLE/BATTLE.PRG", 0x80A78, sizeof Field_kTileSurfaceIds,
-     &Field_kTileSurfaceIds,
-     sizeof Field_kTileSurfaceIds},  // G00106 D_800E9278
+    {"BATTLE/BATTLE.PRG", 0x80A78, sizeof VS::Field::tileSurfaceIds,
+     &VS::Field::tileSurfaceIds,
+     sizeof VS::Field::tileSurfaceIds},  // G00106 D_800E9278
     {"BATTLE/BATTLE.PRG", 0x80A98, sizeof Actors_animationEventLengths,
      &Actors_animationEventLengths,
      sizeof Actors_animationEventLengths},  // G00107 D_800E9298

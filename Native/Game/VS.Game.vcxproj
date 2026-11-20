@@ -1397,13 +1397,7 @@
     <ClCompile Include="src\Field\ChestInteractionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\Collision.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Field\Collision.cpp" />
     <ClCompile Include="src\Field\CollisionMap.cpp" />
     <ClCompile Include="src\Field\CollisionMapLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2100,7 +2094,6 @@
     <ClInclude Include="src\Actors\TextureAnimation.h" />
     <ClInclude Include="src\Actors\Textures.h" />
     <ClInclude Include="src\Actors\WeaponModel.h" />
-    <ClInclude Include="src\Actors\Zud.h" />
     <ClInclude Include="src\Battle\AbilityState.h" />
     <ClInclude Include="src\Battle\ActionAnimation.h" />
     <ClInclude Include="src\Battle\ActionExecution.h" />
@@ -2130,7 +2123,6 @@
     <ClInclude Include="src\Battle\HitChance.h" />
     <ClInclude Include="src\Battle\Hud.h" />
     <ClInclude Include="src\Battle\Rewards.h" />
-    <ClInclude Include="src\Battle\Room.h" />
     <ClInclude Include="src\Battle\Sphere.h" />
     <ClInclude Include="src\Battle\StatusEffects.h" />
     <ClInclude Include="src\Battle\TargetingState.h" />
@@ -2250,7 +2242,7 @@
     <ClInclude Include="src\Field\BackgroundLiveState.hpp" />
     <ClInclude Include="src\Field\CameraLiveState.hpp" />
     <ClInclude Include="src\Field\ChestInteractionsLive.hpp" />
-    <ClInclude Include="src\Field\Collision.h" />
+    <ClInclude Include="src\Field\Collision.hpp" />
     <ClInclude Include="src\Field\DoorMatchList.hpp" />
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />

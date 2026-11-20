@@ -35,7 +35,6 @@
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"

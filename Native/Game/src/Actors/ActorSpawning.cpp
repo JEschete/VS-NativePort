@@ -425,7 +425,7 @@ std::optional<ZudLayout> ParseZudHeader(std::span<const std::byte> file) {
   if (file.size() < kZudHeaderBytes) {
     return std::nullopt;
   }
-  // Actors_ZudHeader: two id words, then offset and size pairs.
+  // ZudHeader (146C.c:128): two id words, then offset and size pairs.
   constexpr std::size_t kShape = 0x08;
   constexpr std::size_t kWeapon = 0x10;
   constexpr std::size_t kShield = 0x18;
