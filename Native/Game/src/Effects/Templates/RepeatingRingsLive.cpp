@@ -18,7 +18,7 @@
 #include "Effects/Plugins/Plg263.hpp"
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/PluginData.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RepeatingRings.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -39,15 +39,15 @@ std::uint64_t refused_rings = 0;
 
 [[nodiscard]] bool BoundCurve(std::uint8_t curve, std::size_t count) {
   return curve == 0 ||
-         (curve <= count && Effects_package->curve_block != nullptr &&
-          Effects_package->curves[curve - 1] != nullptr &&
-          Effects_package->curve_block->Size(curve - 1) != 0);
+         (curve <= count && VS::Effects::package->curve_block != nullptr &&
+          VS::Effects::package->curves[curve - 1] != nullptr &&
+          VS::Effects::package->curve_block->Size(curve - 1) != 0);
 }
 
 [[nodiscard]] bool BoundTick(const LiveParticleDefinition& definition) {
-  if (Effects_currentInstance == nullptr ||
+  if (currentInstance == nullptr ||
       definition.transform_index >=
-          std::span(Effects_currentInstance->transforms).size()) {
+          std::span(currentInstance->transforms).size()) {
     return Refuse("missing current instance or unavailable transform");
   }
   const std::array curves{definition.inner_extent_curve,
@@ -89,13 +89,14 @@ std::uint64_t refused_rings = 0;
       command == RingCommand::kCreate
           ? PlanRing(packed).definition_index
           : static_cast<const LiveRingState*>(slot->renderer_state)->effect;
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr ||
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return Refuse("definition outside the current bound package");
   }
   return command != RingCommand::kTick ||
-         BoundTick(Effects_package->particle_definitions->Definitions()[index]);
+         BoundTick(
+             VS::Effects::package->particle_definitions->Definitions()[index]);
 }
 
 [[nodiscard]] std::array<RingPaletteEntry, kRingPaletteEntries> Palette(

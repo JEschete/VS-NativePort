@@ -15,7 +15,7 @@
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/ParticlePool.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace VS::Effects {
 // decomp: D_800F55F0 (src/BATTLE/BATTLE.PRG/5BF94.c:446)

@@ -22,7 +22,7 @@
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Render.hpp"
@@ -114,13 +114,13 @@ grid::SurfaceDefinition DefinitionOf(const LiveParticleDefinition& source) {
 }
 
 const LiveParticleDefinition* FindDefinition(AnalyzeGridDefinitionId id) {
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr ||
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr ||
       id.value >= LiveParticleDefinitionCount()) {
     Refuse("definition outside the bound package");
     return nullptr;
   }
-  return &Effects_package->particle_definitions->Definitions()[id.value];
+  return &VS::Effects::package->particle_definitions->Definitions()[id.value];
 }
 
 bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {
@@ -181,7 +181,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
   std::optional<grid::SurfaceTickInputs> BeginTick(
       AnalyzeGridDefinitionId id) override {
     definition_ = FindDefinition(id);
-    instance_ = Effects_currentInstance;
+    instance_ = currentInstance;
     if (definition_ == nullptr || instance_ == nullptr ||
         definition_->transform_index >= kTransformCount) {
       Refuse("missing instance or transform outside the instance");
@@ -195,7 +195,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
     }
     const MATRIX& world =
         instance_->transforms[definition_->transform_index].world;
-    const SVECTOR& origin = Effects_actionRequest.position;
+    const SVECTOR& origin = actionRequest.position;
     return grid::SurfaceTickInputs{
         .definition = definition,
         .effect_origin = {origin.vx, origin.vy, origin.vz},

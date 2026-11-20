@@ -72,7 +72,7 @@
 #include "Effects/Plugins/Plg297.hpp"
 #include "Effects/Plugins/Plg301.hpp"
 #include "Effects/Plugins/PluginData.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/ClosedRing.hpp"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/Ring.hpp"
@@ -130,12 +130,12 @@ LiveParticleEmitterScratch& EmitterScratch() {
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 const LiveParticleDefinition* Definition(std::size_t index) {
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr ||
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->particle_definitions->Definitions()[index];
+  return &VS::Effects::package->particle_definitions->Definitions()[index];
 }
 
 [[nodiscard]] Vec3 Wide(const VECTOR& value) {
@@ -319,17 +319,17 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const int program =
       segments ? definition->ring_positions : definition->animation_id;
   // The native closed ring's "effects.texture" diagnostics, for every ring.
-  const bool primary = Effects_package == &Effects_actionPackage;
-  const unsigned request_effect = primary ? Effects_actionRequest.effect_id
-                                          : Effects_secondaryRequest.effect_id;
-  const int tables = Effects_package->texture_table_count;
+  const bool primary = VS::Effects::package == &actionPackage;
+  const unsigned request_effect =
+      primary ? actionRequest.effect_id : secondaryRequest.effect_id;
+  const int tables = VS::Effects::package->texture_table_count;
   VS::Core::LogDebug("effects",
                      "ring: init definition={} lifetime={} table={} program={} "
                      "context={} request_effect={} tables={}",
                      state.definition_index, state.lifetime, table, program,
                      primary ? "primary" : "secondary", request_effect, tables);
   if (table >= tables || std::cmp_greater_equal(table, kTextureTableCount) ||
-      Effects_package->texture_tables[table] == nullptr) {
+      VS::Effects::package->texture_tables[table] == nullptr) {
     VS::Core::LogDebug(
         "effects", "ring: definition {} names unbound texture table {} of {}",
         state.definition_index, table, tables);
@@ -341,7 +341,7 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
 
 std::optional<RingTickInputs> LiveRingHost::BeginTick(
     std::uint8_t definition_index) {
-  instance_ = Effects_currentInstance;
+  instance_ = currentInstance;
   if (instance_ == nullptr) {
     VS::Core::LogWarn("effects",
                       "ring: no current effect instance; ring stopped");
@@ -367,7 +367,7 @@ std::optional<RingTickInputs> LiveRingHost::BeginTick(
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
   // The effect origin (D_800F5310): the action request's focus point.
-  const SVECTOR& origin = Effects_actionRequest.position;
+  const SVECTOR& origin = actionRequest.position;
   return RingTickInputs{
       .definition = TypedDefinition(*definition_),
       .effect_origin = {origin.vx, origin.vy, origin.vz},
@@ -386,7 +386,8 @@ std::int32_t LiveRingHost::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t bound = LiveEffectCurveCount();
-  if (curve > bound || Effects_package->curve_block->Size(curve - 1) == 0) {
+  if (curve > bound ||
+      VS::Effects::package->curve_block->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -424,9 +425,9 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
   LiveParticleTextureAnimation& animation = LiveState()->texture;
   const std::size_t table = animation.texture_index;
   const bool bound =
-      Effects_package->textures != nullptr && table < kTextureTableCount &&
-      std::cmp_less(table, Effects_package->texture_table_count) &&
-      Effects_package->texture_tables[table] != nullptr;
+      VS::Effects::package->textures != nullptr && table < kTextureTableCount &&
+      std::cmp_less(table, VS::Effects::package->texture_table_count) &&
+      VS::Effects::package->texture_tables[table] != nullptr;
   if (bound) {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
@@ -435,13 +436,13 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
       VS::Core::LogWarn("effects",
                         "ring: texture table {} of {} has no frame; ring drawn "
                         "without quads ({} refusals)",
-                        table, Effects_package->texture_table_count,
+                        table, VS::Effects::package->texture_table_count,
                         refused_textures);
     }
     return std::nullopt;
   }
   const LivePackageTexture& texture =
-      Effects_package->textures[animation.texture_info->first_texture];
+      VS::Effects::package->textures[animation.texture_info->first_texture];
   return RingTexture{.clut = texture.clut,
                      .tpage = texture.tpage,
                      .u = texture.u,

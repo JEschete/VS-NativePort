@@ -15,7 +15,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
@@ -166,11 +166,10 @@ int LiveTickTargetActorColorTrack(LiveEffectInstance* instance,
         std::array<CommandEndpoint, kActionTargets> targets{};
         std::span<const CommandEndpoint> action_targets;
         if (all_targets) {
-          std::ranges::transform(Effects_actionRequest.targets, targets.begin(),
+          std::ranges::transform(actionRequest.targets, targets.begin(),
                                  CommandEndpointOf);
-          action_targets =
-              FirstActionEntries(targets, Effects_actionRequest.count,
-                                 "target actor colour track");
+          action_targets = FirstActionEntries(targets, actionRequest.count,
+                                              "target actor colour track");
         }
         return TickTargetActorColourTrack(
             key, frame, action_targets,
@@ -184,10 +183,10 @@ int LiveTickOtherActorColorTrack(LiveEffectInstance* instance,
       instance, track, "other actor colour track",
       [](const ColourKey& key, std::int16_t frame, ColourTrackHost& host) {
         std::array<std::uint8_t, kActionOthers> others{};
-        std::ranges::copy(Effects_actionRequest.others, others.begin());
+        std::ranges::copy(actionRequest.others, others.begin());
         return TickOtherActorColourTrack(
             key, frame,
-            FirstActionEntries(others, Effects_actionRequest.other_count,
+            FirstActionEntries(others, actionRequest.other_count,
                                "other actor colour track"),
             host);
       });

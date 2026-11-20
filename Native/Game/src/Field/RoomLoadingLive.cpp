@@ -52,7 +52,7 @@
 #include "Core/Runtime.hpp"
 #include "Core/Scratch.hpp"
 #include "DiscQueue.h"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
@@ -1103,7 +1103,7 @@ class LiveRoomLoadHost final
     roomGeometryDrawMode = 0;
     isFirstPersonViewEnabled = 0;
     VS::Actors::ashleyMoveInput[0] = 1;
-    Effects_effectBusyFlags = 0;
+    VS::Effects::effectBusyFlags = 0;
     static_cast<void>(Actors::SetOtherLiveActorLogicEnabled(1));
     // The original also zeroes vs_main_unused0-2 here; nothing reads them.
     VS::Input::buttonRepeat = 0;

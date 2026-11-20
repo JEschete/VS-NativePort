@@ -30,7 +30,7 @@
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 #include "Render/TexturePagesLive.hpp"
@@ -64,7 +64,7 @@ int VS::Effects::loadedTextureSlots;
 static_assert(
     std::tuple_size_v<decltype(VS::Effects::LiveEffectPackage::curves)> ==
     VS::Effects::kEffectCurveCapacity);
-static_assert(std::size(Effects_effectRenderers) ==
+static_assert(std::size(VS::Effects::effectRenderers) ==
               VS::Effects::kEffectRendererCapacity);
 
 namespace VS::Effects {
@@ -296,8 +296,8 @@ class LivePackageHost final : public EffectPackageHost {
 // package; nullopt for anything else.
 [[nodiscard]] std::optional<std::span<std::byte>> PackageBytes(void* package) {
   if (package == nullptr) return std::nullopt;
-  if (package == static_cast<void*>(Effects_emptyPackage)) {
-    return std::as_writable_bytes(std::span(Effects_emptyPackage));
+  if (package == static_cast<void*>(emptyPackage)) {
+    return std::as_writable_bytes(std::span(emptyPackage));
   }
   if (package != packageBuffer) return std::nullopt;
   const std::size_t capacity = Memory::LivePayloadCapacity(package).value_or(0);
@@ -441,14 +441,14 @@ class LiveResourceHost final : public EffectResourceHost {
 class LiveLifecycleHost final : public EffectLifecycleHost {
  public:
   void ResetPackageRequests() override {
-    Effects_secondaryPackage.curve_block = nullptr;
-    Effects_secondaryPackage.request = &Effects_secondaryRequest;
-    Effects_actionPackage.request = &Effects_actionRequest;
+    secondaryPackage.curve_block = nullptr;
+    secondaryPackage.request = &secondaryRequest;
+    actionPackage.request = &actionRequest;
   }
 
   void BindEmptyPackage(EffectPackageId package) override {
-    Effects_package = PointerOf<LiveEffectPackage>(package);
-    LiveBindEffectPackageBlocks(Effects_emptyPackage);
+    VS::Effects::package = PointerOf<LiveEffectPackage>(package);
+    LiveBindEffectPackageBlocks(emptyPackage);
   }
 
   void AcquireParticlePool(std::int32_t count) override {
@@ -456,11 +456,13 @@ class LiveLifecycleHost final : public EffectLifecycleHost {
   }
 
   void ClearReloadedBlocks() override {
-    if (Effects_package != nullptr) Effects_package->parameters = nullptr;
-    Effects_actionPackage.curve_block = nullptr;
-    Effects_actionPackage.sound_sequences = nullptr;
-    Effects_actionPackage.sound_bank = nullptr;
-    Effects_actionPackage.auxiliary_sound = nullptr;
+    if (VS::Effects::package != nullptr) {
+      VS::Effects::package->parameters = nullptr;
+    }
+    actionPackage.curve_block = nullptr;
+    actionPackage.sound_sequences = nullptr;
+    actionPackage.sound_bank = nullptr;
+    actionPackage.auxiliary_sound = nullptr;
   }
 };
 
@@ -504,8 +506,7 @@ class LivePluginUpdateHost final : public PluginUpdateHost {
 void PublishRenderers(const EffectRendererTable& renderers) {
   for (std::size_t i = 0; i < renderers.size(); ++i) {
     if (const std::optional<PluginEntry> entry = renderers.at(i)) {
-      Effects_effectRenderers[i] =
-          EntryPoints()[static_cast<std::size_t>(*entry)];
+      effectRenderers[i] = EntryPoints()[static_cast<std::size_t>(*entry)];
     }
   }
 }
@@ -569,28 +570,28 @@ void ReportConfiguration(const EffectPurgeConfiguration& configuration,
 }  // namespace
 
 std::span<std::byte> LiveBoundPackageBlock(PackageBlockType type) {
-  if (Effects_package == nullptr) return {};
-  const PackageRecord* record = FindPackageRecord(Effects_package);
+  if (VS::Effects::package == nullptr) return {};
+  const PackageRecord* record = FindPackageRecord(VS::Effects::package);
   if (record == nullptr) return {};
   const std::span<std::byte> view = BlockView(record->blocks, type);
   if (view.data() == nullptr ||
-      view.data() != LegacyBlock(*Effects_package, type)) {
+      view.data() != LegacyBlock(*VS::Effects::package, type)) {
     return {};
   }
   return view;
 }
 
 std::optional<PackageWalk> BindLiveEffectPackage(std::span<std::byte> package) {
-  if (Effects_package == nullptr) {
+  if (VS::Effects::package == nullptr) {
     ReportRefusal("bind package", "no current package");
     return std::nullopt;
   }
   ForgetLivePackageExtents();
-  PackageRecord& record = PackageRecordFor(Effects_package);
+  PackageRecord& record = PackageRecordFor(VS::Effects::package);
   LivePackageHost host;
   const PackageWalk walk =
       BindEffectPackageBlocks(package, record.blocks, host);
-  PublishBlocks(*Effects_package, record.blocks, walk);
+  PublishBlocks(*VS::Effects::package, record.blocks, walk);
   RecordExtents(record.blocks, walk);
   ReportWalk(walk);
   return walk;
@@ -628,15 +629,15 @@ void StoreLiveEffectResourceState(const EffectResourceState& state) {
 }
 
 EffectResourceContext LoadLiveEffectResourceContext() {
-  return {.current = IdOf<EffectPackageId>(Effects_package),
-          .saved = IdOf<EffectPackageId>(Effects_savedPackage),
-          .action = IdOf<EffectPackageId>(&Effects_actionPackage),
-          .secondary = IdOf<EffectPackageId>(&Effects_secondaryPackage)};
+  return {.current = IdOf<EffectPackageId>(VS::Effects::package),
+          .saved = IdOf<EffectPackageId>(savedPackage),
+          .action = IdOf<EffectPackageId>(&actionPackage),
+          .secondary = IdOf<EffectPackageId>(&secondaryPackage)};
 }
 
 void StoreLiveEffectResourceContext(const EffectResourceContext& context) {
-  Effects_package = PointerOf<LiveEffectPackage>(context.current);
-  Effects_savedPackage = PointerOf<LiveEffectPackage>(context.saved);
+  VS::Effects::package = PointerOf<LiveEffectPackage>(context.current);
+  savedPackage = PointerOf<LiveEffectPackage>(context.saved);
 }
 
 EffectPurgeTables LiveEffectPurgeTables() {
@@ -751,7 +752,7 @@ int LiveInvokeAllPluginUpdates(LiveRendererSlot* /*slot*/,
 
 // decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:911)
 void LiveConfigureEffectResources() {
-  const int effect_id = Effects_actionRequest.effect_id;
+  const int effect_id = actionRequest.effect_id;
   EffectResourceState state = LoadLiveEffectResourceState();
   EffectRendererTable renderers{};
   const EffectPurgeConfiguration configuration = ConfigureEffectResources(

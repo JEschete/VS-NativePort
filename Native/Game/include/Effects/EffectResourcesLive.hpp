@@ -8,12 +8,12 @@
 #include "Effects/EffectResources.hpp"
 
 // Live binding for the effect resources (EffectResources.hpp) over the
-// battle's package records (Effects_package, Effects_actionPackage,
-// Effects_secondaryPackage, Effects_savedPackage), the loader state
-// (EffectResourcesLiveState.hpp), the renderer table (Effects_effectRenderers)
-// and the EFFPURGE.BIN purge tables. The host reads and uploads through the
-// disc queue, the high heap, the overlay arena, VRAM and the texture pages;
-// sound blocks bind through the room sound banks.
+// battle's package records (VS::Effects::package, VS::Effects::actionPackage,
+// VS::Effects::secondaryPackage, VS::Effects::savedPackage), the loader state
+// (EffectResourcesLiveState.hpp), the renderer table
+// (VS::Effects::effectRenderers) and the EFFPURGE.BIN purge tables. The host
+// reads and uploads through the disc queue, the high heap, the overlay arena,
+// VRAM and the texture pages; sound blocks bind through the room sound banks.
 //
 // The block walk keeps each package's typed block views alongside the legacy
 // pointers it publishes, so the typed readers (curves, transforms, gravity)

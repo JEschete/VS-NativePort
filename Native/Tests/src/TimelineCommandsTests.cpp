@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
@@ -148,7 +148,7 @@ TEST_CASE("Random reaction variants redraw until they differ from the last",
 
 TEST_CASE("Live timeline commands refuse a missing instance",
           "[timeline-commands]") {
-  const u_char last = Effects_lastReactionSoundVariant;
+  const u_char last = fx::lastReactionSoundVariant;
   fx::LiveApplyTargetActionImpact(nullptr);
   fx::LiveApplySourceActionImpact(nullptr);
   fx::LiveActivateTargetRoomTile(nullptr);
@@ -157,16 +157,16 @@ TEST_CASE("Live timeline commands refuse a missing instance",
   fx::LivePlaySourceActorReactionSound(nullptr, 4);
   fx::LiveActivateTargetGimmick(nullptr);
   fx::LivePrepareTargetDefenseTiming(nullptr);
-  CHECK(Effects_lastReactionSoundVariant == last);
+  CHECK(fx::lastReactionSoundVariant == last);
 }
 
 TEST_CASE("Live reaction sound skips a non-actor emitter",
           "[timeline-commands]") {
   static fx::LiveEffectInstance instance{};
   instance.context.emit_from.type = fx::kRoomPointEndpoint;
-  const u_char last = Effects_lastReactionSoundVariant;
+  const u_char last = fx::lastReactionSoundVariant;
   fx::LivePlaySourceActorReactionSound(&instance, 4);
-  CHECK(Effects_lastReactionSoundVariant == last);
+  CHECK(fx::lastReactionSoundVariant == last);
 }
 
 namespace {

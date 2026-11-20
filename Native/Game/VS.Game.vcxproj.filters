@@ -1560,7 +1560,7 @@
     <ClCompile Include="src\Effects\Runtime.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Runtime.h">
+    <ClInclude Include="src\Effects\Runtime.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\ScreenDistortion\RadialWarp.cpp">

@@ -15,7 +15,7 @@
 #include "Battle/Rewards.h"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.hpp"
@@ -140,7 +140,7 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
   std::uint32_t EffectsBusyFlags() override {
-    return static_cast<std::uint32_t>(Effects_effectBusyFlags);
+    return static_cast<std::uint32_t>(VS::Effects::effectBusyFlags);
   }
   std::int32_t SceneNotificationPending() override {
     return Menu::IsLiveSceneNotificationPending();

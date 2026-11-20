@@ -40,7 +40,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "DiscQueue.h"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptControlOpcodes.hpp"
@@ -506,11 +506,11 @@ void TestsRestoreStreamPlayback(void) {
 
 int TestsBindEffectStream(void* bytes, size_t size) {
   VS::Effects::LiveEffectPackage package = {0};
-  VS::Effects::LiveEffectPackage* saved = Effects_package;
-  Effects_package = &package;
+  VS::Effects::LiveEffectPackage* saved = VS::Effects::package;
+  VS::Effects::package = &package;
   static_cast<void>(VS::Effects::BindLiveEffectPackage(
       std::span(static_cast<std::byte*>(bytes), size)));
-  Effects_package = saved;
+  VS::Effects::package = saved;
   return package.auxiliary_sound_handle;
 }
 

@@ -340,7 +340,7 @@ struct TimelineRemap {
 [[nodiscard]] OpcodeStep SpawnChildScript(ScriptCursor& cursor,
                                           ScriptEffectHost& host);
 
-// The renderers func_800D47F4 attaches (Effects_scriptRenderers).
+// The renderers func_800D47F4 attaches (scriptRenderers).
 inline constexpr std::size_t kScriptRenderers = 2;
 
 // func_800D47F4 (5BF94.c:7546): reads a renderer index and the low and high

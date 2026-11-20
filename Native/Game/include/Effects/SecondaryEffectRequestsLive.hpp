@@ -8,11 +8,12 @@ struct Battle_HitResult;
 
 // Live binding for the secondary hit and spatial effect requests
 // (SecondaryEffectRequests.hpp) over Battle_actionState, the action
-// definitions, Effects_effectBusyFlags, the skeleton's bone tags, the weapon
-// hit sounds and LiveBeginSecondaryEffects. The entries keep the original
-// signatures for the generated callers and the module's function pointers. A
-// null hit, location or position and a missing action state are refused with
-// a diagnostic, as is a queued target past the request's target array.
+// definitions, VS::Effects::effectBusyFlags, the skeleton's bone tags, the
+// weapon hit sounds and LiveBeginSecondaryEffects. The entries keep the
+// original signatures for the generated callers and the module's function
+// pointers. A null hit, location or position and a missing action state are
+// refused with a diagnostic, as is a queued target past the request's target
+// array.
 namespace VS::Effects {
 // func_8006C4C4 (146C.c:1927).
 void LiveQueueActionHitEffect(int effect_id, Battle_HitResult* hit_result,

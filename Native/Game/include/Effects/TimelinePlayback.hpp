@@ -181,7 +181,7 @@ class TimelinePlaybackHost {
   // LivePlayWorldSfx.
   virtual void PlayWorldSfx(std::int32_t group, std::uint16_t effect,
                             const SoundPoint& point) = 0;
-  // LiveAttachEffectRenderer with Effects_effectRenderers[renderer].
+  // LiveAttachEffectRenderer with effectRenderers[renderer].
   virtual void AttachRenderer(std::uint8_t renderer,
                               std::int32_t parameters) = 0;
   // StartLiveVibrationPattern with the package's vibration pattern.

@@ -16,7 +16,7 @@
 
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
 
@@ -104,25 +104,25 @@ constexpr std::uint8_t kOpPastTable = 49;
 // Installs test handlers in the production handler table while it lives.
 class HandlerTableScope {
  public:
-  HandlerTableScope() : saved_(std::to_array(Effects_scriptOpcodeHandlers)) {
-    std::ranges::fill(Effects_scriptOpcodeHandlers, nullptr);
-    Effects_scriptOpcodeHandlers[kOpYield] = YieldHandler;
-    Effects_scriptOpcodeHandlers[kOpContinue] = ContinueHandler;
-    Effects_scriptOpcodeHandlers[kOpEnd] = EndHandler;
-    Effects_scriptOpcodeHandlers[kOpJump] = JumpHandler;
-    Effects_scriptOpcodeHandlers[kOpYieldAt] = YieldAtHandler;
-    Effects_scriptOpcodeHandlers[kOpOdd] = OddHandler;
+  HandlerTableScope() : saved_(std::to_array(fx::scriptOpcodeHandlers)) {
+    std::ranges::fill(fx::scriptOpcodeHandlers, nullptr);
+    fx::scriptOpcodeHandlers[kOpYield] = YieldHandler;
+    fx::scriptOpcodeHandlers[kOpContinue] = ContinueHandler;
+    fx::scriptOpcodeHandlers[kOpEnd] = EndHandler;
+    fx::scriptOpcodeHandlers[kOpJump] = JumpHandler;
+    fx::scriptOpcodeHandlers[kOpYieldAt] = YieldAtHandler;
+    fx::scriptOpcodeHandlers[kOpOdd] = OddHandler;
   }
   HandlerTableScope(const HandlerTableScope&) = delete;
   HandlerTableScope& operator=(const HandlerTableScope&) = delete;
   HandlerTableScope(HandlerTableScope&&) = delete;
   HandlerTableScope& operator=(HandlerTableScope&&) = delete;
   ~HandlerTableScope() {
-    std::ranges::copy(saved_, std::begin(Effects_scriptOpcodeHandlers));
+    std::ranges::copy(saved_, std::begin(fx::scriptOpcodeHandlers));
   }
 
  private:
-  decltype(std::to_array(Effects_scriptOpcodeHandlers)) saved_;
+  decltype(std::to_array(fx::scriptOpcodeHandlers)) saved_;
 };
 
 fx::LiveEffectInstance InstanceAt(std::vector<std::byte>& program,
@@ -142,27 +142,27 @@ constexpr fx::OpcodeStep kRegisterRefused{std::unexpect, Refusal::kRegister};
 class ScriptGlobalsScope {
  public:
   ScriptGlobalsScope()
-      : selector_(Effects_scriptSelector),
-        variant_(Effects_actionVariant),
+      : selector_(fx::scriptSelector),
+        variant_(fx::actionVariant),
         values_(VariantValues()) {}
   ScriptGlobalsScope(const ScriptGlobalsScope&) = delete;
   ScriptGlobalsScope& operator=(const ScriptGlobalsScope&) = delete;
   ScriptGlobalsScope(ScriptGlobalsScope&&) = delete;
   ScriptGlobalsScope& operator=(ScriptGlobalsScope&&) = delete;
   ~ScriptGlobalsScope() {
-    Effects_scriptSelector = selector_;
-    Effects_actionVariant = variant_;
-    std::ranges::copy(values_, std::begin(Effects_actionVariantValues));
+    fx::scriptSelector = selector_;
+    fx::actionVariant = variant_;
+    std::ranges::copy(values_, std::begin(fx::actionVariantValues));
   }
 
   static void SetVariantValues(std::array<char, fx::kActionVariantValues> to) {
-    std::ranges::copy(to, std::begin(Effects_actionVariantValues));
+    std::ranges::copy(to, std::begin(fx::actionVariantValues));
   }
 
  private:
   static std::array<char, fx::kActionVariantValues> VariantValues() {
     std::array<char, fx::kActionVariantValues> values{};
-    std::ranges::copy_n(std::begin(Effects_actionVariantValues), values.size(),
+    std::ranges::copy_n(std::begin(fx::actionVariantValues), values.size(),
                         values.begin());
     return values;
   }
@@ -548,9 +548,9 @@ TEST_CASE("Live effect script opcodes follow the selector and action variant",
   auto instance = InstanceAt(program, 0);
 
   CHECK(fx::LiveSetEffectScriptSelector(&instance) == 1);
-  CHECK(Effects_scriptSelector == 0xC8);
+  CHECK(fx::scriptSelector == 0xC8);
 
-  Effects_actionVariant = 2;
+  fx::actionVariant = 2;
   CHECK(fx::LiveLoadActionVariantRegister(&instance) == 1);
   CHECK(instance.registers[3] == 30);
   CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
@@ -564,9 +564,9 @@ TEST_CASE("Live effect script variant clears release the variant branch",
   const VS::test_support::EffectProgramScope recorded{program};
   auto instance = InstanceAt(program, 0);
 
-  Effects_actionVariant = 2;
+  fx::actionVariant = 2;
   CHECK(fx::LiveClearScriptActionVariant(nullptr) == 1);
-  CHECK(Effects_actionVariant == 0);
+  CHECK(fx::actionVariant == 0);
   CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
   CHECK(instance.script_offset == 0x1234);
 }

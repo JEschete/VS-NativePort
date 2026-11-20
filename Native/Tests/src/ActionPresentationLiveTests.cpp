@@ -17,7 +17,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
 namespace {

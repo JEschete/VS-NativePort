@@ -6,7 +6,7 @@
 
 #include "Core/Log.hpp"
 #include "Effects/Package.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 
@@ -25,24 +25,25 @@ void Require(bool condition, const char* message) {
 }  // namespace
 
 void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
-  Require(block.data() != nullptr && Effects_package != nullptr,
+  Require(block.data() != nullptr && VS::Effects::package != nullptr,
           "missing package or source block");
   Require(reinterpret_cast<std::uintptr_t>(block.data()) %
                   alignof(LivePackageTexture) ==
               0,
           "unaligned texture storage");
   const EffectTextureOwner owner{
-      Effects_package == &Effects_actionPackage,
-      static_cast<int>(Effects_actionRequest.effect_id)};
+      VS::Effects::package == &VS::Effects::actionPackage,
+      static_cast<int>(VS::Effects::actionRequest.effect_id)};
   const TextureBlockLayout layout = BindEffectTextureTables(block, owner);
   for (std::size_t table = 0; table < kTextureTableCapacity; ++table) {
-    Effects_package->texture_tables[table] =
+    VS::Effects::package->texture_tables[table] =
         table < layout.table_count
             ? reinterpret_cast<LivePackageTextureFrame*>(
                   block.data() + layout.table_offsets.at(table))
             : nullptr;
   }
-  Effects_package->textures = reinterpret_cast<LivePackageTexture*>(
+  VS::Effects::package->textures = reinterpret_cast<LivePackageTexture*>(
       block.data() + layout.descriptor_offset);
-  Effects_package->texture_table_count = static_cast<int>(layout.table_count);
+  VS::Effects::package->texture_table_count =
+      static_cast<int>(layout.table_count);
 }

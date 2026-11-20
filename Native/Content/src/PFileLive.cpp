@@ -13,7 +13,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Package.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace VS::Content {
 namespace {
@@ -37,9 +37,9 @@ std::optional<std::span<std::byte>> LiveTimelineBlock(
     auto* const base = const_cast<std::byte*>(payload->data());
     return Within(at, base, payload->size());
   }
-  return Within(at,
-                reinterpret_cast<std::byte*>(std::data(Effects_emptyPackage)),
-                sizeof Effects_emptyPackage);
+  return Within(
+      at, reinterpret_cast<std::byte*>(std::data(VS::Effects::emptyPackage)),
+      sizeof VS::Effects::emptyPackage);
 }
 
 std::byte* Resolve(std::span<std::byte> block,

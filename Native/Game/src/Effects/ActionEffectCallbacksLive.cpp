@@ -9,7 +9,7 @@
 #include "Effects/ActionEffectCallbacks.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
@@ -54,10 +54,8 @@ class LiveHost final : public ActionEffectCallbackHost {
         static_cast<int>(transform.mode), transform.duration, transform.actor,
         transform.red_offset, transform.green_offset, transform.blue_offset);
   }
-  std::int32_t TintedActor() override { return Effects_tintedActor; }
-  void SetTintedActor(std::int32_t actor) override {
-    Effects_tintedActor = actor;
-  }
+  std::int32_t TintedActor() override { return tintedActor; }
+  void SetTintedActor(std::int32_t actor) override { tintedActor = actor; }
   void SetFieldControlMode(Field::FieldControlMode mode) override {
     Field_controlMode = static_cast<u_int>(mode);
   }
@@ -74,7 +72,7 @@ class LiveHost final : public ActionEffectCallbackHost {
     Field::LiveEnterFieldExplorationMode();
   }
   std::uint32_t EffectBusyFlags() override {
-    return static_cast<std::uint32_t>(Effects_effectBusyFlags);
+    return static_cast<std::uint32_t>(effectBusyFlags);
   }
 };
 }  // namespace

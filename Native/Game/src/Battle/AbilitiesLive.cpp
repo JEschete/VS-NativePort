@@ -39,7 +39,7 @@
 #include "Battle/Hit.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
@@ -238,7 +238,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     return VS::Input::buttonsPressed;
   }
   [[nodiscard]] bool EffectsBusy() const override {
-    return (static_cast<std::uint32_t>(Effects_effectBusyFlags) &
+    return (static_cast<std::uint32_t>(VS::Effects::effectBusyFlags) &
             kEffectBusyMask) != 0;
   }
   [[nodiscard]] bool IsActorActionAnimationBusy(int actor) const override {
@@ -529,7 +529,7 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
       static_cast<unsigned>(record->pose.holdingLastFrame),
       static_cast<int>(state.abilityTimer),
       static_cast<unsigned>(state.abilityWindow),
-      static_cast<unsigned>(Effects_effectBusyFlags),
+      static_cast<unsigned>(VS::Effects::effectBusyFlags),
       static_cast<unsigned>(queued.actionId));
 }
 }  // namespace

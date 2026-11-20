@@ -15,7 +15,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailCore.hpp"
@@ -330,7 +330,7 @@ namespace {
 class EmptyPackageScope {
  public:
   EmptyPackageScope() {
-    Effects_package = &empty_;
+    VS::Effects::package = &empty_;
     VS::Effects::ForgetLivePackageExtents();
   }
   EmptyPackageScope(const EmptyPackageScope&) = delete;
@@ -338,12 +338,12 @@ class EmptyPackageScope {
   EmptyPackageScope(EmptyPackageScope&&) = delete;
   EmptyPackageScope& operator=(EmptyPackageScope&&) = delete;
   ~EmptyPackageScope() {
-    Effects_package = saved_;
+    VS::Effects::package = saved_;
     VS::Effects::ForgetLivePackageExtents();
   }
 
  private:
-  VS::Effects::LiveEffectPackage* saved_ = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_ = VS::Effects::package;
   VS::Effects::LiveEffectPackage empty_{};
 };
 

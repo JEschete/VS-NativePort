@@ -20,7 +20,7 @@
 #include "Effects/ParticleRender.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
@@ -112,11 +112,11 @@ void Mode(u_long word, u_long* ordering) {
 
 std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
   if (curve == 0) return std::nullopt;
-  const auto* block = Effects_package->curve_block;
+  const auto* block = VS::Effects::package->curve_block;
   Require(block != nullptr && curve <= block->count &&
-              curve <= std::size(Effects_package->curves) &&
+              curve <= std::size(VS::Effects::package->curves) &&
               block->Size(curve - 1) != 0 &&
-              Effects_package->curves[curve - 1] != nullptr,
+              VS::Effects::package->curves[curve - 1] != nullptr,
           "Particle color references an invalid effect curve");
   return static_cast<std::uint32_t>(VS::Effects::LiveSampleEffectCurve(
       static_cast<int>(curve), static_cast<int>(age)));
@@ -131,12 +131,10 @@ bool ProjectNode(LiveParticle& node, SVECTOR& point, Core_GteWord& xy,
            Half(node.motion.position.vz >> kFixedShift), 0};
   const MATRIX* matrix = &VS::Render::FrameScratchpad().view_matrix;
   if ((node.emit_flags & kAttached) != 0) {
-    Require(Effects_currentInstance != nullptr &&
-                node.transform_index <
-                    std::size(Effects_currentInstance->transforms),
+    Require(currentInstance != nullptr &&
+                node.transform_index < std::size(currentInstance->transforms),
             "Attached particle has no valid native transform");
-    const auto& transform =
-        Effects_currentInstance->transforms[node.transform_index];
+    const auto& transform = currentInstance->transforms[node.transform_index];
     if ((node.emit_flags & kCullBelow) != 0) {
       Core_Gte_SetRotMatrix(&transform.world);
       Core_Gte_SetTransMatrix(&transform.world);
@@ -177,8 +175,7 @@ void TraceParticle(const LiveParticle& node, SVECTOR point, Core_GteWord xy,
                                                      point.vz};
   nlohmann::json transform = nullptr;
   if (attached) {
-    const auto& slot =
-        Effects_currentInstance->transforms[node.transform_index];
+    const auto& slot = currentInstance->transforms[node.transform_index];
     view = &slot.view;
     transform = matrix(slot.world);
     const std::array<int, kSpatialDimensions> local{point.vx, point.vy,
@@ -202,11 +199,10 @@ void TraceParticle(const LiveParticle& node, SVECTOR point, Core_GteWord xy,
       {"kind", "particle"},
       {"pool", reinterpret_cast<std::uintptr_t>(particlePool)},
       {"slot", &node - particlePool},
-      {"instance", reinterpret_cast<std::uintptr_t>(Effects_currentInstance)},
-      {"effect_id",
-       Effects_currentInstance
-           ? nlohmann::json(Effects_currentInstance->context.effect_id)
-           : nlohmann::json(nullptr)},
+      {"instance", reinterpret_cast<std::uintptr_t>(currentInstance)},
+      {"effect_id", currentInstance
+                        ? nlohmann::json(currentInstance->context.effect_id)
+                        : nlohmann::json(nullptr)},
       {"age", node.age},
       {"lifetime", node.lifetime},
       {"emit_flags", node.emit_flags},
@@ -249,7 +245,8 @@ std::size_t PoolSlot(const LiveParticle* node) {
 std::vector<std::size_t> CollectParticleSlots(const LiveParticle* head) {
   std::vector<std::size_t> slots;
   if (head == nullptr) return slots;
-  Require(Effects_package != nullptr && Effects_package->textures != nullptr,
+  Require(VS::Effects::package != nullptr &&
+              VS::Effects::package->textures != nullptr,
           "Particle rendering requires a loaded effect package");
   Require(particlePool != nullptr && particleCapacity > 0,
           "Particle rendering requires its native pool");
@@ -329,7 +326,7 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   [[nodiscard]] ParticleTexture Texture(std::uint32_t index) const override {
-    const LivePackageTexture& texture = Effects_package->textures[index];
+    const LivePackageTexture& texture = VS::Effects::package->textures[index];
     ParticleTexture typed{};
     for (std::size_t corner = 0; corner < kParticleQuadCorners; ++corner) {
       typed.corners.at(corner) = {texture.corners.at(corner).x,

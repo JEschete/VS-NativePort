@@ -21,7 +21,7 @@
 #include "Battle/TargetingState.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/EnvironmentLiveState.hpp"
 #include "Field/GameMode.hpp"
@@ -160,7 +160,7 @@ struct LiveDialogFixture : LiveMenuFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   u_int saved_control = Field_controlMode;
   int saved_recovery = Battle_recoveryRewardMode;
-  int saved_effects = Effects_effectBusyFlags;
+  int saved_effects = VS::Effects::effectBusyFlags;
   int saved_loot_opened = Battle_lootMenuOpened;
   int* saved_notification = VS::Menu::sceneNotificationBuffer;
   VS::Menu::TextBoxState saved_notice_box = VS::Menu::textBoxes[7];
@@ -175,7 +175,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     REQUIRE(allocation != nullptr);
     notice = {allocation, VS::Menu::kSceneNotificationBytes / sizeof(int)};
     Battle_recoveryRewardMode = 0;
-    Effects_effectBusyFlags = 0;
+    VS::Effects::effectBusyFlags = 0;
     Battle_lootMenuOpened = 0;
     VS::Menu::sceneNotificationBuffer = nullptr;
   }
@@ -186,7 +186,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     }
     Field_controlMode = saved_control;
     Battle_recoveryRewardMode = saved_recovery;
-    Effects_effectBusyFlags = saved_effects;
+    VS::Effects::effectBusyFlags = saved_effects;
     Battle_lootMenuOpened = saved_loot_opened;
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Menu::textBoxes[7] = saved_notice_box;
@@ -327,7 +327,7 @@ TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
 TEST_CASE("F00197 live delay uses older ability grant not reward phase six",
           "[reward-dialogs][reward-live][F00197]") {
   LiveDialogFixture fixture;
-  Effects_effectBusyFlags = 0x10000;
+  VS::Effects::effectBusyFlags = 0x10000;
   b::UpdateLiveAbilityUnlockDelay();
   CHECK(Battle_actionFlowMode == 14);
   CHECK(VS::Field::isInteractionPaused == 1);
@@ -341,7 +341,7 @@ TEST_CASE("F00197 live delay uses older ability grant not reward phase six",
 TEST_CASE("F00197 live busy delay needs no unused action or character owner",
           "[reward-dialogs][reward-live][F00197]") {
   LiveDialogFixture fixture;
-  Effects_effectBusyFlags = GENERATE(1, 2, 3, -1);
+  VS::Effects::effectBusyFlags = GENERATE(1, 2, 3, -1);
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   b::UpdateLiveAbilityUnlockDelay();
@@ -457,7 +457,7 @@ TEST_CASE("Reward dialogs retain four original void module entrypoints",
 TEST_CASE("F00225 live wait opens new reward phase six through actual services",
           "[reward-dispatch][reward-live][F00225]") {
   LiveDialogFixture fixture;
-  Effects_effectBusyFlags = 0x10000;
+  VS::Effects::effectBusyFlags = 0x10000;
   b::WaitForLiveRewardUnlockEffects();
   CHECK(Battle_actionFlowMode == 6);
   CHECK(VS::Field::isInteractionPaused == 1);
@@ -470,7 +470,7 @@ TEST_CASE("F00225 live wait opens new reward phase six through actual services",
 TEST_CASE("F00225 live busy mask does not require action or ability owners",
           "[reward-dispatch][reward-live][F00225]") {
   LiveDialogFixture fixture;
-  Effects_effectBusyFlags = GENERATE(1, 2, 3, INT32_MIN + 2);
+  VS::Effects::effectBusyFlags = GENERATE(1, 2, 3, INT32_MIN + 2);
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   b::WaitForLiveRewardUnlockEffects();
@@ -585,7 +585,7 @@ TEST_CASE("F00229 live handled waiting phases preserve the original int result",
   const u_int phase = GENERATE(3U, 4U, 5U, 6U);
   Battle_actionFlowMode = phase;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Effects_effectBusyFlags = 2;
+  VS::Effects::effectBusyFlags = 2;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 1);

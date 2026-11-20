@@ -12,7 +12,7 @@
 
 #include "Audio/SoundBanks.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelinePlayback.hpp"
@@ -150,11 +150,10 @@ constexpr fx::ChildTrackKey ChildKey(std::uint8_t delay) {
 // Restores the effect package pointer after a test.
 class PackageScope {
  public:
-  explicit PackageScope(fx::LiveEffectPackage* package)
-      : saved_(Effects_package) {
-    Effects_package = package;
+  explicit PackageScope(fx::LiveEffectPackage* package) : saved_(fx::package) {
+    fx::package = package;
   }
-  ~PackageScope() { Effects_package = saved_; }
+  ~PackageScope() { fx::package = saved_; }
   PackageScope(const PackageScope&) = delete;
   PackageScope& operator=(const PackageScope&) = delete;
   PackageScope(PackageScope&&) = delete;

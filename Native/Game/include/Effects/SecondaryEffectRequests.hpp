@@ -60,7 +60,7 @@ inline constexpr std::uint16_t kPositionHitEffect = 0x26;
 // Actor impact kind 1 of the defined actions.
 inline constexpr std::uint16_t kImpactKindOneEffect = 0x27;
 
-// Effects_effectBusyFlags bit that suppresses the trap tile effect (the
+// effectBusyFlags bit that suppresses the trap tile effect (the
 // secondary instances' busy bit, SecondaryBusyBits).
 inline constexpr std::uint32_t kTrapEffectBusyBit = 2;
 
@@ -97,7 +97,7 @@ class SecondaryEffectSink {
   // func_800CF3F8: begins the request's secondary instances.
   virtual void Begin(const SingleTargetEffectRequest& request,
                      std::int32_t parameter) = 0;
-  // Effects_effectBusyFlags.
+  // effectBusyFlags.
   [[nodiscard]] virtual std::uint32_t BusyFlags() = 0;
 
  protected:

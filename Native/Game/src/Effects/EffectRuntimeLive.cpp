@@ -35,11 +35,11 @@
 #include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Input/ControllerLive.hpp"
 
-static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
+static_assert(std::extent_v<decltype(VS::Effects::tokenBitmaps)> >=
               std::size_t{VS::Effects::kEffectTokenWords});
 
 namespace VS::Effects {
@@ -67,14 +67,14 @@ void Refuse(std::string_view call, std::string_view reason) {
 
 // The current package; null, with a diagnostic, when there is none.
 [[nodiscard]] LiveEffectPackage* CurrentPackage(std::string_view call) {
-  if (Effects_package == nullptr) {
+  if (VS::Effects::package == nullptr) {
     Refuse(call, "no current effect package");
   }
-  return Effects_package;
+  return VS::Effects::package;
 }
 
 [[nodiscard]] std::uint8_t StoredToken() {
-  return static_cast<std::uint8_t>(Effects_primaryToken);
+  return static_cast<std::uint8_t>(primaryToken);
 }
 
 // An instance's frame, as both chains play it.
@@ -82,9 +82,7 @@ template <class Host>
 class LivePlayback : public Host {
  public:
   Instance* Next(Instance& instance) override { return instance.next; }
-  void SetCurrent(Instance& instance) override {
-    Effects_currentInstance = &instance;
-  }
+  void SetCurrent(Instance& instance) override { currentInstance = &instance; }
   bool HasCurves() override {
     const LiveEffectPackage* package = CurrentPackage("curve sampling");
     return package != nullptr && package->curve_block != nullptr;
@@ -120,14 +118,12 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
   std::uint8_t PrimaryToken() override { return StoredToken(); }
   void SetPrimaryToken(std::uint8_t token) override {
-    Effects_primaryToken = static_cast<char>(token);
+    primaryToken = static_cast<char>(token);
   }
-  Instance* FirstPrimary() override { return Effects_primaryInstances; }
-  Content_DiscQueueSlot* MenuReloadSlot() override {
-    return Effects_menuReloadSlot;
-  }
+  Instance* FirstPrimary() override { return primaryInstances; }
+  Content_DiscQueueSlot* MenuReloadSlot() override { return menuReloadSlot; }
   void SetMenuReloadSlot(Content_DiscQueueSlot* slot) override {
-    Effects_menuReloadSlot = slot;
+    menuReloadSlot = slot;
   }
 
   bool PollPurgeOverlay() override { return LiveLoadEffectPurgeOverlay() == 0; }
@@ -136,9 +132,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   bool PollPackage() override { return LiveLoadEffectPackage() == 0; }
   void WaitForOverlay() override { Boot::WaitForOverlayReadyLive(); }
   void ConfigureResources() override { LiveConfigureEffectResources(); }
-  bool ActionHasEffect() override {
-    return Effects_actionRequest.effect_id != 0;
-  }
+  bool ActionHasEffect() override { return actionRequest.effect_id != 0; }
   bool PackageOnDisc() override { return packageFile.lba != 0; }
   bool PurgeOverlayHeld() override { return purgeOverlayLoaded != 0; }
   void ReleasePurgeOverlay() override {
@@ -178,10 +172,10 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
       return false;
     }
     LiveEffectSpawnRequest spawn{};
-    spawn.source = &Effects_actionRequest.source;
-    spawn.emit_from = &Effects_actionRequest.source;
-    spawn.target = std::data(Effects_actionRequest.targets);
-    spawn.emit_to = std::data(Effects_actionRequest.targets);
+    spawn.source = &actionRequest.source;
+    spawn.emit_from = &actionRequest.source;
+    spawn.target = std::data(actionRequest.targets);
+    spawn.emit_to = std::data(actionRequest.targets);
     spawn.priority = 0;
     spawn.script = package->programs;
     spawn.script_offset = script_offset;
@@ -200,7 +194,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
   void UnbindSfxBank() override {
     Audio::LiveUnbindRoomSfxBank();
-    Effects_package->sound_bank = nullptr;
+    VS::Effects::package->sound_bank = nullptr;
   }
   bool HasCutsceneStream() override {
     const LiveEffectPackage* package = CurrentPackage("stream release");
@@ -208,8 +202,8 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
   void UnbindCutsceneStream() override {
     Audio::UnbindLiveRoomCutsceneStream();
-    Effects_package->auxiliary_sound = nullptr;
-    Effects_package->auxiliary_sound_handle = 0;
+    VS::Effects::package->auxiliary_sound = nullptr;
+    VS::Effects::package->auxiliary_sound_handle = 0;
   }
   void StopVibration() override {
     Input::StopLiveVibrationPatterns(kAllVibrationPatterns,
@@ -225,11 +219,11 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
 
   void StoreActionRequest() override {
     if (request_ != nullptr) {
-      Effects_actionRequest = *request_;
+      actionRequest = *request_;
     }
   }
   void SetActionVariant(std::uint8_t variant) override {
-    Effects_actionVariant = variant;
+    actionVariant = variant;
   }
   std::uint8_t AllocateToken() override {
     return static_cast<std::uint8_t>(LiveAllocateEffectToken());
@@ -255,7 +249,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
 
 class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
  public:
-  Instance* FirstSecondary() override { return Effects_secondaryInstances; }
+  Instance* FirstSecondary() override { return secondaryInstances; }
   std::int16_t PhaseOf(Instance& instance) override {
     return instance.context.phase;
   }
@@ -296,7 +290,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
   std::uint8_t AllocateToken() override {
     return static_cast<std::uint8_t>(LiveAllocateEffectToken());
   }
-  void StoreRequest() override { Effects_secondaryRequest = *request_; }
+  void StoreRequest() override { secondaryRequest = *request_; }
   std::uint16_t TargetType(std::size_t target) override {
     return std::span(request_->targets)[target].type;
   }
@@ -308,7 +302,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
     request.target = &target;
     request.emit_to = spawn.toward_source ? &request_->source : &target;
     request.priority = spawn.priority;
-    request.script = Effects_package->programs;
+    request.script = VS::Effects::package->programs;
     request.script_offset = spawn.script_offset;
     request.parent = nullptr;
     request.token = spawn.token;
@@ -370,9 +364,9 @@ class LiveStartup final : public EffectRuntimeStartup {
 
 class LiveFrame final : public EffectRuntimeFrame {
  public:
-  std::uint8_t BufferIndex() override { return Effects_effectBufferIndex; }
+  std::uint8_t BufferIndex() override { return effectBufferIndex; }
   void SetBufferIndex(std::uint8_t index) override {
-    Effects_effectBufferIndex = index;
+    effectBufferIndex = index;
   }
   void SelectPackage(ActivePackage package) override {
     LiveSelectEffectResourceContext(std::to_underlying(package));
@@ -397,16 +391,16 @@ void LiveResetEffectInstances() {
   EffectRuntimeRecords records{.primary = LivePrimaryEffectState()};
   ResetEffectInstances(records);
   StoreLivePrimaryEffectState(records.primary);
-  Effects_primaryToken = static_cast<char>(records.primary_token);
-  Effects_secondaryInstances = records.secondary_instances;
-  Effects_currentInstance = records.current_instance;
-  Effects_unusedPrimaryWord = records.unused_primary_word;
-  Effects_primaryInstances = records.primary_instances;
-  std::span(Effects_curveSamples).front() = records.first_curve_sample;
-  Effects_actionVariant = records.action_variant;
-  Effects_menuReloadSlot = records.menu_reload_slot;
+  primaryToken = static_cast<char>(records.primary_token);
+  secondaryInstances = records.secondary_instances;
+  currentInstance = records.current_instance;
+  unusedPrimaryWord = records.unused_primary_word;
+  primaryInstances = records.primary_instances;
+  std::span(curveSamples).front() = records.first_curve_sample;
+  actionVariant = records.action_variant;
+  menuReloadSlot = records.menu_reload_slot;
   std::ranges::transform(
-      records.tokens, std::span(Effects_tokenBitmaps).begin(),
+      records.tokens, std::span(tokenBitmaps).begin(),
       [](std::uint32_t word) { return static_cast<int>(word); });
 }
 
@@ -477,7 +471,7 @@ int LiveSpawnSecondaryEffectRequest(LiveActionEffectRequest* request,
 
 void LiveSpawnSourceActorEffect() {
   const SourceActorEffect effect = MakeSourceActorEffect(
-      static_cast<std::uint8_t>(Effects_actionRequest.source.Actor().actor));
+      static_cast<std::uint8_t>(actionRequest.source.Actor().actor));
   LiveActionEffectRequest request{};
   request.effect_id = effect.effect_id;
   request.count = effect.target_count;
@@ -497,8 +491,8 @@ void LiveSpawnSourceActorEffect() {
 }
 
 void LiveClearActionEffectMode() {
-  std::uint8_t variant = Effects_actionVariant;
+  std::uint8_t variant = actionVariant;
   ClearActionEffectMode(variant);
-  Effects_actionVariant = variant;
+  actionVariant = variant;
 }
 }  // namespace VS::Effects

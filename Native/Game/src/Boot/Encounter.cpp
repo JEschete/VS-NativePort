@@ -49,7 +49,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Ending/ClearResults.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -1016,11 +1016,11 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
       {view.m[1][0], view.m[1][1], view.m[1][2]},
       {view.m[2][0], view.m[2][1], view.m[2][2]}};
   scene["camera"]["view_translation"] = {view.t[0], view.t[1], view.t[2]};
-  scene["effects"] = {{"busy", Effects_effectBusyFlags},
-                      {"phase", Effects_primaryPhase},
-                      {"tracks", Effects_trackCount},
-                      {"started_tracks", Effects_startedTrackCount},
-                      {"pending_tracks", Effects_pendingTracks}};
+  scene["effects"] = {{"busy", VS::Effects::effectBusyFlags},
+                      {"phase", VS::Effects::primaryPhase},
+                      {"tracks", VS::Effects::trackCount},
+                      {"started_tracks", VS::Effects::startedTrackCount},
+                      {"pending_tracks", VS::Effects::pendingTracks}};
   scene["models"] = InspectModels();
   return scene;
 }

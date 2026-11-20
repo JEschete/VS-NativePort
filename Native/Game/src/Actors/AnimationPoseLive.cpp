@@ -34,7 +34,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -79,7 +79,7 @@ static_assert(std::tuple_size_v<ShadowPointWords> ==
 
 // The event playback phase in which the events and head look always run.
 constexpr std::int16_t kEventPlaybackRunning = 4;
-// Effects_effectBusyFlags while an action's effects play.
+// VS::Effects::effectBusyFlags while an action's effects play.
 constexpr int kEffectsBusy = 1;
 // Event 29's palette fade: from 0 over 0x20 steps.
 constexpr u_char kPaletteFadeSteps = 0x20;
@@ -401,7 +401,7 @@ class LiveEventHost final : public AnimationEventHost {
     return EventPlaybackRunning();
   }
   [[nodiscard]] bool EffectsBusy() const override {
-    return Effects_effectBusyFlags == kEffectsBusy;
+    return VS::Effects::effectBusyFlags == kEffectsBusy;
   }
   [[nodiscard]] ActorMotion LoadMotion() const override {
     return LoadLiveActorMotion(actor_);

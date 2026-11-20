@@ -32,7 +32,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"

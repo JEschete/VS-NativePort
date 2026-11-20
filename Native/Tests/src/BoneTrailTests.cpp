@@ -11,7 +11,7 @@
 #include "Effects/BoneTrail.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectInstances.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
@@ -616,8 +616,8 @@ TEST_CASE("The live fade commands only the secondary bone trails",
           "[bone-trail][F01448][F00057][F01418]") {
   TestChain chain;
   chain.slots[1].renderer = &OtherRenderer;
-  fx::LiveEffectInstance* const saved = Effects_secondaryInstances;
-  Effects_secondaryInstances = chain.instances.data();
+  fx::LiveEffectInstance* const saved = fx::secondaryInstances;
+  fx::secondaryInstances = chain.instances.data();
   other_renderer_calls = 0;
   fx::LiveFadeBoneTrails();
   CHECK(chain.trails[0].config.life == fx::kFadingTrailLife);
@@ -626,7 +626,7 @@ TEST_CASE("The live fade commands only the secondary bone trails",
   chain.trails[2].config.life = 1;
   fx::LiveFadeWeaponTrails();
   CHECK(chain.trails[2].config.life == fx::kFadingTrailLife);
-  Effects_secondaryInstances = saved;
+  fx::secondaryInstances = saved;
   CHECK(other_renderer_calls == 0);
 }
 

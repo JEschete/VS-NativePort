@@ -267,7 +267,7 @@ H0265,header,Native/Game/src/Effects/Plugins/Plg297.hpp,generated,no,pragma-once
 H0266,header,Native/Game/src/Effects/Plugins/Plg300.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0267,header,Native/Game/src/Effects/Plugins/Plg301.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,0,31,0,0,remaining,
+H0269,header,Native/Game/src/Effects/Runtime.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/ScreenEffectState.hpp (#441)
 H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,replaced by Native/Game/src/Effects/Templates/TemplateLiveState.hpp (#441)

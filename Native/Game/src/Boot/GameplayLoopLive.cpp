@@ -51,7 +51,7 @@
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
@@ -183,7 +183,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return VS::Field::sphericalCamera.delta.mode;
   }
   [[nodiscard]] std::uint32_t EffectBusyFlags() const override {
-    return static_cast<std::uint32_t>(Effects_effectBusyFlags);
+    return static_cast<std::uint32_t>(VS::Effects::effectBusyFlags);
   }
   [[nodiscard]] bool IsFieldRenderingEnabled() const override {
     return VS::Field::LiveRoomRenderState().field_rendering_enabled;
@@ -504,7 +504,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Battle::LiveUpdateAndDrawFloatingLabels();
   }
   void UpdateEffectRuntime() override {
-    Effects_effectBusyFlags = VS::Effects::LiveUpdateEffectRuntime();
+    VS::Effects::effectBusyFlags = VS::Effects::LiveUpdateEffectRuntime();
   }
   void DrawBattleHud() override { VS::Battle::DrawLiveBattleHud(); }
   void UpdateTextBoxes() override { VS::Menu::UpdateLiveTextBoxes(); }

@@ -18,7 +18,7 @@
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 
 namespace VS::Effects {
@@ -235,13 +235,13 @@ void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
 
 LiveEffectInstance* LiveCreatePrimaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request) {
-  return CreateOn(Effects_primaryInstances, spawn_request,
-                  &CreatePrimaryEffectInstance, "create primary");
+  return CreateOn(primaryInstances, spawn_request, &CreatePrimaryEffectInstance,
+                  "create primary");
 }
 
 LiveEffectInstance* LiveCreateSecondaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request) {
-  return CreateOn(Effects_secondaryInstances, spawn_request,
+  return CreateOn(secondaryInstances, spawn_request,
                   &CreateSecondaryEffectInstance, "create secondary");
 }
 
@@ -250,7 +250,7 @@ void LiveDestroyPrimaryEffectInstance(LiveEffectInstance* instance) {
     Refuse("destroy primary", "no effect instance");
     return;
   }
-  LiveInstanceChain chain(Effects_primaryInstances);
+  LiveInstanceChain chain(primaryInstances);
   DestroyPrimaryEffectInstance(*instance, chain);
 }
 
@@ -259,7 +259,7 @@ void LiveDestroySecondaryEffectInstance(LiveEffectInstance* instance) {
     Refuse("destroy secondary", "no effect instance");
     return;
   }
-  LiveInstanceChain chain(Effects_secondaryInstances);
+  LiveInstanceChain chain(secondaryInstances);
   DestroySecondaryEffectInstance(*instance, chain);
 }
 

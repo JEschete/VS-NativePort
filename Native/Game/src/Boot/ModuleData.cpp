@@ -93,7 +93,7 @@
 #include "Effects/Plugins/Plg297.hpp"
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/Plg301.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/BoneTrailLiveState.hpp"
 #include "Ending/ClearResults.hpp"
 #include "Ending/Credits.hpp"
@@ -724,9 +724,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Menu::kInformationHeaderSpriteWords,
      &VS::Menu::kInformationHeaderSpriteWords,
      sizeof VS::Menu::kInformationHeaderSpriteWords},  // G00218 D_800EC2D8
-    {"BATTLE/BATTLE.PRG", 0x83AE4, sizeof Effects_effectBufferIndex,
-     &Effects_effectBufferIndex,
-     sizeof Effects_effectBufferIndex},  // G00219 D_800EC2E4
+    {"BATTLE/BATTLE.PRG", 0x83AE4, sizeof VS::Effects::effectBufferIndex,
+     &VS::Effects::effectBufferIndex,
+     sizeof VS::Effects::effectBufferIndex},  // G00219 D_800EC2E4
     {"BATTLE/BATTLE.PRG", 0x83AE8, sizeof VS::Effects::trailAdditiveColors,
      &VS::Effects::trailAdditiveColors,
      sizeof VS::Effects::trailAdditiveColors},  // G00220 D_800EC2E8
@@ -735,20 +735,20 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83B28, sizeof VS::Effects::emissionCounter,
      &VS::Effects::emissionCounter,
      sizeof VS::Effects::emissionCounter},  // G00223 D_800EC328
-    {"BATTLE/BATTLE.PRG", 0x83B2C, sizeof Effects_actionVariantValues,
-     &Effects_actionVariantValues,
-     sizeof Effects_actionVariantValues},  // G00224 D_800EC32C
+    {"BATTLE/BATTLE.PRG", 0x83B2C, sizeof VS::Effects::actionVariantValues,
+     &VS::Effects::actionVariantValues,
+     sizeof VS::Effects::actionVariantValues},  // G00224 D_800EC32C
     {"BATTLE/BATTLE.PRG", 0x83B30, sizeof VS::Effects::pairedParticleColorPresets,
      &VS::Effects::pairedParticleColorPresets,
      sizeof VS::Effects::pairedParticleColorPresets},  // G00225 D_800EC330
     {"BATTLE/BATTLE.PRG", 0x83B68, sizeof VS::Effects::particleColorPresetTable,
      &VS::Effects::particleColorPresetTable,
      sizeof VS::Effects::particleColorPresetTable},  // G00226 D_800EC368
-    {"BATTLE/BATTLE.PRG", 0x83CB8, sizeof Effects_lastReactionSoundVariant,
-     &Effects_lastReactionSoundVariant,
-     sizeof Effects_lastReactionSoundVariant},  // G00228 D_800EC4B8
-    {"BATTLE/BATTLE.PRG", 0x83CBC, sizeof Effects_emptyPackage,
-     &Effects_emptyPackage, sizeof Effects_emptyPackage},  // G00229 D_800EC4BC
+    {"BATTLE/BATTLE.PRG", 0x83CB8, sizeof VS::Effects::lastReactionSoundVariant,
+     &VS::Effects::lastReactionSoundVariant,
+     sizeof VS::Effects::lastReactionSoundVariant},  // G00228 D_800EC4B8
+    {"BATTLE/BATTLE.PRG", 0x83CBC, sizeof VS::Effects::emptyPackage,
+     &VS::Effects::emptyPackage, sizeof VS::Effects::emptyPackage},  // G00229 D_800EC4BC
     {"BATTLE/BATTLE.PRG", 0x88EEC, sizeof Battle_Ai_directionDeltas,
      &Battle_Ai_directionDeltas,
      sizeof Battle_Ai_directionDeltas},  // G00230 D_800F16EC

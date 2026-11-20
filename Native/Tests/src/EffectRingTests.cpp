@@ -13,7 +13,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/ClosedRing.hpp"
 #include "Effects/Templates/Ring.hpp"
 #include "Effects/Templates/RingCore.hpp"
@@ -595,17 +595,17 @@ namespace {
 class EmptyLivePackage {
  public:
   EmptyLivePackage() {
-    Effects_package = &package_;
+    VS::Effects::package = &package_;
     VS::Effects::ForgetLivePackageExtents();
   }
   EmptyLivePackage(const EmptyLivePackage&) = delete;
   EmptyLivePackage& operator=(const EmptyLivePackage&) = delete;
   EmptyLivePackage(EmptyLivePackage&&) = delete;
   EmptyLivePackage& operator=(EmptyLivePackage&&) = delete;
-  ~EmptyLivePackage() { Effects_package = saved_; }
+  ~EmptyLivePackage() { VS::Effects::package = saved_; }
 
  private:
-  VS::Effects::LiveEffectPackage* saved_ = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_ = VS::Effects::package;
   VS::Effects::LiveEffectPackage package_{};
 };
 }  // namespace

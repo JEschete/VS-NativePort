@@ -23,7 +23,7 @@
 #include "Effects/BoneTrailLiveState.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
@@ -230,9 +230,7 @@ class LiveBoneTrailHost final : public BoneTrailHost {
 
 class LiveBoneTrailChains final : public BoneTrailChains {
  public:
-  LiveEffectInstance* FirstInstance() override {
-    return Effects_secondaryInstances;
-  }
+  LiveEffectInstance* FirstInstance() override { return secondaryInstances; }
   LiveEffectInstance* NextInstance(LiveEffectInstance& instance) override {
     return instance.next;
   }

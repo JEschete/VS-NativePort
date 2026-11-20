@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracks.hpp"
@@ -290,16 +290,16 @@ TEST_CASE("Live colour tracks refuse missing records and extra targets",
   CHECK(fx::LiveTickSceneColorTrack(&instance, &track) == 0);
 
   // Targets past the request's sixteen are not read.
-  const VS::Effects::LiveActionEffectRequest saved = Effects_actionRequest;
-  Effects_actionRequest = {};
+  const VS::Effects::LiveActionEffectRequest saved = fx::actionRequest;
+  fx::actionRequest = {};
   for (VS::Effects::LiveActionEffectTarget& target :
-       Effects_actionRequest.targets) {
+       fx::actionRequest.targets) {
     target.type = fx::kRoomPointEndpoint;
   }
-  Effects_actionRequest.count = 0xFF;
+  fx::actionRequest.count = 0xFF;
   track.key_index = 0;
   timeline.frame = 3;
   CHECK(fx::LiveTickTargetActorColorTrack(&instance, &track, 2) == 1);
   CHECK(track.key_index == 1);
-  Effects_actionRequest = saved;
+  fx::actionRequest = saved;
 }

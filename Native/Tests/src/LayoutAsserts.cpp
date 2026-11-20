@@ -27,9 +27,10 @@
 #include "Battle/TargetingState.h"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "DiscQueue.h"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
@@ -451,16 +452,16 @@ int Tests_AiFrameCache(void) {
 }
 
 int Tests_DefaultEffectPackageLoaded(void) {
-  if (sizeof Effects_emptyPackage != 0x5200 ||
-      Effects_emptyPackage[0] != 0x00010A70 ||
-      Effects_emptyPackage[0x51FC / sizeof(u_int)] != 0) {
+  if (sizeof VS::Effects::emptyPackage != 0x5200 ||
+      VS::Effects::emptyPackage[0] != 0x00010A70 ||
+      VS::Effects::emptyPackage[0x51FC / sizeof(u_int)] != 0) {
     return 0;
   }
   VS::Effects::LiveEffectPackage package = {0};
-  VS::Effects::LiveEffectPackage* saved = Effects_package;
-  const uintptr_t base = reinterpret_cast<uintptr_t>(Effects_emptyPackage);
-  Effects_package = &package;
-  VS::Effects::LiveBindEffectPackageBlocks(Effects_emptyPackage);
+  VS::Effects::LiveEffectPackage* saved = VS::Effects::package;
+  const uintptr_t base = reinterpret_cast<uintptr_t>(VS::Effects::emptyPackage);
+  VS::Effects::package = &package;
+  VS::Effects::LiveBindEffectPackageBlocks(VS::Effects::emptyPackage);
   const int passed =
       package.texture_table_count == 1 && package.animation_count == 19 &&
       package.timelines->count == 49 && package.curve_block->count == 32 &&
@@ -470,7 +471,7 @@ int Tests_DefaultEffectPackageLoaded(void) {
       reinterpret_cast<uintptr_t>(package.transform_definitions) ==
           base + 0x50A0 &&
       reinterpret_cast<uintptr_t>(package.sound_sequences) == base + 0x51BC;
-  Effects_package = saved;
+  VS::Effects::package = saved;
   return passed;
 }
 

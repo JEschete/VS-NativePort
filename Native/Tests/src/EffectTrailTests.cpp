@@ -17,7 +17,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
@@ -484,7 +484,7 @@ class LiveTrailScope {
                 messages_.emplace_back(record.message);
               }
             })) {
-    Effects_package = &empty_package_;
+    VS::Effects::package = &empty_package_;
     VS::Effects::ForgetLivePackageExtents();
   }
   LiveTrailScope(const LiveTrailScope&) = delete;
@@ -492,7 +492,7 @@ class LiveTrailScope {
   LiveTrailScope(LiveTrailScope&&) = delete;
   LiveTrailScope& operator=(LiveTrailScope&&) = delete;
   ~LiveTrailScope() {
-    Effects_package = saved_package_;
+    VS::Effects::package = saved_package_;
     VS::Core::SetLogObserver(std::move(previous_observer_));
   }
 
@@ -505,7 +505,7 @@ class LiveTrailScope {
  private:
   std::vector<std::string> messages_;
   VS::Core::LogObserver previous_observer_;
-  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_package_ = VS::Effects::package;
   VS::Effects::LiveEffectPackage empty_package_{};
 };
 

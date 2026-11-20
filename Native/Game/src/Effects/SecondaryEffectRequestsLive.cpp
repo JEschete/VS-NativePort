@@ -17,7 +17,7 @@
 #include "Core/Log.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequests.hpp"
 #include "Legacy/Psx.h"
 
@@ -75,7 +75,7 @@ class LiveWorld final : public ActionImpactWorld {
     static_cast<void>(LiveBeginSecondaryEffects(&live, parameter));
   }
   std::uint32_t BusyFlags() override {
-    return static_cast<std::uint32_t>(Effects_effectBusyFlags);
+    return static_cast<std::uint32_t>(effectBusyFlags);
   }
 
   std::optional<QueuedEffectAction> QueuedAction() override {

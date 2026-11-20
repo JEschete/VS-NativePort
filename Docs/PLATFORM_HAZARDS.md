@@ -62,11 +62,11 @@ there would have hidden the defect and left the wrong behavior in place.
 | `PS1-ADDRESS` | Original memory address used as a value | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 0 | 0 | 0 | 0 | 0 | 0 |
-| `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
+| `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 3 | 0 | 0 | 3 | 0 | 3 |
 | `CAPACITY` | Fixed storage capacity | 81 | 0 | 0 | 81 | 0 | 81 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 0 | 0 | 0 | 0 | 0 | 0 |
 | `NARROW-ID` | Identity or index stored in one byte | 38 | 0 | 0 | 38 | 0 | 38 |
-| **Total** | | 255 | 5 | 5 | 237 | 13 | 247 |
+| **Total** | | 254 | 5 | 5 | 236 | 13 | 246 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -94,7 +94,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | #60 | 23 |
 | #55 | 21 |
 | #45 | 19 |
-| #61 | 18 |
+| #61 | 17 |
 | #56 | 16 |
 | #253 | 12 |
 | #50 | 10 |

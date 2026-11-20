@@ -15,7 +15,7 @@
 #include "Battle/ActionFlow.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLiveState.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace {
 struct ImpactFixture {
@@ -24,20 +24,21 @@ struct ImpactFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Battle_ActionState* previous_action = Battle_actionState;
   Actors_ActorRecord* previous_actor = Actors_actorRecords[16];
-  VS::Effects::LiveEffectPackage* previous_package = Effects_package;
-  VS::Effects::LiveEffectPackage* previous_saved = Effects_savedPackage;
-  VS::Effects::LiveEffectPackage previous_secondary = Effects_secondaryPackage;
+  VS::Effects::LiveEffectPackage* previous_package = VS::Effects::package;
+  VS::Effects::LiveEffectPackage* previous_saved = VS::Effects::savedPackage;
+  VS::Effects::LiveEffectPackage previous_secondary =
+      VS::Effects::secondaryPackage;
   VS::Effects::LiveActionEffectRequest previous_request =
-      Effects_secondaryRequest;
+      VS::Effects::secondaryRequest;
   VS::Effects::LiveEffectInstance* previous_instances =
-      Effects_secondaryInstances;
+      VS::Effects::secondaryInstances;
   decltype(VS::Effects::savedActionCamera) previous_camera =
       VS::Effects::savedActionCamera;
   decltype(VS::Effects::effectCamera) previous_effect_camera =
       VS::Effects::effectCamera;
-  decltype(std::to_array(Effects_tokenBitmaps)) previous_tokens =
-      std::to_array(Effects_tokenBitmaps);
-  int previous_busy = Effects_effectBusyFlags;
+  decltype(std::to_array(VS::Effects::tokenBitmaps)) previous_tokens =
+      std::to_array(VS::Effects::tokenBitmaps);
+  int previous_busy = VS::Effects::effectBusyFlags;
   Battle_ActionState action{};
   Actors_ActorRecord actor{};
   std::array<char, 256> script{};
@@ -45,27 +46,27 @@ struct ImpactFixture {
   ImpactFixture() {
     Battle_actionState = &action;
     Actors_actorRecords[16] = &actor;
-    Effects_secondaryPackage = {};
-    Effects_secondaryPackage.programs = script.data();
-    Effects_secondaryInstances = nullptr;
-    Effects_secondaryRequest = {};
-    Effects_effectBusyFlags = 0;
-    std::ranges::fill(Effects_tokenBitmaps, 0);
+    VS::Effects::secondaryPackage = {};
+    VS::Effects::secondaryPackage.programs = script.data();
+    VS::Effects::secondaryInstances = nullptr;
+    VS::Effects::secondaryRequest = {};
+    VS::Effects::effectBusyFlags = 0;
+    std::ranges::fill(VS::Effects::tokenBitmaps, 0);
   }
   ImpactFixture(const ImpactFixture&) = delete;
   ImpactFixture& operator=(const ImpactFixture&) = delete;
   ~ImpactFixture() {
     Battle_actionState = previous_action;
     Actors_actorRecords[16] = previous_actor;
-    Effects_package = previous_package;
-    Effects_savedPackage = previous_saved;
-    Effects_secondaryPackage = previous_secondary;
-    Effects_secondaryRequest = previous_request;
-    Effects_secondaryInstances = previous_instances;
+    VS::Effects::package = previous_package;
+    VS::Effects::savedPackage = previous_saved;
+    VS::Effects::secondaryPackage = previous_secondary;
+    VS::Effects::secondaryRequest = previous_request;
+    VS::Effects::secondaryInstances = previous_instances;
     VS::Effects::savedActionCamera = previous_camera;
     VS::Effects::effectCamera = previous_effect_camera;
-    Effects_effectBusyFlags = previous_busy;
-    std::ranges::copy(previous_tokens, std::begin(Effects_tokenBitmaps));
+    VS::Effects::effectBusyFlags = previous_busy;
+    std::ranges::copy(previous_tokens, std::begin(VS::Effects::tokenBitmaps));
   }
 };
 
@@ -84,9 +85,9 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
                                               std::numeric_limits<int>::min());
   CHECK(fixture->actor.instance.movementMode == 0);
   CHECK(fixture->actor.instance.jumpCountdown == 0);
-  CHECK(Effects_secondaryRequest.effect_id == 0x26);
-  CHECK(Effects_secondaryRequest.count == 1);
-  REQUIRE(Effects_secondaryInstances != nullptr);
-  CHECK(Effects_secondaryInstances->context.effect_id == 0x26);
+  CHECK(VS::Effects::secondaryRequest.effect_id == 0x26);
+  CHECK(VS::Effects::secondaryRequest.count == 1);
+  REQUIRE(VS::Effects::secondaryInstances != nullptr);
+  CHECK(VS::Effects::secondaryInstances->context.effect_id == 0x26);
 }
 }  // namespace

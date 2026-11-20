@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include "Effects/EffectResources.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace VS::Effects {
 // fbcClutRows, fbcFiles, fbcSlots, fbtCounts, pFiles and

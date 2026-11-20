@@ -13,7 +13,7 @@
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {

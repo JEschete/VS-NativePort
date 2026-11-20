@@ -44,7 +44,7 @@
 #include "Effects/Plugins/Plg266.hpp"
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/Plg301.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -113,12 +113,12 @@ LiveParticleEmitterScratch& EmitterScratch() {
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 const LiveParticleDefinition* PackageDefinition(std::size_t index) {
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr ||
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->particle_definitions->Definitions()[index];
+  return &VS::Effects::package->particle_definitions->Definitions()[index];
 }
 
 [[nodiscard]] ParticleVectorRange VectorRange(
@@ -428,7 +428,7 @@ void LiveParticleHost::Create(const ParticleSetState& state,
 
 std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
     std::uint8_t definition_index) {
-  instance_ = Effects_currentInstance;
+  instance_ = currentInstance;
   if (instance_ == nullptr) {
     VS::Core::LogWarn("effects",
                       "particle set: no current effect instance; set stopped");
@@ -473,7 +473,7 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
   // The effect origin (D_800F5310): the action request's focus point.
   return ParticleTickInputs{
       .definition = TypedDefinition(*definition_),
-      .effect_origin = math::VectorOf(Effects_actionRequest.position),
+      .effect_origin = math::VectorOf(actionRequest.position),
       .world = world,
       .target_translation = target_translation,
       .near_clip = VS::Render::nearClip};
@@ -570,7 +570,8 @@ std::int32_t LiveParticleHost::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t bound = LiveEffectCurveCount();
-  if (curve > bound || Effects_package->curve_block->Size(curve - 1) == 0) {
+  if (curve > bound ||
+      VS::Effects::package->curve_block->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -591,9 +592,9 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
   LiveParticleTextureAnimation& animation = LiveState()->texture_animation;
   const std::size_t table = animation.texture_index;
   const bool bound =
-      Effects_package->textures != nullptr && table < kTextureTableCount &&
-      std::cmp_less(table, Effects_package->texture_table_count) &&
-      Effects_package->texture_tables[table] != nullptr;
+      VS::Effects::package->textures != nullptr && table < kTextureTableCount &&
+      std::cmp_less(table, VS::Effects::package->texture_table_count) &&
+      VS::Effects::package->texture_tables[table] != nullptr;
   if (bound) {
     VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   }
@@ -603,12 +604,12 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
           "effects",
           "particle set: texture table {} of {} has no frame; set "
           "drawn without quads ({} refusals)",
-          table, Effects_package->texture_table_count, refused_textures);
+          table, VS::Effects::package->texture_table_count, refused_textures);
     }
     return std::nullopt;
   }
   const LivePackageTexture& texture =
-      Effects_package->textures[animation.texture_info->first_texture];
+      VS::Effects::package->textures[animation.texture_info->first_texture];
   return ParticleTexture{.clut = texture.clut,
                          .tpage = texture.tpage,
                          .u = texture.u,

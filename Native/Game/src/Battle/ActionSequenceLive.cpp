@@ -22,7 +22,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -99,7 +99,9 @@ class LiveWorld final : public ActionSequenceWorld {
   }
   int CanStartEffect() override { return Effects::LiveCanStartEffectTrack(); }
   void AdvanceEffectPhase() override { AdvanceLiveActionEffectPhase(); }
-  std::uint32_t EffectBusyFlags() override { return Effects_effectBusyFlags; }
+  std::uint32_t EffectBusyFlags() override {
+    return VS::Effects::effectBusyFlags;
+  }
   void StartAnimation() override { StartLiveActionAnimation(); }
   void StartEffectTrack() override { VS::Effects::LiveStartEffectTrack(0); }
   void ReleaseAttacks() override { ReleaseLiveQueuedActorAttacks(); }

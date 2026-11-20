@@ -15,7 +15,7 @@
 #include "Effects/ParticlePool.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace {
 namespace fx = VS::Effects;

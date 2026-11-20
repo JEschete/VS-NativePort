@@ -17,7 +17,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {
@@ -44,16 +44,17 @@ struct LiveCurveBlock {
 
 [[nodiscard]] LiveCurveBlock CurrentCurveBlock() {
   LiveCurveBlock live;
-  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->curve_block == nullptr) {
     return live;
   }
-  const LiveCurveTable& header = *Effects_package->curve_block;
+  const LiveCurveTable& header = *VS::Effects::package->curve_block;
   const std::size_t bound =
       std::min(LiveEffectCurveCount(), live.curves.size());
   for (std::size_t i = 0; i < bound; ++i) {
     // A curve the binder refused stays unbound (no data).
-    if (Effects_package->curves[i] != nullptr) {
-      live.curves.at(i) = {Effects_package->curves[i], header.Size(i)};
+    if (VS::Effects::package->curves[i] != nullptr) {
+      live.curves.at(i) = {VS::Effects::package->curves[i], header.Size(i)};
     }
   }
   live.block = {.header_count = header.count,
@@ -82,14 +83,15 @@ void ReportRefusal(std::string_view query, std::int32_t curve,
 }  // namespace
 
 std::span<std::int32_t> LiveEffectCurveSamples() {
-  static_assert(sizeof(Effects_curveSamples[0]) == sizeof(std::int32_t));
-  return {reinterpret_cast<std::int32_t*>(Effects_curveSamples),
-          std::size(Effects_curveSamples)};
+  static_assert(sizeof(curveSamples[0]) == sizeof(std::int32_t));
+  return {reinterpret_cast<std::int32_t*>(curveSamples),
+          std::size(curveSamples)};
 }
 
 CurveSample SampleLiveEffectCurve(std::int32_t curve_id,
                                   std::int32_t distance) {
-  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->curve_block == nullptr) {
     return {.value = 0, .status = CurveSampleStatus::kNoBlock};
   }
   const LiveCurveBlock live = CurrentCurveBlock();
@@ -111,7 +113,8 @@ int LiveSampleEffectCurve(int curve_id, int distance) {
 }
 
 void LiveSampleAllEffectCurves(int distance) {
-  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->curve_block == nullptr) {
     ReportRefusal("sample all curves", 0, distance, CurveSampleStatus::kNoBlock,
                   refused_sweeps);
     return;

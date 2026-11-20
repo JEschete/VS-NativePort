@@ -17,7 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 
 namespace {
@@ -197,15 +197,15 @@ int FinishingRenderer(Slot* slot, unsigned int command, int parameters) {
 class LiveInstances {
  public:
   LiveInstances()
-      : saved_primaries_(std::exchange(Effects_primaryInstances, nullptr)),
-        saved_secondaries_(std::exchange(Effects_secondaryInstances, nullptr)),
-        saved_tokens_(Effects_tokenBitmaps[0]) {
+      : saved_primaries_(std::exchange(fx::primaryInstances, nullptr)),
+        saved_secondaries_(std::exchange(fx::secondaryInstances, nullptr)),
+        saved_tokens_(fx::tokenBitmaps[0]) {
     RendererCalls().clear();
   }
   ~LiveInstances() {
-    Effects_primaryInstances = saved_primaries_;
-    Effects_secondaryInstances = saved_secondaries_;
-    Effects_tokenBitmaps[0] = saved_tokens_;
+    fx::primaryInstances = saved_primaries_;
+    fx::secondaryInstances = saved_secondaries_;
+    fx::tokenBitmaps[0] = saved_tokens_;
   }
   LiveInstances(const LiveInstances&) = delete;
   LiveInstances& operator=(const LiveInstances&) = delete;
@@ -452,13 +452,12 @@ TEST_CASE("Live effect instances join the primary chain by unsigned priority",
     REQUIRE(fx::LiveCreatePrimaryEffectInstance(live.Spawn(priority)) !=
             nullptr);
   }
-  CHECK(Priorities(Effects_primaryInstances) ==
-        std::vector<int>{1, 5, 0x7F, 0x80});
-  const Instance& first = *Effects_primaryInstances;
+  CHECK(Priorities(fx::primaryInstances) == std::vector<int>{1, 5, 0x7F, 0x80});
+  const Instance& first = *fx::primaryInstances;
   CHECK((first.busy_bits == 0 && first.context.effect_id == 0 &&
          first.context.phase == 0));
-  while (Effects_primaryInstances != nullptr) {
-    fx::LiveDestroyPrimaryEffectInstance(Effects_primaryInstances);
+  while (fx::primaryInstances != nullptr) {
+    fx::LiveDestroyPrimaryEffectInstance(fx::primaryInstances);
   }
   CHECK(Memory::GameHeap().Empty());
 }
@@ -477,7 +476,7 @@ TEST_CASE("Live renderers start on attach and stop newest first at the end",
   CHECK(RendererCalls() ==
         std::vector<RendererCall>{
             {first, 1, 11}, {second, 1, 22}, {second, 4, 0}, {first, 4, 0}});
-  CHECK(Effects_primaryInstances == nullptr);
+  CHECK(fx::primaryInstances == nullptr);
   CHECK(Memory::GameHeap().Empty());
 }
 
@@ -524,7 +523,7 @@ TEST_CASE("Live secondary instances take known phases and return their token",
           "[effect-instances]") {
   LiveInstances live;
   constexpr std::uint8_t kToken = 5;
-  Effects_tokenBitmaps[0] |= 1 << kToken;
+  fx::tokenBitmaps[0] |= 1 << kToken;
   Instance* instance =
       fx::LiveCreateSecondaryEffectInstance(live.Spawn(0, kToken));
   REQUIRE(instance != nullptr);
@@ -532,7 +531,7 @@ TEST_CASE("Live secondary instances take known phases and return their token",
   fx::LiveSetSecondaryEffectPhase(7, instance);
   CHECK(instance->context.phase == 3);
   fx::LiveDestroySecondaryEffectInstance(instance);
-  CHECK(Effects_secondaryInstances == nullptr);
-  CHECK((Effects_tokenBitmaps[0] & (1 << kToken)) == 0);
+  CHECK(fx::secondaryInstances == nullptr);
+  CHECK((fx::tokenBitmaps[0] & (1 << kToken)) == 0);
   CHECK(Memory::GameHeap().Empty());
 }

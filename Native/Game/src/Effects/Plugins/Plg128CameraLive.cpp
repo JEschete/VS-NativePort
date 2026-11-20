@@ -25,7 +25,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg128Camera.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
 
 namespace VS::Effects::Plg128 {
@@ -186,8 +186,8 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 
   [[nodiscard]] std::optional<CameraDefinition> Definition(
       std::uint8_t index) override {
-    if (Effects_package == nullptr ||
-        Effects_package->particle_definitions == nullptr ||
+    if (VS::Effects::package == nullptr ||
+        VS::Effects::package->particle_definitions == nullptr ||
         index >= LiveParticleDefinitionCount()) {
       if (ShouldReport(refused_definitions)) {
         VS::Core::LogWarn(
@@ -199,7 +199,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
       return std::nullopt;
     }
     return DefinitionOf(
-        Effects_package->particle_definitions->Definitions()[index]);
+        VS::Effects::package->particle_definitions->Definitions()[index]);
   }
 
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,
@@ -208,7 +208,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
   }
 
   [[nodiscard]] Position3 EffectOrigin() override {
-    return ShortOf(Effects_actionRequest.position);
+    return ShortOf(actionRequest.position);
   }
 
   [[nodiscard]] std::optional<Vec3> TransformTranslation(
@@ -309,7 +309,7 @@ int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
   LiveParticleEmitterScratch& live_scratch = EmitterScratch();
   CameraEffectState state = StateOf(live);
   CameraScratch scratch = ScratchOf(live_scratch);
-  LiveCameraEffectHost host(Effects_currentInstance);
+  LiveCameraEffectHost host(currentInstance);
   const std::int32_t age = state.age;
   const std::int32_t alive =
       UpdateEffectCamera(host, state, scratch, command, packed);

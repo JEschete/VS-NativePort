@@ -22,7 +22,7 @@
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffect.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -801,36 +801,35 @@ TEST_CASE(
     "F01421 the Live reset clears the globals but keeps the pending "
     "tracks",
     "[effect-runtime][F01421]") {
-  const u_int pending = Effects_pendingTracks;
-  const std::array<int, 4> tokens{
-      Effects_tokenBitmaps[0], Effects_tokenBitmaps[1], Effects_tokenBitmaps[2],
-      Effects_tokenBitmaps[3]};
-  Effects_pendingTracks = 0x30;
-  Effects_trackCount = 6;
-  Effects_primaryToken = 9;
-  Effects_tokenBitmaps[2] = 0x10;
-  Effects_curveSamples[0] = 5;
-  Effects_actionVariant = 3;
+  const u_int pending = fx::pendingTracks;
+  const std::array<int, 4> tokens{fx::tokenBitmaps[0], fx::tokenBitmaps[1],
+                                  fx::tokenBitmaps[2], fx::tokenBitmaps[3]};
+  fx::pendingTracks = 0x30;
+  fx::trackCount = 6;
+  fx::primaryToken = 9;
+  fx::tokenBitmaps[2] = 0x10;
+  fx::curveSamples[0] = 5;
+  fx::actionVariant = 3;
   fx::LiveResetEffectInstances();
-  CHECK(Effects_primaryPhase == 0);
-  CHECK(Effects_pendingTracks == 0x30);
-  CHECK(Effects_trackCount == 0);
-  CHECK(Effects_primaryToken == 0);
-  CHECK(Effects_tokenBitmaps[2] == 0);
-  CHECK(Effects_curveSamples[0] == 0);
-  CHECK(Effects_actionVariant == 0);
-  CHECK(Effects_primaryInstances == nullptr);
-  Effects_pendingTracks = pending;
-  std::ranges::copy(tokens, std::begin(Effects_tokenBitmaps));
+  CHECK(fx::primaryPhase == 0);
+  CHECK(fx::pendingTracks == 0x30);
+  CHECK(fx::trackCount == 0);
+  CHECK(fx::primaryToken == 0);
+  CHECK(fx::tokenBitmaps[2] == 0);
+  CHECK(fx::curveSamples[0] == 0);
+  CHECK(fx::actionVariant == 0);
+  CHECK(fx::primaryInstances == nullptr);
+  fx::pendingTracks = pending;
+  std::ranges::copy(tokens, std::begin(fx::tokenBitmaps));
 }
 
 TEST_CASE("F01433 the Live action effect refuses a missing request",
           "[effect-runtime][F01433]") {
-  const u_int phase = Effects_primaryPhase;
-  Effects_primaryPhase = 0;
+  const u_int phase = fx::primaryPhase;
+  fx::primaryPhase = 0;
   CHECK(fx::LiveBeginActionEffect(nullptr, 1, 2) == 0);
-  CHECK(Effects_primaryPhase == 0);
-  Effects_primaryPhase = phase;
+  CHECK(fx::primaryPhase == 0);
+  fx::primaryPhase = phase;
 }
 
 namespace {
@@ -996,11 +995,11 @@ TEST_CASE("F01450 the action effect mode clear resets the variant",
   std::uint8_t variant = 3;
   fx::ClearActionEffectMode(variant);
   CHECK(variant == 0);
-  const auto saved = Effects_actionVariant;
-  Effects_actionVariant = 5;
+  const auto saved = fx::actionVariant;
+  fx::actionVariant = 5;
   fx::LiveClearActionEffectMode();
-  CHECK(Effects_actionVariant == 0);
-  Effects_actionVariant = saved;
+  CHECK(fx::actionVariant == 0);
+  fx::actionVariant = saved;
 }
 
 namespace {
@@ -1009,21 +1008,21 @@ namespace {
 class LiveSecondaryScope {
  public:
   LiveSecondaryScope()
-      : saved_package_(std::exchange(Effects_package, &package_)),
-        saved_secondaries_(std::exchange(Effects_secondaryInstances, nullptr)),
-        saved_request_(Effects_secondaryRequest) {
+      : saved_package_(std::exchange(fx::package, &package_)),
+        saved_secondaries_(std::exchange(fx::secondaryInstances, nullptr)),
+        saved_request_(fx::secondaryRequest) {
     package_.programs = script_.data();
-    std::ranges::copy(Effects_tokenBitmaps, saved_tokens_.begin());
+    std::ranges::copy(fx::tokenBitmaps, saved_tokens_.begin());
   }
   LiveSecondaryScope(const LiveSecondaryScope&) = delete;
   LiveSecondaryScope& operator=(const LiveSecondaryScope&) = delete;
   LiveSecondaryScope(LiveSecondaryScope&&) = delete;
   LiveSecondaryScope& operator=(LiveSecondaryScope&&) = delete;
   ~LiveSecondaryScope() {
-    Effects_secondaryRequest = saved_request_;
-    std::ranges::copy(saved_tokens_, std::begin(Effects_tokenBitmaps));
-    Effects_secondaryInstances = saved_secondaries_;
-    Effects_package = saved_package_;
+    fx::secondaryRequest = saved_request_;
+    std::ranges::copy(saved_tokens_, std::begin(fx::tokenBitmaps));
+    fx::secondaryInstances = saved_secondaries_;
+    fx::package = saved_package_;
   }
 
   [[nodiscard]] const char* Script() const { return script_.data(); }
@@ -1037,7 +1036,7 @@ class LiveSecondaryScope {
   fx::LiveEffectPackage* saved_package_;
   Instance* saved_secondaries_;
   VS::Effects::LiveActionEffectRequest saved_request_;
-  std::array<int, std::size(Effects_tokenBitmaps)> saved_tokens_{};
+  std::array<int, std::size(fx::tokenBitmaps)> saved_tokens_{};
 };
 
 VS::Effects::LiveActionEffectRequest TwoTargetRequest() {
@@ -1057,7 +1056,7 @@ VS::Effects::LiveActionEffectRequest TwoTargetRequest() {
 
 std::vector<Instance*> SecondaryInstances() {
   std::vector<Instance*> instances;
-  for (Instance* instance = Effects_secondaryInstances; instance != nullptr;
+  for (Instance* instance = fx::secondaryInstances; instance != nullptr;
        instance = instance->next) {
     instances.push_back(instance);
   }
@@ -1093,7 +1092,7 @@ TEST_CASE("F01437 the Live spawn starts each target's secondary instance",
   VS::Effects::LiveActionEffectRequest request = TwoTargetRequest();
   const int token = fx::LiveSpawnSecondaryEffectRequest(&request, 0, 0x1234);
   CHECK(token != 0);
-  CHECK(Effects_secondaryRequest.effect_id == 23);
+  CHECK(fx::secondaryRequest.effect_id == 23);
 
   const std::vector<Instance*> spawned = SecondaryInstances();
   REQUIRE(spawned.size() == 2);
@@ -1107,9 +1106,9 @@ TEST_CASE("F01437 the Live spawn starts each target's secondary instance",
 
 TEST_CASE("F01435 the Live secondary spawns refuse a missing request",
           "[effect-runtime][F01435][F01436][F01437]") {
-  const int tokens = Effects_tokenBitmaps[0];
+  const int tokens = fx::tokenBitmaps[0];
   CHECK(fx::LiveSpawnSecondaryEffects(nullptr, 0, 1) == 0);
   CHECK(fx::LiveBeginSecondaryEffects(nullptr, 1) == 0);
   CHECK(fx::LiveSpawnSecondaryEffectRequest(nullptr, 0, 1) == 0);
-  CHECK(Effects_tokenBitmaps[0] == tokens);
+  CHECK(fx::tokenBitmaps[0] == tokens);
 }

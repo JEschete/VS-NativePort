@@ -24,7 +24,7 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailInit.hpp"
@@ -178,12 +178,12 @@ void StoreScratch(const TrailOriginScratch& values,
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 LiveParticleDefinition* Definition(std::size_t index) {
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr ||
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->particle_definitions->Definitions()[index];
+  return &VS::Effects::package->particle_definitions->Definitions()[index];
 }
 
 template <typename Emitter>
@@ -202,8 +202,8 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
     return samples;
   }
   const auto sampled = EmitterLayout<Emitter>::kSample(
-      {Effects_package->curves[curve],
-       Effects_package->curve_block->Size(curve)});
+      {VS::Effects::package->curves[curve],
+       VS::Effects::package->curve_block->Size(curve)});
   if (sampled.clamped) {
     VS::Core::LogDebug("effects",
                        "{} trail emitter: one-entry transparency curve {} "
@@ -224,7 +224,7 @@ void GenerateOrigins(const LiveParticleDefinition& definition,
   }
   const std::span<TrailOf<Emitter>> trails = Trails(overlay.name, state);
   const MATRIX& matrix = instance.transforms[definition.transform_index].world;
-  const SVECTOR& origin = Effects_actionRequest.position;
+  const SVECTOR& origin = actionRequest.position;
   const TrailOriginRequest request{
       .flags = scratch.flags,
       .position =
@@ -381,7 +381,7 @@ template <typename Emitter>
 bool LiveTrailEmitterHost<Emitter>::BeginTick() {
   Emitter& state = *State();
   static_cast<void>(Trails(overlay_.name, state));
-  instance_ = Effects_currentInstance;
+  instance_ = currentInstance;
   if (instance_ == nullptr) {
     VS::Core::LogWarn("effects",
                       "{} trail emitter: no current effect instance; emitter "

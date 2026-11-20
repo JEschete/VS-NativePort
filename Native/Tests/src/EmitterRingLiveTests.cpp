@@ -19,7 +19,7 @@
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -56,13 +56,14 @@ class LiveEmission {
       1, 0, 6, 0, 1, 0, 64, 0};
 
   LiveEmission() {
-    std::ranges::copy(std::span(Effects_curveSamples), saved_samples_.begin());
+    std::ranges::copy(std::span(VS::Effects::curveSamples),
+                      saved_samples_.begin());
     std::ranges::copy(
         std::span(static_cast<const std::byte*>(VS::Core::ScratchBase()),
                   kScratchBytes),
         saved_scratch_.begin());
-    Effects_package = &package;
-    Effects_currentInstance = instance.get();
+    VS::Effects::package = &package;
+    VS::Effects::currentInstance = instance.get();
     package.particle_definitions =
         reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
     package.curve_block =
@@ -71,8 +72,8 @@ class LiveEmission {
     effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span(&definitions, 1)));
     effects::RecordLiveEffectCurves(std::as_bytes(std::span(curves)));
-    std::ranges::fill(Effects_curveSamples, 0);
-    Effects_curveSamples[1] = 64;
+    std::ranges::fill(VS::Effects::curveSamples, 0);
+    VS::Effects::curveSamples[1] = 64;
     VS::Effects::particlePool = particles.data();
     VS::Effects::freeParticles = particles.data();
     VS::Effects::particleCapacity = static_cast<int>(particles.size());
@@ -105,14 +106,14 @@ class LiveEmission {
   LiveEmission& operator=(LiveEmission&&) = delete;
   ~LiveEmission() {
     effects::ForgetLivePackageExtents();
-    Effects_package = saved_package_;
-    Effects_currentInstance = saved_instance_;
+    VS::Effects::package = saved_package_;
+    VS::Effects::currentInstance = saved_instance_;
     VS::Effects::particlePool = saved_pool_;
     VS::Effects::freeParticles = saved_free_;
     VS::Effects::particleCapacity = saved_capacity_;
     VS::Effects::usedParticleCount = saved_used_;
     VS::Effects::emissionCounter = saved_counter_;
-    std::ranges::copy(saved_samples_, Effects_curveSamples);
+    std::ranges::copy(saved_samples_, VS::Effects::curveSamples);
     std::ranges::copy(saved_scratch_,
                       static_cast<std::byte*>(VS::Core::ScratchBase()));
     VS::Core::BiosRand().Seed(saved_random_);
@@ -123,8 +124,9 @@ class LiveEmission {
   }
 
  private:
-  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
-  VS::Effects::LiveEffectInstance* saved_instance_ = Effects_currentInstance;
+  VS::Effects::LiveEffectPackage* saved_package_ = VS::Effects::package;
+  VS::Effects::LiveEffectInstance* saved_instance_ =
+      VS::Effects::currentInstance;
   VS::Effects::LiveParticle* saved_pool_ = VS::Effects::particlePool;
   VS::Effects::LiveParticle* saved_free_ = VS::Effects::freeParticles;
   int saved_capacity_ = VS::Effects::particleCapacity;
@@ -241,7 +243,7 @@ TEST_CASE(
     "F01515 Live resolves source and destination from the supplied instance",
     "[F01515][emitter-rings-live][effects]") {
   LiveEmission fixture;
-  Effects_currentInstance = nullptr;
+  VS::Effects::currentInstance = nullptr;
   auto& definition = fixture.definitions.values[0];
   std::ranges::fill(definition.pair_ranges[2], 10);
   fixture.instance->context.emit_from.position = {100, 0, 0, 0};

@@ -1061,12 +1061,12 @@ int func_800F9800(void) {
             r"offsetof\(LiveActionEffectRequest,\s*position\)\s*==\s*kEffectOriginOffset",
         )
         self.assertIn("kEffectOriginOffset = 0xE0;", request)
-        for name in ("Runtime.h", "Runtime.cpp"):
+        for name in ("Runtime.hpp", "Runtime.cpp"):
             text = (root / "Native" / "Game" / "src" / "Effects" / name).read_text(
                 encoding="utf-8"
             )
             with self.subTest(name=name):
-                self.assertNotIn("Effects_effectOrigin", text)
+                self.assertNotIn("effectOrigin", text)
 
     def test_texture_binding_receives_its_payload_extent(self):
         # #276 slice 38: the package walk is owned; its typed binder hands each block its payload extent.
@@ -3254,7 +3254,7 @@ int func_800F9800(void) {
         self.assertIn("BoundTextureTable(texture_index) == nullptr", source)
         self.assertIn("request_effect={}", source)
         self.assertLess(source.index("VS::Core::LogDebug"), source.index("RestartTextureAnimation("))
-        self.assertNotIn("Effects_currentInstance", source)
+        self.assertNotIn("currentInstance", source)
         source = "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);"
         for old, new, _ in copy_fixups.FIXES["F01861"]:
             self.assertIn(old, source)
@@ -3265,17 +3265,18 @@ int func_800F9800(void) {
     def test_texture_provenance_does_not_read_secondary_only_instance_metadata(self):
         root = Path(__file__).resolve().parents[2]
         live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
-        # The retired copier's F01861 text keeps the decomp member name; the
-        # native request record names it effect_id (#441).
+        # The retired copier's F01861 text keeps the decomp names; the native
+        # request record names the member effect_id and the runtime globals
+        # live in VS::Effects (#441).
         replacements = {
-            "F01861": ("\n".join(new for _, new, _ in copy_fixups.FIXES["F01861"]), "effectId"),
-            "ParticleTextureAnimationLive": (live, "effect_id"),
+            "F01861": ("\n".join(new for _, new, _ in copy_fixups.FIXES["F01861"]), "Effects_", "effectId"),
+            "ParticleTextureAnimationLive": (live, "", "effect_id"),
         }
-        for name, (replacement, member) in replacements.items():
+        for name, (replacement, prefix, member) in replacements.items():
             with self.subTest(name=name):
-                self.assertNotIn("Effects_currentInstance", replacement)
-                self.assertIn(f"Effects_secondaryRequest.{member}", replacement)
-                self.assertIn(f"Effects_actionRequest.{member}", replacement)
+                self.assertNotIn("currentInstance", replacement)
+                self.assertIn(f"{prefix}secondaryRequest.{member}", replacement)
+                self.assertIn(f"{prefix}actionRequest.{member}", replacement)
 
     def test_texture_names_preserve_state_and_stream_roles(self):
         # #276 Group N: the texture animation calls are owned Live adapters

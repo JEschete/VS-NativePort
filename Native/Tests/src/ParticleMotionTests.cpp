@@ -18,7 +18,7 @@
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -155,7 +155,7 @@ class AnimationPackage {
     package.texture_table_count = 1;
     package.texture_tables[0] = frames.data();
     package.animation_table = reinterpret_cast<u_short*>(table.data());
-    Effects_package = &package;
+    fx::package = &package;
     fx::RecordLiveAnimationTable(std::as_writable_bytes(std::span(table)));
   }
   AnimationPackage(const AnimationPackage&) = delete;
@@ -164,7 +164,7 @@ class AnimationPackage {
   AnimationPackage& operator=(AnimationPackage&&) = delete;
   ~AnimationPackage() {
     fx::ForgetLiveAnimationTable(table.data());
-    Effects_package = saved_;
+    fx::package = saved_;
   }
 
   [[nodiscard]] const u_char* Program(std::size_t offset) const {
@@ -172,7 +172,7 @@ class AnimationPackage {
   }
 
  private:
-  fx::LiveEffectPackage* saved_ = Effects_package;
+  fx::LiveEffectPackage* saved_ = fx::package;
 };
 }  // namespace
 

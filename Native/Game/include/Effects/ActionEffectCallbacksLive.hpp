@@ -4,8 +4,8 @@
 #include "Effects/ActionEffectCallbacks.hpp"
 
 // Live binding for the standalone presentation and actor callbacks
-// (ActionEffectCallbacks.hpp) over Effects_tintedActor, Field_controlMode,
-// VS::State::tickSpeed, Effects_effectBusyFlags, the actor animation and
+// (ActionEffectCallbacks.hpp) over VS::Effects::tintedActor, Field_controlMode,
+// VS::State::tickSpeed, VS::Effects::effectBusyFlags, the actor animation and
 // palette services, the HUD, the minimap, the field mode and
 // LiveBeginActionEffect. The entries keep the original signatures for the
 // generated callers and the module's function pointers.

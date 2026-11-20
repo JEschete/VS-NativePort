@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 

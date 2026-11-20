@@ -10,7 +10,7 @@
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 #include <cstdint>
 

@@ -11,7 +11,7 @@
 
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -40,24 +40,24 @@ class PrimaryEffectGlobals {
   PrimaryEffectGlobals(const PrimaryEffectGlobals&) = delete;
   PrimaryEffectGlobals& operator=(const PrimaryEffectGlobals&) = delete;
   ~PrimaryEffectGlobals() {
-    Effects_primaryPhase = phase_;
-    Effects_trackCount = count_;
-    Effects_startedTrackCount = started_;
-    Effects_pendingTracks = pending_;
-    Effects_primaryLoaded = loaded_;
+    fx::primaryPhase = phase_;
+    fx::trackCount = count_;
+    fx::startedTrackCount = started_;
+    fx::pendingTracks = pending_;
+    fx::primaryLoaded = loaded_;
     std::ranges::copy(tokens_, Tokens().begin());
   }
 
   static std::span<int, fx::kEffectTokenWords> Tokens() {
-    return std::span(Effects_tokenBitmaps).first<fx::kEffectTokenWords>();
+    return std::span(fx::tokenBitmaps).first<fx::kEffectTokenWords>();
   }
 
  private:
-  u_int phase_ = Effects_primaryPhase;
-  int count_ = Effects_trackCount;
-  int started_ = Effects_startedTrackCount;
-  u_int pending_ = Effects_pendingTracks;
-  char loaded_ = Effects_primaryLoaded;
+  u_int phase_ = fx::primaryPhase;
+  int count_ = fx::trackCount;
+  int started_ = fx::startedTrackCount;
+  u_int pending_ = fx::pendingTracks;
+  char loaded_ = fx::primaryLoaded;
   std::array<int, fx::kEffectTokenWords> tokens_{};
 };
 }  // namespace
@@ -121,31 +121,31 @@ TEST_CASE("F01429 a track outside the pending mask is refused",
 TEST_CASE("F01427 F01428 F01429 the Live entries read and write the globals",
           "[primary-effect][F01427][F01428][F01429]") {
   const PrimaryEffectGlobals globals;
-  Effects_primaryPhase = 5;
-  Effects_trackCount = 3;
-  Effects_startedTrackCount = 3;
-  Effects_pendingTracks = 0;
+  fx::primaryPhase = 5;
+  fx::trackCount = 3;
+  fx::startedTrackCount = 3;
+  fx::pendingTracks = 0;
   CHECK(fx::LiveCanStartEffectTrack() == 0);
   CHECK(fx::LivePrimaryEffectTrackCount() == 3);
 
   fx::LiveRequeueEffectTrack(2);
-  CHECK(Effects_startedTrackCount == 2);
-  CHECK(Effects_pendingTracks == 0x4);
+  CHECK(fx::startedTrackCount == 2);
+  CHECK(fx::pendingTracks == 0x4);
   CHECK(fx::LiveCanStartEffectTrack() == 1);
 
   fx::LiveRequeueEffectTrack(32);
-  CHECK(Effects_startedTrackCount == 2);
-  CHECK(Effects_pendingTracks == 0x4);
+  CHECK(fx::startedTrackCount == 2);
+  CHECK(fx::pendingTracks == 0x4);
 }
 
 TEST_CASE("F01430 any nonzero loaded byte reports the package loaded",
           "[primary-effect][F01430]") {
   const PrimaryEffectGlobals globals;
-  Effects_primaryLoaded = 0;
+  fx::primaryLoaded = 0;
   CHECK(fx::LiveIsPrimaryEffectLoaded() == 0);
-  Effects_primaryLoaded = 1;
+  fx::primaryLoaded = 1;
   CHECK(fx::LiveIsPrimaryEffectLoaded() == 1);
-  Effects_primaryLoaded = static_cast<char>(0x80);
+  fx::primaryLoaded = static_cast<char>(0x80);
   CHECK(fx::LiveIsPrimaryEffectLoaded() == 1);
   CHECK_FALSE(fx::IsPrimaryEffectLoaded(PrimaryEffectState{}));
 }
@@ -159,12 +159,12 @@ TEST_CASE("F01438 only the runtime's phases are stored",
   CHECK_FALSE(fx::ToPrimaryEffectPhase(10).has_value());
 
   const PrimaryEffectGlobals globals;
-  Effects_primaryPhase = 0;
+  fx::primaryPhase = 0;
   fx::LiveSetPrimaryEffectPhase(6);
-  CHECK(Effects_primaryPhase == 6);
+  CHECK(fx::primaryPhase == 6);
   fx::LiveSetPrimaryEffectPhase(7);
   fx::LiveSetPrimaryEffectPhase(-1);
-  CHECK(Effects_primaryPhase == 6);
+  CHECK(fx::primaryPhase == 6);
 }
 
 TEST_CASE("F01440 the phase read returns the stored number",
@@ -174,10 +174,10 @@ TEST_CASE("F01440 the phase read returns the stored number",
   CHECK(fx::PrimaryEffectPhaseOf(state) == PrimaryEffectPhase::kLoadingPlugins);
 
   const PrimaryEffectGlobals globals;
-  Effects_primaryPhase = 3;
+  fx::primaryPhase = 3;
   CHECK(fx::LivePrimaryEffectPhase() == 3);
   // A number stored around the setter reads back unchanged.
-  Effects_primaryPhase = 7;
+  fx::primaryPhase = 7;
   CHECK(fx::LivePrimaryEffectPhase() == 7);
 }
 

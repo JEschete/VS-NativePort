@@ -6,7 +6,7 @@
 #include <span>
 
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {
@@ -33,8 +33,8 @@ std::size_t next_replacement = 0;
 template <typename Block>
 bool IsBound(const void* data, Block LiveEffectPackage::* block) {
   if (data == nullptr) return false;
-  return static_cast<const void*>(Effects_actionPackage.*block) == data ||
-         static_cast<const void*>(Effects_secondaryPackage.*block) == data;
+  return static_cast<const void*>(actionPackage.*block) == data ||
+         static_cast<const void*>(secondaryPackage.*block) == data;
 }
 
 // A free extent, else the oldest one no package binds, else the oldest; a
@@ -103,24 +103,24 @@ AnimationTableExtent* FindAnimationTable(const void* data) {
 }
 
 PackageExtentRecord* Find() {
-  if (Effects_package == nullptr) return nullptr;
-  const auto found = std::ranges::find(records, Effects_package,
+  if (VS::Effects::package == nullptr) return nullptr;
+  const auto found = std::ranges::find(records, VS::Effects::package,
                                        &PackageExtentRecord::package);
   return found == records.end() ? nullptr : &*found;
 }
 
 PackageExtentRecord* FindOrAdd() {
-  if (Effects_package == nullptr) return nullptr;
+  if (VS::Effects::package == nullptr) return nullptr;
   if (auto* record = Find()) return record;
   auto& record = records.at(next_replacement);
   next_replacement = (next_replacement + 1) % records.size();
-  record = {.package = Effects_package};
+  record = {.package = VS::Effects::package};
   return &record;
 }
 }  // namespace
 
 void ForgetLivePackageExtents() {
-  if (auto* record = Find()) *record = {.package = Effects_package};
+  if (auto* record = Find()) *record = {.package = VS::Effects::package};
 }
 
 void RecordLiveParticleDefinitions(std::span<const std::byte> payload) {
@@ -140,7 +140,7 @@ void RecordLiveEffectCurves(std::span<const std::byte> payload) {
 std::size_t LiveParticleDefinitionCount() {
   const auto* record = Find();
   if (record == nullptr || record->definitions == nullptr ||
-      record->definitions != Effects_package->particle_definitions) {
+      record->definitions != VS::Effects::package->particle_definitions) {
     return 0;
   }
   return record->definition_count;
@@ -149,7 +149,7 @@ std::size_t LiveParticleDefinitionCount() {
 std::size_t LiveEffectCurveCount() {
   const auto* record = Find();
   if (record == nullptr || record->curves == nullptr ||
-      record->curves != Effects_package->curve_block) {
+      record->curves != VS::Effects::package->curve_block) {
     return 0;
   }
   return record->curve_count;

@@ -2336,7 +2336,7 @@
     <ClInclude Include="src\Effects\Plugins\Plg301.hpp" />
     <ClInclude Include="src\Effects\Plugins\PluginData.hpp" />
     <ClInclude Include="src\Effects\PurgeTables.hpp" />
-    <ClInclude Include="src\Effects\Runtime.h" />
+    <ClInclude Include="src\Effects\Runtime.hpp" />
     <ClInclude Include="src\Effects\ScreenEffectState.hpp" />
     <ClInclude Include="src\Effects\SpawnRequest.hpp" />
     <ClInclude Include="src\Effects\Templates\TemplateLiveState.hpp" />

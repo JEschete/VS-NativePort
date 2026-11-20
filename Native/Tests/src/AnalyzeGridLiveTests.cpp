@@ -17,7 +17,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -47,8 +47,8 @@ static_assert(offsetof(Definitions, entries) == 4);
 class LiveGrid {
  public:
   LiveGrid() {
-    Effects_package = &package;
-    Effects_currentInstance = &instance;
+    VS::Effects::package = &package;
+    VS::Effects::currentInstance = &instance;
     effects::ForgetLivePackageExtents();
     package.particle_definitions =
         reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
@@ -77,11 +77,11 @@ class LiveGrid {
     if (memory::LivePayloadCapacity(slot.renderer_state).has_value()) {
       memory::FreeLiveFromHighEnd(slot.renderer_state);
     }
-    Effects_package = &package;
+    VS::Effects::package = &package;
     effects::ForgetLivePackageExtents();
-    Effects_package = saved_package_;
-    Effects_currentInstance = saved_instance_;
-    Effects_actionRequest = saved_request_;
+    VS::Effects::package = saved_package_;
+    VS::Effects::currentInstance = saved_instance_;
+    VS::Effects::actionRequest = saved_request_;
     VS::Render::frameBuf = saved_frame_buf_;
     VS::Render::nearClip = saved_near_clip_;
     VS::Render::FrameScratchpad() = saved_frame_;
@@ -113,9 +113,11 @@ class LiveGrid {
   std::array<u_long, kOrderingWords> ordering{};
 
  private:
-  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
-  VS::Effects::LiveEffectInstance* saved_instance_ = Effects_currentInstance;
-  VS::Effects::LiveActionEffectRequest saved_request_ = Effects_actionRequest;
+  VS::Effects::LiveEffectPackage* saved_package_ = VS::Effects::package;
+  VS::Effects::LiveEffectInstance* saved_instance_ =
+      VS::Effects::currentInstance;
+  VS::Effects::LiveActionEffectRequest saved_request_ =
+      VS::Effects::actionRequest;
   int saved_frame_buf_ = VS::Render::frameBuf;
   int saved_near_clip_ = VS::Render::nearClip;
   VS::Render::FrameScratch saved_frame_ = VS::Render::FrameScratchpad();
@@ -174,9 +176,9 @@ void CheckLiveRefusals(VS::Effects::EffectRenderer entry) {
   REQUIRE(entry(&live.slot, 1, 0x0105) == 1);
   const auto before = live.State();
   if (failure == 0) {
-    Effects_package = nullptr;
+    VS::Effects::package = nullptr;
   } else if (failure == 1) {
-    Effects_currentInstance = nullptr;
+    VS::Effects::currentInstance = nullptr;
   } else if (failure == 2) {
     live.definitions.entries[1].transform_index = 255;
   } else if (failure == 3) {

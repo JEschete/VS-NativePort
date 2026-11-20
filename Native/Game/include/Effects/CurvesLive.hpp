@@ -7,15 +7,15 @@
 #include "Effects/Curves.hpp"
 
 // Live binding for the effect curves (Curves.hpp) over the current package
-// (Effects_package): its curve block (block 4) within the extents recorded
+// (VS::Effects::package): its curve block (block 4) within the extents recorded
 // when it was bound (PackageExtents.hpp), its segmented curve table (block
 // 11) as EffectResourcesLive.hpp bound it, and the sampled curve table
-// (Effects_curveSamples). A curve the package lacks, a segment leaving the
+// (VS::Effects::curveSamples). A curve the package lacks, a segment leaving the
 // table and a sample past the table are refused with a diagnostic and read
 // as 0, where the original indexed past them. The C-shaped entries keep the
 // original signatures for the copied callers.
 namespace VS::Effects {
-// Effects_curveSamples (D_800F5330): slot i + 1 holds curve i's sample of
+// curveSamples (D_800F5330): slot i + 1 holds curve i's sample of
 // the current frame.
 [[nodiscard]] std::span<std::int32_t> LiveEffectCurveSamples();
 

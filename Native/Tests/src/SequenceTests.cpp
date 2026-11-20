@@ -41,7 +41,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "DiscQueue.h"
 #include "Effects/CameraLiveState.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffectOpcodes.hpp"
@@ -1022,17 +1022,17 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Actors_ActorRecord* saved_actor[kSlots];
   Field_GimmickInstance* saved_object[kSlots];
   const VS::Effects::LiveActionEffectRequest saved_request =
-      Effects_actionRequest;
+      VS::Effects::actionRequest;
   const VS::Effects::LiveEffectCamera saved_camera = VS::Effects::effectCamera;
   const VS::Effects::LiveEffectCamera saved_action_camera =
       VS::Effects::savedActionCamera;
-  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
-  const u_int saved_phase = Effects_primaryPhase;
-  const char saved_token = Effects_primaryToken;
+  VS::Effects::LiveEffectPackage* saved_package = VS::Effects::package;
+  const u_int saved_phase = VS::Effects::primaryPhase;
+  const char saved_token = VS::Effects::primaryToken;
   int saved_bitmaps[4];
-  u_char request_before[sizeof Effects_actionRequest];
-  u_char request_after[sizeof Effects_actionRequest];
-  memcpy(request_before, &Effects_actionRequest, sizeof request_before);
+  u_char request_before[sizeof VS::Effects::actionRequest];
+  u_char request_after[sizeof VS::Effects::actionRequest];
+  memcpy(request_before, &VS::Effects::actionRequest, sizeof request_before);
   for (int i = 0; i < kSlots; ++i) {
     saved_battle[i] = Battle_actors[i];
     saved_actor[i] = Actors_actorRecords[i];
@@ -1041,8 +1041,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
     Actors_actorRecords[i] = nullptr;
     Field_gimmickInstances[i] = nullptr;
   }
-  memcpy(saved_bitmaps, Effects_tokenBitmaps, sizeof saved_bitmaps);
-  memset(Effects_tokenBitmaps, 0, sizeof saved_bitmaps);
+  memcpy(saved_bitmaps, VS::Effects::tokenBitmaps, sizeof saved_bitmaps);
+  memset(VS::Effects::tokenBitmaps, 0, sizeof saved_bitmaps);
   const int present = scenario < 3 || scenario == 7;
   const int slot = scenario == 10 ? 2
                    : scenario == 3 || scenario == 6 || scenario == 7
@@ -1063,21 +1063,21 @@ int TestScriptedEffectTargetBinding(int scenario) {
   u_char instruction[] = {
       0xA0, static_cast<u_char>(effect), static_cast<u_char>(effect >> 8),
       static_cast<u_char>(selector), static_cast<u_char>(selector >> 8)};
-  Effects_primaryPhase = 3;
+  VS::Effects::primaryPhase = 3;
   const intptr_t result =
       VS::Event::CommandPlayActorEffectOpcode(instruction, 0);
-  memcpy(request_after, &Effects_actionRequest, sizeof request_after);
+  memcpy(request_after, &VS::Effects::actionRequest, sizeof request_after);
   // Absent model (3) and direct slot references to an empty slot (4, 10) start
   // like the original: func_800BFE50 returns type-1 slots unchecked.
   const int empty = scenario == 3 || scenario == 4 || scenario == 10;
   const int queued = present || empty;
   int passed = result == (queued ? 0 : 1);
   if (queued) {
-    passed &= Effects_primaryPhase == 6 &&
-              Effects_actionRequest.effect_id == effect &&
-              Effects_actionRequest.count == 1 &&
-              Effects_actionRequest.targets[0].type == 4 &&
-              Effects_actionRequest.targets[0].Actor().actor == slot;
+    passed &= VS::Effects::primaryPhase == 6 &&
+              VS::Effects::actionRequest.effect_id == effect &&
+              VS::Effects::actionRequest.count == 1 &&
+              VS::Effects::actionRequest.targets[0].type == 4 &&
+              VS::Effects::actionRequest.targets[0].Actor().actor == slot;
     if (empty) {
       passed &= Battle_actors[slot] == nullptr &&
                 Actors_actorRecords[slot] == nullptr &&
@@ -1097,11 +1097,12 @@ int TestScriptedEffectTargetBinding(int scenario) {
     }
   } else {
     passed &=
-        Effects_primaryPhase == 3 && Effects_primaryToken == saved_token &&
+        VS::Effects::primaryPhase == 3 &&
+        VS::Effects::primaryToken == saved_token &&
         memcmp(request_before, request_after, sizeof request_before) == 0 &&
-        Effects_package == saved_package;
+        VS::Effects::package == saved_package;
     for (int i = 0; i < 4; ++i) {
-      passed &= Effects_tokenBitmaps[i] == 0;
+      passed &= VS::Effects::tokenBitmaps[i] == 0;
     }
   }
   for (int i = 0; i < kSlots; ++i) {
@@ -1109,13 +1110,13 @@ int TestScriptedEffectTargetBinding(int scenario) {
     Actors_actorRecords[i] = saved_actor[i];
     Field_gimmickInstances[i] = saved_object[i];
   }
-  memcpy(Effects_tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
-  Effects_actionRequest = saved_request;
+  memcpy(VS::Effects::tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
+  VS::Effects::actionRequest = saved_request;
   VS::Effects::effectCamera = saved_camera;
   VS::Effects::savedActionCamera = saved_action_camera;
-  Effects_package = saved_package;
-  Effects_primaryPhase = saved_phase;
-  Effects_primaryToken = saved_token;
+  VS::Effects::package = saved_package;
+  VS::Effects::primaryPhase = saved_phase;
+  VS::Effects::primaryToken = saved_token;
   return passed;
 }
 

@@ -37,7 +37,7 @@
 #include "Effects/Plugins/Plg073.hpp"
 #include "Effects/Plugins/Plg082.hpp"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -108,8 +108,9 @@ struct ParticleFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_near = VS::Render::nearClip;
   int saved_projection = VS::Render::projectionDistance;
-  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
-  VS::Effects::LiveEffectInstance* saved_instance = Effects_currentInstance;
+  VS::Effects::LiveEffectPackage* saved_package = VS::Effects::package;
+  VS::Effects::LiveEffectInstance* saved_instance =
+      VS::Effects::currentInstance;
   VS::Effects::LiveParticle* saved_pool = VS::Effects::particlePool;
   int saved_capacity = VS::Effects::particleCapacity;
   int saved_used = VS::Effects::usedParticleCount;
@@ -127,8 +128,8 @@ struct ParticleFixture {
   std::array<u_long, 2064> ordering{};
 
   ParticleFixture() {
-    Effects_package = &package;
-    Effects_currentInstance = &instance;
+    VS::Effects::package = &package;
+    VS::Effects::currentInstance = &instance;
     VS::Effects::particlePool = &particle;
     VS::Effects::particleCapacity = 1;
     package.textures = &texture;
@@ -177,8 +178,8 @@ struct ParticleFixture {
     VS::Render::projectionDistance = saved_projection;
     VS::Effects::ForgetLivePackageExtents();
     VS::Effects::ForgetLiveAnimationTable(script.data());
-    Effects_package = saved_package;
-    Effects_currentInstance = saved_instance;
+    VS::Effects::package = saved_package;
+    VS::Effects::currentInstance = saved_instance;
     VS::Effects::particlePool = saved_pool;
     VS::Effects::particleCapacity = saved_capacity;
     VS::Effects::usedParticleCount = saved_used;
@@ -519,7 +520,7 @@ enum class ChildTrigger { kTick, kLifetimeEnd, kTextureEnd };
 struct ChildEmissionFixture : EmissionFixture {
   VECTOR saved_gravity = VS::Effects::particleGravity;
   int saved_drag = VS::Effects::particleDrag;
-  int saved_sample = Effects_curveSamples[0];
+  int saved_sample = VS::Effects::curveSamples[0];
   std::array<VS::Effects::LiveParticle, 2> nodes{};
   std::array<u_long, 1> terminal{0x30000000u};
 
@@ -530,7 +531,7 @@ struct ChildEmissionFixture : EmissionFixture {
     definition.flags = 4;
     std::ranges::fill(definition.pair_ranges[0], 1);
     std::ranges::fill(definition.pair_ranges[4], 10);
-    Effects_curveSamples[0] = 0;
+    VS::Effects::curveSamples[0] = 0;
     VS::Effects::particleGravity = {};
     VS::Effects::particleDrag = 0;
     nodes[0] = particle;
@@ -564,7 +565,7 @@ struct ChildEmissionFixture : EmissionFixture {
   ~ChildEmissionFixture() {
     VS::Effects::particleGravity = saved_gravity;
     VS::Effects::particleDrag = saved_drag;
-    Effects_curveSamples[0] = saved_sample;
+    VS::Effects::curveSamples[0] = saved_sample;
     VS::Effects::ForgetLiveAnimationTable(terminal.data());
   }
 
@@ -805,24 +806,24 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
 
 TEST_CASE("Effect renderer slots retain eight independent native callbacks",
           "[effects][renderer-registry]") {
-  STATIC_REQUIRE(std::size(Effects_effectRenderers) == 8);
-  const auto saved = std::to_array(Effects_effectRenderers);
-  std::array<std::byte, sizeof(Effects_actionPackage)> package_before;
-  std::memcpy(package_before.data(), &Effects_actionPackage,
+  STATIC_REQUIRE(std::size(VS::Effects::effectRenderers) == 8);
+  const auto saved = std::to_array(VS::Effects::effectRenderers);
+  std::array<std::byte, sizeof(VS::Effects::actionPackage)> package_before;
+  std::memcpy(package_before.data(), &VS::Effects::actionPackage,
               package_before.size());
   for (int index = 0; index < 8; ++index) {
     CHECK(VS::Effects::LiveSetEffectRenderer(
         static_cast<VS::Effects::PluginEntry>(index), index));
   }
   for (int index = 0; index < 8; ++index) {
-    CHECK(Effects_effectRenderers[index] ==
+    CHECK(VS::Effects::effectRenderers[index] ==
           VS::Effects::effectEntryPoints[index]);
   }
-  std::array<std::byte, sizeof(Effects_actionPackage)> package_after;
-  std::memcpy(package_after.data(), &Effects_actionPackage,
+  std::array<std::byte, sizeof(VS::Effects::actionPackage)> package_after;
+  std::memcpy(package_after.data(), &VS::Effects::actionPackage,
               package_after.size());
   CHECK(package_before == package_after);
-  std::copy(saved.begin(), saved.end(), Effects_effectRenderers);
+  std::copy(saved.begin(), saved.end(), VS::Effects::effectRenderers);
 
   for (std::size_t effect = 0;
        effect + 1 < std::size(VS::Effects::effectEntryPointIndices); ++effect) {
@@ -835,25 +836,25 @@ TEST_CASE("Effect renderer slots retain eight independent native callbacks",
 
 TEST_CASE("Primary effect request aliases the canonical native package field",
           "[effects][request-context]") {
-  auto* saved_context = Effects_package;
-  auto* saved_primary = Effects_actionPackage.request;
-  auto* saved_secondary = Effects_secondaryPackage.request;
+  auto* saved_context = VS::Effects::package;
+  auto* saved_primary = VS::Effects::actionPackage.request;
+  auto* saved_secondary = VS::Effects::secondaryPackage.request;
 
   // D_800F5798, the original's primary request pointer, is this field.
-  Effects_actionPackage.request = &Effects_actionRequest;
-  Effects_secondaryPackage.request = &Effects_secondaryRequest;
+  VS::Effects::actionPackage.request = &VS::Effects::actionRequest;
+  VS::Effects::secondaryPackage.request = &VS::Effects::secondaryRequest;
   VS::Effects::LiveSelectEffectResourceContext(1);
-  CHECK(Effects_package == &Effects_actionPackage);
-  CHECK(Effects_package->request == &Effects_actionRequest);
+  CHECK(VS::Effects::package == &VS::Effects::actionPackage);
+  CHECK(VS::Effects::package->request == &VS::Effects::actionRequest);
 
-  Effects_actionPackage.request = &Effects_secondaryRequest;
+  VS::Effects::actionPackage.request = &VS::Effects::secondaryRequest;
   VS::Effects::LiveSelectEffectResourceContext(0);
-  CHECK(Effects_package == &Effects_secondaryPackage);
-  CHECK(Effects_package->request == &Effects_secondaryRequest);
+  CHECK(VS::Effects::package == &VS::Effects::secondaryPackage);
+  CHECK(VS::Effects::package->request == &VS::Effects::secondaryRequest);
 
-  Effects_actionPackage.request = saved_primary;
-  Effects_secondaryPackage.request = saved_secondary;
-  Effects_package = saved_context;
+  VS::Effects::actionPackage.request = saved_primary;
+  VS::Effects::secondaryPackage.request = saved_secondary;
+  VS::Effects::package = saved_context;
 }
 
 TEST_CASE("Child effect tracks wait for the native outstanding child count",
@@ -867,19 +868,20 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
   fixture.instance.context.timeline = &timeline;
   fixture.instance.child_count = 1;
   track.keys = key.data();
-  auto* saved_instances = Effects_primaryInstances;
-  Effects_primaryInstances = nullptr;
+  auto* saved_instances = VS::Effects::primaryInstances;
+  VS::Effects::primaryInstances = nullptr;
 
   CHECK(VS::Effects::LiveTickChildEffectTrack(&fixture.instance, &track, 0) ==
         1);
   CHECK(fixture.instance.child_count == 1);
   CHECK(track.key_parameter == 0);
-  CHECK(Effects_primaryInstances == nullptr);
+  CHECK(VS::Effects::primaryInstances == nullptr);
 
-  while (Effects_primaryInstances != nullptr) {
-    VS::Effects::LiveDestroyPrimaryEffectInstance(Effects_primaryInstances);
+  while (VS::Effects::primaryInstances != nullptr) {
+    VS::Effects::LiveDestroyPrimaryEffectInstance(
+        VS::Effects::primaryInstances);
   }
-  Effects_primaryInstances = saved_instances;
+  VS::Effects::primaryInstances = saved_instances;
 }
 
 TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
@@ -1299,10 +1301,11 @@ Function Plg074Entry(unsigned address, Function expected) {
 }
 
 struct Plg074Fixture : EmissionFixture {
-  int saved_sample = Effects_curveSamples[0];
+  int saved_sample = VS::Effects::curveSamples[0];
   int saved_corner = VS::Effects::Plg073::trailEmissionCounter;
   int saved_plg074_corner = VS::Content::plg074TrailEmissionCounter[0];
-  VS::Effects::LiveActionEffectRequest saved_request = Effects_actionRequest;
+  VS::Effects::LiveActionEffectRequest saved_request =
+      VS::Effects::actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
   VS::Effects::LiveParticleEmitterScratch scratch{};
@@ -1312,10 +1315,10 @@ struct Plg074Fixture : EmissionFixture {
   Plg074Fixture() {
     package.texture_table_count = 1;
     package.animation_count = 1;
-    Effects_curveSamples[0] = 0;
+    VS::Effects::curveSamples[0] = 0;
     VS::Effects::Plg073::trailEmissionCounter = 0;
     VS::Content::plg074TrailEmissionCounter[0] = 0;
-    Effects_actionRequest.position = {400, -500, 600, 0};
+    VS::Effects::actionRequest.position = {400, -500, 600, 0};
     std::ranges::copy(VS::Effects::Plg073::tiledRingColorFactors,
                       saved_colors.begin());
     std::memcpy(saved_arc_colors.data(), VS::Effects::Plg073::ringColorFactors,
@@ -1339,10 +1342,10 @@ struct Plg074Fixture : EmissionFixture {
 
   ~Plg074Fixture() {
     VS::Effects::ForgetLivePackageExtents();
-    Effects_curveSamples[0] = saved_sample;
+    VS::Effects::curveSamples[0] = saved_sample;
     VS::Effects::Plg073::trailEmissionCounter = saved_corner;
     VS::Content::plg074TrailEmissionCounter[0] = saved_plg074_corner;
-    Effects_actionRequest = saved_request;
+    VS::Effects::actionRequest = saved_request;
     std::ranges::copy(saved_colors, VS::Effects::Plg073::tiledRingColorFactors);
     std::memcpy(VS::Effects::Plg073::ringColorFactors, saved_arc_colors.data(),
                 sizeof saved_arc_colors);
@@ -1515,7 +1518,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
           "[effects][plg074][f01988]") {
   const int anchor = GENERATE(0, 1, 2);
   Plg074Fixture fixture;
-  Effects_actionRequest.position = {100, -200, 300, 0};
+  VS::Effects::actionRequest.position = {100, -200, 300, 0};
   auto& definition = fixture.Definition();
   std::ranges::copy(std::array<std::int16_t, 6>{10, 10, 20, 20, 30, 30},
                     definition.extent_range.begin());
@@ -2033,7 +2036,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.renderer_state);
   REQUIRE(state != nullptr);
   if (missing_instance) {
-    Effects_currentInstance = nullptr;
+    VS::Effects::currentInstance = nullptr;
   } else {
     fixture.Definition().transform_index = 16;
   }
@@ -2111,7 +2114,7 @@ TEST_CASE("Live surfaces stop on a missing instance or transform",
   REQUIRE(entry(&slot, 1, 0) == 1);
   REQUIRE(slot.renderer_state != nullptr);
   if (missing_instance) {
-    Effects_currentInstance = nullptr;
+    VS::Effects::currentInstance = nullptr;
   } else {
     fixture.Definition().transform_index = 16;
   }

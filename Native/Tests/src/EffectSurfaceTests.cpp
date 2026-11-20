@@ -13,7 +13,7 @@
 
 #include "Core/Math/Interpolation.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/Grid.hpp"
 #include "Effects/Templates/Mesh10.hpp"
 #include "Effects/Templates/MirrorSurface.hpp"
@@ -815,18 +815,18 @@ TEST_CASE("Rotating surface ticks turn the sheet by the sampled speed",
 }
 
 namespace {
-// Points Effects_package at an empty package while it lives.
+// Points VS::Effects::package at an empty package while it lives.
 class BlankLivePackage {
  public:
-  BlankLivePackage() : previous_(Effects_package) {
-    Effects_package = &blank_;
+  BlankLivePackage() : previous_(VS::Effects::package) {
+    VS::Effects::package = &blank_;
     VS::Effects::ForgetLivePackageExtents();
   }
   BlankLivePackage(BlankLivePackage&&) = delete;
   BlankLivePackage(const BlankLivePackage&) = delete;
   BlankLivePackage& operator=(BlankLivePackage&&) = delete;
   BlankLivePackage& operator=(const BlankLivePackage&) = delete;
-  ~BlankLivePackage() { Effects_package = previous_; }
+  ~BlankLivePackage() { VS::Effects::package = previous_; }
 
  private:
   VS::Effects::LiveEffectPackage blank_{};

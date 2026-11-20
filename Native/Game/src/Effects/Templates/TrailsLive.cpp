@@ -48,7 +48,7 @@
 #include "Effects/Plugins/Plg265.hpp"
 #include "Effects/Plugins/Plg266.hpp"
 #include "Effects/Plugins/Plg291.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
@@ -360,7 +360,7 @@ class LiveTrailHost final : public BasicTrailHost<History> {
     return Core::LiveRandomRangeExclusive(a, b);
   }
   [[nodiscard]] Vec3 RequestPosition() override {
-    return math::VectorOf(Effects_actionRequest.position);
+    return math::VectorOf(actionRequest.position);
   }
   [[nodiscard]] std::optional<Vec3> AttractionTranslation() override;
   [[nodiscard]] bool BeginProjection(bool effect_view) override;
@@ -394,8 +394,8 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t curves = LiveEffectCurveCount();
-  const bool held =
-      curve <= curves && Effects_package->curve_block->Size(curve - 1) != 0;
+  const bool held = curve <= curves &&
+                    VS::Effects::package->curve_block->Size(curve - 1) != 0;
   if (held) {
     // The promoted curve sampler (#276 row 38) through its Live entry.
     return VS::Effects::LiveSampleEffectCurve(curve, distance);
@@ -475,7 +475,7 @@ RingProjection LiveTrailHost<History>::Project(TrailPoint point) {
 
 template <std::size_t History>
 bool LiveTrailHost<History>::TextureTableBound(std::size_t table) const {
-  const LiveEffectPackage& package = *Effects_package;
+  const LiveEffectPackage& package = *VS::Effects::package;
   if (package.textures == nullptr || table >= kTextureTableCount) {
     return false;
   }
@@ -501,12 +501,12 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
           "effects",
           "trail: texture table {} of {} gives no frame; trails left "
           "undrawn ({} ticks)",
-          table, Effects_package->texture_table_count, undrawn_textures);
+          table, VS::Effects::package->texture_table_count, undrawn_textures);
     }
     return std::nullopt;
   }
   const LivePackageTexture& source =
-      Effects_package->textures[frame->first_texture];
+      VS::Effects::package->textures[frame->first_texture];
   RingTexture texture;
   texture.clut = source.clut;
   texture.tpage = source.tpage;

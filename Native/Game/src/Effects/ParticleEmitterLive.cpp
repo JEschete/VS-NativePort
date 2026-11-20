@@ -26,7 +26,7 @@
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
@@ -339,8 +339,9 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   const auto bound = LiveEffectCurveCount();
   return std::ranges::all_of(definition.curves, [bound](std::uint8_t curve) {
     return curve == 0 ||
-           (curve <= bound && Effects_package->curves[curve - 1] != nullptr &&
-            Effects_package->curve_block->Size(curve - 1) != 0);
+           (curve <= bound &&
+            VS::Effects::package->curves[curve - 1] != nullptr &&
+            VS::Effects::package->curve_block->Size(curve - 1) != 0);
   });
 }
 
@@ -376,7 +377,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
       .frame = static_cast<std::uint16_t>(instance.frame),
       .capacity = particleCapacity,
       .used = usedParticleCount,
-      .effect_origin = math::VectorOf(Effects_actionRequest.position),
+      .effect_origin = math::VectorOf(actionRequest.position),
       .transform = math::TransformOf(transforms[definition.transform].world),
       .samples = LiveEffectCurveSamples().first(LiveEffectCurveCount() + 1)};
   if ((definition.flags & kAttractionMask) == kActorAttraction) {
@@ -404,14 +405,14 @@ class LiveEmissionHost final : public ParticleEmissionHost {
 void EmitLiveParticleEvent(LiveEffectInstance* instance, int event,
                            int transparency_override, int particle_variant,
                            const LiveParticle* parent) {
-  if (instance == nullptr || Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr || event < 0 ||
+  if (instance == nullptr || VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr || event < 0 ||
       !std::cmp_less(event, LiveParticleDefinitionCount())) {
     Refuse("missing instance or definition outside the current package");
     return;
   }
-  const auto definition =
-      Definition(Effects_package->particle_definitions->Definitions()[event]);
+  const auto definition = Definition(
+      VS::Effects::package->particle_definitions->Definitions()[event]);
   auto context = Context(*instance, definition);
   if (!context) return;
   context->transparency_override = transparency_override;

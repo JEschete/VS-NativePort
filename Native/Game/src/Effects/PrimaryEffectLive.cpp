@@ -11,9 +11,9 @@
 
 #include "Core/Log.hpp"
 #include "Effects/PrimaryEffect.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 
-static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
+static_assert(std::extent_v<decltype(VS::Effects::tokenBitmaps)> >=
               std::size_t{VS::Effects::kEffectTokenWords});
 
 namespace VS::Effects {
@@ -32,7 +32,7 @@ std::uint64_t exhausted_pools = 0;
 }
 
 [[nodiscard]] std::span<int, kEffectTokenWords> LiveTokenWords() {
-  return std::span(Effects_tokenBitmaps).first<kEffectTokenWords>();
+  return std::span(tokenBitmaps).first<kEffectTokenWords>();
 }
 
 [[nodiscard]] EffectTokenPool LiveTokenPool() {
@@ -51,19 +51,19 @@ void CommitTokenPool(const EffectTokenPool& pool) {
 }  // namespace
 
 PrimaryEffectState LivePrimaryEffectState() {
-  return {.phase = static_cast<PrimaryEffectPhase>(Effects_primaryPhase),
-          .track_count = Effects_trackCount,
-          .started_tracks = Effects_startedTrackCount,
-          .pending_tracks = Effects_pendingTracks,
-          .loaded = Effects_primaryLoaded != 0};
+  return {.phase = static_cast<PrimaryEffectPhase>(primaryPhase),
+          .track_count = trackCount,
+          .started_tracks = startedTrackCount,
+          .pending_tracks = pendingTracks,
+          .loaded = primaryLoaded != 0};
 }
 
 void StoreLivePrimaryEffectState(const PrimaryEffectState& state) {
-  Effects_primaryPhase = std::to_underlying(state.phase);
-  Effects_trackCount = state.track_count;
-  Effects_startedTrackCount = state.started_tracks;
-  Effects_pendingTracks = state.pending_tracks;
-  Effects_primaryLoaded = state.loaded ? char{1} : char{0};
+  primaryPhase = std::to_underlying(state.phase);
+  trackCount = state.track_count;
+  startedTrackCount = state.started_tracks;
+  pendingTracks = state.pending_tracks;
+  primaryLoaded = state.loaded ? char{1} : char{0};
 }
 
 int LiveCanStartEffectTrack() { return CanStartTrack(LiveState()) ? 1 : 0; }
@@ -82,8 +82,8 @@ void LiveRequeueEffectTrack(int track) {
     }
     return;
   }
-  Effects_startedTrackCount = state.started_tracks;
-  Effects_pendingTracks = state.pending_tracks;
+  startedTrackCount = state.started_tracks;
+  pendingTracks = state.pending_tracks;
 }
 
 int LiveIsPrimaryEffectLoaded() {
@@ -104,7 +104,7 @@ void LiveSetPrimaryEffectPhase(int phase) {
   }
   PrimaryEffectState state = LiveState();
   SetPrimaryEffectPhase(state, *known);
-  Effects_primaryPhase = std::to_underlying(state.phase);
+  primaryPhase = std::to_underlying(state.phase);
 }
 
 int LivePrimaryEffectPhase() {

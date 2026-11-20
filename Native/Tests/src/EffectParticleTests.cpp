@@ -18,7 +18,7 @@
 #include "Core/Random.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/ParticleControl.hpp"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
@@ -1176,8 +1176,8 @@ namespace {
 struct LiveParticleScope {
   fx::LiveEffectPackage package{};
   fx::LiveEffectInstance instance{};
-  fx::LiveEffectPackage* saved_package = Effects_package;
-  fx::LiveEffectInstance* saved_instance = Effects_currentInstance;
+  fx::LiveEffectPackage* saved_package = fx::package;
+  fx::LiveEffectInstance* saved_instance = fx::currentInstance;
   std::vector<std::string> warnings;
   VS::Core::LogObserver previous;
 
@@ -1188,8 +1188,8 @@ struct LiveParticleScope {
                 warnings.emplace_back(record.message);
               }
             })) {
-    Effects_package = &package;
-    Effects_currentInstance = &instance;
+    fx::package = &package;
+    fx::currentInstance = &instance;
     VS::Effects::ForgetLivePackageExtents();
   }
   LiveParticleScope(const LiveParticleScope&) = delete;
@@ -1198,8 +1198,8 @@ struct LiveParticleScope {
   LiveParticleScope& operator=(LiveParticleScope&&) = delete;
   ~LiveParticleScope() {
     VS::Core::SetLogObserver(std::move(previous));
-    Effects_package = saved_package;
-    Effects_currentInstance = saved_instance;
+    fx::package = saved_package;
+    fx::currentInstance = saved_instance;
   }
 
   [[nodiscard]] bool Warned(const std::string& text) const {
@@ -1231,7 +1231,7 @@ TEST_CASE("Live particle entries stop sets their package no longer holds",
   CHECK(scope.Warned("no longer holds definition 1"));
   CHECK(particles::UpdateLivePlg065ParticleDispatch(&slot, 3, 0) == 1);
   CHECK(live.lifetime == 1);
-  Effects_currentInstance = nullptr;
+  fx::currentInstance = nullptr;
   CHECK(particles::UpdateLivePlg152ParticleDispatch(&slot, 2, 0) == 0);
   CHECK(scope.Warned("no current effect instance"));
   CHECK(live.age == 0);

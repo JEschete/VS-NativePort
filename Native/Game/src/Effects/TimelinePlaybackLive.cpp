@@ -26,7 +26,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
@@ -42,7 +42,7 @@ using Request = LiveActionEffectRequest;
 using Instance = LiveEffectInstance;
 constexpr auto kActionTargets = std::tuple_size_v<decltype(Request::targets)>;
 constexpr auto kTransforms = std::tuple_size_v<decltype(Instance::transforms)>;
-constexpr auto kRenderers = std::extent_v<decltype(Effects_effectRenderers)>;
+constexpr auto kRenderers = std::extent_v<decltype(effectRenderers)>;
 // Particle and sound keys are one word, renderer and shake keys two and
 // vibration keys one halfword.
 constexpr std::size_t kOneWordKey = 1;
@@ -73,11 +73,12 @@ static_assert(std::is_trivially_copyable_v<ChildTrackKey>);
 }
 
 [[nodiscard]] Request* RequestOf(std::string_view call) {
-  if (Effects_package == nullptr || Effects_package->request == nullptr) {
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->request == nullptr) {
     RefuseTimelineCall(call, "no effect package or action request");
     return nullptr;
   }
-  return Effects_package->request;
+  return VS::Effects::package->request;
 }
 
 // The tick's result for its step: 1 to keep the key, the advance's result
@@ -141,7 +142,7 @@ class LivePlaybackHost final : public TimelinePlaybackHost {
       return;
     }
     static_cast<void>(LiveAttachEffectRenderer(
-        instance_, std::span(Effects_effectRenderers)[renderer], parameters));
+        instance_, std::span(effectRenderers)[renderer], parameters));
   }
   void Vibrate(std::uint8_t pattern) override {
     const std::span<const std::byte> block =
@@ -185,7 +186,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.emit_from = &request_->source;
   spawn.target = &endpoint;
   spawn.emit_to = &endpoint;
-  spawn.script = Effects_package->programs;
+  spawn.script = VS::Effects::package->programs;
   spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<u_char>(instance_->token);
@@ -254,7 +255,8 @@ class LiveTimelineLoadHost final : public TimelineLoadHost {
   // found inside the timeline block.
   std::optional<std::uint16_t> TrackHeader(std::size_t track) override {
     auto* keys = Content::PFileLiveTimelineTrackData(
-        Effects_package->timelines, timeline_index_, static_cast<int>(track));
+        VS::Effects::package->timelines, timeline_index_,
+        static_cast<int>(track));
     if (keys == nullptr) return std::nullopt;
     tracks_[track].keys = reinterpret_cast<const std::uint32_t*>(keys);
     std::uint16_t header{};
@@ -346,12 +348,12 @@ class LiveTimelineRunner final : public TimelineRunner {
 // decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
 void LiveLoadEffectTimeline(LiveEffectInstance* instance, int timeline_index,
                             int /*unused*/) {
-  if (instance == nullptr || Effects_package == nullptr) {
+  if (instance == nullptr || VS::Effects::package == nullptr) {
     RefuseTimelineCall("load", "no effect instance or package");
     return;
   }
   const std::byte* section = Content::PFileLiveTimelineSection(
-      Effects_package->timelines, timeline_index);
+      VS::Effects::package->timelines, timeline_index);
   if (section == nullptr) return;
   // The original reads the count word's low byte; the section lookup bounds
   // only the section's first byte.
@@ -405,8 +407,9 @@ int LiveTickEffectSoundTrack(LiveEffectInstance* instance,
          TimelinePlaybackHost& host) {
         // Without a package there is no stream to play.
         const std::int32_t stream =
-            Effects_package != nullptr ? Effects_package->auxiliary_sound_handle
-                                       : 0;
+            VS::Effects::package != nullptr
+                ? VS::Effects::package->auxiliary_sound_handle
+                : 0;
         return TickSoundTrack(key.front(), frame, stream, host);
       });
 }

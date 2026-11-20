@@ -136,7 +136,7 @@ class RendererChain : public RecordChain<LiveRendererSlot> {
   virtual void Free(LiveRendererSlot& slot) = 0;
 };
 
-// An effect chain (Effects_primaryInstances or Effects_secondaryInstances),
+// An effect chain (primaryInstances or secondaryInstances),
 // ordered by priority.
 class EffectInstanceChain : public RecordChain<LiveEffectInstance> {
  public:

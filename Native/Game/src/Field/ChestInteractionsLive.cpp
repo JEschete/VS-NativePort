@@ -33,7 +33,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"

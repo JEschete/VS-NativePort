@@ -23,7 +23,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -154,7 +154,7 @@ class LiveTransformHostImpl final : public TransformHost {
   }
 
   TransformPoint EffectOrigin() override {
-    return PointOf(Effects_actionRequest.position);
+    return PointOf(actionRequest.position);
   }
 
   std::span<const std::int32_t> CurveSamples() override {

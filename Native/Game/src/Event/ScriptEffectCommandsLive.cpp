@@ -21,7 +21,7 @@
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScriptedEffectTriggersLive.hpp"

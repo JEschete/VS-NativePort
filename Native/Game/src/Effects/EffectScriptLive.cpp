@@ -26,7 +26,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
@@ -35,15 +35,11 @@
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
-static_assert(std::extent_v<decltype(Effects_scriptOpcodeHandlers)> ==
-              VS::Effects::kEffectScriptOpcodes);
-static_assert(std::extent_v<decltype(Effects_actionVariantValues)> >=
+static_assert(std::extent_v<decltype(VS::Effects::actionVariantValues)> >=
               VS::Effects::kActionVariantValues);
 static_assert(
     std::tuple_size_v<decltype(VS::Effects::LiveEffectInstance::transforms)> ==
     VS::Effects::kEffectTransformSlots);
-static_assert(std::extent_v<decltype(Effects_scriptRenderers)> ==
-              VS::Effects::kScriptRenderers);
 
 namespace VS::Effects {
 // decomp: D_800EC330 (src/BATTLE/BATTLE.PRG/5BF94.c:402); contents: module
@@ -213,7 +209,7 @@ void StoreRegisters(LiveEffectInstance& instance,
 [[nodiscard]] ActionVariantValues VariantValues() {
   ActionVariantValues values{};
   std::ranges::transform(
-      std::span{Effects_actionVariantValues}.first<kActionVariantValues>(),
+      std::span{actionVariantValues}.first<kActionVariantValues>(),
       values.begin(),
       [](char value) { return std::bit_cast<std::uint8_t>(value); });
   return values;
@@ -236,11 +232,11 @@ void StoreRegisters(LiveEffectInstance& instance,
 }
 
 [[nodiscard]] std::span<LiveParticleDefinition> PackageDefinitions() {
-  if (Effects_package == nullptr ||
-      Effects_package->particle_definitions == nullptr) {
+  if (VS::Effects::package == nullptr ||
+      VS::Effects::package->particle_definitions == nullptr) {
     return {};
   }
-  return {Effects_package->particle_definitions->Definitions(),
+  return {VS::Effects::package->particle_definitions->Definitions(),
           LiveParticleDefinitionCount()};
 }
 
@@ -370,8 +366,8 @@ class InstanceEffectHost final : public ScriptEffectHost {
     (void)LiveCreatePrimaryEffectInstance(&spawn);
   }
   void AttachRenderer(std::uint8_t index, std::int32_t parameters) override {
-    (void)LiveAttachEffectRenderer(
-        instance_, std::span(Effects_scriptRenderers)[index], parameters);
+    (void)LiveAttachEffectRenderer(instance_, std::span(scriptRenderers)[index],
+                                   parameters);
   }
   void UpdateRenderers() override { LiveUpdateEffectRenderers(instance_); }
   void EmitParticles(std::uint8_t event) override {
@@ -408,7 +404,7 @@ class InstanceMachine final : public ScriptMachine {
   }
 
   std::optional<ScriptStep> Execute(std::uint8_t opcode) override {
-    const std::span handlers{Effects_scriptOpcodeHandlers};
+    const std::span handlers{scriptOpcodeHandlers};
     if (opcode >= handlers.size() || handlers[opcode] == nullptr) {
       if (ShouldReport(refused_opcodes)) {
         VS::Core::LogWarn(
@@ -489,7 +485,7 @@ int LiveRunEffectScript(LiveEffectInstance* instance) {
 int LiveSetEffectScriptSelector(LiveEffectInstance* instance) {
   return RunOpcode(instance, "set selector",
                    [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
-                     return SetScriptSelector(cursor, Effects_scriptSelector);
+                     return SetScriptSelector(cursor, scriptSelector);
                    });
 }
 
@@ -506,8 +502,7 @@ int LiveBranchIfEffectRenderersFinished(LiveEffectInstance* instance) {
 int LiveBranchIfActionVariantCleared(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if action variant cleared",
                    [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
-                     return BranchIfActionVariantCleared(Effects_actionVariant,
-                                                         cursor);
+                     return BranchIfActionVariantCleared(actionVariant, cursor);
                    });
 }
 
@@ -517,7 +512,7 @@ int LiveLoadActionVariantRegister(LiveEffectInstance* instance) {
                    [](LiveEffectInstance& effect, ScriptCursor& /*cursor*/) {
                      auto registers = RegistersOf(effect);
                      const OpcodeStep step = LoadActionVariantRegister(
-                         Effects_actionVariant, VariantValues(), registers);
+                         actionVariant, VariantValues(), registers);
                      StoreRegisters(effect, registers);
                      return step;
                    });
@@ -556,7 +551,7 @@ int LiveBranchIfParticleCountEqual(LiveEffectInstance* instance) {
 
 // decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
 int LiveClearScriptActionVariant(LiveEffectInstance* /*instance*/) {
-  return HandlerResult(ClearActionVariant(Effects_actionVariant));
+  return HandlerResult(ClearActionVariant(actionVariant));
 }
 
 // decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)

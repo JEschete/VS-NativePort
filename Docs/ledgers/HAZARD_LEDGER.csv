@@ -253,4 +253,3 @@ ffa66d0d8f75,POINTER-INT,high,compiler,F03467,InitializeHeap,Native/Engine/src/C
 ad7e47e2bd01,UNSIZED-ARRAY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.cpp,31,Battle_unusedGlobal1,56,24,open,
 c1c90964c4e1,UNSIZED-ARRAY,medium,pattern,,VS::Content::plg074TrailEmissionCounter,Native/Game/src/Boot/ModuleData.cpp,152,VS::Content::plg074TrailEmissionCounter,44,4,open,
 583cc3f09c20,UNSIZED-ARRAY,medium,pattern,,VS::Content::battleAiHesitationLengths,Native/Game/src/Boot/ModuleData.cpp,158,VS::Content::battleAiHesitationLengths,44,4,open,
-deb6e754bb72,UNSIZED-ARRAY,medium,pattern,,Effects_rendererTableAlias,Native/Game/src/Effects/Runtime.cpp,93,Effects_rendererTableAlias,61,31,open,

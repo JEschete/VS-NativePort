@@ -4,9 +4,9 @@
 #include "Effects/EffectInstances.hpp"
 
 // Live binding for the effect instance lifecycle (EffectInstances.hpp): the
-// chains are Effects_primaryInstances and Effects_secondaryInstances, an
-// instance's renderers its context.renderer, and the records live in the game
-// heap. The entries keep the original signatures for the effect runtime,
+// chains are VS::Effects::primaryInstances and VS::Effects::secondaryInstances,
+// an instance's renderers its context.renderer, and the records live in the
+// game heap. The entries keep the original signatures for the effect runtime,
 // script and module pointers. A missing spawn request, endpoint, instance,
 // renderer or slot is refused with a diagnostic, as are a phase the runtime
 // never sets and the detach of a slot the instance does not hold.

@@ -49,7 +49,7 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/PurgeTables.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Field/Interactions.h"
 #include "Input/Buttons.hpp"

@@ -5,7 +5,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/EffectProgramScope.hpp"
 

@@ -73,10 +73,10 @@ struct ActorColorTransform {
 inline constexpr std::int32_t kActionTintDuration = 8;
 inline constexpr std::int16_t kActionTintRedOffset = 0x10;
 inline constexpr std::int32_t kActionTintRestoreDuration = 4;
-// Effects_tintedActor once the tint is restored.
+// tintedActor once the tint is restored.
 inline constexpr std::int32_t kNoTintedActor = 0;
 
-// Effects_effectBusyFlags bits the trap and standalone waits observe: the
+// effectBusyFlags bits the trap and standalone waits observe: the
 // primary (1) and secondary (2) effects' busy bits.
 inline constexpr std::uint32_t kActionEffectBusyMask = 3;
 
@@ -87,7 +87,7 @@ class ActionEffectCallbackHost : public PrimaryEffectSink {
   virtual void RequestActorAnimationAdvance(std::int32_t actor) = 0;
   // func_8007B29C.
   virtual void TransformActorColors(const ActorColorTransform& transform) = 0;
-  // Effects_tintedActor (D_800F185C).
+  // tintedActor (D_800F185C).
   [[nodiscard]] virtual std::int32_t TintedActor() = 0;
   virtual void SetTintedActor(std::int32_t actor) = 0;
   // Field_controlMode (D_800F196C).
@@ -100,7 +100,7 @@ class ActionEffectCallbackHost : public PrimaryEffectSink {
   virtual void SetMinimapVisible(bool visible) = 0;
   // func_8006F5CC.
   virtual void EnterFieldExplorationMode() = 0;
-  // Effects_effectBusyFlags (D_800F1868).
+  // effectBusyFlags (D_800F1868).
   [[nodiscard]] virtual std::uint32_t EffectBusyFlags() = 0;
 };
 

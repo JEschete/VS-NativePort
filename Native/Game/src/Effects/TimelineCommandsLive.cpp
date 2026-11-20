@@ -22,7 +22,7 @@
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
@@ -192,11 +192,11 @@ void LiveSetSourceWeaponBrightness(LiveEffectInstance* instance,
 void LivePlaySourceActorReactionSound(LiveEffectInstance* instance,
                                       std::uint8_t variant) {
   if (Refused(instance, "reaction sound")) return;
-  const auto sound = SourceReactionSound(EndpointsOf(*instance), variant,
-                                         Effects_lastReactionSoundVariant,
-                                         VS::Core::NextBiosRand);
+  const auto sound =
+      SourceReactionSound(EndpointsOf(*instance), variant,
+                          lastReactionSoundVariant, VS::Core::NextBiosRand);
   if (!sound) return;
-  Effects_lastReactionSoundVariant = sound->last_variant;
+  lastReactionSoundVariant = sound->last_variant;
   Audio::LivePlayActorModelSoundVariant(sound->actor, sound->variant);
 }
 

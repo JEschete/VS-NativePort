@@ -21,7 +21,7 @@
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Menu/TextBox.hpp"
 #include "ModelLoading.h"
@@ -37,19 +37,20 @@ struct LiveFixture {
       std::to_array(Battle_actors);
   Battle_ActionState* saved_state = Battle_actionState;
   decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
-  decltype(Effects_secondaryInstances) saved_trails =
-      Effects_secondaryInstances;
+  decltype(VS::Effects::secondaryInstances) saved_trails =
+      VS::Effects::secondaryInstances;
   decltype(VS::Menu::sceneNotificationBuffer) saved_notification =
       VS::Menu::sceneNotificationBuffer;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
   Content_ActorAssetRequest saved_request = Content_legacyActorAssetRequests[0];
-  std::array<unsigned, 2> saved_effects{Effects_primaryPhase,
-                                        Effects_pendingTracks};
-  std::array<int, 2> saved_tracks{Effects_trackCount,
-                                  Effects_startedTrackCount};
-  decltype(Effects_actionVariant) saved_variant = Effects_actionVariant;
-  int saved_busy = Effects_effectBusyFlags;
+  std::array<unsigned, 2> saved_effects{VS::Effects::primaryPhase,
+                                        VS::Effects::pendingTracks};
+  std::array<int, 2> saved_tracks{VS::Effects::trackCount,
+                                  VS::Effects::startedTrackCount};
+  decltype(VS::Effects::actionVariant) saved_variant =
+      VS::Effects::actionVariant;
+  int saved_busy = VS::Effects::effectBusyFlags;
   int saved_projection = VS::Render::projectionDistance;
   int saved_distance_alias = Battle_settledCameraDistance;
   unsigned saved_phase = Battle_actionFlowMode;
@@ -62,7 +63,7 @@ struct LiveFixture {
     std::ranges::fill(Battle_actors, nullptr);
     Battle_actionState = &state;
     Battle_Ai_roomAiState = &room;
-    Effects_secondaryInstances = nullptr;
+    VS::Effects::secondaryInstances = nullptr;
     VS::Menu::sceneNotificationBuffer = nullptr;
   }
   LiveFixture(const LiveFixture&) = delete;
@@ -72,16 +73,16 @@ struct LiveFixture {
     std::ranges::copy(saved_actors, std::begin(Battle_actors));
     Battle_actionState = saved_state;
     Battle_Ai_roomAiState = saved_room;
-    Effects_secondaryInstances = saved_trails;
+    VS::Effects::secondaryInstances = saved_trails;
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Field::sphericalCamera = saved_camera;
     Content_legacyActorAssetRequests[0] = saved_request;
-    Effects_primaryPhase = saved_effects[0];
-    Effects_pendingTracks = saved_effects[1];
-    Effects_trackCount = saved_tracks[0];
-    Effects_startedTrackCount = saved_tracks[1];
-    Effects_actionVariant = saved_variant;
-    Effects_effectBusyFlags = saved_busy;
+    VS::Effects::primaryPhase = saved_effects[0];
+    VS::Effects::pendingTracks = saved_effects[1];
+    VS::Effects::trackCount = saved_tracks[0];
+    VS::Effects::startedTrackCount = saved_tracks[1];
+    VS::Effects::actionVariant = saved_variant;
+    VS::Effects::effectBusyFlags = saved_busy;
     Battle_actionFlowMode = saved_phase;
     Battle_settledCameraDistance = saved_distance_alias;
     VS::Render::projectionDistance = saved_projection;
@@ -137,22 +138,22 @@ TEST_CASE(
   fixture->state.queueIndex = 0xFFFFFFFF;
   fixture->state.queue[3].primaryTarget.target.targetActor = 15;
   Content_legacyActorAssetRequests[0].assetKind = 0;
-  Effects_primaryPhase = 4;
-  Effects_trackCount = 1;
-  Effects_startedTrackCount = 0;
-  Effects_pendingTracks = 1;
-  Effects_actionVariant = 19;
+  VS::Effects::primaryPhase = 4;
+  VS::Effects::trackCount = 1;
+  VS::Effects::startedTrackCount = 0;
+  VS::Effects::pendingTracks = 1;
+  VS::Effects::actionVariant = 19;
   Battle_actionFlowMode = 5;
   b::WaitForLiveActionEffectReady();
   CHECK(Battle_actionFlowMode == 6);
-  CHECK(Effects_actionVariant == 0);
+  CHECK(VS::Effects::actionVariant == 0);
   CHECK(fixture->state.queueIndex == 0xFFFFFFFF);
 }
 TEST_CASE("F00188 production busy bit uses no missing action owner",
           "[action-sequence][F00188]") {
   auto fixture = std::make_unique<LiveFixture>();
   Battle_actionState = nullptr;
-  Effects_effectBusyFlags = -1;
+  VS::Effects::effectBusyFlags = -1;
   Battle_actionFlowMode = 19;
   b::StartLiveReadyActionAnimation();
   CHECK(Battle_actionState == nullptr);

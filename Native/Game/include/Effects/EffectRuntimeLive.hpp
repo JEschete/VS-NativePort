@@ -3,7 +3,7 @@
 
 // Live binding for the effect runtime and the primary effect's action
 // lifecycle (EffectRuntime.hpp) over Runtime.cpp's globals, the current
-// effect package (Effects_package), the loader state
+// effect package (VS::Effects::package), the loader state
 // (EffectResourcesLiveState.hpp) and the effect cameras (CameraLiveState.hpp).
 // The entries keep the original signatures for the battle, event and menu
 // callers and the module's function pointers. A missing action request,

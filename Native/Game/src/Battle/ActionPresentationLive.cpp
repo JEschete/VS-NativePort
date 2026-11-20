@@ -41,7 +41,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"

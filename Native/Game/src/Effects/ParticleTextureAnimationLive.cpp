@@ -15,7 +15,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
 
 namespace VS::Effects {
@@ -44,21 +44,21 @@ struct PackageContext {
 };
 
 [[nodiscard]] PackageContext Context() {
-  const bool primary = Effects_package == &Effects_actionPackage;
+  const bool primary = VS::Effects::package == &actionPackage;
   return {.name = primary ? "primary" : "secondary",
-          .request_effect = primary ? Effects_actionRequest.effect_id
-                                    : Effects_secondaryRequest.effect_id};
+          .request_effect =
+              primary ? actionRequest.effect_id : secondaryRequest.effect_id};
 }
 
 // The current package's frame records of texture table `table`; null when
 // the package lacks the table.
 [[nodiscard]] LivePackageTextureFrame* BoundTextureTable(int table) {
-  if (Effects_package == nullptr || table < 0 ||
+  if (VS::Effects::package == nullptr || table < 0 ||
       std::cmp_greater_equal(table, kTextureTableCapacity) ||
-      table >= Effects_package->texture_table_count) {
+      table >= VS::Effects::package->texture_table_count) {
     return nullptr;
   }
-  return Effects_package->texture_tables[table];
+  return VS::Effects::package->texture_tables[table];
 }
 
 [[nodiscard]] TextureAnimationState Load(const Animation& animation) {
@@ -81,12 +81,12 @@ void Store(Animation& animation, const TextureAnimationState& state) {
 
 // Animation `index` of the current package's recorded animation table.
 [[nodiscard]] std::optional<std::span<std::byte>> AnimationProgram(int index) {
-  if (Effects_package == nullptr) {
+  if (VS::Effects::package == nullptr) {
     return std::nullopt;
   }
   EffectPackageBlocks blocks{};
   BindParticleAnimationTable(
-      blocks, LiveAnimationTable(Effects_package->animation_table));
+      blocks, LiveAnimationTable(VS::Effects::package->animation_table));
   return ParticleAnimationData(blocks, index);
 }
 
@@ -102,7 +102,9 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
           "kept the previous frame (context={} request_effect={}; "
           "{} reports)",
           frame, animation.texture_index,
-          Effects_package == nullptr ? 0 : Effects_package->texture_table_count,
+          VS::Effects::package == nullptr
+              ? 0
+              : VS::Effects::package->texture_table_count,
           context.name, context.request_effect, unbound_frames);
     }
     return;
@@ -140,7 +142,9 @@ void LiveInitializeParticleTextureAnimation(Animation* animation,
         "texture animation: unbound texture={} tables={} program={} "
         "context={} request_effect={}",
         texture_index,
-        Effects_package == nullptr ? 0 : Effects_package->texture_table_count,
+        VS::Effects::package == nullptr
+            ? 0
+            : VS::Effects::package->texture_table_count,
         program_index, context.name, context.request_effect);
   }
   TextureAnimationState state = Load(*animation);
