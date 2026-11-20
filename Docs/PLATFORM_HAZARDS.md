@@ -63,10 +63,10 @@ there would have hidden the defect and left the wrong behavior in place.
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 3 | 0 | 0 | 3 | 0 | 3 |
-| `CAPACITY` | Fixed storage capacity | 77 | 0 | 0 | 77 | 0 | 77 |
+| `CAPACITY` | Fixed storage capacity | 79 | 0 | 0 | 79 | 0 | 79 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 0 | 0 | 0 | 0 | 0 | 0 |
 | `NARROW-ID` | Identity or index stored in one byte | 38 | 0 | 0 | 38 | 0 | 38 |
-| **Total** | | 250 | 5 | 5 | 232 | 13 | 242 |
+| **Total** | | 252 | 5 | 5 | 234 | 13 | 244 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -92,10 +92,10 @@ there would have hidden the defect and left the wrong behavior in place.
 | --- | ---: |
 | no roadmap issue | 111 |
 | #60 | 23 |
-| #55 | 20 |
+| #55 | 21 |
 | #45 | 19 |
 | #61 | 17 |
-| #56 | 15 |
+| #56 | 16 |
 | #253 | 12 |
 | #50 | 10 |
 | #48 | 6 |

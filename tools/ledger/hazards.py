@@ -172,8 +172,8 @@ COMPILER_CLASSES = {
 COMPILER_LINE = re.compile(
     r"^\s*(?P<path>[^\s(][^(]*)\((?P<line>\d+),\d+\)\s*:\s*warning\s*:\s*(?P<message>.*?)\s*\[-W(?P<flag>[\w-]+)\]"
     r"(?:\s*\[(?P<project>[^\]]+\.vcxproj)\])?")
-TABLE = re.compile(r"^\s*extern\s+(?P<type>[A-Za-z_][\w ]*?)\s*\*\s*(?P<name>[A-Za-z_]\w*)\[(?P<size>\w+)\]\s*;", re.M)
-SCALAR_ELEMENTS = re.compile(r"\b(?:char|short|u_char|u_short|u_int|void|int)\b")
+TABLE = re.compile(r"^\s*extern\s+(?P<type>[A-Za-z_][\w: ]*?)\s*\*\s*(?P<name>[A-Za-z_]\w*)\[(?P<size>\w+)\]\s*;", re.M)
+SCALAR_ELEMENTS = re.compile(r"\b(?:char|short|u_char|u_short|u_int|void|int|u?int(?:8|16|32|64)_t)\b")
 # The head of a named struct definition, C++ (`struct X {`) or the C form the headers are leaving (`typedef struct X {`).
 STRUCT_HEAD = r"\b(?:typedef\s+)?struct\s+{name}\s*\{{"
 STRUCT = re.compile(STRUCT_HEAD.format(name=r"(?P<name>\w+)"))

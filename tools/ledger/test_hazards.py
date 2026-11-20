@@ -255,6 +255,20 @@ class CapacityTests(unittest.TestCase):
         found = [item.detail for item in scan_all("int x;\n") if item.hazard_class == "CAPACITY"]
         self.assertEqual(found, ["Actors_actorRecords[17]"])
 
+    def test_a_qualified_element_type_keeps_its_table_rows(self) -> None:
+        # #477: qualifying the element type during the header rewrite dropped the table's rows.
+        header = ("namespace VS::Title {\nextern VS::Legacy::DIRENTRY* cardDirectoryEntries[kCardDirectoryCapacity];\n"
+                  "extern std::uint8_t* frameStyles[4];\n}\n")
+        body = "int Battle_Hit(int i) { return cardDirectoryEntries[i]->size + frameStyles[i][0]; }\n"
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.files["Native/Game/src/Title/SaveCard.hpp"] = header
+            fixture.files[SOURCE] = body
+            found = hazards.scan(fixture.write())
+        self.assertIn("cardDirectoryEntries[kCardDirectoryCapacity]",
+                      [item.detail for item in found if item.hazard_class == "CAPACITY"])
+        self.assertEqual([item.detail for item in found if item.hazard_class == "NULL-TABLE"], ["cardDirectoryEntries[i]"])
+
     def test_cpp_records_in_an_items_header_are_scanned(self) -> None:
         # The typed records keep the copied capacities and one-byte ids in C++ syntax and without the Items_ prefix.
         header = ("#pragma once\nnamespace VS::Items {\nusing Gems = std::array<InventoryGem, kGemSlots>;\n"
