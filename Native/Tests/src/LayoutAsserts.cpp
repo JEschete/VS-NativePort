@@ -210,7 +210,7 @@ static_assert(std::tuple_size_v<decltype(VS::Battle::Ai::actorAiStates)> == 16,
               "AI table extent");
 static_assert(
     std::is_same_v<decltype(VS::Battle::Ai::roomAuxiliaryData), void*>,
-              "room auxiliary-data pointer width");
+    "room auxiliary-data pointer width");
 static_assert(sizeof(VS::Battle::Ai::ActorAiState) % 4 == 0,
               "AI clear requires whole words");
 #undef SAME_FIELD
@@ -406,7 +406,8 @@ int Tests_AiFrameCache(void) {
   std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   std::uint16_t (*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
   void* saved_data = VS::Battle::Ai::roomAuxiliaryData;
-  const unsigned saved_aux_length = VS::Field::roomData.header.ai_navigation_length;
+  const unsigned saved_aux_length =
+      VS::Field::roomData.header.ai_navigation_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
   std::uint8_t saved_scratch[132];
   std::uint8_t* scratch =

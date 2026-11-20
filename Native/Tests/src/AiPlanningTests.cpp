@@ -1551,7 +1551,8 @@ TEST_CASE("Blocked movement forgets its target after exhausting detours",
   std::array<std::byte, sizeof(state)> expected{};
   std::memcpy(expected.data(), &state, expected.size());
   expected[offsetof(VS::Battle::Ai::ActorAiState, is_stuck)] = std::byte{1};
-  expected[offsetof(VS::Battle::Ai::ActorAiState, holds_stall_tile)] = std::byte{0};
+  expected[offsetof(VS::Battle::Ai::ActorAiState, holds_stall_tile)] =
+      std::byte{0};
   expected[offsetof(VS::Battle::Ai::ActorAiState, detour_step)] = std::byte{0};
   std::memset(
       expected.data() + offsetof(VS::Battle::Ai::ActorAiState, previous_tile),

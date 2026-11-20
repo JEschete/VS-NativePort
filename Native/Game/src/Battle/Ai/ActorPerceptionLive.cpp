@@ -84,7 +84,8 @@ static_assert(offsetof(UpdateView, status_flags) ==
               offsetof(AiState, action_delay));
 static_assert(offsetof(UpdateView, detour_step) ==
               offsetof(AiState, detour_step));
-static_assert(offsetof(UpdateView, opaque_fb) == offsetof(AiState, detour_target));
+static_assert(offsetof(UpdateView, opaque_fb) ==
+              offsetof(AiState, detour_target));
 static_assert(offsetof(UpdateView, awareness_frames_remaining) ==
               offsetof(AiState, awareness_frames_remaining));
 static_assert(offsetof(UpdateView, action_status) ==

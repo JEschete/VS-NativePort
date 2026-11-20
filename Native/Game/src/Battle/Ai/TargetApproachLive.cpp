@@ -44,10 +44,12 @@ static_assert(sizeof(VS::Battle::Ai::ApproachRelationBits) ==
 static_assert(offsetof(Approach, close_approach) ==
               offsetof(AiState, close_approach));
 static_assert(offsetof(Approach, gait) == offsetof(AiState, run_requested));
-static_assert(offsetof(Approach, height_filter) == offsetof(AiState, limits_climbs));
+static_assert(offsetof(Approach, height_filter) ==
+              offsetof(AiState, limits_climbs));
 static_assert(offsetof(Approach, near_target_detour) ==
               offsetof(AiState, allows_detours));
-static_assert(offsetof(Approach, toward_point) == offsetof(AiState, targets_point));
+static_assert(offsetof(Approach, toward_point) ==
+              offsetof(AiState, targets_point));
 static_assert(offsetof(Approach, approach_directly) ==
               offsetof(AiState, approaches_directly));
 static_assert(offsetof(Approach, chases_lost_target) ==

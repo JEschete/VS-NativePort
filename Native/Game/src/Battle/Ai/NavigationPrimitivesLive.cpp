@@ -431,13 +431,13 @@ void UpdateLiveRouteGateAvailability() {
   if (VS::Battle::Ai::roomAuxiliaryData == nullptr) return;
   auto* auxiliary =
       static_cast<std::uint8_t*>(VS::Battle::Ai::roomAuxiliaryData);
-  Require(
-      auxiliary == VS::Field::roomData.ai_navigation &&
-          VS::Field::roomData.header.ai_navigation_length >= kRouteAuxiliaryBytes &&
-          reinterpret_cast<const std::uint8_t*>(VS::Battle::Ai::routeGates) ==
-              auxiliary + kRouteEndOffset,
-      "Route availability: route table does not belong to the active "
-      "room auxiliary section");
+  Require(auxiliary == VS::Field::roomData.ai_navigation &&
+              VS::Field::roomData.header.ai_navigation_length >=
+                  kRouteAuxiliaryBytes &&
+              reinterpret_cast<const std::uint8_t*>(
+                  VS::Battle::Ai::routeGates) == auxiliary + kRouteEndOffset,
+          "Route availability: route table does not belong to the active "
+          "room auxiliary section");
   std::array<std::uint32_t, kRouteWordCount> routes{};
   for (std::size_t index = 0; index < kRouteWordCount; ++index) {
     std::uint32_t word;

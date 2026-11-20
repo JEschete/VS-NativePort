@@ -1186,7 +1186,8 @@ int func_800F9800(void) {
         ).read_text(encoding="utf-8")
         self.assertIn("kOriginalPlatformCapacity = 13", source)
         self.assertIn("auxiliary == VS::Field::roomData.ai_navigation", source)
-        self.assertIn("VS::Field::roomData.header.ai_navigation_length >= kRouteAuxiliaryBytes", source)
+        self.assertIn("VS::Field::roomData.header.ai_navigation_length >= kRouteAuxiliaryBytes",
+                      " ".join(source.split()))
         self.assertIn("std::memcpy(location, &word, sizeof word)", source)
 
     def test_gimmick_physics_occupancy_calls_cross_the_explicit_native_view_boundary(self):

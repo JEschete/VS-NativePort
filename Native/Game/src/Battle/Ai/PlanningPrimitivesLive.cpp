@@ -145,18 +145,17 @@ bool OverlappingPlanningBytes(const void* left, std::size_t left_bytes,
 
 SimulatedActorEffect SimulationEffectOf(
     const VS::Battle::Ai::EngagementActor& entry) {
-  return {
-      .actor_id = entry.target_actor,
-      .ignored = entry.targets_position != 0,
-      .hp = {entry.hp, static_cast<std::uint8_t>(entry.hp_effect)},
-      .mp = {entry.mp, static_cast<std::uint8_t>(entry.mp_effect)},
-      .weapon_dp = {entry.weapon_dp_change,
-                    static_cast<std::uint8_t>(entry.weapon_dp_effect)},
-      .shield_dp = {entry.armor_dp_change,
-                    static_cast<std::uint8_t>(entry.armor_dp_effect)},
-      .statuses_set = entry.added_statuses,
-      .statuses_clear = entry.removed_statuses,
-      .hit_threshold = entry.hit_threshold};
+  return {.actor_id = entry.target_actor,
+          .ignored = entry.targets_position != 0,
+          .hp = {entry.hp, static_cast<std::uint8_t>(entry.hp_effect)},
+          .mp = {entry.mp, static_cast<std::uint8_t>(entry.mp_effect)},
+          .weapon_dp = {entry.weapon_dp_change,
+                        static_cast<std::uint8_t>(entry.weapon_dp_effect)},
+          .shield_dp = {entry.armor_dp_change,
+                        static_cast<std::uint8_t>(entry.armor_dp_effect)},
+          .statuses_set = entry.added_statuses,
+          .statuses_clear = entry.removed_statuses,
+          .hit_threshold = entry.hit_threshold};
 }
 
 struct SimulationSnapshot {
@@ -327,7 +326,9 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
     CaptureBattleActorConditions(rows_);
     return true;
   }
-  bool SpecialMode() const override { return state_.scores_special_actions != 0; }
+  bool SpecialMode() const override {
+    return state_.scores_special_actions != 0;
+  }
   bool Simulate(ActionCandidate& candidate,
                 CandidateSimulationMode mode) override {
     candidate_ = RecordOf(candidate);

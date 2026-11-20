@@ -158,7 +158,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     VS::Battle::Ai::roomAiState = &storage->state;
     VS::Battle::Ai::tileFlagMap = storage->flags;
     VS::Battle::Ai::specialTerrainHeights = storage->heights;
-    auto* auxiliary = static_cast<unsigned char*>(VS::Field::roomData.ai_navigation);
+    auto* auxiliary =
+        static_cast<unsigned char*>(VS::Field::roomData.ai_navigation);
     VS::Battle::Ai::roomAuxiliaryData = auxiliary;
     VS::Battle::Ai::patrolRoutes =
         auxiliary != nullptr

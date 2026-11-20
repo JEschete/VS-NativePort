@@ -129,7 +129,7 @@ void DrawLiveRoomTriggerMarkers() {
       VS::State::tickSpeed,
       VS::State::stateFlags.floor_traps_disabled_20 != 0 ||
           VS::State::stateFlags.floor_traps_disabled_40 != 0,
-                                 VS::Field::roomAnimationTicks};
+      VS::Field::roomAnimationTicks};
   TriggerMarkerAnimation animation{VS::Field::triggerMarkerFrameTicks};
   LiveTriggerMarkerRenderer renderer;
   DrawRoomTriggerMarkers(triggers, frame, animation, renderer);

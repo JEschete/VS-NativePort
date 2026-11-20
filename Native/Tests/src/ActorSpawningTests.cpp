@@ -547,9 +547,9 @@ TEST_CASE("Spawn stat, speed and reach rules follow the original",
   CHECK(
       actors::AttackReachFor(
           {.range = 3, .range_y = 4, .range_z = 5, .attack_shape_angle = 0x3F},
-                               0xE2) ==
-        actors::AttackReach{
-            .range = 5, .range_y = 6, .range_z = 7, .shape_angle = 0x1F});
+          0xE2) ==
+      actors::AttackReach{
+          .range = 5, .range_y = 6, .range_z = 7, .shape_angle = 0x1F});
 }
 
 TEST_CASE("Gimmick texture slots and room enemy placements follow the original",

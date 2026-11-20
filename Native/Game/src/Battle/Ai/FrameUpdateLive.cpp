@@ -126,7 +126,8 @@ int CacheLiveActorAiWorkingState() {
   if (frameContext.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
     static_assert(sizeof frameContext.room->collision_extent == extent.size());
-    memcpy(extent.data(), frameContext.room->collision_extent.data(), extent.size());
+    memcpy(extent.data(), frameContext.room->collision_extent.data(),
+           extent.size());
     source.room_extent = extent;
   }
   const std::optional<WorkingStateWindow> window =
