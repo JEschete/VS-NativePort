@@ -6,10 +6,12 @@
 #include "Battle/Ai/ActorCleanup.hpp"
 
 struct Battle_Actor;
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_PerceptionUpdateView;
-struct Battle_Ai_ReactionView;
-struct Battle_Ai_SettingsView;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+struct PerceptionUpdateView;
+struct ReactionView;
+struct SettingsView;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the AI state table, the room AI state, the tile flag grid, the
 // battle actors, their actor records and the heap to the typed actor cleanup
@@ -19,12 +21,12 @@ namespace VS::Battle::Ai {
 void ReleaseLiveAiDestinationTile(int x, int z);
 void FreeLiveActorNavigationOverride(int actor_id);
 void ForceReleaseLiveActorAiReservations(int actor_id);
-void ReleaseLiveActorAiReservations(Battle_Ai_ActorAiState* state);
+void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state);
 void FreeLiveActorAiState(Battle_Actor* actor);
-void AllocateLiveOrbitingBossState(Battle_Ai_SettingsView* state);
-void SetLiveActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView* state,
-                                     int value, int range);
-void MakeLiveTargetHostile(Battle_Ai_ReactionView* state, int target);
+void AllocateLiveOrbitingBossState(VS::Battle::Ai::SettingsView* state);
+void SetLiveActorAiReactionWithDelay(
+    VS::Battle::Ai::PerceptionUpdateView* state, int value, int range);
+void MakeLiveTargetHostile(VS::Battle::Ai::ReactionView* state, int target);
 void RefreshLiveActorAiReservations(int actor_id);
 // The battle module's pointer table stores this binding (0x800E6EB0).
 void ReleaseLiveActorAiContactOccupancy(int actor_id);

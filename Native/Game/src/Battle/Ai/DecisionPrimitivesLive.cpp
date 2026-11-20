@@ -20,8 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -33,36 +32,38 @@
 
 namespace VS::Battle::Ai {
 namespace {
-static_assert(sizeof(Battle_Ai_ActionCandidate) ==
+static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
               sizeof(ActionCandidate::Words));
-static_assert(sizeof(Battle_Ai_CandidateEntryView) ==
+static_assert(sizeof(VS::Battle::Ai::CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
 static_assert(std::size(Field_gimmickInstances) == kCandidateTargetSlots);
 static_assert(std::size(Battle_actionDefinitions) == kActionDefinitionCount);
-static_assert(
-    std::extent_v<decltype(Battle_Ai_ActorAiState::distancesSquared)> ==
-    kCandidateTargetSlots);
+static_assert(std::tuple_size_v<
+                  decltype(VS::Battle::Ai::ActorAiState::distances_squared)> ==
+              kCandidateTargetSlots);
 // Movement passes its target approach view, which aliases the AI state.
-static_assert(offsetof(Battle_Ai_TargetApproachView, distancesSquared) ==
-              offsetof(Battle_Ai_ActorAiState, distancesSquared));
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, distances_squared) ==
+              offsetof(VS::Battle::Ai::ActorAiState, distances_squared));
 constexpr std::uint32_t kRelationReady = 0x80000000;
 constexpr std::uint32_t kRelationInSight = 1u << 2;
 constexpr int kSteppingLocomotion = 1;
 
-const Battle_Ai_ActorAiState& StateOf(const Battle_Ai_ActorAiState* state) {
+const VS::Battle::Ai::ActorAiState& StateOf(
+    const VS::Battle::Ai::ActorAiState* state) {
   Require(state != nullptr, "AI decision gate requires an actor state");
   return *state;
 }
 
-ActionCandidate CandidateOf(const Battle_Ai_ActionCandidate* candidate) {
+ActionCandidate CandidateOf(
+    const VS::Battle::Ai::ActionCandidateRecord* candidate) {
   Require(candidate != nullptr, "AI decision gate requires a candidate");
   return ActionCandidate(std::bit_cast<ActionCandidate::Words>(*candidate));
 }
 
-ActionCooldown CooldownOf(const Battle_Ai_ActorAiState& state) {
-  return {.uses_room_action_delay = state.usesRoomActionDelay != 0,
-          .action_delay = state.actionDelay,
-          .minimum_action_delay = state.minActionDelay};
+ActionCooldown CooldownOf(const VS::Battle::Ai::ActorAiState& state) {
+  return {.uses_room_action_delay = state.uses_room_action_delay != 0,
+          .action_delay = state.action_delay,
+          .minimum_action_delay = state.min_action_delay};
 }
 
 bool HasGimmick(unsigned target) {
@@ -76,7 +77,7 @@ std::int16_t SignedHalf(int value) {
 // The battle actor list as the gimmick proximity check reads it.
 class LiveActorProximity {
  public:
-  explicit LiveActorProximity(const Battle_Ai_ActorAiState& state) {
+  explicit LiveActorProximity(const VS::Battle::Ai::ActorAiState& state) {
     for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
          actor = actor->next) {
       Require(count_ < actors_.size() && actor->id >= 0 &&
@@ -101,7 +102,7 @@ class LiveActorProximity {
   std::size_t count_ = 0;
 };
 
-std::optional<bool> HostileNear(const Battle_Ai_ActorAiState& state,
+std::optional<bool> HostileNear(const VS::Battle::Ai::ActorAiState& state,
                                 unsigned target) {
   const Field_GimmickInstance* gimmick = Field_gimmickInstances[target];
   Require(gimmick != nullptr, "AI proximity check requires a target gimmick");
@@ -114,13 +115,13 @@ std::optional<bool> HostileNear(const Battle_Ai_ActorAiState& state,
 
 class LiveExecutionHost final : public ActionExecutionHost {
  public:
-  explicit LiveExecutionHost(const Battle_Ai_ActorAiState& state)
+  explicit LiveExecutionHost(const VS::Battle::Ai::ActorAiState& state)
       : state_(state) {}
 
   [[nodiscard]] std::uint16_t ReadinessLevel() const override {
     Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI execution check requires room state");
-    return VS::Battle::Ai::roomAiState->readinessLevel;
+    return VS::Battle::Ai::roomAiState->readiness_level;
   }
   [[nodiscard]] ActionCooldown Cooldown() const override {
     return CooldownOf(state_);
@@ -129,7 +130,7 @@ class LiveExecutionHost final : public ActionExecutionHost {
     return HasGimmick(target);
   }
   [[nodiscard]] std::int32_t DistanceSquared(unsigned target) const override {
-    return std::bit_cast<std::int32_t>(state_.distancesSquared[target]);
+    return std::bit_cast<std::int32_t>(state_.distances_squared[target]);
   }
   [[nodiscard]] TargetRelation Relation(unsigned target) const override {
     const auto bits = std::bit_cast<std::uint32_t>(state_.relations[target]);
@@ -149,7 +150,7 @@ class LiveExecutionHost final : public ActionExecutionHost {
   }
 
  private:
-  const Battle_Ai_ActorAiState& state_;
+  const VS::Battle::Ai::ActorAiState& state_;
 };
 
 const Battle_Actor& TargetActor(int action, int actor_id) {
@@ -183,7 +184,7 @@ class LiveFallbackCache final : public FallbackCandidateCache {
                            const ActionCandidate& candidate) override {
     if (VS::Battle::Ai::fallbackCandidates == nullptr) return false;
     VS::Battle::Ai::fallbackCandidates[index] =
-        std::bit_cast<Battle_Ai_CandidateEntryView>(candidate.RawWords());
+        std::bit_cast<VS::Battle::Ai::CandidateEntryView>(candidate.RawWords());
     return true;
   }
   void SetCount(int count) override {
@@ -197,21 +198,23 @@ class LiveCandidateRandom final : public CandidateRandom {
 };
 }  // namespace
 
-bool DoesLiveActionRequireCooldown(const Battle_Ai_ActorAiState* state,
-                                   const Battle_Ai_ActionCandidate* candidate) {
+bool DoesLiveActionRequireCooldown(
+    const VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate) {
   const ActionCandidate typed = CandidateOf(candidate);
   return DoesActionRequireCooldown(CooldownOf(StateOf(state)), typed,
                                    HasGimmick(typed.TargetId()));
 }
 
-bool IsLiveActionCooldownReady(const Battle_Ai_ActorAiState* state,
-                               const Battle_Ai_ActionCandidate* candidate) {
+bool IsLiveActionCooldownReady(
+    const VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate) {
   const ActionCandidate typed = CandidateOf(candidate);
   return IsActionCooldownReady(CooldownOf(StateOf(state)), typed,
                                HasGimmick(typed.TargetId()));
 }
 
-bool HasLiveNearbyEnemy(const Battle_Ai_ActorAiState* state, int target) {
+bool HasLiveNearbyEnemy(const VS::Battle::Ai::ActorAiState* state, int target) {
   Require(target >= 0 && target < kCandidateTargetSlots,
           "AI proximity check requires a target in the gimmick table");
   const std::optional<bool> hostile_near =
@@ -221,8 +224,9 @@ bool HasLiveNearbyEnemy(const Battle_Ai_ActorAiState* state, int target) {
   return *hostile_near;
 }
 
-bool CanExecuteLiveActionCandidate(const Battle_Ai_ActorAiState* state,
-                                   const Battle_Ai_ActionCandidate* candidate) {
+bool CanExecuteLiveActionCandidate(
+    const VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate) {
   const LiveExecutionHost host(StateOf(state));
   const std::optional<bool> executable =
       CanExecuteActionCandidate(host, CandidateOf(candidate));
@@ -256,7 +260,7 @@ int IsLiveActionBeneficialToActor(int action, int actor_id) {
 }
 
 void CacheLiveFallbackActionCandidate(
-    const Battle_Ai_ActionCandidate* candidate,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate,
     const Battle_ActionDefinition* action) {
   Require(action != nullptr, "AI fallback cache requires an action");
   LiveFallbackCache cache;
@@ -266,7 +270,7 @@ void CacheLiveFallbackActionCandidate(
           "AI fallback cache requires a valid slot, count and storage");
 }
 
-void PromoteLiveRandomizedActionCandidate(Battle_Ai_ActionPlanView* state,
+void PromoteLiveRandomizedActionCandidate(VS::Battle::Ai::ActionPlanView* state,
                                           int count) {
   LiveCandidateRanking ranking(state, count);
   LiveCandidateRandom random;
@@ -292,28 +296,29 @@ bool IsLiveAiTargetBeyondNearRadius(const void* view, int target,
                                     int /*range*/) {
   Require(view != nullptr && target >= 0 && target < kCandidateTargetSlots,
           "AI near-target query requires a state and a valid target");
-  const auto& state = *static_cast<const Battle_Ai_ActorAiState*>(view);
+  const auto& state = *static_cast<const VS::Battle::Ai::ActorAiState*>(view);
   return IsAiTargetBeyondNearRadius(
-      state.distancesSquared[static_cast<std::size_t>(target)]);
+      state.distances_squared[static_cast<std::size_t>(target)]);
 }
 
-bool CanApproachLiveEngagedTarget(const Battle_Ai_ActorAiState* state,
-                                  const Battle_Ai_ActionCandidate* candidate) {
-  const Battle_Ai_ActorAiState& actor = StateOf(state);
+bool CanApproachLiveEngagedTarget(
+    const VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate) {
+  const VS::Battle::Ai::ActorAiState& actor = StateOf(state);
   const ActionCandidate typed = CandidateOf(candidate);
   std::optional<EngagementRoster> roster;
   if (VS::Battle::Ai::roomAiState != nullptr) {
-    const Battle_Ai_RoomAiState& room = *VS::Battle::Ai::roomAiState;
+    const VS::Battle::Ai::RoomAiState& room = *VS::Battle::Ai::roomAiState;
     roster = EngagementRoster{.engaged_mask = EngagedMask(room),
-                              .engaged_count = room.engagedCount,
-                              .limit = room.engagementLimit,
-                              .approach_moves = room.approachMoves};
+                              .engaged_count = room.engaged_count,
+                              .limit = room.engagement_limit,
+                              .approach_moves = room.approach_moves};
   }
   const std::optional<bool> approach = CanApproachEngagedTarget(
-      actor.actorId,
-      {.engaged_frames = actor.engagementFrames,
-       .cooldown_frames = actor.engagementCooldownFrames,
-       .grace_frames = actor.reengagementGraceFrames},
+      actor.actor_id,
+      {.engaged_frames = actor.engagement_frames,
+       .cooldown_frames = actor.engagement_cooldown_frames,
+       .grace_frames = actor.reengagement_grace_frames},
       roster.has_value() ? &*roster : nullptr,
       actor.relations[typed.TargetId()].active != 0);
   Require(approach.has_value(),

@@ -15,8 +15,7 @@
 #include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
@@ -1328,10 +1327,10 @@ struct LivePerceptionFixture {
   decltype(VS::Battle::Ai::roomAiState) saved_room =
       VS::Battle::Ai::roomAiState;
   int saved_engaged = VS::Battle::Ai::candidateEngagedThisUpdate;
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
 
   LivePerceptionFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
@@ -1352,12 +1351,12 @@ struct LivePerceptionFixture {
 TEST_CASE("Actor perception Live pass resets the room without actors",
           "[ai][actor-perception]") {
   LivePerceptionFixture fixture;
-  fixture.room.readinessLevel = 5;
-  fixture.room.approachMoves = 9;
+  fixture.room.readiness_level = 5;
+  fixture.room.approach_moves = 9;
   VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   ai::UpdateLiveActorPerception();
-  CHECK(fixture.room.readinessLevel == 6);
-  CHECK(fixture.room.approachMoves == 0);
+  CHECK(fixture.room.readiness_level == 6);
+  CHECK(fixture.room.approach_moves == 0);
   CHECK(VS::Battle::Ai::candidateEngagedThisUpdate == 0);
 }
 
@@ -1366,10 +1365,10 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
   LivePerceptionFixture fixture;
   auto& state = fixture.state;
   std::memset(&state, 0x5A, sizeof(state));
-  state.actorId = kTarget;
-  state.awarenessFramesRemaining = 0;
-  state.decisionDelay = 0;
-  state.minActionDelay = 0;
+  state.actor_id = kTarget;
+  state.awareness_frames_remaining = 0;
+  state.decision_delay = 0;
+  state.min_action_delay = 0;
   fixture.actor.id = kTarget;
   fixture.actor.commandState = 0x80;
   fixture.actor.commandFlags = 0xFF;
@@ -1377,24 +1376,25 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
   fixture.stats.actionRecoveryTimer = 77;
   Battle_actors[0] = &fixture.actor;
   VS::Battle::Ai::LiveFrameContext().actors[kTarget] = &state;
-  const Battle_Ai_ActorAiState before = state;
+  const VS::Battle::Ai::ActorAiState before = state;
 
   ai::UpdateLiveActorPerception();
   CHECK(fixture.actor.commandFlags == 0xFC);
-  CHECK(state.actionDelay == 77);
+  CHECK(state.action_delay == 77);
   const auto& view =
-      *reinterpret_cast<const Battle_Ai_PerceptionUpdateView*>(&state);
+      *reinterpret_cast<const VS::Battle::Ai::PerceptionUpdateView*>(&state);
   CHECK(view.opaque14 == 1);
-  CHECK(view.opaque1D == 0);
+  CHECK(view.opaque_1d == 0);
 
   // Every other byte keeps its value through the typed round trip.
-  Battle_Ai_ActorAiState expected = before;
-  expected.actionDelay = 77;
+  VS::Battle::Ai::ActorAiState expected = before;
+  expected.action_delay = 77;
   auto& expected_view =
-      *reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&expected);
+      *reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&expected);
   expected_view.opaque14 = 1;
-  expected_view.opaque1D = 0;
-  using StateBytes = std::array<std::byte, sizeof(Battle_Ai_ActorAiState)>;
+  expected_view.opaque_1d = 0;
+  using StateBytes =
+      std::array<std::byte, sizeof(VS::Battle::Ai::ActorAiState)>;
   CHECK(std::bit_cast<StateBytes>(state) ==
         std::bit_cast<StateBytes>(expected));
 }

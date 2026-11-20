@@ -18,7 +18,7 @@
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Legacy/Psx.h"
 
@@ -767,33 +767,33 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
                                                 {7, 12, true},
                                                 {7, 13, false}}));
   const auto saved_flags = VS::Battle::Ai::tileFlagMap;
-  Battle_Ai_RoomAiState* const saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::RoomAiState* const saved_room = VS::Battle::Ai::roomAiState;
   u_short flags[32][32]{};
   for (auto& row : flags) {
     for (u_short& cell : row) cell = 0xFFFF;
   }
-  Battle_Ai_RoomAiState room{};
-  room.maxTileX = 10;
-  room.maxTileZ = 12;
-  room.minTileX = 4;
-  room.minTileZ = 6;
-  auto state = std::make_unique<Battle_Ai_ActorAiState>();
-  state->opaque1A = 1;
-  state->nextTile.word = static_cast<u_int>(x | (z << 16));
+  VS::Battle::Ai::RoomAiState room{};
+  room.max_tile_x = 10;
+  room.max_tile_z = 12;
+  room.min_tile_x = 4;
+  room.min_tile_z = 6;
+  auto state = std::make_unique<VS::Battle::Ai::ActorAiState>();
+  state->opaque_1a = 1;
+  state->next_tile.word = static_cast<u_int>(x | (z << 16));
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::roomAiState = &room;
   ai::ReleaseLiveActorAiReservations(state.get());
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::roomAiState = saved_room;
   CHECK(flags[z][x] == (released ? 0xFF7F : 0xFFFF));
-  CHECK(state->opaque1A == 0);
+  CHECK(state->opaque_1a == 0);
 }
 
 TEST_CASE("Live persistence flags read the AI state table", "[ai][cleanup]") {
-  Battle_Ai_ActorAiState* const saved = VS::Battle::Ai::actorAiStates[4];
-  auto state = std::make_unique<Battle_Ai_ActorAiState>();
-  state->usesRoomActionDelay = 1;
-  state->behaviorMode = 0;
+  VS::Battle::Ai::ActorAiState* const saved = VS::Battle::Ai::actorAiStates[4];
+  auto state = std::make_unique<VS::Battle::Ai::ActorAiState>();
+  state->uses_room_action_delay = 1;
+  state->behavior_mode = 0;
   const std::uint32_t relation = 0x37F00080u;
   std::memcpy(&state->relations[0], &relation, sizeof(relation));
   VS::Battle::Ai::actorAiStates[4] = nullptr;

@@ -510,6 +510,9 @@
     <ClInclude Include="src\Battle\Ai\ActionPlanning.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClInclude Include="src\Battle\Ai\ActionRecords.hpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\ActorCleanup.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -549,10 +552,10 @@
     <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\AiState.h">
+    <ClInclude Include="src\Battle\Ai\AiState.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
-    <ClInclude Include="src\Battle\Ai\AiViews.h">
+    <ClInclude Include="src\Battle\Ai\AiViews.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\AreaRoute.cpp">

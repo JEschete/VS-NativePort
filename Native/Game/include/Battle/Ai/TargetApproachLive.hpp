@@ -1,8 +1,10 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_Ai_MovementDecisionView;
-struct Battle_Ai_TargetApproachView;
+namespace VS::Battle::Ai {
+struct MovementDecisionView;
+struct TargetApproachView;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the actor AI state table, the actor models, the battle actor
 // list and the movement code to the typed target approach
@@ -11,9 +13,10 @@ struct Battle_Ai_TargetApproachView;
 // the actor tables.
 namespace VS::Battle::Ai {
 // func_800E24EC.
-int UpdateLiveTargetApproachMovement(Battle_Ai_TargetApproachView* state,
+int UpdateLiveTargetApproachMovement(VS::Battle::Ai::TargetApproachView* state,
                                      int option);
 
 // func_800E2B2C.
-int UpdateLiveTargetFacing(Battle_Ai_MovementDecisionView* state, int target);
+int UpdateLiveTargetFacing(VS::Battle::Ai::MovementDecisionView* state,
+                           int target);
 }  // namespace VS::Battle::Ai

@@ -29,7 +29,7 @@
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettings.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -599,7 +599,7 @@ struct LiveCreationFixture {
       VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
       VS::Battle::Ai::tileFlagMap;
   void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
@@ -608,7 +608,7 @@ struct LiveCreationFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   u_short flags[32][32]{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -677,47 +677,48 @@ struct LiveCreationFixture {
 };
 
 // Ashley's state points at her actor, model, stats and position in the heap.
-void CheckLiveStateLinks(const Battle_Ai_ActorAiState& state,
+void CheckLiveStateLinks(const VS::Battle::Ai::ActorAiState& state,
                          const LiveCreationFixture& fixture) {
   const auto* address = reinterpret_cast<const std::byte*>(&state);
   CHECK(address >= fixture.arena.data());
   CHECK(address < fixture.arena.data() + fixture.arena.size());
-  CHECK(state.actorId == 0);
-  CHECK(state.actor ==
-        reinterpret_cast<const Battle_Ai_EngagementData*>(&fixture.actor));
-  CHECK(state.model == reinterpret_cast<const Battle_Ai_ModelStatePrefix*>(
-                           &fixture.record.instance));
+  CHECK(state.actor_id == 0);
+  CHECK(state.actor == reinterpret_cast<const VS::Battle::Ai::EngagementData*>(
+                           &fixture.actor));
+  CHECK(state.model ==
+        reinterpret_cast<const VS::Battle::Ai::ModelStatePrefix*>(
+            &fixture.record.instance));
   CHECK(state.stats == &fixture.stats);
-  CHECK(state.nativePointer60 == &fixture.record.instance.position);
-  CHECK(state.nativePointer64 == &fixture.record.instance.currentTileX);
+  CHECK(state.native_pointer60 == &fixture.record.instance.position);
+  CHECK(state.native_pointer64 == &fixture.record.instance.currentTileX);
 }
 
-void CheckLiveStateBody(const Battle_Ai_ActorAiState& state) {
+void CheckLiveStateBody(const VS::Battle::Ai::ActorAiState& state) {
   // The anchor rises 0x100 at scale 2 above the position.
-  CHECK(state.pointHeight == 512);
-  CHECK(state.hasTaggedBone3 == 1);
+  CHECK(state.point_height == 512);
+  CHECK(state.has_tagged_bone3 == 1);
   CHECK(state.radius == 40);
   CHECK(state.collision_radius == 40);
-  CHECK(state.opaque13C == 128);
-  CHECK(state.bodyHeight == 0x90);
-  CHECK(state.flightHeight == -128);
+  CHECK(state.opaque_13c == 128);
+  CHECK(state.body_height == 0x90);
+  CHECK(state.flight_height == -128);
 }
 
-void CheckLiveStateLocomotion(const Battle_Ai_ActorAiState& state) {
-  CHECK(state.locomotionFlags == 0x4018);
-  CHECK(state.walkStep == 6);
-  CHECK(state.runStep == 9);
-  CHECK(state.movementFlags == 0x4058);
-  CHECK(state.locomotionMode == 1);
-  CHECK(state.maxRange == 9);
+void CheckLiveStateLocomotion(const VS::Battle::Ai::ActorAiState& state) {
+  CHECK(state.locomotion_flags == 0x4018);
+  CHECK(state.walk_step == 6);
+  CHECK(state.run_step == 9);
+  CHECK(state.movement_flags == 0x4058);
+  CHECK(state.locomotion_mode == 1);
+  CHECK(state.max_range == 9);
 }
 
-void CheckLiveStatePlacement(const Battle_Ai_ActorAiState& state) {
+void CheckLiveStatePlacement(const VS::Battle::Ai::ActorAiState& state) {
   CHECK(state.tile.word == 0x3C050A07u);
   CHECK(state.flee_tile.word == 0x3C050A07u);
-  CHECK(state.moveY == -50 * kOne);
-  CHECK(state.previousTile == -1);
-  CHECK(state.patrolDirection == 1);
+  CHECK(state.move_y == -50 * kOne);
+  CHECK(state.previous_tile == -1);
+  CHECK(state.patrol_direction == 1);
   CHECK(state.reserved124 == 0);
 }
 }  // namespace
@@ -731,16 +732,16 @@ TEST_CASE("Live AI creation builds Ashley's state from her actor record",
   const int idle =
       VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, options);
   CHECK(idle == (options == 0x20 ? 1 : 0));
-  const Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[0];
+  const VS::Battle::Ai::ActorAiState* state = VS::Battle::Ai::actorAiStates[0];
   REQUIRE(state != nullptr);
   CHECK(VS::Battle::Ai::attributeActorMask == 1);
   CheckLiveStateLinks(*state, fixture);
   CheckLiveStateBody(*state);
   CheckLiveStateLocomotion(*state);
   CheckLiveStatePlacement(*state);
-  CHECK(state->savedRelationOptions == static_cast<std::int16_t>(options));
+  CHECK(state->saved_relation_options == static_cast<std::int16_t>(options));
   // Ashley starts no command; only her command is cleared.
-  CHECK(state->behaviorMode == 0);
+  CHECK(state->behavior_mode == 0);
   CHECK(fixture.actor.commandOpcode == 0);
   CHECK(fixture.actor.commandFlags == 0xA0);
 }
@@ -751,16 +752,16 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
   VS::Actors::ActorCore core{};
   core.object_word = static_cast<int>(0xFFFFFF04u);
   Battle_Actor holder{};
-  fixture.room.specialActors[0] = &holder;
+  fixture.room.special_actors[0] = &holder;
   fixture.actor.id = 6;
   fixture.actor.kind = 0x10;
   fixture.actor.allocationKind = VS::Battle::Ai::kAuxiliaryAllocationKind;
   fixture.actor.model = &core.model;
 
   CHECK(VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, -1) == 0);
-  CHECK(fixture.room.specialActors[0] == &holder);
-  CHECK(fixture.room.specialActors[1] == &fixture.actor);
-  CHECK(fixture.room.specialActors[2] == nullptr);
+  CHECK(fixture.room.special_actors[0] == &holder);
+  CHECK(fixture.room.special_actors[1] == &fixture.actor);
+  CHECK(fixture.room.special_actors[2] == nullptr);
   CHECK(VS::Battle::Ai::attributeActorMask == (1 << 6));
   CHECK(VS::Battle::Ai::actorAiStates[6] == nullptr);
 }
@@ -804,7 +805,7 @@ TEST_CASE("Planning invariant termination child",
           "[.planning-uncaught-child]") {
   VS::Platform::InstallCrashHandler();
   Battle_Actor actor{};
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   actor.id = 0;
   VS::Battle::Ai::roomAiState = &room;
   Battle_actors[0] = &actor;

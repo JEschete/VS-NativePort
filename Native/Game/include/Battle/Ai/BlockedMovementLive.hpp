@@ -1,9 +1,11 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_Ai_BlockedRecoveryView;
-struct Battle_Ai_MoveTargetView;
-struct Battle_Ai_PerceptionUpdateView;
+namespace VS::Battle::Ai {
+struct BlockedRecoveryView;
+struct MoveTargetView;
+struct PerceptionUpdateView;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the actor AI state table, the room's AI frame and the
 // movement code to the typed blocked movement (BlockedMovement.cpp). The views
@@ -13,15 +15,15 @@ struct Battle_Ai_PerceptionUpdateView;
 namespace VS::Battle::Ai {
 // func_800D8400.
 unsigned int FindLiveAdjacentMovementDestination(
-    Battle_Ai_MoveTargetView* state, int first, int second,
+    VS::Battle::Ai::MoveTargetView* state, int first, int second,
     unsigned int direction);
 
 // historyStalled, inlined in func_800D8EF4.
-int IsLiveMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state);
+int IsLiveMovementHistoryStalled(VS::Battle::Ai::PerceptionUpdateView* state);
 
 // func_800D9538.
 void SaveLiveMovementRandomState();
 
 // func_800DB0BC.
-int TryRecoverLiveBlockedMovement(Battle_Ai_BlockedRecoveryView* state);
+int TryRecoverLiveBlockedMovement(VS::Battle::Ai::BlockedRecoveryView* state);
 }  // namespace VS::Battle::Ai

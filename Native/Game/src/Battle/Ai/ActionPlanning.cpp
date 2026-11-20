@@ -8,15 +8,15 @@ std::array<std::uint32_t, kTimedStatusFlagWords> kTimedStatusFlags;
 // decomp: D_800F58E8 (D_800F58E8@BATTLE/BATTLE.PRG)
 Battle_ActorStats* planningStatsSnapshot;
 // decomp: D_800F58EC (D_800F58EC@BATTLE/BATTLE.PRG)
-Battle_Ai_CandidateEntryView (*planningPassCandidates)[kPassCandidates];
+VS::Battle::Ai::CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (D_800F58F0@BATTLE/BATTLE.PRG)
 std::int32_t fallbackCandidateCount;
 // decomp: D_800F58F4 (D_800F58F4@BATTLE/BATTLE.PRG)
 std::int32_t unusedPlanCounter;
 // decomp: D_800F58F8 (D_800F58F8@BATTLE/BATTLE.PRG)
-Battle_Ai_CandidateEntryView* fallbackCandidates;
+VS::Battle::Ai::CandidateEntryView* fallbackCandidates;
 // decomp: D_800F5900 (D_800F5900@BATTLE/BATTLE.PRG)
-Battle_Ai_ReactionRecord* planningWorkspace;
+VS::Battle::Ai::ReactionRecord* planningWorkspace;
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 std::uint8_t (*candidateExclusions)[kCandidateExclusionBytes];
 }  // namespace VS::Battle::Ai

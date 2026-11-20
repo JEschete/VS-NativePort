@@ -6,9 +6,11 @@
 
 #include "Battle/Ai/Waypoints.hpp"
 
-struct Battle_Ai_PatrolView;
-struct Battle_Ai_WaypointSearchView;
-struct Battle_Ai_WaypointTile;
+namespace VS::Battle::Ai {
+struct PatrolView;
+struct WaypointSearchView;
+struct WaypointTileRecord;
+}  // namespace VS::Battle::Ai
 
 // Binding from the room's waypoints, patrol routes and special terrain
 // heights and the actor AI state to the typed waypoint routines
@@ -21,10 +23,11 @@ namespace VS::Battle::Ai {
 
 // func_800DD7CC. Writes the nearest active waypoint's x and z bytes to the
 // destination; leaves it alone when no waypoint is active.
-void FindLiveNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state,
-                                   Battle_Ai_WaypointTile* destination);
+void FindLiveNearestActiveWaypoint(
+    VS::Battle::Ai::WaypointSearchView* state,
+    VS::Battle::Ai::WaypointTileRecord* destination);
 
 // func_800E23AC. Moves the patrol cursor, writes the destination tile and
 // dispatches the actor's locomotion.
-void UpdateLiveWaypointPatrol(Battle_Ai_PatrolView* state);
+void UpdateLiveWaypointPatrol(VS::Battle::Ai::PatrolView* state);
 }  // namespace VS::Battle::Ai

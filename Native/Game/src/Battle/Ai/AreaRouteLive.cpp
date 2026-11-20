@@ -12,7 +12,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
@@ -26,8 +26,8 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using RouteView = Battle_Ai_AreaRouteView;
-using AiState = Battle_Ai_ActorAiState;
+using RouteView = VS::Battle::Ai::AreaRouteView;
+using AiState = VS::Battle::Ai::ActorAiState;
 
 constexpr std::size_t kTileWordBytes = sizeof(std::uint32_t);
 // A gate tile's x, platform and z bytes.
@@ -39,40 +39,40 @@ constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 static_assert(offsetof(RouteView, opaque5) == offsetof(AiState, opaque5));
 static_assert(offsetof(RouteView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(RouteView, x) == offsetof(AiState, position));
-static_assert(offsetof(RouteView, nativePointer60) ==
-              offsetof(AiState, nativePointer60));
-static_assert(offsetof(RouteView, actorId) == offsetof(AiState, actorId));
-static_assert(offsetof(RouteView, cooldown) == offsetof(AiState, opaque13A));
-static_assert(offsetof(RouteView, period) == offsetof(AiState, opaque13C));
-static_assert(offsetof(RouteView, area) == offsetof(AiState, reserved154Area));
-static_assert(offsetof(RouteView, movementTarget) ==
-              offsetof(AiState, movementTarget));
+static_assert(offsetof(RouteView, native_pointer60) ==
+              offsetof(AiState, native_pointer60));
+static_assert(offsetof(RouteView, actor_id) == offsetof(AiState, actor_id));
+static_assert(offsetof(RouteView, cooldown) == offsetof(AiState, opaque_13a));
+static_assert(offsetof(RouteView, period) == offsetof(AiState, opaque_13c));
+static_assert(offsetof(RouteView, area) == offsetof(AiState, reserved154_area));
+static_assert(offsetof(RouteView, movement_target) ==
+              offsetof(AiState, movement_target));
 static_assert(offsetof(RouteView, destination) ==
               offsetof(AiState, destination));
-static_assert(offsetof(RouteView, nextTile) == offsetof(AiState, nextTile));
-static_assert(offsetof(RouteView, moveX) == offsetof(AiState, moveX));
-static_assert(offsetof(RouteView, moveZ) == offsetof(AiState, moveZ));
+static_assert(offsetof(RouteView, next_tile) == offsetof(AiState, next_tile));
+static_assert(offsetof(RouteView, move_x) == offsetof(AiState, move_x));
+static_assert(offsetof(RouteView, move_z) == offsetof(AiState, move_z));
 static_assert(offsetof(RouteView, heading) == offsetof(AiState, heading));
 static_assert(offsetof(RouteView, gate) == offsetof(AiState, route_gate));
 static_assert(offsetof(RouteView, exit) == offsetof(AiState, route_exit_bytes));
 static_assert(sizeof(AiState{}.route_exit_bytes) == kTileWordBytes);
 static_assert(sizeof(VS::Battle::Ai::TilePosition) == kTileWordBytes);
 static_assert(kFrameActorSlots == kAreaRouteNoTarget);
-static_assert(sizeof(Battle_Ai_RouteGateTile) == kRouteGateTileBytes);
+static_assert(sizeof(VS::Battle::Ai::RouteGateTile) == kRouteGateTileBytes);
 // So does the area movement view.
-using MoveView = Battle_Ai_TerrainMoveView;
-static_assert(offsetof(MoveView, isStuck) == offsetof(AiState, isStuck));
+using MoveView = VS::Battle::Ai::TerrainMoveView;
+static_assert(offsetof(MoveView, is_stuck) == offsetof(AiState, is_stuck));
 static_assert(offsetof(MoveView, opaque4) == offsetof(AiState, opaque4));
 static_assert(offsetof(MoveView, opaque5) == offsetof(AiState, opaque5));
-static_assert(offsetof(MoveView, opaque1A) == offsetof(AiState, opaque1A));
-static_assert(offsetof(MoveView, settingsBit14) ==
-              offsetof(AiState, settingsBit14));
+static_assert(offsetof(MoveView, opaque_1a) == offsetof(AiState, opaque_1a));
+static_assert(offsetof(MoveView, settings_bit14) ==
+              offsetof(AiState, settings_bit14));
 static_assert(offsetof(MoveView, tile) == offsetof(AiState, tile));
 static_assert(offsetof(MoveView, position) == offsetof(AiState, position));
 static_assert(offsetof(MoveView, destination) ==
               offsetof(AiState, destination));
-static_assert(offsetof(MoveView, moveX) == offsetof(AiState, moveX));
-static_assert(offsetof(MoveView, moveZ) == offsetof(AiState, moveZ));
+static_assert(offsetof(MoveView, move_x) == offsetof(AiState, move_x));
+static_assert(offsetof(MoveView, move_z) == offsetof(AiState, move_z));
 static_assert(offsetof(MoveView, angle) == offsetof(AiState, heading));
 static_assert(offsetof(MoveView, actor) == offsetof(AiState, actor));
 
@@ -92,20 +92,20 @@ std::optional<std::array<RouteGateEnd, kRouteGateEndCount>> LiveGateEnds() {
 
 AreaRouteActor Load(const AiState& state) {
   std::uint32_t exit = 0;
-  std::memcpy(&exit, state.route_exit_bytes, sizeof(exit));
+  std::memcpy(&exit, state.route_exit_bytes.data(), sizeof(exit));
   return {.target_distance_filter = state.opaque5,
           .tile = state.tile.word,
           .x = state.position.vx,
           .z = state.position.vz,
-          .actor_id = state.actorId,
-          .turn_timer = state.opaque13A,
-          .turn_period = state.opaque13C,
-          .area = state.reserved154Area,
-          .movement_target = state.movementTarget,
+          .actor_id = state.actor_id,
+          .turn_timer = state.opaque_13a,
+          .turn_period = state.opaque_13c,
+          .area = state.reserved154_area,
+          .movement_target = state.movement_target,
           .destination = state.destination.word,
-          .next_tile = state.nextTile.word,
-          .move_x = state.moveX,
-          .move_z = state.moveZ,
+          .next_tile = state.next_tile.word,
+          .move_x = state.move_x,
+          .move_z = state.move_z,
           .heading = state.heading,
           .angle = static_cast<std::int16_t>(state.angle),
           .route_gate = state.route_gate,
@@ -117,19 +117,19 @@ void Store(const AreaRouteActor& actor, AiState& state) {
   state.tile.word = actor.tile;
   state.position.vx = actor.x;
   state.position.vz = actor.z;
-  state.actorId = actor.actor_id;
-  state.opaque13A = actor.turn_timer;
-  state.opaque13C = actor.turn_period;
-  state.reserved154Area = actor.area;
-  state.movementTarget = actor.movement_target;
+  state.actor_id = actor.actor_id;
+  state.opaque_13a = actor.turn_timer;
+  state.opaque_13c = actor.turn_period;
+  state.reserved154_area = actor.area;
+  state.movement_target = actor.movement_target;
   state.destination.word = actor.destination;
-  state.nextTile.word = actor.next_tile;
-  state.moveX = actor.move_x;
-  state.moveZ = actor.move_z;
+  state.next_tile.word = actor.next_tile;
+  state.move_x = actor.move_x;
+  state.move_z = actor.move_z;
   state.heading = actor.heading;
   state.angle = actor.angle;
   state.route_gate = actor.route_gate;
-  std::memcpy(state.route_exit_bytes, &actor.route_exit,
+  std::memcpy(state.route_exit_bytes.data(), &actor.route_exit,
               sizeof(actor.route_exit));
 }
 
@@ -181,14 +181,14 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
   }
   [[nodiscard]] std::optional<std::uint8_t> ClosedGates() const override {
     if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
-    return VS::Battle::Ai::roomAiState->reservedEPrefix[0];
+    return VS::Battle::Ai::roomAiState->reserved_e_prefix[0];
   }
   void SetContactOccupancy(int bit) override { SetLiveAiContactOccupancy(bit); }
   [[nodiscard]] std::optional<int> DestinationOccupancy(
       const AreaRouteActor& actor, std::uint32_t tile) override {
     Store(actor, state_);
     return LiveDestinationOccupancy(
-        reinterpret_cast<Battle_Ai_MoveTargetView*>(&state_), tile);
+        reinterpret_cast<VS::Battle::Ai::MoveTargetView*>(&state_), tile);
   }
   [[nodiscard]] bool HasActor(int slot) const override {
     return Frame().actors[slot] != nullptr;
@@ -196,7 +196,7 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
   [[nodiscard]] std::optional<AreaRoutePoint> ActorPosition(
       int slot) const override {
     const auto* position =
-        static_cast<const SVECTOR*>(Frame().actors[slot]->nativePointer60);
+        static_cast<const SVECTOR*>(Frame().actors[slot]->native_pointer60);
     if (position == nullptr) return std::nullopt;
     return AreaRoutePoint{.x = position->vx, .z = position->vz};
   }
@@ -239,7 +239,7 @@ class LiveHeightFilteredMoveWorld final : public HeightFilteredMoveWorld {
   AiState& state_;
 };
 
-std::uint32_t TileWord(const Battle_Ai_RouteGateTile* tile) {
+std::uint32_t TileWord(const VS::Battle::Ai::RouteGateTile* tile) {
   Require(tile != nullptr, "AI route links require a tile");
   // The original read the whole word behind the three tile bytes.
   std::uint32_t word = 0;
@@ -264,8 +264,8 @@ std::optional<int> FindLiveRouteGateLink(std::uint32_t tile,
   return FindRouteGateAtTile(*ends, positions, tile, match_entry_end);
 }
 
-void ResolveLiveRouteGateExit(Battle_Ai_RouteGateTile* entry_tile,
-                              Battle_Ai_RouteGateTile* exit_tile) {
+void ResolveLiveRouteGateExit(VS::Battle::Ai::RouteGateTile* entry_tile,
+                              VS::Battle::Ai::RouteGateTile* exit_tile) {
   Require(exit_tile != nullptr, "AI route link exit requires a tile");
   const auto entry = TileWord(entry_tile);
   const auto ends =
@@ -281,7 +281,7 @@ void ResolveLiveRouteGateExit(Battle_Ai_RouteGateTile* entry_tile,
 }
 
 void FindLiveNearestRouteGateEntry(int platform, int world_x, int world_z,
-                                   Battle_Ai_RouteGateTile* entry_tile) {
+                                   VS::Battle::Ai::RouteGateTile* entry_tile) {
   Require(entry_tile != nullptr, "AI route link entry requires a tile");
   const auto end =
       Required(FindLiveNearestRouteGateEnd(platform, world_x, world_z),
@@ -296,8 +296,8 @@ int FindLiveRouteGateAtTile(std::intptr_t /*state*/, unsigned int tile,
                   "AI route link lookup refused its room or platforms");
 }
 
-int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* view, int index,
-                                   int area) {
+int ResolveLiveNavigationAreaRoute(VS::Battle::Ai::AreaRouteView* view,
+                                   int index, int area) {
   auto& state = State(view);
   LiveAreaRouteWorld world(state);
   auto actor = Load(state);
@@ -307,17 +307,17 @@ int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* view, int index,
       Required(intent, "AI area route refused its room or actor"));
 }
 
-void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* view) {
+void UpdateLiveNavigationAreaMovement(VS::Battle::Ai::TerrainMoveView* view) {
   auto& state = State(view);
   LiveAreaRouteWorld world(state);
   AreaMovementActor actor{.route = Load(state),
-                          .is_stuck = state.isStuck,
+                          .is_stuck = state.is_stuck,
                           .near_target_detour = state.opaque4,
-                          .height_filtered_movement = state.opaque1A,
-                          .area_lock = state.settingsBit14};
+                          .height_filtered_movement = state.opaque_1a,
+                          .area_lock = state.settings_bit14};
   const auto step = UpdateNavigationAreaMovement(world, actor);
   Store(actor.route, state);
-  state.isStuck = actor.is_stuck;
+  state.is_stuck = actor.is_stuck;
   state.opaque4 = actor.near_target_detour;
   const auto movement =
       Required(step, "AI area movement refused its room or actor");
@@ -351,22 +351,23 @@ unsigned char FilterLiveDirectionsByGroundHeight(unsigned char mask,
       "AI height filter refused its terrain");
 }
 
-void MoveLiveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* view) {
+void MoveLiveWithHeightFilteredDirections(
+    VS::Battle::Ai::TerrainMoveView* view) {
   auto& state = State(view);
   // The original named the actor before the move, which may replace it.
   auto* actor = view->actor;
   LiveHeightFilteredMoveWorld world(state);
-  const auto move =
-      Required(MoveWithHeightFilteredDirections(world, {.tile = state.tile.word,
-                                                        .x = state.position.vx,
-                                                        .y = state.position.vy,
-                                                        .z = state.position.vz,
-                                                        .move_x = state.moveX,
-                                                        .move_z = state.moveZ}),
-               "AI height-filtered move refused its room or movement");
+  const auto move = Required(
+      MoveWithHeightFilteredDirections(world, {.tile = state.tile.word,
+                                               .x = state.position.vx,
+                                               .y = state.position.vy,
+                                               .z = state.position.vz,
+                                               .move_x = state.move_x,
+                                               .move_z = state.move_z}),
+      "AI height-filtered move refused its room or movement");
   if (!move.walk_heading) return;
   Require(actor != nullptr, "AI height-filtered walk requires an actor");
-  actor->commandOpcode = static_cast<u_char>(CommandOpcode::kWalk);
-  actor->commandHeading = *move.walk_heading;
+  actor->command_opcode = static_cast<u_char>(CommandOpcode::kWalk);
+  actor->command_heading = *move.walk_heading;
 }
 }  // namespace VS::Battle::Ai

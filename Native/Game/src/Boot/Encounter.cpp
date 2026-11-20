@@ -30,7 +30,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.h"
@@ -266,13 +266,13 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   const auto* ai = VS::Battle::Ai::actorAiStates[slot];
   if (ai != nullptr) {
     snapshot.ai_present = true;
-    snapshot.ai_candidates = ai->candidateCount;
-    snapshot.ai_engagement_frames = ai->engagementFrames;
-    snapshot.ai_movement_mode = ai->requestedMovementMode;
+    snapshot.ai_candidates = ai->candidate_count;
+    snapshot.ai_engagement_frames = ai->engagement_frames;
+    snapshot.ai_movement_mode = ai->requested_movement_mode;
     snapshot.ai_destination_x = ai->destination.tile.tile_x;
     snapshot.ai_destination_z = ai->destination.tile.tile_z;
-    if (ai->candidateCount > 0 && ai->candidateOrder[0] != nullptr) {
-      snapshot.ai_target = ai->candidateOrder[0]->targetId;
+    if (ai->candidate_count > 0 && ai->candidate_order[0] != nullptr) {
+      snapshot.ai_target = ai->candidate_order[0]->target_id;
     }
   }
   return snapshot;

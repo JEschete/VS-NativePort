@@ -3,7 +3,9 @@
 
 #include "Battle/Ai/NavigationPrimitives.hpp"
 
-struct Battle_Ai_ActorAiState;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+}  // namespace VS::Battle::Ai
 struct Field_GimmickInstance;
 
 // Bindings from the room's AI tile maps, route table, AI state table and
@@ -21,8 +23,8 @@ void BuildLiveAiTerrainHeightsWithWorkspace();
 void UpdateLiveRouteGateAvailability();
 int HasLiveActorNavigationState(int actor_id);
 int LiveActorNavigationOverrideStatus(int actor_id);
-void CopyLiveActorNavigationOverrideState(int actor_id,
-                                          Battle_Ai_ActorAiState* destination);
+void CopyLiveActorNavigationOverrideState(
+    int actor_id, VS::Battle::Ai::ActorAiState* destination);
 void SetLiveActorNavigationOverride(int actor_id, int x, int z);
 void UpdateLiveActorNavigationOverrides();
 }  // namespace VS::Battle::Ai

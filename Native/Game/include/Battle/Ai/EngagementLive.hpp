@@ -5,34 +5,39 @@
 
 #include "Battle/Ai/Engagement.hpp"
 
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_PerceptionUpdateView;
-struct Battle_Ai_PlanEvaluationView;
-struct Battle_Ai_RoomAiState;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+struct PerceptionUpdateView;
+struct PlanEvaluationView;
+struct RoomAiState;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the room AI state, the AI state table and the battle actor
 // list to the typed engagement roster and awareness markers (Engagement.cpp).
 // Each aborts with a diagnostic when a state, actor ID or the room is invalid.
 namespace VS::Battle::Ai {
 void SetLiveActorAwarenessIndicator(int actor_id, int marker);
-void ResetLiveActorAwarenessIndicator(Battle_Ai_PlanEvaluationView* state);
-void SetLiveTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* state,
+void ResetLiveActorAwarenessIndicator(
+    VS::Battle::Ai::PlanEvaluationView* state);
+void SetLiveTemporaryAwarenessIndicator(VS::Battle::Ai::ActorAiState* state,
                                         int marker, int frames);
-[[nodiscard]] bool IsLiveEngagementReady(const Battle_Ai_ActorAiState* state);
+[[nodiscard]] bool IsLiveEngagementReady(
+    const VS::Battle::Ai::ActorAiState* state);
 void UpdateLiveTemporaryAwarenessIndicator(
-    Battle_Ai_PerceptionUpdateView* state);
+    VS::Battle::Ai::PerceptionUpdateView* state);
 // The battle action flow passes the player's target here, so an ID outside
 // the AI state table is ignored with a diagnostic rather than aborting.
 void DisengageLiveActorById(int actor_id);
-void DisengageLiveActor(Battle_Ai_ActorAiState* state);
-bool TryEngageLiveActor(Battle_Ai_ActorAiState* state);
+void DisengageLiveActor(VS::Battle::Ai::ActorAiState* state);
+bool TryEngageLiveActor(VS::Battle::Ai::ActorAiState* state);
 // `state` must be the AI state table's entry for its actor ID; the engaged
 // list's pointers are matched against that table.
-void UnlinkLiveEngagedActor(Battle_Ai_ActorAiState* state);
-void UpdateLiveEngagementBuildup(Battle_Ai_ActorAiState* state);
+void UnlinkLiveEngagedActor(VS::Battle::Ai::ActorAiState* state);
+void UpdateLiveEngagementBuildup(VS::Battle::Ai::ActorAiState* state);
 void AnimateLiveEngagementPhase();
 
 // The room's engaged actor mask, stored as two unaligned bytes.
-[[nodiscard]] std::uint16_t EngagedMask(const Battle_Ai_RoomAiState& room);
-void StoreEngagedMask(Battle_Ai_RoomAiState& room, std::uint16_t mask);
+[[nodiscard]] std::uint16_t EngagedMask(
+    const VS::Battle::Ai::RoomAiState& room);
+void StoreEngagedMask(VS::Battle::Ai::RoomAiState& room, std::uint16_t mask);
 }  // namespace VS::Battle::Ai

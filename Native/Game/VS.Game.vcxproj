@@ -2029,9 +2029,10 @@
     <ClInclude Include="src\Battle\ActionTable.h" />
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.hpp" />
+    <ClInclude Include="src\Battle\Ai\ActionRecords.hpp" />
     <ClInclude Include="src\Battle\Ai\ActorState.hpp" />
-    <ClInclude Include="src\Battle\Ai\AiState.h" />
-    <ClInclude Include="src\Battle\Ai\AiViews.h" />
+    <ClInclude Include="src\Battle\Ai\AiState.hpp" />
+    <ClInclude Include="src\Battle\Ai\AiViews.hpp" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
     <ClInclude Include="src\Battle\Ai\LiveRequire.hpp" />

@@ -11,7 +11,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
@@ -24,7 +24,7 @@ namespace {
 struct ConditionFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
-  Battle_Ai_ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
+  VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_ActionState* saved_action = Battle_actionState;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
@@ -39,7 +39,7 @@ struct ConditionFixture {
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   Actors_ActorRecord record{};
-  Battle_Ai_ActorAiState ai{};
+  VS::Battle::Ai::ActorAiState ai{};
   Battle_ActionState action{};
   Battle_FloatingLabel labels[32]{};
 
@@ -143,8 +143,8 @@ struct ConditionFixture {
   void CheckMovement(int walk, int run) const {
     CHECK(stats.walkSpeed == walk);
     CHECK(stats.runSpeed == run);
-    CHECK(ai.walkStep == walk);
-    CHECK(ai.runStep == run);
+    CHECK(ai.walk_step == walk);
+    CHECK(ai.run_step == run);
   }
 
   static void CheckActionRestrictions(int restricted_action = -1) {

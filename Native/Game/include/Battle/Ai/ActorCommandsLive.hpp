@@ -3,7 +3,9 @@
 
 #include "Battle/Ai/ActorCommands.hpp"
 
-struct Battle_Ai_ActorAiState;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+}  // namespace VS::Battle::Ai
 
 // Binding from the battle AI frame to the typed actor command dispatcher.
 namespace VS::Battle::Ai {
@@ -12,5 +14,5 @@ namespace VS::Battle::Ai {
 // frame's movement result, then dispatches through the frame terrain, actor
 // model, selected candidate and destination reservations. Aborts with a
 // diagnostic when the intent, actor slot or identity is invalid.
-void IssueLiveActorCommand(Battle_Ai_ActorAiState* state, int action);
+void IssueLiveActorCommand(VS::Battle::Ai::ActorAiState* state, int action);
 }  // namespace VS::Battle::Ai

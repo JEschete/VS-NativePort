@@ -34,7 +34,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Damage.h"
@@ -291,7 +291,7 @@ struct RuntimeFixture {
   Battle_ActorStats enemy_stats{};
   Actors_ActorRecord player_model{};
   Actors_ActorRecord enemy_model{};
-  Battle_Ai_ActorAiState enemy_ai{};
+  VS::Battle::Ai::ActorAiState enemy_ai{};
   Field_MpdEnvironment environment{};
   VS::Field::CameraTransitionRecord camera_transition{};
   VS::Items::ContainerData storage{};
@@ -561,8 +561,8 @@ struct RuntimeFixture {
     placement.tile_layer = 1;
     placement.tile_z = 3;
     enemy_model.savedPlacement = std::bit_cast<int>(placement);
-    enemy_ai.usesRoomActionDelay = 1;
-    enemy_ai.behaviorMode = 0;
+    enemy_ai.uses_room_action_delay = 1;
+    enemy_ai.behavior_mode = 0;
     enemy_ai.relations[0].classification = 3;
     enemy_ai.relations[0].previous_classification = 2;
     enemy_ai.relations[0].classification_timer = 77;

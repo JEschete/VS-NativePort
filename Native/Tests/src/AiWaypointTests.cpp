@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Waypoints.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
@@ -315,12 +315,13 @@ TEST_CASE("Live waypoint search writes only the nearest active tile",
   u_short heights[32][32]{};
   VS::Battle::Ai::roomWaypoints = waypoints.data();
   VS::Battle::Ai::specialTerrainHeights = heights;
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
   state.position.vx = Centre(4);
   state.position.vz = Centre(4);
-  Battle_Ai_WaypointTile destination{
+  VS::Battle::Ai::WaypointTileRecord destination{
       .x = 0xAA, .reserved1 = 0x11, .z = 0xBB, .reserved3 = 0x22};
-  auto* const view = reinterpret_cast<Battle_Ai_WaypointSearchView*>(&state);
+  auto* const view =
+      reinterpret_cast<VS::Battle::Ai::WaypointSearchView*>(&state);
 
   waypoints[1] = Waypoint(9, 9, false);
   ai::FindLiveNearestActiveWaypoint(view, &destination);

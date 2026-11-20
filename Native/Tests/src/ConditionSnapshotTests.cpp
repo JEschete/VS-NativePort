@@ -72,19 +72,20 @@ TEST_CASE("The planner-row binding writes only listed actors' rows",
   stats.maxHp = 9;
   stats.statuses = 1 << 3;
   stats.shield.max_dp = 50;
-  std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+  std::array<VS::Battle::Ai::ActionTiming,
+             VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   std::memset(rows.data(), 0xA5, sizeof rows);
   Battle_Actor* saved = Battle_actors[0];
   Battle_actors[0] = &actor;
   VS::Battle::Ai::CaptureBattleActorConditions(rows);
   Battle_actors[0] = saved;
-  const Battle_Ai_ActionTiming& row = rows.back();
-  CHECK(row.opaque0Bit0 == 15u);
-  CHECK(row.reserved0Bit4 == 0u);
+  const VS::Battle::Ai::ActionTiming& row = rows.back();
+  CHECK(row.opaque0_bit0 == 15u);
+  CHECK(row.reserved0_bit4 == 0u);
   CHECK(row.opaque4 == 7);
   CHECK(row.opaque6 == 9);
-  CHECK(row.opaqueC == 8u);
+  CHECK(row.opaque_c == 8u);
   CHECK(row.opaque16 == 50);
-  CHECK(rows[0].opaqueC == 0xA5A5A5A5u);
+  CHECK(rows[0].opaque_c == 0xA5A5A5A5u);
 }

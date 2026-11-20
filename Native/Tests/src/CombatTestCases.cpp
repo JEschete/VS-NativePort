@@ -28,7 +28,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
@@ -279,11 +279,11 @@ struct AbilityEffectFixture : AbilityFixture {
       std::to_array(Battle_limbArmorDpLoss);
   decltype(std::to_array(Battle_statusEffectParams)) saved_status_params =
       std::to_array(Battle_statusEffectParams);
-  std::array<Battle_Ai_ActorAiState*, 2> saved_ai{
+  std::array<VS::Battle::Ai::ActorAiState*, 2> saved_ai{
       VS::Battle::Ai::actorAiStates[0], VS::Battle::Ai::actorAiStates[1]};
   u_int saved_last_value = Battle_lastActionStatValue;
   int saved_critical = Battle_criticalHitOccurred;
-  Battle_Ai_ActorAiState ai[2]{};
+  VS::Battle::Ai::ActorAiState ai[2]{};
   Battle_HitResult source{};
   Battle_HitResult target{};
 

@@ -10,13 +10,15 @@
 struct Battle_ActorStats;
 struct Battle_ActionDefinition;
 struct Battle_ActionRequest;
-struct Battle_Ai_ActionCandidate;
-struct Battle_Ai_ActionPlanView;
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_CandidateEntryView;
-struct Battle_Ai_CandidateReadinessView;
-struct Battle_Ai_ActionTiming;
-struct Battle_Ai_ReactionRecord;
+namespace VS::Battle::Ai {
+struct ActionCandidateRecord;
+struct ActionPlanView;
+struct ActorAiState;
+struct CandidateEntryView;
+struct CandidateReadinessView;
+struct ActionTiming;
+struct ReactionRecord;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the actor AI state, its stats, the action table, the AI state
 // table and the planner's exclusion table to the typed candidate list and
@@ -24,18 +26,20 @@ struct Battle_Ai_ReactionRecord;
 // required legacy contracts abort; fallible planning operations report failure.
 namespace VS::Battle::Ai {
 std::optional<bool> RefreshLiveActionCandidateReadiness(
-    Battle_Ai_ActorAiState* state);
+    VS::Battle::Ai::ActorAiState* state);
 bool ApplyLiveSimulatedActionResults(
-    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows);
+    std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows);
 bool SimulateLiveActionCandidate(
-    Battle_Ai_ActorAiState* state,
-    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows,
-    const Battle_Ai_ActionCandidate* candidate, CandidateSimulationMode mode);
-bool UpdateLiveCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);
-bool EvaluateLiveActionCandidate(Battle_Ai_ActorAiState* state,
-                                 Battle_Ai_ActionCandidate* candidate,
-                                 int simulation_mode,
-                                 const Battle_ActionDefinition* action);
+    VS::Battle::Ai::ActorAiState* state,
+    std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate,
+    CandidateSimulationMode mode);
+bool UpdateLiveCandidateHitWeight(
+    VS::Battle::Ai::ActionCandidateRecord* candidate);
+bool EvaluateLiveActionCandidate(
+    VS::Battle::Ai::ActorAiState* state,
+    VS::Battle::Ai::ActionCandidateRecord* candidate, int simulation_mode,
+    const Battle_ActionDefinition* action);
 
 // The condition terms (ActorStatusConditionScore and the ratios,
 // PlanningPrimitives.hpp) of a row of the planner's condition snapshot. The
@@ -43,42 +47,46 @@ bool EvaluateLiveActionCandidate(Battle_Ai_ActorAiState* state,
 // ratios take the table's first row and an actor ID below
 // kBattleActorSlotCount.
 [[nodiscard]] int LiveActorStatusConditionScore(
-    const Battle_Ai_ActionTiming* row);
-[[nodiscard]] int LiveActorHpRatio(const Battle_Ai_ActionTiming* rows, int id);
-[[nodiscard]] int LiveActorMpRatio(const Battle_Ai_ActionTiming* rows, int id);
-[[nodiscard]] int LiveActorEquipmentDpRatio(const Battle_Ai_ActionTiming* rows,
-                                            int id);
+    const VS::Battle::Ai::ActionTiming* row);
+[[nodiscard]] int LiveActorHpRatio(const VS::Battle::Ai::ActionTiming* rows,
+                                   int id);
+[[nodiscard]] int LiveActorMpRatio(const VS::Battle::Ai::ActionTiming* rows,
+                                   int id);
+[[nodiscard]] int LiveActorEquipmentDpRatio(
+    const VS::Battle::Ai::ActionTiming* rows, int id);
 
 // The ranking of a plan view's first `count` candidates, whose handles index
 // the view's order; Apply reorders the view's entries to match it.
 class LiveCandidateRanking {
  public:
-  LiveCandidateRanking(Battle_Ai_ActionPlanView* state, int count);
+  LiveCandidateRanking(VS::Battle::Ai::ActionPlanView* state, int count);
 
   [[nodiscard]] std::span<RankedCandidate> Ranking();
   void Apply();
 
  private:
-  std::span<Battle_Ai_CandidateEntryView*> entries_;
+  std::span<VS::Battle::Ai::CandidateEntryView*> entries_;
   std::array<RankedCandidate, kCandidateCapacity> ranking_{};
 };
 
-void RememberLiveAiActionTarget(Battle_Ai_ActorAiState* state);
-void ForgetLiveAiActionTarget(Battle_Ai_ActorAiState* state);
-void SelectLiveFallbackAction(Battle_Ai_ActorAiState* state);
+void RememberLiveAiActionTarget(VS::Battle::Ai::ActorAiState* state);
+void ForgetLiveAiActionTarget(VS::Battle::Ai::ActorAiState* state);
+void SelectLiveFallbackAction(VS::Battle::Ai::ActorAiState* state);
 void AdvanceLivePlanningSimulation(std::int32_t time_step);
-void EnumerateLiveActionCandidates(Battle_Ai_ActorAiState* state,
+void EnumerateLiveActionCandidates(VS::Battle::Ai::ActorAiState* state,
                                    std::int32_t readiness_threshold);
-void CopyLiveActionCandidate(Battle_Ai_ActionCandidate* destination,
-                             const Battle_Ai_ActionCandidate* source);
+void CopyLiveActionCandidate(
+    VS::Battle::Ai::ActionCandidateRecord* destination,
+    const VS::Battle::Ai::ActionCandidateRecord* source);
 // Operation 2 restores the stat; any other operation spends it.
 void ApplyLiveSimulatedStatDelta(std::int16_t* value,
                                  const std::int16_t* maximum, int delta,
                                  int operation);
-void AppendLiveActionCandidate(Battle_Ai_ActorAiState* state,
-                               const Battle_Ai_ActionCandidate* candidate);
-void SortLiveActionCandidates(Battle_Ai_ActionPlanView* state);
-void BuildLiveActorActionPlan(Battle_Ai_ActorAiState* state);
+void AppendLiveActionCandidate(
+    VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate);
+void SortLiveActionCandidates(VS::Battle::Ai::ActionPlanView* state);
+void BuildLiveActorActionPlan(VS::Battle::Ai::ActorAiState* state);
 // A null request is a no-op, as in the original.
 void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request);
 // The source and destination may be the same record.
@@ -89,33 +97,34 @@ void RestoreLivePlanningActorStats();
 // The game arena is already reset; forget bindings without dereferencing them.
 void InvalidateLivePlanningStatsSnapshot();
 [[nodiscard]] bool CanLiveAiActionAffectActor(
-    const Battle_Ai_ActorAiState* state,
-    const Battle_Ai_ActionCandidate* candidate, int actor_id);
-bool RefreshLiveAiActionUsability(Battle_Ai_ActorAiState* state, int row,
+    const VS::Battle::Ai::ActorAiState* state,
+    const VS::Battle::Ai::ActionCandidateRecord* candidate, int actor_id);
+bool RefreshLiveAiActionUsability(VS::Battle::Ai::ActorAiState* state, int row,
                                   int column);
-void RefreshLiveAiResourceRestrictions(Battle_Ai_ActorAiState* state);
+void RefreshLiveAiResourceRestrictions(VS::Battle::Ai::ActorAiState* state);
 // decomp: BATTLE.PRG func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526); a
 // slot action outside the action table aborts with an error.
-void BuildLiveAiActionMetadata(Battle_Ai_ActorAiState* state);
+void BuildLiveAiActionMetadata(VS::Battle::Ai::ActorAiState* state);
 
 // The BATTLE.PRG module-image entries of the planning operations, in their
 // original calling shape.
 int RefreshActionCandidateReadinessEntry(
-    Battle_Ai_CandidateReadinessView* state);
-void ApplySimulatedActionResultsEntry(Battle_Ai_ActionTiming* rows);
-void SimulateActionCandidateEntry(Battle_Ai_ActorAiState* state,
-                                  Battle_Ai_ActionTiming* rows,
-                                  Battle_Ai_ActionCandidate* candidate,
-                                  int mode);
-void UpdateCandidateHitWeightEntry(Battle_Ai_ActionCandidate* candidate);
-void EvaluateActionCandidateEntry(Battle_Ai_ActorAiState* state,
-                                  Battle_Ai_ActionCandidate* candidate,
-                                  int mode, Battle_ActionDefinition* action);
-void SelectFallbackActionEntry(Battle_Ai_ActorAiState* state);
-void BuildActorActionPlanEntry(Battle_Ai_ActorAiState* state);
+    VS::Battle::Ai::CandidateReadinessView* state);
+void ApplySimulatedActionResultsEntry(VS::Battle::Ai::ActionTiming* rows);
+void SimulateActionCandidateEntry(
+    VS::Battle::Ai::ActorAiState* state, VS::Battle::Ai::ActionTiming* rows,
+    VS::Battle::Ai::ActionCandidateRecord* candidate, int mode);
+void UpdateCandidateHitWeightEntry(
+    VS::Battle::Ai::ActionCandidateRecord* candidate);
+void EvaluateActionCandidateEntry(
+    VS::Battle::Ai::ActorAiState* state,
+    VS::Battle::Ai::ActionCandidateRecord* candidate, int mode,
+    Battle_ActionDefinition* action);
+void SelectFallbackActionEntry(VS::Battle::Ai::ActorAiState* state);
+void BuildActorActionPlanEntry(VS::Battle::Ai::ActorAiState* state);
 void ReconcileCompletedActionPlanEntry(
-    Battle_Ai_ReactionRecord* completed_action);
+    VS::Battle::Ai::ReactionRecord* completed_action);
 void AdvancePlanningSimulationEntry(int time_step);
-void EnumerateActionCandidatesEntry(Battle_Ai_ActorAiState* state,
+void EnumerateActionCandidatesEntry(VS::Battle::Ai::ActorAiState* state,
                                     int readiness_threshold);
 }  // namespace VS::Battle::Ai

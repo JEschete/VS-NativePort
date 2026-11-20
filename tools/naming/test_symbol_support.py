@@ -368,7 +368,7 @@ class ReviewedConsumerTests(unittest.TestCase):
     def test_adopted_padding_cites_the_upstream_declaration(self):
         fields = ledger_rows("FIELD_LEDGER.csv")
         for tid, member, final in (
-            ("T00271", "unkB", "reservedB"),
+            ("T00271", "unkB", "reserved_b"),
             ("T00273", "unk8", "reserved8"),
             ("T00273", "unk15", "reserved15"),
         ):

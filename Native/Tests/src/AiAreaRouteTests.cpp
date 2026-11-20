@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/AreaRoute.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -857,7 +857,7 @@ struct LiveRouteFixture {
   std::array<u_int, 256> routes{};
   u_short flags[32][32]{};
   u_short heights[32][32]{};
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
 
   LiveRouteFixture() {
     auto& frame = VS::Battle::Ai::LiveFrameContext();
@@ -865,7 +865,7 @@ struct LiveRouteFixture {
     frame.tileFlags = flags;
     frame.heightMap = heights;
     state.tile.word = Tile(10, 10, 0x5A000700);
-    state.reserved154Area = 1;
+    state.reserved154_area = 1;
     state.destination.word = Tile(1, 1);
   }
   ~LiveRouteFixture() { VS::Battle::Ai::LiveFrameContext() = saved; }
@@ -874,7 +874,8 @@ struct LiveRouteFixture {
 
   int Resolve() {
     return ai::ResolveLiveNavigationAreaRoute(
-        reinterpret_cast<Battle_Ai_AreaRouteView*>(&state), kIndex, kArea);
+        reinterpret_cast<VS::Battle::Ai::AreaRouteView*>(&state), kIndex,
+        kArea);
   }
 };
 }  // namespace
@@ -886,17 +887,17 @@ TEST_CASE("Live area routing splits room route words and writes the AI state",
       Endpoint(12, 10) | (static_cast<u_int>(Endpoint(10, 13)) << 16);
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));
   CHECK(fixture.state.destination.word == Tile(12, 10));
-  CHECK(fixture.state.reserved154Area == kArea);
+  CHECK(fixture.state.reserved154_area == kArea);
 
   fixture.heights[10][12] = 0x400;
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));
   CHECK(fixture.state.destination.word == Tile(10, 13));
 
   fixture.routes[kRoute] = static_cast<u_int>(Endpoint(10, 13)) << 16;
-  fixture.state.reserved154Area = 1;
+  fixture.state.reserved154_area = 1;
   fixture.state.destination.word = Tile(1, 1);
   CHECK(fixture.Resolve() == static_cast<int>(CommandIntent::kMoveDestination));
   CHECK(fixture.state.destination.word == Tile(1, 1));
-  CHECK(fixture.state.reserved154Area == 1);
+  CHECK(fixture.state.reserved154_area == 1);
   CHECK(fixture.state.tile.word == Tile(10, 10, 0x5A000700));
 }

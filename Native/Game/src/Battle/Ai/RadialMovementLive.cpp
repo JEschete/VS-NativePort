@@ -13,8 +13,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
@@ -26,7 +25,7 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
+using AiState = VS::Battle::Ai::ActorAiState;
 
 // The model's fields read as zero without a model; the entries that reach
 // them require one.
@@ -36,12 +35,12 @@ RadialMover Load(const AiState& state) {
       model != nullptr ? reinterpret_cast<const Actors_ActorRecord*>(model)
                        : nullptr;
   return {.toward_point = state.opaque9,
-          .approach_directly = state.opaqueD,
+          .approach_directly = state.opaque_d,
           .tile = state.tile.word,
-          .saved_destination = state.savedDestination.word,
+          .saved_destination = state.saved_destination.word,
           .x = state.position.vx,
           .z = state.position.vz,
-          .flies = model != nullptr && model->opaqueABit5 != 0,
+          .flies = model != nullptr && model->opaque_a_bit5 != 0,
           .model_look_yaw =
               model_record != nullptr
                   ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
@@ -49,46 +48,46 @@ RadialMover Load(const AiState& state) {
           .model_facing = model_record != nullptr
                               ? model_record->instance.facing
                               : static_cast<std::int16_t>(0),
-          .move_attempts = state.moveAttempts,
-          .move_distance = state.moveDistance,
-          .turn_timer = state.opaque13A,
-          .turn_period = state.opaque13C,
-          .target_x = state.targetX,
-          .target_z = state.targetZ,
-          .movement_target = state.movementTarget,
-          .movement_flags = state.movementFlags,
+          .move_attempts = state.move_attempts,
+          .move_distance = state.move_distance,
+          .turn_timer = state.opaque_13a,
+          .turn_period = state.opaque_13c,
+          .target_x = state.target_x,
+          .target_z = state.target_z,
+          .movement_target = state.movement_target,
+          .movement_flags = state.movement_flags,
           .destination = state.destination.word,
-          .next_tile = state.nextTile.word,
-          .move_x = state.moveX,
-          .move_z = state.moveZ,
+          .next_tile = state.next_tile.word,
+          .move_x = state.move_x,
+          .move_z = state.move_z,
           .heading = state.heading,
           .angle = state.angle,
-          .stall_counter = state.stallCounter};
+          .stall_counter = state.stall_counter};
 }
 
 // The model's fields are the model's; they are not written back.
 void Store(const RadialMover& mover, AiState& state) {
   state.opaque9 = mover.toward_point;
-  state.opaqueD = mover.approach_directly;
+  state.opaque_d = mover.approach_directly;
   state.tile.word = mover.tile;
-  state.savedDestination.word = mover.saved_destination;
+  state.saved_destination.word = mover.saved_destination;
   state.position.vx = mover.x;
   state.position.vz = mover.z;
-  state.moveAttempts = mover.move_attempts;
-  state.moveDistance = mover.move_distance;
-  state.opaque13A = mover.turn_timer;
-  state.opaque13C = mover.turn_period;
-  state.targetX = mover.target_x;
-  state.targetZ = mover.target_z;
-  state.movementTarget = mover.movement_target;
-  state.movementFlags = mover.movement_flags;
+  state.move_attempts = mover.move_attempts;
+  state.move_distance = mover.move_distance;
+  state.opaque_13a = mover.turn_timer;
+  state.opaque_13c = mover.turn_period;
+  state.target_x = mover.target_x;
+  state.target_z = mover.target_z;
+  state.movement_target = mover.movement_target;
+  state.movement_flags = mover.movement_flags;
   state.destination.word = mover.destination;
-  state.nextTile.word = mover.next_tile;
-  state.moveX = mover.move_x;
-  state.moveZ = mover.move_z;
+  state.next_tile.word = mover.next_tile;
+  state.move_x = mover.move_x;
+  state.move_z = mover.move_z;
   state.heading = mover.heading;
   state.angle = mover.angle;
-  state.stallCounter = mover.stall_counter;
+  state.stall_counter = mover.stall_counter;
 }
 
 // The room's AI frame, the battle actors and the actor's movement code. Each
@@ -115,7 +114,7 @@ class LiveRadialWorld final : public RadialMovementWorld {
     int occupancy = 0;
     Run(mover, [&] {
       occupancy = LiveDestinationOccupancy(
-          reinterpret_cast<Battle_Ai_MoveTargetView*>(&state_), tile);
+          reinterpret_cast<VS::Battle::Ai::MoveTargetView*>(&state_), tile);
     });
     return occupancy;
   }
@@ -173,7 +172,7 @@ AiState& StateWithModel(AiState* state) {
 }
 }  // namespace
 
-void ProjectLiveClearRadialDestination(Battle_Ai_ActorAiState* state,
+void ProjectLiveClearRadialDestination(VS::Battle::Ai::ActorAiState* state,
                                        VS::Battle::Ai::TilePosition source,
                                        int angle, unsigned int distance) {
   Require(state != nullptr, "AI radial projection requires an AI state");
@@ -184,14 +183,15 @@ void ProjectLiveClearRadialDestination(Battle_Ai_ActorAiState* state,
          });
 }
 
-void MoveLiveToRadialDestination(Battle_Ai_ActorAiState* state, int unused) {
+void MoveLiveToRadialDestination(VS::Battle::Ai::ActorAiState* state,
+                                 int unused) {
   Update(StateWithModel(state), "AI radial movement refused its room or actors",
          [&](RadialMovementWorld& world, RadialMover& mover) {
            return MoveToRadialDestination(world, mover, unused);
          });
 }
 
-void MoveLiveAwayFromReference(Battle_Ai_ActorAiState* state, int angle) {
+void MoveLiveAwayFromReference(VS::Battle::Ai::ActorAiState* state, int angle) {
   Update(StateWithModel(state),
          "AI retreat movement refused its room or actors",
          [&](RadialMovementWorld& world, RadialMover& mover) {
@@ -199,7 +199,7 @@ void MoveLiveAwayFromReference(Battle_Ai_ActorAiState* state, int angle) {
          });
 }
 
-void RecoverLiveMovement(Battle_Ai_ActorAiState* state) {
+void RecoverLiveMovement(VS::Battle::Ai::ActorAiState* state) {
   Update(StateWithModel(state),
          "AI movement recovery refused its target or terrain",
          [](RadialMovementWorld& world, RadialMover& mover) {

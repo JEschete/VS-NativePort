@@ -14,7 +14,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/BossOrbit.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -28,9 +28,9 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
-using Retreat = Battle_Ai_RadialRetreatView;
-using Tracking = Battle_Ai_OrbitTrackingView;
+using AiState = VS::Battle::Ai::ActorAiState;
+using Retreat = VS::Battle::Ai::RadialRetreatView;
+using Tracking = VS::Battle::Ai::OrbitTrackingView;
 
 // The arena progress script flag the boss and the event script share.
 constexpr int kArenaProgressFlag = 0xA6;
@@ -48,19 +48,19 @@ static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> > kCoreLimb);
 // The retreat and tracking views are the actor's AI state.
 static_assert(offsetof(Retreat, x) == offsetof(AiState, position));
 static_assert(offsetof(Retreat, model) == offsetof(AiState, model));
-static_assert(offsetof(Retreat, moveX) == offsetof(AiState, moveX));
-static_assert(offsetof(Retreat, moveZ) == offsetof(AiState, moveZ));
-static_assert(offsetof(Retreat, moveY) == offsetof(AiState, moveY));
-static_assert(offsetof(Retreat, candidateCount) ==
-              offsetof(AiState, candidateCount));
+static_assert(offsetof(Retreat, move_x) == offsetof(AiState, move_x));
+static_assert(offsetof(Retreat, move_z) == offsetof(AiState, move_z));
+static_assert(offsetof(Retreat, move_y) == offsetof(AiState, move_y));
+static_assert(offsetof(Retreat, candidate_count) ==
+              offsetof(AiState, candidate_count));
 static_assert(offsetof(Tracking, x) == offsetof(AiState, position));
 static_assert(offsetof(Tracking, model) == offsetof(AiState, model));
 static_assert(offsetof(Tracking, stats) == offsetof(AiState, stats));
-static_assert(offsetof(Tracking, movementTarget) ==
-              offsetof(AiState, movementTarget));
-static_assert(offsetof(Tracking, moveX) == offsetof(AiState, moveX));
-static_assert(offsetof(Tracking, moveZ) == offsetof(AiState, moveZ));
-static_assert(offsetof(Tracking, moveY) == offsetof(AiState, moveY));
+static_assert(offsetof(Tracking, movement_target) ==
+              offsetof(AiState, movement_target));
+static_assert(offsetof(Tracking, move_x) == offsetof(AiState, move_x));
+static_assert(offsetof(Tracking, move_z) == offsetof(AiState, move_z));
+static_assert(offsetof(Tracking, move_y) == offsetof(AiState, move_y));
 
 // The AI state's model is the actor's record.
 Actors_ActorRecord* RecordOf(const AiState& state) {
@@ -81,11 +81,11 @@ OrbitingBoss Load(const AiState& state) {
                            .max_hp = stats->maxHp,
                            .core_hp = stats->limbs[kCoreLimb].hp};
   }
-  boss.movement_target = state.movementTarget;
-  boss.move_x = state.moveX;
-  boss.move_z = state.moveZ;
-  boss.move_y = state.moveY;
-  boss.candidate_count = state.candidateCount;
+  boss.movement_target = state.movement_target;
+  boss.move_x = state.move_x;
+  boss.move_z = state.move_z;
+  boss.move_y = state.move_y;
+  boss.candidate_count = state.candidate_count;
   return boss;
 }
 
@@ -94,11 +94,11 @@ void Store(const OrbitingBoss& boss, AiState& state) {
       record != nullptr && boss.model_flag) {
     record->previewPose = *boss.model_flag ? 1 : 0;
   }
-  state.movementTarget = boss.movement_target;
-  state.moveX = boss.move_x;
-  state.moveZ = boss.move_z;
-  state.moveY = boss.move_y;
-  state.candidateCount = boss.candidate_count;
+  state.movement_target = boss.movement_target;
+  state.move_x = boss.move_x;
+  state.move_z = boss.move_z;
+  state.move_y = boss.move_y;
+  state.candidate_count = boss.candidate_count;
 }
 
 ArenaOrbit LoadOrbit(const VS::Battle::Ai::ArenaOrbitState& live) {
@@ -176,7 +176,8 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
   }
   [[nodiscard]] std::optional<bool> IsFirstCandidateCooldownReady(
       OrbitingBoss& boss) override {
-    const Battle_Ai_ActionCandidate* candidate = state_.candidateOrder[0];
+    const VS::Battle::Ai::ActionCandidateRecord* candidate =
+        state_.candidate_order[0];
     if (candidate == nullptr) return std::nullopt;
     bool ready = false;
     Run(boss, [&] { ready = IsLiveActionCooldownReady(&state_, candidate); });
@@ -184,13 +185,14 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
   }
   [[nodiscard]] std::optional<std::uint16_t> FirstCandidateThreshold()
       const override {
-    const Battle_Ai_ActionCandidate* candidate = state_.candidateOrder[0];
+    const VS::Battle::Ai::ActionCandidateRecord* candidate =
+        state_.candidate_order[0];
     if (candidate == nullptr) return std::nullopt;
     return static_cast<std::uint16_t>(candidate->threshold);
   }
   [[nodiscard]] std::optional<std::uint16_t> ReadinessLevel() const override {
     if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
-    return VS::Battle::Ai::roomAiState->readinessLevel;
+    return VS::Battle::Ai::roomAiState->readiness_level;
   }
   [[nodiscard]] bool IsEngagementReady(OrbitingBoss& boss) override {
     bool ready = false;
@@ -281,7 +283,7 @@ std::optional<bool> Succeeded(bool done) {
 }
 }  // namespace
 
-int UpdateLiveBossRadialRetreat(Battle_Ai_RadialRetreatView* state) {
+int UpdateLiveBossRadialRetreat(VS::Battle::Ai::RadialRetreatView* state) {
   return UpdateWithOrbit(
              StateOf(state),
              "AI boss retreat requires a model and a path step "
@@ -293,7 +295,7 @@ int UpdateLiveBossRadialRetreat(Battle_Ai_RadialRetreatView* state) {
              : 0;
 }
 
-int IsLiveBossActionReady(Battle_Ai_ActorAiState* state) {
+int IsLiveBossActionReady(VS::Battle::Ai::ActorAiState* state) {
   AiState& actor = StateOf(state);
   LiveBossOrbitWorld world(actor, nullptr);
   OrbitingBoss boss = Load(actor);
@@ -304,7 +306,7 @@ int IsLiveBossActionReady(Battle_Ai_ActorAiState* state) {
   return *ready ? 1 : 0;
 }
 
-void UpdateLiveBossOrbitTracking(Battle_Ai_OrbitTrackingView* state) {
+void UpdateLiveBossOrbitTracking(VS::Battle::Ai::OrbitTrackingView* state) {
   (void)UpdateWithOrbit(
       StateOf(state),
       "AI boss orbit requires a model, stats, the player's record, its first "
@@ -314,7 +316,7 @@ void UpdateLiveBossOrbitTracking(Battle_Ai_OrbitTrackingView* state) {
       });
 }
 
-int UpdateLiveOrbitingBossBehavior(Battle_Ai_ActorAiState* state) {
+int UpdateLiveOrbitingBossBehavior(VS::Battle::Ai::ActorAiState* state) {
   (void)UpdateWithOrbit(
       StateOf(state),
       "AI orbiting boss refused its model, stats, path step, player's record, "

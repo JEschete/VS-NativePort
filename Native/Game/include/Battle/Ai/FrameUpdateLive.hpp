@@ -8,10 +8,12 @@
 #include "Battle/Ai/FrameUpdate.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_RoomAiState;
-struct Battle_Ai_PerceptionUpdateView;
-struct Battle_Ai_AiCreationView;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+struct RoomAiState;
+struct PerceptionUpdateView;
+struct AiCreationView;
+}  // namespace VS::Battle::Ai
 
 // Binding from the battle AI tables and the frame context to the typed frame
 // update. The signatures keep the module-image entries' calling shape, so
@@ -19,8 +21,8 @@ struct Battle_Ai_AiCreationView;
 namespace VS::Battle::Ai {
 // The battle AI tables cached for the current frame.
 struct FrameContext {
-  Battle_Ai_ActorAiState* actors[kFrameActorSlots];
-  Battle_Ai_RoomAiState* room;
+  VS::Battle::Ai::ActorAiState* actors[kFrameActorSlots];
+  VS::Battle::Ai::RoomAiState* room;
   std::uint16_t (*heightMap)[kNavigationGridSide];
   std::uint16_t (*tileFlags)[kNavigationGridSide];
   std::uint8_t* terrainRegions;
@@ -60,8 +62,8 @@ int CacheLiveActorAiWorkingState();
 // Runs the frame's AI stages; a frame with a room map but no room state or
 // linked actor list aborts with a diagnostic.
 void RunLiveActorAiUpdateStages();
-void TickLiveActorDecisionTimers(Battle_Ai_PerceptionUpdateView* view);
-void InitializeLiveActorLocomotionMode(Battle_Ai_AiCreationView* view);
+void TickLiveActorDecisionTimers(VS::Battle::Ai::PerceptionUpdateView* view);
+void InitializeLiveActorLocomotionMode(VS::Battle::Ai::AiCreationView* view);
 // An actor ID outside the AI table aborts; an empty slot is left alone.
 void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
                                        int run_step);

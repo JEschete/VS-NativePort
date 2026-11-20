@@ -8,7 +8,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
@@ -24,9 +24,10 @@ namespace {
 
 // The completed-plan reconcile and relationship update read the request's
 // header as func_800DEEA4_t; its target list starts where that header ends.
-static_assert(sizeof(Battle_HitResult) == sizeof(Battle_Ai_EngagementActor));
+static_assert(sizeof(Battle_HitResult) ==
+              sizeof(VS::Battle::Ai::EngagementActor));
 static_assert(offsetof(Battle_ActionRequest, targets) ==
-              sizeof(Battle_Ai_ReactionRecord));
+              sizeof(VS::Battle::Ai::ReactionRecord));
 
 // actor->command.fields.unk8 bit 5 (74088.c:1590, lbu 0x8).
 constexpr unsigned kSuppressAwarenessIndicator = 0x20;
@@ -35,7 +36,7 @@ class BoundPlanningWorkspace {
  public:
   explicit BoundPlanningWorkspace(PlanningWorkspace& workspace) {
     VS::Battle::Ai::planningWorkspace =
-        reinterpret_cast<Battle_Ai_ReactionRecord*>(&workspace.result);
+        reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(&workspace.result);
     VS::Battle::Ai::planningPassCandidates = workspace.candidates;
     VS::Battle::Ai::candidateExclusions = workspace.exclusions;
     VS::Battle::Ai::fallbackCandidates = workspace.fallback;
@@ -57,7 +58,7 @@ class BoundPlanningWorkspace {
   VS::Boot::LiveSessionTransitionBarrier barrier_;
 };
 
-Battle_Ai_ActorAiState& AiStateOf(int slot) {
+VS::Battle::Ai::ActorAiState& AiStateOf(int slot) {
   if (slot < 0 ||
       slot >= static_cast<int>(std::size(VS::Battle::Ai::actorAiStates)) ||
       VS::Battle::Ai::actorAiStates[slot] == nullptr) {
@@ -87,10 +88,10 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
  public:
   explicit LiveActionPlanningRoom(Battle_ActionRequest* request)
       : request_(request),
-        record_(reinterpret_cast<Battle_Ai_ReactionRecord*>(request)) {}
+        record_(reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(request)) {}
 
   void ResetReadiness() override {
-    VS::Battle::Ai::roomAiState->readinessLevel = 0;
+    VS::Battle::Ai::roomAiState->readiness_level = 0;
   }
 
   void ReconcileCompletedPlan() override {
@@ -106,16 +107,16 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
     for (const Battle_Actor* live = Battle_actors[0]; live != nullptr;
          live = live->next) {
       actors.push_back(
-          {live->id, AiStateOf(live->id).actorId, StatsOf(*live).currentHp});
+          {live->id, AiStateOf(live->id).actor_id, StatsOf(*live).currentHp});
     }
     return actors;
   }
 
   void PrepareActorPlan(const PlanningActor& actor) override {
     auto& plan = AiStateOf(actor.slot);
-    plan.opaqueE8 = 0;
-    plan.opaqueE7 = 0;
-    plan.opaque19A = 0;
+    plan.opaque_e8 = 0;
+    plan.opaque_e7 = 0;
+    plan.opaque_19a = 0;
     // The original loads both speeds with lbu.
     const auto& stats = StatsOf(ActorOf(actor));
     VS::Battle::Ai::SetLiveActorVerticalMovementSteps(
@@ -125,17 +126,17 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   }
 
   void ClearReengagementGrace(const PlanningActor& actor) override {
-    AiStateOf(actor.slot).reengagementGraceFrames = 0;
+    AiStateOf(actor.slot).reengagement_grace_frames = 0;
   }
 
   void SetDefeated(const PlanningActor& actor, bool defeated) override {
-    AiStateOf(actor.slot).isDead = defeated ? 1 : 0;
+    AiStateOf(actor.slot).is_dead = defeated ? 1 : 0;
   }
 
   [[nodiscard]] bool BuildActorPlan(const PlanningActor& actor) override {
     auto& plan = AiStateOf(actor.slot);
     BuildLiveActorActionPlan(&plan);
-    return plan.usesRoomActionDelay != 0;
+    return plan.uses_room_action_delay != 0;
   }
 
   [[nodiscard]] bool SuppressesAwarenessIndicator(
@@ -145,7 +146,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
   void ResetAwarenessIndicator(const PlanningActor& actor) override {
     VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
-        reinterpret_cast<Battle_Ai_PlanEvaluationView*>(
+        reinterpret_cast<VS::Battle::Ai::PlanEvaluationView*>(
             &AiStateOf(actor.slot)));
   }
 
@@ -155,7 +156,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
  private:
   const Battle_ActionRequest* request_;
-  Battle_Ai_ReactionRecord* record_;
+  VS::Battle::Ai::ReactionRecord* record_;
 };
 
 }  // namespace

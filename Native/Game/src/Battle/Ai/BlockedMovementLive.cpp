@@ -10,7 +10,7 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -24,64 +24,66 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
-using RecoveryView = Battle_Ai_BlockedRecoveryView;
+using AiState = VS::Battle::Ai::ActorAiState;
+using RecoveryView = VS::Battle::Ai::BlockedRecoveryView;
 
 // The recovery view aliases the actor AI state it is handed.
-static_assert(offsetof(RecoveryView, isStuck) == offsetof(AiState, isStuck));
-static_assert(offsetof(RecoveryView, opaque1C) == offsetof(AiState, opaque1C));
+static_assert(offsetof(RecoveryView, is_stuck) == offsetof(AiState, is_stuck));
+static_assert(offsetof(RecoveryView, opaque_1c) ==
+              offsetof(AiState, opaque_1c));
 static_assert(offsetof(RecoveryView, tile) == offsetof(AiState, tile));
-static_assert(offsetof(RecoveryView, previousTile) ==
-              offsetof(AiState, previousTile));
+static_assert(offsetof(RecoveryView, previous_tile) ==
+              offsetof(AiState, previous_tile));
 static_assert(offsetof(RecoveryView, x) == offsetof(AiState, position));
 static_assert(offsetof(RecoveryView, z) ==
               offsetof(AiState, position) + offsetof(SVECTOR, vz));
-static_assert(offsetof(RecoveryView, detourStep) ==
-              offsetof(AiState, detourStep));
-static_assert(offsetof(RecoveryView, opaqueFB) == offsetof(AiState, opaqueFB));
-static_assert(offsetof(RecoveryView, detourDirections) ==
-              offsetof(AiState, detourDirections));
-static_assert(offsetof(RecoveryView, movementTarget) ==
-              offsetof(AiState, movementTarget));
+static_assert(offsetof(RecoveryView, detour_step) ==
+              offsetof(AiState, detour_step));
+static_assert(offsetof(RecoveryView, opaque_fb) ==
+              offsetof(AiState, opaque_fb));
+static_assert(offsetof(RecoveryView, detour_directions) ==
+              offsetof(AiState, detour_directions));
+static_assert(offsetof(RecoveryView, movement_target) ==
+              offsetof(AiState, movement_target));
 static_assert(offsetof(RecoveryView, destination) ==
               offsetof(AiState, destination));
 static_assert(sizeof(RecoveryView) <= sizeof(AiState));
-static_assert(std::size(AiState{}.detourDirections) ==
+static_assert(std::size(AiState{}.detour_directions) ==
               std::tuple_size_v<decltype(BlockedMover::detour_directions)>);
 
-Battle_Ai_MoveTargetView* MoveTarget(AiState& state) {
-  return reinterpret_cast<Battle_Ai_MoveTargetView*>(&state);
+VS::Battle::Ai::MoveTargetView* MoveTarget(AiState& state) {
+  return reinterpret_cast<VS::Battle::Ai::MoveTargetView*>(&state);
 }
 
 BlockedMover Load(const AiState& state) {
   BlockedMover mover{
-      .is_stuck = state.isStuck,
-      .holds_stall_tile = state.opaque1C,
+      .is_stuck = state.is_stuck,
+      .holds_stall_tile = state.opaque_1c,
       .tile = state.tile.word,
-      .previous_tile = static_cast<std::uint32_t>(state.previousTile),
+      .previous_tile = static_cast<std::uint32_t>(state.previous_tile),
       .x = state.position.vx,
       .z = state.position.vz,
-      .detour_step = state.detourStep,
-      .detour_target = state.opaqueFB,
+      .detour_step = state.detour_step,
+      .detour_target = state.opaque_fb,
       .detour_directions = {},
-      .movement_target = state.movementTarget,
+      .movement_target = state.movement_target,
       .destination = state.destination.word};
-  std::ranges::copy(state.detourDirections, mover.detour_directions.begin());
+  std::ranges::copy(state.detour_directions, mover.detour_directions.begin());
   return mover;
 }
 
 void Store(const BlockedMover& mover, AiState& state) {
-  state.isStuck = mover.is_stuck;
-  state.opaque1C = mover.holds_stall_tile;
+  state.is_stuck = mover.is_stuck;
+  state.opaque_1c = mover.holds_stall_tile;
   state.tile.word = mover.tile;
-  state.previousTile = static_cast<int>(mover.previous_tile);
+  state.previous_tile = static_cast<int>(mover.previous_tile);
   state.position.vx = mover.x;
   state.position.vz = mover.z;
-  state.detourStep = mover.detour_step;
-  state.opaqueFB = mover.detour_target;
+  state.detour_step = mover.detour_step;
+  state.opaque_fb = mover.detour_target;
   std::ranges::copy(mover.detour_directions,
-                    std::begin(state.detourDirections));
-  state.movementTarget = mover.movement_target;
+                    std::begin(state.detour_directions));
+  state.movement_target = mover.movement_target;
   state.destination.word = mover.destination;
 }
 
@@ -89,7 +91,7 @@ void Store(const BlockedMover& mover, AiState& state) {
 // routine reads, which they do not change.
 class LiveAdjacentDestinationWorld final : public AdjacentDestinationWorld {
  public:
-  explicit LiveAdjacentDestinationWorld(Battle_Ai_MoveTargetView& state)
+  explicit LiveAdjacentDestinationWorld(VS::Battle::Ai::MoveTargetView& state)
       : state_(state) {}
 
   [[nodiscard]] NavigationDirectionCodes DirectionCodes() const override {
@@ -110,7 +112,7 @@ class LiveAdjacentDestinationWorld final : public AdjacentDestinationWorld {
   }
 
  private:
-  Battle_Ai_MoveTargetView& state_;
+  VS::Battle::Ai::MoveTargetView& state_;
 };
 
 // The room's AI frame and the actor's movement code. Each call taking the
@@ -156,13 +158,13 @@ class LiveBlockedMovementWorld final : public BlockedMovementWorld {
 }  // namespace
 
 unsigned int FindLiveAdjacentMovementDestination(
-    Battle_Ai_MoveTargetView* state, int first, int second,
+    VS::Battle::Ai::MoveTargetView* state, int first, int second,
     unsigned int direction) {
   Require(state != nullptr, "AI adjacent destination requires an AI state");
   LiveAdjacentDestinationWorld world(*state);
   const auto destination = FindAdjacentMovementDestination(
       world,
-      {.movement_disabled = state->movementDisabled != 0,
+      {.movement_disabled = state->movement_disabled != 0,
        .tile = state->tile.word},
       first, second, direction);
   Require(destination.has_value(),
@@ -170,14 +172,14 @@ unsigned int FindLiveAdjacentMovementDestination(
   return *destination;
 }
 
-int IsLiveMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state) {
+int IsLiveMovementHistoryStalled(VS::Battle::Ai::PerceptionUpdateView* state) {
   Require(state != nullptr, "AI movement history requires an AI state");
   const MovementHistory history{
-      .x_words = {static_cast<std::uint32_t>(state->historyX.words[0]),
-                  static_cast<std::uint32_t>(state->historyX.words[1])},
-      .z_words = {static_cast<std::uint32_t>(state->historyZ.words[0]),
-                  static_cast<std::uint32_t>(state->historyZ.words[1])},
-      .mask = state->historyMask};
+      .x_words = {static_cast<std::uint32_t>(state->history_x.words[0]),
+                  static_cast<std::uint32_t>(state->history_x.words[1])},
+      .z_words = {static_cast<std::uint32_t>(state->history_z.words[0]),
+                  static_cast<std::uint32_t>(state->history_z.words[1])},
+      .mask = state->history_mask};
   return IsMovementHistoryStalled(history) ? 1 : 0;
 }
 
@@ -189,7 +191,7 @@ void SaveLiveMovementRandomState() {
   VS::Battle::Ai::savedMovementRandomState = states.saved;
 }
 
-int TryRecoverLiveBlockedMovement(Battle_Ai_BlockedRecoveryView* state) {
+int TryRecoverLiveBlockedMovement(VS::Battle::Ai::BlockedRecoveryView* state) {
   Require(state != nullptr, "AI blocked movement requires an AI state");
   auto& ai_state = *reinterpret_cast<AiState*>(state);
   LiveBlockedMovementWorld world(ai_state);

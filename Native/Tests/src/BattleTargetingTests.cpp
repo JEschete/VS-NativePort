@@ -23,7 +23,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisites.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
@@ -3836,11 +3836,11 @@ TEST_CASE("Live action range borrows the attacker's weapon range",
   action.rangeZ = 4;
   action.shape = 1;
   const BattleLog log;
-  Battle_Ai_ActionRangeView2 weapon{};
-  weapon.opaque38.rangeZ = 4;
+  VS::Battle::Ai::ActionRangeView2 weapon{};
+  weapon.opaque38.range_z = 4;
   weapon.opaque38.shape = 1;
-  Battle_Ai_ActionRangeView view{};
-  view.opaque5C = &weapon;
+  VS::Battle::Ai::ActionRangeView view{};
+  view.opaque_5c = &weapon;
   CHECK(battle::LiveCalculateActionRangeSquared(&view, 250) == 96 * 96);
   action.aiFlags.radialArea = 1;
   action.areaRangeY = 3;
@@ -3876,8 +3876,8 @@ TEST_CASE("Live range shape extent refuses without a shape",
   const BattleLog log;
   CHECK(VS::Battle::LiveCalculateRangeShapeExtent(nullptr) == 0);
   CHECK(log.Saw("range extent refused: no range shape"));
-  Battle_Ai_ActionRangeView2 weapon{};
-  weapon.opaque38.rangeZ = 4;
+  VS::Battle::Ai::ActionRangeView2 weapon{};
+  weapon.opaque38.range_z = 4;
   weapon.opaque38.shape = 1;
   CHECK(VS::Battle::LiveCalculateRangeShapeExtent(&weapon.opaque38) == 128);
 }

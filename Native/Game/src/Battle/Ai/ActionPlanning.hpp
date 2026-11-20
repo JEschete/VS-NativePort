@@ -9,10 +9,9 @@
 #include <cstdint>
 
 struct Battle_ActorStats;
-struct Battle_Ai_CandidateEntryView;
-struct Battle_Ai_ReactionRecord;
-
 namespace VS::Battle::Ai {
+struct CandidateEntryView;
+struct ReactionRecord;
 
 inline constexpr std::size_t kTimedStatusFlagWords = 344;
 inline constexpr std::size_t kPassCandidates = 16;
@@ -23,15 +22,15 @@ extern std::array<std::uint32_t, kTimedStatusFlagWords> kTimedStatusFlags;
 // decomp: D_800F58E8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:528)
 extern Battle_ActorStats* planningStatsSnapshot;
 // decomp: D_800F58EC (src/BATTLE/BATTLE.PRG/6E4CCShared.h:529)
-extern Battle_Ai_CandidateEntryView (*planningPassCandidates)[kPassCandidates];
+extern CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:530)
 extern std::int32_t fallbackCandidateCount;
 // decomp: D_800F58F4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:531)
 extern std::int32_t unusedPlanCounter;
 // decomp: D_800F58F8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:532)
-extern Battle_Ai_CandidateEntryView* fallbackCandidates;
+extern CandidateEntryView* fallbackCandidates;
 // decomp: D_800F5900 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:533)
-extern Battle_Ai_ReactionRecord* planningWorkspace;
+extern ReactionRecord* planningWorkspace;
 // decomp: D_800F5904 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:534)
 extern std::uint8_t (*candidateExclusions)[kCandidateExclusionBytes];
 

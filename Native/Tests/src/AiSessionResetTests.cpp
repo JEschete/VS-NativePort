@@ -124,7 +124,7 @@ void SeedInvalidatedPlanningBindings() {
 void SeedInvalidatedFrameBindings() {
   auto& frame = VS::Battle::Ai::LiveFrameContext();
   std::fill_n(frame.actors, std::size(frame.actors),
-              InvalidatedBinding<Battle_Ai_ActorAiState*>());
+              InvalidatedBinding<VS::Battle::Ai::ActorAiState*>());
   frame.room = InvalidatedBinding<decltype(frame.room)>();
   frame.heightMap = InvalidatedBinding<decltype(frame.heightMap)>();
   frame.tileFlags = InvalidatedBinding<decltype(frame.tileFlags)>();
@@ -207,7 +207,7 @@ TEST_CASE("AI session invalidation never touches reclaimed allocation storage",
   SeedInvalidatedRoomBindings();
   SeedInvalidatedPlanningBindings();
   SeedInvalidatedFrameBindings();
-  auto* dead = InvalidatedBinding<Battle_Ai_ActorAiState*>();
+  auto* dead = InvalidatedBinding<VS::Battle::Ai::ActorAiState*>();
   std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved.actors.size(), dead);
   VS::Battle::Ai::attributeActorMask = 0x1D;
   VS::Battle::Ai::secondPerceptionTarget = 4;

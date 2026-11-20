@@ -19,8 +19,7 @@
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/Navigation.hpp"
@@ -60,7 +59,7 @@ enum {
 // Published room AI storage. The PS1 allocation (0x1038 bytes with tables at
 // 0x38/0x838) is provenance only; the native size comes from this type.
 struct RoomAiStorage {
-  Battle_Ai_RoomAiState state;
+  VS::Battle::Ai::RoomAiState state;
   u_short flags[VS::Battle::Ai::kRoomGridSide][VS::Battle::Ai::kRoomGridSide];
   u_short heights[VS::Battle::Ai::kRoomGridSide][VS::Battle::Ai::kRoomGridSide];
 };
@@ -135,17 +134,17 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     }
     memset(storage, 0, sizeof *storage);
     const VS::Battle::Ai::RoomAiSettings& settings = grid.settings;
-    Battle_Ai_RoomAiState& state = storage->state;
-    state.maxTileX = settings.max_tile_x;
-    state.maxTileZ = settings.max_tile_z;
-    state.minTileX = settings.min_tile_x;
-    state.minTileZ = settings.min_tile_z;
+    VS::Battle::Ai::RoomAiState& state = storage->state;
+    state.max_tile_x = settings.max_tile_x;
+    state.max_tile_z = settings.max_tile_z;
+    state.min_tile_x = settings.min_tile_x;
+    state.min_tile_z = settings.min_tile_z;
     state.reserved4[0] = static_cast<char>(settings.collision_extent[0]);
     state.reserved4[1] = static_cast<char>(settings.collision_extent[1]);
-    state.defaultActionDelay = settings.default_action_delay;
-    state.allowsNonSpellActions = settings.allows_non_spell_actions ? 1 : 0;
-    state.engagementLimit = settings.engagement_limit;
-    state.flightCeiling = settings.flight_ceiling;
+    state.default_action_delay = settings.default_action_delay;
+    state.allows_non_spell_actions = settings.allows_non_spell_actions ? 1 : 0;
+    state.engagement_limit = settings.engagement_limit;
+    state.flight_ceiling = settings.flight_ceiling;
     for (std::size_t z = 0; z < grid.flags.size(); ++z) {
       for (std::size_t x = 0; x < grid.flags[z].size(); ++x) {
         storage->flags[z][x] = grid.flags[z][x];
@@ -175,20 +174,20 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 
   [[nodiscard]] std::optional<VS::Battle::Ai::RoomAiSettings>
   PublishedSettings() const override {
-    const Battle_Ai_RoomAiState* state = VS::Battle::Ai::roomAiState;
+    const VS::Battle::Ai::RoomAiState* state = VS::Battle::Ai::roomAiState;
     if (state == nullptr) return std::nullopt;
     VS::Battle::Ai::RoomAiSettings settings;
-    settings.max_tile_x = state->maxTileX;
-    settings.max_tile_z = state->maxTileZ;
-    settings.min_tile_x = state->minTileX;
-    settings.min_tile_z = state->minTileZ;
+    settings.max_tile_x = state->max_tile_x;
+    settings.max_tile_z = state->max_tile_z;
+    settings.min_tile_x = state->min_tile_x;
+    settings.min_tile_z = state->min_tile_z;
     settings.collision_extent = {
         static_cast<std::uint8_t>(state->reserved4[0]),
         static_cast<std::uint8_t>(state->reserved4[1])};
-    settings.default_action_delay = state->defaultActionDelay;
-    settings.allows_non_spell_actions = state->allowsNonSpellActions != 0;
-    settings.engagement_limit = state->engagementLimit;
-    settings.flight_ceiling = state->flightCeiling;
+    settings.default_action_delay = state->default_action_delay;
+    settings.allows_non_spell_actions = state->allows_non_spell_actions != 0;
+    settings.engagement_limit = state->engagement_limit;
+    settings.flight_ceiling = state->flight_ceiling;
     return settings;
   }
 
@@ -220,9 +219,10 @@ class BattleReactionDelays final : public VS::Battle::Ai::ActorReactionDelays {
     if (actor_id < 0 || actor_id >= VS::Battle::Ai::kAiActorSlotCount) {
       return false;
     }
-    Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[actor_id];
+    VS::Battle::Ai::ActorAiState* state =
+        VS::Battle::Ai::actorAiStates[actor_id];
     if (state == nullptr) return false;
-    state->minActionDelay = frames;
+    state->min_action_delay = frames;
     return true;
   }
 };

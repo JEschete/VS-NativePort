@@ -15,8 +15,7 @@
 
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/CandidateMovement.hpp"
 #include "Battle/Ai/CandidateMovementLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -798,18 +797,18 @@ TEST_CASE(
     "Candidate movement live empty path does not require a candidate or alter "
     "state",
     "[candidate-movement][live]") {
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
   state.opaque1 = 8;
-  state.opaqueF = 9;
+  state.opaque_f = 9;
   state.opaque44 = 10;
-  state.movementTarget = 7;
+  state.movement_target = 7;
   CHECK(ai::MoveLiveForActionCandidate(
-            reinterpret_cast<Battle_Ai_CandidateMovementView*>(&state),
+            reinterpret_cast<VS::Battle::Ai::CandidateMovementView*>(&state),
             nullptr) == 0);
   CHECK(state.opaque1 == 8);
-  CHECK(state.opaqueF == 9);
+  CHECK(state.opaque_f == 9);
   CHECK(state.opaque44 == 10);
-  CHECK(state.movementTarget == 7);
+  CHECK(state.movement_target == 7);
 }
 
 TEST_CASE(

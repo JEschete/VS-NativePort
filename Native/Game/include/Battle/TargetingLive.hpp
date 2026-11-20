@@ -7,8 +7,10 @@
 #include "Legacy/Psx.h"
 
 struct Battle_ActorStats;
-struct Battle_Ai_ActionRangeShape;
-struct Battle_Ai_ActionRangeView;
+namespace VS::Battle::Ai {
+struct ActionRangeShape;
+struct ActionRangeView;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the generated action flow, AI and field callers
 // (tools/port/copy_fixups.py OWNED_CALL_BINDINGS) and from the hand-written
@@ -44,8 +46,8 @@ int LiveUpdateTargetSelectionMenu(std::uint8_t* target);
 int LiveCalculateActionAreaReach(std::intptr_t unused, int action_id,
                                  std::uint32_t maximum_reach);
 // decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476)
-int LiveCalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view,
-                                    int action_id);
+int LiveCalculateActionRangeSquared(
+    VS::Battle::Ai::ActionRangeView* actor_range_view, int action_id);
 // func_800E5698 for typed callers, from the weapon range in the actor's stats.
 int LiveCalculateActorActionRangeSquared(const Battle_ActorStats* stats,
                                          int action_id);
@@ -54,5 +56,5 @@ void LiveUpdateTargetSelectionHighlight(int mode);
 // decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:437); a null
 // range shape is refused and reads as 0.
 int LiveCalculateRangeShapeExtent(
-    const Battle_Ai_ActionRangeShape* range_shape);
+    const VS::Battle::Ai::ActionRangeShape* range_shape);
 }  // namespace VS::Battle

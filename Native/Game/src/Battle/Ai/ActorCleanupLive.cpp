@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -41,29 +41,32 @@ static_assert(
     std::extent_v<
         std::remove_pointer_t<decltype(VS::Battle::Ai::tileFlagMap)>> ==
     kTileFlagGridSide);
-static_assert(std::extent_v<decltype(Battle_Ai_RoomAiState::specialActors)> ==
-              kRoomSpecialActorSlots);
-static_assert(std::extent_v<decltype(Battle_Ai_ActorAiState::relations)> ==
-              kCleanupActorSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Battle::Ai::RoomAiState::special_actors)> ==
+    kRoomSpecialActorSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Battle::Ai::ActorAiState::relations)> ==
+    kCleanupActorSlots);
 static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
 static_assert(sizeof(VS::Battle::Ai::TilePosition) == sizeof(std::uint32_t));
 // Room bytes 0-3 hold the reservable tile range; byte 0x0E the room flags.
 constexpr std::size_t kRoomMinTileZOffset = 0x03;
 constexpr std::size_t kRoomFlagsOffset = 0x0E;
 constexpr std::size_t kRoomEngagedCountOffset = 0x12;
-static_assert(offsetof(Battle_Ai_RoomAiState, maxTileX) == 0);
-static_assert(offsetof(Battle_Ai_RoomAiState, maxTileZ) == 1);
-static_assert(offsetof(Battle_Ai_RoomAiState, minTileX) == 2);
-static_assert(offsetof(Battle_Ai_RoomAiState, minTileZ) == kRoomMinTileZOffset);
-static_assert(offsetof(Battle_Ai_RoomAiState, reservedEPrefix) ==
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, max_tile_x) == 0);
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, max_tile_z) == 1);
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, min_tile_x) == 2);
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, min_tile_z) ==
+              kRoomMinTileZOffset);
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, reserved_e_prefix) ==
               kRoomFlagsOffset);
-static_assert(offsetof(Battle_Ai_RoomAiState, engagedCount) ==
+static_assert(offsetof(VS::Battle::Ai::RoomAiState, engaged_count) ==
               kRoomEngagedCountOffset);
 // The views callers hold alias the actor AI state.
-static_assert(offsetof(Battle_Ai_PerceptionUpdateView, opaque18) ==
-              offsetof(Battle_Ai_ActorAiState, opaque18));
-static_assert(offsetof(Battle_Ai_ReactionView, relations) ==
-              offsetof(Battle_Ai_ActorAiState, relations));
+static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView, opaque18) ==
+              offsetof(VS::Battle::Ai::ActorAiState, opaque18));
+static_assert(offsetof(VS::Battle::Ai::ReactionView, relations) ==
+              offsetof(VS::Battle::Ai::ActorAiState, relations));
 // The original allocates a 0x20-byte orbit state.
 constexpr std::size_t kOrbitStateBytes = 0x20;
 static_assert(sizeof(VS::Battle::Ai::ArenaOrbitState) == kOrbitStateBytes);
@@ -78,7 +81,7 @@ std::span<std::uint16_t> LiveTileFlags() {
   return {&VS::Battle::Ai::tileFlagMap[0][0], kTileFlagCells};
 }
 
-Battle_Ai_ActorAiState* StateAt(int actor_id) {
+VS::Battle::Ai::ActorAiState* StateAt(int actor_id) {
   return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
 }
 
@@ -95,34 +98,35 @@ Battle_Actor* ActorOf(BattleActorHandle actor) {
   return reinterpret_cast<Battle_Actor*>(static_cast<std::uintptr_t>(actor));
 }
 
-ReservationState LoadReservations(const Battle_Ai_ActorAiState& state) {
-  return {.navigation_reset = state.opaque1A,
-          .next_tile = state.nextTile.word,
+ReservationState LoadReservations(const VS::Battle::Ai::ActorAiState& state) {
+  return {.navigation_reset = state.opaque_1a,
+          .next_tile = state.next_tile.word,
           .holds_route_gate = state.route_gate != 0};
 }
 
-CleanupRoom LoadRoom(const Battle_Ai_RoomAiState& room) {
-  CleanupRoom loaded{.max_x = room.maxTileX,
-                     .max_z = room.maxTileZ,
-                     .min_x = room.minTileX,
-                     .min_z = room.minTileZ,
-                     .flags = room.reservedEPrefix[0],
+CleanupRoom LoadRoom(const VS::Battle::Ai::RoomAiState& room) {
+  CleanupRoom loaded{.max_x = room.max_tile_x,
+                     .max_z = room.max_tile_z,
+                     .min_x = room.min_tile_x,
+                     .min_z = room.min_tile_z,
+                     .flags = room.reserved_e_prefix[0],
                      .engaged_mask = EngagedMask(room),
-                     .engaged_count = room.engagedCount};
+                     .engaged_count = room.engaged_count};
   for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
-    loaded.special_actors.at(slot) = HandleOf(room.specialActors[slot]);
+    loaded.special_actors.at(slot) = HandleOf(room.special_actors[slot]);
   }
   return loaded;
 }
 
-void StoreRoomFields(const CleanupRoom& room, Battle_Ai_RoomAiState& target) {
-  target.reservedEPrefix[0] = room.flags;
+void StoreRoomFields(const CleanupRoom& room,
+                     VS::Battle::Ai::RoomAiState& target) {
+  target.reserved_e_prefix[0] = room.flags;
   StoreEngagedMask(target, room.engaged_mask);
-  target.engagedCount = room.engaged_count;
+  target.engaged_count = room.engaged_count;
   // Cleanup only ever empties a special actor slot.
   for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
     if (room.special_actors.at(slot) == kNoBattleActor) {
-      target.specialActors[slot] = nullptr;
+      target.special_actors[slot] = nullptr;
     }
   }
 }
@@ -140,12 +144,12 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<ReservationState> Reservations(
       int actor_id) const override {
-    const Battle_Ai_ActorAiState* state = StateAt(actor_id);
+    const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr) return std::nullopt;
     return LoadReservations(*state);
   }
   void StoreReservations(int actor_id, const ReservationState& state) override {
-    StateAt(actor_id)->opaque1A = state.navigation_reset;
+    StateAt(actor_id)->opaque_1a = state.navigation_reset;
   }
   [[nodiscard]] std::optional<CleanupRoom> Room() const override {
     if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
@@ -155,12 +159,12 @@ class LiveCleanupHost final : public ActorCleanupHost {
     StoreRoomFields(room, *VS::Battle::Ai::roomAiState);
   }
   [[nodiscard]] std::optional<int> LinkedActor(int actor_id) const override {
-    const Battle_Ai_ActorAiState* state = StateAt(actor_id);
+    const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr) return std::nullopt;
-    return state->linkedActor;
+    return state->linked_actor;
   }
   void SetLinkedActor(int actor_id, int linked) override {
-    StateAt(actor_id)->linkedActor = static_cast<signed char>(linked);
+    StateAt(actor_id)->linked_actor = static_cast<signed char>(linked);
   }
   [[nodiscard]] std::optional<std::uint8_t> CommandOpcode(
       int actor_id) const override {
@@ -183,7 +187,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<std::uint8_t> StateModelSupport(
       int actor_id) const override {
-    const Battle_Ai_ActorAiState* state = StateAt(actor_id);
+    const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr || state->model == nullptr) return std::nullopt;
     const Actors_ModelInstance& model =
         reinterpret_cast<const Actors_ActorRecord*>(state->model)->instance;
@@ -192,12 +196,12 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   [[nodiscard]] std::optional<PersistenceFields> Persistence(
       int actor_id) const override {
-    const Battle_Ai_ActorAiState* state = StateAt(actor_id);
+    const VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     if (state == nullptr) return std::nullopt;
     return PersistenceFields{
-        .uses_room_action_delay = state->usesRoomActionDelay,
+        .uses_room_action_delay = state->uses_room_action_delay,
         .relation_to_ashley = std::bit_cast<std::uint32_t>(state->relations[0]),
-        .behavior_mode = state->behaviorMode};
+        .behavior_mode = state->behavior_mode};
   }
   [[nodiscard]] std::uint32_t AttributeActorMask() const override {
     return static_cast<std::uint32_t>(VS::Battle::Ai::attributeActorMask);
@@ -209,15 +213,15 @@ class LiveCleanupHost final : public ActorCleanupHost {
     return static_cast<int>(std::size(Battle_actors));
   }
   [[nodiscard]] bool HasNavigationOverride(int actor_id) const override {
-    return StateAt(actor_id)->nativePointer18C != nullptr;
+    return StateAt(actor_id)->native_pointer_18c != nullptr;
   }
   void StoreCommandFlags(BattleActorHandle actor, std::uint8_t flags) override {
     ActorOf(actor)->commandFlags = flags;
   }
   void FreeNavigationOverride(int actor_id) override {
-    Battle_Ai_ActorAiState& state = *StateAt(actor_id);
-    void* route = state.nativePointer18C;
-    state.nativePointer18C = nullptr;
+    VS::Battle::Ai::ActorAiState& state = *StateAt(actor_id);
+    void* route = state.native_pointer_18c;
+    state.native_pointer_18c = nullptr;
     VS::Core::Memory::FreeLiveFromHighEnd(route);
   }
   void ClearContactOccupancy(int contact) override {
@@ -228,14 +232,15 @@ class LiveCleanupHost final : public ActorCleanupHost {
   }
   void ResetAwarenessIndicator(int actor_id) override {
     ResetLiveActorAwarenessIndicator(
-        reinterpret_cast<Battle_Ai_PlanEvaluationView*>(StateAt(actor_id)));
+        reinterpret_cast<VS::Battle::Ai::PlanEvaluationView*>(
+            StateAt(actor_id)));
   }
   void UnlinkEngagedActor(int actor_id) override {
     UnlinkLiveEngagedActor(StateAt(actor_id));
   }
   void RetireAiState(int actor_id) override {
     const auto slot = static_cast<std::size_t>(actor_id);
-    Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[slot];
+    VS::Battle::Ai::ActorAiState* state = VS::Battle::Ai::actorAiStates[slot];
     VS::Battle::Ai::actorAiStates[slot] = nullptr;
     FrameContext* frame = &LiveFrameContext();
     Require(frame != nullptr, "AI teardown requires the frame state");
@@ -261,7 +266,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
 
 class LiveReactionDelay final : public ReactionDelayHost {
  public:
-  explicit LiveReactionDelay(const Battle_Ai_ActorAiState& state)
+  explicit LiveReactionDelay(const VS::Battle::Ai::ActorAiState& state)
       : state_(state) {}
 
   int NextRandomMasked(int range) override {
@@ -270,18 +275,18 @@ class LiveReactionDelay final : public ReactionDelayHost {
   // The original writes through the AI state's actor pointer (0x54), which
   // always names the battle actor in the state's slot.
   void SetCommandFlags(std::uint8_t flags) override {
-    Require(state_.actorId < kCleanupActorSlots,
+    Require(state_.actor_id < kCleanupActorSlots,
             "AI reaction request actor ID is outside the AI slots");
-    Battle_Actor* actor = Battle_actors[state_.actorId];
+    Battle_Actor* actor = Battle_actors[state_.actor_id];
     Require(actor != nullptr, "AI reaction request requires an actor");
     actor->commandFlags = flags;
   }
 
  private:
-  const Battle_Ai_ActorAiState& state_;
+  const VS::Battle::Ai::ActorAiState& state_;
 };
 
-HostilityState LoadHostility(const Battle_Ai_ActorAiState& source) {
+HostilityState LoadHostility(const VS::Battle::Ai::ActorAiState& source) {
   HostilityState state{.alerted = source.opaque18};
   for (std::size_t id = 0; id < state.relations.size(); ++id) {
     state.relations.at(id) = std::bit_cast<std::uint32_t>(source.relations[id]);
@@ -290,7 +295,7 @@ HostilityState LoadHostility(const Battle_Ai_ActorAiState& source) {
 }
 
 void StoreHostility(const HostilityState& state,
-                    Battle_Ai_ActorAiState& target) {
+                    VS::Battle::Ai::ActorAiState& target) {
   target.opaque18 = state.alerted;
   for (std::size_t id = 0; id < state.relations.size(); ++id) {
     target.relations[id] =
@@ -300,7 +305,7 @@ void StoreHostility(const HostilityState& state,
 
 class LiveHostility final : public HostilityHost {
  public:
-  explicit LiveHostility(Battle_Ai_ActorAiState& state) : state_(state) {}
+  explicit LiveHostility(VS::Battle::Ai::ActorAiState& state) : state_(state) {}
 
   void DrawBiosRandom() override { (void)VS::Core::NextBiosRand(); }
   void ShowAwarenessIndicator(HostilityState& state, int indicator,
@@ -312,13 +317,13 @@ class LiveHostility final : public HostilityHost {
   void RequestReaction(HostilityState& state, int value, int range) override {
     StoreHostility(state, state_);
     SetLiveActorAiReactionWithDelay(
-        reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state_), value,
+        reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state_), value,
         range);
     state = LoadHostility(state_);
   }
 
  private:
-  Battle_Ai_ActorAiState& state_;
+  VS::Battle::Ai::ActorAiState& state_;
 };
 }  // namespace
 
@@ -340,7 +345,7 @@ void ForceReleaseLiveActorAiReservations(int actor_id) {
           "room range inside the tile grid");
 }
 
-void ReleaseLiveActorAiReservations(Battle_Ai_ActorAiState* state) {
+void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state) {
   Require(state != nullptr && VS::Battle::Ai::roomAiState != nullptr,
           "AI reservation release requires actor and room state");
   ReservationState reservations = LoadReservations(*state);
@@ -348,7 +353,7 @@ void ReleaseLiveActorAiReservations(Battle_Ai_ActorAiState* state) {
   Require(ReleaseActorAiReservations(reservations, room, LiveTileFlags()),
           "AI reservation release requires a room range inside the tile "
           "grid");
-  state->opaque1A = reservations.navigation_reset;
+  state->opaque_1a = reservations.navigation_reset;
   StoreRoomFields(room, *VS::Battle::Ai::roomAiState);
 }
 
@@ -365,27 +370,27 @@ void FreeLiveActorAiState(Battle_Actor* actor) {
           "consistent engagement");
 }
 
-void AllocateLiveOrbitingBossState(Battle_Ai_SettingsView* /*state*/) {
+void AllocateLiveOrbitingBossState(VS::Battle::Ai::SettingsView* /*state*/) {
   LiveCleanupHost host;
   Require(AllocateOrbitingBossState(host), "AI orbit-state allocation failed");
 }
 
-void SetLiveActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView* state,
-                                     int value, int range) {
+void SetLiveActorAiReactionWithDelay(
+    VS::Battle::Ai::PerceptionUpdateView* state, int value, int range) {
   Require(state != nullptr, "AI reaction request requires state");
-  auto& live = *reinterpret_cast<Battle_Ai_ActorAiState*>(state);
+  auto& live = *reinterpret_cast<VS::Battle::Ai::ActorAiState*>(state);
   ReactionDelayState delay{
-      .has_navigation_override = live.nativePointer18C != nullptr,
-      .decision_delay = live.decisionDelay};
+      .has_navigation_override = live.native_pointer_18c != nullptr,
+      .decision_delay = live.decision_delay};
   LiveReactionDelay host(live);
   if (SetActorAiReactionWithDelay(delay, host, value, range)) {
-    live.decisionDelay = delay.decision_delay;
+    live.decision_delay = delay.decision_delay;
   }
 }
 
-void MakeLiveTargetHostile(Battle_Ai_ReactionView* state, int target) {
+void MakeLiveTargetHostile(VS::Battle::Ai::ReactionView* state, int target) {
   Require(state != nullptr, "AI hostility request requires state");
-  auto& live = *reinterpret_cast<Battle_Ai_ActorAiState*>(state);
+  auto& live = *reinterpret_cast<VS::Battle::Ai::ActorAiState*>(state);
   HostilityState hostility = LoadHostility(live);
   LiveHostility host(live);
   Require(MakeTargetHostile(hostility, host, target),

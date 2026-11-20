@@ -21,20 +21,21 @@ namespace {
 class PlannerConditionRows final : public ActorConditionTable {
  public:
   explicit PlannerConditionRows(
-      std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows)
+      std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows)
       : rows_(rows) {}
 
   bool StoreActorCondition(int actor_id,
                            const ActorCondition& condition) override {
     if (actor_id < 0 || actor_id >= kBattleActorSlotCount) return false;
-    Battle_Ai_ActionTiming& row = rows_[static_cast<std::size_t>(actor_id)];
-    row = Battle_Ai_ActionTiming{};
-    row.opaque0Bit0 = static_cast<unsigned>(actor_id);
+    VS::Battle::Ai::ActionTiming& row =
+        rows_[static_cast<std::size_t>(actor_id)];
+    row = VS::Battle::Ai::ActionTiming{};
+    row.opaque0_bit0 = static_cast<unsigned>(actor_id);
     row.opaque4 = condition.hp;
     row.opaque6 = condition.max_hp;
     row.opaque8 = condition.mp;
-    row.opaqueA = condition.max_mp;
-    row.opaqueC = condition.statuses;
+    row.opaque_a = condition.max_mp;
+    row.opaque_c = condition.statuses;
     row.opaque10 = condition.weapon_dp;
     row.opaque12 = condition.weapon_max_dp;
     row.opaque14 = condition.shield_dp;
@@ -43,7 +44,7 @@ class PlannerConditionRows final : public ActorConditionTable {
   }
 
  private:
-  std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows_;
+  std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows_;
 };
 
 std::optional<ActorCondition> ReadCondition(const Battle_ActorStats* stats) {
@@ -63,7 +64,7 @@ std::optional<ActorCondition> ReadCondition(const Battle_ActorStats* stats) {
 }  // namespace
 
 void CaptureBattleActorConditions(
-    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows) {
+    std::span<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows) {
   std::array<ActorConditionReading, std::size(Battle_actors)> readings{};
   std::size_t count = 0;
   for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;

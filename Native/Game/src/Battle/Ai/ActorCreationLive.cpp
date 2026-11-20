@@ -21,8 +21,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -33,11 +32,11 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
-using CreationView = Battle_Ai_AiCreationView;
-using ActorView = Battle_Ai_AiActorView;
-using ModelView = Battle_Ai_CreationModelView;
-using StatsView = Battle_Ai_CreationStatsView;
+using AiState = VS::Battle::Ai::ActorAiState;
+using CreationView = VS::Battle::Ai::AiCreationView;
+using ActorView = VS::Battle::Ai::AiActorView;
+using ModelView = VS::Battle::Ai::CreationModelView;
+using StatsView = VS::Battle::Ai::CreationStatsView;
 using BoneTagKind = VS::Actors::BoneTagKind;
 
 // The far perception range (AI state 0xAC) within reservedA0 (0xA0).
@@ -59,29 +58,30 @@ constexpr unsigned kTileZShift = 16;
 constexpr unsigned kTileStatusShift = 24;
 
 static_assert(std::size(VS::Battle::Ai::actorAiStates) == kCleanupActorSlots);
-static_assert(std::extent_v<decltype(Battle_Ai_RoomAiState::specialActors)> ==
-              kRoomSpecialActorSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Battle::Ai::RoomAiState::special_actors)> ==
+    kRoomSpecialActorSlots);
 static_assert(
     std::extent_v<
         std::remove_pointer_t<decltype(VS::Battle::Ai::tileFlagMap)>> ==
     kTileFlagGridSide);
 
 // The original read the battle actor through the creation actor view.
-static_assert(offsetof(ActorView, actorId) == offsetof(Battle_Actor, id));
-static_assert(offsetof(ActorView, stateFlags) + kCommandOpcodeByte ==
+static_assert(offsetof(ActorView, actor_id) == offsetof(Battle_Actor, id));
+static_assert(offsetof(ActorView, state_flags) + kCommandOpcodeByte ==
               offsetof(Battle_Actor, commandOpcode));
-static_assert(offsetof(ActorView, stateFlags) + kCommandFlagsByte ==
+static_assert(offsetof(ActorView, state_flags) + kCommandFlagsByte ==
               offsetof(Battle_Actor, commandFlags));
-static_assert(offsetof(ActorView, aiControlFlags) ==
+static_assert(offsetof(ActorView, ai_control_flags) ==
               offsetof(Battle_Actor, kind));
-static_assert(offsetof(ActorView, startCommandFlag) ==
+static_assert(offsetof(ActorView, start_command_flag) ==
               offsetof(Battle_Actor, spawnByte26));
-static_assert(offsetof(ActorView, savedAiSettingsFlags) ==
+static_assert(offsetof(ActorView, saved_ai_settings_flags) ==
               offsetof(Battle_Actor, reserved34));
-static_assert(offsetof(ActorView, aiSettings) ==
+static_assert(offsetof(ActorView, ai_settings) ==
               offsetof(Battle_Actor, templateWord2C));
 static_assert(offsetof(ActorView, stats) == offsetof(Battle_Actor, stats));
-static_assert(offsetof(ActorView, listExemptFlag) ==
+static_assert(offsetof(ActorView, list_exempt_flag) ==
               offsetof(Battle_Actor, allocationKind));
 static_assert(offsetof(ActorView, model) == offsetof(Battle_Actor, model));
 
@@ -94,7 +94,7 @@ static_assert(offsetof(ModelView, tile) ==
 static_assert(offsetof(ModelView, kind) == kModelObjectWordOffset);
 static_assert(offsetof(ModelView, radius) ==
               offsetof(Actors_ActorRecord, collisionRadius));
-static_assert(offsetof(ModelView, opaque63E) ==
+static_assert(offsetof(ModelView, opaque_63e) ==
               offsetof(Actors_ActorRecord, collisionHeight));
 
 // ...its stats through the creation stats view...
@@ -108,65 +108,68 @@ static_assert(offsetof(StatsView, opaque33) ==
               offsetof(Battle_ActorStats, runSpeed));
 
 // ...and wrote the AI state through the creation view.
-static_assert(offsetof(CreationView, hasTaggedBone3) ==
-              offsetof(AiState, hasTaggedBone3));
+static_assert(offsetof(CreationView, has_tagged_bone3) ==
+              offsetof(AiState, has_tagged_bone3));
 static_assert(offsetof(CreationView, tile) == offsetof(AiState, tile));
-static_assert(offsetof(CreationView, previousTile) ==
-              offsetof(AiState, previousTile));
+static_assert(offsetof(CreationView, previous_tile) ==
+              offsetof(AiState, previous_tile));
 static_assert(offsetof(CreationView, options) ==
-              offsetof(AiState, savedRelationOptions));
+              offsetof(AiState, saved_relation_options));
 static_assert(offsetof(CreationView, actor) == offsetof(AiState, actor));
 static_assert(offsetof(CreationView, model) == offsetof(AiState, model));
 static_assert(offsetof(CreationView, stats) == offsetof(AiState, stats));
-static_assert(offsetof(CreationView, positionSource) ==
-              offsetof(AiState, nativePointer60));
-static_assert(offsetof(CreationView, tileSource) ==
-              offsetof(AiState, nativePointer64));
-static_assert(offsetof(CreationView, pointHeight) ==
-              offsetof(AiState, pointHeight));
-static_assert(offsetof(CreationView, actorId) == offsetof(AiState, actorId));
+static_assert(offsetof(CreationView, position_source) ==
+              offsetof(AiState, native_pointer60));
+static_assert(offsetof(CreationView, tile_source) ==
+              offsetof(AiState, native_pointer64));
+static_assert(offsetof(CreationView, point_height) ==
+              offsetof(AiState, point_height));
+static_assert(offsetof(CreationView, actor_id) == offsetof(AiState, actor_id));
 static_assert(offsetof(CreationView, opaque89) ==
-              offsetof(AiState, requestedMovementMode));
-static_assert(offsetof(CreationView, opaque8A) ==
-              offsetof(AiState, currentMovementMode));
+              offsetof(AiState, requested_movement_mode));
+static_assert(offsetof(CreationView, opaque_8a) ==
+              offsetof(AiState, current_movement_mode));
 static_assert(offsetof(CreationView, radius) == offsetof(AiState, radius));
-static_assert(offsetof(CreationView, collisionRadius) ==
+static_assert(offsetof(CreationView, collision_radius) ==
               offsetof(AiState, collision_radius));
-static_assert(offsetof(CreationView, opaque9C) ==
+static_assert(offsetof(CreationView, opaque_9c) ==
               offsetof(AiState, last_slide_tile_bytes));
-static_assert(offsetof(CreationView, farDistanceSquared) ==
-              offsetof(AiState, reservedA0) + kFarRangeOffset);
-static_assert(offsetof(Battle_Ai_SettingsView, farDistanceSquared) ==
-              offsetof(CreationView, farDistanceSquared));
-static_assert(offsetof(CreationView, maxRange) == offsetof(AiState, maxRange));
-static_assert(offsetof(CreationView, moveDistance) ==
-              offsetof(AiState, moveDistance));
-static_assert(offsetof(CreationView, bodyHeight) ==
-              offsetof(AiState, bodyHeight));
-static_assert(offsetof(CreationView, groundClearance) ==
-              offsetof(AiState, reservedBC));
-static_assert(offsetof(CreationView, flightHeight) ==
-              offsetof(AiState, flightHeight));
+static_assert(offsetof(CreationView, far_distance_squared) ==
+              offsetof(AiState, reserved_a0) + kFarRangeOffset);
+static_assert(offsetof(VS::Battle::Ai::SettingsView, far_distance_squared) ==
+              offsetof(CreationView, far_distance_squared));
+static_assert(offsetof(CreationView, max_range) ==
+              offsetof(AiState, max_range));
+static_assert(offsetof(CreationView, move_distance) ==
+              offsetof(AiState, move_distance));
+static_assert(offsetof(CreationView, body_height) ==
+              offsetof(AiState, body_height));
+static_assert(offsetof(CreationView, ground_clearance) ==
+              offsetof(AiState, reserved_bc));
+static_assert(offsetof(CreationView, flight_height) ==
+              offsetof(AiState, flight_height));
 static_assert(offsetof(CreationView, opaque103) ==
-              offsetof(AiState, patrolDirection));
+              offsetof(AiState, patrol_direction));
 static_assert(offsetof(CreationView, opaque110) ==
               offsetof(AiState, flee_tile));
 static_assert(offsetof(CreationView, opaque124) ==
               offsetof(AiState, reserved124));
-static_assert(offsetof(CreationView, behaviorMode) ==
-              offsetof(AiState, behaviorMode));
-static_assert(offsetof(CreationView, stepHeight) ==
-              offsetof(AiState, opaque13C));
-static_assert(offsetof(CreationView, movementFlags) ==
-              offsetof(AiState, movementFlags));
-static_assert(offsetof(CreationView, nextTile) == offsetof(AiState, nextTile));
-static_assert(offsetof(CreationView, moveY) == offsetof(AiState, moveY));
+static_assert(offsetof(CreationView, behavior_mode) ==
+              offsetof(AiState, behavior_mode));
+static_assert(offsetof(CreationView, step_height) ==
+              offsetof(AiState, opaque_13c));
+static_assert(offsetof(CreationView, movement_flags) ==
+              offsetof(AiState, movement_flags));
+static_assert(offsetof(CreationView, next_tile) ==
+              offsetof(AiState, next_tile));
+static_assert(offsetof(CreationView, move_y) == offsetof(AiState, move_y));
 static_assert(offsetof(CreationView, opaque194) ==
               offsetof(AiState, detour_tile_bytes));
 static_assert(offsetof(CreationView, opaque224) ==
-              offsetof(AiState, locomotionFlags));
-static_assert(offsetof(CreationView, opaque226) == offsetof(AiState, walkStep));
-static_assert(offsetof(CreationView, opaque227) == offsetof(AiState, runStep));
+              offsetof(AiState, locomotion_flags));
+static_assert(offsetof(CreationView, opaque226) ==
+              offsetof(AiState, walk_step));
+static_assert(offsetof(CreationView, opaque227) == offsetof(AiState, run_step));
 
 BattleActorHandle HandleOf(const Battle_Actor* actor) {
   return static_cast<BattleActorHandle>(
@@ -214,73 +217,75 @@ void WriteBytes(Bytes& bytes, Value value) {
 }
 
 void Store(const CreatedAiState& created, AiState& state) {
-  state.hasTaggedBone3 = created.has_auxiliary_tag_bone ? 1 : 0;
+  state.has_tagged_bone3 = created.has_auxiliary_tag_bone ? 1 : 0;
   state.tile.word = created.tile;
-  state.previousTile = created.previous_tile;
-  state.savedRelationOptions = created.saved_relation_options;
-  state.pointHeight = created.point_height;
-  state.actorId = created.actor_id;
-  state.requestedMovementMode = created.requested_movement_mode;
-  state.currentMovementMode = created.current_movement_mode;
+  state.previous_tile = created.previous_tile;
+  state.saved_relation_options = created.saved_relation_options;
+  state.point_height = created.point_height;
+  state.actor_id = created.actor_id;
+  state.requested_movement_mode = created.requested_movement_mode;
+  state.current_movement_mode = created.current_movement_mode;
   state.radius = created.radius;
   state.collision_radius = created.collision_radius;
   WriteBytes(state.last_slide_tile_bytes, created.last_slide_tile);
-  std::memcpy(&state.reservedA0[kFarRangeOffset], &created.far_distance_squared,
+  std::memcpy(&state.reserved_a0[kFarRangeOffset],
+              &created.far_distance_squared,
               sizeof created.far_distance_squared);
-  state.maxRange = created.max_range;
-  state.moveDistance = created.move_distance;
-  state.bodyHeight = created.body_height;
-  WriteBytes(state.reservedBC, created.ground_clearance);
-  state.flightHeight = created.flight_height;
-  state.patrolDirection = created.patrol_direction;
+  state.max_range = created.max_range;
+  state.move_distance = created.move_distance;
+  state.body_height = created.body_height;
+  WriteBytes(state.reserved_bc, created.ground_clearance);
+  state.flight_height = created.flight_height;
+  state.patrol_direction = created.patrol_direction;
   state.flee_tile.word = created.flee_tile;
   state.reserved124 = created.observed_command_opcode;
-  state.locomotionMode = created.locomotion_mode;
-  state.behaviorMode = created.behavior_mode;
-  state.opaque13C = created.step_height;
-  state.movementFlags = created.movement_flags;
-  state.nextTile.word = created.next_tile;
-  state.moveY = created.move_y;
+  state.locomotion_mode = created.locomotion_mode;
+  state.behavior_mode = created.behavior_mode;
+  state.opaque_13c = created.step_height;
+  state.movement_flags = created.movement_flags;
+  state.next_tile.word = created.next_tile;
+  state.move_y = created.move_y;
   WriteBytes(state.detour_tile_bytes, created.detour_tile);
-  state.locomotionFlags = created.locomotion_flags;
-  state.walkStep = created.walk_step;
-  state.runStep = created.run_step;
+  state.locomotion_flags = created.locomotion_flags;
+  state.walk_step = created.walk_step;
+  state.run_step = created.run_step;
 }
 
 CreatedAiState Load(const AiState& state) {
   CreatedAiState created;
-  created.has_auxiliary_tag_bone = state.hasTaggedBone3 != 0;
+  created.has_auxiliary_tag_bone = state.has_tagged_bone3 != 0;
   created.tile = state.tile.word;
-  created.previous_tile = state.previousTile;
-  created.saved_relation_options = state.savedRelationOptions;
-  created.point_height = state.pointHeight;
-  created.actor_id = state.actorId;
-  created.requested_movement_mode = state.requestedMovementMode;
-  created.current_movement_mode = state.currentMovementMode;
+  created.previous_tile = state.previous_tile;
+  created.saved_relation_options = state.saved_relation_options;
+  created.point_height = state.point_height;
+  created.actor_id = state.actor_id;
+  created.requested_movement_mode = state.requested_movement_mode;
+  created.current_movement_mode = state.current_movement_mode;
   created.radius = state.radius;
   created.collision_radius = state.collision_radius;
   created.last_slide_tile =
       ReadBytes<std::uint32_t>(state.last_slide_tile_bytes);
-  std::memcpy(&created.far_distance_squared, &state.reservedA0[kFarRangeOffset],
+  std::memcpy(&created.far_distance_squared,
+              &state.reserved_a0[kFarRangeOffset],
               sizeof created.far_distance_squared);
-  created.max_range = state.maxRange;
-  created.move_distance = state.moveDistance;
-  created.body_height = state.bodyHeight;
-  created.ground_clearance = ReadBytes<std::int16_t>(state.reservedBC);
-  created.flight_height = state.flightHeight;
-  created.patrol_direction = state.patrolDirection;
+  created.max_range = state.max_range;
+  created.move_distance = state.move_distance;
+  created.body_height = state.body_height;
+  created.ground_clearance = ReadBytes<std::int16_t>(state.reserved_bc);
+  created.flight_height = state.flight_height;
+  created.patrol_direction = state.patrol_direction;
   created.flee_tile = state.flee_tile.word;
   created.observed_command_opcode = state.reserved124;
-  created.locomotion_mode = state.locomotionMode;
-  created.behavior_mode = state.behaviorMode;
-  created.step_height = state.opaque13C;
-  created.movement_flags = state.movementFlags;
-  created.next_tile = state.nextTile.word;
-  created.move_y = state.moveY;
+  created.locomotion_mode = state.locomotion_mode;
+  created.behavior_mode = state.behavior_mode;
+  created.step_height = state.opaque_13c;
+  created.movement_flags = state.movement_flags;
+  created.next_tile = state.next_tile.word;
+  created.move_y = state.move_y;
   created.detour_tile = ReadBytes<std::uint32_t>(state.detour_tile_bytes);
-  created.locomotion_flags = state.locomotionFlags;
-  created.walk_step = state.walkStep;
-  created.run_step = state.runStep;
+  created.locomotion_flags = state.locomotion_flags;
+  created.walk_step = state.walk_step;
+  created.run_step = state.run_step;
   return created;
 }
 
@@ -307,7 +312,7 @@ class LiveCreationHost final : public ActorCreationHost {
     RoomSpecialActors slots{};
     for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
       slots.at(slot) =
-          HandleOf(VS::Battle::Ai::roomAiState->specialActors[slot]);
+          HandleOf(VS::Battle::Ai::roomAiState->special_actors[slot]);
     }
     return slots;
   }
@@ -315,7 +320,7 @@ class LiveCreationHost final : public ActorCreationHost {
     Require(
         VS::Battle::Ai::roomAiState != nullptr && slot < kRoomSpecialActorSlots,
         "AI special actors require the room's AI state");
-    VS::Battle::Ai::roomAiState->specialActors[slot] = &ActorOf(actor);
+    VS::Battle::Ai::roomAiState->special_actors[slot] = &ActorOf(actor);
   }
   [[nodiscard]] std::span<const std::uint16_t> TileFlags() const override {
     if (VS::Battle::Ai::tileFlagMap == nullptr) return {};
@@ -365,17 +370,18 @@ class LiveCreationHost final : public ActorCreationHost {
     VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] = state;
     Core::Memory::ClearLiveAlignedWords(
         state, static_cast<std::int32_t>(sizeof(AiState)));
-    state->actorId = static_cast<std::uint8_t>(actor_id);
+    state->actor_id = static_cast<std::uint8_t>(actor_id);
     // The AI state's actor and model links are views of the battle actor
-    // and its actor record (AiState.h).
-    state->actor = reinterpret_cast<Battle_Ai_EngagementData*>(&live);
-    state->model = reinterpret_cast<Battle_Ai_ModelStatePrefix*>(live.model);
+    // and its actor record (AiState.hpp).
+    state->actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&live);
+    state->model =
+        reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(live.model);
     state->stats = live.stats;
-    state->nativePointer60 = &live.model->position;
-    state->nativePointer64 = &live.model->currentTileX;
+    state->native_pointer60 = &live.model->position;
+    state->native_pointer64 = &live.model->currentTileX;
     VS::Core::Debugf(
         "ai", "created state=%p id=%u model=%p stats=%p",
-        static_cast<void*>(state), static_cast<unsigned int>(state->actorId),
+        static_cast<void*>(state), static_cast<unsigned int>(state->actor_id),
         static_cast<void*>(live.model), static_cast<void*>(live.stats));
     return true;
   }
@@ -400,12 +406,12 @@ class LiveCreationHost final : public ActorCreationHost {
 
   void ApplySettings(CreatedAiState& created, std::uint32_t settings) override {
     AiState& state = StoreState(created);
-    Battle_Ai_SettingsWord word{};
+    VS::Battle::Ai::SettingsWord word{};
     word.word = settings;
     // The settings view aliases the AI state it decodes into
     // (ActorSettingsLive.cpp).
-    ApplyLiveActorAiSettings(reinterpret_cast<Battle_Ai_SettingsView*>(&state),
-                             &word);
+    ApplyLiveActorAiSettings(
+        reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state), &word);
     created = Load(state);
   }
   void InitializeRelations(CreatedAiState& created) override {
@@ -467,7 +473,7 @@ int CreateLiveActorAiState(Battle_Actor* actor, int options) {
         static_cast<unsigned int>(sizeof(AiState)),
         static_cast<unsigned int>(state.radius),
         static_cast<unsigned int>(
-            static_cast<std::uint16_t>(state.pointHeight)));
+            static_cast<std::uint16_t>(state.point_height)));
   }
   return *remembered_idle ? 1 : 0;
 }

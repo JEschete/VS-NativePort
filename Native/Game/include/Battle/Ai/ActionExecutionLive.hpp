@@ -5,10 +5,10 @@
 #include <cstdint>
 #include <optional>
 
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_ActionCandidate;
-
 namespace VS::Battle::Ai {
+struct ActorAiState;
+struct ActionCandidateRecord;
+
 [[noreturn]] void RefuseLiveDecisionInputs(const char* message);
 
 template <typename T>
@@ -34,14 +34,16 @@ class LiveDecisionList : public World {
 };
 
 std::optional<int> TryExecuteCheckedLiveActionCandidate(
-    Battle_Ai_ActorAiState* state, Battle_Ai_ActionCandidate* candidate);
+    VS::Battle::Ai::ActorAiState* state,
+    VS::Battle::Ai::ActionCandidateRecord* candidate);
 std::optional<int> TryExecuteCheckedLivePlannedActions(
-    Battle_Ai_ActorAiState* state);
-int TryExecuteLiveActionCandidate(Battle_Ai_ActorAiState* state,
-                                  Battle_Ai_ActionCandidate* candidate);
-int TryExecuteLivePlannedActions(Battle_Ai_ActorAiState* state);
+    VS::Battle::Ai::ActorAiState* state);
+int TryExecuteLiveActionCandidate(
+    VS::Battle::Ai::ActorAiState* state,
+    VS::Battle::Ai::ActionCandidateRecord* candidate);
+int TryExecuteLivePlannedActions(VS::Battle::Ai::ActorAiState* state);
 bool UpdateCheckedLiveActorDecisions();
 void UpdateLiveActorDecisions();
-void ResetLiveDecisionMovement(Battle_Ai_ActorAiState& state,
+void ResetLiveDecisionMovement(VS::Battle::Ai::ActorAiState& state,
                                std::uint8_t area);
 }  // namespace VS::Battle::Ai

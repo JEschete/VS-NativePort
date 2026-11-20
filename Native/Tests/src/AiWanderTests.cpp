@@ -14,8 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/AreaRoute.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -1058,14 +1057,14 @@ TEST_CASE("Live wander choices write the chain back to the AI state",
   fixture.flags[9][10] = 0x21;
   fixture.flags[10][9] = 0x21;
   fixture.flags[11][10] = 0x21;
-  Battle_Ai_ActorAiState state{};
-  auto* const view = reinterpret_cast<Battle_Ai_WanderView*>(&state);
+  VS::Battle::Ai::ActorAiState state{};
+  auto* const view = reinterpret_cast<VS::Battle::Ai::WanderView*>(&state);
   view->goal.word = Tile(1, 1);
-  view->wanderHeading = -1;
+  view->wander_heading = -1;
   view->x = 0x1234;
   CHECK(ai::ChooseNextLiveWanderTile(view, Tile(10, 10), 3, 0) == 0);
   CHECK(view->goal.word == Tile(11, 10));
-  CHECK(view->wanderHeading == 6);
+  CHECK(view->wander_heading == 6);
   CHECK(view->count == 1);
   CHECK(view->x == 0x1234);
   CHECK(ai::ChooseNextLiveWanderTile(view, Tile(10, 10), 0, 0) == -1);
@@ -1074,16 +1073,16 @@ TEST_CASE("Live wander choices write the chain back to the AI state",
 TEST_CASE("Live held wanderers only count the hold",
           "[ai][wander][wander-live]") {
   LiveFrameFixture fixture;
-  Battle_Ai_WanderRecordView record{};
-  Battle_Ai_ActorAiState state{};
-  auto* const view = reinterpret_cast<Battle_Ai_WanderView*>(&state);
+  VS::Battle::Ai::WanderRecordView record{};
+  VS::Battle::Ai::ActorAiState state{};
+  auto* const view = reinterpret_cast<VS::Battle::Ai::WanderView*>(&state);
   view->model = &record;
-  view->behaviorMode = 1;
-  view->wanderTimer = 5;
+  view->behavior_mode = 1;
+  view->wander_timer = 5;
   VS::Battle::Ai::LiveFrameContext().walk_valid = 1;
   ai::UpdateLiveWanderMovement(view, Tile(10, 10), 3);
-  CHECK(view->wanderTimer == 6);
-  CHECK(view->isStuck == 0);
+  CHECK(view->wander_timer == 6);
+  CHECK(view->is_stuck == 0);
   CHECK(VS::Battle::Ai::LiveFrameContext().walk_valid == 1);
 }
 

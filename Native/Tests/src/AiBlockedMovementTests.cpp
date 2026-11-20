@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -269,12 +269,12 @@ TEST_CASE("Movement history stalls when full and repeating",
 
 TEST_CASE("The live movement history reads the perception view",
           "[ai][blocked-movement][blocked-movement-live]") {
-  Battle_Ai_PerceptionUpdateView view{};
-  view.historyX.words[0] = view.historyX.words[1] = -3;
-  view.historyZ.words[0] = view.historyZ.words[1] = 7;
-  view.historyMask = 0xFF;
+  VS::Battle::Ai::PerceptionUpdateView view{};
+  view.history_x.words[0] = view.history_x.words[1] = -3;
+  view.history_z.words[0] = view.history_z.words[1] = 7;
+  view.history_mask = 0xFF;
   CHECK(VS::Battle::Ai::IsLiveMovementHistoryStalled(&view) == 1);
-  view.historyZ.samples[7] = 1;
+  view.history_z.samples[7] = 1;
   CHECK(VS::Battle::Ai::IsLiveMovementHistoryStalled(&view) == 0);
 }
 

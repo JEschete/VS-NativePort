@@ -10,7 +10,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
@@ -20,7 +20,7 @@
 namespace {
 static_assert(offsetof(Actors_ModelInstance, position) ==
               offsetof(Field_GimmickInstance, positionX));
-static_assert(offsetof(Battle_Ai_PerceivedObjectView, position) ==
+static_assert(offsetof(VS::Battle::Ai::PerceivedObjectView, position) ==
               offsetof(Actors_ModelInstance, position));
 
 struct AuxiliaryPerceptionFixture {
@@ -35,8 +35,8 @@ struct AuxiliaryPerceptionFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   std::array<Actors_ActorRecord, 2> records{};
   std::array<Battle_Actor, 3> actors{};
-  Battle_Ai_ActorAiState owner{};
-  Battle_Ai_ActorAiState target{};
+  VS::Battle::Ai::ActorAiState owner{};
+  VS::Battle::Ai::ActorAiState target{};
   Field_GimmickInstance auxiliary{};
   u_short flags[32][32]{};
 
@@ -63,15 +63,15 @@ struct AuxiliaryPerceptionFixture {
     actors[1].model = &records[1].instance;
     Battle_actors[0] = &actors[0];
     Battle_actors[2] = &actors[1];
-    owner.actorId = 0;
+    owner.actor_id = 0;
     View().model =
-        reinterpret_cast<Battle_Ai_PerceivedObjectView*>(&records[0]);
+        reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&records[0]);
     View().position = records[0].instance.position;
-    View().pointHeight = -32;
-    View().nearDistanceSquared = View().farDistanceSquared = 768 * 768;
-    View().viewCosine = -4096;
-    TargetView().pointHeight = -96;
-    TargetView().bodyHeight = 128;
+    View().point_height = -32;
+    View().near_distance_squared = View().far_distance_squared = 768 * 768;
+    View().view_cosine = -4096;
+    TargetView().point_height = -96;
+    TargetView().body_height = 128;
     TargetView().radius = 16;
     if (auxiliary_target) {
       SetAuxiliary(2, records[1].instance.position);
@@ -93,11 +93,11 @@ struct AuxiliaryPerceptionFixture {
     Core_Gte_Reset();
   }
 
-  Battle_Ai_PerceptionView& View() {
-    return *reinterpret_cast<Battle_Ai_PerceptionView*>(&owner);
+  VS::Battle::Ai::PerceptionView& View() {
+    return *reinterpret_cast<VS::Battle::Ai::PerceptionView*>(&owner);
   }
-  Battle_Ai_PerceptionView& TargetView() {
-    return *reinterpret_cast<Battle_Ai_PerceptionView*>(&target);
+  VS::Battle::Ai::PerceptionView& TargetView() {
+    return *reinterpret_cast<VS::Battle::Ai::PerceptionView*>(&target);
   }
   void SetAuxiliary(int id, SVECTOR position) {
     auxiliary.slot = static_cast<u_char>(id);
@@ -113,7 +113,7 @@ struct AuxiliaryPerceptionFixture {
     actors[2].model = reinterpret_cast<Actors_ModelInstance*>(&auxiliary);
     actors[1].next = &actors[2];
     Battle_actors[3] = &actors[2];
-    View().distancesSquared[3] = blocking ? 48 * 48 : 96 * 96 + 48 * 48;
+    View().distances_squared[3] = blocking ? 48 * 48 : 96 * 96 + 48 * 48;
   }
   void Update() { VS::Battle::Ai::UpdateLiveTargetPerception(&View(), 2); }
 };
@@ -127,7 +127,7 @@ TEST_CASE(
     REQUIRE(Actors_actorRecords[2] == nullptr);
     REQUIRE(Battle_actors[2]->model != nullptr);
     fixture.Update();
-    CHECK(fixture.View().distancesSquared[2] == (with_ai ? 13312 : 10240));
+    CHECK(fixture.View().distances_squared[2] == (with_ai ? 13312 : 10240));
     CHECK(Field_gimmickInstances[2] == &fixture.auxiliary);
     CHECK((VS::Battle::Ai::actorAiStates[2] != nullptr) == with_ai);
   }
@@ -138,7 +138,7 @@ TEST_CASE(
     "[ai][perception][auxiliary-target]") {
   AuxiliaryPerceptionFixture fixture(false);
   fixture.Update();
-  CHECK(fixture.View().distancesSquared[2] == 13312);
+  CHECK(fixture.View().distances_squared[2] == 13312);
   CHECK(Actors_actorRecords[2] == &fixture.records[1]);
 }
 

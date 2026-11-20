@@ -21,8 +21,7 @@
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Movement.hpp"
@@ -70,8 +69,8 @@ std::uint8_t* VS::Battle::Ai::FindTerrainRegionCell(int tile_x, int tile_z) {
 }
 
 namespace {
-Battle_Ai_ActorAiState* AsActorAiState(void* view) {
-  return static_cast<Battle_Ai_ActorAiState*>(view);
+VS::Battle::Ai::ActorAiState* AsActorAiState(void* view) {
+  return static_cast<VS::Battle::Ai::ActorAiState*>(view);
 }
 
 class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
@@ -128,7 +127,7 @@ int CacheLiveActorAiWorkingState() {
   if (frame_context.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
     static_assert(sizeof frame_context.room->reserved4 == extent.size());
-    memcpy(extent.data(), frame_context.room->reserved4, extent.size());
+    memcpy(extent.data(), frame_context.room->reserved4.data(), extent.size());
     source.room_extent = extent;
   }
   const std::optional<WorkingStateWindow> window =
@@ -166,22 +165,22 @@ void RunLiveActorAiUpdateStages() {
 }
 
 // decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/7B5DC.s:433).
-void TickLiveActorDecisionTimers(Battle_Ai_PerceptionUpdateView* view) {
-  Battle_Ai_ActorAiState* state = AsActorAiState(view);
-  DecisionTimers timers{state->decisionDelay, state->minActionDelay};
+void TickLiveActorDecisionTimers(VS::Battle::Ai::PerceptionUpdateView* view) {
+  VS::Battle::Ai::ActorAiState* state = AsActorAiState(view);
+  DecisionTimers timers{state->decision_delay, state->min_action_delay};
   TickActorDecisionTimers(timers);
-  state->decisionDelay = timers.decision_delay;
-  state->minActionDelay = timers.min_action_delay;
+  state->decision_delay = timers.decision_delay;
+  state->min_action_delay = timers.min_action_delay;
 }
 
 // decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7E028.s:8).
-void InitializeLiveActorLocomotionMode(Battle_Ai_AiCreationView* view) {
-  Battle_Ai_ActorAiState* state = AsActorAiState(view);
-  LocomotionState locomotion{state->locomotionFlags, state->movementFlags,
-                             state->locomotionMode};
+void InitializeLiveActorLocomotionMode(VS::Battle::Ai::AiCreationView* view) {
+  VS::Battle::Ai::ActorAiState* state = AsActorAiState(view);
+  LocomotionState locomotion{state->locomotion_flags, state->movement_flags,
+                             state->locomotion_mode};
   InitializeActorLocomotionMode(locomotion);
-  state->movementFlags = locomotion.movement_flags;
-  state->locomotionMode = locomotion.mode;
+  state->movement_flags = locomotion.movement_flags;
+  state->locomotion_mode = locomotion.mode;
 }
 
 // decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7E05C.s:16).
@@ -192,13 +191,13 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
                      actor_id);
     abort();
   }
-  Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[actor_id];
+  VS::Battle::Ai::ActorAiState* state = VS::Battle::Ai::actorAiStates[actor_id];
   if (state == nullptr) return;
   VerticalMovementSteps steps;
   SetActorVerticalMovementSteps(steps, walk_step, run_step);
-  state->walkStep = steps.walk_step;
-  state->runStep = steps.run_step;
-  state->maxRange = steps.max_range;
+  state->walk_step = steps.walk_step;
+  state->run_step = steps.run_step;
+  state->max_range = steps.max_range;
 }
 
 NavigationDirectionCodes LiveDirectionCodes() {
@@ -218,9 +217,9 @@ std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
 
 std::optional<RoomTileBounds> LiveRoomTileBounds() {
   if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
-  return RoomTileBounds{.min_x = VS::Battle::Ai::roomAiState->minTileX,
-                        .min_z = VS::Battle::Ai::roomAiState->minTileZ,
-                        .max_x = VS::Battle::Ai::roomAiState->maxTileX,
-                        .max_z = VS::Battle::Ai::roomAiState->maxTileZ};
+  return RoomTileBounds{.min_x = VS::Battle::Ai::roomAiState->min_tile_x,
+                        .min_z = VS::Battle::Ai::roomAiState->min_tile_z,
+                        .max_x = VS::Battle::Ai::roomAiState->max_tile_x,
+                        .max_z = VS::Battle::Ai::roomAiState->max_tile_z};
 }
 }  // namespace VS::Battle::Ai

@@ -28,7 +28,6 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/ActorMarkersLive.hpp"
-#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/BattleTypes.h"

@@ -52,8 +52,6 @@
 "Native\\Game\\src\\Battle\\ActionTable.cpp": "afdc484f6a8496330783bee37580baa58f755d8675562841a9612794246546d4",
 "Native\\Game\\src\\Battle\\ActionTable.h": "f4bc9101de394889600f3821cecc94c30c06853d58d025a41b0eb6cdc17f9df1",
 "Native\\Game\\src\\Battle\\Actor.h": "2fab83e2b118b5eb508c7203021eb16ffad57426a6f7435896adbd45d2ef89e8",
-"Native\\Game\\src\\Battle\\Ai\\AiState.h": "d60a6f34d7e1edcfc1701578c0555d63b2d82006c3b9ce6cf9c3d929164f1b10",
-"Native\\Game\\src\\Battle\\Ai\\AiViews.h": "a0347e573382dc59ed2e9ce9732537b3d4fc8f9a12ed95c3bb8ca1c44680d10c",
 "Native\\Game\\src\\Battle\\BattleTypes.h": "c0e40a1f51a556513db1669f80c2d390defbdcc129ad50898d5ab2fbcd6e6bfe",
 "Native\\Game\\src\\Battle\\Damage.cpp": "8939e9e71fc64e103369956ae29ec0d82d1a4a5e40c5b57173235bda1b18b4dc",
 "Native\\Game\\src\\Battle\\Damage.h": "97bdaecf0734c963424d8655740370460206d498d846f76a81c765df2737c446",

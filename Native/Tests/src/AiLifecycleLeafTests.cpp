@@ -15,7 +15,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
@@ -38,7 +38,7 @@ static_assert(
 namespace {
 struct AiLifecycleFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved = VS::Battle::Ai::actorAiStates;
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
 
   AiLifecycleFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved.size(), nullptr);
@@ -54,11 +54,11 @@ struct HostilityFixture {
   unsigned saved_random = VS::Core::BiosRand().State();
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* saved_actor = Battle_actors[3];
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
   Battle_Actor actor{};
 
   HostilityFixture() {
-    state.actorId = 3;
+    state.actor_id = 3;
     Battle_actors[3] = &actor;
   }
 
@@ -74,21 +74,21 @@ struct HostilityFixture {
 
   void MakeHostile(int target) {
     VS::Battle::Ai::MakeLiveTargetHostile(
-        reinterpret_cast<Battle_Ai_ReactionView*>(&state), target);
+        reinterpret_cast<VS::Battle::Ai::ReactionView*>(&state), target);
   }
 
   void CheckInitialReaction(unsigned busy) const {
     REQUIRE(state.relations[7].classification == 3);
     CHECK(state.relations[7].counter == 0);
     CHECK(state.opaque18 == 1);
-    CHECK(state.awarenessMarker == 6);
-    CHECK(state.awarenessFramesRemaining == 40);
-    CHECK(state.decisionDelay == (busy == 0 ? 30 : (busy & 1)));
+    CHECK(state.awareness_marker == 6);
+    CHECK(state.awareness_frames_remaining == 40);
+    CHECK(state.decision_delay == (busy == 0 ? 30 : (busy & 1)));
     CHECK(actor.commandFlags == (busy == 0 ? 2 : 0x5A));
   }
 };
 
-int AshleyAllianceTestCallback(Battle_Ai_ActorAiState*) { return 0x5A; }
+int AshleyAllianceTestCallback(VS::Battle::Ai::ActorAiState*) { return 0x5A; }
 
 struct AshleyAllianceFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved_ai_states =
@@ -98,15 +98,15 @@ struct AshleyAllianceFixture {
   Battle_Actor* saved_actor0 = Battle_actors[0];
   Battle_Actor* saved_actor1 = Battle_actors[1];
   char saved_marker1 = Battle_actorMarkers[1];
-  Battle_Ai_ActorAiState state{};
-  Battle_Ai_ActorAiState other_state{};
+  VS::Battle::Ai::ActorAiState state{};
+  VS::Battle::Ai::ActorAiState other_state{};
   Battle_Actor actors[2]{};
 
   AshleyAllianceFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai_states.size(),
                 nullptr);
-    state.actorId = 1;
-    other_state.actorId = 0;
+    state.actor_id = 1;
+    other_state.actor_id = 0;
     actors[0].id = 0;
     actors[0].next = &actors[1];
     actors[1].id = 1;
@@ -126,38 +126,38 @@ struct AshleyAllianceFixture {
     Battle_actorMarkers[1] = saved_marker1;
   }
 
-  Battle_Ai_ReactionView* Reaction() {
-    return reinterpret_cast<Battle_Ai_ReactionView*>(&state);
+  VS::Battle::Ai::ReactionView* Reaction() {
+    return reinterpret_cast<VS::Battle::Ai::ReactionView*>(&state);
   }
 
-  Battle_Ai_SettingsView* Settings() {
-    return reinterpret_cast<Battle_Ai_SettingsView*>(&state);
+  VS::Battle::Ai::SettingsView* Settings() {
+    return reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state);
   }
 
-  void CheckRestored(int (*callback)(Battle_Ai_ActorAiState*)) {
-    CHECK(Reaction()->temporaryAshleyAlliance == 0);
-    CHECK(Reaction()->allianceReactionCount == 0);
-    CHECK(Settings()->savedDecisionCallback == nullptr);
-    CHECK(Settings()->decisionCallback == callback);
+  void CheckRestored(int (*callback)(VS::Battle::Ai::ActorAiState*)) {
+    CHECK(Reaction()->temporary_ashley_alliance == 0);
+    CHECK(Reaction()->alliance_reaction_count == 0);
+    CHECK(Settings()->saved_decision_callback == nullptr);
+    CHECK(Settings()->decision_callback == callback);
   }
 
   void CheckEntered(unsigned count,
-                    int (*saved_callback)(Battle_Ai_ActorAiState*)) {
-    CHECK(Reaction()->allianceReactionCount == count);
-    CHECK(Reaction()->temporaryAshleyAlliance == 1);
-    CHECK(Settings()->savedDecisionCallback == saved_callback);
-    CHECK(Settings()->decisionCallback ==
+                    int (*saved_callback)(VS::Battle::Ai::ActorAiState*)) {
+    CHECK(Reaction()->alliance_reaction_count == count);
+    CHECK(Reaction()->temporary_ashley_alliance == 1);
+    CHECK(Settings()->saved_decision_callback == saved_callback);
+    CHECK(Settings()->decision_callback ==
           VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
     CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
   }
 
   void CheckRecovery(int settings_bit, int busy, unsigned random) {
-    CHECK(state.awarenessMarker == (settings_bit ? 0x71 : 6));
-    CHECK(state.awarenessFramesRemaining == (settings_bit ? 0x72 : 40));
+    CHECK(state.awareness_marker == (settings_bit ? 0x71 : 6));
+    CHECK(state.awareness_frames_remaining == (settings_bit ? 0x72 : 40));
     CHECK(VS::Battle::Ai::LiveFrameContext().randomState ==
           (settings_bit ? 0x2000 : 0x2002));
     CHECK(VS::Core::BiosRand().State() == random);
-    CHECK(state.decisionDelay ==
+    CHECK(state.decision_delay ==
           (busy == 1 ? 3 : (!settings_bit && busy == 0 ? 30 : 0)));
     CHECK(actors[1].commandFlags == (!settings_bit && busy == 0 ? 2 : 0x5A));
   }
@@ -165,9 +165,9 @@ struct AshleyAllianceFixture {
   void CheckDeferredRecovery() {
     CHECK(Battle_actorMarkers[1] == 0x05);
     CHECK(state.relations[0].classification == 3);
-    CHECK(state.awarenessMarker == 6);
-    CHECK(state.awarenessFramesRemaining == 0x28);
-    CHECK(state.decisionDelay == 1);
+    CHECK(state.awareness_marker == 6);
+    CHECK(state.awareness_frames_remaining == 0x28);
+    CHECK(state.decision_delay == 1);
     CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 0x2002);
   }
 };
@@ -208,11 +208,11 @@ struct AshleyActionFixture : AshleyAllianceFixture {
   AshleyActionFixture() {
     Battle_actionDefinitions[42] = {};
     actors[1].stats = &stats;
-    state.settingsBit27 = 1;
-    state.decisionDelay = 1;
-    state.savedRelationOptions = -1;
-    other_state.savedRelationOptions = -1;
-    Settings()->decisionCallback = AshleyAllianceTestCallback;
+    state.settings_bit27 = 1;
+    state.decision_delay = 1;
+    state.saved_relation_options = -1;
+    other_state.saved_relation_options = -1;
+    Settings()->decision_callback = AshleyAllianceTestCallback;
     request.actionId = 42;
     request.primaryTarget.target.targetActor = 0;
     request.targetCount = 1;
@@ -228,14 +228,14 @@ struct AshleyActionFixture : AshleyAllianceFixture {
   }
 };
 
-static_assert(offsetof(Battle_Ai_SettingsView, savedDecisionCallback) ==
-              offsetof(Battle_Ai_ActorAiState, reserved60_6C));
-static_assert(sizeof(Battle_Ai_SettingsView::savedDecisionCallback) <=
-              sizeof(Battle_Ai_ActorAiState::reserved60_6C));
-static_assert(offsetof(Battle_Ai_ReactionView, allianceReactionCount) ==
-              offsetof(Battle_Ai_ActorAiState, reserved120) + 6);
+static_assert(offsetof(VS::Battle::Ai::SettingsView, saved_decision_callback) ==
+              offsetof(VS::Battle::Ai::ActorAiState, reserved_60_6c));
+static_assert(sizeof(VS::Battle::Ai::SettingsView::saved_decision_callback) <=
+              sizeof(VS::Battle::Ai::ActorAiState::reserved_60_6c));
+static_assert(offsetof(VS::Battle::Ai::ReactionView, alliance_reaction_count) ==
+              offsetof(VS::Battle::Ai::ActorAiState, reserved120) + 6);
 
-auto StateBytes(const Battle_Ai_ActorAiState& state) {
+auto StateBytes(const VS::Battle::Ai::ActorAiState& state) {
   std::array<std::byte, sizeof(state)> bytes{};
   std::memcpy(bytes.data(), &state, bytes.size());
   return bytes;
@@ -265,15 +265,15 @@ TEST_CASE("AI persistence packs every original bit without mutating live state",
   const unsigned noise = GENERATE(0u, 0xC80FFF3Fu);
   AiLifecycleFixture fixture;
   VS::Battle::Ai::actorAiStates[slot] = &fixture.state;
-  fixture.state.actorId = 7;
-  fixture.state.opaque1A = 0xA5;
+  fixture.state.actor_id = 7;
+  fixture.state.opaque_1a = 0xA5;
   for (unsigned expected = 0; expected < 8192; ++expected) {
     const std::uint32_t relation = noise | (((expected >> 1) & 3) << 6) |
                                    (((expected >> 3) & 3) << 28) |
                                    (((expected >> 6) & 127) << 20);
     std::memcpy(&fixture.state.relations[0], &relation, sizeof(relation));
-    fixture.state.usesRoomActionDelay = static_cast<u_char>(expected & 1);
-    fixture.state.behaviorMode = (expected & 32) ? 0 : 0xA5;
+    fixture.state.uses_room_action_delay = static_cast<u_char>(expected & 1);
+    fixture.state.behavior_mode = (expected & 32) ? 0 : 0xA5;
     const auto before = StateBytes(fixture.state);
     REQUIRE(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot) ==
             static_cast<int>(expected));
@@ -285,9 +285,9 @@ TEST_CASE("AI persistence preserves the complete original delay byte",
           "[ai][lifecycle-leaves]") {
   AiLifecycleFixture fixture;
   VS::Battle::Ai::actorAiStates[4] = &fixture.state;
-  fixture.state.behaviorMode = 1;
+  fixture.state.behavior_mode = 1;
   for (unsigned delay = 0; delay < 256; ++delay) {
-    fixture.state.usesRoomActionDelay = static_cast<u_char>(delay);
+    fixture.state.uses_room_action_delay = static_cast<u_char>(delay);
     CHECK(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(4) ==
           static_cast<int>(delay));
   }
@@ -298,7 +298,7 @@ TEST_CASE(
     "gap",
     "[ai][lifecycle-leaves]") {
   AiLifecycleFixture fixture;
-  fixture.state.opaque1A = 0xA5;
+  fixture.state.opaque_1a = 0xA5;
   VS::Battle::Ai::actorAiStates[3] = &fixture.state;
   const auto state = StateBytes(fixture.state);
   const auto hits = ExtensionHookHits();
@@ -314,13 +314,14 @@ TEST_CASE("AI navigation reset clears only the original hold byte",
   const bool present = GENERATE(false, true);
   AiLifecycleFixture fixture;
   for (int slot = 0; slot < 16; ++slot) {
-    fixture.state.opaque1A = 0xA5;
-    fixture.state.actorId = 7;
-    fixture.state.behaviorMode = 0x5A;
+    fixture.state.opaque_1a = 0xA5;
+    fixture.state.actor_id = 7;
+    fixture.state.behavior_mode = 0x5A;
     VS::Battle::Ai::actorAiStates[slot] = present ? &fixture.state : nullptr;
     auto expected = StateBytes(fixture.state);
     if (present) {
-      expected[offsetof(Battle_Ai_ActorAiState, opaque1A)] = std::byte{0};
+      expected[offsetof(VS::Battle::Ai::ActorAiState, opaque_1a)] =
+          std::byte{0};
     }
     VS::Battle::Ai::ClearLiveActorAiNavigationReset(slot);
     CHECK(StateBytes(fixture.state) == expected);
@@ -335,10 +336,10 @@ TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
   HostilityFixture fixture;
   for (unsigned counter = 0; counter < 128; ++counter) {
     fixture.state = {};
-    fixture.state.actorId = 3;
+    fixture.state.actor_id = 3;
     fixture.state.opaque18 = 0xA5;
-    fixture.state.awarenessMarker = 0x77;
-    fixture.state.awarenessFramesRemaining = 0x66;
+    fixture.state.awareness_marker = 0x77;
+    fixture.state.awareness_frames_remaining = 0x66;
     for (int id = 0; id < 16; ++id) {
       fixture.SetRelation(id, 0xA5C10000u | static_cast<unsigned>(id));
     }
@@ -356,9 +357,9 @@ TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
     if (classification != 3) {
       expected_random.Next();
       expected.opaque18 = 1;
-      expected.awarenessMarker = 6;
-      expected.awarenessFramesRemaining = 40;
-      expected.decisionDelay = 30;
+      expected.awareness_marker = 6;
+      expected.awareness_frames_remaining = 40;
+      expected.decision_delay = 30;
     }
     fixture.MakeHostile(target);
     REQUIRE(StateBytes(fixture.state) == StateBytes(expected));
@@ -374,8 +375,8 @@ TEST_CASE(
     "[ai][hostility]") {
   const unsigned busy = GENERATE(0u, 1u, 2u, 3u);
   HostilityFixture fixture;
-  fixture.state.decisionDelay = static_cast<u_char>(busy & 1);
-  fixture.state.nativePointer18C = (busy & 2) ? &fixture.actor : nullptr;
+  fixture.state.decision_delay = static_cast<u_char>(busy & 1);
+  fixture.state.native_pointer_18c = (busy & 2) ? &fixture.actor : nullptr;
   fixture.SetRelation(7, 0xABCD7F7Fu);
   fixture.actor.commandFlags = 0x5A;
   VS::Core::SeedBiosRand(1234);
@@ -389,8 +390,8 @@ TEST_CASE(
   CHECK(VS::Core::BiosRand().State() == expected_random.State());
   CHECK(frame.randomState == 16);
   fixture.state.opaque18 = 0xA5;
-  fixture.state.awarenessMarker = 0x77;
-  fixture.state.awarenessFramesRemaining = 0x66;
+  fixture.state.awareness_marker = 0x77;
+  fixture.state.awareness_frames_remaining = 0x66;
   fixture.state.relations[7].counter = 127;
   auto expected = fixture.state;
   expected.relations[7].counter = 0;
@@ -408,9 +409,9 @@ TEST_CASE(
     "[ai][ashley-alliance]") {
   AshleyAllianceFixture fixture;
   auto* settings = fixture.Settings();
-  settings->decisionCallback = AshleyAllianceTestCallback;
-  fixture.state.settingsBit25 = 0;
-  fixture.state.decisionDelay = 1;
+  settings->decision_callback = AshleyAllianceTestCallback;
+  fixture.state.settings_bit25 = 0;
+  fixture.state.decision_delay = 1;
   fixture.state.relations[0].classification = 1;
   Battle_actorMarkers[1] = 0x05;
 
@@ -418,9 +419,9 @@ TEST_CASE(
   VS::Core::SeedBiosRand(seed);
 
   VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
-  CHECK(fixture.Reaction()->allianceReactionCount == 1);
-  CHECK(fixture.Reaction()->temporaryAshleyAlliance == 0);
-  CHECK(settings->decisionCallback == AshleyAllianceTestCallback);
+  CHECK(fixture.Reaction()->alliance_reaction_count == 1);
+  CHECK(fixture.Reaction()->temporary_ashley_alliance == 0);
+  CHECK(settings->decision_callback == AshleyAllianceTestCallback);
   CHECK(VS::Core::BiosRand().State() == after_first);
 
   VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
@@ -441,8 +442,8 @@ TEST_CASE(
     "[ai][ashley-alliance]") {
   AshleyAllianceFixture fixture;
   auto* settings = fixture.Settings();
-  settings->decisionCallback = AshleyAllianceTestCallback;
-  fixture.Reaction()->allianceReactionCount = 1;
+  settings->decision_callback = AshleyAllianceTestCallback;
+  fixture.Reaction()->alliance_reaction_count = 1;
   Battle_actorMarkers[1] = 0x05;
 
   unsigned seed = 0;
@@ -461,10 +462,10 @@ TEST_CASE(
 
   VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
 
-  CHECK(fixture.Reaction()->allianceReactionCount == 1);
-  CHECK(fixture.Reaction()->temporaryAshleyAlliance == 0);
-  CHECK(settings->decisionCallback == AshleyAllianceTestCallback);
-  CHECK(settings->savedDecisionCallback == nullptr);
+  CHECK(fixture.Reaction()->alliance_reaction_count == 1);
+  CHECK(fixture.Reaction()->temporary_ashley_alliance == 0);
+  CHECK(settings->decision_callback == AshleyAllianceTestCallback);
+  CHECK(settings->saved_decision_callback == nullptr);
   CHECK(Battle_actorMarkers[1] == 0x05);
   CHECK(VS::Core::BiosRand().State() == after_roll);
 }
@@ -474,14 +475,14 @@ TEST_CASE(
     "callback",
     "[ai][ashley-alliance]") {
   AshleyAllianceFixture fixture;
-  fixture.Reaction()->allianceReactionCount = 9;
+  fixture.Reaction()->alliance_reaction_count = 9;
   Battle_actorMarkers[1] = 0x05;
 
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(nullptr);
   CHECK(Battle_actorMarkers[1] == 0x05);
 
-  fixture.state.settingsBit25 = 1;
+  fixture.state.settings_bit25 = 1;
   const unsigned random_before = VS::Core::BiosRand().State();
   VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 1);
   CHECK(VS::Core::BiosRand().State() == random_before);
@@ -497,14 +498,14 @@ TEST_CASE("AI Ashley alliance compares before truncating the reaction count",
   AshleyAllianceFixture fixture;
   const auto seeds = AshleyAllianceRollSeeds();
   VS::Core::SeedBiosRand(seeds[0]);
-  fixture.Reaction()->allianceReactionCount = 255;
-  fixture.Settings()->decisionCallback = AshleyAllianceTestCallback;
+  fixture.Reaction()->alliance_reaction_count = 255;
+  fixture.Settings()->decision_callback = AshleyAllianceTestCallback;
   VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
-  CHECK(fixture.Reaction()->allianceReactionCount == 0);
-  CHECK(fixture.Reaction()->temporaryAshleyAlliance == 1);
-  CHECK(fixture.Settings()->savedDecisionCallback ==
+  CHECK(fixture.Reaction()->alliance_reaction_count == 0);
+  CHECK(fixture.Reaction()->temporary_ashley_alliance == 1);
+  CHECK(fixture.Settings()->saved_decision_callback ==
         AshleyAllianceTestCallback);
-  CHECK(fixture.Settings()->decisionCallback ==
+  CHECK(fixture.Settings()->decision_callback ==
         VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
 }
 
@@ -516,9 +517,10 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
     for (unsigned counter = 0; counter < 256; ++counter) {
       fixture.state = {};
       auto* settings = fixture.Settings();
-      settings->decisionCallback = AshleyAllianceTestCallback;
-      fixture.Reaction()->allianceReactionCount = static_cast<u_char>(counter);
-      fixture.state.actorId = 1;
+      settings->decision_callback = AshleyAllianceTestCallback;
+      fixture.Reaction()->alliance_reaction_count =
+          static_cast<u_char>(counter);
+      fixture.state.actor_id = 1;
       Battle_actorMarkers[1] = 0x05;
       VS::Core::SeedBiosRand(seeds[roll]);
       VS::Core::Rand15 expected_random(seeds[roll]);
@@ -526,13 +528,13 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
       VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
       const bool favorable = roll < 0x4C;
       const bool entered = favorable && counter + 1 >= 2;
-      CHECK(fixture.Reaction()->allianceReactionCount ==
+      CHECK(fixture.Reaction()->alliance_reaction_count ==
             static_cast<u_char>(counter + (favorable ? 1 : 0)));
-      CHECK(fixture.Reaction()->temporaryAshleyAlliance == entered);
-      CHECK(settings->decisionCallback ==
+      CHECK(fixture.Reaction()->temporary_ashley_alliance == entered);
+      CHECK(settings->decision_callback ==
             (entered ? VS::Battle::Ai::UpdateLiveEngagementApproachBehavior
                      : AshleyAllianceTestCallback));
-      CHECK(settings->savedDecisionCallback ==
+      CHECK(settings->saved_decision_callback ==
             (entered ? AshleyAllianceTestCallback : nullptr));
       CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) ==
             (entered ? 0x85 : 0x05));
@@ -551,16 +553,16 @@ TEST_CASE(
     VS::Core::SeedBiosRand(seeds[0]);
     fixture.Apply(1u << 14);
   }
-  REQUIRE(fixture.Reaction()->temporaryAshleyAlliance == 1);
-  CHECK(fixture.Settings()->savedDecisionCallback ==
+  REQUIRE(fixture.Reaction()->temporary_ashley_alliance == 1);
+  CHECK(fixture.Settings()->saved_decision_callback ==
         AshleyAllianceTestCallback);
   CHECK(fixture.state.relations[0].timer == 28);
   fixture.Apply(1u << 15);
-  CHECK(fixture.Reaction()->temporaryAshleyAlliance == 0);
-  CHECK(fixture.Reaction()->allianceReactionCount == 0);
-  CHECK(fixture.Settings()->decisionCallback == AshleyAllianceTestCallback);
+  CHECK(fixture.Reaction()->temporary_ashley_alliance == 0);
+  CHECK(fixture.Reaction()->alliance_reaction_count == 0);
+  CHECK(fixture.Settings()->decision_callback == AshleyAllianceTestCallback);
   CHECK(fixture.state.relations[0].classification == 3);
-  CHECK(fixture.state.awarenessMarker == 6);
+  CHECK(fixture.state.awareness_marker == 6);
 }
 
 TEST_CASE("AI saved relations force Ashley alliance without consuming BIOS RNG",
@@ -568,35 +570,35 @@ TEST_CASE("AI saved relations force Ashley alliance without consuming BIOS RNG",
   AshleyActionFixture fixture;
   const auto random = VS::Core::BiosRand().State();
   for (int cycle = 0; cycle < 2; ++cycle) {
-    fixture.state.savedRelationOptions = 0x1235;
+    fixture.state.saved_relation_options = 0x1235;
     VS::Battle::Ai::ApplyLiveSavedActorAiRelations();
-    REQUIRE(fixture.Reaction()->temporaryAshleyAlliance == 1);
-    CHECK(fixture.Reaction()->allianceReactionCount == 0);
-    CHECK(fixture.Settings()->savedDecisionCallback ==
+    REQUIRE(fixture.Reaction()->temporary_ashley_alliance == 1);
+    CHECK(fixture.Reaction()->alliance_reaction_count == 0);
+    CHECK(fixture.Settings()->saved_decision_callback ==
           AshleyAllianceTestCallback);
     CHECK(fixture.state.relations[0].classification == ((0x1235 >> 1) & 3));
     CHECK(fixture.state.relations[0].classification_timer ==
           ((0x1235 >> 6) & 127));
     CHECK(VS::Core::BiosRand().State() == random);
     VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
-    CHECK(fixture.Settings()->decisionCallback == AshleyAllianceTestCallback);
+    CHECK(fixture.Settings()->decision_callback == AshleyAllianceTestCallback);
   }
 }
 
 TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
           "[ai][ashley-alliance][alliance-inactive]") {
   AshleyAllianceFixture fixture;
-  fixture.Settings()->decisionCallback = AshleyAllianceTestCallback;
-  fixture.Settings()->savedDecisionCallback =
+  fixture.Settings()->decision_callback = AshleyAllianceTestCallback;
+  fixture.Settings()->saved_decision_callback =
       VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
   Battle_actorMarkers[1] = static_cast<char>(0xA5);
   const auto random = VS::Core::BiosRand().State();
   const auto frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   for (unsigned count = 0; count < 256; ++count) {
-    fixture.Reaction()->allianceReactionCount = static_cast<u_char>(count);
+    fixture.Reaction()->alliance_reaction_count = static_cast<u_char>(count);
     auto expected = fixture.state;
-    reinterpret_cast<Battle_Ai_ReactionView*>(&expected)
-        ->allianceReactionCount = 0;
+    reinterpret_cast<VS::Battle::Ai::ReactionView*>(&expected)
+        ->alliance_reaction_count = 0;
     VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
     CHECK(StateBytes(fixture.state) == StateBytes(expected));
     CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0xA5);
@@ -612,17 +614,17 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   const bool saved_callback = GENERATE(false, true);
   AshleyAllianceFixture fixture;
   auto* settings = fixture.Settings();
-  settings->decisionCallback =
+  settings->decision_callback =
       VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
-  settings->savedDecisionCallback =
+  settings->saved_decision_callback =
       saved_callback ? AshleyAllianceTestCallback : nullptr;
-  fixture.state.settingsBit25 = static_cast<u_char>(settings_bit);
-  fixture.state.decisionDelay = busy == 1 ? 3 : 0;
-  fixture.state.nativePointer18C = busy == 2 ? &fixture : nullptr;
-  fixture.state.awarenessMarker = 0x71;
-  fixture.state.awarenessFramesRemaining = 0x72;
-  fixture.Reaction()->temporaryAshleyAlliance = 1;
-  fixture.Reaction()->allianceReactionCount = 9;
+  fixture.state.settings_bit25 = static_cast<u_char>(settings_bit);
+  fixture.state.decision_delay = busy == 1 ? 3 : 0;
+  fixture.state.native_pointer_18c = busy == 2 ? &fixture : nullptr;
+  fixture.state.awareness_marker = 0x71;
+  fixture.state.awareness_frames_remaining = 0x72;
+  fixture.Reaction()->temporary_ashley_alliance = 1;
+  fixture.Reaction()->alliance_reaction_count = 9;
   Battle_actorMarkers[1] = static_cast<char>(0xA5);
   fixture.actors[1].commandFlags = 0x5A;
   const auto random = VS::Core::BiosRand().State();
@@ -647,10 +649,10 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
   } fixture;
   constexpr std::array<int, 4> kIds{0, 2, 5, 9};
   std::array<Battle_Actor, kIds.size()> actors{};
-  std::array<Battle_Ai_ActorAiState, kIds.size()> states{};
+  std::array<VS::Battle::Ai::ActorAiState, kIds.size()> states{};
   for (std::size_t index = 0; index < kIds.size(); ++index) {
     std::memset(&states[index], 0xA5, sizeof(states[index]));
-    states[index].linkedActor = 16;
+    states[index].linked_actor = 16;
     actors[index].id = kIds[index];
     actors[index].next = index + 1 < kIds.size() ? &actors[index + 1] : nullptr;
     VS::Battle::Ai::actorAiStates[kIds[index]] = &states[index];
@@ -665,19 +667,19 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
   actors[3].aiGroup = 4;
   actors[3].aiLinkedGroup = 4;
   actors[3].reserved30Bit4 = 0x1F;
-  states[3].linkedActor = 7;
+  states[3].linked_actor = 7;
   auto expected = states;
-  expected[1].linkedActor = 5;
-  expected[2].linkedActor = 2;
+  expected[1].linked_actor = 5;
+  expected[2].linked_actor = 2;
   Battle_actors[0] = actors.data();
   VS::Battle::Ai::ResolveLiveAiLinkedActors();
   for (std::size_t index = 0; index < kIds.size(); ++index) {
     CHECK(StateBytes(states[index]) == StateBytes(expected[index]));
   }
-  CHECK(states[0].linkedActor == 16);
-  CHECK(states[1].linkedActor == 5);
-  CHECK(states[2].linkedActor == 2);
-  CHECK(states[3].linkedActor == 7);
+  CHECK(states[0].linked_actor == 16);
+  CHECK(states[1].linked_actor == 5);
+  CHECK(states[2].linked_actor == 2);
+  CHECK(states[3].linked_actor == 7);
 }
 
 TEST_CASE("AI saved settings flags apply through the actor-state creation view",
@@ -695,12 +697,12 @@ TEST_CASE("AI saved settings flags apply through the actor-state creation view",
   actor.reserved34 = static_cast<int>(0xBEEF0ACFu);
   actor.templateWord2C = 0x12345678;
   const auto before = bytes(actor);
-  auto* view = reinterpret_cast<Battle_Ai_AiActorView*>(&actor);
-  REQUIRE((view->savedAiSettingsFlags & 1u) != 0);
-  int packed = view->aiSettings;
+  auto* view = reinterpret_cast<VS::Battle::Ai::AiActorView*>(&actor);
+  REQUIRE((view->saved_ai_settings_flags & 1u) != 0);
+  int packed = view->ai_settings;
   VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(
-      &packed, reinterpret_cast<const Battle_Ai_SavedSettingsPair*>(
-                   &view->savedAiSettings));
+      &packed, reinterpret_cast<const VS::Battle::Ai::SavedSettingsPair*>(
+                   &view->saved_ai_settings));
   CHECK(std::bit_cast<std::uint32_t>(packed) == 0xACF45678u);
   CHECK(bytes(actor) == before);
 }
@@ -716,7 +718,7 @@ struct ActorSettingsFixture {
   void* saved_section6 = Field_roomData.section6;
   u_int saved_section6_length = Field_roomData.header.section6Length;
   std::array<Battle_Actor, 3> actors{};
-  std::array<Battle_Ai_ActorAiState, 3> states{};
+  std::array<VS::Battle::Ai::ActorAiState, 3> states{};
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
 
   ActorSettingsFixture() {
@@ -731,8 +733,8 @@ struct ActorSettingsFixture {
     actors[1].aiLinkedGroup = 4;
     actors[2].aiGroup = 4;
     actors[2].aiLinkedGroup = 3;
-    states[1].linkedActor = 16;
-    states[2].linkedActor = 16;
+    states[1].linked_actor = 16;
+    states[2].linked_actor = 16;
     Battle_actors[0] = actors.data();
     VS::Battle::Ai::roomHasWaypoints = nullptr;
     Field_roomData.section6 = auxiliary.data();
@@ -758,8 +760,8 @@ struct ActorSettingsFixture {
 
   // Ashley's spawn words and a patterned state viewed through the settings
   // view, with the given behaviour index and movement flags.
-  Battle_Ai_SettingsView& PrepareLeader(unsigned behaviour,
-                                        std::uint16_t movement_flags) {
+  VS::Battle::Ai::SettingsView& PrepareLeader(unsigned behaviour,
+                                              std::uint16_t movement_flags) {
     Battle_Actor& actor = actors[0];
     actor.subType = 0xAB;
     // Spawn group: AI group 0xF, behaviour bits 4-8, linked group 0x1F,
@@ -770,14 +772,14 @@ struct ActorSettingsFixture {
     actor.reserved31Bit6 = 2u | (0x2Au << 2) | (0x15u << 8) | (0x1Bu << 13);
     // Spawn flags: mode bits 12-13 both set and patrol rate bit 14.
     actor.reserved34 = 0x7FFF;
-    Battle_Ai_ActorAiState& state = states[0];
+    VS::Battle::Ai::ActorAiState& state = states[0];
     std::memset(&state, 0xA5, sizeof(state));
-    state.actorId = 0;
-    state.linkedActor = 7;
-    auto& view = reinterpret_cast<Battle_Ai_SettingsView&>(state);
-    view.actor = reinterpret_cast<Battle_Ai_SettingsActorView*>(&actor);
-    view.collisionRadius = 129;
-    view.movementFlags = movement_flags;
+    state.actor_id = 0;
+    state.linked_actor = 7;
+    auto& view = reinterpret_cast<VS::Battle::Ai::SettingsView&>(state);
+    view.actor = reinterpret_cast<VS::Battle::Ai::SettingsActorView*>(&actor);
+    view.collision_radius = 129;
+    view.movement_flags = movement_flags;
     return view;
   }
 
@@ -790,50 +792,50 @@ struct ActorSettingsFixture {
 
 // The state ApplyLiveActorAiSettings leaves from the fixture leader's
 // settings and spawn words.
-void ExpectLiveSettings(Battle_Ai_ActorAiState& expected, int waypoints,
+void ExpectLiveSettings(VS::Battle::Ai::ActorAiState& expected, int waypoints,
                         std::uint16_t movement_flags, unsigned behaviour) {
-  auto& want = reinterpret_cast<Battle_Ai_SettingsView&>(expected);
+  auto& want = reinterpret_cast<VS::Battle::Ai::SettingsView&>(expected);
   const unsigned far = VS::Battle::Ai::kPerceptionRangesSquared[6];
-  want.farDistanceSquared = far;
-  want.nearDistanceSquared = far > 0x23FFFF ? 0x240000 : far;
+  want.far_distance_squared = far;
+  want.near_distance_squared = far > 0x23FFFF ? 0x240000 : far;
   want.angle = VS::Battle::Ai::viewAngles[1][0];
-  want.viewCosine = VS::Core::Math::Cosine((want.angle / 2) * 4096 / 360);
-  want.settingsBit15 = 0;
-  want.settingsBit14 = 1;
-  want.settingsBit13 = 0;
-  want.opaque2D = waypoints == 2 ? 1 : 0;
-  want.opaqueB2 = 3;
-  want.opaqueB0 = VS::Battle::Ai::settingsBits8Values[3][0];
-  want.facingDelay = static_cast<std::uint16_t>(
+  want.view_cosine = VS::Core::Math::Cosine((want.angle / 2) * 4096 / 360);
+  want.settings_bit15 = 0;
+  want.settings_bit14 = 1;
+  want.settings_bit13 = 0;
+  want.opaque_2d = waypoints == 2 ? 1 : 0;
+  want.opaque_b2 = 3;
+  want.opaque_b0 = VS::Battle::Ai::settingsBits8Values[3][0];
+  want.facing_delay = static_cast<std::uint16_t>(
       (32 * VS::Battle::Ai::facingDelayScales[2]) >> 4);
-  want.settingsConstant23 = 1;
-  want.settingsByte3Bit0 = 0;
-  want.settingsBit23 = 1;
-  want.settingsBits21 = 2;
-  want.settingsBits28 = 1;
-  want.settingsBits30 = 3;
-  want.settingsBit26 = 0;
-  want.movePeriod = VS::Battle::Ai::kWanderTimingPresets[5].move_period;
-  want.restPeriod = VS::Battle::Ai::kWanderTimingPresets[5].rest_period;
-  want.wanderRate = VS::Battle::Ai::kWanderTimingPresets[5].rate;
-  want.settingsBit27 = 1;
-  want.settingsBit25 = 1;
+  want.settings_constant23 = 1;
+  want.settings_byte3_bit0 = 0;
+  want.settings_bit23 = 1;
+  want.settings_bits21 = 2;
+  want.settings_bits28 = 1;
+  want.settings_bits30 = 3;
+  want.settings_bit26 = 0;
+  want.move_period = VS::Battle::Ai::kWanderTimingPresets[5].move_period;
+  want.rest_period = VS::Battle::Ai::kWanderTimingPresets[5].rest_period;
+  want.wander_rate = VS::Battle::Ai::kWanderTimingPresets[5].rate;
+  want.settings_bit27 = 1;
+  want.settings_bit25 = 1;
   if ((movement_flags & 0xC0) == 0) {
-    want.settingsBits30Value = VS::Battle::Ai::kSettingsBits30Values[3];
+    want.settings_bits30_value = VS::Battle::Ai::kSettingsBits30Values[3];
   }
-  want.settingsByte0Bit7 = 1;
-  want.allowFallbackAction = 1;
-  want.settingsModeLow = 1;
+  want.settings_byte0_bit7 = 1;
+  want.allow_fallback_action = 1;
+  want.settings_mode_low = 1;
   want.opaque102 = VS::Battle::Ai::kFlags34Bit14Values[1];
   want.opaque101 = 2;
-  want.opaqueC8 = 0x2A;
-  want.opaqueCC = 0x15;
-  want.opaqueCE = 0x1B;
-  want.decisionCallback =
+  want.opaque_c8 = 0x2A;
+  want.opaque_cc = 0x15;
+  want.opaque_ce = 0x1B;
+  want.decision_callback =
       behaviour < 9 ? VS::Battle::Ai::decisionCallbacks[behaviour] : nullptr;
-  want.linkedActor = 16;
+  want.linked_actor = 16;
   // Ashley's action metadata only sets her action cost threshold.
-  expected.actionCostEnabled = 1;
+  expected.action_cost_enabled = 1;
 }
 }  // namespace
 
@@ -845,24 +847,25 @@ TEST_CASE("AI settings apply every decoded field through the live view",
   const unsigned behaviour = GENERATE(0u, 4u, 8u, 9u, 31u);
   ActorSettingsFixture fixture;
   if (waypoints != 0) fixture.UseRoomWaypoint(waypoints == 2 ? 0x8001 : 0x7FFF);
-  Battle_Ai_SettingsView& view =
+  VS::Battle::Ai::SettingsView& view =
       fixture.PrepareLeader(behaviour, movement_flags);
-  const Battle_Ai_ActorAiState& state = fixture.states[0];
-  Battle_Ai_ActorAiState expected;
+  const VS::Battle::Ai::ActorAiState& state = fixture.states[0];
+  VS::Battle::Ai::ActorAiState expected;
   std::memcpy(&expected, &state, sizeof(state));
   ExpectLiveSettings(expected, waypoints, movement_flags, behaviour);
-  const auto& want = reinterpret_cast<const Battle_Ai_SettingsView&>(expected);
-  Battle_Ai_SettingsWord word{};
+  const auto& want =
+      reinterpret_cast<const VS::Battle::Ai::SettingsView&>(expected);
+  VS::Battle::Ai::SettingsWord word{};
   word.word = ActorSettingsFixture::kLeaderSettings;
 
   VS::Battle::Ai::ApplyLiveActorAiSettings(&view, &word);
-  CHECK(state.linkedActor == 16);
-  CHECK(view.decisionCallback == want.decisionCallback);
-  CHECK(view.settingsBits30Value == want.settingsBits30Value);
-  CHECK(view.opaque2D == want.opaque2D);
+  CHECK(state.linked_actor == 16);
+  CHECK(view.decision_callback == want.decision_callback);
+  CHECK(view.settings_bits30_value == want.settings_bits30_value);
+  CHECK(view.opaque_2d == want.opaque_2d);
   CHECK(StateBytes(state) == StateBytes(expected));
-  CHECK(fixture.states[1].linkedActor == 5);
-  CHECK(fixture.states[2].linkedActor == 2);
+  CHECK(fixture.states[1].linked_actor == 5);
+  CHECK(fixture.states[2].linked_actor == 2);
 }
 
 TEST_CASE("AI settings retain their original module address",

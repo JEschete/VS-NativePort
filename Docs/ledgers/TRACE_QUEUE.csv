@@ -4,14 +4,14 @@ T00239.071,opaque,1,Actors::ActorRecord.opaque648,unk648_0,0x648.0,Set to 800 wh
 T00628.001,opaque,1,Battle::ActionAiFlags.opaque0Bit4,unk4,0x0.4,"With the actor's settingsModeLow set, scores the action as special with weight 40",VS::Battle::Ai::EvaluateLiveActionCandidate,,native:read
 T00628.006,opaque,1,Battle::ActionAiFlags.opaque1Bit4,unk12,0x1.4,Copied into the candidate and fallback flags,VS::Battle::Ai::(anonymous)::LiveFallbackActionSelection::IgnoresSight VS::Battle::Ai::(anonymous)::LiveCandidateEnumeration::ReadSlot,,native:read
 T00629.017,opaque,1,Battle::ActionDefinition.opaqueDBit4,flagsD_4,0xD.4,Copied to the action state; 1 is cleared when the first target is 0x1C1 or farther,VS::Battle::(anonymous)::LiveWorld::Zoom,Battle::actionDefinitions=0x8004B9E9 stride 0x34,native:read
-T00517.012,opaque,1,Battle::Ai::ActionCandidate.opaque10,unk10,0x10,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveMovementHost::BestCandidateFlags,,native:read
-T00517.009,opaque,1,Battle::Ai::ActionCandidate.opaqueCBit7,unkC_7,0xC.7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActorCommandRoom::SelectedAttack,,native:read
-T00529.001,opaque,1,Battle::Ai::ActionRangeView.opaque5C,unk5C,0x5C,"Used, but its meaning is not established",VS::Battle::LiveCalculateActionRangeSquared,,native:read
+T00517.012,opaque,1,Battle::Ai::ActionCandidateRecord.opaque10,unk10,0x10,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveMovementHost::BestCandidateFlags,,native:read
+T00517.009,opaque,1,Battle::Ai::ActionCandidateRecord.opaque_c_bit7,unkC_7,0xC.7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActorCommandRoom::SelectedAttack,,native:read
+T00529.001,opaque,1,Battle::Ai::ActionRangeView.opaque_5c,unk5C,0x5C,"Used, but its meaning is not established",VS::Battle::LiveCalculateActionRangeSquared,,native:read
 T00530.001,opaque,1,Battle::Ai::ActionRangeView2.opaque38,unk38,0x38,"Used, but its meaning is not established",VS::Battle::LiveCalculateActionRangeSquared,,native:read
-T00520.001,opaque,1,Battle::Ai::ActionSlotMetadata.opaque0Bit1,unk0_1,0x0.1,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveTargeting::SlotExcludesSelf VS::Battle::Ai::(anonymous)::LiveActionMetadata::Slot VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetSlot,,native:read
-T00520.002,opaque,1,Battle::Ai::ActionSlotMetadata.opaque0Bit2,unk0_2,0x0.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActionMetadata::Slot VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetSlot VS::Battle::Ai::(anonymous)::LiveCandidateEnumeration::ReadSlot,,native:read
-T00520.006,opaque,1,Battle::Ai::ActionSlotMetadata.opaque0Bit7,unk0_7,0x0.7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActionUsability::SetSlotUsable VS::Battle::Ai::(anonymous)::LiveCandidateEnumeration::ReadSlot,,native:read
-T00516.000,opaque,1,Battle::Ai::ActionTiming.opaque0Bit0,unk0_0,0x0.0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::Conditions VS::Battle::Ai::LiveActorStatusConditionScore,,native:read
+T00520.001,opaque,1,Battle::Ai::ActionSlotMetadataRecord.opaque0_bit1,unk0_1,0x0.1,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveTargeting::SlotExcludesSelf VS::Battle::Ai::(anonymous)::LiveActionMetadata::Slot VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetSlot,,native:read
+T00520.002,opaque,1,Battle::Ai::ActionSlotMetadataRecord.opaque0_bit2,unk0_2,0x0.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActionMetadata::Slot VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetSlot VS::Battle::Ai::(anonymous)::LiveCandidateEnumeration::ReadSlot,,native:read
+T00520.006,opaque,1,Battle::Ai::ActionSlotMetadataRecord.opaque0_bit7,unk0_7,0x0.7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActionUsability::SetSlotUsable VS::Battle::Ai::(anonymous)::LiveCandidateEnumeration::ReadSlot,,native:read
+T00516.000,opaque,1,Battle::Ai::ActionTiming.opaque0_bit0,unk0_0,0x0.0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::Conditions VS::Battle::Ai::LiveActorStatusConditionScore,,native:read
 T00516.007,opaque,1,Battle::Ai::ActionTiming.opaque10,unk10,0x10,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
 T00516.008,opaque,1,Battle::Ai::ActionTiming.opaque12,unk12,0x12,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf,,native:read
 T00516.009,opaque,1,Battle::Ai::ActionTiming.opaque14,unk14,0x14,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
@@ -19,76 +19,76 @@ T00516.010,opaque,1,Battle::Ai::ActionTiming.opaque16,unk16,0x16,"Used, but its 
 T00516.002,opaque,1,Battle::Ai::ActionTiming.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
 T00516.003,opaque,1,Battle::Ai::ActionTiming.opaque6,unk6,0x6,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf,,native:read
 T00516.004,opaque,1,Battle::Ai::ActionTiming.opaque8,unk8,0x8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
-T00516.005,opaque,1,Battle::Ai::ActionTiming.opaqueA,unkA,0xA,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf,,native:read
-T00516.006,opaque,1,Battle::Ai::ActionTiming.opaqueC,unkC,0xC,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
+T00516.005,opaque,1,Battle::Ai::ActionTiming.opaque_a,unkA,0xA,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf,,native:read
+T00516.006,opaque,1,Battle::Ai::ActionTiming.opaque_c,unkC,0xC,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::PlannerConditionRows::StoreActorCondition VS::Battle::Ai::(anonymous)::SimulationConditionOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
 T00532.001,opaque,1,Battle::Ai::ActorAiState.opaque1,unk1,0x1,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::LoadRoute,*Battle::Ai::actorAiStates+0x1,native:read
-T00532.094,opaque,1,Battle::Ai::ActorAiState.opaque12F,unk12F,0x12F,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveEngagedList::Phase VS::Battle::Ai::(anonymous)::LiveEngagedList::SetPhase,*Battle::Ai::actorAiStates+0x12F,native:read
 T00532.095,opaque,1,Battle::Ai::ActorAiState.opaque130,unk130,0x130,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveEngagedList::Phase VS::Battle::Ai::(anonymous)::LiveEngagedList::SetPhase,*Battle::Ai::actorAiStates+0x130,native:read
-T00532.100,opaque,1,Battle::Ai::ActorAiState.opaque13A,unk13A,0x13A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x13A,native:read
-T00532.101,opaque,1,Battle::Ai::ActorAiState.opaque13C,unk13C,0x13C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0x13C,native:read
-T00532.122,opaque,1,Battle::Ai::ActorAiState.opaque19A,unk19A,0x19A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement VS::Battle::Ai::(anonymous)::LiveGroundRoom::OtherActorDetourWait VS::Battle::Ai::(anonymous)::LiveGroundRoom::SetOtherActorRepeatWait VS::Battle::Ai::(anonymous)::LiveNavigationOverrideCopy::ApplySettings VS::Battle::Ai::(anonymous)::LoadRoute,*Battle::Ai::actorAiStates+0x19A,native:read
-T00532.021,opaque,1,Battle::Ai::ActorAiState.opaque1A,unk1A,0x1A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadReservations VS::Battle::Ai::(anonymous)::LiveCleanupHost::StoreReservations VS::Battle::Ai::ReleaseLiveActorAiReservations VS::Battle::Ai::UpdateLiveNavigationAreaMovement VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0x1A,native:read
-T00532.023,opaque,1,Battle::Ai::ActorAiState.opaque1C,unk1C,0x1C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x1C,native:copy-only
 T00532.003,opaque,1,Battle::Ai::ActorAiState.opaque3,unk3,0x3,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::LoadRoute VS::Battle::Ai::(anonymous)::StoreRouteRecord,*Battle::Ai::actorAiStates+0x3,native:read
 T00532.004,opaque,1,Battle::Ai::ActorAiState.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::UpdateLiveNavigationAreaMovement VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState,*Battle::Ai::actorAiStates+0x4,native:read
 T00532.041,opaque,1,Battle::Ai::ActorAiState.opaque44,unk44,0x44,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x44,native:read
 T00532.005,opaque,1,Battle::Ai::ActorAiState.opaque5,unk5,0x5,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0x5,native:read
 T00532.009,opaque,1,Battle::Ai::ActorAiState.opaque9,unk9,0x9,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x9,native:read
-T00532.011,opaque,1,Battle::Ai::ActorAiState.opaqueD,unkD,0xD,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xD,native:read
-T00532.012,opaque,1,Battle::Ai::ActorAiState.opaqueE,unkE,0xE,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::Fleeing,*Battle::Ai::actorAiStates+0xE,native:read
-T00532.079,opaque,1,Battle::Ai::ActorAiState.opaqueE9,unkE9,0xE9,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0xE9,native:read
-T00532.013,opaque,1,Battle::Ai::ActorAiState.opaqueF,unkF,0xF,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xF,native:read
-T00532.082,opaque,1,Battle::Ai::ActorAiState.opaqueFB,unkFB,0xFB,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LiveCompletedActionPlan::SetDetourTarget,*Battle::Ai::actorAiStates+0xFB,native:read
+T00532.094,opaque,1,Battle::Ai::ActorAiState.opaque_12f,unk12F,0x12F,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveEngagedList::Phase VS::Battle::Ai::(anonymous)::LiveEngagedList::SetPhase,*Battle::Ai::actorAiStates+0x12F,native:read
+T00532.100,opaque,1,Battle::Ai::ActorAiState.opaque_13a,unk13A,0x13A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x13A,native:read
+T00532.101,opaque,1,Battle::Ai::ActorAiState.opaque_13c,unk13C,0x13C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0x13C,native:read
+T00532.122,opaque,1,Battle::Ai::ActorAiState.opaque_19a,unk19A,0x19A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement VS::Battle::Ai::(anonymous)::LiveGroundRoom::OtherActorDetourWait VS::Battle::Ai::(anonymous)::LiveGroundRoom::SetOtherActorRepeatWait VS::Battle::Ai::(anonymous)::LiveNavigationOverrideCopy::ApplySettings VS::Battle::Ai::(anonymous)::LoadRoute,*Battle::Ai::actorAiStates+0x19A,native:read
+T00532.021,opaque,1,Battle::Ai::ActorAiState.opaque_1a,unk1A,0x1A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadReservations VS::Battle::Ai::(anonymous)::LiveCleanupHost::StoreReservations VS::Battle::Ai::ReleaseLiveActorAiReservations VS::Battle::Ai::UpdateLiveNavigationAreaMovement VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0x1A,native:read
+T00532.023,opaque,1,Battle::Ai::ActorAiState.opaque_1c,unk1C,0x1C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x1C,native:copy-only
+T00532.011,opaque,1,Battle::Ai::ActorAiState.opaque_d,unkD,0xD,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xD,native:read
+T00532.012,opaque,1,Battle::Ai::ActorAiState.opaque_e,unkE,0xE,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::Fleeing,*Battle::Ai::actorAiStates+0xE,native:read
+T00532.079,opaque,1,Battle::Ai::ActorAiState.opaque_e9,unkE9,0xE9,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0xE9,native:read
+T00532.013,opaque,1,Battle::Ai::ActorAiState.opaque_f,unkF,0xF,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xF,native:read
+T00532.082,opaque,1,Battle::Ai::ActorAiState.opaque_fb,unkFB,0xFB,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LiveCompletedActionPlan::SetDetourTarget,*Battle::Ai::actorAiStates+0xFB,native:read
 T00521.000,opaque,1,Battle::Ai::EngagementActor.opaque0,unk0,0x0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.007,opaque,1,Battle::Ai::EngagementActor.opaque14,unk14,0x14,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.008,opaque,1,Battle::Ai::EngagementActor.opaque18,unk18,0x18,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00521.009,opaque,1,Battle::Ai::EngagementActor.opaque1CBit0,unk1C_0,0x1C.0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00521.010,opaque,1,Battle::Ai::EngagementActor.opaque1CBit2,unk1C_2,0x1C.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00521.012,opaque,1,Battle::Ai::EngagementActor.opaque1EBit2,unk1C_18,0x1E.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00521.014,opaque,1,Battle::Ai::EngagementActor.opaque1EBit6,unk1C_22,0x1E.6,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.002,opaque,1,Battle::Ai::EngagementActor.opaque2,unk2,0x2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.017,opaque,1,Battle::Ai::EngagementActor.opaque38,unk38,0x38,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00521.019,opaque,1,Battle::Ai::EngagementActor.opaque3C,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.004,opaque,1,Battle::Ai::EngagementActor.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
 T00521.021,opaque,1,Battle::Ai::EngagementActor.opaque40,unk40,0x40,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf VS::Battle::Ai::ApplyLiveSimulatedActionResults,,native:read
 T00521.005,opaque,1,Battle::Ai::EngagementActor.opaque6,unk6,0x6,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
-T00522.011,opaque,1,Battle::Ai::EngagementData.opaque3C,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::StatsOf VS::Battle::Ai::(anonymous)::LiveFallbackActionSelection::RefreshSlot VS::Battle::Ai::(anonymous)::LivePlanningSimulation::RefreshRestrictions VS::Battle::Ai::(anonymous)::LiveCandidateReadiness::RefreshUsability,,native:read
-T00527.003,opaque,1,Battle::Ai::ModelStatePrefix.opaqueABit5,unk8_21,0xA.5,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveDecisionActor::BestCandidate VS::Battle::Ai::(anonymous)::Load,,native:read
+T00521.009,opaque,1,Battle::Ai::EngagementActor.opaque_1c_bit0,unk1C_0,0x1C.0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
+T00521.010,opaque,1,Battle::Ai::EngagementActor.opaque_1c_bit2,unk1C_2,0x1C.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
+T00521.012,opaque,1,Battle::Ai::EngagementActor.opaque_1e_bit2,unk1C_18,0x1E.2,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
+T00521.014,opaque,1,Battle::Ai::EngagementActor.opaque_1e_bit6,unk1C_22,0x1E.6,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
+T00521.019,opaque,1,Battle::Ai::EngagementActor.opaque_3c,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::SimulationEffectOf,,native:read
+T00522.011,opaque,1,Battle::Ai::EngagementData.opaque_3c,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::StatsOf VS::Battle::Ai::(anonymous)::LiveFallbackActionSelection::RefreshSlot VS::Battle::Ai::(anonymous)::LivePlanningSimulation::RefreshRestrictions VS::Battle::Ai::(anonymous)::LiveCandidateReadiness::RefreshUsability,,native:read
+T00527.003,opaque,1,Battle::Ai::ModelStatePrefix.opaque_a_bit5,unk8_21,0xA.5,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveDecisionActor::BestCandidate VS::Battle::Ai::(anonymous)::Load,,native:read
 T00582.007,opaque,1,Battle::Ai::PatrolView.opaque104,timer,0x104,"Used, but its meaning is not established",VS::Battle::Ai::UpdateLiveWaypointPatrol,,native:read
 T00399.040,opaque,1,Battle::Ai::PerceptionUpdateView.opaque114,unk114,0x114,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
 T00399.043,opaque,1,Battle::Ai::PerceptionUpdateView.opaque124,unk124,0x124,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00399.051,opaque,1,Battle::Ai::PerceptionUpdateView.opaque156,unk156,0x156,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00399.007,opaque,1,Battle::Ai::PerceptionUpdateView.opaque18,unk18,0x18,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00399.053,opaque,1,Battle::Ai::PerceptionUpdateView.opaque18C,unk18C,0x18C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
 T00399.055,opaque,1,Battle::Ai::PerceptionUpdateView.opaque190,unk190_5,0x190.5,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00399.058,opaque,1,Battle::Ai::PerceptionUpdateView.opaque19A,unk19A,0x19A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00399.009,opaque,1,Battle::Ai::PerceptionUpdateView.opaque1C,unk1C,0x1C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00399.016,opaque,1,Battle::Ai::PerceptionUpdateView.opaque3C,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
 T00399.017,opaque,1,Battle::Ai::PerceptionUpdateView.opaque40,unk40,0x40,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00399.019,opaque,1,Battle::Ai::PerceptionUpdateView.opaque45,unk45,0x45,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00399.020,opaque,1,Battle::Ai::PerceptionUpdateView.opaque46,unk46,0x46,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00399.022,opaque,1,Battle::Ai::PerceptionUpdateView.opaque4C,unk4C,0x4C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00399.023,opaque,1,Battle::Ai::PerceptionUpdateView.opaque50,unk50,0x50,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00399.053,opaque,1,Battle::Ai::PerceptionUpdateView.opaque_18c,unk18C,0x18C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
+T00399.058,opaque,1,Battle::Ai::PerceptionUpdateView.opaque_19a,unk19A,0x19A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00399.009,opaque,1,Battle::Ai::PerceptionUpdateView.opaque_1c,unk1C,0x1C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00399.016,opaque,1,Battle::Ai::PerceptionUpdateView.opaque_3c,unk3C,0x3C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
+T00399.022,opaque,1,Battle::Ai::PerceptionUpdateView.opaque_4c,unk4C,0x4C,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00398.001,opaque,1,Battle::Ai::PositionLinkView.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LiveActorPerceptionWorld::LinkedPosition,,native:read
 T00523.000,opaque,1,Battle::Ai::ReactionRecord.opaque0,unk0,0x0,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveSimulatedActionResults,*Battle::Ai::planningWorkspace+0x0,native:read
 T00523.002,opaque,1,Battle::Ai::ReactionRecord.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveSimulatedActionResults,*Battle::Ai::planningWorkspace+0x4,native:read
-T00523.004,opaque,1,Battle::Ai::ReactionRecord.opaque4A,unk4A,0x4A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::ReadSimulationSnapshot,*Battle::Ai::planningWorkspace+0x4A,native:read
-T00523.005,opaque,1,Battle::Ai::ReactionRecord.opaque4C,unk4C,0x4C,"Used, but its meaning is not established",,*Battle::Ai::planningWorkspace+0x4C,native:read
+T00523.004,opaque,1,Battle::Ai::ReactionRecord.opaque_4a,unk4A,0x4A,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::ReadSimulationSnapshot,*Battle::Ai::planningWorkspace+0x4A,native:read
+T00523.005,opaque,1,Battle::Ai::ReactionRecord.opaque_4c,unk4C,0x4C,"Used, but its meaning is not established",,*Battle::Ai::planningWorkspace+0x4C,native:read
 T00531.001,opaque,1,Battle::Ai::SavedSettingsPair.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags,,native:read
 T00390.003,opaque,1,Battle::Ai::SettingsActorView.opaque30,flags,0x30,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveActorAiSettings,,native:read
 T00390.004,opaque,1,Battle::Ai::SettingsActorView.opaque34,flags34,0x34,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveActorAiSettings,,native:read
-T00392.018,opaque,1,Battle::Ai::SettingsView.opaque2D,f2D,0x2D,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveActorAiSettings VS::Battle::Ai::(anonymous)::LiveMovementHost::ActionMovementMask,,native:read
+T00392.018,opaque,1,Battle::Ai::SettingsView.opaque_2d,f2D,0x2D,"Used, but its meaning is not established",VS::Battle::Ai::ApplyLiveActorAiSettings VS::Battle::Ai::(anonymous)::LiveMovementHost::ActionMovementMask,,native:read
 T00613.000,opaque,1,Battle::Ai::TargetApproachView.opaque0,b0,0x0,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
 T00613.001,opaque,1,Battle::Ai::TargetApproachView.opaque1,b1,0x1,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
 T00613.003,opaque,1,Battle::Ai::TargetApproachView.opaque3,b3,0x3,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
 T00613.004,opaque,1,Battle::Ai::TargetApproachView.opaque4,b4,0x4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
 T00613.006,opaque,1,Battle::Ai::TargetApproachView.opaque9,b9,0x9,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
-T00613.008,opaque,1,Battle::Ai::TargetApproachView.opaqueC,bC,0xC,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
-T00613.009,opaque,1,Battle::Ai::TargetApproachView.opaqueD,bD,0xD,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
-T00613.028,opaque,1,Battle::Ai::TargetApproachView.opaqueE4,bE4,0xE4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadPlacement VS::Battle::Ai::(anonymous)::StorePlacement VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00613.031,opaque,1,Battle::Ai::TargetApproachView.opaqueE7,bE7,0xE7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00613.032,opaque,1,Battle::Ai::TargetApproachView.opaqueE8,bE8,0xE8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00613.042,opaque,1,Battle::Ai::TargetApproachView.opaqueF8,timer,0xF8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00613.008,opaque,1,Battle::Ai::TargetApproachView.opaque_c,bC,0xC,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
+T00613.009,opaque,1,Battle::Ai::TargetApproachView.opaque_d,bD,0xD,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:copy-only
+T00613.028,opaque,1,Battle::Ai::TargetApproachView.opaque_e4,bE4,0xE4,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadPlacement VS::Battle::Ai::(anonymous)::StorePlacement VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00613.031,opaque,1,Battle::Ai::TargetApproachView.opaque_e7,bE7,0xE7,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00613.032,opaque,1,Battle::Ai::TargetApproachView.opaque_e8,bE8,0xE8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00613.042,opaque,1,Battle::Ai::TargetApproachView.opaque_f8,timer,0xF8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00739.001,opaque,1,Battle::Ai::WanderRecordView.opaque8,flags,0x8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load,,native:read
 T00740.004,opaque,1,Battle::Ai::WanderView.opaque8,flag8,0x8,"Used, but its meaning is not established",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 T00546.000,opaque,1,Battle::LimbEffects.opaque0,value0,0x0,"Used, but its meaning is not established",VS::Battle::(anonymous)::LiveInjuryQueue::PendingHp VS::Battle::(anonymous)::ReadResult VS::Battle::(anonymous)::HitAmounts VS::Battle::(anonymous)::CommitAmounts,,native:read
@@ -211,23 +211,23 @@ T00631.038,low-named,2,Battle::ActorStats.cancelsHitResults,unk956_0,0x956.0,Hit
 T00631.033,low-named,2,Battle::ActorStats.dpSplash,dpSplash,0x920,Fork name kept; see cited use,VS::Actors::(anonymous)::WriteInitialLimbs VS::Battle::LiveDistributeHitLimbDamage,*Battle::Ai::planningStatsSnapshot+0x920,native:read
 T00631.016,low-named,2,Battle::ActorStats.gaitClass,unk32,0x32,Template gait class; 2 and 0x40 make queued walks use the run speed,VS::Actors::(anonymous)::GaitOf VS::Actors::(anonymous)::LiveActorSpawnHost::WriteDefaults VS::Actors::(anonymous)::LiveActorSpawnHost::WriteInitialStats VS::Battle::Ai::(anonymous)::LiveCreationHost::Stats,*Battle::Ai::planningStatsSnapshot+0x32,native:read
 T00631.014,low-named,2,Battle::ActorStats.movementClass,unk30,0x30,Template movement class; 0x10 and 0x20 make saved placement use the current tile while flying,VS::Actors::(anonymous)::LiveActorSpawnHost::WriteDefaults VS::Actors::(anonymous)::LiveActorSpawnHost::WriteInitialStats VS::Actors::(anonymous)::StandingOf VS::Battle::Ai::(anonymous)::LiveCreationHost::Stats VS::Game::Save::(anonymous)::CaptureActors,*Battle::Ai::planningStatsSnapshot+0x30,native:read
-T00532.018,low-named,2,Battle::Ai::ActorAiState.actionCostEnabled,unk17,0x17,Zero when actions cost nothing,VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::Conditions VS::Battle::Ai::(anonymous)::LiveActionMetadata::ActionCostThreshold VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetActionCostThreshold VS::Battle::Ai::LiveActorStatusConditionScore VS::Battle::Ai::RefreshLiveAiResourceRestrictions,*Battle::Ai::actorAiStates+0x17,native:read
-T00532.096,low-named,2,Battle::Ai::ActorAiState.actionStatus,unk131,0x131,Status of the selected action,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::ActionStatus VS::Battle::Ai::(anonymous)::LiveCandidateReadiness::StoreActionStatus,*Battle::Ai::actorAiStates+0x131,native:read
-T00532.092,low-named,2,Battle::Ai::ActorAiState.behaviorMode,unk12D,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::LiveCleanupHost::Persistence VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::BehaviorMode VS::Battle::Ai::(anonymous)::LiveDecisionActor::ClearBehaviorMode,*Battle::Ai::actorAiStates+0x12D,native:read
-T00532.063,low-named,2,Battle::Ai::ActorAiState.bodyHeight,unkB8,0xB8,Model height used for occlusion and reach,VS::Battle::Ai::(anonymous)::LiveDecisions::Player VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::ShapeOf VS::Battle::Ai::(anonymous)::LiveFlightWorld::Obstacle VS::Battle::Ai::(anonymous)::LoadPlacement,*Battle::Ai::actorAiStates+0xB8,native:read
-T00532.064,low-named,2,Battle::Ai::ActorAiState.facingDelay,unkBA,0xBA,Frames before re-facing a target,VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xBA,native:read
-T00532.085,low-named,2,Battle::Ai::ActorAiState.facingPending,unk10C,0x10C,A facing change is pending,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x10C,native:read
-T00532.007,low-named,2,Battle::Ai::ActorAiState.movementDisabled,unk7,0x7,Adjacent-tile search and flight movement are skipped,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0x7,native:read
-T00532.110,low-named,2,Battle::Ai::ActorAiState.movementFlags,unk15E,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::InitializeLiveActorLocomotionMode VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x15E,native:read
-T00532.049,low-named,2,Battle::Ai::ActorAiState.pointHeight,unk82,0x82,Height of the tagged point above the position,VS::Battle::Ai::(anonymous)::LiveDecisions::State VS::Battle::Ai::(anonymous)::LiveDecisions::Player VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::CreateLiveActorAiState VS::Battle::Ai::(anonymous)::ShapeOf,*Battle::Ai::actorAiStates+0x82,native:read
-T00532.084,low-named,2,Battle::Ai::ActorAiState.previousFacingTile,unk108,0x108,Tile faced last time,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x108,native:read
-T00532.135,low-named,2,Battle::Ai::ActorAiState.reactionPending,unk481,0x481,A reaction turn is pending,VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x481,native:read
-T00532.031,low-named,2,Battle::Ai::ActorAiState.settingsBit14,unk29,0x29,Bit 14 of the AI settings word,VS::Battle::Ai::UpdateLiveNavigationAreaMovement VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::LiveNavigationOverrideCopy::ApplySettings,*Battle::Ai::actorAiStates+0x29,native:read
-T00532.034,low-named,2,Battle::Ai::ActorAiState.settingsBits21,unk2C,0x2C,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,VS::Battle::Ai::(anonymous)::LiveRelationTable::Category,*Battle::Ai::actorAiStates+0x2C,native:read
-T00532.020,low-named,2,Battle::Ai::ActorAiState.settingsConstant19,unk19,0x19,Set to 1 when the settings are applied,VS::Battle::Ai::(anonymous)::LiveTargetMemory::MemoryDisabled,*Battle::Ai::actorAiStates+0x19,native:read
-T00532.033,low-named,2,Battle::Ai::ActorAiState.settingsModeLow,unk2B,0x2B,Low bit of the settings mode field,VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::SpecialMode,*Battle::Ai::actorAiStates+0x2B,native:read
-T00532.128,low-named,2,Battle::Ai::ActorAiState.stallCounter,unk228,0x228,Frames without progress,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x228,native:read
-T00532.015,low-named,2,Battle::Ai::ActorAiState.usesRoomActionDelay,unk13,0x13,"When zero the room's default action delay applies, else 50",VS::Battle::Ai::(anonymous)::LiveExecution::UsesRoomDelay VS::Battle::Ai::(anonymous)::LiveCleanupHost::Persistence VS::Battle::Ai::(anonymous)::CooldownOf VS::Battle::Ai::(anonymous)::LiveActionPlanningRoom::BuildActorPlan,*Battle::Ai::actorAiStates+0x13,native:read
+T00532.018,low-named,2,Battle::Ai::ActorAiState.action_cost_enabled,unk17,0x17,Zero when actions cost nothing,VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::Conditions VS::Battle::Ai::(anonymous)::LiveActionMetadata::ActionCostThreshold VS::Battle::Ai::(anonymous)::LiveActionMetadata::SetActionCostThreshold VS::Battle::Ai::LiveActorStatusConditionScore VS::Battle::Ai::RefreshLiveAiResourceRestrictions,*Battle::Ai::actorAiStates+0x17,native:read
+T00532.096,low-named,2,Battle::Ai::ActorAiState.action_status,unk131,0x131,Status of the selected action,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::ActionStatus VS::Battle::Ai::(anonymous)::LiveCandidateReadiness::StoreActionStatus,*Battle::Ai::actorAiStates+0x131,native:read
+T00532.092,low-named,2,Battle::Ai::ActorAiState.behavior_mode,unk12D,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::LiveCleanupHost::Persistence VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::LiveDecisionActor::BehaviorMode VS::Battle::Ai::(anonymous)::LiveDecisionActor::ClearBehaviorMode,*Battle::Ai::actorAiStates+0x12D,native:read
+T00532.063,low-named,2,Battle::Ai::ActorAiState.body_height,unkB8,0xB8,Model height used for occlusion and reach,VS::Battle::Ai::(anonymous)::LiveDecisions::Player VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::ShapeOf VS::Battle::Ai::(anonymous)::LiveFlightWorld::Obstacle VS::Battle::Ai::(anonymous)::LoadPlacement,*Battle::Ai::actorAiStates+0xB8,native:read
+T00532.064,low-named,2,Battle::Ai::ActorAiState.facing_delay,unkBA,0xBA,Frames before re-facing a target,VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0xBA,native:read
+T00532.085,low-named,2,Battle::Ai::ActorAiState.facing_pending,unk10C,0x10C,A facing change is pending,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x10C,native:read
+T00532.007,low-named,2,Battle::Ai::ActorAiState.movement_disabled,unk7,0x7,Adjacent-tile search and flight movement are skipped,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0x7,native:read
+T00532.110,low-named,2,Battle::Ai::ActorAiState.movement_flags,unk15E,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Snapshot VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::InitializeLiveActorLocomotionMode VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x15E,native:read
+T00532.049,low-named,2,Battle::Ai::ActorAiState.point_height,unk82,0x82,Height of the tagged point above the position,VS::Battle::Ai::(anonymous)::LiveDecisions::State VS::Battle::Ai::(anonymous)::LiveDecisions::Player VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::CreateLiveActorAiState VS::Battle::Ai::(anonymous)::ShapeOf,*Battle::Ai::actorAiStates+0x82,native:read
+T00532.084,low-named,2,Battle::Ai::ActorAiState.previous_facing_tile,unk108,0x108,Tile faced last time,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x108,native:read
+T00532.135,low-named,2,Battle::Ai::ActorAiState.reaction_pending,unk481,0x481,A reaction turn is pending,VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,*Battle::Ai::actorAiStates+0x481,native:read
+T00532.031,low-named,2,Battle::Ai::ActorAiState.settings_bit14,unk29,0x29,Bit 14 of the AI settings word,VS::Battle::Ai::UpdateLiveNavigationAreaMovement VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::LiveNavigationOverrideCopy::ApplySettings,*Battle::Ai::actorAiStates+0x29,native:read
+T00532.034,low-named,2,Battle::Ai::ActorAiState.settings_bits21,unk2C,0x2C,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,VS::Battle::Ai::(anonymous)::LiveRelationTable::Category,*Battle::Ai::actorAiStates+0x2C,native:read
+T00532.020,low-named,2,Battle::Ai::ActorAiState.settings_constant19,unk19,0x19,Set to 1 when the settings are applied,VS::Battle::Ai::(anonymous)::LiveTargetMemory::MemoryDisabled,*Battle::Ai::actorAiStates+0x19,native:read
+T00532.033,low-named,2,Battle::Ai::ActorAiState.settings_mode_low,unk2B,0x2B,Low bit of the settings mode field,VS::Battle::Ai::(anonymous)::LiveCandidateEvaluation::SpecialMode,*Battle::Ai::actorAiStates+0x2B,native:read
+T00532.128,low-named,2,Battle::Ai::ActorAiState.stall_counter,unk228,0x228,Frames without progress,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::LoadMovement VS::Battle::Ai::(anonymous)::StoreMovement,*Battle::Ai::actorAiStates+0x228,native:read
+T00532.015,low-named,2,Battle::Ai::ActorAiState.uses_room_action_delay,unk13,0x13,"When zero the room's default action delay applies, else 50",VS::Battle::Ai::(anonymous)::LiveExecution::UsesRoomDelay VS::Battle::Ai::(anonymous)::LiveCleanupHost::Persistence VS::Battle::Ai::(anonymous)::CooldownOf VS::Battle::Ai::(anonymous)::LiveActionPlanningRoom::BuildActorPlan,*Battle::Ai::actorAiStates+0x13,native:read
 T00273.002,low-named,2,Battle::Ai::ArenaOrbitState.distance_cached,unk3,0x3,Set once the distance is measured,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit,*Battle::Ai::arenaOrbit+0x3,native:read
 T00273.000,low-named,2,Battle::Ai::ArenaOrbitState.heading,unk0,0x0,Heading toward the arena centre,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit,*Battle::Ai::arenaOrbit+0x0,native:read
 T00273.005,low-named,2,Battle::Ai::ArenaOrbitState.is_orbiting,unkA,0xA,Set while orbiting,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit VS::Battle::Ai::(anonymous)::LiveActorReaction::StopArenaOrbit,*Battle::Ai::arenaOrbit+0xA,native:read
@@ -236,37 +236,37 @@ T00273.008,low-named,2,Battle::Ai::ArenaOrbitState.requested,unkE,0xE,Orbit requ
 T00273.010,low-named,2,Battle::Ai::ArenaOrbitState.saved_height,unk12,0x12,Height saved when the orbit starts,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit,*Battle::Ai::arenaOrbit+0x12,native:read
 T00273.014,low-named,2,Battle::Ai::ArenaOrbitState.saved_plan_count,unk17,0x17,Plan count restored when the orbit ends,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit VS::Battle::Ai::(anonymous)::LiveActorActionPlan::SetSavedPlanCount,*Battle::Ai::arenaOrbit+0x17,native:read
 T00273.017,low-named,2,Battle::Ai::ArenaOrbitState.started,unk1C,0x1C,Set when the orbit begins,VS::Battle::Ai::(anonymous)::LoadOrbit VS::Battle::Ai::(anonymous)::StoreOrbit,*Battle::Ai::arenaOrbit+0x1C,native:read
-T00514.001,low-named,2,Battle::Ai::MoveTargetView.movementDisabled,disabled,0x7,Adjacent-tile search and flight movement are skipped,VS::Battle::Ai::FindLiveAdjacentMovementDestination,,native:read
-T00759.001,low-named,2,Battle::Ai::PerceivedObjectFlags.bits,bits,,Bit fields,,,native:missing
-T00399.047,low-named,2,Battle::Ai::PerceptionUpdateView.actionStatus,unk131,0x131,Status of the selected action,VS::Battle::Ai::(anonymous)::Load,,native:read
-T00399.027,low-named,2,Battle::Ai::PerceptionUpdateView.positionSource,unk60,0x60,Pointer to the model position,VS::Battle::Ai::(anonymous)::LiveActorPerceptionWorld::LinkedPosition,,native:read
-T00399.012,low-named,2,Battle::Ai::PerceptionUpdateView.settingsBits28,unk2F,0x2F,Bits 28-29 of the AI settings word,VS::Battle::Ai::(anonymous)::Load,,native:read
-T00389.021,low-named,2,Battle::Ai::PerceptionView.bodyHeight,extent,0xB8,Model height used for occlusion and reach,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
-T00389.011,low-named,2,Battle::Ai::PerceptionView.pointHeight,height,0x82,Height of the tagged point above the position,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
-T00389.003,low-named,2,Battle::Ai::PerceptionView.settingsBit15,unk25,0x25,Bit 15 of the AI settings word; also lets out-of-reach targets count,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
-T00389.001,low-named,2,Battle::Ai::PerceptionView.settingsBit23,unk22,0x22,Bit 23 of the AI settings word,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
-T00760.001,low-named,2,Battle::Ai::PositionWord.bytes,b,,Position bytes,,,native:missing
-T00373.014,low-named,2,Battle::Ai::ReactionView.behaviorMode,mode,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::LiveActorReaction::BehaviorMode VS::Battle::Ai::(anonymous)::LiveActorReaction::SetBehaviorMode,,native:read
-T00373.010,low-named,2,Battle::Ai::ReactionView.settingsBit25,flag30,0x30,Bit 25 of the AI settings word,VS::Battle::Ai::(anonymous)::LiveAllianceActor::RecoveryDisabled VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
-T00373.003,low-named,2,Battle::Ai::ReactionView.settingsBit26,flag20,0x20,Bit 26 of the AI settings word,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
-T00373.006,low-named,2,Battle::Ai::ReactionView.settingsBit27,flag27,0x27,Bit 27 of the AI settings word,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
-T00373.008,low-named,2,Battle::Ai::ReactionView.settingsBits21,flag2C,0x2C,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
-T00373.004,low-named,2,Battle::Ai::ReactionView.settingsByte3Bit0,flag21,0x21,Bit 0 of settings byte 3,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
+T00514.001,low-named,2,Battle::Ai::MoveTargetView.movement_disabled,disabled,0x7,Adjacent-tile search and flight movement are skipped,VS::Battle::Ai::FindLiveAdjacentMovementDestination,,native:read
+T00759.001,low-named,2,Battle::Ai::PerceivedObjectFlags.bits,bits,0x0,Bit fields,,,native:none
+T00399.047,low-named,2,Battle::Ai::PerceptionUpdateView.action_status,unk131,0x131,Status of the selected action,VS::Battle::Ai::(anonymous)::Load,,native:read
+T00399.027,low-named,2,Battle::Ai::PerceptionUpdateView.position_source,unk60,0x60,Pointer to the model position,VS::Battle::Ai::(anonymous)::LiveActorPerceptionWorld::LinkedPosition,,native:read
+T00399.012,low-named,2,Battle::Ai::PerceptionUpdateView.settings_bits28,unk2F,0x2F,Bits 28-29 of the AI settings word,VS::Battle::Ai::(anonymous)::Load,,native:read
+T00389.021,low-named,2,Battle::Ai::PerceptionView.body_height,extent,0xB8,Model height used for occlusion and reach,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
+T00389.011,low-named,2,Battle::Ai::PerceptionView.point_height,height,0x82,Height of the tagged point above the position,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
+T00389.003,low-named,2,Battle::Ai::PerceptionView.settings_bit15,unk25,0x25,Bit 15 of the AI settings word; also lets out-of-reach targets count,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
+T00389.001,low-named,2,Battle::Ai::PerceptionView.settings_bit23,unk22,0x22,Bit 23 of the AI settings word,VS::Battle::Ai::(anonymous)::LoadObserver,,native:read
+T00760.001,low-named,2,Battle::Ai::PositionWord.bytes,b,0x0,Position bytes,,,native:none
+T00373.014,low-named,2,Battle::Ai::ReactionView.behavior_mode,mode,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::LiveActorReaction::BehaviorMode VS::Battle::Ai::(anonymous)::LiveActorReaction::SetBehaviorMode,,native:read
+T00373.010,low-named,2,Battle::Ai::ReactionView.settings_bit25,flag30,0x30,Bit 25 of the AI settings word,VS::Battle::Ai::(anonymous)::LiveAllianceActor::RecoveryDisabled VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
+T00373.003,low-named,2,Battle::Ai::ReactionView.settings_bit26,flag20,0x20,Bit 26 of the AI settings word,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
+T00373.006,low-named,2,Battle::Ai::ReactionView.settings_bit27,flag27,0x27,Bit 27 of the AI settings word,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
+T00373.008,low-named,2,Battle::Ai::ReactionView.settings_bits21,flag2C,0x2C,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
+T00373.004,low-named,2,Battle::Ai::ReactionView.settings_byte3_bit0,flag21,0x21,Bit 0 of settings byte 3,VS::Battle::Ai::(anonymous)::ReadSettings,,native:read
 T00515.007,low-named,2,Battle::Ai::RelationWord.blocked,unk0_27,0x3.3,Path to the target is blocked (not read by decompiled code) (same bits as T00136 blocked),VS::Battle::Ai::(anonymous)::LiveExecutionHost::Relation,,native:read
-T00271.007,low-named,2,Battle::Ai::RoomAiState.allowsNonSpellActions,unkA,0xA,Marks non-spell action entries usable,VS::Battle::Ai::(anonymous)::LiveActionMetadata::RoomAllowsNonSpellActions (anonymous)::BattleRuntime::PublishRoomAiMap (anonymous)::BattleRuntime::PublishedSettings,*Battle::Ai::roomAiState+0xA,native:read
-T00271.014,low-named,2,Battle::Ai::RoomAiState.approachMoves,unk24,0x24,Approach moves made this update,VS::Battle::Ai::UpdateLiveActorPerception VS::Battle::Ai::(anonymous)::LiveCandidateMovementWorld::CountApproachMove VS::Battle::Ai::CanApproachLiveEngagedTarget VS::Battle::Ai::(anonymous)::RosterOf,*Battle::Ai::roomAiState+0x24,native:read
-T00271.005,low-named,2,Battle::Ai::RoomAiState.defaultActionDelay,unk8,0x8,Action delay used when an actor has none of its own,VS::Battle::Ai::(anonymous)::LiveExecution::RoomDelay (anonymous)::BattleRuntime::PublishRoomAiMap (anonymous)::BattleRuntime::PublishedSettings,*Battle::Ai::roomAiState+0x8,native:read
-T00271.013,low-named,2,Battle::Ai::RoomAiState.engagedTail,unk20,0x20,Last engaged actor,VS::Battle::Ai::(anonymous)::LiveEngagementHost::LinkEngagedActor VS::Battle::Ai::(anonymous)::LiveEngagedList::Tail VS::Battle::Ai::(anonymous)::LiveEngagedList::SetTail,*Battle::Ai::roomAiState+0x20,native:read
-T00271.010,low-named,2,Battle::Ai::RoomAiState.readinessLevel,unk18,0x18,Threshold an action entry must not exceed to be ready,VS::Battle::Ai::UpdateLiveActorPerception VS::Battle::Ai::(anonymous)::LiveBossOrbitWorld::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveCandidateMovementWorld::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveExecutionHost::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveActorActionPlan::ResetReadiness VS::Battle::Ai::(anonymous)::LivePlanningSimulation::Readiness,*Battle::Ai::roomAiState+0x18,native:read
-T00763.001,low-named,2,Battle::Ai::SavedSettingsWord.bits,bits,,Settings fields,,,native:missing
-T00763.000,low-named,2,Battle::Ai::SavedSettingsWord.word,raw,0x0,Whole settings word; bit 14 selects a range table,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00392.054,low-named,2,Battle::Ai::SettingsView.movementFlags,flags,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::ApplyLiveActorAiSettings,,native:read
-T00613.048,low-named,2,Battle::Ai::TargetApproachView.movementFlags,flags15E,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00613.011,low-named,2,Battle::Ai::TargetApproachView.settingsBit13,b24,0x24,Bit 13 of the AI settings word,VS::Battle::Ai::(anonymous)::Load,,native:read
-T00613.013,low-named,2,Battle::Ai::TargetApproachView.settingsByte0Bit7,b33,0x33,Bit 7 of settings byte 0,VS::Battle::Ai::(anonymous)::Load,,native:read
-T00740.029,low-named,2,Battle::Ai::WanderView.behaviorMode,mode12D,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00740.032,low-named,2,Battle::Ai::WanderView.movementFlags,flags,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
-T00740.017,low-named,2,Battle::Ai::WanderView.wanderPhase,mode,0xC0,Wander phase counter,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00271.007,low-named,2,Battle::Ai::RoomAiState.allows_non_spell_actions,unkA,0xA,Marks non-spell action entries usable,VS::Battle::Ai::(anonymous)::LiveActionMetadata::RoomAllowsNonSpellActions (anonymous)::BattleRuntime::PublishRoomAiMap (anonymous)::BattleRuntime::PublishedSettings,*Battle::Ai::roomAiState+0xA,native:read
+T00271.014,low-named,2,Battle::Ai::RoomAiState.approach_moves,unk24,0x24,Approach moves made this update,VS::Battle::Ai::UpdateLiveActorPerception VS::Battle::Ai::(anonymous)::LiveCandidateMovementWorld::CountApproachMove VS::Battle::Ai::CanApproachLiveEngagedTarget VS::Battle::Ai::(anonymous)::RosterOf,*Battle::Ai::roomAiState+0x24,native:read
+T00271.005,low-named,2,Battle::Ai::RoomAiState.default_action_delay,unk8,0x8,Action delay used when an actor has none of its own,VS::Battle::Ai::(anonymous)::LiveExecution::RoomDelay (anonymous)::BattleRuntime::PublishRoomAiMap (anonymous)::BattleRuntime::PublishedSettings,*Battle::Ai::roomAiState+0x8,native:read
+T00271.013,low-named,2,Battle::Ai::RoomAiState.engaged_tail,unk20,0x20,Last engaged actor,VS::Battle::Ai::(anonymous)::LiveEngagementHost::LinkEngagedActor VS::Battle::Ai::(anonymous)::LiveEngagedList::Tail VS::Battle::Ai::(anonymous)::LiveEngagedList::SetTail,*Battle::Ai::roomAiState+0x20,native:read
+T00271.010,low-named,2,Battle::Ai::RoomAiState.readiness_level,unk18,0x18,Threshold an action entry must not exceed to be ready,VS::Battle::Ai::UpdateLiveActorPerception VS::Battle::Ai::(anonymous)::LiveBossOrbitWorld::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveCandidateMovementWorld::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveExecutionHost::ReadinessLevel VS::Battle::Ai::(anonymous)::LiveActorActionPlan::ResetReadiness VS::Battle::Ai::(anonymous)::LivePlanningSimulation::Readiness,*Battle::Ai::roomAiState+0x18,native:read
+T00763.001,low-named,2,Battle::Ai::SavedSettingsWord.bits,bits,0x0,Settings fields,,,native:none
+T00763.000,low-named,2,Battle::Ai::SavedSettingsWord.word,raw,0x0,Whole settings word; bit 14 selects a range table,VS::Battle::Ai::ApplyLiveActorAiSettings,,native:read
+T00392.054,low-named,2,Battle::Ai::SettingsView.movement_flags,flags,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::ApplyLiveActorAiSettings,,native:read
+T00613.048,low-named,2,Battle::Ai::TargetApproachView.movement_flags,flags15E,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00613.011,low-named,2,Battle::Ai::TargetApproachView.settings_bit13,b24,0x24,Bit 13 of the AI settings word,VS::Battle::Ai::(anonymous)::Load,,native:read
+T00613.013,low-named,2,Battle::Ai::TargetApproachView.settings_byte0_bit7,b33,0x33,Bit 7 of settings byte 0,VS::Battle::Ai::(anonymous)::Load,,native:read
+T00740.029,low-named,2,Battle::Ai::WanderView.behavior_mode,mode12D,0x12D,"Behavior mode (1 reacting, 2 wandering)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00740.032,low-named,2,Battle::Ai::WanderView.movement_flags,flags,0x15E,"Movement flags (bits 1-2 flight, bit 3 planned)",VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
+T00740.017,low-named,2,Battle::Ai::WanderView.wander_phase,mode,0xC0,Wander phase counter,VS::Battle::Ai::(anonymous)::Load VS::Battle::Ai::(anonymous)::Store,,native:read
 G00596,global,2,Battle::Ai::attributeActorMask,D_800F590C,,"Holds one bit per actor whose attributes have any of bits 0, 2 and 4 when its AI state is created.",VS::Battle::Ai::(anonymous)::LiveCleanupHost::AttributeActorMask VS::Battle::Ai::(anonymous)::LiveCleanupHost::StoreAttributeActorMask VS::Battle::Ai::(anonymous)::LiveCreationHost::AttributeActorMask VS::Battle::Ai::(anonymous)::LiveCreationHost::StoreAttributeActorMask (anonymous)::LiveActorAiFrame::AttributeActorMask VS::Battle::Ai::InvalidateSessionBindings,Battle::Ai::attributeActorMask=0x800F590C,state;native:read
 G00588,global,2,Battle::Ai::candidateEngagedThisUpdate,D_800F58E0,,Set when an actor engages an action candidate; cleared at the start of each perception update.,VS::Battle::Ai::(anonymous)::LiveExecution::SelectCandidate VS::Battle::Ai::UpdateLiveActorPerception VS::Battle::Ai::(anonymous)::LiveEngagementHost::CandidateEngagedThisUpdate VS::Battle::Ai::InvalidateSessionBindings,Battle::Ai::candidateEngagedThisUpdate=0x800F58E0,state;native:read
 G00615,global,2,Battle::Ai::kFlags34Bit14Values,D_80069C08,,Gives the AI state value at 0x102 selected by bit 14 of the actor's second flag word (9 or 7).,VS::Battle::Ai::(anonymous)::LiveSettingsTables,,constexpr;native:read
@@ -370,35 +370,22 @@ T00277,type,3,Audio::LegacyVoiceChannelState,FSound80094FA0,size 0x60,Describes 
 T00428,type,3,Audio::SfxSlotRequest,func_800172D4_t,size 0x14,Describes a declared sound-effect slot request whose fields other than index are unidentified.,,,State
 T00429,type,3,Audio::SoundReleaseView,func_8004644C_t,size 0x34,Views a sound record while it is released; not read.,,,State
 T00632,type,3,Battle::ActorStatsFlags,vs_battle_actor2_flags,size 0x4,Declares a flag word of the actor statistics; not read.,,,State
-T00353,type,3,Battle::Ai::ActionChoiceEntryView,actionChoice,size 0x14,Views an action candidate entry while a choice is recorded; not read.,,,State
-T00354,type,3,Battle::Ai::ActionChoiceFlagsView,actionChoiceFlags,size 0x4,Views the flag word of an action choice; not read.,,,State
-T00355,type,3,Battle::Ai::ActionChoiceInfoView,actionChoiceInfo,size 0x34,Views an action definition while a choice is scored; not read.,,,State
-T00356,type,3,Battle::Ai::ActionChoiceView,actionChoiceState,size 0x2F0,Views the first 752 bytes of the AI actor state while an action is chosen.,,,State
-T00357,type,3,Battle::Ai::ActionCostView,actionCostView,size 0x34,Views an action definition's flag word for its cost; not read.,,,State
-T00375,type,3,Battle::Ai::ActionSetupView,actionSetupContext,size 0x230,Views the AI actor state while an action is set up; not read.,,,State
-T00376,type,3,Battle::Ai::ActionSlotConfigView,actionSlotConfig,size 0x8,Views an action slot's configuration; not read.,,,State
 T00147,type,3,Battle::Ai::ActorStateFlagBits,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views an actor's state flag word as bit fields; two 2-bit fields are cleared when the AI state is created.,,,State
 T00146,type,3,Battle::Ai::ActorStateFlagBytes,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views an actor's state flag word as four bytes.,,,State
 T00610,type,3,Battle::Ai::ApproachActorView,targetMovementActor,size 0xA,Views a battle actor's id while a target approach is updated.,,,State
 T00611,type,3,Battle::Ai::ApproachRelationBits,targetMovementFlags,size 0x4,Views the relation word bits tested while a target approach is updated.,,,State
 T00612,type,3,Battle::Ai::ApproachTargetRecordView,targetMovementModel,size 0x24,Views a target's actor record flags and position while a target approach is updated.,,,State
 T00273,type,3,Battle::Ai::ArenaOrbitState,D_800F5920_t,size 0x20,"Drives a boss circling the arena centre (0x7C0, 0x7C0): heading, phase, path step, cooldown and saved plan.",,Battle::Ai::arenaOrbit=0x800F5920,State
-T00518,type,3,Battle::Ai::CandidateTable,func_800DCAA0_t1,size 0x89,Holds the AI candidate table; not read.,,,State
 T00359,type,3,Battle::Ai::DispatchEntryView,actionDispatchEntry,size 0x10,Views an action candidate entry while decisions are dispatched; not read.,,,State
-T00361,type,3,Battle::Ai::DispatchRegistryView,actionDispatchRegistry,size 0x38,Views the room AI state's special-actor list; not read.,,,State
 T00589,type,3,Battle::Ai::ModelActiveView,radialMotionContext,size 0x5B4,Views the actor record's active bit (bit 4 of the word at 0x5B0) set while a boss moves along its path.,,,State
-T00622,type,3,Battle::Ai::OrbitPlayerRecordView,trackingMotionActor,size 0x22,Views the player's actor record position while a boss tracks the player.,,,State
 T00826,type,3,Battle::Ai::PerceivedObjectFlagBits,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Splits a perceived object's flag word into the bits perception tests.,,,State
 T00759,type,3,Battle::Ai::PerceivedObjectFlags,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,"Holds a perceived object's flag word, or its bit fields.",,,State
 T00760,type,3,Battle::Ai::PositionWord,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,"Holds an actor position word, or its bytes.",,,State
-T00588,type,3,Battle::Ai::RetreatPlayerRecordView,radialMotionActor,size 0xC,Views the player's actor record flags while a boss retreat ends.,,,State
-T00591,type,3,Battle::Ai::RouteActorView,routeEdgeActor,size 0x64,Views an actor's position pointer while a route between navigation areas is resolved.,,,State
 T00827,type,3,Battle::Ai::SavedSettingsBits,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Splits the actor's saved settings word into the two-bit mode the AI reads.,,,State
 T00763,type,3,Battle::Ai::SavedSettingsWord,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,"Holds an actor's saved AI settings word, or its fields; the 2-bit field selects a mode.",,,State
 T00140,type,3,Battle::Ai::TargetRelationBytes,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views the per-target relation word as bytes; the top two bits of byte 0 are the classification.,,,State
 T00139,type,3,Battle::Ai::TargetRelationReactionView,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,Views the per-target relation word as the reaction code uses it.,,,State
 T00739,type,3,Battle::Ai::WanderRecordView,wanderObject,size 0xC,Views an actor record's flags while wandering.,,,State
-T00533,type,3,Battle::Ai::WordPair,func_800E78F4_t2,size 0x8,Holds two words; not read.,,,State
 T00541,type,3,Battle::EffectParameterBytes,func_80103080_t,size 0x8,Holds effect parameter bytes; not read.,,,State
 T00496,type,3,Battle::EffectRendererState,func_800D0C60_t,size 0xC0,Holds an effect renderer's state; not read.,,,State
 T00491,type,3,Battle::EffectScriptWord,func_800CFE1C_t,size 0x4,Holds an effect script word; not read.,,,State
@@ -425,106 +412,76 @@ T00279.013,reserved,4,Audio::MusicConfig.reserved34,unk34,0x34,Written by opcode
 T00279.037,reserved,4,Audio::MusicConfig.reserved80,unk80,0x80,Past the real 0x80-byte extent; no access,VS::Audio::Mixer::(anonymous)::LiveDispatchHost::SaveActiveLayer VS::Audio::Seq::(anonymous)::LivePlaybackHost::PromoteSecondaryLayer,Audio::Seq::savedMusicConfig=0x80035910 *Audio::Seq::secondaryMusicConfig+0x80 Audio::Seq::primaryMusicConfig=0x80036770,native:read
 T00628.003,reserved,4,Battle::ActionAiFlags.reserved0Bit6,unk6,0x0.6,Not read by decompiled code,VS::Battle::Ai::CacheLiveFallbackActionCandidate,,native:read
 T00630.028,reserved,4,Battle::Actor.reserved34,unk34,0x34,Not read by decompiled code,VS::Actors::(anonymous)::LiveActorSpawnHost::WriteSpawnDetails VS::Battle::Ai::CreateLiveActorAiState,*Battle::actors+0x34 *Field::auxiliaryActor+0x34 *Battle::characterState+0x34,native:read
-T00356.008,reserved,4,Battle::Ai::ActionChoiceView.reserved154,unk154,,Not read through this view,,,native:split
-T00356.002,reserved,4,Battle::Ai::ActionChoiceView.reserved1C,unk1C,,Not read through this view,,,native:split
-T00356.004,reserved,4,Battle::Ai::ActionChoiceView.reserved60,unk60,,Not read through this view,,,native:split
-T00524.014,reserved,4,Battle::Ai::ActionExecutionView.reserved13A,unk13A,,Not read through this view,,,native:split
-T00524.006,reserved,4,Battle::Ai::ActionExecutionView.reserved58,unk58,,Not read through this view,,,native:split
-T00368.002,reserved,4,Battle::Ai::ActionMetadataView.reserved18,pad18,,Not read through this view,,,native:split
-T00368.004,reserved,4,Battle::Ai::ActionMetadataView.reserved60,pad60,,Not read through this view,,,native:split
-T00368.006,reserved,4,Battle::Ai::ActionMetadataView.reserved89,pad89,,Not read through this view,,,native:split
 T00370.012,reserved,4,Battle::Ai::ActionPlanView.reserved140,unk140,,Not read through this view,,,native:split
 T00370.004,reserved,4,Battle::Ai::ActionPlanView.reserved58,unk58,,Not read through this view,,,native:missing
-T00370.006,reserved,4,Battle::Ai::ActionPlanView.reserved60,unk60,,Not read through this view,,,native:split
+T00370.006,reserved,4,Battle::Ai::ActionPlanView.reserved60,unk60,,Not read through this view,,,native:missing
 T00528.000,reserved,4,Battle::Ai::ActionRangeShape.reserved0,rangeX,0x0,Not read by decompiled code,(anonymous)::RangeOf,,native:read
 T00529.000,reserved,4,Battle::Ai::ActionRangeView.reserved0,unk0,,Not read by decompiled code,,,native:split
 T00532.000,reserved,4,Battle::Ai::ActorAiState.reserved0,unk0,0x0,Not read through this view,VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0x0,native:read
 T00532.097,reserved,4,Battle::Ai::ActorAiState.reserved132,unk132,,Not read through this view,,,native:missing
 T00532.016,reserved,4,Battle::Ai::ActorAiState.reserved14,unk14,0x14,Not read through this view,VS::Battle::Ai::(anonymous)::LiveDecisions::State,*Battle::Ai::actorAiStates+0x14,native:read
-T00532.121,reserved,4,Battle::Ai::ActorAiState.reserved18C,unk18C,,Not read through this view,,,native:missing
-T00532.024,reserved,4,Battle::Ai::ActorAiState.reserved1D,unk1D,0x1D,Not read through this view,VS::Battle::Ai::(anonymous)::LiveDecisions::State,*Battle::Ai::actorAiStates+0x1D,native:read
-T00532.048,reserved,4,Battle::Ai::ActorAiState.reserved60,unk60,,Not read through this view,,,native:split
-T00532.010,reserved,4,Battle::Ai::ActorAiState.reservedA,unkA,0xA,Not read through this view,VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0xA,native:read
-T00532.065,reserved,4,Battle::Ai::ActorAiState.reservedBC,unkBC,0xBC,Not read through this view,VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0xBC,native:read
+T00532.048,reserved,4,Battle::Ai::ActorAiState.reserved60,unk60,,Not read through this view,,,native:missing
+T00532.121,reserved,4,Battle::Ai::ActorAiState.reserved_18c,unk18C,,Not read through this view,,,native:missing
+T00532.024,reserved,4,Battle::Ai::ActorAiState.reserved_1d,unk1D,0x1D,Not read through this view,VS::Battle::Ai::(anonymous)::LiveDecisions::State,*Battle::Ai::actorAiStates+0x1D,native:read
+T00532.010,reserved,4,Battle::Ai::ActorAiState.reserved_a,unkA,0xA,Not read through this view,VS::Battle::Ai::(anonymous)::LoadFlags VS::Battle::Ai::(anonymous)::StoreFlags,*Battle::Ai::actorAiStates+0xA,native:read
+T00532.065,reserved,4,Battle::Ai::ActorAiState.reserved_bc,unkBC,0xBC,Not read through this view,VS::Battle::Ai::(anonymous)::Store VS::Battle::Ai::(anonymous)::Load,*Battle::Ai::actorAiStates+0xBC,native:read
 T00383.000,reserved,4,Battle::Ai::AiActorView.reserved0,pad0,,Covered by the actor record,,,native:missing
 T00385.049,reserved,4,Battle::Ai::AiCreationView.reserved188,pad188,,Not read through this view,,,native:split
 T00385.051,reserved,4,Battle::Ai::AiCreationView.reserved198,pad198,,Not read through this view,,,native:split
-T00385.013,reserved,4,Battle::Ai::AiCreationView.reserved68,pad68,,Not read through this view,,,native:split
+T00385.013,reserved,4,Battle::Ai::AiCreationView.reserved68,pad68,,Not read through this view,,,native:missing
 T00610.000,reserved,4,Battle::Ai::ApproachActorView.reserved0,pad,,Not read by decompiled code,,,native:split
-T00593.027,reserved,4,Battle::Ai::AreaRouteView.reserved18C,unk18C,,Not read through this view,,,native:split
 T00593.008,reserved,4,Battle::Ai::AreaRouteView.reserved52,unk52,,Not read through this view,,,native:split
+T00593.027,reserved,4,Battle::Ai::AreaRouteView.reserved_18c,unk18C,,Not read through this view,,,native:split
 T00608.011,reserved,4,Battle::Ai::BlockedRecoveryView.reserved52,unk52,,Not read through this view,,,native:split
 T00350.000,reserved,4,Battle::Ai::CandidateEntryView.reserved0,score,0x0,Not read by decompiled code,VS::Battle::Ai::LiveCandidateRanking::LiveCandidateRanking,*Battle::Ai::planningPassCandidates+0x0 *Battle::Ai::fallbackCandidates+0x0,native:read
-T00406.018,reserved,4,Battle::Ai::CandidateMovementView.reserved16C,pad16C,,Not read through this view,,,native:split
 T00406.021,reserved,4,Battle::Ai::CandidateMovementView.reserved224,pad224,,Not read through this view,,,native:split
 T00406.004,reserved,4,Battle::Ai::CandidateMovementView.reserved52,pad52,,Not read through this view,,,native:split
+T00406.018,reserved,4,Battle::Ai::CandidateMovementView.reserved_16c,pad16C,,Not read through this view,,,native:split
 T00351.000,reserved,4,Battle::Ai::CandidateReadinessView.reserved0,pad0,,Not read through this view,,,native:split
 T00351.002,reserved,4,Battle::Ai::CandidateReadinessView.reserved132,pad132,,Not read through this view,,,native:split
 T00351.005,reserved,4,Battle::Ai::CandidateReadinessView.reserved224,pad224,,Not read through this view,,,native:split
 T00384.008,reserved,4,Battle::Ai::CreationModelView.reserved170,pad170,,Not read by decompiled code,,,native:split
 T00384.006,reserved,4,Battle::Ai::CreationModelView.reserved60,pad60,,Not read by decompiled code,,,native:split
-T00362.028,reserved,4,Battle::Ai::DecisionDispatchView.reserved15D,pad15D,,Not read through this view,,,native:split
-T00362.030,reserved,4,Battle::Ai::DecisionDispatchView.reserved1E8,pad1E8,,Not read through this view,,,native:split
 T00362.016,reserved,4,Battle::Ai::DecisionDispatchView.reserved52,pad52,,Not read through this view,,,native:split
-T00416.003,reserved,4,Battle::Ai::DirectionCacheView.reserved3C,pad3C,,Not read through this view,,,native:split
-T00358.002,reserved,4,Battle::Ai::DispatchActorView.reserved8,pad8,,Not read by decompiled code,,,native:split
-T00388.000,reserved,4,Battle::Ai::EngagementActorView.reserved0,pad,,Not read by decompiled code,,,native:split
+T00362.028,reserved,4,Battle::Ai::DecisionDispatchView.reserved_15d,pad15D,,Not read through this view,,,native:split
+T00362.030,reserved,4,Battle::Ai::DecisionDispatchView.reserved_1e8,pad1E8,,Not read through this view,,,native:split
 T00522.000,reserved,4,Battle::Ai::EngagementData.reserved0,unk0,,Not read by decompiled code,,,native:split
-T00394.012,reserved,4,Battle::Ai::EngagementView.reserved131,pad131,,Not read through this view,,,native:split
-T00394.002,reserved,4,Battle::Ai::EngagementView.reserved58,pad58,,Not read through this view,,,native:split
-T00414.000,reserved,4,Battle::Ai::EscortRelationsView.reserved0,pad,,Not read through this view,,,native:split
-T00412.027,reserved,4,Battle::Ai::EscortView.reserved15D,pad15D,,Not read through this view,,,native:split
 T00412.030,reserved,4,Battle::Ai::EscortView.reserved224,pad224,,Not read through this view,,,native:split
 T00412.015,reserved,4,Battle::Ai::EscortView.reserved52,pad52,,Not read through this view,,,native:split
-T00526.017,reserved,4,Battle::Ai::FloorHeightView.reserved18A,unk18A,,Not read through this view,,,native:split
-T00526.008,reserved,4,Battle::Ai::FloorHeightView.reserved50,unk50,,Not read through this view,,,native:split
-T00526.010,reserved,4,Battle::Ai::FloorHeightView.reserved5C,unk5C,,Not read through this view,,,native:split
+T00412.027,reserved,4,Battle::Ai::EscortView.reserved_15d,pad15D,,Not read through this view,,,native:split
 T00589.000,reserved,4,Battle::Ai::ModelActiveView.reserved0,pad,,Not read by decompiled code,,,native:split
 T00514.004,reserved,4,Battle::Ai::MoveTargetView.reserved38,unk38,,Not read through this view,,,native:split
-T00554.002,reserved,4,Battle::Ai::MovementCheckView.reserved38,pad38,,Not read through this view,,,native:split
-T00554.004,reserved,4,Battle::Ai::MovementCheckView.reserved5C,pad5C,,Not read through this view,,,native:split
 T00555.004,reserved,4,Battle::Ai::MovementDecisionView.reserved52,padding52,,Not read through this view,,,native:split
-T00556.009,reserved,4,Battle::Ai::MovementDestinationView.reserved52,pad52,,Not read through this view,,,native:split
 T00557.022,reserved,4,Battle::Ai::MovementPathView.reserved174,unk174,,Not read through this view,,,native:split
 T00557.011,reserved,4,Battle::Ai::MovementPathView.reserved52,unk52,,Not read through this view,,,native:split
-T00559.022,reserved,4,Battle::Ai::MovementRecoveryView.reserved18C,pad18C,,Not read through this view,,,native:split
-T00559.008,reserved,4,Battle::Ai::MovementRecoveryView.reserved52,pad52,,Not read through this view,,,native:split
-T00559.010,reserved,4,Battle::Ai::MovementRecoveryView.reserved5C,pad5C,,Not read through this view,,,native:split
-T00561.022,reserved,4,Battle::Ai::MovementStepView.reserved18A,pad18A,,Not read through this view,,,native:split
-T00561.008,reserved,4,Battle::Ai::MovementStepView.reserved52,pad52,,Not read through this view,,,native:split
-T00561.010,reserved,4,Battle::Ai::MovementStepView.reserved5C,pad5C,,Not read through this view,,,native:split
-T00569.002,reserved,4,Battle::Ai::ObstructionView.reserved54,pad54,,Not read through this view,,,native:missing
-T00569.004,reserved,4,Battle::Ai::ObstructionView.reserved5C,pad5C,,Not read through this view,,,native:split
 T00623.004,reserved,4,Battle::Ai::OrbitTrackingView.reserved52,pad52,,Not read through this view,,,native:split
-T00623.007,reserved,4,Battle::Ai::OrbitTrackingView.reserved60,pad60,,Not read through this view,,,native:split
+T00623.007,reserved,4,Battle::Ai::OrbitTrackingView.reserved60,pad60,,Not read through this view,,,native:missing
 T00582.002,reserved,4,Battle::Ai::PatrolView.reserved38,pad38,,Not read through this view,,,native:split
 T00387.011,reserved,4,Battle::Ai::PerceivedObjectView.reserved64,unk64,,Not read by decompiled code,,,native:split
-T00399.059,reserved,4,Battle::Ai::PerceptionUpdateView.reserved19B,unk19B,,Not read through this view,,,native:split
-T00399.029,reserved,4,Battle::Ai::PerceptionUpdateView.reserved68,unk68,,Not read through this view,,,native:split
-T00389.024,reserved,4,Battle::Ai::PerceptionView.reserved12C,unk12C,,Not read through this view,,,native:split
+T00399.029,reserved,4,Battle::Ai::PerceptionUpdateView.reserved68,unk68,,Not read through this view,,,native:missing
+T00399.059,reserved,4,Battle::Ai::PerceptionUpdateView.reserved_19b,unk19B,,Not read through this view,,,native:split
 T00389.008,reserved,4,Battle::Ai::PerceptionView.reserved54,unk54,,Not read through this view,,,native:missing
-T00389.010,reserved,4,Battle::Ai::PerceptionView.reserved5C,unk5C,,Not read through this view,,,native:split
-T00381.004,reserved,4,Battle::Ai::PlanEvaluationView.reserved1C,pad1C,,Not read through this view,,,native:split
-T00381.011,reserved,4,Battle::Ai::PlanEvaluationView.reservedE9,padE9,,Not read through this view,,,native:split
+T00389.024,reserved,4,Battle::Ai::PerceptionView.reserved_12c,unk12C,,Not read through this view,,,native:split
+T00389.010,reserved,4,Battle::Ai::PerceptionView.reserved_5c,unk5C,,Not read through this view,,,native:split
+T00381.004,reserved,4,Battle::Ai::PlanEvaluationView.reserved_1c,pad1C,,Not read through this view,,,native:split
+T00381.011,reserved,4,Battle::Ai::PlanEvaluationView.reserved_e9,padE9,,Not read through this view,,,native:split
 T00590.010,reserved,4,Battle::Ai::RadialRetreatView.reserved188,pad188,,Not read through this view,,,native:split
 T00590.004,reserved,4,Battle::Ai::RadialRetreatView.reserved52,pad52,,Not read through this view,,,native:split
-T00590.006,reserved,4,Battle::Ai::RadialRetreatView.reserved5C,pad5C,,Not read through this view,,,native:split
-T00373.015,reserved,4,Battle::Ai::ReactionView.reserved12E,pad12E,,Not read through this view,,,native:split
+T00590.006,reserved,4,Battle::Ai::RadialRetreatView.reserved_5c,pad5C,,Not read through this view,,,native:split
 T00373.011,reserved,4,Battle::Ai::ReactionView.reserved31,pad31,,Not read through this view,,,native:split
+T00373.015,reserved,4,Battle::Ai::ReactionView.reserved_12e,pad12E,,Not read through this view,,,native:split
 T00515.001,reserved,4,Battle::Ai::RelationWord.reserved0_bit1,unk0_1,0x0.1,Not read by decompiled code,VS::Battle::Ai::(anonymous)::LiveSavedRelationActors::RestoreAshleyRelation,,native:read
 T00271.004,reserved,4,Battle::Ai::RoomAiState.reserved4,unk4,0x4,Not read,VS::Battle::Ai::CacheLiveActorAiWorkingState (anonymous)::BattleRuntime::PublishRoomAiMap (anonymous)::BattleRuntime::PublishedSettings,*Battle::Ai::roomAiState+0x4,native:read
-T00591.000,reserved,4,Battle::Ai::RouteActorView.reserved0,unk0,,Not read by decompiled code,,,native:split
 T00390.000,reserved,4,Battle::Ai::SettingsActorView.reserved0,pad0,,Not read by decompiled code,,,native:split
 T00392.027,reserved,4,Battle::Ai::SettingsView.reserved58,pad58,,Not read through this view,,,native:missing
-T00560.004,reserved,4,Battle::Ai::StepActorView.reserved60,pad60,,Not read by decompiled code,,,native:split
 T00613.054,reserved,4,Battle::Ai::TargetApproachView.reserved184,pad184,,Not read through this view,,,native:split
-T00613.023,reserved,4,Battle::Ai::TargetApproachView.reserved5C,pad5C,,Not read through this view,,,native:split
-T00613.039,reserved,4,Battle::Ai::TargetApproachView.reservedF5,padF5,0xF5,Not read through this view,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState,,native:read
-T00613.041,reserved,4,Battle::Ai::TargetApproachView.reservedF7,padF7,0xF7,Not read through this view,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState,,native:read
+T00613.023,reserved,4,Battle::Ai::TargetApproachView.reserved_5c,pad5C,,Not read through this view,,,native:split
+T00613.039,reserved,4,Battle::Ai::TargetApproachView.reserved_f5,padF5,0xF5,Not read through this view,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState,,native:read
+T00613.041,reserved,4,Battle::Ai::TargetApproachView.reserved_f7,padF7,0xF7,Not read through this view,VS::Battle::Ai::(anonymous)::LoadMovementState VS::Battle::Ai::(anonymous)::StoreMovementState,,native:read
 T00614.000,reserved,4,Battle::Ai::TerrainMoveActorView.reserved0,pad0,,Not read by decompiled code,,,native:split
-T00615.015,reserved,4,Battle::Ai::TerrainMoveView.reserved58,pad58,,Not read through this view,,,native:split
+T00615.015,reserved,4,Battle::Ai::TerrainMoveView.reserved58,pad58,,Not read through this view,,,native:missing
 T00740.012,reserved,4,Battle::Ai::WanderView.reserved52,pad52,,Not read through this view,,,native:split
-T00740.014,reserved,4,Battle::Ai::WanderView.reserved5C,pad5C,,Not read through this view,,,native:split
+T00740.014,reserved,4,Battle::Ai::WanderView.reserved_5c,pad5C,,Not read through this view,,,native:split
 T00215.010,reserved,4,Battle::TargetSphere.reserved2F,unk2F,0x2F,Not read,(anonymous)::LiveTargetSelectionHost::Highlighted (anonymous)::LiveTargetSelectionHost::SetHighlighted,,native:read
 T00215.011,reserved,4,Battle::TargetSphere.reserved30,unk30,0x30,Not read,(anonymous)::LiveTargetSelectionHost::Highlighted (anonymous)::LiveTargetSelectionHost::SetHighlighted,,native:read
 T00215.014,reserved,4,Battle::TargetSphere.reserved34,unk34,0x34,Not read,(anonymous)::LiveTargetSelectionHost::SetHighlightTint (anonymous)::LiveTargetSelectionHost::SetActorTint,,native:read

@@ -19,7 +19,7 @@
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
@@ -180,11 +180,11 @@ class Decisions final : public ai::DecisionUpdateWorld {
 struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* old_head = Battle_actors[0];
-  Battle_Ai_ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
+  VS::Battle::Ai::ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
   Actors_ActorRecord* old_record = Actors_actorRecords[0];
   int old_budget = VS::Battle::Ai::frameTickBudget;
   Battle_Actor head{}, actor{};
-  Battle_Ai_ActorAiState player{}, state{};
+  VS::Battle::Ai::ActorAiState player{}, state{};
   Actors_ActorRecord record{};
   Actors_ModelInstance model{};
   LiveDecisionFixture() {
@@ -192,7 +192,7 @@ struct LiveDecisionFixture {
     head.model = &model;
     actor.id = 1;
     state.reserved14[0] = 1;
-    state.reserved1D[0] = 1;
+    state.reserved_1d[0] = 1;
     Battle_actors[0] = &head;
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     VS::Battle::Ai::actorAiStates[0] = &player;
@@ -275,7 +275,7 @@ TEST_CASE("Execution missing inputs refuse rather than default",
   CHECK_FALSE(ai::TryExecuteActionCandidate(world, 0));
   CHECK(world.delay == 7);
   CHECK_FALSE(ai::TryExecuteCheckedLiveActionCandidate(nullptr, nullptr));
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
   CHECK_FALSE(ai::TryExecuteCheckedLiveActionCandidate(&state, nullptr));
 }
 
@@ -442,28 +442,29 @@ TEST_CASE("Decision lists reject missing states invalid IDs and cycles",
 
 TEST_CASE("Live movement reset preserves all bytes outside original stores",
           "[action-execution][F01659]") {
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::ActorAiState state{};
   state.opaque1 = 7;
-  state.opaqueD = 9;
-  state.opaqueE = 11;
-  state.opaqueF = 13;
-  state.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&state);
-  state.currentCandidate = &state.currentChoice;
-  state.decisionDelay = 99;
+  state.opaque_d = 9;
+  state.opaque_e = 11;
+  state.opaque_f = 13;
+  state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&state);
+  state.current_candidate = &state.current_choice;
+  state.decision_delay = 99;
   auto expected = state;
   auto bytes = std::bit_cast<std::array<std::byte, sizeof(state)>>(expected);
   for (std::size_t i = 0; i < 14; ++i) bytes.at(i) = std::byte{};
-  expected = std::bit_cast<Battle_Ai_ActorAiState>(bytes);
-  expected.movementTarget = 16;
-  expected.savedDestination.word = UINT32_MAX;
+  expected = std::bit_cast<VS::Battle::Ai::ActorAiState>(bytes);
+  expected.movement_target = 16;
+  expected.saved_destination.word = UINT32_MAX;
   expected.ground_area = 11;
-  expected.reserved154Area = 11;
+  expected.reserved154_area = 11;
   ai::ResetLiveDecisionMovement(state, 11);
   CHECK(std::bit_cast<std::array<std::byte, sizeof(state)>>(state) ==
         std::bit_cast<std::array<std::byte, sizeof(state)>>(expected));
-  CHECK(state.actor == reinterpret_cast<Battle_Ai_EngagementData*>(&state));
-  CHECK(state.currentCandidate == &state.currentChoice);
-  CHECK(state.decisionDelay == 99);
+  CHECK(state.actor ==
+        reinterpret_cast<VS::Battle::Ai::EngagementData*>(&state));
+  CHECK(state.current_candidate == &state.current_choice);
+  CHECK(state.decision_delay == 99);
 }
 
 TEST_CASE("Action execution module bindings use typed live entries",
@@ -487,17 +488,17 @@ TEST_CASE("Live partial decisions keep player record and battle model distinct",
   fixture.model.position = {100, 20, 30, 0};
   fixture.record.instance.position = {900, 100, 800, 0};
   fixture.record.instance.locomotionState = 1;
-  fixture.player.bodyHeight = 30;
-  fixture.player.pointHeight = 77;
+  fixture.player.body_height = 30;
+  fixture.player.point_height = 77;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
-  CHECK(fixture.state.distancesSquared[0] == 11000);
+  CHECK(fixture.state.distances_squared[0] == 11000);
   fixture.record.instance.position.vy = 0;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
-  CHECK(fixture.state.distancesSquared[0] == 20309);
+  CHECK(fixture.state.distances_squared[0] == 20309);
   VS::Battle::Ai::actorAiStates[0] = nullptr;
   Actors_actorRecords[0] = nullptr;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
-  CHECK(fixture.state.distancesSquared[0] == 12836);
+  CHECK(fixture.state.distances_squared[0] == 12836);
 }
 
 TEST_CASE("Live decisions diagnose missing listed states and player records",

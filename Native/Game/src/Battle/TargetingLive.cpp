@@ -31,7 +31,7 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -263,13 +263,14 @@ Battle_TargetSphereSpec SphereSpec(const TargetingVolume& volume) {
   return std::bit_cast<Battle_TargetSphereSpec>(RawVolume(volume));
 }
 
-battle::RangeShape RangeOf(const Battle_Ai_ActionRangeShape& shape) {
+battle::RangeShape RangeOf(const VS::Battle::Ai::ActionRangeShape& shape) {
   return {static_cast<std::uint8_t>(shape.reserved0),
-          static_cast<std::uint8_t>(shape.rangeY),
-          static_cast<std::uint8_t>(shape.rangeZ), shape.shape, shape.angle};
+          static_cast<std::uint8_t>(shape.range_y),
+          static_cast<std::uint8_t>(shape.range_z), shape.shape, shape.angle};
 }
 
-// The weapon range bytes at stats 0x38, which Battle_Ai_ActionRangeShape views.
+// The weapon range bytes at stats 0x38, which VS::Battle::Ai::ActionRangeShape
+// views.
 battle::RangeShape WeaponRangeOf(const Battle_ActorStats& stats) {
   return {static_cast<int>(stats.currentRange),
           static_cast<int>(stats.currentRangeY),
@@ -1267,12 +1268,12 @@ int LiveCalculateActionAreaReach(std::intptr_t /*unused*/, int action_id,
   return action ? CalculateActionAreaReach(*action, maximum_reach) : 0;
 }
 
-int LiveCalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view,
-                                    int action_id) {
+int LiveCalculateActionRangeSquared(
+    VS::Battle::Ai::ActionRangeView* actor_range_view, int action_id) {
   return ActionRangeSquared(
       action_id,
-      actor_range_view != nullptr && actor_range_view->opaque5C
-          ? std::optional(RangeOf(actor_range_view->opaque5C->opaque38))
+      actor_range_view != nullptr && actor_range_view->opaque_5c
+          ? std::optional(RangeOf(actor_range_view->opaque_5c->opaque38))
           : std::nullopt);
 }
 
@@ -1293,7 +1294,7 @@ void LiveUpdateTargetSelectionHighlight(int mode) {
 }
 
 int LiveCalculateRangeShapeExtent(
-    const Battle_Ai_ActionRangeShape* range_shape) {
+    const VS::Battle::Ai::ActionRangeShape* range_shape) {
   if (range_shape == nullptr) {
     VS::Core::LogError("battle.targeting",
                        "range extent refused: no range shape");

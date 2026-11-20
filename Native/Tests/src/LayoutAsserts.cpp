@@ -16,7 +16,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -42,15 +42,18 @@ static_assert(
     "The auxiliary actor allocation must own the native gimmick prefix");
 
 static_assert(
-    offsetof(Battle_Ai_ActorAiState, engagementFrames) == 170,
+    offsetof(VS::Battle::Ai::ActorAiState, engagement_frames) == 170,
     "Renamed engagement state must retain its verified native layout");
-static_assert(offsetof(Battle_Ai_ActorAiState, engagementCooldownFrames) == 180,
+static_assert(offsetof(VS::Battle::Ai::ActorAiState,
+                       engagement_cooldown_frames) == 180,
               "Engagement cooldown layout changed");
-static_assert(offsetof(Battle_Ai_ActorAiState, reengagementGraceFrames) == 182,
+static_assert(offsetof(VS::Battle::Ai::ActorAiState,
+                       reengagement_grace_frames) == 182,
               "Reengagement grace layout changed");
-static_assert(offsetof(Battle_Ai_ActorAiState, awarenessFramesRemaining) == 326,
+static_assert(offsetof(VS::Battle::Ai::ActorAiState,
+                       awareness_frames_remaining) == 326,
               "Awareness duration layout changed");
-static_assert(offsetof(Battle_Ai_ActorAiState, awarenessMarker) == 340,
+static_assert(offsetof(VS::Battle::Ai::ActorAiState, awareness_marker) == 340,
               "Awareness marker layout changed");
 
 int TestsRoomSfxBankBinding(void) {
@@ -162,90 +165,95 @@ static_assert(
 #define SAME_FIELD(View, member, Record, field)                    \
   static_assert(offsetof(View, member) == offsetof(Record, field), \
                 "native view mismatch: " #View "." #member)
-SAME_FIELD(Battle_Ai_AiActorView, actorId, Battle_Actor, id);
-SAME_FIELD(Battle_Ai_AiActorView, aiControlFlags, Battle_Actor, kind);
-SAME_FIELD(Battle_Ai_AiActorView, stats, Battle_Actor, stats);
-SAME_FIELD(Battle_Ai_AiActorView, model, Battle_Actor, model);
-SAME_FIELD(Battle_Ai_SettingsActorView, opaque34, Battle_Actor, reserved34);
-SAME_FIELD(Battle_Ai_CreationModelView, radius, Actors_ActorRecord,
+SAME_FIELD(VS::Battle::Ai::AiActorView, actor_id, Battle_Actor, id);
+SAME_FIELD(VS::Battle::Ai::AiActorView, ai_control_flags, Battle_Actor, kind);
+SAME_FIELD(VS::Battle::Ai::AiActorView, stats, Battle_Actor, stats);
+SAME_FIELD(VS::Battle::Ai::AiActorView, model, Battle_Actor, model);
+SAME_FIELD(VS::Battle::Ai::SettingsActorView, opaque34, Battle_Actor,
+           reserved34);
+SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, Actors_ActorRecord,
            collisionRadius);
-SAME_FIELD(Battle_Ai_CreationModelView, opaque63E, Actors_ActorRecord,
+SAME_FIELD(VS::Battle::Ai::CreationModelView, opaque_63e, Actors_ActorRecord,
            collisionHeight);
-SAME_FIELD(Battle_Ai_AiCreationView, actor, Battle_Ai_ActorAiState, actor);
-SAME_FIELD(Battle_Ai_AiCreationView, model, Battle_Ai_ActorAiState, model);
-SAME_FIELD(Battle_Ai_AiCreationView, stats, Battle_Ai_ActorAiState, stats);
-SAME_FIELD(Battle_Ai_AiCreationView, actorId, Battle_Ai_ActorAiState, actorId);
-SAME_FIELD(Battle_Ai_AiCreationView, pointHeight, Battle_Ai_ActorAiState,
-           pointHeight);
-SAME_FIELD(Battle_Ai_SettingsView, decisionCallback, Battle_Ai_ActorAiState,
-           nativePointer68);
-SAME_FIELD(Battle_Ai_PerceptionView, relations, Battle_Ai_ActorAiState,
-           relations);
-SAME_FIELD(Battle_Ai_CandidateReadinessView, candidateOrder,
-           Battle_Ai_ActorAiState, candidateOrder);
-SAME_FIELD(Battle_Ai_CandidateReadinessView, candidateCount,
-           Battle_Ai_ActorAiState, candidateCount);
+SAME_FIELD(VS::Battle::Ai::AiCreationView, actor, VS::Battle::Ai::ActorAiState,
+           actor);
+SAME_FIELD(VS::Battle::Ai::AiCreationView, model, VS::Battle::Ai::ActorAiState,
+           model);
+SAME_FIELD(VS::Battle::Ai::AiCreationView, stats, VS::Battle::Ai::ActorAiState,
+           stats);
+SAME_FIELD(VS::Battle::Ai::AiCreationView, actor_id,
+           VS::Battle::Ai::ActorAiState, actor_id);
+SAME_FIELD(VS::Battle::Ai::AiCreationView, point_height,
+           VS::Battle::Ai::ActorAiState, point_height);
+SAME_FIELD(VS::Battle::Ai::SettingsView, decision_callback,
+           VS::Battle::Ai::ActorAiState, native_pointer68);
+SAME_FIELD(VS::Battle::Ai::PerceptionView, relations,
+           VS::Battle::Ai::ActorAiState, relations);
+SAME_FIELD(VS::Battle::Ai::CandidateReadinessView, candidate_order,
+           VS::Battle::Ai::ActorAiState, candidate_order);
+SAME_FIELD(VS::Battle::Ai::CandidateReadinessView, candidate_count,
+           VS::Battle::Ai::ActorAiState, candidate_count);
 SAME_FIELD(Field_GimmickPhysicsView, nativePointer68, Field_GimmickInstance,
            model);
 SAME_FIELD(Field_GimmickPhysicsView, frame, Field_GimmickInstance,
            objectInfo.supportIndex);
 SAME_FIELD(Field_GimmickPhysicsView, carrier, Field_GimmickInstance,
            objectInfo.carrier);
-static_assert(sizeof(Battle_Ai_AiCreationView) <=
-                  sizeof(Battle_Ai_ActorAiState),
+static_assert(sizeof(VS::Battle::Ai::AiCreationView) <=
+                  sizeof(VS::Battle::Ai::ActorAiState),
               "creation view exceeds storage");
 static_assert(std::tuple_size_v<decltype(VS::Battle::Ai::actorAiStates)> == 16,
               "AI table extent");
 static_assert(std::is_same_v<decltype(VS::Battle::Ai::roomHasWaypoints), void*>,
               "room auxiliary-data pointer width");
-static_assert(sizeof(Battle_Ai_ActorAiState) % 4 == 0,
+static_assert(sizeof(VS::Battle::Ai::ActorAiState) % 4 == 0,
               "AI clear requires whole words");
 #undef SAME_FIELD
 
-static int TestDecision(Battle_Ai_ActorAiState* state) {
-  return state->actorId;
+static int TestDecision(VS::Battle::Ai::ActorAiState* state) {
+  return state->actor_id;
 }
 
-static int TestMovementDecision(Battle_Ai_ActorAiState* state) {
+static int TestMovementDecision(VS::Battle::Ai::ActorAiState* state) {
   ++state->opaque44;
   return 1;
 }
 
 int Tests_AiMovementDispatch(void) {
-  Battle_Ai_ActorAiState state = {0};
-  Battle_Ai_SettingsView* settings =
-      reinterpret_cast<Battle_Ai_SettingsView*>(&state);
-  state.previousTile = -1;
-  settings->decisionCallback = TestMovementDecision;
+  VS::Battle::Ai::ActorAiState state = {0};
+  VS::Battle::Ai::SettingsView* settings =
+      reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state);
+  state.previous_tile = -1;
+  settings->decision_callback = TestMovementDecision;
   VS::Battle::Ai::DispatchLiveMovementBehavior(
-      reinterpret_cast<Battle_Ai_DecisionDispatchView*>(&state));
-  const int passed = state.opaque44 == 1 && state.detourStep == 0;
+      reinterpret_cast<VS::Battle::Ai::DecisionDispatchView*>(&state));
+  const int passed = state.opaque44 == 1 && state.detour_step == 0;
   VS::Battle::Ai::UpdateLiveActorLocomotionMode(
-      reinterpret_cast<Battle_Ai_DecisionDispatchView*>(&state));
-  return passed && state.behaviorMode == 0;
+      reinterpret_cast<VS::Battle::Ai::DecisionDispatchView*>(&state));
+  return passed && state.behavior_mode == 0;
 }
 
 int Tests_AiRelations(void) {
   Battle_Actor actors[3] = {{nullptr}};
-  Battle_Ai_ActorAiState states[3] = {{0}};
+  VS::Battle::Ai::ActorAiState states[3] = {{0}};
   const unsigned ids[3] = {0, 2, 5};
   Battle_Actor* savedHead = Battle_actors[0];
-  Battle_Ai_ActorAiState* savedStates[3];
+  VS::Battle::Ai::ActorAiState* saved_states[3];
   for (unsigned index = 0; index < 3; ++index) {
-    savedStates[index] = VS::Battle::Ai::actorAiStates[ids[index]];
+    saved_states[index] = VS::Battle::Ai::actorAiStates[ids[index]];
     actors[index].id = ids[index];
     actors[index].next = index + 1 < 3 ? &actors[index + 1] : nullptr;
-    states[index].actorId = ids[index];
-    states[index].savedRelationOptions = -1;
+    states[index].actor_id = ids[index];
+    states[index].saved_relation_options = -1;
     VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
   }
-  states[0].settingsBits21 = 3;
-  states[1].settingsBits21 = 0;
-  states[2].settingsBits21 = 2;
+  states[0].settings_bits21 = 3;
+  states[1].settings_bits21 = 0;
+  states[2].settings_bits21 = 2;
   states[1].relations[5].visible = 1;
   Battle_actors[0] = actors;
   VS::Battle::Ai::InitializeLiveActorAiRelations(
-      reinterpret_cast<Battle_Ai_AiCreationView*>(&states[1]));
+      reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&states[1]));
   int passed = states[1].relations[0].classification == 3 &&
                states[0].relations[2].classification == 3 &&
                states[1].relations[5].classification == 2 &&
@@ -254,7 +262,7 @@ int Tests_AiRelations(void) {
   for (unsigned index = 0; index < 3; ++index) {
     passed = passed && states[index].relations[ids[index]].classification == 2;
   }
-  states[1].savedRelationOptions = 0x1234;
+  states[1].saved_relation_options = 0x1234;
   states[1].relations[0].active = 1;
   states[1].relations[0].visible = 1;
   states[1].relations[0].counter = 37;
@@ -269,43 +277,43 @@ int Tests_AiRelations(void) {
       states[0].relations[2].classification == 3;
   Battle_actors[0] = savedHead;
   for (unsigned index = 0; index < 3; ++index) {
-    VS::Battle::Ai::actorAiStates[ids[index]] = savedStates[index];
+    VS::Battle::Ai::actorAiStates[ids[index]] = saved_states[index];
   }
   return passed;
 }
 
 int Tests_AiMovementSetup(void) {
-  Battle_Ai_ActorAiState state = {0};
-  state.decisionDelay = 2;
-  state.minActionDelay = 1;
+  VS::Battle::Ai::ActorAiState state = {0};
+  state.decision_delay = 2;
+  state.min_action_delay = 1;
   VS::Battle::Ai::TickLiveActorDecisionTimers(
-      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
-  int passed = state.decisionDelay == 1 && state.minActionDelay == 0;
+      reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state));
+  int passed = state.decision_delay == 1 && state.min_action_delay == 0;
   VS::Battle::Ai::TickLiveActorDecisionTimers(
-      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
+      reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state));
   VS::Battle::Ai::TickLiveActorDecisionTimers(
-      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
-  passed = passed && state.decisionDelay == 0 && state.minActionDelay == 0;
+      reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state));
+  passed = passed && state.decision_delay == 0 && state.min_action_delay == 0;
   const u_short flags[3] = {0x1000, 0x800, 0x100};
   const u_char modes[3] = {1, 2, 0};
   for (size_t index = 0; index < sizeof flags / sizeof flags[0]; ++index) {
-    state.locomotionFlags = flags[index];
+    state.locomotion_flags = flags[index];
     VS::Battle::Ai::InitializeLiveActorLocomotionMode(
-        reinterpret_cast<Battle_Ai_AiCreationView*>(&state));
-    passed = passed && state.locomotionMode == modes[index] &&
-             state.movementFlags == (flags[index] | (flags[index] >> 8));
+        reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&state));
+    passed = passed && state.locomotion_mode == modes[index] &&
+             state.movement_flags == (flags[index] | (flags[index] >> 8));
   }
-  Battle_Ai_ActorAiState* saved = VS::Battle::Ai::actorAiStates[2];
+  VS::Battle::Ai::ActorAiState* saved = VS::Battle::Ai::actorAiStates[2];
   VS::Battle::Ai::actorAiStates[2] = &state;
   VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 8, 12);
-  passed = passed && state.walkStep == 8 && state.runStep == 12 &&
-           state.maxRange == 12;
+  passed = passed && state.walk_step == 8 && state.run_step == 12 &&
+           state.max_range == 12;
   VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 16, 6);
-  passed = passed && state.walkStep == 16 && state.runStep == 6 &&
-           state.maxRange == 16;
+  passed = passed && state.walk_step == 16 && state.run_step == 6 &&
+           state.max_range == 16;
   VS::Battle::Ai::actorAiStates[2] = nullptr;
   VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 4, 8);
-  passed = passed && state.walkStep == 16 && state.runStep == 6;
+  passed = passed && state.walk_step == 16 && state.run_step == 6;
   VS::Battle::Ai::actorAiStates[2] = saved;
   return passed;
 }
@@ -333,8 +341,8 @@ int Tests_AiFrameStages(void) {
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* savedActor = Battle_actors[0];
-  Battle_Ai_ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
-  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
+  VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   const int saved_target = VS::Battle::Ai::secondPerceptionTarget;
   const int saved_mask = VS::Battle::Ai::attributeActorMask;
@@ -342,14 +350,14 @@ int Tests_AiFrameStages(void) {
   Battle_Actor actor = {nullptr};
   Battle_ActorStats stats = {0};
   Actors_ActorRecord model = {0};
-  Battle_Ai_ActorAiState state = {0};
-  Battle_Ai_PerceptionUpdateView* view =
-      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state);
-  Battle_Ai_RoomAiState room = {0};
+  VS::Battle::Ai::ActorAiState state = {0};
+  VS::Battle::Ai::PerceptionUpdateView* view =
+      reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
+  VS::Battle::Ai::RoomAiState room = {0};
   u_short flags[32][32] = {{0}};
   actor.stats = &stats;
   view->actor = reinterpret_cast<Battle_Actor*>(&actor);
-  view->model = reinterpret_cast<Battle_Ai_PerceivedObjectView*>(&model);
+  view->model = reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&model);
   Battle_actors[0] = &actor;
   VS::Battle::Ai::actorAiStates[0] = &state;
   VS::Battle::Ai::roomAiState = &room;
@@ -359,16 +367,16 @@ int Tests_AiFrameStages(void) {
   VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
   int passed =
-      room.readinessLevel == 0 && VS::Battle::Ai::secondPerceptionTarget == 0;
+      room.readiness_level == 0 && VS::Battle::Ai::secondPerceptionTarget == 0;
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
-  passed = passed && room.readinessLevel == 1 &&
+  passed = passed && room.readiness_level == 1 &&
            VS::Battle::Ai::secondPerceptionTarget == 2;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
-  passed = passed && room.readinessLevel == 2 &&
+  passed = passed && room.readiness_level == 2 &&
            VS::Battle::Ai::secondPerceptionTarget == 5;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
-  passed = passed && room.readinessLevel == 3 &&
+  passed = passed && room.readiness_level == 3 &&
            VS::Battle::Ai::secondPerceptionTarget == 0 &&
            VS::Battle::Ai::savedMovementRandomState == 0x12345678 &&
            view->opaque14 == 1;
@@ -388,7 +396,7 @@ int Tests_AiFrameCache(void) {
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
   const auto saved_actors = VS::Battle::Ai::actorAiStates;
-  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   u_short(*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   u_short(*saved_heights)[32] = VS::Battle::Ai::specialTerrainHeights;
   void* saved_data = VS::Battle::Ai::roomHasWaypoints;
@@ -400,13 +408,13 @@ int Tests_AiFrameCache(void) {
   for (size_t index = 0; index < sizeof savedScratch; ++index) {
     scratch[index] = kScratchSentinel;
   }
-  Battle_Ai_ActorAiState actor = {0};
-  Battle_Ai_RoomAiState room = {0};
+  VS::Battle::Ai::ActorAiState actor = {0};
+  VS::Battle::Ai::RoomAiState room = {0};
   u_short flags[32][32] = {{0}};
   u_short heights[32][32] = {{0}};
   u_char auxiliary[0x898] = {0};
   const u_int bounds = 0x01021F1Eu;
-  memcpy(room.reserved4, &bounds, sizeof bounds);
+  memcpy(room.reserved4.data(), &bounds, sizeof bounds);
   VS::Battle::Ai::actorAiStates.fill(nullptr);
   VS::Battle::Ai::actorAiStates[15] = &actor;
   VS::Battle::Ai::roomAiState = &room;
@@ -482,13 +490,13 @@ int Tests_ActionDefinitionsLoaded(void) {
 int Tests_ActorConditionSnapshot(void) {
   Battle_Actor first = {nullptr}, second = {nullptr};
   Battle_ActorStats firstStats = {0}, secondStats = {0};
-  Battle_Ai_ActorAiState firstAi = {0}, secondAi = {0};
+  VS::Battle::Ai::ActorAiState first_ai = {0}, second_ai = {0};
   Battle_Actor* savedHead = Battle_actors[0];
-  Battle_Ai_ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
-  Battle_Ai_ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
+  VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
+  VS::Battle::Ai::ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
   struct {
     unsigned before;
-    Battle_Ai_ActionTiming rows[16];
+    VS::Battle::Ai::ActionTiming rows[16];
     unsigned after;
   } output;
   memset(&output, 0xA5, sizeof output);
@@ -508,21 +516,21 @@ int Tests_ActorConditionSnapshot(void) {
   firstStats.shield.max_dp = 60;
   secondStats.maxHp = 120;
   secondStats.statuses = (1 << 0) | (1 << 12);
-  secondAi.actionCostEnabled = 1;
+  second_ai.action_cost_enabled = 1;
   Battle_actors[0] = &first;
-  VS::Battle::Ai::actorAiStates[2] = &firstAi;
-  VS::Battle::Ai::actorAiStates[5] = &secondAi;
+  VS::Battle::Ai::actorAiStates[2] = &first_ai;
+  VS::Battle::Ai::actorAiStates[5] = &second_ai;
   VS::Battle::Ai::CaptureBattleActorConditions(output.rows);
   const int passed =
-      output.rows[2].opaque0Bit0 == 2 && output.rows[5].opaque0Bit0 == 5 &&
+      output.rows[2].opaque0_bit0 == 2 && output.rows[5].opaque0_bit0 == 5 &&
       output.rows[2].opaque4 == 20 && output.rows[2].opaque6 == 100 &&
-      output.rows[2].opaque8 == 15 && output.rows[2].opaqueA == 60 &&
+      output.rows[2].opaque8 == 15 && output.rows[2].opaque_a == 60 &&
       output.rows[2].opaque10 == 10 && output.rows[2].opaque12 == 40 &&
       output.rows[2].opaque14 == 30 && output.rows[2].opaque16 == 60 &&
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[2]) == -34 &&
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[5]) == -314 &&
       output.before == 0xA5A5A5A5u && output.after == 0xA5A5A5A5u &&
-      output.rows[1].opaqueC == 0xA5A5A5A5u;
+      output.rows[1].opaque_c == 0xA5A5A5A5u;
   Battle_actors[0] = savedHead;
   VS::Battle::Ai::actorAiStates[2] = saved_first;
   VS::Battle::Ai::actorAiStates[5] = saved_second;
@@ -551,24 +559,24 @@ int Tests_AiViewsRoundTrip(void) {
   enum { kCollisionHeight = 124 };
   struct {
     uint64_t before;
-    Battle_Ai_ActorAiState state;
+    VS::Battle::Ai::ActorAiState state;
     uint64_t after;
   } guarded;
   Battle_Actor actor = {nullptr};
   Actors_ActorRecord model = {0};
   Battle_ActorStats stats = {0};
-  Battle_Ai_AiCreationView* creation =
-      reinterpret_cast<Battle_Ai_AiCreationView*>(&guarded.state);
-  Battle_Ai_SettingsView* settings =
-      reinterpret_cast<Battle_Ai_SettingsView*>(&guarded.state);
-  Battle_Ai_PerceptionUpdateView* update =
-      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&guarded.state);
-  Battle_Ai_CandidateReadinessView* planning =
-      reinterpret_cast<Battle_Ai_CandidateReadinessView*>(&guarded.state);
-  Battle_Ai_AiActorView* actor_view =
-      reinterpret_cast<Battle_Ai_AiActorView*>(&actor);
-  Battle_Ai_CreationModelView* model_view =
-      reinterpret_cast<Battle_Ai_CreationModelView*>(&model);
+  VS::Battle::Ai::AiCreationView* creation =
+      reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&guarded.state);
+  VS::Battle::Ai::SettingsView* settings =
+      reinterpret_cast<VS::Battle::Ai::SettingsView*>(&guarded.state);
+  VS::Battle::Ai::PerceptionUpdateView* update =
+      reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&guarded.state);
+  VS::Battle::Ai::CandidateReadinessView* planning =
+      reinterpret_cast<VS::Battle::Ai::CandidateReadinessView*>(&guarded.state);
+  VS::Battle::Ai::AiActorView* actor_view =
+      reinterpret_cast<VS::Battle::Ai::AiActorView*>(&actor);
+  VS::Battle::Ai::CreationModelView* model_view =
+      reinterpret_cast<VS::Battle::Ai::CreationModelView*>(&model);
   unsigned int i;
   memset(&guarded, 0xA5, sizeof guarded);
   VS::Core::Memory::ClearLiveAlignedWords(&guarded.state, sizeof guarded.state);
@@ -585,38 +593,40 @@ int Tests_AiViewsRoundTrip(void) {
   model.instance.position.vy = -300;
   model.collisionRadius = 61;
   model.collisionHeight = kCollisionHeight;
-  if (actor_view->actorId != 2 || actor_view->aiControlFlags != 5 ||
+  if (actor_view->actor_id != 2 || actor_view->ai_control_flags != 5 ||
       reinterpret_cast<void*>(actor_view->model) != &model ||
       reinterpret_cast<void*>(actor_view->stats) != &stats ||
       model_view->position[1] != -300 || model_view->radius != 61 ||
-      model_view->opaque63E != kCollisionHeight) {
+      model_view->opaque_63e != kCollisionHeight) {
     return 0;
   }
   creation->actor = actor_view;
   creation->model = model_view;
-  creation->stats = reinterpret_cast<Battle_Ai_CreationStatsView*>(&stats);
-  creation->actorId = 2;
-  creation->positionSource = model_view->position;
-  creation->tileSource = &model_view->tile.word;
+  creation->stats =
+      reinterpret_cast<VS::Battle::Ai::CreationStatsView*>(&stats);
+  creation->actor_id = 2;
+  creation->position_source = model_view->position.data();
+  creation->tile_source = &model_view->tile.word;
   creation->radius = 61;
-  creation->collisionRadius = 62;
-  settings->decisionCallback = TestDecision;
-  settings->farDistanceSquared = 0x240000;
-  planning->candidateOrder[15] =
-      reinterpret_cast<Battle_Ai_CandidateEntryView*>(
+  creation->collision_radius = 62;
+  settings->decision_callback = TestDecision;
+  settings->far_distance_squared = 0x240000;
+  planning->candidate_order[15] =
+      reinterpret_cast<VS::Battle::Ai::CandidateEntryView*>(
           &guarded.state.candidates[15]);
-  planning->candidateCount = 16;
+  planning->candidate_count = 16;
   return reinterpret_cast<void*>(guarded.state.actor) == &actor &&
          reinterpret_cast<void*>(guarded.state.model) == &model &&
-         guarded.state.stats == &stats && guarded.state.actorId == 2 &&
-         guarded.state.radius == 61 && settings->collisionRadius == 62 &&
-         creation->farDistanceSquared == 0x240000 &&
-         reinterpret_cast<void*>(update->positionSource) ==
-             creation->positionSource &&
-         reinterpret_cast<void*>(update->tileSource) == creation->tileSource &&
-         settings->decisionCallback(&guarded.state) == 2 &&
-         guarded.state.candidateCount == 16 &&
-         guarded.state.candidateOrder[15] == &guarded.state.candidates[15] &&
+         guarded.state.stats == &stats && guarded.state.actor_id == 2 &&
+         guarded.state.radius == 61 && settings->collision_radius == 62 &&
+         creation->far_distance_squared == 0x240000 &&
+         reinterpret_cast<void*>(update->position_source) ==
+             creation->position_source &&
+         reinterpret_cast<void*>(update->tile_source) ==
+             creation->tile_source &&
+         settings->decision_callback(&guarded.state) == 2 &&
+         guarded.state.candidate_count == 16 &&
+         guarded.state.candidate_order[15] == &guarded.state.candidates[15] &&
          guarded.before == guard_pattern && guarded.after == guard_pattern;
 }
 

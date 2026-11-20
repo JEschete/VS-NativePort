@@ -8,7 +8,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
@@ -26,27 +26,27 @@ struct EngagementFixture {
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
   int saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   std::array<Battle_Actor, 3> actors{};
-  std::array<Battle_Ai_ActorAiState, 3> states{};
+  std::array<VS::Battle::Ai::ActorAiState, 3> states{};
 
   EngagementFixture() {
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::candidateEngagedThisUpdate = 0;
-    room.engagementLimit = 1;
+    room.engagement_limit = 1;
     VS::Battle::Ai::StoreEngagedMask(room, 0);
-    room.engagedCount = 0;
+    room.engaged_count = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     const std::array<int, 3> ids{0, 2, 5};
     for (std::size_t index = 0; index < actors.size(); ++index) {
-      actors[index].id = states[index].actorId = ids[index];
+      actors[index].id = states[index].actor_id = ids[index];
       actors[index].next =
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       states[index].actor =
-          reinterpret_cast<Battle_Ai_EngagementData*>(&actors[index]);
-      states[index].engagementRequest = 7;
+          reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
+      states[index].engagement_request = 7;
       Battle_actors[ids[index]] = &actors[index];
       VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
     }
@@ -65,30 +65,30 @@ struct EngagementFixture {
 
   uint16_t Mask() const {
     uint16_t result = 0;
-    std::memcpy(&result, room.engaged_mask_bytes, sizeof(result));
+    std::memcpy(&result, room.engaged_mask_bytes.data(), sizeof(result));
     return result;
   }
 
   void CheckSingleMember(std::size_t index) const {
-    CHECK(room.engagedCount == 1);
-    CHECK(Mask() == (1u << states[index].actorId));
-    CHECK(room.engagedHead == &states[index]);
-    CHECK(room.engagedTail == &states[index]);
+    CHECK(room.engaged_count == 1);
+    CHECK(Mask() == (1u << states[index].actor_id));
+    CHECK(room.engaged_head == &states[index]);
+    CHECK(room.engaged_tail == &states[index]);
   }
 
   void CheckPair() const {
-    CHECK(room.engagedCount == 2);
+    CHECK(room.engaged_count == 2);
     CHECK(Mask() == 0x24);
-    CHECK(room.engagedHead == &states[2]);
-    CHECK(states[2].nextEngaged == &states[1]);
-    CHECK(room.engagedTail == &states[1]);
+    CHECK(room.engaged_head == &states[2]);
+    CHECK(states[2].next_engaged == &states[1]);
+    CHECK(room.engaged_tail == &states[1]);
   }
 
   void CheckEmpty() const {
-    CHECK(room.engagedCount == 0);
+    CHECK(room.engaged_count == 0);
     CHECK(Mask() == 0);
-    CHECK(room.engagedHead == nullptr);
-    CHECK(room.engagedTail == nullptr);
+    CHECK(room.engaged_head == nullptr);
+    CHECK(room.engaged_tail == nullptr);
   }
 };
 }  // namespace
@@ -96,8 +96,8 @@ struct EngagementFixture {
 TEST_CASE("AI engagement becomes ready at exactly thirty-two buildup frames",
           "[ai][engagement]") {
   const uint16_t timer = GENERATE(0, 1, 31, 32, 33, 65535);
-  Battle_Ai_ActorAiState state{};
-  state.engagementFrames = timer;
+  VS::Battle::Ai::ActorAiState state{};
+  state.engagement_frames = timer;
   CHECK(VS::Battle::Ai::IsLiveEngagementReady(&state) == (timer >= 32));
 }
 
@@ -106,8 +106,8 @@ TEST_CASE(
     "[ai][engagement]") {
   EngagementFixture fixture;
   CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
-  CHECK(fixture.states[1].engagementFrames == 1);
-  CHECK(fixture.states[1].engagementRequest == 0);
+  CHECK(fixture.states[1].engagement_frames == 1);
+  CHECK(fixture.states[1].engagement_request == 0);
   fixture.CheckSingleMember(1);
   CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   fixture.CheckPair();
@@ -122,18 +122,18 @@ TEST_CASE(
     "[ai][engagement]") {
   const auto blocked = GENERATE(0, 1, 2);
   EngagementFixture fixture;
-  if (blocked == 0) fixture.states[1].engagementCooldownFrames = 1;
+  if (blocked == 0) fixture.states[1].engagement_cooldown_frames = 1;
   if (blocked == 1) VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   if (blocked == 2) {
-    fixture.room.engagementLimit = 0;
+    fixture.room.engagement_limit = 0;
     REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   }
-  const auto count = fixture.room.engagedCount;
+  const auto count = fixture.room.engaged_count;
   const auto mask = fixture.Mask();
   CHECK_FALSE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
-  CHECK(fixture.states[1].engagementFrames == 0);
-  CHECK(fixture.states[1].engagementRequest == 7);
-  CHECK(fixture.room.engagedCount == count);
+  CHECK(fixture.states[1].engagement_frames == 0);
+  CHECK(fixture.states[1].engagement_request == 7);
+  CHECK(fixture.room.engaged_count == count);
   CHECK(fixture.Mask() == mask);
 }
 
@@ -141,9 +141,9 @@ TEST_CASE(
     "AI recent-leave state rejoins at ready threshold without a fresh warmup",
     "[ai][engagement]") {
   EngagementFixture fixture;
-  fixture.states[1].reengagementGraceFrames = 1;
+  fixture.states[1].reengagement_grace_frames = 1;
   CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
-  CHECK(fixture.states[1].engagementFrames == 32);
+  CHECK(fixture.states[1].engagement_frames == 32);
   CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
 }
 
@@ -154,7 +154,7 @@ TEST_CASE("AI existing buildup consumer advances a real join to readiness",
   for (int tick = 0; tick < 30; ++tick) {
     VS::Battle::Ai::UpdateLiveEngagementBuildup(&fixture.states[1]);
   }
-  CHECK(fixture.states[1].engagementFrames == 31);
+  CHECK(fixture.states[1].engagement_frames == 31);
   CHECK_FALSE(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
   VS::Battle::Ai::UpdateLiveEngagementBuildup(&fixture.states[1]);
   CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
@@ -169,9 +169,9 @@ TEST_CASE(
   if (two_actors) fixture.actors[1].next = nullptr;
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
-  CHECK(fixture.states[1].engagementFrames == 0);
-  CHECK(fixture.states[1].engagementCooldownFrames == (two_actors ? 0 : 48));
-  CHECK(fixture.states[1].reengagementGraceFrames == 90);
+  CHECK(fixture.states[1].engagement_frames == 0);
+  CHECK(fixture.states[1].engagement_cooldown_frames == (two_actors ? 0 : 48));
+  CHECK(fixture.states[1].reengagement_grace_frames == 90);
   fixture.CheckEmpty();
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
   VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
@@ -184,13 +184,13 @@ TEST_CASE("AI leaving the list head preserves the remaining encounter",
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   VS::Battle::Ai::DisengageLiveActorById(5);
-  CHECK(fixture.room.engagedHead == &fixture.states[1]);
-  CHECK(fixture.room.engagedTail == &fixture.states[1]);
-  CHECK(fixture.room.engagedCount == 1);
+  CHECK(fixture.room.engaged_head == &fixture.states[1]);
+  CHECK(fixture.room.engaged_tail == &fixture.states[1]);
+  CHECK(fixture.room.engaged_count == 1);
   CHECK(fixture.Mask() == 4);
   VS::Battle::Ai::DisengageLiveActorById(0);
   VS::Battle::Ai::DisengageLiveActorById(7);
-  CHECK(fixture.room.engagedCount == 1);
+  CHECK(fixture.room.engaged_count == 1);
 }
 
 TEST_CASE("AI disengagement by ID ignores IDs outside the AI state table",
@@ -200,7 +200,7 @@ TEST_CASE("AI disengagement by ID ignores IDs outside the AI state table",
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   VS::Battle::Ai::DisengageLiveActorById(actor_id);
   fixture.CheckSingleMember(1);
-  CHECK(fixture.states[1].engagementFrames == 1);
+  CHECK(fixture.states[1].engagement_frames == 1);
 }
 
 TEST_CASE("AI marker wrappers never reset every actor through Ashley's index",
@@ -212,7 +212,8 @@ TEST_CASE("AI marker wrappers never reset every actor through Ashley's index",
   VS::Battle::Ai::SetLiveActorAwarenessIndicator(2, 5);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x85);
   VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
-      reinterpret_cast<Battle_Ai_PlanEvaluationView*>(&fixture.states[1]));
+      reinterpret_cast<VS::Battle::Ai::PlanEvaluationView*>(
+          &fixture.states[1]));
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0);
 }
 
@@ -222,15 +223,15 @@ TEST_CASE(
   EngagementFixture fixture;
   auto& state = fixture.states[1];
   VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator(&state, 7, 2);
-  auto* view = reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state);
+  auto* view = reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
-  CHECK(state.awarenessFramesRemaining == 1);
+  CHECK(state.awareness_frames_remaining == 1);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x87);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
-  CHECK(state.awarenessFramesRemaining == 0);
+  CHECK(state.awareness_frames_remaining == 0);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
-  CHECK(state.awarenessMarker == 7);
+  CHECK(state.awareness_marker == 7);
 }
 
 TEST_CASE("AI temporary awareness keeps the stored widths of marker and frames",
@@ -247,7 +248,7 @@ TEST_CASE("AI temporary awareness keeps the stored widths of marker and frames",
   EngagementFixture fixture;
   auto& state = fixture.states[1];
   VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator(&state, 0x10007, 0x128);
-  CHECK(state.awarenessMarker == 7);
-  CHECK(state.awarenessFramesRemaining == 0x28);
+  CHECK(state.awareness_marker == 7);
+  CHECK(state.awareness_frames_remaining == 0x28);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
 }

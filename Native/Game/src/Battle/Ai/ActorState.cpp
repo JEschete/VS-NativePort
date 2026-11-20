@@ -24,9 +24,9 @@ std::array<WordPair, kSettingsBits8ValueCount> settingsBits8Values;
 // (ModuleData.cpp)
 std::array<std::uint8_t, kFacingDelayScaleCount> facingDelayScales;
 // decomp: D_800F5878 (D_800F5878@BATTLE/BATTLE.PRG)
-std::array<Battle_Ai_ActorAiState*, kActorAiStateSlots> actorAiStates;
+std::array<VS::Battle::Ai::ActorAiState*, kActorAiStateSlots> actorAiStates;
 // decomp: D_800F58BC (D_800F58BC@BATTLE/BATTLE.PRG)
-Battle_Ai_RoomAiState* roomAiState;
+VS::Battle::Ai::RoomAiState* roomAiState;
 // decomp: D_800F58C0 (D_800F58C0@BATTLE/BATTLE.PRG)
 void* roomHasWaypoints;
 // decomp: D_800F590C (D_800F590C@BATTLE/BATTLE.PRG)

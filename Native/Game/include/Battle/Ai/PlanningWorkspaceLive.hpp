@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Battle/Action.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 
 namespace VS::Battle::Ai {
@@ -15,9 +15,9 @@ struct PlanningWorkspace {
   static constexpr int kActions = 256;
 
   Battle_ActionRequest result{};
-  Battle_Ai_CandidateEntryView candidates[kPasses][kCandidates]{};
+  VS::Battle::Ai::CandidateEntryView candidates[kPasses][kCandidates]{};
   unsigned char exclusions[kActors][kActions]{};
-  Battle_Ai_CandidateEntryView fallback[kCandidates]{};
+  VS::Battle::Ai::CandidateEntryView fallback[kCandidates]{};
 };
 
 // Reads the queued action's primary target actor (+0x04, lbu) and its

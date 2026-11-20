@@ -14,7 +14,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/Navigation.hpp"
@@ -47,44 +47,44 @@ struct CommandFixture {
   Battle_Actor actor{};
   Actors_ModelInstance model{};
   Actors_ActorRecord target{};
-  Battle_Ai_ActorAiState state{};
-  Battle_Ai_ActionCandidate candidate{};
+  VS::Battle::Ai::ActorAiState state{};
+  VS::Battle::Ai::ActionCandidateRecord candidate{};
   u_short heights[32][32]{};
   u_short flags[32][32]{};
 
   CommandFixture() {
     Battle_actors[2] = &actor;
     Actors_actorRecords[3] = &target;
-    actor.id = state.actorId = 2;
+    actor.id = state.actor_id = 2;
     actor.model = &model;
     actor.commandArg0 = 0x13572468;
     actor.commandArg1.word = 0x22334455;
     actor.commandArg2 = 0x66778899;
-    state.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actor);
-    state.movementTarget = 3;
+    state.actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actor);
+    state.movement_target = 3;
     state.position.vx = state.position.vz = 320;
     state.tile.word = 0x00020002;
-    state.nextTile.word = state.destination.word = 0x00030003;
+    state.next_tile.word = state.destination.word = 0x00030003;
     state.radius = 16;
-    state.locomotionFlags = 0x42;
-    state.walkStep = 8;
-    state.runStep = 12;
-    state.opaque13A = 32;
-    state.facingDelay = 7;
-    state.flightHeight = 16;
-    state.moveX = 1234;
-    state.moveZ = 2345;
-    state.moveY = 3456;
-    state.nextPosition.pad = 0x5555;
+    state.locomotion_flags = 0x42;
+    state.walk_step = 8;
+    state.run_step = 12;
+    state.opaque_13a = 32;
+    state.facing_delay = 7;
+    state.flight_height = 16;
+    state.move_x = 1234;
+    state.move_z = 2345;
+    state.move_y = 3456;
+    state.next_position.pad = 0x5555;
     const uint16_t threshold = 64;
-    std::memcpy(state.step_height_bytes, &threshold, sizeof(threshold));
-    state.currentCandidate = &candidate;
+    std::memcpy(state.step_height_bytes.data(), &threshold, sizeof(threshold));
+    state.current_candidate = &candidate;
     candidate.row = 2;
     candidate.column = 1;
-    candidate.targetId = 3;
-    candidate.targetLimb = 4;
-    candidate.opaqueCBit7 = 13;
-    state.actionSlots[2][1].kind = 1;
+    candidate.target_id = 3;
+    candidate.target_limb = 4;
+    candidate.opaque_c_bit7 = 13;
+    state.action_slots[2][1].kind = 1;
     target.instance.position = {100, 200, 300, 0};
     auto* frame = &VS::Battle::Ai::LiveFrameContext();
     frame->roomData = nullptr;
@@ -147,7 +147,7 @@ TEST_CASE("AI turning keeps strict rate boundaries and upper-body selection",
   const auto upper_body = GENERATE(0, 1);
   CommandFixture fixture;
   fixture.state.angle = static_cast<int16_t>(target);
-  fixture.state.hasTaggedBone3 = static_cast<char>(upper_body);
+  fixture.state.has_tagged_bone3 = static_cast<char>(upper_body);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 4);
   const bool reached = target == 0 || target == 31 || target == 4095;
   CHECK(fixture.actor.commandOpcode == (reached ? 4 : (upper_body ? 7 : 3)));
@@ -160,10 +160,10 @@ TEST_CASE(
     "[ai][actor-commands]") {
   CommandFixture fixture;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 13);
-  CHECK(fixture.state.nextPosition.vx == 448);
-  CHECK(fixture.state.nextPosition.vy == 0);
-  CHECK(fixture.state.nextPosition.vz == 448);
-  CHECK(fixture.state.nextPosition.pad == 0x5555);
+  CHECK(fixture.state.next_position.vx == 448);
+  CHECK(fixture.state.next_position.vy == 0);
+  CHECK(fixture.state.next_position.vz == 448);
+  CHECK(fixture.state.next_position.pad == 0x5555);
   CHECK(fixture.actor.commandArg0 == 0x00030003);
   CHECK(fixture.flags[3][3] == 0x80);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
@@ -178,13 +178,14 @@ TEST_CASE(
   CommandFixture fixture;
   fixture.heights[3][3] = 1;
   const uint16_t threshold = 10;
-  std::memcpy(fixture.state.step_height_bytes, &threshold, sizeof(threshold));
-  fixture.state.movementFlags = static_cast<u_short>(flags);
+  std::memcpy(fixture.state.step_height_bytes.data(), &threshold,
+              sizeof(threshold));
+  fixture.state.movement_flags = static_cast<u_short>(flags);
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 14);
   const auto expected =
       flags == 8 ? 23 : (flags == 0x30 ? 18 : (flags == 0xC0 ? 14 : 11));
   CHECK(fixture.actor.commandOpcode == expected);
-  CHECK(fixture.state.nextPosition.vy == 64);
+  CHECK(fixture.state.next_position.vy == 64);
   CHECK(fixture.flags[3][3] == 0x80);
 }
 
@@ -194,7 +195,7 @@ TEST_CASE(
     "[ai][actor-commands]") {
   const auto kind = GENERATE(0, 1, 2, 3);
   CommandFixture fixture;
-  fixture.state.actionSlots[2][1].kind = kind;
+  fixture.state.action_slots[2][1].kind = kind;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 15);
   CHECK(fixture.actor.commandOpcode == 24);
   CHECK(fixture.actor.commandArg0 == 0x00010002);
@@ -229,7 +230,7 @@ struct RoomCommandFixture : CommandFixture {
       std::to_array(Battle_actors);
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
       VS::Battle::Ai::specialTerrainHeights;
   decltype(VS::Battle::Ai::roomHasWaypoints) saved_auxiliary =
@@ -263,7 +264,7 @@ struct RoomCommandFixture : CommandFixture {
     Field_roomData = {};
     Field_roomData.collisionMap = &dimensions;
     VS::Battle::Ai::LiveFrameContext() = {};
-    state.nextTile.word = 0x00010001;
+    state.next_tile.word = 0x00010001;
     VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   }
 

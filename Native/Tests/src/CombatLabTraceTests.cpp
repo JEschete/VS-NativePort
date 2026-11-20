@@ -22,7 +22,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/GameLoop.hpp"
@@ -1063,7 +1063,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   Battle_ActorStats player_stats{};
   Battle_ActorStats enemy_stats{};
   Actors_ActorRecord player_model{};
-  Battle_Ai_ActorAiState enemy_ai{};
+  VS::Battle::Ai::ActorAiState enemy_ai{};
   decltype(std::to_array(VS::Menu::Magic::shamanSpellIds)) saved_shaman =
       std::to_array(VS::Menu::Magic::shamanSpellIds);
 

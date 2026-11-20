@@ -16,7 +16,7 @@
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -56,7 +56,7 @@ struct LiveFixture {
   int saved_distance_alias = VS::Battle::settledCameraDistance;
   unsigned saved_phase = Battle_actionFlowMode;
   Battle_ActionState state{};
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   Actors_ActorRecord record{};
   Battle_Actor actor{};
   LiveFixture() {
@@ -165,12 +165,12 @@ TEST_CASE("F00192 production planning release and trail phase use real helpers",
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.queueIndex = 0xFFFFFFFE;
   fixture->state.queue[2].primaryTarget.targetsPosition = 1;
-  fixture->room.readinessLevel = 19;
+  fixture->room.readiness_level = 19;
   fixture->actor.commandState = 0x80;
   fixture->actor.commandOpcode = 0x18;
   Battle_actors[15] = &fixture->actor;
   b::WaitForLiveActionResolution();
-  CHECK(fixture->room.readinessLevel == 0);
+  CHECK(fixture->room.readiness_level == 0);
   CHECK(fixture->actor.commandState == 8);
   CHECK(Battle_actionFlowMode == 10);
   CHECK(fixture->state.queueIndex == 0xFFFFFFFE);

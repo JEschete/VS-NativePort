@@ -11,7 +11,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommands.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -54,7 +54,7 @@ unsigned DirectionForOffset(int dx, int dz) {
 
 class LiveActorCommandRoom final : public ActorCommandRoom {
  public:
-  LiveActorCommandRoom(const Battle_Ai_ActorAiState& state,
+  LiveActorCommandRoom(const VS::Battle::Ai::ActorAiState& state,
                        const Battle_Actor& actor)
       : state_(state), actor_(actor) {}
 
@@ -97,17 +97,17 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
   }
 
   [[nodiscard]] AttackSelection SelectedAttack() const override {
-    const auto* candidate = state_.currentCandidate;
+    const auto* candidate = state_.current_candidate;
     Require(candidate != nullptr && candidate->row < kLimbCount &&
                 candidate->column < kActionsPerLimb,
             "AI attack requires a valid selected action slot");
     return AttackSelection{
         candidate->row,
         candidate->column,
-        candidate->targetId,
-        candidate->targetLimb,
-        static_cast<int>(candidate->opaqueCBit7),
-        state_.actionSlots[candidate->row][candidate->column].kind};
+        candidate->target_id,
+        candidate->target_limb,
+        static_cast<int>(candidate->opaque_c_bit7),
+        state_.action_slots[candidate->row][candidate->column].kind};
   }
 
   [[nodiscard]] CommandPosition TargetPosition(
@@ -126,69 +126,69 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
   }
 
  private:
-  const Battle_Ai_ActorAiState& state_;
+  const VS::Battle::Ai::ActorAiState& state_;
   const Battle_Actor& actor_;
 };
 
-ActorCommandState Snapshot(const Battle_Ai_ActorAiState& state,
+ActorCommandState Snapshot(const VS::Battle::Ai::ActorAiState& state,
                            const Battle_Actor& actor) {
   ActorCommandState snapshot{};
   snapshot.actor_id = actor.id;
   snapshot.tile = state.tile.word;
-  snapshot.next_tile = state.nextTile.word;
+  snapshot.next_tile = state.next_tile.word;
   snapshot.destination = state.destination.word;
   snapshot.position_x = state.position.vx;
   snapshot.position_z = state.position.vz;
   snapshot.radius = state.radius;
   snapshot.heading = state.heading;
   snapshot.angle = static_cast<std::int16_t>(state.angle);
-  snapshot.facing_delay = state.facingDelay;
-  snapshot.turn_rate = state.opaque13A;
+  snapshot.facing_delay = state.facing_delay;
+  snapshot.turn_rate = state.opaque_13a;
   // PS1 `char` is unsigned; bit 0 marks a model whose upper body turns alone.
   snapshot.looks_with_upper_body =
-      (static_cast<unsigned char>(state.hasTaggedBone3) & 1u) != 0;
-  snapshot.move_x = state.moveX;
-  snapshot.move_y = state.moveY;
-  snapshot.move_z = state.moveZ;
+      (static_cast<unsigned char>(state.has_tagged_bone3) & 1u) != 0;
+  snapshot.move_x = state.move_x;
+  snapshot.move_y = state.move_y;
+  snapshot.move_z = state.move_z;
   snapshot.may_run = state.opaque1 != 0;
-  snapshot.locomotion_flags = state.locomotionFlags;
-  snapshot.walk_step = state.walkStep;
-  snapshot.run_step = state.runStep;
-  snapshot.movement_flags = state.movementFlags;
-  std::memcpy(&snapshot.step_height, state.step_height_bytes,
+  snapshot.locomotion_flags = state.locomotion_flags;
+  snapshot.walk_step = state.walk_step;
+  snapshot.run_step = state.run_step;
+  snapshot.movement_flags = state.movement_flags;
+  std::memcpy(&snapshot.step_height, state.step_height_bytes.data(),
               sizeof(snapshot.step_height));
-  snapshot.flight_height = state.flightHeight;
-  std::memcpy(&snapshot.last_slide_tile, state.last_slide_tile_bytes,
+  snapshot.flight_height = state.flight_height;
+  std::memcpy(&snapshot.last_slide_tile, state.last_slide_tile_bytes.data(),
               sizeof(snapshot.last_slide_tile));
   snapshot.next_position = CommandPosition{
-      state.nextPosition.vx, state.nextPosition.vy, state.nextPosition.vz};
+      state.next_position.vx, state.next_position.vy, state.next_position.vz};
   return snapshot;
 }
 
 void StoreBack(const ActorCommandState& snapshot,
-               Battle_Ai_ActorAiState& state) {
-  std::memcpy(state.last_slide_tile_bytes, &snapshot.last_slide_tile,
+               VS::Battle::Ai::ActorAiState& state) {
+  std::memcpy(state.last_slide_tile_bytes.data(), &snapshot.last_slide_tile,
               sizeof(snapshot.last_slide_tile));
-  state.nextPosition.vx = snapshot.next_position.x;
-  state.nextPosition.vy = snapshot.next_position.y;
-  state.nextPosition.vz = snapshot.next_position.z;
+  state.next_position.vx = snapshot.next_position.x;
+  state.next_position.vy = snapshot.next_position.y;
+  state.next_position.vz = snapshot.next_position.z;
 }
 }  // namespace
 
 // decomp: func_800DEEFC (src/BATTLE/BATTLE.PRG/766FC.s:14); the typed
 // dispatcher is VS::Battle::Ai::IssueActorCommand.
-void IssueLiveActorCommand(Battle_Ai_ActorAiState* state, int action) {
+void IssueLiveActorCommand(VS::Battle::Ai::ActorAiState* state, int action) {
   Require(state != nullptr && action >= 0 && action < kCommandIntentCount,
           "AI actor command intent is out of bounds");
-  Require(state->actorId < std::size(Battle_actors),
+  Require(state->actor_id < std::size(Battle_actors),
           "AI actor command ID is out of bounds");
-  auto* actor = Battle_actors[state->actorId];
+  auto* actor = Battle_actors[state->actor_id];
   Require(actor != nullptr &&
               static_cast<void*>(actor) == static_cast<void*>(state->actor),
           "AI actor command identity does not match the actor table");
   LiveFrameContext().movementResult = action;
   actor->commandState = kCommandPending;
-  actor->commandTarget = state->movementTarget;
+  actor->commandTarget = state->movement_target;
   ActorCommandPacket packet{static_cast<CommandOpcode>(actor->commandOpcode),
                             actor->commandArg0, actor->commandArg1.word,
                             actor->commandArg2};

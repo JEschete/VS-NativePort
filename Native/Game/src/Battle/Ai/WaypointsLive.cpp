@@ -8,8 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -27,15 +26,16 @@ constexpr std::size_t kLivePatrolRows = 4;
 static_assert(sizeof(VS::Battle::Ai::patrolRoutes[0]) ==
               kPatrolWaypointsPerRow * sizeof(std::uint16_t));
 // The patrol and waypoint search views alias the actor AI state.
-using AiState = Battle_Ai_ActorAiState;
-static_assert(offsetof(Battle_Ai_PatrolView, tile) == offsetof(AiState, tile));
-static_assert(offsetof(Battle_Ai_PatrolView, index) ==
-              offsetof(AiState, patrolIndex));
-static_assert(offsetof(Battle_Ai_PatrolView, opaque104) ==
-              offsetof(AiState, patrolCooldown));
-static_assert(offsetof(Battle_Ai_PatrolView, destination) ==
+using AiState = VS::Battle::Ai::ActorAiState;
+static_assert(offsetof(VS::Battle::Ai::PatrolView, tile) ==
+              offsetof(AiState, tile));
+static_assert(offsetof(VS::Battle::Ai::PatrolView, index) ==
+              offsetof(AiState, patrol_index));
+static_assert(offsetof(VS::Battle::Ai::PatrolView, opaque104) ==
+              offsetof(AiState, patrol_cooldown));
+static_assert(offsetof(VS::Battle::Ai::PatrolView, destination) ==
               offsetof(AiState, destination));
-static_assert(offsetof(Battle_Ai_WaypointSearchView, x) ==
+static_assert(offsetof(VS::Battle::Ai::WaypointSearchView, x) ==
               offsetof(AiState, position));
 
 Field::TerrainGrid LiveSpecialHeights() {
@@ -59,8 +59,9 @@ std::span<const std::uint16_t> LivePatrolRoutes() {
           kLivePatrolRows * kPatrolWaypointsPerRow};
 }
 
-void FindLiveNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state,
-                                   Battle_Ai_WaypointTile* destination) {
+void FindLiveNearestActiveWaypoint(
+    VS::Battle::Ai::WaypointSearchView* state,
+    VS::Battle::Ai::WaypointTileRecord* destination) {
   Require(state != nullptr && destination != nullptr,
           "AI waypoint search requires an AI state and a destination");
   Require(VS::Battle::Ai::roomWaypoints != nullptr,
@@ -77,7 +78,7 @@ void FindLiveNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state,
   destination->z = search.nearest->tile.z;
 }
 
-void UpdateLiveWaypointPatrol(Battle_Ai_PatrolView* state) {
+void UpdateLiveWaypointPatrol(VS::Battle::Ai::PatrolView* state) {
   Require(state != nullptr, "AI patrol requires an AI state");
   PatrolCursor cursor{.index = state->index,
                       .row = state->row,

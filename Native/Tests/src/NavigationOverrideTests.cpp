@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.hpp"
@@ -43,7 +43,7 @@ static_assert(
                    int (*)(int)>);
 static_assert(std::is_same_v<
               decltype(&VS::Battle::Ai::CopyLiveActorNavigationOverrideState),
-              void (*)(int, Battle_Ai_ActorAiState*)>);
+              void (*)(int, VS::Battle::Ai::ActorAiState*)>);
 static_assert(std::is_same_v<decltype(&VS::Battle::Ai::AddLiveAiTileOccupant),
                              void (*)(const Field_GimmickInstance*)>);
 static_assert(
@@ -63,16 +63,16 @@ struct NavigationOverrideFixture {
   decltype(VS::Battle::Ai::tileFlagMap) saved_grid =
       VS::Battle::Ai::tileFlagMap;
   u_short grid[32][32]{};
-  Battle_Ai_ActorAiState source{};
-  Battle_Ai_ActorAiState route{};
+  VS::Battle::Ai::ActorAiState source{};
+  VS::Battle::Ai::ActorAiState route{};
   VS::Battle::Ai::TilePosition tile{};
   Actors_ActorRecord model{};
 
   NavigationOverrideFixture() {
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
     VS::Battle::Ai::tileFlagMap = grid;
-    source.nativePointer18C = &route;
-    route.nativePointer64 = &tile;
+    source.native_pointer_18c = &route;
+    route.native_pointer64 = &tile;
   }
 
   ~NavigationOverrideFixture() {
@@ -102,7 +102,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
-  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
       VS::Battle::Ai::specialTerrainHeights;
@@ -115,7 +115,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Battle_Actor, 2> actors{};
   Actors_ActorRecord ashley_model{};
-  Battle_Ai_RoomAiState room{};
+  VS::Battle::Ai::RoomAiState room{};
   u_short heights[32][32]{};
 
   ScriptedOverrideFixture() {
@@ -135,26 +135,27 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     model.instance.position = {1088, -64, 1088, 0x55AA};
     model.instance.currentTileX = model.instance.currentTileZ = 8;
     Actors_actorRecords[1] = &model;
-    source.nativePointer18C = nullptr;
-    source.actorId = 1;
-    source.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actors[1]);
+    source.native_pointer_18c = nullptr;
+    source.actor_id = 1;
+    source.actor =
+        reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[1]);
     source.model =
-        reinterpret_cast<Battle_Ai_ModelStatePrefix*>(&model.instance);
-    source.nativePointer64 = &model.instance.currentTileX;
+        reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(&model.instance);
+    source.native_pointer64 = &model.instance.currentTileX;
     source.radius = 16;
-    source.walkStep = 32;
-    source.runStep = 64;
-    source.locomotionFlags = 0x42;
+    source.walk_step = 32;
+    source.run_step = 64;
+    source.locomotion_flags = 0x42;
     VS::Battle::Ai::actorAiStates[1] = &source;
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::StoreEngagedMask(room, 0);
-    room.engagedCount = 0;
+    room.engaged_count = 0;
     VS::Battle::Ai::roomHasWaypoints = nullptr;
     VS::Battle::Ai::specialTerrainHeights = heights;
     VS::Battle::Ai::savedMovementRandomState = 0x1234;
-    room.maxTileX = room.minTileX = 31;
+    room.max_tile_x = room.min_tile_x = 31;
     const u_int dimensions = 0x2020;
-    std::memcpy(room.reserved4, &dimensions, sizeof dimensions);
+    std::memcpy(room.reserved4.data(), &dimensions, sizeof dimensions);
     const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
                                            0x10, 0x11, 0x01, 0x31};
     std::memcpy(VS::Battle::Ai::directionDeltas.data(), directions.data(),
@@ -162,8 +163,8 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   }
 
   ~ScriptedOverrideFixture() {
-    if (source.nativePointer18C != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(source.nativePointer18C);
+    if (source.native_pointer_18c != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(source.native_pointer_18c);
     }
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_markers, Battle_actorMarkers);
@@ -176,29 +177,30 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
   }
 
-  Battle_Ai_ActorAiState* ActiveRoute() {
-    return static_cast<Battle_Ai_ActorAiState*>(source.nativePointer18C);
+  VS::Battle::Ai::ActorAiState* ActiveRoute() {
+    return static_cast<VS::Battle::Ai::ActorAiState*>(
+        source.native_pointer_18c);
   }
 
   void AllocateCopiedRoute(unsigned target) {
-    auto* record = static_cast<Battle_Ai_ActorAiState*>(
+    auto* record = static_cast<VS::Battle::Ai::ActorAiState*>(
         VS::Core::Memory::AllocateLiveFromHighEnd(
-            sizeof(Battle_Ai_ActorAiState)));
+            sizeof(VS::Battle::Ai::ActorAiState)));
     REQUIRE(record != nullptr);
     std::construct_at(record);
-    source.nativePointer18C = record;
+    source.native_pointer_18c = record;
     VS::Battle::Ai::CopyLiveActorNavigationOverrideState(1, record);
-    record->scriptedTargetXZ = target;
+    record->scripted_target_xz = target;
   }
 
   void CheckPreparedRoute() {
     const auto* record = ActiveRoute();
     REQUIRE(record != nullptr);
     CHECK(record->movement_wait == 65534);
-    CHECK(record->navigationFlags == 0xABCDFFDD);
-    CHECK(record->opaque19A == 0);
+    CHECK(record->navigation_flags == 0xABCDFFDD);
+    CHECK(record->opaque_19a == 0);
     CHECK(record->ground_area == 0xB);
-    CHECK(record->reserved154Area == 0xB);
+    CHECK(record->reserved154_area == 0xB);
   }
 
   void CheckPreparedFlags() {
@@ -206,15 +208,15 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     REQUIRE(record != nullptr);
     CHECK(record->ignore_floor_mask == 1);
     CHECK(record->opaque1 == 0);
-    CHECK(record->isStuck == 0);
+    CHECK(record->is_stuck == 0);
     CHECK(record->opaque3 == 0);
-    CHECK(record->movementTarget == 16);
+    CHECK(record->movement_target == 16);
   }
 
   void CheckEngagementReleased() const {
-    CHECK(room.engagedHead == nullptr);
-    CHECK(room.engagedTail == nullptr);
-    CHECK(room.engagedCount == 0);
+    CHECK(room.engaged_head == nullptr);
+    CHECK(room.engaged_tail == nullptr);
+    CHECK(room.engaged_count == 0);
     CHECK(Battle_actorMarkers[1] == 0);
   }
 
@@ -312,42 +314,43 @@ struct RouteAvailabilityFixture {
     return word;
   }
 };
-auto Snapshot(const Battle_Ai_ActorAiState& state) {
+auto Snapshot(const VS::Battle::Ai::ActorAiState& state) {
   std::array<std::byte, sizeof(state)> bytes{};
   std::memcpy(bytes.data(), &state, bytes.size());
   return bytes;
 }
 
-void SeedCopyState(Battle_Ai_ActorAiState& state) {
+void SeedCopyState(VS::Battle::Ai::ActorAiState& state) {
   state.reserved0 = 0x12;
-  state.movementEnabled = -1;
-  state.settingsBit14 = 0xAB;
-  state.actorId = 99;
-  state.reserved9C[19] = 0x34;
+  state.movement_enabled = -1;
+  state.settings_bit14 = 0xAB;
+  state.actor_id = 99;
+  state.reserved_9c[19] = 0x34;
   state.step_height_bytes[0] = 0xA5;
   state.step_height_bytes[1] = 0xA5;
-  state.reservedB2 = 0xA5;
-  state.maxRange = 0xCD;
+  state.reserved_b2 = 0xA5;
+  state.max_range = 0xCD;
   state.destination.word = 0xFEDCBA98;
-  state.navigationFlags = 0xFFFFFFFF;
-  state.opaque19A = 0xAB;
-  state.reserved19B[0] = 0x5A;
-  state.candidateCount = 16;
-  state.candidates[15].targetId = 7;
-  state.candidateOrder[15] = &state.candidates[15];
-  state.currentCandidate = &state.candidates[0];
-  state.reactionPending = 0xEF;
+  state.navigation_flags = 0xFFFFFFFF;
+  state.opaque_19a = 0xAB;
+  state.reserved_19b[0] = 0x5A;
+  state.candidate_count = 16;
+  state.candidates[15].target_id = 7;
+  state.candidate_order[15] = &state.candidates[15];
+  state.current_candidate = &state.candidates[0];
+  state.reaction_pending = 0xEF;
 }
 
-void SetExpectedOverrideFields(Battle_Ai_ActorAiState& state, int actor_id) {
-  state.actorId = static_cast<u_char>(actor_id);
+void SetExpectedOverrideFields(VS::Battle::Ai::ActorAiState& state,
+                               int actor_id) {
+  state.actor_id = static_cast<u_char>(actor_id);
   state.step_height_bytes[0] = 0x40;
   state.step_height_bytes[1] = 1;
-  state.reservedB2 = 3;
-  state.navigationFlags = 0;
-  state.opaque19A = 0;
-  state.settingsBit14 = 3;
-  state.movementEnabled = 1;
+  state.reserved_b2 = 3;
+  state.navigation_flags = 0;
+  state.opaque_19a = 0;
+  state.settings_bit14 = 3;
+  state.movement_enabled = 1;
 }
 }  // namespace
 
@@ -358,7 +361,7 @@ TEST_CASE(
   const bool state = GENERATE(false, true);
   NavigationOverrideFixture fixture;
   if (!grid) VS::Battle::Ai::tileFlagMap = nullptr;
-  fixture.source.nativePointer18C = nullptr;
+  fixture.source.native_pointer_18c = nullptr;
   for (int actor_id = 0; actor_id < 16; ++actor_id) {
     VS::Battle::Ai::actorAiStates[actor_id] = state ? &fixture.source : nullptr;
     CHECK(VS::Battle::Ai::HasLiveActorNavigationState(actor_id) ==
@@ -391,16 +394,16 @@ TEST_CASE(
   const bool self = GENERATE(false, true);
   NavigationOverrideFixture fixture;
   SeedCopyState(fixture.source);
-  fixture.source.nativePointer60 = &fixture.source;
-  fixture.source.nativePointer64 = &fixture.tile;
-  fixture.source.nativePointer68 = &fixture.route;
-  fixture.source.nextEngaged = &fixture.route;
+  fixture.source.native_pointer60 = &fixture.source;
+  fixture.source.native_pointer64 = &fixture.tile;
+  fixture.source.native_pointer68 = &fixture.route;
+  fixture.source.next_engaged = &fixture.route;
   const auto before = Snapshot(fixture.source);
   auto expected = fixture.source;
   SetExpectedOverrideFields(expected, actor_id);
   struct {
     std::uint64_t before = 0x123456789ABCDEF0;
-    Battle_Ai_ActorAiState state{};
+    VS::Battle::Ai::ActorAiState state{};
     std::uint64_t after = 0xFEDCBA9876543210;
   } guarded;
   auto* output = self ? &fixture.source : &guarded.state;
@@ -421,10 +424,10 @@ TEST_CASE(
   VS::Battle::Ai::actorAiStates[4] = &fixture.source;
   SeedCopyState(fixture.source);
   VS::Battle::Ai::CopyLiveActorNavigationOverrideState(4, &fixture.route);
-  fixture.route.navigationFlags = 0xFFFFFFFF;
-  fixture.route.opaque19A = 0xFF;
+  fixture.route.navigation_flags = 0xFFFFFFFF;
+  fixture.route.opaque_19a = 0xFF;
   fixture.source.destination.word = 0x12345678;
-  fixture.source.candidateCount = 2;
+  fixture.source.candidate_count = 2;
   auto expected = fixture.source;
   SetExpectedOverrideFields(expected, 4);
   VS::Battle::Ai::CopyLiveActorNavigationOverrideState(4, &fixture.route);
@@ -491,7 +494,7 @@ TEST_CASE(
   fixture.model.ignoredByCollision = 1;
   fixture.tile.word = 0xABCD12EF;
   fixture.route.destination.word = fixture.tile.word ^ (status == 1 ? 1u : 0u);
-  if (status == 2) fixture.source.nativePointer18C = nullptr;
+  if (status == 2) fixture.source.native_pointer_18c = nullptr;
   CHECK(VS::Actors::IsLiveScriptedActorPathFinished(7) == (status != 1));
   CHECK(VS::Field::LiveActorCollisionBypass(7) == (status == 0 ? 1 : 3));
 }
@@ -787,10 +790,10 @@ TEST_CASE("Production scripted path request allocates a complete native route",
   const auto capacity = VS::Core::Memory::LivePayloadCapacity(route);
   REQUIRE(capacity.has_value());
   CHECK(*capacity >= sizeof(*route));
-  CHECK(route->actorId == 1);
-  CHECK(route->scriptedTargetXZ == (1200u | (1300u << 16)));
-  CHECK(route->nativePointer18C == route);
-  CHECK(route->nativePointer64 == &fixture.model.instance.currentTileX);
+  CHECK(route->actor_id == 1);
+  CHECK(route->scripted_target_xz == (1200u | (1300u << 16)));
+  CHECK(route->native_pointer_18c == route);
+  CHECK(route->native_pointer64 == &fixture.model.instance.currentTileX);
   CHECK(VS::Field::LiveActorCollisionBypass(1) == 2);
 }
 
@@ -800,7 +803,7 @@ TEST_CASE(
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
-  CHECK(fixture.source.nativePointer18C == nullptr);
+  CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(fixture.actors[1].commandState == 0x80);
   CHECK(fixture.actors[1].commandOpcode == 2);
   CHECK(VS::Core::Memory::GameHeap().Empty());
@@ -810,24 +813,25 @@ TEST_CASE(
     "Scripted route creation unlinks engagement and preserves native aliases",
     "[ai][scripted-override]") {
   ScriptedOverrideFixture fixture;
-  fixture.room.engagementLimit = 1;
+  fixture.room.engagement_limit = 1;
   const auto saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
   VS::Battle::Ai::candidateEngagedThisUpdate = 0;
   const auto engaged = VS::Battle::Ai::TryEngageLiveActor(&fixture.source);
   VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
   REQUIRE(engaged);
   Battle_actorMarkers[1] = static_cast<char>(0x85);
-  fixture.source.currentCandidate = &fixture.source.candidates[0];
+  fixture.source.current_candidate = &fixture.source.candidates[0];
   const u_int preserved = 0x11223344;
-  std::memcpy(fixture.source.reserved160 + 4, &preserved, sizeof preserved);
+  std::memcpy(fixture.source.reserved160.data() + 4, &preserved,
+              sizeof preserved);
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   const auto* record = fixture.ActiveRoute();
   REQUIRE(record != nullptr);
-  CHECK(record->currentCandidate == &fixture.source.candidates[0]);
+  CHECK(record->current_candidate == &fixture.source.candidates[0]);
   CHECK(record->actor == fixture.source.actor);
   fixture.CheckEngagementReleased();
   u_int actual;
-  std::memcpy(&actual, record->reserved160 + 4, sizeof actual);
+  std::memcpy(&actual, record->reserved160.data() + 4, sizeof actual);
   CHECK(actual == preserved);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(1);
   CHECK(VS::Core::Memory::GameHeap().Empty());
@@ -843,9 +847,9 @@ TEST_CASE(
   const auto units = VS::Core::Memory::GameHeap().FreeUnits();
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1400, 1500);
   CHECK(fixture.ActiveRoute() == first);
-  CHECK(first->scriptedTargetXZ == (1200u | (1300u << 16)));
-  CHECK(fixture.source.scriptedTargetXZ == (1400u | (1500u << 16)));
-  CHECK(fixture.source.settingsBit14 == 3);
+  CHECK(first->scripted_target_xz == (1200u | (1300u << 16)));
+  CHECK(fixture.source.scripted_target_xz == (1400u | (1500u << 16)));
+  CHECK(fixture.source.settings_bit14 == 3);
   CHECK(VS::Core::Memory::GameHeap().FreeUnits() == units);
 }
 
@@ -858,15 +862,15 @@ TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
                                                    0x1234);
     const auto* changed = value == 0 ? fixture.ActiveRoute() : &fixture.source;
     REQUIRE(changed != nullptr);
-    CHECK(changed->scriptedTargetXZ == (value | 0x12340000u));
+    CHECK(changed->scripted_target_xz == (value | 0x12340000u));
     VS::Battle::Ai::SetLiveActorNavigationOverride(1, 0x5678,
                                                    static_cast<int>(value));
-    CHECK(fixture.source.scriptedTargetXZ == (0x5678u | (value << 16)));
+    CHECK(fixture.source.scripted_target_xz == (0x5678u | (value << 16)));
   }
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, -1, 0x1234);
-  CHECK(fixture.source.scriptedTargetXZ == 0xFFFFFFFFu);
+  CHECK(fixture.source.scripted_target_xz == 0xFFFFFFFFu);
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 0x1234, -1);
-  CHECK(fixture.source.scriptedTargetXZ == 0xFFFF1234u);
+  CHECK(fixture.source.scripted_target_xz == 0xFFFF1234u);
   CHECK(VS::Core::BiosRand().State() == random);
 }
 
@@ -876,11 +880,11 @@ TEST_CASE("Scripted path requests retain missing map and AI-state gates",
   Battle_actorMarkers[1] = static_cast<char>(0x85);
   VS::Battle::Ai::tileFlagMap = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
-  CHECK(fixture.source.nativePointer18C == nullptr);
+  CHECK(fixture.source.native_pointer_18c == nullptr);
   VS::Battle::Ai::tileFlagMap = fixture.grid;
   VS::Battle::Ai::actorAiStates[1] = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
-  CHECK(fixture.source.nativePointer18C == nullptr);
+  CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(VS::Core::Memory::GameHeap().Empty());
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
 }
@@ -896,10 +900,10 @@ TEST_CASE("Scripted route updates preserve strict source arrival boundaries",
     fixture.AllocateCopiedRoute(target);
     VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
     const bool reached = delta[0] * delta[0] + delta[1] * delta[1] < 1024;
-    CHECK((fixture.source.nativePointer18C == nullptr) == reached);
+    CHECK((fixture.source.native_pointer_18c == nullptr) == reached);
     if (!reached) {
-      CHECK(fixture.ActiveRoute()->moveX == 1088 + delta[0]);
-      CHECK(fixture.ActiveRoute()->moveZ == 1088 + delta[1]);
+      CHECK(fixture.ActiveRoute()->move_x == 1088 + delta[0]);
+      CHECK(fixture.ActiveRoute()->move_z == 1088 + delta[1]);
     }
     CHECK(fixture.actors[0].next == &fixture.actors[1]);
   }
@@ -912,8 +916,8 @@ TEST_CASE(
   fixture.AllocateCopiedRoute(1200u | (1300u << 16));
   auto* record = fixture.ActiveRoute();
   record->movement_wait = 65535;
-  record->navigationFlags = 0xABCDFFFD;
-  record->opaque19A = record->opaque1 = record->isStuck = record->opaque3 =
+  record->navigation_flags = 0xABCDFFFD;
+  record->opaque_19a = record->opaque1 = record->is_stuck = record->opaque3 =
       0xA5;
   record->route_gate = 1;
   fixture.model.instance.currentTileLayer = 1;
@@ -959,11 +963,11 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   const auto mode = GENERATE(1, 2);
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1200u | (1300u << 16));
-  fixture.ActiveRoute()->locomotionMode = static_cast<u_char>(mode);
+  fixture.ActiveRoute()->locomotion_mode = static_cast<u_char>(mode);
   fixture.ActiveRoute()->destination.word = 0xA5080308;
   fixture.model.instance.currentTileLayer = 5;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
-  CHECK(fixture.source.nativePointer18C == nullptr);
+  CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
@@ -976,7 +980,7 @@ TEST_CASE("Scripted arrival retains signed source square-sum behavior",
       position;
   fixture.AllocateCopiedRoute(0);
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
-  CHECK(fixture.source.nativePointer18C == nullptr);
+  CHECK(fixture.source.native_pointer_18c == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
 }
 

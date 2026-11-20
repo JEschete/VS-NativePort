@@ -116,8 +116,8 @@ struct TargetingVolume {
 // the effect covers.
 enum class TargetingVolumeSlot : std::uint8_t { kRange, kArea };
 
-// A range shape's extents (Battle_Ai_ActionRangeShape); only y and z set its
-// reach.
+// A range shape's extents (VS::Battle::Ai::ActionRangeShape); only y and z set
+// its reach.
 struct RangeShape {
   int x = 0;
   int y = 0;

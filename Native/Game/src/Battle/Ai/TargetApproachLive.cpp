@@ -14,8 +14,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
@@ -29,17 +28,18 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
-using Approach = Battle_Ai_TargetApproachView;
-using Decision = Battle_Ai_MovementDecisionView;
+using AiState = VS::Battle::Ai::ActorAiState;
+using Approach = VS::Battle::Ai::TargetApproachView;
+using Decision = VS::Battle::Ai::MovementDecisionView;
 
-static_assert(std::extent_v<decltype(AiState::relations)> ==
+static_assert(std::tuple_size_v<decltype(AiState::relations)> ==
               kTargetApproachActorSlots);
-static_assert(std::extent_v<decltype(AiState::distancesSquared)> ==
+static_assert(std::tuple_size_v<decltype(AiState::distances_squared)> ==
               kTargetApproachActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kTargetApproachActorSlots);
 static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
-static_assert(sizeof(Battle_Ai_ApproachRelationBits) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Battle::Ai::ApproachRelationBits) ==
+              sizeof(std::uint32_t));
 
 // The approach view names the actor state's unnamed bytes; both alias it.
 static_assert(offsetof(Approach, opaque0) == offsetof(AiState, reserved0));
@@ -47,49 +47,49 @@ static_assert(offsetof(Approach, opaque1) == offsetof(AiState, opaque1));
 static_assert(offsetof(Approach, opaque3) == offsetof(AiState, opaque3));
 static_assert(offsetof(Approach, opaque4) == offsetof(AiState, opaque4));
 static_assert(offsetof(Approach, opaque9) == offsetof(AiState, opaque9));
-static_assert(offsetof(Approach, opaqueD) == offsetof(AiState, opaqueD));
-static_assert(offsetof(Approach, settingsBit13) ==
+static_assert(offsetof(Approach, opaque_d) == offsetof(AiState, opaque_d));
+static_assert(offsetof(Approach, settings_bit13) ==
               offsetof(AiState, reserved24));
-static_assert(offsetof(Approach, settingsByte0Bit7) ==
+static_assert(offsetof(Approach, settings_byte0_bit7) ==
               offsetof(AiState, reserved33));
 static_assert(offsetof(Approach, tile) == offsetof(AiState, tile));
-static_assert(offsetof(Approach, savedDestination) ==
-              offsetof(AiState, savedDestination));
+static_assert(offsetof(Approach, saved_destination) ==
+              offsetof(AiState, saved_destination));
 static_assert(offsetof(Approach, x) == offsetof(AiState, position));
 static_assert(offsetof(Approach, actor) == offsetof(AiState, actor));
 static_assert(offsetof(Approach, model) == offsetof(AiState, model));
-static_assert(offsetof(Approach, actorId) == offsetof(AiState, actorId));
-static_assert(offsetof(Approach, opaqueE7) == offsetof(AiState, opaqueE7));
-static_assert(offsetof(Approach, opaqueE8) == offsetof(AiState, opaqueE8));
-static_assert(offsetof(Approach, rangeMode) == offsetof(AiState, opaqueE9));
-static_assert(offsetof(Approach, targetX) == offsetof(AiState, targetX));
-static_assert(offsetof(Approach, movementTarget) ==
-              offsetof(AiState, movementTarget));
-static_assert(offsetof(Approach, movementFlags) ==
-              offsetof(AiState, movementFlags));
+static_assert(offsetof(Approach, actor_id) == offsetof(AiState, actor_id));
+static_assert(offsetof(Approach, opaque_e7) == offsetof(AiState, opaque_e7));
+static_assert(offsetof(Approach, opaque_e8) == offsetof(AiState, opaque_e8));
+static_assert(offsetof(Approach, range_mode) == offsetof(AiState, opaque_e9));
+static_assert(offsetof(Approach, target_x) == offsetof(AiState, target_x));
+static_assert(offsetof(Approach, movement_target) ==
+              offsetof(AiState, movement_target));
+static_assert(offsetof(Approach, movement_flags) ==
+              offsetof(AiState, movement_flags));
 static_assert(offsetof(Approach, destination) ==
               offsetof(AiState, destination));
-static_assert(offsetof(Approach, moveX) == offsetof(AiState, moveX));
+static_assert(offsetof(Approach, move_x) == offsetof(AiState, move_x));
 static_assert(offsetof(Approach, relations) == offsetof(AiState, relations));
-static_assert(offsetof(Approach, distancesSquared) ==
-              offsetof(AiState, distancesSquared));
+static_assert(offsetof(Approach, distances_squared) ==
+              offsetof(AiState, distances_squared));
 // The facing view, too.
 static_assert(offsetof(Decision, x) == offsetof(AiState, position));
 static_assert(offsetof(Decision, model) == offsetof(AiState, model));
-static_assert(offsetof(Decision, actorId) == offsetof(AiState, actorId));
-static_assert(offsetof(Decision, facingDelay) ==
-              offsetof(AiState, facingDelay));
-static_assert(offsetof(Decision, previousFacingTile) ==
-              offsetof(AiState, previousFacingTile));
-static_assert(offsetof(Decision, facingPending) ==
-              offsetof(AiState, facingPending));
-static_assert(offsetof(Decision, opaque13A) == offsetof(AiState, opaque13A));
+static_assert(offsetof(Decision, actor_id) == offsetof(AiState, actor_id));
+static_assert(offsetof(Decision, facing_delay) ==
+              offsetof(AiState, facing_delay));
+static_assert(offsetof(Decision, previous_facing_tile) ==
+              offsetof(AiState, previous_facing_tile));
+static_assert(offsetof(Decision, facing_pending) ==
+              offsetof(AiState, facing_pending));
+static_assert(offsetof(Decision, opaque_13a) == offsetof(AiState, opaque_13a));
 static_assert(offsetof(Decision, destination) ==
               offsetof(AiState, destination));
-static_assert(offsetof(Decision, moveX) == offsetof(AiState, moveX));
-static_assert(offsetof(Decision, targetFlags) == offsetof(AiState, relations));
-static_assert(offsetof(Decision, reactionPending) ==
-              offsetof(AiState, reactionPending));
+static_assert(offsetof(Decision, move_x) == offsetof(AiState, move_x));
+static_assert(offsetof(Decision, target_flags) == offsetof(AiState, relations));
+static_assert(offsetof(Decision, reaction_pending) ==
+              offsetof(AiState, reaction_pending));
 
 Approach& ApproachOf(AiState& state) {
   return *reinterpret_cast<Approach*>(&state);
@@ -112,53 +112,53 @@ TargetApproacher Load(const AiState& state) {
       .height_filter = view.opaque3,
       .near_target_detour = view.opaque4,
       .toward_point = view.opaque9,
-      .facing_locked = view.opaqueC,
-      .approach_directly = view.opaqueD,
-      .chases_lost_target = view.settingsBit13,
-      .approaches_target_point = view.settingsByte0Bit7,
+      .facing_locked = view.opaque_c,
+      .approach_directly = view.opaque_d,
+      .chases_lost_target = view.settings_bit13,
+      .approaches_target_point = view.settings_byte0_bit7,
       .tile = view.tile.word,
-      .saved_destination = view.savedDestination.word,
+      .saved_destination = view.saved_destination.word,
       .x = view.x,
       .z = view.z,
-      .flies = model != nullptr && model->opaqueABit5 != 0,
+      .flies = model != nullptr && model->opaque_a_bit5 != 0,
       .model_look_yaw =
           model_record != nullptr
               ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
               : static_cast<std::int16_t>(0),
       .model_facing = model_record != nullptr ? model_record->instance.facing
                                               : static_cast<std::int16_t>(0),
-      .actor_id = view.actorId,
-      .facing_delay = state.facingDelay,
+      .actor_id = view.actor_id,
+      .facing_delay = state.facing_delay,
       .range = view.range,
-      .previous_range = view.previousRange,
-      .chasing_lost_target = view.opaqueE4,
-      .target_id = view.targetId,
+      .previous_range = view.previous_range,
+      .chasing_lost_target = view.opaque_e4,
+      .target_id = view.target_id,
       .chase_timeout = view.timeout,
-      .recover_in_range = view.opaqueE7,
-      .walked_close = view.opaqueE8,
-      .range_mode = view.rangeMode,
-      .previous_option = view.previousOption,
-      .previous_target_id = view.previousTargetId,
-      .chase_destination = view.cachedDestination.word,
-      .target_half_tile_x = view.targetTileX,
-      .target_half_tile_z = view.targetTileZ,
-      .retarget_timer = view.opaqueF8,
-      .previous_facing_tile = state.previousFacingTile.word,
-      .facing_pending = state.facingPending,
-      .turn_timer = state.opaque13A,
-      .target_x = view.targetX,
-      .target_z = view.targetZ,
-      .movement_target = view.movementTarget,
-      .movement_flags = view.movementFlags,
+      .recover_in_range = view.opaque_e7,
+      .walked_close = view.opaque_e8,
+      .range_mode = view.range_mode,
+      .previous_option = view.previous_option,
+      .previous_target_id = view.previous_target_id,
+      .chase_destination = view.cached_destination.word,
+      .target_half_tile_x = view.target_tile_x,
+      .target_half_tile_z = view.target_tile_z,
+      .retarget_timer = view.opaque_f8,
+      .previous_facing_tile = state.previous_facing_tile.word,
+      .facing_pending = state.facing_pending,
+      .turn_timer = state.opaque_13a,
+      .target_x = view.target_x,
+      .target_z = view.target_z,
+      .movement_target = view.movement_target,
+      .movement_flags = view.movement_flags,
       .destination = view.destination.word,
-      .move_x = view.moveX,
-      .move_z = view.moveZ,
+      .move_x = view.move_x,
+      .move_z = view.move_z,
       .angle = static_cast<std::int16_t>(state.angle),
-      .reaction_pending = state.reactionPending};
+      .reaction_pending = state.reaction_pending};
   for (std::size_t id = 0; id < approacher.relations.size(); ++id) {
     approacher.relations.at(id) =
         std::bit_cast<std::uint32_t>(state.relations[id]);
-    approacher.distances_squared.at(id) = state.distancesSquared[id];
+    approacher.distances_squared.at(id) = state.distances_squared[id];
   }
   return approacher;
 }
@@ -172,39 +172,39 @@ void Store(const TargetApproacher& approacher, AiState& state) {
   view.opaque3 = approacher.height_filter;
   view.opaque4 = approacher.near_target_detour;
   view.opaque9 = approacher.toward_point;
-  view.opaqueC = approacher.facing_locked;
-  view.opaqueD = approacher.approach_directly;
+  view.opaque_c = approacher.facing_locked;
+  view.opaque_d = approacher.approach_directly;
   view.tile.word = approacher.tile;
-  view.savedDestination.word = approacher.saved_destination;
+  view.saved_destination.word = approacher.saved_destination;
   view.x = approacher.x;
   view.z = approacher.z;
-  state.facingDelay = approacher.facing_delay;
+  state.facing_delay = approacher.facing_delay;
   view.range = approacher.range;
-  view.previousRange = approacher.previous_range;
-  view.opaqueE4 = approacher.chasing_lost_target;
-  view.targetId = approacher.target_id;
+  view.previous_range = approacher.previous_range;
+  view.opaque_e4 = approacher.chasing_lost_target;
+  view.target_id = approacher.target_id;
   view.timeout = approacher.chase_timeout;
-  view.opaqueE7 = approacher.recover_in_range;
-  view.opaqueE8 = approacher.walked_close;
-  view.rangeMode = approacher.range_mode;
-  view.previousOption = approacher.previous_option;
-  view.previousTargetId = approacher.previous_target_id;
-  view.cachedDestination.word = approacher.chase_destination;
-  view.targetTileX = approacher.target_half_tile_x;
-  view.targetTileZ = approacher.target_half_tile_z;
-  view.opaqueF8 = approacher.retarget_timer;
-  state.previousFacingTile.word = approacher.previous_facing_tile;
-  state.facingPending = approacher.facing_pending;
-  state.opaque13A = approacher.turn_timer;
-  view.targetX = approacher.target_x;
-  view.targetZ = approacher.target_z;
-  view.movementTarget = approacher.movement_target;
-  view.movementFlags = approacher.movement_flags;
+  view.opaque_e7 = approacher.recover_in_range;
+  view.opaque_e8 = approacher.walked_close;
+  view.range_mode = approacher.range_mode;
+  view.previous_option = approacher.previous_option;
+  view.previous_target_id = approacher.previous_target_id;
+  view.cached_destination.word = approacher.chase_destination;
+  view.target_tile_x = approacher.target_half_tile_x;
+  view.target_tile_z = approacher.target_half_tile_z;
+  view.opaque_f8 = approacher.retarget_timer;
+  state.previous_facing_tile.word = approacher.previous_facing_tile;
+  state.facing_pending = approacher.facing_pending;
+  state.opaque_13a = approacher.turn_timer;
+  view.target_x = approacher.target_x;
+  view.target_z = approacher.target_z;
+  view.movement_target = approacher.movement_target;
+  view.movement_flags = approacher.movement_flags;
   view.destination.word = approacher.destination;
-  view.moveX = approacher.move_x;
-  view.moveZ = approacher.move_z;
+  view.move_x = approacher.move_x;
+  view.move_z = approacher.move_z;
   state.angle = approacher.angle;
-  state.reactionPending = approacher.reaction_pending;
+  state.reaction_pending = approacher.reaction_pending;
 }
 
 // The actor models, the battle actor and the actor's movement code. Each call
@@ -307,7 +307,7 @@ AiState& StateWithModel(void* state) {
 }
 }  // namespace
 
-int UpdateLiveTargetApproachMovement(Battle_Ai_TargetApproachView* state,
+int UpdateLiveTargetApproachMovement(VS::Battle::Ai::TargetApproachView* state,
                                      int option) {
   return Update(StateWithModel(state),
                 "AI target approach refused its target or battle actor",
@@ -317,7 +317,8 @@ int UpdateLiveTargetApproachMovement(Battle_Ai_TargetApproachView* state,
                 });
 }
 
-int UpdateLiveTargetFacing(Battle_Ai_MovementDecisionView* state, int target) {
+int UpdateLiveTargetFacing(VS::Battle::Ai::MovementDecisionView* state,
+                           int target) {
   return Update(StateWithModel(state), "AI target facing refused its target",
                 [&](TargetApproachWorld& world, TargetApproacher& approacher) {
                   return UpdateTargetFacing(world, approacher, target);

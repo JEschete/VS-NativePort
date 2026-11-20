@@ -8,10 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_RoomAiState;
-
 namespace VS::Battle::Ai {
+struct ActorAiState;
+struct RoomAiState;
 
 // One wander setting's move period, rest period and rate.
 // decomp: D_80069C3C_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:58)
@@ -25,7 +24,7 @@ inline constexpr std::size_t kWanderTimingBytes = 0x6;
 static_assert(sizeof(WanderTiming) == kWanderTimingBytes,
               "WanderTiming must keep its PS1 layout");
 
-using DecisionCallback = int (*)(Battle_Ai_ActorAiState*);
+using DecisionCallback = int (*)(ActorAiState*);
 
 inline constexpr std::size_t kSettingsBits30ValueBytes = 1284;
 inline constexpr std::size_t kPerceptionRangeTableWords = 320;
@@ -55,9 +54,9 @@ extern std::array<WordPair, kSettingsBits8ValueCount> settingsBits8Values;
 // decomp: D_800F17D8 (src/BATTLE/BATTLE.PRG/7CD68.c:69)
 extern std::array<std::uint8_t, kFacingDelayScaleCount> facingDelayScales;
 // decomp: D_800F5878 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:522)
-extern std::array<Battle_Ai_ActorAiState*, kActorAiStateSlots> actorAiStates;
+extern std::array<ActorAiState*, kActorAiStateSlots> actorAiStates;
 // decomp: D_800F58BC (src/BATTLE/BATTLE.PRG/6E4CCShared.h:523)
-extern Battle_Ai_RoomAiState* roomAiState;
+extern RoomAiState* roomAiState;
 // decomp: D_800F58C0 (src/BATTLE/BATTLE.PRG/7CD68.c:71)
 extern void* roomHasWaypoints;
 // decomp: D_800F590C (src/BATTLE/BATTLE.PRG/7CD68.c:72)

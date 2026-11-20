@@ -4,7 +4,9 @@
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Field/TerrainHeight.hpp"
 
-struct Battle_Ai_ActorAiState;
+namespace VS::Battle::Ai {
+struct ActorAiState;
+}  // namespace VS::Battle::Ai
 
 // Bindings from the battle AI frame to the typed terrain and flight queries.
 namespace VS::Battle::Ai {
@@ -15,5 +17,5 @@ namespace VS::Battle::Ai {
 // The frame's terrain, direction steps and cached flight test around an
 // actor; valid while the actor's AI state and the frame are unchanged.
 [[nodiscard]] FlightNeighborhood ActorFlightNeighborhood(
-    Battle_Ai_ActorAiState& state);
+    VS::Battle::Ai::ActorAiState& state);
 }  // namespace VS::Battle::Ai

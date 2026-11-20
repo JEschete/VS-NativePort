@@ -17,8 +17,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FlightMovement.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -32,17 +31,17 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using AiState = Battle_Ai_ActorAiState;
+using AiState = VS::Battle::Ai::ActorAiState;
 
 static_assert(kNavigationDirections == kFlightDirectionCount);
 static_assert(sizeof(FrameContext::blocker_actor) == kFlightDirectionCount);
-static_assert(sizeof(AiState{}.reservedBC) == sizeof(std::int16_t));
+static_assert(sizeof(AiState{}.reserved_bc) == sizeof(std::int16_t));
 // The approach target (0xE5) lies in the state's reserved bytes, which the
 // target approach view names.
 constexpr std::size_t kActorIdOffset = 0x88;
 constexpr std::size_t kApproachTargetOffset = 0xE5;
-static_assert(offsetof(Battle_Ai_TargetApproachView, targetId) ==
-              offsetof(AiState, actorId) + kApproachTargetOffset -
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, target_id) ==
+              offsetof(AiState, actor_id) + kApproachTargetOffset -
                   kActorIdOffset);
 
 FrameContext& Frame() { return LiveFrameContext(); }
@@ -50,42 +49,43 @@ FrameContext& Frame() { return LiveFrameContext(); }
 FlightMover Load(const AiState& state) {
   const auto* model = state.model;
   const auto& approach =
-      *reinterpret_cast<const Battle_Ai_TargetApproachView*>(&state);
+      *reinterpret_cast<const VS::Battle::Ai::TargetApproachView*>(&state);
   std::int16_t ground_clearance = 0;
-  std::memcpy(&ground_clearance, state.reservedBC, sizeof(ground_clearance));
+  std::memcpy(&ground_clearance, state.reserved_bc.data(),
+              sizeof(ground_clearance));
   return {.close_approach = static_cast<std::uint8_t>(state.reserved0),
-          .movement_disabled = state.movementDisabled,
+          .movement_disabled = state.movement_disabled,
           .tile = state.tile.word,
-          .previous_tile = static_cast<std::uint32_t>(state.previousTile),
+          .previous_tile = static_cast<std::uint32_t>(state.previous_tile),
           .x = state.position.vx,
           .y = state.position.vy,
           .z = state.position.vz,
           .flies = model != nullptr
-                       ? std::optional<bool>(model->opaqueABit5 != 0)
+                       ? std::optional<bool>(model->opaque_a_bit5 != 0)
                        : std::nullopt,
-          .actor_id = state.actorId,
+          .actor_id = state.actor_id,
           .radius = state.radius,
-          .max_range = state.maxRange,
-          .body_height = state.bodyHeight,
+          .max_range = state.max_range,
+          .body_height = state.body_height,
           .ground_clearance = ground_clearance,
-          .flight_height = state.flightHeight,
-          .approach_target = approach.targetId,
-          .movement_flags = state.movementFlags,
+          .flight_height = state.flight_height,
+          .approach_target = approach.target_id,
+          .movement_flags = state.movement_flags,
           .destination = state.destination.word,
-          .move_x = state.moveX,
-          .move_z = state.moveZ,
-          .move_y = state.moveY,
+          .move_x = state.move_x,
+          .move_z = state.move_z,
+          .move_y = state.move_y,
           .heading = state.heading,
-          .stall_counter = state.stallCounter};
+          .stall_counter = state.stall_counter};
 }
 
 // Flight movement writes only these fields; the rest are read.
 void Store(const FlightMover& mover, AiState& state) {
-  state.movementDisabled = mover.movement_disabled;
-  state.moveX = mover.move_x;
-  state.moveZ = mover.move_z;
-  state.moveY = mover.move_y;
-  state.stallCounter = mover.stall_counter;
+  state.movement_disabled = mover.movement_disabled;
+  state.move_x = mover.move_x;
+  state.move_z = mover.move_z;
+  state.move_y = mover.move_y;
+  state.stall_counter = mover.stall_counter;
 }
 
 // The room's AI frame, the battle actors, the moving platforms and the
@@ -133,10 +133,10 @@ class LiveFlightWorld final : public FlightMovementWorld {
     }
     const auto* other = Frame().actors[actor_id];
     if (other == nullptr) return std::nullopt;
-    FlightObstacle obstacle{.actor_id = other->actorId,
+    FlightObstacle obstacle{.actor_id = other->actor_id,
                             .radius = other->radius,
-                            .max_range = other->maxRange,
-                            .body_height = other->bodyHeight,
+                            .max_range = other->max_range,
+                            .body_height = other->body_height,
                             .position = std::nullopt};
     if (other->model != nullptr) {
       const auto& position =
@@ -151,7 +151,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
     const auto bounds = LiveRoomTileBounds();
     if (!bounds) return std::nullopt;
     return FlightRoom{.bounds = *bounds,
-                      .ceiling = VS::Battle::Ai::roomAiState->flightCeiling};
+                      .ceiling = VS::Battle::Ai::roomAiState->flight_ceiling};
   }
   [[nodiscard]] std::optional<std::uint16_t> TileFlags(int x,
                                                        int z) const override {
@@ -199,7 +199,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
     int occupancy = 0;
     Run(mover, [&] {
       occupancy = LiveDestinationOccupancy(
-          reinterpret_cast<Battle_Ai_MoveTargetView*>(&state_), tile);
+          reinterpret_cast<VS::Battle::Ai::MoveTargetView*>(&state_), tile);
     });
     return occupancy;
   }
@@ -253,7 +253,7 @@ auto Update(AiState& state, Routine routine) {
 }
 }  // namespace
 
-int IsLiveFlightDirectionObstructed(Battle_Ai_ActorAiState* state,
+int IsLiveFlightDirectionObstructed(VS::Battle::Ai::ActorAiState* state,
                                     int direction, int ahead) {
   auto& live = RequireState(state);
   LiveFlightWorld world(live);
@@ -264,7 +264,8 @@ int IsLiveFlightDirectionObstructed(Battle_Ai_ActorAiState* state,
   return *answer;
 }
 
-int CanLiveActorFlyInDirection(Battle_Ai_ActorAiState* state, int direction) {
+int CanLiveActorFlyInDirection(VS::Battle::Ai::ActorAiState* state,
+                               int direction) {
   auto& live = RequireState(state);
   LiveFlightWorld world(live);
   const auto open = CanFlyInDirection(world, Load(live), direction);
@@ -272,8 +273,8 @@ int CanLiveActorFlyInDirection(Battle_Ai_ActorAiState* state, int direction) {
   return *open ? 1 : 0;
 }
 
-int UpdateLiveFlightGroundTransition(Battle_Ai_ActorAiState* state, int angle,
-                                     int mode) {
+int UpdateLiveFlightGroundTransition(VS::Battle::Ai::ActorAiState* state,
+                                     int angle, int mode) {
   const auto changed = Update(
       RequireState(state), [&](FlightMovementWorld& world, FlightMover& mover) {
         return UpdateFlightGroundTransition(world, mover, angle, mode != 0);
@@ -283,7 +284,7 @@ int UpdateLiveFlightGroundTransition(Battle_Ai_ActorAiState* state, int angle,
   return *changed ? 1 : 0;
 }
 
-void UpdateLiveFlightMovement(Battle_Ai_ActorAiState* state, int angle) {
+void UpdateLiveFlightMovement(VS::Battle::Ai::ActorAiState* state, int angle) {
   const bool done = Update(RequireState(state),
                            [&](FlightMovementWorld& world, FlightMover& mover) {
                              return UpdateFlightMovement(world, mover, angle);
@@ -291,7 +292,7 @@ void UpdateLiveFlightMovement(Battle_Ai_ActorAiState* state, int angle) {
   Require(done, "AI flight movement refused its room, actors or model");
 }
 
-void UpdateLiveFlightDirectionalMovement(Battle_Ai_ActorAiState* state,
+void UpdateLiveFlightDirectionalMovement(VS::Battle::Ai::ActorAiState* state,
                                          int angle) {
   const bool done = Update(
       RequireState(state), [&](FlightMovementWorld& world, FlightMover& mover) {

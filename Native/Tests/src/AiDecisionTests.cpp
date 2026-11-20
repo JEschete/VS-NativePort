@@ -14,7 +14,7 @@
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.hpp"
@@ -42,14 +42,14 @@ struct DecisionFixture {
   std::array<Field_GimmickInstance*, 16> saved_gimmicks =
       std::to_array(Field_gimmickInstances);
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  Battle_Ai_RoomAiState room{};
-  Battle_Ai_ActorAiState state{};
+  VS::Battle::Ai::RoomAiState room{};
+  VS::Battle::Ai::ActorAiState state{};
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_ActorStats, 3> stats{};
   std::array<Actors_ActorRecord, 3> records{};
   Field_GimmickInstance gimmick{};
-  Battle_Ai_ActionCandidate candidate{};
-  std::array<Battle_Ai_CandidateEntryView, 16> fallback{};
+  VS::Battle::Ai::ActionCandidateRecord candidate{};
+  std::array<VS::Battle::Ai::CandidateEntryView, 16> fallback{};
 
   DecisionFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
@@ -68,16 +68,16 @@ struct DecisionFixture {
     VS::Battle::Ai::fallbackCandidates = fallback.data();
     VS::Battle::Ai::fallbackCandidateCount = VS::Battle::Ai::unusedPlanCounter =
         0;
-    state.actorId = 2;
-    state.distancesSquared[3] = 25;
+    state.actor_id = 2;
+    state.distances_squared[3] = 25;
     state.relations[3] =
         std::bit_cast<VS::Battle::Ai::RelationWord>(uint32_t{0x800000C4});
-    room.readinessLevel = 5;
-    candidate.targetId = 3;
+    room.readiness_level = 5;
+    candidate.target_id = 3;
     candidate.action = 42;
     candidate.weight = 40;
     candidate.threshold = 5;
-    candidate.distanceSquared = 25;
+    candidate.distance_squared = 25;
   }
 
   ~DecisionFixture() {
@@ -104,10 +104,10 @@ TEST_CASE(
   const auto timer = GENERATE(0, 1, 30);
   const uint16_t gate = GENERATE(0, 1, 65535);
   DecisionFixture fixture;
-  fixture.state.usesRoomActionDelay = static_cast<u_char>(busy);
-  fixture.state.minActionDelay = static_cast<u_char>(timer);
-  std::memcpy(fixture.state.reserved90, &gate, sizeof(gate));
-  fixture.candidate.opaque10.opaque0Bit4 = target_flag;
+  fixture.state.uses_room_action_delay = static_cast<u_char>(busy);
+  fixture.state.min_action_delay = static_cast<u_char>(timer);
+  std::memcpy(fixture.state.reserved90.data(), &gate, sizeof(gate));
+  fixture.candidate.opaque10.opaque0_bit4 = target_flag;
   Field_gimmickInstances[3] = has_gimmick != 0 ? &fixture.gimmick : nullptr;
   const bool required = busy != 0 || (target_flag != 0 && has_gimmick == 0);
   CHECK(VS::Battle::Ai::DoesLiveActionRequireCooldown(
@@ -120,25 +120,25 @@ TEST_CASE(
 TEST_CASE("AI reaction-delay reset updates only existing non-player states",
           "[ai][decisions]") {
   const auto saved_states = VS::Battle::Ai::actorAiStates;
-  std::array<Battle_Ai_ActorAiState, 16> states{};
+  std::array<VS::Battle::Ai::ActorAiState, 16> states{};
   std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
               nullptr);
   for (std::size_t id = 0; id < states.size(); ++id) {
-    states[id].minActionDelay = static_cast<u_char>(id + 1);
+    states[id].min_action_delay = static_cast<u_char>(id + 1);
     VS::Battle::Ai::actorAiStates[id] = &states[id];
   }
   VS::Battle::Ai::actorAiStates[3] = nullptr;
 
   VS::Battle::Ai::ResetActorAiReactionDelay(
       VS::Battle::Ai::BattleActorReactionDelays(), 0);
-  CHECK(states[0].minActionDelay == 1);
+  CHECK(states[0].min_action_delay == 1);
   for (int id = 1; id < 16; ++id) {
     VS::Battle::Ai::ResetActorAiReactionDelay(
         VS::Battle::Ai::BattleActorReactionDelays(), id);
     if (id == 3) {
-      CHECK(states[id].minActionDelay == id + 1);
+      CHECK(states[id].min_action_delay == id + 1);
     } else {
-      CHECK(states[id].minActionDelay == 30);
+      CHECK(states[id].min_action_delay == 30);
     }
   }
 
@@ -221,19 +221,19 @@ TEST_CASE(
     "AI randomized promotion consumes skipped draws and caps success weight",
     "[ai][decisions]") {
   const auto weight = GENERATE(1, 2, 255);
-  Battle_Ai_ActionPlanView plan{};
-  plan.candidateCount = 4;
+  VS::Battle::Ai::ActionPlanView plan{};
+  plan.candidate_count = 4;
   for (unsigned index = 0; index < 4; ++index) {
     plan.candidates[index].reserved0 = 100 - static_cast<int>(index) * 10;
     plan.candidates[index].action = index == 0 ? 0 : 42;
     plan.candidates[index].weight = weight;
-    plan.candidateOrder[index] = &plan.candidates[index];
+    plan.candidate_order[index] = &plan.candidates[index];
   }
   VS::Core::SeedBiosRand(1);
   VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, 4);
   const bool promoted = weight > 1;
-  CHECK(plan.candidateOrder[0] == &plan.candidates[promoted ? 2 : 0]);
-  CHECK(plan.candidateOrder[1] == &plan.candidates[promoted ? 0 : 1]);
+  CHECK(plan.candidate_order[0] == &plan.candidates[promoted ? 2 : 0]);
+  CHECK(plan.candidate_order[1] == &plan.candidates[promoted ? 0 : 1]);
   VS::Core::Rand15 expected(1);
   for (int index = 0; index < (promoted ? 3 : 4); ++index) expected.Next();
   CHECK(VS::Core::NextBiosRand() == expected.Next());
@@ -262,13 +262,13 @@ TEST_CASE(
       fixture.candidate.weight = 0;
       break;
     case 2:
-      fixture.room.readinessLevel = 4;
+      fixture.room.readiness_level = 4;
       break;
     case 3:
-      fixture.state.actionDelay = 1;
+      fixture.state.action_delay = 1;
       break;
     case 4:
-      fixture.candidate.distanceSquared = 24;
+      fixture.candidate.distance_squared = 24;
       break;
     case 5:
       fixture.state.relations[3] =
@@ -276,8 +276,8 @@ TEST_CASE(
       break;
     case 6:
     case 7:
-      fixture.candidate.opaque10.opaque0Bit1 = 1;
-      fixture.candidate.opaque10.opaque0Bit6 = condition == 6 ? 6 : 5;
+      fixture.candidate.opaque10.opaque0_bit1 = 1;
+      fixture.candidate.opaque10.opaque0_bit6 = condition == 6 ? 6 : 5;
       break;
     default:
       break;
@@ -297,8 +297,8 @@ TEST_CASE("AI execution applies visibility and obstruction option alternatives",
   fixture.state.relations[3] = std::bit_cast<VS::Battle::Ai::RelationWord>(
       uint32_t{0x800000C0} | (static_cast<uint32_t>(visible) << 2));
   fixture.state.relations[3].blocked = blocked;
-  fixture.candidate.opaque10.opaque0Bit2 = override_visibility;
-  fixture.candidate.opaque10.opaque0Bit3 = override_obstruction;
+  fixture.candidate.opaque10.opaque0_bit2 = override_visibility;
+  fixture.candidate.opaque10.opaque0_bit3 = override_obstruction;
   CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
                                                       &fixture.candidate) ==
         ((visible != 0 || override_visibility != 0) &&
@@ -354,15 +354,15 @@ TEST_CASE(
 TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
           "[ai][decisions]") {
   const auto count = GENERATE(0, 1, 16);
-  Battle_Ai_ActionPlanView plan{};
-  plan.candidateCount = count;
+  VS::Battle::Ai::ActionPlanView plan{};
+  plan.candidate_count = count;
   for (int index = 0; index < count; ++index) {
-    plan.candidateOrder[index] = &plan.candidates[index];
+    plan.candidate_order[index] = &plan.candidates[index];
   }
-  const auto order = std::to_array(plan.candidateOrder);
+  const auto order = plan.candidate_order;
   VS::Core::SeedBiosRand(1234);
   VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, count);
-  CHECK(std::to_array(plan.candidateOrder) == order);
+  CHECK(plan.candidate_order == order);
   VS::Core::Rand15 expected(1234);
   for (int index = 0; index < count; ++index) expected.Next();
   CHECK(VS::Core::NextBiosRand() == expected.Next());
@@ -372,8 +372,8 @@ TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
 TEST_CASE(
     "AI weapon range reads the canonical actor stats instead of its model",
     "[ai][decisions]") {
-  REQUIRE(offsetof(Battle_Ai_ActionRangeView, opaque5C) ==
-          offsetof(Battle_Ai_ActorAiState, stats));
+  REQUIRE(offsetof(VS::Battle::Ai::ActionRangeView, opaque_5c) ==
+          offsetof(VS::Battle::Ai::ActorAiState, stats));
   DecisionFixture fixture;
   fixture.state.stats = &fixture.stats[1];
   fixture.stats[1].currentRangeY = 4;
@@ -382,15 +382,15 @@ TEST_CASE(
   fixture.stats[1].currentAttackShapeAngle = 0;
   Battle_actionDefinitions[42].rangeX = 0xFF;
   CHECK(VS::Battle::LiveCalculateActionRangeSquared(
-            reinterpret_cast<Battle_Ai_ActionRangeView*>(&fixture.state), 42) ==
-        25600);
+            reinterpret_cast<VS::Battle::Ai::ActionRangeView*>(&fixture.state),
+            42) == 25600);
 }
 
 namespace {
 struct PerceptionFixture : DecisionFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved_states =
       VS::Battle::Ai::actorAiStates;
-  Battle_Ai_ActorAiState player{};
+  VS::Battle::Ai::ActorAiState player{};
   u_short flags[32][32]{};
 
   PerceptionFixture() {
@@ -404,15 +404,15 @@ struct PerceptionFixture : DecisionFixture {
     actors[0].model = &records[0].instance;
     actors[1].model = &records[1].instance;
     actors[1].next = nullptr;
-    state.model =
-        reinterpret_cast<Battle_Ai_ModelStatePrefix*>(&records[1].instance);
+    state.model = reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(
+        &records[1].instance);
     state.position = records[1].instance.position = {64, 0, 96, 0};
     records[0].instance.position = {64, 0, 32, 0};
-    View().nearDistanceSquared = View().farDistanceSquared = 768 * 768;
-    View().viewCosine = 3850;
+    View().near_distance_squared = View().far_distance_squared = 768 * 768;
+    View().view_cosine = 3850;
     state.relations[0].classification = 3;
-    candidate.targetId = 0;
-    candidate.distanceSquared = 192 * 192;
+    candidate.target_id = 0;
+    candidate.distance_squared = 192 * 192;
   }
 
   ~PerceptionFixture() {
@@ -420,12 +420,13 @@ struct PerceptionFixture : DecisionFixture {
               VS::Battle::Ai::actorAiStates.begin());
   }
 
-  Battle_Ai_PerceptionView& View() {
-    return *reinterpret_cast<Battle_Ai_PerceptionView*>(&state);
+  VS::Battle::Ai::PerceptionView& View() {
+    return *reinterpret_cast<VS::Battle::Ai::PerceptionView*>(&state);
   }
 
-  Battle_Ai_TargetRelation Relation() const {
-    return std::bit_cast<Battle_Ai_TargetRelation>(state.relations[0]);
+  VS::Battle::Ai::TargetRelationWord Relation() const {
+    return std::bit_cast<VS::Battle::Ai::TargetRelationWord>(
+        state.relations[0]);
   }
 
   void Update() { VS::Battle::Ai::UpdateLiveTargetPerception(&View(), 0); }
@@ -443,11 +444,11 @@ TEST_CASE("AI perception connects the original narrow FOV to execution",
   fixture.records[1].instance.facing = static_cast<int16_t>(heading);
   fixture.Update();
   const bool in_view = heading <= 227;
-  CHECK(fixture.state.distancesSquared[0] == 64 * 64);
-  CHECK(fixture.Relation().bits.inView == in_view);
+  CHECK(fixture.state.distances_squared[0] == 64 * 64);
+  CHECK(fixture.Relation().bits.in_view == in_view);
   CHECK(fixture.Relation().bits.active == in_view);
   CHECK(fixture.Relation().bits.visible == 1);
-  CHECK(fixture.Relation().bits.onMarkedTile == in_view);
+  CHECK(fixture.Relation().bits.on_marked_tile == in_view);
   CHECK(fixture.CanExecute() == in_view);
 }
 
@@ -462,14 +463,14 @@ TEST_CASE("AI marked tiles and awareness timers retain original readiness",
   fixture.state.relations[0] =
       std::bit_cast<VS::Battle::Ai::RelationWord>(relation);
   fixture.Update();
-  CHECK(
-      (std::array<int, 5>{
-           fixture.Relation().bits.inView, fixture.Relation().bits.timer,
-           fixture.Relation().bits.active, fixture.Relation().bits.onMarkedTile,
-           fixture.CanExecute()} == std::array<int, 5>{0, 0, 1, 1, 1}));
+  CHECK((std::array<int, 5>{
+             fixture.Relation().bits.in_view, fixture.Relation().bits.timer,
+             fixture.Relation().bits.active,
+             fixture.Relation().bits.on_marked_tile,
+             fixture.CanExecute()} == std::array<int, 5>{0, 0, 1, 1, 1}));
   fixture.Update();
   CHECK((std::array<int, 4>{
              fixture.Relation().bits.active, fixture.Relation().bits.visible,
-             fixture.Relation().bits.onMarkedTile, fixture.CanExecute()} ==
+             fixture.Relation().bits.on_marked_tile, fixture.CanExecute()} ==
          std::array<int, 4>{0, 1, marked, marked}));
 }

@@ -306,7 +306,7 @@ TEST_CASE("AI decision behaviour slots stay within the nine-entry table",
 }
 
 namespace {
-int TestDecisionBehavior(Battle_Ai_ActorAiState* /*state*/) { return 1; }
+int TestDecisionBehavior(VS::Battle::Ai::ActorAiState* /*state*/) { return 1; }
 }  // namespace
 
 TEST_CASE("AI live behaviour selection refuses indices past the table",

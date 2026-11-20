@@ -692,9 +692,10 @@ std::optional<bool> TryAdjacent(GroundNavigationWorld& world,
   return AdjacentAction(world, navigator, tile);
 }
 
-// The detour word (Battle_Ai_DetourWord): bit 0 active, 1-3 heading, 4 the
-// clockwise turn, 5-11 the step budget, 12-15 the visited cardinals, 16 stop,
-// 17 changed, 18-21 the cardinal mask and 22-26 / 27-31 the boundary tiles.
+// The detour word (VS::Battle::Ai::DetourWord): bit 0 active, 1-3 heading, 4
+// the clockwise turn, 5-11 the step budget, 12-15 the visited cardinals, 16
+// stop, 17 changed, 18-21 the cardinal mask and 22-26 / 27-31 the boundary
+// tiles.
 class DetourPath {
  public:
   explicit DetourPath(std::uint32_t word) : word_(word) {}

@@ -549,7 +549,7 @@ struct DetourFields {
   int bound_z = 0;
 };
 
-// An active detour word (Battle_Ai_DetourWord) built field by field.
+// An active detour word (VS::Battle::Ai::DetourWord) built field by field.
 constexpr std::uint32_t DetourWord(const DetourFields& fields) {
   return 1U | (static_cast<std::uint32_t>(fields.heading) << 1U) |
          (fields.clockwise ? 0x10U : 0U) |

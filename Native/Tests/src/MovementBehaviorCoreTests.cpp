@@ -17,7 +17,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/MovementBehavior.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
@@ -951,23 +951,23 @@ TEST_CASE("Live facing cosine matches the core", "[ai][movement]") {
 }
 
 TEST_CASE("Live movement entry stores the wander reset", "[ai][movement]") {
-  auto live = std::make_unique<Battle_Ai_ActorAiState>();
-  live->currentMovementMode = 0;
-  live->requestedMovementMode = 0;
-  live->movementEnabled = 1;
-  live->navigationFlags = 0xFFFFFFFFu;
-  live->wanderPhase = 9;
-  live->wanderCooldown = 4;
-  std::fill(std::begin(live->movementModeCounters),
-            std::end(live->movementModeCounters), 0x5A);
+  auto live = std::make_unique<VS::Battle::Ai::ActorAiState>();
+  live->current_movement_mode = 0;
+  live->requested_movement_mode = 0;
+  live->movement_enabled = 1;
+  live->navigation_flags = 0xFFFFFFFFu;
+  live->wander_phase = 9;
+  live->wander_cooldown = 4;
+  std::fill(std::begin(live->movement_mode_counters),
+            std::end(live->movement_mode_counters), 0x5A);
   CHECK(ai::SetLiveMovementBehavior(live.get(), 3) == 6);
-  CHECK(live->currentMovementMode == 3);
-  CHECK(live->requestedMovementMode == 3);
-  CHECK(live->wanderPhase == 0);
-  CHECK(live->wanderCooldown == 0);
-  CHECK(live->navigationFlags == 0xFFFFF3DEu);
-  CHECK(live->movementModeCounters[6] == 0);
-  CHECK(live->movementModeCounters[5] == 0x5A);
+  CHECK(live->current_movement_mode == 3);
+  CHECK(live->requested_movement_mode == 3);
+  CHECK(live->wander_phase == 0);
+  CHECK(live->wander_cooldown == 0);
+  CHECK(live->navigation_flags == 0xFFFFF3DEu);
+  CHECK(live->movement_mode_counters[6] == 0);
+  CHECK(live->movement_mode_counters[5] == 0x5A);
   CHECK(ai::SetLiveMovementBehavior(live.get(), 3) == 3);
 }
 

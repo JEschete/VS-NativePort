@@ -18,7 +18,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -57,7 +57,7 @@ static_assert(kRouteWordCount * sizeof(u_int) <= kRouteEndOffset);
 static_assert(kRouteEndOffset + (kRouteGateEndCount *
                                  sizeof(VS::Battle::Ai::RouteGateEndRecord)) <=
               kRouteAuxiliaryBytes);
-static_assert(sizeof(Battle_Ai_ActorAiState{}.step_height_bytes) ==
+static_assert(sizeof(VS::Battle::Ai::ActorAiState{}.step_height_bytes) ==
               sizeof(std::uint16_t));
 
 class LiveNavigationGrid final : public NavigationGrid {
@@ -126,23 +126,23 @@ std::array<RouteGateEnd, kRouteGateEndCount> LiveRouteGateEnds() {
           VS::Battle::Ai::routeGates, kRouteGateEndCount));
 }
 
-Battle_Ai_ActorAiState& ActorState(int actor_id) {
+VS::Battle::Ai::ActorAiState& ActorState(int actor_id) {
   auto* state =
       VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
   Require(state != nullptr, "AI navigation requires the actor's AI state");
   return *state;
 }
 
-Battle_Ai_ActorAiState& OverrideRoute(int actor_id) {
-  auto* route = static_cast<Battle_Ai_ActorAiState*>(
-      ActorState(actor_id).nativePointer18C);
+VS::Battle::Ai::ActorAiState& OverrideRoute(int actor_id) {
+  auto* route = static_cast<VS::Battle::Ai::ActorAiState*>(
+      ActorState(actor_id).native_pointer_18c);
   Require(route != nullptr, "AI navigation requires the actor's override");
   return *route;
 }
 
 class LiveNavigationOverrideCopy final : public NavigationOverrideCopy {
  public:
-  explicit LiveNavigationOverrideCopy(Battle_Ai_ActorAiState* destination)
+  explicit LiveNavigationOverrideCopy(VS::Battle::Ai::ActorAiState* destination)
       : destination_(destination) {}
 
   [[nodiscard]] bool HasSource(int actor_id) const override {
@@ -156,18 +156,18 @@ class LiveNavigationOverrideCopy final : public NavigationOverrideCopy {
     *destination_ = ActorState(actor_id);
   }
   void ApplySettings(const NavigationOverrideSettings& settings) override {
-    destination_->actorId = settings.actor_id;
-    std::memcpy(destination_->step_height_bytes, &settings.step_height,
+    destination_->actor_id = settings.actor_id;
+    std::memcpy(destination_->step_height_bytes.data(), &settings.step_height,
                 sizeof(settings.step_height));
-    destination_->reservedB2 = settings.tile_step_limit;
-    destination_->navigationFlags = settings.navigation_flags;
-    destination_->opaque19A = settings.repeat_wait;
-    destination_->settingsBit14 = settings.area_settings;
-    destination_->movementEnabled = settings.movement_enabled;
+    destination_->reserved_b2 = settings.tile_step_limit;
+    destination_->navigation_flags = settings.navigation_flags;
+    destination_->opaque_19a = settings.repeat_wait;
+    destination_->settings_bit14 = settings.area_settings;
+    destination_->movement_enabled = settings.movement_enabled;
   }
 
  private:
-  Battle_Ai_ActorAiState* destination_;
+  VS::Battle::Ai::ActorAiState* destination_;
 };
 
 class LiveNavigationOverrideHost final : public NavigationOverrideHost {
@@ -180,14 +180,14 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
            nullptr;
   }
   [[nodiscard]] bool HasOverride(int actor_id) const override {
-    return ActorState(actor_id).nativePointer18C != nullptr;
+    return ActorState(actor_id).native_pointer_18c != nullptr;
   }
   [[nodiscard]] std::optional<std::uint32_t> OverrideTrackedTile(
       int actor_id) const override {
     const auto& route = OverrideRoute(actor_id);
-    if (route.nativePointer64 == nullptr) return std::nullopt;
+    if (route.native_pointer64 == nullptr) return std::nullopt;
     u_int tile;
-    std::memcpy(&tile, route.nativePointer64, sizeof(tile));
+    std::memcpy(&tile, route.native_pointer64, sizeof(tile));
     return tile;
   }
   [[nodiscard]] std::uint32_t OverrideDestination(int actor_id) const override {
@@ -195,7 +195,7 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
   }
   [[nodiscard]] bool MatchesActorAndRoom(int actor_id) const override {
     const auto& state = ActorState(actor_id);
-    return state.actorId == actor_id && state.actor != nullptr &&
+    return state.actor_id == actor_id && state.actor != nullptr &&
            static_cast<void*>(state.actor) ==
                static_cast<void*>(
                    Battle_actors[static_cast<std::size_t>(actor_id)]) &&
@@ -205,15 +205,15 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
     auto* state = &ActorState(actor_id);
     DisengageLiveActor(state);
     ResetLiveActorAwarenessIndicator(
-        reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
+        reinterpret_cast<VS::Battle::Ai::PlanEvaluationView*>(state));
     UnlinkLiveEngagedActor(state);
   }
   bool AllocateOverride(int actor_id) override {
-    auto* storage = static_cast<Battle_Ai_ActorAiState*>(
+    auto* storage = static_cast<VS::Battle::Ai::ActorAiState*>(
         VS::Core::Memory::AllocateLiveFromHighEnd(
-            sizeof(Battle_Ai_ActorAiState)));
+            sizeof(VS::Battle::Ai::ActorAiState)));
     if (storage == nullptr) return false;
-    ActorState(actor_id).nativePointer18C = std::construct_at(storage);
+    ActorState(actor_id).native_pointer_18c = std::construct_at(storage);
     return true;
   }
   bool CopyOverrideState(int actor_id,
@@ -224,34 +224,34 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
   void SetScriptedTarget(int actor_id, NavigationOverrideTarget where,
                          std::uint32_t target) override {
     auto* destination = Destination(actor_id, where);
-    destination->scriptedTargetXZ = target;
+    destination->scripted_target_xz = target;
   }
 
  private:
-  static Battle_Ai_ActorAiState* Destination(int actor_id,
-                                             NavigationOverrideTarget where) {
+  static VS::Battle::Ai::ActorAiState* Destination(
+      int actor_id, NavigationOverrideTarget where) {
     auto* state = &ActorState(actor_id);
     auto* destination = state;
     if (where == NavigationOverrideTarget::kNewRoute) {
       destination =
-          static_cast<Battle_Ai_ActorAiState*>(state->nativePointer18C);
+          static_cast<VS::Battle::Ai::ActorAiState*>(state->native_pointer_18c);
     }
     return destination;
   }
 };
 
-ScriptedRoute LoadRoute(const Battle_Ai_ActorAiState& state) {
-  return {.actor_id = state.actorId,
-          .locomotion_mode = state.locomotionMode,
+ScriptedRoute LoadRoute(const VS::Battle::Ai::ActorAiState& state) {
+  return {.actor_id = state.actor_id,
+          .locomotion_mode = state.locomotion_mode,
           .route_gate = state.route_gate,
           .movement_wait = state.movement_wait,
-          .navigation_flags = state.navigationFlags,
+          .navigation_flags = state.navigation_flags,
           .ignore_floor = state.ignore_floor_mask,
           .gait = state.opaque1,
-          .movement_target = state.movementTarget,
-          .is_stuck = state.isStuck,
+          .movement_target = state.movement_target,
+          .is_stuck = state.is_stuck,
           .height_filter = state.opaque3,
-          .repeat_wait = state.opaque19A,
+          .repeat_wait = state.opaque_19a,
           .tile = state.tile.word,
           .x = state.position.vx,
           .y = state.position.vy,
@@ -262,26 +262,26 @@ ScriptedRoute LoadRoute(const Battle_Ai_ActorAiState& state) {
           .fine_z = state.fine_z,
           .fine_status = state.fine_status,
           .ground_area = state.ground_area,
-          .area_exception = state.reserved154Area,
-          .scripted_target = state.scriptedTargetXZ,
-          .move_x = state.moveX,
-          .move_z = state.moveZ,
+          .area_exception = state.reserved154_area,
+          .scripted_target = state.scripted_target_xz,
+          .move_x = state.move_x,
+          .move_z = state.move_z,
           .destination = state.destination.word};
 }
 
 void StoreRouteRecord(const ScriptedRoute& route,
-                      Battle_Ai_ActorAiState& state) {
-  state.actorId = route.actor_id;
-  state.locomotionMode = route.locomotion_mode;
+                      VS::Battle::Ai::ActorAiState& state) {
+  state.actor_id = route.actor_id;
+  state.locomotion_mode = route.locomotion_mode;
   state.route_gate = route.route_gate;
   state.movement_wait = route.movement_wait;
-  state.navigationFlags = route.navigation_flags;
+  state.navigation_flags = route.navigation_flags;
   state.ignore_floor_mask = route.ignore_floor;
   state.opaque1 = route.gait;
-  state.movementTarget = route.movement_target;
-  state.isStuck = route.is_stuck;
+  state.movement_target = route.movement_target;
+  state.is_stuck = route.is_stuck;
   state.opaque3 = route.height_filter;
-  state.opaque19A = route.repeat_wait;
+  state.opaque_19a = route.repeat_wait;
   state.tile.word = route.tile;
   state.position.vx = route.x;
   state.position.vy = route.y;
@@ -292,10 +292,10 @@ void StoreRouteRecord(const ScriptedRoute& route,
   state.fine_z = route.fine_z;
   state.fine_status = route.fine_status;
   state.ground_area = route.ground_area;
-  state.reserved154Area = route.area_exception;
-  state.scriptedTargetXZ = route.scripted_target;
-  state.moveX = route.move_x;
-  state.moveZ = route.move_z;
+  state.reserved154_area = route.area_exception;
+  state.scripted_target_xz = route.scripted_target;
+  state.move_x = route.move_x;
+  state.move_z = route.move_z;
   state.destination.word = route.destination;
 }
 
@@ -320,9 +320,9 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   [[nodiscard]] std::optional<ScriptedRoute> Route(int actor_id) override {
     const auto* base =
         LiveFrameContext().actors[static_cast<std::size_t>(actor_id)];
-    route_ = base != nullptr
-                 ? static_cast<Battle_Ai_ActorAiState*>(base->nativePointer18C)
-                 : nullptr;
+    route_ = base != nullptr ? static_cast<VS::Battle::Ai::ActorAiState*>(
+                                   base->native_pointer_18c)
+                             : nullptr;
     if (route_ == nullptr) return std::nullopt;
     return LoadRoute(*route_);
   }
@@ -359,7 +359,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   void UpdateNavigationAreaMovement(ScriptedRoute& route) override {
     StoreRouteRecord(route, *route_);
     UpdateLiveNavigationAreaMovement(
-        reinterpret_cast<Battle_Ai_TerrainMoveView*>(route_));
+        reinterpret_cast<VS::Battle::Ai::TerrainMoveView*>(route_));
     route = LoadRoute(*route_);
   }
   void DispatchTileMovement(ScriptedRoute& route) override {
@@ -370,7 +370,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   void FinishRoute(ScriptedRoute& route) override {
     StoreRouteRecord(route, *route_);
     IssueLiveActorCommand(route_, 0);
-    VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId);
+    VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actor_id);
     route_ = nullptr;
   }
   void SaveMovementRandomState() override { SaveLiveMovementRandomState(); }
@@ -378,7 +378,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
  private:
   bool started_ = false;
   const Battle_Actor* actor_ = nullptr;
-  Battle_Ai_ActorAiState* route_ = nullptr;
+  VS::Battle::Ai::ActorAiState* route_ = nullptr;
 };
 }  // namespace
 
@@ -464,8 +464,8 @@ int LiveActorNavigationOverrideStatus(int actor_id) {
   return *status;
 }
 
-void CopyLiveActorNavigationOverrideState(int actor_id,
-                                          Battle_Ai_ActorAiState* destination) {
+void CopyLiveActorNavigationOverrideState(
+    int actor_id, VS::Battle::Ai::ActorAiState* destination) {
   LiveNavigationOverrideCopy copy(destination);
   Require(CopyActorNavigationOverrideState(copy, actor_id),
           "AI navigation copy requires a valid actor and both states");

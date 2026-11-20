@@ -16,8 +16,7 @@
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -33,74 +32,74 @@ namespace VS::Battle::Ai {
 namespace {
 // The actor-state creation view reads the saved pair from the actor's group
 // word, so its second word is the room spawn's saved settings flags.
-static_assert(offsetof(Battle_Ai_AiActorView, savedAiSettings) +
-                  offsetof(Battle_Ai_SavedSettingsPair, opaque4) ==
-              offsetof(Battle_Ai_AiActorView, savedAiSettingsFlags));
-static_assert(offsetof(Battle_Ai_AiActorView, savedAiSettingsFlags) ==
+static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings) +
+                  offsetof(VS::Battle::Ai::SavedSettingsPair, opaque4) ==
+              offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags));
+static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags) ==
               offsetof(Battle_Actor, reserved34));
-static_assert(offsetof(Battle_Ai_AiActorView, aiSettings) ==
+static_assert(offsetof(VS::Battle::Ai::AiActorView, ai_settings) ==
               offsetof(Battle_Actor, templateWord2C));
 // The settings actor view reads the actor's sub-type, its spawn group word
 // (the AI group bit-fields) and its spawn flags word.
-static_assert(offsetof(Battle_Ai_SettingsActorView, kind) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsActorView, kind) ==
               offsetof(Battle_Actor, subType));
-static_assert(offsetof(Battle_Ai_SettingsActorView, opaque30) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque30) ==
               offsetof(Battle_Actor, lastTriggerTile) +
                   sizeof(Battle_Actor::lastTriggerTile));
-static_assert(offsetof(Battle_Ai_SettingsActorView, opaque34) ==
+static_assert(offsetof(VS::Battle::Ai::SettingsActorView, opaque34) ==
               offsetof(Battle_Actor, reserved34));
 
 // The settings view aliases the AI state it initialises, so the fields it
 // writes must be the ones the AI behaviours read.
-using SettingsView = Battle_Ai_SettingsView;
-using AiState = Battle_Ai_ActorAiState;
-static_assert(offsetof(SettingsView, linkedActor) ==
-              offsetof(AiState, linkedActor));
-static_assert(offsetof(SettingsView, settingsConstant19) ==
-              offsetof(AiState, settingsConstant19));
-static_assert(offsetof(SettingsView, settingsBit26) ==
-              offsetof(AiState, settingsBit26));
-static_assert(offsetof(SettingsView, settingsByte3Bit0) ==
-              offsetof(AiState, settingsByte3Bit0));
-static_assert(offsetof(SettingsView, settingsConstant23) ==
-              offsetof(AiState, movementEnabled));
-static_assert(offsetof(SettingsView, allowFallbackAction) ==
-              offsetof(AiState, allowFallbackAction));
-static_assert(offsetof(SettingsView, settingsBit27) ==
-              offsetof(AiState, settingsBit27));
-static_assert(offsetof(SettingsView, settingsBit14) ==
-              offsetof(AiState, settingsBit14));
-static_assert(offsetof(SettingsView, settingsModeLow) ==
-              offsetof(AiState, settingsModeLow));
-static_assert(offsetof(SettingsView, settingsBits21) ==
-              offsetof(AiState, settingsBits21));
-static_assert(offsetof(SettingsView, settingsBit25) ==
-              offsetof(AiState, settingsBit25));
-static_assert(offsetof(SettingsView, settingsBits30Value) ==
+using SettingsView = VS::Battle::Ai::SettingsView;
+using AiState = VS::Battle::Ai::ActorAiState;
+static_assert(offsetof(SettingsView, linked_actor) ==
+              offsetof(AiState, linked_actor));
+static_assert(offsetof(SettingsView, settings_constant19) ==
+              offsetof(AiState, settings_constant19));
+static_assert(offsetof(SettingsView, settings_bit26) ==
+              offsetof(AiState, settings_bit26));
+static_assert(offsetof(SettingsView, settings_byte3_bit0) ==
+              offsetof(AiState, settings_byte3_bit0));
+static_assert(offsetof(SettingsView, settings_constant23) ==
+              offsetof(AiState, movement_enabled));
+static_assert(offsetof(SettingsView, allow_fallback_action) ==
+              offsetof(AiState, allow_fallback_action));
+static_assert(offsetof(SettingsView, settings_bit27) ==
+              offsetof(AiState, settings_bit27));
+static_assert(offsetof(SettingsView, settings_bit14) ==
+              offsetof(AiState, settings_bit14));
+static_assert(offsetof(SettingsView, settings_mode_low) ==
+              offsetof(AiState, settings_mode_low));
+static_assert(offsetof(SettingsView, settings_bits21) ==
+              offsetof(AiState, settings_bits21));
+static_assert(offsetof(SettingsView, settings_bit25) ==
+              offsetof(AiState, settings_bit25));
+static_assert(offsetof(SettingsView, settings_bits30_value) ==
               offsetof(AiState, terrain_reject_mask));
 static_assert(offsetof(SettingsView, actor) == offsetof(AiState, actor));
-static_assert(offsetof(SettingsView, collisionRadius) ==
+static_assert(offsetof(SettingsView, collision_radius) ==
               offsetof(AiState, collision_radius));
-static_assert(offsetof(SettingsView, opaqueB0) ==
+static_assert(offsetof(SettingsView, opaque_b0) ==
               offsetof(AiState, step_height_bytes));
-static_assert(offsetof(SettingsView, facingDelay) ==
-              offsetof(AiState, facingDelay));
-static_assert(offsetof(SettingsView, opaqueC8) ==
+static_assert(offsetof(SettingsView, facing_delay) ==
+              offsetof(AiState, facing_delay));
+static_assert(offsetof(SettingsView, opaque_c8) ==
               offsetof(AiState, wander_center_radius));
-static_assert(offsetof(SettingsView, opaqueCC) ==
+static_assert(offsetof(SettingsView, opaque_cc) ==
               offsetof(AiState, wander_center));
-static_assert(offsetof(SettingsView, restPeriod) ==
-              offsetof(AiState, restPeriod));
-static_assert(offsetof(SettingsView, movePeriod) ==
-              offsetof(AiState, movePeriod));
-static_assert(offsetof(SettingsView, wanderRate) ==
-              offsetof(AiState, wanderRate));
+static_assert(offsetof(SettingsView, rest_period) ==
+              offsetof(AiState, rest_period));
+static_assert(offsetof(SettingsView, move_period) ==
+              offsetof(AiState, move_period));
+static_assert(offsetof(SettingsView, wander_rate) ==
+              offsetof(AiState, wander_rate));
 static_assert(offsetof(SettingsView, opaque101) ==
-              offsetof(AiState, patrolRow));
+              offsetof(AiState, patrol_row));
 static_assert(offsetof(SettingsView, opaque102) ==
-              offsetof(AiState, patrolRate));
-static_assert(offsetof(SettingsView, movementFlags) ==
-              offsetof(AiState, movementFlags));
+              offsetof(AiState, patrol_rate));
+static_assert(offsetof(SettingsView, movement_flags) ==
+              offsetof(AiState, movement_flags));
 
 // The waypoint halfwords follow the patrol routes in the room's auxiliary
 // AI section.
@@ -165,73 +164,75 @@ std::optional<RoomWaypoints> LiveRoomWaypoints() {
 }  // namespace
 
 void ApplyLiveSavedAiSettingsFlags(
-    int* settings_word, const Battle_Ai_SavedSettingsPair* saved_settings) {
+    int* settings_word,
+    const VS::Battle::Ai::SavedSettingsPair* saved_settings) {
   Require(settings_word != nullptr && saved_settings != nullptr,
           "AI saved settings require a settings word and a saved pair");
   *settings_word = std::bit_cast<int>(ApplySavedAiSettingsFlags(
       std::bit_cast<std::uint32_t>(*settings_word), saved_settings->opaque4));
 }
 
-void ApplyLiveActorAiSettings(Battle_Ai_SettingsView* state,
-                              const Battle_Ai_SettingsWord* settings) {
+void ApplyLiveActorAiSettings(VS::Battle::Ai::SettingsView* state,
+                              const VS::Battle::Ai::SettingsWord* settings) {
   Require(state != nullptr && settings != nullptr && state->actor != nullptr,
           "AI settings require a state, its actor and a settings word");
-  const Battle_Ai_SettingsActorView& actor = *state->actor;
+  const VS::Battle::Ai::SettingsActorView& actor = *state->actor;
   ActorAiSettingsSource source;
   source.settings = settings->word;
   source.spawn_group = actor.opaque30.word;
   source.spawn_flags = actor.opaque34.word;
   source.sub_type = actor.kind;
-  source.collision_radius = state->collisionRadius;
-  source.movement_flags = state->movementFlags;
+  source.collision_radius = state->collision_radius;
+  source.movement_flags = state->movement_flags;
   source.room_waypoints = LiveRoomWaypoints();
   const ActorAiSettings decoded =
       ApplyActorAiSettings(source, LiveSettingsTables());
 
-  state->farDistanceSquared = decoded.far_distance_squared;
-  state->nearDistanceSquared = decoded.near_distance_squared;
+  state->far_distance_squared = decoded.far_distance_squared;
+  state->near_distance_squared = decoded.near_distance_squared;
   state->angle = decoded.view_angle;
-  state->viewCosine = decoded.view_cosine;
-  state->settingsBit15 = decoded.settings_bit15 ? 1 : 0;
-  state->settingsBit14 = decoded.area_lock ? 1 : 0;
-  state->settingsBit13 = decoded.settings_bit13 ? 1 : 0;
-  state->opaque2D = decoded.action_movement_mask;
-  state->opaqueB2 = decoded.tile_step_limit;
-  state->opaqueB0 = decoded.step_height;
-  state->facingDelay = decoded.facing_delay;
-  state->settingsConstant23 = 1;
-  state->settingsByte3Bit0 = decoded.settings_bit24 ? 1 : 0;
-  state->settingsBit23 = decoded.settings_bit23 ? 1 : 0;
-  state->settingsBits21 = decoded.relation_category;
-  state->settingsBits28 = decoded.settings_bits28;
-  state->settingsBits30 = decoded.settings_bits30;
-  state->settingsBit26 = decoded.settings_bit26 ? 1 : 0;
-  state->movePeriod = decoded.wander.move_period;
-  state->restPeriod = decoded.wander.rest_period;
-  state->wanderRate = decoded.wander.rate;
-  state->settingsBit27 = decoded.settings_bit27 ? 1 : 0;
-  state->settingsBit25 = decoded.settings_bit25 ? 1 : 0;
+  state->view_cosine = decoded.view_cosine;
+  state->settings_bit15 = decoded.settings_bit15 ? 1 : 0;
+  state->settings_bit14 = decoded.area_lock ? 1 : 0;
+  state->settings_bit13 = decoded.settings_bit13 ? 1 : 0;
+  state->opaque_2d = decoded.action_movement_mask;
+  state->opaque_b2 = decoded.tile_step_limit;
+  state->opaque_b0 = decoded.step_height;
+  state->facing_delay = decoded.facing_delay;
+  state->settings_constant23 = 1;
+  state->settings_byte3_bit0 = decoded.settings_bit24 ? 1 : 0;
+  state->settings_bit23 = decoded.settings_bit23 ? 1 : 0;
+  state->settings_bits21 = decoded.relation_category;
+  state->settings_bits28 = decoded.settings_bits28;
+  state->settings_bits30 = decoded.settings_bits30;
+  state->settings_bit26 = decoded.settings_bit26 ? 1 : 0;
+  state->move_period = decoded.wander.move_period;
+  state->rest_period = decoded.wander.rest_period;
+  state->wander_rate = decoded.wander.rate;
+  state->settings_bit27 = decoded.settings_bit27 ? 1 : 0;
+  state->settings_bit25 = decoded.settings_bit25 ? 1 : 0;
   if (decoded.terrain_reject_mask) {
-    state->settingsBits30Value = *decoded.terrain_reject_mask;
+    state->settings_bits30_value = *decoded.terrain_reject_mask;
   }
-  state->settingsByte0Bit7 = decoded.settings_bit7 ? 1 : 0;
-  state->allowFallbackAction = decoded.allow_fallback_action ? 1 : 0;
-  state->settingsModeLow = decoded.special_mode ? 1 : 0;
+  state->settings_byte0_bit7 = decoded.settings_bit7 ? 1 : 0;
+  state->allow_fallback_action = decoded.allow_fallback_action ? 1 : 0;
+  state->settings_mode_low = decoded.special_mode ? 1 : 0;
   state->opaque102 = decoded.patrol_rate;
   state->opaque101 = decoded.patrol_row;
-  state->opaqueC8 = decoded.wander_center_radius;
-  state->opaqueCC = decoded.wander_center_tile_x;
-  state->opaqueCE = decoded.wander_center_tile_z;
+  state->opaque_c8 = decoded.wander_center_radius;
+  state->opaque_cc = decoded.wander_center_tile_x;
+  state->opaque_ce = decoded.wander_center_tile_z;
   if (decoded.orbiting_boss) {
-    state->decisionCallback = UpdateLiveOrbitingBossBehavior;
-    state->settingsConstant19 = 1;
+    state->decision_callback = UpdateLiveOrbitingBossBehavior;
+    state->settings_constant19 = 1;
     AllocateLiveOrbitingBossState(state);
   } else {
-    state->decisionCallback = SelectLiveDecisionBehavior(source.spawn_group);
+    state->decision_callback = SelectLiveDecisionBehavior(source.spawn_group);
   }
-  state->linkedActor = static_cast<unsigned char>(kNoLinkedActor);
+  state->linked_actor = static_cast<unsigned char>(kNoLinkedActor);
   ResolveLiveAiLinkedActors();
   // The settings view is the AI state it initialises (asserted above).
-  BuildLiveAiActionMetadata(reinterpret_cast<Battle_Ai_ActorAiState*>(state));
+  BuildLiveAiActionMetadata(
+      reinterpret_cast<VS::Battle::Ai::ActorAiState*>(state));
 }
 }  // namespace VS::Battle::Ai

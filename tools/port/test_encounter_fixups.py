@@ -1145,12 +1145,12 @@ int func_800F9800(void) {
         ).read_text(encoding="utf-8")
         self.assertIn("std::construct_at(storage)", source)
         self.assertIn(
-            "VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_Ai_ActorAiState))",
+            "VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Battle::Ai::ActorAiState))",
             "".join(source.split()),
         )
         self.assertIn("auto* destination = state;", source)
-        self.assertIn("destination->scriptedTargetXZ = target;", source)
-        self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId)", source)
+        self.assertIn("destination->scripted_target_xz = target;", source)
+        self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actor_id)", source)
         self.assertIn("SaveLiveMovementRandomState();", source)
         self.assertNotIn("actor[3]", source)
 
@@ -1303,7 +1303,7 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn("UpdateLiveEngagementApproachBehavior", binding)
-        self.assertIn("settings_.savedDecisionCallback = nullptr;", binding)
+        self.assertIn("settings_.saved_decision_callback = nullptr;", binding)
         self.assertNotIn("RecordUnported", binding)
 
     def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
@@ -2354,7 +2354,7 @@ int func_800F9800(void) {
         self.assertIn('#include "Battle/Ai/ConditionSnapshotBinding.hpp"', live)
         self.assertIn("CaptureBattleActorConditions(rows_);", live)
         self.assertIn(
-            "std::array<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows_{};",
+            "std::array<VS::Battle::Ai::ActionTiming, kBattleActorSlotCount> rows_{};",
             live,
         )
         self.assertNotIn("Battle_Ai_CaptureActorConditionTable(", planning + live)
@@ -2515,7 +2515,8 @@ int func_800F9800(void) {
         self.assertNotIn(live, caller)
         self.assertNotIn("Battle_Ai_BuildAiActionMetadata", caller)
         settings = (ai / "ActorSettingsLive.cpp").read_text(encoding="utf-8")
-        self.assertEqual(settings.count("BuildLiveAiActionMetadata(reinterpret_cast<Battle_Ai_ActorAiState*>(state));"), 1)
+        self.assertEqual("".join(settings.split()).count(
+            "BuildLiveAiActionMetadata(reinterpret_cast<VS::Battle::Ai::ActorAiState*>(state));"), 1)
         # The function was the only item in ActionSelection.cpp/.h, so the copy no longer writes them.
         for name in ("ActionSelection.cpp", "ActionSelection.h"):
             self.assertFalse((ai / name).exists())
@@ -2586,7 +2587,7 @@ int func_800F9800(void) {
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         # The owned creation binding (F01818) decodes the settings once, into the state it stored.
         caller = (ai / "ActorCreationLive.cpp").read_text(encoding="utf-8")
-        call = "ApplyLiveActorAiSettings(reinterpret_cast<Battle_Ai_SettingsView*>(&state),"
+        call = "ApplyLiveActorAiSettings(\n        reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state),"
         self.assertEqual(caller.count(call), 1)
         self.assertLess(caller.index("AiState& state = StoreState(created);"), caller.index(call))
         self.assertIn('#include "Battle/Ai/ActorSettingsLive.hpp"', caller)

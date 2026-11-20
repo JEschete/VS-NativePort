@@ -11,7 +11,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycle.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -115,14 +115,14 @@ State Actor() {
 
 struct LiveFixture {
   Battle_Actor* saved_player = Battle_characterState;
-  Battle_Ai_ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
+  VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_StatusEffectParams saved_attribute = Battle_statusEffectParams[5];
   Battle_StatusEffectParams saved_movement = Battle_statusEffectParams[11];
   Battle_StatusEffectParams saved_poison = Battle_statusEffectParams[14];
   Battle_StatusEffectParams saved_regeneration = Battle_statusEffectParams[17];
   Battle_Actor player{};
   Battle_ActorStats stats{};
-  Battle_Ai_ActorAiState ai{};
+  VS::Battle::Ai::ActorAiState ai{};
   LiveFixture() {
     player.stats = &stats;
     Battle_characterState = &player;
@@ -443,7 +443,7 @@ TEST_CASE("Live infliction maps unsigned speed bytes and low-byte durations",
   CHECK(fixture.stats.statusTimers[5] == 2);
   CHECK(static_cast<std::uint8_t>(fixture.stats.walkSpeed) == 0);
   CHECK(static_cast<std::uint8_t>(fixture.stats.runSpeed) == 62);
-  CHECK(fixture.ai.runStep == 62);
+  CHECK(fixture.ai.run_step == 62);
   CHECK(fixture.stats.strength == 6552);
   CHECK(fixture.stats.isAnalyzed == 1);
 }

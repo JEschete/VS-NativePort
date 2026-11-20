@@ -30,7 +30,7 @@ constexpr unsigned kAiKinds = 5;
 constexpr std::uint8_t kCommandModeMask = 0xFC;
 constexpr std::uint16_t kOrbitingBossFirst = 0xAC;
 constexpr std::uint16_t kOrbitingBossSecond = 0xAD;
-// Relationship word fields (Battle_Ai_TargetRelation).
+// Relationship word fields (VS::Battle::Ai::TargetRelationWord).
 constexpr unsigned kClassificationShift = 6;
 constexpr unsigned kClassificationMask = 3;
 constexpr unsigned kClassificationTimerShift = 20;

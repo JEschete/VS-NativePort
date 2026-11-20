@@ -25,8 +25,9 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/StatusEffects.h"
@@ -97,10 +98,10 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
   snapshot.weapon_pp = stats.weapon.current_pp;
   // Original 7CD68.c:437 reads this four-byte range shape without modifying it.
   constexpr int kRangeUnit = 32;
-  Battle_Ai_ActionRangeShape range{};
-  range.rangeY =
+  VS::Battle::Ai::ActionRangeShape range{};
+  range.range_y =
       std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeY));
-  range.rangeZ =
+  range.range_z =
       std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeZ));
   range.shape = stats.currentAttackShape;
   range.angle = stats.currentAttackShapeAngle;

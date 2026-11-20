@@ -19,7 +19,6 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"

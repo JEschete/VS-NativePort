@@ -11,8 +11,7 @@
 #include "Actors/ShpModel.hpp"
 #include "Actors/TextureAnimationRecords.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiState.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -33,7 +32,8 @@ Field::TerrainGrid CurrentTerrain() noexcept {
           frame->heightMap, Field::kTerrainGridSide)};
 }
 
-FlightNeighborhood ActorFlightNeighborhood(Battle_Ai_ActorAiState& state) {
+FlightNeighborhood ActorFlightNeighborhood(
+    VS::Battle::Ai::ActorAiState& state) {
   FlightNeighborhood neighborhood;
   neighborhood.terrain = CurrentTerrain();
   neighborhood.origin = {state.tile.tile.tile_x, state.tile.tile.tile_z};

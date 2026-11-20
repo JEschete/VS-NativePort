@@ -16,8 +16,7 @@
 #include "Battle/Action.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
@@ -42,12 +41,14 @@ static_assert(std::size(VS::Battle::Ai::actorAiStates) == kMovementActorSlots);
 static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kMovementActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kMovementActorSlots);
-static_assert(std::extent_v<decltype(Battle_Ai_ActorAiState::relations)> ==
-              kMovementActorSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Battle::Ai::ActorAiState::relations)> ==
+    kMovementActorSlots);
 static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
 static_assert(sizeof(VS::Battle::Ai::TilePosition) == sizeof(std::uint32_t));
 static_assert(
-    std::extent_v<decltype(Battle_Ai_ActorAiState::movementModeCounters)> ==
+    std::tuple_size_v<
+        decltype(VS::Battle::Ai::ActorAiState::movement_mode_counters)> ==
     kMovementModeCounterBytes);
 // Pursuit progress lives in the actor state's otherwise unnamed bytes
 // 0xDC-0xF7, which the target approach view names.
@@ -59,55 +60,58 @@ constexpr std::size_t kCachedDestinationOffset = 0xEC;
 constexpr std::size_t kTargetTileXOffset = 0xF4;
 constexpr std::size_t kTargetTileHighOffset = 0xF7;
 constexpr std::size_t ApproachOffset(std::size_t ps1_offset) {
-  return offsetof(Battle_Ai_ActorAiState, actorId) + ps1_offset -
+  return offsetof(VS::Battle::Ai::ActorAiState, actor_id) + ps1_offset -
          kActorIdOffset;
 }
-static_assert(offsetof(Battle_Ai_TargetApproachView, actorId) ==
-              offsetof(Battle_Ai_ActorAiState, actorId));
-static_assert(offsetof(Battle_Ai_TargetApproachView, range) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, actor_id) ==
+              offsetof(VS::Battle::Ai::ActorAiState, actor_id));
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, range) ==
               ApproachOffset(kApproachRangeOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, opaqueE4) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e4) ==
               ApproachOffset(kPursuitProgressOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, opaqueE7) ==
-              offsetof(Battle_Ai_ActorAiState, opaqueE7));
-static_assert(offsetof(Battle_Ai_TargetApproachView, previousTargetId) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, opaque_e7) ==
+              offsetof(VS::Battle::Ai::ActorAiState, opaque_e7));
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView,
+                       previous_target_id) ==
               ApproachOffset(kPreviousTargetOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, cachedDestination) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView,
+                       cached_destination) ==
               ApproachOffset(kCachedDestinationOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, targetTileX) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, target_tile_x) ==
               ApproachOffset(kTargetTileXOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, reservedF7) ==
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, reserved_f7) ==
               ApproachOffset(kTargetTileHighOffset));
-static_assert(offsetof(Battle_Ai_TargetApproachView, destination) ==
-              offsetof(Battle_Ai_ActorAiState, destination));
-static_assert(offsetof(Battle_Ai_TargetApproachView, relations) ==
-              offsetof(Battle_Ai_ActorAiState, relations));
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, destination) ==
+              offsetof(VS::Battle::Ai::ActorAiState, destination));
+static_assert(offsetof(VS::Battle::Ai::TargetApproachView, relations) ==
+              offsetof(VS::Battle::Ai::ActorAiState, relations));
 // The views callers hold alias the actor AI state.
-static_assert(offsetof(Battle_Ai_TerrainMoveView, destination) ==
-              offsetof(Battle_Ai_ActorAiState, destination));
-static_assert(offsetof(Battle_Ai_TerrainMoveView, moveZ) ==
-              offsetof(Battle_Ai_ActorAiState, moveZ));
-static_assert(offsetof(Battle_Ai_CandidateMovementView, planMode) ==
-              offsetof(Battle_Ai_ActorAiState, planMode));
-static_assert(offsetof(Battle_Ai_CandidateMovementView, plannedTile) ==
-              offsetof(Battle_Ai_ActorAiState, plannedTile));
-static_assert(offsetof(Battle_Ai_CandidateMovementView, relations) ==
-              offsetof(Battle_Ai_ActorAiState, relations));
-static_assert(offsetof(Battle_Ai_PerceptionUpdateView, actionStatus) ==
-              offsetof(Battle_Ai_ActorAiState, actionStatus));
-static_assert(offsetof(Battle_Ai_PerceptionUpdateView, relations) ==
-              offsetof(Battle_Ai_ActorAiState, relations));
-static_assert(offsetof(Battle_Ai_CandidateReadinessView, candidateOrder) ==
-              offsetof(Battle_Ai_ActorAiState, candidateOrder));
-static_assert(offsetof(Battle_Ai_EscortView, actorId) ==
-              offsetof(Battle_Ai_ActorAiState, actorId));
-static_assert(offsetof(Battle_Ai_EscortView, relations) ==
-              offsetof(Battle_Ai_ActorAiState, relations));
-static_assert(offsetof(Battle_Ai_SettingsView, decisionCallback) ==
-              offsetof(Battle_Ai_ActorAiState, nativePointer68));
-static_assert(offsetof(Battle_Ai_SettingsView, opaque2D) ==
-              offsetof(Battle_Ai_ActorAiState, reserved2D));
-static_assert(sizeof(Battle_Ai_GuardTileWord) == sizeof(std::uint32_t));
+static_assert(offsetof(VS::Battle::Ai::TerrainMoveView, destination) ==
+              offsetof(VS::Battle::Ai::ActorAiState, destination));
+static_assert(offsetof(VS::Battle::Ai::TerrainMoveView, move_z) ==
+              offsetof(VS::Battle::Ai::ActorAiState, move_z));
+static_assert(offsetof(VS::Battle::Ai::CandidateMovementView, plan_mode) ==
+              offsetof(VS::Battle::Ai::ActorAiState, plan_mode));
+static_assert(offsetof(VS::Battle::Ai::CandidateMovementView, planned_tile) ==
+              offsetof(VS::Battle::Ai::ActorAiState, planned_tile));
+static_assert(offsetof(VS::Battle::Ai::CandidateMovementView, relations) ==
+              offsetof(VS::Battle::Ai::ActorAiState, relations));
+static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView, action_status) ==
+              offsetof(VS::Battle::Ai::ActorAiState, action_status));
+static_assert(offsetof(VS::Battle::Ai::PerceptionUpdateView, relations) ==
+              offsetof(VS::Battle::Ai::ActorAiState, relations));
+static_assert(offsetof(VS::Battle::Ai::CandidateReadinessView,
+                       candidate_order) ==
+              offsetof(VS::Battle::Ai::ActorAiState, candidate_order));
+static_assert(offsetof(VS::Battle::Ai::EscortView, actor_id) ==
+              offsetof(VS::Battle::Ai::ActorAiState, actor_id));
+static_assert(offsetof(VS::Battle::Ai::EscortView, relations) ==
+              offsetof(VS::Battle::Ai::ActorAiState, relations));
+static_assert(offsetof(VS::Battle::Ai::SettingsView, decision_callback) ==
+              offsetof(VS::Battle::Ai::ActorAiState, native_pointer68));
+static_assert(offsetof(VS::Battle::Ai::SettingsView, opaque_2d) ==
+              offsetof(VS::Battle::Ai::ActorAiState, reserved_2d));
+static_assert(sizeof(VS::Battle::Ai::GuardTileWord) == sizeof(std::uint32_t));
 
 [[noreturn]] void Fail(const char* message) {
   VS::Core::Errorf("ai", "%s", message);
@@ -119,18 +123,19 @@ void Require(bool valid, const char* message) {
 }
 
 template <typename View>
-Battle_Ai_ActorAiState& StateOf(View* view) {
+VS::Battle::Ai::ActorAiState& StateOf(View* view) {
   Require(view != nullptr, "AI movement behaviour requires an actor state");
-  return *reinterpret_cast<Battle_Ai_ActorAiState*>(view);
+  return *reinterpret_cast<VS::Battle::Ai::ActorAiState*>(view);
 }
 
-Battle_Ai_TargetApproachView& Approach(Battle_Ai_ActorAiState& state) {
-  return *reinterpret_cast<Battle_Ai_TargetApproachView*>(&state);
+VS::Battle::Ai::TargetApproachView& Approach(
+    VS::Battle::Ai::ActorAiState& state) {
+  return *reinterpret_cast<VS::Battle::Ai::TargetApproachView*>(&state);
 }
 
-const Battle_Ai_TargetApproachView& Approach(
-    const Battle_Ai_ActorAiState& state) {
-  return *reinterpret_cast<const Battle_Ai_TargetApproachView*>(&state);
+const VS::Battle::Ai::TargetApproachView& Approach(
+    const VS::Battle::Ai::ActorAiState& state) {
+  return *reinterpret_cast<const VS::Battle::Ai::TargetApproachView*>(&state);
 }
 
 constexpr unsigned kByteBits = 8;
@@ -146,92 +151,96 @@ std::uint8_t ByteOf(std::uint32_t word, unsigned index) {
   return static_cast<std::uint8_t>(word >> (index * kByteBits));
 }
 
-MovementState LoadMovementState(const Battle_Ai_ActorAiState& source) {
-  const Battle_Ai_TargetApproachView& approach = Approach(source);
+MovementState LoadMovementState(const VS::Battle::Ai::ActorAiState& source) {
+  const VS::Battle::Ai::TargetApproachView& approach = Approach(source);
   MovementState state;
-  state.actor_id = source.actorId;
+  state.actor_id = source.actor_id;
   state.tile = source.tile.word;
   state.position = Core::Math::PositionOf(source.position);
-  state.movement_enabled = source.movementEnabled != 0;
-  state.follows_platform_targets = source.settingsBit14 != 0;
-  state.movement_flags = source.movementFlags;
-  state.requested_mode = source.requestedMovementMode;
-  state.current_mode = source.currentMovementMode;
-  std::copy(std::begin(source.movementModeCounters),
-            std::end(source.movementModeCounters), state.mode_counters.begin());
-  state.navigation_flags = source.navigationFlags;
-  state.pursuit = {.opaque_e4 = approach.opaqueE4,
-                   .target_id = approach.targetId,
+  state.movement_enabled = source.movement_enabled != 0;
+  state.follows_platform_targets = source.settings_bit14 != 0;
+  state.movement_flags = source.movement_flags;
+  state.requested_mode = source.requested_movement_mode;
+  state.current_mode = source.current_movement_mode;
+  std::copy(std::begin(source.movement_mode_counters),
+            std::end(source.movement_mode_counters),
+            state.mode_counters.begin());
+  state.navigation_flags = source.navigation_flags;
+  state.pursuit = {.opaque_e4 = approach.opaque_e4,
+                   .target_id = approach.target_id,
                    .timeout = approach.timeout,
-                   .opaque_e7 = approach.opaqueE7,
-                   .opaque_e8 = approach.opaqueE8,
-                   .range_mode = approach.rangeMode,
-                   .previous_option = approach.previousOption,
-                   .previous_target_id = approach.previousTargetId};
+                   .opaque_e7 = approach.opaque_e7,
+                   .opaque_e8 = approach.opaque_e8,
+                   .range_mode = approach.range_mode,
+                   .previous_option = approach.previous_option,
+                   .previous_target_id = approach.previous_target_id};
   state.approach_range = approach.range;
-  state.cached_destination = approach.cachedDestination.word;
-  state.target_half_tile = PackBytes(
-      approach.targetTileX, static_cast<std::uint8_t>(approach.reservedF5[0]),
-      approach.targetTileZ, static_cast<std::uint8_t>(approach.reservedF7[0]));
-  state.wander_phase = source.wanderPhase;
-  state.wander_cooldown = source.wanderCooldown;
+  state.cached_destination = approach.cached_destination.word;
+  state.target_half_tile =
+      PackBytes(approach.target_tile_x,
+                static_cast<std::uint8_t>(approach.reserved_f5[0]),
+                approach.target_tile_z,
+                static_cast<std::uint8_t>(approach.reserved_f7[0]));
+  state.wander_phase = source.wander_phase;
+  state.wander_cooldown = source.wander_cooldown;
   state.wander_center_radius = source.wander_center_radius;
   state.wander_center = source.wander_center.word;
-  state.patrol = {.index = source.patrolIndex,
-                  .row = source.patrolRow,
-                  .cooldown = source.patrolCooldown};
-  state.previous_facing_tile = source.previousFacingTile.word;
-  state.facing_pending = source.facingPending;
+  state.patrol = {.index = source.patrol_index,
+                  .row = source.patrol_row,
+                  .cooldown = source.patrol_cooldown};
+  state.previous_facing_tile = source.previous_facing_tile.word;
+  state.facing_pending = source.facing_pending;
   state.flee_tile = source.flee_tile.word;
   state.flee_timer = source.flee_timer;
   state.arrive_when_near = source.opaque4;
   state.destination = source.destination.word;
-  state.move_x = source.moveX;
-  state.move_z = source.moveZ;
+  state.move_x = source.move_x;
+  state.move_z = source.move_z;
   for (std::size_t id = 0; id < state.relations.size(); ++id) {
     state.relations.at(id) = std::bit_cast<std::uint32_t>(source.relations[id]);
   }
-  state.plan_mode = source.planMode;
+  state.plan_mode = source.plan_mode;
   return state;
 }
 
 // Writes back the fields the movement behaviours change.
 void StoreMovementState(const MovementState& state,
-                        Battle_Ai_ActorAiState& target) {
-  Battle_Ai_TargetApproachView& approach = Approach(target);
-  target.requestedMovementMode = state.requested_mode;
-  target.currentMovementMode = state.current_mode;
+                        VS::Battle::Ai::ActorAiState& target) {
+  VS::Battle::Ai::TargetApproachView& approach = Approach(target);
+  target.requested_movement_mode = state.requested_mode;
+  target.current_movement_mode = state.current_mode;
   std::copy(state.mode_counters.begin(), state.mode_counters.end(),
-            std::begin(target.movementModeCounters));
-  target.navigationFlags = state.navigation_flags;
-  approach.opaqueE4 = state.pursuit.opaque_e4;
-  approach.targetId = state.pursuit.target_id;
+            std::begin(target.movement_mode_counters));
+  target.navigation_flags = state.navigation_flags;
+  approach.opaque_e4 = state.pursuit.opaque_e4;
+  approach.target_id = state.pursuit.target_id;
   approach.timeout = state.pursuit.timeout;
-  approach.opaqueE7 = state.pursuit.opaque_e7;
-  approach.opaqueE8 = state.pursuit.opaque_e8;
-  approach.rangeMode = state.pursuit.range_mode;
-  approach.previousOption = state.pursuit.previous_option;
-  approach.previousTargetId = state.pursuit.previous_target_id;
+  approach.opaque_e7 = state.pursuit.opaque_e7;
+  approach.opaque_e8 = state.pursuit.opaque_e8;
+  approach.range_mode = state.pursuit.range_mode;
+  approach.previous_option = state.pursuit.previous_option;
+  approach.previous_target_id = state.pursuit.previous_target_id;
   approach.range = state.approach_range;
-  approach.cachedDestination.word = state.cached_destination;
-  approach.targetTileX = ByteOf(state.target_half_tile, 0);
-  approach.reservedF5[0] = static_cast<char>(ByteOf(state.target_half_tile, 1));
-  approach.targetTileZ = ByteOf(state.target_half_tile, 2);
-  approach.reservedF7[0] =
+  approach.cached_destination.word = state.cached_destination;
+  approach.target_tile_x = ByteOf(state.target_half_tile, 0);
+  approach.reserved_f5[0] =
+      static_cast<char>(ByteOf(state.target_half_tile, 1));
+  approach.target_tile_z = ByteOf(state.target_half_tile, 2);
+  approach.reserved_f7[0] =
       static_cast<char>(ByteOf(state.target_half_tile, kHighByte));
-  target.wanderPhase = state.wander_phase;
-  target.wanderCooldown = state.wander_cooldown;
-  target.patrolIndex = state.patrol.index;
-  target.patrolCooldown = state.patrol.cooldown;
-  target.previousFacingTile.word = state.previous_facing_tile;
-  target.facingPending = state.facing_pending;
+  target.wander_phase = state.wander_phase;
+  target.wander_cooldown = state.wander_cooldown;
+  target.patrol_index = state.patrol.index;
+  target.patrol_cooldown = state.patrol.cooldown;
+  target.previous_facing_tile.word = state.previous_facing_tile;
+  target.facing_pending = state.facing_pending;
   target.flee_tile.word = state.flee_tile;
   target.flee_timer = state.flee_timer;
   target.opaque4 = state.arrive_when_near;
   target.destination.word = state.destination;
-  target.moveX = state.move_x;
-  target.moveZ = state.move_z;
-  target.planMode = state.plan_mode;
+  target.move_x = state.move_x;
+  target.move_z = state.move_z;
+  target.plan_mode = state.plan_mode;
 }
 
 // The battle actor list; nothing when it holds an ID outside the actor slots
@@ -252,7 +261,8 @@ std::optional<ActorRoster> LiveBattleActors() {
 
 class LiveMovementHost final : public MovementHost {
  public:
-  explicit LiveMovementHost(Battle_Ai_ActorAiState& state) : state_(state) {}
+  explicit LiveMovementHost(VS::Battle::Ai::ActorAiState& state)
+      : state_(state) {}
 
   [[nodiscard]] std::span<const std::uint16_t> PatrolRoutes() const override {
     return LivePatrolRoutes();
@@ -298,14 +308,15 @@ class LiveMovementHost final : public MovementHost {
         CurrentTerrain(), Core::Math::UnpackTileCoordinate(tile));
   }
   [[nodiscard]] bool RunsPatrolCombatBehavior() const override {
-    return Settings().decisionCallback == UpdateLivePatrolCombatBehavior;
+    return Settings().decision_callback == UpdateLivePatrolCombatBehavior;
   }
   [[nodiscard]] std::uint8_t ActionMovementMask() const override {
-    return Settings().opaque2D;
+    return Settings().opaque_2d;
   }
   [[nodiscard]] std::optional<std::uint32_t> BestCandidateFlags()
       const override {
-    const Battle_Ai_ActionCandidate* best = state_.candidateOrder[0];
+    const VS::Battle::Ai::ActionCandidateRecord* best =
+        state_.candidate_order[0];
     if (best == nullptr) return std::nullopt;
     return std::bit_cast<std::uint32_t>(best->opaque10);
   }
@@ -320,19 +331,21 @@ class LiveMovementHost final : public MovementHost {
   void UpdateWander(MovementState& state, std::uint32_t tile,
                     std::uint32_t range) override {
     StoreMovementState(state, state_);
-    UpdateLiveWanderMovement(reinterpret_cast<Battle_Ai_WanderView*>(&state_),
-                             tile, range);
+    UpdateLiveWanderMovement(
+        reinterpret_cast<VS::Battle::Ai::WanderView*>(&state_), tile, range);
     state = LoadMovementState(state_);
   }
   void UpdateWaypointPatrol(MovementState& state) override {
     StoreMovementState(state, state_);
-    UpdateLiveWaypointPatrol(reinterpret_cast<Battle_Ai_PatrolView*>(&state_));
+    UpdateLiveWaypointPatrol(
+        reinterpret_cast<VS::Battle::Ai::PatrolView*>(&state_));
     state = LoadMovementState(state_);
   }
   int UpdateTargetFacing(MovementState& state, int target) override {
     StoreMovementState(state, state_);
     const int turned = UpdateLiveTargetFacing(
-        reinterpret_cast<Battle_Ai_MovementDecisionView*>(&state_), target);
+        reinterpret_cast<VS::Battle::Ai::MovementDecisionView*>(&state_),
+        target);
     state = LoadMovementState(state_);
     return turned;
   }
@@ -354,22 +367,23 @@ class LiveMovementHost final : public MovementHost {
   void FindNearestActiveWaypoint(MovementState& state) override {
     StoreMovementState(state, state_);
     FindLiveNearestActiveWaypoint(
-        reinterpret_cast<Battle_Ai_WaypointSearchView*>(&state_),
-        reinterpret_cast<Battle_Ai_WaypointTile*>(&state_.plannedTile));
+        reinterpret_cast<VS::Battle::Ai::WaypointSearchView*>(&state_),
+        reinterpret_cast<VS::Battle::Ai::WaypointTileRecord*>(
+            &state_.planned_tile));
     state = LoadMovementState(state_);
   }
 
  private:
-  [[nodiscard]] const Battle_Ai_SettingsView& Settings() const {
-    return *reinterpret_cast<const Battle_Ai_SettingsView*>(&state_);
+  [[nodiscard]] const VS::Battle::Ai::SettingsView& Settings() const {
+    return *reinterpret_cast<const VS::Battle::Ai::SettingsView*>(&state_);
   }
 
-  Battle_Ai_ActorAiState& state_;
+  VS::Battle::Ai::ActorAiState& state_;
 };
 
 class LiveRelationshipChanges final : public RelationshipChangeHost {
  public:
-  explicit LiveRelationshipChanges(Battle_Ai_ReactionRecord* record)
+  explicit LiveRelationshipChanges(VS::Battle::Ai::ReactionRecord* record)
       : record_(record) {}
 
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
@@ -390,17 +404,17 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
   }
 
  private:
-  static Battle_Ai_ReactionView* ReactionState(int actor_id) {
-    return reinterpret_cast<Battle_Ai_ReactionView*>(
+  static VS::Battle::Ai::ReactionView* ReactionState(int actor_id) {
+    return reinterpret_cast<VS::Battle::Ai::ReactionView*>(
         VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)]);
   }
 
-  Battle_Ai_ReactionRecord* record_;
+  VS::Battle::Ai::ReactionRecord* record_;
 };
 
 // Runs a movement behaviour on a live actor state and stores its changes.
 template <typename Behaviour>
-auto RunMovement(Battle_Ai_ActorAiState& live, Behaviour behaviour) {
+auto RunMovement(VS::Battle::Ai::ActorAiState& live, Behaviour behaviour) {
   MovementState state = LoadMovementState(live);
   LiveMovementHost host(live);
   auto result = behaviour(state, host);
@@ -413,7 +427,7 @@ int RequireResult(const std::optional<int>& result, const char* message) {
   return *result;
 }
 
-int FindRelatedActor(Battle_Ai_ActorAiState& live, std::uint32_t* tile,
+int FindRelatedActor(VS::Battle::Ai::ActorAiState& live, std::uint32_t* tile,
                      int relation) {
   const MovementState state = LoadMovementState(live);
   const LiveMovementHost host(live);
@@ -429,7 +443,7 @@ int FindRelatedActor(Battle_Ai_ActorAiState& live, std::uint32_t* tile,
 }
 }  // namespace
 
-int SetLiveMovementBehavior(Battle_Ai_ActorAiState* state, int mode) {
+int SetLiveMovementBehavior(VS::Battle::Ai::ActorAiState* state, int mode) {
   return RunMovement(
       StateOf(state), [mode](MovementState& movement, LiveMovementHost& host) {
         return RequireResult(
@@ -438,14 +452,14 @@ int SetLiveMovementBehavior(Battle_Ai_ActorAiState* state, int mode) {
       });
 }
 
-void RefreshLiveAiMovementCooldown(Battle_Ai_TerrainMoveView* state) {
-  Battle_Ai_ActorAiState& live = StateOf(state);
-  live.navigationFlags = RefreshAiMovementCooldown(live.navigationFlags,
-                                                   live.movementEnabled != 0);
+void RefreshLiveAiMovementCooldown(VS::Battle::Ai::TerrainMoveView* state) {
+  VS::Battle::Ai::ActorAiState& live = StateOf(state);
+  live.navigation_flags = RefreshAiMovementCooldown(live.navigation_flags,
+                                                    live.movement_enabled != 0);
 }
 
-int ApproachLiveActor(Battle_Ai_ActorAiState* state, int target, int distance,
-                      int option) {
+int ApproachLiveActor(VS::Battle::Ai::ActorAiState* state, int target,
+                      int distance, int option) {
   return RunMovement(StateOf(state), [=](MovementState& movement,
                                          LiveMovementHost& host) {
     return RequireResult(
@@ -457,7 +471,7 @@ int ApproachLiveActor(Battle_Ai_ActorAiState* state, int target, int distance,
   });
 }
 
-void RefreshLiveAiTargetTile(Battle_Ai_TargetApproachView* state) {
+void RefreshLiveAiTargetTile(VS::Battle::Ai::TargetApproachView* state) {
   RunMovement(
       StateOf(state), [](MovementState& movement, LiveMovementHost& host) {
         Require(RefreshAiTargetTile(movement, host),
@@ -468,7 +482,7 @@ void RefreshLiveAiTargetTile(Battle_Ai_TargetApproachView* state) {
 }
 
 void RefreshLiveAiTargetTileWhenTracking(
-    Battle_Ai_PerceptionUpdateView* state) {
+    VS::Battle::Ai::PerceptionUpdateView* state) {
   RunMovement(
       StateOf(state), [](MovementState& movement, LiveMovementHost& host) {
         Require(RefreshAiTargetTileWhenTracking(movement, host),
@@ -478,7 +492,7 @@ void RefreshLiveAiTargetTileWhenTracking(
       });
 }
 
-void WanderAroundLiveSavedCenter(Battle_Ai_ActorAiState* state) {
+void WanderAroundLiveSavedCenter(VS::Battle::Ai::ActorAiState* state) {
   RunMovement(StateOf(state),
               [](MovementState& movement, LiveMovementHost& host) {
                 WanderAroundSavedCenter(movement, host);
@@ -486,7 +500,7 @@ void WanderAroundLiveSavedCenter(Battle_Ai_ActorAiState* state) {
               });
 }
 
-void WanderAroundLiveTile(Battle_Ai_CandidateMovementView* state,
+void WanderAroundLiveTile(VS::Battle::Ai::CandidateMovementView* state,
                           std::uint32_t tile, int radius) {
   RunMovement(StateOf(state),
               [=](MovementState& movement, LiveMovementHost& host) {
@@ -495,7 +509,7 @@ void WanderAroundLiveTile(Battle_Ai_CandidateMovementView* state,
               });
 }
 
-void MoveLiveActorToTile(Battle_Ai_CandidateMovementView* state,
+void MoveLiveActorToTile(VS::Battle::Ai::CandidateMovementView* state,
                          std::uint32_t tile, int radius) {
   RunMovement(StateOf(state),
               [=](MovementState& movement, LiveMovementHost& host) {
@@ -504,7 +518,7 @@ void MoveLiveActorToTile(Battle_Ai_CandidateMovementView* state,
               });
 }
 
-void PatrolLiveWaypoints(Battle_Ai_ActorAiState* state) {
+void PatrolLiveWaypoints(VS::Battle::Ai::ActorAiState* state) {
   RunMovement(
       StateOf(state), [](MovementState& movement, LiveMovementHost& host) {
         Require(PatrolWaypoints(movement, host),
@@ -513,7 +527,8 @@ void PatrolLiveWaypoints(Battle_Ai_ActorAiState* state) {
       });
 }
 
-int FleeLiveVisibleEnemies(Battle_Ai_CandidateMovementView* state, int kind) {
+int FleeLiveVisibleEnemies(VS::Battle::Ai::CandidateMovementView* state,
+                           int kind) {
   return RunMovement(
       StateOf(state), [kind](MovementState& movement, LiveMovementHost& host) {
         return RequireResult(
@@ -523,7 +538,7 @@ int FleeLiveVisibleEnemies(Battle_Ai_CandidateMovementView* state, int kind) {
       });
 }
 
-int TrackLiveActorPosition(Battle_Ai_ActorAiState* state, int target) {
+int TrackLiveActorPosition(VS::Battle::Ai::ActorAiState* state, int target) {
   return RunMovement(StateOf(state), [target](MovementState& movement,
                                               LiveMovementHost& host) {
     return RequireResult(
@@ -532,13 +547,14 @@ int TrackLiveActorPosition(Battle_Ai_ActorAiState* state, int target) {
   });
 }
 
-int FindLiveActorByRelationship(Battle_Ai_EscortView* state,
-                                Battle_Ai_GuardTileWord* tile, int relation) {
+int FindLiveActorByRelationship(VS::Battle::Ai::EscortView* state,
+                                VS::Battle::Ai::GuardTileWord* tile,
+                                int relation) {
   return FindRelatedActor(StateOf(state),
                           tile != nullptr ? &tile->word : nullptr, relation);
 }
 
-int FindLiveActorByRelationship(Battle_Ai_ActorAiState* state,
+int FindLiveActorByRelationship(VS::Battle::Ai::ActorAiState* state,
                                 std::uint32_t* tile, int relation) {
   return FindRelatedActor(StateOf(state), tile, relation);
 }
@@ -551,7 +567,8 @@ int LiveTargetFacingCosine(const SVECTOR* from, const SVECTOR* to, int angle,
                             Core::Math::PositionOf(*to), angle, distance);
 }
 
-void SelectLiveActionMovementMode(Battle_Ai_CandidateReadinessView* state) {
+void SelectLiveActionMovementMode(
+    VS::Battle::Ai::CandidateReadinessView* state) {
   RunMovement(
       StateOf(state), [](MovementState& movement, LiveMovementHost& host) {
         Require(SelectActionMovementMode(movement, host),
@@ -560,7 +577,8 @@ void SelectLiveActionMovementMode(Battle_Ai_CandidateReadinessView* state) {
       });
 }
 
-void ApplyLiveActionRelationshipChanges(Battle_Ai_ReactionRecord* record) {
+void ApplyLiveActionRelationshipChanges(
+    VS::Battle::Ai::ReactionRecord* record) {
   LiveRelationshipChanges host(record);
   Require(ApplyActionRelationshipChanges(host),
           "AI relationship changes require a valid battle actor list");

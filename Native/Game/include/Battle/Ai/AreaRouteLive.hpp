@@ -6,9 +6,11 @@
 
 #include "Battle/Ai/AreaRoute.hpp"
 
-struct Battle_Ai_AreaRouteView;
-struct Battle_Ai_RouteGateTile;
-struct Battle_Ai_TerrainMoveView;
+namespace VS::Battle::Ai {
+struct AreaRouteView;
+struct RouteGateTile;
+struct TerrainMoveView;
+}  // namespace VS::Battle::Ai
 
 // Binding from the room's AI frame, route table, route links, moving
 // platforms and the actor AI state to the typed area routing
@@ -28,24 +30,24 @@ namespace VS::Battle::Ai {
 
 // func_800DF9A8. Writes the exit's three bytes, or the whole four-byte entry
 // word when no link starts at the entry tile, as the original did.
-void ResolveLiveRouteGateExit(Battle_Ai_RouteGateTile* entry_tile,
-                              Battle_Ai_RouteGateTile* exit_tile);
+void ResolveLiveRouteGateExit(VS::Battle::Ai::RouteGateTile* entry_tile,
+                              VS::Battle::Ai::RouteGateTile* exit_tile);
 
 // func_800DFA54. Writes the entry's x and z bytes.
 void FindLiveNearestRouteGateEntry(int platform, int world_x, int world_z,
-                                   Battle_Ai_RouteGateTile* entry_tile);
+                                   VS::Battle::Ai::RouteGateTile* entry_tile);
 
 // func_800DFAF8. The original ignored its first argument.
 int FindLiveRouteGateAtTile(std::intptr_t state, unsigned int tile,
                             int match_entry_end);
 
 // func_800DFBCC. Returns the command intent for the actor AI state.
-int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index,
-                                   int area);
+int ResolveLiveNavigationAreaRoute(VS::Battle::Ai::AreaRouteView* state,
+                                   int index, int area);
 
 // func_800E19FC. Runs the movement primitive UpdateNavigationAreaMovement
 // chooses for the actor AI state.
-void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
+void UpdateLiveNavigationAreaMovement(VS::Battle::Ai::TerrainMoveView* state);
 
 // func_800E1850. FilterDirectionsByGroundHeight over the room's direction
 // codes and terrain.
@@ -55,5 +57,6 @@ unsigned char FilterLiveDirectionsByGroundHeight(unsigned char mask,
 
 // func_800E1908. Runs MoveWithHeightFilteredDirections for the actor AI
 // state, then writes the walk command to the actor it named before the move.
-void MoveLiveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state);
+void MoveLiveWithHeightFilteredDirections(
+    VS::Battle::Ai::TerrainMoveView* state);
 }  // namespace VS::Battle::Ai

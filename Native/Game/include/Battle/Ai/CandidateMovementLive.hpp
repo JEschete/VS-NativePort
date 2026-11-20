@@ -1,20 +1,21 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Battle_Ai_ActorAiState;
-struct Battle_Ai_ActionCandidate;
-struct Battle_Ai_CandidateMovementView;
-struct Battle_Ai_CandidateEntryView;
-struct Battle_Ai_EscortView;
-
 namespace VS::Battle::Ai {
-int UpdateLiveEscortCombatBehavior(Battle_Ai_EscortView* state);
-int MoveLiveForActionCandidate(Battle_Ai_CandidateMovementView* state,
-                               Battle_Ai_CandidateEntryView* candidate);
-int UpdateLiveCombatPursuit(Battle_Ai_ActorAiState* state);
-int TryApproachLivePlannedTarget(Battle_Ai_ActorAiState* state,
-                                 Battle_Ai_ActionCandidate* candidate);
-int UpdateLiveCloseFollowBehavior(Battle_Ai_EscortView* state);
-int UpdateLiveEnemyPursuitBehavior(Battle_Ai_EscortView* state);
-int UpdateLiveGuardMovementBehavior(Battle_Ai_EscortView* state);
+struct ActorAiState;
+struct ActionCandidateRecord;
+struct CandidateMovementView;
+struct CandidateEntryView;
+struct EscortView;
+
+int UpdateLiveEscortCombatBehavior(VS::Battle::Ai::EscortView* state);
+int MoveLiveForActionCandidate(VS::Battle::Ai::CandidateMovementView* state,
+                               VS::Battle::Ai::CandidateEntryView* candidate);
+int UpdateLiveCombatPursuit(VS::Battle::Ai::ActorAiState* state);
+int TryApproachLivePlannedTarget(
+    VS::Battle::Ai::ActorAiState* state,
+    VS::Battle::Ai::ActionCandidateRecord* candidate);
+int UpdateLiveCloseFollowBehavior(VS::Battle::Ai::EscortView* state);
+int UpdateLiveEnemyPursuitBehavior(VS::Battle::Ai::EscortView* state);
+int UpdateLiveGuardMovementBehavior(VS::Battle::Ai::EscortView* state);
 }  // namespace VS::Battle::Ai

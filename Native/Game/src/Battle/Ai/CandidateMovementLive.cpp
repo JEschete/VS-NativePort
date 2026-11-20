@@ -19,8 +19,7 @@
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/AiViews.hpp"
 #include "Battle/Ai/CandidateMovement.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
@@ -37,46 +36,49 @@
 
 namespace VS::Battle::Ai {
 namespace {
-using State = Battle_Ai_ActorAiState;
-using Movement = Battle_Ai_CandidateMovementView;
-using Escort = Battle_Ai_EscortView;
-static_assert(sizeof(Battle_Ai_ActionCandidate) ==
+using State = VS::Battle::Ai::ActorAiState;
+using Movement = VS::Battle::Ai::CandidateMovementView;
+using Escort = VS::Battle::Ai::EscortView;
+static_assert(sizeof(VS::Battle::Ai::ActionCandidateRecord) ==
               sizeof(ActionCandidate::Words));
-static_assert(std::extent_v<decltype(State::candidateOrder)> ==
+static_assert(std::tuple_size_v<decltype(State::candidate_order)> ==
               kCandidateCapacity);
 static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
               kCandidateTargetSlots);
 static_assert(kFrameActorSlots == kCandidateTargetSlots);
 static_assert(offsetof(Movement, opaque1) == offsetof(State, opaque1));
 static_assert(offsetof(Movement, position) == offsetof(State, position));
-static_assert(offsetof(Movement, pointHeight) == offsetof(State, pointHeight));
-static_assert(offsetof(Movement, maxRange) == offsetof(State, maxRange));
-static_assert(offsetof(Movement, planMode) == offsetof(State, planMode));
-static_assert(offsetof(Movement, plannedTile) == offsetof(State, plannedTile));
-static_assert(offsetof(Movement, movementTarget) ==
-              offsetof(State, movementTarget));
-static_assert(offsetof(Movement, movementFlags) ==
-              offsetof(State, movementFlags));
+static_assert(offsetof(Movement, point_height) ==
+              offsetof(State, point_height));
+static_assert(offsetof(Movement, max_range) == offsetof(State, max_range));
+static_assert(offsetof(Movement, plan_mode) == offsetof(State, plan_mode));
+static_assert(offsetof(Movement, planned_tile) ==
+              offsetof(State, planned_tile));
+static_assert(offsetof(Movement, movement_target) ==
+              offsetof(State, movement_target));
+static_assert(offsetof(Movement, movement_flags) ==
+              offsetof(State, movement_flags));
 static_assert(offsetof(Movement, destination) == offsetof(State, destination));
 static_assert(offsetof(Movement, relations) == offsetof(State, relations));
-static_assert(offsetof(Movement, distancesSquared) ==
-              offsetof(State, distancesSquared));
-static_assert(offsetof(Movement, candidateCount) ==
-              offsetof(State, candidateCount));
-static_assert(offsetof(Escort, opaqueE) == offsetof(State, opaqueE));
-static_assert(offsetof(Escort, opaqueF) == offsetof(State, opaqueF));
-static_assert(offsetof(Escort, linkedActor) == offsetof(State, linkedActor));
+static_assert(offsetof(Movement, distances_squared) ==
+              offsetof(State, distances_squared));
+static_assert(offsetof(Movement, candidate_count) ==
+              offsetof(State, candidate_count));
+static_assert(offsetof(Escort, opaque_e) == offsetof(State, opaque_e));
+static_assert(offsetof(Escort, opaque_f) == offsetof(State, opaque_f));
+static_assert(offsetof(Escort, linked_actor) == offsetof(State, linked_actor));
 static_assert(offsetof(Escort, opaque18) == offsetof(State, opaque18));
 static_assert(offsetof(Escort, opaque44) == offsetof(State, opaque44));
 static_assert(offsetof(Escort, x) == offsetof(State, position));
-static_assert(offsetof(Escort, actorId) == offsetof(State, actorId));
-static_assert(offsetof(Escort, opaqueE9) == offsetof(State, opaqueE9));
-static_assert(offsetof(Escort, actionStatus) == offsetof(State, actionStatus));
-static_assert(offsetof(Escort, movementTarget) ==
-              offsetof(State, movementTarget));
+static_assert(offsetof(Escort, actor_id) == offsetof(State, actor_id));
+static_assert(offsetof(Escort, opaque_e9) == offsetof(State, opaque_e9));
+static_assert(offsetof(Escort, action_status) ==
+              offsetof(State, action_status));
+static_assert(offsetof(Escort, movement_target) ==
+              offsetof(State, movement_target));
 static_assert(offsetof(Escort, relations) == offsetof(State, relations));
-static_assert(offsetof(Escort, candidateOrder) ==
-              offsetof(State, candidateOrder));
+static_assert(offsetof(Escort, candidate_order) ==
+              offsetof(State, candidate_order));
 
 State& StateOf(State* state) {
   Require(state != nullptr, "AI candidate movement requires an actor state");
@@ -98,36 +100,36 @@ bool ValidTarget(int target) {
 
 CandidateMover Load(const State& state) {
   CandidateMover mover{.gait = state.opaque1,
-                       .fleeing = state.opaqueE,
-                       .guarding = state.opaqueF,
-                       .linked_actor = state.linkedActor,
+                       .fleeing = state.opaque_e,
+                       .guarding = state.opaque_f,
+                       .linked_actor = state.linked_actor,
                        .alerted = state.opaque18,
                        .guard_delay = state.opaque44,
                        .position = Core::Math::PositionOf(state.position),
-                       .point_height = state.pointHeight,
-                       .actor_id = state.actorId,
-                       .max_range = state.maxRange,
-                       .range_mode = state.opaqueE9,
-                       .plan_mode = state.planMode,
-                       .action_status = state.actionStatus,
-                       .planned_tile = state.plannedTile.word,
-                       .movement_target = state.movementTarget,
-                       .movement_flags = state.movementFlags,
+                       .point_height = state.point_height,
+                       .actor_id = state.actor_id,
+                       .max_range = state.max_range,
+                       .range_mode = state.opaque_e9,
+                       .plan_mode = state.plan_mode,
+                       .action_status = state.action_status,
+                       .planned_tile = state.planned_tile.word,
+                       .movement_target = state.movement_target,
+                       .movement_flags = state.movement_flags,
                        .destination = state.destination.word,
-                       .candidate_count = state.candidateCount};
+                       .candidate_count = state.candidate_count};
   for (int id = 0; id < kCandidateTargetSlots; ++id) {
     mover.relations.at(id) = std::bit_cast<std::uint32_t>(state.relations[id]);
-    mover.distances_squared.at(id) = state.distancesSquared[id];
+    mover.distances_squared.at(id) = state.distances_squared[id];
   }
   return mover;
 }
 
 void Store(const CandidateMover& mover, State& state) {
   state.opaque1 = mover.gait;
-  state.opaqueF = mover.guarding;
+  state.opaque_f = mover.guarding;
   state.opaque18 = mover.alerted;
   state.opaque44 = mover.guard_delay;
-  state.movementTarget = mover.movement_target;
+  state.movement_target = mover.movement_target;
   for (int id = 0; id < kCandidateTargetSlots; ++id) {
     state.relations[id] =
         std::bit_cast<VS::Battle::Ai::RelationWord>(mover.relations.at(id));
@@ -140,7 +142,7 @@ class LiveCandidateMovementWorld final
   explicit LiveCandidateMovementWorld(State& state) : state_(state) {}
 
   std::optional<std::size_t> Handle(
-      Battle_Ai_ActionCandidate* candidate) const {
+      VS::Battle::Ai::ActionCandidateRecord* candidate) const {
     if (candidate == nullptr) return std::nullopt;
     const auto found = std::ranges::find(candidates_, candidate);
     if (found != candidates_.end()) {
@@ -151,8 +153,8 @@ class LiveCandidateMovementWorld final
   }
   [[nodiscard]] std::optional<std::size_t> RankedHandle(
       std::size_t rank) const override {
-    if (rank >= std::size(state_.candidateOrder)) return std::nullopt;
-    return Handle(state_.candidateOrder[rank]);
+    if (rank >= std::size(state_.candidate_order)) return std::nullopt;
+    return Handle(state_.candidate_order[rank]);
   }
   [[nodiscard]] std::optional<ActionCandidate> Candidate(
       std::size_t handle) const override {
@@ -186,12 +188,12 @@ class LiveCandidateMovementWorld final
         VS::Battle::Ai::actorAiStates[target] == nullptr) {
       return std::nullopt;
     }
-    return VS::Battle::Ai::actorAiStates[target]->pointHeight;
+    return VS::Battle::Ai::actorAiStates[target]->point_height;
   }
   [[nodiscard]] std::optional<std::uint32_t> FrameDistance(
       int observer, int target) const override {
     if (!HasFrameActor(observer) || !ValidTarget(target)) return std::nullopt;
-    return LiveFrameContext().actors[observer]->distancesSquared[target];
+    return LiveFrameContext().actors[observer]->distances_squared[target];
   }
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
     ActorRoster roster;
@@ -210,12 +212,12 @@ class LiveCandidateMovementWorld final
   [[nodiscard]] std::uint16_t ReadinessLevel() const override {
     Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI pursuit requires room readiness");
-    return VS::Battle::Ai::roomAiState->readinessLevel;
+    return VS::Battle::Ai::roomAiState->readiness_level;
   }
   void CountApproachMove() override {
     Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI pursuit requires the room approach counter");
-    auto& count = VS::Battle::Ai::roomAiState->approachMoves;
+    auto& count = VS::Battle::Ai::roomAiState->approach_moves;
     count = Core::Math::WrappingAdd(count, 1);
   }
   [[nodiscard]] bool CanApproach(CandidateMover& mover,
@@ -310,7 +312,7 @@ class LiveCandidateMovementWorld final
     }
   }
   State& state_;
-  mutable std::vector<Battle_Ai_ActionCandidate*> candidates_;
+  mutable std::vector<VS::Battle::Ai::ActionCandidateRecord*> candidates_;
 };
 
 template <typename Operation>
@@ -324,12 +326,12 @@ int Run(State* state, Operation operation) {
 }
 }  // namespace
 
-int MoveLiveForActionCandidate(Battle_Ai_CandidateMovementView* state,
-                               Battle_Ai_CandidateEntryView* candidate) {
+int MoveLiveForActionCandidate(VS::Battle::Ai::CandidateMovementView* state,
+                               VS::Battle::Ai::CandidateEntryView* candidate) {
   return Run(reinterpret_cast<State*>(state), [&](auto& world, auto& mover) {
     if (mover.candidate_count == 0) return std::optional<int>{0};
-    const auto handle =
-        world.Handle(reinterpret_cast<Battle_Ai_ActionCandidate*>(candidate));
+    const auto handle = world.Handle(
+        reinterpret_cast<VS::Battle::Ai::ActionCandidateRecord*>(candidate));
     return MoveForActionCandidate(
         world, mover,
         RequireValue(handle, "AI movement requires an action candidate"));
@@ -340,8 +342,8 @@ int UpdateLiveCombatPursuit(State* state) {
   return Run(state, UpdateCombatPursuit);
 }
 
-int TryApproachLivePlannedTarget(State* state,
-                                 Battle_Ai_ActionCandidate* candidate) {
+int TryApproachLivePlannedTarget(
+    State* state, VS::Battle::Ai::ActionCandidateRecord* candidate) {
   return Run(state, [&](auto& world, auto& mover) {
     const auto handle = world.Handle(candidate);
     return TryApproachPlannedTarget(
