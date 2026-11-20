@@ -27,7 +27,7 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLiveState.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapTerminalLive.hpp"
 #include "State/Progress.hpp"
@@ -219,8 +219,8 @@ int LiveFindLocationId(int zone_id, int room_id) {
 int LiveCurrentRoomId() {
   const std::array<LocationDestination, kLocationCount> table =
       LiveLocationTable();
-  return CurrentRoomId(table, CurrentRoom{.zone_id = zoneContext.zndId,
-                                          .room_id = zoneContext.mapId});
+  return CurrentRoomId(table, CurrentRoom{.zone_id = zoneContext.zone_id,
+                                          .room_id = zoneContext.room_id});
 }
 
 int LiveEnableOwnedRoomRendering(int owner_room_index) {

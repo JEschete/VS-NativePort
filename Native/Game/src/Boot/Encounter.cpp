@@ -71,7 +71,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -866,8 +866,8 @@ EncounterState InspectGameplay() {
   state.ready = gameplay_inspection_ready && VS::Boot::isGameplayActive != 0 &&
                 VS::Field::controlMode != 0;
   if (!state.ready) return state;
-  state.zone = VS::Field::zoneContext.zndId;
-  state.room = VS::Field::zoneContext.mapId;
+  state.zone = VS::Field::zoneContext.zone_id;
+  state.room = VS::Field::zoneContext.room_id;
   state.control_mode = VS::Field::controlMode;
   state.game_over = VS::State::stateFlags.game_over != 0;
   state.field_rendering_enabled =
@@ -982,7 +982,7 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
   const auto& camera = VS::Field::sphericalCamera;
   const auto script =
       Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
-  scene["id"] = VS::Field::zoneContext.currentSceneId;
+  scene["id"] = VS::Field::zoneContext.scene_id;
   scene["event"] = {
       {"id", VS::Event::eventId},
       {"source", VS::Event::eventSource},
@@ -1058,8 +1058,8 @@ EncounterDoorRequest CheckDoorRequest(int index) {
 
 void ApplyPendingDoorRequest() {
   if (pending_door < 0 || !gameplay_inspection_ready || !room_prepared) return;
-  if (VS::Field::zoneContext.zndId != pending_door_zone ||
-      VS::Field::zoneContext.mapId != pending_door_room) {
+  if (VS::Field::zoneContext.zone_id != pending_door_zone ||
+      VS::Field::zoneContext.room_id != pending_door_room) {
     VS::Core::LogError("field.door-test",
                        "source changed before queued door {} executed",
                        pending_door);
@@ -1081,7 +1081,7 @@ void ApplyPendingDoorRequest() {
                     door.destinationZoneId, door.destinationRoomId);
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
-  if (door.destinationZoneId == VS::Field::zoneContext.zndId) {
+  if (door.destinationZoneId == VS::Field::zoneContext.zone_id) {
     VS::Field::LiveBeginRoomTransition(&door, 0, kTransitionSpeed);
   } else {
     VS::Field::LiveBeginZoneTransition(&door, 0, kTransitionSpeed);
@@ -1098,8 +1098,8 @@ EncounterDoorRequest RequestEncounterDoorTransition(int index) {
   const auto checked = CheckDoorRequest(index);
   if (checked.status != EncounterDoorRequestStatus::kAccepted) return checked;
   pending_door = index;
-  pending_door_zone = VS::Field::zoneContext.zndId;
-  pending_door_room = VS::Field::zoneContext.mapId;
+  pending_door_zone = VS::Field::zoneContext.zone_id;
+  pending_door_room = VS::Field::zoneContext.room_id;
   return {EncounterDoorRequestStatus::kAccepted, {}};
 }
 }  // namespace VS::Game
@@ -1108,11 +1108,11 @@ void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
   VS::Game::room_prepared = false;
   if (!VS::Game::UsesConfiguredEncounterPlacements(
-          VS::Game::configuration, VS::Field::zoneContext.zndId,
-          VS::Field::zoneContext.mapId, VS::Game::external_event_started)) {
+          VS::Game::configuration, VS::Field::zoneContext.zone_id,
+          VS::Field::zoneContext.room_id, VS::Game::external_event_started)) {
     VS::Core::LogDebug(
         "encounter.spawn", "using original placements zone={} room={}",
-        VS::Field::zoneContext.zndId, VS::Field::zoneContext.mapId);
+        VS::Field::zoneContext.zone_id, VS::Field::zoneContext.room_id);
     return;
   }
   *data = VS::Game::placements.data();
@@ -1160,8 +1160,8 @@ void VS::Boot::EncounterPollStop() {
       // frame in the configured room, after any production entry events.
       const bool configured_room_ready =
           VS::Event::playbackPhase == 0 && VS::Field::controlMode == 1 &&
-          VS::Field::zoneContext.zndId == VS::Game::configuration.zone &&
-          VS::Field::zoneContext.mapId == VS::Game::configuration.room;
+          VS::Field::zoneContext.zone_id == VS::Game::configuration.zone &&
+          VS::Field::zoneContext.room_id == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&
           !VS::Game::external_event_started && configured_room_ready) {
         const int event = *VS::Game::configuration.external_event;
@@ -1178,8 +1178,8 @@ void VS::Boot::EncounterPollStop() {
         VS::Core::LogInfo("encounter.event",
                           "Starting external event {} in zone {} room {}; "
                           "component fixture, not story progression",
-                          event, VS::Field::zoneContext.zndId,
-                          VS::Field::zoneContext.mapId);
+                          event, VS::Field::zoneContext.zone_id,
+                          VS::Field::zoneContext.room_id);
         VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
                  !VS::Game::room_local_event_started && configured_room_ready) {
@@ -1194,8 +1194,8 @@ void VS::Boot::EncounterPollStop() {
                                                kDoorOffsetBytes) == 0) {
           VS::Core::Errorf("encounter.event",
                            "Room %d/%d has no local event %d",
-                           VS::Field::zoneContext.zndId,
-                           VS::Field::zoneContext.mapId, selector);
+                           VS::Field::zoneContext.zone_id,
+                           VS::Field::zoneContext.room_id, selector);
           std::abort();
         }
         // Same queue state as a satisfied local room trigger (0x8000 event id)
@@ -1208,8 +1208,8 @@ void VS::Boot::EncounterPollStop() {
         VS::Core::LogInfo("encounter.event",
                           "Starting room-local event {} in zone {} room {}; "
                           "trigger conditions not evaluated",
-                          selector, VS::Field::zoneContext.zndId,
-                          VS::Field::zoneContext.mapId);
+                          selector, VS::Field::zoneContext.zone_id,
+                          VS::Field::zoneContext.room_id);
         VS::Event::BeginLiveQueuedCutscene();
       }
     }

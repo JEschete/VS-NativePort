@@ -1400,8 +1400,8 @@ struct ScriptedFallDoorFixture {
   Field_MpdEnvironment environment{};
 
   ScriptedFallDoorFixture() {
-    REQUIRE(saved_zone.zndData == nullptr);
-    REQUIRE(saved_zone.zndDiscRequest == nullptr);
+    REQUIRE(saved_zone.zone_data == nullptr);
+    REQUIRE(saved_zone.zone_disc_request == nullptr);
     std::ranges::copy(Battle_actors, saved_actors.begin());
     std::ranges::copy(Actors_actorRecords, saved_records.begin());
     std::ranges::fill(Battle_actors, nullptr);
@@ -1410,7 +1410,7 @@ struct ScriptedFallDoorFixture {
     Actors_actorRecords[2] = actors.record.get();
     VS::Field::StoreLiveRoomTransition({});
     VS::Field::zoneContext = {};
-    VS::Field::zoneContext.zndId = 9;
+    VS::Field::zoneContext.zone_id = 9;
     cells[3].isPit = 1;
     environment.fallDestinationZone = 9;
     environment.fallDestinationRoom = 3;
@@ -1422,12 +1422,12 @@ struct ScriptedFallDoorFixture {
     Field_roomData.header.environmentLength = sizeof environment;
   }
   ~ScriptedFallDoorFixture() {
-    if (VS::Field::zoneContext.zndDiscRequest != nullptr) {
+    if (VS::Field::zoneContext.zone_disc_request != nullptr) {
       VS::Content::ReleaseLiveDiscRequest(
-          VS::Field::zoneContext.zndDiscRequest);
+          VS::Field::zoneContext.zone_disc_request);
     }
-    if (VS::Field::zoneContext.zndData != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(VS::Field::zoneContext.zndData);
+    if (VS::Field::zoneContext.zone_data != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Field::zoneContext.zone_data);
     }
     VS::Field::StoreLiveRoomTransition(saved_transition);
     Field_entranceDoorRecord = saved_entrance;

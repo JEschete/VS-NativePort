@@ -231,7 +231,7 @@
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Field/TriggerMarkers.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Input/Controllers.hpp"
 #include "Input/Vibration.hpp"
 #include "Items/Categories.hpp"

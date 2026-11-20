@@ -850,7 +850,7 @@ TEST_CASE("Releasing a zone frees its events and tables",
   CHECK(ZoneSoundFileId(42) == 42);
 
   SavedGlobal saved_zone{zoneContext};
-  zoneContext.musicId = 42;
+  zoneContext.music_id = 42;
   CHECK(LiveZoneSoundFileId() == 42);
 }
 

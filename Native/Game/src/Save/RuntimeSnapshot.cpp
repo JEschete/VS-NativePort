@@ -1436,16 +1436,16 @@ std::expected<Snapshot, std::string> Capture(
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
       Field_roomData.environment == nullptr ||
-      VS::Field::zoneContext.mpdDiscRequest != nullptr ||
-      VS::Field::zoneContext.zndDiscRequest != nullptr) {
+      VS::Field::zoneContext.room_disc_request != nullptr ||
+      VS::Field::zoneContext.zone_disc_request != nullptr) {
     return std::unexpected("gameplay is not ready for a semantic capture");
   }
-  if (VS::Field::zoneContext.zndId <= 0 ||
-      VS::Field::zoneContext.zndId > kLastLocation ||
-      VS::Field::zoneContext.mapId < 0 ||
-      VS::Field::zoneContext.mapId > kLastLocation ||
-      VS::Field::zoneContext.currentSceneId < 0 ||
-      VS::Field::zoneContext.currentSceneId > kLastScene) {
+  if (VS::Field::zoneContext.zone_id <= 0 ||
+      VS::Field::zoneContext.zone_id > kLastLocation ||
+      VS::Field::zoneContext.room_id < 0 ||
+      VS::Field::zoneContext.room_id > kLastLocation ||
+      VS::Field::zoneContext.scene_id < 0 ||
+      VS::Field::zoneContext.scene_id > kLastScene) {
     return std::unexpected("live scene identity is invalid");
   }
   const auto phase = ValidateCaptureBoundary(*Actors_actorRecords[0]);
@@ -1460,12 +1460,12 @@ std::expected<Snapshot, std::string> Capture(
   if (!valid) return std::unexpected(valid.error());
   const auto& model = Actors_actorRecords[0]->instance;
   state.location.zone =
-      static_cast<std::uint16_t>(VS::Field::zoneContext.zndId);
+      static_cast<std::uint16_t>(VS::Field::zoneContext.zone_id);
   state.location.room =
-      static_cast<std::uint16_t>(VS::Field::zoneContext.mapId);
+      static_cast<std::uint16_t>(VS::Field::zoneContext.room_id);
   // _zoneContext+0x68 (G00254/D800F18E8), not the detached door alias.
   state.location.scene =
-      static_cast<std::uint16_t>(VS::Field::zoneContext.currentSceneId);
+      static_cast<std::uint16_t>(VS::Field::zoneContext.scene_id);
   state.location.position = {model.position.vx, model.position.vy,
                              model.position.vz};
   state.location.facing = model.facing;
@@ -1611,12 +1611,12 @@ std::expected<void, std::string> FinishResume() {
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
       Field_roomData.environment == nullptr ||
-      VS::Field::zoneContext.zndId != state.location.zone ||
-      VS::Field::zoneContext.mapId != state.location.room ||
-      VS::Field::zoneContext.currentSceneId != state.location.scene ||
+      VS::Field::zoneContext.zone_id != state.location.zone ||
+      VS::Field::zoneContext.room_id != state.location.room ||
+      VS::Field::zoneContext.scene_id != state.location.scene ||
       Field_roomData.environment->sceneId != state.location.scene ||
-      VS::Field::zoneContext.mpdDiscRequest != nullptr ||
-      VS::Field::zoneContext.zndDiscRequest != nullptr ||
+      VS::Field::zoneContext.room_disc_request != nullptr ||
+      VS::Field::zoneContext.zone_disc_request != nullptr ||
       VS::State::ashleySnapshot.stats.is_pending != 0) {
     return std::unexpected("the staged resume room/Ashley spawn is not ready");
   }

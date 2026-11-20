@@ -4,6 +4,7 @@
 #include "Legacy/Psx.h"
 
 namespace VS::Field {
+struct CameraBounds;
 struct MapScene;
 }  // namespace VS::Field
 struct Field_MpdCollisionHeader;
@@ -17,7 +18,6 @@ struct Field_MpdTileCell;
 struct Field_MpdViewTrigger;
 struct Field_RoomRecord;
 struct Field_RoomTint;
-struct Field_ZoneBounds;
 
 // decomp: D_800F1BB0_t (src/BATTLE/BATTLE.PRG/146C.c:168)
 struct Field_RoomTint {
@@ -84,7 +84,7 @@ struct Field_RoomRecord {
     void* section15; /* a section pointer (filled with the others) */
     void* section16; /* a section pointer (filled with the others) */
     void* section17; /* a section pointer (filled with the others) */
-    Field_ZoneBounds* zoneBounds;
+    VS::Field::CameraBounds* zoneBounds;
 };
 
 extern void* Field_roomPrimitiveRangeEnd;

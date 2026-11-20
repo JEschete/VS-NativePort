@@ -414,7 +414,6 @@ T00511,type,3,Effects::ActionControlKey,func_800D6894_t,size 0x4,Gives one actio
 T00505,type,3,Effects::ChildTrackKey,func_800D5A98_t,size 0x9,Gives one child-effect key.,,,Value
 T00321,type,3,Field::MpdPolygonGroupHeader,_mpdGeometryHeader,size 0x40,Is the 64-byte header of one MPD polygon group; its contents are not read by decompiled code.,,,OnDisc
 T00337,type,3,Field::MpdSectionE,_mpdRoomSectionE,size 0x14,Heads an MPD section holding one or two integer arrays whose purpose is unidentified.,,,OnDisc
-T00221,type,3,Field::RoomLoadResetBlock,D_800F18C8_t,size 0x18,Holds a block of values cleared when a room finishes loading.,,Field::roomLoadResetBlock=0x800F18C8,State
 T00405,type,3,Render::ModelScratchpadCameraView,cameraTransformScratch,size 0x9C,Views the model scratchpad's matrix and scale; not read.,,,State
 T00635.003,reserved,4,Actors::ActorCore.reserved16C,unk16C,0xB20,Not read by the decompiled users,,,native:read
 T00253.002,reserved,4,Actors::AnimationPose.reserved2A0,unk2A0,0x2A0,Not read by the decompiled users,VS::Actors::LoadLiveSkeletalPose VS::Actors::StoreLiveSkeletalPose,,native:read
@@ -554,7 +553,7 @@ T00328.011,reserved,4,Field::MpdDoorRecord.reserved09,unk9,0x9,Remaining door id
 T00328.012,reserved,4,Field::MpdDoorRecord.reserved0A,unkA,0xA,Remaining door identifier bytes,VS::Field::DoorRecordOf VS::Field::StoreDoorRecord VS::Game::Save::(anonymous)::Fields,Field::pendingDestinationDoor=0x800F1ABA Field::entranceDoorRecord=0x800F1CD2 State::savedEntryDoor=0x80061072,native:read
 T00328.013,reserved,4,Field::MpdDoorRecord.reserved0B,unkB,0xB,Remaining door identifier bytes,VS::Field::DoorRecordOf VS::Field::StoreDoorRecord VS::Game::Save::(anonymous)::Fields,Field::pendingDestinationDoor=0x800F1ABB Field::entranceDoorRecord=0x800F1CD3 State::savedEntryDoor=0x80061073,native:read
 T00320.025,reserved,4,Field::MpdEnemySpawn.reserved26,unk26,0x26,Unidentified byte,VS::Actors::DecodeRoomSpawn,,native:read
-T00348.019,reserved,4,Field::ZoneContext.reserved4C,unk4C,0x4C,Unreferenced word,VS::Field::(anonymous)::LiveRoomLoadHost::ClearRoomResetWords,Field::zoneContext=0x800F18CC,native:read
+T00348.019,reserved,4,Field::ZoneContext.reserved4c,unk4C,0x4C,Unreferenced word,VS::Field::(anonymous)::LiveRoomLoadHost::ClearRoomResetWords,Field::zoneContext=0x800F18CC,native:read
 T00348.021,reserved,4,Field::ZoneContext.reserved54,unk54,0x54,Unreferenced word,VS::Field::(anonymous)::LiveRoomLoadHost::ClearRoomResetWords,Field::zoneContext=0x800F18D4,native:read
 T00697.014,reserved,4,Items::InventoryBlade.reserved_bits,unk10_5,,Not read by decompiled code,,,native:missing
 T00332.005,reserved,4,Items::TreasureChest.reserved_a,unkA,0xA,Not read,(anonymous)::LiveAnimationDispatchHost::Job (anonymous)::LiveAnimationDispatchHost::StoreCountdown (anonymous)::LiveChestSwitchHost::State (anonymous)::LiveChestSwitchHost::StoreSwitch (anonymous)::LiveChestSwitchHost::StoreStartState,,native:read

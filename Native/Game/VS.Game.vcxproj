@@ -2275,7 +2275,7 @@
     <ClInclude Include="src\Field\TransitionsLiveState.hpp" />
     <ClInclude Include="src\Field\TriggerMarkers.hpp" />
     <ClInclude Include="src\Field\Weather.hpp" />
-    <ClInclude Include="src\Field\Zone.h" />
+    <ClInclude Include="src\Field\Zone.hpp" />
     <ClInclude Include="src\Items\Categories.hpp" />
     <ClInclude Include="src\Items\ContainerTables.hpp" />
     <ClInclude Include="src\Items\InventoryLiveState.hpp" />

@@ -57,7 +57,9 @@ class LiveTransitionHost final : public TransitionHost {
  public:
   explicit LiveTransitionHost(RoomTransitionState& state) : state_(state) {}
 
-  [[nodiscard]] int CurrentZoneId() const override { return zoneContext.zndId; }
+  [[nodiscard]] int CurrentZoneId() const override {
+    return zoneContext.zone_id;
+  }
   [[nodiscard]] std::optional<LocationDestination> Location(
       int location_id) const override {
     if (location_id < 0 ||

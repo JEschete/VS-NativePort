@@ -641,28 +641,28 @@ void TestsNativeMonoOutput(int enabled) {
 }
 
 int TestsZoneMusicCanonicalState(void) {
-  const int saved_id = VS::Field::zoneContext.musicId;
-  const int saved_slot = VS::Field::zoneContext.musicSlot;
-  const int saved_enabled = VS::Field::zoneContext.isMusicFadeEnabled;
+  const int saved_id = VS::Field::zoneContext.music_id;
+  const int saved_slot = VS::Field::zoneContext.music_slot;
+  const int saved_enabled = VS::Field::zoneContext.music_fade_enabled;
   int passed = 0;
-  VS::Field::zoneContext.musicId = 16;
-  VS::Field::zoneContext.musicSlot = 3;
-  VS::Field::zoneContext.isMusicFadeEnabled = 1;
+  VS::Field::zoneContext.music_id = 16;
+  VS::Field::zoneContext.music_slot = 3;
+  VS::Field::zoneContext.music_fade_enabled = 1;
   if (VS::Field::LiveZoneSoundFileId() == 16) passed |= 1;
-  VS::Field::zoneContext.musicId = 17;
+  VS::Field::zoneContext.music_id = 17;
   if (VS::Field::LiveZoneSoundFileId() == 17) passed |= 2;
-  if (VS::Field::zoneContext.musicSlot == 3) passed |= 4;
+  if (VS::Field::zoneContext.music_slot == 3) passed |= 4;
   VS::Audio::LiveSetZoneMusicSwitchEnabled(0);
-  if (VS::Field::zoneContext.isMusicFadeEnabled == 0) passed |= 8;
+  if (VS::Field::zoneContext.music_fade_enabled == 0) passed |= 8;
   VS::Audio::LiveSetZoneMusicSwitchEnabled(1);
-  if (VS::Field::zoneContext.isMusicFadeEnabled == 1) passed |= 16;
-  if (VS::Field::zoneContext.musicId == 17 &&
-      VS::Field::zoneContext.musicSlot == 3) {
+  if (VS::Field::zoneContext.music_fade_enabled == 1) passed |= 16;
+  if (VS::Field::zoneContext.music_id == 17 &&
+      VS::Field::zoneContext.music_slot == 3) {
     passed |= 32;
   }
-  VS::Field::zoneContext.musicId = saved_id;
-  VS::Field::zoneContext.musicSlot = saved_slot;
-  VS::Field::zoneContext.isMusicFadeEnabled = saved_enabled;
+  VS::Field::zoneContext.music_id = saved_id;
+  VS::Field::zoneContext.music_slot = saved_slot;
+  VS::Field::zoneContext.music_fade_enabled = saved_enabled;
   return passed;
 }
 

@@ -3872,7 +3872,7 @@ int func_800F9800(void) {
         self.assertIn("}else{g_game_over_request=Content::CompleteLiveRefusedDiscRequest(&file,", files)
         spawning = "".join((root / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(request!=nullptr){Content::EnqueueLivePriorityDiscRequest(request,", spawning)
-        self.assertIn("}else{request=Content::CompleteLiveRefusedDiscRequest(&disc,VS::Field::zoneContext.zudData);}", spawning)
+        self.assertIn("}else{request=Content::CompleteLiveRefusedDiscRequest(&disc,VS::Field::zoneContext.zud_data);}", spawning)
         items = "".join((root / r"Native\Game\src\Menu\Framework\ItemRowsLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(g_item_text_request!=nullptr){Content::EnqueueLiveDiscRequest(g_item_text_request,", items)
         self.assertIn("}else{g_item_text_request=Content::CompleteLiveRefusedDiscRequest(&file,block);}", items)
@@ -5008,7 +5008,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         model = live.split("std::uint8_t ZoneEnemyModel(int zud) const override {", 1)[1].split("\n  }\n", 1)[0]
         self.assertIn("zud >= ZoneEnemyCount()", model)
         self.assertIn(
-            "VS::Field::zoneContext.zndEnemies[zud].bytes[kZoneEnemyModelByte]",
+            "VS::Field::zoneContext.zone_enemies[zud].bytes[kZoneEnemyModelByte]",
             "".join(model.split()),
         )
         for text in (core, live):

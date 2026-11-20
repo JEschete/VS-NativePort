@@ -312,7 +312,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
   `VS_AUDIO_CAPTURE` records rendered native PCM through a two-second bounded staging buffer, drained
   on the control thread. Overflow explicitly fails capture, not playback. Captures exclude queue padding,
   physical output gaps and independent movie/XA sources; their length follows device demand, not logical tick count.
-- **Music state:** G00248-G00250 are views of G00246's `Field_ZoneContext` fields, not separate storage.
+- **Music state:** G00248-G00250 are views of G00246's `VS::Field::ZoneContext` fields, not separate storage.
   This lets normal zone initialization/load and opcode `0x92` reach the populated music slot.
   Save/layer/crossfade/restore use complete native config/channel objects, not PS1 byte extents.
   Saved-layer conflict resolution detaches displaced assignments while protecting active SFX and stream voices.

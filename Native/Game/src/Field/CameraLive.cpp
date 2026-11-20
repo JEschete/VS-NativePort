@@ -39,7 +39,7 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
@@ -271,11 +271,11 @@ void LiveCameraHost::SetActorTransitionMode(int mode) {
 bool LiveCameraHost::IsInteractionPaused() { return isInteractionPaused != 0; }
 
 CameraBounds LiveCameraHost::ZoneBounds() {
-  const Field_ZoneBounds& bounds = zoneContext.bounds;
-  return {.min_x = bounds.minX,
-          .min_z = bounds.minZ,
-          .max_x = bounds.maxX,
-          .max_z = bounds.maxZ};
+  const auto& bounds = zoneContext.bounds;
+  return {.min_x = bounds.min_x,
+          .min_z = bounds.min_z,
+          .max_x = bounds.max_x,
+          .max_z = bounds.max_z};
 }
 
 std::optional<std::uint8_t> LiveCameraHost::CollisionCellFlags(int tile_x,

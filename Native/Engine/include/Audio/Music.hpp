@@ -97,7 +97,7 @@ class MusicHost {
   virtual void FadeMusicPitchScale(Control::Fade fade) = 0;
   virtual void StopAllMusic() = 0;
   // The zone's music switch (D_800F18B0, the zone context's
-  // isMusicFadeEnabled word).
+  // music_fade_enabled word).
   virtual void StoreZoneMusicSwitch(std::int32_t enabled) = 0;
 
   virtual void Diagnose(std::uint32_t code) = 0;

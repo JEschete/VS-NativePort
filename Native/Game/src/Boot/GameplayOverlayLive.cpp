@@ -114,20 +114,20 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Battle::ApplyLiveLearnedActionUnlocks();
   }
   void ApplyGameplayDefaults(const GameplayOverlayDefaults& defaults) override {
-    VS::Field::zoneContext.currentSceneId = 0;
+    VS::Field::zoneContext.scene_id = 0;
     VS::Field::zoneContext.reserved38 = 0;
-    VS::Field::zoneContext.mapId = 0;
-    VS::Field::zoneContext.zndId = 0;
-    VS::Field::zoneContext.zudDiscRequest = nullptr;
-    VS::Field::zoneContext.mpdDiscRequest = nullptr;
-    VS::Field::zoneContext.zndDiscRequest = nullptr;
-    VS::Field::zoneContext.mpdData = nullptr;
-    VS::Field::zoneContext.zndData = nullptr;
-    VS::Field::zoneContext.musicSlot = 0;
-    VS::Field::zoneContext.musicId = 0;
-    VS::Field::zoneContext.isMusicFadeEnabled =
+    VS::Field::zoneContext.room_id = 0;
+    VS::Field::zoneContext.zone_id = 0;
+    VS::Field::zoneContext.zud_disc_request = nullptr;
+    VS::Field::zoneContext.room_disc_request = nullptr;
+    VS::Field::zoneContext.zone_disc_request = nullptr;
+    VS::Field::zoneContext.room_data = nullptr;
+    VS::Field::zoneContext.zone_data = nullptr;
+    VS::Field::zoneContext.music_slot = 0;
+    VS::Field::zoneContext.music_id = 0;
+    VS::Field::zoneContext.music_fade_enabled =
         defaults.zone_music_fade_enabled ? 1 : 0;
-    VS::Field::zoneContext.loadedZudIndexPlusOne = 0;
+    VS::Field::zoneContext.loaded_zud_index_plus_one = 0;
     Field_pendingDestinationDoor = VS::State::savedEntryDoor;
     VS::Field::screenTransitionEffect = defaults.transition_effect;
     VS::Field::screenTransitionStep = defaults.transition_step;
@@ -142,8 +142,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Render::SetLiveCameraNearClip(defaults.near_clip);
     VS::State::sceneTimer.mode = VS::State::kSceneTimerStopped;
     VS::State::sceneTimer.time = {};
-    VS::Field::zoneContext.currentSceneId =
-        VS::State::savedEntryDoor.requiredFlagId;
+    VS::Field::zoneContext.scene_id = VS::State::savedEntryDoor.requiredFlagId;
     VS::Field::cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);

@@ -51,7 +51,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
 #include "Render/Camera.hpp"
@@ -846,12 +846,12 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
 }
 
 int Tests_RoomSpawnCountGuard(void) {
-  const Field_ZoneContext saved = VS::Field::zoneContext;
+  const VS::Field::ZoneContext saved = VS::Field::zoneContext;
   int sentinel = 0;
-  memset(&VS::Field::zoneContext, 0, sizeof VS::Field::zoneContext);
-  VS::Field::zoneContext.zudData = &sentinel;
+  VS::Field::zoneContext = {};
+  VS::Field::zoneContext.zud_data = &sentinel;
   VS::Field::LiveSpawnRoomActors();
-  const int passed = VS::Field::zoneContext.zudData == &sentinel;
+  const int passed = VS::Field::zoneContext.zud_data == &sentinel;
   VS::Field::zoneContext = saved;
   return passed;
 }

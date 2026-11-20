@@ -348,7 +348,7 @@ H0346,header,Native/Game/src/Field/TransitionsLiveState.hpp,owned,no,pragma-once
 H0347,header,Native/Game/src/Field/TriggerMarkers.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0348,header,Native/Game/src/Field/Weather.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0349,header,Native/Game/src/Field/Znd.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/include/Field/RoomLoading.hpp as VS::Field::ZoneFileHeader and ZoneEnemyTemplate (#441)
-H0350,header,Native/Game/src/Field/Zone.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
+H0350,header,Native/Game/src/Field/Zone.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0351,header,Native/Game/src/Items/Categories.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0352,header,Native/Game/src/Items/EquipmentInit.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: Items_ArmorInit and Items_AccessoryInit became VS::Items::ArmorInit and AccessoryInit in Items/ItemRecords.hpp; TYPE T00305 and T00301 re-pointed (#441)
 H0353,header,Native/Game/src/Items/InventoryLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

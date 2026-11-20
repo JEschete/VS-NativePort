@@ -23,7 +23,6 @@
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
-#include "Field/Zone.h"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -49,7 +48,6 @@ static_assert(sizeof(Field_MpdTileCell) == sizeof(std::uint32_t));
 static_assert(sizeof(Field_MpdMovingPlatform) == kPlatformRecordBytes);
 static_assert(offsetof(Field_MpdMovingPlatform, tileCell) ==
               kPlatformCellOffset);
-static_assert(sizeof(Field_ZoneBounds) == sizeof(VS::Field::CameraBounds));
 static_assert(std::extent_v<decltype(Field_gimmickInstances)> ==
               kGimmickSlotCount);
 
@@ -185,9 +183,8 @@ int LiveCollisionMapDimensions(int /*unused*/) {
   return CollisionMapDimensions(ReadCollisionMapHeader(LiveRoomCollisionMap()));
 }
 
-const Field_ZoneBounds* LiveRoomCameraBounds(int /*unused*/) {
-  static Field_ZoneBounds bounds{};
-  if (Field_roomData.zoneBounds == nullptr) return nullptr;
+std::optional<CameraBounds> LiveRoomCameraBounds() {
+  if (Field_roomData.zoneBounds == nullptr) return std::nullopt;
   const auto decoded = RoomCameraBounds(
       {reinterpret_cast<const std::byte*>(Field_roomData.zoneBounds),
        Field_roomData.header.zoneBoundsLength});
@@ -195,13 +192,8 @@ const Field_ZoneBounds* LiveRoomCameraBounds(int /*unused*/) {
     VS::Core::LogWarn("field.collision",
                       "Camera bounds section of {} bytes refused",
                       Field_roomData.header.zoneBoundsLength);
-    return nullptr;
   }
-  bounds = Field_ZoneBounds{.minX = decoded->min_x,
-                            .minZ = decoded->min_z,
-                            .maxX = decoded->max_x,
-                            .maxZ = decoded->max_z};
-  return &bounds;
+  return decoded;
 }
 
 Field_MpdTileCell* LiveCollisionCellAt(unsigned int tile_x, unsigned int tile_z,

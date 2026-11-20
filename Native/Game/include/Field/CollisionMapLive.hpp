@@ -7,7 +7,6 @@
 #include "Field/PlatformPlacement.hpp"
 
 struct Field_MpdTileCell;
-struct Field_ZoneBounds;
 struct SVECTOR;
 
 // Binds the typed room collision map rules (CollisionMap.hpp) to the loaded
@@ -18,8 +17,9 @@ namespace VS::Field {
 // The room's cell table; null when the room has none.
 Field_MpdTileCell* LiveRoomCollisionCells();
 int LiveCollisionMapDimensions(int unused);
-// The room's camera bounds record; null when the room has none.
-const Field_ZoneBounds* LiveRoomCameraBounds(int unused);
+// The room's camera bounds record; nullopt when the room has none or its
+// section is too short.
+std::optional<CameraBounds> LiveRoomCameraBounds();
 Field_MpdTileCell* LiveCollisionCellAt(unsigned int tile_x, unsigned int tile_z,
                                        int layer);
 // For the readers the original let dereference a missed lookup: never null,

@@ -382,9 +382,9 @@ struct RuntimeFixture {
     VS::Field::isFirstPersonViewEnabled = 0;
     VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext = {};
-    VS::Field::zoneContext.zndId = 9;
-    VS::Field::zoneContext.mapId = 0;
-    VS::Field::zoneContext.currentSceneId = 37;
+    VS::Field::zoneContext.zone_id = 9;
+    VS::Field::zoneContext.room_id = 0;
+    VS::Field::zoneContext.scene_id = 37;
     VS::Field::zoneContext.bounds = {0, 0, 4, 4};
     environment.sceneId = 37;
     Field_roomData = {};
@@ -933,7 +933,7 @@ void InvalidateLiveMotion(RuntimeFixture& fixture, int defect) {
 
 void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   InvalidateLiveMotion(fixture, defect);
-  if (defect == 0) VS::Field::zoneContext.currentSceneId = 38;
+  if (defect == 0) VS::Field::zoneContext.scene_id = 38;
   if (defect == 1) VS::Boot::isGameplayActive = 0;
   if (defect == 2) fixture.player_stats.weapon.index = 9;
   if (defect == 3) VS::Items::inventory.weapons[0].grip = 255;
@@ -1556,8 +1556,8 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   const auto defect = GENERATE(0, 1, 2, 3, 4);
   VS::State::ashleySnapshot.stats.is_pending = 0;
   if (defect == 0) VS::State::ashleySnapshot.stats.is_pending = 1;
-  if (defect == 1) VS::Field::zoneContext.mapId = 1;
-  if (defect == 2) VS::Field::zoneContext.currentSceneId = 38;
+  if (defect == 1) VS::Field::zoneContext.room_id = 1;
+  if (defect == 2) VS::Field::zoneContext.scene_id = 38;
   if (defect == 3) Field_roomData.isLoaded = 0;
   if (defect == 4) VS::Boot::isGameplayActive = 0;
   const auto before = LiveFingerprint(fixture);
@@ -1676,7 +1676,7 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   REQUIRE(Save::PrepareResume(*decoded));
   CheckResumeRestoresAshley(fixture);
   VS::Boot::isGameplayActive = 1;
-  VS::Field::zoneContext.zndId = 1;
+  VS::Field::zoneContext.zone_id = 1;
   VS::State::recentRoomEnemyStates[0].next_slot = 5;
   VS::State::playTime.frames = 8;
   fixture.player_model.instance.position = {77, -88, 99, 0};

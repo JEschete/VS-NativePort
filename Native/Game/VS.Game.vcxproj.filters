@@ -2295,7 +2295,7 @@
     <ClInclude Include="src\Field\Weather.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
-    <ClInclude Include="src\Field\Zone.h">
+    <ClInclude Include="src\Field\Zone.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Items\Categories.cpp">

@@ -773,7 +773,7 @@ class ActorSpawnHost {
   [[nodiscard]] virtual ZudBlock CachedZudBlock() const = 0;
   virtual void FreeZud() = 0;
   [[nodiscard]] virtual Content::DiscFileExtent ZudFile(int zud) const = 0;
-  // A ZUD read is still pending (VS::Field::zoneContext.zudDiscRequest).
+  // A ZUD read is still pending (VS::Field::zoneContext.zud_disc_request).
   [[nodiscard]] virtual bool ZudReadPending() const = 0;
   // Allocates the ZUD file's block; false when the heap refuses.
   [[nodiscard]] virtual bool AllocateZud(Content::DiscFileExtent file) = 0;

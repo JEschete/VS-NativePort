@@ -150,7 +150,7 @@ class LiveCutsceneHost final : public CutsceneHost {
   }
   void ShowGameplayHud() override { VS::Battle::SetLiveGameplayHudHidden(0); }
   CutsceneMusic Music() override {
-    return {VS::Field::zoneContext.musicSlot,
+    return {VS::Field::zoneContext.music_slot,
             VS::Audio::soundState.playing_music_handle,
             VS::Audio::soundState.music_handles};
   }

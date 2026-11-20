@@ -275,7 +275,6 @@ struct Field_GimmickPhysicsView;
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/Zone.h"
 #include "Items/ItemRecords.hpp"
 
 extern char Field_triggerMarkerRecordTail[192];

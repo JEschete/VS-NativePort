@@ -9,7 +9,6 @@
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/Zone.h"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"

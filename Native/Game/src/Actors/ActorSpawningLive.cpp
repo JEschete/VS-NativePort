@@ -50,7 +50,7 @@
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Zone.h"
+#include "Field/Zone.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -608,27 +608,27 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     return Actors_usesSecondaryBodyModel[model_id] != 0;
   }
 
-  // Both the ZND records and the ZUD files have zndEnemyCount entries
+  // Both the ZND records and the ZUD files have zone_enemy_count entries
   // (RoomLoading.cpp:143-151).
   [[nodiscard]] int ZoneEnemyCount() const override {
-    if (VS::Field::zoneContext.zndEnemies == nullptr ||
-        VS::Field::zoneContext.zudFiles == nullptr) {
+    if (VS::Field::zoneContext.zone_enemies == nullptr ||
+        VS::Field::zoneContext.zud_files == nullptr) {
       return 0;
     }
-    return std::max(VS::Field::zoneContext.zndEnemyCount, 0);
+    return std::max(VS::Field::zoneContext.zone_enemy_count, 0);
   }
 
   [[nodiscard]] std::uint8_t ZoneEnemyModel(int zud) const override {
     if (zud < 0 || zud >= ZoneEnemyCount()) {
       return 0;
     }
-    return VS::Field::zoneContext.zndEnemies[zud].bytes[kZoneEnemyModelByte];
+    return VS::Field::zoneContext.zone_enemies[zud].bytes[kZoneEnemyModelByte];
   }
 
   [[nodiscard]] std::optional<RememberedSpawn> Remembered(
       std::uint8_t spawn_index) const override {
-    if (!IsLiveRememberedRoom(VS::Field::zoneContext.zndId,
-                              VS::Field::zoneContext.mapId)) {
+    if (!IsLiveRememberedRoom(VS::Field::zoneContext.zone_id,
+                              VS::Field::zoneContext.room_id)) {
       return std::nullopt;
     }
     Actors_RoomActorRecord record{};
@@ -641,21 +641,21 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   // A block without a matching index, as after an interrupted read, never
   // matches a ZUD file, so the rules free it as the original did.
   [[nodiscard]] std::optional<int> CachedZud() const override {
-    if (VS::Field::zoneContext.zudData == nullptr) {
+    if (VS::Field::zoneContext.zud_data == nullptr) {
       return std::nullopt;
     }
-    return VS::Field::zoneContext.loadedZudIndexPlusOne - 1;
+    return VS::Field::zoneContext.loaded_zud_index_plus_one - 1;
   }
 
   // The cached file, bounded by its file size and its heap payload.
   [[nodiscard]] ZudBlock CachedZudBlock() const override {
-    const void* data = VS::Field::zoneContext.zudData;
-    const int zud = VS::Field::zoneContext.loadedZudIndexPlusOne - 1;
+    const void* data = VS::Field::zoneContext.zud_data;
+    const int zud = VS::Field::zoneContext.loaded_zud_index_plus_one - 1;
     if (data == nullptr || zud < 0 || zud >= ZoneEnemyCount()) {
       return {};
     }
     const auto file_bytes = static_cast<std::size_t>(
-        std::max(VS::Field::zoneContext.zudFiles[zud].size, 0));
+        std::max(VS::Field::zoneContext.zud_files[zud].size, 0));
     const auto capacity = Core::Memory::LivePayloadCapacity(data);
     const std::size_t bytes =
         capacity.has_value() ? std::min(file_bytes, *capacity) : 0;
@@ -664,32 +664,32 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void FreeZud() override {
-    if (VS::Field::zoneContext.zudData != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(VS::Field::zoneContext.zudData);
+    if (VS::Field::zoneContext.zud_data != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(VS::Field::zoneContext.zud_data);
     }
-    VS::Field::zoneContext.zudData = nullptr;
-    VS::Field::zoneContext.loadedZudIndexPlusOne = 0;
+    VS::Field::zoneContext.zud_data = nullptr;
+    VS::Field::zoneContext.loaded_zud_index_plus_one = 0;
   }
 
   [[nodiscard]] Content::DiscFileExtent ZudFile(int zud) const override {
     if (zud < 0 || zud >= ZoneEnemyCount()) {
       return {};
     }
-    const Content_DiscFile& file = VS::Field::zoneContext.zudFiles[zud];
+    const Content_DiscFile& file = VS::Field::zoneContext.zud_files[zud];
     return {.sector = file.lba, .bytes = file.size};
   }
 
   [[nodiscard]] bool ZudReadPending() const override {
-    return VS::Field::zoneContext.zudDiscRequest != nullptr;
+    return VS::Field::zoneContext.zud_disc_request != nullptr;
   }
 
   [[nodiscard]] bool AllocateZud(Content::DiscFileExtent file) override {
     if (file.bytes < 0) {
       return false;
     }
-    VS::Field::zoneContext.zudData = Core::Memory::AllocateLiveFromHighEnd(
+    VS::Field::zoneContext.zud_data = Core::Memory::AllocateLiveFromHighEnd(
         static_cast<std::size_t>(file.bytes));
-    return VS::Field::zoneContext.zudData != nullptr;
+    return VS::Field::zoneContext.zud_data != nullptr;
   }
 
   void BeginZudRead(Content::DiscFileExtent file) override {
@@ -699,17 +699,17 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc);
     if (request != nullptr) {
       Content::EnqueueLivePriorityDiscRequest(request,
-                                              VS::Field::zoneContext.zudData);
+                                              VS::Field::zoneContext.zud_data);
     } else {
       request = Content::CompleteLiveRefusedDiscRequest(
-          &disc, VS::Field::zoneContext.zudData);
+          &disc, VS::Field::zoneContext.zud_data);
     }
-    VS::Field::zoneContext.zudDiscRequest = request;
+    VS::Field::zoneContext.zud_disc_request = request;
   }
 
   [[nodiscard]] ZudReadState PollZudRead() const override {
     const Content_DiscQueueSlot* request =
-        VS::Field::zoneContext.zudDiscRequest;
+        VS::Field::zoneContext.zud_disc_request;
     if (request == nullptr) {
       return ZudReadState::kFailed;
     }
@@ -724,10 +724,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void FinishZudRead(int zud, bool loaded) override {
-    Content::ReleaseLiveDiscRequest(VS::Field::zoneContext.zudDiscRequest);
-    VS::Field::zoneContext.zudDiscRequest = nullptr;
+    Content::ReleaseLiveDiscRequest(VS::Field::zoneContext.zud_disc_request);
+    VS::Field::zoneContext.zud_disc_request = nullptr;
     if (loaded) {
-      VS::Field::zoneContext.loadedZudIndexPlusOne = zud + 1;
+      VS::Field::zoneContext.loaded_zud_index_plus_one = zud + 1;
     } else {
       FreeZud();
     }

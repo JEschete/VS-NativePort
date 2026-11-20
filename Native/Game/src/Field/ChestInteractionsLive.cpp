@@ -288,7 +288,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     return VS::Field::LoadLiveRoomTransition().pending_door;
   }
   std::uint8_t CurrentZoneId() const override {
-    return static_cast<std::uint8_t>(VS::Field::zoneContext.zndId);
+    return static_cast<std::uint8_t>(VS::Field::zoneContext.zone_id);
   }
   void BeginTransition(const VS::Field::DoorRecord& door,
                        VS::Field::AshleyTransitionRoute route) override {

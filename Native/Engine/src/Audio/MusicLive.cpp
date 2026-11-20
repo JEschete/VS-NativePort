@@ -23,7 +23,6 @@
 #include "Content/CdDrive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "State/GameClockLive.hpp"
 
@@ -39,7 +38,7 @@ static_assert(sizeof(VS::Audio::soundState.music_ids[0]) ==
               sizeof(std::uint8_t));
 static_assert(sizeof(VS::Audio::soundState.current_music_slot) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Field_ZoneContext::isMusicFadeEnabled) ==
+static_assert(sizeof(VS::Field::ZoneContext::music_fade_enabled) ==
               sizeof(std::int32_t));
 
 const char* RefusalReason(MusicRefusal refusal) {
@@ -177,7 +176,7 @@ class LiveMusic final : public MusicHost {
   void StopAllMusic() override { Control::LiveStopAllMusic(); }
 
   void StoreZoneMusicSwitch(std::int32_t enabled) override {
-    VS::Field::zoneContext.isMusicFadeEnabled = enabled;
+    VS::Field::zoneContext.music_fade_enabled = enabled;
   }
 
   void Diagnose(std::uint32_t code) override {

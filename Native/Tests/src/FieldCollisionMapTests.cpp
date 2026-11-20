@@ -32,7 +32,6 @@
 #include "Field/Room.h"
 #include "Field/Traps.hpp"
 #include "Field/TrapsLive.hpp"
-#include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "State/Progress.hpp"
 
@@ -266,7 +265,7 @@ struct LiveRoom {
     Field_roomData.movingPlatforms = nullptr;
     Field_roomData.header.movingPlatformsLength = 0;
     Field_roomData.zoneBounds =
-        reinterpret_cast<Field_ZoneBounds*>(bounds.data());
+        reinterpret_cast<VS::Field::CameraBounds*>(bounds.data());
     Field_roomData.header.zoneBoundsLength = sizeof bounds;
   }
 };
@@ -728,9 +727,10 @@ TEST_CASE("The live collision binding reads the current room's sections",
   const LiveRoom room;
   CHECK(VS::Field::LiveRoomCollisionCells() == Field_roomData.tileCells);
   CHECK(VS::Field::LiveCollisionMapDimensions(0) == ((1 << 20) | 32));
-  const Field_ZoneBounds* live_bounds = VS::Field::LiveRoomCameraBounds(0);
-  REQUIRE(live_bounds != nullptr);
-  CHECK(live_bounds->maxZ == 400);
+  const std::optional<VS::Field::CameraBounds> live_bounds =
+      VS::Field::LiveRoomCameraBounds();
+  REQUIRE(live_bounds.has_value());
+  if (live_bounds.has_value()) CHECK(live_bounds->max_z == 400);
 }
 
 TEST_CASE("The live collision binding reads cells inside the room's table",

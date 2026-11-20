@@ -686,7 +686,8 @@ struct ZoneTileExtent {
 };
 [[nodiscard]] ZoneTileExtent ZoneTileExtentFromDimensions(int dimensions);
 
-// The camera's bounds (Field_ZoneBounds).
+// The camera's bounds as the zone context keeps them (upstream
+// ZoneContextBounds, src/BATTLE/BATTLE.PRG/mpd.h:166).
 struct ZoneBounds {
   std::int16_t min_x = 0;
   std::int16_t min_z = 0;
