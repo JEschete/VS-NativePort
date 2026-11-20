@@ -1183,8 +1183,9 @@ bool ApplyLiveSimulatedActionResults(
   }
   ActionCost cost{};
   if (header.opaque4.opaque40 == 0) {
-    if (header.opaque0 >= std::size(VS::Battle::actionDefinitions))
+    if (header.opaque0 >= std::size(VS::Battle::actionDefinitions)) {
       return false;
+    }
     const auto& action = VS::Battle::actionDefinitions[header.opaque0];
     cost = {.type = action.type, .cost = action.cost};
   }

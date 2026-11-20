@@ -245,7 +245,7 @@ int Tests_AiRelations(void) {
   VS::Battle::Ai::ActorAiState* saved_states[3];
   for (unsigned index = 0; index < 3; ++index) {
     saved_states[index] = VS::Battle::Ai::actorAiStates[ids[index]];
-    actors[index].id = ids[index];
+    actors[index].id = static_cast<std::int32_t>(ids[index]);
     actors[index].next = index + 1 < 3 ? &actors[index + 1] : nullptr;
     states[index].actor_id = ids[index];
     states[index].saved_relation_options = -1;
@@ -407,11 +407,11 @@ int Tests_AiFrameCache(void) {
   void* saved_data = VS::Battle::Ai::roomHasWaypoints;
   const unsigned saved_aux_length = VS::Field::roomData.header.section6_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  std::uint8_t savedScratch[132];
+  std::uint8_t saved_scratch[132];
   std::uint8_t* scratch =
       reinterpret_cast<std::uint8_t*>(VS::Core::ScratchBase()) + 0x37C;
-  memcpy(savedScratch, scratch, sizeof savedScratch);
-  for (size_t index = 0; index < sizeof savedScratch; ++index) {
+  memcpy(saved_scratch, scratch, sizeof saved_scratch);
+  for (size_t index = 0; index < sizeof saved_scratch; ++index) {
     scratch[index] = kScratchSentinel;
   }
   VS::Battle::Ai::ActorAiState actor = {0};
@@ -441,7 +441,7 @@ int Tests_AiFrameCache(void) {
                frame->randomState == 0x12345678 &&
                memcmp(frame->directions, VS::Battle::Ai::directionDeltas.data(),
                       sizeof frame->directions) == 0;
-  for (unsigned index = 0; index < sizeof savedScratch; ++index) {
+  for (unsigned index = 0; index < sizeof saved_scratch; ++index) {
     passed = passed && scratch[index] == kScratchSentinel;
   }
   VS::Battle::Ai::LiveFrameContext() = savedFrame;
@@ -452,7 +452,7 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::roomHasWaypoints = saved_data;
   VS::Field::roomData.header.section6_length = saved_aux_length;
   VS::Battle::Ai::savedMovementRandomState = saved_random;
-  memcpy(scratch, savedScratch, sizeof savedScratch);
+  memcpy(scratch, saved_scratch, sizeof saved_scratch);
   return passed;
 }
 
@@ -495,7 +495,7 @@ int Tests_ActionDefinitionsLoaded(void) {
 
 int Tests_ActorConditionSnapshot(void) {
   VS::Battle::Actor first = {nullptr}, second = {nullptr};
-  VS::Battle::ActorStats firstStats = {0}, secondStats = {0};
+  VS::Battle::ActorStats first_stats = {0}, second_stats = {0};
   VS::Battle::Ai::ActorAiState first_ai = {0}, second_ai = {0};
   VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
@@ -508,20 +508,20 @@ int Tests_ActorConditionSnapshot(void) {
   memset(&output, 0xA5, sizeof output);
   first.id = 2;
   first.next = &second;
-  first.stats = &firstStats;
+  first.stats = &first_stats;
   second.id = 5;
-  second.stats = &secondStats;
-  firstStats.current_hp = 20;
-  firstStats.max_hp = 100;
-  firstStats.current_mp = 15;
-  firstStats.max_mp = 60;
-  firstStats.statuses = (1 << 6) | (1 << 12);
-  firstStats.weapon.current_dp = 10;
-  firstStats.weapon.max_dp = 40;
-  firstStats.shield.current_dp = 30;
-  firstStats.shield.max_dp = 60;
-  secondStats.max_hp = 120;
-  secondStats.statuses = (1 << 0) | (1 << 12);
+  second.stats = &second_stats;
+  first_stats.current_hp = 20;
+  first_stats.max_hp = 100;
+  first_stats.current_mp = 15;
+  first_stats.max_mp = 60;
+  first_stats.statuses = (1 << 6) | (1 << 12);
+  first_stats.weapon.current_dp = 10;
+  first_stats.weapon.max_dp = 40;
+  first_stats.shield.current_dp = 30;
+  first_stats.shield.max_dp = 60;
+  second_stats.max_hp = 120;
+  second_stats.statuses = (1 << 0) | (1 << 12);
   second_ai.action_cost_enabled = 1;
   VS::Battle::actors[0] = &first;
   VS::Battle::Ai::actorAiStates[2] = &first_ai;

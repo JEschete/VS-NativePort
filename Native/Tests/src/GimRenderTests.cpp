@@ -209,7 +209,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   VS::Render::DrawLiveProgressiveTextBoxText(&box);
   passed = passed && box.flags.done && box.previous_chunks == 4 &&
            VS::Render::FrameScratchpad().primitive_cursor ==
-               memory + 8 + 3 * 6 * sizeof(std::uint32_t);
+               memory + 8 + std::size_t{3} * 6 * sizeof(std::uint32_t);
   unsigned shape[] = {0x01040004, 0x00FF0000, 0xFFFFFF00, 0x03020100};
   memset(&VS::Menu::textBoxes[2], 0, sizeof VS::Menu::textBoxes[2]);
   VS::Menu::textBoxes[2].frame_x = 10;

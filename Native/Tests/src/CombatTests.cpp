@@ -14,13 +14,13 @@ using VS::Battle::ActionState;
 
 int Tests_CombatTargetResults(void) {
   enum { kInitialLimbHp = 20 };
-  ActionState actionState = {0};
+  ActionState action_state = {0};
   VS::Battle::Actor target = {nullptr};
   VS::Battle::ActorStats stats = {0};
   VS::Battle::FloatingLabelSlots labels{};
   ActionState* saved_action = VS::Battle::actionState;
   VS::Battle::Actor* saved_target = VS::Battle::actors[2];
-  VS::Actors::ActorRecord* savedModel = VS::Actors::actorRecords[2];
+  VS::Actors::ActorRecord* saved_model = VS::Actors::actorRecords[2];
   auto* saved_labels = VS::Battle::floatingLabels;
   const int16_t saved_label_count = VS::Battle::floatingLabelCount;
   target.id = 2;
@@ -36,9 +36,9 @@ int Tests_CombatTargetResults(void) {
   VS::Actors::actorRecords[2] = nullptr;
   VS::Battle::floatingLabels = &labels;
   VS::Battle::floatingLabelCount = 0;
-  VS::Battle::actionState = &actionState;
-  actionState.queue_index = 5;
-  ActionRequestRecord* action = &actionState.queue[1];
+  VS::Battle::actionState = &action_state;
+  action_state.queue_index = 5;
+  ActionRequestRecord* action = &action_state.queue[1];
   action->action_id = 1;
   action->target_count = 3;
   VS::Battle::HitResult* hit = &action->targets[0];
@@ -69,7 +69,7 @@ int Tests_CombatTargetResults(void) {
   passed = passed && stats.current_mp == 40;
   VS::Battle::actionState = saved_action;
   VS::Battle::actors[2] = saved_target;
-  VS::Actors::actorRecords[2] = savedModel;
+  VS::Actors::actorRecords[2] = saved_model;
   VS::Battle::floatingLabels = saved_labels;
   VS::Battle::floatingLabelCount = saved_label_count;
   return passed;
