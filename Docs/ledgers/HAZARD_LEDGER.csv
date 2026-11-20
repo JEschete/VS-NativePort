@@ -251,5 +251,5 @@ ecbe1cc8caba,POINTER-INT,high,compiler,,RefusalReason,Native/Engine/src/Audio/Dr
 ffa66d0d8f75,POINTER-INT,high,compiler,F03467,InitializeHeap,Native/Engine/src/Core/Memory/Heap.cpp,189,-Wshorten-64-to-32: implicit conversion loses integer precision: 'const std::size_t' (aka 'const unsigned long long') to 'std::uint32_t' (ak,45,3,open,
 7b532634919b,POINTER-INT,high,compiler,,TableEntry,Native/Game/src/Event/ScriptControl.cpp,353,-Wshorten-64-to-32: implicit conversion loses integer precision: 'std::size_t' (aka 'unsigned long long') to 'std::uint32_t' (aka 'unsigned ,59,26,open,
 ad7e47e2bd01,UNSIZED-ARRAY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.cpp,31,Battle_unusedGlobal1,56,24,open,
-c1c90964c4e1,UNSIZED-ARRAY,medium,pattern,,VS::Content::plg074TrailEmissionCounter,Native/Game/src/Boot/ModuleData.cpp,152,VS::Content::plg074TrailEmissionCounter,44,4,open,
-583cc3f09c20,UNSIZED-ARRAY,medium,pattern,,VS::Content::battleAiHesitationLengths,Native/Game/src/Boot/ModuleData.cpp,158,VS::Content::battleAiHesitationLengths,44,4,open,
+c1c90964c4e1,UNSIZED-ARRAY,medium,pattern,,VS::Content::plg074TrailEmissionCounter,Native/Game/src/Boot/ModuleData.cpp,149,VS::Content::plg074TrailEmissionCounter,44,4,open,
+583cc3f09c20,UNSIZED-ARRAY,medium,pattern,,VS::Content::battleAiHesitationLengths,Native/Game/src/Boot/ModuleData.cpp,155,VS::Content::battleAiHesitationLengths,44,4,open,

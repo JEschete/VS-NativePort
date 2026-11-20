@@ -1848,9 +1848,6 @@
     <ClCompile Include="src\Event\EventScreenTweensLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Interpolation.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
     <ClCompile Include="src\Event\InterpolationCurveLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1923,12 +1920,6 @@
     <ClInclude Include="src\Event\ScriptControlOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
-    <ClCompile Include="src\Event\ScriptDialog.cpp">
-      <Filter>src\Event</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Event\ScriptDialog.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
     <ClCompile Include="src\Event\ScriptDialogCommands.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1956,7 +1947,7 @@
     <ClCompile Include="src\Event\ScriptField.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptField.h">
+    <ClInclude Include="src\Event\ScriptField.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptRoomCommands.cpp">
@@ -1965,7 +1956,7 @@
     <ClCompile Include="src\Event\ScriptScreen.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptScreen.h">
+    <ClInclude Include="src\Event\ScriptScreen.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptScreenCommands.cpp">
@@ -1986,13 +1977,7 @@
     <ClCompile Include="src\Event\ScriptVmLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClCompile Include="src\Event\Sound.cpp">
-      <Filter>src\Event</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Event\Sound.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Event\Splash.h">
+    <ClInclude Include="src\Event\Splash.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\Triggers.cpp">
@@ -2013,7 +1998,7 @@
     <ClInclude Include="src\Event\WeaponModeOpcode.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Event\Weather.h">
+    <ClInclude Include="src\Event\Weather.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\ActorCollision.cpp">

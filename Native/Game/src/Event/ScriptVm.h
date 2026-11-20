@@ -3,9 +3,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: D_800F4B8B (D_800F4B8B@BATTLE/BATTLE.PRG): a view into another global
-#define Event_weatherTweenDuration (*(char*)(&Event_weatherTween.durationFrames))
-
 extern char Event_skipPaletteResetCommand[336];
 extern char Event_kSkipSoundRestoreMarker[328];
 extern short Event_kSceneTimerModes[158];

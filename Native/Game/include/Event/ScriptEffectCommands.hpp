@@ -44,7 +44,7 @@ inline constexpr std::uint8_t kBufferedVibrationBit = 0x8;
 // The scripted effect playback states a skipped wait accepts.
 inline constexpr int kEffectStateIdle = 0;
 inline constexpr int kEffectStateFinished = 5;
-// The splash image tweens the frame update runs (Event_splashTweens).
+// The splash image tweens the frame update runs (VS::Event::splashTweens).
 inline constexpr std::size_t kImageTweenCount = 3;
 
 // Script requests the commands refuse rather than overrun.

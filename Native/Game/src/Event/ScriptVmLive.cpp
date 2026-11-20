@@ -45,13 +45,12 @@
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptEffects.h"
-#include "Event/ScriptField.h"
+#include "Event/ScriptField.hpp"
 #include "Event/ScriptRoomCommands.hpp"
-#include "Event/ScriptScreen.h"
+#include "Event/ScriptScreen.hpp"
 #include "Event/ScriptScreenCommands.hpp"
 #include "Event/ScriptSplashCommands.hpp"
 #include "Event/ScriptVm.h"
-#include "Event/Weather.h"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -408,9 +407,9 @@ class LiveVmHost final : public ScriptVmHost {
     Event_isEffectWaitPending = value;
   }
   void CancelImageTweens() override {
-    Event_weatherTweenDuration = 0;
-    for (auto& tween : std::span{Event_splashTweens}.first<3>()) {
-      tween.durationFrames = 0;
+    weatherTween.duration_frames = 0;
+    for (auto& tween : std::span{splashTweens}.first<kImageTweenCount>()) {
+      tween.duration_frames = 0;
     }
   }
   void CaptureEventMusicSlot() override {

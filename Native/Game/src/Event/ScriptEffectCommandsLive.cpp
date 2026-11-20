@@ -30,12 +30,12 @@
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
 #include "Event/ScriptEffects.h"
-#include "Event/ScriptField.h"
-#include "Event/ScriptScreen.h"
+#include "Event/ScriptField.hpp"
+#include "Event/ScriptScreen.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Event/Splash.h"
-#include "Event/Weather.h"
+#include "Event/Splash.hpp"
+#include "Event/Weather.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLive.hpp"
@@ -56,7 +56,7 @@ static_assert(std::size(Field_gimmickInstances) >=
               static_cast<std::size_t>(event::kEffectActorSlots));
 static_assert(std::size(Event_vibrationPatterns) >=
               static_cast<std::size_t>(event::kVibrationPatternCount));
-static_assert(std::size(Event_splashTweens) >= event::kImageTweenCount);
+static_assert(event::kSplashTweenExtent >= event::kImageTweenCount);
 // The original advanced the cursor past a texture page packet to the first
 // line's x0, a packet's length further.
 static_assert(offsetof(LINE_F2, x0) == sizeof(DR_TPAGE));
@@ -292,34 +292,32 @@ class LiveImageTweenHost final : public event::ImageTweenHost {
   }
 };
 
-// The copied tween records hold their frame counts in plain chars; read
-// them as the unsigned bytes the original loaded.
-event::SplashTween FromRecord(const Event_SplashTween& record) {
-  return {.easing_mode = static_cast<std::uint8_t>(record.easingMode),
-          .elapsed = static_cast<std::uint8_t>(record.elapsedFrames),
-          .duration = static_cast<std::uint8_t>(record.durationFrames),
-          .start_x = record.startX,
-          .start_y = record.startY,
-          .delta_x = record.deltaX,
-          .delta_y = record.deltaY,
-          .start_scale = record.startScaleFixed12,
-          .delta_scale = record.deltaScaleFixed12,
-          .start_brightness = record.startBrightness,
-          .delta_brightness = record.deltaBrightness};
+event::SplashTween FromRecord(const event::SplashTweenRecord& record) {
+  return {.easing_mode = record.easing_mode,
+          .elapsed = record.elapsed_frames,
+          .duration = record.duration_frames,
+          .start_x = record.start_x,
+          .start_y = record.start_y,
+          .delta_x = record.delta_x,
+          .delta_y = record.delta_y,
+          .start_scale = record.start_scale_fixed12,
+          .delta_scale = record.delta_scale_fixed12,
+          .start_brightness = record.start_brightness,
+          .delta_brightness = record.delta_brightness};
 }
 
-event::WeatherTween FromRecord(const Event_WeatherTween& record) {
-  return {.elapsed = static_cast<std::uint8_t>(record.elapsedFrames),
-          .duration = static_cast<std::uint8_t>(record.durationFrames),
-          .wind_direction = record.windDirection,
-          .start_wind_direction = record.startWindDirection,
-          .delta_wind_direction = record.deltaWindDirection,
-          .wind_strength = record.windStrength,
-          .start_wind_strength = record.startWindStrength,
-          .delta_wind_strength = record.deltaWindStrength,
+event::WeatherTween FromRecord(const event::WeatherTweenRecord& record) {
+  return {.elapsed = record.elapsed_frames,
+          .duration = record.duration_frames,
+          .wind_direction = record.wind_direction,
+          .start_wind_direction = record.start_wind_direction,
+          .delta_wind_direction = record.delta_wind_direction,
+          .wind_strength = record.wind_strength,
+          .start_wind_strength = record.start_wind_strength,
+          .delta_wind_strength = record.delta_wind_strength,
           .intensity = record.intensity,
-          .start_intensity = record.startIntensity,
-          .delta_intensity = record.deltaIntensity};
+          .start_intensity = record.start_intensity,
+          .delta_intensity = record.delta_intensity};
 }
 }  // namespace
 
@@ -335,73 +333,69 @@ void DrawLiveScanlineOverlay() {
 void UpdateLiveImageTweens() {
   std::array<SplashTween, kImageTweenCount> tweens{};
   for (std::size_t i = 0; i < tweens.size(); ++i) {
-    tweens[i] = FromRecord(Event_splashTweens[i]);
+    tweens[i] = FromRecord(splashTweens[i]);
   }
   LiveImageTweenHost host;
   UpdateEventImageTweens(tweens, VS::State::tickSpeed, host);
   for (std::size_t i = 0; i < tweens.size(); ++i) {
-    Event_splashTweens[i].elapsedFrames = static_cast<char>(tweens[i].elapsed);
-    Event_splashTweens[i].durationFrames =
-        static_cast<char>(tweens[i].duration);
+    splashTweens[i].elapsed_frames = tweens[i].elapsed;
+    splashTweens[i].duration_frames = tweens[i].duration;
   }
 }
 
 void UpdateLiveWeatherTween() {
-  WeatherTween tween = FromRecord(Event_weatherTween);
+  WeatherTween tween = FromRecord(weatherTween);
   if (!UpdateEventWeatherTween(tween)) {
     return;
   }
-  Event_weatherTween.elapsedFrames = static_cast<char>(tween.elapsed);
-  Event_weatherTween.durationFrames = static_cast<char>(tween.duration);
-  Event_weatherTween.windDirection = tween.wind_direction;
-  Event_weatherTween.windStrength = tween.wind_strength;
-  Event_weatherTween.intensity = tween.intensity;
+  weatherTween.elapsed_frames = tween.elapsed;
+  weatherTween.duration_frames = tween.duration;
+  weatherTween.wind_direction = tween.wind_direction;
+  weatherTween.wind_strength = tween.wind_strength;
+  weatherTween.intensity = tween.intensity;
   Field::LiveSetWeatherWindAngles(tween.wind_direction, tween.wind_strength);
   Field::LiveSetWeatherIntensity(tween.intensity);
 }
 
 SplashTween LiveSplashTween(int layer) {
-  if (layer < 0 ||
-      static_cast<std::size_t>(layer) >= std::size(Event_splashTweens)) {
+  if (layer < 0 || static_cast<std::size_t>(layer) >= kSplashTweenExtent) {
     return {};
   }
-  return FromRecord(Event_splashTweens[static_cast<std::size_t>(layer)]);
+  return FromRecord(splashTweens[static_cast<std::size_t>(layer)]);
 }
 
 void SetLiveSplashTween(int layer, const SplashTween& tween) {
-  if (layer < 0 ||
-      static_cast<std::size_t>(layer) >= std::size(Event_splashTweens)) {
+  if (layer < 0 || static_cast<std::size_t>(layer) >= kSplashTweenExtent) {
     return;
   }
-  Event_SplashTween& record =
-      Event_splashTweens[static_cast<std::size_t>(layer)];
-  record.easingMode = static_cast<char>(tween.easing_mode);
-  record.elapsedFrames = static_cast<char>(tween.elapsed);
-  record.durationFrames = static_cast<char>(tween.duration);
-  record.startX = tween.start_x;
-  record.startY = tween.start_y;
-  record.deltaX = tween.delta_x;
-  record.deltaY = tween.delta_y;
-  record.startScaleFixed12 = tween.start_scale;
-  record.deltaScaleFixed12 = tween.delta_scale;
-  record.startBrightness = tween.start_brightness;
-  record.deltaBrightness = tween.delta_brightness;
+  SplashTweenRecord& record = splashTweens[static_cast<std::size_t>(layer)];
+  record.easing_mode = tween.easing_mode;
+  record.elapsed_frames = tween.elapsed;
+  record.duration_frames = tween.duration;
+  record.start_x = tween.start_x;
+  record.start_y = tween.start_y;
+  record.delta_x = tween.delta_x;
+  record.delta_y = tween.delta_y;
+  record.start_scale_fixed12 = tween.start_scale;
+  record.delta_scale_fixed12 = tween.delta_scale;
+  record.start_brightness = tween.start_brightness;
+  record.delta_brightness = tween.delta_brightness;
 }
 
-WeatherTween LiveWeatherTween() { return FromRecord(Event_weatherTween); }
+WeatherTween LiveWeatherTween() { return FromRecord(weatherTween); }
 
 void StoreLiveWeatherTween(const WeatherTween& tween) {
-  Event_weatherTween.elapsedFrames = static_cast<char>(tween.elapsed);
-  Event_weatherTween.durationFrames = static_cast<char>(tween.duration);
-  Event_weatherTween.windDirection = tween.wind_direction;
-  Event_weatherTween.startWindDirection = tween.start_wind_direction;
-  Event_weatherTween.deltaWindDirection = tween.delta_wind_direction;
-  Event_weatherTween.windStrength = tween.wind_strength;
-  Event_weatherTween.startWindStrength = tween.start_wind_strength;
-  Event_weatherTween.deltaWindStrength = tween.delta_wind_strength;
-  Event_weatherTween.intensity = tween.intensity;
-  Event_weatherTween.startIntensity = tween.start_intensity;
-  Event_weatherTween.deltaIntensity = tween.delta_intensity;
+  weatherTween.elapsed_frames = tween.elapsed;
+  weatherTween.duration_frames = tween.duration;
+  weatherTween.wind_direction = tween.wind_direction;
+  weatherTween.start_wind_direction = tween.start_wind_direction;
+  weatherTween.delta_wind_direction = tween.delta_wind_direction;
+  weatherTween.wind_strength = tween.wind_strength;
+  weatherTween.start_wind_strength = tween.start_wind_strength;
+  weatherTween.delta_wind_strength = tween.delta_wind_strength;
+  weatherTween.intensity = tween.intensity;
+  weatherTween.start_intensity = tween.start_intensity;
+  weatherTween.delta_intensity = tween.delta_intensity;
 }
 
 }  // namespace VS::Event

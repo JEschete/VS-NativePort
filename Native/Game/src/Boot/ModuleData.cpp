@@ -102,10 +102,7 @@
 #include "Event/Actors.h"
 #include "Event/Script.h"
 #include "Event/ScriptCamera.h"
-#include "Event/ScriptDialog.h"
-#include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
-#include "Event/Sound.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -454,8 +451,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x81228, sizeof Actors_animationEventPoints,
      &Actors_animationEventPoints,
      sizeof Actors_animationEventPoints},  // G00114 D_800E9A28
-    {"BATTLE/BATTLE.PRG", 0x81334, sizeof Event_sfxSourceIds,
-     &Event_sfxSourceIds, sizeof Event_sfxSourceIds},  // G00115 D_800E9B34
     {"BATTLE/BATTLE.PRG", 0x8134C, sizeof Event_weaponDrawStates,
      &Event_weaponDrawStates,
      sizeof Event_weaponDrawStates},  // G00116 D_800E9B4C
@@ -471,12 +466,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x813E8, sizeof Event_kSkipSoundRestoreMarker,
      &Event_kSkipSoundRestoreMarker,
      sizeof Event_kSkipSoundRestoreMarker},  // G00120 D_800E9BE8
-    {"BATTLE/BATTLE.PRG", 0x813EC, sizeof Event_kDialogPlacementOrder,
-     &Event_kDialogPlacementOrder,
-     sizeof Event_kDialogPlacementOrder},  // G00121 D_800E9BEC
-    {"BATTLE/BATTLE.PRG", 0x813F0, sizeof Event_kMenuTransitionModes,
-     &Event_kMenuTransitionModes,
-     sizeof Event_kMenuTransitionModes},  // G00122 D_800E9BF0
     {"BATTLE/BATTLE.PRG", 0x813F4, sizeof Event_kSceneTimerModes,
      &Event_kSceneTimerModes,
      sizeof Event_kSceneTimerModes},  // G00123 D_800E9BF4

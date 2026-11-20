@@ -2008,31 +2008,31 @@ T00255.182,T00255,D_800F45E0_t,182,unk1868,1,int,,,,savedPlacement,Placement wor
 T00255.183,T00255,D_800F45E0_t,183,unk187C,1,int,,,,reserved187C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:237;declaration-only;source:3A1A0.h:632
 T00256.000,T00256,D_800F4B28_t,0,curve,0,u_char,,,curve family,curveFamily,Linear or trigonometric interpolation curve family,high,source:573B8.c:211
 T00256.001,T00256,D_800F4B28_t,1,power,0,signed char,,,signed power shaping,power,Signed repeated-squaring count for easing shape,high,source:573B8.c:190
-T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Splash.h:9;source:4A0A8.c:148;no consumer identified
-T00257.001,T00257,D_800F4B30_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:901
-T00257.002,T00257,D_800F4B30_t,2,unk2,1,char,,,elapsed frames | elapsed ticks,elapsedFrames,Elapsed logical tween frames,high,source:4A0A8.c:2980
-T00257.003,T00257,D_800F4B30_t,3,unk3,1,char,,,duration,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:2989
-T00257.004,T00257,D_800F4B30_t,4,unk4,1,short,,,,startX,Initial horizontal screen offset,high,source:4A0A8.c:895
-T00257.005,T00257,D_800F4B30_t,5,unk6,1,short,,,,startY,Initial vertical screen offset,high,source:4A0A8.c:896
-T00257.006,T00257,D_800F4B30_t,6,unk8,1,short,,,,deltaX,Target minus initial horizontal offset,high,source:4A0A8.c:895
-T00257.007,T00257,D_800F4B30_t,7,unkA,1,short,,,,deltaY,Target minus initial vertical offset,high,source:4A0A8.c:896
-T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,startScaleFixed12,Initial layer scale in 4.12 fixed point,high,source:4A0A8.c:897
-T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,deltaScaleFixed12,Target minus initial layer scale,high,source:4A0A8.c:897
-T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,startBrightness,Initial layer brightness,high,source:4A0A8.c:898;byte 3 of the layer record
-T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,deltaBrightness,Target minus initial layer brightness,high,source:4A0A8.c:898
-T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.h:9;declaration-only;source:4A0A8.c:159
-T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.h:10;declaration-only;source:4A0A8.c:160
-T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:2998
-T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,durationFrames,Tween duration or zero when inactive,med,G00442 aliases this byte;source:4A0A8.c:2205;use cited by sanity pass;source:4A0A8.c:162
-T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,windDirection,Current wind direction angle in 4096 units,high,source:4A0A8.c:2999
-T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,startWindDirection,Initial wind direction angle,med,source:4A0A8.c:2198;use cited by sanity pass;source:4A0A8.c:164
-T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,deltaWindDirection,Shortest wrapped change in wind direction,med,source:4A0A8.c:2204;use cited by sanity pass;source:4A0A8.c:165
-T00258.007,T00258,D_800F4B88_t,7,unkA,1,short,,,,windStrength,Current wind strength passed with direction to weather,med,source:4A0A8.c:3001
-T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,startWindStrength,Initial wind strength,med,source:4A0A8.c:2197;use cited by sanity pass;source:4A0A8.c:167
-T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,deltaWindStrength,Target minus initial wind strength,med,source:4A0A8.c:2196;use cited by sanity pass;source:4A0A8.c:168
-T00258.010,T00258,D_800F4B88_t,10,unk10,1,short,,,intensity,intensity,Current weather intensity,high,source:4A0A8.c:3002
-T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,startIntensity,Initial weather intensity,med,source:4A0A8.c:2194;use cited by sanity pass;source:4A0A8.c:170
-T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,deltaIntensity,Target minus initial weather intensity,med,source:4A0A8.c:2195;use cited by sanity pass;source:4A0A8.c:171
+T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Splash.hpp:11;native:Splash.hpp VS::Event::SplashTweenRecord::reserved00 (#441);source:4A0A8.c:148;no consumer identified
+T00257.001,T00257,D_800F4B30_t,1,unk1,1,char,,,,easing_mode,Interpolation curve selector,high,native:Splash.hpp VS::Event::SplashTweenRecord::easing_mode (#441);source:4A0A8.c:901
+T00257.002,T00257,D_800F4B30_t,2,unk2,1,char,,,elapsed frames | elapsed ticks,elapsed_frames,Elapsed logical tween frames,high,native:Splash.hpp VS::Event::SplashTweenRecord::elapsed_frames (#441);source:4A0A8.c:2980
+T00257.003,T00257,D_800F4B30_t,3,unk3,1,char,,,duration,duration_frames,Tween duration or zero when inactive,high,native:Splash.hpp VS::Event::SplashTweenRecord::duration_frames (#441);source:4A0A8.c:2989
+T00257.004,T00257,D_800F4B30_t,4,unk4,1,short,,,,start_x,Initial horizontal screen offset,high,native:Splash.hpp VS::Event::SplashTweenRecord::start_x (#441);source:4A0A8.c:895
+T00257.005,T00257,D_800F4B30_t,5,unk6,1,short,,,,start_y,Initial vertical screen offset,high,native:Splash.hpp VS::Event::SplashTweenRecord::start_y (#441);source:4A0A8.c:896
+T00257.006,T00257,D_800F4B30_t,6,unk8,1,short,,,,delta_x,Target minus initial horizontal offset,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_x (#441);source:4A0A8.c:895
+T00257.007,T00257,D_800F4B30_t,7,unkA,1,short,,,,delta_y,Target minus initial vertical offset,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_y (#441);source:4A0A8.c:896
+T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,start_scale_fixed12,Initial layer scale in 4.12 fixed point,high,native:Splash.hpp VS::Event::SplashTweenRecord::start_scale_fixed12 (#441);source:4A0A8.c:897
+T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,delta_scale_fixed12,Target minus initial layer scale,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_scale_fixed12 (#441);source:4A0A8.c:897
+T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,start_brightness,Initial layer brightness,high,native:Splash.hpp VS::Event::SplashTweenRecord::start_brightness (#441);source:4A0A8.c:898;byte 3 of the layer record
+T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,delta_brightness,Target minus initial layer brightness,high,native:Splash.hpp VS::Event::SplashTweenRecord::delta_brightness (#441);source:4A0A8.c:898
+T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:11;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved00 (#441);declaration-only;source:4A0A8.c:159
+T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Event\Weather.hpp:12;native:Weather.hpp VS::Event::WeatherTweenRecord::reserved01 (#441);declaration-only;source:4A0A8.c:160
+T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,elapsed_frames,Elapsed tween frames,high,native:Weather.hpp VS::Event::WeatherTweenRecord::elapsed_frames (#441);source:4A0A8.c:2998
+T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,duration_frames,Tween duration or zero when inactive,med,"native:Weather.hpp VS::Event::WeatherTweenRecord::duration_frames (#441);G00442 aliased this byte (retired, #441);source:4A0A8.c:2205;use cited by sanity pass;source:4A0A8.c:162"
+T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,wind_direction,Current wind direction angle in 4096 units,high,native:Weather.hpp VS::Event::WeatherTweenRecord::wind_direction (#441);source:4A0A8.c:2999
+T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,start_wind_direction,Initial wind direction angle,med,native:Weather.hpp VS::Event::WeatherTweenRecord::start_wind_direction (#441);source:4A0A8.c:2198;use cited by sanity pass;source:4A0A8.c:164
+T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,delta_wind_direction,Shortest wrapped change in wind direction,med,native:Weather.hpp VS::Event::WeatherTweenRecord::delta_wind_direction (#441);source:4A0A8.c:2204;use cited by sanity pass;source:4A0A8.c:165
+T00258.007,T00258,D_800F4B88_t,7,unkA,1,short,,,,wind_strength,Current wind strength passed with direction to weather,med,native:Weather.hpp VS::Event::WeatherTweenRecord::wind_strength (#441);source:4A0A8.c:3001
+T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,start_wind_strength,Initial wind strength,med,native:Weather.hpp VS::Event::WeatherTweenRecord::start_wind_strength (#441);source:4A0A8.c:2197;use cited by sanity pass;source:4A0A8.c:167
+T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,delta_wind_strength,Target minus initial wind strength,med,native:Weather.hpp VS::Event::WeatherTweenRecord::delta_wind_strength (#441);source:4A0A8.c:2196;use cited by sanity pass;source:4A0A8.c:168
+T00258.010,T00258,D_800F4B88_t,10,unk10,1,short,,,intensity,intensity,Current weather intensity,high,native:Weather.hpp VS::Event::WeatherTweenRecord::intensity (#441);source:4A0A8.c:3002
+T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,start_intensity,Initial weather intensity,med,native:Weather.hpp VS::Event::WeatherTweenRecord::start_intensity (#441);source:4A0A8.c:2194;use cited by sanity pass;source:4A0A8.c:170
+T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,delta_intensity,Target minus initial weather intensity,med,native:Weather.hpp VS::Event::WeatherTweenRecord::delta_intensity (#441);source:4A0A8.c:2195;use cited by sanity pass;source:4A0A8.c:171
 T00259.000,T00259,D_800F4BA4_t,0,lookAt,0,D_800F4BA4_t2,,,,lookAt,Look-at endpoint camera track,med,source:4A0A8.c:3026;use cited by sanity pass;source:4A0A8.c:101
 T00259.001,T00259,D_800F4BA4_t,1,eye,0,D_800F4BA4_t2,,,,eye,Eye endpoint camera track,med,source:4A0A8.c:3025;use cited by sanity pass;source:4A0A8.c:102
 T00259.002,T00259,D_800F4BA4_t,2,unk168,1,func_800BD57C_t,,,camera roll tween,cameraRoll,Camera roll angle tween,high,source:4A0A8.c:3605

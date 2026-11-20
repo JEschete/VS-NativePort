@@ -1,8 +1,7 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Event/ScriptScreen.h"
-#include "Event/Splash.h"
+// The event script VM's splash image layer tweens (ScriptScreen.hpp).
+#include "Event/ScriptScreen.hpp"
 
-// decomp: D_800F4B30 (D_800F4B30@BATTLE/BATTLE.PRG)
-Event_SplashTween Event_splashTweens[6];
-
+namespace VS::Event {
+// decomp: gimTweens (D_800F4B30@BATTLE/BATTLE.PRG)
+SplashTweenRecord splashTweens[kSplashTweenExtent];
+}  // namespace VS::Event
