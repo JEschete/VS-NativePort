@@ -1447,7 +1447,7 @@ T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,enemyClass,Enemy class o
 T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
 T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
 T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved08,Cleared with the effect and never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Engine\src\Render\ScreenOverlayLive.cpp:374;source:146C.c:9273
-T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reserved0c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Event\EventScreenTweensLive.cpp:163;declaration-only;source:146C.h:725
+T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reserved0c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Event\EventCameraOwnershipLive.cpp:43;declaration-only;source:146C.h:725
 T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
 T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
 T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392

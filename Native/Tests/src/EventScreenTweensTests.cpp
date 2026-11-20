@@ -14,7 +14,7 @@
 #include "Event/EventScreenTweens.hpp"
 #include "Event/EventScreenTweensLive.hpp"
 #include "Event/InterpolationCurveLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "State/Timers.hpp"
@@ -350,8 +350,8 @@ TEST_CASE("Screen tweens apply each running tween in order",
 
 TEST_CASE("Live screen tween entries skip a missing camera or tween",
           "[event][camera][screen-tween]") {
-  VS::Event::CameraState* const saved = Event_camera;
-  Event_camera = nullptr;
+  VS::Event::CameraState* const saved = VS::Event::cameraWorkspace;
+  VS::Event::cameraWorkspace = nullptr;
   const std::uint64_t before = ev::RefusedEventScreenTweenCount();
   std::array<std::uint8_t, 5> instruction{0xE4, 1, 2, 3, 0};
   CHECK(VS::Event::CommandScreenTransformOpcode(instruction.data(), 0) == 0);
@@ -361,15 +361,15 @@ TEST_CASE("Live screen tween entries skip a missing camera or tween",
   ev::UpdateEventAngleTweenEntry(nullptr);
   CHECK(ev::UpdateEventTripleTweenEntry(nullptr) == 0);
   CHECK(ev::RefusedEventScreenTweenCount() == before + 5);
-  Event_camera = saved;
+  VS::Event::cameraWorkspace = saved;
 }
 
 TEST_CASE("Live screen tween entries keep the workspace layout",
           "[event][camera][screen-tween]") {
-  VS::Event::CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = VS::Event::cameraWorkspace;
   const int saved_tick = VS::State::tickSpeed;
   VS::Event::CameraState camera{};
-  Event_camera = &camera;
+  VS::Event::cameraWorkspace = &camera;
   camera.captured_screen_roll.angle = 0x700;
   std::array<std::uint8_t, 5> roll{0xE3, 0x00, 0x01, 0x2F, 4};
   CHECK(VS::Event::CommandTweenCameraRollOpcode(roll.data(), 0) == 0);
@@ -390,5 +390,5 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
               sizeof(recorded));
   CHECK(recorded == VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
   VS::State::tickSpeed = saved_tick;
-  Event_camera = saved;
+  VS::Event::cameraWorkspace = saved;
 }

@@ -202,7 +202,7 @@ be61930f278d,DIV-ZERO,medium,pattern,,LiveDrawVisitedRooms,Native/Game/src/Menu/
 e8cd5a414e5c,DIV-ZERO,medium,pattern,F01330,SelectTextBoxChoice,Native/Game/src/Menu/TextBoxState.cpp,249,count,60,34,open,
 3871d5c13bc4,DIV-ZERO,low,pattern,,Stats,Native/Game/src/Save/NativeFilePresentation.cpp,484,(kClockRadix * kClockRadix),45,3,open,
 047be567d8a3,GUARD-AFTER-READ,medium,pattern,,RelocateTable,Native/Content/src/ModuleLoader.cpp,234,samples,47,6,open,
-daf4b56a8811,GUARD-AFTER-READ,medium,pattern,,UpdateTrack,Native/Game/src/Event/EventCameraTrackLive.cpp,193,camera,59,26,open,
+daf4b56a8811,GUARD-AFTER-READ,medium,pattern,,UpdateTrack,Native/Game/src/Event/EventCameraTrackLive.cpp,194,camera,59,26,open,
 533e06691dc7,NARROW-ID,medium,pattern,,InventoryWeaponView,Native/Game/include/Actors/ActorSpawning.hpp,539,InventoryWeaponView.blade,none,,open,
 d19c60287e7d,NARROW-ID,medium,pattern,,EquipmentPart,Native/Game/include/Items/ItemRecords.hpp,189,EquipmentPart.sub_id,none,,open,
 26d2ac69edb4,NARROW-ID,medium,pattern,,EquipmentPart,Native/Game/include/Items/ItemRecords.hpp,190,EquipmentPart.weapon_model_id,none,,open,

@@ -11,7 +11,7 @@
 #include "Event/EventCameraControl.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
@@ -30,8 +30,8 @@ constexpr int kSavedFieldDistanceFlag = 0xB0;
 }
 
 CameraState& RequiredCamera(const char* operation) {
-  if (Event_camera == nullptr) Refuse(operation, "missing event camera");
-  return *Event_camera;
+  if (cameraWorkspace == nullptr) Refuse(operation, "missing event camera");
+  return *cameraWorkspace;
 }
 
 class LiveFieldCameraPlacementHost final : public EventFieldCameraHost {
@@ -70,11 +70,7 @@ void StopEventCameraMotionEntry() {
 // 0x800BC1CC-0x800BC2E8)
 void RestoreEventFieldCameraEntry(std::int16_t field_facing,
                                   int field_distance_mode) {
-  auto skip = static_cast<std::uint8_t>(Event_skipNextFieldCameraRestore);
-  if (ConsumeFieldCameraOverride(skip)) {
-    Event_skipNextFieldCameraRestore = static_cast<char>(skip);
-    return;
-  }
+  if (ConsumeFieldCameraOverride(skipNextFieldCameraRestore)) return;
   CameraState& camera = RequiredCamera("RestoreEventFieldCamera");
   LiveFieldCameraPlacementHost field_camera;
   LiveEventCameraTrackHost motion;

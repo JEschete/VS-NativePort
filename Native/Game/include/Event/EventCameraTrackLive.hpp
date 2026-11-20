@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
+// Binding from the event camera workspace (cameraWorkspace), the
 // tick speed and the actor, bone, easing and floor services to the typed
 // track motion (EventCameraTrack.hpp). Each entry keeps the original
 // signature so the opcode table, the module bindings and the callers can use

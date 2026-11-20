@@ -17,7 +17,7 @@
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/EventScreenTweensLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
@@ -46,8 +46,8 @@ void Skip(const char* operation, const char* reason) {
 }
 
 CameraState* LiveCamera(const char* operation) {
-  if (Event_camera == nullptr) Skip(operation, "missing event camera");
-  return Event_camera;
+  if (cameraWorkspace == nullptr) Skip(operation, "missing event camera");
+  return cameraWorkspace;
 }
 
 Vec3 VectorOf(const VECTOR& vector) {
@@ -249,7 +249,7 @@ void ApplyEventCameraStateEntry() {
   LiveCameraOutput output;
   EventCameraFrame frame = LoadFrame(*camera);
   ApplyEventCameraState(
-      frame, Event_skipNextFieldCameraRestore != 0,
+      frame, skipNextFieldCameraRestore != 0,
       static_cast<std::uint8_t>(Event_isScriptBackdropEnabled), output);
   StoreFrame(*camera, frame);
 }

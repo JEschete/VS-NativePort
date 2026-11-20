@@ -41,7 +41,7 @@
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptAudio.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptEffects.hpp"
@@ -489,7 +489,7 @@ class LiveVmHost final : public ScriptVmHost {
   void InitializeEventCamera() override { InitializeEventCameraEntry(); }
   // F01215 (func_800BBDDC) only forwarded to the high-end free; retired.
   void FreeEventCamera() override {
-    Core::Memory::FreeLiveFromHighEnd(Event_camera);
+    Core::Memory::FreeLiveFromHighEnd(cameraWorkspace);
   }
   void UpdateEventCameraOrigin() override { UpdateEventCameraOriginEntry(); }
   void RestoreEventFieldCamera() override {

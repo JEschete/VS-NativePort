@@ -1905,7 +1905,7 @@
     <ClCompile Include="src\Event\ScriptCamera.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptCamera.h">
+    <ClInclude Include="src\Event\ScriptCamera.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptControl.cpp">

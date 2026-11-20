@@ -15,7 +15,7 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/InterpolationCurveLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "State/Timers.hpp"
@@ -39,8 +39,8 @@ constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
 }
 
 CameraState& RequiredCamera(const char* operation) {
-  if (Event_camera == nullptr) Refuse(operation, "missing event camera");
-  return *Event_camera;
+  if (cameraWorkspace == nullptr) Refuse(operation, "missing event camera");
+  return *cameraWorkspace;
 }
 
 template <typename Value>

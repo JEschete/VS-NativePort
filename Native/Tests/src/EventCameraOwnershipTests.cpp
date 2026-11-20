@@ -12,10 +12,11 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Field/CameraLive.hpp"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 
 namespace {
@@ -25,7 +26,9 @@ using VS::Core::Math::Vec3;
 
 // F01215 (func_800BBDDC) is retired: LiveVmHost::FreeEventCamera makes this
 // high-end free directly.
-void FreeEventCamera() { VS::Core::Memory::FreeLiveFromHighEnd(Event_camera); }
+void FreeEventCamera() {
+  VS::Core::Memory::FreeLiveFromHighEnd(event::cameraWorkspace);
+}
 
 class FakeOriginHost final : public event::EventCameraOriginHost {
  public:
@@ -65,8 +68,8 @@ struct LiveEventCameraFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, kArenaBytes> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  VS::Event::CameraState* saved_camera = Event_camera;
-  char saved_override = Event_skipNextFieldCameraRestore;
+  VS::Event::CameraState* saved_camera = event::cameraWorkspace;
+  std::uint8_t saved_override = event::skipNextFieldCameraRestore;
 
   LiveEventCameraFixture() { VS::Render::InitializeLiveFramebufferEffect(); }
   LiveEventCameraFixture(const LiveEventCameraFixture&) = delete;
@@ -75,28 +78,28 @@ struct LiveEventCameraFixture {
   LiveEventCameraFixture& operator=(LiveEventCameraFixture&&) = delete;
   ~LiveEventCameraFixture() {
     VS::Render::InitializeLiveFramebufferEffect();
-    Event_camera = saved_camera;
-    Event_skipNextFieldCameraRestore = saved_override;
+    event::cameraWorkspace = saved_camera;
+    event::skipNextFieldCameraRestore = saved_override;
   }
 };
 
 // A workspace for the origin entries, with the pads marked.
 struct LiveOriginWorkspace {
   VS::Event::CameraState camera{};
-  VS::Event::CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState* saved_camera = event::cameraWorkspace;
 
   LiveOriginWorkspace() {
     camera.origin_actor_id = 7;
     camera.origin_offset = {0x1000, -0x2000, 0x3000, 0x55};
     camera.eye.current_position = {1, 2, 3, 0x66};
     camera.look_at.current_position = {-4, -5, -6, 0x77};
-    Event_camera = &camera;
+    event::cameraWorkspace = &camera;
   }
   LiveOriginWorkspace(const LiveOriginWorkspace&) = delete;
   LiveOriginWorkspace& operator=(const LiveOriginWorkspace&) = delete;
   LiveOriginWorkspace(LiveOriginWorkspace&&) = delete;
   LiveOriginWorkspace& operator=(LiveOriginWorkspace&&) = delete;
-  ~LiveOriginWorkspace() { Event_camera = saved_camera; }
+  ~LiveOriginWorkspace() { event::cameraWorkspace = saved_camera; }
 
   void RequireWorldWithOffsetApplied() const {
     CHECK(camera.origin_actor_id == event::kEventCameraWorldOrigin);
@@ -299,14 +302,16 @@ TEST_CASE("Event camera origin command refuses a short instruction",
 TEST_CASE("Event camera init entry allocates and clears the field override",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
-  Event_skipNextFieldCameraRestore = 1;
+  event::skipNextFieldCameraRestore = 1;
   event::InitializeEventCameraEntry();
-  REQUIRE(Event_camera != nullptr);
-  const auto capacity = VS::Core::Memory::LivePayloadCapacity(Event_camera);
+  REQUIRE(event::cameraWorkspace != nullptr);
+  const auto capacity =
+      VS::Core::Memory::LivePayloadCapacity(event::cameraWorkspace);
   REQUIRE(capacity.has_value());
   CHECK(*capacity >= sizeof(VS::Event::CameraState));
-  CHECK(Event_skipNextFieldCameraRestore == 0);
-  CHECK(Event_camera->origin_actor_id == event::kEventCameraWorldOrigin);
+  CHECK(event::skipNextFieldCameraRestore == 0);
+  CHECK(event::cameraWorkspace->origin_actor_id ==
+        event::kEventCameraWorldOrigin);
 }
 
 TEST_CASE("Event camera init entry mirrors the field camera",
@@ -317,8 +322,8 @@ TEST_CASE("Event camera init entry mirrors the field camera",
   VS::Field::LiveCameraPosition(&field_eye);
   VS::Field::LiveCameraLookAt(&field_look_at);
   event::InitializeEventCameraEntry();
-  REQUIRE(Event_camera != nullptr);
-  const VS::Event::CameraState& camera = *Event_camera;
+  REQUIRE(event::cameraWorkspace != nullptr);
+  const VS::Event::CameraState& camera = *event::cameraWorkspace;
   CHECK(VectorOf(camera.eye.current_position) == VectorOf(field_eye));
   CHECK(VectorOf(camera.look_at.partner_position) == VectorOf(field_eye));
   CHECK(VectorOf(camera.look_at.current_position) == VectorOf(field_look_at));
@@ -331,8 +336,8 @@ TEST_CASE("Event camera init entry starts the angles lens and screen tweens",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  REQUIRE(Event_camera != nullptr);
-  const VS::Event::CameraState& camera = *Event_camera;
+  REQUIRE(event::cameraWorkspace != nullptr);
+  const VS::Event::CameraState& camera = *event::cameraWorkspace;
   CHECK(camera.camera_roll.has_changed == 1);
   CHECK(camera.captured_screen_roll.has_changed == 1);
   CHECK(camera.screen_scale.current_value0 == 0x1000);
@@ -343,15 +348,33 @@ TEST_CASE("Event camera init entry starts the angles lens and screen tweens",
   CHECK(camera.far_clip.value == 0x1000);
 }
 
+TEST_CASE("Event camera init entry applies the original framebuffer defaults",
+          "[event][camera][ownership]") {
+  LiveEventCameraFixture fixture;
+  event::InitializeEventCameraEntry();
+  // Unit scale and offset (D_800E9C0C) and a neutral tint (D_800E9C08).
+  VS::Render::FramebufferEffectTranslation scale{};
+  VS::Render::ReadLiveFramebufferEffectScale(&scale);
+  CHECK(scale.x == 0x1000);
+  CVECTOR tint{};
+  VS::Render::ReadLiveFramebufferEffectTint(&tint);
+  const std::array<unsigned char, 3> rgb{tint.r, tint.g, tint.b};
+  CHECK(rgb == std::array<unsigned char, 3>{0x80, 0x80, 0x80});
+  VS::Render::FramebufferEffectTranslation offset{};
+  VS::Render::ReadLiveFramebufferEffectOffset(&offset);
+  CHECK(offset.x == 0x1000);
+  CHECK(offset.y == 0x1000);
+}
+
 TEST_CASE("Event camera re-init allocates a second workspace",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  VS::Event::CameraState* const first = Event_camera;
+  VS::Event::CameraState* const first = event::cameraWorkspace;
   REQUIRE(first != nullptr);
   event::InitializeEventCameraEntry();
-  REQUIRE(Event_camera != nullptr);
-  CHECK(Event_camera != first);
+  REQUIRE(event::cameraWorkspace != nullptr);
+  CHECK(event::cameraWorkspace != first);
   // The original leaked the first workspace; it stays allocated.
   CHECK(VS::Core::Memory::LivePayloadCapacity(first).has_value());
 }
@@ -360,26 +383,26 @@ TEST_CASE("Event camera free entry releases and keeps the pointer",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  VS::Event::CameraState* const camera = Event_camera;
+  VS::Event::CameraState* const camera = event::cameraWorkspace;
   REQUIRE(camera != nullptr);
   const std::uint64_t refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   FreeEventCamera();
-  CHECK(Event_camera == camera);
+  CHECK(event::cameraWorkspace == camera);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(camera).has_value());
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
   // A second free reaches the heap with the released pointer and is refused.
   FreeEventCamera();
-  CHECK(Event_camera == camera);
+  CHECK(event::cameraWorkspace == camera);
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused + 1);
 }
 
 TEST_CASE("Event camera free without a workspace is refused by the heap",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
-  Event_camera = nullptr;
+  event::cameraWorkspace = nullptr;
   const std::uint64_t refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   FreeEventCamera();
-  CHECK(Event_camera == nullptr);
+  CHECK(event::cameraWorkspace == nullptr);
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused + 1);
 }
 
@@ -387,23 +410,24 @@ TEST_CASE("Event camera free then re-init reuses the released block",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  VS::Event::CameraState* const first = Event_camera;
+  VS::Event::CameraState* const first = event::cameraWorkspace;
   REQUIRE(first != nullptr);
   first->origin_actor_id = 3;
   FreeEventCamera();
   event::InitializeEventCameraEntry();
-  CHECK(Event_camera == first);
-  CHECK(Event_camera->origin_actor_id == event::kEventCameraWorldOrigin);
+  CHECK(event::cameraWorkspace == first);
+  CHECK(event::cameraWorkspace->origin_actor_id ==
+        event::kEventCameraWorldOrigin);
 }
 
 TEST_CASE("Event field camera override entry stores the low byte",
           "[event][camera][ownership]") {
-  const char saved = Event_skipNextFieldCameraRestore;
+  const std::uint8_t saved = event::skipNextFieldCameraRestore;
   event::SetEventFieldCameraOverrideEntry(0x1FF);
-  CHECK(static_cast<std::uint8_t>(Event_skipNextFieldCameraRestore) == 0xFF);
+  CHECK(event::skipNextFieldCameraRestore == 0xFF);
   event::SetEventFieldCameraOverrideEntry(0x100);
-  CHECK(Event_skipNextFieldCameraRestore == 0);
-  Event_skipNextFieldCameraRestore = saved;
+  CHECK(event::skipNextFieldCameraRestore == 0);
+  event::skipNextFieldCameraRestore = saved;
 }
 
 TEST_CASE("Event camera origin entry returns the live workspace to the world",

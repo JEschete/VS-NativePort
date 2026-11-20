@@ -186,7 +186,7 @@
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptAudio.hpp"
 #include "Event/ScriptAudioOpcodes.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptDialogOpcodes.hpp"
 #include "Event/ScriptEffectOpcodes.hpp"
@@ -458,12 +458,6 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E9BF4u, 4u, (void*)&Event_kSceneTimerModes, sizeof Event_kSceneTimerModes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9BF8u, 8u, (void*)&Event_kSceneTimerResetScopes, sizeof Event_kSceneTimerResetScopes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9C00u, 8u, (void*)&Event_kSpecialOperationTenArguments, sizeof Event_kSpecialOperationTenArguments, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C08u, 4u, (void*)&Event_kDefaultScreenTint, sizeof Event_kDefaultScreenTint, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C0Cu, 16u, (void*)&Event_kDefaultScreenTransform, sizeof Event_kDefaultScreenTransform, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C1Cu, 8u, (void*)&Event_fieldCameraReturnCommands, sizeof Event_fieldCameraReturnCommands, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C24u, 4u, (void*)&Event_kOrbitReturnHeightOffsets, sizeof Event_kOrbitReturnHeightOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C28u, 4u, (void*)&Event_kOrbitReturnFirstCommand, sizeof Event_kOrbitReturnFirstCommand, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9C2Cu, 4u, (void*)&Event_kOrbitReturnSecondCommand, sizeof Event_kOrbitReturnSecondCommand, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9C30u, 256u, (void*)&Event_kOpcodeSizes, sizeof Event_kOpcodeSizes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9D30u, 1024u, (void*)&Event_kOpcodeHandlers, sizeof Event_kOpcodeHandlers, 4u, sizeof Event_kOpcodeHandlers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EA234u, 144u, (void*)&Battle_sphereArcBases, sizeof Battle_sphereArcBases, 1u, 1u},
@@ -699,8 +693,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4B30u, 64u, (void*)&VS::Event::splashTweens, sizeof VS::Event::splashTweens, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B70u, 17u, (void*)&VS::Event::scriptControlledActors, sizeof VS::Event::scriptControlledActors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4B88u, 22u, (void*)&VS::Event::weatherTween, sizeof VS::Event::weatherTween, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BA0u, 4u, (void*)&Event_skipNextFieldCameraRestore, sizeof Event_skipNextFieldCameraRestore, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4BA4u, 4u, (void*)&Event_camera, sizeof Event_camera, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BA0u, 4u, (void*)&VS::Event::skipNextFieldCameraRestore, sizeof VS::Event::skipNextFieldCameraRestore, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4BA4u, 4u, (void*)&VS::Event::cameraWorkspace, sizeof VS::Event::cameraWorkspace, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4BA8u, 4u, (void*)&VS::Event::isDirectEventRequest, sizeof VS::Event::isDirectEventRequest, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4BB0u, 4u, (void*)&Event_dialogStrings, sizeof Event_dialogStrings, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4BB4u, 4u, (void*)&Event_cachedFlagValue, sizeof Event_cachedFlagValue, 1u, 1u},

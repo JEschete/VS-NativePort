@@ -14,7 +14,7 @@
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraTrack.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
@@ -130,21 +130,22 @@ void RunFieldReturn(FieldReturn& run, std::int32_t eye_units,
                                              run.motion);
 }
 
-// Points Event_camera at a zeroed workspace and keeps the restore globals.
+// Points VS::Event::cameraWorkspace at a zeroed workspace and keeps the restore
+// globals.
 struct LiveControlWorkspace {
   VS::Event::CameraState camera{};
-  VS::Event::CameraState* saved_camera = Event_camera;
-  char saved_skip = Event_skipNextFieldCameraRestore;
+  VS::Event::CameraState* saved_camera = event::cameraWorkspace;
+  std::uint8_t saved_skip = event::skipNextFieldCameraRestore;
   std::int16_t saved_scripted = Event_isFieldCameraRestoreScripted;
 
-  LiveControlWorkspace() { Event_camera = &camera; }
+  LiveControlWorkspace() { event::cameraWorkspace = &camera; }
   LiveControlWorkspace(const LiveControlWorkspace&) = delete;
   LiveControlWorkspace& operator=(const LiveControlWorkspace&) = delete;
   LiveControlWorkspace(LiveControlWorkspace&&) = delete;
   LiveControlWorkspace& operator=(LiveControlWorkspace&&) = delete;
   ~LiveControlWorkspace() {
-    Event_camera = saved_camera;
-    Event_skipNextFieldCameraRestore = saved_skip;
+    event::cameraWorkspace = saved_camera;
+    event::skipNextFieldCameraRestore = saved_skip;
     Event_isFieldCameraRestoreScripted = saved_scripted;
   }
 };
@@ -360,14 +361,14 @@ TEST_CASE("Field camera restore opcode refuses a command without its distance",
 TEST_CASE("Field camera restore opcode marks the restore scripted if skipped",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  Event_camera = nullptr;
-  Event_skipNextFieldCameraRestore = 1;
+  event::cameraWorkspace = nullptr;
+  event::skipNextFieldCameraRestore = 1;
   Event_isFieldCameraRestoreScripted = 0;
   std::array<std::uint8_t, 3> instruction{0xE9, 0x02, 0x01};
 
   CHECK(VS::Event::CommandRestoreFieldCameraOpcode(instruction.data(), 0) == 0);
 
-  CHECK(Event_skipNextFieldCameraRestore == 0);
+  CHECK(event::skipNextFieldCameraRestore == 0);
   CHECK(Event_isFieldCameraRestoreScripted == 1);
 }
 
@@ -389,12 +390,12 @@ TEST_CASE("Field camera override is consumed by one restore",
 TEST_CASE("Field camera restore entry needs no workspace when overridden",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  Event_camera = nullptr;
-  Event_skipNextFieldCameraRestore = 1;
+  event::cameraWorkspace = nullptr;
+  event::skipNextFieldCameraRestore = 1;
 
   event::RestoreEventFieldCameraEntry(-1, -1);
 
-  CHECK(Event_skipNextFieldCameraRestore == 0);
+  CHECK(event::skipNextFieldCameraRestore == 0);
 }
 
 TEST_CASE("Field camera return command bytes carry the duration",

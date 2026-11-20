@@ -101,7 +101,7 @@
 #include "Ending/Results.hpp"
 #include "Event/Actors.hpp"
 #include "Event/Script.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
@@ -475,24 +475,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x81400, sizeof Event_kSpecialOperationTenArguments,
      &Event_kSpecialOperationTenArguments,
      sizeof Event_kSpecialOperationTenArguments},  // G00125 D_800E9C00
-    {"BATTLE/BATTLE.PRG", 0x81408, sizeof Event_kDefaultScreenTint,
-     &Event_kDefaultScreenTint,
-     sizeof Event_kDefaultScreenTint},  // G00126 D_800E9C08
-    {"BATTLE/BATTLE.PRG", 0x8140C, sizeof Event_kDefaultScreenTransform,
-     &Event_kDefaultScreenTransform,
-     sizeof Event_kDefaultScreenTransform},  // G00127 D_800E9C0C
-    {"BATTLE/BATTLE.PRG", 0x8141C, sizeof Event_fieldCameraReturnCommands,
-     &Event_fieldCameraReturnCommands,
-     sizeof Event_fieldCameraReturnCommands},  // G00128 D_800E9C1C
-    {"BATTLE/BATTLE.PRG", 0x81424, sizeof Event_kOrbitReturnHeightOffsets,
-     &Event_kOrbitReturnHeightOffsets,
-     sizeof Event_kOrbitReturnHeightOffsets},  // G00129 D_800E9C24
-    {"BATTLE/BATTLE.PRG", 0x81428, sizeof Event_kOrbitReturnFirstCommand,
-     &Event_kOrbitReturnFirstCommand,
-     sizeof Event_kOrbitReturnFirstCommand},  // G00130 D_800E9C28
-    {"BATTLE/BATTLE.PRG", 0x8142C, sizeof Event_kOrbitReturnSecondCommand,
-     &Event_kOrbitReturnSecondCommand,
-     sizeof Event_kOrbitReturnSecondCommand},  // G00131 D_800E9C2C
     {"BATTLE/BATTLE.PRG", 0x81430, sizeof Event_kOpcodeSizes,
      &Event_kOpcodeSizes, sizeof Event_kOpcodeSizes},  // G00132 D_800E9C30
     {"BATTLE/BATTLE.PRG", 0x81A34, sizeof Battle_sphereArcBases,

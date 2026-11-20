@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.hpp) and
-// the field camera override (Event_skipNextFieldCameraRestore) to the typed
+// Binding from the event camera workspace (cameraWorkspace) and
+// the field camera override (skipNextFieldCameraRestore) to the typed
 // ownership rules (EventCameraOwnership.hpp). Each entry keeps the original
 // signature so the opcode table, the module bindings and the callers can use
 // it in place of the copy. An entry that needs the workspace refuses a
@@ -13,7 +13,7 @@ namespace VS::Event {
 // bound by VS::Event::CommandSetCameraOriginActorOpcode
 // (ScriptControlOpcodes.hpp). decomp: BATTLE.PRG func_800BBDDC (F01215,
 // 4A0A8.c:3082) only forwarded to
-// Core::Memory::FreeLiveFromHighEnd(Event_camera) and is retired.
+// Core::Memory::FreeLiveFromHighEnd(cameraWorkspace) and is retired.
 
 // decomp: BATTLE.PRG func_800BBBE8 (F01214, 4A0A8.c:3014)
 // Allocates a new workspace from the heap's high end without releasing a

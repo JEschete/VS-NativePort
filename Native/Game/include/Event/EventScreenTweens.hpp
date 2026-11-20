@@ -4,7 +4,8 @@
 // tweens: the script opcodes that start them and the per-frame advances.
 // Each tween keeps the original's 16-bit fields and wrapping; the framebuffer
 // effect, the radial warp and the easing curve are injected ports.
-// EventScreenTweensLive.hpp binds them to Event_camera and the live services.
+// EventScreenTweensLive.hpp binds them to cameraWorkspace and the live
+// services.
 #include <array>
 #include <cstddef>
 #include <cstdint>

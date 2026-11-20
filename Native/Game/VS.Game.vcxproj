@@ -1352,13 +1352,7 @@
     <ClCompile Include="src\Event\ScriptAudioCommandsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Event\ScriptCamera.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Event\ScriptCamera.cpp" />
     <ClCompile Include="src\Event\ScriptControl.cpp" />
     <ClCompile Include="src\Event\ScriptDialogCommands.cpp" />
     <ClCompile Include="src\Event\ScriptDialogCommandsLive.cpp">
@@ -2291,7 +2285,7 @@
     <ClInclude Include="src\Event\ScriptActors.hpp" />
     <ClInclude Include="src\Event\ScriptAudio.hpp" />
     <ClInclude Include="src\Event\ScriptAudioOpcodes.hpp" />
-    <ClInclude Include="src\Event\ScriptCamera.h" />
+    <ClInclude Include="src\Event\ScriptCamera.hpp" />
     <ClInclude Include="src\Event\ScriptControlOpcodes.hpp" />
     <ClInclude Include="src\Event\ScriptDialogOpcodes.hpp" />
     <ClInclude Include="src\Event\ScriptEffectOpcodes.hpp" />

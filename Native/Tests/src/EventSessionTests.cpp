@@ -18,11 +18,13 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
+#include "Event/EventCameraControl.hpp"
+#include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/Script.hpp"
 #include "Event/ScriptActors.hpp"
 #include "Event/ScriptAudio.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptEffects.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -34,9 +36,6 @@
 #include "TestSupport/ScriptSources.hpp"
 
 namespace {
-constexpr std::array<u_char, 4> kEyeReturn{0xD4, 0x10, 0x10, 0x55};
-constexpr std::array<u_char, 3> kLookAtReturn{0xC2, 0x01, 0x55};
-
 struct EventSessionFixture {
   static constexpr std::size_t kArenaBytes = std::size_t{16} * 1024;
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -81,23 +80,17 @@ struct EventCameraFixture {
   // cameraScratch, 0x90 bytes).
   static constexpr std::size_t kCameraScratchOffset = 0x88;
   static constexpr std::size_t kCameraScratchBytes = 0x90;
-  VS::Event::CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState* saved_camera = VS::Event::cameraWorkspace;
   decltype(VS::State::tickSpeed) saved_speed = VS::State::tickSpeed;
   VS::Event::CameraState camera{};
   std::array<std::byte, kCameraScratchBytes> scratch{};
-  std::array<u_char, sizeof Event_kOrbitReturnFirstCommand> saved_eye{};
-  std::array<u_char, sizeof Event_kOrbitReturnSecondCommand> saved_look_at{};
 
   EventCameraFixture() {
-    std::memcpy(saved_eye.data(), &Event_kOrbitReturnFirstCommand,
-                saved_eye.size());
-    std::memcpy(saved_look_at.data(), &Event_kOrbitReturnSecondCommand,
-                saved_look_at.size());
     std::memcpy(
         scratch.data(),
         static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
         scratch.size());
-    Event_camera = &camera;
+    VS::Event::cameraWorkspace = &camera;
     VS::State::tickSpeed = 2;
     camera.look_at.current_position = {100, 200, 300, 0};
     camera.look_at.destination = {400, 500, 600, 0};
@@ -108,39 +101,12 @@ struct EventCameraFixture {
   }
 
   ~EventCameraFixture() {
-    std::memcpy(&Event_kOrbitReturnFirstCommand, saved_eye.data(),
-                saved_eye.size());
-    std::memcpy(&Event_kOrbitReturnSecondCommand, saved_look_at.data(),
-                saved_look_at.size());
     std::memcpy(
         static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
         scratch.data(), scratch.size());
-    Event_camera = saved_camera;
+    VS::Event::cameraWorkspace = saved_camera;
     VS::State::tickSpeed = saved_speed;
     Core_Gte_Reset();
-  }
-
-  static void LoadCommand(void* target, unsigned offset, unsigned size,
-                          std::span<const u_char> image) {
-    const auto entries = VS::Content::ModuleDataEntries();
-    const auto entry = std::ranges::find_if(
-        entries, [target](const auto& item) { return item.target == target; });
-    REQUIRE(entry != entries.end());
-    CHECK(entry->offset == offset);
-    CHECK(entry->size == size);
-    CHECK(entry->capacity == size);
-    REQUIRE(VS::Content::CopyModuleDataEntry(*entry, image));
-  }
-
-  void LoadCommands() {
-    std::vector<u_char> image(0x81430);
-    std::copy(kEyeReturn.begin(), kEyeReturn.end(), image.begin() + 0x81428);
-    std::copy(kLookAtReturn.begin(), kLookAtReturn.end(),
-              image.begin() + 0x8142C);
-    LoadCommand(&Event_kOrbitReturnFirstCommand, 0x81428, kEyeReturn.size(),
-                image);
-    LoadCommand(&Event_kOrbitReturnSecondCommand, 0x8142C, kLookAtReturn.size(),
-                image);
   }
 
   void CheckStarted() const {
@@ -313,30 +279,23 @@ int EnterScriptTitle() {
 TEST_CASE(
     "Orbit return constants retain both complete original camera commands",
     "[event][camera-return]") {
-  EventCameraFixture fixture;
-  CHECK(sizeof Event_kOrbitReturnFirstCommand == kEyeReturn.size());
-  CHECK(sizeof Event_kOrbitReturnSecondCommand == kLookAtReturn.size());
-  if (sizeof Event_kOrbitReturnFirstCommand < kEyeReturn.size() ||
-      sizeof Event_kOrbitReturnSecondCommand < kLookAtReturn.size()) {
-    return;
-  }
-  fixture.LoadCommands();
-  CHECK(std::memcmp(&Event_kOrbitReturnFirstCommand, kEyeReturn.data(),
-                    kEyeReturn.size()) == 0);
-  CHECK(std::memcmp(&Event_kOrbitReturnSecondCommand, kLookAtReturn.data(),
-                    kLookAtReturn.size()) == 0);
+  // Each command is as long as its opcode's motion command (#163), so the
+  // motion entry reads no byte past it.
+  CHECK(VS::Event::CameraMotionCommandLength(
+            VS::Event::kOrbitReturnEyeCommand.front()) ==
+        VS::Event::kOrbitReturnEyeCommand.size());
+  CHECK(VS::Event::CameraMotionCommandLength(
+            VS::Event::kOrbitReturnLookAtCommand.front()) ==
+        VS::Event::kOrbitReturnLookAtCommand.size());
 }
 
 TEST_CASE("Orbit return tracks retain original easing and 85-tick completion",
           "[event][camera-return]") {
   EventCameraFixture fixture;
-  REQUIRE(sizeof Event_kOrbitReturnFirstCommand == 4);
-  REQUIRE(sizeof Event_kOrbitReturnSecondCommand == 3);
-  fixture.LoadCommands();
-  VS::Event::CommandCameraMotionEntry(
-      reinterpret_cast<u_char*>(&Event_kOrbitReturnFirstCommand), 0);
-  VS::Event::CommandCameraMotionEntry(
-      reinterpret_cast<u_char*>(&Event_kOrbitReturnSecondCommand), 0);
+  VS::Event::OrbitCommand eye = VS::Event::kOrbitReturnEyeCommand;
+  VS::Event::LinearCommand look_at = VS::Event::kOrbitReturnLookAtCommand;
+  VS::Event::CommandCameraMotionEntry(eye.data(), 0);
+  VS::Event::CommandCameraMotionEntry(look_at.data(), 0);
   fixture.CheckStarted();
   for (int frame = 0; frame < 85; ++frame) {
     VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.look_at,

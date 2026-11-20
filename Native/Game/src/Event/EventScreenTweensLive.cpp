@@ -14,7 +14,7 @@
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/InterpolationCurveLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Render/FramebufferEffects.hpp"
@@ -165,8 +165,8 @@ class LiveScreenEffect final : public EventScreenEffectPort {
 };
 
 CameraState* LiveCamera(const char* operation) {
-  if (Event_camera == nullptr) Skip(operation, "missing event camera");
-  return Event_camera;
+  if (cameraWorkspace == nullptr) Skip(operation, "missing event camera");
+  return cameraWorkspace;
 }
 }  // namespace
 

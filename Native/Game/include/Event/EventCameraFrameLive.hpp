@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
+// Binding from the event camera workspace (cameraWorkspace), the
 // field camera, the renderer, the GTE and the scratch words to the typed
 // camera frame step (EventCameraFrame.hpp). Each entry keeps the original
 // signature so the script VM, the module bindings and the opcode table can

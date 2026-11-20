@@ -292,7 +292,7 @@ H0290,header,Native/Game/src/Event/ScriptActorOpcodes.hpp,owned,no,pragma-once,0
 H0291,header,Native/Game/src/Event/ScriptActors.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0292,header,Native/Game/src/Event/ScriptAudio.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0293,header,Native/Game/src/Event/ScriptAudioOpcodes.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0294,header,Native/Game/src/Event/ScriptCamera.h,generated,yes,pragma-once,0,0,0,0,0,0,8,0,0,remaining,
+H0294,header,Native/Game/src/Event/ScriptCamera.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0295,header,Native/Game/src/Event/ScriptControlOpcodes.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0296,header,Native/Game/src/Event/ScriptDialog.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Event_kDialogPlacementOrder (G00121) was unread; VS::Event::kDialogPlacementOrder (Event/ScriptDialogCommands.hpp) holds the same bytes (#441)
 H0297,header,Native/Game/src/Event/ScriptDialogOpcodes.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -799,7 +799,7 @@ S0362,source,Native/Game/src/Event/ScriptActorCommandsLive.cpp,owned,no,,0,,,,,,
 S0363,source,Native/Game/src/Event/ScriptActors.cpp,generated,no,,0,,,,,,,,,done,
 S0364,source,Native/Game/src/Event/ScriptAudio.cpp,generated,no,,0,,,,,,,,,done,
 S0365,source,Native/Game/src/Event/ScriptAudioCommandsLive.cpp,owned,no,,0,,,,,,,,,done,
-S0366,source,Native/Game/src/Event/ScriptCamera.cpp,generated,yes,,0,,,,,,,,,done,
+S0366,source,Native/Game/src/Event/ScriptCamera.cpp,generated,no,,0,,,,,,,,,done,
 S0367,source,Native/Game/src/Event/ScriptDialog.cpp,generated,yes,,0,,,,,,,,,retired,deleted: Event_kDialogPlacementOrder (G00121) was unread; VS::Event::kDialogPlacementOrder (Event/ScriptDialogCommands.hpp) holds the same bytes (#441)
 S0368,source,Native/Game/src/Event/ScriptDialogCommandsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0369,source,Native/Game/src/Event/ScriptEffectCommandsLive.cpp,owned,no,,0,,,,,,,,,done,

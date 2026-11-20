@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
+// Binding from the event camera workspace (cameraWorkspace), the
 // tick speed and the shared scratch words to the typed lens and shake rules
 // (EventCameraLens.hpp). Each entry keeps the original signature so the
 // camera update, the module bindings and the opcode table can use it in place

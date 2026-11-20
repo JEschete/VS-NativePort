@@ -17,7 +17,7 @@
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "State/Timers.hpp"
 
@@ -163,19 +163,19 @@ Vec3 VectorOf(const VECTOR& vector) {
           static_cast<std::int32_t>(vector.vz)};
 }
 
-// Points Event_camera at a zeroed workspace for the entry tests.
+// Points VS::Event::cameraWorkspace at a zeroed workspace for the entry tests.
 struct LiveTrackWorkspace {
   VS::Event::CameraState camera{};
-  VS::Event::CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState* saved_camera = event::cameraWorkspace;
   int saved_tick_speed = VS::State::tickSpeed;
 
-  LiveTrackWorkspace() { Event_camera = &camera; }
+  LiveTrackWorkspace() { event::cameraWorkspace = &camera; }
   LiveTrackWorkspace(const LiveTrackWorkspace&) = delete;
   LiveTrackWorkspace& operator=(const LiveTrackWorkspace&) = delete;
   LiveTrackWorkspace(LiveTrackWorkspace&&) = delete;
   LiveTrackWorkspace& operator=(LiveTrackWorkspace&&) = delete;
   ~LiveTrackWorkspace() {
-    Event_camera = saved_camera;
+    event::cameraWorkspace = saved_camera;
     VS::State::tickSpeed = saved_tick_speed;
   }
 };

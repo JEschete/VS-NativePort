@@ -18,7 +18,7 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/InterpolationCurveLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -40,8 +40,8 @@ constexpr std::intptr_t kUnassignedResult = -1;
 }
 
 CameraState& RequiredCamera(const char* operation) {
-  if (Event_camera == nullptr) Refuse(operation, "missing event camera");
-  return *Event_camera;
+  if (cameraWorkspace == nullptr) Refuse(operation, "missing event camera");
+  return *cameraWorkspace;
 }
 
 CameraTrack& RequiredTrack(CameraTrack* track, const char* operation) {
@@ -50,8 +50,9 @@ CameraTrack& RequiredTrack(CameraTrack* track, const char* operation) {
 }
 
 const char* TrackName(const CameraTrack& track) {
-  return Event_camera != nullptr && &track == &Event_camera->eye ? "eye"
-                                                                 : "look_at";
+  return cameraWorkspace != nullptr && &track == &cameraWorkspace->eye
+             ? "eye"
+             : "look_at";
 }
 
 Vec3 LoadVector(const VECTOR& vector) {

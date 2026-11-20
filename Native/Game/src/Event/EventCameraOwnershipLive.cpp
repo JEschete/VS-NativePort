@@ -14,11 +14,12 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
+#include "Render/FramebufferEffects.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 
 namespace VS::Event {
@@ -29,14 +30,27 @@ using Core::Math::Vec3;
 constexpr std::size_t kEventCameraWorkspaceBytes = 0x28C;
 static_assert(sizeof(CameraState) == kEventCameraWorkspaceBytes);
 
+// The framebuffer effect settings the camera start requests: a neutral tint
+// and a unit (ONE) record, which the original passes to both the scale and
+// the offset setters (src/BATTLE/BATTLE.PRG/4DEA8.c:3699, 3704 and 3710).
+// decomp: D_800E9C08 (BATTLE.PRG file offset 0x81408)
+constexpr CVECTOR kDefaultScreenTint{.r = 0x80, .g = 0x80, .b = 0x80, .cd = 0};
+// decomp: D_800E9C0C (BATTLE.PRG file offset 0x8140C)
+constexpr Render::FramebufferEffectTranslation kDefaultScreenTransform{
+    .x = 0x1000,
+    .y = 0x1000,
+    .reserved08 = 0x1000,
+    .reserved0c = 0,
+};
+
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 
 CameraState& RequiredCamera(const char* operation) {
-  if (Event_camera == nullptr) Refuse(operation, "missing event camera");
-  return *Event_camera;
+  if (cameraWorkspace == nullptr) Refuse(operation, "missing event camera");
+  return *cameraWorkspace;
 }
 
 Vec3 LoadVector(const VECTOR& vector) {
@@ -96,13 +110,13 @@ void StoreScreenTweens(CameraState& camera, const EventCameraStart& start) {
   camera.captured_screen_roll.has_changed =
       StoredFlag(start.screen_roll.changed);
   StoreScreenValues(camera.screen_scale, start.screen_scale);
-  Render::SetLiveFramebufferEffectScale(&Event_kDefaultScreenTransform);
+  Render::SetLiveFramebufferEffectScale(&kDefaultScreenTransform);
   camera.screen_scale.duration_frames = start.screen_scale.duration_frames;
   StoreScreenValues(camera.screen_tint, start.screen_tint);
-  Render::SetLiveFramebufferEffectTint(&Event_kDefaultScreenTint);
+  Render::SetLiveFramebufferEffectTint(&kDefaultScreenTint);
   camera.screen_tint.duration_frames = start.screen_tint.duration_frames;
   StoreScreenValues(camera.screen_translation, start.screen_translation);
-  Render::SetLiveFramebufferEffectOffset(&Event_kDefaultScreenTransform);
+  Render::SetLiveFramebufferEffectOffset(&kDefaultScreenTransform);
   camera.screen_translation.duration_frames =
       start.screen_translation.duration_frames;
   Render::SetLiveFramebufferEffectBlendMode(start.screen_blend_mode);
@@ -156,9 +170,9 @@ class LiveEventCameraOriginHost final : public EventCameraOriginHost {
 // decomp: BATTLE.PRG func_800BBBE8 (F01214, src/BATTLE/BATTLE.PRG/4A0A8.c:3014,
 // 0x800BBBE8-0x800BBDDC)
 void InitializeEventCameraEntry() {
-  Event_camera = static_cast<CameraState*>(
+  cameraWorkspace = static_cast<CameraState*>(
       Core::Memory::AllocateLiveFromHighEnd(sizeof(CameraState)));
-  Event_skipNextFieldCameraRestore = 0;
+  skipNextFieldCameraRestore = 0;
   CameraState& camera = RequiredCamera("InitializeEventCamera");
   VECTOR field_eye{};
   VECTOR field_look_at{};
@@ -174,8 +188,7 @@ void InitializeEventCameraEntry() {
 // decomp: BATTLE.PRG func_800BBE04 (F01216, src/BATTLE/BATTLE.PRG/4A0A8.c:3084,
 // 0x800BBE04-0x800BBE10)
 void SetEventFieldCameraOverrideEntry(int field_camera_override) {
-  Event_skipNextFieldCameraRestore =
-      static_cast<char>(EventFieldCameraOverride(field_camera_override));
+  skipNextFieldCameraRestore = EventFieldCameraOverride(field_camera_override);
 }
 
 // decomp: BATTLE.PRG func_800BBE10 (F01217, src/BATTLE/BATTLE.PRG/4A0A8.c:3086,

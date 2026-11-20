@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
+// Binding from the event camera workspace (cameraWorkspace), the
 // tick speed and the live captured screen and radial warp to the typed screen
 // tweens (EventScreenTweens.hpp). Each entry keeps the original signature so
 // the opcode tables, the module bindings and the callers can use it in place

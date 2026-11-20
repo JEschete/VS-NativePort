@@ -4,7 +4,7 @@
 // handing the result to the field camera and renderer, the completion bits the
 // scripts wait on and the opcode that waits for them. The renderer, the field
 // camera and the GTE are injected ports; EventCameraFrameLive.hpp binds them
-// to Event_camera and the live services.
+// to cameraWorkspace and the live services.
 #include <array>
 #include <cstddef>
 #include <cstdint>

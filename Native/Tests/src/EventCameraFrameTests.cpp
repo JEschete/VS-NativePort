@@ -12,7 +12,7 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraFrameLive.hpp"
-#include "Event/ScriptCamera.h"
+#include "Event/ScriptCamera.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Field/CameraLive.hpp"
@@ -276,8 +276,8 @@ TEST_CASE("Camera track update crosses the partners then steps in order",
 
 TEST_CASE("Live camera frame entries skip a missing camera or instruction",
           "[event][camera][camera-frame]") {
-  VS::Event::CameraState* const saved = Event_camera;
-  Event_camera = nullptr;
+  VS::Event::CameraState* const saved = VS::Event::cameraWorkspace;
+  VS::Event::cameraWorkspace = nullptr;
   const std::uint64_t before = ev::RefusedEventCameraFrameCount();
   std::array<std::uint8_t, 2> instruction{0xE0, 0x01};
   CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
@@ -286,14 +286,14 @@ TEST_CASE("Live camera frame entries skip a missing camera or instruction",
   ev::UpdateEventCameraTracksEntry();
   CHECK(ev::EventCameraCompletionMaskEntry() == 0);
   CHECK(ev::RefusedEventCameraFrameCount() == before + 5);
-  Event_camera = saved;
+  VS::Event::cameraWorkspace = saved;
 }
 
 TEST_CASE("Live camera completion reads the workspace bytes unsigned",
           "[event][camera][camera-frame]") {
-  VS::Event::CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = VS::Event::cameraWorkspace;
   VS::Event::CameraState camera{};
-  Event_camera = &camera;
+  VS::Event::cameraWorkspace = &camera;
   camera.look_at.motion_mode = 0xF;
   camera.eye.motion_mode = 0xF;
   CHECK(ev::EventCameraCompletionMaskEntry() == 0xFF);
@@ -306,21 +306,21 @@ TEST_CASE("Live camera completion reads the workspace bytes unsigned",
   CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
   instruction[1] = 0x9F;
   CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 1);
-  Event_camera = saved;
+  VS::Event::cameraWorkspace = saved;
 }
 
 TEST_CASE("Live camera entries keep the workspace layout",
           "[event][camera][camera-frame]") {
-  VS::Event::CameraState* const saved = Event_camera;
-  const char saved_skip = Event_skipNextFieldCameraRestore;
+  VS::Event::CameraState* const saved = VS::Event::cameraWorkspace;
+  const std::uint8_t saved_skip = VS::Event::skipNextFieldCameraRestore;
   VECTOR saved_look_at{};
   VECTOR saved_position{};
   VS::Field::LiveCameraLookAt(&saved_look_at);
   VS::Field::LiveCameraPosition(&saved_position);
   const int saved_roll = VS::Field::LiveCameraRoll();
   VS::Event::CameraState camera{};
-  Event_camera = &camera;
-  Event_skipNextFieldCameraRestore = 0;
+  VS::Event::cameraWorkspace = &camera;
+  VS::Event::skipNextFieldCameraRestore = 0;
   camera.look_at.current_position = {
       .vx = 0x1000, .vy = 0x2000, .vz = 0x3000, .pad = 0x55};
   camera.eye.current_position = {
@@ -344,6 +344,6 @@ TEST_CASE("Live camera entries keep the workspace layout",
   VS::Field::LiveSetCameraLookAt(&saved_look_at);
   VS::Field::LiveSetCameraPosition(&saved_position);
   VS::Field::LiveSetCameraRoll(saved_roll);
-  Event_skipNextFieldCameraRestore = saved_skip;
-  Event_camera = saved;
+  VS::Event::skipNextFieldCameraRestore = saved_skip;
+  VS::Event::cameraWorkspace = saved;
 }
