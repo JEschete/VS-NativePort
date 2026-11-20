@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "DiscQueue.h"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapLoading.hpp"
@@ -64,7 +64,7 @@ extern std::int32_t currentSceneRow;
 // decomp: hideUi (src/MENU/MENU5.PRG/4D8.c:438)
 extern std::int32_t hideUi;
 // decomp: roomNamesTable (src/MENU/MENU5.PRG/4D8.c:439)
-extern Field_MapRoomName* roomNamesTable;
+extern Field::MapRoomName* roomNamesTable;
 // decomp: menuCommandsState (src/MENU/MENU5.PRG/4D8.c:440)
 extern std::int16_t menuCommandsState;
 // decomp: uiAnimationState (src/MENU/MENU5.PRG/4D8.c:441)

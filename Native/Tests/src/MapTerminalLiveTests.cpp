@@ -34,7 +34,6 @@
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Manual.hpp"
-#include "Field/Map.h"
 #include "Field/Minimap.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
@@ -110,7 +109,7 @@ struct LiveWorld {
   ValueRestore<void*> saved_scene{Battle_unusedSceneBuffer};
   ValueRestore<void*> saved_staging{map::armFileBuff};
   ValueRestore<Content_DiscQueueSlot*> saved_scene_slot{map::sceneCdQueueSlot};
-  ValueRestore<Field_MapRoomName*> saved_names{map::roomNamesTable};
+  ValueRestore<VS::Field::MapRoomName*> saved_names{map::roomNamesTable};
   ValueRestore<int> saved_map_row{map::currentMapRow};
   ValueRestore<int> saved_selected{map::chosenMap};
   ValueRestore<int> saved_label_y{map::mapLabelY};
@@ -216,7 +215,7 @@ struct LiveWorld {
            sizeof(map::mapNames)}));
       minimap = SceneFile(1);
       Field_roomData.minimapScene =
-          reinterpret_cast<Field_MapScene*>(minimap.data());
+          reinterpret_cast<VS::Field::MapScene*>(minimap.data());
       Field_roomData.header.minimapSceneLength =
           static_cast<u_int>(minimap.size());
       environment.sceneId = 1;
@@ -474,10 +473,10 @@ void KeepDrawingWhileReading(LiveWorld& world, void* old, std::size_t size,
   CHECK(map::armFileBuff == staging);
   const std::vector<std::byte> before(static_cast<std::byte*>(old),
                                       static_cast<std::byte*>(old) + size);
-  map::LiveScaleRoomVertices(static_cast<Field_MapScene*>(old), 2);
+  map::LiveScaleRoomVertices(static_cast<VS::Field::MapScene*>(old), 2);
   CHECK(std::memcmp(before.data(), old, size) != 0);
-  map::LiveSetRoomCenterTarget(static_cast<Field_MapScene*>(old), 0);
-  map::LiveAnimateCentering(static_cast<Field_MapScene*>(old));
+  map::LiveSetRoomCenterTarget(static_cast<VS::Field::MapScene*>(old), 0);
+  map::LiveAnimateCentering(static_cast<VS::Field::MapScene*>(old));
 }
 
 void CheckDrainedRead(void* old, void* staging, Content_DiscQueueSlot* request,

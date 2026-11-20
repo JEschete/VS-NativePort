@@ -17,7 +17,6 @@
 #include "Core/Log.hpp"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
@@ -38,15 +37,13 @@ constexpr std::size_t kMapOffset = 10;
 constexpr std::size_t kLinkPreviousOffset = 32;
 constexpr std::size_t kLinkNextOffset = 34;
 
-static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
-static_assert(sizeof(Field_MapRoomName) == Field::kMapSceneRoomNameBytes);
 static_assert(sizeof(SVECTOR) == kVertexBytes);
-static_assert(offsetof(Field_MapRoom, visited) == kVisitedOffset);
-static_assert(offsetof(Field_MapRoom, dataAddress) == kDataOffset);
-static_assert(offsetof(Field_MapRoom, zoneId) == kZoneOffset);
-static_assert(offsetof(Field_MapRoom, mapId) == kMapOffset);
-static_assert(offsetof(Field_MapRoomName, prev) == kLinkPreviousOffset);
-static_assert(offsetof(Field_MapRoomName, next) == kLinkNextOffset);
+static_assert(offsetof(Field::MapRoomRecord, visited) == kVisitedOffset);
+static_assert(offsetof(Field::MapRoomRecord, data_offset) == kDataOffset);
+static_assert(offsetof(Field::MapRoomRecord, zone_id) == kZoneOffset);
+static_assert(offsetof(Field::MapRoomRecord, map_id) == kMapOffset);
+static_assert(offsetof(Field::MapRoomName, previous) == kLinkPreviousOffset);
+static_assert(offsetof(Field::MapRoomName, next) == kLinkNextOffset);
 
 std::uint64_t refused_calls = 0;
 
@@ -258,7 +255,7 @@ void LiveMarkAllRoomsVisited(int* scene) {
 }
 
 // decomp: MENU5.PRG _snapMapToRoom (4D8.c:1511).
-void LiveCenterOnRoom(Field_MapScene* scene, int room_id) {
+void LiveCenterOnRoom(Field::MapScene* scene, int room_id) {
   constexpr std::string_view kCall = "CenterOnRoom";
   const auto live = LiveSceneOf(kCall, scene);
   if (!live.has_value()) return;
@@ -279,7 +276,7 @@ void LiveCenterOnRoom(Field_MapScene* scene, int room_id) {
 }
 
 // decomp: MENU5.PRG _setCenterpoint (4D8.c:1578).
-void LiveSetRoomCenterTarget(Field_MapScene* scene, int room_id) {
+void LiveSetRoomCenterTarget(Field::MapScene* scene, int room_id) {
   constexpr std::string_view kCall = "SetRoomCenterTarget";
   const auto live = LiveSceneOf(kCall, scene);
   if (!live.has_value()) return;
@@ -294,7 +291,7 @@ void LiveSetRoomCenterTarget(Field_MapScene* scene, int room_id) {
 }
 
 // decomp: MENU5.PRG _smoothMapToCenterpoint (4D8.c:1629).
-void LiveAnimateCentering(Field_MapScene* scene) {
+void LiveAnimateCentering(Field::MapScene* scene) {
   constexpr std::string_view kCall = "AnimateCentering";
   MapPoint center = CenterPoint();
   if (center == MapPoint{}) return;
@@ -308,7 +305,7 @@ void LiveAnimateCentering(Field_MapScene* scene) {
 }
 
 // decomp: MENU5.PRG _scaleRoomVertices (4D8.c:1728).
-void LiveScaleRoomVertices(Field_MapScene* scene, int factor) {
+void LiveScaleRoomVertices(Field::MapScene* scene, int factor) {
   constexpr std::string_view kCall = "ScaleRoomVertices";
   const auto live = LiveSceneOf(kCall, scene);
   if (!live.has_value()) return;
@@ -319,7 +316,7 @@ void LiveScaleRoomVertices(Field_MapScene* scene, int factor) {
 }
 
 // decomp: MENU5.PRG _getCurrentRoomIndex (4D8.c:1834).
-int LiveInitialRoomIndex(Field_MapScene* scene) {
+int LiveInitialRoomIndex(Field::MapScene* scene) {
   constexpr std::string_view kCall = "InitialRoomIndex";
   const auto live = LiveSceneOf(kCall, scene);
   if (!live.has_value()) return 0;

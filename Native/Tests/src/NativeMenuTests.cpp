@@ -26,7 +26,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Ending/EndingLive.hpp"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -200,9 +200,9 @@ struct MenuContentFixture {
   void AddAreaMap() {
     std::vector<std::uint8_t> arm;
     Put(arm, 0, std::uint32_t{1});
-    Put(arm, 4, Field_MapRoom{0, 24, 9, 1});
-    arm.resize(4 + sizeof(Field_MapRoom) + 24);
-    Field_MapRoomName name{};
+    Put(arm, 4, VS::Field::MapRoomRecord{0, 24, 9, 1});
+    arm.resize(4 + sizeof(VS::Field::MapRoomRecord) + 24);
+    VS::Field::MapRoomName name{};
     name.name[0] = 10;
     name.name[1] = static_cast<char>(0xE7);
     Put(arm, arm.size(), name);

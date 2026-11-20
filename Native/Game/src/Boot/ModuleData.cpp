@@ -106,7 +106,7 @@
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Locations.h"
+#include "Field/Locations.hpp"
 #include "Field/MapProgress.hpp"
 #include "Field/TriggerMarkers.hpp"
 #include "Items/Categories.hpp"
@@ -1423,11 +1423,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams,
      &Battle_statusEffectParams,
      sizeof Battle_statusEffectParams},  // G01906 vs_main_statusEffectParams
-    {"SLUS_010.40", 0x3F8CC, sizeof Field_locationDestinations,
-     &Field_locationDestinations,
-     sizeof Field_locationDestinations},  // G01913 vs_main_locationZoneMapIds
-    {"SLUS_010.40", 0x404CC, sizeof Field_zoneMusicIds, &Field_zoneMusicIds,
-     sizeof Field_zoneMusicIds},  // G01914 D_8004FCCC
+    {"SLUS_010.40", 0x3F8CC, sizeof VS::Field::locationDestinations,
+     &VS::Field::locationDestinations,
+     sizeof VS::Field::locationDestinations},  // G01913 vs_main_locationZoneMapIds
+    {"SLUS_010.40", 0x404CC, sizeof VS::Field::zoneMusicIds,
+     &VS::Field::zoneMusicIds,
+     sizeof VS::Field::zoneMusicIds},  // G01914 vs_main_zndMusicMap (D_8004FCCC)
     {"SLUS_010.40", 0x405D0, sizeof Actors_placeholderActorName,
      &Actors_placeholderActorName,
      sizeof Actors_placeholderActorName},  // G01915 D_8004FDD0

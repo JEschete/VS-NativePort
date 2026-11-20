@@ -19,7 +19,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
@@ -64,8 +63,7 @@ struct LegendTexturePage {
 // The legend's slide starts and stops here (uiXOffset).
 constexpr int kHiddenLegendOffset = -128;
 
-static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
-static_assert(offsetof(Field_MapRoom, dataAddress) == kDataOffset);
+static_assert(offsetof(Field::MapRoomRecord, data_offset) == kDataOffset);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
               kMapPalingScenes);
@@ -482,7 +480,7 @@ class LiveControlsHost final : public ControlsHost {
 }  // namespace
 
 // decomp: MENU5.PRG _renderMap (4D8.c:1081).
-void LiveDrawVisitedRooms(Field_MapScene* scene) {
+void LiveDrawVisitedRooms(Field::MapScene* scene) {
   constexpr std::string_view kCall = "DrawVisitedRooms";
   const auto bytes = SceneBytes(scene);
   if (!bytes || bytes->size() < kWordBytes) {
@@ -498,15 +496,15 @@ void LiveDrawVisitedRooms(Field_MapScene* scene) {
   }
   std::vector<MapRoom> records(rooms);
   for (std::size_t room = 0; room < rooms; ++room) {
-    Field_MapRoom record{};
+    Field::MapRoomRecord record{};
     std::memcpy(
         &record,
         bytes->subspan(kWordBytes + (room * Field::kMapSceneRoomRecordBytes))
             .data(),
         sizeof(record));
     records[room] = {.visited = record.visited,
-                     .zone_id = record.zoneId,
-                     .map_id = record.mapId};
+                     .zone_id = record.zone_id,
+                     .map_id = record.map_id};
   }
   LiveVisitedRoomsHost host(*bytes);
   DrawVisitedRooms(host, geomOffsetX, geomOffsetY, records);

@@ -2,6 +2,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <span>
 #include <vector>
 
@@ -9,7 +10,6 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Menu/Map.hpp"
@@ -26,13 +26,22 @@ std::span<const std::byte> SceneBytes(const void* data, size_t size) {
   return {static_cast<const std::byte*>(data), size};
 }
 
+// The first room's payload in a resolved scene; its offset counts from the
+// room's record.
+void* FirstRoomData(std::vector<u_long>& scene) {
+  auto* bytes = reinterpret_cast<unsigned char*>(scene.data());
+  VS::Field::MapRoomRecord room{};
+  std::memcpy(&room, bytes + VS::Field::kMapSceneHeaderBytes, sizeof(room));
+  return bytes + VS::Field::kMapSceneHeaderBytes + room.data_offset;
+}
+
 struct MapFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   std::array<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers[0],
                                      VS::Render::legacyPrimitiveBuffers[1]};
   std::array<void*, 2> saved_tables{VS::Render::legacyOrderingTables[0],
                                     VS::Render::legacyOrderingTables[1]};
-  Field_MapScene* saved_minimap = Field_roomData.minimapScene;
+  VS::Field::MapScene* saved_minimap = Field_roomData.minimapScene;
   u_int saved_minimap_length = Field_roomData.header.minimapSceneLength;
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_room = VS::Menu::map::currentRoomIndex;
@@ -79,7 +88,7 @@ struct MapFixture {
   // Loads scene as the room's minimap scene, the buffer room data must lie in.
   static void LoadMinimap(std::vector<u_long>& scene) {
     Field_roomData.minimapScene =
-        reinterpret_cast<Field_MapScene*>(scene.data());
+        reinterpret_cast<VS::Field::MapScene*>(scene.data());
     Field_roomData.header.minimapSceneLength =
         static_cast<u_int>(scene.size() * sizeof(u_long));
   }
@@ -161,9 +170,7 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
   VS::Field::ResolveLiveSceneRoomData(scene.data(),
                                       scene.size() * sizeof(u_long));
   MapFixture::LoadMinimap(scene);
-  auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
-  CHECK(VS::Menu::map::LiveDrawRoom(
-            1, VS_ONDISC(&map->rooms[0], dataAddress, void*), 1, 1) == 1);
+  CHECK(VS::Menu::map::LiveDrawRoom(1, FirstRoomData(scene), 1, 1) == 1);
   const auto* triangle =
       reinterpret_cast<const POLY_G3*>(fixture.storage.data() + 1);
   const std::array<int16_t, 6> coordinates{triangle->x0, triangle->y0,
@@ -194,8 +201,7 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
   VS::Field::ResolveLiveSceneRoomData(scene.data(),
                                       scene.size() * sizeof(u_long));
   MapFixture::LoadMinimap(scene);
-  const auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
-  auto* data = VS_ONDISC(&map->rooms[0], dataAddress, void*);
+  auto* data = FirstRoomData(scene);
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
                                                    128, 0,  64,  128};
   VS::Render::SetLiveFogNearDistance(0, 320);

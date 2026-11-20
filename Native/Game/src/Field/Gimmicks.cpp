@@ -7,7 +7,6 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Field/Doors.h"
-#include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/Zone.h"

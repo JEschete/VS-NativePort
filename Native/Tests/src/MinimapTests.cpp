@@ -20,7 +20,6 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Room.h"
@@ -35,6 +34,21 @@
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {
   return {static_cast<const std::byte*>(data), size};
+}
+
+std::size_t SceneRoomOffset(std::size_t room) {
+  return VS::Field::kMapSceneHeaderBytes +
+         (room * VS::Field::kMapSceneRoomRecordBytes);
+}
+
+VS::Field::MapRoomRecord SceneRoom(const std::vector<u_long>& words,
+                                   std::size_t room) {
+  VS::Field::MapRoomRecord record{};
+  std::memcpy(&record,
+              reinterpret_cast<const unsigned char*>(words.data()) +
+                  SceneRoomOffset(room),
+              sizeof(record));
+  return record;
 }
 
 std::vector<u_long> Scene() {
@@ -118,7 +132,7 @@ struct SceneDoorFixture {
   SceneDoorFixture() {
     Field_roomData = {};
     Field_roomData.minimapScene =
-        reinterpret_cast<Field_MapScene*>(words.data());
+        reinterpret_cast<VS::Field::MapScene*>(words.data());
     Field_roomData.header.minimapSceneLength =
         static_cast<std::uint32_t>(words.size() * sizeof(u_long));
   }
@@ -202,11 +216,13 @@ TEST_CASE(
             bytes.size() * sizeof(u_long));
   CHECK(bytes[2] == 24);
   CHECK(bytes[5] == 88);
-  auto* scene = reinterpret_cast<Field_MapScene*>(bytes.data());
-  CHECK(scene->rooms[0].zoneId == 9);
-  CHECK(scene->rooms[1].mapId == 2);
-  CHECK(VS_ONDISC(&scene->rooms[0], dataAddress, void*) == bytes.data() + 7);
-  CHECK(VS_ONDISC(&scene->rooms[1], dataAddress, void*) == bytes.data() + 26);
+  const auto first = SceneRoom(bytes, 0);
+  const auto second = SceneRoom(bytes, 1);
+  CHECK(first.zone_id == 9);
+  CHECK(second.map_id == 2);
+  // Each resolved offset counts from its own record.
+  CHECK(SceneRoomOffset(0) + first.data_offset == 7 * sizeof(u_long));
+  CHECK(SceneRoomOffset(1) + second.data_offset == 26 * sizeof(u_long));
 }
 
 TEST_CASE("Malformed map counts, payloads and indices fail without mutation",
@@ -414,7 +430,7 @@ TEST_CASE("Native entrance lookup accepts bounded scene index 128",
   fixture.words[11] = 129;
   fixture.words[140] = 0xFE00;
   Field_roomData.minimapScene =
-      reinterpret_cast<Field_MapScene*>(fixture.words.data());
+      reinterpret_cast<VS::Field::MapScene*>(fixture.words.data());
   Field_roomData.header.minimapSceneLength =
       static_cast<std::uint32_t>(fixture.words.size() * sizeof(u_long));
   CHECK(VS::Field::IsValidMapScene(std::as_bytes(std::span(fixture.words))));
@@ -665,7 +681,7 @@ TEST_CASE("Every extracted ARM scene decodes packed rooms and its name table",
       CHECK(name_offset == bytes.size());
     } else {
       CHECK(FileWord(bytes, 0) <=
-            (bytes.size() - name_offset) / sizeof(Field_MapRoomName));
+            (bytes.size() - name_offset) / sizeof(VS::Field::MapRoomName));
     }
     ++arm_count;
   }
@@ -694,8 +710,11 @@ TEST_CASE("Every extracted MPD minimap decodes and draws within packet bounds",
         VS::Field::IsValidMapScene(SceneBytes(bytes.data() + offset, size)));
     VS::Field::ResolveLiveSceneRoomData(bytes.data() + offset, size);
     RenderFixture fixture;
-    auto* scene = reinterpret_cast<Field_MapScene*>(bytes.data() + offset);
-    scene->rooms[0].visited = 1;
+    auto* scene = bytes.data() + offset;
+    const std::int32_t visited = 1;
+    std::memcpy(scene + SceneRoomOffset(0) +
+                    offsetof(VS::Field::MapRoomRecord, visited),
+                &visited, sizeof(visited));
     VS::Field::DrawLiveMinimapScene(scene, size);
     CHECK(fixture.packets.back() == 0xDEADBEEF);
     ++scene_count;

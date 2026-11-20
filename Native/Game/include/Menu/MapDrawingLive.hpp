@@ -9,10 +9,12 @@
 // and a primitive buffer or ordering-table entry without room are refused
 // and logged, where the original reads or writes unchecked.
 
-struct Field_MapScene;
+namespace VS::Field {
+struct MapScene;
+}  // namespace VS::Field
 
 namespace VS::Menu::map {
-void LiveDrawVisitedRooms(Field_MapScene* scene);
+void LiveDrawVisitedRooms(Field::MapScene* scene);
 // `room_data` must lie in the ARM scene the menu loaded or the current
 // room's minimap scene; 1 when drawn, 0 otherwise.
 int LiveDrawRoom(int room_index, void* room_data, int zone_id, int map_id);

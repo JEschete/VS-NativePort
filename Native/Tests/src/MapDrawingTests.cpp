@@ -15,7 +15,7 @@
 #include "Core/Gte.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Map.hpp"
@@ -967,7 +967,7 @@ class LiveMap {
   Restore<int> geom_y_{map::geomOffsetY};
   Restore<SVECTOR> angles_{map::cameraAngles};
   Restore<std::int16_t> door_{Field_enteredDoorId};
-  Restore<Field_MapScene*> minimap_{Field_roomData.minimapScene};
+  Restore<VS::Field::MapScene*> minimap_{Field_roomData.minimapScene};
   Restore<u_int> minimap_length_{Field_roomData.header.minimapSceneLength};
   VS::State::StateFlags saved_flags_{};
   std::array<map::CompassPoint, 4> saved_bounds_{};
@@ -995,7 +995,8 @@ std::vector<u_long> OneRoomScene(std::int32_t visited) {
 }
 
 void LoadMinimap(std::vector<u_long>& scene) {
-  Field_roomData.minimapScene = reinterpret_cast<Field_MapScene*>(scene.data());
+  Field_roomData.minimapScene =
+      reinterpret_cast<VS::Field::MapScene*>(scene.data());
   Field_roomData.header.minimapSceneLength =
       static_cast<u_int>(scene.size() * sizeof(u_long));
 }
@@ -1297,7 +1298,8 @@ TEST_CASE("Live visited rooms draw centred and clear the label queue",
   map::mapLabelCount = 5;
   const VS::Render::ScreenOffset before =
       VS::Render::GetLiveProjectionScreenOffset();
-  map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
+  map::LiveDrawVisitedRooms(
+      reinterpret_cast<VS::Field::MapScene*>(scene.data()));
   CHECK(map::mapLabelCount == 0);
   const VS::Render::ScreenOffset after =
       VS::Render::GetLiveProjectionScreenOffset();
@@ -1318,11 +1320,13 @@ TEST_CASE("Live visited rooms refuse a scene the menu did not load",
   auto scene = OneRoomScene(1);
   Field_roomData.minimapScene = nullptr;
   map::mapLabelCount = 5;
-  map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
+  map::LiveDrawVisitedRooms(
+      reinterpret_cast<VS::Field::MapScene*>(scene.data()));
   CHECK(map::mapLabelCount == 5);
   LoadMinimap(scene);
   scene[0] = 100;
-  map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
+  map::LiveDrawVisitedRooms(
+      reinterpret_cast<VS::Field::MapScene*>(scene.data()));
   CHECK(map::mapLabelCount == 5);
   CHECK(frame.UsedWords() == 0);
 }

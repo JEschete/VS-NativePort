@@ -11,7 +11,6 @@
 #include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
@@ -292,19 +291,19 @@ struct LiveMapState {
   }
   static void UseMinimap(SceneImage& image) {
     Field_roomData.minimapScene =
-        reinterpret_cast<Field_MapScene*>(image.bytes.data());
+        reinterpret_cast<VS::Field::MapScene*>(image.bytes.data());
     Field_roomData.header.minimapSceneLength =
         static_cast<u_int>(image.bytes.size());
   }
 
-  Field_MapScene* minimap;
+  VS::Field::MapScene* minimap;
   u_int minimap_length;
   void* arm;
   int scene;
   SVECTOR center;
   int room;
   int current;
-  Field_MapRoomName* names;
+  VS::Field::MapRoomName* names;
 };
 
 constexpr std::size_t kSceneBytes = 0x200;
@@ -363,8 +362,8 @@ TEST_CASE("The live map refuses unknown scenes rooms and blocks",
   LiveMapState::UseMinimap(image);
   nav::centerPoint = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
 
-  nav::LiveCenterOnRoom(reinterpret_cast<Field_MapScene*>(other.bytes.data()),
-                        0);
+  nav::LiveCenterOnRoom(
+      reinterpret_cast<VS::Field::MapScene*>(other.bytes.data()), 0);
   nav::LiveCenterOnRoom(Field_roomData.minimapScene, 1);
   nav::LiveSetRoomCenterTarget(Field_roomData.minimapScene, -1);
   CHECK(nav::centerPoint.vx == 1);
@@ -392,7 +391,7 @@ TEST_CASE("The live initial room matches the minimap scene's first room",
                                {}, size);
   Battle_unusedSceneBuffer = scene.bytes.data();
   nav::currentScene = 1;
-  auto* data = static_cast<Field_MapScene*>(Battle_unusedSceneBuffer);
+  auto* data = static_cast<VS::Field::MapScene*>(Battle_unusedSceneBuffer);
   CHECK(nav::LiveInitialRoomIndex(data) == 2);
   CHECK(nav::isCurrentScene == 2);
 
@@ -420,8 +419,8 @@ TEST_CASE("The live room step follows the ARM scene's name links",
                 size);
   Battle_unusedSceneBuffer = scene.bytes.data();
   nav::currentScene = 1;
-  nav::roomNamesTable =
-      reinterpret_cast<Field_MapRoomName*>(scene.bytes.data() + scene.names);
+  nav::roomNamesTable = reinterpret_cast<VS::Field::MapRoomName*>(
+      scene.bytes.data() + scene.names);
   nav::currentRoomIndex = 0;
   nav::LiveSelectAdjacentVisitedRoom(1);
   CHECK(nav::currentRoomIndex == 2);

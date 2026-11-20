@@ -18,7 +18,7 @@
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/Locations.h"
+#include "Field/Locations.hpp"
 #include "Field/Manual.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/Mpd.h"
@@ -194,17 +194,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
 }  // namespace
 
 std::array<LocationDestination, kLocationCount> LiveLocationTable() {
-  std::array<LocationDestination, kLocationCount> table{};
-  static_assert(sizeof(Field_locationDestinations) == kLocationCount * 2);
-  for (std::size_t id = 0; id < table.size(); ++id) {
-    table.at(id) = LocationDestination{
-        .zone_id =
-            static_cast<std::uint8_t>(Field_locationDestinations[id * 2]),
-        .room_id =
-            static_cast<std::uint8_t>(Field_locationDestinations[(id * 2) + 1]),
-    };
-  }
-  return table;
+  return locationDestinations;
 }
 
 void LiveMarkCurrentRoomVisited() {

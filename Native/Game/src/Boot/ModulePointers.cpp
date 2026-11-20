@@ -215,9 +215,8 @@
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.hpp"
-#include "Field/Locations.h"
+#include "Field/Locations.hpp"
 #include "Field/Manual.hpp"
-#include "Field/Map.h"
 #include "Field/MapProgress.hpp"
 #include "Field/Minimap.hpp"
 #include "Field/MinimapSceneLive.hpp"
@@ -879,9 +878,9 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 1u, 1u},
     {"SLUS_010.40", 0x8004EDDCu, 240u, (void*)&VS::Items::materialModifiers, sizeof VS::Items::materialModifiers, 1u, 1u},
     {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&Battle_statusEffectParams, sizeof Battle_statusEffectParams, 1u, 1u},
-    {"SLUS_010.40", 0x8004F0CCu, 1024u, (void*)&Field_locationDestinations, sizeof Field_locationDestinations, 1u, 1u},
-    {"SLUS_010.40", 0x8004F4CCu, 2048u, (void*)&Field_legacyZoneDiscFiles, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004FCCCu, 280u, (void*)&Field_zoneMusicIds, sizeof Field_zoneMusicIds, 1u, 1u},
+    {"SLUS_010.40", 0x8004F0CCu, 1024u, (void*)&VS::Field::locationDestinations, sizeof VS::Field::locationDestinations, 1u, 1u},
+    {"SLUS_010.40", 0x8004F4CCu, 2048u, (void*)&VS::Field::legacyZoneDiscFiles, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004FCCCu, 256u, (void*)&VS::Field::zoneMusicIds, sizeof VS::Field::zoneMusicIds, 1u, 1u},
     {"SLUS_010.40", 0x8004FDE4u, 120u, (void*)&Battle_breakArtPointRequirements, sizeof Battle_breakArtPointRequirements, 1u, 1u},
     {"SLUS_010.40", 0x8004FE5Cu, 300u, (void*)&Battle_battleAbilityPointRequirements, sizeof Battle_battleAbilityPointRequirements, 1u, 1u},
     {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&VS::Core::randomShuffleTable, sizeof VS::Core::randomShuffleTable, 1u, 1u},

@@ -17,7 +17,6 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Map.h"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -300,8 +299,8 @@ class LiveSceneMap final : public SceneMapHost {
   }
 
  private:
-  [[nodiscard]] static Field_MapScene* Scene() {
-    return static_cast<Field_MapScene*>(Battle_unusedSceneBuffer);
+  [[nodiscard]] static Field::MapScene* Scene() {
+    return static_cast<Field::MapScene*>(Battle_unusedSceneBuffer);
   }
   // The loaded scene's ARM file size (currentScene is checked
   // before the read is polled).

@@ -3,7 +3,9 @@
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 
-struct Field_MapScene;
+namespace VS::Field {
+struct MapScene;
+}  // namespace VS::Field
 struct Field_MpdCollisionHeader;
 struct Field_MpdDoorRecord;
 struct Field_MpdEnvironment;
@@ -73,7 +75,7 @@ struct Field_RoomRecord {
     void* textureEffects;
     void* effectScripts;
     Field_MpdSectionE* sectionE;
-    Field_MapScene* minimapScene;
+    VS::Field::MapScene* minimapScene;
     u_short* tiledBackground;
     Field_MpdViewTrigger* viewTriggers;
     Field_MpdMovingPlatform* movingPlatforms;

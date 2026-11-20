@@ -18,7 +18,7 @@
 
 #include "Content/DataStore.hpp"
 #include "Core/Text/TextCode.hpp"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
@@ -74,11 +74,11 @@ struct ContentFixture {
         [](unsigned char value) { return static_cast<char>(value); });
     Append(arm, std::uint32_t{1});
     // Empty room geometry: vertex count and five primitive counts.
-    Append(arm, Field_MapRoom{0, 24, 9, 6});
+    Append(arm, VS::Field::MapRoomRecord{0, 24, 9, 6});
     for (int index = 0; index < 6; ++index) Append(arm, std::uint32_t{0});
-    Field_MapRoomName room_name{};
-    std::copy(name.begin(), name.end(), room_name.name);
-    room_name.prev = -1;
+    VS::Field::MapRoomName room_name{};
+    std::copy(name.begin(), name.end(), room_name.name.begin());
+    room_name.previous = -1;
     room_name.next = -1;
     Append(arm, room_name);
     Append(zone, VS::Field::ZoneFileHeader{28, 48, 0, 0, 0, 0, 0});
@@ -184,14 +184,14 @@ TEST_CASE("Native file summary rejects missing or inconsistent names",
     fixture.document.state.location.room = 4;
   }
   SECTION("Names must terminate inside their own 32 bytes") {
-    std::fill(fixture.arm.end() - sizeof(Field_MapRoomName),
+    std::fill(fixture.arm.end() - sizeof(VS::Field::MapRoomName),
               fixture.arm.end() - 4, std::uint8_t{10});
   }
   SECTION("A name table must be present") {
-    fixture.arm.resize(fixture.arm.size() - sizeof(Field_MapRoomName));
+    fixture.arm.resize(fixture.arm.size() - sizeof(VS::Field::MapRoomName));
   }
   SECTION("Control operands may not escape the name record") {
-    const auto offset = fixture.arm.size() - sizeof(Field_MapRoomName);
+    const auto offset = fixture.arm.size() - sizeof(VS::Field::MapRoomName);
     auto name = std::span(fixture.arm).subspan(offset, 32);
     std::fill(name.begin(), name.end(), std::uint8_t{10});
     fixture.arm[offset + 31] = VS::Core::TextCode::kSpacing;

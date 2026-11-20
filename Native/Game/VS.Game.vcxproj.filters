@@ -2157,7 +2157,7 @@
     <ClCompile Include="src\Field\Locations.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Locations.h">
+    <ClInclude Include="src\Field\Locations.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Manual.cpp">
@@ -2169,9 +2169,6 @@
     <ClCompile Include="src\Field\Map.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Map.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\MapLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>

@@ -70,9 +70,9 @@
 #include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/Locations.h"
-#include "Field/Map.h"
+#include "Field/Locations.hpp"
 #include "Field/MapLive.hpp"
+#include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -158,9 +158,9 @@ constexpr int kRoomTimerScope = 0;
 constexpr int kZoneTimerScope = 1;
 constexpr int kSceneTimerScope = 2;
 // The minimap scene's first room's visited word.
-constexpr std::size_t kMapSceneBytes = sizeof(Field_MapScene);
-constexpr std::size_t kMapRoomBytes = sizeof(Field_MapRoom);
-constexpr std::size_t kVisitedAt = offsetof(Field_MapRoom, visited);
+constexpr std::size_t kMapSceneBytes = sizeof(MapScene);
+constexpr std::size_t kMapRoomBytes = sizeof(MapRoomRecord);
+constexpr std::size_t kVisitedAt = offsetof(MapRoomRecord, visited);
 constexpr std::size_t kFirstMapRoomVisitedAt = kMapSceneBytes + kVisitedAt;
 constexpr std::size_t kFirstMapRoomEnd = kMapSceneBytes + kMapRoomBytes;
 constexpr std::int32_t kVisited = 1;
@@ -847,11 +847,11 @@ class LiveZoneLoadHost final
   }
 
   [[nodiscard]] Content::DiscFileExtent ZoneFile(int zone_id) const override {
-    return ToExtent(Field_legacyZoneDiscFiles[zone_id]);
+    return legacyZoneDiscFiles.at(static_cast<std::size_t>(zone_id));
   }
 
   [[nodiscard]] int ZoneMusicId(int zone_id) const override {
-    return static_cast<std::uint8_t>(Field_zoneMusicIds[zone_id]);
+    return zoneMusicIds.at(static_cast<std::size_t>(zone_id));
   }
 
   [[nodiscard]] int CurrentMusicId() const override {

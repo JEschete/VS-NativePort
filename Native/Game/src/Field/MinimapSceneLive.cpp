@@ -11,7 +11,6 @@
 #include "Core/Log.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Render/Display.hpp"
@@ -36,8 +35,6 @@ constexpr int kMarkerIntensity = 128;
 constexpr int kDoorCrossLength = 3;
 constexpr int kMinimapTextureX = 768;
 constexpr unsigned kScreenYShift = 16;
-static_assert(sizeof(Field_MapRoom) == kMapSceneRoomRecordBytes);
-static_assert(sizeof(Field_MapRoomName) == kMapSceneRoomNameBytes);
 static_assert(kDoorStateBase + UINT8_MAX < sizeof(VS::State::StateFlags));
 
 class Packets {
@@ -194,14 +191,14 @@ class LiveMinimapRenderer final : public MinimapRenderer {
 
 }  // namespace
 
-Field_MapRoomName* ResolveLiveSceneRoomData(void* data, std::size_t size) {
+MapRoomName* ResolveLiveSceneRoomData(void* data, std::size_t size) {
   if (data == nullptr) {
     VS::Core::LogError("minimap", "Invalid scene at byte 0: null scene");
     throw std::runtime_error("Missing map scene");
   }
   auto* bytes = static_cast<std::byte*>(data);
   const std::size_t names = ResolveSceneRoomData({bytes, size});
-  return reinterpret_cast<Field_MapRoomName*>(bytes + names);
+  return reinterpret_cast<MapRoomName*>(bytes + names);
 }
 
 void DrawLiveMinimapScene(const void* data, std::size_t size) {

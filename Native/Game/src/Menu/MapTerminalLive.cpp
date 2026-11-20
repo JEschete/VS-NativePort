@@ -24,7 +24,6 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Map.h"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
@@ -271,7 +270,7 @@ class LiveFrame final : public MapFrameHost {
   void DrawRooms() override {
     if (LoadedScene()) {
       LiveDrawVisitedRooms(
-          static_cast<Field_MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
     } else {
       Refuse("DrawRooms", "no owned loaded scene");
     }
@@ -390,7 +389,7 @@ class LiveMapMenu final : public MapMenuHost {
     Field::RestoreLiveSceneRoomVisits(destination,
                                       static_cast<std::size_t>(file.bytes));
     Call([&] {
-      LiveScaleRoomVertices(static_cast<Field_MapScene*>(destination),
+      LiveScaleRoomVertices(static_cast<Field::MapScene*>(destination),
                             kMapRoomScale);
     });
     return true;
@@ -400,13 +399,13 @@ class LiveMapMenu final : public MapMenuHost {
     int room = 0;
     Call([&] {
       room = LiveInitialRoomIndex(
-          static_cast<Field_MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
     });
     return room;
   }
   void CenterOnRoom(std::int32_t room) override {
     Call([&] {
-      LiveCenterOnRoom(static_cast<Field_MapScene*>(Battle_unusedSceneBuffer),
+      LiveCenterOnRoom(static_cast<Field::MapScene*>(Battle_unusedSceneBuffer),
                        room);
     });
   }
@@ -419,7 +418,7 @@ class LiveMapMenu final : public MapMenuHost {
   void SetCenterTarget(std::int32_t room) override {
     Call([&] {
       LiveSetRoomCenterTarget(
-          static_cast<Field_MapScene*>(Battle_unusedSceneBuffer), room);
+          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer), room);
     });
   }
   void DrawFrame() override {
@@ -428,7 +427,7 @@ class LiveMapMenu final : public MapMenuHost {
   void AnimateCentering() override {
     Call([] {
       LiveAnimateCentering(
-          static_cast<Field_MapScene*>(Battle_unusedSceneBuffer));
+          static_cast<Field::MapScene*>(Battle_unusedSceneBuffer));
     });
   }
 

@@ -25,7 +25,7 @@
 // RoomLoadingLive.cpp binds the session's zone context, room record and
 // heap.
 namespace VS::Field {
-// The zone files the location table names (Field_legacyZoneDiscFiles).
+// The zone files the location table names (Field/Locations.hpp).
 inline constexpr int kZoneCount = 256;
 // The zone file header: seven words (room file table, enemy templates and
 // textures, each as offset and size, then the zone music id).

@@ -17,7 +17,6 @@
 #include "Content/DataStore.hpp"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.hpp"
-#include "Field/Map.h"
 #include "Field/MapProgress.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
@@ -175,23 +174,23 @@ std::expected<EncodedRoomName, std::string> RoomName(
   }
   const auto table =
       Slice(*bytes, names_offset,
-            static_cast<std::size_t>(*count) * sizeof(Field_MapRoomName));
+            static_cast<std::size_t>(*count) * sizeof(VS::Field::MapRoomName));
   if (!table) return std::unexpected(table.error());
   EncodedRoomName name{};
   bool found = false;
   for (std::uint32_t index = 0; index < *count; ++index) {
-    const auto room = Record<Field_MapRoom>(
-        *bytes, sizeof(*count) + index * sizeof(Field_MapRoom));
+    const auto room = Record<VS::Field::MapRoomRecord>(
+        *bytes, sizeof(*count) + index * sizeof(VS::Field::MapRoomRecord));
     if (!room) return std::unexpected(room.error());
-    if (room->zoneId != location.zone ||
-        room->mapId != static_cast<int>(location.room) + 1) {
+    if (room->zone_id != location.zone ||
+        room->map_id != static_cast<int>(location.room) + 1) {
       continue;
     }
     if (found) return std::unexpected("save summary: ambiguous ARM room");
-    const auto entry =
-        Record<Field_MapRoomName>(*table, index * sizeof(Field_MapRoomName));
+    const auto entry = Record<VS::Field::MapRoomName>(
+        *table, index * sizeof(VS::Field::MapRoomName));
     if (!entry) return std::unexpected(entry.error());
-    std::copy_n(entry->name, name.size(), name.begin());
+    std::copy_n(entry->name.begin(), name.size(), name.begin());
     found = true;
   }
   if (!found) return std::unexpected("save summary: room absent from ARM");

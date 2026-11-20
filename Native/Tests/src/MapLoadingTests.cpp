@@ -12,7 +12,6 @@
 #include "Battle/StatusEffects.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/Map.h"
 #include "Legacy/Psx.h"
 #include "Menu/Map.hpp"
 #include "Menu/MapLoading.hpp"

@@ -19,7 +19,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
@@ -586,7 +586,7 @@ struct LiveReadFixture {
       std::to_array(Content_discRequestSlots);
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
   Content_DiscDrive saved_drive = Content_discDriveState;
-  Field_MapScene* saved_scene = Field_roomData.minimapScene;
+  VS::Field::MapScene* saved_scene = Field_roomData.minimapScene;
   u_int saved_scene_length = Field_roomData.header.minimapSceneLength;
   RECT images{r::kCubePuzzleImageX, r::kCubePuzzleImageY, kImageAreaWidth,
               r::kCubePuzzleImageRows};
@@ -624,7 +624,7 @@ struct LiveReadFixture {
     scene[3] = static_cast<std::uint16_t>(zone_id) |
                (std::uint32_t{static_cast<std::uint16_t>(map_id)} << 16);
     Field_roomData.minimapScene =
-        reinterpret_cast<Field_MapScene*>(scene.data());
+        reinterpret_cast<VS::Field::MapScene*>(scene.data());
     Field_roomData.header.minimapSceneLength = sizeof scene;
   }
   // The one request the initializer queued.

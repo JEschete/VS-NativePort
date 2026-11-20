@@ -13,8 +13,10 @@
 
 namespace VS::Field {
 
+inline constexpr std::size_t kMapSceneHeaderBytes = 4;
 inline constexpr std::size_t kMapSceneRoomRecordBytes = 12;
 inline constexpr std::size_t kMapSceneRoomNameBytes = 36;
+inline constexpr std::size_t kMapRoomNameChars = 32;
 inline constexpr std::size_t kMinimapMaximumVertices = 256;
 inline constexpr std::size_t kMinimapTriangleCorners = 3;
 inline constexpr std::size_t kMinimapQuadCorners = 4;
@@ -83,6 +85,33 @@ class MinimapRenderer {
                              MinimapColor color) = 0;
   virtual void Finish() = 0;
 };
+
+// The scene's on-disc records. Readers copy them out of the scene's bytes;
+// these name the fields and fix the layout.
+// decomp: vs_Scene (src/BATTLE/BATTLE.PRG/mpd.h:114, formerly vs_battle_scene)
+// without its zero-length rooms[]: the room records follow the header.
+struct MapScene {
+  std::int32_t room_count;
+};
+// decomp: vs_Room (src/BATTLE/BATTLE.PRG/mpd.h:109, formerly vs_battle_room)
+struct MapRoomRecord {
+  std::int32_t visited;
+  // The room payload's byte length on disc; ResolveSceneRoomData rewrites it
+  // as the payload's offset from this record.
+  std::uint32_t data_offset;
+  std::int16_t zone_id;
+  std::int16_t map_id;
+};
+// decomp: vs_RoomName (src/BATTLE/BATTLE.PRG/mpd.h:238, formerly
+// vs_battle_roomName)
+struct MapRoomName {
+  std::array<char, kMapRoomNameChars> name;
+  std::int16_t previous;
+  std::int16_t next;
+};
+static_assert(sizeof(MapScene) == kMapSceneHeaderBytes);
+static_assert(sizeof(MapRoomRecord) == kMapSceneRoomRecordBytes);
+static_assert(sizeof(MapRoomName) == kMapSceneRoomNameBytes);
 
 [[nodiscard]] bool IsValidMapScene(std::span<const std::byte> scene);
 

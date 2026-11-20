@@ -5,7 +5,7 @@
 
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
-#include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapLoading.hpp"
@@ -83,7 +83,7 @@ std::int32_t currentSceneRow;
 // decomp: hideUi (src/MENU/MENU5.PRG/4D8.c:438)
 std::int32_t hideUi;
 // decomp: roomNamesTable (src/MENU/MENU5.PRG/4D8.c:439)
-Field_MapRoomName* roomNamesTable;
+Field::MapRoomName* roomNamesTable;
 // decomp: menuCommandsState (src/MENU/MENU5.PRG/4D8.c:440)
 std::int16_t menuCommandsState;
 // decomp: uiAnimationState (src/MENU/MENU5.PRG/4D8.c:441)

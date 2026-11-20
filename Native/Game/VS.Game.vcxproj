@@ -1476,11 +1476,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\Locations.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Field\Manual.cpp" />
     <ClCompile Include="src\Field\Map.cpp" />
@@ -2266,9 +2262,8 @@
     <ClInclude Include="src\Field\Input.hpp" />
     <ClInclude Include="src\Field\InteractionFocusLive.hpp" />
     <ClInclude Include="src\Field\Interactions.hpp" />
-    <ClInclude Include="src\Field\Locations.h" />
+    <ClInclude Include="src\Field\Locations.hpp" />
     <ClInclude Include="src\Field\Manual.hpp" />
-    <ClInclude Include="src\Field\Map.h" />
     <ClInclude Include="src\Field\MapProgress.hpp" />
     <ClInclude Include="src\Field\Minimap.hpp" />
     <ClInclude Include="src\Field\Mpd.h" />

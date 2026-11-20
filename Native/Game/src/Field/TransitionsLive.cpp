@@ -14,7 +14,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Doors.h"
-#include "Field/Locations.h"
+#include "Field/Locations.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -64,12 +64,7 @@ class LiveTransitionHost final : public TransitionHost {
         static_cast<std::size_t>(location_id) >= kLocationCount) {
       return std::nullopt;
     }
-    const auto entry = static_cast<std::size_t>(location_id) * 2;
-    return LocationDestination{
-        .zone_id = static_cast<std::uint8_t>(Field_locationDestinations[entry]),
-        .room_id =
-            static_cast<std::uint8_t>(Field_locationDestinations[entry + 1]),
-    };
+    return locationDestinations.at(static_cast<std::size_t>(location_id));
   }
   [[nodiscard]] std::optional<Actors::ActorPlacementView> AshleyPlacement()
       const override {

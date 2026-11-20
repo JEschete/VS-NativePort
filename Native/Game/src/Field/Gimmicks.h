@@ -273,7 +273,6 @@ struct Field_GimmickPhysicsView {
 struct Field_GimmickPhysicsView;
 
 #include "Field/Doors.h"
-#include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/Zone.h"
