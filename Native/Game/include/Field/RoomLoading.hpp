@@ -327,7 +327,7 @@ struct EnemyPlacement {
   std::uint16_t stat_value = 0;
   Actors::SpawnPlacement placement{};
   std::uint8_t facing = 0;
-  bool starts_engaged = false;
+  bool retain_after_defeat = false;
   std::uint8_t scene_test = 0;
 
   friend bool operator==(const EnemyPlacement&,
@@ -390,8 +390,8 @@ class PlacementTestHost {
 [[nodiscard]] bool EnemyPlacementVisible(const RoomPlacement& placement,
                                          const PlacementTestHost& host);
 // The spawn flags of an enemy placement: its facing rule, with 0x80 when it
-// starts engaged (146C.c:15020-15036). A facing past 3, which the original
-// left unset, faces as 0 does.
+// has its retain-after-defeat byte set (146C.c:15020-15036). A facing past 3,
+// which the original left unset, faces as 0 does.
 [[nodiscard]] int EnemySpawnFlags(const EnemyPlacement& enemy);
 // Whether an object placement shows: its script flag within its range.
 [[nodiscard]] bool ObjectPlacementVisible(const ObjectPlacement& object,

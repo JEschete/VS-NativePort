@@ -273,7 +273,7 @@ void PutEnemy(Bytes& records, std::size_t index, const EnemyPlacement& enemy,
   Put(records, at + 0x0A, enemy.stat_value);
   Put(records, at + 0x0C, enemy.placement);
   Put(records, at + 0x23, enemy.facing);
-  Put<std::uint8_t>(records, at + 0x24, enemy.starts_engaged ? 1 : 0);
+  Put<std::uint8_t>(records, at + 0x24, enemy.retain_after_defeat ? 1 : 0);
   Put(records, at + 0x27, enemy.scene_test);
 }
 
@@ -884,7 +884,7 @@ TEST_CASE("Room placement records decode their enemy and object fields",
       .stat_value = 0x5678,
       .placement = {.tile_x = 9, .direction = 10, .tile_z = 11, .height = 12},
       .facing = 2,
-      .starts_engaged = true,
+      .retain_after_defeat = true,
       .scene_test = 3};
   const ObjectPlacement object{.flag = 0x2345,
                                .flag_min = 1,
@@ -1004,13 +1004,14 @@ TEST_CASE("An object placement shows while its flag is in range",
   CHECK(shows(0x46, 0, 0));
 }
 
-TEST_CASE("An enemy's spawn flags follow its facing and engagement",
-          "[field][field-room-loading]") {
+TEST_CASE(
+    "An enemy's spawn flags follow its facing and retain-after-defeat byte",
+    "[field][field-room-loading]") {
   const std::array<int, 5> expected{6, 0, 1, 6, 6};
   for (std::size_t index = 0; index < expected.size(); ++index) {
     const auto facing = static_cast<std::uint8_t>(index);
     CHECK(EnemySpawnFlags({.facing = facing}) == expected.at(index));
-    CHECK(EnemySpawnFlags({.facing = facing, .starts_engaged = true}) ==
+    CHECK(EnemySpawnFlags({.facing = facing, .retain_after_defeat = true}) ==
           (expected.at(index) | 0x80));
   }
 }
@@ -1105,8 +1106,9 @@ TEST_CASE("Room actors spawn into named and free slots",
   host.templates = 2;
   host.secondary_template = 1;
   host.occupied[2] = true;
-  PutEnemy(host.records, 0,
-           {.enemy_id = 1, .slot = 0, .facing = 1, .starts_engaged = true});
+  PutEnemy(
+      host.records, 0,
+      {.enemy_id = 1, .slot = 0, .facing = 1, .retain_after_defeat = true});
   PutEnemy(host.records, 1, {.enemy_id = 0, .slot = 3});
   PutObject(host.records, 2,
             {.slot = kAnyObjectSlot,

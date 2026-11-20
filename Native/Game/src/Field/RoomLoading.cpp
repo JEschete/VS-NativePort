@@ -73,7 +73,7 @@ constexpr std::size_t kEnemyDirectionAt = 0x0D;
 constexpr std::size_t kEnemyTileZAt = 0x0E;
 constexpr std::size_t kEnemyHeightAt = 0x0F;
 constexpr std::size_t kEnemyFacingAt = 0x23;
-constexpr std::size_t kEnemyEngagedAt = 0x24;
+constexpr std::size_t kEnemyRetainAfterDefeatAt = 0x24;
 constexpr std::size_t kEnemySceneTestAt = 0x27;
 constexpr std::size_t kObjectFlagAt = 0x04;
 constexpr std::size_t kObjectFlagMinAt = 0x06;
@@ -114,7 +114,7 @@ constexpr std::uint8_t kFacingCodeTwo = 2;
 constexpr int kDefaultFacingSpawnFlags = 6;
 constexpr int kFacingOneSpawnFlags = 0;
 constexpr int kFacingTwoSpawnFlags = 1;
-constexpr int kEngagedSpawnFlag = 0x80;
+constexpr int kRetainAfterDefeatSpawnFlag = 0x80;
 
 // The object model word: the model in bits 12-15 and 8-11, the material in
 // bits 5-7 (as 2-4).
@@ -480,19 +480,20 @@ namespace {
 
 [[nodiscard]] EnemyPlacement DecodeEnemyPlacement(
     std::span<const std::byte> record) {
-  return {.enemy_id = LoadByte(record, kEnemyIdAt),
-          .slot = LoadByte(record, kEnemySlotAt),
-          .flag_test = LoadByte(record, kEnemyFlagTestAt),
-          .stat_test = LoadByte(record, kEnemyStatTestAt),
-          .flag_value = LoadHalfword(record, kEnemyFlagValueAt),
-          .stat_value = LoadHalfword(record, kEnemyStatValueAt),
-          .placement = {.tile_x = LoadByte(record, kEnemyTileXAt),
-                        .direction = LoadByte(record, kEnemyDirectionAt),
-                        .tile_z = LoadByte(record, kEnemyTileZAt),
-                        .height = LoadByte(record, kEnemyHeightAt)},
-          .facing = LoadByte(record, kEnemyFacingAt),
-          .starts_engaged = LoadByte(record, kEnemyEngagedAt) != 0,
-          .scene_test = LoadByte(record, kEnemySceneTestAt)};
+  return {
+      .enemy_id = LoadByte(record, kEnemyIdAt),
+      .slot = LoadByte(record, kEnemySlotAt),
+      .flag_test = LoadByte(record, kEnemyFlagTestAt),
+      .stat_test = LoadByte(record, kEnemyStatTestAt),
+      .flag_value = LoadHalfword(record, kEnemyFlagValueAt),
+      .stat_value = LoadHalfword(record, kEnemyStatValueAt),
+      .placement = {.tile_x = LoadByte(record, kEnemyTileXAt),
+                    .direction = LoadByte(record, kEnemyDirectionAt),
+                    .tile_z = LoadByte(record, kEnemyTileZAt),
+                    .height = LoadByte(record, kEnemyHeightAt)},
+      .facing = LoadByte(record, kEnemyFacingAt),
+      .retain_after_defeat = LoadByte(record, kEnemyRetainAfterDefeatAt) != 0,
+      .scene_test = LoadByte(record, kEnemySceneTestAt)};
 }
 
 [[nodiscard]] ObjectPlacement DecodeObjectPlacement(
@@ -736,8 +737,8 @@ int EnemySpawnFlags(const EnemyPlacement& enemy) {
   } else if (enemy.facing == kFacingCodeTwo) {
     flags = kFacingTwoSpawnFlags;
   }
-  if (enemy.starts_engaged) {
-    flags |= kEngagedSpawnFlag;
+  if (enemy.retain_after_defeat) {
+    flags |= kRetainAfterDefeatSpawnFlag;
   }
   return flags;
 }

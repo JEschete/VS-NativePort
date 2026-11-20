@@ -840,7 +840,7 @@
    "An enemy's random item fills the third item row when drawn",
    "An enemy's rolled loot keeps only the equipment that dropped",
    "An enemy's shield and accessory drop as inventory records",
-   "An enemy's spawn flags follow its facing and engagement",
+   "An enemy's spawn flags follow its facing and retain-after-defeat byte",
    "An enemy's weapon drops when the draw is below its rate",
    "An equipped actor is refused before anything is allocated",
    "An equipped actor is refused outside the equipped slots",
