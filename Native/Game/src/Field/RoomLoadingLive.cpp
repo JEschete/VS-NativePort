@@ -47,11 +47,11 @@
 #include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/Scratch.hpp"
-#include "DiscQueue.h"
 #include "Effects/Runtime.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -116,7 +116,7 @@ constexpr std::size_t kOrderingEntryBytes = 4;
 static_assert(sizeof(Field_MpdEnemySpawn) == VS::Field::kRoomPlacementBytes);
 static_assert(sizeof(VS::Actors::CharacterInit) ==
               VS::Field::kZoneEnemyTemplateBytes);
-static_assert(sizeof(Content_DiscFile) == VS::Field::kRoomFileEntryBytes);
+static_assert(sizeof(VS::Content::DiscFile) == VS::Field::kRoomFileEntryBytes);
 static_assert(sizeof(Field_roomData.header) ==
               VS::Field::kRoomSectionHeaderBytes);
 static_assert(sizeof(Field_MpdEnvironment) == VS::Field::kRoomEnvironmentBytes);
@@ -223,11 +223,12 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
   return {area.x, area.y, area.width, area.height};
 }
 
-[[nodiscard]] Content_DiscFile ToDiscFile(Content::DiscFileExtent extent) {
+[[nodiscard]] VS::Content::DiscFile ToDiscFile(Content::DiscFileExtent extent) {
   return {.lba = extent.sector, .size = extent.bytes};
 }
 
-[[nodiscard]] Content::DiscFileExtent ToExtent(const Content_DiscFile& file) {
+[[nodiscard]] Content::DiscFileExtent ToExtent(
+    const VS::Content::DiscFile& file) {
   return {.sector = file.lba, .bytes = file.size};
 }
 
@@ -244,7 +245,7 @@ std::array<ReadRecord, 2> read_records{};
   return read_records.at(file == LoadedFile::kZone ? 0 : 1);
 }
 
-[[nodiscard]] Content_DiscQueueSlot*& RequestOf(LoadedFile file) {
+[[nodiscard]] VS::Content::DiscQueueSlot*& RequestOf(LoadedFile file) {
   return file == LoadedFile::kZone ? zoneContext.zone_disc_request
                                    : zoneContext.room_disc_request;
 }
@@ -258,8 +259,9 @@ std::array<ReadRecord, 2> read_records{};
 // 15254-15269). A block that cannot be taken leaves no request, which the
 // wait refuses; the original read into a null block.
 void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
-  const Content_DiscFile disc_file = ToDiscFile(extent);
-  Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc_file);
+  const VS::Content::DiscFile disc_file = ToDiscFile(extent);
+  VS::Content::DiscQueueSlot* request =
+      Content::AllocateLiveDiscRequest(&disc_file);
   const auto bytes = static_cast<std::size_t>(std::max(extent.bytes, 0));
   void* data = Core::Memory::AllocateLiveFromHighEnd(bytes);
   RecordOf(file) = {};
@@ -400,7 +402,7 @@ void SetSectionData(RoomSectionId section, std::byte* data) {
 
 // The room file table the zone load stored and its entry count.
 struct RoomFileTable {
-  const Content_DiscFile* table = nullptr;
+  const VS::Content::DiscFile* table = nullptr;
   std::size_t count = 0;
 };
 RoomFileTable room_files{};
@@ -450,14 +452,14 @@ class LiveFileReads : public Host {
   }
 
   [[nodiscard]] DiscReadState PollRead(LoadedFile file) const override {
-    const Content_DiscQueueSlot* request = RequestOf(file);
+    const VS::Content::DiscQueueSlot* request = RequestOf(file);
     if (request == nullptr) {
       return DiscReadState::kFailed;
     }
     switch (request->state) {
-      case Content_DiscRequestState_Loaded:
+      case VS::Content::DiscRequestState::kLoaded:
         return DiscReadState::kLoaded;
-      case Content_DiscRequestState_Error:
+      case VS::Content::DiscRequestState::kError:
         return DiscReadState::kFailed;
       default:
         return DiscReadState::kPending;
@@ -469,7 +471,7 @@ class LiveFileReads : public Host {
   }
 
   void ReleaseRead(LoadedFile file) override {
-    Content_DiscQueueSlot*& request = RequestOf(file);
+    VS::Content::DiscQueueSlot*& request = RequestOf(file);
     if (request != nullptr) {
       Content::ReleaseLiveDiscRequest(request);
     }
@@ -783,10 +785,10 @@ class LiveZoneLoadHost final
     if (files.empty()) {
       return;
     }
-    auto* table =
-        static_cast<Content_DiscFile*>(Core::Memory::AllocateLiveFromLowEnd(
-            files.size_bytes() / sizeof(Content::DiscFileExtent) *
-            sizeof(Content_DiscFile)));
+    auto* table = static_cast<VS::Content::DiscFile*>(
+        Core::Memory::AllocateLiveFromLowEnd(files.size_bytes() /
+                                             sizeof(Content::DiscFileExtent) *
+                                             sizeof(VS::Content::DiscFile)));
     if (table == nullptr) {
       return;
     }
@@ -804,9 +806,9 @@ class LiveZoneLoadHost final
     if (zud_files.empty()) {
       return;
     }
-    auto* files =
-        static_cast<Content_DiscFile*>(Core::Memory::AllocateLiveFromLowEnd(
-            zud_files.size() * sizeof(Content_DiscFile)));
+    auto* files = static_cast<VS::Content::DiscFile*>(
+        Core::Memory::AllocateLiveFromLowEnd(zud_files.size() *
+                                             sizeof(VS::Content::DiscFile)));
     auto* records = static_cast<std::byte*>(
         Core::Memory::AllocateLiveFromLowEnd(templates.size()));
     if (files == nullptr || records == nullptr) {

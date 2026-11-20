@@ -52,11 +52,7 @@
     <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
     <ClCompile Include="src\DiscQueue.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\DiscReader.cpp" />
     <ClCompile Include="src\DiscReaderLive.cpp">
@@ -82,7 +78,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DiscQueue.h" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
     <ClInclude Include="include\Content\AudioBank.hpp" />
@@ -93,6 +88,7 @@
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
     <ClInclude Include="include\Content\DiscLayout.h" />
+    <ClInclude Include="include\Content\DiscQueue.hpp" />
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />
@@ -105,7 +101,7 @@
     <ClInclude Include="include\Content\StringTables.hpp" />
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
-    <ClInclude Include="Legacy\LibDs.h" />
+    <ClInclude Include="Legacy\LibDs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

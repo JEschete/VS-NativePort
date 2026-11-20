@@ -12,8 +12,8 @@
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
@@ -34,7 +34,7 @@ using LiveFixture = game_clear_live_tests::Fixture;
 constexpr std::size_t kClutBytes = 512;
 constexpr std::size_t kTimImageBytes = std::size_t{64} * 256 * 2;
 constexpr std::size_t kTimBlockHeader = 12;
-constexpr Content_DiscFile kForeignFile{.lba = 1, .size = 64};
+constexpr VS::Content::DiscFile kForeignFile{.lba = 1, .size = 64};
 
 void PutWord(std::span<std::byte> bytes, std::size_t offset,
              std::uint32_t word) {
@@ -55,20 +55,20 @@ void PutTim(std::span<std::byte> bytes) {
 }
 
 std::span<std::byte> InjectLoadedRank() {
-  auto& request = Content_discRequestSlots[0];
-  const auto capacity = memory::LivePayloadCapacity(request.vram);
+  auto& request = VS::Content::discRequestSlots[0];
+  const auto capacity = memory::LivePayloadCapacity(request.destination);
   if (!capacity.has_value()) {
     FAIL("game-clear did not allocate its request destination");
     return {};
   }
-  std::span bytes(static_cast<std::byte*>(request.vram), *capacity);
+  std::span bytes(static_cast<std::byte*>(request.destination), *capacity);
   for (std::size_t index = 0; index < results::kGameClearTimCount; ++index) {
     PutTim(bytes.subspan(index * results::kGameClearTimStride,
                          results::kGameClearTimStride));
   }
   // An endpoint fixture, not evidence that the physical CD completed I/O.
-  request.state = Content_DiscRequestState_Loaded;
-  Content_discRequestCounts.waiting = 0;
+  request.state = VS::Content::DiscRequestState::kLoaded;
+  VS::Content::discRequestCounts.waiting = 0;
   return bytes;
 }
 
@@ -162,7 +162,7 @@ void TransferPageOwner(int previous, int next) {
 }
 
 struct RankRead {
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
   void* buffer = nullptr;
   std::size_t heap_blocks = 0;
@@ -175,28 +175,28 @@ RankRead StartFailedRankRead(std::array<unsigned char, 1>& outer) {
   constexpr int kUnmappedSector = 0x7FFF'0000;
   REQUIRE(results::LiveUpdateResultsScreen(outer.data()) == 0);
   REQUIRE(Battle_unusedSubmenuState == 1);
-  auto& request = Content_discRequestSlots[0];
-  REQUIRE(request.state == Content_DiscRequestState_Enqueued);
+  auto& request = VS::Content::discRequestSlots[0];
+  REQUIRE(request.state == VS::Content::DiscRequestState::kEnqueued);
   const RankRead rank{
       .request = &request,
       .generation = content::LiveDiscRequestGeneration(&request),
-      .buffer = request.vram,
+      .buffer = request.destination,
       .heap_blocks = memory::GameHeap().AllocatedBlocks().size()};
-  request.cdFile.lba = kUnmappedSector;
+  request.file.lba = kUnmappedSector;
   for (int update = 0; update < kQueueUpdates; ++update) {
     content::UpdateLiveDiscQueue();
   }
-  REQUIRE(request.state == Content_DiscRequestState_Error);
+  REQUIRE(request.state == VS::Content::DiscRequestState::kError);
   return rank;
 }
 
 void CheckFailedRequestKept(const RankRead& rank) {
   CHECK(Battle_unusedSubmenuState == 1);
-  CHECK(rank.request->state == Content_DiscRequestState_Error);
+  CHECK(rank.request->state == VS::Content::DiscRequestState::kError);
   CHECK(content::LiveDiscRequestGeneration(rank.request) == rank.generation);
-  CHECK(rank.request->vram == rank.buffer);
-  CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(Content_discRequestCounts.reading == 0);
+  CHECK(rank.request->destination == rank.buffer);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
+  CHECK(VS::Content::discRequestCounts.reading == 0);
 }
 
 void CheckFailedLoadOwners(const RankRead& rank) {
@@ -256,7 +256,7 @@ TEST_CASE(
   LiveFixture fixture;
   CHECK(results::LiveInitializeGameClear() == 0);
   const auto generation =
-      content::LiveDiscRequestGeneration(&Content_discRequestSlots[0]);
+      content::LiveDiscRequestGeneration(&VS::Content::discRequestSlots[0]);
   REQUIRE(generation != 0);
   REQUIRE(results::InspectLiveGameClear().owns_buffer);
   results::ResetLiveGameClearModuleData();
@@ -265,7 +265,7 @@ TEST_CASE(
   CHECK_FALSE(status.buffer_bound);
   CHECK(status.owns_request);
   CHECK(status.owns_buffer);
-  CHECK(content::LiveDiscRequestGeneration(&Content_discRequestSlots[0]) ==
+  CHECK(content::LiveDiscRequestGeneration(&VS::Content::discRequestSlots[0]) ==
         generation);
 }
 
@@ -280,7 +280,8 @@ TEST_CASE(
   results::ResetLiveGameClearModuleData();
   CHECK(results::CleanupLiveGameClearOwnedState());
   CHECK_FALSE(results::InspectLiveGameClear().owns_buffer);
-  CHECK(content::LiveDiscRequestGeneration(&Content_discRequestSlots[0]) == 0);
+  CHECK(content::LiveDiscRequestGeneration(&VS::Content::discRequestSlots[0]) ==
+        0);
   CHECK(memory::LivePayloadCapacity(other).has_value());
   CHECK(render::LiveTexturePages()[25] ==
         render::TexturePage{render::TexturePageState::kOwned, 9});
@@ -293,16 +294,16 @@ TEST_CASE("Game-clear Live cleanup rejects a reused request identity",
           "[game-clear-live][F03010][ownership]") {
   LiveFixture fixture;
   REQUIRE(results::LiveInitializeGameClear() == 0);
-  content::ReleaseLiveDiscRequest(&Content_discRequestSlots[0]);
+  content::ReleaseLiveDiscRequest(&VS::Content::discRequestSlots[0]);
   auto* const foreign = content::AllocateLiveDiscRequest(&kForeignFile);
-  REQUIRE(foreign == &Content_discRequestSlots[0]);
+  REQUIRE(foreign == &VS::Content::discRequestSlots[0]);
   void* const other = memory::AllocateLiveFromLowEnd(64);
   REQUIRE(other != nullptr);
   content::EnqueueLiveDiscRequest(foreign, other);
   const auto generation = content::LiveDiscRequestGeneration(foreign);
   CHECK(results::CleanupLiveGameClearOwnedState());
   CHECK(content::LiveDiscRequestGeneration(foreign) == generation);
-  CHECK(foreign->state == Content_DiscRequestState_Enqueued);
+  CHECK(foreign->state == VS::Content::DiscRequestState::kEnqueued);
   CHECK(memory::LivePayloadCapacity(other).has_value());
   CHECK_FALSE(results::InspectLiveGameClear().owns_request);
   CHECK(content::CancelLiveDiscWrites({static_cast<std::byte*>(other), 64}));
@@ -344,12 +345,12 @@ TEST_CASE("Game-clear Live interrupted load requires cleanup before restart",
           "[game-clear-live][F03010][ownership]") {
   LiveFixture fixture;
   REQUIRE(results::LiveInitializeGameClear() == 0);
-  void* const buffer = Content_discRequestSlots[0].vram;
+  void* const buffer = VS::Content::discRequestSlots[0].destination;
   results::ResetLiveGameClearModuleData();
   Battle_unusedSubmenuState = 0;
   CHECK(results::LiveInitializeGameClear() == 0);
   CHECK(Battle_unusedSubmenuState == 0);
-  CHECK(Content_discRequestSlots[0].vram == buffer);
+  CHECK(VS::Content::discRequestSlots[0].destination == buffer);
   CHECK(memory::GameHeap().AllocatedBlocks().size() == 1);
   CHECK(results::CleanupLiveGameClearOwnedState());
 }
@@ -363,8 +364,9 @@ TEST_CASE("Game-clear Live missing slot and queue Error remain pending",
   CHECK(memory::GameHeap().Empty());
   Battle_unusedSubmenuState = 0;
   REQUIRE(results::LiveInitializeGameClear() == 0);
-  Content_discRequestSlots[0].state = Content_DiscRequestState_Error;
-  Content_discRequestCounts.waiting = 0;
+  VS::Content::discRequestSlots[0].state =
+      VS::Content::DiscRequestState::kError;
+  VS::Content::discRequestCounts.waiting = 0;
   CHECK(results::LiveInitializeGameClear() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   CHECK(results::InspectLiveGameClear().owns_buffer);
@@ -386,7 +388,8 @@ TEST_CASE(
   int retried = 0;
   for (int frame = 0; frame < kFrames; ++frame) {
     pending += results::LiveUpdateResultsScreen(outer.data()) == 0 ? 1 : 0;
-    retried += rank.request->state != Content_DiscRequestState_Error ? 1 : 0;
+    retried +=
+        rank.request->state != VS::Content::DiscRequestState::kError ? 1 : 0;
     content::UpdateLiveDiscQueue();
   }
   CHECK(pending == kFrames);
@@ -537,7 +540,7 @@ TEST_CASE("Game-clear fixture releases a pending production music request",
   CHECK(VS::Audio::LivePollMusicLoads() == VS::Audio::kLoadInFlight);
   fixture.ReleaseMusic();
   CHECK(content::LiveDiscRequestGeneration(request) == 0);
-  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
   CHECK(VS::Audio::soundState.music_data[LiveFixture::kMusicIndex] == nullptr);
   CHECK(memory::GameHeap().Empty());
 }

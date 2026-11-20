@@ -2,7 +2,9 @@
 
 #include <cstdint>
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Effects {
 
@@ -25,7 +27,7 @@ struct LiveScreenEffectOverlay {
   // Draws the vignette while nonzero.
   std::int32_t vignette_enabled;
   // Disc request that loads SCREFF2.PRG.
-  Content_DiscQueueSlot* slot;
+  VS::Content::DiscQueueSlot* slot;
 };
 
 // decomp: D_800EB9B4 (src/GIM/SCREFF2.PRG/0.h:22). The attached controller,

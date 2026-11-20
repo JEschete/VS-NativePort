@@ -21,8 +21,8 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
@@ -517,26 +517,27 @@ namespace {
 struct LivePreviewFixture {
   std::vector<std::byte> arena = std::vector<std::byte>(0x400000);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Content_DiscQueueSlot, 32> saved_slots{};
-  Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
+  std::array<VS::Content::DiscQueueSlot, 32> saved_slots{};
+  VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
   decltype(VS::Content::legacyActorAssetRequests) saved_requests{};
   std::uint8_t saved_step = VS::Content::objectDataLoadStep;
   score::EnemyPreviewState saved_state = score::LiveEnemyPreviewState();
 
   LivePreviewFixture() {
-    std::memcpy(saved_slots.data(), Content_discRequestSlots,
-                sizeof Content_discRequestSlots);
-    std::memset(Content_discRequestSlots, 0, sizeof Content_discRequestSlots);
-    Content_discRequestCounts = Content_DiscRequestCounts{};
+    std::memcpy(saved_slots.data(), VS::Content::discRequestSlots.data(),
+                sizeof VS::Content::discRequestSlots);
+    std::memset(VS::Content::discRequestSlots.data(), 0,
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
     saved_requests = VS::Content::legacyActorAssetRequests;
     VS::Content::legacyActorAssetRequests.fill({});
     VS::Content::objectDataLoadStep = 0;
     score::ResetLiveEnemyPreview();
   }
   ~LivePreviewFixture() {
-    std::memcpy(Content_discRequestSlots, saved_slots.data(),
-                sizeof Content_discRequestSlots);
-    Content_discRequestCounts = saved_counts;
+    std::memcpy(VS::Content::discRequestSlots.data(), saved_slots.data(),
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = saved_counts;
     VS::Content::legacyActorAssetRequests = saved_requests;
     VS::Content::objectDataLoadStep = saved_step;
     score::LiveEnemyPreviewState() = saved_state;
@@ -577,8 +578,9 @@ void CheckColdPreviewRelease(const score::EnemyPreviewState& before,
   CHECK_FALSE(
       VS::Core::Memory::LivePayloadCapacity(Pointer(before.model_buffer))
           .has_value());
-  CHECK(VS::Content::LiveDiscRequestGeneration(Pointer<Content_DiscQueueSlot>(
-            before.read)) == expected_read_generation);
+  CHECK(VS::Content::LiveDiscRequestGeneration(
+            Pointer<VS::Content::DiscQueueSlot>(before.read)) ==
+        expected_read_generation);
   CHECK(VS::Content::objectDataLoadStep == 0);
 }
 
@@ -590,7 +592,7 @@ void DiscardUnparsedPreview(const score::EnemyPreviewState& before,
   if (owns_file) {
     REQUIRE(VS::Content::CancelLiveDiscWrites({file, before.file_bytes}));
   }
-  auto* request = Pointer<Content_DiscQueueSlot>(before.read);
+  auto* request = Pointer<VS::Content::DiscQueueSlot>(before.read);
   if (VS::Content::LiveDiscRequestGeneration(request) == generation) {
     VS::Content::ReleaseLiveDiscRequest(request);
   }
@@ -644,8 +646,8 @@ score::EnemyPreviewState QueuePreviewParts(bool companion,
   auto bytes = ZudFile();
   if (modelless) bytes[0] = std::byte{0x7F};
   std::ranges::copy(bytes, Pointer(before.file));
-  auto* request = Pointer<Content_DiscQueueSlot>(before.read);
-  request->state = Content_DiscRequestState_Loaded;
+  auto* request = Pointer<VS::Content::DiscQueueSlot>(before.read);
+  request->state = VS::Content::DiscRequestState::kLoaded;
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   REQUIRE(VS::Content::LiveDiscRequestGeneration(request) == 0);
   return before;
@@ -659,8 +661,8 @@ score::EnemyPreviewState QueueOriginalPreview() {
   REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
   const auto before = score::LiveEnemyPreviewState();
   std::ranges::copy(image, Pointer<unsigned char>(before.file));
-  Pointer<Content_DiscQueueSlot>(before.read)->state =
-      Content_DiscRequestState_Loaded;
+  Pointer<VS::Content::DiscQueueSlot>(before.read)->state =
+      VS::Content::DiscRequestState::kLoaded;
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   return before;
 }
@@ -708,7 +710,8 @@ std::span<std::byte> StartForeignModelRead() {
   return {foreign, sizeof(Actors_ActorRecord)};
 }
 
-void CheckForeignModelRead(const void* file, const Content_DiscQueueSlot* read,
+void CheckForeignModelRead(const void* file,
+                           const VS::Content::DiscQueueSlot* read,
                            std::uint64_t generation) {
   CHECK(VS::Content::legacyModelLoadPhase == 1);
   CHECK(VS::Content::legacyShpFileBuffer == file);
@@ -774,12 +777,12 @@ TEST_CASE("Live enemy preview releases the read after queueing parts",
   const score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
   REQUIRE(state.read != AssetAddress::kNone);
   REQUIRE(state.file_bytes >= 0x200);
-  auto* read = Pointer<Content_DiscQueueSlot>(state.read);
-  CHECK(read->vram == Pointer(state.file));
+  auto* read = Pointer<VS::Content::DiscQueueSlot>(state.read);
+  CHECK(read->destination == Pointer(state.file));
   std::ranges::copy(ZudFile(), Pointer(state.file));
-  read->state = Content_DiscRequestState_Loaded;
+  read->state = VS::Content::DiscRequestState::kLoaded;
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
-  CHECK(read->state == Content_DiscRequestState_Free);
+  CHECK(read->state == VS::Content::DiscRequestState::kFree);
   CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 4);
 }
 
@@ -791,8 +794,8 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   const score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
   REQUIRE(state.read != AssetAddress::kNone);
   std::ranges::copy(ZudFile(), Pointer(state.file));
-  Pointer<Content_DiscQueueSlot>(state.read)->state =
-      Content_DiscRequestState_Loaded;
+  Pointer<VS::Content::DiscQueueSlot>(state.read)->state =
+      VS::Content::DiscRequestState::kLoaded;
   auto* buffer = Pointer<u_char>(state.model_buffer);
   auto* file = Pointer<u_char>(state.file);
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
@@ -812,8 +815,8 @@ TEST_CASE("Live enemy preview releases the file after the queue drains",
   REQUIRE(state.read != AssetAddress::kNone);
   const auto* file = Pointer(state.file);
   const auto* buffer = Pointer(state.model_buffer);
-  Pointer<Content_DiscQueueSlot>(state.read)->state =
-      Content_DiscRequestState_Loaded;
+  Pointer<VS::Content::DiscQueueSlot>(state.read)->state =
+      VS::Content::DiscRequestState::kLoaded;
   std::ranges::copy(ZudFile(), Pointer(state.file));
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   VS::Content::legacyActorAssetRequests.fill({});
@@ -833,9 +836,10 @@ TEST_CASE("Live enemy preview refuses ids past the file table",
   score::QueueLiveEnemyModelRead(256);
   CHECK(score::LiveEnemyPreviewRefusals() == before + 1);
   CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
-  CHECK(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
-    return slot.state == Content_DiscRequestState_Free;
-  }));
+  CHECK(
+      std::ranges::all_of(VS::Content::discRequestSlots, [](const auto& slot) {
+        return slot.state == VS::Content::DiscRequestState::kFree;
+      }));
 }
 
 TEST_CASE("Actual cold session drains the pending enemy preview owner",
@@ -851,8 +855,8 @@ TEST_CASE("Actual cold session drains the pending enemy preview owner",
   const auto before = score::LiveEnemyPreviewState();
   REQUIRE(before.read != AssetAddress::kNone);
   const auto generation = VS::Content::LiveDiscRequestGeneration(
-      Pointer<Content_DiscQueueSlot>(before.read));
-  const Content_DiscFile foreign_file{1, 16};
+      Pointer<VS::Content::DiscQueueSlot>(before.read));
+  const VS::Content::DiscFile foreign_file{1, 16};
   auto* foreign_request = VS::Content::AllocateLiveDiscRequest(&foreign_file);
   REQUIRE(foreign_request != nullptr);
   const auto foreign_generation =
@@ -877,8 +881,8 @@ TEST_CASE("Only completed MENU9 abandons a pending or loaded preview read",
   REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
   const auto before = score::LiveEnemyPreviewState();
   if (loaded) {
-    Pointer<Content_DiscQueueSlot>(before.read)->state =
-        Content_DiscRequestState_Loaded;
+    Pointer<VS::Content::DiscQueueSlot>(before.read)->state =
+        VS::Content::DiscRequestState::kLoaded;
   }
   {
     menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
@@ -929,7 +933,7 @@ TEST_CASE("Preview cleanup cancels the companion model-file owner",
   auto* request = VS::Content::legacyShpDiscRequest;
   const auto* file = VS::Content::legacyShpFileBuffer;
   REQUIRE(VS::Content::LiveDiscRequestGeneration(request) != 0);
-  if (loaded) request->state = Content_DiscRequestState_Loaded;
+  if (loaded) request->state = VS::Content::DiscRequestState::kLoaded;
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
   CheckEmptyPreviewQueue();
@@ -961,9 +965,9 @@ TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
   PreviewLifecycleFixture fixture;
   REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
   const auto before = score::LiveEnemyPreviewState();
-  auto* old = Pointer<Content_DiscQueueSlot>(before.read);
+  auto* old = Pointer<VS::Content::DiscQueueSlot>(before.read);
   VS::Content::ReleaseLiveDiscRequest(old);
-  const Content_DiscFile location{1, 16};
+  const VS::Content::DiscFile location{1, 16};
   auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
   REQUIRE(foreign == old);
   const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
@@ -988,8 +992,9 @@ TEST_CASE("Preview cleanup refuses an invalid allocation before losing owners",
   state.model_buffer = At(4);
   CHECK_FALSE(score::CleanupLiveEnemyPreviewOwnedState());
   CHECK(score::LiveEnemyPreviewRefusals() == refused + 1);
-  CHECK(VS::Content::LiveDiscRequestGeneration(Pointer<Content_DiscQueueSlot>(
-            before.read)) == before.read_generation);
+  CHECK(VS::Content::LiveDiscRequestGeneration(
+            Pointer<VS::Content::DiscQueueSlot>(before.read)) ==
+        before.read_generation);
   CHECK(
       VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
   state = before;
@@ -1025,14 +1030,15 @@ TEST_CASE("Preview cleanup preserves a reused companion read generation",
   auto* original = VS::Content::legacyShpDiscRequest;
   const auto* file = VS::Content::legacyShpFileBuffer;
   VS::Content::ReleaseLiveDiscRequest(original);
-  const Content_DiscFile location{1, 16};
+  const VS::Content::DiscFile location{1, 16};
   auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
   REQUIRE(foreign == original);
   const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(
-      before,
-      Pointer<Content_DiscQueueSlot>(before.read) == foreign ? generation : 0);
+      before, Pointer<VS::Content::DiscQueueSlot>(before.read) == foreign
+                  ? generation
+                  : 0);
   CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
   CHECK(VS::Content::legacyShpAllocated == 0);

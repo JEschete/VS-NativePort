@@ -13,7 +13,9 @@
 #include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/Framework.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Menu {
 // decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c)
@@ -30,7 +32,7 @@ namespace VS::Menu::Framework {
 // MenuControl and the menu overlay read it waits on.
 struct LiveMenuControl {
   MenuControl control;
-  Content_DiscQueueSlot* cd_queue = nullptr;
+  VS::Content::DiscQueueSlot* cd_queue = nullptr;
 };
 
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte

@@ -13,12 +13,12 @@
 #include <vector>
 
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
-#include "DiscQueue.h"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
@@ -41,9 +41,9 @@ VECTOR VS::Field::backgroundReferenceVectors[2];
 int VS::Field::backgroundGradientColors
     [VS::Field::kBackgroundGradientColorCount];
 // decomp: D_800F1DAC (D_800F1DAC@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* VS::Field::backgroundTextureDiscRequest;
+VS::Content::DiscQueueSlot* VS::Field::backgroundTextureDiscRequest;
 // decomp: D_800F1DB0 (D_800F1DB0@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* VS::Field::backgroundLayoutDiscRequest;
+VS::Content::DiscQueueSlot* VS::Field::backgroundLayoutDiscRequest;
 // decomp: D_800F1DB4 (D_800F1DB4@BATTLE/BATTLE.PRG)
 int16_t VS::Field::backgroundOffsetX;
 // decomp: D_800F1DB6 (D_800F1DB6@BATTLE/BATTLE.PRG)
@@ -108,7 +108,7 @@ static_assert(offsetof(Field_MpdEnvironment, windStrength) ==
               kEnvironmentWindStrengthAt);
 static_assert(offsetof(Field_MpdEnvironment, weatherArea) ==
               kEnvironmentWeatherAreaAt);
-static_assert(sizeof(Content_DiscFile) == kDiscFileBytes);
+static_assert(sizeof(VS::Content::DiscFile) == kDiscFileBytes);
 static_assert(sizeof(POLY_FT4) % sizeof(u_long) == 0);
 static_assert(sizeof(POLY_GT4) % sizeof(u_long) == 0);
 static_assert(sizeof(TILE) % sizeof(u_long) == 0);
@@ -158,8 +158,8 @@ template <typename T, typename Id>
           .far_clip = camera.far_clip};
 }
 
-[[nodiscard]] Content_DiscFile DiscFileOf(const BackgroundFile& file) {
-  Content_DiscFile disc{};
+[[nodiscard]] VS::Content::DiscFile DiscFileOf(const BackgroundFile& file) {
+  VS::Content::DiscFile disc{};
   disc.lba = file.lba;
   disc.size = file.size;
   return disc;
@@ -167,7 +167,7 @@ template <typename T, typename Id>
 
 [[nodiscard]] BackgroundFile BackgroundFileAt(std::span<const std::byte> bytes,
                                               std::size_t offset) {
-  Content_DiscFile disc{};
+  VS::Content::DiscFile disc{};
   std::memcpy(&disc, bytes.subspan(offset, sizeof(disc)).data(), sizeof(disc));
   return {.lba = disc.lba, .size = disc.size};
 }
@@ -273,9 +273,9 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
   legacyBackgroundTexturePage = static_cast<char>(state.texture_page);
   isTiledBackgroundEnabled = state.tiled_enabled;
   backgroundTextureDiscRequest =
-      PointerOf<Content_DiscQueueSlot>(state.texture_read);
+      PointerOf<VS::Content::DiscQueueSlot>(state.texture_read);
   backgroundLayoutDiscRequest =
-      PointerOf<Content_DiscQueueSlot>(state.layout_read);
+      PointerOf<VS::Content::DiscQueueSlot>(state.layout_read);
   loadedBackgroundLayout = PointerOf<BackgroundLayoutRecord>(state.layout);
   legacyBackgroundTimBuffer = PointerOf<u_long>(state.tim_buffer);
 }
@@ -474,30 +474,30 @@ void LiveBackgroundHost::FreeHighBuffer(BackgroundBufferId buffer) {
 }
 
 BackgroundReadId LiveBackgroundHost::AllocateRead(const BackgroundFile& file) {
-  const Content_DiscFile disc = DiscFileOf(file);
+  const VS::Content::DiscFile disc = DiscFileOf(file);
   return IdOf<BackgroundReadId>(Content::AllocateLiveDiscRequest(&disc));
 }
 
 void LiveBackgroundHost::EnqueueRead(BackgroundReadId read,
                                      BackgroundBufferId destination) {
-  Content::EnqueueLiveDiscRequest(PointerOf<Content_DiscQueueSlot>(read),
+  Content::EnqueueLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read),
                                   PointerOf<void>(destination));
 }
 
 BackgroundReadId LiveBackgroundHost::CompleteRefusedRead(
     const BackgroundFile& file, BackgroundBufferId destination) {
-  const Content_DiscFile disc = DiscFileOf(file);
+  const VS::Content::DiscFile disc = DiscFileOf(file);
   return IdOf<BackgroundReadId>(Content::CompleteLiveRefusedDiscRequest(
       &disc, PointerOf<void>(destination)));
 }
 
 bool LiveBackgroundHost::ReadLoaded(BackgroundReadId read) {
-  return PointerOf<const Content_DiscQueueSlot>(read)->state ==
-         Content_DiscRequestState_Loaded;
+  return PointerOf<const VS::Content::DiscQueueSlot>(read)->state ==
+         VS::Content::DiscRequestState::kLoaded;
 }
 
 void LiveBackgroundHost::ReleaseRead(BackgroundReadId read) {
-  Content::ReleaseLiveDiscRequest(PointerOf<Content_DiscQueueSlot>(read));
+  Content::ReleaseLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read));
 }
 
 void LiveBackgroundHost::StampTimId(BackgroundBufferId buffer,

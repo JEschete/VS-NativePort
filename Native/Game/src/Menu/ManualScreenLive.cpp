@@ -10,14 +10,15 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/Manual.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -37,8 +38,10 @@
 
 namespace VS::Menu::manual {
 namespace {
-static_assert(kHelpFileLoaded == Content_DiscRequestState_Loaded);
-static_assert(kHelpFileFailed == Content_DiscRequestState_Error);
+static_assert(kHelpFileLoaded ==
+              std::to_underlying(VS::Content::DiscRequestState::kLoaded));
+static_assert(kHelpFileFailed ==
+              std::to_underlying(VS::Content::DiscRequestState::kError));
 static_assert(kNoMenuItem == Framework::kNoRow);
 static_assert(VS::Field::kManualScrollPositionCount ==
               std::size_t{kTopicCount});
@@ -130,13 +133,13 @@ void SetHelpBuffer(HelpFile file, void* buffer) {
   }
 }
 
-[[nodiscard]] Content_DiscQueueSlot*& HelpRequest(HelpFile file) {
+[[nodiscard]] VS::Content::DiscQueueSlot*& HelpRequest(HelpFile file) {
   return file == HelpFile::kText ? helpTextCdQueue : helpAssetsCdQueue;
 }
 
 // _helpFileCdFiles[topic * 2 + file]; the core checks the topic.
-[[nodiscard]] const Content_DiscFile& HelpFileOf(HelpFile file,
-                                                 std::int32_t topic) {
+[[nodiscard]] const VS::Content::DiscFile& HelpFileOf(HelpFile file,
+                                                      std::int32_t topic) {
   const auto index = (static_cast<std::size_t>(topic) * kHelpFilesPerTopic) +
                      static_cast<std::size_t>(file);
   return kHelpFileCdFiles[index];
@@ -223,8 +226,8 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   // A full queue reads the file at once (#282), as the other copied callers
   // do.
   void RequestHelpFile(HelpFile file, std::int32_t topic) override {
-    const Content_DiscFile& disc_file = HelpFileOf(file, topic);
-    Content_DiscQueueSlot*& request = HelpRequest(file);
+    const VS::Content::DiscFile& disc_file = HelpFileOf(file, topic);
+    VS::Content::DiscQueueSlot*& request = HelpRequest(file);
     request = Content::AllocateLiveDiscRequest(&disc_file);
     if (request != nullptr) {
       Content::EnqueueLiveDiscRequest(request, HelpBuffer(file));
@@ -236,17 +239,17 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   // A missing request can never load, so it reads as failed and the core
   // returns to the topic list.
   [[nodiscard]] std::int16_t HelpFileState(HelpFile file) const override {
-    const Content_DiscQueueSlot* const request = HelpRequest(file);
+    const VS::Content::DiscQueueSlot* const request = HelpRequest(file);
     if (request == nullptr) {
       RefuseLive("Manual help file has no disc request");
-      return Content_DiscRequestState_Error;
+      return std::to_underlying(VS::Content::DiscRequestState::kError);
     }
-    return request->state;
+    return std::to_underlying(request->state);
   }
   // The original keeps the released request's pointer; nothing reads it
   // before the next request replaces it, so the binding drops it.
   void ReleaseHelpFile(HelpFile file) override {
-    Content_DiscQueueSlot*& request = HelpRequest(file);
+    VS::Content::DiscQueueSlot*& request = HelpRequest(file);
     Content::ReleaseLiveDiscRequest(request);
     request = nullptr;
   }

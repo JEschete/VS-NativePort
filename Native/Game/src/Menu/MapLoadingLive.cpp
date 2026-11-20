@@ -8,15 +8,16 @@
 #include <iterator>
 #include <span>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -44,7 +45,7 @@ constexpr std::size_t kMapNameHalfwords = std::size(mapNames);
 // A chooser row's two menu text entries: the name and no description.
 constexpr std::size_t kMenuTextPerRow = 2;
 
-static_assert(sizeof(Content_DiscFile) == sizeof(DiscFileRange));
+static_assert(sizeof(VS::Content::DiscFile) == sizeof(DiscFileRange));
 static_assert(std::size(sceneRowIdMap) == kSceneCount);
 static_assert(sizeof(VS::State::stateFlags.map_paling) == kSceneCount);
 
@@ -83,7 +84,7 @@ void Refuse(std::string_view call, std::string_view reason) {
                           (static_cast<std::uint32_t>(low) & kHalfMask));
 }
 
-[[nodiscard]] Content_DiscFile DiscFileOf(DiscFileRange file) {
+[[nodiscard]] VS::Content::DiscFile DiscFileOf(DiscFileRange file) {
   return {.lba = file.sector, .size = file.bytes};
 }
 
@@ -141,15 +142,15 @@ class LiveMenuReady final : public MenuReadyHost {
 
 // The background's request, image and step: the original's statics.
 struct BackgroundLoad {
-  Content_DiscFile file{};
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscFile file{};
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
   void* image = nullptr;
   std::int32_t step = 0;
 };
 
 BackgroundLoad background;
-Content_DiscQueueSlot* initial_scene_request = nullptr;
+VS::Content::DiscQueueSlot* initial_scene_request = nullptr;
 std::uint64_t initial_scene_generation = 0;
 void* initial_scene_destination = nullptr;
 std::size_t initial_scene_bytes = 0;
@@ -181,9 +182,9 @@ class LiveBackground final : public BackgroundLoadHost {
         Content::LiveDiscRequestGeneration(background.request) !=
             background.generation) {
       Refuse("LoadBackground", "missing or reused background read");
-      return Content_DiscRequestState_Free;
+      return std::to_underlying(VS::Content::DiscRequestState::kFree);
     }
-    return background.request->state;
+    return std::to_underlying(background.request->state);
   }
   void ReleaseBackgroundRead() override {
     Content::ReleaseLiveDiscRequest(background.request);
@@ -259,9 +260,9 @@ class LiveSceneMap final : public SceneMapHost {
         Content::LiveDiscRequestGeneration(initial_scene_request) !=
             initial_scene_generation) {
       Refuse("LoadSceneMap", "missing or reused scene read");
-      return Content_DiscRequestState_Free;
+      return std::to_underlying(VS::Content::DiscRequestState::kFree);
     }
-    return sceneCdQueueSlot->state;
+    return std::to_underlying(sceneCdQueueSlot->state);
   }
   void ReleaseSceneRead() override {
     Content::ReleaseLiveDiscRequest(sceneCdQueueSlot);
@@ -308,7 +309,7 @@ class LiveSceneMap final : public SceneMapHost {
     return static_cast<std::size_t>(kSceneArmFiles[currentScene].size);
   }
 
-  const Content_DiscFile* file_ = nullptr;
+  const VS::Content::DiscFile* file_ = nullptr;
 };
 
 [[nodiscard]] SceneMapView ViewOfGlobals() {

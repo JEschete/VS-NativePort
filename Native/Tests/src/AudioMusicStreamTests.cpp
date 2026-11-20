@@ -28,8 +28,8 @@
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamLive.hpp"
 #include "Content/CdDrive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
-#include "DiscQueue.h"
 
 namespace {
 namespace Audio = VS::Audio;
@@ -1673,18 +1673,14 @@ TEST_CASE(
 
 TEST_CASE("Live XA stream requests drive the disc drive record's state",
           "[audio-music-streams][audio]") {
-  const GlobalScope drive(Content_discDriveState);
-  const auto state = [] {
-    return static_cast<Content::DiscDriveState>(
-        static_cast<std::uint8_t>(Content_discDriveState.state));
-  };
+  const GlobalScope drive(VS::Content::discDriveState);
+  const auto state = [] { return VS::Content::discDriveState.state; };
   CHECK(Audio::LiveBeginXaStream(kXaSector, kXaBytes) == 1);
   CHECK(state() == Content::DiscDriveState::kReadXaInit);
-  CHECK(Content_discDriveState.startSector == kXaSector);
-  CHECK(Content_discDriveState.byteCount == kXaBytes);
+  CHECK(VS::Content::discDriveState.start_sector == kXaSector);
+  CHECK(VS::Content::discDriveState.byte_count == kXaBytes);
   CHECK(Audio::LiveBeginXaStream(1, 2) == 0);
-  Content_discDriveState.state =
-      static_cast<char>(Content::DiscDriveState::kStreamXa);
+  VS::Content::discDriveState.state = Content::DiscDriveState::kStreamXa;
   CHECK(Audio::LiveRequestXaStreamStop() == 1);
   CHECK(state() == Content::DiscDriveState::kStreamXaEnd);
   CHECK(Audio::LiveRequestXaStreamStop() == 0);

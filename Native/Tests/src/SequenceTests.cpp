@@ -38,7 +38,7 @@
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
@@ -646,7 +646,7 @@ int Tests_FacialTextureBankHandoff(void) {
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
   const unsigned char saved_phase = VS::Content::legacyEtmLoadPhase;
   uint16_t* saved_image = VS::Content::legacyEtmFileBuffer;
-  Content_DiscQueueSlot* saved_request = VS::Content::legacyEtmDiscRequest;
+  VS::Content::DiscQueueSlot* saved_request = VS::Content::legacyEtmDiscRequest;
   const unsigned char saved_page =
       VS::Actors::sharedSequenceBankTexturePages[0];
   const unsigned char saved_legacy_page =
@@ -665,10 +665,11 @@ int Tests_FacialTextureBankHandoff(void) {
   const VS::Actors::TextureAnimationKeyRecord saved_key =
       VS::Actors::secondarySlotSequences[1][0];
   // The loaded read is a queue slot, as the loader's own reads are.
-  Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
-  const Content_DiscQueueSlot saved_slot = *request;
+  VS::Content::DiscQueueSlot* const request =
+      &VS::Content::discRequestSlots[31];
+  const VS::Content::DiscQueueSlot saved_slot = *request;
   const auto saved_requests = VS::Content::legacyActorAssetRequests;
-  request->state = Content_DiscRequestState_Loaded;
+  request->state = VS::Content::DiscRequestState::kLoaded;
   VS::Content::LegacyActorAssetRequest upload{};
   upload.asset_kind = 9;
   upload.target_slot = 1;

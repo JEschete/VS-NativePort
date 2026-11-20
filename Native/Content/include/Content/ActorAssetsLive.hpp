@@ -11,8 +11,6 @@
 namespace VS::Actors {
 struct WeaponModelData;
 }
-struct Content_DiscFile;
-struct Content_DiscQueueSlot;
 
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp) over
 // the legacy request queue (legacyActorAssetRequests), the loaders' globals
@@ -25,6 +23,9 @@ struct Content_DiscQueueSlot;
 // refuse, is counted and warned about on the "content" channel. A loader
 // read the disc queue refuses (#282) is read before the loader returns.
 namespace VS::Content {
+
+struct DiscFile;
+struct DiscQueueSlot;
 
 // decomp: vs_battle_objectData (src/BATTLE/BATTLE.PRG/2842C.h:36), upstream
 // vs_ObjectData (src/BATTLE/BATTLE.PRG/objectData.h:6-17): one slot of the
@@ -126,9 +127,9 @@ extern void* legacyWeaponFileBuffer;
 // decomp: _wepFileLoaded, upstream wepFileLoaded
 extern std::int32_t legacyWeaponFileLoaded;
 // decomp: _wepFile, upstream wepFile
-extern Content_DiscFile legacyWeaponFileLocation;
+extern DiscFile legacyWeaponFileLocation;
 // decomp: _wepCdSlot, upstream wepCdSlot
-extern Content_DiscQueueSlot* legacyWeaponDiscRequest;
+extern DiscQueueSlot* legacyWeaponDiscRequest;
 // decomp: _wepFileEpilog, upstream wepFileEpilog
 extern void* legacyWeaponParseCursor;
 // decomp: _shpData, upstream shpDataBuf
@@ -136,9 +137,9 @@ extern void* legacyShpFileBuffer;
 // decomp: _shpAllocated, upstream shpAllocated
 extern std::int32_t legacyShpAllocated;
 // decomp: _shpFile, upstream shpFile
-extern Content_DiscFile legacyShpFileLocation;
+extern DiscFile legacyShpFileLocation;
 // decomp: _shpCdSlot, upstream shpCdSlot
-extern Content_DiscQueueSlot* legacyShpDiscRequest;
+extern DiscQueueSlot* legacyShpDiscRequest;
 // decomp: D_800F22B4
 extern std::uint8_t* legacyShpParseCursor;
 // decomp: D_800F22B8
@@ -154,17 +155,17 @@ extern void* legacySequenceFileBuffer;
 // decomp: D_800F22D0
 extern std::int32_t legacySequenceBufferOwned;
 // decomp: D_800F22D8
-extern Content_DiscFile legacySequenceFileLocation;
+extern DiscFile legacySequenceFileLocation;
 // decomp: D_800F22E0
-extern Content_DiscQueueSlot* legacySequenceDiscRequest;
+extern DiscQueueSlot* legacySequenceDiscRequest;
 // decomp: D_800F22E4
 extern std::uint8_t* legacySequenceParseData;
 // decomp: _etmData, upstream etmData
 extern std::uint16_t* legacyEtmFileBuffer;
 // decomp: _etmFile, upstream etmFile
-extern Content_DiscFile legacyEtmFileLocation;
+extern DiscFile legacyEtmFileLocation;
 // decomp: _etmFileCdSlot, upstream etmFileCdSlot
-extern Content_DiscQueueSlot* legacyEtmDiscRequest;
+extern DiscQueueSlot* legacyEtmDiscRequest;
 
 // The record arrays and disc file tables of BATTLE.PRG (upstream
 // src/BATTLE/BATTLE.PRG/30DB0.c:59-72): per-model disc offsets and sector

@@ -107,8 +107,9 @@ void CheckReleasedOwner() {
   CHECK_FALSE(status.owns_buffer);
   CHECK_FALSE(status.owns_request);
   CHECK_FALSE(status.owns_pages);
-  CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(content::LiveDiscRequestGeneration(&Content_discRequestSlots[0]) == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
+  CHECK(content::LiveDiscRequestGeneration(&VS::Content::discRequestSlots[0]) ==
+        0);
   CHECK(render::LiveTexturePages()[29].state ==
         render::TexturePageState::kRetiring);
 }
@@ -121,11 +122,12 @@ void CheckFallbackRequest(std::size_t records) {
 }
 
 struct FullQueue {
-  std::array<Content_DiscQueueSlot*, content::kDiscRequestCapacity> slots{};
+  std::array<VS::Content::DiscQueueSlot*, content::kDiscRequestCapacity>
+      slots{};
   std::array<std::uint64_t, content::kDiscRequestCapacity> generations{};
 
   FullQueue() {
-    constexpr Content_DiscFile kForeignFile{.lba = 1, .size = 64};
+    constexpr VS::Content::DiscFile kForeignFile{.lba = 1, .size = 64};
     for (std::size_t index = 0; index < slots.size(); ++index) {
       slots.at(index) = content::AllocateLiveDiscRequest(&kForeignFile);
       REQUIRE(slots.at(index) != nullptr);
@@ -146,7 +148,8 @@ struct FullQueue {
     for (std::size_t index = 0; index < slots.size(); ++index) {
       CHECK(content::LiveDiscRequestGeneration(slots.at(index)) ==
             generations.at(index));
-      CHECK(slots.at(index)->state == Content_DiscRequestState_Allocated);
+      CHECK(slots.at(index)->state ==
+            VS::Content::DiscRequestState::kAllocated);
     }
   }
 };
@@ -215,7 +218,7 @@ TEST_CASE("Production MENUF completion resets views but retains results owners",
           "[game-clear-integration][game-clear-reload][F03010][F03015]") {
   ReloadFixture fixture;
   fixture.Prime();
-  auto* request = &Content_discRequestSlots[0];
+  auto* request = &VS::Content::discRequestSlots[0];
   const auto generation = content::LiveDiscRequestGeneration(request);
   ReloadFixture::CheckOtherAndPending();
   {
@@ -257,7 +260,7 @@ TEST_CASE("Production heap replacement cancels results ownership first",
           "[game-clear-integration][game-clear-heap][F03010]") {
   game_clear_live_tests::Fixture fixture;
   REQUIRE(results::LiveInitializeGameClear() == 0);
-  REQUIRE(Content_discRequestCounts.waiting == 1);
+  REQUIRE(VS::Content::discRequestCounts.waiting == 1);
   const auto refused = memory::RefusedLiveHeapRequestCount();
   VS::Boot::ResetLiveSessionHeap();
   CheckReleasedOwner();
@@ -272,8 +275,7 @@ TEST_CASE(
     "[game-clear-integration][game-clear-full-queue][F03010]") {
   game_clear_live_tests::Fixture fixture;
   content::ClearLiveDiscReadError();
-  REQUIRE(content::LiveDiscState() ==
-          static_cast<int>(content::DiscDriveState::kIdle));
+  REQUIRE(content::LiveDiscState() == content::DiscDriveState::kIdle);
   FullQueue foreign;
   const auto fallback_count = content::LiveRefusedDiscRecordsInUse();
   const auto refusals = content::LiveDiscRequestRefusals();

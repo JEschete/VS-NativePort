@@ -9,10 +9,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Overlays.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Field/DoorMatchList.hpp"
@@ -24,15 +24,15 @@ struct ScreenStateFixture {
       VS::Effects::screenEffectDefaults;
   VS::Effects::LiveScreenEffectOverlay* active =
       VS::Effects::screenEffectOverlay;
-  decltype(std::to_array(Content_discRequestSlots)) requests =
-      std::to_array(Content_discRequestSlots);
-  Content_DiscRequestCounts counts = Content_discRequestCounts;
+  decltype(VS::Content::discRequestSlots) requests =
+      VS::Content::discRequestSlots;
+  VS::Content::DiscRequestCounts counts = VS::Content::discRequestCounts;
   char owner = VS::Content::overlayWorkspaceOwner;
 
   ScreenStateFixture() {
-    std::fill_n(Content_discRequestSlots, requests.size(),
-                Content_DiscQueueSlot{});
-    Content_discRequestCounts = {};
+    std::fill_n(VS::Content::discRequestSlots.begin(), requests.size(),
+                VS::Content::DiscQueueSlot{});
+    VS::Content::discRequestCounts = {};
     VS::Content::overlayWorkspaceOwner = 0;
     VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   }
@@ -40,8 +40,9 @@ struct ScreenStateFixture {
   ~ScreenStateFixture() {
     VS::Effects::screenEffectDefaults = defaults;
     VS::Effects::screenEffectOverlay = active;
-    std::copy(requests.begin(), requests.end(), Content_discRequestSlots);
-    Content_discRequestCounts = counts;
+    std::copy(requests.begin(), requests.end(),
+              VS::Content::discRequestSlots.begin());
+    VS::Content::discRequestCounts = counts;
     VS::Content::overlayWorkspaceOwner = owner;
   }
 };
@@ -56,14 +57,15 @@ void CheckDefaultState() {
   CHECK(VS::Effects::screenEffectDefaults.slot == nullptr);
 }
 
-void CheckQueuedRequest(const Content_DiscQueueSlot* request, int waiting) {
+void CheckQueuedRequest(const VS::Content::DiscQueueSlot* request,
+                        int waiting) {
   CHECK(VS::Effects::screenEffectDefaults.loading == 1);
   CHECK(VS::Content::overlayWorkspaceOwner == 6);
-  CHECK(request->state == Content_DiscRequestState_Enqueued);
-  CHECK(request->cdFile.lba == VS_SCREFF2_PRG_LBA);
-  CHECK(request->cdFile.size == VS_SCREFF2_PRG_SIZE);
-  CHECK(request->vram == VS::Core::kOverlaySlots[1]);
-  CHECK(Content_discRequestCounts.waiting == waiting);
+  CHECK(request->state == VS::Content::DiscRequestState::kEnqueued);
+  CHECK(request->file.lba == VS_SCREFF2_PRG_LBA);
+  CHECK(request->file.size == VS_SCREFF2_PRG_SIZE);
+  CHECK(request->destination == VS::Core::kOverlaySlots[1]);
+  CHECK(VS::Content::discRequestCounts.waiting == waiting);
 }
 }  // namespace
 
@@ -74,7 +76,7 @@ TEST_CASE("Screen-effect defaults own the complete native overlay state",
   CHECK(alignof(decltype(VS::Effects::screenEffectDefaults)) >=
         alignof(VS::Effects::LiveScreenEffectOverlay));
   CHECK(offsetof(VS::Effects::LiveScreenEffectOverlay, slot) +
-            sizeof(Content_DiscQueueSlot*) <=
+            sizeof(VS::Content::DiscQueueSlot*) <=
         sizeof VS::Effects::screenEffectDefaults);
   CHECK((std::is_same_v<decltype(VS::Effects::screenEffectDefaults),
                         VS::Effects::LiveScreenEffectOverlay>));
@@ -84,7 +86,7 @@ TEST_CASE("Screen-effect reset clears the entire native request pointer",
           "[effects][screen-state]") {
   const ScreenStateFixture fixture;
   VS::Effects::screenEffectDefaults = {
-      1, 1, 7, -1, -2, 99, &Content_discRequestSlots[31]};
+      1, 1, 7, -1, -2, 99, &VS::Content::discRequestSlots[31]};
   VS::Effects::screenEffectOverlay = &VS::Effects::screenEffectDefaults;
   VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CHECK(VS::Effects::screenEffectOverlay == nullptr);
@@ -100,12 +102,12 @@ TEST_CASE("Screen-effect acquisition and reentry use one typed native state",
     VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
     REQUIRE(VS::Effects::screenEffectOverlay ==
             &VS::Effects::screenEffectDefaults);
-    auto* request = &Content_discRequestSlots[cycle];
+    auto* request = &VS::Content::discRequestSlots[cycle];
     CHECK(VS::Effects::screenEffectDefaults.slot == request);
     CheckQueuedRequest(request, cycle + 1);
     VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
     CHECK(VS::Effects::screenEffectDefaults.slot == request);
-    CHECK(Content_discRequestCounts.waiting == cycle + 1);
+    CHECK(VS::Content::discRequestCounts.waiting == cycle + 1);
     VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay();
     CHECK(VS::Effects::screenEffectOverlay == nullptr);
     CHECK(VS::Content::overlayWorkspaceOwner == 0);
@@ -123,7 +125,7 @@ TEST_CASE("Screen-effect queue pointer writes stay within native object guards",
   } guarded;
   VS::Effects::screenEffectOverlay = &guarded.state;
   VS::Effects::ScreenDistortion::LoadLiveScreenOverlay(1);
-  CHECK(guarded.state.slot == &Content_discRequestSlots[0]);
+  CHECK(guarded.state.slot == &VS::Content::discRequestSlots[0]);
   CHECK(guarded.state.loading == 1);
   CHECK(guarded.prefix == 0x123456789ABCDEF0);
   CHECK(guarded.suffix == 0x0FEDCBA987654321);

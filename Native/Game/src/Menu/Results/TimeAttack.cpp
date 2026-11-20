@@ -4,11 +4,11 @@
 #include <cstdint>
 
 #include "Content/DiscLayout.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 
 namespace VS::Menu::Results {
 // decomp: _disFiles (_disFiles@src/MENU/MENUF.PRG/3B8.c)
-const Content_DiscFile kDisFiles[kDisFileCount] = {
+const VS::Content::DiscFile kDisFiles[kDisFileCount] = {
     {VS_RANK_DIS_LBA, VS_RANK_DIS_SIZE},
     {VS_TIME_DIS_LBA, VS_TIME_DIS_SIZE},
     {VS_ATTACK_DIS_LBA, VS_ATTACK_DIS_SIZE},

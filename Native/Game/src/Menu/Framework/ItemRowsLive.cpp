@@ -14,10 +14,10 @@
 #include "Battle/TargetingState.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
@@ -104,7 +104,7 @@ constexpr std::array<u_char, kWeaponHandCategories> kInitialWeaponHands{
 
 // The read the last load queued (_itemNamesCdQueueSlot, 2D10.c:1138) and the
 // load state (_itemNamesLoading, 2D10.c:1142).
-Content_DiscQueueSlot* g_item_text_request = nullptr;
+VS::Content::DiscQueueSlot* g_item_text_request = nullptr;
 ItemTextLoadState g_item_text_load;
 
 void Warn(std::string_view what) {
@@ -244,8 +244,8 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
     menu12Text = reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes +
                                             kItemHelpBytes);
     // The three files are contiguous on the disc.
-    const Content_DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
-                                .size = static_cast<int>(kItemTextBytes)};
+    const VS::Content::DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
+                                     .size = static_cast<int>(kItemTextBytes)};
     g_item_text_request = Content::AllocateLiveDiscRequest(&file);
     if (g_item_text_request != nullptr) {
       Content::EnqueueLiveDiscRequest(g_item_text_request, block);
@@ -259,7 +259,7 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
     if (g_item_text_request == nullptr) {
       return std::nullopt;
     }
-    return g_item_text_request->state == Content_DiscRequestState_Loaded;
+    return g_item_text_request->state == VS::Content::DiscRequestState::kLoaded;
   }
 
   void ReleaseItemTextRequest() override {

@@ -8,7 +8,9 @@
 #include "Ending/ClearResultsCore.hpp"
 #include "Render/Images.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Ending {
 inline constexpr std::size_t kResultAtlasRegions = 69;
@@ -29,7 +31,7 @@ extern std::int16_t rankTitleThresholds[kRankCount];
 // decomp: rankScores (rankScores@ENDING/ENDING.PRG)
 extern std::uint32_t rankScoreThresholds[kRankScoreThresholds];
 // decomp: cdSlot (cdSlot@ENDING/ENDING.PRG)
-extern Content_DiscQueueSlot* resultsDiscReadSlot;
+extern VS::Content::DiscQueueSlot* resultsDiscReadSlot;
 // decomp: timData (timData@ENDING/ENDING.PRG)
 extern void* resultsTimBuffer;
 }  // namespace VS::Ending

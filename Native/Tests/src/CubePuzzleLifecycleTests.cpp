@@ -15,9 +15,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/StatusEffects.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
@@ -582,10 +582,10 @@ struct LiveReadFixture {
   std::unique_ptr<LiveReadArena> arena = std::make_unique<LiveReadArena>();
   VS::Core::Memory::ScopedLiveGameHeap heap{arena->bytes};
   render::TexturePageTable saved_pages = render::LiveTexturePages();
-  decltype(std::to_array(Content_discRequestSlots)) saved_slots =
-      std::to_array(Content_discRequestSlots);
-  Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
-  Content_DiscDrive saved_drive = Content_discDriveState;
+  decltype(VS::Content::discRequestSlots) saved_slots =
+      VS::Content::discRequestSlots;
+  VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
+  VS::Content::DiscDrive saved_drive = VS::Content::discDriveState;
   VS::Field::MapScene* saved_scene = Field_roomData.minimapScene;
   u_int saved_scene_length = Field_roomData.header.minimapSceneLength;
   RECT images{r::kCubePuzzleImageX, r::kCubePuzzleImageY, kImageAreaWidth,
@@ -597,20 +597,19 @@ struct LiveReadFixture {
 
   LiveReadFixture() {
     render::InitializeLiveTexturePages();
-    std::fill_n(Content_discRequestSlots, saved_slots.size(),
-                Content_DiscQueueSlot{});
-    Content_discRequestCounts = {};
-    Content_discDriveState.state =
-        static_cast<char>(Content_DiscDriveState_Idle);
+    std::fill_n(VS::Content::discRequestSlots.begin(), saved_slots.size(),
+                VS::Content::DiscQueueSlot{});
+    VS::Content::discRequestCounts = {};
+    VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
     StoreImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
   }
   ~LiveReadFixture() {
     LoadImage(&images, reinterpret_cast<u_long*>(saved_vram.data()));
     Field_roomData.minimapScene = saved_scene;
     Field_roomData.header.minimapSceneLength = saved_scene_length;
-    std::ranges::copy(saved_slots, std::begin(Content_discRequestSlots));
-    Content_discRequestCounts = saved_counts;
-    Content_discDriveState = saved_drive;
+    std::ranges::copy(saved_slots, std::begin(VS::Content::discRequestSlots));
+    VS::Content::discRequestCounts = saved_counts;
+    VS::Content::discDriveState = saved_drive;
     render::LiveTexturePages() = saved_pages;
   }
   LiveReadFixture(const LiveReadFixture&) = delete;
@@ -626,14 +625,14 @@ struct LiveReadFixture {
     Field_roomData.header.minimapSceneLength = sizeof scene;
   }
   // The one request the initializer queued.
-  [[nodiscard]] static Content_DiscQueueSlot* Pending() {
-    auto* const end = std::end(Content_discRequestSlots);
-    auto* const pending =
-        std::find_if(std::begin(Content_discRequestSlots), end,
-                     [](const Content_DiscQueueSlot& slot) {
-                       return slot.state != Content_DiscRequestState_Free;
-                     });
-    return pending == end ? nullptr : pending;
+  [[nodiscard]] static VS::Content::DiscQueueSlot* Pending() {
+    const auto end = std::end(VS::Content::discRequestSlots);
+    const auto pending = std::find_if(
+        std::begin(VS::Content::discRequestSlots), end,
+        [](const VS::Content::DiscQueueSlot& slot) {
+          return slot.state != VS::Content::DiscRequestState::kFree;
+        });
+    return pending == end ? nullptr : &*pending;
   }
   [[nodiscard]] std::vector<std::uint16_t> ImageRow(std::int16_t x) const {
     RECT row{x, r::kCubePuzzleImageY, 64, 1};
@@ -653,30 +652,30 @@ struct LiveReadFixture {
 }
 
 // Starts the IQ.DIS read from the first step; returns its queued request.
-[[nodiscard]] Content_DiscQueueSlot* StartLiveIqRead() {
-  const Content_DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
+[[nodiscard]] VS::Content::DiscQueueSlot* StartLiveIqRead() {
+  const VS::Content::DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
-  Content_DiscQueueSlot* const request = LiveReadFixture::Pending();
+  VS::Content::DiscQueueSlot* const request = LiveReadFixture::Pending();
   REQUIRE(request != nullptr);
-  CHECK(request->cdFile.lba == file.lba);
-  CHECK(request->cdFile.size == file.size);
-  REQUIRE(request->vram != nullptr);
+  CHECK(request->file.lba == file.lba);
+  CHECK(request->file.size == file.size);
+  REQUIRE(request->destination != nullptr);
   return request;
 }
 
 // Completes the read with an IQ.DIS whose third record is zone 4 map 12's;
 // returns the asset.
-std::vector<std::byte> CompleteLiveIqRead(Content_DiscQueueSlot& request) {
-  const Content_DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
+std::vector<std::byte> CompleteLiveIqRead(VS::Content::DiscQueueSlot& request) {
+  const VS::Content::DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
   std::vector<std::byte> asset = IqAsset();
   asset.resize(static_cast<std::size_t>(file.size));
   PutRecord(asset, 1,
             {.zone_id = 4, .map_id = 13, .par_seconds = 8, .rank_cap = 9});
   PutRecord(asset, 2,
             {.zone_id = 4, .map_id = 12, .par_seconds = 45, .rank_cap = 3});
-  std::ranges::copy(asset, static_cast<std::byte*>(request.vram));
-  request.state = Content_DiscRequestState_Loaded;
+  std::ranges::copy(asset, static_cast<std::byte*>(request.destination));
+  request.state = VS::Content::DiscRequestState::kLoaded;
   return asset;
 }
 
@@ -702,14 +701,14 @@ TEST_CASE("F03046 live start reads IQ.DIS and takes the minimap room's record",
   read.UseRoom(4, 12);
   Battle_unusedSubmenuState = 0;
   r::screenTimer = 7;
-  Content_DiscQueueSlot* const request = StartLiveIqRead();
+  VS::Content::DiscQueueSlot* const request = StartLiveIqRead();
   // Still reading.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   const std::vector<std::byte> asset = CompleteLiveIqRead(*request);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
-  CHECK(request->state != Content_DiscRequestState_Loaded);
+  CHECK(request->state != VS::Content::DiscRequestState::kLoaded);
   CHECK(r::puzzleParTime == 45);
   CHECK(r::puzzleRankCap == 3);
   CheckLiveIqUploads(screen, read, asset);
@@ -725,8 +724,8 @@ TEST_CASE(
   read.UseRoom(4, 12);
   Battle_unusedSubmenuState = 0;
   r::screenTimer = 7;
-  Content_DiscQueueSlot* const request = StartLiveIqRead();
-  void* const buffer = request->vram;
+  VS::Content::DiscQueueSlot* const request = StartLiveIqRead();
+  void* const buffer = request->destination;
   (void)CompleteLiveIqRead(*request);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
@@ -734,9 +733,9 @@ TEST_CASE(
   CHECK(r::screenTimer == 0);
   // The buffer was released: entering again reads into the same block.
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  Content_DiscQueueSlot* const again = LiveReadFixture::Pending();
+  VS::Content::DiscQueueSlot* const again = LiveReadFixture::Pending();
   REQUIRE(again != nullptr);
-  CHECK(again->vram == buffer);
+  CHECK(again->destination == buffer);
   Battle_unusedSubmenuState = 2;
   CHECK(r::LiveInitializeCubePuzzleStart() == 1);
 }
@@ -751,13 +750,13 @@ TEST_CASE(
   read.scene[0] = 0;
   Battle_unusedSubmenuState = 0;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
-  Content_DiscQueueSlot* const request = LiveReadFixture::Pending();
+  VS::Content::DiscQueueSlot* const request = LiveReadFixture::Pending();
   REQUIRE(request != nullptr);
   std::vector<std::byte> asset = IqAsset();
   PutRecord(asset, 0,
             {.zone_id = 4, .map_id = 12, .par_seconds = 45, .rank_cap = 3});
-  std::ranges::copy(asset, static_cast<std::byte*>(request->vram));
-  request->state = Content_DiscRequestState_Loaded;
+  std::ranges::copy(asset, static_cast<std::byte*>(request->destination));
+  request->state = VS::Content::DiscRequestState::kLoaded;
   r::puzzleParTime = 12;
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(r::puzzleParTime == 600);

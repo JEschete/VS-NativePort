@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "Content/DiscLayout.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 
 // decomp: _buttonHeld (_buttonHeld@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::buttonHeld;
@@ -51,13 +51,13 @@ std::uint16_t VS::Menu::Score::menuText
                                           (ModuleData.cpp) */
 
 // decomp: _monBinCdQueueSlot (_monBinCdQueueSlot@src/MENU/MENU9.PRG/238.c)
-Content_DiscQueueSlot* VS::Menu::Score::monBinCdQueueSlot;
+VS::Content::DiscQueueSlot* VS::Menu::Score::monBinCdQueueSlot;
 
 // decomp: _monBinData (_monBinData@src/MENU/MENU9.PRG/238.c)
 VS::Menu::Score::EnemyEntry* VS::Menu::Score::monBinData;
 
 // decomp: _monBinFile (_monBinFile@src/MENU/MENU9.PRG/238.c)
-const Content_DiscFile VS::Menu::Score::kMonBinFile = {VS_MON_BIN_LBA,
+const VS::Content::DiscFile VS::Menu::Score::kMonBinFile = {VS_MON_BIN_LBA,
                                                        VS_MON_BIN_SIZE};
 
 // decomp: _nextState (_nextState@src/MENU/MENU9.PRG/238.c)

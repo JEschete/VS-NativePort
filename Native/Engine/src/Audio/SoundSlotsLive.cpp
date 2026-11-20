@@ -10,30 +10,30 @@
 
 #include "Audio/SoundBanks.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio {
 namespace {
-static_assert(sizeof(Content_DiscFile::lba) == sizeof(std::int32_t));
+static_assert(sizeof(VS::Content::DiscFile::lba) == sizeof(std::int32_t));
 
-DiscRequestRef ToRequestRef(const Content_DiscQueueSlot* slot) {
+DiscRequestRef ToRequestRef(const VS::Content::DiscQueueSlot* slot) {
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   return static_cast<DiscRequestRef>(std::bit_cast<std::uintptr_t>(slot));
 }
 
 // The marker a slot holds once its read failed.
-Content_DiscQueueSlot* FailedRequestMarker() {
-  return std::bit_cast<Content_DiscQueueSlot*>(~std::uintptr_t{0});
+VS::Content::DiscQueueSlot* FailedRequestMarker() {
+  return std::bit_cast<VS::Content::DiscQueueSlot*>(~std::uintptr_t{0});
 }
 
-Content_DiscQueueSlot* RequestSlot(DiscRequestRef request) {
-  return std::bit_cast<Content_DiscQueueSlot*>(
+VS::Content::DiscQueueSlot* RequestSlot(DiscRequestRef request) {
+  return std::bit_cast<VS::Content::DiscQueueSlot*>(
       static_cast<std::uintptr_t>(request));
 }
 
-Content_DiscFile ToDiscFile(const Content::DiscFileExtent& extent) {
+VS::Content::DiscFile ToDiscFile(const Content::DiscFileExtent& extent) {
   return {.lba = extent.sector, .size = extent.bytes};
 }
 }  // namespace
@@ -48,13 +48,13 @@ void* LiveBufferPointer(BankBuffer buffer) {
   return std::bit_cast<void*>(static_cast<std::uintptr_t>(buffer));
 }
 
-BankRequest LiveBankRequest(Content_DiscQueueSlot* slot) {
+BankRequest LiveBankRequest(VS::Content::DiscQueueSlot* slot) {
   if (slot == nullptr) return {};
   if (slot == FailedRequestMarker()) return {.mark = RequestMark::kFailed};
   return {.mark = RequestMark::kActive, .request = ToRequestRef(slot)};
 }
 
-Content_DiscQueueSlot* LiveRequestSlot(const BankRequest& request) {
+VS::Content::DiscQueueSlot* LiveRequestSlot(const BankRequest& request) {
   switch (request.mark) {
     case RequestMark::kNone:
       return nullptr;
@@ -77,8 +77,9 @@ std::optional<Content::DiscFileExtent> LiveTableFile(const int* sectors,
 
 std::optional<DiscRequestRef> AllocateLiveSlotRequest(
     const Content::DiscFileExtent& file) {
-  const Content_DiscFile disc_file = ToDiscFile(file);
-  Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc_file);
+  const VS::Content::DiscFile disc_file = ToDiscFile(file);
+  VS::Content::DiscQueueSlot* request =
+      Content::AllocateLiveDiscRequest(&disc_file);
   if (request == nullptr) return std::nullopt;
   return ToRequestRef(request);
 }
@@ -90,15 +91,15 @@ void EnqueueLiveSlotRequest(DiscRequestRef request, BankBuffer destination) {
 
 DiscRequestRef CompleteLiveRefusedSlotRequest(
     const Content::DiscFileExtent& file, BankBuffer destination) {
-  const Content_DiscFile disc_file = ToDiscFile(file);
+  const VS::Content::DiscFile disc_file = ToDiscFile(file);
   return ToRequestRef(Content::CompleteLiveRefusedDiscRequest(
       &disc_file, LiveBufferPointer(destination)));
 }
 
 Content::DiscRequestState LiveSlotRequestState(DiscRequestRef request) {
-  const Content_DiscQueueSlot* slot = RequestSlot(request);
+  const VS::Content::DiscQueueSlot* slot = RequestSlot(request);
   if (slot == nullptr) return Content::DiscRequestState::kFree;
-  return static_cast<Content::DiscRequestState>(slot->state);
+  return slot->state;
 }
 
 void ReleaseLiveSlotRequest(DiscRequestRef request) {

@@ -57,37 +57,37 @@ inline void PutTim(std::span<std::byte> bytes) {
   PutWord(bytes, kImageBlock + 8, 0x01000040);
 }
 
-inline Content_DiscQueueSlot& RequestFor(Asset asset) {
+inline VS::Content::DiscQueueSlot& RequestFor(Asset asset) {
   const auto file = asset == Asset::kResults ? results::DisFile::kTime
                                              : results::DisFile::kAttack;
-  for (auto& request : Content_discRequestSlots) {
+  for (auto& request : VS::Content::discRequestSlots) {
     if (content::LiveDiscRequestGeneration(&request) != 0 &&
-        request.cdFile.lba == results::DiscFileFor(file).lba) {
+        request.file.lba == results::DiscFileFor(file).lba) {
       return request;
     }
   }
   FAIL("time-attack did not allocate its texture request");
-  return Content_discRequestSlots[0];
+  return VS::Content::discRequestSlots[0];
 }
 
 inline std::span<std::byte> InjectLoaded(Asset asset) {
   auto& request = RequestFor(asset);
-  const auto capacity = memory::LivePayloadCapacity(request.vram);
+  const auto capacity = memory::LivePayloadCapacity(request.destination);
   if (!capacity.has_value()) {
     FAIL("texture destination is not owned by the real heap");
     return {};
   }
-  std::span bytes(static_cast<std::byte*>(request.vram), *capacity);
+  std::span bytes(static_cast<std::byte*>(request.destination), *capacity);
   const auto count = asset == Asset::kStart ? results::kTimeAttackStartTims : 1;
   for (std::size_t index = 0; index < count; ++index) {
     PutTim(bytes.subspan(index * results::kGameClearTimStride,
                          results::kGameClearTimStride));
   }
   // Controlled completion of the real request, not physical disc I/O.
-  REQUIRE(request.state == Content_DiscRequestState_Enqueued);
-  REQUIRE(Content_discRequestCounts.waiting > 0);
-  request.state = Content_DiscRequestState_Loaded;
-  --Content_discRequestCounts.waiting;
+  REQUIRE(request.state == VS::Content::DiscRequestState::kEnqueued);
+  REQUIRE(VS::Content::discRequestCounts.waiting > 0);
+  request.state = VS::Content::DiscRequestState::kLoaded;
+  --VS::Content::discRequestCounts.waiting;
   return bytes;
 }
 

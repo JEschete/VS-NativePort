@@ -6,68 +6,68 @@
 
 #include "Audio/XaPlayback.hpp"
 #include "Content/DataAccess.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReader.hpp"
 #include "Core/Diagnostics.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Content {
 namespace {
 
 // The XA markers read 128 while no XA stream owns the drive.
-constexpr int kInactiveXaMarker = 128;
+constexpr std::uint8_t kInactiveXaMarker = 128;
 std::uint64_t read_generation = 0;
 bool read_completed = false;
 
-DiscDrivePhase PhaseOf(int state) {
+DiscDrivePhase PhaseOf(DiscDriveState state) {
   switch (state) {
-    case Content_DiscDriveState_Idle:
+    case DiscDriveState::kIdle:
       return DiscDrivePhase::kIdle;
-    case Content_DiscDriveState_SeekReady:
+    case DiscDriveState::kSeekReady:
       return DiscDrivePhase::kSeekReady;
-    case Content_DiscDriveState_ReadReady:
+    case DiscDriveState::kReadReady:
       return DiscDrivePhase::kReadReady;
-    case Content_DiscDriveState_ReadError:
+    case DiscDriveState::kReadError:
       return DiscDrivePhase::kReadError;
-    case Content_DiscDriveState_ReadInit:
+    case DiscDriveState::kReadInit:
       return DiscDrivePhase::kReadInit;
-    case Content_DiscDriveState_ReadXaInit:
+    case DiscDriveState::kReadXaInit:
       return DiscDrivePhase::kReadXaInit;
-    case Content_DiscDriveState_StreamXa:
+    case DiscDriveState::kStreamXa:
       return DiscDrivePhase::kStreamXa;
-    case Content_DiscDriveState_CommandFailed:
+    case DiscDriveState::kCommandFailed:
       return DiscDrivePhase::kCommandFailed;
-    case Content_DiscDriveState_StreamXaEnd:
+    case DiscDriveState::kStreamXaEnd:
       return DiscDrivePhase::kStreamXaEnd;
     default:
       return DiscDrivePhase::kOther;
   }
 }
 
-char StateOf(DiscDrivePhase phase) {
+DiscDriveState StateOf(DiscDrivePhase phase) {
   switch (phase) {
     case DiscDrivePhase::kIdle:
-      return Content_DiscDriveState_Idle;
+      return DiscDriveState::kIdle;
     case DiscDrivePhase::kSeekReady:
-      return Content_DiscDriveState_SeekReady;
+      return DiscDriveState::kSeekReady;
     case DiscDrivePhase::kReadReady:
-      return Content_DiscDriveState_ReadReady;
+      return DiscDriveState::kReadReady;
     case DiscDrivePhase::kReadError:
-      return Content_DiscDriveState_ReadError;
+      return DiscDriveState::kReadError;
     case DiscDrivePhase::kReadInit:
-      return Content_DiscDriveState_ReadInit;
+      return DiscDriveState::kReadInit;
     case DiscDrivePhase::kReadXaInit:
-      return Content_DiscDriveState_ReadXaInit;
+      return DiscDriveState::kReadXaInit;
     case DiscDrivePhase::kStreamXa:
-      return Content_DiscDriveState_StreamXa;
+      return DiscDriveState::kStreamXa;
     case DiscDrivePhase::kCommandFailed:
-      return Content_DiscDriveState_CommandFailed;
+      return DiscDriveState::kCommandFailed;
     case DiscDrivePhase::kStreamXaEnd:
-      return Content_DiscDriveState_StreamXaEnd;
+      return DiscDriveState::kStreamXaEnd;
     case DiscDrivePhase::kOther:
       break;
   }
-  return Content_discDriveState.state;
+  return discDriveState.state;
 }
 
 class LiveDiscDriveHost final : public DiscDriveHost {
@@ -76,52 +76,52 @@ class LiveDiscDriveHost final : public DiscDriveHost {
       : destination_(destination) {}
 
   [[nodiscard]] DiscDrivePhase Phase() const override {
-    return PhaseOf(Content_discDriveState.state);
+    return PhaseOf(discDriveState.state);
   }
   void SetPhase(DiscDrivePhase phase) override {
-    Content_discDriveState.state = StateOf(phase);
+    discDriveState.state = StateOf(phase);
   }
 
   void ArmRead(const DiscReadPlan& plan) override {
-    Content_DiscDrive& drive = Content_discDriveState;
-    drive.startSector = plan.start_sector;
-    drive.byteCount = plan.byte_count;
+    DiscDrive& drive = discDriveState;
+    drive.start_sector = plan.start_sector;
+    drive.byte_count = plan.byte_count;
     drive.destination = destination_;
-    drive.ringReadIndex = 0;
-    drive.ringWriteIndex = 0;
-    drive.destinationSector = 0;
-    drive.bufferedSectors = 0;
-    drive.sectorsReceived = 0;
-    drive.failureCount = 0;
-    drive.ringSectorsWritten = 0;
-    drive.sectorCount = plan.sector_count;
+    drive.ring_read_index = 0;
+    drive.ring_write_index = 0;
+    drive.destination_sector = 0;
+    drive.buffered_sectors = 0;
+    drive.sectors_received = 0;
+    drive.failure_count = 0;
+    drive.ring_sectors_written = 0;
+    drive.sector_count = plan.sector_count;
   }
   [[nodiscard]] DiscReadPlan PendingRead() const override {
-    const Content_DiscDrive& drive = Content_discDriveState;
+    const DiscDrive& drive = discDriveState;
     return DiscReadPlan{
-        .start_sector = drive.startSector,
-        .byte_count = drive.byteCount,
-        .sector_count = drive.sectorCount,
+        .start_sector = drive.start_sector,
+        .byte_count = drive.byte_count,
+        .sector_count = drive.sector_count,
     };
   }
   [[nodiscard]] bool ReadPendingData() override {
     read_completed = false;
-    const Content_DiscDrive& drive = Content_discDriveState;
-    return ReadDiscBytes(static_cast<unsigned>(drive.startSector),
-                         static_cast<unsigned>(drive.byteCount),
+    const DiscDrive& drive = discDriveState;
+    return ReadDiscBytes(static_cast<unsigned>(drive.start_sector),
+                         static_cast<unsigned>(drive.byte_count),
                          drive.destination) != 0;
   }
   void MarkSectorsDelivered(std::uint32_t sectors) override {
     read_completed = true;
-    Content_discDriveState.sectorsReceived = sectors;
-    Content_discDriveState.destinationSector = sectors;
+    discDriveState.sectors_received = sectors;
+    discDriveState.destination_sector = sectors;
   }
-  void CountFailure() override { ++Content_discDriveState.failureCount; }
+  void CountFailure() override { ++discDriveState.failure_count; }
 
   [[nodiscard]] DiscXaRequest PendingXaRequest() const override {
     return DiscXaRequest{
-        .start_sector = Content_discDriveState.startSector,
-        .volume = Content_discDriveState.byteCount,
+        .start_sector = discDriveState.start_sector,
+        .volume = discDriveState.byte_count,
     };
   }
   [[nodiscard]] bool StartXaStream(const DiscXaRequest& request) override {
@@ -136,19 +136,18 @@ class LiveDiscDriveHost final : public DiscDriveHost {
   }
   void StopXaStream() override { VS::Audio::StopXaStream(); }
   void MarkXaStreamStarted() override {
-    Content_discDriveState.xaModeMarker = 0;
-    Content_discDriveState.position.minute = 0;
+    discDriveState.xa_mode_marker = 0;
+    discDriveState.position.minute = 0;
   }
   void ClearXaMarkers() override {
-    Content_discDriveState.xaModeMarker = static_cast<char>(kInactiveXaMarker);
-    Content_discDriveState.position.minute =
-        static_cast<u_char>(kInactiveXaMarker);
-    Content_discDriveState.reserved2 = 0;
+    discDriveState.xa_mode_marker = kInactiveXaMarker;
+    discDriveState.position.minute = kInactiveXaMarker;
+    discDriveState.reserved2 = 0;
   }
 
   void UseDirectBuffer() override {
-    Content_discDriveState.bufferMode = Content_DiscBufferMode_Direct;
-    Content_legacyDiscReadBuffer = nullptr;
+    discDriveState.buffer_mode = DiscBufferMode::kDirect;
+    legacyDiscReadBuffer = nullptr;
   }
   void WaitFrames(std::uint32_t frames) override {
     VS::Legacy::VSync(static_cast<int>(frames));
@@ -187,18 +186,18 @@ void CancelLiveDiscRead(const void* destination) {
     VS::Core::Warnf("content", "CancelDiscRead refused: null destination");
     return;
   }
-  if (Content_discDriveState.destination != destination) return;
+  if (discDriveState.destination != destination) return;
   read_completed = false;
-  Content_discDriveState.destination = nullptr;
-  const auto phase = PhaseOf(Content_discDriveState.state);
+  discDriveState.destination = nullptr;
+  const auto phase = PhaseOf(discDriveState.state);
   if (phase == DiscDrivePhase::kReadXaInit ||
       phase == DiscDrivePhase::kStreamXa ||
       phase == DiscDrivePhase::kStreamXaEnd) {
     return;
   }
-  Content_discDriveState.state = Content_DiscDriveState_Idle;
-  Content_discDriveState.byteCount = 0;
-  Content_discDriveState.sectorCount = 0;
+  discDriveState.state = DiscDriveState::kIdle;
+  discDriveState.byte_count = 0;
+  discDriveState.sector_count = 0;
 }
 
 void UpdateLiveDiscCommands() {
@@ -208,7 +207,7 @@ void UpdateLiveDiscCommands() {
 
 void ResetLiveDiscDrive() {
   read_completed = false;
-  Content_discDriveState.destination = nullptr;
+  discDriveState.destination = nullptr;
   LiveDiscDriveHost host;
   ResetDiscDrive(host);
 }

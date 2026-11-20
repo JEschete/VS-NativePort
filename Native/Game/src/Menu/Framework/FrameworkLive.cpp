@@ -38,12 +38,12 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Overlays.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -838,7 +838,7 @@ class LiveHost final : public Host {
   }
 
   void BeginOverlayLoad(int sub_menu, bool main_menu_program) override {
-    Content_DiscQueueSlot*& request = menuState.cd_queue;
+    VS::Content::DiscQueueSlot*& request = menuState.cd_queue;
     std::uint32_t file_data = MainMenuProgram();
     if (!main_menu_program) {
       if (sub_menu < 0 ||
@@ -849,7 +849,7 @@ class LiveHost final : public Host {
       }
       file_data = kMenuFiles[static_cast<std::size_t>(sub_menu)];
     }
-    Content_DiscFile file{};
+    VS::Content::DiscFile file{};
     file.lba = static_cast<int>(file_data >> kLbaShift);
     file.size =
         static_cast<int>((file_data & kSectorCountMask) << kSectorShift);
@@ -865,15 +865,15 @@ class LiveHost final : public Host {
   }
 
   bool IsOverlayLoaded() override {
-    const Content_DiscQueueSlot* const request = menuState.cd_queue;
+    const VS::Content::DiscQueueSlot* const request = menuState.cd_queue;
     return request == nullptr ||
-           request->state == Content_DiscRequestState_Loaded;
+           request->state == VS::Content::DiscRequestState::kLoaded;
   }
 
   void FinishOverlayLoad() override {
     std::optional<int> loaded_lba;
     if (auto* request = menuState.cd_queue) {
-      loaded_lba = request->cdFile.lba;
+      loaded_lba = request->file.lba;
       VS::Content::ReleaseLiveDiscRequest(request);
     }
     VS::Boot::WaitForOverlayReadyLive();

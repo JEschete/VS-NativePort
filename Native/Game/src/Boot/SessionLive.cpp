@@ -20,13 +20,13 @@
 #include "Boot/GameLoop.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Overlays.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
-#include "DiscQueue.h"
 #include "Ending/EndingLive.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -178,7 +178,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
                                 public TitleSessionInitHost {
  public:
   void Load(OverlayRequest request) override {
-    Content_DiscFile file{};
+    VS::Content::DiscFile file{};
     switch (request.program) {
       case OverlayProgram::kBattle:
         file.lba = VS_BATTLE_PRG_LBA;
@@ -207,7 +207,8 @@ class LiveLifecycleHost final : public OverlayLoadHost,
       VS::Core::Errorf("boot", "unsupported overlay slot: %u", slot_index);
       std::abort();
     }
-    Content_DiscQueueSlot* slot = VS::Content::AllocateLiveDiscRequest(&file);
+    VS::Content::DiscQueueSlot* slot =
+        VS::Content::AllocateLiveDiscRequest(&file);
     if (slot != nullptr) {
       VS::Content::EnqueueLivePriorityDiscRequest(
           slot, VS::Core::kOverlaySlots[slot_index]);
@@ -215,7 +216,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
       slot = VS::Content::CompleteLiveRefusedDiscRequest(
           &file, VS::Core::kOverlaySlots[slot_index]);
     }
-    while (slot->state != Content_DiscRequestState_Loaded) {
+    while (slot->state != VS::Content::DiscRequestState::kLoaded) {
       VS::State::UpdateLivePlayTimeAndLoading(0);
     }
     VS::Content::ReleaseLiveDiscRequest(slot);
@@ -281,7 +282,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void SetReverbEnabled(bool enabled) override {
     VS::Audio::Driver::EnableOutputReverb(enabled ? 1 : 0);
   }
-  void InitializeDiscDrive() override { DsInit(); }
+  void InitializeDiscDrive() override { VS::Legacy::DsInit(); }
   void InitializeRandomShuffleTable() override {
     VS::Core::InitializeLiveRandomShuffleTable();
   }

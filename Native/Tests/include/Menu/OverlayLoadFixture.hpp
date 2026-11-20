@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "Content/CdDriveLive.hpp"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 
@@ -25,11 +25,11 @@ struct Load {
   equipment_detail_tests::ValueRestore<
       decltype(VS::Menu::Framework::menuBackgroundBuffer)>
       saved_background{VS::Menu::Framework::menuBackgroundBuffer};
-  Content_DiscQueueSlot* request;
+  VS::Content::DiscQueueSlot* request;
   std::uint64_t generation = 0;
   int submenu;
 
-  Load(int menu, Content_DiscFile file)
+  Load(int menu, VS::Content::DiscFile file)
       : request(VS::Content::AllocateLiveDiscRequest(&file)), submenu(menu) {
     if (request == nullptr) {
       throw std::runtime_error("overlay fixture could not own a disc request");
@@ -51,7 +51,7 @@ struct Load {
   }
   int Poll() const { return VS::Menu::Framework::LoadLiveMenuOverlay(submenu); }
   int Complete() {
-    request->state = Content_DiscRequestState_Loaded;
+    request->state = VS::Content::DiscRequestState::kLoaded;
     return Poll();
   }
 };

@@ -15,8 +15,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntime.hpp"
@@ -121,8 +121,8 @@ class FakePrimary final : public FakePlayback<fx::PrimaryEffectRuntime> {
     token = next;
   }
   Instance* FirstPrimary() override { return chain.First(); }
-  Content_DiscQueueSlot* MenuReloadSlot() override { return reload; }
-  void SetMenuReloadSlot(Content_DiscQueueSlot* slot) override {
+  VS::Content::DiscQueueSlot* MenuReloadSlot() override { return reload; }
+  void SetMenuReloadSlot(VS::Content::DiscQueueSlot* slot) override {
     Record(slot == nullptr ? "reload slot none" : "reload slot");
     reload = slot;
   }
@@ -142,17 +142,17 @@ class FakePrimary final : public FakePlayback<fx::PrimaryEffectRuntime> {
   }
   void BindPackage() override { Record("bind"); }
   std::uint8_t PackageTrackCount() override { return track_count; }
-  Content_DiscQueueSlot* RequestMenuReload() override {
+  VS::Content::DiscQueueSlot* RequestMenuReload() override {
     Record("request reload");
     return reload_slot;
   }
-  void EnqueueMenuReload(Content_DiscQueueSlot& /*slot*/) override {
+  void EnqueueMenuReload(VS::Content::DiscQueueSlot& /*slot*/) override {
     Record("enqueue reload");
   }
-  bool MenuReloadLoaded(Content_DiscQueueSlot& /*slot*/) override {
+  bool MenuReloadLoaded(VS::Content::DiscQueueSlot& /*slot*/) override {
     return reload_loaded;
   }
-  void ReleaseMenuReload(Content_DiscQueueSlot& /*slot*/) override {
+  void ReleaseMenuReload(VS::Content::DiscQueueSlot& /*slot*/) override {
     Record("release reload");
   }
 
@@ -196,8 +196,8 @@ class FakePrimary final : public FakePlayback<fx::PrimaryEffectRuntime> {
 
   PrimaryEffectState state;
   std::uint8_t token = 0;
-  Content_DiscQueueSlot* reload = nullptr;
-  Content_DiscQueueSlot* reload_slot = nullptr;
+  VS::Content::DiscQueueSlot* reload = nullptr;
+  VS::Content::DiscQueueSlot* reload_slot = nullptr;
   std::set<std::string> done;
   bool has_effect = false;
   bool on_disc = true;
@@ -323,7 +323,7 @@ PrimaryEffectState InPhase(PrimaryEffectPhase phase) {
 namespace {
 struct ResetRecords {
   std::array<Instance, 2> instances{};
-  Content_DiscQueueSlot slot{};
+  VS::Content::DiscQueueSlot slot{};
   fx::EffectRuntimeRecords records{
       .primary = {.phase = PrimaryEffectPhase::kPlayingTracks,
                   .track_count = 5,
@@ -465,7 +465,7 @@ TEST_CASE("F01425 the texture and plugin loads advance once done",
 namespace {
 struct PackageLoad {
   std::array<Instance, 1> instances{};
-  Content_DiscQueueSlot slot{};
+  VS::Content::DiscQueueSlot slot{};
   Log log;
   FakePrimary primary{instances, log};
 
@@ -603,7 +603,7 @@ TEST_CASE("F01425 instances still playing keep the phase",
 TEST_CASE("F01425 the menu reload idles the effect once loaded",
           "[effect-runtime][F01425]") {
   std::array<Instance, 1> instances{};
-  Content_DiscQueueSlot slot{};
+  VS::Content::DiscQueueSlot slot{};
   Log log;
   FakePrimary primary(instances, log);
   primary.state = InPhase(PrimaryEffectPhase::kReloadingMenu);

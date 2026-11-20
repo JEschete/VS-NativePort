@@ -23,10 +23,10 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Gte.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
@@ -108,7 +108,8 @@ struct LiveWorld {
   RestoreMapView saved_view;
   ValueRestore<void*> saved_scene{Battle_unusedSceneBuffer};
   ValueRestore<void*> saved_staging{map::armFileBuff};
-  ValueRestore<Content_DiscQueueSlot*> saved_scene_slot{map::sceneCdQueueSlot};
+  ValueRestore<VS::Content::DiscQueueSlot*> saved_scene_slot{
+      map::sceneCdQueueSlot};
   ValueRestore<VS::Field::MapRoomName*> saved_names{map::roomNamesTable};
   ValueRestore<int> saved_map_row{map::currentMapRow};
   ValueRestore<int> saved_selected{map::chosenMap};
@@ -149,11 +150,11 @@ struct LiveWorld {
   RestorePages saved_pages;
   ArrayRestore<VS::Menu::TextBoxState, std::size(VS::Menu::textBoxes)>
       saved_boxes{VS::Menu::textBoxes};
-  ArrayRestore<Content_DiscQueueSlot, 32> saved_requests{
-      Content_discRequestSlots};
-  ValueRestore<Content_DiscRequestCounts> saved_counts{
-      Content_discRequestCounts};
-  ValueRestore<Content_DiscDrive> saved_drive{Content_discDriveState};
+  ArrayRestore<VS::Content::DiscQueueSlot, 32> saved_requests{
+      VS::Content::discRequestSlots.data()};
+  ValueRestore<VS::Content::DiscRequestCounts> saved_counts{
+      VS::Content::discRequestCounts};
+  ValueRestore<VS::Content::DiscDrive> saved_drive{VS::Content::discDriveState};
   content::DataStore::ScopedOverride store;
   std::vector<std::byte> arena = std::vector<std::byte>(0x80000);
   memory::ScopedLiveGameHeap heap{arena};
@@ -398,22 +399,22 @@ void CheckPreservedData(
                     sizeof(camera)) == 0);
 }
 
-void CheckReleasedInitialRead(void* buffer, Content_DiscQueueSlot* request,
+void CheckReleasedInitialRead(void* buffer, VS::Content::DiscQueueSlot* request,
                               std::uint64_t generation) {
   CHECK_FALSE(map::BoundLiveMapScene(buffer));
   CHECK_FALSE(memory::LivePayloadCapacity(buffer));
   CHECK(content::LiveDiscRequestGeneration(request) != generation);
 }
 
-Content_DiscQueueSlot* RecycleRequest(Content_DiscQueueSlot* request,
-                                      void* destination) {
+VS::Content::DiscQueueSlot* RecycleRequest(VS::Content::DiscQueueSlot* request,
+                                           void* destination) {
   const auto generation = content::LiveDiscRequestGeneration(request);
   const auto capacity = memory::LivePayloadCapacity(destination);
   REQUIRE(capacity.has_value());
   REQUIRE(content::CancelLiveDiscWrites(
       {static_cast<std::byte*>(destination), *capacity}));
   content::ReleaseLiveDiscRequest(request);
-  const Content_DiscFile other_file{86100, 2048};
+  const VS::Content::DiscFile other_file{86100, 2048};
   auto* replacement = content::AllocateLiveDiscRequest(&other_file);
   REQUIRE(replacement == request);
   REQUIRE(content::LiveDiscRequestGeneration(replacement) != generation);
@@ -479,7 +480,8 @@ void KeepDrawingWhileReading(LiveWorld& world, void* old, std::size_t size,
   map::LiveAnimateCentering(static_cast<VS::Field::MapScene*>(old));
 }
 
-void CheckDrainedRead(void* old, void* staging, Content_DiscQueueSlot* request,
+void CheckDrainedRead(void* old, void* staging,
+                      VS::Content::DiscQueueSlot* request,
                       std::size_t staging_bytes, std::uint64_t refusals) {
   CheckNoSceneOwners();
   CHECK(content::LiveDiscRequestGeneration(request) == 0);
@@ -694,12 +696,12 @@ TEST_CASE("Map background drainage cannot release a recycled queue slot",
           "[map-terminal][map-terminal-live][F04149]") {
   LiveWorld world(true);
   REQUIRE(map::LiveLoadBackground(1) == 0);
-  auto* request = &Content_discRequestSlots[0];
-  REQUIRE(request->vram != nullptr);
-  auto* destination = request->vram;
+  auto* request = &VS::Content::discRequestSlots[0];
+  REQUIRE(request->destination != nullptr);
+  auto* destination = request->destination;
   auto* replacement = RecycleRequest(request, destination);
   REQUIRE(map::DrainMapTerminalLive());
-  CHECK(replacement->state == Content_DiscRequestState_Allocated);
+  CHECK(replacement->state == VS::Content::DiscRequestState::kAllocated);
   CHECK_FALSE(memory::LivePayloadCapacity(destination));
   content::ReleaseLiveDiscRequest(replacement);
 }
@@ -722,7 +724,7 @@ TEST_CASE(
   REQUIRE(request != nullptr);
   KeepDrawingWhileReading(world, old, old_size, staging);
   content::UpdateLiveDiscQueue();
-  REQUIRE(request->state != Content_DiscRequestState_Loaded);
+  REQUIRE(request->state != VS::Content::DiscRequestState::kLoaded);
   const auto failures = memory::RefusedLiveHeapRequestCount();
   const auto staging_bytes =
       static_cast<std::size_t>(map::kSceneArmFiles[map::currentScene].size);
@@ -780,11 +782,12 @@ TEST_CASE(
   auto* request = map::sceneCdQueueSlot;
   REQUIRE(request != nullptr);
   for (std::size_t tick = 0;
-       tick < kTickBudget && request->state != Content_DiscRequestState_Loaded;
+       tick < kTickBudget &&
+       request->state != VS::Content::DiscRequestState::kLoaded;
        ++tick) {
     content::UpdateLiveDiscQueue();
   }
-  REQUIRE(request->state == Content_DiscRequestState_Loaded);
+  REQUIRE(request->state == VS::Content::DiscRequestState::kLoaded);
   HeapBlocker blocker;
   FailSwapAllocation(world, map::armFileBuff);
   if (GENERATE(false, true)) {
@@ -832,7 +835,7 @@ Entry MapModuleEntry(unsigned address, Entry expected) {
 
 struct InitialRead {
   void* buffer;
-  Content_DiscQueueSlot* request;
+  VS::Content::DiscQueueSlot* request;
   std::uint64_t generation;
 
   static InitialRead Begin() {
@@ -859,7 +862,7 @@ void BeginVisibleMapSwap(LiveWorld& world) {
 }
 
 struct FullDiscQueue {
-  std::array<Content_DiscQueueSlot*, 32> requests{};
+  std::array<VS::Content::DiscQueueSlot*, 32> requests{};
   std::array<std::uint64_t, 32> generations{};
 
   FullDiscQueue() {
@@ -882,7 +885,8 @@ struct FullDiscQueue {
     for (std::size_t index = 0; index < requests.size(); ++index) {
       CHECK(content::LiveDiscRequestGeneration(requests[index]) ==
             generations[index]);
-      CHECK(requests[index]->state == Content_DiscRequestState_Allocated);
+      CHECK(requests[index]->state ==
+            VS::Content::DiscRequestState::kAllocated);
     }
   }
 };
@@ -973,12 +977,14 @@ TEST_CASE("Production framework dispatch uses the real map state byte",
   CHECK(static_cast<unsigned char>(
             VS::Menu::Framework::submenuStates[kMapScreen - 1]) == 0xAA);
   CHECK(map::currentMapRow == -1);
-  CHECK(Content_discRequestCounts.waiting != 0);
-  CHECK(std::ranges::any_of(Content_discRequestSlots, [](const auto& slot) {
-    return slot.cdFile.lba == VS_MAPBG_BIN_LBA &&
-           slot.cdFile.size == VS_MAPBG_BIN_SIZE && slot.vram != nullptr &&
-           memory::LivePayloadCapacity(slot.vram).has_value();
-  }));
+  CHECK(VS::Content::discRequestCounts.waiting != 0);
+  CHECK(
+      std::ranges::any_of(VS::Content::discRequestSlots, [](const auto& slot) {
+        return slot.file.lba == VS_MAPBG_BIN_LBA &&
+               slot.file.size == VS_MAPBG_BIN_SIZE &&
+               slot.destination != nullptr &&
+               memory::LivePayloadCapacity(slot.destination).has_value();
+      }));
   CHECK(VS::Save::MemoryCard::LiveMenuAssetPhase() ==
         VS::Save::MemoryCard::MenuAssetPhase::kIdle);
 }
@@ -994,9 +1000,9 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   const auto names = std::to_array(map::mapNames);
   VS::State::stateFlags.map_paling[5] = 19;
   const auto camera = VS::Render::FrameScratchpad().camera;
-  const Content_DiscFile file =
-      map_reload ? Content_DiscFile{VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE}
-                 : Content_DiscFile{VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE};
+  const VS::Content::DiscFile file =
+      map_reload ? VS::Content::DiscFile{VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE}
+                 : VS::Content::DiscFile{VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE};
   menu_overlay_tests::Load overlay(kMapScreen, file);
   CHECK(overlay.Poll() == 0);
   CHECK(memory::LivePayloadCapacity(owner.buffer).has_value());
@@ -1089,8 +1095,8 @@ TEST_CASE("Map completed-scene release cancels writes into its storage",
   REQUIRE(map::DrainMapTerminalLive());
   CHECK_FALSE(map::BoundLiveMapScene(owner));
   CHECK_FALSE(memory::LivePayloadCapacity(owner));
-  CHECK(request->state == Content_DiscRequestState_Error);
-  CHECK(request->vram == nullptr);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
+  CHECK(request->destination == nullptr);
   CHECK(content::LiveDiscRequestGeneration(request) == generation);
   const auto discarded = std::span{static_cast<std::byte*>(owner), 8192};
   std::ranges::fill(discarded, kCancelledReadPoison);
@@ -1113,7 +1119,7 @@ TEST_CASE("Full production queue still completes both map size transitions",
     auto* request = map::sceneCdQueueSlot;
     REQUIRE(request != nullptr);
     CHECK(std::ranges::find(busy.requests, request) == busy.requests.end());
-    CHECK(request->state == Content_DiscRequestState_Loaded);
+    CHECK(request->state == VS::Content::DiscRequestState::kLoaded);
     for (std::size_t tick = 0; tick < kTickBudget && map::menuState != 1;
          ++tick) {
       world.Tick();

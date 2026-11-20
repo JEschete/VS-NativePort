@@ -13,7 +13,7 @@
 #include "Legacy/Core/LibEtc.hpp"
 #include "Legacy/Core/PsxTypes.h"
 #include "Legacy/Input/LibPad.hpp"
-#include "Legacy/LibDs.h"
+#include "Legacy/LibDs.hpp"
 #include "Legacy/OnDisc.h"
 #include "Legacy/Render/LibGpu.h"
 #include "Legacy/Save/LibCard.hpp"

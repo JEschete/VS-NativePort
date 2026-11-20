@@ -41,11 +41,11 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
-#include "DiscQueue.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.hpp"
@@ -675,7 +675,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (zud < 0 || zud >= ZoneEnemyCount()) {
       return {};
     }
-    const Content_DiscFile& file = VS::Field::zoneContext.zud_files[zud];
+    const VS::Content::DiscFile& file = VS::Field::zoneContext.zud_files[zud];
     return {.sector = file.lba, .bytes = file.size};
   }
 
@@ -693,10 +693,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void BeginZudRead(Content::DiscFileExtent file) override {
-    Content_DiscFile disc{};
+    VS::Content::DiscFile disc{};
     disc.lba = file.sector;
     disc.size = file.bytes;
-    Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc);
+    VS::Content::DiscQueueSlot* request =
+        Content::AllocateLiveDiscRequest(&disc);
     if (request != nullptr) {
       Content::EnqueueLivePriorityDiscRequest(request,
                                               VS::Field::zoneContext.zud_data);
@@ -708,12 +709,12 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] ZudReadState PollZudRead() const override {
-    const Content_DiscQueueSlot* request =
+    const VS::Content::DiscQueueSlot* request =
         VS::Field::zoneContext.zud_disc_request;
     if (request == nullptr) {
       return ZudReadState::kFailed;
     }
-    switch (static_cast<Content::DiscRequestState>(request->state)) {
+    switch (request->state) {
       case Content::DiscRequestState::kLoaded:
         return ZudReadState::kLoaded;
       case Content::DiscRequestState::kError:

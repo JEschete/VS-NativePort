@@ -16,50 +16,52 @@
 #include "Audio/SoundState.hpp"
 #include "Audio/Stream.hpp"
 #include "Content/CdDrive.hpp"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio {
 namespace {
 static_assert(std::size(VS::Audio::soundState.sfx_stream_data) ==
               kEffectStreamSlotCount);
-static_assert(sizeof(Content_DiscDrive::state) == sizeof(std::uint8_t));
-static_assert(sizeof(Content_DiscDrive::failureCount) == sizeof(std::uint8_t));
-static_assert(sizeof(Content_DiscDrive::startSector) == sizeof(std::int32_t));
-static_assert(sizeof(Content_DiscDrive::byteCount) == sizeof(std::int32_t));
-static_assert(sizeof(Content_DiscDrive::bufferedSectors) ==
+static_assert(sizeof(VS::Content::DiscDrive::state) == sizeof(std::uint8_t));
+static_assert(sizeof(VS::Content::DiscDrive::failure_count) ==
+              sizeof(std::uint8_t));
+static_assert(sizeof(VS::Content::DiscDrive::start_sector) ==
+              sizeof(std::int32_t));
+static_assert(sizeof(VS::Content::DiscDrive::byte_count) ==
+              sizeof(std::int32_t));
+static_assert(sizeof(VS::Content::DiscDrive::buffered_sectors) ==
               sizeof(std::int32_t));
 
 XaStreamDrive LoadDrive() {
-  const Content_DiscDrive& drive = Content_discDriveState;
+  const VS::Content::DiscDrive& drive = VS::Content::discDriveState;
   return {
       // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-      .state = static_cast<Content::DiscDriveState>(
-          static_cast<std::uint8_t>(drive.state)),
-      .start_sector = drive.startSector,
-      .byte_count = drive.byteCount,
-      .failure_count = static_cast<std::uint8_t>(drive.failureCount),
-      .sectors_received = drive.sectorsReceived,
-      .destination_sector = drive.destinationSector,
-      .buffered_sectors = drive.bufferedSectors,
-      .ring_sectors_written = drive.ringSectorsWritten,
-      .ring_write_index = drive.ringWriteIndex,
-      .ring_read_index = drive.ringReadIndex,
+      .state = drive.state,
+      .start_sector = drive.start_sector,
+      .byte_count = drive.byte_count,
+      .failure_count = drive.failure_count,
+      .sectors_received = drive.sectors_received,
+      .destination_sector = drive.destination_sector,
+      .buffered_sectors = drive.buffered_sectors,
+      .ring_sectors_written = drive.ring_sectors_written,
+      .ring_write_index = drive.ring_write_index,
+      .ring_read_index = drive.ring_read_index,
   };
 }
 
 void CommitDrive(const XaStreamDrive& typed) {
-  Content_DiscDrive& drive = Content_discDriveState;
-  drive.state = static_cast<char>(typed.state);
-  drive.startSector = typed.start_sector;
-  drive.byteCount = typed.byte_count;
-  drive.failureCount = static_cast<char>(typed.failure_count);
-  drive.sectorsReceived = typed.sectors_received;
-  drive.destinationSector = typed.destination_sector;
-  drive.bufferedSectors = typed.buffered_sectors;
-  drive.ringSectorsWritten = typed.ring_sectors_written;
-  drive.ringWriteIndex = typed.ring_write_index;
-  drive.ringReadIndex = typed.ring_read_index;
+  VS::Content::DiscDrive& drive = VS::Content::discDriveState;
+  drive.state = typed.state;
+  drive.start_sector = typed.start_sector;
+  drive.byte_count = typed.byte_count;
+  drive.failure_count = typed.failure_count;
+  drive.sectors_received = typed.sectors_received;
+  drive.destination_sector = typed.destination_sector;
+  drive.buffered_sectors = typed.buffered_sectors;
+  drive.ring_sectors_written = typed.ring_sectors_written;
+  drive.ring_write_index = typed.ring_write_index;
+  drive.ring_read_index = typed.ring_read_index;
 }
 
 class LiveEffectStreams final : public EffectStreamHost {

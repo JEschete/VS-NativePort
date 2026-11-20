@@ -8,8 +8,10 @@
 
 #include "Legacy/Psx.h"
 
-struct Content_DiscFile;
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscFile;
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363): one row of the Gazette's
@@ -104,11 +106,11 @@ extern std::int32_t menuState;
 // decomp: _menuText (src/MENU/MENU9.PRG/238.c:1446)
 extern std::uint16_t menuText[kMenuTextWords];
 // decomp: _monBinCdQueueSlot (src/MENU/MENU9.PRG/238.c:613)
-extern Content_DiscQueueSlot* monBinCdQueueSlot;
+extern VS::Content::DiscQueueSlot* monBinCdQueueSlot;
 // decomp: _monBinData (src/MENU/MENU9.PRG/238.c:612)
 extern EnemyEntry* monBinData;
 // decomp: _monBinFile (src/MENU/MENU9.PRG/238.c:612)
-extern const Content_DiscFile kMonBinFile;
+extern const VS::Content::DiscFile kMonBinFile;
 // decomp: _nextState (src/MENU/MENU9.PRG/238.c:608)
 extern std::int32_t nextState;
 // decomp: _openedChestCount (src/MENU/MENU9.PRG/238.c:446)

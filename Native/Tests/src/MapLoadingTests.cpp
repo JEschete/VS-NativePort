@@ -10,8 +10,8 @@
 
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/Map.hpp"
 #include "Menu/MapLoading.hpp"
@@ -477,7 +477,7 @@ struct LiveLoadingState {
   }
 
   void* arm;
-  Content_DiscQueueSlot* slot;
+  VS::Content::DiscQueueSlot* slot;
   int scene;
   int scene_row;
   int room;
@@ -528,35 +528,36 @@ TEST_CASE("The live scene map refuses a missing read or scene",
 
 struct LiveBackgroundState {
   LiveBackgroundState()
-      : counts(Content_discRequestCounts),
+      : counts(VS::Content::discRequestCounts),
         lower_screen(Battle_lowerScreenUiState) {
-    std::memcpy(slots.data(), Content_discRequestSlots,
-                sizeof Content_discRequestSlots);
-    std::memset(Content_discRequestSlots, 0, sizeof Content_discRequestSlots);
-    Content_discRequestCounts = Content_DiscRequestCounts{};
+    std::memcpy(slots.data(), VS::Content::discRequestSlots.data(),
+                sizeof VS::Content::discRequestSlots);
+    std::memset(VS::Content::discRequestSlots.data(), 0,
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
   }
   LiveBackgroundState(const LiveBackgroundState&) = delete;
   LiveBackgroundState& operator=(const LiveBackgroundState&) = delete;
   LiveBackgroundState(LiveBackgroundState&&) = delete;
   LiveBackgroundState& operator=(LiveBackgroundState&&) = delete;
   ~LiveBackgroundState() {
-    std::memcpy(Content_discRequestSlots, slots.data(),
-                sizeof Content_discRequestSlots);
-    Content_discRequestCounts = counts;
+    std::memcpy(VS::Content::discRequestSlots.data(), slots.data(),
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = counts;
     Battle_lowerScreenUiState = lower_screen;
   }
 
-  std::array<Content_DiscQueueSlot, 32> slots{};
-  Content_DiscRequestCounts counts;
+  std::array<VS::Content::DiscQueueSlot, 32> slots{};
+  VS::Content::DiscRequestCounts counts;
   char lower_screen;
   std::vector<std::byte> arena =
       std::vector<std::byte>(std::size_t{128} * 1024);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 };
 
-[[nodiscard]] Content_DiscQueueSlot* RequestInUse() {
-  for (Content_DiscQueueSlot& slot : Content_discRequestSlots) {
-    if (slot.state != Content_DiscRequestState_Free) return &slot;
+[[nodiscard]] VS::Content::DiscQueueSlot* RequestInUse() {
+  for (VS::Content::DiscQueueSlot& slot : VS::Content::discRequestSlots) {
+    if (slot.state != VS::Content::DiscRequestState::kFree) return &slot;
   }
   return nullptr;
 }
@@ -564,11 +565,11 @@ struct LiveBackgroundState {
 // Begins the background read and polls it until shown; returns its image.
 [[nodiscard]] void* ShowLiveBackground() {
   if (map::LiveLoadBackground(1) != 0) return nullptr;
-  Content_DiscQueueSlot* const request = RequestInUse();
+  VS::Content::DiscQueueSlot* const request = RequestInUse();
   if (request == nullptr) return nullptr;
-  void* const image = request->vram;
+  void* const image = request->destination;
   CHECK(map::LiveLoadBackground(0) == 0);
-  request->state = map::kDiscReadLoaded;
+  request->state = VS::Content::DiscRequestState::kLoaded;
   CHECK(map::LiveLoadBackground(0) == 0);
   CHECK(map::LiveLoadBackground(0) == 1);
   return image;

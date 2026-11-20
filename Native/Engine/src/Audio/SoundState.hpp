@@ -6,7 +6,9 @@
 
 #include "Audio/SoundBanks.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Audio {
 // The original declares four id bytes for the three sound-effect bank slots.
@@ -33,16 +35,16 @@ struct SoundState {
   std::uint8_t music_ids[kMusicSlotCount];
   std::uint32_t music_handles[kMusicSlotCount];
   void* music_data[kMusicSlotCount];
-  Content_DiscQueueSlot* music_requests[kMusicSlotCount];
+  VS::Content::DiscQueueSlot* music_requests[kMusicSlotCount];
   std::uint32_t current_sfx_bank;
   std::int8_t sfx_bank_ids[kSfxBankIdSlots];
   void* sfx_bank_data[kSfxBankSlotCount];
-  Content_DiscQueueSlot* sfx_bank_requests[kSfxBankSlotCount];
+  VS::Content::DiscQueueSlot* sfx_bank_requests[kSfxBankSlotCount];
   void* sfx_stream_data[kEffectStreamSlotCount];
   std::int32_t* reserved70[kEffectStreamSlotCount];
   std::int32_t wave_bank_id;
   void* wave_bank_data;
-  Content_DiscQueueSlot* wave_bank_request;
+  VS::Content::DiscQueueSlot* wave_bank_request;
 };
 
 // decomp: _sfxData (_sfxData@SLUS_010.40)

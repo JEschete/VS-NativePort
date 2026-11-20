@@ -7,9 +7,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Overlays.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
@@ -29,30 +29,30 @@ class RecordingLoader final : public sd::ScreenOverlayLoader {
   void ReleaseWorkspace(int owner_tag) override {
     calls.push_back("release workspace " + std::to_string(owner_tag));
   }
-  Content_DiscQueueSlot* AllocateOverlayRead() override {
+  VS::Content::DiscQueueSlot* AllocateOverlayRead() override {
     calls.emplace_back("allocate");
     return refuse ? nullptr : &queued;
   }
-  void EnqueueOverlayRead(Content_DiscQueueSlot* read) override {
+  void EnqueueOverlayRead(VS::Content::DiscQueueSlot* read) override {
     calls.emplace_back(read == &queued ? "enqueue queued" : "enqueue other");
   }
-  Content_DiscQueueSlot* CompleteRefusedOverlayRead() override {
+  VS::Content::DiscQueueSlot* CompleteRefusedOverlayRead() override {
     calls.emplace_back("complete refused");
     return &fallback;
   }
-  bool OverlayReadLoaded(const Content_DiscQueueSlot* read) override {
+  bool OverlayReadLoaded(const VS::Content::DiscQueueSlot* read) override {
     calls.emplace_back(read == &queued ? "poll queued" : "poll other");
     return loaded;
   }
-  void ReleaseOverlayRead(Content_DiscQueueSlot* read) override {
+  void ReleaseOverlayRead(VS::Content::DiscQueueSlot* read) override {
     calls.emplace_back(read == &queued ? "release queued" : "release other");
   }
   void WaitForOverlayReady() override { calls.emplace_back("wait"); }
 
   bool refuse = false;
   bool loaded = false;
-  Content_DiscQueueSlot queued{};
-  Content_DiscQueueSlot fallback{};
+  VS::Content::DiscQueueSlot queued{};
+  VS::Content::DiscQueueSlot fallback{};
   std::vector<std::string> calls;
 };
 
@@ -96,7 +96,7 @@ sd::ScreenOverlayLifetime Attached() {
 
 TEST_CASE("Screen overlay reset detaches and restores the neutral warp",
           "[screen-overlay-lifetime]") {
-  Content_DiscQueueSlot read{};
+  VS::Content::DiscQueueSlot read{};
   sd::ScreenOverlayLifetime lifetime{
       .attached = true,
       .loading = 1,
@@ -278,15 +278,15 @@ struct LiveLifetimeFixture {
       VS::Effects::screenEffectDefaults;
   VS::Effects::LiveScreenEffectOverlay* active =
       VS::Effects::screenEffectOverlay;
-  decltype(std::to_array(Content_discRequestSlots)) requests =
-      std::to_array(Content_discRequestSlots);
-  Content_DiscRequestCounts counts = Content_discRequestCounts;
+  decltype(VS::Content::discRequestSlots) requests =
+      VS::Content::discRequestSlots;
+  VS::Content::DiscRequestCounts counts = VS::Content::discRequestCounts;
   char owner = VS::Content::overlayWorkspaceOwner;
 
   LiveLifetimeFixture() {
-    std::fill_n(Content_discRequestSlots, requests.size(),
-                Content_DiscQueueSlot{});
-    Content_discRequestCounts = {};
+    std::fill_n(VS::Content::discRequestSlots.begin(), requests.size(),
+                VS::Content::DiscQueueSlot{});
+    VS::Content::discRequestCounts = {};
     VS::Content::overlayWorkspaceOwner = 0;
     sd::ResetLiveScreenOverlay();
   }
@@ -298,17 +298,18 @@ struct LiveLifetimeFixture {
   ~LiveLifetimeFixture() {
     VS::Effects::screenEffectDefaults = defaults;
     VS::Effects::screenEffectOverlay = active;
-    std::copy(requests.begin(), requests.end(), Content_discRequestSlots);
-    Content_discRequestCounts = counts;
+    std::copy(requests.begin(), requests.end(),
+              VS::Content::discRequestSlots.begin());
+    VS::Content::discRequestCounts = counts;
     VS::Content::overlayWorkspaceOwner = owner;
   }
 };
 
-void CheckQueuedScreff2Read(const Content_DiscQueueSlot& request) {
-  CHECK(request.state == Content_DiscRequestState_Enqueued);
-  CHECK(request.cdFile.lba == VS_SCREFF2_PRG_LBA);
-  CHECK(request.cdFile.size == VS_SCREFF2_PRG_SIZE);
-  CHECK(request.vram == VS::Core::kOverlaySlots[1]);
+void CheckQueuedScreff2Read(const VS::Content::DiscQueueSlot& request) {
+  CHECK(request.state == VS::Content::DiscRequestState::kEnqueued);
+  CHECK(request.file.lba == VS_SCREFF2_PRG_LBA);
+  CHECK(request.file.size == VS_SCREFF2_PRG_SIZE);
+  CHECK(request.destination == VS::Core::kOverlaySlots[1]);
 }
 }  // namespace
 
@@ -320,7 +321,8 @@ TEST_CASE("Live screen overlay acquire queues the SCREFF2 read",
   sd::AcquireLiveScreenOverlay();
   REQUIRE(VS::Effects::screenEffectOverlay ==
           &VS::Effects::screenEffectDefaults);
-  const Content_DiscQueueSlot* const request = &Content_discRequestSlots[0];
+  const VS::Content::DiscQueueSlot* const request =
+      &VS::Content::discRequestSlots[0];
   CHECK(VS::Effects::screenEffectDefaults.slot == request);
   CHECK(VS::Effects::screenEffectDefaults.loading == 1);
   CHECK(VS::Content::overlayWorkspaceOwner == 6);
@@ -332,23 +334,24 @@ TEST_CASE("Live screen overlay acquire is ignored while attached",
   const LiveLifetimeFixture fixture;
   sd::AcquireLiveScreenOverlay();
   sd::AcquireLiveScreenOverlay();
-  CHECK(Content_discRequestCounts.waiting == 1);
-  CHECK(Content_discRequestSlots[1].state == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 1);
+  CHECK(VS::Content::discRequestSlots[1].state ==
+        VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("Live screen overlay draw polls the read until loaded",
           "[screen-overlay-lifetime]") {
   const LiveLifetimeFixture fixture;
   sd::AcquireLiveScreenOverlay();
-  Content_DiscQueueSlot* const request = &Content_discRequestSlots[0];
+  VS::Content::DiscQueueSlot* const request = &VS::Content::discRequestSlots[0];
   REQUIRE(VS::Effects::screenEffectDefaults.slot == request);
 
   sd::DrawLiveScreenOverlay();
   CHECK(VS::Effects::screenEffectDefaults.loading == 1);
-  request->state = Content_DiscRequestState_Loaded;
+  request->state = VS::Content::DiscRequestState::kLoaded;
   sd::DrawLiveScreenOverlay();
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
-  CHECK(request->state != Content_DiscRequestState_Loaded);
+  CHECK(request->state != VS::Content::DiscRequestState::kLoaded);
 }
 
 TEST_CASE("Live screen overlay release restores the defaults",
@@ -372,8 +375,9 @@ TEST_CASE("Live screen overlay load refuses a missing controller",
   sd::LoadLiveScreenOverlay(1);
   CHECK(VS::Effects::screenEffectOverlay == nullptr);
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
-  CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(Content_discRequestSlots[0].state == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
+  CHECK(VS::Content::discRequestSlots[0].state ==
+        VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("Live screen overlay load writes the attached controller",
@@ -384,7 +388,7 @@ TEST_CASE("Live screen overlay load writes the attached controller",
   VS::Effects::screenEffectOverlay = &other;
   sd::LoadLiveScreenOverlay(1);
   CHECK(other.loading == 1);
-  CHECK(other.slot == &Content_discRequestSlots[0]);
+  CHECK(other.slot == &VS::Content::discRequestSlots[0]);
   CHECK(other.vignette_enabled == 2);
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
   // A missing request is reported and stays pending.

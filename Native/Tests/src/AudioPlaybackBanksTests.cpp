@@ -1341,7 +1341,7 @@ TEST_CASE("Live slots keep the room bank's address and the failed marker",
   CHECK(VS::Audio::soundState.current_sfx_bank == 3U);
 
   auto* const failed =
-      std::bit_cast<Content_DiscQueueSlot*>(~std::uintptr_t{0});
+      std::bit_cast<VS::Content::DiscQueueSlot*>(~std::uintptr_t{0});
   VS::Audio::soundState.sfx_bank_data[0] = bank.data();
   VS::Audio::soundState.sfx_bank_requests[0] = failed;
   CHECK(Audio::LivePollSfxBankSlotLoad(1) == Audio::kLoadIdle);

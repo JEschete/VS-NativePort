@@ -13,10 +13,10 @@
 
 #include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.hpp"
@@ -95,9 +95,9 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
 });
 
 struct LiveVmFixture {
-  std::array<Content_DiscQueueSlot, 32> slots{};
-  Content_DiscRequestCounts counts = Content_discRequestCounts;
-  Content_DiscDrive drive = Content_discDriveState;
+  std::array<VS::Content::DiscQueueSlot, 32> slots{};
+  VS::Content::DiscRequestCounts counts = VS::Content::discRequestCounts;
+  VS::Content::DiscDrive drive = VS::Content::discDriveState;
   std::array<Handler, 256> handlers{};
   std::array<Handler, 256> skip_handlers{};
   std::array<std::uint8_t, 256> sizes{};
@@ -121,24 +121,24 @@ struct LiveVmFixture {
   char direct_event = event::isDirectEventRequest;
 
   LiveVmFixture() {
-    std::ranges::copy(Content_discRequestSlots, slots.begin());
+    std::ranges::copy(VS::Content::discRequestSlots, slots.begin());
     std::ranges::copy(event::opcodeHandlers, handlers.begin());
     std::ranges::copy(event::skipOpcodeHandlers, skip_handlers.begin());
     std::ranges::copy(event::opcodeSizes, sizes.begin());
     std::ranges::copy(event::loopCounters, loop_counters.begin());
     std::ranges::copy(event::threadWaitFrames, wait_frames.begin());
     content::InitializeLiveDiscQueue();
-    Content_discDriveState = {};
-    Content_discDriveState.state = Content_DiscDriveState_Idle;
+    VS::Content::discDriveState = {};
+    VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
     event::ResetLiveScriptRuntime();
     event::skipState = 0;
     std::ranges::fill(event::opcodeSizes, 1);
   }
   ~LiveVmFixture() {
     event::ResetLiveScriptRuntime();
-    std::ranges::copy(slots, Content_discRequestSlots);
-    Content_discRequestCounts = counts;
-    Content_discDriveState = drive;
+    std::ranges::copy(slots, VS::Content::discRequestSlots.begin());
+    VS::Content::discRequestCounts = counts;
+    VS::Content::discDriveState = drive;
     std::ranges::copy(handlers, event::opcodeHandlers);
     std::ranges::copy(skip_handlers, event::skipOpcodeHandlers);
     std::ranges::copy(sizes, event::opcodeSizes);
@@ -665,23 +665,23 @@ event::ScriptLocation MountScript(
   return *start;
 }
 
-Content_DiscQueueSlot& PendingRequest() {
-  const auto found =
-      std::ranges::find_if(Content_discRequestSlots, [](const auto& request) {
-        return request.state == Content_DiscRequestState_Enqueued;
+VS::Content::DiscQueueSlot& PendingRequest() {
+  const auto found = std::ranges::find_if(
+      VS::Content::discRequestSlots, [](const auto& request) {
+        return request.state == VS::Content::DiscRequestState::kEnqueued;
       });
-  REQUIRE(found != std::end(Content_discRequestSlots));
+  REQUIRE(found != std::end(VS::Content::discRequestSlots));
   return *found;
 }
 
 void CompleteSyntheticFile(std::uint8_t first) {
   auto& request = PendingRequest();
-  REQUIRE(request.cdFile.size == static_cast<int>(event::kEventScriptBytes));
-  REQUIRE(request.vram != nullptr);
-  auto bytes = std::span{static_cast<std::uint8_t*>(request.vram),
+  REQUIRE(request.file.size == static_cast<int>(event::kEventScriptBytes));
+  REQUIRE(request.destination != nullptr);
+  auto bytes = std::span{static_cast<std::uint8_t*>(request.destination),
                          event::kEventScriptBytes};
   std::ranges::fill(bytes, first);
-  request.state = Content_DiscRequestState_Loaded;
+  request.state = VS::Content::DiscRequestState::kLoaded;
 }
 
 void CheckMountedByte(std::uint8_t value, std::uint64_t generation) {
@@ -921,7 +921,7 @@ void CheckLiveSpecialDiscard(bool guarded, int skip) {
   CHECK_FALSE(host.ThreadCursor(0).Present());
   CHECK(host.EventFile() == event::EventFileStatus::kNone);
   CHECK(host.ChainedEventLoaded());
-  CHECK(request.state == Content_DiscRequestState_Free);
+  CHECK(request.state == VS::Content::DiscRequestState::kFree);
   CHECK_FALSE(host.AdoptChainedEvent());
   CheckMountedByte(0xE9, start.generation);
 }
@@ -942,7 +942,9 @@ void CheckLiveFileWait(bool guarded, int skip, int state) {
   if (state != 0) {
     REQUIRE(host.QueueEventFileLoad(0, event::EventBuffer::kScript));
     if (state == 2) CompleteSyntheticFile(0xAA);
-    if (state == 3) PendingRequest().state = Content_DiscRequestState_Error;
+    if (state == 3) {
+      PendingRequest().state = VS::Content::DiscRequestState::kError;
+    }
   }
   host.SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -2985,10 +2987,10 @@ TEST_CASE("Native queue helper preserves owned destinations and busy staging",
     }
     REQUIRE(event::QueueEventScriptLoad(destination, host));
     auto& request = PendingRequest();
-    void* const owner_buffer = request.vram;
+    void* const owner_buffer = request.destination;
     CHECK(host.EventFile() == event::EventFileStatus::kLoading);
     CHECK_FALSE(event::QueueEventScriptLoad(destination, host));
-    CHECK(PendingRequest().vram == owner_buffer);
+    CHECK(PendingRequest().destination == owner_buffer);
     CheckMountedByte(0x55, start.generation);
     CompleteSyntheticFile(0xAA);
     host.ReleaseEventFile();
@@ -3000,9 +3002,9 @@ TEST_CASE("Native queue helper preserves owned destinations and busy staging",
 }
 
 namespace {
-void CheckInitializedLiveScriptState(event::ScriptVmHost& host,
-                                     const Content_DiscQueueSlot& request) {
-  CHECK(request.state == Content_DiscRequestState_Free);
+void CheckInitializedLiveScriptState(
+    event::ScriptVmHost& host, const VS::Content::DiscQueueSlot& request) {
+  CHECK(request.state == VS::Content::DiscRequestState::kFree);
   CHECK(host.EventFile() == event::EventFileStatus::kNone);
   CHECK(host.Phase() == event::PlaybackPhase::kIdle);
   CHECK_FALSE(host.StartConfirmed());
@@ -3287,13 +3289,13 @@ TEST_CASE("Live VM cancellation stops deferred writes and releases its slot",
   auto& host = event::LiveScriptVm();
   REQUIRE(host.QueueEventFileLoad(0, event::EventBuffer::kScript));
   auto& request = PendingRequest();
-  REQUIRE(content::BeginLiveDiscRead(-1, 4, request.vram));
+  REQUIRE(content::BeginLiveDiscRead(-1, 4, request.destination));
   host.CancelEventFile();
   CHECK(host.EventFile() == event::EventFileStatus::kNone);
-  CHECK(request.state == Content_DiscRequestState_Free);
-  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(request.state == VS::Content::DiscRequestState::kFree);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
   content::UpdateLiveDiscCommands();
-  CHECK(content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
   CheckMountedByte(0x55, start.generation);
 }
 
@@ -3303,7 +3305,7 @@ TEST_CASE("Live VM cancellation cannot release a reused terminal queue slot",
   auto& host = event::LiveScriptVm();
   REQUIRE(host.QueueEventFileLoad(0, event::EventBuffer::kScript));
   auto& original = PendingRequest();
-  const auto file = original.cdFile;
+  const auto file = original.file;
   content::ReleaseLiveDiscRequest(&original);
   auto* replacement = content::AllocateLiveDiscRequest(&file);
   REQUIRE(replacement == &original);
@@ -3312,7 +3314,7 @@ TEST_CASE("Live VM cancellation cannot release a reused terminal queue slot",
   REQUIRE(content::CancelLiveDiscWrites(other));
   CHECK(host.EventFile() == event::EventFileStatus::kFailed);
   host.CancelEventFile();
-  CHECK(replacement->state == Content_DiscRequestState_Error);
+  CHECK(replacement->state == VS::Content::DiscRequestState::kError);
   content::ReleaseLiveDiscRequest(replacement);
 }
 

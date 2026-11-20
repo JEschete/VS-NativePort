@@ -13,9 +13,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -937,9 +937,9 @@ struct LiveGimFixture {
   std::unique_ptr<Arena> arena = std::make_unique<Arena>();
   VS::Core::Memory::ScopedLiveGameHeap heap{arena->bytes};
   Render::TexturePageTable saved_pages = Render::LiveTexturePages();
-  decltype(std::to_array(Content_discRequestSlots)) saved_slots =
-      std::to_array(Content_discRequestSlots);
-  Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
+  decltype(VS::Content::discRequestSlots) saved_slots =
+      VS::Content::discRequestSlots;
+  VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
   Render::ClutRowColors saved_clut = Render::LivePaletteAnimation().colors[3];
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -974,8 +974,8 @@ struct LiveGimFixture {
   ~LiveGimFixture() {
     Render::ForgetLiveGimImages();
     Render::LiveTexturePages() = saved_pages;
-    std::ranges::copy(saved_slots, std::begin(Content_discRequestSlots));
-    Content_discRequestCounts = saved_counts;
+    std::ranges::copy(saved_slots, std::begin(VS::Content::discRequestSlots));
+    VS::Content::discRequestCounts = saved_counts;
     Render::LoadLiveClutRow(3, 0, saved_clut);
     LoadImage(&clut_strip, reinterpret_cast<u_long*>(saved_clut_strip.data()));
     LoadImage(&texture_strip,
@@ -1010,33 +1010,34 @@ TEST_CASE("Live GIM requests without an image set do nothing", "[render-gim]") {
 
 // Queues STAFF011.GIM (image 0) at page 25 and fills its disc request with a
 // one-row file.
-Content_DiscQueueSlot& QueueStaffImage() {
+VS::Content::DiscQueueSlot& QueueStaffImage() {
   Render::QueueLiveGimImage(0, 25);
   const auto slot = std::ranges::find_if(
-      Content_discRequestSlots, [](const Content_DiscQueueSlot& request) {
-        return request.state == Content_DiscRequestState_Enqueued &&
-               request.cdFile.lba == VS_STAFF011_GIM_LBA;
+      VS::Content::discRequestSlots,
+      [](const VS::Content::DiscQueueSlot& request) {
+        return request.state == VS::Content::DiscRequestState::kEnqueued &&
+               request.file.lba == VS_STAFF011_GIM_LBA;
       });
-  REQUIRE(slot != std::end(Content_discRequestSlots));
+  REQUIRE(slot != std::end(VS::Content::discRequestSlots));
   const GimFile file = BuildFile(kOneRow, 1);
   REQUIRE(file.words.size() <= std::size_t{13} * 1024);
-  std::ranges::copy(file.words, static_cast<std::uint16_t*>(slot->vram));
+  std::ranges::copy(file.words, static_cast<std::uint16_t*>(slot->destination));
   return *slot;
 }
 
 // Marks the read loaded, then uploads and frees the file.
-void FinishStaffRead(Content_DiscQueueSlot& slot) {
-  slot.state = Content_DiscRequestState_Loaded;
+void FinishStaffRead(VS::Content::DiscQueueSlot& slot) {
+  slot.state = VS::Content::DiscRequestState::kLoaded;
   Render::UpdateLiveGimImages();
   Render::UpdateLiveGimImages();
 }
 
 TEST_CASE("Live GIM images queue one disc read at a time", "[render-gim]") {
   const LiveGimFixture live;
-  const Content_DiscQueueSlot& slot = QueueStaffImage();
+  const VS::Content::DiscQueueSlot& slot = QueueStaffImage();
   REQUIRE(Render::LiveGimImagesPresent());
   CHECK(Render::LiveGimImageLoading() == 1);
-  CHECK(slot.cdFile.size == 13 * 2048);
+  CHECK(slot.file.size == 13 * 2048);
   // A second request while one is held is ignored.
   const Render::GimImageSet* const set = Render::LiveGimImages();
   Render::QueueLiveGimImage(1, 25);
@@ -1074,10 +1075,10 @@ TEST_CASE("Live GIM layer setups past the four routines are refused",
 
 TEST_CASE("Live GIM images upload once their read is loaded", "[render-gim]") {
   const LiveGimFixture live;
-  Content_DiscQueueSlot& slot = QueueStaffImage();
-  slot.state = Content_DiscRequestState_Loaded;
+  VS::Content::DiscQueueSlot& slot = QueueStaffImage();
+  slot.state = VS::Content::DiscRequestState::kLoaded;
   Render::UpdateLiveGimImages();
-  CHECK(slot.state == Content_DiscRequestState_Free);
+  CHECK(slot.state == VS::Content::DiscRequestState::kFree);
   REQUIRE(Render::LiveGimImages() != nullptr);
   CHECK(Render::LiveGimImages()->usable);
   CHECK(Render::LiveTexturePages()[25] ==
@@ -1091,7 +1092,7 @@ TEST_CASE("Live GIM images upload once their read is loaded", "[render-gim]") {
 
 TEST_CASE("Live GIM images draw into the overlay table", "[render-gim]") {
   LiveGimFixture live;
-  Content_DiscQueueSlot& slot = QueueStaffImage();
+  VS::Content::DiscQueueSlot& slot = QueueStaffImage();
   Render::ConfigureLiveGimLayer(0, 0, 0, 0, ONE, 128);
   FinishStaffRead(slot);
   Render::UpdateLiveGimImages();

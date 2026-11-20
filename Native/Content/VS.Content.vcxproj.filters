@@ -42,9 +42,6 @@
     <ClCompile Include="src\DiscQueue.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\DiscQueue.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\DiscReader.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -108,6 +105,9 @@
     <ClInclude Include="include\Content\DiscLayout.h">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\DiscQueue.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\DiscReader.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -147,7 +147,7 @@
     <ClCompile Include="Legacy\LibDs.cpp">
       <Filter>Legacy</Filter>
     </ClCompile>
-    <ClInclude Include="Legacy\LibDs.h">
+    <ClInclude Include="Legacy\LibDs.hpp">
       <Filter>Legacy</Filter>
     </ClInclude>
   </ItemGroup>

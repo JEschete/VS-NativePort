@@ -121,7 +121,7 @@ enum class GimRefusal : std::uint8_t {
 class GimHost {
  public:
   virtual ~GimHost() = default;
-  // The disc read has finished (Content_DiscRequestState_Loaded).
+  // The disc read has finished (VS::Content::DiscRequestState::kLoaded).
   [[nodiscard]] virtual bool FileReadFinished() = 0;
   virtual void ReleaseFileRead() = 0;
   // The file buffer: sectors * 2048 bytes as halfwords.

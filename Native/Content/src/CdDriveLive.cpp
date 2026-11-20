@@ -19,49 +19,46 @@
 #include <vector>
 
 #include "Content/CdDrive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "DiscQueue.h"
-#include "Legacy/LibDs.h"
+#include "Legacy/LibDs.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
 
 namespace VS::Content {
 namespace {
-static_assert(std::size(Content_discRequestSlots) == kDiscRequestCapacity);
-static_assert(offsetof(Content_DiscQueueSlot, state) == 0);
-static_assert(offsetof(Content_DiscQueueSlot, priority) ==
-              sizeof(Content_DiscQueueSlot::state));
-static_assert(offsetof(Content_DiscQueueSlot, cdFile) ==
-              offsetof(Content_DiscQueueSlot, priority) +
-                  sizeof(Content_DiscQueueSlot::priority));
-static_assert(offsetof(Content_DiscQueueSlot, opaqueC) ==
-              offsetof(Content_DiscQueueSlot, cdFile) +
-                  sizeof(Content_DiscFile));
-static_assert(offsetof(Content_DiscQueueSlot, vram) ==
-              offsetof(Content_DiscQueueSlot, opaqueC) +
-                  sizeof(Content_DiscQueueSlot::opaqueC));
-static_assert(sizeof(Content_DiscQueueSlot) ==
-              offsetof(Content_DiscQueueSlot, vram) + sizeof(void*));
-static_assert(offsetof(Content_DiscFile, lba) == 0);
-static_assert(offsetof(Content_DiscFile, size) ==
-              sizeof(Content_DiscFile::lba));
-static_assert(offsetof(Content_DiscRequestCounts, reading) == 0);
-static_assert(offsetof(Content_DiscRequestCounts, waiting) ==
-              sizeof(Content_DiscRequestCounts::reading));
-static_assert(offsetof(Content_DiscDrive, state) == 0);
-static_assert(offsetof(Content_DiscDrive, sectorsReceived) ==
-              sizeof(std::uint32_t));
-static_assert(offsetof(Content_DiscDrive, sectorCount) ==
-              offsetof(Content_DiscDrive, sectorsReceived) +
-                  sizeof(Content_DiscDrive::sectorsReceived));
-static_assert(sizeof(Content_DiscDrive::bufferMode) == sizeof(std::int32_t));
-static_assert(sizeof(Content_DiscDrive::framesSinceLastRead) ==
+static_assert(std::size(discRequestSlots) == kDiscRequestCapacity);
+static_assert(offsetof(DiscQueueSlot, state) == 0);
+static_assert(offsetof(DiscQueueSlot, priority) ==
+              sizeof(DiscQueueSlot::state));
+static_assert(offsetof(DiscQueueSlot, file) ==
+              offsetof(DiscQueueSlot, priority) +
+                  sizeof(DiscQueueSlot::priority));
+static_assert(offsetof(DiscQueueSlot, reserved) ==
+              offsetof(DiscQueueSlot, file) + sizeof(DiscFile));
+static_assert(offsetof(DiscQueueSlot, destination) ==
+              offsetof(DiscQueueSlot, reserved) +
+                  sizeof(DiscQueueSlot::reserved));
+static_assert(sizeof(DiscQueueSlot) ==
+              offsetof(DiscQueueSlot, destination) + sizeof(void*));
+static_assert(offsetof(DiscFile, lba) == 0);
+static_assert(offsetof(DiscFile, size) == sizeof(DiscFile::lba));
+static_assert(offsetof(DiscRequestCounts, reading) == 0);
+static_assert(offsetof(DiscRequestCounts, waiting) ==
+              sizeof(DiscRequestCounts::reading));
+static_assert(offsetof(DiscDrive, state) == 0);
+static_assert(offsetof(DiscDrive, sectors_received) == sizeof(std::uint32_t));
+static_assert(offsetof(DiscDrive, sector_count) ==
+              offsetof(DiscDrive, sectors_received) +
+                  sizeof(DiscDrive::sectors_received));
+static_assert(sizeof(DiscDrive::buffer_mode) == sizeof(std::int32_t));
+static_assert(sizeof(DiscDrive::frames_since_last_read) ==
               sizeof(std::int32_t));
-static_assert(std::is_same_v<decltype(Content_DiscDrive::destinationSector),
-                             std::uint32_t>);
 static_assert(
-    std::is_same_v<decltype(Content_DiscDrive::ringWriteIndex), std::uint32_t>);
+    std::is_same_v<decltype(DiscDrive::destination_sector), std::uint32_t>);
+static_assert(
+    std::is_same_v<decltype(DiscDrive::ring_write_index), std::uint32_t>);
 
 constexpr std::uint32_t kSectorBytes = 2048;
 constexpr int kSectorWords = kSectorBytes / 4;
@@ -73,7 +70,7 @@ std::uint64_t request_serial = 0;
 std::array<std::uint64_t, kDiscRequestCapacity> request_generations{};
 
 struct RefusedRecord {
-  Content_DiscQueueSlot slot{};
+  DiscQueueSlot slot{};
   std::uint64_t generation = 0;
 };
 // #282: completed records for refused requests, outside the request array.
@@ -82,7 +79,7 @@ struct RefusedRecord {
 // its own, so its address stays put).
 std::vector<std::unique_ptr<RefusedRecord>> refused_records;
 
-RefusedRecord* FindRefusedRecord(const Content_DiscQueueSlot* request) {
+RefusedRecord* FindRefusedRecord(const DiscQueueSlot* request) {
   const auto record = std::ranges::find_if(
       refused_records,
       [request](const auto& candidate) { return &candidate->slot == request; });
@@ -92,7 +89,7 @@ RefusedRecord* FindRefusedRecord(const Content_DiscQueueSlot* request) {
 RefusedRecord& FreeRefusedRecord() {
   const auto record =
       std::ranges::find_if(refused_records, [](const auto& candidate) {
-        return candidate->slot.state == Content_DiscRequestState_Free;
+        return candidate->slot.state == DiscRequestState::kFree;
       });
   if (record != refused_records.end()) return **record;
   return *refused_records.emplace_back(std::make_unique<RefusedRecord>());
@@ -115,58 +112,55 @@ void* Pointer(DiscDestination destination) {
   return reinterpret_cast<void*>(static_cast<std::uintptr_t>(destination));
 }
 
-DiscFileExtent Extent(const Content_DiscFile& file) {
+DiscFileExtent Extent(const DiscFile& file) {
   return {.sector = file.lba, .bytes = file.size};
 }
 
 DiscRequestQueue LoadQueue() {
   DiscRequestQueue queue;
   for (std::size_t i = 0; i < kDiscRequestCapacity; ++i) {
-    const Content_DiscQueueSlot& slot = Content_discRequestSlots[i];
+    const DiscQueueSlot& slot = discRequestSlots[i];
     queue.requests[i] = {
-        .state = static_cast<DiscRequestState>(slot.state),
+        .state = slot.state,
         .priority = static_cast<std::uint16_t>(slot.priority),
-        .file = Extent(slot.cdFile),
-        .reserved = slot.opaqueC,
-        .destination = Destination(slot.vram),
+        .file = Extent(slot.file),
+        .reserved = slot.reserved,
+        .destination = Destination(slot.destination),
     };
   }
-  queue.reading = static_cast<std::uint16_t>(Content_discRequestCounts.reading);
-  queue.waiting = static_cast<std::uint16_t>(Content_discRequestCounts.waiting);
+  queue.reading = static_cast<std::uint16_t>(discRequestCounts.reading);
+  queue.waiting = static_cast<std::uint16_t>(discRequestCounts.waiting);
   return queue;
 }
 
 void CommitQueue(const DiscRequestQueue& queue) {
   for (std::size_t i = 0; i < kDiscRequestCapacity; ++i) {
     const DiscRequest& request = queue.requests[i];
-    Content_DiscQueueSlot& slot = Content_discRequestSlots[i];
-    slot.state = static_cast<std::int16_t>(request.state);
+    DiscQueueSlot& slot = discRequestSlots[i];
+    slot.state = request.state;
     slot.priority = static_cast<std::int16_t>(request.priority);
-    slot.cdFile.lba = request.file.sector;
-    slot.cdFile.size = request.file.bytes;
-    slot.opaqueC = request.reserved;
-    slot.vram = Pointer(request.destination);
+    slot.file.lba = request.file.sector;
+    slot.file.size = request.file.bytes;
+    slot.reserved = request.reserved;
+    slot.destination = Pointer(request.destination);
   }
-  Content_discRequestCounts.reading = static_cast<std::int16_t>(queue.reading);
-  Content_discRequestCounts.waiting = static_cast<std::int16_t>(queue.waiting);
+  discRequestCounts.reading = static_cast<std::int16_t>(queue.reading);
+  discRequestCounts.waiting = static_cast<std::int16_t>(queue.waiting);
 }
 
 // The index of `slot` in the request array.
-std::optional<std::size_t> IndexOf(const Content_DiscQueueSlot* slot) {
+std::optional<std::size_t> IndexOf(const DiscQueueSlot* slot) {
   const auto address = reinterpret_cast<std::uintptr_t>(slot);
   const auto base =
-      reinterpret_cast<std::uintptr_t>(std::data(Content_discRequestSlots));
-  if (address < base || address - base >= sizeof Content_discRequestSlots ||
-      (address - base) % sizeof(Content_DiscQueueSlot) != 0) {
+      reinterpret_cast<std::uintptr_t>(std::data(discRequestSlots));
+  if (address < base || address - base >= sizeof discRequestSlots ||
+      (address - base) % sizeof(DiscQueueSlot) != 0) {
     return std::nullopt;
   }
-  return (address - base) / sizeof(Content_DiscQueueSlot);
+  return (address - base) / sizeof(DiscQueueSlot);
 }
 
-DiscDriveState LiveDriveState() {
-  return static_cast<DiscDriveState>(
-      static_cast<std::uint8_t>(Content_discDriveState.state));
-}
+DiscDriveState LiveDriveState() { return discDriveState.state; }
 
 class LiveDiscQueueHost final : public DiscQueueHost {
  public:
@@ -208,7 +202,7 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   void ClearReadFailure() override {
     VS::Core::Warnf("content", "Queued disc read failed: state %d",
                     static_cast<int>(DriveState()));
-    CancelLiveDiscRead(Content_discDriveState.destination);
+    CancelLiveDiscRead(discDriveState.destination);
     queued_request_.reset();
   }
   void CancelRead(DiscDestination destination) override {
@@ -218,12 +212,11 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   // after its scan).
   void UpdateCommands() override { commands_pending_ = true; }
   void CountFrameSinceRead() override {
-    Content_discDriveState.framesSinceLastRead = static_cast<int>(
-        static_cast<std::uint32_t>(Content_discDriveState.framesSinceLastRead) +
-        1U);
+    discDriveState.frames_since_last_read = static_cast<int>(
+        static_cast<std::uint32_t>(discDriveState.frames_since_last_read) + 1U);
   }
   void RestartFramesSinceRead() override {
-    Content_discDriveState.framesSinceLastRead = 0;
+    discDriveState.frames_since_last_read = 0;
   }
   void WaitFrame() override { VS::State::UpdateLivePlayTimeAndLoading(0); }
 
@@ -236,31 +229,31 @@ class LiveDiscQueueHost final : public DiscQueueHost {
 };
 
 DiscTransfer LoadTransfer() {
-  const Content_DiscDrive& drive = Content_discDriveState;
+  const DiscDrive& drive = discDriveState;
   return {
       .state = LiveDriveState(),
-      .sectors_received = drive.sectorsReceived,
-      .sector_count = drive.sectorCount,
-      .buffer_mode = static_cast<DiscBufferMode>(drive.bufferMode),
-      .destination_sector = drive.destinationSector,
-      .buffered_sectors = drive.bufferedSectors,
-      .ring_sectors_written = drive.ringSectorsWritten,
-      .ring_write_index = drive.ringWriteIndex,
-      .ring_read_index = drive.ringReadIndex,
+      .sectors_received = drive.sectors_received,
+      .sector_count = drive.sector_count,
+      .buffer_mode = drive.buffer_mode,
+      .destination_sector = drive.destination_sector,
+      .buffered_sectors = drive.buffered_sectors,
+      .ring_sectors_written = drive.ring_sectors_written,
+      .ring_write_index = drive.ring_write_index,
+      .ring_read_index = drive.ring_read_index,
   };
 }
 
 void CommitTransfer(const DiscTransfer& transfer) {
-  Content_DiscDrive& drive = Content_discDriveState;
-  drive.state = static_cast<char>(transfer.state);
-  drive.sectorsReceived = transfer.sectors_received;
-  drive.sectorCount = transfer.sector_count;
-  drive.bufferMode = static_cast<Content_DiscBufferMode>(transfer.buffer_mode);
-  drive.destinationSector = transfer.destination_sector;
-  drive.bufferedSectors = transfer.buffered_sectors;
-  drive.ringSectorsWritten = transfer.ring_sectors_written;
-  drive.ringWriteIndex = transfer.ring_write_index;
-  drive.ringReadIndex = transfer.ring_read_index;
+  DiscDrive& drive = discDriveState;
+  drive.state = transfer.state;
+  drive.sectors_received = transfer.sectors_received;
+  drive.sector_count = transfer.sector_count;
+  drive.buffer_mode = transfer.buffer_mode;
+  drive.destination_sector = transfer.destination_sector;
+  drive.buffered_sectors = transfer.buffered_sectors;
+  drive.ring_sectors_written = transfer.ring_sectors_written;
+  drive.ring_write_index = transfer.ring_write_index;
+  drive.ring_read_index = transfer.ring_read_index;
 }
 
 // The drive's ready-callback system (DsReadyCallback, DsStartReadySystem,
@@ -271,34 +264,34 @@ class LiveDiscInterruptHost final : public DiscInterruptHost {
  public:
   void ReceiveSector(std::uint32_t sector) override {
     // sll 11: the sector's byte offset wraps at 32 bits.
-    DsGetSector(static_cast<u_char*>(Content_discDriveState.destination) +
-                    static_cast<std::uint32_t>(sector * kSectorBytes),
-                kSectorWords);
+    VS::Legacy::DsGetSector(
+        static_cast<std::uint8_t*>(discDriveState.destination) +
+            static_cast<std::uint32_t>(sector * kSectorBytes),
+        kSectorWords);
   }
   void ReceiveRingSector(std::uint32_t slot) override {
-    DsGetSector(Content_legacyDiscReadBuffer +
-                    static_cast<std::uint32_t>(slot * kSectorBytes),
-                kSectorWords);
+    VS::Legacy::DsGetSector(
+        legacyDiscReadBuffer + static_cast<std::uint32_t>(slot * kSectorBytes),
+        kSectorWords);
   }
   void StartSectorDelivery() override {}
   void ClearReadyCallback() override {}
   void EndSectorDelivery() override {}
   void RecordXaSector(const XaSectorInfo& info) override {
-    Content_legacyXaReadyBcdField = info.bcd_field;
-    Content_legacyXaReadyByteThree = info.byte_three;
-    Content_legacyXaReadyByteFour = info.byte_four;
-    Content_xaReadyMetadataWord = info.metadata;
+    legacyXaReadyBcdField = info.bcd_field;
+    legacyXaReadyByteThree = info.byte_three;
+    legacyXaReadyByteFour = info.byte_four;
+    xaReadyMetadataWord = info.metadata;
   }
 };
 
-void WarnForeignRequest(const char* operation,
-                        const Content_DiscQueueSlot* request) {
+void WarnForeignRequest(const char* operation, const DiscQueueSlot* request) {
   VS::Core::Warnf("content", "%s refused: %p is not a disc request", operation,
                   static_cast<const void*>(request));
 }
 }  // namespace
 
-Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file) {
+DiscQueueSlot* AllocateLiveDiscRequest(const DiscFile* file) {
   if (file == nullptr) {
     VS::Core::Warnf("content", "AllocateDiscRequest refused: null file");
     return nullptr;
@@ -322,25 +315,24 @@ Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file) {
   }
   CommitQueue(queue);
   request_generations[*index] = generation;
-  return &Content_discRequestSlots[*index];
+  return &discRequestSlots[*index];
 }
 
-std::uint64_t LiveDiscRequestGeneration(const Content_DiscQueueSlot* request) {
+std::uint64_t LiveDiscRequestGeneration(const DiscQueueSlot* request) {
   if (const auto index = IndexOf(request)) {
-    return request->state == Content_DiscRequestState_Free
+    return request->state == DiscRequestState::kFree
                ? 0
                : request_generations[*index];
   }
   if (const auto* record = FindRefusedRecord(request)) {
-    return record->slot.state == Content_DiscRequestState_Free
-               ? 0
-               : record->generation;
+    return record->slot.state == DiscRequestState::kFree ? 0
+                                                         : record->generation;
   }
   WarnForeignRequest("DiscRequestGeneration", request);
   return 0;
 }
 
-void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
+void ReleaseLiveDiscRequest(DiscQueueSlot* request) {
   // A refused request (#282) holds nothing to free.
   if (request == nullptr) return;
   const std::optional<std::size_t> index = IndexOf(request);
@@ -349,7 +341,7 @@ void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
     if (record == nullptr) {
       WarnForeignRequest("ReleaseDiscRequest", request);
     } else {
-      record->slot.state = Content_DiscRequestState_Free;
+      record->slot.state = DiscRequestState::kFree;
     }
     return;
   }
@@ -373,8 +365,8 @@ bool CancelLiveDiscWrites(std::span<std::byte> destination) {
   return true;
 }
 
-Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
-    const Content_DiscFile* file, void* destination) {
+DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFile* file,
+                                              void* destination) {
   if (file == nullptr) {
     VS::Core::Warnf("content", "CompleteRefusedDiscRequest refused: null file");
     return nullptr;
@@ -385,24 +377,23 @@ Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
   }
   const bool read = ReadLiveRefusedDiscFile(file, destination) != 0;
   RefusedRecord& owner = FreeRefusedRecord();
-  Content_DiscQueueSlot& record = owner.slot;
+  DiscQueueSlot& record = owner.slot;
   owner.generation = generation;
-  record = Content_DiscQueueSlot{};
-  record.state = static_cast<std::int16_t>(
-      read ? Content_DiscRequestState_Loaded : Content_DiscRequestState_Error);
-  record.cdFile = *file;
-  record.vram = destination;
+  record = DiscQueueSlot{};
+  record.state = read ? DiscRequestState::kLoaded : DiscRequestState::kError;
+  record.file = *file;
+  record.destination = destination;
   return &record;
 }
 
 std::size_t LiveRefusedDiscRecordsInUse() noexcept {
   return static_cast<std::size_t>(
       std::ranges::count_if(refused_records, [](const auto& record) {
-        return record->slot.state != Content_DiscRequestState_Free;
+        return record->slot.state != DiscRequestState::kFree;
       }));
 }
 
-void EnqueueLiveDiscRequest(Content_DiscQueueSlot* request, void* destination) {
+void EnqueueLiveDiscRequest(DiscQueueSlot* request, void* destination) {
   const std::optional<std::size_t> index = IndexOf(request);
   if (!index) {
     WarnForeignRequest("EnqueueDiscRequest", request);
@@ -413,8 +404,7 @@ void EnqueueLiveDiscRequest(Content_DiscQueueSlot* request, void* destination) {
   CommitQueue(queue);
 }
 
-void EnqueueLivePriorityDiscRequest(Content_DiscQueueSlot* request,
-                                    void* destination) {
+void EnqueueLivePriorityDiscRequest(DiscQueueSlot* request, void* destination) {
   const std::optional<std::size_t> index = IndexOf(request);
   if (!index) {
     WarnForeignRequest("EnqueuePriorityDiscRequest", request);
@@ -432,7 +422,7 @@ void InitializeLiveDiscQueue() {
   request_generations.fill(0);
   // The records are freed like the array's slots but never deallocated.
   for (const auto& record : refused_records) {
-    record->slot.state = Content_DiscRequestState_Free;
+    record->slot.state = DiscRequestState::kFree;
     record->generation = 0;
   }
 }
@@ -461,7 +451,7 @@ int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination) {
   return result == DiscReadResult::kComplete ? 1 : 0;
 }
 
-int ReadLiveRefusedDiscFile(const Content_DiscFile* file, void* destination) {
+int ReadLiveRefusedDiscFile(const DiscFile* file, void* destination) {
   if (file == nullptr) {
     VS::Core::Warnf("content", "ReadRefusedDiscFile refused: null file");
     return 0;
@@ -481,10 +471,7 @@ int ReadLiveRefusedDiscFile(const Content_DiscFile* file, void* destination) {
 
 std::uint64_t LiveDiscRequestRefusals() noexcept { return refused_requests; }
 
-int LiveDiscState() {
-  // lbu: the state byte is unsigned.
-  return static_cast<int>(DiscState(LoadTransfer()));
-}
+DiscDriveState LiveDiscState() { return DiscState(LoadTransfer()); }
 
 void ClearLiveDiscReadError() {
   DiscTransfer transfer = LoadTransfer();

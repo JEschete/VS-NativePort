@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapDrawing.hpp"
@@ -24,7 +24,7 @@ inline constexpr std::size_t kDoorNameWords = 522;
 // is chosen.
 extern std::int32_t currentMapRow;
 // decomp: sceneArmFiles (src/MENU/MENU5.PRG/4D8.c:380): each scene's ARM map.
-extern const Content_DiscFile kSceneArmFiles[kSceneCount];
+extern const VS::Content::DiscFile kSceneArmFiles[kSceneCount];
 using AshleyBrightness = std::array<std::int32_t, kAshleyBrightnessSteps>;
 // decomp: ashleyIconBrightness (src/MENU/MENU5.PRG/4D8.c:413): the position
 // marker's pulse, one colour word per step.
@@ -76,7 +76,7 @@ extern SVECTOR cameraPos;
 // decomp: centerPoint (src/MENU/MENU5.PRG/4D8.c:445)
 extern SVECTOR centerPoint;
 // decomp: sceneCdQueueSlot (src/MENU/MENU5.PRG/4D8.c:446)
-extern Content_DiscQueueSlot* sceneCdQueueSlot;
+extern VS::Content::DiscQueueSlot* sceneCdQueueSlot;
 // decomp: armFileBuff (src/MENU/MENU5.PRG/4D8.c:447)
 extern void* armFileBuff;
 // decomp: sceneRowIdMap (src/MENU/MENU5.PRG/4D8.c:448)

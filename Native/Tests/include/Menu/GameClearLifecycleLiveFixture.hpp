@@ -34,11 +34,11 @@
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearLifecycle.hpp"
@@ -155,8 +155,8 @@ class Fixture {
       VS::Audio::Cutscene::streamState, VS::Audio::Samples::musicSampleBankIds,
       VS::State::scoreData, VS::State::stateFlags, VS::State::roomVisitProgress,
       Battle_characterState, Battle_unusedSubmenuState,
-      VS::Input::buttonsPressed, Content_discRequestSlots,
-      Content_discRequestCounts, Content_discDriveState,
+      VS::Input::buttonsPressed, VS::Content::discRequestSlots,
+      VS::Content::discRequestCounts, VS::Content::discDriveState,
       VS::Render::legacyDrawEnvironments, results::screenTimer,
       results::screenState, results::buffReelIndex, results::buffReelSelection,
       results::elementAnimationState, results::score, results::mapCompletion,
@@ -184,10 +184,11 @@ class Fixture {
     REQUIRE_FALSE(results::InspectLiveGameClear().owns_pages);
     REQUIRE(results::InspectLiveGameClear().state_timer == 0);
     REQUIRE(content::LiveRefusedDiscRecordsInUse() == 0);
-    REQUIRE(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
-      return slot.state == Content_DiscRequestState_Free &&
-             content::LiveDiscRequestGeneration(&slot) == 0;
-    }));
+    REQUIRE(std::ranges::all_of(
+        VS::Content::discRequestSlots, [](const auto& slot) {
+          return slot.state == VS::Content::DiscRequestState::kFree &&
+                 content::LiveDiscRequestGeneration(&slot) == 0;
+        }));
     content::InitializeLiveDiscQueue();
     render::InitializeLiveTexturePages();
     results::ResetLiveGameClearModuleData();
@@ -224,9 +225,9 @@ class Fixture {
     auto* const request = VS::Audio::soundState.music_requests[kMusicIndex];
     REQUIRE(request != nullptr);
     REQUIRE(content::LiveDiscRequestGeneration(request) != 0);
-    REQUIRE(request->state == Content_DiscRequestState_Enqueued);
+    REQUIRE(request->state == VS::Content::DiscRequestState::kEnqueued);
     void* const data = VS::Audio::soundState.music_data[kMusicIndex];
-    REQUIRE(request->vram == data);
+    REQUIRE(request->destination == data);
     const auto capacity = memory::LivePayloadCapacity(data);
     REQUIRE(capacity.has_value());
     constexpr std::size_t kProgram = 0x44;
@@ -244,9 +245,9 @@ class Fixture {
     put(0x20, std::uint32_t{1});
     put(0x40, std::uint16_t{4});
     put(kProgram, VS::Audio::Seq::kIdleProgram);
-    REQUIRE(Content_discRequestCounts.waiting > 0);
-    request->state = Content_DiscRequestState_Loaded;
-    --Content_discRequestCounts.waiting;
+    REQUIRE(VS::Content::discRequestCounts.waiting > 0);
+    request->state = VS::Content::DiscRequestState::kLoaded;
+    --VS::Content::discRequestCounts.waiting;
   }
 
   void ReleaseMusic() {
@@ -259,7 +260,7 @@ class Fixture {
                                : nullptr;
       const auto generation =
           queued != nullptr ? content::LiveDiscRequestGeneration(queued) : 0;
-      const bool owns_request = generation != 0 && queued->vram == data;
+      const bool owns_request = generation != 0 && queued->destination == data;
       const auto capacity = memory::LivePayloadCapacity(data);
       if (capacity.has_value()) {
         CHECK(content::CancelLiveDiscWrites(

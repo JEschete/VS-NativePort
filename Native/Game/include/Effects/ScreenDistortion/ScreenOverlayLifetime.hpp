@@ -6,7 +6,9 @@
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 // The lifetime of the SCREFF2 screen overlay controller (BATTLE.PRG): attach
 // it and start reading SCREFF2 into the secondary overlay slot, poll the read
@@ -27,7 +29,7 @@ struct ScreenOverlayLifetime {
   std::uint8_t loading{};
   ScreenOverlayControls controls{};
   // +0xC: the SCREFF2 read request; kept after it is released.
-  Content_DiscQueueSlot* read{};
+  VS::Content::DiscQueueSlot* read{};
 };
 
 // The disc queue, overlay workspace and post-load wait the lifetime uses.
@@ -43,15 +45,16 @@ class ScreenOverlayLoader {
   virtual void AcquireWorkspace(int owner_tag) = 0;
   virtual void ReleaseWorkspace(int owner_tag) = 0;
   // A request for SCREFF2.PRG, or null when the queue refused it.
-  [[nodiscard]] virtual Content_DiscQueueSlot* AllocateOverlayRead() = 0;
+  [[nodiscard]] virtual VS::Content::DiscQueueSlot* AllocateOverlayRead() = 0;
   // Queues the request into the secondary overlay slot.
-  virtual void EnqueueOverlayRead(Content_DiscQueueSlot* read) = 0;
+  virtual void EnqueueOverlayRead(VS::Content::DiscQueueSlot* read) = 0;
   // Reads SCREFF2.PRG without a request after a refusal and returns the
   // completed record that polls and releases accept.
-  [[nodiscard]] virtual Content_DiscQueueSlot* CompleteRefusedOverlayRead() = 0;
+  [[nodiscard]] virtual VS::Content::DiscQueueSlot*
+  CompleteRefusedOverlayRead() = 0;
   [[nodiscard]] virtual bool OverlayReadLoaded(
-      const Content_DiscQueueSlot* read) = 0;
-  virtual void ReleaseOverlayRead(Content_DiscQueueSlot* read) = 0;
+      const VS::Content::DiscQueueSlot* read) = 0;
+  virtual void ReleaseOverlayRead(VS::Content::DiscQueueSlot* read) = 0;
   virtual void WaitForOverlayReady() = 0;
 };
 

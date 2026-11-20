@@ -25,10 +25,10 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Actors.hpp"
 #include "Event/EventCameraControlLive.hpp"
@@ -743,9 +743,9 @@ class LiveVmHost final : public ScriptVmHost {
   void PublishPrepared(PreparedScriptSource&& prepared);
   MutableBuffer pending_buffer_;
   MutableBuffer chained_buffer_;
-  Content_DiscQueueSlot* request_ = nullptr;
+  VS::Content::DiscQueueSlot* request_ = nullptr;
   std::uint64_t request_generation_ = 0;
-  Content_DiscFile pending_file_{};
+  VS::Content::DiscFile pending_file_{};
   EventBuffer pending_destination_ = EventBuffer::kScript;
   PreparedScriptSource pending_publication_;
   bool chained_ready_ = false;
@@ -766,15 +766,16 @@ EventFileStatus LiveVmHost::EventFile() const {
     return EventFileStatus::kFailed;
   }
   switch (request_->state) {
-    case Content_DiscRequestState_Loaded:
-      return pending_buffer_ && request_->vram == pending_buffer_->data() &&
-                     request_->cdFile.lba == pending_file_.lba &&
-                     request_->cdFile.size == pending_file_.size
+    case VS::Content::DiscRequestState::kLoaded:
+      return pending_buffer_ &&
+                     request_->destination == pending_buffer_->data() &&
+                     request_->file.lba == pending_file_.lba &&
+                     request_->file.size == pending_file_.size
                  ? EventFileStatus::kReady
                  : EventFileStatus::kFailed;
-    case Content_DiscRequestState_Allocated:
-    case Content_DiscRequestState_Reading:
-    case Content_DiscRequestState_Enqueued:
+    case VS::Content::DiscRequestState::kAllocated:
+    case VS::Content::DiscRequestState::kReading:
+    case VS::Content::DiscRequestState::kEnqueued:
       return EventFileStatus::kLoading;
     default:
       return EventFileStatus::kFailed;

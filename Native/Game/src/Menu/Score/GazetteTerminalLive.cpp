@@ -18,12 +18,12 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/String/GameText.hpp"
-#include "DiscQueue.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -79,7 +79,7 @@ constexpr std::size_t kOverviewMemoryPage = 3;
 struct EnemyDataOwner {
   std::byte* data = nullptr;
   std::size_t bytes = 0;
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
 };
 
@@ -434,10 +434,10 @@ GazetteReadStatus ReadStatus() {
       EnemyBytes().empty()) {
     return GazetteReadStatus::kRefused;
   }
-  if (enemy_data.request->state == Content_DiscRequestState_Error) {
+  if (enemy_data.request->state == VS::Content::DiscRequestState::kError) {
     return GazetteReadStatus::kRefused;
   }
-  return enemy_data.request->state == Content_DiscRequestState_Loaded
+  return enemy_data.request->state == VS::Content::DiscRequestState::kLoaded
              ? GazetteReadStatus::kLoaded
              : GazetteReadStatus::kPending;
 }

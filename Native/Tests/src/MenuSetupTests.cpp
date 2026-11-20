@@ -16,9 +16,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
@@ -571,13 +571,13 @@ class LiveRecipes {
   LiveRecipes& operator=(LiveRecipes&&) = delete;
   ~LiveRecipes() {
     if (read_ != nullptr) {
-      read_->state = Content_DiscRequestState_Loaded;
+      read_->state = VS::Content::DiscRequestState::kLoaded;
       Load(0);
     }
     setup::ResetLiveSetupStatics();
     setup::LiveSetupState() = saved_state_;
-    std::ranges::copy(saved_slots_, std::begin(Content_discRequestSlots));
-    Content_discRequestCounts = saved_counts_;
+    std::ranges::copy(saved_slots_, std::begin(VS::Content::discRequestSlots));
+    VS::Content::discRequestCounts = saved_counts_;
   }
 
   static int Load(int id) {
@@ -587,22 +587,24 @@ class LiveRecipes {
   }
 
   // The queued SHIELD.SYD read, its block filled with ShieldFile().
-  Content_DiscQueueSlot& QueuedShieldRead() {
+  VS::Content::DiscQueueSlot& QueuedShieldRead() {
     const auto slot = std::ranges::find_if(
-        Content_discRequestSlots, [](const Content_DiscQueueSlot& request) {
-          return request.state == Content_DiscRequestState_Enqueued &&
-                 request.cdFile.lba == VS_SHIELD_SYD_LBA;
+        VS::Content::discRequestSlots,
+        [](const VS::Content::DiscQueueSlot& request) {
+          return request.state == VS::Content::DiscRequestState::kEnqueued &&
+                 request.file.lba == VS_SHIELD_SYD_LBA;
         });
-    REQUIRE(slot != std::end(Content_discRequestSlots));
-    REQUIRE(slot->cdFile.size == VS_SHIELD_SYD_SIZE);
-    std::ranges::copy(ShieldFile(), static_cast<std::uint8_t*>(slot->vram));
+    REQUIRE(slot != std::end(VS::Content::discRequestSlots));
+    REQUIRE(slot->file.size == VS_SHIELD_SYD_SIZE);
+    std::ranges::copy(ShieldFile(),
+                      static_cast<std::uint8_t*>(slot->destination));
     read_ = &*slot;
     return *slot;
   }
 
   void Finish() {
     REQUIRE(read_ != nullptr);
-    read_->state = Content_DiscRequestState_Loaded;
+    read_->state = VS::Content::DiscRequestState::kLoaded;
     read_ = nullptr;
   }
 
@@ -612,11 +614,11 @@ class LiveRecipes {
   };
   std::unique_ptr<Arena> arena_ = std::make_unique<Arena>();
   VS::Core::Memory::ScopedLiveGameHeap heap_{arena_->bytes};
-  decltype(std::to_array(Content_discRequestSlots)) saved_slots_ =
-      std::to_array(Content_discRequestSlots);
-  Content_DiscRequestCounts saved_counts_ = Content_discRequestCounts;
+  decltype(VS::Content::discRequestSlots) saved_slots_ =
+      VS::Content::discRequestSlots;
+  VS::Content::DiscRequestCounts saved_counts_ = VS::Content::discRequestCounts;
   setup::State saved_state_ = setup::LiveSetupState();
-  Content_DiscQueueSlot* read_ = nullptr;
+  VS::Content::DiscQueueSlot* read_ = nullptr;
 };
 
 constexpr int kRecipePoll = 0;

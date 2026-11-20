@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Field {
@@ -42,10 +42,10 @@ inline constexpr int kBackgroundGradientColorCount = 5;
 extern int backgroundGradientColors[kBackgroundGradientColorCount];
 // decomp: D_800F1DAC (BATTLE/BATTLE.PRG 146C.c:711): the tiled background's
 // TIM read, or null.
-extern Content_DiscQueueSlot* backgroundTextureDiscRequest;
+extern VS::Content::DiscQueueSlot* backgroundTextureDiscRequest;
 // decomp: D_800F1DB0 (BATTLE/BATTLE.PRG 146C.c:712): its layout read, or
 // null.
-extern Content_DiscQueueSlot* backgroundLayoutDiscRequest;
+extern VS::Content::DiscQueueSlot* backgroundLayoutDiscRequest;
 // decomp: D_800F1DB4 and D_800F1DB6 (BATTLE/BATTLE.PRG 146C.c:713): the
 // tiled background's scroll offset.
 extern int16_t backgroundOffsetX;

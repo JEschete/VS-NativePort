@@ -19,8 +19,8 @@
 #include "Audio/XaMixLive.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Platform/Paths.hpp"
 
@@ -240,15 +240,15 @@ int VS::Audio::StartXaStream(int sector, int volume) {
 
 void VS::Audio::StopXaStream(void) {
   Playback().Stop();
-  auto& drive = Content_discDriveState;
-  if (drive.state == Content_DiscDriveState_ReadXaInit ||
-      drive.state == Content_DiscDriveState_StreamXa ||
-      drive.state == Content_DiscDriveState_StreamXaEnd) {
+  auto& drive = VS::Content::discDriveState;
+  if (drive.state == VS::Content::DiscDriveState::kReadXaInit ||
+      drive.state == VS::Content::DiscDriveState::kStreamXa ||
+      drive.state == VS::Content::DiscDriveState::kStreamXaEnd) {
     VS::Audio::Seq::discVolume = 0;
     VS::Audio::Seq::discVolumeFadeLength = 0;
-    drive.xaModeMarker = static_cast<char>(kInactiveMarker);
+    drive.xa_mode_marker = kInactiveMarker;
     drive.position.minute = kInactiveMarker;
-    drive.state = Content_DiscDriveState_Idle;
+    drive.state = VS::Content::DiscDriveState::kIdle;
   }
 }
 

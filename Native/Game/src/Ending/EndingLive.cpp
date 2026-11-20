@@ -23,10 +23,10 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Ending/ClearResults.hpp"
 #include "Ending/ClearResultsCore.hpp"
 #include "Ending/Credits.hpp"
@@ -73,7 +73,7 @@ constexpr unsigned kHalfwordShift = 16;
 // clear's block are cleared by a clear.
 constexpr std::size_t kRetainedFlagBytes = 0x10;
 
-constexpr std::array<Content_DiscFile, kResultsFileCount> kResultsFiles{{
+constexpr std::array<VS::Content::DiscFile, kResultsFileCount> kResultsFiles{{
     {VS_END_DIS_LBA, VS_END_DIS_SIZE},
     {VS_ENDSCR00_DIS_LBA, VS_ENDSCR00_DIS_SIZE},
     {VS_ENDSCR01_DIS_LBA, VS_ENDSCR01_DIS_SIZE},
@@ -167,7 +167,7 @@ class LiveDiscRead {
 
   // Allocates the file's buffer and queues its read; returns the buffer, or
   // null when the heap refused it.
-  void* Begin(const Content_DiscFile& file, bool priority) {
+  void* Begin(const VS::Content::DiscFile& file, bool priority) {
     End();
     file_ = file;
     loaded_ = false;
@@ -193,11 +193,11 @@ class LiveDiscRead {
   // True once the read has loaded or failed, or when none was queued.
   [[nodiscard]] bool IsComplete() {
     if (slot_ == nullptr) return true;
-    if (slot_->state == Content_DiscRequestState_Loaded) {
+    if (slot_->state == VS::Content::DiscRequestState::kLoaded) {
       loaded_ = true;
       return true;
     }
-    if (slot_->state == Content_DiscRequestState_Error) {
+    if (slot_->state == VS::Content::DiscRequestState::kError) {
       VS::Core::LogWarn(
           kChannel, "Disc read of sector {} failed; it has no data", file_.lba);
       return true;
@@ -206,7 +206,7 @@ class LiveDiscRead {
   }
 
   [[nodiscard]] bool IsLoaded() const { return loaded_; }
-  [[nodiscard]] Content_DiscQueueSlot* Slot() const { return slot_; }
+  [[nodiscard]] VS::Content::DiscQueueSlot* Slot() const { return slot_; }
   [[nodiscard]] std::size_t Size() const {
     return static_cast<std::size_t>(std::max(file_.size, 0));
   }
@@ -217,8 +217,8 @@ class LiveDiscRead {
   }
 
  private:
-  Content_DiscFile file_{};
-  Content_DiscQueueSlot* slot_ = nullptr;
+  VS::Content::DiscFile file_{};
+  VS::Content::DiscQueueSlot* slot_ = nullptr;
   bool loaded_ = false;
 };
 
@@ -804,7 +804,7 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
  private:
   // The disc illustrations' locations and sizes, from the first disc
   // illustration.
-  static Content_DiscFile DiscFile(std::size_t resource) {
+  static VS::Content::DiscFile DiscFile(std::size_t resource) {
     const std::size_t index = resource - Credits::kFirstDiscIllustration;
     const std::span<const std::int32_t, Credits::kIllustrationCount> locations(
         VS::Ending::Credits::illustrationDiscLocations);

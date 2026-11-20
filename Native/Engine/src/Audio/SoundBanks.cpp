@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/SoundState.hpp"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 
 // decomp: _sfxData (_sfxData@SLUS_010.40)
 u_short VS::Audio::menuSoundEffects[VS::Audio::kMenuSoundEffectWords];

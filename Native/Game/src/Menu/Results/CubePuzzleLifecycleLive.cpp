@@ -16,9 +16,9 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
@@ -69,7 +69,7 @@ void RefuseCall(std::string_view call, std::string_view reason) {
 
 // The original's per-initializer statics: the request and the file buffer.
 struct AssetLoad {
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   void* buffer = nullptr;
 };
 
@@ -83,7 +83,7 @@ AssetLoad esc_load;
 class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
  public:
   LiveCubePuzzleLoad(std::string_view call, AssetLoad& load,
-                     const Content_DiscFile& file)
+                     const VS::Content::DiscFile& file)
       : call_(call), load_(load), file_(file) {}
 
   void ReserveTexturePages(std::uint32_t first_page, std::uint32_t page_count,
@@ -112,7 +112,7 @@ class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
       RefuseCall(call_, "a poll without a read");
       return true;
     }
-    return load_.request->state == Content_DiscRequestState_Loaded;
+    return load_.request->state == VS::Content::DiscRequestState::kLoaded;
   }
   std::span<std::byte> LoadedAsset() override {
     if (load_.buffer == nullptr || load_.request == nullptr) {
@@ -172,7 +172,7 @@ class LiveCubePuzzleLoad final : public CubePuzzleLoadHost {
  private:
   std::string_view call_;
   AssetLoad& load_;
-  const Content_DiscFile& file_;
+  const VS::Content::DiscFile& file_;
 };
 
 class LiveClutTarget final : public ResultsClutTarget {

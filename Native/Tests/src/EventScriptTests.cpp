@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iterator>
 #include <span>
+#include <utility>
 
 #include "Audio/Control/SoundControl.hpp"
 #include "Audio/Cutscene/Stream.hpp"
@@ -36,10 +37,10 @@
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "DiscQueue.h"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Event/Script.hpp"
@@ -66,7 +67,7 @@ static int menuSoundCalls;
 static int16_t savedStreamPan[256];
 static VS::Audio::CommandHandler savedStreamCommands[7];
 static VS::Audio::CommandHandler savedXaCommands[3];
-static Content_DiscDrive savedXaDrive;
+static VS::Content::DiscDrive savedXaDrive;
 static const int kStreamCommandIds[] = {0xE0, 0xE2, 0xE4, 0xE5,
                                         0xE6, 0x9E, 0x9F};
 
@@ -418,9 +419,9 @@ void TestsPrepareXaPlayback(void) {
       VS::Audio::Seq::LiveSetDiscVolume, VS::Audio::Seq::LiveFadeDiscVolume,
       VS::Audio::Seq::LiveFadeDiscVolumeFrom};
   int index;
-  savedXaDrive = Content_discDriveState;
+  savedXaDrive = VS::Content::discDriveState;
   VS::Audio::Driver::ResetLivePlaybackState();
-  memset(&Content_discDriveState, 0, sizeof(Content_discDriveState));
+  memset(&VS::Content::discDriveState, 0, sizeof(VS::Content::discDriveState));
   for (index = 0; index < 3; ++index) {
     savedXaCommands[index] = VS::Audio::Mixer::kCommandHandlers[0xC8 + index];
     VS::Audio::Mixer::kCommandHandlers[0xC8 + index] = handlers[index];
@@ -430,7 +431,7 @@ void TestsPrepareXaPlayback(void) {
 void TestsRestoreXaPlayback(void) {
   int index;
   VS::Audio::Driver::ResetVoiceOutput();
-  Content_discDriveState = savedXaDrive;
+  VS::Content::discDriveState = savedXaDrive;
   for (index = 0; index < 3; ++index) {
     VS::Audio::Mixer::kCommandHandlers[0xC8 + index] = savedXaCommands[index];
   }
@@ -442,7 +443,7 @@ int TestsXaCommand(int command, int first, int second, int third) {
       return VS::Audio::LiveBeginXaStream(first, second);
     case 1:
       VS::Content::UpdateLiveDiscCommands();
-      return Content_discDriveState.state;
+      return std::to_underlying(VS::Content::discDriveState.state);
     case 2:
       return VS::Audio::LiveRequestXaStreamStop();
     case 3:
@@ -463,12 +464,12 @@ int TestsXaCommand(int command, int first, int second, int third) {
       VS::Content::ResetLiveDiscDrive();
       break;
     case 9:
-      return Content_discDriveState.failureCount;
+      return VS::Content::discDriveState.failure_count;
     default:
       fprintf(stderr, "unexpected XA test command: %d\n", command);
       abort();
   }
-  return Content_discDriveState.state;
+  return std::to_underlying(VS::Content::discDriveState.state);
 }
 
 void TestsPrepareStreamPlayback(void) {

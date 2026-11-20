@@ -7,7 +7,9 @@
 #include "Audio/SoundBanks.hpp"
 #include "Content/CdDrive.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 // The slot record's buffers and disc requests as the typed handles
 // (SoundBanks.hpp), and the disc queue and heap services the sound bank and
@@ -17,8 +19,8 @@ struct Content_DiscQueueSlot;
 namespace VS::Audio {
 BankBuffer LiveBankBuffer(const void* data);
 void* LiveBufferPointer(BankBuffer buffer);
-BankRequest LiveBankRequest(Content_DiscQueueSlot* slot);
-Content_DiscQueueSlot* LiveRequestSlot(const BankRequest& request);
+BankRequest LiveBankRequest(VS::Content::DiscQueueSlot* slot);
+VS::Content::DiscQueueSlot* LiveRequestSlot(const BankRequest& request);
 // Entry `index` of a file table of `entries` sectors and sizes; nullopt past
 // it.
 std::optional<Content::DiscFileExtent> LiveTableFile(const int* sectors,

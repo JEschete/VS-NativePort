@@ -13,8 +13,8 @@
 
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "DiscQueue.h"
 #include "State/PlayTime.hpp"
 
 namespace {
@@ -144,8 +144,8 @@ bool IsFree(const Content::DiscRequest& request) {
   return request.state == DiscRequestState::kFree;
 }
 
-bool IsLoaded(const Content_DiscQueueSlot& slot) {
-  return slot.state == Content_DiscRequestState_Loaded;
+bool IsLoaded(const VS::Content::DiscQueueSlot& slot) {
+  return slot.state == VS::Content::DiscRequestState::kLoaded;
 }
 
 std::pair<int, int> Counts(const Content::DiscRequestQueue& queue) {
@@ -191,28 +191,28 @@ bool SameQueue(const Content::DiscRequestQueue& left,
 // Saves the live request array, counts and drive record, leaving the drive
 // idle and every request free.
 struct LiveDiscQueueFixture {
-  std::array<Content_DiscQueueSlot, 32> saved_slots{};
-  Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
-  Content_DiscDrive saved_drive = Content_discDriveState;
+  std::array<VS::Content::DiscQueueSlot, 32> saved_slots{};
+  VS::Content::DiscRequestCounts saved_counts = VS::Content::discRequestCounts;
+  VS::Content::DiscDrive saved_drive = VS::Content::discDriveState;
   VS::State::PlayTime saved_play_time = VS::State::playTime;
-  decltype(Content_legacyDiscReadBuffer) saved_read_buffer =
-      Content_legacyDiscReadBuffer;
+  decltype(VS::Content::legacyDiscReadBuffer) saved_read_buffer =
+      VS::Content::legacyDiscReadBuffer;
 
   LiveDiscQueueFixture() {
-    std::memcpy(saved_slots.data(), Content_discRequestSlots,
-                sizeof Content_discRequestSlots);
-    std::memset(Content_discRequestSlots, 0, sizeof Content_discRequestSlots);
-    Content_discRequestCounts = Content_DiscRequestCounts{};
-    Content_discDriveState.state =
-        static_cast<char>(Content_DiscDriveState_Idle);
+    std::memcpy(saved_slots.data(), VS::Content::discRequestSlots.data(),
+                sizeof VS::Content::discRequestSlots);
+    std::memset(VS::Content::discRequestSlots.data(), 0,
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
+    VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
   }
   ~LiveDiscQueueFixture() {
-    std::memcpy(Content_discRequestSlots, saved_slots.data(),
-                sizeof Content_discRequestSlots);
-    Content_discRequestCounts = saved_counts;
-    Content_discDriveState = saved_drive;
+    std::memcpy(VS::Content::discRequestSlots.data(), saved_slots.data(),
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = saved_counts;
+    VS::Content::discDriveState = saved_drive;
     VS::State::playTime = saved_play_time;
-    Content_legacyDiscReadBuffer = saved_read_buffer;
+    VS::Content::legacyDiscReadBuffer = saved_read_buffer;
   }
   LiveDiscQueueFixture(const LiveDiscQueueFixture&) = delete;
   LiveDiscQueueFixture& operator=(const LiveDiscQueueFixture&) = delete;
@@ -220,8 +220,8 @@ struct LiveDiscQueueFixture {
   LiveDiscQueueFixture& operator=(LiveDiscQueueFixture&&) = delete;
 };
 
-Content_DiscQueueSlot* QueueLiveRead(const Content_DiscFile& file,
-                                     std::span<std::byte> destination) {
+VS::Content::DiscQueueSlot* QueueLiveRead(const VS::Content::DiscFile& file,
+                                          std::span<std::byte> destination) {
   auto* request = Content::AllocateLiveDiscRequest(&file);
   REQUIRE(request != nullptr);
   Content::EnqueueLiveDiscRequest(request, destination.data());
@@ -782,39 +782,39 @@ TEST_CASE("Live disc requests refuse a full queue and complete a refused read",
           "[content-slice][content][disc-queue][issue-282]") {
   const LiveDiscQueueFixture fixture;
   // A size the drive refuses, so the refused read fails without the disc.
-  const Content_DiscFile file{.lba = 2, .size = -1};
-  for (auto& slot : Content_discRequestSlots) {
-    slot.state = Content_DiscRequestState_Loaded;
+  const VS::Content::DiscFile file{.lba = 2, .size = -1};
+  for (auto& slot : VS::Content::discRequestSlots) {
+    slot.state = VS::Content::DiscRequestState::kLoaded;
   }
   const std::uint64_t refusals = Content::LiveDiscRequestRefusals();
   CHECK(Content::AllocateLiveDiscRequest(&file) == nullptr);
   CHECK(Content::LiveDiscRequestRefusals() == refusals + 1);
-  CHECK(std::ranges::all_of(Content_discRequestSlots, IsLoaded));
-  Content_DiscQueueSlot* const record =
+  CHECK(std::ranges::all_of(VS::Content::discRequestSlots, IsLoaded));
+  VS::Content::DiscQueueSlot* const record =
       Content::CompleteLiveRefusedDiscRequest(&file, nullptr);
   REQUIRE(record != nullptr);
-  CHECK(record->state == Content_DiscRequestState_Error);
-  CHECK(record->cdFile.lba == 2);
+  CHECK(record->state == VS::Content::DiscRequestState::kError);
+  CHECK(record->file.lba == 2);
   Content::ReleaseLiveDiscRequest(record);
 }
 
 TEST_CASE("Live refused disc records stay out of the queue and are reused",
           "[content-slice][content][disc-queue][issue-282]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 2, .size = -1};
+  const VS::Content::DiscFile file{.lba = 2, .size = -1};
   const std::size_t in_use = Content::LiveRefusedDiscRecordsInUse();
-  Content_DiscQueueSlot* const record =
+  VS::Content::DiscQueueSlot* const record =
       Content::CompleteLiveRefusedDiscRequest(&file, nullptr);
   REQUIRE(record != nullptr);
   CHECK(Content::LiveRefusedDiscRecordsInUse() == in_use + 1);
   // A record is not a queue slot: enqueueing it changes nothing.
   Content::EnqueueLiveDiscRequest(record, nullptr);
-  CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(record->state == Content_DiscRequestState_Error);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
+  CHECK(record->state == VS::Content::DiscRequestState::kError);
   Content::ReleaseLiveDiscRequest(record);
-  CHECK(record->state == Content_DiscRequestState_Free);
+  CHECK(record->state == VS::Content::DiscRequestState::kFree);
   CHECK(Content::LiveRefusedDiscRecordsInUse() == in_use);
-  Content_DiscQueueSlot* const reused =
+  VS::Content::DiscQueueSlot* const reused =
       Content::CompleteLiveRefusedDiscRequest(&file, nullptr);
   CHECK(reused == record);
   Content::ReleaseLiveDiscRequest(reused);
@@ -823,101 +823,103 @@ TEST_CASE("Live refused disc records stay out of the queue and are reused",
 TEST_CASE("Live disc request bindings refuse null records and reuse a slot",
           "[content-slice][content][disc-queue][issue-282]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 2, .size = -1};
+  const VS::Content::DiscFile file{.lba = 2, .size = -1};
   const std::size_t in_use = Content::LiveRefusedDiscRecordsInUse();
   Content::ReleaseLiveDiscRequest(nullptr);
   CHECK(Content::CompleteLiveRefusedDiscRequest(nullptr, nullptr) == nullptr);
   CHECK(Content::ReadLiveRefusedDiscFile(nullptr, nullptr) == 0);
   CHECK(Content::LiveRefusedDiscRecordsInUse() == in_use);
   CHECK(Content::AllocateLiveDiscRequest(&file) ==
-        &Content_discRequestSlots[0]);
-  for (auto& slot : Content_discRequestSlots) {
-    slot.state = Content_DiscRequestState_Loaded;
+        &VS::Content::discRequestSlots[0]);
+  for (auto& slot : VS::Content::discRequestSlots) {
+    slot.state = VS::Content::DiscRequestState::kLoaded;
   }
   const std::uint64_t refusals = Content::LiveDiscRequestRefusals();
-  Content::ReleaseLiveDiscRequest(&Content_discRequestSlots[5]);
+  Content::ReleaseLiveDiscRequest(&VS::Content::discRequestSlots[5]);
   CHECK(Content::AllocateLiveDiscRequest(&file) ==
-        &Content_discRequestSlots[5]);
+        &VS::Content::discRequestSlots[5]);
   CHECK(Content::LiveDiscRequestRefusals() == refusals);
 }
 
 TEST_CASE("Live disc queue binding allocates requests in slot order",
           "[content-slice][content][disc-queue]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 300, .size = 4096};
-  Content_DiscQueueSlot* const first = Content::AllocateLiveDiscRequest(&file);
-  Content_DiscQueueSlot* const second = Content::AllocateLiveDiscRequest(&file);
-  REQUIRE(first == &Content_discRequestSlots[0]);
-  REQUIRE(second == &Content_discRequestSlots[1]);
-  CHECK(first->state == Content_DiscRequestState_Allocated);
-  CHECK(first->cdFile.lba == 300);
+  const VS::Content::DiscFile file{.lba = 300, .size = 4096};
+  VS::Content::DiscQueueSlot* const first =
+      Content::AllocateLiveDiscRequest(&file);
+  VS::Content::DiscQueueSlot* const second =
+      Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(first == &VS::Content::discRequestSlots[0]);
+  REQUIRE(second == &VS::Content::discRequestSlots[1]);
+  CHECK(first->state == VS::Content::DiscRequestState::kAllocated);
+  CHECK(first->file.lba == 300);
   Content::ReleaseLiveDiscRequest(first);
-  CHECK(first->state == Content_DiscRequestState_Free);
-  CHECK(second->state == Content_DiscRequestState_Allocated);
+  CHECK(first->state == VS::Content::DiscRequestState::kFree);
+  CHECK(second->state == VS::Content::DiscRequestState::kAllocated);
 }
 
 TEST_CASE("Live rejected disc requests become Error without being loaded",
           "[content][disc-queue][disc-failure]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 2, .size = -1};
+  const VS::Content::DiscFile file{.lba = 2, .size = -1};
   std::array<std::byte, 8> bytes{};
   auto* request = QueueLiveRead(file, bytes);
   Content::UpdateLiveDiscQueue();
-  CHECK(request->state == Content_DiscRequestState_Error);
-  CHECK(Content_discRequestCounts.reading == 0);
-  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
+  CHECK(VS::Content::discRequestCounts.reading == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
   Content::UpdateLiveDiscQueue();
-  CHECK(request->state == Content_DiscRequestState_Error);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
   Content::ReleaseLiveDiscRequest(request);
-  CHECK(request->state == Content_DiscRequestState_Free);
+  CHECK(request->state == VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("Live deferred read failures reach their request before polling",
           "[content][disc-queue][disc-failure]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile absent{.lba = -1, .size = 1};
-  const Content_DiscFile empty{.lba = 0, .size = 0};
+  const VS::Content::DiscFile absent{.lba = -1, .size = 1};
+  const VS::Content::DiscFile empty{.lba = 0, .size = 0};
   std::array<std::byte, 2> bytes{std::byte{0x7F}, std::byte{0x7F}};
   auto* failed = QueueLiveRead(absent, bytes);
   auto* following = QueueLiveRead(empty, bytes);
   Content::UpdateLiveDiscQueue();
-  CHECK(failed->state == Content_DiscRequestState_Error);
+  CHECK(failed->state == VS::Content::DiscRequestState::kError);
   CHECK_FALSE(
       Content::LiveDiscReadCompleted(Content::LiveDiscReadGeneration()));
-  CHECK(following->state == Content_DiscRequestState_Enqueued);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(following->state == VS::Content::DiscRequestState::kEnqueued);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
   CHECK(bytes[1] == std::byte{0x7F});
   Content::UpdateLiveDiscQueue();
   Content::UpdateLiveDiscQueue();
-  CHECK(following->state == Content_DiscRequestState_Loaded);
-  CHECK(failed->state == Content_DiscRequestState_Error);
-  CHECK(Content_discRequestCounts.reading == 0);
+  CHECK(following->state == VS::Content::DiscRequestState::kLoaded);
+  CHECK(failed->state == VS::Content::DiscRequestState::kError);
+  CHECK(VS::Content::discRequestCounts.reading == 0);
 }
 
 TEST_CASE("Live cancellation prevents a deferred destination write",
           "[content][disc-queue][disc-cancel]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = -1, .size = 8};
+  const VS::Content::DiscFile file{.lba = -1, .size = 8};
   std::array<std::byte, 8> bytes{};
   bytes.fill(std::byte{0x7F});
   const auto before = bytes;
   auto* request = QueueLiveRead(file, bytes);
   REQUIRE(Content::BeginLiveDiscRead(file.lba, file.size, bytes.data()));
   REQUIRE(Content::CancelLiveDiscWrites(bytes));
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
-  CHECK(Content_discDriveState.destination == nullptr);
-  CHECK(request->state == Content_DiscRequestState_Error);
-  CHECK(request->vram == nullptr);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
+  CHECK(request->destination == nullptr);
   Content::UpdateLiveDiscCommands();
   CHECK(bytes == before);
-  CHECK(Content_discDriveState.failureCount == 0);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(VS::Content::discDriveState.failure_count == 0);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
 }
 
 TEST_CASE("Live request generations distinguish reused queue slots",
           "[content][disc-queue][disc-lifetime]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 0, .size = 0};
+  const VS::Content::DiscFile file{.lba = 0, .size = 0};
   auto* first = Content::AllocateLiveDiscRequest(&file);
   REQUIRE(first != nullptr);
   const auto generation = Content::LiveDiscRequestGeneration(first);
@@ -932,21 +934,21 @@ TEST_CASE("Live request generations distinguish reused queue slots",
 TEST_CASE("Live request generations survive targeted destination cancellation",
           "[content][disc-queue][disc-lifetime]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = -1, .size = 8};
+  const VS::Content::DiscFile file{.lba = -1, .size = 8};
   std::array<std::byte, 8> bytes{};
   auto* request = QueueLiveRead(file, bytes);
   const auto generation = Content::LiveDiscRequestGeneration(request);
   REQUIRE(generation != 0);
   REQUIRE(Content::CancelLiveDiscWrites(bytes));
-  CHECK(request->state == Content_DiscRequestState_Error);
-  CHECK(request->vram == nullptr);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
+  CHECK(request->destination == nullptr);
   CHECK(Content::LiveDiscRequestGeneration(request) == generation);
 }
 
 TEST_CASE("Live request generations do not repeat across queue resets",
           "[content][disc-queue][disc-lifetime]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 0, .size = 0};
+  const VS::Content::DiscFile file{.lba = 0, .size = 0};
   auto* first = Content::AllocateLiveDiscRequest(&file);
   REQUIRE(first != nullptr);
   const auto generation = Content::LiveDiscRequestGeneration(first);
@@ -961,7 +963,7 @@ TEST_CASE("Live request generations do not repeat across queue resets",
 TEST_CASE("Live fallback request generations distinguish stable record reuse",
           "[content][disc-queue][disc-lifetime]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 0, .size = 0};
+  const VS::Content::DiscFile file{.lba = 0, .size = 0};
   std::array<std::byte, 1> bytes{};
   auto* first = Content::CompleteLiveRefusedDiscRequest(&file, bytes.data());
   REQUIRE(first != nullptr);
@@ -992,17 +994,17 @@ TEST_CASE("Live fallback records distinguish failure from completion",
           "[content][disc-queue][disc-failure]") {
   const LiveDiscQueueFixture fixture;
   std::array<std::byte, 1> bytes{};
-  const Content_DiscFile absent{.lba = -1, .size = 1};
+  const VS::Content::DiscFile absent{.lba = -1, .size = 1};
   auto* failed = Content::CompleteLiveRefusedDiscRequest(&absent, bytes.data());
   REQUIRE(failed != nullptr);
-  CHECK(failed->state == Content_DiscRequestState_Error);
+  CHECK(failed->state == VS::Content::DiscRequestState::kError);
   Content::ReleaseLiveDiscRequest(failed);
   Content::ClearLiveDiscReadError();
-  const Content_DiscFile empty{.lba = 0, .size = 0};
+  const VS::Content::DiscFile empty{.lba = 0, .size = 0};
   auto* completed =
       Content::CompleteLiveRefusedDiscRequest(&empty, bytes.data());
   REQUIRE(completed != nullptr);
-  CHECK(completed->state == Content_DiscRequestState_Loaded);
+  CHECK(completed->state == VS::Content::DiscRequestState::kLoaded);
   Content::ReleaseLiveDiscRequest(completed);
 }
 
@@ -1011,50 +1013,50 @@ TEST_CASE("Live cancellation leaves another deferred destination armed",
   const LiveDiscQueueFixture fixture;
   std::array<std::byte, 8> canceled{};
   std::array<std::byte, 8> other{};
-  const Content_DiscFile file{.lba = -1, .size = 8};
+  const VS::Content::DiscFile file{.lba = -1, .size = 8};
   auto* request = QueueLiveRead(file, canceled);
   REQUIRE(Content::BeginLiveDiscRead(file.lba, file.size, other.data()));
   REQUIRE(Content::CancelLiveDiscWrites(canceled));
-  CHECK(request->state == Content_DiscRequestState_Error);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_ReadInit);
-  CHECK(Content_discDriveState.destination == other.data());
-  CHECK(Content_discDriveState.byteCount == file.size);
-  CHECK(Content_discDriveState.sectorCount == 1);
+  CHECK(request->state == VS::Content::DiscRequestState::kError);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kReadInit);
+  CHECK(VS::Content::discDriveState.destination == other.data());
+  CHECK(VS::Content::discDriveState.byte_count == file.size);
+  CHECK(VS::Content::discDriveState.sector_count == 1);
 }
 
 TEST_CASE("Live repeated cancellation preserves completed handles and counts",
           "[content][disc-queue][disc-cancel]") {
   const LiveDiscQueueFixture fixture;
   std::array<std::byte, 8> bytes{};
-  const Content_DiscFile file{.lba = 0, .size = 0};
+  const VS::Content::DiscFile file{.lba = 0, .size = 0};
   auto* completed = QueueLiveRead(file, bytes);
   auto* pending = Content::AllocateLiveDiscRequest(&file);
   REQUIRE(pending != nullptr);
   Content::UpdateLiveDiscQueue();
   Content::UpdateLiveDiscQueue();
-  REQUIRE(completed->state == Content_DiscRequestState_Loaded);
+  REQUIRE(completed->state == VS::Content::DiscRequestState::kLoaded);
   Content::EnqueueLiveDiscRequest(pending, bytes.data());
   REQUIRE(Content::CancelLiveDiscWrites(bytes));
   REQUIRE(Content::CancelLiveDiscWrites(bytes));
-  CHECK(completed->state == Content_DiscRequestState_Loaded);
-  CHECK(pending->state == Content_DiscRequestState_Error);
-  CHECK(Content_discRequestCounts.reading == 0);
-  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(completed->state == VS::Content::DiscRequestState::kLoaded);
+  CHECK(pending->state == VS::Content::DiscRequestState::kError);
+  CHECK(VS::Content::discRequestCounts.reading == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
 }
 
 TEST_CASE("Live cancellation drops an old destination without stopping XA",
           "[content][disc-queue][disc-cancel]") {
   const LiveDiscQueueFixture fixture;
   std::array<std::byte, 8> bytes{};
-  Content_discDriveState.destination = bytes.data();
-  Content_discDriveState.state = Content_DiscDriveState_StreamXa;
-  Content_discDriveState.byteCount = 99;
+  VS::Content::discDriveState.destination = bytes.data();
+  VS::Content::discDriveState.state = VS::Content::DiscDriveState::kStreamXa;
+  VS::Content::discDriveState.byte_count = 99;
   REQUIRE(Content::CancelLiveDiscWrites(bytes));
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_StreamXa);
-  CHECK(Content_discDriveState.destination == nullptr);
-  CHECK(Content_discDriveState.byteCount == 99);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kStreamXa);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.byte_count == 99);
   CHECK_FALSE(Content::CancelLiveDiscWrites({}));
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_StreamXa);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kStreamXa);
 }
 
 TEST_CASE("Live completion belongs to one generation and excludes cancellation",
@@ -1081,50 +1083,51 @@ TEST_CASE("Live nonempty reads refuse a null destination without arming",
   const auto generation = Content::LiveDiscReadGeneration();
   CHECK_FALSE(Content::BeginLiveDiscRead(0, 1, nullptr));
   CHECK(Content::LiveDiscReadGeneration() == generation);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
 }
 
 TEST_CASE("Live disc queue binding commits enqueues and initialization",
           "[content-slice][content][disc-queue]") {
   const LiveDiscQueueFixture fixture;
-  const Content_DiscFile file{.lba = 300, .size = 4096};
+  const VS::Content::DiscFile file{.lba = 300, .size = 4096};
   std::array<std::uint8_t, 16> buffer{};
-  Content_DiscQueueSlot* const first = Content::AllocateLiveDiscRequest(&file);
-  Content_DiscQueueSlot* const second = Content::AllocateLiveDiscRequest(&file);
-  REQUIRE(first == &Content_discRequestSlots[0]);
-  REQUIRE(second == &Content_discRequestSlots[1]);
+  VS::Content::DiscQueueSlot* const first =
+      Content::AllocateLiveDiscRequest(&file);
+  VS::Content::DiscQueueSlot* const second =
+      Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(first == &VS::Content::discRequestSlots[0]);
+  REQUIRE(second == &VS::Content::discRequestSlots[1]);
   Content::EnqueueLiveDiscRequest(first, buffer.data());
   Content::EnqueueLivePriorityDiscRequest(second, nullptr);
-  CHECK(first->state == Content_DiscRequestState_Enqueued);
-  CHECK(first->vram == buffer.data());
+  CHECK(first->state == VS::Content::DiscRequestState::kEnqueued);
+  CHECK(first->destination == buffer.data());
   CHECK(first->priority == 1);
   CHECK(second->priority == 0);
-  CHECK(Content_discRequestCounts.waiting == 2);
+  CHECK(VS::Content::discRequestCounts.waiting == 2);
   Content::InitializeLiveDiscQueue();
-  CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(first->state == Content_DiscRequestState_Free);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
+  CHECK(first->state == VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("Live disc drive binding commits seek, read and XA interrupts",
           "[content-slice][content][disc-queue]") {
   const LiveDiscQueueFixture fixture;
-  Content_discDriveState.state =
-      static_cast<char>(Content_DiscDriveState_SeekReady);
+  VS::Content::discDriveState.state = VS::Content::DiscDriveState::kSeekReady;
   Content::HandleLiveSeekCommandInterrupt(2);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
   Content::HandleLiveReadCommandInterrupt(5);
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_ReadError);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kReadError);
   Content::ClearLiveDiscReadError();
-  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(Content::LiveDiscState() == VS::Content::DiscDriveState::kIdle);
   const std::array<std::uint8_t, 8> result{0, 0x12, 0, 3, 4, 0, 0, 9};
   const std::array<int, 4> saved_xa{
-      Content_legacyXaReadyBcdField, Content_legacyXaReadyByteThree,
-      Content_legacyXaReadyByteFour, Content_xaReadyMetadataWord};
+      VS::Content::legacyXaReadyBcdField, VS::Content::legacyXaReadyByteThree,
+      VS::Content::legacyXaReadyByteFour, VS::Content::xaReadyMetadataWord};
   Content::HandleLiveXaReadyInterrupt(1, result);
-  CHECK(Content_legacyXaReadyBcdField == 12);
-  CHECK(Content_xaReadyMetadataWord == 9);
-  Content_legacyXaReadyBcdField = saved_xa[0];
-  Content_legacyXaReadyByteThree = saved_xa[1];
-  Content_legacyXaReadyByteFour = saved_xa[2];
-  Content_xaReadyMetadataWord = saved_xa[3];
+  CHECK(VS::Content::legacyXaReadyBcdField == 12);
+  CHECK(VS::Content::xaReadyMetadataWord == 9);
+  VS::Content::legacyXaReadyBcdField = saved_xa[0];
+  VS::Content::legacyXaReadyByteThree = saved_xa[1];
+  VS::Content::legacyXaReadyByteFour = saved_xa[2];
+  VS::Content::xaReadyMetadataWord = saved_xa[3];
 }

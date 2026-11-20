@@ -13,7 +13,9 @@
 #include "Effects/Instance.hpp"
 #include "Effects/Package.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 namespace VS::Effects {
 // An effect script opcode handler in the module image's dispatch table.
@@ -68,7 +70,7 @@ extern int effectBusyFlags;
 
 // Holds the read that reloads the main menu after a primary effect.
 // decomp: D_800F5218 (D_800F5218@BATTLE/BATTLE.PRG)
-extern Content_DiscQueueSlot* menuReloadSlot;
+extern VS::Content::DiscQueueSlot* menuReloadSlot;
 
 // Holds one bit per primary effect track not yet started.
 // decomp: D_800F521C (D_800F521C@BATTLE/BATTLE.PRG)

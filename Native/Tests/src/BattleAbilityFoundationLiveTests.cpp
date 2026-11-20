@@ -20,9 +20,9 @@
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Menu/BattleAbilities.hpp"
 #include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
@@ -170,7 +170,7 @@ struct LiveTerminalFixture : LiveFoundationFixture {
                                     std::uint16_t* owner,
                                     std::uint8_t& learned) {
     CHECK(load.Complete() == 1);
-    CHECK(load.request->state == Content_DiscRequestState_Free);
+    CHECK(load.request->state == VS::Content::DiscRequestState::kFree);
     CHECK(learned == 0);
     CHECK(abilities::abilityText == nullptr);
     CHECK(VS::Core::Memory::LivePayloadCapacity(owner).has_value());

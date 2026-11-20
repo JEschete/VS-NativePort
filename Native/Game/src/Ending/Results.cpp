@@ -17,7 +17,7 @@ std::int16_t VS::Ending::rankTitleThresholds[VS::Ending::kRankCount]; /* content
 std::uint32_t VS::Ending::rankScoreThresholds[VS::Ending::kRankScoreThresholds]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: cdSlot (cdSlot@ENDING/ENDING.PRG)
-Content_DiscQueueSlot* VS::Ending::resultsDiscReadSlot;
+VS::Content::DiscQueueSlot* VS::Ending::resultsDiscReadSlot;
 
 // decomp: timData (timData@ENDING/ENDING.PRG)
 void* VS::Ending::resultsTimBuffer;

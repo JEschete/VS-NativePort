@@ -19,10 +19,10 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "DiscQueue.h"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
@@ -130,7 +130,7 @@ constexpr std::int32_t kInterfaceRandomBits = 15;
 
 State g_state{};
 // _initGameOver's queue slot and GAMEOVER.BIN buffer.
-Content_DiscQueueSlot* g_game_over_request = nullptr;
+VS::Content::DiscQueueSlot* g_game_over_request = nullptr;
 void* g_game_over_image = nullptr;
 
 void Warn(std::string_view what) {
@@ -624,8 +624,8 @@ class LiveHost : public LiveCardHost {
   }
 
   void BeginGameOverLoad() override {
-    Content_DiscFile file{.lba = VS_GAMEOVER_BIN_LBA,
-                          .size = VS_GAMEOVER_BIN_SIZE};
+    VS::Content::DiscFile file{.lba = VS_GAMEOVER_BIN_LBA,
+                               .size = VS_GAMEOVER_BIN_SIZE};
     g_game_over_request = Content::AllocateLiveDiscRequest(&file);
     g_game_over_image =
         Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE);
@@ -640,7 +640,7 @@ class LiveHost : public LiveCardHost {
     if (g_game_over_request == nullptr) {
       return std::nullopt;
     }
-    return g_game_over_request->state == Content_DiscRequestState_Loaded;
+    return g_game_over_request->state == VS::Content::DiscRequestState::kLoaded;
   }
   std::span<const std::uint16_t> FinishGameOverLoad() override {
     Content::ReleaseLiveDiscRequest(g_game_over_request);

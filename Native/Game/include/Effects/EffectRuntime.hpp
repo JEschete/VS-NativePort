@@ -7,7 +7,9 @@
 #include "Effects/EffectInstances.hpp"
 #include "Effects/PrimaryEffect.hpp"
 
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscQueueSlot;
+}  // namespace VS::Content
 
 // The effect runtime's start-up and frame update and the primary effect's
 // action lifecycle (BATTLE.PRG 5BF94.c:5047-5070, 5170-5477). Each frame the
@@ -41,7 +43,7 @@ struct EffectRuntimeRecords {
   std::int32_t unused_primary_word{};
   std::int32_t first_curve_sample{};
   std::uint8_t action_variant{};
-  Content_DiscQueueSlot* menu_reload_slot{};
+  VS::Content::DiscQueueSlot* menu_reload_slot{};
   EffectTokenPool tokens{};
 };
 
@@ -111,8 +113,8 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
   [[nodiscard]] virtual std::uint8_t PrimaryToken() = 0;
   virtual void SetPrimaryToken(std::uint8_t token) = 0;
   [[nodiscard]] virtual LiveEffectInstance* FirstPrimary() = 0;
-  [[nodiscard]] virtual Content_DiscQueueSlot* MenuReloadSlot() = 0;
-  virtual void SetMenuReloadSlot(Content_DiscQueueSlot* slot) = 0;
+  [[nodiscard]] virtual VS::Content::DiscQueueSlot* MenuReloadSlot() = 0;
+  virtual void SetMenuReloadSlot(VS::Content::DiscQueueSlot* slot) = 0;
 
   // Each poll advances its loader; true once it has finished.
   [[nodiscard]] virtual bool PollPurgeOverlay() = 0;
@@ -133,10 +135,11 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
   // The bound package's track count (block 9's frame count).
   [[nodiscard]] virtual std::uint8_t PackageTrackCount() = 0;
   // A disc request for the main menu overlay; null when the queue is full.
-  [[nodiscard]] virtual Content_DiscQueueSlot* RequestMenuReload() = 0;
-  virtual void EnqueueMenuReload(Content_DiscQueueSlot& slot) = 0;
-  [[nodiscard]] virtual bool MenuReloadLoaded(Content_DiscQueueSlot& slot) = 0;
-  virtual void ReleaseMenuReload(Content_DiscQueueSlot& slot) = 0;
+  [[nodiscard]] virtual VS::Content::DiscQueueSlot* RequestMenuReload() = 0;
+  virtual void EnqueueMenuReload(VS::Content::DiscQueueSlot& slot) = 0;
+  [[nodiscard]] virtual bool MenuReloadLoaded(
+      VS::Content::DiscQueueSlot& slot) = 0;
+  virtual void ReleaseMenuReload(VS::Content::DiscQueueSlot& slot) = 0;
 
   // Starts a primary instance at `script_offset` in the package's script
   // with the action's source and first target as its endpoints. False

@@ -3,11 +3,11 @@
 // disc volume with its fade.
 #include <cstdint>
 
-#include "Legacy/LibDs.h"
+#include "Legacy/LibDs.hpp"
 
 namespace VS::Audio::Control {
 // decomp: _cdlAtv (_cdlAtv@SLUS_010.40)
-extern CdlATV legacyDiscMixAttenuation;
+extern VS::Legacy::CdlATV legacyDiscMixAttenuation;
 }  // namespace VS::Audio::Control
 
 namespace VS::Audio::Seq {

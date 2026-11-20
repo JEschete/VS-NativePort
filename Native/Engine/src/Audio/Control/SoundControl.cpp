@@ -3,7 +3,7 @@
 #include "Audio/Control/SoundControl.hpp"
 
 // decomp: _cdlAtv (_cdlAtv@SLUS_010.40)
-CdlATV VS::Audio::Control::legacyDiscMixAttenuation;
+VS::Legacy::CdlATV VS::Audio::Control::legacyDiscMixAttenuation;
 
 // decomp: g_Sound_CdVolumeFadeStep (g_Sound_CdVolumeFadeStep@SLUS_010.40)
 int VS::Audio::Seq::discVolumeFadeStep;

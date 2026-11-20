@@ -1,6 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -30,7 +30,7 @@ int VS::Effects::tintedActor;
 int VS::Effects::effectBusyFlags;
 
 // decomp: D_800F5218 (D_800F5218@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* VS::Effects::menuReloadSlot;
+VS::Content::DiscQueueSlot* VS::Effects::menuReloadSlot;
 
 // decomp: D_800F521C (D_800F521C@BATTLE/BATTLE.PRG)
 std::uint32_t VS::Effects::pendingTracks;

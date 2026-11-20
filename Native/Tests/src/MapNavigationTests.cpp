@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/StatusEffects.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"

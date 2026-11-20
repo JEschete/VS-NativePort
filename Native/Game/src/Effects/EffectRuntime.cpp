@@ -100,7 +100,7 @@ void FinishPackage(PrimaryEffectRuntime& runtime) {
   state.pending_tracks |= PendingMask(count);
   state.loaded = true;
   runtime.SetPrimary(state);
-  Content_DiscQueueSlot* slot = runtime.RequestMenuReload();
+  VS::Content::DiscQueueSlot* slot = runtime.RequestMenuReload();
   runtime.SetMenuReloadSlot(slot);
   // The original enqueued a refused (null) request too; it reads nothing and
   // the reload skips it, so it is only kept from the queue (#282).
@@ -160,7 +160,7 @@ void PlayTracks(PrimaryEffectRuntime& runtime) {
 
 // Phase kReloadingMenu (5BF94.c:5296): false once the reload completes.
 [[nodiscard]] bool FinishMenuReload(PrimaryEffectRuntime& runtime) {
-  Content_DiscQueueSlot* slot = runtime.MenuReloadSlot();
+  VS::Content::DiscQueueSlot* slot = runtime.MenuReloadSlot();
   if (slot != nullptr) {
     if (!runtime.MenuReloadLoaded(*slot)) {
       return true;

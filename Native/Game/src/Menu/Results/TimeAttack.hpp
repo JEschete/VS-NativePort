@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <utility>
 
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 
 namespace VS::Menu::Results {
 // decomp: _disFileIndices (src/MENU/MENUF.PRG/3B8.c:44): the results screens'
@@ -18,9 +18,9 @@ static_assert(std::to_underlying(DisFile::kEsc) + 1 == kDisFileCount);
 
 // decomp: _disFiles (_disFiles@src/MENU/MENUF.PRG/3B8.c): the disc location of
 // each results screen's DIS file, indexed by DisFile.
-extern const Content_DiscFile kDisFiles[kDisFileCount];
+extern const VS::Content::DiscFile kDisFiles[kDisFileCount];
 
-[[nodiscard]] inline const Content_DiscFile& DiscFileFor(
+[[nodiscard]] inline const VS::Content::DiscFile& DiscFileFor(
     DisFile file) noexcept {
   return kDisFiles[std::to_underlying(file)];
 }

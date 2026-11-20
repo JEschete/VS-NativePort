@@ -225,7 +225,7 @@ class LiveMusicHost final : public MusicHost {
   void MapSavedInstrumentsToBaseBank(MusicCommandState& state) override {
     StoreMusicCommand(state);
     const auto flags =
-        Same<u_int>(VS::Audio::Seq::savedMusicConfig.status_flags);
+        Same<std::uint32_t>(VS::Audio::Seq::savedMusicConfig.status_flags);
     for (VS::Audio::SeqChannel& channel : VS::Audio::Seq::savedMusicChannels) {
       Samples::LiveMapInstrumentToBaseBank(flags, &channel);
     }
@@ -341,8 +341,8 @@ void LiveLoadMusicSequence(VS::Audio::AkaoSequenceFile* sequence) {
   active->sequence_base = reinterpret_cast<std::uintptr_t>(sequence);
   active->patch_table = TableAt<VS::Audio::AkaoSequenceFile>(
       result.tables.patch_table, *memory, "LoadMusicSequence");
-  active->keymap_table = TableAt<u_short>(result.tables.keymap_table, *memory,
-                                          "LoadMusicSequence");
+  active->keymap_table = TableAt<std::uint16_t>(result.tables.keymap_table,
+                                                *memory, "LoadMusicSequence");
   if (result.channels_outside != 0) {
     ReportRefusal("LoadMusicSequence",
                   "a channel's program starts outside the sequence");
@@ -437,7 +437,8 @@ void LiveRestoreMusicSequence(VS::Audio::AkaoSequenceFile* sequence,
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
     if ((remapped & (1U << i)) != 0) {
       Samples::LiveMapInstrumentToAlternateBank(
-          Same<u_int>(active->status_flags), &VS::Audio::Seq::musicChannels[i]);
+          Same<std::uint32_t>(active->status_flags),
+          &VS::Audio::Seq::musicChannels[i]);
     }
   }
 }

@@ -14,8 +14,8 @@
 #include "Battle/StatusEffects.h"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
@@ -45,11 +45,11 @@ using time_attack_terminal_live_tests::PutWord;
 using time_attack_terminal_live_tests::RequestFor;
 using time_attack_terminal_live_tests::Word;
 constexpr std::array kAssets{Asset::kResults, Asset::kStart};
-constexpr Content_DiscFile kForeignFile{.lba = 1, .size = 64};
+constexpr VS::Content::DiscFile kForeignFile{.lba = 1, .size = 64};
 
 std::vector<std::uint64_t> FillForeignRequestSlots() {
   std::vector<std::uint64_t> generations;
-  for (auto& request : Content_discRequestSlots) {
+  for (auto& request : VS::Content::discRequestSlots) {
     REQUIRE(content::AllocateLiveDiscRequest(&kForeignFile) == &request);
     generations.push_back(content::LiveDiscRequestGeneration(&request));
   }
@@ -59,10 +59,10 @@ std::vector<std::uint64_t> FillForeignRequestSlots() {
 void ReleaseUnchangedForeignRequests(
     const std::vector<std::uint64_t>& generations) {
   for (std::size_t index = 0; index < generations.size(); ++index) {
-    auto& request = Content_discRequestSlots[index];
+    auto& request = VS::Content::discRequestSlots[index];
     CHECK(content::LiveDiscRequestGeneration(&request) ==
           generations.at(index));
-    CHECK(request.state == Content_DiscRequestState_Allocated);
+    CHECK(request.state == VS::Content::DiscRequestState::kAllocated);
     content::ReleaseLiveDiscRequest(&request);
   }
 }
@@ -180,7 +180,7 @@ TEST_CASE(
     auto* const foreign = AllocateForeignResources();
     CHECK(Initialize(asset) == 0);
     auto& request = RequestFor(asset);
-    void* const buffer = request.vram;
+    void* const buffer = request.destination;
     r::ResetLiveTimeAttackModuleData();
     CHECK(r::CleanupLiveTimeAttackOwnedState());
     CHECK(content::LiveDiscRequestGeneration(&request) == 0);
@@ -209,7 +209,7 @@ TEST_CASE(
     CHECK(Battle_unusedSubmenuState == 1);
     CHECK(r::CleanupLiveTimeAttackOwnedState());
     CHECK(content::LiveDiscRequestGeneration(foreign) == generation);
-    CHECK(foreign->state == Content_DiscRequestState_Allocated);
+    CHECK(foreign->state == VS::Content::DiscRequestState::kAllocated);
     content::ReleaseLiveDiscRequest(foreign);
   }
 }
@@ -259,7 +259,7 @@ TEST_CASE(
     CHECK_FALSE(r::InspectLiveTimeAttackLoad(asset).owns_buffer);
     Battle_unusedSubmenuState = 0;
     REQUIRE(Initialize(asset) == 0);
-    RequestFor(asset).state = Content_DiscRequestState_Error;
+    RequestFor(asset).state = VS::Content::DiscRequestState::kError;
     CHECK(Initialize(asset) == 0);
     CHECK(Initialize(asset) == 0);
     CHECK(Battle_unusedSubmenuState == 1);
@@ -588,8 +588,7 @@ TEST_CASE("Time-attack Live queue exhaustion cannot release unrelated requests",
   for (const auto asset : kAssets) {
     LiveFixture fixture;
     content::ClearLiveDiscReadError();
-    REQUIRE(content::LiveDiscState() ==
-            static_cast<int>(content::DiscDriveState::kIdle));
+    REQUIRE(content::LiveDiscState() == content::DiscDriveState::kIdle);
     const auto refused_records = content::LiveRefusedDiscRecordsInUse();
     const auto generations = FillForeignRequestSlots();
     CHECK(Initialize(asset) == 0);

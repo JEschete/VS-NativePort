@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "Content/DiscLayout.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Menu::manual {
@@ -16,9 +16,9 @@ std::int32_t topMenu_state;
 // decomp: menuSelectedRow (src/MENU/MENUE.PRG/494.c:214)
 std::int32_t menuSelectedRow;
 // decomp: helpTextCdQueue (src/MENU/MENUE.PRG/494.c:215)
-Content_DiscQueueSlot* helpTextCdQueue;
+VS::Content::DiscQueueSlot* helpTextCdQueue;
 // decomp: helpAssetsCdQueue (src/MENU/MENUE.PRG/494.c:216)
-Content_DiscQueueSlot* helpAssetsCdQueue;
+VS::Content::DiscQueueSlot* helpAssetsCdQueue;
 // decomp: showMenuState (src/MENU/MENUE.PRG/494.c:217)
 std::int32_t showMenuState;
 // decomp: scrollPosition (src/MENU/MENUE.PRG/494.c:218)
@@ -36,7 +36,7 @@ u_long* helpAssets;
 
 // decomp: helpFileCdFiles (src/MENU/MENUE.PRG/494.c:241): mkHfoPair(HELPnn)
 // for topics 1 to 14.
-const Content_DiscFile kHelpFileCdFiles[kHelpFileCount] = {
+const VS::Content::DiscFile kHelpFileCdFiles[kHelpFileCount] = {
     {VS_HELP01_HF1_LBA, VS_HELP01_HF1_SIZE},
     {VS_HELP01_HF0_LBA, VS_HELP01_HF0_SIZE},
     {VS_HELP02_HF1_LBA, VS_HELP02_HF1_SIZE},

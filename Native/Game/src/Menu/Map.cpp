@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "Content/DiscLayout.h"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/MapDrawing.hpp"
@@ -16,7 +16,7 @@ namespace VS::Menu::map {
 std::int32_t currentMapRow = -1;
 
 // decomp: sceneArmFiles (src/MENU/MENU5.PRG/4D8.c:380)
-const Content_DiscFile kSceneArmFiles[kSceneCount] = {
+const VS::Content::DiscFile kSceneArmFiles[kSceneCount] = {
     {VS_DUMMY_ARM_LBA, VS_DUMMY_ARM_SIZE},
     {VS_SCEN001_ARM_LBA, VS_SCEN001_ARM_SIZE},
     {VS_SCEN002_ARM_LBA, VS_SCEN002_ARM_SIZE},
@@ -95,7 +95,7 @@ SVECTOR cameraPos;
 // decomp: centerPoint (src/MENU/MENU5.PRG/4D8.c:445)
 SVECTOR centerPoint;
 // decomp: sceneCdQueueSlot (src/MENU/MENU5.PRG/4D8.c:446)
-Content_DiscQueueSlot* sceneCdQueueSlot;
+VS::Content::DiscQueueSlot* sceneCdQueueSlot;
 // decomp: armFileBuff (src/MENU/MENU5.PRG/4D8.c:447)
 void* armFileBuff;
 // decomp: sceneRowIdMap (src/MENU/MENU5.PRG/4D8.c:448)

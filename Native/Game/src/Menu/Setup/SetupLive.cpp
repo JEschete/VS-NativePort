@@ -21,10 +21,10 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -189,7 +189,7 @@ struct RecipeLoad {
   void* data = nullptr;
   std::size_t size = 0;
   RecipeKind kind = RecipeKind::kBlade;
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::optional<RecipeBook> book;
 };
 RecipeLoad g_recipes{};
@@ -506,7 +506,7 @@ class LiveHost final : public Host {
     if (g_recipes.request == nullptr) {
       return std::nullopt;
     }
-    return g_recipes.request->state == Content_DiscRequestState_Loaded;
+    return g_recipes.request->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseRecipeRequest() override;
   const RecipeBook* Recipes() override {
@@ -581,7 +581,7 @@ void LiveHost::StartRecipeLoad(RecipeKind kind) {
   g_recipes.data = data;
   g_recipes.size = size;
   g_recipes.kind = kind;
-  Content_DiscFile request{};
+  VS::Content::DiscFile request{};
   request.lba = file.lba;
   request.size = file.size;
   g_recipes.request = Content::AllocateLiveDiscRequest(&request);

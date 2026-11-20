@@ -18,12 +18,12 @@
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "DiscQueue.h"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
@@ -81,7 +81,7 @@ constexpr Render::PageSpace::Rect kLeftMargin{640, 256, 32, 240};
 constexpr Render::PageSpace::Rect kRightMargin{768, 256, 32, 240};
 
 struct PendingScene {
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
   void* destination = nullptr;
   DiscFileRange file{};
@@ -350,9 +350,9 @@ class LiveMapMenu final : public MapMenuHost {
         Content::LiveDiscRequestGeneration(pending_scene.request) !=
             pending_scene.generation) {
       Refuse("SceneReadState", "missing or reused request");
-      return Content_DiscRequestState_Error;
+      return std::to_underlying(VS::Content::DiscRequestState::kError);
     }
-    return pending_scene.request->state;
+    return std::to_underlying(pending_scene.request->state);
   }
   bool InstallSceneRead(std::int32_t scene, DiscFileRange file) override {
     if (!ValidScene(scene) || pending_scene.file != file ||

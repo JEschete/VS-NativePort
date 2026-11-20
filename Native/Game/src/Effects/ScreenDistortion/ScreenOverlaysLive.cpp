@@ -6,10 +6,10 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Overlays.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
@@ -143,33 +143,33 @@ class LiveScreenOverlayLoader final : public ScreenOverlayLoader {
   void ReleaseWorkspace(int owner_tag) override {
     static_cast<void>(Content::ReleaseLiveOverlayWorkspace(owner_tag));
   }
-  Content_DiscQueueSlot* AllocateOverlayRead() override {
-    const Content_DiscFile file = OverlayFile();
+  VS::Content::DiscQueueSlot* AllocateOverlayRead() override {
+    const VS::Content::DiscFile file = OverlayFile();
     return Content::AllocateLiveDiscRequest(&file);
   }
-  void EnqueueOverlayRead(Content_DiscQueueSlot* read) override {
+  void EnqueueOverlayRead(VS::Content::DiscQueueSlot* read) override {
     Content::EnqueueLiveDiscRequest(read, VS::Core::kOverlaySlots[1]);
   }
-  Content_DiscQueueSlot* CompleteRefusedOverlayRead() override {
-    const Content_DiscFile file = OverlayFile();
+  VS::Content::DiscQueueSlot* CompleteRefusedOverlayRead() override {
+    const VS::Content::DiscFile file = OverlayFile();
     return Content::CompleteLiveRefusedDiscRequest(&file,
                                                    VS::Core::kOverlaySlots[1]);
   }
-  bool OverlayReadLoaded(const Content_DiscQueueSlot* read) override {
+  bool OverlayReadLoaded(const VS::Content::DiscQueueSlot* read) override {
     if (read == nullptr) {
       VS::Core::LogError("effects",
                          "screen overlay load poll: no read request");
       return false;
     }
-    return read->state == Content_DiscRequestState_Loaded;
+    return read->state == VS::Content::DiscRequestState::kLoaded;
   }
-  void ReleaseOverlayRead(Content_DiscQueueSlot* read) override {
+  void ReleaseOverlayRead(VS::Content::DiscQueueSlot* read) override {
     Content::ReleaseLiveDiscRequest(read);
   }
   void WaitForOverlayReady() override { Boot::WaitForOverlayReadyLive(); }
 
  private:
-  static Content_DiscFile OverlayFile() {
+  static VS::Content::DiscFile OverlayFile() {
     return {.lba = VS_SCREFF2_PRG_LBA, .size = VS_SCREFF2_PRG_SIZE};
   }
 };

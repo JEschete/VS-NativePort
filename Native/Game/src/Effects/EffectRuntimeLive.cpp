@@ -15,11 +15,11 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/OverlayFiles.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CameraLiveState.hpp"
@@ -121,8 +121,10 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     primaryToken = static_cast<char>(token);
   }
   Instance* FirstPrimary() override { return primaryInstances; }
-  Content_DiscQueueSlot* MenuReloadSlot() override { return menuReloadSlot; }
-  void SetMenuReloadSlot(Content_DiscQueueSlot* slot) override {
+  VS::Content::DiscQueueSlot* MenuReloadSlot() override {
+    return menuReloadSlot;
+  }
+  void SetMenuReloadSlot(VS::Content::DiscQueueSlot* slot) override {
     menuReloadSlot = slot;
   }
 
@@ -151,18 +153,18 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     }
     return package->parameters->frame_count;
   }
-  Content_DiscQueueSlot* RequestMenuReload() override {
-    const Content_DiscFile file{.lba = Content::MainMenuOverlayDiscSector(),
-                                .size = 0};
+  VS::Content::DiscQueueSlot* RequestMenuReload() override {
+    const VS::Content::DiscFile file{
+        .lba = Content::MainMenuOverlayDiscSector(), .size = 0};
     return Content::AllocateLiveDiscRequest(&file);
   }
-  void EnqueueMenuReload(Content_DiscQueueSlot& slot) override {
+  void EnqueueMenuReload(VS::Content::DiscQueueSlot& slot) override {
     Content::EnqueueLiveDiscRequest(&slot, nullptr);
   }
-  bool MenuReloadLoaded(Content_DiscQueueSlot& slot) override {
-    return slot.state == std::to_underlying(Content::DiscRequestState::kLoaded);
+  bool MenuReloadLoaded(VS::Content::DiscQueueSlot& slot) override {
+    return slot.state == Content::DiscRequestState::kLoaded;
   }
-  void ReleaseMenuReload(Content_DiscQueueSlot& slot) override {
+  void ReleaseMenuReload(VS::Content::DiscQueueSlot& slot) override {
     Content::ReleaseLiveDiscRequest(&slot);
   }
 

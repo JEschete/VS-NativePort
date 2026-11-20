@@ -24,8 +24,8 @@
 #include "Audio/XaMixLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Runtime.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "State/GameClockLive.hpp"
 
@@ -198,9 +198,9 @@ class LiveSoundBanks final : public SoundBankHost {
   }
 
   void MarkRequestDispatched(DiscRequestRef request) override {
-    if (Content_DiscQueueSlot* slot = LiveRequestSlot(
+    if (VS::Content::DiscQueueSlot* slot = LiveRequestSlot(
             {.mark = RequestMark::kActive, .request = request})) {
-      slot->state = Content_DiscRequestState_Dispatched;
+      slot->state = VS::Content::DiscRequestState::kDispatched;
     }
   }
 

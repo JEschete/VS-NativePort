@@ -18,10 +18,10 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "DiscQueue.h"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
@@ -426,7 +426,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
     if (allocation == nullptr) {
       return;
     }
-    Content_DiscFile file{};
+    VS::Content::DiscFile file{};
     file.lba = snapshot == IntroSnapshot::kCourtyard ? VS_OPMCIMG1_BIN_LBA
                                                      : VS_OPMCIMG2_BIN_LBA;
     file.size = VS_OPMCIMG1_BIN_SIZE;
@@ -445,7 +445,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
   bool LoadQueued() override { return request_ != nullptr; }
   bool LoadComplete() override {
     return request_ != nullptr &&
-           request_->state == Content_DiscRequestState_Loaded;
+           request_->state == VS::Content::DiscRequestState::kLoaded;
   }
   SaveImage TakeImage() override {
     VS::Content::ReleaseLiveDiscRequest(request_);
@@ -462,7 +462,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
     return SaveImage{image_, kSaveImageBytes};
   }
 
-  Content_DiscQueueSlot* request_ = nullptr;
+  VS::Content::DiscQueueSlot* request_ = nullptr;
   std::byte* image_ = nullptr;
 };
 

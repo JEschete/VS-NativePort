@@ -16,10 +16,10 @@
 #include "Audio/SoundState.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "DiscQueue.h"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -64,7 +64,7 @@ static_assert(std::size(VS::State::stateFlags.chests_opened) ==
 struct LoadOwner {
   std::byte* buffer = nullptr;
   std::size_t bytes = 0;
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
   bool pages = false;
 };
@@ -300,10 +300,10 @@ class LiveInit final : public GameClearInitHost {
       Refuse("missing or reused RANK.DIS controller request");
       return false;
     }
-    if (owner.request->state == Content_DiscRequestState_Error) {
+    if (owner.request->state == VS::Content::DiscRequestState::kError) {
       Refuse("RANK.DIS queue error is not Loaded");
     }
-    return owner.request->state == Content_DiscRequestState_Loaded;
+    return owner.request->state == VS::Content::DiscRequestState::kLoaded;
   }
   std::optional<ResultsTimBlocks> ParseTim(std::size_t index) override {
     const auto bytes = TimBytes(index);

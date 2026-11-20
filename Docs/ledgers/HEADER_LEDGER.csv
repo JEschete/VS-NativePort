@@ -1,12 +1,12 @@
 id,kind,path,origin,generated,guard,c_linkage,static_asserts,typedefs,void_params,gnu_attributes,macros,global_decls,c_wrapped,baseline,status,notes
-H0001,header,Native/Content/Legacy/LibDs.h,legacy,no,pragma-once,0,0,0,0,0,0,5,0,0,remaining,
+H0001,header,Native/Content/Legacy/LibDs.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0002,header,Native/Content/include/Content/DataAccess.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0003,header,Native/Content/include/Content/DiscLayout.h,generated,yes,pragma-once,0,0,0,0,0,10324,0,0,0,remaining,
 H0004,header,Native/Content/include/Content/ModuleData.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0005,header,Native/Content/include/Content/StringTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0006,header,Native/Content/src/ActorAssets.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp as VS::Content::LegacyActorAssetRequest and VS::Content::SequenceBuffer (#441)
 H0007,header,Native/Content/src/ActorAssetsLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,5,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp (#441)
-H0008,header,Native/Content/src/DiscQueue.h,generated,yes,pragma-once,0,0,0,0,0,0,17,0,0,remaining,
+H0008,header,Native/Content/src/DiscQueue.h,generated,yes,pragma-once,0,0,0,0,0,0,17,0,0,retired,"moved to Native/Content/include/Content/DiscQueue.hpp: the disc request, count and drive records and their globals in VS::Content; the duplicate unscoped state enums are retired in favour of the Content/CdDrive.hpp enum classes (#441)"
 H0009,header,Native/Content/src/LegacyFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,12,0,0,retired,"the BATTLE.PRG disc tables became std::array globals in VS::Content, declared in Native/Content/include/Content/ActorAssetsLive.hpp (#441)"
 H0010,header,Native/Content/src/ModelLoading.h,generated,yes,pragma-once,0,0,0,0,0,0,27,0,0,retired,"the BATTLE.PRG loader globals moved to VS::Content, declared in Native/Content/include/Content/ActorAssetsLive.hpp (#441)"
 H0011,header,Native/Content/src/OverlayWorkspaceLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Content/include/Content/OverlayWorkspaceLive.hpp (#441)
@@ -438,7 +438,7 @@ S0001,source,Native/Content/Legacy/LibDs.cpp,legacy,no,,0,,,,,,,,,done,
 S0002,source,Native/Content/src/ActorAssetsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0003,source,Native/Content/src/CdDriveLive.cpp,owned,no,,0,,,,,,,,,done,
 S0004,source,Native/Content/src/DataStore.cpp,owned,no,,0,,,,,,,,,done,
-S0005,source,Native/Content/src/DiscQueue.cpp,generated,yes,,0,,,,,,,,,done,
+S0005,source,Native/Content/src/DiscQueue.cpp,generated,no,,0,,,,,,,,,done,
 S0006,source,Native/Content/src/DiscReaderLive.cpp,owned,no,,0,,,,,,,,,done,
 S0007,source,Native/Content/src/LegacyFiles.cpp,generated,yes,,0,,,,,,,,,retired,the disc table definitions moved to Native/Content/src/ActorAssetsLive.cpp (#441)
 S0008,source,Native/Content/src/ModelLoading.cpp,generated,yes,,0,,,,,,,,,retired,the loader global definitions moved to Native/Content/src/ActorAssetsLive.cpp (#441)

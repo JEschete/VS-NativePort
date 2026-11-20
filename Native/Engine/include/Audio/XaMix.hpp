@@ -7,7 +7,8 @@ namespace VS::Audio {
 inline constexpr std::uint32_t kMaximumDiscMixVolume = 0xFF;
 inline constexpr std::uint32_t kDefaultDiscMixVolume = 0x7F;
 
-// The four CdlATV routes the original vs_sound_setCdVol hands to CdMix.
+// The four VS::Legacy::CdlATV routes the original vs_sound_setCdVol hands to
+// CdMix.
 struct DiscMixMatrix {
   std::uint8_t left_to_left = 0;
   std::uint8_t left_to_right = 0;

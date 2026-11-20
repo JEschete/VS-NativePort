@@ -26,10 +26,10 @@ namespace fw = VS::Menu::Framework;
 
 struct ForeignQueue {
   std::array<std::array<std::byte, 2048>, 32> buffers{};
-  std::array<Content_DiscQueueSlot*, 32> slots{};
+  std::array<VS::Content::DiscQueueSlot*, 32> slots{};
   std::array<std::uint64_t, 32> generations{};
   std::vector<std::byte> snapshot;
-  Content_DiscRequestCounts counts{};
+  VS::Content::DiscRequestCounts counts{};
 
   ForeignQueue() = default;
   ForeignQueue(const ForeignQueue&) = delete;
@@ -47,7 +47,7 @@ struct ForeignQueue {
 };
 
 void FillForeignQueue(ForeignQueue& foreign) {
-  const Content_DiscFile file{score::kMonBinFile.lba, 2048};
+  const VS::Content::DiscFile file{score::kMonBinFile.lba, 2048};
   for (std::size_t index = 0; index < foreign.slots.size(); ++index) {
     foreign.slots[index] = live::content::AllocateLiveDiscRequest(&file);
     REQUIRE(foreign.slots[index] != nullptr);
@@ -59,16 +59,16 @@ void FillForeignQueue(ForeignQueue& foreign) {
         live::content::LiveDiscRequestGeneration(foreign.slots[index]);
     REQUIRE(foreign.generations[index] != 0);
   }
-  const auto bytes = live::BytesOf(Content_discRequestSlots);
+  const auto bytes = live::BytesOf(VS::Content::discRequestSlots);
   foreign.snapshot.assign(bytes.begin(), bytes.end());
-  foreign.counts = Content_discRequestCounts;
+  foreign.counts = VS::Content::discRequestCounts;
 }
 
 void CheckForeignQueue(const ForeignQueue& foreign) {
-  CHECK(std::ranges::equal(live::BytesOf(Content_discRequestSlots),
+  CHECK(std::ranges::equal(live::BytesOf(VS::Content::discRequestSlots),
                            foreign.snapshot));
-  CHECK(Content_discRequestCounts.reading == foreign.counts.reading);
-  CHECK(Content_discRequestCounts.waiting == foreign.counts.waiting);
+  CHECK(VS::Content::discRequestCounts.reading == foreign.counts.reading);
+  CHECK(VS::Content::discRequestCounts.waiting == foreign.counts.waiting);
   for (std::size_t index = 0; index < foreign.slots.size(); ++index) {
     CHECK(live::content::LiveDiscRequestGeneration(foreign.slots[index]) ==
           foreign.generations[index]);
@@ -272,13 +272,13 @@ TEST_CASE("F02834 Live navigation emits its real arrow and directional font",
 
 void LoadFirstEnemy(live::PreviewFixture& fixture) {
   REQUIRE(fixture.TickEnemyPreview(score::monBinData[0].zud_id, false) == 1);
-  const auto pending = std::ranges::find(Content_discRequestSlots,
-                                         Content_DiscRequestState_Enqueued,
-                                         &Content_DiscQueueSlot::state);
-  REQUIRE(pending != std::end(Content_discRequestSlots));
-  CHECK(live::content::LiveDiscRequestGeneration(pending) != 0);
+  const auto pending = std::ranges::find(
+      VS::Content::discRequestSlots, VS::Content::DiscRequestState::kEnqueued,
+      &VS::Content::DiscQueueSlot::state);
+  REQUIRE(pending != std::end(VS::Content::discRequestSlots));
+  CHECK(live::content::LiveDiscRequestGeneration(&*pending) != 0);
   fixture.LoadEnemy(score::monBinData[0].zud_id);
-  CHECK(live::content::LiveDiscRequestGeneration(pending) == 0);
+  CHECK(live::content::LiveDiscRequestGeneration(&*pending) == 0);
 }
 
 void CheckLoadedEnemyGeometry() {
@@ -506,13 +506,13 @@ TEST_CASE(
 }
 
 struct CancellationProbe {
-  Content_DiscQueueSlot* owned_request = nullptr;
+  VS::Content::DiscQueueSlot* owned_request = nullptr;
   std::uint64_t old_generation = 0;
   void* owned_buffer = nullptr;
   std::size_t owned_bytes = 0;
   std::uint64_t read_generation = 0;
   std::array<std::byte, 2048> foreign_buffer{};
-  Content_DiscQueueSlot* foreign = nullptr;
+  VS::Content::DiscQueueSlot* foreign = nullptr;
   std::uint64_t foreign_generation = 0;
   std::vector<std::byte> foreign_snapshot;
 
@@ -536,12 +536,12 @@ void ArmMonCancellation(live::PreviewFixture& fixture,
       static_cast<std::uint32_t>(score::kMonBinFile.size), probe.owned_buffer));
   probe.read_generation = live::content::LiveDiscReadGeneration();
   REQUIRE_FALSE(live::content::LiveDiscReadCompleted(probe.read_generation));
-  REQUIRE(Content_discDriveState.destination == probe.owned_buffer);
+  REQUIRE(VS::Content::discDriveState.destination == probe.owned_buffer);
 }
 
 void QueueForeignCancellation(CancellationProbe& probe, bool reuse_request) {
   if (reuse_request) live::content::ReleaseLiveDiscRequest(probe.owned_request);
-  const Content_DiscFile foreign_file{score::kMonBinFile.lba, 2048};
+  const VS::Content::DiscFile foreign_file{score::kMonBinFile.lba, 2048};
   probe.foreign = live::content::AllocateLiveDiscRequest(&foreign_file);
   REQUIRE(probe.foreign != nullptr);
   if (reuse_request) CHECK(probe.foreign == probe.owned_request);
@@ -563,7 +563,7 @@ void SnapshotForeignCancellation(CancellationProbe& probe, bool reuse_request) {
     const auto priority =
         static_cast<std::int16_t>(probe.foreign->priority - 1);
     std::memcpy(probe.foreign_snapshot.data() +
-                    offsetof(Content_DiscQueueSlot, priority),
+                    offsetof(VS::Content::DiscQueueSlot, priority),
                 &priority, sizeof(priority));
   }
 }
@@ -583,7 +583,7 @@ void CheckCancellationEffects(const CancellationProbe& probe) {
                            probe.foreign_snapshot));
   CHECK(live::content::LiveDiscRequestGeneration(probe.foreign) ==
         probe.foreign_generation);
-  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
   CHECK_FALSE(live::content::LiveDiscReadCompleted(probe.read_generation));
 }
 
@@ -603,11 +603,11 @@ void CheckForeignCompletion(const CancellationProbe& probe,
                             std::span<const std::byte> poison) {
   for (std::size_t tick = 0;
        tick < live::kFrameBudget &&
-       probe.foreign->state != Content_DiscRequestState_Loaded;
+       probe.foreign->state != VS::Content::DiscRequestState::kLoaded;
        ++tick) {
     live::content::UpdateLiveDiscQueue();
   }
-  REQUIRE(probe.foreign->state == Content_DiscRequestState_Loaded);
+  REQUIRE(probe.foreign->state == VS::Content::DiscRequestState::kLoaded);
   const auto mon_image = shared::ReadImage(R"(Native\data\disc\SMALL\MON.BIN)");
   CHECK(std::ranges::equal(probe.foreign_buffer,
                            std::as_bytes(std::span(mon_image)).first(2048)));
@@ -756,7 +756,7 @@ TEST_CASE(
 }
 
 struct FallbackIdentity {
-  Content_DiscQueueSlot* request;
+  VS::Content::DiscQueueSlot* request;
   std::uint64_t generation;
 };
 
@@ -764,10 +764,11 @@ FallbackIdentity CheckFallbackRecord() {
   auto* const fallback = score::monBinCdQueueSlot;
   REQUIRE(fallback != nullptr);
   const auto address = reinterpret_cast<std::uintptr_t>(fallback);
-  const auto first = reinterpret_cast<std::uintptr_t>(Content_discRequestSlots);
-  CHECK(
-      (address < first || address >= first + sizeof(Content_discRequestSlots)));
-  REQUIRE(fallback->state == Content_DiscRequestState_Loaded);
+  const auto first =
+      reinterpret_cast<std::uintptr_t>(VS::Content::discRequestSlots.data());
+  CHECK((address < first ||
+         address >= first + sizeof(VS::Content::discRequestSlots)));
+  REQUIRE(fallback->state == VS::Content::DiscRequestState::kLoaded);
   const auto generation = live::content::LiveDiscRequestGeneration(fallback);
   REQUIRE(generation != 0);
   return {fallback, generation};
@@ -796,7 +797,7 @@ void ConsumeFallback(live::PreviewFixture& fixture,
   CHECK(score::monBinCdQueueSlot == nullptr);
   CHECK(live::content::LiveRefusedDiscRecordsInUse() == 0);
   CHECK(live::content::LiveDiscRequestGeneration(fallback.request) == 0);
-  CHECK(fallback.request->state == Content_DiscRequestState_Free);
+  CHECK(fallback.request->state == VS::Content::DiscRequestState::kFree);
 }
 
 void CheckFallbackList(live::PreviewFixture& fixture) {
@@ -830,7 +831,7 @@ TEST_CASE(
   FillForeignQueue(foreign);
   const auto refusals = score::LiveGazetteTerminalRefusals();
   const auto queue_refusals = live::content::LiveDiscRequestRefusals();
-  Content_DiscQueueSlot* previous_fallback = nullptr;
+  VS::Content::DiscQueueSlot* previous_fallback = nullptr;
   std::uint64_t previous_generation = 0;
   for (int entry = 0; entry < 2; ++entry) {
     fixture.SelectPage(3, false);

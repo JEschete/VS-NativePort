@@ -12,10 +12,10 @@
 #include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Text/TextCode.hpp"
-#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -459,8 +459,9 @@ int CheckMenuReloadClosingDelay(void) {
   const char saved_without_main = VS::Menu::Framework::openedWithoutMainMenu;
   VS::Menu::Framework::MenuRow rows[kRows] = {};
   // The overlay read is a queue slot, as the menu's own reads are.
-  Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
-  const Content_DiscQueueSlot saved_slot = *request;
+  VS::Content::DiscQueueSlot* const request =
+      &VS::Content::discRequestSlots[31];
+  const VS::Content::DiscQueueSlot saved_slot = *request;
   int passed = 1;
   VS::Boot::ResetMainMenuStatics();
   VS::Menu::Framework::ResetLiveMainMenuStatics();
@@ -472,11 +473,11 @@ int CheckMenuReloadClosingDelay(void) {
   VS::Menu::Framework::menuState.cd_queue = request;
 
   for (int visit = 0; visit < kVisits; ++visit) {
-    request->state = Content_DiscRequestState_Loaded;
-    request->cdFile = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
+    request->state = VS::Content::DiscRequestState::kLoaded;
+    request->file = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
     VS::Menu::Framework::menuState.control.loading = 1;
     passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
-              request->state == Content_DiscRequestState_Free &&
+              request->state == VS::Content::DiscRequestState::kFree &&
               VS::Menu::Framework::menuState.control.loading == 0;
     for (int tick = 1; tick <= kClosingTicks; ++tick) {
       passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1;

@@ -23,9 +23,9 @@
 #include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/Manual.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -892,8 +892,8 @@ struct LiveManualFixture {
   fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int* saved_text = manual::helpText;
   u_long* saved_assets = manual::helpAssets;
-  Content_DiscQueueSlot* saved_text_request = manual::helpTextCdQueue;
-  Content_DiscQueueSlot* saved_assets_request = manual::helpAssetsCdQueue;
+  VS::Content::DiscQueueSlot* saved_text_request = manual::helpTextCdQueue;
+  VS::Content::DiscQueueSlot* saved_assets_request = manual::helpAssetsCdQueue;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   VS::Menu::Framework::LiveMenuControl saved_menu_state =
@@ -906,8 +906,8 @@ struct LiveManualFixture {
       *VS::Menu::LiveTextBox(kInformationBox);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  std::array<Content_DiscQueueSlot, 32> saved_requests =
-      std::to_array(Content_discRequestSlots);
+  std::array<VS::Content::DiscQueueSlot, 32> saved_requests =
+      VS::Content::discRequestSlots;
   std::array<fw::MenuRow, 40> rows{};
   int saved_hud_slide = Battle_hudSlideOffset;
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
@@ -927,7 +927,8 @@ struct LiveManualFixture {
   ScreenState saved_screen = manual::LiveManualScreenState();
   VS::Input::Settings saved_settings = VS::Input::settings;
   DRAWENV saved_back_env = VS::Render::legacyDrawEnvironments[1];
-  Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
+  VS::Content::DiscRequestCounts saved_request_counts =
+      VS::Content::discRequestCounts;
   VS::Field::ManualDisplayState saved_display = VS::Field::manualDisplayState;
   VS::Menu::Framework::MenuMemory saved_memory =
       VS::Menu::Framework::menuMemory;
@@ -937,8 +938,9 @@ struct LiveManualFixture {
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
 
   LiveManualFixture() {
-    std::ranges::fill(Content_discRequestSlots, Content_DiscQueueSlot{});
-    Content_discRequestCounts = Content_DiscRequestCounts{};
+    std::ranges::fill(VS::Content::discRequestSlots,
+                      VS::Content::DiscQueueSlot{});
+    VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
     VS::Menu::Framework::menuItems = rows.data();
     VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
@@ -997,8 +999,9 @@ struct LiveManualFixture {
     manual::helpAssetsCdQueue = saved_assets_request;
     manual::topMenu_state = saved_topic_step;
     manual::menuSelectedRow = saved_topic_row;
-    std::ranges::copy(saved_requests, std::begin(Content_discRequestSlots));
-    Content_discRequestCounts = saved_request_counts;
+    std::ranges::copy(saved_requests,
+                      std::begin(VS::Content::discRequestSlots));
+    VS::Content::discRequestCounts = saved_request_counts;
     *VS::Menu::LiveTextBox(manual::kPageTextBox) = saved_box;
     *VS::Menu::LiveTextBox(kInformationBox) = saved_information_box;
     VS::Render::LiveTexturePages() = saved_pages;
@@ -1021,12 +1024,12 @@ struct LiveManualFixture {
   }
 
   // A disc request for the help file that has finished loading.
-  [[nodiscard]] static Content_DiscQueueSlot* LoadedRequest() {
-    static constexpr Content_DiscFile kFile{.lba = 100, .size = 2048};
-    Content_DiscQueueSlot* const request =
+  [[nodiscard]] static VS::Content::DiscQueueSlot* LoadedRequest() {
+    static constexpr VS::Content::DiscFile kFile{.lba = 100, .size = 2048};
+    VS::Content::DiscQueueSlot* const request =
         VS::Content::AllocateLiveDiscRequest(&kFile);
     REQUIRE(request != nullptr);
-    request->state = Content_DiscRequestState_Loaded;
+    request->state = VS::Content::DiscRequestState::kLoaded;
     return request;
   }
 
@@ -1267,7 +1270,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(manual::showMenuState == step);
   CHECK(VS::Field::manualDisplayState.current_manual == 10);
-  CHECK(Content_discRequestSlots[0].state == Content_DiscRequestState_Free);
+  CHECK(VS::Content::discRequestSlots[0].state ==
+        VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
@@ -1276,7 +1280,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
   const std::array<std::uint8_t, 16> assets{};
   manual::helpAssets = LiveManualFixture::Payload<u_long>(assets);
   u_long* const buffer = manual::helpAssets;
-  Content_DiscQueueSlot* const request = LiveManualFixture::LoadedRequest();
+  VS::Content::DiscQueueSlot* const request =
+      LiveManualFixture::LoadedRequest();
   manual::helpAssetsCdQueue = request;
   manual::showMenuState = manual::kHelpLoadAssets;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
@@ -1284,7 +1289,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
   CHECK(manual::showMenuState == manual::kHelpLoadText);
   CHECK(manual::helpAssets == nullptr);
   CHECK(manual::helpAssetsCdQueue == nullptr);
-  CHECK(request->state == Content_DiscRequestState_Free);
+  CHECK(request->state == VS::Content::DiscRequestState::kFree);
   CHECK(Freed(buffer));
   CHECK(manual::LiveManualScreenRefusalCount() == refusals);
 }
@@ -1324,7 +1329,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages opens the loaded text where it was left",
   CHECK(manual::totalLineCount == 20);
   CHECK(manual::helpPageLoadCounter == 0);
   CHECK(manual::helpTextCdQueue == nullptr);
-  CHECK(Content_discRequestSlots[0].state == Content_DiscRequestState_Free);
+  CHECK(VS::Content::discRequestSlots[0].state ==
+        VS::Content::DiscRequestState::kFree);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages draws a page into the frame",
@@ -1451,7 +1457,7 @@ struct MissingHelpFiles {
     std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 4096> bytes{};
   };
   VS::Content::DataStore::ScopedOverride store;
-  Content_DiscDrive saved_drive = Content_discDriveState;
+  VS::Content::DiscDrive saved_drive = VS::Content::discDriveState;
   std::unique_ptr<Arena> arena = std::make_unique<Arena>();
   VS::Core::Memory::ScopedLiveGameHeap heap{arena->bytes};
   std::filesystem::path root =
@@ -1464,7 +1470,7 @@ struct MissingHelpFiles {
     std::ofstream manifest(root / VS::Content::DataStore::ManifestName);
     manifest << "lba\tsize\tform\tpath\n";
     for (const auto file : {HelpFile::kAssets, HelpFile::kText}) {
-      const Content_DiscFile& listed =
+      const VS::Content::DiscFile& listed =
           manual::kHelpFileCdFiles[static_cast<std::size_t>(file)];
       manifest << listed.lba << '\t' << listed.size << "\traw\tSMALL/MISSING"
                << static_cast<int>(file) << ".BIN\n";
@@ -1481,7 +1487,7 @@ struct MissingHelpFiles {
   MissingHelpFiles& operator=(MissingHelpFiles&&) = delete;
   ~MissingHelpFiles() noexcept(false) {
     VS::Content::ResetLiveDiscDrive();
-    Content_discDriveState = saved_drive;
+    VS::Content::discDriveState = saved_drive;
     std::error_code error;
     std::filesystem::remove_all(root, error);
   }
@@ -1499,9 +1505,10 @@ void CheckTopicAbandoned(const int* text, const u_long* assets,
   CHECK(manual::helpAssetsCdQueue == nullptr);
   CHECK(Freed(text));
   CHECK(Freed(assets));
-  CHECK(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
-    return slot.state == Content_DiscRequestState_Free;
-  }));
+  CHECK(
+      std::ranges::all_of(VS::Content::discRequestSlots, [](const auto& slot) {
+        return slot.state == VS::Content::DiscRequestState::kFree;
+      }));
 }
 
 TEST_CASE(

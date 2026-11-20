@@ -1,34 +1,18 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "DiscQueue.h"
+// The legacy disc request array, counts and drive record
+// (Content/DiscQueue.hpp).
+#include "Content/DiscQueue.hpp"
 
-// decomp: _cdReadBuffer (_cdReadBuffer@SLUS_010.40)
-u_char* Content_legacyDiscReadBuffer;
+namespace VS::Content {
 
-// decomp: cdReadLoc (cdReadLoc@SLUS_010.40)
-DslLOC Content_legacyDiscReadLocation;
+std::uint8_t* legacyDiscReadBuffer;
+Legacy::DslLOC legacyDiscReadLocation;
+std::int32_t legacyXaReadyBcdField;
+std::int32_t legacyXaReadyByteThree;
+std::int32_t legacyXaReadyByteFour;
+std::int32_t xaReadyMetadataWord;
+std::array<DiscQueueSlot, kDiscRequestCapacity> discRequestSlots;
+DiscRequestCounts discRequestCounts;
+DiscDrive discDriveState;
+std::array<char, kDiscControlResponseBytes> discControlResponseBytes;
 
-// decomp: D_800501CC (D_800501CC@SLUS_010.40)
-int Content_legacyXaReadyBcdField;
-
-// decomp: D_800501D0 (D_800501D0@SLUS_010.40)
-int Content_legacyXaReadyByteThree;
-
-// decomp: D_800501D4 (D_800501D4@SLUS_010.40)
-int Content_legacyXaReadyByteFour;
-
-// decomp: D_800501D8 (D_800501D8@SLUS_010.40)
-int Content_xaReadyMetadataWord;
-
-// decomp: _cdQueue (_cdQueue@SLUS_010.40)
-Content_DiscQueueSlot Content_discRequestSlots[32];
-
-// decomp: _cdQueueCount (_cdQueueCount@SLUS_010.40)
-struct Content_DiscRequestCounts Content_discRequestCounts;
-
-// decomp: vs_main_disk (vs_main_disk@SLUS_010.40)
-Content_DiscDrive Content_discDriveState;
-
-// decomp: _dsControlBuf (_dsControlBuf@SLUS_010.40)
-char Content_discControlResponseBytes[11];
-
+}  // namespace VS::Content

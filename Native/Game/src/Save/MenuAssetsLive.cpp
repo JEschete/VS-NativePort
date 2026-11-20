@@ -6,9 +6,9 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -50,7 +50,7 @@ static_assert(kResourceOffset + sizeof(VS::Save::CardUiResources) <=
 static_assert(kTextBytes <= sizeof(VS::Save::CardUiResources));
 
 MenuAssetLoad live_load;
-Content_DiscQueueSlot* live_request = nullptr;
+VS::Content::DiscQueueSlot* live_request = nullptr;
 
 const char* MisuseName(MenuAssetMisuse misuse) {
   switch (misuse) {
@@ -69,7 +69,7 @@ const char* MisuseName(MenuAssetMisuse misuse) {
 }
 
 void Request(unsigned lba, unsigned size, void* target) {
-  Content_DiscFile file;
+  VS::Content::DiscFile file;
   file.lba = static_cast<int>(lba);
   file.size = static_cast<int>(size);
   live_request = VS::Content::AllocateLiveDiscRequest(&file);
@@ -131,7 +131,7 @@ class LiveMenuAssets final : public MenuAssetHost {
   }
   bool RequestLoaded() const override {
     return live_request != nullptr &&
-           live_request->state == Content_DiscRequestState_Loaded;
+           live_request->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseRequest() override {
     VS::Content::ReleaseLiveDiscRequest(live_request);

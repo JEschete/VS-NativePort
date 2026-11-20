@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/GameLoop.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -298,12 +298,12 @@ class LiveAssetFixture {
  public:
   LiveAssetFixture() : heap_(arena_->bytes) {
     VS::Render::InitializeLiveTexturePages();
-    std::memcpy(saved_slots_.data(), Content_discRequestSlots,
-                sizeof Content_discRequestSlots);
-    std::memset(Content_discRequestSlots, 0, sizeof Content_discRequestSlots);
-    Content_discRequestCounts = Content_DiscRequestCounts{};
-    Content_discDriveState.state =
-        static_cast<char>(Content_DiscDriveState_Idle);
+    std::memcpy(saved_slots_.data(), VS::Content::discRequestSlots.data(),
+                sizeof VS::Content::discRequestSlots);
+    std::memset(VS::Content::discRequestSlots.data(), 0,
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = VS::Content::DiscRequestCounts{};
+    VS::Content::discDriveState.state = VS::Content::DiscDriveState::kIdle;
     setRECT(&image_, kImageX, kImageY, kImageWidth, kImageHeight);
     StoreImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
   }
@@ -315,10 +315,10 @@ class LiveAssetFixture {
     VS::Title::saveFileSummaries = saved_summaries_;
     VS::Title::cardDirectoryEntryBuffer = saved_directory_;
     VS::Boot::isSoftResetEnabled = saved_soft_reset_;
-    std::memcpy(Content_discRequestSlots, saved_slots_.data(),
-                sizeof Content_discRequestSlots);
-    Content_discRequestCounts = saved_counts_;
-    Content_discDriveState = saved_drive_;
+    std::memcpy(VS::Content::discRequestSlots.data(), saved_slots_.data(),
+                sizeof VS::Content::discRequestSlots);
+    VS::Content::discRequestCounts = saved_counts_;
+    VS::Content::discDriveState = saved_drive_;
   }
   LiveAssetFixture(const LiveAssetFixture&) = delete;
   LiveAssetFixture& operator=(const LiveAssetFixture&) = delete;
@@ -329,9 +329,9 @@ class LiveAssetFixture {
   std::unique_ptr<LiveArena> arena_ = std::make_unique<LiveArena>();
   VS::Core::Memory::ScopedLiveGameHeap heap_;
   VS::Render::TexturePageTable saved_pages_ = VS::Render::LiveTexturePages();
-  std::array<Content_DiscQueueSlot, 32> saved_slots_{};
-  Content_DiscRequestCounts saved_counts_ = Content_discRequestCounts;
-  Content_DiscDrive saved_drive_ = Content_discDriveState;
+  std::array<VS::Content::DiscQueueSlot, 32> saved_slots_{};
+  VS::Content::DiscRequestCounts saved_counts_ = VS::Content::discRequestCounts;
+  VS::Content::DiscDrive saved_drive_ = VS::Content::discDriveState;
   int saved_soft_reset_ = VS::Boot::isSoftResetEnabled;
   u_short* saved_menu_text_ = VS::Menu::Files::textTable;
   u_short* saved_title_text_ = VS::Title::saveMenuText;
@@ -344,14 +344,14 @@ class LiveAssetFixture {
 
 // Marks the one request the load queued as read.
 void CompletePendingRead() {
-  auto* const end = std::end(Content_discRequestSlots);
-  auto* const pending =
-      std::find_if(std::begin(Content_discRequestSlots), end,
-                   [](const Content_DiscQueueSlot& slot) {
-                     return slot.state != Content_DiscRequestState_Free;
+  const auto end = std::end(VS::Content::discRequestSlots);
+  const auto pending =
+      std::find_if(std::begin(VS::Content::discRequestSlots), end,
+                   [](const VS::Content::DiscQueueSlot& slot) {
+                     return slot.state != VS::Content::DiscRequestState::kFree;
                    });
   REQUIRE(pending != end);
-  pending->state = static_cast<std::int16_t>(Content_DiscRequestState_Loaded);
+  pending->state = VS::Content::DiscRequestState::kLoaded;
 }
 
 // Runs a live load through the image read, leaving the text read to queue.
@@ -422,10 +422,11 @@ class HeapBlocker {
 };
 
 bool AnyReadQueued() {
-  return std::any_of(std::begin(Content_discRequestSlots),
-                     std::end(Content_discRequestSlots),
-                     [](const Content_DiscQueueSlot& slot) {
-                       return slot.state != Content_DiscRequestState_Free;
+  return std::any_of(std::begin(VS::Content::discRequestSlots),
+                     std::end(VS::Content::discRequestSlots),
+                     [](const VS::Content::DiscQueueSlot& slot) {
+                       return slot.state !=
+                              VS::Content::DiscRequestState::kFree;
                      });
 }
 

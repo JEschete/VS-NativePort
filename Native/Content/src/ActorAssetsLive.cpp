@@ -39,9 +39,9 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Items/Materials.hpp"
@@ -80,9 +80,9 @@ void* legacyWeaponFileBuffer;
 // decomp: _wepFileLoaded (_wepFileLoaded@BATTLE/BATTLE.PRG)
 std::int32_t legacyWeaponFileLoaded;
 // decomp: _wepFile (_wepFile@BATTLE/BATTLE.PRG)
-Content_DiscFile legacyWeaponFileLocation;
+DiscFile legacyWeaponFileLocation;
 // decomp: _wepCdSlot (_wepCdSlot@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* legacyWeaponDiscRequest;
+DiscQueueSlot* legacyWeaponDiscRequest;
 // decomp: _wepFileEpilog (_wepFileEpilog@BATTLE/BATTLE.PRG)
 void* legacyWeaponParseCursor;
 // decomp: _shpData (_shpData@BATTLE/BATTLE.PRG)
@@ -90,9 +90,9 @@ void* legacyShpFileBuffer;
 // decomp: _shpAllocated (_shpAllocated@BATTLE/BATTLE.PRG)
 std::int32_t legacyShpAllocated;
 // decomp: _shpFile (_shpFile@BATTLE/BATTLE.PRG)
-Content_DiscFile legacyShpFileLocation;
+DiscFile legacyShpFileLocation;
 // decomp: _shpCdSlot (_shpCdSlot@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* legacyShpDiscRequest;
+DiscQueueSlot* legacyShpDiscRequest;
 // decomp: D_800F22B4 (D_800F22B4@BATTLE/BATTLE.PRG)
 std::uint8_t* legacyShpParseCursor;
 // decomp: D_800F22B8 (D_800F22B8@BATTLE/BATTLE.PRG)
@@ -108,17 +108,17 @@ void* legacySequenceFileBuffer;
 // decomp: D_800F22D0 (D_800F22D0@BATTLE/BATTLE.PRG)
 std::int32_t legacySequenceBufferOwned;
 // decomp: D_800F22D8 (D_800F22D8@BATTLE/BATTLE.PRG)
-Content_DiscFile legacySequenceFileLocation;
+DiscFile legacySequenceFileLocation;
 // decomp: D_800F22E0 (D_800F22E0@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* legacySequenceDiscRequest;
+DiscQueueSlot* legacySequenceDiscRequest;
 // decomp: D_800F22E4 (D_800F22E4@BATTLE/BATTLE.PRG)
 std::uint8_t* legacySequenceParseData;
 // decomp: _etmData (_etmData@BATTLE/BATTLE.PRG)
 std::uint16_t* legacyEtmFileBuffer;
 // decomp: _etmFile (_etmFile@BATTLE/BATTLE.PRG)
-Content_DiscFile legacyEtmFileLocation;
+DiscFile legacyEtmFileLocation;
 // decomp: _etmFileCdSlot (_etmFileCdSlot@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* legacyEtmDiscRequest;
+DiscQueueSlot* legacyEtmDiscRequest;
 // decomp: vs_battle_objectDataSlots
 // (vs_battle_objectDataSlots@BATTLE/BATTLE.PRG)
 legacy_files::Requests legacyActorAssetRequests;
@@ -255,8 +255,8 @@ static_assert(std::is_same_v<u_short, std::uint16_t>);
 constexpr std::size_t kTextureSlotBytes = 8;
 static_assert(sizeof(VS::Render::TextureSlot) == kTextureSlotBytes);
 static_assert(sizeof(RECT) == sizeof(VramRect));
-static_assert(std::is_same_v<decltype(Content_DiscFile::lba), std::int32_t>);
-static_assert(std::is_same_v<decltype(Content_DiscFile::size), std::int32_t>);
+static_assert(std::is_same_v<decltype(DiscFile::lba), std::int32_t>);
+static_assert(std::is_same_v<decltype(DiscFile::size), std::int32_t>);
 
 constexpr std::uint8_t kSkippedBit = 0x01;
 constexpr std::uint8_t kUvLayoutBit = 0x08;
@@ -730,12 +730,12 @@ std::optional<std::uint32_t> FlatTableEntry(
 }
 
 struct LiveFileStream {
-  Content_DiscFile* file;
-  Content_DiscQueueSlot** request;
+  DiscFile* file;
+  DiscQueueSlot** request;
 };
 
 struct ModelReadOwner {
-  Content_DiscQueueSlot* request = nullptr;
+  DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
 };
 
@@ -894,7 +894,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return true;
   }
   void ReadRefusedFile(DiscFileExtent file, AssetAddress destination) override {
-    Content_DiscFile location{};
+    DiscFile location{};
     location.lba = file.sector;
     location.size = file.bytes;
     if (ReadLiveRefusedDiscFile(&location, Pointer(destination)) == 0) {
@@ -902,10 +902,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
   }
   bool FileReadFinished(AssetFileStream stream) override {
-    const Content_DiscQueueSlot* request = *Stream(stream).request;
-    return request == nullptr ||
-           static_cast<DiscRequestState>(request->state) ==
-               DiscRequestState::kLoaded;
+    const DiscQueueSlot* request = *Stream(stream).request;
+    return request == nullptr || request->state == DiscRequestState::kLoaded;
   }
   void ReleaseFileRead(AssetFileStream stream) override {
     ReleaseLiveDiscRequest(*Stream(stream).request);

@@ -17,10 +17,10 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "DiscQueue.h"
 #include "Render/Display.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -123,7 +123,7 @@ static_assert(std::ranges::all_of(kGimFiles, [](const GimFile& file) {
 GimImageSet* live_set = nullptr;
 std::uint16_t* live_file = nullptr;
 std::size_t live_file_words = 0;
-Content_DiscQueueSlot* live_request = nullptr;
+VS::Content::DiscQueueSlot* live_request = nullptr;
 std::uint64_t refused_requests = 0;
 
 const char* RefusalName(GimRefusal refusal) {
@@ -166,7 +166,7 @@ class LiveGimHost final : public GimHost {
  public:
   [[nodiscard]] bool FileReadFinished() override {
     return live_request != nullptr &&
-           live_request->state == Content_DiscRequestState_Loaded;
+           live_request->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseFileRead() override {
     if (live_request != nullptr) {
@@ -258,9 +258,10 @@ void QueueLiveGimImage(int image_id, int first_page) {
     Report(GimRefusal::kNoHeap);
     return;
   }
-  const Content_DiscFile disc_file{.lba = static_cast<int>(file.lba),
-                                   .size = static_cast<int>(bytes)};
-  Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc_file);
+  const VS::Content::DiscFile disc_file{.lba = static_cast<int>(file.lba),
+                                        .size = static_cast<int>(bytes)};
+  VS::Content::DiscQueueSlot* request =
+      Content::AllocateLiveDiscRequest(&disc_file);
   if (request == nullptr) {
     Core::Memory::FreeLiveFromHighEnd(data);
     Core::Memory::FreeLiveFromHighEnd(block);

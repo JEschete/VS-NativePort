@@ -8,8 +8,10 @@
 
 #include "Field/RoomLoading.hpp"
 
-struct Content_DiscFile;
-struct Content_DiscQueueSlot;
+namespace VS::Content {
+struct DiscFile;
+struct DiscQueueSlot;
+}  // namespace VS::Content
 struct Field_MpdEnemySpawn;
 
 namespace VS::Field {
@@ -19,16 +21,16 @@ namespace VS::Field {
 struct ZoneContext {
   std::int32_t zone_id = 0;
   // Each room's MPD file extent, indexed by room id.
-  Content_DiscFile* room_files = nullptr;
+  VS::Content::DiscFile* room_files = nullptr;
   std::int32_t zone_enemy_count = 0;
   ZoneEnemyTemplate* zone_enemies = nullptr;
   // Each zone enemy's ZUD file extent, indexed like zone_enemies.
-  Content_DiscFile* zud_files = nullptr;
+  VS::Content::DiscFile* zud_files = nullptr;
   // The cached ZUD's index plus one; 0 when none is cached.
   std::int32_t loaded_zud_index_plus_one = 0;
-  Content_DiscQueueSlot* zud_disc_request = nullptr;
+  VS::Content::DiscQueueSlot* zud_disc_request = nullptr;
   void* zud_data = nullptr;
-  Content_DiscQueueSlot* zone_disc_request = nullptr;
+  VS::Content::DiscQueueSlot* zone_disc_request = nullptr;
   void* zone_data = nullptr;
   std::int32_t music_id = 0;
   std::int32_t music_slot = 0;
@@ -43,7 +45,7 @@ struct ZoneContext {
   std::int32_t reserved4c = 0;
   std::int32_t reserved50 = 0;
   std::int32_t reserved54 = 0;
-  Content_DiscQueueSlot* room_disc_request = nullptr;
+  VS::Content::DiscQueueSlot* room_disc_request = nullptr;
   void* room_data = nullptr;
   std::uint32_t room_enemy_count = 0;
   Field_MpdEnemySpawn* room_enemies = nullptr;

@@ -40,7 +40,7 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 
 struct MonOwner {
   void* buffer;
-  Content_DiscQueueSlot* request;
+  VS::Content::DiscQueueSlot* request;
   std::uint64_t generation;
 
   void CheckReleased() const {
@@ -71,7 +71,7 @@ MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
     REQUIRE(content::BeginLiveDiscRead(
         score::kMonBinFile.lba,
         static_cast<std::uint32_t>(score::kMonBinFile.size), owner.buffer));
-    REQUIRE(Content_discDriveState.destination == owner.buffer);
+    REQUIRE(VS::Content::discDriveState.destination == owner.buffer);
   }
   return owner;
 }
@@ -80,13 +80,13 @@ struct ForeignOwner {
   std::vector<std::byte> cursor;
   void* actor = Actors_actorRecords[0];
   void* allocation = memory::AllocateLiveFromLowEnd(64);
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
 
   ForeignOwner() {
     const auto bytes = live::BytesOf(Battle_unusedMenu9CursorMemory);
     cursor.assign(bytes.begin(), bytes.end());
-    const Content_DiscFile file{score::kMonBinFile.lba, 2048};
+    const VS::Content::DiscFile file{score::kMonBinFile.lba, 2048};
     request = content::AllocateLiveDiscRequest(&file);
     generation = content::LiveDiscRequestGeneration(request);
     if (allocation == nullptr || request == nullptr || generation == 0) {
@@ -110,8 +110,8 @@ struct ForeignOwner {
     CHECK(Actors_actorRecords[0] == actor);
     CHECK(std::ranges::equal(live::BytesOf(Battle_unusedMenu9CursorMemory),
                              cursor));
-    CHECK(Content_discRequestCounts.reading == 0);
-    CHECK(Content_discRequestCounts.waiting == 0);
+    CHECK(VS::Content::discRequestCounts.reading == 0);
+    CHECK(VS::Content::discRequestCounts.waiting == 0);
   }
 };
 
@@ -223,7 +223,7 @@ TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
   }
   owner.CheckReleased();
   foreign.Check();
-  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
   CHECK(fixture.GuardsIntact());
 }
 
@@ -244,7 +244,7 @@ TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
   CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   owner.CheckReleased();
   foreign.Check();
-  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
   CHECK(fixture.GuardsIntact());
 }
 
@@ -258,9 +258,9 @@ TEST_CASE("Actual pre-heap boundary drains MON before replacing heap identity",
   const auto refusals = memory::RefusedLiveHeapRequestCount();
   VS::Boot::ResetLiveSessionHeap();
   owner.CheckReleased();
-  CHECK(Content_discDriveState.destination == nullptr);
-  CHECK(Content_discRequestCounts.reading == 0);
-  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(VS::Content::discRequestCounts.reading == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
   CHECK(memory::GameHeap().Empty());
   CHECK(memory::RefusedLiveHeapRequestCount() == refusals);
 }

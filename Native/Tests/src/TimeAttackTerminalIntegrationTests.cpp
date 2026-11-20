@@ -50,7 +50,7 @@ void CheckReleased(Asset asset) {
   CHECK_FALSE(status.owns_request);
   CHECK_FALSE(status.owns_buffer);
   CHECK_FALSE(status.owns_pages);
-  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(VS::Content::discRequestCounts.waiting == 0);
 }
 
 void CheckModuleReset(Asset asset) {

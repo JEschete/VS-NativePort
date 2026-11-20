@@ -21,9 +21,9 @@
 #include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
-#include "DiscQueue.h"
 #include "Field/MapProgress.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -132,9 +132,9 @@ inline auto ControlOwners() {
                     BytesOf(VS::State::tickSpeed),
                     BytesOf(VS::State::roomVisitProgress),
                     BytesOf(Battle_actionDefinitions),
-                    BytesOf(Content_discRequestSlots),
-                    BytesOf(Content_discRequestCounts),
-                    BytesOf(Content_discDriveState),
+                    BytesOf(VS::Content::discRequestSlots),
+                    BytesOf(VS::Content::discRequestCounts),
+                    BytesOf(VS::Content::discDriveState),
                     BytesOf(score::LiveTopMenuState())};
 }
 
@@ -172,9 +172,10 @@ class TerminalFixture
   TerminalFixture() {
     if (score::monBinData != nullptr || score::monBinCdQueueSlot != nullptr ||
         content::LiveRefusedDiscRecordsInUse() != 0 ||
-        !std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
-          return slot.state == Content_DiscRequestState_Free;
-        })) {
+        !std::ranges::all_of(
+            VS::Content::discRequestSlots, [](const auto& slot) {
+              return slot.state == VS::Content::DiscRequestState::kFree;
+            })) {
       throw std::runtime_error("terminal fixture requires idle disc owners");
     }
     for (const auto owner : ControlOwners()) saved_.Keep(owner);

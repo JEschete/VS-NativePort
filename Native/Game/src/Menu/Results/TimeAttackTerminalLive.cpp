@@ -13,9 +13,9 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
@@ -58,7 +58,7 @@ static_assert(std::size(VS::State::scoreData.boss_time_trial_scores) ==
 struct LoadOwner {
   std::byte* buffer = nullptr;
   std::size_t bytes = 0;
-  Content_DiscQueueSlot* request = nullptr;
+  VS::Content::DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
   bool pages = false;
   // Original file-backed pointer slots are views, not native owners.
@@ -218,10 +218,10 @@ class LiveLoad final : public TimeAttackLoadHost {
       Refuse("missing or reused controller request");
       return false;
     }
-    if (owner_.request->state == Content_DiscRequestState_Error) {
+    if (owner_.request->state == VS::Content::DiscRequestState::kError) {
       Refuse("queue Error is not Loaded");
     }
-    return owner_.request->state == Content_DiscRequestState_Loaded;
+    return owner_.request->state == VS::Content::DiscRequestState::kLoaded;
   }
   std::optional<ResultsTimBlocks> ParseTim(std::size_t index) override {
     const auto bytes = TimBytes(index);

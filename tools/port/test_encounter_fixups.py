@@ -3864,7 +3864,7 @@ int func_800F9800(void) {
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)
         menu = (root / r"Native\Game\src\Menu\Framework\FrameworkLive.cpp").read_text(encoding="utf-8")
         menu = "".join(menu.split())
-        self.assertIn("Content_DiscQueueSlot*&request=menuState.cd_queue;", menu)
+        self.assertIn("VS::Content::DiscQueueSlot*&request=menuState.cd_queue;", menu)
         self.assertIn("request=VS::Content::AllocateLiveDiscRequest(&file);"
                       "if(request!=nullptr){VS::Content::EnqueueLiveDiscRequest(request,", menu)
         self.assertIn("}else{request=VS::Content::CompleteLiveRefusedDiscRequest(", menu)
@@ -3903,7 +3903,7 @@ int func_800F9800(void) {
         root = Path(__file__).resolve().parents[2]
         drive = " ".join((root / r"Native\Content\src\CdDriveLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("constexpr std::uint32_t kSectorBytes = 2048;", drive)
-        self.assertIn("Content_legacyDiscReadBuffer + static_cast<std::uint32_t>(slot * kSectorBytes)", drive)
+        self.assertIn("legacyDiscReadBuffer + static_cast<std::uint32_t>(slot * kSectorBytes)", drive)
         bound = {name for _, _, name in copy_fixups.MODULE_BINDING_ENTRIES}
         for name in ("FreeLiveFromHighEndAt", "FreeLiveFromLowEndAt", "AllocateLiveFromHighEndAt",
                      "AllocateLiveFromLowEndAt", "InitializeLiveHeapAt"):

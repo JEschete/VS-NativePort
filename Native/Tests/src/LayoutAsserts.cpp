@@ -27,9 +27,9 @@
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "DiscQueue.h"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/Runtime.hpp"
@@ -83,23 +83,25 @@ int TestsRoomSfxBankBinding(void) {
 }
 
 int TestsDiscReadSizeContract(void) {
-  const Content_DiscDrive saved = Content_discDriveState;
-  Content_discDriveState = (Content_DiscDrive){0};
-  Content_discDriveState.byteCount = 7;
+  const VS::Content::DiscDrive saved = VS::Content::discDriveState;
+  VS::Content::discDriveState = VS::Content::DiscDrive{};
+  VS::Content::discDriveState.byte_count = 7;
   unsigned char destination[2049];
-  int passed = !VS::Content::BeginLiveDiscRead(1, UINT32_MAX, destination) &&
-               Content_discDriveState.state == Content_DiscDriveState_Idle &&
-               Content_discDriveState.byteCount == 7 &&
-               Content_discDriveState.destination == nullptr;
+  int passed =
+      !VS::Content::BeginLiveDiscRead(1, UINT32_MAX, destination) &&
+      VS::Content::discDriveState.state == VS::Content::DiscDriveState::kIdle &&
+      VS::Content::discDriveState.byte_count == 7 &&
+      VS::Content::discDriveState.destination == nullptr;
   passed = passed &&
            VS::Content::BeginLiveDiscRead(1, sizeof destination, destination) &&
-           Content_discDriveState.state == Content_DiscDriveState_ReadInit &&
-           Content_discDriveState.byteCount == sizeof destination &&
-           Content_discDriveState.sectorCount == 2 &&
-           Content_discDriveState.destination == destination;
+           VS::Content::discDriveState.state ==
+               VS::Content::DiscDriveState::kReadInit &&
+           VS::Content::discDriveState.byte_count == sizeof destination &&
+           VS::Content::discDriveState.sector_count == 2 &&
+           VS::Content::discDriveState.destination == destination;
   passed = passed && !VS::Content::BeginLiveDiscRead(2, 0, nullptr) &&
-           Content_discDriveState.startSector == 1;
-  Content_discDriveState = saved;
+           VS::Content::discDriveState.start_sector == 1;
+  VS::Content::discDriveState = saved;
   return passed;
 }
 

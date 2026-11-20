@@ -2757,7 +2757,7 @@ T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,animation_state,Name
 T00319.006,T00319,_monBinData_t,6,unlocked,0,u_char,,,,unlocked,Named in the fork; see cited use,med,source:238.c:1416
 T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,prev,Named in the fork; see cited use,med,source:238.c:1102
 T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,next,Named in the fork; see cited use,med,source:238.c:1253
-T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.hpp:51;native:ScoreScreen.hpp EnemyEntry::reserved_f (#441);declaration-only;source:238.c:375
+T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.hpp:53;native:ScoreScreen.hpp EnemyEntry::reserved_f (#441);declaration-only;source:238.c:375
 T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,name,Named in the fork; see cited use,med,source:238.c:2036
 T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,kind,Enemy kind,med,source:146C.c:14926;use cited by sanity pass;source:146C.h:662
 T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,index,Enemy table index,med,declaration-only;source:146C.h:663
@@ -3096,9 +3096,9 @@ T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone lo
 T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,tile_columns,Collision map columns,high,native:VS::Field::ZoneContext::tile_columns (#441);source:146C.c:15331
 T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,tile_rows,Collision map rows,high,native:VS::Field::ZoneContext::tile_rows (#441);source:146C.c:15332
 T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,bounds,Map tile bounds,med,native:VS::Field::ZoneContext::bounds (#441);source:146C.c:2435;use cited by sanity pass;source:146C.h:709
-T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1023;native:VS::Field::ZoneContext::reserved48 (#441);declaration-only;source:146C.h:710
+T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1025;native:VS::Field::ZoneContext::reserved48 (#441);declaration-only;source:146C.h:710
 T00348.019,T00348,_zoneContext_t,19,unk4C,1,int,,,,reserved4c,Unreferenced word,low,native:VS::Field::ZoneContext::reserved4c (#441);declaration-only;source:146C.h:711
-T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1026;native:VS::Field::ZoneContext::reserved50 (#441);declaration-only;source:146C.h:712
+T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\RoomLoadingLive.cpp:1028;native:VS::Field::ZoneContext::reserved50 (#441);declaration-only;source:146C.h:712
 T00348.021,T00348,_zoneContext_t,21,unk54,1,int,,,,reserved54,Unreferenced word,low,native:VS::Field::ZoneContext::reserved54 (#441);declaration-only;source:146C.h:713
 T00348.022,T00348,_zoneContext_t,22,mpdCdFile,0,vs_main_CdQueueSlot *,,,,room_disc_request,Disc request loading the room file,med,native:VS::Field::ZoneContext::room_disc_request (#441);source:146C.c:15261;use cited by sanity pass;source:146C.h:714
 T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,room_data,Loaded room file data,med,native:VS::Field::ZoneContext::room_data (#441);source:146C.c:15265;use cited by sanity pass;source:146C.h:715
@@ -3901,8 +3901,8 @@ T00428.001,T00428,func_800172D4_t,1,unk4,1,int,,,,reserved04,Unidentified word; 
 T00428.002,T00428,func_800172D4_t,2,unk8,1,int,,,,reserved08,Unidentified word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SfxChannelGroups.hpp:12;declaration-only;source:25AC.c:53
 T00428.003,T00428,func_800172D4_t,3,unkC,1,int,,,,reserved0c,Unidentified word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SfxChannelGroups.hpp:13;declaration-only;source:25AC.c:54
 T00428.004,T00428,func_800172D4_t,4,unk10,1,int,,,,reserved10,Unidentified word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SfxChannelGroups.hpp:14;declaration-only;source:25AC.c:55
-T00429.000,T00429,func_8004644C_t,0,unk0,1,u_char[48],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SoundState.hpp:22;declaration-only;source:30DB0.c:27
-T00429.001,T00429,func_8004644C_t,1,unk30,1,int *,,,,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SoundState.hpp:23;declaration-only;source:30DB0.c:28
+T00429.000,T00429,func_8004644C_t,0,unk0,1,u_char[48],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SoundState.hpp:24;declaration-only;source:30DB0.c:27
+T00429.001,T00429,func_8004644C_t,1,unk30,1,int *,,,,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\SoundState.hpp:25;declaration-only;source:30DB0.c:28
 T00430.000,T00430,func_80069388_t,0,unk0,1,int,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:D4.c:33
 T00430.001,T00430,func_80069388_t,1,unk4,1,u_char,,,,vertexZeroRed,First vertex red channel,high,source:D4.c:494
 T00430.002,T00430,func_80069388_t,2,unk5,1,u_char,,,,vertexZeroGreen,First vertex green channel,high,source:D4.c:494
@@ -6229,9 +6229,9 @@ T00690.000,T00690,vs_main_CdFile,0,lba,0,int,,,,lba,Named in the fork; see cited
 T00690.001,T00690,vs_main_CdFile,1,size,0,int,,,,size,Named in the fork; see cited use,med,source:146C.c:6630
 T00691.000,T00691,vs_main_CdQueueSlot,0,state,0,short,,,,state,Named in the fork; see cited use,med,source:146C.c:6637
 T00691.001,T00691,vs_main_CdQueueSlot,1,priority,0,short,,,,priority,Named in the fork; see cited use,med,source:main.c:9439
-T00691.002,T00691,vs_main_CdQueueSlot,2,cdFile,0,vs_main_CdFile,,,,cdFile,Named in the fork; see cited use,med,source:main.c:9418
-T00691.003,T00691,vs_main_CdQueueSlot,3,unkC,1,int,,,,opaqueC,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\CdDriveLive.cpp:130;source:main.c:9438
-T00691.004,T00691,vs_main_CdQueueSlot,4,vram,0,void *,,,,vram,Named in the fork; see cited use,med,source:main.c:9437
+T00691.002,T00691,vs_main_CdQueueSlot,2,cdFile,0,vs_main_CdFile,,,,file,Named in the fork; see cited use,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::file (#441);source:main.c:9418
+T00691.003,T00691,vs_main_CdQueueSlot,3,unkC,1,int,,,,reserved,Only copied into members native code never reads; kept for the original layout,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::reserved (#441);native-refs:copy-only;source:native:Native\Content\src\CdDriveLive.cpp:130;source:main.c:9438
+T00691.004,T00691,vs_main_CdQueueSlot,4,vram,0,void *,,,,destination,Named in the fork; see cited use,med,native:DiscQueue.hpp VS::Content::DiscQueueSlot::destination (#441);source:main.c:9437
 T00692.000,T00692,vs_main_HeapHeader,0,prev,0,struct vs_main_HeapHeader *,,,,prev,Previous block,high,source:main.c:8988
 T00692.001,T00692,vs_main_HeapHeader,1,next,0,struct vs_main_HeapHeader *,,,,next,Next block,high,source:main.c:8987
 T00692.002,T00692,vs_main_HeapHeader,2,blockSz,0,u_int,,,sizeInSixteenByteUnits,blockSize,Block size,high,source:main.c:8956
@@ -6239,26 +6239,26 @@ T00692.003,T00692,vs_main_HeapHeader,3,unkC,1,int,,,,reservedC,No access found,l
 T00693.000,T00693,vs_main_artsStatus_t,0,artsLearned,0,u_char[12],,,,arts_learned,Named in the fork; see cited use,med,source:146C.c:3279
 T00693.001,T00693,vs_main_artsStatus_t,1,kills,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),,,,kills,Named in the fork; see cited use,med,source:146C.c:3283
 T00694.000,T00694,vs_main_disk_t,0,state,0,char,,,,state,Drive state,high,source:main.c:9037
-T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,xaModeMarker,Set to 0 when XA streaming starts and 128 when it stops; never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:139;source:main.c:9176;source:main.c:9292
-T00694.002,T00694,vs_main_disk_t,2,unk2,1,char,,,,reserved2,Cleared on reset; never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:146;source:main.c:9392
-T00694.003,T00694,vs_main_disk_t,3,unk3,1,char,,,retryCount,failureCount,Failed command count,high,source:main.c:9151;source:main.c:9200
-T00694.004,T00694,vs_main_disk_t,4,unk4,1,u_int,,,sectorsReceived,sectorsReceived,Sectors delivered by the drive; ends the read at sectorCount,high,source:main.c:9068
-T00694.005,T00694,vs_main_disk_t,5,sectorCount,0,u_int,,,,sectorCount,Sectors to read,high,source:main.c:9153
-T00694.006,T00694,vs_main_disk_t,6,cdSector,0,int,,,,startSector,First sector of the read,high,source:main.c:9143
-T00694.007,T00694,vs_main_disk_t,7,byteCount,0,int,,,,byteCount,Bytes to read,high,source:main.c:9144
+T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,xa_mode_marker,Set to 0 when XA streaming starts and 128 when it stops; never read; written but never read by native code; kept for the original layout,med,native:DiscQueue.hpp VS::Content::DiscDrive::xa_mode_marker (#441);native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:139;source:main.c:9176;source:main.c:9292
+T00694.002,T00694,vs_main_disk_t,2,unk2,1,char,,,,reserved2,Cleared on reset; never read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Content\src\DiscReaderLive.cpp:145;source:main.c:9392
+T00694.003,T00694,vs_main_disk_t,3,unk3,1,char,,,retryCount,failure_count,Failed command count,high,native:DiscQueue.hpp VS::Content::DiscDrive::failure_count (#441);source:main.c:9151;source:main.c:9200
+T00694.004,T00694,vs_main_disk_t,4,unk4,1,u_int,,,sectorsReceived,sectors_received,Sectors delivered by the drive; ends the read at sectorCount,high,native:DiscQueue.hpp VS::Content::DiscDrive::sectors_received (#441);source:main.c:9068
+T00694.005,T00694,vs_main_disk_t,5,sectorCount,0,u_int,,,,sector_count,Sectors to read,high,native:DiscQueue.hpp VS::Content::DiscDrive::sector_count (#441);source:main.c:9153
+T00694.006,T00694,vs_main_disk_t,6,cdSector,0,int,,,,start_sector,First sector of the read,high,native:DiscQueue.hpp VS::Content::DiscDrive::start_sector (#441);source:main.c:9143
+T00694.007,T00694,vs_main_disk_t,7,byteCount,0,int,,,,byte_count,Bytes to read,high,native:DiscQueue.hpp VS::Content::DiscDrive::byte_count (#441);source:main.c:9144
 T00694.008,T00694,vs_main_disk_t,8,vram,0,void *,,,,destination,Destination buffer,high,source:main.c:9145
-T00694.009,T00694,vs_main_disk_t,9,pcm,0,DslFILTER,,,,xaFilter,XA file and channel filter,high,source:main.c:9188
+T00694.009,T00694,vs_main_disk_t,9,pcm,0,DslFILTER,,,,xa_filter,XA file and channel filter,high,native:DiscQueue.hpp VS::Content::DiscDrive::xa_filter (#441);source:main.c:9188
 T00694.010,T00694,vs_main_disk_t,10,cdLoc,0,DslLOC,,,,position,Drive position,high,source:main.c:9157
-T00694.011,T00694,vs_main_disk_t,11,commandId,0,int,,,,commandId,Id of the last issued command,high,source:main.c:9197
-T00694.012,T00694,vs_main_disk_t,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Content\src\DiscQueue.h:79;declaration-only;source:main.c:108
-T00694.013,T00694,vs_main_disk_t,13,unk28,1,int,,,,reserved28,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Content\src\DiscQueue.h:80;declaration-only;source:main.c:109
-T00694.014,T00694,vs_main_disk_t,14,bufferMode,0,enum cdBufferModes_e,,,,bufferMode,Direct or ring-buffered transfer,high,source:main.c:9048
-T00694.015,T00694,vs_main_disk_t,15,sectorBufIndex,0,u_int,,,,destinationSector,Next destination sector to fill,high,source:main.c:9040
-T00694.016,T00694,vs_main_disk_t,16,unk34,1,int,,,unconsumedSectorCount,bufferedSectors,Sectors in the ring not yet copied out,high,source:main.c:9056;source:main.c:9314
-T00694.017,T00694,vs_main_disk_t,17,unk38,1,u_int,,,bufferedSectorsReceived,ringSectorsWritten,Sectors written to the ring; bounds the copy loop,high,source:main.c:9302
-T00694.018,T00694,vs_main_disk_t,18,unk3C,1,u_int,,,ringWriteIndex,ringWriteIndex,Ring entry receiving the next sector,high,source:main.c:9042
-T00694.019,T00694,vs_main_disk_t,19,ringBufIndex,0,u_int,,,,ringReadIndex,Ring entry copied out next,high,source:main.c:9308
-T00694.020,T00694,vs_main_disk_t,20,framesSinceLastRead,0,int,,,,framesSinceLastRead,Frames since the queue last started a read,high,source:main.c:9463
+T00694.011,T00694,vs_main_disk_t,11,commandId,0,int,,,,command_id,Id of the last issued command,high,native:DiscQueue.hpp VS::Content::DiscDrive::command_id (#441);source:main.c:9197
+T00694.012,T00694,vs_main_disk_t,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Content\include\Content\DiscQueue.hpp:72;declaration-only;source:main.c:108
+T00694.013,T00694,vs_main_disk_t,13,unk28,1,int,,,,reserved28,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Content\include\Content\DiscQueue.hpp:73;declaration-only;source:main.c:109
+T00694.014,T00694,vs_main_disk_t,14,bufferMode,0,enum cdBufferModes_e,,,,buffer_mode,Direct or ring-buffered transfer,high,native:DiscQueue.hpp VS::Content::DiscDrive::buffer_mode (#441);source:main.c:9048
+T00694.015,T00694,vs_main_disk_t,15,sectorBufIndex,0,u_int,,,,destination_sector,Next destination sector to fill,high,native:DiscQueue.hpp VS::Content::DiscDrive::destination_sector (#441);source:main.c:9040
+T00694.016,T00694,vs_main_disk_t,16,unk34,1,int,,,unconsumedSectorCount,buffered_sectors,Sectors in the ring not yet copied out,high,native:DiscQueue.hpp VS::Content::DiscDrive::buffered_sectors (#441);source:main.c:9056;source:main.c:9314
+T00694.017,T00694,vs_main_disk_t,17,unk38,1,u_int,,,bufferedSectorsReceived,ring_sectors_written,Sectors written to the ring; bounds the copy loop,high,native:DiscQueue.hpp VS::Content::DiscDrive::ring_sectors_written (#441);source:main.c:9302
+T00694.018,T00694,vs_main_disk_t,18,unk3C,1,u_int,,,ringWriteIndex,ring_write_index,Ring entry receiving the next sector,high,native:DiscQueue.hpp VS::Content::DiscDrive::ring_write_index (#441);source:main.c:9042
+T00694.019,T00694,vs_main_disk_t,19,ringBufIndex,0,u_int,,,,ring_read_index,Ring entry copied out next,high,native:DiscQueue.hpp VS::Content::DiscDrive::ring_read_index (#441);source:main.c:9308
+T00694.020,T00694,vs_main_disk_t,20,framesSinceLastRead,0,int,,,,frames_since_last_read,Frames since the queue last started a read,high,native:DiscQueue.hpp VS::Content::DiscDrive::frames_since_last_read (#441);source:main.c:9463
 T00695.000,T00695,vs_main_flags_t,0,clearCount,0,char,,,,clear_count,Named in the fork; see cited use,med,source:D4.c:1507
 T00695.001,T00695,vs_main_flags_t,1,difficulty,0,char,,,,difficulty,Named in the fork; see cited use,med,source:D4.c:1525
 T00695.002,T00695,vs_main_flags_t,2,normalModeCleared,0,char,,,,normal_mode_cleared,Named in the fork; see cited use,med,source:D4.c:1526

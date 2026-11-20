@@ -15,13 +15,13 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Arena.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Overlays.hpp"
-#include "DiscQueue.h"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLiveState.hpp"
@@ -49,7 +49,7 @@ int VS::Effects::purgeOverlayLoaded;
 // (vs_battle_pFileLoadContext@BATTLE/BATTLE.PRG)
 VS::Effects::EffectFileExtent VS::Effects::packageFile;
 // decomp: D_800F568C (D_800F568C@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* VS::Effects::resourceReadSlot;
+VS::Content::DiscQueueSlot* VS::Effects::resourceReadSlot;
 // decomp: _plgLoadState (_plgLoadState@BATTLE/BATTLE.PRG)
 u_int VS::Effects::pluginLoadState;
 // decomp: _plgLoadContext (_plgLoadContext@BATTLE/BATTLE.PRG)
@@ -343,8 +343,8 @@ void StoreTextures(LiveTextureLoadList& list, const TextureLoadList& textures) {
   }
 }
 
-[[nodiscard]] Content_DiscFile DiscFileOf(DiscRead read) {
-  Content_DiscFile file{};
+[[nodiscard]] VS::Content::DiscFile DiscFileOf(DiscRead read) {
+  VS::Content::DiscFile file{};
   file.lba = read.lba;
   file.size = read.size;
   return file;
@@ -362,29 +362,30 @@ class LiveResourceHost final : public EffectResourceHost {
   }
 
   DiscReadId AllocateRead(DiscRead read) override {
-    const Content_DiscFile file = DiscFileOf(read);
+    const VS::Content::DiscFile file = DiscFileOf(read);
     return IdOf<DiscReadId>(Content::AllocateLiveDiscRequest(&file));
   }
 
   void EnqueueRead(DiscReadId read, EffectBufferId destination) override {
-    Content::EnqueueLiveDiscRequest(PointerOf<Content_DiscQueueSlot>(read),
+    Content::EnqueueLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read),
                                     PointerOf<void>(destination));
   }
 
   DiscReadId CompleteRefusedRead(DiscRead read,
                                  EffectBufferId destination) override {
-    const Content_DiscFile file = DiscFileOf(read);
+    const VS::Content::DiscFile file = DiscFileOf(read);
     return IdOf<DiscReadId>(Content::CompleteLiveRefusedDiscRequest(
         &file, PointerOf<void>(destination)));
   }
 
   bool ReadLoaded(DiscReadId read) override {
-    return PointerOf<const Content_DiscQueueSlot>(read)->state ==
-           Content_DiscRequestState_Loaded;
+    return PointerOf<const VS::Content::DiscQueueSlot>(read)->state ==
+           VS::Content::DiscRequestState::kLoaded;
   }
 
   void ReleaseRead(DiscReadId read) override {
-    Content::ReleaseLiveDiscRequest(PointerOf<Content_DiscQueueSlot>(read));
+    Content::ReleaseLiveDiscRequest(
+        PointerOf<VS::Content::DiscQueueSlot>(read));
   }
 
   EffectBuffer AllocateBuffer(std::size_t bytes) override {
@@ -614,7 +615,7 @@ EffectResourceState LoadLiveEffectResourceState() {
 }
 
 void StoreLiveEffectResourceState(const EffectResourceState& state) {
-  resourceReadSlot = PointerOf<Content_DiscQueueSlot>(state.read);
+  resourceReadSlot = PointerOf<VS::Content::DiscQueueSlot>(state.read);
   packageBuffer = PointerOf<void>(state.package_buffer.id);
   textureLoadBuffer = PointerOf<u_long>(state.texture_buffer.id);
   purgeOverlayLoaded = state.purge_overlay_loaded ? 1 : 0;

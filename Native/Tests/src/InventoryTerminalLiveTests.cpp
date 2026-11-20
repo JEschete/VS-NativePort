@@ -23,11 +23,11 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -185,11 +185,12 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
 
 struct TextLoadingFixture : TerminalFixture {
   content::DataStore::ScopedOverride store;
-  ArrayRestore<Content_DiscQueueSlot, std::size(Content_discRequestSlots)>
-      saved_requests{Content_discRequestSlots};
-  ValueRestore<Content_DiscRequestCounts> saved_request_counts{
-      Content_discRequestCounts};
-  ValueRestore<Content_DiscDrive> saved_drive{Content_discDriveState};
+  ArrayRestore<VS::Content::DiscQueueSlot,
+               std::size(VS::Content::discRequestSlots)>
+      saved_requests{VS::Content::discRequestSlots.data()};
+  ValueRestore<VS::Content::DiscRequestCounts> saved_request_counts{
+      VS::Content::discRequestCounts};
+  ValueRestore<VS::Content::DiscDrive> saved_drive{VS::Content::discDriveState};
   ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
 
   TextLoadingFixture() {
@@ -392,8 +393,8 @@ TEST_CASE(
   const auto other_address = loot ? kItemNavigation : kLootNavigation;
   menu_overlay_tests::Load load(
       loot ? 12 : 4,
-      loot ? Content_DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
-           : Content_DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+      loot ? VS::Content::DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
+           : VS::Content::DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
   VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   EnterEmptyNavigation(other_module, other_address);
   EnterEmptyNavigation(module, address);

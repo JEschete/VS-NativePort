@@ -14,8 +14,8 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
-#include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"

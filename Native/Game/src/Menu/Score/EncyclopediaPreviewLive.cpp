@@ -22,9 +22,9 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/Encyclopedia.hpp"
@@ -60,7 +60,7 @@ T* Pointer(AssetAddress address) {
   return reinterpret_cast<T*>(static_cast<std::uintptr_t>(address));
 }
 
-[[nodiscard]] Content_DiscFile DiscFile(const EnemyPreviewFile& file) {
+[[nodiscard]] VS::Content::DiscFile DiscFile(const EnemyPreviewFile& file) {
   return {.lba = file.sector, .size = file.bytes};
 }
 
@@ -109,7 +109,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   [[nodiscard]] AssetAddress AllocateRead(
       const EnemyPreviewFile& file) override {
-    const Content_DiscFile disc = DiscFile(file);
+    const VS::Content::DiscFile disc = DiscFile(file);
     auto* request = Content::AllocateLiveDiscRequest(&disc);
     live_state.read_generation = Content::LiveDiscRequestGeneration(request);
     return Address(request);
@@ -117,12 +117,12 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   void EnqueueRead(AssetAddress read, AssetAddress destination) override {
     Content::EnqueueLivePriorityDiscRequest(
-        Pointer<Content_DiscQueueSlot>(read), Pointer(destination));
+        Pointer<VS::Content::DiscQueueSlot>(read), Pointer(destination));
   }
 
   [[nodiscard]] AssetAddress ReadRefused(const EnemyPreviewFile& file,
                                          AssetAddress destination) override {
-    const Content_DiscFile disc = DiscFile(file);
+    const VS::Content::DiscFile disc = DiscFile(file);
     auto* request =
         Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination));
     live_state.read_generation = Content::LiveDiscRequestGeneration(request);
@@ -130,13 +130,13 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   }
 
   [[nodiscard]] bool ReadLoaded(AssetAddress read) const override {
-    const auto* request = Pointer<const Content_DiscQueueSlot>(read);
+    const auto* request = Pointer<const VS::Content::DiscQueueSlot>(read);
     return request != nullptr &&
-           request->state == Content_DiscRequestState_Loaded;
+           request->state == VS::Content::DiscRequestState::kLoaded;
   }
 
   void ReleaseRead(AssetAddress read) override {
-    Content::ReleaseLiveDiscRequest(Pointer<Content_DiscQueueSlot>(read));
+    Content::ReleaseLiveDiscRequest(Pointer<VS::Content::DiscQueueSlot>(read));
     live_state.read_generation = 0;
   }
 
@@ -357,7 +357,7 @@ bool CleanupLiveEnemyPreviewOwnedState() {
   if (!file || !model || !ValidatePreviewRecords(*model)) return false;
   if (!file->empty() && !Content::CancelLiveDiscWrites(*file)) return false;
   if (!Content::CancelLiveActorAssetBorrows(*file, *model)) return false;
-  auto* request = Pointer<Content_DiscQueueSlot>(live_state.read);
+  auto* request = Pointer<VS::Content::DiscQueueSlot>(live_state.read);
   if (live_state.read_generation != 0 &&
       Content::LiveDiscRequestGeneration(request) ==
           live_state.read_generation) {

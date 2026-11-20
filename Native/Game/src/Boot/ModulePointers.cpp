@@ -136,7 +136,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
@@ -880,22 +880,22 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004FE5Cu, 300u, (void*)&Battle_battleAbilityPointRequirements, sizeof Battle_battleAbilityPointRequirements, 1u, 1u},
     {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&VS::Core::randomShuffleTable, sizeof VS::Core::randomShuffleTable, 1u, 1u},
     {"SLUS_010.40", 0x8005010Cu, 4u, (void*)&VS::Core::randomShuffleIndex, sizeof VS::Core::randomShuffleIndex, 1u, 1u},
-    {"SLUS_010.40", 0x80050110u, 4u, (void*)&Content_legacyDiscReadBuffer, sizeof Content_legacyDiscReadBuffer, 0u, 0u},
-    {"SLUS_010.40", 0x800501C8u, 4u, (void*)&Content_legacyDiscReadLocation, sizeof Content_legacyDiscReadLocation, 1u, 1u},
-    {"SLUS_010.40", 0x800501CCu, 4u, (void*)&Content_legacyXaReadyBcdField, sizeof Content_legacyXaReadyBcdField, 1u, 1u},
-    {"SLUS_010.40", 0x800501D0u, 4u, (void*)&Content_legacyXaReadyByteThree, sizeof Content_legacyXaReadyByteThree, 1u, 1u},
-    {"SLUS_010.40", 0x800501D4u, 4u, (void*)&Content_legacyXaReadyByteFour, sizeof Content_legacyXaReadyByteFour, 1u, 1u},
-    {"SLUS_010.40", 0x800501D8u, 4u, (void*)&Content_xaReadyMetadataWord, sizeof Content_xaReadyMetadataWord, 1u, 1u},
-    {"SLUS_010.40", 0x800501E0u, 640u, (void*)&Content_discRequestSlots, sizeof Content_discRequestSlots, 0u, 0u},
-    {"SLUS_010.40", 0x80050460u, 4u, (void*)&Content_discRequestCounts, sizeof Content_discRequestCounts, 0u, 0u},
+    {"SLUS_010.40", 0x80050110u, 4u, (void*)&VS::Content::legacyDiscReadBuffer, sizeof VS::Content::legacyDiscReadBuffer, 0u, 0u},
+    {"SLUS_010.40", 0x800501C8u, 4u, (void*)&VS::Content::legacyDiscReadLocation, sizeof VS::Content::legacyDiscReadLocation, 1u, 1u},
+    {"SLUS_010.40", 0x800501CCu, 4u, (void*)&VS::Content::legacyXaReadyBcdField, sizeof VS::Content::legacyXaReadyBcdField, 1u, 1u},
+    {"SLUS_010.40", 0x800501D0u, 4u, (void*)&VS::Content::legacyXaReadyByteThree, sizeof VS::Content::legacyXaReadyByteThree, 1u, 1u},
+    {"SLUS_010.40", 0x800501D4u, 4u, (void*)&VS::Content::legacyXaReadyByteFour, sizeof VS::Content::legacyXaReadyByteFour, 1u, 1u},
+    {"SLUS_010.40", 0x800501D8u, 4u, (void*)&VS::Content::xaReadyMetadataWord, sizeof VS::Content::xaReadyMetadataWord, 1u, 1u},
+    {"SLUS_010.40", 0x800501E0u, 640u, (void*)&VS::Content::discRequestSlots, sizeof VS::Content::discRequestSlots, 0u, 0u},
+    {"SLUS_010.40", 0x80050460u, 4u, (void*)&VS::Content::discRequestCounts, sizeof VS::Content::discRequestCounts, 0u, 0u},
     {"SLUS_010.40", 0x80050468u, 8u, (void*)&VS::State::sceneTimer, sizeof VS::State::sceneTimer, 0u, 0u},
     {"SLUS_010.40", 0x80050470u, 4u, (void*)&VS::Boot::gameEntryMode, sizeof VS::Boot::gameEntryMode, 1u, 1u},
     {"SLUS_010.40", 0x80050474u, 4u, (void*)&VS::Boot::titleReturnStackPointer, sizeof VS::Boot::titleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x80050478u, 22528u, (void*)&VS::Audio::menuSoundEffects, sizeof VS::Audio::menuSoundEffects, 1u, 1u},
     {"SLUS_010.40", 0x80055C80u, 8u, (void*)&VS::Render::legacyOrderingTables, sizeof VS::Render::legacyOrderingTables, 0u, 0u},
     {"SLUS_010.40", 0x80055C88u, 4u, (void*)&VS::Boot::isSoftResetEnabled, sizeof VS::Boot::isSoftResetEnabled, 1u, 1u},
-    {"SLUS_010.40", 0x80055D10u, 28u, (void*)&Content_discDriveState, sizeof Content_discDriveState, 0u, 0u},
-    {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&Content_discControlResponseBytes, sizeof Content_discControlResponseBytes, 1u, 1u},
+    {"SLUS_010.40", 0x80055D10u, 28u, (void*)&VS::Content::discDriveState, sizeof VS::Content::discDriveState, 0u, 0u},
+    {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&VS::Content::discControlResponseBytes, sizeof VS::Content::discControlResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&VS::Boot::battleReturnStackPointer, sizeof VS::Boot::battleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&VS::Input::legacyPadResponseBytes, sizeof VS::Input::legacyPadResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005E038u, 136u, (void*)&VS::Audio::soundState, sizeof VS::Audio::soundState, 0u, 0u},

@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/ManualScreen.hpp"
 #include "Menu/ManualTopics.hpp"
@@ -24,9 +24,9 @@ extern std::int32_t topMenu_state;
 // decomp: menuSelectedRow (src/MENU/MENUE.PRG/494.c:214)
 extern std::int32_t menuSelectedRow;
 // decomp: helpTextCdQueue (src/MENU/MENUE.PRG/494.c:215)
-extern Content_DiscQueueSlot* helpTextCdQueue;
+extern VS::Content::DiscQueueSlot* helpTextCdQueue;
 // decomp: helpAssetsCdQueue (src/MENU/MENUE.PRG/494.c:216)
-extern Content_DiscQueueSlot* helpAssetsCdQueue;
+extern VS::Content::DiscQueueSlot* helpAssetsCdQueue;
 // decomp: showMenuState (src/MENU/MENUE.PRG/494.c:217)
 extern std::int32_t showMenuState;
 // decomp: scrollPosition (src/MENU/MENUE.PRG/494.c:218)
@@ -43,5 +43,5 @@ extern std::int32_t* helpText;
 extern u_long* helpAssets;
 // decomp: helpFileCdFiles (src/MENU/MENUE.PRG/494.c:241): each topic's
 // asset file (HF1), then its text file (HF0).
-extern const Content_DiscFile kHelpFileCdFiles[kHelpFileCount];
+extern const VS::Content::DiscFile kHelpFileCdFiles[kHelpFileCount];
 }  // namespace VS::Menu::manual

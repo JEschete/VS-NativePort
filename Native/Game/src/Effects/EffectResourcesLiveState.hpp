@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "DiscQueue.h"
+#include "Content/DiscQueue.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Legacy/Psx.h"
 
@@ -58,7 +58,7 @@ extern int purgeOverlayLoaded;
 extern EffectFileExtent packageFile;
 // decomp: D_800F568C (BATTLE/BATTLE.PRG 6F014.c:549): the disc request in
 // flight, or null.
-extern Content_DiscQueueSlot* resourceReadSlot;
+extern VS::Content::DiscQueueSlot* resourceReadSlot;
 // decomp: _plgLoadState (BATTLE/BATTLE.PRG 0x800F5690): the plugin load
 // state (0 idle, 1 acquire the overlay, 2 loading, 3 loaded).
 extern u_int pluginLoadState;
