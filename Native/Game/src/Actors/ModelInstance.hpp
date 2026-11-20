@@ -89,11 +89,11 @@ struct ModelInstance {
   /* 0x5C */ std::uint8_t current_tile_x;
   /* 0x5D */ std::uint8_t current_tile_layer;
   /* 0x5E */ std::uint8_t current_tile_z;
-  /* 0x5F */ std::uint8_t reserved5f;
+  /* 0x5F */ std::uint8_t current_tile_spare;
   /* 0x60 */ std::uint8_t previous_tile_x;
   /* 0x61 */ std::uint8_t previous_tile_layer;
   /* 0x62 */ std::uint8_t previous_tile_z;
-  /* 0x63 */ std::uint8_t reserved63;
+  /* 0x63 */ std::uint8_t previous_tile_spare;
   /* 0x64 */ ModelEffectSlot palette_pulse;
   // A native pointer, so the record grows past the PS1's 0x6C bytes here.
   /* 0x68 */ ShpModel* model;

@@ -79,7 +79,7 @@ struct ActorRecord {
   std::uint8_t vertices_displaced : 1;
   std::uint8_t animation_locked : 1;
   std::uint8_t stride_parity : 1;
-  std::uint8_t landing_pending : 1;
+  std::uint8_t jump_speed_raised : 1;
   std::uint8_t is_8bit_texture : 1;
   std::uint8_t support_gimmick : 4;
   std::uint8_t jump_profile : 2;

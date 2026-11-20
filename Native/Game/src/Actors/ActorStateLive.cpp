@@ -89,7 +89,7 @@ VS::Render::ColorCode ToLiveColor(const Render::ColorCode& color) {
 
 void LoadInstance(const VS::Actors::ModelInstance& live,
                   ActorStateRecord& record) {
-  record.motion.current_tile.spare = live.reserved5f;
+  record.motion.current_tile.spare = live.current_tile_spare;
   record.skipped = live.is_skipped != 0;
   record.visible = live.is_visible != 0;
   record.frozen = live.is_frozen != 0;
@@ -109,7 +109,7 @@ void LoadInstance(const VS::Actors::ModelInstance& live,
 
 void StoreInstance(const ActorStateRecord& record,
                    VS::Actors::ModelInstance& live) {
-  live.reserved5f = record.motion.current_tile.spare;
+  live.current_tile_spare = record.motion.current_tile.spare;
   live.is_skipped = SignedBit(record.skipped);
   live.is_visible = SignedBit(record.visible);
   live.is_frozen = SignedBit(record.frozen);

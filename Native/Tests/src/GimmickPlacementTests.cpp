@@ -7291,7 +7291,7 @@ struct GimmickStartLiveFixture : GimmickInteractionLiveFixture {
     instances[0].velocity_y = 99;
     instances[0].slide_x = 37;
     instances[0].slide_z = 29;
-    actor.instance.reserved5f = 255;
+    actor.instance.current_tile_spare = 255;
     actor.instance.facing = 100;
     VS::Field::interactingGimmickId = -1;
     flags[0][0] = 0x400;
@@ -7602,7 +7602,7 @@ TEST_CASE(
   CHECK(VS::Field::interactingGimmickId == 1);
   CheckNativeInitiationSlide(fixture);
   CHECK(fixture.actor.action_locked == 1);
-  CHECK(fixture.actor.instance.reserved5f == 255);
+  CHECK(fixture.actor.instance.current_tile_spare == 255);
   CHECK(fixture.actor.instance.turn_frames == 4);
 }
 

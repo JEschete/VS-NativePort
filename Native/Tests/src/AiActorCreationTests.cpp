@@ -662,7 +662,7 @@ struct LiveCreationFixture {
     record.instance.current_tile_x = 7;
     record.instance.current_tile_layer = 0x0A;
     record.instance.current_tile_z = 5;
-    record.instance.reserved5f = 0x3C;
+    record.instance.current_tile_spare = 0x3C;
     record.model_data_size = static_cast<unsigned>(sizeof model);
     record.scale = 2 * kOne;
     record.anchor_height = 0x100;

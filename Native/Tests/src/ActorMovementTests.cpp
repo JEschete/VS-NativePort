@@ -527,7 +527,7 @@ namespace {
   actor.previous_facing = 0x123;
   actor.saved_placement = {.x = 8, .layer = 9, .z = 10, .spare = 11};
   actor.wall_contact = true;
-  actor.landing_pending = true;
+  actor.jump_speed_raised = true;
   actor.jump_started = true;
   actor.support_gimmick = 12;
   actor.tick_remainder = 13;
@@ -566,7 +566,7 @@ void SetReadFields(const MovementActor& actor,
   record.instance.weapon_drawn = actor.weapon_drawn ? 1 : 0;
   record.instance.attach_parent = actor.attach_parent;
   record.instance.attach_bone = actor.attach_bone;
-  record.instance.reserved5f = actor.tile_spare;
+  record.instance.current_tile_spare = actor.tile_spare;
   record.wall_contact = actor.wall_contact ? 1 : 0;
   record.animation_id = actor.animation_id;
   record.blend_frame = static_cast<char>(actor.blend_frame);

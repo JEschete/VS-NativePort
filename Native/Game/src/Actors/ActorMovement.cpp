@@ -1263,11 +1263,11 @@ void BeginActorJumpToTile(MovementHost& host, MovementActor& actor,
     }
   }
   motion.jump_countdown = kJumpCountdownWalk;
-  actor.landing_pending = false;
+  actor.jump_speed_raised = false;
   if (speed >= motion.run_speed) motion.jump_countdown = kJumpCountdownRun;
   if (speed < kMinimumJumpSpeed) {
     speed = kMinimumJumpSpeed;
-    actor.landing_pending = true;
+    actor.jump_speed_raised = true;
   }
   int x = (target.x * kTileUnits) + kTileCentre;
   int z = (target.z * kTileUnits) + kTileCentre;
@@ -1938,7 +1938,7 @@ void Land(MovementHost& host, int id, MovementActor& actor, int profile,
   motion.jump_countdown = 0;
   if (height < kBottomlessHeight) PlayLandingSound(host, id, actor, drop);
   motion.destination_mode = kDestinationNone;
-  actor.landing_pending = false;
+  actor.jump_speed_raised = false;
   host.PlayAnimation(id,
                      host.Tables().landing_recovery.at(ProfileIndex(profile)),
                      kBlendNormal);

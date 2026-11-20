@@ -204,8 +204,8 @@ static_assert(offsetof(VS::Actors::ModelInstance, reserved0d) ==
               kInstanceFlagsAt + kInstanceBitFieldBytes);
 static_assert(offsetof(VS::Actors::ModelInstance, copied_word_count) ==
               offsetof(VS::Actors::ModelInstance, reserved0d) + 1);
-// The placement word runs from current_tile_x to reserved5f.
-static_assert(offsetof(VS::Actors::ModelInstance, reserved5f) + 1 ==
+// The placement word runs from current_tile_x to current_tile_spare.
+static_assert(offsetof(VS::Actors::ModelInstance, current_tile_spare) + 1 ==
               offsetof(VS::Actors::ModelInstance, current_tile_x) +
                   sizeof(std::uint32_t));
 static_assert(sizeof(CVECTOR) == sizeof(std::uint32_t));

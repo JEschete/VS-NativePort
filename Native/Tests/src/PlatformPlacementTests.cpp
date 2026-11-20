@@ -1844,7 +1844,7 @@ auto Observed(const VS::Actors::ActorRecord& actor) {
   return std::tuple(position.vx, position.vy, position.vz, anchor.vx, anchor.vy,
                     anchor.vz, actor.platform_offset_x, actor.platform_offset_z,
                     actor.move_facing, actor.instance.jump_countdown,
-                    actor.landing_pending, actor.destination_x,
+                    actor.jump_speed_raised, actor.destination_x,
                     actor.destination_z);
 }
 

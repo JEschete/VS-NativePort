@@ -101,7 +101,8 @@ std::uint32_t CurrentTileWord(const VS::Actors::ModelInstance& instance) {
          (static_cast<std::uint32_t>(instance.current_tile_layer)
           << kByteShift) |
          (static_cast<std::uint32_t>(instance.current_tile_z) << kHalfShift) |
-         (static_cast<std::uint32_t>(instance.reserved5f) << kTopByteShift);
+         (static_cast<std::uint32_t>(instance.current_tile_spare)
+          << kTopByteShift);
 }
 
 std::uint32_t PreviousTileWord(const VS::Actors::ModelInstance& instance) {
@@ -109,7 +110,8 @@ std::uint32_t PreviousTileWord(const VS::Actors::ModelInstance& instance) {
          (static_cast<std::uint32_t>(instance.previous_tile_layer)
           << kByteShift) |
          (static_cast<std::uint32_t>(instance.previous_tile_z) << kHalfShift) |
-         (static_cast<std::uint32_t>(instance.reserved63) << kTopByteShift);
+         (static_cast<std::uint32_t>(instance.previous_tile_spare)
+          << kTopByteShift);
 }
 
 // The battle actor list in order; aborts on a list longer than the table.

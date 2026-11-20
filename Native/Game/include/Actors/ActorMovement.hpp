@@ -51,7 +51,7 @@ struct MovementActor {
 
   // Actor record.
   bool wall_contact = false;  // read
-  bool landing_pending = false;
+  bool jump_speed_raised = false;
   bool jump_started = false;
   std::uint8_t support_gimmick = 0;  // 4 bits
   std::uint8_t tick_remainder = 0;   // the airborne half-tick carry

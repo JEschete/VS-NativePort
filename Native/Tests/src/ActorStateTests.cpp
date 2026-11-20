@@ -1391,7 +1391,7 @@ TEST_CASE("Live placement writes the tile, position and facing",
   record->instance.current_tile_x = 7;
   record->instance.current_tile_layer = 2;
   record->instance.current_tile_z = 9;
-  record->instance.reserved5f = 4;
+  record->instance.current_tile_spare = 4;
   record->instance.position = {10, -20, 30, 99};
   record->instance.facing = 0x340;
   VS::Actors::ActorLocationQuery query{};

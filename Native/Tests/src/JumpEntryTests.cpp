@@ -63,11 +63,11 @@ void CheckGroundedSnapshot(VS::Actors::ActorRecord& actor) {
       static_cast<std::uint32_t>(instance.current_tile_x) |
       (static_cast<std::uint32_t>(instance.current_tile_layer) << 8) |
       (static_cast<std::uint32_t>(instance.current_tile_z) << 16) |
-      (static_cast<std::uint32_t>(instance.reserved5f) << 24);
+      (static_cast<std::uint32_t>(instance.current_tile_spare) << 24);
   expected.instance.previous_tile_x = instance.current_tile_x;
   expected.instance.previous_tile_layer = instance.current_tile_layer;
   expected.instance.previous_tile_z = instance.current_tile_z;
-  expected.instance.reserved63 = instance.reserved5f;
+  expected.instance.previous_tile_spare = instance.current_tile_spare;
   const auto xy = static_cast<std::uint32_t>(
                       static_cast<std::uint16_t>(instance.position.vx)) |
                   (static_cast<std::uint32_t>(
@@ -235,7 +235,7 @@ void CheckConsumerArc(const VS::Actors::ActorRecord& actor, int speed) {
   CHECK(actor.instance.root_motion.vy < 0);
   CHECK(actor.instance.root_motion.vz > 0);
   CHECK(actor.instance.jump_countdown == (speed >= 32 ? 2 : 6));
-  CHECK(actor.landing_pending == (speed < 18));
+  CHECK(actor.jump_speed_raised == (speed < 18));
 }
 
 void CheckConsumerFacing(const VS::Actors::ActorRecord& actor, int facing) {
@@ -279,14 +279,14 @@ TEST_CASE("Grounded snapshots write only the actual actor history fields",
   actor.instance.current_tile_x = static_cast<std::uint8_t>(packed);
   actor.instance.current_tile_layer = static_cast<std::uint8_t>(packed >> 8);
   actor.instance.current_tile_z = static_cast<std::uint8_t>(packed >> 16);
-  actor.instance.reserved5f = static_cast<std::uint8_t>(packed >> 24);
+  actor.instance.current_tile_spare = static_cast<std::uint8_t>(packed >> 24);
   actor.instance.support_layer = static_cast<std::uint8_t>(layer);
   actor.instance.placement_layer = static_cast<std::uint8_t>(15 - layer);
   actor.instance.facing = -12345;
   actor.instance.previous_tile_x = 0x11;
   actor.instance.previous_tile_layer = 0x22;
   actor.instance.previous_tile_z = 0x33;
-  actor.instance.reserved63 = 0x44;
+  actor.instance.previous_tile_spare = 0x44;
   actor.instance.grounded_xy = 0x55667788;
   actor.instance.grounded_z = -77;
   actor.instance.previous_facing = 0x1234;
@@ -315,7 +315,7 @@ TEST_CASE("Grounded history preserves its anchor on supports and refreshes",
   actor.instance.current_tile_x = 20;
   actor.instance.current_tile_layer = 3;
   actor.instance.current_tile_z = 30;
-  actor.instance.reserved5f = 0xFF;
+  actor.instance.current_tile_spare = 0xFF;
   actor.instance.position = {-128, 256, -384, -1};
   actor.instance.facing = 0x4321;
   CheckGroundedSnapshot(actor);

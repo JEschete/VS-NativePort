@@ -94,12 +94,12 @@ void LogJumpResult(const VS::Actors::ActorRecord& actor) {
   VS::Core::Debugf(
       "actors.jump",
       "result actor=%d phase=%d countdown=%d destination=[%d,%d] "
-      "destination_mode=%d jump_frames=%d root=[%d,%d,%d] landing_pending=%d",
+      "destination_mode=%d jump_frames=%d root=[%d,%d,%d] jump_speed_raised=%d",
       actor.instance.slot, actor.instance.movement_mode,
       actor.instance.jump_countdown, actor.destination_x, actor.destination_z,
       actor.destination_mode, actor.jump_frames, actor.instance.root_motion.vx,
       actor.instance.root_motion.vy, actor.instance.root_motion.vz,
-      actor.landing_pending);
+      actor.jump_speed_raised);
 }
 
 void SetMode(VS::Actors::MovementRequest& request, MotionMode mode) {
@@ -195,7 +195,7 @@ void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor) {
   auto& instance = actor->instance;
   const auto history = SaveActorGroundedTransform(
       {.tile = {instance.current_tile_x, instance.current_tile_layer,
-                instance.current_tile_z, instance.reserved5f},
+                instance.current_tile_z, instance.current_tile_spare},
        .position = {instance.position.vx, instance.position.vy,
                     instance.position.vz},
        .facing = instance.facing,
@@ -203,7 +203,7 @@ void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor) {
   instance.previous_tile_x = history.previous_tile.x;
   instance.previous_tile_layer = history.previous_tile.layer;
   instance.previous_tile_z = history.previous_tile.z;
-  instance.reserved63 = history.previous_tile.spare;
+  instance.previous_tile_spare = history.previous_tile.spare;
   // Original 0x4C/0x50 history packs X/Y then Z; 0x52 stores facing.
   instance.grounded_xy = std::bit_cast<std::int32_t>(
       std::array{history.position[0], history.position[1]});

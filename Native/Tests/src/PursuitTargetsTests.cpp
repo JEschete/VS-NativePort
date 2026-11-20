@@ -56,10 +56,10 @@ struct PursuitFixture {
     auto& model = models[1].instance;
     model.current_tile_x = 4;
     model.current_tile_z = 6;
-    model.reserved5f = 0x22;
+    model.current_tile_spare = 0x22;
     model.previous_tile_x = 9;
     model.previous_tile_z = 10;
-    model.reserved63 = 0x33;
+    model.previous_tile_spare = 0x33;
     model.position.vx = 1234;
     model.position.vz = -129;
     model.grounded_xy = 0x1234FFBF;

@@ -437,18 +437,18 @@ MovementActor LoadLiveMovementActor(const VS::Actors::ActorRecord& live) {
   actor.attach_parent = instance.attach_parent;
   actor.attach_bone = instance.attach_bone;
   actor.base_color_code = instance.base_color.cd;
-  actor.tile_spare = instance.reserved5f;
+  actor.tile_spare = instance.current_tile_spare;
   actor.previous_tile = {.x = instance.previous_tile_x,
                          .layer = instance.previous_tile_layer,
                          .z = instance.previous_tile_z,
-                         .spare = instance.reserved63};
+                         .spare = instance.previous_tile_spare};
   // Original 0x4C/0x50 history packs X/Y then Z.
   const auto grounded = std::bit_cast<GroundedPair>(instance.grounded_xy);
   actor.grounded_position = {grounded[0], grounded[1], instance.grounded_z};
   actor.previous_facing = instance.previous_facing;
   actor.saved_placement = std::bit_cast<PackedTile>(live.saved_placement);
   actor.wall_contact = live.wall_contact != 0;
-  actor.landing_pending = live.landing_pending != 0;
+  actor.jump_speed_raised = live.jump_speed_raised != 0;
   actor.jump_started = live.jump_started != 0;
   actor.support_gimmick = live.support_gimmick;
   actor.tick_remainder = live.tick_remainder;
@@ -491,13 +491,13 @@ void StoreLiveMovementActor(const MovementActor& actor,
   instance.previous_tile_x = actor.previous_tile.x;
   instance.previous_tile_layer = actor.previous_tile.layer;
   instance.previous_tile_z = actor.previous_tile.z;
-  instance.reserved63 = actor.previous_tile.spare;
+  instance.previous_tile_spare = actor.previous_tile.spare;
   instance.grounded_xy = std::bit_cast<std::int32_t>(
       GroundedPair{actor.grounded_position[0], actor.grounded_position[1]});
   instance.grounded_z = actor.grounded_position[2];
   instance.previous_facing = actor.previous_facing;
   live.saved_placement = std::bit_cast<std::int32_t>(actor.saved_placement);
-  live.landing_pending = actor.landing_pending ? 1 : 0;
+  live.jump_speed_raised = actor.jump_speed_raised ? 1 : 0;
   live.jump_started = actor.jump_started ? 1 : 0;
   live.support_gimmick = actor.support_gimmick & kFourBits;
   live.tick_remainder = actor.tick_remainder;

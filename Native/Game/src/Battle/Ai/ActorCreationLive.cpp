@@ -202,7 +202,8 @@ std::uint32_t TileWord(const VS::Actors::ModelInstance& model) {
          (static_cast<std::uint32_t>(model.current_tile_layer)
           << kTileLayerShift) |
          (static_cast<std::uint32_t>(model.current_tile_z) << kTileZShift) |
-         (static_cast<std::uint32_t>(model.reserved5f) << kTileStatusShift);
+         (static_cast<std::uint32_t>(model.current_tile_spare)
+          << kTileStatusShift);
 }
 
 template <typename Value, typename Bytes>

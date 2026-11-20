@@ -1,17 +1,1 @@
 id,kind,priority,name,original,offset,current_meaning,touched_by,watch,note
-T00239.026,low-named,2,Actors::ActorRecord.landing_pending,unk5AC_26,0x5AF.2,Cleared by the jump and fall update,VS::Actors::LoadLiveMovementActor VS::Actors::StoreLiveMovementActor VS::Actors::(anonymous)::LogJumpResult,*Actors::actorRecords+0x5AF.2,native:read
-T00311.022,low-named,2,Battle::HitResult.source_result,unk1C_26,0x1F.2,Set to 2 when the source action succeeds,VS::Battle::MarkLiveSourceActionSuccess,,native:read
-T00132.002,low-named,2,Battle::TargetLabelBox.texturePageCommand,tpage,,Texture-page command word,,,native:missing
-T00343.008,low-named,2,Effects::LiveTrail.first_step,unk,,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",,,native:missing
-T00732.008,low-named,2,Effects::LiveTrail9.first_step,unk,,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",,,native:missing
-T00489.020,low-named,2,Effects::LiveTransformSlot.saved.pad,unkBE,,Facing angle of the attached actor; PLG128 and the 0x4000 attachment mode turn through it,,,native:missing
-T00329.010,low-named,2,Field::RoomDataRecord.section7,section7,0x7C,Unidentified section of eight-byte entries,VS::Field::(anonymous)::VisitSectionPointer,Field::roomData=0x800F1C74,native:read
-T00277,type,3,Audio::LegacyVoiceChannelState,FSound80094FA0,size 0x60,Describes a Ghidra-derived voice channel record with no current function references.,,,State
-T00428,type,3,Audio::SfxSlotRequest,func_800172D4_t,size 0x14,Describes a declared sound-effect slot request whose fields other than index are unidentified.,,,State
-T00429,type,3,Audio::SoundReleaseView,func_8004644C_t,size 0x34,Views a sound record while it is released; not read.,,,State
-T00405,type,3,Render::ModelScratchpadCameraView,cameraTransformScratch,size 0x9C,Views the model scratchpad's matrix and scale; not read.,,,State
-T00241.060,reserved,4,Actors::ModelInstance.reserved5f,unk5F,0x5F,Height byte of the placement word; not read,VS::Actors::LoadLiveMovementActor VS::Actors::(anonymous)::LoadInstance VS::Actors::(anonymous)::StoreInstance VS::Actors::SaveLiveActorGroundedTransform VS::Battle::Ai::(anonymous)::TileWord VS::Battle::Ai::(anonymous)::CurrentTileWord,,native:read
-T00241.064,reserved,4,Actors::ModelInstance.reserved63,unk63,0x63,Not read,VS::Actors::LoadLiveMovementActor VS::Actors::StoreLiveMovementActor VS::Actors::SaveLiveActorGroundedTransform VS::Battle::Ai::(anonymous)::PreviousTileWord VS::Battle::Ai::(anonymous)::LiveMovementHost::Placement,,native:read
-T00259.009,reserved,4,Event::CameraState.reserved1BC,unk1BC,,Tail bytes of the second oscillator view,,,native:missing
-T00255.074,reserved,4,Field::GimmickInstance.reserved178,unk178,0x178,Not read by the decompiled users,,*Field::gimmickInstances+0x178,native:read
-T00697.014,reserved,4,Items::InventoryBlade.reserved_bits,unk10_5,,Not read by decompiled code,,,native:missing

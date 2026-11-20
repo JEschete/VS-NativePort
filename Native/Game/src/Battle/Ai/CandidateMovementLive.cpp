@@ -179,7 +179,8 @@ class LiveCandidateMovementWorld final
                 (static_cast<std::uint32_t>(model.current_tile_layer)
                  << kLayerShift) |
                 (static_cast<std::uint32_t>(model.current_tile_z) << kZShift) |
-                (static_cast<std::uint32_t>(model.reserved5f) << kStatusShift)};
+                (static_cast<std::uint32_t>(model.current_tile_spare)
+                 << kStatusShift)};
   }
   [[nodiscard]] std::optional<std::int16_t> TargetHeight(
       int target) const override {

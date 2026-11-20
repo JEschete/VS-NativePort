@@ -294,10 +294,10 @@ class LiveMovementHost final : public MovementHost {
         .planned_z = model.grounded_z,
         .current_tile =
             PackBytes(model.current_tile_x, model.current_tile_layer,
-                      model.current_tile_z, model.reserved5f),
+                      model.current_tile_z, model.current_tile_spare),
         .planned_tile =
             PackBytes(model.previous_tile_x, model.previous_tile_layer,
-                      model.previous_tile_z, model.reserved63)};
+                      model.previous_tile_z, model.previous_tile_spare)};
   }
   [[nodiscard]] std::optional<RouteGate> PlatformRouteGate(
       int group) const override {

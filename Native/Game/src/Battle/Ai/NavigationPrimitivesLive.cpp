@@ -338,7 +338,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
     return RouteModelPlacement{.tile_x = instance.current_tile_x,
                                .tile_layer = instance.current_tile_layer,
                                .tile_z = instance.current_tile_z,
-                               .tile_status = instance.reserved5f,
+                               .tile_status = instance.current_tile_spare,
                                .x = instance.position.vx,
                                .y = instance.position.vy,
                                .z = instance.position.vz,
